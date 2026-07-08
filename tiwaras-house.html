@@ -7,472 +7,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;1,300;1,400;1,500&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
-<style>
-*,*::before,*::after{margin:0;padding:0;box-sizing:border-box;}
-:root{
-  --cream:#FDFAF5;--cream-dk:#F0E8D8;
-  --orange:#8B3A00;--orange-mid:#A84800;--orange-glow:rgba(139,58,0,0.15);
-  --green:#1B4332;--green-mid:#2D6A4F;--green-light:#40916C;
-  --gold:#D4A017;--gold-light:#E8C547;--gold-pale:rgba(212,160,23,0.12);
-  --dark:#080604;--dark2:#110D08;
-  --serif:'Cormorant Garamond',Georgia,serif;--sans:'Inter',sans-serif;
-}
-html{scroll-behavior:smooth;}
-body{font-family:var(--sans);color:var(--green);background:var(--cream);overflow-x:hidden;}
-
-/* ── NAV ── */
-nav{position:fixed;top:0;width:100%;z-index:200;display:flex;align-items:center;justify-content:space-between;padding:1.1rem 4rem;transition:background 0.3s,box-shadow 0.3s;}
-nav.scrolled{background:rgba(253,250,245,0.97);backdrop-filter:blur(12px);box-shadow:0 1px 0 rgba(27,67,50,0.08);}
-.nav-logo{font-family:var(--serif);font-size:1.35rem;font-weight:500;color:var(--cream);letter-spacing:0.3px;text-decoration:none;transition:color 0.3s;}
-nav.scrolled .nav-logo{color:var(--green);}
-.nav-logo sup{font-size:0.6rem;color:var(--gold);vertical-align:super;margin-left:2px;}
-.nav-links{display:flex;align-items:center;gap:2.5rem;list-style:none;}
-.nav-links a{text-decoration:none;font-size:0.78rem;font-weight:500;letter-spacing:0.6px;text-transform:uppercase;color:rgba(253,250,245,0.75);transition:color 0.2s;}
-nav.scrolled .nav-links a{color:var(--green-mid);}
-.nav-links a:hover{color:var(--gold)!important;}
-.nav-cta{background:var(--orange);color:var(--cream)!important;padding:0.6rem 1.6rem;border-radius:40px;transition:background 0.2s,transform 0.15s!important;}
-.nav-cta:hover{background:var(--orange-mid)!important;transform:translateY(-1px);}
-.nav-burger{display:none;flex-direction:column;gap:5px;cursor:pointer;padding:4px;}
-.nav-burger span{display:block;width:22px;height:1.5px;background:var(--cream);transition:background 0.3s;}
-nav.scrolled .nav-burger span{background:var(--green);}
-
-/* ── HERO ── */
-.hero{min-height:100vh;display:flex;align-items:center;background:radial-gradient(ellipse at 65% 35%, #3D1A00 0%, #160B04 45%, var(--dark) 100%);position:relative;overflow:hidden;padding:8rem 4rem 5rem;}
-.hero::before{content:'';position:absolute;top:0;right:0;width:55%;height:100%;background:radial-gradient(ellipse at 60% 50%, rgba(212,160,23,0.06) 0%, transparent 60%);}
-.hero::after{content:'';position:absolute;bottom:-2px;left:0;right:0;height:120px;background:linear-gradient(to top, var(--cream), transparent);}
-.hero-eyebrow{display:inline-flex;align-items:center;gap:0.6rem;font-size:0.72rem;font-weight:500;letter-spacing:1.8px;text-transform:uppercase;color:var(--gold);margin-bottom:2rem;}
-.hero-eyebrow::before,.hero-eyebrow::after{content:'';width:28px;height:1px;background:var(--gold);opacity:0.5;}
-.hero h1{font-family:var(--serif);font-weight:300;font-size:clamp(3.5rem,7.5vw,6.5rem);color:var(--cream);line-height:1.05;letter-spacing:-0.5px;margin-bottom:1.75rem;max-width:680px;}
-.hero h1 em{color:var(--gold-light);font-style:italic;}
-.hero-sub{font-size:1rem;color:rgba(253,250,245,0.6);line-height:1.85;max-width:420px;margin-bottom:2.75rem;font-weight:300;}
-.hero-actions{display:flex;align-items:center;gap:1.5rem;}
-.btn-primary{display:inline-block;background:var(--orange);color:var(--cream);padding:1rem 2.4rem;border-radius:50px;font-size:0.85rem;font-weight:500;text-decoration:none;transition:background 0.2s,transform 0.2s,box-shadow 0.2s;}
-.btn-primary:hover{background:var(--orange-mid);transform:translateY(-2px);box-shadow:0 12px 32px rgba(139,58,0,0.35);}
-.btn-ghost{font-size:0.85rem;color:rgba(253,250,245,0.65);text-decoration:none;display:flex;align-items:center;gap:0.5rem;transition:color 0.2s;}
-.btn-ghost:hover{color:var(--gold);}
-.hero-stats{position:absolute;bottom:5rem;right:4rem;display:flex;gap:3rem;z-index:2;}
-.hero-stat-num{display:block;font-family:var(--serif);font-size:2.6rem;font-weight:300;color:var(--gold-light);line-height:1;}
-.hero-stat-label{display:block;font-size:0.68rem;font-weight:500;letter-spacing:1px;text-transform:uppercase;color:rgba(253,250,245,0.38);margin-top:0.3rem;}
-.hero-scroll{position:absolute;bottom:2.5rem;left:50%;transform:translateX(-50%);display:flex;flex-direction:column;align-items:center;gap:0.5rem;font-size:0.68rem;letter-spacing:1px;text-transform:uppercase;color:rgba(253,250,245,0.3);animation:bounce 2s ease-in-out infinite;}
-.hero-scroll::after{content:'';width:1px;height:32px;background:rgba(253,250,245,0.2);}
-@keyframes bounce{0%,100%{transform:translateX(-50%) translateY(0);}50%{transform:translateX(-50%) translateY(6px);}}
-
-/* ── MARQUEE ── */
-.marquee{background:var(--orange);padding:0.75rem 0;overflow:hidden;white-space:nowrap;}
-.marquee-track{display:inline-flex;animation:marquee 22s linear infinite;}
-.marquee-item{font-size:0.72rem;font-weight:600;letter-spacing:1.2px;text-transform:uppercase;color:var(--cream);padding:0 2rem;}
-.marquee-sep{color:rgba(253,250,245,0.4);font-size:0.6rem;}
-@keyframes marquee{from{transform:translateX(0);}to{transform:translateX(-50%);}}
-
-/* ── INTRO ── */
-.intro{padding:6rem 4rem;text-align:center;background:var(--cream);}
-.intro-label{font-size:0.72rem;font-weight:500;letter-spacing:1.8px;text-transform:uppercase;color:var(--gold);margin-bottom:1.5rem;display:block;}
-.intro h2{font-family:var(--serif);font-weight:300;font-size:clamp(1.8rem,4vw,3rem);color:var(--green);line-height:1.35;max-width:680px;margin:0 auto 1.25rem;}
-.intro h2 em{font-style:italic;color:var(--orange);}
-.intro p{font-size:0.95rem;color:var(--green-mid);line-height:1.9;max-width:520px;margin:0 auto;font-weight:300;}
-.intro-divider{width:40px;height:1px;background:var(--gold);margin:2rem auto 0;opacity:0.6;}
-
-/* ── SERVICE CATEGORIES ── */
-.services{padding:5rem 4rem;background:var(--cream-dk);}
-.section-head{text-align:center;margin-bottom:3rem;}
-.section-label{font-size:0.72rem;font-weight:500;letter-spacing:1.8px;text-transform:uppercase;color:var(--orange);display:block;margin-bottom:0.75rem;}
-.section-head h2{font-family:var(--serif);font-weight:300;font-size:clamp(1.8rem,3.5vw,2.8rem);color:var(--green);line-height:1.25;}
-.services-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:1px;max-width:1200px;margin:0 auto;border:1px solid rgba(27,67,50,0.1);border-radius:12px;overflow:hidden;}
-.service-card{position:relative;overflow:hidden;cursor:pointer;aspect-ratio:3/4;background:var(--dark2);transition:flex 0.4s ease;}
-.service-card::before{content:'';position:absolute;inset:0;background:linear-gradient(to top, rgba(8,6,4,0.9) 0%, rgba(8,6,4,0.3) 50%, transparent 100%);z-index:1;transition:opacity 0.3s;}
-.service-card:hover::before{opacity:0.7;}
-.sc-bg-1{background:radial-gradient(ellipse at 50% 20%, #4A1E00, #1A0A00, #050302);}
-.sc-bg-2{background:radial-gradient(ellipse at 50% 25%, #0D2E1F, #061A11, #020805);}
-.sc-bg-3{background:radial-gradient(ellipse at 50% 30%, #3A2008, #1A0E04, #060402);}
-.sc-bg-4{background:radial-gradient(ellipse at 50% 20%, #1A3525, #0A1E14, #030A06);}
-.sc-bg-5{background:radial-gradient(ellipse at 50% 30%, #3D2800, #1A1000, #060402);}
-.service-card-content{position:absolute;bottom:0;left:0;right:0;padding:1.5rem 1.25rem;z-index:2;transform:translateY(0);transition:transform 0.3s;}
-.service-card:hover .service-card-content{transform:translateY(-6px);}
-.sc-num{display:block;font-size:0.65rem;font-weight:500;letter-spacing:1.5px;text-transform:uppercase;color:var(--gold);opacity:0.7;margin-bottom:0.5rem;}
-.sc-title{font-family:var(--serif);font-weight:400;font-size:1.1rem;color:var(--cream);line-height:1.2;margin-bottom:0.5rem;}
-.sc-desc{font-size:0.78rem;color:rgba(253,250,245,0.55);line-height:1.55;max-height:0;overflow:hidden;transition:max-height 0.3s,opacity 0.3s;opacity:0;}
-.service-card:hover .sc-desc{max-height:80px;opacity:1;}
-.sc-cta{display:inline-flex;align-items:center;gap:0.4rem;font-size:0.72rem;font-weight:500;color:var(--gold);margin-top:0.75rem;opacity:0;transition:opacity 0.3s;text-decoration:none;}
-.service-card:hover .sc-cta{opacity:1;}
-.sc-cta::after{content:'→';}
-.sc-open-hint{position:absolute;top:1rem;right:1rem;z-index:2;opacity:0;transition:opacity 0.3s;font-size:0.68rem;letter-spacing:1px;text-transform:uppercase;color:var(--gold);border:1px solid rgba(212,160,23,0.4);padding:0.3rem 0.6rem;border-radius:20px;}
-.service-card:hover .sc-open-hint{opacity:1;}
-
-/* ── HOW IT WORKS ── */
-.how{padding:7rem 4rem;background:var(--cream);}
-.how-inner{max-width:900px;margin:0 auto;}
-.how-steps{display:grid;grid-template-columns:repeat(3,1fr);gap:0;margin-top:3.5rem;position:relative;}
-.how-steps::before{content:'';position:absolute;top:28px;left:calc(16.66% + 1rem);right:calc(16.66% + 1rem);height:1px;background:linear-gradient(to right, var(--orange), var(--gold), var(--green-mid));opacity:0.25;}
-.how-step{text-align:center;padding:0 2rem;}
-.how-step-num{width:56px;height:56px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-family:var(--serif);font-size:1.4rem;font-weight:300;margin:0 auto 1.5rem;position:relative;z-index:1;}
-.how-step:nth-child(1) .how-step-num{background:var(--orange-glow);border:1px solid rgba(139,58,0,0.3);color:var(--orange);}
-.how-step:nth-child(2) .how-step-num{background:var(--gold-pale);border:1px solid rgba(212,160,23,0.3);color:var(--gold);}
-.how-step:nth-child(3) .how-step-num{background:rgba(27,67,50,0.08);border:1px solid rgba(27,67,50,0.2);color:var(--green);}
-.how-step h3{font-family:var(--serif);font-size:1.2rem;font-weight:400;color:var(--green);margin-bottom:0.6rem;}
-.how-step p{font-size:0.85rem;color:var(--green-mid);line-height:1.75;font-weight:300;}
-
-/* ── FEATURED STYLES ── */
-.featured{padding:5rem 4rem;background:var(--dark2);}
-.featured .section-head{margin-bottom:2.5rem;}
-.featured .section-label{color:var(--gold);}
-.featured .section-head h2{color:var(--cream);}
-.gallery-grid{display:grid;grid-template-columns:repeat(3,1fr);grid-template-rows:auto auto;gap:1rem;max-width:1100px;margin:0 auto;}
-.gallery-item{border-radius:8px;overflow:hidden;position:relative;cursor:pointer;transition:transform 0.3s;}
-.gallery-item:hover{transform:scale(1.015);}
-.gallery-item:nth-child(1){grid-column:span 2;height:340px;}
-.gallery-item:nth-child(2){height:340px;}
-.gallery-item:nth-child(3){height:240px;}
-.gallery-item:nth-child(4){height:240px;}
-.gallery-item:nth-child(5){grid-column:span 1;height:240px;}
-.gi-bg-1{background:radial-gradient(ellipse at 40% 30%, #5C2A00 0%, #220F00 60%, #080402 100%);}
-.gi-bg-2{background:radial-gradient(ellipse at 60% 25%, #0A2E1A, #041509, #010602);}
-.gi-bg-3{background:radial-gradient(ellipse at 50% 30%, #3D1A00 0%, #160800 60%, #050201 100%);}
-.gi-bg-4{background:radial-gradient(ellipse at 50% 40%, #1A3830 0%, #091A14 60%, #020806 100%);}
-.gi-bg-5{background:radial-gradient(ellipse at 45% 25%, #4A2E00 0%, #1A1000 60%, #060401 100%);}
-.gallery-item::after{content:'';position:absolute;inset:0;background:linear-gradient(to top, rgba(0,0,0,0.7) 0%, transparent 50%);}
-.gi-label{position:absolute;bottom:1rem;left:1.25rem;z-index:1;font-family:var(--serif);font-size:1rem;font-weight:400;color:var(--cream);}
-.gi-cta{position:absolute;bottom:1rem;right:1.25rem;z-index:1;font-size:0.72rem;font-weight:500;color:var(--gold);text-decoration:none;opacity:0;transition:opacity 0.3s;}
-.gallery-item:hover .gi-cta{opacity:1;}
-
-/* ── TESTIMONIALS ── */
-.testimonials{padding:7rem 4rem;background:var(--cream);text-align:center;}
-.testimonials-track{max-width:680px;margin:3rem auto 0;position:relative;min-height:160px;}
-.testimonial{position:absolute;inset:0;opacity:0;transition:opacity 0.6s;display:flex;flex-direction:column;align-items:center;}
-.testimonial.active{opacity:1;position:relative;}
-.testimonial-quote{font-family:var(--serif);font-size:clamp(1.3rem,2.5vw,1.8rem);font-weight:300;font-style:italic;color:var(--green);line-height:1.5;margin-bottom:1.5rem;}
-.testimonial-quote::before{content:'\201C';color:var(--gold);font-size:3rem;line-height:0;vertical-align:-0.5rem;margin-right:0.2rem;}
-.testimonial-author{font-size:0.78rem;font-weight:500;letter-spacing:0.8px;text-transform:uppercase;color:var(--orange);}
-.testimonial-detail{font-size:0.75rem;color:var(--green-mid);margin-top:0.2rem;}
-.testimonial-dots{display:flex;gap:8px;justify-content:center;margin-top:2.5rem;}
-.t-dot{width:6px;height:6px;border-radius:50%;background:var(--cream-dk);cursor:pointer;transition:background 0.3s,transform 0.2s;}
-.t-dot.active{background:var(--orange);transform:scale(1.3);}
-
-/* ── BOOK CTA SECTION ── */
-.book-cta-section{padding:6rem 4rem;background:var(--green);text-align:center;}
-.book-cta-section h2{font-family:var(--serif);font-weight:300;font-size:clamp(2rem,4vw,3rem);color:var(--cream);margin-bottom:0.75rem;}
-.book-cta-section h2 em{font-style:italic;color:var(--gold-light);}
-.book-cta-section p{font-size:0.95rem;color:rgba(253,250,245,0.6);line-height:1.8;max-width:480px;margin:0 auto 2.5rem;}
-.book-cta-steps{display:flex;gap:0;justify-content:center;max-width:640px;margin:0 auto 3rem;}
-.bcs{flex:1;text-align:center;padding:1.25rem 1rem;border-right:1px solid rgba(253,250,245,0.08);}
-.bcs:last-child{border-right:none;}
-.bcs-num{font-family:var(--serif);font-size:2rem;font-weight:300;color:var(--gold-light);display:block;}
-.bcs-label{font-size:0.75rem;color:rgba(253,250,245,0.5);margin-top:0.25rem;letter-spacing:0.3px;}
-
-/* ── SHOP ── */
-.shop{padding:7rem 4rem;background:var(--cream-dk);}
-.shop-intro{max-width:520px;margin:0 auto 3.5rem;text-align:center;}
-.shop-intro h2{font-family:var(--serif);font-weight:300;font-size:clamp(1.8rem,3.5vw,2.8rem);color:var(--green);margin:0.75rem 0;}
-.shop-intro p{font-size:0.9rem;color:var(--green-mid);line-height:1.8;font-weight:300;}
-.shop-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:1.25rem;max-width:1100px;margin:0 auto;}
-.shop-card{background:var(--cream);border-radius:12px;overflow:hidden;transition:transform 0.2s,box-shadow 0.2s;cursor:pointer;}
-.shop-card:hover{transform:translateY(-4px);box-shadow:0 16px 40px rgba(27,67,50,0.1);}
-.shop-card-img{aspect-ratio:3/4;position:relative;overflow:hidden;}
-.shop-card-img-inner{width:100%;height:100%;transition:transform 0.4s;}
-.shop-card:hover .shop-card-img-inner{transform:scale(1.04);}
-.si-1{background:radial-gradient(ellipse at 50% 30%, #3D1A00, #0F0600, #040201);}
-.si-2{background:radial-gradient(ellipse at 50% 30%, #1A3820, #071509, #020602);}
-.si-3{background:radial-gradient(ellipse at 50% 30%, #2D1800, #0C0700, #030200);}
-.si-4{background:radial-gradient(ellipse at 50% 30%, #0D2820, #040F0A, #010403);}
-.shop-card-badge{position:absolute;top:0.75rem;left:0.75rem;background:var(--orange);color:var(--cream);font-size:0.65rem;font-weight:600;letter-spacing:0.5px;text-transform:uppercase;padding:0.25rem 0.6rem;border-radius:20px;z-index:1;}
-.shop-card-body{padding:1rem 1.1rem 1.25rem;}
-.shop-card-title{font-family:var(--serif);font-size:1rem;font-weight:400;color:var(--green);margin-bottom:0.3rem;line-height:1.3;}
-.shop-card-sub{font-size:0.75rem;color:var(--green-mid);margin-bottom:0.75rem;}
-.shop-card-swatches{display:flex;gap:5px;margin-bottom:0.75rem;}
-.s-swatch{width:14px;height:14px;border-radius:50%;border:1px solid rgba(255,255,255,0.3);}
-.shop-card-footer{display:flex;align-items:center;justify-content:space-between;}
-.shop-card-price{font-size:0.9rem;font-weight:500;color:var(--green);}
-.shop-card-cta{font-size:0.72rem;font-weight:500;color:var(--orange);text-decoration:none;}
-.shop-book-prompt{max-width:600px;margin:3rem auto 0;background:var(--green);border-radius:12px;padding:2rem;display:flex;align-items:center;justify-content:space-between;gap:2rem;}
-.sbp-text{color:var(--cream);}
-.sbp-text h3{font-family:var(--serif);font-size:1.2rem;font-weight:400;margin-bottom:0.4rem;}
-.sbp-text p{font-size:0.82rem;color:rgba(253,250,245,0.6);line-height:1.6;}
-.btn-outline-light{white-space:nowrap;border:1px solid rgba(253,250,245,0.3);color:var(--cream);padding:0.7rem 1.5rem;border-radius:40px;font-size:0.8rem;font-weight:500;text-decoration:none;transition:background 0.2s;flex-shrink:0;}
-.btn-outline-light:hover{background:rgba(253,250,245,0.08);}
-
-/* ── ABOUT ── */
-.about{display:grid;grid-template-columns:1fr 1fr;min-height:80vh;}
-.about-visual{background:radial-gradient(ellipse at 45% 35%, #2D1400, #0D0600, #040200);display:flex;align-items:center;justify-content:center;position:relative;overflow:hidden;}
-.about-crown{font-family:var(--serif);font-size:8rem;font-weight:300;color:rgba(212,160,23,0.08);letter-spacing:-5px;position:absolute;user-select:none;}
-.about-quote{position:relative;z-index:1;text-align:center;padding:3rem;max-width:380px;}
-.about-quote blockquote{font-family:var(--serif);font-size:1.5rem;font-weight:300;font-style:italic;color:var(--cream);line-height:1.5;margin-bottom:1.5rem;}
-.about-quote cite{font-size:0.75rem;font-weight:500;letter-spacing:1px;text-transform:uppercase;color:var(--gold);}
-.about-content{padding:5rem;display:flex;flex-direction:column;justify-content:center;}
-.about-content .section-label{color:var(--orange);margin-bottom:0.75rem;}
-.about-content h2{font-family:var(--serif);font-weight:300;font-size:clamp(2rem,3.5vw,2.8rem);color:var(--green);line-height:1.25;margin-bottom:1.5rem;}
-.about-content h2 em{font-style:italic;color:var(--orange);}
-.about-content p{font-size:0.9rem;color:var(--green-mid);line-height:1.9;font-weight:300;margin-bottom:0.9rem;}
-.values-grid{display:grid;grid-template-columns:1fr 1fr;gap:0.75rem;margin-top:2rem;}
-.value-card{padding:1rem;border-radius:8px;border:1px solid rgba(27,67,50,0.1);}
-.value-card strong{display:block;font-size:0.8rem;font-weight:500;color:var(--green);margin-bottom:0.3rem;}
-.value-card span{font-size:0.78rem;color:var(--green-mid);}
-
-/* ── FOOTER ── */
-footer{background:var(--dark);padding:4rem 4rem 2rem;}
-.footer-top{display:grid;grid-template-columns:2fr 1fr 1fr 1fr;gap:3rem;margin-bottom:3rem;padding-bottom:3rem;border-bottom:1px solid rgba(253,250,245,0.06);}
-.footer-logo-text{font-family:var(--serif);font-size:1.5rem;font-weight:400;color:var(--cream);margin-bottom:0.75rem;}
-.footer-logo-text sup{font-size:0.6rem;color:var(--gold);vertical-align:super;}
-.footer-brand p{font-size:0.82rem;color:rgba(253,250,245,0.38);line-height:1.8;max-width:260px;margin-bottom:1.25rem;}
-.footer-social{display:flex;gap:0.75rem;}
-.footer-social a{width:34px;height:34px;border-radius:50%;border:1px solid rgba(253,250,245,0.1);display:flex;align-items:center;justify-content:center;font-size:0.75rem;color:rgba(253,250,245,0.4);text-decoration:none;transition:border-color 0.2s,color 0.2s;}
-.footer-social a:hover{border-color:var(--gold);color:var(--gold);}
-.footer-col h4{font-size:0.7rem;font-weight:600;letter-spacing:1.2px;text-transform:uppercase;color:rgba(253,250,245,0.35);margin-bottom:1rem;}
-.footer-col ul{list-style:none;display:flex;flex-direction:column;gap:0.5rem;}
-.footer-col ul a{font-size:0.82rem;color:rgba(253,250,245,0.45);text-decoration:none;transition:color 0.2s;}
-.footer-col ul a:hover{color:var(--gold);}
-.footer-bottom{display:flex;justify-content:space-between;align-items:center;font-size:0.75rem;color:rgba(253,250,245,0.22);}
-.footer-bottom a{color:rgba(253,250,245,0.22);text-decoration:none;}
-.footer-bottom a:hover{color:var(--gold);}
-
-/* ── FADE IN ── */
-.fade-in{opacity:0;transform:translateY(24px);transition:opacity 0.7s ease,transform 0.7s ease;}
-.fade-in.visible{opacity:1;transform:translateY(0);}
-
-/* ═══════════════════════════════════════════
-   BOOKING PAGE OVERLAY — THE CORE FEATURE
-═══════════════════════════════════════════ */
-.bp-overlay{
-  position:fixed;inset:0;z-index:900;
-  display:flex;flex-direction:column;
-  background:var(--cream);
-  transform:translateX(100%);
-  transition:transform 0.5s cubic-bezier(0.4,0,0.2,1);
-}
-.bp-overlay.open{transform:translateX(0);}
-
-/* Header */
-.bp-header{
-  height:58px;background:var(--green);flex-shrink:0;
-  display:flex;align-items:center;justify-content:space-between;
-  padding:0 2rem;
-}
-.bp-back{
-  display:flex;align-items:center;gap:0.5rem;
-  font-size:0.8rem;font-weight:500;color:rgba(253,250,245,0.7);
-  background:none;border:none;cursor:pointer;font-family:var(--sans);
-  transition:color 0.2s;padding:0;
-}
-.bp-back:hover{color:var(--gold);}
-.bp-back::before{content:'←';margin-right:0.25rem;}
-.bp-cat-name{font-family:var(--serif);font-size:1rem;font-weight:400;color:var(--cream);}
-.bp-step-counter{
-  display:flex;align-items:center;gap:0.5rem;
-  font-size:0.72rem;color:rgba(253,250,245,0.5);letter-spacing:0.5px;
-}
-.bp-step-dots{display:flex;gap:5px;}
-.bp-step-dot{width:5px;height:5px;border-radius:50%;background:rgba(253,250,245,0.2);transition:background 0.3s;}
-.bp-step-dot.done{background:rgba(212,160,23,0.6);}
-.bp-step-dot.active{background:var(--gold);}
-
-/* Body: options LEFT, image RIGHT */
-.bp-body{flex:1;display:flex;overflow:hidden;}
-
-/* Options panel */
-.bp-options{
-  width:42%;flex-shrink:0;
-  overflow-y:auto;padding:2rem 2.5rem;
-  border-right:1px solid rgba(27,67,50,0.08);
-}
-.bp-step-panel{display:none;}
-.bp-step-panel.active{display:block;}
-
-.bp-step-title{font-family:var(--serif);font-size:1.5rem;font-weight:300;color:var(--green);margin-bottom:0.35rem;}
-.bp-step-sub{font-size:0.82rem;color:var(--green-mid);margin-bottom:1.5rem;line-height:1.6;}
-
-/* Style cards grid */
-.bp-styles-grid{display:grid;grid-template-columns:1fr 1fr;gap:0.75rem;margin-bottom:1.5rem;}
-.bp-style-card{
-  border:1.5px solid rgba(27,67,50,0.1);border-radius:10px;
-  overflow:hidden;cursor:pointer;
-  transition:border-color 0.2s,transform 0.15s,box-shadow 0.2s;
-}
-.bp-style-card:hover{border-color:rgba(139,58,0,0.35);transform:translateY(-2px);box-shadow:0 6px 20px rgba(27,67,50,0.08);}
-.bp-style-card.selected{border-color:var(--orange);box-shadow:0 0 0 2px rgba(139,58,0,0.15);}
-.bp-style-img{
-  height:90px;position:relative;
-  display:flex;align-items:center;justify-content:center;
-}
-.bp-style-body{padding:0.7rem 0.85rem;}
-.bp-style-name{font-size:0.85rem;font-weight:500;color:var(--green);display:block;margin-bottom:0.2rem;}
-.bp-style-meta{font-size:0.72rem;color:var(--green-mid);}
-.bp-style-price{color:var(--orange);font-weight:500;}
-
-/* Customise step */
-.bp-custom-group{margin-bottom:1.5rem;}
-.bp-custom-label{font-size:0.68rem;font-weight:600;letter-spacing:1.2px;text-transform:uppercase;color:var(--green-mid);display:block;margin-bottom:0.6rem;}
-.bp-length-opts{display:grid;grid-template-columns:repeat(4,1fr);gap:0.5rem;}
-.bp-len-opt{
-  padding:0.65rem 0.4rem;text-align:center;
-  border:1px solid rgba(27,67,50,0.15);border-radius:7px;
-  font-size:0.78rem;cursor:pointer;transition:all 0.15s;color:var(--green);
-}
-.bp-len-opt .sub{display:block;font-size:0.65rem;color:var(--green-mid);margin-top:0.1rem;}
-.bp-len-opt:hover,.bp-len-opt.sel{border-color:var(--orange);background:var(--orange);color:var(--cream);}
-.bp-len-opt.sel .sub{color:rgba(253,250,245,0.7);}
-.bp-colour-grid{display:flex;gap:0.65rem;flex-wrap:wrap;}
-.bp-swatch{
-  width:32px;height:32px;border-radius:50%;cursor:pointer;
-  border:2px solid transparent;transition:transform 0.15s,border-color 0.15s,box-shadow 0.15s;
-  position:relative;
-}
-.bp-swatch:hover,.bp-swatch.sel{transform:scale(1.15);border-color:var(--cream);box-shadow:0 0 0 2.5px var(--orange);}
-.bp-swatch-label{position:absolute;bottom:-18px;left:50%;transform:translateX(-50%);font-size:0.6rem;white-space:nowrap;color:var(--green-mid);opacity:0;transition:opacity 0.15s;}
-.bp-swatch:hover .bp-swatch-label{opacity:1;}
-.bp-size-opts{display:grid;grid-template-columns:repeat(3,1fr);gap:0.5rem;}
-.bp-size-opt{padding:0.65rem;text-align:center;border:1px solid rgba(27,67,50,0.15);border-radius:7px;font-size:0.82rem;cursor:pointer;transition:all 0.15s;color:var(--green);}
-.bp-size-opt:hover,.bp-size-opt.sel{border-color:var(--orange);background:var(--orange);color:var(--cream);}
-.bp-addon{display:flex;align-items:center;gap:0.7rem;padding:0.65rem 0.85rem;border:1px solid rgba(27,67,50,0.1);border-radius:8px;margin-bottom:0.5rem;cursor:pointer;transition:border-color 0.15s;font-size:0.82rem;color:var(--green);}
-.bp-addon:hover{border-color:rgba(139,58,0,0.3);}
-.bp-addon input{accent-color:var(--orange);}
-.bp-addon-price{margin-left:auto;font-size:0.75rem;color:var(--orange);font-weight:500;}
-
-/* Calendar */
-.bp-cal{margin-bottom:1rem;}
-.bp-cal-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:0.75rem;}
-.bp-cal-month{font-family:var(--serif);font-size:1rem;font-weight:400;color:var(--green);}
-.bp-cal-nav{width:28px;height:28px;border-radius:50%;border:1px solid rgba(27,67,50,0.15);background:none;cursor:pointer;font-size:0.8rem;color:var(--green);}
-.bp-cal-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:4px;}
-.bp-cal-dn{font-size:0.65rem;font-weight:500;text-align:center;color:var(--green-mid);padding:0.25rem 0;}
-.bp-cal-d{aspect-ratio:1;border-radius:6px;display:flex;align-items:center;justify-content:center;font-size:0.78rem;cursor:pointer;color:var(--green);transition:background 0.15s;}
-.bp-cal-d.avail:hover{background:var(--orange-glow);color:var(--orange);}
-.bp-cal-d.unavail{color:rgba(27,67,50,0.2);cursor:default;}
-.bp-cal-d.today{font-weight:600;color:var(--orange);}
-.bp-cal-d.sel-day{background:var(--orange)!important;color:var(--cream)!important;}
-.bp-cal-d.empty{cursor:default;}
-.bp-times{display:grid;grid-template-columns:repeat(3,1fr);gap:0.5rem;margin-top:0.75rem;}
-.bp-time{padding:0.55rem;text-align:center;border:1px solid rgba(27,67,50,0.12);border-radius:7px;font-size:0.78rem;cursor:pointer;transition:all 0.15s;color:var(--green);}
-.bp-time:hover,.bp-time.sel-t{border-color:var(--orange);background:var(--orange);color:var(--cream);}
-.bp-time.taken{opacity:0.28;cursor:default;text-decoration:line-through;}
-
-/* Details form */
-.bp-form-row{display:grid;grid-template-columns:1fr 1fr;gap:0.75rem;margin-bottom:0.75rem;}
-.bp-form-group{display:flex;flex-direction:column;gap:0.4rem;margin-bottom:0.75rem;}
-.bp-form-label{font-size:0.68rem;font-weight:600;letter-spacing:0.8px;text-transform:uppercase;color:var(--green-mid);}
-.bp-form-input{padding:0.75rem 1rem;border:1px solid rgba(27,67,50,0.15);border-radius:8px;font-size:0.85rem;font-family:var(--sans);color:var(--green);outline:none;background:transparent;transition:border-color 0.2s;}
-.bp-form-input:focus{border-color:var(--orange);}
-.bp-form-input::placeholder{color:rgba(27,67,50,0.3);}
-select.bp-form-input option{background:var(--cream);}
-textarea.bp-form-input{resize:none;height:75px;}
-
-/* Summary */
-.bp-summary-card{background:rgba(27,67,50,0.04);border:1px solid rgba(27,67,50,0.1);border-radius:10px;padding:1.25rem;margin-bottom:1rem;}
-.bp-summary-label{font-size:0.68rem;font-weight:600;letter-spacing:1px;text-transform:uppercase;color:var(--orange);margin-bottom:0.85rem;}
-.bp-summary-row{display:flex;justify-content:space-between;font-size:0.82rem;margin-bottom:0.55rem;}
-.bp-summary-row span:first-child{color:var(--green-mid);}
-.bp-summary-row span:last-child{color:var(--green);font-weight:500;}
-.bp-summary-divider{height:1px;background:rgba(27,67,50,0.08);margin:0.75rem 0;}
-.bp-deposit-row{display:flex;justify-content:space-between;font-size:0.9rem;}
-.bp-deposit-row span:first-child{color:var(--green-mid);}
-.bp-deposit-row span:last-child{color:var(--orange);font-weight:700;font-size:1rem;}
-.bp-policy-note{font-size:0.75rem;color:var(--green-mid);line-height:1.6;padding:0.75rem 1rem;background:var(--gold-pale);border-radius:8px;border-left:2px solid var(--gold);margin-bottom:1rem;}
-
-/* Confirmation */
-.bp-confirm-inner{text-align:center;padding:2rem 0;}
-.bp-confirm-check{width:72px;height:72px;border-radius:50%;background:rgba(27,67,50,0.07);border:2px solid var(--green-light);display:flex;align-items:center;justify-content:center;margin:0 auto 1.5rem;font-size:1.8rem;}
-.bp-confirm-title{font-family:var(--serif);font-size:1.8rem;font-weight:300;color:var(--green);margin-bottom:0.5rem;}
-.bp-confirm-sub{font-size:0.85rem;color:var(--green-mid);line-height:1.7;max-width:300px;margin:0 auto 1.5rem;}
-.bp-confirm-summary{background:rgba(27,67,50,0.05);border-radius:10px;padding:1rem 1.25rem;text-align:left;font-size:0.85rem;color:var(--green);margin-bottom:1.5rem;}
-.bp-confirm-summary strong{display:block;font-weight:500;margin-bottom:0.3rem;}
-.bp-cal-btns{display:flex;gap:0.75rem;justify-content:center;}
-.bp-cal-btn{font-size:0.78rem;color:var(--orange);text-decoration:none;border:1px solid rgba(139,58,0,0.2);padding:0.6rem 1.1rem;border-radius:8px;transition:background 0.15s;}
-.bp-cal-btn:hover{background:var(--orange-glow);}
-
-/* Nav buttons */
-.bp-nav-btns{display:flex;gap:0.75rem;margin-top:1.75rem;padding-top:1.25rem;border-top:1px solid rgba(27,67,50,0.07);}
-.bp-btn-next{flex:1;background:var(--orange);color:var(--cream);border:none;padding:0.9rem;border-radius:8px;font-size:0.85rem;font-weight:500;cursor:pointer;font-family:var(--sans);transition:background 0.2s;}
-.bp-btn-next:hover{background:var(--orange-mid);}
-.bp-btn-next.green{background:var(--green);}
-.bp-btn-next.green:hover{background:var(--green-mid);}
-.bp-btn-back{background:none;border:1px solid rgba(27,67,50,0.15);color:var(--green);padding:0.9rem 1.25rem;border-radius:8px;font-size:0.85rem;cursor:pointer;font-family:var(--sans);}
-
-/* ── IMAGE PANEL (right side) ── */
-.bp-image-panel{
-  flex:1;position:relative;background:#060402;overflow:hidden;
-}
-.bp-img-glow{
-  position:absolute;top:-30%;left:50%;transform:translateX(-50%);
-  width:130%;height:90%;border-radius:50%;
-  transition:background 0.7s ease, opacity 0.5s;
-  filter:blur(48px);opacity:0.55;pointer-events:none;
-}
-.bp-img-shimmer{
-  position:absolute;top:0;left:0;right:0;height:35%;
-  background:linear-gradient(to bottom, rgba(212,160,23,0.05), transparent);
-  pointer-events:none;
-}
-#bpStrandSvg{
-  position:absolute;inset:0;width:100%;height:100%;
-  transition:opacity 0.4s;
-}
-.bp-img-overlay{
-  position:absolute;inset:0;
-  background:linear-gradient(to top, rgba(4,2,1,0.88) 0%, rgba(4,2,1,0.2) 35%, transparent 65%);
-  pointer-events:none;
-}
-.bp-img-info{
-  position:absolute;bottom:0;left:0;right:0;
-  padding:2rem 2.5rem;z-index:2;
-}
-.bp-img-style-name{
-  font-family:var(--serif);font-size:2rem;font-weight:300;color:var(--cream);
-  line-height:1.1;margin-bottom:0.35rem;
-  transition:opacity 0.3s;
-}
-.bp-img-meta{
-  font-size:0.78rem;color:rgba(253,250,245,0.5);letter-spacing:0.3px;
-  transition:opacity 0.3s;
-}
-.bp-img-price{
-  position:absolute;top:1.5rem;right:1.5rem;
-  font-family:var(--serif);font-size:1.2rem;font-weight:300;color:var(--gold-light);
-  background:rgba(4,2,1,0.5);backdrop-filter:blur(4px);
-  padding:0.4rem 0.85rem;border-radius:20px;
-  border:1px solid rgba(212,160,23,0.2);
-}
-.bp-img-length-bar{
-  display:flex;gap:0;margin-bottom:0.75rem;max-width:200px;
-}
-.bp-lbar-item{
-  flex:1;height:2px;background:rgba(253,250,245,0.15);
-  transition:background 0.4s;position:relative;
-}
-.bp-lbar-item.active{background:var(--gold);}
-.bp-img-placeholder{
-  position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);
-  font-size:0.7rem;letter-spacing:1.5px;text-transform:uppercase;
-  color:rgba(253,250,245,0.06);pointer-events:none;text-align:center;
-  line-height:2;
-}
-
-/* ── RESPONSIVE ── */
-@media(max-width:900px){
-  nav{padding:1rem 1.5rem;}
-  .nav-links{display:none;}
-  .nav-burger{display:flex;}
-  .hero{padding:6rem 1.5rem 4rem;}
-  .hero-stats{position:static;margin-top:2.5rem;flex-wrap:wrap;gap:1.5rem;}
-  .intro,.services,.how,.featured,.testimonials,.book-cta-section,.shop{padding:4rem 1.5rem;}
-  .services-grid{grid-template-columns:repeat(2,1fr);}
-  .how-steps{grid-template-columns:1fr;}
-  .how-steps::before{display:none;}
-  .gallery-grid{grid-template-columns:1fr 1fr;}
-  .gallery-item:nth-child(1){grid-column:span 2;}
-  .shop-grid{grid-template-columns:1fr 1fr;}
-  .about{grid-template-columns:1fr;}
-  .about-visual{min-height:300px;}
-  .about-content{padding:3rem 1.5rem;}
-  footer{padding:3rem 1.5rem 1.5rem;}
-  .footer-top{grid-template-columns:1fr 1fr;gap:2rem;}
-  .footer-bottom{flex-direction:column;gap:0.75rem;text-align:center;}
-  .shop-book-prompt{flex-direction:column;text-align:center;}
-  /* Booking page mobile: stack image top, options bottom */
-  .bp-body{flex-direction:column-reverse;}
-  .bp-options{width:100%;border-right:none;border-top:1px solid rgba(27,67,50,0.08);max-height:60vh;}
-  .bp-image-panel{flex:0 0 40vh;}
-  .bp-header{padding:0 1rem;}
-  .bp-cat-name{font-size:0.85rem;}
-  .bp-styles-grid{grid-template-columns:1fr 1fr;}
-}
-</style>
+<link rel="stylesheet" href="tiwaras-house.css">
 </head>
 <body>
 
@@ -498,7 +33,7 @@ textarea.bp-form-input{resize:none;height:75px;}
     <p class="hero-sub">Premium braiding, protective styles, and Afro hair care — crafted with intention, culture, and artistry.</p>
     <div class="hero-actions">
       <a href="#" onclick="openBooking('braids');return false;" class="btn-primary">Book your appointment</a>
-      <a href="#services" class="btn-ghost">Explore services →</a>
+      <a href="#services" class="btn-ghost">Explore services &rarr;</a>
     </div>
   </div>
   <div class="hero-stats">
@@ -539,7 +74,7 @@ textarea.bp-form-input{resize:none;height:75px;}
   <div class="intro-divider fade-in"></div>
 </section>
 
-<!-- SERVICE CATEGORIES — click to open booking page -->
+<!-- SERVICE CATEGORIES -->
 <section class="services" id="services">
   <div class="section-head fade-in">
     <span class="section-label">What we offer</span>
@@ -551,7 +86,7 @@ textarea.bp-form-input{resize:none;height:75px;}
       <div class="sc-open-hint">Book now</div>
       <div class="service-card-content">
         <span class="sc-num">01</span>
-        <div class="sc-title">Braids &<br>Protective Styles</div>
+        <div class="sc-title">Braids &amp;<br>Protective Styles</div>
         <div class="sc-desc">Box braids, knotless, Fulani, cornrows and more — customised by style, length and colour.</div>
         <span class="sc-cta">Choose your style</span>
       </div>
@@ -572,7 +107,7 @@ textarea.bp-form-input{resize:none;height:75px;}
       <div class="service-card-content">
         <span class="sc-num">03</span>
         <div class="sc-title">Natural<br>Hair Care</div>
-        <div class="sc-desc">Wash & styles, blowouts, twist outs, and silk press treatments.</div>
+        <div class="sc-desc">Wash &amp; styles, blowouts, twist outs, and silk press treatments.</div>
         <span class="sc-cta">Choose your style</span>
       </div>
     </div>
@@ -581,7 +116,7 @@ textarea.bp-form-input{resize:none;height:75px;}
       <div class="sc-open-hint">Book now</div>
       <div class="service-card-content">
         <span class="sc-num">04</span>
-        <div class="sc-title">Locs &<br>Twists</div>
+        <div class="sc-title">Locs &amp;<br>Twists</div>
         <div class="sc-desc">Starter locs, Senegalese twists, Marley twists, loc retwists and more.</div>
         <span class="sc-cta">Choose your style</span>
       </div>
@@ -619,7 +154,7 @@ textarea.bp-form-input{resize:none;height:75px;}
       </div>
       <div class="how-step fade-in">
         <div class="how-step-num">3</div>
-        <h3>Book & deposit</h3>
+        <h3>Book &amp; deposit</h3>
         <p>Pick your date and time. Pay your 25% deposit to confirm. Done — confirmation lands in your inbox immediately.</p>
       </div>
     </div>
@@ -633,11 +168,11 @@ textarea.bp-form-input{resize:none;height:75px;}
     <h2 style="color:var(--cream);">Featured styles</h2>
   </div>
   <div class="gallery-grid fade-in">
-    <div class="gallery-item gi-bg-1" onclick="openBooking('braids')"><span class="gi-label">Knotless Braids</span><span class="gi-cta">Book this →</span></div>
-    <div class="gallery-item gi-bg-2" onclick="openBooking('locs')"><span class="gi-label">Goddess Locs</span><span class="gi-cta">Book this →</span></div>
-    <div class="gallery-item gi-bg-3" onclick="openBooking('braids')"><span class="gi-label">Box Braids</span><span class="gi-cta">Book this →</span></div>
-    <div class="gallery-item gi-bg-4" onclick="openBooking('braids')"><span class="gi-label">Fulani Braids</span><span class="gi-cta">Book this →</span></div>
-    <div class="gallery-item gi-bg-5" onclick="openBooking('locs')"><span class="gi-label">Senegalese Twists</span><span class="gi-cta">Book this →</span></div>
+    <div class="gallery-item gi-bg-1" onclick="openBooking('braids')"><span class="gi-label">Knotless Braids</span><span class="gi-cta">Book this &rarr;</span></div>
+    <div class="gallery-item gi-bg-2" onclick="openBooking('locs')"><span class="gi-label">Goddess Locs</span><span class="gi-cta">Book this &rarr;</span></div>
+    <div class="gallery-item gi-bg-3" onclick="openBooking('braids')"><span class="gi-label">Box Braids</span><span class="gi-cta">Book this &rarr;</span></div>
+    <div class="gallery-item gi-bg-4" onclick="openBooking('braids')"><span class="gi-label">Fulani Braids</span><span class="gi-cta">Book this &rarr;</span></div>
+    <div class="gallery-item gi-bg-5" onclick="openBooking('locs')"><span class="gi-label">Senegalese Twists</span><span class="gi-cta">Book this &rarr;</span></div>
   </div>
 </section>
 
@@ -673,10 +208,10 @@ textarea.bp-form-input{resize:none;height:75px;}
   <div class="book-cta-steps">
     <div class="bcs"><span class="bcs-num">1</span><span class="bcs-label">Choose a style</span></div>
     <div class="bcs"><span class="bcs-num">2</span><span class="bcs-label">Customise it live</span></div>
-    <div class="bcs"><span class="bcs-num">3</span><span class="bcs-label">Pick date & time</span></div>
-    <div class="bcs"><span class="bcs-num">4</span><span class="bcs-label">Pay deposit & confirm</span></div>
+    <div class="bcs"><span class="bcs-num">3</span><span class="bcs-label">Pick date &amp; time</span></div>
+    <div class="bcs"><span class="bcs-num">4</span><span class="bcs-label">Pay deposit &amp; confirm</span></div>
   </div>
-  <a href="#" onclick="openBooking('braids');return false;" class="btn-primary" style="display:inline-block;">Start booking →</a>
+  <a href="#" onclick="openBooking('braids');return false;" class="btn-primary" style="display:inline-block;">Start booking &rarr;</a>
 </section>
 
 <!-- SHOP -->
@@ -697,7 +232,7 @@ textarea.bp-form-input{resize:none;height:75px;}
           <div class="s-swatch" style="background:#7a3800;"></div><div class="s-swatch" style="background:#c07020;"></div>
           <div class="s-swatch" style="background:#e8d080;"></div>
         </div>
-        <div class="shop-card-footer"><span class="shop-card-price">£18.99</span><a href="#" class="shop-card-cta">Shop now →</a></div>
+        <div class="shop-card-footer"><span class="shop-card-price">£18.99</span><a href="#" class="shop-card-cta">Shop now &rarr;</a></div>
       </div>
     </div>
     <div class="shop-card">
@@ -709,7 +244,7 @@ textarea.bp-form-input{resize:none;height:75px;}
           <div class="s-swatch" style="background:#1a1108;"></div><div class="s-swatch" style="background:#3d2000;"></div>
           <div class="s-swatch" style="background:#8B3A00;"></div><div class="s-swatch" style="background:#c07020;"></div>
         </div>
-        <div class="shop-card-footer"><span class="shop-card-price">£14.99</span><a href="#" class="shop-card-cta">Shop now →</a></div>
+        <div class="shop-card-footer"><span class="shop-card-price">£14.99</span><a href="#" class="shop-card-cta">Shop now &rarr;</a></div>
       </div>
     </div>
     <div class="shop-card">
@@ -721,7 +256,7 @@ textarea.bp-form-input{resize:none;height:75px;}
           <div class="s-swatch" style="background:#1a1108;"></div><div class="s-swatch" style="background:#3d2000;"></div>
           <div class="s-swatch" style="background:#c07020;"></div>
         </div>
-        <div class="shop-card-footer"><span class="shop-card-price">£16.99</span><a href="#" class="shop-card-cta">Shop now →</a></div>
+        <div class="shop-card-footer"><span class="shop-card-price">£16.99</span><a href="#" class="shop-card-cta">Shop now &rarr;</a></div>
       </div>
     </div>
     <div class="shop-card">
@@ -730,13 +265,13 @@ textarea.bp-form-input{resize:none;height:75px;}
         <div class="shop-card-title">Hair Care Accessories</div>
         <div class="shop-card-sub">Combs, edge tools, scalp oils</div>
         <div class="shop-card-swatches"></div>
-        <div class="shop-card-footer"><span class="shop-card-price">from £6.99</span><a href="#" class="shop-card-cta">Shop now →</a></div>
+        <div class="shop-card-footer"><span class="shop-card-price">from £6.99</span><a href="#" class="shop-card-cta">Shop now &rarr;</a></div>
       </div>
     </div>
   </div>
   <div class="shop-book-prompt fade-in">
     <div class="sbp-text"><h3>Buying hair for your appointment?</h3><p>Add to basket and collect at the salon, or have it delivered before your date.</p></div>
-    <a href="#" onclick="openBooking('braids');return false;" class="btn-outline-light">Book the install →</a>
+    <a href="#" onclick="openBooking('braids');return false;" class="btn-outline-light">Book the install &rarr;</a>
   </div>
 </section>
 
@@ -775,12 +310,12 @@ textarea.bp-form-input{resize:none;height:75px;}
       </div>
     </div>
     <div class="footer-col"><h4>Services</h4><ul>
-      <li><a href="#">Braids & Protective Styles</a></li><li><a href="#">Wig Installs</a></li>
-      <li><a href="#">Natural Hair Care</a></li><li><a href="#">Locs & Twists</a></li><li><a href="#">Treatments</a></li>
+      <li><a href="#">Braids &amp; Protective Styles</a></li><li><a href="#">Wig Installs</a></li>
+      <li><a href="#">Natural Hair Care</a></li><li><a href="#">Locs &amp; Twists</a></li><li><a href="#">Treatments</a></li>
     </ul></div>
     <div class="footer-col"><h4>Studio</h4><ul>
       <li><a href="#">About Tiwara</a></li><li><a href="#">Gallery</a></li>
-      <li><a href="#">Shop</a></li><li><a href="#">Blog & Journal</a></li><li><a href="#">Join our team</a></li>
+      <li><a href="#">Shop</a></li><li><a href="#">Blog &amp; Journal</a></li><li><a href="#">Join our team</a></li>
     </ul></div>
     <div class="footer-col"><h4>Visit us</h4><ul>
       <li><a href="#">Manchester, UK</a></li><li><a href="#">Mon–Sat, 9am–7pm</a></li>
@@ -788,17 +323,14 @@ textarea.bp-form-input{resize:none;height:75px;}
     </ul></div>
   </div>
   <div class="footer-bottom">
-    <span>© 2025 Tiwara's House. All rights reserved.</span>
-    <span>Made with love for the community · Manchester, UK</span>
-    <span><a href="#">GDPR</a> · <a href="#">Cookies</a> · <a href="#">Terms</a></span>
+    <span>&copy; 2025 Tiwara's House. All rights reserved.</span>
+    <span>Made with love for the community &middot; Manchester, UK</span>
+    <span><a href="#">GDPR</a> &middot; <a href="#">Cookies</a> &middot; <a href="#">Terms</a></span>
   </div>
 </footer>
 
-<!-- ═══════════════════════════════════════════
-     BOOKING PAGE OVERLAY
-═══════════════════════════════════════════ -->
+<!-- BOOKING PAGE OVERLAY -->
 <div id="bookingPage" class="bp-overlay">
-  <!-- Header -->
   <div class="bp-header">
     <button class="bp-back" onclick="closeBooking()">Back to site</button>
     <span class="bp-cat-name" id="bpCatName">Braids &amp; Protective Styles</span>
@@ -806,30 +338,23 @@ textarea.bp-form-input{resize:none;height:75px;}
       <div class="bp-step-dots" id="bpStepDots"></div>
     </div>
   </div>
-
-  <!-- Body -->
   <div class="bp-body">
-
-    <!-- LEFT: Options panel -->
     <div class="bp-options" id="bpOptions">
 
-      <!-- STEP 1: Choose style -->
+      <!-- STEP 1 -->
       <div class="bp-step-panel active" id="bpStep0">
         <div class="bp-step-title" id="bpStyleTitle">Choose your style</div>
         <div class="bp-step-sub" id="bpStyleSub">Select the style you'd like</div>
-        <div class="bp-styles-grid" id="bpStylesGrid">
-          <!-- populated by JS -->
-        </div>
+        <div class="bp-styles-grid" id="bpStylesGrid"></div>
         <div class="bp-nav-btns">
-          <button class="bp-btn-next" onclick="bpNext()">Continue →</button>
+          <button class="bp-btn-next" onclick="bpNext()">Continue &rarr;</button>
         </div>
       </div>
 
-      <!-- STEP 2: Customise -->
+      <!-- STEP 2 -->
       <div class="bp-step-panel" id="bpStep1">
         <div class="bp-step-title">Customise your look</div>
         <div class="bp-step-sub">Every selection updates the preview on the right</div>
-
         <div class="bp-custom-group" id="bpLengthGroup">
           <span class="bp-custom-label">Length</span>
           <div class="bp-length-opts">
@@ -839,7 +364,6 @@ textarea.bp-form-input{resize:none;height:75px;}
             <div class="bp-len-opt" onclick="selectLen(3,this)">XL<span class="sub">26–30"</span></div>
           </div>
         </div>
-
         <div class="bp-custom-group" id="bpColourGroup">
           <span class="bp-custom-label">Colour</span>
           <div class="bp-colour-grid">
@@ -852,7 +376,6 @@ textarea.bp-form-input{resize:none;height:75px;}
             <div class="bp-swatch" style="background:#5A0808;" onclick="selectColour('burgundy',this)" title="Burgundy"><span class="bp-swatch-label">Burgundy</span></div>
           </div>
         </div>
-
         <div class="bp-custom-group" id="bpSizeGroup">
           <span class="bp-custom-label">Size / Thickness</span>
           <div class="bp-size-opts">
@@ -861,29 +384,27 @@ textarea.bp-form-input{resize:none;height:75px;}
             <div class="bp-size-opt" onclick="selectSize(this)">Large</div>
           </div>
         </div>
-
         <div class="bp-custom-group">
           <span class="bp-custom-label">Add-ons (optional)</span>
           <label class="bp-addon"><input type="checkbox" onchange="calcTotal()"> Scalp treatment <span class="bp-addon-price">+£15</span></label>
           <label class="bp-addon"><input type="checkbox" onchange="calcTotal()"> Beads &amp; cuffs <span class="bp-addon-price">+£10</span></label>
           <label class="bp-addon"><input type="checkbox" onchange="calcTotal()"> Colour rinse <span class="bp-addon-price">+£20</span></label>
         </div>
-
         <div class="bp-nav-btns">
           <button class="bp-btn-back" onclick="bpPrev()">Back</button>
-          <button class="bp-btn-next" onclick="bpNext()">Continue →</button>
+          <button class="bp-btn-next" onclick="bpNext()">Continue &rarr;</button>
         </div>
       </div>
 
-      <!-- STEP 3: Date & Time -->
+      <!-- STEP 3 -->
       <div class="bp-step-panel" id="bpStep2">
         <div class="bp-step-title">Choose a date &amp; time</div>
         <div class="bp-step-sub">Available dates shown — select to see time slots</div>
         <div class="bp-cal">
           <div class="bp-cal-header">
-            <button class="bp-cal-nav">‹</button>
+            <button class="bp-cal-nav">&#8249;</button>
             <span class="bp-cal-month">July 2025</span>
-            <button class="bp-cal-nav">›</button>
+            <button class="bp-cal-nav">&#8250;</button>
           </div>
           <div class="bp-cal-grid">
             <div class="bp-cal-dn">Mo</div><div class="bp-cal-dn">Tu</div><div class="bp-cal-dn">We</div>
@@ -915,11 +436,11 @@ textarea.bp-form-input{resize:none;height:75px;}
         </div>
         <div class="bp-nav-btns">
           <button class="bp-btn-back" onclick="bpPrev()">Back</button>
-          <button class="bp-btn-next" onclick="bpNext()">Continue →</button>
+          <button class="bp-btn-next" onclick="bpNext()">Continue &rarr;</button>
         </div>
       </div>
 
-      <!-- STEP 4: Details -->
+      <!-- STEP 4 -->
       <div class="bp-step-panel" id="bpStep3">
         <div class="bp-step-title">Your details</div>
         <div class="bp-step-sub">Just a few things we need to confirm your booking</div>
@@ -932,11 +453,11 @@ textarea.bp-form-input{resize:none;height:75px;}
         <div class="bp-form-group"><label class="bp-form-label">Notes (optional)</label><textarea class="bp-form-input" placeholder="e.g. colour-treated hair, reference photo in DMs…"></textarea></div>
         <div class="bp-nav-btns">
           <button class="bp-btn-back" onclick="bpPrev()">Back</button>
-          <button class="bp-btn-next" onclick="bpNext()">Review booking →</button>
+          <button class="bp-btn-next" onclick="bpNext()">Review booking &rarr;</button>
         </div>
       </div>
 
-      <!-- STEP 5: Summary -->
+      <!-- STEP 5 -->
       <div class="bp-step-panel" id="bpStep4">
         <div class="bp-step-title">Review &amp; pay deposit</div>
         <div class="bp-step-sub">Confirm your booking with a 25% deposit</div>
@@ -956,19 +477,19 @@ textarea.bp-form-input{resize:none;height:75px;}
         <div class="bp-policy-note">Deposits are non-refundable within 48 hours of your appointment. You can reschedule up to 48h before via the link in your confirmation email.</div>
         <div class="bp-nav-btns">
           <button class="bp-btn-back" onclick="bpPrev()">Back</button>
-          <button class="bp-btn-next green" onclick="bpNext()">Pay deposit & confirm →</button>
+          <button class="bp-btn-next green" onclick="bpNext()">Pay deposit &amp; confirm &rarr;</button>
         </div>
       </div>
 
-      <!-- STEP 6: Confirmation -->
+      <!-- STEP 6 -->
       <div class="bp-step-panel" id="bpStep5">
         <div class="bp-confirm-inner">
-          <div class="bp-confirm-check">✓</div>
+          <div class="bp-confirm-check">&#10003;</div>
           <div class="bp-confirm-title">You're booked!</div>
           <p class="bp-confirm-sub">A confirmation has been sent to your inbox with all details, the salon address, and a reschedule link.</p>
           <div class="bp-confirm-summary">
             <strong id="conf-service">Knotless Braids — 1B Black, Medium, Long</strong>
-            <span>Fri 11 July, 1:30 pm · Tiwara's House, Manchester</span>
+            <span>Fri 11 July, 1:30 pm &middot; Tiwara's House, Manchester</span>
           </div>
           <div class="bp-cal-btns">
             <a href="#" class="bp-cal-btn">+ Google Calendar</a>
@@ -982,7 +503,7 @@ textarea.bp-form-input{resize:none;height:75px;}
 
     </div><!-- /bp-options -->
 
-    <!-- RIGHT: Dynamic image panel -->
+    <!-- Dynamic image panel -->
     <div class="bp-image-panel">
       <div class="bp-img-glow" id="bpGlow"></div>
       <div class="bp-img-shimmer"></div>
@@ -1005,334 +526,6 @@ textarea.bp-form-input{resize:none;height:75px;}
   </div><!-- /bp-body -->
 </div><!-- /bookingPage -->
 
-<!-- ═══════════════════════════════════════════
-     JAVASCRIPT
-═══════════════════════════════════════════ -->
-<script>
-/* ── SITE JS ── */
-window.addEventListener('scroll', function(){
-  document.getElementById('mainNav').classList.toggle('scrolled', window.scrollY > 60);
-});
-function toggleMenu(){
-  var l=document.querySelector('.nav-links'),o=l.style.display==='flex';
-  l.style.display=o?'none':'flex';
-  if(!o){Object.assign(l.style,{flexDirection:'column',position:'absolute',top:'60px',left:'0',right:'0',background:'var(--cream)',padding:'1.5rem 2rem',gap:'1.25rem',boxShadow:'0 8px 24px rgba(0,0,0,0.08)',zIndex:'300'});}
-}
-document.querySelectorAll('a[href^="#"]').forEach(function(a){
-  a.addEventListener('click',function(e){
-    var id=this.getAttribute('href').substring(1);
-    if(!id) return;
-    var el=document.getElementById(id);
-    if(el){e.preventDefault();el.scrollIntoView({behavior:'smooth'});}
-  });
-});
-var faders=document.querySelectorAll('.fade-in');
-var io=new IntersectionObserver(function(entries){entries.forEach(function(e){if(e.isIntersecting){e.target.classList.add('visible');io.unobserve(e.target);}});},{threshold:0.12});
-faders.forEach(function(f){io.observe(f);});
-var tIdx=0;
-function goTo(i){
-  document.querySelectorAll('.testimonial').forEach(function(t,j){t.classList.toggle('active',j===i);t.style.position=j===i?'relative':'absolute';});
-  document.querySelectorAll('.t-dot').forEach(function(d,j){d.classList.toggle('active',j===i);});
-  tIdx=i;
-}
-setInterval(function(){goTo((tIdx+1)%3);},5000);
-
-/* ══════════════════════════════════
-   BOOKING PAGE DATA & LOGIC
-══════════════════════════════════ */
-var CATS = {
-  braids: {
-    name: 'Braids & Protective Styles',
-    styles: [
-      {id:'knotless',  name:'Knotless Braids',    price:'from £130', base:130, dur:'4–6h',   bg:'radial-gradient(ellipse at 50% 25%, #4A2200, #1A0A00, #060301)'},
-      {id:'box',       name:'Box Braids',          price:'from £100', base:100, dur:'4–5h',   bg:'radial-gradient(ellipse at 50% 25%, #3D1800, #160700, #040201)'},
-      {id:'fulani',    name:'Fulani Braids',        price:'from £110', base:110, dur:'3–4h',   bg:'radial-gradient(ellipse at 50% 25%, #2A1800, #0E0700, #030201)'},
-      {id:'cornrows',  name:'Cornrows',             price:'from £60',  base:60,  dur:'1.5–3h', bg:'radial-gradient(ellipse at 50% 25%, #1A3020, #081509, #020604)'},
-      {id:'feedin',    name:'Feed-In Braids',       price:'from £80',  base:80,  dur:'2–3h',   bg:'radial-gradient(ellipse at 50% 25%, #381A00, #140800, #040201)'},
-      {id:'stitch',    name:'Stitch Braids',        price:'from £90',  base:90,  dur:'2–3h',   bg:'radial-gradient(ellipse at 50% 25%, #2A1200, #0E0600, #030200)'},
-    ],
-    hasSize:true, hasLength:true
-  },
-  wigs: {
-    name: 'Wig Installs',
-    styles: [
-      {id:'lacefront', name:'Lace Front Install',   price:'from £120', base:120, dur:'2–3h',   bg:'radial-gradient(ellipse at 50% 25%, #0A2820, #041408, #010603)'},
-      {id:'fulllace',  name:'Full Lace Install',    price:'from £150', base:150, dur:'2.5–3.5h',bg:'radial-gradient(ellipse at 50% 25%, #0D3025, #050F09, #010503)'},
-      {id:'360',       name:'360 Wig Install',      price:'from £140', base:140, dur:'2–3h',   bg:'radial-gradient(ellipse at 50% 25%, #1A3020, #080E09, #020403)'},
-      {id:'custom',    name:'Wig Customisation',    price:'from £80',  base:80,  dur:'1.5–2.5h',bg:'radial-gradient(ellipse at 50% 25%, #101D18, #06100A, #020503)'},
-    ],
-    hasSize:false, hasLength:true
-  },
-  natural: {
-    name: 'Natural Hair Care',
-    styles: [
-      {id:'washstyle', name:'Wash & Style',         price:'from £55',  base:55,  dur:'2–3h',   bg:'radial-gradient(ellipse at 50% 25%, #3A2808, #140E03, #040301)'},
-      {id:'blowout',   name:'Blowout',              price:'from £65',  base:65,  dur:'2–3h',   bg:'radial-gradient(ellipse at 50% 25%, #4A3010, #1A1005, #050301)'},
-      {id:'twistout',  name:'Twist Out',            price:'from £70',  base:70,  dur:'2–3h',   bg:'radial-gradient(ellipse at 50% 25%, #2A1808, #0E0803, #030201)'},
-      {id:'silkpress', name:'Silk Press',           price:'from £85',  base:85,  dur:'3–4h',   bg:'radial-gradient(ellipse at 50% 25%, #3A2000, #150C00, #040200)'},
-    ],
-    hasSize:false, hasLength:true
-  },
-  locs: {
-    name: 'Locs & Twists',
-    styles: [
-      {id:'starterlocs',name:'Starter Locs',        price:'from £150', base:150, dur:'4–7h',   bg:'radial-gradient(ellipse at 50% 25%, #1A2A10, #080E06, #020402)'},
-      {id:'twostrand',  name:'Two-Strand Twists',   price:'from £90',  base:90,  dur:'3–5h',   bg:'radial-gradient(ellipse at 50% 25%, #2A1808, #100800, #030200)'},
-      {id:'senegalese', name:'Senegalese Twists',   price:'from £110', base:110, dur:'3–5h',   bg:'radial-gradient(ellipse at 50% 25%, #3A2010, #150C04, #040201)'},
-      {id:'marley',     name:'Marley Twists',       price:'from £120', base:120, dur:'4–6h',   bg:'radial-gradient(ellipse at 50% 25%, #281808, #0E0A03, #030200)'},
-      {id:'retwist',    name:'Loc Retwist',         price:'from £60',  base:60,  dur:'1.5–3h', bg:'radial-gradient(ellipse at 50% 25%, #141E0C, #080B05, #020301)'},
-    ],
-    hasSize:true, hasLength:true
-  },
-  treatments: {
-    name: 'Treatments',
-    styles: [
-      {id:'deepcond',  name:'Deep Conditioning',    price:'from £45',  base:45,  dur:'1–1.5h', bg:'radial-gradient(ellipse at 50% 25%, #1A1808, #0A0A04, #030302)'},
-      {id:'scalp',     name:'Scalp Treatment',      price:'from £35',  base:35,  dur:'45min',  bg:'radial-gradient(ellipse at 50% 25%, #1A2010, #0A0E08, #020402)'},
-      {id:'protein',   name:'Protein Treatment',    price:'from £55',  base:55,  dur:'1.5–2h', bg:'radial-gradient(ellipse at 50% 25%, #2A1808, #100A04, #030200)'},
-      {id:'hotoil',    name:'Hot Oil Treatment',    price:'from £30',  base:30,  dur:'45min',  bg:'radial-gradient(ellipse at 50% 25%, #1A1408, #0A0804, #020200)'},
-    ],
-    hasSize:false, hasLength:false
-  }
-};
-
-var COLOURS = {
-  '1b':      {name:'1B Natural Black',  glow:'rgba(38,22,8,0.95)',   strand:'#2A1A0A'},
-  '4':       {name:'4 Dark Brown',      glow:'rgba(80,42,8,0.9)',    strand:'#5A3010'},
-  '30':      {name:'30 Auburn',         glow:'rgba(140,62,15,0.85)', strand:'#9A5020'},
-  '27':      {name:'27 Honey Blonde',   glow:'rgba(180,115,30,0.75)',strand:'#C08030'},
-  '613':     {name:'613 Platinum',      glow:'rgba(200,175,60,0.65)',strand:'#C8A840'},
-  'ombre':   {name:'Ombre',             glow:'rgba(100,50,15,0.8)',  strand:'#7A4018'},
-  'burgundy':{name:'Burgundy',          glow:'rgba(110,16,16,0.9)',  strand:'#6A1010'},
-};
-
-var LENGTHS = ['Short (10–12")', 'Medium (14–18")', 'Long (20–24")', 'XL (26–30")'];
-
-var STRAND_CONFIGS = {
-  knotless:   {count:8, gap:65, amp:14, w:5,  phase:8},
-  box:        {count:5, gap:100,amp:20, w:11, phase:0},
-  fulani:     {count:7, gap:72, amp:16, w:7,  phase:10},
-  cornrows:   {count:10,gap:52, amp:7,  w:3,  phase:0},
-  feedin:     {count:7, gap:72, amp:14, w:6,  phase:8},
-  stitch:     {count:9, gap:58, amp:10, w:4,  phase:5},
-  lacefront:  {count:4, gap:130,amp:28, w:16, phase:0},
-  fulllace:   {count:5, gap:105,amp:26, w:14, phase:10},
-  '360':      {count:5, gap:105,amp:24, w:13, phase:5},
-  custom:     {count:4, gap:130,amp:28, w:16, phase:15},
-  washstyle:  {count:5, gap:105,amp:24, w:10, phase:0},
-  blowout:    {count:4, gap:130,amp:34, w:12, phase:0},
-  twistout:   {count:6, gap:85, amp:20, w:9,  phase:0},
-  silkpress:  {count:4, gap:130,amp:28, w:10, phase:5},
-  starterlocs:{count:5, gap:105,amp:20, w:15, phase:0},
-  twostrand:  {count:6, gap:85, amp:22, w:11, phase:0},
-  senegalese: {count:6, gap:85, amp:18, w:9,  phase:10},
-  marley:     {count:5, gap:105,amp:22, w:13, phase:0},
-  retwist:    {count:5, gap:105,amp:18, w:13, phase:5},
-  deepcond:   {count:3, gap:175,amp:32, w:20, phase:0},
-  scalp:      {count:3, gap:175,amp:28, w:18, phase:10},
-  protein:    {count:3, gap:175,amp:32, w:20, phase:5},
-  hotoil:     {count:3, gap:175,amp:28, w:18, phase:0},
-};
-
-/* State */
-var bpCurrentCat = 'braids';
-var bpCurrentStep = 0;
-var bpSelectedStyle = null;
-var bpSelectedColour = '1b';
-var bpSelectedLength = 1;
-var bpSelectedSize = 'Medium';
-var TOTAL_STEPS = 6;
-
-function openBooking(cat) {
-  bpCurrentCat = cat || 'braids';
-  bpCurrentStep = 0;
-  bpSelectedStyle = null;
-  bpSelectedColour = '1b';
-  bpSelectedLength = 1;
-  document.getElementById('bpCatName').textContent = CATS[cat].name;
-  buildStyleGrid();
-  updateStepDots();
-  showBpStep(0);
-  // Default image
-  updateImagePanel(null, '1b', 1);
-  document.getElementById('bookingPage').classList.add('open');
-  document.body.style.overflow = 'hidden';
-  // hide/show customisation groups
-  var cat_data = CATS[bpCurrentCat];
-  document.getElementById('bpLengthGroup').style.display = cat_data.hasLength ? '' : 'none';
-  document.getElementById('bpSizeGroup').style.display   = cat_data.hasSize   ? '' : 'none';
-}
-
-function closeBooking() {
-  document.getElementById('bookingPage').classList.remove('open');
-  document.body.style.overflow = '';
-}
-
-function buildStyleGrid() {
-  var styles = CATS[bpCurrentCat].styles;
-  var grid = document.getElementById('bpStylesGrid');
-  document.getElementById('bpStyleTitle').textContent = 'Choose your style';
-  document.getElementById('bpStyleSub').textContent = CATS[bpCurrentCat].name + ' — select one to continue';
-  grid.innerHTML = styles.map(function(s) {
-    return '<div class="bp-style-card" id="sc-' + s.id + '" onclick="selectStyle(\'' + s.id + '\',this)">'
-      + '<div class="bp-style-img" style="' + s.bg + '"></div>'
-      + '<div class="bp-style-body">'
-      + '<span class="bp-style-name">' + s.name + '</span>'
-      + '<span class="bp-style-meta"><span class="bp-style-price">' + s.price + '</span> · ' + s.dur + '</span>'
-      + '</div></div>';
-  }).join('');
-}
-
-function selectStyle(id, el) {
-  bpSelectedStyle = id;
-  document.querySelectorAll('.bp-style-card').forEach(function(c){ c.classList.remove('selected'); });
-  el.classList.add('selected');
-  var styles = CATS[bpCurrentCat].styles;
-  var s = styles.find(function(x){ return x.id === id; });
-  if (s) {
-    document.getElementById('bpImgStyle').textContent = s.name;
-    document.getElementById('bpImgPrice').textContent = s.price;
-  }
-  updateImagePanel(id, bpSelectedColour, bpSelectedLength);
-}
-
-function selectLen(idx, el) {
-  bpSelectedLength = idx;
-  document.querySelectorAll('.bp-len-opt').forEach(function(o){ o.classList.remove('sel'); });
-  el.classList.add('sel');
-  updateImagePanel(bpSelectedStyle, bpSelectedColour, idx);
-  updateLengthBar(idx);
-}
-
-function selectColour(id, el) {
-  bpSelectedColour = id;
-  document.querySelectorAll('.bp-swatch').forEach(function(s){ s.classList.remove('sel'); });
-  el.classList.add('sel');
-  updateImagePanel(bpSelectedStyle, bpSelectedColour, bpSelectedLength);
-  var meta = document.getElementById('bpImgMeta');
-  meta.textContent = COLOURS[id].name + ' · ' + LENGTHS[bpSelectedLength] + ' · Tiwara\'s House';
-}
-
-function selectSize(el) {
-  bpSelectedSize = el.textContent.trim();
-  document.querySelectorAll('.bp-size-opt').forEach(function(o){ o.classList.remove('sel'); });
-  el.classList.add('sel');
-}
-
-function updateImagePanel(styleId, colourId, lenIdx) {
-  var glow = document.getElementById('bpGlow');
-  var svg  = document.getElementById('bpStrandSvg');
-  var col  = COLOURS[colourId] || COLOURS['1b'];
-
-  /* Update glow */
-  glow.style.background = 'radial-gradient(ellipse at center, ' + col.glow + ' 0%, transparent 70%)';
-
-  /* Build strand SVG */
-  var cfg = STRAND_CONFIGS[styleId] || STRAND_CONFIGS['knotless'];
-  var paths = '';
-  for (var i = 0; i < cfg.count; i++) {
-    var x = 30 + i * cfg.gap;
-    var a = cfg.amp;
-    var ph = (i % 2 === 0) ? 0 : cfg.phase;
-    var d = 'M' + x + ',' + (-ph);
-    for (var y = 120; y <= 1000; y += 120) {
-      var dir = (Math.floor(y / 120) % 2 === 0) ? 1 : -1;
-      var cx = x + dir * a;
-      d += ' C' + cx + ',' + (y - 90) + ' ' + cx + ',' + (y - 30) + ' ' + x + ',' + y;
-    }
-    var op = 0.35 + (i % 3) * 0.12;
-    paths += '<path d="' + d + '" stroke="' + col.strand + '" stroke-width="' + cfg.w + '" fill="none" stroke-linecap="round" opacity="' + op + '"/>';
-  }
-  svg.innerHTML = paths;
-
-  /* Update meta text */
-  var style_name = bpSelectedStyle ? (CATS[bpCurrentCat].styles.find(function(s){ return s.id === bpSelectedStyle; }) || {}).name || '' : '';
-  if (style_name) document.getElementById('bpImgStyle').textContent = style_name;
-  document.getElementById('bpImgMeta').textContent = col.name + ' · ' + LENGTHS[lenIdx] + ' · Tiwara\'s House';
-  updateLengthBar(lenIdx);
-}
-
-function updateLengthBar(idx) {
-  document.querySelectorAll('.bp-lbar-item').forEach(function(b, i){ b.classList.toggle('active', i <= idx); });
-}
-
-function calcTotal() {
-  var base = 130;
-  if (bpSelectedStyle) {
-    var s = CATS[bpCurrentCat].styles.find(function(x){ return x.id === bpSelectedStyle; });
-    if (s) base = s.base;
-  }
-  var addon = 0;
-  document.querySelectorAll('#bpStep1 input[type=checkbox]:checked').forEach(function(c){
-    var txt = c.closest('.bp-addon').querySelector('.bp-addon-price').textContent;
-    addon += parseInt(txt.replace(/\D/g,''));
-  });
-  var total = base + addon;
-  var deposit = Math.round(total * 0.25 * 100) / 100;
-  document.getElementById('sum-total').textContent = '£' + total;
-  document.getElementById('sum-deposit').textContent = '£' + deposit.toFixed(2);
-  document.getElementById('sum-balance').textContent = '£' + (total - deposit).toFixed(2);
-}
-
-function populateSummary() {
-  var styleName = bpSelectedStyle ? (CATS[bpCurrentCat].styles.find(function(s){ return s.id === bpSelectedStyle; }) || {}).name || '—' : '—';
-  document.getElementById('sum-service').textContent = styleName;
-  document.getElementById('sum-colour').textContent = COLOURS[bpSelectedColour].name;
-  document.getElementById('sum-length').textContent = LENGTHS[bpSelectedLength];
-  document.getElementById('sum-size').textContent = bpSelectedSize;
-  document.getElementById('conf-service').textContent = styleName + ' — ' + COLOURS[bpSelectedColour].name + ', ' + bpSelectedSize + ', ' + LENGTHS[bpSelectedLength];
-  calcTotal();
-}
-
-/* Step navigation */
-function showBpStep(n) {
-  for (var i = 0; i < TOTAL_STEPS; i++) {
-    var p = document.getElementById('bpStep' + i);
-    if (p) p.classList.toggle('active', i === n);
-  }
-  bpCurrentStep = n;
-  updateStepDots();
-  document.getElementById('bpOptions').scrollTop = 0;
-}
-
-function bpNext() {
-  if (bpCurrentStep === 0 && !bpSelectedStyle) {
-    // Select first style automatically if none chosen
-    var firstStyle = CATS[bpCurrentCat].styles[0];
-    if (firstStyle) {
-      var el = document.getElementById('sc-' + firstStyle.id);
-      if (el) selectStyle(firstStyle.id, el);
-    }
-  }
-  if (bpCurrentStep === 4) { populateSummary(); }
-  showBpStep(Math.min(TOTAL_STEPS - 1, bpCurrentStep + 1));
-}
-
-function bpPrev() {
-  showBpStep(Math.max(0, bpCurrentStep - 1));
-}
-
-function updateStepDots() {
-  var container = document.getElementById('bpStepDots');
-  var html = '';
-  for (var i = 0; i < TOTAL_STEPS; i++) {
-    var cls = i < bpCurrentStep ? 'done' : (i === bpCurrentStep ? 'active' : '');
-    html += '<div class="bp-step-dot ' + cls + '"></div>';
-  }
-  container.innerHTML = html;
-}
-
-function selDay(el) {
-  document.querySelectorAll('.bp-cal-d').forEach(function(d){ d.classList.remove('sel-day'); });
-  el.classList.add('sel-day');
-}
-function selTime(el) {
-  document.querySelectorAll('.bp-time:not(.taken)').forEach(function(t){ t.classList.remove('sel-t'); });
-  el.classList.add('sel-t');
-}
-
-/* ESC to close */
-document.addEventListener('keydown', function(e){ if (e.key === 'Escape') closeBooking(); });
-</script>
+<script src="tiwaras-house.js"></script>
 </body>
 </html>
