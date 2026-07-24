@@ -2,6 +2,7 @@
   "name": "tiwaras-house",
   "version": "1.0.0",
   "main": "index.js",
+  "type": "module",
   "repository": "https://github.com/tiwarahair/PROJECTS---TIWARA.git",
   "author": "Kashope Afolabi & Faith Odularu",
   "license": "MIT",
@@ -14,10 +15,14 @@
     "@eslint/js": "^10.0.1",
     "@eslint/json": "^2.0.1",
     "@eslint/markdown": "^8.0.3",
+    "@types/eslint-plugin-jsx-a11y": "^6.10.1",
     "eslint": "^10.7.0",
+    "eslint-plugin-jsx-a11y": "^6.10.2",
     "eslint-plugin-react": "^7.37.5",
+    "eslint-plugin-unicorn": "^72.0.0",
     "globals": "^17.7.0",
     "prettier": "3.9.6",
+    "typescript": "5.9",
     "typescript-eslint": "^8.65.0"
   }
 }
