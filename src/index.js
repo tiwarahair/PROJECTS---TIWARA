@@ -10,7 +10,7 @@ window.addEventListener("scroll", function () {
 });
 
 function toggleMenu() {
-  var l = document.querySelector(".nav-links"),
+  const l = document.querySelector(".nav-links"),
     o = l.style.display === "flex";
   l.style.display = o ? "none" : "flex";
   if (!o) {
@@ -31,9 +31,9 @@ function toggleMenu() {
 
 document.querySelectorAll('a[href^="#"]').forEach(function (a) {
   a.addEventListener("click", function (e) {
-    var id = this.getAttribute("href").substring(1);
+    const id = this.getAttribute("href").substring(1);
     if (!id) return;
-    var el = document.getElementById(id);
+    const el = document.getElementById(id);
     if (el) {
       e.preventDefault();
       el.scrollIntoView({ behavior: "smooth" });
@@ -42,9 +42,9 @@ document.querySelectorAll('a[href^="#"]').forEach(function (a) {
 });
 
 /* ── FADE IN ── */
-var faders = document.querySelectorAll(".fade-in");
+const faders = document.querySelectorAll(".fade-in");
 
-var io = new IntersectionObserver(
+const io = new IntersectionObserver(
   function (entries) {
     entries.forEach(function (e) {
       if (e.isIntersecting) {
@@ -60,7 +60,7 @@ faders.forEach(function (f) {
 });
 
 /* ── TESTIMONIALS ── */
-var tIdx = 0;
+let tIdx = 0;
 function goTo(i) {
   document.querySelectorAll(".testimonial").forEach(function (t, j) {
     t.classList.toggle("active", j === i);
@@ -78,7 +78,7 @@ setInterval(function () {
 /* ══════════════════════════════════════════════════════
    PLATFORM STYLIST DATA
 ══════════════════════════════════════════════════════ */
-var STYLISTS = [
+const STYLISTS = [
   {
     id: "tiwara",
     name: "Tiwara's House",
@@ -248,7 +248,7 @@ var STYLISTS = [
 /* ══════════════════════════════════════════════════════
    SEARCH OVERLAY
 ══════════════════════════════════════════════════════ */
-var activeProfileId = null;
+let activeProfileId = null;
 
 function openSearch(styleFilter) {
   document.getElementById("srStyle").value = styleFilter || "";
@@ -278,13 +278,13 @@ function setSrStyle(el, filter) {
 }
 
 function filterStylists() {
-  var style = document.getElementById("srStyle").value;
-  var loc = (document.getElementById("srLocation").value || "")
+  const style = document.getElementById("srStyle").value;
+  const loc = (document.getElementById("srLocation").value || "")
     .toLowerCase()
     .trim();
-  var filtered = STYLISTS.filter(function (s) {
-    var mStyle = !style || s.tags.indexOf(style) !== -1;
-    var mLoc = !loc || s.city.toLowerCase().indexOf(loc) !== -1;
+  const filtered = STYLISTS.filter(function (s) {
+    const mStyle = !style || s.tags.indexOf(style) !== -1;
+    const mLoc = !loc || s.city.toLowerCase().indexOf(loc) !== -1;
     return mStyle && mLoc;
   });
   document.getElementById("srCount").textContent =
@@ -298,10 +298,10 @@ function filterStylists() {
 }
 
 function renderStylistCard(s) {
-  var stars = "";
-  for (var i = 0; i < 5; i++)
+  let stars = "";
+  for (let i = 0; i < 5; i++)
     stars += i < Math.floor(s.rating) ? "&#9733;" : "&#9734;";
-  var topSvc = s.topServices
+  const topSvc = s.topServices
     .slice(0, 2)
     .map(function (sv) {
       return sv.name;
@@ -360,7 +360,7 @@ function renderStylistCard(s) {
    PROFILE OVERLAY
 ══════════════════════════════════════════════════════ */
 function openProfile(id) {
-  var s = STYLISTS.find(function (x) {
+  const s = STYLISTS.find(function (x) {
     return x.id === id;
   });
   if (!s) return;
@@ -375,8 +375,8 @@ function openProfile(id) {
   document.getElementById("profSpeciality").textContent = s.speciality;
   document.getElementById("profAvail").textContent = s.nextAvail;
 
-  var stars = "";
-  for (var i = 0; i < 5; i++)
+  let stars = "";
+  for (let i = 0; i < 5; i++)
     stars += i < Math.floor(s.rating) ? "&#9733;" : "&#9734;";
   document.getElementById("profStars").innerHTML =
     stars + " <span>" + s.rating + " \xb7 " + s.reviewCount + " reviews</span>";
@@ -406,8 +406,8 @@ function openProfile(id) {
 
   document.getElementById("profReviewsBody").innerHTML = s.reviews
     .map(function (r) {
-      var rs = "";
-      for (var i = 0; i < 5; i++) rs += i < r.rating ? "&#9733;" : "&#9734;";
+      let rs = "";
+      for (let i = 0; i < 5; i++) rs += i < r.rating ? "&#9733;" : "&#9734;";
       return (
         '<div class="prof-review">' +
         '<div class="prof-review-header"><span class="prof-review-stars">' +
@@ -441,7 +441,7 @@ function closeProfile() {
 }
 
 function openBookingFromStylist(id) {
-  var s = STYLISTS.find(function (x) {
+  const s = STYLISTS.find(function (x) {
     return x.id === id;
   });
   if (!s) return;
@@ -460,14 +460,14 @@ function openBookingFromProfile() {
    FEATURED STYLISTS STRIP (homepage)
 ══════════════════════════════════════════════════════ */
 function renderFeaturedStylists() {
-  var track = document.getElementById("fsTrack");
+  const track = document.getElementById("fsTrack");
   if (!track) return;
   track.innerHTML = STYLISTS.filter(function (s) {
     return s.featured;
   })
     .map(function (s) {
-      var stars = "";
-      for (var i = 0; i < 5; i++)
+      let stars = "";
+      for (let i = 0; i < 5; i++)
         stars += i < Math.floor(s.rating) ? "&#9733;" : "&#9734;";
       return (
         '<div class="fs-card" onclick="openProfile(\'' +
@@ -514,14 +514,14 @@ document.addEventListener("DOMContentLoaded", function () {
    HERO SEARCH
 ══════════════════════════════════════════════════════ */
 function heroSearch() {
-  var style = document.getElementById("heroStyleSelect").value;
+  const style = document.getElementById("heroStyleSelect").value;
   openSearch(style);
 }
 
 /* ══════════════════════════════════════════════════════
    BOOKING PAGE DATA & LOGIC
 ══════════════════════════════════════════════════════ */
-var CATS = {
+const CATS = {
   braids: {
     name: "Braids & Protective Styles",
     styles: [
@@ -735,7 +735,7 @@ var CATS = {
   },
 };
 
-var COLOURS = {
+const COLOURS = {
   "1b": {
     name: "1B Natural Black",
     glow: "rgba(38,22,8,0.95)",
@@ -761,16 +761,15 @@ var COLOURS = {
   },
 };
 
-var LENGTHS = [
+const LENGTHS = [
   'Short (10–12")',
   'Medium (14–18")',
   'Long (20–24")',
   'XL (26–30")',
 ];
 
-var STRAND_CONFIGS = {
+const STRAND_CONFIGS = {
   knotless: { count: 8, gap: 65, amp: 14, w: 5, phase: 8 },
-  box: { count: 5, gap: 100, amp: 20, w: 11, phase: 0 },
   fulani: { count: 7, gap: 72, amp: 16, w: 7, phase: 10 },
   cornrows: { count: 10, gap: 52, amp: 7, w: 3, phase: 0 },
   feedin: { count: 7, gap: 72, amp: 14, w: 6, phase: 8 },
@@ -795,13 +794,13 @@ var STRAND_CONFIGS = {
 };
 
 /* State */
-var bpCurrentCat = "braids";
-var bpCurrentStep = 0;
-var bpSelectedStyle = null;
-var bpSelectedColour = "1b";
-var bpSelectedLength = 1;
-var bpSelectedSize = "Medium";
-var TOTAL_STEPS = 6;
+let bpCurrentCat = "braids";
+let bpCurrentStep = 0;
+let bpSelectedStyle = null;
+let bpSelectedColour = "1b";
+let bpSelectedLength = 1;
+let bpSelectedSize = "Medium";
+const TOTAL_STEPS = 6;
 
 function openBooking(cat) {
   bpCurrentCat = cat || "braids";
@@ -809,36 +808,35 @@ function openBooking(cat) {
   bpSelectedStyle = null;
   bpSelectedColour = "1b";
   bpSelectedLength = 1;
-  document.getElementById("bpCatName").textContent = CATS[cat].name;
+  const catData = CATS[bpCurrentCat];
+  document.getElementById("bpCatName").textContent = catData.name;
   buildStyleGrid();
-  updateStepDots();
   showBpStep(0);
   updateImagePanel(null, "1b", 1);
   document.getElementById("bookingPage").classList.add("open");
   document.body.style.overflow = "hidden";
-  var cat_data = CATS[bpCurrentCat];
-  document.getElementById("bpLengthGroup").style.display = cat_data.hasLength
+  document.getElementById("bpLengthGroup").style.display = catData.hasLength
     ? ""
     : "none";
-  document.getElementById("bpSizeGroup").style.display = cat_data.hasSize
+  document.getElementById("bpSizeGroup").style.display = catData.hasSize
     ? ""
     : "none";
 }
 
 function closeBooking() {
   document.getElementById("bookingPage").classList.remove("open");
-  var searchOpen = document
+  const searchOpen = document
     .getElementById("searchPage")
     .classList.contains("open");
-  var profileOpen = document
+  const profileOpen = document
     .getElementById("profilePage")
     .classList.contains("open");
   if (!searchOpen && !profileOpen) document.body.style.overflow = "";
 }
 
 function buildStyleGrid() {
-  var styles = CATS[bpCurrentCat].styles;
-  var grid = document.getElementById("bpStylesGrid");
+  const styles = CATS[bpCurrentCat].styles;
+  const grid = document.getElementById("bpStylesGrid");
   document.getElementById("bpStyleTitle").textContent = "Choose your style";
   document.getElementById("bpStyleSub").textContent =
     CATS[bpCurrentCat].name + " — select one to continue";
@@ -874,7 +872,7 @@ function selectStyle(id, el) {
     c.classList.remove("selected");
   });
   el.classList.add("selected");
-  var s = CATS[bpCurrentCat].styles.find(function (x) {
+  const s = CATS[bpCurrentCat].styles.find(function (x) {
     return x.id === id;
   });
   if (s) {
@@ -905,11 +903,6 @@ function selectColour(id, el) {
   });
   el.classList.add("sel");
   updateImagePanel(bpSelectedStyle, bpSelectedColour, bpSelectedLength);
-  document.getElementById("bpImgMeta").textContent =
-    COLOURS[id].name +
-    " \xb7 " +
-    LENGTHS[bpSelectedLength] +
-    " \xb7 Tiwara's House";
 }
 
 function selectSize(el) {
@@ -921,21 +914,21 @@ function selectSize(el) {
 }
 
 function updateImagePanel(styleId, colourId, lenIdx) {
-  var glow = document.getElementById("bpGlow");
-  var svg = document.getElementById("bpStrandSvg");
-  var col = COLOURS[colourId] || COLOURS["1b"];
+  const glow = document.getElementById("bpGlow");
+  const svg = document.getElementById("bpStrandSvg");
+  const col = COLOURS[colourId] || COLOURS["1b"];
   glow.style.background =
     "radial-gradient(ellipse at center, " + col.glow + " 0%, transparent 70%)";
-  var cfg = STRAND_CONFIGS[styleId] || STRAND_CONFIGS["knotless"];
-  var paths = "";
-  for (var i = 0; i < cfg.count; i++) {
-    var x = 30 + i * cfg.gap;
-    var a = cfg.amp;
-    var ph = i % 2 === 0 ? 0 : cfg.phase;
-    var d = "M" + x + "," + -ph;
-    for (var y = 120; y <= 1000; y += 120) {
-      var dir = Math.floor(y / 120) % 2 === 0 ? 1 : -1;
-      var cx = x + dir * a;
+  const cfg = STRAND_CONFIGS[styleId] || STRAND_CONFIGS["knotless"];
+  let paths = "";
+  for (let i = 0; i < cfg.count; i++) {
+    const x = 30 + i * cfg.gap;
+    const a = cfg.amp;
+    const ph = i % 2 === 0 ? 0 : cfg.phase;
+    let d = "M" + x + "," + -ph;
+    for (let y = 120; y <= 1000; y += 120) {
+      const dir = Math.floor(y / 120) % 2 === 0 ? 1 : -1;
+      const cx = x + dir * a;
       d +=
         " C" +
         cx +
@@ -950,7 +943,7 @@ function updateImagePanel(styleId, colourId, lenIdx) {
         "," +
         y;
     }
-    var op = 0.35 + (i % 3) * 0.12;
+    const op = 0.35 + (i % 3) * 0.12;
     paths +=
       '<path d="' +
       d +
@@ -963,15 +956,14 @@ function updateImagePanel(styleId, colourId, lenIdx) {
       '"/>';
   }
   svg.innerHTML = paths;
-  var style_name = bpSelectedStyle
+  const styleName = bpSelectedStyle
     ? (
         CATS[bpCurrentCat].styles.find(function (s) {
           return s.id === bpSelectedStyle;
         }) || {}
       ).name || ""
     : "";
-  if (style_name)
-    document.getElementById("bpImgStyle").textContent = style_name;
+  if (styleName) document.getElementById("bpImgStyle").textContent = styleName;
   document.getElementById("bpImgMeta").textContent =
     col.name +
     " \xb7 " +
@@ -992,24 +984,24 @@ function updateLengthBar(idx) {
 }
 
 function calcTotal() {
-  var base = 130;
+  let base = 130;
   if (bpSelectedStyle) {
-    var s = CATS[bpCurrentCat].styles.find(function (x) {
+    const s = CATS[bpCurrentCat].styles.find(function (x) {
       return x.id === bpSelectedStyle;
     });
     if (s) base = s.base;
   }
-  var addon = 0;
+  let addon = 0;
   document
     .querySelectorAll("#bpStep1 input[type=checkbox]:checked")
     .forEach(function (c) {
-      var txt = c
+      const txt = c
         .closest(".bp-addon")
         .querySelector(".bp-addon-price").textContent;
       addon += parseInt(txt.replace(/\D/g, ""));
     });
-  var total = base + addon;
-  var deposit = Math.round(total * 0.25 * 100) / 100;
+  const total = base + addon;
+  const deposit = Math.round(total * 0.25 * 100) / 100;
   document.getElementById("sum-total").textContent = "\xa3" + total;
   document.getElementById("sum-deposit").textContent =
     "\xa3" + deposit.toFixed(2);
@@ -1018,7 +1010,7 @@ function calcTotal() {
 }
 
 function populateSummary() {
-  var styleName = bpSelectedStyle
+  const styleName = bpSelectedStyle
     ? (
         CATS[bpCurrentCat].styles.find(function (s) {
           return s.id === bpSelectedStyle;
@@ -1042,8 +1034,8 @@ function populateSummary() {
 }
 
 function showBpStep(n) {
-  for (var i = 0; i < TOTAL_STEPS; i++) {
-    var p = document.getElementById("bpStep" + i);
+  for (let i = 0; i < TOTAL_STEPS; i++) {
+    const p = document.getElementById("bpStep" + i);
     if (p) p.classList.toggle("active", i === n);
   }
   bpCurrentStep = n;
@@ -1053,9 +1045,9 @@ function showBpStep(n) {
 
 function bpNext() {
   if (bpCurrentStep === 0 && !bpSelectedStyle) {
-    var firstStyle = CATS[bpCurrentCat].styles[0];
+    const firstStyle = CATS[bpCurrentCat].styles[0];
     if (firstStyle) {
-      var el = document.getElementById("sc-" + firstStyle.id);
+      const el = document.getElementById("sc-" + firstStyle.id);
       if (el) selectStyle(firstStyle.id, el);
     }
   }
@@ -1070,10 +1062,11 @@ function bpPrev() {
 }
 
 function updateStepDots() {
-  var container = document.getElementById("bpStepDots");
-  var html = "";
-  for (var i = 0; i < TOTAL_STEPS; i++) {
-    var cls = i < bpCurrentStep ? "done" : i === bpCurrentStep ? "active" : "";
+  const container = document.getElementById("bpStepDots");
+  let html = "";
+  for (let i = 0; i < TOTAL_STEPS; i++) {
+    const cls =
+      i < bpCurrentStep ? "done" : i === bpCurrentStep ? "active" : "";
     html += '<div class="bp-step-dot ' + cls + '"></div>';
   }
   container.innerHTML = html;
@@ -1116,7 +1109,7 @@ document.addEventListener("keydown", function (e) {
 /* ══════════════════════════════════════════════════════
    AI STYLE DISCOVERY
 ══════════════════════════════════════════════════════ */
-var AI_STYLE_MAP = [
+const AI_STYLE_MAP = [
   {
     style: "knotless",
     cat: "braids",
@@ -1152,7 +1145,7 @@ var AI_STYLE_MAP = [
   { style: "feedin", cat: "braids", name: "Feed-In Braids", price: "from £80" },
 ];
 
-var AI_COLOUR_MAP = [
+const AI_COLOUR_MAP = [
   { id: "1b", name: "1B Natural Black", bright: 10 },
   { id: "burgundy", name: "Burgundy", bright: 22 },
   { id: "4", name: "4 Dark Brown", bright: 35 },
@@ -1176,13 +1169,13 @@ function openAiDiscovery() {
 
 function closeAiDiscovery() {
   document.getElementById("aiDiscovery").classList.remove("open");
-  var searchOpen = document
+  const searchOpen = document
     .getElementById("searchPage")
     .classList.contains("open");
-  var profileOpen = document
+  const profileOpen = document
     .getElementById("profilePage")
     .classList.contains("open");
-  var bookingOpen = document
+  const bookingOpen = document
     .getElementById("bookingPage")
     .classList.contains("open");
   if (!searchOpen && !profileOpen && !bookingOpen)
@@ -1190,11 +1183,11 @@ function closeAiDiscovery() {
 }
 
 function aiFileSelected(event) {
-  var file = event.target.files[0];
+  const file = event.target.files[0];
   if (!file) return;
-  var reader = new FileReader();
+  const reader = new FileReader();
   reader.onload = function (e) {
-    var preview = document.getElementById("aiPreview");
+    const preview = document.getElementById("aiPreview");
     preview.src = e.target.result;
     preview.style.display = "block";
     document.getElementById("aiUploadZone").style.display = "none";
@@ -1210,24 +1203,25 @@ function aiFileSelected(event) {
 
 function aiAnalyse(imgEl) {
   // Canvas-based colour sampling (smart mock)
-  var canvas = document.createElement("canvas");
+  const canvas = document.createElement("canvas");
   canvas.width = 80;
   canvas.height = 80;
-  var ctx = canvas.getContext("2d");
+  const ctx = canvas.getContext("2d");
   try {
     ctx.drawImage(imgEl, 0, 0, 80, 80);
-  } catch (e) {}
-  var data,
-    r = 128,
+  } catch {
+    // Image not drawable (e.g. cross-origin) — sampling falls back below.
+  }
+  let r = 128,
     g = 100,
     b = 80; // fallback mid values
   try {
-    data = ctx.getImageData(0, 0, 80, 80).data;
-    var total = 0;
+    const { data } = ctx.getImageData(0, 0, 80, 80);
+    let total = 0;
     r = 0;
     g = 0;
     b = 0;
-    for (var i = 0; i < data.length; i += 4) {
+    for (let i = 0; i < data.length; i += 4) {
       r += data[i];
       g += data[i + 1];
       b += data[i + 2];
@@ -1236,15 +1230,17 @@ function aiAnalyse(imgEl) {
     r = Math.round(r / total);
     g = Math.round(g / total);
     b = Math.round(b / total);
-  } catch (e) {}
+  } catch {
+    // Canvas is tainted or unreadable — keep the fallback values above.
+  }
 
-  var brightness = Math.round((r * 299 + g * 587 + b * 114) / 1000);
+  const brightness = Math.round((r * 299 + g * 587 + b * 114) / 1000);
 
   // Colour detection
-  var detectedColour = AI_COLOUR_MAP[0];
-  var minDist = 999;
+  let detectedColour = AI_COLOUR_MAP[0];
+  let minDist = 999;
   AI_COLOUR_MAP.forEach(function (c) {
-    var d = Math.abs(brightness - c.bright);
+    const d = Math.abs(brightness - c.bright);
     if (d < minDist) {
       minDist = d;
       detectedColour = c;
@@ -1252,11 +1248,11 @@ function aiAnalyse(imgEl) {
   });
 
   // Style detection (deterministic from pixel sum)
-  var styleIdx = (r + g + b) % AI_STYLE_MAP.length;
-  var primaryMatch = AI_STYLE_MAP[styleIdx];
+  const styleIdx = (r + g + b) % AI_STYLE_MAP.length;
+  const primaryMatch = AI_STYLE_MAP[styleIdx];
 
   // Length detection (brightness proxy)
-  var lenIdx = Math.min(3, Math.floor(brightness / 26));
+  const lenIdx = Math.min(3, Math.floor(brightness / 26));
 
   // Show results
   document.getElementById("aiAnalysing").style.display = "none";
@@ -1265,11 +1261,11 @@ function aiAnalyse(imgEl) {
   document.getElementById("aiResLength").textContent = LENGTHS[lenIdx];
 
   // 3 match cards (primary + 2 alternates)
-  var matches = [];
-  for (var j = 0; j < 3; j++) {
+  const matches = [];
+  for (let j = 0; j < 3; j++) {
     matches.push(AI_STYLE_MAP[(styleIdx + j) % AI_STYLE_MAP.length]);
   }
-  var confidences = ["98% match", "84% match", "71% match"];
+  const confidences = ["98% match", "84% match", "71% match"];
   document.getElementById("aiMatchStyles").innerHTML = matches
     .map(function (m, idx) {
       return (
@@ -1306,7 +1302,7 @@ function aiBookStyle(cat, styleId, colourId, lenIdx) {
   bpSelectedLength = lenIdx !== undefined ? lenIdx : 1;
   openBooking(cat);
   setTimeout(function () {
-    var el = document.getElementById("sc-" + styleId);
+    const el = document.getElementById("sc-" + styleId);
     if (el) {
       selectStyle(styleId, el);
     }
@@ -1324,9 +1320,9 @@ function aiRetry() {
 /* ══════════════════════════════════════════════════════
    CHATBOT
 ══════════════════════════════════════════════════════ */
-var chatIsOpen = false;
+let chatIsOpen = false;
 
-var CB_QA = {
+const CB_QA = {
   book: "To book: search for a stylist near you, browse their profile, tap 'Book now'. You'll customise your style, pick a date, add your details, and pay a 25% deposit to confirm. Done in minutes! 💛",
   price:
     "Prices vary by service and stylist. Braids from £60, wig installs from £120, locs from £60, natural hair from £55. You'll always see the full price before you pay — no surprises.",
@@ -1353,8 +1349,8 @@ function toggleChatbot() {
 }
 
 function cbAddMsg(html, type) {
-  var body = document.getElementById("chatBody");
-  var div = document.createElement("div");
+  const body = document.getElementById("chatBody");
+  const div = document.createElement("div");
   div.className = "cb-msg " + type;
   div.innerHTML = html;
   body.appendChild(div);
@@ -1362,8 +1358,8 @@ function cbAddMsg(html, type) {
 }
 
 function cbRespond(text) {
-  var lower = text.toLowerCase();
-  var reply;
+  const lower = text.toLowerCase();
+  let reply;
   if (/book|appoint|reserv/.test(lower)) reply = CB_QA.book;
   else if (/price|cost|how much|£|fee/.test(lower)) reply = CB_QA.price;
   else if (/deposit/.test(lower)) reply = CB_QA.deposit;
@@ -1377,8 +1373,8 @@ function cbRespond(text) {
   else reply = CB_QA.dflt;
 
   // Typing indicator
-  var body = document.getElementById("chatBody");
-  var typing = document.createElement("div");
+  const body = document.getElementById("chatBody");
+  const typing = document.createElement("div");
   typing.className = "cb-msg bot";
   typing.id = "cbTyping";
   typing.style.opacity = "0.5";
@@ -1387,7 +1383,7 @@ function cbRespond(text) {
   body.scrollTop = body.scrollHeight;
 
   setTimeout(function () {
-    var t = document.getElementById("cbTyping");
+    const t = document.getElementById("cbTyping");
     if (t) t.remove();
     cbAddMsg(reply, "bot");
     document.getElementById("chatQR").style.display = "none";
@@ -1395,8 +1391,8 @@ function cbRespond(text) {
 }
 
 function cbSend() {
-  var input = document.getElementById("chatInput");
-  var text = input.value.trim();
+  const input = document.getElementById("chatInput");
+  const text = input.value.trim();
   if (!text) return;
   cbAddMsg(text, "user");
   input.value = "";
