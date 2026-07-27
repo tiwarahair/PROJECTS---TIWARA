@@ -6,6 +6,9 @@
   "repository": "https://github.com/tiwarahair/PROJECTS---TIWARA.git",
   "author": "Kashope Afolabi & Faith Odularu",
   "license": "MIT",
+  "engines": {
+    "node": ">=22.13"
+  },
   "scripts": {
     "lint": "eslint src",
     "format": "prettier --write src"
