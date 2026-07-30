@@ -1,0 +1,141 @@
+/* ── FEATURED STYLISTS ── */
+.feat-stylists {
+  padding: 5rem 0 5rem 4rem;
+  background: var(--cream);
+  overflow: hidden;
+}
+.feat-stylists-inner {
+  max-width: 1600px;
+}
+.fs-header {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  margin-bottom: 2rem;
+  padding-right: 4rem;
+}
+.fs-heading {
+  font-family: var(--serif);
+  font-weight: 300;
+  font-size: clamp(1.8rem, 3vw, 2.4rem);
+  color: var(--green);
+  margin-top: 0.4rem;
+}
+.fs-see-all {
+  font-size: 0.82rem;
+  font-weight: 500;
+  color: var(--orange);
+  text-decoration: none;
+  white-space: nowrap;
+  flex-shrink: 0;
+  margin-left: 2rem;
+  padding-bottom: 0.25rem;
+}
+.fs-see-all:hover {
+  text-decoration: underline;
+}
+.fs-track {
+  display: flex;
+  gap: 1.25rem;
+  overflow-x: auto;
+  padding-right: 4rem;
+  padding-bottom: 0.5rem;
+  scroll-snap-type: x mandatory;
+  -webkit-overflow-scrolling: touch;
+}
+.fs-track::-webkit-scrollbar {
+  height: 4px;
+}
+.fs-track::-webkit-scrollbar-thumb {
+  background: var(--cream-dk);
+  border-radius: 2px;
+}
+.fs-card {
+  flex: 0 0 280px;
+  scroll-snap-align: start;
+  border-radius: 14px;
+  overflow: hidden;
+  cursor: pointer;
+  background: var(--cream);
+  border: 1px solid rgba(36, 24, 17, 0.08);
+  transition:
+    transform 0.25s,
+    box-shadow 0.25s;
+}
+.fs-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 20px 48px rgba(36, 24, 17, 0.1);
+}
+.fs-card-img {
+  height: 200px;
+  position: relative;
+  overflow: hidden;
+}
+.fs-flagship {
+  position: absolute;
+  top: 0.75rem;
+  left: 0.75rem;
+  background: var(--gold);
+  color: var(--dark);
+  font-size: 0.65rem;
+  font-weight: 600;
+  letter-spacing: 0.5px;
+  padding: 0.25rem 0.65rem;
+  border-radius: 20px;
+}
+.fs-card-body {
+  padding: 1.1rem 1.25rem 1.25rem;
+}
+.fs-card-name {
+  font-family: var(--serif);
+  font-size: 1.05rem;
+  font-weight: 400;
+  color: var(--green);
+  margin-bottom: 0.2rem;
+}
+.fs-card-city {
+  font-size: 0.75rem;
+  color: var(--green-mid);
+  margin-bottom: 0.5rem;
+}
+.fs-card-spec {
+  font-size: 0.78rem;
+  color: var(--orange);
+  font-weight: 500;
+  margin-bottom: 0.5rem;
+}
+.fs-card-rating {
+  font-size: 0.85rem;
+  color: var(--gold);
+  margin-bottom: 0.75rem;
+}
+.fs-card-rating span {
+  font-size: 0.75rem;
+  color: var(--green-mid);
+  font-family: var(--sans);
+}
+.fs-card-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+.fs-card-price {
+  font-size: 0.82rem;
+  font-weight: 500;
+  color: var(--green);
+}
+.fs-card-btn {
+  font-size: 0.75rem;
+  font-weight: 500;
+  color: var(--orange);
+  background: none;
+  border: 1px solid rgba(143, 17, 18, 0.2);
+  padding: 0.4rem 0.85rem;
+  border-radius: 20px;
+  cursor: pointer;
+  font-family: var(--sans);
+  transition: background 0.15s;
+}
+.fs-card-btn:hover {
+  background: var(--orange-glow);
+}

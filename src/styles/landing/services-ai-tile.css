@@ -1,0 +1,11 @@
+/* 6th service tile */
+.sc-bg-6 {
+  background: radial-gradient(ellipse at 50% 20%, #6c0c0d, #241811, #0e0b09);
+}
+.sc-ai-tile .sc-num {
+  color: var(--gold);
+  font-size: 0.8rem;
+}
+.sc-ai-tile .sc-title {
+  color: var(--cream);
+}

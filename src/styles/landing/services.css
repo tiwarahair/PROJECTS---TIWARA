@@ -1,0 +1,157 @@
+/* ── SERVICE CATEGORIES ── */
+.services {
+  padding: 5rem 4rem;
+  background: var(--cream-dk);
+}
+.section-head {
+  text-align: center;
+  margin-bottom: 3rem;
+}
+.section-label {
+  font-family: var(--label);
+  font-size: 0.72rem;
+  font-weight: 600;
+  letter-spacing: 1.8px;
+  text-transform: uppercase;
+  color: var(--orange);
+  display: block;
+  margin-bottom: 0.75rem;
+}
+.section-head h2 {
+  font-family: var(--serif);
+  font-weight: 300;
+  font-size: clamp(1.8rem, 3.5vw, 2.8rem);
+  color: var(--green);
+  line-height: 1.25;
+}
+.services-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1px;
+  max-width: 1200px;
+  margin: 0 auto;
+  border: 1px solid rgba(36, 24, 17, 0.1);
+  border-radius: 12px;
+  overflow: hidden;
+}
+.service-card {
+  position: relative;
+  overflow: hidden;
+  cursor: pointer;
+  aspect-ratio: 3/4;
+  background: var(--dark2);
+  transition: flex 0.4s ease;
+}
+.service-card::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    to top,
+    rgba(8, 6, 4, 0.9) 0%,
+    rgba(8, 6, 4, 0.3) 50%,
+    transparent 100%
+  );
+  z-index: 1;
+  transition: opacity 0.3s;
+}
+.service-card:hover::before {
+  opacity: 0.7;
+}
+.sc-bg-1 {
+  background: radial-gradient(ellipse at 50% 20%, #4a1e00, #1a0a00, #050302);
+}
+.sc-bg-2 {
+  background: radial-gradient(ellipse at 50% 25%, #0d2e1f, #061a11, #020805);
+}
+.sc-bg-3 {
+  background: radial-gradient(ellipse at 50% 30%, #3a2008, #1a0e04, #060402);
+}
+.sc-bg-4 {
+  background: radial-gradient(ellipse at 50% 20%, #1a3525, #0a1e14, #030a06);
+}
+.sc-bg-5 {
+  background: radial-gradient(ellipse at 50% 30%, #3d2800, #1a1000, #060402);
+}
+.service-card-content {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  padding: 1.5rem 1.25rem;
+  z-index: 2;
+  transform: translateY(0);
+  transition: transform 0.3s;
+}
+.service-card:hover .service-card-content {
+  transform: translateY(-6px);
+}
+.sc-num {
+  display: block;
+  font-size: 0.65rem;
+  font-weight: 500;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  color: var(--gold);
+  opacity: 0.7;
+  margin-bottom: 0.5rem;
+}
+.sc-title {
+  font-family: var(--serif);
+  font-weight: 400;
+  font-size: 1.1rem;
+  color: var(--cream);
+  line-height: 1.2;
+  margin-bottom: 0.5rem;
+}
+.sc-desc {
+  font-size: 0.78rem;
+  color: rgba(246, 240, 228, 0.55);
+  line-height: 1.55;
+  max-height: 0;
+  overflow: hidden;
+  transition:
+    max-height 0.3s,
+    opacity 0.3s;
+  opacity: 0;
+}
+.service-card:hover .sc-desc {
+  max-height: 80px;
+  opacity: 1;
+}
+.sc-cta {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  font-size: 0.72rem;
+  font-weight: 500;
+  color: var(--gold);
+  margin-top: 0.75rem;
+  opacity: 0;
+  transition: opacity 0.3s;
+  text-decoration: none;
+}
+.service-card:hover .sc-cta {
+  opacity: 1;
+}
+.sc-cta::after {
+  content: "→";
+}
+.sc-open-hint {
+  position: absolute;
+  top: 1rem;
+  right: 1rem;
+  z-index: 2;
+  opacity: 0;
+  transition: opacity 0.3s;
+  font-size: 0.68rem;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  color: var(--gold);
+  border: 1px solid rgba(223, 207, 62, 0.4);
+  padding: 0.3rem 0.6rem;
+  border-radius: 20px;
+}
+.service-card:hover .sc-open-hint {
+  opacity: 1;
+}

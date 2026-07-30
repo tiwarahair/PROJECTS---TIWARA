@@ -1,0 +1,31 @@
+/* ── BANNER ── */
+.banner {
+  background: var(--orange);
+  padding: 0.75rem 0;
+  overflow: hidden;
+  white-space: nowrap;
+}
+.banner-track {
+  display: inline-flex;
+  animation: banner 22s linear infinite;
+}
+.banner-item {
+  font-size: 0.72rem;
+  font-weight: 600;
+  letter-spacing: 1.2px;
+  text-transform: uppercase;
+  color: var(--cream);
+  padding: 0 2rem;
+}
+.banner-sep {
+  color: rgba(246, 240, 228, 0.4);
+  font-size: 0.6rem;
+}
+@keyframes banner {
+  from {
+    transform: translateX(0);
+  }
+  to {
+    transform: translateX(-50%);
+  }
+}

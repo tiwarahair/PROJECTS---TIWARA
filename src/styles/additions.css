@@ -1,0 +1,105 @@
+/* ══════════════════════════════════════════════════════
+   ADDITIONS
+
+   Replacements for static inline style="" attributes that lived in
+   the old index.html. 
+══════════════════════════════════════════════════════ */
+
+/* Service-category tiles: the gradient artwork sits in .sc-bg-1..6,
+   but every one of those divs also carried this positioning inline. */
+.sc-bg {
+  position: absolute;
+  inset: 0;
+}
+
+/* Book-CTA is the one section-label with no contextual colour rule
+   of its own; the base .section-label is --orange. */
+.book-cta-section .section-label {
+  color: var(--gold);
+}
+
+/* "Available times" heading above the time-slot grid. */
+.bp-times-label {
+  font-size: 0.7rem;
+  font-weight: 600;
+  letter-spacing: 0.8px;
+  text-transform: uppercase;
+  color: var(--green-mid);
+  margin: 0.75rem 0 0.5rem;
+}
+
+/* Balance-in-salon row sits slightly below the deposit row. */
+.bp-summary-row-spaced {
+  margin-top: 0.4rem;
+}
+
+/* Length bar segments 2 and 3 carry asymmetric gutters — segment 2 is
+   spaced on both sides, segment 3 only on the right. Positional in the
+   original markup, so positional here. */
+.bp-lbar-item:nth-child(2) {
+  margin: 0 3px;
+}
+.bp-lbar-item:nth-child(3) {
+  margin-right: 3px;
+}
+
+/* Full-width buttons in the confirm step and the AI results panel. */
+.bp-btn-full {
+  width: 100%;
+}
+.bp-confirm-done-wrap {
+  margin-top: 1.5rem;
+}
+.ai-retry-btn {
+  width: 100%;
+  margin-top: 0.5rem;
+}
+
+/* Empty span balancing the AI overlay header's flex row. */
+.ai-header-spacer {
+  width: 80px;
+}
+
+/* Price/arrow column of an AI match card. */
+.ai-match-right {
+  text-align: right;
+}
+
+/* AI step-0 intro copy. */
+.ai-intro-title {
+  font-family: var(--serif);
+  font-weight: 300;
+  font-size: clamp(1.6rem, 3vw, 2.2rem);
+  color: var(--green);
+  margin-bottom: 0.5rem;
+}
+.ai-intro-text {
+  font-size: 0.88rem;
+  color: var(--green-mid);
+  margin-bottom: 1.75rem;
+  line-height: 1.7;
+}
+
+/* Mobile nav menu. The original had no class for this — toggleMenu()
+   applied these nine declarations imperatively via Object.assign
+   (old src/index.js:16-29).
+
+   Scoped to the breakpoint deliberately. The burger only exists at
+   <=900px, but the open flag can survive a resize; unscoped, a stale
+   flag would turn the desktop nav into an absolutely-positioned
+   dropdown. Inside the query the class is simply inert at desktop. */
+@media (max-width: 900px) {
+  .nav-links.mobile-open {
+    display: flex;
+    flex-direction: column;
+    position: absolute;
+    top: 60px;
+    left: 0;
+    right: 0;
+    background: var(--cream);
+    padding: 1.5rem 2rem;
+    gap: 1.25rem;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.08);
+    z-index: 300;
+  }
+}
