@@ -1,0 +1,279 @@
+/* ── Hair Quiz Teaser ─────────────────────────────────────────────────────── */
+.quiz-teaser {
+  background: var(--green);
+  padding: 3rem 4rem;
+  border-top: 1px solid rgba(223, 207, 62, 0.12);
+}
+.quiz-teaser-inner {
+  max-width: 1100px;
+  margin: 0 auto;
+  display: flex;
+  align-items: center;
+  gap: 2.5rem;
+}
+.qt-icon {
+  font-size: 2rem;
+  color: var(--gold);
+  flex-shrink: 0;
+}
+.qt-body {
+  flex: 1;
+}
+.qt-body h3 {
+  font-family: var(--serif);
+  font-weight: 400;
+  font-size: 1.5rem;
+  color: var(--cream);
+  margin-bottom: 0.4rem;
+}
+.qt-body p {
+  font-size: 0.9rem;
+  color: rgba(246, 240, 228, 0.6);
+  line-height: 1.75;
+  max-width: 520px;
+}
+.qt-cta {
+  background: var(--gold);
+  color: var(--green);
+  border: none;
+  padding: 0.85rem 2rem;
+  border-radius: 40px;
+  font-family: var(--label);
+  font-size: 0.85rem;
+  font-weight: 600;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: opacity 0.2s;
+  flex-shrink: 0;
+}
+.qt-cta:hover {
+  opacity: 0.88;
+}
+@media (max-width: 768px) {
+  .quiz-teaser {
+    padding: 2rem 1.5rem;
+  }
+  .quiz-teaser-inner {
+    flex-direction: column;
+    text-align: center;
+    gap: 1.5rem;
+  }
+  .qt-body p {
+    margin: 0 auto;
+  }
+}
+
+/* ── Hair Quiz Overlay ────────────────────────────────────────────────────── */
+.hq-overlay {
+  position: fixed;
+  inset: 0;
+  background: var(--green);
+  z-index: 820;
+  transform: translateY(100%);
+  transition: transform 0.45s cubic-bezier(0.16, 1, 0.3, 1);
+  overflow-y: auto;
+}
+.hq-overlay.open {
+  transform: translateY(0);
+}
+.hq-close {
+  position: fixed;
+  top: 1.25rem;
+  right: 1.5rem;
+  background: rgba(246, 240, 228, 0.1);
+  border: none;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  font-size: 1.3rem;
+  cursor: pointer;
+  color: var(--cream);
+  z-index: 10;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.hq-inner {
+  max-width: 700px;
+  margin: 0 auto;
+  padding: 4rem 2rem 5rem;
+}
+.hq-progress-bar {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 3px;
+  background: rgba(246, 240, 228, 0.1);
+  z-index: 11;
+}
+.hq-progress-fill {
+  height: 100%;
+  background: var(--gold);
+  transition: width 0.4s;
+}
+.hq-slide {
+  display: none;
+  animation: fadeUp 0.3s ease;
+}
+.hq-slide.active {
+  display: block;
+}
+@keyframes fadeUp {
+  from {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+.hq-eyebrow {
+  font-family: var(--label);
+  font-size: 0.7rem;
+  font-weight: 600;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  color: var(--gold);
+  margin-bottom: 1rem;
+}
+.hq-question {
+  font-family: var(--serif);
+  font-size: clamp(1.5rem, 3vw, 2.2rem);
+  font-weight: 300;
+  color: var(--cream);
+  margin-bottom: 2rem;
+  line-height: 1.25;
+}
+.hq-options {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+.hq-options--grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+  gap: 0.75rem;
+}
+.hq-options--multi {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: 0.75rem;
+}
+.hq-opt {
+  background: rgba(246, 240, 228, 0.06);
+  border: 1px solid rgba(246, 240, 228, 0.12);
+  color: var(--cream);
+  padding: 1rem 1.25rem;
+  border-radius: 12px;
+  font-family: var(--sans);
+  font-size: 0.9rem;
+  font-weight: 500;
+  cursor: pointer;
+  text-align: left;
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  transition: all 0.2s;
+}
+.hq-opt span {
+  font-size: 0.78rem;
+  color: rgba(246, 240, 228, 0.4);
+  font-weight: 400;
+}
+.hq-opt:hover {
+  background: rgba(246, 240, 228, 0.1);
+  border-color: rgba(223, 207, 62, 0.3);
+}
+.hq-opt.selected {
+  background: rgba(223, 207, 62, 0.15);
+  border-color: var(--gold);
+  color: var(--gold);
+}
+.hq-next-btn {
+  margin-top: 1.5rem;
+  background: var(--gold);
+  color: var(--green);
+  border: none;
+  padding: 0.9rem 2.5rem;
+  border-radius: 40px;
+  font-family: var(--label);
+  font-size: 0.9rem;
+  font-weight: 600;
+  cursor: pointer;
+}
+.hq-results {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  margin-bottom: 2.5rem;
+}
+.hq-result-item {
+  background: rgba(246, 240, 228, 0.06);
+  border: 1px solid rgba(246, 240, 228, 0.1);
+  border-radius: 14px;
+  padding: 1.25rem 1.5rem;
+}
+.hq-result-item h4 {
+  font-family: var(--label);
+  font-size: 0.8rem;
+  font-weight: 600;
+  letter-spacing: 0.5px;
+  color: var(--gold);
+  margin-bottom: 0.4rem;
+  text-transform: uppercase;
+}
+.hq-result-item p {
+  font-size: 0.9rem;
+  color: rgba(246, 240, 228, 0.75);
+  line-height: 1.7;
+}
+.hq-book-prompt {
+  background: rgba(246, 240, 228, 0.06);
+  border: 1px solid rgba(246, 240, 228, 0.1);
+  border-radius: 14px;
+  padding: 1.5rem;
+  text-align: center;
+  margin-bottom: 1.5rem;
+}
+.hq-book-prompt p {
+  font-size: 0.95rem;
+  color: rgba(246, 240, 228, 0.6);
+  margin-bottom: 1rem;
+}
+.hq-book-cta {
+  background: var(--orange);
+  color: var(--cream);
+  border: none;
+  padding: 0.9rem 2rem;
+  border-radius: 40px;
+  font-family: var(--label);
+  font-size: 0.85rem;
+  font-weight: 600;
+  cursor: pointer;
+}
+.hq-retake {
+  background: none;
+  border: 1px solid rgba(246, 240, 228, 0.15);
+  color: rgba(246, 240, 228, 0.5);
+  padding: 0.6rem 1.5rem;
+  border-radius: 30px;
+  font-family: var(--label);
+  font-size: 0.78rem;
+  cursor: pointer;
+  display: block;
+  margin: 0 auto;
+}
+.hq-retake:hover {
+  border-color: rgba(246, 240, 228, 0.3);
+  color: rgba(246, 240, 228, 0.7);
+}
+@media (max-width: 640px) {
+  .hq-options--grid {
+    grid-template-columns: 1fr 1fr;
+  }
+  .hq-options--multi {
+    grid-template-columns: 1fr;
+  }
+}

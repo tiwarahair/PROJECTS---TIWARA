@@ -12,17 +12,11 @@
 @import "./base.css";
 @import "./landing/nav.css";
 @import "./landing/hero.css";
-@import "./landing/banner.css";
 @import "./landing/featured-stylists.css";
 @import "./landing/intro.css";
 @import "./landing/services.css";
-@import "./landing/how.css";
-@import "./landing/gallery.css";
 @import "./landing/testimonials.css";
-@import "./landing/book-cta.css";
 @import "./landing/shop.css";
-@import "./landing/join.css";
-@import "./landing/about.css";
 @import "./landing/footer.css";
 @import "./fade-in.css";
 @import "./search.css";
@@ -35,6 +29,9 @@
 @import "./landing/services-ai-tile.css";
 @import "./chatbot.css";
 @import "./guides.css";
+@import "./pages.css";
+@import "./hair-quiz.css";
+@import "./other-style.css";
 
 /* New rules replacing static inline style="" attributes from the old
    index.html. Last so they win, matching the precedence inline styles had. */

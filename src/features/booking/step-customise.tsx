@@ -1,10 +1,7 @@
 import { cx } from "../../utils/class-names";
 import { useAppDispatch } from "../../stores/hooks";
-import {
-  lengthGuideOpened,
-  sizeGuideOpened,
-} from "../../stores/overlays-slice";
-import { COLOUR_SWATCH_LABELS, COLOURS } from "../../data/colours";
+import { sizeGuideOpened } from "../../stores/overlays-slice";
+import { COLOURS } from "../../data/colours";
 import { LENGTH_OPTIONS } from "../../data/lengths";
 import { ADD_ONS, SIZE_OPTIONS } from "../../data/booking-calendar";
 import { getService } from "../../data/service-categories";
@@ -55,15 +52,7 @@ export function StepCustomise({
         className="bp-custom-group"
         style={hasLength ? undefined : { display: "none" }}
       >
-        <span className="bp-custom-label">
-          Length{" "}
-          <button
-            className="guide-link"
-            onClick={() => dispatch(lengthGuideOpened())}
-          >
-            Length guide →
-          </button>
-        </span>
+        <span className="bp-custom-label">Length</span>
         <div className="bp-length-opts">
           {LENGTH_OPTIONS.map(({ name, inches }, index) => (
             <div
@@ -81,17 +70,19 @@ export function StepCustomise({
       <div className="bp-custom-group">
         <span className="bp-custom-label">Colour</span>
         <div className="bp-colour-grid">
-          {COLOURS.map(({ id, swatch, name }) => (
+          {COLOURS.map(({ id, swatch, title, label }) => (
             <div
               key={id}
-              className={cx("bp-swatch", id === colourId && "sel")}
+              className={cx(
+                "bp-swatch",
+                id === "other" && "bp-swatch--other",
+                id === colourId && "sel",
+              )}
               style={{ background: swatch }}
-              title={name}
+              title={title}
               onClick={() => onSelectColour(id)}
             >
-              <span className="bp-swatch-label">
-                {COLOUR_SWATCH_LABELS[id]}
-              </span>
+              <span className="bp-swatch-label">{label}</span>
             </div>
           ))}
         </div>
@@ -125,14 +116,29 @@ export function StepCustomise({
 
       <div className="bp-custom-group">
         <span className="bp-custom-label">Add-ons (optional)</span>
-        {ADD_ONS.map(({ id, label, price }) => (
-          <label key={id} className="bp-addon">
+        {ADD_ONS.map(({ id, label, price, comingSoon, note }) => (
+          <label
+            key={id}
+            className={cx(
+              "bp-addon",
+              comingSoon && "bp-addon--soon",
+              note && "bp-addon--other",
+            )}
+          >
             <input
               type="checkbox"
-              checked={addOnIds.includes(id)}
+              disabled={comingSoon}
+              checked={!comingSoon && addOnIds.includes(id)}
               onChange={() => onToggleAddOn(id)}
             />{" "}
-            {label} <span className="bp-addon-price">+£{price}</span>
+            {label}{" "}
+            {comingSoon ? (
+              <span className="bp-addon-coming">Coming soon</span>
+            ) : note ? (
+              <span className="bp-addon-note">{note}</span>
+            ) : (
+              <span className="bp-addon-price">+£{price}</span>
+            )}
           </label>
         ))}
       </div>

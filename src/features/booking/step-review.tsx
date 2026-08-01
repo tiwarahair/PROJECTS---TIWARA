@@ -56,6 +56,12 @@ export function StepReview({
               the original formatted them separately and it is preserved. */}
           <span>{`£${money.total}`}</span>
         </div>
+        {/* Informational only — the deposit and balance below still come from
+            the total, not total + fee. */}
+        <div className="bp-summary-row bp-fee-row">
+          <span>Platform fee (2%)</span>
+          <span>{formatPence(money.fee)}</span>
+        </div>
         <div className="bp-deposit-row">
           <span>Deposit due now (25%)</span>
           <span>{formatPence(money.deposit)}</span>

@@ -486,3 +486,224 @@ textarea.bp-form-input {
   cursor: pointer;
   font-family: var(--sans);
 }
+
+/* ── Step 1: when & where ─────────────────────────────────────────────────── */
+.bp-section-label {
+  font-family: var(--label);
+  font-size: 0.68rem;
+  font-weight: 600;
+  letter-spacing: 1.2px;
+  text-transform: uppercase;
+  color: var(--green-mid);
+  display: block;
+  margin-bottom: 0.6rem;
+}
+.bp-section-label--spaced {
+  margin-top: 1.5rem;
+}
+.bp-daterange-row {
+  display: flex;
+  gap: 1rem;
+  margin-bottom: 0.5rem;
+}
+.bp-daterange-field {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+}
+.bp-date-label {
+  font-family: var(--label);
+  font-size: 0.72rem;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: rgba(36, 24, 17, 0.45);
+}
+/* `color` was var(--espresso) upstream, which is not a variable this project
+   defines — it fell back to inherited. --green is the same espresso tone. */
+.bp-date-input {
+  width: 100%;
+  padding: 0.7rem 0.9rem;
+  border: 1.5px solid rgba(36, 24, 17, 0.15);
+  border-radius: 10px;
+  font-family: var(--label);
+  font-size: 0.88rem;
+  color: var(--green);
+  background: #fff;
+  appearance: none;
+  cursor: pointer;
+  transition: border-color 0.2s;
+}
+.bp-date-input:focus {
+  outline: none;
+  border-color: var(--orange);
+}
+.bp-date-input.bp-input-error {
+  border-color: #c0392b;
+  animation: shake 0.3s ease;
+}
+@keyframes shake {
+  0%,
+  100% {
+    transform: translateX(0);
+  }
+  25% {
+    transform: translateX(-6px);
+  }
+  75% {
+    transform: translateX(6px);
+  }
+}
+.bp-location-row {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  border: 1.5px solid rgba(36, 24, 17, 0.15);
+  border-radius: 10px;
+  padding: 0 0.9rem;
+  background: #fff;
+  transition: border-color 0.2s;
+}
+.bp-location-row:focus-within {
+  border-color: var(--orange);
+}
+.bp-loc-icon {
+  font-size: 1rem;
+  line-height: 1;
+  opacity: 0.5;
+}
+.bp-loc-input {
+  flex: 1;
+  border: none;
+  outline: none;
+  padding: 0.75rem 0;
+  font-family: var(--label);
+  font-size: 0.88rem;
+  color: var(--green);
+  background: transparent;
+}
+.bp-loc-input::placeholder {
+  color: rgba(36, 24, 17, 0.35);
+}
+
+/* ── Step 2: choose your stylist ──────────────────────────────────────────── */
+.bp-stylist-picker {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  margin-bottom: 1rem;
+}
+.bp-stylist-pick-card {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding: 0.9rem 1rem;
+  border: 1.5px solid rgba(36, 24, 17, 0.1);
+  border-radius: 12px;
+  cursor: pointer;
+  transition:
+    border-color 0.2s,
+    box-shadow 0.2s;
+}
+.bp-stylist-pick-card:hover {
+  border-color: rgba(143, 17, 18, 0.3);
+  box-shadow: 0 4px 14px rgba(36, 24, 17, 0.07);
+}
+.bp-stylist-pick-card.selected {
+  border-color: var(--orange);
+  box-shadow: 0 0 0 2px rgba(143, 17, 18, 0.12);
+}
+.bp-spc-avatar {
+  width: 52px;
+  height: 52px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+.bp-spc-body {
+  flex: 1;
+  min-width: 0;
+}
+.bp-spc-name {
+  font-family: var(--label);
+  font-size: 0.88rem;
+  font-weight: 700;
+  color: var(--green);
+  margin-bottom: 0.2rem;
+}
+.bp-spc-meta {
+  font-size: 0.75rem;
+  color: rgba(36, 24, 17, 0.5);
+  margin-bottom: 0.2rem;
+}
+.bp-spc-rating {
+  display: flex;
+  align-items: center;
+  gap: 0.3rem;
+}
+.bp-spc-stars {
+  color: var(--gold);
+  font-size: 0.75rem;
+  letter-spacing: 1px;
+}
+.bp-spc-rc {
+  font-size: 0.72rem;
+  color: rgba(36, 24, 17, 0.4);
+}
+.bp-spc-avail {
+  font-size: 0.72rem;
+  color: var(--green-light);
+  font-weight: 500;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+.bp-no-stylists {
+  text-align: center;
+  padding: 2rem;
+  font-size: 0.9rem;
+  color: rgba(36, 24, 17, 0.5);
+}
+.bp-no-stylists a {
+  color: var(--orange);
+}
+
+/* Add-on variants: one is not built yet, one takes free text in the notes. */
+.bp-addon--soon {
+  opacity: 0.5;
+  cursor: default;
+}
+.bp-addon--soon:hover {
+  border-color: rgba(36, 24, 17, 0.1);
+}
+.bp-addon-coming {
+  margin-left: auto;
+  font-size: 0.7rem;
+  color: rgba(36, 24, 17, 0.4);
+  font-style: italic;
+}
+.bp-addon--other {
+  border-style: dashed;
+}
+.bp-addon-note {
+  margin-left: auto;
+  font-size: 0.72rem;
+  color: rgba(36, 24, 17, 0.4);
+}
+.bp-swatch--other {
+  position: relative;
+}
+.bp-swatch--other .bp-swatch-label {
+  font-size: 0.65rem;
+}
+
+/* Platform fee sits between the total and the deposit, styled as a quiet
+   informational line rather than a headline figure. */
+.bp-fee-row span:first-child {
+  color: var(--green-mid);
+  font-size: 0.78rem;
+}
+.bp-fee-row span:last-child {
+  color: var(--green-mid) !important;
+  font-size: 0.78rem;
+  font-weight: 400 !important;
+}

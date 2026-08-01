@@ -25,7 +25,7 @@ Keep changes scoped to the requested task. Avoid opportunistic churn.
 - Update or add tests when behavior changes
 - Include short comments only where logic is non-obvious
 - Files should not be too long
-- Destructure objects where you can without errors
+- Destructure objects where you can without errors & destructure map object arguments where you can
 - Prefer arrow functions
 
 - Do not commit to main

@@ -1,4 +1,5 @@
 import type { ServiceCategoryKey } from "./domain";
+import type { SimpleOverlayId } from "./overlays";
 
 export interface StyleTaxonomyEntry {
   key: ServiceCategoryKey;
@@ -10,11 +11,15 @@ export interface StyleTaxonomyEntry {
   filterLabel: string;
 }
 
+/** What a nav link does instead of following its href. */
+export type NavAction =
+  { kind: "search" } | { kind: "page"; page: SimpleOverlayId };
+
 export interface NavLink {
   label: string;
   href: string;
-  /** Nav links that open the search overlay instead of navigating. */
-  opensSearch?: boolean;
+  /** Omitted for plain anchor links such as #services and #contact. */
+  action?: NavAction;
   className?: string;
 }
 
@@ -35,28 +40,11 @@ export interface ServiceCard {
   action: ServiceCategoryKey | "ai";
 }
 
-export interface HowStep {
-  number: string;
-  heading: string;
-  body: string;
-}
-
-export interface GalleryItem {
-  label: string;
-  backgroundClass: string;
-  filter: ServiceCategoryKey;
-}
-
 export interface Testimonial {
   id: string;
   quote: string;
   author: string;
   detail: string;
-}
-
-export interface BookCtaStep {
-  number: string;
-  label: string;
 }
 
 export interface ShopCard {
@@ -66,16 +54,6 @@ export interface ShopCard {
   badge?: string;
   swatches: string[];
   price: string;
-}
-
-export interface JoinField {
-  type: "text" | "email";
-  placeholder: string;
-}
-
-export interface ValueCard {
-  title: string;
-  description: string;
 }
 
 export interface FooterColumn {
@@ -88,6 +66,8 @@ export interface FooterLink {
   href: string;
   /** Present when the link opens search filtered to a category. */
   searchFilter?: ServiceCategoryKey | "";
+  /** Present when the link opens one of the full-page overlays. */
+  page?: SimpleOverlayId;
 }
 
 export interface SocialLink {
