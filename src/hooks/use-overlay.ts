@@ -3,7 +3,6 @@ import { useAppDispatch, useAppSelector } from "../stores/hooks";
 import {
   aiDiscoveryClosed,
   bookingClosed,
-  lengthGuideClosed,
   pageClosed,
   profileClosed,
   searchClosed,
@@ -19,7 +18,6 @@ import {
 /** Overlays whose close carries extra semantics, so each has its own action. */
 const CLOSE_ACTION = {
   sizeGuide: sizeGuideClosed,
-  lengthGuide: lengthGuideClosed,
   booking: bookingClosed,
   aiDiscovery: aiDiscoveryClosed,
   profile: profileClosed,

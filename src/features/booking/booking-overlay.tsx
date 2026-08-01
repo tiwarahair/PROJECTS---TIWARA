@@ -6,10 +6,13 @@ import {
   getService,
   getIndividualService,
 } from "../../data/service-categories";
-import { TOTAL_BOOKING_STEPS } from "../../types/booking";
+import { findStylist } from "../../data/stylists";
+import { BOOKING_STEP } from "../../types/booking";
 import { useBookingWizard } from "./use-booking-wizard";
 import { StrandPreview } from "./strand-preview";
 import { StepStyle } from "./step-style";
+import { StepWhenWhere } from "./step-when-where";
+import { StepStylist } from "./step-stylist";
 import { StepCustomise } from "./step-customise";
 import { StepSchedule } from "./step-schedule";
 import { StepDetails } from "./step-details";
@@ -28,7 +31,7 @@ export function BookingOverlay() {
   const dispatch = useAppDispatch();
   const { overlay, bookingSession } = useAppSelector((state) => state.overlays);
   const wizard = useBookingWizard(bookingSession);
-  const { booking } = wizard;
+  const { booking, review, sequence } = wizard;
   const optionsRef = useRef<HTMLDivElement>(null);
 
   // The options column scrolls back to the top on every step change.
@@ -39,7 +42,11 @@ export function BookingOverlay() {
   const { name } = getService(booking.categoryKey);
   const style = getIndividualService(booking.categoryKey, booking.styleId);
 
-  // TO DO: This is a temporary close handler until we have a proper booking flow with a confirmation step. The original markup had a "Back" button that closed the overlay, so we preserve that behaviour for now.
+  // The stylist picked in step 2 wins; otherwise fall back to whoever the
+  // booking was opened for (a profile or a search card).
+  const stylistName =
+    findStylist(booking.stylistId)?.name ?? bookingSession.stylistName;
+
   const close = () => dispatch(bookingClosed());
 
   return (
@@ -54,13 +61,15 @@ export function BookingOverlay() {
         <span className="bp-cat-name">{name}</span>
         <div className="bp-step-counter">
           <div className="bp-step-dots">
-            {Array.from({ length: TOTAL_BOOKING_STEPS }, (_unused, index) => (
+            {/* One dot per step this booking will actually visit, so the
+                shortened stylist flow shows six rather than eight. */}
+            {sequence.map((step, index) => (
               <div
-                key={index}
+                key={step}
                 className={cx(
                   "bp-step-dot",
-                  index < booking.step && "done",
-                  index === booking.step && "active",
+                  index < sequence.indexOf(booking.step) && "done",
+                  step === booking.step && "active",
                 )}
               />
             ))}
@@ -71,7 +80,12 @@ export function BookingOverlay() {
       <div className="bp-body">
         {/* Every step panel stays mounted; `.bp-step-panel.active` shows one. */}
         <div className="bp-options" ref={optionsRef}>
-          <div className={cx("bp-step-panel", booking.step === 0 && "active")}>
+          <div
+            className={cx(
+              "bp-step-panel",
+              booking.step === BOOKING_STEP.style && "active",
+            )}
+          >
             <StepStyle
               serviceCategoryKey={booking.categoryKey}
               selectedStyleId={booking.styleId}
@@ -79,7 +93,46 @@ export function BookingOverlay() {
             />
           </div>
 
-          <div className={cx("bp-step-panel", booking.step === 1 && "active")}>
+          <div
+            className={cx(
+              "bp-step-panel",
+              booking.step === BOOKING_STEP.whenWhere && "active",
+            )}
+          >
+            <StepWhenWhere
+              dateFrom={booking.dateFrom}
+              dateTo={booking.dateTo}
+              location={booking.location}
+              onDateRangeChange={wizard.setDateRange}
+              onLocationChange={wizard.setLocation}
+              onBack={wizard.goPrev}
+              onNext={wizard.goNext}
+            />
+          </div>
+
+          <div
+            className={cx(
+              "bp-step-panel",
+              booking.step === BOOKING_STEP.stylist && "active",
+            )}
+          >
+            <StepStylist
+              serviceCategoryKey={booking.categoryKey}
+              location={booking.location}
+              dateFrom={booking.dateFrom}
+              dateTo={booking.dateTo}
+              selectedStylistId={booking.stylistId}
+              onSelectStylist={wizard.selectStylist}
+              onBack={wizard.goPrev}
+            />
+          </div>
+
+          <div
+            className={cx(
+              "bp-step-panel",
+              booking.step === BOOKING_STEP.customise && "active",
+            )}
+          >
             <StepCustomise
               serviceCategoryKey={booking.categoryKey}
               colourId={booking.colourId}
@@ -95,7 +148,12 @@ export function BookingOverlay() {
             />
           </div>
 
-          <div className={cx("bp-step-panel", booking.step === 2 && "active")}>
+          <div
+            className={cx(
+              "bp-step-panel",
+              booking.step === BOOKING_STEP.schedule && "active",
+            )}
+          >
             <StepSchedule
               dayNumber={booking.dayNumber}
               timeSlotId={booking.timeSlotId}
@@ -106,7 +164,12 @@ export function BookingOverlay() {
             />
           </div>
 
-          <div className={cx("bp-step-panel", booking.step === 3 && "active")}>
+          <div
+            className={cx(
+              "bp-step-panel",
+              booking.step === BOOKING_STEP.details && "active",
+            )}
+          >
             <StepDetails
               details={booking.details}
               onChange={wizard.updateDetails}
@@ -115,19 +178,29 @@ export function BookingOverlay() {
             />
           </div>
 
-          <div className={cx("bp-step-panel", booking.step === 4 && "active")}>
+          <div
+            className={cx(
+              "bp-step-panel",
+              booking.step === BOOKING_STEP.review && "active",
+            )}
+          >
             <StepReview
-              review={booking.review}
-              stylistName={bookingSession.stylistName}
+              review={review}
+              stylistName={stylistName}
               onBack={wizard.goPrev}
               onNext={wizard.goNext}
             />
           </div>
 
-          <div className={cx("bp-step-panel", booking.step === 5 && "active")}>
+          <div
+            className={cx(
+              "bp-step-panel",
+              booking.step === BOOKING_STEP.confirm && "active",
+            )}
+          >
             <StepConfirm
-              review={booking.review}
-              stylistName={bookingSession.stylistName}
+              review={review}
+              stylistName={stylistName}
               onDone={close}
             />
           </div>
@@ -137,7 +210,7 @@ export function BookingOverlay() {
           styleId={booking.styleId}
           colourId={booking.colourId}
           lengthIndex={booking.lengthIndex}
-          stylistName={bookingSession.stylistName}
+          stylistName={stylistName}
           styleName={style?.name ?? PLACEHOLDER_STYLE_NAME}
           stylePrice={style?.price ?? PLACEHOLDER_STYLE_PRICE}
         />

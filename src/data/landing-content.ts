@@ -215,7 +215,7 @@ export const FOOTER_COLUMNS: readonly FooterColumn[] = [
       { label: "About us", href: "#", page: "about" },
       { label: "Find a stylist", href: "#", searchFilter: "" },
       { label: "Join as a stylist", href: "#", page: "stylists" },
-      { label: "Shop", href: "#shop" },
+      { label: "Shop", href: "#", page: "shop" },
       { label: "Blog & Journal", href: "#" },
     ],
   },

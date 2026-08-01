@@ -8,8 +8,7 @@ export type OverlayId =
   | "about"
   | "stylists"
   | "shop"
-  | "sizeGuide"
-  | "lengthGuide";
+  | "sizeGuide";
 
 export type Overlays = Record<OverlayId, boolean>;
 
@@ -30,7 +29,6 @@ export type SimpleOverlayId =
  */
 export const ESCAPE_PRIORITY: readonly OverlayId[] = [
   "sizeGuide",
-  "lengthGuide",
   "booking",
   "aiDiscovery",
   "otherStyle",

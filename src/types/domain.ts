@@ -1,7 +1,7 @@
 export type ServiceCategoryKey =
   "braids" | "wigs" | "natural" | "locs" | "treatments";
 
-export type ColourId = "1b" | "4" | "30" | "27" | "613" | "ombre" | "burgundy";
+export type ColourId = "1b" | "30" | "4/33" | "613" | "other";
 
 export interface StylistService {
   name: string;
@@ -56,7 +56,12 @@ export interface ServiceCategory {
 
 export interface HairColour {
   id: ColourId;
+  /** Shown in the summary and the preview caption. */
   name: string;
+  /** Tooltip on the swatch; differs from `name` for the mixed shades. */
+  title: string;
+  /** Short text printed on the swatch tile. */
+  label: string;
   /** rgba() used inside the preview panel's radial-gradient. */
   glow: string;
   /** Stroke colour for the SVG strands. */

@@ -6,6 +6,8 @@ const DEFAULT_STYLIST_NAME = "Tiwara's House";
 
 export interface BookingSession {
   categoryKey: ServiceCategoryKey;
+  /** Set when opened from a stylist, which shortens the flow. */
+  stylistId: string | null;
   stylistName: string;
   /** Bumped on every open so the wizard knows to run its reset. */
   sessionId: number;
@@ -35,7 +37,6 @@ const ALL_CLOSED: Overlays = {
   stylists: false,
   shop: false,
   sizeGuide: false,
-  lengthGuide: false,
 };
 
 const initialState: OverlaysState = {
@@ -45,6 +46,7 @@ const initialState: OverlaysState = {
   searchLocation: "",
   bookingSession: {
     categoryKey: "braids",
+    stylistId: null,
     stylistName: DEFAULT_STYLIST_NAME,
     sessionId: 0,
   },
@@ -95,6 +97,7 @@ export const overlaysSlice = createSlice({
       if (stylistId !== undefined) state.activeStylistId = stylistId;
       state.bookingSession = {
         categoryKey,
+        stylistId: stylistId ?? null,
         // An AI-initiated booking passes no name, so whatever the previous
         // booking set survives (old index.js:449 only ran for stylist flows).
         stylistName: stylistName ?? state.bookingSession.stylistName,
@@ -131,12 +134,6 @@ export const overlaysSlice = createSlice({
     sizeGuideClosed(state) {
       state.overlay.sizeGuide = false;
     },
-    lengthGuideOpened(state) {
-      state.overlay.lengthGuide = true;
-    },
-    lengthGuideClosed(state) {
-      state.overlay.lengthGuide = false;
-    },
   },
 });
 
@@ -155,8 +152,6 @@ export const {
   aiDiscoveryClosed,
   sizeGuideOpened,
   sizeGuideClosed,
-  lengthGuideOpened,
-  lengthGuideClosed,
 } = overlaysSlice.actions;
 
 export const overlaysReducer = overlaysSlice.reducer;

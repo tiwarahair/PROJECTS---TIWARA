@@ -39,9 +39,22 @@ export const TIME_SLOTS: readonly TimeSlot[] = [
 ];
 
 export const ADD_ONS: readonly AddOn[] = [
-  { id: "scalp", label: "Scalp treatment", price: 15 },
-  { id: "beads", label: "Beads & cuffs", price: 10 },
-  { id: "rinse", label: "Colour rinse", price: 20 },
+  { id: "boho", label: "Boho (curly pieces)", price: 15 },
+  { id: "blowdry", label: "Blow dry", price: 15 },
+  {
+    id: "scalp-analysis",
+    label: "Scalp analysis",
+    price: 0,
+    comingSoon: true,
+  },
+  { id: "beads", label: "Beads", price: 0 },
+  { id: "burnt-ends", label: "Burnt ends", price: 10 },
+  {
+    id: "other",
+    label: "Other",
+    price: 0,
+    note: "(specify in appointment notes)",
+  },
 ];
 
 export const SIZE_OPTIONS = ["Small", "Medium", "Large"] as const;

@@ -6,7 +6,8 @@ import {
   getService,
   getIndividualService,
 } from "../../data/service-categories";
-import { calcDeposit } from "../../utils/money";
+import { calcDeposit, calcPlatformFee } from "../../utils/money";
+import { defaultDateWindow } from "../../utils/dates";
 import type {
   BookingDetails,
   BookingState,
@@ -15,15 +16,22 @@ import type {
   BraidSize,
   ReviewSnapshot,
 } from "../../types/booking";
-import { TOTAL_BOOKING_STEPS } from "../../types/booking";
-import type { ColourId, ServiceCategoryKey } from "../../types/domain";
+import {
+  BOOKING_STEP,
+  FULL_SEQUENCE,
+  STYLIST_KNOWN_SEQUENCE,
+} from "../../types/booking";
+import type { ColourId } from "../../types/domain";
 import type { BookingSession } from "../../stores/overlays-slice";
 
 // TO DO: READ FILE
 // TO DO: Move this into the store so the wizard can be rehydrated on refresh. The current implementation is a direct port of the original, which kept the state in the DOM and lost it on refresh. The store would also allow the wizard to be opened from a search card without losing the chosen stylist, and to be rehydrated if the user navigates away and back again.
 
-/** Style selection slides to the customise step after a short beat. */
+/** Style selection slides to the next step after a short beat. */
 const AUTO_ADVANCE_MS = 320;
+
+/** Picking a stylist advances slightly more slowly, matching the new-ui flow. */
+const STYLIST_ADVANCE_MS = 300;
 
 /** Fallback price when no style has been chosen yet. */
 const FALLBACK_BASE_PRICE = 130;
@@ -36,21 +44,16 @@ const EMPTY_DETAILS: BookingDetails = {
   notes: "",
 };
 
-/**
- * What the review step shows before any summary has been captured. These were
- * hardcoded in the original markup, money rows included.
- */
-const INITIAL_REVIEW: ReviewSnapshot = {
-  service: "—",
-  colour: "1B Natural Black",
-  length: 'Medium (14–18")',
-  size: "Medium",
-  money: { total: 130, deposit: 32.5, balance: 97.5 },
-};
-
 export interface BookingWizard {
   booking: BookingState;
+  /** The steps this booking actually visits, in order. */
+  sequence: readonly BookingStepIndex[];
+  /** Derived from live state, so the review step always reflects the choices. */
+  review: ReviewSnapshot;
   selectStyle: (styleId: string) => void;
+  setDateRange: (dateFrom: string, dateTo: string) => void;
+  setLocation: (location: string) => void;
+  selectStylist: (stylistId: string) => void;
   selectColour: (colourId: ColourId) => void;
   selectLength: (index: number) => void;
   selectSize: (size: BraidSize) => void;
@@ -62,11 +65,20 @@ export interface BookingWizard {
   goPrev: () => void;
 }
 
-function initialState(categoryKey: ServiceCategoryKey): BookingState {
+/** Fresh today→+30 window; re-evaluated on every open so it never goes stale. */
+function defaultDateWindowFields() {
+  const { from, to } = defaultDateWindow();
+  return { dateFrom: from, dateTo: to };
+}
+
+function initialState(session: BookingSession): BookingState {
   return {
-    categoryKey,
+    categoryKey: session.categoryKey,
     step: 0,
     styleId: null,
+    ...defaultDateWindowFields(),
+    location: "",
+    stylistId: session.stylistId,
     colourId: DEFAULT_COLOUR_ID,
     lengthIndex: DEFAULT_LENGTH_INDEX,
     size: "Medium",
@@ -74,7 +86,6 @@ function initialState(categoryKey: ServiceCategoryKey): BookingState {
     dayNumber: null,
     timeSlotId: null,
     details: EMPTY_DETAILS,
-    review: INITIAL_REVIEW,
   };
 }
 
@@ -90,7 +101,12 @@ export function totalsOf(state: BookingState): BookingTotals {
 
   const total = base + addOnTotal;
   const deposit = calcDeposit(total);
-  return { total, deposit, balance: total - deposit };
+  return {
+    total,
+    fee: calcPlatformFee(total),
+    deposit,
+    balance: total - deposit,
+  };
 }
 
 function snapshotOf(state: BookingState): ReviewSnapshot {
@@ -106,26 +122,33 @@ function snapshotOf(state: BookingState): ReviewSnapshot {
 
 export function useBookingWizard(session: BookingSession): BookingWizard {
   const [booking, setBooking] = useState<BookingState>(() =>
-    initialState(session.categoryKey),
+    initialState(session),
   );
+
+  // Opening from a stylist answers "when & where" and "which stylist", so
+  // those two steps drop out of the flow entirely.
+  const sequence = session.stylistId ? STYLIST_KNOWN_SEQUENCE : FULL_SEQUENCE;
 
   // Read inside the auto-advance timer so it sees the step at fire time.
   const stepRef = useRef(booking.step);
   stepRef.current = booking.step;
 
-  // Opening a booking resets the category, step, style, colour and length —
-  // and nothing else. Size, add-ons, the chosen day and time, and the details
-  // form all survive into the next booking, exactly as they did before.
+  // Opening a booking clears everything the first three steps collect. Size,
+  // add-ons, the chosen day and time, and the details form still survive into
+  // the next booking, as they did before.
   useEffect(() => {
     setBooking((current) => ({
       ...current,
       categoryKey: session.categoryKey,
       step: 0,
       styleId: null,
+      ...defaultDateWindowFields(),
+      location: "",
+      stylistId: session.stylistId,
       colourId: DEFAULT_COLOUR_ID,
       lengthIndex: DEFAULT_LENGTH_INDEX,
     }));
-  }, [session.sessionId, session.categoryKey]);
+  }, [session.sessionId, session.categoryKey, session.stylistId]);
 
   const goToStep = useCallback((step: BookingStepIndex) => {
     setBooking((current) => ({ ...current, step }));
@@ -139,8 +162,30 @@ export function useBookingWizard(session: BookingSession): BookingWizard {
       // already moved on. An effect with cleanup would cancel the first timer
       // and delay the advance to 320ms after the *second* click.
       setTimeout(() => {
-        if (stepRef.current === 0) goToStep(1);
+        if (stepRef.current === BOOKING_STEP.style) {
+          goToStep(sequence[1] ?? BOOKING_STEP.customise);
+        }
       }, AUTO_ADVANCE_MS);
+    },
+    [goToStep, sequence],
+  );
+
+  const setDateRange = useCallback((dateFrom: string, dateTo: string) => {
+    setBooking((current) => ({ ...current, dateFrom, dateTo }));
+  }, []);
+
+  const setLocation = useCallback((location: string) => {
+    setBooking((current) => ({ ...current, location }));
+  }, []);
+
+  const selectStylist = useCallback(
+    (stylistId: string) => {
+      setBooking((current) => ({ ...current, stylistId }));
+      setTimeout(() => {
+        if (stepRef.current === BOOKING_STEP.stylist) {
+          goToStep(BOOKING_STEP.customise);
+        }
+      }, STYLIST_ADVANCE_MS);
     },
     [goToStep],
   );
@@ -158,17 +203,12 @@ export function useBookingWizard(session: BookingSession): BookingWizard {
   }, []);
 
   const toggleAddOn = useCallback((addOnId: string) => {
-    setBooking((current) => {
-      const next = {
-        ...current,
-        addOnIds: current.addOnIds.includes(addOnId)
-          ? current.addOnIds.filter((id) => id !== addOnId)
-          : [...current.addOnIds, addOnId],
-      };
-      // Ticking an add-on refreshed the money rows even though the rest of the
-      // summary stayed stale — the checkbox called calcTotal() directly.
-      return { ...next, review: { ...next.review, money: totalsOf(next) } };
-    });
+    setBooking((current) => ({
+      ...current,
+      addOnIds: current.addOnIds.includes(addOnId)
+        ? current.addOnIds.filter((id) => id !== addOnId)
+        : [...current.addOnIds, addOnId],
+    }));
   }, []);
 
   const selectDay = useCallback((dayNumber: number) => {
@@ -190,38 +230,34 @@ export function useBookingWizard(session: BookingSession): BookingWizard {
     setBooking((current) => {
       // Continuing from the style step without a choice picks the first style.
       const styleId =
-        current.step === 0 && !current.styleId
+        current.step === BOOKING_STEP.style && !current.styleId
           ? (getService(current.categoryKey).styles[0]?.id ?? null)
           : current.styleId;
 
-      // The summary is captured on the way OUT of step 4, not on the way in,
-      // so the review step shows whatever was captured last time. This is the
-      // original's off-by-one, preserved deliberately — see the
-      // behaviour-parity register in the migration plan.
-      const review = current.step === 4 ? snapshotOf(current) : current.review;
+      const position = sequence.indexOf(current.step);
+      const nextStep =
+        sequence[Math.min(sequence.length - 1, position + 1)] ?? current.step;
 
-      return {
-        ...current,
-        styleId,
-        review,
-        step: Math.min(
-          TOTAL_BOOKING_STEPS - 1,
-          current.step + 1,
-        ) as BookingStepIndex,
-      };
+      return { ...current, styleId, step: nextStep };
     });
-  }, []);
+  }, [sequence]);
 
   const goPrev = useCallback(() => {
-    setBooking((current) => ({
-      ...current,
-      step: Math.max(0, current.step - 1) as BookingStepIndex,
-    }));
-  }, []);
+    setBooking((current) => {
+      const position = sequence.indexOf(current.step);
+      const prevStep = sequence[Math.max(0, position - 1)] ?? current.step;
+      return { ...current, step: prevStep };
+    });
+  }, [sequence]);
 
   return {
     booking,
+    sequence,
+    review: snapshotOf(booking),
     selectStyle,
+    setDateRange,
+    setLocation,
+    selectStylist,
     selectColour,
     selectLength,
     selectSize,

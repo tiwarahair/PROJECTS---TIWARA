@@ -7,7 +7,7 @@ import { SERVICE_CARDS } from "../../data/landing-content";
 export function ServicesGrid() {
   const [headRef, headVisible] = useFadeIn<HTMLDivElement>();
   const [gridRef, gridVisible] = useFadeIn<HTMLDivElement>();
-  const { openSearch, openAiDiscovery } = useOverlayActions();
+  const { openBooking, openAiDiscovery } = useOverlayActions();
 
   return (
     <section className="services" id="services">
@@ -35,8 +35,10 @@ export function ServicesGrid() {
             <div
               key={number}
               className={cx("service-card", action === "ai" && "sc-ai-tile")}
+              // A style card starts a booking directly rather than dropping
+              // the user into search first.
               onClick={() =>
-                action === "ai" ? openAiDiscovery() : openSearch(action)
+                action === "ai" ? openAiDiscovery() : openBooking(action)
               }
             >
               <div className={cx("sc-bg", backgroundClass)} />

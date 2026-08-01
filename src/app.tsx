@@ -10,7 +10,6 @@ import { BookingOverlay } from "./features/booking/booking-overlay";
 import { AIDiscoveryOverlay } from "./features/ai-discovery/ai-discovery-overlay";
 import { ChatbotWidget } from "./features/chatbot/chatbot-widget";
 import { SizeGuideModal } from "./features/guides/size-guide-modal";
-import { LengthGuideModal } from "./features/guides/length-guide-modal";
 import { useOverlay } from "./hooks/use-overlay";
 
 /**
@@ -37,7 +36,6 @@ export function App() {
 
       {/* modals */}
       <SizeGuideModal />
-      <LengthGuideModal />
 
       {/* chatbot */}
       <ChatbotWidget />
