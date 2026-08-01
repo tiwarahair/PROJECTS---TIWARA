@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Tiwara's House — Find Textured Hair Stylists Near You</title>
+<title>Tiwara's House — Book Textured Hair Specialists Near You</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,400;0,9..144,500;1,9..144,300;1,9..144,400&family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
@@ -13,36 +13,40 @@
 
 <!-- NAV -->
 <nav id="mainNav">
-  <a href="#" class="nav-logo">Tiwara's House<sup>✦</sup></a>
+  <a href="#" class="nav-logo">
+    <!-- Replace logo.svg with your actual logo file -->
+    <img src="assets/logo.svg" alt="Tiwara's House" class="nav-logo-img" onerror="this.style.display='none'">
+    <span class="nav-logo-text">Tiwara's House<sup>✦</sup></span>
+  </a>
   <ul class="nav-links">
     <li><a href="#" onclick="openSearch('');return false;">Find a Stylist</a></li>
-    <li><a href="#services">Styles</a></li>
-    <li><a href="#about">About</a></li>
+    <li><a href="#services">Browse Styles</a></li>
+    <li><a href="#" onclick="openHairQuiz();return false;">Hair Quiz</a></li>
+    <li><a href="#" onclick="openStylistsPage();return false;">For Stylists</a></li>
+    <li><a href="#" onclick="openShopPage();return false;">Shop</a></li>
+    <li><a href="#" onclick="openAboutPage();return false;">About</a></li>
     <li><a href="#contact">Contact</a></li>
-    <li><a href="#shop">Shop</a></li>
-    <li><a href="#" onclick="openSearch('');return false;" class="nav-cta">Find a stylist</a></li>
+    <li><a href="#" onclick="openSearch('');return false;" class="nav-cta">Book now</a></li>
   </ul>
   <div class="nav-burger" onclick="toggleMenu()"><span></span><span></span><span></span></div>
 </nav>
 
 <!-- HERO -->
 <section class="hero">
-  <div class="hero-content fade-in">
-    <div class="hero-eyebrow">The UK's Premier Textured Hair Platform</div>
-    <h1>Your stylist is<br>closer than<br>you <em>think.</em></h1>
-    <p class="hero-sub">Find and book skilled textured hair specialists near you — transparent pricing, instant booking, 25% deposit to confirm.</p>
+  <!-- Editorial photo background — replace assets/hero.jpg with your commissioned photo -->
+  <div class="hero-photo-bg" style="background-image:url('assets/hero.jpg')"></div>
+  <div class="hero-overlay"></div>
 
-    <!-- Search bar -->
-    <div class="hero-search">
-      <div class="hs-field">
-        <span class="hs-icon">📍</span>
-        <input type="text" id="heroLocation" class="hs-input" placeholder="Your city or postcode">
-      </div>
-      <div class="hs-sep"></div>
+  <div class="hero-content fade-in">
+    <div class="hero-eyebrow">The UK's Home of Textured Hair</div>
+    <h1>Your stylist is closer<br>than you <em>think.</em></h1>
+
+    <!-- Fresha-style wide centred search bar -->
+    <div class="hero-search hero-search--wide">
       <div class="hs-field">
         <span class="hs-icon">✂</span>
-        <select id="heroStyleSelect" class="hs-input">
-          <option value="">Any style</option>
+        <select id="heroStyleSelect" class="hs-input" aria-label="Style">
+          <option value="">What are you looking for?</option>
           <option value="braids">Braids &amp; Protective Styles</option>
           <option value="wigs">Wig Installs</option>
           <option value="natural">Natural Hair Care</option>
@@ -50,16 +54,22 @@
           <option value="treatments">Treatments</option>
         </select>
       </div>
-      <button class="hs-btn" onclick="heroSearch()">Find stylists</button>
+      <div class="hs-sep"></div>
+      <div class="hs-field">
+        <span class="hs-icon">📍</span>
+        <input type="text" id="heroLocation" class="hs-input" placeholder="City or postcode" aria-label="Location">
+      </div>
+      <button class="hs-btn" onclick="heroSearch()">Search</button>
     </div>
 
     <!-- Quick chips -->
     <div class="hero-chips">
-      <span class="hero-chip" onclick="openSearch('braids')">Braids</span>
+      <span class="hero-chip" onclick="openSearch('braids')">Knotless Braids</span>
       <span class="hero-chip" onclick="openSearch('wigs')">Wig Installs</span>
-      <span class="hero-chip" onclick="openSearch('locs')">Locs &amp; Twists</span>
+      <span class="hero-chip" onclick="openSearch('locs')">Locs</span>
       <span class="hero-chip" onclick="openSearch('natural')">Natural Hair</span>
       <span class="hero-chip" onclick="openSearch('treatments')">Treatments</span>
+      <span class="hero-chip" onclick="openHairQuiz()">✦ Hair Quiz</span>
     </div>
   </div>
 
@@ -71,28 +81,6 @@
   </div>
   <div class="hero-scroll">Scroll</div>
 </section>
-
-<!-- MARQUEE -->
-<div class="marquee"><div class="marquee-track">
-  <span class="marquee-item">Box Braids</span><span class="marquee-sep"> ✦ </span>
-  <span class="marquee-item">Knotless Braids</span><span class="marquee-sep"> ✦ </span>
-  <span class="marquee-item">Goddess Locs</span><span class="marquee-sep"> ✦ </span>
-  <span class="marquee-item">Wig Installs</span><span class="marquee-sep"> ✦ </span>
-  <span class="marquee-item">Fulani Braids</span><span class="marquee-sep"> ✦ </span>
-  <span class="marquee-item">Senegalese Twists</span><span class="marquee-sep"> ✦ </span>
-  <span class="marquee-item">Starter Locs</span><span class="marquee-sep"> ✦ </span>
-  <span class="marquee-item">Silk Press</span><span class="marquee-sep"> ✦ </span>
-  <span class="marquee-item">Cornrows</span><span class="marquee-sep"> ✦ </span>
-  <span class="marquee-item">Box Braids</span><span class="marquee-sep"> ✦ </span>
-  <span class="marquee-item">Knotless Braids</span><span class="marquee-sep"> ✦ </span>
-  <span class="marquee-item">Goddess Locs</span><span class="marquee-sep"> ✦ </span>
-  <span class="marquee-item">Wig Installs</span><span class="marquee-sep"> ✦ </span>
-  <span class="marquee-item">Fulani Braids</span><span class="marquee-sep"> ✦ </span>
-  <span class="marquee-item">Senegalese Twists</span><span class="marquee-sep"> ✦ </span>
-  <span class="marquee-item">Starter Locs</span><span class="marquee-sep"> ✦ </span>
-  <span class="marquee-item">Silk Press</span><span class="marquee-sep"> ✦ </span>
-  <span class="marquee-item">Cornrows</span><span class="marquee-sep"> ✦ </span>
-</div></div>
 
 <!-- FEATURED STYLISTS -->
 <section class="feat-stylists">
@@ -110,14 +98,6 @@
   </div>
 </section>
 
-<!-- INTRO -->
-<section class="intro">
-  <span class="intro-label fade-in">Our promise</span>
-  <h2 class="fade-in">One platform. Every textured hair specialist <em>near you.</em></h2>
-  <p class="fade-in">For too long, finding a skilled, reliable stylist for textured hair has been one of the most frustrating challenges in our community. Tiwara's House exists to change that — connecting clients with world-class textured hair specialists across the UK, with transparent pricing and effortless online booking.</p>
-  <div class="intro-divider fade-in"></div>
-</section>
-
 <!-- SERVICE CATEGORIES -->
 <section class="services" id="services">
   <div class="section-head fade-in">
@@ -125,7 +105,7 @@
     <h2>Six ways to find your look.</h2>
   </div>
   <div class="services-grid fade-in">
-    <div class="service-card" onclick="openSearch('braids')">
+    <div class="service-card" onclick="openBooking('braids')">
       <div class="sc-bg-1" style="position:absolute;inset:0;"></div>
       <div class="sc-open-hint">Find stylists</div>
       <div class="service-card-content">
@@ -135,7 +115,7 @@
         <span class="sc-cta">Find stylists</span>
       </div>
     </div>
-    <div class="service-card" onclick="openSearch('wigs')">
+    <div class="service-card" onclick="openBooking('wigs')">
       <div class="sc-bg-2" style="position:absolute;inset:0;"></div>
       <div class="sc-open-hint">Find stylists</div>
       <div class="service-card-content">
@@ -145,7 +125,7 @@
         <span class="sc-cta">Find stylists</span>
       </div>
     </div>
-    <div class="service-card" onclick="openSearch('natural')">
+    <div class="service-card" onclick="openBooking('natural')">
       <div class="sc-bg-3" style="position:absolute;inset:0;"></div>
       <div class="sc-open-hint">Find stylists</div>
       <div class="service-card-content">
@@ -155,7 +135,7 @@
         <span class="sc-cta">Find stylists</span>
       </div>
     </div>
-    <div class="service-card" onclick="openSearch('locs')">
+    <div class="service-card" onclick="openBooking('locs')">
       <div class="sc-bg-4" style="position:absolute;inset:0;"></div>
       <div class="sc-open-hint">Find stylists</div>
       <div class="service-card-content">
@@ -165,7 +145,7 @@
         <span class="sc-cta">Find stylists</span>
       </div>
     </div>
-    <div class="service-card" onclick="openSearch('treatments')">
+    <div class="service-card" onclick="openBooking('treatments')">
       <div class="sc-bg-5" style="position:absolute;inset:0;"></div>
       <div class="sc-open-hint">Find stylists</div>
       <div class="service-card-content">
@@ -188,8 +168,31 @@
   </div>
 </section>
 
+
+<!-- HAIR QUIZ TEASER -->
+<section class="quiz-teaser">
+  <div class="quiz-teaser-inner fade-in">
+    <div class="qt-icon">✦</div>
+    <div class="qt-body">
+      <h3>Not sure what your hair needs?</h3>
+      <p>Take our 2-minute hair quiz — get personalised product recommendations for your hair type and goals, then book an appointment to see them in action.</p>
+    </div>
+    <button class="qt-cta" onclick="openHairQuiz()">Take the quiz &rarr;</button>
+  </div>
+</section>
+
+<!-- INTRO (accessible from nav/footer — hidden from homepage scroll) -->
+<section class="intro">
+  <span class="intro-label fade-in">Our promise</span>
+  <h2 class="fade-in">One platform. Every textured hair specialist <em>near you.</em></h2>
+  <p class="fade-in">For too long, finding a skilled, reliable stylist for textured hair has been one of the most frustrating challenges in our community. Tiwara's House exists to change that — connecting clients with world-class textured hair specialists across the UK, with transparent pricing and effortless online booking.</p>
+  <div class="intro-divider fade-in"></div>
+</section>
+
+
+
 <!-- HOW IT WORKS -->
-<section class="how">
+<section class="how hp-hidden">
   <div class="how-inner">
     <div class="section-head fade-in">
       <span class="section-label">As simple as it should be</span>
@@ -216,7 +219,7 @@
 </section>
 
 <!-- FEATURED STYLES -->
-<section class="featured">
+<section class="featured hp-hidden">
   <div class="section-head fade-in">
     <span class="section-label">The work</span>
     <h2 style="color:var(--cream);">Featured styles</h2>
@@ -255,7 +258,7 @@
 </section>
 
 <!-- PLATFORM SEARCH CTA -->
-<section class="book-cta-section" id="book">
+<section class="book-cta-section hp-hidden" id="book">
   <span class="section-label" style="color:var(--gold);">Find your match</span>
   <h2>Search. Choose. <em>Book.</em></h2>
   <p>Every stylist on Tiwara's House is vetted, reviewed, and ready to book. Transparent pricing, instant confirmation, and a 25% deposit to secure your appointment.</p>
@@ -330,7 +333,7 @@
 </section>
 
 <!-- JOIN PLATFORM -->
-<section class="join-platform" id="join">
+<section class="join-platform hp-hidden" id="join">
   <div class="join-inner">
     <div class="join-text fade-in">
       <span class="section-label" style="color:var(--gold);">For stylists</span>
@@ -359,7 +362,7 @@
 </section>
 
 <!-- ABOUT -->
-<section class="about" id="about">
+<section class="about hp-hidden" id="about">
   <div class="about-visual">
     <div class="about-crown">TH</div>
     <div class="about-quote">
@@ -400,10 +403,10 @@
       <li><a href="#" onclick="openSearch('treatments');return false;">Treatments</a></li>
     </ul></div>
     <div class="footer-col"><h4>Platform</h4><ul>
-      <li><a href="#about">About us</a></li>
+      <li><a href="#" onclick="openAboutPage();return false;">About us</a></li>
       <li><a href="#" onclick="openSearch('');return false;">Find a stylist</a></li>
-      <li><a href="#join">Join as a stylist</a></li>
-      <li><a href="#shop">Shop</a></li>
+      <li><a href="#" onclick="openStylistsPage();return false;">Join as a stylist</a></li>
+      <li><a href="#" onclick="openShopPage();return false;">Shop</a></li>
       <li><a href="#">Blog &amp; Journal</a></li>
     </ul></div>
     <div class="footer-col"><h4>Legal</h4><ul>
@@ -421,6 +424,337 @@
   </div>
 </footer>
 
+
+<!-- ══ ABOUT PAGE OVERLAY ══ -->
+<div id="aboutPage" class="pg-overlay">
+  <div class="pg-nav">
+    <a href="#" class="pg-nav-logo" onclick="closeAboutPage();return false;">Tiwara's House<sup>✦</sup></a>
+    <button class="pg-close" onclick="closeAboutPage()">✕ Close</button>
+  </div>
+
+  <div class="pg-hero pg-hero--espresso">
+    <div class="pg-hero-inner">
+      <div class="pg-eyebrow">Our story</div>
+      <h1 class="pg-title">Art, heritage, and every<br>strand <em>in between.</em></h1>
+      <p class="pg-sub">Tiwara's House was built from a simple truth: the Black community deserves better. Better access, better transparency, better experiences.</p>
+    </div>
+  </div>
+
+  <div class="pg-body">
+    <div class="pg-section">
+      <div class="pg-two-col">
+        <div>
+          <h2 class="pg-h2">Why we exist</h2>
+          <p>For too long, finding a skilled, reliable stylist for textured hair meant hunting through group chats, Instagram DMs, and word of mouth — and even then you couldn't be sure of pricing, availability, or quality until you turned up. Tiwara's House exists to change that.</p>
+          <p>We connect clients with world-class textured hair specialists across the UK, offering transparent pricing, verified reviews, and an effortless booking experience — all in one place built specifically for us.</p>
+        </div>
+        <div class="pg-mission-block">
+          <div class="pg-mission-label">Our mission</div>
+          <blockquote class="pg-blockquote">"To elevate the textured hair experience — through exceptional craft, cultural authenticity, and a community that looks after its own."</blockquote>
+        </div>
+      </div>
+    </div>
+
+    <div class="pg-section pg-section--cream">
+      <h2 class="pg-h2" style="text-align:center;margin-bottom:2.5rem;">What we stand for</h2>
+      <div class="pg-values">
+        <div class="pg-value">
+          <div class="pg-value-icon">✶</div>
+          <strong>Excellence</strong>
+          <span>Every stylist on the platform is vetted for quality, consistency, and care. World-class craft in every appointment.</span>
+        </div>
+        <div class="pg-value">
+          <div class="pg-value-icon">✶</div>
+          <strong>Authenticity</strong>
+          <span>We are built from and for the community. Our platform reflects the culture — not a sanitised version of it.</span>
+        </div>
+        <div class="pg-value">
+          <div class="pg-value-icon">✶</div>
+          <strong>Community</strong>
+          <span>Tiwara's House lifts stylists and clients equally. When the community wins, we win.</span>
+        </div>
+        <div class="pg-value">
+          <div class="pg-value-icon">✶</div>
+          <strong>Empowerment</strong>
+          <span>Transparent pricing. No hidden fees. No gatekeeping. Access for everyone who needs it.</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="pg-section">
+      <h2 class="pg-h2" style="text-align:center;margin-bottom:2.5rem;">How it works</h2>
+      <div class="pg-steps">
+        <div class="pg-step">
+          <div class="pg-step-num">1</div>
+          <h3>Search</h3>
+          <p>Enter your location and the style you're looking for. Discover vetted textured hair specialists near you.</p>
+        </div>
+        <div class="pg-step">
+          <div class="pg-step-num">2</div>
+          <h3>Choose your stylist</h3>
+          <p>Browse profiles, portfolios, and real client reviews. Filter by style, price, and availability.</p>
+        </div>
+        <div class="pg-step">
+          <div class="pg-step-num">3</div>
+          <h3>Book &amp; confirm</h3>
+          <p>Select your exact style, customise every detail, pick a date, and pay a 25% deposit to confirm.</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="pg-section pg-section--dark">
+      <div class="pg-stats">
+        <div class="pg-stat"><span class="pg-stat-num">50+</span><span class="pg-stat-label">Stylists UK-wide</span></div>
+        <div class="pg-stat"><span class="pg-stat-num">5,000+</span><span class="pg-stat-label">Bookings completed</span></div>
+        <div class="pg-stat"><span class="pg-stat-num">4.9★</span><span class="pg-stat-label">Average rating</span></div>
+        <div class="pg-stat"><span class="pg-stat-num">UK-wide</span><span class="pg-stat-label">Coverage &amp; growing</span></div>
+      </div>
+    </div>
+
+    <div class="pg-section pg-cta-strip">
+      <h2 class="pg-h2">Ready to find your stylist?</h2>
+      <p>Thousands of clients have already booked through Tiwara's House. Join them.</p>
+      <button class="pg-cta-btn" onclick="closeAboutPage();openSearch('');">Find a stylist near me &rarr;</button>
+    </div>
+  </div>
+</div>
+
+<!-- ══ FOR STYLISTS PAGE OVERLAY ══ -->
+<div id="stylistsPage" class="pg-overlay">
+  <div class="pg-nav">
+    <a href="#" class="pg-nav-logo" onclick="closeStylistsPage();return false;">Tiwara's House<sup>✦</sup></a>
+    <button class="pg-close" onclick="closeStylistsPage()">✕ Close</button>
+  </div>
+
+  <div class="pg-hero pg-hero--gold">
+    <div class="pg-hero-inner">
+      <div class="pg-eyebrow">For stylists</div>
+      <h1 class="pg-title">Grow your clientele.<br><em>Fill your calendar.</em></h1>
+      <p class="pg-sub">Join the UK's go-to platform for textured hair and reach thousands of clients who are actively looking for you.</p>
+    </div>
+  </div>
+
+  <div class="pg-body">
+    <div class="pg-section pg-section--cream">
+      <h2 class="pg-h2" style="text-align:center;margin-bottom:2.5rem;">Why stylists choose us</h2>
+      <div class="pg-perks">
+        <div class="pg-perk"><span class="pg-perk-icon">📅</span><strong>Built-in booking &amp; calendar</strong><span>Clients book, pay a deposit, and confirm — all without a single DM from you.</span></div>
+        <div class="pg-perk"><span class="pg-perk-icon">🏪</span><strong>Your own storefront</strong><span>A fully branded profile page with your photos, services, pricing, and client reviews.</span></div>
+        <div class="pg-perk"><span class="pg-perk-icon">💷</span><strong>Free to list</strong><span>No upfront cost. Only a small 2% platform fee per confirmed booking — nothing until you earn.</span></div>
+        <div class="pg-perk"><span class="pg-perk-icon">⭐</span><strong>Verified reviews</strong><span>Build trust with real, verified client reviews displayed prominently on your storefront.</span></div>
+        <div class="pg-perk"><span class="pg-perk-icon">📸</span><strong>Portfolio showcase</strong><span>Upload up to 30 portfolio photos organised by service. Let your work speak for itself.</span></div>
+        <div class="pg-perk"><span class="pg-perk-icon">🌍</span><strong>UK-wide reach</strong><span>Tap into a growing community of clients who know exactly what they want and are ready to book.</span></div>
+      </div>
+    </div>
+
+    <div class="pg-section">
+      <div class="pg-form-wrap">
+        <div class="pg-form-intro">
+          <h2 class="pg-h2">Apply to join</h2>
+          <p>Fill in the form below and we'll be in touch within 48 hours to complete your onboarding.</p>
+        </div>
+
+        <div id="stylistForm">
+          <div class="pg-form-row">
+            <div class="pg-form-group">
+              <label class="pg-label">Your name <span class="pg-required">*</span></label>
+              <input type="text" class="pg-input" id="sf-name" placeholder="e.g. Amara Johnson">
+            </div>
+            <div class="pg-form-group">
+              <label class="pg-label">Business / trading name <span class="pg-required">*</span></label>
+              <input type="text" class="pg-input" id="sf-business" placeholder="e.g. Amara Beauty Studio">
+            </div>
+          </div>
+          <div class="pg-form-row">
+            <div class="pg-form-group">
+              <label class="pg-label">City / location <span class="pg-required">*</span></label>
+              <input type="text" class="pg-input" id="sf-location" placeholder="e.g. London, Manchester">
+            </div>
+            <div class="pg-form-group">
+              <label class="pg-label">Years of experience</label>
+              <select class="pg-input pg-select" id="sf-experience">
+                <option value="">Select…</option>
+                <option>Less than 1 year</option>
+                <option>1–3 years</option>
+                <option>3–5 years</option>
+                <option>5–10 years</option>
+                <option>10+ years</option>
+              </select>
+            </div>
+          </div>
+          <div class="pg-form-row">
+            <div class="pg-form-group">
+              <label class="pg-label">Email address <span class="pg-required">*</span></label>
+              <input type="email" class="pg-input" id="sf-email" placeholder="you@email.com">
+            </div>
+            <div class="pg-form-group">
+              <label class="pg-label">Phone number</label>
+              <input type="tel" class="pg-input" id="sf-phone" placeholder="+44 7700 000000">
+            </div>
+          </div>
+          <div class="pg-form-group">
+            <label class="pg-label">Instagram handle</label>
+            <input type="text" class="pg-input" id="sf-instagram" placeholder="@yourstudio">
+          </div>
+          <div class="pg-form-group">
+            <label class="pg-label">Services you offer <span class="pg-required">*</span></label>
+            <div class="pg-checkboxes">
+              <label class="pg-check"><input type="checkbox"> Braids &amp; Protective Styles</label>
+              <label class="pg-check"><input type="checkbox"> Wig Installs</label>
+              <label class="pg-check"><input type="checkbox"> Natural Hair Care</label>
+              <label class="pg-check"><input type="checkbox"> Locs &amp; Twists</label>
+              <label class="pg-check"><input type="checkbox"> Treatments</label>
+              <label class="pg-check"><input type="checkbox"> Colouring</label>
+            </div>
+          </div>
+          <div class="pg-form-group">
+            <label class="pg-label">Tell us a bit about yourself and your work</label>
+            <textarea class="pg-input pg-textarea" id="sf-bio" rows="4" placeholder="Your background, specialities, the experience you create for clients…"></textarea>
+          </div>
+          <div class="pg-form-group">
+            <label class="pg-label">Portfolio link <span class="pg-optional-label">(Instagram, website, or Google Drive)</span></label>
+            <input type="url" class="pg-input" id="sf-portfolio" placeholder="https://instagram.com/yourstudio">
+          </div>
+          <button class="pg-submit-btn" onclick="submitStylistForm()">Submit application &rarr;</button>
+        </div>
+
+        <div class="pg-form-success" id="stylistSuccess" style="display:none;">
+          <div class="pg-success-icon">✓</div>
+          <h3>Application received!</h3>
+          <p>Thank you for applying to join Tiwara's House. Our team will review your application and be in touch within 48 hours.</p>
+          <button class="pg-cta-btn" onclick="closeStylistsPage()">Back to site</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══ SHOP PAGE OVERLAY ══ -->
+<div id="shopPage" class="pg-overlay">
+  <div class="pg-nav">
+    <a href="#" class="pg-nav-logo" onclick="closeShopPage();return false;">Tiwara's House<sup>✦</sup></a>
+    <button class="pg-close" onclick="closeShopPage()">✕ Close</button>
+  </div>
+
+  <div class="pg-hero pg-hero--forest">
+    <div class="pg-hero-inner">
+      <div class="pg-eyebrow">Tiwara's House Shop</div>
+      <h1 class="pg-title">The same hair we use<br>in the salon.</h1>
+      <p class="pg-sub">Premium pre-sectioned extension hair — every portion perfectly measured. No untangling bundles, no guessing how much you need.</p>
+    </div>
+  </div>
+
+  <div class="pg-body">
+    <div class="pg-section">
+      <div class="pg-shop-filter">
+        <button class="pg-filter-btn active" onclick="filterShop('all',this)">All products</button>
+        <button class="pg-filter-btn" onclick="filterShop('hair',this)">Extension Hair</button>
+        <button class="pg-filter-btn" onclick="filterShop('care',this)">Hair Care</button>
+        <button class="pg-filter-btn" onclick="filterShop('accessories',this)">Accessories</button>
+      </div>
+
+      <div class="pg-shop-grid">
+        <div class="pg-shop-card" data-cat="hair">
+          <div class="pg-shop-img"><div class="shop-card-img-inner si-1"></div><div class="pg-shop-badge">New</div></div>
+          <div class="pg-shop-body">
+            <div class="pg-shop-title">Pre-Sectioned Boho Deep Wave</div>
+            <div class="pg-shop-sub">Bulk braiding hair — 7 lengths available</div>
+            <div class="pg-shop-swatches">
+              <div class="s-swatch" style="background:#1a1108;" title="Natural Black"></div>
+              <div class="s-swatch" style="background:#3d2000;" title="Dark Brown"></div>
+              <div class="s-swatch" style="background:#7a3800;" title="Auburn"></div>
+              <div class="s-swatch" style="background:#c07020;" title="Honey Blonde"></div>
+              <div class="s-swatch" style="background:#e8d080;" title="Platinum"></div>
+            </div>
+            <div class="pg-shop-footer"><span class="pg-shop-price">£18.99</span><button class="pg-shop-cta">Add to bag</button></div>
+          </div>
+        </div>
+        <div class="pg-shop-card" data-cat="hair">
+          <div class="pg-shop-img"><div class="shop-card-img-inner si-2"></div><div class="pg-shop-badge pg-shop-badge--gold">Best seller</div></div>
+          <div class="pg-shop-body">
+            <div class="pg-shop-title">Pre-Sectioned Kanekalon Braiding</div>
+            <div class="pg-shop-sub">Standard braiding hair — 5 lengths available</div>
+            <div class="pg-shop-swatches">
+              <div class="s-swatch" style="background:#1a1108;"></div>
+              <div class="s-swatch" style="background:#3d2000;"></div>
+              <div class="s-swatch" style="background:#8B3A00;"></div>
+              <div class="s-swatch" style="background:#c07020;"></div>
+            </div>
+            <div class="pg-shop-footer"><span class="pg-shop-price">£14.99</span><button class="pg-shop-cta">Add to bag</button></div>
+          </div>
+        </div>
+        <div class="pg-shop-card" data-cat="hair">
+          <div class="pg-shop-img"><div class="shop-card-img-inner si-3"></div></div>
+          <div class="pg-shop-body">
+            <div class="pg-shop-title">Pre-Sectioned French Curl</div>
+            <div class="pg-shop-sub">Curl braiding hair — 4 lengths available</div>
+            <div class="pg-shop-swatches">
+              <div class="s-swatch" style="background:#1a1108;"></div>
+              <div class="s-swatch" style="background:#3d2000;"></div>
+              <div class="s-swatch" style="background:#c07020;"></div>
+            </div>
+            <div class="pg-shop-footer"><span class="pg-shop-price">£16.99</span><button class="pg-shop-cta">Add to bag</button></div>
+          </div>
+        </div>
+        <div class="pg-shop-card" data-cat="accessories">
+          <div class="pg-shop-img"><div class="shop-card-img-inner si-4"></div></div>
+          <div class="pg-shop-body">
+            <div class="pg-shop-title">Hair Care Accessories Kit</div>
+            <div class="pg-shop-sub">Combs, edge tools, scalp oils</div>
+            <div class="pg-shop-swatches"></div>
+            <div class="pg-shop-footer"><span class="pg-shop-price">from £6.99</span><button class="pg-shop-cta">Add to bag</button></div>
+          </div>
+        </div>
+        <div class="pg-shop-card" data-cat="care">
+          <div class="pg-shop-img pg-shop-img--plain"><div class="pg-shop-img-placeholder">🧴</div></div>
+          <div class="pg-shop-body">
+            <div class="pg-shop-title">Deep Conditioning Mask</div>
+            <div class="pg-shop-sub">Intensive moisture treatment — all curl types</div>
+            <div class="pg-shop-swatches"></div>
+            <div class="pg-shop-footer"><span class="pg-shop-price">£12.99</span><button class="pg-shop-cta">Add to bag</button></div>
+          </div>
+        </div>
+        <div class="pg-shop-card" data-cat="care">
+          <div class="pg-shop-img pg-shop-img--plain"><div class="pg-shop-img-placeholder">💧</div></div>
+          <div class="pg-shop-body">
+            <div class="pg-shop-title">Lightweight Leave-In Conditioner</div>
+            <div class="pg-shop-sub">Daily moisture &amp; detangling spray</div>
+            <div class="pg-shop-swatches"></div>
+            <div class="pg-shop-footer"><span class="pg-shop-price">£9.99</span><button class="pg-shop-cta">Add to bag</button></div>
+          </div>
+        </div>
+        <div class="pg-shop-card" data-cat="care">
+          <div class="pg-shop-img pg-shop-img--plain"><div class="pg-shop-img-placeholder">🌿</div></div>
+          <div class="pg-shop-body">
+            <div class="pg-shop-title">Scalp Nourishing Oil</div>
+            <div class="pg-shop-sub">Castor &amp; jojoba blend — stimulates growth</div>
+            <div class="pg-shop-swatches"></div>
+            <div class="pg-shop-footer"><span class="pg-shop-price">£11.99</span><button class="pg-shop-cta">Add to bag</button></div>
+          </div>
+        </div>
+        <div class="pg-shop-card" data-cat="accessories">
+          <div class="pg-shop-img pg-shop-img--plain"><div class="pg-shop-img-placeholder">✨</div></div>
+          <div class="pg-shop-body">
+            <div class="pg-shop-title">Satin-Lined Bonnet</div>
+            <div class="pg-shop-sub">Protects styles overnight — one size</div>
+            <div class="pg-shop-swatches">
+              <div class="s-swatch" style="background:#1a1108;"></div>
+              <div class="s-swatch" style="background:#8F1112;"></div>
+              <div class="s-swatch" style="background:#1C3829;"></div>
+            </div>
+            <div class="pg-shop-footer"><span class="pg-shop-price">£8.99</span><button class="pg-shop-cta">Add to bag</button></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="pg-section pg-section--cream pg-cta-strip">
+      <h2 class="pg-h2">Buying hair for your appointment?</h2>
+      <p>Order now and collect at the salon, or have it delivered before your date.</p>
+      <button class="pg-cta-btn" onclick="closeShopPage();openSearch('');">Book an appointment &rarr;</button>
+    </div>
+  </div>
+</div>
 
 <!-- ══ SEARCH OVERLAY ══ -->
 <div id="searchPage" class="sr-overlay">
@@ -539,29 +873,57 @@
         <!-- Continue removed — selecting a style auto-advances -->
       </div>
 
+      <!-- STEP 8 — Date Range + Location (Browse by Style flow only) -->
+      <div class="bp-step-panel" id="bpStep7">
+        <div class="bp-step-title">When &amp; where?</div>
+        <div class="bp-step-sub">Set your date window and location to find available stylists</div>
+
+        <div class="bp-section-label">Date range</div>
+        <div class="bp-daterange-row">
+          <div class="bp-daterange-field">
+            <label class="bp-date-label">Earliest</label>
+            <input type="date" id="bpDateFrom" class="bp-date-input">
+          </div>
+          <div class="bp-daterange-field">
+            <label class="bp-date-label">Latest</label>
+            <input type="date" id="bpDateTo" class="bp-date-input">
+          </div>
+        </div>
+
+        <div class="bp-section-label" style="margin-top:1.5rem">Your location</div>
+        <div class="bp-location-row">
+          <div class="bp-loc-icon">📍</div>
+          <input type="text" id="bpLocationInput" class="bp-loc-input"
+            placeholder="City or postcode — e.g. London, B1 1AA">
+        </div>
+
+        <div class="bp-nav-btns">
+          <button class="bp-btn-back" onclick="bpPrev()">Back</button>
+          <button class="bp-btn-next" onclick="bpNextDateLoc()">Find stylists →</button>
+        </div>
+      </div>
+
       <!-- STEP 2 -->
       <div class="bp-step-panel" id="bpStep1">
         <div class="bp-step-title">Customise your look</div>
         <div class="bp-step-sub">Every selection updates the preview on the right</div>
         <div class="bp-custom-group" id="bpLengthGroup">
-          <span class="bp-custom-label">Length <button class="guide-link" onclick="openLengthGuide()">Length guide →</button></span>
+          <span class="bp-custom-label">Length</span>
           <div class="bp-length-opts">
-            <div class="bp-len-opt" onclick="selectLen(0,this)">Short<span class="sub">10–12"</span></div>
-            <div class="bp-len-opt sel" onclick="selectLen(1,this)">Medium<span class="sub">14–18"</span></div>
-            <div class="bp-len-opt" onclick="selectLen(2,this)">Long<span class="sub">20–24"</span></div>
-            <div class="bp-len-opt" onclick="selectLen(3,this)">XL<span class="sub">26–30"</span></div>
+            <div class="bp-len-opt" onclick="selectLen(0,this)">Bob<span class="sub">10–12"</span></div>
+            <div class="bp-len-opt sel" onclick="selectLen(1,this)">Shoulder<span class="sub">14–18"</span></div>
+            <div class="bp-len-opt" onclick="selectLen(2,this)">Bra Length<span class="sub">20–24"</span></div>
+            <div class="bp-len-opt" onclick="selectLen(3,this)">Waist / Bum<span class="sub">26"+"</span></div>
           </div>
         </div>
         <div class="bp-custom-group" id="bpColourGroup">
           <span class="bp-custom-label">Colour</span>
           <div class="bp-colour-grid">
-            <div class="bp-swatch sel" style="background:#1A1108;" onclick="selectColour('1b',this)" title="1B Natural Black"><span class="bp-swatch-label">1B Black</span></div>
-            <div class="bp-swatch" style="background:#3D2000;" onclick="selectColour('4',this)" title="4 Dark Brown"><span class="bp-swatch-label">4 Brown</span></div>
-            <div class="bp-swatch" style="background:#7A3800;" onclick="selectColour('30',this)" title="30 Auburn"><span class="bp-swatch-label">30 Auburn</span></div>
-            <div class="bp-swatch" style="background:#C07820;" onclick="selectColour('27',this)" title="27 Honey Blonde"><span class="bp-swatch-label">27 Honey</span></div>
-            <div class="bp-swatch" style="background:#D4C050;" onclick="selectColour('613',this)" title="613 Platinum"><span class="bp-swatch-label">613 Platinum</span></div>
-            <div class="bp-swatch" style="background:linear-gradient(135deg,#1A1108 50%,#7A3800 50%);" onclick="selectColour('ombre',this)" title="Ombre"><span class="bp-swatch-label">Ombre</span></div>
-            <div class="bp-swatch" style="background:#5A0808;" onclick="selectColour('burgundy',this)" title="Burgundy"><span class="bp-swatch-label">Burgundy</span></div>
+            <div class="bp-swatch sel" style="background:#1A1108;" onclick="selectColour('1b',this)" title="1B Natural Black"><span class="bp-swatch-label">1B</span></div>
+            <div class="bp-swatch" style="background:#7A3800;" onclick="selectColour('30',this)" title="30 Auburn"><span class="bp-swatch-label">30</span></div>
+            <div class="bp-swatch" style="background:linear-gradient(135deg,#3D2000 50%,#8F1112 50%);" onclick="selectColour('4/33',this)" title="4/33 Dark Brown / Burgundy"><span class="bp-swatch-label">4/33</span></div>
+            <div class="bp-swatch" style="background:#D4C050;" onclick="selectColour('613',this)" title="613 Platinum Blonde"><span class="bp-swatch-label">613</span></div>
+            <div class="bp-swatch bp-swatch--other" style="background:linear-gradient(135deg,#1A1108 25%,#7A3800 25% 50%,#D4C050 50% 75%,#3D2000 75%);" onclick="selectColour('other',this)" title="Other — specify in notes"><span class="bp-swatch-label">Other</span></div>
           </div>
         </div>
         <div class="bp-custom-group" id="bpSizeGroup">
@@ -574,9 +936,12 @@
         </div>
         <div class="bp-custom-group">
           <span class="bp-custom-label">Add-ons (optional)</span>
-          <label class="bp-addon"><input type="checkbox" onchange="calcTotal()"> Scalp treatment <span class="bp-addon-price">+£15</span></label>
-          <label class="bp-addon"><input type="checkbox" onchange="calcTotal()"> Beads &amp; cuffs <span class="bp-addon-price">+£10</span></label>
-          <label class="bp-addon"><input type="checkbox" onchange="calcTotal()"> Colour rinse <span class="bp-addon-price">+£20</span></label>
+          <label class="bp-addon"><input type="checkbox" onchange="calcTotal()"> Boho (curly pieces) <span class="bp-addon-price">+£15</span></label>
+          <label class="bp-addon"><input type="checkbox" onchange="calcTotal()"> Blow dry <span class="bp-addon-price">+£15</span></label>
+          <label class="bp-addon bp-addon--soon"><input type="checkbox" disabled> Scalp analysis <span class="bp-addon-coming">Coming soon</span></label>
+          <label class="bp-addon"><input type="checkbox" onchange="calcTotal()"> Beads <span class="bp-addon-price">+£0</span></label>
+          <label class="bp-addon"><input type="checkbox" onchange="calcTotal()"> Burnt ends <span class="bp-addon-price">+£10</span></label>
+          <label class="bp-addon bp-addon--other"><input type="checkbox" onchange="calcTotal()"> Other <span class="bp-addon-note">(specify in appointment notes)</span></label>
         </div>
         <div class="bp-nav-btns">
           <button class="bp-btn-back" onclick="bpPrev()">Back</button>
@@ -586,8 +951,8 @@
 
       <!-- STEP 3 -->
       <div class="bp-step-panel" id="bpStep2">
-        <div class="bp-step-title">Choose a date &amp; time</div>
-        <div class="bp-step-sub">Available dates shown — select to see time slots</div>
+        <div class="bp-step-title">Choose a preferred date</div>
+        <div class="bp-step-sub">Select the date that works for you — we'll show available stylists next</div>
         <div class="bp-cal">
           <div class="bp-cal-header">
             <button class="bp-cal-nav">&#8249;</button>
@@ -627,8 +992,20 @@
         </div>
       </div>
 
-      <!-- STEP 4 -->
+      <!-- STEP 4 — Available Stylists (from-homepage flow only) -->
       <div class="bp-step-panel" id="bpStep3">
+        <div class="bp-step-title">Choose your stylist</div>
+        <div class="bp-step-sub" id="bpStylistPickerSub">Stylists available for your chosen style and date</div>
+        <div class="bp-stylist-picker" id="bpStylistPicker">
+          <!-- Populated by JS -->
+        </div>
+        <div class="bp-nav-btns">
+          <button class="bp-btn-back" onclick="bpPrev()">Back</button>
+        </div>
+      </div>
+
+      <!-- STEP 5 -->
+      <div class="bp-step-panel" id="bpStep4">
         <div class="bp-step-title">Your details</div>
         <div class="bp-step-sub">Just a few things to confirm your booking</div>
         <div class="bp-form-row">
@@ -645,7 +1022,7 @@
       </div>
 
       <!-- STEP 5 -->
-      <div class="bp-step-panel" id="bpStep4">
+      <div class="bp-step-panel" id="bpStep5">
         <div class="bp-step-title">Review &amp; pay deposit</div>
         <div class="bp-step-sub">Confirm your booking with a 25% deposit</div>
         <div class="bp-summary-card">
@@ -658,6 +1035,7 @@
           <div class="bp-summary-row"><span>Date &amp; time</span><span id="sum-date">Fri 11 Jul, 1:30 pm</span></div>
           <div class="bp-summary-divider"></div>
           <div class="bp-summary-row"><span>Total</span><span id="sum-total">£130</span></div>
+          <div class="bp-summary-row bp-fee-row"><span>Platform fee (2%)</span><span id="sum-fee">£2.60</span></div>
           <div class="bp-deposit-row"><span>Deposit due now (25%)</span><span id="sum-deposit">£32.50</span></div>
           <div class="bp-summary-row" style="margin-top:0.4rem;"><span>Balance in salon</span><span id="sum-balance">£97.50</span></div>
         </div>
@@ -669,7 +1047,7 @@
       </div>
 
       <!-- STEP 6 -->
-      <div class="bp-step-panel" id="bpStep5">
+      <div class="bp-step-panel" id="bpStep6">
         <div class="bp-confirm-inner">
           <div class="bp-confirm-check">&#10003;</div>
           <div class="bp-confirm-title">You're booked!</div>
@@ -712,6 +1090,125 @@
 
   </div><!-- /bp-body -->
 </div><!-- /bookingPage -->
+
+<!-- ══ OTHER STYLE OVERLAY ══ -->
+<div id="otherStylePage" class="os-overlay">
+  <button class="os-close" onclick="closeOtherStyle()" aria-label="Close">&times;</button>
+  <div class="os-inner">
+    <div class="os-header">
+      <div class="os-eyebrow">Custom request</div>
+      <h2 class="os-title">Request a style</h2>
+      <p class="os-sub">Don't see your look in our catalogue? Describe it below. Your stylist will review your request and accept or suggest an alternative before the appointment is confirmed.</p>
+    </div>
+    <div class="os-form">
+      <label class="os-label">Describe the look you want</label>
+      <textarea id="osDescription" class="os-textarea" placeholder="e.g. &quot;Ghana braids into a bun, medium thickness, waist length&quot;" rows="4"></textarea>
+      <label class="os-label">Upload an inspiration photo <span class="os-optional">(optional but recommended)</span></label>
+      <div class="os-upload-zone" id="osUploadZone" onclick="document.getElementById('osFileInput').click()">
+        <div class="os-upload-icon">📷</div>
+        <div class="os-upload-text">Tap to upload a photo</div>
+        <div class="os-upload-sub">JPG, PNG or WEBP · Max 10 MB</div>
+      </div>
+      <input type="file" id="osFileInput" accept="image/*" style="display:none" onchange="osFileSelected(this)">
+      <div class="os-preview-wrap" id="osPreviewWrap" style="display:none">
+        <img id="osPreviewImg" class="os-preview-img" alt="Inspiration photo">
+        <button class="os-remove-img" onclick="osRemoveImg()">Remove ✕</button>
+      </div>
+      <div class="os-notice">
+        <span class="os-notice-icon">ℹ</span>
+        <span>Your appointment will be <strong>tentative</strong> until the stylist accepts your request (usually within 48 hours). No payment is taken until confirmed.</span>
+      </div>
+      <button class="os-submit" onclick="osSubmit()">Send request &rarr;</button>
+    </div>
+    <div class="os-success" id="osSuccess" style="display:none">
+      <div class="os-success-icon">✓</div>
+      <h3>Request sent!</h3>
+      <p>Your stylist will review your request and respond within 48 hours. We'll notify you by email as soon as they accept.</p>
+      <button class="os-done" onclick="closeOtherStyle()">Back to site</button>
+    </div>
+  </div>
+</div>
+
+<!-- ══ HAIR QUIZ OVERLAY ══ -->
+<div id="hairQuizPage" class="hq-overlay">
+  <button class="hq-close" onclick="closeHairQuiz()" aria-label="Close">&times;</button>
+  <div class="hq-inner">
+    <div class="hq-progress-bar"><div class="hq-progress-fill" id="hqProgressFill"></div></div>
+    <div class="hq-slides" id="hqSlides">
+      <!-- Slide 0: Hair type -->
+      <div class="hq-slide active" data-slide="0">
+        <div class="hq-eyebrow">Question 1 of 5</div>
+        <h2 class="hq-question">What's your curl pattern?</h2>
+        <div class="hq-options hq-options--grid">
+          <button class="hq-opt" data-key="type" data-val="3a" onclick="hqSelect(this)">3a<span>Loose, springy curls</span></button>
+          <button class="hq-opt" data-key="type" data-val="3b" onclick="hqSelect(this)">3b<span>Tight, voluminous curls</span></button>
+          <button class="hq-opt" data-key="type" data-val="3c" onclick="hqSelect(this)">3c<span>Coily corkscrew curls</span></button>
+          <button class="hq-opt" data-key="type" data-val="4a" onclick="hqSelect(this)">4a<span>Soft, tightly coiled</span></button>
+          <button class="hq-opt" data-key="type" data-val="4b" onclick="hqSelect(this)">4b<span>Z-shaped, dense coils</span></button>
+          <button class="hq-opt" data-key="type" data-val="4c" onclick="hqSelect(this)">4c<span>Tight, kinky coils</span></button>
+          <button class="hq-opt" data-key="type" data-val="unsure" onclick="hqSelect(this)" style="grid-column:1/-1">Not sure</button>
+        </div>
+      </div>
+      <!-- Slide 1: Density -->
+      <div class="hq-slide" data-slide="1">
+        <div class="hq-eyebrow">Question 2 of 5</div>
+        <h2 class="hq-question">How would you describe your hair density?</h2>
+        <div class="hq-options">
+          <button class="hq-opt" data-key="density" data-val="fine" onclick="hqSelect(this)">Fine<span>Strands are thin and delicate</span></button>
+          <button class="hq-opt" data-key="density" data-val="medium" onclick="hqSelect(this)">Medium<span>Average strand thickness</span></button>
+          <button class="hq-opt" data-key="density" data-val="coarse" onclick="hqSelect(this)">Coarse<span>Thick, strong strands</span></button>
+        </div>
+      </div>
+      <!-- Slide 2: Scalp -->
+      <div class="hq-slide" data-slide="2">
+        <div class="hq-eyebrow">Question 3 of 5</div>
+        <h2 class="hq-question">How's your scalp usually?</h2>
+        <div class="hq-options">
+          <button class="hq-opt" data-key="scalp" data-val="balanced" onclick="hqSelect(this)">Balanced<span>No major concerns</span></button>
+          <button class="hq-opt" data-key="scalp" data-val="oily" onclick="hqSelect(this)">Oily<span>Gets greasy between washes</span></button>
+          <button class="hq-opt" data-key="scalp" data-val="dry" onclick="hqSelect(this)">Dry<span>Tight, itchy or flaky</span></button>
+          <button class="hq-opt" data-key="scalp" data-val="sensitive" onclick="hqSelect(this)">Sensitive<span>Reacts to products easily</span></button>
+        </div>
+      </div>
+      <!-- Slide 3: Goals (multi-select) -->
+      <div class="hq-slide" data-slide="3">
+        <div class="hq-eyebrow">Question 4 of 5</div>
+        <h2 class="hq-question">What are your main hair goals? <span style="font-size:0.75rem;font-weight:400;opacity:0.6">(pick all that apply)</span></h2>
+        <div class="hq-options hq-options--multi">
+          <button class="hq-opt" data-key="goals" data-val="moisture" onclick="hqToggle(this)">Moisture &amp; hydration</button>
+          <button class="hq-opt" data-key="goals" data-val="growth" onclick="hqToggle(this)">Growth &amp; length retention</button>
+          <button class="hq-opt" data-key="goals" data-val="scalp" onclick="hqToggle(this)">Scalp health</button>
+          <button class="hq-opt" data-key="goals" data-val="definition" onclick="hqToggle(this)">Curl definition</button>
+          <button class="hq-opt" data-key="goals" data-val="shine" onclick="hqToggle(this)">Shine &amp; vibrancy</button>
+          <button class="hq-opt" data-key="goals" data-val="damage" onclick="hqToggle(this)">Repair &amp; strengthen</button>
+        </div>
+        <button class="hq-next-btn" onclick="hqNext()">Next &rarr;</button>
+      </div>
+      <!-- Slide 4: Routine -->
+      <div class="hq-slide" data-slide="4">
+        <div class="hq-eyebrow">Question 5 of 5</div>
+        <h2 class="hq-question">How often do you wash your hair?</h2>
+        <div class="hq-options">
+          <button class="hq-opt" data-key="wash" data-val="weekly" onclick="hqSelect(this)">Weekly</button>
+          <button class="hq-opt" data-key="wash" data-val="biweekly" onclick="hqSelect(this)">Every 2 weeks</button>
+          <button class="hq-opt" data-key="wash" data-val="monthly" onclick="hqSelect(this)">Monthly</button>
+          <button class="hq-opt" data-key="wash" data-val="rarely" onclick="hqSelect(this)">Rarely / unsure</button>
+        </div>
+      </div>
+      <!-- Slide 5: Results -->
+      <div class="hq-slide" data-slide="5">
+        <div class="hq-eyebrow">Your results</div>
+        <h2 class="hq-question" id="hqResultTitle">Your personalised routine</h2>
+        <div class="hq-results" id="hqResults"></div>
+        <div class="hq-book-prompt">
+          <p>Want to see these results in action with a specialist?</p>
+          <button class="hq-book-cta" onclick="closeHairQuiz();openSearch('')">Book an appointment at Tiwara's House &rarr;</button>
+        </div>
+        <button class="hq-retake" onclick="hqReset()">Retake quiz</button>
+      </div>
+    </div>
+  </div>
+</div>
 
 <!-- ══ AI STYLE DISCOVERY OVERLAY ══ -->
 <div id="aiDiscovery" class="ai-overlay">

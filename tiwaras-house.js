@@ -287,7 +287,10 @@ function openBookingFromStylist(id) {
   var s = STYLISTS.find(function(x){ return x.id === id; });
   if (!s) return;
   activeProfileId = id;
+  bpFromProfile   = true;
   document.querySelectorAll('.sum-stylist-name').forEach(function(el){ el.textContent = s.name; });
+  bpSequence = BP_SEQ_PROFILE.slice();
+  bpSeqIdx   = 0;
   openBooking(s.catKey);
 }
 
@@ -391,16 +394,14 @@ var CATS = {
 };
 
 var COLOURS = {
-  '1b':      {name:'1B Natural Black', glow:'rgba(38,22,8,0.95)',    strand:'#2A1A0A'},
-  '4':       {name:'4 Dark Brown',     glow:'rgba(80,42,8,0.9)',     strand:'#5A3010'},
-  '30':      {name:'30 Auburn',        glow:'rgba(140,62,15,0.85)',  strand:'#9A5020'},
-  '27':      {name:'27 Honey Blonde',  glow:'rgba(180,115,30,0.75)', strand:'#C08030'},
-  '613':     {name:'613 Platinum',     glow:'rgba(200,175,60,0.65)', strand:'#C8A840'},
-  'ombre':   {name:'Ombre',            glow:'rgba(100,50,15,0.8)',   strand:'#7A4018'},
-  'burgundy':{name:'Burgundy',         glow:'rgba(110,16,16,0.9)',   strand:'#6A1010'},
+  '1b':    {name:'1B Natural Black',       glow:'rgba(38,22,8,0.95)',    strand:'#2A1A0A'},
+  '30':    {name:'30 Auburn',              glow:'rgba(140,62,15,0.85)',  strand:'#9A5020'},
+  '4/33':  {name:'4/33 Dark Brown Mix',    glow:'rgba(90,16,16,0.88)',   strand:'#5A1010'},
+  '613':   {name:'613 Platinum Blonde',    glow:'rgba(200,175,60,0.65)', strand:'#C8A840'},
+  'other': {name:'Other colour',           glow:'rgba(80,50,20,0.8)',    strand:'#7A4018'},
 };
 
-var LENGTHS = ['Short (10–12")', 'Medium (14–18")', 'Long (20–24")', 'XL (26–30")'];
+var LENGTHS = ['Bob (10–12")', 'Shoulder (14–18")', 'Bra Length (20–24")', 'Waist / Bum (26"+)'];
 
 var STRAND_CONFIGS = {
   knotless:   {count:8,  gap:65,  amp:14, w:5,  phase:8},
@@ -435,7 +436,13 @@ var bpSelectedStyle  = null;
 var bpSelectedColour = '1b';
 var bpSelectedLength = 1;
 var bpSelectedSize   = 'Medium';
-var TOTAL_STEPS = 6;
+var bpFromProfile   = false;  // true when opened from a stylist profile
+// Step sequences — homepage: style→daterange+loc→stylists→customise→details→summary→pay
+//                  profile:  style→customise→date→details→summary→pay
+var BP_SEQ_HOME    = [0, 7, 3, 1, 4, 5, 6];
+var BP_SEQ_PROFILE = [0, 1, 2, 4, 5, 6];
+var bpSequence     = BP_SEQ_HOME;
+var bpSeqIdx       = 0;
 
 function openBooking(cat) {
   bpCurrentCat     = cat || 'braids';
@@ -443,6 +450,20 @@ function openBooking(cat) {
   bpSelectedStyle  = null;
   bpSelectedColour = '1b';
   bpSelectedLength = 1;
+  bpFromProfile    = false;
+  bpSequence       = BP_SEQ_HOME.slice();
+  bpSeqIdx         = 0;
+  // Default date range: today → +30 days
+  var _today = new Date();
+  var _todayStr = _today.toISOString().split('T')[0];
+  var _future = new Date(_today); _future.setDate(_today.getDate() + 30);
+  var _futureStr = _future.toISOString().split('T')[0];
+  var _df = document.getElementById('bpDateFrom');
+  var _dt = document.getElementById('bpDateTo');
+  if (_df) { _df.min = _todayStr; _df.value = _todayStr; }
+  if (_dt) { _dt.min = _todayStr; _dt.value = _futureStr; }
+  var _li = document.getElementById('bpLocationInput');
+  if (_li) _li.value = '';
   document.getElementById('bpCatName').textContent = CATS[cat].name;
   buildStyleGrid();
   updateStepDots();
@@ -474,7 +495,14 @@ function buildStyleGrid() {
       + '<span class="bp-style-name">' + s.name + '</span>'
       + '<span class="bp-style-meta"><span class="bp-style-price">' + s.price + '</span> \xb7 ' + s.dur + '</span>'
       + '</div></div>';
-  }).join('');
+  }).join('')
+  + '<div class="bp-style-card bp-style-other" onclick="openOtherStyle()">'
+  + '<div class="bp-style-other-inner">'
+  + '<div class="bp-style-other-icon">+</div>'
+  + '<div class="bp-style-body">'
+  + '<span class="bp-style-name">Something else?</span>'
+  + '<span class="bp-style-meta">Request a custom style</span>'
+  + '</div></div></div>';
 }
 
 function selectStyle(id, el) {
@@ -556,8 +584,12 @@ function calcTotal() {
     addon += parseInt(txt.replace(/\D/g,''));
   });
   var total   = base + addon;
+  var fee     = Math.round(total * 0.02 * 100) / 100;
   var deposit = Math.round(total * 0.25 * 100) / 100;
   document.getElementById('sum-total').textContent   = '\xa3' + total;
+  if (document.getElementById('sum-fee')) {
+    document.getElementById('sum-fee').textContent = '\xa3' + fee.toFixed(2);
+  }
   document.getElementById('sum-deposit').textContent = '\xa3' + deposit.toFixed(2);
   document.getElementById('sum-balance').textContent = '\xa3' + (total - deposit).toFixed(2);
 }
@@ -575,7 +607,7 @@ function populateSummary() {
 }
 
 function showBpStep(n) {
-  for (var i = 0; i < TOTAL_STEPS; i++) {
+  for (var i = 0; i < 8; i++) {
     var p = document.getElementById('bpStep' + i);
     if (p) p.classList.toggle('active', i === n);
   }
@@ -592,17 +624,39 @@ function bpNext() {
       if (el) selectStyle(firstStyle.id, el);
     }
   }
-  if (bpCurrentStep === 4) { populateSummary(); }
-  showBpStep(Math.min(TOTAL_STEPS - 1, bpCurrentStep + 1));
+  if (bpSeqIdx >= bpSequence.length - 1) return;
+  bpSeqIdx++;
+  var nextStep = bpSequence[bpSeqIdx];
+  if (nextStep === 3) buildStylistPicker();
+  if (nextStep === 5) populateSummary();
+  showBpStep(nextStep);
 }
 
-function bpPrev() { showBpStep(Math.max(0, bpCurrentStep - 1)); }
+// Validate date range + location before advancing to stylist picker
+function bpNextDateLoc() {
+  var df  = document.getElementById('bpDateFrom');
+  var dt  = document.getElementById('bpDateTo');
+  var loc = document.getElementById('bpLocationInput');
+  if (!df || !df.value) {
+    df && df.classList.add('bp-input-error');
+    df && df.focus();
+    return;
+  }
+  df && df.classList.remove('bp-input-error');
+  bpNext();
+}
+
+function bpPrev() {
+  if (bpSeqIdx <= 0) return;
+  bpSeqIdx--;
+  showBpStep(bpSequence[bpSeqIdx]);
+}
 
 function updateStepDots() {
   var container = document.getElementById('bpStepDots');
   var html = '';
-  for (var i = 0; i < TOTAL_STEPS; i++) {
-    var cls = i < bpCurrentStep ? 'done' : (i === bpCurrentStep ? 'active' : '');
+  for (var i = 0; i < bpSequence.length; i++) {
+    var cls = i < bpSeqIdx ? 'done' : (i === bpSeqIdx ? 'active' : '');
     html += '<div class="bp-step-dot ' + cls + '"></div>';
   }
   container.innerHTML = html;
@@ -625,6 +679,11 @@ document.addEventListener('keydown', function(e){
     else if (document.getElementById('lengthGuideModal').classList.contains('open')) closeLengthGuide();
     else if (document.getElementById('bookingPage').classList.contains('open')) closeBooking();
     else if (document.getElementById('aiDiscovery').classList.contains('open')) closeAiDiscovery();
+    else if (document.getElementById('otherStylePage') && document.getElementById('otherStylePage').classList.contains('open')) closeOtherStyle();
+    else if (document.getElementById('hairQuizPage') && document.getElementById('hairQuizPage').classList.contains('open')) closeHairQuiz();
+    else if (document.getElementById('aboutPage') && document.getElementById('aboutPage').classList.contains('open')) closeAboutPage();
+    else if (document.getElementById('stylistsPage') && document.getElementById('stylistsPage').classList.contains('open')) closeStylistsPage();
+    else if (document.getElementById('shopPage') && document.getElementById('shopPage').classList.contains('open')) closeShopPage();
     else if (document.getElementById('profilePage').classList.contains('open')) closeProfile();
     else if (document.getElementById('searchPage').classList.contains('open')) closeSearch();
   }
@@ -858,4 +917,256 @@ function closeLengthGuide(e) {
   if (!e || e.target === document.getElementById('lengthGuideModal')) {
     document.getElementById('lengthGuideModal').classList.remove('open');
   }
+}
+
+// ─── OTHER STYLE OVERLAY ────────────────────────────────────────────────────
+function openOtherStyle() {
+  document.getElementById('otherStylePage').classList.add('open');
+  document.body.style.overflow = 'hidden';
+}
+function closeOtherStyle() {
+  document.getElementById('otherStylePage').classList.remove('open');
+  document.body.style.overflow = '';
+  // reset form
+  document.getElementById('osDescription').value = '';
+  document.getElementById('osPreviewWrap').style.display = 'none';
+  document.getElementById('osUploadZone').style.display = '';
+  document.getElementById('osSuccess').style.display = 'none';
+  document.querySelector('.os-form').style.display = '';
+}
+function osFileSelected(input) {
+  if (!input.files || !input.files[0]) return;
+  var url = URL.createObjectURL(input.files[0]);
+  document.getElementById('osPreviewImg').src = url;
+  document.getElementById('osPreviewWrap').style.display = 'block';
+  document.getElementById('osUploadZone').style.display = 'none';
+}
+function osRemoveImg() {
+  document.getElementById('osPreviewWrap').style.display = 'none';
+  document.getElementById('osUploadZone').style.display = '';
+  document.getElementById('osFileInput').value = '';
+}
+function osSubmit() {
+  var desc = document.getElementById('osDescription').value.trim();
+  if (!desc) {
+    document.getElementById('osDescription').focus();
+    document.getElementById('osDescription').style.borderColor = 'var(--orange)';
+    return;
+  }
+  document.getElementById('osDescription').style.borderColor = '';
+  document.querySelector('.os-form').style.display = 'none';
+  document.getElementById('osSuccess').style.display = 'block';
+}
+
+// ─── HAIR QUIZ OVERLAY ──────────────────────────────────────────────────────
+var hqAnswers = {};
+var hqCurrentSlide = 0;
+var HQ_TOTAL = 5;
+
+var HQ_RECS = {
+  moistureKit: { title: 'Deep Moisture Routine', body: 'Use a sulphate-free shampoo weekly, follow with a rich deep conditioning mask (leave on for 20–30 min under a heat cap). Seal with a lightweight oil (jojoba or argan) on damp hair.' },
+  growthKit:   { title: 'Growth & Retention Protocol', body: 'Monthly protein treatment to strengthen strands, followed by moisture to balance. Protective styling between appointments reduces breakage. Scalp massage with castor oil twice weekly stimulates growth.' },
+  scalpKit:    { title: 'Scalp Health Reset', body: 'Switch to a scalp-balancing shampoo with tea tree or peppermint. Apply a lightweight scalp serum between washes. Avoid heavy butters directly on the scalp.' },
+  defKit:      { title: 'Curl Definition & Shine', body: 'Apply a leave-in conditioner on soaking-wet hair, layer a curl cream on top, then seal with a small amount of oil. Diffuse or air-dry — no raking when dry to preserve clumps.' },
+  fineKit:     { title: 'Fine Hair Care', body: 'Avoid heavy butters that weigh hair down. Use lightweight water-based leave-ins and liquid oils. Protein treatments every 4–6 weeks add structure and body.' },
+  coarseKit:   { title: 'Coarse Hair Nourishment', body: 'Thicker hair needs richer products — shea or mango butter work well as sealants. Layer: water → leave-in → cream → oil (L.O.C. or L.C.O. method). Deep condition every wash day.' },
+};
+
+function openHairQuiz() {
+  hqAnswers = {};
+  hqCurrentSlide = 0;
+  var slides = document.querySelectorAll('.hq-slide');
+  slides.forEach(function(s){ s.classList.remove('active'); s.querySelectorAll('.hq-opt').forEach(function(o){ o.classList.remove('selected'); }); });
+  if (slides[0]) slides[0].classList.add('active');
+  hqUpdateProgress();
+  document.getElementById('hairQuizPage').classList.add('open');
+  document.body.style.overflow = 'hidden';
+}
+function closeHairQuiz() {
+  document.getElementById('hairQuizPage').classList.remove('open');
+  document.body.style.overflow = '';
+}
+function hqUpdateProgress() {
+  var pct = Math.round((hqCurrentSlide / HQ_TOTAL) * 100);
+  document.getElementById('hqProgressFill').style.width = pct + '%';
+}
+function hqSelect(btn) {
+  var key = btn.getAttribute('data-key');
+  var val = btn.getAttribute('data-val');
+  hqAnswers[key] = val;
+  // deselect siblings
+  btn.closest('.hq-options').querySelectorAll('.hq-opt').forEach(function(o){ o.classList.remove('selected'); });
+  btn.classList.add('selected');
+  // auto-advance after brief pause (except multi-select slides)
+  if (!btn.closest('.hq-options--multi')) {
+    setTimeout(hqNext, 280);
+  }
+}
+function hqToggle(btn) {
+  btn.classList.toggle('selected');
+  var key = btn.getAttribute('data-key');
+  var selected = Array.from(btn.closest('.hq-options').querySelectorAll('.hq-opt.selected')).map(function(b){ return b.getAttribute('data-val'); });
+  hqAnswers[key] = selected;
+}
+function hqNext() {
+  var slides = document.querySelectorAll('.hq-slide');
+  if (hqCurrentSlide >= slides.length - 1) { hqShowResults(); return; }
+  slides[hqCurrentSlide].classList.remove('active');
+  hqCurrentSlide++;
+  slides[hqCurrentSlide].classList.add('active');
+  hqUpdateProgress();
+  if (hqCurrentSlide === HQ_TOTAL) hqShowResults();
+}
+function hqShowResults() {
+  hqCurrentSlide = HQ_TOTAL;
+  hqUpdateProgress();
+  var slides = document.querySelectorAll('.hq-slide');
+  slides.forEach(function(s){ s.classList.remove('active'); });
+  slides[HQ_TOTAL].classList.add('active');
+
+  var recs = [];
+  var goals = hqAnswers.goals || [];
+  if (goals.indexOf('moisture') !== -1 || hqAnswers.density === 'coarse') recs.push(HQ_RECS.moistureKit);
+  if (goals.indexOf('growth') !== -1 || goals.indexOf('damage') !== -1) recs.push(HQ_RECS.growthKit);
+  if (goals.indexOf('scalp') !== -1 || hqAnswers.scalp === 'oily' || hqAnswers.scalp === 'dry') recs.push(HQ_RECS.scalpKit);
+  if (goals.indexOf('definition') !== -1 || goals.indexOf('shine') !== -1) recs.push(HQ_RECS.defKit);
+  if (hqAnswers.density === 'fine') recs.push(HQ_RECS.fineKit);
+  if (hqAnswers.density === 'coarse' && recs.indexOf(HQ_RECS.coarseKit) === -1) recs.push(HQ_RECS.coarseKit);
+  if (recs.length === 0) recs.push(HQ_RECS.moistureKit, HQ_RECS.defKit);
+
+  var html = recs.map(function(r){
+    return '<div class="hq-result-item"><h4>' + r.title + '</h4><p>' + r.body + '</p></div>';
+  }).join('');
+  document.getElementById('hqResults').innerHTML = html;
+
+  var typeLabel = hqAnswers.type ? 'Type ' + hqAnswers.type.toUpperCase() : '';
+  document.getElementById('hqResultTitle').textContent = 'Your ' + (typeLabel ? typeLabel + ' ' : '') + 'personalised routine';
+}
+function hqReset() {
+  openHairQuiz();
+}
+
+// ─── ABOUT PAGE ──────────────────────────────────────────────────────────────
+function openAboutPage() {
+  document.getElementById('aboutPage').classList.add('open');
+  document.body.style.overflow = 'hidden';
+}
+function closeAboutPage() {
+  document.getElementById('aboutPage').classList.remove('open');
+  document.body.style.overflow = '';
+}
+
+// ─── FOR STYLISTS PAGE ───────────────────────────────────────────────────────
+function openStylistsPage() {
+  document.getElementById('stylistsPage').classList.add('open');
+  document.body.style.overflow = 'hidden';
+}
+function closeStylistsPage() {
+  document.getElementById('stylistsPage').classList.remove('open');
+  document.body.style.overflow = '';
+}
+function submitStylistForm() {
+  var name     = document.getElementById('sf-name').value.trim();
+  var business = document.getElementById('sf-business').value.trim();
+  var location = document.getElementById('sf-location').value.trim();
+  var email    = document.getElementById('sf-email').value.trim();
+  if (!name || !business || !location || !email) {
+    ['sf-name','sf-business','sf-location','sf-email'].forEach(function(id) {
+      var el = document.getElementById(id);
+      if (!el.value.trim()) el.style.borderColor = 'var(--orange)';
+    });
+    return;
+  }
+  document.getElementById('stylistForm').style.display = 'none';
+  document.getElementById('stylistSuccess').style.display = 'block';
+  document.getElementById('stylistsPage').scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+// ─── SHOP PAGE ────────────────────────────────────────────────────────────────
+function openShopPage() {
+  document.getElementById('shopPage').classList.add('open');
+  document.body.style.overflow = 'hidden';
+}
+function closeShopPage() {
+  document.getElementById('shopPage').classList.remove('open');
+  document.body.style.overflow = '';
+}
+function filterShop(cat, btn) {
+  document.querySelectorAll('.pg-filter-btn').forEach(function(b) { b.classList.remove('active'); });
+  btn.classList.add('active');
+  document.querySelectorAll('.pg-shop-card').forEach(function(card) {
+    if (cat === 'all' || card.getAttribute('data-cat') === cat) {
+      card.style.display = '';
+    } else {
+      card.style.display = 'none';
+    }
+  });
+}
+
+// ─── STYLIST PICKER STEP ─────────────────────────────────────────────────────
+function bpFormatDate(str) {
+  if (!str) return '';
+  var d = new Date(str + 'T00:00:00');
+  return d.toLocaleDateString('en-GB', { day: 'numeric', month: 'short' });
+}
+
+function buildStylistPicker() {
+  var cat      = bpCurrentCat;
+  var dateFrom = document.getElementById('bpDateFrom') ? document.getElementById('bpDateFrom').value : '';
+  var dateTo   = document.getElementById('bpDateTo')   ? document.getElementById('bpDateTo').value   : '';
+  var locRaw   = document.getElementById('bpLocationInput') ? document.getElementById('bpLocationInput').value.trim() : '';
+  var loc      = locRaw.toLowerCase();
+
+  // Filter by category and location
+  var available = STYLISTS.filter(function(s) {
+    var matchesCat = s.tags && s.tags.indexOf(cat) !== -1;
+    var matchesLoc = !loc ||
+      (s.city && s.city.toLowerCase().indexOf(loc) !== -1) ||
+      (s.areas && s.areas.some(function(a){ return a.toLowerCase().indexOf(loc) !== -1; }));
+    return matchesCat && matchesLoc;
+  });
+
+  var sub = document.getElementById('bpStylistPickerSub');
+  if (sub) {
+    var locLabel  = locRaw ? ' near ' + locRaw : ' across the UK';
+    var dateLabel = dateFrom
+      ? ' · ' + bpFormatDate(dateFrom) + (dateTo ? ' – ' + bpFormatDate(dateTo) : '')
+      : '';
+    sub.textContent = available.length + ' stylist' + (available.length !== 1 ? 's' : '') +
+      ' for ' + (CATS[cat] ? CATS[cat].name : cat) + locLabel + dateLabel;
+  }
+
+  var container = document.getElementById('bpStylistPicker');
+  if (!container) return;
+
+  if (available.length === 0) {
+    container.innerHTML = '<div class="bp-no-stylists">No stylists found for this style. <a href="#" onclick="closeBooking();openSearch(\'\');return false;">Browse all stylists</a></div>';
+    return;
+  }
+
+  container.innerHTML = available.map(function(s) {
+    var stars = '';
+    for (var i = 0; i < 5; i++) stars += i < Math.round(s.rating) ? '★' : '☆';
+    return '<div class="bp-stylist-pick-card" onclick="selectStylistForBooking(\'' + s.id + '\',this)">'
+      + '<div class="bp-spc-avatar" style="background:' + s.bg + '"></div>'
+      + '<div class="bp-spc-body">'
+      + '<div class="bp-spc-name">' + s.name + '</div>'
+      + '<div class="bp-spc-meta">' + s.city + ' · from £' + s.startingPrice + '</div>'
+      + '<div class="bp-spc-rating"><span class="bp-spc-stars">' + stars + '</span> <span class="bp-spc-rc">(' + s.reviewCount + ')</span></div>'
+      + '</div>'
+      + '<div class="bp-spc-avail">Next: ' + s.nextAvail + '</div>'
+      + '</div>';
+  }).join('');
+}
+
+function selectStylistForBooking(id, el) {
+  var s = STYLISTS.find(function(x){ return x.id === id; });
+  if (!s) return;
+  activeProfileId = id;
+  document.querySelectorAll('.sum-stylist-name').forEach(function(n){ n.textContent = s.name; });
+  // highlight selected card
+  document.querySelectorAll('.bp-stylist-pick-card').forEach(function(c){ c.classList.remove('selected'); });
+  el.classList.add('selected');
+  // auto-advance after brief pause
+  setTimeout(bpNext, 300);
 }
