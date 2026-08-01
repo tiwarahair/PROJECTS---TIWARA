@@ -1,4 +1,6 @@
 import { useState } from "react";
+import { useAppDispatch } from "../../stores/hooks";
+import { pageClosed, searchOpened } from "../../stores/overlays-slice";
 import { cx } from "../../utils/class-names";
 import {
   SHOP_FILTERS,
@@ -7,9 +9,10 @@ import {
   type ShopFilter,
 } from "../../data/shop-products";
 import { PageOverlay } from "./page-overlay";
-import { PageHero, PageSection } from "./page-blocks";
+import { PageCtaStrip, PageHero, PageSection } from "./page-blocks";
 
 export function ShopPage() {
+  const dispatch = useAppDispatch();
   const [filter, setFilter] = useState<ShopFilter>("all");
   const products = filterProducts(SHOP_PRODUCTS, filter);
 
@@ -105,6 +108,17 @@ export function ShopPage() {
             )}
           </div>
         </PageSection>
+
+        <PageCtaStrip
+          tone="cream"
+          heading="Buying hair for your appointment?"
+          body="Order now and collect at the salon, or have it delivered before your date."
+          ctaLabel="Book an appointment →"
+          onCta={() => {
+            dispatch(pageClosed("shop"));
+            dispatch(searchOpened(""));
+          }}
+        />
       </div>
     </PageOverlay>
   );

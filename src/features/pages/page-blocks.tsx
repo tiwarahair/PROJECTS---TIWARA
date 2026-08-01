@@ -95,6 +95,8 @@ export function PageStats({ stats }: { stats: readonly PageStat[] }) {
 }
 
 export interface PageCtaStripProps {
+  /** The shop page's strip sits on the cream band. */
+  tone?: "cream" | "dark";
   heading: string;
   body: string;
   ctaLabel: string;
@@ -102,13 +104,14 @@ export interface PageCtaStripProps {
 }
 
 export function PageCtaStrip({
+  tone,
   heading,
   body,
   ctaLabel,
   onCta,
 }: PageCtaStripProps) {
   return (
-    <PageSection className="pg-cta-strip">
+    <PageSection tone={tone} className="pg-cta-strip">
       <h2 className="pg-h2">{heading}</h2>
       <p>{body}</p>
       <button className="pg-cta-btn" onClick={onCta}>
