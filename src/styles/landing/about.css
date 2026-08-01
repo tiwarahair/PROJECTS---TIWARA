@@ -1,0 +1,97 @@
+/* ── ABOUT ── */
+.about {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  min-height: 80vh;
+}
+.about-visual {
+  background: radial-gradient(ellipse at 45% 35%, #2d1400, #0d0600, #040200);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  overflow: hidden;
+}
+.about-crown {
+  font-family: var(--serif);
+  font-size: 8rem;
+  font-weight: 300;
+  color: rgba(223, 207, 62, 0.08);
+  letter-spacing: -5px;
+  position: absolute;
+  user-select: none;
+}
+.about-quote {
+  position: relative;
+  z-index: 1;
+  text-align: center;
+  padding: 3rem;
+  max-width: 380px;
+}
+.about-quote blockquote {
+  font-family: var(--serif);
+  font-size: 1.5rem;
+  font-weight: 300;
+  font-style: italic;
+  color: var(--cream);
+  line-height: 1.5;
+  margin-bottom: 1.5rem;
+}
+.about-quote cite {
+  font-size: 0.75rem;
+  font-weight: 500;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  color: var(--gold);
+}
+.about-content {
+  padding: 5rem;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+.about-content .section-label {
+  color: var(--orange);
+  margin-bottom: 0.75rem;
+}
+.about-content h2 {
+  font-family: var(--serif);
+  font-weight: 300;
+  font-size: clamp(2rem, 3.5vw, 2.8rem);
+  color: var(--green);
+  line-height: 1.25;
+  margin-bottom: 1.5rem;
+}
+.about-content h2 em {
+  font-style: italic;
+  color: var(--orange);
+}
+.about-content p {
+  font-size: 0.9rem;
+  color: var(--green-mid);
+  line-height: 1.9;
+  font-weight: 300;
+  margin-bottom: 0.9rem;
+}
+.values-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.75rem;
+  margin-top: 2rem;
+}
+.value-card {
+  padding: 1rem;
+  border-radius: 8px;
+  border: 1px solid rgba(36, 24, 17, 0.1);
+}
+.value-card strong {
+  display: block;
+  font-size: 0.8rem;
+  font-weight: 500;
+  color: var(--green);
+  margin-bottom: 0.3rem;
+}
+.value-card span {
+  font-size: 0.78rem;
+  color: var(--green-mid);
+}

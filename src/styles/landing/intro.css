@@ -1,0 +1,43 @@
+/* ── INTRO ── */
+.intro {
+  padding: 6rem 4rem;
+  text-align: center;
+  background: var(--cream);
+}
+.intro-label {
+  font-size: 0.72rem;
+  font-weight: 500;
+  letter-spacing: 1.8px;
+  text-transform: uppercase;
+  color: var(--gold);
+  margin-bottom: 1.5rem;
+  display: block;
+}
+.intro h2 {
+  font-family: var(--serif);
+  font-weight: 300;
+  font-size: clamp(1.8rem, 4vw, 3rem);
+  color: var(--green);
+  line-height: 1.35;
+  max-width: 680px;
+  margin: 0 auto 1.25rem;
+}
+.intro h2 em {
+  font-style: italic;
+  color: var(--orange);
+}
+.intro p {
+  font-size: 0.95rem;
+  color: var(--green-mid);
+  line-height: 1.9;
+  max-width: 520px;
+  margin: 0 auto;
+  font-weight: 300;
+}
+.intro-divider {
+  width: 40px;
+  height: 1px;
+  background: var(--gold);
+  margin: 2rem auto 0;
+  opacity: 0.6;
+}

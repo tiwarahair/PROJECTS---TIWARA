@@ -1,0 +1,236 @@
+/* ════════════════════════════════════════════════
+   AI STYLE DISCOVERY OVERLAY  (z-index 700)
+════════════════════════════════════════════════ */
+.ai-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 700;
+  background: var(--cream);
+  display: flex;
+  flex-direction: column;
+  transform: translateX(100%);
+  transition: transform 0.45s cubic-bezier(0.4, 0, 0.2, 1);
+}
+.ai-overlay.open {
+  transform: translateX(0);
+}
+.ai-header {
+  height: 58px;
+  background: var(--dark);
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 2rem;
+}
+.ai-back {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  font-size: 0.8rem;
+  font-weight: 500;
+  color: rgba(246, 240, 228, 0.7);
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-family: var(--label);
+  transition: color 0.2s;
+}
+.ai-back:hover {
+  color: var(--gold);
+}
+.ai-back::before {
+  content: "←";
+  margin-right: 0.2rem;
+}
+.ai-title {
+  font-family: var(--serif);
+  font-size: 1rem;
+  font-weight: 400;
+  color: var(--cream);
+}
+.ai-body {
+  flex: 1;
+  overflow-y: auto;
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  padding: 2.5rem 2rem;
+}
+.ai-content {
+  max-width: 580px;
+  width: 100%;
+}
+.ai-step {
+  display: none;
+}
+.ai-step.active {
+  display: block;
+}
+.ai-upload-zone {
+  border: 2px dashed rgba(36, 24, 17, 0.18);
+  border-radius: 16px;
+  padding: 3rem 2rem;
+  text-align: center;
+  cursor: pointer;
+  transition: all 0.2s;
+  margin-bottom: 1.5rem;
+  position: relative;
+  background: transparent;
+}
+.ai-upload-zone:hover,
+.ai-upload-zone.drag {
+  border-color: var(--orange);
+  background: var(--orange-glow);
+}
+.ai-upload-zone input[type="file"] {
+  position: absolute;
+  inset: 0;
+  opacity: 0;
+  cursor: pointer;
+  width: 100%;
+  height: 100%;
+}
+.ai-upload-icon {
+  font-size: 2.4rem;
+  margin-bottom: 0.75rem;
+  color: var(--orange);
+}
+.ai-upload-title {
+  font-family: var(--serif);
+  font-size: 1.4rem;
+  font-weight: 300;
+  color: var(--green);
+  margin-bottom: 0.4rem;
+}
+.ai-upload-sub {
+  font-size: 0.85rem;
+  color: var(--green-mid);
+  line-height: 1.6;
+  margin: 0;
+}
+/* `display: none` removed from the next two rules: both were revealed by
+   setting an inline style and are now rendered conditionally instead. With
+   .join-success these are the only three semantic CSS edits in the port. */
+.ai-img-preview {
+  width: 100%;
+  max-height: 260px;
+  object-fit: cover;
+  border-radius: 12px;
+  margin-bottom: 1.5rem;
+}
+.ai-analysing {
+  text-align: center;
+  padding: 2rem 0;
+}
+.ai-spin {
+  width: 48px;
+  height: 48px;
+  border: 3px solid rgba(36, 24, 17, 0.1);
+  border-top-color: var(--orange);
+  border-radius: 50%;
+  animation: ai-spin 0.8s linear infinite;
+  margin: 0 auto 1rem;
+}
+@keyframes ai-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+.ai-analyse-text {
+  font-family: var(--serif);
+  font-size: 1.1rem;
+  font-weight: 300;
+  color: var(--green);
+}
+.ai-result-heading {
+  font-family: var(--serif);
+  font-size: 1.6rem;
+  font-weight: 300;
+  color: var(--green);
+  margin-bottom: 0.25rem;
+}
+.ai-result-sub {
+  font-size: 0.85rem;
+  color: var(--green-mid);
+  margin-bottom: 1.5rem;
+}
+.ai-result-card {
+  background: rgba(36, 24, 17, 0.04);
+  border: 1px solid rgba(36, 24, 17, 0.1);
+  border-radius: 12px;
+  padding: 1.25rem;
+  margin-bottom: 1.25rem;
+}
+.ai-result-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.5rem 0;
+  border-bottom: 1px solid rgba(36, 24, 17, 0.06);
+}
+.ai-result-row:last-child {
+  border-bottom: none;
+}
+.ai-result-key {
+  font-family: var(--label);
+  font-size: 0.65rem;
+  font-weight: 600;
+  letter-spacing: 0.8px;
+  text-transform: uppercase;
+  color: var(--green-mid);
+}
+.ai-result-val {
+  font-size: 0.88rem;
+  font-weight: 500;
+  color: var(--green);
+}
+.ai-match-label {
+  font-family: var(--label);
+  font-size: 0.65rem;
+  font-weight: 600;
+  letter-spacing: 0.8px;
+  text-transform: uppercase;
+  color: var(--orange);
+  margin-bottom: 0.75rem;
+  display: block;
+}
+.ai-match-styles {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  margin-bottom: 1.5rem;
+}
+.ai-match-card {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.85rem 1rem;
+  border: 1px solid rgba(36, 24, 17, 0.1);
+  border-radius: 10px;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+.ai-match-card:hover {
+  border-color: var(--orange);
+  background: var(--orange-glow);
+}
+.ai-match-name {
+  font-size: 0.9rem;
+  font-weight: 500;
+  color: var(--green);
+}
+.ai-match-price {
+  font-size: 0.8rem;
+  color: var(--orange);
+  font-weight: 500;
+}
+.ai-match-conf {
+  font-size: 0.7rem;
+  color: var(--green-mid);
+  margin-top: 0.15rem;
+}
+.ai-match-arrow {
+  font-size: 0.75rem;
+  color: var(--orange);
+}

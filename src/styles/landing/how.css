@@ -1,0 +1,77 @@
+/* ── HOW IT WORKS ── */
+.how {
+  padding: 7rem 4rem;
+  background: var(--cream);
+}
+.how-inner {
+  max-width: 900px;
+  margin: 0 auto;
+}
+.how-steps {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 0;
+  margin-top: 3.5rem;
+  position: relative;
+}
+.how-steps::before {
+  content: "";
+  position: absolute;
+  top: 28px;
+  left: calc(16.66% + 1rem);
+  right: calc(16.66% + 1rem);
+  height: 1px;
+  background: linear-gradient(
+    to right,
+    var(--orange),
+    var(--gold),
+    var(--green-mid)
+  );
+  opacity: 0.25;
+}
+.how-step {
+  text-align: center;
+  padding: 0 2rem;
+}
+.how-step-num {
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: var(--serif);
+  font-size: 1.4rem;
+  font-weight: 300;
+  margin: 0 auto 1.5rem;
+  position: relative;
+  z-index: 1;
+}
+.how-step:nth-child(1) .how-step-num {
+  background: var(--orange-glow);
+  border: 1px solid rgba(143, 17, 18, 0.3);
+  color: var(--orange);
+}
+.how-step:nth-child(2) .how-step-num {
+  background: var(--gold-pale);
+  border: 1px solid rgba(223, 207, 62, 0.3);
+  color: var(--gold);
+}
+.how-step:nth-child(3) .how-step-num {
+  background: rgba(36, 24, 17, 0.08);
+  border: 1px solid rgba(36, 24, 17, 0.2);
+  color: var(--green);
+}
+.how-step h3 {
+  font-family: var(--serif);
+  font-size: 1.2rem;
+  font-weight: 400;
+  color: var(--green);
+  margin-bottom: 0.6rem;
+}
+.how-step p {
+  font-size: 0.85rem;
+  color: var(--green-mid);
+  line-height: 1.75;
+  font-weight: 300;
+}

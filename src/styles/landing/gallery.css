@@ -1,0 +1,115 @@
+/* ── FEATURED STYLES ── */
+.featured {
+  padding: 5rem 4rem;
+  background: var(--dark2);
+}
+.featured .section-head {
+  margin-bottom: 2.5rem;
+}
+.featured .section-label {
+  color: var(--gold);
+}
+.featured .section-head h2 {
+  color: var(--cream);
+}
+.gallery-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  grid-template-rows: auto auto;
+  gap: 1rem;
+  max-width: 1100px;
+  margin: 0 auto;
+}
+.gallery-item {
+  border-radius: 8px;
+  overflow: hidden;
+  position: relative;
+  cursor: pointer;
+  transition: transform 0.3s;
+}
+.gallery-item:hover {
+  transform: scale(1.015);
+}
+.gallery-item:nth-child(1) {
+  grid-column: span 2;
+  height: 340px;
+}
+.gallery-item:nth-child(2) {
+  height: 340px;
+}
+.gallery-item:nth-child(3) {
+  height: 240px;
+}
+.gallery-item:nth-child(4) {
+  height: 240px;
+}
+.gallery-item:nth-child(5) {
+  grid-column: span 1;
+  height: 240px;
+}
+.gi-bg-1 {
+  background: radial-gradient(
+    ellipse at 40% 30%,
+    #5c2a00 0%,
+    #220f00 60%,
+    #080402 100%
+  );
+}
+.gi-bg-2 {
+  background: radial-gradient(ellipse at 60% 25%, #0a2e1a, #041509, #010602);
+}
+.gi-bg-3 {
+  background: radial-gradient(
+    ellipse at 50% 30%,
+    #3d1a00 0%,
+    #160800 60%,
+    #050201 100%
+  );
+}
+.gi-bg-4 {
+  background: radial-gradient(
+    ellipse at 50% 40%,
+    #1a3830 0%,
+    #091a14 60%,
+    #020806 100%
+  );
+}
+.gi-bg-5 {
+  background: radial-gradient(
+    ellipse at 45% 25%,
+    #4a2e00 0%,
+    #1a1000 60%,
+    #060401 100%
+  );
+}
+.gallery-item::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(to top, rgba(0, 0, 0, 0.7) 0%, transparent 50%);
+}
+.gi-label {
+  position: absolute;
+  bottom: 1rem;
+  left: 1.25rem;
+  z-index: 1;
+  font-family: var(--serif);
+  font-size: 1rem;
+  font-weight: 400;
+  color: var(--cream);
+}
+.gi-cta {
+  position: absolute;
+  bottom: 1rem;
+  right: 1.25rem;
+  z-index: 1;
+  font-size: 0.72rem;
+  font-weight: 500;
+  color: var(--gold);
+  text-decoration: none;
+  opacity: 0;
+  transition: opacity 0.3s;
+}
+.gallery-item:hover .gi-cta {
+  opacity: 1;
+}

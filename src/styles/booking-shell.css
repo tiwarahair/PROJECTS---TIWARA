@@ -1,0 +1,89 @@
+/* ════════════════════════════════════════════════
+   BOOKING PAGE OVERLAY (unchanged)
+════════════════════════════════════════════════ */
+.bp-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 900;
+  display: flex;
+  flex-direction: column;
+  background: var(--cream);
+  transform: translateX(100%);
+  transition: transform 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+}
+.bp-overlay.open {
+  transform: translateX(0);
+}
+.bp-header {
+  height: 58px;
+  background: var(--green);
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 2rem;
+}
+.bp-back {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.8rem;
+  font-weight: 500;
+  color: rgba(246, 240, 228, 0.7);
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-family: var(--sans);
+  transition: color 0.2s;
+  padding: 0;
+}
+.bp-back:hover {
+  color: var(--gold);
+}
+.bp-back::before {
+  content: "←";
+  margin-right: 0.25rem;
+}
+.bp-cat-name {
+  font-family: var(--serif);
+  font-size: 1rem;
+  font-weight: 400;
+  color: var(--cream);
+}
+.bp-step-counter {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.72rem;
+  color: rgba(246, 240, 228, 0.5);
+  letter-spacing: 0.5px;
+}
+.bp-step-dots {
+  display: flex;
+  gap: 5px;
+}
+.bp-step-dot {
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: rgba(246, 240, 228, 0.2);
+  transition: background 0.3s;
+}
+.bp-step-dot.done {
+  background: rgba(223, 207, 62, 0.6);
+}
+.bp-step-dot.active {
+  background: var(--gold);
+}
+.bp-body {
+  flex: 1;
+  display: flex;
+  overflow: hidden;
+}
+.bp-options {
+  width: 42%;
+  flex-shrink: 0;
+  overflow-y: auto;
+  padding: 2rem 2.5rem;
+  border-right: 1px solid rgba(36, 24, 17, 0.08);
+}

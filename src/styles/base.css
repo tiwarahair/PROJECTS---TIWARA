@@ -1,0 +1,37 @@
+*,
+*::before,
+*::after {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+:root {
+  --cream: #f6f0e4;
+  --cream-dk: #ede3ce;
+  --orange: #8f1112;
+  --orange-mid: #6c0c0d;
+  --orange-glow: rgba(143, 17, 18, 0.12);
+  --green: #241811;
+  --green-mid: #3a2b20;
+  --green-light: #1c3829;
+  --gold: #dfcf3e;
+  --gold-light: #ead84a;
+  --gold-pale: rgba(223, 207, 62, 0.12);
+  --dark: #241811;
+  --dark2: #3a2b20;
+  --serif: "Fraunces", Georgia, serif;
+  --sans: "Inter", sans-serif;
+  --label: "Space Grotesk", sans-serif;
+}
+/* ^ TO DO: have a peep at this theme */
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  font-family: var(--sans);
+  color: var(--green);
+  background: var(--cream);
+  overflow-x: hidden;
+}
