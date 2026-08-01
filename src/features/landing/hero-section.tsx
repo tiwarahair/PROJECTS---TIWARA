@@ -2,68 +2,55 @@ import { useState } from "react";
 import { cx } from "../../utils/class-names";
 import { useFadeIn } from "../../hooks/use-fade-in";
 import { useOverlayActions } from "../../hooks/use-overlay-actions";
-import { HERO_STATS } from "../../data/landing-content";
-import {
-  ANY_STYLE_LABEL,
-  CHIP_ORDER,
-  STYLE_TAXONOMY,
-  taxonomyEntry,
-} from "../../data/style-taxonomy";
+import { useAppDispatch } from "../../stores/hooks";
+import { pageOpened } from "../../stores/overlays-slice";
+import { HERO_CHIPS, HERO_STATS } from "../../data/landing-content";
+import { STYLE_TAXONOMY } from "../../data/style-taxonomy";
 import type { ServiceCategoryKey } from "../../types/domain";
+
+/** Editorial background photo; absent until the real asset is supplied. TODO: add hero image */
+const HERO_PHOTO = "/assets/hero.jpg";
 
 export function HeroSection() {
   const [contentRef, contentVisible] = useFadeIn<HTMLDivElement>();
   const [location, setLocation] = useState("");
   const [style, setStyle] = useState<ServiceCategoryKey | "">("");
   const { openSearch } = useOverlayActions();
+  const dispatch = useAppDispatch();
 
   return (
     <section className="hero">
       <div
+        className="hero-photo-bg"
+        style={{ backgroundImage: `url('${HERO_PHOTO}')` }}
+      />
+      <div className="hero-overlay" />
+
+      <div
         ref={contentRef}
         className={cx("hero-content", "fade-in", contentVisible && "visible")}
       >
-        <div className="hero-eyebrow">
-          The UK&apos;s Premier Textured Hair Platform
-        </div>
+        <div className="hero-eyebrow">The UK&apos;s Home of Textured Hair</div>
         <h1>
-          Your stylist is
+          Your stylist is closer
           <br />
-          closer than
-          <br />
-          you <em>think.</em>
+          than you <em>think.</em>
         </h1>
-        <p className="hero-sub">
-          Find and book skilled textured hair specialists near you — transparent
-          pricing, instant booking, 25% deposit to confirm.
-        </p>
 
-        <div className="hero-search">
-          <div className="hs-field">
-            <span className="hs-icon">📍</span>
-            {/* Never read by the search, exactly as before — the original
-                heroSearch() only looked at the style select. */}
-            <input
-              type="text"
-              id="heroLocation"
-              className="hs-input"
-              placeholder="Your city or postcode"
-              value={location}
-              onChange={(event) => setLocation(event.target.value)}
-            />
-          </div>
-          <div className="hs-sep" />
+        {/* Wide centred search: style first, then location. */}
+        <div className="hero-search hero-search--wide">
           <div className="hs-field">
             <span className="hs-icon">✂</span>
             <select
               id="heroStyleSelect"
               className="hs-input"
+              aria-label="Style"
               value={style}
               onChange={(event) =>
                 setStyle(event.target.value as ServiceCategoryKey | "")
               }
             >
-              <option value="">{ANY_STYLE_LABEL}</option>
+              <option value="">What are you looking for?</option>
               {STYLE_TAXONOMY.map((entry) => (
                 <option key={entry.key} value={entry.key}>
                   {entry.selectLabel}
@@ -71,19 +58,37 @@ export function HeroSection() {
               ))}
             </select>
           </div>
+          <div className="hs-sep" />
+          <div className="hs-field">
+            <span className="hs-icon">📍</span>
+            {/* Still never read by the search, exactly as before. */}
+            <input
+              type="text"
+              id="heroLocation"
+              className="hs-input"
+              placeholder="City or postcode"
+              aria-label="Location"
+              value={location}
+              onChange={(event) => setLocation(event.target.value)}
+            />
+          </div>
           <button className="hs-btn" onClick={() => openSearch(style)}>
-            Find stylists
+            Search
           </button>
         </div>
 
         <div className="hero-chips">
-          {CHIP_ORDER.map((key) => (
+          {HERO_CHIPS.map(({ label, filter }) => (
             <span
-              key={key}
+              key={label}
               className="hero-chip"
-              onClick={() => openSearch(key)}
+              onClick={() =>
+                filter === "quiz"
+                  ? dispatch(pageOpened("hairQuiz"))
+                  : openSearch(filter)
+              }
             >
-              {taxonomyEntry(key)?.chipLabel}
+              {label}
             </span>
           ))}
         </div>

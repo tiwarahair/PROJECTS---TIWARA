@@ -1,5 +1,5 @@
 import { createSlice, type PayloadAction } from "@reduxjs/toolkit";
-import type { Overlays } from "../types/overlays";
+import type { Overlays, SimpleOverlayId } from "../types/overlays";
 import type { ServiceCategoryKey } from "../types/domain";
 
 const DEFAULT_STYLIST_NAME = "Tiwara's House";
@@ -29,6 +29,11 @@ const ALL_CLOSED: Overlays = {
   profile: false,
   booking: false,
   aiDiscovery: false,
+  otherStyle: false,
+  hairQuiz: false,
+  about: false,
+  stylists: false,
+  shop: false,
   sizeGuide: false,
   lengthGuide: false,
 };
@@ -101,6 +106,18 @@ export const overlaysSlice = createSlice({
       state.overlay.booking = false;
     },
 
+    /**
+     * The five full-page overlays added by the new-ui work are plain toggles
+     * with no extra semantics, so they share one pair of actions rather than
+     * ten near-identical reducers.
+     */
+    pageOpened(state, action: PayloadAction<SimpleOverlayId>) {
+      state.overlay[action.payload] = true;
+    },
+    pageClosed(state, action: PayloadAction<SimpleOverlayId>) {
+      state.overlay[action.payload] = false;
+    },
+
     aiDiscoveryOpened(state) {
       state.overlay.aiDiscovery = true;
     },
@@ -132,6 +149,8 @@ export const {
   profileClosed,
   bookingOpened,
   bookingClosed,
+  pageOpened,
+  pageClosed,
   aiDiscoveryOpened,
   aiDiscoveryClosed,
   sizeGuideOpened,

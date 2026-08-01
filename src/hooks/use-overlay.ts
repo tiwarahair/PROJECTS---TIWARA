@@ -4,12 +4,19 @@ import {
   aiDiscoveryClosed,
   bookingClosed,
   lengthGuideClosed,
+  pageClosed,
   profileClosed,
   searchClosed,
   sizeGuideClosed,
 } from "../stores/overlays-slice";
-import { ESCAPE_PRIORITY, type OverlayId } from "../types/overlays";
+import {
+  ESCAPE_PRIORITY,
+  SCROLL_LOCKING,
+  type OverlayId,
+  type SimpleOverlayId,
+} from "../types/overlays";
 
+/** Overlays whose close carries extra semantics, so each has its own action. */
 const CLOSE_ACTION = {
   sizeGuide: sizeGuideClosed,
   lengthGuide: lengthGuideClosed,
@@ -17,7 +24,13 @@ const CLOSE_ACTION = {
   aiDiscovery: aiDiscoveryClosed,
   profile: profileClosed,
   search: searchClosed,
-} as const satisfies Record<OverlayId, unknown>;
+} as const;
+
+function closeActionFor(id: OverlayId) {
+  return id in CLOSE_ACTION
+    ? CLOSE_ACTION[id as keyof typeof CLOSE_ACTION]()
+    : pageClosed(id as SimpleOverlayId);
+}
 
 /**
  * Overlay behaviour:
@@ -28,8 +41,7 @@ export function useOverlay(): void {
   const dispatch = useAppDispatch();
   const overlay = useAppSelector((state) => state.overlays.overlay);
 
-  const lockBodyScroll =
-    overlay.search || overlay.profile || overlay.booking || overlay.aiDiscovery;
+  const lockBodyScroll = SCROLL_LOCKING.some((id) => overlay[id]);
 
   // Locks page scrolling while any full-screen overlay is open.
   useEffect(() => {
@@ -43,7 +55,7 @@ export function useOverlay(): void {
   // Run `onEscape` when Escape key is pressed
   const onEscape = () => {
     const topmost = ESCAPE_PRIORITY.find((id) => overlay[id]);
-    if (topmost) dispatch(CLOSE_ACTION[topmost]());
+    if (topmost) dispatch(closeActionFor(topmost));
   };
 
   const handler = useRef(onEscape);

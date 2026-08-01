@@ -30,6 +30,14 @@ nav.scrolled {
 nav.scrolled .nav-logo {
   color: var(--green);
 }
+/* Optional logo image sitting before the wordmark; hidden if it fails to load. */
+.nav-logo-img {
+  height: 28px;
+  width: auto;
+  display: inline-block;
+  vertical-align: middle;
+  margin-right: 0.4rem;
+}
 .nav-logo sup {
   font-size: 0.6rem;
   color: var(--gold);

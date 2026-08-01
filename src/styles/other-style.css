@@ -1,0 +1,203 @@
+/* ── Other Style Overlay ──────────────────────────────────────────────────── */
+.os-overlay {
+  position: fixed;
+  inset: 0;
+  background: var(--cream);
+  z-index: 800;
+  transform: translateX(100%);
+  transition: transform 0.45s cubic-bezier(0.16, 1, 0.3, 1);
+  overflow-y: auto;
+}
+.os-overlay.open {
+  transform: translateX(0);
+}
+.os-close {
+  position: fixed;
+  top: 1.5rem;
+  right: 1.5rem;
+  background: none;
+  border: 1px solid rgba(36, 24, 17, 0.15);
+  width: 42px;
+  height: 42px;
+  border-radius: 50%;
+  font-size: 1.3rem;
+  cursor: pointer;
+  color: var(--green);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 10;
+}
+.os-inner {
+  max-width: 640px;
+  margin: 0 auto;
+  padding: 5rem 2rem 4rem;
+}
+.os-eyebrow {
+  font-family: var(--label);
+  font-size: 0.7rem;
+  font-weight: 600;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  color: var(--orange);
+  margin-bottom: 0.75rem;
+}
+.os-title {
+  font-family: var(--serif);
+  font-size: 2.2rem;
+  font-weight: 300;
+  color: var(--green);
+  margin-bottom: 0.75rem;
+}
+.os-sub {
+  font-size: 0.95rem;
+  color: rgba(36, 24, 17, 0.6);
+  line-height: 1.8;
+  margin-bottom: 2.5rem;
+}
+.os-label {
+  display: block;
+  font-family: var(--label);
+  font-size: 0.78rem;
+  font-weight: 600;
+  letter-spacing: 0.5px;
+  color: var(--green);
+  margin-bottom: 0.6rem;
+  margin-top: 1.5rem;
+}
+.os-optional {
+  font-weight: 400;
+  opacity: 0.5;
+}
+.os-textarea {
+  width: 100%;
+  border: 1px solid rgba(36, 24, 17, 0.15);
+  border-radius: 12px;
+  padding: 1rem;
+  font-family: var(--sans);
+  font-size: 0.9rem;
+  color: var(--green);
+  background: rgba(36, 24, 17, 0.03);
+  resize: vertical;
+  outline: none;
+  box-sizing: border-box;
+}
+.os-textarea:focus {
+  border-color: var(--orange);
+}
+.os-upload-zone {
+  border: 2px dashed rgba(36, 24, 17, 0.15);
+  border-radius: 12px;
+  padding: 2.5rem;
+  text-align: center;
+  cursor: pointer;
+  transition: border-color 0.2s;
+}
+.os-upload-zone:hover {
+  border-color: rgba(143, 17, 18, 0.3);
+}
+.os-upload-icon {
+  font-size: 2rem;
+  margin-bottom: 0.5rem;
+}
+.os-upload-text {
+  font-family: var(--label);
+  font-weight: 600;
+  font-size: 0.9rem;
+  color: var(--green);
+  margin-bottom: 0.25rem;
+}
+.os-upload-sub {
+  font-size: 0.78rem;
+  color: rgba(36, 24, 17, 0.4);
+}
+.os-preview-wrap {
+  margin-top: 1rem;
+  position: relative;
+  display: inline-block;
+}
+.os-preview-img {
+  max-width: 100%;
+  max-height: 240px;
+  border-radius: 10px;
+  display: block;
+}
+.os-remove-img {
+  position: absolute;
+  top: 0.4rem;
+  right: 0.4rem;
+  background: rgba(36, 24, 17, 0.7);
+  color: var(--cream);
+  border: none;
+  border-radius: 20px;
+  padding: 0.25rem 0.6rem;
+  font-size: 0.75rem;
+  cursor: pointer;
+}
+.os-notice {
+  display: flex;
+  gap: 0.75rem;
+  align-items: flex-start;
+  background: rgba(223, 207, 62, 0.1);
+  border: 1px solid rgba(223, 207, 62, 0.2);
+  border-radius: 10px;
+  padding: 1rem;
+  margin-top: 1.5rem;
+  font-size: 0.85rem;
+  color: var(--green);
+  line-height: 1.65;
+}
+.os-notice-icon {
+  font-size: 1rem;
+  flex-shrink: 0;
+  margin-top: 0.1rem;
+}
+.os-submit {
+  width: 100%;
+  margin-top: 2rem;
+  background: var(--orange);
+  color: var(--cream);
+  border: none;
+  padding: 1rem 2rem;
+  border-radius: 40px;
+  font-family: var(--label);
+  font-size: 0.9rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+.os-submit:hover {
+  background: var(--orange-mid);
+}
+.os-success {
+  text-align: center;
+  padding: 2rem 0;
+}
+.os-success-icon {
+  font-size: 3rem;
+  color: var(--green-light);
+  margin-bottom: 1rem;
+}
+.os-success h3 {
+  font-family: var(--serif);
+  font-size: 1.8rem;
+  color: var(--green);
+  margin-bottom: 0.75rem;
+}
+.os-success p {
+  font-size: 0.95rem;
+  color: rgba(36, 24, 17, 0.6);
+  line-height: 1.8;
+  margin-bottom: 2rem;
+}
+.os-done {
+  background: var(--green);
+  color: var(--cream);
+  border: none;
+  padding: 0.85rem 2rem;
+  border-radius: 40px;
+  font-family: var(--label);
+  font-size: 0.85rem;
+  font-weight: 600;
+  cursor: pointer;
+}

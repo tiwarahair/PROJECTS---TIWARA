@@ -1,8 +1,11 @@
 import { useOverlayActions } from "../../hooks/use-overlay-actions";
+import { useAppDispatch } from "../../stores/hooks";
+import { pageOpened } from "../../stores/overlays-slice";
 import { FOOTER_COLUMNS, FOOTER_SOCIALS } from "../../data/landing-content";
 
 export function Footer() {
   const { openSearch } = useOverlayActions();
+  const dispatch = useAppDispatch();
 
   return (
     <footer id="contact">
@@ -28,11 +31,16 @@ export function Footer() {
           <div key={heading} className="footer-col">
             <h4>{heading}</h4>
             <ul>
-              {links.map(({ label, href, searchFilter }) => (
+              {links.map(({ label, href, searchFilter, page }) => (
                 <li key={label}>
                   <a
                     href={href}
                     onClick={(event) => {
+                      if (page) {
+                        event.preventDefault();
+                        dispatch(pageOpened(page));
+                        return;
+                      }
                       if (searchFilter === undefined) return;
                       event.preventDefault();
                       openSearch(searchFilter);

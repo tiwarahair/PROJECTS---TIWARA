@@ -1,30 +1,51 @@
 import type {
-  BookCtaStep,
   FooterColumn,
-  GalleryItem,
   HeroStat,
-  HowStep,
-  JoinField,
   NavLink,
   ServiceCard,
   ShopCard,
   SocialLink,
   Testimonial,
-  ValueCard,
 } from "../types/content";
+import type { ServiceCategoryKey } from "../types/domain";
 
 export const NAV_LINKS: readonly NavLink[] = [
-  { label: "Find a Stylist", href: "#", opensSearch: true },
-  { label: "Styles", href: "#services" },
-  { label: "About", href: "#about" },
-  { label: "Contact", href: "#contact" },
-  { label: "Shop", href: "#shop" },
+  { label: "Find a Stylist", href: "#", action: { kind: "search" } },
+  { label: "Browse Styles", href: "#services" },
+  { label: "Hair Quiz", href: "#", action: { kind: "page", page: "hairQuiz" } },
   {
-    label: "Find a stylist",
+    label: "For Stylists",
     href: "#",
-    opensSearch: true,
+    action: { kind: "page", page: "stylists" },
+  },
+  { label: "Shop", href: "#", action: { kind: "page", page: "shop" } },
+  { label: "About", href: "#", action: { kind: "page", page: "about" } },
+  { label: "Contact", href: "#contact" },
+  {
+    label: "Book now",
+    href: "#",
+    action: { kind: "search" },
     className: "nav-cta",
   },
+];
+
+/**
+ * Hero quick-filter chips. Labels here are hero-specific and differ from both
+ * the <select> and the search-overlay chips, and the last one opens the quiz
+ * rather than filtering.
+ */
+export interface HeroChip {
+  label: string;
+  filter: ServiceCategoryKey | "quiz";
+}
+
+export const HERO_CHIPS: readonly HeroChip[] = [
+  { label: "Knotless Braids", filter: "braids" },
+  { label: "Wig Installs", filter: "wigs" },
+  { label: "Locs", filter: "locs" },
+  { label: "Natural Hair", filter: "natural" },
+  { label: "Treatments", filter: "treatments" },
+  { label: "✦ Hair Quiz", filter: "quiz" },
 ];
 
 export const HERO_STATS: readonly HeroStat[] = [
@@ -109,32 +130,6 @@ export const SERVICE_CARDS: readonly ServiceCard[] = [
   },
 ];
 
-export const HOW_STEPS: readonly HowStep[] = [
-  {
-    number: "1",
-    heading: "Search",
-    body: "Enter your location and the style you're looking for. Discover vetted textured hair specialists in your area.",
-  },
-  {
-    number: "2",
-    heading: "Choose your stylist",
-    body: "Browse profiles, portfolios, and real reviews. Filter by style, price, and availability. Pick the perfect match.",
-  },
-  {
-    number: "3",
-    heading: "Book & deposit",
-    body: "Select your exact style, customise every detail, pick a date. Pay your 25% deposit to confirm. Done.",
-  },
-];
-
-export const GALLERY_ITEMS: readonly GalleryItem[] = [
-  { label: "Knotless Braids", backgroundClass: "gi-bg-1", filter: "braids" },
-  { label: "Goddess Locs", backgroundClass: "gi-bg-2", filter: "locs" },
-  { label: "Box Braids", backgroundClass: "gi-bg-3", filter: "braids" },
-  { label: "Fulani Braids", backgroundClass: "gi-bg-4", filter: "braids" },
-  { label: "Senegalese Twists", backgroundClass: "gi-bg-5", filter: "locs" },
-];
-
 export const TESTIMONIALS: readonly Testimonial[] = [
   {
     id: "t0",
@@ -157,13 +152,6 @@ export const TESTIMONIALS: readonly Testimonial[] = [
     author: "Blessing T.",
     detail: "Lace Front Install — Amara Beauty, London",
   },
-];
-
-export const BOOK_CTA_STEPS: readonly BookCtaStep[] = [
-  { number: "1", label: "Search by style & location" },
-  { number: "2", label: "Browse profiles & reviews" },
-  { number: "3", label: "Customise your style live" },
-  { number: "4", label: "Pay deposit & confirm" },
 ];
 
 export const SHOP_CARDS: readonly ShopCard[] = [
@@ -199,37 +187,6 @@ export const SHOP_CARDS: readonly ShopCard[] = [
   },
 ];
 
-/**
- * Each perk is "✶", a normal space, then a non-breaking space — the original
- * markup used `✶ &nbsp;`. Escaped as \u00A0 so the character is visible in
- * source instead of looking like an ordinary double space.
- */
-export const JOIN_PERKS: readonly string[] = [
-  "✶ \u00A0Free to list — no upfront cost",
-  "✶ \u00A0Built-in booking, calendar & deposit collection",
-  "✶ \u00A0Premium branded profile on a luxury platform",
-  "✶ \u00A00% commission on your first 20 bookings",
-  "✶ \u00A0Access to the Tiwara's House community",
-];
-
-export const JOIN_FIELDS: readonly JoinField[] = [
-  { type: "text", placeholder: "Your name" },
-  { type: "text", placeholder: "Business / trading name" },
-  { type: "text", placeholder: "City / location" },
-  { type: "email", placeholder: "Email address" },
-  { type: "text", placeholder: "Instagram handle" },
-];
-
-export const VALUE_CARDS: readonly ValueCard[] = [
-  {
-    title: "Excellence",
-    description: "World-class craft in every appointment",
-  },
-  { title: "Authenticity", description: "Rooted in culture, always" },
-  { title: "Community", description: "Built for and by us" },
-  { title: "Empowerment", description: "Transparent, accessible, fair" },
-];
-
 export const FOOTER_SOCIALS: readonly SocialLink[] = [
   { title: "Instagram", label: "IG" },
   { title: "TikTok", label: "TT" },
@@ -255,9 +212,9 @@ export const FOOTER_COLUMNS: readonly FooterColumn[] = [
   {
     heading: "Platform",
     links: [
-      { label: "About us", href: "#about" },
+      { label: "About us", href: "#", page: "about" },
       { label: "Find a stylist", href: "#", searchFilter: "" },
-      { label: "Join as a stylist", href: "#join" },
+      { label: "Join as a stylist", href: "#", page: "stylists" },
       { label: "Shop", href: "#shop" },
       { label: "Blog & Journal", href: "#" },
     ],

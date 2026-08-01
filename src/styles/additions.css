@@ -12,12 +12,6 @@
   inset: 0;
 }
 
-/* Book-CTA is the one section-label with no contextual colour rule
-   of its own; the base .section-label is --orange. */
-.book-cta-section .section-label {
-  color: var(--gold);
-}
-
 /* "Available times" heading above the time-slot grid. */
 .bp-times-label {
   font-size: 0.7rem;
@@ -102,4 +96,59 @@
     box-shadow: 0 8px 24px rgba(0, 0, 0, 0.08);
     z-index: 300;
   }
+}
+
+/* Dashed "something else?" tile appended to the booking style grid; opens the
+   Other Style request overlay. */
+.bp-style-other {
+  border-style: dashed !important;
+  border-color: rgba(36, 24, 17, 0.18) !important;
+  background: rgba(36, 24, 17, 0.02);
+}
+.bp-style-other:hover {
+  border-color: rgba(143, 17, 18, 0.3) !important;
+  background: rgba(143, 17, 18, 0.03);
+}
+.bp-style-other-inner {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding: 1rem 1.1rem;
+}
+.bp-style-other-icon {
+  font-size: 1.6rem;
+  font-weight: 300;
+  color: rgba(36, 24, 17, 0.25);
+  flex-shrink: 0;
+  line-height: 1;
+}
+
+/* Section headings that the new pages centred with an inline style. */
+.pg-h2--centred {
+  text-align: center;
+  margin-bottom: 2.5rem;
+}
+
+/* Required field left blank on submit */
+.pg-input--error {
+  border-color: var(--orange);
+}
+
+/* hair quiz */
+.hq-question-note {
+  font-size: 0.75rem;
+  font-weight: 400;
+  opacity: 0.6;
+}
+.hq-opt--full {
+  grid-column: 1/-1;
+}
+
+/* Other-style request: the file input is hidden and driven by the label
+   wrapping the upload zone, and the textarea turns orange when left blank. */
+.os-file-input {
+  display: none;
+}
+.os-textarea--error {
+  border-color: var(--orange);
 }
