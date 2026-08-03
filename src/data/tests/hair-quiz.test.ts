@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { recommendationsFor, resultTitleFor } from "./hair-quiz";
+import { recommendationsFor, resultTitleFor } from "../other/hair-quiz";
 
 const ids = (answers: Parameters<typeof recommendationsFor>[0]) =>
   recommendationsFor(answers).map((rec) => rec.id);

@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { SHOP_PRODUCTS, filterProducts } from "./shop-products";
+import { filterProducts, SHOP_PRODUCTS } from "../other/shop-products";
 
 describe("filterProducts", () => {
   it("shows every product for 'all'", () => {
