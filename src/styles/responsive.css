@@ -12,12 +12,6 @@
   .hero {
     padding: 6rem 1.5rem 4rem;
   }
-  .hero-stats {
-    position: static;
-    margin-top: 2.5rem;
-    flex-wrap: wrap;
-    gap: 1.5rem;
-  }
   .hero-search {
     border-radius: 12px;
     flex-direction: column;

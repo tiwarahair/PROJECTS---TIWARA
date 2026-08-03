@@ -1,6 +1,5 @@
 import type {
   FooterColumn,
-  HeroStat,
   NavLink,
   ServiceCard,
   ShopCard,
@@ -46,12 +45,6 @@ export const HERO_CHIPS: readonly HeroChip[] = [
   { label: "Natural Hair", filter: "natural" },
   { label: "Treatments", filter: "treatments" },
   { label: "✦ Hair Quiz", filter: "quiz" },
-];
-
-export const HERO_STATS: readonly HeroStat[] = [
-  { value: "50+", label: "Stylists UK-wide" },
-  { value: "5,000+", label: "Bookings completed" },
-  { value: "4.9", label: "Average rating" },
 ];
 
 /* Nine names; the track renders them twice so the banner can loop seamlessly. */

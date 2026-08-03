@@ -4,7 +4,7 @@ import { useFadeIn } from "../../hooks/use-fade-in";
 import { useOverlayActions } from "../../hooks/use-overlay-actions";
 import { useAppDispatch } from "../../stores/hooks";
 import { pageOpened } from "../../stores/overlays-slice";
-import { HERO_CHIPS, HERO_STATS } from "../../data/landing-content";
+import { HERO_CHIPS } from "../../data/landing-content";
 import { STYLE_TAXONOMY } from "../../data/style-taxonomy";
 import type { ServiceCategoryKey } from "../../types/domain";
 
@@ -93,16 +93,6 @@ export function HeroSection() {
           ))}
         </div>
       </div>
-
-      <div className="hero-stats">
-        {HERO_STATS.map((stat) => (
-          <div key={stat.label}>
-            <span className="hero-stat-num">{stat.value}</span>
-            <span className="hero-stat-label">{stat.label}</span>
-          </div>
-        ))}
-      </div>
-      <div className="hero-scroll">Scroll</div>
     </section>
   );
 }

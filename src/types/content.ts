@@ -23,11 +23,6 @@ export interface NavLink {
   className?: string;
 }
 
-export interface HeroStat {
-  value: string;
-  label: string;
-}
-
 export interface ServiceCard {
   number: string;
   /** Rendered across two lines; the original used a <br>. */
