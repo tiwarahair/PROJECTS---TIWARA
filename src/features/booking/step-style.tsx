@@ -1,11 +1,11 @@
 import { cx } from "../../utils/class-names";
-import { getService } from "../../data/service-categories";
 import { useAppDispatch } from "../../stores/hooks";
 import { pageOpened } from "../../stores/overlays-slice";
-import type { ServiceCategoryKey } from "../../types/domain";
+import { getService } from "../../data/services/services";
+import type { ServiceId } from "../../types/services";
 
 export interface StepStyleProps {
-  serviceCategoryKey: ServiceCategoryKey;
+  serviceCategoryKey: ServiceId;
   selectedStyleId: string | null;
   onSelectStyle: (styleId: string) => void;
 }
@@ -16,33 +16,37 @@ export function StepStyle({
   selectedStyleId,
   onSelectStyle,
 }: StepStyleProps) {
-  const { name, styles } = getService(serviceCategoryKey);
+  const { label: serviceLabel, individualServices } =
+    getService(serviceCategoryKey);
   const dispatch = useAppDispatch();
 
   return (
     <>
       <div className="bp-step-title">Choose your style</div>
-      <div className="bp-step-sub">{name} — select one to continue</div>
+      <div className="bp-step-sub">{serviceLabel} — select one to continue</div>
       <div className="bp-styles-grid">
-        {styles.map(({ id, name, price, duration }) => (
-          <div
-            key={id}
-            id={`sc-${id}`}
-            className={cx(
-              "bp-style-card",
-              selectedStyleId === id && "selected",
-            )}
-            onClick={() => onSelectStyle(id)}
-          >
-            <div className="bp-style-img" />
-            <div className="bp-style-body">
-              <span className="bp-style-name">{name}</span>
-              <span className="bp-style-meta">
-                <span className="bp-style-price">{price}</span> · {duration}
-              </span>
+        {individualServices.map(
+          ({ id, label, defaultPrice, defaultDuration }) => (
+            <div
+              key={id}
+              id={`sc-${id}`}
+              className={cx(
+                "bp-style-card",
+                selectedStyleId === id && "selected",
+              )}
+              onClick={() => onSelectStyle(id)}
+            >
+              <div className="bp-style-img" />
+              <div className="bp-style-body">
+                <span className="bp-style-name">{label}</span>
+                <span className="bp-style-meta">
+                  <span className="bp-style-price">{`from ${defaultPrice}`}</span>{" "}
+                  · {defaultDuration}
+                </span>
+              </div>
             </div>
-          </div>
-        ))}
+          ),
+        )}
         {/* For looks that aren't in the catalogue. */}
         {/* TO DO: this is broken, page doesn't appear (I think it's behind), 
         also, we need to think about the workflow of this -- how will it be submitted to the stylist &

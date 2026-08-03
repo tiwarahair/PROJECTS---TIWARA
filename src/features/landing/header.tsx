@@ -4,7 +4,7 @@ import { useScrolled } from "../../hooks/use-scrolled";
 import { useOverlayActions } from "../../hooks/use-overlay-actions";
 import { useAppDispatch } from "../../stores/hooks";
 import { pageOpened } from "../../stores/overlays-slice";
-import { NAV_LINKS } from "../../data/landing-content";
+import { NAV_LINKS } from "../../data/other/landing-content";
 import type { NavAction } from "../../types/content";
 
 /* hidden if the file is missing. TO DO: add logo */

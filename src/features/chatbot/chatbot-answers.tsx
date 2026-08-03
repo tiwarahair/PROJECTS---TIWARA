@@ -4,7 +4,7 @@ import {
   CONTACT_EMAIL,
   WHATSAPP_URL,
   type ChatAnswerKey,
-} from "../../data/chatbot-content";
+} from "../../data/other/chatbot-content";
 
 const LINK_STYLE = { color: "var(--orange)" };
 

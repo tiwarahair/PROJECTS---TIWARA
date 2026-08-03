@@ -1,7 +1,7 @@
 import { cx } from "../../utils/class-names";
 import { useFadeIn } from "../../hooks/use-fade-in";
 import { useCarousel } from "../../hooks/use-carousel";
-import { TESTIMONIALS } from "../../data/landing-content";
+import { TESTIMONIALS } from "../../data/other/landing-content";
 
 export function TestimonialsSection() {
   const [headRef, headVisible] = useFadeIn<HTMLDivElement>();

@@ -1,10 +1,10 @@
 import { cx } from "../../utils/class-names";
 import { useAppDispatch, useAppSelector } from "../../stores/hooks";
 import { aiDiscoveryClosed, bookingOpened } from "../../stores/overlays-slice";
-import { lengthLabel } from "../../data/lengths";
-import { AI_CONFIDENCE_LABELS } from "../../data/ai-maps";
+import { lengthLabel } from "../../data/style-config/lengths";
+import { AI_CONFIDENCE_LABELS } from "../../data/other/ai-maps";
 import { useAIDiscovery } from "./use-ai-discovery";
-import type { AiStyleMatch } from "../../data/ai-maps";
+import type { AiStyleMatch } from "../../data/other/ai-maps";
 
 // TO DO: ALL AI DISCOVERY FILES SEEM BOGUS - CLEAN UP / COMPELTELY REFACTOR (NOT READ IT)
 // this includes useAIDiscoveryhook & all all its data

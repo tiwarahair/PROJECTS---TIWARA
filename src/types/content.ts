@@ -1,15 +1,5 @@
-import type { ServiceCategoryKey } from "./domain";
+import type { ServiceId } from "./services";
 import type { SimpleOverlayId } from "./overlays";
-
-export interface StyleTaxonomyEntry {
-  key: ServiceCategoryKey;
-  /** Used in the hero and search <select>s, and the footer Styles column. */
-  selectLabel: string;
-  /** Shorter form used on the hero chips. */
-  chipLabel: string;
-  /** Shorter still, used on the search overlay's filter chips. */
-  filterLabel: string;
-}
 
 /** What a nav link does instead of following its href. */
 export type NavAction =
@@ -32,7 +22,7 @@ export interface ServiceCard {
   hint: string;
   cta: string;
   /** Category to filter by, or "ai" for the Style Discovery tile. */
-  action: ServiceCategoryKey | "ai";
+  action: ServiceId | "ai";
 }
 
 export interface Testimonial {
@@ -60,7 +50,7 @@ export interface FooterLink {
   label: string;
   href: string;
   /** Present when the link opens search filtered to a category. */
-  searchFilter?: ServiceCategoryKey | "";
+  searchFilter?: ServiceId | "";
   /** Present when the link opens one of the full-page overlays. */
   page?: SimpleOverlayId;
 }
@@ -68,4 +58,5 @@ export interface FooterLink {
 export interface SocialLink {
   title: string;
   label: string;
+  href: string;
 }

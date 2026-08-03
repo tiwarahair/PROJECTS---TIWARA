@@ -1,7 +1,7 @@
 import { act, renderHook } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { useChatbot } from "./use-chatbot";
-import { matchChatRule } from "../../data/chatbot-content";
+import { matchChatRule } from "../../data/other/chatbot-content";
 
 const TYPING_MS = 900;
 

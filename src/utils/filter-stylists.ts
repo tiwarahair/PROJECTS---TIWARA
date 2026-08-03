@@ -1,7 +1,8 @@
-import type { Stylist, ServiceCategoryKey } from "../types/domain";
+import type { ServiceId } from "../types/services";
+import type { Stylist } from "../types/domain";
 
 export interface StylistFilter {
-  style: ServiceCategoryKey | "";
+  style: ServiceId | "";
   location: string;
 }
 

@@ -7,7 +7,7 @@ import {
   SHOP_PRODUCTS,
   filterProducts,
   type ShopFilter,
-} from "../../data/shop-products";
+} from "../../data/other/shop-products";
 import { PageOverlay } from "./page-overlay";
 import { PageCtaStrip, PageHero, PageSection } from "./page-blocks";
 

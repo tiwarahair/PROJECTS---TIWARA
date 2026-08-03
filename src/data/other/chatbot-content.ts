@@ -15,6 +15,8 @@ export interface ChatRule {
   answer: ChatAnswerKey;
 }
 
+// to do: read
+
 /**
  * Matched in order, first hit wins. The order is load-bearing: "how much to
  * cancel" resolves to `price`, not `cancel`, because price is tested first.
@@ -52,7 +54,7 @@ export const CHAT_ANSWERS: Readonly<Partial<Record<ChatAnswerKey, string>>> = {
   cancel:
     "You can reschedule up to 48 hours before your appointment using the link in your confirmation email. Cancellations within 48h may forfeit the deposit.",
   style:
-    "We offer: Braids & Protective Styles, Wig Installs, Natural Hair Care, Locs & Twists, and Treatments. You can also try our AI Style Discovery — upload an inspo photo and we'll find your look! ✦",
+    "We offer: Braids & Protective Styles, Wig Installs, Natural Hair Care, Locs & Twists, and Treatments. You can also try our AI Style Discovery — upload an inspo photo and we'll find your look! ✦", //
   location:
     "Tiwara's House has stylists across the UK — Manchester, London, Birmingham, Leeds and more. Use the search bar on the home page to find one near you.",
 };

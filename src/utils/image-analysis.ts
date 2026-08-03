@@ -4,7 +4,7 @@ import {
   AI_STYLE_MATCHES,
   type AiColourMatch,
   type AiStyleMatch,
-} from "../data/ai-maps";
+} from "../data/other/ai-maps";
 
 const SAMPLE_SIZE = 80;
 const MAX_LENGTH_INDEX = 3;

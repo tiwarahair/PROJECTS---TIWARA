@@ -1,7 +1,7 @@
 import { cx } from "../../utils/class-names";
 import { useFadeIn } from "../../hooks/use-fade-in";
 import { useOverlayActions } from "../../hooks/use-overlay-actions";
-import { SHOP_CARDS } from "../../data/landing-content";
+import { SHOP_CARDS } from "../../data/other/landing-content";
 
 export function ShopSection() {
   const [introRef, introVisible] = useFadeIn<HTMLDivElement>();

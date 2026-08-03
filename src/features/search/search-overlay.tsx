@@ -7,17 +7,12 @@ import {
   searchLocationChanged,
   searchStyleChanged,
 } from "../../stores/overlays-slice";
-import {
-  ALL_STYLES_LABEL,
-  CHIP_ORDER,
-  STYLE_TAXONOMY,
-  taxonomyEntry,
-} from "../../data/style-taxonomy";
 import { STYLISTS } from "../../data/stylists";
 import { filterStylists, stylistCountLabel } from "../../utils/filter-stylists";
-import type { ServiceCategoryKey } from "../../types/domain";
 import { StylistCard } from "./stylist-card";
 import { useMemo } from "react";
+import type { ServiceId } from "../../types/services";
+import { capitaliseServiceId, SERVICES } from "../../data/services/services";
 
 export function SearchOverlay() {
   const dispatch = useAppDispatch();
@@ -73,16 +68,14 @@ export function SearchOverlay() {
               value={searchStyle}
               onChange={(event) =>
                 dispatch(
-                  searchStyleChanged(
-                    event.target.value as ServiceCategoryKey | "",
-                  ),
+                  searchStyleChanged(event.target.value as ServiceId | ""),
                 )
               }
             >
-              <option value="">{ALL_STYLES_LABEL}</option>
-              {STYLE_TAXONOMY.map(({ key, selectLabel }) => (
-                <option key={key} value={key}>
-                  {selectLabel}
+              <option value="">All styles</option>
+              {SERVICES.map(({ id, label }) => (
+                <option key={id} value={id}>
+                  {label}
                 </option>
               ))}
             </select>
@@ -98,14 +91,14 @@ export function SearchOverlay() {
           >
             All
           </span>
-          {CHIP_ORDER.map((key) => (
+          {SERVICES.map(({ id }) => (
             <span
-              key={key}
-              className={cx("sr-chip", searchStyle === key && "active")}
-              data-filter={key}
-              onClick={() => dispatch(searchStyleChanged(key))}
+              key={id}
+              className={cx("sr-chip", searchStyle === id && "active")}
+              data-filter={id}
+              onClick={() => dispatch(searchStyleChanged(id))}
             >
-              {taxonomyEntry(key)?.filterLabel}
+              {capitaliseServiceId(id)}
             </span>
           ))}
         </div>

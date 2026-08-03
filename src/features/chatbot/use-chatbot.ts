@@ -3,7 +3,7 @@ import {
   GREETING,
   matchChatRule,
   type ChatMessage,
-} from "../../data/chatbot-content";
+} from "../../data/other/chatbot-content";
 import { answerFor } from "./chatbot-answers";
 
 /** How long the typing indicator is shown before the reply lands. */

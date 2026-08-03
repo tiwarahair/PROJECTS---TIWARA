@@ -2,13 +2,13 @@ import { cx } from "../../utils/class-names";
 import { useAppDispatch } from "../../stores/hooks";
 import { bookingClosed, searchOpened } from "../../stores/overlays-slice";
 import { STYLISTS } from "../../data/stylists";
-import { getService } from "../../data/service-categories";
 import { filterStylists, stylistCountLabel } from "../../utils/filter-stylists";
 import { StarRating } from "../../components/star-rating";
-import type { ServiceCategoryKey } from "../../types/domain";
+import { getService } from "../../data/services/services";
+import type { ServiceId } from "../../types/services";
 
 export interface StepStylistProps {
-  serviceCategoryKey: ServiceCategoryKey;
+  serviceCategoryKey: ServiceId;
   location: string;
   dateFrom: string;
   dateTo: string;
@@ -61,7 +61,7 @@ export function StepStylist({
       <div className="bp-step-sub">
         {buildResultsSummary(
           available.length,
-          getService(serviceCategoryKey).name,
+          getService(serviceCategoryKey).label,
           location,
           dateFrom,
           dateTo,

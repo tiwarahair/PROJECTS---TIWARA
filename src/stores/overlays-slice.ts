@@ -1,11 +1,11 @@
 import { createSlice, type PayloadAction } from "@reduxjs/toolkit";
 import type { Overlays, SimpleOverlayId } from "../types/overlays";
-import type { ServiceCategoryKey } from "../types/domain";
+import type { ServiceId } from "../types/services";
 
 const DEFAULT_STYLIST_NAME = "Tiwara's House";
 
 export interface BookingSession {
-  categoryKey: ServiceCategoryKey;
+  categoryKey: ServiceId;
   /** Set when opened from a stylist, which shortens the flow. */
   stylistId: string | null;
   stylistName: string;
@@ -21,7 +21,7 @@ export interface OverlaysState {
    * profile (old index.js:443).
    */
   activeStylistId: string | null;
-  searchStyle: ServiceCategoryKey | "";
+  searchStyle: ServiceId | "";
   searchLocation: string;
   bookingSession: BookingSession;
 }
@@ -56,7 +56,7 @@ export const overlaysSlice = createSlice({
   name: "overlays",
   initialState,
   reducers: {
-    searchOpened(state, action: PayloadAction<ServiceCategoryKey | "">) {
+    searchOpened(state, action: PayloadAction<ServiceId | "">) {
       state.searchStyle = action.payload;
       // The location box is cleared on every open (old index.js:255).
       state.searchLocation = "";
@@ -69,7 +69,7 @@ export const overlaysSlice = createSlice({
       state.overlay.profile = false;
       state.activeStylistId = null;
     },
-    searchStyleChanged(state, action: PayloadAction<ServiceCategoryKey | "">) {
+    searchStyleChanged(state, action: PayloadAction<ServiceId | "">) {
       state.searchStyle = action.payload;
     },
     searchLocationChanged(state, action: PayloadAction<string>) {
@@ -88,7 +88,7 @@ export const overlaysSlice = createSlice({
     bookingOpened(
       state,
       action: PayloadAction<{
-        categoryKey: ServiceCategoryKey;
+        categoryKey: ServiceId;
         stylistId?: string;
         stylistName?: string;
       }>,

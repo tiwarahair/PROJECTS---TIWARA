@@ -1,0 +1,199 @@
+[
+  {
+    "id": "braids",
+    "label": "Braids & Protective Styles",
+    "description": "Box braids, knotless, fulani, cornrows and more — find a specialist near you",
+    "individualServices": [
+      {
+        "id": "knotless",
+        "label": "Knotless Braids",
+        "defaultPrice": 130,
+        "defaultDuration": "4–6h"
+      },
+      {
+        "id": "fulani",
+        "label": "Fulani Braids",
+        "defaultPrice": 110,
+        "defaultDuration": "3–4h"
+      },
+      {
+        "id": "cornrows",
+        "label": "Cornrows",
+        "defaultPrice": 60,
+        "defaultDuration": "1.5–3h"
+      },
+      {
+        "id": "feedin",
+        "label": "Feed-In Braids",
+        "defaultPrice": 80,
+        "defaultDuration": "2–3h"
+      },
+      {
+        "id": "stitch",
+        "label": "Stitch Braids",
+        "defaultPrice": 90,
+        "defaultDuration": "2–3h"
+      }
+    ],
+    "customisable": true,
+    "configs": {
+      "size": true,
+      "length": true,
+      "colour": true,
+      "addOns": true
+    }
+  },
+  {
+    "id": "wigs",
+    "label": "Wig Installs",
+    "description": "Lace front, full lace, 360 wig installs and customisation. Flawless and tailored.",
+    "individualServices": [
+      {
+        "id": "lacefront",
+        "label": "Lace Front Install",
+        "defaultPrice": 120,
+        "defaultDuration": "2–3h"
+      },
+      {
+        "id": "fulllace",
+        "label": "Full Lace Install",
+        "defaultPrice": 150,
+        "defaultDuration": "2.5–3.5h"
+      },
+      {
+        "id": "360",
+        "label": "360 Wig Install",
+        "defaultPrice": 140,
+        "defaultDuration": "2–3h"
+      },
+      {
+        "id": "custom",
+        "label": "Wig Customisation",
+        "defaultPrice": 80,
+        "defaultDuration": "1.5–2.5h"
+      }
+    ],
+    "customisable": true,
+    "configs": {
+      "hairTexture": true,
+      "length": true,
+      "colour": true
+    }
+  },
+  {
+    "id": "natural-hair",
+    "label": "Natural Hair Care",
+    "description": "Wash & styles, blowouts, twist outs, and silk press treatments.",
+    "individualServices": [
+      {
+        "id": "washstyle",
+        "label": "Wash & Style",
+        "defaultPrice": 55,
+        "defaultDuration": "2–3h"
+      },
+      {
+        "id": "blowout",
+        "label": "Blowout",
+        "defaultPrice": 65,
+        "defaultDuration": "2–3h"
+      },
+      {
+        "id": "twistout",
+        "label": "Twist Out",
+        "defaultPrice": 70,
+        "defaultDuration": "2–3h"
+      },
+      {
+        "id": "braidout",
+        "label": "Braid Out",
+        "defaultPrice": 70,
+        "defaultDuration": "2–3h"
+      },
+      {
+        "id": "silkpress",
+        "label": "Silk Press",
+        "defaultPrice": 85,
+        "defaultDuration": "3–4h"
+      }
+    ],
+    "customisable": true,
+    "configs": {
+      "length": true,
+      "addOns": true
+    }
+  },
+  {
+    "id": "locs",
+    "label": "Locs & Twists",
+    "description": "Starter locs, Senegalese twists, Marley twists, loc retwists and more.",
+    "individualServices": [
+      {
+        "id": "starterlocs",
+        "label": "Starter Locs",
+        "defaultPrice": 150,
+        "defaultDuration": "4–7h"
+      },
+      {
+        "id": "twostrand",
+        "label": "Two-Strand Twists",
+        "defaultPrice": 90,
+        "defaultDuration": "3–5h"
+      },
+      {
+        "id": "senegalese",
+        "label": "Senegalese Twists",
+        "defaultPrice": 110,
+        "defaultDuration": "3–5h"
+      },
+      {
+        "id": "marley",
+        "label": "Marley Twists",
+        "defaultPrice": 120,
+        "defaultDuration": "4–6h"
+      },
+      {
+        "id": "retwist",
+        "label": "Loc Retwist",
+        "defaultPrice": 60,
+        "defaultDuration": "1.5–3h"
+      }
+    ],
+    "customisable": true,
+    "configs": {
+      "size": true,
+      "length": true
+    }
+  },
+  {
+    "id": "treatments",
+    "label": "Treatments",
+    "description": "Deep conditioning, scalp treatments, protein and hot oil treatments.",
+    "individualServices": [
+      {
+        "id": "deepcond",
+        "label": "Deep Conditioning",
+        "defaultPrice": 45,
+        "defaultDuration": "1–1.5h"
+      },
+      {
+        "id": "scalp",
+        "label": "Scalp Treatment",
+        "defaultPrice": 35,
+        "defaultDuration": "45min"
+      },
+      {
+        "id": "protein",
+        "label": "Protein Treatment",
+        "defaultPrice": 55,
+        "defaultDuration": "1.5–2h"
+      },
+      {
+        "id": "hotoil",
+        "label": "Hot Oil Treatment",
+        "defaultPrice": 30,
+        "defaultDuration": "45min"
+      }
+    ],
+    "customisable": false
+  }
+]

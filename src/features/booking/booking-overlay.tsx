@@ -2,10 +2,6 @@ import { useEffect, useRef } from "react";
 import { cx } from "../../utils/class-names";
 import { useAppDispatch, useAppSelector } from "../../stores/hooks";
 import { bookingClosed } from "../../stores/overlays-slice";
-import {
-  getService,
-  getIndividualService,
-} from "../../data/service-categories";
 import { findStylist } from "../../data/stylists";
 import { BOOKING_STEP } from "../../types/booking";
 import { useBookingWizard } from "./use-booking-wizard";
@@ -18,14 +14,7 @@ import { StepSchedule } from "./step-schedule";
 import { StepDetails } from "./step-details";
 import { StepReview } from "./step-review";
 import { StepConfirm } from "./step-confirm";
-
-/**
- * What the preview shows before a style is chosen. The original seeded the
- * panel from the markup and only overwrote the name once a style was picked,
- * so a Treatments booking opens showing Knotless Braids. Preserved.
- */
-const PLACEHOLDER_STYLE_NAME = "Knotless Braids";
-const PLACEHOLDER_STYLE_PRICE = "from £130";
+import { getIndividualService, getService } from "../../data/services/services";
 
 export function BookingOverlay() {
   const dispatch = useAppDispatch();
@@ -39,7 +28,7 @@ export function BookingOverlay() {
     if (optionsRef.current) optionsRef.current.scrollTop = 0;
   }, [booking.step]);
 
-  const { name } = getService(booking.categoryKey);
+  const { label } = getService(booking.categoryKey);
   const style = getIndividualService(booking.categoryKey, booking.styleId);
 
   // The stylist picked in step 2 wins; otherwise fall back to whoever the
@@ -58,7 +47,7 @@ export function BookingOverlay() {
         <button className="bp-back" onClick={close}>
           Back
         </button>
-        <span className="bp-cat-name">{name}</span>
+        <span className="bp-cat-name">{label}</span>
         <div className="bp-step-counter">
           <div className="bp-step-dots">
             {/* One dot per step this booking will actually visit, so the
@@ -211,8 +200,8 @@ export function BookingOverlay() {
           colourId={booking.colourId}
           lengthIndex={booking.lengthIndex}
           stylistName={stylistName}
-          styleName={style?.name ?? PLACEHOLDER_STYLE_NAME}
-          stylePrice={style?.price ?? PLACEHOLDER_STYLE_PRICE}
+          styleName={style?.label ?? ""}
+          stylePrice={`from £${style?.defaultPrice ?? 0}`}
         />
       </div>
     </div>

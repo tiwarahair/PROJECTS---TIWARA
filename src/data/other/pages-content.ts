@@ -2,7 +2,7 @@ import type {
   PageStat,
   PageStep,
   PageValue,
-} from "../features/pages/page-blocks";
+} from "../../features/pages/page-blocks";
 
 export const ABOUT_VALUES: readonly PageValue[] = [
   {
@@ -106,14 +106,4 @@ export const STYLIST_EXPERIENCE_OPTIONS: readonly string[] = [
   "3–5 years",
   "5–10 years",
   "10+ years",
-];
-
-// get from somehere else, maybe a json file or a database, but for now hardcode it
-export const STYLIST_SERVICES: readonly string[] = [
-  "Braids & Protective Styles",
-  "Wig Installs",
-  "Natural Hair Care",
-  "Locs & Twists",
-  "Treatments",
-  "Colouring",
 ];

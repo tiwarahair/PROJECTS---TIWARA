@@ -1,4 +1,6 @@
-import type { AddOn, CalendarDay, TimeSlot } from "../types/booking";
+import type { AddOn, CalendarDay, TimeSlot } from "../../types/booking";
+
+// to do: read
 
 // TO DO: HARDCODED FOR NOW, USE ACTUAL CALENDAR API*** WHEN AVAILABLE
 export const CALENDAR_MONTH_LABEL = "July 2026";
@@ -56,5 +58,3 @@ export const ADD_ONS: readonly AddOn[] = [
     note: "(specify in appointment notes)",
   },
 ];
-
-export const SIZE_OPTIONS = ["Small", "Medium", "Large"] as const;

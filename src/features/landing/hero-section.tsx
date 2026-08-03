@@ -4,9 +4,9 @@ import { useFadeIn } from "../../hooks/use-fade-in";
 import { useOverlayActions } from "../../hooks/use-overlay-actions";
 import { useAppDispatch } from "../../stores/hooks";
 import { pageOpened } from "../../stores/overlays-slice";
-import { HERO_CHIPS } from "../../data/landing-content";
-import { STYLE_TAXONOMY } from "../../data/style-taxonomy";
-import type { ServiceCategoryKey } from "../../types/domain";
+import { HERO_CHIPS } from "../../data/other/landing-content";
+import type { ServiceId } from "../../types/services";
+import { SERVICES } from "../../data/services/services";
 
 /** Editorial background photo; absent until the real asset is supplied. TODO: add hero image */
 const HERO_PHOTO = "/assets/hero.jpg";
@@ -14,7 +14,7 @@ const HERO_PHOTO = "/assets/hero.jpg";
 export function HeroSection() {
   const [contentRef, contentVisible] = useFadeIn<HTMLDivElement>();
   const [location, setLocation] = useState("");
-  const [style, setStyle] = useState<ServiceCategoryKey | "">("");
+  const [style, setStyle] = useState<ServiceId | "">("");
   const { openSearch } = useOverlayActions();
   const dispatch = useAppDispatch();
 
@@ -47,13 +47,13 @@ export function HeroSection() {
               aria-label="Style"
               value={style}
               onChange={(event) =>
-                setStyle(event.target.value as ServiceCategoryKey | "")
+                setStyle(event.target.value as ServiceId | "")
               }
             >
               <option value="">What are you looking for?</option>
-              {STYLE_TAXONOMY.map((entry) => (
-                <option key={entry.key} value={entry.key}>
-                  {entry.selectLabel}
+              {SERVICES.map(({ id, label }) => (
+                <option key={id} value={id}>
+                  {label}
                 </option>
               ))}
             </select>

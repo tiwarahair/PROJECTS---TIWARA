@@ -14,7 +14,7 @@ describe("filterStylists", () => {
       braids: 3,
       wigs: 3,
       locs: 2,
-      natural: 3,
+      "natural-hair": 3,
       treatments: 2,
     } as const;
 

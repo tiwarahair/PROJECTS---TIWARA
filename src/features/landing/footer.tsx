@@ -1,7 +1,10 @@
 import { useOverlayActions } from "../../hooks/use-overlay-actions";
 import { useAppDispatch } from "../../stores/hooks";
 import { pageOpened } from "../../stores/overlays-slice";
-import { FOOTER_COLUMNS, FOOTER_SOCIALS } from "../../data/landing-content";
+import {
+  FOOTER_COLUMNS,
+  FOOTER_SOCIALS,
+} from "../../data/other/landing-content";
 
 export function Footer() {
   const { openSearch } = useOverlayActions();
@@ -20,8 +23,14 @@ export function Footer() {
             booking.
           </p>
           <div className="footer-social">
-            {FOOTER_SOCIALS.map(({ label, title }) => (
-              <a key={label} href="#" title={title}>
+            {FOOTER_SOCIALS.map(({ label, title, href }) => (
+              <a
+                key={label}
+                href={href}
+                title={title}
+                target="_blank"
+                rel="noopener noreferrer"
+              >
                 {label}
               </a>
             ))}

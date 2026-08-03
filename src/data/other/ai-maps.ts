@@ -1,8 +1,10 @@
-import type { ServiceCategoryKey } from "../types/domain";
+// todo: read
+
+import type { ServiceId } from "../../types/services";
 
 export interface AiStyleMatch {
   styleId: string;
-  categoryKey: ServiceCategoryKey;
+  categoryKey: ServiceId;
   name: string;
   price: string;
 }
@@ -14,6 +16,7 @@ export interface AiColourMatch {
 }
 
 // TO DO: RENAME categoryKey TO serviceCategoryKey
+// TO DO: USE LIVE DATA FROM SERVICES.JSON INSTEAD OF HARDCODED VALUES
 
 export const AI_STYLE_MATCHES: readonly AiStyleMatch[] = [
   {
@@ -48,7 +51,7 @@ export const AI_STYLE_MATCHES: readonly AiStyleMatch[] = [
   },
   {
     styleId: "washstyle",
-    categoryKey: "natural",
+    categoryKey: "natural-hair",
     name: "Wash & Style",
     price: "from £55",
   },
@@ -66,6 +69,7 @@ export const AI_STYLE_MATCHES: readonly AiStyleMatch[] = [
   },
 ];
 
+// to do: replace with 'colours' data
 export const AI_COLOUR_MATCHES: readonly AiColourMatch[] = [
   { name: "1B Natural Black", brightness: 10 },
   { name: "Burgundy", brightness: 22 },

@@ -1,0 +1,109 @@
+[
+  {
+    "name": "Length",
+    "options": [
+      {
+        "name": "Bob",
+        "inches": "10\"-12\""
+      },
+      { "name": "Shoulder", "inches": "14\"-18\"" },
+      {
+        "name": "Bra length",
+        "inches": "20\"-24\""
+      },
+      { "name": "Waist / bum", "inches": "26\"+" }
+    ]
+  },
+  {
+    "name": "Colour",
+    "options": [
+      {
+        "name": "1 Jet Black",
+        "value": "1",
+        "hex": "#000000"
+      },
+      {
+        "name": "1B Natural Black",
+        "value": "1B",
+        "hex": "#1A1108"
+      },
+      {
+        "name": "30 Auburn",
+        "value": "30",
+        "hex": "#7A3800"
+      },
+      {
+        "name": "4/33 Dark Brown / Burgundy Mix",
+        "value": "4/33",
+        "hex": "linear-gradient(135deg,#3D2000 50%,#8F1112 50%)"
+      },
+      {
+        "name": "613 Platinum Blonde",
+        "value": "613",
+        "hex": "#D4C050"
+      },
+      {
+        "name": "Other colour",
+        "value": "other",
+        "hex": "linear-gradient(135deg,#1A1108 25%,#7A3800 25% 50%,#D4C050 50% 75%,#3D2000 75%)"
+      }
+    ]
+  },
+  {
+    "name": "Hair Texture",
+    "options": [
+      "Straight",
+      "Body Wave",
+      "Burmese Curly",
+      "Yaki Straight",
+      "Water Wave",
+      "Deep Wave",
+      "Kinky Curly",
+      "Kinky Straight"
+    ]
+  },
+  {
+    "name": "Size",
+    "options": [
+      {
+        "name": "Small",
+        "description": "Micro / pencil-width parting. More braids, longer install, delicate finish.",
+        "strandCount": 6,
+        "strandWidth": 3
+      },
+      {
+        "name": "Medium",
+        "description": "Standard parting. Full look, great longevity — perfect for most clients.",
+        "recommended": true,
+        "badge": "Most popular",
+        "strandCount": 4,
+        "strandWidth": 7
+      },
+      {
+        "name": "Large",
+        "description": "Chunky parting. Bold statement look, quicker install time.",
+        "strandCount": 3,
+        "strandWidth": 13
+      }
+    ]
+  },
+  {
+    "name": "Add-ons",
+    "options": [
+      { "name": "Beads", "serviceIds": ["braids"] },
+      {
+        "name": "Boho (curly/straight pieces)",
+        "addedCost": 15,
+        "serviceIds": ["braids"]
+      },
+      { "name": "Burnt ends", "addedCost": 10, "serviceIds": ["braids"] },
+      { "name": "Blow Dry", "addedCost": 15, "serviceIds": ["natural-hair"] },
+      {
+        "name": "Scalp analysis",
+        "pending": true,
+        "serviceIds": ["natural-hair"]
+      },
+      { "name": "Other", "serviceIds": ["all"] }
+    ]
+  }
+]

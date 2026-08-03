@@ -1,4 +1,4 @@
-import type { StrandConfig } from "../types/domain";
+import type { StrandConfig } from "../../types/domain";
 
 export const DEFAULT_STRAND_STYLE = "knotless";
 

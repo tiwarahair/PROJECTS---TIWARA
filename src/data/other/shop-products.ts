@@ -1,6 +1,7 @@
 export type ShopCategory = "hair" | "care" | "accessories";
 export type ShopFilter = ShopCategory | "all";
 
+// to do: read this file, sort shop data
 export interface ShopProduct {
   id: string;
   category: ShopCategory;

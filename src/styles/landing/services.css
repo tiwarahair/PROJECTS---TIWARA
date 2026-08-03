@@ -103,6 +103,7 @@
   color: var(--cream);
   line-height: 1.2;
   margin-bottom: 0.5rem;
+  white-space: pre-line;
 }
 .sc-desc {
   font-size: 0.78rem;

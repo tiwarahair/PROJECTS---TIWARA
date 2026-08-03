@@ -1,12 +1,12 @@
 import type {
   FooterColumn,
   NavLink,
-  ServiceCard,
   ShopCard,
   SocialLink,
   Testimonial,
-} from "../types/content";
-import type { ServiceCategoryKey } from "../types/domain";
+} from "../../types/content";
+import type { ServiceId } from "../../types/services";
+import { capitaliseServiceId, SERVICES } from "../services/services";
 
 export const NAV_LINKS: readonly NavLink[] = [
   { label: "Find a Stylist", href: "#", action: { kind: "search" } },
@@ -35,94 +35,43 @@ export const NAV_LINKS: readonly NavLink[] = [
  */
 export interface HeroChip {
   label: string;
-  filter: ServiceCategoryKey | "quiz";
+  filter: ServiceId | "quiz";
 }
 
 export const HERO_CHIPS: readonly HeroChip[] = [
-  { label: "Knotless Braids", filter: "braids" },
-  { label: "Wig Installs", filter: "wigs" },
-  { label: "Locs", filter: "locs" },
-  { label: "Natural Hair", filter: "natural" },
-  { label: "Treatments", filter: "treatments" },
+  ...SERVICES.map(({ id }) => ({
+    label:
+      id === "braids"
+        ? "Knotless Braids"
+        : id === "wigs"
+          ? "Wig Installs"
+          : capitaliseServiceId(id),
+    filter: id,
+  })),
   { label: "✦ Hair Quiz", filter: "quiz" },
 ];
 
-/* Nine names; the track renders them twice so the banner can loop seamlessly. */
-export const BANNER_ITEMS: readonly string[] = [
-  "Box Braids",
-  "Knotless Braids",
-  "Goddess Locs",
-  "Wig Installs",
-  "Fulani Braids",
-  "Senegalese Twists",
-  "Starter Locs",
-  "Silk Press",
-  "Cornrows",
-];
+// TO DO: REPLACE W/ JSON, MAKE UP FOR: hint, action etc. then add on the end of array: ✦AI stuff
 
-export const SERVICE_CARDS: readonly ServiceCard[] = [
-  {
-    number: "01",
-    titleLines: ["Braids &", "Protective Styles"],
-    description:
-      "Box braids, knotless, Fulani, cornrows and more — find a specialist near you.",
-    backgroundClass: "sc-bg-1",
+export const SERVICE_CARDS = [
+  ...SERVICES.map(({ id, label, description }) => ({
+    title: label.replace(/ (?!&)/, "\n"),
+    description,
     hint: "Find stylists",
     cta: "Find stylists",
-    action: "braids",
-  },
+    action: id,
+  })),
   {
-    number: "02",
-    titleLines: ["Wig", "Installs"],
-    description:
-      "Lace front, full lace, 360 wig installs and customisation. Flawless and tailored.",
-    backgroundClass: "sc-bg-2",
-    hint: "Find stylists",
-    cta: "Find stylists",
-    action: "wigs",
-  },
-  {
-    number: "03",
-    titleLines: ["Natural", "Hair Care"],
-    description:
-      "Wash & styles, blowouts, twist outs, and silk press treatments.",
-    backgroundClass: "sc-bg-3",
-    hint: "Find stylists",
-    cta: "Find stylists",
-    action: "natural",
-  },
-  {
-    number: "04",
-    titleLines: ["Locs &", "Twists"],
-    description:
-      "Starter locs, Senegalese twists, Marley twists, loc retwists and more.",
-    backgroundClass: "sc-bg-4",
-    hint: "Find stylists",
-    cta: "Find stylists",
-    action: "locs",
-  },
-  {
-    number: "05",
-    titleLines: ["Treatments"],
-    description:
-      "Deep conditioning, scalp treatments, protein and hot oil treatments.",
-    backgroundClass: "sc-bg-5",
-    hint: "Find stylists",
-    cta: "Find stylists",
-    action: "treatments",
-  },
-  {
-    number: "✦ AI",
-    titleLines: ["Style", "Discovery"],
+    title: "Style Discovery",
     description:
       "Upload an inspo photo — our AI identifies your style, colour & length, then links you straight to booking.",
-    backgroundClass: "sc-bg-6",
     hint: "Discover",
     cta: "Discover your look",
-    action: "ai",
+    action: "ai" as const,
   },
 ];
 
+// GETTING ADDED TO THE DB IN 'REVIEW' DOC
 export const TESTIMONIALS: readonly Testimonial[] = [
   {
     id: "t0",
@@ -147,6 +96,7 @@ export const TESTIMONIALS: readonly Testimonial[] = [
   },
 ];
 
+// TO DO: EXTRACT DATA WHEN WE START THE SHOP FEATURE
 export const SHOP_CARDS: readonly ShopCard[] = [
   {
     title: "Pre-Sectioned Boho Deep Wave",
@@ -181,26 +131,31 @@ export const SHOP_CARDS: readonly ShopCard[] = [
 ];
 
 export const FOOTER_SOCIALS: readonly SocialLink[] = [
-  { title: "Instagram", label: "IG" },
-  { title: "TikTok", label: "TT" },
-  { title: "WhatsApp", label: "WA" },
-  { title: "Pinterest", label: "PT" },
+  {
+    title: "Instagram",
+    label: "IG",
+    href: "https://www.instagram.com/tiwarashouse/",
+  },
+  {
+    title: "TikTok",
+    label: "TT",
+    href: "https://www.tiktok.com/@tiwarashouse?_r=1&_t=ZN-98YLLXCFDzq",
+  },
+  {
+    title: "Youtube",
+    label: "YT",
+    href: "https://www.youtube.com/@TiwarasHouse",
+  },
 ];
 
 export const FOOTER_COLUMNS: readonly FooterColumn[] = [
   {
     heading: "Styles",
-    links: [
-      {
-        label: "Braids & Protective Styles",
-        href: "#",
-        searchFilter: "braids",
-      },
-      { label: "Wig Installs", href: "#", searchFilter: "wigs" },
-      { label: "Natural Hair Care", href: "#", searchFilter: "natural" },
-      { label: "Locs & Twists", href: "#", searchFilter: "locs" },
-      { label: "Treatments", href: "#", searchFilter: "treatments" },
-    ],
+    links: SERVICES.map(({ id, label }) => ({
+      label,
+      href: "#",
+      searchFilter: id ?? "",
+    })),
   },
   {
     heading: "Platform",
@@ -209,7 +164,6 @@ export const FOOTER_COLUMNS: readonly FooterColumn[] = [
       { label: "Find a stylist", href: "#", searchFilter: "" },
       { label: "Join as a stylist", href: "#", page: "stylists" },
       { label: "Shop", href: "#", page: "shop" },
-      { label: "Blog & Journal", href: "#" },
     ],
   },
   {

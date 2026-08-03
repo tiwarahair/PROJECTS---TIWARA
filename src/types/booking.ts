@@ -1,6 +1,6 @@
-import type { ColourId, ServiceCategoryKey } from "./domain";
+import type { ServiceId } from "./services";
+import type { BraidSize, ColourId } from "./styles";
 
-export type BraidSize = "Small" | "Medium" | "Large";
 export type BookingStepIndex = 0 | 1 | 2 | 3 | 4 | 5 | 6 | 7;
 
 /**
@@ -93,7 +93,7 @@ export interface ReviewSnapshot {
 }
 
 export interface BookingState {
-  categoryKey: ServiceCategoryKey;
+  categoryKey: ServiceId;
   step: BookingStepIndex;
   styleId: string | null;
   /** Step 1 — the window the client is free in, and where they are. */

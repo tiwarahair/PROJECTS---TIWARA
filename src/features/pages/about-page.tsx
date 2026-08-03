@@ -5,7 +5,7 @@ import {
   ABOUT_STATS,
   ABOUT_STEPS,
   ABOUT_VALUES,
-} from "../../data/pages-content";
+} from "../../data/other/pages-content";
 import { PageOverlay } from "./page-overlay";
 import {
   PageCtaStrip,

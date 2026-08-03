@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import { cx } from "../../utils/class-names";
-import { QUICK_REPLIES } from "../../data/chatbot-content";
+import { QUICK_REPLIES } from "../../data/other/chatbot-content";
 import { useChatbot } from "./use-chatbot";
 
 // to do: check this / rework

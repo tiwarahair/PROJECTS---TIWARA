@@ -5,10 +5,10 @@ import { pageClosed } from "../../stores/overlays-slice";
 import {
   STYLIST_EXPERIENCE_OPTIONS,
   STYLIST_PERKS,
-  STYLIST_SERVICES,
-} from "../../data/pages-content";
+} from "../../data/other/pages-content";
 import { PageOverlay } from "./page-overlay";
 import { PageHero, PageSection } from "./page-blocks";
+import { STYLIST_SERVICES } from "../../data/services/services";
 
 interface StylistApplication {
   name: string;

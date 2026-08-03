@@ -6,12 +6,12 @@ import {
   profileOpened,
   searchOpened,
 } from "../stores/overlays-slice";
-import type { ServiceCategoryKey } from "../types/domain";
+import type { ServiceId } from "../types/services";
 
 export interface OverlayActions {
-  openSearch: (style?: ServiceCategoryKey | "") => void;
+  openSearch: (style?: ServiceId | "") => void;
   openProfile: (stylistId: string) => void;
-  openBooking: (categoryKey: ServiceCategoryKey, stylistName?: string) => void;
+  openBooking: (categoryKey: ServiceId, stylistName?: string) => void;
   openAiDiscovery: () => void;
 }
 

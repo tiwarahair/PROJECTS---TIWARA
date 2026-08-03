@@ -1,16 +1,17 @@
 import { cx } from "../../utils/class-names";
 import { useAppDispatch } from "../../stores/hooks";
 import { sizeGuideOpened } from "../../stores/overlays-slice";
-import { COLOURS } from "../../data/colours";
-import { LENGTH_OPTIONS } from "../../data/lengths";
-import { ADD_ONS, SIZE_OPTIONS } from "../../data/booking-calendar";
-import { getService } from "../../data/service-categories";
-import type { BraidSize } from "../../types/booking";
-import type { ColourId, ServiceCategoryKey } from "../../types/domain";
+import { LENGTH_OPTIONS } from "../../data/style-config/lengths";
+import { ADD_ONS } from "../../data/other/booking-calendar";
 import { BookingNav } from "./booking-nav";
+import { COLOUR_OPTIONS } from "../../data/style-config/colours";
+import type { BraidSize, ColourId } from "../../types/styles";
+import { SIZE_OPTIONS } from "../../data/style-config/size";
+import { getService } from "../../data/services/services";
+import type { ServiceId } from "../../types/services";
 
 export interface StepCustomiseProps {
-  serviceCategoryKey: ServiceCategoryKey;
+  serviceCategoryKey: ServiceId;
   colourId: ColourId;
   lengthIndex: number;
   size: BraidSize;
@@ -37,7 +38,8 @@ export function StepCustomise({
   onNext,
 }: StepCustomiseProps) {
   const dispatch = useAppDispatch();
-  const { hasLength, hasSize } = getService(serviceCategoryKey);
+  const { configs: { size: hasSize, length } = {} } =
+    getService(serviceCategoryKey);
 
   return (
     <>
@@ -50,7 +52,7 @@ export function StepCustomise({
           they were when the original toggled style.display. */}
       <div
         className="bp-custom-group"
-        style={hasLength ? undefined : { display: "none" }}
+        style={length ? undefined : { display: "none" }}
       >
         <span className="bp-custom-label">Length</span>
         <div className="bp-length-opts">
@@ -70,19 +72,19 @@ export function StepCustomise({
       <div className="bp-custom-group">
         <span className="bp-custom-label">Colour</span>
         <div className="bp-colour-grid">
-          {COLOURS.map(({ id, swatch, title, label }) => (
+          {COLOUR_OPTIONS.map(({ value, hex, name }) => (
             <div
-              key={id}
+              key={value}
               className={cx(
                 "bp-swatch",
-                id === "other" && "bp-swatch--other",
-                id === colourId && "sel",
+                value === "other" && "bp-swatch--other",
+                value === colourId && "sel",
               )}
-              style={{ background: swatch }}
-              title={title}
-              onClick={() => onSelectColour(id)}
+              style={{ background: hex }}
+              title={name}
+              onClick={() => onSelectColour(value)}
             >
-              <span className="bp-swatch-label">{label}</span>
+              <span className="bp-swatch-label">{name}</span>
             </div>
           ))}
         </div>
@@ -102,13 +104,13 @@ export function StepCustomise({
           </button>
         </span>
         <div className="bp-size-opts">
-          {SIZE_OPTIONS.map((option) => (
+          {SIZE_OPTIONS.map(({ name }) => (
             <div
-              key={option}
-              className={cx("bp-size-opt", option === size && "sel")}
-              onClick={() => onSelectSize(option)}
+              key={name}
+              className={cx("bp-size-opt", name === size && "sel")}
+              onClick={() => onSelectSize(name)}
             >
-              {option}
+              {name}
             </div>
           ))}
         </div>

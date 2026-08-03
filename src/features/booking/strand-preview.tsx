@@ -1,10 +1,10 @@
 import { useMemo } from "react";
 import { cx } from "../../utils/class-names";
 import { buildStrandPaths } from "../../utils/strand-path";
-import { findColourById } from "../../data/colours";
-import { lengthLabel, LENGTHS } from "../../data/lengths";
-import { strandConfigFor } from "../../data/strand-configs";
-import type { ColourId } from "../../types/domain";
+import { findColourById } from "../../data/style-config/colours";
+import { lengthLabel, LENGTHS } from "../../data/style-config/lengths";
+import { strandConfigFor } from "../../data/other/strand-configs";
+import type { ColourId } from "../../types/styles";
 
 export interface StrandPreviewProps {
   styleId: string | null;
@@ -38,7 +38,7 @@ export function StrandPreview({
       <div
         className="bp-img-glow"
         style={{
-          background: `radial-gradient(ellipse at center, ${colour.glow} 0%, transparent 70%)`,
+          background: `radial-gradient(ellipse at center, 0%, transparent 70%)`,
         }}
       />
       <div className="bp-img-shimmer" />
@@ -53,7 +53,6 @@ export function StrandPreview({
           <path
             key={index}
             d={path.pathData}
-            stroke={colour.strand}
             strokeWidth={config.width}
             fill="none"
             strokeLinecap="round"
@@ -71,7 +70,7 @@ export function StrandPreview({
       </div>
       <div className="bp-img-price">{stylePrice}</div>
       <div className="bp-img-info">
-        {/* TO DO: FIX PROGRESS BAR */}
+        {/* TO DO: FIX PROGRESS BAr, shouldnt use LENGTHs i think */}
         <div className="bp-img-length-bar">
           {LENGTHS.map((label, index) => (
             <div

@@ -3,6 +3,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { useBookingWizard } from "./use-booking-wizard";
 import { BOOKING_STEP } from "../../types/booking";
 import { defaultDateWindow } from "../../utils/dates";
+import { DEFAULT_COLOUR_ID } from "../../data/style-config/colours";
 import type { BookingSession } from "../../stores/overlays-slice";
 
 const AUTO_ADVANCE_MS = 320;
@@ -43,7 +44,7 @@ describe("useBookingWizard", () => {
     // The date window is pre-filled with today → +30 days.
     expect(result.current.booking.dateFrom).toBe(defaultDateWindow().from);
     expect(result.current.booking.dateTo).toBe(defaultDateWindow().to);
-    expect(result.current.booking.colourId).toBe("1b");
+    expect(result.current.booking.colourId).toBe(DEFAULT_COLOUR_ID);
     expect(result.current.booking.lengthIndex).toBe(1);
   });
 
@@ -266,7 +267,7 @@ describe("useBookingWizard", () => {
       expect(result.current.booking.stylistId).toBeNull();
       expect(result.current.booking.dateFrom).toBe(defaultDateWindow().from);
       expect(result.current.booking.location).toBe("");
-      expect(result.current.booking.colourId).toBe("1b");
+      expect(result.current.booking.colourId).toBe(DEFAULT_COLOUR_ID);
       expect(result.current.booking.lengthIndex).toBe(1);
     });
 

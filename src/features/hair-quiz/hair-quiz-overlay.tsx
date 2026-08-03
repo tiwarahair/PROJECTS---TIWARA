@@ -9,7 +9,7 @@ import {
   resultTitleFor,
   type QuizAnswers,
   type QuizSlide,
-} from "../../data/hair-quiz";
+} from "../../data/other/hair-quiz";
 
 /** Single-choice answers move on after a brief pause so the tap registers. */
 const AUTO_ADVANCE_MS = 280;

@@ -1,12 +1,8 @@
 import { cx } from "../../utils/class-names";
 import { useAppDispatch, useAppSelector } from "../../stores/hooks";
 import { sizeGuideClosed } from "../../stores/overlays-slice";
-import {
-  SG_STRAND_HEIGHT,
-  SIZE_GUIDE_ITEMS,
-  SIZE_GUIDE_NOTE,
-} from "../../data/guide-content";
 import { GuideModal } from "./guide-modal";
+import { SIZE_OPTIONS } from "../../data/style-config/size";
 
 export function SizeGuideModal() {
   const dispatch = useAppDispatch();
@@ -20,7 +16,7 @@ export function SizeGuideModal() {
       onClose={() => dispatch(sizeGuideClosed())}
     >
       <div className="size-guide-grid">
-        {SIZE_GUIDE_ITEMS.map(
+        {SIZE_OPTIONS.map(
           ({
             name,
             recommended,
@@ -34,13 +30,13 @@ export function SizeGuideModal() {
               className={cx("sg-item", recommended && "recommended")}
             >
               <div className="sg-visual">
-                {Array.from({ length: strandCount }, (_unused, index) => (
+                {Array.from({ length: strandCount || 0 }, (_unused, index) => (
                   <div
                     key={index}
                     className="sg-strand"
                     style={{
                       width: `${strandWidth}px`,
-                      height: `${SG_STRAND_HEIGHT}px`,
+                      height: `${52}px`,
                     }}
                   />
                 ))}
@@ -52,7 +48,10 @@ export function SizeGuideModal() {
           ),
         )}
       </div>
-      <div className="sg-note">{SIZE_GUIDE_NOTE}</div>
+      <div className="sg-note">
+        ✶ Medium is our most-requested size and recommended for first-time
+        clients. Your stylist will advise at the appointment.
+      </div>
     </GuideModal>
   );
 }

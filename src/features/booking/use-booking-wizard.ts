@@ -1,11 +1,13 @@
 import { useCallback, useEffect, useRef, useState } from "react";
-import { DEFAULT_COLOUR_ID, findColourById } from "../../data/colours";
-import { DEFAULT_LENGTH_INDEX, lengthLabel } from "../../data/lengths";
-import { ADD_ONS } from "../../data/booking-calendar";
 import {
-  getService,
-  getIndividualService,
-} from "../../data/service-categories";
+  DEFAULT_COLOUR_ID,
+  findColourById,
+} from "../../data/style-config/colours";
+import {
+  DEFAULT_LENGTH_INDEX,
+  lengthLabel,
+} from "../../data/style-config/lengths";
+import { ADD_ONS } from "../../data/other/booking-calendar";
 import { calcDeposit, calcPlatformFee } from "../../utils/money";
 import { defaultDateWindow } from "../../utils/dates";
 import type {
@@ -13,7 +15,6 @@ import type {
   BookingState,
   BookingStepIndex,
   BookingTotals,
-  BraidSize,
   ReviewSnapshot,
 } from "../../types/booking";
 import {
@@ -21,8 +22,9 @@ import {
   FULL_SEQUENCE,
   STYLIST_KNOWN_SEQUENCE,
 } from "../../types/booking";
-import type { ColourId } from "../../types/domain";
 import type { BookingSession } from "../../stores/overlays-slice";
+import type { BraidSize, ColourId } from "../../types/styles";
+import { getIndividualService, getService } from "../../data/services/services";
 
 // TO DO: READ FILE
 // TO DO: Move this into the store so the wizard can be rehydrated on refresh. The current implementation is a direct port of the original, which kept the state in the DOM and lost it on refresh. The store would also allow the wizard to be opened from a search card without losing the chosen stylist, and to be rehydrated if the user navigates away and back again.
@@ -32,9 +34,6 @@ const AUTO_ADVANCE_MS = 320;
 
 /** Picking a stylist advances slightly more slowly, matching the new-ui flow. */
 const STYLIST_ADVANCE_MS = 300;
-
-/** Fallback price when no style has been chosen yet. */
-const FALLBACK_BASE_PRICE = 130;
 
 const EMPTY_DETAILS: BookingDetails = {
   firstName: "",
@@ -92,7 +91,7 @@ function initialState(session: BookingSession): BookingState {
 /** Chosen style's base price plus any ticked add-ons. */
 export function totalsOf(state: BookingState): BookingTotals {
   const style = getIndividualService(state.categoryKey, state.styleId);
-  const base = style?.base ?? FALLBACK_BASE_PRICE;
+  const base = style?.defaultPrice ?? 0;
 
   let addOnTotal = 0;
   for (const addOn of ADD_ONS) {
@@ -112,7 +111,7 @@ export function totalsOf(state: BookingState): BookingTotals {
 function snapshotOf(state: BookingState): ReviewSnapshot {
   const style = getIndividualService(state.categoryKey, state.styleId);
   return {
-    service: style?.name ?? "—",
+    service: style?.label ?? "—",
     colour: findColourById(state.colourId).name,
     length: lengthLabel(state.lengthIndex),
     size: state.size,
@@ -231,7 +230,7 @@ export function useBookingWizard(session: BookingSession): BookingWizard {
       // Continuing from the style step without a choice picks the first style.
       const styleId =
         current.step === BOOKING_STEP.style && !current.styleId
-          ? (getService(current.categoryKey).styles[0]?.id ?? null)
+          ? (getService(current.categoryKey).individualServices[0]?.id ?? null)
           : current.styleId;
 
       const position = sequence.indexOf(current.step);

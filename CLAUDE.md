@@ -32,6 +32,7 @@ Keep changes scoped to the requested task. Avoid opportunistic churn.
 - All new changes should be on a separate branch (NOT main), always checkout from the most up to date main, if you are already on a separate branch ignore this and stay on this branch
 
 - If there is a well-known package out there that can achieve a certain piece of logic, outsource this logic to the package, but ASK FIRST, before you decide to install it
+- don't recreate logic/data that already exists in the codebase
 
 ## TypeScript Guidance
 

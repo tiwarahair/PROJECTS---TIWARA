@@ -4,7 +4,7 @@ import { StarRating } from "../../components/star-rating";
 import { useAppDispatch, useAppSelector } from "../../stores/hooks";
 import { bookingOpened, profileClosed } from "../../stores/overlays-slice";
 import { findStylist } from "../../data/stylists";
-import type { ServiceCategoryKey } from "../../types/domain";
+import type { ServiceId } from "../../types/services";
 
 const PORTFOLIO_TILES = [1, 2, 3, 4, 5, 6];
 
@@ -46,7 +46,7 @@ export function ProfileOverlay() {
     if (!stylist) return;
     dispatch(
       bookingOpened({
-        categoryKey: catKey as ServiceCategoryKey,
+        categoryKey: catKey as ServiceId,
         stylistId: id,
         stylistName: name,
       }),

@@ -1,5 +1,6 @@
 import type { Stylist } from "../types/domain";
 
+// last 1....
 // TO DO: HAVE THIS IN DB, THIS IS A PLACEHOLDER FOR NOW
 export const STYLISTS: readonly Stylist[] = [
   {
@@ -9,7 +10,7 @@ export const STYLISTS: readonly Stylist[] = [
     speciality: "Knotless Braids Specialist",
     rating: 4.9,
     reviewCount: 127,
-    tags: ["braids", "wigs", "natural", "locs", "treatments"],
+    tags: ["braids", "wigs", "natural-hair", "locs", "treatments"],
     startingPrice: 60,
     nextAvail: "Thu 10 Jul",
     featured: true,
@@ -51,7 +52,7 @@ export const STYLISTS: readonly Stylist[] = [
     speciality: "Wig Install & Natural Hair Expert",
     rating: 4.8,
     reviewCount: 89,
-    tags: ["wigs", "natural", "treatments"],
+    tags: ["wigs", "natural-hair", "treatments"],
     startingPrice: 55,
     nextAvail: "Fri 11 Jul",
     featured: true,
@@ -93,7 +94,7 @@ export const STYLISTS: readonly Stylist[] = [
     speciality: "Locs & Protective Styles",
     rating: 4.9,
     reviewCount: 63,
-    tags: ["locs", "braids", "natural"],
+    tags: ["locs", "braids", "natural-hair"],
     startingPrice: 60,
     nextAvail: "Sat 12 Jul",
     featured: true,

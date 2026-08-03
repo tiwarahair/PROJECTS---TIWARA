@@ -1,13 +1,22 @@
-import { Fragment } from "react";
 import { cx } from "../../utils/class-names";
 import { useFadeIn } from "../../hooks/use-fade-in";
 import { useOverlayActions } from "../../hooks/use-overlay-actions";
-import { SERVICE_CARDS } from "../../data/landing-content";
+import { SERVICE_CARDS } from "../../data/other/landing-content";
 
 export function ServicesGrid() {
   const [headRef, headVisible] = useFadeIn<HTMLDivElement>();
   const [gridRef, gridVisible] = useFadeIn<HTMLDivElement>();
   const { openBooking, openAiDiscovery } = useOverlayActions();
+
+  const numbers = ["01", "02", "03", "04", "05", "✦ AI"];
+  const backgroundClasses = [
+    "sc-bg-1",
+    "sc-bg-2",
+    "sc-bg-3",
+    "sc-bg-4",
+    "sc-bg-5",
+    "sc-bg-6",
+  ];
 
   return (
     <section className="services" id="services">
@@ -23,17 +32,9 @@ export function ServicesGrid() {
         className={cx("services-grid", "fade-in", gridVisible && "visible")}
       >
         {SERVICE_CARDS.map(
-          ({
-            number,
-            action,
-            backgroundClass,
-            hint,
-            titleLines,
-            description,
-            cta,
-          }) => (
+          ({ action, hint, title, description, cta }, index) => (
             <div
-              key={number}
+              key={numbers[index]}
               className={cx("service-card", action === "ai" && "sc-ai-tile")}
               // A style card starts a booking directly rather than dropping
               // the user into search first.
@@ -41,18 +42,11 @@ export function ServicesGrid() {
                 action === "ai" ? openAiDiscovery() : openBooking(action)
               }
             >
-              <div className={cx("sc-bg", backgroundClass)} />
+              <div className={cx("sc-bg", backgroundClasses[index])} />
               <div className="sc-open-hint">{hint}</div>
               <div className="service-card-content">
-                <span className="sc-num">{number}</span>
-                <div className="sc-title">
-                  {titleLines.map((line, index) => (
-                    <Fragment key={line}>
-                      {index > 0 && <br />}
-                      {line}
-                    </Fragment>
-                  ))}
-                </div>
+                <span className="sc-num">{numbers[index]}</span>
+                <div className="sc-title">{title}</div>
                 <div className="sc-desc">{description}</div>
                 <span className="sc-cta">{cta}</span>
               </div>

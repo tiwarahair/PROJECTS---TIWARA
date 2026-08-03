@@ -4,7 +4,7 @@ import {
   CALENDAR_DAYS,
   CALENDAR_MONTH_LABEL,
   TIME_SLOTS,
-} from "../../data/booking-calendar";
+} from "../../data/other/booking-calendar";
 import { BookingNav } from "./booking-nav";
 
 export interface StepScheduleProps {
