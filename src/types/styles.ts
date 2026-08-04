@@ -1,3 +1,10 @@
+// === styles ===
+export interface StyleConfig {
+  name: "Length" | "Colour" | "Hair Texture" | "Size" | "Add-ons";
+  options:
+    ColourOption[] | LengthOption[] | string[] | SizeOption[] | AddOnOption[];
+}
+
 // Length
 export type Length = "Bob" | "Shoulder" | "Bra length" | "Waist length / bum";
 
@@ -37,6 +44,15 @@ export interface SizeOption {
 
 // Add-ons
 export interface AddOnOption {
+  id:
+    | "beads"
+    | "boho"
+    | "burnt-ends"
+    | "blow-dry"
+    | "scalp-analysis"
+    | "other"
+    | "layers"
+    | "curls";
   name: string;
   addedCost?: number;
   serviceIds: string[];

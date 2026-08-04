@@ -1,4 +1,4 @@
-import type { AddOn, CalendarDay, TimeSlot } from "../../types/booking";
+import type { CalendarDay, TimeSlot } from "../../types/booking";
 
 // to do: read
 
@@ -38,23 +38,4 @@ export const TIME_SLOTS: readonly TimeSlot[] = [
   { id: "1330", label: "1:30 pm", taken: false },
   { id: "1500", label: "3:00 pm", taken: false },
   { id: "1630", label: "4:30 pm", taken: false },
-];
-
-export const ADD_ONS: readonly AddOn[] = [
-  { id: "boho", label: "Boho (curly pieces)", price: 15 },
-  { id: "blowdry", label: "Blow dry", price: 15 },
-  {
-    id: "scalp-analysis",
-    label: "Scalp analysis",
-    price: 0,
-    comingSoon: true,
-  },
-  { id: "beads", label: "Beads", price: 0 },
-  { id: "burnt-ends", label: "Burnt ends", price: 10 },
-  {
-    id: "other",
-    label: "Other",
-    price: 0,
-    note: "(specify in appointment notes)",
-  },
 ];

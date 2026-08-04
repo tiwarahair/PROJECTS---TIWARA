@@ -50,15 +50,21 @@
     "individualServices": [
       {
         "id": "lacefront",
-        "label": "Lace Front Install",
+        "label": "Lace Frontal Install",
         "defaultPrice": 120,
         "defaultDuration": "2–3h"
       },
       {
         "id": "fulllace",
-        "label": "Full Lace Install",
+        "label": "Lace Closure Install",
         "defaultPrice": 150,
         "defaultDuration": "2.5–3.5h"
+      },
+      {
+        "id": "glueless",
+        "label": "Glueless Install",
+        "defaultPrice": 150,
+        "defaultDuration": "1.5–2.5h"
       },
       {
         "id": "360",

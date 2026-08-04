@@ -7,7 +7,6 @@ import {
   DEFAULT_LENGTH_INDEX,
   lengthLabel,
 } from "../../data/style-config/lengths";
-import { ADD_ONS } from "../../data/other/booking-calendar";
 import { calcDeposit, calcPlatformFee } from "../../utils/money";
 import { defaultDateWindow } from "../../utils/dates";
 import type {
@@ -25,6 +24,7 @@ import {
 import type { BookingSession } from "../../stores/overlays-slice";
 import type { BraidSize, ColourId } from "../../types/styles";
 import { getIndividualService, getService } from "../../data/services/services";
+import { ADD_ON_OPTIONS } from "../../data/style-config/add-ons";
 
 // TO DO: READ FILE
 // TO DO: Move this into the store so the wizard can be rehydrated on refresh. The current implementation is a direct port of the original, which kept the state in the DOM and lost it on refresh. The store would also allow the wizard to be opened from a search card without losing the chosen stylist, and to be rehydrated if the user navigates away and back again.
@@ -94,8 +94,8 @@ export function totalsOf(state: BookingState): BookingTotals {
   const base = style?.defaultPrice ?? 0;
 
   let addOnTotal = 0;
-  for (const addOn of ADD_ONS) {
-    if (state.addOnIds.includes(addOn.id)) addOnTotal += addOn.price;
+  for (const { id, addedCost = 0 } of ADD_ON_OPTIONS) {
+    if (state.addOnIds.includes(id)) addOnTotal += addedCost;
   }
 
   const total = base + addOnTotal;

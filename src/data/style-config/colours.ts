@@ -1,17 +1,5 @@
 import styleConfig from "./style-config.json";
-import type {
-  ColourOption,
-  ColourId,
-  AddOnOption,
-  SizeOption,
-  LengthOption,
-} from "../../types/styles";
-
-export interface StyleConfig {
-  name: "Length" | "Colour" | "Hair Texture" | "Size" | "Add-ons";
-  options:
-    ColourOption[] | LengthOption[] | string[] | SizeOption[] | AddOnOption[];
-}
+import type { ColourOption, ColourId, StyleConfig } from "../../types/styles";
 
 const STYLE_CONFIG = styleConfig as StyleConfig[];
 

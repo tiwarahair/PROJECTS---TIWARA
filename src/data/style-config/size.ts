@@ -1,6 +1,5 @@
-import type { SizeOption } from "../../types/styles";
+import type { SizeOption, StyleConfig } from "../../types/styles";
 import styleConfig from "./style-config.json";
-import type { StyleConfig } from "./colours";
 
 const STYLE_CONFIG = styleConfig as StyleConfig[];
 

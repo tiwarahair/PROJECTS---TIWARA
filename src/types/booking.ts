@@ -45,16 +45,6 @@ export const STYLIST_KNOWN_SEQUENCE: readonly BookingStepIndex[] = [
   BOOKING_STEP.confirm,
 ];
 
-export interface AddOn {
-  id: string;
-  label: string;
-  price: number;
-  /** Rendered disabled with a "Coming soon" tag instead of a price. */
-  comingSoon?: boolean;
-  /** Replaces the price with a note, for the free-text "Other" option. */
-  note?: string;
-}
-
 export interface CalendarDay {
   day: number;
   available: boolean;

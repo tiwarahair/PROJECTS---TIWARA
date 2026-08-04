@@ -90,20 +90,44 @@
   {
     "name": "Add-ons",
     "options": [
-      { "name": "Beads", "serviceIds": ["braids"] },
+      { "id": "beads", "name": "Beads", "serviceIds": ["braids"] },
       {
+        "id": "boho",
         "name": "Boho (curly/straight pieces)",
         "addedCost": 15,
         "serviceIds": ["braids"]
       },
-      { "name": "Burnt ends", "addedCost": 10, "serviceIds": ["braids"] },
-      { "name": "Blow Dry", "addedCost": 15, "serviceIds": ["natural-hair"] },
       {
+        "id": "burnt-ends",
+        "name": "Burnt ends",
+        "addedCost": 10,
+        "serviceIds": ["braids"]
+      },
+      {
+        "id": "blow-dry",
+        "name": "Blow Dry",
+        "addedCost": 15,
+        "serviceIds": ["natural-hair"]
+      },
+      {
+        "id": "scalp-analysis",
         "name": "Scalp analysis",
         "pending": true,
         "serviceIds": ["natural-hair"]
       },
-      { "name": "Other", "serviceIds": ["all"] }
+      {
+        "id": "layers",
+        "name": "Layers",
+        "addedCost": 5,
+        "serviceIds": ["wigs"]
+      },
+      {
+        "id": "curls",
+        "name": "Curls",
+        "addedCost": 5,
+        "serviceIds": ["wigs"]
+      },
+      { "id": "other", "name": "Other", "serviceIds": ["all"] }
     ]
   }
 ]
