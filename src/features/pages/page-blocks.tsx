@@ -1,5 +1,6 @@
 import type { ReactNode } from "react";
 import { cx } from "../../utils/class-names";
+import { useFadeIn } from "../../hooks/use-fade-in";
 
 export type PageHeroTone = "espresso" | "gold" | "forest";
 
@@ -12,9 +13,13 @@ export interface PageHeroProps {
 }
 
 export function PageHero({ tone, eyebrow, title, subtitle }: PageHeroProps) {
+  const [heroRef, heroVisible] = useFadeIn<HTMLDivElement>();
   return (
     <div className={cx("pg-hero", `pg-hero--${tone}`)}>
-      <div className="pg-hero-inner">
+      <div
+        className={cx("pg-hero-inner", "fade-in", heroVisible && "visible")}
+        ref={heroRef}
+      >
         <div className="pg-eyebrow">{eyebrow}</div>
         <h1 className="pg-title">{title}</h1>
         <p className="pg-sub">{subtitle}</p>

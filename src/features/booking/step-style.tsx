@@ -1,6 +1,6 @@
 import { cx } from "../../utils/class-names";
 import { useAppDispatch } from "../../stores/hooks";
-import { pageOpened } from "../../stores/overlays-slice";
+import { modalOpened } from "../../stores/modals-slice";
 import { getService } from "../../data/services/services";
 import type { ServiceId } from "../../types/services";
 
@@ -53,7 +53,7 @@ export function StepStyle({
         how will we get back to the customer? */}
         <div
           className="bp-style-card bp-style-other"
-          onClick={() => dispatch(pageOpened("otherStyle"))}
+          onClick={() => dispatch(modalOpened("otherStyle"))}
         >
           <div className="bp-style-other-inner">
             <div className="bp-style-other-icon">+</div>

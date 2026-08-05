@@ -1,12 +1,13 @@
 import { cx } from "../../utils/class-names";
 import { useFadeIn } from "../../hooks/use-fade-in";
-import { useOverlayActions } from "../../hooks/use-overlay-actions";
+import { Link, useNavigate } from "react-router";
+import { PATH, profilePath } from "../../routes/routes";
 import { StarRating } from "../../components/star-rating";
 import { STYLISTS } from "../../data/stylists";
 
 export function FeaturedStylists() {
   const [headerRef, headerVisible] = useFadeIn<HTMLDivElement>();
-  const { openSearch, openProfile } = useOverlayActions();
+  const navigate = useNavigate();
   const featured = STYLISTS.filter(({ featured }) => featured);
 
   return (
@@ -20,21 +21,15 @@ export function FeaturedStylists() {
             <span className="section-label">Featured stylists</span>
             <h2 className="fs-heading">Top rated on the platform</h2>
           </div>
-          <a
-            href="#"
-            className="fs-see-all"
-            onClick={(event) => {
-              event.preventDefault();
-              openSearch("");
-            }}
-          >
+          <Link to={PATH.search} className="fs-see-all">
             See all stylists →
-          </a>
+          </Link>
         </div>
         <div className="fs-track" id="fsTrack">
           {featured.map(
             ({
               id,
+              slug,
               background,
               flagship,
               name,
@@ -43,7 +38,11 @@ export function FeaturedStylists() {
               rating,
               startingPrice,
             }) => (
-              <div key={id} className="fs-card" onClick={() => openProfile(id)}>
+              <div
+                key={id}
+                className="fs-card"
+                onClick={() => navigate(profilePath(slug))}
+              >
                 <div className="fs-card-img" style={{ background }}>
                   {flagship && <div className="fs-flagship">✶ Flagship</div>}
                 </div>
@@ -61,7 +60,7 @@ export function FeaturedStylists() {
                       className="fs-card-btn"
                       onClick={(event) => {
                         event.stopPropagation();
-                        openProfile(id);
+                        navigate(profilePath(slug));
                       }}
                     >
                       View profile →

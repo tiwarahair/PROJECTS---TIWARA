@@ -1,9 +1,8 @@
 import { useState } from "react";
 import { cx } from "../../utils/class-names";
 import { useFadeIn } from "../../hooks/use-fade-in";
-import { useOverlayActions } from "../../hooks/use-overlay-actions";
-import { useAppDispatch } from "../../stores/hooks";
-import { pageOpened } from "../../stores/overlays-slice";
+import { Link, useNavigate } from "react-router";
+import { PATH, searchPath } from "../../routes/routes";
 import { HERO_CHIPS } from "../../data/other/landing-content";
 import type { ServiceId } from "../../types/services";
 import { SERVICES } from "../../data/services/services";
@@ -15,8 +14,7 @@ export function HeroSection() {
   const [contentRef, contentVisible] = useFadeIn<HTMLDivElement>();
   const [location, setLocation] = useState("");
   const [style, setStyle] = useState<ServiceId | "">("");
-  const { openSearch } = useOverlayActions();
-  const dispatch = useAppDispatch();
+  const navigate = useNavigate();
 
   return (
     <section className="hero">
@@ -72,24 +70,28 @@ export function HeroSection() {
               onChange={(event) => setLocation(event.target.value)}
             />
           </div>
-          <button className="hs-btn" onClick={() => openSearch(style)}>
+          {/* `location` is still never read by the search, exactly as before. */}
+          <button
+            className="hs-btn"
+            onClick={() => navigate(searchPath({ style }))}
+          >
             Search
           </button>
         </div>
 
         <div className="hero-chips">
           {HERO_CHIPS.map(({ label, filter }) => (
-            <span
+            <Link
               key={label}
               className="hero-chip"
-              onClick={() =>
+              to={
                 filter === "quiz"
-                  ? dispatch(pageOpened("hairQuiz"))
-                  : openSearch(filter)
+                  ? PATH.hairQuiz
+                  : searchPath({ style: filter })
               }
             >
               {label}
-            </span>
+            </Link>
           ))}
         </div>
       </div>

@@ -19,6 +19,11 @@
   --gold-pale: rgba(223, 207, 62, 0.12);
   --dark: #241811;
   --dark2: #3a2b20;
+  /* Measured height of the fixed nav. Pages pad their top by this so their
+     content starts flush beneath it — a larger value leaves a cream seam
+     above the sticky sub-headers. responsive.css overrides it below 900px,
+     where the nav's padding shrinks. */
+  --nav-h: 62px;
   --serif: "Fraunces", Georgia, serif;
   --sans: "Inter", sans-serif;
   --label: "Space Grotesk", sans-serif;

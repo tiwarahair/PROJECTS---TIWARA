@@ -7,25 +7,18 @@ import type {
 } from "../../types/content";
 import type { ServiceId } from "../../types/services";
 import { capitaliseServiceId, SERVICES } from "../services/services";
+import { PATH, searchPath } from "../../routes/routes";
 
 export const NAV_LINKS: readonly NavLink[] = [
-  { label: "Find a Stylist", href: "#", action: { kind: "search" } },
-  { label: "Browse Styles", href: "#services" },
-  { label: "Hair Quiz", href: "#", action: { kind: "page", page: "hairQuiz" } },
-  {
-    label: "For Stylists",
-    href: "#",
-    action: { kind: "page", page: "stylists" },
-  },
-  { label: "Shop", href: "#", action: { kind: "page", page: "shop" } },
-  { label: "About", href: "#", action: { kind: "page", page: "about" } },
-  { label: "Contact", href: "#contact" },
-  {
-    label: "Book now",
-    href: "#",
-    action: { kind: "search" },
-    className: "nav-cta",
-  },
+  { label: "Find a Stylist", to: PATH.search },
+  // Anchors are absolute so they still work from a page other than the landing route, where the target element is not mounted yet.
+  { label: "Browse Styles", to: "/#services" },
+  { label: "Hair Quiz", to: PATH.hairQuiz },
+  { label: "For Stylists", to: PATH.forStylists },
+  { label: "Shop", to: PATH.shop },
+  { label: "About", to: PATH.about },
+  { label: "Contact", to: "/#contact" },
+  { label: "Book now", to: PATH.book, className: "nav-cta" },
 ];
 
 /**
@@ -153,27 +146,27 @@ export const FOOTER_COLUMNS: readonly FooterColumn[] = [
     heading: "Styles",
     links: SERVICES.map(({ id, label }) => ({
       label,
-      href: "#",
-      searchFilter: id ?? "",
+      to: searchPath({ style: id }),
     })),
   },
   {
     heading: "Platform",
     links: [
-      { label: "About us", href: "#", page: "about" },
-      { label: "Find a stylist", href: "#", searchFilter: "" },
-      { label: "Join as a stylist", href: "#", page: "stylists" },
-      { label: "Shop", href: "#", page: "shop" },
+      { label: "About us", to: PATH.about },
+      { label: "Find a stylist", to: PATH.search },
+      { label: "Join as a stylist", to: PATH.forStylists },
+      { label: "Shop", to: PATH.shop },
     ],
   },
   {
     heading: "Legal",
     links: [
-      { label: "Privacy Policy", href: "#" },
-      { label: "Terms of Service", href: "#" },
-      { label: "Cancellation Policy", href: "#" },
-      { label: "Stylist Terms", href: "#" },
-      { label: "Cookie Policy", href: "#" },
+      // TO DO: no destinations yet; reserved in RESERVED_SLUGS.
+      { label: "Privacy Policy" },
+      { label: "Terms of Service" },
+      { label: "Cancellation Policy" },
+      { label: "Stylist Terms" },
+      { label: "Cookie Policy" },
     ],
   },
 ];

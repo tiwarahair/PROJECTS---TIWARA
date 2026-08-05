@@ -1,72 +1,12 @@
 /* ════════════════════════════════════════════════
-   PROFILE OVERLAY
+   STYLIST PROFILE PAGE
+
+   A stylist's own storefront: no site nav, no top bar. Sticky booking bar
+   and the powered-by band at the foot.
 ════════════════════════════════════════════════ */
 .prof-overlay {
-  position: fixed;
-  inset: 0;
-  z-index: 600;
   background: var(--cream);
-  display: flex;
-  flex-direction: column;
-  transform: translateX(100%);
-  transition: transform 0.45s cubic-bezier(0.4, 0, 0.2, 1);
-}
-.prof-overlay.open {
-  transform: translateX(0);
-}
-
-.prof-nav {
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  z-index: 10;
-  height: 58px;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 0 2rem;
-  background: linear-gradient(to bottom, rgba(8, 6, 4, 0.7), transparent);
-}
-.prof-back {
-  display: flex;
-  align-items: center;
-  gap: 0.4rem;
-  font-size: 0.8rem;
-  font-weight: 500;
-  color: rgba(246, 240, 228, 0.75);
-  background: none;
-  border: none;
-  cursor: pointer;
-  font-family: var(--sans);
-  transition: color 0.2s;
-}
-.prof-back:hover {
-  color: var(--gold);
-}
-.prof-back::before {
-  content: "←";
-  margin-right: 0.2rem;
-}
-.prof-book-top {
-  background: var(--orange);
-  color: var(--cream);
-  border: none;
-  padding: 0.5rem 1.25rem;
-  border-radius: 30px;
-  font-size: 0.78rem;
-  font-weight: 500;
-  cursor: pointer;
-  font-family: var(--sans);
-  transition: background 0.2s;
-}
-.prof-book-top:hover {
-  background: var(--orange-mid);
-}
-
-.prof-scroll {
-  flex: 1;
-  overflow-y: auto;
+  min-height: 100vh;
 }
 
 .prof-hero {
@@ -271,14 +211,17 @@
   font-style: italic;
 }
 
+/* Booking bar, pinned to the bottom of the viewport as the profile scrolls. */
 .prof-footer {
+  position: sticky;
+  bottom: 0;
+  z-index: 20;
   background: var(--cream);
   border-top: 1px solid rgba(36, 24, 17, 0.08);
   padding: 1rem 2rem;
   display: flex;
   align-items: center;
   justify-content: space-between;
-  flex-shrink: 0;
   gap: 1rem;
 }
 .prof-footer-info {
@@ -315,4 +258,40 @@
 .prof-cta-btn:hover {
   background: var(--orange-mid);
   transform: translateY(-1px);
+}
+
+/* ── Powered-by band ──────────────────────────────────────────────────────
+   The only route back to the platform from a stylist's page, so the
+   wordmark is the link rather than a separate "back" control. */
+.prof-powered {
+  border-top: 1px solid rgba(36, 24, 17, 0.1);
+  padding: 2.25rem 2rem;
+  display: flex;
+  align-items: baseline;
+  justify-content: center;
+  gap: 0.6rem;
+}
+.prof-powered-label {
+  font-family: var(--label);
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: var(--green-mid);
+  letter-spacing: 0.2px;
+}
+.prof-powered-mark {
+  font-family: var(--serif);
+  font-size: 1.15rem;
+  font-weight: 400;
+  color: var(--green);
+  text-decoration: none;
+  letter-spacing: -0.2px;
+  transition: opacity 0.2s;
+}
+.prof-powered-mark:hover {
+  opacity: 0.6;
+}
+.prof-powered-mark sup {
+  font-size: 0.55rem;
+  vertical-align: super;
+  color: var(--gold);
 }

@@ -1,6 +1,6 @@
 import { cx } from "../../utils/class-names";
-import { useAppDispatch } from "../../stores/hooks";
-import { bookingClosed, searchOpened } from "../../stores/overlays-slice";
+import { useNavigate } from "react-router";
+import { searchPath } from "../../routes/routes";
 import { STYLISTS } from "../../data/stylists";
 import { filterStylists, stylistCountLabel } from "../../utils/filter-stylists";
 import { StarRating } from "../../components/star-rating";
@@ -49,7 +49,7 @@ export function StepStylist({
   onSelectStylist,
   onBack,
 }: StepStylistProps) {
-  const dispatch = useAppDispatch();
+  const navigate = useNavigate();
   const available = filterStylists(STYLISTS, {
     style: serviceCategoryKey,
     location,
@@ -76,8 +76,7 @@ export function StepStylist({
               href="#"
               onClick={(event) => {
                 event.preventDefault();
-                dispatch(bookingClosed());
-                dispatch(searchOpened(""));
+                navigate(searchPath());
               }}
             >
               Browse all stylists

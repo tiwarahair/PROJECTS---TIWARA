@@ -15,6 +15,12 @@ export interface StylistReview {
 
 export interface Stylist {
   id: string;
+  /**
+   * URL segment for the profile page, e.g. "tiwaras-house". Stored rather than
+   * derived from `name` so a business can rename itself without breaking every
+   * link anyone has shared. Must not collide with `RESERVED_SLUGS`.
+   */
+  slug: string;
   name: string;
   city: string;
   speciality: string;

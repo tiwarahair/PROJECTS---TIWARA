@@ -1,10 +1,12 @@
 import type { Stylist } from "../types/domain";
+import { RESERVED_SLUGS } from "../routes/routes";
 
 // last 1....
 // TO DO: HAVE THIS IN DB, THIS IS A PLACEHOLDER FOR NOW
 export const STYLISTS: readonly Stylist[] = [
   {
     id: "tiwara",
+    slug: "tiwaras-house",
     name: "Tiwara's House",
     city: "Manchester",
     speciality: "Knotless Braids Specialist",
@@ -47,6 +49,7 @@ export const STYLISTS: readonly Stylist[] = [
   },
   {
     id: "amara",
+    slug: "amara-beauty",
     name: "Amara Beauty",
     city: "London",
     speciality: "Wig Install & Natural Hair Expert",
@@ -89,6 +92,7 @@ export const STYLISTS: readonly Stylist[] = [
   },
   {
     id: "nia",
+    slug: "naturally-nia",
     name: "NaturallyNia",
     city: "Birmingham",
     speciality: "Locs & Protective Styles",
@@ -131,6 +135,7 @@ export const STYLISTS: readonly Stylist[] = [
   },
   {
     id: "zee",
+    slug: "styles-by-zee",
     name: "StylesByZee",
     city: "Leeds",
     speciality: "Braids & Colour Specialist",
@@ -176,4 +181,15 @@ export const STYLISTS: readonly Stylist[] = [
 export function findStylist(id: string | null): Stylist | undefined {
   if (!id) return undefined;
   return STYLISTS.find((stylist) => stylist.id === id);
+}
+
+/**
+ * Resolves a profile URL segment. Reserved slugs are rejected outright so a
+ * stylist can never shadow one of the app's own paths.
+ */
+export function findStylistBySlug(
+  slug: string | undefined,
+): Stylist | undefined {
+  if (!slug || RESERVED_SLUGS.has(slug)) return undefined;
+  return STYLISTS.find((stylist) => stylist.slug === slug);
 }

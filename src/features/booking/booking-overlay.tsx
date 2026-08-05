@@ -1,9 +1,18 @@
-import { useEffect, useRef } from "react";
+import { useCallback, useEffect, useMemo, useRef } from "react";
+import { useLocation, useNavigate, useSearchParams } from "react-router";
 import { cx } from "../../utils/class-names";
-import { useAppDispatch, useAppSelector } from "../../stores/hooks";
-import { bookingClosed } from "../../stores/overlays-slice";
-import { findStylist } from "../../data/stylists";
-import { BOOKING_STEP } from "../../types/booking";
+import { findStylist, findStylistBySlug } from "../../data/stylists";
+import { isOpen, useRouteSurfaces } from "../../hooks/use-route-surfaces";
+import { useSurfaceNav } from "../../hooks/use-surface-nav";
+import { bookingPath, stepFromPath } from "../../routes/routes";
+import {
+  BOOKING_STEP,
+  FULL_SEQUENCE,
+  STYLIST_KNOWN_SEQUENCE,
+  type BookingStepIndex,
+} from "../../types/booking";
+import { DEFAULT_SERVICE_ID } from "../../data/services/services";
+import type { ServiceId } from "../../types/services";
 import { useBookingWizard } from "./use-booking-wizard";
 import { StrandPreview } from "./strand-preview";
 import { StepStyle } from "./step-style";
@@ -16,17 +25,67 @@ import { StepReview } from "./step-review";
 import { StepConfirm } from "./step-confirm";
 import { getIndividualService, getService } from "../../data/services/services";
 
+// TO DO: READ
+
+const DEFAULT_STYLIST_NAME = "Tiwara's House";
+
 export function BookingOverlay() {
-  const dispatch = useAppDispatch();
-  const { overlay, bookingSession } = useAppSelector((state) => state.overlays);
-  const wizard = useBookingWizard(bookingSession);
-  const { booking, review, sequence } = wizard;
+  const surfaces = useRouteSurfaces();
+  const { close } = useSurfaceNav();
+  const navigate = useNavigate();
+  const [params] = useSearchParams();
+  const { pathname } = useLocation();
   const optionsRef = useRef<HTMLDivElement>(null);
+
+  const open = isOpen(surfaces, "booking");
+  const service = (params.get("service") ?? DEFAULT_SERVICE_ID) as ServiceId;
+  const contextStylist = findStylistBySlug(params.get("stylist") ?? undefined);
+  const contextSlug = contextStylist?.slug;
+
+  const context = useMemo(
+    () => ({ categoryKey: service, stylistId: contextStylist?.id ?? null }),
+    [service, contextStylist?.id],
+  );
+
+  const goToStep = useCallback(
+    (next: BookingStepIndex) =>
+      navigate(bookingPath(next, { service, stylist: contextSlug })),
+    [navigate, service, contextSlug],
+  );
+
+  // Opening from a stylist drops two steps, so which slugs are valid depends
+  // on how the booking started.
+  const sequence = context.stylistId ? STYLIST_KNOWN_SEQUENCE : FULL_SEQUENCE;
+  const requested = stepFromPath(pathname);
+  const validStep =
+    requested !== undefined && sequence.includes(requested)
+      ? requested
+      : undefined;
+
+  // Bare `/book`, an unknown slug, or a step this sequence skips all fall back
+  // to the start. Replaces rather than pushes, so Back does not bounce here.
+  useEffect(() => {
+    if (!open || validStep !== undefined) return;
+    navigate(
+      bookingPath(BOOKING_STEP.style, { service, stylist: contextSlug }),
+      {
+        replace: true,
+      },
+    );
+  }, [open, validStep, navigate, service, contextSlug]);
+
+  const wizard = useBookingWizard({
+    context,
+    step: validStep ?? BOOKING_STEP.style,
+    open,
+    goToStep,
+  });
+  const { booking, step, review } = wizard;
 
   // The options column scrolls back to the top on every step change.
   useEffect(() => {
     if (optionsRef.current) optionsRef.current.scrollTop = 0;
-  }, [booking.step]);
+  }, [step]);
 
   const { label } = getService(booking.categoryKey);
   const style = getIndividualService(booking.categoryKey, booking.styleId);
@@ -34,15 +93,12 @@ export function BookingOverlay() {
   // The stylist picked in step 2 wins; otherwise fall back to whoever the
   // booking was opened for (a profile or a search card).
   const stylistName =
-    findStylist(booking.stylistId)?.name ?? bookingSession.stylistName;
-
-  const close = () => dispatch(bookingClosed());
+    findStylist(booking.stylistId)?.name ??
+    contextStylist?.name ??
+    DEFAULT_STYLIST_NAME;
 
   return (
-    <div
-      id="bookingPage"
-      className={cx("bp-overlay", overlay.booking && "open")}
-    >
+    <div id="bookingPage" className={cx("bp-overlay", open && "open")}>
       <div className="bp-header">
         <button className="bp-back" onClick={close}>
           Back
@@ -52,13 +108,13 @@ export function BookingOverlay() {
           <div className="bp-step-dots">
             {/* One dot per step this booking will actually visit, so the
                 shortened stylist flow shows six rather than eight. */}
-            {sequence.map((step, index) => (
+            {sequence.map((entry, index) => (
               <div
-                key={step}
+                key={entry}
                 className={cx(
                   "bp-step-dot",
-                  index < sequence.indexOf(booking.step) && "done",
-                  step === booking.step && "active",
+                  index < sequence.indexOf(step) && "done",
+                  entry === step && "active",
                 )}
               />
             ))}
@@ -72,7 +128,7 @@ export function BookingOverlay() {
           <div
             className={cx(
               "bp-step-panel",
-              booking.step === BOOKING_STEP.style && "active",
+              step === BOOKING_STEP.style && "active",
             )}
           >
             <StepStyle
@@ -85,7 +141,7 @@ export function BookingOverlay() {
           <div
             className={cx(
               "bp-step-panel",
-              booking.step === BOOKING_STEP.whenWhere && "active",
+              step === BOOKING_STEP.whenWhere && "active",
             )}
           >
             <StepWhenWhere
@@ -102,7 +158,7 @@ export function BookingOverlay() {
           <div
             className={cx(
               "bp-step-panel",
-              booking.step === BOOKING_STEP.stylist && "active",
+              step === BOOKING_STEP.stylist && "active",
             )}
           >
             <StepStylist
@@ -119,7 +175,7 @@ export function BookingOverlay() {
           <div
             className={cx(
               "bp-step-panel",
-              booking.step === BOOKING_STEP.customise && "active",
+              step === BOOKING_STEP.customise && "active",
             )}
           >
             <StepCustomise
@@ -140,7 +196,7 @@ export function BookingOverlay() {
           <div
             className={cx(
               "bp-step-panel",
-              booking.step === BOOKING_STEP.schedule && "active",
+              step === BOOKING_STEP.schedule && "active",
             )}
           >
             <StepSchedule
@@ -156,7 +212,7 @@ export function BookingOverlay() {
           <div
             className={cx(
               "bp-step-panel",
-              booking.step === BOOKING_STEP.details && "active",
+              step === BOOKING_STEP.details && "active",
             )}
           >
             <StepDetails
@@ -170,7 +226,7 @@ export function BookingOverlay() {
           <div
             className={cx(
               "bp-step-panel",
-              booking.step === BOOKING_STEP.review && "active",
+              step === BOOKING_STEP.review && "active",
             )}
           >
             <StepReview
@@ -184,7 +240,7 @@ export function BookingOverlay() {
           <div
             className={cx(
               "bp-step-panel",
-              booking.step === BOOKING_STEP.confirm && "active",
+              step === BOOKING_STEP.confirm && "active",
             )}
           >
             <StepConfirm

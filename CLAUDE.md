@@ -20,7 +20,8 @@ Keep changes scoped to the requested task. Avoid opportunistic churn.
 
 - Adhere to best practices
 - Variable names should be in camelCase and at least 3 characters long
-- Keep naming consistent
+- Keep variable naming consistent
+  - opt for 'getName' instead of 'nameOf'
 - Code should avoid the use of the reduce javascript method
 - Update or add tests when behavior changes
 - Include short comments only where logic is non-obvious
@@ -29,7 +30,7 @@ Keep changes scoped to the requested task. Avoid opportunistic churn.
 - Prefer arrow functions
 
 - Do not commit to main
-- All new changes should be on a separate branch (NOT main), always checkout from the most up to date main, if you are already on a separate branch ignore this and stay on this branch
+- All new changes should be on a separate branch (NOT main), always checkout from the most up to date main, if you are already on a separate branch ignore this and stay on this branch (only if this branch is up to date with the latest main)
 
 - If there is a well-known package out there that can achieve a certain piece of logic, outsource this logic to the package, but ASK FIRST, before you decide to install it
 - don't recreate logic/data that already exists in the codebase
@@ -86,11 +87,11 @@ export function Button({ label, onClick, variant = "primary" }: ButtonProps) {
 - Use Vitest + React Testing Library
 - Test behavior, not implementation — query by role, text, or test ID
 - Every component should have at least a smoke test (renders without crashing)
-- Place test utilities in `src/test/helpers.ts`
+- Place test utilities in `src/test`
 
 ## UI & Web Design
 
-Do not change UI unless explicitely asked, or only make suggestions, do not change without asking.
+Do not change UI without asking.
 
 ### Frontend UI Guidelines
 
@@ -107,3 +108,4 @@ Do not change UI unless explicitely asked, or only make suggestions, do not chan
 - Do not add new dependencies without discussing first
 - Do not use inline styles
 - Do not commit to main
+- NO NOT remove my comments

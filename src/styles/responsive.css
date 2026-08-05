@@ -1,5 +1,9 @@
 /* ── RESPONSIVE ── */
 @media (max-width: 900px) {
+  :root {
+    /* The nav loses 0.1rem of vertical padding below, so pages must too. */
+    --nav-h: 59px;
+  }
   nav {
     padding: 1rem 1.5rem;
   }

@@ -1,11 +1,11 @@
 import { useEffect, useRef, useState } from "react";
 import { cx } from "../../utils/class-names";
 import { useAppDispatch, useAppSelector } from "../../stores/hooks";
-import { pageClosed } from "../../stores/overlays-slice";
+import { modalClosed } from "../../stores/modals-slice";
 
 export function OtherStyleOverlay() {
   const dispatch = useAppDispatch();
-  const open = useAppSelector((state) => state.overlays.overlay.otherStyle);
+  const open = useAppSelector((state) => state.modals.otherStyle);
   const [description, setDescription] = useState("");
   const [previewSrc, setPreviewSrc] = useState<string | null>(null);
   const [showError, setShowError] = useState(false);
@@ -42,7 +42,7 @@ export function OtherStyleOverlay() {
     setSubmitted(true);
   }
 
-  const close = () => dispatch(pageClosed("otherStyle"));
+  const close = () => dispatch(modalClosed("otherStyle"));
 
   return (
     <div id="otherStylePage" className={cx("os-overlay", open && "open")}>

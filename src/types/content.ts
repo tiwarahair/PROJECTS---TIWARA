@@ -1,15 +1,9 @@
 import type { ServiceId } from "./services";
-import type { SimpleOverlayId } from "./overlays";
-
-/** What a nav link does instead of following its href. */
-export type NavAction =
-  { kind: "search" } | { kind: "page"; page: SimpleOverlayId };
 
 export interface NavLink {
   label: string;
-  href: string;
-  /** Omitted for plain anchor links such as #services and #contact. */
-  action?: NavAction;
+  /** A route path, or `/#services`-style anchor on the landing page. */
+  to: string;
   className?: string;
 }
 
@@ -48,11 +42,8 @@ export interface FooterColumn {
 
 export interface FooterLink {
   label: string;
-  href: string;
-  /** Present when the link opens search filtered to a category. */
-  searchFilter?: ServiceId | "";
-  /** Present when the link opens one of the full-page overlays. */
-  page?: SimpleOverlayId;
+  /** Absent for the legal links, which have no destination yet. */
+  to?: string;
 }
 
 export interface SocialLink {

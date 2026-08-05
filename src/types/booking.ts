@@ -45,6 +45,38 @@ export const STYLIST_KNOWN_SEQUENCE: readonly BookingStepIndex[] = [
   BOOKING_STEP.confirm,
 ];
 
+const getPosition = (
+  sequence: readonly BookingStepIndex[],
+  step: BookingStepIndex,
+) => sequence.indexOf(step);
+
+/** Clamped at the end, so the last step's "next" is itself. */
+export const nextStep = (
+  sequence: readonly BookingStepIndex[],
+  step: BookingStepIndex,
+): BookingStepIndex => {
+  const position = getPosition(sequence, step);
+  if (position === -1) return sequence[0] ?? step;
+  return sequence[Math.min(sequence.length - 1, position + 1)] ?? step;
+};
+
+/** Clamped at the start, so the first step's "previous" is itself. */
+export const prevStep = (
+  sequence: readonly BookingStepIndex[],
+  step: BookingStepIndex,
+): BookingStepIndex => {
+  const position = getPosition(sequence, step);
+  if (position === -1) return sequence[0] ?? step;
+  return sequence[Math.max(0, position - 1)] ?? step;
+};
+
+/** What the URL supplies about a booking: which service, and whose. */
+export interface BookingContext {
+  categoryKey: ServiceId;
+  /** Resolved from the `stylist` slug; its presence shortens the sequence. */
+  stylistId: string | null;
+}
+
 export interface CalendarDay {
   day: number;
   available: boolean;
@@ -82,9 +114,9 @@ export interface ReviewSnapshot {
   money: BookingTotals;
 }
 
+/** Everything the wizard collects. The current step lives in the URL, not here. */
 export interface BookingState {
   categoryKey: ServiceId;
-  step: BookingStepIndex;
   styleId: string | null;
   /** Step 1 — the window the client is free in, and where they are. */
   dateFrom: string;

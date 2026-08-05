@@ -1,62 +1,14 @@
 /* ══════════════════════════════════════════════════════════════════════════
-   FULL-PAGE OVERLAYS — About / For Stylists / Shop
+   FULL PAGES — About / For Stylists / Shop / 404
+
+   Ordinary pages, not overlays: they sit in normal flow, scroll with the
+   body, and are padded clear of the fixed nav.
    ══════════════════════════════════════════════════════════════════════════ */
 .pg-overlay {
-  position: fixed;
-  inset: 0;
   background: var(--cream);
-  z-index: 750;
-  transform: translateX(100%);
-  transition: transform 0.5s cubic-bezier(0.16, 1, 0.3, 1);
-  overflow-y: auto;
+  min-height: 100vh;
+  padding-top: var(--nav-h);
   overflow-x: hidden;
-}
-.pg-overlay.open {
-  transform: translateX(0);
-}
-
-/* Page nav bar */
-.pg-nav {
-  position: sticky;
-  top: 0;
-  z-index: 10;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 1rem 2.5rem;
-  background: rgba(246, 240, 228, 0.92);
-  backdrop-filter: blur(12px);
-  border-bottom: 1px solid rgba(36, 24, 17, 0.08);
-}
-.pg-nav-logo {
-  font-family: var(--serif);
-  font-size: 1.05rem;
-  font-weight: 400;
-  color: var(--green);
-  text-decoration: none;
-  letter-spacing: -0.2px;
-}
-.pg-nav-logo sup {
-  font-size: 0.55rem;
-  vertical-align: super;
-  color: var(--gold);
-}
-.pg-close {
-  background: none;
-  border: 1px solid rgba(36, 24, 17, 0.15);
-  color: var(--green);
-  font-family: var(--label);
-  font-size: 0.78rem;
-  font-weight: 600;
-  padding: 0.45rem 1.1rem;
-  border-radius: 30px;
-  cursor: pointer;
-  transition: all 0.2s;
-  letter-spacing: 0.3px;
-}
-.pg-close:hover {
-  background: var(--green);
-  color: var(--cream);
 }
 
 /* Hero band */

@@ -1,30 +1,30 @@
 import { useState } from "react";
+import { Link } from "react-router";
 import { cx } from "../../utils/class-names";
 import { useScrolled } from "../../hooks/use-scrolled";
-import { useOverlayActions } from "../../hooks/use-overlay-actions";
-import { useAppDispatch } from "../../stores/hooks";
-import { pageOpened } from "../../stores/overlays-slice";
 import { NAV_LINKS } from "../../data/other/landing-content";
-import type { NavAction } from "../../types/content";
+import { PATH } from "../../routes/routes";
 
 /* hidden if the file is missing. TO DO: add logo */
 const LOGO_SRC = "/assets/logo.svg";
+interface HeaderProps {
+  /**
+   * Pages render the nav over a cream background, where its default
+   * cream-on-transparent styling would be invisible. They pin it to the
+   * `.scrolled` look instead — which is also the only option that works, since
+   * a page is no longer its own scroll container for `useScrolled` to watch.
+   */
+  solid?: boolean;
+}
 
 /** Must stay a literal <nav>: the stylesheet targets `nav` and `nav.scrolled`. */
-export function Header() {
+export function Header({ solid = false }: HeaderProps) {
   const scrolled = useScrolled();
   const [menuOpen, setMenuOpen] = useState(false);
-  const { openSearch } = useOverlayActions();
-  const dispatch = useAppDispatch();
-
-  function runAction(action: NavAction) {
-    if (action.kind === "search") openSearch("");
-    else dispatch(pageOpened(action.page));
-  }
 
   return (
-    <nav id="mainNav" className={cx(scrolled && "scrolled")}>
-      <a href="#" className="nav-logo">
+    <nav id="mainNav" className={cx((solid || scrolled) && "scrolled")}>
+      <Link to={PATH.home} className="nav-logo">
         <img
           src={LOGO_SRC}
           alt=""
@@ -38,22 +38,17 @@ export function Header() {
         <span className="nav-logo-text">
           Tiwara&apos;s House<sup>✦</sup>
         </span>
-      </a>
+      </Link>
       <ul className={cx("nav-links", menuOpen && "mobile-open")}>
-        {NAV_LINKS.map((link) => (
-          <li key={link.label + link.href}>
-            <a
-              href={link.href}
-              className={link.className}
-              onClick={(event) => {
-                if (!link.action) return;
-                event.preventDefault();
-                runAction(link.action);
-                setMenuOpen(false);
-              }}
+        {NAV_LINKS.map(({ label, to, className }) => (
+          <li key={label + to}>
+            <Link
+              to={to}
+              className={className}
+              onClick={() => setMenuOpen(false)}
             >
-              {link.label}
-            </a>
+              {label}
+            </Link>
           </li>
         ))}
       </ul>

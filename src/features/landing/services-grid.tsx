@@ -1,12 +1,14 @@
 import { cx } from "../../utils/class-names";
 import { useFadeIn } from "../../hooks/use-fade-in";
-import { useOverlayActions } from "../../hooks/use-overlay-actions";
+import { useNavigate } from "react-router";
+import { bookingPath, PATH } from "../../routes/routes";
+import { BOOKING_STEP } from "../../types/booking";
 import { SERVICE_CARDS } from "../../data/other/landing-content";
 
 export function ServicesGrid() {
   const [headRef, headVisible] = useFadeIn<HTMLDivElement>();
   const [gridRef, gridVisible] = useFadeIn<HTMLDivElement>();
-  const { openBooking, openAiDiscovery } = useOverlayActions();
+  const navigate = useNavigate();
 
   const numbers = ["01", "02", "03", "04", "05", "✦ AI"];
   const backgroundClasses = [
@@ -39,7 +41,11 @@ export function ServicesGrid() {
               // A style card starts a booking directly rather than dropping
               // the user into search first.
               onClick={() =>
-                action === "ai" ? openAiDiscovery() : openBooking(action)
+                navigate(
+                  action === "ai"
+                    ? PATH.styleDiscovery
+                    : bookingPath(BOOKING_STEP.style, { service: action }),
+                )
               }
             >
               <div className={cx("sc-bg", backgroundClasses[index])} />

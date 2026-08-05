@@ -1,10 +1,9 @@
 import { cx } from "../../utils/class-names";
 import { useFadeIn } from "../../hooks/use-fade-in";
-import { useAppDispatch } from "../../stores/hooks";
-import { pageOpened } from "../../stores/overlays-slice";
+import { Link } from "react-router";
+import { PATH } from "../../routes/routes";
 
 export function QuizTeaser() {
-  const dispatch = useAppDispatch();
   const [ref, visible] = useFadeIn<HTMLDivElement>();
 
   return (
@@ -22,12 +21,9 @@ export function QuizTeaser() {
             appointment to see them in action.
           </p>
         </div>
-        <button
-          className="qt-cta"
-          onClick={() => dispatch(pageOpened("hairQuiz"))}
-        >
+        <Link className="qt-cta" to={PATH.hairQuiz}>
           Take the quiz →
-        </button>
+        </Link>
       </div>
     </section>
   );

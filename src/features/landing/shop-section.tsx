@@ -1,13 +1,13 @@
 import { cx } from "../../utils/class-names";
 import { useFadeIn } from "../../hooks/use-fade-in";
-import { useOverlayActions } from "../../hooks/use-overlay-actions";
+import { Link } from "react-router";
+import { PATH } from "../../routes/routes";
 import { SHOP_CARDS } from "../../data/other/landing-content";
 
 export function ShopSection() {
   const [introRef, introVisible] = useFadeIn<HTMLDivElement>();
   const [gridRef, gridVisible] = useFadeIn<HTMLDivElement>();
   const [promptRef, promptVisible] = useFadeIn<HTMLDivElement>();
-  const { openSearch } = useOverlayActions();
 
   return (
     <section className="shop" id="shop">
@@ -47,9 +47,9 @@ export function ShopSection() {
                 </div>
                 <div className="shop-card-footer">
                   <span className="shop-card-price">{price}</span>
-                  <a href="#" className="shop-card-cta">
+                  <Link to={PATH.shop} className="shop-card-cta">
                     Shop now →
-                  </a>
+                  </Link>
                 </div>
               </div>
             </div>
@@ -71,16 +71,9 @@ export function ShopSection() {
             your date.
           </p>
         </div>
-        <a
-          href="#"
-          className="btn-outline-light"
-          onClick={(event) => {
-            event.preventDefault();
-            openSearch("");
-          }}
-        >
+        <Link to={PATH.search} className="btn-outline-light">
           Find your stylist →
-        </a>
+        </Link>
       </div>
     </section>
   );

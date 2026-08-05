@@ -1,6 +1,6 @@
 import { useState } from "react";
-import { useAppDispatch } from "../../stores/hooks";
-import { pageClosed, searchOpened } from "../../stores/overlays-slice";
+import { useNavigate } from "react-router";
+import { searchPath } from "../../routes/routes";
 import { cx } from "../../utils/class-names";
 import {
   SHOP_FILTERS,
@@ -12,12 +12,12 @@ import { PageOverlay } from "./page-overlay";
 import { PageCtaStrip, PageHero, PageSection } from "./page-blocks";
 
 export function ShopPage() {
-  const dispatch = useAppDispatch();
+  const navigate = useNavigate();
   const [filter, setFilter] = useState<ShopFilter>("all");
   const products = filterProducts(SHOP_PRODUCTS, filter);
 
   return (
-    <PageOverlay id="shop" domId="shopPage">
+    <PageOverlay domId="shopPage">
       <PageHero
         tone="forest"
         eyebrow="Tiwara's House Shop"
@@ -114,10 +114,7 @@ export function ShopPage() {
           heading="Buying hair for your appointment?"
           body="Order now and collect at the salon, or have it delivered before your date."
           ctaLabel="Book an appointment →"
-          onCta={() => {
-            dispatch(pageClosed("shop"));
-            dispatch(searchOpened(""));
-          }}
+          onCta={() => navigate(searchPath())}
         />
       </div>
     </PageOverlay>

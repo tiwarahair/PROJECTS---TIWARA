@@ -1,19 +1,19 @@
 import { cx } from "../../utils/class-names";
 import { useAppDispatch, useAppSelector } from "../../stores/hooks";
-import { sizeGuideClosed } from "../../stores/overlays-slice";
+import { modalClosed } from "../../stores/modals-slice";
 import { GuideModal } from "./guide-modal";
 import { SIZE_OPTIONS } from "../../data/style-config/size";
 
 export function SizeGuideModal() {
   const dispatch = useAppDispatch();
-  const open = useAppSelector((state) => state.overlays.overlay.sizeGuide);
+  const open = useAppSelector((state) => state.modals.sizeGuide);
 
   return (
     <GuideModal
       id="sizeGuideModal"
       title="Size & Thickness Guide"
       open={open}
-      onClose={() => dispatch(sizeGuideClosed())}
+      onClose={() => dispatch(modalClosed("sizeGuide"))}
     >
       <div className="size-guide-grid">
         {SIZE_OPTIONS.map(

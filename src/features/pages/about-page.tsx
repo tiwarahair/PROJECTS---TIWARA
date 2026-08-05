@@ -1,5 +1,5 @@
-import { useAppDispatch } from "../../stores/hooks";
-import { pageClosed, searchOpened } from "../../stores/overlays-slice";
+import { useNavigate } from "react-router";
+import { searchPath } from "../../routes/routes";
 import {
   ABOUT_MISSION,
   ABOUT_STATS,
@@ -17,10 +17,10 @@ import {
 } from "./page-blocks";
 
 export function AboutPage() {
-  const dispatch = useAppDispatch();
+  const navigate = useNavigate();
 
   return (
-    <PageOverlay id="about" domId="aboutPage">
+    <PageOverlay domId="aboutPage">
       <PageHero
         tone="espresso"
         eyebrow="Our story"
@@ -78,10 +78,7 @@ export function AboutPage() {
           heading="Ready to find your stylist?"
           body="Thousands of clients have already booked through Tiwara's House. Join them."
           ctaLabel="Find a stylist near me →"
-          onCta={() => {
-            dispatch(pageClosed("about"));
-            dispatch(searchOpened(""));
-          }}
+          onCta={() => navigate(searchPath())}
         />
       </div>
     </PageOverlay>

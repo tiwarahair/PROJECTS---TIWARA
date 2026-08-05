@@ -1,29 +1,21 @@
-import { useEffect, useMemo, useRef } from "react";
+import { Link, useNavigate } from "react-router";
 import { cx } from "../../utils/class-names";
 import { StarRating } from "../../components/star-rating";
-import { useAppDispatch, useAppSelector } from "../../stores/hooks";
-import { bookingOpened, profileClosed } from "../../stores/overlays-slice";
-import { findStylist } from "../../data/stylists";
-import type { ServiceId } from "../../types/services";
+import { useRouteSurfaces } from "../../hooks/use-route-surfaces";
+import { bookingPath, PATH } from "../../routes/routes";
+import { BOOKING_STEP } from "../../types/booking";
 
 const PORTFOLIO_TILES = [1, 2, 3, 4, 5, 6];
 
-export function ProfileOverlay() {
-  const dispatch = useAppDispatch();
-  const {
-    overlay: { profile },
-    activeStylistId,
-  } = useAppSelector((state) => state.overlays);
-  const scrollRef = useRef<HTMLDivElement>(null);
+export function ProfilePage() {
+  const navigate = useNavigate();
+  const surfaces = useRouteSurfaces();
 
-  const stylist = useMemo(
-    () => findStylist(activeStylistId),
-    [activeStylistId],
-  );
-
+  // Resolved from the URL slug; undefined whenever the route is not a profile.
+  const { stylist } = surfaces;
   const {
     catKey,
-    id,
+    slug,
     name,
     city,
     rating,
@@ -35,36 +27,18 @@ export function ProfileOverlay() {
     topServices = [],
     reviews = [],
     nextAvail,
-  } = stylist || {};
-
-  // The panel scrolls back to the top each time a profile is opened.
-  useEffect(() => {
-    if (profile && scrollRef.current) scrollRef.current.scrollTop = 0;
-  }, [profile, activeStylistId]);
+  } = stylist ?? {};
 
   function bookThisStylist() {
     if (!stylist) return;
-    dispatch(
-      bookingOpened({
-        categoryKey: catKey as ServiceId,
-        stylistId: id,
-        stylistName: name,
-      }),
+    navigate(
+      bookingPath(BOOKING_STEP.style, { service: catKey, stylist: slug }),
     );
   }
 
   return (
-    <div id="profilePage" className={cx("prof-overlay", profile && "open")}>
-      <div className="prof-nav">
-        <button className="prof-back" onClick={() => dispatch(profileClosed())}>
-          Back to stylists
-        </button>
-        <button className="prof-book-top" onClick={bookThisStylist}>
-          Book now
-        </button>
-      </div>
-
-      <div className="prof-scroll" ref={scrollRef}>
+    <div id="profilePage" className="prof-overlay">
+      <div className="prof-scroll">
         <div className="prof-hero">
           <div className="prof-hero-bg" style={{ background }} />
           <div className="prof-hero-overlay" />
@@ -137,6 +111,13 @@ export function ProfileOverlay() {
             </div>
           </div>
         </div>
+      </div>
+
+      <div className="prof-powered">
+        <span className="prof-powered-label">Powered by</span>
+        <Link to={PATH.home} className="prof-powered-mark">
+          Tiwara&apos;s House<sup>✦</sup>
+        </Link>
       </div>
 
       <div className="prof-footer">

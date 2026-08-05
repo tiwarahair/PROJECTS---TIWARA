@@ -1,9 +1,9 @@
 import { configureStore } from "@reduxjs/toolkit";
-import { overlaysReducer } from "./overlays-slice";
+import { modalsReducer } from "./modals-slice";
 
 export function createStore() {
   return configureStore({
-    reducer: { overlays: overlaysReducer },
+    reducer: { modals: modalsReducer },
   });
 }
 

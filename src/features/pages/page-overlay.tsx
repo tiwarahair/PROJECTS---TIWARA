@@ -1,41 +1,20 @@
 import type { ReactNode } from "react";
-import { cx } from "../../utils/class-names";
-import { useAppDispatch, useAppSelector } from "../../stores/hooks";
-import { pageClosed } from "../../stores/overlays-slice";
-import type { SimpleOverlayId } from "../../types/overlays";
+import { Header } from "../landing/header";
 
 export interface PageOverlayProps {
-  id: SimpleOverlayId;
   domId: string;
   children: ReactNode;
 }
 
 /**
- * Shared chrome for the full-page overlays (About, For Stylists, Shop).
- * Stays mounted and toggles `.open`, which drives the slide-in transition.
+ * Shared chrome for the full pages (About, For Stylists, Shop). These are
+ * ordinary pages now: the site nav sits on top, they scroll with the body,
+ * and there is nothing to close.
  */
-export function PageOverlay({ id, domId, children }: PageOverlayProps) {
-  const dispatch = useAppDispatch();
-  const open = useAppSelector((state) => state.overlays.overlay[id]);
-  const close = () => dispatch(pageClosed(id));
-
+export function PageOverlay({ domId, children }: PageOverlayProps) {
   return (
-    <div id={domId} className={cx("pg-overlay", open && "open")}>
-      <div className="pg-nav">
-        <a
-          href="#"
-          className="pg-nav-logo"
-          onClick={(event) => {
-            event.preventDefault();
-            close();
-          }}
-        >
-          Tiwara&apos;s House<sup>✦</sup>
-        </a>
-        <button className="pg-close" onClick={close}>
-          ✕ Close
-        </button>
-      </div>
+    <div id={domId} className="pg-overlay">
+      <Header solid />
       {children}
     </div>
   );

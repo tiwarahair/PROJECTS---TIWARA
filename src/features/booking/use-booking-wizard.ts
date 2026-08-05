@@ -20,14 +20,17 @@ import {
   BOOKING_STEP,
   FULL_SEQUENCE,
   STYLIST_KNOWN_SEQUENCE,
+  nextStep,
+  prevStep,
 } from "../../types/booking";
-import type { BookingSession } from "../../stores/overlays-slice";
+import type { BookingContext } from "../../types/booking";
 import type { BraidSize, ColourId } from "../../types/styles";
 import { getIndividualService, getService } from "../../data/services/services";
 import { ADD_ON_OPTIONS } from "../../data/style-config/add-ons";
 
-// TO DO: READ FILE
-// TO DO: Move this into the store so the wizard can be rehydrated on refresh. The current implementation is a direct port of the original, which kept the state in the DOM and lost it on refresh. The store would also allow the wizard to be opened from a search card without losing the chosen stylist, and to be rehydrated if the user navigates away and back again.
+// TO DO: persist this so a refresh mid-booking does not lose the answers.
+// The step survives a refresh because it is in the URL; everything the client
+// has typed does not. <<<
 
 /** Style selection slides to the next step after a short beat. */
 const AUTO_ADVANCE_MS = 320;
@@ -45,6 +48,8 @@ const EMPTY_DETAILS: BookingDetails = {
 
 export interface BookingWizard {
   booking: BookingState;
+  /** The step the URL currently points at. */
+  step: BookingStepIndex;
   /** The steps this booking actually visits, in order. */
   sequence: readonly BookingStepIndex[];
   /** Derived from live state, so the review step always reflects the choices. */
@@ -70,14 +75,16 @@ function defaultDateWindowFields() {
   return { dateFrom: from, dateTo: to };
 }
 
-function initialState(session: BookingSession): BookingState {
+function initialState({
+  categoryKey,
+  stylistId,
+}: BookingContext): BookingState {
   return {
-    categoryKey: session.categoryKey,
-    step: 0,
+    categoryKey,
     styleId: null,
     ...defaultDateWindowFields(),
     location: "",
-    stylistId: session.stylistId,
+    stylistId,
     colourId: DEFAULT_COLOUR_ID,
     lengthIndex: DEFAULT_LENGTH_INDEX,
     size: "Medium",
@@ -119,39 +126,40 @@ function snapshotOf(state: BookingState): ReviewSnapshot {
   };
 }
 
-export function useBookingWizard(session: BookingSession): BookingWizard {
+export interface BookingWizardOptions {
+  context: BookingContext;
+  /** The step the URL points at. */
+  step: BookingStepIndex;
+  /** True while the booking surface is on screen. */
+  open: boolean;
+  /** Navigates to a step, preserving the booking's query params. */
+  goToStep: (step: BookingStepIndex) => void;
+}
+
+export function useBookingWizard({
+  context,
+  step,
+  open,
+  goToStep,
+}: BookingWizardOptions): BookingWizard {
   const [booking, setBooking] = useState<BookingState>(() =>
-    initialState(session),
+    initialState(context),
   );
 
   // Opening from a stylist answers "when & where" and "which stylist", so
   // those two steps drop out of the flow entirely.
-  const sequence = session.stylistId ? STYLIST_KNOWN_SEQUENCE : FULL_SEQUENCE;
+  const sequence = context.stylistId ? STYLIST_KNOWN_SEQUENCE : FULL_SEQUENCE;
 
   // Read inside the auto-advance timer so it sees the step at fire time.
-  const stepRef = useRef(booking.step);
-  stepRef.current = booking.step;
+  const stepRef = useRef(step);
+  stepRef.current = step;
 
-  // Opening a booking clears everything the first three steps collect. Size,
-  // add-ons, the chosen day and time, and the details form still survive into
-  // the next booking, as they did before.
+  // Every booking starts clean
+  const { categoryKey, stylistId } = context;
   useEffect(() => {
-    setBooking((current) => ({
-      ...current,
-      categoryKey: session.categoryKey,
-      step: 0,
-      styleId: null,
-      ...defaultDateWindowFields(),
-      location: "",
-      stylistId: session.stylistId,
-      colourId: DEFAULT_COLOUR_ID,
-      lengthIndex: DEFAULT_LENGTH_INDEX,
-    }));
-  }, [session.sessionId, session.categoryKey, session.stylistId]);
-
-  const goToStep = useCallback((step: BookingStepIndex) => {
-    setBooking((current) => ({ ...current, step }));
-  }, []);
+    if (!open) return;
+    setBooking(initialState({ categoryKey, stylistId }));
+  }, [open, categoryKey, stylistId]);
 
   const selectStyle = useCallback(
     (styleId: string) => {
@@ -226,31 +234,26 @@ export function useBookingWizard(session: BookingSession): BookingWizard {
   }, []);
 
   const goNext = useCallback(() => {
-    setBooking((current) => {
-      // Continuing from the style step without a choice picks the first style.
-      const styleId =
-        current.step === BOOKING_STEP.style && !current.styleId
-          ? (getService(current.categoryKey).individualServices[0]?.id ?? null)
-          : current.styleId;
-
-      const position = sequence.indexOf(current.step);
-      const nextStep =
-        sequence[Math.min(sequence.length - 1, position + 1)] ?? current.step;
-
-      return { ...current, styleId, step: nextStep };
-    });
-  }, [sequence]);
+    // Continuing from the style step without a choice picks the first style.
+    if (step === BOOKING_STEP.style) {
+      setBooking((current) => ({
+        ...current,
+        styleId:
+          current.styleId ??
+          getService(current.categoryKey).individualServices[0]?.id ??
+          null,
+      }));
+    }
+    goToStep(nextStep(sequence, step));
+  }, [goToStep, sequence, step]);
 
   const goPrev = useCallback(() => {
-    setBooking((current) => {
-      const position = sequence.indexOf(current.step);
-      const prevStep = sequence[Math.max(0, position - 1)] ?? current.step;
-      return { ...current, step: prevStep };
-    });
-  }, [sequence]);
+    goToStep(prevStep(sequence, step));
+  }, [goToStep, sequence, step]);
 
   return {
     booking,
+    step,
     sequence,
     review: snapshotOf(booking),
     selectStyle,

@@ -1,47 +1,43 @@
+import { useMemo } from "react";
+import { useNavigate } from "react-router";
 import { cx } from "../../utils/class-names";
-import { useAppDispatch, useAppSelector } from "../../stores/hooks";
-import {
-  bookingOpened,
-  profileOpened,
-  searchClosed,
-  searchLocationChanged,
-  searchStyleChanged,
-} from "../../stores/overlays-slice";
 import { STYLISTS } from "../../data/stylists";
 import { filterStylists, stylistCountLabel } from "../../utils/filter-stylists";
 import { StylistCard } from "./stylist-card";
-import { useMemo } from "react";
-import type { ServiceId } from "../../types/services";
+import { useSearchFilters } from "./use-search-filters";
+import { useRouteSurfaces } from "../../hooks/use-route-surfaces";
+import { Header } from "../landing/header";
+import { bookingPath, PATH, profilePath } from "../../routes/routes";
+import { BOOKING_STEP } from "../../types/booking";
 import { capitaliseServiceId, SERVICES } from "../../data/services/services";
+import type { ServiceId } from "../../types/services";
 
-export function SearchOverlay() {
-  const dispatch = useAppDispatch();
-  const { overlay, searchStyle, searchLocation } = useAppSelector(
-    (state) => state.overlays,
+export function SearchPage() {
+  const navigate = useNavigate();
+  const surfaces = useRouteSurfaces();
+
+  // While a booking sits on top, the live URL is the booking's — so the
+  // filters come from the location this page was frozen at instead.
+  const { style, location, setStyle, setLocation } = useSearchFilters(
+    surfaces.top === "search" ? undefined : surfaces.backdropLocation?.search,
   );
 
   const results = useMemo(
-    () =>
-      filterStylists(STYLISTS, {
-        style: searchStyle,
-        location: searchLocation,
-      }),
-    [searchStyle, searchLocation],
+    () => filterStylists(STYLISTS, { style, location }),
+    [style, location],
   );
 
   function scrollToJoin() {
-    dispatch(searchClosed());
+    navigate(PATH.home);
     document
       .querySelector(".join-platform")
       ?.scrollIntoView({ behavior: "smooth" });
   }
 
   return (
-    <div id="searchPage" className={cx("sr-overlay", overlay.search && "open")}>
+    <div id="searchPage" className="sr-overlay">
+      <Header solid />
       <div className="sr-header">
-        <button className="sr-back" onClick={() => dispatch(searchClosed())}>
-          Back to site
-        </button>
         <span className="sr-title">Find your stylist</span>
         <span className="sr-count">{stylistCountLabel(results.length)}</span>
       </div>
@@ -54,10 +50,8 @@ export function SearchOverlay() {
               type="text"
               placeholder="City or postcode"
               className="sr-filter-input"
-              value={searchLocation}
-              onChange={(event) =>
-                dispatch(searchLocationChanged(event.target.value))
-              }
+              value={location}
+              onChange={(event) => setLocation(event.target.value)}
             />
           </div>
           <div className="sr-filter-sep" />
@@ -65,11 +59,9 @@ export function SearchOverlay() {
             <span className="sr-filter-icon">✂</span>
             <select
               className="sr-filter-select"
-              value={searchStyle}
+              value={style}
               onChange={(event) =>
-                dispatch(
-                  searchStyleChanged(event.target.value as ServiceId | ""),
-                )
+                setStyle(event.target.value as ServiceId | "")
               }
             >
               <option value="">All styles</option>
@@ -81,22 +73,22 @@ export function SearchOverlay() {
             </select>
           </div>
         </div>
-        {/* Chips and the select are two views of the same value, so they stay
-            in sync in both directions without any extra wiring. */}
+        {/* Chips and the select are two views of the same query param, so they
+            stay in sync in both directions without any extra wiring. */}
         <div className="sr-chips-row">
           <span
-            className={cx("sr-chip", searchStyle === "" && "active")}
+            className={cx("sr-chip", style === "" && "active")}
             data-filter=""
-            onClick={() => dispatch(searchStyleChanged(""))}
+            onClick={() => setStyle("")}
           >
             All
           </span>
           {SERVICES.map(({ id }) => (
             <span
               key={id}
-              className={cx("sr-chip", searchStyle === id && "active")}
+              className={cx("sr-chip", style === id && "active")}
               data-filter={id}
-              onClick={() => dispatch(searchStyleChanged(id))}
+              onClick={() => setStyle(id)}
             >
               {capitaliseServiceId(id)}
             </span>
@@ -111,13 +103,12 @@ export function SearchOverlay() {
               <StylistCard
                 key={stylist.id}
                 stylist={stylist}
-                onOpenProfile={(id) => dispatch(profileOpened(id))}
-                onBook={({ catKey, id, name }) =>
-                  dispatch(
-                    bookingOpened({
-                      categoryKey: catKey,
-                      stylistId: id,
-                      stylistName: name,
+                onOpenProfile={(slug) => navigate(profilePath(slug))}
+                onBook={({ catKey, slug }) =>
+                  navigate(
+                    bookingPath(BOOKING_STEP.style, {
+                      service: catKey,
+                      stylist: slug,
                     }),
                   )
                 }

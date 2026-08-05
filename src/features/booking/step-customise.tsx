@@ -1,6 +1,6 @@
 import { cx } from "../../utils/class-names";
 import { useAppDispatch } from "../../stores/hooks";
-import { sizeGuideOpened } from "../../stores/overlays-slice";
+import { modalOpened } from "../../stores/modals-slice";
 import { LENGTH_OPTIONS } from "../../data/style-config/lengths";
 import { BookingNav } from "./booking-nav";
 import { COLOUR_OPTIONS } from "../../data/style-config/colours";
@@ -98,7 +98,7 @@ export function StepCustomise({
           Size / Thickness{" "}
           <button
             className="guide-link"
-            onClick={() => dispatch(sizeGuideOpened())}
+            onClick={() => dispatch(modalOpened("sizeGuide"))}
           >
             Size guide →
           </button>

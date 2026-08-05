@@ -1,7 +1,9 @@
 import { useEffect, useRef, useState } from "react";
 import { cx } from "../../utils/class-names";
-import { useAppDispatch, useAppSelector } from "../../stores/hooks";
-import { pageClosed, searchOpened } from "../../stores/overlays-slice";
+import { useNavigate } from "react-router";
+import { isOpen, useRouteSurfaces } from "../../hooks/use-route-surfaces";
+import { useSurfaceNav } from "../../hooks/use-surface-nav";
+import { searchPath } from "../../routes/routes";
 import {
   QUIZ_SLIDES,
   QUIZ_TOTAL,
@@ -21,8 +23,10 @@ const LAYOUT_CLASS = {
 } as const;
 
 export function HairQuizOverlay() {
-  const dispatch = useAppDispatch();
-  const open = useAppSelector((state) => state.overlays.overlay.hairQuiz);
+  const navigate = useNavigate();
+  const surfaces = useRouteSurfaces();
+  const { close } = useSurfaceNav();
+  const open = isOpen(surfaces, "hairQuiz");
   const [slideIndex, setSlideIndex] = useState(0);
   const [answers, setAnswers] = useState<QuizAnswers>({});
   const wasOpen = useRef(false);
@@ -72,11 +76,7 @@ export function HairQuizOverlay() {
 
   return (
     <div id="hairQuizPage" className={cx("hq-overlay", open && "open")}>
-      <button
-        className="hq-close"
-        onClick={() => dispatch(pageClosed("hairQuiz"))}
-        aria-label="Close"
-      >
+      <button className="hq-close" onClick={close} aria-label="Close">
         ×
       </button>
       <div className="hq-inner">
@@ -144,10 +144,7 @@ export function HairQuizOverlay() {
               <p>Want to see these results in action with a specialist?</p>
               <button
                 className="hq-book-cta"
-                onClick={() => {
-                  dispatch(pageClosed("hairQuiz"));
-                  dispatch(searchOpened(""));
-                }}
+                onClick={() => navigate(searchPath())}
               >
                 Book an appointment at Tiwara&apos;s House →
               </button>

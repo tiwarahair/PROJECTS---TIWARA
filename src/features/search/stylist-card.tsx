@@ -3,13 +3,13 @@ import type { Stylist } from "../../types/domain";
 
 export interface StylistCardProps {
   stylist: Stylist;
-  onOpenProfile: (stylistId: string) => void;
+  onOpenProfile: (stylistSlug: string) => void;
   onBook: (stylist: Stylist) => void;
 }
 
 export function StylistCard({
   stylist: {
-    id,
+    slug,
     name,
     city,
     rating,
@@ -32,7 +32,7 @@ export function StylistCard({
     .join(" · ");
 
   return (
-    <div className="sr-card" onClick={() => onOpenProfile(id)}>
+    <div className="sr-card" onClick={() => onOpenProfile(slug)}>
       <div className="sr-card-img" style={{ background }}>
         {flagship && <div className="sr-flagship-badge">✶ Flagship</div>}
       </div>
@@ -58,7 +58,7 @@ export function StylistCard({
               className="sr-btn-view"
               onClick={(event) => {
                 event.stopPropagation();
-                onOpenProfile(id);
+                onOpenProfile(slug);
               }}
             >
               View profile

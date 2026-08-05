@@ -1,6 +1,9 @@
 import { cx } from "../../utils/class-names";
-import { useAppDispatch, useAppSelector } from "../../stores/hooks";
-import { aiDiscoveryClosed, bookingOpened } from "../../stores/overlays-slice";
+import { useNavigate } from "react-router";
+import { isOpen, useRouteSurfaces } from "../../hooks/use-route-surfaces";
+import { useSurfaceNav } from "../../hooks/use-surface-nav";
+import { bookingPath } from "../../routes/routes";
+import { BOOKING_STEP } from "../../types/booking";
 import { lengthLabel } from "../../data/style-config/lengths";
 import { AI_CONFIDENCE_LABELS } from "../../data/other/ai-maps";
 import { useAIDiscovery } from "./use-ai-discovery";
@@ -10,8 +13,10 @@ import type { AiStyleMatch } from "../../data/other/ai-maps";
 // this includes useAIDiscoveryhook & all all its data
 
 export function AIDiscoveryOverlay() {
-  const dispatch = useAppDispatch();
-  const open = useAppSelector((state) => state.overlays.overlay.aiDiscovery);
+  const navigate = useNavigate();
+  const surfaces = useRouteSurfaces();
+  const { close } = useSurfaceNav();
+  const open = isOpen(surfaces, "aiDiscovery");
   const {
     phase,
     previewSrc,
@@ -23,20 +28,16 @@ export function AIDiscoveryOverlay() {
   } = useAIDiscovery();
 
   function bookMatch(match: AiStyleMatch) {
-    dispatch(aiDiscoveryClosed());
     // The detected colour and length are deliberately not passed on: the
     // original set them and then openBooking immediately reset both to 1B and
     // Medium. Preserved — see the behaviour-parity register.
-    dispatch(bookingOpened({ categoryKey: match.categoryKey }));
+    navigate(bookingPath(BOOKING_STEP.style, { service: match.categoryKey }));
   }
 
   return (
     <div id="aiDiscovery" className={cx("ai-overlay", open && "open")}>
       <div className="ai-header">
-        <button
-          className="ai-back"
-          onClick={() => dispatch(aiDiscoveryClosed())}
-        >
+        <button className="ai-back" onClick={close}>
           Back
         </button>
         <span className="ai-title">AI Style Discovery</span>

@@ -1,7 +1,7 @@
-import { useRef, useState } from "react";
+import { useState } from "react";
 import { cx } from "../../utils/class-names";
-import { useAppDispatch } from "../../stores/hooks";
-import { pageClosed } from "../../stores/overlays-slice";
+import { useNavigate } from "react-router";
+import { PATH } from "../../routes/routes";
 import {
   STYLIST_EXPERIENCE_OPTIONS,
   STYLIST_PERKS,
@@ -39,12 +39,11 @@ const EMPTY: StylistApplication = {
 /** Only these four block submission. */
 const REQUIRED = ["name", "business", "location", "email"] as const;
 
-export function StylistsPage() {
-  const dispatch = useAppDispatch();
+export function ForStylistsPage() {
+  const navigate = useNavigate();
   const [form, setForm] = useState<StylistApplication>(EMPTY);
   const [showErrors, setShowErrors] = useState(false);
   const [submitted, setSubmitted] = useState(false);
-  const overlayRef = useRef<HTMLDivElement>(null);
 
   const set = (patch: Partial<StylistApplication>) =>
     setForm((current) => ({ ...current, ...patch }));
@@ -59,9 +58,8 @@ export function StylistsPage() {
     }
     setSubmitted(true);
     // The page scrolls back to the top so the success panel is in view.
-    overlayRef.current
-      ?.closest(".pg-overlay")
-      ?.scrollTo({ top: 0, behavior: "smooth" });
+    // The window scrolls now that the page is no longer a fixed container.
+    window.scrollTo({ top: 0, behavior: "smooth" });
   }
 
   function toggleService(service: string) {
@@ -74,7 +72,7 @@ export function StylistsPage() {
   }
 
   return (
-    <PageOverlay id="stylists" domId="stylistsPage">
+    <PageOverlay domId="stylistsPage">
       <PageHero
         tone="gold"
         eyebrow="For stylists"
@@ -88,7 +86,7 @@ export function StylistsPage() {
         subtitle="Join the UK's go-to platform for textured hair and reach thousands of clients who are actively looking for you."
       />
 
-      <div className="pg-body" ref={overlayRef}>
+      <div className="pg-body">
         <PageSection tone="cream">
           <h2 className="pg-h2 pg-h2--centred">Why stylists choose us</h2>
           <div className="pg-perks">
@@ -116,7 +114,7 @@ export function StylistsPage() {
                 </p>
                 <button
                   className="pg-cta-btn"
-                  onClick={() => dispatch(pageClosed("stylists"))}
+                  onClick={() => navigate(PATH.home)}
                 >
                   Back to site
                 </button>
