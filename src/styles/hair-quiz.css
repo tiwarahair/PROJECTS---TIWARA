@@ -45,6 +45,7 @@
   white-space: nowrap;
   transition: opacity 0.2s;
   flex-shrink: 0;
+  text-decoration: none;
 }
 .qt-cta:hover {
   opacity: 0.88;

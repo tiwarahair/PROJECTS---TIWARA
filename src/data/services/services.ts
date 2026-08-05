@@ -1,5 +1,6 @@
 import services from "./services.json";
 import type { Service, ServiceId } from "../../types/services";
+import { startCase } from "lodash";
 
 export const SERVICES = services as Service[];
 
@@ -17,5 +18,4 @@ export const getIndividualService = (key: ServiceId, styleId: string | null) =>
     (style) => style.id === styleId,
   );
 
-export const capitaliseServiceId = (id: ServiceId) =>
-  (id.toUpperCase()[0] + id.slice(1)).replace("-", " ");
+export const capitaliseServiceId = (id: ServiceId) => startCase(id);
