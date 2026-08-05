@@ -11,7 +11,7 @@ export interface PageOverlayProps {
  * ordinary pages now: the site nav sits on top, they scroll with the body,
  * and there is nothing to close.
  */
-export function PageOverlay({ domId, children }: PageOverlayProps) {
+export function PageHeader({ domId, children }: PageOverlayProps) {
   return (
     <div id={domId} className="pg-overlay">
       <Header solid />

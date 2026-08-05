@@ -3,18 +3,18 @@ import { AboutPage } from "./features/pages/about-page";
 import { ForStylistsPage } from "./features/pages/stylists-page";
 import { ShopPage } from "./features/pages/shop-page";
 import { NotFoundPage } from "./features/pages/not-found-page";
-import { HairQuizOverlay } from "./features/hair-quiz/hair-quiz-overlay";
-import { OtherStyleOverlay } from "./features/other-style/other-style-overlay";
-import { SearchPage } from "./features/search/search-overlay";
-import { ProfilePage } from "./features/profile/profile-overlay";
+import { HairQuizPage } from "./features/hair-quiz/hair-quiz-page";
+import { RequestStyleOverlay } from "./features/request-style/request-style-overlay";
+import { ProfilePage } from "./features/profile/profile-page";
 import { BookingOverlay } from "./features/booking/booking-overlay";
-import { AIDiscoveryOverlay } from "./features/ai-discovery/ai-discovery-overlay";
+import { AIDiscoveryPage } from "./features/ai-discovery/ai-discovery-page";
 import { ChatbotWidget } from "./features/chatbot/chatbot-widget";
 import { SizeGuideModal } from "./features/guides/size-guide-modal";
 import { useOverlay } from "./hooks/use-overlay";
 import { useRouteSurfaces } from "./hooks/use-route-surfaces";
 import { useScrollReset } from "./hooks/use-scroll-reset";
 import type { SurfaceId } from "./routes/routes";
+import { SearchPage } from "./features/search/search-page";
 
 /**
  * Pages mount only when the URL points at them, or when they are the page an
@@ -43,12 +43,12 @@ export function App() {
       {notFound && <NotFoundPage />}
 
       {/* overlays */}
-      <HairQuizOverlay />
+      <HairQuizPage />
       <BookingOverlay />
-      <AIDiscoveryOverlay />
+      <AIDiscoveryPage />
 
       {/* unrouted modals */}
-      <OtherStyleOverlay />
+      <RequestStyleOverlay />
       <SizeGuideModal />
 
       {/* chatbot */}

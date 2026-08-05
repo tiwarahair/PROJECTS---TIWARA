@@ -12,7 +12,7 @@ import type { AiStyleMatch } from "../../data/other/ai-maps";
 // TO DO: ALL AI DISCOVERY FILES SEEM BOGUS - CLEAN UP / COMPELTELY REFACTOR (NOT READ IT)
 // this includes useAIDiscoveryhook & all all its data
 
-export function AIDiscoveryOverlay() {
+export function AIDiscoveryPage() {
   const navigate = useNavigate();
   const surfaces = useRouteSurfaces();
   const { close } = useSurfaceNav();

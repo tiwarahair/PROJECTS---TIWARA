@@ -8,7 +8,7 @@ import {
   filterProducts,
   type ShopFilter,
 } from "../../data/other/shop-products";
-import { PageOverlay } from "./page-overlay";
+import { PageHeader } from "./page-header";
 import { PageCtaStrip, PageHero, PageSection } from "./page-blocks";
 
 export function ShopPage() {
@@ -17,7 +17,7 @@ export function ShopPage() {
   const products = filterProducts(SHOP_PRODUCTS, filter);
 
   return (
-    <PageOverlay domId="shopPage">
+    <PageHeader domId="shopPage">
       <PageHero
         tone="forest"
         eyebrow="Tiwara's House Shop"
@@ -117,6 +117,6 @@ export function ShopPage() {
           onCta={() => navigate(searchPath())}
         />
       </div>
-    </PageOverlay>
+    </PageHeader>
   );
 }

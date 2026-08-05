@@ -3,7 +3,7 @@ import { cx } from "../../utils/class-names";
 import { useAppDispatch, useAppSelector } from "../../stores/hooks";
 import { modalClosed } from "../../stores/modals-slice";
 
-export function OtherStyleOverlay() {
+export function RequestStyleOverlay() {
   const dispatch = useAppDispatch();
   const open = useAppSelector((state) => state.modals.otherStyle);
   const [description, setDescription] = useState("");

@@ -22,7 +22,8 @@ const LAYOUT_CLASS = {
   multi: "hq-options--multi",
 } as const;
 
-export function HairQuizOverlay() {
+/* acts as an overlay */
+export function HairQuizPage() {
   const navigate = useNavigate();
   const surfaces = useRouteSurfaces();
   const { close } = useSurfaceNav();

@@ -6,7 +6,7 @@ import {
   ABOUT_STEPS,
   ABOUT_VALUES,
 } from "../../data/other/pages-content";
-import { PageOverlay } from "./page-overlay";
+import { PageHeader } from "./page-header";
 import {
   PageCtaStrip,
   PageHero,
@@ -20,7 +20,7 @@ export function AboutPage() {
   const navigate = useNavigate();
 
   return (
-    <PageOverlay domId="aboutPage">
+    <PageHeader domId="aboutPage">
       <PageHero
         tone="espresso"
         eyebrow="Our story"
@@ -81,6 +81,6 @@ export function AboutPage() {
           onCta={() => navigate(searchPath())}
         />
       </div>
-    </PageOverlay>
+    </PageHeader>
   );
 }

@@ -6,7 +6,7 @@ import {
   STYLIST_EXPERIENCE_OPTIONS,
   STYLIST_PERKS,
 } from "../../data/other/pages-content";
-import { PageOverlay } from "./page-overlay";
+import { PageHeader } from "./page-header";
 import { PageHero, PageSection } from "./page-blocks";
 import { STYLIST_SERVICES } from "../../data/services/services";
 
@@ -72,7 +72,7 @@ export function ForStylistsPage() {
   }
 
   return (
-    <PageOverlay domId="stylistsPage">
+    <PageHeader domId="stylistsPage">
       <PageHero
         tone="gold"
         eyebrow="For stylists"
@@ -309,6 +309,6 @@ export function ForStylistsPage() {
           </div>
         </PageSection>
       </div>
-    </PageOverlay>
+    </PageHeader>
   );
 }
