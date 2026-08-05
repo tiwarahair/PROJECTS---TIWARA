@@ -13,9 +13,21 @@ export const getService = (id: ServiceId) =>
   SERVICES.find((service) => service.id === id) ??
   SERVICES.find((service) => service.id === DEFAULT_SERVICE_ID)!;
 
-export const getIndividualService = (key: ServiceId, styleId: string | null) =>
-  SERVICES.find(({ id }) => id === key)?.individualServices.find(
-    (style) => style.id === styleId,
+export const getIndividualService = (
+  styleId: string | null,
+  key?: ServiceId,
+) => {
+  if (key) {
+    return SERVICES.find(({ id }) => id === key)?.individualServices.find(
+      (style) => style.id === styleId,
+    );
+  }
+
+  const individualServices = SERVICES.flatMap(
+    ({ individualServices }) => individualServices,
   );
+
+  return individualServices.find((style) => style.id === styleId);
+};
 
 export const capitaliseServiceId = (id: ServiceId) => startCase(id);

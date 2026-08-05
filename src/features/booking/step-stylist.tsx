@@ -1,11 +1,11 @@
 import { cx } from "../../utils/class-names";
 import { useNavigate } from "react-router";
 import { searchPath } from "../../routes/routes";
-import { STYLISTS } from "../../data/stylists";
 import { filterStylists, stylistCountLabel } from "../../utils/filter-stylists";
 import { StarRating } from "../../components/star-rating";
 import { getService } from "../../data/services/services";
 import type { ServiceId } from "../../types/services";
+import { STYLISTS } from "../../data/stylist/stylist";
 
 export interface StepStylistProps {
   serviceCategoryKey: ServiceId;
@@ -83,48 +83,40 @@ export function StepStylist({
             </a>
           </div>
         ) : (
-          available.map(
-            ({
-              id,
-              name,
-              city,
-              startingPrice,
-              rating,
-              reviewCount,
-              nextAvail,
-              background,
-            }) => (
+          available.map(({ id, name, location }) => (
+            <div
+              key={id}
+              className={cx(
+                "bp-stylist-pick-card",
+                id === selectedStylistId && "selected",
+              )}
+              onClick={() => onSelectStylist(id)}
+            >
               <div
-                key={id}
-                className={cx(
-                  "bp-stylist-pick-card",
-                  id === selectedStylistId && "selected",
-                )}
-                onClick={() => onSelectStylist(id)}
-              >
-                <div
-                  className="bp-spc-avatar"
-                  style={{ background: background }}
-                />
-                <div className="bp-spc-body">
-                  <div className="bp-spc-name">{name}</div>
-                  <div className="bp-spc-meta">
-                    {city} · from £{startingPrice}
-                  </div>
-                  <div className="bp-spc-rating">
-                    {/* Rounded here, unlike the cards elsewhere which floor. */}
-                    <StarRating
-                      as="span"
-                      className="bp-spc-stars"
-                      rating={Math.round(rating)}
-                    />
-                    <span className="bp-spc-rc">({reviewCount})</span>
-                  </div>
+                className="bp-spc-avatar"
+                style={{
+                  background:
+                    "radial-gradient(ellipse at 45% 35%, #3D1A00, #0D0600, #040200)",
+                }}
+              />
+              <div className="bp-spc-body">
+                <div className="bp-spc-name">{name}</div>
+                <div className="bp-spc-meta">
+                  {location} · from £{60}
                 </div>
-                <div className="bp-spc-avail">Next: {nextAvail}</div>
+                <div className="bp-spc-rating">
+                  {/* Rounded here, unlike the cards elsewhere which floor. */}
+                  <StarRating
+                    as="span"
+                    className="bp-spc-stars"
+                    rating={Math.round(4.9)}
+                  />
+                  <span className="bp-spc-rc">({3})</span>
+                </div>
               </div>
-            ),
-          )
+              <div className="bp-spc-avail">Next: {"Thu 10 Jul"}</div>
+            </div>
+          ))
         )}
       </div>
 

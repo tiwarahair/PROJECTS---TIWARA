@@ -4,8 +4,31 @@ import { StarRating } from "../../components/star-rating";
 import { useRouteSurfaces } from "../../hooks/use-route-surfaces";
 import { bookingPath, PATH } from "../../routes/routes";
 import { BOOKING_STEP } from "../../types/booking";
+import { getSpecialty } from "../../data/stylist/stylist";
 
 const PORTFOLIO_TILES = [1, 2, 3, 4, 5, 6];
+
+// temp
+const reviews = [
+  {
+    author: "Adaeze O.",
+    service: "Knotless Braids",
+    rating: 5,
+    text: "The most seamless booking experience I've ever had with a braider. Tiwara's work is absolutely immaculate.",
+  },
+  {
+    author: "Simone W.",
+    service: "Goddess Locs",
+    rating: 5,
+    text: "I've been searching for a braider this good for three years. The clarity on pricing alone changed everything.",
+  },
+  {
+    author: "Ngozi A.",
+    service: "Box Braids",
+    rating: 5,
+    text: "Tiwara is a genuine artist. My braids lasted eight weeks. The booking system is brilliant.",
+  },
+];
 
 export function ProfilePage() {
   const navigate = useNavigate();
@@ -13,26 +36,42 @@ export function ProfilePage() {
 
   // Resolved from the URL slug; undefined whenever the route is not a profile.
   const { stylist } = surfaces;
-  const {
-    catKey,
-    slug,
-    name,
-    city,
-    rating,
-    reviewCount,
-    speciality,
-    background,
-    flagship,
-    bio,
-    topServices = [],
-    reviews = [],
-    nextAvail,
-  } = stylist ?? {};
+  const { slug, name, location, specialityIds, description } = stylist ?? {};
+
+  // temp
+  const rating = 4.9;
+  const reviewCount = 3;
+  const background =
+    "radial-gradient(ellipse at 45% 35%, #3D1A00, #0D0600, #040200)";
+  const flagship = slug === "tiwaras-house";
+  const topServices = [
+    { name: "Knotless Braids", price: "from £130", duration: "4–6h" },
+    { name: "Wig Installs", price: "from £120", duration: "2–3h" },
+    { name: "Fulani Braids", price: "from £110", duration: "3–4h" },
+  ];
+  const nextAvail = "Sat 12 Jul";
+
+  // const top3ServiceIds = Object.keys(services).slice(0,3)
+
+  // for (const serviceId of top3ServiceIds) {
+  //   topServices.push({
+  //     name:
+  //   })
+  // }
+
+  // TO DO: Consider showing more than two services, or a "more" link that opens the profile.
+  // // Only the first two services are listed, as in the original.
+  // const services = topServices
+  //   .slice(0, 2)
+  //   .map(({ name }) => name)
+  //   .join(" · ");
+
+  const speciality = getSpecialty(specialityIds ?? []);
 
   function bookThisStylist() {
     if (!stylist) return;
     navigate(
-      bookingPath(BOOKING_STEP.style, { service: catKey, stylist: slug }),
+      bookingPath(BOOKING_STEP.style, { service: "braids", stylist: slug }), // braids for now
     );
   }
 
@@ -47,7 +86,7 @@ export function ProfilePage() {
               {flagship ? "✶ Flagship Stylist" : "✶ Verified Stylist"}
             </span>
             <h1 className="prof-name">{name}</h1>
-            <div className="prof-location">📍 {city}, UK</div>
+            <div className="prof-location">📍 {location}, UK</div>
             <StarRating className="prof-stars" rating={rating ?? 0}>
               {" "}
               <span>
@@ -61,7 +100,7 @@ export function ProfilePage() {
         <div className="prof-body">
           <div className="prof-section">
             <h3 className="prof-section-title">About</h3>
-            <p className="prof-about-text">{bio}</p>
+            <p className="prof-about-text">{description}</p>
           </div>
 
           <div className="prof-section">

@@ -5,9 +5,9 @@ import {
   getSurfaceKind,
   type SurfaceId,
 } from "../routes/routes";
-import { findStylistBySlug } from "../data/stylists";
 import { useBackdropLocation } from "./use-backdrop-location";
-import type { Stylist } from "../types/domain";
+import { findStylistBySlug } from "../data/stylist/stylist";
+import type { Stylist } from "../types/stylist";
 
 export interface RouteSurfaces {
   /** The surface the URL points at, or undefined on `/` and unknown paths. */

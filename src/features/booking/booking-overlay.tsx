@@ -1,7 +1,6 @@
 import { useCallback, useEffect, useMemo, useRef } from "react";
 import { useLocation, useNavigate, useSearchParams } from "react-router";
 import { cx } from "../../utils/class-names";
-import { findStylist, findStylistBySlug } from "../../data/stylists";
 import { isOpen, useRouteSurfaces } from "../../hooks/use-route-surfaces";
 import { useSurfaceNav } from "../../hooks/use-surface-nav";
 import { bookingPath, stepFromPath } from "../../routes/routes";
@@ -24,6 +23,7 @@ import { StepDetails } from "./step-details";
 import { StepReview } from "./step-review";
 import { StepConfirm } from "./step-confirm";
 import { getIndividualService, getService } from "../../data/services/services";
+import { findStylist, findStylistBySlug } from "../../data/stylist/stylist";
 
 // TO DO: READ
 
@@ -88,7 +88,7 @@ export function BookingOverlay() {
   }, [step]);
 
   const { label } = getService(booking.categoryKey);
-  const style = getIndividualService(booking.categoryKey, booking.styleId);
+  const style = getIndividualService(booking.styleId, booking.categoryKey);
 
   // The stylist picked in step 2 wins; otherwise fall back to whoever the
   // booking was opened for (a profile or a search card).

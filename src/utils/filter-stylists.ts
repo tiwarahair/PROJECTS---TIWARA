@@ -1,5 +1,5 @@
 import type { ServiceId } from "../types/services";
-import type { Stylist } from "../types/domain";
+import type { Stylist } from "../types/stylist";
 
 export interface StylistFilter {
   style: ServiceId | "";
@@ -13,9 +13,10 @@ export function filterStylists(
 ): Stylist[] {
   const city = location.toLowerCase().trim();
 
-  return stylists.filter(({ tags, city: stylistCity }) => {
-    const matchesStyle = !style || tags.includes(style);
-    const matchesCity = !city || stylistCity.toLowerCase().includes(city);
+  return stylists.filter(({ services, location: stylistLocation }) => {
+    const serviceIds = Object.keys(services);
+    const matchesStyle = !style || serviceIds.includes(style);
+    const matchesCity = !city || stylistLocation.toLowerCase().includes(city);
     return matchesStyle && matchesCity;
   });
 }

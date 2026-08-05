@@ -11,8 +11,8 @@ import {
   stepFromSlug,
   type SurfaceId,
 } from "./routes";
-import { findStylistBySlug, STYLISTS } from "../data/stylists";
 import { BOOKING_STEP, FULL_SEQUENCE } from "../types/booking";
+import { findStylistBySlug, STYLISTS } from "../data/stylist/stylist";
 
 /** Mirrors how useRouteSurfaces resolves a path: first entry wins. */
 const surfaceFor = (pathname: string): SurfaceId | undefined =>

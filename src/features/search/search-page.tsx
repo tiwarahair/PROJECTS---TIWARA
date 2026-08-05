@@ -1,7 +1,6 @@
 import { useMemo } from "react";
 import { useNavigate } from "react-router";
 import { cx } from "../../utils/class-names";
-import { STYLISTS } from "../../data/stylists";
 import { filterStylists, stylistCountLabel } from "../../utils/filter-stylists";
 import { StylistCard } from "./stylist-card";
 import { useSearchFilters } from "./use-search-filters";
@@ -11,6 +10,7 @@ import { bookingPath, PATH, profilePath } from "../../routes/routes";
 import { BOOKING_STEP } from "../../types/booking";
 import { capitaliseServiceId, SERVICES } from "../../data/services/services";
 import type { ServiceId } from "../../types/services";
+import { STYLISTS } from "../../data/stylist/stylist";
 
 export function SearchPage() {
   const navigate = useNavigate();
@@ -104,10 +104,10 @@ export function SearchPage() {
                 key={stylist.id}
                 stylist={stylist}
                 onOpenProfile={(slug) => navigate(profilePath(slug))}
-                onBook={({ catKey, slug }) =>
+                onBook={({ slug }) =>
                   navigate(
                     bookingPath(BOOKING_STEP.style, {
-                      service: catKey,
+                      service: "braids", // replace later
                       stylist: slug,
                     }),
                   )

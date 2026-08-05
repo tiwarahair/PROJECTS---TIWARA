@@ -1,0 +1,198 @@
+[
+  {
+    "id": "tiwara",
+    "name": "Tiwara's House",
+    "slug": "tiwaras-house",
+    "location": "Manchester",
+    "specialityIds": ["knotless"],
+    "description": "Tiwara's House is Manchester's premier destination for Afro hair and beauty. Founded on the belief that the Black community deserves better — better access, better transparency, better experiences. No more hunting through group chats for a reliable name. No more travelling hours for a stylist you can trust. World-class braiding, protective styles, wig installs, and treatments — all with effortless online booking and transparent pricing.",
+    "services": {
+      "braids": {
+        "knotless": { "price": 130, "duration": "4-6h" },
+        "fulani": { "price": 110, "duration": "3-4h" },
+        "cornrows": { "price": 60, "duration": "1.5-3h" },
+        "feedin": { "price": 80, "duration": "2-3h" },
+        "stitch": { "price": 90, "duration": "2-3h" }
+      },
+      "wigs": {
+        "lacefront": { "price": 120, "duration": "2-3h" },
+        "fulllace": { "price": 150, "duration": "2.5-3.5h" },
+        "glueless": { "price": 150, "duration": "1.5-2.5h" },
+        "360": { "price": 140, "duration": "2-3h" },
+        "custom": { "price": 80, "duration": "1.5-2.5h" }
+      },
+      "natural-hair": {
+        "washstyle": {
+          "price": 55,
+          "duration": "2–3h"
+        },
+        "blowout": {
+          "price": 65,
+          "duration": "2–3h"
+        },
+        "twistout": {
+          "price": 70,
+          "duration": "2–3h"
+        },
+        "braidout": {
+          "price": 70,
+          "duration": "2–3h"
+        },
+        "silkpress": {
+          "price": 85,
+          "duration": "3–4h"
+        }
+      },
+      "locs": {
+        "starterlocs": {
+          "price": 150,
+          "duration": "4–7h"
+        },
+        "twostrand": {
+          "price": 90,
+          "duration": "3–5h"
+        },
+        "senegalese": {
+          "price": 110,
+          "duration": "3–5h"
+        },
+        "marley": {
+          "price": 120,
+          "duration": "4–6h"
+        },
+        "retwist": {
+          "price": 60,
+          "duration": "1.5–3h"
+        }
+      },
+      "treatments": {
+        "deepcond": { "price": 45, "duration": "1–1.5h" },
+        "scalp": { "price": 35, "duration": "45min" },
+        "protein": { "price": 55, "duration": "1.5–2h" },
+        "hotoil": { "price": 30, "duration": "45min" }
+      }
+    },
+    "portfolioPictures": ["id1", "id2"],
+    "email": "email@.com",
+    "yearsOfExperience": "3-5",
+    "number": "07999",
+    "instagram": "@ooo",
+    "avatar": "avatar"
+  },
+  {
+    "id": "amara",
+    "name": "Amara Beauty",
+    "slug": "amara-beauty",
+    "location": "London",
+    "specialityIds": ["wigs", "natural-hair"],
+    "description": "Amara Beauty is London's go-to studio for flawless wig installs and natural hair care. With over six years of experience working with all textured hair types, Amara brings precision, care, and artistry to every appointment. Every client walks out feeling like the best version of themselves.",
+    "services": {
+      "wigs": {
+        "lacefront": { "price": 120, "duration": "2-3h" },
+        "fulllace": { "price": 150, "duration": "2.5-3.5h" },
+        "glueless": { "price": 150, "duration": "1.5-2.5h" },
+        "360": { "price": 140, "duration": "2-3h" },
+        "custom": { "price": 80, "duration": "1.5-2.5h" }
+      },
+      "natural-hair": {
+        "washstyle": {
+          "price": 55,
+          "duration": "2–3h"
+        },
+        "blowout": {
+          "price": 65,
+          "duration": "2–3h"
+        },
+        "twistout": {
+          "price": 70,
+          "duration": "2–3h"
+        },
+        "braidout": {
+          "price": 70,
+          "duration": "2–3h"
+        },
+        "silkpress": {
+          "price": 85,
+          "duration": "3–4h"
+        }
+      },
+      "treatments": {
+        "deepcond": { "price": 45, "duration": "1–1.5h" },
+        "scalp": { "price": 35, "duration": "45min" },
+        "protein": { "price": 55, "duration": "1.5–2h" },
+        "hotoil": { "price": 30, "duration": "45min" }
+      }
+    },
+    "portfolioPictures": ["id1", "id2"],
+    "email": "email@.com",
+    "yearsOfExperience": "3-5",
+    "number": "07999",
+    "instagram": "@ooo"
+  },
+  {
+    "id": "nia",
+    "name": "NaturallyNia",
+    "slug": "naturally-nia",
+    "location": "Birmingham",
+    "specialityIds": ["locs"],
+    "description": "NaturallyNia is Birmingham's most loved loc specialist. Nia has spent eight years perfecting starter locs, Senegalese twists, and protective styles for all curl types — 3A through 4C. Every client leaves feeling seen, celebrated, and beautiful.",
+    "services": {
+      "braids": {
+        "knotless": { "price": 130, "duration": "4-6h" },
+        "fulani": { "price": 110, "duration": "3-4h" },
+        "cornrows": { "price": 60, "duration": "1.5-3h" },
+        "feedin": { "price": 80, "duration": "2-3h" },
+        "stitch": { "price": 90, "duration": "2-3h" }
+      },
+      "natural-hair": {
+        "washstyle": {
+          "price": 55,
+          "duration": "2–3h"
+        },
+        "blowout": {
+          "price": 65,
+          "duration": "2–3h"
+        },
+        "twistout": {
+          "price": 70,
+          "duration": "2–3h"
+        },
+        "braidout": {
+          "price": 70,
+          "duration": "2–3h"
+        },
+        "silkpress": {
+          "price": 85,
+          "duration": "3–4h"
+        }
+      },
+      "locs": {
+        "starterlocs": {
+          "price": 150,
+          "duration": "4–7h"
+        },
+        "twostrand": {
+          "price": 90,
+          "duration": "3–5h"
+        },
+        "senegalese": {
+          "price": 110,
+          "duration": "3–5h"
+        },
+        "marley": {
+          "price": 120,
+          "duration": "4–6h"
+        },
+        "retwist": {
+          "price": 60,
+          "duration": "1.5–3h"
+        }
+      }
+    },
+    "portfolioPictures": ["id1", "id2"],
+    "email": "email@.com",
+    "yearsOfExperience": "3-5",
+    "number": "07999",
+    "instagram": "@ooo"
+  }
+]

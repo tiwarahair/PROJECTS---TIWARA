@@ -97,7 +97,7 @@ function initialState({
 
 /** Chosen style's base price plus any ticked add-ons. */
 export function totalsOf(state: BookingState): BookingTotals {
-  const style = getIndividualService(state.categoryKey, state.styleId);
+  const style = getIndividualService(state.styleId, state.categoryKey);
   const base = style?.defaultPrice ?? 0;
 
   let addOnTotal = 0;
@@ -116,7 +116,7 @@ export function totalsOf(state: BookingState): BookingTotals {
 }
 
 function snapshotOf(state: BookingState): ReviewSnapshot {
-  const style = getIndividualService(state.categoryKey, state.styleId);
+  const style = getIndividualService(state.styleId, state.categoryKey);
   return {
     service: style?.label ?? "—",
     colour: findColourById(state.colourId).name,

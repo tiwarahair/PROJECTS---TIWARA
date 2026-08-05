@@ -3,12 +3,15 @@ import { useFadeIn } from "../../hooks/use-fade-in";
 import { Link, useNavigate } from "react-router";
 import { PATH, profilePath } from "../../routes/routes";
 import { StarRating } from "../../components/star-rating";
-import { STYLISTS } from "../../data/stylists";
+import { getSpecialty, STYLISTS } from "../../data/stylist/stylist";
+
+const background =
+  "radial-gradient(ellipse at 45% 35%, #3D1A00, #0D0600, #040200)";
 
 export function FeaturedStylists() {
   const [headerRef, headerVisible] = useFadeIn<HTMLDivElement>();
   const navigate = useNavigate();
-  const featured = STYLISTS.filter(({ featured }) => featured);
+  const featured = STYLISTS.slice(0, 3); // for now
 
   return (
     <section className="feat-stylists">
@@ -26,50 +29,42 @@ export function FeaturedStylists() {
           </Link>
         </div>
         <div className="fs-track" id="fsTrack">
-          {featured.map(
-            ({
-              id,
-              slug,
-              background,
-              flagship,
-              name,
-              city,
-              speciality,
-              rating,
-              startingPrice,
-            }) => (
-              <div
-                key={id}
-                className="fs-card"
-                onClick={() => navigate(profilePath(slug))}
-              >
-                <div className="fs-card-img" style={{ background }}>
-                  {flagship && <div className="fs-flagship">✶ Flagship</div>}
+          {featured.map(({ id, slug, name, location, specialityIds }) => (
+            <div
+              key={id}
+              className="fs-card"
+              onClick={() => navigate(profilePath(slug))}
+            >
+              <div className="fs-card-img" style={{ background }}>
+                {slug === "tiwaras-house" && (
+                  <div className="fs-flagship">✶ Flagship</div>
+                )}
+              </div>
+              <div className="fs-card-body">
+                <div className="fs-card-name">{name}</div>
+                <div className="fs-card-city">📍 {location}</div>
+                <div className="fs-card-spec">
+                  {getSpecialty(specialityIds)}
                 </div>
-                <div className="fs-card-body">
-                  <div className="fs-card-name">{name}</div>
-                  <div className="fs-card-city">📍 {city}</div>
-                  <div className="fs-card-spec">{speciality}</div>
-                  <StarRating className="fs-card-rating" rating={rating}>
-                    {" "}
-                    <span>{rating}</span>
-                  </StarRating>
-                  <div className="fs-card-footer">
-                    <span className="fs-card-price">from £{startingPrice}</span>
-                    <button
-                      className="fs-card-btn"
-                      onClick={(event) => {
-                        event.stopPropagation();
-                        navigate(profilePath(slug));
-                      }}
-                    >
-                      View profile →
-                    </button>
-                  </div>
+                <StarRating className="fs-card-rating" rating={4.9}>
+                  {" "}
+                  <span>{4.9}</span>
+                </StarRating>
+                <div className="fs-card-footer">
+                  <span className="fs-card-price">from £{60}</span>
+                  <button
+                    className="fs-card-btn"
+                    onClick={(event) => {
+                      event.stopPropagation();
+                      navigate(profilePath(slug));
+                    }}
+                  >
+                    View profile →
+                  </button>
                 </div>
               </div>
-            ),
-          )}
+            </div>
+          ))}
         </div>
       </div>
     </section>
