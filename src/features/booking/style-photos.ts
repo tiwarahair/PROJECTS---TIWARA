@@ -47,7 +47,7 @@ export const getStylePhoto = (
   colourId: ColourId,
 ): string | null => {
   if (!serviceId) return null;
-  if (!styleId) return DEFAULT_PHOTO;
+  if (!styleId && serviceId === "braids") return DEFAULT_PHOTO;
   if (styleId !== PHOTOGRAPHED_STYLE_ID) return null;
   return (
     byVariant.get(variantKey(lengthId, colourId)) ??
