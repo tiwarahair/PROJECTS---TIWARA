@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import {
   DEFAULT_COLOUR_ID,
   findColourById,
@@ -18,21 +18,22 @@ import type {
 } from "../../types/booking";
 import {
   BOOKING_STEP,
-  FULL_SEQUENCE,
-  STYLIST_KNOWN_SEQUENCE,
+  buildSequence,
   nextStep,
   prevStep,
 } from "../../types/booking";
 import type { BookingContext } from "../../types/booking";
 import type { BraidSize, ColourId } from "../../types/styles";
-import { getIndividualService, getService } from "../../data/services/services";
+import type { ServiceId } from "../../types/services";
+import { getIndividualService } from "../../data/services/services";
+import { getOfferedStyles, getStyleRate } from "../../data/stylist/stylist";
 import { ADD_ON_OPTIONS } from "../../data/style-config/add-ons";
 
 // TO DO: persist this so a refresh mid-booking does not lose the answers.
 // The step survives a refresh because it is in the URL; everything the client
 // has typed does not. <<<
 
-/** Style selection slides to the next step after a short beat. */
+/** Service and style selection slide to the next step after a short beat. */
 const AUTO_ADVANCE_MS = 320;
 
 /** Picking a stylist advances slightly more slowly, matching the new-ui flow. */
@@ -54,6 +55,7 @@ export interface BookingWizard {
   sequence: readonly BookingStepIndex[];
   /** Derived from live state, so the review step always reflects the choices. */
   review: ReviewSnapshot;
+  selectService: (serviceId: ServiceId) => void;
   selectStyle: (styleId: string) => void;
   setDateRange: (dateFrom: string, dateTo: string) => void;
   setLocation: (location: string) => void;
@@ -75,13 +77,19 @@ function defaultDateWindowFields() {
   return { dateFrom: from, dateTo: to };
 }
 
+type BookingAnswers = Pick<
+  BookingContext,
+  "serviceId" | "styleId" | "stylistId"
+>;
+
 function initialState({
-  categoryKey,
+  serviceId,
+  styleId,
   stylistId,
-}: BookingContext): BookingState {
+}: BookingAnswers): BookingState {
   return {
-    categoryKey,
-    styleId: null,
+    serviceId,
+    styleId,
     ...defaultDateWindowFields(),
     location: "",
     stylistId,
@@ -95,10 +103,12 @@ function initialState({
   };
 }
 
-/** Chosen style's base price plus any ticked add-ons. */
+/** The stylist's rate for the chosen style, plus any ticked add-ons. */
 export function totalsOf(state: BookingState): BookingTotals {
-  const style = getIndividualService(state.styleId, state.categoryKey);
-  const base = style?.defaultPrice ?? 0;
+  const { serviceId, styleId, stylistId } = state;
+  const base = serviceId
+    ? getStyleRate(styleId, serviceId, stylistId).price
+    : 0;
 
   let addOnTotal = 0;
   for (const { id, addedCost = 0 } of ADD_ON_OPTIONS) {
@@ -116,7 +126,10 @@ export function totalsOf(state: BookingState): BookingTotals {
 }
 
 function snapshotOf(state: BookingState): ReviewSnapshot {
-  const style = getIndividualService(state.styleId, state.categoryKey);
+  const style = getIndividualService(
+    state.styleId,
+    state.serviceId ?? undefined,
+  );
   return {
     service: style?.label ?? "—",
     colour: findColourById(state.colourId).name,
@@ -132,8 +145,12 @@ export interface BookingWizardOptions {
   step: BookingStepIndex;
   /** True while the booking surface is on screen. */
   open: boolean;
-  /** Navigates to a step, preserving the booking's query params. */
-  goToStep: (step: BookingStepIndex) => void;
+  /**
+   * Navigates to a step, preserving the booking's query params. Passing a
+   * service replaces `?service=` and drops any pre-picked `?style=`, which
+   * would otherwise point at a style the new service does not contain.
+   */
+  goToStep: (step: BookingStepIndex, service?: ServiceId) => void;
 }
 
 export function useBookingWizard({
@@ -146,35 +163,54 @@ export function useBookingWizard({
     initialState(context),
   );
 
-  // Opening from a stylist answers "when & where" and "which stylist", so
-  // those two steps drop out of the flow entirely.
-  const sequence = context.stylistId ? STYLIST_KNOWN_SEQUENCE : FULL_SEQUENCE;
+  const { serviceId, styleId, stylistId, customisable } = context;
+  const sequence = useMemo(
+    () => buildSequence({ serviceId, styleId, stylistId, customisable }),
+    [serviceId, styleId, stylistId, customisable],
+  );
 
   // Read inside the auto-advance timer so it sees the step at fire time.
   const stepRef = useRef(step);
   stepRef.current = step;
 
-  // Every booking starts clean
-  const { categoryKey, stylistId } = context;
+  // Every booking starts clean. Changing the service mid-flow lands here too,
+  // and wipes everything: each service offers a different set of
+  // customisations, so nothing collected under the old one still applies.
   useEffect(() => {
     if (!open) return;
-    setBooking(initialState({ categoryKey, stylistId }));
-  }, [open, categoryKey, stylistId]);
+    setBooking(initialState({ serviceId, styleId, stylistId }));
+  }, [open, serviceId, styleId, stylistId]);
+
+  /**
+   * Scheduled from the handler rather than an effect: two quick clicks queue
+   * two timers, and the second is a no-op because the step has already moved
+   * on. An effect with cleanup would cancel the first timer and delay the
+   * advance to 320ms after the *second* click.
+   */
+  const advanceFrom = useCallback(
+    (from: BookingStepIndex, delay: number, service?: ServiceId) => {
+      setTimeout(() => {
+        if (stepRef.current === from)
+          goToStep(nextStep(sequence, from), service);
+      }, delay);
+    },
+    [goToStep, sequence],
+  );
+
+  const selectService = useCallback(
+    (serviceId: ServiceId) => {
+      setBooking((current) => ({ ...current, serviceId, styleId: null }));
+      advanceFrom(BOOKING_STEP.service, AUTO_ADVANCE_MS, serviceId);
+    },
+    [advanceFrom],
+  );
 
   const selectStyle = useCallback(
     (styleId: string) => {
       setBooking((current) => ({ ...current, styleId }));
-      // Scheduled from the handler rather than an effect: two quick clicks
-      // queue two timers, and the second is a no-op because the step has
-      // already moved on. An effect with cleanup would cancel the first timer
-      // and delay the advance to 320ms after the *second* click.
-      setTimeout(() => {
-        if (stepRef.current === BOOKING_STEP.style) {
-          goToStep(sequence[1] ?? BOOKING_STEP.customise);
-        }
-      }, AUTO_ADVANCE_MS);
+      advanceFrom(BOOKING_STEP.style, AUTO_ADVANCE_MS);
     },
-    [goToStep, sequence],
+    [advanceFrom],
   );
 
   const setDateRange = useCallback((dateFrom: string, dateTo: string) => {
@@ -188,13 +224,9 @@ export function useBookingWizard({
   const selectStylist = useCallback(
     (stylistId: string) => {
       setBooking((current) => ({ ...current, stylistId }));
-      setTimeout(() => {
-        if (stepRef.current === BOOKING_STEP.stylist) {
-          goToStep(BOOKING_STEP.customise);
-        }
-      }, STYLIST_ADVANCE_MS);
+      advanceFrom(BOOKING_STEP.stylist, STYLIST_ADVANCE_MS);
     },
-    [goToStep],
+    [advanceFrom],
   );
 
   const selectColour = useCallback((colourId: ColourId) => {
@@ -234,14 +266,17 @@ export function useBookingWizard({
   }, []);
 
   const goNext = useCallback(() => {
-    // Continuing from the style step without a choice picks the first style.
+    // Continuing from the style step without a choice picks the first style
+    // this stylist offers.
     if (step === BOOKING_STEP.style) {
       setBooking((current) => ({
         ...current,
         styleId:
           current.styleId ??
-          getService(current.categoryKey).individualServices[0]?.id ??
-          null,
+          (current.serviceId
+            ? (getOfferedStyles(current.stylistId, current.serviceId)[0]?.id ??
+              null)
+            : null),
       }));
     }
     goToStep(nextStep(sequence, step));
@@ -256,6 +291,7 @@ export function useBookingWizard({
     step,
     sequence,
     review: snapshotOf(booking),
+    selectService,
     selectStyle,
     setDateRange,
     setLocation,

@@ -1,10 +1,11 @@
 [
   {
     "id": "tiwara",
+    "full-name": "Kashope Afolabi",
     "name": "Tiwara's House",
     "slug": "tiwaras-house",
     "location": "Manchester",
-    "specialityIds": ["knotless"],
+    "specialityIds": ["braids"],
     "description": "Tiwara's House is Manchester's premier destination for Afro hair and beauty. Founded on the belief that the Black community deserves better — better access, better transparency, better experiences. No more hunting through group chats for a reliable name. No more travelling hours for a stylist you can trust. World-class braiding, protective styles, wig installs, and treatments — all with effortless online booking and transparent pricing.",
     "services": {
       "braids": {
@@ -81,6 +82,7 @@
   },
   {
     "id": "amara",
+    "full-name": "name",
     "name": "Amara Beauty",
     "slug": "amara-beauty",
     "location": "London",
@@ -131,6 +133,7 @@
   },
   {
     "id": "nia",
+    "full-name": "name",
     "name": "NaturallyNia",
     "slug": "naturally-nia",
     "location": "Birmingham",

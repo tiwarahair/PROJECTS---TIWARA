@@ -6,22 +6,33 @@ import { BOOKING_STEP, type BookingStepIndex } from "../../types/booking";
 import type { BookingContext } from "../../types/booking";
 import { defaultDateWindow } from "../../utils/dates";
 import { DEFAULT_COLOUR_ID } from "../../data/style-config/colours";
+import { findStylist } from "../../data/stylist/stylist";
 
 const AUTO_ADVANCE_MS = 320;
 const STYLIST_ADVANCE_MS = 300;
 
+/** Defaults to a landing-card entry: service settled, nothing else. */
 function context(overrides: Partial<BookingContext> = {}): BookingContext {
-  return { categoryKey: "braids", stylistId: null, ...overrides };
+  return {
+    serviceId: "braids",
+    styleId: null,
+    stylistId: null,
+    customisable: true,
+    ...overrides,
+  };
 }
 
 /**
  * The step lives in the URL in the real app. This stands in for the router so
  * the wizard can be exercised without one.
  */
-function renderWizard(initial: BookingContext = context()) {
+function renderWizard(
+  initial: BookingContext = context(),
+  startAt: BookingStepIndex = BOOKING_STEP.style,
+) {
   return renderHook(
     ({ ctx }) => {
-      const [step, setStep] = useState<BookingStepIndex>(BOOKING_STEP.style);
+      const [step, setStep] = useState<BookingStepIndex>(startAt);
       return useBookingWizard({
         context: ctx,
         step,
@@ -63,8 +74,15 @@ describe("useBookingWizard", () => {
   });
 
   describe("step order", () => {
-    it("runs style → when&where → stylist → customise → schedule → details → review → confirm", () => {
-      const { result } = renderWizard();
+    it("runs service → style → when&where → stylist → customise → schedule → details → review → confirm", () => {
+      const { result } = renderWizard(
+        context({ serviceId: null }),
+        BOOKING_STEP.service,
+      );
+
+      act(() => result.current.selectService("braids"));
+      act(() => void vi.advanceTimersByTime(AUTO_ADVANCE_MS));
+      expect(result.current.step).toBe(BOOKING_STEP.style);
 
       act(() => result.current.selectStyle("cornrows"));
       act(() => void vi.advanceTimersByTime(AUTO_ADVANCE_MS));
@@ -91,10 +109,10 @@ describe("useBookingWizard", () => {
     });
 
     it("clamps at both ends", () => {
-      const { result } = renderWizard();
+      const { result } = renderWizard(context(), BOOKING_STEP.service);
 
       act(() => result.current.goPrev());
-      expect(result.current.step).toBe(BOOKING_STEP.style);
+      expect(result.current.step).toBe(BOOKING_STEP.service);
 
       for (let index = 0; index < 12; index += 1) {
         act(() => result.current.goNext());
@@ -104,6 +122,20 @@ describe("useBookingWizard", () => {
   });
 
   describe("auto-advance", () => {
+    it("moves off the service step 320ms after a service is chosen", () => {
+      const { result } = renderWizard(
+        context({ serviceId: null }),
+        BOOKING_STEP.service,
+      );
+
+      act(() => result.current.selectService("wigs"));
+      expect(result.current.step).toBe(BOOKING_STEP.service);
+
+      act(() => void vi.advanceTimersByTime(AUTO_ADVANCE_MS));
+      expect(result.current.step).toBe(BOOKING_STEP.style);
+      expect(result.current.booking.serviceId).toBe("wigs");
+    });
+
     it("moves off the style step 320ms after a style is chosen", () => {
       const { result } = renderWizard();
 
@@ -158,6 +190,7 @@ describe("useBookingWizard", () => {
       const { result } = renderWizard(fromStylist());
 
       expect(result.current.sequence).toEqual([
+        BOOKING_STEP.service,
         BOOKING_STEP.style,
         BOOKING_STEP.customise,
         BOOKING_STEP.schedule,
@@ -196,6 +229,82 @@ describe("useBookingWizard", () => {
         act(() => result.current.goNext());
       }
       expect(result.current.step).toBe(BOOKING_STEP.confirm);
+    });
+  });
+
+  describe("a booking that arrives part-answered", () => {
+    // A stylist's profile service row settles all three at once.
+    it("seeds the service, style and stylist from the context", () => {
+      const { result } = renderWizard(
+        context({
+          serviceId: "braids",
+          styleId: "fulani",
+          stylistId: "tiwara",
+        }),
+        BOOKING_STEP.customise,
+      );
+
+      const { serviceId, styleId, stylistId } = result.current.booking;
+      expect({ serviceId, styleId, stylistId }).toEqual({
+        serviceId: "braids",
+        styleId: "fulani",
+        stylistId: "tiwara",
+      });
+    });
+
+    it("still keeps the service and style steps reachable with Back", () => {
+      const { result } = renderWizard(
+        context({
+          serviceId: "braids",
+          styleId: "fulani",
+          stylistId: "tiwara",
+        }),
+        BOOKING_STEP.customise,
+      );
+
+      act(() => result.current.goPrev());
+      expect(result.current.step).toBe(BOOKING_STEP.style);
+
+      act(() => result.current.goPrev());
+      expect(result.current.step).toBe(BOOKING_STEP.service);
+    });
+
+    it("drops the customise step when the service has nothing to customise", () => {
+      const { result } = renderWizard(
+        context({ serviceId: "treatments", customisable: false }),
+        BOOKING_STEP.style,
+      );
+
+      expect(result.current.sequence).not.toContain(BOOKING_STEP.customise);
+
+      act(() => result.current.selectStyle("deepcond"));
+      act(() => void vi.advanceTimersByTime(AUTO_ADVANCE_MS));
+      expect(result.current.step).toBe(BOOKING_STEP.whenWhere);
+    });
+  });
+
+  describe("what the client pays", () => {
+    it("bills the stylist's own rate, not the catalogue default", () => {
+      const { result } = renderWizard(
+        context({ serviceId: "braids", stylistId: "tiwara" }),
+        BOOKING_STEP.style,
+      );
+
+      act(() => result.current.selectStyle("knotless"));
+      act(() => void vi.advanceTimersByTime(AUTO_ADVANCE_MS));
+
+      const { price } = findStylist("tiwara")!.services.braids.knotless!;
+      expect(result.current.review.money.total).toBe(price);
+      expect(result.current.review.money.deposit).toBe(price * 0.25);
+    });
+
+    it("costs nothing before a service is chosen", () => {
+      const { result } = renderWizard(
+        context({ serviceId: null }),
+        BOOKING_STEP.service,
+      );
+
+      expect(result.current.review.money.total).toBe(0);
     });
   });
 
@@ -274,10 +383,10 @@ describe("useBookingWizard", () => {
       act(() => result.current.selectTime("1330"));
       act(() => result.current.updateDetails({ firstName: "Amara" }));
 
-      rerender({ ctx: context({ categoryKey: "locs" }) });
+      rerender({ ctx: context({ serviceId: "locs" }) });
 
       const { booking } = result.current;
-      expect(booking.categoryKey).toBe("locs");
+      expect(booking.serviceId).toBe("locs");
       expect(booking.styleId).toBeNull();
       expect(booking.stylistId).toBeNull();
       expect(booking.dateFrom).toBe(defaultDateWindow().from);

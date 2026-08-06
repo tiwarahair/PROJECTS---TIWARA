@@ -267,32 +267,69 @@ describe("the booking step in the URL", () => {
   // Surfaces are not rendered inside a <Route>, so there is no route match and
   // useParams() would read nothing here — the step must come from the path.
   it.each([
-    ["/book/style", "Choose your style"],
-    ["/book/when-where", "When & where?"],
-    ["/book/customise", "Customise your look"],
-    ["/book/date-time", "Choose a date & time"],
+    ["/book/service", "Choose your service"],
+    ["/book/style?service=braids", "Choose your style"],
+    ["/book/when-where?service=braids", "When & where?"],
+    ["/book/customise?service=braids", "Customise your look"],
+    ["/book/date-time?service=braids", "Choose a date & time"],
   ])("shows the panel named by %s", (route, title) => {
     renderWithRouter(<App />, route);
     expect(activeStep()).toBe(title);
   });
 
-  it("shows six dots when a stylist is already chosen", () => {
-    renderWithRouter(<App />, "/book/style?stylist=tiwaras-house");
-    expect(document.querySelectorAll(".bp-step-dot")).toHaveLength(6);
+  // Every later step describes a service, so without one there is nothing to
+  // show and the flow starts at the question instead.
+  it("falls back to the service step when the URL names no service", () => {
+    renderWithRouter(<App />, "/book/customise");
+    expect(activeStep()).toBe("Choose your service");
   });
 
-  it("shows eight dots otherwise", () => {
-    renderWithRouter(<App />, "/book/style");
+  // Amara does wigs, natural hair and treatments — never braids.
+  it("falls back when the URL names a service the stylist does not offer", () => {
+    renderWithRouter(
+      <App />,
+      "/book/style?service=braids&stylist=amara-beauty",
+    );
+    expect(activeStep()).toBe("Choose your service");
+  });
+
+  it("shows seven dots when a stylist is already chosen", () => {
+    renderWithRouter(
+      <App />,
+      "/book/style?service=braids&stylist=tiwaras-house",
+    );
+    expect(document.querySelectorAll(".bp-step-dot")).toHaveLength(7);
+  });
+
+  it("shows nine dots otherwise", () => {
+    renderWithRouter(<App />, "/book/style?service=braids");
+    expect(document.querySelectorAll(".bp-step-dot")).toHaveLength(9);
+  });
+
+  // Treatments have no length, size or colour to pick, so that step goes.
+  it("drops the customise dot for a service with nothing to customise", () => {
+    renderWithRouter(<App />, "/book/style?service=treatments");
     expect(document.querySelectorAll(".bp-step-dot")).toHaveLength(8);
   });
 
+  // The style step auto-advances, so Back is its only nav control — and it is
+  // the only way to reach the service step from inside the flow.
+  it("steps back from the style step to the service step", () => {
+    renderWithRouter(<App />, "/book/style?service=braids");
+
+    const panel = document.querySelector(".bp-step-panel.active")!;
+    fireEvent.click(panel.querySelector(".bp-btn-back")!);
+
+    expect(activeStep()).toBe("Choose your service");
+  });
+
   it("marks the dot for the step the URL points at", () => {
-    renderWithRouter(<App />, "/book/date-time");
+    renderWithRouter(<App />, "/book/date-time?service=braids");
 
     const dots = [...document.querySelectorAll(".bp-step-dot")];
-    expect(dots.findIndex((dot) => dot.classList.contains("active"))).toBe(4);
+    expect(dots.findIndex((dot) => dot.classList.contains("active"))).toBe(5);
     expect(dots.filter((dot) => dot.classList.contains("done"))).toHaveLength(
-      4,
+      5,
     );
   });
 });

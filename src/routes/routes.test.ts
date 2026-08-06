@@ -11,7 +11,7 @@ import {
   stepFromSlug,
   type SurfaceId,
 } from "./routes";
-import { BOOKING_STEP, FULL_SEQUENCE } from "../types/booking";
+import { BOOKING_STEP } from "../types/booking";
 import { findStylistBySlug, STYLISTS } from "../data/stylist/stylist";
 
 /** Mirrors how useRouteSurfaces resolves a path: first entry wins. */
@@ -79,8 +79,8 @@ describe("stylist slugs", () => {
 });
 
 describe("booking step slugs", () => {
-  it("round-trips every step in the full sequence", () => {
-    for (const step of FULL_SEQUENCE) {
+  it("round-trips every step", () => {
+    for (const step of Object.values(BOOKING_STEP)) {
       expect(stepFromSlug(STEP_SLUG[step])).toBe(step);
     }
   });
@@ -107,6 +107,7 @@ describe("path builders", () => {
   });
 
   it("builds booking paths with only the context that is set", () => {
+    expect(bookingPath(BOOKING_STEP.service)).toBe("/book/service");
     expect(bookingPath(BOOKING_STEP.style)).toBe("/book/style");
     expect(bookingPath(BOOKING_STEP.review, { service: "locs" })).toBe(
       "/book/review?service=locs",
@@ -117,6 +118,19 @@ describe("path builders", () => {
         stylist: "tiwaras-house",
       }),
     ).toBe("/book/customise?service=braids&stylist=tiwaras-house");
+  });
+
+  // A profile service row settles the style as well as the service.
+  it("carries a pre-picked style through to the booking", () => {
+    expect(
+      bookingPath(BOOKING_STEP.customise, {
+        service: "braids",
+        style: "knotless",
+        stylist: "tiwaras-house",
+      }),
+    ).toBe(
+      "/book/customise?service=braids&style=knotless&stylist=tiwaras-house",
+    );
   });
 
   it("builds profile paths that match the profile route", () => {

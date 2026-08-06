@@ -3,7 +3,8 @@ import { useNavigate } from "react-router";
 import { isOpen, useRouteSurfaces } from "../../hooks/use-route-surfaces";
 import { useSurfaceNav } from "../../hooks/use-surface-nav";
 import { bookingPath } from "../../routes/routes";
-import { BOOKING_STEP } from "../../types/booking";
+import { firstUnansweredStep } from "../../types/booking";
+import { isCustomisable } from "../../data/services/services";
 import { lengthLabel } from "../../data/style-config/lengths";
 import { AI_CONFIDENCE_LABELS } from "../../data/other/ai-maps";
 import { useAIDiscovery } from "./use-ai-discovery";
@@ -27,11 +28,18 @@ export function AIDiscoveryPage() {
     retry,
   } = useAIDiscovery();
 
-  function bookMatch(match: AiStyleMatch) {
+  function bookMatch({ serviceId, styleId }: AiStyleMatch) {
     // The detected colour and length are deliberately not passed on: the
     // original set them and then openBooking immediately reset both to 1B and
     // Medium. Preserved — see the behaviour-parity register.
-    navigate(bookingPath(BOOKING_STEP.style, { service: match.categoryKey }));
+    // The style is, though: identifying it is the whole point of the upload.
+    const step = firstUnansweredStep({
+      serviceId,
+      styleId,
+      stylistId: null,
+      customisable: isCustomisable(serviceId),
+    });
+    navigate(bookingPath(step, { service: serviceId, style: styleId }));
   }
 
   return (

@@ -10,7 +10,8 @@ React 19.x and TypeScript 5.9, Redux Tool Kit
 
 ## Core Operating Rules
 
-Keep changes scoped to the requested task. Avoid opportunistic churn.
+- Keep changes scoped to the requested task. Avoid opportunistic churn.
+- When I prefix a message with Q:, answer only — do not plan or execute.
 
 ## Coding Standards
 

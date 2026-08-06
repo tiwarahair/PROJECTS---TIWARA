@@ -8,7 +8,7 @@ import type { ServiceId } from "../../types/services";
 import { STYLISTS } from "../../data/stylist/stylist";
 
 export interface StepStylistProps {
-  serviceCategoryKey: ServiceId;
+  serviceId: ServiceId;
   location: string;
   dateFrom: string;
   dateTo: string;
@@ -41,7 +41,7 @@ export function buildResultsSummary(
 
 /** No Continue button — picking a stylist advances on its own. */
 export function StepStylist({
-  serviceCategoryKey,
+  serviceId,
   location,
   dateFrom,
   dateTo,
@@ -51,7 +51,7 @@ export function StepStylist({
 }: StepStylistProps) {
   const navigate = useNavigate();
   const available = filterStylists(STYLISTS, {
-    style: serviceCategoryKey,
+    style: serviceId,
     location,
   });
 
@@ -61,7 +61,7 @@ export function StepStylist({
       <div className="bp-step-sub">
         {buildResultsSummary(
           available.length,
-          getService(serviceCategoryKey).label,
+          getService(serviceId).label,
           location,
           dateFrom,
           dateTo,

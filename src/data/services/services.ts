@@ -30,4 +30,12 @@ export const getIndividualService = (
   return individualServices.find((style) => style.id === styleId);
 };
 
+/**
+ * Whether a service has anything worth showing on the customise step. Treatments
+ * do not — no length, size or colour, and "Other" as their only add-on. An
+ * unchosen service counts as customisable, since there is nothing to rule out yet.
+ */
+export const isCustomisable = (id: ServiceId | null) =>
+  id === null || getService(id).customisable;
+
 export const capitaliseServiceId = (id: ServiceId) => startCase(id);

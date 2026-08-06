@@ -105,12 +105,7 @@ export function SearchPage() {
                 stylist={stylist}
                 onOpenProfile={(slug) => navigate(profilePath(slug))}
                 onBook={({ slug }) =>
-                  navigate(
-                    bookingPath(BOOKING_STEP.style, {
-                      service: "braids", // replace later
-                      stylist: slug,
-                    }),
-                  )
+                  navigate(bookingPath(BOOKING_STEP.service, { stylist: slug }))
                 }
               />
             ))

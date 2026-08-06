@@ -1,7 +1,15 @@
 import stylists from "./stylist.json";
 import type { Stylist } from "../../types/stylist";
-import { getIndividualService, getService } from "../services/services";
-import type { ServiceId } from "../../types/services";
+import {
+  SERVICES,
+  getIndividualService,
+  getService,
+} from "../services/services";
+import type {
+  IndividualService,
+  Service,
+  ServiceId,
+} from "../../types/services";
 import { RESERVED_SLUGS } from "../../routes/routes";
 
 // will be removed later - and will be asyncrhonous calls to the db
@@ -21,6 +29,77 @@ export function findStylistBySlug(
 ): Stylist | undefined {
   if (!slug || RESERVED_SLUGS.has(slug)) return undefined;
   return STYLISTS.find((stylist) => stylist.slug === slug);
+}
+
+/**
+ * What a stylist actually offers, in catalogue order. `services` is the
+ * capability list — `specialityIds` is a profile headline and mixes style ids
+ * in with service ids, so it cannot be used for this.
+ *
+ * No stylist means no filter: every service is on the table.
+ */
+export function getOfferedServices(stylistId: string | null): Service[] {
+  const stylist = findStylist(stylistId);
+  if (!stylist) return [...SERVICES];
+
+  const offered = Object.keys(stylist.services);
+  return SERVICES.filter(({ id }) => offered.includes(id));
+}
+
+/** The styles a stylist offers within one service, in catalogue order. */
+export function getOfferedStyles(
+  stylistId: string | null,
+  serviceId: ServiceId,
+): IndividualService[] {
+  const { individualServices } = getService(serviceId);
+  const stylist = findStylist(stylistId);
+  if (!stylist) return individualServices;
+
+  const offered = Object.keys(stylist.services[serviceId] ?? {});
+  return individualServices.filter(({ id }) => offered.includes(id));
+}
+
+export interface StyleRate {
+  price: number;
+  duration: string;
+}
+
+/** One bookable row on a stylist's profile: a style, priced by that stylist. */
+export interface StylistStyle extends StyleRate {
+  serviceId: ServiceId;
+  styleId: string;
+  label: string;
+}
+
+/** Everything a stylist offers, flattened to bookable rows in catalogue order. */
+export function getStylistStyles(stylistId: string | null): StylistStyle[] {
+  return getOfferedServices(stylistId).flatMap(({ id: serviceId }) =>
+    getOfferedStyles(stylistId, serviceId).map(({ id: styleId, label }) => ({
+      serviceId,
+      styleId,
+      label,
+      ...getStyleRate(styleId, serviceId, stylistId),
+    })),
+  );
+}
+
+/**
+ * What this style costs *here*. A stylist sets their own rates, so theirs win;
+ * the catalogue default is only a fallback for browsing without a stylist.
+ */
+export function getStyleRate(
+  styleId: string | null,
+  serviceId: ServiceId,
+  stylistId: string | null,
+): StyleRate {
+  const stylistRate = styleId
+    ? findStylist(stylistId)?.services[serviceId]?.[styleId]
+    : undefined;
+  if (stylistRate) return stylistRate;
+
+  const { defaultPrice = 0, defaultDuration = "" } =
+    getIndividualService(styleId, serviceId) ?? {};
+  return { price: defaultPrice, duration: defaultDuration };
 }
 
 export const getSpecialty = (specialityIds: ServiceId[]) =>

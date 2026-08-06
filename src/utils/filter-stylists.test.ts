@@ -1,30 +1,33 @@
 import { describe, expect, it } from "vitest";
 import { filterStylists, stylistCountLabel } from "./filter-stylists";
-import { STYLISTS } from "../data/stylists";
+import { STYLISTS } from "../data/stylist/stylist";
+import { SERVICES } from "../data/services/services";
 
 const ALL = { style: "" as const, location: "" };
 
 describe("filterStylists", () => {
   it("returns everyone when nothing is set", () => {
-    expect(filterStylists(STYLISTS, ALL)).toHaveLength(4);
+    expect(filterStylists(STYLISTS, ALL)).toHaveLength(STYLISTS.length);
   });
 
-  it("counts per category as the original did", () => {
-    const counts = {
-      braids: 3,
-      wigs: 3,
-      locs: 2,
-      "natural-hair": 3,
-      treatments: 2,
-    } as const;
+  // Counted from the data rather than pinned to a number, so adding a stylist
+  // does not break the test that adding a stylist is supposed to be safe.
+  it("returns exactly the stylists who price that service", () => {
+    for (const { id: style } of SERVICES) {
+      const expected = STYLISTS.filter(({ services }) => style in services);
+      const results = filterStylists(STYLISTS, { style, location: "" });
 
-    for (const [style, expected] of Object.entries(counts)) {
-      const results = filterStylists(STYLISTS, {
-        style: style as keyof typeof counts,
-        location: "",
-      });
-      expect(results, `category ${style}`).toHaveLength(expected);
+      expect(results, `category ${style}`).toEqual(expected);
     }
+  });
+
+  it("excludes a stylist who does not offer the service", () => {
+    // Amara does wigs, natural hair and treatments — no braids.
+    const braiders = filterStylists(STYLISTS, {
+      style: "braids",
+      location: "",
+    });
+    expect(braiders.map(({ id }) => id)).not.toContain("amara");
   });
 
   it("matches city as a case-insensitive substring", () => {

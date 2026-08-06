@@ -6,14 +6,14 @@ import { useSurfaceNav } from "../../hooks/use-surface-nav";
 import { bookingPath, stepFromPath } from "../../routes/routes";
 import {
   BOOKING_STEP,
-  FULL_SEQUENCE,
-  STYLIST_KNOWN_SEQUENCE,
+  buildSequence,
+  firstUnansweredStep,
   type BookingStepIndex,
 } from "../../types/booking";
-import { DEFAULT_SERVICE_ID } from "../../data/services/services";
 import type { ServiceId } from "../../types/services";
 import { useBookingWizard } from "./use-booking-wizard";
 import { StrandPreview } from "./strand-preview";
+import { StepService } from "./step-service";
 import { StepStyle } from "./step-style";
 import { StepWhenWhere } from "./step-when-where";
 import { StepStylist } from "./step-stylist";
@@ -22,8 +22,18 @@ import { StepSchedule } from "./step-schedule";
 import { StepDetails } from "./step-details";
 import { StepReview } from "./step-review";
 import { StepConfirm } from "./step-confirm";
-import { getIndividualService, getService } from "../../data/services/services";
-import { findStylist, findStylistBySlug } from "../../data/stylist/stylist";
+import {
+  getIndividualService,
+  getService,
+  isCustomisable,
+} from "../../data/services/services";
+import {
+  findStylist,
+  findStylistBySlug,
+  getOfferedServices,
+  getOfferedStyles,
+  getStyleRate,
+} from "../../data/stylist/stylist";
 
 // TO DO: READ
 
@@ -38,45 +48,74 @@ export function BookingOverlay() {
   const optionsRef = useRef<HTMLDivElement>(null);
 
   const open = isOpen(surfaces, "booking");
-  const service = (params.get("service") ?? DEFAULT_SERVICE_ID) as ServiceId;
   const contextStylist = findStylistBySlug(params.get("stylist") ?? undefined);
   const contextSlug = contextStylist?.slug;
+  const stylistId = contextStylist?.id ?? null;
+  const requestedService = params.get("service");
+  const requestedStyle = params.get("style");
 
-  const context = useMemo(
-    () => ({ categoryKey: service, stylistId: contextStylist?.id ?? null }),
-    [service, contextStylist?.id],
-  );
+  // A service or style this stylist does not offer is treated as if it were
+  // never in the URL, so the client is simply asked the question instead.
+  const context = useMemo(() => {
+    const serviceId =
+      (getOfferedServices(stylistId).find(({ id }) => id === requestedService)
+        ?.id as ServiceId | undefined) ?? null;
+    const styleId = serviceId
+      ? (getOfferedStyles(stylistId, serviceId).find(
+          ({ id }) => id === requestedStyle,
+        )?.id ?? null)
+      : null;
+    return {
+      serviceId,
+      styleId,
+      stylistId,
+      customisable: isCustomisable(serviceId),
+    };
+  }, [requestedService, requestedStyle, stylistId]);
+
+  const { serviceId, styleId } = context;
 
   const goToStep = useCallback(
-    (next: BookingStepIndex) =>
-      navigate(bookingPath(next, { service, stylist: contextSlug })),
-    [navigate, service, contextSlug],
+    (next: BookingStepIndex, chosenService?: ServiceId) =>
+      navigate(
+        bookingPath(next, {
+          service: chosenService ?? serviceId ?? undefined,
+          // A newly chosen service invalidates any style carried in the URL.
+          style: chosenService ? undefined : (styleId ?? undefined),
+          stylist: contextSlug,
+        }),
+      ),
+    [navigate, serviceId, styleId, contextSlug],
   );
 
   // Opening from a stylist drops two steps, so which slugs are valid depends
   // on how the booking started.
-  const sequence = context.stylistId ? STYLIST_KNOWN_SEQUENCE : FULL_SEQUENCE;
+  const sequence = buildSequence(context);
   const requested = stepFromPath(pathname);
-  const validStep =
-    requested !== undefined && sequence.includes(requested)
-      ? requested
-      : undefined;
+  const inSequence = requested !== undefined && sequence.includes(requested);
+  // Every step past the picker needs a service to describe; without one there
+  // is nothing to show.
+  const hasService = requested === BOOKING_STEP.service || serviceId !== null;
+  const validStep = inSequence && hasService ? requested : undefined;
 
-  // Bare `/book`, an unknown slug, or a step this sequence skips all fall back
-  // to the start. Replaces rather than pushes, so Back does not bounce here.
+  // Bare `/book`, an unknown slug, a step this sequence skips, or a service
+  // this stylist does not offer all fall back to the first open question.
+  // Replaces rather than pushes, so Back does not bounce here.
   useEffect(() => {
     if (!open || validStep !== undefined) return;
     navigate(
-      bookingPath(BOOKING_STEP.style, { service, stylist: contextSlug }),
-      {
-        replace: true,
-      },
+      bookingPath(firstUnansweredStep(context), {
+        service: serviceId ?? undefined,
+        style: styleId ?? undefined,
+        stylist: contextSlug,
+      }),
+      { replace: true },
     );
-  }, [open, validStep, navigate, service, contextSlug]);
+  }, [open, validStep, navigate, context, serviceId, styleId, contextSlug]);
 
   const wizard = useBookingWizard({
     context,
-    step: validStep ?? BOOKING_STEP.style,
+    step: validStep ?? firstUnansweredStep(context),
     open,
     goToStep,
   });
@@ -87,15 +126,25 @@ export function BookingOverlay() {
     if (optionsRef.current) optionsRef.current.scrollTop = 0;
   }, [step]);
 
-  const { label } = getService(booking.categoryKey);
-  const style = getIndividualService(booking.styleId, booking.categoryKey);
+  // No service chosen yet means there is no category to name in the header.
+  const headerLabel = booking.serviceId
+    ? getService(booking.serviceId).label
+    : "Book";
+  const style = getIndividualService(
+    booking.styleId,
+    booking.serviceId ?? undefined,
+  );
 
-  // The stylist picked in step 2 wins; otherwise fall back to whoever the
+  // The stylist picked in the picker wins; otherwise fall back to whoever the
   // booking was opened for (a profile or a search card).
   const stylistName =
     findStylist(booking.stylistId)?.name ??
     contextStylist?.name ??
     DEFAULT_STYLIST_NAME;
+
+  const rate = booking.serviceId
+    ? getStyleRate(booking.styleId, booking.serviceId, booking.stylistId)
+    : null;
 
   return (
     <div id="bookingPage" className={cx("bp-overlay", open && "open")}>
@@ -103,7 +152,7 @@ export function BookingOverlay() {
         <button className="bp-back" onClick={close}>
           Back
         </button>
-        <span className="bp-cat-name">{label}</span>
+        <span className="bp-cat-name">{headerLabel}</span>
         <div className="bp-step-counter">
           <div className="bp-step-dots">
             {/* One dot per step this booking will actually visit, so the
@@ -128,14 +177,35 @@ export function BookingOverlay() {
           <div
             className={cx(
               "bp-step-panel",
+              step === BOOKING_STEP.service && "active",
+            )}
+          >
+            <StepService
+              stylistId={booking.stylistId}
+              stylistName={contextStylist?.name}
+              selectedServiceId={booking.serviceId}
+              onSelectService={wizard.selectService}
+            />
+          </div>
+
+          {/* The panels below all describe a service, so they render only once
+              one is chosen. The wrappers stay put either way, so the panel
+              transitions are unaffected. */}
+          <div
+            className={cx(
+              "bp-step-panel",
               step === BOOKING_STEP.style && "active",
             )}
           >
-            <StepStyle
-              serviceCategoryKey={booking.categoryKey}
-              selectedStyleId={booking.styleId}
-              onSelectStyle={wizard.selectStyle}
-            />
+            {booking.serviceId && (
+              <StepStyle
+                serviceId={booking.serviceId}
+                stylistId={booking.stylistId}
+                selectedStyleId={booking.styleId}
+                onSelectStyle={wizard.selectStyle}
+                onBack={wizard.goPrev}
+              />
+            )}
           </div>
 
           <div
@@ -161,15 +231,17 @@ export function BookingOverlay() {
               step === BOOKING_STEP.stylist && "active",
             )}
           >
-            <StepStylist
-              serviceCategoryKey={booking.categoryKey}
-              location={booking.location}
-              dateFrom={booking.dateFrom}
-              dateTo={booking.dateTo}
-              selectedStylistId={booking.stylistId}
-              onSelectStylist={wizard.selectStylist}
-              onBack={wizard.goPrev}
-            />
+            {booking.serviceId && (
+              <StepStylist
+                serviceId={booking.serviceId}
+                location={booking.location}
+                dateFrom={booking.dateFrom}
+                dateTo={booking.dateTo}
+                selectedStylistId={booking.stylistId}
+                onSelectStylist={wizard.selectStylist}
+                onBack={wizard.goPrev}
+              />
+            )}
           </div>
 
           <div
@@ -178,19 +250,21 @@ export function BookingOverlay() {
               step === BOOKING_STEP.customise && "active",
             )}
           >
-            <StepCustomise
-              serviceCategoryKey={booking.categoryKey}
-              colourId={booking.colourId}
-              lengthIndex={booking.lengthIndex}
-              size={booking.size}
-              addOnIds={booking.addOnIds}
-              onSelectColour={wizard.selectColour}
-              onSelectLength={wizard.selectLength}
-              onSelectSize={wizard.selectSize}
-              onToggleAddOn={wizard.toggleAddOn}
-              onBack={wizard.goPrev}
-              onNext={wizard.goNext}
-            />
+            {booking.serviceId && (
+              <StepCustomise
+                serviceId={booking.serviceId}
+                colourId={booking.colourId}
+                lengthIndex={booking.lengthIndex}
+                size={booking.size}
+                addOnIds={booking.addOnIds}
+                onSelectColour={wizard.selectColour}
+                onSelectLength={wizard.selectLength}
+                onSelectSize={wizard.selectSize}
+                onToggleAddOn={wizard.toggleAddOn}
+                onBack={wizard.goPrev}
+                onNext={wizard.goNext}
+              />
+            )}
           </div>
 
           <div
@@ -257,7 +331,7 @@ export function BookingOverlay() {
           lengthIndex={booking.lengthIndex}
           stylistName={stylistName}
           styleName={style?.label ?? ""}
-          stylePrice={`from £${style?.defaultPrice ?? 0}`}
+          stylePrice={`from £${rate?.price ?? 0}`}
         />
       </div>
     </div>

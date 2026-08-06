@@ -116,8 +116,9 @@ export const RESERVED_SLUGS: ReadonlySet<string> = new Set([
   "api",
 ]);
 
-/** URL segment for each booking step, in `FULL_SEQUENCE` order. */
+/** URL segment for each booking step, in step order. */
 export const STEP_SLUG: Record<BookingStepIndex, string> = {
+  [BOOKING_STEP.service]: "service",
   [BOOKING_STEP.style]: "style",
   [BOOKING_STEP.whenWhere]: "when-where",
   [BOOKING_STEP.stylist]: "stylist",
@@ -147,19 +148,22 @@ export const stepFromPath = (pathname: string) =>
   stepFromSlug(matchPath(`${PATH.book}/:step`, pathname)?.params.step);
 
 export interface BookingQuery {
-  /** Which service is being booked; defaults to braids when absent. */
+  /** Which service is being booked; absent means the client picks one. */
   service?: string;
-  /** Stylist slug. Its presence is what shortens the flow to six steps. */
+  /** A style the entry point already settled, e.g. a profile's service row. */
+  style?: string;
+  /** Stylist slug. Its presence is what drops the when & where and picker steps. */
   stylist?: string;
 }
 
-/** Builds `/book/<step>?service=…&stylist=…`. Never carries form values. */
+/** Builds `/book/<step>?service=…&style=…&stylist=…`. Never carries form values. */
 export const bookingPath = (
   step: BookingStepIndex,
-  { service, stylist }: BookingQuery = {},
+  { service, style, stylist }: BookingQuery = {},
 ) => {
   const params = new URLSearchParams();
   if (service) params.set("service", service);
+  if (style) params.set("style", style);
   if (stylist) params.set("stylist", stylist);
   const query = params.toString();
   return `${PATH.book}/${STEP_SLUG[step]}${query ? `?${query}` : ""}`;

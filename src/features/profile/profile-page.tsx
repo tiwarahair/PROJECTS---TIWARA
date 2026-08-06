@@ -3,8 +3,10 @@ import { cx } from "../../utils/class-names";
 import { StarRating } from "../../components/star-rating";
 import { useRouteSurfaces } from "../../hooks/use-route-surfaces";
 import { bookingPath, PATH } from "../../routes/routes";
-import { BOOKING_STEP } from "../../types/booking";
-import { getSpecialty } from "../../data/stylist/stylist";
+import { BOOKING_STEP, firstUnansweredStep } from "../../types/booking";
+import { getSpecialty, getStylistStyles } from "../../data/stylist/stylist";
+import { isCustomisable } from "../../data/services/services";
+import type { ServiceId } from "../../types/services";
 
 const PORTFOLIO_TILES = [1, 2, 3, 4, 5, 6];
 
@@ -44,11 +46,9 @@ export function ProfilePage() {
   const background =
     "radial-gradient(ellipse at 45% 35%, #3D1A00, #0D0600, #040200)";
   const flagship = slug === "tiwaras-house";
-  const topServices = [
-    { name: "Knotless Braids", price: "from £130", duration: "4–6h" },
-    { name: "Wig Installs", price: "from £120", duration: "2–3h" },
-    { name: "Fulani Braids", price: "from £110", duration: "3–4h" },
-  ];
+  // No stylist means no rows. getStylistStyles(null) is the whole catalogue,
+  // which is right for the booking flow but wrong for a storefront.
+  const topServices = stylist ? getStylistStyles(stylist.id).slice(0, 3) : [];
   const nextAvail = "Sat 12 Jul";
 
   // const top3ServiceIds = Object.keys(services).slice(0,3)
@@ -68,10 +68,26 @@ export function ProfilePage() {
 
   const speciality = getSpecialty(specialityIds ?? []);
 
+  /** The main CTA settles only the stylist, so the service is still to pick. */
   function bookThisStylist() {
     if (!stylist) return;
+    navigate(bookingPath(BOOKING_STEP.service, { stylist: slug }));
+  }
+
+  /**
+   * A service row settles the service and the style too, so the booking opens
+   * at whatever it has left to ask.
+   */
+  function bookStyle(serviceId: ServiceId, styleId: string) {
+    if (!stylist) return;
+    const step = firstUnansweredStep({
+      serviceId,
+      styleId,
+      stylistId: stylist.id,
+      customisable: isCustomisable(serviceId),
+    });
     navigate(
-      bookingPath(BOOKING_STEP.style, { service: "braids", stylist: slug }), // braids for now
+      bookingPath(step, { service: serviceId, style: styleId, stylist: slug }),
     );
   }
 
@@ -106,18 +122,23 @@ export function ProfilePage() {
           <div className="prof-section">
             <h3 className="prof-section-title">Services &amp; Pricing</h3>
             <div>
-              {topServices.map(({ name, duration, price }) => (
-                <div key={name} className="prof-svc-row">
-                  <div className="prof-svc-info">
-                    <div className="prof-svc-name">{name}</div>
-                    <div className="prof-svc-dur">{duration}</div>
+              {topServices.map(
+                ({ serviceId, styleId, label, duration, price }) => (
+                  <div key={styleId} className="prof-svc-row">
+                    <div className="prof-svc-info">
+                      <div className="prof-svc-name">{label}</div>
+                      <div className="prof-svc-dur">{duration}</div>
+                    </div>
+                    <div className="prof-svc-price">from £{price}</div>
+                    <button
+                      className="prof-svc-btn"
+                      onClick={() => bookStyle(serviceId, styleId)}
+                    >
+                      Book
+                    </button>
                   </div>
-                  <div className="prof-svc-price">{price}</div>
-                  <button className="prof-svc-btn" onClick={bookThisStylist}>
-                    Book
-                  </button>
-                </div>
-              ))}
+                ),
+              )}
             </div>
           </div>
 

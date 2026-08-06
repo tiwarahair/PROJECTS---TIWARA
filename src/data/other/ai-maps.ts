@@ -4,7 +4,7 @@ import type { ServiceId } from "../../types/services";
 
 export interface AiStyleMatch {
   styleId: string;
-  categoryKey: ServiceId;
+  serviceId: ServiceId;
   name: string;
   price: string;
 }
@@ -15,55 +15,54 @@ export interface AiColourMatch {
   brightness: number;
 }
 
-// TO DO: RENAME categoryKey TO serviceCategoryKey
 // TO DO: USE LIVE DATA FROM SERVICES.JSON INSTEAD OF HARDCODED VALUES
 
 export const AI_STYLE_MATCHES: readonly AiStyleMatch[] = [
   {
     styleId: "knotless",
-    categoryKey: "braids",
+    serviceId: "braids",
     name: "Knotless Braids",
     price: "from £130",
   },
   {
     styleId: "fulani",
-    categoryKey: "braids",
+    serviceId: "braids",
     name: "Fulani Braids",
     price: "from £110",
   },
   {
     styleId: "cornrows",
-    categoryKey: "braids",
+    serviceId: "braids",
     name: "Cornrows",
     price: "from £60",
   },
   {
     styleId: "lacefront",
-    categoryKey: "wigs",
+    serviceId: "wigs",
     name: "Lace Front Install",
     price: "from £120",
   },
   {
     styleId: "starterlocs",
-    categoryKey: "locs",
+    serviceId: "locs",
     name: "Starter Locs",
     price: "from £150",
   },
   {
     styleId: "washstyle",
-    categoryKey: "natural-hair",
+    serviceId: "natural-hair",
     name: "Wash & Style",
     price: "from £55",
   },
   {
     styleId: "senegalese",
-    categoryKey: "locs",
+    serviceId: "locs",
     name: "Senegalese Twists",
     price: "from £110",
   },
   {
     styleId: "feedin",
-    categoryKey: "braids",
+    serviceId: "braids",
     name: "Feed-In Braids",
     price: "from £80",
   },

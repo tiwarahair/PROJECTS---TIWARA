@@ -2,22 +2,29 @@ import { cx } from "../../utils/class-names";
 import { useAppDispatch } from "../../stores/hooks";
 import { modalOpened } from "../../stores/modals-slice";
 import { getService } from "../../data/services/services";
+import { getOfferedStyles, getStyleRate } from "../../data/stylist/stylist";
 import type { ServiceId } from "../../types/services";
 
 export interface StepStyleProps {
-  serviceCategoryKey: ServiceId;
+  serviceId: ServiceId;
+  /** Narrows the list and the prices to this stylist; null shows the catalogue. */
+  stylistId: string | null;
   selectedStyleId: string | null;
   onSelectStyle: (styleId: string) => void;
+  onBack: () => void;
 }
 
-/* No nav buttons — choosing a style advances on its own. */
+/* No Continue button — choosing a style advances on its own. Back is still
+   needed, to reach the service step behind this one. */
 export function StepStyle({
-  serviceCategoryKey,
+  serviceId,
+  stylistId,
   selectedStyleId,
   onSelectStyle,
+  onBack,
 }: StepStyleProps) {
-  const { label: serviceLabel, individualServices } =
-    getService(serviceCategoryKey);
+  const { label: serviceLabel } = getService(serviceId);
+  const styles = getOfferedStyles(stylistId, serviceId);
   const dispatch = useAppDispatch();
 
   return (
@@ -25,8 +32,9 @@ export function StepStyle({
       <div className="bp-step-title">Choose your style</div>
       <div className="bp-step-sub">{serviceLabel} — select one to continue</div>
       <div className="bp-styles-grid">
-        {individualServices.map(
-          ({ id, label, defaultPrice, defaultDuration }) => (
+        {styles.map(({ id, label }) => {
+          const { price, duration } = getStyleRate(id, serviceId, stylistId);
+          return (
             <div
               key={id}
               id={`sc-${id}`}
@@ -40,13 +48,13 @@ export function StepStyle({
               <div className="bp-style-body">
                 <span className="bp-style-name">{label}</span>
                 <span className="bp-style-meta">
-                  <span className="bp-style-price">{`from ${defaultPrice}`}</span>{" "}
-                  · {defaultDuration}
+                  <span className="bp-style-price">{`from ${price}`}</span> ·{" "}
+                  {duration}
                 </span>
               </div>
             </div>
-          ),
-        )}
+          );
+        })}
         {/* For looks that aren't in the catalogue. */}
         {/* TO DO: this is broken, page doesn't appear (I think it's behind), 
         also, we need to think about the workflow of this -- how will it be submitted to the stylist &
@@ -63,6 +71,12 @@ export function StepStyle({
             </div>
           </div>
         </div>
+      </div>
+
+      <div className="bp-nav-btns">
+        <button className="bp-btn-back" onClick={onBack}>
+          Back
+        </button>
       </div>
     </>
   );

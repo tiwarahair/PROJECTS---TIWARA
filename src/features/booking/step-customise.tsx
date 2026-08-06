@@ -11,7 +11,7 @@ import type { ServiceId } from "../../types/services";
 import { getServiceAddOns } from "../../data/style-config/add-ons";
 
 export interface StepCustomiseProps {
-  serviceCategoryKey: ServiceId;
+  serviceId: ServiceId;
   colourId: ColourId;
   lengthIndex: number;
   size: BraidSize;
@@ -25,7 +25,7 @@ export interface StepCustomiseProps {
 }
 
 export function StepCustomise({
-  serviceCategoryKey,
+  serviceId,
   colourId,
   lengthIndex,
   size,
@@ -38,8 +38,8 @@ export function StepCustomise({
   onNext,
 }: StepCustomiseProps) {
   const dispatch = useAppDispatch();
-  const { configs: { size: hasSize, length } = {} } =
-    getService(serviceCategoryKey);
+  const { configs: { size: hasSize, length, colour } = {} } =
+    getService(serviceId);
 
   return (
     <>
@@ -69,7 +69,10 @@ export function StepCustomise({
         </div>
       </div>
 
-      <div className="bp-custom-group">
+      <div
+        className="bp-custom-group"
+        style={colour ? undefined : { display: "none" }}
+      >
         <span className="bp-custom-label">Colour</span>
         <div className="bp-colour-grid">
           {COLOUR_OPTIONS.map(({ value, hex, name }) => (
@@ -118,35 +121,33 @@ export function StepCustomise({
 
       <div className="bp-custom-group">
         <span className="bp-custom-label">Add-ons (optional)</span>
-        {getServiceAddOns(serviceCategoryKey).map(
-          ({ id, name, addedCost, pending }) => (
-            <label
-              key={id}
-              className={cx(
-                "bp-addon",
-                pending && "bp-addon--soon",
-                id === "other" && "bp-addon--other",
-              )}
-            >
-              <input
-                type="checkbox"
-                disabled={pending}
-                checked={!pending && addOnIds.includes(id)}
-                onChange={() => onToggleAddOn(id)}
-              />{" "}
-              {name}{" "}
-              {pending ? (
-                <span className="bp-addon-coming">Coming soon</span>
-              ) : id === "other" ? (
-                <span className="bp-addon-note">
-                  {"(specify in appointment notes)"}
-                </span>
-              ) : (
-                <span className="bp-addon-price">+£{addedCost ?? 0}</span>
-              )}
-            </label>
-          ),
-        )}
+        {getServiceAddOns(serviceId).map(({ id, name, addedCost, pending }) => (
+          <label
+            key={id}
+            className={cx(
+              "bp-addon",
+              pending && "bp-addon--soon",
+              id === "other" && "bp-addon--other",
+            )}
+          >
+            <input
+              type="checkbox"
+              disabled={pending}
+              checked={!pending && addOnIds.includes(id)}
+              onChange={() => onToggleAddOn(id)}
+            />{" "}
+            {name}{" "}
+            {pending ? (
+              <span className="bp-addon-coming">Coming soon</span>
+            ) : id === "other" ? (
+              <span className="bp-addon-note">
+                {"(specify in appointment notes)"}
+              </span>
+            ) : (
+              <span className="bp-addon-price">+£{addedCost ?? 0}</span>
+            )}
+          </label>
+        ))}
       </div>
 
       <BookingNav onBack={onBack} onNext={onNext} nextLabel="Continue →" />
