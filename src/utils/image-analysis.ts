@@ -5,9 +5,13 @@ import {
   type AiColourMatch,
   type AiStyleMatch,
 } from "../data/other/ai-maps";
+import {
+  DEFAULT_LENGTH_ID,
+  LENGTH_OPTIONS,
+} from "../data/style-config/lengths";
+import type { LengthId } from "../types/styles";
 
 const SAMPLE_SIZE = 80;
-const MAX_LENGTH_INDEX = 3;
 const LENGTH_BRIGHTNESS_STEP = 26;
 
 /** Used when the canvas cannot be read at all. */
@@ -22,8 +26,18 @@ export interface RgbSample {
 export interface AiResult {
   style: AiStyleMatch;
   colour: AiColourMatch;
-  lengthIndex: number;
+  lengthId: LengthId;
   matches: AiStyleMatch[];
+}
+
+// ?????? >>
+/** Brighter samples read as longer hair, capped at the longest option. */
+function lengthFromBrightness(brightness: number): LengthId {
+  const index = Math.min(
+    LENGTH_OPTIONS.length - 1,
+    Math.floor(brightness / LENGTH_BRIGHTNESS_STEP),
+  );
+  return LENGTH_OPTIONS[index]?.value ?? DEFAULT_LENGTH_ID;
 }
 
 /** Rec. 601 luma, matching the original's weighting. */
@@ -82,10 +96,7 @@ export function analyseSample(sample: RgbSample): AiResult {
   return {
     style: matches[0]!,
     colour: nearestColour(brightness),
-    lengthIndex: Math.min(
-      MAX_LENGTH_INDEX,
-      Math.floor(brightness / LENGTH_BRIGHTNESS_STEP),
-    ),
+    lengthId: lengthFromBrightness(brightness),
     matches,
   };
 }

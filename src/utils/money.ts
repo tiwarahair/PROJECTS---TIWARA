@@ -1,3 +1,9 @@
+/**
+ * Every amount in this module is an integer number of pence. Nothing here
+ * takes or returns pounds — the price data is stored in pence too, so a value
+ * only becomes a decimal at the moment it is formatted for display.
+ */
+
 export const DEPOSIT_RATE = 0.25;
 
 /**
@@ -6,20 +12,21 @@ export const DEPOSIT_RATE = 0.25;
  */
 export const PLATFORM_FEE_RATE = 0.02;
 
-export function calcPlatformFee(total: number): number {
-  return Math.round(total * PLATFORM_FEE_RATE * 100) / 100;
-}
+export const calcPlatformFee = (totalPence: number): number =>
+  Math.round(totalPence * PLATFORM_FEE_RATE);
 
-// TO DO: IS THE CALCULATION CORRECT?
 /**
- * Deposit is rounded to the penny before formatting — the original did
- * `Math.round(total * 0.25 * 100) / 100` and then `.toFixed(2)`. Collapsing
- * that to a single toFixed changes half-penny cases.
+ * Moved to integer pence: there is now exactly one rounding
+ * step, here, and the balance is defined as `total - dueNow` rather than being
+ * rounded independently, so the parts always add back up to the total.
  */
-export function calcDeposit(total: number): number {
-  return Math.round(total * DEPOSIT_RATE * 100) / 100;
-}
+export const calcDeposit = (totalPence: number, fee: number): number =>
+  Math.round((totalPence + fee) * DEPOSIT_RATE);
 
-export function formatPence(amount: number): string {
-  return `£${amount.toFixed(2)}`;
-}
+/** Always two decimals — used for the deposit, balance and fee rows. */
+export const formatPence = (pence: number): string =>
+  `£${(pence / 100).toFixed(2)}`;
+
+/** Drops the decimals on whole pounds, for the "from £130" style labels. */
+export const formatPenceCompact = (pence: number): string =>
+  pence % 100 === 0 ? `£${pence / 100}` : formatPence(pence);

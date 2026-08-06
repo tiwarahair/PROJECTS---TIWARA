@@ -2,17 +2,40 @@
 export interface StyleConfig {
   name: "Length" | "Colour" | "Hair Texture" | "Size" | "Add-ons";
   options:
-    ColourOption[] | LengthOption[] | string[] | SizeOption[] | AddOnOption[];
+    | ColourOption[]
+    | LengthOption[]
+    | HairTextureOption[]
+    | SizeOption[]
+    | AddOnOption[];
 }
 
 // Length
-export type Length = "Bob" | "Shoulder" | "Bra length" | "Waist length / bum";
+export type Length = "Bob" | "Shoulder" | "Bra length" | "Waist / bum";
 
-export type LengthValue = '10"-12"' | '14"-18"' | '20"-24"' | '26"+';
+export type LengthId = "bob" | "shoulder" | "bra" | "waist";
+
+export type LengthInches = '10"-12"' | '14"-18"' | '20"-24"' | '26"+';
 
 export interface LengthOption {
   name: Length;
-  inches: LengthValue;
+  value: LengthId;
+  inches: LengthInches;
+}
+
+// Hair texture — only Wig Installs collects this.
+export type HairTextureId =
+  | "straight"
+  | "body-wave"
+  | "burmese-curly"
+  | "yaki-straight"
+  | "water-wave"
+  | "deep-wave"
+  | "kinky-curly"
+  | "kinky-straight";
+
+export interface HairTextureOption {
+  name: string;
+  value: HairTextureId;
 }
 
 // Colour
@@ -54,7 +77,7 @@ export interface AddOnOption {
     | "layers"
     | "curls";
   name: string;
-  addedCost?: number;
+  addedCostPence?: number;
   serviceIds: string[];
   pending?: boolean;
 }

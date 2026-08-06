@@ -59,13 +59,13 @@ describe("getStyleRate", () => {
   });
 
   it("falls back to the catalogue when no stylist is chosen", () => {
-    const { defaultPrice, defaultDuration } = getIndividualService(
+    const { defaultPricePence, defaultDuration } = getIndividualService(
       "knotless",
       "braids",
     )!;
 
     expect(getStyleRate("knotless", "braids", null)).toEqual({
-      price: defaultPrice,
+      pricePence: defaultPricePence,
       duration: defaultDuration,
     });
   });
@@ -78,7 +78,7 @@ describe("getStyleRate", () => {
 
   it("costs nothing when no style is chosen", () => {
     expect(getStyleRate(null, "braids", "tiwara")).toEqual({
-      price: 0,
+      pricePence: 0,
       duration: "",
     });
   });

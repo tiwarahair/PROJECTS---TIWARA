@@ -60,7 +60,7 @@ export function getOfferedStyles(
 }
 
 export interface StyleRate {
-  price: number;
+  pricePence: number;
   duration: string;
 }
 
@@ -97,9 +97,9 @@ export function getStyleRate(
     : undefined;
   if (stylistRate) return stylistRate;
 
-  const { defaultPrice = 0, defaultDuration = "" } =
+  const { defaultPricePence = 0, defaultDuration = "" } =
     getIndividualService(styleId, serviceId) ?? {};
-  return { price: defaultPrice, duration: defaultDuration };
+  return { pricePence: defaultPricePence, duration: defaultDuration };
 }
 
 export const getSpecialty = (specialityIds: ServiceId[]) =>

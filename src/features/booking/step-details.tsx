@@ -1,5 +1,12 @@
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { cx } from "../../utils/class-names";
+import { FieldError } from "../../components/field-error";
+import {
+  bookingDetailsSchema,
+  type BookingDetailsValues,
+} from "../../schemas/booking-details";
 import type { BookingDetails } from "../../types/booking";
-import { BookingNav } from "./booking-nav";
 
 export interface StepDetailsProps {
   details: BookingDetails;
@@ -9,18 +16,42 @@ export interface StepDetailsProps {
 }
 
 /**
- * These values are held in state but never displayed anywhere else — the
- * original never read them either. They are here so the inputs are controlled
- * rather than uncontrolled DOM.
+ * The wizard still owns the answers — this form keeps its own copy only so
+ * React Hook Form can validate it, and pushes the trimmed values back up on a
+ * successful submit, just before advancing to the review step.
  */
 export function StepDetails({
-  details: { firstName, lastName, email, phone, notes },
+  details,
   onChange,
   onBack,
   onNext,
 }: StepDetailsProps) {
+  const {
+    register,
+    handleSubmit,
+    formState: { errors },
+    getValues,
+  } = useForm<BookingDetailsValues>({
+    resolver: zodResolver(bookingDetailsSchema),
+    defaultValues: details,
+    mode: "onBlur",
+  });
+  console.log("getValues", getValues());
+
+  const submit = handleSubmit((values) => {
+    onChange(values);
+    onNext();
+  });
+
+  /** Wires the shared class/aria/message treatment onto one field. */
+  const fieldProps = (name: keyof BookingDetailsValues) => ({
+    className: cx("bp-form-input", errors[name] && "bp-form-input--error"),
+    "aria-invalid": Boolean(errors[name]),
+    ...register(name),
+  });
+
   return (
-    <>
+    <form onSubmit={submit} noValidate>
       <div className="bp-step-title">Your details</div>
       <div className="bp-step-sub">
         Just a few things to confirm your booking
@@ -28,64 +59,85 @@ export function StepDetails({
 
       <div className="bp-form-row">
         <div className="bp-form-group">
-          <label className="bp-form-label">First name</label>
+          <label className="bp-form-label" htmlFor="bp-first-name">
+            First name
+          </label>
           <input
-            className="bp-form-input"
+            id="bp-first-name"
             placeholder="Amara"
             type="text"
-            value={firstName}
-            onChange={(event) => onChange({ firstName: event.target.value })}
+            {...fieldProps("firstName")}
+          />
+          <FieldError
+            className="bp-form-error"
+            message={errors.firstName?.message}
           />
         </div>
         <div className="bp-form-group">
-          <label className="bp-form-label">Last name</label>
+          <label className="bp-form-label" htmlFor="bp-last-name">
+            Last name
+          </label>
           <input
-            className="bp-form-input"
+            id="bp-last-name"
             placeholder="Johnson"
             type="text"
-            value={lastName}
-            onChange={(event) => onChange({ lastName: event.target.value })}
+            {...fieldProps("lastName")}
+          />
+          <FieldError
+            className="bp-form-error"
+            message={errors.lastName?.message}
           />
         </div>
       </div>
 
       <div className="bp-form-group">
-        <label className="bp-form-label">Email address</label>
+        <label className="bp-form-label" htmlFor="bp-email">
+          Email address
+        </label>
         <input
-          className="bp-form-input"
+          id="bp-email"
           placeholder="you@email.com"
           type="email"
-          value={email}
-          onChange={(event) => onChange({ email: event.target.value })}
+          {...fieldProps("email")}
         />
+        <FieldError className="bp-form-error" message={errors.email?.message} />
       </div>
 
       <div className="bp-form-group">
-        <label className="bp-form-label">Phone number</label>
+        <label className="bp-form-label" htmlFor="bp-phone">
+          Phone number
+        </label>
         <input
-          className="bp-form-input"
+          id="bp-phone"
           placeholder="+44 7700 000000"
           type="tel"
-          value={phone}
-          onChange={(event) => onChange({ phone: event.target.value })}
+          {...fieldProps("phone")}
         />
+        <FieldError className="bp-form-error" message={errors.phone?.message} />
       </div>
 
       <div className="bp-form-group">
-        <label className="bp-form-label">Notes (optional)</label>
+        <label className="bp-form-label" htmlFor="bp-notes">
+          Notes (optional)
+        </label>
         <textarea
-          className="bp-form-input"
+          id="bp-notes"
           placeholder="e.g. colour-treated hair, reference photo in DMs…"
-          value={notes}
-          onChange={(event) => onChange({ notes: event.target.value })}
+          {...fieldProps("notes")}
         />
+        <FieldError className="bp-form-error" message={errors.notes?.message} />
       </div>
 
-      <BookingNav
-        onBack={onBack}
-        onNext={onNext}
-        nextLabel="Review booking →"
-      />
-    </>
+      {/* Not <BookingNav>: "next" has to be a real submit button so the browser
+          and React Hook Form agree on what triggers validation. */}
+      <div className="bp-nav-btns">
+        <button type="button" className="bp-btn-back" onClick={onBack}>
+          Back
+        </button>
+        <button type="submit" className="bp-btn-next">
+          Review booking →
+        </button>
+      </div>
+    </form>
   );
 }

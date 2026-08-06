@@ -4,9 +4,13 @@ import {
   findColourById,
 } from "../../data/style-config/colours";
 import {
-  DEFAULT_LENGTH_INDEX,
+  DEFAULT_LENGTH_ID,
   lengthLabel,
 } from "../../data/style-config/lengths";
+import {
+  DEFAULT_HAIR_TEXTURE_ID,
+  hairTextureLabel,
+} from "../../data/style-config/hair-textures";
 import { calcDeposit, calcPlatformFee } from "../../utils/money";
 import { defaultDateWindow } from "../../utils/dates";
 import type {
@@ -14,6 +18,7 @@ import type {
   BookingState,
   BookingStepIndex,
   BookingTotals,
+  PaymentPlan,
   ReviewSnapshot,
 } from "../../types/booking";
 import {
@@ -23,11 +28,16 @@ import {
   prevStep,
 } from "../../types/booking";
 import type { BookingContext } from "../../types/booking";
-import type { BraidSize, ColourId } from "../../types/styles";
+import type {
+  BraidSize,
+  ColourId,
+  HairTextureId,
+  LengthId,
+} from "../../types/styles";
 import type { ServiceId } from "../../types/services";
-import { getIndividualService } from "../../data/services/services";
+import { getIndividualService, getService } from "../../data/services/services";
 import { getOfferedStyles, getStyleRate } from "../../data/stylist/stylist";
-import { ADD_ON_OPTIONS } from "../../data/style-config/add-ons";
+import { getServiceAddOns } from "../../data/style-config/add-ons";
 
 // TO DO: persist this so a refresh mid-booking does not lose the answers.
 // The step survives a refresh because it is in the URL; everything the client
@@ -61,11 +71,13 @@ export interface BookingWizard {
   setLocation: (location: string) => void;
   selectStylist: (stylistId: string) => void;
   selectColour: (colourId: ColourId) => void;
-  selectLength: (index: number) => void;
+  selectLength: (lengthId: LengthId) => void;
+  selectHairTexture: (hairTextureId: HairTextureId) => void;
   selectSize: (size: BraidSize) => void;
   toggleAddOn: (addOnId: string) => void;
   selectDay: (day: number) => void;
   selectTime: (slotId: string) => void;
+  selectPaymentPlan: (paymentPlan: PaymentPlan) => void;
   updateDetails: (patch: Partial<BookingDetails>) => void;
   goNext: () => void;
   goPrev: () => void;
@@ -94,47 +106,66 @@ function initialState({
     location: "",
     stylistId,
     colourId: DEFAULT_COLOUR_ID,
-    lengthIndex: DEFAULT_LENGTH_INDEX,
+    lengthId: DEFAULT_LENGTH_ID,
+    hairTextureId: DEFAULT_HAIR_TEXTURE_ID,
     size: "Medium",
     addOnIds: [],
     dayNumber: null,
     timeSlotId: null,
+    paymentPlan: "deposit",
     details: EMPTY_DETAILS,
   };
 }
 
-/** The stylist's rate for the chosen style, plus any ticked add-ons. */
+/**
+ * The stylist's rate for the chosen style, plus any ticked add-ons. Add-ons are
+ * priced from the current service's list, so a tick left over from a previous
+ * service can never be charged. Everything is integer pence.
+ */
 export function totalsOf(state: BookingState): BookingTotals {
-  const { serviceId, styleId, stylistId } = state;
+  const { serviceId, styleId, stylistId, addOnIds, paymentPlan } = state;
   const base = serviceId
-    ? getStyleRate(styleId, serviceId, stylistId).price
+    ? getStyleRate(styleId, serviceId, stylistId).pricePence
     : 0;
 
   let addOnTotal = 0;
-  for (const { id, addedCost = 0 } of ADD_ON_OPTIONS) {
-    if (state.addOnIds.includes(id)) addOnTotal += addedCost;
+  if (serviceId) {
+    for (const { id, addedCostPence = 0 } of getServiceAddOns(serviceId)) {
+      if (addOnIds.includes(id)) addOnTotal += addedCostPence;
+    }
   }
 
   const total = base + addOnTotal;
-  const deposit = calcDeposit(total);
+
+  const fee = calcPlatformFee(total);
+  const deposit = calcDeposit(total, fee);
+  const totalPlusFee = total + fee;
+  const dueNow = paymentPlan === "full" ? totalPlusFee : deposit;
+
   return {
     total,
-    fee: calcPlatformFee(total),
+    totalPlusFee,
+    fee,
     deposit,
-    balance: total - deposit,
+    dueNow,
+    balance: totalPlusFee - dueNow,
   };
 }
 
 function snapshotOf(state: BookingState): ReviewSnapshot {
-  const style = getIndividualService(
-    state.styleId,
-    state.serviceId ?? undefined,
+  const { styleId, serviceId, colourId, lengthId, hairTextureId } = state;
+  const style = getIndividualService(styleId, serviceId ?? undefined);
+  const collectsTexture = Boolean(
+    serviceId && getService(serviceId).configs?.hairTexture,
   );
+
   return {
     service: style?.label ?? "—",
-    colour: findColourById(state.colourId).name,
-    length: lengthLabel(state.lengthIndex),
+    colour: findColourById(colourId).name,
+    length: lengthLabel(lengthId),
     size: state.size,
+    hairTexture: collectsTexture ? hairTextureLabel(hairTextureId) : null,
+    paymentPlan: state.paymentPlan,
     money: totalsOf(state),
   };
 }
@@ -233,8 +264,12 @@ export function useBookingWizard({
     setBooking((current) => ({ ...current, colourId }));
   }, []);
 
-  const selectLength = useCallback((lengthIndex: number) => {
-    setBooking((current) => ({ ...current, lengthIndex }));
+  const selectLength = useCallback((lengthId: LengthId) => {
+    setBooking((current) => ({ ...current, lengthId }));
+  }, []);
+
+  const selectHairTexture = useCallback((hairTextureId: HairTextureId) => {
+    setBooking((current) => ({ ...current, hairTextureId }));
   }, []);
 
   const selectSize = useCallback((size: BraidSize) => {
@@ -256,6 +291,10 @@ export function useBookingWizard({
 
   const selectTime = useCallback((timeSlotId: string) => {
     setBooking((current) => ({ ...current, timeSlotId }));
+  }, []);
+
+  const selectPaymentPlan = useCallback((paymentPlan: PaymentPlan) => {
+    setBooking((current) => ({ ...current, paymentPlan }));
   }, []);
 
   const updateDetails = useCallback((patch: Partial<BookingDetails>) => {
@@ -298,10 +337,12 @@ export function useBookingWizard({
     selectStylist,
     selectColour,
     selectLength,
+    selectHairTexture,
     selectSize,
     toggleAddOn,
     selectDay,
     selectTime,
+    selectPaymentPlan,
     updateDetails,
     goNext,
     goPrev,

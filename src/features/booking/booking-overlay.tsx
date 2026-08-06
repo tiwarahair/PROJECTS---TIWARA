@@ -11,6 +11,7 @@ import {
   type BookingStepIndex,
 } from "../../types/booking";
 import type { ServiceId } from "../../types/services";
+import { formatPenceCompact } from "../../utils/money";
 import { useBookingWizard } from "./use-booking-wizard";
 import { StrandPreview } from "./strand-preview";
 import { StepService } from "./step-service";
@@ -254,11 +255,13 @@ export function BookingOverlay() {
               <StepCustomise
                 serviceId={booking.serviceId}
                 colourId={booking.colourId}
-                lengthIndex={booking.lengthIndex}
+                lengthId={booking.lengthId}
+                hairTextureId={booking.hairTextureId}
                 size={booking.size}
                 addOnIds={booking.addOnIds}
                 onSelectColour={wizard.selectColour}
                 onSelectLength={wizard.selectLength}
+                onSelectHairTexture={wizard.selectHairTexture}
                 onSelectSize={wizard.selectSize}
                 onToggleAddOn={wizard.toggleAddOn}
                 onBack={wizard.goPrev}
@@ -306,6 +309,7 @@ export function BookingOverlay() {
             <StepReview
               review={review}
               stylistName={stylistName}
+              onSelectPaymentPlan={wizard.selectPaymentPlan}
               onBack={wizard.goPrev}
               onNext={wizard.goNext}
             />
@@ -328,10 +332,10 @@ export function BookingOverlay() {
         <StrandPreview
           styleId={booking.styleId}
           colourId={booking.colourId}
-          lengthIndex={booking.lengthIndex}
+          lengthId={booking.lengthId}
           stylistName={stylistName}
           styleName={style?.label ?? ""}
-          stylePrice={`from £${rate?.price ?? 0}`}
+          stylePrice={`from ${formatPenceCompact(rate?.pricePence ?? 0)}`}
         />
       </div>
     </div>

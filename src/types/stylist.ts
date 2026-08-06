@@ -10,7 +10,7 @@ export interface Stylist {
   pending?: boolean;
   services: Record<
     ServiceId,
-    Record<string, { price: number; duration: string }>
+    Record<string, { pricePence: number; duration: string }>
   >;
 
   // more

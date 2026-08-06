@@ -2,14 +2,18 @@ import { useMemo } from "react";
 import { cx } from "../../utils/class-names";
 import { buildStrandPaths } from "../../utils/strand-path";
 import { findColourById } from "../../data/style-config/colours";
-import { lengthLabel, LENGTHS } from "../../data/style-config/lengths";
+import {
+  getLengthIndex,
+  lengthLabel,
+  LENGTH_OPTIONS,
+} from "../../data/style-config/lengths";
 import { strandConfigFor } from "../../data/other/strand-configs";
-import type { ColourId } from "../../types/styles";
+import type { ColourId, LengthId } from "../../types/styles";
 
 export interface StrandPreviewProps {
   styleId: string | null;
   colourId: ColourId;
-  lengthIndex: number;
+  lengthId: LengthId;
   stylistName: string;
   /** Name and price shown over the artwork. */
   styleName: string;
@@ -21,13 +25,14 @@ export interface StrandPreviewProps {
 export function StrandPreview({
   styleId,
   colourId,
-  lengthIndex,
+  lengthId,
   stylistName,
   styleName,
   stylePrice,
 }: StrandPreviewProps) {
   const config = strandConfigFor(styleId);
   const colour = findColourById(colourId);
+  const activeLengthIndex = getLengthIndex(lengthId);
   const paths = useMemo(() => buildStrandPaths(config), [config]);
 
   return (
@@ -72,16 +77,19 @@ export function StrandPreview({
       <div className="bp-img-info">
         {/* TO DO: FIX PROGRESS BAr, shouldnt use LENGTHs i think */}
         <div className="bp-img-length-bar">
-          {LENGTHS.map((label, index) => (
+          {LENGTH_OPTIONS.map(({ value }, index) => (
             <div
-              key={label}
-              className={cx("bp-lbar-item", index <= lengthIndex && "active")}
+              key={value}
+              className={cx(
+                "bp-lbar-item",
+                index <= activeLengthIndex && "active",
+              )}
             />
           ))}
         </div>
         <div className="bp-img-style-name">{styleName}</div>
         <div className="bp-img-meta">
-          {colour.name} · {lengthLabel(lengthIndex)} · {stylistName}
+          {colour.name} · {lengthLabel(lengthId)} · {stylistName}
         </div>
       </div>
     </div>

@@ -3,6 +3,7 @@ import { useAppDispatch } from "../../stores/hooks";
 import { modalOpened } from "../../stores/modals-slice";
 import { getService } from "../../data/services/services";
 import { getOfferedStyles, getStyleRate } from "../../data/stylist/stylist";
+import { formatPenceCompact } from "../../utils/money";
 import type { ServiceId } from "../../types/services";
 
 export interface StepStyleProps {
@@ -33,7 +34,11 @@ export function StepStyle({
       <div className="bp-step-sub">{serviceLabel} — select one to continue</div>
       <div className="bp-styles-grid">
         {styles.map(({ id, label }) => {
-          const { price, duration } = getStyleRate(id, serviceId, stylistId);
+          const { pricePence, duration } = getStyleRate(
+            id,
+            serviceId,
+            stylistId,
+          );
           return (
             <div
               key={id}
@@ -48,8 +53,10 @@ export function StepStyle({
               <div className="bp-style-body">
                 <span className="bp-style-name">{label}</span>
                 <span className="bp-style-meta">
-                  <span className="bp-style-price">{`from ${price}`}</span> ·{" "}
-                  {duration}
+                  <span className="bp-style-price">
+                    {`from ${formatPenceCompact(pricePence)}`}
+                  </span>{" "}
+                  · {duration}
                 </span>
               </div>
             </div>

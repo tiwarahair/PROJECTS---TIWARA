@@ -4,14 +4,16 @@
     "options": [
       {
         "name": "Bob",
+        "value": "bob",
         "inches": "10\"-12\""
       },
-      { "name": "Shoulder", "inches": "14\"-18\"" },
+      { "name": "Shoulder", "value": "shoulder", "inches": "14\"-18\"" },
       {
         "name": "Bra length",
+        "value": "bra",
         "inches": "20\"-24\""
       },
-      { "name": "Waist / bum", "inches": "26\"+" }
+      { "name": "Waist / bum", "value": "waist", "inches": "26\"+" }
     ]
   },
   {
@@ -52,14 +54,14 @@
   {
     "name": "Hair Texture",
     "options": [
-      "Straight",
-      "Body Wave",
-      "Burmese Curly",
-      "Yaki Straight",
-      "Water Wave",
-      "Deep Wave",
-      "Kinky Curly",
-      "Kinky Straight"
+      { "name": "Straight", "value": "straight" },
+      { "name": "Body Wave", "value": "body-wave" },
+      { "name": "Burmese Curly", "value": "burmese-curly" },
+      { "name": "Yaki Straight", "value": "yaki-straight" },
+      { "name": "Water Wave", "value": "water-wave" },
+      { "name": "Deep Wave", "value": "deep-wave" },
+      { "name": "Kinky Curly", "value": "kinky-curly" },
+      { "name": "Kinky Straight", "value": "kinky-straight" }
     ]
   },
   {
@@ -94,19 +96,19 @@
       {
         "id": "boho",
         "name": "Boho (curly/straight pieces)",
-        "addedCost": 15,
+        "addedCostPence": 1500,
         "serviceIds": ["braids"]
       },
       {
         "id": "burnt-ends",
         "name": "Burnt ends",
-        "addedCost": 10,
+        "addedCostPence": 1000,
         "serviceIds": ["braids"]
       },
       {
         "id": "blow-dry",
         "name": "Blow Dry",
-        "addedCost": 15,
+        "addedCostPence": 1500,
         "serviceIds": ["natural-hair"]
       },
       {
@@ -118,13 +120,13 @@
       {
         "id": "layers",
         "name": "Layers",
-        "addedCost": 5,
+        "addedCostPence": 500,
         "serviceIds": ["wigs"]
       },
       {
         "id": "curls",
         "name": "Curls",
-        "addedCost": 5,
+        "addedCostPence": 500,
         "serviceIds": ["wigs"]
       },
       { "id": "other", "name": "Other", "serviceIds": ["all"] }

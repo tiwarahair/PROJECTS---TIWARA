@@ -7,31 +7,31 @@
       {
         "id": "knotless",
         "label": "Knotless Braids",
-        "defaultPrice": 130,
+        "defaultPricePence": 13000,
         "defaultDuration": "4–6h"
       },
       {
         "id": "fulani",
         "label": "Fulani Braids",
-        "defaultPrice": 110,
+        "defaultPricePence": 11000,
         "defaultDuration": "3–4h"
       },
       {
         "id": "cornrows",
         "label": "Cornrows",
-        "defaultPrice": 60,
+        "defaultPricePence": 6000,
         "defaultDuration": "1.5–3h"
       },
       {
         "id": "feedin",
         "label": "Feed-In Braids",
-        "defaultPrice": 80,
+        "defaultPricePence": 8000,
         "defaultDuration": "2–3h"
       },
       {
         "id": "stitch",
         "label": "Stitch Braids",
-        "defaultPrice": 90,
+        "defaultPricePence": 9000,
         "defaultDuration": "2–3h"
       }
     ],
@@ -51,31 +51,31 @@
       {
         "id": "lacefront",
         "label": "Lace Frontal Install",
-        "defaultPrice": 120,
+        "defaultPricePence": 12000,
         "defaultDuration": "2–3h"
       },
       {
         "id": "fulllace",
         "label": "Lace Closure Install",
-        "defaultPrice": 150,
+        "defaultPricePence": 15000,
         "defaultDuration": "2.5–3.5h"
       },
       {
         "id": "glueless",
         "label": "Glueless Install",
-        "defaultPrice": 150,
+        "defaultPricePence": 15000,
         "defaultDuration": "1.5–2.5h"
       },
       {
         "id": "360",
         "label": "360 Wig Install",
-        "defaultPrice": 140,
+        "defaultPricePence": 14000,
         "defaultDuration": "2–3h"
       },
       {
         "id": "custom",
         "label": "Wig Customisation",
-        "defaultPrice": 80,
+        "defaultPricePence": 8000,
         "defaultDuration": "1.5–2.5h"
       }
     ],
@@ -94,31 +94,31 @@
       {
         "id": "washstyle",
         "label": "Wash & Style",
-        "defaultPrice": 55,
+        "defaultPricePence": 5500,
         "defaultDuration": "2–3h"
       },
       {
         "id": "blowout",
         "label": "Blowout",
-        "defaultPrice": 65,
+        "defaultPricePence": 6500,
         "defaultDuration": "2–3h"
       },
       {
         "id": "twistout",
         "label": "Twist Out",
-        "defaultPrice": 70,
+        "defaultPricePence": 7000,
         "defaultDuration": "2–3h"
       },
       {
         "id": "braidout",
         "label": "Braid Out",
-        "defaultPrice": 70,
+        "defaultPricePence": 7000,
         "defaultDuration": "2–3h"
       },
       {
         "id": "silkpress",
         "label": "Silk Press",
-        "defaultPrice": 85,
+        "defaultPricePence": 8500,
         "defaultDuration": "3–4h"
       }
     ],
@@ -136,31 +136,31 @@
       {
         "id": "starterlocs",
         "label": "Starter Locs",
-        "defaultPrice": 150,
+        "defaultPricePence": 15000,
         "defaultDuration": "4–7h"
       },
       {
         "id": "twostrand",
         "label": "Two-Strand Twists",
-        "defaultPrice": 90,
+        "defaultPricePence": 9000,
         "defaultDuration": "3–5h"
       },
       {
         "id": "senegalese",
         "label": "Senegalese Twists",
-        "defaultPrice": 110,
+        "defaultPricePence": 11000,
         "defaultDuration": "3–5h"
       },
       {
         "id": "marley",
         "label": "Marley Twists",
-        "defaultPrice": 120,
+        "defaultPricePence": 12000,
         "defaultDuration": "4–6h"
       },
       {
         "id": "retwist",
         "label": "Loc Retwist",
-        "defaultPrice": 60,
+        "defaultPricePence": 6000,
         "defaultDuration": "1.5–3h"
       }
     ],
@@ -178,25 +178,25 @@
       {
         "id": "deepcond",
         "label": "Deep Conditioning",
-        "defaultPrice": 45,
+        "defaultPricePence": 4500,
         "defaultDuration": "1–1.5h"
       },
       {
         "id": "scalp",
         "label": "Scalp Treatment",
-        "defaultPrice": 35,
+        "defaultPricePence": 3500,
         "defaultDuration": "45min"
       },
       {
         "id": "protein",
         "label": "Protein Treatment",
-        "defaultPrice": 55,
+        "defaultPricePence": 5500,
         "defaultDuration": "1.5–2h"
       },
       {
         "id": "hotoil",
         "label": "Hot Oil Treatment",
-        "defaultPrice": 30,
+        "defaultPricePence": 3000,
         "defaultDuration": "45min"
       }
     ],

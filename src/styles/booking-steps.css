@@ -168,6 +168,28 @@
   background: var(--orange);
   color: var(--cream);
 }
+/* Eight textures, so the grid wraps rather than squeezing into fixed columns. */
+.bp-texture-opts {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(6.5rem, 1fr));
+  gap: 0.5rem;
+}
+.bp-texture-opt {
+  padding: 0.65rem 0.4rem;
+  text-align: center;
+  border: 1px solid rgba(36, 24, 17, 0.15);
+  border-radius: 7px;
+  font-size: 0.78rem;
+  cursor: pointer;
+  transition: all 0.15s;
+  color: var(--green);
+}
+.bp-texture-opt:hover,
+.bp-texture-opt.sel {
+  border-color: var(--orange);
+  background: var(--orange);
+  color: var(--cream);
+}
 .bp-addon {
   display: flex;
   align-items: center;
@@ -320,6 +342,14 @@
 .bp-form-input:focus {
   border-color: var(--orange);
 }
+.bp-form-input--error,
+.bp-form-input--error:focus {
+  border-color: var(--orange-mid);
+}
+.bp-form-error {
+  font-size: 0.72rem;
+  color: var(--orange);
+}
 .bp-form-input::placeholder {
   color: rgba(36, 24, 17, 0.3);
 }
@@ -362,6 +392,41 @@ textarea.bp-form-input {
   height: 1px;
   background: rgba(36, 24, 17, 0.08);
   margin: 0.75rem 0;
+}
+/* Deposit vs pay-in-full. Two equal tiles so neither reads as the default. */
+.bp-plan-toggle {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 0.5rem;
+  margin: 0.85rem 0;
+}
+.bp-plan-opt {
+  font: inherit;
+  padding: 0.6rem 0.5rem;
+  text-align: center;
+  background: none;
+  border: 1px solid rgba(36, 24, 17, 0.15);
+  border-radius: 7px;
+  font-size: 0.8rem;
+  cursor: pointer;
+  transition: all 0.15s;
+  color: var(--green);
+}
+.bp-plan-opt .sub {
+  display: block;
+  font-size: 0.68rem;
+  color: var(--green-mid);
+  margin-top: 0.15rem;
+}
+.bp-plan-opt:hover,
+.bp-plan-opt.sel {
+  border-color: var(--orange);
+  background: var(--orange);
+  color: var(--cream);
+}
+.bp-plan-opt:hover .sub,
+.bp-plan-opt.sel .sub {
+  color: rgba(246, 240, 228, 0.75);
 }
 .bp-deposit-row {
   display: flex;

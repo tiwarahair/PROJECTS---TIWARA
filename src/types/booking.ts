@@ -1,5 +1,5 @@
 import type { ServiceId } from "./services";
-import type { BraidSize, ColourId } from "./styles";
+import type { BraidSize, ColourId, HairTextureId, LengthId } from "./styles";
 
 export type BookingStepIndex = 0 | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8;
 
@@ -131,11 +131,20 @@ export interface BookingDetails {
   notes: string;
 }
 
+/** Whether the client pays the 25% deposit now or settles the whole thing. */
+export type PaymentPlan = "deposit" | "full";
+
+/** Every amount is an integer number of pence. */
 export interface BookingTotals {
   total: number;
+  totalPlusFee: number;
   /** Informational 2% platform fee; not added to the total or deposit. */
   fee: number;
+  /** 25% of the total, shown whichever plan is chosen. */
   deposit: number;
+  /** Charged at checkout: the deposit, or the whole total on the full plan. */
+  dueNow: number;
+  /** Settled in the salon — always `total - dueNow`, so the parts add up. */
   balance: number;
 }
 
@@ -145,6 +154,9 @@ export interface ReviewSnapshot {
   colour: string;
   length: string;
   size: BraidSize;
+  /** Only Wig Installs collects a texture; null for every other service. */
+  hairTexture: string | null;
+  paymentPlan: PaymentPlan;
   money: BookingTotals;
 }
 
@@ -160,10 +172,13 @@ export interface BookingState {
   /** The stylist picked from the filtered list. */
   stylistId: string | null;
   colourId: ColourId;
-  lengthIndex: number;
+  lengthId: LengthId;
+  /** Collected by Wig Installs only; carried for every service like `size`. */
+  hairTextureId: HairTextureId;
   size: BraidSize;
   addOnIds: string[];
   dayNumber: number | null;
   timeSlotId: string | null;
+  paymentPlan: PaymentPlan;
   details: BookingDetails;
 }

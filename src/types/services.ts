@@ -5,7 +5,7 @@ export type ServiceId =
 export interface IndividualService {
   id: string;
   label: string;
-  defaultPrice: number;
+  defaultPricePence: number;
   defaultDuration: string;
 }
 

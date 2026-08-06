@@ -1,4 +1,6 @@
 import { useState } from "react";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
 import { cx } from "../../utils/class-names";
 import { useNavigate } from "react-router";
 import { PATH } from "../../routes/routes";
@@ -8,22 +10,14 @@ import {
 } from "../../data/other/pages-content";
 import { PageHeader } from "./page-header";
 import { PageHero, PageSection } from "./page-blocks";
+import { FieldError } from "../../components/field-error";
 import { STYLIST_SERVICES } from "../../data/services/services";
+import {
+  stylistApplicationSchema,
+  type StylistApplicationValues,
+} from "../../schemas/stylist-application";
 
-interface StylistApplication {
-  name: string;
-  business: string;
-  location: string;
-  experience: string;
-  email: string;
-  phone: string;
-  instagram: string;
-  services: string[];
-  bio: string;
-  portfolio: string;
-}
-
-const EMPTY: StylistApplication = {
+const EMPTY: StylistApplicationValues = {
   name: "",
   business: "",
   location: "",
@@ -36,40 +30,51 @@ const EMPTY: StylistApplication = {
   portfolio: "",
 };
 
-/** Only these four block submission. */
-const REQUIRED = ["name", "business", "location", "email"] as const;
-
 export function ForStylistsPage() {
   const navigate = useNavigate();
-  const [form, setForm] = useState<StylistApplication>(EMPTY);
-  const [showErrors, setShowErrors] = useState(false);
   const [submitted, setSubmitted] = useState(false);
 
-  const set = (patch: Partial<StylistApplication>) =>
-    setForm((current) => ({ ...current, ...patch }));
+  const {
+    register,
+    handleSubmit,
+    watch,
+    setValue,
+    formState: { errors },
+  } = useForm<StylistApplicationValues>({
+    resolver: zodResolver(stylistApplicationSchema),
+    defaultValues: EMPTY,
+    mode: "onBlur",
+  });
 
-  const isMissing = (field: (typeof REQUIRED)[number]) =>
-    showErrors && !form[field].trim();
+  const services = watch("services");
 
-  function submit() {
-    if (REQUIRED.some((field) => !form[field].trim())) {
-      setShowErrors(true);
-      return;
-    }
+  // TO DO: Phase 2 replaces this with the real `submit-application` call.
+  const submit = handleSubmit(() => {
     setSubmitted(true);
     // The page scrolls back to the top so the success panel is in view.
     // The window scrolls now that the page is no longer a fixed container.
     window.scrollTo({ top: 0, behavior: "smooth" });
-  }
+  });
 
   function toggleService(service: string) {
-    setForm((current) => ({
-      ...current,
-      services: current.services.includes(service)
-        ? current.services.filter((entry) => entry !== service)
-        : [...current.services, service],
-    }));
+    setValue(
+      "services",
+      services.includes(service)
+        ? services.filter((entry) => entry !== service)
+        : [...services, service],
+      { shouldValidate: true },
+    );
   }
+
+  /** Shared class/aria treatment for one text field. */
+  const fieldProps = (
+    name: keyof StylistApplicationValues,
+    extraClass?: string,
+  ) => ({
+    className: cx("pg-input", extraClass, errors[name] && "pg-input--error"),
+    "aria-invalid": Boolean(errors[name]),
+    ...register(name),
+  });
 
   return (
     <PageHeader domId="stylistsPage">
@@ -120,7 +125,7 @@ export function ForStylistsPage() {
                 </button>
               </div>
             ) : (
-              <>
+              <form onSubmit={submit} noValidate>
                 <div className="pg-form-intro">
                   <h2 className="pg-h2">Apply to join</h2>
                   <p>
@@ -137,14 +142,10 @@ export function ForStylistsPage() {
                     <input
                       id="sf-name"
                       type="text"
-                      className={cx(
-                        "pg-input",
-                        isMissing("name") && "pg-input--error",
-                      )}
                       placeholder="e.g. Amara Johnson"
-                      value={form.name}
-                      onChange={(event) => set({ name: event.target.value })}
+                      {...fieldProps("name")}
                     />
+                    <FieldError message={errors.name?.message} />
                   </div>
                   <div className="pg-form-group">
                     <label className="pg-label" htmlFor="sf-business">
@@ -154,16 +155,10 @@ export function ForStylistsPage() {
                     <input
                       id="sf-business"
                       type="text"
-                      className={cx(
-                        "pg-input",
-                        isMissing("business") && "pg-input--error",
-                      )}
                       placeholder="e.g. Amara Beauty Studio"
-                      value={form.business}
-                      onChange={(event) =>
-                        set({ business: event.target.value })
-                      }
+                      {...fieldProps("business")}
                     />
+                    <FieldError message={errors.business?.message} />
                   </div>
                 </div>
 
@@ -175,16 +170,10 @@ export function ForStylistsPage() {
                     <input
                       id="sf-location"
                       type="text"
-                      className={cx(
-                        "pg-input",
-                        isMissing("location") && "pg-input--error",
-                      )}
                       placeholder="e.g. London, Manchester"
-                      value={form.location}
-                      onChange={(event) =>
-                        set({ location: event.target.value })
-                      }
+                      {...fieldProps("location")}
                     />
+                    <FieldError message={errors.location?.message} />
                   </div>
                   <div className="pg-form-group">
                     <label className="pg-label" htmlFor="sf-experience">
@@ -193,10 +182,7 @@ export function ForStylistsPage() {
                     <select
                       id="sf-experience"
                       className="pg-input pg-select"
-                      value={form.experience}
-                      onChange={(event) =>
-                        set({ experience: event.target.value })
-                      }
+                      {...register("experience")}
                     >
                       <option value="">Select…</option>
                       {STYLIST_EXPERIENCE_OPTIONS.map((option) => (
@@ -214,14 +200,10 @@ export function ForStylistsPage() {
                     <input
                       id="sf-email"
                       type="email"
-                      className={cx(
-                        "pg-input",
-                        isMissing("email") && "pg-input--error",
-                      )}
                       placeholder="you@email.com"
-                      value={form.email}
-                      onChange={(event) => set({ email: event.target.value })}
+                      {...fieldProps("email")}
                     />
+                    <FieldError message={errors.email?.message} />
                   </div>
                   <div className="pg-form-group">
                     <label className="pg-label" htmlFor="sf-phone">
@@ -230,11 +212,10 @@ export function ForStylistsPage() {
                     <input
                       id="sf-phone"
                       type="tel"
-                      className="pg-input"
                       placeholder="+44 7700 000000"
-                      value={form.phone}
-                      onChange={(event) => set({ phone: event.target.value })}
+                      {...fieldProps("phone")}
                     />
+                    <FieldError message={errors.phone?.message} />
                   </div>
                 </div>
 
@@ -245,11 +226,10 @@ export function ForStylistsPage() {
                   <input
                     id="sf-instagram"
                     type="text"
-                    className="pg-input"
                     placeholder="@yourstudio"
-                    value={form.instagram}
-                    onChange={(event) => set({ instagram: event.target.value })}
+                    {...fieldProps("instagram")}
                   />
+                  <FieldError message={errors.instagram?.message} />
                 </div>
 
                 <div className="pg-form-group">
@@ -261,13 +241,14 @@ export function ForStylistsPage() {
                       <label key={service} className="pg-check">
                         <input
                           type="checkbox"
-                          checked={form.services.includes(service)}
+                          checked={services.includes(service)}
                           onChange={() => toggleService(service)}
                         />{" "}
                         {service}
                       </label>
                     ))}
                   </div>
+                  <FieldError message={errors.services?.message} />
                 </div>
 
                 <div className="pg-form-group">
@@ -276,12 +257,11 @@ export function ForStylistsPage() {
                   </label>
                   <textarea
                     id="sf-bio"
-                    className="pg-input pg-textarea"
                     rows={4}
                     placeholder="Your background, specialities, the experience you create for clients…"
-                    value={form.bio}
-                    onChange={(event) => set({ bio: event.target.value })}
+                    {...fieldProps("bio", "pg-textarea")}
                   />
+                  <FieldError message={errors.bio?.message} />
                 </div>
 
                 <div className="pg-form-group">
@@ -294,17 +274,16 @@ export function ForStylistsPage() {
                   <input
                     id="sf-portfolio"
                     type="url"
-                    className="pg-input"
                     placeholder="https://instagram.com/yourstudio"
-                    value={form.portfolio}
-                    onChange={(event) => set({ portfolio: event.target.value })}
+                    {...fieldProps("portfolio")}
                   />
+                  <FieldError message={errors.portfolio?.message} />
                 </div>
 
-                <button className="pg-submit-btn" onClick={submit}>
+                <button type="submit" className="pg-submit-btn">
                   Submit application →
                 </button>
-              </>
+              </form>
             )}
           </div>
         </PageSection>

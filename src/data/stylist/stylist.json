@@ -9,68 +9,68 @@
     "description": "Tiwara's House is Manchester's premier destination for Afro hair and beauty. Founded on the belief that the Black community deserves better — better access, better transparency, better experiences. No more hunting through group chats for a reliable name. No more travelling hours for a stylist you can trust. World-class braiding, protective styles, wig installs, and treatments — all with effortless online booking and transparent pricing.",
     "services": {
       "braids": {
-        "knotless": { "price": 130, "duration": "4-6h" },
-        "fulani": { "price": 110, "duration": "3-4h" },
-        "cornrows": { "price": 60, "duration": "1.5-3h" },
-        "feedin": { "price": 80, "duration": "2-3h" },
-        "stitch": { "price": 90, "duration": "2-3h" }
+        "knotless": { "pricePence": 13000, "duration": "4-6h" },
+        "fulani": { "pricePence": 11000, "duration": "3-4h" },
+        "cornrows": { "pricePence": 6000, "duration": "1.5-3h" },
+        "feedin": { "pricePence": 8000, "duration": "2-3h" },
+        "stitch": { "pricePence": 9000, "duration": "2-3h" }
       },
       "wigs": {
-        "lacefront": { "price": 120, "duration": "2-3h" },
-        "fulllace": { "price": 150, "duration": "2.5-3.5h" },
-        "glueless": { "price": 150, "duration": "1.5-2.5h" },
-        "360": { "price": 140, "duration": "2-3h" },
-        "custom": { "price": 80, "duration": "1.5-2.5h" }
+        "lacefront": { "pricePence": 12000, "duration": "2-3h" },
+        "fulllace": { "pricePence": 15000, "duration": "2.5-3.5h" },
+        "glueless": { "pricePence": 15000, "duration": "1.5-2.5h" },
+        "360": { "pricePence": 14000, "duration": "2-3h" },
+        "custom": { "pricePence": 8000, "duration": "1.5-2.5h" }
       },
       "natural-hair": {
         "washstyle": {
-          "price": 55,
+          "pricePence": 5500,
           "duration": "2–3h"
         },
         "blowout": {
-          "price": 65,
+          "pricePence": 6500,
           "duration": "2–3h"
         },
         "twistout": {
-          "price": 70,
+          "pricePence": 7000,
           "duration": "2–3h"
         },
         "braidout": {
-          "price": 70,
+          "pricePence": 7000,
           "duration": "2–3h"
         },
         "silkpress": {
-          "price": 85,
+          "pricePence": 8500,
           "duration": "3–4h"
         }
       },
       "locs": {
         "starterlocs": {
-          "price": 150,
+          "pricePence": 15000,
           "duration": "4–7h"
         },
         "twostrand": {
-          "price": 90,
+          "pricePence": 9000,
           "duration": "3–5h"
         },
         "senegalese": {
-          "price": 110,
+          "pricePence": 11000,
           "duration": "3–5h"
         },
         "marley": {
-          "price": 120,
+          "pricePence": 12000,
           "duration": "4–6h"
         },
         "retwist": {
-          "price": 60,
+          "pricePence": 6000,
           "duration": "1.5–3h"
         }
       },
       "treatments": {
-        "deepcond": { "price": 45, "duration": "1–1.5h" },
-        "scalp": { "price": 35, "duration": "45min" },
-        "protein": { "price": 55, "duration": "1.5–2h" },
-        "hotoil": { "price": 30, "duration": "45min" }
+        "deepcond": { "pricePence": 4500, "duration": "1–1.5h" },
+        "scalp": { "pricePence": 3500, "duration": "45min" },
+        "protein": { "pricePence": 5500, "duration": "1.5–2h" },
+        "hotoil": { "pricePence": 3000, "duration": "45min" }
       }
     },
     "portfolioPictures": ["id1", "id2"],
@@ -90,39 +90,39 @@
     "description": "Amara Beauty is London's go-to studio for flawless wig installs and natural hair care. With over six years of experience working with all textured hair types, Amara brings precision, care, and artistry to every appointment. Every client walks out feeling like the best version of themselves.",
     "services": {
       "wigs": {
-        "lacefront": { "price": 120, "duration": "2-3h" },
-        "fulllace": { "price": 150, "duration": "2.5-3.5h" },
-        "glueless": { "price": 150, "duration": "1.5-2.5h" },
-        "360": { "price": 140, "duration": "2-3h" },
-        "custom": { "price": 80, "duration": "1.5-2.5h" }
+        "lacefront": { "pricePence": 12000, "duration": "2-3h" },
+        "fulllace": { "pricePence": 15000, "duration": "2.5-3.5h" },
+        "glueless": { "pricePence": 15000, "duration": "1.5-2.5h" },
+        "360": { "pricePence": 14000, "duration": "2-3h" },
+        "custom": { "pricePence": 8000, "duration": "1.5-2.5h" }
       },
       "natural-hair": {
         "washstyle": {
-          "price": 55,
+          "pricePence": 5500,
           "duration": "2–3h"
         },
         "blowout": {
-          "price": 65,
+          "pricePence": 6500,
           "duration": "2–3h"
         },
         "twistout": {
-          "price": 70,
+          "pricePence": 7000,
           "duration": "2–3h"
         },
         "braidout": {
-          "price": 70,
+          "pricePence": 7000,
           "duration": "2–3h"
         },
         "silkpress": {
-          "price": 85,
+          "pricePence": 8500,
           "duration": "3–4h"
         }
       },
       "treatments": {
-        "deepcond": { "price": 45, "duration": "1–1.5h" },
-        "scalp": { "price": 35, "duration": "45min" },
-        "protein": { "price": 55, "duration": "1.5–2h" },
-        "hotoil": { "price": 30, "duration": "45min" }
+        "deepcond": { "pricePence": 4500, "duration": "1–1.5h" },
+        "scalp": { "pricePence": 3500, "duration": "45min" },
+        "protein": { "pricePence": 5500, "duration": "1.5–2h" },
+        "hotoil": { "pricePence": 3000, "duration": "45min" }
       }
     },
     "portfolioPictures": ["id1", "id2"],
@@ -141,53 +141,53 @@
     "description": "NaturallyNia is Birmingham's most loved loc specialist. Nia has spent eight years perfecting starter locs, Senegalese twists, and protective styles for all curl types — 3A through 4C. Every client leaves feeling seen, celebrated, and beautiful.",
     "services": {
       "braids": {
-        "knotless": { "price": 130, "duration": "4-6h" },
-        "fulani": { "price": 110, "duration": "3-4h" },
-        "cornrows": { "price": 60, "duration": "1.5-3h" },
-        "feedin": { "price": 80, "duration": "2-3h" },
-        "stitch": { "price": 90, "duration": "2-3h" }
+        "knotless": { "pricePence": 13000, "duration": "4-6h" },
+        "fulani": { "pricePence": 11000, "duration": "3-4h" },
+        "cornrows": { "pricePence": 6000, "duration": "1.5-3h" },
+        "feedin": { "pricePence": 8000, "duration": "2-3h" },
+        "stitch": { "pricePence": 9000, "duration": "2-3h" }
       },
       "natural-hair": {
         "washstyle": {
-          "price": 55,
+          "pricePence": 5500,
           "duration": "2–3h"
         },
         "blowout": {
-          "price": 65,
+          "pricePence": 6500,
           "duration": "2–3h"
         },
         "twistout": {
-          "price": 70,
+          "pricePence": 7000,
           "duration": "2–3h"
         },
         "braidout": {
-          "price": 70,
+          "pricePence": 7000,
           "duration": "2–3h"
         },
         "silkpress": {
-          "price": 85,
+          "pricePence": 8500,
           "duration": "3–4h"
         }
       },
       "locs": {
         "starterlocs": {
-          "price": 150,
+          "pricePence": 15000,
           "duration": "4–7h"
         },
         "twostrand": {
-          "price": 90,
+          "pricePence": 9000,
           "duration": "3–5h"
         },
         "senegalese": {
-          "price": 110,
+          "pricePence": 11000,
           "duration": "3–5h"
         },
         "marley": {
-          "price": 120,
+          "pricePence": 12000,
           "duration": "4–6h"
         },
         "retwist": {
-          "price": 60,
+          "pricePence": 6000,
           "duration": "1.5–3h"
         }
       }

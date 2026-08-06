@@ -6,6 +6,7 @@ import { bookingPath, PATH } from "../../routes/routes";
 import { BOOKING_STEP, firstUnansweredStep } from "../../types/booking";
 import { getSpecialty, getStylistStyles } from "../../data/stylist/stylist";
 import { isCustomisable } from "../../data/services/services";
+import { formatPenceCompact } from "../../utils/money";
 import type { ServiceId } from "../../types/services";
 
 const PORTFOLIO_TILES = [1, 2, 3, 4, 5, 6];
@@ -123,13 +124,15 @@ export function ProfilePage() {
             <h3 className="prof-section-title">Services &amp; Pricing</h3>
             <div>
               {topServices.map(
-                ({ serviceId, styleId, label, duration, price }) => (
+                ({ serviceId, styleId, label, duration, pricePence }) => (
                   <div key={styleId} className="prof-svc-row">
                     <div className="prof-svc-info">
                       <div className="prof-svc-name">{label}</div>
                       <div className="prof-svc-dur">{duration}</div>
                     </div>
-                    <div className="prof-svc-price">from £{price}</div>
+                    <div className="prof-svc-price">
+                      from {formatPenceCompact(pricePence)}
+                    </div>
                     <button
                       className="prof-svc-btn"
                       onClick={() => bookStyle(serviceId, styleId)}

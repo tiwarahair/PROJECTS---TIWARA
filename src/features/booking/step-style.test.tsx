@@ -4,6 +4,7 @@ import userEvent from "@testing-library/user-event";
 import { StepStyle } from "./step-style";
 import { renderWithRouter } from "../../test/helpers";
 import { findStylist } from "../../data/stylist/stylist";
+import { formatPenceCompact } from "../../utils/money";
 
 const noop = () => {};
 
@@ -39,8 +40,10 @@ describe("StepStyle", () => {
   it("prices each style at the stylist's own rate", () => {
     renderStep({ stylistId: "tiwara" });
 
-    const { price } = findStylist("tiwara")!.services.braids.knotless!;
-    expect(screen.getByText(`from ${price}`)).toBeInTheDocument();
+    const { pricePence } = findStylist("tiwara")!.services.braids.knotless!;
+    expect(
+      screen.getByText(`from ${formatPenceCompact(pricePence)}`),
+    ).toBeInTheDocument();
   });
 
   // Auto-advance means no Continue, but Back is the only route to the service

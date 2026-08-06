@@ -120,7 +120,7 @@ export function AIDiscoveryPage() {
               <div className="ai-result-row">
                 <span className="ai-result-key">Length</span>
                 <span className="ai-result-val">
-                  {result ? lengthLabel(result.lengthIndex) : ""}
+                  {result ? lengthLabel(result.lengthId) : ""}
                 </span>
               </div>
             </div>
