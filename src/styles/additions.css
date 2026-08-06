@@ -27,16 +27,6 @@
   margin-top: 0.4rem;
 }
 
-/* Length bar segments 2 and 3 carry asymmetric gutters — segment 2 is
-   spaced on both sides, segment 3 only on the right. Positional in the
-   original markup, so positional here. */
-.bp-lbar-item:nth-child(2) {
-  margin: 0 3px;
-}
-.bp-lbar-item:nth-child(3) {
-  margin-right: 3px;
-}
-
 /* Full-width buttons in the confirm step and the AI results panel. */
 .bp-btn-full {
   width: 100%;

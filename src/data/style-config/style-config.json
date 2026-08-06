@@ -35,9 +35,14 @@
         "hex": "#7A3800"
       },
       {
-        "name": "4/33 Dark Brown / Burgundy Mix",
-        "value": "4/33",
-        "hex": "linear-gradient(135deg,#3D2000 50%,#8F1112 50%)"
+        "name": "4 Dark Brown",
+        "value": "4",
+        "hex": "#3D2000"
+      },
+      {
+        "name": "33 Burgundy",
+        "value": "33",
+        "hex": "#8F1112"
       },
       {
         "name": "613 Platinum Blonde",

@@ -18,6 +18,13 @@ export interface ServiceConfigs {
   addOns?: boolean;
 }
 
+/**
+ * The single-choice groups that make up a look. Add-ons are deliberately not
+ * one — they are optional extras rather than a decision the client must make,
+ * so they do not count towards the preview's progress bar.
+ */
+export type CustomisableGroup = "length" | "hairTexture" | "colour" | "size";
+
 export interface Service {
   id: ServiceId;
   label: string;

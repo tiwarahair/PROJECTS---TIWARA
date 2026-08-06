@@ -8,25 +8,28 @@ import {
 
 // to do: check the calcDeposit tests
 describe("calcDeposit", () => {
-  it("takes 25% of the total", () => {
-    expect(calcDeposit(13000, calcPlatformFee(13000))).toBe(3250);
-    expect(calcDeposit(6000, calcPlatformFee(6000))).toBe(1500);
-    expect(calcDeposit(7500, calcPlatformFee(7500))).toBe(1875);
+  /** The deposit is 25% of what is actually owed — the total plus the fee. */
+  const depositOf = (total: number) =>
+    calcDeposit(total, calcPlatformFee(total));
+
+  it("takes 25% of the total plus the platform fee", () => {
+    expect(depositOf(13000)).toBe(3315); // 25% of 13260
+    expect(depositOf(6000)).toBe(1530); // 25% of 6120
+    expect(depositOf(7500)).toBe(1913); // 25% of 7650, rounded up from 1912.5
   });
 
   it("rounds a fractional penny to the nearest whole one", () => {
-    // 25% of 4501 is 1125.25 — money cannot hold a quarter-penny.
-    expect(calcDeposit(4501, calcPlatformFee(4501))).toBe(1125);
-    expect(calcDeposit(4502, calcPlatformFee(4502))).toBe(1126); // 1125.5 rounds up
-    expect(calcDeposit(10, calcPlatformFee(10))).toBe(3); // 2.5 rounds up
+    // 4501 + 90 fee = 4591; a quarter of that is 1147.75, which money cannot hold.
+    expect(depositOf(4501)).toBe(1148);
+    expect(depositOf(10)).toBe(3); // fee rounds to 0, then 2.5 rounds up
   });
 
-  it("leaves no dust: deposit plus balance is always the total", () => {
+  it("leaves no dust: what is due now plus the balance is what is owed", () => {
     for (const total of [0, 1, 4501, 4502, 6000, 13000, 99999]) {
-      const fee = calcPlatformFee(total);
-      expect(calcDeposit(total, fee) + (total - calcDeposit(total, fee))).toBe(
-        total,
-      );
+      const owed = total + calcPlatformFee(total);
+      const deposit = depositOf(total);
+      expect(deposit + (owed - deposit)).toBe(owed);
+      expect(Number.isInteger(deposit)).toBe(true);
     }
   });
 });

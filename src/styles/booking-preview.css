@@ -12,6 +12,12 @@
   width: 130%;
   height: 90%;
   border-radius: 50%;
+  /* Backlights the strands in whatever colour is chosen. */
+  background: radial-gradient(
+    ellipse at center,
+    var(--preview-colour, #1a1108) 0%,
+    transparent 70%
+  );
   transition:
     background 0.7s ease,
     opacity 0.5s;
@@ -34,6 +40,14 @@
   width: 100%;
   height: 100%;
   transition: opacity 0.4s;
+}
+/* Lifted towards the cream in colours.ts, since the panel behind is near-black
+   and an unlifted dark shade would be invisible.
+   No transition here on purpose: transitioning a property whose value comes
+   from an inherited custom property leaves the stroke stuck on the old colour
+   in Chromium. The glow's own background transition carries the change. */
+#bpStrandSvg path {
+  stroke: var(--strand-colour, #4b4038);
 }
 .bp-img-overlay {
   position: absolute;
@@ -68,6 +82,54 @@
   color: rgba(246, 240, 228, 0.5);
   letter-spacing: 0.3px;
   transition: opacity 0.3s;
+  white-space: nowrap;
+}
+/* Collapsed to nothing off the customise step, so the stylist name sits alone
+   at the left. Expanding it is what slides the name right. */
+.bp-img-meta-look {
+  display: inline-block;
+  max-width: 0;
+  opacity: 0;
+  overflow: hidden;
+  vertical-align: bottom;
+  transition:
+    max-width 0.45s ease,
+    opacity 0.45s ease;
+}
+.bp-img-meta-look.shown {
+  max-width: 20rem;
+  opacity: 1;
+}
+
+/* ── Style photography ── */
+.bp-style-photo {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+/* Only the incoming layer animates; the outgoing one sits beneath at full
+   opacity until this finishes, which is what makes it a cross-fade. */
+.bp-style-photo--enter {
+  animation: bp-photo-in 0.45s ease forwards;
+}
+@keyframes bp-photo-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .bp-img-meta-look {
+    transition: none;
+  }
+  .bp-style-photo--enter {
+    animation-duration: 0.01ms;
+  }
 }
 .bp-img-price {
   position: absolute;
@@ -85,7 +147,7 @@
 }
 .bp-img-length-bar {
   display: flex;
-  gap: 0;
+  gap: 3px;
   margin-bottom: 0.75rem;
   max-width: 200px;
 }

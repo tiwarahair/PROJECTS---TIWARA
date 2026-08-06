@@ -39,7 +39,7 @@ export interface HairTextureOption {
 }
 
 // Colour
-export type ColourId = "1" | "1B" | "30" | "4/33" | "613" | "other";
+export type ColourId = "1" | "1B" | "30" | "4" | "33" | "613" | "other";
 
 export interface ColourOption {
   name: string;

@@ -1,4 +1,4 @@
-import type { ServiceId } from "./services";
+import type { CustomisableGroup, ServiceId } from "./services";
 import type { BraidSize, ColourId, HairTextureId, LengthId } from "./styles";
 
 export type BookingStepIndex = 0 | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8;
@@ -177,6 +177,12 @@ export interface BookingState {
   hairTextureId: HairTextureId;
   size: BraidSize;
   addOnIds: string[];
+  /**
+   * Look groups the client has actively picked in, in the order they did so.
+   * Every group has a default, so this is the only way to tell a real choice
+   * from an untouched one — it drives the preview's progress bar.
+   */
+  chosenGroups: CustomisableGroup[];
   dayNumber: number | null;
   timeSlotId: string | null;
   paymentPlan: PaymentPlan;

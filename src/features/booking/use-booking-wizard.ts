@@ -34,7 +34,7 @@ import type {
   HairTextureId,
   LengthId,
 } from "../../types/styles";
-import type { ServiceId } from "../../types/services";
+import type { CustomisableGroup, ServiceId } from "../../types/services";
 import { getIndividualService, getService } from "../../data/services/services";
 import { getOfferedStyles, getStyleRate } from "../../data/stylist/stylist";
 import { getServiceAddOns } from "../../data/style-config/add-ons";
@@ -83,6 +83,15 @@ export interface BookingWizard {
   goPrev: () => void;
 }
 
+/**
+ * Records a group as chosen, once. Re-picking within a group the client has
+ * already answered leaves the list — and so the progress bar — untouched.
+ */
+function withGroupChosen(state: BookingState, group: CustomisableGroup) {
+  if (state.chosenGroups.includes(group)) return {};
+  return { chosenGroups: [...state.chosenGroups, group] };
+}
+
 /** Fresh today→+30 window; re-evaluated on every open so it never goes stale. */
 function defaultDateWindowFields() {
   const { from, to } = defaultDateWindow();
@@ -110,6 +119,7 @@ function initialState({
     hairTextureId: DEFAULT_HAIR_TEXTURE_ID,
     size: "Medium",
     addOnIds: [],
+    chosenGroups: [],
     dayNumber: null,
     timeSlotId: null,
     paymentPlan: "deposit",
@@ -261,19 +271,35 @@ export function useBookingWizard({
   );
 
   const selectColour = useCallback((colourId: ColourId) => {
-    setBooking((current) => ({ ...current, colourId }));
+    setBooking((current) => ({
+      ...current,
+      colourId,
+      ...withGroupChosen(current, "colour"),
+    }));
   }, []);
 
   const selectLength = useCallback((lengthId: LengthId) => {
-    setBooking((current) => ({ ...current, lengthId }));
+    setBooking((current) => ({
+      ...current,
+      lengthId,
+      ...withGroupChosen(current, "length"),
+    }));
   }, []);
 
   const selectHairTexture = useCallback((hairTextureId: HairTextureId) => {
-    setBooking((current) => ({ ...current, hairTextureId }));
+    setBooking((current) => ({
+      ...current,
+      hairTextureId,
+      ...withGroupChosen(current, "hairTexture"),
+    }));
   }, []);
 
   const selectSize = useCallback((size: BraidSize) => {
-    setBooking((current) => ({ ...current, size }));
+    setBooking((current) => ({
+      ...current,
+      size,
+      ...withGroupChosen(current, "size"),
+    }));
   }, []);
 
   const toggleAddOn = useCallback((addOnId: string) => {

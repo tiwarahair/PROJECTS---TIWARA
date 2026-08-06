@@ -24,6 +24,7 @@ import { StepDetails } from "./step-details";
 import { StepReview } from "./step-review";
 import { StepConfirm } from "./step-confirm";
 import {
+  getCustomisableGroups,
   getIndividualService,
   getService,
   isCustomisable,
@@ -330,12 +331,21 @@ export function BookingOverlay() {
         </div>
 
         <StrandPreview
+          serviceId={booking.serviceId}
           styleId={booking.styleId}
           colourId={booking.colourId}
           lengthId={booking.lengthId}
           stylistName={stylistName}
           styleName={style?.label ?? ""}
-          stylePrice={`from ${formatPenceCompact(rate?.pricePence ?? 0)}`}
+          // No style chosen yet means no price to quote
+          stylePrice={
+            rate?.pricePence
+              ? `from ${formatPenceCompact(rate.pricePence)}`
+              : ""
+          }
+          groups={getCustomisableGroups(booking.serviceId)}
+          chosenGroups={booking.chosenGroups}
+          onCustomiseStep={step === BOOKING_STEP.customise}
         />
       </div>
     </div>

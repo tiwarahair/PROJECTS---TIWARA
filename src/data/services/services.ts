@@ -1,5 +1,9 @@
 import services from "./services.json";
-import type { Service, ServiceId } from "../../types/services";
+import type {
+  CustomisableGroup,
+  Service,
+  ServiceId,
+} from "../../types/services";
 import { startCase } from "lodash";
 
 export const SERVICES = services as Service[];
@@ -39,3 +43,23 @@ export const isCustomisable = (id: ServiceId | null) =>
   id === null || getService(id).customisable;
 
 export const capitaliseServiceId = (id: ServiceId) => startCase(id);
+
+/** Customise-step render order, so the preview's segments match the column. */
+const GROUP_ORDER: readonly CustomisableGroup[] = [
+  "length",
+  "hairTexture",
+  "colour",
+  "size",
+];
+
+/**
+ * The look groups this service asks about, in the order they appear on the
+ * customise step. Treatments has no `configs` at all and yields an empty list.
+ */
+export const getCustomisableGroups = (
+  id: ServiceId | null,
+): CustomisableGroup[] => {
+  if (!id) return [];
+  const { configs = {} } = getService(id);
+  return GROUP_ORDER.filter((group) => configs[group]);
+};

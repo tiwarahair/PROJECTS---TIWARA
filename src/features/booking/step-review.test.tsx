@@ -6,9 +6,15 @@ import type { PaymentPlan, ReviewSnapshot } from "../../types/booking";
 
 const noop = () => {};
 
-/** Cornrows at £60: total 6000p, fee 120p, deposit 1500p. */
+/** Cornrows at £60: total 6000p, 2% fee 120p, so 6120p to settle. The deposit
+ *  is 25% of that, 1530p. */
+const TOTAL = 6000;
+const FEE = 120;
+const TOTAL_PLUS_FEE = TOTAL + FEE;
+const DEPOSIT = 1530;
+
 const review = (paymentPlan: PaymentPlan = "deposit"): ReviewSnapshot => {
-  const dueNow = paymentPlan === "full" ? 6000 : 1500;
+  const dueNow = paymentPlan === "full" ? TOTAL_PLUS_FEE : DEPOSIT;
   return {
     service: "Cornrows",
     colour: "1B Natural Black",
@@ -17,11 +23,12 @@ const review = (paymentPlan: PaymentPlan = "deposit"): ReviewSnapshot => {
     hairTexture: null,
     paymentPlan,
     money: {
-      total: 6000,
-      fee: 120,
-      deposit: 1500,
+      total: TOTAL,
+      totalPlusFee: TOTAL_PLUS_FEE,
+      fee: FEE,
+      deposit: DEPOSIT,
       dueNow,
-      balance: 6000 - dueNow,
+      balance: TOTAL_PLUS_FEE - dueNow,
     },
   };
 };
@@ -49,8 +56,8 @@ describe("StepReview", () => {
 
     expect(screen.getByText("£60")).toBeInTheDocument(); // total, no decimals
     expect(screen.getByText("£1.20")).toBeInTheDocument(); // 2% fee
-    expect(screen.getByText("£15.00")).toBeInTheDocument(); // deposit due now
-    expect(screen.getByText("£45.00")).toBeInTheDocument(); // balance
+    expect(screen.getAllByText("£15.30").length).toBeGreaterThan(0); // deposit
+    expect(screen.getByText("£45.90")).toBeInTheDocument(); // balance
   });
 
   it("omits the hair texture row unless the service collects one", () => {
@@ -91,7 +98,8 @@ describe("StepReview", () => {
       renderStep({ review: review("full") });
 
       expect(screen.getByText("Due now (in full)")).toBeInTheDocument();
-      expect(screen.getByText("£60.00")).toBeInTheDocument(); // due now
+      // Total plus the 2% fee, not the bare total.
+      expect(screen.getAllByText("£61.20").length).toBeGreaterThan(0);
       expect(screen.getByText("£0.00")).toBeInTheDocument(); // balance
       expect(
         screen.getByRole("button", { name: "Pay in full & confirm →" }),

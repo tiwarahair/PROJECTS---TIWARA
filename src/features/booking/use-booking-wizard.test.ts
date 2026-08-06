@@ -80,6 +80,56 @@ describe("useBookingWizard", () => {
     expect(result.current.booking.lengthId).toBe("shoulder");
     expect(result.current.booking.hairTextureId).toBe("straight");
     expect(result.current.booking.paymentPlan).toBe("deposit");
+    // Defaults are not choices — the progress bar starts empty.
+    expect(result.current.booking.chosenGroups).toEqual([]);
+  });
+
+  describe("which look groups have been chosen", () => {
+    it("records a group the first time the client picks in it", () => {
+      const { result } = renderWizard();
+      advanceToCustomise(result);
+
+      act(() => result.current.selectColour("613"));
+      expect(result.current.booking.chosenGroups).toEqual(["colour"]);
+
+      act(() => result.current.selectLength("bra"));
+      expect(result.current.booking.chosenGroups).toEqual(["colour", "length"]);
+
+      act(() => result.current.selectSize("Large"));
+      expect(result.current.booking.chosenGroups).toEqual([
+        "colour",
+        "length",
+        "size",
+      ]);
+    });
+
+    it("does not record a group twice when the client changes their mind", () => {
+      const { result } = renderWizard();
+      advanceToCustomise(result);
+
+      act(() => result.current.selectLength("bob"));
+      act(() => result.current.selectLength("waist"));
+      act(() => result.current.selectLength("bra"));
+
+      expect(result.current.booking.chosenGroups).toEqual(["length"]);
+      expect(result.current.booking.lengthId).toBe("bra");
+    });
+
+    it("ignores add-ons, which are extras rather than part of the look", () => {
+      const { result } = renderWizard();
+      advanceToCustomise(result);
+
+      act(() => result.current.toggleAddOn("boho"));
+      expect(result.current.booking.chosenGroups).toEqual([]);
+    });
+
+    it("records the hair texture group for the services that ask", () => {
+      const { result } = renderWizard();
+      advanceToCustomise(result);
+
+      act(() => result.current.selectHairTexture("deep-wave"));
+      expect(result.current.booking.chosenGroups).toEqual(["hairTexture"]);
+    });
   });
 
   describe("step order", () => {
@@ -303,8 +353,10 @@ describe("useBookingWizard", () => {
       act(() => void vi.advanceTimersByTime(AUTO_ADVANCE_MS));
 
       const { pricePence } = findStylist("tiwara")!.services.braids.knotless!;
-      expect(result.current.review.money.total).toBe(pricePence);
-      expect(result.current.review.money.deposit).toBe(pricePence * 0.25);
+      const { total, fee, deposit } = result.current.review.money;
+      expect(total).toBe(pricePence);
+      // The deposit is a quarter of the total plus the fee, not of the total.
+      expect(deposit).toBe(Math.round((pricePence + fee) * 0.25));
     });
 
     it("costs nothing before a service is chosen", () => {
@@ -345,7 +397,7 @@ describe("useBookingWizard", () => {
         service: "Cornrows",
         colour: "1B Natural Black",
         size: "Medium",
-        money: { total: 6000, deposit: 1500, balance: 4500 },
+        money: { total: 6000, deposit: 1530, balance: 4590 },
       });
     });
 
@@ -357,9 +409,10 @@ describe("useBookingWizard", () => {
       expect(result.current.review.money).toEqual({
         total: 7500,
         fee: 150,
-        deposit: 1875,
-        dueNow: 1875,
-        balance: 5625,
+        totalPlusFee: 7650,
+        deposit: 1913, // 25% of 7650, rounded up from 1912.5
+        dueNow: 1913,
+        balance: 5737,
       });
 
       act(() => result.current.toggleAddOn("boho"));
@@ -377,13 +430,15 @@ describe("useBookingWizard", () => {
       expect(result.current.review.money.total).toBe(6000);
     });
 
-    it("carries the 2% platform fee without adding it to the total", () => {
-      const { total, fee, deposit, balance } = reviewAtCustomise().money;
+    it("adds the 2% platform fee on top of the total", () => {
+      const { total, fee, totalPlusFee, deposit, balance } =
+        reviewAtCustomise().money;
       expect(total).toBe(6000);
       expect(fee).toBe(120);
-      // Deposit and balance still come from the total, not total + fee.
-      expect(deposit).toBe(1500);
-      expect(balance).toBe(4500);
+      // The fee is charged, so the deposit and balance work off total + fee.
+      expect(totalPlusFee).toBe(6120);
+      expect(deposit).toBe(1530);
+      expect(balance).toBe(4590);
     });
 
     it("shows only the hair texture of a service that collects one", () => {
@@ -408,32 +463,33 @@ describe("useBookingWizard", () => {
       const { money, paymentPlan } = reviewAtCustomise();
 
       expect(paymentPlan).toBe("deposit");
-      expect(money.dueNow).toBe(1500);
-      expect(money.balance).toBe(4500);
+      expect(money.dueNow).toBe(1530);
+      expect(money.balance).toBe(4590);
     });
 
-    it("charges the whole total up front on the full plan", () => {
+    it("charges the total plus the fee up front on the full plan", () => {
       const { result } = renderWizard();
       advanceToCustomise(result);
 
       act(() => result.current.selectPaymentPlan("full"));
 
-      const { total, deposit, dueNow, balance } = result.current.review.money;
+      const { totalPlusFee, deposit, dueNow, balance } =
+        result.current.review.money;
       expect(result.current.review.paymentPlan).toBe("full");
-      expect(dueNow).toBe(total);
+      expect(dueNow).toBe(totalPlusFee);
       expect(balance).toBe(0);
       // The 25% figure is still reported, for the toggle's own label.
-      expect(deposit).toBe(1500);
+      expect(deposit).toBe(1530);
     });
 
-    it("always splits the total exactly, leaving no rounding dust", () => {
+    it("always splits what is owed exactly, leaving no rounding dust", () => {
       const { result } = renderWizard();
       advanceToCustomise(result);
 
       for (const plan of ["deposit", "full"] as const) {
         act(() => result.current.selectPaymentPlan(plan));
-        const { total, dueNow, balance } = result.current.review.money;
-        expect(dueNow + balance).toBe(total);
+        const { totalPlusFee, dueNow, balance } = result.current.review.money;
+        expect(dueNow + balance).toBe(totalPlusFee);
         expect(Number.isInteger(dueNow)).toBe(true);
         expect(Number.isInteger(balance)).toBe(true);
       }
@@ -468,6 +524,7 @@ describe("useBookingWizard", () => {
       expect(booking.lengthId).toBe("shoulder");
       expect(booking.hairTextureId).toBe("straight");
       expect(booking.paymentPlan).toBe("deposit");
+      expect(booking.chosenGroups).toEqual([]);
       // These five survived a reopen before routing. They must not now — a
       // previous client's slot and contact details cannot leak into the next.
       expect(booking.size).toBe("Medium");

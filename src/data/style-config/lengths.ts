@@ -18,15 +18,3 @@ export const lengthLabel = (id: LengthId): string => {
   const { name, inches } = findLengthById(id);
   return `${name} (${inches})`;
 };
-
-// ??? >>>>
-/**
- * Position in the catalogue order. The preview's length bar fills every
- * segment up to the chosen one, so it needs the rank rather than the id.
- */
-export const getLengthIndex = (id: LengthId): number => {
-  const index = LENGTH_OPTIONS.findIndex(({ value }) => value === id);
-  return index === -1
-    ? LENGTH_OPTIONS.findIndex(({ value }) => value === DEFAULT_LENGTH_ID)
-    : index;
-};
