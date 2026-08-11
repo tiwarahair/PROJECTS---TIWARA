@@ -39,8 +39,6 @@ import {
 
 // TO DO: READ
 
-const DEFAULT_STYLIST_NAME = "Tiwara's House";
-
 export function BookingOverlay() {
   const surfaces = useRouteSurfaces();
   const { close } = useSurfaceNav();
@@ -140,9 +138,7 @@ export function BookingOverlay() {
   // The stylist picked in the picker wins; otherwise fall back to whoever the
   // booking was opened for (a profile or a search card).
   const stylistName =
-    findStylist(booking.stylistId)?.name ??
-    contextStylist?.name ??
-    DEFAULT_STYLIST_NAME;
+    findStylist(booking.stylistId)?.name ?? contextStylist?.name;
 
   const rate = booking.serviceId
     ? getStyleRate(booking.styleId, booking.serviceId, booking.stylistId)
@@ -309,7 +305,7 @@ export function BookingOverlay() {
           >
             <StepReview
               review={review}
-              stylistName={stylistName}
+              stylistName={stylistName || ""}
               onSelectPaymentPlan={wizard.selectPaymentPlan}
               onBack={wizard.goPrev}
               onNext={wizard.goNext}
@@ -324,7 +320,7 @@ export function BookingOverlay() {
           >
             <StepConfirm
               review={review}
-              stylistName={stylistName}
+              stylistName={stylistName || ""}
               onDone={close}
             />
           </div>
@@ -335,7 +331,7 @@ export function BookingOverlay() {
           styleId={booking.styleId}
           colourId={booking.colourId}
           lengthId={booking.lengthId}
-          stylistName={stylistName}
+          stylistName={stylistName || ""}
           styleName={style?.label ?? ""}
           // No style chosen yet means no price to quote
           stylePrice={

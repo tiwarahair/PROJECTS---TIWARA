@@ -33,7 +33,7 @@ const variantKey = (lengthId: LengthId, colourId: ColourId) =>
  * Stands in before a style has been chosen, so the panel is never an empty
  * black rectangle on the way through the early steps.
  */
-const DEFAULT_PHOTO = byVariant.get("shoulder-1b") ?? null;
+const DEFAULT_PHOTO = byVariant.get("shoulder-30") ?? null;
 
 /**
  * The photo for a look, or null when there is none — Jet Black and "Other"

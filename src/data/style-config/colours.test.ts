@@ -17,7 +17,7 @@ describe("colourSolid", () => {
 
   // "Other" is a multi-tone gradient, which is not a colour anything can paint.
   it("falls back to the default for the gradient swatch", () => {
-    expect(colourSolid("other")).toBe(findColourById("1B").hex);
+    expect(colourSolid("other")).toBe(findColourById("30").hex);
   });
 });
 

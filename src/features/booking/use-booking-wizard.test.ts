@@ -395,7 +395,7 @@ describe("useBookingWizard", () => {
       // Cornrows is £60 — the summary is derived, not a stale snapshot.
       expect(result.current.review).toMatchObject({
         service: "Cornrows",
-        colour: "1B Natural Black",
+        colour: "30 Auburn",
         size: "Medium",
         money: { total: 6000, deposit: 1530, balance: 4590 },
       });

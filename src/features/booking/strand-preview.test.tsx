@@ -145,7 +145,7 @@ describe("StrandPreview", () => {
       const photo = screen.getByRole("img", { name: "Braided hair" });
       expect(photo).toHaveAttribute(
         "src",
-        expect.stringContaining("knotless-shoulder-1b"),
+        expect.stringContaining("knotless-shoulder-30"),
       );
       expect(screen.queryByText(/Add your editorial/)).toBeNull();
     });
