@@ -8,7 +8,6 @@ import type { ServiceId } from "../../types/services";
 import { SERVICES } from "../../data/services/services";
 
 /** Editorial background photo; absent until the real asset is supplied. TODO: add hero image */
-const HERO_PHOTO = "/assets/hero.jpg";
 
 export function HeroSection() {
   const [contentRef, contentVisible] = useFadeIn<HTMLDivElement>();
@@ -20,7 +19,9 @@ export function HeroSection() {
     <section className="hero">
       <div
         className="hero-photo-bg"
-        style={{ backgroundImage: `url('${HERO_PHOTO}')` }}
+        style={{
+          backgroundImage: `url('${"src/assets/portfolio-temp/Carno.jpeg"}')`,
+        }}
       />
       <div className="hero-overlay" />
 

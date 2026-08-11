@@ -61,7 +61,6 @@
   left: 0;
   right: 0;
   height: 120px;
-  background: linear-gradient(to top, var(--cream), transparent);
 }
 .hero-eyebrow {
   font-family: var(--label);
