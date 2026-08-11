@@ -1,5 +1,5 @@
 export type ServiceId =
-  "braids" | "wigs" | "natural-hair" | "locs" | "treatments";
+  "braids" | "wigs" | "natural-hair" | "locs" | "treatments" | "sew-ins";
 
 /** A bookable style within a service, e.g. Knotless Braids under Braids. */
 export interface IndividualService {

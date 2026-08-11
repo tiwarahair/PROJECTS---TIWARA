@@ -126,13 +126,13 @@
         "id": "layers",
         "name": "Layers",
         "addedCostPence": 500,
-        "serviceIds": ["wigs"]
+        "serviceIds": ["wigs", "sew-ins"]
       },
       {
         "id": "curls",
         "name": "Curls",
         "addedCostPence": 500,
-        "serviceIds": ["wigs"]
+        "serviceIds": ["wigs", "sew-ins"]
       },
       { "id": "other", "name": "Other", "serviceIds": ["all"] }
     ]

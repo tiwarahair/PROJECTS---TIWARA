@@ -87,6 +87,30 @@
     }
   },
   {
+    "id": "sew-ins",
+    "label": "Sew-ins",
+    "description": "Sew-ins with leave out, closure sew ins, flip over sew ins etc.",
+    "individualServices": [
+      {
+        "id": "sew-in-leave-out",
+        "label": "Sew in with leave out",
+        "defaultPricePence": 12000,
+        "defaultDuration": "2–3h"
+      },
+      {
+        "id": "sew-in-closure",
+        "label": "Closure sew in",
+        "defaultPricePence": 15000,
+        "defaultDuration": "2.5–3.5h"
+      }
+    ],
+    "customisable": true,
+    "configs": {
+      "hairTexture": true,
+      "length": true
+    }
+  },
+  {
     "id": "natural-hair",
     "label": "Natural Hair Care",
     "description": "Wash & styles, blowouts, twist outs, and silk press treatments.",
