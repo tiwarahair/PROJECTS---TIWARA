@@ -6,8 +6,7 @@ import { PATH, searchPath } from "../../routes/routes";
 import { HERO_CHIPS } from "../../data/other/landing-content";
 import type { ServiceId } from "../../types/services";
 import { SERVICES } from "../../data/services/services";
-
-/** Editorial background photo; absent until the real asset is supplied. TODO: add hero image */
+import heroImage from "../../assets/hero/hero.jpeg";
 
 export function HeroSection() {
   const [contentRef, contentVisible] = useFadeIn<HTMLDivElement>();
@@ -20,7 +19,7 @@ export function HeroSection() {
       <div
         className="hero-photo-bg"
         style={{
-          backgroundImage: `url('${"src/assets/hero/hero.jpeg"}')`,
+          backgroundImage: `url('${heroImage}')`,
         }}
       />
       <div className="hero-overlay" />
