@@ -13,7 +13,7 @@ import type {
 import { RESERVED_SLUGS } from "../../routes/routes";
 
 // will be removed later - and will be asyncrhonous calls to the db
-export const STYLISTS = stylists as Stylist[];
+export const STYLISTS = stylists as unknown as Stylist[];
 
 export function findStylist(id: string | null): Stylist | undefined {
   if (!id) return undefined;
