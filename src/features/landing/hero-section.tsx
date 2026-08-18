@@ -20,7 +20,7 @@ export function HeroSection() {
       <div
         className="hero-photo-bg"
         style={{
-          backgroundImage: `url('${"src/assets/portfolio-temp/Carno.jpeg"}')`,
+          backgroundImage: `url('${"src/assets/hero/hero.jpeg"}')`,
         }}
       />
       <div className="hero-overlay" />

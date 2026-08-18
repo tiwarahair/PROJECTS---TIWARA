@@ -33,6 +33,18 @@
         "label": "Stitch Braids",
         "defaultPricePence": 9000,
         "defaultDuration": "2–3h"
+      },
+      {
+        "id": "braids-takedown",
+        "label": "Braids takedown",
+        "defaultPricePence": 9000,
+        "defaultDuration": "2–3h"
+      },
+      {
+        "id": "braids-refresh",
+        "label": "Braids refresh (edges/perimeter)",
+        "defaultPricePence": 9000,
+        "defaultDuration": "2–3h"
       }
     ],
     "customisable": true,
@@ -63,6 +75,12 @@
       {
         "id": "glueless",
         "label": "Glueless Install",
+        "defaultPricePence": 15000,
+        "defaultDuration": "1.5–2.5h"
+      },
+      {
+        "id": "half-wig",
+        "label": "Half wig install",
         "defaultPricePence": 15000,
         "defaultDuration": "1.5–2.5h"
       },
@@ -102,11 +120,147 @@
         "label": "Closure sew in",
         "defaultPricePence": 15000,
         "defaultDuration": "2.5–3.5h"
+      },
+      {
+        "id": "sew-in-removal",
+        "label": "Sew in removal",
+        "defaultPricePence": 12000,
+        "defaultDuration": "2–3h"
+      },
+      {
+        "id": "versatile-sew-in",
+        "label": "Versatile Sew-in",
+        "defaultPricePence": 12000,
+        "defaultDuration": "2–3h"
+      },
+      {
+        "id": "half-up-half-down",
+        "label": "Half up half down",
+        "defaultPricePence": 12000,
+        "defaultDuration": "2–3h"
       }
     ],
     "customisable": true,
     "configs": {
       "hairTexture": true,
+      "length": true
+    }
+  },
+  {
+    "id": "quick-weave",
+    "label": "Quick weave",
+    "description": "",
+    "individualServices": [
+      {
+        "id": "leave-out-quick-weave",
+        "label": "Leave out quick weave",
+        "defaultPricePence": 15000,
+        "defaultDuration": "2.5–3.5h"
+      },
+      {
+        "id": "lace-frontal-quick-weave",
+        "label": "Lace frontal quick weave",
+        "defaultPricePence": 12000,
+        "defaultDuration": "2–3h"
+      },
+      {
+        "id": "lace-closure-quick-weave",
+        "label": "Lace closure quick weave",
+        "defaultPricePence": 15000,
+        "defaultDuration": "2.5–3.5h"
+      }
+    ],
+    "customisable": true,
+    "configs": {
+      "hairTexture": true,
+      "length": true
+    }
+  },
+  {
+    "id": "tape-ins",
+    "label": "Tape-ins",
+    "description": "Hair extensions that are attached to your natural hair ...",
+    "individualServices": [
+      {
+        "id": "tape-in-install",
+        "label": "Tape-in Install",
+        "defaultPricePence": 4500,
+        "defaultDuration": "1–1.5h"
+      },
+      {
+        "id": "tape-in-removal",
+        "label": "Tape-in Removal",
+        "defaultPricePence": 3500,
+        "defaultDuration": "45min"
+      },
+      {
+        "id": "tape-in-re-install",
+        "label": "Tape-in removal & re-install",
+        "defaultPricePence": 5500,
+        "defaultDuration": "1.5–2h"
+      }
+    ],
+    "customisable": false
+  },
+  {
+    "id": "ponytails",
+    "label": "Ponytails",
+    "description": "",
+    "individualServices": [
+      {
+        "id": "frontal-ponytail",
+        "label": "Frontal ponytail",
+        "defaultPricePence": 4500,
+        "defaultDuration": "1–1.5h"
+      },
+      {
+        "id": "360-ponytail",
+        "label": "360 ponytail",
+        "defaultPricePence": 4500,
+        "defaultDuration": "1–1.5h"
+      }
+    ],
+    "customisable": false
+  },
+  {
+    "id": "locs",
+    "label": "Locs & Twists",
+    "description": "Starter locs, Senegalese twists, Marley twists, loc retwists and more.",
+    "individualServices": [
+      {
+        "id": "starterlocs",
+        "label": "Starter Locs",
+        "defaultPricePence": 15000,
+        "defaultDuration": "4–7h"
+      },
+      {
+        "id": "retwist",
+        "label": "Loc Retwist",
+        "defaultPricePence": 6000,
+        "defaultDuration": "1.5–3h"
+      },
+      {
+        "id": "twostrand",
+        "label": "Two-Strand Twists",
+        "defaultPricePence": 9000,
+        "defaultDuration": "3–5h"
+      },
+      {
+        "id": "senegalese",
+        "label": "Senegalese Twists",
+        "defaultPricePence": 11000,
+        "defaultDuration": "3–5h"
+      },
+      {
+        "id": "marley",
+        "label": "Marley Twists",
+        "defaultPricePence": 12000,
+        "defaultDuration": "4–6h"
+      }
+    ],
+    "customisable": true,
+    "configs": {
+      "size": true,
       "length": true
     }
   },
@@ -144,6 +298,12 @@
         "label": "Silk Press",
         "defaultPricePence": 8500,
         "defaultDuration": "3–4h"
+      },
+      {
+        "id": "hair-trim",
+        "label": "Hair Trim",
+        "defaultPricePence": 3500,
+        "defaultDuration": "3–4h"
       }
     ],
     "customisable": true,
@@ -153,52 +313,16 @@
     }
   },
   {
-    "id": "locs",
-    "label": "Locs & Twists",
-    "description": "Starter locs, Senegalese twists, Marley twists, loc retwists and more.",
-    "individualServices": [
-      {
-        "id": "starterlocs",
-        "label": "Starter Locs",
-        "defaultPricePence": 15000,
-        "defaultDuration": "4–7h"
-      },
-      {
-        "id": "twostrand",
-        "label": "Two-Strand Twists",
-        "defaultPricePence": 9000,
-        "defaultDuration": "3–5h"
-      },
-      {
-        "id": "senegalese",
-        "label": "Senegalese Twists",
-        "defaultPricePence": 11000,
-        "defaultDuration": "3–5h"
-      },
-      {
-        "id": "marley",
-        "label": "Marley Twists",
-        "defaultPricePence": 12000,
-        "defaultDuration": "4–6h"
-      },
-      {
-        "id": "retwist",
-        "label": "Loc Retwist",
-        "defaultPricePence": 6000,
-        "defaultDuration": "1.5–3h"
-      }
-    ],
-    "customisable": true,
-    "configs": {
-      "size": true,
-      "length": true
-    }
-  },
-  {
     "id": "treatments",
-    "label": "Treatments",
+    "label": "Hair Treatments",
     "description": "Deep conditioning, scalp treatments, protein and hot oil treatments.",
     "individualServices": [
+      {
+        "id": "colouring",
+        "label": "Colouring",
+        "defaultPricePence": 4500,
+        "defaultDuration": "1–1.5h"
+      },
       {
         "id": "deepcond",
         "label": "Deep Conditioning",
@@ -206,10 +330,10 @@
         "defaultDuration": "1–1.5h"
       },
       {
-        "id": "scalp",
-        "label": "Scalp Treatment",
-        "defaultPricePence": 3500,
-        "defaultDuration": "45min"
+        "id": "keratin",
+        "label": "Keratin Treatment",
+        "defaultPricePence": 5500,
+        "defaultDuration": "1.5–2h"
       },
       {
         "id": "protein",

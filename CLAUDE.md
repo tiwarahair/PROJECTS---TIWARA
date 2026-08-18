@@ -2,7 +2,7 @@
 
 A hair booking platform for salon owners and paying clients. Uses React 19 & Typescript 5.9
 
-Read @CONTEXT.local.md for more context.
+Read @CONTEXT.md for more context.
 
 ## Tech Stack
 
@@ -56,8 +56,11 @@ Always run `yarn format && yarn lint` after code changes.
 - `src/components/` — reusable UI components (Button, Modal, Table, etc.)
 - `src/features/` — feature modules (auth, dashboard, settings), each with its own components & hooks
 - `src/hooks/` — shared custom hooks
-- `src/types/` — shared TypeScript types and interfaces
+- `src/types/` — shared TypeScript types and interfaces (including the types for the data in src/data - each file for each data)
 - `src/utils/` — pure utility functions
+- `src/assets/` — assets
+- `src/data/` — re-usable data used in the front-end kept in json files
+- `src/styles/` — css
 
 ## Component Conventions
 
