@@ -22,3 +22,7 @@ export const getAssetUrl = (prototypePath: string): string => {
   if (!url) throw new Error(`Unknown asset: ${prototypePath}`);
   return url;
 };
+
+/** Like getAssetUrl, but passes through anything that is not a bundled prototype asset (absolute URLs, data URIs). */
+export const resolveAssetUrl = (path: string): string =>
+  assetUrls.get(path.replace(/^\.?\//, "")) ?? path;

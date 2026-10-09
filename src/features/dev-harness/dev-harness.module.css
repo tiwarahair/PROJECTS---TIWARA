@@ -9,3 +9,10 @@
   position: relative;
   margin: 0 0 24px;
 }
+
+.cardBox {
+  width: 320px;
+  height: 600px;
+  position: relative;
+  margin: 0 0 24px;
+}

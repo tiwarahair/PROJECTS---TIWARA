@@ -1,0 +1,225 @@
+/* Values verbatim from prototype StylistCard.dc.html. Pseudo-state rules carry !important like the
+   prototype runtime's style-hover/style-active rules. */
+.card {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  position: relative;
+}
+
+.coverLink {
+  display: block;
+  height: 340px;
+  overflow: hidden;
+  position: relative;
+  border-radius: var(--radius-md);
+  background: var(--neutral-100);
+}
+
+/* doubled class: the prototype set this inline, above the pages' .stycover/.rescover transition rules */
+.cover.cover {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center 10%;
+  transition: transform 0.7s cubic-bezier(0.2, 0.7, 0.2, 1);
+}
+
+.cover:hover {
+  transform: scale(1.045) !important;
+}
+
+.heart {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  width: 38px;
+  height: 38px;
+  border: 0;
+  padding: 0;
+  cursor: pointer;
+  border-radius: var(--radius-full);
+  background: rgba(26, 23, 20, 0.35);
+  -webkit-backdrop-filter: blur(16px) saturate(140%);
+  backdrop-filter: blur(16px) saturate(140%);
+  color: #fffefb;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition:
+    background-color 160ms cubic-bezier(0.2, 0.8, 0.2, 1),
+    transform 160ms cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+
+.heart:hover {
+  background: rgba(26, 23, 20, 0.52) !important;
+}
+
+.heart:active {
+  transform: scale(0.96) !important;
+}
+
+@media (max-width: 720px) {
+  .heart {
+    width: 44px !important;
+    height: 44px !important;
+  }
+}
+
+.body {
+  padding: 14px 6px 0;
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+}
+
+.titleRow {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+/* colour repeated on :hover: inline in the prototype, above the global a:hover */
+.name,
+.name:hover {
+  font-family: "Schibsted Grotesk", sans-serif;
+  font-weight: 600;
+  font-size: 18.5px;
+  letter-spacing: -0.01em;
+  color: var(--text-primary);
+}
+
+.rating {
+  margin-left: auto;
+  flex: 0 0 auto;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.reviewCount {
+  font-weight: 400;
+  color: var(--text-secondary);
+}
+
+.areaRow {
+  margin-top: 4px;
+  font-size: 13.5px;
+  color: var(--text-secondary);
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+
+.areaIcon {
+  flex: 0 0 auto;
+}
+
+.area {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.meta {
+  margin-left: auto;
+  flex: 0 0 auto;
+  padding-left: 10px;
+  white-space: nowrap;
+}
+
+.facts {
+  margin-top: 3px;
+  font-size: 13.5px;
+  color: var(--text-secondary);
+  display: flex;
+  flex-wrap: wrap;
+  column-gap: 10px;
+  row-gap: 2px;
+}
+
+.fact {
+  color: var(--text-secondary);
+  font-weight: 400;
+}
+
+.factStrong {
+  color: var(--text-primary);
+  font-weight: 600;
+}
+
+.rows {
+  margin-top: 12px;
+  display: flex;
+  flex-direction: column;
+}
+
+.row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 10px 2px;
+  border-top: 1px solid var(--border-subtle);
+  color: var(--text-primary);
+  transition: color 0.16s cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+
+.row:hover {
+  color: var(--accent-700) !important;
+}
+
+.rowText {
+  min-width: 0;
+}
+
+.rowName {
+  display: block;
+  font-size: 14.5px;
+  font-weight: 600;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.rowMeta {
+  display: block;
+  font-size: 13px;
+  color: var(--text-secondary);
+  margin-top: 1px;
+  font-variant-numeric: tabular-nums;
+}
+
+.chevron {
+  flex: 0 0 auto;
+}
+
+.book {
+  margin-top: 14px;
+  align-self: flex-start;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--accent-700);
+  color: var(--neutral-50);
+  font-weight: 600;
+  font-size: 14.5px;
+  padding: 11px 24px;
+  border-radius: var(--radius-full);
+  transition:
+    background-color 0.2s cubic-bezier(0.2, 0.8, 0.2, 1),
+    transform 0.16s cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+
+.book:hover {
+  background: #7a0e0f !important;
+  color: var(--neutral-50) !important;
+}
+
+.book:active {
+  transform: scale(0.97) !important;
+}
