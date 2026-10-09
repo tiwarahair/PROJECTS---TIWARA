@@ -37,6 +37,12 @@ export function FeaturedStylists() {
             >
               <div className="fs-card-img" style={{ background }}>
                 {slug === "tiwaras-house" && (
+                  <img
+                    src={`src/assets/portfolio-temp/Carno.jpeg`}
+                    alt="overview picture"
+                  />
+                )}
+                {slug === "tiwaras-house" && (
                   <div className="fs-flagship">✶ Flagship</div>
                 )}
               </div>

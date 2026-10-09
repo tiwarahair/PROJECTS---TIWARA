@@ -9,7 +9,7 @@ import { isCustomisable } from "../../data/services/services";
 import { formatPenceCompact } from "../../utils/money";
 import type { ServiceId } from "../../types/services";
 
-const PORTFOLIO_TILES = [1, 2, 3, 4, 5, 6];
+const PORTFOLIO_TILES = [1, 2, 3, 4, 5];
 
 // temp
 const reviews = [
@@ -44,8 +44,6 @@ export function ProfilePage() {
   // temp
   const rating = 4.9;
   const reviewCount = 3;
-  const background =
-    "radial-gradient(ellipse at 45% 35%, #3D1A00, #0D0600, #040200)";
   const flagship = slug === "tiwaras-house";
   // No stylist means no rows. getStylistStyles(null) is the whole catalogue,
   // which is right for the booking flow but wrong for a storefront.
@@ -96,7 +94,16 @@ export function ProfilePage() {
     <div id="profilePage" className="prof-overlay">
       <div className="prof-scroll">
         <div className="prof-hero">
-          <div className="prof-hero-bg" style={{ background }} />
+          <div className="prof-hero-bg" />
+          <div className="image-container">
+            {stylist?.id === "tiwara" && (
+              <img
+                src={`src/assets/portfolio-temp/Carno.jpeg`}
+                alt="overview picture"
+              />
+            )}
+          </div>
+
           <div className="prof-hero-overlay" />
           <div className="prof-hero-content">
             <span className="prof-badge">
@@ -148,9 +155,21 @@ export function ProfilePage() {
           <div className="prof-section">
             <h3 className="prof-section-title">Portfolio</h3>
             <div className="prof-gallery-grid">
-              {PORTFOLIO_TILES.map((tile) => (
-                <div key={tile} className={cx("prof-gi", `prof-gi-${tile}`)} />
-              ))}
+              {PORTFOLIO_TILES.map((title, i) =>
+                stylist?.id === "tiwara" ? (
+                  <img
+                    key={title}
+                    src={`src/assets/portfolio-temp/${i + 1}.JPG`}
+                    alt="portfolio picture"
+                    className="prof-gi"
+                  />
+                ) : (
+                  <div
+                    key={title}
+                    className={cx("prof-gi", `prof-gi-${title}`)}
+                  />
+                ),
+              )}
             </div>
           </div>
 
