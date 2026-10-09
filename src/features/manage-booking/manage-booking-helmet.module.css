@@ -1,0 +1,38 @@
+/*
+ * Manage Booking <helmet> <style> rules, verbatim values (prototype Manage Booking.dc.html lines 20–32), in the page
+ * layer, scoped to html.manage-page (set while the page is mounted). The global reset lines identical to the base
+ * layer are omitted; the keyframes live in the modules that use them.
+ */
+@layer page {
+  :global(html.manage-page) textarea {
+    font-family: "Hanken Grotesk", sans-serif;
+  }
+
+  :global(html.manage-page) input:focus,
+  :global(html.manage-page) textarea:focus {
+    outline: none;
+    border-color: var(--neutral-400) !important;
+  }
+
+  @media (max-width: 960px) {
+    :global(html.manage-page) input,
+    :global(html.manage-page) textarea {
+      font-size: 16px !important;
+    }
+  }
+
+  @keyframes mbFade {
+    from {
+      opacity: 0;
+    }
+    to {
+      opacity: 1;
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    :global(html.manage-page) [data-mb-anim] {
+      animation: mbFade 0.2s ease both !important;
+    }
+  }
+}

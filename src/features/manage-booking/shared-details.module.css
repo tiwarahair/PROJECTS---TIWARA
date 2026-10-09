@@ -1,0 +1,147 @@
+/* Values verbatim from prototype Manage Booking.dc.html (inline styles; style-hover/active as !important like the prototype runtime). */
+
+.section {
+  margin-top: 36px;
+}
+
+.title {
+  margin: 0;
+  font-family: "Schibsted Grotesk", sans-serif;
+  font-weight: 600;
+  letter-spacing: -0.02em;
+  font-size: 21px;
+}
+
+.sub {
+  margin: 6px 0 0;
+  font-size: 14.5px;
+  line-height: 1.55;
+  color: var(--neutral-600);
+  text-wrap: pretty;
+}
+
+.rows {
+  margin-top: 14px;
+  display: flex;
+  flex-direction: column;
+}
+
+.row {
+  padding: 18px 0;
+  border-top: 1px solid var(--border-subtle);
+}
+
+.rowHead {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 10px 20px;
+}
+
+.rowText {
+  flex: 1 1 260px;
+  min-width: 0;
+}
+
+.label {
+  font-size: 14.5px;
+  font-weight: 600;
+}
+
+.value {
+  margin-top: 4px;
+  font-size: 15px;
+  line-height: 1.5;
+  overflow-wrap: anywhere;
+}
+
+.actions {
+  display: flex;
+  gap: 8px;
+  flex: 0 0 auto;
+}
+
+.button {
+  height: 40px;
+  padding: 0 18px;
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius-full);
+  background: transparent;
+  color: var(--text-primary);
+  font: inherit;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.16s cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+
+.button:hover {
+  background: var(--fill-quiet) !important;
+}
+
+.button:active {
+  transform: scale(0.97) !important;
+}
+
+.editor {
+  margin-top: 14px;
+}
+
+.editorActions {
+  display: flex;
+  gap: 10px;
+  margin-top: 16px;
+  flex-wrap: wrap;
+}
+
+.save {
+  height: 46px;
+  padding: 0 26px;
+  border: none;
+  border-radius: var(--radius-full);
+  background: var(--accent-700);
+  color: var(--neutral-50);
+  font: inherit;
+  font-size: 15px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.save:hover {
+  background: var(--accent-900) !important;
+}
+
+.save:active {
+  transform: scale(0.98) !important;
+}
+
+.cancel {
+  height: 46px;
+  padding: 0 22px;
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius-full);
+  background: transparent;
+  color: var(--text-primary);
+  font: inherit;
+  font-size: 15px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.cancel:hover {
+  background: var(--fill-quiet) !important;
+}
+
+.cancel:active {
+  transform: scale(0.98) !important;
+}
+
+/* r.valColor: muted for "None shared" */
+.valueShared {
+  color: var(--text-primary);
+}
+
+.valueNone {
+  color: var(--neutral-600);
+}

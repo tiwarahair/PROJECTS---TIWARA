@@ -1,0 +1,110 @@
+/* Values verbatim from prototype Manage Booking.dc.html (inline styles; style-hover/active as !important like the prototype runtime). */
+
+.scrim {
+  position: fixed;
+  inset: 0;
+  z-index: 300;
+  background: var(--scrim-modal, rgba(26, 23, 20, 0.45));
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+  box-sizing: border-box;
+  animation: mbFade 0.2s cubic-bezier(0.2, 0.8, 0.2, 1) both;
+}
+
+.panel {
+  width: 100%;
+  max-width: 400px;
+  background: var(--neutral-50);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-modal);
+  padding: 26px 24px 22px;
+  box-sizing: border-box;
+  animation: mbPop 0.24s cubic-bezier(0.2, 0.8, 0.2, 1) both;
+}
+
+.title {
+  margin: 0;
+  font-family: "Schibsted Grotesk", sans-serif;
+  font-weight: 600;
+  letter-spacing: -0.02em;
+  font-size: 22px;
+}
+
+.text {
+  margin: 8px 0 0;
+  font-size: 15px;
+  line-height: 1.55;
+  color: var(--neutral-700, #3d3730);
+}
+
+.actions {
+  display: flex;
+  gap: 10px;
+  margin-top: 22px;
+  flex-wrap: wrap;
+}
+
+.cancel {
+  flex: 1 1 120px;
+  height: 48px;
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius-full);
+  background: transparent;
+  color: var(--text-primary);
+  font: inherit;
+  font-size: 15px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.cancel:hover {
+  background: var(--fill-quiet) !important;
+}
+
+.cancel:active {
+  transform: scale(0.98) !important;
+}
+
+.remove {
+  flex: 1 1 120px;
+  height: 48px;
+  border: none;
+  border-radius: var(--radius-full);
+  background: var(--accent-700);
+  color: var(--neutral-50);
+  font: inherit;
+  font-size: 15px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.remove:hover {
+  background: var(--accent-900) !important;
+}
+
+.remove:active {
+  transform: scale(0.98) !important;
+}
+
+/* helmet keyframes (copied: CSS modules scope keyframe names per file) */
+@keyframes mbFade {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes mbPop {
+  from {
+    opacity: 0;
+    transform: scale(0.96) translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
