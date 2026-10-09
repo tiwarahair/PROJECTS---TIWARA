@@ -24,10 +24,12 @@ describe("StylistCard", () => {
     expect(
       screen.getByRole("img", { name: "Amara Beauty" }),
     ).toBeInTheDocument();
-    expect(screen.getByRole("link", { name: "Amara Beauty" })).toHaveAttribute(
-      "href",
-      "/stylist?stylist=amara-beauty",
-    );
+    // the cover and the title both link to the profile
+    screen
+      .getAllByRole("link", { name: "Amara Beauty" })
+      .forEach((link) =>
+        expect(link).toHaveAttribute("href", "/stylist?stylist=amara-beauty"),
+      );
     expect(screen.getByText("(146)")).toBeInTheDocument();
     expect(screen.getByText("Hulme, Manchester")).toBeInTheDocument();
     expect(screen.getByText("from £81.70")).toBeInTheDocument();
