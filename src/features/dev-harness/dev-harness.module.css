@@ -1,0 +1,11 @@
+/* Mirrors the prototype harness pages (design-import/…/prototype/__harness-*.dc.html). */
+.page {
+  padding: 24px;
+}
+
+.box {
+  width: 420px;
+  height: 520px;
+  position: relative;
+  margin: 0 0 24px;
+}
