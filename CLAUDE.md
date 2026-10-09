@@ -88,7 +88,7 @@ export function Button({ label, onClick, variant = "primary" }: ButtonProps) {
 
 ## Testing
 
-- Use Vitest + React Testing Library
+- Use Vitest + React Testing Library + Playwright
 - Test behavior, not implementation — query by role, text, or test ID
 - Every component should have at least a smoke test (renders without crashing)
 - Place test utilities in `src/test`
@@ -103,9 +103,7 @@ Do not change UI without asking.
 - Typography: Avoid generic fonts like Arial and Inter; opt instead for distinctive choices that elevate the frontend's aesthetics.
 - Color & Theme: Commit to a cohesive aesthetic. Use CSS variables for consistency. The Design should be consistent throughout the app (using re-usable components etc.)
 - Motion: Use animations for effects and micro-interactions.
-- Backgrounds: Create atmosphere and depth rather than defaulting to solid colors. Layer CSS gradients, use geometric patterns, or add contextual effects that match the overall aesthetic.
 - Should adapt to different screen sized: Desktop, Mobile, Tablet etc.
-- Can add: texture wherever needed
 
 ## Do NOT
 
