@@ -1,0 +1,163 @@
+[
+  {
+    "id": "a0",
+    "line1": "14 Blossom Street",
+    "line2": "",
+    "town": "Manchester",
+    "postcode": "M4 6AJ"
+  },
+  {
+    "id": "a1",
+    "line1": "22 Blossom Street",
+    "line2": "Flat 5",
+    "town": "Manchester",
+    "postcode": "M4 6AJ"
+  },
+  {
+    "id": "a2",
+    "line1": "31 Jersey Street",
+    "line2": "",
+    "town": "Manchester",
+    "postcode": "M4 6JB"
+  },
+  {
+    "id": "a3",
+    "line1": "48 Portland Street",
+    "line2": "",
+    "town": "Manchester",
+    "postcode": "M1 4PZ"
+  },
+  {
+    "id": "a4",
+    "line1": "9 Dale Street",
+    "line2": "Apartment 7",
+    "town": "Manchester",
+    "postcode": "M1 1JA"
+  },
+  {
+    "id": "a5",
+    "line1": "210 Oxford Road",
+    "line2": "",
+    "town": "Manchester",
+    "postcode": "M13 9PL"
+  },
+  {
+    "id": "a6",
+    "line1": "17 Hathersage Road",
+    "line2": "",
+    "town": "Manchester",
+    "postcode": "M13 0EW"
+  },
+  {
+    "id": "a7",
+    "line1": "12 Dickenson Road",
+    "line2": "",
+    "town": "Manchester",
+    "postcode": "M14 5TQ"
+  },
+  {
+    "id": "a8",
+    "line1": "14 Dickenson Road",
+    "line2": "Flat 2",
+    "town": "Manchester",
+    "postcode": "M14 5TQ"
+  },
+  {
+    "id": "a9",
+    "line1": "27 Heald Place",
+    "line2": "",
+    "town": "Manchester",
+    "postcode": "M14 5TL"
+  },
+  {
+    "id": "a10",
+    "line1": "118 Wilmslow Road",
+    "line2": "Unit 4",
+    "town": "Manchester",
+    "postcode": "M14 5AJ"
+  },
+  {
+    "id": "a11",
+    "line1": "41 Claremont Road",
+    "line2": "",
+    "town": "Manchester",
+    "postcode": "M14 4RR"
+  },
+  {
+    "id": "a12",
+    "line1": "5 Stretford Road",
+    "line2": "",
+    "town": "Manchester",
+    "postcode": "M15 5JQ"
+  },
+  {
+    "id": "a13",
+    "line1": "88 Seymour Grove",
+    "line2": "",
+    "town": "Manchester",
+    "postcode": "M16 0LN"
+  },
+  {
+    "id": "a14",
+    "line1": "3 Ayres Road",
+    "line2": "",
+    "town": "Manchester",
+    "postcode": "M16 9WA"
+  },
+  {
+    "id": "a15",
+    "line1": "402 Stockport Road",
+    "line2": "",
+    "town": "Manchester",
+    "postcode": "M19 3AB"
+  },
+  {
+    "id": "a16",
+    "line1": "735 Wilmslow Road",
+    "line2": "",
+    "town": "Manchester",
+    "postcode": "M20 6RN"
+  },
+  {
+    "id": "a17",
+    "line1": "41 Beech Road",
+    "line2": "",
+    "town": "Manchester",
+    "postcode": "M21 9EG"
+  },
+  {
+    "id": "a18",
+    "line1": "12 Wilton Road",
+    "line2": "",
+    "town": "Manchester",
+    "postcode": "M21 0BW"
+  },
+  {
+    "id": "a19",
+    "line1": "24 Chester Road",
+    "line2": "",
+    "town": "Stretford",
+    "postcode": "M32 0RS"
+  },
+  {
+    "id": "a20",
+    "line1": "2 The Quays",
+    "line2": "Apartment 21",
+    "town": "Salford",
+    "postcode": "M50 3SQ"
+  },
+  {
+    "id": "a21",
+    "line1": "60 Ashley Road",
+    "line2": "",
+    "town": "Altrincham",
+    "postcode": "WA14 2LX"
+  },
+  {
+    "id": "a22",
+    "line1": "12 Chorley New Road",
+    "line2": "",
+    "town": "Bolton",
+    "postcode": "BL1 4QR"
+  }
+]

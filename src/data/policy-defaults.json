@@ -1,0 +1,18 @@
+{
+  "mode": "deposit",
+  "depositPct": 20,
+  "refundable": true,
+  "freeWindowHrs": 48,
+  "late": {
+    "on": false,
+    "kind": "pct",
+    "pct": 50
+  },
+  "noShow": {
+    "on": false,
+    "kind": "pct",
+    "pct": 50
+  },
+  "graceMins": 0,
+  "extras": []
+}

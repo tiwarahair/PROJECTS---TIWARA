@@ -1,0 +1,37 @@
+[
+  {
+    "name": "1 Jet Black",
+    "value": "1",
+    "hex": "#000000"
+  },
+  {
+    "name": "1B Natural Black",
+    "value": "1B",
+    "hex": "#1A1108"
+  },
+  {
+    "name": "30 Auburn",
+    "value": "30",
+    "hex": "#7A3800"
+  },
+  {
+    "name": "4 Dark Brown",
+    "value": "4",
+    "hex": "#3D2000"
+  },
+  {
+    "name": "33 Burgundy",
+    "value": "33",
+    "hex": "#8F1112"
+  },
+  {
+    "name": "613 Platinum Blonde",
+    "value": "613",
+    "hex": "#D4C050"
+  },
+  {
+    "name": "Other colour — specify in notes",
+    "value": "other",
+    "hex": "linear-gradient(135deg,#1A1108 25%,#7A3800 25% 50%,#D4C050 50% 75%,#3D2000 75%)"
+  }
+]

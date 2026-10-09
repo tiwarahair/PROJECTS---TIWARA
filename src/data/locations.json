@@ -1,0 +1,47 @@
+[
+  {
+    "name": "Manchester city centre",
+    "lat": 53.4808,
+    "lng": -2.2426
+  },
+  {
+    "name": "Ancoats",
+    "lat": 53.4847,
+    "lng": -2.2266
+  },
+  {
+    "name": "Chorlton",
+    "lat": 53.4416,
+    "lng": -2.2768
+  },
+  {
+    "name": "Hulme",
+    "lat": 53.466,
+    "lng": -2.25
+  },
+  {
+    "name": "Moss Side",
+    "lat": 53.4581,
+    "lng": -2.24
+  },
+  {
+    "name": "Salford",
+    "lat": 53.4875,
+    "lng": -2.2901
+  },
+  {
+    "name": "Didsbury",
+    "lat": 53.4166,
+    "lng": -2.231
+  },
+  {
+    "name": "Levenshulme",
+    "lat": 53.444,
+    "lng": -2.192
+  },
+  {
+    "name": "Old Trafford",
+    "lat": 53.458,
+    "lng": -2.283
+  }
+]

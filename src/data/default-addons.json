@@ -1,0 +1,26 @@
+{
+  "braids": [
+    ["Beads", 10, 15],
+    ["Boho pieces", 15, 20],
+    ["Burnt ends", 5, 10],
+    ["Wash & blow-dry", 20, 30]
+  ],
+  "locs": [
+    ["Wash", 15, 20],
+    ["Styling", 20, 30]
+  ],
+  "wigs": [
+    ["Layers", 15, 20],
+    ["Curls", 20, 30],
+    ["Wash & blow dry", 20, 30],
+    ["Cornrow", 15, 20]
+  ],
+  "weaves": [
+    ["Layers", 15, 20],
+    ["Curls", 20, 30],
+    ["Wash & blow dry", 20, 30],
+    ["Highlights", 35, 45]
+  ],
+  "natural": [],
+  "treatments": []
+}

@@ -1,0 +1,50 @@
+[
+  {
+    "name": "Oxblood",
+    "value": "var(--accent-700)"
+  },
+  {
+    "name": "Rust",
+    "value": "var(--accent-500)"
+  },
+  {
+    "name": "Ink",
+    "value": "#1a1714"
+  },
+  {
+    "name": "Rose",
+    "value": "rgba(143,17,18,.4)"
+  },
+  {
+    "name": "Apricot",
+    "value": "rgba(181,84,31,.45)"
+  },
+  {
+    "name": "Purple",
+    "value": "#6b4fbb"
+  },
+  {
+    "name": "Blue",
+    "value": "#3b6fd6"
+  },
+  {
+    "name": "Green",
+    "value": "#2e7d4f"
+  },
+  {
+    "name": "Grey",
+    "value": "#7d7465"
+  },
+  {
+    "name": "Gold",
+    "value": "#c99a1a"
+  },
+  {
+    "name": "Teal",
+    "value": "#1f7a7a"
+  },
+  {
+    "name": "Pink",
+    "value": "#c2417a"
+  }
+]

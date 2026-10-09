@@ -1,0 +1,30 @@
+[
+  {
+    "q": "Do I need an account to book?",
+    "a": "No. You can search, book and pay as a guest. Everything you need to manage your appointment — reschedule, cancel, get directions — lives in a secure link in your confirmation email."
+  },
+  {
+    "q": "How do deposits work?",
+    "a": "Each stylist sets their own deposit, usually 20–30% of the service price. You pay it at booking to secure your slot and pay the remaining balance at the salon. The exact amounts are shown before you confirm."
+  },
+  {
+    "q": "What if I need to cancel or reschedule?",
+    "a": "You can cancel or reschedule free of charge up to each stylist’s cancellation window — typically 24 to 72 hours before your appointment. The window and any late fees are shown on the stylist’s profile and again before you pay."
+  },
+  {
+    "q": "Is braiding hair included?",
+    "a": "It depends on the service. Every listing states clearly whether hair is included or you should bring your own — and it’s repeated in your confirmation email and reminders."
+  },
+  {
+    "q": "What does it cost to use Tiwára’s House?",
+    "a": "Clients pay a small booking fee of £0.50 + 1.5% of the service price, itemised before you pay. Stylists pay nothing — no listing fee and no commission."
+  },
+  {
+    "q": "How do I pay?",
+    "a": "Card, Apple Pay or Google Pay, processed securely by Stripe. Your deposit is charged at booking; the balance is settled at the salon."
+  },
+  {
+    "q": "I’m a stylist — how do I get listed?",
+    "a": "Onboarding takes about five minutes: your business details, the services you offer, and your availability. Listing is free, you keep 100% of your service price, and clients can book you the same day."
+  }
+]

@@ -1,0 +1,20 @@
+[
+  {
+    "id": "a1",
+    "label": "Home",
+    "line1": "12 Dickenson Road",
+    "line2": "",
+    "town": "Manchester",
+    "postcode": "M14 5TQ",
+    "def": true
+  },
+  {
+    "id": "a2",
+    "label": "Work",
+    "line1": "48 Portland Street",
+    "line2": "",
+    "town": "Manchester",
+    "postcode": "M1 4PZ",
+    "def": false
+  }
+]

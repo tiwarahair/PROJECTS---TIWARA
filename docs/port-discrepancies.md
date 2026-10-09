@@ -1,0 +1,20 @@
+# Port discrepancies
+
+Everything where the React port differs from the Claude Design prototype (`HANDOFF.md`, prototype source), or where the prototype conflicts with this repo's `CLAUDE.md`. Each item is reported here rather than silently resolved.
+
+## Open — needs a decision
+
+| # | Where | Issue | Status |
+| - | ----- | ----- | ------ |
+| 1 | HANDOFF §7.25 | Search "Where" in production = Google Places UK; provider / API key not chosen. Port keeps the prototype's demo matching. | NEEDS DECISION |
+| 2 | HANDOFF §3 (every screen) | "empty / error / offline / denied — not designed". Not invented in the port. | NEEDS DECISION |
+
+## Applied — deliberate, behaviour-preserving
+
+| # | Where | Prototype | Port | Why |
+| - | ----- | --------- | ---- | --- |
+| 1 | `data.js` helpers | Short names (`custOf`, `groupOf`, `fromPrice`, `dur`, `lev`, `r2`, …) | `getServiceOptions`, `getGroupId`, `getFromPrice`, `formatDuration`, `getEditDistance`, `roundPence`, … | CLAUDE.md naming rules (`getX`, ≥3 chars). Logic and outputs identical (`src/data/data.test.ts` diffs every helper against the prototype). Data keys, storage keys and query params are unchanged. |
+| 2 | Assets | `img/…`, `_ds_assets/…` served next to the HTML | `src/assets/img`, `src/assets/_ds_assets`, resolved with `getAssetUrl("img/…")` | CLAUDE.md architecture (`src/assets/`). Paths in data stay the prototype's exact strings. Files are byte-identical. |
+| 3 | Design tokens | `_ds/…/styles.css` + `tokens/*.css` | `src/styles/design-system/` (same relative layout), excluded from Prettier | Byte-identical copies; Prettier would reformat them. |
+| 4 | zxcvbn-ts | Loaded from jsDelivr (`core@3.0.4`, `language-common@3.0.4`, `language-en@3.0.2`) | Same versions from npm, lazily `import()`ed on first check; still fires `tw-pw-ready` | Agreed: CDN libraries become npm dependencies. |
+| 5 | GSAP / Leaflet | cdnjs `gsap@3.12.5` + ScrollTrigger; unpkg `leaflet@1.9.4` | npm `gsap@3.12.5`, `leaflet@1.9.4` | Agreed: CDN libraries become npm dependencies. |

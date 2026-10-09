@@ -1,0 +1,61 @@
+// Typed views over the JSON extracted from the prototype's data.js (scripts/extract-prototype-data.mjs).
+// JSON imports widen tuples to arrays and literals to string, so datasets are asserted to their interfaces
+// (tuple-shaped ones via unknown). data.test.ts checks every value against the prototype.
+import type { DemoAddress, SavedAddress } from "../types/address";
+import type { BrandAssets } from "../types/assets";
+import type { CategoryColour } from "../types/category-colour";
+import type { ChatMessage } from "../types/chat";
+import type { HairColour } from "../types/colour";
+import type { DefaultAddons } from "../types/default-addon";
+import type { Faq } from "../types/faq";
+import type { SearchLocation } from "../types/location";
+import type { PlatformCustomisations } from "../types/platform-customisation";
+import type { Policy, PolicyIcons } from "../types/policy";
+import type { Postcodes } from "../types/postcode";
+import type { Review } from "../types/review";
+import type { ServiceGroup } from "../types/service-group";
+import type { ServiceSpecs } from "../types/service-spec";
+import type { ServiceType } from "../types/service-type";
+import type { BusinessLabels, Stylist } from "../types/stylist";
+import addressesJson from "./addresses.json";
+import assetsJson from "./assets.json";
+import businessLabelsJson from "./business-labels.json";
+import categoryColoursJson from "./category-colours.json";
+import chatJson from "./chat.json";
+import coloursJson from "./colours.json";
+import defaultAddonsJson from "./default-addons.json";
+import faqsJson from "./faqs.json";
+import locationsJson from "./locations.json";
+import passwordBlocklistJson from "./password-blocklist.json";
+import platformCustomisationsJson from "./platform-customisations.json";
+import policyDefaultsJson from "./policy-defaults.json";
+import policyIconsJson from "./policy-icons.json";
+import postcodesJson from "./postcodes.json";
+import reviewsJson from "./reviews.json";
+import seedAddressesJson from "./seed-addresses.json";
+import serviceGroupsJson from "./service-groups.json";
+import serviceSpecsJson from "./service-specs.json";
+import serviceTypesJson from "./service-types.json";
+import stylistsJson from "./stylists.json";
+
+export const brandAssets: BrandAssets = assetsJson;
+export const stylists = stylistsJson as unknown as Stylist[];
+export const reviews: Review[] = reviewsJson;
+export const faqs: Faq[] = faqsJson;
+export const chatMessages = chatJson as ChatMessage[];
+export const serviceGroups: ServiceGroup[] = serviceGroupsJson;
+export const serviceTypes: ServiceType[] = serviceTypesJson;
+export const serviceSpecs = serviceSpecsJson as unknown as ServiceSpecs;
+export const platformCustomisations =
+  platformCustomisationsJson as PlatformCustomisations;
+export const hairColours: HairColour[] = coloursJson;
+export const defaultAddons = defaultAddonsJson as unknown as DefaultAddons;
+export const categoryColours: CategoryColour[] = categoryColoursJson;
+export const searchLocations: SearchLocation[] = locationsJson;
+export const postcodes: Postcodes = postcodesJson;
+export const demoAddresses: DemoAddress[] = addressesJson;
+export const policyIcons: PolicyIcons = policyIconsJson;
+export const policyDefaults = policyDefaultsJson as Policy;
+export const businessLabels: BusinessLabels = businessLabelsJson;
+export const seedAddresses: SavedAddress[] = seedAddressesJson;
+export const passwordBlocklist: string[] = passwordBlocklistJson;

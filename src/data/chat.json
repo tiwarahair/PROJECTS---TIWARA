@@ -1,0 +1,22 @@
+[
+  {
+    "from": "client",
+    "text": "Hey, can I book knotless braids for Saturday at 10?"
+  },
+  {
+    "from": "stylist",
+    "text": "Hang on, let me check my calendar..."
+  },
+  {
+    "from": "stylist",
+    "text": "Sorry babe, fully booked. Sunday instead?"
+  },
+  {
+    "from": "client",
+    "text": "I’m working Sunday 😩 what about next week?"
+  },
+  {
+    "from": "stylist",
+    "text": "Sorry girl I’m booked all next week!"
+  }
+]
