@@ -1,0 +1,258 @@
+/* Values verbatim from prototype Home.dc.html (Nav + mobile menu) and renderVals navStyle / logo styles. */
+.nav {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 80;
+  transition:
+    transform 0.4s cubic-bezier(0.25, 0.8, 0.25, 1),
+    background 0.35s ease,
+    box-shadow 0.35s ease,
+    backdrop-filter 0.35s ease;
+  transform: translateY(0);
+  background: transparent;
+  backdrop-filter: none;
+  box-shadow: none;
+  --nav-ink: #faf6ee;
+}
+
+.hidden {
+  transform: translateY(-100%);
+}
+
+/* solid over a cream section: tinted with that section's colour at .85 */
+.solid {
+  background: var(--nav-bg);
+  backdrop-filter: blur(12px);
+  --nav-ink: var(--neutral-900);
+}
+
+.solid.dark {
+  background: rgba(20, 17, 15, 0.26);
+  backdrop-filter: blur(16px) saturate(120%);
+  --nav-ink: #faf6ee;
+}
+
+.bar {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 14px clamp(20px, 5vw, 48px);
+}
+
+.logoLink {
+  display: flex;
+  align-items: center;
+}
+
+.logoStack {
+  position: relative;
+  display: block;
+  height: 26px;
+}
+
+.logoCream {
+  height: 26px;
+  display: block;
+  transition: opacity 0.35s ease;
+  opacity: 1;
+}
+
+.logoMask {
+  display: none;
+}
+
+.logoCrimson {
+  height: 26px;
+  width: 100%;
+  object-fit: contain;
+  object-position: left center;
+  display: block;
+  position: absolute;
+  left: 0;
+  top: 0;
+  transition: opacity 0.35s ease;
+  opacity: 0;
+}
+
+.solid:not(.dark) .logoCream {
+  opacity: 0;
+}
+
+.solid:not(.dark) .logoCrimson {
+  opacity: 1;
+}
+
+.centreLinks {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 28px;
+  font-size: 14px;
+  font-weight: 300;
+  color: var(--nav-ink);
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
+}
+
+.navLink {
+  font-weight: 400;
+  opacity: 0.7;
+}
+
+.right {
+  display: flex;
+  gap: 20px;
+  align-items: center;
+  margin-left: auto;
+}
+
+.rightLinks {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  font-size: 14px;
+  font-weight: 300;
+  color: var(--nav-ink);
+}
+
+.account {
+  font-weight: 500;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  margin-right: -6px;
+  transition: opacity 200ms ease;
+}
+
+.account:hover {
+  opacity: 1 !important;
+}
+
+.avatar {
+  flex: none;
+  width: 36px;
+  height: 36px;
+  border-radius: 999px;
+  background: rgba(246, 240, 228, 0.16);
+  color: var(--neutral-50, #fffefb);
+  backdrop-filter: blur(16px) saturate(140%);
+  -webkit-backdrop-filter: blur(16px) saturate(140%);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-family: "Schibsted Grotesk", sans-serif;
+  font-weight: 600;
+  font-size: 13px;
+  letter-spacing: 0;
+  transition:
+    background-color 280ms cubic-bezier(0.2, 0.8, 0.2, 1),
+    color 280ms cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+
+.solid:not(.dark) .avatar {
+  background: var(--accent-wash, rgba(143, 17, 18, 0.06));
+  color: var(--accent-700, #8f1112);
+}
+
+.bookNow {
+  display: inline-flex;
+  align-items: center;
+  background: var(--accent-700);
+  border: 1.5px solid var(--accent-700);
+  color: var(--neutral-50);
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  padding: 10px 18px;
+  border-radius: 100px;
+  transition: background 0.2s ease;
+}
+
+.bookNow:hover {
+  background: var(--accent-900) !important;
+  border-color: var(--accent-900) !important;
+  color: var(--neutral-50) !important;
+}
+
+.burger {
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 8px;
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  font-weight: 400;
+}
+
+.burgerLine {
+  width: 22px;
+  height: 1.5px;
+  background: var(--nav-ink);
+  display: block;
+}
+
+.burgerLineFirst {
+  font-weight: 400;
+}
+
+/* mobile menu */
+.menu {
+  position: fixed;
+  inset: 0;
+  z-index: 90;
+  background: #faf6ee;
+  display: flex;
+  flex-direction: column;
+  padding: 24px;
+}
+
+.menuTop {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.menuLogo {
+  height: 26px;
+}
+
+.menuClose {
+  background: none;
+  border: none;
+  font-size: 28px;
+  cursor: pointer;
+  color: var(--neutral-900);
+}
+
+.menuLinks {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-top: 48px;
+  font-family: Schibsted Grotesk;
+  font-size: 34px;
+  font-weight: 500;
+  letter-spacing: -0.02em;
+}
+
+.menuLink {
+  padding: 10px 0;
+}
+
+.menuBook {
+  margin-top: auto;
+  background: var(--accent-700);
+  color: var(--neutral-50);
+  text-align: center;
+  font-weight: 600;
+  padding: 16px;
+  border-radius: 100px;
+  font-size: 17px;
+}

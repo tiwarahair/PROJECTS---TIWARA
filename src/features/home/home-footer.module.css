@@ -1,0 +1,124 @@
+/* Values verbatim from prototype Home.dc.html (inline styles; style-hover/active as !important like the prototype runtime). */
+
+.footer {
+  position: relative;
+  z-index: 2;
+  background: var(--neutral-900);
+  color: var(--neutral-50);
+  padding: clamp(56px, 7vw, 88px) clamp(20px, 5vw, 48px) 32px;
+}
+
+.inner {
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.columns {
+  display: flex;
+  justify-content: flex-start;
+  gap: clamp(32px, 4vw, 56px);
+  flex-wrap: wrap;
+}
+
+.brand {
+  flex: 1 1 260px;
+  max-width: 320px;
+}
+
+.logoLink {
+  display: block;
+  margin-bottom: 18px;
+  transition: opacity 220ms cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+
+.logoLink:hover {
+  opacity: 0.78 !important;
+}
+
+.logo {
+  width: 340px;
+  height: 106px;
+  display: block;
+}
+
+.about {
+  margin: 0;
+  color: var(--neutral-400);
+  font-size: 14.5px;
+  line-height: 1.65;
+}
+
+.linkGroups {
+  display: flex;
+  gap: clamp(32px, 4vw, 56px);
+  flex-wrap: wrap;
+  margin-left: auto;
+  font-size: 14.5px;
+}
+
+.linkGroup {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.groupTitle {
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--neutral-500);
+}
+
+.link {
+  color: var(--neutral-50);
+}
+
+.social {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.socialLinks {
+  display: flex;
+  gap: 10px;
+}
+
+.socialLink {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  border-radius: var(--radius-full);
+  background: rgba(255, 254, 251, 0.09);
+  color: var(--neutral-50);
+  transition: background 0.2s ease;
+}
+
+.socialLink:hover {
+  background: rgba(255, 254, 251, 0.18) !important;
+  color: var(--neutral-50) !important;
+}
+
+.bottom {
+  border-top: 1px solid var(--neutral-700);
+  margin-top: clamp(40px, 5vw, 64px);
+  padding-top: 24px;
+  display: flex;
+  justify-content: space-between;
+  gap: 16px;
+  flex-wrap: wrap;
+  font-size: 12.5px;
+  color: var(--neutral-500);
+}
+
+.legal {
+  display: flex;
+  gap: 24px;
+}
+
+.legalLink {
+  color: var(--neutral-500);
+}

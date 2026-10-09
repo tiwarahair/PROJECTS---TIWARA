@@ -1,0 +1,91 @@
+/* Values verbatim from prototype Home.dc.html (inline styles; style-hover/active as !important like the prototype runtime). */
+
+.section {
+  position: relative;
+  z-index: 2;
+  background: transparent;
+  padding: var(--sec-lg) var(--gutter);
+}
+
+.inner {
+  max-width: 720px;
+  margin: 0 auto;
+}
+
+.title {
+  margin: 0 0 40px;
+  text-align: center;
+  font-family: Schibsted Grotesk;
+  font-weight: 600;
+  letter-spacing: -0.05em;
+  line-height: 1.05;
+  font-size: clamp(32px, 4.6vw, 56px);
+}
+
+.list {
+  display: flex;
+  flex-direction: column;
+}
+
+.item {
+  border-bottom: 1px solid var(--border-subtle);
+}
+
+.question {
+  width: 100%;
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 24px;
+  background: none;
+  border: none;
+  cursor: pointer;
+  text-align: left;
+  padding: 26px 0;
+  font-family: Schibsted Grotesk;
+  font-size: 19px;
+  font-weight: 500;
+  letter-spacing: -0.01em;
+  line-height: 1.3;
+  color: var(--text-primary);
+}
+
+.answerClip {
+  overflow: hidden;
+}
+
+.answer {
+  padding: 0 48px 26px 0;
+  color: var(--text-secondary);
+  font-size: 16px;
+  line-height: 1.7;
+  max-width: 60ch;
+}
+
+/* renderVals faq chevStyle / plusVStyle / bodyStyle */
+.chevron {
+  display: flex;
+  flex-shrink: 0;
+  margin-top: 2px;
+  color: var(--neutral-900);
+}
+
+.plusVertical {
+  transform-origin: 12px 12px;
+  transform: scaleY(1);
+  transition: transform 0.3s ease;
+}
+
+.open .plusVertical {
+  transform: scaleY(0);
+}
+
+.answerBody {
+  display: grid;
+  grid-template-rows: 0fr;
+  transition: grid-template-rows 0.4s cubic-bezier(0.25, 0.8, 0.25, 1);
+}
+
+.open .answerBody {
+  grid-template-rows: 1fr;
+}

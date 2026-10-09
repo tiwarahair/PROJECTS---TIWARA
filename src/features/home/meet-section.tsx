@@ -1,0 +1,47 @@
+import { Link } from "react-router";
+import { getAssetUrl } from "../../utils/asset-url";
+import { joinClassNames } from "../../utils/class-names";
+import page from "./home-page.module.css";
+import styles from "./meet-section.module.css";
+
+/** "Meet the founder" (prototype Home "Meet Tiwára"). */
+export const MeetSection = () => (
+  <section
+    id="meet"
+    data-bg="#FAF6EE"
+    data-screen-label="Meet Tiwára"
+    className={styles.section}
+  >
+    <div className={joinClassNames(page.meetgrid, styles.grid)}>
+      <div data-rv="" className={styles.photoFrame}>
+        <img
+          data-plx=""
+          loading="lazy"
+          src={getAssetUrl("img/new/ceo.jpeg")}
+          alt="Kashope in the salon"
+          className={styles.photo}
+        />
+      </div>
+      <div className={styles.text}>
+        <div data-rv="" className={styles.titleRule}>
+          <h2 className={styles.title}>Meet the founder</h2>
+        </div>
+        <p data-rv="" className={styles.intro}>
+          Tiwára&apos;s House started as one chair in Ancoats and a phone full
+          of unanswered booking DMs.
+        </p>
+        <p data-rv="" className={styles.body}>
+          This platform is the fix she built for herself, opened up to every
+          afro hair stylist in the city: bookings, deposits and reminders
+          handled, so the chair stays full and the messages stay quiet.
+        </p>
+        <div data-rv="" className={styles.actions}>
+          <Link to="/stylist?stylist=tiwaras-house" className={styles.book}>
+            Book with Tiwára
+          </Link>
+          <span className={styles.location}>Ancoats, Manchester</span>
+        </div>
+      </div>
+    </div>
+  </section>
+);

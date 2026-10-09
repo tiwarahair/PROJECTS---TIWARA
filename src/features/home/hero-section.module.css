@@ -1,0 +1,132 @@
+/* Values verbatim from prototype Home.dc.html (inline styles; style-hover/active as !important like the prototype runtime). */
+
+.hero {
+  position: relative;
+  z-index: 0;
+  height: 100svh;
+  min-height: 620px;
+  overflow: hidden;
+  background: #faf6ee;
+}
+
+.frame {
+  position: absolute;
+  inset: var(--hcrop, 0px);
+  overflow: hidden;
+  border-radius: var(--hrad, 0px);
+  background: #1a1714;
+}
+
+.image {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center 42%;
+}
+
+.scrim {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    160deg,
+    rgba(26, 23, 20, 0.78) 0%,
+    rgba(26, 23, 20, 0.55) 50%,
+    rgba(26, 23, 20, 0.72) 100%
+  );
+  z-index: 1;
+}
+
+.content {
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  text-align: center;
+  padding: clamp(20px, 5vw, 64px);
+  box-sizing: border-box;
+}
+
+.eyebrow {
+  color: var(--brand-yellow);
+  font-size: clamp(11px, 1.1vw, 13px);
+  font-weight: 600;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  margin-bottom: 16px;
+}
+
+.title {
+  margin: 0;
+  font-family: Schibsted Grotesk;
+  font-weight: 400;
+  letter-spacing: -0.06em;
+  line-height: 1.02;
+  font-size: clamp(40px, 7.2vw, 92px);
+  color: #faf6ee;
+  max-width: 19ch;
+  text-wrap: balance;
+  text-align: center;
+  text-transform: none;
+  align-self: center;
+  font-style: normal;
+}
+
+.titleEmphasis {
+  color: var(--brand-yellow);
+}
+
+.lede {
+  margin: 20px 0 0;
+  max-width: 44ch;
+  font-size: clamp(14px, 1.5vw, 19px);
+  line-height: 1.55;
+  color: rgba(250, 246, 238, 0.82);
+  text-wrap: pretty;
+}
+
+.actions {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  justify-content: center;
+  flex-wrap: wrap;
+  margin-top: 24px;
+}
+
+.bookNow {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  align-self: center;
+  overflow: hidden;
+  background: var(--accent-700);
+  border: 1.5px solid var(--accent-700);
+  color: #fffefb;
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  padding: 13.5px 30px;
+  border-radius: 100px;
+  cursor: pointer;
+  transition:
+    background 0.3s cubic-bezier(0.2, 0.8, 0.2, 1),
+    border-color 0.3s cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+
+.bookNow:hover {
+  background: var(--accent-900) !important;
+  border-color: var(--accent-900) !important;
+  color: #fffefb !important;
+}
+
+.bookNow:active {
+  transform: scale(0.98) !important;
+}

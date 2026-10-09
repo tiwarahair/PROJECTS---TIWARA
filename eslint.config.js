@@ -75,6 +75,8 @@ export default defineConfig([
       // Components take an autoFocus prop (AddressFinder, AllergyField) from the prototype's props
       // contract; only flag the DOM attribute.
       "jsx-a11y/no-autofocus": ["error", { ignoreNonDOM: true }],
+      // The prototype's external links use rel="noopener" (no noreferrer); kept verbatim.
+      "react/jsx-no-target-blank": ["error", { allowReferrer: true }],
     },
   },
 
@@ -114,6 +116,8 @@ export default defineConfig([
       // stay visible for a later cleanup instead of blocking the build.
       "css/no-important": "warn",
       "css/use-baseline": "warn",
+      // Prototype values such as font-family: Schibsted Grotesk (no generic fallback) are copied verbatim.
+      "css/font-family-fallbacks": "warn",
     },
   },
 ]);

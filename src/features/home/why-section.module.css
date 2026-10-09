@@ -1,0 +1,66 @@
+/* Values verbatim from prototype Home.dc.html (inline styles; style-hover/active as !important like the prototype runtime). */
+
+.section {
+  position: relative;
+  z-index: 2;
+  background: transparent;
+  height: 220vh;
+}
+
+.sticky {
+  position: sticky;
+  top: 0;
+  height: 100vh;
+  display: flex;
+  align-items: center;
+  padding: 0 clamp(20px, 5vw, 48px);
+}
+
+.layout {
+  max-width: 1000px;
+  margin: 0 auto;
+  display: flex;
+  gap: clamp(20px, 3vw, 40px);
+  align-items: stretch;
+}
+
+.track {
+  flex: none;
+  width: 2px;
+  background: var(--border-subtle);
+  position: relative;
+}
+
+.bar {
+  position: absolute;
+  inset: 0;
+  background: var(--accent-700);
+  transform: scaleY(0);
+  transform-origin: top;
+}
+
+.eyebrow {
+  font-size: 13px;
+  font-weight: 600;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--accent-700);
+  margin-bottom: clamp(20px, 3vw, 32px);
+}
+
+.words {
+  margin: 0;
+  font-family: Schibsted Grotesk;
+  font-weight: 500;
+  letter-spacing: -0.03em;
+  line-height: 1.26;
+  font-size: clamp(26px, 3.5vw, 50px);
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0 0.32em;
+  text-wrap: pretty;
+}
+
+.word {
+  opacity: 0.15;
+}

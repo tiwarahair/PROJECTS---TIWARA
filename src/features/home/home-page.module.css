@@ -1,0 +1,418 @@
+/*
+ * Home <helmet> <style> rules, verbatim values (prototype Home.dc.html lines 59–176), in the page layer so the
+ * section modules (the prototype's inline styles) still win over them. Page-wide element rules are scoped to
+ * html.home-page, which HomePage sets while it is mounted.
+ */
+@layer page {
+  :global(html.home-page) {
+    scroll-behavior: smooth;
+    --sec-sm: clamp(40px, 6vw, 64px);
+    --sec-md: clamp(56px, 8vw, 96px);
+    --sec-lg: clamp(72px, 10vw, 128px);
+    --gutter: clamp(20px, 5vw, 48px);
+  }
+
+  /* secondary ink darkened for the #FAF6EE canvas: #7d7465 measured 4.27:1, below AA */
+  :global(html.home-page) body {
+    --text-secondary: #5f574b;
+    margin: 0;
+    font-family: "Hanken Grotesk", sans-serif;
+    color: var(--text-primary);
+    background: #faf6ee;
+  }
+
+  :global(html.home-page) ::selection {
+    background: rgba(143, 17, 18, 0.16);
+  }
+
+  :global(html.home-page) input:focus,
+  :global(html.home-page) select:focus {
+    outline: none;
+  }
+
+  :global(html.home-page) [data-sr] {
+    opacity: 0;
+  }
+
+  .nolinks a {
+    color: inherit;
+  }
+
+  @media (max-width: 900px) {
+    .mqDesk {
+      display: none !important;
+    }
+  }
+
+  @media (min-width: 901px) {
+    .mqMob {
+      display: none !important;
+    }
+  }
+
+  /* hero CTA: arrows slide through, the ink circle grows */
+  .flowbtn:hover {
+    border-color: transparent;
+  }
+
+  .flowbtn .fbArrow {
+    position: absolute;
+    width: 16px;
+    height: 16px;
+    z-index: 9;
+    transition:
+      left 0.8s cubic-bezier(0.34, 1.56, 0.64, 1),
+      right 0.8s cubic-bezier(0.34, 1.56, 0.64, 1);
+  }
+
+  .flowbtn .fbArrowLeft {
+    left: -25%;
+  }
+
+  .flowbtn:hover .fbArrowLeft {
+    left: 16px;
+  }
+
+  .flowbtn .fbArrowRight {
+    right: 16px;
+  }
+
+  .flowbtn:hover .fbArrowRight {
+    right: -25%;
+  }
+
+  .flowbtn .fbText {
+    position: relative;
+    z-index: 1;
+    transform: translateX(-12px);
+    transition: transform 0.8s ease-out;
+  }
+
+  .flowbtn:hover .fbText {
+    transform: translateX(12px);
+  }
+
+  .flowbtn .fbCircle {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 16px;
+    height: 16px;
+    background: var(--accent-900);
+    border-radius: 50%;
+    opacity: 0;
+    transition:
+      width 0.8s cubic-bezier(0.19, 1, 0.22, 1),
+      height 0.8s cubic-bezier(0.19, 1, 0.22, 1),
+      opacity 0.8s cubic-bezier(0.19, 1, 0.22, 1);
+  }
+
+  .flowbtn:hover .fbCircle {
+    width: 260px;
+    height: 260px;
+    opacity: 1;
+  }
+
+  @media (max-width: 720px) {
+    .hero .flowbtn {
+      padding: 12px 26px !important;
+      font-size: 11px !important;
+    }
+  }
+
+  /* marquee */
+  @keyframes mqscroll {
+    from {
+      transform: translateX(0);
+    }
+    to {
+      transform: translateX(-50%);
+    }
+  }
+
+  .mqTrack {
+    animation: mqscroll 42s linear infinite;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .mqTrack {
+      animation: none;
+    }
+  }
+
+  /* the problem */
+  @media (max-width: 720px) {
+    .chatgrid {
+      grid-template-columns: 1fr !important;
+    }
+    .chatgrid > .probtext {
+      order: 2;
+    }
+    .chatgrid > .probvis {
+      order: 1;
+    }
+    .problem {
+      padding-top: 0 !important;
+      padding-bottom: 36px !important;
+    }
+    .probvis {
+      padding: 36px 0 20px !important;
+    }
+    .probphoto {
+      left: calc(-1 * var(--gutter)) !important;
+      right: calc(-1 * var(--gutter)) !important;
+      border-radius: 0 !important;
+    }
+    .chatphone {
+      margin: 0 auto !important;
+      max-width: min(344px, 86vw) !important;
+    }
+    .phonescreen {
+      height: clamp(620px, 178vw, 720px) !important;
+    }
+  }
+
+  /* book a slot */
+  .duotile:hover img {
+    transform: scale(1.045);
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .duotile:hover img {
+      transform: none;
+    }
+  }
+
+  @media (max-width: 760px) {
+    .duorow {
+      grid-template-columns: 1fr !important;
+    }
+    .duorow .duotile {
+      height: 64svh !important;
+      min-height: 440px !important;
+    }
+  }
+
+  /* stylist row */
+  .styrow::-webkit-scrollbar {
+    display: none;
+  }
+
+  .styrow {
+    -webkit-overflow-scrolling: touch;
+    overscroll-behavior-x: contain;
+  }
+
+  .styrow > * {
+    scroll-snap-align: center !important;
+  }
+
+  .styrow > *[data-dim="1"] {
+    cursor: pointer;
+  }
+
+  .styrow .stycard {
+    display: flex;
+    flex-direction: column;
+    width: clamp(260px, 72vw, 320px);
+    max-width: clamp(260px, 72vw, 320px);
+    min-width: 0;
+    overflow: hidden;
+    transition:
+      scale 0.45s cubic-bezier(0.2, 0.8, 0.2, 1),
+      opacity 0.45s cubic-bezier(0.2, 0.8, 0.2, 1);
+  }
+
+  .styrow .stycard > div:last-child {
+    min-height: 0;
+  }
+
+  /* StylistCard's cover image carries the global stycover class */
+  .stycard :global(.stycover) {
+    transition: transform 0.8s cubic-bezier(0.2, 0.7, 0.2, 1);
+  }
+
+  .stycard:hover :global(.stycover) {
+    transform: scale(1.045);
+  }
+
+  @media (max-width: 720px) {
+    .styrow {
+      margin: 0 !important;
+      gap: 14px !important;
+    }
+    .styrow > * {
+      flex: 0 0 min(68vw, 320px) !important;
+    }
+  }
+
+  /* browse by style */
+  .looktile .lookimg {
+    transition: transform 0.9s cubic-bezier(0.2, 0.7, 0.2, 1);
+  }
+
+  .looktile:hover .lookimg {
+    transform: scale(1.05);
+  }
+
+  .looktile .lookdesc {
+    opacity: 0;
+    max-height: 0;
+    transition:
+      opacity 0.4s ease,
+      max-height 0.4s ease;
+  }
+
+  .looktile:hover .lookdesc {
+    opacity: 1;
+    max-height: 90px;
+  }
+
+  .looktile .lookscrim {
+    opacity: 0.55;
+    transition: opacity 0.4s ease;
+  }
+
+  .looktile:hover .lookscrim {
+    opacity: 0.8;
+  }
+
+  @media (max-width: 900px) {
+    .lookgrid {
+      grid-template-columns: repeat(2, 1fr) !important;
+    }
+  }
+
+  @media (max-width: 600px) {
+    .lookhead {
+      font-size: clamp(28px, 8.5vw, 38px) !important;
+      margin: 12px 0 28px !important;
+    }
+    .lookgrid {
+      grid-template-columns: repeat(2, 1fr) !important;
+      gap: 10px !important;
+    }
+    .looktile > div:last-child {
+      padding: 12px !important;
+    }
+    .looktile > div:last-child > div:first-child {
+      font-size: 18px !important;
+      letter-spacing: -0.03em !important;
+      line-height: 1.15 !important;
+    }
+    .looktile .lookdesc {
+      display: none;
+    }
+  }
+
+  /* quiz strip */
+  @media (max-width: 860px) {
+    .quizrow {
+      flex-direction: column;
+      align-items: stretch !important;
+    }
+  }
+
+  /* services: descendant hover states */
+  .svcrow .svcmedia {
+    opacity: 0;
+    transform: translateY(14px) rotate(-2.5deg) scale(0.96);
+    transition:
+      opacity 0.5s cubic-bezier(0.2, 0.7, 0.2, 1),
+      transform 0.5s cubic-bezier(0.2, 0.7, 0.2, 1);
+  }
+
+  .svcrow:hover .svcmedia {
+    opacity: 1;
+    transform: none;
+  }
+
+  .svcrow .svcdesc {
+    opacity: 0;
+    max-height: 0;
+    transition:
+      opacity 0.45s ease,
+      max-height 0.45s ease;
+  }
+
+  .svcrow:hover .svcdesc {
+    opacity: 1;
+    max-height: 80px;
+  }
+
+  .svcrow:hover .svcname {
+    color: var(--accent-700);
+  }
+
+  .svcname {
+    transition: color 0.3s ease;
+  }
+
+  @media (hover: none) {
+    .svcrow .svcmedia {
+      display: none;
+    }
+    .svcrow .svcdesc {
+      opacity: 1;
+      max-height: 80px;
+    }
+  }
+
+  @media (max-width: 720px) {
+    .svcrowInner {
+      grid-template-columns: auto 1fr !important;
+    }
+    .svccount {
+      display: none;
+    }
+  }
+
+  /* meet + for stylists */
+  @media (max-width: 860px) {
+    .fsgrid {
+      grid-template-columns: 1fr !important;
+    }
+    .meetgrid {
+      grid-template-columns: 1fr !important;
+    }
+  }
+
+  /* footer */
+  @media (max-width: 820px) {
+    .ftcols {
+      gap: 36px !important;
+    }
+    .ftcols > div:first-child {
+      flex: 1 1 100% !important;
+      max-width: 520px !important;
+    }
+    .ftcols .nolinks {
+      margin-left: 0 !important;
+      gap: 32px !important;
+    }
+    .ftcols .nolinks > div {
+      flex: 1 1 140px;
+    }
+  }
+
+  @media (max-width: 520px) {
+    .ftcols .nolinks {
+      flex: 1 1 100%;
+      gap: 28px 24px !important;
+    }
+    .ftcols .nolinks > div {
+      flex: 1 1 42%;
+    }
+  }
+
+  /* section order toggle */
+  .ordwrap {
+    display: flex;
+    flex-direction: column;
+  }
+
+  .ordwrap[data-order="v2"] > .duorow {
+    order: -1;
+  }
+}

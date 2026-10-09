@@ -1,0 +1,32 @@
+/* Values verbatim from prototype Home.dc.html (inline styles; style-hover/active as !important like the prototype runtime). */
+
+.marquee {
+  position: relative;
+  z-index: 2;
+  background: #1a1714;
+  overflow: hidden;
+  padding: clamp(18px, 2.2vw, 26px) 0;
+}
+
+.track {
+  display: flex;
+  width: max-content;
+  align-items: center;
+  will-change: transform;
+}
+
+.group {
+  display: flex;
+  align-items: center;
+  gap: clamp(36px, 4vw, 64px);
+  padding-right: clamp(36px, 4vw, 64px);
+}
+
+.name {
+  font-family: Schibsted Grotesk;
+  font-weight: 400;
+  letter-spacing: -0.03em;
+  font-size: clamp(26px, 3.2vw, 44px);
+  color: #faf6ee;
+  white-space: nowrap;
+}

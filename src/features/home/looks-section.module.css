@@ -1,0 +1,91 @@
+/* Values verbatim from prototype Home.dc.html (inline styles; style-hover/active as !important like the prototype runtime). */
+
+.section {
+  position: relative;
+  z-index: 2;
+  background: transparent;
+  padding: var(--sec-sm) var(--gutter) var(--sec-lg);
+}
+
+.inner {
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.eyebrow {
+  font-size: 13px;
+  font-weight: 600;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: #5f574b;
+  text-align: center;
+}
+
+.title {
+  margin: 14px 0 40px;
+  font-family: Schibsted Grotesk;
+  font-weight: 600;
+  letter-spacing: -0.05em;
+  line-height: 1.05;
+  font-size: clamp(32px, 4.6vw, 56px);
+  text-align: center;
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: clamp(10px, 1.4vw, 18px);
+}
+
+.tile {
+  position: relative;
+  display: block;
+  aspect-ratio: 4/5;
+  overflow: hidden;
+  border-radius: 16px;
+  background: var(--neutral-100);
+}
+
+.image {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.scrim {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    to top,
+    rgba(26, 23, 20, 0.85) 0%,
+    rgba(26, 23, 20, 0.15) 52%,
+    rgba(26, 23, 20, 0) 100%
+  );
+}
+
+.caption {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  padding: clamp(18px, 2vw, 28px);
+  color: #faf6ee;
+}
+
+.name {
+  font-family: Schibsted Grotesk;
+  font-weight: 400;
+  letter-spacing: -0.04em;
+  font-size: clamp(22px, 2.3vw, 32px);
+  line-height: 1.1;
+}
+
+.desc {
+  overflow: hidden;
+  font-size: 14.5px;
+  line-height: 1.5;
+  color: rgba(250, 246, 238, 0.86);
+  padding-top: 8px;
+}

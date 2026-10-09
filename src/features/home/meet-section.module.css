@@ -1,0 +1,108 @@
+/* Values verbatim from prototype Home.dc.html (inline styles; style-hover/active as !important like the prototype runtime). */
+
+.section {
+  position: relative;
+  z-index: 2;
+  background: transparent;
+  padding: var(--sec-lg) var(--gutter);
+}
+
+.grid {
+  max-width: 1200px;
+  margin: 0 auto;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  gap: clamp(28px, 5vw, 72px);
+  align-items: center;
+}
+
+.photoFrame {
+  position: relative;
+  aspect-ratio: 4/5;
+  overflow: hidden;
+  border-radius: 24px;
+  background: var(--neutral-100);
+}
+
+.photo {
+  position: absolute;
+  inset: -9% 0;
+  width: 100%;
+  height: 118%;
+  object-fit: cover;
+  object-position: center 22%;
+  will-change: transform;
+}
+
+.text {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.titleRule {
+  border-top: 1px solid rgba(26, 23, 20, 0.3);
+  padding-top: 18px;
+}
+
+.title {
+  margin: 0;
+  font-family: Schibsted Grotesk;
+  font-weight: 600;
+  letter-spacing: -0.05em;
+  line-height: 1.05;
+  font-size: clamp(32px, 4.6vw, 56px);
+}
+
+.intro {
+  margin: 0;
+  font-family: Schibsted Grotesk;
+  letter-spacing: -0.015em;
+  font-size: clamp(17px, 1.5vw, 22px);
+  line-height: 1.45;
+  color: var(--text-primary);
+  max-width: 38ch;
+  text-wrap: pretty;
+}
+
+.body {
+  margin: 0;
+  font-size: clamp(15px, 1.2vw, 17px);
+  line-height: 1.6;
+  color: var(--text-secondary);
+  max-width: 46ch;
+  text-wrap: pretty;
+}
+
+.actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  align-items: center;
+}
+
+.book {
+  display: inline-flex;
+  align-items: center;
+  background: var(--neutral-900);
+  color: var(--neutral-50);
+  font-weight: 600;
+  font-size: 14.5px;
+  padding: 12px 22px;
+  border-radius: 100px;
+  transition: background 0.2s ease;
+}
+
+.book:hover {
+  background: var(--accent-700) !important;
+  color: var(--neutral-50) !important;
+}
+
+.book:active {
+  transform: scale(0.98) !important;
+}
+
+.location {
+  font-size: 13px;
+  color: var(--text-secondary);
+}

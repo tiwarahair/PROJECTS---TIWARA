@@ -1,0 +1,232 @@
+/* Values verbatim from prototype Home.dc.html (inline styles; style-hover/active as !important like the prototype runtime). */
+
+.section {
+  position: relative;
+  z-index: 2;
+  background: transparent;
+}
+
+.photoWrap {
+  padding: 0 clamp(12px, 2.4vw, 32px) 0;
+}
+
+.frame {
+  max-width: 1400px;
+  margin: 0 auto;
+  position: relative;
+  overflow: hidden;
+  border-radius: 24px;
+  background: #1a1714;
+  min-height: min(84vh, 720px);
+  display: flex;
+  align-items: flex-end;
+}
+
+.photo {
+  position: absolute;
+  inset: -8% 0;
+  width: 100%;
+  height: 116%;
+  object-fit: cover;
+  object-position: center 35%;
+  will-change: transform;
+}
+
+.scrim {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    to top,
+    rgba(26, 23, 20, 0.86) 0%,
+    rgba(26, 23, 20, 0.35) 55%,
+    rgba(26, 23, 20, 0.15) 100%
+  );
+}
+
+.grid {
+  position: relative;
+  width: 100%;
+  display: grid;
+  grid-template-columns: minmax(0, 1.2fr) minmax(0, 0.8fr);
+  gap: 24px 48px;
+  align-items: end;
+  padding: clamp(24px, 4vw, 56px);
+  color: #faf6ee;
+}
+
+.heading {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+
+.eyebrow {
+  color: var(--brand-yellow);
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+}
+
+.title {
+  margin: 0;
+  font-family: Schibsted Grotesk;
+  font-weight: 500;
+  letter-spacing: -0.05em;
+  line-height: 1;
+  font-size: clamp(34px, 5.4vw, 76px);
+  max-width: 14ch;
+  text-wrap: balance;
+}
+
+.aside {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+  border-top: 1px solid rgba(250, 246, 238, 0.35);
+  padding-top: 20px;
+}
+
+.lede {
+  margin: 0;
+  font-size: clamp(15px, 1.1vw, 16.5px);
+  line-height: 1.55;
+  color: rgba(250, 246, 238, 0.9);
+  max-width: 40ch;
+  text-wrap: pretty;
+}
+
+.cta {
+  display: inline-flex;
+  align-self: flex-start;
+  align-items: center;
+  gap: 12px;
+  background: #faf6ee;
+  color: var(--neutral-900);
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  padding: 15px 26px;
+  border-radius: 100px;
+  transition: background 0.2s ease;
+}
+
+.cta:hover {
+  background: var(--brand-yellow) !important;
+  color: var(--neutral-900) !important;
+}
+
+.cta:active {
+  transform: scale(0.98) !important;
+}
+
+.splitWrap {
+  padding: var(--sec-md) var(--gutter) 0;
+}
+
+.splitGrid {
+  max-width: 1200px;
+  margin: 0 auto;
+  display: grid;
+  grid-template-columns: 1fr 0.78fr;
+  gap: clamp(32px, 5vw, 72px);
+  align-items: center;
+}
+
+.splitText {
+  text-align: left;
+}
+
+.splitEyebrow {
+  font-size: 13px;
+  font-weight: 600;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--text-secondary);
+}
+
+.splitTitle {
+  margin: 14px 0 12px;
+  font-family: Schibsted Grotesk;
+  font-weight: 600;
+  letter-spacing: -0.05em;
+  line-height: 1.05;
+  font-size: clamp(32px, 4.6vw, 56px);
+  text-wrap: balance;
+}
+
+.splitLede {
+  margin: 0 0 40px;
+  color: var(--text-secondary);
+  font-size: clamp(15px, 1.1vw, 16.5px);
+  line-height: 1.6;
+  max-width: 52ch;
+}
+
+.splitActions {
+  display: flex;
+  gap: 14px;
+  justify-content: flex-start;
+  flex-wrap: wrap;
+}
+
+.splitCta {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--accent-700);
+  color: var(--neutral-50);
+  font-weight: 600;
+  font-size: 11px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  padding: 12px 24px;
+  border-radius: 100px;
+  transition: background 0.2s ease;
+}
+
+.splitCta:hover {
+  background: #7a0e0f !important;
+  color: var(--neutral-50) !important;
+}
+
+.splitCta:active {
+  transform: scale(0.98) !important;
+}
+
+.splitAbout {
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border: 1.5px solid var(--neutral-900);
+  color: var(--neutral-900);
+  font-weight: 600;
+  font-size: 11px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  padding: 12px 24px;
+  border-radius: 100px;
+  transition:
+    background 0.2s ease,
+    color 0.2s ease;
+}
+
+.splitAbout:hover {
+  background: var(--neutral-900) !important;
+  color: var(--neutral-50) !important;
+}
+
+.splitPhotoFrame {
+  border-radius: 16px;
+  overflow: hidden;
+  aspect-ratio: 4/5;
+}
+
+.splitPhoto {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  background: var(--neutral-100);
+}

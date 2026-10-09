@@ -1,0 +1,61 @@
+/* Values verbatim from prototype Home.dc.html (inline styles; style-hover/active as !important like the prototype runtime). */
+
+.section {
+  position: relative;
+  z-index: 2;
+  background: transparent;
+  padding: var(--sec-lg) 0 0;
+}
+
+.header {
+  position: relative;
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 clamp(20px, 5vw, 48px);
+}
+
+.eyebrow {
+  font-size: 13px;
+  font-weight: 600;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: #5f574b;
+  text-align: center;
+}
+
+.title {
+  margin: 14px 0 0;
+  font-family: Schibsted Grotesk;
+  font-weight: 600;
+  letter-spacing: -0.05em;
+  line-height: 1.05;
+  font-size: clamp(32px, 4.6vw, 56px);
+  text-align: center;
+}
+
+.rail {
+  position: relative;
+}
+
+.row {
+  display: flex;
+  align-items: flex-start;
+  gap: 20px;
+  overflow-x: auto;
+  scroll-snap-type: x proximity;
+  padding: 40px 0 44px;
+  margin: 0 clamp(24px, 4vw, 48px);
+  scrollbar-width: none;
+}
+
+.card {
+  flex: 0 0 clamp(260px, 72vw, 320px);
+  scroll-snap-align: center;
+}
+
+/* renderVals styCards: STY_STATIC is on, so every card keeps its DOM order at full scale and opacity */
+.card {
+  order: var(--card-order);
+  scale: 1;
+  opacity: 1;
+}
