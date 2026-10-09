@@ -5,6 +5,8 @@ import { AllergyField } from "../../components/allergy-field/allergy-field";
 import { SearchSelect } from "../../components/search-select/search-select";
 import type { SearchSelectProps } from "../../components/search-select/search-select";
 import { StylistCard } from "../../components/stylist-card/stylist-card";
+import { TaxDetailsForm } from "../../components/tax-details-form/tax-details-form";
+import type { TaxDetailsFormProps } from "../../components/tax-details-form/tax-details-form";
 import type { StylistCardProps } from "../../components/stylist-card/stylist-card";
 import type { AddressFixture } from "../../components/address-finder/use-address-finder";
 import styles from "./dev-harness.module.css";
@@ -145,6 +147,76 @@ const SEARCH_SELECTS: { fixture: string; props: SearchSelectProps }[] = [
   },
 ];
 
+const HOME_BUSINESS = {
+  type: "home",
+  v: {
+    line1: "12 Dickenson Road",
+    line2: "Flat 2",
+    city: "Manchester",
+    pc: "M14 5HP",
+  },
+};
+const SHOP_BUSINESS = {
+  type: "chair",
+  v: { line1: "48 Oxford Road", line2: "", city: "Manchester", pc: "M1 5QA" },
+};
+const TAX_FORMS: { fixture: string; props: TaxDetailsFormProps }[] = [
+  ...(
+    [
+      "",
+      "name-no",
+      "ltd",
+      "err-empty",
+      "err-initials",
+      "err-dob",
+      "err-under18",
+      "err-ni",
+      "err-conum",
+      "err-pc",
+    ] as const
+  ).map((fixture) => ({ fixture: fixture || "default", props: { fixture } })),
+  { fixture: "settings", props: { mode: "settings" } },
+  { fixture: "home-same", props: { business: HOME_BUSINESS } },
+  { fixture: "home-ltd", props: { fixture: "ltd", business: HOME_BUSINESS } },
+  { fixture: "shop-ltd", props: { fixture: "ltd", business: SHOP_BUSINESS } },
+  {
+    fixture: "value-sole",
+    props: {
+      mode: "settings",
+      value: {
+        kind: "sole",
+        nameYes: false,
+        first: "Amara",
+        middle: "Chi",
+        last: "Okonkwo",
+        d: "04",
+        m: "11",
+        y: "1992",
+        ni: "QQ 12 34 56 C",
+        addrSame: false,
+        addr: {
+          line1: "7 Wilmslow Road",
+          line2: "",
+          city: "Manchester",
+          pc: "M14 5TB",
+        },
+      },
+    },
+  },
+  {
+    fixture: "value-ltd",
+    props: {
+      mode: "settings",
+      value: {
+        kind: "ltd",
+        coName: "Amara Beauty Ltd",
+        coNum: "SC123456",
+        addrSame: true,
+      },
+    },
+  },
+];
+
 const HARNESSES: Record<string, () => ReactNode> = {
   "address-finder": () =>
     ADDRESS_FIXTURES.map((fixture) => (
@@ -183,6 +255,12 @@ const HARNESSES: Record<string, () => ReactNode> = {
     STYLIST_CARDS.map(({ fixture, props }) => (
       <div key={fixture} className={styles.cardBox} data-fx={fixture}>
         <StylistCard {...props} />
+      </div>
+    )),
+  "tax-details-form": () =>
+    TAX_FORMS.map(({ fixture, props }) => (
+      <div key={fixture} className={styles.formBox} data-fx={fixture}>
+        <TaxDetailsForm {...props} />
       </div>
     )),
   "search-select": () =>
