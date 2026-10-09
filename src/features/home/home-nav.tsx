@@ -1,20 +1,12 @@
 import type { CSSProperties } from "react";
 import { Link } from "react-router";
-import { DEMO_ACCOUNT } from "../../stores/session-slice";
+import { ACCOUNT_INITIALS, DEMO_ACCOUNT } from "../../stores/session-slice";
 import { getAssetUrl } from "../../utils/asset-url";
 import { joinClassNames } from "../../utils/class-names";
 import { hexToRgba } from "./home-colours";
 import page from "./home-page.module.css";
 import styles from "./home-nav.module.css";
 import type { NavMorphState } from "./use-nav-morph";
-
-const ACCOUNT_INITIALS = DEMO_ACCOUNT.name
-  .split(" ")
-  .filter(Boolean)
-  .map((word) => word[0])
-  .slice(0, 2)
-  .join("")
-  .toUpperCase();
 
 interface HomeNavProps {
   morph: NavMorphState;

@@ -1,0 +1,247 @@
+// Derived values for Stylist Profile (prototype Stylist Profile.dc.html renderVals / menu).
+import { reviews as allReviews, stylists } from "../../data";
+import type { Stylist } from "../../types/stylist";
+import { money } from "../../utils/pricing";
+import {
+  formatDuration,
+  getCustomisationSummary,
+  getFromWithFee,
+  getMenu,
+} from "../../utils/services";
+
+export const DEFAULT_STYLIST_ID = "tiwaras-house";
+const MENU_LIMIT = 6;
+
+/** The stylist for ?stylist=<id>, falling back to the first stylist like the prototype. */
+export const getStylist = (id: string): Stylist => {
+  const stylist = stylists.find((item) => item.id === id) ?? stylists[0];
+  if (!stylist) throw new Error("No stylists in the seed data");
+  return stylist;
+};
+
+/** Cover first, then the portfolio, without duplicates or blanks. */
+export const getGallery = ({ cover, portfolio = [] }: Stylist): string[] =>
+  [cover, ...portfolio].filter(
+    (src, index, list) => src && list.indexOf(src) === index,
+  );
+
+export interface ServiceModal {
+  name: string;
+  desc: string;
+  price: string;
+  dur: string;
+  href: string;
+  cust: string;
+}
+
+export interface MenuItem {
+  key: string;
+  name: string;
+  meta: string;
+  price: string;
+  href: string;
+  modal: ServiceModal;
+}
+
+export interface MenuGroup {
+  key: string;
+  name: string;
+  hasName: boolean;
+  items: MenuItem[];
+}
+
+export const getBookHref = (stylistId: string): string =>
+  "/book?stylist=" + stylistId;
+
+export const getMenuGroups = (stylist: Stylist): MenuGroup[] =>
+  getMenu(stylist).map(({ id, name, items }) => ({
+    key: id,
+    name,
+    hasName: !!name,
+    items: items.map((service) => {
+      const price = money(getFromWithFee(service));
+      const dur = formatDuration(service.mins);
+      const href =
+        getBookHref(stylist.id) + "&service=" + encodeURIComponent(service.id);
+      return {
+        key: service.id,
+        name: service.name,
+        meta: dur,
+        price,
+        href,
+        modal: {
+          name: service.name,
+          desc: service.desc,
+          price: "from " + price,
+          dur,
+          href,
+          cust: getCustomisationSummary(service),
+        },
+      };
+    }),
+  }));
+
+export const countServices = (groups: MenuGroup[]): number => {
+  let total = 0;
+  for (const { items } of groups) total += items.length;
+  return total;
+};
+
+/** Only the first six services across all groups are listed; empty groups are dropped. */
+export const limitMenuGroups = (groups: MenuGroup[]): MenuGroup[] =>
+  groups
+    .map((group, index) => ({
+      ...group,
+      items: group.items.slice(
+        0,
+        Math.max(0, MENU_LIMIT - countServices(groups.slice(0, index))),
+      ),
+    }))
+    .filter(({ items }) => items.length);
+
+export const hasMoreServices = (groups: MenuGroup[]): boolean =>
+  countServices(groups) > MENU_LIMIT;
+
+// Opening hours by weekday (0 = Sunday): [open, close] hours, null = closed
+const OPEN_HOURS: Record<number, [number, number] | null> = {
+  0: null,
+  1: [10, 20],
+  2: [10, 20],
+  3: [10, 20],
+  4: [10, 20],
+  5: [10, 20],
+  6: [9, 18],
+};
+const DAY_NAMES = [
+  "Sunday",
+  "Monday",
+  "Tuesday",
+  "Wednesday",
+  "Thursday",
+  "Friday",
+  "Saturday",
+];
+
+const toHourLabel = (hour: number): string =>
+  String(hour).padStart(2, "0") + ":00";
+
+export interface OpenStatus {
+  isOpen: boolean;
+  nextAvailable: string;
+  openLabel: string;
+  openHours: string;
+}
+
+export const getOpenStatus = (now = new Date()): OpenStatus => {
+  const today = OPEN_HOURS[now.getDay()];
+  const mins = now.getHours() * 60 + now.getMinutes();
+  const isOpen = !!today && mins >= today[0] * 60 && mins < today[1] * 60;
+  const opensLater = !!today && mins < today[0] * 60;
+  let nextDay: { name: string; from: number } | null = null;
+  for (let offset = 1; offset <= 7 && !nextDay; offset++) {
+    const day = (now.getDay() + offset) % 7;
+    const hours = OPEN_HOURS[day];
+    if (hours) nextDay = { name: DAY_NAMES[day] ?? "", from: hours[0] };
+  }
+  const nextDayLabel = nextDay
+    ? nextDay.name + " " + toHourLabel(nextDay.from)
+    : "";
+  const nextAvailable =
+    isOpen && today
+      ? "today from " +
+        toHourLabel(
+          mins / 60 < today[0]
+            ? today[0]
+            : Math.min(today[1] - 1, Math.ceil(mins / 60) + 1),
+        )
+      : opensLater && today
+        ? "today " + toHourLabel(today[0])
+        : nextDay
+          ? nextDayLabel
+          : "by request";
+  const openHours =
+    isOpen && today
+      ? "until " + toHourLabel(today[1])
+      : opensLater && today
+        ? "opens " + toHourLabel(today[0])
+        : nextDay
+          ? "opens " + nextDayLabel
+          : "";
+  return {
+    isOpen,
+    nextAvailable,
+    openLabel: isOpen ? "Open now" : "Closed",
+    openHours,
+  };
+};
+
+export interface HoursRow {
+  day: string;
+  time: string;
+  shut: boolean;
+}
+
+// The aside's opening hours are static rows in the prototype (not OPEN_HOURS)
+export const HOURS_ROWS: HoursRow[] = [
+  { day: "Mon – Tue", time: "Closed" },
+  { day: "Wed – Fri", time: "9:00 – 18:00" },
+  { day: "Saturday", time: "8:00 – 19:00" },
+  { day: "Sunday", time: "10:00 – 16:00" },
+].map(({ day, time }) => ({ day, time, shut: time === "Closed" }));
+
+export interface ProfileFacts {
+  depositChip: string;
+  hasPayChip: boolean;
+  cancelChip: string;
+  cancelHrs: number;
+  mailto: string;
+  site: string;
+  siteHref: string;
+}
+
+export const getProfileFacts = ({
+  id,
+  policies,
+  site,
+}: Stylist): ProfileFacts => {
+  const { mode, depositPct, refundable, freeWindowHrs } = policies;
+  const depositChips = {
+    deposit: depositPct + "% deposit" + (refundable ? "" : ", non-refundable"),
+    full: "Pay in full to book",
+    card: "Card needed to book",
+    none: "",
+  };
+  const handle = id.replace(/-/g, "");
+  return {
+    depositChip: depositChips[mode],
+    hasPayChip: mode !== "none",
+    cancelChip: "Free cancellation up to " + freeWindowHrs + "h",
+    cancelHrs: freeWindowHrs,
+    mailto: "mailto:" + handle + "@tiwarashouse.co.uk",
+    site: site || "",
+    siteHref: site ? (/^https?:/.test(site) ? site : "https://" + site) : "",
+  };
+};
+
+export interface ReviewView {
+  key: string;
+  name: string;
+  text: string;
+  style: string;
+  starFills: string[];
+}
+
+export const getReviews = (): ReviewView[] =>
+  allReviews.map(({ name, text, style, stars }, index) => ({
+    key: String(index),
+    name,
+    text,
+    style,
+    starFills: [1, 2, 3, 4, 5].map((star) =>
+      star <= stars ? "var(--brand-yellow)" : "var(--neutral-300)",
+    ),
+  }));
+
+export const getLoginHref = (stylistId: string): string =>
+  "/onboarding?screen=cust-email&return=" +
+  encodeURIComponent("/stylist?stylist=" + stylistId + "&login=1");

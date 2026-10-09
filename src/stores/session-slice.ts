@@ -13,6 +13,15 @@ export const DEMO_ACCOUNT = {
   name: "Nia Okafor",
 } as const;
 
+/** "NO" — the avatar initials shown in every nav (prototype acctInitials). */
+export const ACCOUNT_INITIALS = DEMO_ACCOUNT.name
+  .split(" ")
+  .filter(Boolean)
+  .map((word) => word[0])
+  .slice(0, 2)
+  .join("")
+  .toUpperCase();
+
 const SESSION_KEY = "tw_cust";
 
 /** Logged in = not forced guest, and ?login=1 or sessionStorage tw_cust === '1'. */

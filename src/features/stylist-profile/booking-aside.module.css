@@ -1,0 +1,132 @@
+/* Values verbatim from prototype Stylist Profile.dc.html (inline styles; style-hover/active as !important like the prototype runtime). */
+
+.aside {
+  position: sticky;
+  top: 88px;
+}
+
+.card {
+  background: var(--neutral-0);
+  border-radius: var(--radius-lg);
+  padding: 24px;
+  box-shadow: var(--shadow-rail);
+}
+
+.title {
+  font-family: "Schibsted Grotesk", sans-serif;
+  font-weight: 600;
+  font-size: 20px;
+  letter-spacing: -0.01em;
+}
+
+.from {
+  margin-top: 6px;
+  font-size: 14px;
+  color: var(--text-secondary);
+}
+
+.bookNow {
+  display: block;
+  text-align: center;
+  margin-top: 18px;
+  background: var(--accent-700);
+  color: var(--neutral-50);
+  font-weight: 600;
+  font-size: 15px;
+  padding: 14px;
+  border-radius: var(--radius-full);
+  text-decoration: none;
+  transition:
+    background 200ms ease,
+    transform 160ms ease-out;
+}
+
+.bookNow:hover {
+  background: #7a0e0f !important;
+  color: var(--neutral-50) !important;
+}
+
+.bookNow:active {
+  transform: scale(0.98) !important;
+}
+
+.note {
+  margin-top: 14px;
+  font-size: 12.5px;
+  color: var(--text-muted);
+  text-align: center;
+}
+
+.hours {
+  border-top: 1px solid var(--border-subtle);
+  margin-top: 20px;
+  padding-top: 18px;
+}
+
+.hoursTitle {
+  font-size: 13px;
+  font-weight: 600;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--text-secondary);
+  margin-bottom: 10px;
+}
+
+.hoursRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  font-size: 14px;
+  padding: 3px 0;
+}
+
+.hoursDay {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--text-secondary);
+}
+
+.links {
+  border-top: 1px solid var(--border-subtle);
+  margin-top: 18px;
+  padding-top: 18px;
+  font-size: 14px;
+  color: var(--text-secondary);
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.linkRow {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.linkIcon {
+  display: flex;
+  color: var(--text-secondary);
+}
+
+/* h.dotStyle / h.style (renderVals hours rows) */
+.hoursDot {
+  flex: none;
+  width: 7px;
+  height: 7px;
+  border-radius: var(--radius-full);
+  background: #2f7a4d;
+}
+
+.hoursDotShut {
+  background: var(--neutral-300);
+}
+
+.hoursTime {
+  font-weight: 500;
+}
+
+.hoursTimeShut {
+  color: var(--text-muted);
+}

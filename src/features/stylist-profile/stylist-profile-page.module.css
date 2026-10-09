@@ -1,0 +1,109 @@
+/* Values verbatim from prototype Stylist Profile.dc.html (inline styles; style-hover/active as !important like the prototype runtime). */
+
+.page {
+  min-height: 100vh;
+  background: var(--neutral-50);
+}
+
+.body {
+  max-width: 1040px;
+  margin: 0 auto;
+  padding: clamp(20px, 3vw, 32px) clamp(20px, 5vw, 48px) clamp(64px, 8vw, 96px);
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: 1fr 360px;
+  gap: clamp(28px, 4vw, 56px);
+  margin-top: 36px;
+  align-items: start;
+}
+
+.footer {
+  border-top: 1px solid var(--border-subtle);
+  padding: 34px 24px 56px;
+  display: flex;
+  justify-content: center;
+}
+
+.poweredBy {
+  display: inline-flex;
+  align-items: center;
+  gap: 12px;
+  font-size: 13px;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  color: var(--text-secondary);
+}
+
+.poweredLogo {
+  height: 22px;
+  display: block;
+}
+
+.bookbar {
+  position: sticky;
+  bottom: 0;
+  z-index: 70;
+  display: none;
+  background: rgba(255, 254, 251, 0.88);
+  backdrop-filter: blur(14px);
+  box-shadow: var(--shadow-hairline-up);
+}
+
+.barInner {
+  max-width: 1040px;
+  margin: 0 auto;
+  padding: 12px clamp(20px, 5vw, 48px);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.barText {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+.barNext {
+  font-size: 14.5px;
+  font-weight: 600;
+  color: var(--text-primary);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.barFrom {
+  font-size: 13.5px;
+  color: var(--text-secondary);
+}
+
+.barBook {
+  flex: 0 0 auto;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--accent-700);
+  color: var(--neutral-50);
+  font-weight: 600;
+  font-size: 15px;
+  padding: 13px 24px;
+  border-radius: var(--radius-full);
+  text-decoration: none;
+  transition:
+    background 200ms ease,
+    transform 160ms ease-out;
+}
+
+.barBook:hover {
+  background: #7a0e0f !important;
+  color: var(--neutral-50) !important;
+}
+
+.barBook:active {
+  transform: scale(0.97) !important;
+}

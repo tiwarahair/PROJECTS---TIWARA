@@ -1,0 +1,147 @@
+/* Values verbatim from prototype Stylist Profile.dc.html (inline styles; style-hover/active as !important like the prototype runtime). */
+
+.ledeRow {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 24px;
+  flex-wrap: wrap;
+  margin-top: 4px;
+}
+
+.lede {
+  width: 100%;
+}
+
+.titleRow {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+}
+
+.title {
+  flex: 1 1 auto;
+  min-width: 0;
+  margin: 0;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  flex-wrap: nowrap;
+  font-family: "Schibsted Grotesk", sans-serif;
+  font-weight: 500;
+  letter-spacing: -0.02em;
+  font-size: clamp(22px, 4.4vw, 48px);
+}
+
+.name {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-width: 0;
+  flex: 1 1 auto;
+}
+
+.rating {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  flex: 0 0 auto;
+  white-space: nowrap;
+  font-family: "Hanken Grotesk", sans-serif;
+  font-size: clamp(12.5px, 2.4vw, 16px);
+  font-weight: 600;
+  letter-spacing: 0;
+  color: var(--text-primary);
+}
+
+.reviewCount {
+  color: var(--text-secondary);
+  font-weight: 400;
+}
+
+.meta {
+  margin-top: 10px;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  flex-wrap: wrap;
+  font-size: 15px;
+  color: var(--text-secondary);
+}
+
+.area {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+
+.travels {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: var(--accent-wash);
+  border: 1px solid var(--accent-line);
+  color: var(--accent-700);
+  border-radius: 999px;
+  padding: 4px 10px 4px 8px;
+  font-size: 12.5px;
+  font-weight: 600;
+  letter-spacing: 0.01em;
+}
+
+.openStatus {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+}
+
+.openHours {
+  color: var(--text-muted);
+}
+
+.chips {
+  margin-top: 18px;
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.chip {
+  background: var(--fill-quiet);
+  border-radius: var(--radius-xs);
+  padding: 7px 12px;
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--neutral-600);
+}
+
+.bio {
+  margin: 28px 0 0;
+  font-size: 16.5px;
+  line-height: 1.7;
+  text-wrap: pretty;
+  color: var(--text-secondary);
+  max-width: 62ch;
+}
+
+/* openDotStyle / openTextStyle (renderVals) */
+.openDot {
+  width: 7px;
+  height: 7px;
+  border-radius: var(--radius-full);
+  background: var(--accent-700);
+}
+
+.openDotOn {
+  background: #2f7a4d;
+}
+
+.openText {
+  font-weight: 600;
+  color: var(--accent-700);
+}
+
+.openTextOn {
+  color: #2f7a4d;
+}

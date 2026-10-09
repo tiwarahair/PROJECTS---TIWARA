@@ -1,0 +1,442 @@
+/*
+ * Stylist Profile <helmet> <style> rules, verbatim values (prototype Stylist Profile.dc.html lines 20–101), in the
+ * page layer so the component modules (the prototype's inline styles) still win. Page-wide rules are scoped to
+ * html.profile-page, which StylistProfilePage sets while mounted. The global reset lines identical to the base layer
+ * are omitted. Rules no element uses yet (.mq-desk, .covergrid, .coverside, .twtip) are kept for later.
+ */
+@layer page {
+  .nolinks a {
+    color: inherit;
+  }
+
+  :global(html.profile-page) {
+    --e-out: cubic-bezier(0.23, 1, 0.32, 1);
+    --e-drawer: cubic-bezier(0.32, 0.72, 0, 1);
+  }
+
+  .pfimg {
+    transition: transform 600ms cubic-bezier(0.2, 0.7, 0.2, 1);
+    cursor: zoom-in;
+  }
+
+  @media (hover: hover) and (pointer: fine) {
+    .pfimg:hover {
+      transform: scale(1.03);
+    }
+  }
+
+  @keyframes scpFade {
+    from {
+      opacity: 0;
+    }
+    to {
+      opacity: 1;
+    }
+  }
+
+  @keyframes scpPanel {
+    from {
+      opacity: 0;
+      transform: scale(0.96) translateY(8px);
+    }
+    to {
+      opacity: 1;
+      transform: none;
+    }
+  }
+
+  @keyframes scpDrop {
+    from {
+      opacity: 0;
+      transform: translateY(-6px);
+    }
+    to {
+      opacity: 1;
+      transform: none;
+    }
+  }
+
+  @keyframes scpRise {
+    from {
+      transform: translateY(100%);
+    }
+    to {
+      transform: translateY(0);
+    }
+  }
+
+  @keyframes scpHero {
+    from {
+      opacity: 0;
+      transform: scale(1.015);
+    }
+    to {
+      opacity: 1;
+      transform: none;
+    }
+  }
+
+  @keyframes scpIn {
+    from {
+      opacity: 0;
+      transform: translateY(10px);
+    }
+    to {
+      opacity: 1;
+      transform: none;
+    }
+  }
+
+  .scpScrim {
+    animation: scpFade 200ms var(--e-out) both;
+  }
+
+  .scpPanel {
+    animation: scpPanel 240ms var(--e-out) both;
+    transform-origin: center;
+  }
+
+  .scpMobPanel {
+    animation: scpDrop 200ms var(--e-out) both;
+  }
+
+  .bookbar {
+    animation: scpRise 300ms var(--e-drawer) both;
+  }
+
+  .scpHero {
+    animation: scpHero 520ms var(--e-out) both;
+  }
+
+  .scpLede > * {
+    animation: scpIn 420ms var(--e-out) both;
+  }
+
+  .scpLede > *:nth-child(1) {
+    animation-delay: 60ms;
+  }
+
+  .scpLede > *:nth-child(2) {
+    animation-delay: 120ms;
+  }
+
+  .scpLede > *:nth-child(3) {
+    animation-delay: 180ms;
+  }
+
+  [data-rv] {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+
+  [data-rv].rvIn {
+    opacity: 1;
+    transform: none;
+    transition:
+      opacity 420ms var(--e-out),
+      transform 420ms var(--e-out);
+  }
+
+  .svcrow {
+    transition: background 200ms ease;
+  }
+
+  .svcmeta {
+    display: -webkit-box;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 2;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  @media (hover: hover) and (pointer: fine) {
+    .svcrow:hover {
+      background: var(--accent-wash);
+      border-color: var(--accent-line);
+    }
+  }
+
+  .svcrow > button {
+    transition: transform 160ms ease-out;
+  }
+
+  .svcrow > button:active {
+    transform: scale(0.985);
+  }
+
+  :global(html.profile-page) :focus-visible {
+    outline: 3px solid var(--focus-ring);
+    outline-offset: 2px;
+    border-radius: 6px;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .scpPanel,
+    .scpHero,
+    .scpLede > *,
+    .bookbar,
+    .scpMobPanel {
+      animation: scpFade 200ms ease both;
+    }
+    [data-rv] {
+      opacity: 1 !important;
+      transform: none !important;
+    }
+    .pfimg,
+    .svcrow > button {
+      transition: none;
+    }
+  }
+
+  @media (max-width: 900px) {
+    .mqDesk {
+      display: none !important;
+    }
+    .profgrid {
+      grid-template-columns: 1fr !important;
+    }
+    .bookaside {
+      position: static !important;
+    }
+  }
+
+  @media (max-width: 720px) {
+    :global(html.profile-page),
+    :global(html.profile-page) body {
+      overflow-x: clip;
+    }
+  }
+
+  .profgrid,
+  .profgrid > * {
+    min-width: 0;
+  }
+
+  .svcrow > button {
+    min-width: 0;
+    color: var(--text-primary);
+    -webkit-text-fill-color: currentColor;
+  }
+
+  .svcrow > button > div {
+    max-width: 100%;
+  }
+
+  .svcrow > button > div:first-child {
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  @media (max-width: 480px) {
+    .svcrow > button > div:first-child {
+      white-space: nowrap !important;
+      max-width: 18ch !important;
+    }
+    .svcrow {
+      gap: 10px !important;
+    }
+    .svcrowEnd {
+      gap: 10px !important;
+    }
+    .svcrowEnd span {
+      font-size: 14px !important;
+    }
+    .svcrowEnd a {
+      font-size: 12.5px !important;
+      padding: 7px 12px !important;
+      white-space: nowrap;
+    }
+    .svcrow > button > div:first-child {
+      font-size: 14.5px !important;
+      overflow-wrap: anywhere;
+    }
+  }
+
+  .scpMobPanel {
+    display: none !important;
+  }
+
+  @media (max-width: 900px) {
+    .profbody {
+      padding-left: calc(clamp(20px, 5vw, 48px) + 8px) !important;
+      padding-right: calc(clamp(20px, 5vw, 48px) + 8px) !important;
+    }
+    .bookbar {
+      display: block !important;
+    }
+    .askcta {
+      display: none !important;
+    }
+    .askhours {
+      border-top: none !important;
+      margin-top: 0 !important;
+      padding-top: 0 !important;
+    }
+  }
+
+  @media (max-width: 760px) {
+    .scpDesk {
+      display: none !important;
+    }
+    .scpMob {
+      display: flex !important;
+    }
+    .scpMobPanel {
+      display: flex !important;
+    }
+  }
+
+  @media (max-width: 720px) {
+    .covergrid {
+      grid-template-columns: 1fr !important;
+      grid-template-rows: 300px !important;
+    }
+    .coverside {
+      display: none;
+    }
+  }
+
+  /* second helmet <style> block */
+  .pfMobonly {
+    display: none !important;
+  }
+
+  @media (max-width: 720px) {
+    .pfDeskonly {
+      display: none !important;
+    }
+    .pfMobonly {
+      display: flex !important;
+    }
+  }
+
+  @media (max-width: 720px) {
+    .pfCov {
+      opacity: 0;
+      visibility: hidden;
+      transition:
+        opacity 220ms var(--e-out),
+        visibility 0s 220ms;
+    }
+    .pfCov[data-on="true"] {
+      opacity: 1;
+      visibility: visible;
+      transition: opacity 220ms var(--e-out);
+    }
+    .scpHero {
+      cursor: pointer;
+    }
+  }
+
+  .twtip {
+    position: relative;
+  }
+
+  .pfOvl {
+    display: none;
+  }
+
+  @media (min-width: 721px) and (hover: hover) and (pointer: fine) {
+    .pfOvb {
+      opacity: 0;
+      transform: translateY(-4px);
+      transition:
+        opacity 220ms var(--e-out),
+        transform 220ms var(--e-out),
+        background-color 160ms var(--e-out) !important;
+    }
+    .pfCw:hover .pfOvb,
+    .pfCov:focus-within .pfOvb,
+    .pfOvb[aria-expanded="true"],
+    .pfOvb[aria-expanded="true"] ~ .pfOvb {
+      opacity: 1;
+      transform: none;
+    }
+  }
+
+  @media (min-width: 721px) and (hover: hover) and (pointer: fine) and (prefers-reduced-motion: reduce) {
+    .pfOvb {
+      transform: none !important;
+    }
+  }
+
+  @media (min-width: 721px) {
+    .pfCov {
+      top: 16px !important;
+      right: 16px !important;
+    }
+    .pfOvb {
+      width: auto !important;
+      height: 40px !important;
+      padding: 0 18px 0 14px !important;
+      gap: 8px;
+    }
+    .pfOvl {
+      display: inline;
+      font:
+        600 14px/1 "Hanken Grotesk",
+        sans-serif;
+      letter-spacing: 0;
+    }
+    .pfOvb svg {
+      width: 18px;
+      height: 18px;
+    }
+  }
+
+  @media (hover: hover) and (pointer: fine) {
+    .twtip::after {
+      content: attr(data-tip);
+      position: absolute;
+      top: calc(100% + 8px);
+      left: 50%;
+      transform: translate(-50%, -4px);
+      background: #1a1714;
+      color: #fffefb;
+      font:
+        500 12.5px/1.2 "Hanken Grotesk",
+        sans-serif;
+      padding: 6px 10px;
+      border-radius: 6px;
+      white-space: nowrap;
+      opacity: 0;
+      pointer-events: none;
+      transition:
+        opacity 160ms var(--e-out),
+        transform 160ms var(--e-out);
+      z-index: 5;
+    }
+    .twtip:hover::after {
+      opacity: 1;
+      transform: translate(-50%, 0);
+    }
+    .twtip[aria-expanded="true"]::after {
+      display: none;
+    }
+  }
+
+  @keyframes pfDown {
+    from {
+      transform: translateY(-100%);
+    }
+    to {
+      transform: none;
+    }
+  }
+
+  .pfSticky {
+    animation: pfDown 280ms var(--e-drawer) both;
+  }
+
+  .pfPop {
+    animation: scpPanel 180ms var(--e-out) both;
+    transform-origin: top right;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .pfSticky,
+    .pfPop {
+      animation: scpFade 160ms ease both;
+    }
+  }
+}
