@@ -29,3 +29,17 @@
   position: relative;
   margin: 0 0 24px;
 }
+
+.phoneBox {
+  width: 390px;
+  height: 844px;
+  position: relative;
+  margin: 0 0 24px;
+}
+
+.wideBox {
+  width: 900px;
+  height: 1000px;
+  position: relative;
+  margin: 0 0 24px;
+}

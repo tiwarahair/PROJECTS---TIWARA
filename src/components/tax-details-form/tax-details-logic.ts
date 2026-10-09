@@ -1,5 +1,6 @@
 // TaxDetailsForm state, validation and output (prototype TaxDetailsForm.dc.html: biz, blankAddr, init, fmtNi, fmtPc,
 // pcOk, akey, errors, submit).
+import { formatPostcodeInput, isPostcodeInputValid } from "../../utils/address";
 
 export type TaxKind = "sole" | "ltd";
 export type TaxFixture =
@@ -214,17 +215,6 @@ export const formatNiNumber = (value: string): string => {
   );
 };
 
-// the prototype's own postcode helpers (they differ from utils/address on punctuation), kept verbatim
-const formatTaxPostcode = (value: string): string => {
-  const compact = (value || "").toUpperCase().replace(/\s+/g, "");
-  return compact.length > 3
-    ? compact.slice(0, -3) + " " + compact.slice(-3)
-    : compact;
-};
-
-const isTaxPostcodeValid = (value: string): boolean =>
-  /^[A-Z]{1,2}\d[A-Z\d]?\s?\d[A-Z]{2}$/i.test((value || "").trim());
-
 const isNameBad = (value: string) =>
   !/^[A-Za-zÀ-ÿ' -]+$/.test(value.trim()) ||
   value.trim().replace(/[^A-Za-zÀ-ÿ]/g, "").length < 2;
@@ -279,7 +269,7 @@ export const getTaxErrors = (
       errors.coNum = "Enter your 8-character company registration number.";
   }
   const { same, a } = state[getAddressKey(state.kind)];
-  if (!same && !(a.line1.trim() && a.city.trim() && isTaxPostcodeValid(a.pc)))
+  if (!same && !(a.line1.trim() && a.city.trim() && isPostcodeInputValid(a.pc)))
     errors.addr = isSole
       ? "Enter your home address"
       : "Enter your registered office address";
@@ -303,7 +293,7 @@ export const getTaxOutput = (
         city: v.city || "",
         pc: v.pc || "",
       }
-    : { ...a, pc: formatTaxPostcode(a.pc) };
+    : { ...a, pc: formatPostcodeInput(a.pc) };
   return {
     kind: state.kind,
     nameYes: state.nameYes,

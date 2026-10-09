@@ -2,6 +2,8 @@ import type { ReactNode } from "react";
 import { useParams } from "react-router";
 import { AddressFinder } from "../../components/address-finder/address-finder";
 import { AllergyField } from "../../components/allergy-field/allergy-field";
+import { BusinessDetails } from "../../components/business-details/business-details";
+import type { BusinessDetailsProps } from "../../components/business-details/business-details";
 import { SearchSelect } from "../../components/search-select/search-select";
 import type { SearchSelectProps } from "../../components/search-select/search-select";
 import { StylistCard } from "../../components/stylist-card/stylist-card";
@@ -217,6 +219,52 @@ const TAX_FORMS: { fixture: string; props: TaxDetailsFormProps }[] = [
   },
 ];
 
+const BUSINESS_DETAILS: {
+  fixture: string;
+  isWide: boolean;
+  props: BusinessDetailsProps;
+}[] = [
+  ...(
+    [
+      "shop",
+      "chair",
+      "home",
+      "mobile",
+      "vatValid",
+      "vatInvalid",
+      "unsaved",
+      "pcError",
+    ] as const
+  ).map((preset) => ({ fixture: preset, isWide: false, props: { preset } })),
+  { fixture: "wide-shop", isWide: true, props: { preset: "shop" } },
+  { fixture: "wide-home", isWide: true, props: { preset: "home" } },
+  { fixture: "embedded", isWide: true, props: { embedded: true } },
+  {
+    fixture: "embedded-hide",
+    isWide: true,
+    props: { embedded: true, hideSave: true },
+  },
+  { fixture: "no-tax", isWide: false, props: { tax: null } },
+  {
+    fixture: "ltd-tax",
+    isWide: false,
+    props: {
+      tax: { kind: "ltd", coName: "Amara Beauty Ltd", coNum: "SC123456" },
+    },
+  },
+  {
+    fixture: "seeded",
+    isWide: false,
+    props: {
+      value: {
+        type: "mobile",
+        vatOn: true,
+        v: { basePc: "M20 3BW", radius: "15", vat: "312456789" },
+      },
+    },
+  },
+];
+
 const HARNESSES: Record<string, () => ReactNode> = {
   "address-finder": () =>
     ADDRESS_FIXTURES.map((fixture) => (
@@ -261,6 +309,19 @@ const HARNESSES: Record<string, () => ReactNode> = {
     TAX_FORMS.map(({ fixture, props }) => (
       <div key={fixture} className={styles.formBox} data-fx={fixture}>
         <TaxDetailsForm {...props} />
+      </div>
+    )),
+  "business-details": () =>
+    BUSINESS_DETAILS.map(({ fixture, isWide, props }) => (
+      <div
+        key={fixture}
+        className={isWide ? styles.wideBox : styles.phoneBox}
+        data-fx={fixture}
+      >
+        {/* the prototype's dc-import host block (height auto) */}
+        <div data-dc-host="">
+          <BusinessDetails {...props} />
+        </div>
       </div>
     )),
   "search-select": () =>

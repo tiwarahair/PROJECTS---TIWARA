@@ -57,6 +57,20 @@ export const formatPostcode = (value: unknown): string => {
 export const isPostcodeValid = (value: unknown): boolean =>
   /^[A-Z]{1,2}\d[A-Z\d]?\d[A-Z]{2}$/.test(compact(value));
 
+/**
+ * The Studio forms' own postcode helpers (prototype fmtPc / pcOk in TaxDetailsForm and BusinessDetails):
+ * they only collapse whitespace, unlike formatPostcode / isPostcodeValid, which strip all punctuation.
+ */
+export const formatPostcodeInput = (value: string): string => {
+  const compact = (value || "").toUpperCase().replace(/\s+/g, "");
+  return compact.length > 3
+    ? compact.slice(0, -3) + " " + compact.slice(-3)
+    : compact;
+};
+
+export const isPostcodeInputValid = (value: string): boolean =>
+  /^[A-Z]{1,2}\d[A-Z\d]?\s?\d[A-Z]{2}$/i.test((value || "").trim());
+
 export const getDistrict = (value: unknown): string => {
   const code = compact(value);
   return isPostcodeValid(code) ? code.slice(0, -3) : "";
