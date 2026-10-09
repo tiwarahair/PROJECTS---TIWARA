@@ -72,6 +72,9 @@ export default defineConfig([
       "jsx-a11y/anchor-is-valid": "warn",
       "jsx-a11y/label-has-associated-control": "warn",
       "jsx-a11y/img-redundant-alt": "warn",
+      // Components take an autoFocus prop (AddressFinder, AllergyField) from the prototype's props
+      // contract; only flag the DOM attribute.
+      "jsx-a11y/no-autofocus": ["error", { ignoreNonDOM: true }],
     },
   },
 
