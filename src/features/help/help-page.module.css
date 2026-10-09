@@ -1,0 +1,292 @@
+/* Help (prototype Help.dc.html), inline styles verbatim */
+
+.page {
+  min-height: 100vh;
+  background: var(--neutral-50);
+  display: flex;
+  flex-direction: column;
+}
+
+.header {
+  position: relative;
+  z-index: 60;
+  background: var(--neutral-50);
+  box-shadow: var(--shadow-hairline);
+}
+
+.bar {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 14px clamp(20px, 5vw, 48px);
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.logoLink {
+  display: flex;
+  align-items: center;
+}
+
+.logo {
+  height: 26px;
+  display: block;
+}
+
+.mobActions {
+  margin-left: auto;
+  align-items: center;
+  gap: 4px;
+}
+
+.mobFav {
+  width: 44px;
+  height: 44px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--text-primary);
+}
+
+.menuButton {
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 0;
+  min-width: 44px;
+  min-height: 44px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 5px;
+}
+
+.menuLine {
+  width: 22px;
+  height: 1.5px;
+  background: var(--neutral-900);
+  display: block;
+}
+
+.desk {
+  display: flex;
+  align-items: center;
+  gap: 28px;
+  margin-left: auto;
+  font-size: 14px;
+  font-weight: 300;
+  color: var(--neutral-900);
+}
+
+.deskLink {
+  opacity: 0.7;
+  color: inherit;
+  transition: opacity 200ms ease;
+}
+
+.deskLink:hover {
+  opacity: 1 !important;
+}
+
+.accountButton {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  height: 40px;
+  padding: 0 6px 0 2px;
+  border: none;
+  background: none;
+  color: inherit;
+  font: inherit;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+}
+
+.accountAvatar {
+  flex: none;
+  width: 34px;
+  height: 34px;
+  border-radius: 999px;
+  background: var(--accent-wash, rgba(143, 17, 18, 0.06));
+  color: var(--accent-700, #8f1112);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-family: "Schibsted Grotesk", sans-serif;
+  font-weight: 600;
+  font-size: 13px;
+  letter-spacing: 0;
+  opacity: 1;
+}
+
+.mobMenu {
+  flex-direction: column;
+  padding: 4px clamp(20px, 5vw, 48px) 20px;
+  font-size: 17px;
+  color: var(--neutral-900);
+}
+
+.mobLink {
+  padding: 13px 0;
+  color: inherit;
+}
+
+.mobName {
+  margin-top: 8px;
+  padding-top: 14px;
+  border-top: 1px solid var(--border-subtle);
+  font-size: 13.5px;
+  color: var(--neutral-600);
+}
+
+.mobLinkCurrent {
+  padding: 13px 0;
+  color: inherit;
+  font-weight: 600;
+}
+
+.mobLogOut {
+  padding: 13px 0;
+  border: none;
+  background: none;
+  text-align: left;
+  font: inherit;
+  font-size: 17px;
+  color: inherit;
+  cursor: pointer;
+}
+
+.main {
+  flex: 1;
+  width: 100%;
+  max-width: 720px;
+  margin: 0 auto;
+  box-sizing: border-box;
+  padding: clamp(40px, 6vw, 72px) clamp(20px, 5vw, 48px) clamp(64px, 8vw, 104px);
+}
+
+.title {
+  margin: 0;
+  font-family: "Schibsted Grotesk", sans-serif;
+  font-weight: 600;
+  letter-spacing: -0.03em;
+  font-size: var(--text-h1, clamp(24px, 3vw, 32px));
+}
+
+.about {
+  margin: 10px 0 0;
+  font-size: 15px;
+  color: var(--text-secondary);
+}
+
+.strong {
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.faqHeading {
+  margin: clamp(36px, 5vw, 48px) 0 0;
+  font-family: "Schibsted Grotesk", sans-serif;
+  font-weight: 600;
+  letter-spacing: -0.02em;
+  font-size: 21px;
+}
+
+.faqList {
+  margin-top: 12px;
+  display: flex;
+  flex-direction: column;
+  border-bottom: 1px solid var(--border-subtle);
+}
+
+.faq {
+  border-top: 1px solid var(--border-subtle);
+}
+
+.faqTitle {
+  margin: 0;
+}
+
+.faqButton {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 20px;
+  padding: 18px 0;
+  border: none;
+  background: none;
+  font: inherit;
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--text-primary);
+  text-align: left;
+  cursor: pointer;
+}
+
+.chevron {
+  flex: none;
+  transition: transform 0.22s cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+
+.answer {
+  margin: 0;
+  padding: 0 0 18px;
+  max-width: 640px;
+  font-size: 15px;
+  line-height: 1.6;
+  color: var(--text-secondary);
+  text-wrap: pretty;
+}
+
+.contactHeading {
+  margin: clamp(40px, 6vw, 56px) 0 0;
+  font-family: "Schibsted Grotesk", sans-serif;
+  font-weight: 600;
+  letter-spacing: -0.02em;
+  font-size: 21px;
+}
+
+.contactText {
+  margin: 8px 0 0;
+  font-size: 15.5px;
+  line-height: 1.55;
+  color: var(--text-secondary);
+}
+
+.mail {
+  margin-top: 18px;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  height: 46px;
+  padding: 0 22px;
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius-full);
+  color: var(--text-primary);
+  font-size: 15px;
+  font-weight: 600;
+  transition:
+    background-color 0.16s cubic-bezier(0.2, 0.8, 0.2, 1),
+    transform 0.16s cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+
+.mail:hover {
+  background: var(--fill-quiet) !important;
+  color: var(--text-primary) !important;
+}
+
+.mail:active {
+  transform: scale(0.97) !important;
+}
+
+/* runtime state (prototype f.rot) */
+.chevronOpen {
+  transform: rotate(180deg);
+}
+
+.chevronClosed {
+  transform: none;
+}
