@@ -10,12 +10,11 @@ export interface ChatSequence {
 
 /**
  * Plays the "booking back-and-forth" chat once the phone scrolls into view, then loops
- * (prototype Home startChatWatch / playChat). Reduced motion shows the finished chat at once.
+ * (prototype Home startChatWatch / playChat). Always full motion: the reduced-motion toggle was removed.
  */
 export const useChatSequence = (
   phoneRef: RefObject<HTMLElement | null>,
   listRef: RefObject<HTMLElement | null>,
-  isMotionOn: boolean,
 ): ChatSequence => {
   const [sequence, setSequence] = useState<ChatSequence>({
     shown: 0,
@@ -38,10 +37,6 @@ export const useChatSequence = (
     const play = () => {
       isPlaying = true;
       clearTimers();
-      if (!isMotionOn) {
-        update({ shown: chatMessages.length, isTyping: false, isBooked: true });
-        return;
-      }
       const at = (delay: number, callback: () => void) =>
         timers.push(window.setTimeout(callback, delay));
       update({ shown: 0, isTyping: false, isBooked: false });
@@ -92,7 +87,7 @@ export const useChatSequence = (
       window.clearInterval(watch);
       clearTimers();
     };
-  }, [phoneRef, isMotionOn]);
+  }, [phoneRef]);
 
   // keep the newest message in view
   useLayoutEffect(() => {

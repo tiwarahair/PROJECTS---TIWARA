@@ -6,9 +6,9 @@ Everything where the React port differs from the Claude Design prototype (`HANDO
 
 | # | Where | Issue | Status |
 | - | ----- | ----- | ------ |
-| 1 | HANDOFF §7.25 | Search "Where" in production = Google Places UK; provider / API key not chosen. Port keeps the prototype's demo matching. | NEEDS DECISION |
+| 1 | HANDOFF §7.25 | Search "Where" in production = Google Places UK. | DECIDED: keep the prototype's demo matching for now; real provider later. |
 | 2 | HANDOFF §3 (every screen) | "empty / error / offline / denied — not designed". Not invented in the port. | NEEDS DECISION |
-| 3 | Home — Six looks | With reduced motion (`motion=reduced` or the OS setting) the prototype's `gridReveal` only clears inline styles, so the helmet rule `[data-sr]{opacity:0}` keeps "BROWSE BY STYLE" and "Six ways to find your look" invisible. Ported exactly as-is (see `use-grid-reveal.ts`). Fixing it means showing those two headings when motion is off. | NEEDS DECISION |
+| 3 | Home — reduced motion | The prototype's reduced-motion path left "BROWSE BY STYLE" / "Six ways to find your look" invisible. | DECIDED: reduced-motion toggle removed — Home always runs the full-motion behaviour (`motion` prop and reduced branches deleted). |
 
 ## Applied — deliberate, behaviour-preserving
 
@@ -24,7 +24,7 @@ Everything where the React port differs from the Claude Design prototype (`HANDO
 | 8 | Inline styles → CSS modules | Inline `style` beats global `a:hover` / `:focus-visible` rules | Module rules repeat the property on `:hover` / `:focus-visible` where the prototype element set it inline | Keeps the computed result identical. |
 | 9 | HANDOFF §4.n element → component mapping | Maps prototype buttons (e.g. Home "Menu", "×") to DS `Button` / `IconButton` | Screens keep each element's own prototype styles | Those elements carry inline styles that differ from DS defaults; HANDOFF rule 1 (source wins). DS components are ported 1:1 in `src/components/ds/` and diffed against their `.card.html` (dev route `/__ds/:card`). |
 | 10 | DS `Checkbox` / `Radio` / `Switch` | Clickable `<label>` / `<div>` without keyboard handlers | Same markup | Copied 1:1; lint reports them as warnings (a11y follow-up). |
-| 11 | Home helmet CSS | Rules for `.clipcard`, `.bleedcard`, `.floatcard`, `.pinsec`, `.aboutcols`/`.abouttop`/`#aboutstack`, `.quizgrid`, `.revgrid`/`.revcols`, `#hero .herobtn2`, `@keyframes styheadin` | Not ported | No element on the final page matches them (left over from earlier iterations). |
-| 12 | Home logic | `setupStyCarousel` (behind `STY_STATIC = true`), `ioReveal`, the about-photo stack tween, the search-form state (`q`, `searchHref`, `onService/onDate/onLoc`) and `reviews`/`revAvg`/`revCount` | Not ported | Never reached or never rendered by the template; the static stylist row (2nd card centred) is ported. |
+| 11 | Home helmet CSS | Rules for `.clipcard`, `.bleedcard`, `.floatcard`, `.pinsec`, `.aboutcols`/`.abouttop`/`#aboutstack`, `.quizgrid`, `.revgrid`/`.revcols`, `#hero .herobtn2`, `@keyframes styheadin` | Ported into `home-page.module.css` though nothing uses them yet | Kept in case they are needed later (your call). |
+| 12 | Home logic | `setupStyCarousel` (behind `STY_STATIC = true`), `ioReveal`, the about-photo stack tween, the search-form `searchHref`, `reviews`/`revAvg`/`revCount` | Ported but inactive: `use-stylist-carousel.ts` (`STY_STATIC`), `revealOnEnter` + stack tween in `use-home-motion.ts`, `home-search-link.ts`, `home-reviews.ts` | Kept in case they are needed later (your call). |
 | 13 | Home "The problem" photo | `background-image:url('img/new/problem.jpeg')` | `url('../../assets/img/new/problem.jpeg')` | Same file, bundled by Vite. |
 | 14 | Page `<helmet>` CSS | Global `<style>` per page | `@layer page` CSS module per page; page-wide element rules scoped to `html.<page>-page`, which the page sets while mounted | Same cascade (inline > helmet > tokens) without leaking between routes. |

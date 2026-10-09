@@ -7,19 +7,11 @@ import page from "./home-page.module.css";
 import styles from "./problem-section.module.css";
 import { useChatSequence } from "./use-chat-sequence";
 
-interface ProblemSectionProps {
-  isMotionOn: boolean;
-}
-
 /** "Tired of the booking back-and-forth?" with the animated chat phone (prototype Home "The problem"). */
-export const ProblemSection = ({ isMotionOn }: ProblemSectionProps) => {
+export const ProblemSection = () => {
   const phoneRef = useRef<HTMLDivElement>(null);
   const listRef = useRef<HTMLDivElement>(null);
-  const { shown, isTyping, isBooked } = useChatSequence(
-    phoneRef,
-    listRef,
-    isMotionOn,
-  );
+  const { shown, isTyping, isBooked } = useChatSequence(phoneRef, listRef);
 
   return (
     <section

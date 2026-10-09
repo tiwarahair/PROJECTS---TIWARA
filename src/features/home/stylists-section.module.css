@@ -53,9 +53,9 @@
   scroll-snap-align: center;
 }
 
-/* renderVals styCards: STY_STATIC is on, so every card keeps its DOM order at full scale and opacity */
+/* renderVals styCards: order/scale/opacity from the carousel (index, 1, 1 while STY_STATIC) */
 .card {
   order: var(--card-order);
-  scale: 1;
-  opacity: 1;
+  scale: var(--card-scale);
+  opacity: var(--card-opacity);
 }

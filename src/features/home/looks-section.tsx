@@ -17,19 +17,10 @@ const LOOK_IMAGES: Record<string, string> = {
   treatments: "img/w161244.jpg",
 };
 
-interface LooksSectionProps {
-  isMotionOn: boolean;
-}
-
 /** "Six ways to find your look" grid (prototype Home "Six looks"). */
-export const LooksSection = ({ isMotionOn }: LooksSectionProps) => {
+export const LooksSection = () => {
   const sectionRef = useRef<HTMLElement>(null);
-  useGridReveal(
-    sectionRef,
-    page.looktile ?? "",
-    page.lookgrid ?? "",
-    isMotionOn,
-  );
+  useGridReveal(sectionRef, page.looktile ?? "", page.lookgrid ?? "");
   return (
     <section
       ref={sectionRef}

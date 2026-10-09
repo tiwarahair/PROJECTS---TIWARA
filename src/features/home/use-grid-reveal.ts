@@ -3,27 +3,18 @@ import type { RefObject } from "react";
 
 /**
  * Browse by style: heading first, then the tiles a row at a time (prototype Home gridReveal).
- * Note: with motion off the prototype only clears inline styles, so the helmet's [data-sr]{opacity:0}
- * keeps the eyebrow and heading hidden — kept as-is and listed in docs/port-discrepancies.md.
+ * Always full motion: the reduced-motion toggle was removed.
  */
 export const useGridReveal = (
   sectionRef: RefObject<HTMLElement | null>,
   tileClass: string,
   gridClass: string,
-  isMotionOn: boolean,
 ) => {
   useEffect(() => {
     const root = sectionRef.current;
     if (!root) return;
     const heads = [...root.querySelectorAll<HTMLElement>("[data-sr]")];
     const tiles = [...root.querySelectorAll<HTMLElement>("." + tileClass)];
-    if (!isMotionOn) {
-      [...heads, ...tiles].forEach((element) => {
-        element.style.opacity = "";
-        element.style.transform = "";
-      });
-      return;
-    }
     const observers: IntersectionObserver[] = [];
     const show = (elements: HTMLElement[], step: number) => {
       if (!elements.length) return;
@@ -65,5 +56,5 @@ export const useGridReveal = (
     });
     rows.forEach((row) => show(row, 0.12));
     return () => observers.forEach((observer) => observer.disconnect());
-  }, [sectionRef, tileClass, gridClass, isMotionOn]);
+  }, [sectionRef, tileClass, gridClass]);
 };

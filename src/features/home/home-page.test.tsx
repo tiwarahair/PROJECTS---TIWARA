@@ -9,7 +9,7 @@ import type { HomePageProps } from "./home-page";
 let observer: FakeIntersectionObserver;
 
 const renderHome = (props: HomePageProps = {}, url = "/") =>
-  renderWithStore(<HomePage motion="reduced" {...props} />, url);
+  renderWithStore(<HomePage {...props} />, url);
 
 describe("HomePage", () => {
   beforeEach(() => {
@@ -150,19 +150,8 @@ describe("HomePage", () => {
     ).not.toBeInTheDocument();
   });
 
-  it("with reduced motion the chat shows the whole conversation once in view", async () => {
+  it("the chat plays message by message once in view", async () => {
     renderHome();
-    await act(async () => observer.enter());
-    expect(
-      screen.getByText("Sorry girl I’m booked all next week!"),
-    ).toBeInTheDocument();
-    expect(
-      screen.getByText("Booked in 2 minutes, Sat 10:00"),
-    ).toBeInTheDocument();
-  });
-
-  it("with full motion the chat plays message by message", async () => {
-    renderWithStore(<HomePage motion="full" />);
     await act(async () => observer.enter());
     expect(
       screen.queryByText("Hey, can I book knotless braids for Saturday at 10?"),

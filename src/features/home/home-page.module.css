@@ -415,4 +415,96 @@
   .ordwrap[data-order="v2"] > .duorow {
     order: -1;
   }
+
+  /*
+   * Rules with no matching element on the current page — kept from the prototype in case they are needed later.
+   */
+  .clipcard::before {
+    content: "";
+    position: absolute;
+    top: -12px;
+    right: 26px;
+    width: 14px;
+    height: 40px;
+    border: 2.5px solid var(--neutral-400);
+    border-radius: 7px;
+    background: transparent;
+  }
+
+  .clipcard:nth-child(odd) {
+    transform: rotate(-1.4deg);
+  }
+
+  .clipcard:nth-child(even) {
+    transform: rotate(1.2deg);
+  }
+
+  .clipcard:hover {
+    transform: rotate(0deg) translateY(-6px);
+    box-shadow: 0 22px 46px -18px rgba(26, 23, 20, 0.34);
+  }
+
+  .bleedcard:hover img {
+    transform: scale(1.05);
+  }
+
+  .floatcard:nth-child(even) {
+    transform: translateY(22px);
+  }
+
+  .floatcard:hover {
+    transform: translateY(-6px);
+    box-shadow: 0 30px 56px -24px rgba(26, 23, 20, 0.6);
+  }
+
+  .floatcard:nth-child(even):hover {
+    transform: translateY(16px);
+  }
+
+  /* Slide-over effect, off for now. To re-enable: add class="pinsec" to the wrapper of the section
+     that should hold, and give the following section
+     border-radius:clamp(28px,4.2vw,56px) clamp(28px,4.2vw,56px) 0 0 + box-shadow:0 -24px 60px rgba(26,23,20,.22) + z-index:2 */
+  @media (min-height: 780px) {
+    .pinsec {
+      position: sticky !important;
+      top: 0;
+    }
+  }
+
+  @media (max-width: 720px) {
+    .hero .herobtn2 {
+      display: none !important;
+    }
+    .quizgrid {
+      grid-template-columns: 1fr !important;
+      align-items: start !important;
+    }
+    .revgrid,
+    .revcols {
+      grid-template-columns: 1fr !important;
+    }
+  }
+
+  @media (max-width: 860px) {
+    .aboutcols {
+      grid-template-columns: 1fr !important;
+    }
+    .abouttop {
+      grid-template-columns: 1fr !important;
+    }
+    .aboutstack {
+      aspect-ratio: 16/11 !important;
+    }
+  }
+
+  @keyframes styheadin {
+    from {
+      opacity: 0;
+      transform: translateY(22px);
+    }
+    to {
+      opacity: 1;
+      transform: none;
+    }
+  }
 }

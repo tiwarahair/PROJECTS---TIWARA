@@ -5,7 +5,6 @@ import { FavHost } from "../../components/fav-host/fav-host";
 import { WelcomeToast } from "../../components/welcome-toast/welcome-toast";
 import { useAppSelector } from "../../stores/hooks";
 import { getAssetUrl } from "../../utils/asset-url";
-import { prefersReducedMotion } from "../../utils/page-flags";
 import { BookSlotTiles } from "./book-slot-tiles";
 import { FaqSection } from "./faq-section";
 import { ForStylistsSection } from "./for-stylists-section";
@@ -29,7 +28,6 @@ export interface HomePageProps {
   /** v1: The problem before the photo tiles · v2 (default): photo tiles first */
   order?: "v1" | "v2";
   stylistSection?: "photo" | "split";
-  motion?: "full" | "reduced";
   showServices?: boolean;
   showWhy?: boolean;
 }
@@ -41,7 +39,6 @@ const HOME_FONTS =
 export const HomePage = ({
   order = "v2",
   stylistSection = "photo",
-  motion = "full",
   showServices = false,
   showWhy = false,
 }: HomePageProps) => {
@@ -49,8 +46,7 @@ export const HomePage = ({
   const [menuOpen, setMenuOpen] = useState(false);
   const loggedIn = useAppSelector((state) => state.session.loggedIn);
   const morph = useNavMorph();
-  const isMotionOn = motion !== "reduced" && !prefersReducedMotion();
-  useHomeMotion(rootRef, isMotionOn, showWhy);
+  useHomeMotion(rootRef, showWhy);
   preload(getAssetUrl("img/hero2.jpg"), { as: "image", fetchPriority: "high" });
 
   // page-wide helmet rules (body background, colour tokens, smooth scroll) apply while Home is mounted
@@ -88,12 +84,12 @@ export const HomePage = ({
         <StylesMarquee />
       </div>
       <div className={page.ordwrap} data-order={order === "v2" ? "v2" : "v1"}>
-        <ProblemSection isMotionOn={isMotionOn} />
+        <ProblemSection />
         <BookSlotTiles />
       </div>
       <StylistsSection />
       <div data-bg="#FAF6EE" className={layout.spacer}></div>
-      <LooksSection isMotionOn={isMotionOn} />
+      <LooksSection />
       <QuizStrip />
       {showServices && <ServicesSection />}
       {showWhy && <WhySection />}
