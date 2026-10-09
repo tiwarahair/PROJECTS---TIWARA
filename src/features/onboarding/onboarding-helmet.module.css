@@ -1,0 +1,31 @@
+/*
+ * Onboarding <helmet> <style> rules, verbatim values (prototype Onboarding.dc.html lines 15–30), in the page layer,
+ * scoped to html.onboarding-page (set while mounted). The keyframes (and their reduced-motion variants) are copied
+ * into the modules that use them; pwIn lives with PasswordMeter.
+ */
+@layer page {
+  :global(html.onboarding-page),
+  :global(html.onboarding-page) body {
+    margin: 0;
+    background: #faf6ee;
+  }
+
+  :global(html.onboarding-page) input:focus-visible,
+  :global(html.onboarding-page) button:focus-visible,
+  :global(html.onboarding-page) a:focus-visible {
+    outline: none;
+    box-shadow: 0 0 0 3px var(--ob-ring, var(--accent-glow));
+  }
+
+  /* this page's helmet has no input/select/button font reset: controls without font:inherit keep the browser font */
+  :global(html.onboarding-page) input,
+  :global(html.onboarding-page) select,
+  :global(html.onboarding-page) button {
+    font-family: revert;
+  }
+
+  :global(html.onboarding-page) :global(.leaflet-container) {
+    font-family: inherit;
+    background: #efe8db;
+  }
+}

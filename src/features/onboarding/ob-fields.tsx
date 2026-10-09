@@ -1,0 +1,358 @@
+import type { ChangeEvent, KeyboardEvent } from "react";
+import { joinClassNames } from "../../utils/class-names";
+import styles from "./ob-fields.module.css";
+
+/** Sun (shown in dark mode) / moon (light mode) for the theme toggle. */
+export const ModeIcon = ({ isDark }: { isDark: boolean }) =>
+  isDark ? (
+    <svg
+      width="19"
+      height="19"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="1.8"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      className={styles.modeIcon}
+    >
+      <circle cx="12" cy="12" r="4"></circle>
+      <path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"></path>
+    </svg>
+  ) : (
+    <svg
+      width="19"
+      height="19"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="1.8"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      className={styles.modeIcon}
+    >
+      <path d="M20 14.5A8 8 0 0 1 9.5 4a8 8 0 1 0 10.5 10.5z"></path>
+    </svg>
+  );
+
+export const BackIcon = ({ size = 20 }: { size?: number }) => (
+  <svg
+    width={size}
+    height={size}
+    viewBox="0 0 24 24"
+    fill="none"
+    stroke="currentColor"
+    strokeWidth="2"
+    strokeLinecap="round"
+    strokeLinejoin="round"
+  >
+    <path d="M15 18l-6-6 6-6"></path>
+  </svg>
+);
+
+export const Spinner = ({ small }: { small?: boolean }) => (
+  <span
+    aria-hidden="true"
+    className={small ? styles.spinnerSmall : styles.spinner}
+  ></span>
+);
+
+/** "Saving…"-style primary button: dimmed and inert until the screen is valid (opacity 1 while busy). */
+interface SubmitButtonProps {
+  label: string;
+  onClick: () => void;
+  canSubmit: boolean;
+  busy: boolean;
+  /** Spacing variant: "tight" (14px, email), "loose" (20px), "code" (14px, no colour transition). */
+  variant: "tight" | "loose" | "code";
+}
+
+export const SubmitButton = ({
+  label,
+  onClick,
+  canSubmit,
+  busy,
+  variant,
+}: SubmitButtonProps) => (
+  <button
+    onClick={onClick}
+    disabled={!canSubmit}
+    className={joinClassNames(
+      variant === "tight"
+        ? styles.submitTight
+        : variant === "code"
+          ? styles.submitCode
+          : styles.submitLoose,
+      canSubmit || busy ? styles.submitOn : styles.submitOff,
+      canSubmit ? styles.submitReady : styles.submitInert,
+    )}
+  >
+    {busy && <Spinner />}
+    <span>{label}</span>
+  </button>
+);
+
+interface TextFieldProps {
+  id: string;
+  label: string;
+  /** Label spacing: "first" (8px under), "next" (10px above), "gap" (16px above). */
+  spacing?: "first" | "next" | "gap";
+  value: string;
+  onChange: (event: ChangeEvent<HTMLInputElement>) => void;
+  onBlur?: () => void;
+  onKeyDown?: (event: KeyboardEvent<HTMLInputElement>) => void;
+  error: string;
+  invalid: boolean;
+  type?: string;
+  inputMode?: "email" | "tel" | "text";
+  autoComplete?: string;
+  describedBy?: string;
+  /** The email field animates its border; the others don't. */
+  animated?: boolean;
+  errorId?: string;
+  errorLive?: boolean;
+}
+
+const LABEL_CLASS = {
+  first: styles.label,
+  next: styles.labelNext,
+  gap: styles.labelGap,
+};
+
+export const TextField = ({
+  id,
+  label,
+  spacing = "first",
+  value,
+  onChange,
+  onBlur,
+  onKeyDown,
+  error,
+  invalid,
+  type,
+  inputMode,
+  autoComplete,
+  describedBy,
+  animated,
+  errorId,
+  errorLive,
+}: TextFieldProps) => (
+  <>
+    <label htmlFor={id} className={LABEL_CLASS[spacing]}>
+      {label}
+    </label>
+    <input
+      id={id}
+      type={type}
+      inputMode={inputMode}
+      autoComplete={autoComplete}
+      value={value}
+      onChange={onChange}
+      onBlur={onBlur}
+      onKeyDown={onKeyDown}
+      aria-invalid={invalid ? "true" : "false"}
+      aria-describedby={describedBy}
+      className={joinClassNames(
+        animated ? styles.inputAnimated : styles.input,
+        invalid ? styles.borderError : styles.border,
+      )}
+    />
+    <div
+      id={errorId}
+      role="alert"
+      aria-live={errorLive ? "polite" : undefined}
+      className={styles.error}
+    >
+      {error}
+    </div>
+  </>
+);
+
+/** First / last name side by side. */
+export const NameFields = ({
+  idPrefix,
+  first,
+  last,
+}: {
+  idPrefix: string;
+  first: Omit<TextFieldProps, "id" | "label">;
+  last: Omit<TextFieldProps, "id" | "label">;
+}) => (
+  <div className={styles.nameRow}>
+    <div className={styles.nameCell}>
+      <TextField
+        id={idPrefix + "first"}
+        label="First name"
+        autoComplete="given-name"
+        {...first}
+      />
+    </div>
+    <div className={styles.nameCell}>
+      <TextField
+        id={idPrefix + "last"}
+        label="Last name"
+        autoComplete="family-name"
+        {...last}
+      />
+    </div>
+  </div>
+);
+
+interface PasswordInputProps {
+  id: string;
+  value: string;
+  shown: boolean;
+  onToggle: () => void;
+  onChange: (event: ChangeEvent<HTMLInputElement>) => void;
+  onBlur?: () => void;
+  onKeyDown?: (event: KeyboardEvent<HTMLInputElement>) => void;
+  autoComplete: string;
+  invalid: boolean;
+  describedBy: string;
+  shake?: boolean;
+  /** Log-in password animates its border. */
+  animated?: boolean;
+}
+
+export const PasswordInput = ({
+  id,
+  value,
+  shown,
+  onToggle,
+  onChange,
+  onBlur,
+  onKeyDown,
+  autoComplete,
+  invalid,
+  describedBy,
+  shake,
+  animated,
+}: PasswordInputProps) => (
+  <div className={joinClassNames(styles.passwordWrap, shake && styles.shake)}>
+    <input
+      id={id}
+      type={shown ? "text" : "password"}
+      autoComplete={autoComplete}
+      value={value}
+      onChange={onChange}
+      onBlur={onBlur}
+      onKeyDown={onKeyDown}
+      aria-invalid={invalid ? "true" : "false"}
+      aria-describedby={describedBy}
+      className={joinClassNames(
+        animated ? styles.passwordInputAnimated : styles.passwordInput,
+        invalid ? styles.borderError : styles.border,
+      )}
+    />
+    <button
+      onClick={onToggle}
+      aria-label={shown ? "Hide password" : "Show password"}
+      className={styles.passwordToggle}
+    >
+      {shown ? "Hide" : "Show"}
+    </button>
+  </div>
+);
+
+interface MobileFieldProps {
+  id: string;
+  value: string;
+  onChange: (event: ChangeEvent<HTMLInputElement>) => void;
+  onBlur: () => void;
+  error: string;
+  invalid: boolean;
+}
+
+export const MobileField = ({
+  id,
+  value,
+  onChange,
+  onBlur,
+  error,
+  invalid,
+}: MobileFieldProps) => (
+  <>
+    <label htmlFor={id} className={styles.labelGap}>
+      Mobile
+    </label>
+    <div
+      className={joinClassNames(
+        styles.mobileWrap,
+        invalid ? styles.borderError : styles.border,
+      )}
+    >
+      <span className={styles.prefix}>+44</span>
+      <input
+        id={id}
+        type="tel"
+        inputMode="tel"
+        autoComplete="tel-national"
+        value={value}
+        onChange={onChange}
+        onBlur={onBlur}
+        aria-invalid={invalid ? "true" : "false"}
+        className={styles.mobileInput}
+      />
+    </div>
+    <div role="alert" className={styles.error}>
+      {error}
+    </div>
+  </>
+);
+
+interface ConsentProps {
+  terms: boolean;
+  marketing: boolean;
+  termsError: string;
+  onTerms: (event: ChangeEvent<HTMLInputElement>) => void;
+  onMarketing: (event: ChangeEvent<HTMLInputElement>) => void;
+  onOpenClient: () => void;
+  onOpenPrivacy: () => void;
+}
+
+/** Client Terms + Privacy agreement and the marketing opt-in. */
+export const ClientConsent = ({
+  terms,
+  marketing,
+  termsError,
+  onTerms,
+  onMarketing,
+  onOpenClient,
+  onOpenPrivacy,
+}: ConsentProps) => (
+  <>
+    <label className={styles.termsLabel}>
+      <input
+        type="checkbox"
+        checked={terms}
+        onChange={onTerms}
+        aria-invalid={termsError ? "true" : "false"}
+        className={styles.checkbox}
+      />
+      <span>
+        I agree to the{" "}
+        <button onClick={onOpenClient} className={styles.inlineLink}>
+          Client Terms
+        </button>{" "}
+        and{" "}
+        <button onClick={onOpenPrivacy} className={styles.inlineLink}>
+          Privacy Policy
+        </button>
+      </span>
+    </label>
+    {!!termsError && (
+      <div role="alert" className={styles.termsError}>
+        {termsError}
+      </div>
+    )}
+    <label className={styles.marketingLabel}>
+      <input
+        type="checkbox"
+        checked={marketing}
+        onChange={onMarketing}
+        className={styles.checkbox}
+      />
+      <span>Send me offers and news from Tiwára’s House</span>
+    </label>
+  </>
+);

@@ -1,0 +1,456 @@
+/* Values verbatim from prototype Onboarding.dc.html (inline styles; style-hover/active/focus as !important like the prototype runtime). */
+
+.wizard {
+  min-height: 100dvh;
+  display: flex;
+  flex-direction: column;
+  background: var(--neutral-50);
+  color: var(--text-primary);
+  transition: background-color 0.4s cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+
+.topBar {
+  position: sticky;
+  top: 0;
+  z-index: 20;
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+}
+
+.deskProgress {
+  height: 4px;
+  background: rgba(143, 17, 18, 0.1);
+}
+
+.deskProgressFill {
+  display: block;
+  height: 100%;
+  width: 100%;
+  background: var(--accent-700);
+  transform-origin: left;
+  transition: transform 0.6s cubic-bezier(0.23, 1, 0.32, 1);
+}
+
+.deskBar {
+  height: 76px;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 0 32px;
+}
+
+.deskBack {
+  width: 44px;
+  height: 44px;
+  border-radius: var(--radius-full);
+  border: none;
+  background: transparent;
+  color: var(--text-primary);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition:
+    background-color 0.16s,
+    transform 0.16s cubic-bezier(0.23, 1, 0.32, 1);
+}
+
+.deskBack:hover {
+  background: var(--fill-quiet) !important;
+}
+
+.deskBack:active {
+  transform: scale(0.94) !important;
+}
+
+.logo {
+  height: 22px;
+  display: block;
+}
+
+.grow {
+  flex: 1;
+}
+
+.deskMode {
+  flex: 0 0 auto;
+  border: none;
+  background: transparent;
+  color: var(--text-primary);
+  width: 44px;
+  height: 44px;
+  border-radius: var(--radius-full);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition:
+    background-color 0.16s,
+    transform 0.16s cubic-bezier(0.23, 1, 0.32, 1);
+}
+
+.deskMode:hover {
+  background: var(--fill-quiet) !important;
+}
+
+.deskMode:active {
+  transform: scale(0.92) !important;
+}
+
+.deskSkip {
+  height: 44px;
+  padding: 0 14px;
+  border: none;
+  background: none;
+  font: inherit;
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--text-secondary);
+  cursor: pointer;
+}
+
+.deskSkip:hover {
+  color: var(--text-primary) !important;
+}
+
+.deskSubmit {
+  height: 48px;
+  padding: 0 28px;
+  border-radius: var(--radius-full);
+  border: none;
+  background: var(--accent-700);
+  color: #fffefb;
+  font: inherit;
+  font-size: 15.5px;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  transition:
+    opacity 0.2s,
+    background-color 0.16s,
+    transform 0.16s cubic-bezier(0.23, 1, 0.32, 1);
+}
+
+.deskSubmit:active {
+  transform: scale(0.98) !important;
+}
+
+.spinnerSmall {
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  border: 2px solid rgba(255, 254, 251, 0.35);
+  border-top-color: #fffefb;
+  animation: obSpin 0.6s linear infinite;
+}
+
+.mobileBar {
+  height: 64px;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 0 16px 0 10px;
+}
+
+.mobileBack {
+  flex: 0 0 auto;
+  width: 44px;
+  height: 44px;
+  border-radius: var(--radius-full);
+  border: none;
+  background: transparent;
+  color: var(--text-primary);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+}
+
+.mobileBack:active {
+  transform: scale(0.94) !important;
+  background: var(--fill-quiet) !important;
+}
+
+.mobileProgress {
+  flex: 1;
+  height: 6px;
+  border-radius: var(--radius-full);
+  background: rgba(143, 17, 18, 0.1);
+  overflow: hidden;
+}
+
+.mobileProgressFill {
+  display: block;
+  height: 100%;
+  width: 100%;
+  border-radius: var(--radius-full);
+  background: var(--accent-700);
+  transform-origin: left;
+  transition: transform 0.6s cubic-bezier(0.23, 1, 0.32, 1);
+}
+
+.mobileMode {
+  flex: 0 0 auto;
+  margin-right: -6px;
+  border: none;
+  background: transparent;
+  color: var(--text-primary);
+  width: 44px;
+  height: 44px;
+  border-radius: var(--radius-full);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition:
+    background-color 0.16s,
+    transform 0.16s cubic-bezier(0.23, 1, 0.32, 1);
+}
+
+.mobileMode:hover {
+  background: var(--fill-quiet) !important;
+}
+
+.mobileMode:active {
+  transform: scale(0.92) !important;
+}
+
+.mobileSkip {
+  flex: 0 0 auto;
+  height: 44px;
+  padding: 0 6px;
+  border: none;
+  background: none;
+  font: inherit;
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--text-secondary);
+  cursor: pointer;
+}
+
+.body {
+  flex: 1 0 auto;
+}
+
+.screen {
+  max-width: 640px;
+  margin: 0 auto;
+}
+
+.title {
+  margin: 0;
+  font-family: var(--font-display, "Schibsted Grotesk", sans-serif);
+  font-weight: 600;
+  font-size: clamp(30px, 5vw, 44px);
+  line-height: 1.05;
+  letter-spacing: -0.035em;
+  text-wrap: balance;
+}
+
+.sub {
+  margin: 12px 0 28px;
+  font-size: 16px;
+  line-height: 1.5;
+  color: var(--text-secondary);
+  text-wrap: pretty;
+}
+
+.bottomBar {
+  position: sticky;
+  bottom: 0;
+  z-index: 20;
+  padding: 12px 20px calc(12px + env(safe-area-inset-bottom));
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  box-shadow: var(--shadow-hairline-up, 0 -1px 0 rgba(26, 23, 20, 0.08));
+}
+
+.bottomSubmit {
+  width: 100%;
+  height: 54px;
+  border-radius: var(--radius-full);
+  border: none;
+  background: var(--accent-700);
+  color: #fffefb;
+  font: inherit;
+  font-size: 16px;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  transition:
+    opacity 0.2s,
+    transform 0.16s cubic-bezier(0.23, 1, 0.32, 1);
+}
+
+.bottomSubmit:active {
+  transform: scale(0.98) !important;
+}
+
+.spinner {
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  border: 2px solid rgba(255, 254, 251, 0.35);
+  border-top-color: #fffefb;
+  animation: obSpin 0.6s linear infinite;
+}
+
+/* wz (renderVals): the wizard re-themes the design tokens; bar and field colours as --ob-wz-* */
+.wizardLight {
+  --neutral-50: #faf6ee;
+  --neutral-100: #fdfbf5;
+  --neutral-600: #575045;
+  --text-primary: #1a1714;
+  --text-secondary: #7d7465;
+  --border-subtle: #e9e2d3;
+  --border-strong: #d4cbb9;
+  --fill-quiet: rgba(26, 23, 20, 0.05);
+  --accent-wash: rgba(143, 17, 18, 0.06);
+  --accent-wash-strong: rgba(143, 17, 18, 0.1);
+  --accent-line: rgba(143, 17, 18, 0.28);
+  --accent-700: #8f1112;
+  --ob-acc-text: #8f1112;
+  --accent-glow: rgba(143, 17, 18, 0.35);
+  --ob-wz-bar: rgba(250, 246, 238, 0.85);
+  --ob-wz-field: #faf6ee;
+}
+
+.wizardDark {
+  --neutral-50: #0e0c0a;
+  --neutral-100: #f6f0e4;
+  --neutral-600: rgba(246, 240, 228, 0.74);
+  --text-primary: #f6f0e4;
+  --text-secondary: rgba(246, 240, 228, 0.6);
+  --border-subtle: rgba(246, 240, 228, 0.14);
+  --border-strong: rgba(246, 240, 228, 0.26);
+  --fill-quiet: rgba(246, 240, 228, 0.08);
+  --accent-wash: rgba(184, 51, 42, 0.16);
+  --accent-wash-strong: rgba(184, 51, 42, 0.24);
+  --accent-line: rgba(184, 51, 42, 0.55);
+  --accent-700: #b8332a;
+  --ob-acc-text: #b8332a;
+  --accent-glow: rgba(184, 51, 42, 0.45);
+  --ob-wz-bar: rgba(14, 12, 10, 0.85);
+  --ob-wz-field: rgba(246, 240, 228, 0.06);
+}
+
+/* wz.bar */
+.topBar,
+.bottomBar {
+  background: var(--ob-wz-bar);
+}
+
+/* progress: scaleX(step / 5) */
+.deskProgressFill[data-step="1"],
+.mobileProgressFill[data-step="1"] {
+  transform: scaleX(0.2);
+}
+
+.deskProgressFill[data-step="2"],
+.mobileProgressFill[data-step="2"] {
+  transform: scaleX(0.4);
+}
+
+.deskProgressFill[data-step="3"],
+.mobileProgressFill[data-step="3"] {
+  transform: scaleX(0.6);
+}
+
+.deskProgressFill[data-step="4"],
+.mobileProgressFill[data-step="4"] {
+  transform: scaleX(0.8);
+}
+
+.deskProgressFill[data-step="5"],
+.mobileProgressFill[data-step="5"] {
+  transform: scaleX(1);
+}
+
+/* wizBodyPad */
+.bodyDesk {
+  padding: 48px 32px 96px;
+}
+
+.bodyMid {
+  padding: 24px 32px 40px;
+}
+
+.bodyNarrow {
+  padding: 16px 20px 32px;
+}
+
+/* enterAnim */
+.enterForward {
+  animation: obIn 0.36s cubic-bezier(0.23, 1, 0.32, 1) both;
+}
+
+.enterBack {
+  animation: obBack 0.36s cubic-bezier(0.23, 1, 0.32, 1) both;
+}
+
+/* submitOp / submitCur */
+.submitOn {
+  opacity: 1;
+}
+
+.submitOff {
+  opacity: 0.4;
+}
+
+.submitReady {
+  cursor: pointer;
+}
+
+.submitInert {
+  cursor: default;
+}
+
+/* helmet keyframes (copied: CSS modules scope keyframe names per file) */
+@keyframes obBack {
+  from {
+    opacity: 0;
+    transform: translateX(-32px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+@keyframes obIn {
+  from {
+    opacity: 0;
+    transform: translateX(32px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+@keyframes obSpin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* helmet: under reduced motion the slides, rises and shake become fades */
+@media (prefers-reduced-motion: reduce) {
+  @keyframes obBack {
+    from {
+      opacity: 0;
+    }
+    to {
+      opacity: 1;
+    }
+  }
+  @keyframes obIn {
+    from {
+      opacity: 0;
+    }
+    to {
+      opacity: 1;
+    }
+  }
+}

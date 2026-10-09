@@ -1,0 +1,822 @@
+/* Values verbatim from prototype Onboarding.dc.html (inline styles; style-hover/active/focus as !important like the prototype runtime). */
+
+.welcomeTitle {
+  margin: 0;
+  font-family: var(--font-display, "Schibsted Grotesk", sans-serif);
+  line-height: 1.02;
+  letter-spacing: -0.045em;
+  text-wrap: balance;
+}
+
+.welcomeLead {
+  margin: 14px 0 0;
+  font-size: 16.5px;
+  line-height: 1.5;
+  color: var(--ob-sub);
+  text-wrap: balance;
+}
+
+.getStarted {
+  width: 100%;
+  height: 54px;
+  border-radius: var(--radius-full);
+  border: none;
+  background: var(--accent-700);
+  color: #fffefb;
+  font: inherit;
+  font-size: 16px;
+  font-weight: 600;
+  cursor: pointer;
+  transition:
+    background-color 0.16s,
+    transform 0.16s cubic-bezier(0.23, 1, 0.32, 1);
+}
+
+.getStarted:hover {
+  background: var(--accent-900) !important;
+}
+
+.getStarted:active {
+  transform: scale(0.98) !important;
+}
+
+.welcomeLogin {
+  margin-top: 16px;
+  text-align: center;
+  font-size: 14.5px;
+  color: var(--ob-sub);
+}
+
+.textLink {
+  border: none;
+  background: none;
+  padding: 0;
+  font: inherit;
+  font-weight: 600;
+  color: var(--ob-link);
+  text-decoration: var(--ob-ul);
+  text-underline-offset: 3px;
+  cursor: pointer;
+}
+
+.chooserTitle {
+  margin: 0 0 24px;
+  font-family: var(--font-display, "Schibsted Grotesk", sans-serif);
+  font-weight: 600;
+  font-size: clamp(28px, 3.2vw, 34px);
+  line-height: 1.05;
+  letter-spacing: -0.035em;
+  text-wrap: balance;
+}
+
+.chooserCards {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.chooserCard {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  width: 100%;
+  min-height: 88px;
+  text-align: left;
+  padding: 18px;
+  border-radius: var(--radius-md);
+  border: 1px solid var(--ob-soft);
+  background: transparent;
+  color: var(--ob-fg);
+  font: inherit;
+  cursor: pointer;
+  transition:
+    background-color 0.18s,
+    border-color 0.18s,
+    transform 0.16s cubic-bezier(0.23, 1, 0.32, 1);
+}
+
+.chooserCard:hover {
+  background: var(--ob-hover) !important;
+  border-color: var(--ob-line) !important;
+}
+
+.chooserCard:active {
+  transform: scale(0.985) !important;
+}
+
+.chooserIcon {
+  flex: 0 0 auto;
+  width: 46px;
+  height: 46px;
+  border-radius: var(--radius-full);
+  background: var(--ob-chip);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.chooserText {
+  flex: 1;
+  min-width: 0;
+}
+
+.chooserCardTitle {
+  display: block;
+  font-size: 16.5px;
+  font-weight: 600;
+}
+
+.chooserCardSub {
+  display: block;
+  font-size: 14.5px;
+  color: var(--ob-sub);
+  margin-top: 2px;
+}
+
+.subIcon {
+  flex: 0 0 auto;
+  color: var(--ob-sub);
+}
+
+.emailTitle {
+  margin: 0 0 6px;
+  font-family: var(--font-display, "Schibsted Grotesk", sans-serif);
+  font-weight: 600;
+  line-height: 1.05;
+  letter-spacing: -0.035em;
+  white-space: nowrap;
+}
+
+.lead {
+  margin: 0 0 24px;
+  font-size: 15px;
+  line-height: 1.5;
+  color: var(--ob-sub);
+}
+
+.noBusiness {
+  margin: 6px 0 4px;
+  padding: 16px;
+  border-radius: var(--radius-md);
+  background: var(--ob-chip);
+  animation: obRise 0.28s cubic-bezier(0.23, 1, 0.32, 1) both;
+}
+
+.noBusinessTitle {
+  font-size: 15px;
+  font-weight: 600;
+}
+
+.noBusinessText {
+  font-size: 14px;
+  color: var(--ob-sub);
+  margin-top: 4px;
+}
+
+.listBusiness {
+  margin-top: 12px;
+  height: 42px;
+  padding: 0 18px;
+  border-radius: var(--radius-full);
+  border: 1px solid var(--ob-ghost);
+  background: transparent;
+  color: var(--ob-fg);
+  font: inherit;
+  font-size: 14.5px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background-color 0.16s;
+}
+
+.listBusiness:hover {
+  background: var(--ob-hover) !important;
+}
+
+.listBusiness:active {
+  transform: scale(0.98) !important;
+}
+
+.orRule {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  margin: 24px 0;
+  color: var(--ob-sub);
+  font-size: 13.5px;
+}
+
+.orLine {
+  flex: 1;
+  height: 1px;
+  background: var(--ob-soft);
+}
+
+.socialButtons {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.socialButton {
+  height: 52px;
+  border-radius: var(--radius-full);
+  border: 1px solid var(--ob-ghost);
+  background: transparent;
+  font: inherit;
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--ob-fg);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  cursor: pointer;
+  transition:
+    background-color 0.16s,
+    transform 0.16s cubic-bezier(0.23, 1, 0.32, 1);
+}
+
+.socialButton:hover {
+  background: var(--ob-hover) !important;
+}
+
+.socialButton:active {
+  transform: scale(0.98) !important;
+}
+
+.googleIcon {
+  flex: 0 0 auto;
+}
+
+.appleIcon {
+  flex: 0 0 auto;
+  margin-top: -2px;
+}
+
+.emailFooter {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin-top: 28px;
+  font-size: 14.5px;
+  color: var(--ob-sub);
+}
+
+.passwordTitle {
+  margin: 0 0 20px;
+  font-family: var(--font-display, "Schibsted Grotesk", sans-serif);
+  font-weight: 600;
+  font-size: clamp(28px, 3.2vw, 34px);
+  line-height: 1.05;
+  letter-spacing: -0.035em;
+  text-wrap: balance;
+}
+
+.emailChip {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 12px 12px 16px;
+  border-radius: var(--radius-sm);
+  background: var(--ob-chip);
+  margin-bottom: 22px;
+}
+
+.emailChipText {
+  flex: 1;
+  min-width: 0;
+  font-size: 15px;
+  font-weight: 500;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.change {
+  flex: 0 0 auto;
+  border: none;
+  background: none;
+  padding: 6px 4px;
+  font: inherit;
+  font-size: 14.5px;
+  font-weight: 600;
+  color: var(--ob-link);
+  text-decoration: var(--ob-ul);
+  text-underline-offset: 3px;
+  cursor: pointer;
+}
+
+.label {
+  display: block;
+  font-size: 14px;
+  font-weight: 600;
+  margin-bottom: 8px;
+}
+
+.fieldError {
+  min-height: 4px;
+  font-size: 13.5px;
+  color: var(--ob-err);
+  margin-top: 6px;
+}
+
+.forgot {
+  display: block;
+  margin: 4px 0 0;
+  border: none;
+  background: none;
+  padding: 6px 0;
+  font: inherit;
+  font-size: 14.5px;
+  font-weight: 600;
+  color: var(--ob-link);
+  text-decoration: var(--ob-ul);
+  text-underline-offset: 3px;
+  cursor: pointer;
+}
+
+.title {
+  margin: 0 0 6px;
+  font-family: var(--font-display, "Schibsted Grotesk", sans-serif);
+  font-weight: 600;
+  font-size: clamp(28px, 3.2vw, 34px);
+  line-height: 1.05;
+  letter-spacing: -0.035em;
+  text-wrap: balance;
+}
+
+.createSub {
+  margin: 0 0 24px;
+  font-size: 15px;
+  color: var(--ob-sub);
+  overflow-wrap: anywhere;
+}
+
+.changeInline {
+  border: none;
+  background: none;
+  padding: 0;
+  margin-left: 4px;
+  font: inherit;
+  font-size: 14.5px;
+  font-weight: 700;
+  color: var(--ob-link);
+  cursor: pointer;
+}
+
+.changeInline:hover {
+  color: var(--accent-900) !important;
+}
+
+.labelNext {
+  display: block;
+  font-size: 14px;
+  font-weight: 600;
+  margin: 10px 0 8px;
+}
+
+.exists {
+  margin-top: 14px;
+  padding: 16px;
+  border-radius: var(--radius-md);
+  background: var(--ob-chip);
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+  animation: obRise 0.28s cubic-bezier(0.23, 1, 0.32, 1) both;
+}
+
+.existsText {
+  flex: 1 1 200px;
+  font-size: 15px;
+  font-weight: 600;
+}
+
+.loginInstead {
+  height: 40px;
+  padding: 0 16px;
+  border-radius: var(--radius-full);
+  border: 1px solid var(--ob-ghost);
+  background: transparent;
+  color: var(--ob-fg);
+  font: inherit;
+  font-size: 14.5px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.readonlyLabel {
+  font-size: 14px;
+  font-weight: 600;
+  margin: 10px 0 8px;
+}
+
+.readonlyEmail {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-height: 54px;
+  box-sizing: border-box;
+  padding: 14px 16px;
+  border-radius: var(--radius-sm);
+  background: var(--ob-chip);
+  font-size: 16px;
+  line-height: 1.35;
+  color: var(--ob-fg);
+}
+
+.readonlyText {
+  flex: 1;
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+
+.relayNote {
+  font-size: 13.5px;
+  line-height: 1.45;
+  color: var(--ob-sub);
+  margin-top: 6px;
+}
+
+.socialContinue {
+  margin-top: 20px;
+  width: 100%;
+  height: 54px;
+  border-radius: var(--radius-full);
+  border: none;
+  background: var(--accent-700);
+  color: #fffefb;
+  font: inherit;
+  font-size: 16px;
+  font-weight: 600;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  transition:
+    opacity 0.2s,
+    transform 0.16s cubic-bezier(0.23, 1, 0.32, 1);
+}
+
+.socialContinue:active {
+  transform: scale(0.98) !important;
+}
+
+.codeSub {
+  margin: 0 0 24px;
+  font-size: 15px;
+  line-height: 1.5;
+  color: var(--ob-sub);
+  overflow-wrap: anywhere;
+}
+
+.codeBoxes {
+  display: flex;
+  gap: 8px;
+}
+
+.codeBox {
+  flex: 1 1 0;
+  min-width: 0;
+  max-width: 58px;
+  height: 62px;
+  box-sizing: border-box;
+  text-align: center;
+  border-radius: var(--radius-sm);
+  background: var(--ob-field);
+  color: var(--ob-fg);
+  font: inherit;
+  font-size: 24px;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+  outline: none;
+  transition:
+    border-color 0.16s,
+    box-shadow 0.16s,
+    transform 0.16s cubic-bezier(0.23, 1, 0.32, 1);
+}
+
+.codeBox:focus {
+  border-color: var(--ob-focus) !important;
+  box-shadow: 0 0 0 3px var(--ob-ring) !important;
+  transform: translateY(-1px) !important;
+}
+
+.codeError {
+  min-height: 20px;
+  font-size: 13.5px;
+  color: var(--ob-err);
+  margin-top: 10px;
+}
+
+.remember {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  margin-top: 6px;
+  font-size: 14.5px;
+  cursor: pointer;
+  min-height: 44px;
+}
+
+.rememberBox {
+  width: 20px;
+  height: 20px;
+  margin: 0;
+  accent-color: var(--accent-700);
+}
+
+.codeLinks {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 2px;
+  margin-top: 20px;
+}
+
+.resend {
+  border: none;
+  background: none;
+  padding: 10px 0;
+  font: inherit;
+  font-size: 14.5px;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+}
+
+.codeLink {
+  border: none;
+  background: none;
+  padding: 10px 0;
+  font: inherit;
+  font-size: 14.5px;
+  font-weight: 600;
+  color: var(--ob-link);
+  text-decoration: var(--ob-ul);
+  text-underline-offset: 3px;
+  cursor: pointer;
+}
+
+.mailBadge {
+  display: flex;
+  width: 56px;
+  height: 56px;
+  border-radius: var(--radius-full);
+  background: var(--ob-chip);
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 22px;
+}
+
+.strongEmail {
+  font-weight: 600;
+  color: var(--ob-fg);
+}
+
+.openLink {
+  width: 100%;
+  height: 54px;
+  border-radius: var(--radius-full);
+  border: 1px solid var(--ob-ghost);
+  background: transparent;
+  color: var(--ob-fg);
+  font: inherit;
+  font-size: 16px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background-color 0.16s;
+}
+
+.openLink:hover {
+  background: var(--ob-hover) !important;
+}
+
+.openLink:active {
+  transform: scale(0.98) !important;
+}
+
+.sentLinks {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  margin-top: 16px;
+}
+
+.studio {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  padding: 24px 0;
+}
+
+.studioSpinner {
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  border: 3px solid var(--ob-soft);
+  border-top-color: var(--accent-700);
+  animation: obSpin 0.8s linear infinite;
+  margin-bottom: 24px;
+}
+
+.studioTitle {
+  margin: 0 0 6px;
+  font-family: var(--font-display, "Schibsted Grotesk", sans-serif);
+  font-weight: 600;
+  font-size: clamp(28px, 4vw, 36px);
+  line-height: 1.05;
+  letter-spacing: -0.03em;
+  text-wrap: balance;
+}
+
+.studioText {
+  margin: 0;
+  font-size: 15px;
+  color: var(--ob-sub);
+}
+
+.doneBadge {
+  display: flex;
+  width: 60px;
+  height: 60px;
+  border-radius: var(--radius-full);
+  background: var(--accent-700);
+  color: #fffefb;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto 24px;
+  animation: obBadge 0.36s cubic-bezier(0.23, 1, 0.32, 1) 0.1s both;
+}
+
+.doneTitle {
+  margin: 0 0 6px;
+  font-family: var(--font-display, "Schibsted Grotesk", sans-serif);
+  font-weight: 600;
+  font-size: clamp(28px, 3.2vw, 34px);
+  line-height: 1.05;
+  letter-spacing: -0.035em;
+  text-align: center;
+  text-wrap: balance;
+}
+
+.doneText {
+  margin: 0 0 24px;
+  font-size: 15px;
+  color: var(--ob-sub);
+  text-align: center;
+  text-wrap: pretty;
+}
+
+.doneButton {
+  width: 100%;
+  height: 54px;
+  border-radius: var(--radius-full);
+  border: none;
+  background: var(--accent-700);
+  color: #fffefb;
+  font: inherit;
+  font-size: 16px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background-color 0.16s;
+}
+
+.doneButton:hover {
+  background: var(--accent-900) !important;
+}
+
+.doneButton:active {
+  transform: scale(0.98) !important;
+}
+
+.endTitle {
+  margin: 0 0 6px;
+  font-family: var(--font-display, "Schibsted Grotesk", sans-serif);
+  font-weight: 600;
+  font-size: clamp(28px, 3.2vw, 34px);
+  line-height: 1.05;
+  letter-spacing: -0.035em;
+  text-wrap: balance;
+  text-align: center;
+  text-wrap: balance;
+}
+
+/* welcomeW / welcomeFs / welcomeTW */
+.welcomeTitleLight {
+  font-weight: 600;
+}
+
+.welcomeTitleDark {
+  font-weight: 500;
+}
+
+.welcomeTitleDesk {
+  font-size: clamp(36px, 3.6vw, 56px);
+  width: max-content;
+}
+
+.welcomeTitleMobile {
+  font-size: clamp(36px, 6vw, 56px);
+  width: auto;
+}
+
+/* welcomeGap (the inline welcome always has the 28px gap) */
+.welcomeGap {
+  height: 28px;
+}
+
+/* emailFs */
+.emailTitlePro {
+  font-size: min(26px, calc((100vw - 56px) / 15.3));
+}
+
+.emailTitleCustomer {
+  font-size: min(30px, calc((100vw - 56px) / 13.4));
+}
+
+/* codeShake */
+.shake {
+  animation: obShake 0.3s cubic-bezier(0.36, 0.07, 0.19, 0.97);
+}
+
+/* c.bd: error, filled or empty */
+.codeBoxError {
+  border: 1px solid var(--ob-err);
+}
+
+.codeBoxFilled {
+  border: 1px solid var(--ob-focus);
+}
+
+.codeBoxEmpty {
+  border: 1px solid var(--ob-line);
+}
+
+/* resendColor / resendCur */
+.resendWaiting {
+  color: var(--ob-sub);
+  cursor: default;
+}
+
+.resendReady {
+  color: var(--ob-link);
+  cursor: pointer;
+}
+
+/* helmet keyframes (copied: CSS modules scope keyframe names per file) */
+@keyframes obBadge {
+  from {
+    opacity: 0;
+    transform: scale(0.8);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+@keyframes obRise {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+@keyframes obShake {
+  0%,
+  100% {
+    transform: none;
+  }
+  25% {
+    transform: translateX(-5px);
+  }
+  75% {
+    transform: translateX(5px);
+  }
+}
+@keyframes obSpin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* helmet: under reduced motion the slides and rises become fades; the empty obShake turns the shake off */
+/* eslint-disable css/no-empty-blocks */
+@media (prefers-reduced-motion: reduce) {
+  @keyframes obRise {
+    from {
+      opacity: 0;
+    }
+    to {
+      opacity: 1;
+    }
+  }
+  @keyframes obShake {
+  }
+}
+/* eslint-enable css/no-empty-blocks */

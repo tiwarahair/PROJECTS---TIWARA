@@ -1,0 +1,104 @@
+/* Values verbatim from prototype Onboarding.dc.html (inline styles; style-hover/active/focus as !important like the prototype runtime). */
+
+.root {
+  min-height: 100dvh;
+  transition:
+    background-color 0.35s cubic-bezier(0.2, 0.8, 0.2, 1),
+    color 0.35s cubic-bezier(0.2, 0.8, 0.2, 1);
+  font-family: var(--font-body, "Hanken Grotesk", sans-serif);
+  -webkit-font-smoothing: antialiased;
+  background: var(--ob-bg);
+  color: var(--ob-fg);
+}
+
+.toast {
+  position: fixed;
+  left: 50%;
+  bottom: 24px;
+  transform: translateX(-50%);
+  z-index: 90;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  max-width: calc(100% - 32px);
+  box-sizing: border-box;
+  padding: 14px 20px;
+  border-radius: var(--radius-full);
+  background: #1a1714;
+  color: #f6f0e4;
+  font-size: 15px;
+  font-weight: 600;
+  box-shadow: 0 12px 32px -8px rgba(26, 23, 20, 0.4);
+  animation: obRise 0.3s cubic-bezier(0.2, 0.8, 0.2, 1) both;
+}
+
+.toastIcon {
+  flex: 0 0 auto;
+  display: block;
+  color: #dfcf3e;
+}
+
+/* th (renderVals): the light / dark palette as the root's custom properties */
+.themeLight {
+  color-scheme: light;
+  --accent-700: #8f1112;
+  --accent-900: #6f0c0d;
+  --ob-bg: #faf6ee;
+  --ob-fg: var(--text-primary);
+  --ob-sub: var(--text-secondary);
+  --ob-line: var(--border-strong);
+  --ob-soft: var(--border-subtle);
+  --ob-field: transparent;
+  --ob-focus: var(--accent-700);
+  --ob-ring: var(--accent-glow);
+  --ob-err: var(--accent-700);
+  --ob-link: var(--accent-700);
+  --ob-ul: none;
+  --ob-hover: var(--fill-quiet);
+  --ob-chip: var(--fill-quiet);
+  --ob-ghost: var(--border-strong);
+}
+
+.themeDark {
+  color-scheme: dark;
+  --accent-700: #b8332a;
+  --accent-900: #ca443a;
+  --ob-bg: #0e0c0a;
+  --ob-fg: #f6f0e4;
+  --ob-sub: rgba(246, 240, 228, 0.72);
+  --ob-line: rgba(246, 240, 228, 0.28);
+  --ob-soft: rgba(246, 240, 228, 0.16);
+  --ob-field: rgba(246, 240, 228, 0.05);
+  --ob-focus: #f6f0e4;
+  --ob-ring: rgba(246, 240, 228, 0.22);
+  --ob-err: #ff9d8f;
+  --ob-link: #f6f0e4;
+  --ob-ul: underline;
+  --ob-hover: rgba(246, 240, 228, 0.07);
+  --ob-chip: rgba(246, 240, 228, 0.08);
+  --ob-ghost: rgba(246, 240, 228, 0.34);
+}
+
+/* helmet keyframes (copied: CSS modules scope keyframe names per file) */
+@keyframes obRise {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+/* helmet: under reduced motion the slides, rises and shake become fades */
+@media (prefers-reduced-motion: reduce) {
+  @keyframes obRise {
+    from {
+      opacity: 0;
+    }
+    to {
+      opacity: 1;
+    }
+  }
+}

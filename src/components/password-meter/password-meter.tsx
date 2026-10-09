@@ -6,10 +6,16 @@ export interface PasswordMeterProps {
   /** Id for aria-describedby on the password input. */
   id: string;
   view: PasswordView;
+  /** Onboarding marks any error-coloured message as an alert; by default only shown errors are. */
+  messageRole?: "alert" | "note";
 }
 
 /** The message, "15+ characters" rule, strength label + bars and zxcvbn warning under a password field. */
-export const PasswordMeter = ({ id, view }: PasswordMeterProps) => {
+export const PasswordMeter = ({
+  id,
+  view,
+  messageRole,
+}: PasswordMeterProps) => {
   const {
     msgOn,
     hasErr,
@@ -39,7 +45,10 @@ export const PasswordMeter = ({ id, view }: PasswordMeterProps) => {
   return (
     <div id={id} className={styles.help} style={paletteStyle}>
       {msgOn && (
-        <div role={hasErr ? "alert" : "note"} className={styles.message}>
+        <div
+          role={messageRole ?? (hasErr ? "alert" : "note")}
+          className={styles.message}
+        >
           {msg}
         </div>
       )}

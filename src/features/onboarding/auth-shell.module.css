@@ -1,0 +1,722 @@
+/* Values verbatim from prototype Onboarding.dc.html (inline styles; style-hover/active/focus as !important like the prototype runtime). */
+
+.shell {
+  display: flex;
+  min-height: 100dvh;
+}
+
+.authSide {
+  flex: 1 1 50%;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  min-height: 100dvh;
+  position: relative;
+}
+
+.hero {
+  position: relative;
+  overflow: hidden;
+  transition: height 0.42s cubic-bezier(0.77, 0, 0.175, 1);
+}
+
+.heroPhoto {
+  position: absolute;
+  inset: 0;
+  background-size: cover;
+  animation: obPhoto 0.6s cubic-bezier(0.23, 1, 0.32, 1) both;
+}
+
+.scrim {
+  position: absolute;
+  inset: 0;
+}
+
+.welcomeOver {
+  position: absolute;
+  left: 16px;
+  right: 16px;
+  bottom: 16px;
+  display: flex;
+  flex-direction: column;
+}
+
+.welcomeOverTitle {
+  margin: 0 4px 24px;
+  font-family: var(--font-display, "Schibsted Grotesk", sans-serif);
+  font-weight: 400;
+  font-size: clamp(34px, 9vw, 52px);
+  line-height: 1.02;
+  letter-spacing: -0.045em;
+  color: #fffefb;
+  text-wrap: balance;
+}
+
+.getStarted {
+  width: 100%;
+  height: 54px;
+  border-radius: var(--radius-full);
+  border: none;
+  background: var(--accent-700);
+  color: #fffefb;
+  font: inherit;
+  font-size: 16px;
+  font-weight: 600;
+  cursor: pointer;
+  transition:
+    background-color 0.16s,
+    transform 0.16s cubic-bezier(0.23, 1, 0.32, 1);
+}
+
+.getStarted:hover {
+  background: var(--accent-900) !important;
+}
+
+.getStarted:active {
+  transform: scale(0.98) !important;
+}
+
+.welcomeOverLogin {
+  margin-top: 14px;
+  text-align: center;
+  font-size: 14.5px;
+  color: rgba(255, 254, 251, 0.82);
+}
+
+.welcomeOverLink {
+  border: none;
+  background: none;
+  padding: 0;
+  font: inherit;
+  font-weight: 600;
+  color: #fffefb;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  cursor: pointer;
+}
+
+.heroBar {
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 68px;
+  padding: 0 12px;
+}
+
+.heroBack {
+  position: absolute;
+  left: 12px;
+  top: 12px;
+  width: 44px;
+  height: 44px;
+  border-radius: var(--radius-full);
+  border: none;
+  backdrop-filter: blur(16px) saturate(140%);
+  -webkit-backdrop-filter: blur(16px) saturate(140%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: transform 0.16s cubic-bezier(0.23, 1, 0.32, 1);
+}
+
+.heroBack:active {
+  transform: scale(0.94) !important;
+}
+
+.heroLogo {
+  height: 24px;
+  display: block;
+}
+
+.heroMode {
+  position: absolute;
+  right: 12px;
+  top: 12px;
+  border: none;
+  backdrop-filter: blur(16px) saturate(140%);
+  -webkit-backdrop-filter: blur(16px) saturate(140%);
+  width: 44px;
+  height: 44px;
+  border-radius: var(--radius-full);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition:
+    background-color 0.16s,
+    transform 0.16s cubic-bezier(0.23, 1, 0.32, 1);
+}
+
+.heroMode:hover {
+  background: rgba(246, 240, 228, 0.18) !important;
+}
+
+.heroMode:active {
+  transform: scale(0.92) !important;
+}
+
+.deskBar {
+  flex: 0 0 auto;
+  height: 76px;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 0 40px;
+}
+
+.deskBack {
+  width: 44px;
+  height: 44px;
+  border-radius: var(--radius-full);
+  border: none;
+  background: transparent;
+  color: var(--ob-fg);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition:
+    background-color 0.16s,
+    transform 0.16s cubic-bezier(0.23, 1, 0.32, 1);
+}
+
+.deskBack:hover {
+  background: var(--ob-hover) !important;
+}
+
+.deskBack:active {
+  transform: scale(0.94) !important;
+}
+
+.deskMode {
+  margin-left: auto;
+  border: none;
+  background: transparent;
+  color: var(--ob-fg);
+  width: 44px;
+  height: 44px;
+  border-radius: var(--radius-full);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition:
+    background-color 0.16s,
+    transform 0.16s cubic-bezier(0.23, 1, 0.32, 1);
+}
+
+.deskMode:hover {
+  background: var(--ob-hover) !important;
+}
+
+.deskMode:active {
+  transform: scale(0.92) !important;
+}
+
+.auth {
+  display: flex;
+  flex-direction: column;
+  position: relative;
+  z-index: 1;
+  transition: margin-top 0.42s cubic-bezier(0.77, 0, 0.175, 1);
+}
+
+.screen {
+  width: 100%;
+  margin: 0 auto;
+}
+
+.netError {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 20px;
+  padding: 12px 12px 12px 16px;
+  border-radius: var(--radius-md);
+  background: var(--ob-chip);
+  font-size: 14.5px;
+  animation: obRise 0.28s cubic-bezier(0.23, 1, 0.32, 1) both;
+}
+
+.grow {
+  flex: 1;
+}
+
+.retry {
+  flex: 0 0 auto;
+  height: 36px;
+  padding: 0 16px;
+  border-radius: var(--radius-full);
+  border: 1px solid var(--ob-ghost);
+  background: transparent;
+  color: var(--ob-fg);
+  font: inherit;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.footer {
+  flex: 0 0 auto;
+  display: flex;
+  gap: 18px;
+  font-size: 13.5px;
+}
+
+.footerLink {
+  color: var(--ob-sub);
+}
+
+.footerLink:hover {
+  color: var(--ob-fg) !important;
+}
+
+.photoSide {
+  flex: 1 1 50%;
+  min-width: 0;
+  position: relative;
+}
+
+.photoFrame {
+  position: sticky;
+  overflow: hidden;
+  background: #241a12;
+}
+
+.photo {
+  position: absolute;
+  inset: 0;
+  background-size: cover;
+  animation: obPhoto 0.7s cubic-bezier(0.23, 1, 0.32, 1) both;
+}
+
+.photoFade {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    180deg,
+    rgba(20, 16, 8, 0) 40%,
+    rgba(20, 16, 8, 0.55) 100%
+  );
+  pointer-events: none;
+}
+
+.carousel {
+  position: absolute;
+  left: 32px;
+  bottom: 32px;
+  width: min(400px, calc(100% - 64px));
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.benefitCard {
+  border-radius: var(--radius-md);
+  background: rgba(246, 240, 228, 0.1);
+  backdrop-filter: blur(16px) saturate(140%);
+  -webkit-backdrop-filter: blur(16px) saturate(140%);
+  color: #f6f0e4;
+  overflow: hidden;
+}
+
+.benefit {
+  display: flex;
+  gap: 16px;
+  align-items: flex-start;
+  padding: 22px;
+  animation: obIn 0.45s cubic-bezier(0.23, 1, 0.32, 1) both;
+}
+
+.benefitIcon {
+  flex: 0 0 auto;
+  width: 44px;
+  height: 44px;
+  box-sizing: border-box;
+  border-radius: var(--radius-full);
+  background: rgba(246, 240, 228, 0.14);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  line-height: 0;
+}
+
+.benefitSvg {
+  display: block;
+  flex: 0 0 auto;
+}
+
+.benefitText {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  min-height: 66px;
+}
+
+.benefitTitle {
+  font-size: 17px;
+  font-weight: 600;
+  line-height: 1.3;
+}
+
+.benefitSub {
+  font-size: 14.5px;
+  line-height: 1.45;
+  color: rgba(246, 240, 228, 0.85);
+  text-wrap: pretty;
+}
+
+.dots {
+  display: flex;
+  gap: 6px;
+  padding-left: 4px;
+}
+
+.dot {
+  height: 6px;
+  padding: 0;
+  border: none;
+  border-radius: var(--radius-full);
+  cursor: pointer;
+  transition:
+    width 0.3s cubic-bezier(0.23, 1, 0.32, 1),
+    background-color 0.3s;
+}
+
+/* shellDir */
+.shellRow {
+  flex-direction: row;
+}
+
+.shellColumn {
+  flex-direction: column;
+}
+
+/* heroFlex / heroH / heroM / heroR / heroBg by layout (see getLayout) */
+.hero[data-variant="default"] {
+  flex: 1 0 auto;
+  height: 34dvh;
+  margin: 0;
+  border-radius: 0;
+  background: #241a12;
+}
+
+.hero[data-variant="welcome"] {
+  flex: 1 0 auto;
+  height: 60dvh;
+  margin: 0;
+  border-radius: 0;
+  background: #241a12;
+}
+
+.hero[data-variant="compact"] {
+  flex: 0 0 auto;
+  height: 84px;
+  margin: 0;
+  border-radius: 0;
+  background: #241a12;
+}
+
+.hero[data-variant="nophoto"] {
+  flex: 0 0 auto;
+  height: 68px;
+  margin: 0;
+  border-radius: 0;
+  background: transparent;
+}
+
+.hero[data-variant="clipped"] {
+  flex: 0 0 auto;
+  height: max(220px, 40dvh);
+  margin: 12px 12px 0;
+  border-radius: var(--radius-section);
+  background: #241a12;
+}
+
+.hero[data-variant="clipped-compact"] {
+  flex: 0 0 auto;
+  height: 84px;
+  margin: 12px 12px 0;
+  border-radius: var(--radius-section);
+  background: #241a12;
+}
+
+.hero[data-variant="clipped-welcome"] {
+  flex: 1 0 auto;
+  height: calc(100dvh - 24px);
+  margin: 12px;
+  border-radius: var(--radius-section);
+  background: #241a12;
+}
+
+/* heroScrim */
+.scrim[data-variant="none"] {
+  background: none;
+}
+
+.scrim[data-variant="light"] {
+  background: linear-gradient(
+    180deg,
+    rgba(26, 23, 20, 0.38) 0%,
+    rgba(26, 23, 20, 0) 30%,
+    rgba(250, 246, 238, 0.2) 58%,
+    #faf6ee 100%
+  );
+}
+
+.scrim[data-variant="light-compact"] {
+  background: linear-gradient(
+    180deg,
+    rgba(26, 23, 20, 0.45),
+    rgba(26, 23, 20, 0.6)
+  );
+}
+
+.scrim[data-variant="dark"] {
+  background: linear-gradient(
+    180deg,
+    rgba(26, 23, 20, 0.35) 0%,
+    rgba(26, 23, 20, 0) 28%,
+    rgba(14, 12, 10, 0.2) 55%,
+    #0e0c0a 100%
+  );
+}
+
+.scrim[data-variant="dark-compact"] {
+  background: linear-gradient(
+    180deg,
+    rgba(26, 23, 20, 0.55),
+    rgba(26, 23, 20, 0.85)
+  );
+}
+
+.scrim[data-variant="clipped"] {
+  background: linear-gradient(
+    180deg,
+    rgba(26, 23, 20, 0.32) 0%,
+    rgba(26, 23, 20, 0) 32%
+  );
+}
+
+.scrim[data-variant="clipped-welcome"] {
+  background: linear-gradient(
+    180deg,
+    rgba(26, 23, 20, 0.32) 0%,
+    rgba(26, 23, 20, 0) 28%,
+    rgba(26, 23, 20, 0) 45%,
+    rgba(26, 23, 20, 0.78) 100%
+  );
+}
+
+/* the ph.url photo arrives as --ob-photo; ph.pos by photo */
+.heroPhoto,
+.photo {
+  background-image: var(--ob-photo);
+}
+
+.photoWelcome {
+  background-position: center 32%;
+}
+
+.photoClient {
+  background-position: center 22%;
+}
+
+.photoStylist {
+  background-position: center 28%;
+}
+
+/* hbBg / hbFg */
+.heroButtonPhoto {
+  background: rgba(246, 240, 228, 0.1);
+  color: #f6f0e4;
+}
+
+.heroButtonPlain {
+  background: var(--ob-chip);
+  color: var(--ob-fg);
+}
+
+/* authFlex / authJustify / authPad / contentMt */
+.auth[data-variant="desk"] {
+  flex: 1 0 auto;
+  justify-content: center;
+  padding: 8px 40px 24px;
+  margin-top: 0px;
+}
+
+.auth[data-variant="nophoto"] {
+  flex: 1 0 auto;
+  justify-content: flex-start;
+  padding: max(24px, calc(25dvh - 68px)) 22px 20px;
+  margin-top: 0px;
+}
+
+.auth[data-variant="welcome-over"] {
+  flex: 0 0 auto;
+  justify-content: flex-start;
+  padding: 0;
+  margin-top: 0px;
+}
+
+.auth[data-variant="welcome"] {
+  flex: 0 0 auto;
+  justify-content: flex-start;
+  padding: 0 22px 20px;
+  margin-top: -20dvh;
+}
+
+.auth[data-variant="welcome-compact"] {
+  flex: 0 0 auto;
+  justify-content: flex-start;
+  padding: 0 22px 20px;
+  margin-top: 0px;
+}
+
+.auth[data-variant="default"] {
+  flex: 0 0 auto;
+  justify-content: flex-start;
+  padding: 24px 22px 20px;
+  margin-top: -6dvh;
+}
+
+.auth[data-variant="default-compact"],
+.auth[data-variant="clipped"] {
+  flex: 0 0 auto;
+  justify-content: flex-start;
+  padding: 24px 22px 20px;
+  margin-top: 0px;
+}
+
+/* colMax / enterAnim */
+.screenDesk {
+  max-width: 400px;
+}
+
+.screenMobile {
+  max-width: 480px;
+}
+
+.enterForward {
+  animation: obIn 0.34s cubic-bezier(0.23, 1, 0.32, 1) both;
+}
+
+.enterBack {
+  animation: obBack 0.34s cubic-bezier(0.23, 1, 0.32, 1) both;
+}
+
+/* footJustify / footPad */
+.footerDesk {
+  justify-content: flex-start;
+  padding: 20px 40px 28px;
+}
+
+.footerMobile {
+  justify-content: center;
+  padding: 8px 22px 22px;
+}
+
+/* photoPad / photoTop / photoH / photoR (constant) */
+.photoSide {
+  padding: 0;
+}
+
+.photoFrame {
+  top: 0;
+  height: 100dvh;
+  border-radius: 0;
+}
+
+/* bnDots d.w / d.bg */
+.dotOn {
+  width: 22px;
+  background: #f6f0e4;
+}
+
+.dotOff {
+  width: 6px;
+  background: rgba(246, 240, 228, 0.45);
+}
+
+/* helmet keyframes (copied: CSS modules scope keyframe names per file) */
+@keyframes obBack {
+  from {
+    opacity: 0;
+    transform: translateX(-32px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+@keyframes obIn {
+  from {
+    opacity: 0;
+    transform: translateX(32px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+@keyframes obPhoto {
+  from {
+    opacity: 0;
+    transform: scale(1.04);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+@keyframes obRise {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+/* helmet: under reduced motion the slides, rises and shake become fades */
+@media (prefers-reduced-motion: reduce) {
+  @keyframes obBack {
+    from {
+      opacity: 0;
+    }
+    to {
+      opacity: 1;
+    }
+  }
+  @keyframes obIn {
+    from {
+      opacity: 0;
+    }
+    to {
+      opacity: 1;
+    }
+  }
+  @keyframes obPhoto {
+    from {
+      opacity: 0;
+    }
+    to {
+      opacity: 1;
+    }
+  }
+  @keyframes obRise {
+    from {
+      opacity: 0;
+    }
+    to {
+      opacity: 1;
+    }
+  }
+}

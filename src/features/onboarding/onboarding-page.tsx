@@ -1,0 +1,133 @@
+import { useLayoutEffect } from "react";
+import type { ComponentType } from "react";
+import { joinClassNames } from "../../utils/class-names";
+import { AuthShell } from "./auth-shell";
+import {
+  ChooserScreen,
+  EmailScreen,
+  PasswordScreen,
+  WelcomeScreen,
+} from "./auth-screens-entry";
+import { CodeScreen, CreateScreen, SocialScreen } from "./auth-screens-account";
+import {
+  EndScreen,
+  ForgotSentScreen,
+  ProDoneScreen,
+  ResetScreen,
+  StudioScreen,
+} from "./auth-screens-end";
+import { SCREEN_LABELS, TURNSTILE_SCREENS } from "./onboarding-data";
+import "./onboarding-helmet.module.css";
+import { getLayout } from "./onboarding-layout";
+import styles from "./onboarding-page.module.css";
+import { getErrors, isCodeScreen } from "./onboarding-state";
+import type { OnboardingProps } from "./onboarding-state";
+import type { ScreenProps, ScreenView } from "./screen-props";
+import { TermsSheet } from "./terms-sheet";
+import { useOnboarding } from "./use-onboarding";
+import { Wizard } from "./wizard";
+
+const SHELL_SCREENS: Record<string, ComponentType<ScreenProps>> = {
+  chooser: ChooserScreen,
+  "cust-email": EmailScreen,
+  "pro-email": EmailScreen,
+  "forgot-email": EmailScreen,
+  "cust-password": PasswordScreen,
+  "pro-password": PasswordScreen,
+  "cust-create": CreateScreen,
+  "cust-social": SocialScreen,
+  verify: CodeScreen,
+  "pro-2fa": CodeScreen,
+  "forgot-sent": ForgotSentScreen,
+  "forgot-reset": ResetScreen,
+  studio: StudioScreen,
+  "pro-done": ProDoneScreen,
+  "forgot-done": EndScreen,
+};
+
+/**
+ * Log in / sign up and the stylist set-up wizard, route "/onboarding" (prototype Onboarding.dc.html).
+ * Every prop can also be passed as a URL query param.
+ */
+export const OnboardingPage = (props: OnboardingProps) => {
+  const onboarding = useOnboarding(props);
+  const { state, props: resolved, rootRef, actions } = onboarding;
+  const layout = getLayout(state, resolved);
+  const { screen, isWizard, desk, isDark, welcomeOver } = layout;
+
+  // page-wide helmet rules (cream / ink page, focus rings) apply while Onboarding is mounted
+  useLayoutEffect(() => {
+    document.documentElement.classList.add("onboarding-page");
+    return () => document.documentElement.classList.remove("onboarding-page");
+  }, []);
+
+  const errors = getErrors(state);
+  const shown: Record<string, string> = {};
+  for (const [key, message] of Object.entries(errors))
+    if (state.touched[key]) shown[key] = message;
+  for (const [key, value] of Object.entries(state.err))
+    if (value && typeof value === "string") shown[key] = value;
+  const turnstileMode = state.tsMode || resolved.turnstile || "pass";
+  const turnstileShown =
+    turnstileMode !== "pass" && TURNSTILE_SCREENS.includes(screen);
+  const view: ScreenView = {
+    shown,
+    turnstileShown,
+    canSubmit:
+      !state.busy &&
+      !(state.lockedUntil > Date.now()) &&
+      Object.keys(errors).length === 0 &&
+      !(isCodeScreen(screen) && state.code.join("").length < 6) &&
+      !(turnstileShown && state.ts !== "ok"),
+  };
+  const screenProps: ScreenProps = { onboarding, layout, view };
+  const ShellScreen =
+    screen === "welcome"
+      ? welcomeOver
+        ? null
+        : WelcomeScreen
+      : SHELL_SCREENS[screen];
+
+  return (
+    <div
+      ref={rootRef}
+      data-screen-label={SCREEN_LABELS[screen] || screen}
+      className={joinClassNames(
+        styles.root,
+        isDark ? styles.themeDark : styles.themeLight,
+      )}
+    >
+      {!isWizard && (
+        <AuthShell onboarding={onboarding} layout={layout}>
+          {ShellScreen && <ShellScreen {...screenProps} />}
+        </AuthShell>
+      )}
+      {isWizard && <Wizard {...screenProps} />}
+      {!!state.toast && (
+        <div role="status" className={styles.toast}>
+          <svg
+            width="18"
+            height="18"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="2.2"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            className={styles.toastIcon}
+          >
+            <path d="M5 12l5 5L20 7"></path>
+          </svg>
+          <span>{state.toast}</span>
+        </div>
+      )}
+      {state.termsOn && (
+        <TermsSheet
+          kind={state.termsOn}
+          desk={desk}
+          onClose={() => actions.setState({ termsOn: null })}
+        />
+      )}
+    </div>
+  );
+};

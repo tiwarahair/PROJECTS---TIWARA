@@ -1,0 +1,134 @@
+/* Values verbatim from prototype Onboarding.dc.html (inline styles; style-hover/active/focus as !important like the prototype runtime). */
+
+.scrim {
+  position: fixed;
+  inset: 0;
+  z-index: 80;
+  background: var(--scrim-modal, rgba(26, 23, 20, 0.45));
+  animation: obFade 0.22s cubic-bezier(0.23, 1, 0.32, 1) both;
+}
+
+.sheet {
+  position: fixed;
+  z-index: 81;
+  background: #fffefb;
+  color: var(--text-primary);
+  box-shadow: var(--shadow-modal, 0 24px 60px -12px rgba(26, 23, 20, 0.35));
+  display: flex;
+  flex-direction: column;
+}
+
+.head {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 18px 18px 14px 22px;
+  border-bottom: 1px solid var(--border-subtle);
+}
+
+.grow {
+  flex: 1;
+}
+
+.title {
+  font-size: 18px;
+  font-weight: 600;
+}
+
+.version {
+  font-size: 13px;
+  color: var(--text-secondary);
+  margin-top: 2px;
+}
+
+.close {
+  width: 44px;
+  height: 44px;
+  border-radius: var(--radius-full);
+  border: 1px solid var(--border-strong);
+  background: transparent;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--text-primary);
+  cursor: pointer;
+}
+
+.body {
+  overflow-y: auto;
+  padding: 18px 22px 28px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  font-size: 15px;
+  line-height: 1.6;
+}
+
+.paragraph {
+  margin: 0;
+}
+
+/* tTop / tLeft / tRight / tBottom / tW / tMaxH / tTf / tR / tAnim */
+.sheetDesk {
+  top: 50%;
+  left: 50%;
+  right: auto;
+  bottom: auto;
+  width: min(560px, calc(100% - 32px));
+  max-height: 80vh;
+  transform: translate(-50%, -50%);
+  border-radius: var(--radius-lg);
+  animation: obPop 0.32s cubic-bezier(0.32, 0.72, 0, 1) both;
+}
+
+.sheetMobile {
+  top: auto;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  width: auto;
+  max-height: 86dvh;
+  transform: none;
+  border-radius: var(--radius-lg) var(--radius-lg) 0 0;
+  animation: obUp 0.32s cubic-bezier(0.32, 0.72, 0, 1) both;
+}
+
+/* helmet keyframes (copied: CSS modules scope keyframe names per file) */
+@keyframes obFade {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+@keyframes obPop {
+  from {
+    opacity: 0;
+    transform: translate(-50%, -50%) scale(0.96);
+  }
+  to {
+    opacity: 1;
+    transform: translate(-50%, -50%);
+  }
+}
+@keyframes obUp {
+  from {
+    transform: translateY(100%);
+  }
+  to {
+    transform: none;
+  }
+}
+
+/* helmet: under reduced motion the slides, rises and shake become fades */
+@media (prefers-reduced-motion: reduce) {
+  @keyframes obUp {
+    from {
+      opacity: 0;
+    }
+    to {
+      opacity: 1;
+    }
+  }
+}

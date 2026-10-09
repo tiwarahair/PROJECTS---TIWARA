@@ -1,0 +1,372 @@
+/* Values verbatim from prototype Onboarding.dc.html (inline styles; style-hover/active/focus as !important like the prototype runtime). */
+
+.label {
+  display: block;
+  font-size: 14px;
+  font-weight: 600;
+  margin-bottom: 8px;
+}
+
+.labelNext {
+  display: block;
+  font-size: 14px;
+  font-weight: 600;
+  margin: 10px 0 8px;
+}
+
+.labelGap {
+  display: block;
+  font-size: 14px;
+  font-weight: 600;
+  margin: 16px 0 8px;
+}
+
+.inputAnimated {
+  width: 100%;
+  box-sizing: border-box;
+  height: 54px;
+  border-radius: var(--radius-sm);
+  background: var(--ob-field);
+  color: var(--ob-fg);
+  padding: 0 16px;
+  font: inherit;
+  font-size: 16px;
+  outline: none;
+  transition:
+    border-color 0.16s,
+    box-shadow 0.16s;
+}
+
+.inputAnimated:focus {
+  border-color: var(--ob-focus) !important;
+  box-shadow: 0 0 0 3px var(--ob-ring) !important;
+}
+
+.input {
+  width: 100%;
+  box-sizing: border-box;
+  height: 54px;
+  border-radius: var(--radius-sm);
+  background: var(--ob-field);
+  color: var(--ob-fg);
+  padding: 0 16px;
+  font: inherit;
+  font-size: 16px;
+  outline: none;
+}
+
+.input:focus {
+  border-color: var(--ob-focus) !important;
+  box-shadow: 0 0 0 3px var(--ob-ring) !important;
+}
+
+.passwordInputAnimated {
+  width: 100%;
+  box-sizing: border-box;
+  height: 54px;
+  border-radius: var(--radius-sm);
+  background: var(--ob-field);
+  color: var(--ob-fg);
+  padding: 0 72px 0 16px;
+  font: inherit;
+  font-size: 16px;
+  outline: none;
+  transition:
+    border-color 0.16s,
+    box-shadow 0.16s;
+}
+
+.passwordInputAnimated:focus {
+  border-color: var(--ob-focus) !important;
+  box-shadow: 0 0 0 3px var(--ob-ring) !important;
+}
+
+.passwordInput {
+  width: 100%;
+  box-sizing: border-box;
+  height: 54px;
+  border-radius: var(--radius-sm);
+  background: var(--ob-field);
+  color: var(--ob-fg);
+  padding: 0 72px 0 16px;
+  font: inherit;
+  font-size: 16px;
+  outline: none;
+}
+
+.passwordInput:focus {
+  border-color: var(--ob-focus) !important;
+  box-shadow: 0 0 0 3px var(--ob-ring) !important;
+}
+
+.passwordWrap {
+  position: relative;
+}
+
+.passwordToggle {
+  position: absolute;
+  right: 6px;
+  top: 5px;
+  height: 44px;
+  padding: 0 12px;
+  border: none;
+  background: none;
+  font: inherit;
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--ob-sub);
+  cursor: pointer;
+}
+
+.error {
+  min-height: 4px;
+  font-size: 13.5px;
+  color: var(--ob-err);
+  margin-top: 6px;
+}
+
+.mobileWrap {
+  display: flex;
+  align-items: stretch;
+  height: 54px;
+  border-radius: var(--radius-sm);
+  overflow: hidden;
+  background: var(--ob-field);
+}
+
+.mobileWrap:focus-within {
+  border-color: var(--ob-focus) !important;
+  box-shadow: 0 0 0 3px var(--ob-ring) !important;
+}
+
+.prefix {
+  display: flex;
+  align-items: center;
+  padding: 0 14px;
+  font-size: 16px;
+  font-weight: 500;
+  color: var(--ob-sub);
+  border-right: 1px solid var(--ob-soft);
+}
+
+.mobileInput {
+  flex: 1;
+  min-width: 0;
+  border: none;
+  background: transparent;
+  color: var(--ob-fg);
+  padding: 0 14px;
+  font: inherit;
+  font-size: 16px;
+  outline: none;
+  box-shadow: none;
+}
+
+.termsLabel {
+  display: flex;
+  gap: 12px;
+  align-items: flex-start;
+  margin-top: 20px;
+  font-size: 14.5px;
+  line-height: 1.5;
+  cursor: pointer;
+}
+
+.checkbox {
+  flex: 0 0 auto;
+  width: 20px;
+  height: 20px;
+  margin: 2px 0 0;
+  accent-color: var(--accent-700);
+}
+
+.inlineLink {
+  border: none;
+  background: none;
+  padding: 0;
+  font: inherit;
+  font-weight: 600;
+  color: var(--ob-link);
+  cursor: pointer;
+}
+
+.termsError {
+  font-size: 13.5px;
+  color: var(--ob-err);
+  margin: 6px 0 0 32px;
+}
+
+.marketingLabel {
+  display: flex;
+  gap: 12px;
+  align-items: flex-start;
+  margin-top: 12px;
+  font-size: 14.5px;
+  line-height: 1.5;
+  color: var(--ob-sub);
+  cursor: pointer;
+}
+
+.submitTight {
+  margin-top: 14px;
+  width: 100%;
+  height: 54px;
+  border-radius: var(--radius-full);
+  border: none;
+  background: var(--accent-700);
+  color: #fffefb;
+  font: inherit;
+  font-size: 16px;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  transition:
+    opacity 0.2s,
+    background-color 0.16s,
+    transform 0.16s cubic-bezier(0.23, 1, 0.32, 1);
+}
+
+.submitTight:active {
+  transform: scale(0.98) !important;
+}
+
+.submitLoose {
+  margin-top: 20px;
+  width: 100%;
+  height: 54px;
+  border-radius: var(--radius-full);
+  border: none;
+  background: var(--accent-700);
+  color: #fffefb;
+  font: inherit;
+  font-size: 16px;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  transition:
+    opacity 0.2s,
+    transform 0.16s cubic-bezier(0.23, 1, 0.32, 1);
+}
+
+.submitLoose:active {
+  transform: scale(0.98) !important;
+}
+
+.submitCode {
+  margin-top: 14px;
+  width: 100%;
+  height: 54px;
+  border-radius: var(--radius-full);
+  border: none;
+  background: var(--accent-700);
+  color: #fffefb;
+  font: inherit;
+  font-size: 16px;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  transition:
+    opacity 0.2s,
+    transform 0.16s cubic-bezier(0.23, 1, 0.32, 1);
+}
+
+.submitCode:active {
+  transform: scale(0.98) !important;
+}
+
+.spinner {
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  border: 2px solid rgba(255, 254, 251, 0.35);
+  border-top-color: #fffefb;
+  animation: obSpin 0.6s linear infinite;
+}
+
+.nameRow {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}
+
+.nameCell {
+  min-width: 0;
+}
+
+.modeIcon {
+  animation: obBadge 0.3s cubic-bezier(0.23, 1, 0.32, 1) both;
+}
+
+/* e.<field>Bd (shell): --ob-err with an error, else --ob-line */
+.border {
+  border: 1px solid var(--ob-line);
+}
+
+.borderError {
+  border: 1px solid var(--ob-err);
+}
+
+/* submitOp / submitCur */
+.submitOn {
+  opacity: 1;
+}
+
+.submitOff {
+  opacity: 0.4;
+}
+
+.submitReady {
+  cursor: pointer;
+}
+
+.submitInert {
+  cursor: default;
+}
+
+/* pwShake */
+.shake {
+  animation: obShake 0.3s cubic-bezier(0.36, 0.07, 0.19, 0.97);
+}
+
+/* helmet keyframes (copied: CSS modules scope keyframe names per file) */
+@keyframes obBadge {
+  from {
+    opacity: 0;
+    transform: scale(0.8);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+@keyframes obShake {
+  0%,
+  100% {
+    transform: none;
+  }
+  25% {
+    transform: translateX(-5px);
+  }
+  75% {
+    transform: translateX(5px);
+  }
+}
+@keyframes obSpin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* helmet: under reduced motion the slides and rises become fades; the empty obShake turns the shake off */
+/* eslint-disable css/no-empty-blocks */
+@media (prefers-reduced-motion: reduce) {
+  @keyframes obShake {
+  }
+}
+/* eslint-enable css/no-empty-blocks */
