@@ -1,0 +1,42 @@
+import { act, render, screen } from "@testing-library/react";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+import { WelcomeToast } from "./welcome-toast";
+
+describe("WelcomeToast (tw-toast.js port)", () => {
+  beforeEach(() => {
+    vi.useFakeTimers();
+    sessionStorage.clear();
+    window.history.replaceState(null, "", "/");
+  });
+  afterEach(() => vi.useRealTimers());
+
+  it("shows the stored welcome once, 600ms after load, then hides after 4s", async () => {
+    sessionStorage.setItem("tw_toast", "Welcome back, Nia");
+    render(<WelcomeToast />);
+    expect(sessionStorage.getItem("tw_toast")).toBeNull();
+    expect(screen.queryByRole("status")).not.toBeInTheDocument();
+    await act(async () => vi.advanceTimersByTime(600));
+    expect(screen.getByRole("status")).toHaveTextContent("Welcome back, Nia");
+    await act(async () => vi.advanceTimersByTime(4000));
+    await act(async () => vi.advanceTimersByTime(260));
+    expect(screen.queryByRole("status")).not.toBeInTheDocument();
+  });
+
+  it("pins the ?twtoast= message for boards", async () => {
+    window.history.replaceState(
+      null,
+      "",
+      "/?twtoast=Welcome%20to%20Tiw%C3%A1ra%27s%20House%2C%20Nia",
+    );
+    render(<WelcomeToast />);
+    await act(async () => vi.advanceTimersByTime(10000));
+    expect(screen.getByRole("status")).toHaveTextContent(
+      "Welcome to Tiwára's House, Nia",
+    );
+  });
+
+  it("renders nothing without a message", () => {
+    render(<WelcomeToast />);
+    expect(screen.queryByRole("status")).not.toBeInTheDocument();
+  });
+});

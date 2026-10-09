@@ -1,0 +1,91 @@
+/* Header name menu, values verbatim from prototype tw-fav.js F.openMenu(). */
+.menu {
+  position: fixed;
+  top: var(--menu-top);
+  left: var(--menu-left);
+  z-index: 2147482500;
+  min-width: 240px;
+  box-sizing: border-box;
+  padding: 8px;
+  background: #fffefb;
+  border-radius: 16px;
+  box-shadow:
+    0 16px 40px -12px rgba(26, 23, 20, 0.28),
+    0 2px 6px rgba(26, 23, 20, 0.06);
+  font:
+    400 15px/1.3 "Hanken Grotesk",
+    system-ui,
+    sans-serif;
+  color: #1a1714;
+  transform-origin: top right;
+  opacity: 0;
+  transform: scale(0.97) translateY(-4px);
+  transition:
+    opacity 0.16s cubic-bezier(0.2, 0.8, 0.2, 1),
+    transform 0.16s cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+
+/* once measured, the menu is centred under the trigger */
+.measured {
+  transform-origin: top center;
+}
+
+.reduced {
+  transform: none;
+}
+
+.entered {
+  opacity: 1;
+  transform: none;
+}
+
+.head {
+  padding: 10px 12px 12px;
+  border-bottom: 1px solid rgba(26, 23, 20, 0.1);
+  margin-bottom: 6px;
+}
+
+.name {
+  font-weight: 600;
+}
+
+.email {
+  font-size: 13.5px;
+  color: #575045;
+  margin-top: 2px;
+}
+
+/* :hover/:focus-visible repeat colour, decoration and outline: the prototype set these inline, above the global a/:focus-visible rules. */
+.row,
+.row:hover,
+.row:focus-visible {
+  display: flex;
+  align-items: center;
+  width: 100%;
+  min-height: 44px;
+  box-sizing: border-box;
+  padding: 0 12px;
+  border: none;
+  border-radius: 12px;
+  background: transparent;
+  color: #1a1714;
+  font: inherit;
+  text-align: left;
+  text-decoration: none;
+  cursor: pointer;
+  outline: none;
+}
+
+.current {
+  font-weight: 600;
+}
+
+.row.active {
+  background: rgba(26, 23, 20, 0.08);
+}
+
+.separator {
+  height: 1px;
+  background: rgba(26, 23, 20, 0.1);
+  margin: 6px 4px;
+}
