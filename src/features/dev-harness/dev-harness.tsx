@@ -4,6 +4,8 @@ import { AddressFinder } from "../../components/address-finder/address-finder";
 import { AllergyField } from "../../components/allergy-field/allergy-field";
 import { BusinessDetails } from "../../components/business-details/business-details";
 import type { BusinessDetailsProps } from "../../components/business-details/business-details";
+import { PaymentPolicy } from "../../components/payment-policy/payment-policy";
+import type { PaymentPolicyProps } from "../../components/payment-policy/payment-policy";
 import { SearchSelect } from "../../components/search-select/search-select";
 import type { SearchSelectProps } from "../../components/search-select/search-select";
 import { StylistCard } from "../../components/stylist-card/stylist-card";
@@ -265,6 +267,49 @@ const BUSINESS_DETAILS: {
   },
 ];
 
+const PAYMENT_POLICIES: {
+  fixture: string;
+  isWide: boolean;
+  props: PaymentPolicyProps;
+}[] = [
+  ...(["default", "full", "card", "none", "error", "unsaved"] as const).map(
+    (preset) => ({ fixture: preset, isWide: false, props: { preset } }),
+  ),
+  { fixture: "wide-default", isWide: true, props: { preset: "default" } },
+  { fixture: "wide-unsaved", isWide: true, props: { preset: "unsaved" } },
+  { fixture: "embedded", isWide: true, props: { embedded: true } },
+  {
+    fixture: "embedded-hide",
+    isWide: true,
+    props: { embedded: true, hideSave: true },
+  },
+  { fixture: "one-booking", isWide: false, props: { bookingsCount: 1 } },
+  {
+    fixture: "no-bookings",
+    isWide: false,
+    props: { bookingsCount: 0, stylistName: "Kemi" },
+  },
+  {
+    fixture: "seeded",
+    isWide: true,
+    props: {
+      value: {
+        mode: "card",
+        deposit: 30,
+        refundable: false,
+        window: 24,
+        grace: 15,
+        late: { on: true, kind: "pct", pct: 40 },
+        ns: { on: true, kind: "pct", pct: 100 },
+        extras: [
+          { type: "prep", text: "Come with hair washed and detangled." },
+          { type: "custom", text: "No extra guests, please." },
+        ],
+      },
+    },
+  },
+];
+
 const HARNESSES: Record<string, () => ReactNode> = {
   "address-finder": () =>
     ADDRESS_FIXTURES.map((fixture) => (
@@ -321,6 +366,19 @@ const HARNESSES: Record<string, () => ReactNode> = {
         {/* the prototype's dc-import host block (height auto) */}
         <div data-dc-host="">
           <BusinessDetails {...props} />
+        </div>
+      </div>
+    )),
+  "payment-policy": () =>
+    PAYMENT_POLICIES.map(({ fixture, isWide, props }) => (
+      <div
+        key={fixture}
+        className={isWide ? styles.wideBox : styles.phoneBox}
+        data-fx={fixture}
+      >
+        {/* the prototype's dc-import host block (height auto) */}
+        <div data-dc-host="">
+          <PaymentPolicy {...props} />
         </div>
       </div>
     )),
