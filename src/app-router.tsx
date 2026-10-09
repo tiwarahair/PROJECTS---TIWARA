@@ -8,6 +8,7 @@ import { DsSpecimens } from "./features/ds-specimens/ds-specimens";
 import { ManageBookingPage } from "./features/manage-booking/manage-booking-page";
 import { SaveDetailsPage } from "./features/save-details/save-details-page";
 import { OnboardingPage } from "./features/onboarding/onboarding-page";
+import { EmailChangeNoticePage } from "./features/email-change-notice/email-change-notice-page";
 import { HelpPage } from "./features/help/help-page";
 import { HomePage } from "./features/home/home-page";
 import { SearchPage } from "./features/search/search-page";
@@ -25,6 +26,7 @@ export const appRoutes: RouteObject[] = [
   { path: "/save-details", element: <SaveDetailsPage /> },
   { path: "/account", element: <AccountPage /> },
   { path: "/help", element: <HelpPage /> },
+  { path: "/email/email-change-notice", element: <EmailChangeNoticePage /> },
   { path: "/onboarding", element: <OnboardingPage /> },
   // dev-only: design-system gallery (mirrors each .card.html) and per-component fixture harnesses
   ...(import.meta.env.DEV

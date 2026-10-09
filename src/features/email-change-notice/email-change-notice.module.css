@@ -1,0 +1,93 @@
+/* Email Change Notice (prototype Email Change Notice.dc.html), inline styles verbatim */
+
+.page {
+  min-height: 100vh;
+  box-sizing: border-box;
+  padding: clamp(16px, 4vw, 40px) clamp(12px, 3vw, 24px);
+  background: #efebe4;
+}
+
+.column {
+  max-width: 560px;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.meta {
+  font-size: 13px;
+  line-height: 1.6;
+  color: var(--neutral-600);
+  padding: 0 4px;
+}
+
+.metaLabel {
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.card {
+  background: #fffefb;
+  border-radius: var(--radius-md);
+  padding: clamp(24px, 5vw, 40px);
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.logo {
+  height: 26px;
+  width: auto;
+  align-self: flex-start;
+}
+
+.title {
+  margin: 0;
+  font-family: "Schibsted Grotesk", sans-serif;
+  font-weight: 600;
+  letter-spacing: -0.02em;
+  font-size: 24px;
+  line-height: 1.2;
+}
+
+.greeting {
+  margin: 0;
+  font-size: 15.5px;
+  line-height: 1.6;
+}
+
+.body {
+  margin: 0;
+  font-size: 15.5px;
+  line-height: 1.6;
+  overflow-wrap: anywhere;
+}
+
+.cta {
+  align-self: flex-start;
+  display: inline-flex;
+  align-items: center;
+  height: 46px;
+  padding: 0 24px;
+  border-radius: var(--radius-full);
+  background: var(--accent-700);
+  color: var(--neutral-50);
+  font-size: 15px;
+  font-weight: 600;
+  text-decoration: none;
+}
+
+.cta:hover {
+  background: var(--accent-900) !important;
+  color: var(--neutral-50) !important;
+}
+
+.footnote {
+  margin: 0;
+  padding-top: 16px;
+  border-top: 1px solid var(--border-subtle);
+  font-size: 13px;
+  line-height: 1.55;
+  color: var(--neutral-600);
+}
