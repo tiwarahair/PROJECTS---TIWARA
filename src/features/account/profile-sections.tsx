@@ -1,0 +1,144 @@
+import { Link } from "react-router";
+import { StylistCard } from "../../components/stylist-card/stylist-card";
+import type { Stylist } from "../../types/stylist";
+import { SECTIONS } from "./account-data";
+import styles from "./profile-sections.module.css";
+import ui from "./account-ui.module.css";
+
+const getIcon = (id: string) =>
+  SECTIONS.find((section) => section.id === id)?.icon ?? "";
+
+export const FavouritesSection = ({
+  favourites,
+}: {
+  favourites: Stylist[];
+}) => (
+  <section data-screen-label="Account: Favourites">
+    {favourites.length > 0 && (
+      <>
+        <p className={styles.count}>
+          {favourites.length === 1
+            ? "1 saved stylist"
+            : favourites.length + " saved stylists"}
+        </p>
+        <div className={styles.favGrid}>
+          {favourites.map(
+            ({
+              id,
+              name,
+              cover,
+              rating,
+              reviews,
+              area,
+              verified,
+              fromLabel,
+            }) => (
+              // the prototype's dc-import host block, which the card's height:100% depends on
+              <div key={id} data-dc-host="">
+                <StylistCard
+                  href={"/stylist?stylist=" + id}
+                  bookHref={"/book?stylist=" + id}
+                  stylistId={id}
+                  cover={cover}
+                  stylistName={name}
+                  rating={rating}
+                  reviews={reviews}
+                  area={area}
+                  meta={fromLabel ? "From " + fromLabel : ""}
+                  verified={!!verified}
+                />
+              </div>
+            ),
+          )}
+        </div>
+      </>
+    )}
+    {!favourites.length && (
+      <div className={styles.favEmpty} data-screen-label="Favourites empty">
+        <div className={ui.emptyIcon}>
+          <svg
+            width="24"
+            height="24"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="2"
+            strokeLinejoin="round"
+            aria-hidden="true"
+          >
+            <path d={getIcon("favourites")}></path>
+          </svg>
+        </div>
+        <p className={ui.emptyText}>
+          No favourites yet. Tap the heart on any stylist to save them here.
+        </p>
+        <Link className={styles.favFind} to="/search">
+          Find a stylist
+        </Link>
+      </div>
+    )}
+  </section>
+);
+
+export const HairSection = ({
+  quiz,
+  quizDate,
+}: {
+  quiz: boolean;
+  quizDate: string;
+}) => {
+  const rows = [
+    ["Hair type", "Type 4C, coily"],
+    ["Length", "Shoulder length"],
+    ["Styles you like", "Knotless braids, silk press, twist outs"],
+    ["Last updated", quizDate],
+  ];
+  return (
+    <section data-screen-label="Account: Hair profile">
+      {quiz && (
+        <>
+          <div className={ui.list}>
+            {rows.map(([label, value]) => (
+              <div key={label} className={styles.quizRow}>
+                <div className={ui.rowLabel}>{label}</div>
+                <div className={styles.quizValue}>{value}</div>
+              </div>
+            ))}
+          </div>
+          <Link className={styles.retake} to="/#quiz">
+            Retake the quiz
+          </Link>
+        </>
+      )}
+      {!quiz && (
+        <div
+          className={styles.quizEmpty}
+          data-screen-label="Hair profile: not taken"
+        >
+          <div className={ui.emptyIcon}>
+            <svg
+              className={ui.icon}
+              width="24"
+              height="24"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              aria-hidden="true"
+            >
+              <path d={getIcon("hair")}></path>
+            </svg>
+          </div>
+          <p className={styles.quizEmptyText}>
+            Find styles that suit your hair
+          </p>
+          <Link className={styles.takeQuiz} to="/#quiz">
+            Take the hair quiz
+          </Link>
+        </div>
+      )}
+    </section>
+  );
+};

@@ -1,0 +1,269 @@
+import { useLayoutEffect } from "react";
+import { Link } from "react-router";
+import { FavHost } from "../../components/fav-host/fav-host";
+import { useAppSelector } from "../../stores/hooks";
+import { joinClassNames } from "../../utils/class-names";
+import { AccountDialogs } from "./account-dialogs";
+import { AccountHeader } from "./account-header";
+import { downloadFile, getCalendarFile } from "./account-logic";
+import { AccountMobileList, AccountSideNav } from "./account-nav";
+import { getAccountView } from "./account-view";
+import type { BookingCardView } from "./account-view";
+import { BookingsSection, OverviewSection } from "./bookings-sections";
+import { PersonalSection } from "./personal-section";
+import { FavouritesSection, HairSection } from "./profile-sections";
+import { SecuritySection } from "./security-section";
+import {
+  CommunicationSection,
+  PrivacySection,
+  SharedSection,
+} from "./settings-sections";
+import { useAccount } from "./use-account";
+import type { AccountProps } from "./use-account";
+import { AddressesSection, PaymentsSection } from "./wallet-sections";
+import helmet from "./account-helmet.module.css";
+import styles from "./account-page.module.css";
+
+export type AccountPageProps = AccountProps;
+
+/**
+ * The customer account, route "/account" (prototype Account.dc.html): side nav (wide) or section list (narrow),
+ * eleven sections chosen by ?section= (legacy ?tab=), dialogs, toast, and the logged-out / deleted gate.
+ */
+export const AccountPage = (props: AccountPageProps) => {
+  const account = useAccount(props);
+  const { state, actions, loggedIn } = account;
+  const favouriteIds = useAppSelector(({ favourites }) => favourites.ids);
+  const view = getAccountView(state, favouriteIds, loggedIn);
+  const { current, mobileHome, initials, accountName } = view;
+  const { setState, go, showToast } = actions;
+
+  useLayoutEffect(() => {
+    document.documentElement.classList.add("account-page");
+    return () => document.documentElement.classList.remove("account-page");
+  }, []);
+
+  const onCalendar = ({ booking, money }: BookingCardView) => {
+    downloadFile(
+      "tiwaras-house-" + booking.id + ".ics",
+      getCalendarFile(booking, money),
+      "text/calendar",
+    );
+    showToast("Calendar file downloaded");
+  };
+  const onCookies = () => {
+    setState(({ cookies }) => ({ ckDraft: { ...cookies } }));
+    actions.openDialog({ k: "cookies" });
+  };
+
+  return (
+    <div className={styles.page} data-screen-label={view.screenLabel}>
+      <AccountHeader
+        loggedIn={loggedIn}
+        loginHref={view.loginHref}
+        accountName={accountName}
+        initials={initials}
+        photo={state.photo}
+        menuOpen={state.menuOpen}
+        onToggleMenu={() =>
+          setState(({ menuOpen }) => ({ menuOpen: !menuOpen }))
+        }
+        onGo={go}
+        onLogOut={actions.logout}
+      />
+      {!loggedIn && (
+        <main
+          className={styles.gate}
+          data-screen-label={
+            state.deleted ? "Account deleted" : "Log in to see your account"
+          }
+        >
+          <div className={styles.gateInner}>
+            <h1 className={styles.gateTitle}>
+              {state.deleted
+                ? "Your account has been deleted"
+                : "Log in to see your account"}
+            </h1>
+            <p className={styles.gateText}>
+              {state.deleted
+                ? "We’ve logged you out. Your payment records are kept without your name, as we explained."
+                : "Your bookings, favourites and saved details are here once you log in."}
+            </p>
+            <Link
+              className={styles.gateCta}
+              to={state.deleted ? "/" : view.loginHref}
+            >
+              {state.deleted ? "Go to the home page" : "Log in"}
+            </Link>
+          </div>
+        </main>
+      )}
+      {loggedIn && (
+        <div className={styles.layout}>
+          {state.wide && (
+            <AccountSideNav
+              current={current}
+              accountName={accountName}
+              initials={initials}
+              photo={state.photo}
+              onGo={go}
+              onLogOut={actions.logout}
+            />
+          )}
+          <main className={styles.main}>
+            {mobileHome && (
+              <AccountMobileList
+                accountName={accountName}
+                initials={initials}
+                photo={state.photo}
+                onGo={go}
+                onLogOut={actions.logout}
+              />
+            )}
+            {!mobileHome && (
+              <>
+                <div className={styles.titleRow}>
+                  {!state.wide && !!state.sec && (
+                    <button
+                      className={styles.back}
+                      onClick={() => go(null)}
+                      aria-label="Back to your account"
+                    >
+                      <svg
+                        className={styles.icon}
+                        width="22"
+                        height="22"
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="currentColor"
+                        strokeWidth="2"
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        aria-hidden="true"
+                      >
+                        <path d="M19 12H5M11 18l-6-6 6-6"></path>
+                      </svg>
+                    </button>
+                  )}
+                  <h1 className={styles.title} id="ac-title" tabIndex={-1}>
+                    {view.title}
+                  </h1>
+                </div>
+                <p className={styles.description}>{view.description}</p>
+                <div className={styles.body}>
+                  {current === "overview" && (
+                    <OverviewSection
+                      upcoming={view.upcoming}
+                      quick={view.quick}
+                      onCalendar={onCalendar}
+                      onGo={go}
+                    />
+                  )}
+                  {current === "bookings" && (
+                    <BookingsSection
+                      upcoming={view.upcoming}
+                      past={view.past}
+                      activeTab={view.activeTab}
+                      showUpcoming={view.showUpcoming}
+                      showPast={view.showPast}
+                      onTab={(bkTab, focus) =>
+                        setState(
+                          { bkTab },
+                          focus
+                            ? () =>
+                                document
+                                  .getElementById("ac-bk-" + bkTab)
+                                  ?.focus()
+                            : undefined,
+                        )
+                      }
+                      onCalendar={onCalendar}
+                      onReceipt={(id) =>
+                        actions.openDialog({ k: "receipt", id })
+                      }
+                    />
+                  )}
+                  {current === "favourites" && (
+                    <FavouritesSection favourites={view.favourites} />
+                  )}
+                  {current === "hair" && (
+                    <HairSection quiz={state.quiz} quizDate={view.quizDate} />
+                  )}
+                  {current === "personal" && (
+                    <PersonalSection account={account} initials={initials} />
+                  )}
+                  {current === "security" && (
+                    <SecuritySection account={account} />
+                  )}
+                  {current === "payments" && (
+                    <PaymentsSection
+                      account={account}
+                      getCardInUse={view.getCardInUse}
+                    />
+                  )}
+                  {current === "addresses" && (
+                    <AddressesSection account={account} />
+                  )}
+                  {current === "shared" && (
+                    <SharedSection
+                      account={account}
+                      getStylistName={view.getStylistName}
+                    />
+                  )}
+                  {current === "communication" && (
+                    <CommunicationSection account={account} />
+                  )}
+                  {current === "privacy" && (
+                    <PrivacySection account={account} onCookies={onCookies} />
+                  )}
+                </div>
+              </>
+            )}
+          </main>
+        </div>
+      )}
+      <footer className={styles.footer} data-screen-label="Account footer">
+        <div className={joinClassNames(helmet.acFoot, styles.footInner)}>
+          <span>{"© Tiwára's House"}</span>
+          <nav className={styles.footNav} aria-label="Footer">
+            <Link className={styles.footLink} to="/help">
+              Help
+            </Link>
+            <Link className={styles.footLink} to="/help#terms">
+              Terms
+            </Link>
+            <Link className={styles.footLink} to="/help#privacy">
+              Privacy
+            </Link>
+            <button className={styles.footCookies} onClick={onCookies}>
+              Cookies
+            </button>
+          </nav>
+        </div>
+      </footer>
+      <AccountDialogs account={account} view={view} />
+      <div className={styles.liveRegion} aria-live="polite" role="status">
+        {state.toast}
+      </div>
+      {!!state.toast && (
+        <div className={styles.toast} aria-hidden="true" data-a="1">
+          <svg
+            className={styles.icon}
+            width="18"
+            height="18"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="var(--brand-yellow)"
+            strokeWidth="2.2"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+          >
+            <path d="M5 12l5 5L20 7"></path>
+          </svg>
+          <span className={styles.toastText}>{state.toast}</span>
+        </div>
+      )}
+      <FavHost />
+    </div>
+  );
+};

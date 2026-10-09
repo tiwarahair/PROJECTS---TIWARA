@@ -1,6 +1,7 @@
 import { createBrowserRouter } from "react-router";
 import type { RouteObject } from "react-router";
 import { AppLayout } from "./app-layout";
+import { AccountPage } from "./features/account/account-page";
 import { BookingPage } from "./features/booking/booking-page";
 import { DevHarness } from "./features/dev-harness/dev-harness";
 import { DsSpecimens } from "./features/ds-specimens/ds-specimens";
@@ -21,6 +22,7 @@ export const appRoutes: RouteObject[] = [
   { path: "/book", element: <BookingPage /> },
   { path: "/manage", element: <ManageBookingPage /> },
   { path: "/save-details", element: <SaveDetailsPage /> },
+  { path: "/account", element: <AccountPage /> },
   { path: "/onboarding", element: <OnboardingPage /> },
   // dev-only: design-system gallery (mirrors each .card.html) and per-component fixture harnesses
   ...(import.meta.env.DEV

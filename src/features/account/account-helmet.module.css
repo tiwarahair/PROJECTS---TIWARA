@@ -1,0 +1,73 @@
+/*
+ * Account <helmet> <style> rules, verbatim values (prototype Account.dc.html lines 21–36), in the page layer, scoped
+ * to html.account-page (set while mounted). The global reset lines identical to the base layer are omitted. The
+ * prototype's global .ac-mob / .ac-desk / .ac-foot / .ac-ov / .ac-dlg classes are this module's classes; components
+ * add them next to their own. acSheet and acFade live here because the rules below use them; the other keyframes
+ * are copied into the modules that use them.
+ */
+@layer page {
+  :global(html.account-page) textarea {
+    font-family: "Hanken Grotesk", sans-serif;
+  }
+
+  .acMob {
+    display: none !important;
+  }
+
+  @media (max-width: 760px) {
+    .acDesk {
+      display: none !important;
+    }
+    .acMob {
+      display: flex !important;
+    }
+    :global(html.account-page) input {
+      font-size: 16px !important;
+    }
+    .acFoot {
+      flex-direction: column !important;
+      align-items: center !important;
+      text-align: center;
+    }
+  }
+
+  @media (max-width: 640px) {
+    .acOv {
+      align-items: flex-end !important;
+      padding: 0 !important;
+    }
+    .acDlg {
+      max-width: none !important;
+      border-radius: 24px 24px 0 0 !important;
+      padding-bottom: calc(24px + env(safe-area-inset-bottom)) !important;
+      max-height: 92dvh;
+    }
+    .acDlg[data-a] {
+      animation-name: acSheet !important;
+    }
+  }
+
+  @keyframes acFade {
+    from {
+      opacity: 0;
+    }
+    to {
+      opacity: 1;
+    }
+  }
+
+  @keyframes acSheet {
+    from {
+      transform: translateY(100%);
+    }
+    to {
+      transform: none;
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    :global(html.account-page) [data-a] {
+      animation: acFade 0.2s ease both !important;
+    }
+  }
+}

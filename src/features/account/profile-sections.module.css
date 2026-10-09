@@ -1,0 +1,131 @@
+/* Account (prototype Account.dc.html), inline styles verbatim */
+
+.count {
+  margin: 0;
+  font-size: 15px;
+  color: var(--text-secondary);
+}
+
+.favGrid {
+  margin-top: 24px;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, 260px), 1fr));
+  gap: 40px 24px;
+}
+
+.favEmpty {
+  max-width: 420px;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 20px;
+}
+
+.favFind {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--accent-700);
+  color: var(--neutral-50);
+  font-weight: 600;
+  font-size: 15px;
+  padding: 13px 26px;
+  border-radius: var(--radius-full);
+  transition:
+    background-color 200ms cubic-bezier(0.2, 0.8, 0.2, 1),
+    transform 160ms cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+
+.favFind:hover {
+  background: #7a0e0f !important;
+  color: var(--neutral-50) !important;
+}
+
+.favFind:active {
+  transform: scale(0.97) !important;
+}
+
+.quizRow {
+  padding: 16px 0;
+  box-shadow: 0 -1px 0 var(--border-subtle);
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  gap: 6px 20px;
+}
+
+.quizValue {
+  flex: 1 1 200px;
+  min-width: 0;
+  font-size: 15px;
+  line-height: 1.5;
+}
+
+.retake {
+  margin-top: 18px;
+  height: 40px;
+  padding: 0 18px;
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius-full);
+  background: transparent;
+  color: var(--text-primary);
+  font: inherit;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.16s cubic-bezier(0.2, 0.8, 0.2, 1);
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  white-space: nowrap;
+  height: 44px;
+  padding: 0 20px;
+}
+
+.retake:hover {
+  background: var(--fill-quiet) !important;
+  color: var(--text-primary) !important;
+}
+
+.retake:active {
+  transform: scale(0.97) !important;
+}
+
+.quizEmpty {
+  max-width: 420px;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 18px;
+}
+
+.quizEmptyText {
+  margin: 0;
+  font-size: 16.5px;
+  line-height: 1.55;
+  color: var(--text-secondary);
+}
+
+.takeQuiz {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--accent-700);
+  color: var(--neutral-50);
+  font-weight: 600;
+  font-size: 15px;
+  padding: 13px 26px;
+  border-radius: var(--radius-full);
+  transition:
+    background-color 200ms cubic-bezier(0.2, 0.8, 0.2, 1),
+    transform 160ms cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+
+.takeQuiz:hover {
+  background: var(--accent-900) !important;
+  color: var(--neutral-50) !important;
+}
+
+.takeQuiz:active {
+  transform: scale(0.97) !important;
+}

@@ -1,0 +1,337 @@
+/* Account (prototype Account.dc.html), inline styles verbatim */
+
+.card {
+  padding: 18px 0;
+  box-shadow: 0 -1px 0 var(--border-subtle);
+  display: flex;
+  align-items: flex-start;
+  gap: 14px;
+  flex-wrap: wrap;
+}
+
+.cardMark {
+  flex: none;
+  width: 46px;
+  height: 32px;
+  margin-top: 2px;
+  border-radius: var(--radius-xs);
+  background: var(--neutral-900);
+  color: var(--neutral-50);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: "Schibsted Grotesk", sans-serif;
+  font-weight: 700;
+  font-size: 10.5px;
+  letter-spacing: 0.06em;
+}
+
+.cardBody {
+  flex: 1 1 200px;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+
+.cardTitle {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.inUse {
+  margin-top: 4px;
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  font-size: 14px;
+  color: var(--neutral-700, #3d3730);
+}
+
+.cardActions {
+  display: flex;
+  gap: 8px;
+  flex: 0 0 auto;
+  flex-wrap: wrap;
+}
+
+.cardButton {
+  height: 40px;
+  padding: 0 16px;
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius-full);
+  background: transparent;
+  color: var(--text-primary);
+  font: inherit;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.cardButton:hover {
+  background: var(--fill-quiet) !important;
+}
+
+.cardButton:active {
+  transform: scale(0.97) !important;
+}
+
+.inUseNote {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  border-radius: var(--radius-full);
+  color: var(--neutral-600);
+  cursor: help;
+  outline-offset: 2px;
+}
+
+.addCard {
+  margin-top: 20px;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  height: 44px;
+  padding: 0 20px;
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius-full);
+  background: transparent;
+  color: var(--text-primary);
+  font: inherit;
+  font-size: 14.5px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.16s cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+
+.addCard:hover {
+  background: var(--fill-quiet) !important;
+}
+
+.addCard:active {
+  transform: scale(0.97) !important;
+}
+
+.addrRow {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+}
+
+.addrMain {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  gap: 6px 20px;
+}
+
+.addrBody {
+  flex: 1 1 200px;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.addrTitle {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+  font-size: 14.5px;
+  font-weight: 600;
+}
+
+.menuWrap {
+  position: relative;
+  flex: none;
+  margin: -8px -8px 0 0;
+}
+
+.dots {
+  width: 40px;
+  height: 40px;
+  border: none;
+  border-radius: var(--radius-full);
+  color: var(--text-primary);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: background-color 0.16s cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+
+.dots:hover {
+  background: var(--fill-quiet) !important;
+}
+
+.dots:active {
+  transform: scale(0.96) !important;
+}
+
+.menuScrim {
+  position: fixed;
+  inset: 0;
+  z-index: 40;
+}
+
+.menu {
+  position: absolute;
+  top: 44px;
+  right: 0;
+  z-index: 41;
+  min-width: 180px;
+  padding: 6px;
+  background: #fff;
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-popover);
+  display: flex;
+  flex-direction: column;
+  animation: acPop 0.16s cubic-bezier(0.2, 0.8, 0.2, 1) both;
+  transform-origin: top right;
+}
+
+.menuItem {
+  display: flex;
+  align-items: center;
+  width: 100%;
+  min-height: 40px;
+  padding: 0 12px;
+  border: none;
+  border-radius: var(--radius-sm);
+  background: transparent;
+  font: inherit;
+  font-size: 14.5px;
+  font-weight: 500;
+  text-align: left;
+  cursor: pointer;
+  color: var(--text-primary);
+}
+
+.menuItem:hover {
+  background: var(--fill-quiet) !important;
+}
+
+.menuRemove {
+  display: flex;
+  align-items: center;
+  width: 100%;
+  min-height: 40px;
+  padding: 0 12px;
+  border: none;
+  border-radius: var(--radius-sm);
+  background: transparent;
+  font: inherit;
+  font-size: 14.5px;
+  font-weight: 500;
+  text-align: left;
+  cursor: pointer;
+  color: #b3261e;
+}
+
+.menuRemove:hover {
+  background: var(--fill-quiet) !important;
+}
+
+.addrForm {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  max-width: 460px;
+}
+
+.labelInput {
+  height: 48px;
+  box-sizing: border-box;
+  padding: 0 14px;
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius-sm);
+  background: #fff;
+  font: inherit;
+  font-size: 15px;
+  font-weight: 400;
+  color: var(--text-primary);
+  outline: none;
+}
+
+.labelInput:focus {
+  border-color: var(--neutral-900) !important;
+  box-shadow: var(--focus-ring) !important;
+}
+
+.optionalHint {
+  font-weight: 400;
+  color: var(--neutral-600);
+  margin-top: -4px;
+}
+
+.addPanel {
+  margin-top: 8px;
+  padding: 20px 0;
+  border-bottom: 1px solid var(--border-subtle);
+}
+
+.addTitle {
+  margin: 0;
+  font-family: "Schibsted Grotesk", sans-serif;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  font-size: 17px;
+}
+
+.addAddress {
+  margin-top: 20px;
+  height: 40px;
+  padding: 0 18px;
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius-full);
+  background: transparent;
+  color: var(--text-primary);
+  font: inherit;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.16s cubic-bezier(0.2, 0.8, 0.2, 1);
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  white-space: nowrap;
+  height: 44px;
+  padding: 0 20px;
+  font-size: 14.5px;
+}
+
+.addAddress:hover {
+  background: var(--fill-quiet) !important;
+}
+
+.addAddress:active {
+  transform: scale(0.97) !important;
+}
+
+/* runtime states (prototype dotsBg, op) */
+.dotsOpen {
+  background: var(--fill-quiet);
+}
+
+.dotsClosed {
+  background: transparent;
+}
+
+/* helmet keyframes (copied: CSS modules scope keyframe names per file) */
+@keyframes acPop {
+  from {
+    opacity: 0;
+    transform: scale(0.97) translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}

@@ -1,0 +1,224 @@
+/* Account (prototype Account.dc.html), inline styles verbatim */
+
+.algMain {
+  flex: 1 1 260px;
+  min-width: 0;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  gap: 6px 20px;
+}
+
+.algValue {
+  flex: 1 1 160px;
+  min-width: 0;
+  font-size: 15px;
+  line-height: 1.5;
+  overflow-wrap: anywhere;
+}
+
+.algActions {
+  display: flex;
+  gap: 8px;
+  flex: 0 0 auto;
+}
+
+.algButton {
+  height: 40px;
+  padding: 0 18px;
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius-full);
+  background: transparent;
+  color: var(--text-primary);
+  font: inherit;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.16s cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+
+.algButton:hover {
+  background: var(--fill-quiet) !important;
+}
+
+.algButton:active {
+  transform: scale(0.97) !important;
+}
+
+.algEdit {
+  margin-top: 14px;
+}
+
+.algEditActions {
+  display: flex;
+  gap: 10px;
+  margin-top: 16px;
+  flex-wrap: wrap;
+}
+
+.switchRow {
+  padding: 18px 0;
+  box-shadow: 0 -1px 0 var(--border-subtle);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.syncBox {
+  padding: 18px 0;
+  box-shadow: 0 -1px 0 var(--border-subtle);
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.syncText {
+  margin: 0;
+  font-size: 15px;
+  line-height: 1.55;
+}
+
+.syncLabel {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  font-size: 13.5px;
+  font-weight: 600;
+  color: var(--neutral-600);
+}
+
+.syncInput {
+  height: 44px;
+  box-sizing: border-box;
+  padding: 0 14px;
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-sm);
+  background: var(--neutral-50);
+  font: inherit;
+  font-size: 14px;
+  font-weight: 400;
+  color: var(--text-primary);
+  outline: none;
+  text-overflow: ellipsis;
+}
+
+.syncInput:focus {
+  border-color: var(--neutral-900) !important;
+  box-shadow: var(--focus-ring) !important;
+}
+
+.copy {
+  height: 40px;
+  padding: 0 18px;
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius-full);
+  background: transparent;
+  color: var(--text-primary);
+  font: inherit;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.16s cubic-bezier(0.2, 0.8, 0.2, 1);
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  white-space: nowrap;
+  border-color: var(--neutral-900);
+  background: var(--neutral-900);
+  color: var(--neutral-50);
+}
+
+.copy:active {
+  transform: scale(0.97) !important;
+}
+
+.syncHint {
+  margin: 0;
+  font-size: 13.5px;
+  line-height: 1.5;
+  color: var(--neutral-600);
+}
+
+.privacyRow {
+  padding: 18px 0;
+  box-shadow: 0 -1px 0 var(--border-subtle);
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px 20px;
+}
+
+.cookieLink {
+  border: none;
+  background: none;
+  padding: 10px 0;
+  font: inherit;
+  font-size: 14.5px;
+  font-weight: 600;
+  color: var(--accent-700);
+  cursor: pointer;
+}
+
+.cookieLink:hover {
+  color: var(--accent-900) !important;
+}
+
+.danger {
+  margin-top: 40px;
+  background: rgba(179, 38, 30, 0.06);
+  border-radius: var(--radius-md);
+  padding: 20px;
+}
+
+.dangerTitle {
+  margin: 0;
+  font-family: "Schibsted Grotesk", sans-serif;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  font-size: 17px;
+  color: #b3261e;
+}
+
+.dangerRow {
+  margin-top: 12px;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px 20px;
+}
+
+.dangerText {
+  flex: 1 1 240px;
+  min-width: 0;
+  font-size: 14.5px;
+  line-height: 1.55;
+  color: var(--neutral-700, #3d3730);
+}
+
+.dangerButton {
+  height: 40px;
+  padding: 0 18px;
+  border: 1px solid #b3261e;
+  border-radius: var(--radius-full);
+  background: transparent;
+  color: #b3261e;
+  font: inherit;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition:
+    background-color 0.16s cubic-bezier(0.2, 0.8, 0.2, 1),
+    color 0.16s;
+}
+
+.dangerButton:hover {
+  background: #b3261e !important;
+  color: #fff !important;
+}
+
+.dangerButton:active {
+  transform: scale(0.97) !important;
+}

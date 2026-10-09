@@ -1,0 +1,284 @@
+/* Account (prototype Account.dc.html), inline styles verbatim */
+
+.side {
+  flex: 0 0 260px;
+  position: sticky;
+  top: 24px;
+  align-self: flex-start;
+  display: flex;
+  flex-direction: column;
+  gap: 28px;
+  padding-top: 4px;
+}
+
+.sideProfile {
+  padding: 0 12px;
+}
+
+.profile {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  min-width: 0;
+}
+
+.sideAvatar {
+  flex: none;
+  width: 56px;
+  height: 56px;
+  border-radius: var(--radius-full);
+  overflow: hidden;
+  background: var(--accent-wash);
+  color: var(--accent-700);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: "Schibsted Grotesk", sans-serif;
+  font-weight: 600;
+  font-size: 20px;
+  letter-spacing: -0.01em;
+}
+
+.avatarImage {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center 25%;
+  display: block;
+}
+
+.profileText {
+  min-width: 0;
+}
+
+.sideName {
+  font-size: 16px;
+  font-weight: 600;
+  overflow-wrap: anywhere;
+}
+
+.memberSince {
+  margin-top: 2px;
+  font-size: 13.5px;
+  color: var(--neutral-600);
+}
+
+.sideHeading {
+  margin: 0 0 6px;
+  padding: 0 12px;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--neutral-600);
+}
+
+.sideLinks {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.sideLink {
+  display: flex;
+  align-items: center;
+  min-height: 40px;
+  padding: 0 12px;
+  border-radius: var(--radius-sm);
+  font-size: 14.5px;
+  transition: background-color 0.16s cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+
+.sideLink:hover {
+  background: var(--fill-quiet) !important;
+}
+
+.sideFoot {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding-top: 16px;
+  border-top: 1px solid var(--border-subtle);
+}
+
+.sideHelp {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-height: 40px;
+  padding: 0 12px;
+  border-radius: var(--radius-sm);
+  color: var(--text-primary);
+  font-size: 14.5px;
+  font-weight: 500;
+}
+
+.sideHelp:hover {
+  background: var(--fill-quiet) !important;
+  color: var(--text-primary) !important;
+}
+
+.icon {
+  flex: none;
+}
+
+.sideLogOut {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-height: 40px;
+  padding: 0 12px;
+  border: none;
+  border-radius: var(--radius-sm);
+  background: transparent;
+  color: var(--text-primary);
+  font: inherit;
+  font-size: 14.5px;
+  font-weight: 500;
+  text-align: left;
+  cursor: pointer;
+}
+
+.sideLogOut:hover {
+  background: var(--fill-quiet) !important;
+}
+
+.srTitle {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+}
+
+.listAvatar {
+  flex: none;
+  width: 64px;
+  height: 64px;
+  border-radius: var(--radius-full);
+  overflow: hidden;
+  background: var(--accent-wash);
+  color: var(--accent-700);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: "Schibsted Grotesk", sans-serif;
+  font-weight: 600;
+  font-size: 23px;
+  letter-spacing: -0.01em;
+}
+
+.listName {
+  font-size: 18px;
+  font-weight: 600;
+  overflow-wrap: anywhere;
+}
+
+.listHeading {
+  margin: 0 0 6px;
+  padding: 0 12px;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--neutral-600);
+  margin-top: 32px;
+  padding: 0;
+}
+
+.list {
+  display: flex;
+  flex-direction: column;
+  border-bottom: 1px solid var(--border-subtle);
+}
+
+.row {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  min-height: 56px;
+  padding: 0 2px;
+  box-shadow: 0 -1px 0 var(--border-subtle);
+  color: var(--text-primary);
+  font-size: 15.5px;
+  font-weight: 500;
+}
+
+.row:active {
+  background: var(--fill-quiet) !important;
+}
+
+.rowLabel {
+  flex: 1;
+  min-width: 0;
+}
+
+.chevron {
+  color: var(--neutral-600);
+  display: flex;
+}
+
+.listHeadingNext {
+  margin: 0 0 6px;
+  padding: 0 12px;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--neutral-600);
+  margin-top: 28px;
+  padding: 0;
+}
+
+.listFoot {
+  display: flex;
+  flex-direction: column;
+  border-bottom: 1px solid var(--border-subtle);
+  margin-top: 28px;
+}
+
+.footRow {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  min-height: 56px;
+  padding: 0 2px;
+  box-shadow: 0 -1px 0 var(--border-subtle);
+  color: var(--text-primary);
+  font-size: 15.5px;
+  font-weight: 500;
+}
+
+.footRowLabel {
+  flex: 1;
+}
+
+.footLogOut {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  min-height: 56px;
+  padding: 0 2px;
+  border: none;
+  box-shadow: 0 -1px 0 var(--border-subtle);
+  background: transparent;
+  color: var(--text-primary);
+  font: inherit;
+  font-size: 15.5px;
+  font-weight: 500;
+  text-align: left;
+  cursor: pointer;
+}
+
+/* runtime states (prototype navItem fg/bg/fw) */
+.sideLinkCurrent {
+  background: var(--accent-wash);
+  color: var(--accent-700);
+  font-weight: 600;
+}
+
+.sideLinkIdle {
+  background: transparent;
+  color: var(--text-primary);
+  font-weight: 500;
+}
