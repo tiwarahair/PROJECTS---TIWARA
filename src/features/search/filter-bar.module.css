@@ -1,0 +1,181 @@
+/* Values verbatim from prototype Search.dc.html (inline styles; style-hover/active as !important like the prototype runtime). */
+
+.wrap {
+  padding: clamp(24px, 4vw, 44px) clamp(20px, 5vw, 48px) 0;
+  max-width: 1200px;
+  margin: 0 auto;
+  padding-top: 0;
+}
+
+.desk {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+  margin-top: 24px;
+}
+
+.iconBlock {
+  display: block;
+}
+
+.popoverAnchor {
+  position: relative;
+  flex: 0 0 auto;
+}
+
+.popoverScrim {
+  position: fixed;
+  inset: 0;
+  z-index: 60;
+}
+
+.pricePopover {
+  position: absolute;
+  top: calc(100% + 8px);
+  left: 0;
+  z-index: 61;
+  width: 300px;
+  background: var(--neutral-0);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-popover);
+  padding: 18px 20px 16px;
+  animation: ddIn 0.18s cubic-bezier(0.2, 0.8, 0.2, 1) both;
+  transform-origin: top left;
+}
+
+.priceHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  margin-bottom: 14px;
+}
+
+.priceTitle {
+  font-size: 15px;
+  font-weight: 600;
+}
+
+.priceValue {
+  font-size: 15px;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+}
+
+.priceClear {
+  margin-top: 14px;
+  border: none;
+  background: none;
+  padding: 0;
+  font: inherit;
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--accent-700);
+  cursor: pointer;
+}
+
+.distancePopover {
+  position: absolute;
+  top: calc(100% + 8px);
+  left: 0;
+  z-index: 61;
+  width: 220px;
+  background: var(--neutral-0);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-popover);
+  padding: 8px;
+  animation: ddIn 0.18s cubic-bezier(0.2, 0.8, 0.2, 1) both;
+  transform-origin: top left;
+}
+
+.optionLabel {
+  flex: 1;
+}
+
+.clearFilters {
+  flex: 0 0 auto;
+  border: none;
+  background: none;
+  padding: 8px 6px;
+  font: inherit;
+  font-size: 14.5px;
+  font-weight: 600;
+  color: var(--accent-700);
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.clearFilters:hover {
+  color: var(--accent-900) !important;
+}
+
+.resultRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin: 20px 0 24px;
+}
+
+.resultLine {
+  font-size: 14.5px;
+  color: var(--text-secondary);
+  min-width: 0;
+  flex: 1 1 auto;
+}
+
+.actions {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  margin-left: auto;
+  flex: 0 0 auto;
+}
+
+.pillButton {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  height: 38px;
+  padding: 0 16px;
+  border-radius: var(--radius-full);
+  border: 1px solid var(--border-strong);
+  background: transparent;
+  font: inherit;
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--text-primary);
+  cursor: pointer;
+  white-space: nowrap;
+  transition: background-color 0.16s cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+
+.sortAnchor {
+  position: relative;
+}
+
+.sortPopover {
+  position: absolute;
+  top: calc(100% + 8px);
+  right: 0;
+  z-index: 61;
+  width: 240px;
+  background: var(--neutral-0);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-popover);
+  padding: 8px;
+  animation: ddIn 0.18s cubic-bezier(0.2, 0.8, 0.2, 1) both;
+  transform-origin: top right;
+}
+
+/* helmet keyframes, copied here because CSS modules scope keyframe names per file */
+@keyframes ddIn {
+  from {
+    opacity: 0;
+    transform: translateY(-6px) scale(0.98);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}

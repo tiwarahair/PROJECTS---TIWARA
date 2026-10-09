@@ -1,0 +1,297 @@
+import type { CSSProperties } from "react";
+import { joinClassNames } from "../../utils/class-names";
+import { CheckIcon, ChevronIcon } from "./check-icon";
+import controls from "./search-controls.module.css";
+import {
+  formatMaxPrice,
+  getPriceFill,
+  SORTS,
+  toggleVenue,
+  toMaxPrice,
+  VENUES,
+} from "./search-filters";
+import { RADII } from "./search-state";
+import helmet from "./search-helmet.module.css";
+import styles from "./filter-bar.module.css";
+import type { SearchController } from "./use-search";
+
+interface FilterBarProps {
+  search: SearchController;
+}
+
+/** Venue / price / distance chips (desktop), result count, Filters button (mobile) and Sort. */
+export const FilterBar = ({ search }: FilterBarProps) => {
+  const { state, selection, place, cards, actions } = search;
+  const count = cards.length;
+  const locationName = place.current ? "you" : place.name;
+  const hasFilter =
+    selection.has ||
+    !place.current ||
+    !!state.q.date ||
+    state.time !== "any" ||
+    state.venues.length > 0 ||
+    state.maxPrice != null ||
+    state.radius !== 10;
+  const filterCount =
+    state.venues.length +
+    (state.maxPrice != null ? 1 : 0) +
+    (state.radius !== 10 ? 1 : 0);
+  const sortLabel = (SORTS.find(([key]) => key === state.sort) ||
+    SORTS[0])?.[1];
+
+  return (
+    <div className={joinClassNames(helmet.flWrap, styles.wrap)}>
+      <div className={helmet.flLine}>
+        <div
+          role="group"
+          aria-label="Filters"
+          className={joinClassNames(helmet.flDesk, styles.desk)}
+        >
+          {VENUES.map((venue) => {
+            const isOn = state.venues.includes(venue);
+            return (
+              <button
+                key={venue}
+                type="button"
+                onClick={() =>
+                  actions.setVenues(toggleVenue(state.venues, venue))
+                }
+                aria-pressed={isOn ? "true" : "false"}
+                className={joinClassNames(
+                  controls.chip,
+                  controls.chipLarge,
+                  isOn && controls.chipOn,
+                )}
+              >
+                {isOn && <CheckIcon className={styles.iconBlock} />}
+                {venue}
+              </button>
+            );
+          })}
+          <div className={styles.popoverAnchor}>
+            <button
+              type="button"
+              onClick={actions.togglePrice}
+              aria-expanded={state.priceOpen ? "true" : "false"}
+              aria-haspopup="dialog"
+              className={joinClassNames(
+                controls.chip,
+                controls.chipLarge,
+                state.maxPrice != null && controls.chipOn,
+              )}
+            >
+              {state.maxPrice != null ? "Up to £" + state.maxPrice : "Price"}
+              <ChevronIcon className={styles.iconBlock} />
+            </button>
+            {state.priceOpen && (
+              <>
+                <div
+                  onClick={actions.closePrice}
+                  className={styles.popoverScrim}
+                ></div>
+                <div
+                  data-dd=""
+                  role="dialog"
+                  aria-label="Max price"
+                  className={styles.pricePopover}
+                >
+                  <div className={styles.priceHeader}>
+                    <span className={styles.priceTitle}>Max price</span>
+                    <span aria-live="polite" className={styles.priceValue}>
+                      {formatMaxPrice(state.maxPrice)}
+                    </span>
+                  </div>
+                  <input
+                    type="range"
+                    min="0"
+                    max="250"
+                    step="5"
+                    value={state.maxPrice == null ? 250 : state.maxPrice}
+                    onChange={(event) =>
+                      actions.setMaxPrice(toMaxPrice(event.target.value))
+                    }
+                    aria-label="Max price"
+                    aria-valuetext={formatMaxPrice(state.maxPrice)}
+                    className={helmet.prange}
+                    // --fill: how much of the track is filled
+                    style={
+                      {
+                        "--fill": getPriceFill(state.maxPrice),
+                      } as CSSProperties
+                    }
+                  />
+                  {state.maxPrice != null && (
+                    <button
+                      type="button"
+                      onClick={() => actions.setMaxPrice(null)}
+                      className={styles.priceClear}
+                    >
+                      Clear
+                    </button>
+                  )}
+                </div>
+              </>
+            )}
+          </div>
+          <div className={styles.popoverAnchor}>
+            <button
+              type="button"
+              onClick={actions.toggleDistance}
+              aria-expanded={state.distOpen ? "true" : "false"}
+              aria-haspopup="listbox"
+              className={joinClassNames(
+                controls.chip,
+                controls.chipLarge,
+                state.radius !== 10 && controls.chipOn,
+              )}
+            >
+              {"Within " + state.radius + " miles"}
+              <ChevronIcon className={styles.iconBlock} />
+            </button>
+            {state.distOpen && (
+              <>
+                <div
+                  onClick={actions.closeDistance}
+                  className={styles.popoverScrim}
+                ></div>
+                <div
+                  data-dd=""
+                  role="listbox"
+                  aria-label="Distance"
+                  className={styles.distancePopover}
+                >
+                  {RADII.map((radius) => {
+                    const isSelected = state.radius === radius;
+                    return (
+                      <button
+                        key={"d" + radius}
+                        type="button"
+                        role="option"
+                        aria-selected={isSelected ? "true" : "false"}
+                        onClick={() => actions.pickDistance(radius)}
+                        className={joinClassNames(
+                          controls.option,
+                          isSelected && controls.optionOn,
+                        )}
+                      >
+                        <span className={styles.optionLabel}>
+                          {"Within " + radius + " miles"}
+                        </span>
+                        {isSelected && (
+                          <CheckIcon className={styles.iconBlock} />
+                        )}
+                      </button>
+                    );
+                  })}
+                </div>
+              </>
+            )}
+          </div>
+          {hasFilter && (
+            <button
+              type="button"
+              onClick={actions.clearAll}
+              className={styles.clearFilters}
+            >
+              Clear filters
+            </button>
+          )}
+        </div>
+
+        <div className={joinClassNames(helmet.rlRow, styles.resultRow)}>
+          <div
+            role="status"
+            className={joinClassNames(helmet.rlLine, styles.resultLine)}
+          >
+            <span className={helmet.rlFull}>
+              {count +
+                " stylist" +
+                (count === 1 ? "" : "s") +
+                (selection.name ? " for " + selection.name : "") +
+                " near " +
+                locationName}
+            </span>
+            <span className={helmet.rlShort}>
+              {count +
+                " stylist" +
+                (count === 1 ? "" : "s") +
+                " near " +
+                locationName}
+            </span>
+          </div>
+          <div className={styles.actions}>
+            <button
+              type="button"
+              onClick={actions.openFilters}
+              className={joinClassNames(helmet.flMob, styles.pillButton)}
+            >
+              <svg
+                className={styles.iconBlock}
+                width="16"
+                height="16"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="1.7"
+                strokeLinecap="round"
+              >
+                <path d="M4 7h10M18 7h2M4 17h4M12 17h8"></path>
+                <circle cx="16" cy="7" r="2"></circle>
+                <circle cx="10" cy="17" r="2"></circle>
+              </svg>
+              {"Filters" + (filterCount ? " · " + filterCount : "")}
+            </button>
+            <div className={styles.sortAnchor}>
+              <button
+                type="button"
+                onClick={actions.toggleSort}
+                aria-haspopup="listbox"
+                aria-expanded={state.sortOpen ? "true" : "false"}
+                className={styles.pillButton}
+              >
+                {"Sort: " + sortLabel}
+                <ChevronIcon className={styles.iconBlock} />
+              </button>
+              {state.sortOpen && (
+                <>
+                  <div
+                    onClick={actions.closeSort}
+                    className={styles.popoverScrim}
+                  ></div>
+                  <div
+                    data-dd=""
+                    role="listbox"
+                    aria-label="Sort"
+                    className={styles.sortPopover}
+                  >
+                    {SORTS.map(([key, label]) => {
+                      const isSelected = state.sort === key;
+                      return (
+                        <button
+                          key={key}
+                          type="button"
+                          role="option"
+                          aria-selected={isSelected ? "true" : "false"}
+                          onClick={() => actions.pickSort(key)}
+                          className={joinClassNames(
+                            controls.option,
+                            isSelected && controls.optionOn,
+                          )}
+                        >
+                          <span className={styles.optionLabel}>{label}</span>
+                          {isSelected && (
+                            <CheckIcon className={styles.iconBlock} />
+                          )}
+                        </button>
+                      );
+                    })}
+                  </div>
+                </>
+              )}
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+};

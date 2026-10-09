@@ -1,0 +1,191 @@
+/* Runtime style strings from prototype Search renderVals / baseVals (chipS, optS, rowVm, quickDays, calCells,
+   timePills), as classes with the same values. */
+
+/* chipS(on) — 32px; chipS(on,36) adds .chipLarge */
+.chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  height: 32px;
+  padding: 0 12px;
+  border-radius: var(--radius-full);
+  font: inherit;
+  font-size: 13.5px;
+  font-weight: 600;
+  cursor: pointer;
+  white-space: nowrap;
+  flex: 0 0 auto;
+  transition:
+    background-color 0.16s cubic-bezier(0.2, 0.8, 0.2, 1),
+    color 0.16s cubic-bezier(0.2, 0.8, 0.2, 1);
+  background: transparent;
+  color: var(--text-primary);
+  border: 1px solid var(--border-strong);
+}
+
+.chipLarge {
+  height: 36px;
+  padding: 0 14px;
+  font-size: 14px;
+}
+
+.chipOn {
+  background: var(--neutral-900);
+  color: var(--neutral-50);
+  border: 1px solid transparent;
+}
+
+/* optS(on) — sort / distance options */
+.option {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  min-height: 44px;
+  padding: 10px 12px;
+  border: none;
+  border-radius: var(--radius-sm);
+  background: transparent;
+  cursor: pointer;
+  text-align: left;
+  font: inherit;
+  font-size: 15px;
+  color: var(--text-primary);
+  font-weight: 500;
+}
+
+.optionOn {
+  background: var(--accent-wash);
+  color: var(--accent-700);
+  font-weight: 600;
+}
+
+/* rowVm — What / Where suggestion rows: active = keyboard/hover, on = current selection */
+.row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+  min-height: 52px;
+  padding: 8px 10px;
+  border: none;
+  border-radius: var(--radius-sm);
+  background: transparent;
+  cursor: pointer;
+  text-align: left;
+  font: inherit;
+  color: var(--text-primary);
+  font-weight: 500;
+}
+
+.rowActive {
+  background: var(--accent-wash);
+}
+
+.rowOn {
+  color: var(--accent-700);
+  font-weight: 600;
+}
+
+.rowIconBg {
+  background: var(--accent-wash);
+}
+
+.rowActive .rowIconBg {
+  background: transparent;
+}
+
+/* quickDays */
+.quickDay {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 4px;
+  padding: 16px 18px;
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  text-align: left;
+  transition: all 0.2s ease;
+  font-family: inherit;
+  color: var(--text-primary);
+  border: 1px solid var(--border-subtle);
+  background: var(--neutral-0);
+}
+
+.quickDaySelected {
+  border: 1px solid var(--accent-700);
+  background: var(--accent-wash);
+}
+
+/* calCells */
+.cell {
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: var(--radius-full);
+  font-size: 14.5px;
+  border: none;
+  background: transparent;
+  color: var(--text-primary);
+  cursor: pointer;
+  font-weight: 500;
+  transition: background 0.2s ease;
+}
+
+/* marker so .cellSelected only fills real days */
+.cellDay {
+  cursor: pointer;
+}
+
+.cellPast {
+  color: var(--neutral-400, #b8b2a9);
+  cursor: default;
+}
+
+.cellBlank {
+  color: transparent;
+  cursor: default;
+}
+
+/* value === selected date (blank cells match too while no date is set, as in the prototype) */
+.cellSelected {
+  font-weight: 600;
+}
+
+.cellSelected.cellDay {
+  background: var(--accent-700);
+  color: var(--neutral-50);
+}
+
+/* timePills */
+.timePill {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 2px;
+  min-height: 62px;
+  padding: 10px 16px;
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  transition: all 0.2s ease;
+  border: 1px solid var(--border-subtle);
+  background: var(--neutral-0);
+  color: var(--text-primary);
+}
+
+.timePillSelected {
+  border: 1px solid var(--accent-700);
+  background: var(--accent-wash);
+  color: var(--accent-700);
+}
+
+.timeMeta {
+  font-size: 12.5px;
+  color: var(--text-secondary);
+}
+
+.timePillSelected .timeMeta {
+  color: var(--accent-700);
+}

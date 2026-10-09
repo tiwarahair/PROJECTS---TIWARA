@@ -1,0 +1,103 @@
+/* Values verbatim from prototype Search.dc.html (inline styles; style-hover/active as !important like the prototype runtime). */
+
+.page {
+  min-height: 100vh;
+  background: var(--neutral-50);
+}
+
+.dropdownScrim {
+  position: fixed;
+  inset: 0;
+  z-index: 79;
+  background: var(--scrim-popover, rgba(26, 23, 20, 0.28));
+  animation: sheetFade 0.2s ease both;
+}
+
+.results {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 clamp(20px, 5vw, 48px) clamp(64px, 8vw, 96px);
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 24px;
+}
+
+.empty {
+  text-align: center;
+  padding: 80px 24px 88px;
+  max-width: 46ch;
+  margin: 0 auto;
+}
+
+.emptyTitle {
+  font-family: "Schibsted Grotesk", sans-serif;
+  font-size: 24px;
+  font-weight: 500;
+  letter-spacing: -0.02em;
+  margin-bottom: 8px;
+}
+
+.emptyText {
+  color: var(--neutral-600);
+  font-size: 15px;
+  line-height: 1.55;
+  margin-bottom: 24px;
+  text-wrap: pretty;
+}
+
+.emptyActions {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 10px;
+}
+
+.suggestion {
+  background: transparent;
+  color: var(--text-primary);
+  border: 1px solid var(--border-strong);
+  font: inherit;
+  font-weight: 600;
+  font-size: 14.5px;
+  padding: 12px 22px;
+  border-radius: var(--radius-full);
+  cursor: pointer;
+  transition: background-color 0.16s cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+
+.suggestion:hover {
+  background: var(--fill-quiet) !important;
+}
+
+.suggestion:active {
+  transform: scale(0.98) !important;
+}
+
+.emptyClear {
+  background: var(--neutral-900);
+  color: var(--neutral-50);
+  border: none;
+  font: inherit;
+  font-weight: 600;
+  font-size: 14.5px;
+  padding: 13px 24px;
+  border-radius: var(--radius-full);
+  cursor: pointer;
+}
+
+.emptyClear:active {
+  transform: scale(0.98) !important;
+}
+
+/* helmet keyframes, copied here because CSS modules scope keyframe names per file */
+@keyframes sheetFade {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}

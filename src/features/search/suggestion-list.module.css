@@ -1,0 +1,112 @@
+/* Values verbatim from prototype Search.dc.html (inline styles; style-hover/active as !important like the prototype runtime). */
+
+.chips {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  margin: 2px 2px 8px;
+}
+
+.chipCount {
+  font-variant-numeric: tabular-nums;
+  opacity: 0.72;
+}
+
+.section {
+  margin-top: 6px;
+}
+
+.sectionTitle {
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--neutral-600);
+  padding: 8px 10px 4px;
+}
+
+.rowIcon {
+  flex: 0 0 auto;
+  width: 36px;
+  height: 36px;
+  border-radius: var(--radius-full);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--accent-700);
+  transition: background-color 0.16s cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+
+.iconBlock {
+  display: block;
+}
+
+.rowAvatar {
+  flex: 0 0 auto;
+  width: 36px;
+  height: 36px;
+  border-radius: var(--radius-full);
+  object-fit: cover;
+  display: block;
+}
+
+.rowText {
+  min-width: 0;
+  flex: 1;
+}
+
+.rowLabel {
+  display: block;
+  font-size: 15px;
+  line-height: 1.3;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.rowMatch {
+  font-weight: 700;
+}
+
+.rowSub {
+  display: block;
+  font-size: 13px;
+  line-height: 1.3;
+  color: var(--neutral-600);
+  font-weight: 400;
+  margin-top: 2px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.seeAll {
+  border-top: 1px solid var(--border-subtle);
+  margin-top: 8px;
+  padding-top: 6px;
+}
+
+.whatEmpty {
+  padding: 16px 10px 10px;
+  font-size: 14.5px;
+  line-height: 1.55;
+  color: var(--neutral-600);
+  text-wrap: pretty;
+}
+
+.popularAreas {
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--neutral-600);
+  padding: 12px 10px 4px;
+}
+
+.whereEmpty {
+  padding: 14px 10px;
+  font-size: 14.5px;
+  line-height: 1.55;
+  color: var(--neutral-600);
+  text-wrap: pretty;
+}

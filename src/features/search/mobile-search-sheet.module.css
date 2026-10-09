@@ -1,0 +1,290 @@
+/* Values verbatim from prototype Search.dc.html (inline styles; style-hover/active as !important like the prototype runtime). */
+
+.wrap {
+  position: fixed;
+  inset: 0;
+  z-index: 130;
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+}
+
+.scrim {
+  position: absolute;
+  inset: 0;
+  background: rgba(26, 23, 20, 0.45);
+  opacity: 1;
+  animation: sheetFade 0.3s ease;
+}
+
+.panel {
+  position: relative;
+  width: 100%;
+  height: 100dvh;
+  display: flex;
+  flex-direction: column;
+  background: var(--neutral-0);
+  border-radius: 0;
+  transform: translateY(0);
+  animation: sheetUp 0.36s cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+
+.header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 20px 22px 0;
+}
+
+.headerButton {
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 4px;
+  display: flex;
+  color: var(--text-primary);
+}
+
+.spacer {
+  flex: 1;
+}
+
+.body {
+  flex: 1;
+  overflow-y: auto;
+  padding: 8px 22px 24px;
+}
+
+.heading {
+  font-family: "Schibsted Grotesk", sans-serif;
+  font-size: 30px;
+  font-weight: 600;
+  letter-spacing: -0.02em;
+  margin: 6px 0 24px;
+}
+
+.rows {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.row {
+  display: flex;
+  align-items: center;
+  width: 100%;
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius-full);
+  background: var(--neutral-0);
+}
+
+.rowButton {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 12px 8px 12px 20px;
+  border: none;
+  border-radius: var(--radius-full);
+  background: transparent;
+  cursor: pointer;
+  text-align: left;
+  font-size: 16px;
+  color: var(--text-primary);
+}
+
+.rowIcon {
+  flex: 0 0 auto;
+  display: flex;
+  color: var(--text-secondary);
+}
+
+.rowText {
+  min-width: 0;
+  flex: 1;
+}
+
+.rowCaption {
+  display: block;
+  font-size: 12.5px;
+  font-weight: 600;
+  color: var(--neutral-600);
+}
+
+.rowLabel {
+  display: block;
+  font-size: 16px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  margin-top: 1px;
+  /* renderVals mobRows color */
+  color: var(--text-primary);
+}
+
+.rowClear {
+  flex: 0 0 auto;
+  width: 44px;
+  height: 44px;
+  margin-right: 8px;
+  border: none;
+  border-radius: var(--radius-full);
+  background: transparent;
+  color: var(--text-primary);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  padding: 0;
+}
+
+.rowClear:active {
+  transform: scale(0.92) !important;
+}
+
+.iconBlock {
+  display: block;
+}
+
+.searchField {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 0 10px 0 18px;
+  height: 52px;
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius-full);
+  margin-bottom: 14px;
+}
+
+.searchFieldIcon {
+  flex: 0 0 auto;
+  color: var(--text-secondary);
+}
+
+.searchFieldInner {
+  flex: 1;
+  min-width: 0;
+}
+
+.fieldRow {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.input {
+  flex: 1;
+  min-width: 0;
+  border: none;
+  background: transparent;
+  font-size: 16px;
+  color: var(--text-primary);
+  padding: 0;
+  outline: none;
+}
+
+.clearButton {
+  flex: 0 0 auto;
+  width: 24px;
+  height: 24px;
+  border: none;
+  border-radius: var(--radius-full);
+  background: var(--fill-quiet);
+  color: var(--neutral-600);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  padding: 0;
+  transition: background-color 0.16s cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+
+.clearButton:hover {
+  background: var(--fill-quiet-strong) !important;
+}
+
+.clearButton:active {
+  transform: scale(0.92) !important;
+}
+
+.footer {
+  border-top: 1px solid var(--border-subtle);
+  padding: 16px 22px;
+  display: flex;
+  background: var(--neutral-0);
+}
+
+.searchButton {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 16px;
+  border: none;
+  border-radius: var(--radius-full);
+  background: var(--accent-700);
+  color: var(--neutral-50);
+  font-family: inherit;
+  font-size: 15px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.searchButton:active {
+  transform: scale(0.98) !important;
+}
+
+.dateFooter {
+  border-top: 1px solid var(--border-subtle);
+  padding: 16px 22px;
+  display: flex;
+  gap: 12px;
+  background: var(--neutral-0);
+  border-radius: 0 0 0 0;
+}
+
+.clearButton2 {
+  flex: 1;
+  padding: 16px;
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius-full);
+  background: var(--neutral-0);
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--text-primary);
+  cursor: pointer;
+}
+
+.doneButton {
+  flex: 1;
+  padding: 16px;
+  border: none;
+  border-radius: var(--radius-full);
+  background: var(--neutral-900);
+  color: var(--neutral-50);
+  font-size: 15px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+/* helmet keyframes, copied here because CSS modules scope keyframe names per file */
+@keyframes sheetFade {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes sheetUp {
+  from {
+    transform: translateY(100%);
+  }
+  to {
+    transform: translateY(0);
+  }
+}

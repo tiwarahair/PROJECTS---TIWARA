@@ -1,0 +1,192 @@
+/* Values verbatim from prototype Search.dc.html (inline styles; style-hover/active as !important like the prototype runtime). */
+
+.overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 110;
+}
+
+.overlayScrim {
+  position: absolute;
+  inset: 0;
+  background: rgba(26, 23, 20, 0.28);
+  opacity: 1;
+  animation: sheetFade 0.25s ease;
+}
+
+.popover {
+  position: absolute;
+  top: 84px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: min(680px, calc(100vw - 32px));
+  max-height: min(78vh, 720px);
+  overflow-y: auto;
+  background: var(--neutral-0);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-popover);
+  padding: 26px;
+  animation: svcIn 0.28s cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+
+.calgrid {
+  display: grid;
+  grid-template-columns: 172px 1fr;
+  gap: 24px;
+}
+
+.quickDaysColumn {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.quickDayLabel {
+  font-size: 15.5px;
+  font-weight: 600;
+}
+
+.quickDayMeta {
+  font-size: 13.5px;
+  color: var(--text-secondary);
+}
+
+.monthBar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 16px;
+}
+
+.monthNav {
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 6px;
+  display: flex;
+  color: var(--text-primary);
+}
+
+.monthLabel {
+  font-family: "Schibsted Grotesk", sans-serif;
+  font-size: 18px;
+  font-weight: 600;
+}
+
+.dowRow {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 4px;
+  margin-bottom: 6px;
+}
+
+.dow {
+  text-align: center;
+  font-size: 13px;
+  color: var(--text-secondary);
+  padding: 4px 0;
+}
+
+.cells {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 4px;
+}
+
+.timeRow {
+  border-top: 1px solid var(--border-subtle);
+  margin-top: 24px;
+  padding-top: 20px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.timeLabel {
+  font-size: 14.5px;
+  font-weight: 600;
+}
+
+.customRow {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  margin-top: 14px;
+  max-width: 520px;
+}
+
+.timeSelect {
+  flex: 1;
+  padding: 14px 46px 14px 16px;
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-sm);
+  background-color: var(--neutral-0);
+  font-size: 15px;
+  color: var(--text-primary);
+  cursor: pointer;
+}
+
+.to {
+  font-size: 15px;
+  color: var(--text-secondary);
+}
+
+.quickDaysGrid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+  margin-bottom: 26px;
+}
+
+.monthBarMobile {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 14px;
+}
+
+.timeRowMobile {
+  border-top: 1px solid var(--border-subtle);
+  margin-top: 22px;
+  padding-top: 18px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.timeLabelMobile {
+  font-size: 14.5px;
+  font-weight: 600;
+  width: 100%;
+}
+
+.customRowMobile {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+  margin-top: 12px;
+}
+
+/* helmet keyframes, copied here because CSS modules scope keyframe names per file */
+@keyframes sheetFade {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes svcIn {
+  from {
+    opacity: 0;
+    transform: translate(-50%, -10px);
+  }
+  to {
+    opacity: 1;
+    transform: translate(-50%, 0);
+  }
+}

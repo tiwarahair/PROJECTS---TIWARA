@@ -1,0 +1,291 @@
+/* Values verbatim from prototype Search.dc.html (inline styles; style-hover/active as !important like the prototype runtime). */
+
+.nav {
+  position: sticky;
+  top: 0;
+  z-index: 80;
+  background: var(--neutral-50);
+}
+
+.inner {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 12px clamp(20px, 5vw, 48px);
+  min-height: 72px;
+  padding-top: 12px;
+  padding-bottom: 12px;
+}
+
+.railLeft {
+  position: absolute;
+  left: clamp(20px, 5vw, 48px);
+  top: 50%;
+  transform: translateY(-50%);
+  display: flex;
+}
+
+.logoLink {
+  display: flex;
+  align-items: center;
+  flex: 0 0 auto;
+}
+
+.logo {
+  height: 26px;
+  display: block;
+}
+
+.pill {
+  display: flex;
+  align-items: center;
+  background: var(--neutral-0);
+  border-radius: var(--radius-full);
+  padding: 5px 5px 5px 8px;
+  width: 100%;
+  margin: 0 auto;
+  box-shadow: 0px 6px 20px 0px rgba(26, 23, 20, 0.13);
+  /* renderVals pillMax */
+  max-width: var(--pill-max);
+}
+
+.mobileSummary {
+  align-items: center;
+  gap: 12px;
+  flex: 1;
+  padding: 6px 10px;
+  color: var(--text-primary);
+}
+
+.mobileBack {
+  display: flex;
+  flex: 0 0 auto;
+  color: var(--text-primary);
+  padding: 2px;
+}
+
+.mobileSummaryButton {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 2px;
+  min-width: 0;
+  flex: 1;
+  background: none;
+  border: none;
+  padding: 0;
+  cursor: pointer;
+  text-align: left;
+  color: inherit;
+}
+
+.mobileTitle {
+  font-size: 15px;
+  font-weight: 600;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.mobileSub {
+  font-size: 13px;
+  color: var(--text-secondary);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.field {
+  flex: 1 1 0;
+  min-width: 0;
+  padding: 4px 10px 4px 16px;
+  border-right: 1px solid var(--border-subtle);
+}
+
+.dateField {
+  flex: 1 1 0;
+  min-width: 0;
+  padding: 6px 10px 6px 16px;
+  white-space: nowrap;
+}
+
+.fieldRow {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.input {
+  flex: 1;
+  min-width: 0;
+  width: 100%;
+  border: none;
+  background: transparent;
+  font-size: 14px;
+  color: var(--text-primary);
+  padding: 4px 0;
+  outline: none;
+}
+
+.clearButton {
+  flex: 0 0 auto;
+  width: 24px;
+  height: 24px;
+  border: none;
+  border-radius: var(--radius-full);
+  background: var(--fill-quiet);
+  color: var(--neutral-600);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  padding: 0;
+  transition: background-color 0.16s cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+
+.clearButton:hover {
+  background: var(--fill-quiet-strong) !important;
+}
+
+.clearButton:active {
+  transform: scale(0.92) !important;
+}
+
+.iconBlock {
+  display: block;
+}
+
+.whatDropdown {
+  position: absolute;
+  top: calc(100% + 14px);
+  left: -6px;
+  width: min(440px, calc(100vw - 32px));
+  max-height: min(70vh, 560px);
+  overflow-y: auto;
+  background: var(--neutral-0);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-popover);
+  padding: 12px;
+  z-index: 5;
+  text-align: left;
+  animation: ddIn 0.18s cubic-bezier(0.2, 0.8, 0.2, 1) both;
+  transform-origin: top left;
+}
+
+.whereDropdown {
+  position: absolute;
+  top: calc(100% + 14px);
+  left: -6px;
+  width: min(380px, calc(100vw - 32px));
+  max-height: min(70vh, 560px);
+  overflow-y: auto;
+  background: var(--neutral-0);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-popover);
+  padding: 12px;
+  z-index: 5;
+  text-align: left;
+  animation: ddIn 0.18s cubic-bezier(0.2, 0.8, 0.2, 1) both;
+  transform-origin: top left;
+}
+
+.dateButton {
+  flex: 1;
+  min-width: 0;
+  display: block;
+  border: none;
+  background: transparent;
+  font-size: 14px;
+  color: var(--text-primary);
+  padding: 2px 0;
+  cursor: pointer;
+  text-align: left;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.searchButton {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--neutral-50);
+  height: 38px;
+  transition:
+    width 0.45s cubic-bezier(0.2, 0.8, 0.2, 1),
+    padding 0.45s cubic-bezier(0.2, 0.8, 0.2, 1),
+    background 0.2s ease;
+  flex: 0 0 auto;
+  border-radius: var(--radius-full);
+  margin-left: 6px;
+  border: none;
+  cursor: pointer;
+  transition: background 0.2s ease;
+  background-color: var(--accent-700);
+}
+
+.searchButton:hover {
+  background: #000 !important;
+}
+
+.searchLabel {
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.railRight {
+  position: absolute;
+  right: clamp(20px, 5vw, 48px);
+  top: 50%;
+  transform: translateY(-50%);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.favourites {
+  width: 40px;
+  height: 40px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: var(--radius-full);
+  color: var(--text-primary);
+  transition: background-color 160ms cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+
+.favourites:hover {
+  background: var(--fill-quiet-strong) !important;
+  color: var(--text-primary) !important;
+}
+
+.menuButton {
+  flex: 0 0 auto;
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 8px;
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.menuLine {
+  width: 22px;
+  height: 1.5px;
+  background: var(--neutral-900);
+  display: block;
+}
+
+/* helmet keyframes, copied here because CSS modules scope keyframe names per file */
+@keyframes ddIn {
+  from {
+    opacity: 0;
+    transform: translateY(-6px) scale(0.98);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
