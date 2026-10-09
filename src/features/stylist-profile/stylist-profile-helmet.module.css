@@ -124,12 +124,12 @@
     animation-delay: 180ms;
   }
 
-  [data-rv] {
+  :global(html.profile-page) [data-rv] {
     opacity: 0;
     transform: translateY(10px);
   }
 
-  [data-rv].rvIn {
+  :global(html.profile-page) [data-rv].rvIn {
     opacity: 1;
     transform: none;
     transition:
@@ -178,7 +178,7 @@
     .scpMobPanel {
       animation: scpFade 200ms ease both;
     }
-    [data-rv] {
+    :global(html.profile-page) [data-rv] {
       opacity: 1 !important;
       transform: none !important;
     }

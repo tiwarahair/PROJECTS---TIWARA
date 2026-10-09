@@ -1,5 +1,6 @@
 import { createBrowserRouter } from "react-router";
 import type { RouteObject } from "react-router";
+import { AppLayout } from "./app-layout";
 import { BookingPage } from "./features/booking/booking-page";
 import { DevHarness } from "./features/dev-harness/dev-harness";
 import { DsSpecimens } from "./features/ds-specimens/ds-specimens";
@@ -24,4 +25,6 @@ export const appRoutes: RouteObject[] = [
     : []),
 ];
 
-export const appRouter = createBrowserRouter(appRoutes);
+export const appRouter = createBrowserRouter([
+  { element: <AppLayout />, children: appRoutes },
+]);

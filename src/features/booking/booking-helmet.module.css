@@ -149,7 +149,7 @@
   }
 
   @media (prefers-reduced-motion: reduce) {
-    [data-al-anim] {
+    :global(html.booking-page) [data-al-anim] {
       animation: bkFade 0.2s ease both !important;
     }
   }

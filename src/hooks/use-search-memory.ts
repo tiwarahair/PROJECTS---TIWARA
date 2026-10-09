@@ -22,6 +22,8 @@ export const useSearchMemory = (): void => {
   useEffect(() => {
     if (isBoardView()) return;
     const record = () => {
+      // the router changes the URL before Search unmounts; never record another page as the search
+      if (window.location.pathname !== "/search") return;
       writeSession(
         LAST_SEARCH_KEY,
         window.location.pathname + window.location.search,
@@ -36,30 +38,33 @@ export const useSearchMemory = (): void => {
       window.clearTimeout(scrollTimer);
       scrollTimer = window.setTimeout(record, 120);
     };
-    record();
+    // Coming back via "Back to results": read the saved position before anything records over it (the
+    // prototype recorded first, which replaced it with 0). The flag is only cleared once the restore has run,
+    // so a remount (React StrictMode runs effects twice in development) still restores.
+    const isBack = readSession(SEARCH_BACK_KEY) === "1";
+    const targetY = isBack ? readSavedScroll() : 0;
+    if (!isBack) record();
     const interval = window.setInterval(record, 800);
     window.addEventListener("pagehide", record);
     window.addEventListener("scroll", handleScroll, { passive: true });
 
     let restoreTimer = 0;
-    if (readSession(SEARCH_BACK_KEY) === "1") {
-      writeSession(SEARCH_BACK_KEY, null);
-      const targetY = readSavedScroll();
-      if (targetY > 0) {
-        let attempts = 0;
-        // wait for results to render tall enough, then restore
-        restoreTimer = window.setInterval(() => {
-          attempts++;
-          if (
-            document.documentElement.scrollHeight >=
-              targetY + window.innerHeight * 0.5 ||
-            attempts > 40
-          ) {
-            window.scrollTo(0, targetY);
-            if (attempts > 3) window.clearInterval(restoreTimer);
-          }
-        }, 60);
-      }
+    if (isBack && targetY <= 0) writeSession(SEARCH_BACK_KEY, null);
+    if (isBack && targetY > 0) {
+      let attempts = 0;
+      // wait for results to render tall enough, then restore
+      restoreTimer = window.setInterval(() => {
+        attempts++;
+        if (
+          document.documentElement.scrollHeight >=
+            targetY + window.innerHeight * 0.5 ||
+          attempts > 40
+        ) {
+          window.scrollTo(0, targetY);
+          writeSession(SEARCH_BACK_KEY, null);
+          if (attempts > 3) window.clearInterval(restoreTimer);
+        }
+      }, 60);
     }
     // no final record on unmount: the router has already moved to the next URL by then
     return () => {

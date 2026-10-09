@@ -13,11 +13,11 @@
     color: inherit;
   }
 
-  .rescard:hover :global(.rescover) {
+  :global(html.search-page) .rescard:hover :global(.rescover) {
     transform: scale(1.04);
   }
 
-  :global(.rescover) {
+  :global(html.search-page .rescover) {
     transition: transform 0.7s cubic-bezier(0.2, 0.7, 0.2, 1);
   }
 
@@ -397,7 +397,7 @@
   }
 
   @media (prefers-reduced-motion: reduce) {
-    [data-dd] {
+    :global(html.search-page) [data-dd] {
       animation: none !important;
     }
   }

@@ -126,7 +126,8 @@ export const useSearch = () => {
   useEffect(() => {
     const search = getStateSearch(state);
     if (search !== window.location.search)
-      navigate({ search }, { replace: true });
+      // URL sync only: keep the scroll position (ScrollRestoration resets it on other navigations)
+      navigate({ search }, { replace: true, preventScrollReset: true });
   }, [state, navigate]);
 
   const results = useMemo(() => calcResults(state), [state]);
