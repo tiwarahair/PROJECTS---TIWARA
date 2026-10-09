@@ -1,0 +1,45 @@
+@import url('https://fonts.googleapis.com/css2?family=Schibsted+Grotesk:ital,wght@0,400..900;1,400..900&family=Hanken+Grotesk:ital,wght@0,300..800;1,300..800&display=swap');
+:root{
+--font-display:'Schibsted Grotesk',system-ui,sans-serif;
+--font-body:'Hanken Grotesk',system-ui,sans-serif;
+/* Display scale — fluid, applied from audit A5. Headings are never fixed px. */
+--text-hero:clamp(40px,7.2vw,92px);    /* marketing hero, one per page */
+--text-display:clamp(32px,4.6vw,56px); /* section headline */
+--text-h1:clamp(24px,3vw,32px);        /* page/dashboard title */
+--text-h2:28px;                        /* subsection */
+--text-h3:20px;                        /* card heading */
+--text-stat:clamp(28px,3.4vw,44px);    /* big numerals */
+/* Body scale — half-pixel steps, matching what the product actually sets */
+--text-body-lg:16.5px;
+--text-body:15px;
+--text-body-sm:14.5px;
+--text-body-xs:13.5px;
+--text-caption:12.5px;
+--text-eyebrow:13px;    /* uppercase, letterspaced */
+--text-eyebrow-sm:11px; /* uppercase, tighter tracking */
+/* Line heights */
+--leading-display:1.05;
+--leading-hero:1.02;
+--leading-heading:1.15;
+--leading-body:1.55;
+--leading-body-loose:1.7;
+/* Optical tracking ladder — tightens as size grows. Key to the size, not the element. */
+--tracking-hero:-0.06em;
+--tracking-display:-0.05em;
+--tracking-h1:-0.03em;
+--tracking-h2:-0.02em;
+--tracking-h3:-0.01em;
+--tracking-body:0;
+--tracking-eyebrow:0.18em;    /* at 11–13px */
+--tracking-eyebrow-sm:0.13em; /* at 9–10px */
+/* Weights */
+--weight-light:300;    /* navigation links only */
+--weight-regular:400;
+--weight-medium:500;
+--weight-semibold:600;
+--weight-bold:700;
+}
+body{font-family:var(--font-body);color:var(--text-primary);}
+a{color:var(--link);text-decoration:none;}
+a:hover{color:var(--accent-900);text-decoration:none;}
+:focus-visible{outline:3px solid var(--focus-ring);outline-offset:2px;border-radius:var(--radius-xs);}

@@ -1,0 +1,65 @@
+:root{
+/* Accent — Tiwára Crimson (single accent family) */
+--accent-900:#5e0b0c;
+--accent-700:#8f1112; /* core brand accent — matches the logo */
+--accent-500:#b5541f; /* warm rust support tone within the accent family */
+/* Brand yellow — from the logo. On DARK surfaces it is permitted as display text and
+   accent marks (hero eyebrow, an emphasised word, the heading underline, rating stars).
+   On LIGHT surfaces it stays a small mark only, capped at roughly 4% of the surface:
+   never a fill for buttons, cards or large panels, never body copy. Applied from audit A9. */
+--brand-yellow:#dfcf3e;
+/* Solid accent tints — kept for legacy use; prefer the alpha washes below */
+--accent-200:#e9c9b2;
+--accent-100:#f6e3d6;
+/* Accent alpha tints — applied from audit A6. The product builds crimson tints from
+   alpha rather than solids so one value sits correctly on white, cream and ink alike. */
+--accent-wash:rgba(143,17,18,.06);        /* selected cards, quiet accent panels */
+--accent-wash-strong:rgba(143,17,18,.10); /* hover on a selected surface */
+--accent-select:rgba(143,17,18,.16);      /* ::selection */
+--accent-line:rgba(143,17,18,.28);        /* border on an accent-washed panel */
+--accent-glow:rgba(143,17,18,.35);        /* focus ring, pulse */
+/* Neutral scale — warm paper neutrals, light to dark */
+--neutral-0:#ffffff;
+--neutral-50:#fffefb;  /* page background */
+--neutral-100:#fdfbf5; /* raised surface / tint — tags, tertiary buttons */
+--neutral-200:#e9e2d3;
+--neutral-300:#d4cbb9;
+--neutral-400:#a89e8d;
+--neutral-500:#7d7465;
+--neutral-600:#575045;
+--neutral-700:#3a342c;
+--neutral-800:#26211b;
+--neutral-900:#1a1714; /* ink */
+--ink-warm:#241a12;    /* warm brown behind hero photography — applied from audit A16 */
+/* Semantic aliases */
+--surface-page:var(--neutral-50);
+/* White. NOT "every card is white" — there is no default card (see SURFACES & ELEVATION).
+   This is the fill for the two levels that are white: 1b dashboard panels and 2 overlays. */
+--surface-card:var(--neutral-0);
+--surface-raised:var(--neutral-100);
+--surface-cream:#f6f0e4;
+--fill-quiet:rgba(26,23,20,.05);
+--fill-quiet-strong:rgba(26,23,20,.08); /* hover on a --fill-quiet control */
+--surface-ink:var(--neutral-900);
+--text-primary:var(--neutral-900);
+--text-secondary:var(--neutral-500);
+--text-muted:var(--neutral-400);
+--text-inverse:var(--neutral-50);
+--text-on-accent:var(--neutral-50);
+--border-subtle:var(--neutral-200);
+--border-strong:var(--neutral-300);
+--action-primary:var(--accent-700);
+--action-primary-hover:#7a0e0f;
+--action-secondary:var(--neutral-900);
+--action-secondary-hover:#2e2822;
+--link:var(--accent-700);
+--focus-ring:var(--accent-glow);
+/* Scrims — three steps, applied from audit A20 */
+--scrim-popover:rgba(26,23,20,.28);   /* anchored popovers */
+--scrim-modal:rgba(26,23,20,.45);     /* modals and bottom sheets */
+--scrim-immersive:rgba(26,23,20,.9);  /* lightbox */
+/* Status (derived from palette, used sparingly) */
+--status-success:#2f7a4d;
+--status-warning:var(--accent-500);
+--status-danger:var(--accent-700);
+}

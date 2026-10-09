@@ -1,0 +1,24 @@
+/* Global reset, verbatim from the prototype helmet (HANDOFF §8 Task 1). */
+html,
+body {
+  margin: 0;
+  max-width: 100%;
+}
+body {
+  font-family: "Hanken Grotesk", sans-serif;
+  color: var(--text-primary);
+  background: var(--neutral-50);
+}
+a {
+  color: var(--accent-700);
+  text-decoration: none;
+}
+a:hover {
+  color: var(--accent-900);
+  text-decoration: none;
+}
+input,
+select,
+button {
+  font-family: "Hanken Grotesk", sans-serif;
+}

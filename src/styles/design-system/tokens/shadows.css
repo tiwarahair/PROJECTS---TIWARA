@@ -1,0 +1,33 @@
+:root{
+/* SHADOW IS ASSIGNED BY ELEVATION LEVEL, NOT BY APPEARANCE. See "Surfaces & elevation"
+   in the readme. Levels 0, 1 and 1t carry NO shadow. Only 1b and 2 do.
+   Warm ink in every value — pure black goes grey and cold against cream. */
+
+/* Level 1b — dashboard panels. One value, applied uniformly to every panel on a board,
+   with no border alongside it. At this size it reads as a soft edge, not elevation,
+   so it never competes with level 2. */
+--shadow-panel:0 1px 2px 0 rgba(26,23,20,.06);
+
+/* Level 2 — things that float over scrolling content. */
+--shadow-rail:0 4px 24px -4px rgba(26,23,20,.10),0 1px 2px 0 rgba(26,23,20,.05); /* sticky summary rails, in-flow floating panels */
+--shadow-modal:0 24px 70px rgba(26,23,20,.22);   /* centred modals */
+--shadow-popover:0 20px 56px rgba(26,23,20,.2);  /* small anchored popovers */
+--shadow-sheet:0 -24px 60px rgba(26,23,20,.22);  /* bottom sheets */
+--shadow-pill:0 6px 24px rgba(26,23,20,.13),0 2px 6px rgba(26,23,20,.07); /* floating search pill */
+
+/* Hairline shadows — a border's job on sticky chrome, where a real border would clip. */
+--shadow-hairline:0 1px 0 rgba(26,23,20,.07);    /* sticky nav */
+--shadow-hairline-up:0 -1px 0 rgba(26,23,20,.09);/* sticky bottom bars */
+
+/* Photography only. Editorial lift on a floating or stacked image, never on a container. */
+--shadow-float:0 24px 60px -24px rgba(26,23,20,.35);
+
+/* RETIRED — kept as aliases so existing components don't break. Do not use in new work.
+   --shadow-card: level 1 has no card to shadow.
+   --shadow-lift: the card hover-lift is retired; hover on a tappable row is a fill change.
+   --shadow-raised: renamed --shadow-panel and redefined to the 1px value. */
+--shadow-card:var(--shadow-panel);
+--shadow-lift:var(--shadow-rail);
+--shadow-raised:var(--shadow-panel);
+--shadow-overlay:var(--shadow-modal);
+}

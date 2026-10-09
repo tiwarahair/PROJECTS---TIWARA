@@ -1,0 +1,12 @@
+:root{
+--radius-xs:6px;     /* tags, chips, focus outline */
+--radius-sm:12px;    /* form fields, list rows, popover items, select controls */
+--radius-md:16px;    /* cards, images, tiles, portfolio */
+--radius-lg:24px;    /* modals, sheets, large media */
+--radius-section:clamp(20px,3vw,40px); /* inset section panels, scroll-cropped hero */
+--radius-full:999px; /* buttons, icon buttons, avatars, search inputs, dots */
+/* Message bubbles are asymmetric: three corners at --radius-bubble,
+   the speaker's near corner at --radius-bubble-tail. Not a scale step. */
+--radius-bubble:18px;
+--radius-bubble-tail:4px;
+}
