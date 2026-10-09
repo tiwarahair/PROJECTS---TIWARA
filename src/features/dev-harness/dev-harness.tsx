@@ -2,6 +2,8 @@ import type { ReactNode } from "react";
 import { useParams } from "react-router";
 import { AddressFinder } from "../../components/address-finder/address-finder";
 import { AllergyField } from "../../components/allergy-field/allergy-field";
+import { SearchSelect } from "../../components/search-select/search-select";
+import type { SearchSelectProps } from "../../components/search-select/search-select";
 import { StylistCard } from "../../components/stylist-card/stylist-card";
 import type { StylistCardProps } from "../../components/stylist-card/stylist-card";
 import type { AddressFixture } from "../../components/address-finder/use-address-finder";
@@ -96,6 +98,53 @@ const STYLIST_CARDS: { fixture: string; props: StylistCardProps }[] = [
   },
 ];
 
+const CATEGORY_OPTIONS = [
+  { label: "Signature braids", dot: "var(--accent-700)" },
+  { label: "Natural & silk press", dot: "var(--accent-500)" },
+  { label: "+ New category", action: true },
+];
+const TYPE_OPTIONS = [
+  {
+    label: "Knotless braids",
+    group: "Braids & Twists",
+    keywords: ["knotless"],
+  },
+  { label: "Box braids", group: "Braids & Twists" },
+  { label: "Silk press", group: "Natural Hair", keywords: ["press"] },
+  { label: "other natural hair", group: "Natural Hair" },
+];
+const SEARCH_SELECTS: { fixture: string; props: SearchSelectProps }[] = [
+  {
+    fixture: "placeholder",
+    props: { options: CATEGORY_OPTIONS, value: "", placeholder: "No category" },
+  },
+  {
+    fixture: "value-dot",
+    props: {
+      options: CATEGORY_OPTIONS,
+      value: "Signature braids",
+      placeholder: "No category",
+    },
+  },
+  {
+    fixture: "disabled",
+    props: {
+      options: CATEGORY_OPTIONS,
+      value: "",
+      placeholder: "No category",
+      disabled: true,
+    },
+  },
+  {
+    fixture: "open",
+    props: {
+      options: TYPE_OPTIONS,
+      value: "Knotless braids",
+      placeholder: "Search service types",
+    },
+  },
+];
+
 const HARNESSES: Record<string, () => ReactNode> = {
   "address-finder": () =>
     ADDRESS_FIXTURES.map((fixture) => (
@@ -134,6 +183,12 @@ const HARNESSES: Record<string, () => ReactNode> = {
     STYLIST_CARDS.map(({ fixture, props }) => (
       <div key={fixture} className={styles.cardBox} data-fx={fixture}>
         <StylistCard {...props} />
+      </div>
+    )),
+  "search-select": () =>
+    SEARCH_SELECTS.map(({ fixture, props }) => (
+      <div key={fixture} className={styles.selectBox} data-fx={fixture}>
+        <SearchSelect {...props} />
       </div>
     )),
 };

@@ -1,0 +1,141 @@
+/* Values verbatim from prototype SearchSelect.jsx (style object S). */
+.wrap {
+  position: relative;
+  font-family: inherit;
+}
+
+.trigger {
+  width: 100%;
+  box-sizing: border-box;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius-sm);
+  padding: 11px 13px;
+  font-size: 14.5px;
+  font-family: inherit;
+  background: transparent;
+  color: var(--text-muted);
+  cursor: pointer;
+  text-align: left;
+}
+
+.hasValue {
+  color: var(--text-primary);
+}
+
+.trigger:disabled {
+  background: var(--fill-quiet);
+  color: var(--text-muted);
+  cursor: not-allowed;
+  border-color: var(--border-subtle);
+}
+
+.triggerLabel {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+}
+
+.triggerText {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 999px;
+  background: var(--dot-colour);
+  flex: 0 0 auto;
+}
+
+.panel {
+  position: fixed;
+  z-index: 300;
+  left: var(--panel-left);
+  width: var(--panel-width);
+  top: var(--panel-top);
+  bottom: var(--panel-bottom);
+  background: #fff;
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-popover, 0 12px 28px -8px rgba(26, 23, 20, 0.35));
+  overflow: hidden;
+  font-family: inherit;
+}
+
+.searchRow {
+  padding: 8px;
+  border-bottom: 1px solid var(--border-subtle);
+}
+
+/* outline/box-shadow repeated on :focus-visible: inline in the prototype, above the global focus ring */
+.search,
+.search:focus-visible {
+  width: 100%;
+  box-sizing: border-box;
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-sm);
+  padding: 9px 11px;
+  font-size: 14px;
+  font-family: inherit;
+  background: transparent;
+  color: var(--text-primary);
+  outline: none;
+  box-shadow: none;
+}
+
+.list {
+  max-height: 260px;
+  overflow-y: auto;
+  padding: 6px;
+  display: flex;
+  flex-direction: column;
+}
+
+.groupLabel {
+  padding: 10px 10px 4px;
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--neutral-600);
+}
+
+.option {
+  border: 1px solid transparent;
+  text-align: left;
+  font: inherit;
+  font-size: 14px;
+  padding: 9px 10px;
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  background: none;
+  color: var(--text-primary);
+  font-weight: 400;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.optionSelected {
+  border: 1px solid var(--accent-700);
+  background: var(--accent-wash);
+  color: var(--accent-700);
+  font-weight: 600;
+}
+
+.optionAction {
+  color: var(--accent-700);
+  font-weight: 600;
+}
+
+.empty {
+  padding: 12px 10px;
+  font-size: 13.5px;
+  color: var(--text-muted);
+}
