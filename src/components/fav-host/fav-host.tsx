@@ -103,7 +103,9 @@ export const FavHost = () => {
     };
   }, [dispatch, store]);
 
-  // any [data-tw-acct] trigger toggles the menu
+  // any [data-tw-acct] trigger toggles the menu. Capture phase: it must run before a router <Link>'s own click
+  // handler, which navigates unless the default is already prevented (the prototype's plain <a> only navigated
+  // after the bubbling listener had prevented it)
   useEffect(() => {
     const handleClick = (event: MouseEvent) => {
       const anchor = (event.target as Element | null)?.closest?.<HTMLElement>(
@@ -113,8 +115,8 @@ export const FavHost = () => {
       event.preventDefault();
       setMenu((open) => (open ? null : { anchor, pinned: false }));
     };
-    document.addEventListener("click", handleClick);
-    return () => document.removeEventListener("click", handleClick);
+    document.addEventListener("click", handleClick, true);
+    return () => document.removeEventListener("click", handleClick, true);
   }, []);
 
   return (
