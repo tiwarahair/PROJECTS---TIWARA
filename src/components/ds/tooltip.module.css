@@ -1,0 +1,21 @@
+/* Values verbatim from design_system_source/components/feedback/Tooltip.jsx */
+.wrapper {
+  position: relative;
+  display: inline-flex;
+}
+
+.bubble {
+  position: absolute;
+  bottom: calc(100% + 8px);
+  left: 50%;
+  transform: translateX(-50%);
+  background: var(--surface-ink);
+  color: var(--text-inverse);
+  font-family: var(--font-body);
+  font-size: 12px;
+  font-weight: 500;
+  padding: 6px 10px;
+  border-radius: var(--radius-xs);
+  white-space: nowrap;
+  z-index: 50;
+}

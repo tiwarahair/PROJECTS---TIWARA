@@ -1,0 +1,62 @@
+/* Values verbatim from design_system_source/components/forms/Input.jsx */
+.field {
+  display: block;
+  font-family: var(--font-body);
+}
+
+.label {
+  display: block;
+  font-size: 13px;
+  font-weight: 600;
+  margin-bottom: 6px;
+  color: var(--text-primary);
+}
+
+.error {
+  display: block;
+  font-size: 12px;
+  color: var(--status-danger);
+  margin-top: 5px;
+}
+
+.hint {
+  display: block;
+  font-size: 12px;
+  color: var(--text-secondary);
+  margin-top: 5px;
+}
+
+/* outline:none repeated on :focus-visible: inline in the prototype, it beat the global focus ring */
+.control,
+.control:focus-visible {
+  font-family: var(--font-body);
+  font-size: 15px;
+  color: var(--text-primary);
+  background: var(--surface-card);
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius-sm);
+  padding: 10px 14px;
+  outline: none;
+  width: 100%;
+  box-sizing: border-box;
+  transition:
+    border-color var(--duration-base) var(--ease-out),
+    box-shadow var(--duration-base) var(--ease-out);
+}
+
+.control:focus {
+  border-color: var(--accent-700);
+  box-shadow: 0 0 0 3px var(--focus-ring);
+}
+
+.invalid,
+.invalid:focus {
+  border-color: var(--status-danger);
+}
+
+.select {
+  appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%237d7465' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 12px center;
+}

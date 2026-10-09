@@ -1,0 +1,33 @@
+/* Values verbatim from design_system_source/components/display/IconChip.jsx */
+.iconChip {
+  flex: 0 0 auto;
+  border-radius: var(--radius-full);
+  background: var(--surface-raised);
+  border: 1px solid var(--border-subtle);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.sm {
+  width: 34px;
+  height: 34px;
+}
+.md {
+  width: 42px;
+  height: 42px;
+}
+.lg {
+  width: 44px;
+  height: 44px;
+}
+
+.accent {
+  color: var(--accent-700);
+}
+.muted {
+  color: var(--text-muted);
+}
+.ink {
+  color: var(--text-primary);
+}

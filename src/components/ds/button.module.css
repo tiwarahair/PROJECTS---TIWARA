@@ -1,0 +1,109 @@
+/* Values verbatim from design_system_source/components/actions/Button.jsx */
+.button {
+  font-family: var(--font-body);
+  font-weight: 600;
+  border-radius: var(--radius-full);
+  border: 1px solid transparent;
+  letter-spacing: normal;
+  text-transform: none;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  line-height: 1.2;
+  white-space: nowrap;
+  transition:
+    background var(--duration-base) var(--ease-out),
+    color var(--duration-base) var(--ease-out),
+    transform var(--duration-fast) var(--ease-out);
+  opacity: 1;
+  text-decoration: none;
+}
+
+.sm {
+  font-size: 13.5px;
+  padding: 8px 16px;
+}
+.md {
+  font-size: 15px;
+  padding: 11px 22px;
+}
+.lg {
+  font-size: 16px;
+  padding: 14px 28px;
+}
+
+/* cta = marketing/hero/nav treatment: uppercase, letterspaced, smaller type, wider padding */
+.cta {
+  border: 1.5px solid transparent;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  gap: 10px;
+}
+.cta.sm {
+  font-size: 10.5px;
+  padding: 8px 14px;
+}
+.cta.md {
+  font-size: 11px;
+  padding: 10px 18px;
+}
+.cta.lg {
+  font-size: 12px;
+  padding: 13.5px 30px;
+}
+
+.primary {
+  background: var(--action-primary);
+  color: var(--text-on-accent);
+  border-color: var(--action-primary);
+}
+.secondary {
+  background: var(--action-secondary);
+  color: var(--text-inverse);
+  border-color: var(--action-secondary);
+}
+.tertiary {
+  background: var(--fill-quiet);
+  color: var(--text-primary);
+  border-color: transparent;
+}
+.outline {
+  background: transparent;
+  color: var(--text-primary);
+  border-color: var(--neutral-900);
+}
+.ghost {
+  background: transparent;
+  color: var(--text-primary);
+}
+
+/* outline fills ink on hover — the prototype's behaviour, adopted here */
+.primary:hover:not(:disabled) {
+  background: var(--action-primary-hover);
+  border-color: var(--action-primary-hover);
+}
+.secondary:hover:not(:disabled) {
+  background: var(--action-secondary-hover);
+  border-color: var(--action-secondary-hover);
+}
+.tertiary:hover:not(:disabled) {
+  background: var(--fill-quiet-strong);
+}
+.outline:hover:not(:disabled) {
+  background: var(--neutral-900);
+  color: var(--neutral-50);
+}
+.ghost:hover:not(:disabled) {
+  background: var(--surface-raised);
+}
+
+.button:active:not(:disabled) {
+  transform: scale(0.98);
+}
+
+.button:disabled {
+  cursor: not-allowed;
+  opacity: 0.45;
+}

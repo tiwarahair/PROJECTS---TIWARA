@@ -4,7 +4,9 @@
     {
       "name": "tiwara-dev",
       "runtimeExecutable": "/Users/Faith-Personal/.nvm/versions/node/v24.18.0/bin/node",
-      "runtimeArgs": ["node_modules/vite/bin/vite.js"],
+      "runtimeArgs": [
+        "node_modules/vite/bin/vite.js"
+      ],
       "port": 5173,
       "autoPort": true
     },

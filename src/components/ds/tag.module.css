@@ -1,0 +1,40 @@
+/* Values verbatim from design_system_source/components/display/Tag.jsx */
+.tag {
+  border-radius: var(--radius-xs);
+  padding: 6px 12px;
+  font-family: var(--font-body);
+  font-size: 13px;
+  font-weight: 500;
+  cursor: default;
+  border: 1px solid;
+  transition:
+    background var(--duration-fast) var(--ease-out),
+    border-color var(--duration-fast) var(--ease-out);
+}
+
+/* STATIC MARK (no onClick): --fill-quiet, no border, --neutral-600 label */
+.mark {
+  background: var(--fill-quiet);
+  border-color: transparent;
+  color: var(--neutral-600);
+}
+
+/* INTERACTIVE CHIP: unselected-control hairline, no fill at rest */
+.control {
+  cursor: pointer;
+  background: transparent;
+  border-color: var(--border-subtle);
+  color: var(--text-primary);
+}
+
+.control:hover {
+  background: var(--fill-quiet);
+}
+
+/* small-control fill flip: solid ink, transparent border so the box keeps its 1px */
+.control.selected,
+.control.selected:hover {
+  background: var(--surface-ink);
+  border-color: transparent;
+  color: var(--text-inverse);
+}

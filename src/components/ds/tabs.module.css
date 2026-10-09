@@ -1,0 +1,27 @@
+/* Values verbatim from design_system_source/components/navigation/Tabs.jsx */
+.tabs {
+  display: flex;
+  gap: 4px;
+  border-bottom: 1px solid var(--border-subtle);
+  font-family: var(--font-body);
+}
+
+.tab {
+  background: none;
+  border: none;
+  border-bottom: 2px solid transparent;
+  margin-bottom: -1px;
+  padding: 10px 14px;
+  font-family: var(--font-body);
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--text-secondary);
+  cursor: pointer;
+  transition: color var(--duration-fast) var(--ease-out);
+}
+
+.active {
+  border-bottom: 2px solid var(--accent-700);
+  font-weight: 600;
+  color: var(--text-primary);
+}

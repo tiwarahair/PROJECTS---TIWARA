@@ -1,0 +1,38 @@
+/* Values verbatim from design_system_source/components/display/Badge.jsx */
+.badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  border-radius: var(--radius-full);
+  padding: 4px 12px;
+  font-family: var(--font-body);
+  font-size: 13px;
+  font-weight: 600;
+  line-height: 1.3;
+}
+
+/* --fill-quiet reads on white, cream and --surface-cream alike; --neutral-600 keeps the label above AA on it. */
+.neutral {
+  background: var(--fill-quiet);
+  color: var(--neutral-600);
+}
+.accent {
+  background: var(--accent-100);
+  color: var(--accent-700);
+}
+.success {
+  background: #e8efe4;
+  color: var(--status-success);
+}
+.warning {
+  background: var(--accent-100);
+  color: var(--accent-500);
+}
+.danger {
+  background: #f8e4e4;
+  color: var(--accent-700);
+}
+.ink {
+  background: var(--surface-ink);
+  color: var(--text-inverse);
+}

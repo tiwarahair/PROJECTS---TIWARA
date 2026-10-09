@@ -1,0 +1,83 @@
+/* Values verbatim from design_system_source/components/actions/IconButton.jsx */
+.iconButton {
+  border-radius: var(--radius-full);
+  border: 1px solid transparent;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  cursor: pointer;
+  opacity: 1;
+  transition:
+    background var(--duration-base) var(--ease-out),
+    color var(--duration-base) var(--ease-out),
+    transform var(--duration-fast) var(--ease-out);
+}
+
+.sm {
+  width: 34px;
+  height: 34px;
+}
+.md {
+  width: 44px;
+  height: 44px;
+}
+.lg {
+  width: 52px;
+  height: 52px;
+}
+
+.ghost {
+  background: transparent;
+  color: var(--text-primary);
+}
+.tint {
+  background: var(--fill-quiet);
+  color: var(--accent-700);
+  border-color: transparent;
+}
+.outline {
+  background: transparent;
+  color: var(--text-primary);
+  border-color: var(--border-strong);
+}
+.primary {
+  background: var(--action-primary);
+  color: var(--text-on-accent);
+}
+
+.ghost:hover:not(:disabled) {
+  background: var(--fill-quiet);
+}
+.tint:hover:not(:disabled) {
+  background: var(--fill-quiet-strong);
+}
+.outline:hover:not(:disabled) {
+  background: var(--neutral-900);
+  color: var(--neutral-50);
+}
+.primary:hover:not(:disabled) {
+  background: var(--action-primary-hover);
+}
+
+/* Over photography the hairline is replaced by the over-media recipe — one ground or the other, never both. */
+.iconButton.onMedia {
+  background: rgba(246, 240, 228, 0.1);
+  backdrop-filter: blur(16px) saturate(140%);
+  -webkit-backdrop-filter: blur(16px) saturate(140%);
+  color: var(--neutral-50);
+  border-color: transparent;
+}
+.iconButton.onMedia:hover:not(:disabled) {
+  background: rgba(246, 240, 228, 0.2);
+  color: var(--neutral-50);
+}
+
+.iconButton:active:not(:disabled) {
+  transform: scale(0.94);
+}
+
+.iconButton:disabled {
+  cursor: not-allowed;
+  opacity: 0.45;
+}
