@@ -1,0 +1,56 @@
+/* Values verbatim from prototype Booking.dc.html (inline styles; style-hover/active as !important like the prototype runtime). */
+
+.bar {
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 90;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 14px clamp(16px, 5vw, 24px);
+  background: rgba(255, 254, 251, 0.85);
+  backdrop-filter: blur(12px);
+  box-shadow: var(--shadow-hairline-up);
+}
+
+.text {
+  min-width: 0;
+}
+
+.total {
+  font-family: "Schibsted Grotesk", sans-serif;
+  font-weight: 600;
+  font-size: 22px;
+  letter-spacing: -0.01em;
+}
+
+.line {
+  font-size: 13px;
+  color: var(--text-secondary);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.actions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex: 0 0 auto;
+}
+
+.back {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 46px;
+  height: 46px;
+  flex: 0 0 auto;
+  border: 1px solid var(--border-strong);
+  background: transparent;
+  color: var(--neutral-900);
+  border-radius: var(--radius-full);
+  cursor: pointer;
+}

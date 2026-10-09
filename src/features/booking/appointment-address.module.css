@@ -1,0 +1,121 @@
+/* Values verbatim from prototype Booking.dc.html (inline styles; style-hover/active as !important like the prototype runtime). */
+
+.section {
+  margin: 0 0 36px;
+}
+
+.cards {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, 210px), 1fr));
+  gap: 10px;
+  margin-bottom: 16px;
+}
+
+.card {
+  text-align: left;
+  padding: 14px 16px;
+  border-radius: var(--radius-md);
+  font: inherit;
+  color: var(--text-primary);
+  cursor: pointer;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  transition:
+    background-color 0.16s cubic-bezier(0.2, 0.8, 0.2, 1),
+    border-color 0.16s cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+
+.card:hover {
+  border-color: var(--accent-line) !important;
+}
+
+.card:active {
+  transform: scale(0.98) !important;
+}
+
+.cardLabel {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 14.5px;
+  font-weight: 600;
+}
+
+.defaultTag {
+  font-size: 12px;
+  font-weight: 600;
+  padding: 2px 7px;
+  border-radius: var(--radius-xs);
+  background: var(--fill-quiet);
+  color: var(--neutral-600);
+}
+
+.cardLine {
+  font-size: 14px;
+  line-height: 1.45;
+  color: var(--neutral-600);
+}
+
+.finderColumn {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  min-width: 0;
+  grid-column: 1/-1;
+}
+
+.areaIn {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 13.5px;
+  font-weight: 600;
+  color: #2f7a4d;
+}
+
+.areaOut {
+  display: flex;
+  align-items: flex-start;
+  gap: 6px;
+  font-size: 13.5px;
+  line-height: 1.45;
+  font-weight: 600;
+  color: var(--accent-700);
+}
+
+.nearLink {
+  white-space: nowrap;
+}
+
+.accessNotes {
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius-sm);
+  padding: 14px 16px;
+  font-size: 15px;
+  background: transparent;
+  width: 100%;
+  box-sizing: border-box;
+  resize: vertical;
+  font-family: inherit;
+  color: var(--text-primary);
+}
+
+/* savedCards a.bd / a.bg / a.fg */
+.cardOn {
+  border: 1px solid var(--accent-700);
+  background: var(--accent-wash);
+}
+
+.cardOff {
+  border: 1px solid var(--border-subtle);
+  background: transparent;
+}
+
+.cardLabelOn {
+  color: var(--accent-700);
+}
+
+.cardLabelOff {
+  color: var(--text-primary);
+}

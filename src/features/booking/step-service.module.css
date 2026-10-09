@@ -1,0 +1,70 @@
+/* Values verbatim from prototype Booking.dc.html (inline styles; style-hover/active as !important like the prototype runtime). */
+
+.group {
+  margin-bottom: 24px;
+}
+
+.groupName {
+  font-size: 13px;
+  font-weight: 600;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--text-secondary);
+  margin-bottom: 10px;
+}
+
+.row:hover {
+  border-color: var(--accent-line) !important;
+  background: var(--accent-wash) !important;
+}
+
+.name {
+  display: block;
+  font-weight: 600;
+  font-size: 15.5px;
+}
+
+.meta {
+  display: block;
+  font-size: 13.5px;
+  color: var(--text-secondary);
+  margin-top: 2px;
+}
+
+.price {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  font-weight: 600;
+  font-size: 15px;
+}
+
+/* sv.rowStyle (renderVals groups) */
+.row {
+  width: 100%;
+  color: var(--text-primary);
+  -webkit-text-fill-color: currentColor;
+  font-family: inherit;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  text-align: left;
+  border-radius: var(--radius-md);
+  padding: 16px 18px;
+  margin-bottom: 8px;
+  cursor: pointer;
+  transition:
+    border-color 0.2s ease,
+    box-shadow 0.2s ease;
+}
+
+.rowChosen {
+  background: var(--accent-wash);
+  border: 1px solid var(--accent-700);
+}
+
+.rowIdle {
+  background: transparent;
+  border: 1px solid var(--border-subtle);
+}

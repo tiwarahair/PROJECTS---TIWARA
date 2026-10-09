@@ -1,0 +1,358 @@
+import { useCallback, useEffect, useRef, useState } from "react";
+import type { MouseEvent } from "react";
+import { useNavigate } from "react-router";
+import { logOut as logOutSession } from "../../stores/session-slice";
+import { useAppDispatch } from "../../stores/hooks";
+import { getServiceOptions, findService, hasStep2 } from "../../utils/services";
+import { getBookingMoney, getCustomisationLine } from "./booking-pricing";
+import {
+  getAddressCheck,
+  getFieldErrors,
+  getFirstErrorTarget,
+} from "./booking-details";
+import {
+  clearDraft,
+  EMPTY_ADDRESS,
+  getDraftPatch,
+  getFreshSelection,
+  getHoldKey,
+  getInitialBooking,
+  getStylist,
+  saveDraft,
+} from "./booking-state";
+import type { BookingState, FieldKey } from "./booking-state";
+
+type StatePatch =
+  Partial<BookingState> | ((state: BookingState) => Partial<BookingState>);
+
+const STEPS = [
+  { n: 1, label: "Service" },
+  { n: 2, label: "Customise" },
+  { n: 3, label: "Time" },
+  { n: 4, label: "Details" },
+  { n: 5, label: "Review" },
+  { n: 6, label: "Pay" },
+];
+
+const PAY_ERRORS = {
+  declined: "Your card was declined. Try another card or payment method.",
+  bank: "We couldn't confirm this payment with your bank. Try again or use another card.",
+  network: "Something went wrong and you haven't been charged. Try again.",
+};
+
+// Stripe test cards the demo reacts to
+const DECLINED_CARD = "4000000000000002";
+const BANK_CHECK_CARD = "4000002760003184";
+const NETWORK_ERROR_CARD = "4000000000000119";
+
+/** Booking state and actions (prototype Booking.dc.html class Component). */
+export const useBooking = () => {
+  const [initial] = useState(getInitialBooking);
+  const [state, setRawState] = useState(initial.state);
+  const [, setTick] = useState(0);
+  const navigate = useNavigate();
+  const dispatch = useAppDispatch();
+  const stateRef = useRef(state);
+  stateRef.current = state;
+  const afterCommit = useRef<(() => void)[]>([]);
+  const crumbsRef = useRef<HTMLDivElement>(null);
+  const focusTarget = useRef<string | null>(null);
+  const payTimer = useRef(0);
+
+  /** setState with a merge patch and an optional callback after the render, like the prototype's setState. */
+  const setState = useCallback((patch: StatePatch, callback?: () => void) => {
+    if (callback) afterCommit.current.push(callback);
+    setRawState((current) => ({
+      ...current,
+      ...(typeof patch === "function" ? patch(current) : patch),
+    }));
+  }, []);
+
+  useEffect(() => {
+    const callbacks = afterCommit.current.splice(0);
+    for (const callback of callbacks) callback();
+  });
+
+  /** Step changes scroll so the step title sits at the top. */
+  const scrollToTitle = useCallback(() => {
+    const crumbs = crumbsRef.current;
+    if (!crumbs) {
+      window.scrollTo(0, 0);
+      return;
+    }
+    const y = crumbs.getBoundingClientRect().bottom + window.scrollY;
+    window.scrollTo(0, Math.max(0, y - 40));
+  }, []);
+
+  // 1s tick: the hold countdown (and its expiry) and the "Resend email (Ns)" countdown
+  useEffect(() => {
+    const interval = window.setInterval(() => {
+      const { confirmed, acct, hold, holdExpired } = stateRef.current;
+      if (confirmed && acct.sent && Date.now() - acct.sentAt < 31000) {
+        setTick((tick) => tick + 1);
+        return;
+      }
+      if (!hold || confirmed || holdExpired) return;
+      if (Date.now() >= hold.until) setState({ holdExpired: true });
+      else setTick((tick) => tick + 1);
+    }, 1000);
+    return () => {
+      window.clearInterval(interval);
+      window.clearTimeout(payTimer.current);
+    };
+  }, [setState]);
+
+  // after every update: keep the draft (or drop it once confirmed), then focus the first error if asked
+  const isFirstRender = useRef(true);
+  useEffect(() => {
+    if (isFirstRender.current) {
+      isFirstRender.current = false;
+      return;
+    }
+    if (state.confirmed) {
+      if (!state.board) clearDraft(state.id);
+    } else saveDraft(state);
+    const target = focusTarget.current;
+    if (target == null) return;
+    focusTarget.current = null;
+    window.setTimeout(() => {
+      const element =
+        target === "@addr"
+          ? document.querySelector<HTMLElement>(
+              '[data-af-root="bk-addr"] [aria-invalid="true"], [data-af-root="bk-addr"] input, [data-af-root="bk-addr"] button[aria-label="Edit address"]',
+            )
+          : document.getElementById(target);
+      element?.focus();
+    }, 60);
+  }, [state]);
+
+  const stylist = getStylist(state.id);
+  const service = findService(stylist, state.svc);
+  const options = getServiceOptions(service);
+  const money = getBookingMoney(stylist, service, options, state.sel);
+  const isMobileStylist = stylist.businessType === "mobile";
+  const address = getAddressCheck(stylist, state.addr);
+  const errors = getFieldErrors(
+    state.details,
+    isMobileStylist,
+    address.isValid,
+  );
+  const firstError = getFirstErrorTarget(errors, address.outBlock);
+  const hasErrors = Object.keys(errors).length > 0;
+  const has2 = !!(service && hasStep2(service));
+  const needSize = options.size.length > 0 && !state.sel.size;
+  const needLength = options.length.length > 0 && !state.sel.length;
+  const nextDisabled =
+    (state.step === 2 && (needSize || needLength)) ||
+    (state.step === 3 && !(state.date && state.time));
+  const tsShow = !!state.tsMode && state.step === 6;
+  const tsBlock = tsShow && state.ts !== "ok";
+  const payDisabled = state.paying || tsBlock;
+  const holdLeftMs = state.hold
+    ? Math.max(0, state.hold.until - Date.now())
+    : 0;
+
+  const confirmNow = () =>
+    setState(
+      {
+        confirmed: true,
+        paying: false,
+        hold: null,
+        bank: false,
+        wallet: null,
+        holdExpired: false,
+      },
+      () => window.scrollTo(0, 0),
+    );
+
+  /** Simulated Stripe: 900ms, then the outcome for the test card (or success). */
+  const attemptPay = (card: string) => {
+    setState({ paying: true, payErr: "", payKind: "" });
+    window.clearTimeout(payTimer.current);
+    payTimer.current = window.setTimeout(() => {
+      const current = stateRef.current;
+      if (current.taken)
+        return setState({
+          paying: false,
+          payErr:
+            "Sorry, " +
+            current.time +
+            " was just booked by someone else. You haven't been charged.",
+          payKind: "taken",
+        });
+      if (card === DECLINED_CARD)
+        return setState({
+          paying: false,
+          payErr: PAY_ERRORS.declined,
+          payKind: "declined",
+          pay: { ...current.pay, num: "", exp: "", cvc: "" },
+        });
+      if (card === BANK_CHECK_CARD)
+        return setState({ paying: false, bank: true });
+      if (card === NETWORK_ERROR_CARD)
+        return setState({
+          paying: false,
+          payErr: PAY_ERRORS.network,
+          payKind: "network",
+        });
+      confirmNow();
+    }, 900);
+  };
+
+  const goToStep = (step: number) => setState({ step }, scrollToTitle);
+
+  const actions = {
+    setState,
+    scrollToTitle,
+    goToStep,
+    attemptPay,
+    pickService: (serviceId: string) => {
+      const picked = findService(stylist, serviceId);
+      setState(
+        {
+          svc: serviceId,
+          step: picked && hasStep2(picked) ? 2 : 3,
+          sel: getFreshSelection(picked),
+          showPrev: false,
+          date: null,
+          time: null,
+        },
+        scrollToTitle,
+      );
+    },
+    goBack: () =>
+      setState(
+        ({ step }) => ({
+          step: Math.max(1, step - 1 - (step === 3 && !has2 ? 1 : 0)),
+        }),
+        scrollToTitle,
+      ),
+    goNext: () => {
+      if (nextDisabled) return;
+      if (state.step === 4 && (hasErrors || address.outBlock)) {
+        focusTarget.current = firstError;
+        setState({ showErrs: true });
+        return;
+      }
+      const extra: Partial<BookingState> = {};
+      if (state.step === 3 && state.time && !state.hold)
+        extra.hold = {
+          key: getHoldKey(state.calY, state.calM, state.date, state.time),
+          until: Date.now() + state.holdLen * 1000,
+        };
+      setState(
+        ({ step }) => ({
+          ...extra,
+          step: Math.min(6, step + 1),
+          reNote: false,
+        }),
+        scrollToTitle,
+      );
+    },
+    touchField: (key: FieldKey) =>
+      setState(({ touched }) => ({ touched: { ...touched, [key]: true } })),
+    logOut: () => {
+      dispatch(logOutSession());
+      setState(({ details }) => ({
+        loggedIn: false,
+        details: { ...details, first: "", last: "", email: "", phone: "" },
+      }));
+    },
+    saveDraftNow: () => saveDraft(stateRef.current),
+    onLeaveLink: (event: MouseEvent<HTMLAnchorElement>) => {
+      if (state.svc && !state.confirmed) {
+        event.preventDefault();
+        setState({ leave: event.currentTarget.getAttribute("href") });
+      }
+    },
+    confirmLeave: () => {
+      const href = state.leave;
+      setState({ hold: null, leave: null }, () => {
+        if (href) navigate(href);
+      });
+    },
+    resumeContinue: () => {
+      if (state.resumeDraft)
+        setState(getDraftPatch(state.resumeDraft, state), scrollToTitle);
+    },
+    resumeStartOver: () => {
+      clearDraft(state.id);
+      setState({ resumeDraft: null });
+    },
+    pickAgain: () =>
+      setState(
+        {
+          holdExpired: false,
+          hold: null,
+          time: null,
+          step: 3,
+          reNote: false,
+          payErr: "",
+          payKind: "",
+        },
+        scrollToTitle,
+      ),
+    pickAnother: () =>
+      setState(
+        {
+          step: 3,
+          time: null,
+          hold: null,
+          payErr: "",
+          payKind: "",
+          taken: false,
+        },
+        scrollToTitle,
+      ),
+    bankApprove: () => {
+      setState({ bank: false, paying: true });
+      window.clearTimeout(payTimer.current);
+      payTimer.current = window.setTimeout(confirmNow, 600);
+    },
+    bankFail: () =>
+      setState({
+        bank: false,
+        paying: false,
+        payErr: PAY_ERRORS.bank,
+        payKind: "bank",
+      }),
+    openWallet: (wallet: string) => {
+      if (!payDisabled) setState({ wallet, payErr: "", payKind: "" });
+    },
+    walletPay: () => {
+      setState({ wallet: null });
+      attemptPay("wallet");
+    },
+    clearAddress: () =>
+      setState(({ addr }) => ({
+        addr: { ...EMPTY_ADDRESS, notes: addr.notes },
+      })),
+  };
+
+  return {
+    state,
+    openPrivacy: initial.openPrivacy,
+    crumbsRef,
+    stylist,
+    service,
+    options,
+    money,
+    custLine: getCustomisationLine(options, state.sel),
+    isMobileStylist,
+    address,
+    errors,
+    has2,
+    needSize,
+    needLength,
+    nextDisabled,
+    tsShow,
+    tsBlock,
+    payDisabled,
+    holdOn: !!state.hold && !!state.time && !state.confirmed,
+    holdLeftMs,
+    steps: STEPS.filter(({ n }) => n !== 2 || has2),
+    actions,
+  };
+};
+
+export type BookingController = ReturnType<typeof useBooking>;

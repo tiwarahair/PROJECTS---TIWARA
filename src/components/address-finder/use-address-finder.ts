@@ -22,7 +22,8 @@ export interface AddressDraft {
 }
 
 export interface AddressFinderValue extends Partial<AddressDraft> {
-  source?: AddressSource;
+  // pages pass their own sources too (Booking: "saved"); only "manual" changes the finder's mode
+  source?: string;
 }
 
 /** What onChange receives: the trimmed address plus district / lat / lng from the demo postcodes. */

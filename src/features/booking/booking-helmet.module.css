@@ -1,0 +1,356 @@
+/*
+ * Booking <helmet> <style> rules, verbatim values (prototype Booking.dc.html lines 20–73), in the page layer so the
+ * component modules (the prototype's inline styles) still win. Page-wide element rules are scoped to
+ * html.booking-page, which BookingPage sets while mounted. The global reset lines identical to the base layer are
+ * omitted. `.sumcover:not([style*="height: 0px"])` matched the inline height the prototype wrote while the AI
+ * preview was open; the port marks that state with .sumcoverHidden instead.
+ */
+@layer page {
+  :global(html.booking-page) textarea {
+    font-family: "Hanken Grotesk", sans-serif;
+  }
+
+  :global(html.booking-page) input:focus,
+  :global(html.booking-page) textarea:focus {
+    outline: none;
+    border-color: var(--neutral-400) !important;
+  }
+
+  @keyframes bkSpin {
+    to {
+      transform: rotate(360deg);
+    }
+  }
+
+  @keyframes pulseGlow {
+    0%,
+    100% {
+      box-shadow: 0 0 0 0 rgba(143, 17, 18, 0.35);
+    }
+    50% {
+      box-shadow: 0 0 0 10px rgba(143, 17, 18, 0);
+    }
+  }
+
+  .aiBtn {
+    animation: pulseGlow 2.2s ease-in-out infinite;
+  }
+
+  @media (max-width: 960px) {
+    .bkgrid {
+      grid-template-columns: 1fr !important;
+    }
+    .bkgrid > div:first-child {
+      padding-right: 0 !important;
+    }
+    .bksum {
+      position: static !important;
+      order: -1;
+      transform: none !important;
+    }
+    .sumcard {
+      display: none !important;
+    }
+    .mobsum {
+      display: flex !important;
+    }
+    .navbtns {
+      display: none !important;
+    }
+    .bkpage {
+      padding-bottom: 104px !important;
+    }
+    .aiBtn {
+      width: 100% !important;
+    }
+    .prevshell {
+      width: 100% !important;
+    }
+    .sumcard {
+      width: 100% !important;
+    }
+  }
+
+  @media (max-width: 960px) {
+    .prevshellOff {
+      display: none !important;
+    }
+  }
+
+  @media (max-width: 960px) {
+    :global(html.booking-page) input,
+    :global(html.booking-page) textarea,
+    :global(html.booking-page) select {
+      font-size: 16px !important;
+    }
+  }
+
+  .mobsum {
+    display: none;
+  }
+
+  .holdmob {
+    display: none;
+  }
+
+  @media (max-width: 960px) {
+    .holdmob {
+      display: flex !important;
+    }
+  }
+
+  @keyframes bkSheet {
+    from {
+      transform: translateY(100%);
+    }
+    to {
+      transform: none;
+    }
+  }
+
+  @media (max-width: 640px) {
+    .bkmscrim {
+      align-items: flex-end !important;
+      padding: 0 !important;
+    }
+    .bkmpanel {
+      width: 100% !important;
+      max-width: none !important;
+      border-radius: var(--radius-lg) var(--radius-lg) 0 0 !important;
+      padding-bottom: calc(24px + env(safe-area-inset-bottom)) !important;
+      animation: bkSheet 300ms cubic-bezier(0.32, 0.72, 0, 1) both !important;
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .bkmpanel {
+      animation: bkFade 200ms ease both !important;
+    }
+  }
+
+  @keyframes bkFade {
+    from {
+      opacity: 0;
+    }
+    to {
+      opacity: 1;
+    }
+  }
+
+  @keyframes alIn {
+    from {
+      opacity: 0;
+      transform: translateY(8px);
+    }
+    to {
+      opacity: 1;
+      transform: none;
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    [data-al-anim] {
+      animation: bkFade 0.2s ease both !important;
+    }
+  }
+
+  @keyframes bkPanel {
+    from {
+      opacity: 0;
+      transform: scale(0.96) translateY(8px);
+    }
+    to {
+      opacity: 1;
+      transform: none;
+    }
+  }
+
+  .bkscrim {
+    animation: bkFade 200ms cubic-bezier(0.23, 1, 0.32, 1) both;
+  }
+
+  .bkpanel {
+    animation: bkPanel 240ms cubic-bezier(0.23, 1, 0.32, 1) both;
+    transform-origin: center;
+  }
+
+  @media (max-width: 720px) {
+    .bkcrumbs {
+      margin-bottom: 8px !important;
+    }
+  }
+
+  @media (max-width: 640px) {
+    .sizeguide {
+      grid-template-columns: 1fr !important;
+      gap: 10px !important;
+      margin-top: 18px !important;
+    }
+    .bkpanel {
+      max-height: 86vh;
+      overflow: auto;
+      border-radius: var(--radius-lg) !important;
+      padding: 20px 18px 22px !important;
+    }
+    .sgcard {
+      display: flex !important;
+      gap: 14px;
+      align-items: center;
+      padding: 12px !important;
+    }
+    .sgdiag {
+      flex: 0 0 92px;
+      width: 92px;
+      aspect-ratio: 1 / 1 !important;
+    }
+    .sgbody {
+      margin-top: 0 !important;
+    }
+    .sgbody > div {
+      font-size: 16px !important;
+    }
+    .sgbody > p {
+      font-size: 13px !important;
+    }
+    .sgbadge {
+      top: 6px !important;
+      left: 6px !important;
+      font-size: 8px !important;
+      letter-spacing: 0.06em !important;
+      padding: 2px 5px !important;
+      gap: 3px !important;
+    }
+    .sgbadge > span {
+      width: 4px !important;
+      height: 4px !important;
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .bkpanel {
+      animation: bkFade 200ms ease both;
+    }
+  }
+
+  .swname {
+    display: none;
+  }
+
+  @media (hover: none), (max-width: 760px) {
+    .swname {
+      display: block;
+      position: absolute;
+      top: calc(100% + 5px);
+      left: 50%;
+      transform: translateX(-50%);
+      width: 74px;
+      text-align: center;
+      font-size: 10.5px;
+      line-height: 1.25;
+      color: var(--text-secondary);
+      text-wrap: pretty;
+      pointer-events: none;
+      visibility: hidden;
+    }
+    .swwrapOn .swname {
+      visibility: visible;
+    }
+    .swtip {
+      display: none;
+    }
+  }
+
+  .swwrap > button {
+    width: 38px;
+    height: 38px;
+    min-width: 38px;
+    border-radius: var(--radius-full);
+    cursor: pointer;
+    padding: 0;
+    background-clip: padding-box;
+    transition:
+      transform 160ms cubic-bezier(0.23, 1, 0.32, 1),
+      box-shadow 200ms ease;
+  }
+
+  .swwrap > button:active {
+    transform: scale(0.92);
+  }
+
+  @media (hover: hover) and (pointer: fine) {
+    .swwrap > button:hover {
+      transform: scale(1.06);
+    }
+  }
+
+  .swtip {
+    position: absolute;
+    top: calc(100% + 9px);
+    left: 50%;
+    pointer-events: none;
+    width: max-content;
+    max-width: min(260px, 72vw);
+    text-align: center;
+    line-height: 1.4;
+    background: var(--neutral-900);
+    color: var(--neutral-50);
+    font-size: 12.5px;
+    font-weight: 500;
+    padding: 7px 11px;
+    border-radius: var(--radius-xs);
+    opacity: 0;
+    transform: translate(-50%, -4px);
+    transition:
+      opacity 150ms cubic-bezier(0.23, 1, 0.32, 1),
+      transform 150ms cubic-bezier(0.23, 1, 0.32, 1);
+    z-index: 5;
+  }
+
+  @media (hover: hover) and (pointer: fine) {
+    .swwrap:hover .swtip {
+      opacity: 1;
+      transform: translate(-50%, 0);
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .swwrap > button,
+    .swtip {
+      transition: opacity 150ms ease;
+    }
+    .swwrap > button:hover {
+      transform: none;
+    }
+  }
+
+  .aiprev:hover .aihide {
+    opacity: 1 !important;
+    transform: translateX(0) !important;
+  }
+
+  @media (max-width: 720px) {
+    :global(html.booking-page),
+    :global(html.booking-page) body {
+      overflow-x: clip;
+    }
+    .custgrid {
+      grid-template-columns: 1fr !important;
+    }
+    .aiBtn {
+      font-size: 12px !important;
+      padding-left: 14px !important;
+      padding-right: 14px !important;
+      white-space: nowrap;
+    }
+    .sumcover:not(.sumcoverHidden) {
+      height: 210px !important;
+      background-position: center 34% !important;
+    }
+    .aiprev {
+      height: min(50vh, 476px) !important;
+    }
+    .aiprev > [role="img"] {
+      background-position: center 26% !important;
+    }
+  }
+}

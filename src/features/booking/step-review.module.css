@@ -1,0 +1,219 @@
+/* Values verbatim from prototype Booking.dc.html (inline styles; style-hover/active as !important like the prototype runtime). */
+
+.summary {
+  background: var(--neutral-0);
+  border-radius: var(--radius-lg);
+  padding: 24px;
+  max-width: 620px;
+  box-sizing: border-box;
+  box-shadow: var(--shadow-rail);
+}
+
+.eyebrow {
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--accent-700);
+}
+
+.rows {
+  margin-top: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 11px;
+}
+
+.row {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 20px;
+}
+
+.rowLabel {
+  font-size: 14.5px;
+  color: var(--neutral-600);
+  flex: 0 0 auto;
+}
+
+.rowValue {
+  font-size: 14.5px;
+  font-weight: 600;
+  text-align: right;
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+
+.edit {
+  border: none;
+  background: none;
+  padding: 0 0 0 6px;
+  font: inherit;
+  font-weight: 600;
+  color: var(--accent-700);
+  cursor: pointer;
+}
+
+.rowSub {
+  display: block;
+  font-weight: 400;
+  font-size: 13.5px;
+  color: var(--neutral-600);
+  margin-top: 2px;
+}
+
+.totals {
+  border-top: 1px solid var(--border-subtle);
+  margin-top: 16px;
+  padding-top: 16px;
+  font-size: 14.5px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.totalRow {
+  display: flex;
+  justify-content: space-between;
+}
+
+.muted {
+  color: var(--neutral-600);
+}
+
+.grandTotal {
+  display: flex;
+  justify-content: space-between;
+  font-weight: 600;
+  font-size: 15.5px;
+}
+
+.policyCard {
+  margin-top: 20px;
+  max-width: 620px;
+  background: var(--accent-wash);
+  border-radius: var(--radius-md);
+  padding: 22px 22px 24px;
+  box-sizing: border-box;
+}
+
+.dueRow {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.dueLabelRow {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.accentLabel {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--accent-700);
+}
+
+.tag {
+  font-size: 12.5px;
+  font-weight: 600;
+  color: var(--neutral-50);
+  background: var(--accent-700);
+  border-radius: var(--radius-xs);
+  padding: 3px 8px;
+}
+
+.dueAmount {
+  font-family: "Schibsted Grotesk", sans-serif;
+  font-weight: 600;
+  font-size: 21px;
+  letter-spacing: -0.01em;
+}
+
+.fullNotice {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 10px;
+  font-size: 14px;
+  line-height: 1.45;
+  color: var(--neutral-900);
+}
+
+.fullTag {
+  flex: 0 0 auto;
+  font-size: 12.5px;
+  font-weight: 600;
+  color: var(--neutral-50);
+  background: var(--accent-700);
+  border-radius: var(--radius-xs);
+  padding: 3px 8px;
+}
+
+.pretty {
+  text-wrap: pretty;
+}
+
+.rule {
+  height: 1px;
+  background: var(--accent-line);
+  margin: 16px 0 18px;
+}
+
+.lines {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.line {
+  display: flex;
+  gap: 12px;
+  align-items: flex-start;
+}
+
+.lineIcon {
+  flex: 0 0 auto;
+  margin-top: 3px;
+  color: var(--accent-700);
+}
+
+.lineText {
+  font-size: 14.5px;
+  line-height: 1.5;
+  color: var(--neutral-900);
+  text-wrap: pretty;
+}
+
+.notesRule {
+  height: 1px;
+  background: var(--accent-line);
+  margin: 18px 0 16px;
+}
+
+.notes {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-top: 8px;
+}
+
+.note {
+  font-size: 14.5px;
+  line-height: 1.5;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+
+.agreement {
+  margin: 14px 0 0;
+  max-width: 620px;
+  font-size: 13px;
+  line-height: 1.55;
+  color: var(--neutral-600);
+  text-wrap: pretty;
+}

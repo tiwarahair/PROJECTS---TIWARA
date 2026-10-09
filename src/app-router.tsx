@@ -1,5 +1,6 @@
 import { createBrowserRouter } from "react-router";
 import type { RouteObject } from "react-router";
+import { BookingPage } from "./features/booking/booking-page";
 import { DevHarness } from "./features/dev-harness/dev-harness";
 import { DsSpecimens } from "./features/ds-specimens/ds-specimens";
 import { HomePage } from "./features/home/home-page";
@@ -13,6 +14,7 @@ export const appRoutes: RouteObject[] = [
   { path: "/", element: <HomePage /> },
   { path: "/search", element: <SearchPage /> },
   { path: "/stylist", element: <StylistProfilePage /> },
+  { path: "/book", element: <BookingPage /> },
   // dev-only: design-system gallery (mirrors each .card.html) and per-component fixture harnesses
   ...(import.meta.env.DEV
     ? [

@@ -1,0 +1,35 @@
+/* nextStyle / mobNextStyle (renderVals), verbatim values from prototype Booking.dc.html. */
+
+.desktop {
+  font-weight: 600;
+  font-size: 15px;
+  padding: 13px 28px;
+  border-radius: var(--radius-full);
+  border: none;
+  transition: background 0.2s ease;
+}
+
+.mobile {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  flex: 0 0 auto;
+  font-weight: 600;
+  font-size: 15px;
+  padding: 14px 24px;
+  border-radius: var(--radius-full);
+  border: none;
+  transition: background 0.2s ease;
+}
+
+.disabled {
+  background: var(--neutral-200);
+  color: var(--neutral-400);
+  cursor: default;
+}
+
+.enabled {
+  background: var(--accent-700);
+  color: var(--neutral-50);
+  cursor: pointer;
+}

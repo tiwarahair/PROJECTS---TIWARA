@@ -1,0 +1,171 @@
+/* Values verbatim from prototype Booking.dc.html (inline styles; style-hover/active as !important like the prototype runtime). */
+
+.scrim {
+  position: fixed;
+  inset: 0;
+  z-index: 180;
+  background: rgba(26, 23, 20, 0.45);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+  box-sizing: border-box;
+  overflow: auto;
+}
+
+.panel {
+  width: min(860px, 96vw);
+  background: var(--neutral-50);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-modal);
+  padding: 26px clamp(20px, 3vw, 32px) 30px;
+  box-sizing: border-box;
+}
+
+.head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.eyebrow {
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--text-secondary);
+}
+
+.title {
+  margin: 8px 0 0;
+  font-family: "Schibsted Grotesk", sans-serif;
+  font-weight: 500;
+  letter-spacing: -0.02em;
+  font-size: clamp(24px, 3.4vw, 30px);
+}
+
+.close {
+  border: none;
+  background: none;
+  color: var(--text-secondary);
+  padding: 8px;
+  margin: -8px;
+  cursor: pointer;
+  display: flex;
+  transition:
+    color 200ms ease,
+    transform 160ms ease-out;
+}
+
+.close:hover {
+  color: var(--text-primary) !important;
+}
+
+.close:active {
+  transform: scale(0.9) !important;
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 14px;
+  margin-top: 22px;
+}
+
+.diagramBox {
+  position: relative;
+  border-radius: var(--radius-sm);
+  overflow: hidden;
+  background: var(--neutral-100);
+  aspect-ratio: 4 / 3;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.badge {
+  position: absolute;
+  top: 10px;
+  left: 10px;
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  background: var(--neutral-900);
+  color: var(--neutral-50);
+  font-size: 10.5px;
+  font-weight: 600;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  padding: 4px 8px;
+  border-radius: var(--radius-full);
+}
+
+.badgeDot {
+  width: 5px;
+  height: 5px;
+  border-radius: var(--radius-full);
+  background: var(--brand-yellow);
+}
+
+.body {
+  margin-top: 14px;
+  min-width: 0;
+}
+
+.name {
+  font-family: "Schibsted Grotesk", sans-serif;
+  font-weight: 600;
+  font-size: 18px;
+  letter-spacing: -0.01em;
+}
+
+.desc {
+  margin: 6px 0 0;
+  font-size: 14px;
+  line-height: 1.6;
+  text-wrap: pretty;
+  color: var(--text-secondary);
+}
+
+.note {
+  margin: 20px 0 0;
+  font-size: 13.5px;
+  line-height: 1.6;
+  color: var(--text-secondary);
+}
+
+/* g.cardStyle */
+.card {
+  background: transparent;
+  border-radius: var(--radius-md);
+  padding: 16px;
+}
+
+.cardPopular {
+  border: 1px solid var(--neutral-900);
+}
+
+.cardPlain {
+  border: 1px solid var(--border-subtle);
+}
+
+/* g.diagramStyle */
+.diagram {
+  width: 78%;
+  height: 70%;
+  display: flex;
+  align-items: stretch;
+  justify-content: center;
+  gap: 8px;
+  overflow: hidden;
+}
+
+/* b.style; the braid width arrives as --bar-width */
+.bar {
+  width: var(--bar-width);
+  height: 100%;
+  border-radius: var(--radius-full);
+  background: var(--neutral-900);
+  flex: 0 0 auto;
+}

@@ -1,0 +1,24 @@
+/* Values verbatim from prototype Booking.dc.html (inline styles; style-hover/active as !important like the prototype runtime). */
+
+.page {
+  min-height: 100vh;
+  background: var(--neutral-50);
+}
+
+.content {
+  max-width: 1160px;
+  margin: 0 auto;
+  padding: clamp(20px, 3.5vw, 40px) clamp(20px, 5vw, 48px)
+    clamp(64px, 8vw, 96px);
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: 1fr 350px;
+  gap: clamp(24px, 4vw, 56px);
+  align-items: start;
+}
+
+.main {
+  padding-right: 30px;
+}

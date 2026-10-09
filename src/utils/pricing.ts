@@ -17,7 +17,8 @@ export const money = (amount: number): string =>
     ? String(Math.round(amount))
     : amount.toFixed(2));
 
-const getWindowText = (hours: number): string =>
+/** "48 hours", "1 hour", "30 minutes" */
+export const getWindowText = (hours: number): string =>
   hours < 1 ? "30 minutes" : hours === 1 ? "1 hour" : hours + " hours";
 
 export interface PolicyLine {
