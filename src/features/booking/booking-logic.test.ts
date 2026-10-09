@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { getStylist } from "./booking-state";
 import { getClosedLine, getWhenLine } from "./booking-calendar";
-import { getPreviewIndex, PREVIEW_POOL } from "./booking-content";
+import { getPreviewIndex, hasPreview, PREVIEW_POOL } from "./booking-content";
 import {
   formatCardNumber,
   formatExpiry,
@@ -108,12 +108,11 @@ describe("labels", () => {
   });
 
   it("picks the knotless render for length and colour", () => {
-    const index = getPreviewIndex({
-      size: "Medium",
-      length: "Waist",
-      colour: "613 Blonde",
-      hasBob: true,
-    });
+    const index = getPreviewIndex("Waist", "613 Blonde");
     expect(PREVIEW_POOL[index]).toBe("img/ai-knotless-waist-613.webp");
+    expect(PREVIEW_POOL[getPreviewIndex("Bra", "Other")]).toBe(
+      "img/ai-knotless-bra-1b.webp",
+    );
+    expect(hasPreview(["Shoulder", "Waist"])).toBe(false);
   });
 });

@@ -124,19 +124,8 @@ export const getCancelSentence = (mode: PolicyMode, windowText: string) =>
       " before your appointment."
     : "Free cancellation up to " + windowText + " before your appointment.";
 
-// AI preview: five reference photos, then the knotless renders by length and colour
-const PHOTO_POOL = [
-  "16.09.44",
-  "16.11.56",
-  "16.10.25",
-  "16.11.54",
-  "16.21.39",
-].map(
-  (time) =>
-    "uploads/assets for claude design/website pictures/WhatsApp Image 2026-08-16 at " +
-    time +
-    ".jpeg",
-);
+// AI preview: knotless braid renders by length and colour. The prototype also pooled five reference photos
+// from uploads/ (not in the handoff bundle) for other braids; dropped, so the preview is knotless-only.
 const AI_KEYS = [
   "bob-1b",
   "bob-30",
@@ -159,47 +148,34 @@ const AI_KEYS = [
   "waist-613",
 ];
 
-export const PREVIEW_POOL = [
-  ...PHOTO_POOL,
-  ...AI_KEYS.map((key) => "img/ai-knotless-" + key + ".webp"),
-];
+export const PREVIEW_POOL = AI_KEYS.map(
+  (key) => "img/ai-knotless-" + key + ".webp",
+);
 
-interface PreviewPick {
-  size: string | null;
-  length: string | null;
-  colour: string;
-  hasBob: boolean;
-}
+/** Only services with the knotless lengths (Bob … Waist) have renders to preview. */
+export const hasPreview = (lengthLabels: string[]): boolean =>
+  lengthLabels.includes("Bob");
 
-/** Index into PREVIEW_POOL: the knotless render for length + colour, else a photo picked by the choices. */
-export const getPreviewIndex = ({
-  size,
-  length,
-  colour,
-  hasBob,
-}: PreviewPick): number => {
+/** Index into PREVIEW_POOL for the chosen length and colour (unknown colours fall back to 1B). */
+export const getPreviewIndex = (
+  length: string | null,
+  colour: string,
+): number => {
   const lengthValue = String(length || "").toLowerCase();
-  const aiLength = !hasBob
-    ? null
-    : lengthValue.startsWith("bob")
-      ? "bob"
-      : lengthValue.startsWith("bra")
-        ? "bra"
-        : lengthValue.startsWith("waist")
-          ? "waist"
-          : "shoulder";
-  const colourValue = String(colour || "")
-    .toLowerCase()
-    .split(" ")[0];
-  const aiColour = ["30", "33", "4", "613"].includes(colourValue ?? "")
+  const aiLength = lengthValue.startsWith("bob")
+    ? "bob"
+    : lengthValue.startsWith("bra")
+      ? "bra"
+      : lengthValue.startsWith("waist")
+        ? "waist"
+        : "shoulder";
+  const colourValue =
+    String(colour || "")
+      .toLowerCase()
+      .split(" ")[0] ?? "";
+  const aiColour = ["30", "33", "4", "613"].includes(colourValue)
     ? colourValue
     : "1b";
-  let aiKey = aiLength && aiLength + "-" + aiColour;
-  if (aiKey && !AI_KEYS.includes(aiKey)) aiKey = aiLength + "-1b";
-  if (aiKey) return PHOTO_POOL.length + AI_KEYS.indexOf(aiKey);
-  if (!(size && length)) return 0;
-  let total = 0;
-  for (const character of (size + length + colour).split(""))
-    total += character.charCodeAt(0);
-  return total % PHOTO_POOL.length;
+  const aiKey = aiLength + "-" + aiColour;
+  return AI_KEYS.indexOf(AI_KEYS.includes(aiKey) ? aiKey : aiLength + "-1b");
 };

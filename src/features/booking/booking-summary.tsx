@@ -2,7 +2,7 @@ import type { CSSProperties } from "react";
 import { resolveAssetUrl } from "../../utils/asset-url";
 import { joinClassNames } from "../../utils/class-names";
 import { getWhenLine } from "./booking-calendar";
-import { PREVIEW_POOL, getPreviewIndex } from "./booking-content";
+import { getPreviewIndex, hasPreview, PREVIEW_POOL } from "./booking-content";
 import { getSummaryWhere } from "./booking-details";
 import helmet from "./booking-helmet.module.css";
 import { HoldBar } from "./hold-bar";
@@ -32,12 +32,8 @@ export const BookingSummary = ({ booking }: BookingSummaryProps) => {
   const { showPrev, sel, step } = state;
   // the prototype reads the window width on each render (no resize listener)
   const isMobile = window.innerWidth <= 960;
-  const previewIndex = getPreviewIndex({
-    size: sel.size,
-    length: sel.length,
-    colour: sel.colour,
-    hasBob: options.length.some(({ label }) => label === "Bob"),
-  });
+  const canPreview = hasPreview(options.length.map(({ label }) => label));
+  const previewIndex = getPreviewIndex(sel.length, sel.colour);
   const previewPath = PREVIEW_POOL[previewIndex] ?? "";
   // previewBoxStyle / coverShellStyle background images
   const previewStyle = {
@@ -189,7 +185,7 @@ export const BookingSummary = ({ booking }: BookingSummaryProps) => {
             )}
           </div>
         )}
-        {showPrev && options.colour && (
+        {showPrev && canPreview && (
           <div className={styles.compact}>
             <div className={styles.compactText}>
               <div className={styles.compactName}>
@@ -201,7 +197,7 @@ export const BookingSummary = ({ booking }: BookingSummaryProps) => {
           </div>
         )}
       </div>
-      {step === 2 && !showPrev && options.colour && (
+      {step === 2 && !showPrev && canPreview && (
         <button
           onClick={() => actions.setState({ showPrev: true })}
           className={joinClassNames(helmet.aiBtn, styles.aiButton)}

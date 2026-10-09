@@ -9,7 +9,7 @@ Everything where the React port differs from the Claude Design prototype (`HANDO
 | 1 | HANDOFF §7.25 | Search "Where" in production = Google Places UK. | DECIDED: keep the prototype's demo matching for now; real provider later. |
 | 2 | HANDOFF §3 (every screen) | "empty / error / offline / denied — not designed". Not invented in the port. | NEEDS DECISION |
 | 3 | Home — reduced motion | The prototype's reduced-motion path left "BROWSE BY STYLE" / "Six ways to find your look" invisible. | DECIDED: reduced-motion toggle removed — Home always runs the full-motion behaviour (`motion` prop and reduced branches deleted). |
-| 4 | Booking — AI preview photos | The preview pool lists five `uploads/assets for claude design/website pictures/WhatsApp Image 2026-08-16 at …jpeg` photos. `uploads/` is not in the handoff bundle (HANDOFF §1), so they 404 in the prototype too; they show only for braids services without a "Bob" length. Paths kept verbatim. | NEEDS DECISION: supply the photos (or drop them from the pool). |
+| 4 | Booking — AI preview photos | The preview pool lists five `uploads/assets for claude design/website pictures/WhatsApp Image 2026-08-16 at …jpeg` photos. `uploads/` is not in the handoff bundle (HANDOFF §1), so they 404 in the prototype too; they show only for braids services without a "Bob" length. Paths kept verbatim. | DECIDED: dropped. The AI preview (and its "See AI preview" button) only shows for services with the knotless lengths; other braids no longer offer it. |
 
 ## Applied — deliberate, behaviour-preserving
 
