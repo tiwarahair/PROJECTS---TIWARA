@@ -5,6 +5,7 @@ import { BookingPage } from "./features/booking/booking-page";
 import { DevHarness } from "./features/dev-harness/dev-harness";
 import { DsSpecimens } from "./features/ds-specimens/ds-specimens";
 import { ManageBookingPage } from "./features/manage-booking/manage-booking-page";
+import { SaveDetailsPage } from "./features/save-details/save-details-page";
 import { HomePage } from "./features/home/home-page";
 import { SearchPage } from "./features/search/search-page";
 import { StylistProfilePage } from "./features/stylist-profile/stylist-profile-page";
@@ -18,6 +19,7 @@ export const appRoutes: RouteObject[] = [
   { path: "/stylist", element: <StylistProfilePage /> },
   { path: "/book", element: <BookingPage /> },
   { path: "/manage", element: <ManageBookingPage /> },
+  { path: "/save-details", element: <SaveDetailsPage /> },
   // dev-only: design-system gallery (mirrors each .card.html) and per-component fixture harnesses
   ...(import.meta.env.DEV
     ? [
