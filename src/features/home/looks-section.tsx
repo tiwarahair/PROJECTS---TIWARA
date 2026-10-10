@@ -12,7 +12,7 @@ const LOOK_IMAGES: Record<string, string> = {
   braids: "img/w160944.jpg",
   wigs: "img/w160800.jpg",
   weaves: "img/IMG_1581.jpg",
-  locs: "img/IMG_1772.jpg",
+  locs: "img/home-locs-twists.jpg",
   natural: "img/natural-cornrows.jpg",
   treatments: "img/w161244.jpg",
 };
