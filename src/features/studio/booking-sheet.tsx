@@ -1,8 +1,7 @@
 import type { CSSProperties } from "react";
-import type { MenuGroup } from "../../components/checkout-sheet/checkout-data";
-import { CheckoutSheet } from "../../components/checkout-sheet/checkout-sheet";
 import { joinClassNames } from "../../utils/class-names";
-import { getEditServiceView } from "./booking-edit-view";
+import { getAddBookingView } from "./add-booking-view";
+import { getAddonDialog, getEditServiceView } from "./booking-edit-view";
 import type { EditServiceView } from "./booking-edit-view";
 import { AddonEditDialog } from "./booking-dialogs";
 import { getBookingSheetView } from "./booking-sheet-view";
@@ -16,6 +15,7 @@ import {
   NoShowPanel,
   RescheduleStep,
 } from "./booking-steps";
+import { StudioCheckout } from "./studio-checkout";
 import type { StudioController } from "./use-studio";
 import styles from "./booking-sheet.module.css";
 import stepStyles from "./booking-steps.module.css";
@@ -881,76 +881,33 @@ export const BookingCheckout = ({
 }: {
   studio: StudioController;
   view: BookingSheetView;
-}) => {
-  const { state, setState, isWide, props, actions } = studio;
-  const { business } = state;
-  const fields = business.v || {};
-  const formatMinutes = (minutes: number) => {
-    const hours = Math.floor(minutes / 60);
-    const rest = minutes % 60;
-    return (
-      (hours ? hours + "h" : "") +
-      (hours && rest ? " " : "") +
-      (rest ? rest + "m" : "")
-    );
-  };
-  const addons = state.addons
-    .filter(({ st }) => st !== "archived")
-    .map(({ name, price, hr, min }) => {
-      const minutes = (Number(hr) || 0) * 60 + (Number(min) || 0);
-      return [
-        name,
-        Number(price) || 0,
-        minutes ? "+" + formatMinutes(minutes) : "Add-on",
-      ] as [string, number, string];
-    });
-  const services = state.services
-    .filter(({ st }) => st !== "archived")
-    .map(
-      ({ name, price, dur }) =>
-        [name, price || 0, dur || ""] as [string, number, string],
-    );
-  const menu: MenuGroup[] = [
-    { title: "Add-ons", rows: addons },
-    { title: "Services", rows: services },
-  ].filter(({ rows }) => rows.length);
-  return (
-    <div className={sheet.checkout} data-screen-label="Checkout">
-      <CheckoutSheet
-        booking={view.checkoutBooking}
-        start="items"
-        layout={isWide ? "desktop" : "mobile"}
-        radius={isWide ? "var(--radius-lg)" : "24px 24px 0 0"}
-        stylist={{
-          name: state.profile?.salon || "Tiwára’s House",
-          addr: [fields.line1, fields.city, fields.pc]
-            .filter(Boolean)
-            .join(", "),
-          vat: business.vatOn && fields.vat ? "GB " + fields.vat : "",
-        }}
-        declineMode={props.cardDeclines || "none"}
-        menu={menu}
-        onExit={() => setState({ bkStep: "view" })}
-        onClose={actions.closeSheet}
-        onComplete={(result, action) =>
-          view.onCheckoutComplete({ ...result, tip: result.tip ?? 0 }, action)
-        }
-        onRefund={() => {}}
-        onResent={() => {}}
-        onCancelLink={() => {}}
-      />
-    </div>
-  );
-};
+}) => (
+  <StudioCheckout
+    studio={studio}
+    booking={view.checkoutBooking}
+    onExit={() => studio.setState({ bkStep: "view" })}
+    onComplete={(result, action) =>
+      view.onCheckoutComplete({ ...result, tip: result.tip ?? 0 }, action)
+    }
+  />
+);
 
-/** The add-on dialog over the booking's Edit service step (rendered with the other dialogs, as in the prototype). */
+/** The add-on dialog over Edit service or New booking (rendered with the other dialogs, as in the prototype). */
 export const BookingAddonDialog = ({
   studio,
 }: {
   studio: StudioController;
 }) => {
-  const { esAddon } = studio.state;
-  if (!esAddon || esAddon.ctx === "add") return null;
+  const { esAddon, sheet } = studio.state;
+  if (!esAddon) return null;
+  if (esAddon.ctx === "add") {
+    if (sheet !== "add") return null;
+    const dialog = {
+      ...getAddonDialog(studio, esAddon),
+      ...getAddBookingView(studio).addonDialog(esAddon),
+    };
+    return <AddonEditDialog studio={studio} dialog={dialog} />;
+  }
   const view = getBookingSheetView(studio);
   if (!view) return null;
   const { addonDialog } = getEditServiceView(

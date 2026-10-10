@@ -104,10 +104,13 @@ export const MonthCalendar = ({
   nav,
   days,
   className,
+  isLoose = false,
 }: {
   nav: ReturnType<typeof getMonthNav>;
   days: MiniCalDay[];
   className?: string;
+  /** New booking's weekday row is spaced 4px instead of 2px. */
+  isLoose?: boolean;
 }) => (
   <div className={joinClassNames(styles.month, className)}>
     <div className={styles.monthHead}>
@@ -131,7 +134,7 @@ export const MonthCalendar = ({
         <Arrow d="m9 18 6-6-6-6" />
       </button>
     </div>
-    <div className={styles.dows}>
+    <div className={joinClassNames(styles.dows, isLoose && styles.dowsLoose)}>
       {CAL_DOWS.map((dow) => (
         <div key={dow} className={styles.dow}>
           {dow}

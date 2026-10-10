@@ -1,0 +1,447 @@
+/* Manage categories and the add-on sheet — verbatim values from Studio.dc.html lines 3063–3169 and the add-on
+   footer (3410–3414). */
+
+.cats {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+
+.intro {
+  margin: 0;
+  font-size: 14.5px;
+  line-height: 1.5;
+  color: var(--text-secondary);
+}
+
+.column {
+  display: flex;
+  flex-direction: column;
+}
+
+.row {
+  padding: 12px 0;
+  border-top: 1px solid var(--border-subtle);
+}
+
+.rowView {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.dot {
+  width: 12px;
+  height: 12px;
+  border-radius: var(--radius-full);
+  background: var(--dot);
+  flex: 0 0 auto;
+}
+
+.grow {
+  flex: 1;
+  min-width: 0;
+}
+
+.name {
+  display: block;
+  font-size: 15px;
+  font-weight: 600;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.meta {
+  display: block;
+  font-size: 13px;
+  color: var(--text-secondary);
+  margin-top: 1px;
+}
+
+.iconButton {
+  width: 36px;
+  height: 36px;
+  border-radius: var(--radius-full);
+  border: none;
+  background: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 1;
+  cursor: pointer;
+}
+
+.iconButton:hover {
+  background: var(--quiet) !important;
+}
+
+.iconOff {
+  opacity: 0.3;
+}
+
+.edit {
+  height: 34px;
+  padding: 0 12px;
+  border: none;
+  background: none;
+  border-radius: var(--radius-full);
+  font: inherit;
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--accent-700);
+  cursor: pointer;
+}
+
+.edit:hover {
+  background: var(--quiet) !important;
+}
+
+.delete {
+  width: 36px;
+  height: 36px;
+  border-radius: var(--radius-full);
+  border: none;
+  background: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--text-secondary);
+  cursor: pointer;
+}
+
+.delete:hover {
+  background: var(--quiet) !important;
+  color: var(--accent-700) !important;
+}
+
+.editor {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  animation: rowin 0.22s cubic-bezier(0.2, 0.8, 0.2, 1) both;
+}
+
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.label135 {
+  font-size: 13.5px;
+  font-weight: 500;
+}
+
+.label145 {
+  font-size: 14.5px;
+  font-weight: 600;
+}
+
+.label135Strong {
+  font-size: 13.5px;
+  font-weight: 600;
+}
+
+.nameInput {
+  width: 100%;
+  box-sizing: border-box;
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-sm);
+  background: #fff;
+  padding: 12px 14px;
+  font-size: 16px;
+  outline: none;
+}
+
+.nameInput:focus {
+  border-color: var(--accent-700) !important;
+  box-shadow: 0 0 0 3px var(--accent-glow, rgba(143, 17, 18, 0.35)) !important;
+}
+
+.nameInputError {
+  border-color: var(--accent-700);
+}
+
+.error {
+  font-size: 13.5px;
+  font-weight: 600;
+  color: var(--accent-700);
+}
+
+.swatches {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.swatch {
+  width: 30px;
+  height: 30px;
+  border-radius: var(--radius-full);
+  border: none;
+  padding: 0;
+  background: var(--swatch-bg);
+  box-shadow: var(--swatch-ring);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition:
+    box-shadow 0.16s cubic-bezier(0.2, 0.8, 0.2, 1),
+    transform 0.16s cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+
+.swatch:active {
+  transform: scale(0.92) !important;
+}
+
+.buttons {
+  display: flex;
+  gap: 8px;
+}
+
+.save {
+  height: 40px;
+  padding: 0 18px;
+  border: none;
+  border-radius: var(--radius-full);
+  background: var(--accent-700);
+  color: var(--neutral-100);
+  font: inherit;
+  font-size: 14.5px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.save:active {
+  transform: scale(0.97) !important;
+}
+
+.cancel {
+  height: 40px;
+  padding: 0 16px;
+  border: 1px solid var(--border-strong, #d8d2c6);
+  border-radius: var(--radius-full);
+  background: transparent;
+  font: inherit;
+  font-size: 14.5px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.cancel:active {
+  transform: scale(0.97) !important;
+}
+
+.empty {
+  padding: 14px 0;
+  border-top: 1px solid var(--border-subtle);
+  font-size: 14.5px;
+  color: var(--text-secondary);
+}
+
+.newBox {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding: 16px;
+  border-radius: var(--radius-md);
+  background: var(--fill-quiet, rgba(26, 23, 20, 0.05));
+}
+
+.addCategory {
+  align-self: flex-start;
+  height: 40px;
+  padding: 0 18px;
+  border: none;
+  border-radius: var(--radius-full);
+  background: #1a1714;
+  color: var(--neutral-100);
+  font: inherit;
+  font-size: 14.5px;
+  font-weight: 600;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.addCategory:active {
+  transform: scale(0.97) !important;
+}
+
+.done {
+  height: 48px;
+  border: none;
+  border-radius: var(--radius-full);
+  background: var(--accent-700);
+  color: var(--neutral-100);
+  font: inherit;
+  font-size: 15px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.done:active {
+  transform: scale(0.98) !important;
+}
+
+/* ---- add-on sheet ---- */
+
+.addon {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.block {
+  display: block;
+}
+
+.fieldLabel {
+  display: block;
+  font-size: 13.5px;
+  font-weight: 500;
+  margin-bottom: 6px;
+}
+
+.optional {
+  font-weight: 400;
+  color: var(--text-secondary);
+}
+
+.input {
+  width: 100%;
+  box-sizing: border-box;
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-sm);
+  background: transparent;
+  padding: 12px 14px;
+  font-size: 16px;
+  outline: none;
+}
+
+.newCat {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-top: 10px;
+  padding: 14px;
+  border-radius: var(--radius-md);
+  background: var(--fill-quiet, rgba(26, 23, 20, 0.05));
+  animation: rowin 0.22s cubic-bezier(0.2, 0.8, 0.2, 1) both;
+}
+
+.smallDark {
+  height: 38px;
+  padding: 0 16px;
+  border: none;
+  border-radius: var(--radius-full);
+  background: #1a1714;
+  color: var(--neutral-100);
+  font: inherit;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.smallDark:active {
+  transform: scale(0.97) !important;
+}
+
+.smallCancel {
+  height: 38px;
+  padding: 0 14px;
+  border: 1px solid var(--border-strong, #d8d2c6);
+  border-radius: var(--radius-full);
+  background: transparent;
+  font: inherit;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.smallCancel:active {
+  transform: scale(0.97) !important;
+}
+
+.priceTime {
+  display: flex;
+  gap: 20px;
+}
+
+.inline {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+
+.prefix {
+  font-size: 14.5px;
+  color: var(--text-secondary);
+}
+
+.priceInput {
+  width: 60px;
+  box-sizing: border-box;
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-sm);
+  background: transparent;
+  padding: 9px 6px;
+  font-size: 16px;
+  text-align: center;
+  outline: none;
+}
+
+.select {
+  box-sizing: border-box;
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-sm);
+  background: transparent;
+  padding: 10px 6px;
+  font-size: 16px;
+  outline: none;
+  font-family: inherit;
+}
+
+.footer {
+  flex: 0 0 auto;
+  padding: 12px 18px calc(16px + env(safe-area-inset-bottom));
+  background: var(--neutral-50);
+  box-shadow: var(--shadow-hairline-up, 0 -1px 0 rgba(26, 23, 20, 0.08));
+}
+
+.saveAddon {
+  width: 100%;
+  border: none;
+  background: var(--accent-700);
+  color: var(--neutral-100);
+  border-radius: var(--radius-full);
+  padding: 13px 0;
+  font-size: 15px;
+  font-weight: 600;
+  opacity: 1;
+  transition:
+    opacity 0.2s,
+    transform 0.16s cubic-bezier(0.23, 1, 0.32, 1);
+}
+
+.saveAddon:active {
+  transform: scale(0.98) !important;
+}
+
+.faded {
+  opacity: 0.45;
+}
+
+@keyframes rowin {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}

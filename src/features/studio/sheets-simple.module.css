@@ -290,6 +290,11 @@
   margin-bottom: 2px;
 }
 
+.dowsLoose {
+  gap: 4px;
+  margin-bottom: 4px;
+}
+
 .dow {
   text-align: center;
   font-size: 12.5px;
