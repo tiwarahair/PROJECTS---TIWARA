@@ -16,12 +16,6 @@
     border-color: var(--neutral-400) !important;
   }
 
-  @keyframes bkSpin {
-    to {
-      transform: rotate(360deg);
-    }
-  }
-
   @keyframes pulseGlow {
     0%,
     100% {
@@ -134,17 +128,6 @@
     }
     to {
       opacity: 1;
-    }
-  }
-
-  @keyframes alIn {
-    from {
-      opacity: 0;
-      transform: translateY(8px);
-    }
-    to {
-      opacity: 1;
-      transform: none;
     }
   }
 

@@ -1,4 +1,4 @@
-// Onboarding constants, verbatim from prototype Onboarding.dc.html (TYPES, CATS, SOURCES, RADII, STREETS, PHOTOS,
+// Onboarding constants, verbatim from prototype Onboarding.dc.html (TYPES, CATS, SOURCES, RADII, PHOTOS,
 // NAMES, the benefit carousel, chooser cards and terms sheets). Generated from the prototype source.
 
 export interface ChoiceTile {
@@ -84,13 +84,6 @@ export const SOURCES = [
 ];
 
 export const RADII = [2, 5, 10, 15, 25];
-
-export const STREETS = [
-  "Claremont Road",
-  "Wilmslow Road",
-  "Dickenson Road",
-  "Platt Lane",
-];
 
 export const BENEFITS: Omit<ChoiceTile, "key">[] = [
   {

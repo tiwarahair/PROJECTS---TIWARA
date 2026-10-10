@@ -19,7 +19,6 @@ import {
   NAMES,
   PHOTOS,
   STORAGE_KEY,
-  STREETS,
   TURNSTILE_SCREENS,
 } from "./onboarding-data";
 import {
@@ -694,50 +693,6 @@ export const useOnboarding = (props: OnboardingProps) => {
     }
   };
 
-  /**
-   * Postcode → street matches (prototype lookup(); not called by the current template, where AddressFinder replaced
-   * it). Kept for the final clean-up.
-   */
-  const lookup = async () => {
-    const postcode = stateRef.current.f.pc.trim().toUpperCase();
-    if (!isValidPostcode(postcode)) {
-      touch("pc");
-      return;
-    }
-    let result: {
-      latitude: number;
-      longitude: number;
-      admin_ward?: string;
-      admin_district?: string;
-      outcode: string;
-      post_town?: string;
-    } | null = null;
-    let notFound = /^ZZ/.test(postcode) || resolved.addressLookup === "fail";
-    if (!notFound) {
-      try {
-        const response = await fetch(
-          "https://api.postcodes.io/postcodes/" + encodeURIComponent(postcode),
-        );
-        if (response.status === 404) notFound = true;
-        else if (response.ok) result = (await response.json()).result;
-      } catch {
-        // offline: fall through with no result
-      }
-    }
-    await new Promise((resolve) => window.setTimeout(resolve, 350));
-    if (notFound) return [];
-    return [12, 41, 58, 7].map((number, index) => ({
-      label:
-        number +
-        " " +
-        STREETS[index] +
-        ", " +
-        (result?.post_town || result?.admin_district || "Manchester") +
-        " " +
-        postcode,
-    }));
-  };
-
   const setAddress = (address: EmittedAddress | null) => {
     const previousPostcode = stateRef.current.f.pc;
     const fields = address
@@ -797,7 +752,6 @@ export const useOnboarding = (props: OnboardingProps) => {
       pasteCode,
       setAddress,
       geocodeOnly,
-      lookup,
       save,
       toStudio,
       setMode,

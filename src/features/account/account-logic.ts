@@ -200,7 +200,7 @@ export const getBookingMoney = (
   };
 };
 
-export type EditKey = "name" | "email" | "mob" | "pron";
+export type EditKey = "name" | "email" | "mob";
 
 export const validateEdit = (
   key: EditKey,
@@ -225,8 +225,6 @@ export const validateEdit = (
     if (!/^7\d{9}$/.test(value))
       errors.mob = "Enter a UK mobile number, like 07700 900123";
   }
-  if (key === "pron" && draft.pron.trim().length > 30)
-    errors.pron = "Use 30 characters or fewer";
   return errors;
 };
 

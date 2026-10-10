@@ -18,9 +18,6 @@ interface NavDef {
   icon: NavIconName;
 }
 
-// the prototype's top-bar "Finish setup" button (topSetupShow) is switched off; the floating pill replaced it
-const IS_TOP_SETUP_SHOWN = false as boolean;
-
 const STROKE = {
   fill: "none",
   stroke: "currentColor",
@@ -238,17 +235,6 @@ export const StudioTopBar = ({ studio }: { studio: StudioController }) => {
             MONTHS[now.getMonth()]}
         </div>
       </div>
-      {IS_TOP_SETUP_SHOWN && (
-        <button
-          className={styles.finishSetup}
-          onClick={() => setState({ setupMin: false })}
-        >
-          <span className={styles.finishCount}>
-            {getSetupProgress(studio).doneCount + "/4"}
-          </span>
-          <span>Finish setup</span>
-        </button>
-      )}
       <button
         className={styles.bell}
         onClick={() => actions.openSheet("notif")}

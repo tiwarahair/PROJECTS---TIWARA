@@ -9,20 +9,12 @@
     outline: none;
   }
 
-  .nolinks a {
-    color: inherit;
-  }
-
   :global(html.search-page) .rescard:hover :global(.rescover) {
     transform: scale(1.04);
   }
 
   :global(html.search-page .rescover) {
     transition: transform 0.7s cubic-bezier(0.2, 0.7, 0.2, 1);
-  }
-
-  .daysrow {
-    scrollbar-width: none;
   }
 
   @keyframes rescardIn {
@@ -94,12 +86,6 @@
   .searchPill[data-expanded="true"] .spBtn {
     width: auto;
     padding: 0 20px;
-  }
-
-  @media (max-width: 900px) {
-    .mqDesk {
-      display: none !important;
-    }
   }
 
   .spMobile {
@@ -181,18 +167,6 @@
     .spMobile {
       display: flex !important;
     }
-    .daysrow {
-      margin-top: 0 !important;
-    }
-  }
-
-  @keyframes sheetUp {
-    from {
-      transform: translateY(100%);
-    }
-    to {
-      transform: translateY(0);
-    }
   }
 
   @keyframes sheetDown {
@@ -223,15 +197,6 @@
     animation: sheetFadeOut 0.34s ease;
   }
 
-  @keyframes sheetFade {
-    from {
-      opacity: 0;
-    }
-    to {
-      opacity: 1;
-    }
-  }
-
   @media (max-width: 720px) {
     .calgrid {
       grid-template-columns: 1fr !important;
@@ -245,56 +210,6 @@
     background-image: url("data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIxNiIgaGVpZ2h0PSIxNiIgdmlld0JveD0iMCAwIDI0IDI0IiBmaWxsPSJub25lIiBzdHJva2U9IiMxYTE3MTQiIHN0cm9rZS13aWR0aD0iMiIgc3Ryb2tlLWxpbmVjYXA9InJvdW5kIj48cGF0aCBkPSJtNiA5IDYgNiA2LTYiLz48L3N2Zz4=");
     background-repeat: no-repeat;
     background-position: right 16px center;
-  }
-
-  @keyframes dlgIn {
-    from {
-      opacity: 0;
-      transform: scale(0.96);
-    }
-    to {
-      opacity: 1;
-      transform: scale(1);
-    }
-  }
-
-  @keyframes dlgOut {
-    from {
-      opacity: 1;
-      transform: scale(1);
-    }
-    to {
-      opacity: 0;
-      transform: scale(0.96);
-    }
-  }
-
-  @media (min-width: 721px) {
-    .timeSheet {
-      align-items: center !important;
-    }
-    .timeSheet .sheetPanel {
-      max-width: 520px;
-      border-radius: var(--radius-lg) !important;
-      animation: dlgIn 0.26s cubic-bezier(0.2, 0.8, 0.2, 1);
-      transform: scale(1);
-    }
-    .timeSheet[data-closing="true"] .sheetPanel {
-      animation: dlgOut 0.24s ease;
-      opacity: 0;
-      transform: scale(0.96);
-    }
-  }
-
-  @keyframes ddIn {
-    from {
-      opacity: 0;
-      transform: translateY(-6px) scale(0.98);
-    }
-    to {
-      opacity: 1;
-      transform: none;
-    }
   }
 
   .flMob {
@@ -399,17 +314,6 @@
   @media (prefers-reduced-motion: reduce) {
     :global(html.search-page) [data-dd] {
       animation: none !important;
-    }
-  }
-
-  @keyframes svcIn {
-    from {
-      opacity: 0;
-      transform: translate(-50%, -10px);
-    }
-    to {
-      opacity: 1;
-      transform: translate(-50%, 0);
     }
   }
 

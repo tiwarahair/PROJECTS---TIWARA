@@ -2,13 +2,9 @@
  * Stylist Profile <helmet> <style> rules, verbatim values (prototype Stylist Profile.dc.html lines 20–101), in the
  * page layer so the component modules (the prototype's inline styles) still win. Page-wide rules are scoped to
  * html.profile-page, which StylistProfilePage sets while mounted. The global reset lines identical to the base layer
- * are omitted. Rules no element uses yet (.mq-desk, .covergrid, .coverside, .twtip) are kept for later.
+ * are omitted.
  */
 @layer page {
-  .nolinks a {
-    color: inherit;
-  }
-
   :global(html.profile-page) {
     --e-out: cubic-bezier(0.23, 1, 0.32, 1);
     --e-drawer: cubic-bezier(0.32, 0.72, 0, 1);
@@ -189,9 +185,6 @@
   }
 
   @media (max-width: 900px) {
-    .mqDesk {
-      display: none !important;
-    }
     .profgrid {
       grid-template-columns: 1fr !important;
     }
@@ -286,16 +279,6 @@
     }
   }
 
-  @media (max-width: 720px) {
-    .covergrid {
-      grid-template-columns: 1fr !important;
-      grid-template-rows: 300px !important;
-    }
-    .coverside {
-      display: none;
-    }
-  }
-
   /* second helmet <style> block */
   .pfMobonly {
     display: none !important;
@@ -326,10 +309,6 @@
     .scpHero {
       cursor: pointer;
     }
-  }
-
-  .twtip {
-    position: relative;
   }
 
   .pfOvl {
@@ -381,37 +360,6 @@
     .pfOvb svg {
       width: 18px;
       height: 18px;
-    }
-  }
-
-  @media (hover: hover) and (pointer: fine) {
-    .twtip::after {
-      content: attr(data-tip);
-      position: absolute;
-      top: calc(100% + 8px);
-      left: 50%;
-      transform: translate(-50%, -4px);
-      background: #1a1714;
-      color: #fffefb;
-      font:
-        500 12.5px/1.2 "Hanken Grotesk",
-        sans-serif;
-      padding: 6px 10px;
-      border-radius: 6px;
-      white-space: nowrap;
-      opacity: 0;
-      pointer-events: none;
-      transition:
-        opacity 160ms var(--e-out),
-        transform 160ms var(--e-out);
-      z-index: 5;
-    }
-    .twtip:hover::after {
-      opacity: 1;
-      transform: translate(-50%, 0);
-    }
-    .twtip[aria-expanded="true"]::after {
-      display: none;
     }
   }
 

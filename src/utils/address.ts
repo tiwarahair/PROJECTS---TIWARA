@@ -262,10 +262,3 @@ export const getAddressLines = (
 export const getAddressOneLine = (
   address: AddressValue | null | undefined,
 ): string => getAddressLines(address).join(", ");
-
-export const hasFlatNumber = (
-  address: AddressValue | null | undefined,
-): boolean =>
-  !!address &&
-  (/\d/.test(address.line2 || "") ||
-    /^(flat|apartment|apt|unit|floor|suite)\b/i.test(address.line1 || ""));

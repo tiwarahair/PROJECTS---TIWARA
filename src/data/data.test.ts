@@ -12,9 +12,8 @@ import {
   getSpec,
   hasStep2,
   matchTypes,
-  slugify,
 } from "../utils/services";
-import { miles, nextAvailable, slotsFor } from "../utils/availability";
+import { miles, slotsFor } from "../utils/availability";
 import { bookingFee, money, policyLines } from "../utils/pricing";
 import {
   formatPostcode,
@@ -22,7 +21,6 @@ import {
   getAddressOneLine,
   getDistrict,
   getPostcodeGeo,
-  hasFlatNumber,
   isAddressValid,
   isPostcodeValid,
   searchAddresses,
@@ -48,7 +46,6 @@ describe.skipIf(!hasPrototype)("data layer matches prototype data.js", () => {
     expect(data.reviews).toEqual(toPlain(proto.reviews));
     expect(data.faqs).toEqual(toPlain(proto.faqs));
     expect(data.chatMessages).toEqual(toPlain(proto.chat));
-    expect(data.brandAssets).toEqual(toPlain(proto.assets));
     expect(data.serviceGroups).toEqual(toPlain(proto.serviceGroups));
     expect(data.serviceTypes).toEqual(toPlain(proto.serviceTypes));
     expect(data.platformCustomisations).toEqual(
@@ -61,8 +58,6 @@ describe.skipIf(!hasPrototype)("data layer matches prototype data.js", () => {
     expect(data.postcodes).toEqual(toPlain(proto.postcodes));
     expect(data.demoAddresses).toEqual(toPlain(proto.addresses));
     expect(data.policyIcons).toEqual(toPlain(proto.policyIcons));
-    expect(data.policyDefaults).toEqual(toPlain(proto.policyDefaults));
-    expect(data.businessLabels).toEqual(toPlain(proto.services.businessLabel));
     expect(data.seedAddresses).toEqual(toPlain(proto.account.seedAddresses));
   });
 
@@ -106,7 +101,6 @@ describe.skipIf(!hasPrototype)("data layer matches prototype data.js", () => {
     ];
     names.forEach((name) => {
       expect(getSpec(name)).toEqual(toPlain(proto.services.spec(name)));
-      expect(slugify(name)).toBe(proto.services.slugify(name));
     });
     [0, 10, 14, 15, 44.6, 45, 59, 60, 61, 90, 120, 135, 240, 245].forEach(
       (minutes) =>
@@ -142,16 +136,6 @@ describe.skipIf(!hasPrototype)("data layer matches prototype data.js", () => {
           ),
         );
       }
-      [60, 240, 600].forEach((mins) =>
-        expect(toPlain(nextAvailable(stylist, mins))).toEqual(
-          toPlain(proto.services.nextAvailable(protoStylist, mins)),
-        ),
-      );
-      expect(toPlain(nextAvailable(stylist, 600, "2026-10-12", 3))).toEqual(
-        toPlain(
-          proto.services.nextAvailable(protoStylist, 600, "2026-10-12", 3),
-        ),
-      );
     });
     expect(miles(53.4808, -2.2426, 53.4166, -2.231)).toBe(
       proto.services.miles(53.4808, -2.2426, 53.4166, -2.231),
@@ -204,7 +188,10 @@ describe.skipIf(!hasPrototype)("data layer matches prototype data.js", () => {
     ];
     const policies: Policy[] = [
       ...data.stylists.map(({ policies }) => policies),
-      ...variants.map((variant) => ({ ...data.policyDefaults, ...variant })),
+      ...variants.map((variant) => ({
+        ...data.stylists[0]!.policies,
+        ...variant,
+      })),
     ];
     policies.forEach((policy) =>
       [20, 45, 120, 133.33].forEach((price) =>
@@ -279,7 +266,6 @@ describe.skipIf(!hasPrototype)("data layer matches prototype data.js", () => {
         toPlain(proto.address.lines(address)),
       );
       expect(getAddressOneLine(address)).toBe(proto.address.oneLine(address));
-      expect(hasFlatNumber(address)).toBe(proto.address.hasNumber(address));
     });
   });
 

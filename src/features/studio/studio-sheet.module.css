@@ -126,23 +126,6 @@
   padding: 4px;
 }
 
-.statusBadge {
-  flex: 0 0 auto;
-  display: inline-flex;
-  align-items: center;
-  gap: 5px;
-  height: 28px;
-  box-sizing: border-box;
-  padding: 0 11px;
-  border-radius: var(--radius-xs);
-  font-size: 12.5px;
-  font-weight: 500;
-  margin-top: -2px;
-  /* runtime: the outcome's tone */
-  background: var(--badge-bg);
-  color: var(--badge-color);
-}
-
 .close {
   flex: 0 0 auto;
   width: 32px;
@@ -449,59 +432,6 @@
 
 .goEqual {
   flex: 1;
-}
-
-.wizBack {
-  flex: 0 0 auto;
-  border: 1px solid var(--border-strong, #d8d2c6);
-  background: transparent;
-  border-radius: var(--radius-full);
-  padding: 13px 20px;
-  font-size: 15px;
-  font-weight: 600;
-  transition: transform 0.16s cubic-bezier(0.23, 1, 0.32, 1);
-}
-
-.wizBack:active {
-  transform: scale(0.97) !important;
-}
-
-.wizNext {
-  flex: 1;
-  border: none;
-  background: var(--accent-700);
-  color: var(--neutral-100);
-  border-radius: var(--radius-full);
-  padding: 13px 0;
-  font-size: 15px;
-  font-weight: 600;
-  transition:
-    opacity 0.2s,
-    transform 0.16s cubic-bezier(0.23, 1, 0.32, 1);
-  opacity: 1;
-}
-
-.wizNext:active {
-  transform: scale(0.98) !important;
-}
-
-.fullButton {
-  width: 100%;
-  border: none;
-  background: var(--accent-700);
-  color: var(--neutral-100);
-  border-radius: var(--radius-full);
-  padding: 13px 0;
-  font-size: 15px;
-  font-weight: 600;
-  transition:
-    opacity 0.2s,
-    transform 0.16s cubic-bezier(0.23, 1, 0.32, 1);
-  opacity: 1;
-}
-
-.fullButton:active {
-  transform: scale(0.98) !important;
 }
 
 /* disabled primary actions fade (prototype *Op = .45) */

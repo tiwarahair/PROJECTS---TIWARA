@@ -70,28 +70,6 @@ export const slotsFor = (
   return slots;
 };
 
-export interface NextSlot {
-  date: Date;
-  time: string;
-}
-
-export const nextAvailable = (
-  stylist: Stylist,
-  mins: number,
-  from?: Date | string | number | null,
-  days?: number,
-): NextSlot | null => {
-  const startDay = from ? new Date(from) : new Date();
-  startDay.setHours(0, 0, 0, 0);
-  for (let offset = 0; offset < (days || 28); offset++) {
-    const day = new Date(startDay);
-    day.setDate(startDay.getDate() + offset);
-    const [first] = slotsFor(stylist, day, mins);
-    if (first) return { date: day, time: first };
-  }
-  return null;
-};
-
 /** Great-circle distance in miles between two lat/lng points. */
 export const miles = (
   latA: number,

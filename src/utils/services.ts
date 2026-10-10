@@ -1,5 +1,5 @@
 // Service catalogue helpers, ported from data.js (TIWARA.services). Outputs are identical to the prototype.
-import { serviceGroups, serviceSpecs, serviceTypes } from "../data";
+import { serviceSpecs, serviceTypes } from "../data";
 import type {
   CustomisationGroup,
   CustomisationOption,
@@ -7,20 +7,12 @@ import type {
   Service,
   ServiceAddon,
 } from "../types/service";
-import type { ServiceGroup } from "../types/service-group";
 import type { ServiceSpec } from "../types/service-spec";
 import type { ServiceType } from "../types/service-type";
 import type { Stylist } from "../types/stylist";
 import { bookingFee, roundPence } from "./pricing";
 
 const toLower = (value: unknown): string => String(value ?? "").toLowerCase();
-
-export const slugify = (value: string): string =>
-  String(value)
-    .toLowerCase()
-    .replace(/&/g, "and")
-    .replace(/[^a-z0-9]+/g, "-")
-    .replace(/^-|-$/g, "");
 
 export const getSpec = (name: string): ServiceSpec => {
   const key = toLower(name);
@@ -48,14 +40,6 @@ export const formatDuration = (minutes: number): string => {
 export const getTypeById = (
   id: string | null | undefined,
 ): ServiceType | null => serviceTypes.find((type) => type.id === id) ?? null;
-export const getTypeByName = (name: string): ServiceType | null =>
-  serviceTypes.find((type) => toLower(type.name) === toLower(name)) ?? null;
-export const getTypeBySlug = (slug: string): ServiceType | null =>
-  serviceTypes.find((type) => type.slug === slug) ?? null;
-export const getGroupById = (id: string): ServiceGroup | null =>
-  serviceGroups.find((group) => group.id === id) ?? null;
-export const getGroupBySlug = (slug: string): ServiceGroup | null =>
-  serviceGroups.find((group) => group.slug === slug) ?? null;
 
 export const isActive = (service: Service | null | undefined): boolean =>
   !!service && service.status === "active";

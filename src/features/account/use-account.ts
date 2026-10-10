@@ -208,7 +208,6 @@ const getInitialState = ({
     "profile-full": {
       sec: "personal",
       photo: DEMO_PHOTO,
-      me: { ...ME, pron: "she/her" },
     },
     "photo-error": {
       sec: "personal",
@@ -340,7 +339,6 @@ export const useAccount = (props: AccountProps) => {
       first: createRef<HTMLInputElement>(),
       email: createRef<HTMLInputElement>(),
       mob: createRef<HTMLInputElement>(),
-      pron: createRef<HTMLInputElement>(),
       current: createRef<HTMLInputElement>(),
       next: createRef<HTMLInputElement>(),
       del: createRef<HTMLInputElement>(),
@@ -404,7 +402,6 @@ export const useAccount = (props: AccountProps) => {
             name: refs.first,
             email: refs.email,
             mob: refs.mob,
-            pron: refs.pron,
           }[current.edit ?? "name"];
           ref?.current?.focus();
         }
@@ -606,7 +603,6 @@ export const useAccount = (props: AccountProps) => {
       const digits = current.draft.mob.replace(/\D/g, "").replace(/^0/, "");
       me.mob = digits.slice(0, 4) + " " + digits.slice(4);
     }
-    if (key === "pron") me.pron = current.draft.pron.trim();
     setState({ me, edit: null, err: {} });
     showToast("Your details are updated");
   };

@@ -4,11 +4,6 @@
  */
 
 /* ---- scrims ---- */
-.scrim {
-  position: fixed;
-  inset: 0;
-  background: var(--scrim-modal, rgba(26, 23, 20, 0.45));
-}
 
 .scrimIn20 {
   animation: scrimin 0.2s ease both;

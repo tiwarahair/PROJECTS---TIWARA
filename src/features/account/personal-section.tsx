@@ -446,27 +446,6 @@ export const PersonalSection = ({
                     </div>
                   </div>
                 )}
-                {/* the prototype keeps a pronouns editor, though no row opens it */}
-                {!isView && (key as EditKey) === "pron" && (
-                  <div className={styles.editField}>
-                    <label className={ui.label}>
-                      Pronouns{" "}
-                      <input
-                        className={joinClassNames(ui.input, borderOf("pron"))}
-                        ref={refs.pron}
-                        value={draft.pron}
-                        onChange={setDraft("pron")}
-                        placeholder="e.g. she/her"
-                        maxLength={30}
-                        aria-invalid={err.pron ? "true" : "false"}
-                        aria-describedby="ac-e-pron"
-                      />
-                      <span className={ui.error} id="ac-e-pron">
-                        {err.pron}
-                      </span>
-                    </label>
-                  </div>
-                )}
                 {!isView && key !== "email" && (
                   <div className={styles.editActions}>
                     <button className={styles.saveEdit} onClick={saveEdit}>

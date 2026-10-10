@@ -5,7 +5,7 @@ import type {
   TaxBusiness,
   TaxDetails,
 } from "../tax-details-form/tax-details-logic";
-import { getInitialSettingsState, isNiValid } from "./account-settings-logic";
+import { getInitialSettingsState } from "./account-settings-logic";
 import type {
   ConfirmDialog,
   PayoutStatus,
@@ -180,14 +180,6 @@ export const useAccountSettings = (props: AccountSettingsProps) => {
   const isNameDirty =
     state.first !== state.savedName[0] || state.last !== state.savedName[1];
 
-  // ---- payouts: the prototype's NI editor (kept, not rendered)
-  const niCompact = state.niInput.toUpperCase().replace(/\s+/g, "");
-  const isNiEditing = !state.ni || state.niEdit;
-  const niError =
-    state.niTouched && !isNiValid(niCompact)
-      ? "Enter your number like QQ 12 34 56 C."
-      : "";
-
   // ---- save bar (only pages with typed fields)
   const isPasswordDirty =
     showPasswordFields && !!(state.pw.cur || state.pw.nw || state.pw.conf);
@@ -196,9 +188,7 @@ export const useAccountSettings = (props: AccountSettingsProps) => {
       ? isNameDirty
       : page === "security"
         ? isPasswordDirty
-        : page === "payouts"
-          ? isNiEditing && !!niCompact
-          : false;
+        : false;
   const hasSave =
     page === "personal" || (page === "security" && showPasswordFields);
   const hasBarError =
@@ -206,9 +196,7 @@ export const useAccountSettings = (props: AccountSettingsProps) => {
       ? !!(getNameError("first") || getNameError("last"))
       : page === "security"
         ? !!(passwordErrors.cur || passwordErrors.nw || passwordErrors.conf)
-        : page === "payouts"
-          ? !!niError
-          : false;
+        : false;
 
   const save = () => {
     if (page === "personal") {
@@ -249,11 +237,6 @@ export const useAccountSettings = (props: AccountSettingsProps) => {
               (others === 1 ? "" : "s")
             : "Password updated",
       );
-    }
-    if (page === "payouts") {
-      if (!isNiValid(niCompact)) return setState({ niTouched: true });
-      setState({ ni: niCompact, niEdit: false, niInput: "", niTouched: false });
-      toast("National Insurance number saved");
     }
   };
 

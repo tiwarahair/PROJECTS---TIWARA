@@ -21,10 +21,6 @@
   gap: 20px;
 }
 
-.full {
-  grid-column: 1/-1;
-}
-
 .main {
   grid-column: 1/-1;
 }

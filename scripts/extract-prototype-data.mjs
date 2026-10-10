@@ -18,10 +18,13 @@ const exposed = source.replace(
 
 const sandbox = { window: {}, location: { search: "" } };
 vm.runInNewContext(exposed, sandbox);
-const { TIWARA: data, __specs: specs, __passwordBlocklist: passwordBlocklist } = sandbox.window;
+const {
+  TIWARA: data,
+  __specs: specs,
+  __passwordBlocklist: passwordBlocklist,
+} = sandbox.window;
 
 const outputs = {
-  "assets.json": data.assets,
   "stylists.json": data.stylists,
   "reviews.json": data.reviews,
   "faqs.json": data.faqs,
@@ -37,13 +40,14 @@ const outputs = {
   "postcodes.json": data.postcodes,
   "addresses.json": data.addresses,
   "policy-icons.json": data.policyIcons,
-  "policy-defaults.json": data.policyDefaults,
-  "business-labels.json": data.services.businessLabel,
   "seed-addresses.json": data.account.seedAddresses,
   "password-blocklist.json": passwordBlocklist,
 };
 
 for (const [fileName, value] of Object.entries(outputs)) {
-  writeFileSync(join("src/data", fileName), JSON.stringify(value, null, 2) + "\n");
+  writeFileSync(
+    join("src/data", fileName),
+    JSON.stringify(value, null, 2) + "\n",
+  );
 }
 console.log(`Wrote ${Object.keys(outputs).length} files to src/data`);

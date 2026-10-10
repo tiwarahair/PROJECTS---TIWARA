@@ -468,12 +468,6 @@
   }
 }
 
-@keyframes txspin {
-  to {
-    transform: rotate(360deg);
-  }
-}
-
 @media (prefers-reduced-motion: reduce) {
   .nameFields[data-tx-anim] {
     animation: none !important;

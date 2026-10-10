@@ -209,40 +209,6 @@ export const useHomeMotion = (
           );
         if (timeline.scrollTrigger) reveals.push(timeline.scrollTrigger);
       });
-      // about photos: fan out of a tight stack (no [data-stackimg] on the current page; kept from the prototype)
-      const stack = select("[data-stackimg]");
-      if (stack.length) {
-        const stackTimeline = gsap
-          .timeline({
-            scrollTrigger: {
-              trigger: "#aboutstack",
-              start: "top 85%",
-              once: true,
-            },
-          })
-          .fromTo(
-            stack,
-            {
-              x: (index: number) => -index * 46,
-              y: (index: number) => -index * 34,
-              rotate: 0,
-              opacity: 0,
-              scale: 0.94,
-            },
-            {
-              x: 0,
-              y: 0,
-              rotate: (index: number) => [-6, 2, 7][index] ?? 0,
-              opacity: 1,
-              scale: 1,
-              duration: 1.1,
-              stagger: 0.13,
-              ease: "power3.out",
-            },
-          );
-        if (stackTimeline.scrollTrigger)
-          reveals.push(stackTimeline.scrollTrigger);
-      }
       // one debounced refresh after the layout settles
       later(() => ScrollTrigger.refresh(), 600);
       // safety net: if triggers went missing, never leave content invisible
@@ -277,47 +243,4 @@ export const useHomeMotion = (
       context.revert();
     };
   }, [rootRef, showWhy]);
-};
-
-/**
- * One-shot fade-up when elements enter the viewport (prototype Home ioReveal). Not called by the current page;
- * kept from the prototype. Returns a cleanup that disconnects the observer.
- */
-export const revealOnEnter = (
-  elements: HTMLElement[],
-  {
-    y = 26,
-    duration = 0.8,
-    stagger = 0,
-    delay = 0,
-    margin = "0px 0px -10% 0px",
-  } = {},
-): (() => void) => {
-  const pending = elements.filter((element) => !element.dataset.rvDone);
-  if (!pending.length) return () => {};
-  gsap.set(pending, { y, opacity: 0 });
-  const observer = new IntersectionObserver(
-    (entries) =>
-      entries.forEach(({ isIntersecting }) => {
-        if (!isIntersecting) return;
-        observer.disconnect();
-        gsap.to(pending, {
-          y: 0,
-          opacity: 1,
-          duration,
-          stagger,
-          delay,
-          ease: "power2.out",
-          clearProps: "opacity,transform",
-          onComplete: () =>
-            pending.forEach((element) => (element.dataset.rvDone = "1")),
-        });
-      }),
-    {
-      threshold: 0,
-      rootMargin: window.innerWidth <= 760 ? "0px 0px 38% 0px" : margin,
-    },
-  );
-  pending.forEach((element) => observer.observe(element));
-  return () => observer.disconnect();
 };

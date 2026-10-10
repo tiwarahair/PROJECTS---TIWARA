@@ -61,10 +61,6 @@ export interface SettingsState {
   sessLoading: boolean;
   alerts: boolean;
   notif: Record<NotificationKey, ChannelSetting>;
-  ni: string;
-  niEdit: boolean;
-  niInput: string;
-  niTouched: boolean;
   g: {
     state: "off" | "connecting" | "on";
     cals: Record<"main" | "fam" | "hol", boolean>;
@@ -142,10 +138,6 @@ export const getInitialSettingsState = (
       acx: channel(),
       rv: channel(),
     },
-    ni: isNew ? "" : "QQ123456C",
-    niEdit: false,
-    niInput: "",
-    niTouched: false,
     g: {
       state: isNew ? "off" : "on",
       cals: { main: true, fam: true, hol: false },
@@ -162,9 +154,6 @@ export const isEmailValid = (value: string): boolean =>
 
 export const isMobileValid = (value: string): boolean =>
   /^(?:\+44|0)7\d{9}$/.test(value.replace(/[\s()-]/g, ""));
-
-export const isNiValid = (compact: string): boolean =>
-  /^[A-CEGHJ-PR-TW-Z][A-CEGHJ-NPR-TW-Z]\d{6}[A-D]$/.test(compact);
 
 /** Why the account can't be closed yet, else "". */
 export const getCloseReason = (upcoming: number, owed: boolean): string =>

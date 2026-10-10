@@ -98,7 +98,6 @@ export const ME = {
   last: "Okafor",
   email: "nia.okafor@gmail.com",
   mob: "7700 900412",
-  pron: "",
 };
 
 export type Profile = typeof ME;

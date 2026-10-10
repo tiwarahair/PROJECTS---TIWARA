@@ -725,20 +725,6 @@
   flex: 0 0 auto;
 }
 
-.optionButtonOn {
-  display: flex;
-  align-items: flex-start;
-  gap: 14px;
-  width: 100%;
-  padding: 16px;
-  border: none;
-  background: transparent;
-  text-align: left;
-  font: inherit;
-  color: var(--text-primary);
-  cursor: pointer;
-}
-
 .linkOptions {
   padding: 0 16px 16px 50px;
   display: flex;

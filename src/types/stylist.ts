@@ -47,5 +47,3 @@ export interface Stylist {
   fromFee: number | null;
   fromLabel: string;
 }
-
-export type BusinessLabels = Record<BusinessType, string>;
