@@ -1,0 +1,414 @@
+/* Earnings (prototype Earnings.dc.html), inline styles verbatim */
+
+.emptyTitle {
+  font-size: 15px;
+  font-weight: 600;
+}
+
+.card {
+  background: #fff;
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-panel);
+  overflow: hidden;
+}
+
+.emptyAll {
+  padding: 44px 20px;
+  text-align: center;
+  max-width: 420px;
+  margin: 0 auto;
+}
+
+.emptyAllTitle {
+  font-size: 15.5px;
+  font-weight: 600;
+}
+
+.emptyText {
+  font-size: 14.5px;
+  color: var(--text-secondary);
+  margin-top: 4px;
+  line-height: 1.5;
+}
+
+.copyLink {
+  margin-top: 16px;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  height: 40px;
+  padding: 0 18px;
+  border-radius: var(--radius-full);
+  border: 1px solid var(--border-strong);
+  background: transparent;
+  font: inherit;
+  font-size: 14.5px;
+  font-weight: 600;
+  color: var(--text-primary);
+  cursor: pointer;
+  transition: background-color 0.16s;
+}
+
+.copyLink:hover {
+  background: var(--fill-quiet) !important;
+}
+
+.copyLink:active {
+  transform: scale(0.97) !important;
+}
+
+.emptyFiltered {
+  padding: 36px 20px;
+  text-align: center;
+}
+
+.emptyFilteredText {
+  font-size: 14.5px;
+  color: var(--text-secondary);
+  margin-top: 4px;
+}
+
+.tableScroll {
+  overflow-x: auto;
+}
+
+.table {
+  min-width: 920px;
+}
+
+.tableHead {
+  display: grid;
+  gap: 12px;
+  padding: 12px 18px;
+  font-size: 12.5px;
+  font-weight: 600;
+  color: var(--text-secondary);
+  border-bottom: 1px solid var(--border-subtle);
+}
+
+.alignRight {
+  text-align: right;
+}
+
+.txRow {
+  display: grid;
+  gap: 12px;
+  align-items: center;
+  width: 100%;
+  text-align: left;
+  border: none;
+  border-bottom: 1px solid var(--border-subtle);
+  padding: 11px 18px;
+  font: inherit;
+  color: inherit;
+  cursor: pointer;
+  transition: background-color 0.14s;
+}
+
+.txRow:hover {
+  background: var(--fill-quiet) !important;
+}
+
+.txDate {
+  font-size: 14px;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
+.txName {
+  font-size: 14.5px;
+  font-weight: 600;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.txDesc {
+  font-size: 14px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.txMethod {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  min-width: 0;
+  font-size: 14px;
+  color: var(--text-secondary);
+  white-space: nowrap;
+}
+
+.recordedTag {
+  flex: 0 0 auto;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--neutral-600);
+  background: var(--fill-quiet);
+  border-radius: var(--radius-xs);
+  padding: 2px 7px;
+}
+
+.txMethodText {
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.txAmount {
+  text-align: right;
+  font-size: 14.5px;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
+.txFee {
+  text-align: right;
+  font-size: 14px;
+  font-variant-numeric: tabular-nums;
+  color: var(--text-secondary);
+  white-space: nowrap;
+}
+
+.txNet {
+  text-align: right;
+  font-size: 14.5px;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
+.statusTag {
+  display: inline-block;
+  font-size: 12.5px;
+  font-weight: 600;
+  border-radius: var(--radius-xs);
+  padding: 3px 8px;
+  white-space: nowrap;
+}
+
+.txItem {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+  text-align: left;
+  border: none;
+  border-bottom: 1px solid var(--border-subtle);
+  padding: 12px 16px;
+  font: inherit;
+  color: inherit;
+  cursor: pointer;
+}
+
+.txItem:active {
+  background: var(--fill-quiet) !important;
+}
+
+.itemText {
+  flex: 1;
+  min-width: 0;
+}
+
+.itemName {
+  font-size: 15px;
+  font-weight: 600;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.itemSub {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-top: 2px;
+  font-size: 13.5px;
+  color: var(--text-secondary);
+  min-width: 0;
+}
+
+.recordedSmall {
+  flex: 0 0 auto;
+  font-size: 11.5px;
+  font-weight: 600;
+  color: var(--neutral-600);
+  background: var(--fill-quiet);
+  border-radius: var(--radius-xs);
+  padding: 1px 6px;
+}
+
+.itemSubText {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.itemSide {
+  flex: 0 0 auto;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 4px;
+}
+
+.itemAmount {
+  font-size: 15px;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+}
+
+.statusSmall {
+  font-size: 11.5px;
+  font-weight: 600;
+  border-radius: var(--radius-xs);
+  padding: 2px 7px;
+}
+
+.more {
+  display: block;
+  width: 100%;
+  padding: 14px;
+  border: none;
+  background: transparent;
+  font: inherit;
+  font-size: 14.5px;
+  font-weight: 600;
+  color: var(--accent-700);
+  cursor: pointer;
+  transition: background-color 0.14s;
+}
+
+.more:hover {
+  background: var(--fill-quiet) !important;
+}
+
+.poEmptyIcon {
+  width: 44px;
+  height: 44px;
+  border-radius: var(--radius-full);
+  background: var(--fill-quiet);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto 12px;
+  color: var(--text-primary);
+}
+
+.poEmptyText {
+  font-size: 14.5px;
+  color: var(--neutral-600);
+  line-height: 1.5;
+}
+
+.poRow {
+  display: grid;
+  gap: 12px;
+  align-items: center;
+  width: 100%;
+  text-align: left;
+  border: none;
+  border-bottom: 1px solid var(--border-subtle);
+  padding: 12px 18px;
+  font: inherit;
+  color: inherit;
+  cursor: pointer;
+  transition: background-color 0.14s;
+}
+
+.poRow:hover {
+  background: var(--fill-quiet) !important;
+}
+
+.poDateCell {
+  min-width: 0;
+}
+
+.poDate {
+  display: block;
+  font-size: 14.5px;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.poSub {
+  font-size: 13px;
+  color: var(--text-secondary);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.poAmount {
+  text-align: right;
+  font-size: 15px;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+}
+
+.poTo {
+  font-size: 14px;
+  color: var(--text-secondary);
+  white-space: nowrap;
+}
+
+.poStatus {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 3px;
+}
+
+.poFix {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--accent-700);
+  white-space: nowrap;
+}
+
+/* runtime states (prototype txCols / poCols, t.rowBg, t.ac, stBg / stFg, subDisp / toDisp) */
+.tableHead,
+.txRow {
+  grid-template-columns:
+    96px minmax(0, 1.3fr) minmax(0, 1fr) minmax(0, 1.3fr)
+    92px 80px 92px 100px;
+}
+
+.poDesk {
+  grid-template-columns: minmax(0, 1fr) 120px minmax(0, 1.2fr) minmax(0, 1.2fr);
+}
+
+.poMobile {
+  grid-template-columns: minmax(0, 1fr) auto auto;
+}
+
+.rowSelected {
+  background: var(--accent-wash);
+}
+
+.rowIdle {
+  background: transparent;
+}
+
+.amountNegative {
+  color: var(--accent-700);
+}
+
+.amountPositive {
+  color: var(--text-primary);
+}
+
+/* the status colours come from the status table (prototype STT) */
+.statusTag,
+.statusSmall {
+  background: var(--st-bg);
+  color: var(--st-fg);
+}
+
+.showOnDesk {
+  display: block;
+}
+
+.hideOnDesk {
+  display: none;
+}

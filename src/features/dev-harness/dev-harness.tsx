@@ -6,6 +6,8 @@ import { AddressFinder } from "../../components/address-finder/address-finder";
 import { AllergyField } from "../../components/allergy-field/allergy-field";
 import { BusinessDetails } from "../../components/business-details/business-details";
 import type { BusinessDetailsProps } from "../../components/business-details/business-details";
+import { Earnings } from "../../components/earnings/earnings";
+import type { EarningsProps } from "../../components/earnings/earnings";
 import { PaymentPolicy } from "../../components/payment-policy/payment-policy";
 import type { PaymentPolicyProps } from "../../components/payment-policy/payment-policy";
 import { SearchSelect } from "../../components/search-select/search-select";
@@ -465,6 +467,36 @@ const ACCOUNT_SETTINGS: {
   },
 ];
 
+const EARNINGS: { fixture: string; isWide: boolean; props: EarningsProps }[] = [
+  { fixture: "default", isWide: true, props: {} },
+  { fixture: "default-auto-phone", isWide: false, props: {} },
+  { fixture: "mobile", isWide: true, props: { layout: "mobile" } },
+  { fixture: "payouts", isWide: true, props: { tab: "po" } },
+  { fixture: "payouts-phone", isWide: false, props: { tab: "po" } },
+  { fixture: "onhold", isWide: true, props: { scenario: "onhold" } },
+  {
+    fixture: "onhold-po",
+    isWide: true,
+    props: { scenario: "onhold", tab: "po" },
+  },
+  { fixture: "paused", isWide: true, props: { scenario: "paused" } },
+  { fixture: "setup", isWide: true, props: { scenario: "setup" } },
+  {
+    fixture: "setup-tax",
+    isWide: true,
+    props: { scenario: "setup", taxHold: true },
+  },
+  { fixture: "empty", isWide: false, props: { scenario: "empty" } },
+  {
+    fixture: "empty-po",
+    isWide: false,
+    props: { scenario: "empty", tab: "po" },
+  },
+  { fixture: "month", isWide: true, props: { period: "month" } },
+  { fixture: "lastmonth", isWide: true, props: { period: "lastmonth" } },
+  { fixture: "filt-fees", isWide: true, props: { filt: "fees" } },
+];
+
 const HARNESSES: Record<string, () => ReactNode> = {
   "address-finder": () =>
     ADDRESS_FIXTURES.map((fixture) => (
@@ -547,6 +579,19 @@ const HARNESSES: Record<string, () => ReactNode> = {
         {/* the prototype's dc-import host block */}
         <div data-dc-host="">
           <AccountSettings {...props} />
+        </div>
+      </div>
+    )),
+  earnings: () =>
+    EARNINGS.map(({ fixture, isWide, props }) => (
+      <div
+        key={fixture}
+        className={isWide ? styles.earningsBox : styles.phoneAutoBox}
+        data-fx={fixture}
+      >
+        {/* the prototype's dc-import host block */}
+        <div data-dc-host="">
+          <Earnings {...props} />
         </div>
       </div>
     )),
