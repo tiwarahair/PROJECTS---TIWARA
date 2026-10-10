@@ -6,6 +6,7 @@ import { StudioClients } from "./studio-clients";
 import { StudioEarnings } from "./studio-earnings";
 import { StudioHome } from "./studio-home";
 import { StudioServices } from "./studio-services";
+import { StudioSettings } from "./studio-settings";
 import {
   ActionsMenu,
   ConfirmSheet,
@@ -72,6 +73,7 @@ export const StudioPage = (props: StudioPageProps) => {
               {state.tab === "services" && <StudioServices studio={studio} />}
               {state.tab === "earnings" && <StudioEarnings studio={studio} />}
               {state.tab === "clients" && <StudioClients studio={studio} />}
+              {state.tab === "settings" && <StudioSettings studio={studio} />}
               {bookingsView && (
                 <>
                   <StudioBookings studio={studio} view={bookingsView} />
