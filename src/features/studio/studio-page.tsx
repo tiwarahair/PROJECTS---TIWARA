@@ -3,6 +3,7 @@ import { joinClassNames } from "../../utils/class-names";
 import { FilterSheet, QuickActions, SlotPopover } from "./bookings-overlays";
 import { StudioBookings, getBookingsView } from "./studio-bookings";
 import { StudioHome } from "./studio-home";
+import { StudioServices } from "./studio-services";
 import {
   ActionsMenu,
   ConfirmSheet,
@@ -66,6 +67,7 @@ export const StudioPage = (props: StudioPageProps) => {
               id="stbody"
             >
               {state.tab === "home" && <StudioHome studio={studio} />}
+              {state.tab === "services" && <StudioServices studio={studio} />}
               {bookingsView && (
                 <>
                   <StudioBookings studio={studio} view={bookingsView} />

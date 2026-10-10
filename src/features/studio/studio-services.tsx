@@ -1,0 +1,434 @@
+import type { CSSProperties } from "react";
+import { joinClassNames } from "../../utils/class-names";
+import { getServicesView } from "./services-view";
+import type { ListGroup, ServicesView } from "./services-view";
+import type { StudioController } from "./use-studio";
+import styles from "./studio-services.module.css";
+
+const asStyle = (values: Record<string, string | null | undefined>) =>
+  values as CSSProperties;
+
+const FilterIcon = ({ size }: { size: string }) => (
+  <svg
+    width={size}
+    height={size}
+    viewBox="0 0 24 24"
+    fill="none"
+    stroke="currentColor"
+    strokeWidth="1.8"
+    strokeLinecap="round"
+  >
+    <path d="M4 6h16M6 12h12M9 18h6"></path>
+  </svg>
+);
+
+const MoreIcon = () => (
+  <svg
+    width="17"
+    height="17"
+    viewBox="0 0 24 24"
+    fill="none"
+    stroke="currentColor"
+    strokeWidth="2"
+    strokeLinecap="round"
+    strokeLinejoin="round"
+  >
+    <circle cx="12" cy="5" r="1"></circle>
+    <circle cx="12" cy="12" r="1"></circle>
+    <circle cx="12" cy="19" r="1"></circle>
+  </svg>
+);
+
+const StatusMenu = ({
+  studio,
+  view,
+}: {
+  studio: StudioController;
+  view: ServicesView;
+}) => {
+  const toggle = () =>
+    studio.setState({ svcStatOpen: !studio.state.svcStatOpen });
+  return (
+    <>
+      {/* eslint-disable-next-line jsx-a11y/click-events-have-key-events, jsx-a11y/no-static-element-interactions */}
+      <div className={styles.menuScrim} onClick={toggle}></div>
+      <div className={styles.statusMenu}>
+        {view.statusFilters.map(({ key, label, isOn, pick }) => (
+          <button
+            key={key}
+            className={joinClassNames(
+              styles.statusItem,
+              isOn && styles.statusItemOn,
+            )}
+            onClick={pick}
+          >
+            {label}
+          </button>
+        ))}
+      </div>
+    </>
+  );
+};
+
+const Empty = ({ title, body }: { title: string; body: string }) => (
+  <div className={styles.empty}>
+    <div className={styles.emptyTitle}>{title}</div>
+    <div className={styles.emptyBody}>{body}</div>
+  </div>
+);
+
+const Groups = ({
+  groups,
+  isAddons,
+}: {
+  groups: ListGroup[];
+  isAddons: boolean;
+}) =>
+  groups.map(({ key, cat, count, tone, hasMenu, menu, items }) => (
+    <div key={key} className={styles.group}>
+      <div className={styles.groupHead}>
+        <span className={styles.groupTitle}>
+          <span
+            className={styles.groupDot}
+            style={asStyle({ "--dot": tone })}
+            aria-hidden="true"
+          ></span>
+          <span className={styles.groupName}>{cat}</span>
+        </span>
+        <span className={styles.groupEnd}>
+          <span className={styles.groupCount}>{count}</span>
+          {hasMenu && (
+            <button
+              className={styles.groupMenu}
+              onClick={menu}
+              aria-label="Category options"
+            >
+              <MoreIcon />
+            </button>
+          )}
+        </span>
+      </div>
+      <div>
+        {items.map((item) => (
+          // eslint-disable-next-line jsx-a11y/click-events-have-key-events, jsx-a11y/no-static-element-interactions
+          <div key={item.key} className={styles.row} onClick={item.open}>
+            {/* runtime: the category's colour */}
+            <span
+              className={styles.rail}
+              style={asStyle({ "--rail": item.rail })}
+              aria-hidden="true"
+            ></span>
+            {isAddons ? (
+              <span className={styles.addonMain}>
+                <span
+                  className={joinClassNames(
+                    styles.name,
+                    item.isArchived && styles.nameArchived,
+                  )}
+                >
+                  {item.name}
+                </span>
+                {item.isArchived && (
+                  <span className={styles.archived}>Archived</span>
+                )}
+              </span>
+            ) : (
+              <span className={styles.rowMain}>
+                <span className={styles.nameRow}>
+                  <span
+                    className={joinClassNames(
+                      styles.name,
+                      item.isArchived && styles.nameArchived,
+                    )}
+                  >
+                    {item.name}
+                  </span>
+                  {item.isArchived && (
+                    <span className={styles.archived}>Archived</span>
+                  )}
+                  {item.isDraft && <span className={styles.draft}>Draft</span>}
+                </span>
+                <span className={styles.metaRow}>
+                  <span>{item.dur}</span>
+                  {item.extraLabel && (
+                    <span className={styles.extra}>{item.extraLabel}</span>
+                  )}
+                </span>
+                {item.isDraft && (
+                  <span className={styles.finishHolder}>
+                    <button className={styles.finish} onClick={item.finish}>
+                      Finish setting up
+                    </button>
+                  </span>
+                )}
+              </span>
+            )}
+            <span className={styles.rowEnd}>
+              {isAddons ? (
+                <span className={styles.addonMeta}>{item.meta}</span>
+              ) : (
+                <span
+                  className={joinClassNames(
+                    styles.price,
+                    item.isArchived && styles.priceArchived,
+                  )}
+                >
+                  {item.priceLabel}
+                </span>
+              )}
+              {item.isArchived && (
+                // eslint-disable-next-line jsx-a11y/click-events-have-key-events, jsx-a11y/no-static-element-interactions
+                <span className={styles.restore} onClick={item.restore}>
+                  Restore
+                </span>
+              )}
+              {!item.isArchived && (
+                <button
+                  className={styles.rowMenu}
+                  onClick={item.menu}
+                  aria-label={isAddons ? "Add-on options" : "Service options"}
+                >
+                  <MoreIcon />
+                </button>
+              )}
+            </span>
+          </div>
+        ))}
+      </div>
+    </div>
+  ));
+
+/** Studio → Services and Add-ons (prototype Studio.dc.html lines 722–904). */
+export const StudioServices = ({ studio }: { studio: StudioController }) => {
+  const { state, setState, isWide, isDesk, serviceActions } = studio;
+  const view = getServicesView(studio);
+  const toggleStatus = () => setState({ svcStatOpen: !state.svcStatOpen });
+  return (
+    <div
+      className={joinClassNames(
+        styles.services,
+        isWide && styles.wide,
+        isDesk && styles.desk,
+      )}
+      data-screen-label="Services"
+    >
+      <div className={styles.header}>
+        <div className={styles.headRow}>
+          <div className={styles.tabs}>
+            {[
+              { id: "services", label: "Services" },
+              { id: "addons", label: "Add-ons" },
+            ].map(({ id, label }) => (
+              <button
+                key={id}
+                className={joinClassNames(
+                  styles.tab,
+                  view.isAddons === (id === "addons") && styles.tabOn,
+                )}
+                onClick={() => setState({ svcTab: id })}
+              >
+                {label}
+              </button>
+            ))}
+          </div>
+          <div className={styles.search}>
+            <svg
+              className={styles.searchIcon}
+              width="15"
+              height="15"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="var(--text-secondary)"
+              strokeWidth="2"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            >
+              <circle cx="11" cy="11" r="7"></circle>
+              <path d="m20 20-3.5-3.5"></path>
+            </svg>
+            <input
+              className={joinClassNames(
+                styles.searchInput,
+                view.hasQuery && styles.searchInputFilled,
+              )}
+              value={state.svcQuery || ""}
+              onChange={(event) => setState({ svcQuery: event.target.value })}
+              placeholder={view.isAddons ? "Search add-ons" : "Search services"}
+            />
+            {view.hasQuery && (
+              <button
+                className={styles.clearSearch}
+                onClick={() => setState({ svcQuery: "" })}
+                aria-label="Clear search"
+              >
+                <svg
+                  width="13"
+                  height="13"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2.2"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                >
+                  <path d="M18 6 6 18M6 6l12 12"></path>
+                </svg>
+              </button>
+            )}
+          </div>
+          <div className={styles.statusHolder}>
+            <button
+              className={joinClassNames(
+                styles.statusButton,
+                state.svcStatOpen && styles.statusOpen,
+              )}
+              onClick={toggleStatus}
+              aria-label="Filter by status"
+            >
+              <FilterIcon size="15" />
+              {view.statusLabel}
+            </button>
+            {state.svcStatOpen && <StatusMenu studio={studio} view={view} />}
+          </div>
+          <button className={styles.addButton} onClick={view.add}>
+            <svg
+              width="14"
+              height="14"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2.2"
+              strokeLinecap="round"
+            >
+              <path d="M12 5v14M5 12h14"></path>
+            </svg>
+            {view.addLabel}
+          </button>
+        </div>
+        <div className={styles.chipRow}>
+          <div className={styles.chipScroll}>
+            {view.categories.map(
+              ({ key, chipLabel, count, dot, isOn, pick }) => (
+                <button
+                  key={key}
+                  className={joinClassNames(styles.chip, isOn && styles.chipOn)}
+                  onClick={pick}
+                  aria-pressed={isOn ? "true" : "false"}
+                >
+                  {dot && (
+                    <span
+                      className={styles.chipDot}
+                      style={asStyle({ "--dot": dot })}
+                      aria-hidden="true"
+                    ></span>
+                  )}
+                  {chipLabel}
+                  <span className={styles.chipCount}>{count}</span>
+                </button>
+              ),
+            )}
+            <button
+              className={styles.manageChip}
+              onClick={serviceActions.openCats}
+            >
+              Manage categories
+            </button>
+          </div>
+          {!isWide && (
+            <div className={styles.chipStatus}>
+              <button
+                className={joinClassNames(
+                  styles.chipStatusButton,
+                  state.svcStatOpen && styles.statusOpen,
+                )}
+                onClick={toggleStatus}
+                aria-label="Filter by status"
+              >
+                <FilterIcon size="14" />
+                {view.statusShort}
+              </button>
+              {state.svcStatOpen && <StatusMenu studio={studio} view={view} />}
+            </div>
+          )}
+        </div>
+      </div>
+      <div className={styles.body}>
+        {isDesk && (
+          <aside className={styles.categories} data-screen-label="Categories">
+            <div className={styles.categoriesLabel}>Categories</div>
+            <div className={styles.categoryList}>
+              {view.categories.map(({ key, label, count, dot, isOn, pick }) => (
+                <button
+                  key={key}
+                  className={joinClassNames(
+                    styles.categoryRow,
+                    isOn && styles.categoryRowOn,
+                  )}
+                  onClick={pick}
+                >
+                  {dot && (
+                    <span
+                      className={styles.categoryDot}
+                      style={asStyle({ "--dot": dot })}
+                      aria-hidden="true"
+                    ></span>
+                  )}
+                  <span className={styles.categoryName}>{label}</span>
+                  <span className={styles.categoryCount}>{count}</span>
+                </button>
+              ))}
+            </div>
+            <button
+              className={styles.manageRow}
+              onClick={serviceActions.openCats}
+            >
+              <svg
+                width="16"
+                height="16"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="1.7"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              >
+                <path d="M4 6h16M4 12h16M4 18h10"></path>
+              </svg>
+              Manage categories
+            </button>
+          </aside>
+        )}
+        <div className={styles.grow}>
+          {!view.isAddons && (
+            <>
+              {view.isServiceResultsEmpty && (
+                <Empty
+                  title="Nothing matches"
+                  body="Try a different search or clear the filter."
+                />
+              )}
+              <Groups groups={view.serviceGroups} isAddons={false} />
+            </>
+          )}
+          {view.isAddons && (
+            <>
+              {view.isAddonResultsEmpty && (
+                <Empty
+                  title="Nothing matches"
+                  body="Try a different search or clear the filter."
+                />
+              )}
+              {view.isAddonsEmpty && (
+                <Empty
+                  title="No add-ons yet"
+                  body="Add-ons are extras clients can pick at booking, like beads or a wash."
+                />
+              )}
+              <Groups groups={view.addonGroups} isAddons={true} />
+            </>
+          )}
+        </div>
+      </div>
+    </div>
+  );
+};
