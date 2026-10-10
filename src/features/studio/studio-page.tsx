@@ -9,6 +9,8 @@ import { StudioServices } from "./studio-services";
 import { StudioSettings } from "./studio-settings";
 import { EndDateDialog } from "./sheets-simple";
 import { StudioSheets } from "./studio-sheets";
+import { BookingAddonDialog } from "./booking-sheet";
+import { NewClientDialog } from "./booking-dialogs";
 import {
   ActionsMenu,
   ConfirmSheet,
@@ -112,6 +114,8 @@ export const StudioPage = (props: StudioPageProps) => {
             <EndDateDialog studio={studio} />
             <ActionsMenu studio={studio} />
             <ConfirmSheet studio={studio} />
+            <BookingAddonDialog studio={studio} />
+            <NewClientDialog studio={studio} />
             <StudioToast studio={studio} />
           </div>
         </div>

@@ -1,0 +1,377 @@
+/* The per-booking add-on dialog and the "Add a new client" dialog — verbatim values from Studio.dc.html lines
+   3792–3874. */
+
+.scrim {
+  position: fixed;
+  inset: 0;
+  z-index: 70;
+  background: var(--scrim-modal, rgba(26, 23, 20, 0.45));
+  animation: scrimin 0.26s ease both;
+}
+
+.dialog {
+  position: fixed;
+  left: 50%;
+  width: 100%;
+  box-sizing: border-box;
+  z-index: 71;
+  background: var(--neutral-50);
+  box-shadow: var(--shadow-modal, 0 24px 60px rgba(26, 23, 20, 0.3));
+  padding: 20px 18px calc(22px + env(safe-area-inset-bottom));
+}
+
+.title {
+  font-family: "Schibsted Grotesk", sans-serif;
+  font-size: 18px;
+  font-weight: 600;
+  letter-spacing: -0.02em;
+}
+
+.intro {
+  font-size: 14.5px;
+  color: var(--text-secondary);
+  margin-top: 4px;
+  line-height: 1.5;
+}
+
+.twoCols {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+  margin-top: 16px;
+}
+
+.twoColsMin {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  gap: 10px;
+  margin-top: 16px;
+}
+
+.field {
+  display: block;
+  min-width: 0;
+}
+
+.fieldSpaced {
+  display: block;
+  margin-top: 12px;
+}
+
+.fieldLabel {
+  display: block;
+  font-size: 13.5px;
+  font-weight: 500;
+  margin-bottom: 6px;
+}
+
+.optional {
+  font-weight: 400;
+  color: var(--text-secondary);
+}
+
+.moneyBox {
+  display: flex;
+  align-items: center;
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-sm);
+  padding: 0 12px;
+  height: 44px;
+  box-sizing: border-box;
+}
+
+.pound {
+  font-size: 15px;
+  font-weight: 500;
+  color: var(--text-secondary);
+}
+
+.moneyInput {
+  flex: 1;
+  min-width: 0;
+  border: none;
+  background: none;
+  padding: 0 0 0 4px;
+  font-size: 16px;
+  font-weight: 600;
+  font-family: inherit;
+  outline: none;
+  color: var(--text-primary);
+}
+
+.qtyRow {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.qtyBox {
+  display: flex;
+  align-items: center;
+  flex: 1;
+  min-width: 0;
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-sm);
+  padding: 0 12px;
+  height: 44px;
+  box-sizing: border-box;
+}
+
+.qtyInput {
+  flex: 1;
+  min-width: 0;
+  width: 100%;
+  border: none;
+  background: none;
+  padding: 0;
+  font-size: 16px;
+  font-weight: 600;
+  font-family: inherit;
+  outline: none;
+  color: var(--text-primary);
+}
+
+.stepper {
+  display: flex;
+  align-items: center;
+  flex: 0 0 auto;
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-sm);
+  height: 44px;
+  box-sizing: border-box;
+  padding: 0 2px;
+}
+
+.fewer {
+  width: 38px;
+  height: 40px;
+  border: none;
+  background: none;
+  border-radius: var(--radius-sm);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--text-primary);
+  opacity: 1;
+}
+
+.fewer:hover {
+  background: var(--quiet) !important;
+}
+
+.fewer:active {
+  transform: scale(0.92) !important;
+}
+
+.fewerOff {
+  opacity: 0.4;
+}
+
+.more {
+  width: 38px;
+  height: 40px;
+  border: none;
+  background: var(--quiet);
+  border-radius: var(--radius-full);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--text-primary);
+}
+
+.more:hover {
+  background: var(--quiet-strong) !important;
+}
+
+.more:active {
+  transform: scale(0.92) !important;
+}
+
+.extra {
+  margin-top: 12px;
+}
+
+.label135 {
+  font-size: 13.5px;
+  font-weight: 500;
+  margin-bottom: 6px;
+}
+
+.grid2 {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+}
+
+.select {
+  width: 100%;
+  height: 44px;
+  padding: 0 10px;
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-sm);
+  background: transparent;
+  font-family: inherit;
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--text-primary);
+  outline: none;
+}
+
+.actions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-top: 18px;
+}
+
+.remove {
+  flex: 0 0 auto;
+  width: 46px;
+  height: 46px;
+  border: 1px solid var(--border-strong, #d8d2c6);
+  background: transparent;
+  border-radius: var(--radius-full);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--accent-700);
+}
+
+.remove:hover {
+  background: var(--accent-wash) !important;
+}
+
+.remove:active {
+  transform: scale(0.95) !important;
+}
+
+.cancel {
+  flex: 1;
+  border: 1px solid var(--border-strong, #d8d2c6);
+  background: transparent;
+  border-radius: var(--radius-full);
+  padding: 12px 0;
+  font-size: 15px;
+  font-weight: 600;
+}
+
+.cancel:active {
+  transform: scale(0.97) !important;
+}
+
+.save {
+  flex: 1;
+  border: none;
+  background: var(--accent-700);
+  color: var(--neutral-100);
+  border-radius: var(--radius-full);
+  padding: 12px 0;
+  font-size: 15px;
+  font-weight: 600;
+  opacity: 1;
+}
+
+.save:active {
+  transform: scale(0.97) !important;
+}
+
+.saveOff {
+  opacity: 0.45;
+}
+
+.row10 {
+  display: flex;
+  gap: 10px;
+  margin-top: 18px;
+}
+
+.input {
+  width: 100%;
+  height: 44px;
+  box-sizing: border-box;
+  padding: 0 12px;
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-sm);
+  background: transparent;
+  font-family: inherit;
+  font-size: 16px;
+  color: var(--text-primary);
+  outline: none;
+}
+
+.duplicate {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  margin-top: 12px;
+  padding: 12px 14px;
+  border-radius: var(--radius-md);
+  background: rgba(181, 84, 31, 0.08);
+  animation: rowin 0.2s cubic-bezier(0.2, 0.8, 0.2, 1) both;
+}
+
+.duplicateAvatar {
+  width: 36px;
+  height: 36px;
+  border-radius: var(--radius-full);
+  object-fit: cover;
+  flex: 0 0 auto;
+  background: var(--fill-quiet);
+}
+
+.grow {
+  flex: 1;
+  min-width: 0;
+}
+
+.duplicateTitle {
+  font-size: 14.5px;
+  font-weight: 600;
+  line-height: 1.35;
+  color: var(--text-primary);
+}
+
+.duplicateSub {
+  font-size: 13.5px;
+  line-height: 1.45;
+  color: var(--neutral-600);
+  margin-top: 2px;
+}
+
+.duplicateGo {
+  margin-top: 10px;
+  height: 34px;
+  padding: 0 14px;
+  border: none;
+  border-radius: var(--radius-full);
+  background: #1a1714;
+  color: var(--neutral-100);
+  font: inherit;
+  font-size: 13.5px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.duplicateGo:active {
+  transform: scale(0.97) !important;
+}
+
+@keyframes scrimin {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes rowin {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
