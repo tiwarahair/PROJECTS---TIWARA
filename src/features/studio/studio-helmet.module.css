@@ -1,0 +1,84 @@
+/*
+ * Studio <helmet> <style> rules, verbatim values (prototype Studio.dc.html lines 20–66), in the page layer, scoped to
+ * html.studio-page (set while mounted). The global reset lines identical to the base layer are omitted. The keyframes
+ * are copied into the modules that use them.
+ */
+@layer page {
+  :global(html.studio-page) {
+    --canvas: #fbfaf7;
+    --quiet: #f6f2ea;
+    --quiet-strong: #efe9dc;
+    --shadow-panel:
+      0 1px 2px rgba(60, 40, 10, 0.05), 0 10px 30px -18px rgba(60, 40, 10, 0.35);
+  }
+
+  :global(html.studio-page) body {
+    margin: 0;
+    font-family: "Hanken Grotesk", sans-serif;
+    color: var(--text-primary);
+    background: var(--quiet);
+  }
+
+  :global(html.studio-page) button {
+    font-family: "Hanken Grotesk", sans-serif;
+    cursor: pointer;
+    color: var(--text-primary);
+    -webkit-text-fill-color: currentColor;
+  }
+
+  :global(html.studio-page) button * {
+    -webkit-text-fill-color: currentColor;
+  }
+
+  :global(html.studio-page) input,
+  :global(html.studio-page) select,
+  :global(html.studio-page) textarea {
+    font-family: "Hanken Grotesk", sans-serif;
+    color: var(--text-primary);
+  }
+
+  :global(html.studio-page) * {
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  :global(html.studio-page) input,
+  :global(html.studio-page) textarea,
+  :global(html.studio-page) select {
+    font-size: 17px !important;
+  }
+
+  :global(html.studio-page) a[href^="tel"],
+  :global(html.studio-page) a[x-apple-data-detectors],
+  :global(html.studio-page) [x-apple-data-detectors] {
+    color: inherit !important;
+    text-decoration: none !important;
+  }
+
+  :global(html.studio-page) ::-webkit-scrollbar {
+    display: none;
+  }
+
+  :global(html.studio-page) input[type="number"]::-webkit-inner-spin-button,
+  :global(html.studio-page) input[type="number"]::-webkit-outer-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+  }
+
+  :global(html.studio-page) input[type="number"] {
+    -moz-appearance: textfield;
+    appearance: textfield;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    :global(html.studio-page) [data-flash] {
+      animation: none !important;
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    :global(html.studio-page) * {
+      animation-duration: 0.01ms !important;
+      transition-duration: 0.01ms !important;
+    }
+  }
+}

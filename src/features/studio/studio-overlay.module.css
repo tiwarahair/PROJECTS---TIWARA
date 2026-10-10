@@ -1,0 +1,214 @@
+/*
+ * Studio's shared overlay placement and motion (prototype renderVals ov*, dg*, ovAnim, scrim animations), verbatim
+ * values. Narrow = below 640px (the prototype's _mq), where sheets rise from the bottom.
+ */
+
+/* ---- scrims ---- */
+.scrim {
+  position: fixed;
+  inset: 0;
+  background: var(--scrim-modal, rgba(26, 23, 20, 0.45));
+}
+
+.scrimIn20 {
+  animation: scrimin 0.2s ease both;
+}
+
+.scrimIn26 {
+  animation: scrimin 0.26s ease both;
+}
+
+.scrimOut21 {
+  animation: scrimout 0.21s ease both;
+}
+
+.scrimOut16 {
+  animation: scrimout 0.16s ease both;
+}
+
+/* ---- ovAnim(out, kind) ---- */
+.shUp {
+  animation: shup 0.3s cubic-bezier(0.32, 0.72, 0, 1) both;
+}
+
+.shDown {
+  animation: shdown 0.21s cubic-bezier(0.4, 0, 0.7, 0.2) both;
+}
+
+.slIn {
+  animation: slin 0.28s cubic-bezier(0.32, 0.72, 0, 1) both;
+}
+
+.slOut {
+  animation: slout 0.2s cubic-bezier(0.4, 0, 0.7, 0.2) both;
+}
+
+.dlgIn {
+  animation: dlgin 0.18s cubic-bezier(0.2, 0.8, 0.2, 1) both;
+}
+
+.dlgOut {
+  animation: dlgout 0.14s cubic-bezier(0.4, 0, 0.7, 0.2) both;
+}
+
+.subIn {
+  animation: subin 0.28s cubic-bezier(0.32, 0.72, 0, 1) both;
+}
+
+.subOut {
+  animation: subout 0.21s cubic-bezier(0.4, 0, 0.7, 0.2) both;
+}
+
+.popIn {
+  animation: popin 0.16s cubic-bezier(0.23, 1, 0.32, 1) both;
+}
+
+/* ---- dg*: centred dialog (wide) or bottom sheet (narrow) ---- */
+.dialogWide {
+  bottom: auto;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  max-width: 440px;
+  border-radius: var(--radius-lg, 24px);
+}
+
+.dialogNarrow {
+  bottom: 0;
+  top: auto;
+  transform: translateX(-50%);
+  max-width: 430px;
+  border-radius: 24px 24px 0 0;
+}
+
+/* ---- ov*: side panel (wide) or full-width sheet (narrow) ---- */
+.panelWide {
+  top: 12px;
+  bottom: 12px;
+  left: auto;
+  right: 12px;
+  transform: none;
+  width: calc(100% - 24px);
+  max-width: 468px;
+  box-shadow: var(--shadow-modal, 0 24px 60px rgba(26, 23, 20, 0.3));
+}
+
+.panelNarrow {
+  top: 0;
+  bottom: 0;
+  left: 50%;
+  right: auto;
+  transform: translateX(-50%);
+  width: 100%;
+  max-width: 430px;
+  box-shadow: none;
+}
+
+@keyframes scrimin {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes scrimout {
+  from {
+    opacity: 1;
+  }
+  to {
+    opacity: 0;
+  }
+}
+
+@keyframes shup {
+  from {
+    transform: translate(-50%, 100%);
+  }
+  to {
+    transform: translate(-50%, 0);
+  }
+}
+
+@keyframes shdown {
+  from {
+    transform: translate(-50%, 0);
+  }
+  to {
+    transform: translate(-50%, 100%);
+  }
+}
+
+@keyframes subin {
+  from {
+    transform: translate(calc(-50% + 100%), 0);
+  }
+  to {
+    transform: translate(-50%, 0);
+  }
+}
+
+@keyframes subout {
+  from {
+    transform: translate(-50%, 0);
+  }
+  to {
+    transform: translate(calc(-50% + 100%), 0);
+  }
+}
+
+@keyframes slin {
+  from {
+    transform: translateX(40px);
+    opacity: 0;
+  }
+  to {
+    transform: translateX(0);
+    opacity: 1;
+  }
+}
+
+@keyframes slout {
+  from {
+    transform: translateX(0);
+    opacity: 1;
+  }
+  to {
+    transform: translateX(40px);
+    opacity: 0;
+  }
+}
+
+@keyframes dlgout {
+  from {
+    opacity: 1;
+    transform: translate(-50%, -50%) scale(1);
+  }
+  to {
+    opacity: 0;
+    transform: translate(-50%, -50%) scale(0.97);
+  }
+}
+
+@keyframes dlgin {
+  from {
+    opacity: 0;
+    transform: translate(-50%, -50%) scale(0.96);
+  }
+  to {
+    opacity: 1;
+    transform: translate(-50%, -50%) scale(1);
+  }
+}
+
+/* the helmet defines popin twice; the second definition wins */
+@keyframes popin {
+  from {
+    opacity: 0;
+    transform: scale(0.96) translateY(-4px);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+}

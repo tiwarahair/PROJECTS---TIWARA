@@ -13,6 +13,7 @@ import { HelpPage } from "./features/help/help-page";
 import { HomePage } from "./features/home/home-page";
 import { SearchPage } from "./features/search/search-page";
 import { StylistProfilePage } from "./features/stylist-profile/stylist-profile-page";
+import { StudioPage } from "./features/studio/studio-page";
 
 // Routes from HANDOFF §2. Each screen is added here as its task lands:
 // /, /search, /stylist, /book, /manage, /save-details, /account, /help,
@@ -28,6 +29,7 @@ export const appRoutes: RouteObject[] = [
   { path: "/help", element: <HelpPage /> },
   { path: "/email/email-change-notice", element: <EmailChangeNoticePage /> },
   { path: "/onboarding", element: <OnboardingPage /> },
+  { path: "/studio", element: <StudioPage /> },
   // dev-only: design-system gallery (mirrors each .card.html) and per-component fixture harnesses
   ...(import.meta.env.DEV
     ? [
