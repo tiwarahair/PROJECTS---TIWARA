@@ -44,6 +44,12 @@ describe("TaxDetailsForm", () => {
     );
   });
 
+  it("accepts postcodes typed with punctuation, like every other form", () => {
+    const state = getInitialTaxState({ fixture: "err-pc" });
+    state.home.a.pc = "m14-5tq";
+    expect(getTaxErrors(state).addr).toBeUndefined();
+  });
+
   it("fixture err-pc flags the address", () => {
     expect(getTaxErrors(getInitialTaxState({ fixture: "err-pc" })).addr).toBe(
       "Enter your home address",

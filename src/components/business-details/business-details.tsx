@@ -1,5 +1,5 @@
 import { useEffect, useId, useRef, useState } from "react";
-import { formatPostcodeInput } from "../../utils/address";
+import { formatPostcode } from "../../utils/address";
 import { joinClassNames } from "../../utils/class-names";
 import type { TaxDetails } from "../tax-details-form/tax-details-logic";
 import {
@@ -111,8 +111,8 @@ export const BusinessDetails = ({
       vatOn,
       v: {
         ...v,
-        pc: formatPostcodeInput(v.pc),
-        basePc: formatPostcodeInput(v.basePc),
+        pc: formatPostcode(v.pc),
+        basePc: formatPostcode(v.basePc),
       },
     });
     // inside Studio the host shows its own toast
@@ -154,7 +154,7 @@ export const BusinessDetails = ({
     error: getError(key),
     onChange: (event) => setFields({ [key]: event.target.value }),
     onBlur: () => {
-      if (isPostcode) setFields({ [key]: formatPostcodeInput(v[key]) });
+      if (isPostcode) setFields({ [key]: formatPostcode(v[key]) });
       touch(key);
     },
   });

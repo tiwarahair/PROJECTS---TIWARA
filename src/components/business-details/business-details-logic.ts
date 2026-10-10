@@ -1,6 +1,6 @@
 // BusinessDetails state, validation and display values (prototype BusinessDetails.dc.html: base, key, init, rules,
 // AREAS, legalRows, vatPretty).
-import { isPostcodeInputValid } from "../../utils/address";
+import { formatPostcode, isPostcodeValid } from "../../utils/address";
 import type { TaxDetails } from "../tax-details-form/tax-details-logic";
 
 export type BusinessType = "shop" | "chair" | "home" | "mobile";
@@ -121,11 +121,11 @@ export const getBusinessErrors = ({
   return {
     addr:
       type !== "mobile" &&
-      !(v.line1.trim() && v.city.trim() && isPostcodeInputValid(v.pc))
+      !(v.line1.trim() && v.city.trim() && isPostcodeValid(v.pc))
         ? "Enter your address."
         : "",
     basePc:
-      type === "mobile" && !isPostcodeInputValid(v.basePc)
+      type === "mobile" && !isPostcodeValid(v.basePc)
         ? "Enter a full UK postcode, like M16 8AF."
         : "",
     phone: !v.phone.trim()
@@ -164,9 +164,8 @@ const AREAS: Record<string, string> = {
 
 /** "Rusholme, M14" — what clients see for a home-based stylist. */
 export const getAreaLabel = (postcode: string): string => {
-  const outward = postcode.toUpperCase().replace(/\s+/g, "").slice(0, -3);
-  if (!isPostcodeInputValid(postcode))
-    return "Add your postcode to see your area";
+  if (!isPostcodeValid(postcode)) return "Add your postcode to see your area";
+  const [outward = ""] = formatPostcode(postcode).split(" ");
   const area = AREAS[outward];
   return area ? area + ", " + outward : outward;
 };
