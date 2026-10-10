@@ -74,9 +74,16 @@ describe("HomePage", () => {
     );
     sessionStorage.setItem("tw_cust", "1");
     renderHome();
-    expect(screen.getByRole("link", { name: "Nia Okafor" })).toHaveTextContent(
-      "NO",
-    );
+
+    const accountLinks = screen.getAllByRole("link", { name: "Account" });
+
+    expect(
+      accountLinks.find((link) => link.getAttribute("href") === "/account"),
+    ).toHaveTextContent("NO");
+
+    expect(
+      screen.queryByRole("link", { name: "Nia Okafor" }),
+    ).not.toBeInTheDocument();
   });
 
   it("order v2 (default) puts the photo tiles first via data-order; v1 keeps the problem first", () => {

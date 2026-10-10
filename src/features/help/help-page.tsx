@@ -3,11 +3,7 @@ import { Link, useNavigate } from "react-router";
 import { FavHost } from "../../components/fav-host/fav-host";
 import { faqs } from "../../data";
 import { useAppDispatch, useAppSelector } from "../../stores/hooks";
-import {
-  ACCOUNT_INITIALS,
-  DEMO_ACCOUNT,
-  logOut,
-} from "../../stores/session-slice";
+import { ACCOUNT_INITIALS, logOut } from "../../stores/session-slice";
 import { getAssetUrl } from "../../utils/asset-url";
 import { joinClassNames } from "../../utils/class-names";
 import { getSearchParams } from "../../utils/page-flags";
@@ -99,7 +95,7 @@ export const HelpPage = () => {
               <button
                 className={styles.accountButton}
                 data-tw-acct="1"
-                aria-label={DEMO_ACCOUNT.name}
+                aria-label="Account"
                 aria-haspopup="menu"
                 aria-expanded="false"
               >
@@ -138,7 +134,7 @@ export const HelpPage = () => {
             </Link>
             {loggedIn && (
               <>
-                <div className={styles.mobName}>{DEMO_ACCOUNT.name}</div>
+                <div className={styles.mobName}>Account</div>
                 <Link className={styles.mobLink} to="/account?section=bookings">
                   Bookings
                 </Link>

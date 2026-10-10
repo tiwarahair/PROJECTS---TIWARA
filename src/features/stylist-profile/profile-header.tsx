@@ -1,6 +1,6 @@
 import { Link } from "react-router";
 import { FAVOURITES_HREF } from "../../hooks/use-favourites";
-import { ACCOUNT_INITIALS, DEMO_ACCOUNT } from "../../stores/session-slice";
+import { ACCOUNT_INITIALS } from "../../stores/session-slice";
 import { getAssetUrl } from "../../utils/asset-url";
 import { joinClassNames } from "../../utils/class-names";
 import { HeartPath } from "./profile-icons";
@@ -78,7 +78,7 @@ export const ProfileHeader = ({
           <Link
             to="/account"
             data-tw-acct="1"
-            aria-label={DEMO_ACCOUNT.name}
+            aria-label="Account"
             aria-haspopup="menu"
             aria-expanded="false"
             className={styles.account}
@@ -117,7 +117,7 @@ export const ProfileHeader = ({
             onClick={onToggleMenu}
             className={styles.mobileLink}
           >
-            {DEMO_ACCOUNT.name}
+            Account
           </Link>
         )}
       </div>

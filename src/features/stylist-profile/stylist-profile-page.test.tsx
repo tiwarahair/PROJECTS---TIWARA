@@ -37,10 +37,16 @@ describe("StylistProfilePage", () => {
       <StylistProfilePage />,
       "/stylist?stylist=tiwaras-house&login=1",
     );
-    expect(screen.getByRole("link", { name: "Nia Okafor" })).toHaveAttribute(
-      "href",
+
+    const accountLinks = screen.getAllByRole("link", { name: "Account" });
+
+    expect(accountLinks.map((link) => link.getAttribute("href"))).toContain(
       "/account",
     );
+
+    expect(
+      screen.queryByRole("link", { name: "Nia Okafor" }),
+    ).not.toBeInTheDocument();
   });
 
   it("a service row opens its details modal", () => {

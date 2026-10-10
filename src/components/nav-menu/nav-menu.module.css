@@ -1,4 +1,4 @@
-/* Header name menu, values verbatim from prototype tw-fav.js F.openMenu(). */
+/* Pop-up nav menu (the header account menu and the Search menu), values verbatim from prototype tw-fav.js F.openMenu(). */
 .menu {
   position: fixed;
   top: var(--menu-top);
@@ -88,4 +88,11 @@
   height: 1px;
   background: rgba(26, 23, 20, 0.1);
   margin: 6px 4px;
+}
+
+/* a small heading above a group of rows (e.g. "Account" in the Search menu) */
+.label {
+  padding: 10px 12px 4px;
+  font-size: 13.5px;
+  color: #575045;
 }

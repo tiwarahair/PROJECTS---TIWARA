@@ -40,4 +40,12 @@ describe("HelpPage", () => {
       "mailto:help@tiwarashouse.co.uk?subject=Help%20with%20booking%20TH-48213",
     );
   });
+
+  it("the logged-in mobile menu heads its account links with Account, not the name", () => {
+    sessionStorage.setItem("tw_cust", "1");
+    renderWithStore(<HelpPage />, "/help");
+    fireEvent.click(screen.getByRole("button", { name: "Menu" }));
+    expect(screen.getByText("Account")).toBeInTheDocument();
+    expect(screen.queryByText("Nia Okafor")).not.toBeInTheDocument();
+  });
 });

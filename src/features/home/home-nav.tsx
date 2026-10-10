@@ -1,6 +1,6 @@
 import type { CSSProperties } from "react";
 import { Link } from "react-router";
-import { ACCOUNT_INITIALS, DEMO_ACCOUNT } from "../../stores/session-slice";
+import { ACCOUNT_INITIALS } from "../../stores/session-slice";
 import { getAssetUrl } from "../../utils/asset-url";
 import { joinClassNames } from "../../utils/class-names";
 import { hexToRgba } from "./home-colours";
@@ -89,7 +89,7 @@ export const HomeNav = ({
                 <Link
                   to="/account"
                   data-tw-acct="1"
-                  aria-label={DEMO_ACCOUNT.name}
+                  aria-label="Account"
                   aria-haspopup="menu"
                   aria-expanded="false"
                   className={styles.account}
@@ -164,7 +164,7 @@ export const HomeNav = ({
             )}
             {loggedIn && (
               <Link to="/account?section=personal" className={styles.menuLink}>
-                {DEMO_ACCOUNT.name}
+                Account
               </Link>
             )}
           </div>

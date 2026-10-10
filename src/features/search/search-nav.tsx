@@ -5,6 +5,7 @@ import { getAssetUrl } from "../../utils/asset-url";
 import { joinClassNames } from "../../utils/class-names";
 import { ClearButton } from "./clear-button";
 import { getDateLabel, getMobileDateLabel } from "./search-dates";
+import { SearchMenu } from "./search-menu";
 import helmet from "./search-helmet.module.css";
 import styles from "./search-nav.module.css";
 import { getWhatListProps, WhatList, WhereList } from "./suggestion-list";
@@ -215,14 +216,7 @@ export const SearchNav = ({ search }: SearchNavProps) => {
               </svg>
             </Link>
           )}
-          <button
-            onClick={() => {}}
-            aria-label="Menu"
-            className={styles.menuButton}
-          >
-            <span className={styles.menuLine}></span>
-            <span className={styles.menuLine}></span>
-          </button>
+          <SearchMenu />
         </div>
       </div>
     </nav>
