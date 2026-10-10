@@ -1,0 +1,1042 @@
+/* CheckoutSheet (prototype CheckoutSheet.dc.html), inline styles verbatim */
+
+.viewGap26 {
+  padding: 4px 24px 32px;
+  display: flex;
+  flex-direction: column;
+  gap: 26px;
+}
+
+.badges {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  height: 30px;
+  padding: 0 11px;
+  border-radius: var(--radius-xs);
+  font-size: 13.5px;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.clientRow {
+  margin-top: 14px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.avatarLarge {
+  flex: 0 0 auto;
+  width: 48px;
+  height: 48px;
+  border-radius: var(--radius-full);
+  background: var(--fill-quiet);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--neutral-700);
+}
+
+.clientName {
+  margin: 0;
+  min-width: 0;
+  font-family: "Schibsted Grotesk", sans-serif;
+  font-size: 26px;
+  font-weight: 600;
+  letter-spacing: -0.02em;
+  line-height: 1.15;
+}
+
+.detailService {
+  font-size: 15px;
+  color: var(--neutral-600);
+  margin-top: 6px;
+  line-height: 1.45;
+}
+
+.detailWhen {
+  font-size: 15px;
+  color: var(--neutral-600);
+  line-height: 1.45;
+}
+
+.panel {
+  border-radius: var(--radius-md);
+  padding: 14px 16px;
+  display: flex;
+  gap: 12px;
+  align-items: flex-start;
+}
+
+.strong15 {
+  font-size: 15px;
+  font-weight: 600;
+}
+
+.panelBody {
+  font-size: 14.5px;
+  color: var(--neutral-700);
+  line-height: 1.5;
+  margin-top: 2px;
+  text-wrap: pretty;
+}
+
+.sectionLabel {
+  font-size: 12.5px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.18em;
+  color: var(--neutral-600);
+  margin-bottom: 4px;
+}
+
+.row {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 12px 0;
+  border-bottom: 1px solid var(--border-subtle);
+}
+
+.rowLabel {
+  display: block;
+  font-size: 15px;
+}
+
+.rowSubDetail {
+  display: block;
+  font-size: 13.5px;
+  color: var(--neutral-600);
+  margin-top: 2px;
+  line-height: 1.4;
+}
+
+.rowValue {
+  flex: 0 0 auto;
+  font-size: 15px;
+  font-variant-numeric: tabular-nums;
+}
+
+.totalDetail {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 12px;
+  padding-top: 14px;
+  font-size: 17px;
+  font-weight: 600;
+}
+
+.stack8 {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.linkRow {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+  min-height: 52px;
+  padding: 0 14px;
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-sm);
+  background: transparent;
+  font: inherit;
+  text-align: left;
+  color: var(--text-primary);
+  cursor: pointer;
+  transition: background-color 0.16s ease;
+}
+
+.linkRow:hover {
+  background: var(--fill-quiet) !important;
+}
+
+.linkRow:active {
+  background: var(--fill-quiet-strong) !important;
+}
+
+.linkLabel {
+  flex: 1;
+  font-size: 15px;
+  font-weight: 500;
+}
+
+.action {
+  width: 100%;
+  height: 52px;
+  border-radius: var(--radius-full);
+  font: inherit;
+  font-size: 15.5px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: transform 0.12s cubic-bezier(0.23, 1, 0.32, 1);
+}
+
+.action:active {
+  transform: scale(0.98) !important;
+}
+
+.undoBlock {
+  border-top: 1px solid var(--border-subtle);
+  padding-top: 14px;
+}
+
+.undoButton {
+  height: 44px;
+  padding: 0;
+  border: none;
+  background: transparent;
+  font: inherit;
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--accent-700);
+  cursor: pointer;
+}
+
+.rowCenter {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.avatar {
+  flex: 0 0 auto;
+  width: 44px;
+  height: 44px;
+  border-radius: var(--radius-full);
+  background: var(--fill-quiet);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--neutral-700);
+}
+
+.itemsWhen {
+  font-size: 13.5px;
+  color: var(--neutral-600);
+  margin-top: 1px;
+}
+
+.modeTag {
+  flex: 0 0 auto;
+  display: inline-flex;
+  align-items: center;
+  height: 28px;
+  padding: 0 10px;
+  border-radius: var(--radius-xs);
+  background: var(--fill-quiet);
+  font-size: 12.5px;
+  font-weight: 600;
+  color: var(--neutral-600);
+}
+
+.sectionLabelTight {
+  font-size: 12.5px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.18em;
+  color: var(--neutral-600);
+  margin-bottom: 2px;
+}
+
+.itemRow {
+  padding: 14px 0 8px;
+  border-bottom: 1px solid var(--border-subtle);
+}
+
+.itemHead {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.itemName {
+  font-size: 15.5px;
+  font-weight: 600;
+}
+
+.itemSub {
+  font-size: 13.5px;
+  color: var(--neutral-600);
+  margin-top: 2px;
+}
+
+.itemPriceCell {
+  flex: 0 0 auto;
+  text-align: right;
+}
+
+.itemWas {
+  font-size: 13.5px;
+  color: var(--neutral-500);
+  text-decoration: line-through;
+  font-variant-numeric: tabular-nums;
+}
+
+.itemPrice {
+  font-size: 15.5px;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+}
+
+.itemNote {
+  margin-top: 8px;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 9px;
+  border-radius: var(--radius-xs);
+  background: var(--fill-quiet);
+  font-size: 13px;
+  color: var(--neutral-600);
+}
+
+.itemActions {
+  display: flex;
+  gap: 2px;
+  margin: 4px 0 0 -10px;
+}
+
+.itemAdjust {
+  height: 40px;
+  padding: 0 10px;
+  border: none;
+  background: transparent;
+  border-radius: var(--radius-full);
+  font: inherit;
+  font-size: 14.5px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.itemAdjust:active {
+  background: var(--fill-quiet) !important;
+}
+
+.itemRemove {
+  height: 40px;
+  padding: 0 10px;
+  border: none;
+  background: transparent;
+  border-radius: var(--radius-full);
+  font: inherit;
+  font-size: 14.5px;
+  font-weight: 500;
+  color: var(--neutral-600);
+  cursor: pointer;
+}
+
+.itemRemove:active {
+  background: var(--fill-quiet) !important;
+}
+
+.adjustPanel {
+  margin-top: 12px;
+  background: var(--fill-quiet);
+  border-radius: var(--radius-md);
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  animation: ckup 0.22s cubic-bezier(0.23, 1, 0.32, 1) both;
+}
+
+.moneyWrap {
+  position: relative;
+  display: block;
+}
+
+.moneyInput {
+  width: 100%;
+  box-sizing: border-box;
+  height: 48px;
+  padding: 0 14px 0 30px;
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius-sm);
+  background: #fff;
+  font: inherit;
+  font-size: 17px;
+  outline: none;
+  color: var(--text-primary);
+}
+
+.select {
+  width: 100%;
+  box-sizing: border-box;
+  height: 48px;
+  padding: 0 12px;
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius-sm);
+  background: #fff;
+  font: inherit;
+  font-size: 17px;
+  color: var(--text-primary);
+}
+
+.textInput {
+  width: 100%;
+  box-sizing: border-box;
+  height: 48px;
+  padding: 0 14px;
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius-sm);
+  background: #fff;
+  font: inherit;
+  font-size: 17px;
+  outline: none;
+  color: var(--text-primary);
+}
+
+.adjustError {
+  display: flex;
+  gap: 6px;
+  align-items: flex-start;
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--accent-700);
+  line-height: 1.4;
+}
+
+.adjustFoot {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+
+.adjustPreview {
+  flex: 1 1 110px;
+  font-size: 14.5px;
+  color: var(--neutral-700);
+  font-variant-numeric: tabular-nums;
+}
+
+.adjustReset {
+  height: 44px;
+  padding: 0 12px;
+  border: none;
+  background: transparent;
+  font: inherit;
+  font-size: 14.5px;
+  font-weight: 600;
+  color: var(--accent-700);
+  cursor: pointer;
+}
+
+.adjustCancel {
+  height: 44px;
+  padding: 0 14px;
+  border: none;
+  background: transparent;
+  border-radius: var(--radius-full);
+  font: inherit;
+  font-size: 14.5px;
+  font-weight: 600;
+  color: var(--text-primary);
+  cursor: pointer;
+}
+
+.adjustApply {
+  height: 44px;
+  padding: 0 20px;
+  border: none;
+  background: var(--neutral-900);
+  border-radius: var(--radius-full);
+  font: inherit;
+  font-size: 14.5px;
+  font-weight: 600;
+  color: var(--neutral-50);
+  cursor: pointer;
+}
+
+.adjustApply:active {
+  transform: scale(0.98) !important;
+}
+
+.addItem {
+  margin-top: 14px;
+  width: 100%;
+  height: 48px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  border: 1px solid var(--border-strong);
+  background: transparent;
+  border-radius: var(--radius-full);
+  font: inherit;
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--text-primary);
+  cursor: pointer;
+}
+
+.addItem:active {
+  transform: scale(0.98) !important;
+}
+
+.rowTotal {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 12px 0;
+  border-bottom: 1px solid var(--border-subtle);
+  font-size: 15px;
+}
+
+.rowSub {
+  display: block;
+  font-size: 13.5px;
+  color: var(--neutral-600);
+  margin-top: 2px;
+}
+
+.totalLarge {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 12px;
+  padding-top: 14px;
+  font-size: 19px;
+  font-weight: 600;
+}
+
+.refundNote {
+  margin-top: 12px;
+  display: flex;
+  gap: 10px;
+  align-items: flex-start;
+  background: var(--fill-quiet);
+  border-radius: var(--radius-md);
+  padding: 12px 14px;
+  font-size: 14.5px;
+  line-height: 1.5;
+  color: var(--neutral-700);
+}
+
+.iconTop3 {
+  flex: 0 0 auto;
+  margin-top: 3px;
+}
+
+.viewGap24 {
+  padding: 4px 24px 32px;
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.sectionLabelLoose {
+  font-size: 12.5px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.18em;
+  color: var(--neutral-600);
+  margin-bottom: 8px;
+}
+
+.addRow {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+  min-height: 56px;
+  padding: 0 14px;
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-sm);
+  background: transparent;
+  font: inherit;
+  text-align: left;
+  color: var(--text-primary);
+  cursor: pointer;
+  transition: background-color 0.16s ease;
+}
+
+.addRow:hover {
+  background: var(--accent-wash) !important;
+  border-color: var(--accent-line) !important;
+}
+
+.addRow:active {
+  background: var(--accent-wash-strong) !important;
+}
+
+.addName {
+  display: block;
+  font-size: 15px;
+  font-weight: 500;
+}
+
+.addMeta {
+  display: block;
+  font-size: 13.5px;
+  color: var(--neutral-600);
+  margin-top: 1px;
+}
+
+.addPrice {
+  font-size: 15px;
+  font-variant-numeric: tabular-nums;
+}
+
+.viewGap20 {
+  padding: 4px 24px 32px;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.viewSub {
+  font-size: 15px;
+  color: var(--neutral-600);
+  margin-top: 4px;
+}
+
+.tipGrid {
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  gap: 6px;
+}
+
+.tipChip {
+  height: 60px;
+  min-width: 0;
+  padding: 0 2px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 1px;
+  border-radius: var(--radius-sm);
+  font: inherit;
+  cursor: pointer;
+  transition:
+    background-color 0.16s ease,
+    color 0.16s ease,
+    border-color 0.16s ease;
+}
+
+.tipChip:active {
+  transform: scale(0.97) !important;
+}
+
+.tipLabel {
+  font-size: 15px;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.tipSub {
+  font-size: 12.5px;
+  font-variant-numeric: tabular-nums;
+}
+
+.tipCustom {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  animation: ckup 0.2s cubic-bezier(0.23, 1, 0.32, 1) both;
+}
+
+.tipHelp {
+  font-size: 14.5px;
+  color: var(--neutral-700);
+  line-height: 1.5;
+}
+
+.cardNote {
+  display: flex;
+  gap: 10px;
+  align-items: flex-start;
+  background: var(--fill-quiet);
+  border-radius: var(--radius-md);
+  padding: 12px 14px;
+}
+
+.cardNoteText {
+  font-size: 14.5px;
+  line-height: 1.5;
+  color: var(--neutral-700);
+}
+
+.cardNoteTitle {
+  display: block;
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.optionButton {
+  display: flex;
+  align-items: flex-start;
+  gap: 14px;
+  width: 100%;
+  padding: 16px;
+  border: none;
+  background: transparent;
+  text-align: left;
+  font: inherit;
+  color: var(--text-primary);
+}
+
+.radioRing {
+  flex: 0 0 auto;
+  width: 20px;
+  height: 20px;
+  margin-top: 1px;
+  box-sizing: border-box;
+  border-radius: var(--radius-full);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.optionTitle {
+  display: block;
+  font-size: 16px;
+  font-weight: 600;
+}
+
+.optionSub {
+  display: block;
+  font-size: 14px;
+  color: var(--neutral-600);
+  margin-top: 3px;
+  line-height: 1.45;
+}
+
+.optionIcon {
+  flex: 0 0 auto;
+}
+
+.optionButtonOn {
+  display: flex;
+  align-items: flex-start;
+  gap: 14px;
+  width: 100%;
+  padding: 16px;
+  border: none;
+  background: transparent;
+  text-align: left;
+  font: inherit;
+  color: var(--text-primary);
+  cursor: pointer;
+}
+
+.linkOptions {
+  padding: 0 16px 16px 50px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  animation: ckup 0.2s cubic-bezier(0.23, 1, 0.32, 1) both;
+}
+
+.linkChip {
+  height: 44px;
+  padding: 0 18px;
+  border-radius: var(--radius-full);
+  font: inherit;
+  font-size: 14.5px;
+  font-weight: 600;
+  cursor: pointer;
+  transition:
+    background-color 0.16s ease,
+    color 0.16s ease;
+}
+
+.linkTo {
+  font-size: 14px;
+  color: var(--neutral-700);
+}
+
+.linkTipDrop {
+  font-size: 14px;
+  color: var(--neutral-600);
+  line-height: 1.45;
+}
+
+.recordOptions {
+  padding: 0 16px 16px 50px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  animation: ckup 0.2s cubic-bezier(0.23, 1, 0.32, 1) both;
+}
+
+.chipWrap {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.recordChip {
+  height: 44px;
+  padding: 0 16px;
+  border-radius: var(--radius-full);
+  font: inherit;
+  font-size: 14.5px;
+  font-weight: 600;
+  cursor: pointer;
+  transition:
+    background-color 0.16s ease,
+    color 0.16s ease;
+}
+
+.recordNote {
+  font-size: 14px;
+  color: var(--neutral-700);
+  line-height: 1.45;
+}
+
+.viewGap22 {
+  padding: 4px 24px 32px;
+  display: flex;
+  flex-direction: column;
+  gap: 22px;
+}
+
+.declined {
+  background: var(--accent-wash);
+  border-radius: var(--radius-md);
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  animation: ckup 0.24s cubic-bezier(0.23, 1, 0.32, 1) both;
+}
+
+.declinedHead {
+  display: flex;
+  gap: 10px;
+  align-items: flex-start;
+}
+
+.declinedTitle {
+  font-size: 15.5px;
+  font-weight: 600;
+  color: var(--accent-700);
+}
+
+.declinedBody {
+  font-size: 14.5px;
+  line-height: 1.5;
+  color: var(--neutral-700);
+  margin-top: 3px;
+}
+
+.declinedButton {
+  flex: 1 1 140px;
+  height: 44px;
+  border: 1px solid var(--border-strong);
+  background: #fff;
+  border-radius: var(--radius-full);
+  font: inherit;
+  font-size: 14.5px;
+  font-weight: 600;
+  color: var(--text-primary);
+  cursor: pointer;
+}
+
+.reviewValue {
+  flex: 0 0 auto;
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+}
+
+.reviewWas {
+  font-size: 13.5px;
+  color: var(--neutral-500);
+  text-decoration: line-through;
+  margin-right: 6px;
+}
+
+.reviewAmount {
+  font-size: 15px;
+}
+
+.methodIcon {
+  flex: 0 0 auto;
+  width: 40px;
+  height: 40px;
+  border-radius: var(--radius-full);
+  background: var(--fill-quiet);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.methodSub {
+  font-size: 13.5px;
+  color: var(--neutral-600);
+  margin-top: 1px;
+  line-height: 1.4;
+}
+
+.changeMethod {
+  flex: 0 0 auto;
+  height: 44px;
+  padding: 0 12px;
+  border: none;
+  background: transparent;
+  border-radius: var(--radius-full);
+  font: inherit;
+  font-size: 14.5px;
+  font-weight: 600;
+  color: var(--accent-700);
+  cursor: pointer;
+}
+
+.changeMethod:active {
+  background: var(--fill-quiet) !important;
+}
+
+.nothing {
+  background: var(--fill-quiet);
+  border-radius: var(--radius-md);
+  padding: 14px 16px;
+}
+
+.nothingText {
+  font-size: 14.5px;
+  color: var(--neutral-700);
+  margin-top: 2px;
+  line-height: 1.5;
+}
+
+.reviewRefund {
+  display: flex;
+  gap: 10px;
+  align-items: flex-start;
+  background: var(--fill-quiet);
+  border-radius: var(--radius-md);
+  padding: 12px 14px;
+  font-size: 14.5px;
+  line-height: 1.5;
+  color: var(--neutral-700);
+}
+
+.addTip {
+  align-self: flex-start;
+  height: 44px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 0 16px;
+  border: 1px solid var(--border-strong);
+  background: transparent;
+  border-radius: var(--radius-full);
+  font: inherit;
+  font-size: 14.5px;
+  font-weight: 600;
+  color: var(--text-primary);
+  cursor: pointer;
+}
+
+.reviewNotes {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  font-size: 14px;
+  line-height: 1.5;
+  color: var(--neutral-600);
+}
+
+/* runtime states: badge colours come from the tone table (prototype T); panel tone, r.fg, act(), adjFg, c.sfg */
+.badge {
+  background: var(--badge-bg);
+  color: var(--badge-fg);
+}
+
+.panelNeutral {
+  background: var(--fill-quiet);
+}
+
+.panelRed {
+  background: var(--accent-wash);
+}
+
+.panelTitleNeutral {
+  color: var(--text-primary);
+}
+
+.panelTitleRed {
+  color: var(--accent-700);
+}
+
+.valueNormal {
+  color: var(--text-primary);
+}
+
+.valueAlert {
+  color: var(--accent-700);
+}
+
+.actionPrimary {
+  border: 1px solid var(--accent-700);
+  background: var(--accent-700);
+  color: var(--neutral-50);
+}
+
+.actionSecondary {
+  border: 1px solid var(--border-strong);
+  background: transparent;
+  color: var(--text-primary);
+}
+
+.actionGhost {
+  border: 1px solid transparent;
+  background: transparent;
+  color: var(--accent-700);
+}
+
+.adjustActive {
+  color: var(--neutral-600);
+}
+
+.adjustIdle {
+  color: var(--accent-700);
+}
+
+.tipSubOn {
+  color: rgba(255, 254, 251, 0.78);
+}
+
+.tipSubOff {
+  color: var(--neutral-600);
+}
+
+.cursorPointer {
+  cursor: pointer;
+}
+
+.cursorBlocked {
+  cursor: not-allowed;
+}
+
+/* helmet keyframes (copied: CSS modules scope keyframe names per file) */
+@keyframes ckup {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}

@@ -1,0 +1,538 @@
+import type { ReactNode } from "react";
+import { joinClassNames } from "../../utils/class-names";
+import { AmountRow, Icon, getViewAnimation } from "./checkout-detail";
+import { ICONS, formatPence, formatPounds, roundPounds } from "./checkout-data";
+import type { TipChoice } from "./checkout-data";
+import { RECORD_VIA_LABELS, getAdjustNote } from "./checkout-view";
+import type { CheckoutViewModel, DetailRow } from "./checkout-view";
+import type { CheckoutController } from "./use-checkout";
+import flow from "./checkout-flow.module.css";
+import shared from "./checkout-sheet.module.css";
+
+const TIP_CHOICES: [TipChoice, string][] = [
+  ["none", "No tip"],
+  [10, "10%"],
+  [15, "15%"],
+  [20, "20%"],
+  ["custom", "Custom"],
+];
+
+/** Chip toggle (prototype chip()). */
+export const Chip = ({
+  isOn,
+  className,
+  onPick,
+  children,
+}: {
+  isOn: boolean;
+  className: string | undefined;
+  onPick: () => void;
+  children: ReactNode;
+}) => (
+  <button
+    className={joinClassNames(className, isOn ? shared.chipOn : shared.chipOff)}
+    onClick={onPick}
+    aria-pressed={isOn ? "true" : "false"}
+  >
+    {children}
+  </button>
+);
+
+/** Radio ring and dot (prototype tile() ring / dot). */
+export const RadioMark = ({
+  isOn,
+  className,
+}: {
+  isOn: boolean;
+  className: string | undefined;
+}) => (
+  <span
+    className={joinClassNames(className, isOn ? shared.ringOn : shared.ringOff)}
+  >
+    <span
+      className={joinClassNames(
+        shared.radioDot,
+        isOn ? shared.dotOn : shared.dotOff,
+      )}
+    ></span>
+  </span>
+);
+
+export const CheckoutTip = ({
+  checkout: { state, setState, money },
+  view,
+}: {
+  checkout: CheckoutController;
+  view: CheckoutViewModel;
+}) => {
+  const isRecord = money.method === "record";
+  return (
+    <div
+      className={joinClassNames(
+        flow.viewGap20,
+        shared.motion,
+        getViewAnimation(state.dir),
+      )}
+      data-ck-m="1"
+    >
+      <div>
+        <h2 className={shared.viewTitle}>
+          {isRecord ? "Tip received?" : "Add a tip?"}
+        </h2>
+        <div className={flow.viewSub}>
+          {`Percentages of the ${formatPounds(money.items)} service total.`}
+        </div>
+      </div>
+      <div className={flow.tipGrid} role="radiogroup" aria-label="Tip">
+        {TIP_CHOICES.map(([choice, label]) => {
+          const isOn = state.tip === choice;
+          const sub =
+            typeof choice === "number"
+              ? formatPounds(roundPounds((money.items * choice) / 100))
+              : choice === "custom" && isOn && money.tipSt > 0
+                ? formatPounds(money.tipSt)
+                : " ";
+          return (
+            <button
+              key={String(choice)}
+              className={joinClassNames(
+                flow.tipChip,
+                isOn ? shared.chipOn : shared.chipOff,
+              )}
+              role="radio"
+              aria-checked={isOn ? "true" : "false"}
+              onClick={() => setState({ tip: choice })}
+            >
+              <span className={flow.tipLabel}>{label}</span>
+              <span
+                className={joinClassNames(
+                  flow.tipSub,
+                  isOn ? flow.tipSubOn : flow.tipSubOff,
+                )}
+              >
+                {sub}
+              </span>
+            </button>
+          );
+        })}
+      </div>
+      {state.tip === "custom" && (
+        <label
+          className={joinClassNames(flow.tipCustom, shared.motion)}
+          data-ck-m="1"
+        >
+          <span className={shared.fieldLabel}>Custom tip</span>
+          <span className={shared.moneyWrapNarrow}>
+            <span className={shared.poundSign}>£</span>
+            <input
+              className={flow.moneyInput}
+              inputMode="decimal"
+              value={state.tipCustom}
+              onChange={(event) =>
+                setState({
+                  tipCustom: event.target.value
+                    .replace(/[^0-9.]/g, "")
+                    .slice(0, 6),
+                })
+              }
+              placeholder="0.00"
+            />
+          </span>
+        </label>
+      )}
+      <div className={flow.tipHelp}>
+        {isRecord
+          ? "Tips go 100% to you. Recorded only, no money moves through Tiwára’s House."
+          : "Tips go 100% to you (card fees apply)."}
+      </div>
+      {money.method === "card" && (
+        <div className={flow.cardNote}>
+          <Icon
+            className={flow.iconTop3}
+            path={ICONS.card}
+            size={16}
+            stroke="var(--neutral-700)"
+            strokeWidth="1.5"
+          />
+          <div className={flow.cardNoteText}>
+            <span className={flow.cardNoteTitle}>
+              {`Charging ${view.name}’s saved card?`}
+            </span>
+            Only add a tip your client has asked you to add.
+          </div>
+        </div>
+      )}
+    </div>
+  );
+};
+
+export const CheckoutPay = ({
+  checkout: { state, setState, money, booking },
+  view,
+}: {
+  checkout: CheckoutController;
+  view: CheckoutViewModel;
+}) => {
+  const isCardOn = state.method === "card" && money.cardOk;
+  const isLinkOn =
+    state.method === "link" || (state.method === "card" && !money.cardOk);
+  const isRecordOn = state.method === "record";
+  const option = (
+    isOn: boolean,
+    title: string,
+    sub: string,
+    icon: string,
+    onPick: () => void,
+    extra: ReactNode,
+    isDisabled = false,
+  ) => (
+    <div
+      className={joinClassNames(
+        shared.optionCard,
+        isOn ? shared.tileOn : shared.tileOff,
+        isDisabled && shared.tileDisabled,
+      )}
+    >
+      <button
+        className={joinClassNames(
+          flow.optionButton,
+          isDisabled ? flow.cursorBlocked : flow.cursorPointer,
+        )}
+        role="radio"
+        aria-checked={isOn ? "true" : "false"}
+        disabled={isDisabled}
+        onClick={onPick}
+      >
+        <RadioMark isOn={isOn} className={flow.radioRing} />
+        <span className={shared.flexCell}>
+          <span
+            className={joinClassNames(
+              flow.optionTitle,
+              isOn ? shared.textOn : shared.textOff,
+            )}
+          >
+            {title}
+          </span>
+          <span className={flow.optionSub}>{sub}</span>
+        </span>
+        <Icon
+          className={flow.optionIcon}
+          path={icon}
+          size={20}
+          stroke="var(--neutral-600)"
+          strokeWidth="1.7"
+        />
+      </button>
+      {extra}
+    </div>
+  );
+
+  return (
+    <div
+      className={joinClassNames(
+        shared.viewGap18,
+        shared.motion,
+        getViewAnimation(state.dir),
+      )}
+      data-ck-m="1"
+    >
+      <h2 className={shared.viewTitle}>{`How is ${view.name} paying?`}</h2>
+      <div
+        className={shared.stack10}
+        role="radiogroup"
+        aria-label="Payment method"
+      >
+        {option(
+          isCardOn,
+          "Charge saved card",
+          money.cardOk ? view.cardText : "No saved card for this booking",
+          ICONS.card,
+          () => {
+            if (money.cardOk) setState({ method: "card" });
+          },
+          null,
+          !money.cardOk,
+        )}
+        {option(
+          isLinkOn,
+          "Send payment link",
+          "By SMS or email. Opens a secure payment page with Apple Pay and Google Pay, where your client can add a tip.",
+          ICONS.link,
+          () => setState({ method: "link" }),
+          isLinkOn && (
+            <div
+              className={joinClassNames(flow.linkOptions, shared.motion)}
+              data-ck-m="1"
+            >
+              <div className={shared.chipRow}>
+                {(
+                  [
+                    ["sms", "SMS"],
+                    ["email", "Email"],
+                  ] as const
+                ).map(([via, label]) => (
+                  <Chip
+                    key={via}
+                    isOn={state.linkVia === via}
+                    className={flow.linkChip}
+                    onPick={() => setState({ linkVia: via })}
+                  >
+                    {label}
+                  </Chip>
+                ))}
+              </div>
+              <div className={flow.linkTo}>
+                {"Sends to " +
+                  (state.linkVia === "sms" ? booking.phone : booking.email)}
+              </div>
+              {money.tipSt > 0 && (
+                <div className={flow.linkTipDrop}>
+                  {`The ${formatPounds(money.tipSt)} tip isn’t added. Your client can choose their own tip on the payment page.`}
+                </div>
+              )}
+            </div>
+          ),
+        )}
+        {option(
+          isRecordOn,
+          "Record payment",
+          "Cash, bank transfer or your own card reader.",
+          ICONS.cash,
+          () => setState({ method: "record" }),
+          isRecordOn && (
+            <div
+              className={joinClassNames(flow.recordOptions, shared.motion)}
+              data-ck-m="1"
+            >
+              <div className={flow.chipWrap}>
+                {(
+                  [
+                    ["cash", "Cash"],
+                    ["bank", "Bank transfer"],
+                    ["reader", "Own card reader"],
+                  ] as const
+                ).map(([via, label]) => (
+                  <Chip
+                    key={via}
+                    isOn={state.recVia === via}
+                    className={flow.recordChip}
+                    onPick={() => setState({ recVia: via })}
+                  >
+                    {label}
+                  </Chip>
+                ))}
+              </div>
+              {state.recVia === "reader" && (
+                <div className={flow.linkTo}>
+                  SumUp, Square etc. Take the payment on your reader first.
+                </div>
+              )}
+              <div className={flow.recordNote}>
+                {"Recorded only, no money moves through Tiwára's House."}
+              </div>
+            </div>
+          ),
+        )}
+      </div>
+    </div>
+  );
+};
+
+export const CheckoutReview = ({
+  checkout: { state, setState, money, booking, go },
+  view,
+}: {
+  checkout: CheckoutController;
+  view: CheckoutViewModel;
+}) => {
+  const extraRows: DetailRow[] = [];
+  if (money.tip > 0)
+    extraRows.push({
+      key: "Tip" + formatPounds(money.tip),
+      label: "Tip",
+      sub:
+        state.method === "record"
+          ? "Received in person"
+          : typeof state.tip === "number"
+            ? state.tip + "% of " + formatPounds(money.items)
+            : "Custom amount",
+      value: formatPounds(money.tip),
+      isAlert: false,
+    });
+  extraRows.push(...view.creditRows);
+  const method =
+    money.method === "card"
+      ? { icon: ICONS.card, label: "Saved card", sub: view.cardText }
+      : money.method === "link"
+        ? {
+            icon: ICONS.link,
+            label:
+              "Payment link by " + (state.linkVia === "sms" ? "SMS" : "email"),
+            sub: state.linkVia === "sms" ? booking.phone : booking.email,
+          }
+        : {
+            icon: ICONS.cash,
+            label: (RECORD_VIA_LABELS[state.recVia] || "") + ", recorded",
+            sub: "Recorded only, no money moves through Tiwára’s House.",
+          };
+  const isHard = state.decline === "hard";
+
+  return (
+    <div
+      className={joinClassNames(
+        flow.viewGap22,
+        shared.motion,
+        getViewAnimation(state.dir),
+      )}
+      data-ck-m="1"
+    >
+      {!!state.decline && (
+        <div
+          className={joinClassNames(flow.declined, shared.motion)}
+          role="alert"
+          data-ck-m="1"
+        >
+          <div className={flow.declinedHead}>
+            <Icon
+              className={shared.iconTop2}
+              path={ICONS.alert}
+              size={18}
+              stroke="var(--accent-700)"
+              strokeWidth="1.7"
+            />
+            <div>
+              <div className={flow.declinedTitle}>
+                {isHard
+                  ? "Card declined: reported lost or stolen"
+                  : "Card declined: insufficient funds"}
+              </div>
+              <div className={flow.declinedBody}>
+                {isHard
+                  ? `${view.cardText} can’t be charged again. Send ${view.name} a payment link or record another payment.`
+                  : `${view.name}’s bank declined ${view.cardText}. You can retry once more, or take payment another way.`}
+              </div>
+            </div>
+          </div>
+          <div className={flow.chipWrap}>
+            <button
+              className={flow.declinedButton}
+              onClick={() => setState({ method: "link", decline: null })}
+            >
+              Send payment link
+            </button>
+            <button
+              className={flow.declinedButton}
+              onClick={() => {
+                setState({ method: "record", decline: null });
+                go("pay", -1);
+              }}
+            >
+              Record payment
+            </button>
+          </div>
+        </div>
+      )}
+      <h2 className={shared.viewTitle}>Review</h2>
+      <div>
+        {state.lines.map((line) => (
+          <div key={"r" + line.id} className={flow.row}>
+            <span className={shared.minWidth}>
+              <span className={flow.rowLabel}>{line.name}</span>
+              {!!line.adj && (
+                <span className={flow.rowSub}>{getAdjustNote(line)}</span>
+              )}
+            </span>
+            <span className={flow.reviewValue}>
+              {!!line.adj && (
+                <span className={flow.reviewWas}>
+                  {formatPounds(line.base)}
+                </span>
+              )}
+              <span className={flow.reviewAmount}>
+                {formatPounds(line.base + line.adj)}
+              </span>
+            </span>
+          </div>
+        ))}
+        {extraRows.map((row) => (
+          <AmountRow key={row.key} row={row} subClassName={flow.rowSub} />
+        ))}
+        <div className={flow.totalLarge}>
+          <span>{view.review.totalLabel}</span>
+          <span className={shared.numeric}>{view.review.totalValue}</span>
+        </div>
+      </div>
+      {money.method !== "none" && (
+        <div>
+          <div className={flow.sectionLabelLoose}>Payment method</div>
+          <div className={flow.rowCenter}>
+            <span className={flow.methodIcon}>
+              <Icon
+                path={method.icon}
+                size={18}
+                stroke="var(--neutral-700)"
+                strokeWidth="1.7"
+              />
+            </span>
+            <div className={shared.flexCell}>
+              <div className={flow.strong15}>{method.label}</div>
+              <div className={flow.methodSub}>{method.sub}</div>
+            </div>
+            <button className={flow.changeMethod} onClick={() => go("pay", -1)}>
+              Change
+            </button>
+          </div>
+        </div>
+      )}
+      {money.method === "none" && !view.isRefund && (
+        <div className={flow.nothing}>
+          <div className={flow.strong15}>Nothing to pay</div>
+          <div className={flow.nothingText}>
+            {`${view.name} has already paid ${formatPounds(state.paid)}.`}
+          </div>
+        </div>
+      )}
+      {view.isRefund && (
+        <div className={flow.reviewRefund}>
+          <Icon
+            className={flow.iconTop3}
+            path={ICONS.ret}
+            size={16}
+            strokeWidth="1.7"
+          />
+          <span>{view.refundNote}</span>
+        </div>
+      )}
+      {money.method === "none" && !money.steps.includes("tip") && (
+        <button
+          className={flow.addTip}
+          onClick={() => {
+            setState({ tipOpen: true });
+            go("pay", 1);
+          }}
+        >
+          <Icon
+            path="M12 5v14M5 12h14"
+            size={15}
+            strokeWidth="1.7"
+            isRound={false}
+          />
+          Add a tip
+        </button>
+      )}
+      <div className={flow.reviewNotes}>
+        {money.cardFee > 0 && (
+          <span>{`Card fee of about ${formatPence(money.cardFee)} is deducted from your payout.`}</span>
+        )}
+        {money.method === "link" && (
+          <span>{`${view.name} can choose their own tip on the payment page. The booking shows Awaiting payment until they pay.`}</span>
+        )}
+        <span>
+          {money.method === "link"
+            ? `A review request goes to ${view.name} automatically.`
+            : `A receipt and review request go to ${view.name} automatically.`}
+        </span>
+      </div>
+    </div>
+  );
+};

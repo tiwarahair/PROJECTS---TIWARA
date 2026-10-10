@@ -6,6 +6,8 @@ import { AddressFinder } from "../../components/address-finder/address-finder";
 import { AllergyField } from "../../components/allergy-field/allergy-field";
 import { BusinessDetails } from "../../components/business-details/business-details";
 import type { BusinessDetailsProps } from "../../components/business-details/business-details";
+import { CheckoutSheet } from "../../components/checkout-sheet/checkout-sheet";
+import type { CheckoutSheetProps } from "../../components/checkout-sheet/checkout-sheet";
 import { Earnings } from "../../components/earnings/earnings";
 import type { EarningsProps } from "../../components/earnings/earnings";
 import { PaymentPolicy } from "../../components/payment-policy/payment-policy";
@@ -497,6 +499,72 @@ const EARNINGS: { fixture: string; isWide: boolean; props: EarningsProps }[] = [
   { fixture: "filt-fees", isWide: true, props: { filt: "fees" } },
 ];
 
+const LIVE_BOOKING = {
+  client: "Ama Mensah",
+  first: "Ama",
+  svc: "Fulani braids",
+  meta: "Medium, bum length",
+  price: 90,
+  addons: [],
+  mode: "deposit" as const,
+  paid: 18,
+  card: "5555",
+  brand: "Mastercard",
+  paidOn: "Sat 5 Sep",
+  phone: "07700 900888",
+  email: "ama.mensah@gmail.com",
+  day: "Thu 10 Sep",
+  time: "14:00–18:00",
+  arrived: "13:57",
+};
+const LIVE_DONE = {
+  method: "card" as const,
+  via: "sms",
+  charged: 72,
+  tip: 0,
+  refundAuto: 0,
+};
+const CHECKOUT_SHEETS: { fixture: string; props: CheckoutSheetProps }[] = [
+  { fixture: "arrived", props: { scenario: "arrived" } },
+  { fixture: "items", props: { scenario: "items" } },
+  { fixture: "tip", props: { scenario: "tip" } },
+  { fixture: "review", props: { scenario: "review" } },
+  { fixture: "done", props: { scenario: "done" } },
+  { fixture: "reduce", props: { scenario: "reduce" } },
+  { fixture: "reduce-review", props: { scenario: "reduce-review" } },
+  { fixture: "link", props: { scenario: "link" } },
+  { fixture: "awaiting", props: { scenario: "awaiting" } },
+  { fixture: "cash", props: { scenario: "cash" } },
+  { fixture: "unpaid", props: { scenario: "unpaid" } },
+  { fixture: "declined", props: { scenario: "declined" } },
+  { fixture: "declined-hard", props: { scenario: "declined-hard" } },
+  { fixture: "paid", props: { scenario: "paid" } },
+  { fixture: "refund", props: { scenario: "refund" } },
+  { fixture: "receipt", props: { scenario: "receipt" } },
+  { fixture: "resend", props: { scenario: "resend" } },
+  { fixture: "fee-pending", props: { scenario: "fee-pending" } },
+  { fixture: "fee-waived", props: { scenario: "fee-waived" } },
+  { fixture: "fee-unpaid", props: { scenario: "fee-unpaid" } },
+  { fixture: "fee-collected", props: { scenario: "fee-collected" } },
+  { fixture: "waive-dep", props: { scenario: "waive-dep" } },
+  { fixture: "waive-nonref", props: { scenario: "waive-nonref" } },
+  { fixture: "waive-full", props: { scenario: "waive-full" } },
+  { fixture: "waive-card", props: { scenario: "waive-card" } },
+  {
+    fixture: "desktop-arrived",
+    props: { scenario: "arrived", layout: "desktop" },
+  },
+  {
+    fixture: "desktop-review",
+    props: { scenario: "review", layout: "desktop" },
+  },
+  { fixture: "embedded", props: { booking: LIVE_BOOKING, radius: "16px" } },
+  {
+    fixture: "embedded-done",
+    props: { booking: LIVE_BOOKING, start: "done", done: LIVE_DONE },
+  },
+];
+
 const HARNESSES: Record<string, () => ReactNode> = {
   "address-finder": () =>
     ADDRESS_FIXTURES.map((fixture) => (
@@ -592,6 +660,15 @@ const HARNESSES: Record<string, () => ReactNode> = {
         {/* the prototype's dc-import host block */}
         <div data-dc-host="">
           <Earnings {...props} />
+        </div>
+      </div>
+    )),
+  "checkout-sheet": () =>
+    CHECKOUT_SHEETS.map(({ fixture, props }) => (
+      <div key={fixture} className={styles.sheetBox} data-fx={fixture}>
+        {/* the prototype's dc-import host block */}
+        <div data-dc-host="">
+          <CheckoutSheet {...props} />
         </div>
       </div>
     )),
