@@ -1,5 +1,7 @@
 import { useLayoutEffect } from "react";
 import { joinClassNames } from "../../utils/class-names";
+import { FilterSheet, QuickActions, SlotPopover } from "./bookings-overlays";
+import { StudioBookings, getBookingsView } from "./studio-bookings";
 import { StudioHome } from "./studio-home";
 import {
   ActionsMenu,
@@ -32,6 +34,8 @@ export const StudioPage = (props: StudioPageProps) => {
   const studio = useStudio(props);
   const { state, isWide } = studio;
   const { isSetupOn, isComplete } = getSetupProgress(studio);
+  const bookingsView =
+    state.tab === "bookings" ? getBookingsView(studio) : null;
 
   useLayoutEffect(() => {
     document.documentElement.classList.add("studio-page");
@@ -62,6 +66,14 @@ export const StudioPage = (props: StudioPageProps) => {
               id="stbody"
             >
               {state.tab === "home" && <StudioHome studio={studio} />}
+              {bookingsView && (
+                <>
+                  <StudioBookings studio={studio} view={bookingsView} />
+                  {state.filtOpen && (
+                    <FilterSheet studio={studio} view={bookingsView} />
+                  )}
+                </>
+              )}
             </div>
             {isWide &&
               isSetupOn &&
@@ -82,6 +94,10 @@ export const StudioPage = (props: StudioPageProps) => {
                 state.tab === "bookings" ||
                 state.tab === "services") && <Fab studio={studio} />}
             {!isWide && <FooterNav studio={studio} />}
+            <SlotPopover studio={studio} />
+            {bookingsView && (
+              <QuickActions studio={studio} view={bookingsView} />
+            )}
             <ActionsMenu studio={studio} />
             <ConfirmSheet studio={studio} />
             <StudioToast studio={studio} />
