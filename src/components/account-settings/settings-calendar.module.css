@@ -1,0 +1,220 @@
+/* AccountSettings (prototype AccountSettings.dc.html), inline styles verbatim */
+
+.connecting {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.connectingText {
+  font-size: 14.5px;
+  font-weight: 600;
+  color: var(--neutral-700);
+}
+
+.skeletonLong {
+  width: 60%;
+  height: 12px;
+  border-radius: var(--radius-xs);
+  background: var(--fill-quiet-strong, rgba(26, 23, 20, 0.08));
+  animation: acpulse 1.2s ease-in-out infinite;
+}
+
+.skeletonShort {
+  width: 40%;
+  height: 12px;
+  border-radius: var(--radius-xs);
+  background: var(--fill-quiet, rgba(26, 23, 20, 0.05));
+  animation: acpulse 1.2s ease-in-out infinite;
+}
+
+.connectedTag {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--neutral-700);
+  background: var(--fill-quiet);
+  border-radius: var(--radius-xs);
+  padding: 3px 7px;
+}
+
+.divider {
+  height: 1px;
+  background: var(--border-subtle);
+  margin: 18px 0 14px;
+}
+
+.calendarsHelp {
+  font-size: 14px;
+  color: var(--neutral-600);
+  margin-top: 2px;
+}
+
+.calendars {
+  display: flex;
+  flex-direction: column;
+  margin-top: 6px;
+}
+
+.calendarName {
+  font-size: 15px;
+  overflow-wrap: anywhere;
+}
+
+.targetLabel {
+  display: block;
+  margin-top: 16px;
+  font-size: 15px;
+  font-weight: 600;
+}
+
+.selectWrap {
+  position: relative;
+  display: inline-block;
+  max-width: 100%;
+  margin-top: 8px;
+}
+
+.select {
+  max-width: 100%;
+  height: 44px;
+  box-sizing: border-box;
+  padding: 0 40px 0 14px;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--border-strong);
+  background: #fff;
+  appearance: none;
+  -webkit-appearance: none;
+  font: inherit;
+  font-size: 16px;
+  color: var(--text-primary);
+  outline: none;
+  cursor: pointer;
+}
+
+.selectChevron {
+  position: absolute;
+  right: 14px;
+  top: 50%;
+  transform: translateY(-50%);
+  pointer-events: none;
+  color: var(--neutral-600);
+}
+
+.disconnectRow {
+  margin-top: 20px;
+}
+
+.disconnect {
+  height: 44px;
+  padding: 0 18px;
+  border: 1px solid var(--border-strong);
+  background: transparent;
+  border-radius: var(--radius-full);
+  font: inherit;
+  font-size: 14.5px;
+  font-weight: 600;
+  color: var(--accent-700);
+  cursor: pointer;
+}
+
+.disconnect:hover {
+  background: var(--accent-wash) !important;
+}
+
+.disconnect:active {
+  transform: scale(0.98) !important;
+}
+
+.icsInput {
+  display: block;
+  width: 100%;
+  margin-top: 8px;
+  height: 44px;
+  box-sizing: border-box;
+  padding: 0 14px;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--border-subtle);
+  background: var(--fill-quiet);
+  font: inherit;
+  font-size: 15px;
+  color: var(--neutral-700);
+  outline: none;
+  text-overflow: ellipsis;
+}
+
+.icsActions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 12px;
+}
+
+.copyLink {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  height: 44px;
+  padding: 0 18px;
+  border: none;
+  background: var(--neutral-900, #1a1714);
+  color: #fffefb;
+  border-radius: var(--radius-full);
+  font: inherit;
+  font-size: 14.5px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.copyLink:active {
+  transform: scale(0.98) !important;
+}
+
+.resetLink {
+  height: 44px;
+  padding: 0 18px;
+  border: 1px solid var(--border-strong);
+  background: transparent;
+  border-radius: var(--radius-full);
+  font: inherit;
+  font-size: 14.5px;
+  font-weight: 600;
+  color: var(--text-primary);
+  cursor: pointer;
+}
+
+.resetLink:hover {
+  background: var(--fill-quiet) !important;
+}
+
+.resetLink:active {
+  transform: scale(0.98) !important;
+}
+
+.icsHelp {
+  margin: 12px 0 0;
+  font-size: 14px;
+  line-height: 1.5;
+  color: var(--neutral-600);
+}
+
+/* helmet keyframes (copied: CSS modules scope keyframe names per file) */
+@keyframes acpulse {
+  0%,
+  100% {
+    opacity: 0.55;
+  }
+  50% {
+    opacity: 1;
+  }
+}
+
+/* helmet: [data-ac-sk] under reduced motion */
+@media (prefers-reduced-motion: reduce) {
+  .skeletonLong,
+  .skeletonShort {
+    animation: none !important;
+  }
+}

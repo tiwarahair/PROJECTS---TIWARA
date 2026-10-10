@@ -1,0 +1,112 @@
+/* AccountSettings (prototype AccountSettings.dc.html), inline styles verbatim */
+
+.groupCard {
+  flex: 999 1 420px;
+  min-width: 0;
+  background: #fff;
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-panel);
+  padding: 8px clamp(18px, 3cqi, 24px) 6px;
+  box-sizing: border-box;
+}
+
+.groupHead {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 52px 52px;
+  gap: 4px;
+  padding: 6px 0 2px;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--neutral-600);
+  text-align: center;
+}
+
+.groupRow {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 52px 52px;
+  gap: 4px;
+  align-items: center;
+  min-height: 52px;
+  border-top: 1px solid var(--border-subtle);
+}
+
+.rowLabel {
+  font-size: 15px;
+  line-height: 1.35;
+  padding: 8px 0;
+}
+
+.switchCell {
+  width: 52px;
+  height: 44px;
+  display: grid;
+  place-items: center;
+  padding: 0;
+  border: none;
+  background: none;
+  cursor: pointer;
+  border-radius: var(--radius-full);
+}
+
+.alwaysCard {
+  flex: 999 1 420px;
+  min-width: 0;
+  background: #fff;
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-panel);
+  padding: 4px clamp(18px, 3cqi, 24px);
+  box-sizing: border-box;
+}
+
+.alwaysRow {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-height: 52px;
+  border-bottom: 1px solid var(--border-subtle);
+}
+
+.alwaysLabel {
+  flex: 1;
+  font-size: 15px;
+}
+
+.alwaysTag {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 13.5px;
+  font-weight: 600;
+  color: var(--neutral-600);
+}
+
+.clientText {
+  margin: 0;
+  font-size: 14.5px;
+  line-height: 1.45;
+  color: var(--neutral-700);
+}
+
+.clientChip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 7px 12px;
+  border-radius: var(--radius-full);
+  background: #fff;
+  font-size: 14px;
+  color: var(--neutral-900);
+}
+
+.clientTick {
+  color: var(--neutral-600);
+}
+
+.bellNote {
+  margin: 0;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 14.5px;
+  color: var(--neutral-600);
+}

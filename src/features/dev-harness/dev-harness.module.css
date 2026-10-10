@@ -43,3 +43,15 @@
   position: relative;
   margin: 0 0 24px;
 }
+
+.phoneAutoBox {
+  width: 390px;
+  position: relative;
+  margin: 0 0 24px;
+}
+
+.wideAutoBox {
+  width: 900px;
+  position: relative;
+  margin: 0 0 24px;
+}

@@ -1,0 +1,294 @@
+/* AccountSettings (prototype AccountSettings.dc.html), inline styles verbatim */
+
+.nameCard {
+  flex: 999 1 420px;
+  min-width: 0;
+  background: #fff;
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-panel);
+  padding: clamp(18px, 3cqi, 24px);
+  box-sizing: border-box;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 180px), 1fr));
+  gap: 18px;
+}
+
+.input {
+  display: block;
+  width: 100%;
+  margin-top: 8px;
+  height: 44px;
+  box-sizing: border-box;
+  padding: 0 14px;
+  border-radius: var(--radius-sm);
+  background: #fff;
+  font: inherit;
+  font-size: 16px;
+  color: var(--text-primary);
+  outline: none;
+}
+
+.linkButton {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  min-height: 44px;
+  padding: 0;
+  border: none;
+  background: none;
+  font: inherit;
+  font-size: 14.5px;
+  font-weight: 600;
+  color: var(--accent-700);
+  cursor: pointer;
+}
+
+.linkButton:hover {
+  color: var(--accent-900) !important;
+}
+
+.pending {
+  margin-top: 14px;
+  background: var(--fill-quiet);
+  border-radius: var(--radius-md);
+  padding: 14px 16px;
+}
+
+.pendingTitle {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 14.5px;
+  font-weight: 600;
+  color: var(--neutral-700);
+}
+
+.pendingText {
+  margin: 6px 0 0;
+  font-size: 14.5px;
+  line-height: 1.45;
+  color: var(--neutral-700);
+}
+
+.strong {
+  font-weight: 600;
+  overflow-wrap: anywhere;
+}
+
+.pendingActions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 10px;
+}
+
+.resend {
+  height: 40px;
+  padding: 0 16px;
+  border: 1px solid var(--border-strong);
+  background: #fff;
+  border-radius: var(--radius-full);
+  font: inherit;
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--text-primary);
+  cursor: pointer;
+}
+
+.cancelChange {
+  height: 40px;
+  padding: 0 12px;
+  border: none;
+  background: none;
+  border-radius: var(--radius-full);
+  font: inherit;
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--neutral-700);
+  cursor: pointer;
+}
+
+.cancelChange:hover {
+  background: var(--fill-quiet-strong) !important;
+}
+
+.reveal {
+  display: grid;
+}
+
+.revealInner {
+  overflow: hidden;
+  min-height: 0;
+}
+
+.emailForm {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  padding-top: 16px;
+}
+
+.formActions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.cancel {
+  height: 44px;
+  padding: 0 16px;
+  border: none;
+  background: none;
+  border-radius: var(--radius-full);
+  font: inherit;
+  font-size: 14.5px;
+  font-weight: 600;
+  color: var(--text-primary);
+  cursor: pointer;
+}
+
+.cancel:hover {
+  background: var(--fill-quiet) !important;
+}
+
+.divider {
+  height: 1px;
+  background: var(--border-subtle);
+  margin: 18px 0;
+}
+
+.phoneValue {
+  font-size: 15.5px;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+}
+
+.phoneForm {
+  padding-top: 16px;
+}
+
+.phoneInput {
+  display: block;
+  width: 100%;
+  max-width: 280px;
+  margin-top: 8px;
+  height: 44px;
+  box-sizing: border-box;
+  padding: 0 14px;
+  border-radius: var(--radius-sm);
+  background: #fff;
+  font: inherit;
+  font-size: 16px;
+  color: var(--text-primary);
+  outline: none;
+}
+
+.codeInput {
+  display: block;
+  width: 100%;
+  max-width: 180px;
+  margin-top: 8px;
+  height: 44px;
+  box-sizing: border-box;
+  padding: 0 14px;
+  border-radius: var(--radius-sm);
+  background: #fff;
+  font: inherit;
+  font-size: 18px;
+  font-weight: 600;
+  letter-spacing: 0.3em;
+  font-variant-numeric: tabular-nums;
+  color: var(--text-primary);
+  outline: none;
+}
+
+.closeSection {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 14px 48px;
+  padding-top: clamp(28px, 4cqi, 36px);
+  border-top: 1px solid var(--border-subtle);
+}
+
+.closeCard {
+  flex: 999 1 420px;
+  min-width: 0;
+  background: var(--accent-wash);
+  border-radius: var(--radius-lg);
+  padding: clamp(18px, 3cqi, 24px);
+  box-sizing: border-box;
+}
+
+.closeText {
+  margin: 0;
+  font-size: 15px;
+  line-height: 1.5;
+  color: var(--neutral-900);
+  max-width: 52ch;
+}
+
+.closeReason {
+  display: flex;
+  gap: 8px;
+  align-items: flex-start;
+  margin-top: 12px;
+  font-size: 14.5px;
+  line-height: 1.45;
+  font-weight: 600;
+  color: var(--neutral-700);
+}
+
+.closeButton {
+  margin-top: 14px;
+  height: 44px;
+  padding: 0 20px;
+  background: transparent;
+  border-radius: var(--radius-full);
+  font: inherit;
+  font-size: 14.5px;
+  font-weight: 600;
+}
+
+.closeButton:active {
+  transform: scale(0.98) !important;
+}
+
+/* runtime states (prototype dis(), close*) */
+.revealOpen {
+  grid-template-rows: 1fr;
+  opacity: 1;
+  visibility: visible;
+  transition:
+    grid-template-rows 280ms var(--ease-inout, cubic-bezier(0.65, 0, 0.35, 1)),
+    opacity 220ms var(--ease-out) 60ms,
+    visibility 0s;
+}
+
+.revealClosed {
+  grid-template-rows: 0fr;
+  opacity: 0;
+  visibility: hidden;
+  transition:
+    grid-template-rows 240ms var(--ease-inout, cubic-bezier(0.65, 0, 0.35, 1)),
+    opacity 140ms var(--ease-out),
+    visibility 0s linear 240ms;
+}
+
+.closeOpen {
+  border: 1px solid var(--accent-700);
+  color: var(--accent-700);
+  cursor: pointer;
+}
+
+.closeBlocked {
+  border: 1px solid var(--border-subtle);
+  color: var(--neutral-400, #a39a8c);
+  cursor: not-allowed;
+}
+
+/* helmet: [data-ac-anim] under reduced motion */
+@media (prefers-reduced-motion: reduce) {
+  .reveal {
+    transition-property: opacity, visibility !important;
+  }
+}

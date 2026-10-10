@@ -1,0 +1,371 @@
+/* AccountSettings (prototype AccountSettings.dc.html), inline styles verbatim */
+
+.root {
+  position: relative;
+  font-family: var(--font-body);
+  color: var(--text-primary);
+  container-type: inline-size;
+}
+
+.pages {
+  display: flex;
+  flex-direction: column;
+  gap: clamp(36px, 5cqi, 48px);
+}
+
+.section {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 14px 48px;
+}
+
+.intro {
+  flex: 1 1 220px;
+  max-width: 300px;
+}
+
+.heading {
+  margin: 0;
+  font-family: var(--font-display);
+  font-weight: 600;
+  font-size: 19px;
+  letter-spacing: -0.01em;
+}
+
+.introText {
+  margin: 4px 0 0;
+  font-size: 14.5px;
+  line-height: 1.45;
+  color: var(--neutral-600);
+}
+
+.label {
+  display: block;
+  font-size: 15px;
+  font-weight: 600;
+}
+
+.error {
+  margin-top: 8px;
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--accent-700);
+}
+
+.card {
+  flex: 999 1 420px;
+  min-width: 0;
+  background: #fff;
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-panel);
+  padding: clamp(18px, 3cqi, 24px);
+  box-sizing: border-box;
+}
+
+.row {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px 16px;
+}
+
+.rowText {
+  flex: 1 1 200px;
+  min-width: 0;
+}
+
+.rowLabel {
+  font-size: 14px;
+  color: var(--neutral-600);
+}
+
+.rowValue {
+  font-size: 15.5px;
+  font-weight: 600;
+  overflow-wrap: anywhere;
+}
+
+.outlineButton {
+  flex: 0 0 auto;
+  height: 44px;
+  padding: 0 18px;
+  border: 1px solid var(--border-strong);
+  background: transparent;
+  border-radius: var(--radius-full);
+  font: inherit;
+  font-size: 14.5px;
+  font-weight: 600;
+  color: var(--text-primary);
+  cursor: pointer;
+}
+
+.outlineButton:hover {
+  background: var(--fill-quiet) !important;
+}
+
+.outlineButton:active {
+  transform: scale(0.98) !important;
+}
+
+.darkButton {
+  height: 44px;
+  padding: 0 20px;
+  border: none;
+  background: var(--neutral-900, #1a1714);
+  color: #fffefb;
+  border-radius: var(--radius-full);
+  font: inherit;
+  font-size: 14.5px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.darkButton:active {
+  transform: scale(0.98) !important;
+}
+
+.help {
+  margin-top: 6px;
+  font-size: 14px;
+  color: var(--neutral-600);
+}
+
+.actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 14px;
+}
+
+.infoIcon {
+  flex: 0 0 auto;
+  margin-top: 2px;
+}
+
+.checkRow {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-height: 44px;
+  padding: 0;
+  border: none;
+  background: none;
+  font: inherit;
+  cursor: pointer;
+  text-align: left;
+}
+
+.checkBox {
+  flex: 0 0 auto;
+  width: 22px;
+  height: 22px;
+  box-sizing: border-box;
+  border-radius: var(--radius-xs);
+  display: grid;
+  place-items: center;
+  transition:
+    background-color 160ms var(--ease-out),
+    border-color 160ms var(--ease-out);
+}
+
+.checkTick {
+  transition: opacity 140ms var(--ease-out);
+}
+
+.strongText {
+  font-size: 15px;
+  font-weight: 600;
+}
+
+.badgeRow {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.switchTrack {
+  position: relative;
+  width: 44px;
+  height: 26px;
+  border-radius: var(--radius-full);
+  transition: background-color 200ms var(--ease-out);
+}
+
+.switchKnob {
+  position: absolute;
+  top: 3px;
+  left: 3px;
+  width: 20px;
+  height: 20px;
+  border-radius: var(--radius-full);
+  background: #fff;
+  box-shadow: 0 1px 2px rgba(26, 23, 20, 0.22);
+  transition: transform 200ms var(--ease-out);
+}
+
+.quietCard {
+  flex: 999 1 420px;
+  min-width: 0;
+  background: var(--fill-quiet);
+  border-radius: var(--radius-lg);
+  padding: clamp(18px, 3cqi, 24px);
+  box-sizing: border-box;
+}
+
+.saveBar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 10px 24px;
+  margin-top: 32px;
+  padding-top: 18px;
+  border-top: 1px solid var(--border-subtle);
+}
+
+.saveError {
+  flex: 100 1 220px;
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--accent-700);
+}
+
+.saveButton {
+  height: 44px;
+  padding: 0 24px;
+  border: none;
+  border-radius: var(--radius-full);
+  font: inherit;
+  font-size: 14.5px;
+  font-weight: 600;
+  transition:
+    background-color 160ms var(--ease-out),
+    color 160ms var(--ease-out);
+}
+
+.saveButton:active {
+  transform: scale(0.97) !important;
+}
+
+.toast {
+  position: fixed;
+  left: 50%;
+  bottom: 24px;
+  z-index: 90;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 12px 18px;
+  border-radius: var(--radius-full);
+  background: var(--neutral-900, #1a1714);
+  color: #fffefb;
+  font-size: 14.5px;
+  font-weight: 600;
+  white-space: nowrap;
+  box-shadow: var(--shadow-popover);
+  pointer-events: none;
+}
+
+/* runtime states (prototype inp() bd / ring, so* / c.* checkbox, sw(), save*, toast*) */
+.fieldOk {
+  border: 1px solid var(--border-strong);
+  box-shadow: none;
+}
+
+.fieldErr {
+  border: 1px solid var(--accent-700);
+  box-shadow: 0 0 0 1px var(--accent-700);
+}
+
+.checkOn {
+  border: 1.5px solid var(--accent-700);
+  background: var(--accent-700);
+}
+
+.checkOff {
+  border: 1.5px solid var(--border-strong);
+  background: #fff;
+}
+
+.tickOn {
+  opacity: 1;
+}
+
+.tickOff {
+  opacity: 0;
+}
+
+.trackOn {
+  background: var(--accent-700);
+}
+
+.trackOff {
+  background: var(--neutral-300, #d8d2c6);
+}
+
+.knobOn {
+  transform: translateX(18px);
+}
+
+.knobOff {
+  transform: translateX(0);
+}
+
+.saveOn {
+  background: var(--accent-700);
+  color: #fffefb;
+  cursor: pointer;
+}
+
+.saveOff {
+  background: var(--neutral-200, #ece6db);
+  color: var(--neutral-600);
+  cursor: not-allowed;
+}
+
+.toastShown {
+  opacity: 1;
+  visibility: visible;
+  transform: translateX(-50%) translateY(0);
+  transition:
+    opacity 220ms var(--ease-out),
+    transform 220ms var(--ease-out),
+    visibility 0s;
+}
+
+.toastHidden {
+  opacity: 0;
+  visibility: hidden;
+  transform: translateX(-50%) translateY(8px);
+  transition:
+    opacity 160ms var(--ease-in, cubic-bezier(0.4, 0, 0.7, 0.2)),
+    transform 160ms var(--ease-in, cubic-bezier(0.4, 0, 0.7, 0.2)),
+    visibility 0s linear 160ms;
+}
+
+/*
+ * helmet rules (prototype lines 11–18), scoped to this component's classes; [data-ac-in] elements carry .focusRing.
+ * The reveal / skeleton reduced-motion rules live with those classes; pwIn lives with PasswordMeter.
+ */
+@media (prefers-reduced-motion: reduce) {
+  .toast {
+    transform: translateX(-50%) !important;
+  }
+}
+
+.focusRing:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 3px var(--focus-ring, rgba(143, 17, 18, 0.35)) !important;
+}
+
+.root[data-ac-emb="0"] {
+  padding: 24px 20px 40px;
+  background: #fffefb;
+  min-height: 100%;
+  box-sizing: border-box;
+}
+
+.root[data-ac-hidesave="1"] .saveButton {
+  display: none !important;
+}

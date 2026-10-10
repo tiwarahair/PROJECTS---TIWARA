@@ -1,5 +1,7 @@
 import type { ReactNode } from "react";
 import { useParams } from "react-router";
+import { AccountSettings } from "../../components/account-settings/account-settings";
+import type { AccountSettingsProps } from "../../components/account-settings/account-settings";
 import { AddressFinder } from "../../components/address-finder/address-finder";
 import { AllergyField } from "../../components/allergy-field/allergy-field";
 import { BusinessDetails } from "../../components/business-details/business-details";
@@ -310,6 +312,159 @@ const PAYMENT_POLICIES: {
   },
 ];
 
+const ONE_DEVICE = [{ name: "Main phone", backup: false }];
+const TWO_DEVICES = [
+  { name: "Main phone", backup: false },
+  { name: "Old iPhone", backup: true },
+];
+const SOLE_TAX = {
+  kind: "sole" as const,
+  nameYes: true,
+  legalName: "Amara Okonkwo",
+  d: "04",
+  m: "11",
+  y: "1992",
+  ni: "QQ123456C",
+  addrSame: false,
+  addr: {
+    line1: "7 Wilmslow Road",
+    line2: "",
+    city: "Manchester",
+    pc: "M14 5TB",
+  },
+};
+const LTD_TAX = {
+  kind: "ltd" as const,
+  coName: "Amara Beauty Ltd",
+  coNum: "SC123456",
+  addrSame: true,
+  addr: {
+    line1: "48 Oxford Road",
+    line2: "",
+    city: "Manchester",
+    pc: "M1 5QA",
+  },
+};
+const ACCOUNT_SETTINGS: {
+  fixture: string;
+  isWide: boolean;
+  props: AccountSettingsProps;
+}[] = [
+  { fixture: "personal", isWide: false, props: { page: "personal" } },
+  { fixture: "personal-wide", isWide: true, props: { page: "personal" } },
+  {
+    fixture: "personal-upcoming",
+    isWide: false,
+    props: { page: "personal", upcoming: 2 },
+  },
+  {
+    fixture: "personal-one",
+    isWide: false,
+    props: { page: "personal", upcoming: 1 },
+  },
+  {
+    fixture: "personal-owed",
+    isWide: false,
+    props: { page: "personal", owed: true },
+  },
+  { fixture: "security", isWide: false, props: { page: "security" } },
+  { fixture: "security-wide", isWide: true, props: { page: "security" } },
+  {
+    fixture: "security-google",
+    isWide: false,
+    props: { page: "security", signIn: "google" },
+  },
+  {
+    fixture: "security-apple",
+    isWide: false,
+    props: { page: "security", signIn: "apple" },
+  },
+  {
+    fixture: "security-tfa",
+    isWide: false,
+    props: { page: "security", tfaDevices: ONE_DEVICE },
+  },
+  {
+    fixture: "security-tfa2",
+    isWide: false,
+    props: { page: "security", tfaDevices: TWO_DEVICES },
+  },
+  { fixture: "notifications", isWide: false, props: { page: "notifications" } },
+  {
+    fixture: "notifications-wide",
+    isWide: true,
+    props: { page: "notifications" },
+  },
+  { fixture: "payouts", isWide: false, props: { page: "payouts" } },
+  {
+    fixture: "payouts-none",
+    isWide: false,
+    props: { page: "payouts", payoutStatus: "none" },
+  },
+  {
+    fixture: "payouts-verifying",
+    isWide: false,
+    props: { page: "payouts", payoutStatus: "verifying" },
+  },
+  {
+    fixture: "payouts-action",
+    isWide: false,
+    props: { page: "payouts", payoutStatus: "action" },
+  },
+  {
+    fixture: "payouts-paused",
+    isWide: false,
+    props: { page: "payouts", payoutStatus: "paused" },
+  },
+  {
+    fixture: "payouts-review",
+    isWide: false,
+    props: { page: "payouts", payoutStatus: "paused", pauseReason: "review" },
+  },
+  {
+    fixture: "payouts-new",
+    isWide: true,
+    props: { page: "payouts", isNew: true },
+  },
+  {
+    fixture: "payouts-tax",
+    isWide: true,
+    props: { page: "payouts", tax: SOLE_TAX },
+  },
+  {
+    fixture: "payouts-tax-ltd",
+    isWide: false,
+    props: { page: "payouts", tax: LTD_TAX },
+  },
+  {
+    fixture: "payouts-editing",
+    isWide: false,
+    props: {
+      page: "payouts",
+      tax: SOLE_TAX,
+      taxEditing: true,
+      taxLegalName: "Amara Okonkwo",
+      taxBusinessName: "Amara Beauty Ltd",
+    },
+  },
+  { fixture: "calendar", isWide: false, props: { page: "calendar" } },
+  {
+    fixture: "calendar-new",
+    isWide: true,
+    props: { page: "calendar", isNew: true },
+  },
+  {
+    fixture: "embedded",
+    isWide: true,
+    props: { page: "personal", embedded: true },
+  },
+  {
+    fixture: "embedded-hide",
+    isWide: true,
+    props: { page: "security", embedded: true, hideSave: true },
+  },
+];
+
 const HARNESSES: Record<string, () => ReactNode> = {
   "address-finder": () =>
     ADDRESS_FIXTURES.map((fixture) => (
@@ -379,6 +534,19 @@ const HARNESSES: Record<string, () => ReactNode> = {
         {/* the prototype's dc-import host block (height auto) */}
         <div data-dc-host="">
           <PaymentPolicy {...props} />
+        </div>
+      </div>
+    )),
+  "account-settings": () =>
+    ACCOUNT_SETTINGS.map(({ fixture, isWide, props }) => (
+      <div
+        key={fixture}
+        className={isWide ? styles.wideAutoBox : styles.phoneAutoBox}
+        data-fx={fixture}
+      >
+        {/* the prototype's dc-import host block */}
+        <div data-dc-host="">
+          <AccountSettings {...props} />
         </div>
       </div>
     )),
