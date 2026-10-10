@@ -88,7 +88,7 @@ export const HelpPage = () => {
             <Link className={styles.deskLink} to="/search">
               Find a stylist
             </Link>
-            <Link className={styles.deskLink} to="/#services">
+            <Link className={styles.deskLink} to="/#stylegrid">
               Services
             </Link>
             {loggedIn && (
@@ -129,7 +129,7 @@ export const HelpPage = () => {
             <Link className={styles.mobLink} to="/search">
               Find a stylist
             </Link>
-            <Link className={styles.mobLink} to="/#services">
+            <Link className={styles.mobLink} to="/#stylegrid">
               Services
             </Link>
             {loggedIn && (

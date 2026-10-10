@@ -66,7 +66,7 @@ export const ProfileHeader = ({
         <Link to="/search" className={styles.navLink}>
           Find a stylist
         </Link>
-        <Link to="/#services" className={styles.navLink}>
+        <Link to="/#stylegrid" className={styles.navLink}>
           Services
         </Link>
         {!loggedIn && (
@@ -96,7 +96,7 @@ export const ProfileHeader = ({
           Find a stylist
         </Link>
         <Link
-          to="/#services"
+          to="/#stylegrid"
           onClick={onToggleMenu}
           className={styles.mobileLink}
         >

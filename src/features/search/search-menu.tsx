@@ -26,7 +26,7 @@ export const SearchMenu = () => {
       to: "/search",
       isCurrent: true,
     },
-    { kind: "link", key: "services", label: "Services", to: "/#services" },
+    { kind: "link", key: "services", label: "Services", to: "/#stylegrid" },
     { kind: "separator", key: "separator" },
     ...(loggedIn
       ? ([

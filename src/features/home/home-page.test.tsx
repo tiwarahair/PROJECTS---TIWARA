@@ -145,6 +145,24 @@ describe("HomePage", () => {
     expect(second.parentElement?.className).toMatch(/open/);
   });
 
+  it("every Services link jumps to the six-styles grid, which is on the page", () => {
+    renderHome();
+    const links = screen.getAllByRole("link", { name: "Services" });
+    expect(links.length).toBeGreaterThan(0);
+    links.forEach((link) => expect(link).toHaveAttribute("href", "#stylegrid"));
+    expect(document.getElementById("stylegrid")).toBeInTheDocument();
+  });
+
+  it("arriving at /#stylegrid scrolls the grid into view", () => {
+    const scrollIntoView = vi.fn();
+    Element.prototype.scrollIntoView = scrollIntoView;
+    renderHome({}, "/#stylegrid");
+    expect(scrollIntoView).toHaveBeenCalled();
+    expect(scrollIntoView.mock.contexts[0]).toBe(
+      document.getElementById("stylegrid"),
+    );
+  });
+
   it("the burger opens and closes the mobile menu", () => {
     renderHome();
     fireEvent.click(screen.getByRole("button", { name: "Menu" }));

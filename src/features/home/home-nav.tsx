@@ -62,7 +62,7 @@ export const HomeNav = ({
             <Link to="/search" className={styles.navLink}>
               Find a stylist
             </Link>
-            <a href="#services" className={styles.navLink}>
+            <a href="#stylegrid" className={styles.navLink}>
               Services
             </a>
             <a href="#stylists" className={styles.navLink}>
@@ -137,7 +137,7 @@ export const HomeNav = ({
               Find a stylist
             </Link>
             <a
-              href="#services"
+              href="#stylegrid"
               onClick={onToggleMenu}
               className={styles.menuLink}
             >

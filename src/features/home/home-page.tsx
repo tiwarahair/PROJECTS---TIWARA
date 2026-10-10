@@ -52,12 +52,28 @@ export const HomePage = ({
   // page-wide helmet rules (body background, colour tokens, smooth scroll) apply while Home is mounted
   useLayoutEffect(() => {
     document.documentElement.classList.add("home-page");
-    if (!window.location.hash) {
+    const { hash } = window.location;
+    if (!hash) {
       if ("scrollRestoration" in history) history.scrollRestoration = "manual";
       window.scrollTo(0, 0);
       requestAnimationFrame(() => window.scrollTo(0, 0));
     }
-    return () => document.documentElement.classList.remove("home-page");
+    // links like "/#stylegrid" from other pages: the router doesn't scroll to a hash, so jump to it here,
+    // then re-align once in case images or fonts above it shifted the layout (unless the visitor has scrolled)
+    const target = hash ? document.getElementById(hash.slice(1)) : null;
+    let realign = 0;
+    if (target) {
+      target.scrollIntoView({ behavior: "instant" });
+      const landedAt = window.scrollY;
+      realign = window.setTimeout(() => {
+        if (window.scrollY === landedAt)
+          target.scrollIntoView({ behavior: "instant" });
+      }, 400);
+    }
+    return () => {
+      window.clearTimeout(realign);
+      document.documentElement.classList.remove("home-page");
+    };
   }, []);
 
   const toggleMenu = () => setMenuOpen((open) => !open);
