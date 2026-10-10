@@ -334,7 +334,6 @@ export const getSettingsView = (
   const saveRules = () => {
     toastMsg("Booking rules saved");
     if (state.page) leavePage();
-    else actions.closeSub();
   };
 
   // ---- pause online bookings ----

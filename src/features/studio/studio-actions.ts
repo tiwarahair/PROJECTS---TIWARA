@@ -248,14 +248,11 @@ export const createStudioActions = (context: StudioContext) => {
   };
 
   const openPage = (name: StudioPage, fromSetup?: boolean) => {
-    clear(timers, "sub");
     clear(timers, "sheet");
     setState(({ setupMin }) => ({
       tab: "settings",
       page: name,
       pageFromSetup: !!fromSetup,
-      sub: null,
-      subOut: false,
       sheet: null,
       out: false,
       cliSel: null,
@@ -279,15 +276,6 @@ export const createStudioActions = (context: StudioContext) => {
           : { page: null, pageFromSetup: false },
     );
     scrollBody(0, false);
-  };
-
-  const closeSub = () => {
-    setState({ subOut: true });
-    clear(timers, "sub");
-    timers.sub = window.setTimeout(
-      () => setState({ sub: null, subOut: false }),
-      210,
-    );
   };
 
   /** Ticks off finished setup steps and celebrates when all four are done. */
@@ -686,7 +674,6 @@ export const createStudioActions = (context: StudioContext) => {
     openPage,
     closePage,
     leavePage,
-    closeSub,
     checkDone,
     openTf,
     closeTf,

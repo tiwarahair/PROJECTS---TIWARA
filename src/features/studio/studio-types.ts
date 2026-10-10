@@ -525,8 +525,6 @@ export interface StudioState {
   range: "today" | "week" | "month";
   sheet: SheetKind | null;
   out: boolean;
-  sub: string | null;
-  subOut: boolean;
   toast: string | null;
   pop: Popover | null;
   check: StudioCheck;

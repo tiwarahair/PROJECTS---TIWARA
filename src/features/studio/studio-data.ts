@@ -492,8 +492,6 @@ export const getInitialStudioState = (): StudioState => {
     range: "week",
     sheet: null,
     out: false,
-    sub: null,
-    subOut: false,
     toast: null,
     pop: null,
     check: { avail: false, profile: false, stripe: false },

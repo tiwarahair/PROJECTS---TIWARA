@@ -828,7 +828,6 @@ export const ClientSheet = ({ studio }: { studio: StudioController }) => {
             const clientId = state.sheetCId ?? null;
             actions.closeSheet();
             window.setTimeout(() => {
-              actions.closeSub();
               actions.openSheet("add", {
                 addStep: 2,
                 addClient: clientId,

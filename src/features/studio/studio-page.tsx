@@ -9,7 +9,6 @@ import { StudioServices } from "./studio-services";
 import { StudioSettings } from "./studio-settings";
 import { EndDateDialog } from "./sheets-simple";
 import { StudioSheets } from "./studio-sheets";
-import { SubScreen } from "./sub-screen";
 import { TwoFactorDialog } from "./two-factor";
 import { BookingAddonDialog } from "./booking-sheet";
 import { NewClientDialog } from "./booking-dialogs";
@@ -105,14 +104,12 @@ export const StudioPage = (props: StudioPageProps) => {
               !state.setupExit && <SetupPill studio={studio} />}
             {isWide && state.linkCard && <LinkCard studio={studio} />}
             {!isWide &&
-              !state.sub &&
               !state.sheet &&
               !state.wiz &&
               (state.tab === "home" ||
                 state.tab === "bookings" ||
                 state.tab === "services") && <Fab studio={studio} />}
             {!isWide && <FooterNav studio={studio} />}
-            <SubScreen studio={studio} />
             {state.sheet && <StudioSheets studio={studio} />}
             <SlotPopover studio={studio} />
             {bookingsView && (

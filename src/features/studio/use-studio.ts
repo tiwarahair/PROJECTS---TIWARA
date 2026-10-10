@@ -207,7 +207,6 @@ export const useStudio = (props: StudioProps) => {
     } else if (!week) memo.wkScrolled = null;
     const isLocked = !!(
       state.sheet ||
-      state.sub ||
       state.qa ||
       state.confirm ||
       state.acts ||

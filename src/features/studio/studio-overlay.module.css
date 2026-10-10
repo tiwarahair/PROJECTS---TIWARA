@@ -46,14 +46,6 @@
   animation: dlgout 0.14s cubic-bezier(0.4, 0, 0.7, 0.2) both;
 }
 
-.subIn {
-  animation: subin 0.28s cubic-bezier(0.32, 0.72, 0, 1) both;
-}
-
-.subOut {
-  animation: subout 0.21s cubic-bezier(0.4, 0, 0.7, 0.2) both;
-}
-
 .popIn {
   animation: popin 0.16s cubic-bezier(0.23, 1, 0.32, 1) both;
 }
@@ -131,24 +123,6 @@
   }
   to {
     transform: translate(-50%, 100%);
-  }
-}
-
-@keyframes subin {
-  from {
-    transform: translate(calc(-50% + 100%), 0);
-  }
-  to {
-    transform: translate(-50%, 0);
-  }
-}
-
-@keyframes subout {
-  from {
-    transform: translate(-50%, 0);
-  }
-  to {
-    transform: translate(calc(-50% + 100%), 0);
   }
 }
 
