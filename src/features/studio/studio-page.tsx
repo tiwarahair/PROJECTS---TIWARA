@@ -7,6 +7,8 @@ import { StudioEarnings } from "./studio-earnings";
 import { StudioHome } from "./studio-home";
 import { StudioServices } from "./studio-services";
 import { StudioSettings } from "./studio-settings";
+import { EndDateDialog } from "./sheets-simple";
+import { StudioSheets } from "./studio-sheets";
 import {
   ActionsMenu,
   ConfirmSheet,
@@ -102,10 +104,12 @@ export const StudioPage = (props: StudioPageProps) => {
                 state.tab === "bookings" ||
                 state.tab === "services") && <Fab studio={studio} />}
             {!isWide && <FooterNav studio={studio} />}
+            {state.sheet && <StudioSheets studio={studio} />}
             <SlotPopover studio={studio} />
             {bookingsView && (
               <QuickActions studio={studio} view={bookingsView} />
             )}
+            <EndDateDialog studio={studio} />
             <ActionsMenu studio={studio} />
             <ConfirmSheet studio={studio} />
             <StudioToast studio={studio} />
