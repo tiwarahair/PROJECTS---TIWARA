@@ -117,11 +117,16 @@ export const useStudio = (props: StudioProps) => {
   const wideRef = useRef(isWide);
   wideRef.current = isWide;
 
-  const setState = (patch: StudioPatch) =>
-    setRawState((current) => ({
+  // like the prototype's runtime, the new state is readable straight away (getState) and the render follows
+  const setState = (patch: StudioPatch) => {
+    const current = stateRef.current;
+    const next = {
       ...current,
       ...(typeof patch === "function" ? patch(current) : patch),
-    }));
+    };
+    stateRef.current = next;
+    setRawState(next);
+  };
   const context: StudioContext = {
     getState: () => stateRef.current,
     setState,

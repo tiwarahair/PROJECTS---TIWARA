@@ -9,8 +9,14 @@ import { StudioServices } from "./studio-services";
 import { StudioSettings } from "./studio-settings";
 import { EndDateDialog } from "./sheets-simple";
 import { StudioSheets } from "./studio-sheets";
+import { SubScreen } from "./sub-screen";
+import { TwoFactorDialog } from "./two-factor";
 import { BookingAddonDialog } from "./booking-sheet";
 import { NewClientDialog } from "./booking-dialogs";
+import {
+  WizardNewAddonDialog,
+  WizardSuggestionDialogs,
+} from "./wizard-dialogs";
 import {
   ActionsMenu,
   ConfirmSheet,
@@ -106,13 +112,17 @@ export const StudioPage = (props: StudioPageProps) => {
                 state.tab === "bookings" ||
                 state.tab === "services") && <Fab studio={studio} />}
             {!isWide && <FooterNav studio={studio} />}
+            <SubScreen studio={studio} />
             {state.sheet && <StudioSheets studio={studio} />}
             <SlotPopover studio={studio} />
             {bookingsView && (
               <QuickActions studio={studio} view={bookingsView} />
             )}
             <EndDateDialog studio={studio} />
+            <WizardNewAddonDialog studio={studio} />
             <ActionsMenu studio={studio} />
+            <WizardSuggestionDialogs studio={studio} />
+            <TwoFactorDialog studio={studio} />
             <ConfirmSheet studio={studio} />
             <BookingAddonDialog studio={studio} />
             <NewClientDialog studio={studio} />

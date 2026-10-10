@@ -34,6 +34,8 @@ import {
 } from "./sheets-simple";
 import { SheetFrame } from "./studio-sheet";
 import type { StudioController } from "./use-studio";
+import { WizardFooter, WizardSheet } from "./wizard";
+import { getWizardView } from "./wizard-view";
 
 /** The open sheet's body and footer inside the shared frame (prototype Studio.dc.html lines 1544–3418). */
 export const StudioSheets = ({ studio }: { studio: StudioController }) => {
@@ -43,6 +45,7 @@ export const StudioSheets = ({ studio }: { studio: StudioController }) => {
   const addView = sheet === "add" ? getAddBookingView(studio) : null;
   const categoriesView = sheet === "cats" ? getCategoriesView(studio) : null;
   const addonView = sheet === "addon" ? getAddonSheetView(studio) : null;
+  const wizardView = sheet === "svcwiz" ? getWizardView(studio) : null;
   const clientsView =
     sheet === "cliView" || sheet === "clientEdit"
       ? getClientsView(studio)
@@ -65,6 +68,8 @@ export const StudioSheets = ({ studio }: { studio: StudioController }) => {
           <PastSheetFooter view={pastView} />
         ) : clientsView && sheet === "clientEdit" ? (
           <ClientEditFooter view={clientsView} />
+        ) : wizardView ? (
+          <WizardFooter view={wizardView} />
         ) : addonView ? (
           <AddonSheetFooter view={addonView} />
         ) : null
@@ -78,6 +83,7 @@ export const StudioSheets = ({ studio }: { studio: StudioController }) => {
       )}
       {sheet === "notif" && <NotificationsSheet studio={studio} />}
       {addView && <AddBookingSheet studio={studio} view={addView} />}
+      {wizardView && <WizardSheet view={wizardView} />}
       {categoriesView && (
         <CategoriesSheet studio={studio} view={categoriesView} />
       )}
