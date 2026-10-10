@@ -1,0 +1,30 @@
+/* Studio → Earnings wrapper — verbatim values from Studio.dc.html line 906. */
+
+.earnings {
+  padding: 18px 18px 110px;
+  max-width: none;
+  box-sizing: border-box;
+  animation: tabin 0.26s cubic-bezier(0.2, 0.8, 0.2, 1) backwards;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.wide {
+  padding: 18px 22px 40px;
+}
+
+.desk {
+  padding: 22px 28px 40px;
+  max-width: 1120px;
+}
+
+@keyframes tabin {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}

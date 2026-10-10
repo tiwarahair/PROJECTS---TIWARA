@@ -2,6 +2,8 @@ import { useLayoutEffect } from "react";
 import { joinClassNames } from "../../utils/class-names";
 import { FilterSheet, QuickActions, SlotPopover } from "./bookings-overlays";
 import { StudioBookings, getBookingsView } from "./studio-bookings";
+import { StudioClients } from "./studio-clients";
+import { StudioEarnings } from "./studio-earnings";
 import { StudioHome } from "./studio-home";
 import { StudioServices } from "./studio-services";
 import {
@@ -68,6 +70,8 @@ export const StudioPage = (props: StudioPageProps) => {
             >
               {state.tab === "home" && <StudioHome studio={studio} />}
               {state.tab === "services" && <StudioServices studio={studio} />}
+              {state.tab === "earnings" && <StudioEarnings studio={studio} />}
+              {state.tab === "clients" && <StudioClients studio={studio} />}
               {bookingsView && (
                 <>
                   <StudioBookings studio={studio} view={bookingsView} />
