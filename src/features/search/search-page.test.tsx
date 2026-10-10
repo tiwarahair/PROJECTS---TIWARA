@@ -64,9 +64,19 @@ describe("SearchPage", () => {
   it("sort and distance pick from their popovers", () => {
     renderWithStore(<SearchPage />, "/search");
     fireEvent.click(screen.getByRole("button", { name: "Sort: Distance" }));
-    fireEvent.click(screen.getByRole("option", { name: "Lowest price" }));
     expect(
-      screen.getByRole("button", { name: "Sort: Lowest price" }),
+      screen.queryByRole("option", { name: "Lowest price" }),
+    ).not.toBeInTheDocument();
+    fireEvent.click(screen.getByRole("option", { name: "Price: high to low" }));
+    expect(
+      screen.getByRole("button", { name: "Sort: Price: high to low" }),
+    ).toBeInTheDocument();
+    fireEvent.click(
+      screen.getByRole("button", { name: "Sort: Price: high to low" }),
+    );
+    fireEvent.click(screen.getByRole("option", { name: "Price: low to high" }));
+    expect(
+      screen.getByRole("button", { name: "Sort: Price: low to high" }),
     ).toBeInTheDocument();
     fireEvent.click(screen.getByRole("button", { name: "Within 10 miles" }));
     fireEvent.click(screen.getByRole("option", { name: "Within 25 miles" }));

@@ -220,6 +220,8 @@ export const calcResults = (
       getDistance(left) - getDistance(right),
     price: (left, right) =>
       left.price - right.price || getDistance(left) - getDistance(right),
+    "price-desc": (left, right) =>
+      right.price - left.price || getDistance(left) - getDistance(right),
   };
   list.sort(comparators[sort] || comparators.distance);
   return { list, selection, place };

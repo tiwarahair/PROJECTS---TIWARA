@@ -119,6 +119,23 @@ describe("search logic", () => {
     expect(locs.map(({ st }) => st.id)).toEqual(["locd-and-lovely"]);
   });
 
+  it("sorts by price low to high and high to low, keeping the URL param", () => {
+    const getPrices = (search: string) =>
+      calcResults(stateFor(search)).list.map(({ price }) => price);
+    const ascending = getPrices("?sort=price");
+    const descending = getPrices("?sort=price-desc");
+    expect(ascending.length).toBeGreaterThan(1);
+    expect(ascending).toEqual(
+      [...ascending].sort((left, right) => left - right),
+    );
+    expect(descending).toEqual(
+      [...descending].sort((left, right) => right - left),
+    );
+    expect(getStateSearch(stateFor("?sort=price-desc"))).toBe(
+      "?sort=price-desc",
+    );
+  });
+
   it("builds result cards with facts and service rows when a style is chosen", () => {
     const state = stateFor("?group=locs");
     const { list, selection } = calcResults(state);

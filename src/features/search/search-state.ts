@@ -1,6 +1,6 @@
 // Search page state, initialised from the URL exactly like the prototype constructor.
 
-export type SortKey = "distance" | "earliest" | "price";
+export type SortKey = "distance" | "earliest" | "price" | "price-desc";
 export type Venue = "Salon" | "Home-based" | "Mobile";
 export type MobileView = "" | "menu" | "service" | "location" | "date";
 export type WhatChip = "all" | "styles" | "stylists";
@@ -68,6 +68,7 @@ const SORT_PARAMS: Record<string, SortKey> = {
   distance: "distance",
   earliest: "earliest",
   price: "price",
+  "price-desc": "price-desc",
   soonest: "earliest",
   nearest: "distance",
 };

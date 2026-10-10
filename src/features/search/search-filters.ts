@@ -5,7 +5,8 @@ export const VENUES: Venue[] = ["Salon", "Home-based", "Mobile"];
 export const SORTS: [SortKey, string][] = [
   ["distance", "Distance"],
   ["earliest", "Earliest available"],
-  ["price", "Lowest price"],
+  ["price", "Price: low to high"],
+  ["price-desc", "Price: high to low"],
 ];
 
 export const toggleVenue = (list: Venue[], venue: Venue): Venue[] =>
