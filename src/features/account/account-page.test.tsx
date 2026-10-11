@@ -38,7 +38,7 @@ describe("AccountPage", () => {
     const gate = screen.getByRole("main");
     expect(within(gate).getByRole("link", { name: "Log in" })).toHaveAttribute(
       "href",
-      "/onboarding?screen=cust-email&return=" +
+      "/login?screen=cust-email&return=" +
         encodeURIComponent("/account?section=bookings&login=1"),
     );
   });

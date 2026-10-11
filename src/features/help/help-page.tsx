@@ -14,7 +14,7 @@ const HELP_FAQS = faqs.filter(({ q }) =>
   /cancel or reschedule|deposits work|How do I pay/.test(q),
 );
 const LOGIN_HREF =
-  "/onboarding?screen=cust-email&return=" + encodeURIComponent("/help");
+  "/login?screen=cust-email&return=" + encodeURIComponent("/help");
 const HEART_PATH =
   "M12 20.5s-7.5-4.6-9.2-9.4C1.6 7.6 3.9 4.5 7.2 4.5c2 0 3.6 1.1 4.8 2.8 1.2-1.7 2.8-2.8 4.8-2.8 3.3 0 5.6 3.1 4.4 6.6-1.7 4.8-9.2 9.4-9.2 9.4z";
 

@@ -29,7 +29,7 @@ describe("StylistProfilePage", () => {
     );
     expect(screen.getAllByRole("link", { name: "Log in" })[0]).toHaveAttribute(
       "href",
-      "/onboarding?screen=cust-email&return=" +
+      "/login?screen=cust-email&return=" +
         encodeURIComponent("/stylist?stylist=tiwaras-house&login=1"),
     );
     unmount();

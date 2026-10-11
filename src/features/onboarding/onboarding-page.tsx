@@ -25,6 +25,7 @@ import type { OnboardingProps } from "./onboarding-state";
 import type { ScreenProps, ScreenView } from "./screen-props";
 import { TermsSheet } from "./terms-sheet";
 import { useOnboarding } from "./use-onboarding";
+import { useOnboardingRoute } from "./use-onboarding-route";
 import { Wizard } from "./wizard";
 
 const SHELL_SCREENS: Record<string, ComponentType<ScreenProps>> = {
@@ -46,11 +47,12 @@ const SHELL_SCREENS: Record<string, ComponentType<ScreenProps>> = {
 };
 
 /**
- * Log in / sign up and the stylist set-up wizard, route "/onboarding" (prototype Onboarding.dc.html).
- * Every prop can also be passed as a URL query param.
+ * Log in (/login), customer sign-up (/signup) and the stylist set-up wizard (/join)
+ * One page serves all three routes so answers carry across them.
  */
 export const OnboardingPage = (props: OnboardingProps) => {
   const onboarding = useOnboarding(props);
+  useOnboardingRoute(onboarding);
   const { state, props: resolved, rootRef, actions } = onboarding;
   const layout = getLayout(state, resolved);
   const { screen, isWizard, desk, isDark, welcomeOver } = layout;

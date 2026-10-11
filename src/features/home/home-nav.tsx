@@ -81,7 +81,7 @@ export const HomeNav = ({
               )}
             >
               {!loggedIn && (
-                <Link to="/onboarding" className={styles.navLink}>
+                <Link to="/login" className={styles.navLink}>
                   Log in
                 </Link>
               )}
@@ -158,7 +158,7 @@ export const HomeNav = ({
               For stylists
             </a>
             {!loggedIn && (
-              <Link to="/onboarding" className={styles.menuLink}>
+              <Link to="/login" className={styles.menuLink}>
                 Log in
               </Link>
             )}

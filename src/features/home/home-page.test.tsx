@@ -70,7 +70,7 @@ describe("HomePage", () => {
     renderHome();
     expect(screen.getAllByRole("link", { name: "Log in" })[0]).toHaveAttribute(
       "href",
-      "/onboarding",
+      "/login",
     );
     sessionStorage.setItem("tw_cust", "1");
     renderHome();

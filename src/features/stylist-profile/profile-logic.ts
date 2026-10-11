@@ -243,5 +243,5 @@ export const getReviews = (): ReviewView[] =>
   }));
 
 export const getLoginHref = (stylistId: string): string =>
-  "/onboarding?screen=cust-email&return=" +
+  "/login?screen=cust-email&return=" +
   encodeURIComponent("/stylist?stylist=" + stylistId + "&login=1");

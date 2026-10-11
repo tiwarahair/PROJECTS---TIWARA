@@ -15,8 +15,8 @@ const LINK_GROUPS = [
   {
     title: "Stylists",
     links: [
-      { label: "List your business", to: "/onboarding?flow=list" },
-      { label: "Tiwára's Studio", to: "/onboarding?flow=pro" },
+      { label: "List your business", to: "/join" },
+      { label: "Tiwára's Studio", to: "/login?flow=pro" },
       { label: "Why join", href: "#for-stylists" },
     ],
   },

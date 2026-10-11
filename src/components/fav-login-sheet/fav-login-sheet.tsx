@@ -3,6 +3,7 @@ import { useLocation, useNavigate } from "react-router";
 import { useEntered } from "../../hooks/use-entered";
 import { closeLoginSheet } from "../../stores/favourites-slice";
 import { useAppDispatch, useAppSelector } from "../../stores/hooks";
+import { getScreenPath } from "../../features/onboarding/onboarding-routes";
 import { writeSession } from "../../utils/page-flags";
 
 import styles from "./fav-login-sheet.module.css";
@@ -55,7 +56,8 @@ const LoginSheetCard = ({ stylistId }: LoginSheetCardProps) => {
     writeSession("tw_fav_pending", stylistId);
     dispatch(closeLoginSheet());
     navigate(
-      "/onboarding?screen=" +
+      getScreenPath(screen) +
+        "?screen=" +
         screen +
         "&return=" +
         encodeURIComponent(returnTo),

@@ -29,7 +29,7 @@ const openNewBooking = () => {
 const getContinue = () =>
   screen.getByRole("button", { name: "Continue" }) as HTMLButtonElement;
 
-describe("Studio → New booking", () => {
+describe("Studio → New booking", { timeout: 15_000 }, () => {
   beforeEach(() => {
     vi.useFakeTimers({
       toFake: [

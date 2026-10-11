@@ -51,7 +51,7 @@ describe("FavHost (tw-fav.js port)", () => {
     fireEvent.click(screen.getByRole("button", { name: "Log in" }));
     expect(sessionStorage.getItem("tw_fav_pending")).toBe("amara-beauty");
     expect(screen.getByTestId("location")).toHaveTextContent(
-      "/onboarding?screen=cust-email&return=" +
+      "/login?screen=cust-email&return=" +
         encodeURIComponent("/search?login=1"),
     );
   });

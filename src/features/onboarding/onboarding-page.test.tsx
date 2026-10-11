@@ -16,7 +16,7 @@ describe("OnboardingPage", () => {
   afterEach(() => vi.useRealTimers());
 
   it("starts on the chooser; For customers asks for an email", () => {
-    renderWithStore(<OnboardingPage />, "/onboarding");
+    renderWithStore(<OnboardingPage />, "/login");
     expect(
       screen.getByRole("heading", { name: "Log in or sign up" }),
     ).toBeInTheDocument();
@@ -29,7 +29,7 @@ describe("OnboardingPage", () => {
   it("a known customer email goes to the password; the demo password logs in and returns", () => {
     renderWithStore(
       <OnboardingPage />,
-      "/onboarding?screen=cust-email&return=%2Fsearch",
+      "/login?screen=cust-email&return=%2Fsearch",
     );
     fireEvent.change(screen.getByLabelText("Email address"), {
       target: { value: "nia.okafor@gmail.com" },
@@ -51,7 +51,7 @@ describe("OnboardingPage", () => {
   it("a wrong password shows the error", () => {
     renderWithStore(
       <OnboardingPage />,
-      "/onboarding?fixture=wrong-password&password=strict&board=true",
+      "/login?fixture=wrong-password&password=strict&board=true",
     );
     expect(screen.getAllByRole("alert")[0]).toHaveTextContent(
       "That password isn’t right. Try again or reset it.",
@@ -59,7 +59,7 @@ describe("OnboardingPage", () => {
   });
 
   it("the wizard picks a business type and moves on after 300ms", () => {
-    renderWithStore(<OnboardingPage />, "/onboarding?screen=w1&board=true");
+    renderWithStore(<OnboardingPage />, "/join?screen=w1&board=true");
     fireEvent.click(screen.getByRole("radio", { name: /Mobile/ }));
     advance(300);
     expect(
@@ -70,7 +70,7 @@ describe("OnboardingPage", () => {
   it("the code screen accepts 123456 typed into the boxes and signs the customer in", () => {
     renderWithStore(
       <OnboardingPage />,
-      "/onboarding?screen=verify&board=true&stayOnDone=true&code=strict",
+      "/signup?screen=verify&board=true&stayOnDone=true&code=strict",
     );
     "123456".split("").forEach((digit, index) =>
       fireEvent.change(screen.getByLabelText("Digit " + (index + 1)), {
@@ -87,11 +87,61 @@ describe("OnboardingPage", () => {
   it("Client Terms opens the terms sheet", () => {
     renderWithStore(
       <OnboardingPage />,
-      "/onboarding?screen=cust-create&board=true",
+      "/signup?screen=cust-create&board=true",
     );
     fireEvent.click(screen.getByRole("button", { name: "Client Terms" }));
     expect(
       screen.getByRole("dialog", { name: "Client Terms" }),
     ).toBeInTheDocument();
+  });
+
+  describe("routes", () => {
+    const getLocation = () => screen.getByTestId("location").textContent;
+
+    it("/join opens on the stylist landing and Get started begins the set-up", () => {
+      renderWithStore(<OnboardingPage />, "/join");
+      expect(
+        screen.getByRole("heading", { name: /Run your hair/ }),
+      ).toBeInTheDocument();
+      fireEvent.click(screen.getByRole("button", { name: "Get started" }));
+      expect(
+        screen.getByRole("heading", { name: "How do you work?" }),
+      ).toBeInTheDocument();
+      expect(getLocation()).toBe("/join");
+    });
+
+    it("/signup opens on the email step", () => {
+      renderWithStore(<OnboardingPage />, "/signup");
+      expect(screen.getByLabelText("Email address")).toBeInTheDocument();
+      expect(getLocation()).toBe("/signup");
+    });
+
+    it("a new email on /login moves to /signup, keeping the email", () => {
+      renderWithStore(<OnboardingPage />, "/login?screen=cust-email");
+      fireEvent.change(screen.getByLabelText("Email address"), {
+        target: { value: "new.person@example.com" },
+      });
+      fireEvent.click(screen.getByRole("button", { name: "Continue" }));
+      advance(650);
+      expect(
+        screen.getByRole("heading", { name: "Create account" }),
+      ).toBeInTheDocument();
+      expect(screen.getByText(/new.person@example.com/)).toBeInTheDocument();
+      expect(getLocation()).toBe("/signup");
+    });
+
+    it("Log in on the stylist landing moves to /login", () => {
+      renderWithStore(<OnboardingPage />, "/join");
+      fireEvent.click(screen.getByRole("button", { name: "Log in" }));
+      expect(getLocation()).toBe("/login");
+    });
+
+    it("a ?screen= for another route opens on that route", () => {
+      renderWithStore(<OnboardingPage />, "/login?screen=w1&board=true");
+      expect(
+        screen.getByRole("heading", { name: "How do you work?" }),
+      ).toBeInTheDocument();
+      expect(getLocation()).toBe("/join");
+    });
   });
 });

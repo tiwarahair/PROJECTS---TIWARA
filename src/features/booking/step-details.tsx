@@ -119,7 +119,7 @@ export const StepDetails = ({ booking }: StepDetailsProps) => {
           Already have an account?{" "}
           <Link
             to={
-              "/onboarding?screen=cust-email&return=" +
+              "/login?screen=cust-email&return=" +
               encodeURIComponent(
                 "/book?stylist=" + stylist.id + "&login=1&resume=1",
               )

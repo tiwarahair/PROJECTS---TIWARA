@@ -62,7 +62,7 @@ export const SearchMenu = () => {
           },
         ] satisfies NavMenuItem[])
       : ([
-          { kind: "link", key: "log-in", label: "Log in", to: "/onboarding" },
+          { kind: "link", key: "log-in", label: "Log in", to: "/login" },
           { kind: "link", key: "help", label: "Help & support", to: "/help" },
         ] satisfies NavMenuItem[])),
   ];

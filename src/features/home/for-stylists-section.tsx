@@ -53,7 +53,7 @@ export const ForStylistsSection = ({ variant }: ForStylistsSectionProps) => (
                 Free to list, no commission, set up in about five minutes.
               </p>
               <Link
-                to="/onboarding?flow=list"
+                to="/join"
                 onClick={rememberListFlow}
                 className={styles.cta}
               >
@@ -82,7 +82,7 @@ export const ForStylistsSection = ({ variant }: ForStylistsSectionProps) => (
             </p>
             <div data-rv="" className={styles.splitActions}>
               <Link
-                to="/onboarding?flow=list"
+                to="/join"
                 onClick={rememberListFlow}
                 className={styles.splitCta}
               >

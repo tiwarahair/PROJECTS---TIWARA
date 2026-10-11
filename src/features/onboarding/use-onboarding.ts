@@ -21,6 +21,7 @@ import {
   STORAGE_KEY,
   TURNSTILE_SCREENS,
 } from "./onboarding-data";
+import { getRouteForPath, ROUTE_START } from "./onboarding-routes";
 import {
   EMPTY_CODE,
   getBackScreen,
@@ -77,7 +78,9 @@ const getReturnTo = (): string => {
       if (
         referrer &&
         referrer.origin === window.location.origin &&
-        !/onboarding/i.test(decodeURIComponent(referrer.pathname))
+        !/onboarding|^\/(login|signup|join)$/i.test(
+          decodeURIComponent(referrer.pathname),
+        )
       )
         returnTo = referrer.pathname + referrer.search;
     } catch {
@@ -109,6 +112,7 @@ const getStartState = (props: ResolvedProps): OnboardingState => {
   }
   const flow =
     new URLSearchParams(window.location.search).get("flow") || handoff;
+  const route = getRouteForPath(window.location.pathname) ?? "login";
   const start =
     flow === "list"
       ? "welcome"
@@ -116,7 +120,7 @@ const getStartState = (props: ResolvedProps): OnboardingState => {
         ? "pro-email"
         : props.screen && props.screen !== "auto"
           ? props.screen
-          : "chooser";
+          : ROUTE_START[route];
   state.screen = start;
   state.returnTo = getReturnTo();
   if (start === "welcome" || start[0] === "w") state.audience = "pro";
