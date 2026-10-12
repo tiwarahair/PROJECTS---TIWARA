@@ -2,8 +2,8 @@ import { Link } from "react-router";
 import { serviceGroups } from "../../data";
 import { joinClassNames } from "../../utils/class-names";
 import { ArrowIcon } from "./arrow-icon";
-import page from "./home-page.module.css";
-import styles from "./quiz-strip.module.css";
+import page from "../../styles/features/home/home-page.module.css";
+import styles from "../../styles/features/home/quiz-strip.module.css";
 
 const QUIZ_GROUP_IDS = ["braids", "locs", "natural", "wigs"];
 

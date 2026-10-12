@@ -2,9 +2,9 @@ import type { CSSProperties } from "react";
 import { joinClassNames } from "../../utils/class-names";
 import { getDialogPlacement, getOverlayAnimation } from "./studio-overlay";
 import type { StudioController } from "./use-studio";
-import overlay from "./studio-overlay.module.css";
-import shell from "./studio-shell.module.css";
-import styles from "./studio-overlays.module.css";
+import overlay from "../../styles/features/studio/studio-overlay.module.css";
+import shell from "../../styles/features/studio/studio-shell.module.css";
+import styles from "../../styles/features/studio/studio-overlays.module.css";
 
 export const StudioTooltip = ({ studio }: { studio: StudioController }) => {
   const { tip } = studio.state;

@@ -5,8 +5,8 @@ import { DuplicateNotice } from "./booking-dialogs";
 import { AddonPickerList } from "./booking-steps";
 import { CalendarToggle, getMonthNav, MonthCalendar } from "./sheets-simple";
 import type { StudioController } from "./use-studio";
-import styles from "./add-booking.module.css";
-import stepStyles from "./booking-steps.module.css";
+import styles from "../../styles/features/studio/add-booking.module.css";
+import stepStyles from "../../styles/features/studio/booking-steps.module.css";
 
 const asStyle = (values: Record<string, string>) => values as CSSProperties;
 

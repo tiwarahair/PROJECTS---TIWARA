@@ -11,7 +11,7 @@ import type { SettingsIcon, SettingsView } from "./settings-view";
 import { GATE_REASON, STUDIO_STYLIST_ID } from "./studio-data";
 import { getAvatarSrc } from "./studio-shell";
 import type { StudioController } from "./use-studio";
-import styles from "./studio-settings.module.css";
+import styles from "../../styles/features/studio/studio-settings.module.css";
 
 const STROKE = {
   fill: "none",

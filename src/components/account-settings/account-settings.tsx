@@ -13,8 +13,8 @@ import type {
   AccountSettingsController,
   AccountSettingsProps,
 } from "./use-account-settings";
-import shared from "./account-settings.module.css";
-import dialogStyles from "./settings-dialog.module.css";
+import shared from "../../styles/components/account-settings/account-settings.module.css";
+import dialogStyles from "../../styles/components/account-settings/settings-dialog.module.css";
 
 export type {
   AccountSettingsApi,

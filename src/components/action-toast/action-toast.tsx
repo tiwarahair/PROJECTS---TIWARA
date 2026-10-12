@@ -6,7 +6,7 @@ import { useAppDispatch, useAppSelector } from "../../stores/hooks";
 import { setFavourite } from "../../stores/favourites-slice";
 import { clearToast } from "../../stores/toast-slice";
 import type { ToastMessage } from "../../stores/toast-slice";
-import styles from "./action-toast.module.css";
+import styles from "../../styles/components/action-toast/action-toast.module.css";
 
 const EXIT_MS = 260;
 

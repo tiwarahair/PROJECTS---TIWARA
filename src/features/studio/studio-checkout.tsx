@@ -6,7 +6,7 @@ import type {
 import { CheckoutSheet } from "../../components/checkout-sheet/checkout-sheet";
 import type { CheckoutSheetProps } from "../../components/checkout-sheet/use-checkout";
 import type { StudioController } from "./use-studio";
-import sheet from "./studio-sheet.module.css";
+import sheet from "../../styles/features/studio/studio-sheet.module.css";
 
 const formatMinutes = (minutes: number) => {
   const hours = Math.floor(minutes / 60);

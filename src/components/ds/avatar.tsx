@@ -1,6 +1,6 @@
 import type { CSSProperties } from "react";
 import { joinClassNames } from "../../utils/class-names";
-import styles from "./avatar.module.css";
+import styles from "../../styles/components/ds/avatar.module.css";
 
 /** Circular photo or initials fallback (crimson tint). */
 export interface AvatarProps {

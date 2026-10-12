@@ -2,8 +2,8 @@ import { Link } from "react-router";
 import { getAssetUrl } from "../../utils/asset-url";
 import { joinClassNames } from "../../utils/class-names";
 import { ArrowIcon } from "./arrow-icon";
-import page from "./home-page.module.css";
-import styles from "./book-slot-tiles.module.css";
+import page from "../../styles/features/home/home-page.module.css";
+import styles from "../../styles/features/home/book-slot-tiles.module.css";
 
 const TILES = [
   {

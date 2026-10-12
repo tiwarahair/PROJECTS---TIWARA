@@ -2,7 +2,7 @@ import { useEffect, useLayoutEffect, useRef, useState } from "react";
 import type { CSSProperties, MouseEvent, ReactNode } from "react";
 import { Link } from "react-router";
 import { prefersReducedMotion } from "../../utils/page-flags";
-import styles from "./nav-menu.module.css";
+import styles from "../../styles/components/nav-menu/nav-menu.module.css";
 
 export type NavMenuItem =
   | {

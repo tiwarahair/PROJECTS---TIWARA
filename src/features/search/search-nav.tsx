@@ -6,8 +6,8 @@ import { joinClassNames } from "../../utils/class-names";
 import { ClearButton } from "./clear-button";
 import { getDateLabel, getMobileDateLabel } from "./search-dates";
 import { SearchMenu } from "./search-menu";
-import helmet from "./search-helmet.module.css";
-import styles from "./search-nav.module.css";
+import helmet from "../../styles/features/search/search-helmet.module.css";
+import styles from "../../styles/features/search/search-nav.module.css";
 import { getWhatListProps, WhatList, WhereList } from "./suggestion-list";
 import type { SearchController } from "./use-search";
 

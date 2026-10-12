@@ -11,7 +11,7 @@ import type {
   Swatch,
 } from "./catalog-sheets-view";
 import type { StudioController } from "./use-studio";
-import styles from "./catalog-sheets.module.css";
+import styles from "../../styles/features/studio/catalog-sheets.module.css";
 
 const asStyle = (values: Record<string, string>) => values as CSSProperties;
 

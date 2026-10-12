@@ -21,8 +21,8 @@ import {
 import { useAccount } from "./use-account";
 import type { AccountProps } from "./use-account";
 import { AddressesSection, PaymentsSection } from "./wallet-sections";
-import helmet from "./account-helmet.module.css";
-import styles from "./account-page.module.css";
+import helmet from "../../styles/features/account/account-helmet.module.css";
+import styles from "../../styles/features/account/account-page.module.css";
 
 export type AccountPageProps = AccountProps;
 

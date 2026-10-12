@@ -1,6 +1,6 @@
 import type { CSSProperties } from "react";
 import type { PasswordView } from "../../utils/password";
-import styles from "./password-meter.module.css";
+import styles from "../../styles/components/password-meter/password-meter.module.css";
 
 export interface PasswordMeterProps {
   /** Id for aria-describedby on the password input. */

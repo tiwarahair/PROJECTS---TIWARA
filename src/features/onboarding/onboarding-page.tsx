@@ -17,9 +17,9 @@ import {
   StudioScreen,
 } from "./auth-screens-end";
 import { SCREEN_LABELS, TURNSTILE_SCREENS } from "./onboarding-data";
-import "./onboarding-helmet.module.css";
+import "../../styles/features/onboarding/onboarding-helmet.module.css";
 import { getLayout } from "./onboarding-layout";
-import styles from "./onboarding-page.module.css";
+import styles from "../../styles/features/onboarding/onboarding-page.module.css";
 import { getErrors, isCodeScreen } from "./onboarding-state";
 import type { OnboardingProps } from "./onboarding-state";
 import type { ScreenProps, ScreenView } from "./screen-props";

@@ -90,7 +90,11 @@ export default defineConfig([
       "unicorn/prefer-set-has": "off",
       "unicorn/filename-case": [
         "error",
-        { cases: { kebabCase: true, snakeCase: true } },
+        // tests live in a __tests__ folder beside the code they cover
+        {
+          cases: { kebabCase: true, snakeCase: true },
+          ignore: [/^__tests__$/],
+        },
       ],
 
       "react/react-in-jsx-scope": "off",

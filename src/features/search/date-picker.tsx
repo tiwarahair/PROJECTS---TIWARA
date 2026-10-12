@@ -1,5 +1,5 @@
 import { joinClassNames } from "../../utils/class-names";
-import controls from "./search-controls.module.css";
+import controls from "../../styles/features/search/search-controls.module.css";
 import {
   WEEKDAY_LABELS,
   getCalendarCells,
@@ -8,8 +8,8 @@ import {
   HOURS,
   TIMES,
 } from "./search-dates";
-import helmet from "./search-helmet.module.css";
-import styles from "./date-picker.module.css";
+import helmet from "../../styles/features/search/search-helmet.module.css";
+import styles from "../../styles/features/search/date-picker.module.css";
 import type { SearchController } from "./use-search";
 
 interface PickerProps {

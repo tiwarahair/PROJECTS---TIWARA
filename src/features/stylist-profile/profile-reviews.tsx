@@ -1,5 +1,5 @@
 import type { ReviewView } from "./profile-logic";
-import styles from "./profile-reviews.module.css";
+import styles from "../../styles/features/stylist-profile/profile-reviews.module.css";
 
 interface ProfileReviewsProps {
   reviews: ReviewView[];

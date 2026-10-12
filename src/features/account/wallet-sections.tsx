@@ -2,8 +2,8 @@ import { AddressFinder } from "../../components/address-finder/address-finder";
 import { joinClassNames } from "../../utils/class-names";
 import { getAddressLine } from "./account-logic";
 import type { AddressForm, AccountController } from "./use-account";
-import styles from "./wallet-sections.module.css";
-import ui from "./account-ui.module.css";
+import styles from "../../styles/features/account/wallet-sections.module.css";
+import ui from "../../styles/features/account/account-ui.module.css";
 
 interface PaymentsSectionProps {
   account: AccountController;

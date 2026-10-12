@@ -2,8 +2,8 @@ import { useRef } from "react";
 import { StylistCard } from "../../components/stylist-card/stylist-card";
 import { stylists } from "../../data";
 import { joinClassNames } from "../../utils/class-names";
-import page from "./home-page.module.css";
-import styles from "./stylists-section.module.css";
+import page from "../../styles/features/home/home-page.module.css";
+import styles from "../../styles/features/home/stylists-section.module.css";
 import { useCentreSecondCard } from "./use-centre-second-card";
 
 /** "Book our stylists" row with the second card centred on load. */

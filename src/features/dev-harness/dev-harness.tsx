@@ -19,7 +19,7 @@ import { TaxDetailsForm } from "../../components/tax-details-form/tax-details-fo
 import type { TaxDetailsFormProps } from "../../components/tax-details-form/tax-details-form";
 import type { StylistCardProps } from "../../components/stylist-card/stylist-card";
 import type { AddressFixture } from "../../components/address-finder/use-address-finder";
-import styles from "./dev-harness.module.css";
+import styles from "../../styles/features/dev-harness/dev-harness.module.css";
 
 const ADDRESS_FIXTURES: AddressFixture[] = [
   "",

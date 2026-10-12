@@ -3,8 +3,8 @@ import { joinClassNames } from "../../utils/class-names";
 import { getOverlayAnimation } from "./studio-overlay";
 import type { BookingStep } from "./studio-types";
 import type { StudioController } from "./use-studio";
-import overlay from "./studio-overlay.module.css";
-import styles from "./studio-sheet.module.css";
+import overlay from "../../styles/features/studio/studio-overlay.module.css";
+import styles from "../../styles/features/studio/studio-sheet.module.css";
 
 const BOOKING_TITLES: Record<BookingStep, string> = {
   view: "Booking",

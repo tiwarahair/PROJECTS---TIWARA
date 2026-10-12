@@ -1,6 +1,6 @@
 import { useState } from "react";
 import type { ReactNode } from "react";
-import styles from "./tooltip.module.css";
+import styles from "../../styles/components/ds/tooltip.module.css";
 
 /** Hover tooltip, ink bubble above the child. */
 export interface TooltipProps {

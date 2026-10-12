@@ -3,7 +3,7 @@ import { joinClassNames } from "../../utils/class-names";
 import { getClientsView } from "./clients-view";
 import type { ClientsView } from "./clients-view";
 import type { StudioController } from "./use-studio";
-import styles from "./studio-clients.module.css";
+import styles from "../../styles/features/studio/studio-clients.module.css";
 
 const asStyle = (values: Record<string, string | null | undefined>) =>
   values as CSSProperties;

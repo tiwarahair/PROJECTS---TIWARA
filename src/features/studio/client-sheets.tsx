@@ -2,9 +2,9 @@ import { useRef } from "react";
 import { joinClassNames } from "../../utils/class-names";
 import type { ClientsView } from "./clients-view";
 import { ClientProfile } from "./studio-clients";
-import styles from "./client-sheets.module.css";
-import clientStyles from "./studio-clients.module.css";
-import sheet from "./studio-sheet.module.css";
+import styles from "../../styles/features/studio/client-sheets.module.css";
+import clientStyles from "../../styles/features/studio/studio-clients.module.css";
+import sheet from "../../styles/features/studio/studio-sheet.module.css";
 
 /** The client's profile in the side panel. */
 export const ClientViewSheet = ({ view }: { view: ClientsView }) => (

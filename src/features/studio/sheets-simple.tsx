@@ -15,8 +15,8 @@ import { getClient, getServiceDuration } from "./studio-model";
 import { getDialogPlacement, getOverlayAnimation } from "./studio-overlay";
 import type { StudioState } from "./studio-types";
 import type { StudioController } from "./use-studio";
-import overlay from "./studio-overlay.module.css";
-import styles from "./sheets-simple.module.css";
+import overlay from "../../styles/features/studio/studio-overlay.module.css";
+import styles from "../../styles/features/studio/sheets-simple.module.css";
 
 const CALENDAR_WEEKDAYS = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
 

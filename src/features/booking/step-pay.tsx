@@ -10,9 +10,9 @@ import {
   getCvcLabel,
 } from "./booking-details";
 import type { PayFields } from "./booking-state";
-import fields from "./booking-fields.module.css";
-import step from "./booking-step.module.css";
-import styles from "./step-pay.module.css";
+import fields from "../../styles/features/booking/booking-fields.module.css";
+import step from "../../styles/features/booking/booking-step.module.css";
+import styles from "../../styles/features/booking/step-pay.module.css";
 import { TurnstileFallback } from "./turnstile-fallback";
 import type { BookingController } from "./use-booking";
 

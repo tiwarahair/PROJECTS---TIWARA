@@ -2,7 +2,7 @@ import { AllergyField } from "../../components/allergy-field/allergy-field";
 import { joinClassNames } from "../../utils/class-names";
 import { getEntryStylist } from "./manage-booking-logic";
 import type { SharedEntry } from "./manage-booking-logic";
-import styles from "./shared-details.module.css";
+import styles from "../../styles/features/manage-booking/shared-details.module.css";
 
 interface SharedDetailsProps {
   isAccount: boolean;

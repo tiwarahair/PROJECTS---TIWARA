@@ -33,8 +33,8 @@ import { ProfileServices } from "./profile-services";
 import { ProfileStickyBar } from "./profile-sticky-bar";
 import { ServiceModal } from "./service-modal";
 import { SharePopover } from "./share-popover";
-import helmet from "./stylist-profile-helmet.module.css";
-import styles from "./stylist-profile-page.module.css";
+import helmet from "../../styles/features/stylist-profile/stylist-profile-helmet.module.css";
+import styles from "../../styles/features/stylist-profile/stylist-profile-page.module.css";
 import { useRevealSweep } from "./use-reveal-sweep";
 import { useStylistProfile } from "./use-stylist-profile";
 

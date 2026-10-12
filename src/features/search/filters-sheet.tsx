@@ -1,7 +1,7 @@
 import type { CSSProperties } from "react";
 import { joinClassNames } from "../../utils/class-names";
 import { CheckIcon } from "./check-icon";
-import controls from "./search-controls.module.css";
+import controls from "../../styles/features/search/search-controls.module.css";
 import {
   formatMaxPrice,
   getPriceFill,
@@ -10,8 +10,8 @@ import {
   VENUES,
 } from "./search-filters";
 import { RADII } from "./search-state";
-import helmet from "./search-helmet.module.css";
-import styles from "./filters-sheet.module.css";
+import helmet from "../../styles/features/search/search-helmet.module.css";
+import styles from "../../styles/features/search/filters-sheet.module.css";
 import type { SearchController } from "./use-search";
 
 interface FiltersSheetProps {

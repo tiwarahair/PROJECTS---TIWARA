@@ -3,7 +3,7 @@ import { joinClassNames } from "../../utils/class-names";
 import { CLIENTS } from "./studio-data";
 import { getClient, hasTwoFactor, isLive } from "./studio-model";
 import type { StudioController } from "./use-studio";
-import styles from "./studio-earnings.module.css";
+import styles from "../../styles/features/studio/studio-earnings.module.css";
 
 /** Studio → Earnings: the embedded Earnings dashboard. */
 export const StudioEarnings = ({ studio }: { studio: StudioController }) => {

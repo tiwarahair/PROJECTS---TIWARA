@@ -4,7 +4,7 @@ import { joinClassNames } from "../../utils/class-names";
 import { getWindowText } from "../../utils/pricing";
 import { getCancelSentence, getPaySubtitle } from "./booking-content";
 import { getWhenLine } from "./booking-calendar";
-import styles from "./booking-confirmation.module.css";
+import styles from "../../styles/features/booking/booking-confirmation.module.css";
 import type { BookingController } from "./use-booking";
 
 interface BookingConfirmationProps {

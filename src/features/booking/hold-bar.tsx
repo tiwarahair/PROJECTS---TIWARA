@@ -1,6 +1,6 @@
 import { joinClassNames } from "../../utils/class-names";
-import helmet from "./booking-helmet.module.css";
-import styles from "./hold-bar.module.css";
+import helmet from "../../styles/features/booking/booking-helmet.module.css";
+import styles from "../../styles/features/booking/hold-bar.module.css";
 
 interface HoldBarProps {
   /** "nav": under the nav, mobile only · "card": inside the summary card. */

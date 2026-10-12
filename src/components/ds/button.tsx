@@ -1,6 +1,6 @@
 import type { ButtonHTMLAttributes, ReactNode } from "react";
 import { joinClassNames } from "../../utils/class-names";
-import styles from "./button.module.css";
+import styles from "../../styles/components/ds/button.module.css";
 
 /**
  * The button. One shape everywhere — pill (`--radius-full`) — on marketing pages,

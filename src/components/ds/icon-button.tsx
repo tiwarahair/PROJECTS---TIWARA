@@ -1,6 +1,6 @@
 import type { ButtonHTMLAttributes } from "react";
 import { joinClassNames } from "../../utils/class-names";
-import styles from "./icon-button.module.css";
+import styles from "../../styles/components/ds/icon-button.module.css";
 
 /** Circular icon-only button — the pill applied to a square. Always pass a label. */
 export interface IconButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {

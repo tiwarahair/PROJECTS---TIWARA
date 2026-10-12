@@ -1,8 +1,8 @@
 import { Link } from "react-router";
 import { getAssetUrl } from "../../utils/asset-url";
 import { joinClassNames } from "../../utils/class-names";
-import page from "./home-page.module.css";
-import styles from "./home-footer.module.css";
+import page from "../../styles/features/home/home-page.module.css";
+import styles from "../../styles/features/home/home-footer.module.css";
 
 const LINK_GROUPS = [
   {

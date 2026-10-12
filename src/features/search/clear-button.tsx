@@ -1,4 +1,4 @@
-import styles from "./search-nav.module.css";
+import styles from "../../styles/features/search/search-nav.module.css";
 
 interface ClearButtonProps {
   label: string;

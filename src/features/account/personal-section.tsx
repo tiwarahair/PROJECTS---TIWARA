@@ -5,8 +5,8 @@ import { joinClassNames } from "../../utils/class-names";
 import type { EditKey } from "./account-logic";
 import type { Profile } from "./account-data";
 import type { AccountController } from "./use-account";
-import styles from "./personal-section.module.css";
-import ui from "./account-ui.module.css";
+import styles from "../../styles/features/account/personal-section.module.css";
+import ui from "../../styles/features/account/account-ui.module.css";
 
 const EMPTY_CODE = ["", "", "", "", "", ""];
 

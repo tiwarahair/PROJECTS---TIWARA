@@ -1,6 +1,6 @@
 import { joinClassNames } from "../../utils/class-names";
 import type { TurnstileState } from "./onboarding-state";
-import styles from "./onboarding-turnstile.module.css";
+import styles from "../../styles/features/onboarding/onboarding-turnstile.module.css";
 
 interface OnboardingTurnstileProps {
   status: TurnstileState;

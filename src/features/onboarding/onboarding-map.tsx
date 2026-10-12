@@ -1,7 +1,7 @@
 import { useEffect, useRef } from "react";
 import leaflet from "leaflet";
 import "leaflet/dist/leaflet.css";
-import styles from "./wizard-steps.module.css";
+import styles from "../../styles/features/onboarding/wizard-steps.module.css";
 
 interface OnboardingMapProps {
   /** Where the pin starts: the dragged pin, else the geocoded postcode, else central Manchester. */

@@ -12,10 +12,10 @@ import type { AccountSettingsProps } from "./use-account-settings";
 import type { AccountSettingsController } from "./use-account-settings";
 import { InfoIcon, SettingsSection } from "./settings-personal";
 import { CheckRow, Switch } from "./settings-security";
-import shared from "./account-settings.module.css";
-import calendar from "./settings-calendar.module.css";
-import notifications from "./settings-notifications.module.css";
-import payouts from "./settings-payouts.module.css";
+import shared from "../../styles/components/account-settings/account-settings.module.css";
+import calendar from "../../styles/components/account-settings/settings-calendar.module.css";
+import notifications from "../../styles/components/account-settings/settings-notifications.module.css";
+import payouts from "../../styles/components/account-settings/settings-payouts.module.css";
 
 interface PageProps {
   settings: AccountSettingsController;

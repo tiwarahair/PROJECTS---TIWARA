@@ -21,7 +21,7 @@ import type {
   TaxKind,
   TaxState,
 } from "./tax-details-logic";
-import styles from "./tax-details-form.module.css";
+import styles from "../../styles/components/tax-details-form/tax-details-form.module.css";
 
 export interface TaxDetailsFormProps {
   mode?: "setup" | "settings";

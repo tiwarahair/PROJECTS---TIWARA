@@ -11,8 +11,8 @@ import { getAdjustNote } from "./checkout-view";
 import type { CheckoutLine } from "./checkout-data";
 import type { CheckoutViewModel } from "./checkout-view";
 import type { CheckoutController, CheckoutSheetProps } from "./use-checkout";
-import flow from "./checkout-flow.module.css";
-import shared from "./checkout-sheet.module.css";
+import flow from "../../styles/components/checkout-sheet/checkout-flow.module.css";
+import shared from "../../styles/components/checkout-sheet/checkout-sheet.module.css";
 
 const PLUS = "M12 5v14M5 12h14";
 

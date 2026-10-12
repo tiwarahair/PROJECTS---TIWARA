@@ -32,7 +32,7 @@ import {
   getTextClass,
   getTileClass,
 } from "./payment-policy-sections";
-import styles from "./payment-policy.module.css";
+import styles from "../../styles/components/payment-policy/payment-policy.module.css";
 
 const FLASH_MS = 1800;
 

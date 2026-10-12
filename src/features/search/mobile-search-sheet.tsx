@@ -2,9 +2,9 @@ import { joinClassNames } from "../../utils/class-names";
 import { ClearButton } from "./clear-button";
 import { DatePickerMobile } from "./date-picker";
 import { getMobileDateLabel } from "./search-dates";
-import helmet from "./search-helmet.module.css";
+import helmet from "../../styles/features/search/search-helmet.module.css";
 import { SEARCH_ICONS } from "./search-icons";
-import styles from "./mobile-search-sheet.module.css";
+import styles from "../../styles/features/search/mobile-search-sheet.module.css";
 import { getWhatListProps, WhatList, WhereList } from "./suggestion-list";
 import type { SearchController } from "./use-search";
 

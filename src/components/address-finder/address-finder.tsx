@@ -1,7 +1,7 @@
 import { useState } from "react";
 import type { CSSProperties, MouseEvent } from "react";
 import { joinClassNames } from "../../utils/class-names";
-import styles from "./address-finder.module.css";
+import styles from "../../styles/components/address-finder/address-finder.module.css";
 import { useAddressFinder } from "./use-address-finder";
 import type {
   AddressFinderValue,

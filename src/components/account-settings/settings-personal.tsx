@@ -7,8 +7,8 @@ import {
 } from "./account-settings-logic";
 import type { AccountSettingsProps } from "./use-account-settings";
 import type { AccountSettingsController } from "./use-account-settings";
-import shared from "./account-settings.module.css";
-import styles from "./settings-personal.module.css";
+import shared from "../../styles/components/account-settings/account-settings.module.css";
+import styles from "../../styles/components/account-settings/settings-personal.module.css";
 
 /** Section with the heading column on the left (wraps above on narrow containers). */
 export const SettingsSection = ({

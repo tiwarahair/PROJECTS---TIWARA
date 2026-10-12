@@ -1,7 +1,7 @@
 import { joinClassNames } from "../../utils/class-names";
-import helmet from "./booking-helmet.module.css";
-import next from "./next-button.module.css";
-import styles from "./mobile-summary.module.css";
+import helmet from "../../styles/features/booking/booking-helmet.module.css";
+import next from "../../styles/features/booking/next-button.module.css";
+import styles from "../../styles/features/booking/mobile-summary.module.css";
 import type { BookingController } from "./use-booking";
 
 interface MobileSummaryProps {

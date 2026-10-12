@@ -6,8 +6,8 @@ import { getAssetUrl } from "../../utils/asset-url";
 import { joinClassNames } from "../../utils/class-names";
 import { getSearchParams } from "../../utils/page-flags";
 import { checkPassword, getPasswordView } from "../../utils/password";
-import "./save-details-helmet.module.css";
-import styles from "./save-details-page.module.css";
+import "../../styles/features/save-details/save-details-helmet.module.css";
+import styles from "../../styles/features/save-details/save-details-page.module.css";
 
 // clients need 15+ characters
 const CLIENT_MIN = 15;

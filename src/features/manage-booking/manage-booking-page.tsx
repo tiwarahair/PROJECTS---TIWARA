@@ -2,15 +2,15 @@ import { useEffect, useLayoutEffect, useRef, useState } from "react";
 import { Link, useNavigate } from "react-router";
 import { getAssetUrl } from "../../utils/asset-url";
 import { getSearchParams } from "../../utils/page-flags";
-import "./manage-booking-helmet.module.css";
+import "../../styles/features/manage-booking/manage-booking-helmet.module.css";
 import {
   DEFAULT_STYLIST_ID,
   getDemoBooking,
   getEntryStylist,
 } from "./manage-booking-logic";
 import type { SharedEntry } from "./manage-booking-logic";
-import styles from "./manage-booking-page.module.css";
-import toastStyles from "./manage-toast.module.css";
+import styles from "../../styles/features/manage-booking/manage-booking-page.module.css";
+import toastStyles from "../../styles/features/manage-booking/manage-toast.module.css";
 import { RemoveDialog } from "./remove-dialog";
 import { SharedDetails } from "./shared-details";
 

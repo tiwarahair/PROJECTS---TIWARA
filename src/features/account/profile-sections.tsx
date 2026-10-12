@@ -2,8 +2,8 @@ import { Link } from "react-router";
 import { StylistCard } from "../../components/stylist-card/stylist-card";
 import type { Stylist } from "../../types/stylist";
 import { SECTIONS } from "./account-data";
-import styles from "./profile-sections.module.css";
-import ui from "./account-ui.module.css";
+import styles from "../../styles/features/account/profile-sections.module.css";
+import ui from "../../styles/features/account/account-ui.module.css";
 
 const getIcon = (id: string) =>
   SECTIONS.find((section) => section.id === id)?.icon ?? "";

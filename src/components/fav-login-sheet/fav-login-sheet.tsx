@@ -6,7 +6,7 @@ import { useAppDispatch, useAppSelector } from "../../stores/hooks";
 import { getScreenPath } from "../../features/onboarding/onboarding-routes";
 import { writeSession } from "../../utils/page-flags";
 
-import styles from "./fav-login-sheet.module.css";
+import styles from "../../styles/components/fav-login-sheet/fav-login-sheet.module.css";
 
 const EXIT_MS = 230;
 

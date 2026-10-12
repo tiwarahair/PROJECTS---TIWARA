@@ -1,6 +1,6 @@
 import type { CSSProperties, ReactNode } from "react";
 import { joinClassNames } from "../../utils/class-names";
-import styles from "./tag.module.css";
+import styles from "../../styles/components/ds/tag.module.css";
 
 /** Small mark (no onClick) or chip (onClick) at --radius-xs. */
 export interface TagProps {

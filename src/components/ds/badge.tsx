@@ -1,6 +1,6 @@
 import type { CSSProperties, ReactNode } from "react";
 import { joinClassNames } from "../../utils/class-names";
-import styles from "./badge.module.css";
+import styles from "../../styles/components/ds/badge.module.css";
 
 /** Pill status label. */
 export interface BadgeProps {

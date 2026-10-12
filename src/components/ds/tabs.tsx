@@ -1,6 +1,6 @@
 import type { CSSProperties } from "react";
 import { joinClassNames } from "../../utils/class-names";
-import styles from "./tabs.module.css";
+import styles from "../../styles/components/ds/tabs.module.css";
 import { useControllable } from "./use-controllable";
 
 /** Underline tabs; active gets crimson underline. */

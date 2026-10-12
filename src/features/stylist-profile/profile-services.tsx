@@ -1,8 +1,8 @@
 import { Link } from "react-router";
 import { joinClassNames } from "../../utils/class-names";
 import type { MenuGroup, ServiceModal } from "./profile-logic";
-import styles from "./profile-services.module.css";
-import helmet from "./stylist-profile-helmet.module.css";
+import styles from "../../styles/features/stylist-profile/profile-services.module.css";
+import helmet from "../../styles/features/stylist-profile/stylist-profile-helmet.module.css";
 
 interface ProfileServicesProps {
   groups: MenuGroup[];

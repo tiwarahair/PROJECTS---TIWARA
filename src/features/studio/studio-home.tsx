@@ -12,7 +12,7 @@ import {
   isGated,
 } from "./studio-shell";
 import type { StudioController } from "./use-studio";
-import styles from "./studio-home.module.css";
+import styles from "../../styles/features/studio/studio-home.module.css";
 
 const RANGES = [
   { id: "today", label: "Today" },

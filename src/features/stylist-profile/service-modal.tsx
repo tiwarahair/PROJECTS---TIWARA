@@ -1,8 +1,8 @@
 import { Link } from "react-router";
 import { joinClassNames } from "../../utils/class-names";
 import type { ServiceModal as ServiceModalData } from "./profile-logic";
-import styles from "./service-modal.module.css";
-import helmet from "./stylist-profile-helmet.module.css";
+import styles from "../../styles/features/stylist-profile/service-modal.module.css";
+import helmet from "../../styles/features/stylist-profile/stylist-profile-helmet.module.css";
 
 interface ServiceModalProps {
   service: ServiceModalData;

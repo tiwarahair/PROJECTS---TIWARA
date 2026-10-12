@@ -3,8 +3,8 @@ import { Link } from "react-router";
 import { getAssetUrl, resolveAssetUrl } from "../../utils/asset-url";
 import { joinClassNames } from "../../utils/class-names";
 import { SECTIONS } from "./account-data";
-import helmet from "./account-helmet.module.css";
-import styles from "./account-header.module.css";
+import helmet from "../../styles/features/account/account-helmet.module.css";
+import styles from "../../styles/features/account/account-header.module.css";
 
 const MOBILE_LINKS = [
   ["bookings", "Bookings"],

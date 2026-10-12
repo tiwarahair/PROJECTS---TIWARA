@@ -1,8 +1,8 @@
 import { AllergyField } from "../../components/allergy-field/allergy-field";
 import { joinClassNames } from "../../utils/class-names";
 import type { AccountController } from "./use-account";
-import styles from "./settings-sections.module.css";
-import ui from "./account-ui.module.css";
+import styles from "../../styles/features/account/settings-sections.module.css";
+import ui from "../../styles/features/account/account-ui.module.css";
 
 interface SwitchProps {
   id: string;

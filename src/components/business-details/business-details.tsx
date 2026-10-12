@@ -28,7 +28,7 @@ import {
   TypeTiles,
 } from "./business-details-sections";
 import type { FieldView } from "./business-details-sections";
-import styles from "./business-details.module.css";
+import styles from "../../styles/components/business-details/business-details.module.css";
 
 const TOAST_MS = 2400;
 

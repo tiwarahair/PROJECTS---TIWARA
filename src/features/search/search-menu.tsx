@@ -4,7 +4,7 @@ import { NavMenu } from "../../components/nav-menu/nav-menu";
 import type { NavMenuItem } from "../../components/nav-menu/nav-menu";
 import { useAppDispatch, useAppSelector } from "../../stores/hooks";
 import { logOut } from "../../stores/session-slice";
-import styles from "./search-nav.module.css";
+import styles from "../../styles/features/search/search-nav.module.css";
 
 /** The nav's ☰ button and its pop-up menu. */
 export const SearchMenu = () => {

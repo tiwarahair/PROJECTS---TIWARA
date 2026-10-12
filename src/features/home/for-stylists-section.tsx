@@ -2,8 +2,8 @@ import { Link } from "react-router";
 import { getAssetUrl } from "../../utils/asset-url";
 import { joinClassNames } from "../../utils/class-names";
 import { ArrowIcon } from "./arrow-icon";
-import page from "./home-page.module.css";
-import styles from "./for-stylists-section.module.css";
+import page from "../../styles/features/home/home-page.module.css";
+import styles from "../../styles/features/home/for-stylists-section.module.css";
 
 /** Remembers the list-your-business intent for Onboarding. */
 const rememberListFlow = () => {

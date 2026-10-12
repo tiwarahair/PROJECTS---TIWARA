@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { faqs } from "../../data";
 import { joinClassNames } from "../../utils/class-names";
-import styles from "./faq-section.module.css";
+import styles from "../../styles/features/home/faq-section.module.css";
 
 /** Accordion FAQ, one answer open at a time. */
 export const FaqSection = () => {

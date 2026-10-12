@@ -1,7 +1,7 @@
 import { joinClassNames } from "../../utils/class-names";
 import { TERMS_BODY } from "./onboarding-data";
 import type { TermsKind } from "./onboarding-state";
-import styles from "./terms-sheet.module.css";
+import styles from "../../styles/features/onboarding/terms-sheet.module.css";
 
 interface TermsSheetProps {
   kind: TermsKind;

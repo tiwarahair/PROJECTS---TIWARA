@@ -1,7 +1,7 @@
 import type { CSSProperties } from "react";
 import { joinClassNames } from "../../utils/class-names";
-import styles from "./share-popover.module.css";
-import helmet from "./stylist-profile-helmet.module.css";
+import styles from "../../styles/features/stylist-profile/share-popover.module.css";
+import helmet from "../../styles/features/stylist-profile/stylist-profile-helmet.module.css";
 import type { SharePosition } from "./use-stylist-profile";
 
 interface SharePopoverProps {

@@ -4,8 +4,8 @@ import type { BookingsView } from "./bookings-view";
 import { dayInfo, hhmm, timeToMinutes } from "./studio-format";
 import { getDialogPlacement, getOverlayAnimation } from "./studio-overlay";
 import type { StudioController } from "./use-studio";
-import overlay from "./studio-overlay.module.css";
-import styles from "./bookings-overlays.module.css";
+import overlay from "../../styles/features/studio/studio-overlay.module.css";
+import styles from "../../styles/features/studio/bookings-overlays.module.css";
 
 const CloseIcon = () => (
   <svg

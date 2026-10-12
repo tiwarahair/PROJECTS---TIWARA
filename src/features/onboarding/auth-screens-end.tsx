@@ -3,7 +3,7 @@ import { joinClassNames } from "../../utils/class-names";
 import { getOnboardingMeter } from "./auth-screens-account";
 import { PasswordInput, SubmitButton, TextField } from "./onboarding-fields";
 import type { ScreenProps } from "./screen-props";
-import styles from "./auth-screens.module.css";
+import styles from "../../styles/features/onboarding/auth-screens.module.css";
 
 const DoneBadge = () => (
   <span className={styles.doneBadge}>

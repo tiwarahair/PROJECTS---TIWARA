@@ -5,7 +5,7 @@ import type { BookingSheetView } from "./booking-sheet-view";
 import { CalendarToggle, MonthCalendar, getMonthNav } from "./sheets-simple";
 import { getMiniCalendarDays } from "./studio-format";
 import type { StudioController } from "./use-studio";
-import styles from "./booking-steps.module.css";
+import styles from "../../styles/features/studio/booking-steps.module.css";
 
 const PlusIcon = ({
   size = "15",

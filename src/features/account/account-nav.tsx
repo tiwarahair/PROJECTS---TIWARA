@@ -4,7 +4,7 @@ import { resolveAssetUrl } from "../../utils/asset-url";
 import { joinClassNames } from "../../utils/class-names";
 import { HELP_ICON, LOG_OUT_ICON, SECTIONS } from "./account-data";
 import type { AccountSection } from "./account-data";
-import styles from "./account-nav.module.css";
+import styles from "../../styles/features/account/account-nav.module.css";
 
 const APPOINTMENTS = SECTIONS.slice(0, 4);
 const SETTINGS = SECTIONS.slice(4);

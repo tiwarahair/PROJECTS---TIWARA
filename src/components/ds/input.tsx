@@ -4,7 +4,7 @@ import type {
   SelectHTMLAttributes,
 } from "react";
 import { joinClassNames } from "../../utils/class-names";
-import styles from "./input.module.css";
+import styles from "../../styles/components/ds/input.module.css";
 
 export interface FieldProps {
   label?: string;

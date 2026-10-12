@@ -9,8 +9,8 @@ import {
   getSlots,
 } from "./booking-calendar";
 import { getHoldKey } from "./booking-state";
-import step from "./booking-step.module.css";
-import styles from "./step-time.module.css";
+import step from "../../styles/features/booking/booking-step.module.css";
+import styles from "../../styles/features/booking/step-time.module.css";
 import type { BookingController } from "./use-booking";
 
 const getDayClass = ({

@@ -1,6 +1,6 @@
 import { useEffect, useLayoutEffect, useRef, useState } from "react";
 import { joinClassNames } from "../../utils/class-names";
-import styles from "./allergy-field.module.css";
+import styles from "../../styles/components/allergy-field/allergy-field.module.css";
 
 const MAX_LENGTH = 200;
 const COUNTER_FROM = 150;

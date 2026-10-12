@@ -3,8 +3,8 @@ import { Link } from "react-router";
 import { joinClassNames } from "../../utils/class-names";
 import type { LastSearch } from "../../utils/last-search";
 import { BackPath, HeartPath, SharePaths } from "./profile-icons";
-import styles from "./profile-cover.module.css";
-import helmet from "./stylist-profile-helmet.module.css";
+import styles from "../../styles/features/stylist-profile/profile-cover.module.css";
+import helmet from "../../styles/features/stylist-profile/stylist-profile-helmet.module.css";
 
 /** Share + save state and handlers shared by the cover buttons and the sticky bar. */
 export interface ProfileActions {

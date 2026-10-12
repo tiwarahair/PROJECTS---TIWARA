@@ -3,7 +3,7 @@ import { Link } from "react-router";
 import { useFavourites } from "../../hooks/use-favourites";
 import { resolveAssetUrl } from "../../utils/asset-url";
 import { joinClassNames } from "../../utils/class-names";
-import styles from "./stylist-card.module.css";
+import styles from "../../styles/components/stylist-card/stylist-card.module.css";
 
 export interface StylistCardRow {
   name: string;

@@ -4,7 +4,7 @@ import { AddressFinder } from "../address-finder/address-finder";
 import type { AddressFinderValue } from "../address-finder/use-address-finder";
 import type { EmittedAddress } from "../address-finder/use-address-finder";
 import type { BusinessType } from "./business-details-logic";
-import styles from "./business-details.module.css";
+import styles from "../../styles/components/business-details/business-details.module.css";
 
 const TYPES: {
   key: BusinessType;

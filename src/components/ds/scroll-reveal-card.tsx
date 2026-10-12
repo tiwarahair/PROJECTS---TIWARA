@@ -2,7 +2,7 @@ import { useEffect, useRef, useState } from "react";
 import type { CSSProperties, ReactNode } from "react";
 import { joinClassNames } from "../../utils/class-names";
 import { prefersReducedMotion } from "../../utils/page-flags";
-import styles from "./scroll-reveal-card.module.css";
+import styles from "../../styles/components/ds/scroll-reveal-card.module.css";
 
 /**
  * Marketing hero device: a 3D-tilted ink-framed screen that rotates flat, scales up and

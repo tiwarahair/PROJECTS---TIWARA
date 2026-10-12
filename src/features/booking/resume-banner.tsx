@@ -1,6 +1,6 @@
 import { findService } from "../../utils/services";
 import { formatShortDate } from "./booking-calendar";
-import styles from "./resume-banner.module.css";
+import styles from "../../styles/features/booking/resume-banner.module.css";
 import type { BookingController } from "./use-booking";
 
 interface ResumeBannerProps {

@@ -8,7 +8,7 @@ import {
 } from "./earnings-data";
 import type { Payout, Transaction, TransactionStatus } from "./earnings-data";
 import type { EarningsController, EarningsProps } from "./use-earnings";
-import styles from "./earnings-lists.module.css";
+import styles from "../../styles/components/earnings/earnings-lists.module.css";
 
 const DAY_MS = 86400000;
 

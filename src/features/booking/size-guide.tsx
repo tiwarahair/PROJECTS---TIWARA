@@ -1,8 +1,8 @@
 import type { CSSProperties } from "react";
 import { joinClassNames } from "../../utils/class-names";
 import { getBarCount, SIZE_GUIDE } from "./booking-content";
-import helmet from "./booking-helmet.module.css";
-import styles from "./size-guide.module.css";
+import helmet from "../../styles/features/booking/booking-helmet.module.css";
+import styles from "../../styles/features/booking/size-guide.module.css";
 
 interface SizeGuideProps {
   onClose: () => void;

@@ -7,7 +7,7 @@ import { stylists } from "../../data";
 import { STUDIO_STYLIST_ID, TIMES } from "./studio-data";
 import { getAvatarSrc } from "./studio-shell";
 import type { StudioController } from "./use-studio";
-import styles from "./settings-pages.module.css";
+import styles from "../../styles/features/studio/settings-pages.module.css";
 
 const DEMO_COVER =
   stylists.find(({ id }) => id === STUDIO_STYLIST_ID)?.cover ?? "";

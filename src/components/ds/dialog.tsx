@@ -1,5 +1,5 @@
 import type { CSSProperties, ReactNode } from "react";
-import styles from "./dialog.module.css";
+import styles from "../../styles/components/ds/dialog.module.css";
 
 /** Modal dialog: 24px radius, overlay shadow, scrim click closes. */
 export interface DialogProps {

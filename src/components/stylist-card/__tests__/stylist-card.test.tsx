@@ -1,0 +1,117 @@
+import { fireEvent, screen } from "@testing-library/react";
+import { beforeEach, describe, expect, it } from "vitest";
+import { renderWithStore } from "../../../test/render-with-store";
+import { StylistCard } from "../stylist-card";
+
+const BASE = {
+  href: "/stylist?stylist=amara-beauty",
+  cover: "demo/stylists/w161154.jpg",
+  stylistName: "Amara Beauty",
+  rating: "4.8",
+  reviews: 146,
+  area: "Hulme, Manchester",
+  verified: true,
+};
+
+describe("StylistCard", () => {
+  beforeEach(() => {
+    sessionStorage.clear();
+    localStorage.clear();
+  });
+
+  it("renders the photo, name, rating, area and fee-inclusive from price", () => {
+    renderWithStore(<StylistCard {...BASE} from="£81.70" />);
+
+    expect(
+      screen.getByRole("img", { name: "Amara Beauty" }),
+    ).toBeInTheDocument();
+
+    // the cover and the title both link to the profile
+    screen
+      .getAllByRole("link", { name: "Amara Beauty" })
+      .forEach((link) =>
+        expect(link).toHaveAttribute("href", "/stylist?stylist=amara-beauty"),
+      );
+
+    expect(screen.getByText("(146)")).toBeInTheDocument();
+    expect(screen.getByText("Hulme, Manchester")).toBeInTheDocument();
+    expect(screen.getByText("from £81.70")).toBeInTheDocument();
+  });
+
+  it("builds the meta line from active services and a numeric from price", () => {
+    renderWithStore(
+      <StylistCard
+        {...BASE}
+        from={41.1}
+        services={[
+          "Fulani braids",
+          { name: "Feed-in braids", status: "active" },
+          { name: "Draft", status: "draft" },
+        ]}
+      />,
+    );
+
+    expect(
+      screen.getByText("Fulani braids · Feed-in braids · from £41.1"),
+    ).toBeInTheDocument();
+  });
+
+  it("an explicit meta replaces the computed line", () => {
+    renderWithStore(<StylistCard {...BASE} from={50} meta="1.2 mi" />);
+    expect(screen.getByText("1.2 mi")).toBeInTheDocument();
+    expect(screen.queryByText(/from £50/)).not.toBeInTheDocument();
+  });
+
+  it("shows facts, service rows and a Book button instead of the meta line", () => {
+    renderWithStore(
+      <StylistCard
+        {...BASE}
+        from={50}
+        facts={[{ text: "Travels to you", strong: true }]}
+        rows={[
+          {
+            name: "Silk press",
+            meta: "2 hr · from £30.95",
+            href: "/book?stylist=amara-beauty",
+          },
+        ]}
+        bookHref="/book?stylist=amara-beauty"
+      />,
+    );
+
+    expect(screen.getByText("Travels to you")).toBeInTheDocument();
+
+    expect(screen.getByRole("link", { name: /Silk press/ })).toHaveAttribute(
+      "href",
+      "/book?stylist=amara-beauty",
+    );
+
+    expect(screen.getByRole("link", { name: "Book" })).toBeInTheDocument();
+    expect(screen.queryByText("from £50")).not.toBeInTheDocument();
+  });
+
+  it("guests tapping the heart get the log-in sheet", () => {
+    const { store } = renderWithStore(<StylistCard {...BASE} />);
+
+    fireEvent.click(
+      screen.getByRole("button", { name: "Save Amara Beauty to favourites" }),
+    );
+
+    expect(store.getState().favourites.loginSheetFor).toBe("amara-beauty");
+  });
+
+  it("logged-in customers toggle the favourite", () => {
+    sessionStorage.setItem("tw_cust", "1");
+    renderWithStore(<StylistCard {...BASE} />);
+
+    fireEvent.click(
+      screen.getByRole("button", { name: "Save Amara Beauty to favourites" }),
+    );
+
+    expect(
+      screen.getByRole("button", {
+        name: "Remove Amara Beauty from favourites",
+      }),
+    ).toHaveAttribute("aria-pressed", "true");
+  });
+});

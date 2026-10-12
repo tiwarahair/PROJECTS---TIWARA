@@ -6,8 +6,8 @@ import type { TipChoice } from "./checkout-data";
 import { RECORD_VIA_LABELS, getAdjustNote } from "./checkout-view";
 import type { CheckoutViewModel, DetailRow } from "./checkout-view";
 import type { CheckoutController } from "./use-checkout";
-import flow from "./checkout-flow.module.css";
-import shared from "./checkout-sheet.module.css";
+import flow from "../../styles/components/checkout-sheet/checkout-flow.module.css";
+import shared from "../../styles/components/checkout-sheet/checkout-sheet.module.css";
 
 const TIP_CHOICES: [TipChoice, string][] = [
   ["none", "No tip"],

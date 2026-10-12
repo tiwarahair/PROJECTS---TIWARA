@@ -15,7 +15,7 @@ import { EarningsLists } from "./earnings-lists";
 import { EarningsOverlays } from "./earnings-overlays";
 import { useEarnings } from "./use-earnings";
 import type { EarningsProps } from "./use-earnings";
-import styles from "./earnings.module.css";
+import styles from "../../styles/components/earnings/earnings.module.css";
 
 export type { EarningsProps } from "./use-earnings";
 

@@ -14,7 +14,7 @@ import {
 import { OnboardingTurnstile } from "./onboarding-turnstile";
 import { OnboardingMap } from "./onboarding-map";
 import type { ScreenProps } from "./screen-props";
-import styles from "./wizard-steps.module.css";
+import styles from "../../styles/features/onboarding/wizard-steps.module.css";
 
 interface WizardFieldProps {
   id: string;

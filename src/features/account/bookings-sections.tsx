@@ -3,8 +3,8 @@ import { Link } from "react-router";
 import { resolveAssetUrl } from "../../utils/asset-url";
 import { joinClassNames } from "../../utils/class-names";
 import type { BookingCardView, QuickAction } from "./account-view";
-import styles from "./bookings-sections.module.css";
-import ui from "./account-ui.module.css";
+import styles from "../../styles/features/account/bookings-sections.module.css";
+import ui from "../../styles/features/account/account-ui.module.css";
 
 const CalendarIcon = () => (
   <svg

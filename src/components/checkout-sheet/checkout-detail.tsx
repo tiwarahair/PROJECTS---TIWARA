@@ -3,8 +3,8 @@ import { joinClassNames } from "../../utils/class-names";
 import { TONES } from "./checkout-view";
 import type { CheckoutViewModel, DetailRow } from "./checkout-view";
 import type { CheckoutController } from "./use-checkout";
-import flow from "./checkout-flow.module.css";
-import shared from "./checkout-sheet.module.css";
+import flow from "../../styles/components/checkout-sheet/checkout-flow.module.css";
+import shared from "../../styles/components/checkout-sheet/checkout-sheet.module.css";
 
 export const Icon = ({
   path,

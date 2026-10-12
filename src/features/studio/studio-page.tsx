@@ -34,8 +34,8 @@ import {
 } from "./studio-shell";
 import { useStudio } from "./use-studio";
 import type { StudioProps } from "./use-studio";
-import "./studio-helmet.module.css";
-import styles from "./studio-shell.module.css";
+import "../../styles/features/studio/studio-helmet.module.css";
+import styles from "../../styles/features/studio/studio-shell.module.css";
 
 export type StudioPageProps = StudioProps;
 

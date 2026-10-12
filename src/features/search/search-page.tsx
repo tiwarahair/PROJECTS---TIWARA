@@ -7,9 +7,9 @@ import { DatePopover } from "./date-picker";
 import { FilterBar } from "./filter-bar";
 import { FiltersSheet } from "./filters-sheet";
 import { MobileSearchSheet } from "./mobile-search-sheet";
-import helmet from "./search-helmet.module.css";
+import helmet from "../../styles/features/search/search-helmet.module.css";
 import { SearchNav } from "./search-nav";
-import styles from "./search-page.module.css";
+import styles from "../../styles/features/search/search-page.module.css";
 import { useSearch } from "./use-search";
 
 /** Search & results, route "/search". */

@@ -4,7 +4,7 @@ import { CHOOSER_PATHS } from "./onboarding-data";
 import { OnboardingTurnstile } from "./onboarding-turnstile";
 import { PasswordInput, SubmitButton, TextField } from "./onboarding-fields";
 import type { ScreenProps } from "./screen-props";
-import styles from "./auth-screens.module.css";
+import styles from "../../styles/features/onboarding/auth-screens.module.css";
 
 export const WelcomeScreen = ({ onboarding, layout }: ScreenProps) => {
   const { actions } = onboarding;

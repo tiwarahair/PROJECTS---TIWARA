@@ -1,6 +1,6 @@
 import type { CSSProperties, ReactNode } from "react";
 import { joinClassNames } from "../../utils/class-names";
-import styles from "./card.module.css";
+import styles from "../../styles/components/ds/card.module.css";
 
 /** Container assigned by behaviour, not appearance. There is no default card: 'flow' has no box unless tappable. */
 export interface CardProps {

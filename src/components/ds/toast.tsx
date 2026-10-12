@@ -1,6 +1,6 @@
 import type { CSSProperties, ReactNode } from "react";
 import { joinClassNames } from "../../utils/class-names";
-import styles from "./toast.module.css";
+import styles from "../../styles/components/ds/toast.module.css";
 
 /** Ink toast with tone dot; brief factual messages. */
 export interface ToastProps {

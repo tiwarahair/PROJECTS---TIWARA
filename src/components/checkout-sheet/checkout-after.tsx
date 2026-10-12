@@ -5,8 +5,8 @@ import { Chip, RadioMark } from "./checkout-payment";
 import { RECORD_VIA_LABELS } from "./checkout-view";
 import type { CheckoutViewModel } from "./checkout-view";
 import type { CheckoutController } from "./use-checkout";
-import after from "./checkout-after.module.css";
-import shared from "./checkout-sheet.module.css";
+import after from "../../styles/components/checkout-sheet/checkout-after.module.css";
+import shared from "../../styles/components/checkout-sheet/checkout-sheet.module.css";
 
 export const CheckoutDone = ({
   checkout: { state, setState, goTo, booking },

@@ -1,6 +1,6 @@
 import type { ChangeEvent, KeyboardEvent } from "react";
 import { joinClassNames } from "../../utils/class-names";
-import styles from "./onboarding-fields.module.css";
+import styles from "../../styles/features/onboarding/onboarding-fields.module.css";
 
 /** Sun (shown in dark mode) / moon (light mode) for the theme toggle. */
 export const ModeIcon = ({ isDark }: { isDark: boolean }) =>

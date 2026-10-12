@@ -1,6 +1,6 @@
 import type { ReactNode } from "react";
 import { joinClassNames } from "../../utils/class-names";
-import styles from "./choice.module.css";
+import styles from "../../styles/components/ds/choice.module.css";
 import { useControllable } from "./use-controllable";
 
 /** Checkbox with label; controlled (checked) or uncontrolled (defaultChecked). */

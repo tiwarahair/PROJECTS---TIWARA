@@ -17,9 +17,9 @@ import {
 } from "./booking-steps";
 import { StudioCheckout } from "./studio-checkout";
 import type { StudioController } from "./use-studio";
-import styles from "./booking-sheet.module.css";
-import stepStyles from "./booking-steps.module.css";
-import sheet from "./studio-sheet.module.css";
+import styles from "../../styles/features/studio/booking-sheet.module.css";
+import stepStyles from "../../styles/features/studio/booking-steps.module.css";
+import sheet from "../../styles/features/studio/studio-sheet.module.css";
 
 const asStyle = (values: Record<string, string>) => values as CSSProperties;
 

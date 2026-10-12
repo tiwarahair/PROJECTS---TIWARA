@@ -2,8 +2,8 @@ import { Link } from "react-router";
 import { joinClassNames } from "../../utils/class-names";
 import { HOURS_ROWS } from "./profile-logic";
 import type { ProfileFacts } from "./profile-logic";
-import styles from "./booking-aside.module.css";
-import helmet from "./stylist-profile-helmet.module.css";
+import styles from "../../styles/features/stylist-profile/booking-aside.module.css";
+import helmet from "../../styles/features/stylist-profile/stylist-profile-helmet.module.css";
 
 interface BookingAsideProps {
   fromLabel: string;

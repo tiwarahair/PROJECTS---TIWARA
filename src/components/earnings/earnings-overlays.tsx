@@ -13,7 +13,7 @@ import {
 import type { Payout, Transaction } from "./earnings-data";
 import { DEFAULT_BANK, getDayWord, getStatusStyle } from "./earnings-lists";
 import type { EarningsController, EarningsProps } from "./use-earnings";
-import styles from "./earnings-overlays.module.css";
+import styles from "../../styles/components/earnings/earnings-overlays.module.css";
 
 const STRIPE_PAYOUTS = "https://dashboard.stripe.com/settings/payouts";
 

@@ -1,8 +1,8 @@
 import { money } from "../../utils/pricing";
 import { formatDuration, getFromWithFee, getMenu } from "../../utils/services";
 import { joinClassNames } from "../../utils/class-names";
-import step from "./booking-step.module.css";
-import styles from "./step-service.module.css";
+import step from "../../styles/features/booking/booking-step.module.css";
+import styles from "../../styles/features/booking/step-service.module.css";
 import type { BookingController } from "./use-booking";
 
 interface StepServiceProps {

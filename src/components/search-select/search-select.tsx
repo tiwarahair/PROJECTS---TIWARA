@@ -2,7 +2,7 @@ import { Fragment, useCallback, useEffect, useRef, useState } from "react";
 import type { CSSProperties } from "react";
 import { createPortal } from "react-dom";
 import { joinClassNames } from "../../utils/class-names";
-import styles from "./search-select.module.css";
+import styles from "../../styles/components/search-select/search-select.module.css";
 
 /** A plain label, or a grouped / searchable-by-synonym option. `action` rows (e.g. "New category") always show. */
 export interface SearchSelectOption {

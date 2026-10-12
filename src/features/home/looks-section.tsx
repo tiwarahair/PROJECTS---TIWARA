@@ -3,8 +3,8 @@ import { Link } from "react-router";
 import { serviceGroups } from "../../data";
 import { getAssetUrl } from "../../utils/asset-url";
 import { joinClassNames } from "../../utils/class-names";
-import page from "./home-page.module.css";
-import styles from "./looks-section.module.css";
+import page from "../../styles/features/home/home-page.module.css";
+import styles from "../../styles/features/home/looks-section.module.css";
 import { useGridReveal } from "./use-grid-reveal";
 
 /** Home's own photo per service group, falling back to the group image. */

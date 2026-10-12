@@ -3,7 +3,7 @@ import { SearchSelect } from "../../components/search-select/search-select";
 import { joinClassNames } from "../../utils/class-names";
 import { Swatches } from "./catalog-sheets";
 import type { WizardView } from "./wizard-view";
-import styles from "./wizard.module.css";
+import styles from "../../styles/features/studio/wizard.module.css";
 
 const asStyle = (values: Record<string, string>) => values as CSSProperties;
 

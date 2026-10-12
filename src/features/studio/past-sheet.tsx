@@ -5,9 +5,9 @@ import { getPastCheckoutView } from "./past-sheet-view";
 import type { PastSheetView } from "./past-sheet-view";
 import { StudioCheckout } from "./studio-checkout";
 import type { StudioController } from "./use-studio";
-import bookingStyles from "./booking-sheet.module.css";
-import styles from "./past-sheet.module.css";
-import sheet from "./studio-sheet.module.css";
+import bookingStyles from "../../styles/features/studio/booking-sheet.module.css";
+import styles from "../../styles/features/studio/past-sheet.module.css";
+import sheet from "../../styles/features/studio/studio-sheet.module.css";
 
 const asStyle = (values: Record<string, string>) => values as CSSProperties;
 

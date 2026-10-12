@@ -2,8 +2,8 @@ import { Link } from "react-router";
 import { getAssetUrl } from "../../utils/asset-url";
 import { joinClassNames } from "../../utils/class-names";
 import { ArrowIcon } from "./arrow-icon";
-import page from "./home-page.module.css";
-import styles from "./hero-section.module.css";
+import page from "../../styles/features/home/home-page.module.css";
+import styles from "../../styles/features/home/hero-section.module.css";
 
 /** Full-bleed hero with the flowing "Book now" CTA. */
 export const HeroSection = () => (

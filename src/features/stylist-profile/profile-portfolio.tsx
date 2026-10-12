@@ -1,7 +1,7 @@
 import { joinClassNames } from "../../utils/class-names";
 import { resolveAssetUrl } from "../../utils/asset-url";
-import styles from "./profile-portfolio.module.css";
-import helmet from "./stylist-profile-helmet.module.css";
+import styles from "../../styles/features/stylist-profile/profile-portfolio.module.css";
+import helmet from "../../styles/features/stylist-profile/stylist-profile-helmet.module.css";
 
 interface ProfilePortfolioProps {
   portfolio: string[];

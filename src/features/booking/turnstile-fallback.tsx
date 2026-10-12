@@ -1,5 +1,5 @@
 import { joinClassNames } from "../../utils/class-names";
-import styles from "./turnstile-fallback.module.css";
+import styles from "../../styles/features/booking/turnstile-fallback.module.css";
 import type { BookingController } from "./use-booking";
 
 interface TurnstileFallbackProps {

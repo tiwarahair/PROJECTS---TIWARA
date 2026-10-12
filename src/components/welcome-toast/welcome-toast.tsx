@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useState } from "react";
 import { useEntered } from "../../hooks/use-entered";
-import styles from "./welcome-toast.module.css";
+import styles from "../../styles/components/welcome-toast/welcome-toast.module.css";
 
 interface WelcomeToastPillProps {
   message: string;

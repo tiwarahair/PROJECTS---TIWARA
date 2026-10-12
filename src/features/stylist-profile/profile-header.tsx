@@ -4,8 +4,8 @@ import { ACCOUNT_INITIALS } from "../../stores/session-slice";
 import { getAssetUrl } from "../../utils/asset-url";
 import { joinClassNames } from "../../utils/class-names";
 import { HeartPath } from "./profile-icons";
-import styles from "./profile-header.module.css";
-import helmet from "./stylist-profile-helmet.module.css";
+import styles from "../../styles/features/stylist-profile/profile-header.module.css";
+import helmet from "../../styles/features/stylist-profile/stylist-profile-helmet.module.css";
 
 interface ProfileHeaderProps {
   loggedIn: boolean;

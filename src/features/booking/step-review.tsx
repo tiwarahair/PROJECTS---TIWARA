@@ -1,8 +1,8 @@
 import { getWhenLine } from "./booking-calendar";
 import { getWhereRow } from "./booking-details";
-import fields from "./booking-fields.module.css";
-import step from "./booking-step.module.css";
-import styles from "./step-review.module.css";
+import fields from "../../styles/features/booking/booking-fields.module.css";
+import step from "../../styles/features/booking/booking-step.module.css";
+import styles from "../../styles/features/booking/step-review.module.css";
 import type { BookingController } from "./use-booking";
 
 interface StepReviewProps {

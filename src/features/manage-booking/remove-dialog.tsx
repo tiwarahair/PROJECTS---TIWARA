@@ -1,4 +1,4 @@
-import styles from "./remove-dialog.module.css";
+import styles from "../../styles/features/manage-booking/remove-dialog.module.css";
 
 interface RemoveDialogProps {
   text: string;

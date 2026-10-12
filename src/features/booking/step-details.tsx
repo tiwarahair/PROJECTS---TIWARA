@@ -6,10 +6,10 @@ import { AppointmentAddress } from "./appointment-address";
 import { getEmailFix } from "./booking-details";
 import type { AllergyState, Details, FieldKey } from "./booking-state";
 import { DEMO_DETAILS } from "./booking-state";
-import fields from "./booking-fields.module.css";
-import step from "./booking-step.module.css";
+import fields from "../../styles/features/booking/booking-fields.module.css";
+import step from "../../styles/features/booking/booking-step.module.css";
 import { CheckBox } from "./step-customise";
-import styles from "./step-details.module.css";
+import styles from "../../styles/features/booking/step-details.module.css";
 import type { BookingController } from "./use-booking";
 
 interface StepDetailsProps {

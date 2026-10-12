@@ -2,8 +2,8 @@ import type { ReactNode } from "react";
 import { joinClassNames } from "../../utils/class-names";
 import { formatShortDate } from "./booking-calendar";
 import { getPrivacySections, TERMS_SECTIONS } from "./booking-content";
-import helmet from "./booking-helmet.module.css";
-import styles from "./booking-dialogs.module.css";
+import helmet from "../../styles/features/booking/booking-helmet.module.css";
+import styles from "../../styles/features/booking/booking-dialogs.module.css";
 import type { BookingController } from "./use-booking";
 
 interface BookingDialogsProps {

@@ -12,7 +12,7 @@ import { CheckoutPay, CheckoutReview, CheckoutTip } from "./checkout-payment";
 import { STEP_LABELS, VIEW_TITLES, getCheckoutView } from "./checkout-view";
 import { useCheckout } from "./use-checkout";
 import type { CheckoutSheetProps } from "./use-checkout";
-import shared from "./checkout-sheet.module.css";
+import shared from "../../styles/components/checkout-sheet/checkout-sheet.module.css";
 
 export type { CheckoutSheetProps } from "./use-checkout";
 

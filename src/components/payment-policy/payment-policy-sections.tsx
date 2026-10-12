@@ -2,7 +2,7 @@ import type { ChangeEvent, KeyboardEvent, ReactNode } from "react";
 import type { PolicyMode } from "../../types/policy";
 import { joinClassNames } from "../../utils/class-names";
 import type { FeeState } from "./payment-policy-logic";
-import styles from "./payment-policy.module.css";
+import styles from "../../styles/components/payment-policy/payment-policy.module.css";
 
 export const MODES: {
   key: PolicyMode;

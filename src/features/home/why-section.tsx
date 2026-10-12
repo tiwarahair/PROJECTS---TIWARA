@@ -1,4 +1,4 @@
-import styles from "./why-section.module.css";
+import styles from "../../styles/features/home/why-section.module.css";
 
 const WORDS = (
   "Afro hair deserves specialists, not guesswork. We built Tiwára's House so finding someone who knows your " +

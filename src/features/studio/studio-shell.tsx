@@ -12,7 +12,7 @@ import { copyText } from "./studio-format";
 import { getSteps, isLive } from "./studio-model";
 import type { StudioTab } from "./studio-types";
 import type { StudioController } from "./use-studio";
-import styles from "./studio-shell.module.css";
+import styles from "../../styles/features/studio/studio-shell.module.css";
 
 type NavIconName =
   "home" | "cal" | "scis" | "pound" | "gear" | "people" | "more";

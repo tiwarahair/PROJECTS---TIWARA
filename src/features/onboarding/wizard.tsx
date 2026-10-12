@@ -10,7 +10,7 @@ import {
   StepSource,
   StepType,
 } from "./wizard-steps";
-import styles from "./wizard.module.css";
+import styles from "../../styles/features/onboarding/wizard.module.css";
 
 const STEPS = {
   w1: StepType,

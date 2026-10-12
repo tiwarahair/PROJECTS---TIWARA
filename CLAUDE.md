@@ -60,7 +60,7 @@ Always run `yarn format && yarn lint` after code changes.
 - `src/utils/` — pure utility functions
 - `assets/` (project root) — images and logos, resolved with `getAssetUrl`
 - `src/data/` — re-usable data used in the front-end kept in json files
-- `src/styles/` — css
+- `src/styles/` — all CSS lives here, never next to components. Global styles and design tokens at the top level; CSS modules mirror the source tree, e.g. `src/features/home/hero-section.tsx` → `src/styles/features/home/hero-section.module.css`
 
 ## Component Conventions
 
@@ -92,6 +92,7 @@ export function Button({ label, onClick, variant = "primary" }: ButtonProps) {
 - Test behavior, not implementation — query by role, text, or test ID
 - Every component should have at least a smoke test (renders without crashing)
 - Place test utilities in `src/test`
+- Put tests in a `__tests__` folder inside the folder of the code they cover, e.g. `src/features/home/__tests__/home-page.test.tsx`
 
 ## UI & Web Design
 

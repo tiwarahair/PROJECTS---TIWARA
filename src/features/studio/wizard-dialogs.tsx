@@ -7,7 +7,7 @@ import { getDialogPlacement, getOverlayAnimation } from "./studio-overlay";
 import type { StudioController } from "./use-studio";
 import { getWizardView } from "./wizard-view";
 import type { WizardView } from "./wizard-view";
-import styles from "./wizard-dialogs.module.css";
+import styles from "../../styles/features/studio/wizard-dialogs.module.css";
 
 const CloseIcon = ({
   size,

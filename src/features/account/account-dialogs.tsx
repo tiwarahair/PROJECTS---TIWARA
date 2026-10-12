@@ -10,9 +10,9 @@ import {
 import type { AccountView } from "./account-view";
 import { AccountSwitch } from "./settings-sections";
 import type { AccountController } from "./use-account";
-import styles from "./account-dialogs.module.css";
-import helmet from "./account-helmet.module.css";
-import ui from "./account-ui.module.css";
+import styles from "../../styles/features/account/account-dialogs.module.css";
+import helmet from "../../styles/features/account/account-helmet.module.css";
+import ui from "../../styles/features/account/account-ui.module.css";
 
 const WIDE_DIALOGS = ["receipt", "delete", "cookies"];
 

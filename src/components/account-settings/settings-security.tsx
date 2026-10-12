@@ -4,8 +4,8 @@ import { SESSION_ICONS } from "./account-settings-logic";
 import type { AccountSettingsProps } from "./use-account-settings";
 import type { AccountSettingsController } from "./use-account-settings";
 import { SettingsSection } from "./settings-personal";
-import shared from "./account-settings.module.css";
-import styles from "./settings-security.module.css";
+import shared from "../../styles/components/account-settings/account-settings.module.css";
+import styles from "../../styles/components/account-settings/settings-security.module.css";
 
 const TickPath = () => <path d="M5 12.5l4.5 4.5L19 7.5"></path>;
 

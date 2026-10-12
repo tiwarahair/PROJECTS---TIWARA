@@ -1,8 +1,8 @@
 import { useLayoutEffect } from "react";
 import { Link } from "react-router";
 import { getAssetUrl } from "../../utils/asset-url";
-import "./email-change-notice-helmet.module.css";
-import styles from "./email-change-notice.module.css";
+import "../../styles/features/email-change-notice/email-change-notice-helmet.module.css";
+import styles from "../../styles/features/email-change-notice/email-change-notice.module.css";
 
 /**
  * Mock of the email sent to the old address after an email change, route "/email/email-change-notice".

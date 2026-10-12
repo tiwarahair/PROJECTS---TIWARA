@@ -1,6 +1,6 @@
 import type { CSSProperties, ReactNode } from "react";
 import { joinClassNames } from "../../utils/class-names";
-import styles from "./icon-chip.module.css";
+import styles from "../../styles/components/ds/icon-chip.module.css";
 
 /** Non-interactive circular tint holding an icon; the static counterpart to IconButton's tint. */
 export interface IconChipProps {

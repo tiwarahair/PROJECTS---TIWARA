@@ -4,8 +4,8 @@ import { joinClassNames } from "../../utils/class-names";
 import type { LastSearch } from "../../utils/last-search";
 import type { ProfileActions } from "./profile-cover";
 import { BackPath, HeartPath, SharePaths } from "./profile-icons";
-import styles from "./profile-sticky-bar.module.css";
-import helmet from "./stylist-profile-helmet.module.css";
+import styles from "../../styles/features/stylist-profile/profile-sticky-bar.module.css";
+import helmet from "../../styles/features/stylist-profile/stylist-profile-helmet.module.css";
 
 interface ProfileStickyBarProps {
   name: string;

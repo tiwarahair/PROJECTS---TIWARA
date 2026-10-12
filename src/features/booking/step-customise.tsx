@@ -2,11 +2,11 @@ import type { CSSProperties } from "react";
 import { hairColours } from "../../data";
 import { joinClassNames } from "../../utils/class-names";
 import { formatDuration } from "../../utils/services";
-import helmet from "./booking-helmet.module.css";
+import helmet from "../../styles/features/booking/booking-helmet.module.css";
 import { getDeltaLabel } from "./booking-pricing";
 import type { Selection } from "./booking-state";
-import step from "./booking-step.module.css";
-import styles from "./step-customise.module.css";
+import step from "../../styles/features/booking/booking-step.module.css";
+import styles from "../../styles/features/booking/step-customise.module.css";
 import type { BookingController } from "./use-booking";
 
 interface StepCustomiseProps {

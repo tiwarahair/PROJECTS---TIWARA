@@ -3,7 +3,7 @@ import { joinClassNames } from "../../utils/class-names";
 import { getServicesView } from "./services-view";
 import type { ListGroup, ServicesView } from "./services-view";
 import type { StudioController } from "./use-studio";
-import styles from "./studio-services.module.css";
+import styles from "../../styles/features/studio/studio-services.module.css";
 
 const asStyle = (values: Record<string, string | null | undefined>) =>
   values as CSSProperties;

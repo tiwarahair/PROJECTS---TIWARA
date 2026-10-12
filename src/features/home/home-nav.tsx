@@ -4,8 +4,8 @@ import { ACCOUNT_INITIALS } from "../../stores/session-slice";
 import { getAssetUrl } from "../../utils/asset-url";
 import { joinClassNames } from "../../utils/class-names";
 import { hexToRgba } from "./home-colours";
-import page from "./home-page.module.css";
-import styles from "./home-nav.module.css";
+import page from "../../styles/features/home/home-page.module.css";
+import styles from "../../styles/features/home/home-nav.module.css";
 import type { NavMorphState } from "./use-nav-morph";
 
 interface HomeNavProps {

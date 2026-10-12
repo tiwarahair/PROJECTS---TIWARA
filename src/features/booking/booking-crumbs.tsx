@@ -1,7 +1,7 @@
 import { Fragment } from "react";
 import { joinClassNames } from "../../utils/class-names";
-import helmet from "./booking-helmet.module.css";
-import styles from "./booking-crumbs.module.css";
+import helmet from "../../styles/features/booking/booking-helmet.module.css";
+import styles from "../../styles/features/booking/booking-crumbs.module.css";
 import type { BookingController } from "./use-booking";
 
 interface BookingCrumbsProps {

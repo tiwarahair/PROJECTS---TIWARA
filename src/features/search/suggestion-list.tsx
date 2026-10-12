@@ -1,13 +1,13 @@
 import { resolveAssetUrl } from "../../utils/asset-url";
 import { joinClassNames } from "../../utils/class-names";
-import controls from "./search-controls.module.css";
+import controls from "../../styles/features/search/search-controls.module.css";
 import type { WhatChip } from "./search-state";
 import type {
   RowView,
   SuggestionRow,
   WhatChipView,
 } from "./search-suggestions";
-import styles from "./suggestion-list.module.css";
+import styles from "../../styles/features/search/suggestion-list.module.css";
 
 interface SuggestionButtonProps {
   view: RowView;

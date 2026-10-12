@@ -7,8 +7,8 @@ import { ACCOUNT_INITIALS, logOut } from "../../stores/session-slice";
 import { getAssetUrl } from "../../utils/asset-url";
 import { joinClassNames } from "../../utils/class-names";
 import { getSearchParams } from "../../utils/page-flags";
-import helmet from "./help-helmet.module.css";
-import styles from "./help-page.module.css";
+import helmet from "../../styles/features/help/help-helmet.module.css";
+import styles from "../../styles/features/help/help-page.module.css";
 
 const HELP_FAQS = faqs.filter(({ question }) =>
   /cancel or reschedule|deposits work|How do I pay/.test(question),

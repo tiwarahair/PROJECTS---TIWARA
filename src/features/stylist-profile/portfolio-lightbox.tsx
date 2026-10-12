@@ -1,8 +1,8 @@
 import type { CSSProperties } from "react";
 import { joinClassNames } from "../../utils/class-names";
 import { resolveAssetUrl } from "../../utils/asset-url";
-import styles from "./portfolio-lightbox.module.css";
-import helmet from "./stylist-profile-helmet.module.css";
+import styles from "../../styles/features/stylist-profile/portfolio-lightbox.module.css";
+import helmet from "../../styles/features/stylist-profile/stylist-profile-helmet.module.css";
 import type { StylistProfileController } from "./use-stylist-profile";
 
 interface PortfolioLightboxProps {

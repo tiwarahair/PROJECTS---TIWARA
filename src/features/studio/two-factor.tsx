@@ -5,8 +5,8 @@ import { getOverlayAnimation } from "./studio-overlay";
 import { getTwoFactorView } from "./two-factor-view";
 import type { TwoFactorView } from "./two-factor-view";
 import type { StudioController } from "./use-studio";
-import overlay from "./studio-overlay.module.css";
-import styles from "./two-factor.module.css";
+import overlay from "../../styles/features/studio/studio-overlay.module.css";
+import styles from "../../styles/features/studio/two-factor.module.css";
 
 const asStyle = (values: Record<string, string>) => values as CSSProperties;
 

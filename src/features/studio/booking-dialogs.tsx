@@ -5,7 +5,7 @@ import type { DuplicateView } from "./clients-view";
 import { findDuplicate } from "./studio-model";
 import { getDialogPlacement, getOverlayAnimation } from "./studio-overlay";
 import type { StudioController } from "./use-studio";
-import styles from "./booking-dialogs.module.css";
+import styles from "../../styles/features/studio/booking-dialogs.module.css";
 
 export type AddonDialogView = ReturnType<typeof getAddonDialog> & {
   remove: () => void;

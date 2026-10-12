@@ -7,7 +7,7 @@ import type { DecoratedBooking } from "./studio-decorate";
 import { copyText, dateAt } from "./studio-format";
 import { isGated } from "./studio-shell";
 import type { StudioController } from "./use-studio";
-import styles from "./studio-bookings.module.css";
+import styles from "../../styles/features/studio/studio-bookings.module.css";
 
 const CALENDAR_WEEKDAYS = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
 

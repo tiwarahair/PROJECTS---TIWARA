@@ -4,9 +4,9 @@ import { joinClassNames } from "../../utils/class-names";
 import { getWhenLine } from "./booking-calendar";
 import { getPreviewIndex, hasPreview, PREVIEW_POOL } from "./booking-content";
 import { getSummaryWhere } from "./booking-details";
-import helmet from "./booking-helmet.module.css";
+import helmet from "../../styles/features/booking/booking-helmet.module.css";
 import { HoldBar } from "./hold-bar";
-import styles from "./booking-summary.module.css";
+import styles from "../../styles/features/booking/booking-summary.module.css";
 import type { BookingController } from "./use-booking";
 
 interface BookingSummaryProps {

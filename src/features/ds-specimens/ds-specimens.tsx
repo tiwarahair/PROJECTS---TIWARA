@@ -16,7 +16,7 @@ import { Tabs } from "../../components/ds/tabs";
 import { Tag } from "../../components/ds/tag";
 import { Toast } from "../../components/ds/toast";
 import { joinClassNames } from "../../utils/class-names";
-import styles from "./ds-specimens.module.css";
+import styles from "../../styles/features/ds-specimens/ds-specimens.module.css";
 
 interface SpecimenIconProps {
   paths: string;
