@@ -33,7 +33,7 @@ import { ProfileServices } from "./profile-services";
 import { ProfileStickyBar } from "./profile-sticky-bar";
 import { ServiceModal } from "./service-modal";
 import { SharePopover } from "./share-popover";
-import helmet from "../../styles/features/stylist-profile/stylist-profile-helmet.module.css";
+import pageGlobal from "../../styles/features/stylist-profile/stylist-profile-page-global.module.css";
 import styles from "../../styles/features/stylist-profile/stylist-profile-page.module.css";
 import { useRevealSweep } from "./use-reveal-sweep";
 import { useStylistProfile } from "./use-stylist-profile";
@@ -46,9 +46,9 @@ export const StylistProfilePage = () => {
   const { loggedIn, isFavourite, toggleFavourite } = useFavourites();
   const { share, copyLink } = useShare();
 
-  useRevealSweep(helmet.rvIn ?? "");
+  useRevealSweep(pageGlobal.rvIn ?? "");
 
-  // page-wide helmet rules (colour easings, focus ring, mobile overflow) apply while the profile is mounted
+  // page-wide rules (colour easings, focus ring, mobile overflow) apply while the profile is mounted
   useLayoutEffect(() => {
     document.documentElement.classList.add("profile-page");
 
@@ -122,9 +122,9 @@ export const StylistProfilePage = () => {
         onToggleCoverActions={profile.toggleCoverActions}
         actions={actions}
       />
-      <div className={joinClassNames(helmet.profbody, styles.body)}>
+      <div className={joinClassNames(pageGlobal.profbody, styles.body)}>
         <ProfileLede stylist={stylist} facts={facts} status={status} />
-        <div className={joinClassNames(helmet.profgrid, styles.grid)}>
+        <div className={joinClassNames(pageGlobal.profgrid, styles.grid)}>
           <div>
             <ProfileServices
               groups={limitMenuGroups(menuGroups)}
@@ -167,7 +167,7 @@ export const StylistProfilePage = () => {
           onClose={profile.closeShare}
         />
       )}
-      <div className={joinClassNames(helmet.bookbar, styles.bookbar)}>
+      <div className={joinClassNames(pageGlobal.bookbar, styles.bookbar)}>
         <div className={styles.barInner}>
           <div className={styles.barText}>
             <span className={styles.barNext}>

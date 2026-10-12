@@ -199,7 +199,7 @@ export const SettingsPayouts = ({ props }: PageProps) => {
   const status = props.payoutStatus || "active";
   const view = getPayoutStatus(status, props.pauseReason);
 
-  // the status palette comes from the PST table
+  // the status palette comes from getPayoutStatus
   const statusStyle = {
     "--pst-bg": view.background,
     "--pst-shadow": view.flat ? "none" : "var(--shadow-panel)",

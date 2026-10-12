@@ -155,7 +155,6 @@ const getRefundTag = (refunded: number, left: number) => {
   return "";
 };
 
-/** The past booking sheet. */
 export const getPastSheetView = (studio: StudioController) => {
   const { state, setState, actions, seedPast } = studio;
   const row = findPastRow(studio);

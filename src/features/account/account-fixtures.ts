@@ -2,7 +2,6 @@
 import { CURRENT_PASSWORD, DEMO_PHOTO, SEED_PROFILE } from "./account-data";
 import type { AccountState } from "./use-account";
 
-/** ?fixture= board states. */
 export const applyFixture = (state: AccountState, fixture: string): void => {
   const openPassword = {
     ...state.password,

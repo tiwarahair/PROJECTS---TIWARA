@@ -1,5 +1,3 @@
-/* Onboarding component styles; hover/active/focus states are !important on purpose so they always win over the base rules. */
-
 .scrim {
   position: fixed;
   inset: 0;
@@ -68,7 +66,6 @@
   margin: 0;
 }
 
-/* tTop / tLeft / tRight / tBottom / tW / tMaxH / tTf / tR / tAnim */
 .sheetDesk {
   top: 50%;
   left: 50%;
@@ -93,7 +90,7 @@
   animation: obUp 0.32s cubic-bezier(0.32, 0.72, 0, 1) both;
 }
 
-/* helmet keyframes (copied: CSS modules scope keyframe names per file) */
+/* keyframes are scoped per file in CSS modules, so shared ones are repeated */
 @keyframes obFade {
   from {
     opacity: 0;
@@ -121,7 +118,7 @@
   }
 }
 
-/* helmet: under reduced motion the slides, rises and shake become fades */
+/* under reduced motion the slides, rises and shake become fades */
 @media (prefers-reduced-motion: reduce) {
   @keyframes obUp {
     from {

@@ -2,7 +2,7 @@ import { Link } from "react-router";
 import { joinClassNames } from "../../utils/class-names";
 import type { MenuGroup, ServiceModal } from "./profile-logic";
 import styles from "../../styles/features/stylist-profile/profile-services.module.css";
-import helmet from "../../styles/features/stylist-profile/stylist-profile-helmet.module.css";
+import pageGlobal from "../../styles/features/stylist-profile/stylist-profile-page-global.module.css";
 
 interface ProfileServicesProps {
   groups: MenuGroup[];
@@ -39,7 +39,7 @@ export const ProfileServices = ({
             }) => (
               <div
                 key={serviceKey}
-                className={joinClassNames(helmet.svcrow, styles.row)}
+                className={joinClassNames(pageGlobal.svcrow, styles.row)}
               >
                 <button
                   onClick={() => onOpenService(modal)}
@@ -47,13 +47,19 @@ export const ProfileServices = ({
                 >
                   <div className={styles.rowName}>{serviceName}</div>
                   <div
-                    className={joinClassNames(helmet.svcmeta, styles.rowMeta)}
+                    className={joinClassNames(
+                      pageGlobal.svcmeta,
+                      styles.rowMeta,
+                    )}
                   >
                     {meta}
                   </div>
                 </button>
                 <div
-                  className={joinClassNames(helmet.svcrowEnd, styles.rowEnd)}
+                  className={joinClassNames(
+                    pageGlobal.svcrowEnd,
+                    styles.rowEnd,
+                  )}
                 >
                   <span className={styles.price}>
                     <span className={styles.priceFrom}>{"from "}</span>

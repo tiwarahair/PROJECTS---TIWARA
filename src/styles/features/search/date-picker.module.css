@@ -1,5 +1,3 @@
-/* Search page styles; hover/active states use !important so they win over the base rules. */
-
 .overlay {
   position: fixed;
   inset: 0;
@@ -170,7 +168,7 @@
   margin-top: 12px;
 }
 
-/* helmet keyframes, copied here because CSS modules scope keyframe names per file */
+/* keyframes are scoped per file in CSS modules, so shared ones are repeated */
 @keyframes sheetFade {
   from {
     opacity: 0;

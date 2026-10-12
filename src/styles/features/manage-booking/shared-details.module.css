@@ -1,5 +1,3 @@
-/* Manage Booking page styles; hover/active states use !important so they win over the base rules. */
-
 .section {
   margin-top: 36px;
 }
@@ -137,7 +135,7 @@
   transform: scale(0.98) !important;
 }
 
-/* r.valColor: muted for "None shared" */
+/* muted for "None shared" */
 .valueShared {
   color: var(--text-primary);
 }

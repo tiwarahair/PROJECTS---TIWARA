@@ -19,7 +19,7 @@ const PHOTO_CLASS = {
   stylist: styles.photoStylist,
 };
 
-/** The heroPhotos background (photo URL as a custom property; position by photo). */
+/** The hero photo background (photo URL as a custom property; position by photo). */
 const HeroPhoto = ({
   photoKey,
   className,
@@ -29,7 +29,6 @@ const HeroPhoto = ({
 }) => {
   const [src] = PHOTOS[photoKey];
 
-  // ph.url
   const photoStyle = {
     "--ob-photo": `url('${getAssetUrl(src)}')`,
   } as CSSProperties;

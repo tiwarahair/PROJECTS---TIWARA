@@ -1,5 +1,3 @@
-/* Search page styles; hover/active states use !important so they win over the base rules. */
-
 .page {
   min-height: 100vh;
   background: var(--neutral-50);
@@ -92,7 +90,7 @@
   transform: scale(0.98) !important;
 }
 
-/* helmet keyframes, copied here because CSS modules scope keyframe names per file */
+/* keyframes are scoped per file in CSS modules, so shared ones are repeated */
 @keyframes sheetFade {
   from {
     opacity: 0;

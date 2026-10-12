@@ -1,5 +1,3 @@
-/* Onboarding component styles; hover/active/focus states are !important on purpose so they always win over the base rules. */
-
 .wrap {
   margin-top: 16px;
   animation: obRise 0.28s cubic-bezier(0.23, 1, 0.32, 1) both;
@@ -116,7 +114,6 @@
   margin-top: 8px;
 }
 
-/* ts.bd / ts.bg / ts.fg / ts.track / ts.sub by theme */
 .widgetLight {
   border: 1px solid #e0e0e0;
   background: #fafafa;
@@ -147,7 +144,6 @@
   color: #a0a0a0;
 }
 
-/* ts.cur */
 .labelIdle {
   cursor: pointer;
 }
@@ -156,7 +152,7 @@
   cursor: default;
 }
 
-/* helmet keyframes (copied: CSS modules scope keyframe names per file) */
+/* keyframes are scoped per file in CSS modules, so shared ones are repeated */
 @keyframes obBadge {
   from {
     opacity: 0;
@@ -183,7 +179,7 @@
   }
 }
 
-/* helmet: under reduced motion the slides, rises and shake become fades */
+/* under reduced motion the slides, rises and shake become fades */
 @media (prefers-reduced-motion: reduce) {
   @keyframes obRise {
     from {

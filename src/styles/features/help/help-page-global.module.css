@@ -3,7 +3,7 @@
  * reset lines identical to the base layer are omitted; .hp-mob / .hp-desk are this module's classes.
  */
 @layer page {
-  /* this page's helmet has no input/select/button font reset: controls without font:inherit keep the browser font */
+  /* this page has no input/select/button font reset: controls without font:inherit keep the browser font */
   :global(html.help-page) input,
   :global(html.help-page) select,
   :global(html.help-page) button {

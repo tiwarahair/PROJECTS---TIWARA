@@ -132,7 +132,7 @@ export const EarningsOverlays = ({
   const amountClass = (amount: number) =>
     amount < 0 ? styles.amountNegative : styles.amountPositive;
 
-  // export
+  // export dialog
   const exportPeriod = state.exportPeriod || period;
 
   const exportRange =

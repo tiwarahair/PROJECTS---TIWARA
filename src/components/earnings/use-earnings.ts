@@ -107,7 +107,6 @@ const INITIAL_STATE: EarningsState = {
   width: 0,
 };
 
-/** Earnings state and actions. */
 export const useEarnings = (props: EarningsProps) => {
   const { scenario = "default", layout = "auto" } = props;
   const [state, setRawState] = useState(INITIAL_STATE);

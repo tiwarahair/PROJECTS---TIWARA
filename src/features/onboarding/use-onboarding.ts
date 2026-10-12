@@ -210,7 +210,6 @@ const getStartState = (
   return state;
 };
 
-/** Onboarding state and actions. */
 export const useOnboarding = (props: OnboardingProps) => {
   const location = useLocation();
 

@@ -7,7 +7,7 @@ import { ACCOUNT_INITIALS, logOut } from "../../stores/session-slice";
 import { getAssetUrl } from "../../utils/asset-url";
 import { joinClassNames } from "../../utils/class-names";
 import { getSearchParams } from "../../utils/page-flags";
-import helmet from "../../styles/features/help/help-helmet.module.css";
+import pageGlobal from "../../styles/features/help/help-page-global.module.css";
 import styles from "../../styles/features/help/help-page.module.css";
 
 const HELP_FAQS = faqs.filter(({ question }) =>
@@ -53,7 +53,7 @@ export const HelpPage = () => {
               alt="Tiwára's House"
             />
           </Link>
-          <div className={joinClassNames(helmet.hpMob, styles.mobActions)}>
+          <div className={joinClassNames(pageGlobal.hpMob, styles.mobActions)}>
             {loggedIn && (
               <Link
                 className={styles.mobFav}
@@ -84,7 +84,7 @@ export const HelpPage = () => {
               <span className={styles.menuLine}></span>
             </button>
           </div>
-          <nav className={joinClassNames(helmet.hpDesk, styles.desk)}>
+          <nav className={joinClassNames(pageGlobal.hpDesk, styles.desk)}>
             <Link className={styles.deskLink} to="/search">
               Find a stylist
             </Link>
@@ -125,7 +125,7 @@ export const HelpPage = () => {
           </nav>
         </div>
         {menuOpen && (
-          <div className={joinClassNames(helmet.hpMob, styles.mobMenu)}>
+          <div className={joinClassNames(pageGlobal.hpMob, styles.mobMenu)}>
             <Link className={styles.mobLink} to="/search">
               Find a stylist
             </Link>

@@ -2,7 +2,7 @@ import type { CSSProperties } from "react";
 import { joinClassNames } from "../../utils/class-names";
 import { resolveAssetUrl } from "../../utils/asset-url";
 import styles from "../../styles/features/stylist-profile/portfolio-lightbox.module.css";
-import helmet from "../../styles/features/stylist-profile/stylist-profile-helmet.module.css";
+import pageGlobal from "../../styles/features/stylist-profile/stylist-profile-page-global.module.css";
 import type { StylistProfileController } from "./use-stylist-profile";
 
 interface PortfolioLightboxProps {
@@ -13,7 +13,7 @@ interface PortfolioLightboxProps {
 export const PortfolioLightbox = ({
   zoom: { src, counter, close, prev, next, touchStart, touchEnd },
 }: PortfolioLightboxProps) => {
-  // zoomImgStyle backgroundImage: the current photo
+  // the current photo
   const imageStyle = {
     "--zoom-image": src ? `url("${resolveAssetUrl(src)}")` : "none",
   } as CSSProperties;
@@ -25,7 +25,7 @@ export const PortfolioLightbox = ({
       onClick={close}
       onTouchStart={touchStart}
       onTouchEnd={touchEnd}
-      className={joinClassNames(helmet.scpScrim, styles.scrim)}
+      className={joinClassNames(pageGlobal.scpScrim, styles.scrim)}
     >
       <button onClick={prev} aria-label="Previous" className={styles.prev}>
         <svg
@@ -45,7 +45,7 @@ export const PortfolioLightbox = ({
         role="img"
         aria-label="Portfolio"
         onClick={(event) => event.stopPropagation()}
-        className={joinClassNames(helmet.scpPanel, styles.image)}
+        className={joinClassNames(pageGlobal.scpPanel, styles.image)}
         style={imageStyle}
       ></div>
       <button onClick={next} aria-label="Next" className={styles.next}>

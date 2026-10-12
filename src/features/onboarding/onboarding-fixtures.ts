@@ -13,7 +13,6 @@ const PASSWORD_FIXTURES: Record<string, string> = {
   "pw-repeat": "aaaaaaaaaaaaaaaaaaa",
 };
 
-/** ?fixture= board states. */
 export const getFixturePatch = (
   key: string,
   baseForm: OnboardingForm,

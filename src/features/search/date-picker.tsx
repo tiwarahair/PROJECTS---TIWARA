@@ -7,7 +7,7 @@ import {
   HOURS,
   TIMES,
 } from "./search-dates";
-import helmet from "../../styles/features/search/search-helmet.module.css";
+import pageGlobal from "../../styles/features/search/search-page-global.module.css";
 import styles from "../../styles/features/search/date-picker.module.css";
 import type { SearchController } from "./use-search";
 import { MONDAY_FIRST_WEEKDAYS } from "../../utils/dates";
@@ -138,7 +138,7 @@ const CustomTimes = ({
     <select
       value={state.customFrom}
       onChange={actions.changeFrom}
-      className={joinClassNames(helmet.timesel, styles.timeSelect)}
+      className={joinClassNames(pageGlobal.timesel, styles.timeSelect)}
     >
       {HOURS.map((hour) => (
         <option key={hour} value={hour}>
@@ -150,7 +150,7 @@ const CustomTimes = ({
     <select
       value={state.customTo}
       onChange={actions.changeTo}
-      className={joinClassNames(helmet.timesel, styles.timeSelect)}
+      className={joinClassNames(pageGlobal.timesel, styles.timeSelect)}
     >
       {HOURS.map((hour) => (
         <option key={hour} value={hour}>
@@ -169,7 +169,7 @@ export const DatePopover = ({ search }: PickerProps) => (
       className={styles.overlayScrim}
     ></div>
     <div className={styles.popover}>
-      <div className={joinClassNames(helmet.calgrid, styles.calgrid)}>
+      <div className={joinClassNames(pageGlobal.calgrid, styles.calgrid)}>
         <div className={styles.quickDaysColumn}>
           <QuickDays search={search} />
         </div>

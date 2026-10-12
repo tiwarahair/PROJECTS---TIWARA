@@ -1,4 +1,3 @@
-/* ScrollRevealCard styles. */
 .track {
   min-height: var(--reveal-height, 80rem);
   display: flex;

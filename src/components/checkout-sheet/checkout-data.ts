@@ -270,7 +270,6 @@ export const ICONS = {
   send: "M22 2 11 13M22 2l-7 20-4-9-9-4z",
 };
 
-/** A typed amount as pounds. */
 export const parsePounds = (value: string): number => {
   const parsed = parseFloat(String(value || "").replace(/[^0-9.]/g, ""));
 

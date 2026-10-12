@@ -247,7 +247,7 @@ export const useAddressFinder = ({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  // follow external value changes (componentDidUpdate)
+  // follow external value changes
   useEffect(() => {
     const previous = previousValueRef.current;
 

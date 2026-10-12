@@ -1,5 +1,3 @@
-/* AccountSettings calendar sync styles. */
-
 .connecting {
   display: flex;
   flex-direction: column;
@@ -200,7 +198,7 @@
   color: var(--neutral-600);
 }
 
-/* helmet keyframes (copied: CSS modules scope keyframe names per file) */
+/* keyframes are scoped per file in CSS modules, so shared ones are repeated */
 @keyframes acpulse {
   0%,
   100% {
@@ -211,7 +209,6 @@
   }
 }
 
-/* helmet: [data-ac-sk] under reduced motion */
 @media (prefers-reduced-motion: reduce) {
   .skeletonLong,
   .skeletonShort {

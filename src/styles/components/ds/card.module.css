@@ -1,5 +1,4 @@
-/* Card styles.
-   Surfaces & elevation: level is assigned by behaviour, never appearance. */
+/* Surfaces & elevation: level is assigned by behaviour, never appearance. */
 .card {
   padding: var(--card-padding);
   transition:

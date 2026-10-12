@@ -21,7 +21,7 @@ import {
 import { useAccount } from "./use-account";
 import type { AccountProps } from "./use-account";
 import { AddressesSection, PaymentsSection } from "./wallet-sections";
-import helmet from "../../styles/features/account/account-helmet.module.css";
+import pageGlobal from "../../styles/features/account/account-page-global.module.css";
 import styles from "../../styles/features/account/account-page.module.css";
 
 export type AccountPageProps = AccountProps;
@@ -226,7 +226,7 @@ export const AccountPage = (props: AccountPageProps) => {
         </div>
       )}
       <footer className={styles.footer} data-screen-label="Account footer">
-        <div className={joinClassNames(helmet.acFoot, styles.footInner)}>
+        <div className={joinClassNames(pageGlobal.acFoot, styles.footInner)}>
           <span>{"© Tiwára's House"}</span>
           <nav className={styles.footNav} aria-label="Footer">
             <Link className={styles.footLink} to="/help">

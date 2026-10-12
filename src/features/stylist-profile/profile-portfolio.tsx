@@ -1,7 +1,7 @@
 import { joinClassNames } from "../../utils/class-names";
 import { resolveAssetUrl } from "../../utils/asset-url";
 import styles from "../../styles/features/stylist-profile/profile-portfolio.module.css";
-import helmet from "../../styles/features/stylist-profile/stylist-profile-helmet.module.css";
+import pageGlobal from "../../styles/features/stylist-profile/stylist-profile-page-global.module.css";
 
 interface ProfilePortfolioProps {
   portfolio: string[];
@@ -32,7 +32,7 @@ export const ProfilePortfolio = ({
             src={resolveAssetUrl(src)}
             alt="Portfolio"
             onClick={() => onZoom(src)}
-            className={joinClassNames(helmet.pfimg, styles.image)}
+            className={joinClassNames(pageGlobal.pfimg, styles.image)}
           />
         </div>
       ))}

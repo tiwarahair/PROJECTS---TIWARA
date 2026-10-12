@@ -33,7 +33,6 @@ const pickLabel = (
         ?.label ?? null)
     : null;
 
-/** ?fixture= board states. */
 export const applyFixture = (
   state: BookingState,
   fixture: string,

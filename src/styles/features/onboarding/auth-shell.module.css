@@ -1,5 +1,3 @@
-/* Onboarding component styles; hover/active/focus states are !important on purpose so they always win over the base rules. */
-
 .shell {
   display: flex;
   min-height: 100dvh;
@@ -388,7 +386,6 @@
     background-color 0.3s;
 }
 
-/* shellDir */
 .shellRow {
   flex-direction: row;
 }
@@ -397,7 +394,7 @@
   flex-direction: column;
 }
 
-/* heroFlex / heroH / heroM / heroR / heroBg by layout (see getLayout) */
+/* hero size and background by layout (see getLayout) */
 .hero[data-variant="default"] {
   flex: 1 0 auto;
   height: 34dvh;
@@ -454,7 +451,6 @@
   background: #241a12;
 }
 
-/* heroScrim */
 .scrim[data-variant="none"] {
   background: none;
 }
@@ -513,7 +509,7 @@
   );
 }
 
-/* the ph.url photo arrives as --ob-photo; ph.pos by photo */
+/* the photo arrives as --ob-photo; its position is set per photo */
 .heroPhoto,
 .photo {
   background-image: var(--ob-photo);
@@ -531,7 +527,6 @@
   background-position: center 28%;
 }
 
-/* hbBg / hbFg */
 .heroButtonPhoto {
   background: rgba(246, 240, 228, 0.1);
   color: #f6f0e4;
@@ -542,7 +537,6 @@
   color: var(--ob-fg);
 }
 
-/* authFlex / authJustify / authPad / contentMt */
 .auth[data-variant="desk"] {
   flex: 1 0 auto;
   justify-content: center;
@@ -593,7 +587,6 @@
   margin-top: 0px;
 }
 
-/* colMax / enterAnim */
 .screenDesk {
   max-width: 400px;
 }
@@ -610,7 +603,6 @@
   animation: obBack 0.34s cubic-bezier(0.23, 1, 0.32, 1) both;
 }
 
-/* footJustify / footPad */
 .footerDesk {
   justify-content: flex-start;
   padding: 20px 40px 28px;
@@ -621,7 +613,6 @@
   padding: 8px 22px 22px;
 }
 
-/* photoPad / photoTop / photoH / photoR (constant) */
 .photoSide {
   padding: 0;
 }
@@ -632,7 +623,6 @@
   border-radius: 0;
 }
 
-/* bnDots d.w / d.bg */
 .dotOn {
   width: 22px;
   background: #f6f0e4;
@@ -643,7 +633,7 @@
   background: rgba(246, 240, 228, 0.45);
 }
 
-/* helmet keyframes (copied: CSS modules scope keyframe names per file) */
+/* keyframes are scoped per file in CSS modules, so shared ones are repeated */
 @keyframes obBack {
   from {
     opacity: 0;
@@ -685,7 +675,7 @@
   }
 }
 
-/* helmet: under reduced motion the slides, rises and shake become fades */
+/* under reduced motion the slides, rises and shake become fades */
 @media (prefers-reduced-motion: reduce) {
   @keyframes obBack {
     from {

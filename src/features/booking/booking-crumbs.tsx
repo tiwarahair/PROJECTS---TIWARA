@@ -1,6 +1,6 @@
 import { Fragment } from "react";
 import { joinClassNames } from "../../utils/class-names";
-import helmet from "../../styles/features/booking/booking-helmet.module.css";
+import pageGlobal from "../../styles/features/booking/booking-page-global.module.css";
 import styles from "../../styles/features/booking/booking-crumbs.module.css";
 import type { BookingController } from "./use-booking";
 
@@ -21,7 +21,7 @@ export const BookingCrumbs = ({ booking }: BookingCrumbsProps) => {
   return (
     <div
       ref={crumbsRef}
-      className={joinClassNames(helmet.bkcrumbs, styles.crumbs)}
+      className={joinClassNames(pageGlobal.bkcrumbs, styles.crumbs)}
     >
       {steps.map(({ stepNumber, label }, index) => (
         <Fragment key={stepNumber}>

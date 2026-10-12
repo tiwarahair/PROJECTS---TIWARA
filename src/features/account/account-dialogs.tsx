@@ -11,7 +11,7 @@ import type { AccountView } from "./account-view";
 import { AccountSwitch } from "./settings-sections";
 import type { AccountController } from "./use-account";
 import styles from "../../styles/features/account/account-dialogs.module.css";
-import helmet from "../../styles/features/account/account-helmet.module.css";
+import pageGlobal from "../../styles/features/account/account-page-global.module.css";
 import ui from "../../styles/features/account/account-ui.module.css";
 
 const WIDE_DIALOGS = ["receipt", "delete", "cookies"];
@@ -569,14 +569,14 @@ export const AccountDialogs = ({ account, view }: AccountDialogsProps) => {
   return (
     // eslint-disable-next-line jsx-a11y/click-events-have-key-events, jsx-a11y/no-static-element-interactions
     <div
-      className={joinClassNames(helmet.acOv, styles.overlay)}
+      className={joinClassNames(pageGlobal.acOv, styles.overlay)}
       onClick={closeDialog}
       data-a="1"
     >
       {/* eslint-disable-next-line jsx-a11y/click-events-have-key-events, jsx-a11y/no-noninteractive-element-interactions */}
       <div
         className={joinClassNames(
-          helmet.acDlg,
+          pageGlobal.acDlg,
           styles.dialog,
           WIDE_DIALOGS.includes(dialog.kind)
             ? styles.dialogWide

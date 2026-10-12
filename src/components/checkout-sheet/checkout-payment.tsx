@@ -18,7 +18,6 @@ const TIP_CHOICES: [TipChoice, string][] = [
   ["custom", "Custom"],
 ];
 
-/** Chip toggle. */
 export const Chip = ({
   isOn,
   className,

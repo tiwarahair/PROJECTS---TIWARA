@@ -3,7 +3,7 @@ import { joinClassNames } from "../../utils/class-names";
 import { HOURS_ROWS } from "./profile-logic";
 import type { ProfileFacts } from "./profile-logic";
 import styles from "../../styles/features/stylist-profile/booking-aside.module.css";
-import helmet from "../../styles/features/stylist-profile/stylist-profile-helmet.module.css";
+import pageGlobal from "../../styles/features/stylist-profile/stylist-profile-page-global.module.css";
 
 interface BookingAsideProps {
   fromLabel: string;
@@ -17,9 +17,9 @@ export const BookingAside = ({
   bookHref,
   facts: { cancelHours, mailto, site, siteHref },
 }: BookingAsideProps) => (
-  <div className={joinClassNames(helmet.bookaside, styles.aside)}>
+  <div className={joinClassNames(pageGlobal.bookaside, styles.aside)}>
     <div className={styles.card}>
-      <div className={helmet.askcta}>
+      <div className={pageGlobal.askcta}>
         <div className={styles.title}>Book an appointment</div>
         <div className={styles.from}>{`from ${fromLabel}`}</div>
         <Link to={bookHref} className={styles.bookNow}>
@@ -30,7 +30,7 @@ export const BookingAside = ({
           {cancelHours}h before.
         </div>
       </div>
-      <div className={joinClassNames(helmet.askhours, styles.hours)}>
+      <div className={joinClassNames(pageGlobal.askhours, styles.hours)}>
         <div className={styles.hoursTitle}>Opening hours</div>
         {HOURS_ROWS.map(({ day, time, shut }) => (
           <div key={day} className={styles.hoursRow}>

@@ -1,7 +1,7 @@
 import type { CSSProperties } from "react";
 import { joinClassNames } from "../../utils/class-names";
 import { getBarCount, SIZE_GUIDE } from "./booking-content";
-import helmet from "../../styles/features/booking/booking-helmet.module.css";
+import pageGlobal from "../../styles/features/booking/booking-page-global.module.css";
 import styles from "../../styles/features/booking/size-guide.module.css";
 
 interface SizeGuideProps {
@@ -14,12 +14,12 @@ export const SizeGuide = ({ onClose }: SizeGuideProps) => (
   // eslint-disable-next-line jsx-a11y/click-events-have-key-events, jsx-a11y/no-static-element-interactions
   <div
     onClick={onClose}
-    className={joinClassNames(helmet.bkscrim, styles.scrim)}
+    className={joinClassNames(pageGlobal.bkscrim, styles.scrim)}
   >
     {/* eslint-disable-next-line jsx-a11y/click-events-have-key-events, jsx-a11y/no-static-element-interactions */}
     <div
       onClick={(event) => event.stopPropagation()}
-      className={joinClassNames(helmet.bkpanel, styles.panel)}
+      className={joinClassNames(pageGlobal.bkpanel, styles.panel)}
     >
       <div className={styles.head}>
         <div>
@@ -40,7 +40,7 @@ export const SizeGuide = ({ onClose }: SizeGuideProps) => (
           </svg>
         </button>
       </div>
-      <div className={joinClassNames(helmet.sizeguide, styles.grid)}>
+      <div className={joinClassNames(pageGlobal.sizeguide, styles.grid)}>
         {SIZE_GUIDE.map(({ name, description, width, popular }) => {
           const barStyle = { "--bar-width": `${width}px` } as CSSProperties;
 
@@ -48,12 +48,14 @@ export const SizeGuide = ({ onClose }: SizeGuideProps) => (
             <div
               key={name}
               className={joinClassNames(
-                helmet.sgcard,
+                pageGlobal.sgcard,
                 styles.card,
                 popular ? styles.cardPopular : styles.cardPlain,
               )}
             >
-              <div className={joinClassNames(helmet.sgdiag, styles.diagramBox)}>
+              <div
+                className={joinClassNames(pageGlobal.sgdiag, styles.diagramBox)}
+              >
                 <div className={styles.diagram}>
                   {Array.from({ length: getBarCount(width) }, (_bar, index) => (
                     <span
@@ -65,14 +67,14 @@ export const SizeGuide = ({ onClose }: SizeGuideProps) => (
                 </div>
                 {popular && (
                   <span
-                    className={joinClassNames(helmet.sgbadge, styles.badge)}
+                    className={joinClassNames(pageGlobal.sgbadge, styles.badge)}
                   >
                     <span className={styles.badgeDot}></span>
                     Most popular
                   </span>
                 )}
               </div>
-              <div className={joinClassNames(helmet.sgbody, styles.body)}>
+              <div className={joinClassNames(pageGlobal.sgbody, styles.body)}>
                 <div className={styles.name}>{name}</div>
                 <p className={styles.desc}>{description}</p>
               </div>

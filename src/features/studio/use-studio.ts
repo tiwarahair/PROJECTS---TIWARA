@@ -112,7 +112,6 @@ const seedNewAccount = (
   };
 };
 
-/** Studio's state, actions and lifecycle. */
 export const useStudio = (props: StudioProps) => {
   const isNew =
     (getQueryParam("account") || props.account || "populated") === "new";
@@ -232,7 +231,7 @@ export const useStudio = (props: StudioProps) => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  // componentDidUpdate: follow the calendar to now, restore the week scroll, lock the page under overlays
+  // after every update: follow the calendar to now, restore the week scroll, lock the page under overlays
   useLayoutEffect(() => {
     const memo = memoRef.current;
     const calendarKey = `${state.tab}|${state.bookingsLayout}|${state.dayIndex}`;

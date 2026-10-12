@@ -1,4 +1,3 @@
-/* StylistCard styles. Pseudo-state rules carry !important so they win over the base rules. */
 .card {
   display: flex;
   flex-direction: column;

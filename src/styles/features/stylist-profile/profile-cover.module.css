@@ -1,5 +1,3 @@
-/* Stylist Profile page styles; hover/active states use !important so they win over the base rules. */
-
 .wrap {
   max-width: 1040px;
   margin: 0 auto;

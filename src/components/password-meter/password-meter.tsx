@@ -99,7 +99,6 @@ export const PasswordMeter = ({
             </span>
             <span aria-hidden="true" className={styles.bars}>
               {segments.map(({ key, background }) => (
-                // pm.s1–s3: each bar's colour
                 <span
                   key={key}
                   className={styles.bar}

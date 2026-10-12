@@ -1,4 +1,4 @@
-/* CheckoutSheet done, receipt and refund styles. */
+/* Done, receipt and refund screens. */
 
 .doneView {
   padding: 12px 24px 32px;
@@ -404,7 +404,7 @@
   box-shadow: 0 0 0 1px var(--accent-700);
 }
 
-/* helmet keyframes (copied: CSS modules scope keyframe names per file) */
+/* keyframes are scoped per file in CSS modules, so shared ones are repeated */
 @keyframes ckup {
   from {
     opacity: 0;

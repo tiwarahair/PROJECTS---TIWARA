@@ -1,5 +1,3 @@
-/* Stylist Profile page styles; hover/active states use !important so they win over the base rules. */
-
 .header {
   position: relative;
   z-index: 60;
@@ -132,7 +130,7 @@
   text-decoration: none;
 }
 
-/* menuMl: margin-left:{{ menuMl }} — '-12px' when logged in, else 'auto' */
+/* margin-left is -12px when logged in, else auto */
 .menuButtonLoggedIn {
   margin-left: -12px;
 }

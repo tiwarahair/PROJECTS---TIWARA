@@ -2,7 +2,7 @@ import type { ReactNode } from "react";
 import { joinClassNames } from "../../utils/class-names";
 import { formatShortDate } from "./booking-calendar";
 import { getPrivacySections, TERMS_SECTIONS } from "./booking-content";
-import helmet from "../../styles/features/booking/booking-helmet.module.css";
+import pageGlobal from "../../styles/features/booking/booking-page-global.module.css";
 import styles from "../../styles/features/booking/booking-dialogs.module.css";
 import type { BookingController } from "./use-booking";
 
@@ -55,8 +55,8 @@ const ConfirmDialog = ({
     <div
       data-screen-label={screenLabel}
       className={joinClassNames(
-        helmet.bkscrim,
-        helmet.bkmscrim,
+        pageGlobal.bkscrim,
+        pageGlobal.bkmscrim,
         styles.confirmScrim,
       )}
     >
@@ -65,8 +65,8 @@ const ConfirmDialog = ({
         aria-modal="true"
         aria-labelledby={titleId}
         className={joinClassNames(
-          helmet.bkpanel,
-          helmet.bkmpanel,
+          pageGlobal.bkpanel,
+          pageGlobal.bkmpanel,
           styles.confirmPanel,
         )}
       >
@@ -116,7 +116,7 @@ export const BookingDialogs = ({ booking }: BookingDialogsProps) => {
         <div
           data-screen-label={legalDocumentTitle}
           onClick={closeLegalDocument}
-          className={joinClassNames(helmet.bkscrim, styles.docScrim)}
+          className={joinClassNames(pageGlobal.bkscrim, styles.docScrim)}
         >
           {/* eslint-disable-next-line jsx-a11y/click-events-have-key-events, jsx-a11y/no-noninteractive-element-interactions */}
           <div
@@ -124,7 +124,7 @@ export const BookingDialogs = ({ booking }: BookingDialogsProps) => {
             aria-modal="true"
             aria-label={legalDocumentTitle}
             onClick={(event) => event.stopPropagation()}
-            className={joinClassNames(helmet.bkpanel, styles.docPanel)}
+            className={joinClassNames(pageGlobal.bkpanel, styles.docPanel)}
           >
             <div className={styles.docHead}>
               <h3 className={styles.docTitle}>{legalDocumentTitle}</h3>

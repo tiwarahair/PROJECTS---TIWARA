@@ -5,7 +5,7 @@ import { getAssetUrl } from "../../utils/asset-url";
 import { joinClassNames } from "../../utils/class-names";
 import { HeartPath } from "./profile-icons";
 import styles from "../../styles/features/stylist-profile/profile-header.module.css";
-import helmet from "../../styles/features/stylist-profile/stylist-profile-helmet.module.css";
+import pageGlobal from "../../styles/features/stylist-profile/stylist-profile-page-global.module.css";
 
 interface ProfileHeaderProps {
   loggedIn: boolean;
@@ -34,7 +34,7 @@ export const ProfileHeader = ({
         <Link
           to={FAVOURITES_HREF}
           aria-label="Favourites"
-          className={joinClassNames(helmet.scpMob, styles.favourites)}
+          className={joinClassNames(pageGlobal.scpMob, styles.favourites)}
         >
           <svg
             width="20"
@@ -54,7 +54,7 @@ export const ProfileHeader = ({
         onClick={onToggleMenu}
         aria-label="Menu"
         className={joinClassNames(
-          helmet.scpMob,
+          pageGlobal.scpMob,
           styles.menuButton,
           loggedIn ? styles.menuButtonLoggedIn : styles.menuButtonGuest,
         )}
@@ -62,7 +62,7 @@ export const ProfileHeader = ({
         <span className={styles.menuLine}></span>
         <span className={styles.menuLine}></span>
       </button>
-      <nav className={joinClassNames(helmet.scpDesk, styles.desktopNav)}>
+      <nav className={joinClassNames(pageGlobal.scpDesk, styles.desktopNav)}>
         <Link to="/search" className={styles.navLink}>
           Find a stylist
         </Link>
@@ -91,7 +91,9 @@ export const ProfileHeader = ({
       </nav>
     </div>
     {menuOpen && (
-      <div className={joinClassNames(helmet.scpMobPanel, styles.mobilePanel)}>
+      <div
+        className={joinClassNames(pageGlobal.scpMobPanel, styles.mobilePanel)}
+      >
         <Link to="/search" onClick={onToggleMenu} className={styles.mobileLink}>
           Find a stylist
         </Link>

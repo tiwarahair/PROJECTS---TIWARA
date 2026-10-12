@@ -1,7 +1,7 @@
 /* Runtime states for the search controls: chips, options, suggestion rows, quick days, calendar cells and
    time pills. */
 
-/* chipS(on) — 32px; chipS(on,36) adds .chipLarge */
+/* 32px; the 36px size adds .chipLarge */
 .chip {
   display: inline-flex;
   align-items: center;
@@ -35,7 +35,7 @@
   border: 1px solid transparent;
 }
 
-/* optS(on) — sort / distance options */
+/* sort / distance options */
 .option {
   display: flex;
   align-items: center;
@@ -60,7 +60,7 @@
   font-weight: 600;
 }
 
-/* rowVm — What / Where suggestion rows: active = keyboard/hover, on = current selection */
+/* What / Where suggestion rows: active = keyboard/hover, on = current selection */
 .row {
   display: flex;
   align-items: center;
@@ -95,7 +95,6 @@
   background: transparent;
 }
 
-/* quickDays */
 .quickDay {
   display: flex;
   flex-direction: column;
@@ -117,7 +116,6 @@
   background: var(--accent-wash);
 }
 
-/* calCells */
 .cell {
   height: 40px;
   display: flex;
@@ -158,7 +156,6 @@
   color: var(--neutral-50);
 }
 
-/* timePills */
 .timePill {
   display: flex;
   flex-direction: column;

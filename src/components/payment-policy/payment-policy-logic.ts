@@ -28,7 +28,6 @@ export interface PolicyFormState {
   extras: ExtraState[];
   saved: string;
   flash: boolean;
-  /** Next extra id. */
   nextExtraId: number;
 }
 

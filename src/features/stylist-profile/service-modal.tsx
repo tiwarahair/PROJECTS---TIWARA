@@ -2,7 +2,7 @@ import { Link } from "react-router";
 import { joinClassNames } from "../../utils/class-names";
 import type { ServiceModal as ServiceModalData } from "./profile-logic";
 import styles from "../../styles/features/stylist-profile/service-modal.module.css";
-import helmet from "../../styles/features/stylist-profile/stylist-profile-helmet.module.css";
+import pageGlobal from "../../styles/features/stylist-profile/stylist-profile-page-global.module.css";
 
 interface ServiceModalProps {
   service: ServiceModalData;
@@ -14,13 +14,12 @@ export const ServiceModal = ({
   service: { name, description, customisation, price, duration, href },
   onClose,
 }: ServiceModalProps) => (
-  // clicking anywhere on the scrim (panel included) closes it
   // eslint-disable-next-line jsx-a11y/click-events-have-key-events, jsx-a11y/no-static-element-interactions
   <div
     onClick={onClose}
-    className={joinClassNames(helmet.scpScrim, styles.scrim)}
+    className={joinClassNames(pageGlobal.scpScrim, styles.scrim)}
   >
-    <div className={joinClassNames(helmet.scpPanel, styles.panel)}>
+    <div className={joinClassNames(pageGlobal.scpPanel, styles.panel)}>
       <div className={styles.closeRow}>
         <button onClick={onClose} aria-label="Close" className={styles.close}>
           <svg

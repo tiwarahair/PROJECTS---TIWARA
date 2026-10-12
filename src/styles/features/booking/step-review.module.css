@@ -1,5 +1,3 @@
-/* Booking page styles; hover/active states use !important so they win over the base rules. */
-
 .summary {
   background: var(--neutral-0);
   border-radius: var(--radius-lg);

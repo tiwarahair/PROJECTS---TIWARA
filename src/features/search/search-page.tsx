@@ -7,7 +7,7 @@ import { DatePopover } from "./date-picker";
 import { FilterBar } from "./filter-bar";
 import { FiltersSheet } from "./filters-sheet";
 import { MobileSearchSheet } from "./mobile-search-sheet";
-import helmet from "../../styles/features/search/search-helmet.module.css";
+import pageGlobal from "../../styles/features/search/search-page-global.module.css";
 import { SearchNav } from "./search-nav";
 import styles from "../../styles/features/search/search-page.module.css";
 import { useSearch } from "./use-search";
@@ -19,7 +19,7 @@ export const SearchPage = () => {
 
   useSearchMemory();
 
-  // page-wide helmet rules apply while Search is mounted
+  // page-wide rules apply while Search is mounted
   useLayoutEffect(() => {
     document.documentElement.classList.add("search-page");
 
@@ -60,7 +60,7 @@ export const SearchPage = () => {
               from,
               verified,
             }) => (
-              <div key={key} className={helmet.rescard}>
+              <div key={key} className={pageGlobal.rescard}>
                 <StylistCard
                   href={href}
                   cover={cover}

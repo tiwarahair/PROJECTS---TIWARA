@@ -1,5 +1,3 @@
-/* PaymentPolicy styles. */
-
 .root {
   height: 100%;
   display: flex;
@@ -883,9 +881,7 @@
   cursor: not-allowed;
 }
 
-/*
- * helmet rules: scoped to this component's classes; [data-pp-in] elements carry .focusRing
- */
+/* [data-pp-in] elements carry .focusRing */
 @media (prefers-reduced-motion: reduce) {
   .reveal {
     transition-property: opacity, visibility !important;

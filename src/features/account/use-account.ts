@@ -217,7 +217,6 @@ const getInitialState = (
   return state;
 };
 
-/** Account state and actions. */
 export const useAccount = (props: AccountProps) => {
   const [searchParams] = useSearchParams();
 

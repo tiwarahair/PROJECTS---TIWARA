@@ -1,5 +1,3 @@
-/* Booking page styles; hover/active states use !important so they win over the base rules. */
-
 .loginLine {
   margin: 0 0 28px;
   color: var(--text-secondary);
@@ -263,7 +261,7 @@
   background-position: center;
 }
 
-/* helmet keyframes used by .prior (copied: CSS modules scope keyframe names per file) */
+/* keyframes are scoped per file in CSS modules, so shared ones are repeated */
 @keyframes alIn {
   from {
     opacity: 0;

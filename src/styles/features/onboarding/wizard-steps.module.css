@@ -1,5 +1,3 @@
-/* Onboarding component styles; hover/active/focus states are !important on purpose so they always win over the base rules. */
-
 .typeGrid {
   display: grid;
   gap: 12px;
@@ -575,7 +573,6 @@
   box-shadow: 0 0 0 3px var(--accent-glow) !important;
 }
 
-/* e.<field>Bd (wizard) */
 .border {
   border: 1px solid var(--border-strong);
 }
@@ -584,7 +581,6 @@
   border: 1px solid var(--accent-700);
 }
 
-/* e.bizHelpColor / e.pcHelpColor / catHelpColor / e.bcHelpColor */
 .helpMuted {
   color: var(--text-secondary);
 }
@@ -597,7 +593,7 @@
   color: var(--neutral-600);
 }
 
-/* cols2 / cols3 and the category tile layout by width (mid = ≥640px) */
+/* two / three columns and the category tile layout by width (mid = ≥640px) */
 .typeGridMid {
   grid-template-columns: 1fr 1fr;
 }
@@ -654,7 +650,7 @@
   padding-right: 34px;
 }
 
-/* tile(on): border, fill, icon and title colours */
+/* selected tile: border, fill, icon and title colours */
 .tileOn {
   border: 1px solid var(--accent-700);
   background: var(--accent-wash);
@@ -685,7 +681,7 @@
   color: var(--text-primary);
 }
 
-/* t.dly / c.dly: staggered rise */
+/* staggered rise */
 .typeTile,
 .catTile {
   animation: obRise 0.36s cubic-bezier(0.23, 1, 0.32, 1) both;
@@ -737,7 +733,6 @@
   animation-delay: 0.2s;
 }
 
-/* radii r.bd / r.bg / r.fg */
 .radiusOn {
   border: 1px solid #1a1714;
   background: #1a1714;
@@ -750,12 +745,10 @@
   color: var(--text-primary);
 }
 
-/* wz.field */
 .bizInput {
   background: var(--ob-wz-field);
 }
 
-/* sources o.bd / o.bg / o.fw / o.fg / o.ring / o.dot / o.dly */
 .source {
   animation: obRise 0.34s cubic-bezier(0.23, 1, 0.32, 1) both;
 }
@@ -790,7 +783,7 @@
   transform: scale(0);
 }
 
-/* helmet keyframes (copied: CSS modules scope keyframe names per file) */
+/* keyframes are scoped per file in CSS modules, so shared ones are repeated */
 @keyframes obBadge {
   from {
     opacity: 0;
@@ -812,7 +805,7 @@
   }
 }
 
-/* helmet: under reduced motion the slides, rises and shake become fades */
+/* under reduced motion the slides, rises and shake become fades */
 @media (prefers-reduced-motion: reduce) {
   @keyframes obRise {
     from {

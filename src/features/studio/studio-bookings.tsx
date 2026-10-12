@@ -856,7 +856,6 @@ const BookingsList = ({ view }: { view: BookingsView }) => (
   </div>
 );
 
-/** Studio → Bookings. */
 export const StudioBookings = ({
   studio,
   view,

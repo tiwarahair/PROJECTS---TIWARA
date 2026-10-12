@@ -2,7 +2,7 @@ import type { CSSProperties } from "react";
 import { hairColours } from "../../data";
 import { joinClassNames } from "../../utils/class-names";
 import { formatServiceDuration } from "../../utils/services";
-import helmet from "../../styles/features/booking/booking-helmet.module.css";
+import pageGlobal from "../../styles/features/booking/booking-page-global.module.css";
 import { getDeltaLabel } from "./booking-pricing";
 import type { Selection } from "./booking-state";
 import step from "../../styles/features/booking/booking-step.module.css";
@@ -90,7 +90,7 @@ export const StepCustomise = ({ booking }: StepCustomiseProps) => {
       <p className={step.lead}>
         {`${serviceName} with ${stylist.name} — price and time update as you choose.`}
       </p>
-      <div className={joinClassNames(helmet.custgrid, styles.grid)}>
+      <div className={joinClassNames(pageGlobal.custgrid, styles.grid)}>
         <div>
           {options.size.length > 0 && (
             <div className={styles.section}>
@@ -153,15 +153,15 @@ export const StepCustomise = ({ booking }: StepCustomiseProps) => {
               <div className={styles.swatches}>
                 {hairColours.map(({ name, hex }) => {
                   const on = selection.colour === name;
-                  // o.style background: the colour's hex (or gradient)
+                  // the colour's hex (or gradient)
                   const swatchStyle = { "--swatch": hex } as CSSProperties;
 
                   return (
                     <span
                       key={name}
                       className={joinClassNames(
-                        helmet.swwrap,
-                        on && helmet.swwrapOn,
+                        pageGlobal.swwrap,
+                        on && pageGlobal.swwrapOn,
                         styles.swatchWrap,
                       )}
                     >
@@ -179,8 +179,8 @@ export const StepCustomise = ({ booking }: StepCustomiseProps) => {
                         )}
                         style={swatchStyle}
                       ></button>
-                      <span className={helmet.swtip}>{name}</span>
-                      <span className={helmet.swname}>{name}</span>
+                      <span className={pageGlobal.swtip}>{name}</span>
+                      <span className={pageGlobal.swname}>{name}</span>
                     </span>
                   );
                 })}

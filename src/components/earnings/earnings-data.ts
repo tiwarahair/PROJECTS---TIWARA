@@ -158,7 +158,6 @@ export const getClient = (
 export const getLedgerKey = (scenario: EarningsScenario): string =>
   `${scenario}|${new Date().toDateString()}`;
 
-/** The demo ledger for a scenario. */
 const getMethodForRoll = (roll: number) => {
   if (roll < 0.34) return "Saved card";
 

@@ -1,7 +1,7 @@
 import { useLayoutEffect } from "react";
 import { Link } from "react-router";
 import { getAssetUrl } from "../../utils/asset-url";
-import "../../styles/features/email-change-notice/email-change-notice-helmet.module.css";
+import "../../styles/features/email-change-notice/email-change-notice-page-global.module.css";
 import styles from "../../styles/features/email-change-notice/email-change-notice.module.css";
 
 /**

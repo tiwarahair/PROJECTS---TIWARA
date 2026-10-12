@@ -1,9 +1,11 @@
 /*
  * Cascade layers:
  *   base — design tokens + global reset
- *   page — each page's <helmet> <style> rules, scoped to that page
+ *   page — page-wide rules, each scoped to its page
  *   unlayered — component CSS modules, which beat both
  */
+
+/* Page and component modules give hover/active/focus states !important so they win over the base rules. */
 @layer base, page;
 
 @import "./design-system/styles.css" layer(base);

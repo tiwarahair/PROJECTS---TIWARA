@@ -1,5 +1,3 @@
-/* Onboarding component styles; hover/active/focus states are !important on purpose so they always win over the base rules. */
-
 .welcomeTitle {
   margin: 0;
   font-family: var(--font-display, "Schibsted Grotesk", sans-serif);
@@ -704,7 +702,6 @@
   text-wrap: balance;
 }
 
-/* welcomeW / welcomeFs / welcomeTW */
 .welcomeTitleLight {
   font-weight: 600;
 }
@@ -723,12 +720,11 @@
   width: auto;
 }
 
-/* welcomeGap (the inline welcome always has the 28px gap) */
+/* the inline welcome always has the 28px gap */
 .welcomeGap {
   height: 28px;
 }
 
-/* emailFs */
 .emailTitlePro {
   font-size: min(26px, calc((100vw - 56px) / 15.3));
 }
@@ -737,12 +733,11 @@
   font-size: min(30px, calc((100vw - 56px) / 13.4));
 }
 
-/* codeShake */
 .shake {
   animation: obShake 0.3s cubic-bezier(0.36, 0.07, 0.19, 0.97);
 }
 
-/* c.bd: error, filled or empty */
+/* code box border: error, filled or empty */
 .codeBoxError {
   border: 1px solid var(--ob-err);
 }
@@ -755,7 +750,6 @@
   border: 1px solid var(--ob-line);
 }
 
-/* resendColor / resendCur */
 .resendWaiting {
   color: var(--ob-sub);
   cursor: default;
@@ -766,7 +760,7 @@
   cursor: pointer;
 }
 
-/* helmet keyframes (copied: CSS modules scope keyframe names per file) */
+/* keyframes are scoped per file in CSS modules, so shared ones are repeated */
 @keyframes obBadge {
   from {
     opacity: 0;
@@ -805,7 +799,7 @@
   }
 }
 
-/* helmet: under reduced motion the slides and rises become fades; the empty obShake turns the shake off */
+/* under reduced motion the slides and rises become fades; the empty obShake turns the shake off */
 /* eslint-disable css/no-empty-blocks */
 @media (prefers-reduced-motion: reduce) {
   @keyframes obRise {

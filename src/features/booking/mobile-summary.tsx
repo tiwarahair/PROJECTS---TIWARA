@@ -1,5 +1,5 @@
 import { joinClassNames } from "../../utils/class-names";
-import helmet from "../../styles/features/booking/booking-helmet.module.css";
+import pageGlobal from "../../styles/features/booking/booking-page-global.module.css";
 import next from "../../styles/features/booking/next-button.module.css";
 import styles from "../../styles/features/booking/mobile-summary.module.css";
 import type { BookingController } from "./use-booking";
@@ -14,7 +14,7 @@ export const MobileSummary = ({ booking }: MobileSummaryProps) => {
   const { step } = state;
 
   return (
-    <div className={joinClassNames(helmet.mobsum, styles.bar)}>
+    <div className={joinClassNames(pageGlobal.mobsum, styles.bar)}>
       <div className={styles.text}>
         <div className={styles.total}>{service ? money.total : "—"}</div>
         <div className={styles.line}>

@@ -54,7 +54,6 @@ export interface CheckoutSheetProps {
   onCancelLink?: () => void;
 }
 
-/** CheckoutSheet state and actions. */
 export const useCheckout = (props: CheckoutSheetProps) => {
   const [state, setRawState] = useState(() =>
     getInitialCheckout({

@@ -21,7 +21,7 @@
   animation: scrimout 0.16s ease both;
 }
 
-/* ---- ovAnim(out, kind) ---- */
+/* ---- open / close animations ---- */
 .shUp {
   animation: shup 0.3s cubic-bezier(0.32, 0.72, 0, 1) both;
 }
@@ -50,7 +50,7 @@
   animation: popin 0.16s cubic-bezier(0.23, 1, 0.32, 1) both;
 }
 
-/* ---- dg*: centred dialog (wide) or bottom sheet (narrow) ---- */
+/* ---- centred dialog (wide) or bottom sheet (narrow) ---- */
 .dialogWide {
   bottom: auto;
   top: 50%;
@@ -147,7 +147,7 @@
   }
 }
 
-/* the helmet defines popin twice; the second definition wins */
+/* the page-wide styles define popin twice; the second definition wins */
 @keyframes popin {
   from {
     opacity: 0;

@@ -54,7 +54,7 @@ export const HomePage = ({
   // eslint-disable-next-line id-length -- React preload() option name
   preload(heroUrl, { as: "image", fetchPriority: "high" });
 
-  // page-wide helmet rules (body background, colour tokens, smooth scroll) apply while Home is mounted
+  // page-wide rules (body background, colour tokens, smooth scroll) apply while Home is mounted
   useLayoutEffect(() => {
     document.documentElement.classList.add("home-page");
     const { hash } = window.location;

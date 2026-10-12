@@ -17,7 +17,6 @@ import type {
 export interface StudioContext {
   getState: () => StudioState;
   setState: (patch: StudioPatch) => void;
-  /** Named timeouts. */
   timers: Record<string, number>;
   /** Values kept between renders (seen setup steps, the clash override, the last pointer type). */
   memo: {

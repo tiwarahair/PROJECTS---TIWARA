@@ -1,5 +1,3 @@
-/* AccountSettings styles. */
-
 .root {
   position: relative;
   font-family: var(--font-body);
@@ -345,7 +343,7 @@
 }
 
 /*
- * helmet rules, scoped to this component's classes; [data-ac-in] elements carry .focusRing.
+ * [data-ac-in] elements carry .focusRing.
  * The reveal / skeleton reduced-motion rules live with those classes; pwIn lives with PasswordMeter.
  */
 @media (prefers-reduced-motion: reduce) {

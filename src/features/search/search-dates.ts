@@ -100,7 +100,6 @@ export const getDateLabel = (state: SearchState): string =>
     ? formatWeekdayDate(new Date(`${state.query.date}T00:00:00`))
     : "Any date") + (state.time !== "any" ? ` · ${getTimeLabel(state)}` : "");
 
-/** Mobile summary date label. */
 export const getMobileDateLabel = ({ query }: SearchState): string =>
   query.date
     ? formatWeekdayDate(new Date(`${query.date}T00:00:00`))

@@ -1,18 +1,18 @@
 :root{
 /* Easing — the house curve is the gentlest of the three the product converged on.
    Applied from audit A1; replaces the single cubic-bezier(.22,.61,.36,1). */
---ease-out:cubic-bezier(.2,.8,.2,1);        /* @kind other */ /* default: entries, hovers, colour */
---ease-in:cubic-bezier(.4,0,.7,.2);         /* @kind other */ /* exits only — sheets, dialogs dismissing */
---ease-drawer:cubic-bezier(.32,.72,0,1);    /* @kind other */ /* sheets and sticky bars arriving */
---ease-inout:cubic-bezier(.4,0,.2,1);       /* @kind other */ /* layout: width, margin, grid rows */
---ease-spring:cubic-bezier(.34,1.56,.64,1); /* @kind other */ /* one overshoot, used sparingly */
+--ease-out:cubic-bezier(.2,.8,.2,1);        /* default: entries, hovers, colour */
+--ease-in:cubic-bezier(.4,0,.7,.2);         /* exits only — sheets, dialogs dismissing */
+--ease-drawer:cubic-bezier(.32,.72,0,1);    /* sheets and sticky bars arriving */
+--ease-inout:cubic-bezier(.4,0,.2,1);       /* layout: width, margin, grid rows */
+--ease-spring:cubic-bezier(.34,1.56,.64,1); /* one overshoot, used sparingly */
 /* Durations */
---duration-fast:160ms;   /* @kind other */ /* press, small colour shifts */
---duration-base:220ms;   /* @kind other */ /* hovers, menus, popovers */
---duration-mid:280ms;    /* @kind other */ /* dialogs, staggered entries */
---duration-slow:360ms;   /* @kind other */ /* sheets, drawers */
---duration-slower:520ms; /* @kind other */ /* hero reveals */
---duration-scenic:700ms; /* @kind other */ /* image scale, card arrivals */
+--duration-fast:160ms;   /* press, small colour shifts */
+--duration-base:220ms;   /* hovers, menus, popovers */
+--duration-mid:280ms;    /* dialogs, staggered entries */
+--duration-slow:360ms;   /* sheets, drawers */
+--duration-slower:520ms; /* hero reveals */
+--duration-scenic:700ms; /* image scale, card arrivals */
 /* Stagger step for grouped entries */
---stagger-step:60ms;     /* @kind other */
+--stagger-step:60ms;
 }

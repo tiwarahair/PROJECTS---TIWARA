@@ -313,7 +313,7 @@ export const StepDetails = ({ booking }: StepDetailsProps) => {
         </div>
         <div className={styles.photoRow}>
           {photos.map(({ name, url }, index) => {
-            // p.style backgroundImage: the uploaded photo
+            // the uploaded photo
             const photoStyle = {
               "--photo": `url("${url}")`,
             } as CSSProperties;

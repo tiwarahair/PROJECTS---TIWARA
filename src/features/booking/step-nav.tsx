@@ -1,5 +1,5 @@
 import { joinClassNames } from "../../utils/class-names";
-import helmet from "../../styles/features/booking/booking-helmet.module.css";
+import pageGlobal from "../../styles/features/booking/booking-page-global.module.css";
 import next from "../../styles/features/booking/next-button.module.css";
 import styles from "../../styles/features/booking/step-nav.module.css";
 import type { BookingController } from "./use-booking";
@@ -14,7 +14,7 @@ export const StepNav = ({ booking }: StepNavProps) => {
   const { step } = state;
 
   return (
-    <div className={joinClassNames(helmet.navbtns, styles.row)}>
+    <div className={joinClassNames(pageGlobal.navbtns, styles.row)}>
       {step > 1 && step < 6 && (
         <button
           onClick={actions.goBack}

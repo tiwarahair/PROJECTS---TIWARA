@@ -4,7 +4,7 @@ import { joinClassNames } from "../../utils/class-names";
 import { BookingConfirmation } from "./booking-confirmation";
 import { BookingCrumbs } from "./booking-crumbs";
 import { BookingDialogs } from "./booking-dialogs";
-import helmet from "../../styles/features/booking/booking-helmet.module.css";
+import pageGlobal from "../../styles/features/booking/booking-page-global.module.css";
 import { BookingNav } from "./booking-nav";
 import styles from "../../styles/features/booking/booking-page.module.css";
 import { BookingSummary } from "./booking-summary";
@@ -37,7 +37,7 @@ export const BookingPage = () => {
   const { step, confirmed } = state;
   const StepView = STEP_VIEWS[step as keyof typeof STEP_VIEWS];
 
-  // page-wide helmet rules (16px inputs on mobile, focus borders, overflow) apply while Booking is mounted
+  // page-wide rules (16px inputs on mobile, focus borders, overflow) apply while Booking is mounted
   useLayoutEffect(() => {
     document.documentElement.classList.add("booking-page");
 
@@ -47,7 +47,7 @@ export const BookingPage = () => {
   return (
     <div
       data-screen-label="Booking"
-      className={joinClassNames(helmet.bkpage, styles.page)}
+      className={joinClassNames(pageGlobal.bkpage, styles.page)}
     >
       <BookingNav
         exitHref={`/stylist?stylist=${stylist.id}`}
@@ -64,7 +64,7 @@ export const BookingPage = () => {
           <div className={styles.content}>
             {!!state.resumeDraft && <ResumeBanner booking={booking} />}
             <BookingCrumbs booking={booking} />
-            <div className={joinClassNames(helmet.bkgrid, styles.grid)}>
+            <div className={joinClassNames(pageGlobal.bkgrid, styles.grid)}>
               <div className={styles.main}>
                 {StepView && <StepView booking={booking} />}
                 <StepNav booking={booking} />

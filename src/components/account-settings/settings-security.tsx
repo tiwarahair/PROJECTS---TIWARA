@@ -53,7 +53,6 @@ export const CheckRow = ({
   </button>
 );
 
-/** On / off switch. */
 export const Switch = ({
   isOn,
   label,

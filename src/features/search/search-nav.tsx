@@ -6,7 +6,7 @@ import { joinClassNames } from "../../utils/class-names";
 import { ClearButton } from "./clear-button";
 import { getDateLabel, getMobileDateLabel } from "./search-dates";
 import { SearchMenu } from "./search-menu";
-import helmet from "../../styles/features/search/search-helmet.module.css";
+import pageGlobal from "../../styles/features/search/search-page-global.module.css";
 import styles from "../../styles/features/search/search-nav.module.css";
 import { getWhatListProps, WhatList, WhereList } from "./suggestion-list";
 import type { SearchController } from "./use-search";
@@ -28,15 +28,15 @@ export const SearchNav = ({ search }: SearchNavProps) => {
   const mobileDateLabel = getMobileDateLabel(state);
   const mobileWhereLabel = where.display || "Current location";
 
-  // pillMax: the pill grows with the window, leaving room for the logo and the right rail
+  // the pill grows with the window, leaving room for the logo and the right rail
   const pillStyle = {
     "--pill-max": `${Math.min(880, viewportWidth - (viewportWidth < 1100 ? 300 : 360))}px`,
   } as CSSProperties;
 
   return (
     <nav ref={refs.nav} className={styles.nav}>
-      <div className={joinClassNames(helmet.navinner, styles.inner)}>
-        <div className={joinClassNames(helmet.navRail, styles.railLeft)}>
+      <div className={joinClassNames(pageGlobal.navinner, styles.inner)}>
+        <div className={joinClassNames(pageGlobal.navRail, styles.railLeft)}>
           <Link to="/" className={styles.logoLink}>
             <img
               src={getAssetUrl("logos/logo-crimson.png")}
@@ -47,11 +47,14 @@ export const SearchNav = ({ search }: SearchNavProps) => {
         </div>
         <div
           data-expanded="true"
-          className={joinClassNames(helmet.searchPill, styles.pill)}
+          className={joinClassNames(pageGlobal.searchPill, styles.pill)}
           style={pillStyle}
         >
           <div
-            className={joinClassNames(helmet.spMobile, styles.mobileSummary)}
+            className={joinClassNames(
+              pageGlobal.spMobile,
+              styles.mobileSummary,
+            )}
           >
             <Link to="/" aria-label="Back" className={styles.mobileBack}>
               <svg
@@ -80,7 +83,7 @@ export const SearchNav = ({ search }: SearchNavProps) => {
               </span>
             </button>
           </div>
-          <div className={joinClassNames(helmet.hsField, styles.field)}>
+          <div className={joinClassNames(pageGlobal.hsField, styles.field)}>
             <div className={styles.fieldRow}>
               <input
                 ref={refs.what}
@@ -118,7 +121,7 @@ export const SearchNav = ({ search }: SearchNavProps) => {
               </div>
             )}
           </div>
-          <div className={joinClassNames(helmet.hsField, styles.field)}>
+          <div className={joinClassNames(pageGlobal.hsField, styles.field)}>
             <div className={styles.fieldRow}>
               <input
                 ref={refs.where}
@@ -161,7 +164,7 @@ export const SearchNav = ({ search }: SearchNavProps) => {
               </div>
             )}
           </div>
-          <div className={joinClassNames(helmet.hsField, styles.dateField)}>
+          <div className={joinClassNames(pageGlobal.hsField, styles.dateField)}>
             <div className={styles.fieldRow}>
               <button onClick={actions.openDate} className={styles.dateButton}>
                 {getDateLabel(state)}
@@ -174,7 +177,7 @@ export const SearchNav = ({ search }: SearchNavProps) => {
           <button
             onClick={actions.search}
             aria-label="Search"
-            className={joinClassNames(helmet.spBtn, styles.searchButton)}
+            className={joinClassNames(pageGlobal.spBtn, styles.searchButton)}
           >
             <svg
               width="17"
@@ -189,13 +192,13 @@ export const SearchNav = ({ search }: SearchNavProps) => {
               <path d="m21 21-4.3-4.3"></path>
             </svg>
             <span
-              className={joinClassNames(helmet.spLabel, styles.searchLabel)}
+              className={joinClassNames(pageGlobal.spLabel, styles.searchLabel)}
             >
               Search
             </span>
           </button>
         </div>
-        <div className={joinClassNames(helmet.navRail, styles.railRight)}>
+        <div className={joinClassNames(pageGlobal.navRail, styles.railRight)}>
           {loggedIn && (
             <Link
               to="/account?section=favourites"

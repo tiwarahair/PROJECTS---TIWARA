@@ -1,7 +1,7 @@
 import type { CSSProperties } from "react";
 import { joinClassNames } from "../../utils/class-names";
 import styles from "../../styles/features/stylist-profile/share-popover.module.css";
-import helmet from "../../styles/features/stylist-profile/stylist-profile-helmet.module.css";
+import pageGlobal from "../../styles/features/stylist-profile/stylist-profile-page-global.module.css";
 import type { SharePosition } from "./use-stylist-profile";
 
 interface SharePopoverProps {
@@ -20,7 +20,7 @@ export const SharePopover = ({
   onCopy,
   onClose,
 }: SharePopoverProps) => {
-  // sharePos: measured from the Share button when it opened
+  // measured from the Share button when it opened
   const positionStyle = {
     "--share-top": top,
     "--share-right": right,
@@ -34,7 +34,11 @@ export const SharePopover = ({
       role="dialog"
       aria-label="Share this stylist"
       onClick={(event) => event.stopPropagation()}
-      className={joinClassNames(helmet.pfPop, styles.popover, styles.position)}
+      className={joinClassNames(
+        pageGlobal.pfPop,
+        styles.popover,
+        styles.position,
+      )}
       style={positionStyle}
     >
       <div className={styles.title}>Share this stylist</div>

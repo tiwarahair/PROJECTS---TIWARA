@@ -4,7 +4,7 @@ import { joinClassNames } from "../../utils/class-names";
 import { getWhenLine } from "./booking-calendar";
 import { getPreviewIndex, hasPreview, PREVIEW_POOL } from "./booking-content";
 import { getSummaryWhere } from "./booking-details";
-import helmet from "../../styles/features/booking/booking-helmet.module.css";
+import pageGlobal from "../../styles/features/booking/booking-page-global.module.css";
 import { HoldBar } from "./hold-bar";
 import styles from "../../styles/features/booking/booking-summary.module.css";
 import type { BookingController } from "./use-booking";
@@ -37,7 +37,6 @@ export const BookingSummary = ({ booking }: BookingSummaryProps) => {
   const previewIndex = getPreviewIndex(selection.length, selection.colour);
   const previewPath = PREVIEW_POOL[previewIndex] ?? "";
 
-  // previewBoxStyle / coverShellStyle background images
   const previewStyle = {
     "--preview-image": toImage(previewPath),
   } as CSSProperties;
@@ -54,11 +53,11 @@ export const BookingSummary = ({ booking }: BookingSummaryProps) => {
     : styles.previewBoxOpen;
 
   return (
-    <div className={joinClassNames(helmet.bksum, styles.aside)}>
+    <div className={joinClassNames(pageGlobal.bksum, styles.aside)}>
       <div
         className={joinClassNames(
-          helmet.prevshell,
-          step !== 2 && helmet.prevshellOff,
+          pageGlobal.prevshell,
+          step !== 2 && pageGlobal.prevshellOff,
           styles.previewShell,
           showPrev ? styles.previewShellOpen : styles.previewShellClosed,
           motion,
@@ -66,7 +65,7 @@ export const BookingSummary = ({ booking }: BookingSummaryProps) => {
       >
         <div
           className={joinClassNames(
-            helmet.aiprev,
+            pageGlobal.aiprev,
             styles.previewBox,
             showPrev ? previewOpenClass : styles.previewBoxClosed,
             isMobile ? styles.previewBoxMobile : styles.previewBoxDesktop,
@@ -75,7 +74,6 @@ export const BookingSummary = ({ booking }: BookingSummaryProps) => {
           style={previewStyle}
         >
           {PREVIEW_POOL.map((path, index) => {
-            // previewPool p.style backgroundImage
             const layerStyle = {
               "--layer-image": toImage(path),
             } as CSSProperties;
@@ -98,7 +96,7 @@ export const BookingSummary = ({ booking }: BookingSummaryProps) => {
             <span className={styles.previewTag}>AI preview</span>
             <button
               onClick={() => actions.setState({ showPrev: false })}
-              className={joinClassNames(helmet.aihide, styles.hide)}
+              className={joinClassNames(pageGlobal.aihide, styles.hide)}
             >
               Hide
             </button>
@@ -108,13 +106,13 @@ export const BookingSummary = ({ booking }: BookingSummaryProps) => {
           </span>
         </div>
       </div>
-      <div className={joinClassNames(helmet.sumcard, styles.card)}>
+      <div className={joinClassNames(pageGlobal.sumcard, styles.card)}>
         <div
           role="img"
           aria-label={stylist.name}
           className={joinClassNames(
-            helmet.sumcover,
-            showPrev && helmet.sumcoverHidden,
+            pageGlobal.sumcover,
+            showPrev && pageGlobal.sumcoverHidden,
             styles.cover,
             showPrev ? styles.coverHidden : styles.coverShown,
             motion,
@@ -210,7 +208,7 @@ export const BookingSummary = ({ booking }: BookingSummaryProps) => {
       {step === 2 && !showPrev && canPreview && (
         <button
           onClick={() => actions.setState({ showPrev: true })}
-          className={joinClassNames(helmet.aiBtn, styles.aiButton)}
+          className={joinClassNames(pageGlobal.aiBtn, styles.aiButton)}
         >
           <svg
             width="16"

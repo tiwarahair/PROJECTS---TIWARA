@@ -1,5 +1,3 @@
-/* Onboarding component styles; hover/active/focus states are !important on purpose so they always win over the base rules. */
-
 .root {
   min-height: 100dvh;
   transition:
@@ -38,7 +36,7 @@
   color: #dfcf3e;
 }
 
-/* th: the light / dark palette as the root's custom properties */
+/* the light / dark palette as the root's custom properties */
 .themeLight {
   color-scheme: light;
   --accent-700: #8f1112;
@@ -79,7 +77,7 @@
   --ob-ghost: rgba(246, 240, 228, 0.34);
 }
 
-/* helmet keyframes (copied: CSS modules scope keyframe names per file) */
+/* keyframes are scoped per file in CSS modules, so shared ones are repeated */
 @keyframes obRise {
   from {
     opacity: 0;
@@ -91,7 +89,7 @@
   }
 }
 
-/* helmet: under reduced motion the slides, rises and shake become fades */
+/* under reduced motion the slides, rises and shake become fades */
 @media (prefers-reduced-motion: reduce) {
   @keyframes obRise {
     from {

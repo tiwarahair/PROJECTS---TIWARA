@@ -431,7 +431,6 @@ export const TAXONOMY: Taxonomy[] = serviceGroups.map(({ id, name }) => {
 
 export const CATEGORY_COLOURS: CategoryColour[] = categoryColours;
 
-/** Studio's initial state. */
 export const getInitialStudioState = (): StudioState => {
   const readStored = (key: string) => {
     try {

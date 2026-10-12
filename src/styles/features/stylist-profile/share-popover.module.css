@@ -1,5 +1,3 @@
-/* Stylist Profile page styles; hover/active states use !important so they win over the base rules. */
-
 .popover {
   position: fixed;
   z-index: 150;
@@ -59,7 +57,7 @@
   color: var(--text-primary) !important;
 }
 
-/* sharePos: top/right measured from the Share button, passed as --share-top / --share-right */
+/* top/right measured from the Share button, passed as --share-top / --share-right */
 .position {
   top: var(--share-top);
   right: var(--share-right);

@@ -4,7 +4,7 @@ import { joinClassNames } from "../../utils/class-names";
 import type { LastSearch } from "../../utils/last-search";
 import { BackPath, HeartPath, SharePaths } from "./profile-icons";
 import styles from "../../styles/features/stylist-profile/profile-cover.module.css";
-import helmet from "../../styles/features/stylist-profile/stylist-profile-helmet.module.css";
+import pageGlobal from "../../styles/features/stylist-profile/stylist-profile-page-global.module.css";
 
 /** Share + save state and handlers shared by the cover buttons and the sticky bar. */
 export interface ProfileActions {
@@ -51,7 +51,7 @@ export const ProfileCover = ({
     onToggleSaved,
   } = actions;
 
-  // heroStyle backgroundImage: the stylist's cover photo
+  // the stylist's cover photo
   const heroStyle = {
     "--hero-image": coverUrl ? `url("${coverUrl}")` : "none",
   } as CSSProperties;
@@ -61,7 +61,7 @@ export const ProfileCover = ({
       {back.has && (
         <div
           data-screen-label="Back to results"
-          className={joinClassNames(helmet.pfDeskonly, styles.backRow)}
+          className={joinClassNames(pageGlobal.pfDeskonly, styles.backRow)}
         >
           <Link to={back.href} onClick={onBack} className={styles.backLink}>
             <svg
@@ -83,7 +83,7 @@ export const ProfileCover = ({
           <span className={styles.backSummary}>{back.summary}</span>
         </div>
       )}
-      <div className={joinClassNames(helmet.pfCw, styles.coverWrap)}>
+      <div className={joinClassNames(pageGlobal.pfCw, styles.coverWrap)}>
         {/* a role="img" div that toggles the overlay buttons on tap (mobile) */}
         {/* eslint-disable-next-line jsx-a11y/click-events-have-key-events, jsx-a11y/no-noninteractive-element-interactions */}
         <div
@@ -91,19 +91,22 @@ export const ProfileCover = ({
           role="img"
           aria-label={name}
           onClick={onToggleCoverActions}
-          className={joinClassNames(helmet.scpHero, styles.hero)}
+          className={joinClassNames(pageGlobal.scpHero, styles.hero)}
           style={heroStyle}
         ></div>
         <div
           data-on={coverActionsOn ? "true" : "false"}
-          className={joinClassNames(helmet.pfCov, styles.coverActions)}
+          className={joinClassNames(pageGlobal.pfCov, styles.coverActions)}
         >
           {back.has && (
             <Link
               to={back.href}
               onClick={onBack}
               aria-label={back.label}
-              className={joinClassNames(helmet.pfMobonly, styles.mobileBack)}
+              className={joinClassNames(
+                pageGlobal.pfMobonly,
+                styles.mobileBack,
+              )}
             >
               <svg
                 width="20"
@@ -128,7 +131,7 @@ export const ProfileCover = ({
               aria-label={shareLabel}
               aria-haspopup="dialog"
               aria-expanded={shareExpanded}
-              className={joinClassNames(helmet.pfOvb, styles.coverButton)}
+              className={joinClassNames(pageGlobal.pfOvb, styles.coverButton)}
             >
               <svg
                 width="20"
@@ -143,14 +146,14 @@ export const ProfileCover = ({
               >
                 <SharePaths />
               </svg>
-              <span className={helmet.pfOvl}>Share</span>
+              <span className={pageGlobal.pfOvl}>Share</span>
             </button>
             <button
               data-tip={saveTip}
               onClick={onToggleSaved}
               aria-label={saveLabel}
               aria-pressed={saved ? "true" : "false"}
-              className={joinClassNames(helmet.pfOvb, styles.coverButton)}
+              className={joinClassNames(pageGlobal.pfOvb, styles.coverButton)}
             >
               <svg
                 width="20"
@@ -164,7 +167,7 @@ export const ProfileCover = ({
               >
                 <HeartPath />
               </svg>
-              <span className={helmet.pfOvl}>{saveTip}</span>
+              <span className={pageGlobal.pfOvl}>{saveTip}</span>
             </button>
           </div>
         </div>

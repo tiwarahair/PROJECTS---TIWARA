@@ -237,7 +237,6 @@ export const getStatementHtml = ({
   return `<!doctype html><html><head><meta charset="utf-8"><title>Statement ${slug}</title><style>${STATEMENT_STYLE}</style></head><body><div class="hd"><div><h1>Earnings statement</h1><p class="mu">${rangeText}</p></div><div style="text-align:right"><p><b>${businessText}</b></p><p>${legalText}</p>${vatLine}<p class="mu">Generated ${generatedOn}</p></div></div>${body}</body></html>`;
 };
 
-/** Saves text as a file download. */
 export const downloadText = (name: string, mime: string, body: string) => {
   try {
     const url = URL.createObjectURL(new Blob([body], { type: mime }));

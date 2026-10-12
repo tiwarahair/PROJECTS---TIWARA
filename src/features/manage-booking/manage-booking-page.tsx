@@ -2,7 +2,7 @@ import { useEffect, useLayoutEffect, useRef, useState } from "react";
 import { Link, useNavigate } from "react-router";
 import { getAssetUrl } from "../../utils/asset-url";
 import { getSearchParams } from "../../utils/page-flags";
-import "../../styles/features/manage-booking/manage-booking-helmet.module.css";
+import "../../styles/features/manage-booking/manage-booking-page-global.module.css";
 import {
   DEFAULT_STYLIST_ID,
   getDemoBooking,

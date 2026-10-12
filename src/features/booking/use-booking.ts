@@ -45,7 +45,6 @@ const DECLINED_CARD = "4000000000000002";
 const BANK_CHECK_CARD = "4000002760003184";
 const NETWORK_ERROR_CARD = "4000000000000119";
 
-/** Booking state and actions. */
 export const useBooking = () => {
   const [initial] = useState(getInitialBooking);
   const [state, setRawState] = useState(initial.state);

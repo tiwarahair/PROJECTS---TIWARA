@@ -2,7 +2,7 @@ import type { Stylist } from "../../types/stylist";
 import { joinClassNames } from "../../utils/class-names";
 import type { OpenStatus, ProfileFacts } from "./profile-logic";
 import styles from "../../styles/features/stylist-profile/profile-lede.module.css";
-import helmet from "../../styles/features/stylist-profile/stylist-profile-helmet.module.css";
+import pageGlobal from "../../styles/features/stylist-profile/stylist-profile-page-global.module.css";
 
 interface ProfileLedeProps {
   stylist: Stylist;
@@ -18,7 +18,7 @@ export const ProfileLede = ({
 }: ProfileLedeProps) => (
   <>
     <div className={styles.ledeRow}>
-      <div className={joinClassNames(helmet.scpLede, styles.lede)}>
+      <div className={joinClassNames(pageGlobal.scpLede, styles.lede)}>
         <div className={styles.titleRow}>
           <h1 className={styles.title}>
             <span className={styles.name}>

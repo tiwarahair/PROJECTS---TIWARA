@@ -11,7 +11,7 @@ import {
   VENUES,
 } from "./search-filters";
 import { RADII } from "./search-state";
-import helmet from "../../styles/features/search/search-helmet.module.css";
+import pageGlobal from "../../styles/features/search/search-page-global.module.css";
 import styles from "../../styles/features/search/filter-bar.module.css";
 import type { SearchController } from "./use-search";
 
@@ -45,12 +45,12 @@ export const FilterBar = ({ search }: FilterBarProps) => {
     SORTS[0])?.[1];
 
   return (
-    <div className={joinClassNames(helmet.flWrap, styles.wrap)}>
-      <div className={helmet.flLine}>
+    <div className={joinClassNames(pageGlobal.flWrap, styles.wrap)}>
+      <div className={pageGlobal.flLine}>
         <div
           role="group"
           aria-label="Filters"
-          className={joinClassNames(helmet.flDesk, styles.desk)}
+          className={joinClassNames(pageGlobal.flDesk, styles.desk)}
         >
           {VENUES.map((venue) => {
             const isOn = state.venues.includes(venue);
@@ -118,7 +118,7 @@ export const FilterBar = ({ search }: FilterBarProps) => {
                     }
                     aria-label="Max price"
                     aria-valuetext={formatMaxPrice(state.maxPrice)}
-                    className={helmet.prange}
+                    className={pageGlobal.prange}
                     // --fill: how much of the track is filled
                     style={
                       {
@@ -205,15 +205,15 @@ export const FilterBar = ({ search }: FilterBarProps) => {
           )}
         </div>
 
-        <div className={joinClassNames(helmet.rlRow, styles.resultRow)}>
+        <div className={joinClassNames(pageGlobal.rlRow, styles.resultRow)}>
           <div
             role="status"
-            className={joinClassNames(helmet.rlLine, styles.resultLine)}
+            className={joinClassNames(pageGlobal.rlLine, styles.resultLine)}
           >
-            <span className={helmet.rlFull}>
+            <span className={pageGlobal.rlFull}>
               {`${count} stylist${pluralSuffix}${serviceText} near ${locationName}`}
             </span>
-            <span className={helmet.rlShort}>
+            <span className={pageGlobal.rlShort}>
               {`${count} stylist${pluralSuffix} near ${locationName}`}
             </span>
           </div>
@@ -221,7 +221,7 @@ export const FilterBar = ({ search }: FilterBarProps) => {
             <button
               type="button"
               onClick={actions.openFilters}
-              className={joinClassNames(helmet.flMob, styles.pillButton)}
+              className={joinClassNames(pageGlobal.flMob, styles.pillButton)}
             >
               <svg
                 className={styles.iconBlock}

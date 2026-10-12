@@ -10,7 +10,7 @@ import {
   VENUES,
 } from "./search-filters";
 import { RADII } from "./search-state";
-import helmet from "../../styles/features/search/search-helmet.module.css";
+import pageGlobal from "../../styles/features/search/search-page-global.module.css";
 import styles from "../../styles/features/search/filters-sheet.module.css";
 import type { SearchController } from "./use-search";
 
@@ -25,17 +25,17 @@ export const FiltersSheet = ({ search }: FiltersSheetProps) => {
   return (
     <div
       data-closing={state.filtersClosing ? "true" : "false"}
-      className={joinClassNames(helmet.sheetWrap, styles.wrap)}
+      className={joinClassNames(pageGlobal.sheetWrap, styles.wrap)}
     >
       <div
         onClick={actions.closeFilters}
-        className={joinClassNames(helmet.sheetScrim, styles.scrim)}
+        className={joinClassNames(pageGlobal.sheetScrim, styles.scrim)}
       ></div>
       <div
         role="dialog"
         aria-modal="true"
         aria-label="Filters"
-        className={joinClassNames(helmet.sheetPanel, styles.panel)}
+        className={joinClassNames(pageGlobal.sheetPanel, styles.panel)}
       >
         <div className={styles.header}>
           <div className={styles.title}>Filters</div>
@@ -138,7 +138,7 @@ export const FiltersSheet = ({ search }: FiltersSheetProps) => {
               }
               aria-label="Max price"
               aria-valuetext={formatMaxPrice(filterDraft.maxPrice)}
-              className={helmet.prange}
+              className={pageGlobal.prange}
               // --fill: how much of the track is filled
               style={
                 {

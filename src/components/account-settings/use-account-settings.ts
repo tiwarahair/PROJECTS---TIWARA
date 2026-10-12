@@ -63,7 +63,6 @@ export interface AccountSettingsProps {
 
 type DialogPhase = "idle" | "open" | "closing";
 
-/** AccountSettings state and actions. */
 export const useAccountSettings = (props: AccountSettingsProps) => {
   const { page = "personal", signIn, isNew = false } = props;
   const { search } = useLocation();

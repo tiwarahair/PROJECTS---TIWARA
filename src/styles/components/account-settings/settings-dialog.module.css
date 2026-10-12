@@ -97,7 +97,7 @@
   color: #fffefb;
 }
 
-/* helmet: [data-ac-dlg] under reduced motion. No element carries data-ac-dlg, so it matches nothing */
+/* No element carries data-ac-dlg, so this matches nothing */
 @media (prefers-reduced-motion: reduce) {
   .panel[data-ac-dlg] {
     transform: none !important;

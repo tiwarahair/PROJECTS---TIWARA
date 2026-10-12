@@ -3,7 +3,7 @@ import { Link } from "react-router";
 import { getAssetUrl, resolveAssetUrl } from "../../utils/asset-url";
 import { joinClassNames } from "../../utils/class-names";
 import { SECTIONS } from "./account-data";
-import helmet from "../../styles/features/account/account-helmet.module.css";
+import pageGlobal from "../../styles/features/account/account-page-global.module.css";
 import styles from "../../styles/features/account/account-header.module.css";
 
 const MOBILE_LINKS = [
@@ -53,7 +53,7 @@ export const AccountHeader = ({
             alt="Tiwára's House"
           />
         </Link>
-        <div className={joinClassNames(helmet.acMob, styles.mobActions)}>
+        <div className={joinClassNames(pageGlobal.acMob, styles.mobActions)}>
           {loggedIn && (
             <Link
               className={styles.mobFav}
@@ -85,7 +85,7 @@ export const AccountHeader = ({
             <span className={styles.menuLine}></span>
           </button>
         </div>
-        <nav className={joinClassNames(helmet.acDesk, styles.desk)}>
+        <nav className={joinClassNames(pageGlobal.acDesk, styles.desk)}>
           <Link className={styles.deskLink} to="/search">
             Find a stylist
           </Link>
@@ -134,7 +134,7 @@ export const AccountHeader = ({
         </nav>
       </div>
       {menuOpen && (
-        <div className={joinClassNames(helmet.acMob, styles.mobMenu)}>
+        <div className={joinClassNames(pageGlobal.acMob, styles.mobMenu)}>
           <Link className={styles.mobLink} to="/search">
             Find a stylist
           </Link>

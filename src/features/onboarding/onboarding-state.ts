@@ -26,7 +26,6 @@ export interface OnboardingProps {
   stayOnDone?: boolean;
 }
 
-/** The data-props defaults. */
 const DEFAULT_PROPS: Required<
   Omit<OnboardingProps, "theme" | "board" | "stayOnDone">
 > = {

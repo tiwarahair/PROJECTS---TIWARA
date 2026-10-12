@@ -1,5 +1,3 @@
-/* Onboarding component styles; hover/active/focus states are !important on purpose so they always win over the base rules. */
-
 .wizard {
   min-height: 100dvh;
   display: flex;
@@ -298,7 +296,7 @@
   animation: obSpin 0.6s linear infinite;
 }
 
-/* wz: the wizard re-themes the design tokens; bar and field colours as --ob-wz-* */
+/* the wizard re-themes the design tokens; bar and field colours as --ob-wz-* */
 .wizardLight {
   --neutral-50: #faf6ee;
   --neutral-100: #fdfbf5;
@@ -337,7 +335,6 @@
   --ob-wz-field: rgba(246, 240, 228, 0.06);
 }
 
-/* wz.bar */
 .topBar,
 .bottomBar {
   background: var(--ob-wz-bar);
@@ -369,7 +366,6 @@
   transform: scaleX(1);
 }
 
-/* wizBodyPad */
 .bodyDesk {
   padding: 48px 32px 96px;
 }
@@ -382,7 +378,6 @@
   padding: 16px 20px 32px;
 }
 
-/* enterAnim */
 .enterForward {
   animation: obIn 0.36s cubic-bezier(0.23, 1, 0.32, 1) both;
 }
@@ -391,7 +386,6 @@
   animation: obBack 0.36s cubic-bezier(0.23, 1, 0.32, 1) both;
 }
 
-/* submitOp / submitCur */
 .submitOn {
   opacity: 1;
 }
@@ -408,7 +402,7 @@
   cursor: default;
 }
 
-/* helmet keyframes (copied: CSS modules scope keyframe names per file) */
+/* keyframes are scoped per file in CSS modules, so shared ones are repeated */
 @keyframes obBack {
   from {
     opacity: 0;
@@ -435,7 +429,7 @@
   }
 }
 
-/* helmet: under reduced motion the slides, rises and shake become fades */
+/* under reduced motion the slides, rises and shake become fades */
 @media (prefers-reduced-motion: reduce) {
   @keyframes obBack {
     from {

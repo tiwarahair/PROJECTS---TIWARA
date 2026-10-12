@@ -1,5 +1,3 @@
-/* Stylist Profile page styles; hover/active states use !important so they win over the base rules. */
-
 .aside {
   position: sticky;
   top: 88px;

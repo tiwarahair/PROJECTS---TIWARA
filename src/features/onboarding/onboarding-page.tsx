@@ -17,7 +17,7 @@ import {
   StudioScreen,
 } from "./auth-screens-end";
 import { SCREEN_LABELS, TURNSTILE_SCREENS } from "./onboarding-data";
-import "../../styles/features/onboarding/onboarding-helmet.module.css";
+import "../../styles/features/onboarding/onboarding-page-global.module.css";
 import { getLayout } from "./onboarding-layout";
 import styles from "../../styles/features/onboarding/onboarding-page.module.css";
 import { getErrors, isCodeScreen } from "./onboarding-state";
@@ -58,7 +58,7 @@ export const OnboardingPage = (props: OnboardingProps) => {
   const layout = getLayout(state, resolved);
   const { screen, isWizard, isDesktop, isDark, welcomeOver } = layout;
 
-  // page-wide helmet rules (cream / ink page, focus rings) apply while Onboarding is mounted
+  // page-wide rules (cream / ink page, focus rings) apply while Onboarding is mounted
   useLayoutEffect(() => {
     document.documentElement.classList.add("onboarding-page");
 

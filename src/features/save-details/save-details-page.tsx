@@ -6,7 +6,7 @@ import { getAssetUrl } from "../../utils/asset-url";
 import { joinClassNames } from "../../utils/class-names";
 import { getSearchParams } from "../../utils/page-flags";
 import { checkPassword, getPasswordView } from "../../utils/password";
-import "../../styles/features/save-details/save-details-helmet.module.css";
+import "../../styles/features/save-details/save-details-page-global.module.css";
 import styles from "../../styles/features/save-details/save-details-page.module.css";
 
 // clients need 15+ characters

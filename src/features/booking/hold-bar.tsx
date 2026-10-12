@@ -1,5 +1,5 @@
 import { joinClassNames } from "../../utils/class-names";
-import helmet from "../../styles/features/booking/booking-helmet.module.css";
+import pageGlobal from "../../styles/features/booking/booking-page-global.module.css";
 import styles from "../../styles/features/booking/hold-bar.module.css";
 
 interface HoldBarProps {
@@ -21,7 +21,7 @@ export const HoldBar = ({ variant, time, leftMs }: HoldBarProps) => {
       role="timer"
       aria-label={`Holding ${time} for you, ${minutes} minutes ${seconds} seconds left`}
       className={joinClassNames(
-        isNav && helmet.holdmob,
+        isNav && pageGlobal.holdmob,
         isNav ? styles.barMobile : styles.barCard,
         styles.tone,
         leftMs < 120000 && styles.toneAmber,

@@ -2,7 +2,7 @@ import { joinClassNames } from "../../utils/class-names";
 import { ClearButton } from "./clear-button";
 import { DatePickerMobile } from "./date-picker";
 import { getMobileDateLabel } from "./search-dates";
-import helmet from "../../styles/features/search/search-helmet.module.css";
+import pageGlobal from "../../styles/features/search/search-page-global.module.css";
 import { SEARCH_ICONS } from "./search-icons";
 import styles from "../../styles/features/search/mobile-search-sheet.module.css";
 import { getWhatListProps, WhatList, WhereList } from "./suggestion-list";
@@ -62,13 +62,13 @@ export const MobileSearchSheet = ({ search }: MobileSearchSheetProps) => {
   return (
     <div
       data-closing={state.mobileClosing ? "true" : "false"}
-      className={joinClassNames(helmet.sheetWrap, styles.wrap)}
+      className={joinClassNames(pageGlobal.sheetWrap, styles.wrap)}
     >
       <div
         onClick={actions.closeMobileSheet}
-        className={joinClassNames(helmet.sheetScrim, styles.scrim)}
+        className={joinClassNames(pageGlobal.sheetScrim, styles.scrim)}
       ></div>
-      <div className={joinClassNames(helmet.sheetPanel, styles.panel)}>
+      <div className={joinClassNames(pageGlobal.sheetPanel, styles.panel)}>
         <div className={styles.header}>
           {state.mobileView !== "menu" && (
             <button

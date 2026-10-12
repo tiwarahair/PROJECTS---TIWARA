@@ -1,4 +1,4 @@
-/* Earnings drawer, modal and toast styles. */
+/* Drawer, modal and toast. */
 
 .dateLabel {
   display: flex;
@@ -730,7 +730,7 @@
   animation: eToastOut 0.18s cubic-bezier(0.4, 0, 0.7, 0.2) both;
 }
 
-/* helmet keyframes (copied: CSS modules scope keyframe names per file) */
+/* keyframes are scoped per file in CSS modules, so shared ones are repeated */
 @keyframes eDrR {
   from {
     transform: translateX(100%);

@@ -352,7 +352,6 @@ export const ClientProfile = ({
   );
 };
 
-/** Studio → Clients. */
 export const StudioClients = ({ studio }: { studio: StudioController }) => {
   const { state, setState, isWide, isDesktop } = studio;
   const view = getClientsView(studio);
