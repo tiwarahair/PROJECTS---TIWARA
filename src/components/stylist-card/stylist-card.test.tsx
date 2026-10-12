@@ -5,7 +5,7 @@ import { StylistCard } from "./stylist-card";
 
 const BASE = {
   href: "/stylist?stylist=amara-beauty",
-  cover: "img/w161154.jpg",
+  cover: "demo/stylists/w161154.jpg",
   stylistName: "Amara Beauty",
   rating: "4.8",
   reviews: 146,

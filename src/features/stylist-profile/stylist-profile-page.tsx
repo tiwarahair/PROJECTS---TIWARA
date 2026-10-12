@@ -185,7 +185,7 @@ export const StylistProfilePage = () => {
         <Link to="/" className={styles.poweredBy}>
           Powered by{" "}
           <img
-            src={getAssetUrl("logo-crimson.png")}
+            src={getAssetUrl("logos/logo-crimson.png")}
             alt="Tiwára's House"
             className={styles.poweredLogo}
           />

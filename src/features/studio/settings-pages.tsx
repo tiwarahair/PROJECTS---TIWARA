@@ -58,7 +58,7 @@ export const ProfilePage = ({
       <div className={styles.cover}>
         <img
           className={styles.coverImage}
-          src={state.coverUrl || getAssetUrl("img/reveal.jpg")}
+          src={state.coverUrl || getAssetUrl("site/reveal.jpg")}
           alt="Cover"
         />
         <input

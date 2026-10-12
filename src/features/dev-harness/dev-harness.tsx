@@ -44,7 +44,7 @@ const STYLIST_CARDS: { fixture: string; props: StylistCardProps }[] = [
     fixture: "home-usage",
     props: {
       href: "/stylist?stylist=amara-beauty",
-      cover: "img/w161154.jpg",
+      cover: "demo/stylists/w161154.jpg",
       stylistName: "Amara Beauty",
       rating: "4.8",
       reviews: 146,
@@ -57,7 +57,7 @@ const STYLIST_CARDS: { fixture: string; props: StylistCardProps }[] = [
     fixture: "meta",
     props: {
       href: "/stylist?stylist=studio-zuri",
-      cover: "img/w162031.jpg",
+      cover: "demo/stylists/w162031.jpg",
       stylistName: "Studio Zuri",
       rating: "4.8",
       reviews: 121,
@@ -70,7 +70,7 @@ const STYLIST_CARDS: { fixture: string; props: StylistCardProps }[] = [
     fixture: "rows",
     props: {
       href: "/stylist?stylist=naturallynia",
-      cover: "img/IMG_0013.jpg",
+      cover: "demo/stylists/IMG_0013.jpg",
       stylistName: "NaturallyNia",
       rating: "5.0",
       reviews: 98,
@@ -95,7 +95,7 @@ const STYLIST_CARDS: { fixture: string; props: StylistCardProps }[] = [
     fixture: "services",
     props: {
       href: "/stylist?stylist=braid-bar-mcr",
-      cover: "img/w161244.jpg",
+      cover: "demo/stylists/w161244.jpg",
       stylistName: "The Braid Bar MCR",
       rating: "4.7",
       reviews: 183,

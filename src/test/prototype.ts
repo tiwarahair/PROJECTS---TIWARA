@@ -53,3 +53,29 @@ export const renameKeys = (
 
   return rename(value);
 };
+
+// where each image file lives in assets/ (by file name), e.g. "w160524.jpg" → "demo/stylists/w160524.jpg"
+const ASSET_PATHS = new Map(
+  Object.keys(import.meta.glob("../../assets/**/*.{jpg,jpeg,png,webp}")).map(
+    (modulePath) => {
+      const relativePath = modulePath.replace("../../assets/", "");
+
+      return [relativePath.split("/").pop(), relativePath];
+    },
+  ),
+);
+
+/** Deep-maps the reference implementation's flat "img/<file>" paths to where each file lives in assets/. */
+export const toAssetPaths = (value: unknown): unknown => {
+  if (Array.isArray(value)) return value.map(toAssetPaths);
+
+  if (value && typeof value === "object")
+    return Object.fromEntries(
+      Object.entries(value).map(([key, entry]) => [key, toAssetPaths(entry)]),
+    );
+
+  if (typeof value === "string" && value.startsWith("img/"))
+    return ASSET_PATHS.get(value.slice("img/".length)) ?? value;
+
+  return value;
+};

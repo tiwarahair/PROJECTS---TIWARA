@@ -39,7 +39,7 @@ export const SearchNav = ({ search }: SearchNavProps) => {
         <div className={joinClassNames(helmet.navRail, styles.railLeft)}>
           <Link to="/" className={styles.logoLink}>
             <img
-              src={getAssetUrl("logo-crimson.png")}
+              src={getAssetUrl("logos/logo-crimson.png")}
               alt="Tiwára's House"
               className={styles.logo}
             />

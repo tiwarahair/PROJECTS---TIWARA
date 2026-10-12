@@ -5,7 +5,7 @@
     "name": "Braids & Twists",
     "icon": "braid",
     "description": "Knotless, french curl, goddess, fulani, faux locs, feed-in, stitch and twists.",
-    "image": "img/w160944.jpg"
+    "image": "demo/stylists/w160944.jpg"
   },
   {
     "id": "wigs",
@@ -13,7 +13,7 @@
     "name": "Wigs",
     "icon": "wig",
     "description": "Frontal, closure, glueless and 360 installs, plus construction and revamps.",
-    "image": "img/w160800.jpg"
+    "image": "demo/portfolio/w160800.jpg"
   },
   {
     "id": "weaves",
@@ -21,7 +21,7 @@
     "name": "Weave extensions & Sew-ins",
     "icon": "thread",
     "description": "Sew-ins, quick weaves, tape-ins and ponytail extensions.",
-    "image": "img/IMG_1581.jpg"
+    "image": "demo/portfolio/IMG_1581.jpg"
   },
   {
     "id": "locs",
@@ -29,7 +29,7 @@
     "name": "Locs",
     "icon": "locs",
     "description": "Starter locs, re-twists, repairs and loc extensions.",
-    "image": "img/IMG_1772.jpg"
+    "image": "demo/portfolio/IMG_1772.jpg"
   },
   {
     "id": "natural",
@@ -37,7 +37,7 @@
     "name": "Natural Hair",
     "icon": "curl",
     "description": "Wash and style, defined curls, silk press, blow dry, cornrows and trims.",
-    "image": "img/w160826.jpg"
+    "image": "demo/portfolio/w160826.jpg"
   },
   {
     "id": "treatments",
@@ -45,6 +45,6 @@
     "name": "Hair Treatments",
     "icon": "wave",
     "description": "Colouring, deep conditioning, protein, keratin, scalp and hot-oil treatments.",
-    "image": "img/w161244.jpg"
+    "image": "demo/stylists/w161244.jpg"
   }
 ]

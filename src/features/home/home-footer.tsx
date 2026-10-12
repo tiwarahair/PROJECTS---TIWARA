@@ -76,7 +76,7 @@ export const HomeFooter = () => (
         <div className={styles.brand}>
           <a href="#" aria-label="Back to top" className={styles.logoLink}>
             <img
-              src={getAssetUrl("logo-cream.png")}
+              src={getAssetUrl("logos/logo-cream.png")}
               alt="Tiwára's House"
               className={styles.logo}
             />

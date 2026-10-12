@@ -91,7 +91,9 @@ export const Wizard = (props: ScreenProps) => {
               </button>
               <img
                 src={getAssetUrl(
-                  isDark ? "logo-cream-sm.png" : "logo-crimson-sm.png",
+                  isDark
+                    ? "logos/logo-cream-sm.png"
+                    : "logos/logo-crimson-sm.png",
                 )}
                 alt="Tiwára's House"
                 className={styles.logo}

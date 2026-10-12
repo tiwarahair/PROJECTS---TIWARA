@@ -167,9 +167,9 @@ export const TURNSTILE_SCREENS = [
 
 export type PhotoKey = "welcome" | "client" | "stylist";
 export const PHOTOS: Record<PhotoKey, [string, string]> = {
-  welcome: ["img/onb-welcome-web.jpg", "center 32%"],
-  client: ["img/onb-client-web.jpg", "center 22%"],
-  stylist: ["img/onb-stylist-web.jpg", "center 28%"],
+  welcome: ["site/onboarding-welcome.jpg", "center 32%"],
+  client: ["site/onboarding-client.jpg", "center 22%"],
+  stylist: ["site/onboarding-stylist.jpg", "center 28%"],
 };
 
 export const SCREEN_LABELS: Record<string, string> = {

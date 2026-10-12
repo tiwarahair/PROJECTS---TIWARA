@@ -3,6 +3,7 @@ import {
   hasPrototype,
   loadPrototypeData,
   renameKeys,
+  toAssetPaths,
   toPlain,
 } from "../test/prototype";
 import * as data from "./index";
@@ -72,7 +73,7 @@ describe.skipIf(!hasPrototype)("data layer matches prototype data.js", () => {
 
   it("datasets are identical", () => {
     expect(data.stylists).toEqual(
-      renameKeys(toPlain(prototypeData.stylists), STYLIST_KEYS),
+      renameKeys(toAssetPaths(toPlain(prototypeData.stylists)), STYLIST_KEYS),
     );
 
     expect(data.reviews).toEqual(toPlain(prototypeData.reviews));
@@ -87,7 +88,7 @@ describe.skipIf(!hasPrototype)("data layer matches prototype data.js", () => {
     expect(data.chatMessages).toEqual(toPlain(prototypeData.chat));
 
     expect(data.serviceGroups).toEqual(
-      renameKeys(toPlain(prototypeData.serviceGroups), [
+      renameKeys(toAssetPaths(toPlain(prototypeData.serviceGroups)), [
         ["desc", "description"],
         ["img", "image"],
       ]),

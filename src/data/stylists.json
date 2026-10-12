@@ -11,15 +11,15 @@
     "reviews": 212,
     "from": 45,
     "verified": true,
-    "cover": "img/w160944.jpg",
+    "cover": "demo/stylists/w160944.jpg",
     "bio": "The house that started the platform. Tiwára has spent eight years perfecting protective styles that last — every appointment starts with a consultation and ends with hair you don't have to think about for weeks.",
     "portfolio": [
-      "img/w160944.jpg",
-      "img/w161156.jpg",
-      "img/w161025.jpg",
-      "img/w162139.jpg",
-      "img/IMG_1599.jpg",
-      "img/IMG_1538.jpg"
+      "demo/stylists/w160944.jpg",
+      "demo/portfolio/w161156.jpg",
+      "demo/portfolio/w161025.jpg",
+      "demo/portfolio/w162139.jpg",
+      "demo/portfolio/IMG_1599.jpg",
+      "demo/portfolio/IMG_1538.jpg"
     ],
     "policies": {
       "mode": "deposit",
@@ -623,9 +623,13 @@
     "reviews": 146,
     "from": 55,
     "verified": true,
-    "cover": "img/w161154.jpg",
+    "cover": "demo/stylists/w161154.jpg",
     "bio": "Colour-brave boho and goddess braids with a soft finish. Amara works from a private studio in Hulme.",
-    "portfolio": ["img/w161154.jpg", "img/w161153.jpg", "img/w161907.jpg"],
+    "portfolio": [
+      "demo/stylists/w161154.jpg",
+      "demo/portfolio/w161153.jpg",
+      "demo/portfolio/w161907.jpg"
+    ],
     "policies": {
       "mode": "deposit",
       "depositPercent": 25,
@@ -1088,9 +1092,13 @@
     "reviews": 98,
     "from": 35,
     "verified": true,
-    "cover": "img/IMG_0013.jpg",
+    "cover": "demo/stylists/IMG_0013.jpg",
     "bio": "Healthy-hair-first natural care. Nia specialises in curl definition, trims and treatments for 3c–4c hair.",
-    "portfolio": ["img/IMG_0013.jpg", "img/w160826.jpg", "img/IMG_1581.jpg"],
+    "portfolio": [
+      "demo/stylists/IMG_0013.jpg",
+      "demo/portfolio/w160826.jpg",
+      "demo/portfolio/IMG_1581.jpg"
+    ],
     "policies": {
       "mode": "card",
       "depositPercent": 20,
@@ -1251,9 +1259,13 @@
     "reviews": 183,
     "from": 50,
     "verified": true,
-    "cover": "img/w161244.jpg",
+    "cover": "demo/stylists/w161244.jpg",
     "bio": "Fast hands, clean parts. Walk-out-ready fulani and stitch styles in the middle of town.",
-    "portfolio": ["img/w161244.jpg", "img/IMG_1572.jpg", "img/w161512.jpg"],
+    "portfolio": [
+      "demo/stylists/w161244.jpg",
+      "demo/portfolio/IMG_1572.jpg",
+      "demo/stylists/w161512.jpg"
+    ],
     "policies": {
       "mode": "none",
       "depositPercent": 20,
@@ -1718,9 +1730,13 @@
     "reviews": 77,
     "from": 65,
     "verified": false,
-    "cover": "img/w161942.jpg",
+    "cover": "demo/stylists/w161942.jpg",
     "bio": "Statement colour and boho texture. Kemi mixes custom tones for every install.",
-    "portfolio": ["img/w161942.jpg", "img/w162031.jpg", "img/w161154.jpg"],
+    "portfolio": [
+      "demo/stylists/w161942.jpg",
+      "demo/stylists/w162031.jpg",
+      "demo/stylists/w161154.jpg"
+    ],
     "policies": {
       "mode": "deposit",
       "depositPercent": 25,
@@ -2174,9 +2190,13 @@
     "reviews": 121,
     "from": 60,
     "verified": true,
-    "cover": "img/w162031.jpg",
+    "cover": "demo/stylists/w162031.jpg",
     "bio": "Precision installs and short knotless shapes in a calm Salford studio.",
-    "portfolio": ["img/w162031.jpg", "img/w160800.jpg", "img/w160524.jpg"],
+    "portfolio": [
+      "demo/stylists/w162031.jpg",
+      "demo/portfolio/w160800.jpg",
+      "demo/stylists/w160524.jpg"
+    ],
     "policies": {
       "mode": "full",
       "depositPercent": 20,
@@ -2516,9 +2536,13 @@
     "reviews": 164,
     "from": 40,
     "verified": true,
-    "cover": "img/w161512.jpg",
+    "cover": "demo/stylists/w161512.jpg",
     "bio": "Locs only, done properly — retwists, repairs and styles that respect your roots.",
-    "portfolio": ["img/w161512.jpg", "img/IMG_1772.jpg", "img/IMG_1538.jpg"],
+    "portfolio": [
+      "demo/stylists/w161512.jpg",
+      "demo/portfolio/IMG_1772.jpg",
+      "demo/portfolio/IMG_1538.jpg"
+    ],
     "policies": {
       "mode": "card",
       "depositPercent": 20,
@@ -2963,9 +2987,13 @@
     "reviews": 89,
     "from": 45,
     "verified": false,
-    "cover": "img/w160524.jpg",
+    "cover": "demo/stylists/w160524.jpg",
     "bio": "Sleek finishes and healthy stretches — silk presses that survive Manchester weather.",
-    "portfolio": ["img/w160524.jpg", "img/w160800.jpg", "img/w160846.jpg"],
+    "portfolio": [
+      "demo/stylists/w160524.jpg",
+      "demo/portfolio/w160800.jpg",
+      "demo/portfolio/w160846.jpg"
+    ],
     "policies": {
       "mode": "none",
       "depositPercent": 20,

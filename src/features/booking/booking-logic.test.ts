@@ -120,10 +120,10 @@ describe("labels", () => {
   it("picks the knotless render for length and colour", () => {
     const index = getPreviewIndex("Waist", "613 Blonde");
 
-    expect(PREVIEW_POOL[index]).toBe("img/ai-knotless-waist-613.webp");
+    expect(PREVIEW_POOL[index]).toBe("ai-preview/ai-knotless-waist-613.webp");
 
     expect(PREVIEW_POOL[getPreviewIndex("Bra", "Other")]).toBe(
-      "img/ai-knotless-bra-1b.webp",
+      "ai-preview/ai-knotless-bra-1b.webp",
     );
 
     expect(hasPreview(["Shoulder", "Waist"])).toBe(false);

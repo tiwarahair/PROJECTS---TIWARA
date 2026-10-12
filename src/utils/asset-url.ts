@@ -1,7 +1,7 @@
-// Pages reference images by relative path ("img/hero.jpg", "logo-crimson.png"),
-// often built at runtime ('img/' + name). Map those exact strings to Vite-hashed URLs.
+// Pages reference images by their path inside assets/ ("site/hero2.jpg", "logos/logo-crimson.png"),
+// sometimes built at runtime (the AI preview renders). Map those exact strings to Vite-hashed URLs.
 const assetModules = import.meta.glob<string>(
-  "../assets/**/*.{jpg,jpeg,png,webp}",
+  "../../assets/**/*.{jpg,jpeg,png,webp}",
   {
     eager: true,
     query: "?url",
@@ -11,16 +11,16 @@ const assetModules = import.meta.glob<string>(
 
 const assetUrls = new Map(
   Object.entries(assetModules).map(([modulePath, url]) => [
-    modulePath.replace("../assets/", ""),
+    modulePath.replace("../../assets/", ""),
     url,
   ]),
 );
 
-/** Resolve a relative asset path (e.g. "img/w160524.jpg") to its bundled URL. */
-export const getAssetUrl = (prototypePath: string): string => {
-  const url = assetUrls.get(prototypePath.replace(/^\.?\//, ""));
+/** Resolve a relative asset path (e.g. "demo/stylists/w160524.jpg") to its bundled URL. */
+export const getAssetUrl = (relativePath: string): string => {
+  const url = assetUrls.get(relativePath.replace(/^\.?\//, ""));
 
-  if (!url) throw new Error(`Unknown asset: ${prototypePath}`);
+  if (!url) throw new Error(`Unknown asset: ${relativePath}`);
 
   return url;
 };

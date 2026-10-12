@@ -49,7 +49,7 @@ export const HelpPage = () => {
           <Link className={styles.logoLink} to="/">
             <img
               className={styles.logo}
-              src={getAssetUrl("logo-crimson.png")}
+              src={getAssetUrl("logos/logo-crimson.png")}
               alt="Tiwára's House"
             />
           </Link>

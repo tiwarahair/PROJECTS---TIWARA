@@ -17,7 +17,7 @@ export const MeetSection = () => (
         <img
           data-plx=""
           loading="lazy"
-          src={getAssetUrl("img/new/ceo.jpeg")}
+          src={getAssetUrl("site/ceo.jpeg")}
           alt="Kashope in the salon"
           className={styles.photo}
         />

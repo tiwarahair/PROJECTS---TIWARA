@@ -148,7 +148,9 @@ const AI_KEYS = [
   "waist-613",
 ];
 
-export const PREVIEW_POOL = AI_KEYS.map((key) => `img/ai-knotless-${key}.webp`);
+export const PREVIEW_POOL = AI_KEYS.map(
+  (key) => `ai-preview/ai-knotless-${key}.webp`,
+);
 
 /** Only services with the knotless lengths (Bob … Waist) have renders to preview. */
 export const hasPreview = (lengthLabels: string[]): boolean =>

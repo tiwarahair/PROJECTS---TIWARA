@@ -148,8 +148,8 @@ export const AuthShell = ({ onboarding, layout, children }: AuthShellProps) => {
               <img
                 src={getAssetUrl(
                   noPhoto && !isDark
-                    ? "logo-crimson-sm.png"
-                    : "logo-cream-sm.png",
+                    ? "logos/logo-crimson-sm.png"
+                    : "logos/logo-cream-sm.png",
                 )}
                 alt="Tiwára's House"
                 className={styles.heroLogo}

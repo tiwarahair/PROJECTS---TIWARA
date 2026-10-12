@@ -102,7 +102,7 @@ export const SEED_PROFILE = {
 
 export type Profile = typeof SEED_PROFILE;
 
-export const DEMO_PHOTO = "img/onb-client-web.jpg";
+export const DEMO_PHOTO = "site/onboarding-client.jpg";
 
 export type BookingStatus =
   "confirmed" | "awaiting" | "completed" | "cancelled" | "noshow";

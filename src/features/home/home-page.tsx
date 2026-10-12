@@ -48,8 +48,11 @@ export const HomePage = ({
   const morph = useNavMorph();
 
   useHomeMotion(rootRef, showWhy);
+
+  const heroUrl = getAssetUrl("site/hero2.jpg");
+
   // eslint-disable-next-line id-length -- React preload() option name
-  preload(getAssetUrl("img/hero2.jpg"), { as: "image", fetchPriority: "high" });
+  preload(heroUrl, { as: "image", fetchPriority: "high" });
 
   // page-wide helmet rules (body background, colour tokens, smooth scroll) apply while Home is mounted
   useLayoutEffect(() => {

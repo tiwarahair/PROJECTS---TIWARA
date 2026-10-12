@@ -33,7 +33,7 @@ export const ForStylistsSection = ({ variant }: ForStylistsSectionProps) => (
           <img
             data-plx=""
             loading="lazy"
-            src={getAssetUrl("img/new/dsc03215.jpeg")}
+            src={getAssetUrl("site/dsc03215.jpeg")}
             alt="Barber at work"
             className={styles.photo}
           />
@@ -96,7 +96,7 @@ export const ForStylistsSection = ({ variant }: ForStylistsSectionProps) => (
           <div data-rv="" className={styles.splitPhotoFrame}>
             <img
               loading="lazy"
-              src={getAssetUrl("img/w161154.jpg")}
+              src={getAssetUrl("demo/stylists/w161154.jpg")}
               alt="Stylist at work in the chair"
               className={styles.splitPhoto}
             />

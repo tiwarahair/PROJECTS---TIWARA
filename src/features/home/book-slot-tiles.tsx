@@ -8,14 +8,14 @@ import styles from "./book-slot-tiles.module.css";
 const TILES = [
   {
     key: "lounge",
-    image: "img/duo-lounge.jpeg",
+    image: "site/duo-lounge.jpeg",
     alt: "Two clients in the studio",
     lines: ["Find your stylist,", "book in minutes"],
     imageClass: styles.imageLounge,
   },
   {
     key: "comb",
-    image: "img/duo-comb.jpeg",
+    image: "site/duo-comb.jpeg",
     alt: "A stylist combing out a client",
     lines: ["Choose with reviews", "you can trust"],
     imageClass: styles.imageComb,

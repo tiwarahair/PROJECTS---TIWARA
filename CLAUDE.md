@@ -58,7 +58,7 @@ Always run `yarn format && yarn lint` after code changes.
 - `src/hooks/` — shared custom hooks
 - `src/types/` — shared TypeScript types and interfaces (including the types for the data in src/data - each file for each data)
 - `src/utils/` — pure utility functions
-- `src/assets/` — assets
+- `assets/` (project root) — images and logos, resolved with `getAssetUrl`
 - `src/data/` — re-usable data used in the front-end kept in json files
 - `src/styles/` — css
 

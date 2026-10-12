@@ -372,7 +372,7 @@ export const StudioHome = ({ studio }: { studio: StudioController }) => {
       >
         <img
           className={styles.heroImage}
-          src={getAssetUrl("img/hero2.jpg")}
+          src={getAssetUrl("site/hero2.jpg")}
           alt=""
         />
         <div className={styles.heroShade}></div>

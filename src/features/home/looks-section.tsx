@@ -9,12 +9,12 @@ import { useGridReveal } from "./use-grid-reveal";
 
 /** Home's own photo per service group, falling back to the group image. */
 const LOOK_IMAGES: Record<string, string> = {
-  braids: "img/w160944.jpg",
-  wigs: "img/w160800.jpg",
-  weaves: "img/IMG_1581.jpg",
-  locs: "img/home-locs-twists.jpg",
-  natural: "img/natural-cornrows.jpg",
-  treatments: "img/w161244.jpg",
+  braids: "demo/stylists/w160944.jpg",
+  wigs: "demo/portfolio/w160800.jpg",
+  weaves: "demo/portfolio/IMG_1581.jpg",
+  locs: "demo/portfolio/home-locs-twists.jpg",
+  natural: "demo/portfolio/natural-cornrows.jpg",
+  treatments: "demo/stylists/w161244.jpg",
 };
 
 /** "Six ways to find your look" grid. */

@@ -119,7 +119,7 @@ export const getNavItems = (studio: StudioController) => {
 };
 
 export const getAvatarSrc = ({ avatarUrl }: { avatarUrl: string | null }) =>
-  avatarUrl || getAssetUrl("img/old-hero.jpg");
+  avatarUrl || getAssetUrl("site/old-hero.jpg");
 
 export const StudioSidebar = ({ studio }: { studio: StudioController }) => {
   const { state, isDesktop, setState } = studio;
@@ -137,7 +137,7 @@ export const StudioSidebar = ({ studio }: { studio: StudioController }) => {
         {isOpen && (
           <img
             className={styles.logo}
-            src={getAssetUrl("logo-crimson.png")}
+            src={getAssetUrl("logos/logo-crimson.png")}
             alt="Tiwára's House"
           />
         )}

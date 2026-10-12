@@ -87,7 +87,7 @@
   right: 0;
   border-radius: var(--radius-md, 16px);
   overflow: hidden;
-  background-image: url("../../assets/img/new/problem.jpeg");
+  background-image: url("../../../assets/site/problem.jpeg");
   background-size: cover;
   background-position: 38% center;
 }
