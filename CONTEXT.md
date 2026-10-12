@@ -10,4 +10,4 @@ At the moment this project is only front-end but my plan is to build a scaleable
 
 - refactor code of the git repo & make it adhere to best practices, remove unused code etc. (done)
 - switch to use React & Typescript (done)
-- start on the backend: create an express server, create a login system & onboarding process for hairstylists etc.
+- start on the backend: create a login system & onboarding process for hairstylists etc.
