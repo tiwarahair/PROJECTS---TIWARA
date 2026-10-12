@@ -1,7 +1,6 @@
 // Password rules for every "create / change password" field, ported from data.js (TIWARA.password).
 // Strength = zxcvbn-ts (guidance only, never blocks); loaded on first use, pages re-render once it's ready.
 // Real breached-password screening comes with the back end.
-import type { scorePassword as ScorePassword } from "./password-checker";
 import { passwordBlocklist } from "../data";
 
 export const PASSWORD_MAX = 64;
@@ -18,26 +17,22 @@ const SITE_NAMES = [
 export const getPasswordMin = (who: "pro" | "client"): number =>
   who === "pro" ? 8 : 15;
 
-let scorePassword: typeof ScorePassword | null = null;
-let checkerLoad: Promise<void> | null = null;
+type PasswordChecker = typeof import("./password-checker");
+
+let scorePassword: PasswordChecker["scorePassword"] | null = null;
+let checkerImport: Promise<PasswordChecker> | null = null;
 
 export const isPasswordCheckerReady = (): boolean => scorePassword !== null;
 
-/** Starts loading the checker once; every caller shares the same promise. */
-export const loadPasswordChecker = (): Promise<void> => {
-  if (typeof document === "undefined") return Promise.resolve();
+/** Loads the checker once (every caller shares one import); a failed load is retried next time. */
+export const loadPasswordChecker = async (): Promise<void> => {
+  checkerImport ??= import("./password-checker");
 
-  checkerLoad ??= import("./password-checker").then(
-    (checker) => {
-      scorePassword = checker.scorePassword;
-    },
-    () => {
-      // let the next password field try again
-      checkerLoad = null;
-    },
-  );
-
-  return checkerLoad;
+  try {
+    ({ scorePassword } = await checkerImport);
+  } catch {
+    checkerImport = null;
+  }
 };
 
 /** Calls the listener once the checker has loaded; returns a function that cancels it. */
