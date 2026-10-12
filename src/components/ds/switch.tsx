@@ -20,12 +20,16 @@ export const Switch = ({
   disabled = false,
 }: SwitchProps) => {
   const [isOn, setOn] = useControllable(checked, defaultChecked);
+
   const toggle = () => {
     if (disabled) return;
+
     const next = !isOn;
+
     setOn(next);
     onChange?.(next);
   };
+
   return (
     <label
       className={joinClassNames(styles.label, disabled && styles.disabled)}

@@ -48,40 +48,54 @@ export const ScrollRevealCard = ({
 
   useEffect(() => {
     const checkMobile = () => setIsMobile(window.innerWidth <= 768);
+
     checkMobile();
     window.addEventListener("resize", checkMobile);
+
     return () => window.removeEventListener("resize", checkMobile);
   }, []);
 
   useEffect(() => {
     if (isControlled) return;
+
     if (prefersReducedMotion()) {
       setScrollProgress(1);
+
       return;
     }
+
     let frame = 0;
+
     const handleScroll = () => {
       if (frame) return;
+
       frame = requestAnimationFrame(() => {
         frame = 0;
         const element = trackRef.current;
+
         if (!element) return;
+
         const rect = element.getBoundingClientRect();
         const span = rect.height - window.innerHeight;
+
         const next =
           span > 0
             ? -rect.top / span
             : (window.innerHeight - rect.top) /
               (window.innerHeight + rect.height);
+
         setScrollProgress(Math.min(1, Math.max(0, next)));
       });
     };
+
     handleScroll();
     window.addEventListener("scroll", handleScroll, { passive: true });
     window.addEventListener("resize", handleScroll);
+
     return () => {
       window.removeEventListener("scroll", handleScroll);
       window.removeEventListener("resize", handleScroll);
+
       if (frame) cancelAnimationFrame(frame);
     };
   }, [isControlled]);
@@ -93,14 +107,14 @@ export const ScrollRevealCard = ({
 
   // scroll-driven transforms change every frame, so they are passed as custom properties
   const motionStyle = {
-    "--reveal-rotate": rotate + "deg",
+    "--reveal-rotate": `${rotate}deg`,
     "--reveal-scale": String(scale),
-    "--reveal-lift": lift + "px",
+    "--reveal-lift": `${lift}px`,
     // falsy height (including 0) falls back to the default track height, as in the prototype
     ...(height
       ? {
           "--reveal-height":
-            typeof height === "number" ? height + "px" : height,
+            typeof height === "number" ? `${height}px` : height,
         }
       : {}),
     ...style,

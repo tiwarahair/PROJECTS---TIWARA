@@ -26,9 +26,10 @@ export const useOnboardingRoute = ({
     const isRouteChange = previousRoute.current !== route;
 
     previousRoute.current = route;
+
     if (!screen || isScreenOnRoute(screen, route)) return;
 
-    if (isRouteChange) actions.go(ROUTE_START[route], "back");
+    if (isRouteChange) actions.goTo(ROUTE_START[route], "back");
     else navigate(getScreenPath(screen));
     // only a new screen or route should trigger this; actions and navigate change identity every render
     // eslint-disable-next-line react-hooks/exhaustive-deps

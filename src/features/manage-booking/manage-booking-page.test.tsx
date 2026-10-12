@@ -8,17 +8,21 @@ describe("ManageBookingPage", () => {
   beforeEach(() => {
     vi.useFakeTimers({ toFake: ["setTimeout", "clearTimeout"] });
   });
+
   afterEach(() => vi.useRealTimers());
 
   it("shows the booking and what is shared with the stylist", () => {
     renderWithStore(<ManageBookingPage />, "/manage");
+
     expect(
       screen.getByRole("heading", {
         level: 1,
         name: "You’re booked with Amara Beauty",
       }),
     ).toBeInTheDocument();
+
     expect(screen.getByText("Sensitive scalp")).toBeInTheDocument();
+
     expect(
       screen.getByText(getDemoBooking("amara-beauty").total),
     ).toBeInTheDocument();
@@ -27,9 +31,11 @@ describe("ManageBookingPage", () => {
   it("Edit opens the allergy field; Save stores the text and shows a toast that clears", () => {
     renderWithStore(<ManageBookingPage />, "/manage");
     fireEvent.click(screen.getByRole("button", { name: "Edit" }));
+
     fireEvent.change(screen.getByRole("textbox"), {
       target: { value: "Nut allergy" },
     });
+
     fireEvent.click(screen.getByRole("button", { name: "Save" }));
     expect(screen.getByText("Nut allergy")).toBeInTheDocument();
     expect(screen.getByRole("status")).toHaveTextContent("Saved");
@@ -41,6 +47,7 @@ describe("ManageBookingPage", () => {
     renderWithStore(<ManageBookingPage />, "/manage");
     fireEvent.click(screen.getByRole("button", { name: "Remove" }));
     const dialog = screen.getByRole("alertdialog", { name: "Remove this?" });
+
     expect(dialog).toHaveTextContent("Amara Beauty won’t see it any more.");
     fireEvent.click(within(dialog).getByRole("button", { name: "Remove" }));
     expect(screen.getByText("None shared")).toBeInTheDocument();
@@ -49,6 +56,7 @@ describe("ManageBookingPage", () => {
 
   it("?view=account forwards to Account → Shared with stylists", () => {
     renderWithStore(<ManageBookingPage />, "/manage?view=account");
+
     expect(screen.getByTestId("location")).toHaveTextContent(
       "/account?section=shared",
     );

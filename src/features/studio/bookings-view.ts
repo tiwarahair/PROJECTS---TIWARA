@@ -6,13 +6,13 @@ import type { DecoratedBooking } from "./studio-decorate";
 import {
   dateAt,
   dayInfo,
-  durToMin,
+  durationToMinutes,
   getAvatarSrc,
-  getMiniCalDays,
-  hexA,
+  getMiniCalendarDays,
+  hexWithAlpha,
   hhmm,
   timeRange,
-  toMin,
+  timeToMinutes,
 } from "./studio-format";
 import {
   getBlockColour,
@@ -22,7 +22,7 @@ import {
   getExtraByName,
   getPastKey,
   getPastRows,
-  getServiceDur,
+  getServiceDuration,
   getTileTone,
   getWorkingHours,
   isBlockOn,
@@ -35,39 +35,108 @@ const DAY_PX = 128;
 const WEEK_PX = 88;
 const END_HOUR = 24;
 
-const getY = (pixelsPerHour: number) => (minutes: number) =>
+type EmptyKind = "new" | "filtered" | "past" | "upcoming";
+
+interface EmptyCopy {
+  title: string;
+  body: string;
+}
+
+const EMPTY_COPY: Record<EmptyKind, EmptyCopy> = {
+  new: {
+    title: "No appointments yet",
+    body: "Share your booking link to get your first one.",
+  },
+  filtered: {
+    title: "Nothing matches",
+    body: "Try a wider date range or clear the filters.",
+  },
+  past: {
+    title: "No past appointments",
+    body: "Completed appointments will appear here once the date has passed.",
+  },
+  upcoming: {
+    title: "Nothing booked yet",
+    body: "Add a booking yourself or leave your days open for online bookings.",
+  },
+};
+
+const DAY_NAMES: Record<number, string> = { 0: "Today", 1: "Tomorrow" };
+
+/** Whether a booking `off` days away falls in a "When" filter option. */
+const isInRangeOption = (id: string, dayOffset: number) => {
+  if (id === "today") return dayOffset === 0;
+
+  if (id === "7") return dayOffset < 7;
+
+  if (id === "30") return dayOffset < 30;
+
+  return true;
+};
+
+const isPayOption = (id: string, paid: string) => {
+  if (id === "any") return true;
+
+  if (id === "unpaid") return paid === "none" || paid === "link";
+
+  return paid === "full";
+};
+
+const getTravelNote = (extra: number, travel: number) => {
+  if (extra && travel) return ` (${travel}m travel)`;
+
+  if (travel) return " travel";
+
+  return "";
+};
+
+const getDotColour = (hasBooking: boolean, isSelected: boolean) => {
+  if (!hasBooking) return "transparent";
+
+  return isSelected ? "var(--brand-yellow)" : "var(--accent-700)";
+};
+
+const getTimeToPixels = (pixelsPerHour: number) => (minutes: number) =>
   (minutes / 60) * pixelsPerHour;
+
 const clampMinutes = (minutes: number) =>
   Math.min(Math.max(minutes, 0), END_HOUR * 60);
 
 const getOffBands = (
   state: StudioState,
   offset: number,
-  y: (minutes: number) => number,
+  getTop: (minutes: number) => number,
 ) => {
   const hours = getWorkingHours(state, offset);
+
   const band = (from: number, to: number) => {
-    const top = y(clampMinutes(from));
-    const height = y(clampMinutes(to)) - top;
+    const top = getTop(clampMinutes(from));
+    const height = getTop(clampMinutes(to)) - top;
+
     return height > 1
-      ? { top: top.toFixed(0) + "px", h: height.toFixed(0) + "px" }
+      ? { top: `${top.toFixed(0)}px`, height: `${height.toFixed(0)}px` }
       : null;
   };
+
   const bands = hours.on
-    ? [band(0, toMin(hours.s)), band(toMin(hours.e), END_HOUR * 60)]
+    ? [
+        band(0, timeToMinutes(hours.start)),
+        band(timeToMinutes(hours.end), END_HOUR * 60),
+      ]
     : [band(0, END_HOUR * 60)];
+
   return bands.filter((item) => item !== null);
 };
 
 /** A booking's tile colours as custom properties (runtime: from its service category and status). */
 export const getBlockTone = (booking: DecoratedBooking) => ({
-  "--bk-bg": booking.tileBg,
+  "--bk-bg": booking.tileBackground,
   "--bk-bar": booking.tileBar,
   "--bk-line": booking.tileLine,
   "--bk-dash": booking.tileBorder,
   "--bk-text": booking.tileText,
   "--bk-meta": booking.tileMeta,
-  "--badge-bg": booking.badgeBg,
+  "--badge-bg": booking.badgeBackground,
   "--badge-border": booking.badgeBorder,
   "--badge-color": booking.badgeColor,
 });
@@ -75,102 +144,123 @@ export const getBlockTone = (booking: DecoratedBooking) => ({
 export const getBookingsView = (studio: StudioController) => {
   const { state, setState, isWide, isNew, actions, seedPast } = studio;
   const now = new Date();
-  const nowMin = now.getHours() * 60 + now.getMinutes();
+  const nowMinutes = now.getHours() * 60 + now.getMinutes();
+
   const upcoming = getDecoratedBookings(state, isNew, (booking) =>
-    actions.openSheet("booking", { sheetBId: booking.id }),
+    actions.openSheet("booking", { sheetBookingId: booking.id }),
   );
-  const dayBookings = upcoming.filter(({ off }) => off === state.dayIdx);
-  const isList = state.bview === "list";
+
+  const dayBookings = upcoming.filter(
+    ({ dayOffset }) => dayOffset === state.dayIndex,
+  );
+
+  const isList = state.bookingsLayout === "list";
   const scope = state.listScope || "upcoming";
   const isPast = isList && scope === "past";
   const isUpcoming = isList && !isPast;
-  const day = dayInfo(state.dayIdx);
-  const mondayOffset = state.dayIdx - ((dateAt(state.dayIdx).getDay() + 6) % 7);
-  const query = (state.bkQ || "").trim().toLowerCase();
+  const day = dayInfo(state.dayIndex);
+
+  const mondayOffset =
+    state.dayIndex - ((dateAt(state.dayIndex).getDay() + 6) % 7);
+
+  const query = (state.bookingsQuery || "").trim().toLowerCase();
+
   const matchesQuery = (name: string, service: string) =>
     !query ||
     name.toLowerCase().includes(query) ||
     service.toLowerCase().includes(query);
+
   const isInRange = (booking: DecoratedBooking) =>
-    state.fRange === "today"
-      ? booking.off === 0
-      : state.fRange === "7"
-        ? booking.off < 7
-        : state.fRange === "30"
-          ? booking.off < 30
-          : true;
+    isInRangeOption(state.filterRange, booking.dayOffset);
+
   const isStatus = (booking: DecoratedBooking) =>
-    state.fStatus === "all" || booking.st === state.fStatus;
+    state.filterStatus === "all" || booking.status === state.filterStatus;
+
   const isPay = (booking: DecoratedBooking) =>
-    state.fPay === "any"
-      ? true
-      : state.fPay === "unpaid"
-        ? booking.paid === "none" || booking.paid === "link"
-        : booking.paid === "full";
-  const upBase = upcoming.filter((booking) =>
-    matchesQuery(booking.clientName, booking.svc),
+    isPayOption(state.filterPayment, booking.paid);
+
+  const upcomingBase = upcoming.filter((booking) =>
+    matchesQuery(booking.clientName, booking.service),
   );
-  const upItems = upBase.filter(
+
+  const upcomingItems = upcomingBase.filter(
     (booking) => isInRange(booking) && isStatus(booking) && isPay(booking),
   );
+
   const pastFilter = state.pastFilter || "all";
+
   const pastBase = getPastRows(state, isNew, seedPast).filter((row) =>
-    matchesQuery(getClient(state, row.client).name, row.svc),
+    matchesQuery(getClient(state, row.client).name, row.service),
   );
+
   const pastItems = pastBase.filter((row) => isPastIn(row, pastFilter));
 
-  const dayGroups: { off: number; items: DecoratedBooking[] }[] = [];
-  upItems.forEach((booking) => {
-    let group = dayGroups.find(({ off }) => off === booking.off);
+  const dayGroups: { dayOffset: number; items: DecoratedBooking[] }[] = [];
+
+  upcomingItems.forEach((booking) => {
+    let group = dayGroups.find(
+      ({ dayOffset }) => dayOffset === booking.dayOffset,
+    );
+
     if (!group) {
-      group = { off: booking.off, items: [] };
+      group = { dayOffset: booking.dayOffset, items: [] };
       dayGroups.push(group);
     }
+
     group.items.push(booking);
   });
+
   const getTotal = (items: { price: number }[]) => {
     let total = 0;
+
     for (const { price } of items) total += price;
+
     return total;
   };
-  const upGroups = dayGroups.map(({ off, items }, index) => ({
-    key: String(off),
-    isLast: index === dayGroups.length - 1,
-    label: off === 0 ? "Today" : off === 1 ? "Tomorrow" : dayInfo(off).label,
-    isToday: off === 0,
-    meta:
-      items.length +
-      (items.length === 1 ? " booking" : " bookings") +
-      " · £" +
-      getTotal(items),
-    items,
-  }));
-  const upCount = upItems.length;
+
+  const upcomingGroups = dayGroups.map(({ dayOffset, items }, index) => {
+    const countLabel =
+      items.length + (items.length === 1 ? " booking" : " bookings");
+
+    return {
+      key: String(dayOffset),
+      isLast: index === dayGroups.length - 1,
+      label: DAY_NAMES[dayOffset] ?? dayInfo(dayOffset).label,
+      isToday: dayOffset === 0,
+      meta: `${countLabel} · £${getTotal(items)}`,
+      items,
+    };
+  });
+
+  const upcomingCount = upcomingItems.length;
   const pastCount = pastItems.length;
+
   const filterCount = isPast
-    ? pastFilter !== "all"
-      ? 1
-      : 0
-    : Number(state.fRange !== "all") +
-      Number(state.fStatus !== "all") +
-      Number(state.fPay !== "any");
+    ? Number(pastFilter !== "all")
+    : Number(state.filterRange !== "all") +
+      Number(state.filterStatus !== "all") +
+      Number(state.filterPayment !== "any");
+
   const RANGE = [
     { id: "all", label: "All upcoming" },
     { id: "today", label: "Today" },
     { id: "7", label: "Next 7 days" },
     { id: "30", label: "Next 30 days" },
   ];
+
   const STATUS = [
     { id: "all", label: "Any status" },
     { id: "awaiting", label: "Awaiting confirmation" },
     { id: "confirmed", label: "Confirmed" },
     { id: "arrived", label: "Arrived" },
   ];
+
   const PAY = [
     { id: "any", label: "Any payment" },
     { id: "unpaid", label: "Deposit unpaid" },
     { id: "full", label: "Paid in full" },
   ];
+
   const PAST_STATUS = [
     { id: "all", label: "All" },
     { id: "completed", label: "Completed" },
@@ -178,38 +268,46 @@ export const getBookingsView = (studio: StudioController) => {
     { id: "noshow", label: "No show" },
     { id: "failed", label: "Payment failed" },
   ];
+
   const getLabel = (list: { id: string; label: string }[], id: string) =>
     list.find((option) => option.id === id)?.label || "";
+
   const filterChips: { label: string; clear: () => void }[] = [];
+
   if (isUpcoming) {
-    if (state.fRange !== "all")
+    if (state.filterRange !== "all")
       filterChips.push({
-        label: getLabel(RANGE, state.fRange),
-        clear: () => setState({ fRange: "all" }),
+        label: getLabel(RANGE, state.filterRange),
+        clear: () => setState({ filterRange: "all" }),
       });
-    if (state.fStatus !== "all")
+
+    if (state.filterStatus !== "all")
       filterChips.push({
-        label: getLabel(STATUS, state.fStatus),
-        clear: () => setState({ fStatus: "all" }),
+        label: getLabel(STATUS, state.filterStatus),
+        clear: () => setState({ filterStatus: "all" }),
       });
-    if (state.fPay !== "any")
+
+    if (state.filterPayment !== "any")
       filterChips.push({
-        label: getLabel(PAY, state.fPay),
-        clear: () => setState({ fPay: "any" }),
+        label: getLabel(PAY, state.filterPayment),
+        clear: () => setState({ filterPayment: "any" }),
       });
   } else if (pastFilter !== "all")
     filterChips.push({
       label: getLabel(PAST_STATUS, pastFilter),
       clear: () => setState({ pastFilter: "all" }),
     });
+
   const closeFilter = () => {
-    setState({ filtOut: true });
+    setState({ filterOut: true });
     window.clearTimeout(studio.context.timers.filter);
+
     studio.context.timers.filter = window.setTimeout(
-      () => setState({ filtOpen: false, filtOut: false }),
+      () => setState({ filterOpen: false, filterOut: false }),
       210,
     );
   };
+
   const toChip = (
     option: { id: string; label: string },
     isOn: boolean,
@@ -222,19 +320,15 @@ export const getBookingsView = (studio: StudioController) => {
     isOn,
     pick,
   });
+
   const isRangeOption = (id: string, booking: DecoratedBooking) =>
-    id === "today"
-      ? booking.off === 0
-      : id === "7"
-        ? booking.off < 7
-        : id === "30"
-          ? booking.off < 30
-          : true;
+    isInRangeOption(id, booking.dayOffset);
+
   const filterSections = isPast
     ? [
         {
           label: "Status",
-          opts: PAST_STATUS.map((option) =>
+          options: PAST_STATUS.map((option) =>
             toChip(
               option,
               pastFilter === option.id,
@@ -247,12 +341,12 @@ export const getBookingsView = (studio: StudioController) => {
     : [
         {
           label: "When",
-          opts: RANGE.map((option) =>
+          options: RANGE.map((option) =>
             toChip(
               option,
-              state.fRange === option.id,
-              () => setState({ fRange: option.id }),
-              upBase.filter(
+              state.filterRange === option.id,
+              () => setState({ filterRange: option.id }),
+              upcomingBase.filter(
                 (booking) =>
                   isStatus(booking) &&
                   isPay(booking) &&
@@ -263,69 +357,69 @@ export const getBookingsView = (studio: StudioController) => {
         },
         {
           label: "Status",
-          opts: STATUS.map((option) =>
+          options: STATUS.map((option) =>
             toChip(
               option,
-              state.fStatus === option.id,
-              () => setState({ fStatus: option.id }),
-              upBase.filter(
+              state.filterStatus === option.id,
+              () => setState({ filterStatus: option.id }),
+              upcomingBase.filter(
                 (booking) =>
                   isInRange(booking) &&
                   isPay(booking) &&
-                  (option.id === "all" || booking.st === option.id),
+                  (option.id === "all" || booking.status === option.id),
               ).length,
             ),
           ),
         },
         {
           label: "Payment",
-          opts: PAY.map((option) =>
+          options: PAY.map((option) =>
             toChip(
               option,
-              state.fPay === option.id,
-              () => setState({ fPay: option.id }),
-              upBase.filter(
+              state.filterPayment === option.id,
+              () => setState({ filterPayment: option.id }),
+              upcomingBase.filter(
                 (booking) =>
                   isInRange(booking) &&
                   isStatus(booking) &&
-                  (option.id === "any"
-                    ? true
-                    : option.id === "unpaid"
-                      ? booking.paid === "none" || booking.paid === "link"
-                      : booking.paid === "full"),
+                  isPayOption(option.id, booking.paid),
               ).length,
             ),
           ),
         },
       ];
-  const shownCount = isPast ? pastCount : upCount;
+
+  const shownCount = isPast ? pastCount : upcomingCount;
   let earned = 0;
+
   for (const row of pastItems)
     if (row.status === "Completed") earned += row.price;
 
   // ---- the day / week timeline ----
-  const yDay = getY(DAY_PX);
-  const yWeek = getY(WEEK_PX);
+  const getDayTop = getTimeToPixels(DAY_PX);
+  const getWeekTop = getTimeToPixels(WEEK_PX);
+
   const getBlocked = (
     offset: number,
-    y: (minutes: number) => number,
+    getTop: (minutes: number) => number,
     minHeight: number,
   ) =>
     state.blocked
       .filter((block) => isBlockOn(block, offset))
       .map((block) => {
         const [from, to] = getBlockRange(state, block, offset);
-        const top = y(clampMinutes(from));
-        const height = y(clampMinutes(to)) - top;
+        const top = getTop(clampMinutes(from));
+        const height = getTop(clampMinutes(to)) - top;
         const colour = getBlockColour();
-        const foreground = colour.fg || colour.hex;
+        const foreground = colour.foreground || colour.hex;
+
         return {
           key: block.id,
-          top: (top + 1).toFixed(0) + "px",
-          h: Math.max(minHeight, height - 3).toFixed(0) + "px",
+          top: `${(top + 1).toFixed(0)}px`,
+          height: `${Math.max(minHeight, height - 3).toFixed(0)}px`,
           hex: foreground,
-          line: hexA(colour.hex, 0.45),
-          bg: hexA(colour.hex, 0.16),
+          line: hexWithAlpha(colour.hex, 0.45),
+          background: hexWithAlpha(colour.hex, 0.16),
           label:
             (block.reason || "Blocked").replace(/( · )?Repeats.*$/, "") +
             (block.span === "All day" ? " · All day" : ""),
@@ -335,114 +429,136 @@ export const getBookingsView = (studio: StudioController) => {
           },
         };
       });
-  const hours = getWorkingHours(state, state.dayIdx || 0);
+
+  const hours = getWorkingHours(state, state.dayIndex || 0);
+
   const hourLines: {
     key: number;
     label: string;
-    hh: string;
+    paddedHour: string;
     top: string;
     isWorking: boolean;
   }[] = [];
+
   for (let hour = 0; hour <= END_HOUR; hour++)
     hourLines.push({
       key: hour,
-      label: hour === 24 ? "" : (hour < 10 ? "0" : "") + hour + ":00",
-      hh: (hour < 10 ? "0" : "") + hour,
-      top: yDay(hour * 60).toFixed(0) + "px",
+      label: hour === 24 ? "" : `${(hour < 10 ? "0" : "") + hour}:00`,
+      paddedHour: (hour < 10 ? "0" : "") + hour,
+      top: `${getDayTop(hour * 60).toFixed(0)}px`,
       isWorking:
-        hours.on && hour * 60 >= toMin(hours.s) && hour * 60 <= toMin(hours.e),
+        hours.on &&
+        hour * 60 >= timeToMinutes(hours.start) &&
+        hour * 60 <= timeToMinutes(hours.end),
     });
+
   const quarters: string[] = [];
+
   for (let minutes = 15; minutes < END_HOUR * 60; minutes += 15)
-    if (minutes % 60) quarters.push(yDay(minutes).toFixed(0) + "px");
+    if (minutes % 60) quarters.push(`${getDayTop(minutes).toFixed(0)}px`);
+
   const dayBlocks = dayBookings.map((booking) => ({
     booking,
-    top: yDay(toMin(booking.time)).toFixed(0) + "px",
-    h:
-      Math.max(40, (durToMin(booking.dur) / 60) * DAY_PX - 3).toFixed(0) + "px",
+    top: `${getDayTop(timeToMinutes(booking.time)).toFixed(0)}px`,
+    height: `${Math.max(40, (durationToMinutes(booking.duration) / 60) * DAY_PX - 3).toFixed(0)}px`,
   }));
+
   const stubs = dayBookings
     .map((booking) => {
-      const buffer = getBookingBuffer(state, booking.svc);
+      const buffer = getBookingBuffer(state, booking.service);
+
       if (!buffer) return null;
-      const end = toMin(booking.time) + durToMin(booking.dur);
-      const extra = getExtraByName(state, booking.svc);
+
+      const end =
+        timeToMinutes(booking.time) + durationToMinutes(booking.duration);
+
+      const extra = getExtraByName(state, booking.service);
       const travel = buffer - extra;
-      const tone = getTileTone(state, booking.svc);
+      const tone = getTileTone(state, booking.service);
+
       return {
         key: booking.id,
-        top: (yDay(end) - 1).toFixed(0) + "px",
-        h: Math.max(15, (buffer / 60) * DAY_PX - 1).toFixed(0) + "px",
-        bg: tone.bg,
-        fg: tone.meta,
+        top: `${(getDayTop(end) - 1).toFixed(0)}px`,
+        height: `${Math.max(15, (buffer / 60) * DAY_PX - 1).toFixed(0)}px`,
+        background: tone.background,
+        foreground: tone.meta,
         dash: tone.hatch,
-        label:
-          "+" +
-          buffer +
-          "m" +
-          (extra && travel
-            ? " (" + travel + "m travel)"
-            : travel
-              ? " travel"
-              : ""),
+        label: `+${buffer}m${getTravelNote(extra, travel)}`,
       };
     })
     .filter((item) => item !== null);
+
   const nowLine =
-    state.dayIdx === 0 && nowMin > 0 && nowMin < END_HOUR * 60
-      ? { top: yDay(nowMin).toFixed(0) + "px", label: hhmm(nowMin) }
+    state.dayIndex === 0 && nowMinutes > 0 && nowMinutes < END_HOUR * 60
+      ? {
+          top: `${getDayTop(nowMinutes).toFixed(0)}px`,
+          label: hhmm(nowMinutes),
+        }
       : null;
-  const isWeek = state.calMode === "week";
+
+  const isWeek = state.calendarMode === "week";
+
   const weekMonday = (() => {
-    const offset = state.dayIdx || 0;
+    const offset = state.dayIndex || 0;
+
     return offset - ((dateAt(offset).getDay() + 6) % 7);
   })();
+
   const weekCols = isWeek
-    ? Array.from({ length: 7 }, (_, index) => {
+    ? Array.from({ length: 7 }, (_slot, index) => {
         const offset = weekMonday + index;
         const info = dayInfo(offset);
         const isToday = offset === 0;
-        const isSelected = offset === (state.dayIdx || 0);
+        const isSelected = offset === (state.dayIndex || 0);
+
         return {
           key: offset,
-          dow: info.dow,
-          num: info.num,
+          weekday: info.weekday,
+          dayNumber: info.dayNumber,
           isToday,
           isSelected,
-          offBands: getOffBands(state, offset, yWeek),
-          blocked: getBlocked(offset, yWeek, 18),
+          offBands: getOffBands(state, offset, getWeekTop),
+          blocked: getBlocked(offset, getWeekTop, 18),
           blocks: upcoming
-            .filter(({ off }) => off === offset)
-            .map((booking) => ({
-              booking,
-              top: yWeek(toMin(booking.time)).toFixed(0) + "px",
-              h:
-                Math.max(
-                  30,
-                  (durToMin(booking.dur) / 60) * WEEK_PX - 3,
-                ).toFixed(0) + "px",
-            })),
+            .filter(({ dayOffset }) => dayOffset === offset)
+            .map((booking) => {
+              const blockHeight = Math.max(
+                30,
+                (durationToMinutes(booking.duration) / 60) * WEEK_PX - 3,
+              ).toFixed(0);
+
+              return {
+                booking,
+                top: `${getWeekTop(timeToMinutes(booking.time)).toFixed(0)}px`,
+                height: `${blockHeight}px`,
+              };
+            }),
           nowTop:
-            isToday && nowMin > 0 && nowMin < END_HOUR * 60
-              ? yWeek(nowMin).toFixed(0) + "px"
+            isToday && nowMinutes > 0 && nowMinutes < END_HOUR * 60
+              ? `${getWeekTop(nowMinutes).toFixed(0)}px`
               : null,
-          pickDay: () => actions.setCal({ dayIdx: offset }),
+          pickDay: () => actions.setCalendar({ dayIndex: offset }),
           tap: (event: MouseEvent<HTMLElement>) => {
             const rect = event.currentTarget.getBoundingClientRect();
+
             const quarter = Math.floor(
               (event.clientY - rect.top) / (WEEK_PX / 4),
             );
+
             const minutes = Math.min(23 * 60 + 45, Math.max(0, quarter * 15));
             const dayHours = getWorkingHours(state, offset);
+
             const isOutside =
               !dayHours.on ||
-              minutes < toMin(dayHours.s) ||
-              minutes >= toMin(dayHours.e);
+              minutes < timeToMinutes(dayHours.start) ||
+              minutes >= timeToMinutes(dayHours.end);
+
             const width = 236;
             const height = 132;
             const pad = 12;
+
             setState({
-              dayIdx: offset,
+              dayIndex: offset,
               pop: {
                 time: hhmm(minutes),
                 warn: isOutside,
@@ -460,56 +576,73 @@ export const getBookingsView = (studio: StudioController) => {
         };
       })
     : [];
+
   if (isWeek) {
     // where the week view scrolls to: an hour before now, else just above the first booking
     const hasToday = weekMonday <= 0 && weekMonday + 6 >= 0;
+
     const firsts = weekCols.flatMap(({ blocks }) =>
       blocks.map(({ top }) => parseFloat(top)),
     );
-    const target = hasToday
-      ? yWeek(Math.max(0, nowMin - 60))
-      : firsts.length
-        ? Math.min(...firsts) - 24
-        : yWeek(8 * 60);
-    studio.context.memo.wkTarget = Math.max(0, target);
-    studio.context.memo.wkKey = weekMonday;
+
+    const getTarget = () => {
+      if (hasToday) return getWeekTop(Math.max(0, nowMinutes - 60));
+
+      if (firsts.length) return Math.min(...firsts) - 24;
+
+      return getWeekTop(8 * 60);
+    };
+
+    const target = getTarget();
+
+    studio.context.memo.weekScrollTarget = Math.max(0, target);
+    studio.context.memo.weekKey = weekMonday;
   }
+
   const weekHours: { key: number; label: string; top: string }[] = [];
+
   for (let hour = 0; hour <= END_HOUR; hour++)
     weekHours.push({
       key: hour,
-      label: hour === 24 ? "" : (hour < 10 ? "0" : "") + hour + ":00",
-      top: yWeek(hour * 60).toFixed(0) + "px",
+      label: hour === 24 ? "" : `${(hour < 10 ? "0" : "") + hour}:00`,
+      top: `${getWeekTop(hour * 60).toFixed(0)}px`,
     });
-  const quickTime = state.qa?.time ?? null;
-  const quickMinutes = quickTime ? toMin(quickTime) : null;
+
+  const quickTime = state.quickAdd?.time ?? null;
+  const quickMinutes = quickTime ? timeToMinutes(quickTime) : null;
+
   const isQuickOutside =
     quickMinutes != null &&
     (!hours.on ||
-      quickMinutes < toMin(hours.s) ||
-      quickMinutes >= toMin(hours.e));
+      quickMinutes < timeToMinutes(hours.start) ||
+      quickMinutes >= timeToMinutes(hours.end));
 
   // ---- the date picker ----
-  const pickerMonth = state.bkCalM == null ? now.getMonth() : state.bkCalM;
-  const pickerYear = state.bkCalY == null ? now.getFullYear() : state.bkCalY;
-  const hasBookings = new Set(upcoming.map(({ off }) => off));
+  const pickerMonth =
+    state.bookingCalendarMonth == null
+      ? now.getMonth()
+      : state.bookingCalendarMonth;
+
+  const pickerYear =
+    state.bookingCalendarYear == null
+      ? now.getFullYear()
+      : state.bookingCalendarYear;
+
+  const hasBookings = new Set(upcoming.map(({ dayOffset }) => dayOffset));
+
   const isPrevOff =
-    state.bkCalY == null ||
-    state.bkCalY < now.getFullYear() ||
-    (state.bkCalY === now.getFullYear() &&
-      (state.bkCalM ?? 0) <= now.getMonth());
-  const pickerDays = getMiniCalDays(
+    state.bookingCalendarYear == null ||
+    state.bookingCalendarYear < now.getFullYear() ||
+    (state.bookingCalendarYear === now.getFullYear() &&
+      (state.bookingCalendarMonth ?? 0) <= now.getMonth());
+
+  const pickerDays = getMiniCalendarDays(
     pickerMonth,
     pickerYear,
-    state.dayIdx,
-    (offset) => actions.setDay({ dayIdx: offset, dpOpen: false }),
+    state.dayIndex,
+    (offset) => actions.setDay({ dayIndex: offset, datePickerOpen: false }),
     -3650,
-    (offset, isSelected) =>
-      hasBookings.has(offset)
-        ? isSelected
-          ? "var(--brand-yellow)"
-          : "var(--accent-700)"
-        : "transparent",
+    (offset, isSelected) => getDotColour(hasBookings.has(offset), isSelected),
   );
 
   // ---- past list ----
@@ -517,101 +650,135 @@ export const getBookingsView = (studio: StudioController) => {
     month: string;
     items: ReturnType<typeof getPastItem>[];
   }[] = [];
+
   const getPastItem = (row: PastRecord, index: number) => {
     const client = getClient(state, row.client);
+
     const tone = PAST_TONE[row.status] ?? {
-      bg: "var(--quiet)",
+      background: "var(--quiet)",
       color: "var(--text-secondary)",
       icon: "",
       meta: "",
     };
-    const isOk = row.status === "Completed";
+
+    const isCompleted = row.status === "Completed";
     const isFresh = !!row.at && Date.now() - row.at < 86400000;
-    const duration = row.dur || getServiceDur(state, row.svc);
-    const end = toMin(row.time) + durToMin(duration);
+    const duration = row.duration || getServiceDuration(state, row.service);
+    const end = timeToMinutes(row.time) + durationToMinutes(duration);
+    const feeMeta = isFresh ? "Fee pending" : `${row.feeLabel} fee kept`;
+    const settledMeta = row.meta || (isCompleted ? "Paid" : tone.meta);
+    const endHours = String(Math.floor(end / 60) % 24).padStart(2, "0");
+    const endMinutes = String(end % 60).padStart(2, "0");
+
     return {
       key: String(getPastKey(row)),
       clientName: client.name,
       imgSrc: getAvatarSrc(client),
-      isFaded: !isOk,
-      svc: row.svc,
+      isFaded: !isCompleted,
+      service: row.service,
       when: row.when,
       time: timeRange(row.time, duration),
       start: row.time,
-      endTime:
-        "–" +
-        String(Math.floor(end / 60) % 24).padStart(2, "0") +
-        ":" +
-        String(end % 60).padStart(2, "0"),
-      stripe: getTileTone(state, row.svc).bar,
+      endTime: `–${endHours}:${endMinutes}`,
+      stripe: getTileTone(state, row.service).bar,
       status: row.status,
-      badgeBg: tone.bg,
+      badgeBackground: tone.background,
       badgeColor: tone.color,
-      open: () => actions.openSheet("past", { pastSel: getPastKey(row) }),
-      priceLabel: "£" + row.price,
-      isStruck: !isOk,
-      priceMeta:
-        row.feePending && !row.waived
-          ? isFresh
-            ? "Fee pending"
-            : row.feeLabel + " fee kept"
-          : row.meta || (isOk ? "Paid" : tone.meta),
-      dly: (index * 0.04).toFixed(2) + "s",
+      open: () =>
+        actions.openSheet("past", { selectedPastId: getPastKey(row) }),
+      priceLabel: `£${row.price}`,
+      isStruck: !isCompleted,
+      priceMeta: row.feePending && !row.waived ? feeMeta : settledMeta,
+      delay: `${(index * 0.04).toFixed(2)}s`,
     };
   };
+
   getPastRows(state, isNew, seedPast)
     .filter((row) => isPastIn(row, pastFilter))
     .filter(
       (row) =>
         !query ||
         getClient(state, row.client).name.toLowerCase().includes(query) ||
-        row.svc.toLowerCase().includes(query),
+        row.service.toLowerCase().includes(query),
     )
     .forEach((row, index) => {
       const month = PAST_MONTHS[row.when.split(" ")[2] ?? ""] || "Earlier";
       let group = pastGroups.find((item) => item.month === month);
+
       if (!group) {
         group = { month, items: [] };
         pastGroups.push(group);
       }
+
       group.items.push(getPastItem(row, index));
     });
+
+  const getListSummary = () => {
+    if (!isPast)
+      return (
+        upcomingCount +
+        (upcomingCount === 1 ? " booking" : " bookings") +
+        (state.filterRange === "all" ? " upcoming" : "")
+      );
+
+    const pastLabel =
+      pastCount + (pastCount === 1 ? " appointment" : " appointments");
+
+    if (pastFilter === "off") return `${pastLabel} did not go ahead`;
+
+    const completedCount = pastItems.filter(
+      ({ status }) => status === "Completed",
+    ).length;
+
+    return `${pastLabel} · ${completedCount} completed`;
+  };
+
+  const getEmptyKind = (): EmptyKind => {
+    if (isNew) return "new";
+
+    if (filterCount > 0 || query) return "filtered";
+
+    if (isPast) return "past";
+
+    return "upcoming";
+  };
+
+  const emptyCopy = EMPTY_COPY[getEmptyKind()];
+
+  const outsideHint = hours.on
+    ? `Outside your hours (${hours.start}–${hours.end}). You can still book it.`
+    : "You’re closed this day. You can still book it.";
+
+  const dayPrefix = DAY_NAMES[state.dayIndex]
+    ? `${DAY_NAMES[state.dayIndex]}, `
+    : "";
 
   return {
     upcoming,
     isList,
-    isCal: !isList,
+    isCalendar: !isList,
     isUpcoming,
     isPast,
-    calDateLabel:
-      (state.dayIdx === 0
-        ? "Today, "
-        : state.dayIdx === 1
-          ? "Tomorrow, "
-          : "") +
-      day.dow +
-      " " +
-      day.num +
-      " " +
-      day.mon,
-    weekStrip: Array.from({ length: 7 }, (_, index) => {
+    calendarDateLabel: `${dayPrefix}${day.weekday} ${day.dayNumber} ${day.monthName}`,
+    weekStrip: Array.from({ length: 7 }, (_slot, index) => {
       const offset = mondayOffset + index;
       const info = dayInfo(offset);
-      const count = upcoming.filter(({ off }) => off === offset).length;
-      const isSelected = offset === state.dayIdx;
+
+      const count = upcoming.filter(
+        ({ dayOffset }) => dayOffset === offset,
+      ).length;
+
+      const isSelected = offset === state.dayIndex;
+
       return {
         key: offset,
-        dow: info.dow,
-        num: info.num,
+        weekday: info.weekday,
+        dayNumber: info.dayNumber,
         isSelected,
         isToday: offset === 0,
         isPast: offset < 0,
-        dot: count
-          ? isSelected
-            ? "var(--brand-yellow)"
-            : "var(--accent-700)"
-          : "transparent",
-        pick: () => actions.setDay({ dayIdx: offset }),
+        dot: getDotColour(count > 0, isSelected),
+        pick: () => actions.setDay({ dayIndex: offset }),
       };
     }),
     filterCount: filterCount ? String(filterCount) : "",
@@ -619,48 +786,23 @@ export const getBookingsView = (studio: StudioController) => {
     filterChips,
     clearFilter: () =>
       setState({
-        fRange: "all",
-        fStatus: "all",
-        fPay: "any",
+        filterRange: "all",
+        filterStatus: "all",
+        filterPayment: "any",
         pastFilter: "all",
-        bkQ: "",
+        bookingsQuery: "",
       }),
     closeFilter,
     filterSections,
-    filterCta:
-      "Show " + shownCount + (shownCount === 1 ? " booking" : " bookings"),
-    upGroups,
-    listSummary: isPast
-      ? pastFilter === "off"
-        ? pastCount +
-          (pastCount === 1 ? " appointment" : " appointments") +
-          " did not go ahead"
-        : pastCount +
-          (pastCount === 1 ? " appointment" : " appointments") +
-          " · " +
-          pastItems.filter(({ status }) => status === "Completed").length +
-          " completed"
-      : upCount +
-        (upCount === 1 ? " booking" : " bookings") +
-        (state.fRange === "all" ? " upcoming" : ""),
+    filterCta: `Show ${shownCount}${shownCount === 1 ? " booking" : " bookings"}`,
+    upcomingGroups,
+    listSummary: getListSummary(),
     listTotal: isPast
-      ? "£" + earned + " earned"
-      : "£" + getTotal(upItems) + " booked",
-    isListEmpty: isPast ? pastCount === 0 : upCount === 0,
-    listEmptyTitle: isNew
-      ? "No appointments yet"
-      : filterCount > 0 || query
-        ? "Nothing matches"
-        : isPast
-          ? "No past appointments"
-          : "Nothing booked yet",
-    listEmptyBody: isNew
-      ? "Share your booking link to get your first one."
-      : filterCount > 0 || query
-        ? "Try a wider date range or clear the filters."
-        : isPast
-          ? "Completed appointments will appear here once the date has passed."
-          : "Add a booking yourself or leave your days open for online bookings.",
+      ? `£${earned} earned`
+      : `£${getTotal(upcomingItems)} booked`,
+    isListEmpty: isPast ? pastCount === 0 : upcomingCount === 0,
+    listEmptyTitle: emptyCopy.title,
+    listEmptyBody: emptyCopy.body,
     pastGroups,
     // timeline
     hourLines,
@@ -668,70 +810,77 @@ export const getBookingsView = (studio: StudioController) => {
     dayBlocks,
     stubs,
     nowLine,
-    dayOffBands: getOffBands(state, state.dayIdx || 0, yDay),
-    dayBlocked: getBlocked(state.dayIdx || 0, yDay, 22),
-    dayHeight: END_HOUR * DAY_PX + 14 + "px",
+    dayOffBands: getOffBands(state, state.dayIndex || 0, getDayTop),
+    dayBlocked: getBlocked(state.dayIndex || 0, getDayTop, 22),
+    dayHeight: `${END_HOUR * DAY_PX + 14}px`,
     isWeek,
     weekCols,
     weekHours,
-    weekHeight: END_HOUR * WEEK_PX + 14 + "px",
-    quickHint: isQuickOutside
-      ? hours.on
-        ? "Outside your hours (" +
-          hours.s +
-          "–" +
-          hours.e +
-          "). You can still book it."
-        : "You’re closed this day. You can still book it."
-      : "What would you like to do here?",
+    weekHeight: `${END_HOUR * WEEK_PX + 14}px`,
+    quickHint: isQuickOutside ? outsideHint : "What would you like to do here?",
     isQuickOutside,
     // date picker
-    pickerTitle: MONTHS_LONG[pickerMonth] + " " + pickerYear,
+    pickerTitle: `${MONTHS_LONG[pickerMonth]} ${pickerYear}`,
     pickerDays,
     isPrevOff,
     swipeStart: (event: TouchEvent) => {
       const touch = event.touches?.[0];
+
       if (touch)
         studio.context.memo.swipe = { x: touch.clientX, y: touch.clientY };
     },
     swipeEnd: (event: TouchEvent) => {
       const start = studio.context.memo.swipe;
+
       studio.context.memo.swipe = null;
       const touch = event.changedTouches?.[0];
+
       if (!start || !touch) return;
+
       const deltaX = touch.clientX - start.x;
       const deltaY = touch.clientY - start.y;
+
       if (Math.abs(deltaX) < 50 || Math.abs(deltaX) < Math.abs(deltaY) * 1.3)
         return;
+
       actions.slideDay(deltaX < 0 ? 1 : -1);
     },
-    tlTap: (event: MouseEvent<HTMLElement>) => {
+    onTimelineTap: (event: MouseEvent<HTMLElement>) => {
       const rect = event.currentTarget.getBoundingClientRect();
+
       const quarter = Math.floor(
         (event.clientY - rect.top) / (rect.height / 96),
       );
+
       const minutes = Math.min(23 * 60 + 45, Math.max(0, quarter * 15));
-      const dayHours = getWorkingHours(state, state.dayIdx);
+      const dayHours = getWorkingHours(state, state.dayIndex);
+
       const isOutside =
         !dayHours.on ||
-        minutes < toMin(dayHours.s) ||
-        minutes >= toMin(dayHours.e);
+        minutes < timeToMinutes(dayHours.start) ||
+        minutes >= timeToMinutes(dayHours.end);
+
       // anchor to the pointer, kept inside the viewport
       const width = 236;
       const height = 132;
       const pad = 12;
+
       const x = Math.min(
         Math.max(pad, event.clientX + 6),
         window.innerWidth - width - pad,
       );
+
       const y = Math.min(
         Math.max(pad, event.clientY + 6),
         window.innerHeight - height - pad,
       );
+
       if (!isWide) {
-        setState({ qa: { time: hhmm(minutes) }, qaOut: false });
+        setState({ quickAdd: { time: hhmm(minutes) }, quickAddOut: false });
+
         return;
       }
+
       setState({ pop: { time: hhmm(minutes), x, y, warn: isOutside } });
     },
   };

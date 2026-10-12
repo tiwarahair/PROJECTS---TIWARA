@@ -1,5 +1,5 @@
 import { useEffect, useRef } from "react";
-import L from "leaflet";
+import leaflet from "leaflet";
 import "leaflet/dist/leaflet.css";
 import styles from "./wizard-steps.module.css";
 
@@ -7,15 +7,16 @@ interface OnboardingMapProps {
   /** Where the pin starts: the dragged pin, else the geocoded postcode, else central Manchester. */
   center: [number, number];
   /** Re-centre when the geocoded postcode changes (prototype centerMap). */
-  geo: [number, number] | null;
+  geocodedLatLng: [number, number] | null;
   isDark: boolean;
   onPin: (latLng: [number, number]) => void;
 }
 
-const getTileUrl = (isDark: boolean) =>
-  "https://{s}.basemaps.cartocdn.com/" +
-  (isDark ? "dark_all" : "light_all") +
-  "/{z}/{x}/{y}{r}.png";
+const getTileUrl = (isDark: boolean) => {
+  const tileStyle = isDark ? "dark_all" : "light_all";
+
+  return `https://{s}.basemaps.cartocdn.com/${tileStyle}/{z}/{x}/{y}{r}.png`;
+};
 
 // the crimson pin, verbatim from the prototype's divIcon
 const PIN_HTML =
@@ -24,55 +25,74 @@ const PIN_HTML =
 /** "Is the pin in the right place?": Leaflet + CARTO tiles, a draggable pin; tap the map to move it. */
 export const OnboardingMap = ({
   center,
-  geo,
+  geocodedLatLng,
   isDark,
   onPin,
 }: OnboardingMapProps) => {
   const elementRef = useRef<HTMLDivElement>(null);
-  const mapRef = useRef<L.Map | null>(null);
-  const markerRef = useRef<L.Marker | null>(null);
-  const tileRef = useRef<L.TileLayer | null>(null);
+  const mapRef = useRef<leaflet.Map | null>(null);
+  const markerRef = useRef<leaflet.Marker | null>(null);
+  const tileRef = useRef<leaflet.TileLayer | null>(null);
   const onPinRef = useRef(onPin);
+
   onPinRef.current = onPin;
   const initial = useRef({ center, isDark });
 
   useEffect(() => {
     const element = elementRef.current;
+
     if (!element) return;
+
     const { center: start, isDark: dark } = initial.current;
-    const map = L.map(element, {
-      zoomControl: false,
-      attributionControl: true,
-      scrollWheelZoom: false,
-    }).setView(start, 16);
-    tileRef.current = L.tileLayer(getTileUrl(dark), {
-      maxZoom: 19,
-      subdomains: "abcd",
-      attribution: "© OpenStreetMap, © CARTO",
-    }).addTo(map);
-    L.control.zoom({ position: "bottomright" }).addTo(map);
-    const icon = L.divIcon({
+
+    const map = leaflet
+      .map(element, {
+        zoomControl: false,
+        attributionControl: true,
+        scrollWheelZoom: false,
+      })
+      .setView(start, 16);
+
+    tileRef.current = leaflet
+      .tileLayer(getTileUrl(dark), {
+        maxZoom: 19,
+        subdomains: "abcd",
+        attribution: "© OpenStreetMap, © CARTO",
+      })
+      .addTo(map);
+
+    leaflet.control.zoom({ position: "bottomright" }).addTo(map);
+
+    const icon = leaflet.divIcon({
       className: "",
       iconSize: [30, 40],
       iconAnchor: [15, 38],
       html: PIN_HTML,
     });
-    const marker = L.marker(start, {
-      draggable: true,
-      icon,
-      keyboard: true,
-      title: "Your location",
-    }).addTo(map);
+
+    const marker = leaflet
+      .marker(start, {
+        draggable: true,
+        icon,
+        keyboard: true,
+        title: "Your location",
+      })
+      .addTo(map);
+
     marker.on("dragend", () => {
       const { lat, lng } = marker.getLatLng();
+
       onPinRef.current([lat, lng]);
     });
-    map.on("click", (event: L.LeafletMouseEvent) => {
+
+    map.on("click", (event: leaflet.LeafletMouseEvent) => {
       marker.setLatLng(event.latlng);
       onPinRef.current([event.latlng.lat, event.latlng.lng]);
     });
+
     mapRef.current = map;
     markerRef.current = marker;
+
     // the section animates in; measure again once it has settled
     const timer = window.setTimeout(() => {
       try {
@@ -81,6 +101,7 @@ export const OnboardingMap = ({
         // map already removed
       }
     }, 380);
+
     return () => {
       window.clearTimeout(timer);
       map.remove();
@@ -95,10 +116,11 @@ export const OnboardingMap = ({
   }, [isDark]);
 
   useEffect(() => {
-    if (!geo || !mapRef.current) return;
-    mapRef.current.setView(geo, 16, { animate: true });
-    markerRef.current?.setLatLng(geo);
-  }, [geo]);
+    if (!geocodedLatLng || !mapRef.current) return;
+
+    mapRef.current.setView(geocodedLatLng, 16, { animate: true });
+    markerRef.current?.setLatLng(geocodedLatLng);
+  }, [geocodedLatLng]);
 
   return (
     <div

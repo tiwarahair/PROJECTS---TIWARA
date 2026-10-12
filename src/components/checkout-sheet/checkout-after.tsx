@@ -9,27 +9,37 @@ import after from "./checkout-after.module.css";
 import shared from "./checkout-sheet.module.css";
 
 export const CheckoutDone = ({
-  checkout: { state, setState, go, booking },
+  checkout: { state, setState, goTo, booking },
   view,
 }: {
   checkout: CheckoutController;
   view: CheckoutViewModel;
 }) => {
   const { done, receipt, name, cardText } = view;
+
   const linkTarget =
     state.linkVia === "sms"
-      ? "SMS to " + booking.phone
-      : "email to " + booking.email;
-  const summary =
-    done.method === "card"
-      ? `${formatPounds(done.charged)} charged to ${cardText}.`
-      : done.method === "link"
-        ? `Payment link for ${formatPounds(done.charged)} sent by ${linkTarget}.`
-        : done.method === "record"
-          ? `${formatPounds(done.charged)} ${(RECORD_VIA_LABELS[done.via] || "").toLowerCase()} recorded.`
-          : done.refundAuto > 0
-            ? `${formatPounds(done.refundAuto)} refund on its way to ${cardText}.`
-            : `Nothing to pay. ${name} had already paid.`;
+      ? `SMS to ${booking.phone}`
+      : `email to ${booking.email}`;
+
+  const getSummary = () => {
+    if (done.method === "card")
+      return `${formatPounds(done.charged)} charged to ${cardText}.`;
+
+    if (done.method === "link")
+      return `Payment link for ${formatPounds(done.charged)} sent by ${linkTarget}.`;
+
+    if (done.method === "record")
+      return `${formatPounds(done.charged)} ${(RECORD_VIA_LABELS[done.via] || "").toLowerCase()} recorded.`;
+
+    if (done.refundAuto > 0)
+      return `${formatPounds(done.refundAuto)} refund on its way to ${cardText}.`;
+
+    return `Nothing to pay. ${name} had already paid.`;
+  };
+
+  const summary = getSummary();
+
   return (
     <div className={after.doneView}>
       <span
@@ -105,7 +115,7 @@ export const CheckoutDone = ({
           className={after.viewReceipt}
           onClick={() => {
             setState({ fromDone: true });
-            go("receipt", 1);
+            goTo("receipt", 1);
           }}
         >
           View full receipt
@@ -121,7 +131,7 @@ export const CheckoutDone = ({
 };
 
 export const CheckoutReceipt = ({
-  checkout: { state, setState, go, booking },
+  checkout: { state, setState, goTo, booking },
   view: { receipt },
 }: {
   checkout: CheckoutController;
@@ -131,18 +141,18 @@ export const CheckoutReceipt = ({
     className={joinClassNames(
       shared.viewGap18,
       shared.motion,
-      getViewAnimation(state.dir),
+      getViewAnimation(state.direction),
     )}
     data-ck-m="1"
   >
     <div className={after.receipt}>
       <div className={after.receiptStylist}>{receipt.stylist}</div>
-      <div className={after.receiptAddr}>{receipt.addr}</div>
+      <div className={after.receiptAddr}>{receipt.address}</div>
       {!!receipt.vat && (
-        <div className={after.receiptMeta}>{"VAT number " + receipt.vat}</div>
+        <div className={after.receiptMeta}>{`VAT number ${receipt.vat}`}</div>
       )}
       <div className={after.receiptNo}>
-        <span>{receipt.no}</span>
+        <span>{receipt.number}</span>
         <span>{receipt.date}</span>
       </div>
       <div className={after.receiptMeta}>{receipt.client}</div>
@@ -171,11 +181,11 @@ export const CheckoutReceipt = ({
             <span className={shared.numeric}>{receipt.tip}</span>
           </div>
         )}
-        {receipt.pays.map(({ key, label, sub, value }) => (
+        {receipt.pays.map(({ key, label, subtitle, value }) => (
           <div key={key} className={after.receiptRow}>
             <span className={shared.minWidth}>
               {label}
-              <span className={after.receiptRowSub}>{sub}</span>
+              <span className={after.receiptRowSub}>{subtitle}</span>
             </span>
             <span className={shared.numeric}>{value}</span>
           </div>
@@ -194,13 +204,13 @@ export const CheckoutReceipt = ({
         <span>Total paid</span>
         <span className={shared.numeric}>{receipt.paid}</span>
       </div>
-      <div className={after.receiptAddr}>{"Paid by " + receipt.method}</div>
+      <div className={after.receiptAddr}>{`Paid by ${receipt.method}`}</div>
     </div>
     <button
       className={after.resend}
       onClick={() => {
-        setState({ rsVia: "email", rsTo: booking.email });
-        go("resend", 1);
+        setState({ resendVia: "email", resendTo: booking.email });
+        goTo("resend", 1);
       }}
     >
       <Icon path={ICONS.send} size={16} strokeWidth="1.7" />
@@ -214,13 +224,14 @@ export const CheckoutResend = ({
 }: {
   checkout: CheckoutController;
 }) => {
-  const hasError = state.rsTried && !state.rsTo.trim();
+  const hasError = state.resendTried && !state.resendTo.trim();
+
   return (
     <div
       className={joinClassNames(
         shared.viewGap18,
         shared.motion,
-        getViewAnimation(state.dir),
+        getViewAnimation(state.direction),
       )}
       data-ck-m="1"
     >
@@ -236,13 +247,13 @@ export const CheckoutResend = ({
         ).map(([via, label]) => (
           <Chip
             key={via}
-            isOn={state.rsVia === via}
+            isOn={state.resendVia === via}
             className={after.resendChip}
             onPick={() =>
               setState({
-                rsVia: via,
-                rsTo: via === "email" ? booking.email : booking.phone,
-                rsTried: false,
+                resendVia: via,
+                resendTo: via === "email" ? booking.email : booking.phone,
+                resendTried: false,
               })
             }
           >
@@ -252,16 +263,16 @@ export const CheckoutResend = ({
       </div>
       <label className={shared.field}>
         <span className={shared.fieldLabel}>
-          {state.rsVia === "email" ? "Email address" : "Mobile number"}
+          {state.resendVia === "email" ? "Email address" : "Mobile number"}
         </span>
         <input
           className={joinClassNames(
             after.resendInput,
             hasError ? after.borderErr : after.borderOk,
           )}
-          type={state.rsVia === "email" ? "email" : "tel"}
-          value={state.rsTo}
-          onChange={(event) => setState({ rsTo: event.target.value })}
+          type={state.resendVia === "email" ? "email" : "tel"}
+          value={state.resendTo}
+          onChange={(event) => setState({ resendTo: event.target.value })}
         />
         {hasError && (
           <span className={after.fieldError} role="alert">
@@ -285,29 +296,32 @@ export const CheckoutRefund = ({
 }) => {
   const { refundCap, refundCapAll, isOffPlatform, cardText } = view;
   const refundError = view.refund.error;
-  const isReasonMissing = state.rfTried && !state.rfReason;
+  const isReasonMissing = state.refundTried && !state.refundReason;
+
   const already =
     state.refunded > 0
       ? ` ${formatPounds(state.refunded)} already refunded.`
       : "";
-  const isFull = state.rfKind === "full";
+
+  const isFull = state.refundKind === "full";
+  const paidText = formatPounds(refundCapAll);
+  const capText = formatPounds(refundCap);
+
   return (
     <div
       className={joinClassNames(
         shared.viewGap18,
         shared.motion,
-        getViewAnimation(state.dir),
+        getViewAnimation(state.direction),
       )}
       data-ck-m="1"
     >
       <div>
-        <h2 className={shared.viewTitle}>{"Refund " + booking.first}</h2>
+        <h2 className={shared.viewTitle}>{`Refund ${booking.first}`}</h2>
         <div className={after.refundSub}>
           {isOffPlatform
-            ? `${formatPounds(refundCapAll)} was recorded off the platform. Up to ${formatPounds(refundCap)} can be recorded as refunded.` +
-              already
-            : `${formatPounds(refundCapAll)} paid through Tiwára’s House by ${cardText}. Up to ${formatPounds(refundCap)} can be refunded.` +
-              already}
+            ? `${paidText} was recorded off the platform. Up to ${capText} can be recorded as refunded.${already}`
+            : `${paidText} paid through Tiwára’s House by ${cardText}. Up to ${capText} can be refunded.${already}`}
         </div>
       </div>
       <div
@@ -322,7 +336,7 @@ export const CheckoutRefund = ({
           )}
           role="radio"
           aria-checked={isFull ? "true" : "false"}
-          onClick={() => setState({ rfKind: "full" })}
+          onClick={() => setState({ refundKind: "full" })}
         >
           <RadioMark isOn={isFull} className={after.refundRing} />
           <span
@@ -344,7 +358,7 @@ export const CheckoutRefund = ({
             className={after.refundPartial}
             role="radio"
             aria-checked={!isFull ? "true" : "false"}
-            onClick={() => setState({ rfKind: "partial" })}
+            onClick={() => setState({ refundKind: "partial" })}
           >
             <RadioMark isOn={!isFull} className={after.refundRing} />
             <span
@@ -370,10 +384,10 @@ export const CheckoutRefund = ({
                     refundError ? after.refundInputErr : after.refundInputOk,
                   )}
                   inputMode="decimal"
-                  value={state.rfAmt}
+                  value={state.refundAmount}
                   onChange={(event) =>
                     setState({
-                      rfAmt: event.target.value
+                      refundAmount: event.target.value
                         .replace(/[^0-9.]/g, "")
                         .slice(0, 7),
                     })
@@ -411,8 +425,8 @@ export const CheckoutRefund = ({
             after.refundSelect,
             isReasonMissing ? after.borderErr : after.borderOk,
           )}
-          value={state.rfReason}
-          onChange={(event) => setState({ rfReason: event.target.value })}
+          value={state.refundReason}
+          onChange={(event) => setState({ refundReason: event.target.value })}
         >
           <option value="">Choose a reason</option>
           {REFUND_REASONS.map((reason) => (

@@ -15,6 +15,7 @@ import type {
   BusinessPreset,
   BusinessRuleKey,
   BusinessState,
+  BusinessType,
   BusinessValue,
 } from "./business-details-logic";
 import {
@@ -31,6 +32,11 @@ import styles from "./business-details.module.css";
 
 const TOAST_MS = 2400;
 
+const LOCATION_HEADINGS: Partial<Record<BusinessType, string>> = {
+  mobile: "Where you work",
+  home: "Your address",
+};
+
 /** What the host (Studio) gets after every render to drive its own save bar. */
 export interface BusinessDetailsApi {
   canSave: boolean;
@@ -44,7 +50,9 @@ export interface BusinessDetailsProps {
   scrollTo?: "" | "type" | "location" | "vat" | "legal";
   embedded?: boolean;
   hideSave?: boolean;
-  value?: Partial<Omit<BusinessValue, "v">> & { v?: Partial<BusinessFields> };
+  value?: Partial<Omit<BusinessValue, "details">> & {
+    details?: Partial<BusinessFields>;
+  };
   /** Legal details from TaxDetailsForm; null shows the "add tax details" state. */
   tax?: Partial<TaxDetails> | null;
   onSave?: (value: BusinessValue) => void;
@@ -68,26 +76,31 @@ export const BusinessDetails = ({
   onState,
   onEditTax,
 }: BusinessDetailsProps) => {
-  const uid = "bd" + useId().replace(/[^a-zA-Z0-9]/g, "");
+  const uid = `bd${useId().replace(/[^a-zA-Z0-9]/g, "")}`;
+
   const [state, setRawState] = useState(() =>
     getInitialBusinessState(preset, value),
   );
+
   const scrollRef = useRef<HTMLDivElement>(null);
   const toastTimer = useRef(0);
+
   const setState = (
     patch: (current: BusinessState) => Partial<BusinessState>,
   ) => setRawState((current) => ({ ...current, ...patch(current) }));
+
   const setFields = (fields: Partial<BusinessFields>) =>
-    setState(({ v }) => ({ v: { ...v, ...fields } }));
+    setState(({ details }) => ({ details: { ...details, ...fields } }));
+
   const touch = (key: BusinessRuleKey) =>
     setState(({ touched }) => ({ touched: { ...touched, [key]: true } }));
 
-  const { type, vatOn, v, touched } = state;
+  const { type, vatOn, details, touched } = state;
   const rules = getBusinessErrors(state);
   const getError = (key: BusinessRuleKey) => (touched[key] ? rules[key] : "");
   const shown = (Object.keys(rules) as BusinessRuleKey[]).filter(getError);
   const isDirty = getBusinessKey(state) !== state.saved;
-  const vatDigits = v.vat.replace(/\s+/g, "");
+  const vatDigits = details.vat.replace(/\s+/g, "");
   const vatError = getError("vat");
   const legalRows = getLegalRows(tax);
   const hasLegal = tax !== null;
@@ -96,6 +109,7 @@ export const BusinessDetails = ({
     const failing = (Object.keys(rules) as BusinessRuleKey[]).filter(
       (key) => rules[key],
     );
+
     if (failing.length) {
       setState(({ touched: current }) => ({
         touched: {
@@ -103,21 +117,27 @@ export const BusinessDetails = ({
           ...Object.fromEntries(failing.map((key) => [key, true])),
         },
       }));
+
       return;
     }
+
     window.clearTimeout(toastTimer.current);
+
     onSave?.({
       type,
       vatOn,
-      v: {
-        ...v,
-        pc: formatPostcode(v.pc),
-        basePc: formatPostcode(v.basePc),
+      details: {
+        ...details,
+        postcode: formatPostcode(details.postcode),
+        basePostcode: formatPostcode(details.basePostcode),
       },
     });
+
     // inside Studio the host shows its own toast
     const isOwnToast = !embedded;
+
     setState(() => ({ saved: getBusinessKey(state), toast: isOwnToast }));
+
     if (isOwnToast)
       toastTimer.current = window.setTimeout(
         () => setState(() => ({ toast: false })),
@@ -132,32 +152,37 @@ export const BusinessDetails = ({
 
   useEffect(() => {
     const element = scrollRef.current;
+
     const target = scrollTo
-      ? element?.querySelector<HTMLElement>('[data-sec="' + scrollTo + '"]')
+      ? element?.querySelector<HTMLElement>(`[data-sec="${scrollTo}"]`)
       : null;
+
     if (element && target)
       element.scrollTop = Math.max(0, target.offsetTop - 12);
+
     return () => window.clearTimeout(toastTimer.current);
     // mount only (prototype componentDidMount)
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const getField = (
-    key: "basePc" | "phone" | "email",
+    key: "basePostcode" | "phone" | "email",
     label: string,
     isPostcode = false,
   ): FieldView => ({
-    id: uid + "-" + key,
-    errId: uid + "-" + key + "-e",
+    id: `${uid}-${key}`,
+    errorId: `${uid}-${key}-e`,
     label,
-    value: v[key],
+    value: details[key],
     error: getError(key),
     onChange: (event) => setFields({ [key]: event.target.value }),
     onBlur: () => {
-      if (isPostcode) setFields({ [key]: formatPostcode(v[key]) });
+      if (isPostcode) setFields({ [key]: formatPostcode(details[key]) });
+
       touch(key);
     },
   });
+
   const contactFields = [
     {
       field: getField("phone", "Business phone"),
@@ -225,49 +250,43 @@ export const BusinessDetails = ({
             <Section
               id="location"
               label="Location"
-              heading={
-                type === "mobile"
-                  ? "Where you work"
-                  : type === "home"
-                    ? "Your address"
-                    : "Salon address"
-              }
+              heading={LOCATION_HEADINGS[type] ?? "Salon address"}
             >
               <LocationCard
                 type={type}
-                finderId={uid + "-addr"}
+                finderId={`${uid}-addr`}
                 addressValue={
-                  v.line1
+                  details.line1
                     ? {
-                        line1: v.line1,
-                        line2: v.line2,
-                        town: v.city,
-                        postcode: v.pc,
-                        source: state.addrSrc || "pick",
+                        line1: details.line1,
+                        line2: details.line2,
+                        town: details.city,
+                        postcode: details.postcode,
+                        source: state.addressSource || "pick",
                       }
                     : null
                 }
                 onAddress={(address) =>
-                  setState(({ v: current }) => ({
-                    addrSrc: address ? address.source : "",
-                    v: {
+                  setState(({ details: current }) => ({
+                    addressSource: address ? address.source : "",
+                    details: {
                       ...current,
                       ...(address
                         ? {
                             line1: address.line1,
                             line2: address.line2 || "",
                             city: address.town,
-                            pc: address.postcode,
+                            postcode: address.postcode,
                           }
-                        : { line1: "", line2: "", city: "", pc: "" }),
+                        : { line1: "", line2: "", city: "", postcode: "" }),
                     },
                   }))
                 }
-                showAddressErrors={!!touched.addr}
-                areaLabel={getAreaLabel(v.pc)}
-                basePostcode={getField("basePc", "Base postcode", true)}
-                radiusId={uid + "-rad"}
-                radius={v.radius}
+                showAddressErrors={!!touched.address}
+                areaLabel={getAreaLabel(details.postcode)}
+                basePostcode={getField("basePostcode", "Base postcode", true)}
+                radiusId={`${uid}-rad`}
+                radius={details.radius}
                 onRadius={(radius) => setFields({ radius })}
               />
             </Section>
@@ -304,9 +323,9 @@ export const BusinessDetails = ({
                       onChange={field.onChange}
                       onBlur={field.onBlur}
                       aria-invalid={field.error ? "true" : "false"}
-                      aria-describedby={field.errId}
+                      aria-describedby={field.errorId}
                     />
-                    <FieldError id={field.errId} error={field.error} />
+                    <FieldError id={field.errorId} error={field.error} />
                   </div>
                 ))}
               </div>
@@ -347,7 +366,7 @@ export const BusinessDetails = ({
                 </Reveal>
                 <Reveal open={vatOn}>
                   <div className={styles.vatField}>
-                    <label className={styles.label} htmlFor={uid + "-vat"}>
+                    <label className={styles.label} htmlFor={`${uid}-vat`}>
                       VAT number
                     </label>
                     <span className={styles.vatWrap}>
@@ -361,10 +380,10 @@ export const BusinessDetails = ({
                           vatError ? styles.fieldErr : styles.fieldOk,
                         )}
                         data-bd-in="1"
-                        id={uid + "-vat"}
+                        id={`${uid}-vat`}
                         inputMode="numeric"
                         autoComplete="off"
-                        value={v.vat}
+                        value={details.vat}
                         onChange={(event) =>
                           setFields({
                             vat: event.target.value
@@ -376,7 +395,7 @@ export const BusinessDetails = ({
                         }
                         onBlur={() => touch("vat")}
                         aria-invalid={vatError ? "true" : "false"}
-                        aria-describedby={uid + "-vath"}
+                        aria-describedby={`${uid}-vath`}
                       />
                     </span>
                     {!!vatError && (
@@ -391,7 +410,7 @@ export const BusinessDetails = ({
                         {formatVatNumber(vatDigits)}
                       </div>
                     )}
-                    <div className={styles.vatHelp} id={uid + "-vath"}>
+                    <div className={styles.vatHelp} id={`${uid}-vath`}>
                       Shown on your clients’ receipts and your payout
                       statements.
                     </div>
@@ -411,7 +430,7 @@ export const BusinessDetails = ({
                   <dl className={styles.legalList}>
                     {legalRows.map(({ label, value: rowValue }, index) => (
                       <div
-                        key={"l" + index}
+                        key={`l${index}`}
                         className={joinClassNames(
                           styles.legalRow,
                           index ? styles.legalRowNext : styles.legalRowFirst,
@@ -477,7 +496,7 @@ export const BusinessDetails = ({
               <ErrorIcon className={styles.barErrorIcon} />
               {shown.length === 1
                 ? "Fix the highlighted field to save"
-                : "Fix the " + shown.length + " highlighted fields to save"}
+                : `Fix the ${shown.length} highlighted fields to save`}
             </div>
           )}
           <button

@@ -1,6 +1,7 @@
 import { joinClassNames } from "../../utils/class-names";
 import {
-  DOW_LABELS,
+  type CalendarDay,
+  WEEKDAY_LABELS,
   formatLongDate,
   formatMonthTitle,
   getCalendarDays,
@@ -12,6 +13,18 @@ import step from "./booking-step.module.css";
 import styles from "./step-time.module.css";
 import type { BookingController } from "./use-booking";
 
+const getDayClass = ({
+  day,
+  selected,
+  off,
+}: Pick<CalendarDay, "day" | "selected" | "off">) => {
+  if (day == null) return styles.dayBlank;
+
+  if (selected) return styles.daySelected;
+
+  return off ? styles.dayOff : styles.dayOpen;
+};
+
 interface StepTimeProps {
   booking: BookingController;
 }
@@ -20,23 +33,39 @@ interface StepTimeProps {
 export const StepTime = ({ booking }: StepTimeProps) => {
   const { state, stylist, money, actions } = booking;
   const { setState } = actions;
-  const { calY, calM, date, time } = state;
+  const { calendarYear, calendarMonth, date, time } = state;
+
   const changeMonth = (delta: number) =>
-    setState(({ calM: month, calY: year }) => {
+    setState(({ calendarMonth: month, calendarYear: year }) => {
       const next = month + delta;
-      if (next < 0) return { calM: 11, calY: year - 1, date: null, time: null };
-      if (next > 11) return { calM: 0, calY: year + 1, date: null, time: null };
-      return { calM: next, date: null, time: null };
+
+      if (next < 0)
+        return {
+          calendarMonth: 11,
+          calendarYear: year - 1,
+          date: null,
+          time: null,
+        };
+
+      if (next > 11)
+        return {
+          calendarMonth: 0,
+          calendarYear: year + 1,
+          date: null,
+          time: null,
+        };
+
+      return { calendarMonth: next, date: null, time: null };
     });
 
   return (
     <>
       <h1 className={step.title}>Pick a time</h1>
       <p className={step.lead}>
-        {stylist.name + "'s live availability for " + money.duration}.
+        {`${stylist.name}'s live availability for ${money.duration}`}.
         {getClosedLine(stylist)}
       </p>
-      {state.reNote && (
+      {state.repickNote && (
         <div role="status" className={styles.reNote}>
           <svg
             width="15"
@@ -73,7 +102,7 @@ export const StepTime = ({ booking }: StepTimeProps) => {
             </svg>
           </button>
           <div className={styles.monthTitle}>
-            {formatMonthTitle(calY, calM)}
+            {formatMonthTitle(calendarYear, calendarMonth)}
           </div>
           <button
             onClick={() => changeMonth(1)}
@@ -94,44 +123,48 @@ export const StepTime = ({ booking }: StepTimeProps) => {
           </button>
         </div>
         <div className={styles.weekdays}>
-          {DOW_LABELS.map((label) => (
+          {WEEKDAY_LABELS.map((label) => (
             <div key={label} className={styles.weekday}>
               {label}
             </div>
           ))}
         </div>
         <div className={styles.days}>
-          {getCalendarDays(stylist, calY, calM, money.mins, date).map(
-            ({ key, label, day, off, selected }) => (
-              <button
-                key={key}
-                onClick={() => {
-                  if (day) setState({ date: day, time: null, hold: null });
-                }}
-                disabled={off}
-                className={joinClassNames(
-                  styles.day,
-                  day == null
-                    ? styles.dayBlank
-                    : selected
-                      ? styles.daySelected
-                      : off
-                        ? styles.dayOff
-                        : styles.dayOpen,
-                )}
-              >
-                {label}
-              </button>
-            ),
-          )}
+          {getCalendarDays(
+            stylist,
+            calendarYear,
+            calendarMonth,
+            money.minutes,
+            date,
+          ).map(({ key, label, day, off, selected }) => (
+            <button
+              key={key}
+              onClick={() => {
+                if (day) setState({ date: day, time: null, hold: null });
+              }}
+              disabled={off}
+              className={joinClassNames(
+                styles.day,
+                getDayClass({ day, selected, off }),
+              )}
+            >
+              {label}
+            </button>
+          ))}
         </div>
         {!!date && (
           <div className={styles.times}>
             <div className={styles.timesTitle}>
-              {"Times on " + formatLongDate(calY, calM, date)}
+              {`Times on ${formatLongDate(calendarYear, calendarMonth, date)}`}
             </div>
             <div className={styles.slots}>
-              {getSlots(stylist, calY, calM, date, money.mins).map((slot) => (
+              {getSlots(
+                stylist,
+                calendarYear,
+                calendarMonth,
+                date,
+                money.minutes,
+              ).map((slot) => (
                 <button
                   key={slot}
                   onClick={() =>
@@ -142,8 +175,8 @@ export const StepTime = ({ booking }: StepTimeProps) => {
                         current.hold &&
                         current.hold.key ===
                           getHoldKey(
-                            current.calY,
-                            current.calM,
+                            current.calendarYear,
+                            current.calendarMonth,
                             current.date,
                             slot,
                           )

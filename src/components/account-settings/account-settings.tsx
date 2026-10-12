@@ -37,11 +37,15 @@ const ConfirmDialog = ({
 
   useEffect(() => {
     if (!isOpen) return;
+
     cancelRef.current?.focus();
+
     const handleKey = (event: KeyboardEvent) => {
       if (event.key === "Escape") closeDialog();
     };
+
     document.addEventListener("keydown", handleKey);
+
     return () => document.removeEventListener("keydown", handleKey);
   }, [isOpen, closeDialog]);
 
@@ -66,9 +70,9 @@ const ConfirmDialog = ({
         )}
         role="alertdialog"
         aria-modal="true"
-        aria-labelledby={uid + "-dt"}
+        aria-labelledby={`${uid}-dt`}
       >
-        <h3 className={dialogStyles.title} id={uid + "-dt"}>
+        <h3 className={dialogStyles.title} id={`${uid}-dt`}>
           {dialog.title}
         </h3>
         <p className={dialogStyles.body}>{dialog.body}</p>
@@ -95,7 +99,7 @@ const ConfirmDialog = ({
  * login & security, notifications, payouts and calendar sync, with a save bar for the typed fields.
  */
 export const AccountSettings = (props: AccountSettingsProps) => {
-  const uid = "ac" + useId().replace(/[^a-zA-Z0-9]/g, "");
+  const uid = `ac${useId().replace(/[^a-zA-Z0-9]/g, "")}`;
   const settings = useAccountSettings(props);
   const { page, state, isDirty, hasSave, hasBarError, save } = settings;
   const pageProps = { settings, uid, props };

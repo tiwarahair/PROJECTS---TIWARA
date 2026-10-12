@@ -3,7 +3,7 @@ export type PolicyMode = "none" | "deposit" | "full" | "card";
 export interface PolicyFee {
   on: boolean;
   kind: "pct" | "keep";
-  pct: number;
+  percent: number;
 }
 
 export interface PolicyExtra {
@@ -13,18 +13,18 @@ export interface PolicyExtra {
 /** Booking protection shared by Payment policy, Booking, Profile and Search (data.js POL()). */
 export interface Policy {
   mode: PolicyMode;
-  depositPct: number;
+  depositPercent: number;
   refundable: boolean;
-  freeWindowHrs: number;
+  freeWindowHours: number;
   late: PolicyFee;
   noShow: PolicyFee;
-  graceMins: number;
+  graceMinutes: number;
   extras: PolicyExtra[];
 }
 
 export interface PolicyIcons {
-  pay: string;
-  cal: string;
+  payment: string;
+  calendar: string;
   late: string;
-  ns: string;
+  noShow: string;
 }

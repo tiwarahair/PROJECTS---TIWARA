@@ -1,7 +1,7 @@
 import { getAssetUrl } from "../../utils/asset-url";
 import { joinClassNames } from "../../utils/class-names";
 import { WIZARD_TITLES } from "./onboarding-data";
-import { BackIcon, ModeIcon } from "./ob-fields";
+import { BackIcon, ModeIcon } from "./onboarding-fields";
 import type { ScreenProps } from "./screen-props";
 import {
   StepAccount,
@@ -32,20 +32,28 @@ const getSubtitle = (screen: string, businessType: string): string =>
     w5: "Optional. It helps us reach more stylists like you.",
   })[screen] ?? "";
 
+const getBodyWidthClass = (isDesktop: boolean, isTabletOrWider: boolean) => {
+  if (isDesktop) return styles.bodyDesk;
+
+  return isTabletOrWider ? styles.bodyMid : styles.bodyNarrow;
+};
+
 /** The 5-step stylist set-up: progress bar, Back / theme / Skip / Continue, then the step. */
 export const Wizard = (props: ScreenProps) => {
   const { onboarding, layout, view } = props;
   const { state, actions } = onboarding;
-  const { screen, step, desk, mid, isDark } = layout;
+  const { screen, step, isDesktop, isTabletOrWider, isDark } = layout;
   const Step = STEPS[screen as keyof typeof STEPS];
   const modeLabel = isDark ? "Switch to light mode" : "Switch to dark mode";
   const toggleMode = () => actions.setMode(isDark ? "light" : "dark");
-  const cta = screen === "w4" ? "Create account" : "Continue";
+  const submitLabel = screen === "w4" ? "Create account" : "Continue";
   const isSkippable = screen === "w5";
+
   const skip = () => {
     actions.setState({ codeKind: "verify" });
-    actions.go("verify");
+    actions.goTo("verify");
   };
+
   const submitClass = (base: string | undefined) =>
     joinClassNames(
       base,
@@ -61,7 +69,7 @@ export const Wizard = (props: ScreenProps) => {
       )}
     >
       <div className={styles.topBar}>
-        {desk && (
+        {isDesktop && (
           <>
             <div
               role="progressbar"
@@ -115,12 +123,12 @@ export const Wizard = (props: ScreenProps) => {
                     className={styles.spinnerSmall}
                   ></span>
                 )}
-                <span>{cta}</span>
+                <span>{submitLabel}</span>
               </button>
             </div>
           </>
         )}
-        {!desk && (
+        {!isDesktop && (
           <div className={styles.mobileBar}>
             <button
               onClick={actions.back}
@@ -161,22 +169,22 @@ export const Wizard = (props: ScreenProps) => {
       <div
         className={joinClassNames(
           styles.body,
-          desk ? styles.bodyDesk : mid ? styles.bodyMid : styles.bodyNarrow,
+          getBodyWidthClass(isDesktop, isTabletOrWider),
         )}
       >
         <div
           key={screen}
           className={joinClassNames(
             styles.screen,
-            state.dir === "back" ? styles.enterBack : styles.enterForward,
+            state.direction === "back" ? styles.enterBack : styles.enterForward,
           )}
         >
           <h1 className={styles.title}>{WIZARD_TITLES[screen] ?? ""}</h1>
-          <p className={styles.sub}>{getSubtitle(screen, state.f.type)}</p>
+          <p className={styles.sub}>{getSubtitle(screen, state.form.type)}</p>
           {Step && <Step {...props} />}
         </div>
       </div>
-      {!desk && (
+      {!isDesktop && (
         <div className={styles.bottomBar}>
           <button
             onClick={actions.submit}
@@ -186,7 +194,7 @@ export const Wizard = (props: ScreenProps) => {
             {state.busy && (
               <span aria-hidden="true" className={styles.spinner}></span>
             )}
-            <span>{cta}</span>
+            <span>{submitLabel}</span>
           </button>
         </div>
       )}

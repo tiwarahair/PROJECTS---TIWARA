@@ -19,8 +19,8 @@ export const DuplicateNotice = ({ duplicate }: { duplicate: DuplicateView }) =>
       <img className={styles.duplicateAvatar} src={duplicate.img} alt="" />
       <div className={styles.grow}>
         <div className={styles.duplicateTitle}>{duplicate.title}</div>
-        <div className={styles.duplicateSub}>{duplicate.sub}</div>
-        <button className={styles.duplicateGo} onClick={duplicate.go}>
+        <div className={styles.duplicateSub}>{duplicate.subtitle}</div>
+        <button className={styles.duplicateGo} onClick={duplicate.onSelect}>
           {duplicate.cta}
         </button>
       </div>
@@ -36,6 +36,7 @@ export const AddonEditDialog = ({
   dialog: AddonDialogView;
 }) => {
   const { isWide, state } = studio;
+
   return (
     <>
       {/* eslint-disable-next-line jsx-a11y/click-events-have-key-events, jsx-a11y/no-static-element-interactions */}
@@ -44,7 +45,7 @@ export const AddonEditDialog = ({
         className={joinClassNames(
           styles.dialog,
           getDialogPlacement(isWide),
-          getOverlayAnimation(state.confirmOut, "dlg", isWide),
+          getOverlayAnimation(state.confirmOut, "dialog", isWide),
         )}
       >
         <div className={styles.title}>{dialog.name}</div>
@@ -76,18 +77,18 @@ export const AddonEditDialog = ({
                   inputMode="numeric"
                   min="1"
                   max="20"
-                  value={dialog.qty}
-                  onChange={dialog.onQty}
+                  value={dialog.quantity}
+                  onChange={dialog.onQuantity}
                 />
               </span>
               <span className={styles.stepper}>
                 <button
                   className={joinClassNames(
                     styles.fewer,
-                    dialog.isMinQty && styles.fewerOff,
+                    dialog.isMinQuantity && styles.fewerOff,
                   )}
-                  onClick={dialog.qtyDown}
-                  disabled={dialog.isMinQty}
+                  onClick={dialog.quantityDown}
+                  disabled={dialog.isMinQuantity}
                   aria-label="Fewer"
                 >
                   <svg
@@ -104,7 +105,7 @@ export const AddonEditDialog = ({
                 </button>
                 <button
                   className={styles.more}
-                  onClick={dialog.qtyUp}
+                  onClick={dialog.quantityUp}
                   aria-label="More"
                 >
                   <svg
@@ -128,24 +129,24 @@ export const AddonEditDialog = ({
           <div className={styles.grid2}>
             <select
               className={styles.select}
-              value={dialog.hrs}
-              onChange={dialog.onHrs}
+              value={dialog.hours}
+              onChange={dialog.onHours}
               aria-label="Hours"
             >
-              {dialog.hourOptions.map(({ key, v, label }) => (
-                <option key={key} value={v}>
+              {dialog.hourOptions.map(({ key, value, label }) => (
+                <option key={key} value={value}>
                   {label}
                 </option>
               ))}
             </select>
             <select
               className={styles.select}
-              value={dialog.mins}
-              onChange={dialog.onMins}
+              value={dialog.minutes}
+              onChange={dialog.onMinutes}
               aria-label="Minutes"
             >
-              {dialog.minuteOptions.map(({ key, v, label }) => (
-                <option key={key} value={v}>
+              {dialog.minuteOptions.map(({ key, value, label }) => (
+                <option key={key} value={value}>
                   {label}
                 </option>
               ))}
@@ -187,20 +188,26 @@ export const AddonEditDialog = ({
 export const NewClientDialog = ({ studio }: { studio: StudioController }) => {
   const { state, setState, isWide, actions, context } = studio;
   const draft = state.newClient;
+
   if (!draft) return null;
+
   const update = (patch: Partial<typeof draft>) =>
     setState({ newClient: { ...draft, ...patch } });
+
   const duplicate = findDuplicate(state, draft.phone, draft.email, null);
   const isReady = (draft.first || "").trim().length > 1 && !duplicate;
+
   const save = () => {
     if (!isReady) return;
-    const id = "c" + Date.now();
+
+    const id = `c${Date.now()}`;
     const first = (draft.first || "").trim();
     const last = (draft.last || "").trim();
     const name = [first, last].filter(Boolean).join(" ");
+
     setState(({ extraClients }) => ({
       newClient: null,
-      ccQ: "",
+      changeClientQuery: "",
       extraClients: extraClients.concat([
         {
           id,
@@ -216,9 +223,11 @@ export const NewClientDialog = ({ studio }: { studio: StudioController }) => {
         },
       ]),
     }));
-    context.memo.ccSet?.(id);
-    actions.toastMsg(name + " added");
+
+    context.memo.setChangeClient?.(id);
+    actions.showToast(`${name} added`);
   };
+
   const field = (
     value: string,
     key: keyof typeof draft,
@@ -233,6 +242,7 @@ export const NewClientDialog = ({ studio }: { studio: StudioController }) => {
       {...extra}
     />
   );
+
   return (
     <>
       {/* eslint-disable-next-line jsx-a11y/click-events-have-key-events, jsx-a11y/no-static-element-interactions */}
@@ -244,7 +254,7 @@ export const NewClientDialog = ({ studio }: { studio: StudioController }) => {
         className={joinClassNames(
           styles.dialog,
           getDialogPlacement(isWide),
-          getOverlayAnimation(state.confirmOut, "dlg", isWide),
+          getOverlayAnimation(state.confirmOut, "dialog", isWide),
         )}
       >
         <div className={styles.title}>Add a new client</div>
@@ -280,8 +290,8 @@ export const NewClientDialog = ({ studio }: { studio: StudioController }) => {
             duplicate,
             "Use {f} instead",
             (client) => {
-              setState({ newClient: null, ccQ: "" });
-              context.memo.ccSet?.(client.id);
+              setState({ newClient: null, changeClientQuery: "" });
+              context.memo.setChangeClient?.(client.id);
             },
           )}
         />

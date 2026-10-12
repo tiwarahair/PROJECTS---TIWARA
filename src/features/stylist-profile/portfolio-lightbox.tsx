@@ -15,7 +15,7 @@ export const PortfolioLightbox = ({
 }: PortfolioLightboxProps) => {
   // zoomImgStyle backgroundImage: the current photo
   const imageStyle = {
-    "--zoom-image": src ? 'url("' + resolveAssetUrl(src) + '")' : "none",
+    "--zoom-image": src ? `url("${resolveAssetUrl(src)}")` : "none",
   } as CSSProperties;
 
   return (

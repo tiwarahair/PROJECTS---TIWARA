@@ -16,6 +16,17 @@ import ui from "./account-ui.module.css";
 
 const WIDE_DIALOGS = ["receipt", "delete", "cookies"];
 
+const getFormattedCardField = (
+  key: "number" | "expiry" | "cvc",
+  value: string,
+) => {
+  if (key === "number") return formatCardDigits(value);
+
+  if (key === "expiry") return formatCardExpiry(value);
+
+  return value.replace(/\D/g, "").slice(0, 4);
+};
+
 interface AccountDialogsProps {
   account: AccountController;
   view: AccountView;
@@ -24,11 +35,25 @@ interface AccountDialogsProps {
 /** Overlay + dialog for receipts, confirmations, add card, cookie settings and delete account. */
 export const AccountDialogs = ({ account, view }: AccountDialogsProps) => {
   const { state, refs, actions } = account;
-  const { dlg, cards, addrs, cf, cfErr, ckDraft, delText, me, entries } = state;
+
+  const {
+    dialog,
+    cards,
+    addresses,
+    cardForm,
+    cardFormErrors,
+    cookiesDraft,
+    deleteText,
+    profile,
+    entries,
+  } = state;
+
   const { setState, closeDialog, showToast, focusLater } = actions;
-  if (!dlg) return null;
+
+  if (!dialog) return null;
+
   const { receipt, blocked, upcoming } = view;
-  const canDelete = delText.trim() === "DELETE";
+  const canDelete = deleteText.trim() === "DELETE";
 
   const confirm = (
     title: string,
@@ -51,67 +76,72 @@ export const AccountDialogs = ({ account, view }: AccountDialogsProps) => {
       </div>
     </>
   );
+
   const closeThen = (patch: Parameters<typeof setState>[0]) =>
-    setState(patch, () => focusLater("undlg"));
+    setState(patch, () => focusLater("returnFocus"));
+
   const setCardField =
-    (key: "num" | "exp" | "cvc") => (event: ChangeEvent<HTMLInputElement>) => {
+    (key: "number" | "expiry" | "cvc") =>
+    (event: ChangeEvent<HTMLInputElement>) => {
       const { value } = event.target;
-      const formatted =
-        key === "num"
-          ? formatCardDigits(value)
-          : key === "exp"
-            ? formatCardExpiry(value)
-            : value.replace(/\D/g, "").slice(0, 4);
-      setState(({ cf: current, cfErr: errors }) => ({
-        cf: { ...current, [key]: formatted },
-        cfErr: { ...errors, [key]: "" },
+      const formatted = getFormattedCardField(key, value);
+
+      setState(({ cardForm: current, cardFormErrors: errors }) => ({
+        cardForm: { ...current, [key]: formatted },
+        cardFormErrors: { ...errors, [key]: "" },
       }));
     };
-  const cardBorder = (key: string) => (cfErr[key] ? ui.inputErr : ui.inputOk);
+
+  const cardBorder = (key: string) =>
+    cardFormErrors[key] ? ui.inputErr : ui.inputOk;
 
   let content: ReactNode = null;
-  if (dlg.k === "receipt") {
-    const rc = receipt ?? {
+
+  if (dialog.kind === "receipt") {
+    const receiptView = receipt ?? {
       ref: "",
       date: "",
       stylist: "",
       where: "",
       total: "",
       lines: [],
-      pays: [],
+      payments: [],
     };
+
     content = (
       <div data-screen-label="Receipt">
         <h2 className={styles.receiptTitle} id="ac-dlg-t">
           Receipt
         </h2>
         <div className={styles.receiptRef}>
-          {rc.ref}
+          {receiptView.ref}
           {" · "}
-          {rc.date}
+          {receiptView.date}
         </div>
-        <div className={styles.receiptStylist}>{rc.stylist}</div>
-        <div className={ui.muted}>{rc.where}</div>
+        <div className={styles.receiptStylist}>{receiptView.stylist}</div>
+        <div className={ui.muted}>{receiptView.where}</div>
         <div className={styles.receiptLines}>
-          {rc.lines.map(({ label, sub, amt }, index) => (
+          {receiptView.lines.map(({ label, subtitle, amount }, index) => (
             <div key={index} className={styles.receiptLine}>
               <span className={styles.lineLabel}>
                 {label}
-                {!!sub && <span className={styles.lineSub}>{sub}</span>}
+                {!!subtitle && (
+                  <span className={styles.lineSub}>{subtitle}</span>
+                )}
               </span>
-              <span className={styles.amount}>{amt}</span>
+              <span className={styles.amount}>{amount}</span>
             </div>
           ))}
           <div className={styles.totalRow}>
             <span>Total</span>
-            <span className={styles.amount}>{rc.total}</span>
+            <span className={styles.amount}>{receiptView.total}</span>
           </div>
         </div>
         <div className={styles.pays}>
-          {rc.pays.map(({ label, amt }, index) => (
+          {receiptView.payments.map(({ label, amount }, index) => (
             <div key={index} className={styles.pay}>
               <span>{label}</span>
-              <span className={styles.payAmount}>{amt}</span>
+              <span className={styles.payAmount}>{amount}</span>
             </div>
           ))}
         </div>
@@ -120,11 +150,13 @@ export const AccountDialogs = ({ account, view }: AccountDialogsProps) => {
             className={styles.download}
             onClick={() => {
               if (!receipt) return;
+
               downloadFile(
-                "receipt-" + receipt.ref + ".html",
-                getReceiptHtml(receipt, me),
+                `receipt-${receipt.ref}.html`,
+                getReceiptHtml(receipt, profile),
                 "text/html",
               );
+
               showToast("Receipt downloaded");
             }}
           >
@@ -150,48 +182,59 @@ export const AccountDialogs = ({ account, view }: AccountDialogsProps) => {
       </div>
     );
   }
-  if (dlg.k === "alg") {
-    const { i: index } = dlg;
+
+  if (dialog.kind === "allergy") {
+    const { index } = dialog;
+
     content = confirm(
       "Remove this?",
-      view.getStylistName(entries[index]?.id ?? "") + " won’t see it any more.",
+      `${view.getStylistName(entries[index]?.id ?? "")} won’t see it any more.`,
       "Remove",
       () => {
         closeThen(({ entries: current }) => ({
           entries: current.map((entry, position) =>
             position === index ? { ...entry, text: "" } : entry,
           ),
-          dlg: null,
+          dialog: null,
         }));
+
         showToast("Removed");
       },
     );
   }
-  if (dlg.k === "card") {
-    const { id } = dlg;
+
+  if (dialog.kind === "card") {
+    const { id } = dialog;
     const card = cards.find((item) => item.id === id);
+
+    const defaultNote =
+      card?.isDefault && cards.length > 1
+        ? " Your other card becomes your default."
+        : "";
+
     content = confirm(
       "Remove this card?",
-      card?.brand +
-        " ending " +
-        card?.last4 +
-        " will be removed from your account." +
-        (card?.def && cards.length > 1
-          ? " Your other card becomes your default."
-          : ""),
+      `${card?.brand} ending ${card?.last4} will be removed from your account.${defaultNote}`,
       "Remove card",
       () => {
         closeThen(({ cards: current }) => {
           let list = current.filter((item) => item.id !== id);
-          if (card?.def && list.length)
-            list = list.map((item, index) => ({ ...item, def: index === 0 }));
-          return { cards: list, dlg: null };
+
+          if (card?.isDefault && list.length)
+            list = list.map((item, index) => ({
+              ...item,
+              isDefault: index === 0,
+            }));
+
+          return { cards: list, dialog: null };
         });
+
         showToast("Card removed");
       },
     );
   }
-  if (dlg.k === "addCard")
+
+  if (dialog.kind === "addCard")
     content = (
       <div data-screen-label="Add a card">
         <h2 className={styles.title} id="ac-dlg-t">
@@ -201,17 +244,17 @@ export const AccountDialogs = ({ account, view }: AccountDialogsProps) => {
           <label className={ui.label}>
             Card number{" "}
             <input
-              className={joinClassNames(styles.cardInput, cardBorder("num"))}
-              value={cf.num}
-              onChange={setCardField("num")}
+              className={joinClassNames(styles.cardInput, cardBorder("number"))}
+              value={cardForm.number}
+              onChange={setCardField("number")}
               inputMode="numeric"
               autoComplete="cc-number"
               placeholder="1234 1234 1234 1234"
-              aria-invalid={cfErr.num ? "true" : "false"}
+              aria-invalid={cardFormErrors.number ? "true" : "false"}
               aria-describedby="ac-e-num"
             />
             <span className={ui.error} id="ac-e-num">
-              {cfErr.num}
+              {cardFormErrors.number}
             </span>
           </label>
           <div className={styles.cardGrid}>
@@ -220,18 +263,18 @@ export const AccountDialogs = ({ account, view }: AccountDialogsProps) => {
               <input
                 className={joinClassNames(
                   styles.cardInputSmall,
-                  cardBorder("exp"),
+                  cardBorder("expiry"),
                 )}
-                value={cf.exp}
-                onChange={setCardField("exp")}
+                value={cardForm.expiry}
+                onChange={setCardField("expiry")}
                 inputMode="numeric"
                 autoComplete="cc-exp"
                 placeholder="MM / YY"
-                aria-invalid={cfErr.exp ? "true" : "false"}
+                aria-invalid={cardFormErrors.expiry ? "true" : "false"}
                 aria-describedby="ac-e-exp"
               />
               <span className={ui.error} id="ac-e-exp">
-                {cfErr.exp}
+                {cardFormErrors.expiry}
               </span>
             </label>
             <label className={ui.label}>
@@ -241,16 +284,16 @@ export const AccountDialogs = ({ account, view }: AccountDialogsProps) => {
                   styles.cardInputSmall,
                   cardBorder("cvc"),
                 )}
-                value={cf.cvc}
+                value={cardForm.cvc}
                 onChange={setCardField("cvc")}
                 inputMode="numeric"
                 autoComplete="cc-csc"
                 placeholder="CVC"
-                aria-invalid={cfErr.cvc ? "true" : "false"}
+                aria-invalid={cardFormErrors.cvc ? "true" : "false"}
                 aria-describedby="ac-e-cvc"
               />
               <span className={ui.error} id="ac-e-cvc">
-                {cfErr.cvc}
+                {cardFormErrors.cvc}
               </span>
             </label>
           </div>
@@ -259,12 +302,13 @@ export const AccountDialogs = ({ account, view }: AccountDialogsProps) => {
               <input
                 className={ui.checkbox}
                 type="checkbox"
-                checked={cf.def}
+                checked={cardForm.isDefault}
                 onChange={(event) => {
-                  const def = event.target.checked;
-                  setState(({ cf: current, cfErr: errors }) => ({
-                    cf: { ...current, def },
-                    cfErr: { ...errors, def: "" },
+                  const isDefault = event.target.checked;
+
+                  setState(({ cardForm: current, cardFormErrors: errors }) => ({
+                    cardForm: { ...current, isDefault },
+                    cardFormErrors: { ...errors, isDefault: "" },
                   }));
                 }}
               />
@@ -297,47 +341,61 @@ export const AccountDialogs = ({ account, view }: AccountDialogsProps) => {
         </div>
       </div>
     );
-  if (dlg.k === "logoutAll")
+
+  if (dialog.kind === "logoutAll")
     content = confirm(
       "Log out of all devices?",
       "You’ll be logged out everywhere you use Tiwára's House, including here. Your bookings and details stay as they are.",
       "Log out everywhere",
       () => {
-        setState({ dlg: null, loggedOut: true });
+        setState({ dialog: null, loggedOut: true });
         actions.endSession();
         showToast("You’re logged out of all devices");
       },
     );
-  if (dlg.k === "addr") {
-    const { id } = dlg;
-    const address = addrs.find((item) => item.id === id);
+
+  if (dialog.kind === "address") {
+    const { id } = dialog;
+    const address = addresses.find((item) => item.id === id);
+
     content = confirm(
       "Remove this address?",
       address
-        ? address.label + " at " + getAddressLine(address) + " will be removed."
+        ? `${address.label} at ${getAddressLine(address)} will be removed.`
         : "",
       "Remove",
       () => {
-        let list = addrs.filter((item) => item.id !== id);
-        if (address?.def && list.length)
-          list = list.map((item, index) => ({ ...item, def: index === 0 }));
+        let list = addresses.filter((item) => item.id !== id);
+
+        if (address?.isDefault && list.length)
+          list = list.map((item, index) => ({
+            ...item,
+            isDefault: index === 0,
+          }));
+
         actions.setAddresses(list);
-        closeThen({ dlg: null });
+        closeThen({ dialog: null });
         showToast("Address removed");
       },
     );
   }
-  if (dlg.k === "sync")
+
+  if (dialog.kind === "sync")
     content = confirm(
       "Reset your calendar link?",
       "The old link will stop working.",
       "Reset link",
       () => {
-        closeThen({ sync: Math.random().toString(36).slice(2, 10), dlg: null });
+        closeThen({
+          sync: Math.random().toString(36).slice(2, 10),
+          dialog: null,
+        });
+
         showToast("New calendar link created");
       },
     );
-  if (dlg.k === "cookies")
+
+  if (dialog.kind === "cookies")
     content = (
       <div data-screen-label="Cookie settings">
         <h2 className={styles.title} id="ac-dlg-t">
@@ -365,10 +423,10 @@ export const AccountDialogs = ({ account, view }: AccountDialogsProps) => {
             <AccountSwitch
               id="ac-ck-an"
               labelId="ac-ck-an-l"
-              on={ckDraft.an}
+              on={cookiesDraft.analytics}
               onToggle={() =>
-                setState(({ ckDraft: current }) => ({
-                  ckDraft: { ...current, an: !current.an },
+                setState(({ cookiesDraft: current }) => ({
+                  cookiesDraft: { ...current, analytics: !current.analytics },
                 }))
               }
             />
@@ -385,10 +443,10 @@ export const AccountDialogs = ({ account, view }: AccountDialogsProps) => {
             <AccountSwitch
               id="ac-ck-mk"
               labelId="ac-ck-mk-l"
-              on={ckDraft.mk}
+              on={cookiesDraft.marketing}
               onToggle={() =>
-                setState(({ ckDraft: current }) => ({
-                  ckDraft: { ...current, mk: !current.mk },
+                setState(({ cookiesDraft: current }) => ({
+                  cookiesDraft: { ...current, marketing: !current.marketing },
                 }))
               }
             />
@@ -398,10 +456,11 @@ export const AccountDialogs = ({ account, view }: AccountDialogsProps) => {
           <button
             className={styles.saveCard}
             onClick={() => {
-              closeThen(({ ckDraft: current }) => ({
+              closeThen(({ cookiesDraft: current }) => ({
                 cookies: { ...current },
-                dlg: null,
+                dialog: null,
               }));
+
               showToast("Cookie settings saved");
             }}
           >
@@ -413,7 +472,10 @@ export const AccountDialogs = ({ account, view }: AccountDialogsProps) => {
         </div>
       </div>
     );
-  if (dlg.k === "delete" && blocked)
+
+  if (dialog.kind === "delete" && blocked) {
+    const upcomingCount = upcoming.length;
+
     content = (
       <div data-screen-label="Delete account blocked">
         <h2 className={styles.title} id="ac-dlg-t">
@@ -427,16 +489,14 @@ export const AccountDialogs = ({ account, view }: AccountDialogsProps) => {
         <p className={styles.deleteDetail}>
           {upcoming.length === 1
             ? "You have 1 upcoming booking. Cancel it or wait until it’s over, then try again."
-            : "You have " +
-              upcoming.length +
-              " upcoming bookings. Cancel them or wait until they’re over, then try again."}
+            : `You have ${upcomingCount} upcoming bookings. Cancel them or wait until they’re over, then try again.`}
         </p>
         <div className={styles.actions}>
           <button
             className={styles.viewBookings}
             onClick={() => {
-              setState({ dlg: null });
-              actions.go("bookings");
+              setState({ dialog: null });
+              actions.goToSection("bookings");
             }}
           >
             View bookings
@@ -447,7 +507,9 @@ export const AccountDialogs = ({ account, view }: AccountDialogsProps) => {
         </div>
       </div>
     );
-  if (dlg.k === "delete" && !blocked)
+  }
+
+  if (dialog.kind === "delete" && !blocked)
     content = (
       <div data-screen-label="Delete account allowed">
         <h2 className={styles.title} id="ac-dlg-t">
@@ -470,10 +532,10 @@ export const AccountDialogs = ({ account, view }: AccountDialogsProps) => {
           Type DELETE to confirm{" "}
           <input
             className={styles.deleteInput}
-            ref={refs.del}
-            value={delText}
+            ref={refs.deleteConfirm}
+            value={deleteText}
             onChange={(event) =>
-              setState({ delText: event.target.value.toUpperCase() })
+              setState({ deleteText: event.target.value.toUpperCase() })
             }
             autoComplete="off"
             autoCapitalize="characters"
@@ -491,7 +553,8 @@ export const AccountDialogs = ({ account, view }: AccountDialogsProps) => {
             )}
             onClick={() => {
               if (!canDelete) return;
-              setState({ dlg: null, deleted: true });
+
+              setState({ dialog: null, deleted: true });
               actions.endSession();
               showToast("Your account has been deleted");
             }}
@@ -515,7 +578,7 @@ export const AccountDialogs = ({ account, view }: AccountDialogsProps) => {
         className={joinClassNames(
           helmet.acDlg,
           styles.dialog,
-          WIDE_DIALOGS.includes(dlg.k)
+          WIDE_DIALOGS.includes(dialog.kind)
             ? styles.dialogWide
             : styles.dialogNarrow,
         )}

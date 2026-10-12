@@ -9,6 +9,7 @@ import {
 } from "./checkout-data";
 
 const advance = (ms: number) => act(() => vi.advanceTimersByTime(ms));
+
 const click = (name: string | RegExp) =>
   fireEvent.click(screen.getByRole("button", { name }));
 
@@ -16,6 +17,7 @@ describe("checkout money", () => {
   it("charges the balance after the deposit, plus the tip and card fee", () => {
     const state = getInitialCheckout({ scenario: "review" });
     const money = getMoney(state, BOOKINGS.zainab!);
+
     expect(money.items).toBe(100);
     expect(money.due).toBe(80);
     expect(money.tip).toBe(15);
@@ -27,6 +29,7 @@ describe("checkout money", () => {
   it("a price cut below the prepayment becomes a refund", () => {
     const state = getInitialCheckout({ scenario: "reduce-review" });
     const money = getMoney(state, BOOKINGS.nia!);
+
     expect(money.refundDue).toBe(20);
     expect(money.method).toBe("none");
   });
@@ -57,17 +60,21 @@ describe("CheckoutSheet", () => {
     click("Charge £95");
     expect(screen.getByRole("button", { name: "Charging" })).toBeDisabled();
     advance(1100);
+
     expect(
       screen.getByRole("heading", { name: "Checkout complete" }),
     ).toBeInTheDocument();
+
     expect(screen.getByText("£95 charged to Visa •••• 4242.")).toBeVisible();
   });
 
   it("validates a price adjustment", () => {
     render(<CheckoutSheet scenario="items" />);
+
     fireEvent.click(
       screen.getAllByRole("button", { name: "Adjust price" })[0]!,
     );
+
     click("Apply");
     expect(screen.getByRole("alert")).toHaveTextContent("Enter the new price.");
   });
@@ -77,6 +84,7 @@ describe("CheckoutSheet", () => {
     click("Add item");
     click(/Beads and cuffs/);
     expect(screen.getByText("Beads and cuffs")).toBeInTheDocument();
+
     expect(screen.getByRole("status")).toHaveTextContent(
       "Beads and cuffs added",
     );
@@ -84,9 +92,11 @@ describe("CheckoutSheet", () => {
 
   it("a soft decline offers a retry", () => {
     render(<CheckoutSheet scenario="declined" />);
+
     expect(screen.getByRole("alert")).toHaveTextContent(
       "Card declined: insufficient funds",
     );
+
     expect(
       screen.getByRole("button", { name: "Retry card (1 of 2 left)" }),
     ).toBeInTheDocument();
@@ -101,6 +111,7 @@ describe("CheckoutSheet", () => {
   it("waives a no-show fee from the dialog", () => {
     render(<CheckoutSheet scenario="waive-dep" />);
     const dialog = screen.getByRole("alertdialog");
+
     fireEvent.click(within(dialog).getByRole("button", { name: "Waive fee" }));
     expect(screen.getByText("No-show · Fee waived")).toBeInTheDocument();
     expect(screen.getByRole("status")).toHaveTextContent("Fee waived");
@@ -108,6 +119,7 @@ describe("CheckoutSheet", () => {
 
   it("embedded: finishing hands the result to the host", () => {
     const onComplete = vi.fn();
+
     render(
       <CheckoutSheet
         booking={BOOKINGS.zainab}
@@ -122,7 +134,9 @@ describe("CheckoutSheet", () => {
         onComplete={onComplete}
       />,
     );
+
     click("Done");
+
     expect(onComplete).toHaveBeenCalledWith(
       expect.objectContaining({ method: "card", charged: 80, total: 100 }),
       "done",

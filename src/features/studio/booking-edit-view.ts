@@ -4,7 +4,12 @@ import type { ChangeEvent, MouseEvent } from "react";
 import { getAddonPicker } from "./addon-picker";
 import type { DecoratedBooking } from "./studio-decorate";
 import { ICONS, TAXONOMY } from "./studio-data";
-import { hhmm, minToDur, parseNumber, toMin } from "./studio-format";
+import {
+  hhmm,
+  minutesToDuration,
+  parseNumber,
+  timeToMinutes,
+} from "./studio-format";
 import { getBusy, getWorkingHours } from "./studio-model";
 import type {
   AddonEditDraft,
@@ -13,15 +18,16 @@ import type {
 } from "./studio-types";
 import type { StudioController } from "./use-studio";
 
-const HOUR_OPTIONS = Array.from({ length: 13 }, (_, index) => ({
+const HOUR_OPTIONS = Array.from({ length: 13 }, (_slot, index) => ({
   key: index,
-  v: String(index),
-  label: index + "h",
+  value: String(index),
+  label: `${index}h`,
 }));
-const MINUTE_OPTIONS = Array.from({ length: 12 }, (_, index) => ({
+
+const MINUTE_OPTIONS = Array.from({ length: 12 }, (_slot, index) => ({
   key: index * 5,
-  v: String(index * 5),
-  label: index * 5 + "m",
+  value: String(index * 5),
+  label: `${index * 5}m`,
 }));
 
 /** The per-booking add-on dialog's values (prototype esaBuild). */
@@ -30,33 +36,35 @@ export const getAddonDialog = (
   draft: AddonEditDraft,
 ) => {
   const { setState } = studio;
-  const quantity = parseInt(draft.qty) || 1;
+  const quantity = parseInt(draft.quantity) || 1;
+
   const update = (patch: Partial<AddonEditDraft>) =>
-    setState({ esAddon: { ...draft, ...patch } });
+    setState({ addonEdit: { ...draft, ...patch } });
+
   return {
     name: draft.name,
     price: draft.price,
-    hrs: draft.hrs || "0",
-    mins: draft.mins || "0",
-    qty: draft.qty || "1",
+    hours: draft.hours || "0",
+    minutes: draft.minutes || "0",
+    quantity: draft.quantity || "1",
     hourOptions: HOUR_OPTIONS,
     minuteOptions: MINUTE_OPTIONS,
-    isMinQty: quantity <= 1,
-    qtyDown: () => update({ qty: String(Math.max(1, quantity - 1)) }),
-    qtyUp: () => update({ qty: String(Math.min(20, quantity + 1)) }),
+    isMinQuantity: quantity <= 1,
+    quantityDown: () => update({ quantity: String(Math.max(1, quantity - 1)) }),
+    quantityUp: () => update({ quantity: String(Math.min(20, quantity + 1)) }),
     onPrice: (event: ChangeEvent<HTMLInputElement>) =>
       update({ price: event.target.value }),
-    onHrs: (event: ChangeEvent<HTMLSelectElement>) =>
-      update({ hrs: event.target.value }),
-    onMins: (event: ChangeEvent<HTMLSelectElement>) =>
-      update({ mins: event.target.value }),
-    onQty: (event: ChangeEvent<HTMLInputElement>) =>
+    onHours: (event: ChangeEvent<HTMLSelectElement>) =>
+      update({ hours: event.target.value }),
+    onMinutes: (event: ChangeEvent<HTMLSelectElement>) =>
+      update({ minutes: event.target.value }),
+    onQuantity: (event: ChangeEvent<HTMLInputElement>) =>
       update({
-        qty: String(
+        quantity: String(
           Math.max(1, Math.min(20, parseInt(event.target.value) || 1)),
         ),
       }),
-    close: () => setState({ esAddon: null }),
+    close: () => setState({ addonEdit: null }),
   };
 };
 
@@ -66,59 +74,86 @@ export const getEditServiceView = (
   patchBooking: (patch: Partial<StudioBooking>) => void,
 ) => {
   const { state, setState, actions, serviceActions, context } = studio;
-  const draft = state.es ?? {
-    svcId: null,
-    svcName: "",
-    cat: null,
+
+  const draft = state.serviceEdit ?? {
+    serviceId: null,
+    serviceName: "",
+    taxonomyId: null,
     time: 0,
-    dur: 0,
+    duration: 0,
     price: "",
-    price0: "",
+    originalPrice: "",
     priceOpen: false,
     priceReason: "",
     extra: null,
     addons: [],
   };
-  const { esPatch } = serviceActions;
+
+  const { patchServiceEdit } = serviceActions;
+
   const getService = (id: string | null) =>
     state.services.find((service) => service.id === id) ?? null;
+
   const getAddon = (id: string | undefined) =>
     state.addons.find((addon) => addon.id === id) ?? null;
-  const hours = getWorkingHours(state, booking.off);
-  const open = hours.on ? toMin(hours.s) : 9 * 60;
-  const close = hours.on ? toMin(hours.e) : 18 * 60;
-  const duration = draft.dur || booking.durMin;
+
+  const hours = getWorkingHours(state, booking.dayOffset);
+  const open = hours.on ? timeToMinutes(hours.start) : 9 * 60;
+  const close = hours.on ? timeToMinutes(hours.end) : 18 * 60;
+  const duration = draft.duration || booking.durationMinutes;
   const extra = draft.extra || 0;
   const span = duration + extra;
-  const busy = getBusy(state, booking.off, booking.id);
+  const busy = getBusy(state, booking.dayOffset, booking.id);
+
   const isFree = (start: number) =>
     start >= open &&
     start + span <= close &&
-    !busy.some(({ s, e }) => s < start + span && e > start);
-  const timeOptions: { key: number; v: string; label: string }[] = [];
+    !busy.some(
+      ({ startMinutes, endMinutes }) =>
+        startMinutes < start + span && endMinutes > start,
+    );
+
+  const timeOptions: { key: number; value: string; label: string }[] = [];
+
   for (let start = open; start + span <= close; start += 5)
-    timeOptions.push({ v: String(start), label: hhmm(start), key: start });
+    timeOptions.push({ value: String(start), label: hhmm(start), key: start });
+
   if (draft.time != null && !timeOptions.some(({ key }) => key === draft.time))
     timeOptions.push({
-      v: String(draft.time),
+      value: String(draft.time),
       label: hhmm(draft.time),
       key: draft.time,
     });
+
   timeOptions.sort((first, second) => first.key - second.key);
+
   const clashes =
     draft.time != null
-      ? busy.filter(({ s, e }) => s < draft.time + span && e > draft.time)
+      ? busy.filter(
+          ({ startMinutes, endMinutes }) =>
+            startMinutes < draft.time + span && endMinutes > draft.time,
+        )
       : [];
+
   const firstClash = clashes[0];
-  const clashText = firstClash
-    ? "Not available at " +
-      hhmm(draft.time) +
-      // the prototype shows the clashing booking's client id here, not the name
-      (firstClash.kind === "booking"
-        ? " · " + firstClash.b?.client
-        : " · " + (firstClash.k?.reason || "blocked"))
-    : "";
+
+  const getClashText = () => {
+    if (!firstClash) return "";
+
+    const clashTime = hhmm(draft.time);
+
+    // the prototype shows the clashing booking's client id here, not the name
+    const clashWho =
+      firstClash.kind === "booking"
+        ? ` · ${firstClash.booking?.client}`
+        : ` · ${firstClash.block?.reason || "blocked"}`;
+
+    return `Not available at ${clashTime}${clashWho}`;
+  };
+
+  const clashText = getClashText();
   const nextFree: { key: number; label: string; pick: () => void }[] = [];
+
   for (
     let start = (draft.time || open) + 5;
     start + span <= close && nextFree.length < 3;
@@ -126,54 +161,67 @@ export const getEditServiceView = (
   )
     if (isFree(start)) {
       const value = start;
+
       nextFree.push({
         key: value,
         label: hhmm(value),
-        pick: () => esPatch({ time: value }),
+        pick: () => patchServiceEdit({ time: value }),
       });
     }
-  const extraOptions: { key: number; v: string; label: string }[] = [];
+
+  const extraOptions: { key: number; value: string; label: string }[] = [];
+
   for (let minutes = 5; minutes <= 60; minutes += 5)
     extraOptions.push({
-      v: String(minutes),
-      label: minutes + " min",
+      value: String(minutes),
+      label: `${minutes} min`,
       key: minutes,
     });
+
   const getAddonValues = (link: BookingAddon) => {
-    const addon = getAddon(link.aid) ?? {
+    const addon = getAddon(link.addonId) ?? {
       name: link.name || "Add-on",
       price: 0,
-      hr: 0,
+      hours: 0,
       min: 0,
     };
+
     const price = link.price != null ? link.price : parseNumber(addon.price);
+
     const minutes =
-      link.mins != null
-        ? link.mins
-        : (parseInt(String(addon.hr)) || 0) * 60 +
+      link.minutes != null
+        ? link.minutes
+        : (parseInt(String(addon.hours)) || 0) * 60 +
           (parseInt(String(addon.min)) || 0);
-    return { addon, price, minutes, quantity: link.qty || 1 };
+
+    return { addon, price, minutes, quantity: link.quantity || 1 };
   };
+
   const addonRows = draft.addons.map((link, index) => {
     const { addon, price, minutes, quantity } = getAddonValues(link);
+
     const openEdit = () =>
       setState({
-        esAddon: {
-          idx: index,
+        addonEdit: {
+          index,
           name: addon.name,
           price: String(price),
-          hrs: String(Math.floor(minutes / 60)),
-          mins: String(minutes % 60),
-          qty: String(quantity),
+          hours: String(Math.floor(minutes / 60)),
+          minutes: String(minutes % 60),
+          quantity: String(quantity),
         },
       });
+
+    const addonTotal = price * quantity;
+
+    const timeNote = minutes
+      ? ` · ${minutesToDuration(minutes * quantity)}`
+      : " · no extra time";
+
     return {
-      key: (link.aid ?? "") + index,
-      name: addon.name + (quantity > 1 ? " ×" + quantity : ""),
-      meta:
-        "+£" +
-        price * quantity +
-        (minutes ? " · " + minToDur(minutes * quantity) : " · no extra time"),
+      key: (link.addonId ?? "") + index,
+      name: addon.name + (quantity > 1 ? ` ×${quantity}` : ""),
+      meta: `+£${addonTotal}${timeNote}`,
       edit: (event?: MouseEvent) => {
         event?.stopPropagation();
         openEdit();
@@ -182,28 +230,33 @@ export const getEditServiceView = (
         const host =
           (event.currentTarget as Element).closest?.("[data-aorow]") ??
           (event.currentTarget as Element);
+
         const rect = host.getBoundingClientRect?.();
+
         const anchor = rect
           ? {
               top: rect.bottom + 6,
               right: Math.max(12, window.innerWidth - rect.right),
             }
           : null;
+
         event.stopPropagation();
-        actions.openActs({
+
+        actions.openActionSheet({
           title: addon.name,
-          sub:
-            "+£" + price * quantity + (quantity > 1 ? " · ×" + quantity : ""),
+          subtitle: `+£${price * quantity}${quantity > 1 ? ` · ×${quantity}` : ""}`,
           anchor,
           items: [
-            { label: "Edit", d: ICONS.edit, run: openEdit },
+            { label: "Edit", iconPath: ICONS.edit, run: openEdit },
             {
               label: "Remove",
-              d: ICONS.trash,
+              iconPath: ICONS.trash,
               danger: true,
               run: () =>
-                esPatch({
-                  addons: draft.addons.filter((_, other) => other !== index),
+                patchServiceEdit({
+                  addons: draft.addons.filter(
+                    (_item, other) => other !== index,
+                  ),
                 }),
             },
           ],
@@ -211,60 +264,73 @@ export const getEditServiceView = (
       },
     };
   });
+
   let addonsPrice = 0;
   let addonsMinutes = 0;
+
   for (const link of draft.addons) {
     const { price, minutes, quantity } = getAddonValues(link);
+
     addonsPrice += price * quantity;
     addonsMinutes += minutes * quantity;
   }
+
   const totalPrice = parseNumber(draft.price) + addonsPrice;
   const totalMinutes = duration + extra + addonsMinutes;
+
   const categoryName = (id: string | null) =>
     TAXONOMY.find((group) => group.id === id)?.name ?? "Other";
-  const query = (state.csQ || "").toLowerCase();
+
+  const query = (state.changeServiceQuery || "").toLowerCase();
+
   const serviceGroups: {
     key: string;
-    cat: string;
-    n: string;
+    category: string;
+    count: string;
     items: {
       key: string;
       name: string;
-      dur: string;
+      duration: string;
       price: string;
       isOn: boolean;
       pick: () => void;
     }[];
   }[] = [];
+
   TAXONOMY.forEach((group) => {
     const items = state.services
       .filter(
         (service) =>
-          service.cat === group.id &&
-          (service.st || "active") !== "archived" &&
+          service.taxonomyId === group.id &&
+          (service.status || "active") !== "archived" &&
           (!query || service.name.toLowerCase().includes(query)),
       )
       .map((service) => {
-        const isOn = service.id === draft.svcId;
+        const isOn = service.id === draft.serviceId;
+
         return {
           key: service.id,
           name: service.name,
-          dur: service.dur,
-          price: "£" + service.price,
+          duration: service.duration,
+          price: `£${service.price}`,
           isOn,
           pick: () => {
             if (isOn) {
-              setState({ bkStep: "editsvc" });
+              setState({ bookingStep: "editsvc" });
+
               return;
             }
+
             setState({
-              bkStep: "editsvc",
-              es: {
+              bookingStep: "editsvc",
+              serviceEdit: {
                 ...draft,
-                svcId: service.id,
-                svcName: service.name,
-                cat: service.cat,
-                dur: (service.durH || 0) * 60 + (service.durM || 0),
+                serviceId: service.id,
+                serviceName: service.name,
+                taxonomyId: service.taxonomyId,
+                duration:
+                  (service.durationHours || 0) * 60 +
+                  (service.durationMinutes || 0),
                 price: String(service.price),
                 extra: service.extra ? Number(service.extra) : null,
                 addons: [],
@@ -273,79 +339,89 @@ export const getEditServiceView = (
           },
         };
       });
+
     if (items.length)
       serviceGroups.push({
         key: group.id,
-        cat: group.name,
-        n: String(items.length),
+        category: group.name,
+        count: String(items.length),
         items,
       });
   });
-  const addonDraft = state.esAddon;
+
+  const addonDraft = state.addonEdit;
 
   const apply = () => {
     if (clashes.length && !context.memo.clashOk && firstClash) {
       const who =
-        firstClash.kind === "booking" && firstClash.b
-          ? firstClash.b.client + "'s " + firstClash.b.svc
-          : firstClash.k?.reason || "blocked time";
+        firstClash.kind === "booking" && firstClash.booking
+          ? `${firstClash.booking.client}'s ${firstClash.booking.service}`
+          : firstClash.block?.reason || "blocked time";
+
+      const clashTime = hhmm(draft.time);
+
       setState({
         confirm: {
           title: "Double-book this slot?",
           yesLabel: "Apply anyway",
           noLabel: "Pick another time",
-          body:
-            hhmm(draft.time) +
-            " overlaps " +
-            who +
-            ". Both stay in your calendar and the slot will not reopen for online booking.",
+          body: `${clashTime} overlaps ${who}. Both stay in your calendar and the slot will not reopen for online booking.`,
           yes: () => {
             context.memo.clashOk = true;
             setState({ confirm: null });
-            context.memo.applyFn?.();
+            context.memo.applyEdit?.();
             context.memo.clashOk = false;
           },
         },
       });
+
       return;
     }
+
     patchBooking({
       price: parseNumber(draft.price) + addonsPrice,
-      dur: minToDur(duration),
+      duration: minutesToDuration(duration),
       time: hhmm(draft.time),
       priceReason: (draft.priceReason || "").trim(),
     });
+
     const list = state.bookings.map((item) =>
       item.id === booking.id
-        ? { ...item, svc: draft.svcName, addons: draft.addons.slice() }
+        ? { ...item, service: draft.serviceName, addons: draft.addons.slice() }
         : item,
     );
-    setState({ bkOut: true });
+
+    setState({ bookingStepOut: true });
+
     window.setTimeout(() => {
       setState(({ bookings }) => ({
         // the patch above already landed; keep its price / time and take the new service and add-ons
         bookings: bookings.map((item) => {
           const next = list.find(({ id }) => id === item.id);
+
           return next && item.id === booking.id
-            ? { ...item, svc: next.svc, addons: next.addons }
+            ? { ...item, service: next.service, addons: next.addons }
             : item;
         }),
-        bkStep: "view",
-        bkOut: false,
-        bkBack: true,
+        bookingStep: "view",
+        bookingStepOut: false,
+        bookingStepBack: true,
       }));
-      actions.toastMsg(
-        "Service updated. " + booking.firstName + " is notified",
-      );
-      window.setTimeout(() => setState({ bkBack: false }), 700);
+
+      actions.showToast(`Service updated. ${booking.firstName} is notified`);
+      window.setTimeout(() => setState({ bookingStepBack: false }), 700);
     }, 200);
   };
-  context.memo.applyFn = apply;
+
+  context.memo.applyEdit = apply;
 
   const priceDifference = (() => {
     const difference =
       parseNumber(draft.price) -
-      parseNumber(draft.price0 != null ? draft.price0 : draft.price);
+      parseNumber(
+        draft.originalPrice != null ? draft.originalPrice : draft.price,
+      );
+
     return difference
       ? (difference < 0 ? "Lowered by £" : "Raised by £") +
           Math.abs(Math.round(difference * 100) / 100)
@@ -357,171 +433,201 @@ export const getEditServiceView = (
     bookingAddons: (
       state.bookings.find(({ id }) => id === booking.id)?.addons || []
     ).map((link, index) => {
-      const addon = getAddon(link.aid) ?? {
+      const addon = getAddon(link.addonId) ?? {
         name: "Add-on",
         price: 0,
-        hr: 0,
+        hours: 0,
         min: 0,
       };
+
       const price = link.price != null ? link.price : parseNumber(addon.price);
+
       const minutes =
-        link.mins != null
-          ? link.mins
-          : (parseInt(String(addon.hr)) || 0) * 60 +
+        link.minutes != null
+          ? link.minutes
+          : (parseInt(String(addon.hours)) || 0) * 60 +
             (parseInt(String(addon.min)) || 0);
+
       return {
-        key: (link.aid ?? "") + index,
+        key: (link.addonId ?? "") + index,
         name: addon.name || "Add-on",
-        meta: "+£" + price + (minutes ? " · " + minToDur(minutes) : ""),
+        meta: `+£${price}${minutes ? ` · ${minutesToDuration(minutes)}` : ""}`,
       };
     }),
     // edit step
-    catLabel: categoryName(draft.cat),
-    svcName: draft.svcName || booking.svc,
-    svcMeta: minToDur(duration) + " · £" + parseNumber(draft.price),
+    categoryLabel: categoryName(draft.taxonomyId),
+    serviceName: draft.serviceName || booking.service,
+    serviceMeta: `${minutesToDuration(duration)} · £${parseNumber(draft.price)}`,
     openChange: () => {
-      const old = getService(draft.svcId);
+      const old = getService(draft.serviceId);
       const changed: string[] = [];
+
       if (old) {
         if (parseNumber(draft.price) !== parseNumber(old.price))
           changed.push("price");
-        if ((draft.dur || 0) !== (old.durH || 0) * 60 + (old.durM || 0))
+
+        if (
+          (draft.duration || 0) !==
+          (old.durationHours || 0) * 60 + (old.durationMinutes || 0)
+        )
           changed.push("duration");
+
         if ((draft.extra || 0) !== (old.extra ? Number(old.extra) : 0))
           changed.push("extra time");
       }
+
       if (draft.addons.length)
         changed.push(
           draft.addons.length === 1
             ? "1 add-on"
-            : draft.addons.length + " add-ons",
+            : `${draft.addons.length} add-ons`,
         );
-      const go = () =>
-        setState({ confirm: null, bkStep: "changesvc", csQ: "" });
+
+      const openChangeService = () =>
+        setState({
+          confirm: null,
+          bookingStep: "changesvc",
+          changeServiceQuery: "",
+        });
+
       if (!changed.length) {
-        go();
+        openChangeService();
+
         return;
       }
+
+      const changedList = changed.join(", ");
+
       setState({
         confirm: {
           title: "Change the service?",
           yesLabel: "Change service",
           noLabel: "Keep editing",
-          body:
-            "Picking a different service resets the " +
-            changed.join(", ") +
-            " you set here to the new service’s defaults. The start time stays as it is.",
-          yes: go,
+          body: `Picking a different service resets the ${changedList} you set here to the new service’s defaults. The start time stays as it is.`,
+          yes: openChangeService,
         },
       });
     },
     time: String(draft.time),
     timeOptions,
     onTime: (event: ChangeEvent<HTMLSelectElement>) =>
-      esPatch({ time: Number(event.target.value) }),
+      patchServiceEdit({ time: Number(event.target.value) }),
     hasClash: clashes.length > 0,
     clashText,
     nextFree,
-    durH: String(Math.floor(duration / 60)),
-    durM: String(duration % 60),
+    durationHours: String(Math.floor(duration / 60)),
+    durationMinutes: String(duration % 60),
     hourOptions: HOUR_OPTIONS,
     minuteOptions: MINUTE_OPTIONS,
-    onDurH: (event: ChangeEvent<HTMLSelectElement>) =>
-      esPatch({
-        dur: Math.max(5, Number(event.target.value) * 60 + (duration % 60)),
+    onDurationHours: (event: ChangeEvent<HTMLSelectElement>) =>
+      patchServiceEdit({
+        duration: Math.max(
+          5,
+          Number(event.target.value) * 60 + (duration % 60),
+        ),
       }),
-    onDurM: (event: ChangeEvent<HTMLSelectElement>) =>
-      esPatch({
-        dur: Math.max(
+    onDurationMinutes: (event: ChangeEvent<HTMLSelectElement>) =>
+      patchServiceEdit({
+        duration: Math.max(
           5,
           Math.floor(duration / 60) * 60 + Number(event.target.value),
         ),
       }),
     price: draft.price,
     onPrice: (event: ChangeEvent<HTMLInputElement>) =>
-      esPatch({ price: event.target.value }),
+      patchServiceEdit({ price: event.target.value }),
     isPriceOpen: !!draft.priceOpen,
-    openPrice: () => esPatch({ priceOpen: true }),
+    openPrice: () => patchServiceEdit({ priceOpen: true }),
     priceReason: draft.priceReason || "",
     onPriceReason: (event: ChangeEvent<HTMLInputElement>) =>
-      esPatch({ priceReason: event.target.value }),
+      patchServiceEdit({ priceReason: event.target.value }),
     priceDifference,
     hasExtra: draft.extra != null,
     extra: String(draft.extra || 15),
     extraOptions,
-    addExtra: () => esPatch({ extra: 15 }),
-    clearExtra: () => esPatch({ extra: null }),
+    addExtra: () => patchServiceEdit({ extra: 15 }),
+    clearExtra: () => patchServiceEdit({ extra: null }),
     onExtra: (event: ChangeEvent<HTMLSelectElement>) =>
-      esPatch({ extra: Number(event.target.value) }),
+      patchServiceEdit({ extra: Number(event.target.value) }),
     addonRows,
-    openAddAddon: () => setState({ bkStep: "addaddon", aaQ: "", aaCat: null }),
-    totalLabel: minToDur(totalMinutes) + "  £" + totalPrice,
+    openAddAddon: () =>
+      setState({
+        bookingStep: "addaddon",
+        addAddonQuery: "",
+        addAddonCategory: null,
+      }),
+    totalLabel: `${minutesToDuration(totalMinutes)}  £${totalPrice}`,
     apply,
     // add an add-on
     picker: getAddonPicker(
       studio,
       state,
-      draft.addons.map(({ aid }) => aid ?? ""),
+      draft.addons.map(({ addonId }) => addonId ?? ""),
       (addon) =>
         setState({
-          es: {
+          serviceEdit: {
             ...draft,
             addons: draft.addons.concat([
               {
-                aid: addon.id,
+                addonId: addon.id,
                 price: parseNumber(addon.price),
-                mins:
-                  (parseInt(String(addon.hr)) || 0) * 60 +
+                minutes:
+                  (parseInt(String(addon.hours)) || 0) * 60 +
                   (parseInt(String(addon.min)) || 0),
-                qty: 1,
+                quantity: 1,
               },
             ]),
           },
         }),
-      (state.services.find(({ id }) => id === draft.svcId) ?? null)?.categoryId,
+      (state.services.find(({ id }) => id === draft.serviceId) ?? null)
+        ?.categoryId,
       (addon) =>
         setState({
-          es: {
+          serviceEdit: {
             ...draft,
-            addons: draft.addons.filter(({ aid }) => aid !== addon.id),
+            addons: draft.addons.filter(({ addonId }) => addonId !== addon.id),
           },
         }),
-      () => setState({ bkStep: "editsvc" }),
+      () => setState({ bookingStep: "editsvc" }),
     ),
     // change service
-    serviceQuery: state.csQ || "",
+    serviceQuery: state.changeServiceQuery || "",
     onServiceQuery: (event: ChangeEvent<HTMLInputElement>) =>
-      setState({ csQ: event.target.value }),
+      setState({ changeServiceQuery: event.target.value }),
     serviceGroups,
     // the add-on edit dialog
     addonDialog:
-      addonDraft && addonDraft.ctx !== "add"
+      addonDraft && addonDraft.context !== "add"
         ? {
             ...getAddonDialog(studio, addonDraft),
             remove: () =>
               setState({
-                esAddon: null,
-                es: {
+                addonEdit: null,
+                serviceEdit: {
                   ...draft,
                   addons: draft.addons.filter(
-                    (_, index) => index !== addonDraft.idx,
+                    (_item, index) => index !== addonDraft.index,
                   ),
                 },
               }),
             save: () => {
               const list = draft.addons.map((link, index) =>
-                index === addonDraft.idx
+                index === addonDraft.index
                   ? {
                       ...link,
                       price: parseNumber(addonDraft.price),
-                      mins:
-                        (parseInt(addonDraft.hrs) || 0) * 60 +
-                        (parseInt(addonDraft.mins) || 0),
-                      qty: parseInt(addonDraft.qty) || 1,
+                      minutes:
+                        (parseInt(addonDraft.hours) || 0) * 60 +
+                        (parseInt(addonDraft.minutes) || 0),
+                      quantity: parseInt(addonDraft.quantity) || 1,
                     }
                   : link,
               );
-              setState({ esAddon: null, es: { ...draft, addons: list } });
+
+              setState({
+                addonEdit: null,
+                serviceEdit: { ...draft, addons: list },
+              });
             },
           }
         : null,

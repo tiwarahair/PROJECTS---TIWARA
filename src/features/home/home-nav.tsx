@@ -22,7 +22,8 @@ export const HomeNav = ({
   menuOpen,
   onToggleMenu,
 }: HomeNavProps) => {
-  const { navSolid, navDark, navHidden, navBg } = morph;
+  const { navSolid, navDark, navHidden, navBackground } = morph;
+
   return (
     <>
       <nav
@@ -34,7 +35,7 @@ export const HomeNav = ({
           navDark && styles.dark,
         )}
         // --nav-bg: the colour of the section under the nav, at .85
-        style={{ "--nav-bg": hexToRgba(navBg, 0.85) } as CSSProperties}
+        style={{ "--nav-bg": hexToRgba(navBackground, 0.85) } as CSSProperties}
       >
         <div className={styles.bar}>
           <Link to="/" className={styles.logoLink}>

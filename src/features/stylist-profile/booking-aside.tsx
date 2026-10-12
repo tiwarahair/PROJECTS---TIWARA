@@ -15,19 +15,19 @@ interface BookingAsideProps {
 export const BookingAside = ({
   fromLabel,
   bookHref,
-  facts: { cancelHrs, mailto, site, siteHref },
+  facts: { cancelHours, mailto, site, siteHref },
 }: BookingAsideProps) => (
   <div className={joinClassNames(helmet.bookaside, styles.aside)}>
     <div className={styles.card}>
       <div className={helmet.askcta}>
         <div className={styles.title}>Book an appointment</div>
-        <div className={styles.from}>{"from " + fromLabel}</div>
+        <div className={styles.from}>{`from ${fromLabel}`}</div>
         <Link to={bookHref} className={styles.bookNow}>
           Book now
         </Link>
         <div className={styles.note}>
           {"No account needed. Free cancellation up to "}
-          {cancelHrs}h before.
+          {cancelHours}h before.
         </div>
       </div>
       <div className={joinClassNames(helmet.askhours, styles.hours)}>

@@ -10,12 +10,13 @@ import {
   getRangeLabel,
   toIsoDate,
 } from "./earnings-data";
-import type { Transaction } from "./earnings-data";
+import type { Payout, Transaction } from "./earnings-data";
 import { DEFAULT_BANK, getDayWord, getStatusStyle } from "./earnings-lists";
 import type { EarningsController, EarningsProps } from "./use-earnings";
 import styles from "./earnings-overlays.module.css";
 
 const STRIPE_PAYOUTS = "https://dashboard.stripe.com/settings/payouts";
+
 const FORMATS = [
   [
     "csv",
@@ -65,14 +66,27 @@ const CloseIcon = ({
 );
 
 /** "Not paid out yet", "Next payout" … for a transaction without a payout. */
-const getNoPayoutText = ({ rec, status }: Transaction): string =>
-  rec
-    ? "Not paid out. You took this directly."
-    : status === "On hold"
-      ? "Released 24 hours after the appointment"
-      : status === "Available"
-        ? "Next payout"
-        : "Not paid out yet";
+const getNoPayoutText = ({ isRecorded, status }: Transaction): string => {
+  if (isRecorded) return "Not paid out. You took this directly.";
+
+  if (status === "On hold") return "Released 24 hours after the appointment";
+
+  return status === "Available" ? "Next payout" : "Not paid out yet";
+};
+
+const getFeeText = ({ fee }: Transaction): string => {
+  if (fee == null) return "Recorded";
+
+  return fee > 0 ? `Fee ${formatGbp(fee)}` : "No fee";
+};
+
+const getPayoutNote = ({ status, arrive, sent }: Payout): string => {
+  if (status === "Paid") return `Arrived ${formatDay(arrive)}`;
+
+  if (status === "Failed") return `Sent ${formatDay(sent)}`;
+
+  return `Expected ${formatDay(arrive)}`;
+};
 
 export const EarningsOverlays = ({
   earnings,
@@ -85,7 +99,7 @@ export const EarningsOverlays = ({
     state,
     setState,
     ledger,
-    isDesk,
+    isDesktop,
     period,
     range,
     openDrawer,
@@ -95,80 +109,95 @@ export const EarningsOverlays = ({
     showToast,
     lastDay,
   } = earnings;
+
   const contained = !!props.contained;
   const layer = contained ? styles.contained : styles.fixed;
   const bank = props.bankLabel || DEFAULT_BANK;
   const { drawer } = state;
-  const drawerTx =
-    drawer?.k === "tx"
-      ? ledger.tx.find(({ id }) => id === drawer.id)
+
+  const drawerTransaction =
+    drawer?.kind === "tx"
+      ? ledger.transactions.find(({ id }) => id === drawer.id)
       : undefined;
-  const drawerPo =
-    drawer?.k === "po"
+
+  const drawerPayout =
+    drawer?.kind === "po"
       ? ledger.payouts.find(({ id }) => id === drawer.id)
       : undefined;
-  const isDrawerOn = !!drawer && (!!drawerTx || !!drawerPo);
+
+  const isDrawerOn = !!drawer && (!!drawerTransaction || !!drawerPayout);
+
   const amountClass = (amount: number) =>
     amount < 0 ? styles.amountNegative : styles.amountPositive;
 
   // export
-  const exportPeriod = state.exPeriod || period;
+  const exportPeriod = state.exportPeriod || period;
+
   const exportRange =
     exportPeriod === "custom"
-      ? getRange("custom", state.exFrom || state.aFrom, state.exTo || state.aTo)
+      ? getRange(
+          "custom",
+          state.exportFrom || state.appliedFrom,
+          state.exportTo || state.appliedTo,
+        )
       : getRange(exportPeriod);
-  const exportCount = ledger.tx.filter(
-    ({ at }) => at >= exportRange.s && at < exportRange.e,
-  ).length;
-  const exportFrom = state.exFrom || state.aFrom || toIsoDate(range.s);
-  const exportTo = state.exTo || state.aTo || lastDay(range.e);
 
-  const transactionRow = (transaction: Transaction) => (
-    <button
-      key={transaction.id}
-      className={styles.includedRow}
-      onClick={() => openDrawer({ k: "tx", id: transaction.id }, true)}
-    >
-      <div className={styles.rowText}>
-        <div className={styles.rowName}>
-          {getClient(transaction.client, props.clients).name}
+  const exportCount = ledger.transactions.filter(
+    ({ at }) => at >= exportRange.start && at < exportRange.end,
+  ).length;
+
+  const exportRangeLabel = getRangeLabel(exportRange);
+  const exportNoun = exportCount === 1 ? " transaction" : " transactions";
+
+  const exportFrom =
+    state.exportFrom || state.appliedFrom || toIsoDate(range.start);
+
+  const exportTo = state.exportTo || state.appliedTo || lastDay(range.end);
+
+  const transactionRow = (transaction: Transaction) => {
+    const dayWord = getDayWord(transaction.at, ledger.today);
+
+    return (
+      <button
+        key={transaction.id}
+        className={styles.includedRow}
+        onClick={() => openDrawer({ kind: "tx", id: transaction.id }, true)}
+      >
+        <div className={styles.rowText}>
+          <div className={styles.rowName}>
+            {getClient(transaction.client, props.clients).name}
+          </div>
+          <div className={styles.rowSub}>
+            {`${transaction.description} · ${transaction.method} · ${dayWord}`}
+          </div>
         </div>
-        <div className={styles.rowSub}>
-          {transaction.desc +
-            " · " +
-            transaction.method +
-            " · " +
-            getDayWord(transaction.at, ledger.T0)}
+        <div className={styles.alignRight}>
+          <div
+            className={joinClassNames(
+              styles.includedNet,
+              amountClass(transaction.amount),
+            )}
+          >
+            {formatGbp(transaction.net)}
+          </div>
+          <div className={styles.includedFee}>{getFeeText(transaction)}</div>
         </div>
-      </div>
-      <div className={styles.alignRight}>
-        <div
-          className={joinClassNames(
-            styles.includedNet,
-            amountClass(transaction.amount),
-          )}
-        >
-          {formatGbp(transaction.net)}
-        </div>
-        <div className={styles.includedFee}>
-          {transaction.fee == null
-            ? "Recorded"
-            : transaction.fee > 0
-              ? "Fee " + formatGbp(transaction.fee)
-              : "No fee"}
-        </div>
-      </div>
-    </button>
-  );
+      </button>
+    );
+  };
 
   const renderTransactionDetail = (transaction: Transaction) => {
-    const payout = transaction.po
-      ? ledger.payouts.find(({ id }) => id === transaction.po)
+    const payout = transaction.payoutId
+      ? ledger.payouts.find(({ id }) => id === transaction.payoutId)
       : undefined;
-    const status = transaction.rec ? "Recorded" : transaction.status;
+
+    const status = transaction.isRecorded ? "Recorded" : transaction.status;
+    const appointmentDay = formatDay(transaction.appointment);
+    const appointmentTime = formatTime(transaction.appointment);
+
     return (
       <>
-        <div className={styles.mutedText}>{transaction.desc}</div>
+        <div className={styles.mutedText}>{transaction.description}</div>
         <div
           className={joinClassNames(
             styles.bigAmount,
@@ -181,7 +210,7 @@ export const EarningsOverlays = ({
           <span className={styles.statusTag} style={getStatusStyle(status)}>
             {status}
           </span>
-          {transaction.rec && (
+          {transaction.isRecorded && (
             <span className={styles.recNote}>
               Doesn’t count towards your balance
             </span>
@@ -199,21 +228,19 @@ export const EarningsOverlays = ({
           </div>
           <div className={styles.fact}>
             <span className={styles.factLabel}>Service</span>
-            <span className={styles.factValue}>{transaction.svc}</span>
+            <span className={styles.factValue}>{transaction.service}</span>
           </div>
           <button
             className={styles.factButton}
             onClick={() => {
               if (props.onOpenBooking)
-                props.onOpenBooking(transaction.bref, transaction.client);
-              else showToast("Opening booking " + transaction.bref);
+                props.onOpenBooking(transaction.bookingRef, transaction.client);
+              else showToast(`Opening booking ${transaction.bookingRef}`);
             }}
           >
             <span className={styles.factLabel}>Appointment</span>
             <span className={styles.factLink}>
-              {formatDay(transaction.appt) +
-                ", " +
-                formatTime(transaction.appt)}
+              {`${appointmentDay}, ${appointmentTime}`}
               <Chevron />
             </span>
           </button>
@@ -226,7 +253,7 @@ export const EarningsOverlays = ({
           <div className={styles.fact}>
             <span className={styles.factLabel}>Taken</span>
             <span className={styles.factNumeric}>
-              {formatDay(transaction.at) + ", " + formatTime(transaction.at)}
+              {`${formatDay(transaction.at)}, ${formatTime(transaction.at)}`}
             </span>
           </div>
         </div>
@@ -260,9 +287,9 @@ export const EarningsOverlays = ({
           {payout && (
             <button
               className={styles.payoutLink}
-              onClick={() => openDrawer({ k: "po", id: payout.id }, true)}
+              onClick={() => openDrawer({ kind: "po", id: payout.id }, true)}
             >
-              {payout.id + " · " + formatDay(payout.sent)}
+              {`${payout.id} · ${formatDay(payout.sent)}`}
               <Chevron />
             </button>
           )}
@@ -275,7 +302,7 @@ export const EarningsOverlays = ({
         <div className={styles.reference}>
           <span>Reference</span>
           <span className={styles.numeric}>
-            {transaction.id + " · " + transaction.bref}
+            {`${transaction.id} · ${transaction.bookingRef}`}
           </span>
         </div>
       </>
@@ -292,7 +319,7 @@ export const EarningsOverlays = ({
               styles.scrim,
               layer,
               styles.layerScrim,
-              state.drOut ? styles.scrimOut : styles.scrimIn,
+              state.drawerOut ? styles.scrimOut : styles.scrimIn,
             )}
             onClick={closeDrawer}
           ></div>
@@ -301,21 +328,21 @@ export const EarningsOverlays = ({
               styles.drawer,
               layer,
               styles.layerPanel,
-              isDesk ? styles.drawerDesk : styles.drawerMobile,
-              state.drOut && styles.out,
+              isDesktop ? styles.drawerDesk : styles.drawerMobile,
+              state.drawerOut && styles.out,
             )}
             role="dialog"
             aria-modal="true"
-            aria-label={drawerTx ? "Transaction" : "Payout"}
+            aria-label={drawerTransaction ? "Transaction" : "Payout"}
           >
             <div className={styles.drawerHead}>
-              {state.drStack.length > 0 && (
+              {state.drawerStack.length > 0 && (
                 <button
                   className={styles.iconButton}
                   onClick={() =>
-                    setState(({ drStack }) => ({
-                      drawer: drStack[drStack.length - 1] ?? null,
-                      drStack: drStack.slice(0, -1),
+                    setState(({ drawerStack }) => ({
+                      drawer: drawerStack[drawerStack.length - 1] ?? null,
+                      drawerStack: drawerStack.slice(0, -1),
                     }))
                   }
                   aria-label="Back"
@@ -335,7 +362,7 @@ export const EarningsOverlays = ({
                 </button>
               )}
               <div className={styles.drawerTitle}>
-                {drawerTx ? "Transaction" : "Payout"}
+                {drawerTransaction ? "Transaction" : "Payout"}
               </div>
               <button
                 className={styles.iconButton}
@@ -346,29 +373,25 @@ export const EarningsOverlays = ({
               </button>
             </div>
             <div className={styles.drawerBody}>
-              {drawerTx && renderTransactionDetail(drawerTx)}
-              {drawerPo && (
+              {drawerTransaction && renderTransactionDetail(drawerTransaction)}
+              {drawerPayout && (
                 <>
-                  <div className={styles.mutedText}>{"To " + bank}</div>
+                  <div className={styles.mutedText}>{`To ${bank}`}</div>
                   <div className={styles.bigAmount}>
-                    {formatGbp(drawerPo.amount)}
+                    {formatGbp(drawerPayout.amount)}
                   </div>
                   <div className={styles.poStatusRow}>
                     <span
                       className={styles.statusTag}
-                      style={getStatusStyle(drawerPo.status)}
+                      style={getStatusStyle(drawerPayout.status)}
                     >
-                      {drawerPo.status}
+                      {drawerPayout.status}
                     </span>
                     <span className={styles.recNote}>
-                      {drawerPo.status === "Paid"
-                        ? "Arrived " + formatDay(drawerPo.arrive)
-                        : drawerPo.status === "Failed"
-                          ? "Sent " + formatDay(drawerPo.sent)
-                          : "Expected " + formatDay(drawerPo.arrive)}
+                      {getPayoutNote(drawerPayout)}
                     </span>
                   </div>
-                  {drawerPo.status === "Failed" && (
+                  {drawerPayout.status === "Failed" && (
                     <div className={styles.failed}>
                       <div className={styles.failedText}>
                         Your bank rejected this payout. The money is back in
@@ -388,13 +411,14 @@ export const EarningsOverlays = ({
                   <div className={styles.money}>
                     {(
                       [
-                        ["Gross", drawerPo.gross],
-                        ["Card fees", -drawerPo.fees],
-                        ["Refunds", drawerPo.refunds],
-                        ["Net", drawerPo.amount],
+                        ["Gross", drawerPayout.gross],
+                        ["Card fees", -drawerPayout.fees],
+                        ["Refunds", drawerPayout.refunds],
+                        ["Net", drawerPayout.amount],
                       ] as const
                     ).map(([label, value], index) => {
                       const isNet = index === 3;
+
                       return (
                         <div
                           key={label}
@@ -423,13 +447,13 @@ export const EarningsOverlays = ({
                       Included transactions
                     </div>
                     <div className={styles.mutedText}>
-                      {drawerPo.items.length +
-                        (drawerPo.items.length === 1
+                      {drawerPayout.items.length +
+                        (drawerPayout.items.length === 1
                           ? " transaction"
                           : " transactions")}
                     </div>
                   </div>
-                  {drawerPo.items
+                  {drawerPayout.items
                     .slice()
                     .sort(
                       (first, second) =>
@@ -438,7 +462,7 @@ export const EarningsOverlays = ({
                     .map(transactionRow)}
                   <div className={styles.reference}>
                     <span>Reference</span>
-                    <span>{drawerPo.id}</span>
+                    <span>{drawerPayout.id}</span>
                   </div>
                 </>
               )}
@@ -447,7 +471,7 @@ export const EarningsOverlays = ({
         </>
       )}
 
-      {state.exOn && (
+      {state.exportOn && (
         <>
           {/* eslint-disable-next-line jsx-a11y/click-events-have-key-events, jsx-a11y/no-static-element-interactions */}
           <div
@@ -455,7 +479,7 @@ export const EarningsOverlays = ({
               styles.scrim,
               layer,
               styles.layerScrim,
-              state.exOut ? styles.exportScrimOut : styles.exportScrimIn,
+              state.exportOut ? styles.exportScrimOut : styles.exportScrimIn,
             )}
             onClick={closeExport}
           ></div>
@@ -464,8 +488,8 @@ export const EarningsOverlays = ({
               styles.modal,
               layer,
               styles.layerPanel,
-              isDesk ? styles.modalDesk : styles.modalMobile,
-              state.exOut && styles.out,
+              isDesktop ? styles.modalDesk : styles.modalMobile,
+              state.exportOut && styles.out,
             )}
             role="dialog"
             aria-modal="true"
@@ -493,9 +517,9 @@ export const EarningsOverlays = ({
                     )}
                     onClick={() =>
                       setState({
-                        exPeriod: id,
-                        exFrom: exportFrom,
-                        exTo: exportTo,
+                        exportPeriod: id,
+                        exportFrom,
+                        exportTo,
                       })
                     }
                   >
@@ -507,8 +531,8 @@ export const EarningsOverlays = ({
                 <div className={styles.customDates}>
                   {(
                     [
-                      ["From", "exFrom", exportFrom],
-                      ["To", "exTo", exportTo],
+                      ["From", "exportFrom", exportFrom],
+                      ["To", "exportTo", exportTo],
                     ] as const
                   ).map(([label, key, value]) => (
                     <label key={key} className={styles.dateLabel}>
@@ -526,15 +550,13 @@ export const EarningsOverlays = ({
                 </div>
               )}
               <div className={styles.exportRange}>
-                {getRangeLabel(exportRange) +
-                  " · " +
-                  exportCount +
-                  (exportCount === 1 ? " transaction" : " transactions")}
+                {`${exportRangeLabel} · ${exportCount}${exportNoun}`}
               </div>
               <div className={styles.sectionLabel}>Format</div>
               <div className={styles.formats}>
-                {FORMATS.map(([id, label, sub]) => {
-                  const isOn = state.exFmt === id;
+                {FORMATS.map(([id, label, subtitle]) => {
+                  const isOn = state.exportFormat === id;
+
                   return (
                     <button
                       key={id}
@@ -542,7 +564,7 @@ export const EarningsOverlays = ({
                         styles.format,
                         isOn ? styles.formatOn : styles.formatOff,
                       )}
-                      onClick={() => setState({ exFmt: id })}
+                      onClick={() => setState({ exportFormat: id })}
                       role="radio"
                       aria-checked={isOn}
                     >
@@ -568,7 +590,7 @@ export const EarningsOverlays = ({
                         >
                           {label}
                         </span>
-                        <span className={styles.formatSub}>{sub}</span>
+                        <span className={styles.formatSub}>{subtitle}</span>
                       </span>
                     </button>
                   );
@@ -593,7 +615,7 @@ export const EarningsOverlays = ({
             styles.toast,
             layer,
             styles.layerToast,
-            contained || isDesk ? styles.toastDesk : styles.toastMobile,
+            contained || isDesktop ? styles.toastDesk : styles.toastMobile,
             state.toastOut ? styles.toastOut : styles.toastIn,
           )}
           role="status"

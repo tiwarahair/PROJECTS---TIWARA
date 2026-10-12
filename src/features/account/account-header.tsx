@@ -42,6 +42,7 @@ export const AccountHeader = ({
     event.preventDefault();
     onGo(id);
   };
+
   return (
     <header className={styles.header}>
       <div className={styles.bar}>
@@ -147,7 +148,7 @@ export const AccountHeader = ({
                 <Link
                   key={id}
                   className={styles.mobLink}
-                  to={"/account?section=" + id}
+                  to={`/account?section=${id}`}
                   onClick={goTo(id)}
                 >
                   {label}

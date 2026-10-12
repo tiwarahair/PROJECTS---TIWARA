@@ -20,6 +20,7 @@ const MENU_ITEMS = [
   },
   { tab: "help", label: "Help & support", href: "/help" },
 ];
+
 const LEGACY_TABS: Record<string, string> = {
   details: "shared",
   marketing: "communication",
@@ -40,6 +41,7 @@ export const AccountMenu = ({ anchor, pinned, onClose }: AccountMenuProps) => {
   const onAccountPage = pathname === "/account";
   const params = new URLSearchParams(search);
   const tabParam = params.get("tab");
+
   const currentTab =
     params.get("section") ||
     (tabParam ? LEGACY_TABS[tabParam] || tabParam : "") ||
@@ -58,6 +60,7 @@ export const AccountMenu = ({ anchor, pinned, onClose }: AccountMenuProps) => {
         if (onAccountPage && tab !== "help") {
           event.preventDefault();
           onClose(false);
+
           window.dispatchEvent(
             new CustomEvent(ACCOUNT_TAB_EVENT, { detail: tab }),
           );

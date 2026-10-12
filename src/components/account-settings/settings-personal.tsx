@@ -142,45 +142,55 @@ export const SettingsPersonal = ({
   props,
 }: SettingsPersonalProps) => {
   const { state, setState, toast, ask, getNameError } = settings;
+
   const emailErrors = {
-    ne:
+    newEmail:
       state.emailTouched && !isEmailValid(state.newEmail)
         ? "Enter an email address, like name@example.co.uk."
         : "",
-    pw:
-      state.emailTouched && !state.emailPw
+    password:
+      state.emailTouched && !state.emailPassword
         ? "Enter your current password."
         : "",
   };
+
   const closeReason = getCloseReason(props.upcoming || 0, !!props.owed);
   const isPhoneCode = state.phoneFlow === "code";
+
   const phoneNext = () => {
     if (state.phoneFlow === "edit") {
       if (!isMobileValid(state.newPhone))
         return setState({
-          phoneErr: "Enter a UK mobile number, like 07700 900418.",
+          phoneError: "Enter a UK mobile number, like 07700 900418.",
         });
-      setState({ phoneFlow: "code", code: "", phoneErr: "" });
-      toast("Code sent to " + state.newPhone);
+
+      setState({ phoneFlow: "code", code: "", phoneError: "" });
+      toast(`Code sent to ${state.newPhone}`);
+
       return;
     }
+
     if (!/^\d{6}$/.test(state.code))
-      return setState({ phoneErr: "Enter the 6-digit code." });
+      return setState({ phoneError: "Enter the 6-digit code." });
+
     if (state.code === "000000")
       return setState({
-        phoneErr:
+        phoneError:
           "That code didn’t match. Check the latest text and try again.",
       });
+
     setState({
       phone: state.newPhone,
       phoneFlow: null,
       newPhone: "",
       code: "",
-      phoneErr: "",
+      phoneError: "",
     });
+
     toast("Login phone updated");
   };
-  const phoneClass = state.phoneErr ? shared.fieldErr : shared.fieldOk;
+
+  const phoneClass = state.phoneError ? shared.fieldErr : shared.fieldOk;
 
   return (
     <>
@@ -194,7 +204,7 @@ export const SettingsPersonal = ({
           ).map(([key, label, autoComplete]) => (
             <TextField
               key={key}
-              id={uid + "-" + key}
+              id={`${uid}-${key}`}
               label={label}
               value={state[key]}
               error={getNameError(key)}
@@ -218,7 +228,7 @@ export const SettingsPersonal = ({
             <button
               className={joinClassNames(styles.linkButton, shared.focusRing)}
               data-ac-in="1"
-              onClick={() => props.onNav?.("business")}
+              onClick={() => props.onNavigate?.("business")}
             >
               Business details
               <ArrowIcon />
@@ -243,7 +253,7 @@ export const SettingsPersonal = ({
                   setState({
                     emailFlow: "edit",
                     newEmail: "",
-                    emailPw: "",
+                    emailPassword: "",
                     emailTouched: false,
                   })
                 }
@@ -301,23 +311,25 @@ export const SettingsPersonal = ({
           <Reveal open={state.emailFlow === "edit"}>
             <div className={styles.emailForm}>
               <TextField
-                id={uid + "-ne"}
+                id={`${uid}-ne`}
                 label="New email"
                 type="email"
                 autoComplete="email"
                 value={state.newEmail}
-                error={emailErrors.ne}
+                error={emailErrors.newEmail}
                 onChange={(event) => setState({ newEmail: event.target.value })}
                 className={styles.input}
               />
               <TextField
-                id={uid + "-epw"}
+                id={`${uid}-epw`}
                 label="Current password"
                 type="password"
                 autoComplete="current-password"
-                value={state.emailPw}
-                error={emailErrors.pw}
-                onChange={(event) => setState({ emailPw: event.target.value })}
+                value={state.emailPassword}
+                error={emailErrors.password}
+                onChange={(event) =>
+                  setState({ emailPassword: event.target.value })
+                }
                 className={styles.input}
               />
               <div className={styles.formActions}>
@@ -328,13 +340,15 @@ export const SettingsPersonal = ({
                   )}
                   data-ac-in="1"
                   onClick={() => {
-                    if (!isEmailValid(state.newEmail) || !state.emailPw)
+                    if (!isEmailValid(state.newEmail) || !state.emailPassword)
                       return setState({ emailTouched: true });
+
                     setState({
                       emailFlow: null,
                       pendingEmail: state.newEmail.trim(),
-                      emailPw: "",
+                      emailPassword: "",
                     });
+
                     toast("Verification link sent");
                   }}
                 >
@@ -368,7 +382,7 @@ export const SettingsPersonal = ({
                 )}
                 data-ac-in="1"
                 onClick={() =>
-                  setState({ phoneFlow: "edit", newPhone: "", phoneErr: "" })
+                  setState({ phoneFlow: "edit", newPhone: "", phoneError: "" })
                 }
               >
                 Change
@@ -379,7 +393,7 @@ export const SettingsPersonal = ({
             <div className={styles.phoneForm}>
               {!isPhoneCode && (
                 <>
-                  <label className={shared.label} htmlFor={uid + "-np"}>
+                  <label className={shared.label} htmlFor={`${uid}-np`}>
                     New phone number
                   </label>
                   <input
@@ -389,15 +403,15 @@ export const SettingsPersonal = ({
                       phoneClass,
                     )}
                     data-ac-in="1"
-                    id={uid + "-np"}
+                    id={`${uid}-np`}
                     type="tel"
                     inputMode="tel"
                     autoComplete="tel"
                     value={state.newPhone}
                     onChange={(event) =>
-                      setState({ newPhone: event.target.value, phoneErr: "" })
+                      setState({ newPhone: event.target.value, phoneError: "" })
                     }
-                    aria-invalid={state.phoneErr ? "true" : "false"}
+                    aria-invalid={state.phoneError ? "true" : "false"}
                   />
                   <div className={shared.help}>
                     We’ll text a 6-digit code to this number.
@@ -406,8 +420,8 @@ export const SettingsPersonal = ({
               )}
               {isPhoneCode && (
                 <>
-                  <label className={shared.label} htmlFor={uid + "-code"}>
-                    {"Enter the code sent to " + state.newPhone}
+                  <label className={shared.label} htmlFor={`${uid}-code`}>
+                    {`Enter the code sent to ${state.newPhone}`}
                   </label>
                   <input
                     className={joinClassNames(
@@ -416,23 +430,23 @@ export const SettingsPersonal = ({
                       phoneClass,
                     )}
                     data-ac-in="1"
-                    id={uid + "-code"}
+                    id={`${uid}-code`}
                     inputMode="numeric"
                     autoComplete="one-time-code"
                     value={state.code}
                     onChange={(event) =>
                       setState({
                         code: event.target.value.replace(/\D/g, "").slice(0, 6),
-                        phoneErr: "",
+                        phoneError: "",
                       })
                     }
-                    aria-invalid={state.phoneErr ? "true" : "false"}
+                    aria-invalid={state.phoneError ? "true" : "false"}
                   />
                 </>
               )}
-              {!!state.phoneErr && (
+              {!!state.phoneError && (
                 <div className={shared.error} role="alert">
-                  {state.phoneErr}
+                  {state.phoneError}
                 </div>
               )}
               <div className={shared.actions}>
@@ -449,7 +463,7 @@ export const SettingsPersonal = ({
                 <button
                   className={joinClassNames(styles.cancel, shared.focusRing)}
                   data-ac-in="1"
-                  onClick={() => setState({ phoneFlow: null, phoneErr: "" })}
+                  onClick={() => setState({ phoneFlow: null, phoneError: "" })}
                 >
                   Cancel
                 </button>

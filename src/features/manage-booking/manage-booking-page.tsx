@@ -38,6 +38,7 @@ const getInitialState = (
   const view = params.get("view") || propView || "booking";
   const fixture = params.get("fixture") || propFixture || "";
   const id = params.get("stylist") || DEFAULT_STYLIST_ID;
+
   const entries =
     view === "account"
       ? [
@@ -45,9 +46,12 @@ const getInitialState = (
           { id: "crowned-by-kemi", text: "" },
         ]
       : [{ id, text: "Sensitive scalp" }];
+
   const isEdit = fixture === "edit";
   const isRemoved = fixture === "removed";
+
   if (isRemoved) entries[0] = { id, text: "" };
+
   return {
     view,
     entries,
@@ -76,6 +80,7 @@ export const ManageBookingPage = ({
 
   useLayoutEffect(() => {
     document.documentElement.classList.add("manage-page");
+
     return () => document.documentElement.classList.remove("manage-page");
   }, []);
 
@@ -88,11 +93,13 @@ export const ManageBookingPage = ({
   const showToast = (toast: string) => {
     window.clearTimeout(toastTimer.current);
     setState((current) => ({ ...current, toast }));
+
     toastTimer.current = window.setTimeout(
       () => setState((current) => ({ ...current, toast: "" })),
       TOAST_MS,
     );
   };
+
   const setEntry = (index: number, text: string) =>
     setState((current) => ({
       ...current,
@@ -100,6 +107,7 @@ export const ManageBookingPage = ({
         entryIndex === index ? { ...entry, text } : entry,
       ),
     }));
+
   const confirmEntry = state.entries[state.confirm];
 
   return (
@@ -128,7 +136,7 @@ export const ManageBookingPage = ({
         <h1 className={styles.title}>
           {isAccount
             ? "Your details for stylists"
-            : "You’re booked with " + first.name}
+            : `You’re booked with ${first.name}`}
         </h1>
         {!isAccount && (
           <div className={styles.card}>
@@ -164,7 +172,7 @@ export const ManageBookingPage = ({
                   <path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0z"></path>
                   <circle cx="12" cy="10" r="3"></circle>
                 </svg>
-                {booking.stylist + " · " + booking.area}
+                {`${booking.stylist} · ${booking.area}`}
               </span>
             </div>
           </div>
@@ -174,12 +182,12 @@ export const ManageBookingPage = ({
           title={
             isAccount
               ? "Allergies or sensitivities"
-              : "Shared with " + first.name
+              : `Shared with ${first.name}`
           }
-          sub={
+          subtitle={
             isAccount
               ? "Each stylist only sees what you’ve shared with them."
-              : "Only " + first.name + " sees this, on your booking."
+              : `Only ${first.name} sees this, on your booking.`
           }
           entries={state.entries}
           editing={state.editing}
@@ -197,6 +205,7 @@ export const ManageBookingPage = ({
           onDraft={(draft) => setState((current) => ({ ...current, draft }))}
           onSave={(index) => {
             const text = state.draft.trim();
+
             setEntry(index, text);
             setState((current) => ({ ...current, editing: -1 }));
             showToast(text ? "Saved" : "Removed");
@@ -206,9 +215,7 @@ export const ManageBookingPage = ({
       </main>
       {confirmEntry && (
         <RemoveDialog
-          text={
-            getEntryStylist(confirmEntry.id).name + " won’t see it any more."
-          }
+          text={`${getEntryStylist(confirmEntry.id).name} won’t see it any more.`}
           onCancel={() => setState((current) => ({ ...current, confirm: -1 }))}
           onRemove={() => {
             setEntry(state.confirm, "");

@@ -33,81 +33,118 @@ const SUB_STEPS: BookingStep[] = [
 /** The sheet's title, back button and body sizing (prototype sheetTitle, shBack, shBackGo, shBody*). */
 export const getSheetFrame = (studio: StudioController) => {
   const { state, setState, isWide, actions } = studio;
-  const { sheet, bkStep } = state;
+  const { sheet, bookingStep } = state;
   const isBooking = sheet === "booking";
+
   const isNarrowCheckout =
-    !isWide && (bkStep === "checkout" || bkStep === "noshow");
+    !isWide && (bookingStep === "checkout" || bookingStep === "noshow");
+
+  const getAddTitle = () => {
+    if (state.addAddonPickerOpen) return "Add an add-on";
+
+    return state.addEditService ? "Edit service" : "New booking";
+  };
+
   const titles: Record<string, string> = {
     cats: "Manage categories",
     past: "Booking",
     notif: "Notifications",
-    booking: BOOKING_TITLES[bkStep] ?? "",
-    add: state.addAoPick
-      ? "Add an add-on"
-      : state.addEditSvc
-        ? "Edit service"
-        : "New booking",
-    svcwiz: state.wiz?.mode === "edit" ? "Edit service" : "Add a service",
+    booking: BOOKING_TITLES[bookingStep] ?? "",
+    add: getAddTitle(),
+    svcwiz: state.wizard?.mode === "edit" ? "Edit service" : "Add a service",
     addon: state.addonDraft?.id ? "Edit add-on" : "New add-on",
     profile: "Edit profile",
     stripe: "Connect Stripe",
     block: "Block time",
     closed: "Closed period",
     client: "Client",
-    clientEdit: state.ce?.id ? "Edit client" : "Add client",
+    clientEdit: state.clientEdit?.id ? "Edit client" : "Add client",
     cliView: "Client",
   };
+
   const isClientSheet = sheet === "client" || sheet === "cliView";
+
   const hasBack =
-    (isBooking && (SUB_STEPS.includes(bkStep) || isNarrowCheckout)) ||
-    (isClientSheet && (!!state.cFromB || !!state.cFromP)) ||
-    (sheet === "clientEdit" && !!state.ceFromView) ||
-    (!!state.fromCli && (sheet === "past" || (isBooking && bkStep === "view")));
+    (isBooking && (SUB_STEPS.includes(bookingStep) || isNarrowCheckout)) ||
+    (isClientSheet &&
+      (!!state.clientFromBookingId || !!state.clientFromPastId)) ||
+    (sheet === "clientEdit" && !!state.clientEditFromView) ||
+    (!!state.fromClientId &&
+      (sheet === "past" || (isBooking && bookingStep === "view")));
+
   const goBack = () => {
     if (
-      state.fromCli &&
-      (sheet === "past" || (isBooking && bkStep === "view"))
+      state.fromClientId &&
+      (sheet === "past" || (isBooking && bookingStep === "view"))
     ) {
-      actions.openSheet("cliView", { cliSel: state.fromCli, fromCli: null });
+      actions.openSheet("cliView", {
+        selectedClientId: state.fromClientId,
+        fromClientId: null,
+      });
+
       return;
     }
-    if (isClientSheet && state.cFromP) {
-      actions.openSheet("past", { pastSel: state.cFromP });
+
+    if (isClientSheet && state.clientFromPastId) {
+      actions.openSheet("past", { selectedPastId: state.clientFromPastId });
+
       return;
     }
-    if (sheet === "clientEdit" && state.ceFromView) {
-      actions.openSheet("cliView", { cliSel: state.ce?.id ?? null });
+
+    if (sheet === "clientEdit" && state.clientEditFromView) {
+      actions.openSheet("cliView", {
+        selectedClientId: state.clientEdit?.id ?? null,
+      });
+
       return;
     }
-    if (isClientSheet && state.cFromB) {
-      actions.openSheet("booking", { sheetBId: state.cFromB, cFromB: null });
+
+    if (isClientSheet && state.clientFromBookingId) {
+      actions.openSheet("booking", {
+        sheetBookingId: state.clientFromBookingId,
+        clientFromBookingId: null,
+      });
+
       return;
     }
+
     const to: BookingStep =
-      bkStep === "changesvc" || bkStep === "addaddon" ? "editsvc" : "view";
-    setState({ bkOut: true });
+      bookingStep === "changesvc" || bookingStep === "addaddon"
+        ? "editsvc"
+        : "view";
+
+    setState({ bookingStepOut: true });
+
     window.setTimeout(
-      () => setState({ bkOut: false, bkBack: to === "view", bkStep: to }),
+      () =>
+        setState({
+          bookingStepOut: false,
+          bookingStepBack: to === "view",
+          bookingStep: to,
+        }),
       200,
     );
+
     if (to === "view")
-      window.setTimeout(() => setState({ bkBack: false }), 900);
+      window.setTimeout(() => setState({ bookingStepBack: false }), 900);
   };
+
+  const getTitle = () => {
+    if (sheet === "add" && state.addRebook) return "Book again";
+
+    return sheet ? titles[sheet] || "" : "";
+  };
+
   return {
-    title:
-      sheet === "add" && state.addRebook
-        ? "Book again"
-        : sheet
-          ? titles[sheet] || ""
-          : "",
+    title: getTitle(),
     hasBack,
     goBack,
     isBodyShort: isBooking && isNarrowCheckout,
     isFull: !isWide && sheet === "svcwiz",
     isTall:
       !isWide &&
-      ((isBooking && bkStep === "checkout") ||
-        (sheet === "past" && !!state.pastCk)),
+      ((isBooking && bookingStep === "checkout") ||
+        (sheet === "past" && !!state.pastCheckoutPanel)),
   };
 };
 
@@ -132,6 +169,7 @@ export const SheetFrame = ({
 }: SheetFrameProps) => {
   const { state, isWide, actions } = studio;
   const frame = getSheetFrame(studio);
+
   return (
     <>
       {/* eslint-disable-next-line jsx-a11y/click-events-have-key-events, jsx-a11y/no-static-element-interactions */}
@@ -184,7 +222,7 @@ export const SheetFrame = ({
               className={styles.markAllRead}
               onClick={() => {
                 studio.setState({ notifAllRead: true });
-                actions.toastMsg("All caught up");
+                actions.showToast("All caught up");
               }}
             >
               Mark all read

@@ -7,6 +7,7 @@ import { appRouter } from "./app-router";
 import { createStore } from "./stores/store";
 
 const rootElement = document.getElementById("root");
+
 if (!rootElement) throw new Error("Missing #root element");
 
 createRoot(rootElement).render(

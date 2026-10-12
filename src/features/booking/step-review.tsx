@@ -13,32 +13,37 @@ interface SummaryRow {
   label: string;
   value: string | null;
   edit?: boolean;
-  sub?: string;
+  subtitle?: string;
 }
 
 /** Step 5 (Review your booking): summary rows, money, the policy card and the agreement line. */
 export const StepReview = ({ booking }: StepReviewProps) => {
   const { state, stylist, service, options, money, address, actions } = booking;
-  const { sel, alg, photos } = state;
-  const { PL } = money;
-  const allergyText = alg.on ? alg.text.trim() : "";
-  const [whereValue, whereSub] = getWhereRow(stylist, address.clientAddress);
+  const { selection, allergy, photos } = state;
+  const { policy } = money;
+  const allergyText = allergy.on ? allergy.text.trim() : "";
+
+  const [whereValue, whereSubtitle] = getWhereRow(
+    stylist,
+    address.clientAddress,
+  );
+
   const rows: SummaryRow[] = [
     { label: "Service", value: service ? service.name : null },
-    { label: "Size", value: options.size.length ? sel.size : null },
-    { label: "Length", value: options.length.length ? sel.length : null },
-    { label: "Colour", value: options.colour ? sel.colour : null },
+    { label: "Size", value: options.size.length ? selection.size : null },
+    { label: "Length", value: options.length.length ? selection.length : null },
+    { label: "Colour", value: options.colour ? selection.colour : null },
     ...options.own.map(({ name }) => ({
       label: name,
-      value: sel.own[name] || null,
+      value: selection.own[name] || null,
     })),
     {
       label: "Add-ons",
-      value: sel.addons.length ? sel.addons.join(" · ") : null,
+      value: selection.addons.length ? selection.addons.join(" · ") : null,
     },
     {
       label: "Inspiration photos",
-      value: photos.length ? photos.length + " attached" : null,
+      value: photos.length ? `${photos.length} attached` : null,
     },
     {
       label: "Allergies or sensitivities",
@@ -50,17 +55,23 @@ export const StepReview = ({ booking }: StepReviewProps) => {
       label: "Date & time",
       value:
         state.date && state.time
-          ? getWhenLine(state.calY, state.calM, state.date, state.time)
+          ? getWhenLine(
+              state.calendarYear,
+              state.calendarMonth,
+              state.date,
+              state.time,
+            )
           : null,
     },
-    { label: "Where", value: whereValue, edit: false, sub: whereSub },
+    { label: "Where", value: whereValue, edit: false, subtitle: whereSubtitle },
   ];
+
   // Edit (allergies) jumps back to Your details with the field open
   const editAllergies = () =>
     actions.setState(
       (current) => ({
         step: 4,
-        alg: { ...current.alg, prior: false, focus: true },
+        allergy: { ...current.allergy, prior: false, focus: true },
       }),
       actions.scrollToTitle,
     );
@@ -78,7 +89,7 @@ export const StepReview = ({ booking }: StepReviewProps) => {
         <div className={styles.rows}>
           {rows
             .filter(({ value }) => value)
-            .map(({ label, value, edit, sub }) => (
+            .map(({ label, value, edit, subtitle }) => (
               <div key={label} className={styles.row}>
                 <span className={styles.rowLabel}>{label}</span>
                 <span className={styles.rowValue}>
@@ -91,7 +102,9 @@ export const StepReview = ({ booking }: StepReviewProps) => {
                       </button>
                     </>
                   )}
-                  {!!sub && <span className={styles.rowSub}>{sub}</span>}
+                  {!!subtitle && (
+                    <span className={styles.rowSub}>{subtitle}</span>
+                  )}
                 </span>
               </div>
             ))}
@@ -119,28 +132,28 @@ export const StepReview = ({ booking }: StepReviewProps) => {
         <div className={styles.dueRow}>
           <span className={styles.dueLabelRow}>
             <span className={styles.accentLabel}>Due today</span>
-            {PL.mode === "deposit" && (
+            {policy.mode === "deposit" && (
               <span data-screen-label="Deposit tag" className={styles.tag}>
-                {(stylist.policies.depositPct || 0) + "% deposit"}
+                {`${stylist.policies.depositPercent || 0}% deposit`}
               </span>
             )}
           </span>
           <span className={styles.dueAmount}>{money.dueToday}</span>
         </div>
-        {PL.mode === "full" && (
+        {policy.mode === "full" && (
           <div
             data-screen-label="Full payment notice"
             className={styles.fullNotice}
           >
             <span className={styles.fullTag}>Full payment</span>
             <span className={styles.pretty}>
-              {stylist.name + " asks for the full price when you book."}
+              {`${stylist.name} asks for the full price when you book.`}
             </span>
           </div>
         )}
         <div className={styles.rule}></div>
         <div className={styles.lines}>
-          {PL.lines.map(({ icon, text }) => (
+          {policy.lines.map(({ icon, text }) => (
             <div key={text} className={styles.line}>
               <svg
                 width="16"
@@ -159,12 +172,12 @@ export const StepReview = ({ booking }: StepReviewProps) => {
             </div>
           ))}
         </div>
-        {PL.notes.length > 0 && (
+        {policy.notes.length > 0 && (
           <>
             <div className={styles.notesRule}></div>
             <div className={styles.accentLabel}>From your stylist</div>
             <div className={styles.notes}>
-              {PL.notes.map((note) => (
+              {policy.notes.map((note) => (
                 <div key={note} className={styles.note}>
                   {note}
                 </div>
@@ -173,13 +186,11 @@ export const StepReview = ({ booking }: StepReviewProps) => {
           </>
         )}
       </div>
-      {PL.cardSaved && !state.loggedIn && (
+      {policy.cardSaved && !state.loggedIn && (
         <p data-screen-label="Agreement line" className={styles.agreement}>
-          {"By booking, you agree to " +
-            stylist.name +
-            "'s cancellation policy and our "}
+          {`By booking, you agree to ${stylist.name}'s cancellation policy and our `}
           <button
-            onClick={() => actions.setState({ doc: "terms" })}
+            onClick={() => actions.setState({ legalDocument: "terms" })}
             className={fields.linkButton}
           >
             Terms

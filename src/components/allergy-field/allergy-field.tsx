@@ -18,23 +18,17 @@ const getNotice = (name: string) => [
   {
     key: "a",
     term: "What we keep",
-    text:
-      "Only what you type in this field, linked to your bookings with " +
-      name +
-      ".",
+    text: `Only what you type in this field, linked to your bookings with ${name}.`,
   },
   {
     key: "b",
     term: "Who sees it",
-    text:
-      name +
-      ", on your bookings. It isn’t shown to other stylists or on your reviews.",
+    text: `${name}, on your bookings. It isn’t shown to other stylists or on your reviews.`,
   },
   {
     key: "c",
     term: "Why",
-    text:
-      "So " + name + " can choose products and methods that are safe for you.",
+    text: `So ${name} can choose products and methods that are safe for you.`,
   },
   {
     key: "d",
@@ -51,25 +45,31 @@ export const AllergyField = ({
   openPrivacy = false,
   autoFocus = false,
 }: AllergyFieldProps) => {
-  const [uid] = useState(() => "al" + Math.random().toString(36).slice(2, 7));
+  const [uid] = useState(() => `al${Math.random().toString(36).slice(2, 7)}`);
   const [isSheetOpen, setSheetOpen] = useState(openPrivacy);
+
   const [viewportWidth, setViewportWidth] = useState(() =>
     typeof window !== "undefined" ? window.innerWidth : 1200,
   );
+
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const name = stylistName || "your stylist";
   const length = value.length;
+
   const ids = {
-    field: uid + "-f",
-    hint: uid + "-h",
-    count: uid + "-c",
-    title: uid + "-t",
+    field: `${uid}-f`,
+    hint: `${uid}-h`,
+    count: `${uid}-c`,
+    title: `${uid}-t`,
   };
 
   useEffect(() => {
     const handleResize = () => setViewportWidth(window.innerWidth);
+
     window.addEventListener("resize", handleResize);
+
     if (autoFocus) textareaRef.current?.focus({ preventScroll: true });
+
     return () => window.removeEventListener("resize", handleResize);
     // autoFocus only applies on mount
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -78,10 +78,11 @@ export const AllergyField = ({
   // grow the textarea to its content, between 52px and 96px
   useLayoutEffect(() => {
     const textarea = textareaRef.current;
+
     if (!textarea) return;
+
     textarea.style.height = "auto";
-    textarea.style.height =
-      Math.min(Math.max(textarea.scrollHeight + 2, 52), 96) + "px";
+    textarea.style.height = `${Math.min(Math.max(textarea.scrollHeight + 2, 52), 96)}px`;
   }, [value]);
 
   const closeSheet = () => setSheetOpen(false);
@@ -106,7 +107,7 @@ export const AllergyField = ({
           }
           rows={1}
           maxLength={MAX_LENGTH}
-          aria-describedby={ids.hint + " " + ids.count}
+          aria-describedby={`${ids.hint} ${ids.count}`}
         ></textarea>
         {length >= COUNTER_FROM && (
           <div

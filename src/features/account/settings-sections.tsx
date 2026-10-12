@@ -37,8 +37,9 @@ export const SharedSection = ({
   account: { state, actions },
   getStylistName,
 }: SharedSectionProps) => {
-  const { entries, algEdit, algDraft } = state;
+  const { entries, allergyEdit, allergyDraft } = state;
   const { setState, showToast } = actions;
+
   return (
     <section data-screen-label="Account: Shared with stylists">
       <h2 className={ui.heading}>Allergies or sensitivities</h2>
@@ -46,7 +47,8 @@ export const SharedSection = ({
         {entries.map(({ id, text }, index) => {
           const name = getStylistName(id);
           const hasText = !!text;
-          const isEditing = algEdit === index;
+          const isEditing = allergyEdit === index;
+
           return (
             <div key={id} className={ui.row}>
               <div className={ui.rowHead}>
@@ -68,7 +70,7 @@ export const SharedSection = ({
                     <button
                       className={styles.algButton}
                       onClick={() =>
-                        setState({ algEdit: index, algDraft: text })
+                        setState({ allergyEdit: index, allergyDraft: text })
                       }
                     >
                       {hasText ? "Edit" : "Add"}
@@ -77,7 +79,7 @@ export const SharedSection = ({
                       <button
                         className={styles.algButton}
                         onClick={() =>
-                          actions.openDialog({ k: "alg", i: index })
+                          actions.openDialog({ kind: "allergy", index })
                         }
                       >
                         Remove
@@ -90,23 +92,25 @@ export const SharedSection = ({
                 <div className={styles.algEdit}>
                   <AllergyField
                     stylistName={name}
-                    value={algDraft}
-                    onChange={(draft) => setState({ algDraft: draft })}
+                    value={allergyDraft}
+                    onChange={(draft) => setState({ allergyDraft: draft })}
                     autoFocus={true}
                   />
                   <div className={styles.algEditActions}>
                     <button
                       className={ui.save}
                       onClick={() => {
-                        const saved = algDraft.trim();
+                        const saved = allergyDraft.trim();
+
                         setState(({ entries: current }) => ({
                           entries: current.map((entry, position) =>
                             position === index
                               ? { ...entry, text: saved }
                               : entry,
                           ),
-                          algEdit: -1,
+                          allergyEdit: -1,
                         }));
+
                         showToast(saved ? "Saved" : "Removed");
                       }}
                     >
@@ -114,7 +118,7 @@ export const SharedSection = ({
                     </button>
                     <button
                       className={ui.cancel}
-                      onClick={() => setState({ algEdit: -1 })}
+                      onClick={() => setState({ allergyEdit: -1 })}
                     >
                       Cancel
                     </button>
@@ -134,7 +138,8 @@ export const CommunicationSection = ({
 }: {
   account: AccountController;
 }) => {
-  const syncUrl = "webcal://tiwarashouse.co.uk/cal/" + state.sync + ".ics";
+  const syncUrl = `webcal://tiwarashouse.co.uk/cal/${state.sync}.ics`;
+
   return (
     <section data-screen-label="Account: Communication">
       <h2 className={ui.heading}>Marketing emails</h2>
@@ -146,10 +151,12 @@ export const CommunicationSection = ({
           <AccountSwitch
             id="ac-mkt"
             labelId="ac-mkt-l"
-            on={state.mkt}
+            on={state.marketing}
             onToggle={() => {
-              const isOn = !state.mkt;
-              actions.setState({ mkt: isOn });
+              const isOn = !state.marketing;
+
+              actions.setState({ marketing: isOn });
+
               actions.showToast(
                 isOn
                   ? "You’ll get offers and news by email"
@@ -198,7 +205,7 @@ export const CommunicationSection = ({
             </button>
             <button
               className={ui.quietButton}
-              onClick={() => actions.openDialog({ k: "sync" })}
+              onClick={() => actions.openDialog({ kind: "sync" })}
             >
               Reset link
             </button>
@@ -259,7 +266,7 @@ export const PrivacySection = ({
         </div>
         <button
           className={styles.dangerButton}
-          onClick={() => actions.openDialog({ k: "delete" })}
+          onClick={() => actions.openDialog({ kind: "delete" })}
         >
           Delete account
         </button>

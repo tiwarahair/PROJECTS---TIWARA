@@ -22,18 +22,18 @@ export const HOURS = [
   "7pm",
   "8pm",
 ];
-export const DOW_LABELS = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
+export const WEEKDAY_LABELS = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
 
 /** Local YYYY-MM-DD. */
-export const toIsoDate = (date: Date): string =>
-  date.getFullYear() +
-  "-" +
-  String(date.getMonth() + 1).padStart(2, "0") +
-  "-" +
-  String(date.getDate()).padStart(2, "0");
+export const toIsoDate = (date: Date): string => {
+  const month = String(date.getMonth() + 1).padStart(2, "0");
+  const day = String(date.getDate()).padStart(2, "0");
 
-export const getVisibleMonth = ({ calM }: SearchState): Date =>
-  calM || new Date(new Date().getFullYear(), new Date().getMonth(), 1);
+  return `${date.getFullYear()}-${month}-${day}`;
+};
+
+export const getVisibleMonth = ({ calendarMonth }: SearchState): Date =>
+  calendarMonth || new Date(new Date().getFullYear(), new Date().getMonth(), 1);
 
 export interface CalendarCell {
   key: string;
@@ -48,28 +48,33 @@ export const getCalendarCells = (month: Date): CalendarCell[] => {
   const todayIso = toIsoDate(new Date());
   const first = new Date(month.getFullYear(), month.getMonth(), 1);
   const lead = (first.getDay() + 6) % 7;
+
   const daysInMonth = new Date(
     month.getFullYear(),
     month.getMonth() + 1,
     0,
   ).getDate();
+
   return Array.from(
     { length: Math.ceil((lead + daysInMonth) / 7) * 7 },
-    (_, index) => {
+    (_cell, index) => {
       const day = index - lead + 1;
+
       if (day < 1 || day > daysInMonth)
         return {
-          key: "c" + index,
+          key: `c${index}`,
           label: "",
           isDay: false,
           value: "",
           isPast: false,
         };
+
       const value = toIsoDate(
         new Date(month.getFullYear(), month.getMonth(), day),
       );
+
       return {
-        key: "c" + index,
+        key: `c${index}`,
         label: String(day),
         isDay: true,
         value,
@@ -82,9 +87,11 @@ export const getCalendarCells = (month: Date): CalendarCell[] => {
 export const getQuickDays = () =>
   [0, 1].map((offset) => {
     const date = new Date();
+
     date.setDate(date.getDate() + offset);
+
     return {
-      key: "q" + offset,
+      key: `q${offset}`,
       label: offset === 0 ? "Today" : "Tomorrow",
       meta: date.toLocaleDateString("en-GB", {
         weekday: "short",
@@ -95,25 +102,29 @@ export const getQuickDays = () =>
     };
   });
 
-export const getTimeLabel = ({ time, cFrom, cTo }: SearchState): string =>
+export const getTimeLabel = ({
+  time,
+  customFrom,
+  customTo,
+}: SearchState): string =>
   time === "custom"
-    ? cFrom + " - " + cTo
+    ? `${customFrom} - ${customTo}`
     : (TIMES.find(({ id }) => id === time) || TIMES[0])?.label || "Any time";
 
 /** Desktop When field: "Sat 12 Oct · Morning" or "Any date". */
 export const getDateLabel = (state: SearchState): string =>
-  (state.q.date
-    ? new Date(state.q.date + "T00:00:00").toLocaleDateString("en-GB", {
+  (state.query.date
+    ? new Date(`${state.query.date}T00:00:00`).toLocaleDateString("en-GB", {
         weekday: "short",
         day: "numeric",
         month: "short",
       })
-    : "Any date") + (state.time !== "any" ? " · " + getTimeLabel(state) : "");
+    : "Any date") + (state.time !== "any" ? ` · ${getTimeLabel(state)}` : "");
 
 /** Mobile summary date label (prototype baseVals mobRows[2].label). */
-export const getMobileDateLabel = ({ q }: SearchState): string =>
-  q.date
-    ? new Date(q.date + "T00:00:00").toLocaleDateString("en-GB", {
+export const getMobileDateLabel = ({ query }: SearchState): string =>
+  query.date
+    ? new Date(`${query.date}T00:00:00`).toLocaleDateString("en-GB", {
         weekday: "short",
         day: "numeric",
         month: "short",

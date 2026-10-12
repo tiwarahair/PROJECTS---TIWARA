@@ -3,6 +3,6 @@ export interface ServiceGroup {
   slug: string;
   name: string;
   icon: string;
-  desc: string;
-  img: string;
+  description: string;
+  image: string;
 }

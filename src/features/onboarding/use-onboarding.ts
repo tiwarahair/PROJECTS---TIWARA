@@ -22,6 +22,7 @@ import {
   TURNSTILE_SCREENS,
 } from "./onboarding-data";
 import { getRouteForPath, ROUTE_START } from "./onboarding-routes";
+import type { OnboardingRoute } from "./onboarding-routes";
 import {
   EMPTY_CODE,
   getBackScreen,
@@ -49,13 +50,14 @@ const CORRECT_CODE = "123456";
 const EXPIRED_CODE = "000000";
 const LOCK_MS = 9e5;
 const MAX_ATTEMPTS = 5;
-const DEFAULT_GEO: [number, number] = [53.4486, -2.2237];
+const DEFAULT_LAT_LNG: [number, number] = [53.4486, -2.2237];
+const NEXT_WIZARD_SCREEN = { w1: "w2", w2: "w3", w3: "w4" };
 
 interface SavedProgress {
-  f?: Partial<OnboardingForm>;
-  addrOpen?: boolean;
-  ll?: [number, number] | null;
-  geo?: [number, number] | null;
+  form?: Partial<OnboardingForm>;
+  addressOpen?: boolean;
+  pinLatLng?: [number, number] | null;
+  geocodedLatLng?: [number, number] | null;
   area?: string | null;
 }
 
@@ -72,9 +74,11 @@ const getReturnTo = (): string => {
   let returnTo =
     new URLSearchParams(window.location.search).get("return") ||
     readStorage(sessionStorage, "tw_return");
+
   if (!returnTo) {
     try {
       const referrer = document.referrer ? new URL(document.referrer) : null;
+
       if (
         referrer &&
         referrer.origin === window.location.origin &&
@@ -87,16 +91,47 @@ const getReturnTo = (): string => {
       // unreadable referrer
     }
   }
+
   return returnTo || "/";
+};
+
+/** A ?flow= / handed-off flow wins, then an explicit screen prop, then the route's own start. */
+const getStartScreen = (
+  flow: string | null,
+  { screen }: ResolvedProps,
+  route: OnboardingRoute,
+) => {
+  if (flow === "list") return "welcome";
+
+  if (flow === "pro") return "pro-email";
+
+  if (screen && screen !== "auto") return screen;
+
+  return ROUTE_START[route];
+};
+
+/** The theme prop wins, then the stored mode, then the system preference. */
+const getStartMode = (
+  { theme }: ResolvedProps,
+  storedMode: string | null,
+  prefersDark: boolean,
+) => {
+  if (theme && theme !== "auto") return theme;
+
+  if (storedMode === "dark" || storedMode === "light") return storedMode;
+
+  return prefersDark ? "dark" : "light";
 };
 
 /** The prototype's componentDidMount setup, computed up front (start screen, saved progress, board, fixture, mode). */
 const getStartState = (props: ResolvedProps): OnboardingState => {
   const state: OnboardingState = {
     ...INITIAL_STATE,
-    w: document.documentElement.clientWidth,
+    width: document.documentElement.clientWidth,
   };
+
   let saved: SavedProgress | null = null;
+
   try {
     saved = JSON.parse(
       readStorage(localStorage, STORAGE_KEY) || "null",
@@ -104,60 +139,71 @@ const getStartState = (props: ResolvedProps): OnboardingState => {
   } catch {
     // unreadable progress: start fresh
   }
+
   const handoff = readStorage(sessionStorage, "tw_flow");
+
   try {
     sessionStorage.removeItem("tw_flow");
   } catch {
     // storage unavailable
   }
+
   const flow =
     new URLSearchParams(window.location.search).get("flow") || handoff;
+
   const route = getRouteForPath(window.location.pathname) ?? "login";
-  const start =
-    flow === "list"
-      ? "welcome"
-      : flow === "pro"
-        ? "pro-email"
-        : props.screen && props.screen !== "auto"
-          ? props.screen
-          : ROUTE_START[route];
+  const start = getStartScreen(flow, props, route);
+
   state.screen = start;
   state.returnTo = getReturnTo();
+
   if (start === "welcome" || start[0] === "w") state.audience = "pro";
-  if (saved && saved.f && !props.board) {
-    state.f = { ...state.f, ...saved.f, pw: "", pw2: "", terms: false };
-    if (saved.addrOpen) state.addrOpen = true;
-    if (saved.ll) state.ll = saved.ll;
-    if (saved.geo) state.geo = saved.geo;
+
+  if (saved && saved.form && !props.board) {
+    state.form = {
+      ...state.form,
+      ...saved.form,
+      password: "",
+      passwordConfirm: "",
+      terms: false,
+    };
+
+    if (saved.addressOpen) state.addressOpen = true;
+
+    if (saved.pinLatLng) state.pinLatLng = saved.pinLatLng;
+
+    if (saved.geocodedLatLng) state.geocodedLatLng = saved.geocodedLatLng;
+
     if (saved.area) state.area = saved.area;
   }
+
   if (props.board) {
     const isPro = /^(pro-|w)/.test(start);
-    state.f = {
-      ...state.f,
+
+    state.form = {
+      ...state.form,
       ...(isPro
         ? { email: "amara@amarabeauty.co.uk", first: "Amara", last: "Okonkwo" }
         : { email: "ama@example.com", first: "Ama", last: "Mensah" }),
     };
+
     if (isPro) state.audience = "pro";
     else if (start !== "welcome" && start !== "chooser")
       state.audience = "customer";
   }
+
   // fixtures start from the blank form, not the saved / board one (the prototype read this.state.f before setState)
   if (props.fixture && props.fixture !== "none")
-    Object.assign(state, getFixturePatch(props.fixture, INITIAL_STATE.f));
+    Object.assign(state, getFixturePatch(props.fixture, INITIAL_STATE.form));
+
   const storedMode = readStorage(localStorage, MODE_KEY);
+
   const prefersDark =
     !!window.matchMedia &&
     window.matchMedia("(prefers-color-scheme: dark)").matches;
-  state.mode =
-    props.theme && props.theme !== "auto"
-      ? props.theme
-      : storedMode === "dark" || storedMode === "light"
-        ? storedMode
-        : prefersDark
-          ? "dark"
-          : "light";
+
+  state.mode = getStartMode(props, storedMode, prefersDark);
+
   return state;
 };
 
@@ -167,20 +213,25 @@ export const useOnboarding = (props: OnboardingProps) => {
   const [state, setRawState] = useState(() => getStartState(resolved));
   const navigate = useNavigate();
   const stateRef = useRef(state);
+
   stateRef.current = state;
   const afterCommit = useRef<(() => void)[]>([]);
   const rootRef = useRef<HTMLDivElement>(null);
+
   const codeRefs = useMemo(
     () => EMPTY_CODE.map(() => createRef<HTMLInputElement>()),
     [],
   );
+
   const timers = useRef<Record<string, number>>({});
   const carouselHeld = useRef(false);
   const carouselTouchedAt = useRef(0);
+
   usePasswordChecker();
 
   const setState = useCallback((patch: StatePatch, callback?: () => void) => {
     if (callback) afterCommit.current.push(callback);
+
     setRawState((current) => ({
       ...current,
       ...(typeof patch === "function" ? patch(current) : patch),
@@ -189,6 +240,7 @@ export const useOnboarding = (props: OnboardingProps) => {
 
   useEffect(() => {
     const callbacks = afterCommit.current.splice(0);
+
     for (const callback of callbacks) callback();
   });
 
@@ -200,15 +252,18 @@ export const useOnboarding = (props: OnboardingProps) => {
   /** Saves wizard progress (never passwords); boards never save. */
   const save = useCallback(() => {
     if (resolved.board) return;
-    const { f, addrOpen, ll, geo, area } = stateRef.current;
+
+    const { form, addressOpen, pinLatLng, geocodedLatLng, area } =
+      stateRef.current;
+
     try {
       localStorage.setItem(
         STORAGE_KEY,
         JSON.stringify({
-          f: { ...f, pw: "", pw2: "" },
-          addrOpen,
-          ll,
-          geo,
+          form: { ...form, password: "", passwordConfirm: "" },
+          addressOpen,
+          pinLatLng,
+          geocodedLatLng,
           area,
         }),
       );
@@ -232,6 +287,7 @@ export const useOnboarding = (props: OnboardingProps) => {
       } catch {
         // storage unavailable
       }
+
       setState({ mode });
     },
     [setState],
@@ -240,19 +296,26 @@ export const useOnboarding = (props: OnboardingProps) => {
   // width drives desktop (≥900) / tablet (≥640) layouts
   useEffect(() => {
     const root = rootRef.current;
+
     if (!root || !window.ResizeObserver) return;
+
     const observer = new ResizeObserver((entries) => {
       const width = Math.round(entries[0]?.contentRect.width ?? 0);
-      if (Math.abs(width - stateRef.current.w) > 4) setState({ w: width });
+
+      if (Math.abs(width - stateRef.current.width) > 4) setState({ width });
     });
+
     observer.observe(root);
+
     return () => observer.disconnect();
   }, [setState]);
 
   // follow the system theme unless the user (or ?theme=) chose one
   useEffect(() => {
     const query = window.matchMedia?.("(prefers-color-scheme: dark)");
+
     if (!query?.addEventListener) return;
+
     const handleChange = (event: MediaQueryListEvent) => {
       if (
         !readStorage(localStorage, MODE_KEY) &&
@@ -260,7 +323,9 @@ export const useOnboarding = (props: OnboardingProps) => {
       )
         setMode(event.matches ? "dark" : "light");
     };
+
     query.addEventListener("change", handleChange);
+
     return () => query.removeEventListener("change", handleChange);
   }, [resolved.theme, setMode]);
 
@@ -270,23 +335,31 @@ export const useOnboarding = (props: OnboardingProps) => {
       for (const [src] of Object.values(PHOTOS))
         new Image().src = getAssetUrl(src);
     }, 1200);
+
     const carousel = window.setInterval(() => {
       const { screen } = stateRef.current;
+
       if (screen !== "welcome" || carouselHeld.current || document.hidden)
         return;
+
       if (
         carouselTouchedAt.current &&
         Date.now() - carouselTouchedAt.current < 5000
       )
         return;
-      setState((current) => ({ bn: (current.bn + 1) % 4 }));
+
+      setState((current) => ({ benefitIndex: (current.benefitIndex + 1) % 4 }));
     }, 5000);
+
     const tick = window.setInterval(() => {
       const { resendIn, screen } = stateRef.current;
+
       if (resendIn > 0 && (isCodeScreen(screen) || screen === "forgot-sent"))
         setState((current) => ({ resendIn: current.resendIn - 1 }));
     }, 1000);
+
     const pending = timers.current;
+
     return () => {
       window.clearTimeout(preload);
       window.clearInterval(carousel);
@@ -298,30 +371,34 @@ export const useOnboarding = (props: OnboardingProps) => {
   // code screens focus the first box once the slide-in has run
   useEffect(() => {
     if (!isCodeScreen(state.screen)) return;
+
     const timer = window.setTimeout(
       () => codeRefs[0]?.current?.focus({ preventScroll: true }),
       360,
     );
+
     return () => window.clearTimeout(timer);
   }, [state.screen, codeRefs]);
 
-  const go = (screen: string, dir: "fwd" | "back" = "fwd") => {
+  const goTo = (screen: string, direction: "fwd" | "back" = "fwd") => {
     window.clearTimeout(timers.current.auto);
+
     setState({
       screen,
-      dir,
-      err: {},
+      direction,
+      serverErrors: {},
       touched: {},
       busy: false,
-      netErr: false,
+      networkError: false,
       shake: 0,
       code: EMPTY_CODE,
-      codeErr: "",
+      codeError: "",
       resendIn: 30,
       compact: false,
-      pwShow: false,
-      ts: "idle",
+      passwordShown: false,
+      turnstile: "idle",
     });
+
     try {
       window.scrollTo({ top: 0 });
     } catch {
@@ -337,13 +414,13 @@ export const useOnboarding = (props: OnboardingProps) => {
   ) =>
     setState(
       (current) => ({
-        f: { ...current.f, [key]: value },
+        form: { ...current.form, [key]: value },
         touched: touch ? { ...current.touched, [key]: true } : current.touched,
-        err: {
-          ...current.err,
+        serverErrors: {
+          ...current.serverErrors,
           [key]: undefined,
           exists: undefined,
-          noBiz: undefined,
+          noBusiness: undefined,
         },
       }),
       () => {
@@ -355,28 +432,33 @@ export const useOnboarding = (props: OnboardingProps) => {
     setState((current) => ({ touched: { ...current.touched, [key]: true } }));
 
   const getTurnstileMode = () =>
-    stateRef.current.tsMode || resolved.turnstile || "pass";
+    stateRef.current.turnstileMode || resolved.turnstile || "pass";
+
   const isTurnstileBlocked = () => {
-    const { screen, ts } = stateRef.current;
+    const { screen, turnstile } = stateRef.current;
+
     return (
       getTurnstileMode() !== "pass" &&
       TURNSTILE_SCREENS.includes(screen ?? "") &&
-      ts !== "ok"
+      turnstile !== "passed"
     );
   };
 
-  const firstName = () => {
-    const { f } = stateRef.current;
-    if (f.first && f.first.trim()) return f.first.trim();
-    return NAMES[f.email.trim().toLowerCase()]?.[0] ?? "";
+  const getFirstName = () => {
+    const { form } = stateRef.current;
+
+    if (form.first && form.first.trim()) return form.first.trim();
+
+    return NAMES[form.email.trim().toLowerCase()]?.[0] ?? "";
   };
 
   const toStudio = (isNew: boolean) => {
-    go("studio");
+    goTo("studio");
+
     if (!resolved.stayOnDone)
       later(
         "studio",
-        () => navigate("/studio" + (isNew ? "?welcome=1" : "")),
+        () => navigate(`/studio${isNew ? "?welcome=1" : ""}`),
         500,
       );
   };
@@ -385,33 +467,41 @@ export const useOnboarding = (props: OnboardingProps) => {
     kind: "customer-login" | "customer-new" | "newpro" | "pro",
   ) => {
     if (kind === "customer-login" || kind === "customer-new") {
-      const first = firstName();
+      const first = getFirstName();
+
       const message =
         kind === "customer-new"
-          ? "Welcome to Tiwára’s House" + (first ? ", " + first : "")
-          : "Welcome back" + (first ? ", " + first : "");
+          ? `Welcome to Tiwára’s House${first ? `, ${first}` : ""}`
+          : `Welcome back${first ? `, ${first}` : ""}`;
+
       if (resolved.stayOnDone) {
         setState({ busy: false, toast: message });
+
         return;
       }
+
       try {
         sessionStorage.setItem("tw_toast", message);
         sessionStorage.removeItem("tw_return");
       } catch {
         // storage unavailable
       }
+
       setState({ busy: true });
       navigate(stateRef.current.returnTo || "/");
+
       return;
     }
+
     if (kind === "newpro") {
-      const { f } = stateRef.current;
+      const { form } = stateRef.current;
+
       try {
         localStorage.setItem(
           "tw_welcome",
           JSON.stringify({
-            first: f.first,
-            cats: f.cats,
+            first: form.first,
+            cats: form.categories,
             drafts: 2,
             at: Date.now(),
           }),
@@ -419,195 +509,263 @@ export const useOnboarding = (props: OnboardingProps) => {
       } catch {
         // storage unavailable
       }
+
       clearSaved();
       setState({ busy: false });
-      go("pro-done");
+      goTo("pro-done");
+
       return;
     }
+
     toStudio(false);
   };
 
   const afterProAuth = () => {
     if (resolved.twoFa === "off") finish("pro");
-    else setState({ codeKind: "2fa" }, () => go("pro-2fa"));
+    else setState({ codeKind: "2fa" }, () => goTo("pro-2fa"));
   };
 
   const submit = () => {
     const current = stateRef.current;
+
     if (current.busy) return;
+
     if (current.lockedUntil > Date.now()) return;
+
     const errorKeys = Object.keys(getErrors(current));
+
     if (errorKeys.length) {
       const touched: Record<string, boolean> = {};
+
       for (const key of errorKeys) touched[key] = true;
+
       setState((state) => ({ touched: { ...state.touched, ...touched } }));
+
       return;
     }
+
     if (isTurnstileBlocked()) return;
-    const { screen, f } = current;
-    const email = f.email.trim().toLowerCase();
+
+    const { screen, form } = current;
+    const email = form.email.trim().toLowerCase();
+
     if (screen === "w1" || screen === "w2" || screen === "w3") {
       save();
-      go(screen === "w1" ? "w2" : screen === "w2" ? "w3" : "w4");
+      goTo(NEXT_WIZARD_SCREEN[screen]);
+
       return;
     }
+
     if (screen === "w5") {
-      setState({ codeKind: "verify" }, () => go("verify"));
+      setState({ codeKind: "verify" }, () => goTo("verify"));
+
       return;
     }
-    setState({ busy: true, netErr: false });
+
+    setState({ busy: true, networkError: false });
+
     // simulated round trip; ?network=offline shows the connection error
     const done = (callback: () => void) =>
       later(
         "busy",
         () => {
           if (resolved.network === "offline") {
-            setState({ busy: false, netErr: true });
+            setState({ busy: false, networkError: true });
+
             return;
           }
+
           callback();
         },
         SUBMIT_MS,
       );
+
     if (screen === "cust-email")
       return done(() =>
-        go(KNOWN_CUSTOMERS.includes(email) ? "cust-password" : "cust-create"),
+        goTo(KNOWN_CUSTOMERS.includes(email) ? "cust-password" : "cust-create"),
       );
+
     if (screen === "pro-email")
       return done(() => {
-        if (KNOWN_PROS.includes(email)) go("pro-password");
-        else setState({ busy: false, err: { noBiz: true } });
+        if (KNOWN_PROS.includes(email)) goTo("pro-password");
+        else setState({ busy: false, serverErrors: { noBusiness: true } });
       });
+
     if (screen === "cust-password" || screen === "pro-password")
       return done(() => {
-        if (f.pw === CORRECT_PASSWORD || resolved.password === "accept") {
+        if (
+          form.password === CORRECT_PASSWORD ||
+          resolved.password === "accept"
+        ) {
           if (screen === "pro-password") afterProAuth();
           else finish("customer-login");
+
           return;
         }
+
         const attempts = current.attempts + 1;
+
         if (attempts >= MAX_ATTEMPTS)
           setState({
             busy: false,
             attempts,
             lockedUntil: Date.now() + LOCK_MS,
-            err: { pw: "Too many attempts. Try again in 15 minutes." },
+            serverErrors: {
+              password: "Too many attempts. Try again in 15 minutes.",
+            },
           });
         else
           setState((state) => ({
             busy: false,
             attempts,
             shake: state.shake + 1,
-            err: { pw: "That password isn’t right. Try again or reset it." },
+            serverErrors: {
+              password: "That password isn’t right. Try again or reset it.",
+            },
           }));
       });
+
     if (screen === "cust-create")
       return done(() => {
         if (KNOWN_CUSTOMERS.includes(email)) {
-          setState({ busy: false, err: { exists: true } });
+          setState({ busy: false, serverErrors: { exists: true } });
+
           return;
         }
+
         setState({ codeKind: "verify", audience: "customer" }, () =>
-          go("verify"),
+          goTo("verify"),
         );
       });
+
     if (screen === "cust-social") return done(() => finish("customer-new"));
-    if (screen === "forgot-email") return done(() => go("forgot-sent"));
-    if (screen === "forgot-reset") return done(() => go("forgot-done"));
+
+    if (screen === "forgot-email") return done(() => goTo("forgot-sent"));
+
+    if (screen === "forgot-reset") return done(() => goTo("forgot-done"));
+
     if (isCodeScreen(screen)) {
       const code = current.code.join("");
+
       if (code.length < 6) {
-        setState({ busy: false, codeErr: "Enter the 6-digit code" });
+        setState({ busy: false, codeError: "Enter the 6-digit code" });
+
         return;
       }
+
       return done(() => {
         if (code === EXPIRED_CODE) {
           setState({
             busy: false,
-            codeErr: "That code has expired. Send a new one.",
+            codeError: "That code has expired. Send a new one.",
             resendIn: 0,
           });
+
           return;
         }
+
         if (code !== CORRECT_CODE && resolved.code !== "accept") {
           setState((state) => ({
             busy: false,
             shake: state.shake + 1,
-            codeErr: "That code isn’t right",
+            codeError: "That code isn’t right",
           }));
+
           return;
         }
+
         if (screen === "pro-2fa") finish("pro");
         else
           finish(current.audience === "customer" ? "customer-new" : "newpro");
       });
     }
+
     if (screen === "w4")
       return done(() => {
         if (KNOWN_PROS.includes(email)) {
-          setState({ busy: false, err: { exists: true } });
+          setState({ busy: false, serverErrors: { exists: true } });
+
           return;
         }
-        setState({ audience: "newpro" }, () => go("w5"));
+
+        setState({ audience: "newpro" }, () => goTo("w5"));
       });
+
     setState({ busy: false });
   };
 
   /** Simulated Google / Apple sign-in (?socialEmail=unknown, ?appleName=withheld). */
   const socialSignIn = (provider: "google" | "apple", isPro: boolean) => {
     if (stateRef.current.busy) return;
+
     const isKnown = resolved.socialEmail !== "unknown";
-    setState({ busy: true, netErr: false, err: {} });
+
+    setState({ busy: true, networkError: false, serverErrors: {} });
+
     later(
       "busy",
       () => {
         if (resolved.network === "offline") {
-          setState({ busy: false, netErr: true });
+          setState({ busy: false, networkError: true });
+
           return;
         }
-        const f = { ...stateRef.current.f };
+
+        const form = { ...stateRef.current.form };
+
         if (isPro) {
-          f.email = isKnown
-            ? "amara@amarabeauty.co.uk"
-            : provider === "apple"
+          const newProEmail =
+            provider === "apple"
               ? "k3x9wq2m7t@privaterelay.appleid.com"
               : "ama.studio@gmail.com";
+
+          form.email = isKnown ? "amara@amarabeauty.co.uk" : newProEmail;
+
           if (!isKnown) {
-            setState({ busy: false, f, err: { noBiz: true } });
+            setState({ busy: false, form, serverErrors: { noBusiness: true } });
+
             return;
           }
-          setState({ busy: false, f }, afterProAuth);
+
+          setState({ busy: false, form }, afterProAuth);
+
           return;
         }
+
         if (isKnown) {
           const email =
             provider === "apple" ? "kemi.a@icloud.com" : "nia.okafor@gmail.com";
+
           const [first = "", last = ""] = NAMES[email] ?? [];
-          setState({ f: { ...f, email, first, last } }, () =>
+
+          setState({ form: { ...form, email, first, last } }, () =>
             finish("customer-login"),
           );
+
           return;
         }
+
         const sharesName =
           provider === "google" || resolved.appleName !== "withheld";
+
         setState(
           {
-            f: {
-              ...f,
+            form: {
+              ...form,
               email:
                 provider === "apple"
                   ? "x7k2m9q4pd@privaterelay.appleid.com"
                   : "ama.mensah@gmail.com",
               first: sharesName ? "Ama" : "",
               last: sharesName ? "Mensah" : "",
-              mob: "",
+              mobile: "",
               terms: false,
-              mkt: false,
+              marketing: false,
             },
-            socialP: provider,
+            socialProvider: provider,
             audience: "customer",
           },
-          () => go("cust-social"),
+          () => goTo("cust-social"),
         );
       },
       SUBMIT_MS,
@@ -615,11 +773,16 @@ export const useOnboarding = (props: OnboardingProps) => {
   };
 
   const checkTurnstile = () => {
-    if (stateRef.current.ts !== "idle") return;
-    setState({ ts: "checking" });
+    if (stateRef.current.turnstile !== "idle") return;
+
+    setState({ turnstile: "checking" });
+
     later(
       "turnstile",
-      () => setState({ ts: getTurnstileMode() === "fail" ? "fail" : "ok" }),
+      () =>
+        setState({
+          turnstile: getTurnstileMode() === "fail" ? "fail" : "passed",
+        }),
       1100,
     );
   };
@@ -627,14 +790,18 @@ export const useOnboarding = (props: OnboardingProps) => {
   /** One digit per box: advance on input, submit when all six are filled. */
   const setCodeDigit = (index: number, value: string) => {
     const digit = value.replace(/\D/g, "");
+
     setState(
       (current) => {
         const code = current.code.slice();
+
         code[index] = digit.slice(-1);
-        return { code, codeErr: "" };
+
+        return { code, codeError: "" };
       },
       () => {
         if (digit && index < 5) codeRefs[index + 1]?.current?.focus();
+
         if (digit && index === 5 && stateRef.current.code.every(Boolean))
           submit();
       },
@@ -643,6 +810,7 @@ export const useOnboarding = (props: OnboardingProps) => {
 
   const handleCodeKey = (index: number, event: KeyboardEvent) => {
     const { code } = stateRef.current;
+
     if (event.key === "Backspace" && !code[index] && index > 0) {
       codeRefs[index - 1]?.current?.focus();
       setCodeDigit(index - 1, "");
@@ -657,25 +825,34 @@ export const useOnboarding = (props: OnboardingProps) => {
     const text = (event.clipboardData.getData("text") || "")
       .replace(/\D/g, "")
       .slice(0, 6);
+
     if (!text.length) return;
+
     event.preventDefault();
     const code = EMPTY_CODE.slice();
+
     text.split("").forEach((digit, index) => (code[index] = digit));
-    setState({ code, codeErr: "" }, () => {
+
+    setState({ code, codeError: "" }, () => {
       codeRefs[Math.min(5, text.length)]?.current?.focus();
+
       if (text.length === 6) submit();
     });
   };
 
   /** Re-centres the pin on the postcode via postcodes.io (live). */
   const geocodeOnly = async () => {
-    const postcode = stateRef.current.f.pc.trim().toUpperCase();
+    const postcode = stateRef.current.form.postcode.trim().toUpperCase();
+
     if (!isValidPostcode(postcode)) return;
+
     try {
       const response = await fetch(
-        "https://api.postcodes.io/postcodes/" + encodeURIComponent(postcode),
+        `https://api.postcodes.io/postcodes/${encodeURIComponent(postcode)}`,
       );
+
       if (!response.ok) return;
+
       const { result } = (await response.json()) as {
         result: {
           latitude: number;
@@ -684,11 +861,12 @@ export const useOnboarding = (props: OnboardingProps) => {
           outcode: string;
         };
       };
+
       setState(
         {
-          geo: [result.latitude, result.longitude],
-          ll: null,
-          area: (result.admin_ward || "Manchester") + ", " + result.outcode,
+          geocodedLatLng: [result.latitude, result.longitude],
+          pinLatLng: null,
+          area: `${result.admin_ward || "Manchester"}, ${result.outcode}`,
         },
         save,
       );
@@ -698,33 +876,38 @@ export const useOnboarding = (props: OnboardingProps) => {
   };
 
   const setAddress = (address: EmittedAddress | null) => {
-    const previousPostcode = stateRef.current.f.pc;
+    const previousPostcode = stateRef.current.form.postcode;
+
     const fields = address
       ? {
-          a1: address.line1,
-          a2: address.line2 || "",
+          line1: address.line1,
+          line2: address.line2 || "",
           city: address.town,
-          pc: address.postcode,
+          postcode: address.postcode,
         }
-      : { a1: "", a2: "", city: "", pc: "" };
+      : { line1: "", line2: "", city: "", postcode: "" };
+
     const isOk = !!address && isAddressValid(address);
-    const geo: [number, number] | null =
+
+    const addressLatLng: [number, number] | null =
       address && address.lat != null && address.lng != null
         ? [address.lat, address.lng]
         : null;
+
     setState(
       (current) => ({
-        f: { ...current.f, ...fields },
-        addrOpen: isOk,
-        addrSrc: address ? address.source : "",
-        afFx: "",
-        ...(geo && fields.pc !== previousPostcode
-          ? { geo, ll: null, area: null }
+        form: { ...current.form, ...fields },
+        addressOpen: isOk,
+        addressSource: address ? address.source : "",
+        addressFinderFixture: "",
+        ...(addressLatLng && fields.postcode !== previousPostcode
+          ? { geocodedLatLng: addressLatLng, pinLatLng: null, area: null }
           : {}),
       }),
       () => {
         save();
-        if (isOk && fields.pc !== previousPostcode) void geocodeOnly();
+
+        if (isOk && fields.postcode !== previousPostcode) void geocodeOnly();
       },
     );
   };
@@ -732,9 +915,10 @@ export const useOnboarding = (props: OnboardingProps) => {
   const back = () => {
     const target = getBackScreen(stateRef.current);
     const { screen } = stateRef.current;
-    if (target) go(target, "back");
+
+    if (target) goTo(target, "back");
     else if (screen === "chooser" || screen === "welcome") navigate("/");
-    else go("chooser", "back");
+    else goTo("chooser", "back");
   };
 
   return {
@@ -744,7 +928,7 @@ export const useOnboarding = (props: OnboardingProps) => {
     codeRefs,
     actions: {
       setState,
-      go,
+      goTo,
       back,
       setField,
       touch,
@@ -764,7 +948,7 @@ export const useOnboarding = (props: OnboardingProps) => {
           "auto",
           () => {
             after?.();
-            go(to);
+            goTo(to);
           },
           300,
         ),
@@ -773,12 +957,12 @@ export const useOnboarding = (props: OnboardingProps) => {
       },
       showBenefit: (index: number) => {
         carouselTouchedAt.current = Date.now();
-        setState({ bn: index });
+        setState({ benefitIndex: index });
       },
       compactLater: (callback: () => void) => later("compact", callback, 140),
       cancelCompact: () => window.clearTimeout(timers.current.compact),
     },
-    defaultGeo: DEFAULT_GEO,
+    defaultLatLng: DEFAULT_LAT_LNG,
   };
 };
 

@@ -10,6 +10,7 @@ export interface TooltipProps {
 
 export const Tooltip = ({ label, children }: TooltipProps) => {
   const [isVisible, setIsVisible] = useState(false);
+
   return (
     <span
       className={styles.wrapper}

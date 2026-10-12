@@ -58,6 +58,7 @@ const PlusIcon = ({
 /** Step 1: pick a client, add a new one, or make it a walk-in. */
 const WhoStep = ({ view }: { view: AddBookingView }) => {
   const { newClient } = view;
+
   return (
     <>
       <div className={styles.question}>Who is it for?</div>
@@ -67,8 +68,8 @@ const WhoStep = ({ view }: { view: AddBookingView }) => {
             <SearchIcon className={styles.searchIcon} />
             <input
               className={styles.searchInput}
-              value={view.addQ}
-              onChange={view.onAddQ}
+              value={view.clientQuery}
+              onChange={view.onClientQuery}
               placeholder="Search by name or phone"
             />
           </div>
@@ -80,7 +81,7 @@ const WhoStep = ({ view }: { view: AddBookingView }) => {
               <span className={styles.newLabel}>{view.newLabel}</span>
             </button>
             {view.clients.map(
-              ({ key, delay, name, imgSrc, sub, isOn, pick }) => (
+              ({ key, delay, name, imgSrc, subtitle, isOn, pick }) => (
                 <button
                   key={key}
                   className={joinClassNames(
@@ -94,7 +95,7 @@ const WhoStep = ({ view }: { view: AddBookingView }) => {
                   <img className={styles.avatar36} src={imgSrc} alt="" />
                   <span className={styles.grow}>
                     <span className={styles.clientName}>{name}</span>
-                    <span className={styles.clientSub}>{sub}</span>
+                    <span className={styles.clientSub}>{subtitle}</span>
                   </span>
                   {isOn && (
                     <svg
@@ -115,9 +116,7 @@ const WhoStep = ({ view }: { view: AddBookingView }) => {
             )}
             {view.isNoMatch && (
               <div className={styles.noMatch}>
-                {"No client matches “" +
-                  view.addQ +
-                  "”. Add them as a new client above."}
+                {`No client matches “${view.clientQuery}”. Add them as a new client above.`}
               </div>
             )}
           </div>
@@ -184,16 +183,16 @@ const WhoStep = ({ view }: { view: AddBookingView }) => {
                 placeholder="name@email.com"
               />
             </label>
-            {view.isAddrShown && (
+            {view.isAddressShown && (
               <label className={styles.block}>
                 <span className={styles.fieldLabel}>
                   Address <span className={styles.optional}>(optional)</span>
                 </span>
                 <input
                   className={styles.input}
-                  value={newClient.addr}
+                  value={newClient.address}
                   onChange={(event) =>
-                    view.patchNew({ addr: event.target.value })
+                    view.patchNew({ address: event.target.value })
                   }
                   placeholder="Street, postcode"
                 />
@@ -218,17 +217,17 @@ const ServiceList = ({ view }: { view: AddBookingView }) => (
       <SearchIcon className={styles.noShrink} size="16" strokeWidth="1.7" />
       <input
         className={styles.searchFieldInput}
-        value={view.serviceQ}
-        onChange={view.onServiceQ}
+        value={view.serviceQuery}
+        onChange={view.onServiceQuery}
         placeholder="Search services"
       />
     </label>
     <div className={styles.serviceList}>
-      {view.serviceGroups.map(({ key, cat, n, items }) => (
+      {view.serviceGroups.map(({ key, category, count, items }) => (
         <div key={key} className={styles.group}>
           <div className={styles.groupHead}>
-            <span className={styles.h3}>{cat}</span>
-            <span className={styles.count}>{n}</span>
+            <span className={styles.h3}>{category}</span>
+            <span className={styles.count}>{count}</span>
           </div>
           <div className={styles.stack6}>
             {items.map((item) => (
@@ -242,7 +241,7 @@ const ServiceList = ({ view }: { view: AddBookingView }) => (
               >
                 <span className={styles.grow}>
                   <span className={styles.optionName}>{item.name}</span>
-                  <span className={styles.optionSub}>{item.dur}</span>
+                  <span className={styles.optionSub}>{item.duration}</span>
                 </span>
                 <span className={styles.optionPrice}>{item.priceLabel}</span>
               </button>
@@ -306,8 +305,8 @@ const ServiceEdit = ({ view }: { view: AddBookingView }) => (
             onChange={view.onDurationHours}
             aria-label="Hours"
           >
-            {view.hourOptions.map(({ key, v, label }) => (
-              <option key={key} value={v}>
+            {view.hourOptions.map(({ key, value, label }) => (
+              <option key={key} value={value}>
                 {label}
               </option>
             ))}
@@ -318,8 +317,8 @@ const ServiceEdit = ({ view }: { view: AddBookingView }) => (
             onChange={view.onDurationMinutes}
             aria-label="Minutes"
           >
-            {view.minuteOptions.map(({ key, v, label }) => (
-              <option key={key} value={v}>
+            {view.minuteOptions.map(({ key, value, label }) => (
+              <option key={key} value={value}>
                 {label}
               </option>
             ))}
@@ -348,8 +347,8 @@ const ServiceEdit = ({ view }: { view: AddBookingView }) => (
         value={view.extraValue}
         onChange={view.onExtra}
       >
-        {view.extraOptions.map(({ key, v, label }) => (
-          <option key={key} value={v}>
+        {view.extraOptions.map(({ key, value, label }) => (
+          <option key={key} value={value}>
             {label}
           </option>
         ))}
@@ -413,16 +412,20 @@ const WhenStep = ({
   studio: StudioController;
   view: AddBookingView;
 }) => {
-  const nav = getMonthNav(studio, "calM", "calY");
+  const monthNav = getMonthNav(studio, "calendarMonth", "calendarYear");
+
   return (
     <>
       <div className={styles.whenHead}>
         <div className={styles.label145}>When?</div>
-        <CalendarToggle isOpen={view.isCalOpen} onClick={view.toggleCal} />
+        <CalendarToggle
+          isOpen={view.isCalendarOpen}
+          onClick={view.toggleCalendar}
+        />
       </div>
-      {!view.isCalOpen && (
+      {!view.isCalendarOpen && (
         <div className={stepStyles.dayStrip}>
-          {view.days.map(({ key, dow, num, isOn, pick }) => (
+          {view.days.map(({ key, weekday, dayNumber, isOn, pick }) => (
             <button
               key={key}
               className={joinClassNames(
@@ -431,14 +434,14 @@ const WhenStep = ({
               )}
               onClick={pick}
             >
-              <div className={stepStyles.chipDow}>{dow}</div>
-              <div className={stepStyles.chipNum}>{num}</div>
+              <div className={stepStyles.chipDow}>{weekday}</div>
+              <div className={stepStyles.chipNum}>{dayNumber}</div>
             </button>
           ))}
         </div>
       )}
-      {view.isCalOpen && (
-        <MonthCalendar nav={nav} days={view.calDays} isLoose />
+      {view.isCalendarOpen && (
+        <MonthCalendar monthNav={monthNav} days={view.calendarDays} isLoose />
       )}
       <div className={stepStyles.timesLabel}>Available times</div>
       <div className={stepStyles.times}>
@@ -485,7 +488,7 @@ const WhenStep = ({
             className={stepStyles.timeInput}
             type="time"
             step="300"
-            min={view.customMin}
+            min={view.customMinutes}
             max={view.customMax}
             value={view.customTime}
             onChange={view.onCustomTime}
@@ -501,7 +504,7 @@ const WhenStep = ({
             <span
               className={joinClassNames(
                 styles.checkbox,
-                view.isOverlapOk && styles.checkboxOn,
+                view.isOverlapAllowed && styles.checkboxOn,
               )}
             >
               <svg
@@ -546,11 +549,11 @@ const ProtectionStep = ({ view }: { view: AddBookingView }) => (
       </svg>
       <div className={styles.policyText}>
         Your policy requires{" "}
-        <span className={styles.strong}>{view.protNoun}</span> to confirm.
+        <span className={styles.strong}>{view.protectionNoun}</span> to confirm.
       </div>
     </div>
     <div className={styles.protOptions}>
-      {view.protOptions.map(({ key, label, sub, isOn, pick }) => (
+      {view.protectionOptions.map(({ key, label, subtitle, isOn, pick }) => (
         <button
           key={key}
           className={joinClassNames(
@@ -564,18 +567,18 @@ const ProtectionStep = ({ view }: { view: AddBookingView }) => (
           </span>
           <span className={styles.grow}>
             <span className={styles.protLabel}>{label}</span>
-            <span className={styles.protSub}>{sub}</span>
+            <span className={styles.protSub}>{subtitle}</span>
           </span>
         </button>
       ))}
     </div>
-    <div className={styles.protFoot}>{view.protFoot}</div>
-    {view.isProtSend && (
+    <div className={styles.protFoot}>{view.protectionFootnote}</div>
+    {view.isProtectionSend && (
       <>
         <div className={styles.receives}>
-          {"What " + view.firstName + " receives"}
+          {`What ${view.firstName} receives`}
         </div>
-        <div className={styles.preview}>{view.protPreview}</div>
+        <div className={styles.preview}>{view.protectionPreview}</div>
       </>
     )}
   </>
@@ -586,15 +589,15 @@ const NotesStep = ({ view }: { view: AddBookingView }) => (
   <>
     <div className={styles.question}>Anything else?</div>
     <div className={styles.stack12}>
-      {view.isAddrAsked && (
+      {view.isAddressAsked && (
         <label className={styles.block}>
           <span className={styles.fieldLabel}>
             Client address <span className={styles.optional}>(optional)</span>
           </span>
           <input
             className={styles.input}
-            value={view.addrValue}
-            onChange={view.onAddr}
+            value={view.addressValue}
+            onChange={view.onAddress}
             placeholder="Street, postcode"
           />
         </label>

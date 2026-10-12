@@ -132,14 +132,17 @@ export const AddressFinder = ({
   autoFocus = false,
 }: AddressFinderProps) => {
   const [generatedId] = useState(
-    () => "af" + Math.random().toString(36).slice(2, 7),
+    () => `af${Math.random().toString(36).slice(2, 7)}`,
   );
+
   const prefix = idPrefix || generatedId;
+
   const ids = {
-    q: prefix + "-q",
-    list: prefix + "-list",
-    qErr: prefix + "-q-err",
+    query: `${prefix}-q`,
+    list: `${prefix}-list`,
+    queryError: `${prefix}-q-err`,
   };
+
   const finder = useAddressFinder({
     value,
     onChange,
@@ -147,6 +150,7 @@ export const AddressFinder = ({
     showErrors,
     autoFocus,
   });
+
   const {
     state,
     hits,
@@ -159,8 +163,8 @@ export const AddressFinder = ({
 
   // label size/colour and field height are props
   const rootStyle = {
-    "--af-field-height": fieldHeight + "px",
-    "--af-label-size": labelSize + "px",
+    "--af-field-height": `${fieldHeight}px`,
+    "--af-label-size": `${labelSize}px`,
     "--af-label-colour":
       labelColor === "secondary"
         ? "var(--text-secondary)"
@@ -176,7 +180,7 @@ export const AddressFinder = ({
     >
       {state.mode === "find" && (
         <div className={styles.findStack}>
-          <label htmlFor={ids.q} className={styles.label}>
+          <label htmlFor={ids.query} className={styles.label}>
             {label}
           </label>
           <div className={styles.inputWrap}>
@@ -187,10 +191,10 @@ export const AddressFinder = ({
             />
             <input
               ref={finder.queryRef}
-              id={ids.q}
+              id={ids.query}
               type="text"
               className={joinClassNames(styles.input, styles.queryInput)}
-              value={state.q}
+              value={state.query}
               onChange={finder.handleQueryChange}
               onKeyDown={finder.handleQueryKeyDown}
               onFocus={finder.handleQueryFocus}
@@ -204,12 +208,14 @@ export const AddressFinder = ({
               aria-expanded={isOpen ? "true" : "false"}
               aria-controls={ids.list}
               aria-activedescendant={
-                isOpen && state.idx >= 0 ? prefix + "-opt-" + state.idx : ""
+                isOpen && state.highlightedIndex >= 0
+                  ? `${prefix}-opt-${state.highlightedIndex}`
+                  : ""
               }
               aria-invalid={queryError ? "true" : "false"}
-              aria-describedby={ids.qErr}
+              aria-describedby={ids.queryError}
             />
-            {state.q.length > 0 && (
+            {state.query.length > 0 && (
               <button
                 type="button"
                 className={styles.clear}
@@ -243,14 +249,17 @@ export const AddressFinder = ({
                   >
                     {hits.map((hit, index) => (
                       <div
-                        key={hit.a.id}
-                        id={prefix + "-opt-" + index}
+                        key={hit.address.id}
+                        id={`${prefix}-opt-${index}`}
                         role="option"
                         tabIndex={-1}
-                        aria-selected={index === state.idx ? "true" : "false"}
+                        aria-selected={
+                          index === state.highlightedIndex ? "true" : "false"
+                        }
                         className={joinClassNames(
                           styles.option,
-                          index === state.idx && styles.optionActive,
+                          index === state.highlightedIndex &&
+                            styles.optionActive,
                         )}
                         onMouseDown={keepFocus}
                         onClick={() => finder.pick(hit)}
@@ -259,30 +268,32 @@ export const AddressFinder = ({
                         <PinIcon className={styles.pinIcon} size={16} />
                         <span className={styles.optionText}>
                           <span className={styles.optionLine}>
-                            {hit.line.map(({ key, t, hl }) => (
+                            {hit.line.map(({ key, text, highlighted }) => (
                               <span
                                 key={key}
                                 className={joinClassNames(
                                   styles.lineSegment,
-                                  hl && styles.lineSegmentHit,
+                                  highlighted && styles.lineSegmentHit,
                                 )}
                               >
-                                {t}
+                                {text}
                               </span>
                             ))}
                           </span>
                           <span className={styles.optionSub}>
-                            {hit.sub.map(({ key, t, hl }) => (
-                              <span
-                                key={key}
-                                className={joinClassNames(
-                                  styles.subSegment,
-                                  hl && styles.subSegmentHit,
-                                )}
-                              >
-                                {t}
-                              </span>
-                            ))}
+                            {hit.secondaryLine.map(
+                              ({ key, text, highlighted }) => (
+                                <span
+                                  key={key}
+                                  className={joinClassNames(
+                                    styles.subSegment,
+                                    highlighted && styles.subSegmentHit,
+                                  )}
+                                >
+                                  {text}
+                                </span>
+                              ),
+                            )}
                           </span>
                         </span>
                       </div>
@@ -305,7 +316,7 @@ export const AddressFinder = ({
               </div>
             )}
           </div>
-          <div id={ids.qErr} aria-live="polite">
+          <div id={ids.queryError} aria-live="polite">
             {queryError && (
               <div role="alert" className={styles.error}>
                 <ErrorIcon />
@@ -332,7 +343,7 @@ export const AddressFinder = ({
             <address className={styles.address}>
               {summaryLines.map((line, index) => (
                 <div
-                  key={"l" + index}
+                  key={`l${index}`}
                   className={
                     index === 0 ? styles.addressFirst : styles.addressRest
                   }
@@ -359,7 +370,8 @@ export const AddressFinder = ({
           {MANUAL_FIELDS.map(
             ({ key, label: fieldLabel, autoComplete, optional, sizeClass }) => {
               const error = isErrorShown(key) ? fieldErrors[key] : "";
-              const fieldId = prefix + "-" + key;
+              const fieldId = `${prefix}-${key}`;
+
               return (
                 <div
                   key={key}
@@ -385,9 +397,9 @@ export const AddressFinder = ({
                     autoComplete={autoComplete}
                     autoCapitalize={key === "postcode" ? "characters" : "words"}
                     aria-invalid={error ? "true" : "false"}
-                    aria-describedby={fieldId + "-err"}
+                    aria-describedby={`${fieldId}-err`}
                   />
-                  <div id={fieldId + "-err"} aria-live="polite">
+                  <div id={`${fieldId}-err`} aria-live="polite">
                     {error && (
                       <div role="alert" className={styles.error}>
                         <ErrorIcon />

@@ -68,10 +68,10 @@ const getMeta = (
     )
     .slice(0, 2)
     .map((service) => (typeof service === "string" ? service : service.name));
+
   const fromText =
-    from != null
-      ? "from " + (String(from)[0] === "£" ? from : "£" + from)
-      : null;
+    from != null ? `from ${String(from)[0] === "£" ? from : `£${from}`}` : null;
+
   return [...serviceNames, fromText].filter(Boolean).join(" · ");
 };
 
@@ -93,14 +93,17 @@ export const StylistCard = ({
   bookHref = "",
 }: StylistCardProps) => {
   const { isFavourite, toggleFavourite } = useFavourites();
+
   const id =
     stylistId || (String(href).match(/stylist=([^&]+)/) || [])[1] || "";
+
   const isSaved = !!id && isFavourite(id);
   const metaText = meta ?? getMeta(services, from);
 
   const handleHeart = (event: MouseEvent<HTMLButtonElement>) => {
     event.preventDefault();
     event.stopPropagation();
+
     if (id) toggleFavourite(id, event);
   };
 
@@ -198,7 +201,7 @@ export const StylistCard = ({
             <div className={styles.facts}>
               {facts.map(({ text, strong }, index) => (
                 <span
-                  key={"f" + index}
+                  key={`f${index}`}
                   className={strong ? styles.factStrong : styles.fact}
                 >
                   {text}
@@ -210,7 +213,7 @@ export const StylistCard = ({
             <div className={styles.rows}>
               {rows.map(({ name, meta: rowMeta, href: rowHref }, index) => (
                 <CardLink
-                  key={"r" + index}
+                  key={`r${index}`}
                   href={rowHref}
                   className={styles.row}
                 >

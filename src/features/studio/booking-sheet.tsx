@@ -43,7 +43,7 @@ export const ContactLinks = ({
   hasPhone: boolean;
   hasEmail: boolean;
 }) => {
-  const link = (href: string, label: string, d: string) => (
+  const link = (href: string, label: string, iconPath: string) => (
     <a
       className={styles.contact}
       href={href}
@@ -62,10 +62,11 @@ export const ContactLinks = ({
         strokeLinecap="round"
         strokeLinejoin="round"
       >
-        <path d={d}></path>
+        <path d={iconPath}></path>
       </svg>
     </a>
   );
+
   return (
     <span className={styles.contacts}>
       {hasPhone && link(telHref, "Call client", CONTACT_ICONS.call)}
@@ -106,28 +107,36 @@ const BookingMain = ({
 }) => {
   const { state, setState } = studio;
   const { booking } = view;
-  const isHovering = !!state.cliHov && view.isView;
+  const isHovering = !!state.clientHover && view.isView;
   const hasClientActions = isHovering && !view.isClientLocked;
-  const isServiceHover = !!state.svcHov;
+  const isServiceHover = !!state.serviceHover;
+
+  const getLocationLabel = () => {
+    if (state.bookingAddressOn) return "Save";
+
+    return booking.address ? "Edit" : "Add";
+  };
+
   return (
     <>
       <div
-        className={joinClassNames(styles.main, state.bkBack && styles.mainBack)}
+        className={joinClassNames(
+          styles.main,
+          state.bookingStepBack && styles.mainBack,
+        )}
       >
         {booking.autoX && (
           <div className={styles.autoCancelled}>
             <div className={styles.autoLabel}>Auto-cancelled</div>
             <div className={styles.autoBody}>
-              {"The payment link expired on " +
-                booking.expiryLabel +
-                " without being confirmed, so the slot was released."}
+              {`The payment link expired on ${booking.expiryLabel} without being confirmed, so the slot was released.`}
             </div>
           </div>
         )}
         <div
           className={styles.clientRow}
-          onMouseEnter={() => setState({ cliHov: true })}
-          onMouseLeave={() => setState({ cliHov: false })}
+          onMouseEnter={() => setState({ clientHover: true })}
+          onMouseLeave={() => setState({ clientHover: false })}
         >
           <div
             className={styles.clientOpen}
@@ -224,18 +233,20 @@ const BookingMain = ({
               <button
                 className={styles.statusButton}
                 style={asStyle({
-                  "--st-bg": booking.stBg,
-                  "--st-border": booking.stBorder,
-                  "--st-color": booking.stColor,
+                  "--st-bg": booking.statusBackground,
+                  "--st-border": booking.statusBorder,
+                  "--st-color": booking.statusColor,
                 })}
-                onClick={() => setState({ stMenu: !state.stMenu })}
+                onClick={() =>
+                  setState({ statusMenuOpen: !state.statusMenuOpen })
+                }
               >
-                {booking.stDot && <span className={styles.pulse}></span>}
-                {booking.stLabel}
+                {booking.statusDot && <span className={styles.pulse}></span>}
+                {booking.statusLabel}
                 <svg
                   className={joinClassNames(
                     styles.chevron,
-                    state.stMenu && styles.chevronOpen,
+                    state.statusMenuOpen && styles.chevronOpen,
                   )}
                   width="13"
                   height="13"
@@ -249,24 +260,31 @@ const BookingMain = ({
                   <path d="m6 9 6 6 6-6"></path>
                 </svg>
               </button>
-              {state.stMenu && (
+              {state.statusMenuOpen && (
                 <>
                   {/* eslint-disable-next-line jsx-a11y/click-events-have-key-events, jsx-a11y/no-static-element-interactions */}
                   <span
                     className={styles.menuScrim}
-                    onClick={() => setState({ stMenu: false })}
+                    onClick={() => setState({ statusMenuOpen: false })}
                   ></span>
                   <span className={styles.statusMenu}>
                     {view.statusItems.map(
-                      ({ label, d, sub, off, danger, run }) => (
+                      ({
+                        label,
+                        iconPath,
+                        subtitle,
+                        disabled,
+                        danger,
+                        run,
+                      }) => (
                         <button
                           key={label}
                           className={joinClassNames(
                             styles.menuItem,
-                            off && styles.menuItemOff,
+                            disabled && styles.menuItemOff,
                           )}
                           onClick={run}
-                          disabled={!!off}
+                          disabled={!!disabled}
                         >
                           <svg
                             className={styles.menuIcon}
@@ -279,7 +297,7 @@ const BookingMain = ({
                             strokeLinecap="round"
                             strokeLinejoin="round"
                           >
-                            <path d={d}></path>
+                            <path d={iconPath}></path>
                           </svg>
                           <span className={styles.grow}>
                             <span
@@ -290,8 +308,8 @@ const BookingMain = ({
                             >
                               {label}
                             </span>
-                            {!!sub && (
-                              <span className={styles.menuSub}>{sub}</span>
+                            {!!subtitle && (
+                              <span className={styles.menuSub}>{subtitle}</span>
                             )}
                           </span>
                         </button>
@@ -306,15 +324,15 @@ const BookingMain = ({
         {!!booking.note && (
           <figure className={styles.note}>
             <figcaption className={styles.noteCaption}>
-              {"Note from " + booking.firstName}
+              {`Note from ${booking.firstName}`}
             </figcaption>
             <blockquote className={styles.noteQuote}>
-              {"“" + booking.note + "”"}
+              {`“${booking.note}”`}
             </blockquote>
           </figure>
         )}
       </div>
-      {!!view.sens && (
+      {!!view.sensitivities && (
         <div className={styles.sens}>
           <svg
             className={styles.noShrink}
@@ -329,7 +347,7 @@ const BookingMain = ({
           >
             <path d="M10.3 3.9 1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0zM12 9v4M12 17h.01"></path>
           </svg>
-          {view.sens}
+          {view.sensitivities}
         </div>
       )}
       {/* eslint-disable-next-line jsx-a11y/click-events-have-key-events, jsx-a11y/no-static-element-interactions */}
@@ -340,24 +358,22 @@ const BookingMain = ({
           isServiceHover && styles.serviceHover,
         )}
         onClick={() => {
-          if (view.isView) studio.serviceActions.esOpen(booking);
+          if (view.isView) studio.serviceActions.openAddonEdit(booking);
         }}
-        onMouseEnter={() => setState({ svcHov: true })}
-        onMouseLeave={() => setState({ svcHov: false })}
+        onMouseEnter={() => setState({ serviceHover: true })}
+        onMouseLeave={() => setState({ serviceHover: false })}
       >
         <div className={styles.serviceTop}>
           <div className={styles.grow}>
-            <div className={styles.eyebrow}>{booking.catLabel}</div>
-            <div className={styles.serviceName}>{booking.svc}</div>
+            <div className={styles.eyebrow}>{booking.categoryLabel}</div>
+            <div className={styles.serviceName}>{booking.service}</div>
             <div className={styles.when}>
-              {booking.dayLabel + " · " + booking.timeRange}
+              {`${booking.dayLabel} · ${booking.timeRange}`}
             </div>
-            <div className={styles.duration}>{booking.durLabel}</div>
+            <div className={styles.duration}>{booking.durationLabel}</div>
             {booking.movedByClient && (
               <div className={styles.moved}>
-                {"Moved once by " +
-                  booking.firstName +
-                  ". Free reschedule used."}
+                {`Moved once by ${booking.firstName}. Free reschedule used.`}
               </div>
             )}
           </div>
@@ -367,7 +383,7 @@ const BookingMain = ({
               {view.isView && (
                 <button
                   className={styles.editLink}
-                  onClick={() => studio.serviceActions.esOpen(booking)}
+                  onClick={() => studio.serviceActions.openAddonEdit(booking)}
                 >
                   Edit
                 </button>
@@ -377,7 +393,7 @@ const BookingMain = ({
               <div className={styles.iconLayer}>
                 <button
                   className={styles.editIcon}
-                  onClick={() => studio.serviceActions.esOpen(booking)}
+                  onClick={() => studio.serviceActions.openAddonEdit(booking)}
                   aria-label="Edit service"
                 >
                   <svg
@@ -426,7 +442,7 @@ const BookingMain = ({
           </svg>
           <div className={styles.grow}>
             <div className={styles.awaitingTitle}>
-              {"Auto-cancels " + booking.expiryLabel}
+              {`Auto-cancels ${booking.expiryLabel}`}
             </div>
             <div className={styles.muted135}>{booking.hoursLeft}</div>
           </div>
@@ -450,29 +466,29 @@ const BookingMain = ({
           </svg>
           <div className={styles.grow}>
             <div className={styles.panelLabel}>Client location</div>
-            {!state.bkLocOn && (
+            {!state.bookingAddressOn && (
               <div
                 className={joinClassNames(
                   styles.panelValue,
-                  !booking.addr && styles.panelValueEmpty,
+                  !booking.address && styles.panelValueEmpty,
                 )}
               >
-                {booking.addrLabel}
+                {booking.addressLabel}
               </div>
             )}
-            {state.bkLocOn && (
+            {state.bookingAddressOn && (
               <input
                 className={styles.addressInput}
-                value={state.bkAddrDraft}
+                value={state.bookingAddressDraft}
                 onChange={(event) =>
-                  setState({ bkAddrDraft: event.target.value })
+                  setState({ bookingAddressDraft: event.target.value })
                 }
                 placeholder="Street, postcode"
               />
             )}
           </div>
           <button className={styles.textAction} onClick={view.toggleLocation}>
-            {state.bkLocOn ? "Save" : booking.addr ? "Edit" : "Add"}
+            {getLocationLabel()}
           </button>
         </div>
       )}
@@ -493,12 +509,9 @@ const BookingMain = ({
             <path d="M22 2 11 13"></path>
           </svg>
           <div className={styles.grow}>
-            <div className={styles.panelLabel}>{booking.protWord}</div>
+            <div className={styles.panelLabel}>{booking.protectionWord}</div>
             <div className={styles.panelValue}>
-              {"Link sent to " +
-                booking.firstName +
-                " " +
-                booking.linkSentLabel}
+              {`Link sent to ${booking.firstName} ${booking.linkSentLabel}`}
             </div>
             <div className={styles.linkActions}>
               <button
@@ -540,22 +553,28 @@ const BookingMain = ({
           </div>
         </div>
       )}
-      {!state.bkNoteOn && booking.hasStNote && (
+      {!state.bookingNoteOn && booking.hasStylistNote && (
         <button
           className={styles.ownNote}
           onClick={() =>
-            setState({ bkNoteOn: true, bkNoteDraft: booking.stylistNote })
+            setState({
+              bookingNoteOn: true,
+              bookingNoteDraft: booking.stylistNote,
+            })
           }
         >
           <span className={styles.strong}>Your note:</span>{" "}
           {booking.stylistNote}
         </button>
       )}
-      {!state.bkNoteOn && booking.noStNote && (
+      {!state.bookingNoteOn && booking.noStylistNote && (
         <button
           className={styles.addNote}
           onClick={() =>
-            setState({ bkNoteOn: true, bkNoteDraft: booking.stylistNote })
+            setState({
+              bookingNoteOn: true,
+              bookingNoteDraft: booking.stylistNote,
+            })
           }
         >
           <svg
@@ -572,19 +591,21 @@ const BookingMain = ({
           Add a note only you can see
         </button>
       )}
-      {state.bkNoteOn && (
+      {state.bookingNoteOn && (
         <div className={styles.noteEditor}>
           <textarea
             className={styles.noteInput}
-            value={state.bkNoteDraft}
-            onChange={(event) => setState({ bkNoteDraft: event.target.value })}
+            value={state.bookingNoteDraft}
+            onChange={(event) =>
+              setState({ bookingNoteDraft: event.target.value })
+            }
             rows={3}
             placeholder="e.g. Bring the 30 colour, she wants it longer this time"
           ></textarea>
           <div className={styles.noteActions}>
             <button
               className={styles.noteCancel}
-              onClick={() => setState({ bkNoteOn: false })}
+              onClick={() => setState({ bookingNoteOn: false })}
             >
               Cancel
             </button>
@@ -600,16 +621,17 @@ const BookingMain = ({
 
 const PaymentStep = ({ view }: { view: BookingSheetView }) => {
   const { booking } = view;
+
   return (
     <div className={styles.payment}>
       <div className={styles.paymentHead}>
         <span className={styles.secondary145}>
-          {booking.svc + " · " + booking.dayLabel}
+          {`${booking.service} · ${booking.dayLabel}`}
         </span>
         <span
           className={styles.payBadge}
           style={asStyle({
-            "--pay-bg": booking.payBg,
+            "--pay-bg": booking.payBackground,
             "--pay-color": booking.payColor,
           })}
         >
@@ -631,11 +653,11 @@ const PaymentStep = ({ view }: { view: BookingSheetView }) => {
       </div>
       <div>
         <div className={styles.sectionLabel}>Payments</div>
-        {view.payReceived.map(({ key, label, sub, value, tone }) => (
+        {view.payReceived.map(({ key, label, subtitle, value, tone }) => (
           <div key={key} className={styles.line}>
             <span className={styles.minWidth}>
               <span className={styles.blockPrimary}>{label}</span>
-              <span className={styles.lineSub}>{sub}</span>
+              <span className={styles.lineSub}>{subtitle}</span>
             </span>
             <span
               className={joinClassNames(
@@ -656,14 +678,12 @@ const PaymentStep = ({ view }: { view: BookingSheetView }) => {
       <div className={styles.feeBox}>
         <div className={styles.feeLine}>
           <span className={styles.ink700}>
-            {"Booking fee, paid by " + view.feeWho}
+            {`Booking fee, paid by ${view.feeWho}`}
           </span>
           <span className={styles.inkNumeric}>{view.payFeeLabel}</span>
         </div>
         <div className={styles.feeNote}>
-          {"£0.50 + 1.5% on top of your price. You keep the full " +
-            booking.priceLabel +
-            "."}
+          {`£0.50 + 1.5% on top of your price. You keep the full ${booking.priceLabel}.`}
         </div>
       </div>
     </div>
@@ -680,11 +700,12 @@ export const BookingSheetBody = ({
 }) => {
   const { state, actions } = studio;
   const edit = getEditServiceView(studio, view.booking, view.patchBooking);
+
   return (
     <>
-      {state.bkStep === "payment" && <PaymentStep view={view} />}
+      {state.bookingStep === "payment" && <PaymentStep view={view} />}
       {view.isMain && <BookingMain studio={studio} view={view} edit={edit} />}
-      {state.bkStep === "done" && (
+      {state.bookingStep === "done" && (
         <div className={styles.done}>
           <div className={styles.doneIcon}>
             <svg
@@ -703,35 +724,37 @@ export const BookingSheetBody = ({
           <div className={styles.doneTitle}>{view.doneTitle}</div>
           <div className={styles.doneBody}>{view.doneBody}</div>
           <button className={styles.rebook} onClick={view.rebook}>
-            {"Rebook " + view.booking.firstName}
+            {`Rebook ${view.booking.firstName}`}
           </button>
           <button className={styles.doneButton} onClick={actions.closeSheet}>
             Done
           </button>
         </div>
       )}
-      {state.bkStep === "editsvc" && (
+      {state.bookingStep === "editsvc" && (
         <EditServiceStep studio={studio} edit={edit} />
       )}
-      {state.bkStep === "changesvc" && (
+      {state.bookingStep === "changesvc" && (
         <ChangeServiceStep studio={studio} edit={edit} />
       )}
-      {state.bkStep === "changeclient" && (
+      {state.bookingStep === "changeclient" && (
         <ChangeClientStep studio={studio} view={view} />
       )}
-      {state.bkStep === "addaddon" && (
+      {state.bookingStep === "addaddon" && (
         <AddonPickerList
           className={joinClassNames(
             stepStyles.pane,
-            state.bkOut && stepStyles.paneOut,
+            state.bookingStepOut && stepStyles.paneOut,
           )}
           picker={edit.picker}
         />
       )}
-      {state.bkStep === "resched" && (
+      {state.bookingStep === "resched" && (
         <RescheduleStep studio={studio} view={view} />
       )}
-      {state.bkStep === "cancel" && <CancelStep studio={studio} view={view} />}
+      {state.bookingStep === "cancel" && (
+        <CancelStep studio={studio} view={view} />
+      )}
     </>
   );
 };
@@ -746,21 +769,37 @@ export const BookingSheetAfter = ({
 }) => {
   const { state } = studio;
   const { booking } = view;
-  const step = state.bkStep;
+  const step = state.bookingStep;
+
   const edit =
     step === "editsvc"
       ? getEditServiceView(studio, booking, view.patchBooking)
       : null;
-  const go = () => {
-    const run =
-      step === "cancel"
-        ? view.cancel
-        : step === "editsvc"
-          ? edit?.apply
-          : view.reschedule;
+
+  const runStep = () => {
+    const getRun = () => {
+      if (step === "cancel") return view.cancel;
+
+      if (step === "editsvc") return edit?.apply;
+
+      return view.reschedule;
+    };
+
+    const run = getRun();
+
     run?.();
   };
+
+  const getGoLabel = () => {
+    if (step === "cancel") return "Cancel booking";
+
+    if (step === "editsvc") return "Apply";
+
+    return "Move booking";
+  };
+
   const isFooterOff = step === "resched" && !view.canMove;
+
   return (
     <>
       {step === "noshow" && <NoShowPanel studio={studio} view={view} />}
@@ -842,10 +881,10 @@ export const BookingSheetAfter = ({
                 className={sheet.reschedule}
                 onClick={() =>
                   studio.setState({
-                    bkStep: "resched",
-                    rsDay: null,
-                    rsTime: null,
-                    rsCustom: false,
+                    bookingStep: "resched",
+                    rescheduleDay: null,
+                    rescheduleTime: null,
+                    rescheduleCustom: false,
                   })
                 }
               >
@@ -858,14 +897,10 @@ export const BookingSheetAfter = ({
                 step === "cancel" && sheet.goEqual,
                 isFooterOff && sheet.faded,
               )}
-              onClick={go}
+              onClick={runStep}
               disabled={isFooterOff}
             >
-              {step === "cancel"
-                ? "Cancel booking"
-                : step === "editsvc"
-                  ? "Apply"
-                  : "Move booking"}
+              {getGoLabel()}
             </button>
           </div>
         </div>
@@ -885,7 +920,7 @@ export const BookingCheckout = ({
   <StudioCheckout
     studio={studio}
     booking={view.checkoutBooking}
-    onExit={() => studio.setState({ bkStep: "view" })}
+    onExit={() => studio.setState({ bookingStep: "view" })}
     onComplete={(result, action) =>
       view.onCheckoutComplete({ ...result, tip: result.tip ?? 0 }, action)
     }
@@ -898,23 +933,31 @@ export const BookingAddonDialog = ({
 }: {
   studio: StudioController;
 }) => {
-  const { esAddon, sheet } = studio.state;
-  if (!esAddon) return null;
-  if (esAddon.ctx === "add") {
+  const { addonEdit, sheet } = studio.state;
+
+  if (!addonEdit) return null;
+
+  if (addonEdit.context === "add") {
     if (sheet !== "add") return null;
+
     const dialog = {
-      ...getAddonDialog(studio, esAddon),
-      ...getAddBookingView(studio).addonDialog(esAddon),
+      ...getAddonDialog(studio, addonEdit),
+      ...getAddBookingView(studio).addonDialog(addonEdit),
     };
+
     return <AddonEditDialog studio={studio} dialog={dialog} />;
   }
+
   const view = getBookingSheetView(studio);
+
   if (!view) return null;
+
   const { addonDialog } = getEditServiceView(
     studio,
     view.booking,
     view.patchBooking,
   );
+
   return addonDialog ? (
     <AddonEditDialog studio={studio} dialog={addonDialog} />
   ) : null;

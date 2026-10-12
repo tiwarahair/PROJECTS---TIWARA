@@ -6,15 +6,19 @@ import { useEffect, useState } from "react";
  */
 export const useEntered = (): boolean => {
   const [entered, setEntered] = useState(false);
+
   useEffect(() => {
     let innerFrame = 0;
+
     const outerFrame = requestAnimationFrame(() => {
       innerFrame = requestAnimationFrame(() => setEntered(true));
     });
+
     return () => {
       cancelAnimationFrame(outerFrame);
       cancelAnimationFrame(innerFrame);
     };
   }, []);
+
   return entered;
 };

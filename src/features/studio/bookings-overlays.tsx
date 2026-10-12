@@ -1,7 +1,7 @@
 import type { CSSProperties } from "react";
 import { joinClassNames } from "../../utils/class-names";
 import type { BookingsView } from "./bookings-view";
-import { dayInfo, hhmm, toMin } from "./studio-format";
+import { dayInfo, hhmm, timeToMinutes } from "./studio-format";
 import { getDialogPlacement, getOverlayAnimation } from "./studio-overlay";
 import type { StudioController } from "./use-studio";
 import overlay from "./studio-overlay.module.css";
@@ -30,13 +30,14 @@ export const FilterSheet = ({
   view: BookingsView;
 }) => {
   const { state, isWide } = studio;
+
   return (
     <>
       {/* eslint-disable-next-line jsx-a11y/click-events-have-key-events, jsx-a11y/no-static-element-interactions */}
       <div
         className={joinClassNames(
           styles.filterScrim,
-          state.filtOut ? overlay.scrimOut21 : overlay.scrimIn20,
+          state.filterOut ? overlay.scrimOut21 : overlay.scrimIn20,
         )}
         onClick={view.closeFilter}
       ></div>
@@ -44,7 +45,7 @@ export const FilterSheet = ({
         className={joinClassNames(
           styles.filterSheet,
           getDialogPlacement(isWide),
-          getOverlayAnimation(state.filtOut, "dlg", isWide),
+          getOverlayAnimation(state.filterOut, "dialog", isWide),
         )}
       >
         <div className={styles.sheetHead}>
@@ -58,23 +59,25 @@ export const FilterSheet = ({
           </button>
         </div>
         <div className={styles.sections}>
-          {view.filterSections.map(({ label, opts }) => (
+          {view.filterSections.map(({ label, options }) => (
             <div key={label}>
               <div className={styles.sectionLabel}>{label}</div>
               <div className={styles.options}>
-                {opts.map(({ key, label: optionLabel, count, isOn, pick }) => (
-                  <button
-                    key={key}
-                    className={joinClassNames(
-                      styles.option,
-                      isOn && styles.optionOn,
-                    )}
-                    onClick={pick}
-                  >
-                    {optionLabel}
-                    <span className={styles.count}>{count}</span>
-                  </button>
-                ))}
+                {options.map(
+                  ({ key, label: optionLabel, count, isOn, pick }) => (
+                    <button
+                      key={key}
+                      className={joinClassNames(
+                        styles.option,
+                        isOn && styles.optionOn,
+                      )}
+                      onClick={pick}
+                    >
+                      {optionLabel}
+                      <span className={styles.count}>{count}</span>
+                    </button>
+                  ),
+                )}
               </div>
             </div>
           ))}
@@ -96,35 +99,45 @@ export const FilterSheet = ({
 export const SlotPopover = ({ studio }: { studio: StudioController }) => {
   const { state, setState, actions } = studio;
   const { pop } = state;
+
   if (!pop) return null;
+
   const isBlock = pop.kind === "block";
+
   // runtime: placed at the tapped point
   const position = {
-    "--pop-x": pop.x + "px",
-    "--pop-y": pop.y + "px",
+    "--pop-x": `${pop.x}px`,
+    "--pop-y": `${pop.y}px`,
   } as CSSProperties;
+
   const book = () => {
     const time = pop.time;
+
     setState({ pop: null });
+
     actions.openSheet("add", {
       addStep: 1,
-      addDay: state.dayIdx,
+      addDay: state.dayIndex,
       addTime: time ?? null,
-      addCustom: !!time && toMin(time) % 30 !== 0,
+      addCustom: !!time && timeToMinutes(time) % 30 !== 0,
     });
   };
+
   const block = () => {
     const time = pop.time || "13:00";
+
     setState({ pop: null });
+
     actions.openSheet("block", {
       blockDraft: {
-        day: state.dayIdx,
+        day: state.dayIndex,
         start: time,
-        end: hhmm(Math.min(24 * 60 - 15, toMin(time) + 60)),
+        end: hhmm(Math.min(24 * 60 - 15, timeToMinutes(time) + 60)),
         reason: "",
       },
     });
   };
+
   return (
     <>
       {/* eslint-disable-next-line jsx-a11y/click-events-have-key-events, jsx-a11y/no-static-element-interactions */}
@@ -137,13 +150,14 @@ export const SlotPopover = ({ studio }: { studio: StudioController }) => {
           <>
             <div className={styles.popHead}>
               <div className={styles.popTitle}>{pop.title || ""}</div>
-              <div className={styles.popSub}>{pop.sub || ""}</div>
+              <div className={styles.popSub}>{pop.subtitle || ""}</div>
             </div>
             <button
               className={styles.popItem}
               onClick={() => {
                 setState({ pop: null });
-                if (pop.b) actions.editBlock(pop.b);
+
+                if (pop.block) actions.editBlock(pop.block);
               }}
             >
               <svg
@@ -164,7 +178,8 @@ export const SlotPopover = ({ studio }: { studio: StudioController }) => {
               className={joinClassNames(styles.popItem, styles.popDanger)}
               onClick={() => {
                 setState({ pop: null });
-                if (pop.b) actions.removeBlock(pop.b);
+
+                if (pop.block) actions.removeBlock(pop.block);
               }}
             >
               <svg
@@ -237,46 +252,65 @@ export const QuickActions = ({
   view: BookingsView;
 }) => {
   const { state, setState, isWide, actions, context } = studio;
-  if (!state.qa) return null;
-  const time = state.qa.time;
+
+  if (!state.quickAdd) return null;
+
+  const time = state.quickAdd.time;
+
   const close = () => {
-    setState({ qaOut: true });
+    setState({ quickAddOut: true });
     window.clearTimeout(context.timers.quick);
+
     context.timers.quick = window.setTimeout(
-      () => setState({ qa: null, qaOut: false }),
+      () => setState({ quickAdd: null, quickAddOut: false }),
       210,
     );
   };
+
   const add = () => {
-    const dayIdx = state.dayIdx;
-    setState({ qa: null, qaOut: false });
+    const dayIndex = state.dayIndex;
+
+    setState({ quickAdd: null, quickAddOut: false });
+
     actions.openSheet("add", {
       addStep: 1,
-      addDay: dayIdx,
+      addDay: dayIndex,
       addTime: time || null,
-      addCustom: !!time && toMin(time) % 30 !== 0,
+      addCustom: !!time && timeToMinutes(time) % 30 !== 0,
     });
   };
+
   const block = () => {
-    const start = time ? toMin(time) : 13 * 60;
-    setState({ qa: null, qaOut: false });
+    const start = time ? timeToMinutes(time) : 13 * 60;
+
+    setState({ quickAdd: null, quickAddOut: false });
+
     actions.openSheet("block", {
       blockDraft: {
-        day: state.dayIdx,
+        day: state.dayIndex,
         start: hhmm(start),
         end: hhmm(Math.min(23 * 60 + 45, start + 60)),
         reason: "",
-        freq: "none",
+        frequency: "none",
       },
     });
   };
+
+  const getBlockSubtitle = () => {
+    if (!time) return "Keep part of this day free";
+
+    const blockEnd = hhmm(Math.min(24 * 60 - 15, timeToMinutes(time) + 60));
+
+    return `Keep ${time} to ${blockEnd} free`;
+  };
+
   return (
     <>
       {/* eslint-disable-next-line jsx-a11y/click-events-have-key-events, jsx-a11y/no-static-element-interactions */}
       <div
         className={joinClassNames(
           styles.quickScrim,
-          state.qaOut ? overlay.scrimOut21 : overlay.scrimIn20,
+          state.quickAddOut ? overlay.scrimOut21 : overlay.scrimIn20,
         )}
         onClick={close}
       ></div>
@@ -284,13 +318,13 @@ export const QuickActions = ({
         className={joinClassNames(
           styles.quickSheet,
           getDialogPlacement(isWide),
-          getOverlayAnimation(state.qaOut, "dlg", isWide),
+          getOverlayAnimation(state.quickAddOut, "dialog", isWide),
         )}
       >
         <div className={styles.quickHead}>
           <div className={styles.grow}>
             <div className={styles.h3}>
-              {dayInfo(state.dayIdx).label + (time ? " · " + time : "")}
+              {dayInfo(state.dayIndex).label + (time ? ` · ${time}` : "")}
             </div>
             <div
               className={joinClassNames(
@@ -324,7 +358,7 @@ export const QuickActions = ({
               <span className={styles.quickLabel}>Add appointment</span>
               <span className={styles.quickSub}>
                 {time
-                  ? "Book a client in at " + time
+                  ? `Book a client in at ${time}`
                   : "Book a client in on this day"}
               </span>
             </span>
@@ -346,15 +380,7 @@ export const QuickActions = ({
             </svg>
             <span className={styles.flex1}>
               <span className={styles.quickLabel}>Block time</span>
-              <span className={styles.quickSub}>
-                {time
-                  ? "Keep " +
-                    time +
-                    " to " +
-                    hhmm(Math.min(24 * 60 - 15, toMin(time) + 60)) +
-                    " free"
-                  : "Keep part of this day free"}
-              </span>
+              <span className={styles.quickSub}>{getBlockSubtitle()}</span>
             </span>
           </button>
         </div>

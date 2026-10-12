@@ -22,23 +22,30 @@ export type { CheckoutSheetProps } from "./use-checkout";
  */
 export const CheckoutSheet = (props: CheckoutSheetProps) => {
   const checkout = useCheckout(props);
-  const { state, setState, money, isEmbedded, scrollRef, go } = checkout;
+  const { state, setState, money, isEmbedded, scrollRef, goTo } = checkout;
   const view = getCheckoutView(checkout, props);
   const isMobile = (props.layout || "mobile") !== "desktop";
   const isPhoneFrame = isMobile && !isEmbedded;
   const hasBack = state.view !== "detail" && state.view !== "done";
   const { footer, dialog } = view;
+  const ownRadius = isMobile ? "24px 24px 0 0" : "24px";
+
   // embedded, the host decides the sheet's corners
   const sheetStyle = {
-    "--sheet-radius": isEmbedded
-      ? props.radius || "0"
-      : isMobile
-        ? "24px 24px 0 0"
-        : "24px",
+    "--sheet-radius": isEmbedded ? props.radius || "0" : ownRadius,
   } as CSSProperties;
+
+  const getStepClass = (index: number) => {
+    if (index === view.stepIndex) return shared.stepCurrent;
+
+    return index < view.stepIndex ? shared.stepDone : shared.stepTodo;
+  };
+
   const close = () => {
-    if (!isEmbedded) return go("detail", -1);
+    if (!isEmbedded) return goTo("detail", -1);
+
     if (state.view === "done") return view.leaveDone("done");
+
     if (props.onClose) props.onClose();
     else checkout.exit();
   };
@@ -107,11 +114,7 @@ export const CheckoutSheet = (props: CheckoutSheetProps) => {
                 <div
                   className={joinClassNames(
                     shared.stepLabel,
-                    index === view.stepIndex
-                      ? shared.stepCurrent
-                      : index < view.stepIndex
-                        ? shared.stepDone
-                        : shared.stepTodo,
+                    getStepClass(index),
                   )}
                 >
                   {STEP_LABELS[step]}
@@ -213,9 +216,9 @@ export const CheckoutSheet = (props: CheckoutSheetProps) => {
                 </button>
                 <button
                   className={shared.dialogNo}
-                  onClick={() => setState({ dlg: null })}
+                  onClick={() => setState({ dialog: null })}
                 >
-                  {dialog.no}
+                  {dialog.cancel}
                 </button>
               </div>
             </div>

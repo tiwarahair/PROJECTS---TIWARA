@@ -21,6 +21,7 @@ export const Tag = ({
   className,
 }: TagProps) => {
   const isControl = !!onClick;
+
   return (
     <button
       type="button"

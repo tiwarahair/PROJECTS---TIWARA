@@ -1,5 +1,8 @@
 import { joinClassNames } from "../../utils/class-names";
-import { DUR_HOUR_OPTIONS, DUR_MINUTE_OPTIONS } from "./catalog-sheets-view";
+import {
+  DURATION_HOUR_OPTIONS,
+  DURATION_MINUTE_OPTIONS,
+} from "./catalog-sheets-view";
 import { getDialogPlacement, getOverlayAnimation } from "./studio-overlay";
 import type { StudioController } from "./use-studio";
 import { getWizardView } from "./wizard-view";
@@ -33,7 +36,9 @@ const OWN_MINUTES = ["0", "5", "10", "15", "20", "30", "45", "60", "90", "120"];
 const NewAddonDialog = ({ view }: { view: WizardView }) => {
   const { addons, isWide } = view;
   const draft = addons.newAddon;
+
   if (!draft) return null;
+
   return (
     <>
       {/* eslint-disable-next-line jsx-a11y/click-events-have-key-events, jsx-a11y/no-static-element-interactions */}
@@ -67,7 +72,7 @@ const NewAddonDialog = ({ view }: { view: WizardView }) => {
             <span className={styles.fieldLabel}>Category</span>
             <select
               className={styles.select}
-              value={addons.newCat}
+              value={addons.newCategory}
               onChange={(event) =>
                 addons.patchNew({
                   categoryId:
@@ -75,8 +80,8 @@ const NewAddonDialog = ({ view }: { view: WizardView }) => {
                 })
               }
             >
-              {addons.newCatOptions.map(({ v, label }) => (
-                <option key={v} value={v}>
+              {addons.newCategoryOptions.map(({ value, label }) => (
+                <option key={value} value={value}>
                   {label}
                 </option>
               ))}
@@ -105,12 +110,12 @@ const NewAddonDialog = ({ view }: { view: WizardView }) => {
                   className={styles.timeSelect}
                   value={addons.newHour}
                   onChange={(event) =>
-                    addons.patchNew({ hr: event.target.value })
+                    addons.patchNew({ hours: event.target.value })
                   }
                   aria-label="Hours"
                 >
-                  {DUR_HOUR_OPTIONS.map(({ v, label }) => (
-                    <option key={v} value={v}>
+                  {DURATION_HOUR_OPTIONS.map(({ value, label }) => (
+                    <option key={value} value={value}>
                       {label}
                     </option>
                   ))}
@@ -123,8 +128,8 @@ const NewAddonDialog = ({ view }: { view: WizardView }) => {
                   }
                   aria-label="Minutes"
                 >
-                  {DUR_MINUTE_OPTIONS.map(({ v, label }) => (
-                    <option key={v} value={v}>
+                  {DURATION_MINUTE_OPTIONS.map(({ value, label }) => (
+                    <option key={value} value={value}>
                       {label}
                     </option>
                   ))}
@@ -148,21 +153,22 @@ const NewAddonDialog = ({ view }: { view: WizardView }) => {
 
 /** Suggested services: search the platform's service types (prototype wizSuggOn). */
 const SuggestionsDialog = ({ view }: { view: WizardView }) => {
-  if (!view.isSuggOpen) return null;
+  if (!view.isSuggestionsOpen) return null;
+
   return (
     <>
       {/* eslint-disable-next-line jsx-a11y/click-events-have-key-events, jsx-a11y/no-static-element-interactions */}
-      <div className={styles.scrim70} onClick={view.closeSugg}></div>
+      <div className={styles.scrim70} onClick={view.closeSuggestions}></div>
       <div
         className={joinClassNames(
           styles.sugg,
           view.isWide && styles.suggWide,
-          getOverlayAnimation(false, "dlg", view.isWide),
+          getOverlayAnimation(false, "dialog", view.isWide),
         )}
         role="dialog"
         aria-modal="true"
         aria-labelledby="sugg-title"
-        onKeyDown={view.suggKey}
+        onKeyDown={view.suggestionKey}
         data-screen-label="Suggested services"
       >
         <div className={styles.suggHead}>
@@ -172,7 +178,7 @@ const SuggestionsDialog = ({ view }: { view: WizardView }) => {
           <button
             className={styles.closeRound}
             type="button"
-            onClick={view.closeSugg}
+            onClick={view.closeSuggestions}
             aria-label="Close"
           >
             <svg
@@ -225,7 +231,7 @@ const SuggestionsDialog = ({ view }: { view: WizardView }) => {
             )}
           </div>
           <div className={styles.chips}>
-            {view.catChips.map(({ key, label, isOn, pick }) => (
+            {view.categoryChips.map(({ key, label, isOn, pick }) => (
               <button
                 key={key}
                 className={joinClassNames(styles.chip, isOn && styles.chipOn)}
@@ -235,9 +241,9 @@ const SuggestionsDialog = ({ view }: { view: WizardView }) => {
               </button>
             ))}
           </div>
-          {view.catalogue.map(({ key, cat, items }) => (
+          {view.catalogue.map(({ key, category, items }) => (
             <div key={key} className={styles.group}>
-              <div className={styles.groupTitle}>{cat}</div>
+              <div className={styles.groupTitle}>{category}</div>
               {items.map((item) => (
                 <button
                   key={item.key}
@@ -265,9 +271,7 @@ const SuggestionsDialog = ({ view }: { view: WizardView }) => {
           {view.hasNoResults && (
             <div className={styles.noResults}>
               <div className={styles.noResultsText}>
-                {"No suggestions for ‘" +
-                  view.search +
-                  "’. Close this and fill the form in yourself."}
+                {`No suggestions for ‘${view.search}’. Close this and fill the form in yourself.`}
               </div>
             </div>
           )}
@@ -281,7 +285,9 @@ const SuggestionsDialog = ({ view }: { view: WizardView }) => {
 const CustomisationDialog = ({ view }: { view: WizardView }) => {
   const { own, isWide } = view;
   const { editor } = own;
+
   if (!editor) return null;
+
   return (
     <>
       {/* eslint-disable-next-line jsx-a11y/click-events-have-key-events, jsx-a11y/no-static-element-interactions */}
@@ -290,7 +296,7 @@ const CustomisationDialog = ({ view }: { view: WizardView }) => {
         className={joinClassNames(
           styles.own,
           getDialogPlacement(isWide),
-          getOverlayAnimation(false, "dlg", isWide),
+          getOverlayAnimation(false, "dialog", isWide),
         )}
         role="dialog"
         aria-modal="true"
@@ -333,7 +339,7 @@ const CustomisationDialog = ({ view }: { view: WizardView }) => {
               <button
                 className={joinClassNames(
                   styles.sign,
-                  option.isNeg && styles.signNeg,
+                  option.isNegativeValue && styles.signNeg,
                 )}
                 type="button"
                 onClick={option.flip}
@@ -341,8 +347,8 @@ const CustomisationDialog = ({ view }: { view: WizardView }) => {
                 aria-label={option.signAria}
                 onMouseEnter={option.tipSign}
                 onFocus={option.tipSign}
-                onMouseLeave={view.tipOut}
-                onBlur={view.tipOut}
+                onMouseLeave={view.hideSubcategoryTip}
+                onBlur={view.hideSubcategoryTip}
               >
                 {option.signText}
               </button>
@@ -439,6 +445,7 @@ export const WizardNewAddonDialog = ({
   studio: StudioController;
 }) => {
   const view = getWizardView(studio);
+
   return view ? <NewAddonDialog view={view} /> : null;
 };
 
@@ -448,6 +455,7 @@ export const WizardSuggestionDialogs = ({
   studio: StudioController;
 }) => {
   const view = getWizardView(studio);
+
   return view ? (
     <>
       <SuggestionsDialog view={view} />

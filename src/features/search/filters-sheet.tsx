@@ -21,9 +21,10 @@ interface FiltersSheetProps {
 /** Mobile/tablet filters bottom sheet: edits a draft, "Show n stylists" applies it (prototype fOpen). */
 export const FiltersSheet = ({ search }: FiltersSheetProps) => {
   const { state, filterDraft, draftCount, actions } = search;
+
   return (
     <div
-      data-closing={state.fClosing ? "true" : "false"}
+      data-closing={state.filtersClosing ? "true" : "false"}
       className={joinClassNames(helmet.sheetWrap, styles.wrap)}
     >
       <div
@@ -64,6 +65,7 @@ export const FiltersSheet = ({ search }: FiltersSheetProps) => {
             <div className={styles.chips}>
               {VENUES.map((venue) => {
                 const isOn = filterDraft.venues.includes(venue);
+
                 return (
                   <button
                     key={venue}
@@ -96,9 +98,10 @@ export const FiltersSheet = ({ search }: FiltersSheetProps) => {
             >
               {RADII.map((radius) => {
                 const isOn = (filterDraft.radius || 10) === radius;
+
                 return (
                   <button
-                    key={"fd" + radius}
+                    key={`fd${radius}`}
                     type="button"
                     role="radio"
                     aria-checked={isOn ? "true" : "false"}
@@ -109,7 +112,7 @@ export const FiltersSheet = ({ search }: FiltersSheetProps) => {
                       isOn && controls.chipOn,
                     )}
                   >
-                    {radius + " miles"}
+                    {`${radius} miles`}
                   </button>
                 );
               })}
@@ -158,7 +161,7 @@ export const FiltersSheet = ({ search }: FiltersSheetProps) => {
             onClick={actions.applyFilters}
             className={styles.apply}
           >
-            {"Show " + draftCount + " stylist" + (draftCount === 1 ? "" : "s")}
+            {`Show ${draftCount} stylist${draftCount === 1 ? "" : "s"}`}
           </button>
         </div>
       </div>

@@ -15,12 +15,13 @@ const JOIN_SCREENS = ["welcome", "w1", "w2", "w3", "w4", "w5"];
 const SHARED_SCREENS = ["cust-email", "verify", "studio"];
 
 /** The route a screen opens on from elsewhere; anything not listed is on /login. */
-const getScreenRoute = (screen: string): OnboardingRoute =>
-  SIGNUP_SCREENS.includes(screen)
-    ? "signup"
-    : JOIN_SCREENS.includes(screen)
-      ? "join"
-      : "login";
+const getScreenRoute = (screen: string): OnboardingRoute => {
+  if (SIGNUP_SCREENS.includes(screen)) return "signup";
+
+  if (JOIN_SCREENS.includes(screen)) return "join";
+
+  return "login";
+};
 
 export const getRouteForPath = (pathname: string): OnboardingRoute | null => {
   const route = pathname.slice(1);
@@ -32,4 +33,4 @@ export const isScreenOnRoute = (screen: string, route: OnboardingRoute) =>
   SHARED_SCREENS.includes(screen) || getScreenRoute(screen) === route;
 
 /** The path a screen opens on from elsewhere, e.g. "/signup" for cust-create. */
-export const getScreenPath = (screen: string) => "/" + getScreenRoute(screen);
+export const getScreenPath = (screen: string) => `/${getScreenRoute(screen)}`;

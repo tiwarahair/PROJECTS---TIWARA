@@ -7,6 +7,7 @@ import { createStore } from "../stores/store";
 /** Shows the current router location so tests can assert navigation. */
 const LocationProbe = () => {
   const { pathname, search } = useLocation();
+
   return <div data-testid="location">{pathname + search}</div>;
 };
 
@@ -17,6 +18,7 @@ const LocationProbe = () => {
 export const renderWithStore = (ui: ReactElement, url = "/") => {
   window.history.replaceState(null, "", url);
   const store = createStore();
+
   const result = render(
     <Provider store={store}>
       <MemoryRouter initialEntries={[url]}>
@@ -27,5 +29,6 @@ export const renderWithStore = (ui: ReactElement, url = "/") => {
       </MemoryRouter>
     </Provider>,
   );
+
   return { ...result, store };
 };

@@ -13,8 +13,10 @@ export const SearchMenu = () => {
   const loggedIn = useAppSelector((root) => root.session.loggedIn);
   const buttonRef = useRef<HTMLButtonElement>(null);
   const [isOpen, setIsOpen] = useState(false);
+
   const close = useCallback((refocus: boolean) => {
     setIsOpen(false);
+
     if (refocus) buttonRef.current?.focus();
   }, []);
 

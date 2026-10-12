@@ -30,19 +30,24 @@ const LoginSheetCard = ({ stylistId }: LoginSheetCardProps) => {
 
   useEffect(() => {
     if (closing) return;
+
     const handleKey = (event: KeyboardEvent) => {
       if (event.key === "Escape") setClosing(true);
     };
+
     document.addEventListener("keydown", handleKey);
+
     return () => document.removeEventListener("keydown", handleKey);
   }, [closing]);
 
   useEffect(() => {
     if (!closing) return;
+
     const timer = window.setTimeout(() => {
       dispatch(closeLoginSheet());
       previousFocus.current?.focus?.();
     }, EXIT_MS);
+
     return () => window.clearTimeout(timer);
   }, [closing, dispatch]);
 
@@ -52,16 +57,14 @@ const LoginSheetCard = ({ stylistId }: LoginSheetCardProps) => {
       .replace(/([?&])(guest|login|favsheet|favtoast)=[^&]*/g, "$1")
       .replace(/[?&]+$/, "")
       .replace("?&", "?");
-    returnTo += (returnTo.indexOf("?") > -1 ? "&" : "?") + "login=1";
+
+    returnTo += `${returnTo.indexOf("?") > -1 ? "&" : "?"}login=1`;
     writeSession("tw_fav_pending", stylistId);
     dispatch(closeLoginSheet());
-    navigate(
-      getScreenPath(screen) +
-        "?screen=" +
-        screen +
-        "&return=" +
-        encodeURIComponent(returnTo),
-    );
+    const screenPath = getScreenPath(screen);
+    const encodedReturn = encodeURIComponent(returnTo);
+
+    navigate(`${screenPath}?screen=${screen}&return=${encodedReturn}`);
   };
 
   const className = [
@@ -150,6 +153,7 @@ const LoginSheetCard = ({ stylistId }: LoginSheetCardProps) => {
 /** Guests tapping a heart see this sheet (prototype tw-fav.js openLogin). */
 export const FavLoginSheet = () => {
   const stylistId = useAppSelector((state) => state.favourites.loginSheetFor);
+
   return stylistId ? (
     <LoginSheetCard key={stylistId} stylistId={stylistId} />
   ) : null;

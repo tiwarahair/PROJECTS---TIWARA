@@ -95,25 +95,26 @@ export const SettingsNotifications = ({
               <span className={notifications.rowLabel}>{label}</span>
               {(
                 [
-                  ["e", " by email"],
-                  ["s", " by SMS"],
+                  ["email", " by email"],
+                  ["sms", " by SMS"],
                 ] as const
               ).map(([channel, suffix]) => (
                 <Switch
                   key={channel}
-                  isOn={state.notif[key][channel]}
+                  isOn={state.notifications[key][channel]}
                   label={label + suffix}
                   className={notifications.switchCell}
                   onToggle={() => {
-                    setState(({ notif }) => ({
-                      notif: {
-                        ...notif,
+                    setState(({ notifications: currentNotifications }) => ({
+                      notifications: {
+                        ...currentNotifications,
                         [key]: {
-                          ...notif[key],
-                          [channel]: !notif[key][channel],
+                          ...currentNotifications[key],
+                          [channel]: !currentNotifications[key][channel],
                         },
                       },
                     }));
+
                     toast("Notification settings saved");
                   }}
                 />
@@ -197,16 +198,18 @@ export const SettingsNotifications = ({
 export const SettingsPayouts = ({ props }: PageProps) => {
   const status = props.payoutStatus || "active";
   const view = getPayoutStatus(status, props.pauseReason);
+
   // the status palette comes from the PST table
   const statusStyle = {
-    "--pst-bg": view.bg,
+    "--pst-bg": view.background,
     "--pst-shadow": view.flat ? "none" : "var(--shadow-panel)",
     "--pst-chip": view.chip,
-    "--pst-fg": view.fg,
+    "--pst-fg": view.foreground,
     "--pst-btn-bd": view.primary ? "none" : "1px solid var(--border-strong)",
     "--pst-btn-bg": view.primary ? "var(--neutral-900,#1a1714)" : "transparent",
     "--pst-btn-fg": view.primary ? "#fffefb" : "var(--text-primary)",
   } as CSSProperties;
+
   const { tax, taxEditing = false } = props;
   const taxRows = tax ? getTaxRows(tax) : [];
 
@@ -239,7 +242,7 @@ export const SettingsPayouts = ({ props }: PageProps) => {
               if (status === "none") props.onConnectStripe?.();
             }}
           >
-            {view.btn}
+            {view.buttonLabel}
             <ExternalIcon />
           </button>
         </div>
@@ -288,7 +291,7 @@ export const SettingsPayouts = ({ props }: PageProps) => {
           <button
             className={joinClassNames(payouts.earningsLink, shared.focusRing)}
             data-ac-in="1"
-            onClick={() => props.onNav?.("earnings")}
+            onClick={() => props.onNavigate?.("earnings")}
           >
             View payout history in Earnings
             <svg
@@ -372,7 +375,7 @@ export const SettingsPayouts = ({ props }: PageProps) => {
               </div>
               <dl className={payouts.taxList}>
                 {taxRows.map(({ label, value, isSpaced }, index) => (
-                  <div key={"t" + index} className={payouts.taxRow}>
+                  <div key={`t${index}`} className={payouts.taxRow}>
                     <dt className={shared.rowLabel}>{label}</dt>
                     <dd
                       className={joinClassNames(
@@ -415,10 +418,11 @@ export const SettingsCalendar = ({
   settings: { state, setState, toast, ask, connectGoogle },
   uid,
 }: PageProps) => {
-  const { g } = state;
-  const icsUrl = "webcal://tiwaras.house/cal/" + state.icsToken + ".ics";
-  const setGoogle = (patch: Partial<typeof g>) =>
-    setState(({ g: current }) => ({ g: { ...current, ...patch } }));
+  const { google } = state;
+  const icsUrl = `webcal://tiwaras.house/cal/${state.icsToken}.ics`;
+
+  const setGoogle = (patch: Partial<typeof google>) =>
+    setState(({ google: current }) => ({ google: { ...current, ...patch } }));
 
   return (
     <>
@@ -433,7 +437,7 @@ export const SettingsCalendar = ({
         }
       >
         <div className={shared.card}>
-          {g.state === "off" && (
+          {google.state === "off" && (
             <button
               className={joinClassNames(shared.darkButton, shared.focusRing)}
               data-ac-in="1"
@@ -442,7 +446,7 @@ export const SettingsCalendar = ({
               Connect Google Calendar
             </button>
           )}
-          {g.state === "connecting" && (
+          {google.state === "connecting" && (
             <div className={calendar.connecting} aria-busy="true">
               <span className={calendar.connectingText}>
                 Connecting to Google
@@ -451,7 +455,7 @@ export const SettingsCalendar = ({
               <span className={calendar.skeletonShort} data-ac-sk="1"></span>
             </div>
           )}
-          {g.state === "on" && (
+          {google.state === "on" && (
             <>
               <div className={shared.row}>
                 <div className={shared.rowText}>
@@ -476,15 +480,21 @@ export const SettingsCalendar = ({
                 {(
                   [
                     ["main", GOOGLE_EMAIL],
-                    ["fam", "Family"],
-                    ["hol", "Holidays in the UK"],
+                    ["family", "Family"],
+                    ["holidays", "Holidays in the UK"],
                   ] as const
                 ).map(([key, name]) => (
                   <CheckRow
                     key={key}
-                    isOn={g.cals[key]}
+                    isOn={google.calendars[key]}
                     onToggle={() => {
-                      setGoogle({ cals: { ...g.cals, [key]: !g.cals[key] } });
+                      setGoogle({
+                        calendars: {
+                          ...google.calendars,
+                          [key]: !google.calendars[key],
+                        },
+                      });
+
                       toast("Calendar settings saved");
                     }}
                   >
@@ -492,15 +502,15 @@ export const SettingsCalendar = ({
                   </CheckRow>
                 ))}
               </div>
-              <label className={calendar.targetLabel} htmlFor={uid + "-gt"}>
+              <label className={calendar.targetLabel} htmlFor={`${uid}-gt`}>
                 Add my bookings to
               </label>
               <span className={calendar.selectWrap}>
                 <select
                   className={joinClassNames(calendar.select, shared.focusRing)}
                   data-ac-in="1"
-                  id={uid + "-gt"}
-                  value={g.target}
+                  id={`${uid}-gt`}
+                  value={google.target}
                   onChange={(event) => {
                     setGoogle({ target: event.target.value });
                     toast("Calendar settings saved");
@@ -560,13 +570,13 @@ export const SettingsCalendar = ({
         heading="Apple, Outlook and other calendars"
       >
         <div className={shared.card}>
-          <label className={shared.label} htmlFor={uid + "-ics"}>
+          <label className={shared.label} htmlFor={`${uid}-ics`}>
             Private subscribe link
           </label>
           <input
             className={joinClassNames(calendar.icsInput, shared.focusRing)}
             data-ac-in="1"
-            id={uid + "-ics"}
+            id={`${uid}-ics`}
             readOnly={true}
             value={icsUrl}
             onFocus={(event) => event.target.select()}
@@ -581,6 +591,7 @@ export const SettingsCalendar = ({
                 } catch {
                   // clipboard unavailable
                 }
+
                 toast("Link copied");
               }}
             >
@@ -613,6 +624,7 @@ export const SettingsCalendar = ({
                     setState({
                       icsToken: Math.random().toString(36).slice(2, 10),
                     });
+
                     toast("New link ready. Add it to your calendar app");
                   },
                 )

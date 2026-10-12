@@ -67,7 +67,7 @@ const SmsRow = () => (
 /** The 6-digit code field shared by the tax-code, app and remove steps. */
 const CodeField = ({ view, label }: { view: TwoFactorView; label: string }) => (
   <>
-    {/* eslint-disable-next-line jsx-a11y/label-has-associated-control */}
+    {}
     <label className={styles.label}>{label}</label>
     <input
       className={joinClassNames(
@@ -85,7 +85,7 @@ const CodeField = ({ view, label }: { view: TwoFactorView; label: string }) => (
     />
     {view.isCodeError && (
       <div className={styles.error} role="alert">
-        {view.errMsg}
+        {view.errorMessage}
       </div>
     )}
   </>
@@ -122,12 +122,14 @@ const TwoFactorBody = ({
   view: TwoFactorView;
 }) => {
   const { state } = studio;
+
   return (
     <>
       {view.isSecure && (
         <div className={styles.parts}>
           {view.parts.map((part) => {
             const isLocked = !part.isDone && !part.isUnlocked;
+
             return (
               <div
                 key={part.key}
@@ -156,7 +158,7 @@ const TwoFactorBody = ({
                       isLocked && styles.locked,
                     )}
                   >
-                    {part.n}
+                    {part.stepNumber}
                   </span>
                 )}
                 <div className={styles.grow}>
@@ -168,10 +170,10 @@ const TwoFactorBody = ({
                   >
                     {part.label}
                   </div>
-                  <div className={styles.partSub}>{part.sub}</div>
+                  <div className={styles.partSub}>{part.subtitle}</div>
                 </div>
                 {!part.isDone && part.isUnlocked && (
-                  <button className={styles.partButton} onClick={part.go}>
+                  <button className={styles.partButton} onClick={part.onSelect}>
                     {part.buttonLabel}
                   </button>
                 )}
@@ -294,7 +296,7 @@ const TwoFactorBody = ({
           />
           {view.isNameError && (
             <div className={styles.error} role="alert">
-              {view.errMsg}
+              {view.errorMessage}
             </div>
           )}
           {view.isOpenAppShown && (
@@ -309,12 +311,12 @@ const TwoFactorBody = ({
               role="img"
               aria-label="QR code for your authenticator app"
             >
-              {view.qr.map(({ key, bg }) => (
+              {view.qrCells.map(({ key, background }) => (
                 <span
                   key={key}
                   className={styles.qrCell}
                   // runtime: each QR module is dark or light
-                  style={asStyle({ "--cell": bg })}
+                  style={asStyle({ "--cell": background })}
                 ></span>
               ))}
             </div>
@@ -430,8 +432,11 @@ const TwoFactorBody = ({
 /** Get paid / two-step verification (prototype tfOpen). */
 export const TwoFactorDialog = ({ studio }: { studio: StudioController }) => {
   const view = getTwoFactorView(studio);
+
   if (!view) return null;
+
   const { isWide } = view;
+
   return (
     <>
       {/* eslint-disable-next-line jsx-a11y/click-events-have-key-events, jsx-a11y/no-static-element-interactions */}
@@ -446,7 +451,7 @@ export const TwoFactorDialog = ({ studio }: { studio: StudioController }) => {
         className={joinClassNames(
           styles.dialog,
           isWide && styles.dialogWide,
-          getOverlayAnimation(view.isOut, "dlg", isWide),
+          getOverlayAnimation(view.isOut, "dialog", isWide),
         )}
         role="dialog"
         aria-modal="true"
@@ -533,7 +538,7 @@ export const TwoFactorDialog = ({ studio }: { studio: StudioController }) => {
             view.isCentred && styles.centred,
           )}
         >
-          {view.sub}
+          {view.subtitle}
           {view.hasLearn && (
             <>
               {" "}

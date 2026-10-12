@@ -3,7 +3,7 @@ import type { AddonPicker } from "./addon-picker";
 import type { EditServiceView } from "./booking-edit-view";
 import type { BookingSheetView } from "./booking-sheet-view";
 import { CalendarToggle, MonthCalendar, getMonthNav } from "./sheets-simple";
-import { getMiniCalDays } from "./studio-format";
+import { getMiniCalendarDays } from "./studio-format";
 import type { StudioController } from "./use-studio";
 import styles from "./booking-steps.module.css";
 
@@ -60,7 +60,7 @@ const SearchField = ({
 );
 
 const paneClass = (studio: StudioController) =>
-  joinClassNames(styles.pane, studio.state.bkOut && styles.paneOut);
+  joinClassNames(styles.pane, studio.state.bookingStepOut && styles.paneOut);
 
 export const EditServiceStep = ({
   studio,
@@ -72,9 +72,9 @@ export const EditServiceStep = ({
   <div className={paneClass(studio)}>
     <button className={styles.change} onClick={edit.openChange}>
       <span className={styles.grow}>
-        <span className={styles.eyebrow}>{edit.catLabel}</span>
-        <span className={styles.changeName}>{edit.svcName}</span>
-        <span className={styles.changeMeta}>{edit.svcMeta}</span>
+        <span className={styles.eyebrow}>{edit.categoryLabel}</span>
+        <span className={styles.changeName}>{edit.serviceName}</span>
+        <span className={styles.changeMeta}>{edit.serviceMeta}</span>
       </span>
       <span className={styles.changeLink}>
         Change
@@ -103,8 +103,8 @@ export const EditServiceStep = ({
           value={edit.time}
           onChange={edit.onTime}
         >
-          {edit.timeOptions.map(({ key, v, label }) => (
-            <option key={key} value={v}>
+          {edit.timeOptions.map(({ key, value, label }) => (
+            <option key={key} value={value}>
               {label}
             </option>
           ))}
@@ -115,24 +115,24 @@ export const EditServiceStep = ({
         <div className={styles.row8}>
           <select
             className={styles.durSelect}
-            value={edit.durH}
-            onChange={edit.onDurH}
+            value={edit.durationHours}
+            onChange={edit.onDurationHours}
             aria-label="Hours"
           >
-            {edit.hourOptions.map(({ key, v, label }) => (
-              <option key={key} value={v}>
+            {edit.hourOptions.map(({ key, value, label }) => (
+              <option key={key} value={value}>
                 {label}
               </option>
             ))}
           </select>
           <select
             className={styles.durSelect}
-            value={edit.durM}
-            onChange={edit.onDurM}
+            value={edit.durationMinutes}
+            onChange={edit.onDurationMinutes}
             aria-label="Minutes"
           >
-            {edit.minuteOptions.map(({ key, v, label }) => (
-              <option key={key} value={v}>
+            {edit.minuteOptions.map(({ key, value, label }) => (
+              <option key={key} value={value}>
                 {label}
               </option>
             ))}
@@ -186,8 +186,8 @@ export const EditServiceStep = ({
             value={edit.extra}
             onChange={edit.onExtra}
           >
-            {edit.extraOptions.map(({ key, v, label }) => (
-              <option key={key} value={v}>
+            {edit.extraOptions.map(({ key, value, label }) => (
+              <option key={key} value={value}>
                 {label}
               </option>
             ))}
@@ -205,7 +205,7 @@ export const EditServiceStep = ({
       <div className={styles.priceRow}>
         <span className={styles.minWidth}>
           <span className={styles.priceLabel}>Price</span>
-          <span className={styles.priceValue}>{"£" + edit.price}</span>
+          <span className={styles.priceValue}>{`£${edit.price}`}</span>
         </span>
         <button className={styles.adjust} onClick={edit.openPrice}>
           Adjust price
@@ -296,11 +296,11 @@ export const ChangeServiceStep = ({
       onChange={edit.onServiceQuery}
       placeholder="Search services"
     />
-    {edit.serviceGroups.map(({ key, cat, n, items }) => (
+    {edit.serviceGroups.map(({ key, category, count, items }) => (
       <div key={key} className={styles.group}>
         <div className={styles.groupHead}>
-          <span className={styles.h3}>{cat}</span>
-          <span className={styles.count}>{n}</span>
+          <span className={styles.h3}>{category}</span>
+          <span className={styles.count}>{count}</span>
         </div>
         <div className={styles.stack6}>
           {items.map((item) => (
@@ -314,7 +314,7 @@ export const ChangeServiceStep = ({
             >
               <span className={styles.grow}>
                 <span className={styles.optionName}>{item.name}</span>
-                <span className={styles.optionSub}>{item.dur}</span>
+                <span className={styles.optionSub}>{item.duration}</span>
               </span>
               <span className={styles.optionPrice}>{item.price}</span>
             </button>
@@ -341,26 +341,26 @@ export const AddonPickerList = ({
 }) => (
   <div className={className}>
     <SearchField
-      value={picker.q}
-      onChange={picker.onQ}
+      value={picker.query}
+      onChange={picker.onQuery}
       placeholder="Search add-ons"
     />
     <div className={styles.chips}>
-      {picker.chips.map(({ key, label, isOn, go }) => (
+      {picker.chips.map(({ key, label, isOn, onSelect }) => (
         <button
           key={key}
           className={joinClassNames(styles.chip, isOn && styles.chipOn)}
-          onClick={go}
+          onClick={onSelect}
         >
           {label}
         </button>
       ))}
     </div>
-    {picker.groups.map(({ key, cat, n, items }) => (
+    {picker.groups.map(({ key, category, count, items }) => (
       <div key={key} className={styles.group}>
         <div className={styles.groupHead}>
-          <span className={styles.h3}>{cat}</span>
-          <span className={styles.count}>{n}</span>
+          <span className={styles.h3}>{category}</span>
+          <span className={styles.count}>{count}</span>
         </div>
         <div className={styles.stack6}>
           {items.map((item) => (
@@ -421,11 +421,14 @@ export const ChangeClientStep = ({
   view: BookingSheetView;
 }) => {
   const { state, setState } = studio;
+
   return (
     <div className={paneClass(studio)}>
       <SearchField
-        value={state.ccQ || ""}
-        onChange={(event) => setState({ ccQ: event.target.value })}
+        value={state.changeClientQuery || ""}
+        onChange={(event) =>
+          setState({ changeClientQuery: event.target.value })
+        }
         placeholder="Search clients, or type a new name"
       />
       <button className={styles.newClient} onClick={view.openNewClient}>
@@ -443,7 +446,7 @@ export const ChangeClientStep = ({
           </span>
           <span className={styles.grow}>
             <span className={styles.addTypedLabel}>
-              {"Add “" + (state.ccQ || "").trim() + "” as a new client"}
+              {`Add “${(state.changeClientQuery || "").trim()}” as a new client`}
             </span>
             <span className={styles.optionSub}>
               You can add their details later
@@ -484,13 +487,14 @@ export const ChangeClientStep = ({
 
 const BookingSummary = ({ view }: { view: BookingSheetView }) => {
   const { booking } = view;
+
   return (
     <div className={styles.summary}>
       <img className={styles.avatar42} src={booking.imgSrc} alt="" />
       <div className={styles.grow}>
         <div className={styles.summaryName}>{booking.clientName}</div>
         <div className={styles.summaryMeta}>
-          {booking.svc + " · " + booking.durLabel}
+          {`${booking.service} · ${booking.durationLabel}`}
         </div>
       </div>
       <div className={styles.summaryEnd}>
@@ -509,7 +513,13 @@ export const RescheduleStep = ({
   view: BookingSheetView;
 }) => {
   const { state, setState } = studio;
-  const nav = getMonthNav(studio, "rsCalM", "rsCalY");
+
+  const monthNav = getMonthNav(
+    studio,
+    "rescheduleCalendarMonth",
+    "rescheduleCalendarYear",
+  );
+
   return (
     <>
       <BookingSummary view={view} />
@@ -517,43 +527,51 @@ export const RescheduleStep = ({
         <div className={styles.pickHead}>
           <div className={styles.label145}>Pick a new time</div>
           <CalendarToggle
-            isOpen={state.rsCalOpen}
+            isOpen={state.rescheduleCalendarOpen}
             onClick={() => {
               const today = new Date();
+
               setState({
-                rsCalOpen: !state.rsCalOpen,
-                rsCalM: state.rsCalM == null ? today.getMonth() : state.rsCalM,
-                rsCalY:
-                  state.rsCalY == null ? today.getFullYear() : state.rsCalY,
+                rescheduleCalendarOpen: !state.rescheduleCalendarOpen,
+                rescheduleCalendarMonth:
+                  state.rescheduleCalendarMonth == null
+                    ? today.getMonth()
+                    : state.rescheduleCalendarMonth,
+                rescheduleCalendarYear:
+                  state.rescheduleCalendarYear == null
+                    ? today.getFullYear()
+                    : state.rescheduleCalendarYear,
               });
             }}
           />
         </div>
-        {!state.rsCalOpen && (
+        {!state.rescheduleCalendarOpen && (
           <div className={styles.dayStrip}>
-            {view.rescheduleDays.map(({ key, dow, num, isOn, pick }) => (
-              <button
-                key={key}
-                className={joinClassNames(
-                  styles.dayChip,
-                  isOn && styles.dayChipOn,
-                )}
-                onClick={pick}
-              >
-                <div className={styles.chipDow}>{dow}</div>
-                <div className={styles.chipNum}>{num}</div>
-              </button>
-            ))}
+            {view.rescheduleDays.map(
+              ({ key, weekday, dayNumber, isOn, pick }) => (
+                <button
+                  key={key}
+                  className={joinClassNames(
+                    styles.dayChip,
+                    isOn && styles.dayChipOn,
+                  )}
+                  onClick={pick}
+                >
+                  <div className={styles.chipDow}>{weekday}</div>
+                  <div className={styles.chipNum}>{dayNumber}</div>
+                </button>
+              ),
+            )}
           </div>
         )}
-        {state.rsCalOpen && (
+        {state.rescheduleCalendarOpen && (
           <MonthCalendar
-            nav={nav}
-            days={getMiniCalDays(
-              nav.month,
-              nav.year,
-              state.rsDay,
-              (offset) => setState({ rsDay: offset }),
+            monthNav={monthNav}
+            days={getMiniCalendarDays(
+              monthNav.month,
+              monthNav.year,
+              state.rescheduleDay,
+              (offset) => setState({ rescheduleDay: offset }),
               0,
             )}
           />
@@ -610,8 +628,7 @@ export const RescheduleStep = ({
           <div className={styles.warning}>{view.rescheduleWarning}</div>
         )}
         <div className={styles.told}>
-          {view.booking.firstName +
-            " is told about the new time straight away. No deposit is lost."}
+          {`${view.booking.firstName} is told about the new time straight away. No deposit is lost.`}
         </div>
       </div>
     </>
@@ -626,6 +643,7 @@ export const CancelStep = ({
   view: BookingSheetView;
 }) => {
   const { state, setState } = studio;
+
   return (
     <>
       <BookingSummary view={view} />
@@ -637,9 +655,9 @@ export const CancelStep = ({
               key={id}
               className={joinClassNames(
                 styles.whoOption,
-                state.cxWho === id && styles.whoOptionOn,
+                state.cancelWho === id && styles.whoOptionOn,
               )}
-              onClick={() => setState({ cxWho: id })}
+              onClick={() => setState({ cancelWho: id })}
             >
               {label}
             </button>
@@ -649,12 +667,12 @@ export const CancelStep = ({
         {view.isFeeShown && (
           <button
             className={styles.feeToggle}
-            onClick={() => setState({ cxFee: !state.cxFee })}
+            onClick={() => setState({ cancelFee: !state.cancelFee })}
           >
             <span
               className={joinClassNames(
                 styles.checkbox,
-                state.cxFee && styles.checkboxOn,
+                state.cancelFee && styles.checkboxOn,
               )}
             >
               <svg
@@ -675,8 +693,8 @@ export const CancelStep = ({
         )}
         <input
           className={styles.reason}
-          value={state.cxReason}
-          onChange={(event) => setState({ cxReason: event.target.value })}
+          value={state.cancelReason}
+          onChange={(event) => setState({ cancelReason: event.target.value })}
           placeholder="Reason (optional)"
         />
       </div>
@@ -706,7 +724,7 @@ export const NoShowPanel = ({
       hours from Past.
     </div>
     <div className={styles.radios}>
-      {view.noShowOptions.map(({ id, label, sub, isOn, pick }) => (
+      {view.noShowOptions.map(({ id, label, subtitle, isOn, pick }) => (
         <button
           key={id}
           className={joinClassNames(styles.radio, isOn && styles.radioOn)}
@@ -717,7 +735,7 @@ export const NoShowPanel = ({
           </span>
           <span className={styles.grow}>
             <span className={styles.radioLabel}>{label}</span>
-            <span className={styles.radioSub}>{sub}</span>
+            <span className={styles.radioSub}>{subtitle}</span>
           </span>
         </button>
       ))}

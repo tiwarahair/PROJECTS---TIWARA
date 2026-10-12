@@ -18,8 +18,8 @@ import type {
 const DAY_MS = 86400000;
 const DEFAULT_BANK = "Barclays •••• 4471";
 
-export const getExportSlug = ({ s, e }: DateRange): string =>
-  toIsoDate(s) + "-to-" + toIsoDate(new Date(e.getTime() - DAY_MS));
+export const getExportSlug = ({ start, end }: DateRange): string =>
+  `${toIsoDate(start)}-to-${toIsoDate(new Date(end.getTime() - DAY_MS))}`;
 
 /** One row per transaction, with a BOM so Excel reads the £ / accents. */
 export const getEarningsCsv = (
@@ -28,8 +28,10 @@ export const getEarningsCsv = (
 ): string => {
   const quote = (value: unknown) => {
     const text = String(value == null ? "" : value);
-    return /[",\n]/.test(text) ? '"' + text.replace(/"/g, '""') + '"' : text;
+
+    return /[",\n]/.test(text) ? `"${text.replace(/"/g, '""')}"` : text;
   };
+
   const rows = [
     [
       "Date",
@@ -50,33 +52,39 @@ export const getEarningsCsv = (
       transaction.at.toLocaleDateString("en-GB"),
       formatTime(transaction.at),
       transaction.id,
-      transaction.bref,
+      transaction.bookingRef,
       getClient(transaction.client, clients).name,
-      transaction.svc,
-      transaction.desc,
+      transaction.service,
+      transaction.description,
       getMethodLabel(transaction),
       transaction.amount.toFixed(2),
       transaction.fee == null ? "" : transaction.fee.toFixed(2),
       transaction.net.toFixed(2),
       transaction.status,
-      transaction.po || "",
+      transaction.payoutId || "",
     ]),
   ];
-  return "﻿" + rows.map((row) => row.map(quote).join(",")).join("\n");
+
+  return `\uFEFF${rows.map((row) => row.map(quote).join(",")).join("\n")}`;
 };
 
 const GROUPS: [string, (transaction: Transaction) => boolean][] = [
   [
     "Service payments",
-    ({ desc }) => desc === "Balance" || desc === "Full payment",
+    ({ description }) =>
+      description === "Balance" || description === "Full payment",
   ],
-  ["Deposits", ({ desc }) => desc === "Deposit"],
-  ["Tips", ({ desc }) => desc === "Tip"],
-  ["Cancellation fees", ({ desc }) => desc === "Cancellation fee"],
-  ["No-show fees", ({ desc }) => desc === "No-show fee"],
+  ["Deposits", ({ description }) => description === "Deposit"],
+  ["Tips", ({ description }) => description === "Tip"],
+  [
+    "Cancellation fees",
+    ({ description }) => description === "Cancellation fee",
+  ],
+  ["No-show fees", ({ description }) => description === "No-show fee"],
   [
     "Refunds",
-    ({ desc }) => desc === "Refund" || desc === "Adjustment (recovery)",
+    ({ description }) =>
+      description === "Refund" || description === "Adjustment (recovery)",
   ],
 ];
 
@@ -107,131 +115,130 @@ export const getStatementHtml = ({
 }: StatementOptions): string => {
   const escape = (value: unknown) =>
     String(value).replace(/&/g, "&amp;").replace(/</g, "&lt;");
-  const months: { s: Date; e: Date; label: string }[] = [];
-  let month = new Date(range.s.getFullYear(), range.s.getMonth(), 1);
-  while (month < range.e) {
+
+  const months: { start: Date; end: Date; label: string }[] = [];
+  let month = new Date(range.start.getFullYear(), range.start.getMonth(), 1);
+
+  while (month < range.end) {
     const monthEnd = new Date(month.getFullYear(), month.getMonth() + 1, 1);
+
     months.push({
-      s: new Date(Math.max(month.getTime(), range.s.getTime())),
-      e: monthEnd < range.e ? monthEnd : range.e,
+      start: new Date(Math.max(month.getTime(), range.start.getTime())),
+      end: monthEnd < range.end ? monthEnd : range.end,
       label: month.toLocaleDateString("en-GB", {
         month: "long",
         year: "numeric",
       }),
     });
+
     month = monthEnd;
   }
-  const line = (date: string, what: string, how: string, amount: string) =>
-    '<tr><td class="d">' +
-    escape(date) +
-    "</td><td>" +
-    escape(what) +
-    '</td><td class="mu">' +
-    escape(how) +
-    '</td><td class="r">' +
-    escape(amount) +
-    "</td></tr>";
+
+  const line = (date: string, what: string, how: string, amount: string) => {
+    const dateCell = escape(date);
+    const whatCell = escape(what);
+    const howCell = escape(how);
+    const amountCell = escape(amount);
+
+    return `<tr><td class="d">${dateCell}</td><td>${whatCell}</td><td class="mu">${howCell}</td><td class="r">${amountCell}</td></tr>`;
+  };
+
   let body = "";
-  for (const { s, e, label } of months) {
-    const inMonth = transactions.filter(({ at }) => at >= s && at < e);
+
+  for (const { start, end, label } of months) {
+    const inMonth = transactions.filter(({ at }) => at >= start && at < end);
     const stats = getStats(inMonth);
-    body += "<section><h2>" + escape(label) + "</h2>";
+
+    body += `<section><h2>${escape(label)}</h2>`;
+
     for (const [title, matches] of GROUPS) {
       const rows = inMonth.filter(matches);
+
       if (!rows.length) continue;
+
       let total = 0;
+
       for (const { amount } of rows) total += amount;
-      body +=
-        "<h3>" +
-        title +
-        "</h3><table>" +
-        rows
-          .map((transaction) =>
-            line(
-              transaction.at.toLocaleDateString("en-GB"),
-              getClient(transaction.client, clients).name +
-                " · " +
-                transaction.svc,
-              getMethodLabel(transaction),
-              formatGbp(transaction.amount),
-            ),
-          )
-          .join("") +
-        '<tr class="st"><td></td><td>Total ' +
-        title.toLowerCase() +
-        '</td><td></td><td class="r">' +
-        formatGbp(total) +
-        "</td></tr></table>";
+
+      const groupLines = rows
+        .map((transaction) => {
+          const clientName = getClient(transaction.client, clients).name;
+
+          return line(
+            transaction.at.toLocaleDateString("en-GB"),
+            `${clientName} · ${transaction.service}`,
+            getMethodLabel(transaction),
+            formatGbp(transaction.amount),
+          );
+        })
+        .join("");
+
+      const groupName = title.toLowerCase();
+      const totalText = formatGbp(total);
+
+      body += `<h3>${title}</h3><table>${groupLines}<tr class="st"><td></td><td>Total ${groupName}</td><td></td><td class="r">${totalText}</td></tr></table>`;
     }
+
     const feeRows = inMonth.filter(({ fee }) => (fee ?? 0) > 0);
-    if (feeRows.length)
-      body +=
-        "<h3>Card fees</h3><table>" +
-        feeRows
-          .map((transaction) =>
-            line(
-              transaction.at.toLocaleDateString("en-GB"),
-              "Fee on " +
-                transaction.desc.toLowerCase() +
-                " · " +
-                getClient(transaction.client, clients).name,
-              transaction.method,
-              formatGbp(-(transaction.fee ?? 0)),
-            ),
-          )
-          .join("") +
-        '<tr class="st"><td></td><td>Total card fees</td><td></td><td class="r">' +
-        formatGbp(-stats.fees) +
-        "</td></tr></table>";
-    body +=
-      '<table class="tot"><tr><td>Takings</td><td class="r">' +
-      formatGbp(stats.takings) +
-      '</td></tr><tr><td>Card fees</td><td class="r">' +
-      formatGbp(-stats.fees) +
-      '</td></tr><tr><td>Refunds</td><td class="r">' +
-      formatGbp(stats.refunds) +
-      '</td></tr><tr class="n"><td>Net</td><td class="r">' +
-      formatGbp(stats.net) +
-      "</td></tr></table>";
-    const monthPayouts = payouts.filter(({ sent }) => sent >= s && sent < e);
-    if (monthPayouts.length)
-      body +=
-        "<h3>Payouts</h3><table>" +
-        monthPayouts
-          .map((payout) =>
-            line(
-              payout.sent.toLocaleDateString("en-GB"),
-              "To " + (bankLabel || DEFAULT_BANK),
-              payout.status,
-              formatGbp(payout.amount),
-            ),
-          )
-          .join("") +
-        "</table>";
+    const feesText = formatGbp(-stats.fees);
+
+    if (feeRows.length) {
+      const feeLines = feeRows
+        .map((transaction) => {
+          const feeWhat = transaction.description.toLowerCase();
+          const clientName = getClient(transaction.client, clients).name;
+
+          return line(
+            transaction.at.toLocaleDateString("en-GB"),
+            `Fee on ${feeWhat} · ${clientName}`,
+            transaction.method,
+            formatGbp(-(transaction.fee ?? 0)),
+          );
+        })
+        .join("");
+
+      body += `<h3>Card fees</h3><table>${feeLines}<tr class="st"><td></td><td>Total card fees</td><td></td><td class="r">${feesText}</td></tr></table>`;
+    }
+
+    const takingsText = formatGbp(stats.takings);
+    const refundsText = formatGbp(stats.refunds);
+    const netText = formatGbp(stats.net);
+
+    body += `<table class="tot"><tr><td>Takings</td><td class="r">${takingsText}</td></tr><tr><td>Card fees</td><td class="r">${feesText}</td></tr><tr><td>Refunds</td><td class="r">${refundsText}</td></tr><tr class="n"><td>Net</td><td class="r">${netText}</td></tr></table>`;
+
+    const monthPayouts = payouts.filter(
+      ({ sent }) => sent >= start && sent < end,
+    );
+
+    if (monthPayouts.length) {
+      const payoutLines = monthPayouts
+        .map((payout) =>
+          line(
+            payout.sent.toLocaleDateString("en-GB"),
+            `To ${bankLabel || DEFAULT_BANK}`,
+            payout.status,
+            formatGbp(payout.amount),
+          ),
+        )
+        .join("");
+
+      body += `<h3>Payouts</h3><table>${payoutLines}</table>`;
+    }
+
     body += "</section>";
   }
+
   if (!months.length || !transactions.length)
     body += '<p class="mu">No transactions in this period.</p>';
-  const slug = getExportSlug(range);
-  return (
-    '<!doctype html><html><head><meta charset="utf-8"><title>Statement ' +
-    escape(slug) +
-    "</title><style>" +
-    STATEMENT_STYLE +
-    '</style></head><body><div class="hd"><div><h1>Earnings statement</h1><p class="mu">' +
-    escape(getRangeLabel(range)) +
-    '</p></div><div style="text-align:right"><p><b>' +
-    escape(businessName) +
-    "</b></p><p>" +
-    escape(legalName) +
-    "</p>" +
-    (vatNumber ? "<p>VAT " + escape(vatNumber) + "</p>" : "") +
-    '<p class="mu">Generated ' +
-    new Date().toLocaleDateString("en-GB") +
-    "</p></div></div>" +
-    body +
-    "</body></html>"
-  );
+
+  const slug = escape(getExportSlug(range));
+  const rangeText = escape(getRangeLabel(range));
+  const businessText = escape(businessName);
+  const legalText = escape(legalName);
+  const vatLine = vatNumber ? `<p>VAT ${escape(vatNumber)}</p>` : "";
+  const generatedOn = new Date().toLocaleDateString("en-GB");
+
+  return `<!doctype html><html><head><meta charset="utf-8"><title>Statement ${slug}</title><style>${STATEMENT_STYLE}</style></head><body><div class="hd"><div><h1>Earnings statement</h1><p class="mu">${rangeText}</p></div><div style="text-align:right"><p><b>${businessText}</b></p><p>${legalText}</p>${vatLine}<p class="mu">Generated ${generatedOn}</p></div></div>${body}</body></html>`;
 };
 
 /** Saves text as a file download. */
@@ -239,6 +246,7 @@ export const downloadText = (name: string, mime: string, body: string) => {
   try {
     const url = URL.createObjectURL(new Blob([body], { type: mime }));
     const link = document.createElement("a");
+
     link.href = url;
     link.download = name;
     document.body.appendChild(link);
@@ -253,15 +261,20 @@ export const downloadText = (name: string, mime: string, body: string) => {
 /** Prints an HTML document from a hidden iframe (the browser's "Save as PDF"). */
 export const printHtml = (html: string) => {
   const frame = document.createElement("iframe");
+
   // a zero-size frame rather than display:none, which some browsers won't print
   frame.style.cssText =
     "position:fixed;right:0;bottom:0;width:0;height:0;border:0";
+
   document.body.appendChild(frame);
   const frameDocument = frame.contentWindow?.document;
+
   if (!frameDocument) return;
+
   frameDocument.open();
   frameDocument.write(html);
   frameDocument.close();
+
   window.setTimeout(() => {
     try {
       frame.contentWindow?.focus();
@@ -269,6 +282,7 @@ export const printHtml = (html: string) => {
     } catch {
       // printing unavailable
     }
+
     window.setTimeout(() => frame.remove(), 60000);
   }, 300);
 };

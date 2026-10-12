@@ -7,8 +7,8 @@ export interface OnboardingLayout {
   screen: string;
   isWizard: boolean;
   step: number;
-  desk: boolean;
-  mid: boolean;
+  isDesktop: boolean;
+  isTabletOrWider: boolean;
   isDark: boolean;
   isPro: boolean;
   noPhoto: boolean;
@@ -27,77 +27,130 @@ const CUSTOMER_SCREENS = [
   "cust-social",
 ];
 
+interface VariantFlags {
+  isDesktop: boolean;
+  noPhoto: boolean;
+  clipped: boolean;
+  compact: boolean;
+  welcome: boolean;
+  welcomeOver: boolean;
+  isDark: boolean;
+}
+
+/** Forced by the layout prop, otherwise by width (desktop until the width is known). */
+const getIsDesktop = ({ layout }: ResolvedProps, width: number) => {
+  if (layout === "desktop") return true;
+
+  if (layout === "mobile") return false;
+
+  return width ? width >= 900 : true;
+};
+
+const getHeroVariant = ({
+  noPhoto,
+  clipped,
+  compact,
+  welcome,
+}: VariantFlags) => {
+  if (noPhoto) return "nophoto";
+
+  if (clipped) {
+    if (compact) return "clipped-compact";
+
+    return welcome ? "clipped-welcome" : "clipped";
+  }
+
+  if (compact) return "compact";
+
+  return welcome ? "welcome" : "default";
+};
+
+const getScrimVariant = ({
+  noPhoto,
+  clipped,
+  welcome,
+  isDark,
+  compact,
+}: VariantFlags) => {
+  if (noPhoto) return "none";
+
+  if (clipped) return welcome ? "clipped-welcome" : "clipped";
+
+  return (isDark ? "dark" : "light") + (compact ? "-compact" : "");
+};
+
+const getAuthVariant = ({
+  isDesktop,
+  noPhoto,
+  welcomeOver,
+  welcome,
+  clipped,
+  compact,
+}: VariantFlags) => {
+  if (isDesktop) return "desk";
+
+  if (noPhoto) return "nophoto";
+
+  if (welcomeOver) return "welcome-over";
+
+  if (welcome && !clipped) return compact ? "welcome-compact" : "welcome";
+
+  if (clipped) return "clipped";
+
+  return compact ? "default-compact" : "default";
+};
+
+const getPhotoKey = (screen: string, isPro: boolean): PhotoKey => {
+  if (screen === "welcome" || screen === "chooser") return "welcome";
+
+  return isPro && !["pro-email", "pro-password", "pro-2fa"].includes(screen)
+    ? "stylist"
+    : "client";
+};
+
 export const getLayout = (
   state: OnboardingState,
   props: ResolvedProps,
 ): OnboardingLayout => {
   const screen = state.screen || "chooser";
-  const desk =
-    props.layout === "desktop"
-      ? true
-      : props.layout === "mobile"
-        ? false
-        : state.w
-          ? state.w >= 900
-          : true;
-  const mid = state.w ? state.w >= 640 : true;
+  const isDesktop = getIsDesktop(props, state.width);
+  const isTabletOrWider = state.width ? state.width >= 640 : true;
   const isWizard = /^w[1-5]$/.test(screen);
   const isDark = state.mode === "dark";
   const welcome = screen === "welcome";
-  const compact = state.compact && !desk;
-  const noPhoto = screen === "chooser" && !desk;
-  const clipped = !noPhoto && (props.photo || "full") === "clipped" && !desk;
+  const compact = state.compact && !isDesktop;
+  const noPhoto = screen === "chooser" && !isDesktop;
+
+  const clipped =
+    !noPhoto && (props.photo || "full") === "clipped" && !isDesktop;
+
   const welcomeOver = clipped && welcome;
+
   const isPro =
     screen.startsWith("pro") ||
     (state.audience !== "customer" && !CUSTOMER_SCREENS.includes(screen));
-  const heroVariant = noPhoto
-    ? "nophoto"
-    : clipped
-      ? compact
-        ? "clipped-compact"
-        : welcome
-          ? "clipped-welcome"
-          : "clipped"
-      : compact
-        ? "compact"
-        : welcome
-          ? "welcome"
-          : "default";
-  const scrimVariant = noPhoto
-    ? "none"
-    : clipped
-      ? welcome
-        ? "clipped-welcome"
-        : "clipped"
-      : (isDark ? "dark" : "light") + (compact ? "-compact" : "");
-  const authVariant = desk
-    ? "desk"
-    : noPhoto
-      ? "nophoto"
-      : welcomeOver
-        ? "welcome-over"
-        : welcome && !clipped
-          ? compact
-            ? "welcome-compact"
-            : "welcome"
-          : clipped
-            ? "clipped"
-            : compact
-              ? "default-compact"
-              : "default";
-  const photoKey: PhotoKey =
-    screen === "welcome" || screen === "chooser"
-      ? "welcome"
-      : isPro && !["pro-email", "pro-password", "pro-2fa"].includes(screen)
-        ? "stylist"
-        : "client";
+
+  const flags: VariantFlags = {
+    isDesktop,
+    noPhoto,
+    clipped,
+    compact,
+    welcome,
+    welcomeOver,
+    isDark,
+  };
+
+  const heroVariant = getHeroVariant(flags);
+  const scrimVariant = getScrimVariant(flags);
+  const authVariant = getAuthVariant(flags);
+  const photoKey = getPhotoKey(screen, isPro);
+
   return {
     screen,
     isWizard,
     step: isWizard ? Number(screen[1]) : 0,
-    desk,
-    mid,
+    isDesktop,
+    isTabletOrWider,
     isDark,
     isPro,
     noPhoto,

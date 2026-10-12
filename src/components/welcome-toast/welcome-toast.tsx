@@ -18,13 +18,17 @@ const WelcomeToastPill = ({
 
   useEffect(() => {
     if (pinned) return;
+
     const closeTimer = window.setTimeout(() => setClosing(true), 4000);
+
     return () => window.clearTimeout(closeTimer);
   }, [pinned]);
 
   useEffect(() => {
     if (!closing) return;
+
     const removeTimer = window.setTimeout(onDone, 260);
+
     return () => window.clearTimeout(removeTimer);
   }, [closing, onDone]);
 
@@ -61,9 +65,13 @@ const readWelcomeMessage = (): { message: string; pinned: boolean } | null => {
     const pinnedMessage = new URLSearchParams(window.location.search).get(
       "twtoast",
     );
+
     if (pinnedMessage) return { message: pinnedMessage, pinned: true };
+
     const stored = window.sessionStorage.getItem("tw_toast");
+
     window.sessionStorage.removeItem("tw_toast");
+
     return stored ? { message: stored, pinned: false } : null;
   } catch {
     return null;
@@ -79,18 +87,23 @@ export const WelcomeToast = () => {
     message: string;
     pinned: boolean;
   } | null>(null);
+
   const [visible, setVisible] = useState(false);
   const handleDone = useCallback(() => setToast(null), []);
 
   useEffect(() => {
     const welcome = readWelcomeMessage();
+
     if (!welcome) return;
+
     setToast(welcome);
     const showTimer = window.setTimeout(() => setVisible(true), 600);
+
     return () => window.clearTimeout(showTimer);
   }, []);
 
   if (!toast || !visible) return null;
+
   return (
     <WelcomeToastPill
       message={toast.message}

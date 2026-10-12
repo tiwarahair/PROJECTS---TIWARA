@@ -19,7 +19,9 @@ const assetUrls = new Map(
 /** Resolve a prototype-relative asset path (e.g. "img/w160524.jpg") to its bundled URL. */
 export const getAssetUrl = (prototypePath: string): string => {
   const url = assetUrls.get(prototypePath.replace(/^\.?\//, ""));
+
   if (!url) throw new Error(`Unknown asset: ${prototypePath}`);
+
   return url;
 };
 

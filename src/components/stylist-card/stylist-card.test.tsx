@@ -21,15 +21,18 @@ describe("StylistCard", () => {
 
   it("renders the photo, name, rating, area and fee-inclusive from price", () => {
     renderWithStore(<StylistCard {...BASE} from="£81.70" />);
+
     expect(
       screen.getByRole("img", { name: "Amara Beauty" }),
     ).toBeInTheDocument();
+
     // the cover and the title both link to the profile
     screen
       .getAllByRole("link", { name: "Amara Beauty" })
       .forEach((link) =>
         expect(link).toHaveAttribute("href", "/stylist?stylist=amara-beauty"),
       );
+
     expect(screen.getByText("(146)")).toBeInTheDocument();
     expect(screen.getByText("Hulme, Manchester")).toBeInTheDocument();
     expect(screen.getByText("from £81.70")).toBeInTheDocument();
@@ -47,6 +50,7 @@ describe("StylistCard", () => {
         ]}
       />,
     );
+
     expect(
       screen.getByText("Fulani braids · Feed-in braids · from £41.1"),
     ).toBeInTheDocument();
@@ -74,29 +78,36 @@ describe("StylistCard", () => {
         bookHref="/book?stylist=amara-beauty"
       />,
     );
+
     expect(screen.getByText("Travels to you")).toBeInTheDocument();
+
     expect(screen.getByRole("link", { name: /Silk press/ })).toHaveAttribute(
       "href",
       "/book?stylist=amara-beauty",
     );
+
     expect(screen.getByRole("link", { name: "Book" })).toBeInTheDocument();
     expect(screen.queryByText("from £50")).not.toBeInTheDocument();
   });
 
   it("guests tapping the heart get the log-in sheet", () => {
     const { store } = renderWithStore(<StylistCard {...BASE} />);
+
     fireEvent.click(
       screen.getByRole("button", { name: "Save Amara Beauty to favourites" }),
     );
+
     expect(store.getState().favourites.loginSheetFor).toBe("amara-beauty");
   });
 
   it("logged-in customers toggle the favourite", () => {
     sessionStorage.setItem("tw_cust", "1");
     renderWithStore(<StylistCard {...BASE} />);
+
     fireEvent.click(
       screen.getByRole("button", { name: "Save Amara Beauty to favourites" }),
     );
+
     expect(
       screen.getByRole("button", {
         name: "Remove Amara Beauty from favourites",

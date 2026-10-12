@@ -20,13 +20,16 @@ describe("SearchSelect", () => {
         placeholder="No category"
       />,
     );
+
     expect(screen.getByRole("button")).toHaveTextContent("No category");
+
     rerender(
       <SearchSelect
         options={["deep conditioning"]}
         value="deep conditioning"
       />,
     );
+
     expect(screen.getByRole("button")).toHaveTextContent("Deep conditioning");
   });
 
@@ -35,23 +38,29 @@ describe("SearchSelect", () => {
     fireEvent.click(screen.getByRole("button", { name: "Select" }));
     expect(screen.getByText("Braids & Twists")).toBeInTheDocument();
     expect(screen.getByText("Natural Hair")).toBeInTheDocument();
+
     fireEvent.change(screen.getByPlaceholderText("Search"), {
       target: { value: "press" },
     });
+
     expect(
       screen.getByRole("button", { name: "Silk press" }),
     ).toBeInTheDocument();
+
     expect(
       screen.queryByRole("button", { name: "Box braids" }),
     ).not.toBeInTheDocument();
+
     fireEvent.change(screen.getByPlaceholderText("Search"), {
       target: { value: "zzz" },
     });
+
     expect(screen.getByText("No matches")).toBeInTheDocument();
   });
 
   it("keeps action rows visible and reports the picked label", () => {
     const handleChange = vi.fn();
+
     render(
       <SearchSelect
         options={[
@@ -61,10 +70,13 @@ describe("SearchSelect", () => {
         onChange={handleChange}
       />,
     );
+
     fireEvent.click(screen.getByRole("button", { name: "Select" }));
+
     fireEvent.change(screen.getByPlaceholderText("Search"), {
       target: { value: "zzz" },
     });
+
     fireEvent.click(screen.getByRole("button", { name: "+ New category" }));
     expect(handleChange).toHaveBeenCalledWith("+ New category");
     expect(screen.queryByPlaceholderText("Search")).not.toBeInTheDocument();

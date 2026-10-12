@@ -10,7 +10,7 @@ export interface DemoAddress {
 export interface SavedAddress extends Omit<DemoAddress, "id"> {
   id: string;
   label: string;
-  def: boolean;
+  isDefault: boolean;
 }
 
 /** Any address value the finder and validators accept. */

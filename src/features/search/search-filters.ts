@@ -16,11 +16,11 @@ export const toggleVenue = (list: Venue[], venue: Venue): Venue[] =>
 
 /** "£80" or "£250+" for no limit. */
 export const formatMaxPrice = (value: number | null): string =>
-  value == null ? "£250+" : "£" + value;
+  value == null ? "£250+" : `£${value}`;
 
 /** Slider value → max price; the top of the range means no limit. */
 export const toMaxPrice = (value: string): number | null =>
   Number(value) >= 250 ? null : Number(value);
 
 export const getPriceFill = (value: number | null): string =>
-  ((value == null ? 250 : value) / 250) * 100 + "%";
+  `${((value == null ? 250 : value) / 250) * 100}%`;

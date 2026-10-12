@@ -16,33 +16,36 @@ const NEW_ADDRESS_ID = "new";
 export const AppointmentAddress = ({ booking }: AppointmentAddressProps) => {
   const { state, stylist, address, actions } = booking;
   const { setState } = actions;
-  const { saved, savedSel, addr } = state;
+  const { saved, selectedAddressId, appointmentAddress } = state;
+
   const cards = saved
-    .map(({ id, label, def, line1, line2, town, postcode }) => ({
+    .map(({ id, label, isDefault, line1, line2, town, postcode }) => ({
       id,
       label,
-      def,
-      line: [line1, line2, town].filter(Boolean).join(", ") + " " + postcode,
+      isDefault,
+      line: `${[line1, line2, town].filter(Boolean).join(", ")} ${postcode}`,
     }))
     .concat([
       {
         id: NEW_ADDRESS_ID,
         label: "A different address",
-        def: false,
+        isDefault: false,
         line: "Search for an address or postcode",
       },
     ]);
+
   const pickCard = (id: string) => {
     const picked = saved.find((item) => item.id === id);
+
     if (id === NEW_ADDRESS_ID || !picked)
-      setState(({ addr: current }) => ({
-        savedSel: NEW_ADDRESS_ID,
-        addr: { ...EMPTY_ADDRESS, notes: current.notes },
+      setState(({ appointmentAddress: current }) => ({
+        selectedAddressId: NEW_ADDRESS_ID,
+        appointmentAddress: { ...EMPTY_ADDRESS, notes: current.notes },
       }));
     else
-      setState(({ addr: current }) => ({
-        savedSel: id,
-        addr: {
+      setState(({ appointmentAddress: current }) => ({
+        selectedAddressId: id,
+        appointmentAddress: {
           line1: picked.line1,
           line2: picked.line2 || "",
           town: picked.town,
@@ -56,7 +59,7 @@ export const AppointmentAddress = ({ booking }: AppointmentAddressProps) => {
   return (
     <section data-screen-label="Appointment address" className={styles.section}>
       <h2 className={fields.heading}>
-        {"Where should " + stylist.name + " come to?"}
+        {`Where should ${stylist.name} come to?`}
       </h2>
       {saved.length > 0 && (
         <div
@@ -65,8 +68,9 @@ export const AppointmentAddress = ({ booking }: AppointmentAddressProps) => {
           data-screen-label="Saved address cards"
           className={styles.cards}
         >
-          {cards.map(({ id, label, def, line }) => {
-            const on = savedSel === id;
+          {cards.map(({ id, label, isDefault, line }) => {
+            const on = selectedAddressId === id;
+
             return (
               <button
                 key={id}
@@ -85,7 +89,9 @@ export const AppointmentAddress = ({ booking }: AppointmentAddressProps) => {
                   )}
                 >
                   {label}
-                  {def && <span className={styles.defaultTag}>Default</span>}
+                  {isDefault && (
+                    <span className={styles.defaultTag}>Default</span>
+                  )}
                 </span>
                 <span className={styles.cardLine}>{line}</span>
               </button>
@@ -95,21 +101,25 @@ export const AppointmentAddress = ({ booking }: AppointmentAddressProps) => {
       )}
       <div className={fields.grid}>
         <div className={styles.finderColumn}>
-          {(!saved.length || savedSel === NEW_ADDRESS_ID) && (
+          {(!saved.length || selectedAddressId === NEW_ADDRESS_ID) && (
             // plain block wrapper = the prototype runtime's .sc-host around the embedded finder
             <div data-dc-host="">
               <AddressFinder
                 idPrefix="bk-addr"
                 label="Address or postcode"
-                value={addr.line1 || addr.postcode ? addr : null}
+                value={
+                  appointmentAddress.line1 || appointmentAddress.postcode
+                    ? appointmentAddress
+                    : null
+                }
                 onChange={(next) =>
-                  setState(({ addr: current }) => ({
-                    addr: next
+                  setState(({ appointmentAddress: current }) => ({
+                    appointmentAddress: next
                       ? { ...next, notes: current.notes }
                       : { ...EMPTY_ADDRESS, notes: current.notes },
                   }))
                 }
-                showErrors={state.showErrs}
+                showErrors={state.showErrors}
                 fieldHeight={50}
                 labelSize={12.5}
                 labelColor="secondary"
@@ -131,7 +141,7 @@ export const AppointmentAddress = ({ booking }: AppointmentAddressProps) => {
                 >
                   <path d="M5 12.5l4.5 4.5L19 7.5"></path>
                 </svg>
-                {"Inside " + stylist.name + "'s travel area"}
+                {`Inside ${stylist.name}'s travel area`}
               </div>
             )}
             {address.outBlock && (
@@ -150,15 +160,9 @@ export const AppointmentAddress = ({ booking }: AppointmentAddressProps) => {
                   <path d="M12 7v6M12 16.5v.5"></path>
                 </svg>
                 <span>
-                  {"This address is outside " +
-                    stylist.name +
-                    "'s travel area (up to " +
-                    stylist.travelMiles +
-                    " miles). Try another address or find a stylist near you."}{" "}
+                  {`This address is outside ${stylist.name}'s travel area (up to ${stylist.travelMiles} miles). Try another address or find a stylist near you.`}{" "}
                   <Link
-                    to={
-                      "/search?loc=" + encodeURIComponent(address.postcodeLabel)
-                    }
+                    to={`/search?loc=${encodeURIComponent(address.postcodeLabel)}`}
                     onClick={actions.onLeaveLink}
                     className={styles.nearLink}
                   >
@@ -177,10 +181,13 @@ export const AppointmentAddress = ({ booking }: AppointmentAddressProps) => {
             id="bk-access"
             rows={2}
             placeholder="Parking, buzzer number, floor…"
-            value={addr.notes}
+            value={appointmentAddress.notes}
             onChange={(event) =>
-              setState(({ addr: current }) => ({
-                addr: { ...current, notes: event.target.value.slice(0, 300) },
+              setState(({ appointmentAddress: current }) => ({
+                appointmentAddress: {
+                  ...current,
+                  notes: event.target.value.slice(0, 300),
+                },
               }))
             }
             className={styles.accessNotes}

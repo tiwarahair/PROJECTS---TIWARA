@@ -9,18 +9,18 @@ import type { Place, StyleSelection } from "./search-logic";
 import type { SearchState, WhatChip } from "./search-state";
 
 export type RowKind =
-  "all" | "group" | "type" | "stylist" | "all-results" | "cur" | "loc";
+  "all" | "group" | "type" | "stylist" | "all-results" | "current" | "location";
 
 export interface SuggestionRow {
   kind: RowKind;
   label: string;
-  sub?: string;
+  subtitle?: string;
   icon?: string;
-  img?: string;
+  image?: string;
   on?: boolean;
-  g?: ServiceGroup;
-  t?: ServiceType;
-  st?: Stylist;
+  group?: ServiceGroup;
+  serviceType?: ServiceType;
+  stylist?: Stylist;
   raw?: string;
 }
 
@@ -28,9 +28,9 @@ export interface RowView {
   key: string;
   row: SuggestionRow;
   index: number;
-  pre: string;
-  mid: string;
-  post: string;
+  before: string;
+  match: string;
+  after: string;
   isActive: boolean;
   isOn: boolean;
 }
@@ -44,16 +44,18 @@ export const getRowView = (
 ): RowView => {
   const { label, kind } = row;
   const at = query ? label.toLowerCase().indexOf(query) : -1;
+
   const parts =
     at < 0
-      ? { pre: label, mid: "", post: "" }
+      ? { before: label, match: "", after: "" }
       : {
-          pre: label.slice(0, at),
-          mid: label.slice(at, at + query.length),
-          post: label.slice(at + query.length),
+          before: label.slice(0, at),
+          match: label.slice(at, at + query.length),
+          after: label.slice(at + query.length),
         };
+
   return {
-    key: kind + ":" + label,
+    key: `${kind}:${label}`,
     row,
     index,
     ...parts,
@@ -72,15 +74,18 @@ export interface WhatChipView {
 export const getWhatModel = (state: SearchState, selection: StyleSelection) => {
   const raw = state.whatTyped ? String(state.whatText || "").trim() : "";
   const query = raw.toLowerCase();
+
   const groupRow = (group: ServiceGroup): SuggestionRow => ({
     kind: "group",
-    g: group,
+    group,
     label: group.name,
     icon: SEARCH_ICONS[group.id] || SEARCH_ICONS.grid,
-    on: selection.isGroup && selection.gr?.id === group.id,
+    on: selection.isGroup && selection.group?.id === group.id,
   });
+
   let styleRows: SuggestionRow[];
   let stylistList: Stylist[];
+
   if (!query) {
     styleRows = [
       {
@@ -91,6 +96,7 @@ export const getWhatModel = (state: SearchState, selection: StyleSelection) => {
       },
       ...serviceGroups.map(groupRow),
     ];
+
     stylistList = stylists
       .slice()
       .sort((left, right) => left.name.localeCompare(right.name));
@@ -103,51 +109,63 @@ export const getWhatModel = (state: SearchState, selection: StyleSelection) => {
         .filter(({ isOther }) => !isOther)
         .map((type): SuggestionRow => ({
           kind: "type",
-          t: type,
+          serviceType: type,
           label: type.name,
-          sub: serviceGroups.find(({ id }) => id === type.groupId)?.name,
-          on: !!selection.ty && selection.ty.id === type.id,
+          subtitle: serviceGroups.find(({ id }) => id === type.groupId)?.name,
+          on: !!selection.serviceType && selection.serviceType.id === type.id,
         })),
     ];
+
     stylistList = stylists.filter(({ name }) =>
       name.toLowerCase().includes(query),
     );
   }
+
   const stylistRows = stylistList.map((stylist): SuggestionRow => ({
     kind: "stylist",
-    st: stylist,
+    stylist,
     label: stylist.name,
-    sub: stylist.area,
-    img: stylist.cover,
+    subtitle: stylist.area,
+    image: stylist.cover,
   }));
+
   const styleCount = styleRows.filter(({ kind }) => kind !== "all").length;
   const stylistCount = stylistRows.length;
   const chip = state.whatChip;
   const sections: { key: string; title: string; rows: SuggestionRow[] }[] = [];
+
   if (chip !== "stylists" && styleRows.length)
     sections.push({ key: "styles", title: "Styles", rows: styleRows });
+
   if (chip !== "styles" && stylistCount && (query || chip === "stylists"))
     sections.push({ key: "stylists", title: "Stylists", rows: stylistRows });
+
   const isEmpty = !!query && !sections.length;
   const flat = sections.flatMap(({ rows }) => rows);
+
   if (query && !isEmpty)
     flat.push({
       kind: "all-results",
-      label: "See all results for ‘" + raw + "’",
+      label: `See all results for ‘${raw}’`,
       raw,
       icon: SEARCH_ICONS.search,
     });
+
   let index = 0;
+
   const sectionViews = sections.map(({ key, title, rows }) => ({
     key,
     title,
-    rows: rows.map((row) => getRowView(row, index++, state.whatIdx, query)),
+    rows: rows.map((row) => getRowView(row, index++, state.whatIndex, query)),
   }));
+
   const lastRow = flat[flat.length - 1];
+
   const seeAll =
     query && !isEmpty && lastRow
-      ? [getRowView(lastRow, flat.length - 1, state.whatIdx, "")]
+      ? [getRowView(lastRow, flat.length - 1, state.whatIndex, "")]
       : [];
+
   const chips: WhatChipView[] = (
     [
       ["all", "All", styleCount + stylistCount],
@@ -160,6 +178,7 @@ export const getWhatModel = (state: SearchState, selection: StyleSelection) => {
     count: String(count),
     on: chip === key,
   }));
+
   return {
     raw,
     query,
@@ -168,52 +187,51 @@ export const getWhatModel = (state: SearchState, selection: StyleSelection) => {
     sections: sectionViews,
     seeAll,
     isEmpty,
-    emptyText:
-      "No styles or stylists match ‘" +
-      raw +
-      "’. Try a broader term like braids or locs.",
+    emptyText: `No styles or stylists match ‘${raw}’. Try a broader term like braids or locs.`,
   };
 };
 
 export const getWhereModel = (state: SearchState, place: Place) => {
   const raw = state.whereTyped ? String(state.whereText || "").trim() : "";
   const query = raw.toLowerCase();
+
   const locationRows = (
     query
       ? searchLocations.filter(({ name }) => name.toLowerCase().includes(query))
       : searchLocations
   ).map(({ name }): SuggestionRow => ({
-    kind: "loc",
+    kind: "location",
     label: name,
-    sub: query ? "Manchester, UK" : "",
+    subtitle: query ? "Manchester, UK" : "",
     icon: SEARCH_ICONS.pin,
     on: !place.current && place.name === name,
   }));
+
   const currentRows: SuggestionRow[] = query
     ? []
     : [
         {
-          kind: "cur",
+          kind: "current",
           label: "Current location",
           icon: SEARCH_ICONS.arrow,
           on: !!place.current,
         },
       ];
+
   return {
     raw,
     query,
     locationRows,
     flat: [...currentRows, ...locationRows],
     current: currentRows.map((row, index) =>
-      getRowView(row, index, state.whereIdx, ""),
+      getRowView(row, index, state.whereIndex, ""),
     ),
     rows: locationRows.map((row, index) =>
-      getRowView(row, index + currentRows.length, state.whereIdx, query),
+      getRowView(row, index + currentRows.length, state.whereIndex, query),
     ),
     showPopular: !query,
     isEmpty: !!query && !locationRows.length,
-    emptyText:
-      "No areas match ‘" + raw + "’. Try an area like Chorlton or Salford.",
+    emptyText: `No areas match ‘${raw}’. Try an area like Chorlton or Salford.`,
     display: place.current ? "" : place.name,
   };
 };

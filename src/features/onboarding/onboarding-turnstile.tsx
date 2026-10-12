@@ -1,9 +1,9 @@
 import { joinClassNames } from "../../utils/class-names";
 import type { TurnstileState } from "./onboarding-state";
-import styles from "./ob-turnstile.module.css";
+import styles from "./onboarding-turnstile.module.css";
 
-interface ObTurnstileProps {
-  ts: TurnstileState;
+interface OnboardingTurnstileProps {
+  status: TurnstileState;
   isDark: boolean;
   onCheck: () => void;
   /** The wizard's error line is crimson; the shell's follows --ob-err. */
@@ -13,17 +13,17 @@ interface ObTurnstileProps {
 const LABELS: Record<TurnstileState, string> = {
   idle: "Verify you are human",
   checking: "Verifying…",
-  ok: "Success!",
+  passed: "Success!",
   fail: "Verification failed",
 };
 
 /** Simulated Cloudflare Turnstile fallback (?turnstile=challenge|fail), light or dark. */
-export const ObTurnstile = ({
-  ts,
+export const OnboardingTurnstile = ({
+  status,
   isDark,
   onCheck,
   inWizard,
-}: ObTurnstileProps) => (
+}: OnboardingTurnstileProps) => (
   <div className={styles.wrap}>
     <div
       className={joinClassNames(
@@ -34,10 +34,10 @@ export const ObTurnstile = ({
       <label
         className={joinClassNames(
           styles.label,
-          ts === "idle" ? styles.labelIdle : styles.labelBusy,
+          status === "idle" ? styles.labelIdle : styles.labelBusy,
         )}
       >
-        {ts === "idle" && (
+        {status === "idle" && (
           <input
             type="checkbox"
             checked={false}
@@ -46,10 +46,10 @@ export const ObTurnstile = ({
             className={styles.checkbox}
           />
         )}
-        {ts === "checking" && (
+        {status === "checking" && (
           <span aria-hidden="true" className={styles.spinner}></span>
         )}
-        {ts === "ok" && (
+        {status === "passed" && (
           <span aria-hidden="true" className={styles.ok}>
             <svg
               width="14"
@@ -66,7 +66,7 @@ export const ObTurnstile = ({
             </svg>
           </span>
         )}
-        {ts === "fail" && (
+        {status === "fail" && (
           <span aria-hidden="true" className={styles.failed}>
             <svg
               width="14"
@@ -83,7 +83,7 @@ export const ObTurnstile = ({
           </span>
         )}
         <span role="status" aria-live="polite" className={styles.status}>
-          {LABELS[ts]}
+          {LABELS[status]}
         </span>
       </label>
       <span className={styles.brand}>
@@ -92,7 +92,7 @@ export const ObTurnstile = ({
       </span>
     </div>
     <div role="alert" className={inWizard ? styles.errorWizard : styles.error}>
-      {ts === "fail"
+      {status === "fail"
         ? "We couldn’t check you’re not a robot. Refresh the page and try again."
         : ""}
     </div>

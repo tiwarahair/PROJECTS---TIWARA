@@ -57,10 +57,12 @@ const CardIcon = () => (
 /** Status tag; its colours come from the booking's status (runtime values). */
 const StatusTag = ({ card }: { card: BookingCardView }) => {
   const [label, background, colour] = card.money.tag;
+
   const tagStyle = {
     "--tag-bg": background,
     "--tag-fg": colour,
   } as CSSProperties;
+
   return (
     <span className={styles.tag} style={tagStyle}>
       {label}
@@ -77,8 +79,10 @@ const CardHead = ({ card }: { card: BookingCardView }) => (
       </Link>
       <StatusTag card={card} />
     </div>
-    <div className={styles.service}>{card.booking.svc}</div>
-    {!!card.booking.cust && <div className={ui.muted}>{card.booking.cust}</div>}
+    <div className={styles.service}>{card.booking.service}</div>
+    {!!card.booking.customisation && (
+      <div className={ui.muted}>{card.booking.customisation}</div>
+    )}
   </>
 );
 
@@ -146,13 +150,14 @@ export const OverviewSection = ({
     )}
     <h2 className={ui.headingSpaced}>Quick actions</h2>
     <div className={styles.quickGrid}>
-      {quick.map(({ key, label, sub, href, icon, section }) => (
+      {quick.map(({ key, label, subtitle, href, icon, section }) => (
         <Link
           key={key}
           className={styles.quickLink}
           to={href}
           onClick={(event: MouseEvent) => {
             if (!section) return;
+
             event.preventDefault();
             onGo(section);
           }}
@@ -175,7 +180,7 @@ export const OverviewSection = ({
           </span>
           <span className={styles.quickText}>
             <span className={styles.quickLabel}>{label}</span>
-            <span className={ui.smallMuted}>{sub}</span>
+            <span className={ui.smallMuted}>{subtitle}</span>
           </span>
         </Link>
       ))}
@@ -210,15 +215,18 @@ export const BookingsSection = ({
       ["past", "Past and cancelled", past.length],
     ] as const
   ).filter(([id, , count]) => id === "up" || count > 0);
+
   const onTabKey = (event: KeyboardEvent) => {
     if (
       !past.length ||
       !["ArrowLeft", "ArrowRight", "Home", "End"].includes(event.key)
     )
       return;
+
     event.preventDefault();
     onTab(["ArrowRight", "End"].includes(event.key) ? "past" : "up", true);
   };
+
   return (
     <section data-screen-label="Account: Bookings">
       {/* the prototype handles the tabs' arrow keys on the tablist (the focused tab's keydown bubbles up) */}
@@ -231,6 +239,7 @@ export const BookingsSection = ({
       >
         {chips.map(([id, label, count]) => {
           const isOn = activeTab === id;
+
           return (
             <button
               key={id}
@@ -238,7 +247,7 @@ export const BookingsSection = ({
                 styles.tab,
                 isOn ? styles.tabOn : styles.tabOff,
               )}
-              id={"ac-bk-" + id}
+              id={`ac-bk-${id}`}
               role="tab"
               aria-selected={isOn}
               tabIndex={isOn ? 0 : -1}
@@ -346,11 +355,11 @@ export const BookingsSection = ({
                   <StatusTag card={card} />
                 </div>
                 <div className={styles.pastService}>
-                  {card.booking.svc}
-                  {!!card.booking.cust && (
+                  {card.booking.service}
+                  {!!card.booking.customisation && (
                     <span className={ui.optional}>
                       {"· "}
-                      {card.booking.cust}
+                      {card.booking.customisation}
                     </span>
                   )}
                 </div>

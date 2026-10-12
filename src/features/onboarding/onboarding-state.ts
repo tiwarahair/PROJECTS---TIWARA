@@ -48,147 +48,155 @@ export const DEFAULT_PROPS: Required<
 export type ResolvedProps = typeof DEFAULT_PROPS &
   Pick<OnboardingProps, "theme" | "board" | "stayOnDone">;
 
+// a Map so query values like "constructor" can't match inherited object keys
+const URL_BOOLEANS = new Map([
+  ["true", true],
+  ["false", false],
+]);
+
 /** Props overlaid with every URL query param ("true"/"false" become booleans), like the prototype's pp. */
 export const resolveProps = (props: OnboardingProps): ResolvedProps => {
   const fromUrl: Record<string, string | boolean> = {};
+
   new URLSearchParams(window.location.search).forEach((value, key) => {
-    fromUrl[key] = value === "true" ? true : value === "false" ? false : value;
+    fromUrl[key] = URL_BOOLEANS.get(value) ?? value;
   });
+
   return { ...DEFAULT_PROPS, ...props, ...fromUrl } as ResolvedProps;
 };
 
 export interface OnboardingForm {
   email: string;
-  pw: string;
-  pw2: string;
+  password: string;
+  passwordConfirm: string;
   first: string;
   last: string;
-  mob: string;
+  mobile: string;
   terms: boolean;
-  mkt: boolean;
+  marketing: boolean;
   remember: boolean;
-  biz: string;
-  pc: string;
-  a1: string;
-  a2: string;
+  businessName: string;
+  postcode: string;
+  line1: string;
+  line2: string;
   city: string;
   type: string;
   radius: number;
-  cats: string[];
+  categories: string[];
   useContact: boolean;
-  bph: string;
-  bem: string;
-  src: string;
-  srcOther: string;
+  businessPhone: string;
+  businessEmail: string;
+  referralSource: string;
+  referralSourceOther: string;
 }
 
 export type Audience = "pro" | "customer" | "newpro";
 export type TermsKind = "client" | "partner" | "privacy";
-export type TurnstileState = "idle" | "checking" | "ok" | "fail";
+export type TurnstileState = "idle" | "checking" | "passed" | "fail";
 
 export interface ServerError {
-  pw?: string;
-  noBiz?: boolean;
+  password?: string;
+  noBusiness?: boolean;
   exists?: boolean;
 }
 
 export interface OnboardingState {
   screen: string | null;
-  dir: "fwd" | "back";
-  f: OnboardingForm;
+  direction: "fwd" | "back";
+  form: OnboardingForm;
   touched: Record<string, boolean>;
-  err: ServerError & Record<string, string | boolean | undefined>;
+  serverErrors: ServerError & Record<string, string | boolean | undefined>;
   busy: boolean;
-  pwShow: boolean;
+  passwordShown: boolean;
   code: string[];
-  codeErr: string;
+  codeError: string;
   shake: number;
   resendIn: number;
   codeKind: "verify" | "2fa";
   twoFaMethod: "app" | "backup";
   attempts: number;
   lockedUntil: number;
-  addrOpen: boolean;
-  addrSrc: string;
-  afFx: string;
-  geo: [number, number] | null;
-  ll: [number, number] | null;
+  addressOpen: boolean;
+  addressSource: string;
+  addressFinderFixture: string;
+  geocodedLatLng: [number, number] | null;
+  pinLatLng: [number, number] | null;
   area: string | null;
   termsOn: TermsKind | null;
-  netErr: boolean;
-  w: number;
+  networkError: boolean;
+  width: number;
   audience: Audience;
   compact: boolean;
-  ts: TurnstileState;
-  tsMode: "challenge" | "fail" | null;
+  turnstile: TurnstileState;
+  turnstileMode: "challenge" | "fail" | null;
   returnTo: string;
   toast: string | null;
-  socialP: "google" | "apple" | null;
+  socialProvider: "google" | "apple" | null;
   mode: "light" | "dark" | null;
-  bn: number;
+  benefitIndex: number;
 }
 
 export const EMPTY_CODE = ["", "", "", "", "", ""];
 
 export const INITIAL_FORM: OnboardingForm = {
   email: "",
-  pw: "",
-  pw2: "",
+  password: "",
+  passwordConfirm: "",
   first: "",
   last: "",
-  mob: "",
+  mobile: "",
   terms: false,
-  mkt: false,
+  marketing: false,
   remember: true,
-  biz: "",
-  pc: "",
-  a1: "",
-  a2: "",
+  businessName: "",
+  postcode: "",
+  line1: "",
+  line2: "",
   city: "",
   type: "",
   radius: 10,
-  cats: [],
+  categories: [],
   useContact: true,
-  bph: "",
-  bem: "",
-  src: "",
-  srcOther: "",
+  businessPhone: "",
+  businessEmail: "",
+  referralSource: "",
+  referralSourceOther: "",
 };
 
 export const INITIAL_STATE: OnboardingState = {
   screen: null,
-  dir: "fwd",
-  f: INITIAL_FORM,
+  direction: "fwd",
+  form: INITIAL_FORM,
   touched: {},
-  err: {},
+  serverErrors: {},
   busy: false,
-  pwShow: false,
+  passwordShown: false,
   code: EMPTY_CODE,
-  codeErr: "",
+  codeError: "",
   shake: 0,
   resendIn: 30,
   codeKind: "verify",
   twoFaMethod: "app",
   attempts: 0,
   lockedUntil: 0,
-  addrOpen: false,
-  addrSrc: "",
-  afFx: "",
-  geo: null,
-  ll: null,
+  addressOpen: false,
+  addressSource: "",
+  addressFinderFixture: "",
+  geocodedLatLng: null,
+  pinLatLng: null,
   area: null,
   termsOn: null,
-  netErr: false,
-  w: 0,
+  networkError: false,
+  width: 0,
   audience: "pro",
   compact: false,
-  ts: "idle",
-  tsMode: null,
+  turnstile: "idle",
+  turnstileMode: null,
   returnTo: "/",
   toast: null,
-  socialP: null,
+  socialProvider: null,
   mode: null,
-  bn: 0,
+  benefitIndex: 0,
 };
 
 const PASSWORD_FIXTURES: Record<string, string> = {
@@ -206,55 +214,74 @@ const PASSWORD_FIXTURES: Record<string, string> = {
 /** ?fixture= board states (prototype fixture()). */
 export const getFixturePatch = (
   key: string,
-  form: OnboardingForm,
+  baseForm: OnboardingForm,
 ): Partial<OnboardingState> => {
-  const f = { ...form };
-  const withForm = (patch: Partial<OnboardingForm>) => Object.assign(f, patch);
+  const form = { ...baseForm };
+
+  const withForm = (patch: Partial<OnboardingForm>) =>
+    Object.assign(form, patch);
+
   switch (key) {
     case "welcome":
       return { screen: "welcome", audience: "pro" };
     case "pro-2fa":
       withForm({ email: "amara@amarabeauty.co.uk" });
-      return { screen: "pro-2fa", f, codeKind: "2fa" };
+
+      return { screen: "pro-2fa", form, codeKind: "2fa" };
     case "pro-2fa-backup":
       withForm({ email: "amara@amarabeauty.co.uk" });
-      return { screen: "pro-2fa", f, codeKind: "2fa", twoFaMethod: "backup" };
+
+      return {
+        screen: "pro-2fa",
+        form,
+        codeKind: "2fa",
+        twoFaMethod: "backup",
+      };
     case "pro-unknown":
       withForm({ email: "someone@example.com" });
-      return { screen: "pro-email", f, err: { noBiz: true } };
+
+      return { screen: "pro-email", form, serverErrors: { noBusiness: true } };
     case "wrong-password":
-      withForm({ email: "nia.okafor@gmail.com", pw: "sunflower" });
+      withForm({ email: "nia.okafor@gmail.com", password: "sunflower" });
+
       return {
         screen: "cust-password",
         audience: "customer",
-        f,
-        err: { pw: "That password isn’t right. Try again or reset it." },
+        form,
+        serverErrors: {
+          password: "That password isn’t right. Try again or reset it.",
+        },
         shake: 1,
       };
     case "locked":
       withForm({ email: "nia.okafor@gmail.com" });
+
       return {
         screen: "cust-password",
         audience: "customer",
-        f,
-        err: { pw: "Too many attempts. Try again in 15 minutes." },
+        form,
+        serverErrors: {
+          password: "Too many attempts. Try again in 15 minutes.",
+        },
         lockedUntil: Date.now() + 9e5,
       };
     case "code-wrong":
       withForm({ email: "ama@example.com" });
+
       return {
         screen: "verify",
-        f,
+        form,
         code: ["1", "2", "3", "4", "5", "6"],
-        codeErr: "That code isn’t right",
+        codeError: "That code isn’t right",
         shake: 1,
       };
     case "code-expired":
       withForm({ email: "ama@example.com" });
+
       return {
         screen: "verify",
-        f,
-        codeErr: "That code has expired. Send a new one.",
+        form,
+        codeError: "That code has expired. Send a new one.",
         resendIn: 0,
       };
     case "email-exists":
@@ -262,234 +289,296 @@ export const getFixturePatch = (
         first: "Nia",
         last: "Okafor",
         email: "amara@amarabeauty.co.uk",
-        mob: "7700 900412",
-        pw: "sunflower9",
+        mobile: "7700 900412",
+        password: "sunflower9",
         terms: true,
         type: "home",
-        biz: "Nia Does Hair",
-        cats: ["braids"],
+        businessName: "Nia Does Hair",
+        categories: ["braids"],
       });
-      return { screen: "w4", f, err: { exists: true } };
+
+      return { screen: "w4", form, serverErrors: { exists: true } };
     case "w3-shop":
       withForm({
         type: "shop",
-        biz: "Crown & Coil",
-        pc: "M14 7NB",
-        a1: "41 Claremont Road",
+        businessName: "Crown & Coil",
+        postcode: "M14 7NB",
+        line1: "41 Claremont Road",
         city: "Manchester",
       });
+
       return {
         screen: "w3",
-        f,
-        addrOpen: true,
-        geo: [53.4532, -2.2213],
-        ll: null,
+        form,
+        addressOpen: true,
+        geocodedLatLng: [53.4532, -2.2213],
+        pinLatLng: null,
         area: "Rusholme, M14",
       };
     case "w3-home":
       withForm({
         type: "home",
-        biz: "Nia Does Hair",
-        pc: "M14 5TQ",
-        a1: "12 Dickenson Road",
+        businessName: "Nia Does Hair",
+        postcode: "M14 5TQ",
+        line1: "12 Dickenson Road",
         city: "Manchester",
       });
+
       return {
         screen: "w3",
-        f,
-        addrOpen: true,
-        geo: [53.4479, -2.2153],
-        ll: null,
+        form,
+        addressOpen: true,
+        geocodedLatLng: [53.4479, -2.2153],
+        pinLatLng: null,
         area: "Rusholme, M14",
       };
     case "w3-mobile":
       withForm({
         type: "mobile",
-        biz: "Braids by Kemi",
-        pc: "M21 0BW",
+        businessName: "Braids by Kemi",
+        postcode: "M21 0BW",
         radius: 10,
       });
-      return { screen: "w3", f };
+
+      return { screen: "w3", form };
     case "addr-notfound":
-      withForm({ type: "shop", biz: "Crown & Coil", pc: "" });
-      return { screen: "w3", f, addrOpen: false, afFx: "nomatch" };
+      withForm({ type: "shop", businessName: "Crown & Coil", postcode: "" });
+
+      return {
+        screen: "w3",
+        form,
+        addressOpen: false,
+        addressFinderFixture: "nomatch",
+      };
     case "w3-typing":
-      withForm({ type: "shop", biz: "Crown & Coil", pc: "" });
-      return { screen: "w3", f, addrOpen: false, afFx: "typing" };
+      withForm({ type: "shop", businessName: "Crown & Coil", postcode: "" });
+
+      return {
+        screen: "w3",
+        form,
+        addressOpen: false,
+        addressFinderFixture: "typing",
+      };
     case "w3-manual":
       withForm({
         type: "shop",
-        biz: "Crown & Coil",
-        pc: "M4 6AJ",
-        a1: "14 Blossom Street",
-        a2: "Unit 2",
+        businessName: "Crown & Coil",
+        postcode: "M4 6AJ",
+        line1: "14 Blossom Street",
+        line2: "Unit 2",
         city: "Manchester",
       });
+
       return {
         screen: "w3",
-        f,
-        addrOpen: true,
-        addrSrc: "manual",
-        geo: [53.484, -2.227],
-        ll: null,
+        form,
+        addressOpen: true,
+        addressSource: "manual",
+        geocodedLatLng: [53.484, -2.227],
+        pinLatLng: null,
       };
     case "w2":
-      withForm({ type: "shop", cats: ["braids", "natural", "locs"] });
-      return { screen: "w2", f };
+      withForm({ type: "shop", categories: ["braids", "natural", "locs"] });
+
+      return { screen: "w2", form };
     case "w2-empty":
-      withForm({ type: "shop", cats: [] });
-      return { screen: "w2", f, touched: { cats: true } };
+      withForm({ type: "shop", categories: [] });
+
+      return { screen: "w2", form, touched: { categories: true } };
     case "w4-bizcontact":
       withForm({
         type: "shop",
         first: "Amara",
         last: "Okonkwo",
         email: "amara@example.com",
-        mob: "7700 900001",
+        mobile: "7700 900001",
         useContact: false,
       });
-      return { screen: "w4", f };
+
+      return { screen: "w4", form };
     case "pro-pw-good":
       withForm({
         type: "shop",
         first: "Amara",
         last: "Okonkwo",
         email: "hello@amarabeauty.co.uk",
-        mob: "7700 900418",
-        pw: "tide2lam",
+        mobile: "7700 900418",
+        password: "tide2lam",
         terms: true,
         useContact: true,
       });
-      return { screen: "w4", audience: "newpro", f, pwShow: true };
+
+      return { screen: "w4", audience: "newpro", form, passwordShown: true };
     case "reset-pw":
       withForm({
         email: "nia.okafor@gmail.com",
-        pw: "quiet river lamp",
-        pw2: "",
+        password: "quiet river lamp",
+        passwordConfirm: "",
       });
-      return { screen: "forgot-reset", audience: "customer", f, pwShow: true };
+
+      return {
+        screen: "forgot-reset",
+        audience: "customer",
+        form,
+        passwordShown: true,
+      };
     case "errors":
-      withForm({ email: "ama@example.com", mob: "12", pw: "short" });
+      withForm({ email: "ama@example.com", mobile: "12", password: "short" });
+
       return {
         screen: "cust-create",
         audience: "customer",
-        f,
-        touched: { first: true, last: true, mob: true, pw: true, terms: true },
+        form,
+        touched: {
+          first: true,
+          last: true,
+          mobile: true,
+          password: true,
+          terms: true,
+        },
       };
     case "required-empty":
       withForm({ email: "" });
+
       return {
         screen: "cust-email",
         audience: "customer",
-        f,
+        form,
         touched: { email: true },
       };
     case "network":
       withForm({ email: "ama@example.com" });
-      return { screen: "cust-email", audience: "customer", f, netErr: true };
+
+      return {
+        screen: "cust-email",
+        audience: "customer",
+        form,
+        networkError: true,
+      };
     case "reset-mismatch":
-      withForm({ pw: "sunflower9", pw2: "sunflower8" });
-      return { screen: "forgot-reset", f, touched: { pw2: true } };
+      withForm({ password: "sunflower9", passwordConfirm: "sunflower8" });
+
+      return {
+        screen: "forgot-reset",
+        form,
+        touched: { passwordConfirm: true },
+      };
     case "pro-social-unknown":
       withForm({ email: "ama.studio@gmail.com" });
-      return { screen: "pro-email", audience: "pro", f, err: { noBiz: true } };
+
+      return {
+        screen: "pro-email",
+        audience: "pro",
+        form,
+        serverErrors: { noBusiness: true },
+      };
     case "pro-2fa-off":
       return { screen: "studio", audience: "pro" };
     case "pro-done":
       withForm({ first: "Ama" });
-      return { screen: "pro-done", audience: "pro", f };
+
+      return { screen: "pro-done", audience: "pro", form };
     case "cust-social":
       withForm({
         first: "Ama",
         last: "Mensah",
         email: "ama.mensah@gmail.com",
-        mob: "",
+        mobile: "",
         terms: false,
-        mkt: false,
+        marketing: false,
       });
+
       return {
         screen: "cust-social",
         audience: "customer",
-        socialP: "google",
-        f,
+        socialProvider: "google",
+        form,
       };
     case "cust-social-apple":
       withForm({
         first: "",
         last: "",
         email: "x7k2m9q4pd@privaterelay.appleid.com",
-        mob: "",
+        mobile: "",
         terms: false,
-        mkt: false,
+        marketing: false,
       });
+
       return {
         screen: "cust-social",
         audience: "customer",
-        socialP: "apple",
-        f,
+        socialProvider: "apple",
+        form,
       };
     case "cust-social-error":
       withForm({
         first: "Ama",
         last: "Mensah",
         email: "ama.mensah@gmail.com",
-        mob: "7700 900123",
+        mobile: "7700 900123",
         terms: false,
-        mkt: false,
+        marketing: false,
       });
+
       return {
         screen: "cust-social",
         audience: "customer",
-        socialP: "google",
-        f,
-        touched: { first: true, last: true, mob: true, terms: true },
+        socialProvider: "google",
+        form,
+        touched: { first: true, last: true, mobile: true, terms: true },
       };
     case "cust-toast":
       withForm({ first: "Nia", email: "nia.okafor@gmail.com" });
+
       return {
         screen: "cust-email",
         audience: "customer",
-        f,
+        form,
         toast: "Welcome back, Nia",
       };
     case "w5-picked":
-      withForm({ src: "Instagram" });
-      return { screen: "w5", audience: "pro", f };
+      withForm({ referralSource: "Instagram" });
+
+      return { screen: "w5", audience: "pro", form };
     case "turnstile":
       withForm({
         first: "Ama",
         last: "Mensah",
         email: "ama@example.com",
-        pw: "sunflower9",
-        mob: "7700 900123",
+        password: "sunflower9",
+        mobile: "7700 900123",
         terms: true,
       });
+
       return {
         screen: "cust-create",
         audience: "customer",
-        f,
-        tsMode: "challenge",
+        form,
+        turnstileMode: "challenge",
       };
   }
+
   if (key.startsWith("pw-")) {
     withForm({
       first: "Ama",
       last: "Mensah",
       email: "ama@example.com",
-      mob: "7700 900123",
+      mobile: "7700 900123",
       terms: true,
-      pw: PASSWORD_FIXTURES[key] || "",
+      password: PASSWORD_FIXTURES[key] || "",
     });
+
     return {
       screen: "cust-create",
       audience: "customer",
-      f,
+      form,
       touched: ["pw-blocked", "pw-common", "pw-site"].includes(key)
-        ? { pw: true }
+        ? { password: true }
         : {},
-      pwShow: key !== "pw-empty",
+      passwordShown: key !== "pw-empty",
     };
   }
+
   return { screen: key };
 };
 
@@ -501,6 +590,7 @@ export const isValidEmail = (value: string): boolean =>
 
 export const isValidMobile = (value: string): boolean => {
   const digits = value.replace(/\D/g, "");
+
   return /^7\d{9}$/.test(digits) || /^07\d{9}$/.test(digits);
 };
 
@@ -513,97 +603,135 @@ export const getPasswordWho = ({
   audience,
 }: OnboardingState): "pro" | "client" => {
   if (screen === "w4") return "pro";
+
   if (screen === "cust-create") return "client";
+
   return audience === "customer" ? "client" : "pro";
 };
 
 export const getPasswordCheck = (state: OnboardingState): PasswordCheck => {
-  const { f } = state;
+  const { form } = state;
   const min = getPasswordWho(state) === "pro" ? 8 : 15;
-  return checkPassword(f.pw, {
+
+  return checkPassword(form.password, {
     min,
-    first: f.first,
-    last: f.last,
-    email: f.email,
+    first: form.first,
+    last: form.last,
+    email: form.email,
   });
 };
 
-const isAddressOk = ({ a1, city, pc }: OnboardingForm): boolean =>
-  !!a1.trim() && !!city.trim() && isPostcodeValid(pc);
+const isAddressOk = ({ line1, city, postcode }: OnboardingForm): boolean =>
+  !!line1.trim() && !!city.trim() && isPostcodeValid(postcode);
 
 export type FormErrors = Record<string, string>;
 
 /** Field errors for the current screen (prototype errors()). */
 export const getErrors = (state: OnboardingState): FormErrors => {
-  const { f, screen } = state;
+  const { form, screen } = state;
   const errors: FormErrors = {};
+
   const checkEmail = () => {
-    if (!f.email.trim()) errors.email = "Enter your email address";
-    else if (!isValidEmail(f.email))
+    if (!form.email.trim()) errors.email = "Enter your email address";
+    else if (!isValidEmail(form.email))
       errors.email = "Enter a valid email address, like name@example.com";
   };
+
   const checkPasswordField = () => {
     const { error } = getPasswordCheck(state);
-    if (error) errors.pw = error;
+
+    if (error) errors.password = error;
   };
+
   const checkNames = () => {
-    if (!f.first.trim()) errors.first = "Enter your first name";
-    if (!f.last.trim()) errors.last = "Enter your last name";
+    if (!form.first.trim()) errors.first = "Enter your first name";
+
+    if (!form.last.trim()) errors.last = "Enter your last name";
   };
+
   const checkMobile = () => {
-    if (!f.mob.trim()) errors.mob = "Enter your mobile number";
-    else if (!isValidMobile(f.mob))
-      errors.mob = "Enter a valid UK mobile, like 7700 900123";
+    if (!form.mobile.trim()) errors.mobile = "Enter your mobile number";
+    else if (!isValidMobile(form.mobile))
+      errors.mobile = "Enter a valid UK mobile, like 7700 900123";
   };
+
   const termsError = "Agree to the terms to continue";
+
   if (
     screen === "cust-email" ||
     screen === "pro-email" ||
     screen === "forgot-email"
   )
     checkEmail();
+
   if (screen === "cust-password" || screen === "pro-password")
-    if (!f.pw) errors.pw = "Enter your password";
+    if (!form.password) errors.password = "Enter your password";
+
   if (screen === "cust-create") {
     checkNames();
     checkPasswordField();
     checkMobile();
-    if (!f.terms) errors.terms = termsError;
+
+    if (!form.terms) errors.terms = termsError;
   }
+
   if (screen === "cust-social") {
     checkNames();
     checkMobile();
-    if (!f.terms) errors.terms = termsError;
+
+    if (!form.terms) errors.terms = termsError;
   }
+
   if (screen === "w5") {
-    if (!f.src) errors.src = "Choose an option";
-    else if (f.src === "Other" && !f.srcOther.trim())
-      errors.srcOther = "Tell us where";
+    if (!form.referralSource) errors.referralSource = "Choose an option";
+    else if (
+      form.referralSource === "Other" &&
+      !form.referralSourceOther.trim()
+    )
+      errors.referralSourceOther = "Tell us where";
   }
+
   if (screen === "forgot-reset") {
     checkPasswordField();
-    if (!f.pw2) errors.pw2 = "Confirm your new password";
-    else if (f.pw !== f.pw2) errors.pw2 = "Passwords don’t match";
+
+    if (!form.passwordConfirm)
+      errors.passwordConfirm = "Confirm your new password";
+    else if (form.password !== form.passwordConfirm)
+      errors.passwordConfirm = "Passwords don’t match";
   }
-  if (screen === "w1" && !f.type) errors.type = "Choose how you work";
-  if (screen === "w2" && !f.cats.length) errors.cats = "Choose at least one";
+
+  if (screen === "w1" && !form.type) errors.type = "Choose how you work";
+
+  if (screen === "w2" && !form.categories.length)
+    errors.categories = "Choose at least one";
+
   if (screen === "w3") {
-    if (!f.biz.trim()) errors.biz = "Enter your business name";
-    if (f.type === "mobile") {
-      if (!f.pc.trim()) errors.pc = "Enter your base postcode";
-      else if (!isValidPostcode(f.pc))
-        errors.pc = "Enter a valid UK postcode, like M14 5TQ";
-    } else if (!isAddressOk(f)) errors.addr = "Enter your address";
+    if (!form.businessName.trim())
+      errors.businessName = "Enter your business name";
+
+    if (form.type === "mobile") {
+      if (!form.postcode.trim()) errors.postcode = "Enter your base postcode";
+      else if (!isValidPostcode(form.postcode))
+        errors.postcode = "Enter a valid UK postcode, like M14 5TQ";
+    } else if (!isAddressOk(form)) errors.address = "Enter your address";
   }
+
   if (screen === "w4") {
     checkNames();
     checkEmail();
     checkMobile();
     checkPasswordField();
-    if (!f.terms) errors.terms = termsError;
-    if (!f.useContact && !f.bph.trim() && !f.bem.trim())
-      errors.bc = "Add at least one";
+
+    if (!form.terms) errors.terms = termsError;
+
+    if (
+      !form.useContact &&
+      !form.businessPhone.trim() &&
+      !form.businessEmail.trim()
+    )
+      errors.businessContact = "Add at least one";
   }
+
   return errors;
 };
 
@@ -613,6 +741,7 @@ export const getBackScreen = ({
   audience,
 }: OnboardingState): string | undefined => {
   const isCustomer = audience === "customer";
+
   const map: Record<string, string> = {
     "cust-email": "chooser",
     "pro-email": "chooser",
@@ -631,5 +760,6 @@ export const getBackScreen = ({
     w5: "w4",
     verify: isCustomer ? "cust-create" : "w5",
   };
+
   return screen ? map[screen] : undefined;
 };

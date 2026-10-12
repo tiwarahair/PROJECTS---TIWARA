@@ -3,7 +3,7 @@ export type ServiceSpecEntry = [number, number, string];
 export type ServiceSpecs = Record<string, ServiceSpecEntry>;
 
 export interface ServiceSpec {
-  mins: number;
-  add: number;
-  desc: string;
+  minutes: number;
+  addedPrice: number;
+  description: string;
 }

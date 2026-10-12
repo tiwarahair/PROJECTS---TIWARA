@@ -1,12 +1,12 @@
 // Studio → Services values (prototype renderVals: serviceGroups, addonGroups, the category rows / chips and filters).
 import type { MouseEvent } from "react";
-import { NO_CAT_TONE } from "./studio-data";
+import { NO_CATEGORY_TONE } from "./studio-data";
 import {
   formatAddon,
-  getAddonCat,
-  getCatById,
-  getCatTone,
-  getCatsSorted,
+  getAddonCategory,
+  getCategoryById,
+  getCategoryTone,
+  getSortedCategories,
   getServiceExtra,
 } from "./studio-model";
 import { getAnchor, getBlankAddon } from "./studio-service-actions";
@@ -22,7 +22,7 @@ export interface ListRow {
   rail: string;
   isArchived: boolean;
   isDraft: boolean;
-  dur?: string;
+  duration?: string;
   priceLabel?: string;
   extraLabel?: string;
   open: () => void;
@@ -33,7 +33,7 @@ export interface ListRow {
 
 export interface ListGroup {
   key: string;
-  cat: string;
+  category: string;
   count: string;
   tone: string;
   hasMenu: boolean;
@@ -43,150 +43,190 @@ export interface ListGroup {
 
 export const getServicesView = (studio: StudioController) => {
   const { state, setState, actions, serviceActions } = studio;
-  const { openActs, toastMsg, openSheet } = actions;
-  const { openWiz, openCats, svcActions, addonActions, openAddon } =
-    serviceActions;
-  const query = (state.svcQuery || "").trim().toLowerCase();
-  const statusFilter = state.svcStatusFilter || "all";
-  const serviceCat = state.svcCat || "all";
-  const addonCatFilter = state.addonCat || "all";
-  const isAddons = state.svcTab === "addons";
-  const getServiceCat = (service: StudioService) =>
-    getCatById(state, service.categoryId)
+  const { openActionSheet, showToast, openSheet } = actions;
+
+  const {
+    openWizard,
+    openCategories,
+    openServiceActions,
+    openAddonActions,
+    openAddon,
+  } = serviceActions;
+
+  const query = (state.serviceQuery || "").trim().toLowerCase();
+  const statusFilter = state.serviceStatusFilter || "all";
+  const serviceCategory = state.serviceCategoryFilter || "all";
+  const addonCategoryFilter = state.addonCategoryFilter || "all";
+  const isAddons = state.servicesTab === "addons";
+
+  const getServiceCategory = (service: StudioService) =>
+    getCategoryById(state, service.categoryId)
       ? (service.categoryId as string)
       : "none";
+
   const isServiceMatch = (service: StudioService) =>
-    (statusFilter === "all" || service.st === statusFilter) &&
-    (serviceCat === "all" || getServiceCat(service) === serviceCat) &&
+    (statusFilter === "all" || service.status === statusFilter) &&
+    (serviceCategory === "all" ||
+      getServiceCategory(service) === serviceCategory) &&
     (!query || service.name.toLowerCase().includes(query));
+
   const stop = (event?: MouseEvent) => event?.stopPropagation();
 
   const groupMenu =
     (
       label: string,
       countLabel: string,
-      catId: string,
+      categoryId: string,
       addHere: { label: string; run: () => void },
       currentFilter: string,
       showOnly: () => void,
     ) =>
     (event: MouseEvent) => {
       stop(event);
-      openActs({
+
+      openActionSheet({
         title: label,
-        sub: countLabel,
+        subtitle: countLabel,
         anchor: getAnchor(event),
         items: [
-          { label: addHere.label, d: "M12 5v14M5 12h14", run: addHere.run },
-          ...(currentFilter === catId
+          {
+            label: addHere.label,
+            iconPath: "M12 5v14M5 12h14",
+            run: addHere.run,
+          },
+          ...(currentFilter === categoryId
             ? []
             : [
                 {
                   label: "Show only this category",
-                  d: "M4 6h16M6 12h12M9 18h6",
+                  iconPath: "M4 6h16M6 12h12M9 18h6",
                   run: showOnly,
                 },
               ]),
           {
             label: "Manage categories",
-            d: "M4 6h16M4 12h16M4 18h10",
-            run: () => openCats(),
+            iconPath: "M4 6h16M4 12h16M4 18h10",
+            run: () => openCategories(),
           },
         ],
       });
     };
 
   // ---- services ----
-  const raw: { cat: string; catId: string | null; items: StudioService[] }[] =
-    [];
-  getCatsSorted(state).forEach(({ id, name }) => {
+  const raw: {
+    category: string;
+    categoryId: string | null;
+    items: StudioService[];
+  }[] = [];
+
+  getSortedCategories(state).forEach(({ id, name }) => {
     const items = state.services.filter(
       (service) =>
         service.categoryId === id &&
-        service.st !== "archived" &&
+        service.status !== "archived" &&
         isServiceMatch(service),
     );
-    if (items.length) raw.push({ cat: name, catId: id, items });
+
+    if (items.length) raw.push({ category: name, categoryId: id, items });
   });
+
   const uncategorised = state.services.filter(
     (service) =>
-      getServiceCat(service) === "none" &&
-      service.st !== "archived" &&
+      getServiceCategory(service) === "none" &&
+      service.status !== "archived" &&
       isServiceMatch(service),
   );
+
   if (uncategorised.length)
-    raw.push({ cat: "Other services", catId: "none", items: uncategorised });
+    raw.push({
+      category: "Other services",
+      categoryId: "none",
+      items: uncategorised,
+    });
+
   const archived = state.services.filter(
-    (service) => service.st === "archived" && isServiceMatch(service),
+    (service) => service.status === "archived" && isServiceMatch(service),
   );
+
   if (archived.length)
-    raw.push({ cat: "Archived", catId: null, items: archived });
-  const serviceGroups: ListGroup[] = raw.map(({ cat, catId, items }) => {
-    const tone = catId ? getCatTone(state, catId) : NO_CAT_TONE;
-    const countLabel =
-      items.length + (items.length === 1 ? " service" : " services");
-    return {
-      key: catId ?? "archived",
-      cat,
-      count: countLabel,
-      tone,
-      hasMenu: !!catId,
-      menu: groupMenu(
-        cat,
-        countLabel,
-        catId || "all",
-        {
-          label: "Add a service here",
-          run: () =>
-            openWiz("add", null, {
-              categoryId: catId === "none" ? null : catId,
-            }),
-        },
-        serviceCat,
-        () => setState({ svcCat: catId || "all" }),
-      ),
-      items: items.map((service) => {
-        const isArchived = service.st === "archived";
-        const extra = getServiceExtra(state, service);
-        return {
-          key: service.id,
-          name: service.name,
-          meta: "",
-          rail: tone,
-          isArchived,
-          isDraft: service.st === "draft",
-          dur: service.dur,
-          priceLabel: "£" + service.price,
-          extraLabel: extra ? "+" + extra + "m" : "",
-          open: () => openWiz("edit", service),
-          menu: (event: MouseEvent) => {
-            stop(event);
-            svcActions(service, event);
+    raw.push({ category: "Archived", categoryId: null, items: archived });
+
+  const serviceGroups: ListGroup[] = raw.map(
+    ({ category, categoryId, items }) => {
+      const tone = categoryId
+        ? getCategoryTone(state, categoryId)
+        : NO_CATEGORY_TONE;
+
+      const countLabel =
+        items.length + (items.length === 1 ? " service" : " services");
+
+      return {
+        key: categoryId ?? "archived",
+        category,
+        count: countLabel,
+        tone,
+        hasMenu: !!categoryId,
+        menu: groupMenu(
+          category,
+          countLabel,
+          categoryId || "all",
+          {
+            label: "Add a service here",
+            run: () =>
+              openWizard("add", null, {
+                categoryId: categoryId === "none" ? null : categoryId,
+              }),
           },
-          finish: (event: MouseEvent) => {
-            stop(event);
-            openWiz("edit", service);
-          },
-          restore: (event: MouseEvent) => {
-            stop(event);
-            setState({
-              services: state.services.map((item) =>
-                item.id === service.id ? { ...item, st: "active" } : item,
-              ),
-            });
-            toastMsg(service.name + " restored");
-          },
-        };
-      }),
-    };
-  });
+          serviceCategory,
+          () => setState({ serviceCategoryFilter: categoryId || "all" }),
+        ),
+        items: items.map((service) => {
+          const isArchived = service.status === "archived";
+          const extra = getServiceExtra(state, service);
+
+          return {
+            key: service.id,
+            name: service.name,
+            meta: "",
+            rail: tone,
+            isArchived,
+            isDraft: service.status === "draft",
+            duration: service.duration,
+            priceLabel: `£${service.price}`,
+            extraLabel: extra ? `+${extra}m` : "",
+            open: () => openWizard("edit", service),
+            menu: (event: MouseEvent) => {
+              stop(event);
+              openServiceActions(service, event);
+            },
+            finish: (event: MouseEvent) => {
+              stop(event);
+              openWizard("edit", service);
+            },
+            restore: (event: MouseEvent) => {
+              stop(event);
+
+              setState({
+                services: state.services.map((item) =>
+                  item.id === service.id ? { ...item, status: "active" } : item,
+                ),
+              });
+
+              showToast(`${service.name} restored`);
+            },
+          };
+        }),
+      };
+    },
+  );
 
   // ---- add-ons ----
   const isAddonMatch = (addon: StudioAddon) =>
-    (statusFilter === "all" || (addon.st || "active") === statusFilter) &&
-    (addonCatFilter === "all" ||
-      getAddonCat(state, addon) === addonCatFilter) &&
+    (statusFilter === "all" || (addon.status || "active") === statusFilter) &&
+    (addonCategoryFilter === "all" ||
+      getAddonCategory(state, addon) === addonCategoryFilter) &&
     (!query || addon.name.toLowerCase().includes(query));
+
   const addonRow = (
     addon: StudioAddon,
     rail: string,
@@ -201,86 +241,96 @@ export const getServicesView = (studio: StudioController) => {
     open: () => openAddon(addon),
     menu: (event: MouseEvent) => {
       stop(event);
-      addonActions(addon, event);
+      openAddonActions(addon, event);
     },
     restore: (event: MouseEvent) => {
       stop(event);
+
       setState({
         addons: state.addons.map((item) =>
-          item.id === addon.id ? { ...item, st: "active" } : item,
+          item.id === addon.id ? { ...item, status: "active" } : item,
         ),
       });
-      toastMsg(addon.name + " restored");
+
+      showToast(`${addon.name} restored`);
     },
   });
+
   const addonGroups: ListGroup[] = [];
+
   const addAddonGroup = (
-    cat: string,
-    catId: string,
+    category: string,
+    categoryId: string,
     tone: string,
     items: StudioAddon[],
   ) => {
     if (!items.length) return;
+
     const countLabel =
       items.length + (items.length === 1 ? " add-on" : " add-ons");
+
     addonGroups.push({
-      key: catId,
-      cat,
+      key: categoryId,
+      category,
       count: countLabel,
       tone,
       hasMenu: true,
       menu: groupMenu(
-        cat,
+        category,
         countLabel,
-        catId,
+        categoryId,
         {
           label: "Add an add-on here",
           run: () =>
             openSheet("addon", {
               addonDraft: {
                 ...getBlankAddon(),
-                categoryId: catId === "none" ? null : catId,
+                categoryId: categoryId === "none" ? null : categoryId,
               },
-              adNewCat: null,
+              addonNewCategory: null,
             }),
         },
-        addonCatFilter,
-        () => setState({ addonCat: catId }),
+        addonCategoryFilter,
+        () => setState({ addonCategoryFilter: categoryId }),
       ),
       items: items.map((addon) => addonRow(addon, tone, false)),
     });
   };
-  getCatsSorted(state).forEach(({ id, name, colour }) =>
+
+  getSortedCategories(state).forEach(({ id, name, colour }) =>
     addAddonGroup(
       name,
       id,
       colour,
       state.addons.filter(
         (addon) =>
-          getAddonCat(state, addon) === id &&
-          (addon.st || "active") !== "archived" &&
+          getAddonCategory(state, addon) === id &&
+          (addon.status || "active") !== "archived" &&
           isAddonMatch(addon),
       ),
     ),
   );
+
   addAddonGroup(
     "Other add-ons",
     "none",
     ARCHIVED_TONE,
     state.addons.filter(
       (addon) =>
-        getAddonCat(state, addon) === "none" &&
-        (addon.st || "active") !== "archived" &&
+        getAddonCategory(state, addon) === "none" &&
+        (addon.status || "active") !== "archived" &&
         isAddonMatch(addon),
     ),
   );
+
   const archivedAddons = state.addons.filter(
-    (addon) => (addon.st || "active") === "archived" && isAddonMatch(addon),
+    (addon) => (addon.status || "active") === "archived" && isAddonMatch(addon),
   );
+
   if (archivedAddons.length)
     addonGroups.push({
       key: "archived",
-      cat: "Archived",
+      category: "Archived",
       count:
         archivedAddons.length +
         (archivedAddons.length === 1 ? " add-on" : " add-ons"),
@@ -292,15 +342,18 @@ export const getServicesView = (studio: StudioController) => {
     });
 
   // ---- category filter rows (desk) / chips ----
-  const currentFilter = isAddons ? addonCatFilter : serviceCat;
+  const currentFilter = isAddons ? addonCategoryFilter : serviceCategory;
+
   const pool = (isAddons ? state.addons : state.services)
     .filter(
       (item) =>
-        statusFilter === "all" || (item.st || "active") === statusFilter,
+        statusFilter === "all" || (item.status || "active") === statusFilter,
     )
     .filter((item) => !query || item.name.toLowerCase().includes(query));
+
   const countIf = (test: (item: StudioAddon | StudioService) => boolean) =>
     pool.filter(test).length;
+
   const categoryDefs = isAddons
     ? [
         {
@@ -311,11 +364,11 @@ export const getServicesView = (studio: StudioController) => {
         },
       ]
         .concat(
-          getCatsSorted(state).map(({ id, name, colour }) => ({
+          getSortedCategories(state).map(({ id, name, colour }) => ({
             id,
             label: name,
             count: countIf(
-              (item) => getAddonCat(state, item as StudioAddon) === id,
+              (item) => getAddonCategory(state, item as StudioAddon) === id,
             ),
             dot: colour,
           })),
@@ -326,9 +379,10 @@ export const getServicesView = (studio: StudioController) => {
               id: "none",
               label: "Other add-ons",
               count: countIf(
-                (item) => getAddonCat(state, item as StudioAddon) === "none",
+                (item) =>
+                  getAddonCategory(state, item as StudioAddon) === "none",
               ),
-              dot: NO_CAT_TONE,
+              dot: NO_CATEGORY_TONE,
             },
           ].filter(({ count, id }) => count > 0 || currentFilter === id),
         )
@@ -337,7 +391,7 @@ export const getServicesView = (studio: StudioController) => {
             {
               id: "unclassified",
               label: "Unclassified",
-              count: countIf((item) => !item.cat),
+              count: countIf((item) => !item.taxonomyId),
               dot: null,
             },
           ].filter(({ count, id }) => count > 0 || currentFilter === id),
@@ -351,7 +405,7 @@ export const getServicesView = (studio: StudioController) => {
         },
       ]
         .concat(
-          getCatsSorted(state).map(({ id, name, colour }) => ({
+          getSortedCategories(state).map(({ id, name, colour }) => ({
             id,
             label: name,
             count: countIf((item) => item.categoryId === id),
@@ -363,13 +417,19 @@ export const getServicesView = (studio: StudioController) => {
             {
               id: "none",
               label: "Other services",
-              count: countIf((item) => !getCatById(state, item.categoryId)),
-              dot: NO_CAT_TONE,
+              count: countIf(
+                (item) => !getCategoryById(state, item.categoryId),
+              ),
+              dot: NO_CATEGORY_TONE,
             },
           ].filter(({ count, id }) => count > 0 || currentFilter === id),
         );
+
   const pickCategory = (id: string) =>
-    setState(isAddons ? { addonCat: id } : { svcCat: id });
+    setState(
+      isAddons ? { addonCategoryFilter: id } : { serviceCategoryFilter: id },
+    );
+
   const categories = categoryDefs.map(({ id, label, count, dot }) => ({
     key: id,
     label,
@@ -409,7 +469,8 @@ export const getServicesView = (studio: StudioController) => {
       key: id,
       label,
       isOn: statusFilter === id,
-      pick: () => setState({ svcStatusFilter: id, svcStatOpen: false }),
+      pick: () =>
+        setState({ serviceStatusFilter: id, serviceStatusOpen: false }),
     })),
     categories,
     addLabel: isAddons ? "Add add-on" : "Add service",
@@ -419,15 +480,15 @@ export const getServicesView = (studio: StudioController) => {
           addonDraft: {
             ...getBlankAddon(),
             categoryId:
-              state.addonCat &&
-              state.addonCat !== "all" &&
-              state.addonCat !== "none"
-                ? state.addonCat
+              state.addonCategoryFilter &&
+              state.addonCategoryFilter !== "all" &&
+              state.addonCategoryFilter !== "none"
+                ? state.addonCategoryFilter
                 : null,
           },
-          adNewCat: null,
+          addonNewCategory: null,
         });
-      else openWiz("add");
+      else openWizard("add");
     },
   };
 };

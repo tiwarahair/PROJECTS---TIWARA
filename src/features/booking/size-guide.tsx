@@ -41,9 +41,9 @@ export const SizeGuide = ({ onClose }: SizeGuideProps) => (
         </button>
       </div>
       <div className={joinClassNames(helmet.sizeguide, styles.grid)}>
-        {SIZE_GUIDE.map(({ name, desc, w, popular }) => {
-          // b.style width: the braid thickness
-          const barStyle = { "--bar-width": w + "px" } as CSSProperties;
+        {SIZE_GUIDE.map(({ name, description, width, popular }) => {
+          const barStyle = { "--bar-width": `${width}px` } as CSSProperties;
+
           return (
             <div
               key={name}
@@ -55,7 +55,7 @@ export const SizeGuide = ({ onClose }: SizeGuideProps) => (
             >
               <div className={joinClassNames(helmet.sgdiag, styles.diagramBox)}>
                 <div className={styles.diagram}>
-                  {Array.from({ length: getBarCount(w) }, (_bar, index) => (
+                  {Array.from({ length: getBarCount(width) }, (_bar, index) => (
                     <span
                       key={index}
                       className={styles.bar}
@@ -74,7 +74,7 @@ export const SizeGuide = ({ onClose }: SizeGuideProps) => (
               </div>
               <div className={joinClassNames(helmet.sgbody, styles.body)}>
                 <div className={styles.name}>{name}</div>
-                <p className={styles.desc}>{desc}</p>
+                <p className={styles.desc}>{description}</p>
               </div>
             </div>
           );

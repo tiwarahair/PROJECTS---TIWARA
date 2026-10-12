@@ -10,7 +10,9 @@ export const FAVOURITES_HREF = "/account?section=favourites";
 /** Heart "pop" on save (prototype tw-fav.js F.pop). */
 const popHeart = (element: Element) => {
   const svg = element.querySelector("svg") ?? element;
+
   if (prefersReducedMotion() || !svg.animate) return;
+
   svg.animate(
     [
       { transform: "scale(1)" },
@@ -37,13 +39,19 @@ export const useFavourites = () => {
     (id: string, event?: MouseEvent<HTMLElement>) => {
       event?.preventDefault();
       event?.stopPropagation();
+
       if (!loggedIn) {
         dispatch(openLoginSheet(id));
+
         return;
       }
+
       const isOn = !favouriteIds.includes(id);
+
       dispatch(setFavourite({ id, on: isOn }));
+
       if (event?.currentTarget && isOn) popHeart(event.currentTarget);
+
       if (isOn)
         dispatch(
           showToast("Saved to favourites", {

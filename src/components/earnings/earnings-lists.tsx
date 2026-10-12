@@ -6,25 +6,26 @@ import {
   formatGbp,
   getClient,
 } from "./earnings-data";
-import type { Payout, Transaction, TxStatus } from "./earnings-data";
+import type { Payout, Transaction, TransactionStatus } from "./earnings-data";
 import type { EarningsController, EarningsProps } from "./use-earnings";
 import styles from "./earnings-lists.module.css";
 
 const DAY_MS = 86400000;
+
 export const DEFAULT_BANK = "Barclays •••• 4471";
 const STRIPE_PAYOUTS = "https://dashboard.stripe.com/settings/payouts";
 
 const FILTERS: Record<string, (transaction: Transaction) => boolean> = {
   all: () => true,
-  card: ({ rec }) => !rec,
-  recorded: ({ rec }) => !!rec,
-  fees: ({ desc }) =>
+  card: ({ isRecorded }) => !isRecorded,
+  recorded: ({ isRecorded }) => !!isRecorded,
+  fees: ({ description }) =>
     [
       "Cancellation fee",
       "No-show fee",
       "Refund",
       "Adjustment (recovery)",
-    ].includes(desc),
+    ].includes(description),
 };
 
 /** Status tag colours from the status table (prototype STT). */
@@ -32,12 +33,15 @@ export const getStatusStyle = (
   status: keyof typeof STATUS_COLOURS,
 ): CSSProperties => {
   const [background, colour] = STATUS_COLOURS[status];
+
   return { "--st-bg": background, "--st-fg": colour } as CSSProperties;
 };
 
 /** Recorded (cash etc.) rows show "—" in a plain tag. */
-export const getTxStatusStyle = (transaction: Transaction): CSSProperties =>
-  transaction.rec
+export const getTransactionStatusStyle = (
+  transaction: Transaction,
+): CSSProperties =>
+  transaction.isRecorded
     ? ({
         "--st-bg": "transparent",
         "--st-fg": "var(--text-secondary)",
@@ -48,11 +52,12 @@ export const getTxStatusStyle = (transaction: Transaction): CSSProperties =>
 export const getDayWord = (date: Date, today: Date): string => {
   const key = date.toDateString();
   const yesterday = new Date(today.getTime() - DAY_MS);
-  return key === today.toDateString()
-    ? "Today"
-    : key === yesterday.toDateString()
-      ? "Yesterday"
-      : date.toLocaleDateString("en-GB", { day: "numeric", month: "short" });
+
+  if (key === today.toDateString()) return "Today";
+
+  if (key === yesterday.toDateString()) return "Yesterday";
+
+  return date.toLocaleDateString("en-GB", { day: "numeric", month: "short" });
 };
 
 export const EarningsLists = ({
@@ -64,22 +69,41 @@ export const EarningsLists = ({
   props: EarningsProps;
   filter: string;
 }) => {
-  const { state, setState, ledger, isDesk, tab, range, openDrawer, showToast } =
-    earnings;
-  const selectedTx = state.drawer?.k === "tx" ? state.drawer.id : null;
-  const selectedPo = state.drawer?.k === "po" ? state.drawer.id : null;
-  const inPeriod = ledger.tx.filter(({ at }) => at >= range.s && at < range.e);
-  const listed = inPeriod.filter(FILTERS[filter] ?? FILTERS.all!);
-  const shown = listed.slice(0, state.lim);
-  const payouts = ledger.payouts.filter(
-    ({ sent }) => sent >= range.s && sent < range.e,
+  const {
+    state,
+    setState,
+    ledger,
+    isDesktop,
+    tab,
+    range,
+    openDrawer,
+    showToast,
+  } = earnings;
+
+  const selectedTransactionId =
+    state.drawer?.kind === "tx" ? state.drawer.id : null;
+
+  const selectedPayoutId = state.drawer?.kind === "po" ? state.drawer.id : null;
+
+  const inPeriod = ledger.transactions.filter(
+    ({ at }) => at >= range.start && at < range.end,
   );
+
+  const listed = inPeriod.filter(FILTERS[filter] ?? FILTERS.all!);
+  const shown = listed.slice(0, state.limit);
+
+  const payouts = ledger.payouts.filter(
+    ({ sent }) => sent >= range.start && sent < range.end,
+  );
+
   const amountClass = (transaction: Transaction) =>
     transaction.amount < 0 ? styles.amountNegative : styles.amountPositive;
+
   const rowClass = (isSelected: boolean) =>
     isSelected ? styles.rowSelected : styles.rowIdle;
-  const statusText = (transaction: Transaction): TxStatus | "—" =>
-    transaction.rec ? "—" : transaction.status;
+
+  const statusText = (transaction: Transaction): TransactionStatus | "—" =>
+    transaction.isRecorded ? "—" : transaction.status;
 
   if (tab === "po")
     return (
@@ -116,7 +140,7 @@ export const EarningsLists = ({
         )}
         {payouts.length > 0 && (
           <>
-            {isDesk && (
+            {isDesktop && (
               <div className={joinClassNames(styles.tableHead, styles.poDesk)}>
                 <span>Date</span>
                 <span className={styles.alignRight}>Amount</span>
@@ -126,15 +150,18 @@ export const EarningsLists = ({
             )}
             {payouts.map((payout: Payout) => {
               const to = props.bankLabel || DEFAULT_BANK;
+
               return (
                 <button
                   key={payout.id}
                   className={joinClassNames(
                     styles.poRow,
-                    isDesk ? styles.poDesk : styles.poMobile,
-                    rowClass(selectedPo === payout.id),
+                    isDesktop ? styles.poDesk : styles.poMobile,
+                    rowClass(selectedPayoutId === payout.id),
                   )}
-                  onClick={() => openDrawer({ k: "po", id: payout.id }, false)}
+                  onClick={() =>
+                    openDrawer({ kind: "po", id: payout.id }, false)
+                  }
                 >
                   <span className={styles.poDateCell}>
                     <span className={styles.poDate}>
@@ -143,7 +170,7 @@ export const EarningsLists = ({
                     <span
                       className={joinClassNames(
                         styles.poSub,
-                        isDesk ? styles.hideOnDesk : styles.showOnDesk,
+                        isDesktop ? styles.hideOnDesk : styles.showOnDesk,
                       )}
                     >
                       {to}
@@ -155,7 +182,7 @@ export const EarningsLists = ({
                   <span
                     className={joinClassNames(
                       styles.poTo,
-                      isDesk ? styles.showOnDesk : styles.hideOnDesk,
+                      isDesktop ? styles.showOnDesk : styles.hideOnDesk,
                     )}
                   >
                     {to}
@@ -189,7 +216,7 @@ export const EarningsLists = ({
 
   return (
     <div className={styles.card} data-screen-label="Transactions">
-      {ledger.tx.length === 0 && (
+      {ledger.transactions.length === 0 && (
         <div className={styles.emptyAll}>
           <div className={styles.emptyAllTitle}>No earnings yet.</div>
           <div className={styles.emptyText}>
@@ -199,11 +226,13 @@ export const EarningsLists = ({
             className={styles.copyLink}
             onClick={() => {
               const link = props.bookingLink || "tiwaras.house/book/tiwara";
+
               try {
-                void navigator.clipboard?.writeText("https://" + link);
+                void navigator.clipboard?.writeText(`https://${link}`);
               } catch {
                 // clipboard unavailable
               }
+
               showToast("Booking link copied");
             }}
           >
@@ -224,7 +253,7 @@ export const EarningsLists = ({
           </button>
         </div>
       )}
-      {ledger.tx.length > 0 && listed.length === 0 && (
+      {ledger.transactions.length > 0 && listed.length === 0 && (
         <div className={styles.emptyFiltered}>
           <div className={styles.emptyTitle}>Nothing in this period</div>
           <div className={styles.emptyFilteredText}>
@@ -232,7 +261,7 @@ export const EarningsLists = ({
           </div>
         </div>
       )}
-      {isDesk && listed.length > 0 && (
+      {isDesktop && listed.length > 0 && (
         <div className={styles.tableScroll}>
           <div className={styles.table}>
             <div className={styles.tableHead}>
@@ -250,21 +279,21 @@ export const EarningsLists = ({
                 key={transaction.id}
                 className={joinClassNames(
                   styles.txRow,
-                  rowClass(selectedTx === transaction.id),
+                  rowClass(selectedTransactionId === transaction.id),
                 )}
                 onClick={() =>
-                  openDrawer({ k: "tx", id: transaction.id }, false)
+                  openDrawer({ kind: "tx", id: transaction.id }, false)
                 }
               >
                 <span className={styles.txDate}>
-                  {getDayWord(transaction.at, ledger.T0)}
+                  {getDayWord(transaction.at, ledger.today)}
                 </span>
                 <span className={styles.txName}>
                   {getClient(transaction.client, props.clients).name}
                 </span>
-                <span className={styles.txDesc}>{transaction.desc}</span>
+                <span className={styles.txDesc}>{transaction.description}</span>
                 <span className={styles.txMethod}>
-                  {transaction.rec && (
+                  {transaction.isRecorded && (
                     <span className={styles.recordedTag}>Recorded</span>
                   )}
                   <span className={styles.txMethodText}>
@@ -293,7 +322,7 @@ export const EarningsLists = ({
                 <span>
                   <span
                     className={styles.statusTag}
-                    style={getTxStatusStyle(transaction)}
+                    style={getTransactionStatusStyle(transaction)}
                   >
                     {statusText(transaction)}
                   </span>
@@ -303,58 +332,60 @@ export const EarningsLists = ({
           </div>
         </div>
       )}
-      {!isDesk &&
+      {!isDesktop &&
         listed.length > 0 &&
-        shown.map((transaction) => (
-          <button
-            key={transaction.id}
-            className={joinClassNames(
-              styles.txItem,
-              rowClass(selectedTx === transaction.id),
-            )}
-            onClick={() => openDrawer({ k: "tx", id: transaction.id }, false)}
-          >
-            <div className={styles.itemText}>
-              <div className={styles.itemName}>
-                {getClient(transaction.client, props.clients).name}
+        shown.map((transaction) => {
+          const dayWord = getDayWord(transaction.at, ledger.today);
+
+          return (
+            <button
+              key={transaction.id}
+              className={joinClassNames(
+                styles.txItem,
+                rowClass(selectedTransactionId === transaction.id),
+              )}
+              onClick={() =>
+                openDrawer({ kind: "tx", id: transaction.id }, false)
+              }
+            >
+              <div className={styles.itemText}>
+                <div className={styles.itemName}>
+                  {getClient(transaction.client, props.clients).name}
+                </div>
+                <div className={styles.itemSub}>
+                  {transaction.isRecorded && (
+                    <span className={styles.recordedSmall}>Recorded</span>
+                  )}
+                  <span className={styles.itemSubText}>
+                    {`${transaction.description} · ${transaction.method} · ${dayWord}`}
+                  </span>
+                </div>
               </div>
-              <div className={styles.itemSub}>
-                {transaction.rec && (
-                  <span className={styles.recordedSmall}>Recorded</span>
-                )}
-                <span className={styles.itemSubText}>
-                  {transaction.desc +
-                    " · " +
-                    transaction.method +
-                    " · " +
-                    getDayWord(transaction.at, ledger.T0)}
+              <div className={styles.itemSide}>
+                <span
+                  className={joinClassNames(
+                    styles.itemAmount,
+                    amountClass(transaction),
+                  )}
+                >
+                  {formatGbp(transaction.amount)}
+                </span>
+                <span
+                  className={styles.statusSmall}
+                  style={getTransactionStatusStyle(transaction)}
+                >
+                  {statusText(transaction)}
                 </span>
               </div>
-            </div>
-            <div className={styles.itemSide}>
-              <span
-                className={joinClassNames(
-                  styles.itemAmount,
-                  amountClass(transaction),
-                )}
-              >
-                {formatGbp(transaction.amount)}
-              </span>
-              <span
-                className={styles.statusSmall}
-                style={getTxStatusStyle(transaction)}
-              >
-                {statusText(transaction)}
-              </span>
-            </div>
-          </button>
-        ))}
-      {listed.length > state.lim && (
+            </button>
+          );
+        })}
+      {listed.length > state.limit && (
         <button
           className={styles.more}
-          onClick={() => setState({ lim: state.lim + 15 })}
+          onClick={() => setState({ limit: state.limit + 15 })}
         >
-          {"Show " + Math.min(15, listed.length - state.lim) + " more"}
+          {`Show ${Math.min(15, listed.length - state.limit)} more`}
         </button>
       )}
     </div>

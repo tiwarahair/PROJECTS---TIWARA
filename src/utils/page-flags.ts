@@ -22,6 +22,7 @@ export const readSession = (key: string): string | null => {
 /** sessionStorage write that is a no-op on board views; null removes the key. */
 export const writeSession = (key: string, value: string | null): void => {
   if (isBoardView()) return;
+
   try {
     if (value == null) window.sessionStorage.removeItem(key);
     else window.sessionStorage.setItem(key, value);

@@ -13,20 +13,25 @@ export const ClientViewSheet = ({ view }: { view: ClientsView }) => (
   </div>
 );
 
-type DraftField = "first" | "last" | "phone" | "email" | "products" | "sens";
+type DraftField =
+  "first" | "last" | "phone" | "email" | "products" | "sensitivities";
 
 /** Add or edit a client (prototype shClientEdit). */
 export const ClientEditSheet = ({ view }: { view: ClientsView }) => {
   const fileRef = useRef<HTMLInputElement>(null);
   const { draft, draftImage, duplicate } = view;
+
   if (!draft) return null;
+
   const pickImage = () => fileRef.current?.click();
   const getValue = (field: DraftField) => draft[field] || "";
+
   const onField = (field: DraftField) => ({
     value: getValue(field),
     onChange: (event: { target: { value: string } }) =>
       view.patchDraft({ [field]: event.target.value }),
   });
+
   return (
     <div className={styles.form}>
       <div className={styles.photoRow}>
@@ -139,8 +144,8 @@ export const ClientEditSheet = ({ view }: { view: ClientsView }) => {
           <img className={styles.duplicateAvatar} src={duplicate.img} alt="" />
           <div className={styles.grow}>
             <div className={styles.duplicateTitle}>{duplicate.title}</div>
-            <div className={styles.duplicateSub}>{duplicate.sub}</div>
-            <button className={styles.duplicateGo} onClick={duplicate.go}>
+            <div className={styles.duplicateSub}>{duplicate.subtitle}</div>
+            <button className={styles.duplicateGo} onClick={duplicate.onSelect}>
               {duplicate.cta}
             </button>
           </div>
@@ -168,7 +173,7 @@ export const ClientEditSheet = ({ view }: { view: ClientsView }) => {
         </span>
         <input
           className={styles.input}
-          {...onField("sens")}
+          {...onField("sensitivities")}
           maxLength={80}
           placeholder="e.g. Sensitive scalp"
         />
@@ -187,9 +192,12 @@ export const ClientEditFooter = ({ view }: { view: ClientsView }) => (
       Cancel
     </button>
     <button
-      className={joinClassNames(sheet.save48, !view.isDraftOk && sheet.faded)}
+      className={joinClassNames(
+        sheet.save48,
+        !view.isDraftValid && sheet.faded,
+      )}
       onClick={view.saveDraft}
-      disabled={!view.isDraftOk}
+      disabled={!view.isDraftValid}
     >
       {view.saveLabel}
     </button>

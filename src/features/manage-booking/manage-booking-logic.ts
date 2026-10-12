@@ -32,32 +32,39 @@ export interface DemoBooking {
 export const getDemoBooking = (stylistId: string): DemoBooking => {
   const stylist = getEntryStylist(stylistId);
   const active = stylist.services ? getActiveServices(stylist as Stylist) : [];
+
   const service =
     active.find(({ serviceTypeId }) => serviceTypeId === "knotless-braids") ??
     active[0] ??
     null;
+
   const options = getServiceOptions(service);
+
   const price = service
     ? service.price +
       (options.length.find(({ label }) => label === "Shoulder")?.priceDelta ||
         0)
     : 0;
+
   const date = new Date();
+
   date.setDate(date.getDate() + ((10 - date.getDay()) % 7 || 7));
+
+  const dateLabel = date.toLocaleDateString("en-GB", {
+    weekday: "short",
+    day: "numeric",
+    month: "short",
+  });
+
   return {
     service: service ? service.name : "Knotless braids",
     // the prototype adds the booking fee inline (50p + 1.5%), unrounded until toFixed
-    total: service ? "£" + (price + 0.5 + price * 0.015).toFixed(2) : "£142.60",
+    total: service ? `£${(price + 0.5 + price * 0.015).toFixed(2)}` : "£142.60",
     options:
       service && options.size.length
         ? "Medium · Shoulder · 1B Natural Black"
         : "",
-    when:
-      date.toLocaleDateString("en-GB", {
-        weekday: "short",
-        day: "numeric",
-        month: "short",
-      }) + " · 10:30",
+    when: `${dateLabel} · 10:30`,
     stylist: stylist.name,
     area: stylist.area,
   };

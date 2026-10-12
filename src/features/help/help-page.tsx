@@ -10,11 +10,12 @@ import { getSearchParams } from "../../utils/page-flags";
 import helmet from "./help-helmet.module.css";
 import styles from "./help-page.module.css";
 
-const HELP_FAQS = faqs.filter(({ q }) =>
-  /cancel or reschedule|deposits work|How do I pay/.test(q),
+const HELP_FAQS = faqs.filter(({ question }) =>
+  /cancel or reschedule|deposits work|How do I pay/.test(question),
 );
-const LOGIN_HREF =
-  "/login?screen=cust-email&return=" + encodeURIComponent("/help");
+
+const LOGIN_HREF = `/login?screen=cust-email&return=${encodeURIComponent("/help")}`;
+
 const HEART_PATH =
   "M12 20.5s-7.5-4.6-9.2-9.4C1.6 7.6 3.9 4.5 7.2 4.5c2 0 3.6 1.1 4.8 2.8 1.2-1.7 2.8-2.8 4.8-2.8 3.3 0 5.6 3.1 4.4 6.6-1.7 4.8-9.2 9.4-9.2 9.4z";
 
@@ -26,14 +27,13 @@ export const HelpPage = () => {
   const dispatch = useAppDispatch();
   const navigate = useNavigate();
   const [bookingRef] = useState(() => getSearchParams().get("booking") || "");
-  const mailHref =
-    "mailto:help@tiwarashouse.co.uk" +
-    (bookingRef
-      ? "?subject=" + encodeURIComponent("Help with booking " + bookingRef)
-      : "");
+  const mailSubject = encodeURIComponent(`Help with booking ${bookingRef}`);
+  const mailQuery = bookingRef ? `?subject=${mailSubject}` : "";
+  const mailHref = `mailto:help@tiwarashouse.co.uk${mailQuery}`;
 
   useLayoutEffect(() => {
     document.documentElement.classList.add("help-page");
+
     return () => document.documentElement.classList.remove("help-page");
   }, []);
 
@@ -178,10 +178,11 @@ export const HelpPage = () => {
         )}
         <h2 className={styles.faqHeading}>FAQs</h2>
         <div className={styles.faqList}>
-          {HELP_FAQS.map(({ q, a }, index) => {
+          {HELP_FAQS.map(({ question, answer }, index) => {
             const isOpen = openFaq === index;
+
             return (
-              <div key={"f" + index} className={styles.faq}>
+              <div key={`f${index}`} className={styles.faq}>
                 <h3 className={styles.faqTitle}>
                   <button
                     className={styles.faqButton}
@@ -189,9 +190,9 @@ export const HelpPage = () => {
                       setOpenFaq((open) => (open === index ? -1 : index))
                     }
                     aria-expanded={isOpen}
-                    aria-controls={"faq-a-" + index}
+                    aria-controls={`faq-a-${index}`}
                   >
-                    {q}
+                    {question}
                     <svg
                       className={joinClassNames(
                         styles.chevron,
@@ -212,8 +213,8 @@ export const HelpPage = () => {
                   </button>
                 </h3>
                 {isOpen && (
-                  <p className={styles.answer} id={"faq-a-" + index}>
-                    {a}
+                  <p className={styles.answer} id={`faq-a-${index}`}>
+                    {answer}
                   </p>
                 )}
               </div>

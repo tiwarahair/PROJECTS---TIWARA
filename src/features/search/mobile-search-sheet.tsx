@@ -22,6 +22,7 @@ const HEADINGS: Record<string, string> = {
 export const MobileSearchSheet = ({ search }: MobileSearchSheetProps) => {
   const { state, refs, selection, place, what, where, actions } = search;
   const dateLabel = getMobileDateLabel(state);
+
   const rows = [
     {
       key: "w",
@@ -49,17 +50,18 @@ export const MobileSearchSheet = ({ search }: MobileSearchSheetProps) => {
       label: dateLabel,
       icon: SEARCH_ICONS.calendar ?? "",
       open: actions.openMobileDate,
-      hasClear: !!state.q.date || state.time !== "any",
+      hasClear: !!state.query.date || state.time !== "any",
       clearLabel: "Clear date",
       clear: actions.clearDate,
     },
   ];
+
   const whatValue = state.whatText != null ? state.whatText : selection.display;
   const whereValue = state.whereText != null ? state.whereText : where.display;
 
   return (
     <div
-      data-closing={state.mobClosing ? "true" : "false"}
+      data-closing={state.mobileClosing ? "true" : "false"}
       className={joinClassNames(helmet.sheetWrap, styles.wrap)}
     >
       <div
@@ -68,7 +70,7 @@ export const MobileSearchSheet = ({ search }: MobileSearchSheetProps) => {
       ></div>
       <div className={joinClassNames(helmet.sheetPanel, styles.panel)}>
         <div className={styles.header}>
-          {state.mob !== "menu" && (
+          {state.mobileView !== "menu" && (
             <button
               onClick={actions.mobileToMenu}
               aria-label="Back"
@@ -111,10 +113,10 @@ export const MobileSearchSheet = ({ search }: MobileSearchSheetProps) => {
         </div>
         <div className={styles.body}>
           <div className={styles.heading}>
-            {HEADINGS[state.mob] || "Search"}
+            {HEADINGS[state.mobileView] || "Search"}
           </div>
 
-          {state.mob === "menu" && (
+          {state.mobileView === "menu" && (
             <div className={styles.rows}>
               {rows.map(
                 ({
@@ -176,7 +178,7 @@ export const MobileSearchSheet = ({ search }: MobileSearchSheetProps) => {
             </div>
           )}
 
-          {state.mob === "service" && (
+          {state.mobileView === "service" && (
             <>
               <div className={styles.searchField}>
                 <svg
@@ -230,7 +232,7 @@ export const MobileSearchSheet = ({ search }: MobileSearchSheetProps) => {
             </>
           )}
 
-          {state.mob === "location" && (
+          {state.mobileView === "location" && (
             <>
               <div className={styles.searchField}>
                 <svg
@@ -292,9 +294,9 @@ export const MobileSearchSheet = ({ search }: MobileSearchSheetProps) => {
             </>
           )}
 
-          {state.mob === "date" && <DatePickerMobile search={search} />}
+          {state.mobileView === "date" && <DatePickerMobile search={search} />}
         </div>
-        {state.mob === "menu" && (
+        {state.mobileView === "menu" && (
           <div className={styles.footer}>
             <button
               onClick={actions.closeMobileSheet}
@@ -316,7 +318,7 @@ export const MobileSearchSheet = ({ search }: MobileSearchSheetProps) => {
             </button>
           </div>
         )}
-        {state.mob === "date" && (
+        {state.mobileView === "date" && (
           <div className={styles.dateFooter}>
             <button onClick={actions.clearDate} className={styles.clearButton2}>
               Clear

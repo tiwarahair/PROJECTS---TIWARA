@@ -19,7 +19,7 @@ export const FavouritesSection = ({
         <p className={styles.count}>
           {favourites.length === 1
             ? "1 saved stylist"
-            : favourites.length + " saved stylists"}
+            : `${favourites.length} saved stylists`}
         </p>
         <div className={styles.favGrid}>
           {favourites.map(
@@ -36,15 +36,15 @@ export const FavouritesSection = ({
               // the prototype's dc-import host block, which the card's height:100% depends on
               <div key={id} data-dc-host="">
                 <StylistCard
-                  href={"/stylist?stylist=" + id}
-                  bookHref={"/book?stylist=" + id}
+                  href={`/stylist?stylist=${id}`}
+                  bookHref={`/book?stylist=${id}`}
                   stylistId={id}
                   cover={cover}
                   stylistName={name}
                   rating={rating}
                   reviews={reviews}
                   area={area}
-                  meta={fromLabel ? "From " + fromLabel : ""}
+                  meta={fromLabel ? `From ${fromLabel}` : ""}
                   verified={!!verified}
                 />
               </div>
@@ -93,6 +93,7 @@ export const HairSection = ({
     ["Styles you like", "Knotless braids, silk press, twist outs"],
     ["Last updated", quizDate],
   ];
+
   return (
     <section data-screen-label="Account: Hair profile">
       {quiz && (

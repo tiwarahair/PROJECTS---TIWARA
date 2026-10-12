@@ -35,6 +35,7 @@ const ADDRESS_FIXTURES: AddressFixture[] = [
 
 const ALLERGY_160 =
   "Sensitive scalp, allergic to tea tree oil and some edge controls. Please use fragrance-free products where possible and avoid tight tension at the nape of the n";
+
 const ALLERGY_200 =
   "Allergic to latex and lanolin. Sensitive scalp after relaxers in the past, so please patch test new products. Fragrance-free where possible, and gentle on the edges and nape. Thanks very much!!       ";
 
@@ -115,6 +116,7 @@ const CATEGORY_OPTIONS = [
   { label: "Natural & silk press", dot: "var(--accent-500)" },
   { label: "+ New category", action: true },
 ];
+
 const TYPE_OPTIONS = [
   {
     label: "Knotless braids",
@@ -125,6 +127,7 @@ const TYPE_OPTIONS = [
   { label: "Silk press", group: "Natural Hair", keywords: ["press"] },
   { label: "other natural hair", group: "Natural Hair" },
 ];
+
 const SEARCH_SELECTS: { fixture: string; props: SearchSelectProps }[] = [
   {
     fixture: "placeholder",
@@ -159,17 +162,24 @@ const SEARCH_SELECTS: { fixture: string; props: SearchSelectProps }[] = [
 
 const HOME_BUSINESS = {
   type: "home",
-  v: {
+  details: {
     line1: "12 Dickenson Road",
     line2: "Flat 2",
     city: "Manchester",
-    pc: "M14 5HP",
+    postcode: "M14 5HP",
   },
 };
+
 const SHOP_BUSINESS = {
   type: "chair",
-  v: { line1: "48 Oxford Road", line2: "", city: "Manchester", pc: "M1 5QA" },
+  details: {
+    line1: "48 Oxford Road",
+    line2: "",
+    city: "Manchester",
+    postcode: "M1 5QA",
+  },
 };
+
 const TAX_FORMS: { fixture: string; props: TaxDetailsFormProps }[] = [
   ...(
     [
@@ -199,16 +209,16 @@ const TAX_FORMS: { fixture: string; props: TaxDetailsFormProps }[] = [
         first: "Amara",
         middle: "Chi",
         last: "Okonkwo",
-        d: "04",
-        m: "11",
-        y: "1992",
-        ni: "QQ 12 34 56 C",
-        addrSame: false,
-        addr: {
+        day: "04",
+        month: "11",
+        year: "1992",
+        nationalInsuranceNumber: "QQ 12 34 56 C",
+        isAddressSame: false,
+        address: {
           line1: "7 Wilmslow Road",
           line2: "",
           city: "Manchester",
-          pc: "M14 5TB",
+          postcode: "M14 5TB",
         },
       },
     },
@@ -219,9 +229,9 @@ const TAX_FORMS: { fixture: string; props: TaxDetailsFormProps }[] = [
       mode: "settings",
       value: {
         kind: "ltd",
-        coName: "Amara Beauty Ltd",
-        coNum: "SC123456",
-        addrSame: true,
+        companyName: "Amara Beauty Ltd",
+        companyNumber: "SC123456",
+        isAddressSame: true,
       },
     },
   },
@@ -257,7 +267,11 @@ const BUSINESS_DETAILS: {
     fixture: "ltd-tax",
     isWide: false,
     props: {
-      tax: { kind: "ltd", coName: "Amara Beauty Ltd", coNum: "SC123456" },
+      tax: {
+        kind: "ltd",
+        companyName: "Amara Beauty Ltd",
+        companyNumber: "SC123456",
+      },
     },
   },
   {
@@ -267,7 +281,7 @@ const BUSINESS_DETAILS: {
       value: {
         type: "mobile",
         vatOn: true,
-        v: { basePc: "M20 3BW", radius: "15", vat: "312456789" },
+        details: { basePostcode: "M20 3BW", radius: "15", vat: "312456789" },
       },
     },
   },
@@ -305,8 +319,8 @@ const PAYMENT_POLICIES: {
         refundable: false,
         window: 24,
         grace: 15,
-        late: { on: true, kind: "pct", pct: 40 },
-        ns: { on: true, kind: "pct", pct: 100 },
+        late: { on: true, kind: "pct", percent: 40 },
+        noShow: { on: true, kind: "pct", percent: 100 },
         extras: [
           { type: "prep", text: "Come with hair washed and detangled." },
           { type: "custom", text: "No extra guests, please." },
@@ -317,38 +331,42 @@ const PAYMENT_POLICIES: {
 ];
 
 const ONE_DEVICE = [{ name: "Main phone", backup: false }];
+
 const TWO_DEVICES = [
   { name: "Main phone", backup: false },
   { name: "Old iPhone", backup: true },
 ];
+
 const SOLE_TAX = {
   kind: "sole" as const,
   nameYes: true,
   legalName: "Amara Okonkwo",
-  d: "04",
-  m: "11",
-  y: "1992",
-  ni: "QQ123456C",
-  addrSame: false,
-  addr: {
+  day: "04",
+  month: "11",
+  year: "1992",
+  nationalInsuranceNumber: "QQ123456C",
+  isAddressSame: false,
+  address: {
     line1: "7 Wilmslow Road",
     line2: "",
     city: "Manchester",
-    pc: "M14 5TB",
+    postcode: "M14 5TB",
   },
 };
+
 const LTD_TAX = {
   kind: "ltd" as const,
-  coName: "Amara Beauty Ltd",
-  coNum: "SC123456",
-  addrSame: true,
-  addr: {
+  companyName: "Amara Beauty Ltd",
+  companyNumber: "SC123456",
+  isAddressSame: true,
+  address: {
     line1: "48 Oxford Road",
     line2: "",
     city: "Manchester",
-    pc: "M1 5QA",
+    postcode: "M1 5QA",
   },
 };
+
 const ACCOUNT_SETTINGS: {
   fixture: string;
   isWide: boolean;
@@ -386,12 +404,12 @@ const ACCOUNT_SETTINGS: {
   {
     fixture: "security-tfa",
     isWide: false,
-    props: { page: "security", tfaDevices: ONE_DEVICE },
+    props: { page: "security", twoFactorDevices: ONE_DEVICE },
   },
   {
     fixture: "security-tfa2",
     isWide: false,
-    props: { page: "security", tfaDevices: TWO_DEVICES },
+    props: { page: "security", twoFactorDevices: TWO_DEVICES },
   },
   { fixture: "notifications", isWide: false, props: { page: "notifications" } },
   {
@@ -496,13 +514,13 @@ const EARNINGS: { fixture: string; isWide: boolean; props: EarningsProps }[] = [
   },
   { fixture: "month", isWide: true, props: { period: "month" } },
   { fixture: "lastmonth", isWide: true, props: { period: "lastmonth" } },
-  { fixture: "filt-fees", isWide: true, props: { filt: "fees" } },
+  { fixture: "filt-fees", isWide: true, props: { filter: "fees" } },
 ];
 
 const LIVE_BOOKING = {
   client: "Ama Mensah",
   first: "Ama",
-  svc: "Fulani braids",
+  service: "Fulani braids",
   meta: "Medium, bum length",
   price: 90,
   addons: [],
@@ -517,6 +535,7 @@ const LIVE_BOOKING = {
   time: "14:00–18:00",
   arrived: "13:57",
 };
+
 const LIVE_DONE = {
   method: "card" as const,
   via: "sms",
@@ -524,6 +543,7 @@ const LIVE_DONE = {
   tip: 0,
   refundAuto: 0,
 };
+
 const CHECKOUT_SHEETS: { fixture: string; props: CheckoutSheetProps }[] = [
   { fixture: "arrived", props: { scenario: "arrived" } },
   { fixture: "items", props: { scenario: "items" } },
@@ -575,7 +595,7 @@ const HARNESSES: Record<string, () => ReactNode> = {
       >
         <AddressFinder
           fixture={fixture}
-          idPrefix={"hx-" + (fixture || "default")}
+          idPrefix={`hx-${fixture || "default"}`}
         />
       </div>
     )),
@@ -684,6 +704,7 @@ const HARNESSES: Record<string, () => ReactNode> = {
 export const DevHarness = () => {
   const { component = "" } = useParams();
   const render = HARNESSES[component];
+
   return (
     <div className={styles.page}>{render ? render() : "Unknown harness"}</div>
   );

@@ -24,8 +24,8 @@ interface ProfileCoverProps {
   onBack: (event: MouseEvent<HTMLAnchorElement>) => void;
   heroRef: RefObject<HTMLDivElement | null>;
   shareButtonRef: RefObject<HTMLButtonElement | null>;
-  covOn: boolean;
-  onToggleCov: () => void;
+  coverActionsOn: boolean;
+  onToggleCoverActions: () => void;
   actions: ProfileActions;
 }
 
@@ -37,8 +37,8 @@ export const ProfileCover = ({
   onBack,
   heroRef,
   shareButtonRef,
-  covOn,
-  onToggleCov,
+  coverActionsOn,
+  onToggleCoverActions,
   actions,
 }: ProfileCoverProps) => {
   const {
@@ -50,9 +50,10 @@ export const ProfileCover = ({
     saveTip,
     onToggleSaved,
   } = actions;
+
   // heroStyle backgroundImage: the stylist's cover photo
   const heroStyle = {
-    "--hero-image": coverUrl ? 'url("' + coverUrl + '")' : "none",
+    "--hero-image": coverUrl ? `url("${coverUrl}")` : "none",
   } as CSSProperties;
 
   return (
@@ -89,12 +90,12 @@ export const ProfileCover = ({
           ref={heroRef}
           role="img"
           aria-label={name}
-          onClick={onToggleCov}
+          onClick={onToggleCoverActions}
           className={joinClassNames(helmet.scpHero, styles.hero)}
           style={heroStyle}
         ></div>
         <div
-          data-on={covOn ? "true" : "false"}
+          data-on={coverActionsOn ? "true" : "false"}
           className={joinClassNames(helmet.pfCov, styles.coverActions)}
         >
           {back.has && (

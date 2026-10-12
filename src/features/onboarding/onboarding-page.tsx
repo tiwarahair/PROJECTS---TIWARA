@@ -52,26 +52,33 @@ const SHELL_SCREENS: Record<string, ComponentType<ScreenProps>> = {
  */
 export const OnboardingPage = (props: OnboardingProps) => {
   const onboarding = useOnboarding(props);
+
   useOnboardingRoute(onboarding);
   const { state, props: resolved, rootRef, actions } = onboarding;
   const layout = getLayout(state, resolved);
-  const { screen, isWizard, desk, isDark, welcomeOver } = layout;
+  const { screen, isWizard, isDesktop, isDark, welcomeOver } = layout;
 
   // page-wide helmet rules (cream / ink page, focus rings) apply while Onboarding is mounted
   useLayoutEffect(() => {
     document.documentElement.classList.add("onboarding-page");
+
     return () => document.documentElement.classList.remove("onboarding-page");
   }, []);
 
   const errors = getErrors(state);
   const shown: Record<string, string> = {};
+
   for (const [key, message] of Object.entries(errors))
     if (state.touched[key]) shown[key] = message;
-  for (const [key, value] of Object.entries(state.err))
+
+  for (const [key, value] of Object.entries(state.serverErrors))
     if (value && typeof value === "string") shown[key] = value;
-  const turnstileMode = state.tsMode || resolved.turnstile || "pass";
+
+  const turnstileMode = state.turnstileMode || resolved.turnstile || "pass";
+
   const turnstileShown =
     turnstileMode !== "pass" && TURNSTILE_SCREENS.includes(screen);
+
   const view: ScreenView = {
     shown,
     turnstileShown,
@@ -80,15 +87,14 @@ export const OnboardingPage = (props: OnboardingProps) => {
       !(state.lockedUntil > Date.now()) &&
       Object.keys(errors).length === 0 &&
       !(isCodeScreen(screen) && state.code.join("").length < 6) &&
-      !(turnstileShown && state.ts !== "ok"),
+      !(turnstileShown && state.turnstile !== "passed"),
   };
+
   const screenProps: ScreenProps = { onboarding, layout, view };
+  const welcomeScreen = welcomeOver ? null : WelcomeScreen;
+
   const ShellScreen =
-    screen === "welcome"
-      ? welcomeOver
-        ? null
-        : WelcomeScreen
-      : SHELL_SCREENS[screen];
+    screen === "welcome" ? welcomeScreen : SHELL_SCREENS[screen];
 
   return (
     <div
@@ -126,7 +132,7 @@ export const OnboardingPage = (props: OnboardingProps) => {
       {state.termsOn && (
         <TermsSheet
           kind={state.termsOn}
-          desk={desk}
+          isDesktop={isDesktop}
           onClose={() => actions.setState({ termsOn: null })}
         />
       )}

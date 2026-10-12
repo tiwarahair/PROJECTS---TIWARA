@@ -3,11 +3,13 @@ import overlay from "./studio-overlay.module.css";
 /** The enter/leave animation for a sheet, side panel or dialog (prototype ovAnim). */
 export const getOverlayAnimation = (
   isOut: boolean | undefined,
-  kind: "side" | "dlg",
+  kind: "side" | "dialog",
   isWide: boolean,
 ): string | undefined => {
   if (!isWide) return isOut ? overlay.shDown : overlay.shUp;
+
   if (kind === "side") return isOut ? overlay.slOut : overlay.slIn;
+
   return isOut ? overlay.dlgOut : overlay.dlgIn;
 };
 

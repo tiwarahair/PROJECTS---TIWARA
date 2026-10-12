@@ -2,7 +2,7 @@ import { Link } from "react-router";
 import { AppleIcon, GoogleIcon } from "./brand-icons";
 import { joinClassNames } from "../../utils/class-names";
 import { getWindowText } from "../../utils/pricing";
-import { getCancelSentence, getPaySub } from "./booking-content";
+import { getCancelSentence, getPaySubtitle } from "./booking-content";
 import { getWhenLine } from "./booking-calendar";
 import styles from "./booking-confirmation.module.css";
 import type { BookingController } from "./use-booking";
@@ -28,14 +28,25 @@ const CheckIcon = () => (
 
 /** "You're booked in." with the summary, where, inbox note, calendar buttons and the guest "Save your details" row. */
 export const BookingConfirmation = ({ booking }: BookingConfirmationProps) => {
-  const { state, stylist, service, money, custLine, address, actions } =
-    booking;
+  const {
+    state,
+    stylist,
+    service,
+    money,
+    customisationLine,
+    address,
+    actions,
+  } = booking;
+
   const { setState } = actions;
-  const { acct, loggedIn, details } = state;
+  const { account, loggedIn, details } = state;
   const { name, addressFull, businessType, policies } = stylist;
   const isMobile = businessType === "mobile";
-  const resendWaitMs = 30000 - (Date.now() - acct.sentAt);
+  const clientAddress = address.clientAddress || "your address";
+  const mapsQuery = encodeURIComponent(`${name} ${addressFull}`);
+  const resendWaitMs = 30000 - (Date.now() - account.sentAt);
   const resendOff = resendWaitMs > 0;
+
   const noop = () => {};
 
   return (
@@ -67,7 +78,9 @@ export const BookingConfirmation = ({ booking }: BookingConfirmationProps) => {
           </div>
           <div className={styles.strong}>{money.total}</div>
         </div>
-        <div className={styles.custLine}>{custLine || "No add-ons"}</div>
+        <div className={styles.custLine}>
+          {customisationLine || "No add-ons"}
+        </div>
         <div className={styles.facts}>
           <span className={styles.fact}>
             <svg
@@ -81,7 +94,12 @@ export const BookingConfirmation = ({ booking }: BookingConfirmationProps) => {
               <rect x="3" y="4" width="18" height="18" rx="3"></rect>
               <path d="M3 10h18M8 2v4M16 2v4"></path>
             </svg>
-            {getWhenLine(state.calY, state.calM, state.date, state.time)}
+            {getWhenLine(
+              state.calendarYear,
+              state.calendarMonth,
+              state.date,
+              state.time,
+            )}
           </span>
           <span
             data-screen-label="Confirmation where"
@@ -102,17 +120,12 @@ export const BookingConfirmation = ({ booking }: BookingConfirmationProps) => {
             <span className={styles.factLines}>
               <span>
                 {isMobile
-                  ? name +
-                    " will come to " +
-                    (address.clientAddress || "your address")
-                  : name + ", " + addressFull}
+                  ? `${name} will come to ${clientAddress}`
+                  : `${name}, ${addressFull}`}
               </span>
               {!isMobile && (
                 <a
-                  href={
-                    "https://www.google.com/maps/search/?api=1&query=" +
-                    encodeURIComponent(name + " " + addressFull)
-                  }
+                  href={`https://www.google.com/maps/search/?api=1&query=${mapsQuery}`}
                   target="_blank"
                   rel="noopener"
                   className={styles.directions}
@@ -135,9 +148,14 @@ export const BookingConfirmation = ({ booking }: BookingConfirmationProps) => {
               <path d="M12 7v5l3 3"></path>
             </svg>
             <span className={styles.factLines}>
-              <span>{"Paid today " + money.dueToday}</span>
+              <span>{`Paid today ${money.dueToday}`}</span>
               <span>
-                {getPaySub(money.PL.mode, money.balance, money.price, name)}
+                {getPaySubtitle(
+                  money.policy.mode,
+                  money.balance,
+                  money.price,
+                  name,
+                )}
               </span>
             </span>
           </span>
@@ -167,10 +185,10 @@ export const BookingConfirmation = ({ booking }: BookingConfirmationProps) => {
         </p>
         <p className={styles.inboxNote}>
           {getCancelSentence(
-            money.PL.mode,
-            getWindowText(policies.freeWindowHrs),
+            money.policy.mode,
+            getWindowText(policies.freeWindowHours),
           )}{" "}
-          {loggedIn || acct.saved
+          {loggedIn || account.saved
             ? "You can also manage it from My bookings."
             : "Keep the email — it's the only way back in."}
         </p>
@@ -183,7 +201,7 @@ export const BookingConfirmation = ({ booking }: BookingConfirmationProps) => {
           + Google Calendar
         </button>
       </div>
-      {!loggedIn && !acct.saved && !acct.hidden && !acct.sent && (
+      {!loggedIn && !account.saved && !account.hidden && !account.sent && (
         <div data-screen-label="Save your details" className={styles.saveRow}>
           <div className={styles.saveText}>
             <div className={styles.saveTitle}>
@@ -196,7 +214,9 @@ export const BookingConfirmation = ({ booking }: BookingConfirmationProps) => {
           <div className={styles.saveActions}>
             <button
               onClick={() =>
-                setState({ acct: { ...acct, sent: true, sentAt: Date.now() } })
+                setState({
+                  account: { ...account, sent: true, sentAt: Date.now() },
+                })
               }
               className={styles.saveButton}
             >
@@ -204,7 +224,7 @@ export const BookingConfirmation = ({ booking }: BookingConfirmationProps) => {
             </button>
             <button
               onClick={() =>
-                setState({ acct: { ...acct, saved: true, err: "" } })
+                setState({ account: { ...account, saved: true, error: "" } })
               }
               aria-label="Continue with Google"
               className={styles.socialButton}
@@ -213,7 +233,7 @@ export const BookingConfirmation = ({ booking }: BookingConfirmationProps) => {
             </button>
             <button
               onClick={() =>
-                setState({ acct: { ...acct, saved: true, err: "" } })
+                setState({ account: { ...account, saved: true, error: "" } })
               }
               aria-label="Continue with Apple"
               className={styles.socialButton}
@@ -221,7 +241,9 @@ export const BookingConfirmation = ({ booking }: BookingConfirmationProps) => {
               <AppleIcon size={17} />
             </button>
             <button
-              onClick={() => setState({ acct: { ...acct, hidden: true } })}
+              onClick={() =>
+                setState({ account: { ...account, hidden: true } })
+              }
               className={styles.noThanks}
             >
               No thanks
@@ -229,7 +251,7 @@ export const BookingConfirmation = ({ booking }: BookingConfirmationProps) => {
           </div>
         </div>
       )}
-      {!loggedIn && acct.sent && !acct.saved && (
+      {!loggedIn && account.sent && !account.saved && (
         <div
           data-screen-label="Check your email"
           role="status"
@@ -240,13 +262,11 @@ export const BookingConfirmation = ({ booking }: BookingConfirmationProps) => {
           </span>
           <span className={styles.sentText}>
             <strong className={styles.strong}>Check your email.</strong>{" "}
-            {"We've sent a link to " +
-              details.email +
-              " to finish saving your details."}{" "}
+            {`We've sent a link to ${details.email} to finish saving your details.`}{" "}
             <button
               onClick={() => {
                 if (!resendOff)
-                  setState({ acct: { ...acct, sentAt: Date.now() } });
+                  setState({ account: { ...account, sentAt: Date.now() } });
               }}
               disabled={resendOff}
               className={joinClassNames(
@@ -255,13 +275,13 @@ export const BookingConfirmation = ({ booking }: BookingConfirmationProps) => {
               )}
             >
               {resendOff
-                ? "Resend email (" + Math.ceil(resendWaitMs / 1000) + "s)"
+                ? `Resend email (${Math.ceil(resendWaitMs / 1000)}s)`
                 : "Resend email"}
             </button>
           </span>
         </div>
       )}
-      {!loggedIn && acct.saved && (
+      {!loggedIn && account.saved && (
         <div
           data-screen-label="Details saved"
           role="status"

@@ -25,8 +25,10 @@ export const Avatar = ({
     .slice(0, 2)
     .join("")
     .toUpperCase();
+
   // --avatar-size: the size prop is any pixel value
-  const sizeStyle = { "--avatar-size": size + "px", ...style } as CSSProperties;
+  const sizeStyle = { "--avatar-size": `${size}px`, ...style } as CSSProperties;
+
   if (src)
     return (
       <img
@@ -36,6 +38,7 @@ export const Avatar = ({
         style={sizeStyle}
       />
     );
+
   return (
     <span
       className={joinClassNames(styles.avatar, styles.initials, className)}

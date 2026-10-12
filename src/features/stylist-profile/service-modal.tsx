@@ -11,7 +11,7 @@ interface ServiceModalProps {
 
 /** Service details: description, customisation summary, price, duration and Book. */
 export const ServiceModal = ({
-  service: { name, desc, cust, price, dur, href },
+  service: { name, description, customisation, price, duration, href },
   onClose,
 }: ServiceModalProps) => (
   // prototype: clicking anywhere on the scrim (panel included) closes it
@@ -37,12 +37,12 @@ export const ServiceModal = ({
         </button>
       </div>
       <h3 className={styles.title}>{name}</h3>
-      <p className={styles.desc}>{desc}</p>
-      {!!cust && <p className={styles.cust}>{cust}</p>}
+      <p className={styles.desc}>{description}</p>
+      {!!customisation && <p className={styles.cust}>{customisation}</p>}
       <div className={styles.footer}>
         <div>
           <div className={styles.price}>{price}</div>
-          <div className={styles.duration}>{dur}</div>
+          <div className={styles.duration}>{duration}</div>
         </div>
         <Link to={href} className={styles.book}>
           Book

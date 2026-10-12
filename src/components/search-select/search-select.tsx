@@ -58,9 +58,11 @@ export const SearchSelect = ({
 
   const measure = useCallback(() => {
     if (!wrapRef.current) return;
+
     const bounds = wrapRef.current.getBoundingClientRect();
     const spaceBelow = window.innerHeight - bounds.bottom;
     const flip = spaceBelow < 280 && bounds.top > spaceBelow;
+
     setRect({
       left: bounds.left,
       width: bounds.width,
@@ -72,18 +74,23 @@ export const SearchSelect = ({
 
   useEffect(() => {
     if (!isOpen) return;
+
     measure();
+
     const handleAway = (event: MouseEvent) => {
       const target = event.target as Node;
+
       if (
         !wrapRef.current?.contains(target) &&
         !panelRef.current?.contains(target)
       )
         setIsOpen(false);
     };
+
     document.addEventListener("mousedown", handleAway);
     window.addEventListener("resize", measure);
     window.addEventListener("scroll", measure, true);
+
     return () => {
       document.removeEventListener("mousedown", handleAway);
       window.removeEventListener("resize", measure);
@@ -100,7 +107,9 @@ export const SearchSelect = ({
   const normalised = options.map((option) =>
     typeof option === "string" ? { label: option } : option,
   );
+
   const needle = query.trim().toLowerCase();
+
   const visible = normalised.filter(
     ({ action, label, keywords }) =>
       action ||
@@ -112,15 +121,16 @@ export const SearchSelect = ({
           needle.includes(keyword.toLowerCase()),
       ),
   );
+
   const current = normalised.find(({ label }) => label === value);
 
   // position comes from the trigger's measured rect; flips above when there is no room below
   const panelStyle = rect
     ? ({
-        "--panel-left": rect.left + "px",
-        "--panel-width": rect.width + "px",
-        "--panel-top": rect.flip ? "auto" : rect.top + "px",
-        "--panel-bottom": rect.flip ? rect.bottom + "px" : "auto",
+        "--panel-left": `${rect.left}px`,
+        "--panel-width": `${rect.width}px`,
+        "--panel-top": rect.flip ? "auto" : `${rect.top}px`,
+        "--panel-bottom": rect.flip ? `${rect.bottom}px` : "auto",
       } as CSSProperties)
     : undefined;
 
@@ -132,6 +142,7 @@ export const SearchSelect = ({
         className={joinClassNames(styles.trigger, value && styles.hasValue)}
         onClick={() => {
           if (disabled) return;
+
           setQuery("");
           setIsOpen((open) => !open);
         }}
@@ -171,7 +182,7 @@ export const SearchSelect = ({
             </div>
             <div className={styles.list}>
               {visible.map(({ label, group, dot, action }, index) => (
-                <Fragment key={label + "::" + index}>
+                <Fragment key={`${label}::${index}`}>
                   {group &&
                   (index === 0 || visible[index - 1]?.group !== group) ? (
                     <div className={styles.groupLabel}>{group}</div>

@@ -29,30 +29,32 @@ export const getAccountStylist = (id: string): StylistLike =>
 
 /** The service's current price (else the booking's fallback) plus the customisation extra. */
 const getPrice = (booking: AccountBooking): number => {
-  let price = booking.fb;
-  const stylist = getAccountStylist(booking.sid);
+  let price = booking.fallbackPrice;
+  const stylist = getAccountStylist(booking.stylistId);
+
   const service = stylist.services
-    ? findService(stylist as Stylist, booking.svc)
+    ? findService(stylist as Stylist, booking.service)
     : null;
+
   if (service && service.price) price = service.price;
+
   return price + (booking.extra || 0);
 };
 
 /** "Wed 14 Oct" or "Wed 14 Oct, 10:30". */
 export const formatAccountDate = (time: number, withTime = false): string => {
   const date = new Date(time);
+
   const day = date.toLocaleDateString("en-GB", {
     weekday: "short",
     day: "numeric",
     month: "short",
   });
-  return withTime
-    ? day +
-        ", " +
-        String(date.getHours()).padStart(2, "0") +
-        ":" +
-        String(date.getMinutes()).padStart(2, "0")
-    : day;
+
+  const hours = String(date.getHours()).padStart(2, "0");
+  const minutes = String(date.getMinutes()).padStart(2, "0");
+
+  return withTime ? `${day}, ${hours}:${minutes}` : day;
 };
 
 export const getAddressLine = (address: SavedAddress | undefined): string =>
@@ -60,8 +62,8 @@ export const getAddressLine = (address: SavedAddress | undefined): string =>
 
 export interface ReceiptLine {
   label: string;
-  sub: string;
-  amt: string;
+  subtitle: string;
+  amount: string;
 }
 
 export interface BookingMoney {
@@ -72,7 +74,7 @@ export interface BookingMoney {
   paid: string;
   due: string;
   lines: ReceiptLine[];
-  pays: { label: string; amt: string }[];
+  payments: { label: string; amount: string }[];
   total: number;
 }
 
@@ -95,96 +97,122 @@ export const getBookingMoney = (
   addresses: SavedAddress[],
   cards: SavedCard[],
 ): BookingMoney => {
-  const stylist = getAccountStylist(booking.sid);
+  const stylist = getAccountStylist(booking.stylistId);
   const price = getPrice(booking);
   const fee = bookingFee(price);
   const deposit = Math.round(price * 20) / 100;
-  const home = addresses.find(({ def }) => def) ?? addresses[0];
+  const home = addresses.find(({ isDefault }) => isDefault) ?? addresses[0];
   const isMobile = stylist.businessType === "mobile";
+  const homeText = home ? getAddressLine(home) : "your address";
+
   const where = isMobile
-    ? stylist.name +
-      " will come to " +
-      (home ? getAddressLine(home) : "your address")
-    : stylist.name + ", " + (stylist.addressFull || stylist.area);
+    ? `${stylist.name} will come to ${homeText}`
+    : `${stylist.name}, ${stylist.addressFull || stylist.area}`;
+
   const cardText = (id: string) => {
     const card = cards.find((item) => item.id === id) ?? {
       brand: "Visa",
       last4: "4242",
     };
-    return card.brand + " •••• " + card.last4;
+
+    return `${card.brand} •••• ${card.last4}`;
   };
+
   let paid = "";
   let due = "";
+
   let lines: ReceiptLine[] = [
-    { label: booking.svc, sub: booking.cust, amt: money(price) },
-    { label: "Booking fee", sub: "", amt: money(fee) },
+    {
+      label: booking.service,
+      subtitle: booking.customisation,
+      amount: money(price),
+    },
+    { label: "Booking fee", subtitle: "", amount: money(fee) },
   ];
-  let pays: BookingMoney["pays"] = [];
+
+  let payments: BookingMoney["payments"] = [];
   let total = price + fee;
+
   switch (booking.status) {
     case "confirmed":
-      paid = money(deposit + fee) + " paid";
-      due = " · " + money(price - deposit) + " to pay at your appointment";
+      paid = `${money(deposit + fee)} paid`;
+      due = ` · ${money(price - deposit)} to pay at your appointment`;
       break;
     case "awaiting":
-      paid = money(fee) + " booking fee paid";
-      due = " · " + money(price) + " to pay at your appointment";
+      paid = `${money(fee)} booking fee paid`;
+      due = ` · ${money(price)} to pay at your appointment`;
       break;
-    case "completed":
-      paid = money(price + fee) + " paid";
-      pays = [
+
+    case "completed": {
+      paid = `${money(price + fee)} paid`;
+      const paidDate = formatAccountDate(booking.at - DAY_MS * 9);
+      const paidCard = cardText(booking.card);
+
+      payments = [
         {
-          label:
-            "Paid " +
-            formatAccountDate(booking.at - DAY_MS * 9) +
-            " · " +
-            cardText(booking.card),
-          amt: money(price + fee),
+          label: `Paid ${paidDate} · ${paidCard}`,
+          amount: money(price + fee),
         },
       ];
+
       break;
+    }
+
     case "cancelled":
-      paid = "Deposit of " + money(deposit) + " refunded";
+      paid = `Deposit of ${money(deposit)} refunded`;
+
       lines = [
         {
-          label: "Deposit for " + booking.svc,
-          sub: booking.cust,
-          amt: money(deposit),
+          label: `Deposit for ${booking.service}`,
+          subtitle: booking.customisation,
+          amount: money(deposit),
         },
-        { label: "Booking fee", sub: "Not refundable", amt: money(fee) },
+        {
+          label: "Booking fee",
+          subtitle: "Not refundable",
+          amount: money(fee),
+        },
       ];
+
       total = deposit + fee;
-      pays = [
+
+      payments = [
         {
-          label: "Paid · " + cardText(booking.card),
-          amt: money(deposit + fee),
+          label: `Paid · ${cardText(booking.card)}`,
+          amount: money(deposit + fee),
         },
         {
-          label: "Refunded " + formatAccountDate(booking.at - DAY_MS * 3),
-          amt: "−" + money(deposit),
+          label: `Refunded ${formatAccountDate(booking.at - DAY_MS * 3)}`,
+          amount: `−${money(deposit)}`,
         },
       ];
+
       break;
     case "noshow":
-      paid = money(deposit + fee) + " paid";
+      paid = `${money(deposit + fee)} paid`;
       due = " · deposit kept as a no-show fee";
+
       lines = [
         {
-          label: "Deposit for " + booking.svc,
-          sub: "Kept as a no-show fee",
-          amt: money(deposit),
+          label: `Deposit for ${booking.service}`,
+          subtitle: "Kept as a no-show fee",
+          amount: money(deposit),
         },
-        { label: "Booking fee", sub: "", amt: money(fee) },
+        { label: "Booking fee", subtitle: "", amount: money(fee) },
       ];
+
       total = deposit + fee;
-      pays = [
+
+      payments = [
         {
-          label: "Paid · " + cardText(booking.card),
-          amt: money(deposit + fee),
+          label: `Paid · ${cardText(booking.card)}`,
+          amount: money(deposit + fee),
         },
       ];
+
       break;
   }
+
   return {
     stylist,
     where,
@@ -195,12 +223,12 @@ export const getBookingMoney = (
     paid,
     due,
     lines,
-    pays,
+    payments,
     total,
   };
 };
 
-export type EditKey = "name" | "email" | "mob";
+export type EditKey = "name" | "email" | "mobile";
 
 export const validateEdit = (
   key: EditKey,
@@ -208,23 +236,30 @@ export const validateEdit = (
   currentEmail: string,
 ): Record<string, string> => {
   const errors: Record<string, string> = {};
+
   if (key === "name") {
     if (!draft.first.trim()) errors.first = "Enter your first name";
+
     if (!draft.last.trim()) errors.last = "Enter your last name";
   }
+
   if (key === "email") {
     const value = draft.email.trim().toLowerCase();
+
     if (!/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(value))
       errors.email = "Enter an email address like name@example.com";
     else if (value === currentEmail) errors.email = "That’s already your email";
     else if (TAKEN_EMAILS.includes(value))
       errors.email = "This email is already used by another account";
   }
-  if (key === "mob") {
-    const value = draft.mob.replace(/\D/g, "").replace(/^0/, "");
+
+  if (key === "mobile") {
+    const value = draft.mobile.replace(/\D/g, "").replace(/^0/, "");
+
     if (!/^7\d{9}$/.test(value))
-      errors.mob = "Enter a UK mobile number, like 07700 900123";
+      errors.mobile = "Enter a UK mobile number, like 07700 900123";
   }
+
   return errors;
 };
 
@@ -233,6 +268,7 @@ export const downloadFile = (name: string, text: string, type: string) => {
   try {
     const url = URL.createObjectURL(new Blob([text], { type }));
     const link = document.createElement("a");
+
     link.href = url;
     link.download = name;
     document.body.appendChild(link);
@@ -250,30 +286,32 @@ export const getCalendarFile = (
   { stylist, where }: BookingMoney,
 ): string => {
   const pad = (value: number) => String(value).padStart(2, "0");
+
   const format = (time: number) => {
     const date = new Date(time);
-    return (
+
+    const datePart =
       date.getUTCFullYear() +
       pad(date.getUTCMonth() + 1) +
-      pad(date.getUTCDate()) +
-      "T" +
-      pad(date.getUTCHours()) +
-      pad(date.getUTCMinutes()) +
-      "00Z"
-    );
+      pad(date.getUTCDate());
+
+    const timePart = pad(date.getUTCHours()) + pad(date.getUTCMinutes());
+
+    return `${datePart}T${timePart}00Z`;
   };
+
   return [
     "BEGIN:VCALENDAR",
     "VERSION:2.0",
     "PRODID:-//Tiwaras House//Bookings//EN",
     "BEGIN:VEVENT",
-    "UID:" + booking.id + "@tiwarashouse.co.uk",
-    "DTSTAMP:" + format(Date.now()),
-    "DTSTART:" + format(booking.at),
-    "DTEND:" + format(booking.at + booking.mins * 6e4),
-    "SUMMARY:" + booking.svc + " with " + stylist.name,
-    "LOCATION:" + where.replace(/,/g, "\\,"),
-    "DESCRIPTION:Booking " + booking.id,
+    `UID:${booking.id}@tiwarashouse.co.uk`,
+    `DTSTAMP:${format(Date.now())}`,
+    `DTSTART:${format(booking.at)}`,
+    `DTEND:${format(booking.at + booking.minutes * 6e4)}`,
+    `SUMMARY:${booking.service} with ${stylist.name}`,
+    `LOCATION:${where.replace(/,/g, "\\,")}`,
+    `DESCRIPTION:Booking ${booking.id}`,
     "END:VEVENT",
     "END:VCALENDAR",
   ].join("\r\n");
@@ -286,53 +324,32 @@ export interface ReceiptView {
   where: string;
   total: string;
   lines: ReceiptLine[];
-  pays: { label: string; amt: string }[];
+  payments: { label: string; amount: string }[];
 }
 
-export const getReceiptHtml = (receipt: ReceiptView, me: Profile): string => {
+export const getReceiptHtml = (
+  receipt: ReceiptView,
+  profile: Profile,
+): string => {
   const rows =
     receipt.lines
-      .map(
-        ({ label, sub, amt }) =>
-          "<tr><td>" +
-          label +
-          (sub ? "<br><small>" + sub + "</small>" : "") +
-          '</td><td align="right">' +
-          amt +
-          "</td></tr>",
-      )
+      .map(({ label, subtitle, amount }) => {
+        const subtitleLine = subtitle ? `<br><small>${subtitle}</small>` : "";
+
+        return `<tr><td>${label}${subtitleLine}</td><td align="right">${amount}</td></tr>`;
+      })
       .join("") +
-    receipt.pays
+    receipt.payments
       .map(
-        ({ label, amt }) =>
-          "<tr><td><small>" +
-          label +
-          '</small></td><td align="right"><small>' +
-          amt +
-          "</small></td></tr>",
+        ({ label, amount }) =>
+          `<tr><td><small>${label}</small></td><td align="right"><small>${amount}</small></td></tr>`,
       )
       .join("");
-  return (
-    '<!doctype html><meta charset="utf-8"><title>Receipt ' +
-    receipt.ref +
-    '</title><body style="font-family:sans-serif;max-width:480px;margin:40px auto;color:#1a1714"><h1>Tiwára’s House receipt</h1><p>' +
-    receipt.ref +
-    " · " +
-    receipt.date +
-    "<br>" +
-    receipt.stylist +
-    "<br>" +
-    receipt.where +
-    "<br>Billed to " +
-    me.first +
-    " " +
-    me.last +
-    '</p><table width="100%" cellpadding="8">' +
-    rows +
-    '<tr><th align="left">Total</th><th align="right">' +
-    receipt.total +
-    "</th></tr></table></body>"
-  );
+
+  const { ref, date, stylist, where, total } = receipt;
+  const { first, last } = profile;
+
+  return `<!doctype html><meta charset="utf-8"><title>Receipt ${ref}</title><body style="font-family:sans-serif;max-width:480px;margin:40px auto;color:#1a1714"><h1>Tiwára’s House receipt</h1><p>${ref} · ${date}<br>${stylist}<br>${where}<br>Billed to ${first} ${last}</p><table width="100%" cellpadding="8">${rows}<tr><th align="left">Total</th><th align="right">${total}</th></tr></table></body>`;
 };
 
 /** "4242 4242 4242 4242" (16 digits max). */
@@ -345,31 +362,37 @@ export const formatCardDigits = (value: string): string =>
 /** "MM / YY" */
 export const formatCardExpiry = (value: string): string => {
   const digits = value.replace(/\D/g, "").slice(0, 4);
+
   return digits.length > 2
-    ? digits.slice(0, 2) + " / " + digits.slice(2)
+    ? `${digits.slice(0, 2)} / ${digits.slice(2)}`
     : digits;
 };
 
 export const getCardErrors = (form: {
-  num: string;
-  exp: string;
+  number: string;
+  expiry: string;
   cvc: string;
 }): Record<string, string> => {
   const errors: Record<string, string> = {};
-  const number = form.num.replace(/\D/g, "");
-  const expiry = form.exp.replace(/\D/g, "");
-  if (number.length < 15) errors.num = "Enter your card number";
+  const number = form.number.replace(/\D/g, "");
+  const expiry = form.expiry.replace(/\D/g, "");
+
+  if (number.length < 15) errors.number = "Enter your card number";
+
   const month = Number(expiry.slice(0, 2));
   const year = Number(expiry.slice(2, 4));
   const now = new Date();
   const currentYear = now.getFullYear() % 100;
+
   if (expiry.length < 4 || month < 1 || month > 12)
-    errors.exp = "Enter the expiry date";
+    errors.expiry = "Enter the expiry date";
   else if (
     year < currentYear ||
     (year === currentYear && month < now.getMonth() + 1)
   )
-    errors.exp = "This card has expired";
+    errors.expiry = "This card has expired";
+
   if (!/^\d{3,4}$/.test(form.cvc)) errors.cvc = "Enter the 3 or 4-digit code";
+
   return errors;
 };

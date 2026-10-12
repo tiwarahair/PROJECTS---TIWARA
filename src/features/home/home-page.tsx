@@ -46,30 +46,38 @@ export const HomePage = ({
   const [menuOpen, setMenuOpen] = useState(false);
   const loggedIn = useAppSelector((state) => state.session.loggedIn);
   const morph = useNavMorph();
+
   useHomeMotion(rootRef, showWhy);
+  // eslint-disable-next-line id-length -- React preload() option name
   preload(getAssetUrl("img/hero2.jpg"), { as: "image", fetchPriority: "high" });
 
   // page-wide helmet rules (body background, colour tokens, smooth scroll) apply while Home is mounted
   useLayoutEffect(() => {
     document.documentElement.classList.add("home-page");
     const { hash } = window.location;
+
     if (!hash) {
       if ("scrollRestoration" in history) history.scrollRestoration = "manual";
+
       window.scrollTo(0, 0);
       requestAnimationFrame(() => window.scrollTo(0, 0));
     }
+
     // links like "/#stylegrid" from other pages: the router doesn't scroll to a hash, so jump to it here,
     // then re-align once in case images or fonts above it shifted the layout (unless the visitor has scrolled)
     const target = hash ? document.getElementById(hash.slice(1)) : null;
     let realign = 0;
+
     if (target) {
       target.scrollIntoView({ behavior: "instant" });
       const landedAt = window.scrollY;
+
       realign = window.setTimeout(() => {
         if (window.scrollY === landedAt)
           target.scrollIntoView({ behavior: "instant" });
       }, 400);
     }
+
     return () => {
       window.clearTimeout(realign);
       document.documentElement.classList.remove("home-page");
@@ -88,7 +96,7 @@ export const HomePage = ({
         data-screen-label="Home"
         className={layout.morph}
         // --morph-bg: cream of the section in the middle of the viewport
-        style={{ "--morph-bg": morph.morphBg } as CSSProperties}
+        style={{ "--morph-bg": morph.morphBackground } as CSSProperties}
       >
         <HomeNav
           morph={morph}

@@ -35,6 +35,7 @@ export const ProfilePage = ({
   const coverInput = useRef<HTMLInputElement>(null);
   const avatarInput = useRef<HTMLInputElement>(null);
   const portInput = useRef<HTMLInputElement>(null);
+
   const field = (
     label: string,
     value: string | undefined,
@@ -51,6 +52,7 @@ export const ProfilePage = ({
       />
     </label>
   );
+
   return (
     <div className={styles.profile} data-screen-label="Edit profile">
       <div className={styles.cover}>
@@ -120,7 +122,9 @@ export const ProfilePage = ({
           ></textarea>
         </label>
         <div className={styles.twoCols}>
-          {field("Instagram", profile.ig, (ig) => view.setProfile({ ig }))}
+          {field("Instagram", profile.instagram, (instagram) =>
+            view.setProfile({ instagram }),
+          )}
           {field("TikTok", profile.tiktok, (tiktok) =>
             view.setProfile({ tiktok }),
           )}
@@ -220,6 +224,7 @@ export const AvailabilityPage = ({
   view: SettingsView;
 }) => {
   const { pause } = view;
+
   return (
     <div className={styles.availability} data-screen-label="Availability">
       <div
@@ -314,53 +319,58 @@ export const AvailabilityPage = ({
         </div>
       </div>
       <div className={styles.list}>
-        {view.hourRows.map(({ key, d, on, s, e, toggle, setStart, setEnd }) => (
-          <div key={key} className={styles.hourRow}>
-            <button
-              className={joinClassNames(
-                styles.daySwitch,
-                on && styles.daySwitchOn,
+        {view.hourRows.map(
+          ({ key, day, on, start, end, toggle, setStart, setEnd }) => (
+            <div key={key} className={styles.hourRow}>
+              <button
+                className={joinClassNames(
+                  styles.daySwitch,
+                  on && styles.daySwitchOn,
+                )}
+                onClick={toggle}
+                aria-label="Toggle day"
+              >
+                <span className={styles.dayKnob}></span>
+              </button>
+              <div
+                className={joinClassNames(
+                  styles.dayName,
+                  on && styles.dayNameOn,
+                )}
+              >
+                {day}
+              </div>
+              {on && (
+                <>
+                  <select
+                    className={styles.timeSelect}
+                    defaultValue={start}
+                    onChange={setStart}
+                  >
+                    {TIMES.map((time) => (
+                      <option key={time} value={time}>
+                        {time}
+                      </option>
+                    ))}
+                  </select>
+                  <span className={styles.to}>to</span>
+                  <select
+                    className={styles.timeSelect}
+                    defaultValue={end}
+                    onChange={setEnd}
+                  >
+                    {TIMES.map((time) => (
+                      <option key={time} value={time}>
+                        {time}
+                      </option>
+                    ))}
+                  </select>
+                </>
               )}
-              onClick={toggle}
-              aria-label="Toggle day"
-            >
-              <span className={styles.dayKnob}></span>
-            </button>
-            <div
-              className={joinClassNames(styles.dayName, on && styles.dayNameOn)}
-            >
-              {d}
+              {!on && <span className={styles.closed}>Closed</span>}
             </div>
-            {on && (
-              <>
-                <select
-                  className={styles.timeSelect}
-                  defaultValue={s}
-                  onChange={setStart}
-                >
-                  {TIMES.map((time) => (
-                    <option key={time} value={time}>
-                      {time}
-                    </option>
-                  ))}
-                </select>
-                <span className={styles.to}>to</span>
-                <select
-                  className={styles.timeSelect}
-                  defaultValue={e}
-                  onChange={setEnd}
-                >
-                  {TIMES.map((time) => (
-                    <option key={time} value={time}>
-                      {time}
-                    </option>
-                  ))}
-                </select>
-              </>
-            )}
-            {!on && <span className={styles.closed}>Closed</span>}
-          </div>
-        ))}
+          ),
+        )}
       </div>
       <div className={styles.sectionHeadSpaced}>
         <div className={styles.grow}>
@@ -387,7 +397,7 @@ export const AvailabilityPage = ({
                 style={{ "--dot": hex } as CSSProperties}
               ></span>
               <div className={styles.flex1}>
-                <div className={styles.itemTitle}>{day + " · " + span}</div>
+                <div className={styles.itemTitle}>{`${day} · ${span}`}</div>
                 <div className={styles.muted}>{reason}</div>
               </div>
               <button className={styles.edit} onClick={edit}>
@@ -459,6 +469,7 @@ export const RulesPage = ({
   view: SettingsView;
 }) => {
   const { rules, profile } = studio.state;
+
   return (
     <div className={styles.rules} data-screen-label="Booking rules">
       <div className={styles.panel}>
@@ -481,8 +492,8 @@ export const RulesPage = ({
             onChange={view.onRulesMax}
             aria-label="Maximum notice"
           >
-            {view.rulesMaxOptions.map(({ v, label }) => (
-              <option key={v} value={v}>
+            {view.rulesMaxOptions.map(({ value, label }) => (
+              <option key={value} value={value}>
                 {label}
               </option>
             ))}
@@ -501,8 +512,8 @@ export const RulesPage = ({
             onChange={view.onRulesMin}
             aria-label="Minimum notice"
           >
-            {view.rulesMinOptions.map(({ v, label }) => (
-              <option key={v} value={v}>
+            {view.rulesMinOptions.map(({ value, label }) => (
+              <option key={value} value={value}>
                 {label}
               </option>
             ))}
@@ -588,7 +599,7 @@ export const RulesPage = ({
           </div>
           <button
             className={styles.travelButton}
-            onClick={() => studio.actions.openSub("business")}
+            onClick={() => studio.actions.openSubpage("business")}
           >
             Business details
           </button>

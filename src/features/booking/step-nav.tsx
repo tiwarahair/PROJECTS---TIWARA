@@ -12,6 +12,7 @@ interface StepNavProps {
 export const StepNav = ({ booking }: StepNavProps) => {
   const { state, nextDisabled, actions } = booking;
   const { step } = state;
+
   return (
     <div className={joinClassNames(helmet.navbtns, styles.row)}>
       {step > 1 && step < 6 && (

@@ -6,6 +6,7 @@ import styles from "./faq-section.module.css";
 /** Accordion FAQ, one answer open at a time (prototype Home "FAQ"). */
 export const FaqSection = () => {
   const [openIndex, setOpenIndex] = useState(-1);
+
   return (
     <section
       id="faq"
@@ -18,9 +19,9 @@ export const FaqSection = () => {
           Frequently asked questions
         </h2>
         <div className={styles.list}>
-          {faqs.map(({ q, a }, index) => (
+          {faqs.map(({ question, answer }, index) => (
             <div
-              key={q}
+              key={question}
               data-rv=""
               className={joinClassNames(
                 styles.item,
@@ -33,7 +34,7 @@ export const FaqSection = () => {
                   setOpenIndex((current) => (current === index ? -1 : index))
                 }
               >
-                {q}
+                {question}
                 <span className={styles.chevron}>
                   <svg
                     width="22"
@@ -51,7 +52,7 @@ export const FaqSection = () => {
               </button>
               <div className={styles.answerBody}>
                 <div className={styles.answerClip}>
-                  <div className={styles.answer}>{a}</div>
+                  <div className={styles.answer}>{answer}</div>
                 </div>
               </div>
             </div>

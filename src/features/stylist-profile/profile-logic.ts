@@ -15,7 +15,9 @@ const MENU_LIMIT = 6;
 /** The stylist for ?stylist=<id>, falling back to the first stylist like the prototype. */
 export const getStylist = (id: string): Stylist => {
   const stylist = stylists.find((item) => item.id === id) ?? stylists[0];
+
   if (!stylist) throw new Error("No stylists in the seed data");
+
   return stylist;
 };
 
@@ -27,11 +29,11 @@ export const getGallery = ({ cover, portfolio = [] }: Stylist): string[] =>
 
 export interface ServiceModal {
   name: string;
-  desc: string;
+  description: string;
   price: string;
-  dur: string;
+  duration: string;
   href: string;
-  cust: string;
+  customisation: string;
 }
 
 export interface MenuItem {
@@ -51,7 +53,7 @@ export interface MenuGroup {
 }
 
 export const getBookHref = (stylistId: string): string =>
-  "/book?stylist=" + stylistId;
+  `/book?stylist=${stylistId}`;
 
 export const getMenuGroups = (stylist: Stylist): MenuGroup[] =>
   getMenu(stylist).map(({ id, name, items }) => ({
@@ -60,22 +62,22 @@ export const getMenuGroups = (stylist: Stylist): MenuGroup[] =>
     hasName: !!name,
     items: items.map((service) => {
       const price = money(getFromWithFee(service));
-      const dur = formatDuration(service.mins);
-      const href =
-        getBookHref(stylist.id) + "&service=" + encodeURIComponent(service.id);
+      const duration = formatDuration(service.minutes);
+      const href = `${getBookHref(stylist.id)}&service=${encodeURIComponent(service.id)}`;
+
       return {
         key: service.id,
         name: service.name,
-        meta: dur,
+        meta: duration,
         price,
         href,
         modal: {
           name: service.name,
-          desc: service.desc,
-          price: "from " + price,
-          dur,
+          description: service.description,
+          price: `from ${price}`,
+          duration,
           href,
-          cust: getCustomisationSummary(service),
+          customisation: getCustomisationSummary(service),
         },
       };
     }),
@@ -83,7 +85,9 @@ export const getMenuGroups = (stylist: Stylist): MenuGroup[] =>
 
 export const countServices = (groups: MenuGroup[]): number => {
   let total = 0;
+
   for (const { items } of groups) total += items.length;
+
   return total;
 };
 
@@ -112,6 +116,7 @@ const OPEN_HOURS: Record<number, [number, number] | null> = {
   5: [10, 20],
   6: [9, 18],
 };
+
 const DAY_NAMES = [
   "Sunday",
   "Monday",
@@ -123,7 +128,7 @@ const DAY_NAMES = [
 ];
 
 const toHourLabel = (hour: number): string =>
-  String(hour).padStart(2, "0") + ":00";
+  `${String(hour).padStart(2, "0")}:00`;
 
 export interface OpenStatus {
   isOpen: boolean;
@@ -134,39 +139,44 @@ export interface OpenStatus {
 
 export const getOpenStatus = (now = new Date()): OpenStatus => {
   const today = OPEN_HOURS[now.getDay()];
-  const mins = now.getHours() * 60 + now.getMinutes();
-  const isOpen = !!today && mins >= today[0] * 60 && mins < today[1] * 60;
-  const opensLater = !!today && mins < today[0] * 60;
+  const minutesNow = now.getHours() * 60 + now.getMinutes();
+
+  const isOpen =
+    !!today && minutesNow >= today[0] * 60 && minutesNow < today[1] * 60;
+
+  const opensLater = !!today && minutesNow < today[0] * 60;
   let nextDay: { name: string; from: number } | null = null;
+
   for (let offset = 1; offset <= 7 && !nextDay; offset++) {
     const day = (now.getDay() + offset) % 7;
     const hours = OPEN_HOURS[day];
+
     if (hours) nextDay = { name: DAY_NAMES[day] ?? "", from: hours[0] };
   }
+
   const nextDayLabel = nextDay
-    ? nextDay.name + " " + toHourLabel(nextDay.from)
+    ? `${nextDay.name} ${toHourLabel(nextDay.from)}`
     : "";
-  const nextAvailable =
-    isOpen && today
-      ? "today from " +
-        toHourLabel(
-          mins / 60 < today[0]
-            ? today[0]
-            : Math.min(today[1] - 1, Math.ceil(mins / 60) + 1),
-        )
-      : opensLater && today
-        ? "today " + toHourLabel(today[0])
-        : nextDay
-          ? nextDayLabel
-          : "by request";
-  const openHours =
-    isOpen && today
-      ? "until " + toHourLabel(today[1])
-      : opensLater && today
-        ? "opens " + toHourLabel(today[0])
-        : nextDay
-          ? "opens " + nextDayLabel
-          : "";
+
+  let nextAvailable = "by request";
+  let openHours = "";
+
+  if (isOpen && today) {
+    const fromHour =
+      minutesNow / 60 < today[0]
+        ? today[0]
+        : Math.min(today[1] - 1, Math.ceil(minutesNow / 60) + 1);
+
+    nextAvailable = `today from ${toHourLabel(fromHour)}`;
+    openHours = `until ${toHourLabel(today[1])}`;
+  } else if (opensLater && today) {
+    nextAvailable = `today ${toHourLabel(today[0])}`;
+    openHours = `opens ${toHourLabel(today[0])}`;
+  } else if (nextDay) {
+    nextAvailable = nextDayLabel;
+    openHours = `opens ${nextDayLabel}`;
+  }
+
   return {
     isOpen,
     nextAvailable,
@@ -193,33 +203,42 @@ export interface ProfileFacts {
   depositChip: string;
   hasPayChip: boolean;
   cancelChip: string;
-  cancelHrs: number;
+  cancelHours: number;
   mailto: string;
   site: string;
   siteHref: string;
 }
+
+const getSiteHref = (site?: string): string => {
+  if (!site) return "";
+
+  return /^https?:/.test(site) ? site : `https://${site}`;
+};
 
 export const getProfileFacts = ({
   id,
   policies,
   site,
 }: Stylist): ProfileFacts => {
-  const { mode, depositPct, refundable, freeWindowHrs } = policies;
+  const { mode, depositPercent, refundable, freeWindowHours } = policies;
+
   const depositChips = {
-    deposit: depositPct + "% deposit" + (refundable ? "" : ", non-refundable"),
+    deposit: `${depositPercent}% deposit${refundable ? "" : ", non-refundable"}`,
     full: "Pay in full to book",
     card: "Card needed to book",
     none: "",
   };
+
   const handle = id.replace(/-/g, "");
+
   return {
     depositChip: depositChips[mode],
     hasPayChip: mode !== "none",
-    cancelChip: "Free cancellation up to " + freeWindowHrs + "h",
-    cancelHrs: freeWindowHrs,
-    mailto: "mailto:" + handle + "@tiwarashouse.co.uk",
+    cancelChip: `Free cancellation up to ${freeWindowHours}h`,
+    cancelHours: freeWindowHours,
+    mailto: `mailto:${handle}@tiwarashouse.co.uk`,
     site: site || "",
-    siteHref: site ? (/^https?:/.test(site) ? site : "https://" + site) : "",
+    siteHref: getSiteHref(site),
   };
 };
 
@@ -242,6 +261,10 @@ export const getReviews = (): ReviewView[] =>
     ),
   }));
 
-export const getLoginHref = (stylistId: string): string =>
-  "/login?screen=cust-email&return=" +
-  encodeURIComponent("/stylist?stylist=" + stylistId + "&login=1");
+export const getLoginHref = (stylistId: string): string => {
+  const returnPath = encodeURIComponent(
+    `/stylist?stylist=${stylistId}&login=1`,
+  );
+
+  return `/login?screen=cust-email&return=${returnPath}`;
+};

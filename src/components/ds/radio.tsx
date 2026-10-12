@@ -22,6 +22,7 @@ export const Radio = ({
   direction = "column",
 }: RadioProps) => {
   const [selected, setSelected] = useControllable(value, defaultValue);
+
   return (
     <div
       role="radiogroup"
@@ -36,6 +37,7 @@ export const Radio = ({
           className={joinClassNames(styles.label, disabled && styles.disabled)}
           onClick={() => {
             if (disabled) return;
+
             setSelected(option);
             onChange?.(option);
           }}

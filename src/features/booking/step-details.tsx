@@ -35,7 +35,7 @@ const ErrorIcon = () => (
 );
 
 interface FieldProps {
-  fieldKey: Exclude<FieldKey, "addr">;
+  fieldKey: Exclude<FieldKey, "address">;
   label: string;
   wide?: boolean;
   error: string;
@@ -60,13 +60,15 @@ const DetailsField = ({
   renderInput,
   prefix,
 }: FieldProps) => {
-  const id = "bk-" + fieldKey;
+  const id = `bk-${fieldKey}`;
+
   const input = renderInput({
     id,
     invalid: showError ? "true" : "false",
-    describedBy: id + "-err",
+    describedBy: `${id}-err`,
     borderClass: showError ? fields.borderError : fields.border,
   });
+
   return (
     <div className={wide ? fields.fieldWide : fields.field}>
       <label htmlFor={id} className={fields.label}>
@@ -81,7 +83,7 @@ const DetailsField = ({
         input
       )}
       {showError && (
-        <div id={id + "-err"} role="alert" className={fields.error}>
+        <div id={`${id}-err`} role="alert" className={fields.error}>
           <ErrorIcon />
           {error}
         </div>
@@ -94,18 +96,27 @@ const DetailsField = ({
 export const StepDetails = ({ booking }: StepDetailsProps) => {
   const { state, stylist, errors, isMobileStylist, actions, openPrivacy } =
     booking;
+
   const { setState, touchField } = actions;
-  const { details, loggedIn, alg, photos } = state;
+  const { details, loggedIn, allergy, photos } = state;
   const emailFix = getEmailFix(details.email);
+
+  const loginReturn = encodeURIComponent(
+    `/book?stylist=${stylist.id}&login=1&resume=1`,
+  );
+
   const isShown = (key: FieldKey) =>
-    (state.showErrs || !!state.touched[key]) && !!errors[key];
+    (state.showErrors || !!state.touched[key]) && !!errors[key];
+
   const setDetail =
     (key: keyof Details, clean: (value: string) => string = (value) => value) =>
     (event: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) =>
       setState({ details: { ...details, [key]: clean(event.target.value) } });
+
   const setAllergy = (patch: Partial<AllergyState>) =>
-    setState((current) => ({ alg: { ...current.alg, ...patch } }));
-  const fieldProps = (key: Exclude<FieldKey, "addr">) => ({
+    setState((current) => ({ allergy: { ...current.allergy, ...patch } }));
+
+  const fieldProps = (key: Exclude<FieldKey, "address">) => ({
     fieldKey: key,
     error: errors[key] ?? "",
     showError: isShown(key),
@@ -118,12 +129,7 @@ export const StepDetails = ({ booking }: StepDetailsProps) => {
         <p data-screen-label="Log in line" className={styles.loginLine}>
           Already have an account?{" "}
           <Link
-            to={
-              "/login?screen=cust-email&return=" +
-              encodeURIComponent(
-                "/book?stylist=" + stylist.id + "&login=1&resume=1",
-              )
-            }
+            to={`/login?screen=cust-email&return=${loginReturn}`}
             onClick={actions.saveDraftNow}
             className={styles.loginLink}
           >
@@ -136,7 +142,7 @@ export const StepDetails = ({ booking }: StepDetailsProps) => {
           <span>
             Booking as{" "}
             <strong className={styles.accountName}>
-              {DEMO_DETAILS.first + " " + DEMO_DETAILS.last}
+              {`${DEMO_DETAILS.first} ${DEMO_DETAILS.last}`}
             </strong>
           </span>
           <span aria-hidden="true">·</span>
@@ -244,25 +250,23 @@ export const StepDetails = ({ booking }: StepDetailsProps) => {
       <div data-screen-label="Allergies opt-in" className={styles.allergies}>
         <button
           role="checkbox"
-          aria-checked={alg.on ? "true" : "false"}
+          aria-checked={allergy.on ? "true" : "false"}
           onClick={() =>
             setAllergy(
-              alg.on
+              allergy.on
                 ? { on: false, text: "", prior: false, focus: false }
                 : { on: true, focus: true },
             )
           }
           className={styles.allergyToggle}
         >
-          <CheckBox on={alg.on} />
+          <CheckBox on={allergy.on} />
           <span>
-            {"I have allergies or sensitivities to share with " +
-              stylist.name +
-              " "}
+            {`I have allergies or sensitivities to share with ${stylist.name} `}
             <span className={styles.muted}>(optional)</span>
           </span>
         </button>
-        {alg.on && alg.prior && (
+        {allergy.on && allergy.prior && (
           <div data-al-anim="1" className={styles.prior}>
             <div className={styles.priorActions}>
               <span className={styles.priorAsk}>Still correct?</span>
@@ -287,17 +291,17 @@ export const StepDetails = ({ booking }: StepDetailsProps) => {
               </button>
             </div>
             <div className={styles.priorLabel}>Allergies or sensitivities</div>
-            <div className={styles.priorText}>{alg.text}</div>
+            <div className={styles.priorText}>{allergy.text}</div>
           </div>
         )}
-        {alg.on && !alg.prior && (
+        {allergy.on && !allergy.prior && (
           <div className={styles.allergyField}>
             <AllergyField
               stylistName={stylist.name}
-              value={alg.text}
+              value={allergy.text}
               onChange={(text) => setAllergy({ text })}
               openPrivacy={openPrivacy}
-              autoFocus={!!alg.focus}
+              autoFocus={!!allergy.focus}
             />
           </div>
         )}
@@ -311,8 +315,9 @@ export const StepDetails = ({ booking }: StepDetailsProps) => {
           {photos.map(({ name, url }, index) => {
             // p.style backgroundImage: the uploaded photo
             const photoStyle = {
-              "--photo": 'url("' + url + '")',
+              "--photo": `url("${url}")`,
             } as CSSProperties;
+
             return (
               <span key={url} className={styles.photo}>
                 <span
@@ -324,6 +329,7 @@ export const StepDetails = ({ booking }: StepDetailsProps) => {
                 <button
                   onClick={() => {
                     URL.revokeObjectURL(url);
+
                     setState((current) => ({
                       photos: current.photos.filter(
                         (_photo, photoIndex) => photoIndex !== index,
@@ -372,7 +378,9 @@ export const StepDetails = ({ booking }: StepDetailsProps) => {
                     url: URL.createObjectURL(file),
                   }),
                 );
+
                 event.target.value = "";
+
                 if (added.length)
                   setState((current) => ({
                     photos: current.photos.concat(added).slice(0, MAX_PHOTOS),
@@ -387,7 +395,7 @@ export const StepDetails = ({ booking }: StepDetailsProps) => {
         <div data-screen-label="Privacy line" className={styles.privacyLine}>
           We use your details to manage this booking.{" "}
           <button
-            onClick={() => setState({ doc: "privacy" })}
+            onClick={() => setState({ legalDocument: "privacy" })}
             className={fields.linkButton}
           >
             Privacy Policy

@@ -50,6 +50,7 @@ const ConfirmDialog = ({
       {title}
     </h3>
   );
+
   return (
     <div
       data-screen-label={screenLabel}
@@ -94,32 +95,41 @@ const ConfirmDialog = ({
 export const BookingDialogs = ({ booking }: BookingDialogsProps) => {
   const { state, stylist, money, actions } = booking;
   const { setState } = actions;
-  const { doc, time, date, calY, calM, confirmed } = state;
-  const docTitle = doc === "privacy" ? "Privacy Policy" : "Client Terms";
-  const closeDoc = () => setState({ doc: null });
+
+  const { legalDocument, time, date, calendarYear, calendarMonth, confirmed } =
+    state;
+
+  const legalDocumentTitle =
+    legalDocument === "privacy" ? "Privacy Policy" : "Client Terms";
+
+  const heldDate = date
+    ? formatShortDate(calendarYear, calendarMonth, date)
+    : "";
+
+  const closeLegalDocument = () => setState({ legalDocument: null });
 
   return (
     <>
-      {!!doc && (
+      {!!legalDocument && (
         // prototype: the scrim closes the sheet; the panel stops the click
         // eslint-disable-next-line jsx-a11y/click-events-have-key-events, jsx-a11y/no-static-element-interactions
         <div
-          data-screen-label={docTitle}
-          onClick={closeDoc}
+          data-screen-label={legalDocumentTitle}
+          onClick={closeLegalDocument}
           className={joinClassNames(helmet.bkscrim, styles.docScrim)}
         >
           {/* eslint-disable-next-line jsx-a11y/click-events-have-key-events, jsx-a11y/no-noninteractive-element-interactions */}
           <div
             role="dialog"
             aria-modal="true"
-            aria-label={docTitle}
+            aria-label={legalDocumentTitle}
             onClick={(event) => event.stopPropagation()}
             className={joinClassNames(helmet.bkpanel, styles.docPanel)}
           >
             <div className={styles.docHead}>
-              <h3 className={styles.docTitle}>{docTitle}</h3>
+              <h3 className={styles.docTitle}>{legalDocumentTitle}</h3>
               <button
-                onClick={closeDoc}
+                onClick={closeLegalDocument}
                 aria-label="Close"
                 className={styles.docClose}
               >
@@ -127,13 +137,13 @@ export const BookingDialogs = ({ booking }: BookingDialogsProps) => {
               </button>
             </div>
             <div className={styles.docBody}>
-              {(doc === "privacy"
+              {(legalDocument === "privacy"
                 ? getPrivacySections(stylist.name)
                 : TERMS_SECTIONS
-              ).map(({ h, p }) => (
-                <div key={h}>
-                  <div className={styles.docHeading}>{h}</div>
-                  <p className={styles.docText}>{p}</p>
+              ).map(({ title, body }) => (
+                <div key={title}>
+                  <div className={styles.docHeading}>{title}</div>
+                  <p className={styles.docText}>{body}</p>
                 </div>
               ))}
             </div>
@@ -164,13 +174,7 @@ export const BookingDialogs = ({ booking }: BookingDialogsProps) => {
           role="alertdialog"
           titleId="holdExpired-t"
           title="Your slot is no longer held"
-          text={
-            "We held " +
-            time +
-            " on " +
-            (date ? formatShortDate(calY, calM, date) : "") +
-            " for 10 minutes and the time ran out. Please pick a time again."
-          }
+          text={`We held ${time} on ${heldDate} for 10 minutes and the time ran out. Please pick a time again.`}
         >
           <button onClick={actions.pickAgain} className={styles.primary}>
             Pick a time again
@@ -182,11 +186,7 @@ export const BookingDialogs = ({ booking }: BookingDialogsProps) => {
           screenLabel="Bank check"
           titleId="bankOpen-t"
           title="Confirm with your bank"
-          text={
-            "Your bank wants to check this payment of " +
-            money.dueToday +
-            ". In the real flow this is your bank's own screen; here you choose the outcome."
-          }
+          text={`Your bank wants to check this payment of ${money.dueToday}. In the real flow this is your bank's own screen; here you choose the outcome.`}
           onClose={actions.bankFail}
         >
           <button onClick={actions.bankFail} className={styles.secondary}>
@@ -202,13 +202,7 @@ export const BookingDialogs = ({ booking }: BookingDialogsProps) => {
           screenLabel="Wallet sheet"
           titleId="walletOpen-t"
           title={state.wallet}
-          text={
-            "Pay " +
-            money.dueToday +
-            " to Tiwára's House for your booking with " +
-            stylist.name +
-            ". Demo sheet."
-          }
+          text={`Pay ${money.dueToday} to Tiwára's House for your booking with ${stylist.name}. Demo sheet.`}
         >
           <button
             onClick={() => setState({ wallet: null })}
@@ -217,7 +211,7 @@ export const BookingDialogs = ({ booking }: BookingDialogsProps) => {
             Cancel
           </button>
           <button onClick={actions.walletPay} className={styles.walletPay}>
-            {"Pay " + money.dueToday}
+            {`Pay ${money.dueToday}`}
           </button>
         </ConfirmDialog>
       )}

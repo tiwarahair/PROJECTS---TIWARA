@@ -35,6 +35,7 @@ export const FavHost = () => {
   const closeMenu = useCallback((refocus: boolean) => {
     setMenu((open) => {
       if (open && refocus) open.anchor.focus();
+
       return null;
     });
   }, []);
@@ -45,14 +46,18 @@ export const FavHost = () => {
     dispatch(syncFavourites());
     const params = getSearchParams();
     const timers: number[] = [];
+
     const later = (callback: () => void, delay: number) =>
       timers.push(window.setTimeout(callback, delay));
 
     const pending = readSession("tw_fav_pending");
+
     if (pending && store.getState().session.loggedIn) {
       writeSession("tw_fav_pending", null);
+
       if (!store.getState().favourites.ids.includes(pending))
         dispatch(setFavourite({ id: pending, on: true }));
+
       later(
         () =>
           dispatch(
@@ -65,10 +70,12 @@ export const FavHost = () => {
         700,
       );
     }
-    const favToast = params.get("favtoast");
-    if (favToast)
+
+    const favouriteToast = params.get("favtoast");
+
+    if (favouriteToast)
       later(() => {
-        if (favToast === "saved")
+        if (favouriteToast === "saved")
           dispatch(
             showToast(
               "Saved to favourites",
@@ -76,7 +83,7 @@ export const FavHost = () => {
               { pinned: true },
             ),
           );
-        else if (favToast === "removed")
+        else if (favouriteToast === "removed")
           dispatch(
             showToast(
               "Removed from favourites",
@@ -84,16 +91,19 @@ export const FavHost = () => {
               { pinned: true },
             ),
           );
-        else if (favToast === "copied")
+        else if (favouriteToast === "copied")
           dispatch(showToast("Link copied", null, { pinned: true }));
       }, 500);
+
     if (params.get("acctmenu") === "1")
       later(() => {
         const anchor = [
           ...document.querySelectorAll<HTMLElement>("[data-tw-acct]"),
         ].find((element) => element.offsetParent !== null);
+
         if (anchor) setMenu({ anchor, pinned: true });
       }, 900);
+
     if (params.get("favsheet") === "1")
       later(() => dispatch(openLoginSheet("demo")), 500);
 
@@ -111,11 +121,15 @@ export const FavHost = () => {
       const anchor = (event.target as Element | null)?.closest?.<HTMLElement>(
         "[data-tw-acct]",
       );
+
       if (!anchor) return;
+
       event.preventDefault();
       setMenu((open) => (open ? null : { anchor, pinned: false }));
     };
+
     document.addEventListener("click", handleClick, true);
+
     return () => document.removeEventListener("click", handleClick, true);
   }, []);
 

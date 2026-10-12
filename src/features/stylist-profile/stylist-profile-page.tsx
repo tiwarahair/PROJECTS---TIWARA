@@ -41,15 +41,17 @@ import { useStylistProfile } from "./use-stylist-profile";
 /** A stylist's public profile, route "/stylist?stylist=<id>" (prototype Stylist Profile.dc.html). */
 export const StylistProfilePage = () => {
   const profile = useStylistProfile();
-  const { id, shareAt, svcModal, zoom, openZoom } = profile;
+  const { id, shareAt, serviceModal, zoom, openZoom } = profile;
   const navigate = useNavigate();
   const { loggedIn, isFavourite, toggleFavourite } = useFavourites();
   const { share, copyLink } = useShare();
+
   useRevealSweep(helmet.rvIn ?? "");
 
   // page-wide helmet rules (colour easings, focus ring, mobile overflow) apply while the profile is mounted
   useLayoutEffect(() => {
     document.documentElement.classList.add("profile-page");
+
     return () => document.documentElement.classList.remove("profile-page");
   }, []);
 
@@ -67,7 +69,9 @@ export const StylistProfilePage = () => {
 
   const goBack = (event: MouseEvent<HTMLAnchorElement>) => {
     markSearchBack();
+
     if (!back.has) return;
+
     event.preventDefault();
     navigate(back.href);
   };
@@ -75,15 +79,19 @@ export const StylistProfilePage = () => {
   const zoomTo = (src: string) => openZoom(gallery, gallery.indexOf(src));
 
   const actions: ProfileActions = {
-    shareLabel: "Share " + name,
+    shareLabel: `Share ${name}`,
     shareExpanded: shareAt ? "true" : "false",
     onShare: (event) => {
       event.stopPropagation();
+
       if (shareAt) {
         profile.closeShare();
+
         return;
       }
+
       if (share({ id: stylist.id, name, area })) return;
+
       profile.openShare(event.currentTarget);
     },
     saved,
@@ -110,8 +118,8 @@ export const StylistProfilePage = () => {
         onBack={goBack}
         heroRef={profile.heroRef}
         shareButtonRef={profile.shareButtonRef}
-        covOn={profile.covOn}
-        onToggleCov={profile.toggleCov}
+        coverActionsOn={profile.coverActionsOn}
+        onToggleCoverActions={profile.toggleCoverActions}
         actions={actions}
       />
       <div className={joinClassNames(helmet.profbody, styles.body)}>
@@ -121,11 +129,9 @@ export const StylistProfilePage = () => {
             <ProfileServices
               groups={limitMenuGroups(menuGroups)}
               hasMore={hasMoreServices(menuGroups)}
-              showAllLabel={
-                "Show all " + countServices(menuGroups) + " services"
-              }
+              showAllLabel={`Show all ${countServices(menuGroups)} services`}
               bookHref={bookHref}
-              onOpenService={profile.openSvcModal}
+              onOpenService={profile.openServiceModal}
             />
             <ProfilePortfolio
               portfolio={portfolio}
@@ -152,7 +158,7 @@ export const StylistProfilePage = () => {
       {shareAt && (
         <SharePopover
           position={shareAt}
-          whatsappHref={shareData.wa}
+          whatsappHref={shareData.whatsapp}
           mailHref={shareData.mail}
           onCopy={() => {
             copyLink(shareData.url);
@@ -165,9 +171,9 @@ export const StylistProfilePage = () => {
         <div className={styles.barInner}>
           <div className={styles.barText}>
             <span className={styles.barNext}>
-              {"Next available: " + status.nextAvailable}
+              {`Next available: ${status.nextAvailable}`}
             </span>
-            <span className={styles.barFrom}>{"from " + fromLabel}</span>
+            <span className={styles.barFrom}>{`from ${fromLabel}`}</span>
           </div>
           <Link to={bookHref} className={styles.barBook}>
             Book now
@@ -185,8 +191,11 @@ export const StylistProfilePage = () => {
           />
         </Link>
       </div>
-      {svcModal && (
-        <ServiceModal service={svcModal} onClose={profile.closeSvcModal} />
+      {serviceModal && (
+        <ServiceModal
+          service={serviceModal}
+          onClose={profile.closeServiceModal}
+        />
       )}
       <WelcomeToast />
       <FavHost />

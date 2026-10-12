@@ -17,7 +17,7 @@ interface SuggestionButtonProps {
 
 /** One What/Where suggestion: icon or avatar, label with the typed text in bold, optional sub-line (prototype rowVm). */
 export const SuggestionButton = ({
-  view: { row, index, pre, mid, post, isActive, isOn },
+  view: { row, index, before, match, after, isActive, isOn },
   onPick,
   onHover,
 }: SuggestionButtonProps) => (
@@ -53,16 +53,20 @@ export const SuggestionButton = ({
         ></svg>
       </span>
     )}
-    {!!row.img && (
-      <img src={resolveAssetUrl(row.img)} alt="" className={styles.rowAvatar} />
+    {!!row.image && (
+      <img
+        src={resolveAssetUrl(row.image)}
+        alt=""
+        className={styles.rowAvatar}
+      />
     )}
     <span className={styles.rowText}>
       <span className={styles.rowLabel}>
-        {pre}
-        <b className={styles.rowMatch}>{mid}</b>
-        {post}
+        {before}
+        <b className={styles.rowMatch}>{match}</b>
+        {after}
       </span>
-      {!!row.sub && <span className={styles.rowSub}>{row.sub}</span>}
+      {!!row.subtitle && <span className={styles.rowSub}>{row.subtitle}</span>}
     </span>
   </button>
 );

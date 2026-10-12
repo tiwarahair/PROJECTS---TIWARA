@@ -4,7 +4,7 @@ export interface CustomisationOption {
   label: string;
   on: boolean;
   priceDelta: number;
-  minsDelta: number;
+  minutesDelta: number;
 }
 
 export interface CustomisationGroup {
@@ -20,7 +20,7 @@ export interface ServiceCustomisations {
 export interface OwnCustomisationOption {
   label: string;
   priceDelta: number;
-  minsDelta: number;
+  minutesDelta: number;
 }
 
 export interface OwnCustomisation {
@@ -31,7 +31,7 @@ export interface OwnCustomisation {
 export interface ServiceAddon {
   name: string;
   price: number;
-  mins: number;
+  minutes: number;
 }
 
 export interface Service {
@@ -40,8 +40,8 @@ export interface Service {
   serviceTypeId: string;
   categoryId: string | null;
   price: number;
-  mins: number;
-  desc: string;
+  minutes: number;
+  description: string;
   status: ServiceStatus;
   customisations: ServiceCustomisations | null;
   ownCustomisations: OwnCustomisation[];

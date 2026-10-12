@@ -25,7 +25,7 @@ const TOAST_MS = 2600;
 const TOAST_OUT_MS = 180;
 const DRAWER_OUT_MS = 200;
 const EXPORT_OUT_MS = 180;
-const DESK_MIN = 720;
+const DESKTOP_MIN = 720;
 
 export interface EarningsProps {
   scenario?: EarningsScenario;
@@ -37,7 +37,7 @@ export interface EarningsProps {
   contained?: boolean;
   showTitle?: boolean;
   period?: PeriodId;
-  filt?: string;
+  filter?: string;
   clients?: EarningsClient[];
   services?: EarningsService[];
   businessName?: string;
@@ -53,32 +53,32 @@ export interface EarningsProps {
 }
 
 export interface DrawerRef {
-  k: "tx" | "po";
+  kind: "tx" | "po";
   id: string;
 }
 
 export interface EarningsState {
   period: PeriodId | null;
-  cFrom: string;
-  cTo: string;
-  aFrom: string;
-  aTo: string;
-  ddOpen: boolean;
-  ddCustom: boolean;
-  cErr: string;
+  customFrom: string;
+  customTo: string;
+  appliedFrom: string;
+  appliedTo: string;
+  dropdownOpen: boolean;
+  dropdownCustom: boolean;
+  customError: string;
   tab: "tx" | "po" | null;
-  filt: string | null;
-  lim: number;
+  filter: string | null;
+  limit: number;
   bar: number | null;
   drawer: DrawerRef | null;
-  drStack: DrawerRef[];
-  drOut: boolean;
-  exOn: boolean;
-  exOut: boolean;
-  exPeriod: PeriodId | null;
-  exFrom: string;
-  exTo: string;
-  exFmt: "csv" | "pdf";
+  drawerStack: DrawerRef[];
+  drawerOut: boolean;
+  exportOn: boolean;
+  exportOut: boolean;
+  exportPeriod: PeriodId | null;
+  exportFrom: string;
+  exportTo: string;
+  exportFormat: "csv" | "pdf";
   toast: string;
   toastOut: boolean;
   width: number;
@@ -86,26 +86,26 @@ export interface EarningsState {
 
 const INITIAL_STATE: EarningsState = {
   period: null,
-  cFrom: "",
-  cTo: "",
-  aFrom: "",
-  aTo: "",
-  ddOpen: false,
-  ddCustom: false,
-  cErr: "",
+  customFrom: "",
+  customTo: "",
+  appliedFrom: "",
+  appliedTo: "",
+  dropdownOpen: false,
+  dropdownCustom: false,
+  customError: "",
   tab: null,
-  filt: null,
-  lim: 15,
+  filter: null,
+  limit: 15,
   bar: null,
   drawer: null,
-  drStack: [],
-  drOut: false,
-  exOn: false,
-  exOut: false,
-  exPeriod: null,
-  exFrom: "",
-  exTo: "",
-  exFmt: "csv",
+  drawerStack: [],
+  drawerOut: false,
+  exportOn: false,
+  exportOut: false,
+  exportPeriod: null,
+  exportFrom: "",
+  exportTo: "",
+  exportFormat: "csv",
   toast: "",
   toastOut: false,
   width: 0,
@@ -118,6 +118,7 @@ export const useEarnings = (props: EarningsProps) => {
   const rootRef = useRef<HTMLDivElement>(null);
   const ledgerRef = useRef<{ key: string; ledger: Ledger } | null>(null);
   const timers = useRef({ toast: 0, toastOut: 0, drawer: 0, exportOut: 0 });
+
   const setState = (
     patch:
       | Partial<EarningsState>
@@ -131,36 +132,43 @@ export const useEarnings = (props: EarningsProps) => {
   // rebuilt only when the scenario or the day changes (prototype build() cache)
   const getLedger = (): Ledger => {
     const key = getLedgerKey(scenario);
+
     if (ledgerRef.current?.key !== key)
       ledgerRef.current = {
         key,
         ledger: buildLedger(scenario, props.clients, props.services),
       };
+
     return ledgerRef.current.ledger;
   };
+
   const ledger = getLedger();
 
-  const isDesk =
-    layout === "desktop"
-      ? true
-      : layout === "mobile"
-        ? false
-        : state.width
-          ? state.width >= DESK_MIN
-          : true;
+  const getIsDesktop = () => {
+    if (layout === "desktop") return true;
+
+    if (layout === "mobile") return false;
+
+    return state.width ? state.width >= DESKTOP_MIN : true;
+  };
+
+  const isDesktop = getIsDesktop();
   const period = state.period || props.period || "week";
   const tab = state.tab || props.tab || "tx";
+
   const range =
     period === "custom"
-      ? getRange("custom", state.aFrom, state.aTo)
+      ? getRange("custom", state.appliedFrom, state.appliedTo)
       : getRange(period);
 
   const showToast = (message: string) => {
     window.clearTimeout(timers.current.toast);
     window.clearTimeout(timers.current.toastOut);
     setState({ toast: message, toastOut: false });
+
     timers.current.toast = window.setTimeout(() => {
       setState({ toastOut: true });
+
       timers.current.toastOut = window.setTimeout(
         () => setState({ toast: "" }),
         TOAST_OUT_MS,
@@ -170,53 +178,63 @@ export const useEarnings = (props: EarningsProps) => {
 
   const openDrawer = (drawer: DrawerRef, isPush: boolean) => {
     window.clearTimeout(timers.current.drawer);
+
     setState((current) => ({
       drawer,
-      drOut: false,
-      drStack:
+      drawerOut: false,
+      drawerStack:
         isPush && current.drawer
-          ? current.drStack.concat([current.drawer])
+          ? current.drawerStack.concat([current.drawer])
           : [],
     }));
   };
+
   const closeDrawer = () => {
     window.clearTimeout(timers.current.drawer);
-    setState({ drOut: true });
+    setState({ drawerOut: true });
+
     timers.current.drawer = window.setTimeout(
-      () => setState({ drawer: null, drOut: false, drStack: [] }),
+      () => setState({ drawer: null, drawerOut: false, drawerStack: [] }),
       DRAWER_OUT_MS,
     );
   };
+
   const closeExport = () => {
     window.clearTimeout(timers.current.exportOut);
-    setState({ exOut: true });
+    setState({ exportOut: true });
+
     timers.current.exportOut = window.setTimeout(
-      () => setState({ exOn: false, exOut: false }),
+      () => setState({ exportOn: false, exportOut: false }),
       EXPORT_OUT_MS,
     );
   };
+
   const openExport = () => {
     window.clearTimeout(timers.current.exportOut);
-    setState({ exOn: true, exOut: false, exPeriod: period });
+    setState({ exportOn: true, exportOut: false, exportPeriod: period });
   };
 
   const doExport = () => {
-    const exportPeriod = state.exPeriod || state.period || "week";
+    const exportPeriod = state.exportPeriod || state.period || "week";
+
     const exportRange =
       exportPeriod === "custom"
         ? getRange(
             "custom",
-            state.exFrom || state.aFrom,
-            state.exTo || state.aTo,
+            state.exportFrom || state.appliedFrom,
+            state.exportTo || state.appliedTo,
           )
         : getRange(exportPeriod);
-    const inRange = ledger.tx
-      .filter(({ at }) => at >= exportRange.s && at < exportRange.e)
+
+    const inRange = ledger.transactions
+      .filter(({ at }) => at >= exportRange.start && at < exportRange.end)
       .sort((first, second) => first.at.getTime() - second.at.getTime());
+
     const slug = getExportSlug(exportRange);
-    if (state.exFmt === "csv")
+
+    if (state.exportFormat === "csv")
       downloadText(
-        "earnings-" + slug + ".csv",
+        `earnings-${slug}.csv`,
         "text/csv;charset=utf-8",
         getEarningsCsv(inRange, props.clients),
       );
@@ -226,7 +244,9 @@ export const useEarnings = (props: EarningsProps) => {
           range: exportRange,
           transactions: inRange,
           payouts: ledger.payouts
-            .filter(({ sent }) => sent >= exportRange.s && sent < exportRange.e)
+            .filter(
+              ({ sent }) => sent >= exportRange.start && sent < exportRange.end,
+            )
             .sort(
               (first, second) => first.sent.getTime() - second.sent.getTime(),
             ),
@@ -237,6 +257,7 @@ export const useEarnings = (props: EarningsProps) => {
           bankLabel: props.bankLabel,
         }),
       );
+
     closeExport();
     showToast("Your export is downloading.");
   };
@@ -245,39 +266,50 @@ export const useEarnings = (props: EarningsProps) => {
   useEffect(() => {
     const element = rootRef.current;
     let observer: ResizeObserver | undefined;
+
     if (element && window.ResizeObserver) {
       observer = new ResizeObserver(([entry]) => {
         const width = Math.round(entry?.contentRect.width ?? 0);
+
         setState((current) =>
           Math.abs(width - current.width) > 4 ? { width } : {},
         );
       });
+
       observer.observe(element);
     }
+
     const { open } = props;
     let openTimer = 0;
-    if (open === "export") setState({ exOn: true });
+
+    if (open === "export") setState({ exportOn: true });
     else if (open === "tx" || open === "po")
       openTimer = window.setTimeout(() => {
-        const { tx, payouts } = getLedger();
+        const { transactions, payouts } = getLedger();
+
         const id =
           open === "tx"
             ? (
-                tx.find(
-                  ({ po, desc, method }) =>
-                    po && desc === "Balance" && method === "Saved card",
+                transactions.find(
+                  ({ payoutId, description, method }) =>
+                    payoutId &&
+                    description === "Balance" &&
+                    method === "Saved card",
                 ) ??
-                tx.find(({ po }) => po) ??
-                tx[0]
+                transactions.find(({ payoutId }) => payoutId) ??
+                transactions[0]
               )?.id
             : (
                 payouts.find(
                   ({ status, items }) => status === "Paid" && items.length >= 3,
                 ) ?? payouts[0]
               )?.id;
-        if (id) setState({ drawer: { k: open, id } });
+
+        if (id) setState({ drawer: { kind: open, id } });
       }, 0);
+
     const pending = timers.current;
+
     return () => {
       observer?.disconnect();
       window.clearTimeout(openTimer);
@@ -297,7 +329,7 @@ export const useEarnings = (props: EarningsProps) => {
     state,
     setState,
     ledger,
-    isDesk,
+    isDesktop,
     period,
     tab,
     range,

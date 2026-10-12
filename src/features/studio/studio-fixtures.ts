@@ -4,37 +4,39 @@ import type { TaxDetails } from "../../components/tax-details-form/tax-details-l
 import type { StudioActions, StudioContext } from "./studio-actions";
 import type { ServiceActions } from "./studio-service-actions";
 import { getTaxonomy, makeVariationRows } from "./studio-service-actions";
-import { getCatNameError, getNextCatColour } from "./studio-model";
+import { getCategoryNameError, getNextCategoryColour } from "./studio-model";
 import type { StudioState } from "./studio-types";
 
 const WRONG_CODE =
   "That code isn’t right. Enter the latest code from your app.";
+
 const SOLE_TAX: Partial<TaxDetails> = {
   kind: "sole",
   nameYes: true,
   legalName: "Amara Okonkwo",
-  d: "14",
-  m: "06",
-  y: "1994",
-  ni: "QQ123456C",
-  addrSame: false,
-  addr: {
+  day: "14",
+  month: "06",
+  year: "1994",
+  nationalInsuranceNumber: "QQ123456C",
+  isAddressSame: false,
+  address: {
     line1: "27 Heald Place",
     line2: "",
     city: "Manchester",
-    pc: "M14 5TQ",
+    postcode: "M14 5TQ",
   },
 };
+
 const LTD_TAX: Partial<TaxDetails> = {
   kind: "ltd",
-  coName: "Amara Beauty Ltd",
-  coNum: "14829307",
-  addrSame: true,
-  addr: {
+  companyName: "Amara Beauty Ltd",
+  companyNumber: "14829307",
+  isAddressSame: true,
+  address: {
     line1: "118 Wilmslow Road",
     line2: "Unit 4",
     city: "Manchester",
-    pc: "M14 5AJ",
+    postcode: "M14 5AJ",
   },
 };
 
@@ -49,17 +51,23 @@ const getQueryParam = (key: string) => {
 /** Scrolls the first visible match to the top of its scroller once it renders. */
 const scrollToSelector = (selector: string) => {
   let tries = 0;
-  const go = () => {
+
+  const tryScroll = () => {
     const element = [...document.querySelectorAll<HTMLElement>(selector)].find(
       (item) => item.offsetParent,
     );
+
     if (!element) {
-      if (++tries < 20) window.setTimeout(go, 150);
+      if (++tries < 20) window.setTimeout(tryScroll, 150);
+
       return;
     }
+
     let parent = element.parentElement;
+
     while (parent && parent !== document.body) {
       const style = getComputedStyle(parent);
+
       if (
         /(auto|scroll)/.test(style.overflowY) &&
         parent.scrollHeight > parent.clientHeight
@@ -68,12 +76,15 @@ const scrollToSelector = (selector: string) => {
           element.getBoundingClientRect().top -
           parent.getBoundingClientRect().top -
           16;
+
         break;
       }
+
       parent = parent.parentElement;
     }
   };
-  window.setTimeout(go, 400);
+
+  window.setTimeout(tryScroll, 400);
 };
 
 export const applyFixture = (
@@ -83,34 +94,55 @@ export const applyFixture = (
   serviceActions: ServiceActions,
 ) => {
   const { getState, setState, memo } = context;
-  const { openTf, openSheet, scrollCalToNow } = actions;
-  const { openCats, openWiz, setWiz, setDraft, applySugg, pickSugg } =
-    serviceActions;
+  const { openTwoFactor, openSheet, scrollCalendarToNow } = actions;
+
+  const {
+    openCategories,
+    openWizard,
+    setWizard,
+    setDraft,
+    applySuggestion,
+    pickSuggestion,
+  } = serviceActions;
+
   const state = getState();
   const main = [{ name: "Main phone", backup: false }];
   const both = main.concat([{ name: "Password manager", backup: true }]);
+
   const drafts = state.services.map((service) =>
-    service.st === "active" ? { ...service, st: "draft" } : service,
+    service.status === "active" ? { ...service, status: "draft" } : service,
   );
+
   const base: Partial<StudioState> = {
-    check: { avail: true, profile: true, stripe: false },
-    setupMin: false,
+    check: { availability: true, profile: true, stripe: false },
+    setupMinimised: false,
     tab: "home",
     page: null,
-    tfa: { devices: [] },
+    twoFactorSettings: { devices: [] },
     tax: null,
     taxEdit: false,
     services: drafts,
   };
+
   if (!["checklist", "checklist-services", "all-done"].includes(key))
-    base.setupMin = true;
+    base.setupMinimised = true;
+
   const setBase = (patch: Partial<StudioState>) =>
     setState({ ...base, ...patch });
+
   if (/^pay-/.test(key)) scrollToSelector('[data-screen-label="Tax details"]');
+
   if (/^biz-legal/.test(key)) scrollToSelector('[data-sec="legal"]');
-  const stripeDone = { avail: true, profile: true, stripe: true };
+
+  const stripeDone = { availability: true, profile: true, stripe: true };
+
   const toServices = () =>
-    setState({ tab: "services", svcTab: "services", setupMin: true });
+    setState({
+      tab: "services",
+      servicesTab: "services",
+      setupMinimised: true,
+    });
+
   const knotless = () =>
     getState().services.find(({ id }) => id === "knotless");
 
@@ -123,134 +155,171 @@ export const applyFixture = (
       break;
     case "cats-sheet":
       toServices();
-      window.setTimeout(() => openCats(), 60);
+      window.setTimeout(() => openCategories(), 60);
       break;
     case "cats-dup":
       toServices();
+
       window.setTimeout(() => {
-        openCats();
-        setState(({ catsUi }) =>
-          catsUi
+        openCategories();
+
+        setState(({ categoriesUi }) =>
+          categoriesUi
             ? {
-                catsUi: {
-                  ...catsUi,
+                categoriesUi: {
+                  ...categoriesUi,
                   newName: "locs",
-                  newErr: getCatNameError(getState(), "locs"),
+                  newError: getCategoryNameError(getState(), "locs"),
                 },
               }
             : {},
         );
       }, 80);
+
       break;
     case "wiz-details":
       toServices();
+
       window.setTimeout(() => {
         const braids = getTaxonomy("braids");
-        openWiz("add", null, {
+
+        openWizard("add", null, {
           categoryId: "c1",
-          cat: "braids",
-          sub: "Box braids",
+          taxonomyId: "braids",
+          subcategory: "Box braids",
           typeId: "box-braids",
           name: "Jumbo box braids",
           sizes: makeVariationRows(braids?.sizes),
           lengths: makeVariationRows(braids?.lengths),
         });
-        setWiz({ step: 2 });
+
+        setWizard({ step: 2 });
       }, 60);
+
       break;
     case "wiz-newcat":
       toServices();
+
       window.setTimeout(() => {
-        openWiz("add", null, {
-          cat: "braids",
-          sub: "Box braids",
+        openWizard("add", null, {
+          taxonomyId: "braids",
+          subcategory: "Box braids",
           typeId: "box-braids",
           name: "Jumbo box braids",
         });
-        setState(({ wiz, categories }) =>
-          wiz
+
+        setState(({ wizard, categories }) =>
+          wizard
             ? {
-                wiz: {
-                  ...wiz,
+                wizard: {
+                  ...wizard,
                   step: 2,
-                  newCat: {
+                  newCategory: {
                     name: "",
-                    colour: getNextCatColour(categories),
-                    err: "",
+                    colour: getNextCategoryColour(categories),
+                    error: "",
                   },
                 },
               }
             : {},
         );
       }, 60);
+
       break;
     case "wiz-own":
       toServices();
+
       window.setTimeout(() => {
-        openWiz("edit", knotless());
-        setWiz({ step: 3 });
+        openWizard("edit", knotless());
+        setWizard({ step: 3 });
       }, 60);
+
       break;
     case "wiz-sign":
     case "wiz-sign-err":
     case "wiz-own-sign":
       toServices();
+
       window.setTimeout(() => {
-        openWiz("edit", knotless());
+        openWizard("edit", knotless());
         const isError = key === "wiz-sign-err";
         const isOwn = key === "wiz-own-sign";
-        setState(({ wiz }) => {
-          if (!wiz) return {};
+
+        setState(({ wizard }) => {
+          if (!wizard) return {};
+
           const draft = {
-            ...wiz.draft,
+            ...wizard.draft,
             sizesOn: !isOwn,
-            sizes: wiz.draft.sizes.map((row) =>
+            sizes: wizard.draft.sizes.map((row) =>
               row.label === "Large" && isError
-                ? { ...row, neg: true, dp: "-90", dh: "-2", dm: "0" }
+                ? {
+                    ...row,
+                    negative: true,
+                    priceDelta: "-90",
+                    hoursDelta: "-2",
+                    minutesDelta: "0",
+                  }
                 : row,
             ),
           };
+
           return {
-            wiz: {
-              ...wiz,
+            wizard: {
+              ...wizard,
               step: 3,
               draft,
               ...(isOwn
                 ? {
-                    ownEd: {
-                      idx: 0,
+                    ownEdit: {
+                      index: 0,
                       name: "Parting",
                       options: [
-                        { label: "Straight", dp: "0", dm: "0" },
-                        { label: "Zig-zag", dp: "10", dm: "20" },
+                        {
+                          label: "Straight",
+                          priceDelta: "0",
+                          minutesDelta: "0",
+                        },
+                        {
+                          label: "Zig-zag",
+                          priceDelta: "10",
+                          minutesDelta: "20",
+                        },
                         {
                           label: "Middle part",
-                          neg: true,
-                          dp: "-5",
-                          dm: "-15",
+                          negative: true,
+                          priceDelta: "-5",
+                          minutesDelta: "-15",
                         },
                       ],
-                      err: "",
+                      error: "",
                     },
                   }
                 : {}),
             },
           };
         });
+
         const tip = getQueryParam("tip");
+
         if (tip)
           window.setTimeout(() => {
             const selector =
               tip === "ck"
                 ? 'button[aria-label="Offer Small"]'
                 : 'button[aria-label="Take off price and time"]';
+
             const element = document.querySelector(selector);
+
             if (!element) return;
+
             const rect = element.getBoundingClientRect();
+
             const text =
               tip === "ck"
                 ? "Offer this size"
                 : "Takes off the base price and time. Click to add instead.";
+
             setState({
               tip: {
                 key: "fx",
@@ -264,24 +333,28 @@ export const applyFixture = (
             });
           }, 700);
       }, 60);
+
       break;
     case "wiz-own-edit":
       toServices();
+
       window.setTimeout(() => {
-        openWiz("edit", knotless());
-        setWiz({
+        openWizard("edit", knotless());
+
+        setWizard({
           step: 3,
-          ownEd: {
-            idx: 0,
+          ownEdit: {
+            index: 0,
             name: "Parting",
             options: [
-              { label: "Straight", dp: "0", dm: "0" },
-              { label: "Zig-zag", dp: "10", dm: "20" },
+              { label: "Straight", priceDelta: "0", minutesDelta: "0" },
+              { label: "Zig-zag", priceDelta: "10", minutesDelta: "20" },
             ],
-            err: "",
+            error: "",
           },
         });
       }, 60);
+
       break;
     case "wiz-new":
     case "sugg":
@@ -292,83 +365,105 @@ export const applyFixture = (
     case "wiz-filled-addons":
     case "wiz-replace":
       toServices();
+
       window.setTimeout(() => {
-        openWiz("add");
+        openWizard("add");
         const type = serviceTypes.find(({ id }) => id === "knotless-braids");
-        if (key === "sugg") setWiz({ sugg: true });
-        if (key === "sugg-group") setWiz({ sugg: true, catF: "locs" });
-        if (key === "sugg-none") setWiz({ sugg: true, search: "mohawk fade" });
+
+        if (key === "sugg") setWizard({ suggestionsOpen: true });
+
+        if (key === "sugg-group")
+          setWizard({ suggestionsOpen: true, categoryFilter: "locs" });
+
+        if (key === "sugg-none")
+          setWizard({ suggestionsOpen: true, search: "mohawk fade" });
+
         if (!type) return;
+
         if (
           key === "wiz-filled" ||
           key === "wiz-filled-pricing" ||
           key === "wiz-filled-addons"
         ) {
-          applySugg(type, true, key === "wiz-filled");
+          applySuggestion(type, true, key === "wiz-filled");
+
           if (key !== "wiz-filled")
             window.setTimeout(
-              () => setWiz({ step: key === "wiz-filled-pricing" ? 3 : 4 }),
+              () => setWizard({ step: key === "wiz-filled-pricing" ? 3 : 4 }),
               50,
             );
         }
+
         if (key === "wiz-replace") {
           setDraft({ name: "My knotless" });
-          window.setTimeout(() => pickSugg(type), 60);
+          window.setTimeout(() => pickSuggestion(type), 60);
         }
       }, 60);
+
       break;
     case "wiz-search":
       toServices();
+
       window.setTimeout(() => {
-        openWiz("add");
-        setWiz({ sugg: true, search: "retwist" });
+        openWizard("add");
+        setWizard({ suggestionsOpen: true, search: "retwist" });
       }, 60);
+
       break;
     case "cal-day":
-      setState({ tab: "bookings", bview: "cal", dayIdx: 0, setupMin: true });
+      setState({
+        tab: "bookings",
+        bookingsLayout: "cal",
+        dayIndex: 0,
+        setupMinimised: true,
+      });
+
       window.setTimeout(() => {
         try {
-          scrollCalToNow();
+          scrollCalendarToNow();
         } catch {
           // the calendar may not be laid out yet
         }
       }, 120);
+
       break;
     case "secure-tax":
-      setBase({ tfa: { devices: both } });
-      openTf("secure");
+      setBase({ twoFactorSettings: { devices: both } });
+      openTwoFactor("secure");
       break;
     case "tax-home":
       setBase({
-        tfa: { devices: both },
+        twoFactorSettings: { devices: both },
         business: {
           ...state.business,
           type: "home",
-          v: {
-            ...state.business.v,
+          details: {
+            ...state.business.details,
             line1: "27 Heald Place",
             line2: "",
             city: "Manchester",
-            pc: "M14 5TQ",
+            postcode: "M14 5TQ",
           },
         },
       });
-      openTf("tax");
+
+      openTwoFactor("tax");
       break;
     case "tax-mobile":
       setBase({
-        tfa: { devices: both },
+        twoFactorSettings: { devices: both },
         business: {
           ...state.business,
           type: "mobile",
-          v: { ...state.business.v, basePc: "M16 8AF" },
+          details: { ...state.business.details, basePostcode: "M16 8AF" },
         },
       });
-      openTf("tax");
+
+      openTwoFactor("tax");
       break;
     case "tax-shop":
-      setBase({ tfa: { devices: both } });
-      openTf("tax");
+      setBase({ twoFactorSettings: { devices: both } });
+      openTwoFactor("tax");
       break;
     case "tax-name-no":
     case "tax-ltd":
@@ -379,149 +474,184 @@ export const applyFixture = (
     case "tax-err-ni":
     case "tax-err-conum":
     case "tax-err-pc":
-      setBase({ tfa: { devices: both } });
-      openTf("tax", { fx: key.slice(4) });
+      setBase({ twoFactorSettings: { devices: both } });
+      openTwoFactor("tax", { fixture: key.slice(4) });
       break;
     case "tax-learn":
-      setBase({ tfa: { devices: both } });
-      openTf("learn", { from: "tax" });
+      setBase({ twoFactorSettings: { devices: both } });
+      openTwoFactor("learn", { from: "tax" });
       break;
     case "stripe-sheet":
-      setBase({ tfa: { devices: both }, tax: SOLE_TAX });
+      setBase({ twoFactorSettings: { devices: both }, tax: SOLE_TAX });
       window.setTimeout(() => openSheet("stripe"), 50);
       break;
     case "pay-saved":
       setBase({
-        tfa: { devices: both },
+        twoFactorSettings: { devices: both },
         tax: SOLE_TAX,
         check: stripeDone,
         tab: "settings",
         page: "payouts",
       });
+
       break;
     case "pay-saved-ltd":
       setBase({
-        tfa: { devices: both },
+        twoFactorSettings: { devices: both },
         tax: LTD_TAX,
         check: stripeDone,
         tab: "settings",
         page: "payouts",
       });
+
       break;
     case "pay-hold":
       setBase({
-        tfa: { devices: both },
+        twoFactorSettings: { devices: both },
         check: stripeDone,
         tab: "settings",
         page: "payouts",
       });
+
       break;
     case "pay-code":
       setBase({
-        tfa: { devices: both },
+        twoFactorSettings: { devices: both },
         tax: SOLE_TAX,
         check: stripeDone,
         tab: "settings",
         page: "payouts",
       });
-      openTf("taxcode", { flow: "info" });
+
+      openTwoFactor("taxcode", { flow: "info" });
       break;
     case "pay-edit":
       setBase({
-        tfa: { devices: both },
+        twoFactorSettings: { devices: both },
         tax: SOLE_TAX,
         check: stripeDone,
         tab: "settings",
         page: "payouts",
         taxEdit: true,
       });
+
       break;
     case "biz-legal":
       setBase({
-        tfa: { devices: both },
+        twoFactorSettings: { devices: both },
         tax: SOLE_TAX,
         check: stripeDone,
         tab: "settings",
         page: "business",
       });
+
       break;
     case "biz-legal-ltd":
       setBase({
-        tfa: { devices: both },
+        twoFactorSettings: { devices: both },
         tax: LTD_TAX,
         check: stripeDone,
         tab: "settings",
         page: "business",
       });
+
       break;
     case "earn-hold":
-      setBase({ tfa: { devices: both }, check: stripeDone, tab: "earnings" });
+      setBase({
+        twoFactorSettings: { devices: both },
+        check: stripeDone,
+        tab: "earnings",
+      });
+
       break;
     case "secure-locked":
       setBase({});
-      openTf("secure");
+      openTwoFactor("secure");
       break;
     case "secure-unlocked":
-      setBase({ tfa: { devices: both } });
-      openTf("secure");
+      setBase({ twoFactorSettings: { devices: both } });
+      openTwoFactor("secure");
       break;
     case "checklist-services":
-      setBase({ tfa: { devices: both }, tax: SOLE_TAX, check: stripeDone });
+      setBase({
+        twoFactorSettings: { devices: both },
+        tax: SOLE_TAX,
+        check: stripeDone,
+      });
+
       break;
     case "services-drafts":
       setBase({
-        tfa: { devices: both },
+        twoFactorSettings: { devices: both },
         tax: SOLE_TAX,
         check: stripeDone,
         tab: "services",
-        svcTab: "services",
+        servicesTab: "services",
       });
+
       break;
     case "tf-method":
       setBase({});
-      openTf("method");
+      openTwoFactor("method");
       break;
     case "tf-app":
       setBase({});
-      openTf("app");
+      openTwoFactor("app");
       break;
     case "tf-app-key":
       setBase({});
-      openTf("app", { keyOn: true });
+      openTwoFactor("app", { keyShown: true });
       break;
     case "tf-app-error":
       setBase({});
-      openTf("app", { code: "482910", err: "code", errMsg: WRONG_CODE });
+
+      openTwoFactor("app", {
+        code: "482910",
+        error: "code",
+        errorMessage: WRONG_CODE,
+      });
+
       break;
     case "tf-dup":
-      setBase({ tfa: { devices: main } });
-      openTf("app", {
+      setBase({ twoFactorSettings: { devices: main } });
+
+      openTwoFactor("app", {
         kind: "backup",
-        opt: "device",
+        option: "device",
         name: "Main phone",
         code: "",
-        err: "name",
-        errMsg: "You already have a device with this name",
+        error: "name",
+        errorMessage: "You already have a device with this name",
       });
+
       break;
     case "tf-backup":
-      setBase({ tfa: { devices: main } });
-      openTf("backup");
+      setBase({ twoFactorSettings: { devices: main } });
+      openTwoFactor("backup");
       break;
     case "tf-backup-app":
-      setBase({ tfa: { devices: main } });
-      openTf("app", { kind: "backup", opt: "pm", name: "Password manager" });
+      setBase({ twoFactorSettings: { devices: main } });
+
+      openTwoFactor("app", {
+        kind: "backup",
+        option: "pm",
+        name: "Password manager",
+      });
+
       break;
     case "tf-skip":
-      setBase({ tfa: { devices: main } });
-      openTf("backup", { skipWarn: true });
+      setBase({ twoFactorSettings: { devices: main } });
+      openTwoFactor("backup", { skipWarn: true });
       break;
     case "tf-done":
-      setBase({ tfa: { devices: both } });
-      openTf("done");
+      setBase({ twoFactorSettings: { devices: both } });
+      openTwoFactor("done");
       break;
     case "home-gate":
-      setBase({ check: { avail: false, profile: false, stripe: false } });
+      setBase({
+        check: { availability: false, profile: false, stripe: false },
+      });
+
       break;
     case "share-locked":
       setBase({ tab: "settings", page: "profile", shareTip: true });
@@ -530,30 +660,47 @@ export const applyFixture = (
       setBase({ tab: "settings", page: "security" });
       break;
     case "sec-on1":
-      setBase({ tab: "settings", page: "security", tfa: { devices: main } });
+      setBase({
+        tab: "settings",
+        page: "security",
+        twoFactorSettings: { devices: main },
+      });
+
       break;
     case "sec-on2":
-      setBase({ tab: "settings", page: "security", tfa: { devices: both } });
+      setBase({
+        tab: "settings",
+        page: "security",
+        twoFactorSettings: { devices: both },
+      });
+
       break;
     case "sec-remove":
-      setBase({ tab: "settings", page: "security", tfa: { devices: both } });
-      openTf("remove", { name: "Password manager" });
+      setBase({
+        tab: "settings",
+        page: "security",
+        twoFactorSettings: { devices: both },
+      });
+
+      openTwoFactor("remove", { name: "Password manager" });
       break;
     case "all-done":
       memo.seenDone = {
-        avail: true,
+        availability: true,
         profile: true,
         secure: true,
         services: false,
       };
+
       setBase({
-        tfa: { devices: both },
+        twoFactorSettings: { devices: both },
         tax: SOLE_TAX,
         check: stripeDone,
         services: drafts.map((service, index) =>
-          index === 0 ? { ...service, st: "active" } : service,
+          index === 0 ? { ...service, status: "active" } : service,
         ),
       });
+
       actions.checkDone();
       break;
   }

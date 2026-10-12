@@ -1,7 +1,7 @@
 import { joinClassNames } from "../../utils/class-names";
 import controls from "./search-controls.module.css";
 import {
-  DOW_LABELS,
+  WEEKDAY_LABELS,
   getCalendarCells,
   getQuickDays,
   getVisibleMonth,
@@ -23,7 +23,7 @@ const QuickDays = ({ search: { state, actions } }: PickerProps) =>
       onClick={() => actions.pickDay(value)}
       className={joinClassNames(
         controls.quickDay,
-        state.q.date === value && controls.quickDaySelected,
+        state.query.date === value && controls.quickDaySelected,
       )}
     >
       <span className={styles.quickDayLabel}>{label}</span>
@@ -36,6 +36,7 @@ const MonthBar = ({
   className,
 }: PickerProps & { className?: string }) => {
   const month = getVisibleMonth(state);
+
   return (
     <div className={className}>
       <button
@@ -82,7 +83,7 @@ const MonthBar = ({
 const MonthGrid = ({ search: { state, actions } }: PickerProps) => (
   <>
     <div className={styles.dowRow}>
-      {DOW_LABELS.map((label) => (
+      {WEEKDAY_LABELS.map((label) => (
         <div key={label} className={styles.dow}>
           {label}
         </div>
@@ -101,7 +102,7 @@ const MonthGrid = ({ search: { state, actions } }: PickerProps) => (
               isDay && controls.cellDay,
               !isDay && controls.cellBlank,
               isDay && isPast && controls.cellPast,
-              state.q.date === value && controls.cellSelected,
+              state.query.date === value && controls.cellSelected,
             )}
           >
             {label}
@@ -135,7 +136,7 @@ const CustomTimes = ({
 }: PickerProps & { className?: string }) => (
   <div className={className}>
     <select
-      value={state.cFrom}
+      value={state.customFrom}
       onChange={actions.changeFrom}
       className={joinClassNames(helmet.timesel, styles.timeSelect)}
     >
@@ -147,7 +148,7 @@ const CustomTimes = ({
     </select>
     <span className={styles.to}>to</span>
     <select
-      value={state.cTo}
+      value={state.customTo}
       onChange={actions.changeTo}
       className={joinClassNames(helmet.timesel, styles.timeSelect)}
     >

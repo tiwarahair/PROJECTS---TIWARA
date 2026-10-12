@@ -12,13 +12,13 @@ import sheet from "./studio-sheet.module.css";
 const asStyle = (values: Record<string, string>) => values as CSSProperties;
 
 const Icon = ({
-  d,
+  iconPath,
   size = 18,
   stroke = "currentColor",
   width = "1.7",
   className,
 }: {
-  d: string;
+  iconPath: string;
   size?: number;
   stroke?: string;
   width?: string;
@@ -35,7 +35,7 @@ const Icon = ({
     strokeLinecap="round"
     strokeLinejoin="round"
   >
-    <path d={d}></path>
+    <path d={iconPath}></path>
   </svg>
 );
 
@@ -47,18 +47,18 @@ export const PastBadge = ({ view }: { view: PastSheetView }) => (
     className={styles.badge}
     // the status tone comes from PAST_TONE at runtime
     style={asStyle({
-      "--badge-bg": view.badgeBg,
+      "--badge-bg": view.badgeBackground,
       "--badge-color": view.badgeColor,
     })}
   >
-    <Icon d={view.badgeIcon} size={11} width="2.6" />
+    <Icon iconPath={view.badgeIcon} size={11} width="2.6" />
     {view.status}
   </span>
 );
 
 const RefundTag = ({ label }: { label: string }) => (
   <span className={styles.tag}>
-    <Icon d={REFUND_ICON} size={14} width="2" />
+    <Icon iconPath={REFUND_ICON} size={14} width="2" />
     {label}
   </span>
 );
@@ -95,8 +95,8 @@ export const PastSheetBody = ({ view }: { view: PastSheetView }) => (
     </div>
     <div className={styles.service}>
       <div className={styles.grow}>
-        <div className={styles.serviceName}>{view.svc}</div>
-        <div className={styles.when}>{view.when + " · " + view.time}</div>
+        <div className={styles.serviceName}>{view.service}</div>
+        <div className={styles.when}>{`${view.when} · ${view.time}`}</div>
       </div>
       <div
         className={joinClassNames(
@@ -113,26 +113,26 @@ export const PastSheetBody = ({ view }: { view: PastSheetView }) => (
           <Icon
             className={styles.alertIcon}
             stroke="var(--accent-700)"
-            d="M12 9v4M12 17h.01M10.3 3.9 1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0Z"
+            iconPath="M12 9v4M12 17h.01M10.3 3.9 1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0Z"
           />
           <div className={styles.minWidth}>
-            <div className={styles.unpaidTitle}>{view.fuTitle}</div>
-            <div className={styles.panelBody}>{view.fuBody}</div>
+            <div className={styles.unpaidTitle}>{view.feeUnpaidTitle}</div>
+            <div className={styles.panelBody}>{view.feeUnpaidBody}</div>
           </div>
         </div>
         <div className={styles.buttons}>
-          {view.fuRetryShow && (
-            <button className={styles.retry} onClick={view.fuRetry}>
-              {view.fuRetryLabel}
+          {view.feeUnpaidRetryShown && (
+            <button className={styles.retry} onClick={view.feeUnpaidRetry}>
+              {view.feeUnpaidRetryLabel}
             </button>
           )}
-          <button className={styles.whiteButton} onClick={view.fuLink}>
+          <button className={styles.whiteButton} onClick={view.feeUnpaidLink}>
             Send payment link
           </button>
-          <button className={styles.whiteButton} onClick={view.fuRecord}>
+          <button className={styles.whiteButton} onClick={view.feeUnpaidRecord}>
             Record as paid
           </button>
-          <button className={styles.waive} onClick={view.fuWaive}>
+          <button className={styles.waive} onClick={view.feeUnpaidWaive}>
             Waive fee
           </button>
         </div>
@@ -142,26 +142,26 @@ export const PastSheetBody = ({ view }: { view: PastSheetView }) => (
     {view.feeMerge && (
       <div className={styles.merge}>
         <div className={styles.minWidth}>
-          <div className={styles.mergeTitle}>{view.actTitle}</div>
+          <div className={styles.mergeTitle}>{view.actionTitle}</div>
           <div className={styles.mergeBody}>{view.feeReason}</div>
         </div>
-        <button className={styles.feeAct} onClick={view.feeAct ?? undefined}>
-          {view.feeActLabel}
+        <button className={styles.feeAct} onClick={view.feeAction ?? undefined}>
+          {view.feeActionLabel}
         </button>
       </div>
     )}
     {view.hasNote && <div className={styles.note}>{view.note}</div>}
-    {view.hasAct && (
+    {view.hasAction && (
       <div className={styles.actRow}>
-        {view.actHasText && (
+        {view.actionHasText && (
           <div className={styles.grow}>
-            <div className={styles.actTitle}>{view.actTitle}</div>
-            <div className={styles.actWhy}>{view.actWhy}</div>
+            <div className={styles.actTitle}>{view.actionTitle}</div>
+            <div className={styles.actWhy}>{view.actionReason}</div>
           </div>
         )}
-        <button className={styles.act} onClick={view.act ?? undefined}>
-          <Icon d="M3 7v6h6M21 17a9 9 0 0 0-15-6.7L3 13" size={14} />
-          {view.actLabel}
+        <button className={styles.act} onClick={view.action ?? undefined}>
+          <Icon iconPath="M3 7v6h6M21 17a9 9 0 0 0-15-6.7L3 13" size={14} />
+          {view.actionLabel}
         </button>
       </div>
     )}
@@ -171,7 +171,7 @@ export const PastSheetBody = ({ view }: { view: PastSheetView }) => (
           <Icon
             className={styles.alertIcon}
             stroke="var(--neutral-700)"
-            d="M10 13a5 5 0 0 0 7.5.5l3-3a5 5 0 0 0-7-7l-1.7 1.7M14 11a5 5 0 0 0-7.5-.5l-3 3a5 5 0 0 0 7 7l1.7-1.7"
+            iconPath="M10 13a5 5 0 0 0 7.5.5l3-3a5 5 0 0 0-7-7l-1.7 1.7M14 11a5 5 0 0 0-7.5-.5l-3 3a5 5 0 0 0 7 7l1.7-1.7"
           />
           <div className={styles.minWidth}>
             <div className={styles.awaitingTitle}>
@@ -201,18 +201,26 @@ export const PastSheetBody = ({ view }: { view: PastSheetView }) => (
         <button className={styles.linkRow} onClick={view.viewReceipt}>
           <Icon
             stroke="var(--neutral-600)"
-            d="M5 3h14v18l-3-2-2 2-2-2-2 2-2-2-3 2zM9 8h6M9 12h6"
+            iconPath="M5 3h14v18l-3-2-2 2-2-2-2 2-2-2-3 2zM9 8h6M9 12h6"
           />
           <span className={styles.linkLabel}>View receipt</span>
-          <Icon size={16} stroke="var(--neutral-500)" d="m9 18 6-6-6-6" />
+          <Icon
+            size={16}
+            stroke="var(--neutral-500)"
+            iconPath="m9 18 6-6-6-6"
+          />
         </button>
         <button className={styles.linkRow} onClick={view.resendReceipt}>
           <Icon
             stroke="var(--neutral-600)"
-            d="M22 2 11 13M22 2l-7 20-4-9-9-4z"
+            iconPath="M22 2 11 13M22 2l-7 20-4-9-9-4z"
           />
           <span className={styles.linkLabel}>Resend receipt</span>
-          <Icon size={16} stroke="var(--neutral-500)" d="m9 18 6-6-6-6" />
+          <Icon
+            size={16}
+            stroke="var(--neutral-500)"
+            iconPath="m9 18 6-6-6-6"
+          />
         </button>
       </div>
     )}
@@ -248,5 +256,6 @@ export const PastSheetFooter = ({ view }: { view: PastSheetView }) => (
 /** Receipt, resend or refund over the past sheet (prototype ckOn with pastCk). */
 export const PastCheckout = ({ studio }: { studio: StudioController }) => {
   const checkout = getPastCheckoutView(studio);
+
   return checkout ? <StudioCheckout studio={studio} {...checkout} /> : null;
 };

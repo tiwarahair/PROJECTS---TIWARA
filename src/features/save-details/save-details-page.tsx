@@ -18,28 +18,33 @@ interface SaveDetailsState {
   email: string;
   first: string;
   last: string;
-  pw: string;
+  password: string;
   show: boolean;
   shown: boolean;
   saving: boolean;
   resent: boolean;
 }
 
+const getInitialView = (
+  invite: string,
+  params: URLSearchParams,
+): SaveDetailsState["view"] => {
+  if (invite === "expired") return "expired";
+
+  return params.get("state") === "done" ? "done" : "form";
+};
+
 /** ?invite=demo|expired, ?state=done, ?email / first / last / pw seed the page (prototype constructor). */
 const getInitialState = (): SaveDetailsState => {
   const params = getSearchParams();
   const invite = params.get("invite") || "demo";
+
   return {
-    view:
-      invite === "expired"
-        ? "expired"
-        : params.get("state") === "done"
-          ? "done"
-          : "form",
+    view: getInitialView(invite, params),
     email: params.get("email") || "nia.okafor@gmail.com",
     first: params.get("first") || "Nia",
     last: params.get("last") || "Okafor",
-    pw: params.get("pw") || "",
+    password: params.get("pw") || "",
     show: !!params.get("pw"),
     shown: false,
     saving: false,
@@ -69,35 +74,43 @@ const CheckIcon = ({ size }: { size: number }) => (
 export const SaveDetailsPage = () => {
   const [state, setState] = useState(getInitialState);
   const saveTimer = useRef(0);
-  const { view, email, pw, show, shown, saving, resent } = state;
+  const { view, email, password, show, shown, saving, resent } = state;
+
   const set = (patch: Partial<SaveDetailsState>) =>
     setState((current) => ({ ...current, ...patch }));
 
   useLayoutEffect(() => {
     document.documentElement.classList.add("save-details-page");
+
     return () => document.documentElement.classList.remove("save-details-page");
   }, []);
 
   // re-check once zxcvbn has loaded
   usePasswordChecker();
+
   useEffect(() => {
     return () => window.clearTimeout(saveTimer.current);
   }, []);
 
-  const check = checkPassword(pw, {
+  const check = checkPassword(password, {
     min: CLIENT_MIN,
     first: state.first,
     last: state.last,
     email,
   });
+
   const meter = getPasswordView(check, {
     show: shown,
-    errColor: "var(--accent-700)",
+    errorColour: "var(--accent-700)",
   });
+
   const save = () => {
     if (saving) return;
-    if (!check.ok) return set({ shown: true });
+
+    if (!check.valid) return set({ shown: true });
+
     set({ saving: true, shown: false });
+
     saveTimer.current = window.setTimeout(
       () => set({ saving: false, view: "done" }),
       SAVE_MS,
@@ -141,19 +154,19 @@ export const SaveDetailsPage = () => {
                     id="sd-pw"
                     type={show ? "text" : "password"}
                     autoComplete="new-password"
-                    value={pw}
-                    onChange={(event) => set({ pw: event.target.value })}
+                    value={password}
+                    onChange={(event) => set({ password: event.target.value })}
                     onKeyDown={(event) => {
                       if (event.key === "Enter") save();
                     }}
                     onBlur={() => {
-                      if (pw) set({ shown: true });
+                      if (password) set({ shown: true });
                     }}
                     aria-describedby="sd-pw-help"
-                    aria-invalid={meter.hasErr ? "true" : "false"}
+                    aria-invalid={meter.hasError ? "true" : "false"}
                     className={joinClassNames(
                       styles.input,
-                      meter.hasErr
+                      meter.hasError
                         ? styles.inputBorderError
                         : styles.inputBorder,
                     )}
@@ -192,7 +205,7 @@ export const SaveDetailsPage = () => {
             </div>
             <h1 className={styles.title}>Your details are saved</h1>
             <p className={styles.lead}>
-              {"Log in with " + email + " next time you book."}
+              {`Log in with ${email} next time you book.`}
             </p>
             <div className={styles.doneActions}>
               <Link
@@ -211,9 +224,7 @@ export const SaveDetailsPage = () => {
           <div data-sd-in="1" data-screen-label="Link expired">
             <h1 className={styles.title}>This link has expired</h1>
             <p className={styles.lead}>
-              {"Links to save your details work for 24 hours. We'll send a new one to " +
-                email +
-                "."}
+              {`Links to save your details work for 24 hours. We'll send a new one to ${email}.`}
             </p>
             {resent && (
               <div role="status" className={styles.sentNote}>
@@ -231,7 +242,7 @@ export const SaveDetailsPage = () => {
                   <path d="M20 6 9 17l-5-5"></path>
                 </svg>
                 <span>
-                  {"Check your email. We've sent a new link to " + email + "."}
+                  {`Check your email. We've sent a new link to ${email}.`}
                 </span>
               </div>
             )}

@@ -5,7 +5,7 @@ import styles from "./terms-sheet.module.css";
 
 interface TermsSheetProps {
   kind: TermsKind;
-  desk: boolean;
+  isDesktop: boolean;
   onClose: () => void;
 }
 
@@ -16,7 +16,7 @@ const TITLES: Record<TermsKind, string> = {
 };
 
 /** Partner / Client Terms or Privacy Policy: centred dialog on desktop, bottom sheet on mobile. */
-export const TermsSheet = ({ kind, desk, onClose }: TermsSheetProps) => (
+export const TermsSheet = ({ kind, isDesktop, onClose }: TermsSheetProps) => (
   <>
     {/* prototype: the scrim closes the sheet */}
     {/* eslint-disable-next-line jsx-a11y/click-events-have-key-events, jsx-a11y/no-static-element-interactions */}
@@ -27,7 +27,7 @@ export const TermsSheet = ({ kind, desk, onClose }: TermsSheetProps) => (
       aria-labelledby="ob-terms-t"
       className={joinClassNames(
         styles.sheet,
-        desk ? styles.sheetDesk : styles.sheetMobile,
+        isDesktop ? styles.sheetDesk : styles.sheetMobile,
       )}
     >
       <div className={styles.head}>

@@ -39,41 +39,51 @@ import { getWizardView } from "./wizard-view";
 
 /** The open sheet's body and footer inside the shared frame (prototype Studio.dc.html lines 1544–3418). */
 export const StudioSheets = ({ studio }: { studio: StudioController }) => {
-  const { sheet, bkStep, pastCk } = studio.state;
+  const {
+    sheet,
+    bookingStep: bkStep,
+    pastCheckoutPanel: pastCk,
+  } = studio.state;
+
   const bookingView = sheet === "booking" ? getBookingSheetView(studio) : null;
   const pastView = sheet === "past" ? getPastSheetView(studio) : null;
   const addView = sheet === "add" ? getAddBookingView(studio) : null;
   const categoriesView = sheet === "cats" ? getCategoriesView(studio) : null;
   const addonView = sheet === "addon" ? getAddonSheetView(studio) : null;
   const wizardView = sheet === "svcwiz" ? getWizardView(studio) : null;
+
   const clientsView =
     sheet === "cliView" || sheet === "clientEdit"
       ? getClientsView(studio)
       : null;
+
+  const getCover = () => {
+    if (bookingView && bkStep === "checkout")
+      return <BookingCheckout studio={studio} view={bookingView} />;
+
+    return pastView && pastCk ? <PastCheckout studio={studio} /> : null;
+  };
+
+  const getAfter = () => {
+    if (bookingView)
+      return <BookingSheetAfter studio={studio} view={bookingView} />;
+
+    if (pastView) return <PastSheetFooter view={pastView} />;
+
+    if (clientsView && sheet === "clientEdit")
+      return <ClientEditFooter view={clientsView} />;
+
+    if (wizardView) return <WizardFooter view={wizardView} />;
+
+    return addonView ? <AddonSheetFooter view={addonView} /> : null;
+  };
+
   return (
     <SheetFrame
       studio={studio}
-      cover={
-        bookingView && bkStep === "checkout" ? (
-          <BookingCheckout studio={studio} view={bookingView} />
-        ) : pastView && pastCk ? (
-          <PastCheckout studio={studio} />
-        ) : null
-      }
+      cover={getCover()}
       headerBadge={pastView && <PastBadge view={pastView} />}
-      after={
-        bookingView ? (
-          <BookingSheetAfter studio={studio} view={bookingView} />
-        ) : pastView ? (
-          <PastSheetFooter view={pastView} />
-        ) : clientsView && sheet === "clientEdit" ? (
-          <ClientEditFooter view={clientsView} />
-        ) : wizardView ? (
-          <WizardFooter view={wizardView} />
-        ) : addonView ? (
-          <AddonSheetFooter view={addonView} />
-        ) : null
-      }
+      after={getAfter()}
     >
       {bookingView && <BookingSheetBody studio={studio} view={bookingView} />}
       {pastView && <PastSheetBody view={pastView} />}

@@ -25,21 +25,21 @@ export const ServicesSection = () => (
         you.
       </p>
       <div className={styles.list}>
-        {serviceGroups.map(({ id, name, desc, img, slug }, index) => (
+        {serviceGroups.map(({ id, name, description, image, slug }, index) => (
           <Link
             key={id}
-            to={"/search?group=" + slug}
+            to={`/search?group=${slug}`}
             data-rv=""
             className={joinClassNames(page.svcrow, styles.row)}
           >
             <div className={joinClassNames(page.svcrowInner, styles.rowInner)}>
-              <span className={styles.number}>{"0" + (index + 1)}</span>
+              <span className={styles.number}>{`0${index + 1}`}</span>
               <div>
                 <span className={joinClassNames(page.svcname, styles.name)}>
                   {name}
                 </span>
                 <div className={joinClassNames(page.svcdesc, styles.desc)}>
-                  {desc}
+                  {description}
                 </div>
               </div>
               <span className={joinClassNames(page.svccount, styles.count)}>
@@ -58,10 +58,10 @@ export const ServicesSection = () => (
                 </svg>
               </span>
             </div>
-            {img && (
+            {image && (
               <img
                 loading="lazy"
-                src={getAssetUrl(img)}
+                src={getAssetUrl(image)}
                 alt={name}
                 className={joinClassNames(page.svcmedia, styles.media)}
               />

@@ -16,19 +16,22 @@ import { useSearch } from "./use-search";
 export const SearchPage = () => {
   const search = useSearch();
   const { state, place, selection, cards, suggestions, actions } = search;
+
   useSearchMemory();
 
   // page-wide helmet rules apply while Search is mounted
   useLayoutEffect(() => {
     document.documentElement.classList.add("search-page");
+
     return () => document.documentElement.classList.remove("search-page");
   }, []);
 
   const locationName = place.current ? "you" : place.name;
+  const serviceText = selection.name ? ` for ${selection.name}` : "";
 
   return (
     <div data-screen-label="Search" className={styles.page}>
-      {!state.mob && (state.whatOpen || state.whereOpen) && (
+      {!state.mobileView && (state.whatOpen || state.whereOpen) && (
         <div
           onClick={actions.closeDropdowns}
           className={styles.dropdownScrim}
@@ -36,7 +39,7 @@ export const SearchPage = () => {
       )}
       <SearchNav search={search} />
       {state.dateOpen && <DatePopover search={search} />}
-      {!!state.mob && <MobileSearchSheet search={search} />}
+      {!!state.mobileView && <MobileSearchSheet search={search} />}
       <FilterBar search={search} />
 
       <div className={styles.results}>
@@ -80,11 +83,7 @@ export const SearchPage = () => {
           <div className={styles.empty}>
             <div className={styles.emptyTitle}>No stylists match that yet</div>
             <div className={styles.emptyText}>
-              {"No stylists" +
-                (selection.name ? " for " + selection.name : "") +
-                " near " +
-                locationName +
-                " match these filters."}
+              {`No stylists${serviceText} near ${locationName} match these filters.`}
             </div>
             <div className={styles.emptyActions}>
               {suggestions.map(({ key, label, pick }) => (
@@ -100,7 +99,7 @@ export const SearchPage = () => {
         )}
       </div>
 
-      {state.fOpen && <FiltersSheet search={search} />}
+      {state.filtersOpen && <FiltersSheet search={search} />}
       <WelcomeToast />
       <FavHost />
     </div>

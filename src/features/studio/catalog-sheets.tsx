@@ -1,7 +1,10 @@
 import type { CSSProperties } from "react";
 import { SearchSelect } from "../../components/search-select/search-select";
 import { joinClassNames } from "../../utils/class-names";
-import { DUR_HOUR_OPTIONS, DUR_MINUTE_OPTIONS } from "./catalog-sheets-view";
+import {
+  DURATION_HOUR_OPTIONS,
+  DURATION_MINUTE_OPTIONS,
+} from "./catalog-sheets-view";
 import type {
   AddonSheetView,
   CategoriesView,
@@ -12,7 +15,7 @@ import styles from "./catalog-sheets.module.css";
 
 const asStyle = (values: Record<string, string>) => values as CSSProperties;
 
-const Chevron = ({ d }: { d: string }) => (
+const Chevron = ({ iconPath }: { iconPath: string }) => (
   <svg
     width="16"
     height="16"
@@ -23,7 +26,7 @@ const Chevron = ({ d }: { d: string }) => (
     strokeLinecap="round"
     strokeLinejoin="round"
   >
-    <path d={d}></path>
+    <path d={iconPath}></path>
   </svg>
 );
 
@@ -34,7 +37,7 @@ export const Swatches = ({ swatches }: { swatches: Swatch[] }) => (
     role="radiogroup"
     aria-label="Category colour"
   >
-    {swatches.map(({ key, name, bg, isOn, ring, pick }) => (
+    {swatches.map(({ key, name, background, isOn, ring, pick }) => (
       <button
         key={key}
         className={styles.swatch}
@@ -45,7 +48,7 @@ export const Swatches = ({ swatches }: { swatches: Swatch[] }) => (
         title={name}
         onClick={pick}
         // runtime: each swatch is its own colour, ringed when picked
-        style={asStyle({ "--swatch-bg": bg, "--swatch-ring": ring })}
+        style={asStyle({ "--swatch-bg": background, "--swatch-ring": ring })}
       >
         {isOn && (
           <svg
@@ -97,26 +100,26 @@ export const CategoriesSheet = ({
               <button
                 className={joinClassNames(
                   styles.iconButton,
-                  row.isUpOff && styles.iconOff,
+                  row.isMoveUpDisabled && styles.iconOff,
                 )}
                 type="button"
-                onClick={row.up}
-                disabled={row.isUpOff}
-                aria-label={"Move " + row.name + " up"}
+                onClick={row.moveUp}
+                disabled={row.isMoveUpDisabled}
+                aria-label={`Move ${row.name} up`}
               >
-                <Chevron d="m6 15 6-6 6 6" />
+                <Chevron iconPath="m6 15 6-6 6 6" />
               </button>
               <button
                 className={joinClassNames(
                   styles.iconButton,
-                  row.isDownOff && styles.iconOff,
+                  row.isMoveDownDisabled && styles.iconOff,
                 )}
                 type="button"
                 onClick={row.down}
-                disabled={row.isDownOff}
-                aria-label={"Move " + row.name + " down"}
+                disabled={row.isMoveDownDisabled}
+                aria-label={`Move ${row.name} down`}
               >
-                <Chevron d="m6 9 6 6 6-6" />
+                <Chevron iconPath="m6 9 6 6 6-6" />
               </button>
               <button className={styles.edit} type="button" onClick={row.edit}>
                 Edit
@@ -125,7 +128,7 @@ export const CategoriesSheet = ({
                 className={styles.delete}
                 type="button"
                 onClick={row.remove}
-                aria-label={"Delete " + row.name}
+                aria-label={`Delete ${row.name}`}
               >
                 <svg
                   width="16"
@@ -239,7 +242,8 @@ export const CategoriesSheet = ({
 
 /** Create or edit an add-on (prototype shAddon). */
 export const AddonSheet = ({ view }: { view: AddonSheetView }) => {
-  const { newCat } = view;
+  const { newCategory } = view;
+
   return (
     <div className={styles.addon}>
       <label className={styles.block}>
@@ -256,45 +260,45 @@ export const AddonSheet = ({ view }: { view: AddonSheetView }) => {
           Category <span className={styles.optional}>(optional)</span>
         </span>
         <SearchSelect
-          options={view.catOptions}
-          value={view.catValue}
+          options={view.categoryOptions}
+          value={view.categoryValue}
           placeholder="No category"
-          onChange={view.pickCat}
+          onChange={view.pickCategory}
         />
-        {newCat && (
+        {newCategory && (
           <div className={styles.newCat}>
             <label className={styles.field}>
               <span className={styles.label135Strong}>New category</span>
               <input
                 className={joinClassNames(
                   styles.nameInput,
-                  !!newCat.err && styles.nameInputError,
+                  !!newCategory.error && styles.nameInputError,
                 )}
-                value={newCat.name}
-                onChange={view.onNewCatName}
+                value={newCategory.name}
+                onChange={view.onNewCategoryName}
                 maxLength={40}
                 placeholder="e.g. Kids"
-                aria-invalid={newCat.err ? "true" : "false"}
+                aria-invalid={newCategory.error ? "true" : "false"}
               />
-              {!!newCat.err && (
+              {!!newCategory.error && (
                 <span className={styles.error} role="alert">
-                  {newCat.err}
+                  {newCategory.error}
                 </span>
               )}
             </label>
-            <Swatches swatches={view.newCatSwatches} />
+            <Swatches swatches={view.newCategorySwatches} />
             <div className={styles.buttons}>
               <button
                 className={styles.smallDark}
                 type="button"
-                onClick={view.addNewCat}
+                onClick={view.addNewCategory}
               >
                 Add category
               </button>
               <button
                 className={styles.smallCancel}
                 type="button"
-                onClick={view.cancelNewCat}
+                onClick={view.cancelNewCategory}
               >
                 Cancel
               </button>
@@ -326,8 +330,8 @@ export const AddonSheet = ({ view }: { view: AddonSheetView }) => {
               onChange={view.onHour}
               aria-label="Hours"
             >
-              {DUR_HOUR_OPTIONS.map(({ v, label }) => (
-                <option key={v} value={v}>
+              {DURATION_HOUR_OPTIONS.map(({ value, label }) => (
+                <option key={value} value={value}>
                   {label}
                 </option>
               ))}
@@ -338,8 +342,8 @@ export const AddonSheet = ({ view }: { view: AddonSheetView }) => {
               onChange={view.onMinute}
               aria-label="Minutes"
             >
-              {DUR_MINUTE_OPTIONS.map(({ v, label }) => (
-                <option key={v} value={v}>
+              {DURATION_MINUTE_OPTIONS.map(({ value, label }) => (
+                <option key={value} value={value}>
                   {label}
                 </option>
               ))}

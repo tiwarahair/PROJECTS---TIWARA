@@ -4,9 +4,13 @@ import type { SearchSelectOption } from "../../components/search-select/search-s
 import { serviceTypes } from "../../data";
 import type { ServiceType } from "../../types/service-type";
 import { getSwatches } from "./catalog-sheets-view";
-import { NO_CAT_TONE, TAXONOMY } from "./studio-data";
-import { fmtDur, fmtMin } from "./studio-format";
-import { getCatById, getCatsSorted, getNextCatColour } from "./studio-model";
+import { NO_CATEGORY_TONE, TAXONOMY } from "./studio-data";
+import { formatDuration, formatMinutes } from "./studio-format";
+import {
+  getCategoryById,
+  getSortedCategories,
+  getNextCategoryColour,
+} from "./studio-model";
 import { getTaxonomy, makeVariationRows } from "./studio-service-actions";
 import type { WizardDraft } from "./studio-types";
 import type { StudioController } from "./use-studio";
@@ -20,32 +24,38 @@ import {
 } from "./wizard-options-view";
 
 const STEPS = [2, 3, 4];
+
 const STEP_NAMES: Record<number, string> = {
   1: "Select a service",
   2: "Details",
   3: "Pricing",
   4: "Add-ons",
 };
-const SUB_TIP =
+
+const SUBCATEGORY_TIP =
   "Select the service type that best describes this service. This helps clients discover your service";
 
 const getHourLabel = (hours: string | number) =>
   hours + (Number(hours) === 1 ? " hr" : " hrs");
+
 const getMinuteLabel = (minutes: string | number) =>
   minutes + (Number(minutes) === 1 ? " min" : " mins");
 
 export const getWizardView = (studio: StudioController) => {
   const { state, setState, isWide, actions, serviceActions, context } = studio;
-  const wizard = state.sheet === "svcwiz" ? state.wiz : null;
+  const wizard = state.sheet === "svcwiz" ? state.wizard : null;
+
   if (!wizard) return null;
-  const { setWiz, setDraft, addCategory, pickSugg } = serviceActions;
+
+  const { setWizard, setDraft, addCategory, pickSuggestion } = serviceActions;
   const { draft } = wizard;
-  const group = draft.cat ? getTaxonomy(draft.cat) : null;
+  const group = draft.taxonomyId ? getTaxonomy(draft.taxonomyId) : null;
   const stepIndex = STEPS.indexOf(wizard.step);
   const base = getWizardBase(draft);
-  const isStep3Ok = base.basePrice > 0 && base.totalMinutes > 0;
+  const isStep3Valid = base.basePrice > 0 && base.totalMinutes > 0;
   const query = (wizard.search || "").toLowerCase();
-  const catFilter = wizard.catF || "all";
+  const categoryFilter = wizard.categoryFilter || "all";
+
   const isTypeHit = ({ name, synonyms }: ServiceType) =>
     !query ||
     name.toLowerCase().includes(query) ||
@@ -54,13 +64,15 @@ export const getWizardView = (studio: StudioController) => {
         word.toLowerCase().includes(query) ||
         query.includes(word.toLowerCase()),
     );
+
   const applyType = (type: ServiceType, extra: Partial<WizardDraft> = {}) => {
     const typeGroup = getTaxonomy(type.groupId);
-    const isSame = draft.cat === type.groupId;
+    const isSame = draft.taxonomyId === type.groupId;
+
     return {
       ...draft,
-      cat: type.groupId,
-      sub: type.name,
+      taxonomyId: type.groupId,
+      subcategory: type.name,
       typeId: type.id,
       ...(isSame
         ? {}
@@ -76,12 +88,15 @@ export const getWizardView = (studio: StudioController) => {
       ...extra,
     };
   };
+
   const catalogue = wizard.pickGroup
     ? []
-    : TAXONOMY.filter(({ id }) => catFilter === "all" || id === catFilter)
+    : TAXONOMY.filter(
+        ({ id }) => categoryFilter === "all" || id === categoryFilter,
+      )
         .map(({ id, name, types }) => ({
           key: id,
-          cat: name,
+          category: name,
           items: types
             .filter(
               (type) =>
@@ -92,12 +107,14 @@ export const getWizardView = (studio: StudioController) => {
             .map((type) => ({
               key: type.id,
               name: type.name,
-              pick: () => pickSugg(type),
+              pick: () => pickSuggestion(type),
             })),
         }))
         .filter(({ items }) => items.length);
-  const currentCat = getCatById(state, draft.categoryId);
+
+  const currentCategory = getCategoryById(state, draft.categoryId);
   const typeOptions: SearchSelectOption[] = [];
+
   TAXONOMY.forEach(({ name, types }) =>
     types.forEach((type) =>
       typeOptions.push({
@@ -107,54 +124,65 @@ export const getWizardView = (studio: StudioController) => {
       }),
     ),
   );
+
   const currentType = draft.typeId
     ? serviceTypes.find(({ id }) => id === draft.typeId)
     : null;
-  const newCat = wizard.newCat || null;
+
+  const newCategory = wizard.newCategory || null;
   const sizes = draft.sizesOn ? draft.sizes || [] : [];
   const lengths = draft.lengthsOn ? draft.lengths || [] : [];
+
   const isVariationBad = sizes.concat(lengths).some((row) => {
     const errors = getVariationErrors(row, base);
-    return errors.pErr || errors.tErr;
+
+    return errors.priceError || errors.timeError;
   });
+
   const review = getReview(draft, base);
+
   const isReviewReady =
     review.sizes.length + review.lengths.length > 0 &&
-    isStep3Ok &&
+    isStep3Valid &&
     !isVariationBad;
 
   const save = () => {
     const service = {
-      id: wizard.editId || "svc" + Date.now(),
-      cat: draft.cat,
-      sub: draft.sub || "",
+      id: wizard.editId || `svc${Date.now()}`,
+      taxonomyId: draft.taxonomyId,
+      subcategory: draft.subcategory || "",
       typeId: draft.typeId || null,
-      categoryId: getCatById(state, draft.categoryId) ? draft.categoryId : null,
+      categoryId: getCategoryById(state, draft.categoryId)
+        ? draft.categoryId
+        : null,
       own: (draft.own || []).map(({ name, options }) => ({
         name,
         options: options.map((option) => ({ ...option })),
       })),
       name: draft.name.trim(),
-      desc: draft.desc,
+      description: draft.description,
       price: base.basePrice,
-      durH: base.baseHours,
-      durM: base.baseMinutes,
-      dur: fmtDur(base.baseHours, base.baseMinutes),
+      durationHours: base.baseHours,
+      durationMinutes: base.baseMinutes,
+      duration: formatDuration(base.baseHours, base.baseMinutes),
       extraCustom: String(draft.extra || "") !== "",
       extra:
         String(draft.extra || "") === ""
           ? state.rules.extra || 0
           : parseInt(draft.extra) || 0,
-      st: draft.st && draft.st !== "draft" ? draft.st : "active",
+      status:
+        draft.status && draft.status !== "draft" ? draft.status : "active",
       sizesOn: draft.sizesOn,
       lengthsOn: draft.lengthsOn,
       sizes: draft.sizes,
       lengths: draft.lengths,
       addons: draft.addons,
     };
-    const keepNew = (wizard.pendAddons || []).filter(({ id }) =>
-      draft.addons.some(({ aid }) => aid === id),
+
+    const keepNew = (wizard.pendingAddons || []).filter(({ id }) =>
+      draft.addons.some(({ addonId }) => addonId === id),
     );
+
     setState({
       services: wizard.editId
         ? state.services.map((item) =>
@@ -162,59 +190,90 @@ export const getWizardView = (studio: StudioController) => {
           )
         : state.services.concat([service]),
       addons: state.addons.concat(keepNew),
-      svcTab: "services",
+      servicesTab: "services",
     });
-    actions.toastMsg(
+
+    actions.showToast(
       wizard.mode === "add"
-        ? service.name + " added to your services"
-        : service.name + " updated",
+        ? `${service.name} added to your services`
+        : `${service.name} updated`,
     );
+
     actions.closeSheet();
     actions.checkDone();
   };
 
-  const isDisabled =
-    wizard.mode === "edit"
-      ? !(
-          draft.name.trim() &&
-          draft.cat &&
-          draft.typeId &&
-          isStep3Ok &&
-          !isVariationBad
-        )
-      : wizard.step === 1
-        ? true
-        : wizard.step === 2
-          ? !(draft.name.trim() && draft.cat && draft.typeId)
-          : wizard.step === 3 && !wizard.review
-            ? !(isStep3Ok && !isVariationBad)
-            : false;
+  const getIsDisabled = () => {
+    if (wizard.mode === "edit")
+      return !(
+        draft.name.trim() &&
+        draft.taxonomyId &&
+        draft.typeId &&
+        isStep3Valid &&
+        !isVariationBad
+      );
+
+    if (wizard.step === 1) return true;
+
+    if (wizard.step === 2)
+      return !(draft.name.trim() && draft.taxonomyId && draft.typeId);
+
+    if (wizard.step === 3 && !wizard.review)
+      return !(isStep3Valid && !isVariationBad);
+
+    return false;
+  };
+
+  const isDisabled = getIsDisabled();
 
   const flash = wizard.flash || {};
-  const durHourValue = String(draft.durH == null ? "" : draft.durH);
-  const durMinuteValue = String(draft.durM == null ? "" : draft.durM);
-  const hourOptions = Array.from({ length: 13 }, (_, hour) => ({
-    v: String(hour),
+
+  const durationHourValue = String(
+    draft.durationHours == null ? "" : draft.durationHours,
+  );
+
+  const durationMinuteValue = String(
+    draft.durationMinutes == null ? "" : draft.durationMinutes,
+  );
+
+  const hourOptions = Array.from({ length: 13 }, (_slot, hour) => ({
+    value: String(hour),
     label: getHourLabel(hour),
   }));
-  const minuteOptions = Array.from({ length: 12 }, (_, index) => ({
-    v: String(index * 5),
+
+  const minuteOptions = Array.from({ length: 12 }, (_slot, index) => ({
+    value: String(index * 5),
     label: getMinuteLabel(index * 5),
   }));
-  if (durHourValue !== "" && !hourOptions.some(({ v }) => v === durHourValue))
-    hourOptions.unshift({ v: durHourValue, label: getHourLabel(durHourValue) });
+
   if (
-    durMinuteValue !== "" &&
-    !minuteOptions.some(({ v }) => v === durMinuteValue)
+    durationHourValue !== "" &&
+    !hourOptions.some(({ value }) => value === durationHourValue)
+  )
+    hourOptions.unshift({
+      value: durationHourValue,
+      label: getHourLabel(durationHourValue),
+    });
+
+  if (
+    durationMinuteValue !== "" &&
+    !minuteOptions.some(({ value }) => value === durationMinuteValue)
   )
     minuteOptions.push({
-      v: durMinuteValue,
-      label: getMinuteLabel(durMinuteValue),
+      value: durationMinuteValue,
+      label: getMinuteLabel(durationMinuteValue),
     });
+
   const defaultExtra = state.rules.extra || 0;
   const rawExtra = draft.extra == null ? "" : String(draft.extra);
   const isExtraTyped = rawExtra !== "";
   const extraMinutes = [0, 5, 10, 15, 20, 25, 30];
+
+  const getCta = () => {
+    if (wizard.mode === "edit") return "Save service";
+
+    return stepIndex === STEPS.length - 1 ? "Add service" : "Continue";
+  };
 
   return {
     wizard,
@@ -232,12 +291,12 @@ export const getWizardView = (studio: StudioController) => {
       key: step,
       label,
       isOn: wizard.step === step,
-      pick: () => setWiz({ step, review: false }),
+      pick: () => setWizard({ step, review: false }),
     })),
     isPricing: wizard.step === 3 && !wizard.review,
     isReview: wizard.step === 3 && wizard.review,
     dots: STEPS.map((step, index) => ({ key: step, isOn: index <= stepIndex })),
-    stepLabel: "Step " + (stepIndex + 1) + " of " + STEPS.length + " · ",
+    stepLabel: `Step ${stepIndex + 1} of ${STEPS.length} · `,
     stepName:
       wizard.step === 3 && wizard.review
         ? "Review prices"
@@ -245,113 +304,135 @@ export const getWizardView = (studio: StudioController) => {
     // suggestions dialog
     search: wizard.search,
     onSearch: (event: ChangeEvent<HTMLInputElement>) =>
-      setWiz({ search: event.target.value }),
+      setWizard({ search: event.target.value }),
     isSearching: !!query,
-    clearSearch: () => setWiz({ search: "" }),
-    catChips: [{ id: "all", label: "All" }]
+    clearSearch: () => setWizard({ search: "" }),
+    categoryChips: [{ id: "all", label: "All" }]
       .concat(TAXONOMY.map(({ id, name }) => ({ id, label: name })))
       .map(({ id, label }) => ({
         key: id,
         label,
-        isOn: catFilter === id,
-        pick: () => setWiz({ catF: id }),
+        isOn: categoryFilter === id,
+        pick: () => setWizard({ categoryFilter: id }),
       })),
     catalogue,
     hasNoResults: catalogue.length === 0,
-    isSuggOpen: !!wizard.sugg,
-    openSugg: () =>
-      setWiz({ sugg: true, search: "", catF: "all", pickGroup: false }),
-    closeSugg: () => setWiz({ sugg: false }),
-    suggKey: (event: { key: string; stopPropagation: () => void }) => {
+    isSuggestionsOpen: !!wizard.suggestionsOpen,
+    openSuggestions: () =>
+      setWizard({
+        suggestionsOpen: true,
+        search: "",
+        categoryFilter: "all",
+        pickGroup: false,
+      }),
+    closeSuggestions: () => setWizard({ suggestionsOpen: false }),
+    suggestionKey: (event: { key: string; stopPropagation: () => void }) => {
       if (event.key === "Escape") {
         event.stopPropagation();
-        setWiz({ sugg: false });
+        setWizard({ suggestionsOpen: false });
       }
     },
     flash: {
       name: !!flash.name,
-      desc: !!flash.desc,
+      description: !!flash.description,
       type: !!flash.type,
       price: !!flash.price,
-      opts: !!flash.opts,
+      options: !!flash.options,
     },
     // details
-    catOptions: (
-      [{ label: "No category", dot: NO_CAT_TONE }] as SearchSelectOption[]
+    categoryOptions: (
+      [{ label: "No category", dot: NO_CATEGORY_TONE }] as SearchSelectOption[]
     )
       .concat(
-        getCatsSorted(state).map(({ name, colour }) => ({
+        getSortedCategories(state).map(({ name, colour }) => ({
           label: name,
           dot: colour,
         })),
       )
       .concat([{ label: "+ New category", action: true }]),
-    catValue: currentCat ? currentCat.name : "No category",
-    pickCat: (label: string) => {
+    categoryValue: currentCategory ? currentCategory.name : "No category",
+    pickCategory: (label: string) => {
       if (label === "+ New category") {
-        setWiz({
-          newCat: {
+        setWizard({
+          newCategory: {
             name: "",
-            colour: getNextCatColour(state.categories),
-            err: "",
+            colour: getNextCategoryColour(state.categories),
+            error: "",
           },
         });
+
         return;
       }
-      const category = getCatsSorted(state).find(({ name }) => name === label);
+
+      const category = getSortedCategories(state).find(
+        ({ name }) => name === label,
+      );
+
       setDraft({ categoryId: category ? category.id : null });
     },
-    newCat,
-    onNewCatName: (event: ChangeEvent<HTMLInputElement>) =>
-      newCat &&
-      setWiz({
-        newCat: { ...newCat, name: event.target.value.slice(0, 40), err: "" },
+    newCategory,
+    onNewCategoryName: (event: ChangeEvent<HTMLInputElement>) =>
+      newCategory &&
+      setWizard({
+        newCategory: {
+          ...newCategory,
+          name: event.target.value.slice(0, 40),
+          error: "",
+        },
       }),
-    newCatSwatches: newCat
-      ? getSwatches(newCat.colour, (value) =>
-          setWiz({ newCat: { ...newCat, colour: value } }),
+    newCategorySwatches: newCategory
+      ? getSwatches(newCategory.colour, (value) =>
+          setWizard({ newCategory: { ...newCategory, colour: value } }),
         )
       : [],
-    addNewCat: () => {
-      if (!newCat) return;
-      const result = addCategory(newCat.name, newCat.colour);
-      if (result.err !== undefined) {
-        setWiz({ newCat: { ...newCat, err: result.err } });
+    addNewCategory: () => {
+      if (!newCategory) return;
+
+      const result = addCategory(newCategory.name, newCategory.colour);
+
+      if (result.error !== undefined) {
+        setWizard({ newCategory: { ...newCategory, error: result.error } });
+
         return;
       }
+
       window.setTimeout(() => {
-        const current = context.getState().wiz;
+        const current = context.getState().wizard;
+
         if (current)
           setState({
-            wiz: {
+            wizard: {
               ...current,
-              newCat: null,
+              newCategory: null,
               draft: { ...current.draft, categoryId: result.id },
             },
           });
       }, 0);
     },
-    cancelNewCat: () => setWiz({ newCat: null }),
+    cancelNewCategory: () => setWizard({ newCategory: null }),
     typeOptions,
     typeValue: currentType ? currentType.name : "",
     pickType: (label: string) => {
       const type = serviceTypes.find(({ name }) => name === label);
+
       if (type) setDraft(applyType(type));
     },
-    isSubTipOpen: !!wizard.subTip,
-    toggleSubTip: () => {
-      if (actions.isTouch()) setWiz({ subTip: !wizard.subTip });
+    isSubcategoryTipOpen: !!wizard.subcategoryTipOpen,
+    toggleSubcategoryTip: () => {
+      if (actions.isTouch())
+        setWizard({ subcategoryTipOpen: !wizard.subcategoryTipOpen });
     },
-    subTipIn: (event: MouseEvent | FocusEvent) =>
+    showSubcategoryTip: (event: MouseEvent | FocusEvent) =>
       actions.tipShow(
         event as unknown as { currentTarget: Element },
         "subtype",
-        SUB_TIP,
+        SUBCATEGORY_TIP,
         true,
       ),
-    tipOut: () => actions.tipHide(),
+    hideSubcategoryTip: () => actions.tipHide(),
     selectAll: (event: FocusEvent<HTMLInputElement>) => {
       const target = event.target;
+
       window.setTimeout(() => {
         try {
           target.select();
@@ -361,22 +442,21 @@ export const getWizardView = (studio: StudioController) => {
       }, 0);
     },
     pickImages: () =>
-      actions.toastMsg("Image upload is not part of this prototype"),
+      actions.showToast("Image upload is not part of this prototype"),
     onName: (event: ChangeEvent<HTMLInputElement>) =>
       setDraft({ name: event.target.value }),
-    onDesc: (event: ChangeEvent<HTMLTextAreaElement>) =>
-      setDraft({ desc: event.target.value }),
+    onDescription: (event: ChangeEvent<HTMLTextAreaElement>) =>
+      setDraft({ description: event.target.value }),
     // pricing
     onPrice: (event: ChangeEvent<HTMLInputElement>) =>
       setDraft({ price: event.target.value }),
-    onDurHours: (event: ChangeEvent<HTMLSelectElement>) =>
-      setDraft({ durH: event.target.value }),
-    onDurMinutes: (event: ChangeEvent<HTMLSelectElement>) =>
-      setDraft({ durM: event.target.value }),
-    priceWidth:
-      String(draft.price == null ? "" : draft.price).length * 8 + 14 + "px",
-    durHourValue: durHourValue === "" ? "0" : durHourValue,
-    durMinuteValue: durMinuteValue === "" ? "0" : durMinuteValue,
+    onDurationHours: (event: ChangeEvent<HTMLSelectElement>) =>
+      setDraft({ durationHours: event.target.value }),
+    onDurationMinutes: (event: ChangeEvent<HTMLSelectElement>) =>
+      setDraft({ durationMinutes: event.target.value }),
+    priceWidth: `${String(draft.price == null ? "" : draft.price).length * 8 + 14}px`,
+    durationHourValue: durationHourValue === "" ? "0" : durationHourValue,
+    durationMinuteValue: durationMinuteValue === "" ? "0" : durationMinuteValue,
     hourOptions,
     minuteOptions,
     extraValue: rawExtra,
@@ -385,45 +465,54 @@ export const getWizardView = (studio: StudioController) => {
     isExtraTyped,
     extraOptions: [
       {
-        v: "",
-        label: defaultExtra
-          ? "Default (" + defaultExtra + " min)"
-          : "None selected",
+        value: "",
+        label: defaultExtra ? `Default (${defaultExtra} min)` : "None selected",
       },
     ].concat(
       extraMinutes.map((minutes) => ({
-        v: String(minutes),
-        label: minutes + " min",
+        value: String(minutes),
+        label: `${minutes} min`,
       })),
     ),
     extraOptionsShort: [
-      { v: "", label: defaultExtra ? "+" + defaultExtra + "m" : "+ min" },
+      { value: "", label: defaultExtra ? `+${defaultExtra}m` : "+ min" },
     ].concat(
       extraMinutes.map((minutes) => ({
-        v: String(minutes),
-        label: "+" + minutes + "m",
+        value: String(minutes),
+        label: `+${minutes}m`,
       })),
     ),
     isExtraOverride: !!defaultExtra && isExtraTyped,
-    extraHelp: "Overrides your default (" + fmtMin(defaultExtra) + ").",
+    extraHelp: `Overrides your default (${formatMinutes(defaultExtra)}).`,
     hasSizes: !!group?.sizes,
     hasLengths: !!group?.lengths,
     hasPlatform: !!(group && (group.sizes || group.lengths)),
     isPricingCollapsed: !!(draft.sizesOn || draft.lengthsOn),
     toggleSizes: () => {
       const isOn = !draft.sizesOn;
-      let rows =
-        draft.sizes && draft.sizes.length
-          ? draft.sizes
-          : group?.sizes
-            ? makeVariationRows(group.sizes)
-            : [];
+
+      const getBaseRows = () => {
+        if (draft.sizes && draft.sizes.length) return draft.sizes;
+
+        return group?.sizes ? makeVariationRows(group.sizes) : [];
+      };
+
+      let rows = getBaseRows();
+
       if (isOn && rows.length && !rows.some(({ on }) => on))
         rows = rows.map((row, index) =>
           index === 0
-            ? { ...row, on: true, neg: false, dp: "0", dh: "0", dm: "0" }
+            ? {
+                ...row,
+                on: true,
+                negative: false,
+                priceDelta: "0",
+                hoursDelta: "0",
+                minutesDelta: "0",
+              }
             : row,
         );
+
       setDraft({ sizesOn: isOn, sizes: rows });
     },
     toggleLengths: () =>
@@ -433,14 +522,14 @@ export const getWizardView = (studio: StudioController) => {
           ? { lengths: makeVariationRows(group.lengths) }
           : {}),
       }),
-    sizeHead: draft.cat === "locs" ? "Size" : "Size / thickness",
+    sizeHead: draft.taxonomyId === "locs" ? "Size" : "Size / thickness",
     sizeRows: getVariationRows(studio, "sizes", draft.sizes || [], base),
     lengthRows: getVariationRows(studio, "lengths", draft.lengths || [], base),
     own: getOwnEditor(studio, wizard, base),
     isReviewShown: !!(draft.sizesOn || draft.lengthsOn),
     isReviewReady,
     openReview: () => {
-      if (isReviewReady) setWiz({ review: true });
+      if (isReviewReady) setWizard({ review: true });
     },
     review,
     // add-ons
@@ -449,35 +538,39 @@ export const getWizardView = (studio: StudioController) => {
     canBack: wizard.review || (wizard.mode === "add" && stepIndex > 0),
     back: () => {
       if (wizard.review) {
-        setWiz({ review: false });
+        setWizard({ review: false });
+
         return;
       }
+
       if (stepIndex > 0)
-        setWiz({ step: STEPS[stepIndex - 1] as number, review: false });
+        setWizard({ step: STEPS[stepIndex - 1] as number, review: false });
     },
     next: () => {
       if (isDisabled) return;
+
       if (wizard.mode === "edit") {
         save();
+
         return;
       }
+
       if (wizard.review) {
-        setWiz({ review: false, step: 4 });
+        setWizard({ review: false, step: 4 });
+
         return;
       }
+
       if (stepIndex < STEPS.length - 1) {
-        setWiz({ step: STEPS[stepIndex + 1] as number });
+        setWizard({ step: STEPS[stepIndex + 1] as number });
+
         return;
       }
+
       save();
     },
     isDisabled,
-    cta:
-      wizard.mode === "edit"
-        ? "Save service"
-        : stepIndex === STEPS.length - 1
-          ? "Add service"
-          : "Continue",
+    cta: getCta(),
     isWide,
   };
 };

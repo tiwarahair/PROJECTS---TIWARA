@@ -44,6 +44,7 @@ export function installFakeIntersectionObserver(): FakeIntersectionObserver {
   function fire(isIntersecting: boolean) {
     for (const callback of [...callbacks]) {
       const entry = { isIntersecting } as IntersectionObserverEntry;
+
       callback([entry], {} as IntersectionObserver);
     }
   }

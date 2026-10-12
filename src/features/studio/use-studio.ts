@@ -3,7 +3,7 @@ import { useMediaQuery } from "../../hooks/use-media-query";
 import { createStudioActions } from "./studio-actions";
 import type { StudioContext } from "./studio-actions";
 import {
-  CAT_COLOURS,
+  CATEGORY_COLOURS,
   TAXONOMY,
   getInitialStudioState,
   getSeedPast,
@@ -36,6 +36,7 @@ const readWelcome = (): WelcomeNote | null => {
     const note = JSON.parse(
       localStorage.getItem("tw_welcome") || "null",
     ) as WelcomeNote | null;
+
     return note && Date.now() - note.at < 864e5 ? note : null;
   } catch {
     return null;
@@ -48,49 +49,64 @@ const seedNewAccount = (
   welcome: WelcomeNote | null,
 ): StudioState => {
   let picked = ["braids"];
+
   if (welcome && Array.isArray(welcome.cats) && welcome.cats.length)
     picked = welcome.cats.map((category) =>
       category === "weave" ? "weaves" : category,
     );
+
   const categories: StudioCategory[] = [];
+
   picked.forEach((groupId) => {
     const group = TAXONOMY.find(({ id }) => id === groupId);
+
     if (group)
       categories.push({
-        id: "c" + (categories.length + 1),
+        id: `c${categories.length + 1}`,
         name: group.name,
         sort: categories.length,
         colour:
-          CAT_COLOURS[categories.length % CAT_COLOURS.length]?.value ?? "",
+          CATEGORY_COLOURS[categories.length % CATEGORY_COLOURS.length]
+            ?.value ?? "",
       });
   });
+
   const primary = TAXONOMY.find(({ id }) => id === picked[0]) ?? TAXONOMY[0];
   const isBraids = !primary || primary.id === "braids";
+
   const drafts = state.services.slice(0, 2).map((service) => ({
     ...service,
-    st: "draft",
+    status: "draft",
     categoryId: categories[0] ? categories[0].id : null,
     ...(isBraids
       ? {}
       : {
-          cat: primary.id,
-          sub: primary.subs[0] ?? "",
+          taxonomyId: primary.id,
+          subcategory: primary.subcategories[0] ?? "",
           typeId: null,
-          name: primary.subs[0] ?? "",
+          name: primary.subcategories[0] ?? "",
           sizes: [],
           lengths: [],
           own: [],
           addons: [],
         }),
   }));
+
   if (!isBraids && drafts[1]) {
-    const name = primary.subs[1] || primary.subs[0] || "";
-    drafts[1] = { ...drafts[1], id: drafts[1].id + "2", sub: name, name };
+    const name = primary.subcategories[1] || primary.subcategories[0] || "";
+
+    drafts[1] = {
+      ...drafts[1],
+      id: `${drafts[1].id}2`,
+      subcategory: name,
+      name,
+    };
   }
+
   return {
     ...state,
     policy: { ...state.policy, mode: "none" },
-    tfa: { devices: [] },
+    twoFactorSettings: { devices: [] },
     categories,
     services: drafts,
   };
@@ -100,33 +116,43 @@ const seedNewAccount = (
 export const useStudio = (props: StudioProps) => {
   const isNew =
     (getQueryParam("account") || props.account || "populated") === "new";
+
   const memoRef = useRef<StudioContext["memo"]>({});
+
   const [state, setRawState] = useState(() => {
     const welcome = readWelcome();
+
     memoRef.current.welcome = welcome;
     const initial = getInitialStudioState();
+
     return isNew ? seedNewAccount(initial, welcome) : initial;
   });
+
   const [seedPast] = useState(getSeedPast);
   const [, setTick] = useState(0);
   const stateRef = useRef(state);
+
   stateRef.current = state;
   const timers = useRef<Record<string, number>>({}).current;
   const isWide = useMediaQuery("(min-width:640px)");
-  const isDesk = useMediaQuery("(min-width:1024px)");
+  const isDesktop = useMediaQuery("(min-width:1024px)");
   const wideRef = useRef(isWide);
+
   wideRef.current = isWide;
 
   // like the prototype's runtime, the new state is readable straight away (getState) and the render follows
   const setState = (patch: StudioPatch) => {
     const current = stateRef.current;
+
     const next = {
       ...current,
       ...(typeof patch === "function" ? patch(current) : patch),
     };
+
     stateRef.current = next;
     setRawState(next);
   };
+
   const context: StudioContext = {
     getState: () => stateRef.current,
     setState,
@@ -134,9 +160,11 @@ export const useStudio = (props: StudioProps) => {
     memo: memoRef.current,
     isWide: () => wideRef.current,
   };
+
   const actions = createStudioActions(context);
   const serviceActions = createServiceActions(context, actions);
   const latest = useRef({ actions, serviceActions, context });
+
   latest.current = { actions, serviceActions, context };
 
   useEffect(() => {
@@ -145,40 +173,52 @@ export const useStudio = (props: StudioProps) => {
       serviceActions: services,
       context: currentContext,
     } = latest.current;
+
     const memo = currentContext.memo;
     const mountTimers: number[] = [];
+
     if (memo.welcome) {
       const welcome = memo.welcome;
+
       try {
         localStorage.removeItem("tw_welcome");
       } catch {
         // storage can be blocked
       }
+
       mountTimers.push(
         window.setTimeout(() => {
           memo.welcome = null;
-          currentContext.setState({ tab: "home", setupMin: false });
-          current.toastMsg(
-            "Welcome, " +
-              (welcome.first || "there") +
-              ". Let’s get you ready to take bookings.",
+          currentContext.setState({ tab: "home", setupMinimised: false });
+          const welcomeName = welcome.first || "there";
+
+          current.showToast(
+            `Welcome, ${welcomeName}. Let’s get you ready to take bookings.`,
           );
         }, 600),
       );
     }
+
     const fixture = props.fixture || getQueryParam("fixture");
+
     mountTimers.push(
       window.setTimeout(() => {
         memo.seenDone = getSteps(currentContext.getState());
+
         if (fixture) applyFixture(fixture, currentContext, current, services);
       }, 0),
     );
+
     const tick = window.setInterval(() => {
       latest.current.actions.autoComplete();
       setTick((count) => count + 1);
     }, 30000);
+
     current.autoComplete();
-    if (currentContext.getState().tab === "bookings") current.scrollCalToNow();
+
+    if (currentContext.getState().tab === "bookings")
+      current.scrollCalendarToNow();
+
     return () => {
       mountTimers.forEach((timer) => window.clearTimeout(timer));
       window.clearInterval(tick);
@@ -193,27 +233,33 @@ export const useStudio = (props: StudioProps) => {
   // componentDidUpdate: follow the calendar to now, restore the week scroll, lock the page under overlays
   useLayoutEffect(() => {
     const memo = memoRef.current;
-    const calKey = state.tab + "|" + state.bview + "|" + state.dayIdx;
-    if (calKey !== memo.calKey) {
-      memo.calKey = calKey;
-      if (state.tab === "bookings" && state.bview !== "list")
-        latest.current.actions.scrollCalToNow();
+    const calendarKey = `${state.tab}|${state.bookingsLayout}|${state.dayIndex}`;
+
+    if (calendarKey !== memo.calendarKey) {
+      memo.calendarKey = calendarKey;
+
+      if (state.tab === "bookings" && state.bookingsLayout !== "list")
+        latest.current.actions.scrollCalendarToNow();
     }
+
     const week = document.querySelector<HTMLElement>("[data-wk-scroll]");
-    const weekKey = week ? state.calMode + "|" + memo.wkKey : null;
-    if (week && weekKey !== memo.wkScrolled) {
-      memo.wkScrolled = weekKey;
-      week.scrollTop = memo.wkTarget || 0;
-    } else if (!week) memo.wkScrolled = null;
+    const weekKey = week ? `${state.calendarMode}|${memo.weekKey}` : null;
+
+    if (week && weekKey !== memo.weekScrolledKey) {
+      memo.weekScrolledKey = weekKey;
+      week.scrollTop = memo.weekScrollTarget || 0;
+    } else if (!week) memo.weekScrolledKey = null;
+
     const isLocked = !!(
       state.sheet ||
-      state.qa ||
+      state.quickAdd ||
       state.confirm ||
-      state.acts ||
-      state.endCal ||
-      state.filtOpen ||
-      state.tf
+      state.actionSheet ||
+      state.endCalendarOpen ||
+      state.filterOpen ||
+      state.twoFactor
     );
+
     if (isLocked !== memo.locked) {
       memo.locked = isLocked;
       document.documentElement.style.overflow = isLocked ? "hidden" : "";
@@ -227,7 +273,7 @@ export const useStudio = (props: StudioProps) => {
     props,
     isNew,
     isWide,
-    isDesk,
+    isDesktop,
     actions,
     serviceActions,
     context,

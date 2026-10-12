@@ -3,7 +3,7 @@ import { getAssetUrl } from "../../utils/asset-url";
 import { joinClassNames } from "../../utils/class-names";
 import { BENEFITS, FOOTER_SCREENS, PHOTOS } from "./onboarding-data";
 import type { OnboardingLayout } from "./onboarding-layout";
-import { BackIcon, ModeIcon } from "./ob-fields";
+import { BackIcon, ModeIcon } from "./onboarding-fields";
 import styles from "./auth-shell.module.css";
 import type { OnboardingController } from "./use-onboarding";
 
@@ -28,10 +28,12 @@ const HeroPhoto = ({
   className: string | undefined;
 }) => {
   const [src] = PHOTOS[photoKey];
+
   // ph.url
   const photoStyle = {
-    "--ob-photo": "url('" + getAssetUrl(src) + "')",
+    "--ob-photo": `url('${getAssetUrl(src)}')`,
   } as CSSProperties;
+
   return (
     <div
       key={photoKey}
@@ -45,9 +47,10 @@ const HeroPhoto = ({
 export const AuthShell = ({ onboarding, layout, children }: AuthShellProps) => {
   const { state, actions } = onboarding;
   const { setState } = actions;
+
   const {
     screen,
-    desk,
+    isDesktop,
     isDark,
     noPhoto,
     welcomeOver,
@@ -56,43 +59,55 @@ export const AuthShell = ({ onboarding, layout, children }: AuthShellProps) => {
     authVariant,
     photoKey,
   } = layout;
+
   const canBack =
     screen !== "studio" && screen !== "forgot-done" && screen !== "pro-done";
+
   const modeLabel = isDark ? "Switch to light mode" : "Switch to dark mode";
   const toggleMode = () => actions.setMode(isDark ? "light" : "dark");
+
   const goProLogin = () => {
     setState({ audience: "pro" });
-    actions.go("pro-email");
+    actions.goTo("pro-email");
   };
+
   const goWizard = () => {
     setState({ audience: "pro" });
-    actions.go("w1");
+    actions.goTo("w1");
   };
+
   // mobile: shrink the hero while a text field has focus
   const compactOn = (event: FocusEvent) => {
     const target = event.target as HTMLElement;
-    if (desk || target.tagName !== "INPUT") return;
+
+    if (isDesktop || target.tagName !== "INPUT") return;
+
     if ((target as HTMLInputElement).type === "checkbox") return;
+
     actions.cancelCompact();
+
     if (!state.compact) setState({ compact: true });
   };
+
   const compactOff = () => {
     actions.compactLater(() => {
       const active = document.activeElement;
+
       if (!active || active.tagName !== "INPUT") setState({ compact: false });
     });
   };
-  const benefit = BENEFITS[state.bn] ?? BENEFITS[0];
+
+  const benefit = BENEFITS[state.benefitIndex] ?? BENEFITS[0];
 
   return (
     <div
       className={joinClassNames(
         styles.shell,
-        desk ? styles.shellRow : styles.shellColumn,
+        isDesktop ? styles.shellRow : styles.shellColumn,
       )}
     >
       <div className={styles.authSide}>
-        {!desk && (
+        {!isDesktop && (
           <div data-variant={heroVariant} className={styles.hero}>
             {!noPhoto && (
               <HeroPhoto photoKey={photoKey} className={styles.heroPhoto} />
@@ -153,7 +168,7 @@ export const AuthShell = ({ onboarding, layout, children }: AuthShellProps) => {
             </div>
           </div>
         )}
-        {desk && (
+        {isDesktop && (
           <div className={styles.deskBar}>
             {canBack && (
               <button
@@ -185,18 +200,20 @@ export const AuthShell = ({ onboarding, layout, children }: AuthShellProps) => {
             key={screen}
             className={joinClassNames(
               styles.screen,
-              desk ? styles.screenDesk : styles.screenMobile,
-              state.dir === "back" ? styles.enterBack : styles.enterForward,
+              isDesktop ? styles.screenDesk : styles.screenMobile,
+              state.direction === "back"
+                ? styles.enterBack
+                : styles.enterForward,
             )}
           >
-            {state.netErr && (
+            {state.networkError && (
               <div role="alert" className={styles.netError}>
                 <span className={styles.grow}>
                   We couldn’t connect. Check your signal and try again.
                 </span>
                 <button
                   onClick={() => {
-                    setState({ netErr: false });
+                    setState({ networkError: false });
                     actions.submit();
                   }}
                   className={styles.retry}
@@ -212,7 +229,7 @@ export const AuthShell = ({ onboarding, layout, children }: AuthShellProps) => {
           <div
             className={joinClassNames(
               styles.footer,
-              desk ? styles.footerDesk : styles.footerMobile,
+              isDesktop ? styles.footerDesk : styles.footerMobile,
             )}
           >
             {/* prototype placeholder links */}
@@ -234,7 +251,7 @@ export const AuthShell = ({ onboarding, layout, children }: AuthShellProps) => {
           </div>
         )}
       </div>
-      {desk && (
+      {isDesktop && (
         <div className={styles.photoSide}>
           <div className={styles.photoFrame}>
             <HeroPhoto photoKey={photoKey} className={styles.photo} />
@@ -251,7 +268,7 @@ export const AuthShell = ({ onboarding, layout, children }: AuthShellProps) => {
                 >
                   <div className={styles.benefitCard}>
                     <div
-                      key={state.bn}
+                      key={state.benefitIndex}
                       aria-live="polite"
                       className={styles.benefit}
                     >
@@ -267,14 +284,16 @@ export const AuthShell = ({ onboarding, layout, children }: AuthShellProps) => {
                           strokeLinejoin="round"
                           className={styles.benefitSvg}
                         >
-                          <path d={benefit.d}></path>
+                          <path d={benefit.iconPath}></path>
                         </svg>
                       </span>
                       <span className={styles.benefitText}>
                         <span className={styles.benefitTitle}>
                           {benefit.title}
                         </span>
-                        <span className={styles.benefitSub}>{benefit.sub}</span>
+                        <span className={styles.benefitSub}>
+                          {benefit.subtitle}
+                        </span>
                       </span>
                     </div>
                   </div>
@@ -283,11 +302,15 @@ export const AuthShell = ({ onboarding, layout, children }: AuthShellProps) => {
                       <button
                         key={title}
                         onClick={() => actions.showBenefit(index)}
-                        aria-label={"Show benefit " + (index + 1) + " of 4"}
-                        aria-current={state.bn === index ? "true" : "false"}
+                        aria-label={`Show benefit ${index + 1} of 4`}
+                        aria-current={
+                          state.benefitIndex === index ? "true" : "false"
+                        }
                         className={joinClassNames(
                           styles.dot,
-                          state.bn === index ? styles.dotOn : styles.dotOff,
+                          state.benefitIndex === index
+                            ? styles.dotOn
+                            : styles.dotOff,
                         )}
                       ></button>
                     ))}

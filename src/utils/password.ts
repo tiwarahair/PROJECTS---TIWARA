@@ -1,11 +1,12 @@
 // Password rules for every "create / change password" field, ported from data.js (TIWARA.password).
-// Strength = zxcvbn-ts (guidance only, never blocks); loaded on first use, pages re-render on 'tw-pw-ready'.
+// Strength = zxcvbn-ts (guidance only, never blocks); loaded on first use, pages re-render once it's ready.
 // Real breached-password screening comes with the back end.
-import type { zxcvbn as ZxcvbnFn } from "@zxcvbn-ts/core";
+import type { scorePassword as ScorePassword } from "./password-checker";
 import { passwordBlocklist } from "../data";
 
 export const PASSWORD_MAX = 64;
-export const PASSWORD_READY_EVENT = "tw-pw-ready";
+
+// ban site names from the password
 const SITE_NAMES = [
   "tiwara",
   "tiwaras",
@@ -17,39 +18,39 @@ const SITE_NAMES = [
 export const getPasswordMin = (who: "pro" | "client"): number =>
   who === "pro" ? 8 : 15;
 
-let zxcvbnScore: typeof ZxcvbnFn | null = null;
-let isLoading = false;
+let scorePassword: typeof ScorePassword | null = null;
+let checkerLoad: Promise<void> | null = null;
 
-export const isPasswordCheckerReady = (): boolean => zxcvbnScore !== null;
+export const isPasswordCheckerReady = (): boolean => scorePassword !== null;
 
-export const loadPasswordChecker = (): void => {
-  if (zxcvbnScore || isLoading || typeof document === "undefined") return;
-  isLoading = true;
-  Promise.all([
-    import("@zxcvbn-ts/core"),
-    import("@zxcvbn-ts/language-common"),
-    import("@zxcvbn-ts/language-en"),
-  ])
-    .then(([core, common, english]) => {
-      core.zxcvbnOptions.setOptions({
-        translations: english.translations,
-        graphs: common.adjacencyGraphs,
-        dictionary: { ...common.dictionary, ...english.dictionary },
-      });
-      zxcvbnScore = core.zxcvbn;
-      window.dispatchEvent(new Event(PASSWORD_READY_EVENT));
-    })
-    .catch(() => {
-      isLoading = false;
-    });
+/** Starts loading the checker once; every caller shares the same promise. */
+export const loadPasswordChecker = (): Promise<void> => {
+  if (typeof document === "undefined") return Promise.resolve();
+
+  checkerLoad ??= import("./password-checker").then(
+    (checker) => {
+      scorePassword = checker.scorePassword;
+    },
+    () => {
+      // let the next password field try again
+      checkerLoad = null;
+    },
+  );
+
+  return checkerLoad;
 };
 
-/** Subscribe to the checker finishing loading; returns an unsubscribe function. */
+/** Calls the listener once the checker has loaded; returns a function that cancels it. */
 export const onPasswordCheckerReady = (listener: () => void): (() => void) => {
-  loadPasswordChecker();
-  if (zxcvbnScore) return () => {};
-  window.addEventListener(PASSWORD_READY_EVENT, listener);
-  return () => window.removeEventListener(PASSWORD_READY_EVENT, listener);
+  let isCancelled = false;
+
+  void loadPasswordChecker().then(() => {
+    if (!isCancelled && scorePassword) listener();
+  });
+
+  return () => {
+    isCancelled = true;
+  };
 };
 
 const normaliseAccents = (value: unknown): string =>
@@ -69,7 +70,7 @@ export type BlockKind = "" | "common" | "name" | "site";
 
 export interface PasswordCheck {
   min: number;
-  len: number;
+  length: number;
   typed: boolean;
   short: boolean;
   long: boolean;
@@ -80,7 +81,7 @@ export interface PasswordCheck {
   level: 0 | 1 | 2;
   label: "Weak" | "Good" | "Strong";
   error: string;
-  ok: boolean;
+  valid: boolean;
 }
 
 const BLOCK_MESSAGES: Record<Exclude<BlockKind, "">, string> = {
@@ -89,25 +90,86 @@ const BLOCK_MESSAGES: Record<Exclude<BlockKind, "">, string> = {
   site: "Your password can’t be the name of this website. Choose a different one.",
 };
 
+interface BlockKindInputs {
+  length: number;
+  flat: string;
+  lettersOnly: string;
+  names: string[];
+}
+
+const getBlockKind = ({
+  length,
+  flat,
+  lettersOnly,
+  names,
+}: BlockKindInputs): BlockKind => {
+  if (!length) return "";
+
+  if (passwordBlocklist.includes(flat)) return "common";
+
+  if (lettersOnly && names.includes(lettersOnly)) return "name";
+
+  return SITE_NAMES.includes(lettersOnly) ? "site" : "";
+};
+
+const getLevel = (failsRules: boolean, score: number | null): 0 | 1 | 2 => {
+  if (failsRules) return 0;
+
+  if (score == null) return 1;
+
+  if (score <= 2) return 0;
+
+  return score === 3 ? 1 : 2;
+};
+
+interface PasswordErrorInputs {
+  length: number;
+  long: boolean;
+  blockKind: BlockKind;
+  short: boolean;
+  min: number;
+}
+
+const getPasswordError = ({
+  length,
+  long,
+  blockKind,
+  short,
+  min,
+}: PasswordErrorInputs) => {
+  if (!length) return "Enter a password";
+
+  if (long) return `Use ${PASSWORD_MAX} characters or fewer`;
+
+  if (blockKind) return BLOCK_MESSAGES[blockKind];
+
+  return short ? `Use at least ${min} characters` : "";
+};
+
 export const checkPassword = (
   password: unknown,
   options: PasswordCheckOptions = {},
 ): PasswordCheck => {
   const value = String(password || "");
   const min = options.min || 15;
-  const len = [...value].length;
+  const length = [...value].length;
   const lowered = normaliseAccents(value);
   // whole-password comparison only: lowercase, no spaces; names/site may only have digits or symbols added
   const flat = lowered.replace(/\s+/g, "");
   const lettersOnly = flat.replace(/[^a-z]/g, "");
+
   const toLetters = (text: unknown) =>
     normaliseAccents(text).replace(/[^a-z]/g, "");
+
   const first = toLetters(options.first);
   const last = toLetters(options.last);
+
   const email = String(options.email || "")
     .toLowerCase()
     .trim();
+
   const emailName = email.split("@")[0] ?? "";
+
   const names = [
     first,
     last,
@@ -116,23 +178,18 @@ export const checkPassword = (
     toLetters(emailName),
     toLetters(email),
   ].filter(Boolean);
-  const blockKind: BlockKind = !len
-    ? ""
-    : passwordBlocklist.includes(flat)
-      ? "common"
-      : lettersOnly && names.includes(lettersOnly)
-        ? "name"
-        : SITE_NAMES.includes(lettersOnly)
-          ? "site"
-          : "";
+
+  const blockKind = getBlockKind({ length, flat, lettersOnly, names });
   const blocked = !!blockKind;
-  const short = len < min;
-  const long = len > PASSWORD_MAX;
-  loadPasswordChecker();
+  const short = length < min;
+  const long = length > PASSWORD_MAX;
+
+  void loadPasswordChecker();
 
   let score: number | null = null;
   let warning = "";
-  if (len && !long && zxcvbnScore) {
+
+  if (length && !long && scorePassword) {
     try {
       const userInputs = [
         options.first,
@@ -142,38 +199,26 @@ export const checkPassword = (
         "tiwara",
         "tiwarashouse",
       ].filter((input): input is string => !!input);
-      const result = zxcvbnScore(value, userInputs);
+
+      const result = scorePassword(value, userInputs);
+
       score = result.score;
+
       if (score <= 2) warning = result.feedback?.warning || "";
     } catch {
       // strength is guidance only
     }
   }
+
   // 0-2 Weak, 3 Good, 4 Strong; failing length or blocklist is always Weak
-  const level: 0 | 1 | 2 =
-    !len || short || long || blocked
-      ? 0
-      : score == null
-        ? 1
-        : score <= 2
-          ? 0
-          : score === 3
-            ? 1
-            : 2;
-  const error = !len
-    ? "Enter a password"
-    : long
-      ? "Use " + PASSWORD_MAX + " characters or fewer"
-      : blockKind
-        ? BLOCK_MESSAGES[blockKind]
-        : short
-          ? "Use at least " + min + " characters"
-          : "";
+  const level = getLevel(!length || short || long || blocked, score);
+  const error = getPasswordError({ length, long, blockKind, short, min });
   const labels = ["Weak", "Good", "Strong"] as const;
+
   return {
     min,
-    len,
-    typed: len > 0,
+    length,
+    typed: length > 0,
     short,
     long,
     blocked,
@@ -183,7 +228,7 @@ export const checkPassword = (
     level,
     label: labels[level],
     error,
-    ok: !error,
+    valid: !error,
   };
 };
 
@@ -191,12 +236,12 @@ export interface PasswordViewOptions {
   dark?: boolean;
   /** Whether to surface the error (field blurred or form submitted). */
   show?: boolean;
-  errColor?: string;
+  errorColour?: string;
 }
 
 export interface MeterSegment {
   key: number;
-  bg: string;
+  background: string;
 }
 
 /** View-model for the strength meter under a password field. */
@@ -221,45 +266,50 @@ export const getPasswordView = (
         empty: "rgba(26,23,20,.10)",
         mute: "var(--neutral-600)",
       };
+
   const { typed, short, long, level, min, label, warning, error } = check;
+
   const labelColour = [palette.weak, palette.good, palette.strong][
     level
   ] as string;
+
   const barColour = [palette.weak, palette.goodBar, palette.strong][
     level
   ] as string;
-  const segs: MeterSegment[] = [0, 1, 2].map((index) => ({
+
+  const segments: MeterSegment[] = [0, 1, 2].map((index) => ({
     key: index,
-    bg: typed && index <= level ? barColour : palette.empty,
+    background: typed && index <= level ? barColour : palette.empty,
   }));
+
   const shownError = options.show && error ? error : "";
-  const lengthOk = typed && !short && !long;
+  const lengthMet = typed && !short && !long;
+  const lengthColour = !short && !long ? palette.strong : palette.weak;
+
   return {
     typed,
-    okLen: lengthOk,
-    noLen: !lengthOk,
-    rule: min + "+ characters",
-    ruleSr: lengthOk ? "met" : "not met",
-    ruleC: !typed
-      ? palette.mute
-      : !short && !long
-        ? palette.strong
-        : palette.weak,
+    lengthMet,
+    lengthUnmet: !lengthMet,
+    rule: `${min}+ characters`,
+    ruleScreenReaderText: lengthMet ? "met" : "not met",
+    ruleColour: typed ? lengthColour : palette.mute,
     label,
-    labelC: labelColour,
-    muteC: palette.mute,
-    segs,
-    s1: segs[0]?.bg ?? palette.empty,
-    s2: segs[1]?.bg ?? palette.empty,
-    s3: segs[2]?.bg ?? palette.empty,
-    msg: shownError || "At least " + min + " characters",
-    msgC: shownError ? options.errColor || palette.weak : palette.mute,
-    msgW: shownError ? 600 : 400,
-    hasErr: !!shownError,
-    msgOn: !!shownError,
-    warn: warning || "",
-    warnOn: !!(typed && warning && !shownError),
-    inv: shownError ? "true" : "false",
+    labelColour,
+    mutedColour: palette.mute,
+    segments,
+    bar1Colour: segments[0]?.background ?? palette.empty,
+    bar2Colour: segments[1]?.background ?? palette.empty,
+    bar3Colour: segments[2]?.background ?? palette.empty,
+    message: shownError || `At least ${min} characters`,
+    messageColour: shownError
+      ? options.errorColour || palette.weak
+      : palette.mute,
+    messageWeight: shownError ? 600 : 400,
+    hasError: !!shownError,
+    showMessage: !!shownError,
+    warning: warning || "",
+    showWarning: !!(typed && warning && !shownError),
+    ariaInvalid: shownError ? "true" : "false",
   };
 };
 

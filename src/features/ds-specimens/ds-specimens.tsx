@@ -47,8 +47,10 @@ const SpecimenIcon = ({
 
 const CALENDAR =
   "M8 3v4M16 3v4M3 11h18|M6 5h12a3 3 0 0 1 3 3v11a3 3 0 0 1-3 3H6a3 3 0 0 1-3-3V8a3 3 0 0 1 3-3z";
+
 const SEARCH = "M16.7 16.7 21 21|M11 18a7 7 0 1 0 0-14 7 7 0 0 0 0 14z";
 const NEXT = "m10 6 6 6-6 6";
+
 const SHARE =
   "M10 13a5 5 0 0 0 7.5.5l3-3a5 5 0 0 0-7-7l-1.7 1.7|M14 11a5 5 0 0 0-7.5-.5l-3 3a5 5 0 0 0 7 7l1.7-1.7";
 
@@ -270,6 +272,7 @@ const TAB_COPY: Record<string, string> = {
 
 const NavigationSpecimen = () => {
   const [tab, setTab] = useState("Upcoming");
+
   return (
     <div className={styles.navigationBody}>
       <div>
@@ -288,10 +291,12 @@ const MotionSpecimen = () => {
   const title = (
     <div className={styles.motionTitle}>Run your chair like a business</div>
   );
+
   const frames = [
     { progress: 0, label: "progress 0 — tilted back" },
     { progress: 1, label: "progress 1 — settled" },
   ];
+
   return (
     <div className={styles.motionBody}>
       <div className={styles.pair}>
@@ -331,6 +336,7 @@ const SPECIMENS: Record<string, () => React.JSX.Element> = {
 export const DsSpecimens = () => {
   const { card = "actions" } = useParams();
   const Specimen = SPECIMENS[card] ?? ActionsSpecimen;
+
   return (
     <div id="root-specimen">
       <Specimen />

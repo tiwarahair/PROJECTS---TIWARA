@@ -41,6 +41,52 @@ export default defineConfig([
       parserOptions: { ecmaFeatures: { jsx: true } },
     },
     rules: {
+      "no-nested-ternary": "error",
+      "prefer-template": "error",
+      "id-length": [
+        "error",
+        {
+          min: 3,
+          properties: "always",
+          exceptions: ["id", "x", "y", "to", "on", "at", "ms", "ui"],
+          // the onboarding wizard's screen ids, which appear in ?screen= URLs
+          exceptionPatterns: ["^w[1-5]$"],
+        },
+      ],
+      // blank lines around blocks, returns, exports and after declarations so code isn't squashed together
+      "padding-line-between-statements": [
+        "error",
+        { blankLine: "always", prev: "*", next: "return" },
+        { blankLine: "always", prev: ["const", "let"], next: "*" },
+        { blankLine: "any", prev: ["const", "let"], next: ["const", "let"] },
+        { blankLine: "always", prev: "*", next: "block-like" },
+        { blankLine: "always", prev: "block-like", next: "*" },
+        { blankLine: "always", prev: "*", next: "export" },
+        { blankLine: "any", prev: "export", next: "export" },
+        { blankLine: "any", prev: "import", next: "import" },
+        // also around ifs and loops (with or without braces) and anything spanning several lines
+        {
+          blankLine: "always",
+          prev: "*",
+          next: ["if", "for", "while", "do", "switch", "try"],
+        },
+        {
+          blankLine: "always",
+          prev: ["if", "for", "while", "do", "switch", "try"],
+          next: "*",
+        },
+        {
+          blankLine: "always",
+          prev: "*",
+          next: ["multiline-expression", "multiline-const", "multiline-let"],
+        },
+        {
+          blankLine: "always",
+          prev: ["multiline-expression", "multiline-const", "multiline-let"],
+          next: "*",
+        },
+      ],
+
       "unicorn/prefer-set-has": "off",
       "unicorn/filename-case": [
         "error",

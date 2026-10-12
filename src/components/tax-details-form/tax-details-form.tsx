@@ -10,7 +10,7 @@ import {
   getTaxErrors,
   getTaxOutput,
   getTouchedAll,
-  formatNiNumber,
+  formatNationalInsuranceNumber,
 } from "./tax-details-logic";
 import type {
   TaxAddressState,
@@ -38,10 +38,23 @@ const KINDS: [TaxKind, string][] = [
   ["sole", "Sole trader / self-employed"],
   ["ltd", "Limited company"],
 ];
+
 const DOB_PARTS = [
-  { key: "d", label: "DD", aria: "Day", max: 2, ac: "bday-day" },
-  { key: "m", label: "MM", aria: "Month", max: 2, ac: "bday-month" },
-  { key: "y", label: "YYYY", aria: "Year", max: 4, ac: "bday-year" },
+  { key: "day", label: "DD", aria: "Day", max: 2, autoComplete: "bday-day" },
+  {
+    key: "month",
+    label: "MM",
+    aria: "Month",
+    max: 2,
+    autoComplete: "bday-month",
+  },
+  {
+    key: "year",
+    label: "YYYY",
+    aria: "Year",
+    max: 4,
+    autoComplete: "bday-year",
+  },
 ] as const;
 
 interface FieldProps {
@@ -72,7 +85,8 @@ const Field = ({
   placeholder,
   isCode = false,
 }: FieldProps) => {
-  const errorId = id + "-e";
+  const errorId = `${id}-e`;
+
   return (
     <div>
       <label
@@ -122,45 +136,66 @@ export const TaxDetailsForm = ({
   onSubmit,
   onCancel,
 }: TaxDetailsFormProps) => {
-  const uid = "tx" + useId().replace(/[^a-zA-Z0-9]/g, "");
+  const uid = `tx${useId().replace(/[^a-zA-Z0-9]/g, "")}`;
+
   const [state, setRawState] = useState(() =>
     getInitialTaxState({ fixture, businessName, business, value }),
   );
+
   const dobRefs = useRef<(HTMLInputElement | null)[]>([]);
+
   const setState = (patch: Partial<TaxState>) =>
     setRawState((current) => ({ ...current, ...patch }));
+
   const touch = (key: TaxErrorKey | "middle") =>
     setRawState((current) => ({
       ...current,
       touched: { ...current.touched, [key]: 1 },
     }));
+
   const isSole = state.kind === "sole";
   const addressKey = getAddressKey(state.kind);
   const address = state[addressKey];
+
   const setAddress = (patch: Partial<TaxAddressState>) =>
     setRawState((current) => ({
       ...current,
       [addressKey]: { ...current[addressKey], ...patch },
     }));
+
   const errors = getTaxErrors(state);
+
   const getError = (key: TaxErrorKey) =>
     (state.touched[key] && errors[key]) || "";
-  const fieldId = (key: string) => uid + "-" + key;
 
-  const { type, v } = getTaxBusiness(business);
+  const fieldId = (key: string) => `${uid}-${key}`;
+
+  const { type, details } = getTaxBusiness(business);
+
   const showSame = isSole
     ? type === "home"
     : type === "home" || type === "shop";
-  const sameText = [v.line1, v.line2, v.city, v.pc].filter(Boolean).join(", ");
+
+  const sameText = [
+    details.line1,
+    details.line2,
+    details.city,
+    details.postcode,
+  ]
+    .filter(Boolean)
+    .join(", ");
+
   const dobError = getError("dob");
-  const niError = getError("ni");
+  const nationalInsuranceError = getError("nationalInsuranceNumber");
   const isSettings = mode === "settings";
 
   const submit = () => {
     if (Object.keys(errors).length) {
       setState({ touched: getTouchedAll() });
+
       return;
     }
+
     onSubmit?.(getTaxOutput(state, legalName, business));
   };
 
@@ -171,6 +206,7 @@ export const TaxDetailsForm = ({
         <div className={styles.kinds} role="radiogroup">
           {KINDS.map(([kind, label]) => {
             const isOn = state.kind === kind;
+
             return (
               <button
                 key={kind}
@@ -214,7 +250,7 @@ export const TaxDetailsForm = ({
         <div className={styles.group}>
           <div>
             <div className={styles.question} id={fieldId("nq")}>
-              {"Is " + (legalName || "this") + " your legal name?"}
+              {`Is ${legalName || "this"} your legal name?`}
             </div>
             <div
               className={styles.chips}
@@ -228,6 +264,7 @@ export const TaxDetailsForm = ({
                 ] as const
               ).map(([key, label, isYes]) => {
                 const isOn = state.nameYes === isYes;
+
                 return (
                   <button
                     key={key}
@@ -290,42 +327,46 @@ export const TaxDetailsForm = ({
           >
             <legend className={styles.dobLegend}>Date of birth</legend>
             <div className={styles.dobRow}>
-              {DOB_PARTS.map(({ key, label, aria, max, ac }, index) => (
-                <label
-                  key={key}
-                  className={joinClassNames(
-                    styles.dobPart,
-                    max === 4 ? styles.dobLong : styles.dobShort,
-                  )}
-                >
-                  <span className={styles.dobLabel}>{label}</span>
-                  <input
+              {DOB_PARTS.map(
+                ({ key, label, aria, max, autoComplete }, index) => (
+                  <label
+                    key={key}
                     className={joinClassNames(
-                      styles.dobInput,
-                      dobError ? styles.fieldErr : styles.fieldOk,
+                      styles.dobPart,
+                      max === 4 ? styles.dobLong : styles.dobShort,
                     )}
-                    ref={(element) => {
-                      dobRefs.current[index] = element;
-                    }}
-                    value={state[key]}
-                    onChange={(event) => {
-                      const digits = event.target.value
-                        .replace(/\D/g, "")
-                        .slice(0, max);
-                      setState({ [key]: digits });
-                      if (digits.length === max && index < 2)
-                        dobRefs.current[index + 1]?.focus();
-                    }}
-                    onBlur={() => touch("dob")}
-                    inputMode="numeric"
-                    autoComplete={ac}
-                    maxLength={max}
-                    placeholder={label}
-                    aria-label={aria}
-                    aria-invalid={dobError ? "true" : "false"}
-                  />
-                </label>
-              ))}
+                  >
+                    <span className={styles.dobLabel}>{label}</span>
+                    <input
+                      className={joinClassNames(
+                        styles.dobInput,
+                        dobError ? styles.fieldErr : styles.fieldOk,
+                      )}
+                      ref={(element) => {
+                        dobRefs.current[index] = element;
+                      }}
+                      value={state[key]}
+                      onChange={(event) => {
+                        const digits = event.target.value
+                          .replace(/\D/g, "")
+                          .slice(0, max);
+
+                        setState({ [key]: digits });
+
+                        if (digits.length === max && index < 2)
+                          dobRefs.current[index + 1]?.focus();
+                      }}
+                      onBlur={() => touch("dob")}
+                      inputMode="numeric"
+                      autoComplete={autoComplete}
+                      maxLength={max}
+                      placeholder={label}
+                      aria-label={aria}
+                      aria-invalid={dobError ? "true" : "false"}
+                    />
+                  </label>
+                ),
+              )}
             </div>
             {!!dobError && (
               <div className={styles.error} role="alert" id={fieldId("dob-e")}>
@@ -341,27 +382,27 @@ export const TaxDetailsForm = ({
           <Field
             id={fieldId("coName")}
             label="Company name"
-            value={state.coName}
-            error={getError("coName")}
-            onChange={(event) => setState({ coName: event.target.value })}
-            onBlur={() => touch("coName")}
+            value={state.companyName}
+            error={getError("companyName")}
+            onChange={(event) => setState({ companyName: event.target.value })}
+            onBlur={() => touch("companyName")}
             help="As registered at Companies House."
             placeholder=""
           />
           <Field
             id={fieldId("coNum")}
             label="Company registration number"
-            value={state.coNum}
-            error={getError("coNum")}
+            value={state.companyNumber}
+            error={getError("companyNumber")}
             onChange={(event) =>
               setState({
-                coNum: event.target.value
+                companyNumber: event.target.value
                   .toUpperCase()
                   .replace(/[^A-Z0-9]/g, "")
                   .slice(0, 8),
               })
             }
-            onBlur={() => touch("coNum")}
+            onBlur={() => touch("companyNumber")}
             help="8 characters, like 12345678 or SC123456."
             placeholder="12345678"
             isCode={true}
@@ -397,15 +438,15 @@ export const TaxDetailsForm = ({
             {/* the prototype's dc-import host block */}
             <div data-dc-host="">
               <AddressFinder
-                idPrefix={uid + "-" + addressKey}
+                idPrefix={`${uid}-${addressKey}`}
                 label="Address or postcode"
                 value={
-                  address.a.line1
+                  address.fields.line1
                     ? {
-                        line1: address.a.line1,
-                        line2: address.a.line2,
-                        town: address.a.city,
-                        postcode: address.a.pc,
+                        line1: address.fields.line1,
+                        line2: address.fields.line2,
+                        town: address.fields.city,
+                        postcode: address.fields.postcode,
                         source: address.src || "pick",
                       }
                     : null
@@ -413,17 +454,17 @@ export const TaxDetailsForm = ({
                 onChange={(picked) =>
                   setAddress({
                     src: picked ? picked.source : "",
-                    a: picked
+                    fields: picked
                       ? {
                           line1: picked.line1,
                           line2: picked.line2 || "",
                           city: picked.town,
-                          pc: picked.postcode,
+                          postcode: picked.postcode,
                         }
                       : getBlankAddress(),
                   })
                 }
-                showErrors={!!state.touched.addr}
+                showErrors={!!state.touched.address}
                 fieldHeight={50}
                 labelSize={13.5}
               />
@@ -444,32 +485,40 @@ export const TaxDetailsForm = ({
             <input
               className={joinClassNames(
                 styles.niInput,
-                niError ? styles.fieldErr : styles.fieldOk,
+                nationalInsuranceError ? styles.fieldErr : styles.fieldOk,
               )}
               id={fieldId("ni")}
-              type={state.niShow ? "text" : "password"}
-              value={state.ni}
+              type={state.showNationalInsurance ? "text" : "password"}
+              value={state.nationalInsuranceNumber}
               onChange={(event) =>
-                setState({ ni: formatNiNumber(event.target.value) })
+                setState({
+                  nationalInsuranceNumber: formatNationalInsuranceNumber(
+                    event.target.value,
+                  ),
+                })
               }
-              onBlur={() => touch("ni")}
+              onBlur={() => touch("nationalInsuranceNumber")}
               autoComplete="off"
               spellCheck="false"
               placeholder="QQ 12 34 56 C"
-              aria-invalid={niError ? "true" : "false"}
+              aria-invalid={nationalInsuranceError ? "true" : "false"}
               aria-describedby={fieldId("ni-e")}
             />
             <button
               className={styles.niToggle}
-              onClick={() => setState({ niShow: !state.niShow })}
+              onClick={() =>
+                setState({
+                  showNationalInsurance: !state.showNationalInsurance,
+                })
+              }
               aria-label={
-                state.niShow
+                state.showNationalInsurance
                   ? "Hide National Insurance number"
                   : "Show National Insurance number"
               }
-              aria-pressed={state.niShow}
+              aria-pressed={state.showNationalInsurance}
             >
-              {!state.niShow && (
+              {!state.showNationalInsurance && (
                 <svg
                   width="18"
                   height="18"
@@ -484,7 +533,7 @@ export const TaxDetailsForm = ({
                   <circle cx="12" cy="12" r="3"></circle>
                 </svg>
               )}
-              {state.niShow && (
+              {state.showNationalInsurance && (
                 <svg
                   width="18"
                   height="18"
@@ -500,9 +549,9 @@ export const TaxDetailsForm = ({
               )}
             </button>
           </div>
-          {!!niError && (
+          {!!nationalInsuranceError && (
             <div className={styles.error} role="alert" id={fieldId("ni-e")}>
-              {niError}
+              {nationalInsuranceError}
             </div>
           )}
         </div>

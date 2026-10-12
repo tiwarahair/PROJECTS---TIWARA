@@ -1,4 +1,4 @@
-I am creating a website for a client, a hair booking platform that salons can onboard onto and manage their shop on, also clients will be able to pick a service, then pick a salon near them. The website should enable clients to:
+I am creating a saas application which will be a hair booking platform that salons can onboard onto and manage their shop on, also clients will be able to pick a service, then pick a salon near them. The website should enable clients to:
 
 - book appointments (& pay a deposit at the point of booking)
 - customise their service (e.g. style, colour, length) with a dynamically updating visual preview (updated every time a new length/colour etc. is chosen)

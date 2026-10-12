@@ -22,16 +22,20 @@ const ToastPill = ({ toast }: ToastPillProps) => {
 
   useEffect(() => {
     if (!closing) return;
+
     const timer = window.setTimeout(() => dispatch(clearToast(id)), EXIT_MS);
+
     return () => window.clearTimeout(timer);
   }, [closing, dispatch, id]);
 
   useEffect(() => {
     if (pinned) return;
+
     const timer = window.setTimeout(
       () => setClosing(true),
       action ? 5000 : 3200,
     );
+
     return () => window.clearTimeout(timer);
   }, [pinned, action]);
 
@@ -49,7 +53,7 @@ const ToastPill = ({ toast }: ToastPillProps) => {
     <div
       role="status"
       className={className}
-      style={{ "--toast-bottom": bottom + "px" } as CSSProperties}
+      style={{ "--toast-bottom": `${bottom}px` } as CSSProperties}
     >
       <span>{message}</span>
       {action?.href && (
@@ -63,6 +67,7 @@ const ToastPill = ({ toast }: ToastPillProps) => {
           className={styles.action}
           onClick={() => {
             if (!action.undoFavouriteId) return;
+
             dispatch(setFavourite({ id: action.undoFavouriteId, on: true }));
             setClosing(true);
           }}
@@ -77,5 +82,6 @@ const ToastPill = ({ toast }: ToastPillProps) => {
 /** The single favourites/share toast; a new toast replaces the old one immediately. */
 export const ActionToast = () => {
   const toast = useAppSelector((state) => state.toast.current);
+
   return toast ? <ToastPill key={toast.id} toast={toast} /> : null;
 };

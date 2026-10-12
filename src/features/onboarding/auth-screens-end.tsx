@@ -1,7 +1,7 @@
 import { PasswordMeter } from "../../components/password-meter/password-meter";
 import { joinClassNames } from "../../utils/class-names";
 import { getOnboardingMeter } from "./auth-screens-account";
-import { PasswordInput, SubmitButton, TextField } from "./ob-fields";
+import { PasswordInput, SubmitButton, TextField } from "./onboarding-fields";
 import type { ScreenProps } from "./screen-props";
 import styles from "./auth-screens.module.css";
 
@@ -25,6 +25,7 @@ const DoneBadge = () => (
 export const ForgotSentScreen = ({ onboarding }: ScreenProps) => {
   const { state, actions } = onboarding;
   const resendOff = state.resendIn > 0;
+
   return (
     <>
       <span className={styles.mailBadge}>
@@ -44,11 +45,11 @@ export const ForgotSentScreen = ({ onboarding }: ScreenProps) => {
       <h1 className={styles.title}>Check your email for a reset link</h1>
       <p className={styles.codeSub}>
         We sent a reset link to{" "}
-        <strong className={styles.strongEmail}>{state.f.email}</strong>. The
+        <strong className={styles.strongEmail}>{state.form.email}</strong>. The
         link works for 30 minutes.
       </p>
       <button
-        onClick={() => actions.go("forgot-reset")}
+        onClick={() => actions.goTo("forgot-reset")}
         className={styles.openLink}
       >
         Open reset link (demo)
@@ -59,7 +60,7 @@ export const ForgotSentScreen = ({ onboarding }: ScreenProps) => {
             if (!resendOff)
               actions.setState({
                 resendIn: 30,
-                codeErr: "",
+                codeError: "",
                 code: ["", "", "", "", "", ""],
               });
           }}
@@ -68,11 +69,11 @@ export const ForgotSentScreen = ({ onboarding }: ScreenProps) => {
             resendOff ? styles.resendWaiting : styles.resendReady,
           )}
         >
-          {resendOff ? "Resend link in " + state.resendIn + "s" : "Resend link"}
+          {resendOff ? `Resend link in ${state.resendIn}s` : "Resend link"}
         </button>
         <button
           onClick={() =>
-            actions.go(
+            actions.goTo(
               state.audience === "customer" ? "cust-email" : "pro-email",
               "back",
             )
@@ -88,12 +89,14 @@ export const ForgotSentScreen = ({ onboarding }: ScreenProps) => {
 
 export const ResetScreen = ({ onboarding, layout, view }: ScreenProps) => {
   const { state, actions } = onboarding;
-  const { f } = state;
+  const { form } = state;
+
   const { meter, role } = getOnboardingMeter(
     onboarding,
     layout.isDark,
-    view.shown.pw ?? "",
+    view.shown.password ?? "",
   );
+
   return (
     <>
       <h1 className={styles.chooserTitle}>Choose a new password</h1>
@@ -102,13 +105,15 @@ export const ResetScreen = ({ onboarding, layout, view }: ScreenProps) => {
       </label>
       <PasswordInput
         id="ob-rpw"
-        value={f.pw}
-        shown={state.pwShow}
-        onToggle={() => actions.setState({ pwShow: !state.pwShow })}
-        onChange={(event) => actions.setField("pw", event.target.value)}
-        onBlur={() => actions.touch("pw")}
+        value={form.password}
+        shown={state.passwordShown}
+        onToggle={() =>
+          actions.setState({ passwordShown: !state.passwordShown })
+        }
+        onChange={(event) => actions.setField("password", event.target.value)}
+        onBlur={() => actions.touch("password")}
         autoComplete="new-password"
-        invalid={!!view.shown.pw}
+        invalid={!!view.shown.password}
         describedBy="ob-rpw-hint"
       />
       <PasswordMeter id="ob-rpw-hint" view={meter} messageRole={role} />
@@ -116,16 +121,18 @@ export const ResetScreen = ({ onboarding, layout, view }: ScreenProps) => {
         id="ob-rpw2"
         label="Confirm new password"
         spacing="gap"
-        type={state.pwShow ? "text" : "password"}
+        type={state.passwordShown ? "text" : "password"}
         autoComplete="new-password"
-        value={f.pw2}
-        onChange={(event) => actions.setField("pw2", event.target.value)}
-        onBlur={() => actions.touch("pw2")}
+        value={form.passwordConfirm}
+        onChange={(event) =>
+          actions.setField("passwordConfirm", event.target.value)
+        }
+        onBlur={() => actions.touch("passwordConfirm")}
         onKeyDown={(event) => {
           if (event.key === "Enter") actions.submit();
         }}
-        error={view.shown.pw2 ?? ""}
-        invalid={!!view.shown.pw2}
+        error={view.shown.passwordConfirm ?? ""}
+        invalid={!!view.shown.passwordConfirm}
       />
       <SubmitButton
         label="Update password"
@@ -172,7 +179,7 @@ export const EndScreen = ({ onboarding }: ScreenProps) => (
     <p className={styles.doneText}>Log in with your new password.</p>
     <button
       onClick={() =>
-        onboarding.actions.go(
+        onboarding.actions.goTo(
           onboarding.state.audience === "customer" ? "cust-email" : "pro-email",
         )
       }

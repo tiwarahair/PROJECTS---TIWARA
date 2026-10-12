@@ -45,6 +45,7 @@ const SettingsGlyph = ({
         <path d={path}></path>
       </svg>
     );
+
   return (
     <svg
       className={className}
@@ -155,6 +156,7 @@ const SettingsRoot = ({
   view: SettingsView;
 }) => {
   const { state, actions } = studio;
+
   return (
     <div className={styles.root} data-screen-label="Settings">
       <div className={styles.profileCard}>
@@ -184,11 +186,11 @@ const SettingsRoot = ({
               </span>
             )}
           </div>
-          <div className={styles.addr}>{state.profile.addr}</div>
+          <div className={styles.addr}>{state.profile.address}</div>
         </div>
         <button
           className={styles.editProfile}
-          onClick={() => actions.openSub("profile")}
+          onClick={() => actions.openSubpage("profile")}
         >
           <svg width="13" height="13" viewBox="0 0 24 24" {...STROKE}>
             <path d="M17 3a2.8 2.8 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z"></path>
@@ -207,7 +209,7 @@ const SettingsRoot = ({
                   styles.row,
                   row.isLocked && styles.rowLocked,
                 )}
-                onClick={row.go}
+                onClick={row.onSelect}
                 aria-disabled={row.isLocked ? "true" : "false"}
               >
                 <span className={styles.rowIcon}>
@@ -220,7 +222,7 @@ const SettingsRoot = ({
                 </span>
                 <span className={styles.grow}>
                   <span className={styles.rowLabel}>{row.label}</span>
-                  <span className={styles.rowSub}>{row.sub}</span>
+                  <span className={styles.rowSub}>{row.subtitle}</span>
                 </span>
               </button>
             ))}
@@ -250,15 +252,21 @@ const SettingsNav = ({
   view: SettingsView;
 }) => {
   const { state, setState } = studio;
+
   const showTip = () => {
     if (!studio.context.getState().shareTip) setState({ shareTip: true });
   };
+
   const hideTip = () => {
     if (studio.context.getState().shareTip) setState({ shareTip: false });
   };
+
   return (
     <aside
-      className={joinClassNames(styles.nav, view.isNavDesk && styles.navDesk)}
+      className={joinClassNames(
+        styles.nav,
+        view.isNavDesktop && styles.navDesk,
+      )}
       data-screen-label="Settings nav"
     >
       <div className={styles.navTitle}>Settings</div>
@@ -279,7 +287,7 @@ const SettingsNav = ({
                   styles.navItem,
                   item.isCurrent && styles.navItemOn,
                 )}
-                onClick={item.go}
+                onClick={item.onSelect}
               >
                 <span className={styles.navIcon}>
                   <SettingsGlyph icon={item.icon} path={item.path} size="16" />
@@ -376,12 +384,13 @@ const SettingsFrame = ({
   studio: StudioController;
   view: SettingsView;
 }) => {
-  const { state, isWide, isDesk, isNew, props, actions } = studio;
+  const { state, isWide, isDesktop, isNew, props, actions } = studio;
+
   return (
     <div
       className={joinClassNames(
         styles.frame,
-        isWide && (isDesk ? styles.frameDesk : styles.frameWide),
+        isWide && (isDesktop ? styles.frameDesk : styles.frameWide),
       )}
       data-screen-label="Settings"
     >
@@ -403,8 +412,8 @@ const SettingsFrame = ({
                 Settings
               </button>
               <div className={styles.spacer}></div>
-              {view.isAvail && (
-                <button className={styles.save} onClick={view.saveAvail}>
+              {view.isAvailability && (
+                <button className={styles.save} onClick={view.saveAvailability}>
                   Save
                 </button>
               )}
@@ -420,19 +429,19 @@ const SettingsFrame = ({
               )}
               {view.isPolicy && (
                 <HostSave
-                  isOn={!!state.polCanSave}
+                  isOn={!!state.policyCanSave}
                   onClick={view.savePolicyHeader}
                 />
               )}
               {view.hasAccountSave && (
                 <HostSave
-                  isOn={!!state.accCanSave}
+                  isOn={!!state.accountCanSave}
                   onClick={view.saveAccountHeader}
                 />
               )}
               {view.isBusiness && (
                 <HostSave
-                  isOn={!!state.bizCanSave}
+                  isOn={!!state.businessCanSave}
                   onClick={view.saveBusinessHeader}
                 />
               )}
@@ -442,13 +451,15 @@ const SettingsFrame = ({
         <div
           className={joinClassNames(
             styles.pagePad,
-            isDesk ? styles.pagePadDesk : isWide && styles.pagePadWide,
+            isDesktop ? styles.pagePadDesk : isWide && styles.pagePadWide,
           )}
         >
           <div className={styles.page} data-screen-label="Settings page">
             <h1 className={styles.h1}>{view.pageTitle}</h1>
             {view.isProfile && <ProfilePage studio={studio} view={view} />}
-            {view.isAvail && <AvailabilityPage studio={studio} view={view} />}
+            {view.isAvailability && (
+              <AvailabilityPage studio={studio} view={view} />
+            )}
             {view.isRules && <RulesPage studio={studio} view={view} />}
             {view.isBusiness && (
               <div
@@ -493,14 +504,14 @@ const SettingsFrame = ({
                 signIn={props.signIn || "email"}
                 isNew={isNew}
                 upcoming={view.accountUpcoming}
-                onNav={view.onAccountNav}
-                onToast={(text) => actions.toastMsg(text)}
+                onNavigate={view.onAccountNav}
+                onToast={(text) => actions.showToast(text)}
                 onState={view.onAccountState}
                 onConnectStripe={view.connectStripe}
-                tfaDevices={state.tfa.devices}
-                onTfaTurnOn={view.onTfaTurnOn}
-                onTfaAddBackup={view.onTfaAddBackup}
-                onTfaRemove={view.onTfaRemove}
+                twoFactorDevices={state.twoFactorSettings.devices}
+                onTwoFactorTurnOn={view.onTwoFactorTurnOn}
+                onTwoFactorAddBackup={view.onTwoFactorAddBackup}
+                onTwoFactorRemove={view.onTwoFactorRemove}
                 hideSave={!isWide}
               />
             </div>
@@ -521,10 +532,10 @@ const SettingsFrame = ({
             )}
             {isWide && view.hasOwnFooter && (
               <div className={styles.footer}>
-                {view.isAvail && (
+                {view.isAvailability && (
                   <button
                     className={styles.saveChanges}
-                    onClick={view.saveAvail}
+                    onClick={view.saveAvailability}
                   >
                     Save changes
                   </button>
@@ -558,6 +569,7 @@ const SettingsFrame = ({
 export const StudioSettings = ({ studio }: { studio: StudioController }) => {
   const navigate = useNavigate();
   const view = getSettingsView(studio, navigate);
+
   return (
     <>
       {view.isRootMobile && <SettingsRoot studio={studio} view={view} />}

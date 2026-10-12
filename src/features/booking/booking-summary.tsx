@@ -13,7 +13,7 @@ interface BookingSummaryProps {
   booking: BookingController;
 }
 
-const toImage = (path: string) => 'url("' + resolveAssetUrl(path) + '")';
+const toImage = (path: string) => `url("${resolveAssetUrl(path)}")`;
 
 /** The sticky aside: AI preview (braids), cover photo, hold bar, the booking summary and "See AI preview". */
 export const BookingSummary = ({ booking }: BookingSummaryProps) => {
@@ -23,27 +23,35 @@ export const BookingSummary = ({ booking }: BookingSummaryProps) => {
     service,
     options,
     money,
-    custLine,
+    customisationLine,
     address,
     holdOn,
     holdLeftMs,
     actions,
   } = booking;
-  const { showPrev, sel, step } = state;
+
+  const { showPrev, selection, step } = state;
   // the prototype reads the window width on each render (no resize listener)
   const isMobile = window.innerWidth <= 960;
   const canPreview = hasPreview(options.length.map(({ label }) => label));
-  const previewIndex = getPreviewIndex(sel.length, sel.colour);
+  const previewIndex = getPreviewIndex(selection.length, selection.colour);
   const previewPath = PREVIEW_POOL[previewIndex] ?? "";
+
   // previewBoxStyle / coverShellStyle background images
   const previewStyle = {
     "--preview-image": toImage(previewPath),
   } as CSSProperties;
+
   const coverStyle = {
     "--cover-image": stylist.cover ? toImage(stylist.cover) : "none",
   } as CSSProperties;
+
   const motion = isMobile ? styles.motionMobile : styles.motionDesktop;
-  const totalOr = service ? money.total : "—";
+  const totalLabel = service ? money.total : "—";
+
+  const previewOpenClass = isMobile
+    ? styles.previewBoxOpenMobile
+    : styles.previewBoxOpen;
 
   return (
     <div className={joinClassNames(helmet.bksum, styles.aside)}>
@@ -60,11 +68,7 @@ export const BookingSummary = ({ booking }: BookingSummaryProps) => {
           className={joinClassNames(
             helmet.aiprev,
             styles.previewBox,
-            showPrev
-              ? isMobile
-                ? styles.previewBoxOpenMobile
-                : styles.previewBoxOpen
-              : styles.previewBoxClosed,
+            showPrev ? previewOpenClass : styles.previewBoxClosed,
             isMobile ? styles.previewBoxMobile : styles.previewBoxDesktop,
             motion,
           )}
@@ -75,6 +79,7 @@ export const BookingSummary = ({ booking }: BookingSummaryProps) => {
             const layerStyle = {
               "--layer-image": toImage(path),
             } as CSSProperties;
+
             return (
               <div
                 key={path}
@@ -99,7 +104,7 @@ export const BookingSummary = ({ booking }: BookingSummaryProps) => {
             </button>
           </div>
           <span className={styles.previewCaption}>
-            {custLine || "No add-ons"}
+            {customisationLine || "No add-ons"}
           </span>
         </div>
       </div>
@@ -123,7 +128,7 @@ export const BookingSummary = ({ booking }: BookingSummaryProps) => {
           <div className={styles.body}>
             <div className={styles.name}>{stylist.name}</div>
             <div className={styles.meta}>
-              {stylist.area + " · ★ " + stylist.rating}
+              {`${stylist.area} · ★ ${stylist.rating}`}
             </div>
             <div className={styles.section}>
               <div className={styles.row}>
@@ -135,13 +140,18 @@ export const BookingSummary = ({ booking }: BookingSummaryProps) => {
               <div className={styles.row}>
                 <span className={styles.muted}>Options</span>
                 <span className={styles.value}>
-                  {step >= 2 ? custLine : "—"}
+                  {step >= 2 ? customisationLine : "—"}
                 </span>
               </div>
               <div className={styles.row}>
                 <span className={styles.muted}>When</span>
                 <span className={styles.value}>
-                  {getWhenLine(state.calY, state.calM, state.date, state.time)}
+                  {getWhenLine(
+                    state.calendarYear,
+                    state.calendarMonth,
+                    state.date,
+                    state.time,
+                  )}
                 </span>
               </div>
               <div className={styles.row}>
@@ -173,7 +183,7 @@ export const BookingSummary = ({ booking }: BookingSummaryProps) => {
                   <span>Due today</span>
                   <span>{money.dueToday}</span>
                 </div>
-                {money.PL.balance > 0 && (
+                {money.policy.balance > 0 && (
                   <div className={styles.balanceRow}>
                     <span>Balance at your appointment</span>
                     <span>{money.balance}</span>
@@ -193,7 +203,7 @@ export const BookingSummary = ({ booking }: BookingSummaryProps) => {
               </div>
               <div className={styles.compactDuration}>{money.duration}</div>
             </div>
-            <div className={styles.compactTotal}>{totalOr}</div>
+            <div className={styles.compactTotal}>{totalLabel}</div>
           </div>
         )}
       </div>

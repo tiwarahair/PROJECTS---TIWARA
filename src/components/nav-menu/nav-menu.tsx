@@ -50,6 +50,7 @@ export const NavMenu = ({
   const menuRef = useRef<HTMLDivElement>(null);
   const itemRefs = useRef<(HTMLElement | null)[]>([]);
   const [anchorRect] = useState(() => anchor.getBoundingClientRect());
+
   const [left, setLeft] = useState(() =>
     Math.max(
       12,
@@ -59,9 +60,11 @@ export const NavMenu = ({
       ),
     ),
   );
+
   const [measured, setMeasured] = useState(false);
   const [entered, setEntered] = useState(false);
   const [activeIndex, setActiveIndex] = useState<number | null>(null);
+
   const focusableCount = items.filter(
     ({ kind }) => kind === "link" || kind === "button",
   ).length;
@@ -69,24 +72,31 @@ export const NavMenu = ({
   useLayoutEffect(() => {
     const menuWidth = menuRef.current?.offsetWidth ?? 240;
     const centre = (anchorRect.left + anchorRect.right) / 2;
+
     setLeft(
       Math.max(
         12,
         Math.min(window.innerWidth - menuWidth - 12, centre - menuWidth / 2),
       ),
     );
+
     setMeasured(true);
+
     const frame = requestAnimationFrame(() => {
       setEntered(true);
+
       if (!pinned) itemRefs.current[0]?.focus();
     });
+
     return () => cancelAnimationFrame(frame);
   }, [anchorRect, pinned]);
 
   useEffect(() => {
     anchor.setAttribute("aria-expanded", "true");
+
     const handleOutside = (event: globalThis.MouseEvent) => {
       const target = event.target as Node;
+
       if (
         !pinned &&
         !menuRef.current?.contains(target) &&
@@ -94,9 +104,12 @@ export const NavMenu = ({
       )
         onClose(false);
     };
+
     const handleResize = () => onClose(false);
+
     document.addEventListener("mousedown", handleOutside, true);
     window.addEventListener("resize", handleResize);
+
     return () => {
       anchor.setAttribute("aria-expanded", "false");
       document.removeEventListener("mousedown", handleOutside, true);
@@ -107,10 +120,12 @@ export const NavMenu = ({
   // keyboard handled on the document (capture) like the prototype, so a pinned menu without focus still responds
   useEffect(() => {
     const focusItem = (index: number) => itemRefs.current[index]?.focus();
+
     const handleKeyDown = (event: KeyboardEvent) => {
       const index = itemRefs.current.findIndex(
         (item) => item === document.activeElement,
       );
+
       if (event.key === "Escape") {
         event.preventDefault();
         onClose(true);
@@ -128,7 +143,9 @@ export const NavMenu = ({
         focusItem(focusableCount - 1);
       } else if (event.key === "Tab") onClose(false);
     };
+
     document.addEventListener("keydown", handleKeyDown, true);
+
     return () => document.removeEventListener("keydown", handleKeyDown, true);
   }, [onClose, focusableCount]);
 
@@ -142,6 +159,7 @@ export const NavMenu = ({
     .join(" ");
 
   let focusIndex = 0;
+
   return (
     <div
       ref={menuRef}
@@ -151,8 +169,8 @@ export const NavMenu = ({
       // --menu-top/--menu-left: measured from the trigger at open time
       style={
         {
-          "--menu-top": anchorRect.bottom + 8 + "px",
-          "--menu-left": left + "px",
+          "--menu-top": `${anchorRect.bottom + 8}px`,
+          "--menu-left": `${left}px`,
         } as CSSProperties
       }
     >
@@ -166,14 +184,17 @@ export const NavMenu = ({
               className={styles.separator}
             ></div>
           );
+
         if (item.kind === "label")
           return (
             <div key={item.key} role="presentation" className={styles.label}>
               {item.label}
             </div>
           );
+
         const index = focusIndex++;
         const isCurrent = item.kind === "link" && !!item.isCurrent;
+
         const rowProps = {
           role: "menuitem",
           tabIndex: -1,
@@ -188,6 +209,7 @@ export const NavMenu = ({
             .filter(Boolean)
             .join(" "),
         };
+
         return item.kind === "link" ? (
           <Link
             key={item.key}

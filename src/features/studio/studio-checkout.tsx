@@ -11,10 +11,11 @@ import sheet from "./studio-sheet.module.css";
 const formatMinutes = (minutes: number) => {
   const hours = Math.floor(minutes / 60);
   const rest = minutes % 60;
+
   return (
-    (hours ? hours + "h" : "") +
+    (hours ? `${hours}h` : "") +
     (hours && rest ? " " : "") +
-    (rest ? rest + "m" : "")
+    (rest ? `${rest}m` : "")
   );
 };
 
@@ -42,27 +43,32 @@ export const StudioCheckout = ({
 }: StudioCheckoutProps) => {
   const { state, isWide, props, actions } = studio;
   const { business } = state;
-  const fields = business.v || {};
+  const fields = business.details || {};
+
   const addons = state.addons
-    .filter(({ st }) => st !== "archived")
-    .map(({ name, price, hr, min }) => {
-      const minutes = (Number(hr) || 0) * 60 + (Number(min) || 0);
+    .filter(({ status }) => status !== "archived")
+    .map(({ name, price, hours, min }) => {
+      const minutes = (Number(hours) || 0) * 60 + (Number(min) || 0);
+
       return [
         name,
         Number(price) || 0,
-        minutes ? "+" + formatMinutes(minutes) : "Add-on",
+        minutes ? `+${formatMinutes(minutes)}` : "Add-on",
       ] as [string, number, string];
     });
+
   const services = state.services
-    .filter(({ st }) => st !== "archived")
+    .filter(({ status }) => status !== "archived")
     .map(
-      ({ name, price, dur }) =>
-        [name, price || 0, dur || ""] as [string, number, string],
+      ({ name, price, duration }) =>
+        [name, price || 0, duration || ""] as [string, number, string],
     );
+
   const menu: MenuGroup[] = [
     { title: "Add-ons", rows: addons },
     { title: "Services", rows: services },
   ].filter(({ rows }) => rows.length);
+
   return (
     <div className={sheet.checkout} data-screen-label="Checkout">
       <CheckoutSheet
@@ -75,10 +81,10 @@ export const StudioCheckout = ({
         radius={isWide ? "var(--radius-lg)" : "24px 24px 0 0"}
         stylist={{
           name: state.profile?.salon || "Tiwára’s House",
-          addr: [fields.line1, fields.city, fields.pc]
+          address: [fields.line1, fields.city, fields.postcode]
             .filter(Boolean)
             .join(", "),
-          vat: business.vatOn && fields.vat ? "GB " + fields.vat : "",
+          vat: business.vatOn && fields.vat ? `GB ${fields.vat}` : "",
         }}
         declineMode={props.cardDeclines || "none"}
         menu={menu}

@@ -8,6 +8,7 @@ describe("WelcomeToast (tw-toast.js port)", () => {
     sessionStorage.clear();
     window.history.replaceState(null, "", "/");
   });
+
   afterEach(() => vi.useRealTimers());
 
   it("shows the stored welcome once, 600ms after load, then hides after 4s", async () => {
@@ -28,8 +29,10 @@ describe("WelcomeToast (tw-toast.js port)", () => {
       "",
       "/?twtoast=Welcome%20to%20Tiw%C3%A1ra%27s%20House%2C%20Nia",
     );
+
     render(<WelcomeToast />);
     await act(async () => vi.advanceTimersByTime(10000));
+
     expect(screen.getByRole("status")).toHaveTextContent(
       "Welcome to Tiwára's House, Nia",
     );

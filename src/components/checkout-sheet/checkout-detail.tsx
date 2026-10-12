@@ -38,16 +38,16 @@ export const Icon = ({
 
 /** Label (+ sub line) and amount (prototype row()). */
 export const AmountRow = ({
-  row: { label, sub, value, isAlert },
-  subClassName,
+  row: { label, subtitle, value, isAlert },
+  subtitleClassName,
 }: {
   row: DetailRow;
-  subClassName: string | undefined;
+  subtitleClassName: string | undefined;
 }) => (
   <div className={flow.row}>
     <span className={shared.minWidth}>
       <span className={flow.rowLabel}>{label}</span>
-      {!!sub && <span className={subClassName}>{sub}</span>}
+      {!!subtitle && <span className={subtitleClassName}>{subtitle}</span>}
     </span>
     <span
       className={joinClassNames(
@@ -60,16 +60,15 @@ export const AmountRow = ({
   </div>
 );
 
-export const getViewAnimation = (direction: number) =>
-  direction === 0
-    ? undefined
-    : direction > 0
-      ? shared.animForward
-      : shared.animBack;
+export const getViewAnimation = (direction: number) => {
+  if (direction === 0) return undefined;
+
+  return direction > 0 ? shared.animForward : shared.animBack;
+};
 
 const ACTION_CLASSES = {
-  pri: flow.actionPrimary,
-  sec: flow.actionSecondary,
+  primary: flow.actionPrimary,
+  secondary: flow.actionSecondary,
   ghost: flow.actionGhost,
 };
 
@@ -81,12 +80,13 @@ export const CheckoutDetail = ({
   view: CheckoutViewModel;
 }) => {
   const { badges, panel, rows, total, links, actions, hasUndo } = view.detail;
+
   return (
     <div
       className={joinClassNames(
         flow.viewGap26,
         shared.motion,
-        getViewAnimation(state.dir),
+        getViewAnimation(state.direction),
       )}
       data-ck-m="1"
     >
@@ -95,9 +95,10 @@ export const CheckoutDetail = ({
           {badges.map(({ label, icon, tone }) => {
             // the badge colours come from the tone table (prototype T)
             const toneStyle = {
-              "--badge-bg": TONES[tone].bg,
-              "--badge-fg": TONES[tone].fg,
+              "--badge-bg": TONES[tone].background,
+              "--badge-fg": TONES[tone].foreground,
             } as CSSProperties;
+
             return (
               <span
                 key={label}
@@ -120,10 +121,10 @@ export const CheckoutDetail = ({
           <h2 className={flow.clientName}>{booking.client}</h2>
         </div>
         <div className={flow.detailService}>
-          {booking.svc + " · " + booking.meta}
+          {`${booking.service} · ${booking.meta}`}
         </div>
         <div className={flow.detailWhen}>
-          {booking.day + ", " + booking.time}
+          {`${booking.day}, ${booking.time}`}
         </div>
       </div>
       {panel && (
@@ -164,7 +165,7 @@ export const CheckoutDetail = ({
             <AmountRow
               key={row.key}
               row={row}
-              subClassName={flow.rowSubDetail}
+              subtitleClassName={flow.rowSubDetail}
             />
           ))}
           <div className={flow.totalDetail}>
@@ -211,7 +212,7 @@ export const CheckoutDetail = ({
         <div className={flow.undoBlock}>
           <button
             className={flow.undoButton}
-            onClick={() => setState({ dlg: "undoNs" })}
+            onClick={() => setState({ dialog: "undoNs" })}
           >
             Undo no-show
           </button>

@@ -8,12 +8,15 @@ import styles from "./studio-overlays.module.css";
 
 export const StudioTooltip = ({ studio }: { studio: StudioController }) => {
   const { tip } = studio.state;
+
   if (!tip) return null;
+
   // runtime: anchored to the hovered control
   const position = {
-    "--tip-x": tip.x + "px",
-    "--tip-y": tip.y + "px",
+    "--tip-x": `${tip.x}px`,
+    "--tip-y": `${tip.y}px`,
   } as CSSProperties;
+
   return (
     <div
       className={joinClassNames(
@@ -32,27 +35,31 @@ export const StudioTooltip = ({ studio }: { studio: StudioController }) => {
 /** The "…" action menu: anchored under its opener on wide screens, a sheet otherwise (prototype acts*). */
 export const ActionsMenu = ({ studio }: { studio: StudioController }) => {
   const { state, isWide, actions } = studio;
-  const { acts } = state;
-  if (!acts) return null;
-  const anchor = acts.anchor && isWide ? acts.anchor : null;
+  const { actionSheet } = state;
+
+  if (!actionSheet) return null;
+
+  const anchor = actionSheet.anchor && isWide ? actionSheet.anchor : null;
+
   // runtime: the opener's position on screen
   const anchorStyle = anchor
     ? ({
-        "--acts-top": anchor.top + "px",
-        "--acts-right": anchor.right + "px",
-        "--acts-bottom": anchor.bottom + "px",
-        "--acts-left": anchor.left + "px",
+        "--acts-top": `${anchor.top}px`,
+        "--acts-right": `${anchor.right}px`,
+        "--acts-bottom": `${anchor.bottom}px`,
+        "--acts-left": `${anchor.left}px`,
       } as CSSProperties)
     : undefined;
+
   return (
     <>
       <div
         className={joinClassNames(
           styles.actsScrim,
           anchor && styles.actsScrimClear,
-          state.actsOut ? overlay.scrimOut21 : overlay.scrimIn20,
+          state.actionSheetOut ? overlay.scrimOut21 : overlay.scrimIn20,
         )}
-        onClick={actions.closeActs}
+        onClick={actions.closeActionSheet}
       ></div>
       <div
         className={joinClassNames(
@@ -65,7 +72,7 @@ export const ActionsMenu = ({ studio }: { studio: StudioController }) => {
             : joinClassNames(
                 styles.actsSheet,
                 getDialogPlacement(isWide),
-                getOverlayAnimation(state.actsOut, "dlg", isWide),
+                getOverlayAnimation(state.actionSheetOut, "dialog", isWide),
               ),
         )}
         style={anchorStyle}
@@ -77,12 +84,12 @@ export const ActionsMenu = ({ studio }: { studio: StudioController }) => {
           )}
         >
           <div className={styles.grow}>
-            <div className={styles.actsTitle}>{acts.title}</div>
-            <div className={styles.actsSub}>{acts.sub}</div>
+            <div className={styles.actsTitle}>{actionSheet.title}</div>
+            <div className={styles.actsSub}>{actionSheet.subtitle}</div>
           </div>
           <button
             className={styles.closeButton}
-            onClick={actions.closeActs}
+            onClick={actions.closeActionSheet}
             aria-label="Close"
           >
             <svg
@@ -100,37 +107,40 @@ export const ActionsMenu = ({ studio }: { studio: StudioController }) => {
           </button>
         </div>
         <div className={styles.actsList}>
-          {acts.items.map(({ label, d, off, danger, run }) => (
-            <button
-              key={label}
-              className={joinClassNames(
-                styles.actsItem,
-                danger && styles.actsDanger,
-                off && styles.actsOff,
-              )}
-              onClick={() => {
-                if (off) return;
-                actions.closeActs();
-                window.setTimeout(run, 180);
-              }}
-              disabled={!!off}
-            >
-              <svg
-                className={styles.noShrink}
-                width="17"
-                height="17"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="1.7"
-                strokeLinecap="round"
-                strokeLinejoin="round"
+          {actionSheet.items.map(
+            ({ label, iconPath, disabled, danger, run }) => (
+              <button
+                key={label}
+                className={joinClassNames(
+                  styles.actsItem,
+                  danger && styles.actsDanger,
+                  disabled && styles.actsOff,
+                )}
+                onClick={() => {
+                  if (disabled) return;
+
+                  actions.closeActionSheet();
+                  window.setTimeout(run, 180);
+                }}
+                disabled={!!disabled}
               >
-                <path d={d}></path>
-              </svg>
-              <span className={styles.grow}>{label}</span>
-            </button>
-          ))}
+                <svg
+                  className={styles.noShrink}
+                  width="17"
+                  height="17"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="1.7"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                >
+                  <path d={iconPath}></path>
+                </svg>
+                <span className={styles.grow}>{label}</span>
+              </button>
+            ),
+          )}
         </div>
       </div>
     </>
@@ -140,20 +150,26 @@ export const ActionsMenu = ({ studio }: { studio: StudioController }) => {
 export const ConfirmSheet = ({ studio }: { studio: StudioController }) => {
   const { state, setState, isWide, context } = studio;
   const { confirm } = state;
+
   if (!confirm) return null;
+
   const onNo = () => {
-    if (confirm.no) {
+    if (confirm.onNo) {
       setState({ confirmOut: false });
-      confirm.no();
+      confirm.onNo();
+
       return;
     }
+
     setState({ confirmOut: true });
     window.clearTimeout(context.timers.confirm);
+
     context.timers.confirm = window.setTimeout(
       () => setState({ confirm: null, confirmOut: false }),
       210,
     );
   };
+
   return (
     <>
       <div
@@ -167,7 +183,7 @@ export const ConfirmSheet = ({ studio }: { studio: StudioController }) => {
         className={joinClassNames(
           styles.confirmBox,
           getDialogPlacement(isWide),
-          getOverlayAnimation(state.confirmOut, "dlg", isWide),
+          getOverlayAnimation(state.confirmOut, "dialog", isWide),
         )}
       >
         <div className={styles.confirmTitle}>
@@ -189,8 +205,11 @@ export const ConfirmSheet = ({ studio }: { studio: StudioController }) => {
 
 export const StudioToast = ({ studio }: { studio: StudioController }) => {
   const { state, setState, isWide, context } = studio;
+
   if (!state.toast) return null;
+
   const undo = state.toastUndo;
+
   return (
     <div className={joinClassNames(styles.toast, isWide && styles.toastWide)}>
       <span className={styles.toastText}>{state.toast}</span>

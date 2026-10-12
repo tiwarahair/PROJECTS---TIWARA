@@ -3,26 +3,35 @@ import { joinClassNames } from "../../utils/class-names";
 import { MONTHS, MONTHS_LONG, NOTIFS } from "./studio-data";
 import {
   dayInfo,
-  durToMin,
+  durationToMinutes,
   getAvatarSrc,
-  getMiniCalDays,
+  getMiniCalendarDays,
   hhmm,
   timeRange,
-  toMin,
+  timeToMinutes,
 } from "./studio-format";
-import type { MiniCalDay } from "./studio-format";
-import { getClient, getServiceDur } from "./studio-model";
+import type { MiniCalendarDay } from "./studio-format";
+import { getClient, getServiceDuration } from "./studio-model";
 import { getDialogPlacement, getOverlayAnimation } from "./studio-overlay";
 import type { StudioState } from "./studio-types";
 import type { StudioController } from "./use-studio";
 import overlay from "./studio-overlay.module.css";
 import styles from "./sheets-simple.module.css";
 
-const CAL_DOWS = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
-type MonthKey = "blCalM" | "calM" | "rsCalM" | "ecM";
-type YearKey = "blCalY" | "calY" | "rsCalY" | "ecY";
+const CALENDAR_WEEKDAYS = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
 
-const Arrow = ({ d }: { d: string }) => (
+type MonthKey =
+  | "blockCalendarMonth"
+  | "calendarMonth"
+  | "rescheduleCalendarMonth"
+  | "endCalendarMonth";
+type YearKey =
+  | "blockCalendarYear"
+  | "calendarYear"
+  | "rescheduleCalendarYear"
+  | "endCalendarYear";
+
+const Arrow = ({ iconPath }: { iconPath: string }) => (
   <svg
     width="15"
     height="15"
@@ -33,7 +42,7 @@ const Arrow = ({ d }: { d: string }) => (
     strokeLinecap="round"
     strokeLinejoin="round"
   >
-    <path d={d}></path>
+    <path d={iconPath}></path>
   </svg>
 );
 
@@ -61,23 +70,29 @@ export const getMonthNav = (
 ) => {
   const { state, setState } = studio;
   const now = new Date();
+
   const month =
     state[monthKey] == null ? now.getMonth() : (state[monthKey] as number);
+
   const year =
     state[yearKey] == null ? now.getFullYear() : (state[yearKey] as number);
+
   const rawMonth = state[monthKey] as number | null;
   const rawYear = state[yearKey] as number | null;
+
   const isPrevOff =
     rawYear == null ||
     rawYear < now.getFullYear() ||
     (rawYear === now.getFullYear() && (rawMonth ?? 0) <= now.getMonth());
+
   return {
     month,
     year,
-    title: MONTHS_LONG[month] + " " + year,
+    title: `${MONTHS_LONG[month]} ${year}`,
     isPrevOff,
     prev: () => {
       if (isPrevOff) return;
+
       setState(
         (rawMonth === 0
           ? { [monthKey]: 11, [yearKey]: (rawYear ?? 0) - 1 }
@@ -101,13 +116,13 @@ export const getMonthNav = (
 
 /** A month grid inside a sheet (block time, new booking, reschedule, repeat-until). */
 export const MonthCalendar = ({
-  nav,
+  monthNav,
   days,
   className,
   isLoose = false,
 }: {
-  nav: ReturnType<typeof getMonthNav>;
-  days: MiniCalDay[];
+  monthNav: ReturnType<typeof getMonthNav>;
+  days: MiniCalendarDay[];
   className?: string;
   /** New booking's weekday row is spaced 4px instead of 2px. */
   isLoose?: boolean;
@@ -117,49 +132,51 @@ export const MonthCalendar = ({
       <button
         className={joinClassNames(
           styles.monthArrow,
-          nav.isPrevOff && styles.monthArrowOff,
+          monthNav.isPrevOff && styles.monthArrowOff,
         )}
-        onClick={nav.prev}
-        disabled={nav.isPrevOff}
+        onClick={monthNav.prev}
+        disabled={monthNav.isPrevOff}
         aria-label="Previous month"
       >
-        <Arrow d="m15 18-6-6 6-6" />
+        <Arrow iconPath="m15 18-6-6 6-6" />
       </button>
-      <div className={styles.h3}>{nav.title}</div>
+      <div className={styles.h3}>{monthNav.title}</div>
       <button
         className={styles.monthArrow}
-        onClick={nav.next}
+        onClick={monthNav.next}
         aria-label="Next month"
       >
-        <Arrow d="m9 18 6-6-6-6" />
+        <Arrow iconPath="m9 18 6-6-6-6" />
       </button>
     </div>
     <div className={joinClassNames(styles.dows, isLoose && styles.dowsLoose)}>
-      {CAL_DOWS.map((dow) => (
-        <div key={dow} className={styles.dow}>
-          {dow}
+      {CALENDAR_WEEKDAYS.map((weekday) => (
+        <div key={weekday} className={styles.dow}>
+          {weekday}
         </div>
       ))}
     </div>
     <div className={styles.days}>
-      {days.map(({ key, n, off, bg, color, weight, pick }) => (
-        <button
-          key={key}
-          className={styles.day}
-          // runtime: the day's selected / past state
-          style={
-            {
-              "--day-bg": bg,
-              "--day-color": color,
-              "--day-weight": weight,
-            } as CSSProperties
-          }
-          onClick={pick}
-          disabled={off}
-        >
-          {n}
-        </button>
-      ))}
+      {days.map(
+        ({ key, dayNumber, disabled, background, color, weight, pick }) => (
+          <button
+            key={key}
+            className={styles.day}
+            // runtime: the day's selected / past state
+            style={
+              {
+                "--day-bg": background,
+                "--day-color": color,
+                "--day-weight": weight,
+              } as CSSProperties
+            }
+            onClick={pick}
+            disabled={disabled}
+          >
+            {dayNumber}
+          </button>
+        ),
+      )}
     </div>
   </div>
 );
@@ -186,35 +203,47 @@ export const NotificationsSheet = ({
   studio: StudioController;
 }) => {
   const { state, setState, isWide, actions } = studio;
+
   const deepLink = (run: () => void) => () => {
     actions.closeSheet();
     window.setTimeout(run, 230);
   };
+
   const handlers = [
     deepLink(() =>
       setState({
         tab: "bookings",
-        bview: "list",
+        bookingsLayout: "list",
         listScope: "past",
         pastFilter: "off",
       }),
     ),
     deepLink(() => {
-      setState({ tab: "bookings", dayIdx: 3, bview: "cal" });
-      actions.openSheet("booking", { sheetBId: 4 });
+      setState({ tab: "bookings", dayIndex: 3, bookingsLayout: "cal" });
+      actions.openSheet("booking", { sheetBookingId: 4 });
     }),
     deepLink(() => {
       if (isWide) {
         setState({ tab: "clients" });
-        actions.openSheet("cliView", { cliSel: "kemi", cliApptTab: "past" });
-      } else setState({ tab: "clients", cliSel: "kemi", cliApptTab: "past" });
+
+        actions.openSheet("cliView", {
+          selectedClientId: "kemi",
+          clientAppointmentsTab: "past",
+        });
+      } else
+        setState({
+          tab: "clients",
+          selectedClientId: "kemi",
+          clientAppointmentsTab: "past",
+        });
     }),
     deepLink(() => setState({ tab: "earnings" })),
     deepLink(() => {
-      setState({ tab: "bookings", dayIdx: 0, bview: "cal" });
-      actions.openSheet("booking", { sheetBId: 1 });
+      setState({ tab: "bookings", dayIndex: 0, bookingsLayout: "cal" });
+      actions.openSheet("booking", { sheetBookingId: 1 });
     }),
   ];
+
   return (
     <div className={styles.stack8}>
       {NOTIFS.map(({ title, body, time, unread }, index) => (
@@ -223,7 +252,7 @@ export const NotificationsSheet = ({
           className={styles.notif}
           // runtime: staggered entry
           style={
-            { "--delay": (index * 0.05).toFixed(2) + "s" } as CSSProperties
+            { "--delay": `${(index * 0.05).toFixed(2)}s` } as CSSProperties
           }
           onClick={handlers[index]}
         >
@@ -261,19 +290,24 @@ export const NotificationsSheet = ({
 
 export const StripeSheet = ({ studio }: { studio: StudioController }) => {
   const { state, setState, actions } = studio;
+
   const connect = () => {
     if (state.stripeBusy) return;
+
     setState({ stripeBusy: true });
+
     window.setTimeout(() => {
       setState(({ check }) => ({
         stripeBusy: false,
         check: { ...check, stripe: true },
       }));
-      actions.toastMsg("Stripe connected. You can take payments");
+
+      actions.showToast("Stripe connected. You can take payments");
       actions.closeSheet();
       actions.checkDone();
     }, 1400);
   };
+
   return (
     <>
       <div className={styles.stripeCard}>
@@ -321,7 +355,7 @@ export const StripeSheet = ({ studio }: { studio: StudioController }) => {
   );
 };
 
-const FREQ_LABELS: Record<string, string> = {
+const FREQUENCY_LABELS: Record<string, string> = {
   none: "",
   daily: "Repeats daily",
   weekly: "Repeats weekly",
@@ -331,57 +365,80 @@ const FREQ_LABELS: Record<string, string> = {
 export const BlockSheet = ({ studio }: { studio: StudioController }) => {
   const { state, setState, actions } = studio;
   const draft = state.blockDraft;
+
   const setDraft = (patch: Partial<StudioState["blockDraft"]>) =>
     setState(({ blockDraft }) => ({ blockDraft: { ...blockDraft, ...patch } }));
+
   const selected = draft.day || 0;
   const first = selected > 6 ? selected - 3 : 0;
-  const nav = getMonthNav(studio, "blCalM", "blCalY");
+
+  const monthNav = getMonthNav(
+    studio,
+    "blockCalendarMonth",
+    "blockCalendarYear",
+  );
+
   const times: string[] = [];
+
   for (let minutes = 6 * 60; minutes <= 23 * 60 + 45; minutes += 15)
     times.push(hhmm(minutes));
+
   [draft.start, draft.end].forEach((time) => {
     if (time && !times.includes(time)) times.push(time);
   });
+
   times.sort();
   const isDisabled = !draft.allDay && draft.start >= draft.end;
-  const isRepeating = (draft.freq || "none") !== "none";
-  const endInfo = draft.endOff != null ? dayInfo(draft.endOff) : null;
+  const isRepeating = (draft.frequency || "none") !== "none";
+
+  const endDayInfo =
+    draft.endDayOffset != null ? dayInfo(draft.endDayOffset) : null;
+
   const save = () => {
     const current = studio.context.getState();
     const block = current.blockDraft;
+
     if (!block.allDay && block.start >= block.end) return;
-    const from = block.allDay ? 0 : toMin(block.start);
-    const to = block.allDay ? 1440 : toMin(block.end);
+
+    const from = block.allDay ? 0 : timeToMinutes(block.start);
+    const to = block.allDay ? 1440 : timeToMinutes(block.end);
+
     const hits = current.bookings
-      .filter(({ off }) => off === block.day)
+      .filter(({ dayOffset }) => dayOffset === block.day)
       .filter((booking) => {
-        const start = toMin(booking.time);
+        const start = timeToMinutes(booking.time);
+
         const end =
-          start + durToMin(booking.dur || getServiceDur(current, booking.svc));
+          start +
+          durationToMinutes(
+            booking.duration || getServiceDuration(current, booking.service),
+          );
+
         return start < to && end > from;
       });
+
     if (hits.length && !block.force) {
       const names = hits
-        .map(
-          (booking) =>
-            getClient(current, booking.client).name.split(" ")[0] +
-            " (" +
-            timeRange(
-              booking.time,
-              booking.dur || getServiceDur(current, booking.svc),
-            ) +
-            ")",
-        )
+        .map((booking) => {
+          const clientFirst = getClient(current, booking.client).name.split(
+            " ",
+          )[0];
+
+          const slot = timeRange(
+            booking.time,
+            booking.duration || getServiceDuration(current, booking.service),
+          );
+
+          return `${clientFirst} (${slot})`;
+        })
         .join(", ");
+
+      const bookingNoun = hits.length === 1 ? " booking" : " bookings";
+
       setState({
         confirm: {
-          title:
-            "This overlaps " +
-            hits.length +
-            (hits.length === 1 ? " booking" : " bookings"),
-          body:
-            names +
-            " stay exactly as they are. Blocking only stops new online bookings in this time.",
+          title: `This overlaps ${hits.length}${bookingNoun}`,
+          body: `${names} stay exactly as they are. Blocking only stops new online bookings in this time.`,
           yesLabel: "Keep bookings and block",
           noLabel: "Go back",
           yes: () => {
@@ -389,36 +446,43 @@ export const BlockSheet = ({ studio }: { studio: StudioController }) => {
               confirm: null,
               blockDraft: { ...blockDraft, force: true },
             }));
+
             window.setTimeout(save, 0);
           },
         },
       });
+
       return;
     }
+
     const info = dayInfo(block.day);
-    const frequency = block.freq || "none";
-    let frequencyLabel = FREQ_LABELS[frequency] ?? "";
+    const frequency = block.frequency || "none";
+    let frequencyLabel = FREQUENCY_LABELS[frequency] ?? "";
+
     if (
       frequencyLabel &&
       (block.ends || "never") === "date" &&
-      block.endOff != null
+      block.endDayOffset != null
     ) {
-      const end = dayInfo(block.endOff);
-      frequencyLabel += " until " + end.num + " " + end.mon;
+      const end = dayInfo(block.endDayOffset);
+
+      frequencyLabel += ` until ${end.dayNumber} ${end.monthName}`;
     }
+
     const item = {
       id: block.editId || Date.now(),
-      day: info.dow + " " + info.num + " " + info.mon,
-      dayIdx: block.day,
-      span: block.allDay ? "All day" : block.start + " to " + block.end,
-      freq: frequency,
+      day: `${info.weekday} ${info.dayNumber} ${info.monthName}`,
+      dayIndex: block.day,
+      span: block.allDay ? "All day" : `${block.start} to ${block.end}`,
+      frequency,
       ends: block.ends || "never",
-      endOff: block.endOff,
+      endDayOffset: block.endDayOffset,
       color: block.color || "purple",
       reason:
         [block.reason, frequencyLabel].filter(Boolean).join(" · ") ||
         block.reason,
     };
+
     setState({
       blocked: block.editId
         ? current.blocked.map((existing) =>
@@ -426,30 +490,40 @@ export const BlockSheet = ({ studio }: { studio: StudioController }) => {
           )
         : current.blocked.concat([item]),
     });
-    actions.toastMsg(block.editId ? "Blocked time updated" : "Time blocked");
+
+    actions.showToast(block.editId ? "Blocked time updated" : "Time blocked");
     actions.closeSheet();
   };
+
   return (
     <>
       <div className={styles.dayHead}>
         <div className={styles.label500}>Day</div>
         <CalendarToggle
-          isOpen={state.blCalOpen}
+          isOpen={state.blockCalendarOpen}
           onClick={() => {
             const today = new Date();
+
             setState({
-              blCalOpen: !state.blCalOpen,
-              blCalM: state.blCalM == null ? today.getMonth() : state.blCalM,
-              blCalY: state.blCalY == null ? today.getFullYear() : state.blCalY,
+              blockCalendarOpen: !state.blockCalendarOpen,
+              blockCalendarMonth:
+                state.blockCalendarMonth == null
+                  ? today.getMonth()
+                  : state.blockCalendarMonth,
+              blockCalendarYear:
+                state.blockCalendarYear == null
+                  ? today.getFullYear()
+                  : state.blockCalendarYear,
             });
           }}
         />
       </div>
-      {!state.blCalOpen && (
+      {!state.blockCalendarOpen && (
         <div className={styles.dayStrip}>
-          {Array.from({ length: 7 }, (_, index) => {
+          {Array.from({ length: 7 }, (_slot, index) => {
             const offset = first + index;
             const info = dayInfo(offset);
+
             return (
               <button
                 key={offset}
@@ -459,20 +533,20 @@ export const BlockSheet = ({ studio }: { studio: StudioController }) => {
                 )}
                 onClick={() => setDraft({ day: offset })}
               >
-                <div className={styles.chipDow}>{info.dow}</div>
-                <div className={styles.chipNum}>{info.num}</div>
+                <div className={styles.chipDow}>{info.weekday}</div>
+                <div className={styles.chipNum}>{info.dayNumber}</div>
               </button>
             );
           })}
         </div>
       )}
-      {state.blCalOpen && (
+      {state.blockCalendarOpen && (
         <MonthCalendar
           className={styles.monthIn}
-          nav={nav}
-          days={getMiniCalDays(
-            nav.month,
-            nav.year,
+          monthNav={monthNav}
+          days={getMiniCalendarDays(
+            monthNav.month,
+            monthNav.year,
             draft.day,
             (offset) => setDraft({ day: offset }),
             0,
@@ -531,8 +605,8 @@ export const BlockSheet = ({ studio }: { studio: StudioController }) => {
         <span className={styles.fieldLabel}>Repeats</span>
         <select
           className={styles.select}
-          defaultValue={draft.freq || "none"}
-          onChange={(event) => setDraft({ freq: event.target.value })}
+          defaultValue={draft.frequency || "none"}
+          onChange={(event) => setDraft({ frequency: event.target.value })}
         >
           <option value="none">Doesn&apos;t repeat</option>
           <option value="daily">Daily</option>
@@ -557,20 +631,27 @@ export const BlockSheet = ({ studio }: { studio: StudioController }) => {
             <button
               className={joinClassNames(
                 styles.endDate,
-                draft.endOff != null && styles.endDateSet,
+                draft.endDayOffset != null && styles.endDateSet,
               )}
               onClick={() => {
                 const today = new Date();
+
                 setState({
-                  endCal: true,
-                  endCalOut: false,
-                  ecM: state.ecM == null ? today.getMonth() : state.ecM,
-                  ecY: state.ecY == null ? today.getFullYear() : state.ecY,
+                  endCalendarOpen: true,
+                  endCalendarOut: false,
+                  endCalendarMonth:
+                    state.endCalendarMonth == null
+                      ? today.getMonth()
+                      : state.endCalendarMonth,
+                  endCalendarYear:
+                    state.endCalendarYear == null
+                      ? today.getFullYear()
+                      : state.endCalendarYear,
                 });
               }}
             >
-              {endInfo
-                ? endInfo.dow + " " + endInfo.num + " " + endInfo.mon
+              {endDayInfo
+                ? `${endDayInfo.weekday} ${endDayInfo.dayNumber} ${endDayInfo.monthName}`
                 : "Pick a date"}
               <svg
                 width="15"
@@ -615,40 +696,48 @@ export const BlockSheet = ({ studio }: { studio: StudioController }) => {
 /** "Repeat until" — the block sheet's end-date calendar (prototype endCal). */
 export const EndDateDialog = ({ studio }: { studio: StudioController }) => {
   const { state, setState, isWide, context } = studio;
-  if (!state.endCal) return null;
+
+  if (!state.endCalendarOpen) return null;
+
   const close = () => {
-    setState({ endCalOut: true });
-    window.clearTimeout(context.timers.endCal);
-    context.timers.endCal = window.setTimeout(
-      () => setState({ endCal: false, endCalOut: false }),
+    setState({ endCalendarOut: true });
+    window.clearTimeout(context.timers.endCalendar);
+
+    context.timers.endCalendar = window.setTimeout(
+      () => setState({ endCalendarOpen: false, endCalendarOut: false }),
       210,
     );
   };
-  const nav = getMonthNav(studio, "ecM", "ecY");
-  const days = getMiniCalDays(
-    nav.month,
-    nav.year,
-    state.blockDraft.endOff,
+
+  const monthNav = getMonthNav(studio, "endCalendarMonth", "endCalendarYear");
+
+  const days = getMiniCalendarDays(
+    monthNav.month,
+    monthNav.year,
+    state.blockDraft.endDayOffset,
     (offset) => {
       setState(({ blockDraft }) => ({
-        blockDraft: { ...blockDraft, endOff: offset },
-        endCalOut: true,
+        blockDraft: { ...blockDraft, endDayOffset: offset },
+        endCalendarOut: true,
       }));
-      window.clearTimeout(context.timers.endCal);
-      context.timers.endCal = window.setTimeout(
-        () => setState({ endCal: false, endCalOut: false }),
+
+      window.clearTimeout(context.timers.endCalendar);
+
+      context.timers.endCalendar = window.setTimeout(
+        () => setState({ endCalendarOpen: false, endCalendarOut: false }),
         210,
       );
     },
     Math.max(1, (state.blockDraft.day || 0) + 1),
   );
+
   return (
     <>
       {/* eslint-disable-next-line jsx-a11y/click-events-have-key-events, jsx-a11y/no-static-element-interactions */}
       <div
         className={joinClassNames(
           styles.endScrim,
-          state.endCalOut ? overlay.scrimOut21 : overlay.scrimIn20,
+          state.endCalendarOut ? overlay.scrimOut21 : overlay.scrimIn20,
         )}
         onClick={close}
       ></div>
@@ -656,7 +745,7 @@ export const EndDateDialog = ({ studio }: { studio: StudioController }) => {
         className={joinClassNames(
           styles.endDialog,
           getDialogPlacement(isWide),
-          getOverlayAnimation(state.endCalOut, "dlg", isWide),
+          getOverlayAnimation(state.endCalendarOut, "dialog", isWide),
         )}
       >
         <div className={styles.endHead}>
@@ -676,7 +765,7 @@ export const EndDateDialog = ({ studio }: { studio: StudioController }) => {
             </svg>
           </button>
         </div>
-        <MonthCalendar nav={nav} days={days} />
+        <MonthCalendar monthNav={monthNav} days={days} />
       </div>
     </>
   );
@@ -685,24 +774,31 @@ export const EndDateDialog = ({ studio }: { studio: StudioController }) => {
 export const ClosedSheet = ({ studio }: { studio: StudioController }) => {
   const { state, setState, actions } = studio;
   const draft = state.closedDraft;
+
   const setDraft = (patch: Partial<StudioState["closedDraft"]>) =>
     setState(({ closedDraft }) => ({
       closedDraft: { ...closedDraft, ...patch },
     }));
+
   const isReady = !!(draft.from && draft.to);
+
   const save = () => {
     if (!isReady) return;
+
     const format = (value: string) => {
-      const date = new Date(value + "T12:00:00");
-      return date.getDate() + " " + MONTHS[date.getMonth()];
+      const date = new Date(`${value}T12:00:00`);
+
+      return `${date.getDate()} ${MONTHS[date.getMonth()]}`;
     };
+
     const item = {
       id: draft.editId || Date.now(),
       from: draft.from,
       to: draft.to,
-      span: format(draft.from) + " to " + format(draft.to),
+      span: `${format(draft.from)} to ${format(draft.to)}`,
       reason: draft.reason,
     };
+
     setState({
       closed: draft.editId
         ? state.closed.map((period) =>
@@ -710,13 +806,16 @@ export const ClosedSheet = ({ studio }: { studio: StudioController }) => {
           )
         : state.closed.concat([item]),
     });
-    actions.toastMsg(
+
+    actions.showToast(
       draft.editId
         ? "Closed period updated"
         : "Closed period added. Online booking blocked",
     );
+
     actions.closeSheet();
   };
+
   return (
     <>
       <div className={styles.closedIntro}>
@@ -766,21 +865,26 @@ export const ClosedSheet = ({ studio }: { studio: StudioController }) => {
 /** The older "Client" sheet (prototype sheetC), still reachable from the booking flow. */
 export const ClientSheet = ({ studio }: { studio: StudioController }) => {
   const { state, actions, seedPast } = studio;
-  if (!state.sheetCId) return null;
-  const client = getClient(state, state.sheetCId);
+
+  if (!state.sheetClientId) return null;
+
+  const client = getClient(state, state.sheetClientId);
+
   const history = seedPast
     .filter((row) => row.client === client.id)
     .map((row) => ({
       key: row.when + row.time,
-      svc: row.svc,
-      when: row.when + " · £" + row.price,
+      service: row.service,
+      when: `${row.when} · £${row.price}`,
     }));
-  const subLine = [
+
+  const subtitleLine = [
     client.area || "",
-    client.fav ? "Usually books " + client.fav : "",
+    client.fav ? `Usually books ${client.fav}` : "",
   ]
     .filter(Boolean)
     .join(" · ");
+
   return (
     <>
       <div className={styles.clientHead}>
@@ -791,7 +895,7 @@ export const ClientSheet = ({ studio }: { studio: StudioController }) => {
         />
         <div className={styles.flex1}>
           <div className={styles.clientName}>{client.name}</div>
-          {subLine && <div className={styles.muted}>{subLine}</div>}
+          {subtitleLine && <div className={styles.muted}>{subtitleLine}</div>}
         </div>
       </div>
       <div className={styles.clientStats}>
@@ -800,7 +904,7 @@ export const ClientSheet = ({ studio }: { studio: StudioController }) => {
           <div className={styles.statLabel}>Visits</div>
         </div>
         <div className={styles.clientStat}>
-          <div className={styles.statValue}>{"£" + (client.spent || 0)}</div>
+          <div className={styles.statValue}>{`£${client.spent || 0}`}</div>
           <div className={styles.statLabel}>Spent</div>
         </div>
         <div className={styles.clientStat}>
@@ -812,26 +916,28 @@ export const ClientSheet = ({ studio }: { studio: StudioController }) => {
         <>
           <div className={styles.historyTitle}>Recent appointments</div>
           <div className={styles.history}>
-            {history.map(({ key, svc, when }) => (
+            {history.map(({ key, service, when }) => (
               <div key={key} className={styles.historyRow}>
-                <span className={styles.bold}>{svc}</span>
+                <span className={styles.bold}>{service}</span>
                 <span className={styles.secondary}>{when}</span>
               </div>
             ))}
           </div>
         </>
       )}
-      {!state.cFromB && (
+      {!state.clientFromBookingId && (
         <button
           className={styles.bookButton}
           onClick={() => {
-            const clientId = state.sheetCId ?? null;
+            const clientId = state.sheetClientId ?? null;
+
             actions.closeSheet();
+
             window.setTimeout(() => {
               actions.openSheet("add", {
                 addStep: 2,
                 addClient: clientId,
-                addSvc: null,
+                addService: null,
                 addDay: null,
                 addTime: null,
                 addCustom: false,

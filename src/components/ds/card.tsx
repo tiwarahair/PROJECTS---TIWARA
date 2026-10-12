@@ -29,6 +29,7 @@ export const Card = ({
 }: CardProps) => {
   // The hairline is the resting outline of an interactive thing. onClick implies it.
   const isBounded = tappable ?? !!onClick;
+
   return (
     <div
       onClick={onClick}
@@ -44,7 +45,7 @@ export const Card = ({
       style={
         {
           "--card-padding":
-            typeof padding === "number" ? padding + "px" : padding,
+            typeof padding === "number" ? `${padding}px` : padding,
           ...style,
         } as CSSProperties
       }

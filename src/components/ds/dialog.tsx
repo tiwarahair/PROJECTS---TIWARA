@@ -21,13 +21,14 @@ export const Dialog = ({
   width = 440,
 }: DialogProps) => {
   if (!open) return null;
+
   return (
     <div className={styles.scrim} onClick={onClose}>
       <div
         className={styles.panel}
         onClick={(event) => event.stopPropagation()}
         // --dialog-width: the width prop is any pixel value
-        style={{ "--dialog-width": width + "px" } as CSSProperties}
+        style={{ "--dialog-width": `${width}px` } as CSSProperties}
       >
         <div className={styles.header}>
           <div className={styles.title}>{title}</div>

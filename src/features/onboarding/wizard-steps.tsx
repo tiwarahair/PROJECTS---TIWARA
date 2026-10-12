@@ -11,7 +11,7 @@ import {
   RADII,
   SOURCES,
 } from "./onboarding-data";
-import { ObTurnstile } from "./ob-turnstile";
+import { OnboardingTurnstile } from "./onboarding-turnstile";
 import { OnboardingMap } from "./onboarding-map";
 import type { ScreenProps } from "./screen-props";
 import styles from "./wizard-steps.module.css";
@@ -74,17 +74,19 @@ const tileClass = (on: boolean) => (on ? styles.tileOn : styles.tileOff);
 /** Step 1: how you work; picking one moves on after 300ms. */
 export const StepType = ({ onboarding, layout }: ScreenProps) => {
   const { state, actions } = onboarding;
+
   return (
     <div
       role="radiogroup"
       aria-label="How you work"
       className={joinClassNames(
         styles.typeGrid,
-        layout.mid ? styles.typeGridMid : styles.typeGridNarrow,
+        layout.isTabletOrWider ? styles.typeGridMid : styles.typeGridNarrow,
       )}
     >
-      {BUSINESS_TYPES.map(({ key, title, sub, d }) => {
-        const on = state.f.type === key;
+      {BUSINESS_TYPES.map(({ key, title, subtitle, iconPath }) => {
+        const on = state.form.type === key;
+
         return (
           <button
             key={key}
@@ -107,12 +109,12 @@ export const StepType = ({ onboarding, layout }: ScreenProps) => {
                 strokeLinecap="round"
                 strokeLinejoin="round"
               >
-                <path d={d}></path>
+                <path d={iconPath}></path>
               </svg>
             </span>
             <span className={styles.tileText}>
               <span className={styles.tileTitle}>{title}</span>
-              <span className={styles.tileSub}>{sub}</span>
+              <span className={styles.tileSub}>{subtitle}</span>
             </span>
           </button>
         );
@@ -124,8 +126,9 @@ export const StepType = ({ onboarding, layout }: ScreenProps) => {
 /** Step 2: service categories; the first picked is Primary. */
 export const StepServices = ({ onboarding, layout, view }: ScreenProps) => {
   const { state, actions } = onboarding;
-  const { cats } = state.f;
-  const helpShown = !!view.shown.cats;
+  const { categories } = state.form;
+  const helpShown = !!view.shown.categories;
+
   return (
     <>
       <div
@@ -133,20 +136,23 @@ export const StepServices = ({ onboarding, layout, view }: ScreenProps) => {
         aria-label="Service categories"
         className={joinClassNames(
           styles.catGrid,
-          layout.mid ? styles.catGridMid : styles.catGridNarrow,
+          layout.isTabletOrWider ? styles.catGridMid : styles.catGridNarrow,
         )}
       >
-        {CATEGORIES.map(({ key, title, d }) => {
-          const index = cats.indexOf(key);
+        {CATEGORIES.map(({ key, title, iconPath }) => {
+          const index = categories.indexOf(key);
           const on = index >= 0;
+
           return (
             <button
               key={key}
               aria-pressed={on ? "true" : "false"}
               onClick={() =>
                 actions.setField(
-                  "cats",
-                  on ? cats.filter((cat) => cat !== key) : cats.concat([key]),
+                  "categories",
+                  on
+                    ? categories.filter((category) => category !== key)
+                    : categories.concat([key]),
                   true,
                 )
               }
@@ -163,7 +169,7 @@ export const StepServices = ({ onboarding, layout, view }: ScreenProps) => {
                   strokeLinecap="round"
                   strokeLinejoin="round"
                 >
-                  <path d={d}></path>
+                  <path d={iconPath}></path>
                 </svg>
               </span>
               <span className={joinClassNames(styles.tileText, styles.catText)}>
@@ -191,16 +197,21 @@ export const StepServices = ({ onboarding, layout, view }: ScreenProps) => {
 
 /** Step 3: business name, then the address + pin (or base postcode + travel radius for mobile stylists). */
 export const StepDetails = ({ onboarding, layout, view }: ScreenProps) => {
-  const { state, actions, defaultGeo } = onboarding;
-  const { f } = state;
+  const { state, actions, defaultLatLng } = onboarding;
+  const { form } = state;
   const { shown } = view;
-  const isMobile = f.type === "mobile";
+  const isMobile = form.type === "mobile";
+  const radiusBase = form.postcode ? form.postcode.toUpperCase() : "your base";
+
   const areaHint =
     state.area ||
     (() => {
-      const district = (f.pc || "M14").toUpperCase().split(/\s/)[0] ?? "";
-      return (AREA_NAMES[district] || "Rusholme") + ", " + district;
+      const district =
+        (form.postcode || "M14").toUpperCase().split(/\s/)[0] ?? "";
+
+      return `${AREA_NAMES[district] || "Rusholme"}, ${district}`;
     })();
+
   return (
     <>
       <label htmlFor="ob-biz" className={styles.label}>
@@ -209,14 +220,16 @@ export const StepDetails = ({ onboarding, layout, view }: ScreenProps) => {
       <input
         id="ob-biz"
         autoComplete="organization"
-        value={f.biz}
-        onChange={(event) => actions.setField("biz", event.target.value)}
-        onBlur={() => actions.touch("biz")}
-        aria-invalid={shown.biz ? "true" : "false"}
+        value={form.businessName}
+        onChange={(event) =>
+          actions.setField("businessName", event.target.value)
+        }
+        onBlur={() => actions.touch("businessName")}
+        aria-invalid={shown.businessName ? "true" : "false"}
         aria-describedby="ob-biz-help"
         className={joinClassNames(
           styles.input,
-          shown.biz ? styles.borderError : styles.border,
+          shown.businessName ? styles.borderError : styles.border,
         )}
       />
       <div
@@ -224,10 +237,10 @@ export const StepDetails = ({ onboarding, layout, view }: ScreenProps) => {
         role="alert"
         className={joinClassNames(
           styles.help,
-          shown.biz ? styles.helpError : styles.helpMuted,
+          shown.businessName ? styles.helpError : styles.helpMuted,
         )}
       >
-        {shown.biz ||
+        {shown.businessName ||
           "The name clients see. Your legal name comes from Stripe later."}
       </div>
       {isMobile && (
@@ -239,23 +252,26 @@ export const StepDetails = ({ onboarding, layout, view }: ScreenProps) => {
             id="ob-bpc"
             autoComplete="postal-code"
             autoCapitalize="characters"
-            value={f.pc}
-            onChange={(event) => actions.setField("pc", event.target.value)}
-            onBlur={() => actions.touch("pc")}
-            aria-invalid={shown.pc ? "true" : "false"}
+            value={form.postcode}
+            onChange={(event) =>
+              actions.setField("postcode", event.target.value)
+            }
+            onBlur={() => actions.touch("postcode")}
+            aria-invalid={shown.postcode ? "true" : "false"}
             className={joinClassNames(
               styles.postcodeInput,
-              shown.pc ? styles.borderError : styles.border,
+              shown.postcode ? styles.borderError : styles.border,
             )}
           />
           <div
             role="alert"
             className={joinClassNames(
               styles.help,
-              shown.pc ? styles.helpError : styles.helpMuted,
+              shown.postcode ? styles.helpError : styles.helpMuted,
             )}
           >
-            {shown.pc || "Where your day usually starts. Clients never see it."}
+            {shown.postcode ||
+              "Where your day usually starts. Clients never see it."}
           </div>
           <div className={styles.radiusTitle}>How far will you travel?</div>
           <div
@@ -264,7 +280,8 @@ export const StepDetails = ({ onboarding, layout, view }: ScreenProps) => {
             className={styles.radii}
           >
             {RADII.map((radius) => {
-              const on = f.radius === radius;
+              const on = form.radius === radius;
+
               return (
                 <button
                   key={radius}
@@ -276,17 +293,13 @@ export const StepDetails = ({ onboarding, layout, view }: ScreenProps) => {
                     on ? styles.radiusOn : styles.radiusOff,
                   )}
                 >
-                  {radius + " miles"}
+                  {`${radius} miles`}
                 </button>
               );
             })}
           </div>
           <div className={styles.radiusHint}>
-            {"Clients within " +
-              f.radius +
-              " miles of " +
-              (f.pc ? f.pc.toUpperCase() : "your base") +
-              " can book you. You can change this any time."}
+            {`Clients within ${form.radius} miles of ${radiusBase} can book you. You can change this any time.`}
           </div>
         </>
       )}
@@ -297,24 +310,24 @@ export const StepDetails = ({ onboarding, layout, view }: ScreenProps) => {
               idPrefix="ob-addr"
               label="Address or postcode"
               value={
-                f.a1
+                form.line1
                   ? {
-                      line1: f.a1,
-                      line2: f.a2,
-                      town: f.city,
-                      postcode: f.pc,
-                      source: state.addrSrc || "pick",
+                      line1: form.line1,
+                      line2: form.line2,
+                      town: form.city,
+                      postcode: form.postcode,
+                      source: state.addressSource || "pick",
                     }
                   : null
               }
               onChange={actions.setAddress}
-              showErrors={!!state.touched.addr}
-              fixture={(state.afFx || "") as AddressFixture}
+              showErrors={!!state.touched.address}
+              fixture={(state.addressFinderFixture || "") as AddressFixture}
               fieldHeight={54}
               labelSize={14}
             />
           </div>
-          {state.addrOpen && (
+          {state.addressOpen && (
             <div className={styles.pinSection}>
               <div className={styles.pinTitle}>
                 Is the pin in the right place?
@@ -323,12 +336,16 @@ export const StepDetails = ({ onboarding, layout, view }: ScreenProps) => {
                 Drag it, or tap the map, to mark your door.
               </div>
               <OnboardingMap
-                center={state.ll || state.geo || defaultGeo}
-                geo={state.geo}
+                center={
+                  state.pinLatLng || state.geocodedLatLng || defaultLatLng
+                }
+                geocodedLatLng={state.geocodedLatLng}
                 isDark={layout.isDark}
-                onPin={(ll) => actions.setState({ ll }, actions.save)}
+                onPin={(pinLatLng) =>
+                  actions.setState({ pinLatLng }, actions.save)
+                }
               />
-              {f.type === "home" && (
+              {form.type === "home" && (
                 <div className={styles.homeNote}>
                   <svg
                     width="18"
@@ -357,6 +374,12 @@ export const StepDetails = ({ onboarding, layout, view }: ScreenProps) => {
   );
 };
 
+const getAriaInvalid = (invalid: boolean | undefined) => {
+  if (invalid === undefined) return undefined;
+
+  return invalid ? "true" : "false";
+};
+
 const Checkbox = ({
   checked,
   onChange,
@@ -375,9 +398,7 @@ const Checkbox = ({
       type="checkbox"
       checked={checked}
       onChange={onChange}
-      aria-invalid={
-        invalid === undefined ? undefined : invalid ? "true" : "false"
-      }
+      aria-invalid={getAriaInvalid(invalid)}
       className={styles.checkbox}
     />
     {children}
@@ -387,20 +408,23 @@ const Checkbox = ({
 /** Step 4: the stylist's account (8+ character password), business contact and Partner Terms. */
 export const StepAccount = ({ onboarding, layout, view }: ScreenProps) => {
   const { state, actions } = onboarding;
-  const { f } = state;
+  const { form } = state;
   const { shown } = view;
+
   const text = (key: "first" | "last" | "email") => ({
-    value: f[key],
+    value: form[key],
     onChange: (event: ChangeEvent<HTMLInputElement>) =>
       actions.setField(key, event.target.value),
     onBlur: () => actions.touch(key),
     error: shown[key] ?? "",
   });
+
   const { meter, role } = getOnboardingMeter(
     onboarding,
     layout.isDark,
-    shown.pw ?? "",
+    shown.password ?? "",
   );
+
   return (
     <>
       <div className={styles.nameRow}>
@@ -436,7 +460,7 @@ export const StepAccount = ({ onboarding, layout, view }: ScreenProps) => {
       <div
         className={joinClassNames(
           styles.mobileWrap,
-          shown.mob ? styles.borderError : styles.border,
+          shown.mobile ? styles.borderError : styles.border,
         )}
       >
         <span className={styles.prefix}>+44</span>
@@ -445,15 +469,15 @@ export const StepAccount = ({ onboarding, layout, view }: ScreenProps) => {
           type="tel"
           inputMode="tel"
           autoComplete="tel-national"
-          value={f.mob}
-          onChange={(event) => actions.setField("mob", event.target.value)}
-          onBlur={() => actions.touch("mob")}
-          aria-invalid={shown.mob ? "true" : "false"}
+          value={form.mobile}
+          onChange={(event) => actions.setField("mobile", event.target.value)}
+          onBlur={() => actions.touch("mobile")}
+          aria-invalid={shown.mobile ? "true" : "false"}
           className={styles.mobileInput}
         />
       </div>
       <div role="alert" className={styles.error}>
-        {shown.mob ?? ""}
+        {shown.mobile ?? ""}
       </div>
       <label htmlFor="ob-wpw" className={styles.labelNext}>
         Password
@@ -461,29 +485,31 @@ export const StepAccount = ({ onboarding, layout, view }: ScreenProps) => {
       <div className={styles.passwordWrap}>
         <input
           id="ob-wpw"
-          type={state.pwShow ? "text" : "password"}
+          type={state.passwordShown ? "text" : "password"}
           autoComplete="new-password"
-          value={f.pw}
-          onChange={(event) => actions.setField("pw", event.target.value)}
-          onBlur={() => actions.touch("pw")}
-          aria-invalid={shown.pw ? "true" : "false"}
+          value={form.password}
+          onChange={(event) => actions.setField("password", event.target.value)}
+          onBlur={() => actions.touch("password")}
+          aria-invalid={shown.password ? "true" : "false"}
           aria-describedby="ob-wpw-hint"
           className={joinClassNames(
             styles.passwordInput,
-            shown.pw ? styles.borderError : styles.border,
+            shown.password ? styles.borderError : styles.border,
           )}
         />
         <button
-          onClick={() => actions.setState({ pwShow: !state.pwShow })}
-          aria-label={state.pwShow ? "Hide password" : "Show password"}
+          onClick={() =>
+            actions.setState({ passwordShown: !state.passwordShown })
+          }
+          aria-label={state.passwordShown ? "Hide password" : "Show password"}
           className={styles.passwordToggle}
         >
-          {state.pwShow ? "Hide" : "Show"}
+          {state.passwordShown ? "Hide" : "Show"}
         </button>
       </div>
       <PasswordMeter id="ob-wpw-hint" view={meter} messageRole={role} />
       <Checkbox
-        checked={f.useContact}
+        checked={form.useContact}
         onChange={(event) =>
           actions.setField("useContact", event.target.checked, true)
         }
@@ -491,7 +517,7 @@ export const StepAccount = ({ onboarding, layout, view }: ScreenProps) => {
       >
         <span>Use these details for clients to contact me</span>
       </Checkbox>
-      {!f.useContact && (
+      {!form.useContact && (
         <div className={styles.bizContact}>
           <label htmlFor="ob-bph" className={styles.label}>
             Business phone
@@ -501,8 +527,10 @@ export const StepAccount = ({ onboarding, layout, view }: ScreenProps) => {
             type="tel"
             inputMode="tel"
             autoComplete="off"
-            value={f.bph}
-            onChange={(event) => actions.setField("bph", event.target.value)}
+            value={form.businessPhone}
+            onChange={(event) =>
+              actions.setField("businessPhone", event.target.value)
+            }
             className={styles.bizInput}
           />
           <label htmlFor="ob-bem" className={styles.bizEmailLabel}>
@@ -513,23 +541,25 @@ export const StepAccount = ({ onboarding, layout, view }: ScreenProps) => {
             type="email"
             inputMode="email"
             autoComplete="off"
-            value={f.bem}
-            onChange={(event) => actions.setField("bem", event.target.value)}
+            value={form.businessEmail}
+            onChange={(event) =>
+              actions.setField("businessEmail", event.target.value)
+            }
             className={styles.bizInput}
           />
           <div
             role="alert"
             className={joinClassNames(
               styles.bizHelp,
-              shown.bc ? styles.helpError : styles.bizHelpMuted,
+              shown.businessContact ? styles.helpError : styles.bizHelpMuted,
             )}
           >
-            {shown.bc || "Add at least one"}
+            {shown.businessContact || "Add at least one"}
           </div>
         </div>
       )}
       <Checkbox
-        checked={f.terms}
+        checked={form.terms}
         onChange={(event) =>
           actions.setField("terms", event.target.checked, true)
         }
@@ -559,14 +589,14 @@ export const StepAccount = ({ onboarding, layout, view }: ScreenProps) => {
         {shown.terms ?? ""}
       </div>
       {view.turnstileShown && (
-        <ObTurnstile
-          ts={state.ts}
+        <OnboardingTurnstile
+          status={state.turnstile}
           isDark={layout.isDark}
           onCheck={actions.checkTurnstile}
           inWizard
         />
       )}
-      {!!state.err.exists && (
+      {!!state.serverErrors.exists && (
         <div role="alert" className={styles.exists}>
           <span className={styles.existsText}>
             <span className={styles.existsTitle}>
@@ -577,7 +607,7 @@ export const StepAccount = ({ onboarding, layout, view }: ScreenProps) => {
           <button
             onClick={() => {
               actions.setState({ audience: "pro" });
-              actions.go("pro-password");
+              actions.goTo("pro-password");
             }}
             className={styles.loginInstead}
           >
@@ -592,7 +622,8 @@ export const StepAccount = ({ onboarding, layout, view }: ScreenProps) => {
 /** Step 5: how they heard about us (optional; Skip goes straight to verify). */
 export const StepSource = ({ onboarding }: ScreenProps) => {
   const { state, actions } = onboarding;
-  const { f } = state;
+  const { form } = state;
+
   return (
     <>
       <div
@@ -601,13 +632,14 @@ export const StepSource = ({ onboarding }: ScreenProps) => {
         className={styles.sources}
       >
         {SOURCES.map((source) => {
-          const on = f.src === source;
+          const on = form.referralSource === source;
+
           return (
             <button
               key={source}
               role="radio"
               aria-checked={on ? "true" : "false"}
-              onClick={() => actions.setField("src", source)}
+              onClick={() => actions.setField("referralSource", source)}
               className={joinClassNames(
                 styles.source,
                 on ? styles.sourceOn : styles.sourceOff,
@@ -621,16 +653,16 @@ export const StepSource = ({ onboarding }: ScreenProps) => {
           );
         })}
       </div>
-      {f.src === "Other" && (
+      {form.referralSource === "Other" && (
         <div className={styles.otherWrap}>
           <label htmlFor="ob-other" className={styles.labelGap}>
             Where did you hear about us?
           </label>
           <input
             id="ob-other"
-            value={f.srcOther}
+            value={form.referralSourceOther}
             onChange={(event) =>
-              actions.setField("srcOther", event.target.value)
+              actions.setField("referralSourceOther", event.target.value)
             }
             maxLength={80}
             className={styles.otherInput}

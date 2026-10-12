@@ -24,34 +24,45 @@ const findByIdOrSlug = <T extends { id: string; slug: string }>(
 ): T | undefined =>
   list.filter(({ id, slug }) => id === value || slug === value)[0];
 
+const getSearchWhat = (
+  type: string | null,
+  group: string | null,
+  query: string | null,
+) => {
+  if (type) return findByIdOrSlug(serviceTypes, type)?.name || type;
+
+  if (group) return findByIdOrSlug(serviceGroups, group)?.name || group;
+
+  if (query) return `‘${query}’`;
+
+  return "All styles";
+};
+
 /** "Knotless braids · Chorlton · Sat 12 Sep, Morning" */
 export const getSearchSummary = (href: string): string => {
   const params = new URLSearchParams(href.split("?")[1] || "");
   const group = params.get("group") || params.get("service");
   const type = params.get("type");
   const query = params.get("q");
-  const what = type
-    ? findByIdOrSlug(serviceTypes, type)?.name || type
-    : group
-      ? findByIdOrSlug(serviceGroups, group)?.name || group
-      : query
-        ? "‘" + query + "’"
-        : "All styles";
+  const what = getSearchWhat(type, group, query);
   const where = params.get("loc") || "Current location";
   const date = params.get("date");
   const time = params.get("time");
   let when = "";
+
   if (date && /^\d{4}-\d{2}-\d{2}$/.test(date))
-    when = new Date(date + "T12:00").toLocaleDateString("en-GB", {
+    when = new Date(`${date}T12:00`).toLocaleDateString("en-GB", {
       weekday: "short",
       day: "numeric",
       month: "short",
     });
+
   if (time && time !== "any")
     when +=
       (when ? ", " : "") +
       time.charAt(0).toUpperCase() +
       time.slice(1).replace("-", "–");
+
   return [what, where, when || "Any time"].join(" · ");
 };
 
@@ -59,6 +70,7 @@ export const getLastSearch = (): LastSearch => {
   const href =
     getSearchParams().get("lastsearch") ||
     (isBoardView() ? null : readSession(LAST_SEARCH_KEY));
+
   if (!href)
     return {
       has: false,
@@ -66,6 +78,7 @@ export const getLastSearch = (): LastSearch => {
       label: "Find a stylist",
       summary: "",
     };
+
   return {
     has: true,
     href,

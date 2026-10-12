@@ -5,9 +5,15 @@ import {
   getPasswordMin,
   getPasswordView,
 } from "../../utils/password";
-import type { AccountController } from "./use-account";
+import type { AccountController, PasswordState } from "./use-account";
 import styles from "./security-section.module.css";
 import ui from "./account-ui.module.css";
+
+const getPasswordStatus = ({ has, changed }: PasswordState) => {
+  if (!has) return "Not set. You log in with Google.";
+
+  return changed ? "Changed just now" : "Last changed 4 months ago";
+};
 
 /** Login & security: password (change / set, with the strength meter), Google / Apple, log out everywhere. */
 export const SecuritySection = ({
@@ -15,35 +21,58 @@ export const SecuritySection = ({
 }: {
   account: AccountController;
 }) => {
-  const { pw, me, gg, ap } = state;
+  const { password, profile, googleConnected, appleConnected } = state;
   const { setState, showToast } = actions;
-  const check = checkPassword(pw.next, {
+
+  const check = checkPassword(password.next, {
     min: getPasswordMin("client"),
-    first: me.first,
-    last: me.last,
-    email: me.email,
+    first: profile.first,
+    last: profile.last,
+    email: profile.email,
   });
+
   const meter = getPasswordView(check, {
-    show: pw.tried || (pw.blur && check.typed),
+    show: password.tried || (password.blur && check.typed),
   });
-  const methods = (pw.has ? 1 : 0) + (gg ? 1 : 0) + (ap ? 1 : 0);
+
+  const methods =
+    (password.has ? 1 : 0) +
+    (googleConnected ? 1 : 0) +
+    (appleConnected ? 1 : 0);
+
   const openPassword = () =>
     setState(
-      ({ pw: current }) => ({ pw: { ...current, open: true } }),
-      () => actions.focusLater("pw"),
+      ({ password: current }) => ({ password: { ...current, open: true } }),
+      () => actions.focusLater("password"),
     );
+
   const socials = [
-    { key: "gg" as const, name: "Google", mark: "G", on: gg, sub: me.email },
-    { key: "ap" as const, name: "Apple", mark: "A", on: ap, sub: "" },
+    {
+      key: "googleConnected" as const,
+      name: "Google",
+      mark: "G",
+      on: googleConnected,
+      subtitle: profile.email,
+    },
+    {
+      key: "appleConnected" as const,
+      name: "Apple",
+      mark: "A",
+      on: appleConnected,
+      subtitle: "",
+    },
   ];
+
   // the meter colours come from the password checker
-  const segStyle = (background: string) =>
+  const segmentStyle = (background: string) =>
     ({ "--seg-bg": background }) as CSSProperties;
+
   const messageStyle = {
-    "--msg-colour": meter.msgC,
-    "--msg-weight": meter.msgW,
+    "--msg-colour": meter.messageColour,
+    "--msg-weight": meter.messageWeight,
   } as CSSProperties;
-  const labelStyle = { "--label-colour": meter.labelC } as CSSProperties;
+
+  const labelStyle = { "--label-colour": meter.labelColour } as CSSProperties;
 
   return (
     <section data-screen-label="Account: Login and security">
@@ -56,50 +85,51 @@ export const SecuritySection = ({
               <div
                 className={joinClassNames(
                   styles.pwValue,
-                  pw.has ? ui.valueOn : ui.valueOff,
+                  password.has ? ui.valueOn : ui.valueOff,
                 )}
               >
-                {!pw.has
-                  ? "Not set. You log in with Google."
-                  : pw.changed
-                    ? "Changed just now"
-                    : "Last changed 4 months ago"}
+                {getPasswordStatus(password)}
               </div>
             </div>
-            {!pw.open && (
+            {!password.open && (
               <button className={ui.outlineButton} onClick={openPassword}>
-                {pw.has ? "Change password" : "Set a password"}
+                {password.has ? "Change password" : "Set a password"}
               </button>
             )}
           </div>
-          {pw.open && (
+          {password.open && (
             <div
               className={styles.pwForm}
               data-screen-label="Change password open"
             >
-              {pw.has && (
+              {password.has && (
                 <label className={ui.label}>
                   Current password{" "}
                   <input
                     className={joinClassNames(
                       ui.input,
-                      pw.curErr ? ui.inputErr : ui.inputOk,
+                      password.currentError ? ui.inputErr : ui.inputOk,
                     )}
                     ref={refs.current}
-                    type={pw.show ? "text" : "password"}
-                    value={pw.cur}
+                    type={password.show ? "text" : "password"}
+                    value={password.current}
                     onChange={(event) => {
                       const { value } = event.target;
-                      setState(({ pw: current }) => ({
-                        pw: { ...current, cur: value, curErr: "" },
+
+                      setState(({ password: current }) => ({
+                        password: {
+                          ...current,
+                          current: value,
+                          currentError: "",
+                        },
                       }));
                     }}
                     autoComplete="current-password"
-                    aria-invalid={pw.curErr ? "true" : "false"}
+                    aria-invalid={password.currentError ? "true" : "false"}
                     aria-describedby="ac-e-cur"
                   />
                   <span className={ui.error} id="ac-e-cur">
-                    {pw.curErr}
+                    {password.currentError}
                   </span>
                 </label>
               )}
@@ -111,50 +141,53 @@ export const SecuritySection = ({
                   <input
                     className={joinClassNames(
                       styles.pwInput,
-                      meter.hasErr ? ui.inputErr : ui.inputOk,
+                      meter.hasError ? ui.inputErr : ui.inputOk,
                     )}
                     id="ac-newpw"
                     ref={refs.next}
-                    type={pw.show ? "text" : "password"}
-                    value={pw.next}
+                    type={password.show ? "text" : "password"}
+                    value={password.next}
                     onChange={(event) => {
                       const { value } = event.target;
-                      setState(({ pw: current }) => ({
-                        pw: { ...current, next: value },
+
+                      setState(({ password: current }) => ({
+                        password: { ...current, next: value },
                       }));
                     }}
                     onBlur={() =>
-                      setState(({ pw: current }) => ({
-                        pw: { ...current, blur: true },
+                      setState(({ password: current }) => ({
+                        password: { ...current, blur: true },
                       }))
                     }
                     autoComplete="new-password"
-                    aria-invalid={meter.hasErr}
+                    aria-invalid={meter.hasError}
                     aria-describedby="ac-pw-msg"
                   />
                   <button
                     className={styles.pwToggle}
                     onClick={() =>
-                      setState(({ pw: current }) => ({
-                        pw: { ...current, show: !current.show },
+                      setState(({ password: current }) => ({
+                        password: { ...current, show: !current.show },
                       }))
                     }
-                    aria-pressed={pw.show}
+                    aria-pressed={password.show}
                   >
-                    {pw.show ? "Hide" : "Show"}
+                    {password.show ? "Hide" : "Show"}
                   </button>
                 </div>
                 <div className={styles.meter} aria-hidden="true">
-                  {[meter.s1, meter.s2, meter.s3].map((background, index) => (
-                    <span
-                      key={index}
-                      className={joinClassNames(
-                        styles.meterSeg,
-                        styles.meterSegColour,
-                      )}
-                      style={segStyle(background)}
-                    ></span>
-                  ))}
+                  {[meter.bar1Colour, meter.bar2Colour, meter.bar3Colour].map(
+                    (background, index) => (
+                      <span
+                        key={index}
+                        className={joinClassNames(
+                          styles.meterSeg,
+                          styles.meterSegColour,
+                        )}
+                        style={segmentStyle(background)}
+                      ></span>
+                    ),
+                  )}
                 </div>
                 <div className={styles.meterText}>
                   <span
@@ -162,7 +195,7 @@ export const SecuritySection = ({
                     id="ac-pw-msg"
                     style={messageStyle}
                   >
-                    {meter.msg}
+                    {meter.message}
                   </span>
                   {meter.typed && (
                     <span
@@ -173,8 +206,8 @@ export const SecuritySection = ({
                     </span>
                   )}
                 </div>
-                {meter.warnOn && (
-                  <div className={ui.smallMuted}>{meter.warn}</div>
+                {meter.showWarning && (
+                  <div className={ui.smallMuted}>{meter.warning}</div>
                 )}
               </div>
               <div className={ui.actions}>
@@ -184,15 +217,15 @@ export const SecuritySection = ({
                 <button
                   className={ui.cancel}
                   onClick={() =>
-                    setState(({ pw: current }) => ({
-                      pw: {
+                    setState(({ password: current }) => ({
+                      password: {
                         ...current,
                         open: false,
-                        cur: "",
+                        current: "",
                         next: "",
                         tried: false,
                         blur: false,
-                        curErr: "",
+                        currentError: "",
                       },
                     }))
                   }
@@ -209,8 +242,9 @@ export const SecuritySection = ({
         Log in with Google or Apple instead of a password.
       </p>
       <div className={ui.list}>
-        {socials.map(({ key, name, mark, on, sub }) => {
+        {socials.map(({ key, name, mark, on, subtitle }) => {
           const isLast = on && methods <= 1;
+
           return (
             <div key={key} className={styles.social}>
               <span className={styles.socialMark} aria-hidden="true">
@@ -220,7 +254,7 @@ export const SecuritySection = ({
                 <div className={ui.itemTitle}>{name}</div>
                 <div className={styles.socialSub}>
                   {on
-                    ? "Connected" + (sub ? " · " + sub : "")
+                    ? `Connected${subtitle ? ` · ${subtitle}` : ""}`
                     : "Not connected"}
                 </div>
               </div>
@@ -228,7 +262,12 @@ export const SecuritySection = ({
                 <button
                   className={ui.outlineButton}
                   onClick={() => {
-                    setState(key === "gg" ? { gg: !on } : { ap: !on });
+                    setState(
+                      key === "googleConnected"
+                        ? { googleConnected: !on }
+                        : { appleConnected: !on },
+                    );
+
                     showToast(name + (on ? " disconnected" : " connected"));
                   }}
                 >
@@ -254,7 +293,7 @@ export const SecuritySection = ({
         </div>
         <button
           className={ui.outlineButton}
-          onClick={() => actions.openDialog({ k: "logoutAll" })}
+          onClick={() => actions.openDialog({ kind: "logoutAll" })}
         >
           Log out everywhere
         </button>

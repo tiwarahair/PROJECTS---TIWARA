@@ -47,7 +47,8 @@ const StatusMenu = ({
   view: ServicesView;
 }) => {
   const toggle = () =>
-    studio.setState({ svcStatOpen: !studio.state.svcStatOpen });
+    studio.setState({ serviceStatusOpen: !studio.state.serviceStatusOpen });
+
   return (
     <>
       {/* eslint-disable-next-line jsx-a11y/click-events-have-key-events, jsx-a11y/no-static-element-interactions */}
@@ -84,7 +85,7 @@ const Groups = ({
   groups: ListGroup[];
   isAddons: boolean;
 }) =>
-  groups.map(({ key, cat, count, tone, hasMenu, menu, items }) => (
+  groups.map(({ key, category, count, tone, hasMenu, menu, items }) => (
     <div key={key} className={styles.group}>
       <div className={styles.groupHead}>
         <span className={styles.groupTitle}>
@@ -93,7 +94,7 @@ const Groups = ({
             style={asStyle({ "--dot": tone })}
             aria-hidden="true"
           ></span>
-          <span className={styles.groupName}>{cat}</span>
+          <span className={styles.groupName}>{category}</span>
         </span>
         <span className={styles.groupEnd}>
           <span className={styles.groupCount}>{count}</span>
@@ -149,7 +150,7 @@ const Groups = ({
                   {item.isDraft && <span className={styles.draft}>Draft</span>}
                 </span>
                 <span className={styles.metaRow}>
-                  <span>{item.dur}</span>
+                  <span>{item.duration}</span>
                   {item.extraLabel && (
                     <span className={styles.extra}>{item.extraLabel}</span>
                   )}
@@ -200,15 +201,18 @@ const Groups = ({
 
 /** Studio → Services and Add-ons (prototype Studio.dc.html lines 722–904). */
 export const StudioServices = ({ studio }: { studio: StudioController }) => {
-  const { state, setState, isWide, isDesk, serviceActions } = studio;
+  const { state, setState, isWide, isDesktop, serviceActions } = studio;
   const view = getServicesView(studio);
-  const toggleStatus = () => setState({ svcStatOpen: !state.svcStatOpen });
+
+  const toggleStatus = () =>
+    setState({ serviceStatusOpen: !state.serviceStatusOpen });
+
   return (
     <div
       className={joinClassNames(
         styles.services,
         isWide && styles.wide,
-        isDesk && styles.desk,
+        isDesktop && styles.desk,
       )}
       data-screen-label="Services"
     >
@@ -225,7 +229,7 @@ export const StudioServices = ({ studio }: { studio: StudioController }) => {
                   styles.tab,
                   view.isAddons === (id === "addons") && styles.tabOn,
                 )}
-                onClick={() => setState({ svcTab: id })}
+                onClick={() => setState({ servicesTab: id })}
               >
                 {label}
               </button>
@@ -251,14 +255,16 @@ export const StudioServices = ({ studio }: { studio: StudioController }) => {
                 styles.searchInput,
                 view.hasQuery && styles.searchInputFilled,
               )}
-              value={state.svcQuery || ""}
-              onChange={(event) => setState({ svcQuery: event.target.value })}
+              value={state.serviceQuery || ""}
+              onChange={(event) =>
+                setState({ serviceQuery: event.target.value })
+              }
               placeholder={view.isAddons ? "Search add-ons" : "Search services"}
             />
             {view.hasQuery && (
               <button
                 className={styles.clearSearch}
-                onClick={() => setState({ svcQuery: "" })}
+                onClick={() => setState({ serviceQuery: "" })}
                 aria-label="Clear search"
               >
                 <svg
@@ -280,7 +286,7 @@ export const StudioServices = ({ studio }: { studio: StudioController }) => {
             <button
               className={joinClassNames(
                 styles.statusButton,
-                state.svcStatOpen && styles.statusOpen,
+                state.serviceStatusOpen && styles.statusOpen,
               )}
               onClick={toggleStatus}
               aria-label="Filter by status"
@@ -288,7 +294,9 @@ export const StudioServices = ({ studio }: { studio: StudioController }) => {
               <FilterIcon size="15" />
               {view.statusLabel}
             </button>
-            {state.svcStatOpen && <StatusMenu studio={studio} view={view} />}
+            {state.serviceStatusOpen && (
+              <StatusMenu studio={studio} view={view} />
+            )}
           </div>
           <button className={styles.addButton} onClick={view.add}>
             <svg
@@ -329,7 +337,7 @@ export const StudioServices = ({ studio }: { studio: StudioController }) => {
             )}
             <button
               className={styles.manageChip}
-              onClick={serviceActions.openCats}
+              onClick={serviceActions.openCategories}
             >
               Manage categories
             </button>
@@ -339,7 +347,7 @@ export const StudioServices = ({ studio }: { studio: StudioController }) => {
               <button
                 className={joinClassNames(
                   styles.chipStatusButton,
-                  state.svcStatOpen && styles.statusOpen,
+                  state.serviceStatusOpen && styles.statusOpen,
                 )}
                 onClick={toggleStatus}
                 aria-label="Filter by status"
@@ -347,13 +355,15 @@ export const StudioServices = ({ studio }: { studio: StudioController }) => {
                 <FilterIcon size="14" />
                 {view.statusShort}
               </button>
-              {state.svcStatOpen && <StatusMenu studio={studio} view={view} />}
+              {state.serviceStatusOpen && (
+                <StatusMenu studio={studio} view={view} />
+              )}
             </div>
           )}
         </div>
       </div>
       <div className={styles.body}>
-        {isDesk && (
+        {isDesktop && (
           <aside className={styles.categories} data-screen-label="Categories">
             <div className={styles.categoriesLabel}>Categories</div>
             <div className={styles.categoryList}>
@@ -380,7 +390,7 @@ export const StudioServices = ({ studio }: { studio: StudioController }) => {
             </div>
             <button
               className={styles.manageRow}
-              onClick={serviceActions.openCats}
+              onClick={serviceActions.openCategories}
             >
               <svg
                 width="16"

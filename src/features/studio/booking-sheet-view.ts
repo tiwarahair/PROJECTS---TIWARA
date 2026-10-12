@@ -20,8 +20,8 @@ import {
   getClient,
   getConflicts,
   getPolicyFee,
-  getProtExpiry,
-  getProtNoun,
+  getProtectionExpiry,
+  getProtectionNoun,
   getSlots,
   getWorkingHours,
 } from "./studio-model";
@@ -42,6 +42,54 @@ const CLOSED_STATUSES = [
   "expired",
 ];
 
+const VIA_LABELS: Record<string, string> = {
+  cash: "Cash",
+  bank: "Bank transfer",
+  reader: "Card reader",
+};
+
+const getPaymentMode = ({
+  paidKind,
+  protect,
+  protectionMode,
+  awaiting,
+}: DecoratedBooking): PaymentMode => {
+  if (paidKind === "full") return "full";
+
+  if (paidKind === "deposit") return "deposit";
+
+  if (protect === "link" && protectionMode === "card" && !awaiting)
+    return "card";
+
+  return "none";
+};
+
+/** A status action's hint when it is not available yet: only on the day, else from a set time. */
+const getOnTheDaySubtitle = (
+  canDo: boolean,
+  dayOffset: number,
+  fromText: string,
+) => {
+  if (canDo) return "";
+
+  return dayOffset !== 0 ? "Only on the day" : fromText;
+};
+
+const getCheckoutLabel = ({
+  method,
+  charged,
+  via,
+  refundAuto,
+}: CheckoutRecord) => {
+  if (method === "link") return `Link sent · £${charged} due`;
+
+  if (method === "record") return `Paid · ${VIA_LABELS[via] || "Recorded"}`;
+
+  if (method === "card") return "Paid · Card";
+
+  return refundAuto > 0 ? `Refunded £${refundAuto}` : "Paid";
+};
+
 /** The booking in the shape CheckoutSheet takes (prototype ckBookingOf). */
 export const getCheckoutBooking = (
   state: StudioState,
@@ -49,33 +97,29 @@ export const getCheckoutBooking = (
 ): CheckoutBooking => {
   const raw = state.bookings.find(({ id }) => id === booking.id);
   const client = booking.client ? getClient(state, booking.client) : null;
+
   const addons: [string, number][] = (raw?.addons || []).map(
-    ({ name, qty, price }) => [
-      (name || "Add-on") + ((qty || 1) > 1 ? " × " + qty : ""),
-      (price || 0) * (qty || 1),
+    ({ name, quantity, price }) => [
+      (name || "Add-on") + ((quantity || 1) > 1 ? ` × ${quantity}` : ""),
+      (price || 0) * (quantity || 1),
     ],
   );
+
   let addonSum = 0;
+
   for (const [, amount] of addons) addonSum += amount;
-  const mode: PaymentMode =
-    booking.paidKind === "full"
-      ? "full"
-      : booking.paidKind === "deposit"
-        ? "deposit"
-        : booking.protect === "link" &&
-            booking.protMode === "card" &&
-            !booking.awaiting
-          ? "card"
-          : "none";
+
+  const mode = getPaymentMode(booking);
+
   return {
     client: booking.client ? booking.clientName : "Walk-in",
     first: booking.client ? booking.firstName : "your client",
-    svc: booking.svc,
-    meta: booking.durLabel,
+    service: booking.service,
+    meta: booking.durationLabel,
     price: Math.max(0, booking.price - addonSum),
     addons,
     mode,
-    paid: booking.paidAmt || 0,
+    paid: booking.paidAmount || 0,
     card: mode === "none" ? null : "4242",
     brand: "Visa",
     paidOn: "",
@@ -89,43 +133,68 @@ export const getCheckoutBooking = (
 
 export const getBookingSheetView = (studio: StudioController) => {
   const { state, setState, isWide, isNew, actions, context } = studio;
-  const { toastMsg, openSheet, closeSheet, openActs, setStatus, rebookFrom } =
-    actions;
+
+  const {
+    showToast,
+    openSheet,
+    closeSheet,
+    openActionSheet,
+    setStatus,
+    rebookFrom,
+  } = actions;
+
   if (state.sheet !== "booking") return null;
+
   const upcoming = getDecoratedBookings(state, isNew, (booking) =>
-    openSheet("booking", { sheetBId: booking.id }),
+    openSheet("booking", { sheetBookingId: booking.id }),
   );
+
   const raw =
-    state.bookings.find(({ id }) => id === state.sheetBId) || state.bookings[0];
+    state.bookings.find(({ id }) => id === state.sheetBookingId) ||
+    state.bookings[0];
+
   const booking =
-    state.bkStep === "done" && state.bkDoneB
-      ? decorateBooking(state, state.bkDoneB, 0, () => {})
-      : (upcoming.find(({ id }) => id === state.sheetBId) ??
+    state.bookingStep === "done" && state.doneBooking
+      ? decorateBooking(state, state.doneBooking, 0, () => {})
+      : (upcoming.find(({ id }) => id === state.sheetBookingId) ??
         (raw
           ? decorateBooking(state, raw, 0, () =>
-              openSheet("booking", { sheetBId: raw.id }),
+              openSheet("booking", { sheetBookingId: raw.id }),
             )
           : null));
+
   if (!booking) return null;
+
   const now = new Date();
-  const nowMin = now.getHours() * 60 + now.getMinutes();
+  const nowMinutes = now.getHours() * 60 + now.getMinutes();
+
   const patchBooking = (patch: Partial<StudioBooking>) =>
     setState(({ bookings }) => ({
       bookings: bookings.map((item) =>
         item.id === booking.id ? { ...item, ...patch } : item,
       ),
     }));
-  const hoursToStart = (booking.off * 1440 + booking.startMin - nowMin) / 60;
+
+  const hoursToStart =
+    (booking.dayOffset * 1440 + booking.startMinutes - nowMinutes) / 60;
+
   const isLate = hoursToStart < state.policy.window;
   const lateFee = getPolicyFee(state, "late", booking);
-  const noShowFee = getPolicyFee(state, "ns", booking);
+  const noShowFee = getPolicyFee(state, "noShow", booking);
+
   const windowText =
-    state.policy.window < 1 ? "30-minute" : state.policy.window + "-hour";
+    state.policy.window < 1 ? "30-minute" : `${state.policy.window}-hour`;
+
   const isFeeKept =
-    state.cxWho === "client" && isLate && lateFee.amt > 0 && state.cxFee;
+    state.cancelWho === "client" &&
+    isLate &&
+    lateFee.amount > 0 &&
+    state.cancelFee;
+
   const noShowChoice =
-    noShowFee.amt > 0 && state.nsCharge !== "none" ? "fee" : "none";
-  const isClosed = CLOSED_STATUSES.includes(booking.st);
+    noShowFee.amount > 0 && state.noShowCharge !== "none" ? "fee" : "none";
+
+  const isClosed = CLOSED_STATUSES.includes(booking.status);
   const due = booking.due;
 
   /** Moves the booking to Past with an undo (prototype finish). */
@@ -134,24 +203,26 @@ export const getBookingSheetView = (studio: StudioController) => {
     const previousBookings = current.bookings;
     const previousPast = current.pastNew;
     const original = previousBookings.find(({ id }) => id === booking.id);
+
     setState({
       bookings: previousBookings.filter(({ id }) => id !== booking.id),
       pastNew: [
         {
-          pid: Date.now(),
+          pastId: Date.now(),
           client: booking.client,
-          svc: booking.svc,
+          service: booking.service,
           price: booking.price,
-          dur: booking.durLabel,
-          when: dateLabel(booking.off || 0),
+          duration: booking.durationLabel,
+          when: dateLabel(booking.dayOffset || 0),
           time: booking.time,
           at: Date.now(),
-          orig: original,
+          original,
           ...record,
         } as PastRecord,
       ].concat(previousPast),
     });
-    toastMsg(message, () => {
+
+    showToast(message, () => {
       setState({ bookings: previousBookings, pastNew: previousPast });
       closeSheet();
     });
@@ -160,39 +231,45 @@ export const getBookingSheetView = (studio: StudioController) => {
   // ---- the payment breakdown ----
   const addonLines = (
     state.bookings.find(({ id }) => id === booking.id)?.addons || []
-  ).map(({ name, qty, price }) => {
-    const quantity = qty || 1;
+  ).map(({ name, quantity: rawQuantity, price }) => {
+    const quantity = rawQuantity || 1;
     const amount = (price || 0) * quantity;
+
     return {
       key: (name || "Add-on") + quantity,
-      label: (name || "Add-on") + (quantity > 1 ? " × " + quantity : ""),
-      value: "£" + amount,
+      label: (name || "Add-on") + (quantity > 1 ? ` × ${quantity}` : ""),
+      value: `£${amount}`,
       amount,
     };
   });
+
   let addonSum = 0;
+
   for (const { amount } of addonLines) addonSum += amount;
-  const paidAmount = booking.price - booking.dueAmt;
+
+  const paidAmount = booking.price - booking.dueAmount;
+
   const received: {
     key: string;
     label: string;
-    sub: string;
+    subtitle: string;
     value: string;
     tone: "paid" | "quiet" | "failed";
   }[] = [];
+
   if (booking.paidKind === "deposit" || booking.paidKind === "full")
     received.push({
       key: "paid",
       label: booking.paidKind === "deposit" ? "Deposit" : "Paid in full",
-      sub: "Card · online at booking",
-      value: "£" + paidAmount,
+      subtitle: "Card · online at booking",
+      value: `£${paidAmount}`,
       tone: "paid",
     });
   else if (booking.awaiting)
     received.push({
       key: "link",
-      label: booking.protWord,
-      sub: "Link sent " + (booking.linkSentLabel || ""),
+      label: booking.protectionWord,
+      subtitle: `Link sent ${booking.linkSentLabel || ""}`,
       value: "Pending",
       tone: "quiet",
     });
@@ -200,7 +277,7 @@ export const getBookingSheetView = (studio: StudioController) => {
     received.push({
       key: "failed",
       label: "Card payment",
-      sub: "Declined",
+      subtitle: "Declined",
       value: "£0",
       tone: "failed",
     });
@@ -208,163 +285,178 @@ export const getBookingSheetView = (studio: StudioController) => {
     received.push({
       key: "none",
       label: "Nothing paid yet",
-      sub: booking.noProtect ? "No booking protection" : "Collect at checkout",
+      subtitle: booking.noProtect
+        ? "No booking protection"
+        : "Collect at checkout",
       value: "£0",
       tone: "quiet",
     });
+
   const fee = Math.round((booking.price * 0.015 + 0.5) * 100) / 100;
 
   // ---- the status menu ----
   const items: {
     label: string;
-    d: string;
-    sub?: string;
-    off?: boolean;
+    iconPath: string;
+    subtitle?: string;
+    disabled?: boolean;
     danger?: boolean;
     run: () => void;
   }[] = [];
+
   if (booking.awaiting) {
     items.push({
       label: "Confirmed",
-      d: "M20 6 9 17l-5-5",
-      sub: "Confirm without protection",
+      iconPath: "M20 6 9 17l-5-5",
+      subtitle: "Confirm without protection",
       run: () =>
         setStatus(booking.id, "confirmed", "Marked as confirmed", {
-          paid: booking.protMode === "full" ? "full" : "deposit",
+          paid: booking.protectionMode === "full" ? "full" : "deposit",
           protect: "link",
         }),
     });
+
     items.push({
       label: booking.canResend ? "Resend payment link" : "No resends left",
-      d: "m22 2-7 20-4-9-9-4Z",
-      off: !booking.canResend,
+      iconPath: "m22 2-7 20-4-9-9-4Z",
+      disabled: !booking.canResend,
       run: () => {
         const count = (booking.resends || 0) + 1;
         const sentAt = Date.now();
+
         setState({
-          stMenu: false,
+          statusMenuOpen: false,
           bookings: state.bookings.map((item) =>
             item.id === booking.id
               ? {
                   ...item,
                   resends: count,
                   linkSentAt: sentAt,
-                  expiresAt: getProtExpiry(sentAt, booking.off, booking.time),
+                  expiresAt: getProtectionExpiry(
+                    sentAt,
+                    booking.dayOffset,
+                    booking.time,
+                  ),
                 }
               : item,
           ),
         });
-        toastMsg(
-          "Link resent to " +
-            booking.firstName +
-            " · " +
-            (2 - count) +
-            " of 2 left",
+
+        showToast(
+          `Link resent to ${booking.firstName} · ${2 - count} of 2 left`,
         );
       },
     });
+
     items.push({
       label: "Cancel",
-      d: "M18 6 6 18M6 6l12 12",
+      iconPath: "M18 6 6 18M6 6l12 12",
       danger: true,
       run: () =>
         setState({
-          bkStep: "cancel",
-          cxWho: "client",
-          cxFee: true,
-          cxReason: "",
+          bookingStep: "cancel",
+          cancelWho: "client",
+          cancelFee: true,
+          cancelReason: "",
         }),
     });
   } else if (booking.autoX) {
     items.push({
       label: "Send a new link",
-      d: "m22 2-7 20-4-9-9-4Z",
-      sub: "Starts a fresh 48 hrs",
+      iconPath: "m22 2-7 20-4-9-9-4Z",
+      subtitle: "Starts a fresh 48 hrs",
       run: () => {
         const sentAt = Date.now();
+
         setStatus(
           booking.id,
           "awaiting",
-          "New link sent to " + booking.firstName,
+          `New link sent to ${booking.firstName}`,
           {
             paid: "link",
             resends: 0,
             linkSentAt: sentAt,
-            expiresAt: getProtExpiry(sentAt, booking.off, booking.time),
+            expiresAt: getProtectionExpiry(
+              sentAt,
+              booking.dayOffset,
+              booking.time,
+            ),
           },
         );
       },
     });
-  } else if (booking.st !== "arrived") {
+  } else if (booking.status !== "arrived") {
     items.push({
       label: "Arrived",
-      d: "M20 6 9 17l-5-5",
-      off: !booking.canArrive,
-      sub: booking.canArrive
-        ? ""
-        : booking.off !== 0
-          ? "Only on the day"
-          : "From " + hhmm(booking.startMin - 60),
+      iconPath: "M20 6 9 17l-5-5",
+      disabled: !booking.canArrive,
+      subtitle: getOnTheDaySubtitle(
+        booking.canArrive,
+        booking.dayOffset,
+        `From ${hhmm(booking.startMinutes - 60)}`,
+      ),
       run: () => setStatus(booking.id, "arrived", "Marked as arrived"),
     });
+
     items.push({
       label: "No-show",
-      d: "M12 9v4M12 17h.01M10.3 3.9 1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0Z",
-      off: !booking.canNoShow,
+      iconPath:
+        "M12 9v4M12 17h.01M10.3 3.9 1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0Z",
+      disabled: !booking.canNoShow,
       danger: true,
-      sub: booking.canNoShow
-        ? ""
-        : booking.off !== 0
-          ? "Only on the day"
-          : "From " +
-            hhmm(booking.graceEnd) +
-            " (" +
-            state.policy.grace +
-            " min grace)",
-      run: () => setState({ bkStep: "noshow", nsCharge: "deposit" }),
+      subtitle: getOnTheDaySubtitle(
+        booking.canNoShow,
+        booking.dayOffset,
+        `From ${hhmm(booking.graceEnd)} (${state.policy.grace} min grace)`,
+      ),
+      run: () => setState({ bookingStep: "noshow", noShowCharge: "deposit" }),
     });
+
     items.push({
       label: "Cancel",
-      d: "M18 6 6 18M6 6l12 12",
+      iconPath: "M18 6 6 18M6 6l12 12",
       danger: true,
       run: () =>
         setState({
-          bkStep: "cancel",
-          cxWho: "client",
-          cxFee: true,
-          cxReason: "",
+          bookingStep: "cancel",
+          cancelWho: "client",
+          cancelFee: true,
+          cancelReason: "",
         }),
     });
   } else {
     items.push({
       label: "Completed",
-      d: "M2 7h20v12H2zM2 11h20",
-      sub: due > 0 ? "Collect £" + due : "Nothing left to collect",
-      run: () => setState({ bkStep: "checkout", coMethod: null }),
+      iconPath: "M2 7h20v12H2zM2 11h20",
+      subtitle: due > 0 ? `Collect £${due}` : "Nothing left to collect",
+      run: () => setState({ bookingStep: "checkout", checkoutMethod: null }),
     });
+
     items.push({
       label: "Confirmed",
-      d: "M3 7v6h6M21 17a9 9 0 0 0-15-6.7L3 13",
-      sub: "Undo arrived",
+      iconPath: "M3 7v6h6M21 17a9 9 0 0 0-15-6.7L3 13",
+      subtitle: "Undo arrived",
       run: () => setStatus(booking.id, "confirmed", "Back to confirmed"),
     });
   }
 
   // ---- change client ----
-  const changeQuery = (state.ccQ || "").trim();
+  const changeQuery = (state.changeClientQuery || "").trim();
   const lowerQuery = changeQuery.toLowerCase();
   const everyone = CLIENTS.concat(state.extraClients);
+
   const applyClient = (
     clientId: string | null,
     patch: Partial<StudioBooking> = {},
   ) => {
-    setState({ bkOut: true });
+    setState({ bookingStepOut: true });
+
     window.setTimeout(
       () =>
         setState(({ bookings }) => ({
-          bkOut: false,
-          bkStep: "view",
-          bkBack: true,
+          bookingStepOut: false,
+          bookingStep: "view",
+          bookingStepBack: true,
           confirm: null,
           bookings: bookings.map((item) =>
             item.id === booking.id
@@ -374,46 +466,55 @@ export const getBookingSheetView = (studio: StudioController) => {
         })),
       200,
     );
-    window.setTimeout(() => setState({ bkBack: false }), 900);
+
+    window.setTimeout(() => setState({ bookingStepBack: false }), 900);
   };
+
   const setClient = (clientId: string | null) => {
     const other = everyone.find(({ id }) => id === clientId);
-    const name = clientId
-      ? other
-        ? (other.name.split(" ")[0] ?? "")
-        : "the client"
-      : "a walk-in";
+
+    const getName = () => {
+      if (!clientId) return "a walk-in";
+
+      return other ? (other.name.split(" ")[0] ?? "") : "the client";
+    };
+
+    const name = getName();
+
     if (!clientId || state.policy.mode === "none") {
       applyClient(clientId, {
         protect: "none",
         paid: "none",
         status: "confirmed",
       });
+
       return;
     }
+
     const sentAt = Date.now();
+    const protectionNoun = getProtectionNoun(state);
+
     setState({
       confirm: {
-        title: "Ask " + name + " for booking protection?",
+        title: `Ask ${name} for booking protection?`,
         yesLabel: "Send a link",
         noLabel: "No protection",
-        body:
-          "Protection was agreed with the previous client, so it does not carry over. Sending a link asks " +
-          name +
-          " for " +
-          getProtNoun(state) +
-          "; the booking waits 48 hrs to be confirmed.",
+        body: `Protection was agreed with the previous client, so it does not carry over. Sending a link asks ${name} for ${protectionNoun}; the booking waits 48 hrs to be confirmed.`,
         yes: () =>
           applyClient(clientId, {
             protect: "link",
             paid: "link",
             status: "awaiting",
-            protMode: state.policy.mode,
+            protectionMode: state.policy.mode,
             resends: 0,
             linkSentAt: sentAt,
-            expiresAt: getProtExpiry(sentAt, booking.off, booking.time),
+            expiresAt: getProtectionExpiry(
+              sentAt,
+              booking.dayOffset,
+              booking.time,
+            ),
           }),
-        no: () =>
+        onNo: () =>
           applyClient(clientId, {
             protect: "none",
             paid: "none",
@@ -422,130 +523,181 @@ export const getBookingSheetView = (studio: StudioController) => {
       },
     });
   };
-  context.memo.ccSet = setClient;
+
+  context.memo.setChangeClient = setClient;
 
   // ---- reschedule ----
   const slots = getSlots(
     state,
-    state.rsDay,
-    booking.durMin,
-    getBookingBuffer(state, booking.svc),
+    state.rescheduleDay,
+    booking.durationMinutes,
+    getBookingBuffer(state, booking.service),
     booking.id,
   );
+
   const rescheduleConflicts = getConflicts(
     state,
-    state.rsDay,
-    state.rsTime,
-    booking.durMin,
+    state.rescheduleDay,
+    state.rescheduleTime,
+    booking.durationMinutes,
     booking.id,
   );
+
   const rescheduleDate = new Date();
-  rescheduleDate.setDate(rescheduleDate.getDate() + (state.rsDay || 0));
+
+  rescheduleDate.setDate(rescheduleDate.getDate() + (state.rescheduleDay || 0));
+
   const rescheduleHours = state.hours[(rescheduleDate.getDay() + 6) % 7] ?? {
-    d: "",
+    day: "",
     on: true,
-    s: "09:00",
-    e: "18:00",
+    start: "09:00",
+    end: "18:00",
   };
-  const customTime = state.rsTime || "";
-  const isCustom = !!state.rsCustom;
+
+  const customTime = state.rescheduleTime || "";
+  const isCustom = !!state.rescheduleCustom;
+
   const isInRange =
     !customTime || !rescheduleHours.on
       ? false
-      : customTime >= rescheduleHours.s && customTime < rescheduleHours.e;
+      : customTime >= rescheduleHours.start && customTime < rescheduleHours.end;
+
   const isOutside =
     isCustom && !!customTime && (!rescheduleHours.on || !isInRange);
-  const canMove = state.rsDay != null && !!state.rsTime;
+
+  const canMove = state.rescheduleDay != null && !!state.rescheduleTime;
+
+  const getCustomHint = () => {
+    if (!rescheduleHours.on)
+      return "You’re closed this day. You can still book it.";
+
+    if (isOutside)
+      return `Outside your hours (${rescheduleHours.start}–${rescheduleHours.end}). You can still book it.`;
+
+    return `Any time between ${rescheduleHours.start} and ${rescheduleHours.end}`;
+  };
+
   const reschedule = () => {
     if (!canMove) return;
+
     const previous = state.bookings;
+
     setState({
       bookings: state.bookings.map((item) =>
-        item.id === state.sheetBId
+        item.id === state.sheetBookingId
           ? {
               ...item,
-              off: state.rsDay ?? 0,
-              time: state.rsTime ?? item.time,
+              dayOffset: state.rescheduleDay ?? 0,
+              time: state.rescheduleTime ?? item.time,
               pending: false,
             }
           : item,
       ),
-      dayIdx: state.rsDay ?? 0,
-      bview: "cal",
+      dayIndex: state.rescheduleDay ?? 0,
+      bookingsLayout: "cal",
     });
-    toastMsg(
-      "Moved to " +
-        dayInfo(state.rsDay ?? 0).label +
-        ", " +
-        state.rsTime +
-        ". " +
-        booking.firstName +
-        " notified",
+
+    const { label: dayLabel } = dayInfo(state.rescheduleDay ?? 0);
+
+    showToast(
+      `Moved to ${dayLabel}, ${state.rescheduleTime}. ${booking.firstName} notified`,
       () => setState({ bookings: previous }),
     );
+
     closeSheet();
   };
-  context.memo.reschedFn = reschedule;
+
+  context.memo.applyReschedule = reschedule;
 
   // ---- cancel ----
   const cancel = () => {
-    const who = state.cxWho === "me" ? "you" : booking.firstName;
+    const who = state.cancelWho === "me" ? "you" : booking.firstName;
+
     const notice =
       hoursToStart < 48
-        ? Math.max(1, Math.round(hoursToStart)) + " hours before"
-        : Math.round(hoursToStart / 24) + " days before";
+        ? `${Math.max(1, Math.round(hoursToStart))} hours before`
+        : `${Math.round(hoursToStart / 24)} days before`;
+
     const isNothingPaid =
       state.policy.mode === "card" || state.policy.mode === "none";
+
+    // the outcome copy: a late fee is kept, nothing was taken, or a full refund
+    const getCancelCopy = () => {
+      if (isFeeKept)
+        return {
+          meta: "Fee pending",
+          noteTail: ` ${lateFee.subtitle}.`,
+          toast: `Cancelled. ${lateFee.label} fee pending`,
+        };
+
+      if (isNothingPaid)
+        return { meta: "No charge", noteTail: "", toast: "Booking cancelled" };
+
+      return {
+        meta: "Refunded",
+        noteTail: " Refunded in full.",
+        toast: `Cancelled. ${booking.firstName} refunded in full`,
+      };
+    };
+
+    const { meta, noteTail, toast } = getCancelCopy();
+    const reason = state.cancelReason.trim();
+    const reasonNote = reason ? ` ${reason}` : "";
+
     finish(
       {
         status: "Cancelled",
         feeKept: isFeeKept,
         feePending: isFeeKept,
         feeLabel: lateFee.label,
-        meta: isFeeKept
-          ? "Fee pending"
-          : isNothingPaid
-            ? "No charge"
-            : "Refunded",
-        note:
-          "Cancelled by " +
-          who +
-          " " +
-          notice +
-          "." +
-          (isFeeKept
-            ? " " + lateFee.sub + "."
-            : isNothingPaid
-              ? ""
-              : " Refunded in full.") +
-          (state.cxReason.trim() ? " " + state.cxReason.trim() : ""),
+        meta,
+        note: `Cancelled by ${who} ${notice}.${noteTail}${reasonNote}`,
       },
-      isFeeKept
-        ? "Cancelled. " + lateFee.label + " fee pending"
-        : isNothingPaid
-          ? "Booking cancelled"
-          : "Cancelled. " + booking.firstName + " refunded in full",
+      toast,
     );
+
     closeSheet();
   };
-  context.memo.cancelFn = cancel;
+
+  context.memo.cancelBooking = cancel;
+
+  const getCancelBody = () => {
+    if (state.cancelWho === "me")
+      return `Cancelling refunds ${booking.firstName} in full, including the booking fee, and frees the slot for online booking.`;
+
+    if (!isLate)
+      return `${booking.firstName} is cancelling outside your ${windowText} window, so there is no fee. ${lateFee.refund}. The slot opens up for online booking.`;
+
+    if (lateFee.amount > 0)
+      return `${booking.firstName} is cancelling inside your ${windowText} window, so your policy charges a ${lateFee.label} late cancellation fee (${lateFee.subtitle}). The slot opens up.`;
+
+    const refundNote = lateFee.refund.toLowerCase();
+
+    return `${booking.firstName} is cancelling inside your ${windowText} window. Your policy has no late cancellation fee: ${refundNote}. The slot opens up.`;
+  };
+
+  const rescheduleConflictList = rescheduleConflicts
+    .map(({ name, range }) => `${name} (${range})`)
+    .join(", ");
 
   return {
     booking,
     raw,
     patchBooking,
     finish,
-    sens: (() => {
+    sensitivities: (() => {
       const bookingRaw =
-        state.sheetBId != null
-          ? state.bookings.find(({ id }) => id === state.sheetBId)
+        state.sheetBookingId != null
+          ? state.bookings.find(({ id }) => id === state.sheetBookingId)
           : null;
+
       const client = bookingRaw?.client
         ? getClient(state, bookingRaw.client)
         : null;
-      return client?.sens || "";
+
+      return client?.sensitivities || "";
     })(),
-    isView: state.bkStep === "view",
+    isView: state.bookingStep === "view",
     isMain:
       ![
         "done",
@@ -556,37 +708,40 @@ export const getBookingSheetView = (studio: StudioController) => {
         "addaddon",
         "changeclient",
         "payment",
-      ].includes(state.bkStep) &&
-      !(!isWide && (state.bkStep === "checkout" || state.bkStep === "noshow")),
+      ].includes(state.bookingStep) &&
+      !(
+        !isWide &&
+        (state.bookingStep === "checkout" || state.bookingStep === "noshow")
+      ),
     // client row: hover reveals change / walk-in unless a payment locks the client
     isClientLocked:
       booking.paidKind === "deposit" ||
       booking.paidKind === "full" ||
       (booking.protect === "link" &&
-        booking.protMode === "card" &&
+        booking.protectionMode === "card" &&
         !booking.awaiting),
     openClient: () => {
       if (!booking.client) {
-        setState({ bkStep: "changeclient", ccQ: "" });
+        setState({ bookingStep: "changeclient", changeClientQuery: "" });
+
         return;
       }
+
       openSheet("cliView", {
-        cliSel: booking.client,
-        cliApptTab: "up",
-        cFromB: booking.id,
+        selectedClientId: booking.client,
+        clientAppointmentsTab: "up",
+        clientFromBookingId: booking.id,
       });
     },
-    changeClient: () => setState({ bkStep: "changeclient", ccQ: "" }),
+    changeClient: () =>
+      setState({ bookingStep: "changeclient", changeClientQuery: "" }),
     clearClient: () =>
       setState({
         confirm: {
           title: "Make this a walk-in?",
           yesLabel: "Make walk-in",
           noLabel: "Keep client",
-          body:
-            "The appointment stays in your calendar with no client attached. " +
-            booking.firstName +
-            " will not get reminders for it.",
+          body: `The appointment stays in your calendar with no client attached. ${booking.firstName} will not get reminders for it.`,
           yes: () => {
             setState(({ bookings }) => ({
               confirm: null,
@@ -594,15 +749,17 @@ export const getBookingSheetView = (studio: StudioController) => {
                 item.id === booking.id ? { ...item, client: null } : item,
               ),
             }));
-            toastMsg("Now a walk-in");
+
+            showToast("Now a walk-in");
           },
         },
       }),
     statusItems: items.map((item) => ({
       ...item,
       run: () => {
-        if (item.off) return;
-        setState({ stMenu: false });
+        if (item.disabled) return;
+
+        setState({ statusMenuOpen: false });
         item.run();
       },
     })),
@@ -610,91 +767,91 @@ export const getBookingSheetView = (studio: StudioController) => {
     payLines: [
       {
         key: "svc",
-        label: booking.svc,
-        value: "£" + Math.max(0, booking.price - addonSum),
+        label: booking.service,
+        value: `£${Math.max(0, booking.price - addonSum)}`,
       },
     ].concat(
       addonLines.map(({ key, label, value }) => ({ key, label, value })),
     ),
     payReceived: received,
-    payFeeLabel: "£" + fee.toFixed(2),
+    payFeeLabel: `£${fee.toFixed(2)}`,
     feeWho: booking.client ? booking.firstName : "the client",
-    payRowLabel: booking.dueAmt > 0 ? "To pay" : "Paid",
+    payRowLabel: booking.dueAmount > 0 ? "To pay" : "Paid",
     // footer
     canCheckout:
       !isClosed &&
       !booking.awaiting &&
       !booking.autoX &&
-      (booking.st === "arrived" ||
-        booking.off < 0 ||
-        (booking.off === 0 && nowMin >= booking.startMin)),
+      (booking.status === "arrived" ||
+        booking.dayOffset < 0 ||
+        (booking.dayOffset === 0 && nowMinutes >= booking.startMinutes)),
     hasMore: !isClosed,
     more: (event: MouseEvent) => {
       const host = event.currentTarget as Element;
       const rect = host.getBoundingClientRect?.();
+
       const anchor = rect
         ? { bottom: window.innerHeight - rect.top + 8, left: rect.left }
         : null;
+
       const guest: ActionItem[] = booking.client
         ? [
             {
               label: "Copy guest management link",
-              d: "M10 13a5 5 0 0 0 7.5.5l3-3a5 5 0 0 0-7-7l-1.7 1.7M14 11a5 5 0 0 0-7.5-.5l-3 3a5 5 0 0 0 7 7l1.7-1.7",
+              iconPath:
+                "M10 13a5 5 0 0 0 7.5.5l3-3a5 5 0 0 0-7-7l-1.7 1.7M14 11a5 5 0 0 0-7.5-.5l-3 3a5 5 0 0 0 7 7l1.7-1.7",
               run: () => {
-                copyText("tiwaras.house/manage/" + booking.id);
-                toastMsg("Guest link copied for " + booking.firstName);
+                copyText(`tiwaras.house/manage/${booking.id}`);
+                showToast(`Guest link copied for ${booking.firstName}`);
               },
             },
           ]
         : [];
-      openActs({
+
+      openActionSheet({
         title: booking.clientName || "Walk-in",
-        sub:
-          booking.svc +
-          " · " +
-          booking.dayShort +
-          " " +
-          (booking.timeRange || ""),
+        subtitle: `${booking.service} · ${booking.dayShort} ${booking.timeRange || ""}`,
         anchor,
         items: guest.concat([
           {
             label: "Reschedule",
-            d: "M3 7v6h6M21 17a9 9 0 0 0-15-6.7L3 13",
+            iconPath: "M3 7v6h6M21 17a9 9 0 0 0-15-6.7L3 13",
             run: () =>
               setState({
-                bkStep: "resched",
-                rsDay: null,
-                rsTime: null,
-                rsCustom: false,
-                stMenu: false,
+                bookingStep: "resched",
+                rescheduleDay: null,
+                rescheduleTime: null,
+                rescheduleCustom: false,
+                statusMenuOpen: false,
               }),
           },
           {
             label: "Cancel",
-            d: "M18 6 6 18M6 6l12 12",
+            iconPath: "M18 6 6 18M6 6l12 12",
             danger: true,
             run: () =>
               setState({
-                bkStep: "cancel",
-                cxWho: "client",
-                cxFee: true,
-                cxReason: "",
-                stMenu: false,
+                bookingStep: "cancel",
+                cancelWho: "client",
+                cancelFee: true,
+                cancelReason: "",
+                statusMenuOpen: false,
               }),
           },
           {
             label: "No-show",
-            d: "M12 9v4M12 17h.01M10.3 3.9 1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0Z",
+            iconPath:
+              "M12 9v4M12 17h.01M10.3 3.9 1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0Z",
             danger: true,
             run: () => {
               if (booking.canNoShow)
                 setState({
-                  bkStep: "noshow",
-                  nsCharge: "deposit",
-                  stMenu: false,
+                  bookingStep: "noshow",
+                  noShowCharge: "deposit",
+                  statusMenuOpen: false,
                 });
               else
-                toastMsg(
+                showToast(
                   "No-show can be marked once the appointment has started",
                 );
             },
@@ -704,13 +861,20 @@ export const getBookingSheetView = (studio: StudioController) => {
     },
     bookAgain: () => rebookFrom(booking),
     goCheckout: () =>
-      setState({ bkStep: "checkout", coMethod: null, stMenu: false }),
-    openPayment: () => setState({ bkStep: "payment", stMenu: false }),
+      setState({
+        bookingStep: "checkout",
+        checkoutMethod: null,
+        statusMenuOpen: false,
+      }),
+    openPayment: () =>
+      setState({ bookingStep: "payment", statusMenuOpen: false }),
     // awaiting confirmation
     resend: () => {
       if (!booking.canResend) return;
+
       const count = (booking.resends || 0) + 1;
       const sentAt = Date.now();
+
       setState({
         bookings: state.bookings.map((item) =>
           item.id === booking.id
@@ -718,46 +882,56 @@ export const getBookingSheetView = (studio: StudioController) => {
                 ...item,
                 resends: count,
                 linkSentAt: sentAt,
-                expiresAt: getProtExpiry(sentAt, booking.off, booking.time),
+                expiresAt: getProtectionExpiry(
+                  sentAt,
+                  booking.dayOffset,
+                  booking.time,
+                ),
               }
             : item,
         ),
       });
-      toastMsg(
-        "Link resent to " +
-          booking.firstName +
-          " · " +
-          (2 - count) +
-          " of 2 left",
-      );
+
+      showToast(`Link resent to ${booking.firstName} · ${2 - count} of 2 left`);
     },
     copyPaymentLink: () => {
-      copyText("tiwaras.house/pay/" + booking.id);
-      toastMsg("Payment link copied");
+      copyText(`tiwaras.house/pay/${booking.id}`);
+      showToast("Payment link copied");
     },
     // location (mobile stylists)
     toggleLocation: () => {
-      if (!state.bkLocOn) {
-        setState({ bkLocOn: true, bkAddrDraft: booking.addr });
+      if (!state.bookingAddressOn) {
+        setState({
+          bookingAddressOn: true,
+          bookingAddressDraft: booking.address,
+        });
+
         return;
       }
-      const address = state.bkAddrDraft.trim();
+
+      const address = state.bookingAddressDraft.trim();
+
       setState({
-        bkLocOn: false,
-        clientAddrs: { ...state.clientAddrs, [booking.client ?? ""]: address },
+        bookingAddressOn: false,
+        clientAddresses: {
+          ...state.clientAddresses,
+          [booking.client ?? ""]: address,
+        },
       });
-      patchBooking({ addr: address });
-      toastMsg(
+
+      patchBooking({ address });
+
+      showToast(
         address
-          ? "Address saved to " + booking.firstName + "’s profile"
+          ? `Address saved to ${booking.firstName}’s profile`
           : "Address removed",
       );
     },
     // the stylist's own note
     saveNote: () => {
-      patchBooking({ stylistNote: state.bkNoteDraft.trim() });
-      setState({ bkNoteOn: false });
-      toastMsg(state.bkNoteDraft.trim() ? "Note saved" : "Note removed");
+      patchBooking({ stylistNote: state.bookingNoteDraft.trim() });
+      setState({ bookingNoteOn: false });
+      showToast(state.bookingNoteDraft.trim() ? "Note saved" : "Note removed");
     },
     // change client
     changeRows: everyone
@@ -771,7 +945,7 @@ export const getBookingSheetView = (studio: StudioController) => {
         meta:
           (client.visits || 0) +
           (client.visits === 1 ? " visit" : " visits") +
-          (client.area ? " · " + client.area : ""),
+          (client.area ? ` · ${client.area}` : ""),
         isCurrent: client.id === booking.client,
         pick: () => setClient(client.id),
       })),
@@ -780,6 +954,7 @@ export const getBookingSheetView = (studio: StudioController) => {
       !everyone.some(({ name }) => name.toLowerCase() === lowerQuery),
     openNewClient: () => {
       const parts = changeQuery.split(" ");
+
       setState({
         newClient: {
           first: parts[0] || "",
@@ -790,7 +965,8 @@ export const getBookingSheetView = (studio: StudioController) => {
       });
     },
     addTypedClient: () => {
-      const id = "c" + Date.now();
+      const id = `c${Date.now()}`;
+
       setState(({ extraClients }) => ({
         extraClients: extraClients.concat([
           {
@@ -807,125 +983,87 @@ export const getBookingSheetView = (studio: StudioController) => {
           },
         ]),
       }));
+
       setClient(id);
-      toastMsg(changeQuery + " added");
+      showToast(`${changeQuery} added`);
     },
     makeWalkIn: () => setClient(null),
     // reschedule
-    rescheduleDays: Array.from({ length: 8 }, (_, offset) => {
+    rescheduleDays: Array.from({ length: 8 }, (_slot, offset) => {
       const info = dayInfo(offset);
+
       return {
         key: offset,
-        dow: info.dow,
-        num: info.num,
-        isOn: state.rsDay === offset,
-        pick: () => setState({ rsDay: offset }),
+        weekday: info.weekday,
+        dayNumber: info.dayNumber,
+        isOn: state.rescheduleDay === offset,
+        pick: () => setState({ rescheduleDay: offset }),
       };
     }),
     rescheduleTimes: slots.map((time) => ({
       key: time,
       label: time,
-      isOn: state.rsTime === time,
-      pick: () => setState({ rsTime: time, rsCustom: false }),
+      isOn: state.rescheduleTime === time,
+      pick: () => setState({ rescheduleTime: time, rescheduleCustom: false }),
     })),
-    hasNoSlots: state.rsDay != null && slots.length === 0,
-    noSlotsText: getWorkingHours(state, state.rsDay || 0).on
+    hasNoSlots: state.rescheduleDay != null && slots.length === 0,
+    noSlotsText: getWorkingHours(state, state.rescheduleDay || 0).on
       ? "No free 30-minute starts left this day. Use a custom time if you want to squeeze it in."
       : "You’re closed this day. Use a custom time to book it anyway.",
     isCustom,
     toggleCustom: () =>
       setState({
-        rsCustom: !isCustom,
-        rsTime: isCustom
-          ? null
-          : SLOT_TIMES.includes(state.rsTime ?? "")
+        rescheduleCustom: !isCustom,
+        rescheduleTime:
+          isCustom || SLOT_TIMES.includes(state.rescheduleTime ?? "")
             ? null
-            : state.rsTime,
+            : state.rescheduleTime,
       }),
     customTime,
     onCustomTime: (event: ChangeEvent<HTMLInputElement>) =>
-      setState({ rsTime: event.target.value || null }),
-    customHint: !rescheduleHours.on
-      ? "You’re closed this day. You can still book it."
-      : isOutside
-        ? "Outside your hours (" +
-          rescheduleHours.s +
-          "–" +
-          rescheduleHours.e +
-          "). You can still book it."
-        : "Any time between " + rescheduleHours.s + " and " + rescheduleHours.e,
+      setState({ rescheduleTime: event.target.value || null }),
+    customHint: getCustomHint(),
     isCustomWarn: isOutside || !rescheduleHours.on,
     rescheduleWarning: rescheduleConflicts.length
-      ? "Overlaps " +
-        rescheduleConflicts
-          .map(({ name, range }) => name + " (" + range + ")")
-          .join(", ") +
-        ". You can still move it."
+      ? `Overlaps ${rescheduleConflictList}. You can still move it.`
       : "",
     canMove,
     reschedule,
     // cancel
     cancelWhoOptions: [
-      { id: "client", label: booking.firstName + " is cancelling" },
+      { id: "client", label: `${booking.firstName} is cancelling` },
       { id: "me", label: "I am cancelling" },
     ],
-    cancelBody:
-      state.cxWho === "me"
-        ? "Cancelling refunds " +
-          booking.firstName +
-          " in full, including the booking fee, and frees the slot for online booking."
-        : isLate
-          ? lateFee.amt > 0
-            ? booking.firstName +
-              " is cancelling inside your " +
-              windowText +
-              " window, so your policy charges a " +
-              lateFee.label +
-              " late cancellation fee (" +
-              lateFee.sub +
-              "). The slot opens up."
-            : booking.firstName +
-              " is cancelling inside your " +
-              windowText +
-              " window. Your policy has no late cancellation fee: " +
-              lateFee.refund.toLowerCase() +
-              ". The slot opens up."
-          : booking.firstName +
-            " is cancelling outside your " +
-            windowText +
-            " window, so there is no fee. " +
-            lateFee.refund +
-            ". The slot opens up for online booking.",
-    isFeeShown: state.cxWho === "client" && isLate && lateFee.amt > 0,
-    feeLabel: "Charge the " + (lateFee.label || "") + " late cancellation fee",
+    cancelBody: getCancelBody(),
+    isFeeShown: state.cancelWho === "client" && isLate && lateFee.amount > 0,
+    feeLabel: `Charge the ${lateFee.label || ""} late cancellation fee`,
     cancel,
     // no-show
-    noShowOptions: (noShowFee.amt > 0
+    noShowOptions: (noShowFee.amount > 0
       ? [
           {
             id: "fee",
-            label: "Charge the " + noShowFee.label + " no-show fee",
-            sub: noShowFee.sub ?? "",
+            label: `Charge the ${noShowFee.label} no-show fee`,
+            subtitle: noShowFee.subtitle ?? "",
           },
-          { id: "none", label: "No charge", sub: noShowFee.refund },
+          { id: "none", label: "No charge", subtitle: noShowFee.refund },
         ]
       : [
           {
             id: "none",
             label: "No charge",
-            sub:
-              "Your payment policy has no no-show fee. " +
-              noShowFee.refund +
-              ".",
+            subtitle: `Your payment policy has no no-show fee. ${noShowFee.refund}.`,
           },
         ]
     ).map((option) => ({
       ...option,
       isOn: noShowChoice === option.id,
-      pick: () => setState({ nsCharge: option.id }),
+      pick: () => setState({ noShowCharge: option.id }),
     })),
     confirmNoShow: () => {
       const isCharging = noShowChoice === "fee";
+      const noShowNote = isCharging ? noShowFee.subtitle : noShowFee.refund;
+
       finish(
         {
           status: "No show",
@@ -933,63 +1071,55 @@ export const getBookingSheetView = (studio: StudioController) => {
           feeKept: isCharging,
           feePending: isCharging,
           feeLabel: noShowFee.label,
-          note:
-            "Client did not attend." +
-            (isCharging
-              ? " " + noShowFee.sub + "."
-              : " " + noShowFee.refund + "."),
+          note: `Client did not attend. ${noShowNote}.`,
         },
         "Marked as no-show",
       );
+
       closeSheet();
     },
     backToView: () => {
       const to =
-        state.bkStep === "changesvc" || state.bkStep === "addaddon"
+        state.bookingStep === "changesvc" || state.bookingStep === "addaddon"
           ? "editsvc"
           : "view";
-      setState({ bkOut: true });
+
+      setState({ bookingStepOut: true });
+
       window.setTimeout(
-        () => setState({ bkOut: false, bkBack: to === "view", bkStep: to }),
+        () =>
+          setState({
+            bookingStepOut: false,
+            bookingStepBack: to === "view",
+            bookingStep: to,
+          }),
         200,
       );
+
       if (to === "view")
-        window.setTimeout(() => setState({ bkBack: false }), 700);
+        window.setTimeout(() => setState({ bookingStepBack: false }), 700);
     },
     // done
-    doneTitle: "Done, " + booking.firstName + " is all set",
+    doneTitle: `Done, ${booking.firstName} is all set`,
     doneBody:
-      state.coMethod === "link"
-        ? "A payment link for £" +
-          due +
-          " is on its way to " +
-          booking.firstName +
-          ". The booking is in Past."
+      state.checkoutMethod === "link"
+        ? `A payment link for £${due} is on its way to ${booking.firstName}. The booking is in Past.`
         : "Marked completed and moved to Past.",
     rebook: () => rebookFrom(booking),
     // the embedded checkout's result
     onCheckoutComplete: (result: CheckoutRecord, action: string) => {
-      const label =
-        result.method === "link"
-          ? "Link sent · £" + result.charged + " due"
-          : result.method === "record"
-            ? "Paid · " +
-              ((
-                {
-                  cash: "Cash",
-                  bank: "Bank transfer",
-                  reader: "Card reader",
-                } as Record<string, string>
-              )[result.via] || "Recorded")
-            : result.method === "card"
-              ? "Paid · Card"
-              : result.refundAuto > 0
-                ? "Refunded £" + result.refundAuto
-                : "Paid";
+      const label = getCheckoutLabel(result);
+
       finish(
-        { status: "Completed", meta: label, price: result.total, ck: result },
+        {
+          status: "Completed",
+          meta: label,
+          price: result.total,
+          checkout: result,
+        },
         "Checkout complete",
       );
+
       if (action === "rebook") rebookFrom(booking);
       else closeSheet();
     },

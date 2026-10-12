@@ -12,7 +12,7 @@ import type {
   SettingsPage,
   SettingsState,
   SignIn,
-  TfaDevice,
+  TwoFactorDevice,
 } from "./account-settings-logic";
 
 const TOAST_MS = 2400;
@@ -40,7 +40,7 @@ export interface AccountSettingsProps {
   name?: string;
   legalName?: string;
   /** Host-managed two-step devices (Studio); otherwise the component keeps its own list. */
-  tfaDevices?: TfaDevice[];
+  twoFactorDevices?: TwoFactorDevice[];
   tax?: Partial<TaxDetails> | null;
   taxEditing?: boolean;
   taxBusiness?: TaxBusiness | null;
@@ -48,11 +48,11 @@ export interface AccountSettingsProps {
   taxBusinessName?: string;
   onState?: (api: AccountSettingsApi) => void;
   onToast?: (text: string) => void;
-  onNav?: (to: "business" | "earnings") => void;
+  onNavigate?: (to: "business" | "earnings") => void;
   onConnectStripe?: () => void;
-  onTfaRemove?: (name: string) => void;
-  onTfaTurnOn?: () => void;
-  onTfaAddBackup?: () => void;
+  onTwoFactorRemove?: (name: string) => void;
+  onTwoFactorTurnOn?: () => void;
+  onTwoFactorAddBackup?: () => void;
   onTaxEdit?: () => void;
   onTaxAdd?: () => void;
   onTaxSave?: (details: TaxDetails) => void;
@@ -65,20 +65,24 @@ export type DialogPhase = "idle" | "open" | "closing";
 /** AccountSettings state and actions (prototype class Component: init, toast, ask, maybeLoad, report, save). */
 export const useAccountSettings = (props: AccountSettingsProps) => {
   const { page = "personal", signIn, isNew = false } = props;
+
   const [state, setRawState] = useState(() =>
     getInitialSettingsState(isNew, window.location.search),
   );
+
   const [dialog, setDialog] = useState<ConfirmDialog>({
     title: "",
     body: "",
     cta: "",
   });
+
   const [dialogPhase, setDialogPhase] = useState<DialogPhase>("idle");
   const dialogRun = useRef<(() => void) | null>(null);
   const dialogReturn = useRef<HTMLElement | null>(null);
   const toastTimer = useRef(0);
   const googleTimer = useRef(0);
   const hasLoaded = useRef(false);
+
   usePasswordChecker();
 
   const setState = (
@@ -93,8 +97,10 @@ export const useAccountSettings = (props: AccountSettingsProps) => {
 
   const toast = (text: string) => {
     if (props.onToast) return props.onToast(text);
+
     window.clearTimeout(toastTimer.current);
     setState({ toast: true, toastText: text });
+
     toastTimer.current = window.setTimeout(
       () => setState({ toast: false }),
       TOAST_MS,
@@ -107,12 +113,15 @@ export const useAccountSettings = (props: AccountSettingsProps) => {
     setDialog(next);
     setDialogPhase("open");
   };
+
   const closeDialog = useCallback(() => {
     setDialogPhase("closing");
     dialogReturn.current?.focus?.();
   }, []);
+
   const confirmDialog = () => {
     const run = dialogRun.current;
+
     closeDialog();
     run?.();
   };
@@ -120,19 +129,25 @@ export const useAccountSettings = (props: AccountSettingsProps) => {
   // the sessions list "loads" once, the first time the security page shows
   useEffect(() => {
     if (page !== "security" || hasLoaded.current) return;
+
     hasLoaded.current = true;
     let isDone = false;
-    setState({ sessLoading: true });
+
+    setState({ sessionsLoading: true });
+
     const timer = window.setTimeout(() => {
       isDone = true;
-      setState({ sessLoading: false });
+      setState({ sessionsLoading: false });
     }, SESSIONS_LOAD_MS);
+
     return () => {
       window.clearTimeout(timer);
+
       // interrupted (a remount, or leaving the page early): load again next time
       if (isDone) return;
+
       hasLoaded.current = false;
-      setState({ sessLoading: false });
+      setState({ sessionsLoading: false });
     };
   }, [page]);
 
@@ -146,28 +161,32 @@ export const useAccountSettings = (props: AccountSettingsProps) => {
 
   // ---- security: the password checker (min 8 for stylists' account settings)
   const isSocial = !!signIn && signIn !== "email";
-  const showPasswordFields = !isSocial || state.setPw;
+  const showPasswordFields = !isSocial || state.isSettingPassword;
+
   const nameParts = String(props.name || props.legalName || "")
     .trim()
     .split(/\s+/);
-  const passwordCheck = checkPassword(state.pw.nw, {
+
+  const passwordCheck = checkPassword(state.password.next, {
     min: PASSWORD_MIN,
     first: state.first || nameParts[0],
     last: state.last || nameParts.slice(1).join(" "),
     email: state.email,
   });
+
   const passwordView = getPasswordView(passwordCheck, {
-    show: state.pwTouched || state.pwNwBlur,
-    errColor: "var(--accent-700)",
+    show: state.passwordTouched || state.newPasswordBlurred,
+    errorColour: "var(--accent-700)",
   });
+
   const passwordErrors = {
-    cur:
-      state.pwTouched && !isSocial && !state.pw.cur
+    current:
+      state.passwordTouched && !isSocial && !state.password.current
         ? "Enter your current password."
         : "",
-    nw: passwordView.hasErr ? passwordCheck.error : "",
-    conf:
-      state.pwTouched && state.pw.conf !== state.pw.nw
+    next: passwordView.hasError ? passwordCheck.error : "",
+    confirm:
+      state.passwordTouched && state.password.confirm !== state.password.next
         ? "Passwords don’t match."
         : "",
   };
@@ -175,68 +194,75 @@ export const useAccountSettings = (props: AccountSettingsProps) => {
   // ---- personal
   const getNameError = (key: "first" | "last") =>
     state.nameTouched && !state[key].trim()
-      ? "Enter your " + (key === "first" ? "first" : "last") + " name."
+      ? `Enter your ${key === "first" ? "first" : "last"} name.`
       : "";
+
   const isNameDirty =
     state.first !== state.savedName[0] || state.last !== state.savedName[1];
 
   // ---- save bar (only pages with typed fields)
   const isPasswordDirty =
-    showPasswordFields && !!(state.pw.cur || state.pw.nw || state.pw.conf);
+    showPasswordFields &&
+    !!(state.password.current || state.password.next || state.password.confirm);
+
   const isDirty =
-    page === "personal"
-      ? isNameDirty
-      : page === "security"
-        ? isPasswordDirty
-        : false;
+    page === "personal" ? isNameDirty : page === "security" && isPasswordDirty;
+
   const hasSave =
     page === "personal" || (page === "security" && showPasswordFields);
+
   const hasBarError =
     page === "personal"
       ? !!(getNameError("first") || getNameError("last"))
-      : page === "security"
-        ? !!(passwordErrors.cur || passwordErrors.nw || passwordErrors.conf)
-        : false;
+      : page === "security" &&
+        !!(
+          passwordErrors.current ||
+          passwordErrors.next ||
+          passwordErrors.confirm
+        );
 
   const save = () => {
     if (page === "personal") {
       if (!state.first.trim() || !state.last.trim())
         return setState({ nameTouched: true });
+
       setState({
         savedName: [state.first.trim(), state.last.trim()],
         nameTouched: false,
       });
+
       toast("Personal details saved");
     }
+
     if (page === "security") {
       if (
-        (!isSocial && !state.pw.cur) ||
-        !passwordCheck.ok ||
-        state.pw.conf !== state.pw.nw
+        (!isSocial && !state.password.current) ||
+        !passwordCheck.valid ||
+        state.password.confirm !== state.password.next
       )
-        return setState({ pwTouched: true });
+        return setState({ passwordTouched: true });
+
       const others = state.signOthers
-        ? state.sessions.filter(({ cur }) => !cur).length
+        ? state.sessions.filter(({ isCurrent }) => !isCurrent).length
         : 0;
+
       setState({
-        pw: { cur: "", nw: "", conf: "" },
-        pwTouched: false,
-        pwNwBlur: false,
-        setPw: false,
+        password: { current: "", next: "", confirm: "" },
+        passwordTouched: false,
+        newPasswordBlurred: false,
+        isSettingPassword: false,
         sessions: state.signOthers
-          ? state.sessions.filter(({ cur }) => cur)
+          ? state.sessions.filter(({ isCurrent }) => isCurrent)
           : state.sessions,
       });
-      toast(
-        isSocial
-          ? "Password set"
-          : others
-            ? "Password updated. Signed out of " +
-              others +
-              " other device" +
-              (others === 1 ? "" : "s")
-            : "Password updated",
-      );
+
+      const deviceSuffix = others === 1 ? "" : "s";
+
+      const updatedText = others
+        ? `Password updated. Signed out of ${others} other device${deviceSuffix}`
+        : "Password updated";
+
+      toast(isSocial ? "Password set" : updatedText);
     }
   };
 
@@ -246,10 +272,11 @@ export const useAccountSettings = (props: AccountSettingsProps) => {
   });
 
   const connectGoogle = () => {
-    setState(({ g }) => ({ g: { ...g, state: "connecting" } }));
+    setState(({ google }) => ({ google: { ...google, state: "connecting" } }));
     window.clearTimeout(googleTimer.current);
+
     googleTimer.current = window.setTimeout(() => {
-      setState(({ g }) => ({ g: { ...g, state: "on" } }));
+      setState(({ google }) => ({ google: { ...google, state: "on" } }));
       toast("Google Calendar connected");
     }, 1200);
   };

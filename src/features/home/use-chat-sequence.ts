@@ -21,14 +21,18 @@ export const useChatSequence = (
     isTyping: false,
     isBooked: false,
   });
+
   const update = (patch: Partial<ChatSequence>) =>
     setSequence((current) => ({ ...current, ...patch }));
 
   useEffect(() => {
     const phone = phoneRef.current;
+
     if (!phone || !chatMessages.length) return;
+
     let isPlaying = false;
     let timers: number[] = [];
+
     const clearTimers = () => {
       timers.forEach((timer) => window.clearTimeout(timer));
       timers = [];
@@ -37,19 +41,25 @@ export const useChatSequence = (
     const play = () => {
       isPlaying = true;
       clearTimers();
+
       const at = (delay: number, callback: () => void) =>
         timers.push(window.setTimeout(callback, delay));
+
       update({ shown: 0, isTyping: false, isBooked: false });
       let time = 500;
+
       chatMessages.forEach(({ from, text }, index) => {
         if (from === "stylist") {
           at(time, () => update({ isTyping: true }));
           time += 1150;
           at(time, () => update({ isTyping: false, shown: index + 1 }));
         } else at(time, () => update({ shown: index + 1 }));
+
         time += text.length * 13 + 500;
       });
+
       at(time + 400, () => update({ isBooked: true }));
+
       at(time + 5200, () => {
         isPlaying = false;
         play();
@@ -68,14 +78,19 @@ export const useChatSequence = (
           : "0px 0px -6% 0px",
       },
     );
+
     observer.observe(phone);
+
     // fallback: some environments never fire IO — poll the rect instead
     const watch = window.setInterval(() => {
       if (isPlaying) {
         window.clearInterval(watch);
+
         return;
       }
+
       const rect = phone.getBoundingClientRect();
+
       if (rect.top < window.innerHeight * 1.05 && rect.bottom > 0) {
         window.clearInterval(watch);
         play();
@@ -92,6 +107,7 @@ export const useChatSequence = (
   // keep the newest message in view
   useLayoutEffect(() => {
     const list = listRef.current;
+
     if (list && list.scrollHeight > list.clientHeight)
       list.scrollTop = list.scrollHeight;
   }, [listRef, sequence]);

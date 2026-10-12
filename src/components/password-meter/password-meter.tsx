@@ -17,44 +17,46 @@ export const PasswordMeter = ({
   messageRole,
 }: PasswordMeterProps) => {
   const {
-    msgOn,
-    hasErr,
-    msg,
-    msgW,
-    msgC,
-    ruleC,
-    muteC,
-    labelC,
-    okLen,
+    showMessage,
+    hasError,
+    message,
+    messageWeight,
+    messageColour,
+    ruleColour,
+    mutedColour,
+    labelColour,
+    lengthMet,
     rule,
-    ruleSr,
+    ruleScreenReaderText,
     typed,
     label,
-    segs,
-    warnOn,
-    warn,
+    segments,
+    showWarning,
+    warning,
   } = view;
+
   // runtime palette colours from getPasswordView
   const paletteStyle = {
-    "--pm-msg-weight": msgW,
-    "--pm-msg-colour": msgC,
-    "--pm-rule-colour": ruleC,
-    "--pm-mute-colour": muteC,
-    "--pm-label-colour": labelC,
+    "--pm-msg-weight": messageWeight,
+    "--pm-msg-colour": messageColour,
+    "--pm-rule-colour": ruleColour,
+    "--pm-mute-colour": mutedColour,
+    "--pm-label-colour": labelColour,
   } as CSSProperties;
+
   return (
     <div id={id} className={styles.help} style={paletteStyle}>
-      {msgOn && (
+      {showMessage && (
         <div
-          role={messageRole ?? (hasErr ? "alert" : "note")}
+          role={messageRole ?? (hasError ? "alert" : "note")}
           className={styles.message}
         >
-          {msg}
+          {message}
         </div>
       )}
       <div aria-live="polite" className={styles.ruleRow}>
         <div className={styles.rule}>
-          {okLen ? (
+          {lengthMet ? (
             <svg
               width="14"
               height="14"
@@ -86,7 +88,7 @@ export const PasswordMeter = ({
           )}
           <span>
             {rule}
-            <span className={styles.srOnly}>{", " + ruleSr}</span>
+            <span className={styles.srOnly}>{`, ${ruleScreenReaderText}`}</span>
           </span>
         </div>
         {typed && (
@@ -96,21 +98,21 @@ export const PasswordMeter = ({
               <strong className={styles.strengthValue}>{label}</strong>
             </span>
             <span aria-hidden="true" className={styles.bars}>
-              {segs.map(({ key, bg }) => (
+              {segments.map(({ key, background }) => (
                 // pm.s1–s3: each bar's colour
                 <span
                   key={key}
                   className={styles.bar}
-                  style={{ "--pm-bar-colour": bg } as CSSProperties}
+                  style={{ "--pm-bar-colour": background } as CSSProperties}
                 ></span>
               ))}
             </span>
           </div>
         )}
       </div>
-      {warnOn && (
+      {showWarning && (
         <div aria-live="polite" className={styles.warning}>
-          {warn}
+          {warning}
         </div>
       )}
     </div>

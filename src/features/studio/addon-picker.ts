@@ -1,17 +1,21 @@
 // The searchable add-on picker shared by Edit service, New booking and the service wizard (prototype aaBuild).
 import type { ChangeEvent } from "react";
-import { formatAddon, getAddonCat, getCatsSorted } from "./studio-model";
+import {
+  formatAddon,
+  getAddonCategory,
+  getSortedCategories,
+} from "./studio-model";
 import type { StudioAddon, StudioState } from "./studio-types";
 import type { StudioController } from "./use-studio";
 
 export interface AddonPickerOptions {
   /** Overrides for the wizard, which keeps its own query and category. */
-  q?: string | null;
-  cat?: string | null;
+  query?: string | null;
+  category?: string | null;
   list?: StudioAddon[];
   hideSelected?: boolean;
   setQuery?: (value: string) => void;
-  setCat?: (value: string) => void;
+  setCategory?: (value: string) => void;
 }
 
 export interface AddonPickerItem {
@@ -27,33 +31,44 @@ export const getAddonPicker = (
   state: StudioState,
   selected: string[],
   onAdd: (addon: StudioAddon) => void,
-  serviceCat: string | null | undefined,
+  serviceCategory: string | null | undefined,
   onRemove?: ((addon: StudioAddon) => void) | null,
   onDone?: (() => void) | null,
   options: AddonPickerOptions = {},
 ) => {
-  const query = options.q != null ? options.q : state.aaQ || "";
-  const catValue = options.q != null ? options.cat : state.aaCat;
+  const query =
+    options.query != null ? options.query : state.addAddonQuery || "";
+
+  const categoryValue =
+    options.query != null ? options.category : state.addAddonCategory;
+
   const lowerQuery = query.toLowerCase();
+
   const live = (options.list || state.addons).filter(
     (addon) =>
-      (addon.st || "active") !== "archived" &&
+      (addon.status || "active") !== "archived" &&
       !(options.hideSelected && selected.includes(addon.id)),
   );
-  const cats: [string, string][] = getCatsSorted(state)
-    .filter(({ id }) => live.some((addon) => getAddonCat(state, addon) === id))
+
+  const categories: [string, string][] = getSortedCategories(state)
+    .filter(({ id }) =>
+      live.some((addon) => getAddonCategory(state, addon) === id),
+    )
     .map(({ id, name }) => [id, name]);
-  if (live.some((addon) => getAddonCat(state, addon) === "none"))
-    cats.push(["none", "Other add-ons"]);
+
+  if (live.some((addon) => getAddonCategory(state, addon) === "none"))
+    categories.push(["none", "Other add-ons"]);
+
   const current =
-    catValue != null
-      ? catValue
-      : serviceCat && cats.some(([id]) => id === serviceCat)
-        ? serviceCat
-        : "all";
+    categoryValue ??
+    (serviceCategory && categories.some(([id]) => id === serviceCategory)
+      ? serviceCategory
+      : "all");
+
   const toItems = (list: StudioAddon[]): AddonPickerItem[] =>
     list.map((addon) => {
       const isOn = selected.includes(addon.id);
+
       return {
         key: addon.id,
         name: addon.name,
@@ -65,45 +80,56 @@ export const getAddonPicker = (
         },
       };
     });
+
   const isMatch = (addon: StudioAddon) =>
     !lowerQuery || addon.name.toLowerCase().includes(lowerQuery);
+
   const groups: {
     key: string;
-    cat: string;
-    n: string;
+    category: string;
+    count: string;
     items: AddonPickerItem[];
   }[] = [];
-  cats.forEach(([id, name]) => {
+
+  categories.forEach(([id, name]) => {
     if (current !== "all" && current !== id) return;
+
     const items = toItems(
       live.filter(
-        (addon) => getAddonCat(state, addon) === id && isMatch(addon),
+        (addon) => getAddonCategory(state, addon) === id && isMatch(addon),
       ),
     );
+
     if (items.length)
-      groups.push({ key: id, cat: name, n: String(items.length), items });
+      groups.push({
+        key: id,
+        category: name,
+        count: String(items.length),
+        items,
+      });
   });
+
   return {
-    q: query,
-    onQ: (event: ChangeEvent<HTMLInputElement>) =>
+    query,
+    onQuery: (event: ChangeEvent<HTMLInputElement>) =>
       options.setQuery
         ? options.setQuery(event.target.value)
-        : studio.setState({ aaQ: event.target.value }),
+        : studio.setState({ addAddonQuery: event.target.value }),
     groups,
     isEmpty: groups.length === 0,
     hasDone: !!onDone,
     done: onDone || (() => {}),
-    doneLabel: selected.length
-      ? "Done · " + selected.length + " added"
-      : "Done",
+    doneLabel: selected.length ? `Done · ${selected.length} added` : "Done",
     chips: ([["all", "All"]] as [string, string][])
-      .concat(cats)
+      .concat(categories)
       .map(([id, label]) => ({
         key: id,
         label,
         isOn: current === id,
-        go: () =>
-          options.setCat ? options.setCat(id) : studio.setState({ aaCat: id }),
+        onSelect: () =>
+          options.setCategory
+            ? options.setCategory(id)
+            : studio.setState({ addAddonCategory: id }),
       })),
   };
 };

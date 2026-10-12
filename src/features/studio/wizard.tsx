@@ -55,7 +55,8 @@ const Plus = ({ className }: { className?: string }) => (
 
 /** Step 2: name, description, category, service type and images. */
 const DetailsStep = ({ view }: { view: WizardView }) => {
-  const { draft, newCat } = view;
+  const { draft, newCategory } = view;
+
   return (
     <div className={styles.stack12}>
       {view.isAdd && (
@@ -63,7 +64,7 @@ const DetailsStep = ({ view }: { view: WizardView }) => {
           <button
             className={styles.suggestButton}
             type="button"
-            onClick={view.openSugg}
+            onClick={view.openSuggestions}
           >
             <svg
               width="17"
@@ -106,11 +107,11 @@ const DetailsStep = ({ view }: { view: WizardView }) => {
         <textarea
           className={joinClassNames(
             styles.textarea,
-            view.flash.desc && styles.flash,
+            view.flash.description && styles.flash,
           )}
           data-flash="1"
-          value={draft.desc}
-          onChange={view.onDesc}
+          value={draft.description}
+          onChange={view.onDescription}
           rows={3}
           placeholder="What's included, how to come prepared, etc."
         ></textarea>
@@ -121,45 +122,45 @@ const DetailsStep = ({ view }: { view: WizardView }) => {
             Category <span className={styles.optional}>(optional)</span>
           </span>
           <SearchSelect
-            options={view.catOptions}
-            value={view.catValue}
+            options={view.categoryOptions}
+            value={view.categoryValue}
             placeholder="No category"
-            onChange={view.pickCat}
+            onChange={view.pickCategory}
           />
-          {newCat && (
+          {newCategory && (
             <div className={styles.newCat}>
               <label className={styles.field6}>
                 <span className={styles.label135Strong}>New category</span>
                 <input
                   className={joinClassNames(
                     styles.catInput,
-                    !!newCat.err && styles.catInputError,
+                    !!newCategory.error && styles.catInputError,
                   )}
-                  value={newCat.name}
-                  onChange={view.onNewCatName}
+                  value={newCategory.name}
+                  onChange={view.onNewCategoryName}
                   maxLength={40}
                   placeholder="e.g. Kids"
-                  aria-invalid={newCat.err ? "true" : "false"}
+                  aria-invalid={newCategory.error ? "true" : "false"}
                 />
-                {!!newCat.err && (
+                {!!newCategory.error && (
                   <span className={styles.error} role="alert">
-                    {newCat.err}
+                    {newCategory.error}
                   </span>
                 )}
               </label>
-              <Swatches swatches={view.newCatSwatches} />
+              <Swatches swatches={view.newCategorySwatches} />
               <div className={styles.row8}>
                 <button
                   className={styles.darkSmall}
                   type="button"
-                  onClick={view.addNewCat}
+                  onClick={view.addNewCategory}
                 >
                   Add category
                 </button>
                 <button
                   className={styles.cancelSmall}
                   type="button"
-                  onClick={view.cancelNewCat}
+                  onClick={view.cancelNewCategory}
                 >
                   Cancel
                 </button>
@@ -173,11 +174,11 @@ const DetailsStep = ({ view }: { view: WizardView }) => {
             <button
               className={styles.help}
               type="button"
-              onClick={view.toggleSubTip}
-              onMouseEnter={view.subTipIn}
-              onMouseLeave={view.tipOut}
-              onFocus={view.subTipIn}
-              onBlur={view.tipOut}
+              onClick={view.toggleSubcategoryTip}
+              onMouseEnter={view.showSubcategoryTip}
+              onMouseLeave={view.hideSubcategoryTip}
+              onFocus={view.showSubcategoryTip}
+              onBlur={view.hideSubcategoryTip}
               aria-label="What is service type used for?"
             >
               ?
@@ -197,9 +198,9 @@ const DetailsStep = ({ view }: { view: WizardView }) => {
               onChange={view.pickType}
             />
           </div>
-          {view.isSubTipOpen && (
+          {view.isSubcategoryTipOpen && (
             // eslint-disable-next-line jsx-a11y/click-events-have-key-events, jsx-a11y/no-static-element-interactions
-            <div className={styles.subTip} onClick={view.toggleSubTip}>
+            <div className={styles.subTip} onClick={view.toggleSubcategoryTip}>
               Select the service type that best describes this service. This
               helps clients discover your service
             </div>
@@ -245,7 +246,7 @@ type VariationRow = WizardView["sizeRows"][number];
 const VariationCard = ({
   view,
   title,
-  sub,
+  subtitle,
   aria,
   head,
   isOn,
@@ -255,7 +256,7 @@ const VariationCard = ({
 }: {
   view: WizardView;
   title: string;
-  sub: string;
+  subtitle: string;
   aria: string;
   head: string;
   isOn: boolean;
@@ -267,14 +268,14 @@ const VariationCard = ({
     className={joinClassNames(
       styles.optionCard,
       isNext && styles.optionCardNext,
-      view.flash.opts && styles.flash,
+      view.flash.options && styles.flash,
     )}
     data-flash="1"
   >
     <div className={styles.toggleRow}>
       <div className={styles.grow}>
         <div className={styles.title15}>{title}</div>
-        <div className={styles.sub135}>{sub}</div>
+        <div className={styles.sub135}>{subtitle}</div>
       </div>
       <button
         className={joinClassNames(styles.switch, isOn && styles.switchOn)}
@@ -301,6 +302,7 @@ const VariationCard = ({
         </div>
         {rows.map((row) => {
           const fade = !row.isOn && styles.faded;
+
           return (
             <div key={row.key} className={styles.varRowWrap}>
               <div
@@ -316,7 +318,7 @@ const VariationCard = ({
                   className={joinClassNames(
                     styles.sign,
                     row.isOn && styles.signActive,
-                    row.isNeg && styles.signNeg,
+                    row.isNegativeValue && styles.signNeg,
                     fade,
                   )}
                   type="button"
@@ -325,8 +327,8 @@ const VariationCard = ({
                   aria-label={row.signAria}
                   onMouseEnter={row.tipSign}
                   onFocus={row.tipSign}
-                  onMouseLeave={view.tipOut}
-                  onBlur={view.tipOut}
+                  onMouseLeave={view.hideSubcategoryTip}
+                  onBlur={view.hideSubcategoryTip}
                 >
                   {row.signText}
                 </button>
@@ -339,7 +341,7 @@ const VariationCard = ({
                   onBlur={row.blur}
                   disabled={!row.isOn}
                   inputMode="decimal"
-                  aria-label={row.label + " price in pounds"}
+                  aria-label={`${row.label} price in pounds`}
                 />
                 <input
                   className={joinClassNames(
@@ -353,7 +355,7 @@ const VariationCard = ({
                   onBlur={row.blur}
                   disabled={!row.isOn}
                   inputMode="decimal"
-                  aria-label={row.label + " hours"}
+                  aria-label={`${row.label} hours`}
                 />
                 <span className={joinClassNames(styles.unit, fade)}>hr</span>
                 <input
@@ -364,7 +366,7 @@ const VariationCard = ({
                   onBlur={row.blur}
                   disabled={!row.isOn}
                   inputMode="decimal"
-                  aria-label={row.label + " minutes"}
+                  aria-label={`${row.label} minutes`}
                 />
                 <span className={joinClassNames(styles.unit, fade)}>min</span>
                 <button
@@ -374,12 +376,12 @@ const VariationCard = ({
                   )}
                   type="button"
                   onClick={row.toggle}
-                  aria-label={"Offer " + row.label}
+                  aria-label={`Offer ${row.label}`}
                   aria-pressed={row.isOn ? "true" : "false"}
                   onMouseEnter={row.tipCheck}
                   onFocus={row.tipCheck}
-                  onMouseLeave={view.tipOut}
-                  onBlur={view.tipOut}
+                  onMouseLeave={view.hideSubcategoryTip}
+                  onBlur={view.hideSubcategoryTip}
                 >
                   {row.isOn && <Tick size="11" />}
                 </button>
@@ -407,6 +409,7 @@ const VariationCard = ({
 /** Step 3: base price and time, size / length options and own customisations. */
 const PricingStep = ({ view }: { view: WizardView }) => {
   const { draft, own } = view;
+
   return (
     <>
       {!view.isPricingCollapsed && (
@@ -446,12 +449,12 @@ const PricingStep = ({ view }: { view: WizardView }) => {
                   <span className={styles.selectWrap}>
                     <select
                       className={styles.select}
-                      value={view.durHourValue}
-                      onChange={view.onDurHours}
+                      value={view.durationHourValue}
+                      onChange={view.onDurationHours}
                       aria-label="Hours"
                     >
-                      {view.hourOptions.map(({ v, label }) => (
-                        <option key={v} value={v}>
+                      {view.hourOptions.map(({ value, label }) => (
+                        <option key={value} value={value}>
                           {label}
                         </option>
                       ))}
@@ -461,12 +464,12 @@ const PricingStep = ({ view }: { view: WizardView }) => {
                   <span className={styles.selectWrap}>
                     <select
                       className={styles.select}
-                      value={view.durMinuteValue}
-                      onChange={view.onDurMinutes}
+                      value={view.durationMinuteValue}
+                      onChange={view.onDurationMinutes}
                       aria-label="Minutes"
                     >
-                      {view.minuteOptions.map(({ v, label }) => (
-                        <option key={v} value={v}>
+                      {view.minuteOptions.map(({ value, label }) => (
+                        <option key={value} value={value}>
                           {label}
                         </option>
                       ))}
@@ -487,8 +490,8 @@ const PricingStep = ({ view }: { view: WizardView }) => {
                     onChange={view.onExtra}
                     aria-label="Extra time after"
                   >
-                    {view.extraOptions.map(({ v, label }) => (
-                      <option key={v} value={v}>
+                    {view.extraOptions.map(({ value, label }) => (
+                      <option key={value} value={value}>
                         {label}
                       </option>
                     ))}
@@ -530,12 +533,12 @@ const PricingStep = ({ view }: { view: WizardView }) => {
             <div className={styles.pill}>
               <select
                 className={styles.pillHours}
-                value={view.durHourValue}
-                onChange={view.onDurHours}
+                value={view.durationHourValue}
+                onChange={view.onDurationHours}
                 aria-label="Hours"
               >
-                {view.hourOptions.map(({ v, label }) => (
-                  <option key={v} value={v}>
+                {view.hourOptions.map(({ value, label }) => (
+                  <option key={value} value={value}>
                     {label}
                   </option>
                 ))}
@@ -543,12 +546,12 @@ const PricingStep = ({ view }: { view: WizardView }) => {
               <span className={styles.pillDivider}></span>
               <select
                 className={styles.pillMinutes}
-                value={view.durMinuteValue}
-                onChange={view.onDurMinutes}
+                value={view.durationMinuteValue}
+                onChange={view.onDurationMinutes}
                 aria-label="Minutes"
               >
-                {view.minuteOptions.map(({ v, label }) => (
-                  <option key={v} value={v}>
+                {view.minuteOptions.map(({ value, label }) => (
+                  <option key={value} value={value}>
                     {label}
                   </option>
                 ))}
@@ -564,8 +567,8 @@ const PricingStep = ({ view }: { view: WizardView }) => {
                 onChange={view.onExtra}
                 aria-label="Extra time after"
               >
-                {view.extraOptionsShort.map(({ v, label }) => (
-                  <option key={v} value={v}>
+                {view.extraOptionsShort.map(({ value, label }) => (
+                  <option key={value} value={value}>
                     {label}
                   </option>
                 ))}
@@ -581,7 +584,7 @@ const PricingStep = ({ view }: { view: WizardView }) => {
         <VariationCard
           view={view}
           title="Add size options"
-          sub="Adjust price and time by size."
+          subtitle="Adjust price and time by size."
           aria="Toggle size options"
           head={view.sizeHead}
           isOn={draft.sizesOn}
@@ -593,7 +596,7 @@ const PricingStep = ({ view }: { view: WizardView }) => {
         <VariationCard
           view={view}
           title="Add length options"
-          sub="Adjust price and time by hair length."
+          subtitle="Adjust price and time by hair length."
           aria="Toggle length options"
           head="Length"
           isOn={draft.lengthsOn}
@@ -651,6 +654,7 @@ const PricingStep = ({ view }: { view: WizardView }) => {
 /** Step 3 review: every bookable combination. */
 const ReviewStep = ({ view }: { view: WizardView }) => {
   const { review } = view;
+
   return (
     <>
       <div className={styles.intro}>
@@ -671,10 +675,10 @@ const ReviewStep = ({ view }: { view: WizardView }) => {
             {review.rows.map(({ label, cells }) => (
               <div key={label} className={styles.gridRow}>
                 <div className={styles.rowLabel}>{label}</div>
-                {cells.map(({ price, dur }, index) => (
+                {cells.map(({ price, duration }, index) => (
                   <div key={index} className={styles.cell}>
                     <div className={styles.amount}>{price}</div>
-                    <div className={styles.unit}>{dur}</div>
+                    <div className={styles.unit}>{duration}</div>
                   </div>
                 ))}
               </div>
@@ -682,10 +686,10 @@ const ReviewStep = ({ view }: { view: WizardView }) => {
           </>
         )}
         {!review.isGrid &&
-          review.items.map(({ label, price, dur }) => (
+          review.items.map(({ label, price, duration }) => (
             <div key={label} className={styles.listRow}>
               <div className={styles.listLabel}>{label}</div>
-              <div className={styles.muted135}>{dur}</div>
+              <div className={styles.muted135}>{duration}</div>
               <div className={styles.amount}>{price}</div>
             </div>
           ))}
@@ -698,6 +702,7 @@ const ReviewStep = ({ view }: { view: WizardView }) => {
 const AddonsStep = ({ view }: { view: WizardView }) => {
   const { addons } = view;
   const { picker } = addons;
+
   return (
     <>
       <div className={styles.intro}>
@@ -727,28 +732,28 @@ const AddonsStep = ({ view }: { view: WizardView }) => {
           </svg>
           <input
             className={styles.searchInput}
-            value={picker.q}
-            onChange={picker.onQ}
+            value={picker.query}
+            onChange={picker.onQuery}
             placeholder="Search add-ons"
             aria-label="Search add-ons"
           />
         </label>
         <div className={styles.chips}>
-          {picker.chips.map(({ key, label, isOn, go }) => (
+          {picker.chips.map(({ key, label, isOn, onSelect }) => (
             <button
               key={key}
               className={joinClassNames(styles.chip, isOn && styles.chipOn)}
-              onClick={go}
+              onClick={onSelect}
             >
               {label}
             </button>
           ))}
         </div>
-        {picker.groups.map(({ key, cat, n, items }) => (
+        {picker.groups.map(({ key, category, count, items }) => (
           <div key={key} className={styles.group}>
             <div className={styles.groupHead}>
-              <span className={styles.groupName}>{cat}</span>
-              <span className={styles.groupCount}>{n}</span>
+              <span className={styles.groupName}>{category}</span>
+              <span className={styles.groupCount}>{count}</span>
             </div>
             <div className={styles.stack6}>
               {items.map((item) => (

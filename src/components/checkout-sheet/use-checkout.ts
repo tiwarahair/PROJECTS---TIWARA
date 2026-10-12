@@ -39,9 +39,9 @@ export interface CheckoutSheetProps {
       total: number;
       lines: {
         name: string;
-        sub: string;
+        subtitle: string;
         base: number;
-        adj: number;
+        adjustment: number;
         reason: string;
       }[];
       mode: string;
@@ -66,14 +66,20 @@ export const useCheckout = (props: CheckoutSheetProps) => {
       linkPaid: props.linkPaid,
     }),
   );
+
   const stateRef = useRef(state);
+
   stateRef.current = state;
   const scrollRef = useRef<HTMLDivElement>(null);
   const toastTimer = useRef(0);
   const chargeTimer = useRef(0);
   const isEmbedded = !!props.booking;
+
   const booking: CheckoutBooking =
-    state.bk === "live" && props.booking ? props.booking : BOOKINGS[state.bk]!;
+    state.bookingKey === "live" && props.booking
+      ? props.booking
+      : BOOKINGS[state.bookingKey]!;
+
   const money = getMoney(state, booking);
 
   const setState = (
@@ -101,15 +107,17 @@ export const useCheckout = (props: CheckoutSheetProps) => {
   const exit = () => props.onExit?.();
 
   /** Show a view; leaving to "detail" inside Studio exits the sheet instead. */
-  const go = (view: CheckoutView, direction = 1) => {
+  const goTo = (view: CheckoutView, direction = 1) => {
     if (view === "detail" && isEmbedded) return exit();
-    setState({ view, dir: direction, adjId: null, rsTried: false });
+
+    setState({ view, direction, adjustingLineId: null, resendTried: false });
     scrollTop();
   };
 
   const showToast = (text: string) => {
     window.clearTimeout(toastTimer.current);
     setState({ toast: text });
+
     toastTimer.current = window.setTimeout(
       () => setState({ toast: "" }),
       TOAST_MS,
@@ -118,7 +126,7 @@ export const useCheckout = (props: CheckoutSheetProps) => {
 
   const startCheckout = () => {
     setState({ decline: null });
-    go("items", 1);
+    goTo("items", 1);
   };
 
   const complete = () => {
@@ -128,22 +136,28 @@ export const useCheckout = (props: CheckoutSheetProps) => {
           ...current,
           busy: false,
           decline: null,
-          dir: 1,
+          direction: 1,
           view: "done" as const,
           fromDone: false,
         };
+
         return { ...next, ...getFinalized(next, booking) };
       });
+
       scrollTop();
     };
+
     if (money.method !== "card") return finish();
+
     setState({ busy: true });
     window.clearTimeout(chargeTimer.current);
     const declineMode = props.declineMode || "none";
     const isFirst = !stateRef.current.decline;
+
     // demo: 'soft' declines the first attempt then succeeds on retry; 'hard' always declines with no retry
     const isFailing =
       declineMode === "hard" || (declineMode === "soft" && isFirst);
+
     chargeTimer.current = window.setTimeout(
       isFailing
         ? () =>
@@ -166,11 +180,11 @@ export const useCheckout = (props: CheckoutSheetProps) => {
     refundAuto: 0,
     ...(state.done ?? {}),
     total: money.items,
-    lines: state.lines.map(({ name, sub, base, adj, reason }) => ({
+    lines: state.lines.map(({ name, subtitle, base, adjustment, reason }) => ({
       name,
-      sub,
+      subtitle,
       base,
-      adj,
+      adjustment,
       reason,
     })),
     mode: state.mode,
@@ -184,7 +198,7 @@ export const useCheckout = (props: CheckoutSheetProps) => {
     money,
     isEmbedded,
     scrollRef,
-    go,
+    goTo,
     exit,
     showToast,
     startCheckout,

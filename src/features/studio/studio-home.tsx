@@ -21,12 +21,17 @@ const RANGES = [
 ] as const;
 
 // desktop cards are stretched to the hero's height, so a quiet line under the number fills the room
-const STAT_SUBS: Record<string, string> = {
+const STAT_SUBTITLES: Record<string, string> = {
   Bookings: "vs last period",
   Revenue: "completed bookings",
   Occupancy: "of working hours",
   "New clients": "first visits",
 };
+
+// how many days ahead each range looks; anything else falls back to 30
+const RANGE_DAYS: Record<string, number> = { today: 1, week: 7 };
+
+const getZeroStat = (label: string) => (label === "Revenue" ? "£0" : "0");
 
 const Chevron = ({
   stroke = "currentColor",
@@ -53,14 +58,22 @@ const getTileStyle = (booking: DecoratedBooking) =>
   // runtime: the service category's tile colours and the booking's status tone
   ({
     "--tile-line": booking.tileLine,
-    "--tile-bg": booking.tileBg,
+    "--tile-bg": booking.tileBackground,
     "--tile-bar": booking.tileBar,
     "--tile-text": booking.tileText,
     "--tile-meta": booking.tileMeta,
-    "--st-bg": booking.stBg,
-    "--st-color": booking.stColor,
-    "--st-border": booking.stBorder,
+    "--st-bg": booking.statusBackground,
+    "--st-color": booking.statusColor,
+    "--st-border": booking.statusBorder,
   }) as CSSProperties;
+
+const getDueLine = (booking: DecoratedBooking) => {
+  const dayPrefix = booking.dayOffset < 0 ? `${booking.dayShort} ` : "";
+  const endTime = booking.timeRange.split("–")[1] || booking.time;
+  const dueNote = booking.due > 0 ? `£${booking.due} due` : "paid in full";
+
+  return `${booking.service} · ended ${dayPrefix}${endTime} · ${dueNote}`;
+};
 
 const RangeSwitch = ({ studio }: { studio: StudioController }) => (
   <div className={styles.ranges}>
@@ -71,7 +84,7 @@ const RangeSwitch = ({ studio }: { studio: StudioController }) => (
           styles.range,
           studio.state.range === id && styles.rangeOn,
         )}
-        onClick={() => studio.setState({ range: id, chartIdx: null })}
+        onClick={() => studio.setState({ range: id, chartIndex: null })}
       >
         {label}
       </button>
@@ -81,15 +94,17 @@ const RangeSwitch = ({ studio }: { studio: StudioController }) => (
 
 const SetupBanner = ({ studio }: { studio: StudioController }) => {
   const { steps, doneCount } = getSetupProgress(studio);
+
   // runtime: the share of setup steps done
   const barStyle = {
-    "--setup-pct": ((doneCount / 4) * 100).toFixed(0) + "%",
+    "--setup-pct": `${((doneCount / 4) * 100).toFixed(0)}%`,
   } as CSSProperties;
+
   return (
     <section className={styles.setup}>
       <div className={styles.setupHead}>
         <div className={styles.setupTitle}>Set up your studio</div>
-        <div className={styles.setupCount}>{doneCount + " of 4 done"}</div>
+        <div className={styles.setupCount}>{`${doneCount} of 4 done`}</div>
       </div>
       <div className={styles.setupSub}>
         Four steps and clients can book you.
@@ -98,10 +113,11 @@ const SetupBanner = ({ studio }: { studio: StudioController }) => {
         <div className={styles.setupBar} style={barStyle}></div>
       </div>
       <div className={styles.column}>
-        {getSetupRows(studio).map(([key, label, sub, go]) => {
+        {getSetupRows(studio).map(([key, label, subtitle, onSelect]) => {
           const isDone = !!steps[key];
+
           return (
-            <button key={key} className={styles.setupRow} onClick={go}>
+            <button key={key} className={styles.setupRow} onClick={onSelect}>
               <span
                 className={joinClassNames(
                   styles.setupTick,
@@ -130,7 +146,7 @@ const SetupBanner = ({ studio }: { studio: StudioController }) => {
                 )}
               >
                 <span className={styles.setupLabel}>{label}</span>
-                <span className={styles.setupRowSub}>{sub}</span>
+                <span className={styles.setupRowSub}>{subtitle}</span>
               </span>
               <Chevron stroke="rgba(246,240,228,.55)" />
             </button>
@@ -143,34 +159,50 @@ const SetupBanner = ({ studio }: { studio: StudioController }) => {
 
 /** Studio → Home (prototype Studio.dc.html lines 140–401). */
 export const StudioHome = ({ studio }: { studio: StudioController }) => {
-  const { state, setState, isWide, isDesk, isNew, actions } = studio;
+  const { state, setState, isWide, isDesktop, isNew, actions } = studio;
   const { isSetupOn, isComplete } = getSetupProgress(studio);
+
   const upcoming = getDecoratedBookings(state, isNew, (booking) =>
-    actions.openSheet("booking", { sheetBId: booking.id }),
+    actions.openSheet("booking", { sheetBookingId: booking.id }),
   );
+
   const rangeData = RANGE_DATA[state.range];
   const chart = makeChart(rangeData.chart);
-  const tipPoint = state.chartIdx != null ? chart.points[state.chartIdx] : null;
+
+  const tipPoint =
+    state.chartIndex != null ? chart.points[state.chartIndex] : null;
+
   const now = new Date();
-  const nowMin = now.getHours() * 60 + now.getMinutes();
+  const nowMinutes = now.getHours() * 60 + now.getMinutes();
+
   const due = upcoming
     .filter(
-      ({ st, awaiting, ended }) =>
-        (st === "confirmed" || st === "arrived") && !awaiting && ended,
+      ({ status, awaiting, ended }) =>
+        (status === "confirmed" || status === "arrived") && !awaiting && ended,
     )
     .sort(
       (first, second) =>
-        first.off - second.off || first.startMin - second.startMin,
+        first.dayOffset - second.dayOffset ||
+        first.startMinutes - second.startMinutes,
     );
+
   const today = upcoming
-    .filter(({ off }) => off === 0)
-    .sort((first, second) => first.startMin - second.startMin);
-  const next = today.find(({ startMin, durMin }) => startMin + durMin > nowMin);
-  const limit = state.range === "today" ? 1 : state.range === "week" ? 7 : 30;
+    .filter(({ dayOffset }) => dayOffset === 0)
+    .sort((first, second) => first.startMinutes - second.startMinutes);
+
+  const next = today.find(
+    ({ startMinutes, durationMinutes }) =>
+      startMinutes + durationMinutes > nowMinutes,
+  );
+
+  const limit = RANGE_DAYS[state.range] ?? 30;
+
   const homeUpcoming = upcoming
-    .filter(({ off }) => off >= 0 && off < limit)
-    .slice(0, isDesk ? 5 : 3);
+    .filter(({ dayOffset }) => dayOffset >= 0 && dayOffset < limit)
+    .slice(0, isDesktop ? 5 : 3);
+
   const stats = rangeData.stats;
+
   const statCards = (
     [
       ["Bookings", stats.bookings],
@@ -180,42 +212,67 @@ export const StudioHome = ({ studio }: { studio: StudioController }) => {
     ] as const
   ).map(([label, [value, delta]], index) => ({
     label,
-    value: isNew ? (label === "Revenue" ? "£0" : "0") : value,
-    sub: isDesk && !isNew ? STAT_SUBS[label] : "",
+    value: isNew ? getZeroStat(label) : value,
+    subtitle: isDesktop && !isNew ? STAT_SUBTITLES[label] : "",
     delta: isNew ? "" : delta,
-    delay: (index * 0.05).toFixed(2) + "s",
+    delay: `${(index * 0.05).toFixed(2)}s`,
   }));
+
   const feed = NOTIFS.slice(0, 4);
   const isGate = isGated(studio);
+
   const goCalendarToday = () => {
-    setState({ tab: "bookings", dayIdx: 0, bview: "cal" });
+    setState({ tab: "bookings", dayIndex: 0, bookingsLayout: "cal" });
     actions.scrollBody(0, false);
-    actions.scrollCalToNow();
+    actions.scrollCalendarToNow();
   };
+
   const copyLink = () => {
     if (isGate) {
-      actions.toastMsg(GATE_REASON);
+      actions.showToast(GATE_REASON);
+
       return;
     }
+
     copyText(BOOKING_LINK);
-    actions.toastMsg("Booking link copied");
+    actions.showToast("Booking link copied");
   };
+
   const onChartMove = (event: PointerEvent<HTMLDivElement>) => {
     const rect = event.currentTarget.getBoundingClientRect();
     const x = ((event.clientX - rect.left) / rect.width) * 340;
     const count = rangeData.chart.length;
+
     const index = Math.max(
       0,
       Math.min(count - 1, Math.round(((x - 8) / (340 - 16)) * (count - 1))),
     );
-    if (index !== state.chartIdx) setState({ chartIdx: index });
+
+    if (index !== state.chartIndex) setState({ chartIndex: index });
+  };
+
+  const getHeroNext = () => {
+    if (next)
+      return `Next: ${next.clientName} at ${next.time} · ${next.service}`;
+
+    return today.length
+      ? "All done for today"
+      : "Share your link to fill the day";
+  };
+
+  const getEmptyTitle = () => {
+    if (isNew) return "No appointments yet";
+
+    return state.range === "today"
+      ? "Nothing booked today"
+      : "Nothing booked in this range";
   };
 
   return (
     <div
       className={joinClassNames(
         styles.home,
-        isDesk ? styles.homeDesk : isWide && styles.homeWide,
+        isDesktop ? styles.homeDesk : isWide && styles.homeWide,
       )}
       data-screen-label="Home"
     >
@@ -247,7 +304,7 @@ export const StudioHome = ({ studio }: { studio: StudioController }) => {
           </div>
           <button
             className={styles.gateButton}
-            onClick={() => actions.openTf("secure")}
+            onClick={() => actions.openTwoFactor("secure")}
           >
             Continue setup
           </button>
@@ -301,7 +358,7 @@ export const StudioHome = ({ studio }: { studio: StudioController }) => {
             <div className={styles.nudgeActions}>
               <button
                 className={styles.nudgeButton}
-                onClick={() => actions.openSub("policy")}
+                onClick={() => actions.openSubpage("policy")}
               >
                 Payment policy
               </button>
@@ -328,18 +385,7 @@ export const StudioHome = ({ studio }: { studio: StudioController }) => {
                 : today.length +
                   (today.length === 1 ? " appointment" : " appointments")}
             </div>
-            <div className={styles.heroNext}>
-              {next
-                ? "Next: " +
-                  next.clientName +
-                  " at " +
-                  next.time +
-                  " · " +
-                  next.svc
-                : today.length
-                  ? "All done for today"
-                  : "Share your link to fill the day"}
-            </div>
+            <div className={styles.heroNext}>{getHeroNext()}</div>
           </div>
           <button className={styles.heroButton} onClick={goCalendarToday}>
             Open calendar
@@ -349,14 +395,14 @@ export const StudioHome = ({ studio }: { studio: StudioController }) => {
       </section>
 
       <section className={styles.side}>
-        {!isDesk && (
+        {!isDesktop && (
           <div className={styles.sectionHead}>
             <h2 className={styles.h2}>Overview</h2>
             <RangeSwitch studio={studio} />
           </div>
         )}
         <div className={styles.stats}>
-          {statCards.map(({ label, value, sub, delta, delay }) => (
+          {statCards.map(({ label, value, subtitle, delta, delay }) => (
             // runtime: staggered entry
             <div
               key={label}
@@ -369,7 +415,7 @@ export const StudioHome = ({ studio }: { studio: StudioController }) => {
               </div>
               <div>
                 <div className={styles.statValue}>{value}</div>
-                {sub && <div className={styles.statSub}>{sub}</div>}
+                {subtitle && <div className={styles.statSub}>{subtitle}</div>}
               </div>
             </div>
           ))}
@@ -383,7 +429,7 @@ export const StudioHome = ({ studio }: { studio: StudioController }) => {
               <div className={styles.chartTitle}>Revenue</div>
               <div className={styles.muted}>{rangeData.caption}</div>
             </div>
-            {isDesk && <RangeSwitch studio={studio} />}
+            {isDesktop && <RangeSwitch studio={studio} />}
           </div>
           {isNew && (
             <div className={styles.chartEmpty}>
@@ -399,7 +445,7 @@ export const StudioHome = ({ studio }: { studio: StudioController }) => {
               <div
                 className={styles.chart}
                 onPointerMove={onChartMove}
-                onPointerLeave={() => setState({ chartIdx: null })}
+                onPointerLeave={() => setState({ chartIndex: null })}
                 onPointerDown={onChartMove}
               >
                 <svg className={styles.chartSvg} viewBox="0 0 340 120">
@@ -447,18 +493,17 @@ export const StudioHome = ({ studio }: { studio: StudioController }) => {
                     </>
                   )}
                 </svg>
-                {tipPoint && state.chartIdx != null && (
+                {tipPoint && state.chartIndex != null && (
                   <div
                     className={styles.chartTip}
                     // runtime: over the hovered point
                     style={
                       {
-                        "--tip-left":
-                          ((tipPoint.x / 340) * 100).toFixed(1) + "%",
+                        "--tip-left": `${((tipPoint.x / 340) * 100).toFixed(1)}%`,
                       } as CSSProperties
                     }
                   >
-                    {rangeData.tips[state.chartIdx] + " · £" + tipPoint.v}
+                    {`${rangeData.tips[state.chartIndex]} · £${tipPoint.value}`}
                   </div>
                 )}
               </div>
@@ -506,10 +551,10 @@ export const StudioHome = ({ studio }: { studio: StudioController }) => {
                 <span className={styles.grow}>
                   <span className={styles.tileName}>{booking.clientName}</span>
                   <span className={styles.tileMeta}>
-                    {booking.svc + " · " + booking.timeRange}
+                    {`${booking.service} · ${booking.timeRange}`}
                   </span>
                 </span>
-                <span className={styles.status}>{booking.stLabel}</span>
+                <span className={styles.status}>{booking.statusLabel}</span>
               </button>
             ))}
           </div>
@@ -539,7 +584,7 @@ export const StudioHome = ({ studio }: { studio: StudioController }) => {
                 <button
                   className={styles.dueOpen}
                   onClick={() =>
-                    actions.openSheet("booking", { sheetBId: booking.id })
+                    actions.openSheet("booking", { sheetBookingId: booking.id })
                   }
                 >
                   <img
@@ -568,14 +613,7 @@ export const StudioHome = ({ studio }: { studio: StudioController }) => {
                         </span>
                       )}
                       <span className={styles.dueCount}>
-                        {booking.svc +
-                          " · ended " +
-                          (booking.off < 0 ? booking.dayShort + " " : "") +
-                          (booking.timeRange.split("–")[1] || booking.time) +
-                          " · " +
-                          (booking.due > 0
-                            ? "£" + booking.due + " due"
-                            : "paid in full")}
+                        {getDueLine(booking)}
                       </span>
                     </span>
                   </span>
@@ -584,8 +622,8 @@ export const StudioHome = ({ studio }: { studio: StudioController }) => {
                   className={styles.checkout}
                   onClick={() =>
                     actions.openSheet("booking", {
-                      sheetBId: booking.id,
-                      bkStep: "checkout",
+                      sheetBookingId: booking.id,
+                      bookingStep: "checkout",
                     })
                   }
                 >
@@ -611,20 +649,14 @@ export const StudioHome = ({ studio }: { studio: StudioController }) => {
           </h2>
           <button
             className={styles.textLink}
-            onClick={() => actions.setCal({ tab: "bookings" })}
+            onClick={() => actions.setCalendar({ tab: "bookings" })}
           >
             View all
           </button>
         </div>
         {upcoming.length === 0 && (
           <div className={styles.emptyCard}>
-            <div className={styles.emptyCardTitle}>
-              {isNew
-                ? "No appointments yet"
-                : state.range === "today"
-                  ? "Nothing booked today"
-                  : "Nothing booked in this range"}
-            </div>
+            <div className={styles.emptyCardTitle}>{getEmptyTitle()}</div>
             <div className={styles.emptyCardBody}>
               {isNew
                 ? "Share your booking link to get your first one."
@@ -641,7 +673,7 @@ export const StudioHome = ({ studio }: { studio: StudioController }) => {
               key={booking.id}
               className={styles.upRow}
               // runtime: staggered entry
-              style={{ "--delay": booking.dly } as CSSProperties}
+              style={{ "--delay": booking.delay } as CSSProperties}
               onClick={booking.open}
             >
               <div className={styles.dateChip}>
@@ -652,7 +684,7 @@ export const StudioHome = ({ studio }: { studio: StudioController }) => {
               <div className={styles.grow}>
                 <div className={styles.upName}>{booking.clientName}</div>
                 <div className={styles.upMeta}>
-                  {booking.svc + " · " + booking.timeRange}
+                  {`${booking.service} · ${booking.timeRange}`}
                 </div>
               </div>
               <div className={styles.upPrice}>{booking.priceLabel}</div>

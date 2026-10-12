@@ -9,7 +9,8 @@ import { useCentreSecondCard } from "./use-centre-second-card";
 /** "Book our stylists" row with the second card centred on load (prototype Home "Stylists"). */
 export const StylistsSection = () => {
   const rowRef = useRef<HTMLDivElement>(null);
-  useCentreSecondCard(rowRef, "." + page.stycard);
+
+  useCentreSecondCard(rowRef, `.${page.stycard}`);
 
   return (
     <section
@@ -44,7 +45,7 @@ export const StylistsSection = () => {
                 className={joinClassNames(page.stycard, styles.card)}
               >
                 <StylistCard
-                  href={"/stylist?stylist=" + id}
+                  href={`/stylist?stylist=${id}`}
                   cover={cover}
                   stylistName={name}
                   rating={rating}

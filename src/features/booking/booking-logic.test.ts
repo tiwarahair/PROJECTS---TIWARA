@@ -16,13 +16,15 @@ import { getDeltaLabel } from "./booking-pricing";
 describe("details validation", () => {
   it("flags every empty contact field and a non-UK mobile", () => {
     const empty = { first: "", last: "", email: "", phone: "", notes: "" };
+
     expect(Object.keys(getFieldErrors(empty, true, false))).toEqual([
-      "addr",
+      "address",
       "first",
       "last",
       "email",
       "phone",
     ]);
+
     expect(
       getFieldErrors(
         {
@@ -46,6 +48,7 @@ describe("details validation", () => {
   it("checks a mobile stylist's travel area by postcode district", () => {
     const stylist = getStylist("amara-beauty");
     const base = { line2: "", notes: "", source: "pick" };
+
     expect(
       getAddressCheck(stylist, {
         ...base,
@@ -54,6 +57,7 @@ describe("details validation", () => {
         postcode: "M14 5TQ",
       }).inArea,
     ).toBe(true);
+
     expect(
       getAddressCheck(stylist, {
         ...base,
@@ -74,17 +78,21 @@ describe("card fields", () => {
 
   it("formats expiry and reports the first problem", () => {
     expect(formatExpiry("929")).toBe("09 / 29");
+
     const card = {
-      num: "4242 4242 4242 4242",
-      exp: "12 / 29",
+      number: "4242 4242 4242 4242",
+      expiry: "12 / 29",
       cvc: "123",
       name: "Nia",
       postcode: "M14 5TQ",
     };
+
     expect(getCardError(card)).toBe("");
-    expect(getCardError({ ...card, exp: "13 / 29" })).toBe(
+
+    expect(getCardError({ ...card, expiry: "13 / 29" })).toBe(
       "Check the expiry date.",
     );
+
     expect(getCardError({ ...card, postcode: "M1" })).toBe(
       "Add your billing postcode.",
     );
@@ -93,8 +101,9 @@ describe("card fields", () => {
 
 describe("labels", () => {
   it("formats option deltas with a real minus sign", () => {
-    expect(getDeltaLabel({ priceDelta: 10, minsDelta: 30 })).toBe("+£10");
-    expect(getDeltaLabel({ priceDelta: -5, minsDelta: -30 }, true)).toBe(
+    expect(getDeltaLabel({ priceDelta: 10, minutesDelta: 30 })).toBe("+£10");
+
+    expect(getDeltaLabel({ priceDelta: -5, minutesDelta: -30 }, true)).toBe(
       "−£5 −30 min",
     );
   });
@@ -103,16 +112,20 @@ describe("labels", () => {
     expect(getClosedLine(getStylist("tiwaras-house"))).toMatch(
       /^( Closed .+\.)?$/,
     );
+
     expect(getWhenLine(2026, 9, null, null)).toBe("Not chosen yet");
     expect(getWhenLine(2026, 9, 14, "10:30")).toBe("Wed 14 Oct · 10:30");
   });
 
   it("picks the knotless render for length and colour", () => {
     const index = getPreviewIndex("Waist", "613 Blonde");
+
     expect(PREVIEW_POOL[index]).toBe("img/ai-knotless-waist-613.webp");
+
     expect(PREVIEW_POOL[getPreviewIndex("Bra", "Other")]).toBe(
       "img/ai-knotless-bra-1b.webp",
     );
+
     expect(hasPreview(["Shoulder", "Waist"])).toBe(false);
   });
 });

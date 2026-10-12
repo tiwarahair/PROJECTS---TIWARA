@@ -4,47 +4,47 @@
     "slug": "braids",
     "name": "Braids & Twists",
     "icon": "braid",
-    "desc": "Knotless, french curl, goddess, fulani, faux locs, feed-in, stitch and twists.",
-    "img": "img/w160944.jpg"
+    "description": "Knotless, french curl, goddess, fulani, faux locs, feed-in, stitch and twists.",
+    "image": "img/w160944.jpg"
   },
   {
     "id": "wigs",
     "slug": "wigs",
     "name": "Wigs",
     "icon": "wig",
-    "desc": "Frontal, closure, glueless and 360 installs, plus construction and revamps.",
-    "img": "img/w160800.jpg"
+    "description": "Frontal, closure, glueless and 360 installs, plus construction and revamps.",
+    "image": "img/w160800.jpg"
   },
   {
     "id": "weaves",
     "slug": "weaves",
     "name": "Weave extensions & Sew-ins",
     "icon": "thread",
-    "desc": "Sew-ins, quick weaves, tape-ins and ponytail extensions.",
-    "img": "img/IMG_1581.jpg"
+    "description": "Sew-ins, quick weaves, tape-ins and ponytail extensions.",
+    "image": "img/IMG_1581.jpg"
   },
   {
     "id": "locs",
     "slug": "locs",
     "name": "Locs",
     "icon": "locs",
-    "desc": "Starter locs, re-twists, repairs and loc extensions.",
-    "img": "img/IMG_1772.jpg"
+    "description": "Starter locs, re-twists, repairs and loc extensions.",
+    "image": "img/IMG_1772.jpg"
   },
   {
     "id": "natural",
     "slug": "natural",
     "name": "Natural Hair",
     "icon": "curl",
-    "desc": "Wash and style, defined curls, silk press, blow dry, cornrows and trims.",
-    "img": "img/w160826.jpg"
+    "description": "Wash and style, defined curls, silk press, blow dry, cornrows and trims.",
+    "image": "img/w160826.jpg"
   },
   {
     "id": "treatments",
     "slug": "treatments",
     "name": "Hair Treatments",
     "icon": "wave",
-    "desc": "Colouring, deep conditioning, protein, keratin, scalp and hot-oil treatments.",
-    "img": "img/w161244.jpg"
+    "description": "Colouring, deep conditioning, protein, keratin, scalp and hot-oil treatments.",
+    "image": "img/w161244.jpg"
   }
 ]

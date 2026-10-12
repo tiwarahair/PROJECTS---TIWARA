@@ -6,16 +6,28 @@ export interface NavMorphState {
   navSolid: boolean;
   navDark: boolean;
   navHidden: boolean;
-  navBg: string;
-  morphBg: string;
+  navBackground: string;
+  morphBackground: string;
 }
 
 const INITIAL: NavMorphState = {
   navSolid: false,
   navDark: false,
   navHidden: false,
-  navBg: "#FAF6EE",
-  morphBg: "#FAF6EE",
+  navBackground: "#FAF6EE",
+  morphBackground: "#FAF6EE",
+};
+
+const getIsHidden = (
+  scrollY: number,
+  previousY: number,
+  wasHidden: boolean,
+): boolean => {
+  if (scrollY > previousY + 2 && scrollY > 4) return true;
+
+  if (scrollY < previousY - 2 || scrollY <= 4) return false;
+
+  return wasHidden;
 };
 
 /**
@@ -26,6 +38,7 @@ const INITIAL: NavMorphState = {
 export const useNavMorph = (): NavMorphState => {
   const [state, setState] = useState(INITIAL);
   const stateRef = useRef(state);
+
   stateRef.current = state;
   const lastYRef = useRef<number | null>(null);
 
@@ -36,25 +49,28 @@ export const useNavMorph = (): NavMorphState => {
       const isSolid = scrollY > 40;
       // hide the nav on the way down, bring it back the moment you scroll up
       const previousY = lastYRef.current == null ? 0 : lastYRef.current;
-      const isHidden =
-        scrollY > previousY + 2 && scrollY > 4
-          ? true
-          : scrollY < previousY - 2 || scrollY <= 4
-            ? false
-            : current.navHidden;
+      const isHidden = getIsHidden(scrollY, previousY, current.navHidden);
+
       lastYRef.current = scrollY;
+
       const hero = document.querySelector<HTMLElement>(
         '[data-screen-label="Hero"]',
       );
+
       const isOverHero =
         isSolid && hero ? scrollY < hero.offsetHeight - 72 : false;
-      let navBg = current.navBg;
-      let morphBg = current.morphBg;
+
+      let navBackground = current.navBackground;
+      let morphBackground = current.morphBackground;
       const middle = window.innerHeight * 0.55;
+
       document.querySelectorAll("[data-bg]").forEach((section) => {
         const rect = section.getBoundingClientRect();
         const colour = section.getAttribute("data-bg") ?? "";
-        if (!isOverHero && rect.top <= 80 && rect.bottom > 80) navBg = colour;
+
+        if (!isOverHero && rect.top <= 80 && rect.bottom > 80)
+          navBackground = colour;
+
         // ink bands paint their own fill — keeping them out of the morph layer stops
         // the dark colour bleeding through the transparent cream sections mid-crossfade
         if (
@@ -62,24 +78,27 @@ export const useNavMorph = (): NavMorphState => {
           rect.bottom > middle &&
           !isDarkBackground(colour)
         )
-          morphBg = colour;
+          morphBackground = colour;
       });
+
       // any ink section under the header gets the cream nav treatment, not just the hero
-      const isDark = isOverHero || isDarkBackground(navBg);
+      const isDark = isOverHero || isDarkBackground(navBackground);
+
       if (
         isHidden !== current.navHidden ||
         isSolid !== current.navSolid ||
         isDark !== current.navDark ||
-        navBg !== current.navBg ||
-        morphBg !== current.morphBg
+        navBackground !== current.navBackground ||
+        morphBackground !== current.morphBackground
       )
         setState({
           navHidden: isHidden,
           navSolid: isSolid,
           navDark: isDark,
-          navBg,
-          morphBg,
+          navBackground,
+          morphBackground,
         });
+
       // some hosts swallow the scroll events ScrollTrigger listens for — drive it ourselves
       try {
         ScrollTrigger.update();
@@ -87,7 +106,9 @@ export const useNavMorph = (): NavMorphState => {
         // ScrollTrigger not ready
       }
     };
+
     window.addEventListener("scroll", handleScroll, { passive: true });
+
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 

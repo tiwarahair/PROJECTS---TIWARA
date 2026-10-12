@@ -6,7 +6,7 @@
     "line2": "",
     "town": "Manchester",
     "postcode": "M14 5TQ",
-    "def": true
+    "isDefault": true
   },
   {
     "id": "a2",
@@ -15,6 +15,6 @@
     "line2": "",
     "town": "Manchester",
     "postcode": "M1 4PZ",
-    "def": false
+    "isDefault": false
   }
 ]

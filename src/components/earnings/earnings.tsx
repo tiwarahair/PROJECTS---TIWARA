@@ -43,33 +43,55 @@ const WarningIcon = ({ className }: { className: string | undefined }) => (
 );
 
 /**
- * Studio → Earnings (prototype Earnings.dc.html): balance, period picker, totals, takings chart, transactions and
+ * Studio → Earnings: balance, period picker, totals, takings chart, transactions and
  * payouts with detail drawers, and the CSV / PDF export.
  */
+const getBarFillClass = (
+  isFuture: boolean,
+  isSelected: boolean,
+  hasSelection: boolean,
+) => {
+  if (isFuture) return styles.barFuture;
+
+  if (isSelected) return styles.barSelected;
+
+  return hasSelection ? styles.barDimmed : styles.barIdle;
+};
+
 export const Earnings = (props: EarningsProps) => {
   const earnings = useEarnings(props);
-  const { rootRef, state, setState, ledger, isDesk, period, tab, range } =
+
+  const { rootRef, state, setState, ledger, isDesktop, period, tab, range } =
     earnings;
+
   const contained = !!props.contained;
-  const scenario = ledger.sc;
+  const scenario = ledger.scenario;
+
   const stats = getStats(
-    ledger.tx.filter(({ at }) => at >= range.s && at < range.e),
+    ledger.transactions.filter(({ at }) => at >= range.start && at < range.end),
   );
+
   const buckets = getBuckets(range);
   const now = new Date();
-  const bars = buckets.b.map((bucket) => ({
+
+  const bars = buckets.buckets.map((bucket) => ({
     ...bucket,
-    value: getTakings(ledger.tx, bucket.s, bucket.e),
-    isFuture: bucket.s > now,
+    value: getTakings(ledger.transactions, bucket.start, bucket.end),
+    isFuture: bucket.start > now,
   }));
+
   let maxValue = 1;
+
   for (const { value } of bars) maxValue = Math.max(maxValue, value);
+
   const periodLabel =
     period === "custom"
       ? "Custom"
       : (PERIODS.find(([id]) => id === period)?.[1] ?? "This week");
-  const filter = state.filt || props.filt || "all";
+
+  const filter = state.filter || props.filter || "all";
   const selectedBar = state.bar != null ? bars[state.bar] : undefined;
+
   const tiles = [
     { key: "t", label: "Takings", value: stats.takings, kind: "normal" },
     { key: "f", label: "Card fees", value: -stats.fees, kind: "normal" },
@@ -81,11 +103,17 @@ export const Earnings = (props: EarningsProps) => {
     },
     { key: "n", label: "Net", value: stats.net, kind: "net" },
   ];
+
   const tileClass = {
     normal: styles.tileValueNormal,
     negative: styles.tileValueNegative,
     net: styles.tileValueNet,
   };
+
+  const pausedText = formatGbp(ledger.pausedAmount);
+  const availableText = formatGbp(ledger.available);
+  const nextPayoutDay = ledger.nextDate ? formatDay(ledger.nextDate) : "";
+  const onHoldText = formatGbp(ledger.onHold);
 
   return (
     <div
@@ -100,7 +128,7 @@ export const Earnings = (props: EarningsProps) => {
         className={joinClassNames(
           styles.scroll,
           contained ? styles.scrollContained : styles.scrollInline,
-          contained && (isDesk ? styles.padDesk : styles.padMobile),
+          contained && (isDesktop ? styles.padDesk : styles.padMobile),
         )}
       >
         <div className={styles.balance}>
@@ -108,9 +136,7 @@ export const Earnings = (props: EarningsProps) => {
             <div className={styles.pausedBanner}>
               <WarningIcon className={styles.bannerIcon} />
               <div className={styles.pausedText}>
-                {"Payouts paused — " +
-                  formatGbp(ledger.pausedAmt) +
-                  " being recovered from a refund or dispute"}
+                {`Payouts paused — ${pausedText} being recovered from a refund or dispute`}
               </div>
               <button
                 className={styles.learnMore}
@@ -131,9 +157,7 @@ export const Earnings = (props: EarningsProps) => {
           {!!ledger.nextDate && scenario !== "setup" && (
             <div className={styles.nextLine}>
               <span className={styles.nextDot}></span>
-              {formatGbp(ledger.available) +
-                " · Next payout " +
-                formatDay(ledger.nextDate)}
+              {`${availableText} · Next payout ${nextPayoutDay}`}
             </div>
           )}
           {ledger.onHold > 0 && (
@@ -153,8 +177,7 @@ export const Earnings = (props: EarningsProps) => {
                 <path d="M8 11V8a4 4 0 0 1 8 0v3"></path>
               </svg>
               <span>
-                {formatGbp(ledger.onHold) +
-                  " on hold · released 24 hours after each appointment (first 5 bookings)"}
+                {`${onHoldText} on hold · released 24 hours after each appointment (first 5 bookings)`}
               </span>
             </div>
           )}
@@ -199,21 +222,23 @@ export const Earnings = (props: EarningsProps) => {
               className={styles.periodButton}
               onClick={() =>
                 setState({
-                  ddOpen: !state.ddOpen,
-                  ddCustom: period === "custom",
-                  cFrom: state.aFrom || toIsoDate(range.s),
-                  cTo: state.aTo || earnings.lastDay(range.e),
-                  cErr: "",
+                  dropdownOpen: !state.dropdownOpen,
+                  dropdownCustom: period === "custom",
+                  customFrom: state.appliedFrom || toIsoDate(range.start),
+                  customTo: state.appliedTo || earnings.lastDay(range.end),
+                  customError: "",
                 })
               }
               aria-haspopup="listbox"
-              aria-expanded={state.ddOpen}
+              aria-expanded={state.dropdownOpen}
             >
               {periodLabel}
               <svg
                 className={joinClassNames(
                   styles.periodChevron,
-                  state.ddOpen ? styles.chevronOpen : styles.chevronClosed,
+                  state.dropdownOpen
+                    ? styles.chevronOpen
+                    : styles.chevronClosed,
                 )}
                 width="16"
                 height="16"
@@ -227,16 +252,17 @@ export const Earnings = (props: EarningsProps) => {
                 <path d="m6 9 6 6 6-6"></path>
               </svg>
             </button>
-            {state.ddOpen && (
+            {state.dropdownOpen && (
               <>
                 {/* eslint-disable-next-line jsx-a11y/click-events-have-key-events, jsx-a11y/no-static-element-interactions */}
                 <div
                   className={styles.periodScrim}
-                  onClick={() => setState({ ddOpen: false })}
+                  onClick={() => setState({ dropdownOpen: false })}
                 ></div>
                 <div className={styles.periodMenu} role="listbox">
                   {PERIODS.map(([id, label]) => {
                     const isOn = period === id;
+
                     return (
                       <button
                         key={id}
@@ -245,13 +271,14 @@ export const Earnings = (props: EarningsProps) => {
                           isOn ? styles.optionOn : styles.optionOff,
                         )}
                         onClick={() => {
-                          if (id === "custom") setState({ ddCustom: true });
+                          if (id === "custom")
+                            setState({ dropdownCustom: true });
                           else
                             setState({
                               period: id,
-                              ddOpen: false,
-                              ddCustom: false,
-                              lim: 15,
+                              dropdownOpen: false,
+                              dropdownCustom: false,
+                              limit: 15,
                               bar: null,
                             });
                         }}
@@ -270,12 +297,12 @@ export const Earnings = (props: EarningsProps) => {
                       </button>
                     );
                   })}
-                  {state.ddCustom && (
+                  {state.dropdownCustom && (
                     <div className={styles.customRange}>
                       {(
                         [
-                          ["From", "cFrom"],
-                          ["To", "cTo"],
+                          ["From", "customFrom"],
+                          ["To", "customTo"],
                         ] as const
                       ).map(([label, key]) => (
                         <label key={key} className={styles.dateLabel}>
@@ -285,29 +312,39 @@ export const Earnings = (props: EarningsProps) => {
                             type="date"
                             value={state[key]}
                             onChange={(event) =>
-                              setState({ [key]: event.target.value, cErr: "" })
+                              setState({
+                                [key]: event.target.value,
+                                customError: "",
+                              })
                             }
                           />
                         </label>
                       ))}
-                      {!!state.cErr && (
-                        <div className={styles.customError}>{state.cErr}</div>
+                      {!!state.customError && (
+                        <div className={styles.customError}>
+                          {state.customError}
+                        </div>
                       )}
                       <button
                         className={styles.apply}
                         onClick={() => {
-                          if (!state.cFrom || !state.cTo)
-                            return setState({ cErr: "Pick both dates." });
-                          if (state.cFrom > state.cTo)
+                          if (!state.customFrom || !state.customTo)
                             return setState({
-                              cErr: "The start date is after the end date.",
+                              customError: "Pick both dates.",
                             });
+
+                          if (state.customFrom > state.customTo)
+                            return setState({
+                              customError:
+                                "The start date is after the end date.",
+                            });
+
                           setState({
                             period: "custom",
-                            aFrom: state.cFrom,
-                            aTo: state.cTo,
-                            ddOpen: false,
-                            lim: 15,
+                            appliedFrom: state.customFrom,
+                            appliedTo: state.customTo,
+                            dropdownOpen: false,
+                            limit: 15,
                             bar: null,
                           });
                         }}
@@ -342,7 +379,7 @@ export const Earnings = (props: EarningsProps) => {
         <div
           className={joinClassNames(
             styles.tiles,
-            isDesk ? styles.tilesDesk : styles.tilesMobile,
+            isDesktop ? styles.tilesDesk : styles.tilesMobile,
           )}
         >
           {tiles.map(({ key, label, value, kind }) => (
@@ -375,18 +412,19 @@ export const Earnings = (props: EarningsProps) => {
           >
             {bars.map(({ label, long, value, isFuture }, index) => {
               const isSelected = state.bar === index;
+
               // the bar height is the takings scaled to the busiest bucket; the delay staggers the entrance
               const barStyle = {
-                "--bar-h":
-                  Math.max(4, Math.round((value / maxValue) * 84)) + "px",
-                "--bar-delay": (index * 0.03).toFixed(2) + "s",
+                "--bar-h": `${Math.max(4, Math.round((value / maxValue) * 84))}px`,
+                "--bar-delay": `${(index * 0.03).toFixed(2)}s`,
               } as CSSProperties;
+
               return (
                 <button
-                  key={"b" + index}
+                  key={`b${index}`}
                   className={styles.bar}
                   onClick={() => setState({ bar: isSelected ? null : index })}
-                  aria-label={long + ", " + formatGbp(value)}
+                  aria-label={`${long}, ${formatGbp(value)}`}
                 >
                   <span
                     className={joinClassNames(
@@ -396,18 +434,12 @@ export const Earnings = (props: EarningsProps) => {
                         : styles.barAmountHidden,
                     )}
                   >
-                    {"£" + Math.round(value)}
+                    {`£${Math.round(value)}`}
                   </span>
                   <span
                     className={joinClassNames(
                       styles.barFill,
-                      isFuture
-                        ? styles.barFuture
-                        : isSelected
-                          ? styles.barSelected
-                          : state.bar != null
-                            ? styles.barDimmed
-                            : styles.barIdle,
+                      getBarFillClass(isFuture, isSelected, state.bar != null),
                     )}
                     style={barStyle}
                   ></span>
@@ -436,6 +468,7 @@ export const Earnings = (props: EarningsProps) => {
               ] as const
             ).map(([id, label]) => {
               const isOn = tab === id;
+
               return (
                 <button
                   key={id}
@@ -461,7 +494,7 @@ export const Earnings = (props: EarningsProps) => {
                     styles.chip,
                     filter === id ? styles.chipOn : styles.chipOff,
                   )}
-                  onClick={() => setState({ filt: id, lim: 15 })}
+                  onClick={() => setState({ filter: id, limit: 15 })}
                 >
                   {label}
                 </button>

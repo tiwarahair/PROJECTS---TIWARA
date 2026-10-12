@@ -11,6 +11,7 @@ import styles from "./email-change-notice.module.css";
 export const EmailChangeNoticePage = () => {
   useLayoutEffect(() => {
     document.documentElement.classList.add("email-notice-page");
+
     return () => document.documentElement.classList.remove("email-notice-page");
   }, []);
 

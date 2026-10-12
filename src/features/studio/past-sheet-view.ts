@@ -11,7 +11,7 @@ import {
   getClient,
   getPastKey,
   getPastRows,
-  getServiceDur,
+  getServiceDuration,
   getWaiveConfirm,
 } from "./studio-model";
 import type { PastRecord, StudioState } from "./studio-types";
@@ -19,6 +19,7 @@ import type { StudioController } from "./use-studio";
 
 const DAY_MS = 86400000;
 const roundMoney = (value: number) => Math.round(value * 100) / 100;
+
 const toNumber = (value: unknown) =>
   parseFloat(String(value || "").replace(/[^0-9.]/g, "")) || 0;
 
@@ -34,12 +35,13 @@ export const getPastCheckout = (
   row: PastRecord,
 ): PastCheckout => {
   const client = row.client ? getClient(state, row.client) : null;
-  const { ck } = row;
+  const { checkout } = row;
   const name = client?.name || "";
+
   const shared = {
     client: name || "Walk-in",
     first: (name || "your client").split(" ")[0] ?? "",
-    svc: row.svc,
+    service: row.service,
     meta: "",
     addons: [] as [string, number][],
     card: "4242",
@@ -48,11 +50,16 @@ export const getPastCheckout = (
     phone: client?.phone || "",
     email: client?.email || "",
     day: row.when,
-    time: timeRange(row.time, row.dur || getServiceDur(state, row.svc)),
+    time: timeRange(
+      row.time,
+      row.duration || getServiceDuration(state, row.service),
+    ),
     arrived: "",
   };
+
   if (row.status !== "Completed") {
     const fee = toNumber(row.feeLabel);
+
     return {
       booking: {
         ...shared,
@@ -63,9 +70,9 @@ export const getPastCheckout = (
               row.status === "No show"
                 ? "No-show fee"
                 : "Late cancellation fee",
-            sub: row.svc,
+            subtitle: row.service,
             base: fee,
-            adj: 0,
+            adjustment: 0,
             reason: "",
           },
         ],
@@ -76,29 +83,32 @@ export const getPastCheckout = (
       cap: fee,
     };
   }
-  const paid = ck
-    ? ck.paid
+
+  const paid = checkout
+    ? checkout.paid
     : roundMoney(
         (row.price * (parseFloat(String(state.policy.deposit)) || 20)) / 100,
       );
-  const lines = ck?.lines
-    ? ck.lines
+
+  const lines = checkout?.lines
+    ? checkout.lines
     : [
         {
-          name: row.svc,
-          sub: row.dur || "",
+          name: row.service,
+          subtitle: row.duration || "",
           base: row.price,
-          adj: 0,
+          adjustment: 0,
           reason: "",
         },
       ];
-  const done = ck
+
+  const done = checkout
     ? {
-        method: ck.method,
-        via: ck.via,
-        charged: ck.charged,
-        tip: ck.tip,
-        refundAuto: ck.refundAuto,
+        method: checkout.method,
+        via: checkout.via,
+        charged: checkout.charged,
+        tip: checkout.tip,
+        refundAuto: checkout.refundAuto,
       }
     : {
         method: "card",
@@ -107,91 +117,121 @@ export const getPastCheckout = (
         tip: 0,
         refundAuto: 0,
       };
+
   if (row.linkPaid && done.method === "link") {
     done.method = "record";
     done.via = row.linkVia || "cash";
   }
+
   const platform = roundMoney(
     paid -
       (done.refundAuto || 0) +
       (done.method === "card" || done.method === "link" ? done.charged : 0),
   );
+
+  const getCap = () => {
+    if (platform > 0) return platform;
+
+    return done.method === "record" ? done.charged : 0;
+  };
+
   return {
     booking: {
       ...shared,
       price: row.price,
       lines,
-      mode: (ck ? ck.mode : "deposit") as PaymentMode,
+      mode: (checkout ? checkout.mode : "deposit") as PaymentMode,
       paid,
     },
     done: done as PastCheckout["done"],
-    cap: platform > 0 ? platform : done.method === "record" ? done.charged : 0,
+    cap: getCap(),
   };
 };
 
 const findPastRow = (studio: StudioController) => {
   const { state, isNew, seedPast } = studio;
+
   return getPastRows(state, isNew, seedPast).find(
-    (row) => getPastKey(row) === state.pastSel,
+    (row) => getPastKey(row) === state.selectedPastId,
   );
+};
+
+const getRefundTag = (refunded: number, left: number) => {
+  if (refunded > 0)
+    return left <= 0 ? "Refunded" : `Partially refunded £${refunded}`;
+
+  return "";
 };
 
 /** The past booking sheet (prototype pastS). */
 export const getPastSheetView = (studio: StudioController) => {
   const { state, setState, actions, seedPast } = studio;
   const row = findPastRow(studio);
+
   if (!row) return null;
+
   const { policy } = state;
   const client = getClient(state, row.client);
+
   const tone = PAST_TONE[row.status] ?? {
-    bg: "",
+    background: "",
     color: "",
     icon: "",
     meta: "",
   };
-  const isOk = row.status === "Completed";
+
+  const isCompleted = row.status === "Completed";
   const isFresh = !!row.at && Date.now() - row.at < DAY_MS;
+
   const hoursLeft = isFresh
     ? Math.max(1, Math.round((DAY_MS - (Date.now() - (row.at || 0))) / 3600000))
     : 0;
+
   const patch = (value: Parameters<typeof actions.patchPast>[1]) =>
-    actions.patchPast(row.pid, value, seedPast);
+    actions.patchPast(row.pastId, value, seedPast);
+
   const firstName = (fallback: string) =>
     (client.name || fallback).split(" ")[0] ?? "";
 
-  let act: (() => void) | null = null;
-  let actLabel = "";
-  let actHint = "";
-  const { orig } = row;
-  if (isFresh && row.status === "No show" && orig) {
-    actLabel = "Undo no-show";
-    actHint = "Puts the booking back. Available for " + hoursLeft + "h.";
-    act = () => {
+  let action: (() => void) | null = null;
+  let actionLabel = "";
+  let actionHint = "";
+  const { original } = row;
+
+  if (isFresh && row.status === "No show" && original) {
+    actionLabel = "Undo no-show";
+    actionHint = `Puts the booking back. Available for ${hoursLeft}h.`;
+
+    action = () => {
       setState({
-        bookings: state.bookings.concat([orig]),
-        pastNew: state.pastNew.filter(({ pid }) => pid !== row.pid),
+        bookings: state.bookings.concat([original]),
+        pastNew: state.pastNew.filter(({ pastId }) => pastId !== row.pastId),
       });
+
       actions.closeSheet();
-      actions.toastMsg("Booking restored");
+      actions.showToast("Booking restored");
     };
   }
 
   const isKept =
     (row.feeKept || row.feePending) && !row.waived && !row.feeUnpaid;
+
   const feeNumber = toNumber(row.feeLabel);
   const feeLeft = roundMoney(feeNumber - (row.refunded || 0));
   // the fee gets its own action so a no-show can offer both "Undo no-show" and "Waive fee"
-  let feeAct: (() => void) | null = null;
-  let feeActLabel = "";
+  let feeAction: (() => void) | null = null;
+  let feeActionLabel = "";
+
   if (isKept) {
-    feeActLabel = isFresh
-      ? "Waive " +
-        row.feeLabel +
-        " fee" +
-        (row.feePending ? " (applies in " + hoursLeft + "h)" : "")
+    const pendingNote = row.feePending ? ` (applies in ${hoursLeft}h)` : "";
+
+    feeActionLabel = isFresh
+      ? `Waive ${row.feeLabel} fee${pendingNote}`
       : "Refund";
-    const doFee = () => {
+
+    const waiveFee = () => {
       setState({ confirm: null });
+
       patch((current) => ({
         waived: true,
         feePending: false,
@@ -203,29 +243,31 @@ export const getPastSheetView = (studio: StudioController) => {
           ) +
           (isFresh ? " Fee waived, client refunded." : " Fee refunded later."),
       }));
-      actions.toastMsg(
-        (isFresh ? "Fee waived. " : "Refunded. ") +
-          (client.name || "").split(" ")[0] +
-          " gets " +
-          row.feeLabel +
-          " back",
+
+      const refundLead = isFresh ? "Fee waived. " : "Refunded. ";
+      const clientFirst = (client.name || "").split(" ")[0];
+
+      actions.showToast(
+        `${refundLead}${clientFirst} gets ${row.feeLabel} back`,
       );
     };
-    feeAct = isFresh
-      ? () =>
-          setState({
-            confirm: getWaiveConfirm(state, row, client, isFresh, doFee),
-          })
-      : feeLeft > 0
-        ? () => setState({ pastCk: "refund" })
-        : null;
+
+    if (isFresh)
+      feeAction = () =>
+        setState({
+          confirm: getWaiveConfirm(state, row, client, isFresh, waiveFee),
+        });
+    else if (feeLeft > 0)
+      feeAction = () => setState({ pastCheckoutPanel: "refund" });
   }
+
   // a pending/kept fee with an action collapses note + action into one panel
-  const isMerged = isKept && !!feeAct;
+  const isMerged = isKept && !!feeAction;
 
   const unpaidFirst = firstName("the client");
   const isUnpaid = !!row.feeUnpaid && !row.waived;
   const tries = row.feeTries == null ? 1 : row.feeTries;
+
   const extra =
     Math.max(
       0,
@@ -234,14 +276,15 @@ export const getPastSheetView = (studio: StudioController) => {
           (row.price * (parseFloat(String(policy.deposit)) || 20)) / 100,
       ),
     ) || feeNumber;
+
   const settle = (value: Partial<PastRecord>, message: string) => {
     setState({ confirm: null });
     patch(value);
-    actions.toastMsg(message);
+    actions.showToast(message);
   };
 
   const completed = (() => {
-    if (!isOk)
+    if (!isCompleted)
       return {
         hasAwait: false,
         hasLinks: false,
@@ -250,146 +293,170 @@ export const getPastSheetView = (studio: StudioController) => {
         awaitBody: "",
         canCancelLink: false,
       };
+
     const checkout = getPastCheckout(state, row);
     const first = firstName("your client");
     const isAwaiting = checkout.done.method === "link";
     const refunded = row.refunded || 0;
     const left = roundMoney(checkout.cap - refunded);
+
     return {
       hasAwait: isAwaiting,
-      awaitBody:
-        "Payment link for £" +
-        checkout.done.charged +
-        " sent to " +
-        first +
-        ". They can pay by card, Apple Pay or Google Pay, and add a tip.",
-      resendLink: () => actions.toastMsg("Payment link resent to " + first),
+      awaitBody: `Payment link for £${checkout.done.charged} sent to ${first}. They can pay by card, Apple Pay or Google Pay, and add a tip.`,
+      resendLink: () => actions.showToast(`Payment link resent to ${first}`),
       recordPaid: () =>
         setState({
           confirm: {
-            title: "Record £" + checkout.done.charged + " as paid?",
+            title: `Record £${checkout.done.charged} as paid?`,
             body: "Recorded only, no money moves through Tiwára’s House.",
             yesLabel: "Record as paid",
             yes: () => {
               setState({ confirm: null });
+
               patch({
                 linkPaid: true,
                 linkVia: "cash",
                 meta: "Paid · Recorded",
               });
-              actions.toastMsg("Payment recorded");
+
+              actions.showToast("Payment recorded");
             },
           },
         }),
-      canCancelLink: isAwaiting && !!orig,
+      canCancelLink: isAwaiting && !!original,
       cancelLink: () =>
         setState({
           confirm: {
             title: "Cancel the payment link?",
-            body:
-              first +
-              " won’t be able to pay with it. The booking moves to Unpaid and back into Due for checkout.",
+            body: `${first} won’t be able to pay with it. The booking moves to Unpaid and back into Due for checkout.`,
             yesLabel: "Cancel link",
             yes: () => {
-              if (!orig) return;
+              if (!original) return;
+
               setState({
                 confirm: null,
                 bookings: state.bookings.concat([
-                  { ...orig, status: "arrived", ckUnpaid: true },
+                  { ...original, status: "arrived", checkoutUnpaid: true },
                 ]),
-                pastNew: state.pastNew.filter(({ pid }) => pid !== row.pid),
+                pastNew: state.pastNew.filter(
+                  ({ pastId }) => pastId !== row.pastId,
+                ),
               });
+
               actions.closeSheet();
-              actions.toastMsg("Payment link cancelled");
+              actions.showToast("Payment link cancelled");
             },
           },
         }),
-      refundTag:
-        refunded > 0
-          ? left <= 0
-            ? "Refunded"
-            : "Partially refunded £" + refunded
-          : "",
+      refundTag: getRefundTag(refunded, left),
       hasLinks: !isAwaiting,
-      viewReceipt: () => setState({ pastCk: "receipt" }),
-      resendReceipt: () => setState({ pastCk: "resend" }),
+      viewReceipt: () => setState({ pastCheckoutPanel: "receipt" }),
+      resendReceipt: () => setState({ pastCheckoutPanel: "resend" }),
       canRefund: !isAwaiting && left > 0,
-      openRefund: () => setState({ pastCk: "refund" }),
+      openRefund: () => setState({ pastCheckoutPanel: "refund" }),
     };
   })();
 
   const hasFee = (row.feeKept || row.feePending) && !row.waived;
+
   const why =
     row.status === "No show"
       ? "They didn’t turn up."
-      : "Cancelled inside your " + policy.window + "h window.";
+      : `Cancelled inside your ${policy.window}h window.`;
+
   const phone = (client.phone || "").replace(/\s/g, "");
+
+  const getSinceLabel = () => {
+    if (!row.client) return "";
+
+    if (client.since) return ` · client since ${client.since}`;
+
+    return client.area ? ` · ${client.area}` : "";
+  };
+
+  const getActionTitle = () => {
+    if (hasFee) {
+      const feeKind =
+        row.status === "No show" ? "no-show fee" : "late cancellation fee";
+
+      return `${row.feeLabel} ${feeKind}`;
+    }
+
+    return actionLabel === "Undo no-show" ? "Marked as a no-show" : "";
+  };
+
+  const getOutLabel = () => {
+    if (isCompleted || !isKept) return "Paid";
+
+    return row.feePending && isFresh ? "Fee pending" : "Fee kept";
+  };
+
+  const getOutValue = () => {
+    if (isCompleted) return `£${row.price}`;
+
+    return isKept ? row.feeLabel : "£0";
+  };
+
+  const feeTiming =
+    row.feePending && isFresh
+      ? `Charged automatically in ${hoursLeft}h.`
+      : "Kept from the deposit.";
+
   return {
     clientName: client.name || "Walk-in",
     imgSrc: getAvatarSrc(client),
     visitLabel: row.client
       ? (client.visits || 0) + (client.visits === 1 ? " visit" : " visits")
       : "Walk-in",
-    sinceLabel: row.client
-      ? client.since
-        ? " · client since " + client.since
-        : client.area
-          ? " · " + client.area
-          : ""
-      : "",
+    sinceLabel: getSinceLabel(),
     hasPhone: !!client.phone,
     hasEmail: !!client.email,
     hasContact: !!(client.phone || client.email),
-    telHref: "tel:" + phone,
-    smsHref: "sms:" + phone,
-    mailHref: "mailto:" + (client.email || ""),
+    telHref: `tel:${phone}`,
+    smsHref: `sms:${phone}`,
+    mailHref: `mailto:${client.email || ""}`,
     canOpen: !!row.client,
     openClient: () => {
       if (row.client)
         actions.openSheet("cliView", {
-          cliSel: row.client,
-          cFromP: state.pastSel,
+          selectedClientId: row.client,
+          clientFromPastId: state.selectedPastId,
         });
     },
-    svc: row.svc,
+    service: row.service,
     when: row.when,
-    time: timeRange(row.time, row.dur || getServiceDur(state, row.svc)),
-    priceLabel: "£" + row.price,
-    isStruck: !isOk,
+    time: timeRange(
+      row.time,
+      row.duration || getServiceDuration(state, row.service),
+    ),
+    priceLabel: `£${row.price}`,
+    isStruck: !isCompleted,
     note: row.note || "",
     hasNote: !!row.note && !isMerged,
-    hasAct: !!act,
-    actHasText: !isMerged,
+    hasAction: !!action,
+    actionHasText: !isMerged,
     feeMerge: isMerged,
-    feeAct,
-    feeActLabel,
+    feeAction,
+    feeActionLabel,
     feeReason:
       (row.note || why) +
       (row.feePending && isFresh
-        ? " Charged automatically in " + hoursLeft + "h unless you waive it."
+        ? ` Charged automatically in ${hoursLeft}h unless you waive it.`
         : ""),
     feeUnpaid: isUnpaid,
-    fuTitle: "Card declined: insufficient funds",
-    fuBody:
-      "£" +
-      extra +
-      " of " +
-      unpaidFirst +
-      "’s " +
-      row.feeLabel +
-      " fee couldn’t be charged to Visa •••• 4242.",
-    fuRetryShow: tries > 0,
-    fuRetryLabel: "Retry card (" + tries + " of 2 left)",
-    fuRetry: () =>
+    feeUnpaidTitle: "Card declined: insufficient funds",
+    feeUnpaidBody: `£${extra} of ${unpaidFirst}’s ${row.feeLabel} fee couldn’t be charged to Visa •••• 4242.`,
+    feeUnpaidRetryShown: tries > 0,
+    feeUnpaidRetryLabel: `Retry card (${tries} of 2 left)`,
+    feeUnpaidRetry: () =>
       setState({
         confirm: {
-          title:
-            "Charge £" + extra + " to " + unpaidFirst + "’s card ending 4242?",
+          title: `Charge £${extra} to ${unpaidFirst}’s card ending 4242?`,
           body:
             tries === 1
               ? "This uses your last retry. If it’s declined again, send a payment link or record the payment instead."
-              : "You have " + tries + " retries left.",
-          yesLabel: "Charge £" + extra,
+              : `You have ${tries} retries left.`,
+          yesLabel: `Charge £${extra}`,
           yes: () => {
             if ((studio.props.cardDeclines || "none") !== "none")
               settle({ feeTries: tries - 1 }, "Card declined again");
@@ -401,21 +468,19 @@ export const getPastSheetView = (studio: StudioController) => {
                   meta: "Fee collected",
                   at: Date.now() - 2 * DAY_MS,
                 },
-                "£" + extra + " charged",
+                `£${extra} charged`,
               );
           },
         },
       }),
-    fuLink: () => {
+    feeUnpaidLink: () => {
       patch({ meta: "Fee link sent" });
-      actions.toastMsg(
-        "Payment link for £" + extra + " sent to " + unpaidFirst,
-      );
+      actions.showToast(`Payment link for £${extra} sent to ${unpaidFirst}`);
     },
-    fuRecord: () =>
+    feeUnpaidRecord: () =>
       setState({
         confirm: {
-          title: "Record £" + extra + " as paid?",
+          title: `Record £${extra} as paid?`,
           body: "Recorded only, no money moves through Tiwára’s House.",
           yesLabel: "Record as paid",
           yes: () =>
@@ -430,7 +495,7 @@ export const getPastSheetView = (studio: StudioController) => {
             ),
         },
       }),
-    fuWaive: () =>
+    feeUnpaidWaive: () =>
       setState({
         confirm: getWaiveConfirm(state, row, client, true, () =>
           settle(
@@ -444,46 +509,23 @@ export const getPastSheetView = (studio: StudioController) => {
           ),
         ),
       }),
-    feeRefundTag:
-      !isOk && (row.refunded || 0) > 0
-        ? feeLeft <= 0
-          ? "Refunded"
-          : "Partially refunded £" + row.refunded
-        : "",
+    feeRefundTag: isCompleted ? "" : getRefundTag(row.refunded || 0, feeLeft),
     ...completed,
-    act,
-    actLabel,
-    actTitle: hasFee
-      ? row.feeLabel +
-        " " +
-        (row.status === "No show" ? "no-show fee" : "late cancellation fee")
-      : actLabel === "Undo no-show"
-        ? "Marked as a no-show"
-        : "",
-    actWhy: hasFee
-      ? why +
-        " " +
-        (row.feePending && isFresh
-          ? "Charged automatically in " + hoursLeft + "h."
-          : "Kept from the deposit.")
-      : actHint,
+    action,
+    actionLabel,
+    actionTitle: getActionTitle(),
+    actionReason: hasFee ? `${why} ${feeTiming}` : actionHint,
     status: row.status,
-    badgeBg: tone.bg,
+    badgeBackground: tone.background,
     badgeColor: tone.color,
     badgeIcon: tone.icon,
-    totalLabel: "£" + row.price,
-    outLabel: isOk
-      ? "Paid"
-      : isKept
-        ? row.feePending && isFresh
-          ? "Fee pending"
-          : "Fee kept"
-        : "Paid",
-    outValue: isOk ? "£" + row.price : isKept ? row.feeLabel : "£0",
+    totalLabel: `£${row.price}`,
+    outLabel: getOutLabel(),
+    outValue: getOutValue(),
     canRebook: !!row.client,
     rebook: () =>
       actions.rebookFrom({
-        svc: row.svc,
+        service: row.service,
         client: row.client,
         price: row.price,
       }),
@@ -495,21 +537,26 @@ export type PastSheetView = NonNullable<ReturnType<typeof getPastSheetView>>;
 /** CheckoutSheet's receipt / resend / refund over the past sheet (prototype ckBooking … onCkRefund for pastCk). */
 export const getPastCheckoutView = (studio: StudioController) => {
   const { state, setState, actions, seedPast } = studio;
-  if (state.sheet !== "past" || !state.pastCk) return null;
+
+  if (state.sheet !== "past" || !state.pastCheckoutPanel) return null;
+
   const row = findPastRow(studio);
+
   if (!row) return null;
+
   const { booking, done } = getPastCheckout(state, row);
-  const back = () => setState({ pastCk: null });
+  const back = () => setState({ pastCheckoutPanel: null });
+
   return {
     booking,
-    start: state.pastCk as CheckoutView,
+    start: state.pastCheckoutPanel as CheckoutView,
     done,
     refunded: row.refunded || 0,
     onExit: back,
     onComplete: back,
     onRefund: (amount: number, reason: string) =>
       actions.patchPast(
-        row.pid,
+        row.pastId,
         (current) => ({
           refunded: roundMoney((current.refunded || 0) + amount),
           refundReason: reason,

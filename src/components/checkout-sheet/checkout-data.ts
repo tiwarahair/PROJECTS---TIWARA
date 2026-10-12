@@ -31,7 +31,7 @@ export type TipChoice = "none" | "custom" | number;
 export interface CheckoutBooking {
   client: string;
   first: string;
-  svc: string;
+  service: string;
   meta: string;
   price: number;
   addons: [string, number][];
@@ -53,9 +53,9 @@ export interface CheckoutBooking {
 export interface CheckoutLine {
   id: number;
   name: string;
-  sub: string;
+  subtitle: string;
   base: number;
-  adj: number;
+  adjustment: number;
   reason: string;
   added?: boolean;
 }
@@ -69,42 +69,42 @@ export interface CheckoutResult {
 }
 
 export interface CheckoutState {
-  bk: string;
+  bookingKey: string;
   mode: PaymentMode;
   paid: number;
-  nonref: boolean;
+  isNonRefundable: boolean;
   view: CheckoutView;
-  dir: number;
+  direction: number;
   lines: CheckoutLine[];
-  nid: number;
-  adjId: number | null;
-  adjAmt: string;
-  adjReason: string;
-  adjOther: string;
-  adjErr: string;
+  nextLineId: number;
+  adjustingLineId: number | null;
+  adjustmentAmount: string;
+  adjustmentReason: string;
+  adjustmentOther: string;
+  adjustmentError: string;
   tip: TipChoice;
   tipCustom: string;
   tipOpen: boolean;
   method: PayMethod;
   linkVia: "sms" | "email";
-  recVia: RecordVia;
-  tipRecv: string;
+  recordVia: RecordVia;
+  tipReceived: string;
   status: CheckoutStatus;
   decline: "soft" | "hard" | null;
   tries: number;
   busy: boolean;
   fromDone: boolean;
-  rfKind: "full" | "partial";
-  rfAmt: string;
-  rfReason: string;
-  rfTried: boolean;
-  rfFinal: number;
+  refundKind: "full" | "partial";
+  refundAmount: string;
+  refundReason: string;
+  refundTried: boolean;
+  refundFinal: number;
   refunded: number;
-  rfLast: string;
-  dlg: DialogKind | null;
-  rsVia: "email" | "sms";
-  rsTo: string;
-  rsTried: boolean;
+  refundLast: string;
+  dialog: DialogKind | null;
+  resendVia: "email" | "sms";
+  resendTo: string;
+  resendTried: boolean;
   toast: string;
   done: CheckoutResult | null;
 }
@@ -113,7 +113,7 @@ export const BOOKINGS: Record<string, CheckoutBooking> = {
   zainab: {
     client: "Zainab Bello",
     first: "Zainab",
-    svc: "Knotless braids",
+    service: "Knotless braids",
     meta: "Medium, mid-back",
     price: 85,
     addons: [["Boho curls", 15]],
@@ -131,7 +131,7 @@ export const BOOKINGS: Record<string, CheckoutBooking> = {
   nia: {
     client: "Nia Johnson",
     first: "Nia",
-    svc: "Silk press",
+    service: "Silk press",
     meta: "Shoulder length",
     price: 100,
     addons: [],
@@ -149,7 +149,7 @@ export const BOOKINGS: Record<string, CheckoutBooking> = {
   chi: {
     client: "Chi Eze",
     first: "Chi",
-    svc: "Box braids",
+    service: "Box braids",
     meta: "Small, waist length",
     price: 120,
     addons: [],
@@ -167,7 +167,7 @@ export const BOOKINGS: Record<string, CheckoutBooking> = {
   tola: {
     client: "Tola Okafor",
     first: "Tola",
-    svc: "Cornrows",
+    service: "Cornrows",
     meta: "Straight back, 8 rows",
     price: 45,
     addons: [],
@@ -185,7 +185,7 @@ export const BOOKINGS: Record<string, CheckoutBooking> = {
   kemi: {
     client: "Kemi Adeyemi",
     first: "Kemi",
-    svc: "Silk press",
+    service: "Silk press",
     meta: "Mid-back length",
     price: 100,
     addons: [],
@@ -243,13 +243,13 @@ export const REFUND_REASONS = [
 
 export interface CheckoutStylist {
   name: string;
-  addr: string;
+  address: string;
   vat: string;
 }
 
 export const DEFAULT_STYLIST: CheckoutStylist = {
   name: "Amara Beauty",
-  addr: "118 Wilmslow Road, Manchester M14 5AJ",
+  address: "118 Wilmslow Road, Manchester M14 5AJ",
   vat: "GB 312 4567 89",
 };
 
@@ -263,7 +263,7 @@ export const ICONS = {
   card: "M3 5h18a1 1 0 0 1 1 1v12a1 1 0 0 1-1 1H3a1 1 0 0 1-1-1V6a1 1 0 0 1 1-1zM2 10h20",
   link: "M10 13a5 5 0 0 0 7.5.5l3-3a5 5 0 0 0-7-7l-1.7 1.7M14 11a5 5 0 0 0-7.5-.5l-3 3a5 5 0 0 0 7 7l1.7-1.7",
   cash: "M2 7h20v10H2zM12 15a3 3 0 1 0 0-6 3 3 0 0 0 0 6z",
-  ret: "M9 14 4 9l5-5M4 9h11a5 5 0 0 1 0 10h-3",
+  returnArrow: "M9 14 4 9l5-5M4 9h11a5 5 0 0 1 0 10h-3",
   receipt: "M5 3h14v18l-3-2-2 2-2-2-2 2-2-2-3 2zM9 8h6M9 12h6",
   send: "M22 2 11 13M22 2l-7 20-4-9-9-4z",
 };
@@ -275,20 +275,20 @@ export const roundPounds = (value: number): number =>
 export const formatPounds = (value: number): string => {
   const rounded = roundPounds(value);
   const absolute = Math.abs(rounded);
-  return (
-    (rounded < 0 ? "−" : "") +
-    "£" +
-    (absolute % 1 === 0 ? String(absolute) : absolute.toFixed(2))
-  );
+  const sign = rounded < 0 ? "−" : "";
+  const amount = absolute % 1 === 0 ? String(absolute) : absolute.toFixed(2);
+
+  return `${sign}£${amount}`;
 };
 
 /** Always two decimals (prototype f2), for receipts. */
 export const formatPence = (value: number): string =>
-  (value < 0 ? "−" : "") + "£" + Math.abs(value).toFixed(2);
+  `${value < 0 ? "−" : ""}£${Math.abs(value).toFixed(2)}`;
 
 /** A typed amount as pounds (prototype money().num). */
 export const parsePounds = (value: string): number => {
   const parsed = parseFloat(String(value || "").replace(/[^0-9.]/g, ""));
+
   return isNaN(parsed) ? 0 : roundPounds(parsed);
 };
 
@@ -318,7 +318,7 @@ export interface CheckoutMoney {
   items: number;
   due: number;
   refundDue: number;
-  tipSt: number;
+  selectedTip: number;
   tip: number;
   charge: number;
   cardFee: number;
@@ -335,39 +335,54 @@ export const getMoney = (
 ): CheckoutMoney => {
   const isCardOk =
     !!booking.card && (state.mode === "deposit" || state.mode === "card");
+
   let lineTotal = 0;
-  for (const { base, adj } of state.lines) lineTotal += base + adj;
+
+  for (const { base, adjustment } of state.lines)
+    lineTotal += base + adjustment;
+
   const items = roundPounds(lineTotal);
   const balance = roundPounds(items - state.paid);
   const due = Math.max(0, balance);
   const refundDue = Math.max(0, roundPounds(-balance));
-  const tipSt =
-    state.tip === "custom"
-      ? parsePounds(state.tipCustom)
-      : typeof state.tip === "number"
-        ? roundPounds((items * state.tip) / 100)
-        : 0;
-  const isPayNeeded = due > 0 || tipSt > 0 || !!state.tipOpen;
+
+  const getSelectedTip = () => {
+    if (state.tip === "custom") return parsePounds(state.tipCustom);
+
+    if (typeof state.tip === "number")
+      return roundPounds((items * state.tip) / 100);
+
+    return 0;
+  };
+
+  const selectedTip = getSelectedTip();
+  const isPayNeeded = due > 0 || selectedTip > 0 || !!state.tipOpen;
   let method: PayMethod | "none" = isPayNeeded ? state.method : "none";
+
   if (method === "card" && !isCardOk) method = "link";
-  const tip = method === "link" || method === "none" ? 0 : tipSt;
+
+  const tip = method === "link" || method === "none" ? 0 : selectedTip;
   const charge = roundPounds(due + tip);
+
   const cardFee =
     (method === "card" || method === "link") && charge > 0
       ? roundPounds(charge * 0.015 + 0.2)
       : 0;
+
   const steps: CheckoutView[] = [
     "items",
     ...(isPayNeeded ? (["pay"] as const) : []),
     ...(isPayNeeded && method !== "link" ? (["tip"] as const) : []),
     "review",
   ];
+
   const bookFee = state.paid > 0 ? roundPounds(state.paid * 0.015 + 0.5) : 0;
+
   return {
     items,
     due,
     refundDue,
-    tipSt,
+    selectedTip,
     tip,
     charge,
     cardFee,
@@ -384,10 +399,11 @@ export const getFinalized = (
   booking: CheckoutBooking,
 ): Pick<CheckoutState, "done" | "status"> => {
   const money = getMoney(state, booking);
+
   return {
     done: {
       method: money.method,
-      via: state.method === "link" ? state.linkVia : state.recVia,
+      via: state.method === "link" ? state.linkVia : state.recordVia,
       charged: money.charge,
       tip: money.tip,
       refundAuto: money.refundDue,
@@ -407,37 +423,38 @@ export const getInitialCheckout = ({
 }: CheckoutSeedProps): CheckoutState => {
   const bookingKey = getBookingKey(scenario, !!hostBooking);
   const booking = hostBooking ?? BOOKINGS[bookingKey]!;
+
   const state: CheckoutState = {
-    bk: bookingKey,
+    bookingKey,
     mode: booking.mode,
     paid: booking.paid,
-    nonref: false,
+    isNonRefundable: false,
     view: "detail",
-    dir: 0,
+    direction: 0,
     lines: [
       {
         id: 1,
-        name: booking.svc,
-        sub: booking.meta,
+        name: booking.service,
+        subtitle: booking.meta,
         base: booking.price,
-        adj: 0,
+        adjustment: 0,
         reason: "",
       },
       ...booking.addons.map(([name, price], index) => ({
         id: index + 2,
         name,
-        sub: "Add-on",
+        subtitle: "Add-on",
         base: price,
-        adj: 0,
+        adjustment: 0,
         reason: "",
       })),
     ],
-    nid: 10,
-    adjId: null,
-    adjAmt: "",
-    adjReason: "",
-    adjOther: "",
-    adjErr: "",
+    nextLineId: 10,
+    adjustingLineId: null,
+    adjustmentAmount: "",
+    adjustmentReason: "",
+    adjustmentOther: "",
+    adjustmentError: "",
     tip: "none",
     tipCustom: "",
     tipOpen: false,
@@ -446,41 +463,44 @@ export const getInitialCheckout = ({
         ? "card"
         : "link",
     linkVia: "sms",
-    recVia: "cash",
-    tipRecv: "",
+    recordVia: "cash",
+    tipReceived: "",
     status: "arrived",
     decline: null,
     tries: 2,
     busy: false,
     fromDone: false,
-    rfKind: "full",
-    rfAmt: "",
-    rfReason: "",
-    rfTried: false,
-    rfFinal: 0,
+    refundKind: "full",
+    refundAmount: "",
+    refundReason: "",
+    refundTried: false,
+    refundFinal: 0,
     refunded: 0,
-    rfLast: "",
-    dlg: null,
-    rsVia: "email",
-    rsTo: booking.email,
-    rsTried: false,
+    refundLast: "",
+    dialog: null,
+    resendVia: "email",
+    resendTo: booking.email,
+    resendTried: false,
     toast: "",
     done: null,
   };
+
   const finalize = () => Object.assign(state, getFinalized(state, booking));
 
   if (hostBooking) {
     if (Array.isArray(hostBooking.lines))
       state.lines = hostBooking.lines.map((line, index) => ({
         id: index + 1,
-        adj: 0,
+        adjustment: 0,
         reason: "",
         name: "",
-        sub: "",
+        subtitle: "",
         base: 0,
         ...line,
       }));
+
     state.view = start || "items";
+
     if (done) {
       state.done = {
         method: done.method ?? "none",
@@ -489,19 +509,25 @@ export const getInitialCheckout = ({
         tip: done.tip ?? 0,
         refundAuto: done.refundAuto ?? 0,
       };
+
       state.status = done.method === "link" && !linkPaid ? "awaiting" : "paid";
+
       if (done.tip && typeof done.tip === "number") {
         state.tip = "custom";
         state.tipCustom = String(done.tip);
       }
+
       if (done.method === "record") {
         state.method = "record";
-        state.recVia = (done.via as RecordVia) || "cash";
+        state.recordVia = (done.via as RecordVia) || "cash";
       }
+
       if (done.method === "link")
         state.linkVia = (done.via as "sms" | "email") || "sms";
     }
+
     state.refunded = refunded || 0;
+
     return state;
   }
 
@@ -529,12 +555,14 @@ export const getInitialCheckout = ({
     case "refund":
       state.tip = 15;
       finalize();
+
       Object.assign(state, {
         view: "refund",
-        rfKind: "partial",
-        rfAmt: "20",
-        rfReason: "Service issue",
+        refundKind: "partial",
+        refundAmount: "20",
+        refundReason: "Service issue",
       });
+
       break;
     case "receipt":
       state.tip = 15;
@@ -544,15 +572,17 @@ export const getInitialCheckout = ({
     case "resend":
       state.tip = 15;
       finalize();
+
       Object.assign(state, {
         view: "resend",
-        rsVia: "sms",
-        rsTo: booking.phone,
+        resendVia: "sms",
+        resendTo: booking.phone,
       });
+
       break;
     case "reduce":
     case "reduce-review":
-      state.lines[0]!.adj = -20;
+      state.lines[0]!.adjustment = -20;
       state.lines[0]!.reason = "Service shortened";
       state.view = scenario === "reduce" ? "items" : "review";
       break;
@@ -571,6 +601,7 @@ export const getInitialCheckout = ({
         tip: "custom",
         tipCustom: "5",
       });
+
       break;
     case "unpaid":
       state.status = "unpaid";
@@ -582,6 +613,7 @@ export const getInitialCheckout = ({
         decline: "soft",
         tries: 1,
       });
+
       break;
     case "declined-hard":
       Object.assign(state, {
@@ -590,6 +622,7 @@ export const getInitialCheckout = ({
         decline: "hard",
         tries: 0,
       });
+
       break;
     case "fee-pending":
       state.status = "feePending";
@@ -604,32 +637,36 @@ export const getInitialCheckout = ({
       state.status = "feeCollected";
       break;
     case "waive-dep":
-      Object.assign(state, { status: "feePending", dlg: "waive" });
+      Object.assign(state, { status: "feePending", dialog: "waive" });
       break;
     case "waive-nonref":
       Object.assign(state, {
         status: "feePending",
-        nonref: true,
-        dlg: "waive",
+        isNonRefundable: true,
+        dialog: "waive",
       });
+
       break;
     case "waive-full":
       Object.assign(state, {
         status: "feePending",
         mode: "full",
         paid: 100,
-        dlg: "waive",
+        dialog: "waive",
       });
+
       break;
     case "waive-card":
       Object.assign(state, {
         status: "feePending",
         mode: "card",
         paid: 0,
-        dlg: "waive",
+        dialog: "waive",
       });
+
       break;
   }
+
   return state;
 };
 
@@ -637,11 +674,13 @@ export const getInitialCheckout = ({
 export const getRefundContext = (
   state: CheckoutState,
   booking: CheckoutBooking,
-): { plat: number; off: number } => {
-  if (/^fee/.test(state.status)) return { plat: booking.fee || 0, off: 0 };
+): { platform: number; off: number } => {
+  if (/^fee/.test(state.status)) return { platform: booking.fee || 0, off: 0 };
+
   const done = state.done ?? { charged: 0, refundAuto: 0, method: "none" };
+
   return {
-    plat:
+    platform:
       state.paid -
       (done.refundAuto || 0) +
       (done.method === "card" || done.method === "link" ? done.charged : 0),

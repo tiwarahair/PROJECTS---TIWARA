@@ -11,12 +11,15 @@ describe("BusinessDetails", () => {
 
   it("renders the shop preset with saving disabled", () => {
     render(<BusinessDetails />);
+
     expect(
       screen.getByRole("radio", { name: /Shop \/ salon/ }),
     ).toHaveAttribute("aria-checked", "true");
+
     expect(
       screen.getByRole("heading", { name: "Salon address" }),
     ).toBeVisible();
+
     expect(screen.getByRole("button", { name: "Save changes" })).toBeDisabled();
   });
 
@@ -31,9 +34,11 @@ describe("BusinessDetails", () => {
 
   it("presets vatValid / vatInvalid show the VAT result", () => {
     const { unmount } = render(<BusinessDetails preset="vatValid" />);
+
     expect(screen.getByText("GB 312 4567 89")).toBeInTheDocument();
     unmount();
     render(<BusinessDetails preset="vatInvalid" />);
+
     expect(
       screen.getByText(
         "UK VAT numbers are 9 digits, or 12 for some businesses.",
@@ -43,6 +48,7 @@ describe("BusinessDetails", () => {
 
   it("preset pcError flags the address in the save bar", () => {
     render(<BusinessDetails preset="pcError" />);
+
     expect(
       screen.getByText("Fix the highlighted field to save"),
     ).toBeInTheDocument();
@@ -51,17 +57,24 @@ describe("BusinessDetails", () => {
   it("preset unsaved saves, reports and shows the toast for 2.4s", () => {
     const onSave = vi.fn();
     const onState = vi.fn<(api: BusinessDetailsApi) => void>();
+
     render(
       <BusinessDetails preset="unsaved" onSave={onSave} onState={onState} />,
     );
+
     expect(onState.mock.lastCall?.[0].canSave).toBe(true);
     fireEvent.click(screen.getByRole("button", { name: "Save changes" }));
+
     expect(onSave).toHaveBeenCalledWith(
       expect.objectContaining({
         type: "shop",
-        v: expect.objectContaining({ phone: "07700 900512", pc: "M14 5AJ" }),
+        details: expect.objectContaining({
+          phone: "07700 900512",
+          postcode: "M14 5AJ",
+        }),
       }),
     );
+
     expect(onState.mock.lastCall?.[0].canSave).toBe(false);
     expect(screen.getByRole("status")).toHaveClass(/toastShown/);
     act(() => vi.advanceTimersByTime(2400));
@@ -70,6 +83,7 @@ describe("BusinessDetails", () => {
 
   it("without tax details offers to add them", () => {
     const onEditTax = vi.fn();
+
     render(<BusinessDetails tax={null} onEditTax={onEditTax} />);
     fireEvent.click(screen.getByRole("button", { name: "Add tax details" }));
     expect(onEditTax).toHaveBeenCalled();

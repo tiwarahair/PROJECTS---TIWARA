@@ -93,14 +93,14 @@ export const LEGACY_TABS: Record<string, string> = {
 // demo: emails another account already uses
 export const TAKEN_EMAILS = ["kemi.a@icloud.com", "amara@amarabeauty.co.uk"];
 
-export const ME = {
+export const SEED_PROFILE = {
   first: "Nia",
   last: "Okafor",
   email: "nia.okafor@gmail.com",
-  mob: "7700 900412",
+  mobile: "7700 900412",
 };
 
-export type Profile = typeof ME;
+export type Profile = typeof SEED_PROFILE;
 
 export const DEMO_PHOTO = "img/onb-client-web.jpg";
 
@@ -109,14 +109,14 @@ export type BookingStatus =
 
 export interface AccountBooking {
   id: string;
-  sid: string;
-  svc: string;
-  cust: string;
+  stylistId: string;
+  service: string;
+  customisation: string;
   extra: number;
   /** Fallback price when the service is not on the stylist's menu. */
-  fb: number;
+  fallbackPrice: number;
   at: number;
-  mins: number;
+  minutes: number;
   status: BookingStatus;
   mode: "deposit" | "card" | "full";
   card: string;
@@ -127,8 +127,10 @@ const DAY_MS = 864e5;
 /** n days from today at h:m. */
 const at = (days: number, hours: number, minutes: number): number => {
   const date = new Date();
+
   date.setHours(hours, minutes, 0, 0);
   date.setDate(date.getDate() + days);
+
   return date.getTime();
 };
 
@@ -137,73 +139,76 @@ export const getSeedBookings = (fixture: string): AccountBooking[] => {
   const all: AccountBooking[] = [
     {
       id: "TH-48213",
-      sid: "amara-beauty",
-      svc: "Knotless braids",
-      cust: "Medium · Shoulder · 1B Natural Black",
+      stylistId: "amara-beauty",
+      service: "Knotless braids",
+      customisation: "Medium · Shoulder · 1B Natural Black",
       extra: 20,
-      fb: 140,
+      fallbackPrice: 140,
       at: at(9, 10, 30),
-      mins: 330,
+      minutes: 330,
       status: "confirmed",
       mode: "deposit",
       card: "c1",
     },
     {
       id: "TH-48377",
-      sid: "crowned-by-kemi",
-      svc: "Faux locs",
-      cust: "Medium · Mid-back",
+      stylistId: "crowned-by-kemi",
+      service: "Faux locs",
+      customisation: "Medium · Mid-back",
       extra: 0,
-      fb: 160,
+      fallbackPrice: 160,
       at: at(16, 11, 0),
-      mins: 360,
+      minutes: 360,
       status: "awaiting",
       mode: "card",
       card: "c1",
     },
     {
       id: "TH-47702",
-      sid: "silk-and-roots",
-      svc: "Silk press",
-      cust: "",
+      stylistId: "silk-and-roots",
+      service: "Silk press",
+      customisation: "",
       extra: 0,
-      fb: 65,
+      fallbackPrice: 65,
       at: at(-12, 9, 30),
-      mins: 120,
+      minutes: 120,
       status: "completed",
       mode: "full",
       card: "c1",
     },
     {
       id: "TH-47118",
-      sid: "studio-zuri",
-      svc: "Knotless braids",
-      cust: "Medium · Mid-back",
+      stylistId: "studio-zuri",
+      service: "Knotless braids",
+      customisation: "Medium · Mid-back",
       extra: 15,
-      fb: 150,
+      fallbackPrice: 150,
       at: at(-34, 13, 0),
-      mins: 300,
+      minutes: 300,
       status: "cancelled",
       mode: "deposit",
       card: "c2",
     },
     {
       id: "TH-46590",
-      sid: "locd-and-lovely",
-      svc: "Loc re-twist",
-      cust: "",
+      stylistId: "locd-and-lovely",
+      service: "Loc re-twist",
+      customisation: "",
       extra: 0,
-      fb: 70,
+      fallbackPrice: 70,
       at: at(-61, 10, 0),
-      mins: 150,
+      minutes: 150,
       status: "noshow",
       mode: "deposit",
       card: "c1",
     },
   ];
+
   if (["bk-empty", "ov-empty", "delete-allowed", "deleted"].includes(fixture))
     return all.filter(({ at: time }) => time < Date.now());
+
   if (fixture === "bk-none") return [];
+
   return all;
 };
 
@@ -213,13 +218,19 @@ export interface SavedCard {
   id: string;
   brand: string;
   last4: string;
-  exp: string;
-  def: boolean;
+  expiry: string;
+  isDefault: boolean;
 }
 
 export const SEED_CARDS: SavedCard[] = [
-  { id: "c1", brand: "Visa", last4: "4242", exp: "08/28", def: true },
-  { id: "c2", brand: "Mastercard", last4: "4444", exp: "03/27", def: false },
+  { id: "c1", brand: "Visa", last4: "4242", expiry: "08/28", isDefault: true },
+  {
+    id: "c2",
+    brand: "Mastercard",
+    last4: "4444",
+    expiry: "03/27",
+    isDefault: false,
+  },
 ];
 
 export const SHARED_ENTRIES = [

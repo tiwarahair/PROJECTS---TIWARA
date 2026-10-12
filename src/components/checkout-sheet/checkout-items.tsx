@@ -8,12 +8,19 @@ import {
   roundPounds,
 } from "./checkout-data";
 import { getAdjustNote } from "./checkout-view";
+import type { CheckoutLine } from "./checkout-data";
 import type { CheckoutViewModel } from "./checkout-view";
 import type { CheckoutController, CheckoutSheetProps } from "./use-checkout";
 import flow from "./checkout-flow.module.css";
 import shared from "./checkout-sheet.module.css";
 
 const PLUS = "M12 5v14M5 12h14";
+
+const getAdjustReason = ({ adjustment, reason }: CheckoutLine) => {
+  if (!adjustment) return "";
+
+  return ADJUST_REASONS.includes(reason) ? reason : "Other";
+};
 
 export const CheckoutItems = ({
   checkout,
@@ -22,35 +29,51 @@ export const CheckoutItems = ({
   checkout: CheckoutController;
   view: CheckoutViewModel;
 }) => {
-  const { state, setState, booking, showToast, go } = checkout;
-  const line = state.lines.find(({ id }) => id === state.adjId);
+  const { state, setState, booking, showToast, goTo } = checkout;
+  const line = state.lines.find(({ id }) => id === state.adjustingLineId);
+
   const adjustPreview = (() => {
-    if (!line || String(state.adjAmt).trim() === "") return "";
-    const delta = roundPounds(parsePounds(state.adjAmt) - line.base);
+    if (!line || String(state.adjustmentAmount).trim() === "") return "";
+
+    const delta = roundPounds(parsePounds(state.adjustmentAmount) - line.base);
+
     return delta === 0
       ? "Same as booked price"
       : (delta < 0 ? "Lowered by " : "Raised by ") +
           formatPounds(Math.abs(delta));
   })();
+
   const applyAdjustment = () => {
     if (!line) return;
-    const delta = roundPounds(parsePounds(state.adjAmt) - line.base);
+
+    const delta = roundPounds(parsePounds(state.adjustmentAmount) - line.base);
     let error = "";
-    if (String(state.adjAmt).trim() === "") error = "Enter the new price.";
+
+    if (String(state.adjustmentAmount).trim() === "")
+      error = "Enter the new price.";
     else if (delta === 0)
       error = `That’s the booked price. Enter a different amount.`;
-    else if (!state.adjReason) error = "Choose a reason.";
-    else if (state.adjReason === "Other" && !state.adjOther.trim())
+    else if (!state.adjustmentReason) error = "Choose a reason.";
+    else if (
+      state.adjustmentReason === "Other" &&
+      !state.adjustmentOther.trim()
+    )
       error = "Describe the reason.";
-    if (error) return setState({ adjErr: error });
+
+    if (error) return setState({ adjustmentError: error });
+
     const reason =
-      state.adjReason === "Other" ? state.adjOther.trim() : state.adjReason;
+      state.adjustmentReason === "Other"
+        ? state.adjustmentOther.trim()
+        : state.adjustmentReason;
+
     setState({
       lines: state.lines.map((item) =>
-        item.id === line.id ? { ...item, adj: delta, reason } : item,
+        item.id === line.id ? { ...item, adjustment: delta, reason } : item,
       ),
-      adjId: null,
+      adjustingLineId: null,
     });
+
     showToast("Price adjusted");
   };
 
@@ -59,7 +82,7 @@ export const CheckoutItems = ({
       className={joinClassNames(
         flow.viewGap26,
         shared.motion,
-        getViewAnimation(state.dir),
+        getViewAnimation(state.direction),
       )}
       data-ck-m="1"
     >
@@ -73,7 +96,7 @@ export const CheckoutItems = ({
         <div className={shared.flexCell}>
           <div className={shared.strong16}>{booking.client}</div>
           <div className={flow.itemsWhen}>
-            {booking.day + ", " + booking.time}
+            {`${booking.day}, ${booking.time}`}
           </div>
         </div>
         <span className={flow.modeTag}>{view.modeLabel}</span>
@@ -81,26 +104,27 @@ export const CheckoutItems = ({
       <div>
         <div className={flow.sectionLabelTight}>Items</div>
         {state.lines.map((item) => {
-          const isAdjusting = state.adjId === item.id;
+          const isAdjusting = state.adjustingLineId === item.id;
+
           return (
-            <div key={"i" + item.id} className={flow.itemRow}>
+            <div key={`i${item.id}`} className={flow.itemRow}>
               <div className={flow.itemHead}>
                 <div className={shared.minWidth}>
                   <div className={flow.itemName}>{item.name}</div>
-                  <div className={flow.itemSub}>{item.sub}</div>
+                  <div className={flow.itemSub}>{item.subtitle}</div>
                 </div>
                 <div className={flow.itemPriceCell}>
-                  {!!item.adj && (
+                  {!!item.adjustment && (
                     <div className={flow.itemWas}>
                       {formatPounds(item.base)}
                     </div>
                   )}
                   <div className={flow.itemPrice}>
-                    {formatPounds(item.base + item.adj)}
+                    {formatPounds(item.base + item.adjustment)}
                   </div>
                 </div>
               </div>
-              {!!item.adj && (
+              {!!item.adjustment && (
                 <div className={flow.itemNote}>{getAdjustNote(item)}</div>
               )}
               <div className={flow.itemActions}>
@@ -111,18 +135,16 @@ export const CheckoutItems = ({
                   )}
                   onClick={() =>
                     setState({
-                      adjId: item.id,
-                      adjAmt: item.adj ? String(item.base + item.adj) : "",
-                      adjReason: item.adj
-                        ? ADJUST_REASONS.includes(item.reason)
-                          ? item.reason
-                          : "Other"
+                      adjustingLineId: item.id,
+                      adjustmentAmount: item.adjustment
+                        ? String(item.base + item.adjustment)
                         : "",
-                      adjOther:
-                        item.adj && !ADJUST_REASONS.includes(item.reason)
+                      adjustmentReason: getAdjustReason(item),
+                      adjustmentOther:
+                        item.adjustment && !ADJUST_REASONS.includes(item.reason)
                           ? item.reason
                           : "",
-                      adjErr: "",
+                      adjustmentError: "",
                     })
                   }
                 >
@@ -134,7 +156,9 @@ export const CheckoutItems = ({
                     onClick={() =>
                       setState({
                         lines: state.lines.filter(({ id }) => id !== item.id),
-                        adjId: isAdjusting ? null : state.adjId,
+                        adjustingLineId: isAdjusting
+                          ? null
+                          : state.adjustingLineId,
                       })
                     }
                   >
@@ -151,7 +175,7 @@ export const CheckoutItems = ({
             data-ck-m="1"
           >
             <div className={flow.strong15}>
-              {"Adjust " + line.name + " (" + formatPounds(line.base) + ")"}
+              {`Adjust ${line.name} (${formatPounds(line.base)})`}
             </div>
             <label className={shared.field}>
               <span className={shared.fieldLabel}>New price</span>
@@ -160,13 +184,13 @@ export const CheckoutItems = ({
                 <input
                   className={flow.moneyInput}
                   inputMode="decimal"
-                  value={state.adjAmt}
+                  value={state.adjustmentAmount}
                   onChange={(event) =>
                     setState({
-                      adjAmt: event.target.value
+                      adjustmentAmount: event.target.value
                         .replace(/[^0-9.]/g, "")
                         .slice(0, 7),
-                      adjErr: "",
+                      adjustmentError: "",
                     })
                   }
                   placeholder="0.00"
@@ -177,9 +201,12 @@ export const CheckoutItems = ({
               <span className={shared.fieldLabel}>Reason</span>
               <select
                 className={flow.select}
-                value={state.adjReason}
+                value={state.adjustmentReason}
                 onChange={(event) =>
-                  setState({ adjReason: event.target.value, adjErr: "" })
+                  setState({
+                    adjustmentReason: event.target.value,
+                    adjustmentError: "",
+                  })
                 }
               >
                 <option value="">Choose a reason</option>
@@ -191,21 +218,21 @@ export const CheckoutItems = ({
               </select>
               <span className={shared.muted135}>Shown on the receipt.</span>
             </label>
-            {state.adjReason === "Other" && (
+            {state.adjustmentReason === "Other" && (
               <input
                 className={flow.textInput}
-                value={state.adjOther}
+                value={state.adjustmentOther}
                 onChange={(event) =>
                   setState({
-                    adjOther: event.target.value.slice(0, 60),
-                    adjErr: "",
+                    adjustmentOther: event.target.value.slice(0, 60),
+                    adjustmentError: "",
                   })
                 }
                 aria-label="Describe the reason"
                 placeholder="Describe the reason"
               />
             )}
-            {!!state.adjErr && (
+            {!!state.adjustmentError && (
               <div className={flow.adjustError} role="alert">
                 <svg
                   className={shared.iconTop2}
@@ -220,23 +247,24 @@ export const CheckoutItems = ({
                   <circle cx="12" cy="12" r="10"></circle>
                   <path d="M12 7v6M12 16.5v.5"></path>
                 </svg>
-                {state.adjErr}
+                {state.adjustmentError}
               </div>
             )}
             <div className={flow.adjustFoot}>
               <div className={flow.adjustPreview}>{adjustPreview}</div>
-              {!!line.adj && (
+              {!!line.adjustment && (
                 <button
                   className={flow.adjustReset}
                   onClick={() => {
                     setState({
                       lines: state.lines.map((item) =>
                         item.id === line.id
-                          ? { ...item, adj: 0, reason: "" }
+                          ? { ...item, adjustment: 0, reason: "" }
                           : item,
                       ),
-                      adjId: null,
+                      adjustingLineId: null,
                     });
+
                     showToast("Adjustment removed");
                   }}
                 >
@@ -245,7 +273,7 @@ export const CheckoutItems = ({
               )}
               <button
                 className={flow.adjustCancel}
-                onClick={() => setState({ adjId: null })}
+                onClick={() => setState({ adjustingLineId: null })}
               >
                 Cancel
               </button>
@@ -255,7 +283,7 @@ export const CheckoutItems = ({
             </div>
           </div>
         )}
-        <button className={flow.addItem} onClick={() => go("add", 1)}>
+        <button className={flow.addItem} onClick={() => goTo("add", 1)}>
           <Icon path={PLUS} size={16} strokeWidth="1.7" isRound={false} />
           Add item
         </button>
@@ -268,7 +296,7 @@ export const CheckoutItems = ({
           </span>
         </div>
         {view.creditRows.map((row) => (
-          <AmountRow key={row.key} row={row} subClassName={flow.rowSub} />
+          <AmountRow key={row.key} row={row} subtitleClassName={flow.rowSub} />
         ))}
         <div className={flow.totalLarge}>
           <span>{view.balanceLabel}</span>
@@ -291,7 +319,7 @@ export const CheckoutItems = ({
 };
 
 export const CheckoutAdd = ({
-  checkout: { state, setState, go, showToast },
+  checkout: { state, setState, goTo, showToast },
   menu,
 }: {
   checkout: CheckoutController;
@@ -301,7 +329,7 @@ export const CheckoutAdd = ({
     className={joinClassNames(
       flow.viewGap24,
       shared.motion,
-      getViewAnimation(state.dir),
+      getViewAnimation(state.direction),
     )}
     data-ck-m="1"
   >
@@ -314,23 +342,25 @@ export const CheckoutAdd = ({
               key={name}
               className={flow.addRow}
               onClick={() => {
-                const id = state.nid;
+                const id = state.nextLineId;
+
                 setState({
                   lines: state.lines.concat([
                     {
                       id,
                       name,
-                      sub: title === "Add-ons" ? "Add-on" : "Service",
+                      subtitle: title === "Add-ons" ? "Add-on" : "Service",
                       base: price,
-                      adj: 0,
+                      adjustment: 0,
                       reason: "",
                       added: true,
                     },
                   ]),
-                  nid: id + 1,
+                  nextLineId: id + 1,
                 });
-                go("items", -1);
-                showToast(name + " added");
+
+                goTo("items", -1);
+                showToast(`${name} added`);
               }}
             >
               <span className={shared.flexCell}>

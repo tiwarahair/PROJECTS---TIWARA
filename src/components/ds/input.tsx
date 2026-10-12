@@ -13,15 +13,17 @@ export interface FieldProps {
   children?: ReactNode;
 }
 
+const getFieldMessage = ({ hint, error }: FieldProps) => {
+  if (error) return <span className={styles.error}>{error}</span>;
+
+  return hint ? <span className={styles.hint}>{hint}</span> : null;
+};
+
 export const Field = ({ label, hint, error, children }: FieldProps) => (
   <label className={styles.field}>
     {label && <span className={styles.label}>{label}</span>}
     {children}
-    {error ? (
-      <span className={styles.error}>{error}</span>
-    ) : hint ? (
-      <span className={styles.hint}>{hint}</span>
-    ) : null}
+    {getFieldMessage({ hint, error })}
   </label>
 );
 

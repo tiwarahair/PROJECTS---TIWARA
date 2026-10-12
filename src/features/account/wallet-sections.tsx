@@ -11,12 +11,13 @@ interface PaymentsSectionProps {
   getCardInUse: (cardId: string) => string;
 }
 
-const getCardMark = (brand: string) =>
-  brand === "Visa"
-    ? "VISA"
-    : brand === "Mastercard"
-      ? "MC"
-      : brand.toUpperCase().slice(0, 4);
+const getCardMark = (brand: string) => {
+  if (brand === "Visa") return "VISA";
+
+  if (brand === "Mastercard") return "MC";
+
+  return brand.toUpperCase().slice(0, 4);
+};
 
 export const PaymentsSection = ({
   account: { state, actions },
@@ -25,8 +26,9 @@ export const PaymentsSection = ({
   <section data-screen-label="Account: Payment methods">
     {state.cards.length > 0 && (
       <div className={ui.list}>
-        {state.cards.map(({ id, brand, last4, exp, def }) => {
+        {state.cards.map(({ id, brand, last4, expiry, isDefault }) => {
           const inUse = getCardInUse(id);
+
           return (
             <div key={id} className={styles.card}>
               <span className={styles.cardMark} aria-hidden="true">
@@ -39,11 +41,11 @@ export const PaymentsSection = ({
                     {" •••• "}
                     {last4}
                   </span>
-                  {def && <span className={ui.defaultTag}>Default</span>}
+                  {isDefault && <span className={ui.defaultTag}>Default</span>}
                 </div>
                 <div className={ui.muted}>
                   {"Expires "}
-                  {exp}
+                  {expiry}
                 </div>
                 {!!inUse && (
                   <div className={styles.inUse}>
@@ -59,23 +61,24 @@ export const PaymentsSection = ({
                       <rect x="4" y="11" width="16" height="10" rx="2"></rect>
                       <path d="M8 11V7a4 4 0 0 1 8 0v4"></path>
                     </svg>
-                    <span>{"In use for your booking on " + inUse}</span>
+                    <span>{`In use for your booking on ${inUse}`}</span>
                   </div>
                 )}
               </div>
               <div className={styles.cardActions}>
-                {!def && (
+                {!isDefault && (
                   <button
                     className={styles.cardButton}
                     onClick={() => {
                       actions.setState(({ cards }) => ({
                         cards: cards.map((card) => ({
                           ...card,
-                          def: card.id === id,
+                          isDefault: card.id === id,
                         })),
                       }));
+
                       actions.showToast(
-                        brand + " •••• " + last4 + " is now your default card",
+                        `${brand} •••• ${last4} is now your default card`,
                       );
                     }}
                   >
@@ -85,8 +88,8 @@ export const PaymentsSection = ({
                 {!inUse && (
                   <button
                     className={styles.cardButton}
-                    onClick={() => actions.openDialog({ k: "card", id })}
-                    aria-label={"Remove " + brand + " ending " + last4}
+                    onClick={() => actions.openDialog({ kind: "card", id })}
+                    aria-label={`Remove ${brand} ending ${last4}`}
                   >
                     Remove
                   </button>
@@ -94,7 +97,6 @@ export const PaymentsSection = ({
                 {!!inUse && (
                   <span
                     className={styles.inUseNote}
-                    // focusable so keyboard users reach the explanation (prototype markup)
                     // eslint-disable-next-line jsx-a11y/no-noninteractive-tabindex
                     tabIndex={0}
                     role="note"
@@ -128,7 +130,7 @@ export const PaymentsSection = ({
     )}
     <button
       className={styles.addCard}
-      onClick={() => actions.openDialog({ k: "addCard" })}
+      onClick={() => actions.openDialog({ kind: "addCard" })}
     >
       <svg
         width="16"
@@ -160,6 +162,7 @@ const AddressFormFields = ({
   showDefault,
 }: AddressFormFieldsProps) => {
   const { setState } = actions;
+
   return (
     <>
       <label className={ui.label}>
@@ -167,12 +170,13 @@ const AddressFormFields = ({
         <span className={styles.optionalHint}>Optional</span>
         <input
           className={styles.labelInput}
-          ref={refs.addrLabel}
+          ref={refs.addressLabel}
           value={form.label}
           onChange={(event) => {
             const label = event.target.value.slice(0, 30);
-            setState(({ addrForm }) => ({
-              addrForm: addrForm && { ...addrForm, label },
+
+            setState(({ addressForm }) => ({
+              addressForm: addressForm && { ...addressForm, label },
             }));
           }}
           placeholder="e.g. Home"
@@ -184,10 +188,12 @@ const AddressFormFields = ({
         <AddressFinder
           idPrefix="ac-addr"
           label="Address or postcode"
-          value={form.addr}
-          onChange={(addr) =>
-            setState(({ addrForm }) => ({
-              addrForm: addrForm ? { ...addrForm, addr } : addrForm,
+          value={form.address}
+          onChange={(address) =>
+            setState(({ addressForm }) => ({
+              addressForm: addressForm
+                ? { ...addressForm, address }
+                : addressForm,
             }))
           }
           showErrors={form.tried}
@@ -199,11 +205,12 @@ const AddressFormFields = ({
           <input
             className={ui.checkbox}
             type="checkbox"
-            checked={form.def}
+            checked={form.isDefault}
             onChange={(event) => {
-              const def = event.target.checked;
-              setState(({ addrForm }) => ({
-                addrForm: addrForm && { ...addrForm, def },
+              const isDefault = event.target.checked;
+
+              setState(({ addressForm }) => ({
+                addressForm: addressForm && { ...addressForm, isDefault },
               }));
             }}
           />
@@ -216,7 +223,7 @@ const AddressFormFields = ({
         </button>
         <button
           className={ui.cancel}
-          onClick={() => setState({ addrForm: null })}
+          onClick={() => setState({ addressForm: null })}
         >
           Cancel
         </button>
@@ -231,33 +238,39 @@ export const AddressesSection = ({
   account: AccountController;
 }) => {
   const { state, actions } = account;
-  const { addrs, addrForm: form, addrMenu } = state;
+  const { addresses, addressForm: form, addressMenu } = state;
   const { setState, showToast, focusLater } = actions;
   const isEditing = form?.mode === "edit";
+
   const showDefault =
-    addrs.length > (isEditing ? 1 : 0) &&
-    !(isEditing && addrs.find(({ id, def }) => id === form?.id && def));
+    addresses.length > (isEditing ? 1 : 0) &&
+    !(
+      isEditing &&
+      addresses.find(({ id, isDefault }) => id === form?.id && isDefault)
+    );
+
   return (
     <section data-screen-label="Account: Saved addresses">
-      {addrs.length > 0 && (
+      {addresses.length > 0 && (
         <div className={ui.list}>
-          {addrs.map((address, index) => {
-            const { id, label, def } = address;
-            const isOpen = addrMenu === id;
-            const menuLabel = "Options for address " + (index + 1);
+          {addresses.map((address, index) => {
+            const { id, label, isDefault } = address;
+            const isOpen = addressMenu === id;
+            const menuLabel = `Options for address ${index + 1}`;
             const isThisEditing = isEditing && form?.id === id;
+
             return (
               <div key={id} className={ui.row}>
                 {!isThisEditing && (
                   <div className={styles.addrRow}>
                     <div className={styles.addrMain}>
                       <div className={ui.rowLabel}>
-                        {"Address " + (index + 1)}
+                        {`Address ${index + 1}`}
                       </div>
                       <div className={styles.addrBody}>
                         <div className={styles.addrTitle}>
                           {label}
-                          {def && (
+                          {isDefault && (
                             <span className={ui.defaultTag}>Default</span>
                           )}
                         </div>
@@ -274,8 +287,8 @@ export const AddressesSection = ({
                           !!form && ui.dimmed,
                         )}
                         onClick={() =>
-                          setState(({ addrMenu: current }) => ({
-                            addrMenu: current === id ? null : id,
+                          setState(({ addressMenu: current }) => ({
+                            addressMenu: current === id ? null : id,
                           }))
                         }
                         disabled={!!form}
@@ -300,7 +313,7 @@ export const AddressesSection = ({
                           {/* eslint-disable-next-line jsx-a11y/click-events-have-key-events, jsx-a11y/no-static-element-interactions */}
                           <div
                             className={styles.menuScrim}
-                            onClick={() => setState({ addrMenu: null })}
+                            onClick={() => setState({ addressMenu: null })}
                           ></div>
                           <div
                             className={styles.menu}
@@ -313,42 +326,44 @@ export const AddressesSection = ({
                               onClick={() =>
                                 setState(
                                   {
-                                    addrMenu: null,
-                                    addrForm: {
+                                    addressMenu: null,
+                                    addressForm: {
                                       mode: "edit",
                                       id,
                                       label,
-                                      addr: {
+                                      address: {
                                         line1: address.line1,
                                         line2: address.line2,
                                         town: address.town,
                                         postcode: address.postcode,
                                         source: "manual",
                                       },
-                                      def,
+                                      isDefault,
                                       tried: false,
                                     },
                                   },
-                                  () => focusLater("addr"),
+                                  () => focusLater("address"),
                                 )
                               }
                             >
                               Edit
                             </button>
-                            {!def && (
+                            {!isDefault && (
                               <button
                                 className={styles.menuItem}
                                 role="menuitem"
                                 onClick={() => {
-                                  setState({ addrMenu: null });
+                                  setState({ addressMenu: null });
+
                                   actions.setAddresses(
-                                    addrs.map((item) => ({
+                                    addresses.map((item) => ({
                                       ...item,
-                                      def: item.id === id,
+                                      isDefault: item.id === id,
                                     })),
                                   );
+
                                   showToast(
-                                    label + " is now your default address",
+                                    `${label} is now your default address`,
                                   );
                                 }}
                               >
@@ -359,8 +374,8 @@ export const AddressesSection = ({
                               className={styles.menuRemove}
                               role="menuitem"
                               onClick={() => {
-                                setState({ addrMenu: null });
-                                actions.openDialog({ k: "addr", id });
+                                setState({ addressMenu: null });
+                                actions.openDialog({ kind: "address", id });
                               }}
                             >
                               Remove
@@ -388,7 +403,7 @@ export const AddressesSection = ({
           })}
         </div>
       )}
-      {!addrs.length && form?.mode !== "add" && (
+      {!addresses.length && form?.mode !== "add" && (
         <p className={ui.emptyLine} data-screen-label="Saved addresses empty">
           No saved addresses. Save one to book mobile stylists faster.
         </p>
@@ -411,15 +426,15 @@ export const AddressesSection = ({
           onClick={() =>
             setState(
               {
-                addrForm: {
+                addressForm: {
                   mode: "add",
                   label: "",
-                  addr: null,
-                  def: false,
+                  address: null,
+                  isDefault: false,
                   tried: false,
                 },
               },
-              () => focusLater("addr"),
+              () => focusLater("address"),
             )
           }
         >

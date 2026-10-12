@@ -19,15 +19,18 @@ interface SearchNavProps {
 export const SearchNav = ({ search }: SearchNavProps) => {
   const { state, refs, viewportWidth, selection, what, where, actions } =
     search;
+
   const loggedIn = useAppSelector((root) => root.session.loggedIn);
-  const isMobileSheet = !!state.mob;
+  const isMobileSheet = !!state.mobileView;
   const whatValue = state.whatText != null ? state.whatText : selection.display;
   const whereValue = state.whereText != null ? state.whereText : where.display;
-  const hasDate = !!state.q.date || state.time !== "any";
+  const hasDate = !!state.query.date || state.time !== "any";
+  const mobileDateLabel = getMobileDateLabel(state);
+  const mobileWhereLabel = where.display || "Current location";
+
   // pillMax: the pill grows with the window, leaving room for the logo and the right rail
   const pillStyle = {
-    "--pill-max":
-      Math.min(880, viewportWidth - (viewportWidth < 1100 ? 300 : 360)) + "px",
+    "--pill-max": `${Math.min(880, viewportWidth - (viewportWidth < 1100 ? 300 : 360))}px`,
   } as CSSProperties;
 
   return (
@@ -73,9 +76,7 @@ export const SearchNav = ({ search }: SearchNavProps) => {
                 {selection.display || "All styles"}
               </span>
               <span className={styles.mobileSub}>
-                {getMobileDateLabel(state) +
-                  " · " +
-                  (where.display || "Current location")}
+                {`${mobileDateLabel} · ${mobileWhereLabel}`}
               </span>
             </button>
           </div>

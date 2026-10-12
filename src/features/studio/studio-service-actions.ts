@@ -5,12 +5,12 @@ import type { ServiceType } from "../../types/service-type";
 import { getSpec } from "../../utils/services";
 import type { StudioActions, StudioContext } from "./studio-actions";
 import { ICONS, TAXONOMY } from "./studio-data";
-import { toMin } from "./studio-format";
+import { timeToMinutes } from "./studio-format";
 import {
   formatAddon,
-  getCatById,
-  getCatNameError,
-  getNextCatColour,
+  getCategoryById,
+  getCategoryNameError,
+  getNextCategoryColour,
   getTypeOf,
 } from "./studio-model";
 import type {
@@ -25,14 +25,20 @@ import type {
 export const makeVariationRows = (
   labels: string[] | null | undefined,
 ): VariationRow[] =>
-  (labels || []).map((label) => ({ label, on: false, dp: "", dh: "", dm: "" }));
+  (labels || []).map((label) => ({
+    label,
+    on: false,
+    priceDelta: "",
+    hoursDelta: "",
+    minutesDelta: "",
+  }));
 
 export const getBlankAddon = (): StudioAddon => ({
   id: "",
   categoryId: null,
   name: "",
   price: "",
-  hr: "",
+  hours: "",
   min: "",
 });
 
@@ -44,8 +50,11 @@ export const getAnchor = (
   event?: { currentTarget?: EventTarget | null } | null,
 ) => {
   const host = event?.currentTarget as Element | null | undefined;
+
   if (!host?.getBoundingClientRect) return null;
+
   const rect = host.getBoundingClientRect();
+
   return {
     top: rect.bottom + 6,
     right: Math.max(12, window.innerWidth - rect.right),
@@ -57,45 +66,54 @@ export const createServiceActions = (
   actions: StudioActions,
 ) => {
   const { getState, setState, timers, isWide } = context;
-  const { openSheet, openActs, toastMsg } = actions;
+  const { openSheet, openActionSheet, showToast } = actions;
 
-  const openCats = () =>
+  const openCategories = () =>
     openSheet("cats", {
-      catsUi: {
+      categoriesUi: {
         newName: "",
-        newColour: getNextCatColour(getState().categories),
-        newErr: "",
+        newColour: getNextCategoryColour(getState().categories),
+        newError: "",
         editId: null,
         editName: "",
         editColour: null,
-        editErr: "",
+        editError: "",
       },
     });
 
   const addCategory = (name: string, colour?: string | null) => {
     const state = getState();
-    const error = getCatNameError(state, name);
-    if (error) return { err: error };
+    const error = getCategoryNameError(state, name);
+
+    if (error) return { error };
+
     const categories = state.categories;
-    const id = "c" + Date.now().toString(36);
+    const id = `c${Date.now().toString(36)}`;
+
     const category = {
       id,
       name: String(name).trim().slice(0, 40),
       sort: categories.length
         ? Math.max(...categories.map(({ sort }) => sort)) + 1
         : 0,
-      colour: colour || getNextCatColour(categories),
+      colour: colour || getNextCategoryColour(categories),
     };
+
     setState({ categories: categories.concat([category]) });
-    return { id, cat: category };
+
+    return { id, category };
   };
 
-  const setWiz = (patch: Partial<WizardState>) =>
-    setState(({ wiz }) => ({ wiz: wiz ? { ...wiz, ...patch } : wiz }));
+  const setWizard = (patch: Partial<WizardState>) =>
+    setState(({ wizard }) => ({
+      wizard: wizard ? { ...wizard, ...patch } : wizard,
+    }));
 
   const setDraft = (patch: Partial<WizardDraft>) =>
-    setState(({ wiz }) => ({
-      wiz: wiz ? { ...wiz, draft: { ...wiz.draft, ...patch } } : wiz,
+    setState(({ wizard }) => ({
+      wizard: wizard
+        ? { ...wizard, draft: { ...wizard.draft, ...patch } }
+        : wizard,
     }));
 
   const setVarRow = (
@@ -103,67 +121,72 @@ export const createServiceActions = (
     index: number,
     patch: Partial<VariationRow>,
   ) => {
-    const draft = getState().wiz?.draft;
+    const draft = getState().wizard?.draft;
+
     if (!draft) return;
+
     const list = draft[key].map((row, rowIndex) =>
       rowIndex === index ? { ...row, ...patch } : row,
     );
+
     setDraft(key === "sizes" ? { sizes: list } : { lengths: list });
   };
 
-  const openWiz = (
+  const openWizard = (
     mode: "add" | "edit",
     service?: StudioService | null,
     preset: Partial<WizardDraft> = {},
   ) => {
     const type = service ? getTypeOf(service) : null;
+
     const draft: WizardDraft = service
       ? {
           name: service.name,
-          desc: service.desc || "",
-          cat: service.cat,
-          sub: type ? type.name : service.sub || "",
+          description: service.description || "",
+          taxonomyId: service.taxonomyId,
+          subcategory: type ? type.name : service.subcategory || "",
           typeId: type ? type.id : null,
           categoryId: service.categoryId || null,
           own: (service.own || []).map(({ name, options }) => ({
             name,
             options: options.map((option) => ({ ...option })),
           })),
-          price: "" + service.price,
-          durH: "" + (service.durH || 0),
-          durM: "" + (service.durM || 0),
+          price: `${service.price}`,
+          durationHours: `${service.durationHours || 0}`,
+          durationMinutes: `${service.durationMinutes || 0}`,
           sizesOn: !!service.sizesOn,
           lengthsOn: !!service.lengthsOn,
           sizes: (service.sizes || []).map((row) => ({ ...row })),
           lengths: (service.lengths || []).map((row) => ({ ...row })),
           addons: (service.addons || []).map((link) => ({ ...link })),
-          st: service.st,
+          status: service.status,
           extra: service.extraCustom ? String(service.extra || 0) : "",
         }
       : {
           name: "",
-          desc: "",
-          cat: null,
-          sub: "",
+          description: "",
+          taxonomyId: null,
+          subcategory: "",
           typeId: null,
           categoryId: null,
           own: [],
           price: "",
-          durH: "",
-          durM: "",
+          durationHours: "",
+          durationMinutes: "",
           sizesOn: false,
           lengthsOn: false,
           sizes: [],
           lengths: [],
           addons: [],
-          st: "active",
+          status: "active",
           extra: "",
         };
+
     openSheet("svcwiz", {
-      wiz: {
+      wizard: {
         mode,
         step: 2,
-        sugg: false,
+        suggestionsOpen: false,
         flash: null,
         editId: service ? service.id : null,
         search: "",
@@ -171,202 +194,249 @@ export const createServiceActions = (
         review: false,
         openAddon: null,
         newAddon: null,
-        aq: "",
+        addonQuery: "",
         draft: { ...draft, ...preset },
       },
     });
   };
 
   /** What a suggested service type fills in (prototype suggFill). */
-  const suggFill = (type: ServiceType) => {
+  const getSuggestionFill = (type: ServiceType) => {
     const spec = getSpec(type.name);
+
     const custom =
       platformCustomisations[
         type.groupId as keyof typeof platformCustomisations
       ];
+
     const group = getTaxonomy(type.groupId);
+
     const toRow = ([label, price, minutes]: [
       string,
       number,
       number,
     ]): VariationRow => {
-      const isNeg = price < 0 || minutes < 0;
-      const absMinutes = Math.abs(minutes);
-      const sign = isNeg ? "-" : "";
+      const isNegativeValue = price < 0 || minutes < 0;
+      const absoluteMinutes = Math.abs(minutes);
+      const sign = isNegativeValue ? "-" : "";
+
       return {
         label,
         on: true,
-        neg: isNeg,
-        dp: (price ? sign : "") + Math.abs(price),
-        dh:
-          (Math.floor(absMinutes / 60) ? sign : "") +
-          Math.floor(absMinutes / 60),
-        dm: (absMinutes % 60 ? sign : "") + (absMinutes % 60),
+        negative: isNegativeValue,
+        priceDelta: (price ? sign : "") + Math.abs(price),
+        hoursDelta:
+          (Math.floor(absoluteMinutes / 60) ? sign : "") +
+          Math.floor(absoluteMinutes / 60),
+        minutesDelta:
+          (absoluteMinutes % 60 ? sign : "") + (absoluteMinutes % 60),
       };
     };
+
+    const getSizes = () => {
+      if (custom) return custom.size.map(toRow);
+
+      return group?.sizes ? makeVariationRows(group.sizes) : [];
+    };
+
+    const getLengths = () => {
+      if (custom) return custom.length.map(toRow);
+
+      return group?.lengths ? makeVariationRows(group.lengths) : [];
+    };
+
     return {
       name: type.name,
-      desc: spec.desc || "",
-      cat: type.groupId,
-      sub: type.name,
+      description: spec.description || "",
+      taxonomyId: type.groupId,
+      subcategory: type.name,
       typeId: type.id,
-      price: String(spec.add),
-      durH: String(Math.floor(spec.mins / 60)),
-      durM: String(spec.mins % 60),
+      price: String(spec.addedPrice),
+      durationHours: String(Math.floor(spec.minutes / 60)),
+      durationMinutes: String(spec.minutes % 60),
       sizesOn: !!custom,
       lengthsOn: !!custom,
-      sizes: custom
-        ? custom.size.map(toRow)
-        : group?.sizes
-          ? makeVariationRows(group.sizes)
-          : [],
-      lengths: custom
-        ? custom.length.map(toRow)
-        : group?.lengths
-          ? makeVariationRows(group.lengths)
-          : [],
-      addonDefs: defaultAddons[type.groupId] || [],
+      sizes: getSizes(),
+      lengths: getLengths(),
+      addonDefinitions: defaultAddons[type.groupId] || [],
     };
   };
 
-  const applySugg = (
+  const applySuggestion = (
     type: ServiceType,
     isReplace: boolean,
     isHeld?: boolean,
   ) => {
     const state = getState();
-    const wizard = state.wiz;
+    const wizard = state.wizard;
+
     if (!wizard) return;
+
     const draft = wizard.draft;
-    const fill = suggFill(type);
+    const fill = getSuggestionFill(type);
+
     const isEmpty = (value: unknown) =>
       !String(value == null ? "" : value).trim();
-    const pending = (wizard.pendAddons || []).slice();
+
+    const pending = (wizard.pendingAddons || []).slice();
     const addons = state.addons.concat(pending);
     const links: WizardDraft["addons"] = [];
-    fill.addonDefs.forEach(([name, price, minutes], index) => {
+
+    fill.addonDefinitions.forEach(([name, price, minutes], index) => {
       let addon = addons.find(
         (item) =>
-          (item.st || "active") !== "archived" &&
+          (item.status || "active") !== "archived" &&
           String(item.name).toLowerCase() === name.toLowerCase(),
       );
+
       if (!addon) {
         addon = {
-          id: "ad" + Date.now() + index,
-          categoryId: getCatById(state, draft.categoryId)
+          id: `ad${Date.now()}${index}`,
+          categoryId: getCategoryById(state, draft.categoryId)
             ? draft.categoryId
             : null,
           name,
           price,
-          hr: Math.floor(minutes / 60),
+          hours: Math.floor(minutes / 60),
           min: minutes % 60,
-          st: "active",
+          status: "active",
         };
+
         addons.push(addon);
         pending.push(addon);
       }
-      links.push({ aid: addon.id, ovP: null, ovH: null, ovM: null });
+
+      links.push({
+        addonId: addon.id,
+        priceOverride: null,
+        hoursOverride: null,
+        minutesOverride: null,
+      });
     });
+
     const patch: Partial<WizardDraft> = {};
     const flash: Record<string, number> = {};
+
     const put = <K extends keyof WizardDraft>(
       key: K,
       value: WizardDraft[K],
       flashKey?: string,
     ) => {
       patch[key] = value;
+
       if (flashKey) flash[flashKey] = 1;
     };
+
     if (isReplace || isEmpty(draft.name)) put("name", fill.name, "name");
-    if ((isReplace || isEmpty(draft.desc)) && fill.desc)
-      put("desc", fill.desc, "desc");
+
+    if ((isReplace || isEmpty(draft.description)) && fill.description)
+      put("description", fill.description, "description");
+
     if (isReplace || !draft.typeId) {
-      put("cat", fill.cat);
-      put("sub", fill.sub);
+      put("taxonomyId", fill.taxonomyId);
+      put("subcategory", fill.subcategory);
       put("typeId", fill.typeId, "type");
     }
+
     if (isReplace || isEmpty(draft.price)) put("price", fill.price, "price");
-    if (isReplace || (!parseInt(draft.durH) && !parseInt(draft.durM))) {
-      put("durH", fill.durH, "price");
-      put("durM", fill.durM);
+
+    if (
+      isReplace ||
+      (!parseInt(draft.durationHours) && !parseInt(draft.durationMinutes))
+    ) {
+      put("durationHours", fill.durationHours, "price");
+      put("durationMinutes", fill.durationMinutes);
     }
+
     if (
       isReplace ||
       !(draft.sizesOn || draft.lengthsOn) ||
-      (patch.cat && patch.cat !== draft.cat)
+      (patch.taxonomyId && patch.taxonomyId !== draft.taxonomyId)
     ) {
       put("sizesOn", fill.sizesOn);
       put("lengthsOn", fill.lengthsOn);
       put("sizes", fill.sizes);
       put("lengths", fill.lengths);
-      if (fill.sizesOn) flash.opts = 1;
+
+      if (fill.sizesOn) flash.options = 1;
     }
+
     if (isReplace || !draft.addons.length) {
       const keep = isReplace ? [] : draft.addons;
+
       put(
         "addons",
         keep.concat(
-          links.filter((link) => !keep.some(({ aid }) => aid === link.aid)),
+          links.filter(
+            (link) => !keep.some(({ addonId }) => addonId === link.addonId),
+          ),
         ),
       );
     }
+
     setState({
-      wiz: {
+      wizard: {
         ...wizard,
-        sugg: false,
+        suggestionsOpen: false,
         flash,
-        pendAddons: pending,
+        pendingAddons: pending,
         draft: { ...draft, ...patch },
       },
     });
-    toastMsg(
+
+    showToast(
       isWide()
-        ? "Filled in from " + type.name + ". Check and edit anything you need."
-        : "Filled in from " + type.name,
+        ? `Filled in from ${type.name}. Check and edit anything you need.`
+        : `Filled in from ${type.name}`,
     );
+
     window.clearTimeout(timers.flash);
+
     if (!isHeld)
       timers.flash = window.setTimeout(() => {
-        if (getState().wiz) setWiz({ flash: null });
+        if (getState().wizard) setWizard({ flash: null });
       }, 1100);
   };
 
-  const pickSugg = (type: ServiceType) => {
-    const draft = getState().wiz?.draft;
+  const pickSuggestion = (type: ServiceType) => {
+    const draft = getState().wizard?.draft;
+
     if (!draft) return;
+
     const hasEntries = !!(
       String(draft.name || "").trim() ||
-      String(draft.desc || "").trim() ||
+      String(draft.description || "").trim() ||
       draft.typeId ||
       String(draft.price || "").trim() ||
-      parseInt(draft.durH) ||
-      parseInt(draft.durM) ||
+      parseInt(draft.durationHours) ||
+      parseInt(draft.durationMinutes) ||
       draft.sizesOn ||
       draft.lengthsOn
     );
-    setWiz({ sugg: false });
+
+    setWizard({ suggestionsOpen: false });
+
     if (!hasEntries) {
-      applySugg(type, true);
+      applySuggestion(type, true);
+
       return;
     }
+
     window.setTimeout(
       () =>
         setState({
           confirm: {
             title: "Replace what you’ve entered?",
-            body:
-              "We’ll fill in the name, description, service type, price, time and options from " +
-              type.name +
-              ".",
+            body: `We’ll fill in the name, description, service type, price, time and options from ${type.name}.`,
             yesLabel: "Replace",
             noLabel: "Keep mine",
             yes: () => {
               setState({ confirm: null });
-              applySugg(type, true);
+              applySuggestion(type, true);
             },
-            no: () => {
+            onNo: () => {
               setState({ confirm: null });
-              applySugg(type, false);
+              applySuggestion(type, false);
             },
           },
         }),
@@ -374,84 +444,96 @@ export const createServiceActions = (
     );
   };
 
-  const svcActions = (
+  const openServiceActions = (
     service: StudioService,
     event?: { currentTarget?: EventTarget | null } | null,
   ) => {
-    const isArchived = service.st === "archived";
-    openActs({
+    const isArchived = service.status === "archived";
+
+    openActionSheet({
       title: service.name,
-      sub: service.dur + " · £" + service.price,
+      subtitle: `${service.duration} · £${service.price}`,
       anchor: getAnchor(event),
       items: [
-        { label: "Edit", d: ICONS.edit, run: () => openWiz("edit", service) },
+        {
+          label: "Edit",
+          iconPath: ICONS.edit,
+          run: () => openWizard("edit", service),
+        },
         {
           label: "Duplicate",
-          d: ICONS.copy,
+          iconPath: ICONS.copy,
           run: () => {
             const services = getState().services;
             const index = services.findIndex(({ id }) => id === service.id);
+
             const copy = {
               ...service,
-              id: service.id + "-copy-" + Date.now(),
-              name: service.name + " (copy)",
+              id: `${service.id}-copy-${Date.now()}`,
+              name: `${service.name} (copy)`,
               sizes: (service.sizes || []).map((row) => ({ ...row })),
               lengths: (service.lengths || []).map((row) => ({ ...row })),
               addons: (service.addons || []).map((link) => ({ ...link })),
             };
+
             const list = services.slice();
+
             list.splice(index + 1, 0, copy);
             setState({ services: list });
-            toastMsg(service.name + " duplicated");
+            showToast(`${service.name} duplicated`);
           },
         },
         {
           label: "Quick booking link",
-          d: ICONS.link,
-          run: () => toastMsg("Booking link for " + service.name + " copied"),
+          iconPath: ICONS.link,
+          run: () => showToast(`Booking link for ${service.name} copied`),
         },
         isArchived
           ? {
               label: "Restore",
-              d: ICONS.restore,
+              iconPath: ICONS.restore,
               run: () => {
                 setState(({ services }) => ({
                   services: services.map((item) =>
-                    item.id === service.id ? { ...item, st: "active" } : item,
+                    item.id === service.id
+                      ? { ...item, status: "active" }
+                      : item,
                   ),
                 }));
-                toastMsg(service.name + " restored");
+
+                showToast(`${service.name} restored`);
               },
             }
           : {
               label: "Archive",
-              d: ICONS.archive,
+              iconPath: ICONS.archive,
               run: () => {
                 setState(({ services }) => ({
                   services: services.map((item) =>
-                    item.id === service.id ? { ...item, st: "archived" } : item,
+                    item.id === service.id
+                      ? { ...item, status: "archived" }
+                      : item,
                   ),
                 }));
-                toastMsg(service.name + " archived");
+
+                showToast(`${service.name} archived`);
               },
             },
         {
           label: "Delete",
-          d: ICONS.trash,
+          iconPath: ICONS.trash,
           danger: true,
           run: () =>
             setState({
               confirm: {
-                body:
-                  '"' +
-                  service.name +
-                  '" will be removed from your services. Bookings already made are kept.',
+                body: `"${service.name}" will be removed from your services. Bookings already made are kept.`,
                 yes: () => {
                   setState(({ services }) => ({
                     services: services.filter(({ id }) => id !== service.id),
                     confirm: null,
                   }));
-                  toastMsg(service.name + " deleted");
+
+                  showToast(`${service.name} deleted`);
                 },
               },
             }),
@@ -461,83 +543,88 @@ export const createServiceActions = (
   };
 
   const openAddon = (addon: StudioAddon) =>
-    openSheet("addon", { addonDraft: { ...addon }, adNewCat: null });
+    openSheet("addon", { addonDraft: { ...addon }, addonNewCategory: null });
 
-  const addonActions = (
+  const openAddonActions = (
     addon: StudioAddon,
     event?: { currentTarget?: EventTarget | null } | null,
   ) => {
-    const isArchived = addon.st === "archived";
-    openActs({
+    const isArchived = addon.status === "archived";
+
+    openActionSheet({
       title: addon.name,
-      sub: formatAddon(addon),
+      subtitle: formatAddon(addon),
       anchor: getAnchor(event),
       items: [
-        { label: "Edit", d: ICONS.edit, run: () => openAddon(addon) },
+        { label: "Edit", iconPath: ICONS.edit, run: () => openAddon(addon) },
         {
           label: "Duplicate",
-          d: ICONS.copy,
+          iconPath: ICONS.copy,
           run: () => {
             const addons = getState().addons;
             const index = addons.findIndex(({ id }) => id === addon.id);
             const list = addons.slice();
+
             list.splice(index + 1, 0, {
               ...addon,
-              id: addon.id + "-copy-" + Date.now(),
-              name: addon.name + " (copy)",
+              id: `${addon.id}-copy-${Date.now()}`,
+              name: `${addon.name} (copy)`,
             });
+
             setState({ addons: list });
-            toastMsg(addon.name + " duplicated");
+            showToast(`${addon.name} duplicated`);
           },
         },
         isArchived
           ? {
               label: "Restore",
-              d: ICONS.restore,
+              iconPath: ICONS.restore,
               run: () => {
                 setState(({ addons }) => ({
                   addons: addons.map((item) =>
-                    item.id === addon.id ? { ...item, st: "active" } : item,
+                    item.id === addon.id ? { ...item, status: "active" } : item,
                   ),
                 }));
-                toastMsg(addon.name + " restored");
+
+                showToast(`${addon.name} restored`);
               },
             }
           : {
               label: "Archive",
-              d: ICONS.archive,
+              iconPath: ICONS.archive,
               run: () => {
                 setState(({ addons }) => ({
                   addons: addons.map((item) =>
-                    item.id === addon.id ? { ...item, st: "archived" } : item,
+                    item.id === addon.id
+                      ? { ...item, status: "archived" }
+                      : item,
                   ),
                 }));
-                toastMsg(addon.name + " archived");
+
+                showToast(`${addon.name} archived`);
               },
             },
         {
           label: "Delete",
-          d: ICONS.trash,
+          iconPath: ICONS.trash,
           danger: true,
           run: () =>
             setState({
               confirm: {
-                body:
-                  '"' +
-                  addon.name +
-                  '" will be removed from every service that uses it.',
+                body: `"${addon.name}" will be removed from every service that uses it.`,
                 yes: () => {
                   setState(({ addons, services }) => ({
                     addons: addons.filter(({ id }) => id !== addon.id),
                     services: services.map((service) => ({
                       ...service,
                       addons: (service.addons || []).filter(
-                        ({ aid }) => aid !== addon.id,
+                        ({ addonId }) => addonId !== addon.id,
                       ),
                     })),
                     confirm: null,
                   }));
-                  toastMsg(addon.name + " deleted");
+
+                  showToast(`${addon.name} deleted`);
                 },
               },
             }),
@@ -550,21 +637,24 @@ export const createServiceActions = (
     getState().bookings.find(({ id }) => id === booking.id)?.addons || [];
 
   /** Opens the booking's "Edit service" step with a draft of its service (prototype esOpen). */
-  const esOpen = (booking: StudioBooking & { durMin: number }) => {
+  const openAddonEdit = (
+    booking: StudioBooking & { durationMinutes: number },
+  ) => {
     const service = getState().services.find(
-      ({ name }) => name === booking.svc,
+      ({ name }) => name === booking.service,
     );
+
     setState({
-      bkStep: "editsvc",
-      csQ: "",
-      es: {
-        svcId: service ? service.id : null,
-        svcName: booking.svc,
-        cat: service ? service.cat : null,
-        time: toMin(booking.time),
-        dur: booking.durMin,
+      bookingStep: "editsvc",
+      changeServiceQuery: "",
+      serviceEdit: {
+        serviceId: service ? service.id : null,
+        serviceName: booking.service,
+        taxonomyId: service ? service.taxonomyId : null,
+        time: timeToMinutes(booking.time),
+        duration: booking.durationMinutes,
         price: String(booking.price),
-        price0: String(booking.price),
+        originalPrice: String(booking.price),
         priceOpen: !!booking.priceReason,
         priceReason: booking.priceReason || "",
         extra: service?.extra ? Number(service.extra) : null,
@@ -573,26 +663,29 @@ export const createServiceActions = (
     });
   };
 
-  const esPatch = (
-    patch: Partial<NonNullable<ReturnType<typeof getState>["es"]>>,
-  ) => setState(({ es }) => ({ es: es ? { ...es, ...patch } : es }));
+  const patchServiceEdit = (
+    patch: Partial<NonNullable<ReturnType<typeof getState>["serviceEdit"]>>,
+  ) =>
+    setState(({ serviceEdit }) => ({
+      serviceEdit: serviceEdit ? { ...serviceEdit, ...patch } : serviceEdit,
+    }));
 
   return {
-    openCats,
+    openCategories,
     addCategory,
-    setWiz,
+    setWizard,
     setDraft,
     setVarRow,
-    openWiz,
-    suggFill,
-    applySugg,
-    pickSugg,
-    svcActions,
+    openWizard,
+    getSuggestionFill,
+    applySuggestion,
+    pickSuggestion,
+    openServiceActions,
     openAddon,
-    addonActions,
+    openAddonActions,
     getBookingAddons,
-    esOpen,
-    esPatch,
+    openAddonEdit,
+    patchServiceEdit,
   };
 };
 

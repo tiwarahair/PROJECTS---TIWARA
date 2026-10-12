@@ -12,18 +12,20 @@ interface StepServiceProps {
 /** Step 1: every active service, grouped by the stylist's categories. */
 export const StepService = ({ booking }: StepServiceProps) => {
   const { state, stylist, actions } = booking;
+
   return (
     <>
       <h1 className={step.title}>Pick a service</h1>
       <p className={step.lead}>
-        {"Everything " + stylist.name + " offers, grouped by category."}
+        {`Everything ${stylist.name} offers, grouped by category.`}
       </p>
       {getMenu(stylist).map(({ id: groupId, name: groupName, items }) => (
         <div key={groupId} className={styles.group}>
           {!!groupName && <div className={styles.groupName}>{groupName}</div>}
           {items.map((service) => {
-            const { id, name, mins } = service;
-            const chosen = state.svc === id;
+            const { id, name, minutes } = service;
+            const chosen = state.serviceId === id;
+
             return (
               <button
                 key={id}
@@ -35,10 +37,10 @@ export const StepService = ({ booking }: StepServiceProps) => {
               >
                 <span>
                   <span className={styles.name}>{name}</span>
-                  <span className={styles.meta}>{formatDuration(mins)}</span>
+                  <span className={styles.meta}>{formatDuration(minutes)}</span>
                 </span>
                 <span className={styles.price}>
-                  {"from " + money(getFromWithFee(service))}{" "}
+                  {`from ${money(getFromWithFee(service))}`}{" "}
                   {chosen ? (
                     <svg
                       width="17"

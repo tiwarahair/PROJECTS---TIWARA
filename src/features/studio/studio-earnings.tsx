@@ -7,23 +7,25 @@ import styles from "./studio-earnings.module.css";
 
 /** Studio → Earnings: the embedded Earnings dashboard (prototype Studio.dc.html line 906). */
 export const StudioEarnings = ({ studio }: { studio: StudioController }) => {
-  const { state, setState, props, isWide, isDesk, isNew, actions } = studio;
+  const { state, setState, props, isWide, isDesktop, isNew, actions } = studio;
   const live = isLive(state);
-  const scenario = isNew
-    ? live
-      ? "empty"
-      : "setup"
-    : props.earnings && props.earnings !== "default"
-      ? props.earnings
-      : props.payouts === "paused"
-        ? "paused"
-        : "default";
+
+  const getScenario = () => {
+    if (isNew) return live ? "empty" : "setup";
+
+    if (props.earnings && props.earnings !== "default") return props.earnings;
+
+    return props.payouts === "paused" ? "paused" : "default";
+  };
+
+  const scenario = getScenario();
+
   return (
     <div
       className={joinClassNames(
         styles.earnings,
         isWide && styles.wide,
-        isDesk && styles.desk,
+        isDesktop && styles.desk,
       )}
       data-screen-label="Earnings"
     >
@@ -40,20 +42,27 @@ export const StudioEarnings = ({ studio }: { studio: StudioController }) => {
         services={state.services}
         businessName={state.profile.salon || "Tiwára's House"}
         onOpenBooking={(_bookingRef, clientId) => {
-          setState({ tab: "bookings", bview: "list", listScope: "past" });
-          actions.toastMsg(
-            "Showing past bookings for " + getClient(state, clientId).name,
+          setState({
+            tab: "bookings",
+            bookingsLayout: "list",
+            listScope: "past",
+          });
+
+          actions.showToast(
+            `Showing past bookings for ${getClient(state, clientId).name}`,
           );
         }}
         onContinueSetup={() => {
-          setState({ tab: "home", setupMin: false });
-          if (!live) actions.openTf("secure");
+          setState({ tab: "home", setupMinimised: false });
+
+          if (!live) actions.openTwoFactor("secure");
         }}
         taxHold={!!state.check.stripe && !state.tax}
         onAddTax={() => {
           setState({ tab: "settings", page: "payouts" });
+
           if (hasTwoFactor(state)) setState({ taxEdit: true });
-          else actions.openTf("secure");
+          else actions.openTwoFactor("secure");
         }}
       />
     </div>

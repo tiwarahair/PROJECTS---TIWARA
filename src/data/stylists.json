@@ -23,20 +23,20 @@
     ],
     "policies": {
       "mode": "deposit",
-      "depositPct": 20,
+      "depositPercent": 20,
       "refundable": true,
-      "freeWindowHrs": 48,
+      "freeWindowHours": 48,
       "late": {
         "on": false,
         "kind": "pct",
-        "pct": 50
+        "percent": 50
       },
       "noShow": {
         "on": false,
         "kind": "pct",
-        "pct": 50
+        "percent": 50
       },
-      "graceMins": 0,
+      "graceMinutes": 0,
       "extras": []
     },
     "categories": [
@@ -67,8 +67,8 @@
         "serviceTypeId": "knotless-braids",
         "categoryId": "tiwaras-house-c1",
         "price": 130,
-        "mins": 240,
-        "desc": "Small to medium · back length · hair included",
+        "minutes": 240,
+        "description": "Small to medium · back length · hair included",
         "status": "active",
         "customisations": {
           "size": {
@@ -78,31 +78,31 @@
                 "label": "Small",
                 "on": true,
                 "priceDelta": 45,
-                "minsDelta": 60
+                "minutesDelta": 60
               },
               {
                 "label": "Smedium",
                 "on": true,
                 "priceDelta": 25,
-                "minsDelta": 30
+                "minutesDelta": 30
               },
               {
                 "label": "Medium",
                 "on": true,
                 "priceDelta": 0,
-                "minsDelta": 0
+                "minutesDelta": 0
               },
               {
                 "label": "Large",
                 "on": true,
                 "priceDelta": -10,
-                "minsDelta": -30
+                "minutesDelta": -30
               },
               {
                 "label": "Jumbo",
                 "on": true,
                 "priceDelta": -15,
-                "minsDelta": -45
+                "minutesDelta": -45
               }
             ]
           },
@@ -113,25 +113,25 @@
                 "label": "Bob",
                 "on": true,
                 "priceDelta": -20,
-                "minsDelta": -30
+                "minutesDelta": -30
               },
               {
                 "label": "Shoulder",
                 "on": true,
                 "priceDelta": 0,
-                "minsDelta": 0
+                "minutesDelta": 0
               },
               {
                 "label": "Bra",
                 "on": true,
                 "priceDelta": 25,
-                "minsDelta": 30
+                "minutesDelta": 30
               },
               {
                 "label": "Waist/Bum",
                 "on": true,
                 "priceDelta": 50,
-                "minsDelta": 60
+                "minutesDelta": 60
               }
             ]
           }
@@ -143,12 +143,12 @@
               {
                 "label": "Straight",
                 "priceDelta": 0,
-                "minsDelta": 0
+                "minutesDelta": 0
               },
               {
                 "label": "Zig-zag",
                 "priceDelta": 10,
-                "minsDelta": 20
+                "minutesDelta": 20
               }
             ]
           }
@@ -157,22 +157,22 @@
           {
             "name": "Beads",
             "price": 10,
-            "mins": 15
+            "minutes": 15
           },
           {
             "name": "Boho pieces",
             "price": 15,
-            "mins": 20
+            "minutes": 20
           },
           {
             "name": "Burnt ends",
             "price": 5,
-            "mins": 10
+            "minutes": 10
           },
           {
             "name": "Wash & blow-dry",
             "price": 20,
-            "mins": 30
+            "minutes": 30
           }
         ]
       },
@@ -182,8 +182,8 @@
         "serviceTypeId": "box-braids",
         "categoryId": "tiwaras-house-c1",
         "price": 125,
-        "mins": 300,
-        "desc": "Classic knotted base · back length · hair included",
+        "minutes": 300,
+        "description": "Classic knotted base · back length · hair included",
         "status": "active",
         "customisations": {
           "size": {
@@ -193,31 +193,31 @@
                 "label": "Small",
                 "on": true,
                 "priceDelta": 45,
-                "minsDelta": 60
+                "minutesDelta": 60
               },
               {
                 "label": "Smedium",
                 "on": true,
                 "priceDelta": 25,
-                "minsDelta": 30
+                "minutesDelta": 30
               },
               {
                 "label": "Medium",
                 "on": true,
                 "priceDelta": 0,
-                "minsDelta": 0
+                "minutesDelta": 0
               },
               {
                 "label": "Large",
                 "on": true,
                 "priceDelta": -10,
-                "minsDelta": -30
+                "minutesDelta": -30
               },
               {
                 "label": "Jumbo",
                 "on": true,
                 "priceDelta": -15,
-                "minsDelta": -45
+                "minutesDelta": -45
               }
             ]
           },
@@ -228,25 +228,25 @@
                 "label": "Bob",
                 "on": true,
                 "priceDelta": -20,
-                "minsDelta": -30
+                "minutesDelta": -30
               },
               {
                 "label": "Shoulder",
                 "on": true,
                 "priceDelta": 0,
-                "minsDelta": 0
+                "minutesDelta": 0
               },
               {
                 "label": "Bra",
                 "on": true,
                 "priceDelta": 25,
-                "minsDelta": 30
+                "minutesDelta": 30
               },
               {
                 "label": "Waist/Bum",
                 "on": true,
                 "priceDelta": 50,
-                "minsDelta": 60
+                "minutesDelta": 60
               }
             ]
           }
@@ -256,22 +256,22 @@
           {
             "name": "Beads",
             "price": 10,
-            "mins": 15
+            "minutes": 15
           },
           {
             "name": "Boho pieces",
             "price": 15,
-            "mins": 20
+            "minutes": 20
           },
           {
             "name": "Burnt ends",
             "price": 5,
-            "mins": 10
+            "minutes": 10
           },
           {
             "name": "Wash & blow-dry",
             "price": 20,
-            "mins": 30
+            "minutes": 30
           }
         ]
       },
@@ -281,8 +281,8 @@
         "serviceTypeId": "french-curl",
         "categoryId": "tiwaras-house-c1",
         "price": 120,
-        "mins": 210,
-        "desc": "Waist length · curly ends · hair included",
+        "minutes": 210,
+        "description": "Waist length · curly ends · hair included",
         "status": "active",
         "customisations": {
           "size": {
@@ -292,31 +292,31 @@
                 "label": "Small",
                 "on": true,
                 "priceDelta": 45,
-                "minsDelta": 60
+                "minutesDelta": 60
               },
               {
                 "label": "Smedium",
                 "on": true,
                 "priceDelta": 25,
-                "minsDelta": 30
+                "minutesDelta": 30
               },
               {
                 "label": "Medium",
                 "on": true,
                 "priceDelta": 0,
-                "minsDelta": 0
+                "minutesDelta": 0
               },
               {
                 "label": "Large",
                 "on": true,
                 "priceDelta": -10,
-                "minsDelta": -30
+                "minutesDelta": -30
               },
               {
                 "label": "Jumbo",
                 "on": true,
                 "priceDelta": -15,
-                "minsDelta": -45
+                "minutesDelta": -45
               }
             ]
           },
@@ -327,25 +327,25 @@
                 "label": "Bob",
                 "on": true,
                 "priceDelta": -20,
-                "minsDelta": -30
+                "minutesDelta": -30
               },
               {
                 "label": "Shoulder",
                 "on": true,
                 "priceDelta": 0,
-                "minsDelta": 0
+                "minutesDelta": 0
               },
               {
                 "label": "Bra",
                 "on": true,
                 "priceDelta": 25,
-                "minsDelta": 30
+                "minutesDelta": 30
               },
               {
                 "label": "Waist/Bum",
                 "on": true,
                 "priceDelta": 50,
-                "minsDelta": 60
+                "minutesDelta": 60
               }
             ]
           }
@@ -355,22 +355,22 @@
           {
             "name": "Beads",
             "price": 10,
-            "mins": 15
+            "minutes": 15
           },
           {
             "name": "Boho pieces",
             "price": 15,
-            "mins": 20
+            "minutes": 20
           },
           {
             "name": "Burnt ends",
             "price": 5,
-            "mins": 10
+            "minutes": 10
           },
           {
             "name": "Wash & blow-dry",
             "price": 20,
-            "mins": 30
+            "minutes": 30
           }
         ]
       },
@@ -380,8 +380,8 @@
         "serviceTypeId": "stitch-braids",
         "categoryId": "tiwaras-house-c1",
         "price": 90,
-        "mins": 150,
-        "desc": "4–8 rows · scalp-friendly tension",
+        "minutes": 150,
+        "description": "4–8 rows · scalp-friendly tension",
         "status": "active",
         "customisations": {
           "size": {
@@ -391,31 +391,31 @@
                 "label": "Small",
                 "on": true,
                 "priceDelta": 45,
-                "minsDelta": 60
+                "minutesDelta": 60
               },
               {
                 "label": "Smedium",
                 "on": true,
                 "priceDelta": 25,
-                "minsDelta": 30
+                "minutesDelta": 30
               },
               {
                 "label": "Medium",
                 "on": true,
                 "priceDelta": 0,
-                "minsDelta": 0
+                "minutesDelta": 0
               },
               {
                 "label": "Large",
                 "on": true,
                 "priceDelta": -10,
-                "minsDelta": -30
+                "minutesDelta": -30
               },
               {
                 "label": "Jumbo",
                 "on": true,
                 "priceDelta": -15,
-                "minsDelta": -45
+                "minutesDelta": -45
               }
             ]
           },
@@ -426,25 +426,25 @@
                 "label": "Bob",
                 "on": true,
                 "priceDelta": -20,
-                "minsDelta": -30
+                "minutesDelta": -30
               },
               {
                 "label": "Shoulder",
                 "on": true,
                 "priceDelta": 0,
-                "minsDelta": 0
+                "minutesDelta": 0
               },
               {
                 "label": "Bra",
                 "on": true,
                 "priceDelta": 25,
-                "minsDelta": 30
+                "minutesDelta": 30
               },
               {
                 "label": "Waist/Bum",
                 "on": true,
                 "priceDelta": 50,
-                "minsDelta": 60
+                "minutesDelta": 60
               }
             ]
           }
@@ -454,22 +454,22 @@
           {
             "name": "Beads",
             "price": 10,
-            "mins": 15
+            "minutes": 15
           },
           {
             "name": "Boho pieces",
             "price": 15,
-            "mins": 20
+            "minutes": 20
           },
           {
             "name": "Burnt ends",
             "price": 5,
-            "mins": 10
+            "minutes": 10
           },
           {
             "name": "Wash & blow-dry",
             "price": 20,
-            "mins": 30
+            "minutes": 30
           }
         ]
       },
@@ -479,8 +479,8 @@
         "serviceTypeId": "silk-press",
         "categoryId": "tiwaras-house-c2",
         "price": 75,
-        "mins": 120,
-        "desc": "Wash, blow-dry and flat iron · trim on request",
+        "minutes": 120,
+        "description": "Wash, blow-dry and flat iron · trim on request",
         "status": "active",
         "customisations": null,
         "ownCustomisations": [],
@@ -492,8 +492,8 @@
         "serviceTypeId": "define-curls",
         "categoryId": "tiwaras-house-c2",
         "price": 70,
-        "mins": 105,
-        "desc": "Cleanse, curl cream and diffuse",
+        "minutes": 105,
+        "description": "Cleanse, curl cream and diffuse",
         "status": "active",
         "customisations": null,
         "ownCustomisations": [],
@@ -505,8 +505,8 @@
         "serviceTypeId": "takedown",
         "categoryId": "tiwaras-house-c1",
         "price": 70,
-        "mins": 90,
-        "desc": "Careful removal, detangle and wash",
+        "minutes": 90,
+        "description": "Careful removal, detangle and wash",
         "status": "archived",
         "customisations": {
           "size": {
@@ -516,31 +516,31 @@
                 "label": "Small",
                 "on": true,
                 "priceDelta": 45,
-                "minsDelta": 60
+                "minutesDelta": 60
               },
               {
                 "label": "Smedium",
                 "on": true,
                 "priceDelta": 25,
-                "minsDelta": 30
+                "minutesDelta": 30
               },
               {
                 "label": "Medium",
                 "on": true,
                 "priceDelta": 0,
-                "minsDelta": 0
+                "minutesDelta": 0
               },
               {
                 "label": "Large",
                 "on": true,
                 "priceDelta": -10,
-                "minsDelta": -30
+                "minutesDelta": -30
               },
               {
                 "label": "Jumbo",
                 "on": true,
                 "priceDelta": -15,
-                "minsDelta": -45
+                "minutesDelta": -45
               }
             ]
           },
@@ -551,25 +551,25 @@
                 "label": "Bob",
                 "on": true,
                 "priceDelta": -20,
-                "minsDelta": -30
+                "minutesDelta": -30
               },
               {
                 "label": "Shoulder",
                 "on": true,
                 "priceDelta": 0,
-                "minsDelta": 0
+                "minutesDelta": 0
               },
               {
                 "label": "Bra",
                 "on": true,
                 "priceDelta": 25,
-                "minsDelta": 30
+                "minutesDelta": 30
               },
               {
                 "label": "Waist/Bum",
                 "on": true,
                 "priceDelta": 50,
-                "minsDelta": 60
+                "minutesDelta": 60
               }
             ]
           }
@@ -579,22 +579,22 @@
           {
             "name": "Beads",
             "price": 10,
-            "mins": 15
+            "minutes": 15
           },
           {
             "name": "Boho pieces",
             "price": 15,
-            "mins": 20
+            "minutes": 20
           },
           {
             "name": "Burnt ends",
             "price": 5,
-            "mins": 10
+            "minutes": 10
           },
           {
             "name": "Wash & blow-dry",
             "price": 20,
-            "mins": 30
+            "minutes": 30
           }
         ]
       }
@@ -628,20 +628,20 @@
     "portfolio": ["img/w161154.jpg", "img/w161153.jpg", "img/w161907.jpg"],
     "policies": {
       "mode": "deposit",
-      "depositPct": 25,
+      "depositPercent": 25,
       "refundable": true,
-      "freeWindowHrs": 48,
+      "freeWindowHours": 48,
       "late": {
         "on": true,
         "kind": "pct",
-        "pct": 50
+        "percent": 50
       },
       "noShow": {
         "on": true,
         "kind": "pct",
-        "pct": 100
+        "percent": 100
       },
-      "graceMins": 0,
+      "graceMinutes": 0,
       "extras": []
     },
     "categories": [
@@ -672,8 +672,8 @@
         "serviceTypeId": "goddess-braids",
         "categoryId": "amara-beauty-c1",
         "price": 135,
-        "mins": 240,
-        "desc": "Curly pieces throughout · shoulder to waist",
+        "minutes": 240,
+        "description": "Curly pieces throughout · shoulder to waist",
         "status": "active",
         "customisations": {
           "size": {
@@ -683,31 +683,31 @@
                 "label": "Small",
                 "on": false,
                 "priceDelta": 45,
-                "minsDelta": 60
+                "minutesDelta": 60
               },
               {
                 "label": "Smedium",
                 "on": true,
                 "priceDelta": 25,
-                "minsDelta": 30
+                "minutesDelta": 30
               },
               {
                 "label": "Medium",
                 "on": true,
                 "priceDelta": 0,
-                "minsDelta": 0
+                "minutesDelta": 0
               },
               {
                 "label": "Large",
                 "on": true,
                 "priceDelta": -10,
-                "minsDelta": -30
+                "minutesDelta": -30
               },
               {
                 "label": "Jumbo",
                 "on": false,
                 "priceDelta": -15,
-                "minsDelta": -45
+                "minutesDelta": -45
               }
             ]
           },
@@ -718,25 +718,25 @@
                 "label": "Bob",
                 "on": true,
                 "priceDelta": -20,
-                "minsDelta": -30
+                "minutesDelta": -30
               },
               {
                 "label": "Shoulder",
                 "on": true,
                 "priceDelta": 0,
-                "minsDelta": 0
+                "minutesDelta": 0
               },
               {
                 "label": "Bra",
                 "on": true,
                 "priceDelta": 25,
-                "minsDelta": 30
+                "minutesDelta": 30
               },
               {
                 "label": "Waist/Bum",
                 "on": true,
                 "priceDelta": 50,
-                "minsDelta": 60
+                "minutesDelta": 60
               }
             ]
           }
@@ -746,22 +746,22 @@
           {
             "name": "Beads",
             "price": 10,
-            "mins": 15
+            "minutes": 15
           },
           {
             "name": "Boho pieces",
             "price": 20,
-            "mins": 20
+            "minutes": 20
           },
           {
             "name": "Burnt ends",
             "price": 5,
-            "mins": 10
+            "minutes": 10
           },
           {
             "name": "Wash & blow-dry",
             "price": 25,
-            "mins": 30
+            "minutes": 30
           }
         ]
       },
@@ -771,8 +771,8 @@
         "serviceTypeId": "french-curl",
         "categoryId": "amara-beauty-c1",
         "price": 130,
-        "mins": 210,
-        "desc": "Waist length · curly ends · hair included",
+        "minutes": 210,
+        "description": "Waist length · curly ends · hair included",
         "status": "active",
         "customisations": {
           "size": {
@@ -782,31 +782,31 @@
                 "label": "Small",
                 "on": true,
                 "priceDelta": 45,
-                "minsDelta": 60
+                "minutesDelta": 60
               },
               {
                 "label": "Smedium",
                 "on": true,
                 "priceDelta": 25,
-                "minsDelta": 30
+                "minutesDelta": 30
               },
               {
                 "label": "Medium",
                 "on": true,
                 "priceDelta": 0,
-                "minsDelta": 0
+                "minutesDelta": 0
               },
               {
                 "label": "Large",
                 "on": true,
                 "priceDelta": -10,
-                "minsDelta": -30
+                "minutesDelta": -30
               },
               {
                 "label": "Jumbo",
                 "on": false,
                 "priceDelta": -15,
-                "minsDelta": -45
+                "minutesDelta": -45
               }
             ]
           },
@@ -817,25 +817,25 @@
                 "label": "Bob",
                 "on": true,
                 "priceDelta": -20,
-                "minsDelta": -30
+                "minutesDelta": -30
               },
               {
                 "label": "Shoulder",
                 "on": true,
                 "priceDelta": 0,
-                "minsDelta": 0
+                "minutesDelta": 0
               },
               {
                 "label": "Bra",
                 "on": true,
                 "priceDelta": 25,
-                "minsDelta": 30
+                "minutesDelta": 30
               },
               {
                 "label": "Waist/Bum",
                 "on": true,
                 "priceDelta": 50,
-                "minsDelta": 60
+                "minutesDelta": 60
               }
             ]
           }
@@ -845,22 +845,22 @@
           {
             "name": "Beads",
             "price": 10,
-            "mins": 15
+            "minutes": 15
           },
           {
             "name": "Boho pieces",
             "price": 20,
-            "mins": 20
+            "minutes": 20
           },
           {
             "name": "Burnt ends",
             "price": 5,
-            "mins": 10
+            "minutes": 10
           },
           {
             "name": "Wash & blow-dry",
             "price": 25,
-            "mins": 30
+            "minutes": 30
           }
         ]
       },
@@ -870,8 +870,8 @@
         "serviceTypeId": "knotless-braids",
         "categoryId": "amara-beauty-c2",
         "price": 140,
-        "mins": 240,
-        "desc": "Small to medium · back length · hair included",
+        "minutes": 240,
+        "description": "Small to medium · back length · hair included",
         "status": "active",
         "customisations": {
           "size": {
@@ -881,31 +881,31 @@
                 "label": "Small",
                 "on": false,
                 "priceDelta": 45,
-                "minsDelta": 60
+                "minutesDelta": 60
               },
               {
                 "label": "Smedium",
                 "on": true,
                 "priceDelta": 25,
-                "minsDelta": 30
+                "minutesDelta": 30
               },
               {
                 "label": "Medium",
                 "on": true,
                 "priceDelta": 0,
-                "minsDelta": 0
+                "minutesDelta": 0
               },
               {
                 "label": "Large",
                 "on": true,
                 "priceDelta": -10,
-                "minsDelta": -30
+                "minutesDelta": -30
               },
               {
                 "label": "Jumbo",
                 "on": true,
                 "priceDelta": -15,
-                "minsDelta": -45
+                "minutesDelta": -45
               }
             ]
           },
@@ -916,25 +916,25 @@
                 "label": "Bob",
                 "on": true,
                 "priceDelta": -20,
-                "minsDelta": -30
+                "minutesDelta": -30
               },
               {
                 "label": "Shoulder",
                 "on": true,
                 "priceDelta": 0,
-                "minsDelta": 0
+                "minutesDelta": 0
               },
               {
                 "label": "Bra",
                 "on": true,
                 "priceDelta": 25,
-                "minsDelta": 30
+                "minutesDelta": 30
               },
               {
                 "label": "Waist/Bum",
                 "on": true,
                 "priceDelta": 50,
-                "minsDelta": 60
+                "minutesDelta": 60
               }
             ]
           }
@@ -944,22 +944,22 @@
           {
             "name": "Beads",
             "price": 10,
-            "mins": 15
+            "minutes": 15
           },
           {
             "name": "Boho pieces",
             "price": 20,
-            "mins": 20
+            "minutes": 20
           },
           {
             "name": "Burnt ends",
             "price": 5,
-            "mins": 10
+            "minutes": 10
           },
           {
             "name": "Wash & blow-dry",
             "price": 25,
-            "mins": 30
+            "minutes": 30
           }
         ]
       },
@@ -969,8 +969,8 @@
         "serviceTypeId": "fulani-braids",
         "categoryId": "amara-beauty-c2",
         "price": 115,
-        "mins": 180,
-        "desc": "Patterned parting · beads optional",
+        "minutes": 180,
+        "description": "Patterned parting · beads optional",
         "status": "active",
         "customisations": {
           "size": {
@@ -980,31 +980,31 @@
                 "label": "Small",
                 "on": true,
                 "priceDelta": 45,
-                "minsDelta": 60
+                "minutesDelta": 60
               },
               {
                 "label": "Smedium",
                 "on": true,
                 "priceDelta": 25,
-                "minsDelta": 30
+                "minutesDelta": 30
               },
               {
                 "label": "Medium",
                 "on": true,
                 "priceDelta": 0,
-                "minsDelta": 0
+                "minutesDelta": 0
               },
               {
                 "label": "Large",
                 "on": true,
                 "priceDelta": -10,
-                "minsDelta": -30
+                "minutesDelta": -30
               },
               {
                 "label": "Jumbo",
                 "on": true,
                 "priceDelta": -15,
-                "minsDelta": -45
+                "minutesDelta": -45
               }
             ]
           },
@@ -1015,25 +1015,25 @@
                 "label": "Bob",
                 "on": true,
                 "priceDelta": -20,
-                "minsDelta": -30
+                "minutesDelta": -30
               },
               {
                 "label": "Shoulder",
                 "on": true,
                 "priceDelta": 0,
-                "minsDelta": 0
+                "minutesDelta": 0
               },
               {
                 "label": "Bra",
                 "on": true,
                 "priceDelta": 25,
-                "minsDelta": 30
+                "minutesDelta": 30
               },
               {
                 "label": "Waist/Bum",
                 "on": true,
                 "priceDelta": 50,
-                "minsDelta": 60
+                "minutesDelta": 60
               }
             ]
           }
@@ -1043,22 +1043,22 @@
           {
             "name": "Beads",
             "price": 10,
-            "mins": 15
+            "minutes": 15
           },
           {
             "name": "Boho pieces",
             "price": 20,
-            "mins": 20
+            "minutes": 20
           },
           {
             "name": "Burnt ends",
             "price": 5,
-            "mins": 10
+            "minutes": 10
           },
           {
             "name": "Wash & blow-dry",
             "price": 25,
-            "mins": 30
+            "minutes": 30
           }
         ]
       }
@@ -1093,20 +1093,20 @@
     "portfolio": ["img/IMG_0013.jpg", "img/w160826.jpg", "img/IMG_1581.jpg"],
     "policies": {
       "mode": "card",
-      "depositPct": 20,
+      "depositPercent": 20,
       "refundable": true,
-      "freeWindowHrs": 24,
+      "freeWindowHours": 24,
       "late": {
         "on": false,
         "kind": "pct",
-        "pct": 50
+        "percent": 50
       },
       "noShow": {
         "on": true,
         "kind": "pct",
-        "pct": 50
+        "percent": 50
       },
-      "graceMins": 15,
+      "graceMinutes": 15,
       "extras": []
     },
     "categories": [
@@ -1142,8 +1142,8 @@
         "serviceTypeId": "wash-and-style",
         "categoryId": "naturallynia-c1",
         "price": 50,
-        "mins": 90,
-        "desc": "Cleanse, condition and blow-dry",
+        "minutes": 90,
+        "description": "Cleanse, condition and blow-dry",
         "status": "active",
         "customisations": null,
         "ownCustomisations": [],
@@ -1155,8 +1155,8 @@
         "serviceTypeId": "define-curls",
         "categoryId": "naturallynia-c1",
         "price": 60,
-        "mins": 105,
-        "desc": "Cleanse, curl cream and diffuse",
+        "minutes": 105,
+        "description": "Cleanse, curl cream and diffuse",
         "status": "active",
         "customisations": null,
         "ownCustomisations": [],
@@ -1168,8 +1168,8 @@
         "serviceTypeId": "silk-press",
         "categoryId": "naturallynia-c1",
         "price": 65,
-        "mins": 120,
-        "desc": "Wash, blow-dry and flat iron · trim on request",
+        "minutes": 120,
+        "description": "Wash, blow-dry and flat iron · trim on request",
         "status": "active",
         "customisations": null,
         "ownCustomisations": [],
@@ -1181,8 +1181,8 @@
         "serviceTypeId": "deep-conditioning",
         "categoryId": "naturallynia-c2",
         "price": 47,
-        "mins": 60,
-        "desc": "Steamed mask and rinse",
+        "minutes": 60,
+        "description": "Steamed mask and rinse",
         "status": "active",
         "customisations": null,
         "ownCustomisations": [],
@@ -1194,8 +1194,8 @@
         "serviceTypeId": "scalp-treatment",
         "categoryId": "naturallynia-c2",
         "price": 50,
-        "mins": 60,
-        "desc": "Steam, exfoliation and oil",
+        "minutes": 60,
+        "description": "Steam, exfoliation and oil",
         "status": "active",
         "customisations": null,
         "ownCustomisations": [],
@@ -1207,8 +1207,8 @@
         "serviceTypeId": "cornrows",
         "categoryId": "naturallynia-c3",
         "price": 30,
-        "mins": 75,
-        "desc": "Straight-backs or pattern · no extensions",
+        "minutes": 75,
+        "description": "Straight-backs or pattern · no extensions",
         "status": "active",
         "customisations": null,
         "ownCustomisations": [],
@@ -1220,8 +1220,8 @@
         "serviceTypeId": "twist-out",
         "categoryId": "naturallynia-c3",
         "price": 28,
-        "mins": 60,
-        "desc": "Wash, stretch and set",
+        "minutes": 60,
+        "description": "Wash, stretch and set",
         "status": "draft",
         "customisations": null,
         "ownCustomisations": [],
@@ -1256,20 +1256,20 @@
     "portfolio": ["img/w161244.jpg", "img/IMG_1572.jpg", "img/w161512.jpg"],
     "policies": {
       "mode": "none",
-      "depositPct": 20,
+      "depositPercent": 20,
       "refundable": true,
-      "freeWindowHrs": 24,
+      "freeWindowHours": 24,
       "late": {
         "on": false,
         "kind": "pct",
-        "pct": 50
+        "percent": 50
       },
       "noShow": {
         "on": false,
         "kind": "pct",
-        "pct": 50
+        "percent": 50
       },
-      "graceMins": 0,
+      "graceMinutes": 0,
       "extras": []
     },
     "categories": [],
@@ -1288,8 +1288,8 @@
         "serviceTypeId": "fulani-braids",
         "categoryId": null,
         "price": 110,
-        "mins": 180,
-        "desc": "Patterned parting · beads optional",
+        "minutes": 180,
+        "description": "Patterned parting · beads optional",
         "status": "active",
         "customisations": {
           "size": {
@@ -1299,31 +1299,31 @@
                 "label": "Small",
                 "on": true,
                 "priceDelta": 45,
-                "minsDelta": 60
+                "minutesDelta": 60
               },
               {
                 "label": "Smedium",
                 "on": true,
                 "priceDelta": 25,
-                "minsDelta": 30
+                "minutesDelta": 30
               },
               {
                 "label": "Medium",
                 "on": true,
                 "priceDelta": 0,
-                "minsDelta": 0
+                "minutesDelta": 0
               },
               {
                 "label": "Large",
                 "on": true,
                 "priceDelta": -10,
-                "minsDelta": -30
+                "minutesDelta": -30
               },
               {
                 "label": "Jumbo",
                 "on": true,
                 "priceDelta": -15,
-                "minsDelta": -45
+                "minutesDelta": -45
               }
             ]
           },
@@ -1334,25 +1334,25 @@
                 "label": "Bob",
                 "on": true,
                 "priceDelta": -20,
-                "minsDelta": -30
+                "minutesDelta": -30
               },
               {
                 "label": "Shoulder",
                 "on": true,
                 "priceDelta": 0,
-                "minsDelta": 0
+                "minutesDelta": 0
               },
               {
                 "label": "Bra",
                 "on": true,
                 "priceDelta": 25,
-                "minsDelta": 30
+                "minutesDelta": 30
               },
               {
                 "label": "Waist/Bum",
                 "on": true,
                 "priceDelta": 50,
-                "minsDelta": 60
+                "minutesDelta": 60
               }
             ]
           }
@@ -1362,22 +1362,22 @@
           {
             "name": "Beads",
             "price": 10,
-            "mins": 15
+            "minutes": 15
           },
           {
             "name": "Boho pieces",
             "price": 15,
-            "mins": 20
+            "minutes": 20
           },
           {
             "name": "Burnt ends",
             "price": 5,
-            "mins": 10
+            "minutes": 10
           },
           {
             "name": "Wash & blow-dry",
             "price": 20,
-            "mins": 30
+            "minutes": 30
           }
         ]
       },
@@ -1387,8 +1387,8 @@
         "serviceTypeId": "feed-in-braids",
         "categoryId": null,
         "price": 95,
-        "mins": 150,
-        "desc": "2–6 rows · natural taper",
+        "minutes": 150,
+        "description": "2–6 rows · natural taper",
         "status": "active",
         "customisations": {
           "size": {
@@ -1398,31 +1398,31 @@
                 "label": "Small",
                 "on": true,
                 "priceDelta": 45,
-                "minsDelta": 60
+                "minutesDelta": 60
               },
               {
                 "label": "Smedium",
                 "on": true,
                 "priceDelta": 25,
-                "minsDelta": 30
+                "minutesDelta": 30
               },
               {
                 "label": "Medium",
                 "on": true,
                 "priceDelta": 0,
-                "minsDelta": 0
+                "minutesDelta": 0
               },
               {
                 "label": "Large",
                 "on": true,
                 "priceDelta": -10,
-                "minsDelta": -30
+                "minutesDelta": -30
               },
               {
                 "label": "Jumbo",
                 "on": true,
                 "priceDelta": -15,
-                "minsDelta": -45
+                "minutesDelta": -45
               }
             ]
           },
@@ -1433,25 +1433,25 @@
                 "label": "Bob",
                 "on": true,
                 "priceDelta": -20,
-                "minsDelta": -30
+                "minutesDelta": -30
               },
               {
                 "label": "Shoulder",
                 "on": true,
                 "priceDelta": 0,
-                "minsDelta": 0
+                "minutesDelta": 0
               },
               {
                 "label": "Bra",
                 "on": true,
                 "priceDelta": 25,
-                "minsDelta": 30
+                "minutesDelta": 30
               },
               {
                 "label": "Waist/Bum",
                 "on": true,
                 "priceDelta": 50,
-                "minsDelta": 60
+                "minutesDelta": 60
               }
             ]
           }
@@ -1461,22 +1461,22 @@
           {
             "name": "Beads",
             "price": 10,
-            "mins": 15
+            "minutes": 15
           },
           {
             "name": "Boho pieces",
             "price": 15,
-            "mins": 20
+            "minutes": 20
           },
           {
             "name": "Burnt ends",
             "price": 5,
-            "mins": 10
+            "minutes": 10
           },
           {
             "name": "Wash & blow-dry",
             "price": 20,
-            "mins": 30
+            "minutes": 30
           }
         ]
       },
@@ -1486,8 +1486,8 @@
         "serviceTypeId": "stitch-braids",
         "categoryId": null,
         "price": 95,
-        "mins": 150,
-        "desc": "4–8 rows · scalp-friendly tension",
+        "minutes": 150,
+        "description": "4–8 rows · scalp-friendly tension",
         "status": "active",
         "customisations": {
           "size": {
@@ -1497,31 +1497,31 @@
                 "label": "Small",
                 "on": true,
                 "priceDelta": 45,
-                "minsDelta": 60
+                "minutesDelta": 60
               },
               {
                 "label": "Smedium",
                 "on": true,
                 "priceDelta": 25,
-                "minsDelta": 30
+                "minutesDelta": 30
               },
               {
                 "label": "Medium",
                 "on": true,
                 "priceDelta": 0,
-                "minsDelta": 0
+                "minutesDelta": 0
               },
               {
                 "label": "Large",
                 "on": true,
                 "priceDelta": -10,
-                "minsDelta": -30
+                "minutesDelta": -30
               },
               {
                 "label": "Jumbo",
                 "on": true,
                 "priceDelta": -15,
-                "minsDelta": -45
+                "minutesDelta": -45
               }
             ]
           },
@@ -1532,25 +1532,25 @@
                 "label": "Bob",
                 "on": true,
                 "priceDelta": -20,
-                "minsDelta": -30
+                "minutesDelta": -30
               },
               {
                 "label": "Shoulder",
                 "on": true,
                 "priceDelta": 0,
-                "minsDelta": 0
+                "minutesDelta": 0
               },
               {
                 "label": "Bra",
                 "on": true,
                 "priceDelta": 25,
-                "minsDelta": 30
+                "minutesDelta": 30
               },
               {
                 "label": "Waist/Bum",
                 "on": true,
                 "priceDelta": 50,
-                "minsDelta": 60
+                "minutesDelta": 60
               }
             ]
           }
@@ -1562,12 +1562,12 @@
               {
                 "label": "Straight",
                 "priceDelta": 0,
-                "minsDelta": 0
+                "minutesDelta": 0
               },
               {
                 "label": "Zig-zag",
                 "priceDelta": 10,
-                "minsDelta": 20
+                "minutesDelta": 20
               }
             ]
           }
@@ -1576,22 +1576,22 @@
           {
             "name": "Beads",
             "price": 10,
-            "mins": 15
+            "minutes": 15
           },
           {
             "name": "Boho pieces",
             "price": 15,
-            "mins": 20
+            "minutes": 20
           },
           {
             "name": "Burnt ends",
             "price": 5,
-            "mins": 10
+            "minutes": 10
           },
           {
             "name": "Wash & blow-dry",
             "price": 20,
-            "mins": 30
+            "minutes": 30
           }
         ]
       },
@@ -1601,8 +1601,8 @@
         "serviceTypeId": "takedown",
         "categoryId": null,
         "price": 75,
-        "mins": 90,
-        "desc": "Careful removal, detangle and wash",
+        "minutes": 90,
+        "description": "Careful removal, detangle and wash",
         "status": "active",
         "customisations": {
           "size": {
@@ -1612,31 +1612,31 @@
                 "label": "Small",
                 "on": true,
                 "priceDelta": 45,
-                "minsDelta": 60
+                "minutesDelta": 60
               },
               {
                 "label": "Smedium",
                 "on": true,
                 "priceDelta": 25,
-                "minsDelta": 30
+                "minutesDelta": 30
               },
               {
                 "label": "Medium",
                 "on": true,
                 "priceDelta": 0,
-                "minsDelta": 0
+                "minutesDelta": 0
               },
               {
                 "label": "Large",
                 "on": true,
                 "priceDelta": -10,
-                "minsDelta": -30
+                "minutesDelta": -30
               },
               {
                 "label": "Jumbo",
                 "on": true,
                 "priceDelta": -15,
-                "minsDelta": -45
+                "minutesDelta": -45
               }
             ]
           },
@@ -1647,25 +1647,25 @@
                 "label": "Bob",
                 "on": true,
                 "priceDelta": -20,
-                "minsDelta": -30
+                "minutesDelta": -30
               },
               {
                 "label": "Shoulder",
                 "on": true,
                 "priceDelta": 0,
-                "minsDelta": 0
+                "minutesDelta": 0
               },
               {
                 "label": "Bra",
                 "on": true,
                 "priceDelta": 25,
-                "minsDelta": 30
+                "minutesDelta": 30
               },
               {
                 "label": "Waist/Bum",
                 "on": true,
                 "priceDelta": 50,
-                "minsDelta": 60
+                "minutesDelta": 60
               }
             ]
           }
@@ -1675,22 +1675,22 @@
           {
             "name": "Beads",
             "price": 10,
-            "mins": 15
+            "minutes": 15
           },
           {
             "name": "Boho pieces",
             "price": 15,
-            "mins": 20
+            "minutes": 20
           },
           {
             "name": "Burnt ends",
             "price": 5,
-            "mins": 10
+            "minutes": 10
           },
           {
             "name": "Wash & blow-dry",
             "price": 20,
-            "mins": 30
+            "minutes": 30
           }
         ]
       }
@@ -1723,20 +1723,20 @@
     "portfolio": ["img/w161942.jpg", "img/w162031.jpg", "img/w161154.jpg"],
     "policies": {
       "mode": "deposit",
-      "depositPct": 25,
+      "depositPercent": 25,
       "refundable": false,
-      "freeWindowHrs": 72,
+      "freeWindowHours": 72,
       "late": {
         "on": true,
         "kind": "keep",
-        "pct": 50
+        "percent": 50
       },
       "noShow": {
         "on": true,
         "kind": "keep",
-        "pct": 50
+        "percent": 50
       },
-      "graceMins": 0,
+      "graceMinutes": 0,
       "extras": []
     },
     "categories": [
@@ -1760,8 +1760,8 @@
         "serviceTypeId": "knotless-braids",
         "categoryId": "crowned-by-kemi-c1",
         "price": 150,
-        "mins": 240,
-        "desc": "Small to medium · back length · hair included",
+        "minutes": 240,
+        "description": "Small to medium · back length · hair included",
         "status": "active",
         "customisations": {
           "size": {
@@ -1771,31 +1771,31 @@
                 "label": "Small",
                 "on": true,
                 "priceDelta": 45,
-                "minsDelta": 60
+                "minutesDelta": 60
               },
               {
                 "label": "Smedium",
                 "on": true,
                 "priceDelta": 25,
-                "minsDelta": 30
+                "minutesDelta": 30
               },
               {
                 "label": "Medium",
                 "on": true,
                 "priceDelta": 0,
-                "minsDelta": 0
+                "minutesDelta": 0
               },
               {
                 "label": "Large",
                 "on": true,
                 "priceDelta": -10,
-                "minsDelta": -30
+                "minutesDelta": -30
               },
               {
                 "label": "Jumbo",
                 "on": true,
                 "priceDelta": -15,
-                "minsDelta": -45
+                "minutesDelta": -45
               }
             ]
           },
@@ -1806,25 +1806,25 @@
                 "label": "Bob",
                 "on": false,
                 "priceDelta": -20,
-                "minsDelta": -30
+                "minutesDelta": -30
               },
               {
                 "label": "Shoulder",
                 "on": true,
                 "priceDelta": 0,
-                "minsDelta": 0
+                "minutesDelta": 0
               },
               {
                 "label": "Bra",
                 "on": true,
                 "priceDelta": 25,
-                "minsDelta": 30
+                "minutesDelta": 30
               },
               {
                 "label": "Waist/Bum",
                 "on": true,
                 "priceDelta": 50,
-                "minsDelta": 60
+                "minutesDelta": 60
               }
             ]
           }
@@ -1834,22 +1834,22 @@
           {
             "name": "Beads",
             "price": 10,
-            "mins": 15
+            "minutes": 15
           },
           {
             "name": "Boho pieces",
             "price": 20,
-            "mins": 20
+            "minutes": 20
           },
           {
             "name": "Burnt ends",
             "price": 5,
-            "mins": 10
+            "minutes": 10
           },
           {
             "name": "Wash & blow-dry",
             "price": 25,
-            "mins": 30
+            "minutes": 30
           }
         ]
       },
@@ -1859,8 +1859,8 @@
         "serviceTypeId": "faux-locs",
         "categoryId": "crowned-by-kemi-c1",
         "price": 160,
-        "mins": 270,
-        "desc": "Soft or crochet · butterfly finish",
+        "minutes": 270,
+        "description": "Soft or crochet · butterfly finish",
         "status": "active",
         "customisations": {
           "size": {
@@ -1870,31 +1870,31 @@
                 "label": "Small",
                 "on": true,
                 "priceDelta": 45,
-                "minsDelta": 60
+                "minutesDelta": 60
               },
               {
                 "label": "Smedium",
                 "on": true,
                 "priceDelta": 25,
-                "minsDelta": 30
+                "minutesDelta": 30
               },
               {
                 "label": "Medium",
                 "on": true,
                 "priceDelta": 0,
-                "minsDelta": 0
+                "minutesDelta": 0
               },
               {
                 "label": "Large",
                 "on": true,
                 "priceDelta": -10,
-                "minsDelta": -30
+                "minutesDelta": -30
               },
               {
                 "label": "Jumbo",
                 "on": true,
                 "priceDelta": -15,
-                "minsDelta": -45
+                "minutesDelta": -45
               }
             ]
           },
@@ -1905,25 +1905,25 @@
                 "label": "Bob",
                 "on": true,
                 "priceDelta": -20,
-                "minsDelta": -30
+                "minutesDelta": -30
               },
               {
                 "label": "Shoulder",
                 "on": true,
                 "priceDelta": 0,
-                "minsDelta": 0
+                "minutesDelta": 0
               },
               {
                 "label": "Bra",
                 "on": true,
                 "priceDelta": 25,
-                "minsDelta": 30
+                "minutesDelta": 30
               },
               {
                 "label": "Waist/Bum",
                 "on": true,
                 "priceDelta": 50,
-                "minsDelta": 60
+                "minutesDelta": 60
               }
             ]
           }
@@ -1933,22 +1933,22 @@
           {
             "name": "Beads",
             "price": 10,
-            "mins": 15
+            "minutes": 15
           },
           {
             "name": "Boho pieces",
             "price": 20,
-            "mins": 20
+            "minutes": 20
           },
           {
             "name": "Burnt ends",
             "price": 5,
-            "mins": 10
+            "minutes": 10
           },
           {
             "name": "Wash & blow-dry",
             "price": 25,
-            "mins": 30
+            "minutes": 30
           }
         ]
       },
@@ -1958,8 +1958,8 @@
         "serviceTypeId": "passion-twists",
         "categoryId": "crowned-by-kemi-c1",
         "price": 135,
-        "mins": 210,
-        "desc": "Waist length · lightweight",
+        "minutes": 210,
+        "description": "Waist length · lightweight",
         "status": "active",
         "customisations": {
           "size": {
@@ -1969,31 +1969,31 @@
                 "label": "Small",
                 "on": true,
                 "priceDelta": 45,
-                "minsDelta": 60
+                "minutesDelta": 60
               },
               {
                 "label": "Smedium",
                 "on": true,
                 "priceDelta": 25,
-                "minsDelta": 30
+                "minutesDelta": 30
               },
               {
                 "label": "Medium",
                 "on": true,
                 "priceDelta": 0,
-                "minsDelta": 0
+                "minutesDelta": 0
               },
               {
                 "label": "Large",
                 "on": true,
                 "priceDelta": -10,
-                "minsDelta": -30
+                "minutesDelta": -30
               },
               {
                 "label": "Jumbo",
                 "on": true,
                 "priceDelta": -15,
-                "minsDelta": -45
+                "minutesDelta": -45
               }
             ]
           },
@@ -2004,25 +2004,25 @@
                 "label": "Bob",
                 "on": true,
                 "priceDelta": -20,
-                "minsDelta": -30
+                "minutesDelta": -30
               },
               {
                 "label": "Shoulder",
                 "on": true,
                 "priceDelta": 0,
-                "minsDelta": 0
+                "minutesDelta": 0
               },
               {
                 "label": "Bra",
                 "on": true,
                 "priceDelta": 25,
-                "minsDelta": 30
+                "minutesDelta": 30
               },
               {
                 "label": "Waist/Bum",
                 "on": true,
                 "priceDelta": 50,
-                "minsDelta": 60
+                "minutesDelta": 60
               }
             ]
           }
@@ -2032,22 +2032,22 @@
           {
             "name": "Beads",
             "price": 10,
-            "mins": 15
+            "minutes": 15
           },
           {
             "name": "Boho pieces",
             "price": 20,
-            "mins": 20
+            "minutes": 20
           },
           {
             "name": "Burnt ends",
             "price": 5,
-            "mins": 10
+            "minutes": 10
           },
           {
             "name": "Wash & blow-dry",
             "price": 25,
-            "mins": 30
+            "minutes": 30
           }
         ]
       },
@@ -2057,8 +2057,8 @@
         "serviceTypeId": "miracle-knots",
         "categoryId": "crowned-by-kemi-c1",
         "price": 135,
-        "mins": 210,
-        "desc": "Tiny knotless twists · lightweight · hair included",
+        "minutes": 210,
+        "description": "Tiny knotless twists · lightweight · hair included",
         "status": "active",
         "customisations": {
           "size": {
@@ -2068,31 +2068,31 @@
                 "label": "Small",
                 "on": true,
                 "priceDelta": 45,
-                "minsDelta": 60
+                "minutesDelta": 60
               },
               {
                 "label": "Smedium",
                 "on": true,
                 "priceDelta": 25,
-                "minsDelta": 30
+                "minutesDelta": 30
               },
               {
                 "label": "Medium",
                 "on": true,
                 "priceDelta": 0,
-                "minsDelta": 0
+                "minutesDelta": 0
               },
               {
                 "label": "Large",
                 "on": true,
                 "priceDelta": -10,
-                "minsDelta": -30
+                "minutesDelta": -30
               },
               {
                 "label": "Jumbo",
                 "on": true,
                 "priceDelta": -15,
-                "minsDelta": -45
+                "minutesDelta": -45
               }
             ]
           },
@@ -2103,25 +2103,25 @@
                 "label": "Bob",
                 "on": true,
                 "priceDelta": -20,
-                "minsDelta": -30
+                "minutesDelta": -30
               },
               {
                 "label": "Shoulder",
                 "on": true,
                 "priceDelta": 0,
-                "minsDelta": 0
+                "minutesDelta": 0
               },
               {
                 "label": "Bra",
                 "on": true,
                 "priceDelta": 25,
-                "minsDelta": 30
+                "minutesDelta": 30
               },
               {
                 "label": "Waist/Bum",
                 "on": true,
                 "priceDelta": 50,
-                "minsDelta": 60
+                "minutesDelta": 60
               }
             ]
           }
@@ -2131,22 +2131,22 @@
           {
             "name": "Beads",
             "price": 10,
-            "mins": 15
+            "minutes": 15
           },
           {
             "name": "Boho pieces",
             "price": 20,
-            "mins": 20
+            "minutes": 20
           },
           {
             "name": "Burnt ends",
             "price": 5,
-            "mins": 10
+            "minutes": 10
           },
           {
             "name": "Wash & blow-dry",
             "price": 25,
-            "mins": 30
+            "minutes": 30
           }
         ]
       }
@@ -2179,20 +2179,20 @@
     "portfolio": ["img/w162031.jpg", "img/w160800.jpg", "img/w160524.jpg"],
     "policies": {
       "mode": "full",
-      "depositPct": 20,
+      "depositPercent": 20,
       "refundable": true,
-      "freeWindowHrs": 48,
+      "freeWindowHours": 48,
       "late": {
         "on": true,
         "kind": "pct",
-        "pct": 50
+        "percent": 50
       },
       "noShow": {
         "on": true,
         "kind": "pct",
-        "pct": 100
+        "percent": 100
       },
-      "graceMins": 0,
+      "graceMinutes": 0,
       "extras": []
     },
     "categories": [
@@ -2229,8 +2229,8 @@
         "serviceTypeId": "knotless-braids",
         "categoryId": "studio-zuri-c1",
         "price": 145,
-        "mins": 240,
-        "desc": "Small to medium · back length · hair included",
+        "minutes": 240,
+        "description": "Small to medium · back length · hair included",
         "status": "active",
         "customisations": {
           "size": {
@@ -2240,31 +2240,31 @@
                 "label": "Small",
                 "on": true,
                 "priceDelta": 45,
-                "minsDelta": 60
+                "minutesDelta": 60
               },
               {
                 "label": "Smedium",
                 "on": true,
                 "priceDelta": 25,
-                "minsDelta": 30
+                "minutesDelta": 30
               },
               {
                 "label": "Medium",
                 "on": true,
                 "priceDelta": 0,
-                "minsDelta": 0
+                "minutesDelta": 0
               },
               {
                 "label": "Large",
                 "on": true,
                 "priceDelta": -10,
-                "minsDelta": -30
+                "minutesDelta": -30
               },
               {
                 "label": "Jumbo",
                 "on": true,
                 "priceDelta": -15,
-                "minsDelta": -45
+                "minutesDelta": -45
               }
             ]
           },
@@ -2275,25 +2275,25 @@
                 "label": "Bob",
                 "on": true,
                 "priceDelta": -20,
-                "minsDelta": -30
+                "minutesDelta": -30
               },
               {
                 "label": "Shoulder",
                 "on": true,
                 "priceDelta": 0,
-                "minsDelta": 0
+                "minutesDelta": 0
               },
               {
                 "label": "Bra",
                 "on": true,
                 "priceDelta": 25,
-                "minsDelta": 30
+                "minutesDelta": 30
               },
               {
                 "label": "Waist/Bum",
                 "on": false,
                 "priceDelta": 50,
-                "minsDelta": 60
+                "minutesDelta": 60
               }
             ]
           }
@@ -2303,22 +2303,22 @@
           {
             "name": "Beads",
             "price": 10,
-            "mins": 15
+            "minutes": 15
           },
           {
             "name": "Boho pieces",
             "price": 20,
-            "mins": 20
+            "minutes": 20
           },
           {
             "name": "Burnt ends",
             "price": 5,
-            "mins": 10
+            "minutes": 10
           },
           {
             "name": "Wash & blow-dry",
             "price": 25,
-            "mins": 30
+            "minutes": 30
           }
         ]
       },
@@ -2328,8 +2328,8 @@
         "serviceTypeId": "frontal-install",
         "categoryId": "studio-zuri-c2",
         "price": 135,
-        "mins": 210,
-        "desc": "Bleach, pluck and melt · glue or glueless",
+        "minutes": 210,
+        "description": "Bleach, pluck and melt · glue or glueless",
         "status": "active",
         "customisations": null,
         "ownCustomisations": [],
@@ -2337,22 +2337,22 @@
           {
             "name": "Layers",
             "price": 15,
-            "mins": 20
+            "minutes": 20
           },
           {
             "name": "Curls",
             "price": 25,
-            "mins": 30
+            "minutes": 30
           },
           {
             "name": "Wash & blow dry",
             "price": 20,
-            "mins": 30
+            "minutes": 30
           },
           {
             "name": "Cornrow",
             "price": 20,
-            "mins": 20
+            "minutes": 20
           }
         ]
       },
@@ -2362,8 +2362,8 @@
         "serviceTypeId": "glueless-install",
         "categoryId": "studio-zuri-c2",
         "price": 110,
-        "mins": 150,
-        "desc": "Fitted band and elastic · beginner friendly",
+        "minutes": 150,
+        "description": "Fitted band and elastic · beginner friendly",
         "status": "active",
         "customisations": null,
         "ownCustomisations": [],
@@ -2371,22 +2371,22 @@
           {
             "name": "Layers",
             "price": 15,
-            "mins": 20
+            "minutes": 20
           },
           {
             "name": "Curls",
             "price": 25,
-            "mins": 30
+            "minutes": 30
           },
           {
             "name": "Wash & blow dry",
             "price": 20,
-            "mins": 30
+            "minutes": 30
           },
           {
             "name": "Cornrow",
             "price": 20,
-            "mins": 20
+            "minutes": 20
           }
         ]
       },
@@ -2396,8 +2396,8 @@
         "serviceTypeId": "wig-styling",
         "categoryId": "studio-zuri-c2",
         "price": 90,
-        "mins": 90,
-        "desc": "Cut, curl or straighten your unit",
+        "minutes": 90,
+        "description": "Cut, curl or straighten your unit",
         "status": "draft",
         "customisations": null,
         "ownCustomisations": [],
@@ -2405,22 +2405,22 @@
           {
             "name": "Layers",
             "price": 15,
-            "mins": 20
+            "minutes": 20
           },
           {
             "name": "Curls",
             "price": 25,
-            "mins": 30
+            "minutes": 30
           },
           {
             "name": "Wash & blow dry",
             "price": 20,
-            "mins": 30
+            "minutes": 30
           },
           {
             "name": "Cornrow",
             "price": 20,
-            "mins": 20
+            "minutes": 20
           }
         ]
       },
@@ -2430,8 +2430,8 @@
         "serviceTypeId": "closure-sew-in",
         "categoryId": "studio-zuri-c3",
         "price": 130,
-        "mins": 195,
-        "desc": "Braided base · closure melted",
+        "minutes": 195,
+        "description": "Braided base · closure melted",
         "status": "active",
         "customisations": null,
         "ownCustomisations": [],
@@ -2439,22 +2439,22 @@
           {
             "name": "Layers",
             "price": 15,
-            "mins": 20
+            "minutes": 20
           },
           {
             "name": "Curls",
             "price": 25,
-            "mins": 30
+            "minutes": 30
           },
           {
             "name": "Wash & blow dry",
             "price": 20,
-            "mins": 30
+            "minutes": 30
           },
           {
             "name": "Highlights",
             "price": 40,
-            "mins": 45
+            "minutes": 45
           }
         ]
       },
@@ -2464,8 +2464,8 @@
         "serviceTypeId": "versatile-sew-in",
         "categoryId": "studio-zuri-c3",
         "price": 140,
-        "mins": 210,
-        "desc": "Multi-directional parting",
+        "minutes": 210,
+        "description": "Multi-directional parting",
         "status": "active",
         "customisations": null,
         "ownCustomisations": [],
@@ -2473,22 +2473,22 @@
           {
             "name": "Layers",
             "price": 15,
-            "mins": 20
+            "minutes": 20
           },
           {
             "name": "Curls",
             "price": 25,
-            "mins": 30
+            "minutes": 30
           },
           {
             "name": "Wash & blow dry",
             "price": 20,
-            "mins": 30
+            "minutes": 30
           },
           {
             "name": "Highlights",
             "price": 40,
-            "mins": 45
+            "minutes": 45
           }
         ]
       }
@@ -2521,20 +2521,20 @@
     "portfolio": ["img/w161512.jpg", "img/IMG_1772.jpg", "img/IMG_1538.jpg"],
     "policies": {
       "mode": "card",
-      "depositPct": 20,
+      "depositPercent": 20,
       "refundable": true,
-      "freeWindowHrs": 24,
+      "freeWindowHours": 24,
       "late": {
         "on": true,
         "kind": "pct",
-        "pct": 25
+        "percent": 25
       },
       "noShow": {
         "on": true,
         "kind": "pct",
-        "pct": 50
+        "percent": 50
       },
-      "graceMins": 20,
+      "graceMinutes": 20,
       "extras": []
     },
     "categories": [
@@ -2565,8 +2565,8 @@
         "serviceTypeId": "loc-re-twist",
         "categoryId": "locd-and-lovely-c1",
         "price": 65,
-        "mins": 120,
-        "desc": "Re-twist, style and oil scalp",
+        "minutes": 120,
+        "description": "Re-twist, style and oil scalp",
         "status": "active",
         "customisations": {
           "size": {
@@ -2576,31 +2576,31 @@
                 "label": "Micro",
                 "on": true,
                 "priceDelta": 55,
-                "minsDelta": 90
+                "minutesDelta": 90
               },
               {
                 "label": "Small",
                 "on": true,
                 "priceDelta": 45,
-                "minsDelta": 60
+                "minutesDelta": 60
               },
               {
                 "label": "Medium",
                 "on": true,
                 "priceDelta": 0,
-                "minsDelta": 0
+                "minutesDelta": 0
               },
               {
                 "label": "Large",
                 "on": true,
                 "priceDelta": -10,
-                "minsDelta": -30
+                "minutesDelta": -30
               },
               {
                 "label": "Jumbo",
                 "on": true,
                 "priceDelta": -15,
-                "minsDelta": -45
+                "minutesDelta": -45
               }
             ]
           },
@@ -2611,31 +2611,31 @@
                 "label": "Short",
                 "on": true,
                 "priceDelta": -20,
-                "minsDelta": -30
+                "minutesDelta": -30
               },
               {
                 "label": "Shoulder",
                 "on": true,
                 "priceDelta": 0,
-                "minsDelta": 0
+                "minutesDelta": 0
               },
               {
                 "label": "Mid-back",
                 "on": true,
                 "priceDelta": 25,
-                "minsDelta": 30
+                "minutesDelta": 30
               },
               {
                 "label": "Waist",
                 "on": true,
                 "priceDelta": 50,
-                "minsDelta": 60
+                "minutesDelta": 60
               },
               {
                 "label": "Extra long",
                 "on": true,
                 "priceDelta": 70,
-                "minsDelta": 90
+                "minutesDelta": 90
               }
             ]
           }
@@ -2645,12 +2645,12 @@
           {
             "name": "Wash",
             "price": 15,
-            "mins": 20
+            "minutes": 20
           },
           {
             "name": "Styling",
             "price": 20,
-            "mins": 30
+            "minutes": 30
           }
         ]
       },
@@ -2660,8 +2660,8 @@
         "serviceTypeId": "loc-repair",
         "categoryId": "locd-and-lovely-c1",
         "price": 80,
-        "mins": 120,
-        "desc": "Rejoin, refill and reinforce",
+        "minutes": 120,
+        "description": "Rejoin, refill and reinforce",
         "status": "active",
         "customisations": {
           "size": {
@@ -2671,31 +2671,31 @@
                 "label": "Micro",
                 "on": true,
                 "priceDelta": 55,
-                "minsDelta": 90
+                "minutesDelta": 90
               },
               {
                 "label": "Small",
                 "on": true,
                 "priceDelta": 45,
-                "minsDelta": 60
+                "minutesDelta": 60
               },
               {
                 "label": "Medium",
                 "on": true,
                 "priceDelta": 0,
-                "minsDelta": 0
+                "minutesDelta": 0
               },
               {
                 "label": "Large",
                 "on": true,
                 "priceDelta": -10,
-                "minsDelta": -30
+                "minutesDelta": -30
               },
               {
                 "label": "Jumbo",
                 "on": true,
                 "priceDelta": -15,
-                "minsDelta": -45
+                "minutesDelta": -45
               }
             ]
           },
@@ -2706,31 +2706,31 @@
                 "label": "Short",
                 "on": true,
                 "priceDelta": -20,
-                "minsDelta": -30
+                "minutesDelta": -30
               },
               {
                 "label": "Shoulder",
                 "on": true,
                 "priceDelta": 0,
-                "minsDelta": 0
+                "minutesDelta": 0
               },
               {
                 "label": "Mid-back",
                 "on": true,
                 "priceDelta": 25,
-                "minsDelta": 30
+                "minutesDelta": 30
               },
               {
                 "label": "Waist",
                 "on": true,
                 "priceDelta": 50,
-                "minsDelta": 60
+                "minutesDelta": 60
               },
               {
                 "label": "Extra long",
                 "on": true,
                 "priceDelta": 70,
-                "minsDelta": 90
+                "minutesDelta": 90
               }
             ]
           }
@@ -2740,12 +2740,12 @@
           {
             "name": "Wash",
             "price": 15,
-            "mins": 20
+            "minutes": 20
           },
           {
             "name": "Styling",
             "price": 20,
-            "mins": 30
+            "minutes": 30
           }
         ]
       },
@@ -2755,8 +2755,8 @@
         "serviceTypeId": "starter-locs",
         "categoryId": "locd-and-lovely-c2",
         "price": 120,
-        "mins": 240,
-        "desc": "Consultation, parting grid and first twist",
+        "minutes": 240,
+        "description": "Consultation, parting grid and first twist",
         "status": "active",
         "customisations": {
           "size": {
@@ -2766,31 +2766,31 @@
                 "label": "Micro",
                 "on": true,
                 "priceDelta": 55,
-                "minsDelta": 90
+                "minutesDelta": 90
               },
               {
                 "label": "Small",
                 "on": true,
                 "priceDelta": 45,
-                "minsDelta": 60
+                "minutesDelta": 60
               },
               {
                 "label": "Medium",
                 "on": true,
                 "priceDelta": 0,
-                "minsDelta": 0
+                "minutesDelta": 0
               },
               {
                 "label": "Large",
                 "on": true,
                 "priceDelta": -10,
-                "minsDelta": -30
+                "minutesDelta": -30
               },
               {
                 "label": "Jumbo",
                 "on": false,
                 "priceDelta": -15,
-                "minsDelta": -45
+                "minutesDelta": -45
               }
             ]
           },
@@ -2801,31 +2801,31 @@
                 "label": "Short",
                 "on": true,
                 "priceDelta": -20,
-                "minsDelta": -30
+                "minutesDelta": -30
               },
               {
                 "label": "Shoulder",
                 "on": true,
                 "priceDelta": 0,
-                "minsDelta": 0
+                "minutesDelta": 0
               },
               {
                 "label": "Mid-back",
                 "on": true,
                 "priceDelta": 25,
-                "minsDelta": 30
+                "minutesDelta": 30
               },
               {
                 "label": "Waist",
                 "on": true,
                 "priceDelta": 50,
-                "minsDelta": 60
+                "minutesDelta": 60
               },
               {
                 "label": "Extra long",
                 "on": true,
                 "priceDelta": 70,
-                "minsDelta": 90
+                "minutesDelta": 90
               }
             ]
           }
@@ -2835,12 +2835,12 @@
           {
             "name": "Wash",
             "price": 15,
-            "mins": 20
+            "minutes": 20
           },
           {
             "name": "Styling",
             "price": 20,
-            "mins": 30
+            "minutes": 30
           }
         ]
       },
@@ -2850,8 +2850,8 @@
         "serviceTypeId": "loc-extensions",
         "categoryId": "locd-and-lovely-c2",
         "price": 150,
-        "mins": 270,
-        "desc": "Added length · human or synthetic",
+        "minutes": 270,
+        "description": "Added length · human or synthetic",
         "status": "active",
         "customisations": {
           "size": {
@@ -2861,31 +2861,31 @@
                 "label": "Micro",
                 "on": true,
                 "priceDelta": 55,
-                "minsDelta": 90
+                "minutesDelta": 90
               },
               {
                 "label": "Small",
                 "on": true,
                 "priceDelta": 45,
-                "minsDelta": 60
+                "minutesDelta": 60
               },
               {
                 "label": "Medium",
                 "on": true,
                 "priceDelta": 0,
-                "minsDelta": 0
+                "minutesDelta": 0
               },
               {
                 "label": "Large",
                 "on": true,
                 "priceDelta": -10,
-                "minsDelta": -30
+                "minutesDelta": -30
               },
               {
                 "label": "Jumbo",
                 "on": true,
                 "priceDelta": -15,
-                "minsDelta": -45
+                "minutesDelta": -45
               }
             ]
           },
@@ -2896,31 +2896,31 @@
                 "label": "Short",
                 "on": true,
                 "priceDelta": -20,
-                "minsDelta": -30
+                "minutesDelta": -30
               },
               {
                 "label": "Shoulder",
                 "on": true,
                 "priceDelta": 0,
-                "minsDelta": 0
+                "minutesDelta": 0
               },
               {
                 "label": "Mid-back",
                 "on": true,
                 "priceDelta": 25,
-                "minsDelta": 30
+                "minutesDelta": 30
               },
               {
                 "label": "Waist",
                 "on": true,
                 "priceDelta": 50,
-                "minsDelta": 60
+                "minutesDelta": 60
               },
               {
                 "label": "Extra long",
                 "on": true,
                 "priceDelta": 70,
-                "minsDelta": 90
+                "minutesDelta": 90
               }
             ]
           }
@@ -2930,12 +2930,12 @@
           {
             "name": "Wash",
             "price": 15,
-            "mins": 20
+            "minutes": 20
           },
           {
             "name": "Styling",
             "price": 20,
-            "mins": 30
+            "minutes": 30
           }
         ]
       }
@@ -2968,20 +2968,20 @@
     "portfolio": ["img/w160524.jpg", "img/w160800.jpg", "img/w160846.jpg"],
     "policies": {
       "mode": "none",
-      "depositPct": 20,
+      "depositPercent": 20,
       "refundable": true,
-      "freeWindowHrs": 24,
+      "freeWindowHours": 24,
       "late": {
         "on": false,
         "kind": "pct",
-        "pct": 50
+        "percent": 50
       },
       "noShow": {
         "on": false,
         "kind": "pct",
-        "pct": 50
+        "percent": 50
       },
-      "graceMins": 15,
+      "graceMinutes": 15,
       "extras": []
     },
     "categories": [
@@ -3012,8 +3012,8 @@
         "serviceTypeId": "silk-press",
         "categoryId": "silk-and-roots-c1",
         "price": 75,
-        "mins": 120,
-        "desc": "Wash, blow-dry and flat iron · trim on request",
+        "minutes": 120,
+        "description": "Wash, blow-dry and flat iron · trim on request",
         "status": "active",
         "customisations": null,
         "ownCustomisations": [],
@@ -3025,8 +3025,8 @@
         "serviceTypeId": "blow-dry",
         "categoryId": "silk-and-roots-c1",
         "price": 60,
-        "mins": 75,
-        "desc": "Wash and stretch",
+        "minutes": 75,
+        "description": "Wash and stretch",
         "status": "active",
         "customisations": null,
         "ownCustomisations": [],
@@ -3038,8 +3038,8 @@
         "serviceTypeId": "deep-conditioning",
         "categoryId": "silk-and-roots-c2",
         "price": 57,
-        "mins": 60,
-        "desc": "Steamed mask and rinse",
+        "minutes": 60,
+        "description": "Steamed mask and rinse",
         "status": "active",
         "customisations": null,
         "ownCustomisations": [],
@@ -3051,8 +3051,8 @@
         "serviceTypeId": "tape-in-install",
         "categoryId": null,
         "price": 85,
-        "mins": 120,
-        "desc": "Application only · hair not included",
+        "minutes": 120,
+        "description": "Application only · hair not included",
         "status": "active",
         "customisations": null,
         "ownCustomisations": [],
@@ -3060,22 +3060,22 @@
           {
             "name": "Layers",
             "price": 15,
-            "mins": 20
+            "minutes": 20
           },
           {
             "name": "Curls",
             "price": 20,
-            "mins": 30
+            "minutes": 30
           },
           {
             "name": "Wash & blow dry",
             "price": 20,
-            "mins": 30
+            "minutes": 30
           },
           {
             "name": "Highlights",
             "price": 35,
-            "mins": 45
+            "minutes": 45
           }
         ]
       }

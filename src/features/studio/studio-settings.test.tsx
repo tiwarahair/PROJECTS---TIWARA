@@ -4,12 +4,14 @@ import { renderWithStore } from "../../test/render-with-store";
 import { StudioPage } from "./studio-page";
 
 const getLabelled = (label: string) =>
-  document.querySelector('[data-screen-label="' + label + '"]') as HTMLElement;
+  document.querySelector(`[data-screen-label="${label}"]`) as HTMLElement;
+
 const runNextTimer = () => act(() => void vi.advanceTimersToNextTimer());
 
 const setViewport = (width: number) => {
   window.matchMedia = vi.fn().mockImplementation((query: string) => {
     const minWidth = /min-width:\s*(\d+)px/.exec(query);
+
     return {
       matches: minWidth ? width >= Number(minWidth[1]) : false,
       addEventListener: vi.fn(),
@@ -19,7 +21,7 @@ const setViewport = (width: number) => {
 };
 
 const renderStudio = (query = "") => {
-  renderWithStore(<StudioPage />, "/studio" + query);
+  renderWithStore(<StudioPage />, `/studio${query}`);
   runNextTimer();
 };
 
@@ -34,28 +36,35 @@ describe("Studio → Settings", () => {
         "Date",
       ],
     });
+
     vi.setSystemTime(new Date(2026, 8, 7, 9, 0));
     localStorage.clear();
     setViewport(390);
   });
+
   afterEach(() => vi.useRealTimers());
 
   it("the narrow More tab lists the settings groups and opens a page with a back bar", () => {
     renderStudio();
     fireEvent.click(screen.getByRole("button", { name: "More" }));
     const root = getLabelled("Settings");
+
     expect(within(root).getByText("Your studio")).toBeInTheDocument();
+
     expect(
       within(root).getByRole("button", {
         name: /^Booking link/,
       }),
     ).toHaveAttribute("aria-disabled", "true");
+
     fireEvent.click(
       within(root).getByRole("button", { name: /^Booking rules/ }),
     );
+
     expect(
       screen.getByRole("heading", { level: 1, name: "Booking rules" }),
     ).toBeInTheDocument();
+
     fireEvent.click(screen.getByRole("button", { name: "Settings" }));
     expect(screen.getByText("Your studio")).toBeInTheDocument();
   });
@@ -64,6 +73,7 @@ describe("Studio → Settings", () => {
     renderStudio();
     fireEvent.click(screen.getByRole("button", { name: "More" }));
     fireEvent.click(screen.getByRole("button", { name: /^Booking link/ }));
+
     expect(
       screen.getByText(/Your booking link and payouts are off/),
     ).toBeInTheDocument();
@@ -74,17 +84,22 @@ describe("Studio → Settings", () => {
     renderStudio();
     fireEvent.click(within(getLabelled("Sidebar")).getByTitle("Settings"));
     const nav = getLabelled("Settings nav");
+
     expect(
       within(nav).getByRole("button", { name: "Profile" }),
     ).toBeInTheDocument();
+
     expect(
       screen.getByRole("heading", { level: 1, name: "Your profile" }),
     ).toBeInTheDocument();
+
     expect(screen.getByDisplayValue("Tiwára's House")).toBeInTheDocument();
     fireEvent.click(within(nav).getByRole("button", { name: "Availability" }));
+
     expect(
       screen.getByRole("heading", { level: 1, name: "Availability" }),
     ).toBeInTheDocument();
+
     expect(screen.getByText("Lunch")).toBeInTheDocument();
   });
 
@@ -92,15 +107,19 @@ describe("Studio → Settings", () => {
     setViewport(1440);
     renderStudio();
     fireEvent.click(within(getLabelled("Sidebar")).getByTitle("Settings"));
+
     fireEvent.click(
       within(getLabelled("Settings nav")).getByRole("button", {
         name: "Availability",
       }),
     );
+
     fireEvent.click(
       screen.getByRole("switch", { name: "Pause online bookings" }),
     );
+
     expect(screen.getByText("Online bookings paused")).toBeInTheDocument();
+
     expect(
       screen.getByText("Not taking online bookings right now"),
     ).toBeInTheDocument();
@@ -110,20 +129,24 @@ describe("Studio → Settings", () => {
     setViewport(1440);
     renderStudio();
     fireEvent.click(within(getLabelled("Sidebar")).getByTitle("Settings"));
+
     fireEvent.click(
       within(getLabelled("Settings nav")).getByRole("button", {
         name: "Booking rules",
       }),
     );
+
     expect(screen.getByText("None")).toBeInTheDocument();
     fireEvent.click(screen.getByRole("button", { name: "More extra time" }));
     expect(screen.getByText("5 min")).toBeInTheDocument();
+
     // the hidden AccountSettings has its own save bar; the page footer comes last
     fireEvent.click(
       screen
         .getAllByRole("button", { name: "Save changes" })
         .at(-1) as HTMLElement,
     );
+
     expect(screen.getByText("Booking rules saved")).toBeInTheDocument();
   });
 
@@ -131,18 +154,22 @@ describe("Studio → Settings", () => {
     setViewport(1440);
     renderStudio();
     fireEvent.click(within(getLabelled("Sidebar")).getByTitle("Settings"));
+
     fireEvent.click(
       within(getLabelled("Settings nav")).getByRole("button", {
         name: "Availability",
       }),
     );
+
     // the hidden AccountSettings has its own save bar; the page footer comes last
     fireEvent.click(
       screen
         .getAllByRole("button", { name: "Save changes" })
         .at(-1) as HTMLElement,
     );
+
     runNextTimer();
+
     expect(
       screen.getByRole("region", { name: "Set up your studio" }),
     ).toHaveTextContent("2 of 4 done");

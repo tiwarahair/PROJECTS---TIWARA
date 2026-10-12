@@ -1,6 +1,6 @@
 import type { ChangeEvent, KeyboardEvent } from "react";
 import { joinClassNames } from "../../utils/class-names";
-import styles from "./ob-fields.module.css";
+import styles from "./onboarding-fields.module.css";
 
 /** Sun (shown in dark mode) / moon (light mode) for the theme toggle. */
 export const ModeIcon = ({ isDark }: { isDark: boolean }) =>
@@ -67,6 +67,12 @@ interface SubmitButtonProps {
   variant: "tight" | "loose" | "code";
 }
 
+const SUBMIT_VARIANT_CLASSES = {
+  tight: styles.submitTight,
+  code: styles.submitCode,
+  loose: styles.submitLoose,
+};
+
 export const SubmitButton = ({
   label,
   onClick,
@@ -78,11 +84,7 @@ export const SubmitButton = ({
     onClick={onClick}
     disabled={!canSubmit}
     className={joinClassNames(
-      variant === "tight"
-        ? styles.submitTight
-        : variant === "code"
-          ? styles.submitCode
-          : styles.submitLoose,
+      SUBMIT_VARIANT_CLASSES[variant],
       canSubmit || busy ? styles.submitOn : styles.submitOff,
       canSubmit ? styles.submitReady : styles.submitInert,
     )}
@@ -181,7 +183,7 @@ export const NameFields = ({
   <div className={styles.nameRow}>
     <div className={styles.nameCell}>
       <TextField
-        id={idPrefix + "first"}
+        id={`${idPrefix}first`}
         label="First name"
         autoComplete="given-name"
         {...first}
@@ -189,7 +191,7 @@ export const NameFields = ({
     </div>
     <div className={styles.nameCell}>
       <TextField
-        id={idPrefix + "last"}
+        id={`${idPrefix}last`}
         label="Last name"
         autoComplete="family-name"
         {...last}

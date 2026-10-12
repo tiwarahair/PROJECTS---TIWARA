@@ -9,36 +9,40 @@ interface TurnstileFallbackProps {
 const LABELS = {
   idle: "Verify you are human",
   checking: "Verifying…",
-  ok: "Success!",
+  passed: "Success!",
   fail: "Verification failed",
 };
 
 /** Simulated Cloudflare Turnstile challenge (?turnstile=challenge|fail): blocks Pay until it passes. */
 export const TurnstileFallback = ({ booking }: TurnstileFallbackProps) => {
   const { state, actions } = booking;
-  const { ts } = state;
+  const { turnstileStatus } = state;
+
   const verify = () => {
-    if (ts !== "idle") return;
-    actions.setState({ ts: "checking" });
+    if (turnstileStatus !== "idle") return;
+
+    actions.setState({ turnstileStatus: "checking" });
+
     // the demo check takes 1.1s, then passes (or fails with ?turnstile=fail)
     window.setTimeout(
       () =>
         actions.setState((current) => ({
-          ts: current.tsMode === "fail" ? "fail" : "ok",
+          turnstileStatus: current.turnstileMode === "fail" ? "fail" : "passed",
         })),
       1100,
     );
   };
+
   return (
     <div data-screen-label="Turnstile fallback" className={styles.wrap}>
       <div className={styles.widget}>
         <label
           className={joinClassNames(
             styles.label,
-            ts === "idle" ? styles.labelIdle : styles.labelBusy,
+            turnstileStatus === "idle" ? styles.labelIdle : styles.labelBusy,
           )}
         >
-          {ts === "idle" && (
+          {turnstileStatus === "idle" && (
             <input
               type="checkbox"
               checked={false}
@@ -47,10 +51,10 @@ export const TurnstileFallback = ({ booking }: TurnstileFallbackProps) => {
               className={styles.checkbox}
             />
           )}
-          {ts === "checking" && (
+          {turnstileStatus === "checking" && (
             <span aria-hidden="true" className={styles.spinner}></span>
           )}
-          {ts === "ok" && (
+          {turnstileStatus === "passed" && (
             <span aria-hidden="true" className={styles.ok}>
               <svg
                 width="14"
@@ -67,7 +71,7 @@ export const TurnstileFallback = ({ booking }: TurnstileFallbackProps) => {
               </svg>
             </span>
           )}
-          {ts === "fail" && (
+          {turnstileStatus === "fail" && (
             <span aria-hidden="true" className={styles.failed}>
               <svg
                 width="14"
@@ -84,7 +88,7 @@ export const TurnstileFallback = ({ booking }: TurnstileFallbackProps) => {
             </span>
           )}
           <span role="status" aria-live="polite" className={styles.status}>
-            {LABELS[ts]}
+            {LABELS[turnstileStatus]}
           </span>
         </label>
         <span className={styles.brand}>
@@ -92,7 +96,7 @@ export const TurnstileFallback = ({ booking }: TurnstileFallbackProps) => {
           <span className={styles.legal}>Privacy · Terms</span>
         </span>
       </div>
-      {ts === "fail" && (
+      {turnstileStatus === "fail" && (
         <div role="alert" className={styles.failNote}>
           {
             "We couldn't check you're not a robot. Refresh the page and try again."

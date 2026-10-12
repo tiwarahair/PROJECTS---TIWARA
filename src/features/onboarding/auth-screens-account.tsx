@@ -1,7 +1,7 @@
 import { PasswordMeter } from "../../components/password-meter/password-meter";
 import { joinClassNames } from "../../utils/class-names";
 import { getPasswordView } from "../../utils/password";
-import { ObTurnstile } from "./ob-turnstile";
+import { OnboardingTurnstile } from "./onboarding-turnstile";
 import {
   ClientConsent,
   MobileField,
@@ -9,7 +9,7 @@ import {
   PasswordInput,
   Spinner,
   SubmitButton,
-} from "./ob-fields";
+} from "./onboarding-fields";
 import { getPasswordCheck } from "./onboarding-state";
 import type { OnboardingController } from "./use-onboarding";
 import type { ScreenProps } from "./screen-props";
@@ -24,21 +24,23 @@ export const getOnboardingMeter = (
   const view = getPasswordView(getPasswordCheck(onboarding.state), {
     dark: isDark,
     show: !!shownError,
-    errColor: "var(--ob-err)",
+    errorColour: "var(--ob-err)",
   });
+
   const meter =
-    shownError && !view.hasErr
+    shownError && !view.hasError
       ? {
           ...view,
-          msg: shownError,
-          msgC: "var(--ob-err)",
-          msgW: 600,
-          msgOn: true,
+          message: shownError,
+          messageColour: "var(--ob-err)",
+          messageWeight: 600,
+          showMessage: true,
         }
       : view;
+
   return {
     meter,
-    role: (meter.msgC === "var(--ob-err)" ? "alert" : "note") as
+    role: (meter.messageColour === "var(--ob-err)" ? "alert" : "note") as
       "alert" | "note",
   };
 };
@@ -46,21 +48,22 @@ export const getOnboardingMeter = (
 /** The name, mobile and consent fields shared by Create account and the social finish. */
 const getCommonFields = ({ onboarding, view }: ScreenProps) => {
   const { state, actions } = onboarding;
-  const { f } = state;
+  const { form } = state;
   const { shown } = view;
+
   return {
     names: (idPrefix: string) => (
       <NameFields
         idPrefix={idPrefix}
         first={{
-          value: f.first,
+          value: form.first,
           onChange: (event) => actions.setField("first", event.target.value),
           onBlur: () => actions.touch("first"),
           error: shown.first ?? "",
           invalid: !!shown.first,
         }}
         last={{
-          value: f.last,
+          value: form.last,
           onChange: (event) => actions.setField("last", event.target.value),
           onBlur: () => actions.touch("last"),
           error: shown.last ?? "",
@@ -71,23 +74,23 @@ const getCommonFields = ({ onboarding, view }: ScreenProps) => {
     mobile: (id: string) => (
       <MobileField
         id={id}
-        value={f.mob}
-        onChange={(event) => actions.setField("mob", event.target.value)}
-        onBlur={() => actions.touch("mob")}
-        error={shown.mob ?? ""}
-        invalid={!!shown.mob}
+        value={form.mobile}
+        onChange={(event) => actions.setField("mobile", event.target.value)}
+        onBlur={() => actions.touch("mobile")}
+        error={shown.mobile ?? ""}
+        invalid={!!shown.mobile}
       />
     ),
     consent: (
       <ClientConsent
-        terms={f.terms}
-        marketing={f.mkt}
+        terms={form.terms}
+        marketing={form.marketing}
         termsError={shown.terms ?? ""}
         onTerms={(event) =>
           actions.setField("terms", event.target.checked, true)
         }
         onMarketing={(event) =>
-          actions.setField("mkt", event.target.checked, true)
+          actions.setField("marketing", event.target.checked, true)
         }
         onOpenClient={() => actions.setState({ termsOn: "client" })}
         onOpenPrivacy={() => actions.setState({ termsOn: "privacy" })}
@@ -99,21 +102,23 @@ const getCommonFields = ({ onboarding, view }: ScreenProps) => {
 export const CreateScreen = (props: ScreenProps) => {
   const { onboarding, layout, view } = props;
   const { state, actions } = onboarding;
-  const { f } = state;
+  const { form } = state;
   const { names, mobile, consent } = getCommonFields(props);
+
   const { meter, role } = getOnboardingMeter(
     onboarding,
     layout.isDark,
-    view.shown.pw ?? "",
+    view.shown.password ?? "",
   );
+
   return (
     <>
       <h1 className={styles.title}>Create account</h1>
       <p className={styles.createSub}>
-        {f.email}{" "}
+        {form.email}{" "}
         <button
           onClick={() =>
-            actions.go(layout.isPro ? "pro-email" : "cust-email", "back")
+            actions.goTo(layout.isPro ? "pro-email" : "cust-email", "back")
           }
           className={styles.changeInline}
         >
@@ -126,19 +131,21 @@ export const CreateScreen = (props: ScreenProps) => {
       </label>
       <PasswordInput
         id="ob-npw"
-        value={f.pw}
-        shown={state.pwShow}
-        onToggle={() => actions.setState({ pwShow: !state.pwShow })}
-        onChange={(event) => actions.setField("pw", event.target.value)}
-        onBlur={() => actions.touch("pw")}
+        value={form.password}
+        shown={state.passwordShown}
+        onToggle={() =>
+          actions.setState({ passwordShown: !state.passwordShown })
+        }
+        onChange={(event) => actions.setField("password", event.target.value)}
+        onBlur={() => actions.touch("password")}
         autoComplete="new-password"
-        invalid={!!view.shown.pw}
+        invalid={!!view.shown.password}
         describedBy="ob-npw-hint"
       />
       <PasswordMeter id="ob-npw-hint" view={meter} messageRole={role} />
       {mobile("ob-mob")}
       {consent}
-      {!!state.err.exists && (
+      {!!state.serverErrors.exists && (
         <div role="alert" className={styles.exists}>
           <span className={styles.existsText}>
             You already have an account with this email
@@ -146,7 +153,7 @@ export const CreateScreen = (props: ScreenProps) => {
           <button
             onClick={() => {
               actions.setState({ audience: "customer" });
-              actions.go("cust-password");
+              actions.goTo("cust-password");
             }}
             className={styles.loginInstead}
           >
@@ -155,8 +162,8 @@ export const CreateScreen = (props: ScreenProps) => {
         </div>
       )}
       {view.turnstileShown && (
-        <ObTurnstile
-          ts={state.ts}
+        <OnboardingTurnstile
+          status={state.turnstile}
           isDark={layout.isDark}
           onCheck={actions.checkTurnstile}
         />
@@ -176,20 +183,21 @@ export const CreateScreen = (props: ScreenProps) => {
 export const SocialScreen = (props: ScreenProps) => {
   const { onboarding, view } = props;
   const { state, actions } = onboarding;
-  const { f } = state;
+  const { form } = state;
   const { names, mobile, consent } = getCommonFields(props);
+
   return (
     <>
       <h1 className={styles.title}>Finish creating your account</h1>
       <p className={styles.lead}>
-        {state.socialP === "apple"
+        {state.socialProvider === "apple"
           ? "Signed in with Apple. Check your name, then add your mobile."
           : "Signed in with Google. Check your name, then add your mobile."}
       </p>
       {names("ob-s")}
       <div className={styles.readonlyLabel}>Email address</div>
       <div aria-readonly="true" className={styles.readonlyEmail}>
-        <span className={styles.readonlyText}>{f.email}</span>
+        <span className={styles.readonlyText}>{form.email}</span>
         <svg
           width="16"
           height="16"
@@ -205,7 +213,7 @@ export const SocialScreen = (props: ScreenProps) => {
           <path d="M6 11h12v10H6zM8.5 11V8a3.5 3.5 0 0 1 7 0v3"></path>
         </svg>
       </div>
-      {/privaterelay\.appleid\.com$/i.test(f.email) && (
+      {/privaterelay\.appleid\.com$/i.test(form.email) && (
         <div className={styles.relayNote}>
           Apple’s private relay address. Emails we send reach your Apple ID
           inbox.
@@ -225,13 +233,20 @@ export const SocialScreen = (props: ScreenProps) => {
   );
 };
 
+const getCodeBoxClass = (hasError: boolean, digit: string) => {
+  if (hasError) return styles.codeBoxError;
+
+  return digit ? styles.codeBoxFilled : styles.codeBoxEmpty;
+};
+
 /** Verify email (after sign-up) and pro 2FA: six digit boxes, resend countdown and help links. */
 export const CodeScreen = ({ onboarding, view }: ScreenProps) => {
   const { state, actions, codeRefs } = onboarding;
-  const { f, code, codeErr } = state;
+  const { form, code, codeError } = state;
   const is2fa = state.screen === "pro-2fa";
   const resendOff = state.resendIn > 0;
   const isBackup = state.twoFaMethod === "backup";
+
   const links = is2fa
     ? [
         {
@@ -239,37 +254,42 @@ export const CodeScreen = ({ onboarding, view }: ScreenProps) => {
           label: isBackup
             ? "Use your authenticator app"
             : "Use your backup authenticator",
-          go: () =>
+          onSelect: () =>
             actions.setState({
               twoFaMethod: isBackup ? "app" : "backup",
               code: ["", "", "", "", "", ""],
-              codeErr: "",
+              codeError: "",
             }),
         },
-        { key: "c", label: "Lost your phone? Contact support", go: () => {} },
+        {
+          key: "c",
+          label: "Lost your phone? Contact support",
+          onSelect: () => {},
+        },
       ]
     : [
         {
           key: "c",
           label: "Change email",
-          go: () =>
-            actions.go(
+          onSelect: () =>
+            actions.goTo(
               state.audience === "customer" ? "cust-create" : "w4",
               "back",
             ),
         },
       ];
+
+  const twoFactorSub = isBackup
+    ? "Enter the code from your backup authenticator."
+    : "Enter the code from your authenticator app.";
+
   return (
     <>
       <h1 className={styles.title}>
         {is2fa ? "Enter your 6-digit code" : "Check your email"}
       </h1>
       <p className={styles.codeSub}>
-        {is2fa
-          ? isBackup
-            ? "Enter the code from your backup authenticator."
-            : "Enter the code from your authenticator app."
-          : "We sent a 6-digit code to " + f.email}
+        {is2fa ? twoFactorSub : `We sent a 6-digit code to ${form.email}`}
       </p>
       <div
         onPaste={actions.pasteCode}
@@ -282,7 +302,7 @@ export const CodeScreen = ({ onboarding, view }: ScreenProps) => {
       >
         {code.map((digit, index) => (
           <input
-            key={"c" + index}
+            key={`c${index}`}
             ref={codeRefs[index]}
             value={digit}
             onChange={(event) =>
@@ -293,26 +313,22 @@ export const CodeScreen = ({ onboarding, view }: ScreenProps) => {
             inputMode="numeric"
             autoComplete="one-time-code"
             maxLength={1}
-            aria-label={"Digit " + (index + 1)}
+            aria-label={`Digit ${index + 1}`}
             className={joinClassNames(
               styles.codeBox,
-              codeErr
-                ? styles.codeBoxError
-                : digit
-                  ? styles.codeBoxFilled
-                  : styles.codeBoxEmpty,
+              getCodeBoxClass(!!codeError, digit),
             )}
           />
         ))}
       </div>
       <div role="alert" aria-live="assertive" className={styles.codeError}>
-        {codeErr}
+        {codeError}
       </div>
       {is2fa && (
         <label className={styles.remember}>
           <input
             type="checkbox"
-            checked={f.remember}
+            checked={form.remember}
             onChange={(event) =>
               actions.setField("remember", event.target.checked, true)
             }
@@ -335,7 +351,7 @@ export const CodeScreen = ({ onboarding, view }: ScreenProps) => {
               if (!resendOff)
                 actions.setState({
                   resendIn: 30,
-                  codeErr: "",
+                  codeError: "",
                   code: ["", "", "", "", "", ""],
                 });
             }}
@@ -345,13 +361,11 @@ export const CodeScreen = ({ onboarding, view }: ScreenProps) => {
               resendOff ? styles.resendWaiting : styles.resendReady,
             )}
           >
-            {resendOff
-              ? "Resend code in " + state.resendIn + "s"
-              : "Resend code"}
+            {resendOff ? `Resend code in ${state.resendIn}s` : "Resend code"}
           </button>
         )}
-        {links.map(({ key, label, go }) => (
-          <button key={key} onClick={go} className={styles.codeLink}>
+        {links.map(({ key, label, onSelect }) => (
+          <button key={key} onClick={onSelect} className={styles.codeLink}>
             {label}
           </button>
         ))}

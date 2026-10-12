@@ -47,11 +47,13 @@ export const StudioPage = (props: StudioPageProps) => {
   const studio = useStudio(props);
   const { state, isWide } = studio;
   const { isSetupOn, isComplete } = getSetupProgress(studio);
+
   const bookingsView =
     state.tab === "bookings" ? getBookingsView(studio) : null;
 
   useLayoutEffect(() => {
     document.documentElement.classList.add("studio-page");
+
     return () => document.documentElement.classList.remove("studio-page");
   }, []);
 
@@ -86,7 +88,7 @@ export const StudioPage = (props: StudioPageProps) => {
               {bookingsView && (
                 <>
                   <StudioBookings studio={studio} view={bookingsView} />
-                  {state.filtOpen && (
+                  {state.filterOpen && (
                     <FilterSheet studio={studio} view={bookingsView} />
                   )}
                 </>
@@ -94,18 +96,18 @@ export const StudioPage = (props: StudioPageProps) => {
             </div>
             {isWide &&
               isSetupOn &&
-              ((!isComplete && !state.setupMin) || !!state.setupExit) && (
+              ((!isComplete && !state.setupMinimised) || !!state.setupExit) && (
                 <SetupCard studio={studio} />
               )}
             {isWide &&
               isSetupOn &&
               !isComplete &&
-              state.setupMin &&
+              state.setupMinimised &&
               !state.setupExit && <SetupPill studio={studio} />}
             {isWide && state.linkCard && <LinkCard studio={studio} />}
             {!isWide &&
               !state.sheet &&
-              !state.wiz &&
+              !state.wizard &&
               (state.tab === "home" ||
                 state.tab === "bookings" ||
                 state.tab === "services") && <Fab studio={studio} />}

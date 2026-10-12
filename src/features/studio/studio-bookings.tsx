@@ -9,20 +9,25 @@ import { isGated } from "./studio-shell";
 import type { StudioController } from "./use-studio";
 import styles from "./studio-bookings.module.css";
 
-const CAL_DOWS = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
+const CALENDAR_WEEKDAYS = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
+
 const VIEW_SEGMENTS = [
-  { id: "cal", label: "Calendar", d: "M3 5h18v16H3zM16 3v4M8 3v4M3 11h18" },
+  {
+    id: "cal",
+    label: "Calendar",
+    iconPath: "M3 5h18v16H3zM16 3v4M8 3v4M3 11h18",
+  },
   {
     id: "list",
     label: "List",
-    d: "M8 6h13M8 12h13M8 18h13M3 6h.01M3 12h.01M3 18h.01",
+    iconPath: "M8 6h13M8 12h13M8 18h13M3 6h.01M3 12h.01M3 18h.01",
   },
 ];
 
 const asStyle = (values: Record<string, string | null | undefined>) =>
   values as CSSProperties;
 
-const Arrow = ({ d }: { d: string }) => (
+const Arrow = ({ iconPath }: { iconPath: string }) => (
   <svg
     width="15"
     height="15"
@@ -33,7 +38,7 @@ const Arrow = ({ d }: { d: string }) => (
     strokeLinecap="round"
     strokeLinejoin="round"
   >
-    <path d={d}></path>
+    <path d={iconPath}></path>
   </svg>
 );
 
@@ -45,54 +50,67 @@ const DatePicker = ({
   view: BookingsView;
 }) => {
   const { state, setState } = studio;
+
   const toggle = () => {
-    const date = dateAt(state.dayIdx);
+    const date = dateAt(state.dayIndex);
+
     setState({
-      dpOpen: !state.dpOpen,
-      bkCalM: state.dpOpen ? state.bkCalM : date.getMonth(),
-      bkCalY: state.dpOpen ? state.bkCalY : date.getFullYear(),
+      datePickerOpen: !state.datePickerOpen,
+      bookingCalendarMonth: state.datePickerOpen
+        ? state.bookingCalendarMonth
+        : date.getMonth(),
+      bookingCalendarYear: state.datePickerOpen
+        ? state.bookingCalendarYear
+        : date.getFullYear(),
     });
   };
+
   const now = new Date();
+
   const goPrev = () => {
-    const month = state.bkCalM ?? 0;
-    const year = state.bkCalY ?? 0;
+    const month = state.bookingCalendarMonth ?? 0;
+    const year = state.bookingCalendarYear ?? 0;
+
     if (
       year < now.getFullYear() ||
       (year === now.getFullYear() && month <= now.getMonth())
     )
       return;
+
     setState(
       month === 0
-        ? { bkCalM: 11, bkCalY: year - 1 }
-        : { bkCalM: month - 1, bkCalY: year },
+        ? { bookingCalendarMonth: 11, bookingCalendarYear: year - 1 }
+        : { bookingCalendarMonth: month - 1, bookingCalendarYear: year },
     );
   };
+
   const goNext = () => {
-    const month = state.bkCalM ?? 0;
-    const year = state.bkCalY ?? 0;
+    const month = state.bookingCalendarMonth ?? 0;
+    const year = state.bookingCalendarYear ?? 0;
+
     setState(
       month === 11
-        ? { bkCalM: 0, bkCalY: year + 1 }
-        : { bkCalM: month + 1, bkCalY: year },
+        ? { bookingCalendarMonth: 0, bookingCalendarYear: year + 1 }
+        : { bookingCalendarMonth: month + 1, bookingCalendarYear: year },
     );
   };
+
   return (
     <div className={styles.dateNav}>
       <button
         className={styles.weekArrow}
-        onClick={() => studio.actions.setDay({ dayIdx: state.dayIdx - 7 })}
+        onClick={() => studio.actions.setDay({ dayIndex: state.dayIndex - 7 })}
         disabled={false}
         aria-label="Previous week"
       >
-        <Arrow d="m15 18-6-6 6-6" />
+        <Arrow iconPath="m15 18-6-6 6-6" />
       </button>
       <button className={styles.dateButton} onClick={toggle}>
-        <span className={styles.dateLabel}>{view.calDateLabel}</span>
+        <span className={styles.dateLabel}>{view.calendarDateLabel}</span>
         <svg
           className={joinClassNames(
             styles.chevron,
-            state.dpOpen && styles.chevronOpen,
+            state.datePickerOpen && styles.chevronOpen,
           )}
           width="13"
           height="13"
@@ -108,12 +126,12 @@ const DatePicker = ({
       </button>
       <button
         className={joinClassNames(styles.weekArrow, styles.weekArrowNext)}
-        onClick={() => studio.actions.setDay({ dayIdx: state.dayIdx + 7 })}
+        onClick={() => studio.actions.setDay({ dayIndex: state.dayIndex + 7 })}
         aria-label="Next week"
       >
-        <Arrow d="m9 18 6-6-6-6" />
+        <Arrow iconPath="m9 18 6-6-6-6" />
       </button>
-      {state.dpOpen && (
+      {state.datePickerOpen && (
         <>
           {/* eslint-disable-next-line jsx-a11y/click-events-have-key-events, jsx-a11y/no-static-element-interactions */}
           <div className={styles.pickerScrim} onClick={toggle}></div>
@@ -128,7 +146,7 @@ const DatePicker = ({
                 disabled={view.isPrevOff}
                 aria-label="Previous month"
               >
-                <Arrow d="m15 18-6-6 6-6" />
+                <Arrow iconPath="m15 18-6-6 6-6" />
               </button>
               <div className={styles.h3}>{view.pickerTitle}</div>
               <button
@@ -136,32 +154,41 @@ const DatePicker = ({
                 onClick={goNext}
                 aria-label="Next month"
               >
-                <Arrow d="m9 18 6-6-6-6" />
+                <Arrow iconPath="m9 18 6-6-6-6" />
               </button>
             </div>
             <div className={styles.dows}>
-              {CAL_DOWS.map((dow) => (
-                <div key={dow} className={styles.dow}>
-                  {dow}
+              {CALENDAR_WEEKDAYS.map((weekday) => (
+                <div key={weekday} className={styles.dow}>
+                  {weekday}
                 </div>
               ))}
             </div>
             <div className={styles.days}>
               {view.pickerDays.map(
-                ({ key, n, off, bg, color, weight, dot, pick }) => (
+                ({
+                  key,
+                  dayNumber,
+                  disabled,
+                  background,
+                  color,
+                  weight,
+                  dot,
+                  pick,
+                }) => (
                   <button
                     key={key}
                     className={styles.calDay}
                     // runtime: the day's selected / past state and booking dot
                     style={asStyle({
-                      "--day-bg": bg,
+                      "--day-bg": background,
                       "--day-color": color,
                       "--day-weight": weight,
                     })}
                     onClick={pick}
-                    disabled={off}
+                    disabled={disabled}
                   >
-                    {n}
+                    {dayNumber}
                     <span
                       className={styles.dot}
                       style={asStyle({ "--dot": dot })}
@@ -185,19 +212,21 @@ const BookingsHeader = ({
   view: BookingsView;
 }) => {
   const { state, setState, isWide, actions } = studio;
+
   const isOn = (id: string) =>
-    state.bview === id || (id === "cal" && !view.isList);
+    state.bookingsLayout === id || (id === "cal" && !view.isList);
+
   return (
     <div
       className={joinClassNames(
         styles.header,
-        !view.isList && state.calMode === "week" && styles.headerFlat,
+        !view.isList && state.calendarMode === "week" && styles.headerFlat,
       )}
     >
       <div className={styles.controls}>
         <div className={styles.controlRow}>
           <div className={styles.segments}>
-            {VIEW_SEGMENTS.map(({ id, label, d }) => (
+            {VIEW_SEGMENTS.map(({ id, label, iconPath }) => (
               <button
                 key={id}
                 className={joinClassNames(
@@ -205,7 +234,12 @@ const BookingsHeader = ({
                   styles.viewSegment,
                   isOn(id) && styles.segmentOn,
                 )}
-                onClick={() => actions.setCal({ bview: id, dpOpen: false })}
+                onClick={() =>
+                  actions.setCalendar({
+                    bookingsLayout: id,
+                    datePickerOpen: false,
+                  })
+                }
                 title={label}
                 aria-label={label}
               >
@@ -220,13 +254,13 @@ const BookingsHeader = ({
                   strokeLinecap="round"
                   strokeLinejoin="round"
                 >
-                  <path d={d}></path>
+                  <path d={iconPath}></path>
                 </svg>
                 {isWide && <span>{label}</span>}
               </button>
             ))}
           </div>
-          {view.isCal && (
+          {view.isCalendar && (
             <>
               <div className={styles.segments}>
                 {[
@@ -238,9 +272,9 @@ const BookingsHeader = ({
                     className={joinClassNames(
                       styles.segment,
                       styles.modeSegment,
-                      (state.calMode || "day") === id && styles.segmentOn,
+                      (state.calendarMode || "day") === id && styles.segmentOn,
                     )}
-                    onClick={() => actions.setCal({ calMode: id })}
+                    onClick={() => actions.setCalendar({ calendarMode: id })}
                   >
                     {label}
                   </button>
@@ -249,10 +283,10 @@ const BookingsHeader = ({
               <button
                 className={joinClassNames(
                   styles.today,
-                  state.dayIdx === 0 && styles.todayOff,
+                  state.dayIndex === 0 && styles.todayOff,
                 )}
-                onClick={() => actions.setCal({ dayIdx: 0 })}
-                disabled={state.dayIdx === 0}
+                onClick={() => actions.setCalendar({ dayIndex: 0 })}
+                disabled={state.dayIndex === 0}
               >
                 Today
               </button>
@@ -280,7 +314,7 @@ const BookingsHeader = ({
           )}
         </div>
       </div>
-      {view.isCal && (
+      {view.isCalendar && (
         <>
           <DatePicker studio={studio} view={view} />
           <div
@@ -289,7 +323,16 @@ const BookingsHeader = ({
             onTouchEnd={view.swipeEnd}
           >
             {view.weekStrip.map(
-              ({ key, dow, num, isSelected, isToday, isPast, dot, pick }) => (
+              ({
+                key,
+                weekday,
+                dayNumber,
+                isSelected,
+                isToday,
+                isPast,
+                dot,
+                pick,
+              }) => (
                 <button
                   key={key}
                   className={styles.stripDay}
@@ -304,7 +347,7 @@ const BookingsHeader = ({
                         : isToday && styles.stripDowToday,
                     )}
                   >
-                    {dow}
+                    {weekday}
                   </span>
                   <span
                     className={joinClassNames(
@@ -315,7 +358,7 @@ const BookingsHeader = ({
                       isSelected && styles.stripNumOn,
                     )}
                   >
-                    {num}
+                    {dayNumber}
                   </span>
                   <span
                     className={styles.dot}
@@ -346,8 +389,10 @@ const BookingsHeader = ({
             </svg>
             <input
               className={styles.searchInput}
-              value={state.bkQ || ""}
-              onChange={(event) => setState({ bkQ: event.target.value })}
+              value={state.bookingsQuery || ""}
+              onChange={(event) =>
+                setState({ bookingsQuery: event.target.value })
+              }
               placeholder="Search client or service"
             />
           </div>
@@ -356,7 +401,7 @@ const BookingsHeader = ({
               styles.filterButton,
               !!view.filterCount && styles.filterButtonOn,
             )}
-            onClick={() => setState({ filtOpen: true, filtOut: false })}
+            onClick={() => setState({ filterOpen: true, filterOut: false })}
             aria-label="Filter bookings"
           >
             <svg
@@ -396,9 +441,9 @@ const WeekView = ({ view }: { view: BookingsView }) => (
       <div className={styles.weekHead}>
         <div></div>
         {view.weekCols.map(
-          ({ key, dow, num, isToday, isSelected, pickDay }) => (
+          ({ key, weekday, dayNumber, isToday, isSelected, pickDay }) => (
             <button key={key} className={styles.weekDay} onClick={pickDay}>
-              <span className={styles.weekDow}>{dow}</span>
+              <span className={styles.weekDow}>{weekday}</span>
               <span
                 className={joinClassNames(
                   styles.weekNum,
@@ -407,7 +452,7 @@ const WeekView = ({ view }: { view: BookingsView }) => (
                     : isSelected && styles.weekNumOn,
                 )}
               >
-                {num}
+                {dayNumber}
               </span>
             </button>
           ),
@@ -437,22 +482,22 @@ const WeekView = ({ view }: { view: BookingsView }) => (
                   )}
                   onClick={tap}
                 >
-                  {offBands.map(({ top, h }) => (
+                  {offBands.map(({ top, height }) => (
                     <div
                       key={top}
                       className={styles.band}
-                      style={asStyle({ "--top": top, "--h": h })}
+                      style={asStyle({ "--top": top, "--h": height })}
                       aria-hidden="true"
                     ></div>
                   ))}
                   {blocked.map(
-                    ({ key: blockKey, top, h, hex, label, open }) => (
+                    ({ key: blockKey, top, height, hex, label, open }) => (
                       <button
                         key={blockKey}
                         className={styles.weekBlocked}
                         style={asStyle({
                           "--top": top,
-                          "--h": h,
+                          "--h": height,
                           "--hex": hex,
                         })}
                         onClick={open}
@@ -461,13 +506,13 @@ const WeekView = ({ view }: { view: BookingsView }) => (
                       </button>
                     ),
                   )}
-                  {blocks.map(({ booking, top, h }) => (
+                  {blocks.map(({ booking, top, height }) => (
                     <button
                       key={booking.id}
                       className={styles.weekBooking}
                       style={asStyle({
                         "--top": top,
-                        "--h": h,
+                        "--h": height,
                         ...getBlockTone(booking),
                       })}
                       onClick={(event) => {
@@ -487,7 +532,7 @@ const WeekView = ({ view }: { view: BookingsView }) => (
                       <span className={styles.weekMeta}>
                         {booking.timeRange || booking.time}
                       </span>
-                      <span className={styles.weekMeta}>{booking.svc}</span>
+                      <span className={styles.weekMeta}>{booking.service}</span>
                     </button>
                   ))}
                   {nowTop && (
@@ -517,6 +562,13 @@ const DayView = ({
   view: BookingsView;
 }) => {
   const { slideFrom } = studio.state;
+
+  const getSlideClass = () => {
+    if (!slideFrom) return undefined;
+
+    return slideFrom > 0 ? styles.slideFromNext : styles.slideFromPrev;
+  };
+
   return (
     <div
       className={styles.dayView}
@@ -525,21 +577,14 @@ const DayView = ({
     >
       {/* eslint-disable-next-line jsx-a11y/click-events-have-key-events, jsx-a11y/no-static-element-interactions */}
       <div
-        className={joinClassNames(
-          styles.timeline,
-          slideFrom
-            ? slideFrom > 0
-              ? styles.slideFromNext
-              : styles.slideFromPrev
-            : undefined,
-        )}
-        onClick={view.tlTap}
+        className={joinClassNames(styles.timeline, getSlideClass())}
+        onClick={view.onTimelineTap}
       >
-        {view.dayOffBands.map(({ top, h }) => (
+        {view.dayOffBands.map(({ top, height }) => (
           <div
             key={top}
             className={joinClassNames(styles.band, styles.dayBand)}
-            style={asStyle({ "--top": top, "--h": h })}
+            style={asStyle({ "--top": top, "--h": height })}
             aria-hidden="true"
           ></div>
         ))}
@@ -551,11 +596,11 @@ const DayView = ({
             aria-hidden="true"
           ></div>
         ))}
-        {view.hourLines.map(({ key, label, hh, top, isWorking }) => (
+        {view.hourLines.map(({ key, label, paddedHour, top, isWorking }) => (
           <div
             key={key}
             className={styles.hourLine}
-            id={"tl-h-" + hh}
+            id={`tl-h-${paddedHour}`}
             style={asStyle({ "--top": top })}
           >
             <span
@@ -569,11 +614,11 @@ const DayView = ({
             <span className={styles.dayRule}></span>
           </div>
         ))}
-        {view.dayBlocked.map(({ key, top, h, hex, label, open }) => (
+        {view.dayBlocked.map(({ key, top, height, hex, label, open }) => (
           <button
             key={key}
             className={styles.dayBlocked}
-            style={asStyle({ "--top": top, "--h": h, "--hex": hex })}
+            style={asStyle({ "--top": top, "--h": height, "--hex": hex })}
             onClick={open}
           >
             <svg
@@ -593,13 +638,13 @@ const DayView = ({
             <span className={styles.dayBlockedLabel}>{label}</span>
           </button>
         ))}
-        {view.dayBlocks.map(({ booking, top, h }) => (
+        {view.dayBlocks.map(({ booking, top, height }) => (
           <button
             key={booking.id}
             className={styles.dayBooking}
             style={asStyle({
               "--top": top,
-              "--h": h,
+              "--h": height,
               ...getBlockTone(booking),
             })}
             onClick={(event) => {
@@ -615,26 +660,28 @@ const DayView = ({
               {booking.timeRange || booking.time}
             </span>
             <span className={styles.dayMeta}>
-              {booking.svc + " · " + booking.priceLabel}
+              {`${booking.service} · ${booking.priceLabel}`}
             </span>
           </button>
         ))}
-        {view.stubs.map(({ key, top, h, bg, fg, dash, label }) => (
-          <div
-            key={key}
-            className={styles.stub}
-            style={asStyle({
-              "--top": top,
-              "--h": h,
-              "--stub-bg": bg,
-              "--stub-fg": fg,
-              "--stub-dash": dash,
-            })}
-            aria-hidden="true"
-          >
-            <span className={styles.stubLabel}>{label}</span>
-          </div>
-        ))}
+        {view.stubs.map(
+          ({ key, top, height, background, foreground, dash, label }) => (
+            <div
+              key={key}
+              className={styles.stub}
+              style={asStyle({
+                "--top": top,
+                "--h": height,
+                "--stub-bg": background,
+                "--stub-fg": foreground,
+                "--stub-dash": dash,
+              })}
+              aria-hidden="true"
+            >
+              <span className={styles.stubLabel}>{label}</span>
+            </div>
+          ),
+        )}
         {view.nowLine && (
           <div
             className={styles.nowLine}
@@ -691,65 +738,67 @@ const BookingsList = ({ view }: { view: BookingsView }) => (
       </div>
     )}
     {view.isUpcoming &&
-      view.upGroups.map(({ key, isLast, label, isToday, meta, items }) => (
-        <div
-          key={key}
-          className={joinClassNames(styles.group, isLast && styles.groupLast)}
-        >
-          <div className={styles.groupHead}>
-            <span
-              className={joinClassNames(
-                styles.groupLabel,
-                isToday && styles.groupLabelToday,
-              )}
-            >
-              {label}
-            </span>
-            <span className={styles.groupMeta}>{meta}</span>
-          </div>
-          <div className={styles.stack10}>
-            {items.map((booking) => (
-              <button
-                key={booking.id}
-                className={styles.row}
-                style={asStyle({
-                  "--delay": booking.dly,
-                  "--stripe": booking.stripe,
-                  "--badge-bg": booking.badgeBg,
-                  "--badge-border": booking.badgeBorder,
-                  "--badge-color": booking.badgeColor,
-                })}
-                onClick={booking.open}
+      view.upcomingGroups.map(
+        ({ key, isLast, label, isToday, meta, items }) => (
+          <div
+            key={key}
+            className={joinClassNames(styles.group, isLast && styles.groupLast)}
+          >
+            <div className={styles.groupHead}>
+              <span
+                className={joinClassNames(
+                  styles.groupLabel,
+                  isToday && styles.groupLabelToday,
+                )}
               >
-                <div className={styles.stripe}></div>
-                <div className={styles.times}>
-                  <div className={styles.start}>{booking.time}</div>
-                  <div className={styles.end}>{booking.endTime}</div>
-                </div>
-                <img className={styles.avatar} src={booking.imgSrc} alt="" />
-                <div className={styles.grow}>
-                  <div className={styles.nameRow}>
-                    <span className={styles.name}>{booking.clientName}</span>
-                    {booking.badge && (
-                      <span className={styles.badge}>
-                        {booking.badgeDot && (
-                          <span className={styles.pulse}></span>
-                        )}
-                        {booking.badge}
-                      </span>
+                {label}
+              </span>
+              <span className={styles.groupMeta}>{meta}</span>
+            </div>
+            <div className={styles.stack10}>
+              {items.map((booking) => (
+                <button
+                  key={booking.id}
+                  className={styles.row}
+                  style={asStyle({
+                    "--delay": booking.delay,
+                    "--stripe": booking.stripe,
+                    "--badge-bg": booking.badgeBackground,
+                    "--badge-border": booking.badgeBorder,
+                    "--badge-color": booking.badgeColor,
+                  })}
+                  onClick={booking.open}
+                >
+                  <div className={styles.stripe}></div>
+                  <div className={styles.times}>
+                    <div className={styles.start}>{booking.time}</div>
+                    <div className={styles.end}>{booking.endTime}</div>
+                  </div>
+                  <img className={styles.avatar} src={booking.imgSrc} alt="" />
+                  <div className={styles.grow}>
+                    <div className={styles.nameRow}>
+                      <span className={styles.name}>{booking.clientName}</span>
+                      {booking.badge && (
+                        <span className={styles.badge}>
+                          {booking.badgeDot && (
+                            <span className={styles.pulse}></span>
+                          )}
+                          {booking.badge}
+                        </span>
+                      )}
+                    </div>
+                    <div className={styles.service}>{booking.service}</div>
+                    {booking.subtitle && (
+                      <div className={styles.sub}>{booking.subtitle}</div>
                     )}
                   </div>
-                  <div className={styles.service}>{booking.svc}</div>
-                  {booking.sub && (
-                    <div className={styles.sub}>{booking.sub}</div>
-                  )}
-                </div>
-                <div className={styles.price}>{booking.priceLabel}</div>
-              </button>
-            ))}
+                  <div className={styles.price}>{booking.priceLabel}</div>
+                </button>
+              ))}
+            </div>
           </div>
-        </div>
-      ))}
+        ),
+      )}
     {view.isPast &&
       view.pastGroups.map(({ month, items }) => (
         <div key={month} className={styles.month}>
@@ -760,9 +809,9 @@ const BookingsList = ({ view }: { view: BookingsView }) => (
                 key={item.key}
                 className={joinClassNames(styles.row, styles.pastRow)}
                 style={asStyle({
-                  "--delay": item.dly,
+                  "--delay": item.delay,
                   "--stripe": item.stripe,
-                  "--badge-bg": item.badgeBg,
+                  "--badge-bg": item.badgeBackground,
                   "--badge-color": item.badgeColor,
                 })}
                 onClick={item.open}
@@ -786,7 +835,7 @@ const BookingsList = ({ view }: { view: BookingsView }) => (
                     <span className={styles.pastBadge}>{item.status}</span>
                   </div>
                   <div className={styles.service}>
-                    {item.svc + " · " + item.when}
+                    {`${item.service} · ${item.when}`}
                   </div>
                 </div>
                 <div className={styles.priceCell}>
@@ -816,30 +865,37 @@ export const StudioBookings = ({
   studio: StudioController;
   view: BookingsView;
 }) => {
-  const { state, setState, isWide, isDesk, isNew, actions } = studio;
+  const { state, setState, isWide, isDesktop, isNew, actions } = studio;
+
   const copyLink = () => {
     if (isGated(studio)) {
-      actions.toastMsg(GATE_REASON);
+      actions.showToast(GATE_REASON);
+
       return;
     }
+
     copyText(BOOKING_LINK);
-    actions.toastMsg("Booking link copied");
+    actions.showToast("Booking link copied");
   };
+
   return (
     <div
       className={joinClassNames(
         styles.bookings,
         isWide && styles.wide,
-        isDesk && styles.desk,
+        isDesktop && styles.desk,
       )}
       data-screen-label="Bookings"
     >
       <div className={styles.column}>
         <BookingsHeader studio={studio} view={view} />
         <div
-          className={joinClassNames(styles.card, view.isCal && styles.cardCal)}
+          className={joinClassNames(
+            styles.card,
+            view.isCalendar && styles.cardCal,
+          )}
         >
-          {isNew && !state.calEmptyHidden && (
+          {isNew && !state.calendarEmptyHidden && (
             <div className={styles.emptyHolder}>
               <div className={styles.emptyLayer}>
                 <div
@@ -848,7 +904,7 @@ export const StudioBookings = ({
                 >
                   <button
                     className={styles.emptyClose}
-                    onClick={() => setState({ calEmptyHidden: true })}
+                    onClick={() => setState({ calendarEmptyHidden: true })}
                     aria-label="Close"
                   >
                     <svg
@@ -899,7 +955,7 @@ export const StudioBookings = ({
               </div>
             </div>
           )}
-          {view.isCal &&
+          {view.isCalendar &&
             (view.isWeek ? (
               <WeekView view={view} />
             ) : (

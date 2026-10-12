@@ -6,9 +6,11 @@ import { EmailChangeNoticePage } from "./email-change-notice-page";
 describe("EmailChangeNoticePage", () => {
   it("renders the notice with the 'This wasn't me' link to help", () => {
     renderWithStore(<EmailChangeNoticePage />, "/email/email-change-notice");
+
     expect(
       screen.getByRole("heading", { name: "Your email was changed" }),
     ).toBeInTheDocument();
+
     expect(
       screen.getByRole("link", { name: "This wasn't me" }),
     ).toHaveAttribute("href", "/help");

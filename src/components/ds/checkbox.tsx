@@ -20,12 +20,16 @@ export const Checkbox = ({
   disabled = false,
 }: CheckboxProps) => {
   const [isChecked, setChecked] = useControllable(checked, defaultChecked);
+
   const toggle = () => {
     if (disabled) return;
+
     const next = !isChecked;
+
     setChecked(next);
     onChange?.(next);
   };
+
   return (
     <label
       className={joinClassNames(styles.label, disabled && styles.disabled)}

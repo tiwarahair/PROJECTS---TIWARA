@@ -36,24 +36,27 @@ export const AccountPage = (props: AccountPageProps) => {
   const favouriteIds = useAppSelector(({ favourites }) => favourites.ids);
   const view = getAccountView(state, favouriteIds, loggedIn);
   const { current, mobileHome, initials, accountName } = view;
-  const { setState, go, showToast } = actions;
+  const { setState, goToSection, showToast } = actions;
 
   useLayoutEffect(() => {
     document.documentElement.classList.add("account-page");
+
     return () => document.documentElement.classList.remove("account-page");
   }, []);
 
   const onCalendar = ({ booking, money }: BookingCardView) => {
     downloadFile(
-      "tiwaras-house-" + booking.id + ".ics",
+      `tiwaras-house-${booking.id}.ics`,
       getCalendarFile(booking, money),
       "text/calendar",
     );
+
     showToast("Calendar file downloaded");
   };
+
   const onCookies = () => {
-    setState(({ cookies }) => ({ ckDraft: { ...cookies } }));
-    actions.openDialog({ k: "cookies" });
+    setState(({ cookies }) => ({ cookiesDraft: { ...cookies } }));
+    actions.openDialog({ kind: "cookies" });
   };
 
   return (
@@ -68,7 +71,7 @@ export const AccountPage = (props: AccountPageProps) => {
         onToggleMenu={() =>
           setState(({ menuOpen }) => ({ menuOpen: !menuOpen }))
         }
-        onGo={go}
+        onGo={goToSection}
         onLogOut={actions.logout}
       />
       {!loggedIn && (
@@ -106,7 +109,7 @@ export const AccountPage = (props: AccountPageProps) => {
               accountName={accountName}
               initials={initials}
               photo={state.photo}
-              onGo={go}
+              onGo={goToSection}
               onLogOut={actions.logout}
             />
           )}
@@ -116,17 +119,17 @@ export const AccountPage = (props: AccountPageProps) => {
                 accountName={accountName}
                 initials={initials}
                 photo={state.photo}
-                onGo={go}
+                onGo={goToSection}
                 onLogOut={actions.logout}
               />
             )}
             {!mobileHome && (
               <>
                 <div className={styles.titleRow}>
-                  {!state.wide && !!state.sec && (
+                  {!state.wide && !!state.sectionId && (
                     <button
                       className={styles.back}
-                      onClick={() => go(null)}
+                      onClick={() => goToSection(null)}
                       aria-label="Back to your account"
                     >
                       <svg
@@ -156,7 +159,7 @@ export const AccountPage = (props: AccountPageProps) => {
                       upcoming={view.upcoming}
                       quick={view.quick}
                       onCalendar={onCalendar}
-                      onGo={go}
+                      onGo={goToSection}
                     />
                   )}
                   {current === "bookings" && (
@@ -166,20 +169,20 @@ export const AccountPage = (props: AccountPageProps) => {
                       activeTab={view.activeTab}
                       showUpcoming={view.showUpcoming}
                       showPast={view.showPast}
-                      onTab={(bkTab, focus) =>
+                      onTab={(bookingsTab, focus) =>
                         setState(
-                          { bkTab },
+                          { bookingsTab },
                           focus
                             ? () =>
                                 document
-                                  .getElementById("ac-bk-" + bkTab)
+                                  .getElementById(`ac-bk-${bookingsTab}`)
                                   ?.focus()
                             : undefined,
                         )
                       }
                       onCalendar={onCalendar}
                       onReceipt={(id) =>
-                        actions.openDialog({ k: "receipt", id })
+                        actions.openDialog({ kind: "receipt", id })
                       }
                     />
                   )}

@@ -9,20 +9,21 @@ import {
 } from "./onboarding-state";
 import type { OnboardingState } from "./onboarding-state";
 
-const at = (patch: Partial<OnboardingState>): OnboardingState => ({
+const buildState = (patch: Partial<OnboardingState>): OnboardingState => ({
   ...INITIAL_STATE,
   ...patch,
-  f: { ...INITIAL_STATE.f, ...patch.f },
+  form: { ...INITIAL_STATE.form, ...patch.form },
 });
 
 describe("onboarding validation", () => {
   it("checks the customer sign-up fields", () => {
-    const errors = getErrors(at({ screen: "cust-create" }));
+    const errors = getErrors(buildState({ screen: "cust-create" }));
+
     expect(Object.keys(errors).sort()).toEqual([
       "first",
       "last",
-      "mob",
-      "pw",
+      "mobile",
+      "password",
       "terms",
     ]);
   });
@@ -30,20 +31,26 @@ describe("onboarding validation", () => {
   it("asks mobile stylists for a base postcode instead of an address", () => {
     expect(
       getErrors(
-        at({
+        buildState({
           screen: "w3",
-          f: { ...INITIAL_STATE.f, biz: "Crown", type: "mobile", pc: "nope" },
+          form: {
+            ...INITIAL_STATE.form,
+            businessName: "Crown",
+            type: "mobile",
+            postcode: "nope",
+          },
         }),
       ),
-    ).toEqual({ pc: "Enter a valid UK postcode, like M14 5TQ" });
+    ).toEqual({ postcode: "Enter a valid UK postcode, like M14 5TQ" });
+
     expect(
       getErrors(
-        at({
+        buildState({
           screen: "w3",
-          f: { ...INITIAL_STATE.f, biz: "Crown", type: "shop" },
+          form: { ...INITIAL_STATE.form, businessName: "Crown", type: "shop" },
         }),
       ),
-    ).toEqual({ addr: "Enter your address" });
+    ).toEqual({ address: "Enter your address" });
   });
 
   it("validates UK mobiles and postcodes", () => {
@@ -54,22 +61,27 @@ describe("onboarding validation", () => {
   });
 
   it("Back follows the flow; verify returns to the right form", () => {
-    expect(getBackScreen(at({ screen: "w3" }))).toBe("w2");
-    expect(getBackScreen(at({ screen: "verify", audience: "customer" }))).toBe(
-      "cust-create",
-    );
-    expect(getBackScreen(at({ screen: "verify", audience: "pro" }))).toBe("w5");
+    expect(getBackScreen(buildState({ screen: "w3" }))).toBe("w2");
+
+    expect(
+      getBackScreen(buildState({ screen: "verify", audience: "customer" })),
+    ).toBe("cust-create");
+
+    expect(
+      getBackScreen(buildState({ screen: "verify", audience: "pro" })),
+    ).toBe("w5");
   });
 
   it("fixtures seed board states", () => {
-    expect(getFixturePatch("w2", INITIAL_STATE.f)).toMatchObject({
+    expect(getFixturePatch("w2", INITIAL_STATE.form)).toMatchObject({
       screen: "w2",
-      f: { cats: ["braids", "natural", "locs"] },
+      form: { categories: ["braids", "natural", "locs"] },
     });
-    expect(getFixturePatch("pw-good", INITIAL_STATE.f)).toMatchObject({
+
+    expect(getFixturePatch("pw-good", INITIAL_STATE.form)).toMatchObject({
       screen: "cust-create",
-      f: { pw: "sunflower house" },
-      pwShow: true,
+      form: { password: "sunflower house" },
+      passwordShown: true,
     });
   });
 });

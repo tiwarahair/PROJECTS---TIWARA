@@ -2,32 +2,184 @@
 import { getTaxonomy } from "./studio-service-actions";
 import {
   dayInfo,
-  durToMin,
-  fmtDT,
+  durationToMinutes,
+  formatDateTime,
   getAvatarSrc,
   timeRange,
-  toMin,
+  timeToMinutes,
 } from "./studio-format";
 import {
   getClient,
-  getProtTotal,
-  getServiceDur,
+  getProtectionTotal,
+  getServiceDuration,
   getTileTone,
   isOngoing,
 } from "./studio-model";
-import type { StudioBooking, StudioState } from "./studio-types";
+import type { StudioBooking, StudioClient, StudioState } from "./studio-types";
 
 const INK = "#1a1714";
 const YELLOW = "var(--brand-yellow,#f2c94c)";
-const YELLOW_BG = "rgba(223,207,62,.10)";
+const YELLOW_BACKGROUND = "rgba(223,207,62,.10)";
 const YELLOW_LINE = "rgba(223,207,62,.40)";
 const YELLOW_INK = "#6b5a10";
 
 interface Tone {
-  bg: string;
+  background: string;
   border: string;
   color: string;
 }
+
+interface StatusFlags {
+  awaiting: boolean;
+  autoX: boolean;
+  ongoing: boolean;
+  status: string;
+}
+
+const QUIET_TONE: Tone = {
+  background: "var(--quiet)",
+  border: "var(--border-subtle)",
+  color: "var(--text-secondary)",
+};
+
+const WAITING_TONE: Tone = {
+  background: YELLOW_BACKGROUND,
+  border: YELLOW_LINE,
+  color: YELLOW_INK,
+};
+
+const ONGOING_TONE: Tone = { background: YELLOW, border: YELLOW, color: INK };
+
+const ARRIVED_TONE: Tone = {
+  background: INK,
+  border: INK,
+  color: "var(--neutral-100)",
+};
+
+const CONFIRMED_TONE: Tone = {
+  background: "var(--accent-wash)",
+  border: "var(--accent-line)",
+  color: "var(--accent-900)",
+};
+
+const UNPAID_TONE: Tone = {
+  background: "rgba(181,84,31,.1)",
+  border: "rgba(181,84,31,.3)",
+  color: "var(--accent-500)",
+};
+
+const FAILED_TONE: Tone = {
+  background: "var(--accent-wash)",
+  border: "var(--accent-line)",
+  color: "var(--accent-700)",
+};
+
+const PAID_TONE: Tone = {
+  background: "rgba(46,125,79,.1)",
+  border: "rgba(46,125,79,.25)",
+  color: "#2e7d4f",
+};
+
+const PAID_BADGES: Record<string, string> = {
+  none: "Nothing paid",
+  failed: "Payment failed",
+  link: "Link sent",
+};
+
+const PROTECTION_WORDS: Record<string, string> = {
+  card: "Card request",
+  full: "Payment request",
+};
+
+// Status wins over payment: awaiting, auto-cancelled, ongoing and arrived each have a fixed tone.
+const getStatusTone = (
+  { awaiting, autoX, ongoing, status }: StatusFlags,
+  fallback: Tone,
+): Tone => {
+  if (awaiting) return WAITING_TONE;
+
+  if (autoX) return QUIET_TONE;
+
+  if (ongoing) return ONGOING_TONE;
+
+  if (status === "arrived") return ARRIVED_TONE;
+
+  return fallback;
+};
+
+const getPaidTone = (paid: string): Tone => {
+  if (paid === "none" || paid === "link") return UNPAID_TONE;
+
+  if (paid === "failed") return FAILED_TONE;
+
+  return CONFIRMED_TONE;
+};
+
+const getPayTone = (isPaid: boolean, paid: string): Tone => {
+  if (isPaid) return PAID_TONE;
+
+  if (paid === "failed") return FAILED_TONE;
+
+  return UNPAID_TONE;
+};
+
+const getBadge = (
+  { awaiting, autoX, ongoing, status }: StatusFlags,
+  paid: string,
+  msLeft: number,
+  leftShort: string,
+) => {
+  if (ongoing) return "In progress";
+
+  if (awaiting)
+    return msLeft > 0 ? `Auto-cancels in ${leftShort}` : "Auto-cancels now";
+
+  if (autoX) return "Auto-cancelled";
+
+  if (status === "arrived") return "Arrived";
+
+  return PAID_BADGES[paid] ?? "";
+};
+
+const getStatusLabel = (
+  { awaiting, autoX, ongoing, status }: StatusFlags,
+  autoDone: boolean | undefined,
+) => {
+  if (awaiting) return "Awaiting confirmation";
+
+  if (autoX) return "Auto-cancelled";
+
+  if (autoDone) return "Completed · Unpaid";
+
+  if (ongoing) return "In progress";
+
+  if (status === "arrived") return "Arrived";
+
+  return "Confirmed";
+};
+
+const getPayLabel = (paid: string, protectionMode: string | undefined) => {
+  if (paid === "full") return "Paid in full";
+
+  if (paid === "deposit") return "Deposit paid";
+
+  if (paid === "link")
+    return protectionMode === "card"
+      ? "Card request sent"
+      : "Payment link sent";
+
+  if (paid === "failed") return "Payment failed";
+
+  return "Nothing paid yet";
+};
+
+const getSinceLabel = ({ since, area }: StudioClient) => {
+  if (since) return ` · client since ${since}`;
+
+  if (area) return ` · ${area}`;
+
+  return "";
+};
 
 export const decorateBooking = (
   state: StudioState,
@@ -36,115 +188,69 @@ export const decorateBooking = (
   onOpen: () => void,
 ) => {
   const client = getClient(state, booking.client);
-  const day = dayInfo(booking.off);
+  const day = dayInfo(booking.dayOffset);
   const status = booking.status || "confirmed";
   const paid = booking.paid || "deposit";
-  const duration = booking.dur || getServiceDur(state, booking.svc);
-  const startMin = toMin(booking.time);
+
+  const duration =
+    booking.duration || getServiceDuration(state, booking.service);
+
+  const startMinutes = timeToMinutes(booking.time);
   const now = new Date();
-  const nowMin = now.getHours() * 60 + now.getMinutes();
+  const nowMinutes = now.getHours() * 60 + now.getMinutes();
   const ongoing = isOngoing(booking);
   const isPre = status === "confirmed";
-  const canArrive = isPre && booking.off === 0 && startMin - nowMin <= 60;
-  const graceEnd = startMin + (state.policy.grace || 0);
-  const canNoShow = isPre && booking.off === 0 && nowMin >= graceEnd;
-  const depAmt = Math.round(booking.price * state.policy.deposit) / 100;
-  const paidAmt =
-    paid === "full" ? booking.price : paid === "deposit" ? depAmt : 0;
-  const due = Math.max(0, booking.price - paidAmt);
+
+  const canArrive =
+    isPre && booking.dayOffset === 0 && startMinutes - nowMinutes <= 60;
+
+  const graceEnd = startMinutes + (state.policy.grace || 0);
+  const canNoShow = isPre && booking.dayOffset === 0 && nowMinutes >= graceEnd;
+  const depositAmount = Math.round(booking.price * state.policy.deposit) / 100;
+
+  const paidAmounts: Record<string, number> = {
+    full: booking.price,
+    deposit: depositAmount,
+  };
+
+  const paidAmount = paidAmounts[paid] ?? 0;
+  const due = Math.max(0, booking.price - paidAmount);
   const awaiting = status === "awaiting";
   const autoX = status === "autocancelled";
+
   const msLeft = booking.expiresAt
     ? Math.max(0, booking.expiresAt - Date.now())
     : 0;
+
   const leftShort =
     msLeft >= 3600000
-      ? Math.round(msLeft / 3600000) + " h"
-      : Math.max(1, Math.round(msLeft / 60000)) + " min";
-  const badge = ongoing
-    ? "In progress"
-    : awaiting
-      ? msLeft > 0
-        ? "Auto-cancels in " + leftShort
-        : "Auto-cancels now"
-      : autoX
-        ? "Auto-cancelled"
-        : status === "arrived"
-          ? "Arrived"
-          : paid === "none"
-            ? "Nothing paid"
-            : paid === "failed"
-              ? "Payment failed"
-              : paid === "link"
-                ? "Link sent"
-                : "";
-  const quiet: Tone = {
-    bg: "var(--quiet)",
-    border: "var(--border-subtle)",
-    color: "var(--text-secondary)",
-  };
-  const waiting: Tone = {
-    bg: YELLOW_BG,
-    border: YELLOW_LINE,
-    color: YELLOW_INK,
-  };
-  const tone: Tone = awaiting
-    ? waiting
-    : autoX
-      ? quiet
-      : ongoing
-        ? { bg: YELLOW, border: YELLOW, color: INK }
-        : status === "arrived"
-          ? { bg: INK, border: INK, color: "var(--neutral-100)" }
-          : paid === "none" || paid === "link"
-            ? {
-                bg: "rgba(181,84,31,.1)",
-                border: "rgba(181,84,31,.3)",
-                color: "var(--accent-500)",
-              }
-            : paid === "failed"
-              ? {
-                  bg: "var(--accent-wash)",
-                  border: "var(--accent-line)",
-                  color: "var(--accent-700)",
-                }
-              : {
-                  bg: "var(--accent-wash)",
-                  border: "var(--accent-line)",
-                  color: "var(--accent-900)",
-                };
-  const statusTone: Tone = awaiting
-    ? waiting
-    : autoX
-      ? quiet
-      : ongoing
-        ? { bg: YELLOW, border: YELLOW, color: INK }
-        : status === "arrived"
-          ? { bg: INK, border: INK, color: "var(--neutral-100)" }
-          : {
-              bg: "var(--accent-wash)",
-              border: "var(--accent-line)",
-              color: "var(--accent-900)",
-            };
-  const tileTone = getTileTone(state, booking.svc);
-  const address = booking.addr || client.addr || "";
+      ? `${Math.round(msLeft / 3600000)} h`
+      : `${Math.max(1, Math.round(msLeft / 60000))} min`;
+
+  const flags: StatusFlags = { awaiting, autoX, ongoing, status };
+  const badge = getBadge(flags, paid, msLeft, leftShort);
+  const tone = getStatusTone(flags, getPaidTone(paid));
+  const statusTone = getStatusTone(flags, CONFIRMED_TONE);
+  const payTone = getPayTone(paid === "full" || paid === "deposit", paid);
+  const tileTone = getTileTone(state, booking.service);
+  const address = booking.address || client.address || "";
   const range = timeRange(booking.time, duration);
   const resends = booking.resends || 0;
-  const isPaid = paid === "full" || paid === "deposit";
   const phone = (client.phone || "").replace(/\s/g, "");
-  const service = state.services.find(({ name }) => name === booking.svc);
-  const group = service ? getTaxonomy(service.cat) : null;
+  const service = state.services.find(({ name }) => name === booking.service);
+  const group = service ? getTaxonomy(service.taxonomyId) : null;
+
   return {
     ...booking,
-    st: status,
+    status,
     paid,
     canArrive,
     canNoShow,
-    startMin,
+    startMinutes,
     graceEnd,
-    durMin: durToMin(duration),
-    depAmt,
-    paidAmt,
+    durationMinutes: durationToMinutes(duration),
+    depositAmount,
+    paidAmount,
     due,
     clientName: client.name,
     firstName: client.name.split(" ")[0] ?? "",
@@ -155,10 +261,10 @@ export const decorateBooking = (
     hasPhone: !!client.phone,
     hasEmail: !!client.email,
     hasContact: !!(client.phone || client.email),
-    mailHref: "mailto:" + (client.email || ""),
-    telHref: "tel:" + phone,
-    smsHref: "sms:" + phone,
-    tileBg: tileTone.bg,
+    mailHref: `mailto:${client.email || ""}`,
+    telHref: `tel:${phone}`,
+    smsHref: `sms:${phone}`,
+    tileBackground: tileTone.background,
     tileBar: tileTone.bar,
     tileLine: awaiting ? "rgba(201,181,40,.55)" : "transparent",
     tileBorder: awaiting ? "dashed" : "solid",
@@ -166,112 +272,71 @@ export const decorateBooking = (
     tileMeta: tileTone.meta,
     visitLabel:
       (client.visits || 0) + (client.visits === 1 ? " visit" : " visits"),
-    sinceLabel: client.since
-      ? " · client since " + client.since
-      : client.area
-        ? " · " + client.area
-        : "",
-    catLabel: (group ? group.name : "Service").toUpperCase(),
+    sinceLabel: getSinceLabel(client),
+    categoryLabel: (group ? group.name : "Service").toUpperCase(),
     timeRange: range,
-    endTime: range === booking.time ? "" : "–" + (range.split("–")[1] ?? ""),
-    durLabel: duration,
+    endTime: range === booking.time ? "" : `–${range.split("–")[1] ?? ""}`,
+    durationLabel: duration,
     ongoing,
     badge,
-    badgeBg: tone.bg,
+    badgeBackground: tone.background,
     badgeBorder: tone.border,
     badgeColor: tone.color,
     badgeDot: ongoing,
-    sub: "",
-    subColor: "var(--accent-500)",
-    stLabel: awaiting
-      ? "Awaiting confirmation"
-      : autoX
-        ? "Auto-cancelled"
-        : booking.autoDone
-          ? "Completed · Unpaid"
-          : ongoing
-            ? "In progress"
-            : status === "arrived"
-              ? "Arrived"
-              : "Confirmed",
-    stBg: statusTone.bg,
-    stBorder: statusTone.border,
-    stColor: statusTone.color,
-    stDot: ongoing,
+    subtitle: "",
+    subtitleColor: "var(--accent-500)",
+    statusLabel: getStatusLabel(flags, booking.autoDone),
+    statusBackground: statusTone.background,
+    statusBorder: statusTone.border,
+    statusColor: statusTone.color,
+    statusDot: ongoing,
     awaiting,
     autoX,
     noProtect: booking.protect === "none",
-    protIsCard: booking.protMode === "card",
-    protIsFull: booking.protMode === "full",
-    protWord:
-      booking.protMode === "card"
-        ? "Card request"
-        : booking.protMode === "full"
-          ? "Payment request"
-          : "Deposit request",
-    linkSentLabel: booking.linkSentAt ? fmtDT(booking.linkSentAt) : "",
-    expiryLabel: booking.expiresAt ? fmtDT(booking.expiresAt) : "",
-    hoursLeft: booking.expiresAt ? leftShort + " left" : "",
+    protectionIsCard: booking.protectionMode === "card",
+    protectionIsFull: booking.protectionMode === "full",
+    protectionWord:
+      PROTECTION_WORDS[booking.protectionMode ?? ""] ?? "Deposit request",
+    linkSentLabel: booking.linkSentAt ? formatDateTime(booking.linkSentAt) : "",
+    expiryLabel: booking.expiresAt ? formatDateTime(booking.expiresAt) : "",
+    hoursLeft: booking.expiresAt ? `${leftShort} left` : "",
     resendsLeft: Math.max(0, 2 - resends),
-    resendLabel:
-      "Resend by email/SMS (" + Math.max(0, 2 - resends) + " of 2 left)",
+    resendLabel: `Resend by email/SMS (${Math.max(0, 2 - resends)} of 2 left)`,
     canResend: resends < 2,
-    resendOp: resends < 2 ? "1" : ".45",
-    protAmtLabel: "£" + getProtTotal(state, booking.price).toFixed(2),
-    payLabel:
-      paid === "full"
-        ? "Paid in full"
-        : paid === "deposit"
-          ? "Deposit paid"
-          : paid === "link"
-            ? booking.protMode === "card"
-              ? "Card request sent"
-              : "Payment link sent"
-            : paid === "failed"
-              ? "Payment failed"
-              : "Nothing paid yet",
-    payBg: isPaid
-      ? "rgba(46,125,79,.1)"
-      : paid === "failed"
-        ? "var(--accent-wash)"
-        : "rgba(181,84,31,.1)",
-    payBorder: isPaid
-      ? "rgba(46,125,79,.25)"
-      : paid === "failed"
-        ? "var(--accent-line)"
-        : "rgba(181,84,31,.3)",
-    payColor: isPaid
-      ? "#2e7d4f"
-      : paid === "failed"
-        ? "var(--accent-700)"
-        : "var(--accent-500)",
+    resendOpacity: resends < 2 ? "1" : ".45",
+    protectionAmountLabel: `£${getProtectionTotal(state, booking.price).toFixed(2)}`,
+    payLabel: getPayLabel(paid, booking.protectionMode),
+    payBackground: payTone.background,
+    payBorder: payTone.border,
+    payColor: payTone.color,
     paidKind: paid,
-    dueAmt: due,
+    dueAmount: due,
     visits: client.visits || 0,
     ended:
-      booking.off < 0 ||
-      (booking.off === 0 && startMin + durToMin(duration) <= nowMin),
+      booking.dayOffset < 0 ||
+      (booking.dayOffset === 0 &&
+        startMinutes + durationToMinutes(duration) <= nowMinutes),
     unpaidFlag:
-      !!booking.ckUnpaid ||
+      !!booking.checkoutUnpaid ||
       ((status === "confirmed" || status === "arrived") &&
         !awaiting &&
-        (booking.off < 0 ||
-          (booking.off === 0 &&
-            nowMin - (startMin + durToMin(duration)) >= 60))),
-    paidLabel: "£" + paidAmt,
-    dueLabel: "£" + due,
+        (booking.dayOffset < 0 ||
+          (booking.dayOffset === 0 &&
+            nowMinutes - (startMinutes + durationToMinutes(duration)) >= 60))),
+    paidLabel: `£${paidAmount}`,
+    dueLabel: `£${due}`,
     dueColor: due > 0 ? "var(--text-primary)" : "var(--text-secondary)",
-    addrLabel: address || "No address yet",
-    addrColor: address ? "var(--text-primary)" : "var(--text-secondary)",
-    addr: address,
-    hasStNote: !!booking.stylistNote,
-    noStNote: !booking.stylistNote,
+    addressLabel: address || "No address yet",
+    addressColor: address ? "var(--text-primary)" : "var(--text-secondary)",
+    address,
+    hasStylistNote: !!booking.stylistNote,
+    noStylistNote: !booking.stylistNote,
     stylistNote: booking.stylistNote || "",
-    priceLabel: "£" + booking.price,
+    priceLabel: `£${booking.price}`,
     dayShort: day.short,
     dayLabel: day.label,
-    deposit: "£" + depAmt.toFixed(2),
-    dly: (index * 0.05).toFixed(2) + "s",
+    deposit: `£${depositAmount.toFixed(2)}`,
+    delay: `${(index * 0.05).toFixed(2)}s`,
     stripe: tileTone.bar,
     open: onOpen,
   };
@@ -291,7 +356,8 @@ export const getDecoratedBookings = (
         .slice()
         .sort(
           (first, second) =>
-            first.off - second.off || first.time.localeCompare(second.time),
+            first.dayOffset - second.dayOffset ||
+            first.time.localeCompare(second.time),
         )
         .map((booking, index) =>
           decorateBooking(state, booking, index, () => onOpen(booking)),

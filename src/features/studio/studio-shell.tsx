@@ -2,7 +2,7 @@ import type { CSSProperties } from "react";
 import { Link } from "react-router";
 import { getAssetUrl } from "../../utils/asset-url";
 import { joinClassNames } from "../../utils/class-names";
-import { BOOKING_LINK, DOWS, MONTHS } from "./studio-data";
+import { BOOKING_LINK, WEEKDAYS, MONTHS } from "./studio-data";
 import { copyText } from "./studio-format";
 import { getSteps, isLive } from "./studio-model";
 import type { StudioTab } from "./studio-types";
@@ -12,7 +12,7 @@ import styles from "./studio-shell.module.css";
 type NavIconName =
   "home" | "cal" | "scis" | "pound" | "gear" | "people" | "more";
 
-interface NavDef {
+interface NavDefinition {
   id: StudioTab;
   label: string;
   icon: NavIconName;
@@ -35,6 +35,7 @@ export const NavIcon = ({ icon }: { icon: NavIconName }) => {
         <circle cx="19" cy="12" r="1.9"></circle>
       </svg>
     );
+
   return (
     <svg width="19" height="19" viewBox="0 0 24 24" {...STROKE}>
       {icon === "home" && (
@@ -88,7 +89,8 @@ export const NavIcon = ({ icon }: { icon: NavIconName }) => {
 /** The navigation entries and which one is current (prototype navDefs / navBtns). */
 export const getNavItems = (studio: StudioController) => {
   const { state, isWide, setState, actions } = studio;
-  const defs: NavDef[] = [
+
+  const navDefinitions: NavDefinition[] = [
     { id: "home", label: "Home", icon: "home" },
     { id: "bookings", label: "Bookings", icon: "cal" },
     { id: "services", label: "Services", icon: "scis" },
@@ -97,19 +99,21 @@ export const getNavItems = (studio: StudioController) => {
       ? ([
           { id: "clients", label: "Clients", icon: "people" },
           { id: "settings", label: "Settings", icon: "gear" },
-        ] as NavDef[])
-      : ([{ id: "settings", label: "More", icon: "more" }] as NavDef[])),
+        ] as NavDefinition[])
+      : ([{ id: "settings", label: "More", icon: "more" }] as NavDefinition[])),
   ];
-  return defs.map((def) => ({
-    ...def,
+
+  return navDefinitions.map((navDefinition) => ({
+    ...navDefinition,
     isOn:
-      state.tab === def.id ||
-      (!isWide && def.id === "settings" && state.tab === "clients"),
-    go: () => {
-      setState({ tab: def.id, cliSel: null, page: null });
+      state.tab === navDefinition.id ||
+      (!isWide && navDefinition.id === "settings" && state.tab === "clients"),
+    onSelect: () => {
+      setState({ tab: navDefinition.id, selectedClientId: null, page: null });
       actions.scrollBody(0, false);
-      if (def.id === "bookings" && state.bview !== "list")
-        actions.scrollCalToNow();
+
+      if (navDefinition.id === "bookings" && state.bookingsLayout !== "list")
+        actions.scrollCalendarToNow();
     },
   }));
 };
@@ -118,8 +122,9 @@ export const getAvatarSrc = ({ avatarUrl }: { avatarUrl: string | null }) =>
   avatarUrl || getAssetUrl("img/hero.jpg");
 
 export const StudioSidebar = ({ studio }: { studio: StudioController }) => {
-  const { state, isDesk, setState } = studio;
-  const isOpen = state.sbOpen == null ? isDesk : state.sbOpen;
+  const { state, isDesktop, setState } = studio;
+  const isOpen = state.sidebarOpen == null ? isDesktop : state.sidebarOpen;
+
   return (
     <aside
       className={joinClassNames(
@@ -141,7 +146,7 @@ export const StudioSidebar = ({ studio }: { studio: StudioController }) => {
             styles.toggle,
             isOpen ? styles.toggleOpen : styles.toggleClosed,
           )}
-          onClick={() => setState({ sbOpen: !isOpen })}
+          onClick={() => setState({ sidebarOpen: !isOpen })}
           aria-label="Toggle sidebar"
         >
           <svg width="18" height="18" viewBox="0 0 24 24" {...STROKE}>
@@ -151,7 +156,7 @@ export const StudioSidebar = ({ studio }: { studio: StudioController }) => {
         </button>
       </div>
       <nav className={styles.nav}>
-        {getNavItems(studio).map(({ id, label, icon, isOn, go }) => (
+        {getNavItems(studio).map(({ id, label, icon, isOn, onSelect }) => (
           <button
             key={id}
             className={joinClassNames(
@@ -159,7 +164,7 @@ export const StudioSidebar = ({ studio }: { studio: StudioController }) => {
               isOpen ? styles.navOpen : styles.navClosed,
               isOn ? styles.navOn : styles.navOff,
             )}
-            onClick={go}
+            onClick={onSelect}
             title={label}
           >
             <span className={styles.navIcon}>
@@ -194,20 +199,27 @@ export const StudioSidebar = ({ studio }: { studio: StudioController }) => {
   );
 };
 
+const getDayPart = (hour: number) => {
+  if (hour < 12) return "Morning";
+
+  return hour < 18 ? "Afternoon" : "Evening";
+};
+
 export const StudioTopBar = ({ studio }: { studio: StudioController }) => {
-  const { state, isWide, isDesk, setState, actions } = studio;
+  const { state, isWide, isDesktop, setState, actions } = studio;
   const now = new Date();
   const hour = now.getHours();
-  const greeting =
-    (hour < 12 ? "Morning" : hour < 18 ? "Afternoon" : "Evening") + ", Amara";
+  const greeting = `${getDayPart(hour)}, Amara`;
   const hasUnread = !state.notifAllRead;
+
   const isHidden =
     !isWide && (state.tab === "settings" || state.tab === "clients");
+
   return (
     <div
       className={joinClassNames(
         styles.topBar,
-        isDesk ? styles.topBarDesk : isWide && styles.topBarWide,
+        isDesktop ? styles.topBarDesk : isWide && styles.topBarWide,
         isHidden && styles.topBarHidden,
       )}
       data-screen-label="Top bar"
@@ -228,11 +240,7 @@ export const StudioTopBar = ({ studio }: { studio: StudioController }) => {
       <div className={styles.grow}>
         <div className={styles.title}>{greeting}</div>
         <div className={styles.dateLine}>
-          {DOWS[now.getDay()] +
-            " " +
-            now.getDate() +
-            " " +
-            MONTHS[now.getMonth()]}
+          {`${WEEKDAYS[now.getDay()]} ${now.getDate()} ${MONTHS[now.getMonth()]}`}
         </div>
       </div>
       <button
@@ -252,7 +260,7 @@ export const StudioTopBar = ({ studio }: { studio: StudioController }) => {
         </svg>
         {hasUnread && <span className={styles.unreadDot}></span>}
       </button>
-      {isWide && !(state.tab === "clients" && state.cliSel) && (
+      {isWide && !(state.tab === "clients" && state.selectedClientId) && (
         <button
           className={styles.newBooking}
           onClick={() => actions.openSheet("add")}
@@ -277,11 +285,11 @@ export const StudioTopBar = ({ studio }: { studio: StudioController }) => {
 
 export const FooterNav = ({ studio }: { studio: StudioController }) => (
   <nav className={styles.footerNav}>
-    {getNavItems(studio).map(({ id, label, icon, isOn, go }) => (
+    {getNavItems(studio).map(({ id, label, icon, isOn, onSelect }) => (
       <button
         key={id}
         className={joinClassNames(styles.footerButton, isOn && styles.footerOn)}
-        onClick={go}
+        onClick={onSelect}
       >
         <span className={styles.footerPill}>
           <NavIcon icon={icon} />
@@ -292,14 +300,15 @@ export const FooterNav = ({ studio }: { studio: StudioController }) => (
   </nav>
 );
 
-const SETUP_KEYS = ["avail", "profile", "secure", "services"] as const;
+const SETUP_KEYS = ["availability", "profile", "secure", "services"] as const;
 
 /** The four setup steps with their actions (prototype SETUP_ROWS). */
 export const getSetupRows = (studio: StudioController) => {
   const { setState, actions } = studio;
+
   const rows: [(typeof SETUP_KEYS)[number], string, string, () => void][] = [
     [
-      "avail",
+      "availability",
       "Set up availability",
       "Working days and hours, blocked time, closed periods",
       () => actions.openPage("availability", true),
@@ -314,7 +323,7 @@ export const getSetupRows = (studio: StudioController) => {
       "secure",
       "Get paid: 2FA, tax details and Stripe",
       "Secure your account and set up payouts. Takes about 5 minutes.",
-      () => actions.openTf("secure"),
+      () => actions.openTwoFactor("secure"),
     ],
     [
       "services",
@@ -323,20 +332,23 @@ export const getSetupRows = (studio: StudioController) => {
       () => {
         setState({
           tab: "services",
-          svcTab: "services",
+          servicesTab: "services",
           page: null,
-          svcStatusFilter: "all",
+          serviceStatusFilter: "all",
         });
+
         actions.scrollBody(0, false);
       },
     ],
   ];
+
   return rows;
 };
 
 export const getSetupProgress = (studio: StudioController) => {
   const steps = getSteps(studio.state);
   const doneCount = SETUP_KEYS.filter((key) => steps[key]).length;
+
   return {
     steps,
     doneCount,
@@ -348,10 +360,12 @@ export const getSetupProgress = (studio: StudioController) => {
 export const SetupCard = ({ studio }: { studio: StudioController }) => {
   const { state, setState } = studio;
   const { steps, doneCount, isComplete } = getSetupProgress(studio);
+
   // runtime: the progress bar's fill
   const progressStyle = {
     "--setup-frac": String(doneCount / 4),
   } as CSSProperties;
+
   return (
     <div
       className={joinClassNames(
@@ -368,7 +382,7 @@ export const SetupCard = ({ studio }: { studio: StudioController }) => {
             <div className={styles.cardTitle}>
               {isComplete ? "You’re ready for bookings" : "Set up your studio"}
             </div>
-            <div className={styles.cardCount}>{doneCount + " of 4 done"}</div>
+            <div className={styles.cardCount}>{`${doneCount} of 4 done`}</div>
           </div>
           <div className={styles.cardSub}>
             Four steps and clients can book you.
@@ -376,7 +390,7 @@ export const SetupCard = ({ studio }: { studio: StudioController }) => {
         </div>
         <button
           className={styles.cardClose}
-          onClick={() => setState({ setupMin: true })}
+          onClick={() => setState({ setupMinimised: true })}
           aria-label="Minimise checklist"
         >
           <svg
@@ -397,10 +411,11 @@ export const SetupCard = ({ studio }: { studio: StudioController }) => {
         <div className={styles.progressBar} style={progressStyle}></div>
       </div>
       <div className={styles.column}>
-        {getSetupRows(studio).map(([key, label, sub, go]) => {
+        {getSetupRows(studio).map(([key, label, subtitle, onSelect]) => {
           const isDone = !!steps[key];
+
           return (
-            <button key={key} className={styles.setupRow} onClick={go}>
+            <button key={key} className={styles.setupRow} onClick={onSelect}>
               <span
                 className={joinClassNames(
                   styles.tick,
@@ -429,7 +444,7 @@ export const SetupCard = ({ studio }: { studio: StudioController }) => {
                 )}
               >
                 <span className={styles.rowLabel}>{label}</span>
-                <span className={styles.rowSub}>{sub}</span>
+                <span className={styles.rowSub}>{subtitle}</span>
               </span>
               <svg
                 className={styles.noShrink}
@@ -455,11 +470,11 @@ export const SetupCard = ({ studio }: { studio: StudioController }) => {
 export const SetupPill = ({ studio }: { studio: StudioController }) => (
   <button
     className={styles.setupPill}
-    onClick={() => studio.setState({ setupMin: false })}
+    onClick={() => studio.setState({ setupMinimised: false })}
     aria-label="Open setup checklist"
   >
     <span className={styles.pillCount}>
-      {getSetupProgress(studio).doneCount + "/4"}
+      {`${getSetupProgress(studio).doneCount}/4`}
     </span>
     <span>Finish setup</span>
   </button>
@@ -499,6 +514,7 @@ const CloseIcon = () => (
 /** "Your booking link is ready to share" — the wide floating card, or (narrow) the Home banner's body. */
 export const LinkCardBody = ({ studio }: { studio: StudioController }) => {
   const { setState, actions } = studio;
+
   return (
     <>
       <div className={styles.cardHead}>
@@ -533,7 +549,7 @@ export const LinkCardBody = ({ studio }: { studio: StudioController }) => {
           className={styles.copyLink}
           onClick={() => {
             copyText(BOOKING_LINK);
-            actions.toastMsg("Booking link copied");
+            actions.showToast("Booking link copied");
             setState({ linkCard: false });
           }}
         >
@@ -556,28 +572,32 @@ export const LinkCard = ({ studio }: { studio: StudioController }) => (
 
 export const Fab = ({ studio }: { studio: StudioController }) => {
   const { state, actions, serviceActions } = studio;
-  const label =
-    state.tab === "services"
-      ? state.svcTab === "addons"
-        ? "Add add-on"
-        : "Add service"
-      : "New booking";
+
+  const getLabel = () => {
+    if (state.tab !== "services") return "New booking";
+
+    return state.servicesTab === "addons" ? "Add add-on" : "Add service";
+  };
+
+  const label = getLabel();
+
   const onAdd = () => {
     if (state.tab === "services") {
-      if (state.svcTab === "addons")
+      if (state.servicesTab === "addons")
         actions.openSheet("addon", {
           addonDraft: {
             id: "",
             categoryId: null,
             name: "",
             price: "",
-            hr: "",
+            hours: "",
             min: "",
           },
         });
-      else serviceActions.openWiz("add");
+      else serviceActions.openWizard("add");
     } else actions.openSheet("add");
   };
+
   return (
     <button className={styles.fab} onClick={onAdd} aria-label={label}>
       <svg

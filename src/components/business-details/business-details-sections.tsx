@@ -9,34 +9,35 @@ import styles from "./business-details.module.css";
 const TYPES: {
   key: BusinessType;
   title: string;
-  desc: string;
+  description: string;
   icon: string;
 }[] = [
   {
     key: "shop",
     title: "Shop / salon",
-    desc: "Clients come to your salon",
+    description: "Clients come to your salon",
     icon: "M4 10v10h16V10M3 10l1.6-6h14.8L21 10M3 10c0 1.7 1.3 3 3 3s3-1.3 3-3c0 1.7 1.3 3 3 3s3-1.3 3-3c0 1.7 1.3 3 3 3s3-1.3 3-3M10 20v-5h4v5",
   },
   {
     key: "chair",
     title: "Chair rental",
-    desc: "You rent a chair in someone else’s salon",
+    description: "You rent a chair in someone else’s salon",
     icon: "M8 3h8a1 1 0 0 1 1 1v6H7V4a1 1 0 0 1 1-1zM5 10h14v4H5zM12 14v4M8 21h8M12 18v3",
   },
   {
     key: "home",
     title: "Home-based",
-    desc: "Clients come to your home",
+    description: "Clients come to your home",
     icon: "M3 11l9-7 9 7M5 9.5V20h14V9.5M10 20v-6h4v6",
   },
   {
     key: "mobile",
     title: "Mobile",
-    desc: "You travel to your clients",
+    description: "You travel to your clients",
     icon: "M3 16V11l2.2-5h9.3l4 5H21v5M3 16h2M9 16h6M19 16h2M7 18a2 2 0 1 0 0-4 2 2 0 0 0 0 4zM17 18a2 2 0 1 0 0-4 2 2 0 0 0 0 4z",
   },
 ];
+
 const RADIUS_OPTIONS = ["3", "5", "10", "15", "20", "30"];
 
 export const ErrorIcon = ({ className }: { className?: string }) => (
@@ -126,7 +127,7 @@ export const Reveal = ({
 
 export interface FieldView {
   id: string;
-  errId: string;
+  errorId: string;
   label: string;
   value: string;
   error: string;
@@ -150,8 +151,9 @@ export const TypeTiles = ({
   onPick: (type: BusinessType) => void;
 }) => (
   <div className={styles.types} role="radiogroup" aria-label="Business type">
-    {TYPES.map(({ key, title, desc, icon }) => {
+    {TYPES.map(({ key, title, description, icon }) => {
       const isOn = type === key;
+
       return (
         <button
           key={key}
@@ -193,7 +195,7 @@ export const TypeTiles = ({
             >
               {title}
             </span>
-            <span className={styles.tileDesc}>{desc}</span>
+            <span className={styles.tileDesc}>{description}</span>
           </span>
           <span
             className={joinClassNames(
@@ -332,9 +334,9 @@ export const LocationCard = ({
             onChange={basePostcode.onChange}
             onBlur={basePostcode.onBlur}
             aria-invalid={basePostcode.error ? "true" : "false"}
-            aria-describedby={basePostcode.errId}
+            aria-describedby={basePostcode.errorId}
           />
-          <FieldError id={basePostcode.errId} error={basePostcode.error} />
+          <FieldError id={basePostcode.errorId} error={basePostcode.error} />
         </div>
         <div>
           <label className={styles.label} htmlFor={radiusId}>
@@ -350,7 +352,7 @@ export const LocationCard = ({
             >
               {RADIUS_OPTIONS.map((miles) => (
                 <option key={miles} value={miles}>
-                  {miles + " miles"}
+                  {`${miles} miles`}
                 </option>
               ))}
             </select>

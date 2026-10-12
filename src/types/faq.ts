@@ -1,4 +1,4 @@
 export interface Faq {
-  q: string;
-  a: string;
+  question: string;
+  answer: string;
 }

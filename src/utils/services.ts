@@ -17,24 +17,31 @@ const toLower = (value: unknown): string => String(value ?? "").toLowerCase();
 export const getSpec = (name: string): ServiceSpec => {
   const key = toLower(name);
   const entry = serviceSpecs[key];
-  if (entry) return { mins: entry[0], add: entry[1], desc: entry[2] };
+
+  if (entry)
+    return { minutes: entry[0], addedPrice: entry[1], description: entry[2] };
+
   // deterministic demo fallback for types without a spec
   let hashValue = 0;
+
   for (let index = 0; index < key.length; index++)
     hashValue = (hashValue * 31 + key.charCodeAt(index)) % 997;
+
   return {
-    mins: 90 + (hashValue % 5) * 30,
-    add: 10 + (hashValue % 6) * 10,
-    desc: "Consultation included · message for options",
+    minutes: 90 + (hashValue % 5) * 30,
+    addedPrice: 10 + (hashValue % 6) * 10,
+    description: "Consultation included · message for options",
   };
 };
 
 export const formatDuration = (minutes: number): string => {
-  const mins = Math.max(15, Math.round(minutes));
-  if (mins < 60) return mins + " min";
-  return mins % 60 === 0
-    ? mins / 60 + " hr"
-    : Math.floor(mins / 60) + " hr " + (mins % 60);
+  const roundedMinutes = Math.max(15, Math.round(minutes));
+
+  if (roundedMinutes < 60) return `${roundedMinutes} min`;
+
+  return roundedMinutes % 60 === 0
+    ? `${roundedMinutes / 60} hr`
+    : `${Math.floor(roundedMinutes / 60)} hr ${roundedMinutes % 60}`;
 };
 
 export const getTypeById = (
@@ -70,6 +77,7 @@ export const getServiceOptions = (
   service: Service | null | undefined,
 ): ServiceOptions => {
   const customisations = service?.customisations;
+
   return {
     size: customisations ? getOnOptions(customisations.size) : [],
     length: customisations ? getOnOptions(customisations.length) : [],
@@ -81,6 +89,7 @@ export const getServiceOptions = (
 
 export const hasStep2 = (service: Service): boolean => {
   const { size, length, colour, own, addons } = getServiceOptions(service);
+
   return !!(
     size.length ||
     length.length ||
@@ -95,27 +104,35 @@ const getLowestDelta = (options: CustomisationOption[]): number =>
 
 export const getFromPrice = (service: Service): number => {
   const { size, length } = getServiceOptions(service);
+
   return service.price + getLowestDelta(size) + getLowestDelta(length);
 };
 
 /** "From" price including the client booking fee — every displayed "from" price uses this. */
 export const getFromWithFee = (service: Service): number => {
   const fromPrice = getFromPrice(service);
+
   return roundPence(fromPrice + bookingFee(fromPrice));
 };
 
 export const getCustomisationSummary = (service: Service): string => {
   const { size, length, own } = getServiceOptions(service);
+
   const getRange = (options: CustomisationOption[]): string =>
     options.length > 1
-      ? options[0]?.label + "–" + options[options.length - 1]?.label
+      ? `${options[0]?.label}–${options[options.length - 1]?.label}`
       : (options[0]?.label ?? "");
+
   const parts: string[] = [];
-  if (size.length) parts.push("Sizes: " + getRange(size));
-  if (length.length) parts.push("Lengths: " + getRange(length));
+
+  if (size.length) parts.push(`Sizes: ${getRange(size)}`);
+
+  if (length.length) parts.push(`Lengths: ${getRange(length)}`);
+
   own.forEach(({ name, options }) =>
-    parts.push(name + ": " + options.map(({ label }) => label).join(", ")),
+    parts.push(`${name}: ${options.map(({ label }) => label).join(", ")}`),
   );
+
   return parts.join(" · ");
 };
 
@@ -129,13 +146,16 @@ export interface MenuSection {
 /** A stylist's active services grouped by their own categories, "Other services" last, flat if none. */
 export const getMenu = (stylist: Stylist | null | undefined): MenuSection[] => {
   const active = getActiveServices(stylist);
+
   const categories = (stylist?.categories ?? [])
     .slice()
     .sort((left, right) => left.sort - right.sort);
+
   if (!categories.length)
     return active.length
       ? [{ id: "all", name: "", items: active, flat: true }]
       : [];
+
   const sections: MenuSection[] = categories
     .map(({ id, name }) => ({
       id,
@@ -143,17 +163,22 @@ export const getMenu = (stylist: Stylist | null | undefined): MenuSection[] => {
       items: active.filter((service) => service.categoryId === id),
     }))
     .filter(({ items }) => items.length);
+
   const rest = active.filter(
     (service) => !categories.some(({ id }) => id === service.categoryId),
   );
+
   if (rest.length)
     sections.push({ id: "other", name: "Other services", items: rest });
+
   return sections;
 };
 
 export const matchTypes = (query: string): ServiceType[] => {
   const needle = toLower(query).trim();
+
   if (!needle) return serviceTypes.slice();
+
   return serviceTypes.filter(
     ({ name, synonyms }) =>
       toLower(name).includes(needle) ||
@@ -170,6 +195,7 @@ export const findService = (
   idOrName: string,
 ): Service | null => {
   const services = stylist?.services ?? [];
+
   return (
     services.find(({ id }) => id === idOrName) ??
     services.find(({ name }) => toLower(name) === toLower(idOrName)) ??

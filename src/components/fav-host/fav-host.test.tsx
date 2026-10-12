@@ -9,6 +9,7 @@ const FAVS_KEY = "tw_favs_nia.okafor@gmail.com";
 
 const HeartPage = () => {
   const { isFavourite, toggleFavourite } = useFavourites();
+
   return (
     <>
       <button
@@ -39,20 +40,23 @@ describe("FavHost (tw-fav.js port)", () => {
     sessionStorage.clear();
     localStorage.clear();
   });
+
   afterEach(() => vi.useRealTimers());
 
   it("asks guests to log in and remembers the stylist for after log in", async () => {
     renderWithStore(<HeartPage />, "/search");
     fireEvent.click(screen.getByRole("button", { name: "Save Amara" }));
+
     expect(
       screen.getByRole("dialog", { name: "Log in to save stylists" }),
     ).toBeInTheDocument();
 
     fireEvent.click(screen.getByRole("button", { name: "Log in" }));
     expect(sessionStorage.getItem("tw_fav_pending")).toBe("amara-beauty");
+    const encodedReturn = encodeURIComponent("/search?login=1");
+
     expect(screen.getByTestId("location")).toHaveTextContent(
-      "/login?screen=cust-email&return=" +
-        encodeURIComponent("/search?login=1"),
+      `/login?screen=cust-email&return=${encodedReturn}`,
     );
   });
 
@@ -63,10 +67,13 @@ describe("FavHost (tw-fav.js port)", () => {
 
     fireEvent.click(heart);
     expect(heart).toHaveTextContent("saved");
+
     expect(JSON.parse(localStorage.getItem(FAVS_KEY) ?? "[]")).toEqual([
       "amara-beauty",
     ]);
+
     expect(screen.getByRole("status")).toHaveTextContent("Saved to favourites");
+
     expect(screen.getByRole("link", { name: "View" })).toHaveAttribute(
       "href",
       "/account?section=favourites",
@@ -74,9 +81,11 @@ describe("FavHost (tw-fav.js port)", () => {
 
     fireEvent.click(heart);
     expect(heart).toHaveTextContent("not saved");
+
     expect(screen.getByRole("status")).toHaveTextContent(
       "Removed from favourites",
     );
+
     fireEvent.click(screen.getByRole("button", { name: "Undo" }));
     expect(heart).toHaveTextContent("saved");
 
@@ -90,9 +99,11 @@ describe("FavHost (tw-fav.js port)", () => {
     sessionStorage.setItem("tw_fav_pending", "amara-beauty");
     renderWithStore(<HeartPage />, "/search?login=1");
     await flush(0);
+
     expect(
       screen.getByRole("button", { name: "Save Amara" }),
     ).toHaveTextContent("saved");
+
     expect(sessionStorage.getItem("tw_fav_pending")).toBeNull();
     await flush(700);
     expect(screen.getByRole("status")).toHaveTextContent("Saved to favourites");
@@ -100,9 +111,11 @@ describe("FavHost (tw-fav.js port)", () => {
 
   it("keeps ?favs= in memory and shows pinned board toasts", async () => {
     renderWithStore(<HeartPage />, "/search?favs=amara-beauty&favtoast=copied");
+
     expect(
       screen.getByRole("button", { name: "Save Amara" }),
     ).toHaveTextContent("saved");
+
     await flush(500);
     expect(screen.getByRole("status")).toHaveTextContent("Link copied");
     await flush(10000);
@@ -115,7 +128,9 @@ describe("FavHost (tw-fav.js port)", () => {
     renderWithStore(<HeartPage />, "/search");
     fireEvent.click(screen.getByRole("link", { name: "Nia Okafor" }));
     const menu = screen.getByRole("menu", { name: "Nia Okafor" });
+
     expect(menu).toHaveTextContent("nia.okafor@gmail.com");
+
     expect(
       screen.getAllByRole("menuitem").map((item) => item.textContent),
     ).toEqual([
@@ -125,6 +140,7 @@ describe("FavHost (tw-fav.js port)", () => {
       "Help & support",
       "Log out",
     ]);
+
     fireEvent.keyDown(document, { key: "Escape" });
     expect(screen.queryByRole("menu")).not.toBeInTheDocument();
 
@@ -136,6 +152,7 @@ describe("FavHost (tw-fav.js port)", () => {
 
   it("a router <Link> trigger opens the menu instead of navigating", async () => {
     sessionStorage.setItem("tw_cust", "1");
+
     renderWithStore(
       <>
         <Link to="/account" data-tw-acct="1" aria-label="Nia Okafor">
@@ -145,6 +162,7 @@ describe("FavHost (tw-fav.js port)", () => {
       </>,
       "/",
     );
+
     fireEvent.click(screen.getByRole("link", { name: "Nia Okafor" }));
     await flush(50);
     expect(screen.getByRole("menu")).toBeInTheDocument();

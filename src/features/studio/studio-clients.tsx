@@ -72,14 +72,14 @@ const CameraIcon = ({
 );
 
 const NameBadges = ({
-  hasSens,
+  hasSensitivities,
   isBlocked,
 }: {
-  hasSens: boolean;
+  hasSensitivities: boolean;
   isBlocked: boolean;
 }) => (
   <>
-    {hasSens && (
+    {hasSensitivities && (
       <span className={styles.sens} title="Has an allergy or sensitivity">
         <WarnIcon size="14" stroke="currentColor" strokeWidth="1.5" />
       </span>
@@ -97,13 +97,17 @@ export const ClientProfile = ({
   variant: "page" | "sheet";
 }) => {
   const { profile } = view;
+
   if (!profile) return null;
+
   const isSheet = variant === "sheet";
   const card = isSheet ? styles.sheetCard : styles.card;
+
   const nextCard = joinClassNames(
     card,
     isSheet ? styles.sheetCardNext : styles.cardNext,
   );
+
   return (
     <>
       <section className={card}>
@@ -135,40 +139,42 @@ export const ClientProfile = ({
                 <span className={styles.blocked}>Blocked</span>
               )}
             </div>
-            <div className={styles.sub}>{profile.sub}</div>
+            <div className={styles.sub}>{profile.subtitle}</div>
             <div className={styles.subPlain}>{profile.lastVisit}</div>
           </div>
         </div>
         {profile.contacts.length > 0 && (
           <div className={styles.contacts}>
-            {profile.contacts.map(({ key, label, value, acts }) => (
+            {profile.contacts.map(({ key, label, value, contactActions }) => (
               <div key={key} className={styles.contactRow}>
                 <div className={styles.grow}>
                   <div className={styles.label}>{label}</div>
                   <div className={styles.value}>{value}</div>
                 </div>
-                {acts.map(({ key: actKey, label: actLabel, href, d }) => (
-                  <a
-                    key={actKey}
-                    className={styles.contactAction}
-                    href={href}
-                    aria-label={actLabel}
-                    title={actLabel}
-                  >
-                    <svg
-                      width="16"
-                      height="16"
-                      viewBox="0 0 24 24"
-                      fill="none"
-                      stroke="currentColor"
-                      strokeWidth="1.7"
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
+                {contactActions.map(
+                  ({ key: actionKey, label: actionLabel, href, iconPath }) => (
+                    <a
+                      key={actionKey}
+                      className={styles.contactAction}
+                      href={href}
+                      aria-label={actionLabel}
+                      title={actionLabel}
                     >
-                      <path d={d}></path>
-                    </svg>
-                  </a>
-                ))}
+                      <svg
+                        width="16"
+                        height="16"
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="currentColor"
+                        strokeWidth="1.7"
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                      >
+                        <path d={iconPath}></path>
+                      </svg>
+                    </a>
+                  ),
+                )}
               </div>
             ))}
           </div>
@@ -176,8 +182,7 @@ export const ClientProfile = ({
         {profile.isBlocked && (
           <div className={styles.blockedNote}>
             <div className={styles.blockedText}>
-              {profile.first +
-                " can't book online. You can still book them yourself."}
+              {`${profile.first} can't book online. You can still book them yourself.`}
             </div>
             {/* the prototype's cpUnblock is not defined, so the button does nothing */}
             <button className={styles.textButton}>Unblock</button>
@@ -185,7 +190,7 @@ export const ClientProfile = ({
         )}
         <div className={styles.actions}>
           <button className={styles.book} onClick={view.bookSelected}>
-            {"Book " + profile.first}
+            {`Book ${profile.first}`}
           </button>
           <button className={styles.edit} onClick={view.editSelected}>
             Edit
@@ -203,7 +208,7 @@ export const ClientProfile = ({
           </button>
         </div>
       </section>
-      {!!profile.sens && (
+      {!!profile.sensitivities && (
         <div className={styles.sensBox}>
           <WarnIcon
             className={styles.sensIcon}
@@ -213,7 +218,7 @@ export const ClientProfile = ({
           />
           <div className={styles.grow}>
             <div className={styles.sensLabel}>Allergy or sensitivity</div>
-            <div className={styles.sensText}>{profile.sens}</div>
+            <div className={styles.sensText}>{profile.sensitivities}</div>
           </div>
           <button className={styles.sensEdit} onClick={view.editSelected}>
             Edit
@@ -224,7 +229,7 @@ export const ClientProfile = ({
         <div className={styles.sectionHead}>
           <div className={styles.h3}>Hair notes</div>
           <button className={styles.inlineLink} onClick={view.editSelected}>
-            {profile.hairAct}
+            {profile.hairActionLabel}
           </button>
         </div>
         <div className={styles.private}>
@@ -234,10 +239,10 @@ export const ClientProfile = ({
           <div className={styles.products}>{profile.products}</div>
         ) : (
           <div className={styles.noNotes}>
-            {"Add anything to remember about " + profile.first + "'s hair."}
+            {`Add anything to remember about ${profile.first}'s hair.`}
           </div>
         )}
-        {!profile.sens && (
+        {!profile.sensitivities && (
           <button className={styles.addSens} onClick={view.editSelected}>
             Add allergy or sensitivity
           </button>
@@ -261,10 +266,10 @@ export const ClientProfile = ({
             <div
               className={joinClassNames(
                 styles.tileValue,
-                profile.hasLateCx && styles.tileValueWarn,
+                profile.hasLateCancel && styles.tileValueWarn,
               )}
             >
-              {profile.lateCx}
+              {profile.lateCancel}
             </div>
             <div className={styles.tileLabel}>Late cancellations</div>
           </div>
@@ -274,11 +279,11 @@ export const ClientProfile = ({
         <div className={styles.apptHead}>
           <div className={styles.h3}>Appointments</div>
           <div className={styles.segs}>
-            {profile.apptTabs.map(({ key, label, isOn, go }) => (
+            {profile.appointmentTabs.map(({ key, label, isOn, onSelect }) => (
               <button
                 key={key}
                 className={joinClassNames(styles.seg, isOn && styles.segOn)}
-                onClick={go}
+                onClick={onSelect}
               >
                 {label}
               </button>
@@ -289,18 +294,18 @@ export const ClientProfile = ({
           {profile.appointments.map(
             ({
               key,
-              svc,
+              service,
               when,
               price,
               isStruck,
               status,
-              statusBg,
-              statusFg,
+              statusBackground,
+              statusForeground,
               open,
             }) => (
               <button key={key} className={styles.appt} onClick={open}>
                 <span className={styles.grow}>
-                  <span className={styles.apptSvc}>{svc}</span>
+                  <span className={styles.apptSvc}>{service}</span>
                   <span className={styles.apptWhen}>{when}</span>
                 </span>
                 <span className={styles.apptEnd}>
@@ -315,8 +320,8 @@ export const ClientProfile = ({
                   <span
                     className={styles.apptStatus}
                     style={asStyle({
-                      "--st-bg": statusBg,
-                      "--st-fg": statusFg,
+                      "--st-bg": statusBackground,
+                      "--st-fg": statusForeground,
                     })}
                   >
                     {status}
@@ -326,7 +331,9 @@ export const ClientProfile = ({
             ),
           )}
           {profile.appointments.length === 0 && (
-            <div className={styles.apptEmpty}>{profile.apptEmptyMsg}</div>
+            <div className={styles.apptEmpty}>
+              {profile.appointmentsEmptyMessage}
+            </div>
           )}
         </div>
       </section>
@@ -347,14 +354,15 @@ export const ClientProfile = ({
 
 /** Studio → Clients (prototype Studio.dc.html lines 913–1100). */
 export const StudioClients = ({ studio }: { studio: StudioController }) => {
-  const { state, setState, isWide, isDesk } = studio;
+  const { state, setState, isWide, isDesktop } = studio;
   const view = getClientsView(studio);
+
   return (
     <div
       className={joinClassNames(
         styles.clients,
         isWide && styles.wide,
-        isDesk && styles.desk,
+        isDesktop && styles.desk,
       )}
       data-screen-label="Clients"
     >
@@ -387,15 +395,17 @@ export const StudioClients = ({ studio }: { studio: StudioController }) => {
               </svg>
               <input
                 className={styles.searchInput}
-                value={state.cliQ}
-                onChange={(event) => setState({ cliQ: event.target.value })}
+                value={state.clientListQuery}
+                onChange={(event) =>
+                  setState({ clientListQuery: event.target.value })
+                }
                 placeholder="Search"
                 aria-label="Search clients by name, phone or email"
               />
-              {!!state.cliQ && (
+              {!!state.clientListQuery && (
                 <button
                   className={styles.clearSearch}
-                  onClick={() => setState({ cliQ: "" })}
+                  onClick={() => setState({ clientListQuery: "" })}
                   aria-label="Clear search"
                 >
                   <svg
@@ -427,8 +437,10 @@ export const StudioClients = ({ studio }: { studio: StudioController }) => {
               </svg>
               <select
                 className={styles.sortSelect}
-                value={state.cliSort}
-                onChange={(event) => setState({ cliSort: event.target.value })}
+                value={state.clientSort}
+                onChange={(event) =>
+                  setState({ clientSort: event.target.value })
+                }
                 aria-label="Sort clients"
               >
                 <option value="next">Next booking</option>
@@ -466,14 +478,14 @@ export const StudioClients = ({ studio }: { studio: StudioController }) => {
             </button>
           </div>
           <div className={styles.filters}>
-            {view.filters.map(({ key, label, count, isOn, go }) => (
+            {view.filters.map(({ key, label, count, isOn, onSelect }) => (
               <button
                 key={key}
                 className={joinClassNames(
                   styles.filter,
                   isOn && styles.filterOn,
                 )}
-                onClick={go}
+                onClick={onSelect}
               >
                 {label}
                 <span className={styles.filterCount}>{count}</span>
@@ -506,7 +518,7 @@ export const StudioClients = ({ studio }: { studio: StudioController }) => {
                     <button
                       key={row.key}
                       className={styles.tableRow}
-                      style={asStyle({ "--delay": row.dly })}
+                      style={asStyle({ "--delay": row.delay })}
                       onClick={row.open}
                     >
                       <span className={styles.clientCell}>
@@ -525,7 +537,7 @@ export const StudioClients = ({ studio }: { studio: StudioController }) => {
                           <span className={styles.nameLine}>
                             <span className={styles.name}>{row.name}</span>
                             <NameBadges
-                              hasSens={row.hasSens}
+                              hasSensitivities={row.hasSensitivities}
                               isBlocked={row.isBlocked}
                             />
                           </span>
@@ -547,7 +559,7 @@ export const StudioClients = ({ studio }: { studio: StudioController }) => {
                           row.hasNext && styles.hasNext,
                         )}
                       >
-                        {row.upCount}
+                        {row.upcomingCount}
                       </span>
                       <span className={styles.spendCell}>{row.spend}</span>
                     </button>
@@ -559,7 +571,7 @@ export const StudioClients = ({ studio }: { studio: StudioController }) => {
                   <button
                     key={row.key}
                     className={styles.cardRow}
-                    style={asStyle({ "--delay": row.dly })}
+                    style={asStyle({ "--delay": row.delay })}
                     onClick={row.open}
                   >
                     {row.img ? (
@@ -571,7 +583,7 @@ export const StudioClients = ({ studio }: { studio: StudioController }) => {
                       <span className={styles.nameLine}>
                         <span className={styles.name}>{row.name}</span>
                         <NameBadges
-                          hasSens={row.hasSens}
+                          hasSensitivities={row.hasSensitivities}
                           isBlocked={row.isBlocked}
                         />
                       </span>
@@ -599,7 +611,7 @@ export const StudioClients = ({ studio }: { studio: StudioController }) => {
         <div className={styles.profilePage}>
           <button
             className={joinClassNames(styles.back, styles.backProfile)}
-            onClick={() => setState({ cliSel: null })}
+            onClick={() => setState({ selectedClientId: null })}
           >
             <BackIcon />
             Clients

@@ -40,6 +40,7 @@ export const BookingPage = () => {
   // page-wide helmet rules (16px inputs on mobile, focus borders, overflow) apply while Booking is mounted
   useLayoutEffect(() => {
     document.documentElement.classList.add("booking-page");
+
     return () => document.documentElement.classList.remove("booking-page");
   }, []);
 
@@ -49,7 +50,7 @@ export const BookingPage = () => {
       className={joinClassNames(helmet.bkpage, styles.page)}
     >
       <BookingNav
-        exitHref={"/stylist?stylist=" + stylist.id}
+        exitHref={`/stylist?stylist=${stylist.id}`}
         onLeaveLink={actions.onLeaveLink}
         holdBar={
           holdOn && (

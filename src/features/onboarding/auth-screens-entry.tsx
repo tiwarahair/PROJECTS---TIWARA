@@ -1,28 +1,33 @@
 import type { KeyboardEvent } from "react";
 import { joinClassNames } from "../../utils/class-names";
 import { CHOOSER_PATHS } from "./onboarding-data";
-import { ObTurnstile } from "./ob-turnstile";
-import { PasswordInput, SubmitButton, TextField } from "./ob-fields";
+import { OnboardingTurnstile } from "./onboarding-turnstile";
+import { PasswordInput, SubmitButton, TextField } from "./onboarding-fields";
 import type { ScreenProps } from "./screen-props";
 import styles from "./auth-screens.module.css";
 
 export const WelcomeScreen = ({ onboarding, layout }: ScreenProps) => {
   const { actions } = onboarding;
+
   const goWizard = () => {
     actions.setState({ audience: "pro" });
-    actions.go("w1");
+    actions.goTo("w1");
   };
+
   const goProLogin = () => {
     actions.setState({ audience: "pro" });
-    actions.go("pro-email");
+    actions.goTo("pro-email");
   };
+
   return (
     <>
       <h1
         className={joinClassNames(
           styles.welcomeTitle,
           layout.isDark ? styles.welcomeTitleDark : styles.welcomeTitleLight,
-          layout.desk ? styles.welcomeTitleDesk : styles.welcomeTitleMobile,
+          layout.isDesktop
+            ? styles.welcomeTitleDesk
+            : styles.welcomeTitleMobile,
         )}
       >
         Run your hair
@@ -48,34 +53,36 @@ export const WelcomeScreen = ({ onboarding, layout }: ScreenProps) => {
 
 export const ChooserScreen = ({ onboarding }: ScreenProps) => {
   const { actions } = onboarding;
+
   const cards = [
     {
       key: "c",
-      d: CHOOSER_PATHS.customer,
+      iconPath: CHOOSER_PATHS.customer,
       title: "For customers",
-      sub: "Book afro-hair stylists near you",
+      subtitle: "Book afro-hair stylists near you",
       audience: "customer" as const,
       screen: "cust-email",
     },
     {
       key: "p",
-      d: CHOOSER_PATHS.pro,
+      iconPath: CHOOSER_PATHS.pro,
       title: "For professionals",
-      sub: "Manage and grow your business",
+      subtitle: "Manage and grow your business",
       audience: "pro" as const,
       screen: "pro-email",
     },
   ];
+
   return (
     <>
       <h1 className={styles.chooserTitle}>Log in or sign up</h1>
       <div className={styles.chooserCards}>
-        {cards.map(({ key, d, title, sub, audience, screen }) => (
+        {cards.map(({ key, iconPath, title, subtitle, audience, screen }) => (
           <button
             key={key}
             onClick={() => {
               actions.setState({ audience });
-              actions.go(screen);
+              actions.goTo(screen);
             }}
             className={styles.chooserCard}
           >
@@ -90,12 +97,12 @@ export const ChooserScreen = ({ onboarding }: ScreenProps) => {
                 strokeLinecap="round"
                 strokeLinejoin="round"
               >
-                <path d={d}></path>
+                <path d={iconPath}></path>
               </svg>
             </span>
             <span className={styles.chooserText}>
               <span className={styles.chooserCardTitle}>{title}</span>
-              <span className={styles.chooserCardSub}>{sub}</span>
+              <span className={styles.chooserCardSub}>{subtitle}</span>
             </span>
             <svg
               width="20"
@@ -121,6 +128,7 @@ export const ChooserScreen = ({ onboarding }: ScreenProps) => {
 const SocialButtons = ({ onboarding, layout }: ScreenProps) => {
   const { state, actions } = onboarding;
   const isPro = layout.screen === "pro-email";
+
   return (
     <>
       <div className={styles.orRule}>
@@ -188,38 +196,53 @@ export const EmailScreen = (props: ScreenProps) => {
   const { screen, isDark } = layout;
   const isPro = screen === "pro-email";
   const isForgot = screen === "forgot-email";
+
   const enterSubmit = (event: KeyboardEvent) => {
     if (event.key === "Enter") actions.submit();
   };
+
   const switchTo = (audience: "customer" | "pro", target: string) => {
     actions.setState({ audience });
-    actions.go(target);
+    actions.goTo(target);
   };
+
+  const customerFooter =
+    screen === "cust-email"
+      ? [
+          {
+            key: "a",
+            text: "Are you a stylist?",
+            linkLabel: "Log in as a professional",
+            onSelect: () => switchTo("pro", "pro-email"),
+          },
+        ]
+      : [];
+
   const footer = isPro
     ? [
         {
           key: "a",
           text: "Booking an appointment?",
-          cta: "Log in as a customer",
-          go: () => switchTo("customer", "cust-email"),
+          linkLabel: "Log in as a customer",
+          onSelect: () => switchTo("customer", "cust-email"),
         },
         {
           key: "b",
           text: "New to Tiwára’s House?",
-          cta: "List your business",
-          go: () => switchTo("pro", "welcome"),
+          linkLabel: "List your business",
+          onSelect: () => switchTo("pro", "welcome"),
         },
       ]
-    : screen === "cust-email"
-      ? [
-          {
-            key: "a",
-            text: "Are you a stylist?",
-            cta: "Log in as a professional",
-            go: () => switchTo("pro", "pro-email"),
-          },
-        ]
-      : [];
+    : customerFooter;
+
+  const customerTitle = isForgot
+    ? "Reset your password"
+    : "Tiwára’s House for customers";
+
+  const customerLead = isForgot
+    ? "Enter your email and we’ll send you a reset link."
+    : "Log in or create an account to book.";
+
   return (
     <>
       <h1
@@ -228,18 +251,10 @@ export const EmailScreen = (props: ScreenProps) => {
           isPro ? styles.emailTitlePro : styles.emailTitleCustomer,
         )}
       >
-        {isPro
-          ? "Tiwára’s House for professionals"
-          : isForgot
-            ? "Reset your password"
-            : "Tiwára’s House for customers"}
+        {isPro ? "Tiwára’s House for professionals" : customerTitle}
       </h1>
       <p className={styles.lead}>
-        {isPro
-          ? "Log in to manage your bookings."
-          : isForgot
-            ? "Enter your email and we’ll send you a reset link."
-            : "Log in or create an account to book."}
+        {isPro ? "Log in to manage your bookings." : customerLead}
       </p>
       <TextField
         id="ob-email"
@@ -247,7 +262,7 @@ export const EmailScreen = (props: ScreenProps) => {
         type="email"
         inputMode="email"
         autoComplete="email"
-        value={state.f.email}
+        value={state.form.email}
         onChange={(event) => actions.setField("email", event.target.value)}
         onBlur={() => actions.touch("email")}
         onKeyDown={enterSubmit}
@@ -258,7 +273,7 @@ export const EmailScreen = (props: ScreenProps) => {
         errorLive
         animated
       />
-      {!!state.err.noBiz && (
+      {!!state.serverErrors.noBusiness && (
         <div role="alert" className={styles.noBusiness}>
           <div className={styles.noBusinessTitle}>
             There’s no business account for this email
@@ -275,8 +290,8 @@ export const EmailScreen = (props: ScreenProps) => {
         </div>
       )}
       {view.turnstileShown && (
-        <ObTurnstile
-          ts={state.ts}
+        <OnboardingTurnstile
+          status={state.turnstile}
           isDark={isDark}
           onCheck={actions.checkTurnstile}
         />
@@ -290,11 +305,11 @@ export const EmailScreen = (props: ScreenProps) => {
       />
       {!isForgot && <SocialButtons {...props} />}
       <div className={styles.emailFooter}>
-        {footer.map(({ key, text, cta, go }) => (
+        {footer.map(({ key, text, linkLabel, onSelect }) => (
           <div key={key}>
             {text}{" "}
-            <button onClick={go} className={styles.textLink}>
-              {cta}
+            <button onClick={onSelect} className={styles.textLink}>
+              {linkLabel}
             </button>
           </div>
         ))}
@@ -305,15 +320,16 @@ export const EmailScreen = (props: ScreenProps) => {
 
 export const PasswordScreen = ({ onboarding, layout, view }: ScreenProps) => {
   const { state, actions } = onboarding;
-  const shownError = view.shown.pw ?? "";
+  const shownError = view.shown.password ?? "";
+
   return (
     <>
       <h1 className={styles.passwordTitle}>Welcome back</h1>
       <div className={styles.emailChip}>
-        <span className={styles.emailChipText}>{state.f.email}</span>
+        <span className={styles.emailChipText}>{state.form.email}</span>
         <button
           onClick={() =>
-            actions.go(layout.isPro ? "pro-email" : "cust-email", "back")
+            actions.goTo(layout.isPro ? "pro-email" : "cust-email", "back")
           }
           className={styles.change}
         >
@@ -325,10 +341,12 @@ export const PasswordScreen = ({ onboarding, layout, view }: ScreenProps) => {
       </label>
       <PasswordInput
         id="ob-pw"
-        value={state.f.pw}
-        shown={state.pwShow}
-        onToggle={() => actions.setState({ pwShow: !state.pwShow })}
-        onChange={(event) => actions.setField("pw", event.target.value)}
+        value={state.form.password}
+        shown={state.passwordShown}
+        onToggle={() =>
+          actions.setState({ passwordShown: !state.passwordShown })
+        }
+        onChange={(event) => actions.setField("password", event.target.value)}
         onKeyDown={(event) => {
           if (event.key === "Enter") actions.submit();
         }}
@@ -347,14 +365,14 @@ export const PasswordScreen = ({ onboarding, layout, view }: ScreenProps) => {
         {shownError}
       </div>
       <button
-        onClick={() => actions.go("forgot-email")}
+        onClick={() => actions.goTo("forgot-email")}
         className={styles.forgot}
       >
         Forgot password?
       </button>
       {view.turnstileShown && (
-        <ObTurnstile
-          ts={state.ts}
+        <OnboardingTurnstile
+          status={state.turnstile}
           isDark={layout.isDark}
           onCheck={actions.checkTurnstile}
         />

@@ -12,12 +12,13 @@ interface MobileSummaryProps {
 export const MobileSummary = ({ booking }: MobileSummaryProps) => {
   const { state, service, money, nextDisabled, actions } = booking;
   const { step } = state;
+
   return (
     <div className={joinClassNames(helmet.mobsum, styles.bar)}>
       <div className={styles.text}>
         <div className={styles.total}>{service ? money.total : "—"}</div>
         <div className={styles.line}>
-          {(service ? service.name : "—") + " · " + money.duration}
+          {`${service ? service.name : "—"} · ${money.duration}`}
         </div>
       </div>
       <div className={styles.actions}>

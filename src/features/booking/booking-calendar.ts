@@ -15,32 +15,37 @@ export const getCalendarDays = (
   stylist: Stylist,
   year: number,
   month: number,
-  mins: number,
+  minutes: number,
   selectedDay: number | null,
 ): CalendarDay[] => {
   const daysIn = new Date(year, month + 1, 0).getDate();
-  const firstDow = (new Date(year, month, 1).getDay() + 6) % 7;
+  const firstWeekday = (new Date(year, month, 1).getDay() + 6) % 7;
   const today = new Date();
+
   today.setHours(0, 0, 0, 0);
   const days: CalendarDay[] = [];
-  for (let index = 0; index < firstDow; index++)
+
+  for (let index = 0; index < firstWeekday; index++)
     days.push({
-      key: "blank-" + index,
+      key: `blank-${index}`,
       label: "",
       day: null,
       off: true,
       selected: false,
     });
+
   for (let day = 1; day <= daysIn; day++) {
     const date = new Date(year, month, day);
+
     days.push({
-      key: "day-" + day,
-      label: "" + day,
+      key: `day-${day}`,
+      label: `${day}`,
       day,
-      off: date < today || !slotsFor(stylist, date, mins).length,
+      off: date < today || !slotsFor(stylist, date, minutes).length,
       selected: selectedDay === day,
     });
   }
+
   return days;
 };
 
@@ -49,10 +54,12 @@ export const getSlots = (
   year: number,
   month: number,
   day: number | null,
-  mins: number,
-): string[] => (day ? slotsFor(stylist, new Date(year, month, day), mins) : []);
+  minutes: number,
+): string[] =>
+  day ? slotsFor(stylist, new Date(year, month, day), minutes) : [];
 
 const WEEKDAY_KEYS = ["sun", "mon", "tue", "wed", "thu", "fri", "sat"] as const;
+
 const WEEKDAY_PLURALS = [
   "Sundays",
   "Mondays",
@@ -68,17 +75,19 @@ export const getClosedLine = ({ availability }: Stylist): string => {
   const closed = [1, 2, 3, 4, 5, 6, 0]
     .filter((index) => {
       const key = WEEKDAY_KEYS[index];
+
       return !(key && (availability ?? {})[key]?.length);
     })
     .map((index) => WEEKDAY_PLURALS[index] ?? "");
+
   if (!closed.length) return "";
-  return (
-    " Closed " +
-    (closed.length > 1
-      ? closed.slice(0, -1).join(", ") + " and " + closed[closed.length - 1]
-      : closed[0]) +
-    "."
-  );
+
+  const closedDays =
+    closed.length > 1
+      ? `${closed.slice(0, -1).join(", ")} and ${closed[closed.length - 1]}`
+      : closed[0];
+
+  return ` Closed ${closedDays}.`;
 };
 
 /** "Wed 14 Oct" */
@@ -101,7 +110,7 @@ export const getWhenLine = (
   time: string | null,
 ): string =>
   day
-    ? formatShortDate(year, month, day) + (time ? " · " + time : "")
+    ? formatShortDate(year, month, day) + (time ? ` · ${time}` : "")
     : "Not chosen yet";
 
 /** "Wednesday 14 October" */
@@ -123,4 +132,4 @@ export const formatMonthTitle = (year: number, month: number): string =>
     year: "numeric",
   });
 
-export const DOW_LABELS = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
+export const WEEKDAY_LABELS = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];

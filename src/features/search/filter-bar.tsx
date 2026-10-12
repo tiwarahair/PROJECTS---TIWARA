@@ -24,18 +24,23 @@ export const FilterBar = ({ search }: FilterBarProps) => {
   const { state, selection, place, cards, actions } = search;
   const count = cards.length;
   const locationName = place.current ? "you" : place.name;
+  const pluralSuffix = count === 1 ? "" : "s";
+  const serviceText = selection.name ? ` for ${selection.name}` : "";
+
   const hasFilter =
     selection.has ||
     !place.current ||
-    !!state.q.date ||
+    !!state.query.date ||
     state.time !== "any" ||
     state.venues.length > 0 ||
     state.maxPrice != null ||
     state.radius !== 10;
+
   const filterCount =
     state.venues.length +
     (state.maxPrice != null ? 1 : 0) +
     (state.radius !== 10 ? 1 : 0);
+
   const sortLabel = (SORTS.find(([key]) => key === state.sort) ||
     SORTS[0])?.[1];
 
@@ -49,6 +54,7 @@ export const FilterBar = ({ search }: FilterBarProps) => {
         >
           {VENUES.map((venue) => {
             const isOn = state.venues.includes(venue);
+
             return (
               <button
                 key={venue}
@@ -80,7 +86,7 @@ export const FilterBar = ({ search }: FilterBarProps) => {
                 state.maxPrice != null && controls.chipOn,
               )}
             >
-              {state.maxPrice != null ? "Up to £" + state.maxPrice : "Price"}
+              {state.maxPrice != null ? `Up to £${state.maxPrice}` : "Price"}
               <ChevronIcon className={styles.iconBlock} />
             </button>
             {state.priceOpen && (
@@ -137,7 +143,7 @@ export const FilterBar = ({ search }: FilterBarProps) => {
             <button
               type="button"
               onClick={actions.toggleDistance}
-              aria-expanded={state.distOpen ? "true" : "false"}
+              aria-expanded={state.distanceOpen ? "true" : "false"}
               aria-haspopup="listbox"
               className={joinClassNames(
                 controls.chip,
@@ -145,10 +151,10 @@ export const FilterBar = ({ search }: FilterBarProps) => {
                 state.radius !== 10 && controls.chipOn,
               )}
             >
-              {"Within " + state.radius + " miles"}
+              {`Within ${state.radius} miles`}
               <ChevronIcon className={styles.iconBlock} />
             </button>
-            {state.distOpen && (
+            {state.distanceOpen && (
               <>
                 <div
                   onClick={actions.closeDistance}
@@ -162,9 +168,10 @@ export const FilterBar = ({ search }: FilterBarProps) => {
                 >
                   {RADII.map((radius) => {
                     const isSelected = state.radius === radius;
+
                     return (
                       <button
-                        key={"d" + radius}
+                        key={`d${radius}`}
                         type="button"
                         role="option"
                         aria-selected={isSelected ? "true" : "false"}
@@ -175,7 +182,7 @@ export const FilterBar = ({ search }: FilterBarProps) => {
                         )}
                       >
                         <span className={styles.optionLabel}>
-                          {"Within " + radius + " miles"}
+                          {`Within ${radius} miles`}
                         </span>
                         {isSelected && (
                           <CheckIcon className={styles.iconBlock} />
@@ -204,19 +211,10 @@ export const FilterBar = ({ search }: FilterBarProps) => {
             className={joinClassNames(helmet.rlLine, styles.resultLine)}
           >
             <span className={helmet.rlFull}>
-              {count +
-                " stylist" +
-                (count === 1 ? "" : "s") +
-                (selection.name ? " for " + selection.name : "") +
-                " near " +
-                locationName}
+              {`${count} stylist${pluralSuffix}${serviceText} near ${locationName}`}
             </span>
             <span className={helmet.rlShort}>
-              {count +
-                " stylist" +
-                (count === 1 ? "" : "s") +
-                " near " +
-                locationName}
+              {`${count} stylist${pluralSuffix} near ${locationName}`}
             </span>
           </div>
           <div className={styles.actions}>
@@ -239,7 +237,7 @@ export const FilterBar = ({ search }: FilterBarProps) => {
                 <circle cx="16" cy="7" r="2"></circle>
                 <circle cx="10" cy="17" r="2"></circle>
               </svg>
-              {"Filters" + (filterCount ? " · " + filterCount : "")}
+              {`Filters${filterCount ? ` · ${filterCount}` : ""}`}
             </button>
             <div className={styles.sortAnchor}>
               <button
@@ -249,7 +247,7 @@ export const FilterBar = ({ search }: FilterBarProps) => {
                 aria-expanded={state.sortOpen ? "true" : "false"}
                 className={styles.pillButton}
               >
-                {"Sort: " + sortLabel}
+                {`Sort: ${sortLabel}`}
                 <ChevronIcon className={styles.iconBlock} />
               </button>
               {state.sortOpen && (
@@ -266,6 +264,7 @@ export const FilterBar = ({ search }: FilterBarProps) => {
                   >
                     {SORTS.map(([key, label]) => {
                       const isSelected = state.sort === key;
+
                       return (
                         <button
                           key={key}

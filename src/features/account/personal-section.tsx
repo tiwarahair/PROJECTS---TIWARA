@@ -10,6 +10,12 @@ import ui from "./account-ui.module.css";
 
 const EMPTY_CODE = ["", "", "", "", "", ""];
 
+const getCodeBoxClass = (codeError: string, digit: string) => {
+  if (codeError) return styles.codeBoxErr;
+
+  return digit ? styles.codeBoxFilled : styles.codeBoxEmpty;
+};
+
 interface PersonalSectionProps {
   account: AccountController;
   initials: string;
@@ -20,27 +26,44 @@ export const PersonalSection = ({
   account: { state, refs, actions },
   initials,
 }: PersonalSectionProps) => {
-  const { me, edit, draft, err, emailStep, code, codeErr, shake, resendIn } =
-    state;
+  const {
+    profile,
+    edit,
+    draft,
+    fieldErrors,
+    emailStep,
+    code,
+    codeError,
+    shake,
+    resendIn,
+  } = state;
+
   const { setState, focusLater, showToast, saveEdit } = actions;
   const codeStep = edit === "email" && emailStep === "code";
+  const resendSeconds = String(resendIn).padStart(2, "0");
+
   const rows: [EditKey, string, string][] = [
-    ["name", "Full name", me.first + " " + me.last],
-    ["email", "Email", me.email],
-    ["mob", "Mobile", "+44 " + me.mob],
+    ["name", "Full name", `${profile.first} ${profile.last}`],
+    ["email", "Email", profile.email],
+    ["mobile", "Mobile", `+44 ${profile.mobile}`],
   ];
+
   const setDraft =
     (key: keyof Profile) => (event: ChangeEvent<HTMLInputElement>) => {
       const { value } = event.target;
-      setState(({ draft: current, err: errors }) => ({
+
+      setState(({ draft: current, fieldErrors: errors }) => ({
         draft: { ...current, [key]: value },
-        err: { ...errors, [key]: "" },
+        fieldErrors: { ...errors, [key]: "" },
       }));
     };
-  const borderOf = (key: string) => (err[key] ? ui.inputErr : ui.inputOk);
+
+  const borderOf = (key: string) =>
+    fieldErrors[key] ? ui.inputErr : ui.inputOk;
+
   const cancelEdit = () => {
     actions.stopResendCountdown();
-    setState({ edit: null, err: {}, emailStep: "", codeErr: "" });
+    setState({ edit: null, fieldErrors: {}, emailStep: "", codeError: "" });
   };
 
   return (
@@ -89,7 +112,7 @@ export const PersonalSection = ({
                   <button
                     className={ui.quietButton}
                     onClick={() => {
-                      setState({ photo: null, photoErr: "" });
+                      setState({ photo: null, photoError: "" });
                       showToast("Photo removed");
                     }}
                   >
@@ -111,12 +134,13 @@ export const PersonalSection = ({
             Helps your stylist recognise you. JPG, JPEG or PNG, up to 10MB.
           </div>
           <div className={ui.error} role="alert">
-            {state.photoErr}
+            {state.photoError}
           </div>
         </div>
         {rows.map(([key, label, value]) => {
           const isView = edit !== key;
           const isLocked = !!edit && edit !== key;
+
           return (
             <Fragment key={key}>
               <div className={ui.row}>
@@ -151,7 +175,7 @@ export const PersonalSection = ({
                                   className={styles.linkButton}
                                   onClick={() =>
                                     setState(
-                                      ({ me: current, pendingEmail }) => ({
+                                      ({ profile: current, pendingEmail }) => ({
                                         edit: "email",
                                         emailStep: "code",
                                         draft: {
@@ -159,8 +183,8 @@ export const PersonalSection = ({
                                           email: pendingEmail ?? "",
                                         },
                                         code: EMPTY_CODE,
-                                        codeErr: "",
-                                        err: {},
+                                        codeError: "",
+                                        fieldErrors: {},
                                       }),
                                       () => focusLater("code"),
                                     )
@@ -192,7 +216,9 @@ export const PersonalSection = ({
                           <div className={styles.currentLabel}>
                             Current email
                           </div>
-                          <div className={styles.currentValue}>{me.email}</div>
+                          <div className={styles.currentValue}>
+                            {profile.email}
+                          </div>
                         </div>
                         <div className={ui.field}>
                           <label
@@ -215,10 +241,11 @@ export const PersonalSection = ({
                             onChange={setDraft("email")}
                             onKeyDown={(event) => {
                               if (event.key !== "Enter") return;
+
                               event.preventDefault();
                               saveEdit();
                             }}
-                            aria-invalid={err.email ? "true" : "false"}
+                            aria-invalid={fieldErrors.email ? "true" : "false"}
                             aria-describedby="ac-e-email"
                           />
                           <div
@@ -226,7 +253,7 @@ export const PersonalSection = ({
                             id="ac-e-email"
                             role="alert"
                           >
-                            {err.email}
+                            {fieldErrors.email}
                           </div>
                         </div>
                         <div className={ui.actions}>
@@ -262,14 +289,10 @@ export const PersonalSection = ({
                         >
                           {code.map((digit, index) => (
                             <input
-                              key={"c" + index}
+                              key={`c${index}`}
                               className={joinClassNames(
                                 styles.codeBox,
-                                codeErr
-                                  ? styles.codeBoxErr
-                                  : digit
-                                    ? styles.codeBoxFilled
-                                    : styles.codeBoxEmpty,
+                                getCodeBoxClass(codeError, digit),
                               )}
                               ref={refs.code[index]}
                               value={digit}
@@ -283,12 +306,12 @@ export const PersonalSection = ({
                               inputMode="numeric"
                               autoComplete="one-time-code"
                               maxLength={1}
-                              aria-label={"Digit " + (index + 1)}
+                              aria-label={`Digit ${index + 1}`}
                             />
                           ))}
                         </div>
                         <div className={styles.codeError} role="alert">
-                          {codeErr}
+                          {codeError}
                         </div>
                         <div className={styles.codeLinks}>
                           <button
@@ -300,29 +323,31 @@ export const PersonalSection = ({
                             )}
                             onClick={() => {
                               if (resendIn > 0) return;
+
                               setState({
                                 resendIn: 30,
-                                codeErr: "",
+                                codeError: "",
                                 code: EMPTY_CODE,
                               });
+
                               actions.startResendCountdown();
                               showToast("We sent a new code");
                             }}
                             aria-disabled={resendIn > 0 ? "true" : "false"}
                           >
                             {resendIn > 0
-                              ? "Resend code in 0:" +
-                                String(resendIn).padStart(2, "0")
+                              ? `Resend code in 0:${resendSeconds}`
                               : "Resend code"}
                           </button>
                           <button
                             className={styles.linkButton}
                             onClick={() => {
                               actions.stopResendCountdown();
+
                               setState(
                                 {
                                   emailStep: "",
-                                  codeErr: "",
+                                  codeError: "",
                                   pendingEmail: "",
                                   resendIn: 0,
                                 },
@@ -344,10 +369,11 @@ export const PersonalSection = ({
                             className={ui.cancel}
                             onClick={() => {
                               actions.stopResendCountdown();
+
                               setState({
                                 edit: null,
                                 emailStep: "",
-                                codeErr: "",
+                                codeError: "",
                               });
                             }}
                           >
@@ -368,16 +394,16 @@ export const PersonalSection = ({
                           {
                             edit: key,
                             draft: {
-                              ...me,
-                              email: key === "email" ? "" : me.email,
+                              ...profile,
+                              email: key === "email" ? "" : profile.email,
                             },
-                            err: {},
+                            fieldErrors: {},
                             emailStep: "",
                           },
                           () => focusLater("edit"),
                         )
                       }
-                      aria-label={"Edit " + label.toLowerCase()}
+                      aria-label={`Edit ${label.toLowerCase()}`}
                       disabled={isLocked}
                     >
                       Edit
@@ -394,11 +420,11 @@ export const PersonalSection = ({
                         value={draft.first}
                         onChange={setDraft("first")}
                         autoComplete="given-name"
-                        aria-invalid={err.first ? "true" : "false"}
+                        aria-invalid={fieldErrors.first ? "true" : "false"}
                         aria-describedby="ac-e-first"
                       />
                       <span className={ui.error} id="ac-e-first">
-                        {err.first}
+                        {fieldErrors.first}
                       </span>
                     </label>
                     <label className={ui.label}>
@@ -408,16 +434,16 @@ export const PersonalSection = ({
                         value={draft.last}
                         onChange={setDraft("last")}
                         autoComplete="family-name"
-                        aria-invalid={err.last ? "true" : "false"}
+                        aria-invalid={fieldErrors.last ? "true" : "false"}
                         aria-describedby="ac-e-last"
                       />
                       <span className={ui.error} id="ac-e-last">
-                        {err.last}
+                        {fieldErrors.last}
                       </span>
                     </label>
                   </div>
                 )}
-                {!isView && key === "mob" && (
+                {!isView && key === "mobile" && (
                   <div className={styles.editField}>
                     <label className={ui.labelText} htmlFor="ac-mob">
                       Mobile
@@ -425,24 +451,24 @@ export const PersonalSection = ({
                     <div
                       className={joinClassNames(
                         styles.mobileWrap,
-                        borderOf("mob"),
+                        borderOf("mobile"),
                       )}
                     >
                       <span className={styles.prefix}>+44</span>
                       <input
                         className={styles.mobileInput}
                         id="ac-mob"
-                        ref={refs.mob}
+                        ref={refs.mobile}
                         type="tel"
-                        value={draft.mob}
-                        onChange={setDraft("mob")}
+                        value={draft.mobile}
+                        onChange={setDraft("mobile")}
                         autoComplete="tel-national"
-                        aria-invalid={err.mob ? "true" : "false"}
+                        aria-invalid={fieldErrors.mobile ? "true" : "false"}
                         aria-describedby="ac-e-mob"
                       />
                     </div>
                     <div className={styles.mobileError} id="ac-e-mob">
-                      {err.mob}
+                      {fieldErrors.mobile}
                     </div>
                   </div>
                 )}

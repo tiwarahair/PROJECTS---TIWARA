@@ -22,18 +22,31 @@ interface ChipProps {
   isRadio?: boolean;
 }
 
-const OptionChip = ({ label, delta, on, onPick, isRadio }: ChipProps) => (
-  <button
-    role={isRadio ? "radio" : undefined}
-    aria-checked={isRadio ? (on ? "true" : "false") : undefined}
-    aria-pressed={isRadio ? undefined : on ? "true" : "false"}
-    onClick={onPick}
-    className={joinClassNames(styles.chip, on ? styles.chipOn : styles.chipOff)}
-  >
-    {label}
-    {!!delta && <span className={styles.delta}>{delta}</span>}
-  </button>
-);
+const OptionChip = ({ label, delta, on, onPick, isRadio }: ChipProps) => {
+  const ariaState = on ? "true" : "false";
+
+  return (
+    <button
+      role={isRadio ? "radio" : undefined}
+      aria-checked={isRadio ? ariaState : undefined}
+      aria-pressed={isRadio ? undefined : ariaState}
+      onClick={onPick}
+      className={joinClassNames(
+        styles.chip,
+        on ? styles.chipOn : styles.chipOff,
+      )}
+    >
+      {label}
+      {!!delta && <span className={styles.delta}>{delta}</span>}
+    </button>
+  );
+};
+
+const getChooseHint = (needSize: boolean, needLength: boolean): string => {
+  if (needSize && needLength) return "Choose a size and length";
+
+  return needSize ? "Choose a size" : "Choose a length";
+};
 
 export const CheckBox = ({ on }: { on: boolean }) => (
   <span className={joinClassNames(step.box, on ? step.boxOn : step.boxOff)}>
@@ -58,12 +71,15 @@ export const CheckBox = ({ on }: { on: boolean }) => (
 export const StepCustomise = ({ booking }: StepCustomiseProps) => {
   const { state, stylist, service, options, needSize, needLength, actions } =
     booking;
+
   const { setState } = actions;
-  const { sel } = state;
+  const { selection } = state;
+  const serviceName = service ? service.name : "Appointment";
+
   // size, length and add-ons change the duration, so they clear the chosen time
   const pickTimed = (patch: Partial<Selection>) =>
     setState((current) => ({
-      sel: { ...current.sel, ...patch },
+      selection: { ...current.selection, ...patch },
       date: null,
       time: null,
     }));
@@ -72,10 +88,7 @@ export const StepCustomise = ({ booking }: StepCustomiseProps) => {
     <>
       <h1 className={step.title}>Make it yours</h1>
       <p className={step.lead}>
-        {(service ? service.name : "Appointment") +
-          " with " +
-          stylist.name +
-          " — price and time update as you choose."}
+        {`${serviceName} with ${stylist.name} — price and time update as you choose.`}
       </p>
       <div className={joinClassNames(helmet.custgrid, styles.grid)}>
         <div>
@@ -108,7 +121,7 @@ export const StepCustomise = ({ booking }: StepCustomiseProps) => {
                     key={option.label}
                     label={option.label}
                     delta={getDeltaLabel(option)}
-                    on={sel.size === option.label}
+                    on={selection.size === option.label}
                     onPick={() => pickTimed({ size: option.label })}
                   />
                 ))}
@@ -124,7 +137,7 @@ export const StepCustomise = ({ booking }: StepCustomiseProps) => {
                     key={option.label}
                     label={option.label}
                     delta={getDeltaLabel(option)}
-                    on={sel.length === option.label}
+                    on={selection.length === option.label}
                     onPick={() => pickTimed({ length: option.label })}
                   />
                 ))}
@@ -135,15 +148,14 @@ export const StepCustomise = ({ booking }: StepCustomiseProps) => {
             <div className={styles.section}>
               <div className={styles.colourLabel}>Colour</div>
               <div className={styles.colourNote}>
-                {"Doesn't affect the price — " +
-                  stylist.name +
-                  " will see your pick."}
+                {`Doesn't affect the price — ${stylist.name} will see your pick.`}
               </div>
               <div className={styles.swatches}>
                 {hairColours.map(({ name, hex }) => {
-                  const on = sel.colour === name;
+                  const on = selection.colour === name;
                   // o.style background: the colour's hex (or gradient)
                   const swatchStyle = { "--swatch": hex } as CSSProperties;
+
                   return (
                     <span
                       key={name}
@@ -155,7 +167,9 @@ export const StepCustomise = ({ booking }: StepCustomiseProps) => {
                     >
                       <button
                         onClick={() =>
-                          setState({ sel: { ...sel, colour: name } })
+                          setState({
+                            selection: { ...selection, colour: name },
+                          })
                         }
                         aria-label={name}
                         title={name}
@@ -175,12 +189,12 @@ export const StepCustomise = ({ booking }: StepCustomiseProps) => {
           )}
           {options.own.map(({ name, options: ownOptions }, groupIndex) => (
             <div key={name} className={styles.section}>
-              <div id={"own-" + groupIndex} className={styles.label}>
+              <div id={`own-${groupIndex}`} className={styles.label}>
                 {name}
               </div>
               <div
                 role="radiogroup"
-                aria-labelledby={"own-" + groupIndex}
+                aria-labelledby={`own-${groupIndex}`}
                 className={styles.chips}
               >
                 {ownOptions.map((option) => (
@@ -188,13 +202,16 @@ export const StepCustomise = ({ booking }: StepCustomiseProps) => {
                     key={option.label}
                     label={option.label}
                     delta={getDeltaLabel(option, true)}
-                    on={sel.own[name] === option.label}
+                    on={selection.own[name] === option.label}
                     isRadio
                     onPick={() =>
                       setState((current) => ({
-                        sel: {
-                          ...current.sel,
-                          own: { ...current.sel.own, [name]: option.label },
+                        selection: {
+                          ...current.selection,
+                          own: {
+                            ...current.selection.own,
+                            [name]: option.label,
+                          },
                         },
                       }))
                     }
@@ -207,16 +224,21 @@ export const StepCustomise = ({ booking }: StepCustomiseProps) => {
             <div>
               <div className={styles.label}>Add-ons</div>
               <div className={styles.addons}>
-                {options.addons.map(({ name, price, mins }) => {
-                  const on = sel.addons.includes(name);
+                {options.addons.map(({ name, price, minutes }) => {
+                  const on = selection.addons.includes(name);
+
+                  const timeExtra = minutes
+                    ? ` · +${formatDuration(minutes)}`
+                    : "";
+
                   return (
                     <button
                       key={name}
                       onClick={() =>
                         pickTimed({
                           addons: on
-                            ? sel.addons.filter((addon) => addon !== name)
-                            : sel.addons.concat(name),
+                            ? selection.addons.filter((addon) => addon !== name)
+                            : selection.addons.concat(name),
                         })
                       }
                       className={joinClassNames(
@@ -229,9 +251,7 @@ export const StepCustomise = ({ booking }: StepCustomiseProps) => {
                         {name}
                       </span>
                       <span className={styles.addonMeta}>
-                        {"+£" +
-                          price +
-                          (mins ? " · +" + formatDuration(mins) : "")}
+                        {`+£${price}${timeExtra}`}
                       </span>
                     </button>
                   );
@@ -241,11 +261,7 @@ export const StepCustomise = ({ booking }: StepCustomiseProps) => {
           )}
           {state.step === 2 && (needSize || needLength) && (
             <div role="status" className={styles.hint}>
-              {needSize && needLength
-                ? "Choose a size and length"
-                : needSize
-                  ? "Choose a size"
-                  : "Choose a length"}
+              {getChooseHint(needSize, needLength)}
             </div>
           )}
         </div>

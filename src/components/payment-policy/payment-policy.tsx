@@ -35,6 +35,7 @@ import {
 import styles from "./payment-policy.module.css";
 
 const FLASH_MS = 1800;
+
 const WINDOW_OPTIONS = (
   [
     [0.5, "30 mins"],
@@ -46,10 +47,12 @@ const WINDOW_OPTIONS = (
     [72, "72 hours"],
   ] as const
 ).map(([value, label]) => ({ value: String(value), label }));
+
 const GRACE_OPTIONS = [0, 15, 20, 25, 30, 45, 60].map((minutes) => ({
   value: String(minutes),
-  label: minutes ? minutes + " min" : "None",
+  label: minutes ? `${minutes} min` : "None",
 }));
+
 const DEFAULT_STYLIST = stylists.find(({ id }) => id === "amara-beauty");
 
 /** What the host (Studio) gets after every render to drive its own save button. */
@@ -84,40 +87,58 @@ export const PaymentPolicy = ({
   onSave,
   onState,
 }: PaymentPolicyProps) => {
-  const uid = "pp" + useId().replace(/[^a-zA-Z0-9]/g, "");
+  const uid = `pp${useId().replace(/[^a-zA-Z0-9]/g, "")}`;
+
   const [state, setRawState] = useState(() =>
     getInitialPolicyState(preset, value),
   );
+
   const rootRef = useRef<HTMLDivElement>(null);
   const focusExtra = useRef<number | null>(null);
   const flashTimer = useRef(0);
+
   const setState = (patch: Partial<PolicyFormState>) =>
     setRawState((current) => ({ ...current, ...patch }));
 
-  const { mode, dep, refundable, win, late, ns, grace, extras, flash } = state;
-  const deposit = parseInt(dep, 10);
+  const {
+    mode,
+    deposit: depositInput,
+    refundable,
+    freeWindowHours,
+    late,
+    noShow,
+    grace,
+    extras,
+    flash,
+  } = state;
+
+  const deposit = parseInt(depositInput, 10);
   const depositError = getDepositError(state);
   const lateError = getFeeError(mode, late);
-  const noShowError = getFeeError(mode, ns);
+  const noShowError = getFeeError(mode, noShow);
   const hasError = !!depositError || !!lateError || !!noShowError;
   const isDirty = getPolicyKey(state) !== state.saved;
   const canSave = isDirty && !hasError;
   const used = getExtrasUsed(extras);
   const isFull = used >= EXTRAS_LIMIT;
+
   const preview = policyLines(
     getPreviewPolicy(state),
     PREVIEW_PRICE,
     stylistName ?? DEFAULT_STYLIST?.name ?? "",
   );
+
   const notes = extras
     .filter(({ text }) => text.trim())
     .map(({ text }) => text.trim());
 
   const save = () => {
     if (!canSave) return;
+
     window.clearTimeout(flashTimer.current);
     onSave?.(getPolicyOutput(state));
     setState({ saved: getPolicyKey(state), flash: true });
+
     flashTimer.current = window.setTimeout(
       () => setState({ flash: false }),
       FLASH_MS,
@@ -127,29 +148,32 @@ export const PaymentPolicy = ({
   // tells the host (Studio) whether a save is possible, so its own header button can mirror the state
   useEffect(() => {
     onState?.({ canSave, save });
+
     if (focusExtra.current !== null) {
       rootRef.current
-        ?.querySelector<HTMLElement>(
-          '[data-extra="' + focusExtra.current + '"]',
-        )
+        ?.querySelector<HTMLElement>(`[data-extra="${focusExtra.current}"]`)
         ?.focus({ preventScroll: false });
+
       focusExtra.current = null;
     }
   });
 
   useEffect(() => () => window.clearTimeout(flashTimer.current), []);
 
-  const updateFee = (key: "late" | "ns") => (patch: Partial<FeeState>) =>
+  const updateFee = (key: "late" | "noShow") => (patch: Partial<FeeState>) =>
     setRawState((current) => ({
       ...current,
       [key]: { ...current[key], ...patch },
     }));
+
   const addExtra = (type: ExtraType) => {
     if (isFull) return;
-    focusExtra.current = state.nid;
+
+    focusExtra.current = state.nextExtraId;
+
     setState({
-      extras: extras.concat({ id: state.nid, type, text: "" }),
-      nid: state.nid + 1,
+      extras: extras.concat({ id: state.nextExtraId, type, text: "" }),
+      nextExtraId: state.nextExtraId + 1,
     });
   };
 
@@ -196,8 +220,9 @@ export const PaymentPolicy = ({
                   role="radiogroup"
                   aria-label="Booking protection"
                 >
-                  {MODES.map(({ key, title, desc, isRecommended }) => {
+                  {MODES.map(({ key, title, description, isRecommended }) => {
                     const isOn = mode === key;
+
                     return (
                       <button
                         key={key}
@@ -226,7 +251,7 @@ export const PaymentPolicy = ({
                               <span className={styles.tag}>Recommended</span>
                             )}
                           </span>
-                          <span className={styles.modeDesc}>{desc}</span>
+                          <span className={styles.modeDesc}>{description}</span>
                         </span>
                       </button>
                     );
@@ -236,7 +261,7 @@ export const PaymentPolicy = ({
                 <Reveal open={mode === "deposit"}>
                   <div className={styles.depositStack}>
                     <div>
-                      <label className={styles.label} htmlFor={uid + "-dep"}>
+                      <label className={styles.label} htmlFor={`${uid}-dep`}>
                         Deposit amount
                       </label>
                       <div className={styles.pctWrap}>
@@ -247,12 +272,12 @@ export const PaymentPolicy = ({
                             depositError ? styles.fieldErr : styles.fieldOk,
                           )}
                           data-pp-in="1"
-                          id={uid + "-dep"}
+                          id={`${uid}-dep`}
                           inputMode="numeric"
-                          value={dep}
+                          value={depositInput}
                           onChange={(event) =>
                             setState({
-                              dep: event.target.value
+                              deposit: event.target.value
                                 .replace(/\D/g, "")
                                 .slice(0, 3),
                             })
@@ -268,13 +293,13 @@ export const PaymentPolicy = ({
                       )}
                     </div>
                     <div>
-                      <div className={styles.strong} id={uid + "-ref"}>
+                      <div className={styles.strong} id={`${uid}-ref`}>
                         Deposit refund
                       </div>
                       <div
                         className={styles.options}
                         role="radiogroup"
-                        aria-labelledby={uid + "-ref"}
+                        aria-labelledby={`${uid}-ref`}
                       >
                         {(
                           [
@@ -286,6 +311,7 @@ export const PaymentPolicy = ({
                           ] as const
                         ).map(([isRefundable, label]) => {
                           const isOn = refundable === isRefundable;
+
                           return (
                             <button
                               key={label}
@@ -347,16 +373,16 @@ export const PaymentPolicy = ({
               <section data-screen-label="Cancellations and no-shows">
                 <h2 className={styles.heading}>Cancellations & no-shows</h2>
                 <div className={styles.windowField}>
-                  <label className={styles.label} htmlFor={uid + "-win"}>
+                  <label className={styles.label} htmlFor={`${uid}-win`}>
                     Free cancellation & rescheduling until
                   </label>
                   <div className={styles.windowRow}>
                     <Select
-                      id={uid + "-win"}
-                      value={String(win)}
+                      id={`${uid}-win`}
+                      value={String(freeWindowHours)}
                       options={WINDOW_OPTIONS}
                       onChange={(picked) =>
-                        setState({ win: parseFloat(picked) })
+                        setState({ freeWindowHours: parseFloat(picked) })
                       }
                       wrapClassName={styles.selectWrap}
                     />
@@ -379,21 +405,21 @@ export const PaymentPolicy = ({
                     />
                     <FeeBlock
                       label="No-show fee"
-                      fee={ns}
+                      fee={noShow}
                       mode={mode}
                       depositText={String(isNaN(deposit) ? 0 : deposit)}
                       error={noShowError}
-                      onUpdate={updateFee("ns")}
+                      onUpdate={updateFee("noShow")}
                     />
                   </div>
                 </Reveal>
 
                 <div className={styles.graceField}>
-                  <label className={styles.label} htmlFor={uid + "-gr"}>
+                  <label className={styles.label} htmlFor={`${uid}-gr`}>
                     Grace period before no-show
                   </label>
                   <Select
-                    id={uid + "-gr"}
+                    id={`${uid}-gr`}
                     value={String(grace)}
                     options={GRACE_OPTIONS}
                     onChange={(picked) =>
@@ -421,13 +447,20 @@ export const PaymentPolicy = ({
                 {extras.length > 0 && (
                   <div className={styles.extras}>
                     {extras.map(({ id, type, text }) => {
-                      const fieldId = uid + "-x" + id;
-                      const isPrep = type === "prep";
+                      const fieldId = `${uid}-x${id}`;
+                      const isPreparation = type === "prep";
+
+                      const extraName = isPreparation
+                        ? "preparation note"
+                        : "custom policy";
+
                       return (
                         <div key={id}>
                           <div className={styles.extraHead}>
                             <label className={styles.strong} htmlFor={fieldId}>
-                              {isPrep ? "Preparation note" : "Custom policy"}
+                              {isPreparation
+                                ? "Preparation note"
+                                : "Custom policy"}
                             </label>
                             <button
                               className={joinClassNames(
@@ -435,10 +468,7 @@ export const PaymentPolicy = ({
                                 styles.focusRing,
                               )}
                               data-pp-in="1"
-                              aria-label={
-                                "Remove " +
-                                (isPrep ? "preparation note" : "custom policy")
-                              }
+                              aria-label={`Remove ${extraName}`}
                               onClick={() =>
                                 setState({
                                   extras: extras.filter(
@@ -471,7 +501,7 @@ export const PaymentPolicy = ({
                             data-extra={id}
                             rows={3}
                             placeholder={
-                              isPrep
+                              isPreparation
                                 ? "e.g. Please arrive with clean, product-free hair"
                                 : "e.g. Please don’t bring extra guests to your appointment"
                             }
@@ -479,6 +509,7 @@ export const PaymentPolicy = ({
                             onChange={(event) => {
                               const room = EXTRAS_LIMIT - (used - text.length);
                               const next = event.target.value.slice(0, room);
+
                               setState({
                                 extras: extras.map((extra) =>
                                   extra.id === id

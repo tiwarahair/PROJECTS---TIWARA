@@ -6,14 +6,17 @@ describe("AllergyField", () => {
   it("default: label, hint for the stylist and no counter", () => {
     render(<AllergyField stylistName="Amara Beauty" />);
     expect(screen.getByLabelText("Allergies or sensitivities")).toHaveValue("");
+
     expect(
       screen.getByText(/Only Amara Beauty will see this\./),
     ).toBeInTheDocument();
+
     expect(screen.queryByText(/\/ 200/)).not.toBeInTheDocument();
   });
 
   it("falls back to 'your stylist' without a name", () => {
     render(<AllergyField />);
+
     expect(
       screen.getByText(/Only your stylist will see this\./),
     ).toBeInTheDocument();
@@ -26,19 +29,24 @@ describe("AllergyField", () => {
 
   it("caps input at 200 characters", () => {
     const handleChange = vi.fn();
+
     render(<AllergyField onChange={handleChange} />);
+
     fireEvent.change(screen.getByLabelText("Allergies or sensitivities"), {
       target: { value: "y".repeat(240) },
     });
+
     expect(handleChange).toHaveBeenCalledWith("y".repeat(200));
   });
 
   it("opens and closes the privacy sheet", () => {
     render(<AllergyField stylistName="Studio Zuri" />);
     fireEvent.click(screen.getByRole("button", { name: "How we use it" }));
+
     const dialog = screen.getByRole("dialog", {
       name: "How we use your allergy information",
     });
+
     expect(dialog).toHaveTextContent("Studio Zuri, on your bookings.");
     fireEvent.click(screen.getByRole("button", { name: "Got it" }));
     expect(screen.queryByRole("dialog")).not.toBeInTheDocument();
@@ -47,6 +55,7 @@ describe("AllergyField", () => {
   it("openPrivacy shows the sheet on load; the scrim closes it", () => {
     render(<AllergyField openPrivacy />);
     const dialog = screen.getByRole("dialog");
+
     fireEvent.click(dialog);
     expect(screen.getByRole("dialog")).toBeInTheDocument();
     fireEvent.click(dialog.parentElement as HTMLElement);

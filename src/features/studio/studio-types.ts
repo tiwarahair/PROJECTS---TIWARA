@@ -64,9 +64,9 @@ export interface StudioClient {
   fav?: string;
   phone?: string;
   email?: string;
-  addr?: string;
+  address?: string;
   since?: string;
-  sens?: string;
+  sensitivities?: string;
   notes?: ClientNotes | null;
   blocked?: boolean;
   deleted?: boolean;
@@ -74,37 +74,37 @@ export interface StudioClient {
 }
 
 export interface BookingAddon {
-  aid?: string;
+  addonId?: string;
   id?: string;
   name?: string;
   price?: number;
-  mins?: number;
-  qty?: number;
+  minutes?: number;
+  quantity?: number;
 }
 
 export interface StudioBooking {
   id: number;
-  off: number;
+  dayOffset: number;
   time: string;
-  dur: string;
+  duration: string;
   client: string | null;
-  svc: string;
+  service: string;
   price: number;
   note?: string;
   pending: boolean;
   status: string;
   paid: string;
   protect?: string;
-  protMode?: string;
+  protectionMode?: string;
   resends?: number;
   linkSentAt?: number;
   expiresAt?: number;
   stylistNote?: string;
-  addr?: string;
+  address?: string;
   walkIn?: boolean;
   movedByClient?: boolean;
   autoDone?: boolean;
-  ckUnpaid?: boolean;
+  checkoutUnpaid?: boolean;
   extra?: number;
   addons?: BookingAddon[];
   priceReason?: string;
@@ -119,9 +119,9 @@ export interface CheckoutRecord {
   total: number;
   lines: {
     name: string;
-    sub: string;
+    subtitle: string;
     base: number;
-    adj: number;
+    adjustment: number;
     reason: string;
   }[];
   mode: string;
@@ -129,14 +129,14 @@ export interface CheckoutRecord {
 }
 
 export interface PastRecord {
-  pid?: string | number;
+  pastId?: string | number;
   client: string | null;
-  svc: string;
+  service: string;
   price: number;
   when: string;
   time: string;
   status: string;
-  dur?: string;
+  duration?: string;
   at?: number;
   note?: string;
   meta?: string;
@@ -150,8 +150,8 @@ export interface PastRecord {
   refundReason?: string;
   linkPaid?: boolean;
   linkVia?: string;
-  orig?: StudioBooking;
-  ck?: CheckoutRecord;
+  original?: StudioBooking;
+  checkout?: CheckoutRecord;
   total?: number;
   paid?: number;
   method?: string;
@@ -160,17 +160,17 @@ export interface PastRecord {
 export interface VariationRow {
   label: string;
   on: boolean;
-  neg?: boolean;
-  dp: string;
-  dh: string;
-  dm: string;
+  negative?: boolean;
+  priceDelta: string;
+  hoursDelta: string;
+  minutesDelta: string;
 }
 
 export interface OwnOption {
   label: string;
-  neg?: boolean;
-  dp: string;
-  dm: string;
+  negative?: boolean;
+  priceDelta: string;
+  minutesDelta: string;
 }
 
 export interface OwnGroup {
@@ -179,28 +179,28 @@ export interface OwnGroup {
 }
 
 export interface ServiceAddonLink {
-  aid: string;
-  ovP: string | number | null;
-  ovH: string | number | null;
-  ovM: string | number | null;
+  addonId: string;
+  priceOverride: string | number | null;
+  hoursOverride: string | number | null;
+  minutesOverride: string | number | null;
 }
 
 export interface StudioService {
   id: string;
-  cat: string | null;
-  sub: string;
+  taxonomyId: string | null;
+  subcategory: string;
   typeId?: string | null;
   categoryId: string | null;
   own?: OwnGroup[];
   name: string;
-  desc: string;
+  description: string;
   price: number;
-  durH: number;
-  durM: number;
-  dur: string;
+  durationHours: number;
+  durationMinutes: number;
+  duration: string;
   extra?: number;
   extraCustom?: boolean;
-  st: string;
+  status: string;
   sizesOn: boolean;
   lengthsOn: boolean;
   sizes: VariationRow[];
@@ -210,13 +210,13 @@ export interface StudioService {
 
 export interface StudioAddon {
   id: string;
-  cat?: string;
+  taxonomyId?: string;
   categoryId: string | null;
   name: string;
   price: number | string;
-  hr: number | string;
+  hours: number | string;
   min: number | string;
-  st?: string;
+  status?: string;
 }
 
 export interface StudioCategory {
@@ -229,12 +229,12 @@ export interface StudioCategory {
 export interface BlockedTime {
   id: number;
   day: string;
-  dayIdx: number;
+  dayIndex: number;
   span: string;
   reason: string;
-  freq?: string;
+  frequency?: string;
   ends?: string;
-  endOff?: number | null;
+  endDayOffset?: number | null;
   color?: string;
 }
 
@@ -247,19 +247,19 @@ export interface ClosedPeriod {
 }
 
 export interface WorkingHours {
-  d: string;
+  day: string;
   on: boolean;
-  s: string;
-  e: string;
+  start: string;
+  end: string;
 }
 
 export interface StudioProfile {
   salon: string;
   about: string;
-  addr: string;
+  address: string;
   mobile: boolean;
   site: string;
-  ig: string;
+  instagram: string;
   tiktok: string;
   email: string;
   youtube?: string;
@@ -286,14 +286,14 @@ export interface TwoFactorFlow {
   kind: string;
   name: string;
   code: string;
-  err: string;
-  errMsg: string;
-  keyOn: boolean;
-  opt: string;
+  error: string;
+  errorMessage: string;
+  keyShown: boolean;
+  option: string;
   skipWarn: boolean;
   flow: string;
   from?: string;
-  fx?: string;
+  fixture?: string;
 }
 
 export interface ConfirmDialog {
@@ -302,14 +302,14 @@ export interface ConfirmDialog {
   yesLabel?: string;
   noLabel?: string;
   yes: () => void;
-  no?: () => void;
+  onNo?: () => void;
 }
 
 export interface ActionItem {
   label: string;
-  d: string;
-  sub?: string;
-  off?: boolean;
+  iconPath: string;
+  subtitle?: string;
+  disabled?: boolean;
   danger?: boolean;
   run: () => void;
 }
@@ -323,7 +323,7 @@ export interface ActionAnchor {
 
 export interface ActionSheet {
   title: string;
-  sub: string;
+  subtitle: string;
   anchor?: ActionAnchor | null;
   items: ActionItem[];
 }
@@ -335,8 +335,8 @@ export interface Popover {
   y: number;
   warn?: boolean;
   title?: string;
-  sub?: string;
-  b?: BlockedTime;
+  subtitle?: string;
+  block?: BlockedTime;
 }
 
 export interface Tooltip {
@@ -353,9 +353,9 @@ export interface BlockDraft {
   end: string;
   reason: string;
   allDay?: boolean;
-  freq?: string;
+  frequency?: string;
   ends?: string;
-  endOff?: number | null;
+  endDayOffset?: number | null;
   color?: string;
   editId?: number;
   force?: boolean;
@@ -378,7 +378,7 @@ export interface ClientEditDraft {
   size: string;
   length: string;
   products: string;
-  sens: string;
+  sensitivities: string;
   img?: string;
 }
 
@@ -393,17 +393,17 @@ export interface AddNewClient {
   name: string;
   contact: string;
   email: string;
-  addr: string;
+  address: string;
 }
 
 export interface EditServiceDraft {
-  svcId: string | null;
-  svcName: string;
-  cat: string | null;
+  serviceId: string | null;
+  serviceName: string;
+  taxonomyId: string | null;
   time: number;
-  dur: number;
+  duration: number;
   price: string;
-  price0: string;
+  originalPrice: string;
   priceOpen: boolean;
   priceReason: string;
   extra: number | null;
@@ -411,71 +411,71 @@ export interface EditServiceDraft {
 }
 
 export interface AddonEditDraft {
-  ctx?: "add";
+  context?: "add";
   id?: string;
-  idx?: number;
+  index?: number;
   name: string;
   price: string;
-  hrs: string;
-  mins: string;
-  qty: string;
+  hours: string;
+  minutes: string;
+  quantity: string;
 }
 
 export interface CategoryDraft {
   name: string;
   colour: string;
-  err: string;
+  error: string;
 }
 
 export interface CategoriesUi {
   newName: string;
   newColour: string;
-  newErr: string;
+  newError: string;
   editId: string | null;
   editName: string;
   editColour: string | null;
-  editErr: string;
+  editError: string;
 }
 
 export interface AddonQuickDraft {
   name: string;
   price: string;
-  hr: string;
+  hours: string;
   min: string;
   categoryId?: string | null;
 }
 
 export interface OwnEditDraft {
-  idx: number;
+  index: number;
   name: string;
   options: OwnOption[];
-  err: string;
+  error: string;
 }
 
 export interface WizardDraft {
   name: string;
-  desc: string;
-  cat: string | null;
-  sub: string | null;
+  description: string;
+  taxonomyId: string | null;
+  subcategory: string | null;
   typeId: string | null;
   categoryId: string | null;
   own: OwnGroup[];
   price: string;
-  durH: string;
-  durM: string;
+  durationHours: string;
+  durationMinutes: string;
   sizesOn: boolean;
   lengthsOn: boolean;
   sizes: VariationRow[];
   lengths: VariationRow[];
   addons: ServiceAddonLink[];
-  st: string;
+  status: string;
   extra: string;
 }
 
 export interface WizardState {
   mode: "add" | "edit";
   step: number;
-  sugg: boolean;
+  suggestionsOpen: boolean;
   flash: Record<string, number> | null;
   editId: string | null;
   search: string;
@@ -483,29 +483,29 @@ export interface WizardState {
   review: boolean;
   openAddon: string | null;
   newAddon: AddonQuickDraft | null;
-  aq: string;
+  addonQuery: string;
   draft: WizardDraft;
-  catF?: string;
+  categoryFilter?: string;
   pickGroup?: boolean;
-  newCat?: CategoryDraft | null;
-  ownEd?: OwnEditDraft | null;
-  pendAddons?: StudioAddon[];
-  aCat?: string | null;
-  subTip?: boolean;
+  newCategory?: CategoryDraft | null;
+  ownEdit?: OwnEditDraft | null;
+  pendingAddons?: StudioAddon[];
+  addonCategory?: string | null;
+  subcategoryTipOpen?: boolean;
 }
 
 export interface Taxonomy {
   id: string;
   name: string;
   types: ServiceType[];
-  subs: string[];
+  subcategories: string[];
   other?: string;
   sizes: string[] | null;
   lengths: string[] | null;
 }
 
 export interface StudioCheck {
-  avail: boolean;
+  availability: boolean;
   profile: boolean;
   stripe: boolean;
 }
@@ -514,149 +514,152 @@ export interface StudioState {
   avatarUrl: string | null;
   coverUrl: string | null;
   tab: StudioTab;
-  cliSel: string | null;
-  cliQ: string;
-  cliSort: string;
-  cliFilt: string;
-  cliApptTab: string;
-  cliOv: Record<string, Partial<StudioClient>>;
-  ce: ClientEditDraft | null;
-  ceFromView?: boolean;
+  selectedClientId: string | null;
+  clientListQuery: string;
+  clientSort: string;
+  clientFilter: string;
+  clientAppointmentsTab: string;
+  clientOverrides: Record<string, Partial<StudioClient>>;
+  clientEdit: ClientEditDraft | null;
+  clientEditFromView?: boolean;
   range: "today" | "week" | "month";
   sheet: SheetKind | null;
   out: boolean;
   toast: string | null;
   pop: Popover | null;
   check: StudioCheck;
-  tfa: { devices: TwoFactorDevice[] };
+  twoFactorSettings: { devices: TwoFactorDevice[] };
   tax: Partial<TaxDetails> | null;
   taxEdit: boolean;
-  tf: TwoFactorFlow | null;
-  tfOut: boolean;
+  twoFactor: TwoFactorFlow | null;
+  twoFactorOut: boolean;
   shareTip: boolean;
   stripeBusy: boolean;
   nudge: boolean;
-  svcNudge: boolean;
+  serviceNudge: boolean;
   celebrated: boolean;
   page: StudioPage | null;
   pageFromSetup: boolean;
-  setupMin: boolean;
+  setupMinimised: boolean;
   setupExit: "hold" | "out" | null;
   linkCard: boolean;
   lastDone: string | null;
   portfolio: { id: string; src: string }[];
-  chartIdx: number | null;
-  dayIdx: number;
-  bview: string;
-  calMode?: string;
-  wkOff?: number;
+  chartIndex: number | null;
+  dayIndex: number;
+  bookingsLayout: string;
+  calendarMode?: string;
+  weekOffset?: number;
   listScope: string;
-  bkQ: string;
-  fRange: string;
-  fStatus: string;
-  fPay: string;
-  filtOpen: boolean;
-  filtOut: boolean;
-  dpOpen: boolean;
+  bookingsQuery: string;
+  filterRange: string;
+  filterStatus: string;
+  filterPayment: string;
+  filterOpen: boolean;
+  filterOut: boolean;
+  datePickerOpen: boolean;
   notifAllRead: boolean;
   clientQuery: string;
-  earnSel: number;
-  bkStep: BookingStep;
-  rsDay: number | null;
-  rsTime: string | null;
-  rsCustom?: boolean;
+  earningsSelection: number;
+  bookingStep: BookingStep;
+  rescheduleDay: number | null;
+  rescheduleTime: string | null;
+  rescheduleCustom?: boolean;
   pastNew: PastRecord[];
-  pastOv?: Record<string, Partial<PastRecord>>;
-  bkDoneB: StudioBooking | null;
-  bkEdit: boolean;
-  svcHov: boolean;
-  cliHov: boolean;
-  ccQ: string;
-  cFromB: number | null;
-  cFromP?: string | number | null;
-  fromCli?: string | null;
+  pastOverrides?: Record<string, Partial<PastRecord>>;
+  doneBooking: StudioBooking | null;
+  bookingEdit: boolean;
+  serviceHover: boolean;
+  clientHover: boolean;
+  changeClientQuery: string;
+  clientFromBookingId: number | null;
+  clientFromPastId?: string | number | null;
+  fromClientId?: string | null;
   newClient: NewClientDraft | null;
-  bkOut: boolean;
-  bkBack: boolean;
-  es: EditServiceDraft | null;
-  csQ: string;
-  aaQ: string;
-  aaCat?: string | null;
-  esAddon: AddonEditDraft | null;
-  bkNoteOn: boolean;
-  bkNoteDraft: string;
-  bkLocOn: boolean;
-  bkAddrDraft: string;
-  cxWho: string;
-  cxFee: boolean;
-  cxReason: string;
-  coMethod: string | null;
-  nsCharge: string;
+  bookingStepOut: boolean;
+  bookingStepBack: boolean;
+  serviceEdit: EditServiceDraft | null;
+  changeServiceQuery: string;
+  addAddonQuery: string;
+  addAddonCategory?: string | null;
+  addonEdit: AddonEditDraft | null;
+  bookingNoteOn: boolean;
+  bookingNoteDraft: string;
+  bookingAddressOn: boolean;
+  bookingAddressDraft: string;
+  cancelWho: string;
+  cancelFee: boolean;
+  cancelReason: string;
+  checkoutMethod: string | null;
+  noShowCharge: string;
   toastUndo: (() => void) | null;
   extraClients: StudioClient[];
-  clientAddrs: Record<string, string>;
-  sheetBId?: number | null;
-  sheetCId?: string | null;
-  pastSel?: string | number | null;
-  pastCk?: string | null;
-  stMenu?: boolean;
+  clientAddresses: Record<string, string>;
+  sheetBookingId?: number | null;
+  sheetClientId?: string | null;
+  selectedPastId?: string | number | null;
+  pastCheckoutPanel?: string | null;
+  statusMenuOpen?: boolean;
   addRebook?: boolean;
   addStep: number;
   addClient: string | null;
-  addSvc: string | null;
+  addService: string | null;
   addDay: number | null;
   addTime: string | null;
   addCustom: boolean;
-  addQ: string;
-  addSvcQ: string;
+  addClientQuery: string;
+  addServiceQuery: string;
   addNew: AddNewClient | null;
-  addDur: number | null;
+  addDuration: number | null;
   addPrice: string | number | null;
-  addOverlapOk: boolean;
+  addOverlapAllowed: boolean;
   addNote: string;
-  addDep: string;
-  addAddr: string;
+  addDeposit: string;
+  addAddress: string;
   addWalkIn: boolean;
-  addProt: string;
-  addEditSvc?: boolean;
-  addAoPick?: boolean;
+  addProtection: string;
+  addEditService?: boolean;
+  addAddonPickerOpen?: boolean;
   addAddons?: string[];
-  addAoOv?: Record<string, { price: number; mins: number; qty: number }>;
+  addAddonOverrides?: Record<
+    string,
+    { price: number; minutes: number; quantity: number }
+  >;
   addExtra?: number;
-  calOpen: boolean;
-  calM: number | null;
-  calY: number | null;
-  rsCalOpen: boolean;
-  rsCalM: number | null;
-  rsCalY: number | null;
-  bkCal: boolean;
-  bkCalM: number | null;
-  bkCalY: number | null;
+  calendarOpen: boolean;
+  calendarMonth: number | null;
+  calendarYear: number | null;
+  rescheduleCalendarOpen: boolean;
+  rescheduleCalendarMonth: number | null;
+  rescheduleCalendarYear: number | null;
+  bookingCalendarOpen: boolean;
+  bookingCalendarMonth: number | null;
+  bookingCalendarYear: number | null;
   pastFilter: string;
-  svcQuery: string;
-  svcStatusFilter: string;
-  svcCat: string;
-  addonCat?: string;
-  svcSel?: string | null;
-  svcStatOpen?: boolean;
+  serviceQuery: string;
+  serviceStatusFilter: string;
+  serviceCategoryFilter: string;
+  addonCategoryFilter?: string;
+  selectedServiceId?: string | null;
+  serviceStatusOpen?: boolean;
   confirm: ConfirmDialog | null;
   confirmOut: boolean;
-  acts: ActionSheet | null;
-  actsOut: boolean;
-  blCalOpen: boolean;
-  blCalM: number | null;
-  blCalY: number | null;
-  endCal: boolean;
-  endCalOut: boolean;
-  ecM: number | null;
-  ecY: number | null;
-  qa: { time: string | null } | null;
-  qaOut: boolean;
-  svcTab: string;
-  wiz: WizardState | null;
+  actionSheet: ActionSheet | null;
+  actionSheetOut: boolean;
+  blockCalendarOpen: boolean;
+  blockCalendarMonth: number | null;
+  blockCalendarYear: number | null;
+  endCalendarOpen: boolean;
+  endCalendarOut: boolean;
+  endCalendarMonth: number | null;
+  endCalendarYear: number | null;
+  quickAdd: { time: string | null } | null;
+  quickAddOut: boolean;
+  servicesTab: string;
+  wizard: WizardState | null;
   addonDraft: StudioAddon | null;
-  adNewCat?: CategoryDraft | null;
-  catsUi?: CategoriesUi;
+  addonNewCategory?: CategoryDraft | null;
+  categoriesUi?: CategoriesUi;
   blockDraft: BlockDraft;
   closedDraft: ClosedDraft;
   bookings: StudioBooking[];
@@ -670,15 +673,15 @@ export interface StudioState {
   business: BusinessValue;
   policy: StudioPolicy;
   rules: StudioRules;
-  sbOpen?: boolean | null;
-  calEmptyHidden?: boolean;
+  sidebarOpen?: boolean | null;
+  calendarEmptyHidden?: boolean;
   slideFrom?: number | null;
   tip?: Tooltip | null;
   pause?: { on: boolean; until: string };
   stripeBusyAt?: number;
-  polCanSave?: boolean;
-  accCanSave?: boolean;
-  bizCanSave?: boolean;
+  policyCanSave?: boolean;
+  accountCanSave?: boolean;
+  businessCanSave?: boolean;
 }
 
 export type StudioPatch =

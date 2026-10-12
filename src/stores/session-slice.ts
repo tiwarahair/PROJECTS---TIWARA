@@ -27,7 +27,9 @@ const SESSION_KEY = "tw_cust";
 /** Logged in = not forced guest, and ?login=1 or sessionStorage tw_cust === '1'. */
 export const readLoggedIn = (): boolean => {
   const params = getSearchParams();
+
   if (params.get("guest") === "1") return false;
+
   return params.get("login") === "1" || readSession(SESSION_KEY) === "1";
 };
 
@@ -44,8 +46,10 @@ export const sessionSlice = createSlice({
     /** Re-read the session for the current page (runs on each page mount, like the prototype's page load). */
     syncSession: (state) => {
       const params = getSearchParams();
+
       if (params.get("login") === "1" && !isBoardView(params))
         writeSession(SESSION_KEY, "1");
+
       state.loggedIn = readLoggedIn();
     },
     logOut: (state) => {
@@ -54,6 +58,7 @@ export const sessionSlice = createSlice({
       } catch {
         // storage unavailable
       }
+
       state.loggedIn = false;
     },
   },

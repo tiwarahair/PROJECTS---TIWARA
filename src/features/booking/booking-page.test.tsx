@@ -8,20 +8,26 @@ describe("BookingPage", () => {
     vi.useFakeTimers({
       toFake: ["setTimeout", "clearTimeout", "setInterval", "clearInterval"],
     });
+
     sessionStorage.clear();
     localStorage.clear();
   });
+
   afterEach(() => vi.useRealTimers());
 
   it("starts on Pick a service and moves to Customise for a braids service", () => {
     renderWithStore(<BookingPage />, "/book?stylist=tiwaras-house");
+
     expect(
       screen.getByRole("heading", { level: 1, name: "Pick a service" }),
     ).toBeInTheDocument();
+
     fireEvent.click(screen.getByRole("button", { name: /^Knotless braids/ }));
+
     expect(
       screen.getByRole("heading", { level: 1, name: "Make it yours" }),
     ).toBeInTheDocument();
+
     expect(screen.getAllByRole("status")[0]).toHaveTextContent(
       "Choose a size and length",
     );
@@ -35,10 +41,13 @@ describe("BookingPage", () => {
 
   it("review: shows the policy card and Continue to payment", () => {
     renderWithStore(<BookingPage />, "/book?fixture=review");
+
     expect(
       screen.getByRole("heading", { level: 1, name: "Review your booking" }),
     ).toBeInTheDocument();
+
     expect(screen.getAllByText("Due today").length).toBeGreaterThan(0);
+
     expect(
       screen.getAllByRole("button", { name: /Continue to payment/ })[0],
     ).toBeInTheDocument();
@@ -47,12 +56,16 @@ describe("BookingPage", () => {
   it("pay: an incomplete card shows an error; the declined test card is declined", () => {
     renderWithStore(<BookingPage />, "/book?fixture=pay");
     const pay = screen.getByRole("button", { name: /^Pay £.* & confirm/ });
+
     fireEvent.click(pay);
+
     expect(screen.getByRole("alert")).toHaveTextContent(
       "Check the card number — it looks incomplete.",
     );
+
     const type = (label: string, value: string) =>
       fireEvent.change(screen.getByLabelText(label), { target: { value } });
+
     type("Card number", "4000000000000002");
     type("Expiry", "1229");
     type("Security code", "123");
@@ -60,6 +73,7 @@ describe("BookingPage", () => {
     type("Billing postcode", "M14 5TQ");
     fireEvent.click(pay);
     act(() => vi.advanceTimersByTime(900));
+
     expect(screen.getByRole("alert")).toHaveTextContent(
       "Your card was declined.",
     );
@@ -67,9 +81,11 @@ describe("BookingPage", () => {
 
   it("confirm: shows You're booked in. and the guest save row", () => {
     renderWithStore(<BookingPage />, "/book?fixture=confirm");
+
     expect(
       screen.getByRole("heading", { level: 1, name: "You're booked in." }),
     ).toBeInTheDocument();
+
     fireEvent.click(screen.getByRole("button", { name: "Save my details" }));
     expect(screen.getByText("Check your email.")).toBeInTheDocument();
   });
@@ -79,11 +95,14 @@ describe("BookingPage", () => {
       <BookingPage />,
       "/book?fixture=hold-expired",
     );
+
     expect(
       screen.getByRole("alertdialog", { name: "Your slot is no longer held" }),
     ).toBeInTheDocument();
+
     unmount();
     renderWithStore(<BookingPage />, "/book?fixture=leave");
+
     expect(
       screen.getByRole("dialog", { name: "Leave this booking?" }),
     ).toBeInTheDocument();
@@ -94,9 +113,11 @@ describe("BookingPage", () => {
       <BookingPage />,
       "/book?stylist=tiwaras-house",
     );
+
     fireEvent.click(screen.getByRole("button", { name: /^Knotless braids/ }));
     unmount();
     renderWithStore(<BookingPage />, "/book?stylist=tiwaras-house");
+
     expect(
       screen.getByRole("region", { name: "Unfinished booking" }),
     ).toHaveTextContent("Knotless braids");

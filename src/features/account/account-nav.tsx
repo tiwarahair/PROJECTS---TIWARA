@@ -76,6 +76,7 @@ export const AccountSideNav = ({
   onLogOut,
 }: AccountNavProps) => {
   const goTo = getGoTo(onGo);
+
   const renderLinks = (sections: AccountSection[]) => (
     <div className={styles.sideLinks}>
       {sections.map(({ id, label }) => (
@@ -85,7 +86,7 @@ export const AccountSideNav = ({
             styles.sideLink,
             current === id ? styles.sideLinkCurrent : styles.sideLinkIdle,
           )}
-          to={"/account?section=" + id}
+          to={`/account?section=${id}`}
           onClick={goTo(id)}
           aria-current={current === id ? "page" : undefined}
         >
@@ -94,6 +95,7 @@ export const AccountSideNav = ({
       ))}
     </div>
   );
+
   return (
     <nav className={styles.side} aria-label="Your account">
       <div className={styles.sideProfile}>
@@ -140,14 +142,15 @@ export const AccountMobileList = ({
   onLogOut,
 }: Omit<AccountNavProps, "current">) => {
   const goTo = getGoTo(onGo);
+
   const renderRows = (sections: AccountSection[]) => (
     <div className={styles.list}>
       {sections.map(({ id, label, icon }) => (
         <Link
           key={id}
           className={styles.row}
-          id={"ac-row-" + id}
-          to={"/account?section=" + id}
+          id={`ac-row-${id}`}
+          to={`/account?section=${id}`}
           onClick={goTo(id)}
         >
           <Icon path={icon} size={20} />
@@ -157,6 +160,7 @@ export const AccountMobileList = ({
       ))}
     </div>
   );
+
   return (
     <div data-screen-label="Account list (mobile)">
       <h1 className={styles.srTitle}>Your account</h1>

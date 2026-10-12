@@ -12,6 +12,7 @@ export const QuizStrip = () => {
   const chips = QUIZ_GROUP_IDS.map((id) =>
     serviceGroups.find((group) => group.id === id),
   ).filter((group) => !!group);
+
   return (
     <div
       id="quiz"
@@ -23,7 +24,7 @@ export const QuizStrip = () => {
         <h3 className={styles.title}>Not sure what your hair needs?</h3>
         <div className={styles.actions}>
           {chips.map(({ id, name, slug }) => (
-            <Link key={id} to={"/search?group=" + slug} className={styles.chip}>
+            <Link key={id} to={`/search?group=${slug}`} className={styles.chip}>
               {name}
             </Link>
           ))}

@@ -7,7 +7,7 @@ import styles from "./shared-details.module.css";
 interface SharedDetailsProps {
   isAccount: boolean;
   title: string;
-  sub: string;
+  subtitle: string;
   entries: SharedEntry[];
   editing: number;
   draft: string;
@@ -22,7 +22,7 @@ interface SharedDetailsProps {
 export const SharedDetails = ({
   isAccount,
   title,
-  sub,
+  subtitle,
   entries,
   editing,
   draft,
@@ -34,12 +34,13 @@ export const SharedDetails = ({
 }: SharedDetailsProps) => (
   <section className={styles.section}>
     <h2 className={styles.title}>{title}</h2>
-    <p className={styles.sub}>{sub}</p>
+    <p className={styles.sub}>{subtitle}</p>
     <div className={styles.rows}>
       {entries.map(({ id, text }, index) => {
         const { name } = getEntryStylist(id);
         const has = !!text;
         const isEditing = editing === index;
+
         return (
           <div key={id} className={styles.row}>
             <div className={styles.rowHead}>

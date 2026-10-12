@@ -26,7 +26,7 @@ export interface BookingCardView {
 export interface QuickAction {
   key: string;
   label: string;
-  sub: string;
+  subtitle: string;
   href: string;
   icon: string;
   /** Switches section in place instead of following the link. */
@@ -37,23 +37,18 @@ const getBookingCard = (
   booking: AccountBooking,
   bookingMoney: BookingMoney,
 ): BookingCardView => {
-  const { id, sid, svc, at } = booking;
+  const { id, stylistId, service, at } = booking;
+  const when = formatAccountDate(at, true);
+
   return {
     booking,
     money: bookingMoney,
-    aria:
-      svc +
-      " with " +
-      bookingMoney.stylist.name +
-      ", " +
-      formatAccountDate(at, true) +
-      ", " +
-      bookingMoney.tag[0],
-    when: formatAccountDate(at, true),
-    profile: "/stylist?stylist=" + sid,
-    manage: "/manage?view=booking&stylist=" + sid,
-    help: "/help?booking=" + id,
-    again: "/book?stylist=" + sid + "&service=" + encodeURIComponent(svc),
+    aria: `${service} with ${bookingMoney.stylist.name}, ${when}, ${bookingMoney.tag[0]}`,
+    when,
+    profile: `/stylist?stylist=${stylistId}`,
+    manage: `/manage?view=booking&stylist=${stylistId}`,
+    help: `/help?booking=${id}`,
+    again: `/book?stylist=${stylistId}&service=${encodeURIComponent(service)}`,
   };
 };
 
@@ -67,35 +62,53 @@ export const getAccountView = (
   loggedIn: boolean,
 ) => {
   const now = Date.now();
-  const { sec, wide, me, quiz, addrs, cards, bookings, dlg, bkTab } = state;
-  const current = sec || (wide ? "overview" : null);
-  const mobileHome = !wide && !sec;
+
+  const {
+    sectionId,
+    wide,
+    profile,
+    quiz,
+    addresses,
+    cards,
+    bookings,
+    dialog,
+    bookingsTab,
+  } = state;
+
+  const current = sectionId || (wide ? "overview" : null);
+  const mobileHome = !wide && !sectionId;
+
   const section: AccountSection | undefined = SECTIONS.find(
     ({ id }) => id === current,
   );
-  const returnTo =
-    "/account" + (current ? "?section=" + current + "&" : "?") + "login=1";
-  const loginHref =
-    "/login?screen=cust-email&return=" + encodeURIComponent(returnTo);
+
+  const returnTo = `/account${current ? `?section=${current}&` : "?"}login=1`;
+  const loginHref = `/login?screen=cust-email&return=${encodeURIComponent(returnTo)}`;
 
   const withMoney = bookings.map((booking) => ({
     booking,
-    money: getBookingMoney(booking, addrs, cards),
+    money: getBookingMoney(booking, addresses, cards),
   }));
+
   const isUpcoming = ({ at, status }: AccountBooking) =>
     at >= now && status !== "cancelled";
+
   const upcomingRaw = withMoney
     .filter(({ booking }) => isUpcoming(booking))
     .sort((first, second) => first.booking.at - second.booking.at);
+
   const pastRaw = withMoney
     .filter(({ booking }) => !isUpcoming(booking))
     .sort((first, second) => second.booking.at - first.booking.at);
+
   const upcoming = upcomingRaw.map(({ booking, money: bookingMoney }) =>
     getBookingCard(booking, bookingMoney),
   );
+
   const past = pastRaw.map(({ booking, money: bookingMoney }) =>
     getBookingCard(booking, bookingMoney),
   );
+
   const lastDone = pastRaw.find(
     ({ booking }) => booking.status === "completed",
   );
@@ -109,40 +122,63 @@ export const getAccountView = (
     month: "long",
     year: "numeric",
   });
+
   const quick: QuickAction[] = [];
-  if (lastDone)
+
+  if (lastDone) {
+    const { stylistId, service } = lastDone.booking;
+    const serviceParam = encodeURIComponent(service);
+
     quick.push({
       key: "again",
-      label: "Book again with " + lastDone.money.stylist.name,
-      sub: lastDone.booking.svc,
-      href:
-        "/book?stylist=" +
-        lastDone.booking.sid +
-        "&service=" +
-        encodeURIComponent(lastDone.booking.svc),
+      label: `Book again with ${lastDone.money.stylist.name}`,
+      subtitle: service,
+      href: `/book?stylist=${stylistId}&service=${serviceParam}`,
       icon: "M3 12a9 9 0 1 0 3-6.7L3 8M3 3v5h5",
     });
+  }
+
   quick.push({
     key: "favs",
-    label: "Your favourites (" + favourites.length + ")",
-    sub: favourites.length ? "Stylists you’ve saved" : "Save stylists you love",
+    label: `Your favourites (${favourites.length})`,
+    subtitle: favourites.length
+      ? "Stylists you’ve saved"
+      : "Save stylists you love",
     href: "/account?section=favourites",
     icon: getSectionIcon("favourites"),
     section: "favourites",
   });
+
   quick.push({
     key: "quiz",
     label: quiz ? "Retake the hair quiz" : "Take the hair quiz",
-    sub: quiz ? "Last taken " + quizDate : "Find styles that suit your hair",
+    subtitle: quiz
+      ? `Last taken ${quizDate}`
+      : "Find styles that suit your hair",
     href: "/#quiz",
     icon: getSectionIcon("hair"),
   });
 
-  const showPastTab = bkTab === "past" && past.length > 0;
+  const getScreenLabel = () => {
+    if (state.deleted) return "Account deleted";
+
+    if (!loggedIn) return "Account: logged out";
+
+    if (mobileHome) return "Account: home list";
+
+    return `Account: ${section?.label ?? ""}`;
+  };
+
+  const overviewDescription = upcoming.length
+    ? "Here’s what’s coming up."
+    : "Nothing booked yet.";
+
+  const showPastTab = bookingsTab === "past" && past.length > 0;
   const blocked = upcoming.length > 0;
+
   const receiptBooking =
-    dlg?.k === "receipt"
-      ? withMoney.find(({ booking }) => booking.id === dlg.id)
+    dialog?.kind === "receipt"
+      ? withMoney.find(({ booking }) => booking.id === dialog.id)
       : undefined;
 
   return {
@@ -151,28 +187,21 @@ export const getAccountView = (
     mobileHome,
     section,
     loginHref,
-    initials: (me.first[0] || "") + (me.last[0] || ""),
-    accountName: me.first + " " + me.last,
-    screenLabel: state.deleted
-      ? "Account deleted"
-      : !loggedIn
-        ? "Account: logged out"
-        : mobileHome
-          ? "Account: home list"
-          : "Account: " + (section?.label ?? ""),
-    title: current === "overview" ? "Hi " + me.first : (section?.label ?? ""),
+    initials: (profile.first[0] || "") + (profile.last[0] || ""),
+    accountName: `${profile.first} ${profile.last}`,
+    screenLabel: getScreenLabel(),
+    title:
+      current === "overview" ? `Hi ${profile.first}` : (section?.label ?? ""),
     description:
       current === "overview"
-        ? upcoming.length
-          ? "Here’s what’s coming up."
-          : "Nothing booked yet."
+        ? overviewDescription
         : (section?.description ?? ""),
     upcoming,
     past,
     quick,
     quizDate,
     favourites,
-    showUpcoming: (bkTab || "up") !== "past" || !past.length,
+    showUpcoming: (bookingsTab || "up") !== "past" || !past.length,
     showPast: showPastTab,
     activeTab: showPastTab ? "past" : "up",
     blocked,
@@ -184,7 +213,7 @@ export const getAccountView = (
           where: receiptBooking.money.where,
           total: money(receiptBooking.money.total),
           lines: receiptBooking.money.lines,
-          pays: receiptBooking.money.pays,
+          payments: receiptBooking.money.payments,
         }
       : null,
     /** "Wed 14 Oct" of the next card-secured booking, else "". */
@@ -198,6 +227,7 @@ export const getAccountView = (
             status !== "cancelled",
         )
         .sort((first, second) => first.at - second.at);
+
       return next ? formatAccountDate(next.at) : "";
     },
     getStylistName: (id: string) => getAccountStylist(id).name,

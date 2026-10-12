@@ -21,6 +21,7 @@ import { Tooltip } from "./tooltip";
 describe("design-system components", () => {
   it("Button renders every variant and ignores clicks when disabled", () => {
     const handleClick = vi.fn();
+
     const variants = [
       "primary",
       "secondary",
@@ -28,6 +29,7 @@ describe("design-system components", () => {
       "outline",
       "ghost",
     ] as const;
+
     render(
       <>
         {variants.map((variant) => (
@@ -43,9 +45,11 @@ describe("design-system components", () => {
         </Button>
       </>,
     );
+
     variants.forEach((variant) =>
       fireEvent.click(screen.getByRole("button", { name: variant })),
     );
+
     fireEvent.click(screen.getByRole("button", { name: "Booked" }));
     expect(handleClick).toHaveBeenCalledTimes(variants.length);
     expect(screen.getByRole("button", { name: "Booked" })).toBeDisabled();
@@ -53,6 +57,7 @@ describe("design-system components", () => {
 
   it("IconButton uses its label for name and title", () => {
     render(<IconButton label="Share" variant="outline" onMedia />);
+
     expect(screen.getByRole("button", { name: "Share" })).toHaveAttribute(
       "title",
       "Share",
@@ -66,7 +71,9 @@ describe("design-system components", () => {
         <Avatar src="/amara.jpg" name="Amara Osei" />
       </>,
     );
+
     expect(screen.getByText("ZB")).toBeInTheDocument();
+
     expect(screen.getByRole("img", { name: "Amara Osei" })).toHaveAttribute(
       "src",
       "/amara.jpg",
@@ -81,8 +88,10 @@ describe("design-system components", () => {
         <Toast tone="danger">Payment failed. Try another card.</Toast>
       </>,
     );
+
     expect(screen.getByText("Confirmed")).toBeInTheDocument();
     expect(screen.getByText("icon")).toHaveAttribute("aria-hidden", "true");
+
     expect(screen.getByRole("status")).toHaveTextContent(
       "Payment failed. Try another card.",
     );
@@ -91,6 +100,7 @@ describe("design-system components", () => {
   it("Card and Tag respond to clicks", () => {
     const handleCard = vi.fn();
     const handleTag = vi.fn();
+
     render(
       <>
         <Card onClick={handleCard} selected>
@@ -102,6 +112,7 @@ describe("design-system components", () => {
         <Tag>Retwist</Tag>
       </>,
     );
+
     fireEvent.click(screen.getByText("Amara"));
     fireEvent.click(screen.getByRole("button", { name: "Starter locs" }));
     expect(handleCard).toHaveBeenCalledOnce();
@@ -110,11 +121,13 @@ describe("design-system components", () => {
 
   it("Dialog closes from the scrim and the close button, not from inside", () => {
     const handleClose = vi.fn();
+
     render(
       <Dialog open title="Cancel appointment?" onClose={handleClose}>
         Your deposit is refundable.
       </Dialog>,
     );
+
     fireEvent.click(screen.getByText("Your deposit is refundable."));
     expect(handleClose).not.toHaveBeenCalled();
     fireEvent.click(screen.getByRole("button", { name: "Close" }));
@@ -132,7 +145,9 @@ describe("design-system components", () => {
         <span>Share</span>
       </Tooltip>,
     );
+
     fireEvent.mouseEnter(screen.getByText("Share"));
+
     expect(screen.getByRole("tooltip")).toHaveTextContent(
       "Finish setup to share",
     );
@@ -140,6 +155,7 @@ describe("design-system components", () => {
 
   it("Checkbox and Switch toggle uncontrolled and report changes", () => {
     const handleChange = vi.fn();
+
     render(
       <>
         <Checkbox label="Send me reminders" onChange={handleChange} />
@@ -150,6 +166,7 @@ describe("design-system components", () => {
         />
       </>,
     );
+
     fireEvent.click(screen.getByText("Send me reminders"));
     fireEvent.click(screen.getByText("Accept new clients"));
     expect(handleChange.mock.calls).toEqual([[true], [false]]);
@@ -157,6 +174,7 @@ describe("design-system components", () => {
 
   it("Radio selects an option", () => {
     const handleChange = vi.fn();
+
     render(
       <Radio
         options={["In salon", "Mobile"]}
@@ -164,6 +182,7 @@ describe("design-system components", () => {
         onChange={handleChange}
       />,
     );
+
     fireEvent.click(screen.getByText("Mobile"));
     expect(handleChange).toHaveBeenCalledWith("Mobile");
   });
@@ -176,11 +195,15 @@ describe("design-system components", () => {
         <Select label="Service" options={["Knotless braids", "Silk press"]} />
       </>,
     );
+
     expect(screen.getByLabelText(/^Email/)).toBeInTheDocument();
+
     expect(
       screen.getByText("Only used for booking confirmations."),
     ).toBeInTheDocument();
+
     expect(screen.getByText("Enter a valid phone number.")).toBeInTheDocument();
+
     expect(screen.getByRole("combobox", { name: "Service" })).toHaveValue(
       "Knotless braids",
     );
@@ -188,6 +211,7 @@ describe("design-system components", () => {
 
   it("Tabs switch the active tab", () => {
     const handleChange = vi.fn();
+
     render(<Tabs tabs={["Upcoming", "Past"]} onChange={handleChange} />);
     fireEvent.click(screen.getByRole("button", { name: "Past" }));
     expect(handleChange).toHaveBeenCalledWith("Past");
@@ -202,9 +226,11 @@ describe("design-system components", () => {
         <p>Screen</p>
       </ScrollRevealCard>,
     );
+
     expect(
       screen.getByRole("heading", { name: "Run your chair like a business" }),
     ).toBeInTheDocument();
+
     expect(screen.getByText("Screen")).toBeInTheDocument();
   });
 });

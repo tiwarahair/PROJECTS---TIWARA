@@ -8,13 +8,13 @@ import {
   parsePounds,
   roundPounds,
 } from "./checkout-data";
-import type { CheckoutLine, CheckoutView } from "./checkout-data";
+import type { CheckoutLine, CheckoutView, PayMethod } from "./checkout-data";
 import type { CheckoutController, CheckoutSheetProps } from "./use-checkout";
 
 export interface DetailRow {
   key: string;
   label: string;
-  sub: string;
+  subtitle: string;
   value: string;
   isAlert: boolean;
 }
@@ -30,20 +30,29 @@ export interface Badge {
 export interface DetailAction {
   label: string;
   run: () => void;
-  kind: "pri" | "sec" | "ghost";
+  kind: "primary" | "secondary" | "ghost";
 }
 
-export const TONES: Record<Tone, { fg: string; bg: string }> = {
-  green: { fg: "#2f7a4d", bg: "rgba(47,122,77,.10)" },
-  rust: { fg: "var(--accent-500)", bg: "rgba(181,84,31,.10)" },
-  red: { fg: "var(--accent-700)", bg: "var(--accent-wash)" },
-  neutral: { fg: "var(--neutral-700)", bg: "var(--fill-quiet)" },
+export const TONES: Record<Tone, { foreground: string; background: string }> = {
+  green: { foreground: "#2f7a4d", background: "rgba(47,122,77,.10)" },
+  rust: { foreground: "var(--accent-500)", background: "rgba(181,84,31,.10)" },
+  red: { foreground: "var(--accent-700)", background: "var(--accent-wash)" },
+  neutral: {
+    foreground: "var(--neutral-700)",
+    background: "var(--fill-quiet)",
+  },
 };
 
 export const RECORD_VIA_LABELS: Record<string, string> = {
   cash: "Cash",
   bank: "Bank transfer",
   reader: "Own card reader",
+};
+
+const REVIEW_TOTAL_LABELS: Record<PayMethod, string> = {
+  card: "To charge",
+  link: "Payment link for",
+  record: "To record",
 };
 
 export const STEP_LABELS: Partial<Record<CheckoutView, string>> = {
@@ -68,59 +77,68 @@ export const VIEW_TITLES: Record<CheckoutView, string> = {
 
 const row = (
   label: string,
-  sub: string,
+  subtitle: string,
   value: string,
   isAlert = false,
-): DetailRow => ({ key: label + value, label, sub, value, isAlert });
+): DetailRow => ({ key: label + value, label, subtitle, value, isAlert });
 
-export const getAdjustNote = ({ adj, reason }: CheckoutLine): string =>
-  (adj < 0 ? "Lowered " : "Raised ") +
-  formatPounds(Math.abs(adj)) +
-  ": " +
-  reason;
+export const getAdjustNote = ({ adjustment, reason }: CheckoutLine): string => {
+  const direction = adjustment < 0 ? "Lowered " : "Raised ";
+  const amount = formatPounds(Math.abs(adjustment));
+
+  return `${direction}${amount}: ${reason}`;
+};
 
 /** Everything the views read from the state (prototype renderVals body). */
 export const getCheckoutView = (
   checkout: CheckoutController,
   props: CheckoutSheetProps,
 ) => {
-  const { state, setState, booking, money, go, showToast, isEmbedded } =
+  const { state, setState, booking, money, goTo, showToast, isEmbedded } =
     checkout;
+
   const { first: name } = booking;
-  const cardText = booking.card ? booking.brand + " •••• " + booking.card : "";
+  const cardText = booking.card ? `${booking.brand} •••• ${booking.card}` : "";
   let bookedTotal = booking.price;
+
   for (const [, price] of booking.addons) bookedTotal += price;
+
   const modeLabel = {
-    deposit: Math.round((state.paid / bookedTotal) * 100) + "% deposit",
+    deposit: `${Math.round((state.paid / bookedTotal) * 100)}% deposit`,
     full: "Full payment",
     card: "Card protection",
     none: "No protection",
   }[state.mode];
+
   const creditRows =
     state.paid > 0
       ? [
           row(
             state.mode === "full" ? "Paid in full" : "Deposit paid",
-            cardText + (booking.paidOn ? " · " + booking.paidOn : ""),
+            cardText + (booking.paidOn ? ` · ${booking.paidOn}` : ""),
             formatPounds(-state.paid),
           ),
         ]
       : [];
+
   const isRefund = money.refundDue > 0;
   const balanceLabel = isRefund ? "Refund due" : "Balance due";
   const balanceValue = formatPounds(isRefund ? money.refundDue : money.due);
   const isInCheckout = ["items", "tip", "pay", "review"].includes(state.view);
   const stepIndex = money.steps.indexOf(state.view);
+
   const goNext = () =>
-    go(money.steps[Math.min(stepIndex + 1, money.steps.length - 1)]!, 1);
+    goTo(money.steps[Math.min(stepIndex + 1, money.steps.length - 1)]!, 1);
+
   const back = () => {
     if (isInCheckout) {
-      if (stepIndex > 0) go(money.steps[stepIndex - 1]!, -1);
-      else go("detail", -1);
-    } else if (state.view === "add") go("items", -1);
-    else if (state.view === "receipt" && state.fromDone) go("done", -1);
-    else go("detail", -1);
+      if (stepIndex > 0) goTo(money.steps[stepIndex - 1]!, -1);
+      else goTo("detail", -1);
+    } else if (state.view === "add") goTo("items", -1);
+    else if (state.view === "receipt" && state.fromDone) goTo("done", -1);
+    else goTo("detail", -1);
   };
+
   const done = state.done ?? {
     method: "none" as const,
     via: "",
@@ -128,45 +146,62 @@ export const getCheckoutView = (
     tip: 0,
     refundAuto: 0,
   };
+
   const refundContext = getRefundContext(state, booking);
-  const isOffPlatform = !(refundContext.plat > 0);
+  const isOffPlatform = !(refundContext.platform > 0);
+
   const refundCapAll = roundPounds(
-    isOffPlatform ? refundContext.off : refundContext.plat,
+    isOffPlatform ? refundContext.off : refundContext.platform,
   );
+
   const refundCap = roundPounds(refundCapAll - state.refunded);
   const fee = booking.fee || 0;
   const feeExtra = Math.max(0, fee - state.paid);
+
   const openRefund = () => {
-    setState({ rfKind: "full", rfAmt: "", rfReason: "", rfTried: false });
-    go("refund", 1);
+    setState({
+      refundKind: "full",
+      refundAmount: "",
+      refundReason: "",
+      refundTried: false,
+    });
+
+    goTo("refund", 1);
   };
 
   // booking detail
   let badges: Badge[] = [];
+
   let panel: {
     tone: "red" | "neutral";
     icon: string;
     title: string;
     body: string;
   } | null = null;
+
   let rows: DetailRow[] = [];
   let total = { label: "", value: "" };
+
   let links: { key: string; label: string; icon: string; run: () => void }[] =
     [];
+
   let actions: DetailAction[] = [];
   let hasUndo = false;
+
   const lineRows = state.lines.map((line) =>
     row(
       line.name,
-      line.adj ? getAdjustNote(line) : line.sub,
-      formatPounds(line.base + line.adj),
+      line.adjustment ? getAdjustNote(line) : line.subtitle,
+      formatPounds(line.base + line.adjustment),
     ),
   );
+
   const modeBadge: Badge = {
     label: modeLabel,
     tone: "neutral",
     icon: ICONS.card,
   };
+
   const refundBadges: Badge[] =
     state.refunded > 0
       ? [
@@ -174,73 +209,96 @@ export const getCheckoutView = (
             label:
               refundCap <= 0
                 ? "Refunded"
-                : "Partially refunded " + formatPounds(state.refunded),
+                : `Partially refunded ${formatPounds(state.refunded)}`,
             tone: "neutral",
-            icon: ICONS.ret,
+            icon: ICONS.returnArrow,
           },
         ]
       : [];
-  const feeRows =
-    state.mode === "deposit"
-      ? [
-          row(
-            "Deposit kept",
-            cardText + " · paid " + booking.paidOn,
-            formatPounds(state.paid),
-          ),
-          row(
-            state.status === "feeUnpaid"
-              ? "Unpaid"
-              : state.status === "feeCollected"
-                ? "Charged to card"
-                : "To charge to card",
-            cardText,
-            formatPounds(feeExtra),
-            state.status === "feeUnpaid",
-          ),
-        ]
-      : state.mode === "full"
-        ? [
-            row("Kept from full payment", cardText, formatPounds(fee)),
-            row("Refunded", cardText, formatPounds(state.paid - fee)),
-          ]
-        : [
-            row(
-              state.status === "feeCollected"
-                ? "Charged to card"
-                : "To charge to card",
-              cardText,
-              formatPounds(fee),
-            ),
-          ];
-  const waiveWhat =
-    state.mode === "deposit"
-      ? state.nonref
+
+  const chargeLabel =
+    state.status === "feeCollected" ? "Charged to card" : "To charge to card";
+
+  const getFeeRows = () => {
+    if (state.mode === "deposit")
+      return [
+        row(
+          "Deposit kept",
+          `${cardText} · paid ${booking.paidOn}`,
+          formatPounds(state.paid),
+        ),
+        row(
+          state.status === "feeUnpaid" ? "Unpaid" : chargeLabel,
+          cardText,
+          formatPounds(feeExtra),
+          state.status === "feeUnpaid",
+        ),
+      ];
+
+    if (state.mode === "full")
+      return [
+        row("Kept from full payment", cardText, formatPounds(fee)),
+        row("Refunded", cardText, formatPounds(state.paid - fee)),
+      ];
+
+    return [row(chargeLabel, cardText, formatPounds(fee))];
+  };
+
+  const feeRows = getFeeRows();
+
+  const getWaiveWhat = () => {
+    if (state.mode === "deposit")
+      return state.isNonRefundable
         ? `She won’t be charged the extra ${formatPounds(feeExtra)}. Her ${formatPounds(state.paid)} deposit is non-refundable and will be kept.`
-        : `Her ${formatPounds(state.paid)} deposit will be refunded and she won’t be charged anything else.`
-      : state.mode === "full"
-        ? `The ${formatPounds(fee)} will be refunded to her card.`
-        : "She won’t be charged.";
-  const waivedWhat =
-    state.mode === "deposit"
-      ? state.nonref
+        : `Her ${formatPounds(state.paid)} deposit will be refunded and she won’t be charged anything else.`;
+
+    if (state.mode === "full")
+      return `The ${formatPounds(fee)} will be refunded to her card.`;
+
+    return "She won’t be charged.";
+  };
+
+  const waiveWhat = getWaiveWhat();
+
+  const getWaivedWhat = () => {
+    if (state.mode === "deposit")
+      return state.isNonRefundable
         ? `${name} wasn’t charged the extra ${formatPounds(feeExtra)}. Her ${formatPounds(state.paid)} deposit is non-refundable and was kept.`
-        : `Her ${formatPounds(state.paid)} deposit was refunded and she wasn’t charged anything else.`
-      : state.mode === "full"
-        ? `The ${formatPounds(fee)} was refunded to her card.`
-        : `${name} wasn’t charged.`;
+        : `Her ${formatPounds(state.paid)} deposit was refunded and she wasn’t charged anything else.`;
+
+    if (state.mode === "full")
+      return `The ${formatPounds(fee)} was refunded to her card.`;
+
+    return `${name} wasn’t charged.`;
+  };
+
+  const waivedWhat = getWaivedWhat();
   const linkTarget = state.linkVia === "sms" ? booking.phone : booking.email;
+
+  const doneVia =
+    done.method === "record" ? (RECORD_VIA_LABELS[done.via] ?? "") : cardText;
+
+  const tipNote =
+    done.tip > 0 ? ` · includes ${formatPounds(done.tip)} tip` : "";
+
+  const depositNote =
+    state.paid > 0
+      ? ` Her ${formatPounds(state.paid)} deposit is kept towards it.`
+      : "";
+
+  const feeExtraText = formatPounds(feeExtra);
 
   switch (state.status) {
     case "arrived":
       badges = [
         {
-          label: "Arrived " + booking.arrived,
+          label: `Arrived ${booking.arrived}`,
           tone: "neutral",
           icon: ICONS.person,
         },
         modeBadge,
       ];
+
       rows = [...lineRows, ...creditRows];
       total = { label: balanceLabel, value: balanceValue };
       break;
@@ -249,12 +307,14 @@ export const getCheckoutView = (
         { label: "Completed · Unpaid", tone: "rust", icon: ICONS.alert },
         modeBadge,
       ];
+
       panel = {
         tone: "neutral",
         icon: ICONS.clock,
         title: "Not checked out",
         body: `Marked Unpaid 1 hour after the ${booking.time.split("–")[1]} end time. It stays in Due for checkout until you check out.`,
       };
+
       rows = [...lineRows, ...creditRows];
       total = { label: balanceLabel, value: balanceValue };
       break;
@@ -263,32 +323,29 @@ export const getCheckoutView = (
         { label: "Completed · Paid", tone: "green", icon: ICONS.check },
         ...refundBadges,
       ];
+
       if (state.paid > 0)
         rows.push(
           row(
             state.mode === "full"
               ? "Paid in full at booking"
               : "Deposit paid at booking",
-            cardText + " · " + booking.paidOn,
+            `${cardText} · ${booking.paidOn}`,
             formatPounds(state.paid),
           ),
         );
+
       if (done.charged > 0)
         rows.push(
           row(
             done.method === "record"
               ? "Recorded at checkout"
               : "Paid at checkout",
-            (done.method === "record"
-              ? (RECORD_VIA_LABELS[done.via] ?? "")
-              : cardText) +
-              " · 15:08" +
-              (done.tip > 0
-                ? " · includes " + formatPounds(done.tip) + " tip"
-                : ""),
+            `${doneVia} · 15:08${tipNote}`,
             formatPounds(done.charged),
           ),
         );
+
       if (done.refundAuto > 0)
         rows.push(
           row(
@@ -297,20 +354,23 @@ export const getCheckoutView = (
             formatPounds(-done.refundAuto),
           ),
         );
+
       if (state.refunded > 0)
         rows.push(
           row(
             isOffPlatform ? "Refund recorded" : "Refund",
-            state.rfLast,
+            state.refundLast,
             formatPounds(-state.refunded),
           ),
         );
+
       total = {
         label: "Total paid",
         value: formatPounds(
           state.paid + done.charged - done.refundAuto - state.refunded,
         ),
       };
+
       links = [
         {
           key: "v",
@@ -318,7 +378,7 @@ export const getCheckoutView = (
           icon: ICONS.receipt,
           run: () => {
             setState({ fromDone: false });
-            go("receipt", 1);
+            goTo("receipt", 1);
           },
         },
         {
@@ -326,13 +386,15 @@ export const getCheckoutView = (
           label: "Resend receipt",
           icon: ICONS.send,
           run: () => {
-            setState({ rsVia: "email", rsTo: booking.email });
-            go("resend", 1);
+            setState({ resendVia: "email", resendTo: booking.email });
+            goTo("resend", 1);
           },
         },
       ];
+
       if (refundCap > 0)
-        actions = [{ label: "Refund", run: openRefund, kind: "sec" }];
+        actions = [{ label: "Refund", run: openRefund, kind: "secondary" }];
+
       break;
     case "awaiting":
       badges = [
@@ -342,162 +404,173 @@ export const getCheckoutView = (
           icon: ICONS.clock,
         },
       ];
+
       panel = {
         tone: "neutral",
         icon: ICONS.link,
         title: "Payment link sent",
-        body: `Sent by ${state.linkVia === "sms" ? "SMS to " + booking.phone : "email to " + booking.email} at 15:08. ${name} can pay by card, Apple Pay or Google Pay, and add a tip.`,
+        body: `Sent by ${state.linkVia === "sms" ? `SMS to ${booking.phone}` : `email to ${booking.email}`} at 15:08. ${name} can pay by card, Apple Pay or Google Pay, and add a tip.`,
       };
+
       rows = [...lineRows, ...creditRows];
       total = { label: "Awaiting payment", value: formatPounds(done.charged) };
+
       actions = [
         {
           label: "Resend link",
-          run: () => showToast("Payment link resent to " + linkTarget),
-          kind: "sec",
+          run: () => showToast(`Payment link resent to ${linkTarget}`),
+          kind: "secondary",
         },
         {
           label: "Record as paid",
           run: () => {
             setState({ method: "record" });
-            go("pay", 1);
+            goTo("pay", 1);
           },
-          kind: "sec",
+          kind: "secondary",
         },
         {
           label: "Cancel link",
-          run: () => setState({ dlg: "cancelLink" }),
+          run: () => setState({ dialog: "cancelLink" }),
           kind: "ghost",
         },
       ];
+
       break;
     case "feePending":
       badges = [
         { label: "No-show · Fee pending", tone: "rust", icon: ICONS.clock },
       ];
+
       panel = {
         tone: "neutral",
         icon: ICONS.clock,
-        title: formatPounds(fee) + " no-show fee",
+        title: `${formatPounds(fee)} no-show fee`,
         body: `${name} didn’t turn up on ${booking.day}. The fee is charged automatically in 18h unless you waive it.`,
       };
+
       rows = feeRows;
       total = { label: "No-show fee", value: formatPounds(fee) };
+
       actions = [
         {
           label: `Waive ${formatPounds(fee)} fee (applies in 18h)`,
-          run: () => setState({ dlg: "waive" }),
-          kind: "sec",
+          run: () => setState({ dialog: "waive" }),
+          kind: "secondary",
         },
       ];
+
       hasUndo = true;
       break;
     case "feeWaived":
       badges = [
         { label: "No-show · Fee waived", tone: "neutral", icon: ICONS.check },
       ];
+
       panel = {
         tone: "neutral",
         icon: ICONS.check,
         title: "Fee waived",
         body: `You waived the ${formatPounds(fee)} fee today at 16:20. ${waivedWhat} The booking fee isn’t refunded.`,
       };
+
       hasUndo = true;
       break;
     case "feeUnpaid":
       badges = [
         { label: "No-show · Fee unpaid", tone: "red", icon: ICONS.alert },
       ];
+
       panel = {
         tone: "red",
         icon: ICONS.alert,
         title: "Card declined: insufficient funds",
-        body:
-          `${formatPounds(feeExtra)} of ${name}’s ${formatPounds(fee)} fee couldn’t be charged to ${cardText}.` +
-          (state.paid > 0
-            ? ` Her ${formatPounds(state.paid)} deposit is kept towards it.`
-            : ""),
+        body: `${feeExtraText} of ${name}’s ${formatPounds(fee)} fee couldn’t be charged to ${cardText}.${depositNote}`,
       };
+
       rows = feeRows;
       total = { label: "No-show fee", value: formatPounds(fee) };
+
       actions = [
         {
           label: "Retry card (1 of 2 left)",
-          run: () => setState({ dlg: "retryFee" }),
-          kind: "pri",
+          run: () => setState({ dialog: "retryFee" }),
+          kind: "primary",
         },
         {
           label: "Send payment link",
           run: () =>
             showToast(
-              "Payment link for " +
-                formatPounds(feeExtra) +
-                " sent to " +
-                booking.phone,
+              `Payment link for ${feeExtraText} sent to ${booking.phone}`,
             ),
-          kind: "sec",
+          kind: "secondary",
         },
         {
           label: "Record as paid",
-          run: () => setState({ dlg: "recordFee" }),
-          kind: "sec",
+          run: () => setState({ dialog: "recordFee" }),
+          kind: "secondary",
         },
         {
           label: "Waive fee",
-          run: () => setState({ dlg: "waive" }),
+          run: () => setState({ dialog: "waive" }),
           kind: "ghost",
         },
       ];
+
       break;
     case "feeCollected":
       badges = [
         { label: "No-show · Fee collected", tone: "green", icon: ICONS.check },
         ...refundBadges,
       ];
+
       rows = feeRows.slice();
+
       if (state.refunded > 0)
-        rows.push(row("Refund", state.rfLast, formatPounds(-state.refunded)));
+        rows.push(
+          row("Refund", state.refundLast, formatPounds(-state.refunded)),
+        );
+
       total = {
         label: "Fee collected",
         value: formatPounds(fee - state.refunded),
       };
+
       if (refundCap > 0)
-        actions = [{ label: "Refund", run: openRefund, kind: "sec" }];
+        actions = [{ label: "Refund", run: openRefund, kind: "secondary" }];
+
       break;
   }
 
   // refund
   const refundAmount =
-    state.rfKind === "full" ? refundCap : parsePounds(state.rfAmt);
+    state.refundKind === "full" ? refundCap : parsePounds(state.refundAmount);
+
   const overError =
-    state.rfKind === "partial" && refundAmount > refundCap
+    state.refundKind === "partial" && refundAmount > refundCap
       ? `You can refund up to ${formatPounds(refundCap)}.`
       : "";
+
   const refundError =
     overError ||
-    (state.rfTried && state.rfKind === "partial" && !(refundAmount > 0)
+    (state.refundTried && state.refundKind === "partial" && !(refundAmount > 0)
       ? "Enter an amount."
       : "");
+
   const isRefundValid =
-    refundAmount > 0 && refundAmount <= refundCap && !!state.rfReason;
+    refundAmount > 0 && refundAmount <= refundCap && !!state.refundReason;
 
   // review
+  const noPayTotalLabel = isRefund ? "Refund due" : "Nothing to pay";
+  const noPayTotalValue = isRefund ? formatPounds(money.refundDue) : "£0";
+
   const reviewTotalLabel =
-    money.method === "card"
-      ? "To charge"
-      : money.method === "link"
-        ? "Payment link for"
-        : money.method === "record"
-          ? "To record"
-          : isRefund
-            ? "Refund due"
-            : "Nothing to pay";
-  const reviewTotalValue =
     money.method === "none"
-      ? isRefund
-        ? formatPounds(money.refundDue)
-        : "£0"
-      : formatPounds(money.charge);
+      ? noPayTotalLabel
+      : REVIEW_TOTAL_LABELS[money.method];
+
+  const reviewTotalValue =
+    money.method === "none" ? noPayTotalValue : formatPounds(money.charge);
 
   // receipt
   const receiptDone = state.done ?? {
@@ -505,94 +578,110 @@ export const getCheckoutView = (
     charged: money.charge,
     tip: money.tip,
     refundAuto: money.refundDue,
-    via: state.recVia,
+    via: state.recordVia,
   };
+
   const receiptLines: {
     key: string;
     label: string;
     value: string;
     isAdjust: boolean;
   }[] = [];
+
   for (const line of state.lines) {
     receiptLines.push({
-      key: "l" + line.id,
+      key: `l${line.id}`,
       label: line.name,
       value: formatPence(line.base),
       isAdjust: false,
     });
-    if (line.adj)
+
+    if (line.adjustment)
       receiptLines.push({
-        key: "a" + line.id,
-        label: "Price adjusted: " + line.reason,
-        value: formatPence(line.adj),
+        key: `a${line.id}`,
+        label: `Price adjusted: ${line.reason}`,
+        value: formatPence(line.adjustment),
         isAdjust: true,
       });
   }
+
   const receiptPays: {
     key: string;
     label: string;
-    sub: string;
+    subtitle: string;
     value: string;
   }[] = [];
+
   if (state.paid > 0)
     receiptPays.push({
       key: "p",
       label: state.mode === "full" ? "Prepayment applied" : "Deposit applied",
-      sub: "Paid at booking" + (booking.paidOn ? ", " + booking.paidOn : ""),
+      subtitle: `Paid at booking${booking.paidOn ? `, ${booking.paidOn}` : ""}`,
       value: formatPence(-state.paid),
     });
+
+  const receiptVia = RECORD_VIA_LABELS[receiptDone.via] ?? "";
+
   if (receiptDone.charged > 0)
     receiptPays.push({
       key: "c",
       label:
         receiptDone.method === "link" ? "Awaiting payment" : "Paid at checkout",
-      sub:
+      subtitle:
         receiptDone.method === "record"
-          ? (RECORD_VIA_LABELS[receiptDone.via] ?? "") +
-            ", recorded by the stylist"
+          ? `${receiptVia}, recorded by the stylist`
           : "",
       value: formatPence(receiptDone.charged),
     });
+
   if (receiptDone.refundAuto > 0)
     receiptPays.push({
       key: "ra",
       label: "Refunded to card",
-      sub: "Price lowered after booking",
+      subtitle: "Price lowered after booking",
       value: formatPence(receiptDone.refundAuto),
     });
+
   if (state.refunded > 0)
     receiptPays.push({
       key: "rf",
       label: "Refunded",
-      sub: state.rfLast,
+      subtitle: state.refundLast,
       value: formatPence(state.refunded),
     });
+
   const receiptPaid =
     state.paid +
     money.bookFee +
     (receiptDone.method === "link" ? 0 : receiptDone.charged) -
     receiptDone.refundAuto -
     state.refunded;
+
+  const getReceiptMethod = () => {
+    if (receiptDone.method === "record")
+      return `${RECORD_VIA_LABELS[receiptDone.via] ?? ""} (recorded)`;
+
+    if (receiptDone.method === "link") return "payment link, not paid yet";
+
+    return cardText || "card";
+  };
+
   const stylist = { ...DEFAULT_STYLIST, ...props.stylist };
+
   const receipt = {
     stylist: stylist.name,
-    addr: stylist.addr,
+    address: stylist.address,
     vat: stylist.vat,
-    no: "Receipt TH-20418",
-    date: booking.day + " 2026",
-    client: "For " + booking.client,
+    number: "Receipt TH-20418",
+    date: `${booking.day} 2026`,
+    client: `For ${booking.client}`,
     lines: receiptLines,
     subtotal: formatPence(money.items),
     tip: receiptDone.tip > 0 ? formatPence(receiptDone.tip || 0) : "",
     pays: receiptPays,
     fee: money.bookFee > 0 ? formatPence(money.bookFee) : "",
     paid: formatPence(receiptPaid),
-    method:
-      receiptDone.method === "record"
-        ? (RECORD_VIA_LABELS[receiptDone.via] ?? "") + " (recorded)"
-        : receiptDone.method === "link"
-          ? "payment link, not paid yet"
-          : cardText || "card",
+    method: getReceiptMethod(),
   };
 
   // dialogs
@@ -600,24 +689,28 @@ export const getCheckoutView = (
     title: string;
     body: string;
     yes: string;
-    no: string;
+    cancel: string;
     run: () => void;
   } | null = null;
-  switch (state.dlg) {
+
+  switch (state.dialog) {
     case "waive":
       dialog = {
         title: `Waive ${name}’s ${formatPounds(fee)} fee?`,
-        body: waiveWhat + " The booking fee isn’t refunded.",
+        body: `${waiveWhat} The booking fee isn’t refunded.`,
         yes: "Waive fee",
-        no: "Keep fee",
+        cancel: "Keep fee",
         run: () => {
-          setState({ dlg: null, status: "feeWaived" });
+          setState({ dialog: null, status: "feeWaived" });
           showToast("Fee waived");
         },
       };
+
       break;
+
     case "refund": {
-      const amount = state.rfFinal || 0;
+      const amount = state.refundFinal || 0;
+
       dialog = {
         title: isOffPlatform
           ? `Record a ${formatPounds(amount)} refund?`
@@ -625,73 +718,81 @@ export const getCheckoutView = (
         body: isOffPlatform
           ? "Recorded only, refund the client directly."
           : "It usually takes 5–10 business days to arrive. The card fee isn’t returned.",
-        yes: isOffPlatform ? "Record refund" : "Refund " + formatPounds(amount),
-        no: "Cancel",
+        yes: isOffPlatform ? "Record refund" : `Refund ${formatPounds(amount)}`,
+        cancel: "Cancel",
         run: () => {
           setState({
-            dlg: null,
+            dialog: null,
             refunded: roundPounds(state.refunded + amount),
-            rfLast: state.rfReason,
+            refundLast: state.refundReason,
           });
-          props.onRefund?.(amount, state.rfReason, isOffPlatform);
-          go("detail", -1);
+
+          props.onRefund?.(amount, state.refundReason, isOffPlatform);
+          goTo("detail", -1);
+
           showToast(
             isOffPlatform
               ? "Refund recorded"
-              : "Refund of " + formatPounds(amount) + " on its way",
+              : `Refund of ${formatPounds(amount)} on its way`,
           );
         },
       };
+
       break;
     }
+
     case "cancelLink":
       dialog = {
         title: "Cancel the payment link?",
         body: `${name} won’t be able to pay with it. The booking moves to Unpaid and back into Due for checkout.`,
         yes: "Cancel link",
-        no: "Keep link",
+        cancel: "Keep link",
         run: () => {
-          setState({ dlg: null, status: "unpaid", done: null });
+          setState({ dialog: null, status: "unpaid", done: null });
           showToast("Payment link cancelled");
           props.onCancelLink?.();
         },
       };
+
       break;
     case "retryFee":
       dialog = {
         title: `Charge ${formatPounds(feeExtra)} to ${name}’s card ending ${booking.card}?`,
         body: "This uses your last retry. If it’s declined again, send a payment link or record the payment instead.",
-        yes: "Charge " + formatPounds(feeExtra),
-        no: "Not now",
+        yes: `Charge ${formatPounds(feeExtra)}`,
+        cancel: "Not now",
         run: () => {
-          setState({ dlg: null, status: "feeCollected" });
-          showToast(formatPounds(feeExtra) + " charged");
+          setState({ dialog: null, status: "feeCollected" });
+          showToast(`${formatPounds(feeExtra)} charged`);
         },
       };
+
       break;
     case "recordFee":
       dialog = {
         title: `Record ${formatPounds(feeExtra)} as paid?`,
         body: "Recorded only, no money moves through Tiwára’s House.",
         yes: "Record as paid",
-        no: "Cancel",
+        cancel: "Cancel",
         run: () => {
-          setState({ dlg: null, status: "feeCollected" });
+          setState({ dialog: null, status: "feeCollected" });
           showToast("Payment recorded");
         },
       };
+
       break;
     case "undoNs":
       dialog = {
         title: "Undo no-show?",
         body: `Only use this if ${name} did attend. It reverses the no-show entirely, with no fee, and the booking goes back to Arrived so you can check out.`,
         yes: "Undo no-show",
-        no: "Cancel",
+        cancel: "Cancel",
         run: () => {
-          setState({ dlg: null, status: "arrived" });
+          setState({ dialog: null, status: "arrived" });
           showToast("No-show undone");
         },
       };
+
       break;
     case null:
       break;
@@ -701,10 +802,10 @@ export const getCheckoutView = (
   const leaveDone = (action: "done" | "rebook") => {
     if (isEmbedded && props.onComplete)
       props.onComplete(checkout.getResult(), action);
-    else if (action === "rebook")
-      showToast("New booking for " + name + " started");
-    else go("detail", -1);
+    else if (action === "rebook") showToast(`New booking for ${name} started`);
+    else goTo("detail", -1);
   };
+
   const footer = {
     show: false,
     hasTotal: false,
@@ -718,8 +819,10 @@ export const getCheckoutView = (
     secondaryLabel: "",
     secondaryRun: () => {},
   };
+
   const setFooter = (patch: Partial<typeof footer>) =>
     Object.assign(footer, { show: true }, patch);
+
   if (
     state.view === "detail" &&
     (state.status === "arrived" || state.status === "unpaid")
@@ -731,6 +834,7 @@ export const getCheckoutView = (
       primaryLabel: "Checkout",
       primaryRun: checkout.startCheckout,
     });
+
   if (state.view === "items")
     setFooter({
       hasTotal: true,
@@ -738,10 +842,11 @@ export const getCheckoutView = (
       totalValue: balanceValue,
       primaryLabel: "Continue",
       primaryRun: () => {
-        setState({ adjId: null });
+        setState({ adjustingLineId: null });
         goNext();
       },
     });
+
   if (state.view === "tip")
     setFooter({
       hasTotal: true,
@@ -750,6 +855,7 @@ export const getCheckoutView = (
       primaryLabel: "Continue",
       primaryRun: goNext,
     });
+
   if (state.view === "pay")
     setFooter({
       hasTotal: true,
@@ -760,6 +866,20 @@ export const getCheckoutView = (
       primaryLabel: "Continue",
       primaryRun: goNext,
     });
+
+  const getReviewPrimaryLabel = () => {
+    if (state.busy) return "Charging";
+
+    if (state.decline === "soft")
+      return `Retry card (${state.tries} of 2 left)`;
+
+    if (money.method === "card") return `Charge ${formatPounds(money.charge)}`;
+
+    if (money.method === "link") return "Send link and complete";
+
+    return "Complete checkout";
+  };
+
   if (state.view === "review")
     setFooter({
       hasTotal: true,
@@ -767,19 +887,12 @@ export const getCheckoutView = (
       totalValue: reviewTotalValue,
       hasPrimary: state.decline !== "hard",
       isPrimaryDisabled: state.busy,
-      primaryLabel: state.busy
-        ? "Charging"
-        : state.decline === "soft"
-          ? `Retry card (${state.tries} of 2 left)`
-          : money.method === "card"
-            ? "Charge " + formatPounds(money.charge)
-            : money.method === "link"
-              ? "Send link and complete"
-              : "Complete checkout",
+      primaryLabel: getReviewPrimaryLabel(),
       primaryRun: () => {
         if (!checkout.state.busy) checkout.complete();
       },
     });
+
   if (state.view === "done")
     setFooter({
       hasSecondary: true,
@@ -788,6 +901,7 @@ export const getCheckoutView = (
       primaryLabel: "Done",
       primaryRun: () => leaveDone("done"),
     });
+
   if (state.view === "refund")
     setFooter({
       hasTotal: true,
@@ -798,22 +912,25 @@ export const getCheckoutView = (
       primaryLabel:
         (isOffPlatform ? "Record refund" : "Refund") +
         (refundAmount > 0 && refundAmount <= refundCap
-          ? " " + formatPounds(refundAmount)
+          ? ` ${formatPounds(refundAmount)}`
           : ""),
       primaryRun: () => {
-        if (!isRefundValid) return setState({ rfTried: true });
-        setState({ dlg: "refund", rfFinal: refundAmount });
+        if (!isRefundValid) return setState({ refundTried: true });
+
+        setState({ dialog: "refund", refundFinal: refundAmount });
       },
       isPrimaryDisabled: !!overError,
     });
+
   if (state.view === "resend")
     setFooter({
       primaryLabel: "Send receipt",
       primaryRun: () => {
-        if (!state.rsTo.trim()) return setState({ rsTried: true });
-        showToast("Receipt sent to " + state.rsTo.trim());
-        props.onResent?.(state.rsTo.trim());
-        go("detail", -1);
+        if (!state.resendTo.trim()) return setState({ resendTried: true });
+
+        showToast(`Receipt sent to ${state.resendTo.trim()}`);
+        props.onResent?.(state.resendTo.trim());
+        goTo("detail", -1);
       },
     });
 

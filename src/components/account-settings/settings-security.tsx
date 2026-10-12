@@ -110,36 +110,41 @@ export const SettingsSecurity = ({
     passwordView,
     passwordErrors,
   } = settings;
+
   const provider = props.signIn === "apple" ? "Apple" : "Google";
-  const setPassword = (key: "cur" | "nw" | "conf", value: string) =>
-    setState(({ pw }) => ({ pw: { ...pw, [key]: value } }));
-  const tfaDevices = Array.isArray(props.tfaDevices)
-    ? props.tfaDevices
-    : state.tfaDevs;
-  const isTfaOn = tfaDevices.length > 0;
-  const hasOthers = state.sessions.some(({ cur }) => !cur);
+
+  const setPassword = (key: "current" | "next" | "confirm", value: string) =>
+    setState(({ password }) => ({ password: { ...password, [key]: value } }));
+
+  const twoFactorDevices = Array.isArray(props.twoFactorDevices)
+    ? props.twoFactorDevices
+    : state.twoFactorDevices;
+
+  const isTwoFactorOn = twoFactorDevices.length > 0;
+  const hasOthers = state.sessions.some(({ isCurrent }) => !isCurrent);
+
   const passwordFields = [
     ...(isSocial
       ? []
       : [
           {
-            key: "cur" as const,
+            key: "current" as const,
             label: "Current password",
             autoComplete: "current-password",
-            error: passwordErrors.cur,
+            error: passwordErrors.current,
           },
         ]),
     {
-      key: "nw" as const,
+      key: "next" as const,
       label: "New password",
       autoComplete: "new-password",
-      error: passwordErrors.nw,
+      error: passwordErrors.next,
     },
     {
-      key: "conf" as const,
+      key: "confirm" as const,
       label: "Confirm new password",
       autoComplete: "new-password",
-      error: passwordErrors.conf,
+      error: passwordErrors.confirm,
     },
   ];
 
@@ -147,17 +152,15 @@ export const SettingsSecurity = ({
     <>
       <SettingsSection label="Password" heading="Password">
         <div className={shared.card}>
-          {isSocial && !state.setPw && (
+          {isSocial && !state.isSettingPassword && (
             <div className={styles.socialIntro}>
               <p className={styles.socialText}>
-                {"You sign in with " +
-                  provider +
-                  ". Set a password to also sign in with email."}
+                {`You sign in with ${provider}. Set a password to also sign in with email.`}
               </p>
               <button
                 className={joinClassNames(styles.setPassword, shared.focusRing)}
                 data-ac-in="1"
-                onClick={() => setState({ setPw: true })}
+                onClick={() => setState({ isSettingPassword: true })}
               >
                 Set password
               </button>
@@ -166,8 +169,9 @@ export const SettingsSecurity = ({
           {showPasswordFields && (
             <div className={styles.pwFields}>
               {passwordFields.map(({ key, label, autoComplete, error }) => {
-                const id = uid + "-p" + { cur: "c", nw: "n", conf: "f" }[key];
-                const isNew = key === "nw";
+                const id = `${uid}-p${{ current: "c", next: "n", confirm: "f" }[key]}`;
+                const isNew = key === "next";
+
                 return (
                   <div key={key}>
                     <label className={shared.label} htmlFor={id}>
@@ -182,14 +186,15 @@ export const SettingsSecurity = ({
                       data-ac-in="1"
                       id={id}
                       type="password"
-                      value={state.pw[key]}
+                      value={state.password[key]}
                       onChange={(event) => setPassword(key, event.target.value)}
                       onBlur={() => {
-                        if (isNew && state.pw.nw) setState({ pwNwBlur: true });
+                        if (isNew && state.password.next)
+                          setState({ newPasswordBlurred: true });
                       }}
                       autoComplete={autoComplete}
                       aria-invalid={error ? "true" : "false"}
-                      aria-describedby={isNew ? id + "-hint" : ""}
+                      aria-describedby={isNew ? `${id}-hint` : ""}
                     />
                     {/* the new password's error shows in the meter, not as a line */}
                     {!isNew && !!error && (
@@ -198,7 +203,7 @@ export const SettingsSecurity = ({
                       </div>
                     )}
                     {isNew && (
-                      <PasswordMeter id={id + "-hint"} view={passwordView} />
+                      <PasswordMeter id={`${id}-hint`} view={passwordView} />
                     )}
                   </div>
                 );
@@ -230,8 +235,10 @@ export const SettingsSecurity = ({
           <div className={styles.listRow}>
             <div className={shared.rowText}>
               <div className={styles.listTitle}>Two-step verification</div>
-              {!isTfaOn && <div className={styles.tfaOff}>Off · Required</div>}
-              {isTfaOn && (
+              {!isTwoFactorOn && (
+                <div className={styles.tfaOff}>Off · Required</div>
+              )}
+              {isTwoFactorOn && (
                 <div className={styles.tfaOn}>
                   <svg
                     width="14"
@@ -249,15 +256,17 @@ export const SettingsSecurity = ({
                 </div>
               )}
             </div>
-            {!isTfaOn && (
+            {!isTwoFactorOn && (
               <button
                 className={joinClassNames(styles.turnOn, shared.focusRing)}
                 data-ac-in="1"
                 onClick={() => {
-                  if (props.onTfaTurnOn) return props.onTfaTurnOn();
+                  if (props.onTwoFactorTurnOn) return props.onTwoFactorTurnOn();
+
                   setState({
-                    tfaDevs: [{ name: "Main phone", backup: false }],
+                    twoFactorDevices: [{ name: "Main phone", backup: false }],
                   });
+
                   toast("Two-step verification is on");
                 }}
               >
@@ -265,15 +274,15 @@ export const SettingsSecurity = ({
               </button>
             )}
           </div>
-          {tfaDevices.map((device, index) => (
-            <div key={"d" + index} className={styles.listRow}>
+          {twoFactorDevices.map((device, index) => (
+            <div key={`d${index}`} className={styles.listRow}>
               <div className={shared.rowText}>
                 <div className={styles.listTitle}>{device.name}</div>
                 <div className={styles.listSub}>
-                  {"Authenticator app" + (device.backup ? " · Backup" : "")}
+                  {`Authenticator app${device.backup ? " · Backup" : ""}`}
                 </div>
               </div>
-              {tfaDevices.length > 1 && (
+              {twoFactorDevices.length > 1 && (
                 <button
                   className={joinClassNames(
                     shared.outlineButton,
@@ -281,21 +290,25 @@ export const SettingsSecurity = ({
                   )}
                   data-ac-in="1"
                   onClick={() => {
-                    if (props.onTfaRemove)
-                      return props.onTfaRemove(device.name);
+                    if (props.onTwoFactorRemove)
+                      return props.onTwoFactorRemove(device.name);
+
                     setState({
-                      tfaDevs: tfaDevices.filter((item) => item !== device),
+                      twoFactorDevices: twoFactorDevices.filter(
+                        (item) => item !== device,
+                      ),
                     });
-                    toast(device.name + " removed");
+
+                    toast(`${device.name} removed`);
                   }}
-                  aria-label={"Remove " + device.name}
+                  aria-label={`Remove ${device.name}`}
                 >
                   Remove
                 </button>
               )}
             </div>
           ))}
-          {tfaDevices.length === 1 && (
+          {twoFactorDevices.length === 1 && (
             <div className={styles.listRow}>
               <div className={shared.rowText}>
                 <div className={styles.listTitle}>Backup</div>
@@ -308,12 +321,15 @@ export const SettingsSecurity = ({
                 )}
                 data-ac-in="1"
                 onClick={() => {
-                  if (props.onTfaAddBackup) return props.onTfaAddBackup();
+                  if (props.onTwoFactorAddBackup)
+                    return props.onTwoFactorAddBackup();
+
                   setState({
-                    tfaDevs: tfaDevices.concat([
+                    twoFactorDevices: twoFactorDevices.concat([
                       { name: "Backup phone", backup: true },
                     ]),
                   });
+
                   toast("Backup added");
                 }}
               >
@@ -327,7 +343,7 @@ export const SettingsSecurity = ({
               <span className={styles.soonTag}>Coming soon</span>
             </div>
           </div>
-          {isTfaOn && !tfaDevices.some(({ backup }) => backup) && (
+          {isTwoFactorOn && !twoFactorDevices.some(({ backup }) => backup) && (
             <div className={styles.backupNote} role="note">
               <svg
                 className={shared.infoIcon}
@@ -383,7 +399,7 @@ export const SettingsSecurity = ({
 
       <SettingsSection label="Active sessions" heading="Where you’re signed in">
         <div className={styles.listCard}>
-          {state.sessLoading && (
+          {state.sessionsLoading && (
             <div aria-busy="true" aria-label="Loading sessions">
               {[1, 2, 3].map((key) => (
                 <div key={key} className={styles.skeletonRow}>
@@ -399,55 +415,15 @@ export const SettingsSecurity = ({
               ))}
             </div>
           )}
-          {!state.sessLoading && (
+          {!state.sessionsLoading && (
             <>
-              {state.sessions.map(({ id, device, loc, last, cur, kind }) => (
-                <div key={id} className={styles.sessionRow}>
-                  <span className={styles.sessionIcon}>
-                    <svg
-                      width="18"
-                      height="18"
-                      viewBox="0 0 24 24"
-                      fill="none"
-                      stroke="currentColor"
-                      strokeWidth="1.7"
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                    >
-                      <path d={SESSION_ICONS[kind]}></path>
-                    </svg>
-                  </span>
-                  <div className={styles.sessionBody}>
-                    <div className={styles.sessionMain}>
-                      <div className={shared.badgeRow}>
-                        <span className={shared.strongText}>{device}</span>
-                        {cur && (
-                          <span className={styles.currentTag}>Current</span>
-                        )}
-                      </div>
-                      <div className={shared.rowLabel}>{loc}</div>
-                    </div>
-                    <div className={styles.sessionLast}>{last}</div>
-                  </div>
-                  {!cur && (
-                    <button
-                      className={joinClassNames(
-                        styles.signOut,
-                        shared.focusRing,
-                      )}
-                      data-ac-in="1"
-                      onClick={() => {
-                        setState(({ sessions }) => ({
-                          sessions: sessions.filter((item) => item.id !== id),
-                        }));
-                        toast("Signed out of " + device.split(",")[0]);
-                      }}
-                      aria-label={"Sign out of " + device}
-                      title="Sign out"
-                    >
+              {state.sessions.map(
+                ({ id, device, location, last, isCurrent, kind }) => (
+                  <div key={id} className={styles.sessionRow}>
+                    <span className={styles.sessionIcon}>
                       <svg
-                        width="17"
-                        height="17"
+                        width="18"
+                        height="18"
                         viewBox="0 0 24 24"
                         fill="none"
                         stroke="currentColor"
@@ -455,13 +431,58 @@ export const SettingsSecurity = ({
                         strokeLinecap="round"
                         strokeLinejoin="round"
                       >
-                        <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4M16 17l5-5-5-5M21 12H9"></path>
+                        <path d={SESSION_ICONS[kind]}></path>
                       </svg>
-                    </button>
-                  )}
-                  {cur && <span className={styles.signOutSpacer}></span>}
-                </div>
-              ))}
+                    </span>
+                    <div className={styles.sessionBody}>
+                      <div className={styles.sessionMain}>
+                        <div className={shared.badgeRow}>
+                          <span className={shared.strongText}>{device}</span>
+                          {isCurrent && (
+                            <span className={styles.currentTag}>Current</span>
+                          )}
+                        </div>
+                        <div className={shared.rowLabel}>{location}</div>
+                      </div>
+                      <div className={styles.sessionLast}>{last}</div>
+                    </div>
+                    {!isCurrent && (
+                      <button
+                        className={joinClassNames(
+                          styles.signOut,
+                          shared.focusRing,
+                        )}
+                        data-ac-in="1"
+                        onClick={() => {
+                          setState(({ sessions }) => ({
+                            sessions: sessions.filter((item) => item.id !== id),
+                          }));
+
+                          toast(`Signed out of ${device.split(",")[0]}`);
+                        }}
+                        aria-label={`Sign out of ${device}`}
+                        title="Sign out"
+                      >
+                        <svg
+                          width="17"
+                          height="17"
+                          viewBox="0 0 24 24"
+                          fill="none"
+                          stroke="currentColor"
+                          strokeWidth="1.7"
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                        >
+                          <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4M16 17l5-5-5-5M21 12H9"></path>
+                        </svg>
+                      </button>
+                    )}
+                    {isCurrent && (
+                      <span className={styles.signOutSpacer}></span>
+                    )}
+                  </div>
+                ),
+              )}
               {!hasOthers && (
                 <p className={styles.noOthers}>
                   No other devices are signed in.
@@ -484,8 +505,9 @@ export const SettingsSecurity = ({
                     },
                     () => {
                       setState(({ sessions }) => ({
-                        sessions: sessions.filter(({ cur }) => cur),
+                        sessions: sessions.filter(({ isCurrent }) => isCurrent),
                       }));
+
                       toast("Signed out of other sessions");
                     },
                   )

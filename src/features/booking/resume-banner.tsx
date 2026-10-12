@@ -11,12 +11,16 @@ interface ResumeBannerProps {
 export const ResumeBanner = ({ booking }: ResumeBannerProps) => {
   const { state, stylist, actions } = booking;
   const draft = state.resumeDraft;
+
   if (!draft) return null;
-  const draftService = findService(stylist, draft.svc);
+
+  const draftService = findService(stylist, draft.serviceId);
+
   const when = draft.date
-    ? formatShortDate(draft.calY, draft.calM, draft.date) +
-      (draft.time ? ", " + draft.time : "")
+    ? formatShortDate(draft.calendarYear, draft.calendarMonth, draft.date) +
+      (draft.time ? `, ${draft.time}` : "")
     : "";
+
   return (
     <div
       data-screen-label="Resume banner"
@@ -28,7 +32,7 @@ export const ResumeBanner = ({ booking }: ResumeBannerProps) => {
         <div className={styles.title}>Pick up where you left off?</div>
         <div className={styles.line}>
           {(draftService ? draftService.name : "Your booking") +
-            (when ? " · " + when : "")}
+            (when ? ` · ${when}` : "")}
         </div>
       </div>
       <div className={styles.actions}>

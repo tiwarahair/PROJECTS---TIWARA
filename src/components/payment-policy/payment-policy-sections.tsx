@@ -7,31 +7,32 @@ import styles from "./payment-policy.module.css";
 export const MODES: {
   key: PolicyMode;
   title: string;
-  desc: string;
+  description: string;
   isRecommended: boolean;
 }[] = [
   {
     key: "deposit",
     title: "Deposit",
-    desc: "Clients pay part now, the rest to you at the appointment",
+    description: "Clients pay part now, the rest to you at the appointment",
     isRecommended: true,
   },
   {
     key: "full",
     title: "Full payment",
-    desc: "Clients pay the full price when they book",
+    description: "Clients pay the full price when they book",
     isRecommended: false,
   },
   {
     key: "card",
     title: "Card protection",
-    desc: "Nothing upfront. Card saved to cover late cancellations and no-shows",
+    description:
+      "Nothing upfront. Card saved to cover late cancellations and no-shows",
     isRecommended: false,
   },
   {
     key: "none",
     title: "No protection",
-    desc: "Nothing upfront. No card saved",
+    description: "Nothing upfront. No card saved",
     isRecommended: false,
   },
 ];
@@ -170,9 +171,11 @@ export const FeeBlock = ({
   onUpdate,
 }: FeeBlockProps) => {
   const isKeep = fee.kind === "keep";
+
   const pickPercent = () => {
     if (fee.kind !== "pct") onUpdate({ kind: "pct" });
   };
+
   const percentInput = (withFocus: boolean) => (
     <span className={styles.pctFieldWrap}>
       <input
@@ -183,11 +186,11 @@ export const FeeBlock = ({
         )}
         data-pp-in="1"
         inputMode="numeric"
-        aria-label={label + " percentage of service"}
-        value={fee.pct}
+        aria-label={`${label} percentage of service`}
+        value={fee.percent}
         onChange={(event: ChangeEvent<HTMLInputElement>) =>
           onUpdate({
-            pct: event.target.value.replace(/\D/g, "").slice(0, 3),
+            percent: event.target.value.replace(/\D/g, "").slice(0, 3),
             kind: "pct",
           })
         }
@@ -197,6 +200,7 @@ export const FeeBlock = ({
       <span className={styles.pctFieldSign}>%</span>
     </span>
   );
+
   return (
     <div>
       <button
@@ -257,7 +261,7 @@ export const FeeBlock = ({
                     getTextClass(isKeep),
                   )}
                 >
-                  {"Keep the deposit (" + depositText + "%)"}
+                  {`Keep the deposit (${depositText}%)`}
                 </span>
               </button>
               {/* the prototype's radio is a focusable div because it contains the percentage input */}

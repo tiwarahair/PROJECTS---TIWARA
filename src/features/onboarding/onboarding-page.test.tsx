@@ -10,17 +10,22 @@ describe("OnboardingPage", () => {
     vi.useFakeTimers({
       toFake: ["setTimeout", "clearTimeout", "setInterval", "clearInterval"],
     });
+
     localStorage.clear();
     sessionStorage.clear();
   });
+
   afterEach(() => vi.useRealTimers());
 
   it("starts on the chooser; For customers asks for an email", () => {
     renderWithStore(<OnboardingPage />, "/login");
+
     expect(
       screen.getByRole("heading", { name: "Log in or sign up" }),
     ).toBeInTheDocument();
+
     fireEvent.click(screen.getByRole("button", { name: /For customers/ }));
+
     expect(
       screen.getByRole("heading", { name: "Tiwára’s House for customers" }),
     ).toBeInTheDocument();
@@ -31,17 +36,22 @@ describe("OnboardingPage", () => {
       <OnboardingPage />,
       "/login?screen=cust-email&return=%2Fsearch",
     );
+
     fireEvent.change(screen.getByLabelText("Email address"), {
       target: { value: "nia.okafor@gmail.com" },
     });
+
     fireEvent.click(screen.getByRole("button", { name: "Continue" }));
     advance(650);
+
     expect(
       screen.getByRole("heading", { name: "Welcome back" }),
     ).toBeInTheDocument();
+
     fireEvent.change(screen.getByLabelText("Password"), {
       target: { value: "sunflower9" },
     });
+
     fireEvent.click(screen.getByRole("button", { name: "Log in" }));
     advance(650);
     expect(screen.getByTestId("location")).toHaveTextContent("/search");
@@ -53,6 +63,7 @@ describe("OnboardingPage", () => {
       <OnboardingPage />,
       "/login?fixture=wrong-password&password=strict&board=true",
     );
+
     expect(screen.getAllByRole("alert")[0]).toHaveTextContent(
       "That password isn’t right. Try again or reset it.",
     );
@@ -62,6 +73,7 @@ describe("OnboardingPage", () => {
     renderWithStore(<OnboardingPage />, "/join?screen=w1&board=true");
     fireEvent.click(screen.getByRole("radio", { name: /Mobile/ }));
     advance(300);
+
     expect(
       screen.getByRole("heading", { name: "What services do you offer?" }),
     ).toBeInTheDocument();
@@ -72,12 +84,15 @@ describe("OnboardingPage", () => {
       <OnboardingPage />,
       "/signup?screen=verify&board=true&stayOnDone=true&code=strict",
     );
+
     "123456".split("").forEach((digit, index) =>
-      fireEvent.change(screen.getByLabelText("Digit " + (index + 1)), {
+      fireEvent.change(screen.getByLabelText(`Digit ${index + 1}`), {
         target: { value: digit },
       }),
     );
+
     advance(650);
+
     // a board's verify screen is a customer sign-up: it ends with the welcome toast
     expect(screen.getByRole("status")).toHaveTextContent(
       "Welcome to Tiwára’s House, Ama",
@@ -89,7 +104,9 @@ describe("OnboardingPage", () => {
       <OnboardingPage />,
       "/signup?screen=cust-create&board=true",
     );
+
     fireEvent.click(screen.getByRole("button", { name: "Client Terms" }));
+
     expect(
       screen.getByRole("dialog", { name: "Client Terms" }),
     ).toBeInTheDocument();
@@ -100,13 +117,17 @@ describe("OnboardingPage", () => {
 
     it("/join opens on the stylist landing and Get started begins the set-up", () => {
       renderWithStore(<OnboardingPage />, "/join");
+
       expect(
         screen.getByRole("heading", { name: /Run your hair/ }),
       ).toBeInTheDocument();
+
       fireEvent.click(screen.getByRole("button", { name: "Get started" }));
+
       expect(
         screen.getByRole("heading", { name: "How do you work?" }),
       ).toBeInTheDocument();
+
       expect(getLocation()).toBe("/join");
     });
 
@@ -118,14 +139,18 @@ describe("OnboardingPage", () => {
 
     it("a new email on /login moves to /signup, keeping the email", () => {
       renderWithStore(<OnboardingPage />, "/login?screen=cust-email");
+
       fireEvent.change(screen.getByLabelText("Email address"), {
         target: { value: "new.person@example.com" },
       });
+
       fireEvent.click(screen.getByRole("button", { name: "Continue" }));
       advance(650);
+
       expect(
         screen.getByRole("heading", { name: "Create account" }),
       ).toBeInTheDocument();
+
       expect(screen.getByText(/new.person@example.com/)).toBeInTheDocument();
       expect(getLocation()).toBe("/signup");
     });
@@ -138,9 +163,11 @@ describe("OnboardingPage", () => {
 
     it("a ?screen= for another route opens on that route", () => {
       renderWithStore(<OnboardingPage />, "/login?screen=w1&board=true");
+
       expect(
         screen.getByRole("heading", { name: "How do you work?" }),
       ).toBeInTheDocument();
+
       expect(getLocation()).toBe("/join");
     });
   });

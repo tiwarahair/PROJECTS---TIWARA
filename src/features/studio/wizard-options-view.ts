@@ -3,8 +3,12 @@
 import type { ChangeEvent, FocusEvent, MouseEvent } from "react";
 import { getAddonPicker } from "./addon-picker";
 import { getTaxonomy } from "./studio-service-actions";
-import { fmtDur } from "./studio-format";
-import { formatAddon, getCatById, getCatsSorted } from "./studio-model";
+import { formatDuration } from "./studio-format";
+import {
+  formatAddon,
+  getCategoryById,
+  getSortedCategories,
+} from "./studio-model";
 import type {
   OwnOption,
   StudioAddon,
@@ -19,51 +23,57 @@ const SIGN_OFF = "Takes off the base price and time. Click to add instead.";
 
 export const toNumber = (value: unknown) => {
   const parsed = parseFloat(String(value));
+
   return isNaN(parsed) ? 0 : parsed;
 };
 
 /** "−5", "05" → "5" (prototype adjAbs). */
-export const getAbs = (value: unknown) => {
+export const getAbsolute = (value: unknown) => {
   const clean = String(value == null ? "" : value)
     .replace(/[^0-9.]/g, "")
     .replace(/^0+(?=\d)/, "");
+
   return clean === "" ? "0" : clean;
 };
 
 /** Whether a row takes off rather than adds (prototype adjNeg). */
 export const isNegative = (row: {
-  neg?: boolean;
-  dp?: string;
-  dh?: string;
-  dm?: string;
+  negative?: boolean;
+  priceDelta?: string;
+  hoursDelta?: string;
+  minutesDelta?: string;
 }) =>
-  row.neg != null
-    ? !!row.neg
-    : [row.dp, row.dh, row.dm].some(
+  row.negative != null
+    ? !!row.negative
+    : [row.priceDelta, row.hoursDelta, row.minutesDelta].some(
         (value) =>
           /^\s*[-−]/.test(String(value == null ? "" : value)) &&
           parseFloat(String(value).replace(/[^0-9.]/g, "")) > 0,
       );
 
-export const getSigned = (value: unknown, isNeg: boolean) => {
-  const abs = getAbs(value);
-  return (isNeg && parseFloat(abs) > 0 ? "-" : "") + abs;
+export const getSigned = (value: unknown, isNegativeValue: boolean) => {
+  const absoluteValue = getAbsolute(value);
+
+  return (
+    (isNegativeValue && parseFloat(absoluteValue) > 0 ? "-" : "") +
+    absoluteValue
+  );
 };
 
 /** Takes off more than the base allows (prototype adjErrs). */
 export const getAdjustErrors = (
-  isNeg: boolean,
+  isNegativeValue: boolean,
   price: string,
   minutes: number,
   basePrice: number,
   baseMinutes: number,
 ) => ({
-  pErr:
-    isNeg && basePrice - (parseFloat(price) || 0) < 0
+  priceError:
+    isNegativeValue && basePrice - (parseFloat(price) || 0) < 0
       ? "This would make the price less than £0."
       : "",
-  tErr:
-    isNeg && baseMinutes - minutes < 0
+  timeError:
+    isNegativeValue && baseMinutes - minutes < 0
       ? "This would make the time less than 0."
       : "",
 });
@@ -77,8 +87,9 @@ export interface WizardBase {
 
 export const getWizardBase = (draft: WizardDraft): WizardBase => {
   const basePrice = toNumber(draft.price);
-  const baseHours = toNumber(draft.durH);
-  const baseMinutes = toNumber(draft.durM);
+  const baseHours = toNumber(draft.durationHours);
+  const baseMinutes = toNumber(draft.durationMinutes);
+
   return {
     basePrice,
     baseHours,
@@ -88,25 +99,28 @@ export const getWizardBase = (draft: WizardDraft): WizardBase => {
 };
 
 export const getVariationErrors = (row: VariationRow, base: WizardBase) => {
-  if (!row.on) return { pErr: "", tErr: "" };
+  if (!row.on) return { priceError: "", timeError: "" };
+
   return getAdjustErrors(
     isNegative(row),
-    getAbs(row.dp),
-    (parseFloat(getAbs(row.dh)) || 0) * 60 + (parseFloat(getAbs(row.dm)) || 0),
+    getAbsolute(row.priceDelta),
+    (parseFloat(getAbsolute(row.hoursDelta)) || 0) * 60 +
+      (parseFloat(getAbsolute(row.minutesDelta)) || 0),
     base.basePrice,
     base.totalMinutes,
   );
 };
 
 const getOwnErrors = (option: OwnOption, base: WizardBase) => {
-  const isNeg =
-    !!option.neg ||
-    /^\s*-/.test(String(option.dp || "")) ||
-    /^\s*-/.test(String(option.dm || ""));
+  const isNegativeValue =
+    !!option.negative ||
+    /^\s*-/.test(String(option.priceDelta || "")) ||
+    /^\s*-/.test(String(option.minutesDelta || ""));
+
   return getAdjustErrors(
-    isNeg,
-    getAbs(option.dp),
-    parseFloat(getAbs(option.dm)) || 0,
+    isNegativeValue,
+    getAbsolute(option.priceDelta),
+    parseFloat(getAbsolute(option.minutesDelta)) || 0,
     base.basePrice,
     base.totalMinutes,
   );
@@ -120,26 +134,31 @@ export const getVariationRows = (
   base: WizardBase,
 ) => {
   const { actions, serviceActions } = studio;
+
   return rows.map((row, index) => {
-    const isNeg = isNegative(row);
-    const price = getAbs(row.dp);
-    const hours = getAbs(row.dh);
-    const minutes = getAbs(row.dm);
+    const isNegativeValue = isNegative(row);
+    const price = getAbsolute(row.priceDelta);
+    const hours = getAbsolute(row.hoursDelta);
+    const minutes = getAbsolute(row.minutesDelta);
     const errors = getVariationErrors(row, base);
     const word = key === "sizes" ? "size" : "length";
     const tipKey = key + index;
-    const signed = (nextNeg: boolean) => ({
-      neg: nextNeg,
-      dp: getSigned(price, nextNeg),
-      dh: getSigned(hours, nextNeg),
-      dm: getSigned(minutes, nextNeg),
+
+    const signed = (nextNegative: boolean) => ({
+      negative: nextNegative,
+      priceDelta: getSigned(price, nextNegative),
+      hoursDelta: getSigned(hours, nextNegative),
+      minutesDelta: getSigned(minutes, nextNegative),
     });
+
     const setField =
-      (field: "dp" | "dh" | "dm") => (event: ChangeEvent<HTMLInputElement>) =>
+      (field: "priceDelta" | "hoursDelta" | "minutesDelta") =>
+      (event: ChangeEvent<HTMLInputElement>) =>
         serviceActions.setVarRow(key, index, {
-          neg: isNeg,
-          [field]: getSigned(getAbs(event.target.value), isNeg),
+          negative: isNegativeValue,
+          [field]: getSigned(getAbsolute(event.target.value), isNegativeValue),
         });
+
     return {
       key: tipKey,
       label: row.label,
@@ -147,40 +166,44 @@ export const getVariationRows = (
       price,
       hours,
       minutes,
-      signText: isNeg ? "−" : "+",
-      isNeg,
-      signAria: isNeg ? "Take off price and time" : "Add to price and time",
+      signText: isNegativeValue ? "−" : "+",
+      isNegativeValue,
+      signAria: isNegativeValue
+        ? "Take off price and time"
+        : "Add to price and time",
       flip: () => {
-        const next = !isNeg;
+        const next = !isNegativeValue;
+
         serviceActions.setVarRow(key, index, signed(next));
-        actions.tipUpdate("s" + tipKey, next ? SIGN_OFF : SIGN_ADD);
+        actions.tipUpdate(`s${tipKey}`, next ? SIGN_OFF : SIGN_ADD);
       },
       tipSign: (event: MouseEvent | FocusEvent) => {
         if (row.on)
           actions.tipShow(
             event as unknown as { currentTarget: Element },
-            "s" + tipKey,
-            isNeg ? SIGN_OFF : SIGN_ADD,
+            `s${tipKey}`,
+            isNegativeValue ? SIGN_OFF : SIGN_ADD,
           );
       },
       tipCheck: (event: MouseEvent | FocusEvent) =>
         actions.tipShow(
           event as unknown as { currentTarget: Element },
-          "c" + tipKey,
-          "Offer this " + word,
+          `c${tipKey}`,
+          `Offer this ${word}`,
         ),
       blur: () => {
         actions.tipHide();
+
         if (
-          isNeg &&
+          isNegativeValue &&
           !(parseFloat(price) > 0) &&
           !(parseFloat(hours) > 0) &&
           !(parseFloat(minutes) > 0)
         )
           serviceActions.setVarRow(key, index, signed(false));
       },
-      priceError: errors.pErr,
-      timeError: errors.tErr,
+      priceError: errors.priceError,
+      timeError: errors.timeError,
       toggle: () =>
         serviceActions.setVarRow(
           key,
@@ -189,14 +212,14 @@ export const getVariationRows = (
             ? { on: false }
             : {
                 on: true,
-                dp: row.dp || "0",
-                dh: row.dh || "0",
-                dm: row.dm || "0",
+                priceDelta: row.priceDelta || "0",
+                hoursDelta: row.hoursDelta || "0",
+                minutesDelta: row.minutesDelta || "0",
               },
         ),
-      setPrice: setField("dp"),
-      setHours: setField("dh"),
-      setMinutes: setField("dm"),
+      setPrice: setField("priceDelta"),
+      setHours: setField("hoursDelta"),
+      setMinutes: setField("minutesDelta"),
     };
   });
 };
@@ -209,117 +232,146 @@ export const getOwnEditor = (
 ) => {
   const { actions, serviceActions, setState, context } = studio;
   const { getState } = context;
-  const { setWiz, setDraft } = serviceActions;
+  const { setWizard, setDraft } = serviceActions;
   const ownList = wizard.draft.own || [];
-  const editor = wizard.ownEd || null;
+  const editor = wizard.ownEdit || null;
+
   return {
     rows: ownList.map((group, index) => ({
       key: group.name + index,
       name: group.name,
       meta: group.options
         .map((option) => {
-          const price = parseFloat(option.dp) || 0;
-          const minutes = parseInt(option.dm) || 0;
+          const price = parseFloat(option.priceDelta) || 0;
+          const minutes = parseInt(option.minutesDelta) || 0;
+
           return (
             option.label +
             (price ? (price < 0 ? " −£" : " +£") + Math.abs(price) : "") +
             (minutes
-              ? (minutes < 0 ? " −" : " +") + Math.abs(minutes) + " min"
+              ? `${(minutes < 0 ? " −" : " +") + Math.abs(minutes)} min`
               : "")
           );
         })
         .join(" · "),
       edit: () =>
-        setWiz({
-          ownEd: {
-            idx: index,
+        setWizard({
+          ownEdit: {
+            index,
             name: group.name,
             options: group.options.map((option) => ({ ...option })),
-            err: "",
+            error: "",
           },
         }),
       remove: () =>
-        setDraft({ own: ownList.filter((_, other) => other !== index) }),
+        setDraft({ own: ownList.filter((_item, other) => other !== index) }),
     })),
     editor,
     title:
-      editor && editor.idx >= 0 ? "Edit customisation" : "Add a customisation",
+      editor && editor.index >= 0
+        ? "Edit customisation"
+        : "Add a customisation",
     onName: (event: ChangeEvent<HTMLInputElement>) =>
       editor &&
-      setWiz({ ownEd: { ...editor, name: event.target.value, err: "" } }),
+      setWizard({
+        ownEdit: { ...editor, name: event.target.value, error: "" },
+      }),
     options: editor
       ? editor.options.map((option, index) => {
-          const isNeg =
-            !!option.neg ||
-            /^\s*-/.test(String(option.dp || "")) ||
-            /^\s*-/.test(String(option.dm || ""));
-          const price = getAbs(option.dp);
-          const minutes = getAbs(option.dm);
+          const isNegativeValue =
+            !!option.negative ||
+            /^\s*-/.test(String(option.priceDelta || "")) ||
+            /^\s*-/.test(String(option.minutesDelta || ""));
+
+          const price = getAbsolute(option.priceDelta);
+          const minutes = getAbsolute(option.minutesDelta);
           const errors = getOwnErrors(option, base);
+
           const name =
-            String(option.label || "").trim() || "Option " + (index + 1);
-          const tipKey = "own" + index;
+            String(option.label || "").trim() || `Option ${index + 1}`;
+
+          const tipKey = `own${index}`;
+
           const put = (patch: Partial<OwnOption>) => {
             const next = editor.options.slice();
+
             next[index] = { ...next[index], ...patch } as OwnOption;
-            setWiz({ ownEd: { ...editor, options: next } });
+            setWizard({ ownEdit: { ...editor, options: next } });
           };
+
           return {
-            key: "o" + index,
+            key: `o${index}`,
             label: option.label,
             price,
             minutes,
             canRemove: editor.options.length > 2,
-            signText: isNeg ? "−" : "+",
-            isNeg,
-            signAria: isNeg
+            signText: isNegativeValue ? "−" : "+",
+            isNegativeValue,
+            signAria: isNegativeValue
               ? "Take off price and time"
               : "Add to price and time",
-            priceAria: name + " price in pounds",
-            minutesAria: name + " time in minutes",
+            priceAria: `${name} price in pounds`,
+            minutesAria: `${name} time in minutes`,
             flip: () => {
-              const next = !isNeg;
+              const next = !isNegativeValue;
+
               put({
-                neg: next,
-                dp: getSigned(price, next),
-                dm: getSigned(minutes, next),
+                negative: next,
+                priceDelta: getSigned(price, next),
+                minutesDelta: getSigned(minutes, next),
               });
-              actions.tipUpdate("s" + tipKey, next ? SIGN_OFF : SIGN_ADD);
+
+              actions.tipUpdate(`s${tipKey}`, next ? SIGN_OFF : SIGN_ADD);
             },
             tipSign: (event: MouseEvent | FocusEvent) =>
               actions.tipShow(
                 event as unknown as { currentTarget: Element },
-                "s" + tipKey,
-                isNeg ? SIGN_OFF : SIGN_ADD,
+                `s${tipKey}`,
+                isNegativeValue ? SIGN_OFF : SIGN_ADD,
               ),
             blur: () => {
               actions.tipHide();
+
               if (
-                isNeg &&
+                isNegativeValue &&
                 !(parseFloat(price) > 0) &&
                 !(parseFloat(minutes) > 0)
               )
-                put({ neg: false, dp: price, dm: minutes });
+                put({
+                  negative: false,
+                  priceDelta: price,
+                  minutesDelta: minutes,
+                });
             },
-            priceError: errors.pErr,
-            timeError: errors.tErr,
+            priceError: errors.priceError,
+            timeError: errors.timeError,
             onLabel: (event: ChangeEvent<HTMLInputElement>) => {
               const next = editor.options.slice();
+
               next[index] = {
                 ...next[index],
                 label: event.target.value,
               } as OwnOption;
-              setWiz({ ownEd: { ...editor, options: next, err: "" } });
+
+              setWizard({ ownEdit: { ...editor, options: next, error: "" } });
             },
             onPrice: (event: ChangeEvent<HTMLInputElement>) =>
-              put({ neg: isNeg, dp: getSigned(event.target.value, isNeg) }),
+              put({
+                negative: isNegativeValue,
+                priceDelta: getSigned(event.target.value, isNegativeValue),
+              }),
             onMinutes: (event: ChangeEvent<HTMLSelectElement>) =>
-              put({ neg: isNeg, dm: getSigned(event.target.value, isNeg) }),
+              put({
+                negative: isNegativeValue,
+                minutesDelta: getSigned(event.target.value, isNegativeValue),
+              }),
             remove: () =>
-              setWiz({
-                ownEd: {
+              setWizard({
+                ownEdit: {
                   ...editor,
-                  options: editor.options.filter((_, other) => other !== index),
+                  options: editor.options.filter(
+                    (_item, other) => other !== index,
+                  ),
                 },
               }),
           };
@@ -327,69 +379,89 @@ export const getOwnEditor = (
       : [],
     onKey: (event: { key: string; stopPropagation: () => void }) => {
       if (event.key !== "Escape") return;
+
       event.stopPropagation();
+
       if (getState().tip) {
         actions.tipHide();
+
         return;
       }
-      setWiz({ ownEd: null });
+
+      setWizard({ ownEdit: null });
     },
-    error: editor ? editor.err || "" : "",
+    error: editor ? editor.error || "" : "",
     addOption: () =>
       editor &&
-      setWiz({
-        ownEd: {
+      setWizard({
+        ownEdit: {
           ...editor,
-          options: editor.options.concat([{ label: "", dp: "0", dm: "0" }]),
+          options: editor.options.concat([
+            { label: "", priceDelta: "0", minutesDelta: "0" },
+          ]),
         },
       }),
     startNew: () =>
-      setWiz({
-        ownEd: {
-          idx: -1,
+      setWizard({
+        ownEdit: {
+          index: -1,
           name: "",
           options: [
-            { label: "", dp: "0", dm: "0" },
-            { label: "", dp: "0", dm: "0" },
+            { label: "", priceDelta: "0", minutesDelta: "0" },
+            { label: "", priceDelta: "0", minutesDelta: "0" },
           ],
-          err: "",
+          error: "",
         },
       }),
-    cancel: () => setWiz({ ownEd: null }),
+    cancel: () => setWizard({ ownEdit: null }),
     save: () => {
       if (!editor) return;
+
       const name = String(editor.name || "").trim();
+
       const options = editor.options
         .map((option) => ({
           ...option,
           label: String(option.label || "").trim(),
         }))
         .filter(({ label }) => label);
+
       if (!name) {
-        setWiz({ ownEd: { ...editor, err: "Add a name, like Parting" } });
+        setWizard({
+          ownEdit: { ...editor, error: "Add a name, like Parting" },
+        });
+
         return;
       }
+
       if (options.length < 2) {
-        setWiz({ ownEd: { ...editor, err: "Add at least 2 options" } });
+        setWizard({ ownEdit: { ...editor, error: "Add at least 2 options" } });
+
         return;
       }
+
       if (
         options.some((option) => {
           const errors = getOwnErrors(option, base);
-          return errors.pErr || errors.tErr;
+
+          return errors.priceError || errors.timeError;
         })
       )
         return;
+
       const list = ownList.slice();
       const value = { name, options };
-      if (editor.idx >= 0) list[editor.idx] = value;
+
+      if (editor.index >= 0) list[editor.index] = value;
       else list.push(value);
-      const current = getState().wiz;
+
+      const current = getState().wizard;
+
       if (current)
         setState({
-          wiz: {
+          wizard: {
             ...current,
-            ownEd: null,
+            ownEdit: null,
             draft: { ...current.draft, own: list },
           },
         });
@@ -405,36 +477,41 @@ const getCell = (
 ) => {
   const price =
     base.basePrice +
-    (size ? toNumber(size.dp) : 0) +
-    (length ? toNumber(length.dp) : 0);
+    (size ? toNumber(size.priceDelta) : 0) +
+    (length ? toNumber(length.priceDelta) : 0);
+
   const minutes =
     (base.baseHours +
-      (size ? toNumber(size.dh) : 0) +
-      (length ? toNumber(length.dh) : 0)) *
+      (size ? toNumber(size.hoursDelta) : 0) +
+      (length ? toNumber(length.hoursDelta) : 0)) *
       60 +
     base.baseMinutes +
-    (size ? toNumber(size.dm) : 0) +
-    (length ? toNumber(length.dm) : 0);
+    (size ? toNumber(size.minutesDelta) : 0) +
+    (length ? toNumber(length.minutesDelta) : 0);
+
   return {
-    price: "£" + price,
-    dur: fmtDur(Math.floor(minutes / 60), minutes % 60),
+    price: `£${price}`,
+    duration: formatDuration(Math.floor(minutes / 60), minutes % 60),
   };
 };
 
 /** Every bookable combination (prototype wizRev*). */
 export const getReview = (draft: WizardDraft, base: WizardBase) => {
   const sizes = draft.sizesOn ? (draft.sizes || []).filter(({ on }) => on) : [];
+
   const lengths = draft.lengthsOn
     ? (draft.lengths || []).filter(({ on }) => on)
     : [];
+
   const isGrid = sizes.length > 0 && lengths.length > 0;
   const plain = getCell(base, null, null);
+
   return {
     sizes,
     lengths,
-    baseLabel: "Base price " + plain.price + " · " + plain.dur,
+    baseLabel: `Base price ${plain.price} · ${plain.duration}`,
     isGrid,
-    corner: (draft.cat === "locs" ? "Size" : "Size") + " \\ Length",
+    corner: `${draft.taxonomyId === "locs" ? "Size" : "Size"} \\ Length`,
     head: lengths.map(({ label }) => label),
     rows: isGrid
       ? sizes.map((size) => ({
@@ -446,7 +523,8 @@ export const getReview = (draft: WizardDraft, base: WizardBase) => {
       const cell = sizes.length
         ? getCell(base, row, null)
         : getCell(base, null, row);
-      return { label: row.label, price: cell.price, dur: cell.dur };
+
+      return { label: row.label, price: cell.price, duration: cell.duration };
     }),
   };
 };
@@ -457,142 +535,173 @@ export const getWizardAddons = (
   wizard: WizardState,
 ) => {
   const { state, setState, actions, serviceActions } = studio;
-  const { setWiz, setDraft } = serviceActions;
+  const { setWizard, setDraft } = serviceActions;
   const { draft } = wizard;
-  const category = getCatById(state, draft.categoryId)
+
+  const category = getCategoryById(state, draft.categoryId)
     ? draft.categoryId
     : null;
-  const addonCat =
-    wizard.aCat === undefined
-      ? category &&
-        state.addons.some(({ categoryId }) => categoryId === category)
-        ? category
-        : "all"
-      : wizard.aCat;
-  const getCatName = (id: string | null) =>
-    getCatById(state, id)?.name ?? "Other add-ons";
-  const all: StudioAddon[] = state.addons.concat(wizard.pendAddons || []);
+
+  const getAddonCategoryValue = () => {
+    if (wizard.addonCategory !== undefined) return wizard.addonCategory;
+
+    return category &&
+      state.addons.some(({ categoryId }) => categoryId === category)
+      ? category
+      : "all";
+  };
+
+  const addonCategory = getAddonCategoryValue();
+
+  const getCategoryName = (id: string | null) =>
+    getCategoryById(state, id)?.name ?? "Other add-ons";
+
+  const all: StudioAddon[] = state.addons.concat(wizard.pendingAddons || []);
   const { newAddon } = wizard;
-  const group = getTaxonomy(draft.cat);
+  const group = getTaxonomy(draft.taxonomyId);
+
+  const getNewCategoryLabel = () => {
+    if (addonCategory !== "all") return getCategoryName(addonCategory);
+
+    return group ? group.name : "Other";
+  };
+
   return {
     picker: getAddonPicker(
       studio,
       state,
-      draft.addons.map(({ aid }) => aid),
+      draft.addons.map(({ addonId }) => addonId),
       (addon) =>
         setDraft({
           addons: draft.addons.concat([
-            { aid: addon.id, ovP: null, ovH: null, ovM: null },
+            {
+              addonId: addon.id,
+              priceOverride: null,
+              hoursOverride: null,
+              minutesOverride: null,
+            },
           ]),
         }),
       category,
       (addon) =>
         setDraft({
-          addons: draft.addons.filter(({ aid }) => aid !== addon.id),
+          addons: draft.addons.filter(({ addonId }) => addonId !== addon.id),
         }),
       null,
       {
         hideSelected: true,
         list: all,
-        q: wizard.aq || "",
-        cat: wizard.aCat == null ? null : wizard.aCat,
-        setQuery: (value) => setWiz({ aq: value }),
-        setCat: (value) => setWiz({ aCat: value }),
+        query: wizard.addonQuery || "",
+        category: wizard.addonCategory == null ? null : wizard.addonCategory,
+        setQuery: (value) => setWizard({ addonQuery: value }),
+        setCategory: (value) => setWizard({ addonCategory: value }),
       },
     ),
     toggleNew: () =>
-      setWiz({
-        newAddon: newAddon ? null : { name: "", price: "", hr: "", min: "" },
+      setWizard({
+        newAddon: newAddon ? null : { name: "", price: "", hours: "", min: "" },
       }),
     newAddon,
-    newCatLabel:
-      addonCat === "all"
-        ? group
-          ? group.name
-          : "Other"
-        : getCatName(addonCat),
-    newCatOptions: getCatsSorted(state)
-      .map(({ id, name }) => ({ v: id, label: name }))
-      .concat([{ v: "none", label: "No category" }]),
-    newCat:
+    newCategoryLabel: getNewCategoryLabel(),
+    newCategoryOptions: getSortedCategories(state)
+      .map(({ id, name }) => ({ value: id, label: name }))
+      .concat([{ value: "none", label: "No category" }]),
+    newCategory:
       newAddon && newAddon.categoryId !== undefined
         ? newAddon.categoryId || "none"
         : category || "none",
     patchNew: (patch: Partial<NonNullable<typeof newAddon>>) =>
-      newAddon && setWiz({ newAddon: { ...newAddon, ...patch } }),
-    newHour: String(parseInt(newAddon?.hr ?? "") || 0),
+      newAddon && setWizard({ newAddon: { ...newAddon, ...patch } }),
+    newHour: String(parseInt(newAddon?.hours ?? "") || 0),
     newMinute: String(parseInt(newAddon?.min ?? "") || 0),
-    cancelNew: () => setWiz({ newAddon: null }),
+    cancelNew: () => setWizard({ newAddon: null }),
     createNew: () => {
       if (!newAddon || !String(newAddon.name).trim()) {
-        actions.toastMsg("Give the add-on a name first");
+        actions.showToast("Give the add-on a name first");
+
         return;
       }
+
       const addon: StudioAddon = {
-        id: "ad" + Date.now(),
+        id: `ad${Date.now()}`,
         categoryId:
           newAddon.categoryId !== undefined ? newAddon.categoryId : category,
         name: String(newAddon.name).trim(),
         price: toNumber(newAddon.price),
-        hr: parseInt(newAddon.hr) || 0,
+        hours: parseInt(newAddon.hours) || 0,
         min: parseInt(newAddon.min) || 0,
       };
+
       setState({
         addons: state.addons.concat([addon]),
-        wiz: {
+        wizard: {
           ...wizard,
           newAddon: null,
           draft: {
             ...draft,
             addons: draft.addons.concat([
-              { aid: addon.id, ovP: null, ovH: null, ovM: null },
+              {
+                addonId: addon.id,
+                priceOverride: null,
+                hoursOverride: null,
+                minutesOverride: null,
+              },
             ]),
           },
         },
       });
-      actions.toastMsg(
-        addon.name + " created. It now lives on your Add-ons tab too",
+
+      actions.showToast(
+        `${addon.name} created. It now lives on your Add-ons tab too`,
       );
     },
     selected: draft.addons
       .map((link) => {
-        const addon = all.find(({ id }) => id === link.aid);
+        const addon = all.find(({ id }) => id === link.addonId);
+
         if (!addon) return null;
-        const isOpen = wizard.openAddon === link.aid;
+
+        const isOpen = wizard.openAddon === link.addonId;
+
         const pick = (override: unknown, fallback: unknown) =>
           override != null && override !== "" ? override : fallback;
+
         const patchLink = (patch: Partial<typeof link>) =>
           setDraft({
             addons: draft.addons.map((item) =>
-              item.aid === link.aid ? { ...item, ...patch } : item,
+              item.addonId === link.addonId ? { ...item, ...patch } : item,
             ),
           });
+
         return {
-          key: link.aid,
+          key: link.addonId,
           name: addon.name,
           meta: formatAddon({
-            price: pick(link.ovP, addon.price),
-            hr: pick(link.ovH, addon.hr),
-            min: pick(link.ovM, addon.min),
+            price: pick(link.priceOverride, addon.price),
+            hours: pick(link.hoursOverride, addon.hours),
+            min: pick(link.minutesOverride, addon.min),
           }),
           isOpen,
-          toggle: () => setWiz({ openAddon: isOpen ? null : link.aid }),
+          toggle: () => setWizard({ openAddon: isOpen ? null : link.addonId }),
           remove: () =>
             setDraft({
-              addons: draft.addons.filter(({ aid }) => aid !== link.aid),
+              addons: draft.addons.filter(
+                ({ addonId }) => addonId !== link.addonId,
+              ),
             }),
-          price: link.ovP != null ? String(link.ovP) : "",
-          hours: link.ovH != null ? String(link.ovH) : "",
-          minutes: link.ovM != null ? String(link.ovM) : "",
-          pricePlaceholder: "" + (addon.price || 0),
-          hoursPlaceholder: "" + (addon.hr || 0),
-          minutesPlaceholder: "" + (addon.min || 0),
+          price: link.priceOverride != null ? String(link.priceOverride) : "",
+          hours: link.hoursOverride != null ? String(link.hoursOverride) : "",
+          minutes:
+            link.minutesOverride != null ? String(link.minutesOverride) : "",
+          pricePlaceholder: `${addon.price || 0}`,
+          hoursPlaceholder: `${addon.hours || 0}`,
+          minutesPlaceholder: `${addon.min || 0}`,
           setPrice: (event: ChangeEvent<HTMLInputElement>) =>
-            patchLink({ ovP: event.target.value }),
+            patchLink({ priceOverride: event.target.value }),
           setHours: (event: ChangeEvent<HTMLInputElement>) =>
-            patchLink({ ovH: event.target.value }),
+            patchLink({ hoursOverride: event.target.value }),
           setMinutes: (event: ChangeEvent<HTMLInputElement>) =>
-            patchLink({ ovM: event.target.value }),
+            patchLink({ minutesOverride: event.target.value }),
         };
       })
       .filter((item): item is NonNullable<typeof item> => !!item),

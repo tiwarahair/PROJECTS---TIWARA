@@ -4,8 +4,8 @@ import type { ChangeEvent } from "react";
 import type { BusinessValue } from "../../components/business-details/business-details-logic";
 import type { PolicyValue } from "../../components/payment-policy/payment-policy-logic";
 import type { TaxDetails } from "../../components/tax-details-form/tax-details-logic";
-import { BOOKING_LINK, GATE_REASON, MONS3 } from "./studio-data";
-import { copyText, fmtDur, fmtMin } from "./studio-format";
+import { BOOKING_LINK, GATE_REASON, SHORT_MONTH_NAMES } from "./studio-data";
+import { copyText, formatDuration, formatMinutes } from "./studio-format";
 import {
   getAllClients,
   getBlockColour,
@@ -57,6 +57,7 @@ const ACCOUNT_PAGES: StudioPage[] = [
   "payouts",
   "calendar",
 ];
+
 const MIN_OPTIONS: [number, string][] = [
   [0, "Immediately"],
   [30, "30 minutes"],
@@ -79,103 +80,115 @@ const MIN_OPTIONS: [number, string][] = [
 export interface SettingsRow {
   key: string;
   label: string;
-  sub: string;
+  subtitle: string;
   icon: SettingsIcon;
   path: string;
   isLocked: boolean;
-  go: () => void;
+  onSelect: () => void;
 }
 
 export const getSettingsView = (
   studio: StudioController,
   navigate: (to: string) => void,
 ) => {
-  const { state, setState, props, isWide, isDesk, isNew, actions, context } =
+  const { state, setState, props, isWide, isDesktop, isNew, actions, context } =
     studio;
+
   const {
-    toastMsg,
-    openSub,
+    showToast,
+    openSubpage,
     openSheet,
-    openTf,
+    openTwoFactor,
     scrollBody,
     leavePage,
     checkDone,
   } = actions;
+
   const isSetupOn = props.setup ?? true;
   const live = isLive(state);
   const isGate = isSetupOn && !live;
+
   const copyLink = () => {
     if (isGate) {
-      toastMsg(GATE_REASON);
+      showToast(GATE_REASON);
+
       return;
     }
+
     copyText(BOOKING_LINK);
-    toastMsg("Booking link copied");
+    showToast("Booking link copied");
   };
 
   // ---- the narrow root menu ----
   const business = state.business;
+
   const policyModes: Record<string, string> = {
-    deposit: state.policy.deposit + "% deposit",
+    deposit: `${state.policy.deposit}% deposit`,
     full: "Full payment",
     card: "Card protection",
     none: "No protection",
   };
+
   const clientCount = isNew
     ? state.extraClients.length
     : getAllClients(state).length;
+
+  const businessTypes: Record<string, string> = {
+    shop: "Shop / salon",
+    chair: "Chair rental",
+    home: "Home-based",
+    mobile: "Mobile",
+  };
+
+  const businessType = businessTypes[business.type];
+
+  const businessArea =
+    business.type === "mobile"
+      ? business.details.basePostcode
+      : business.details.postcode;
+
+  const travelNote = state.profile.mobile ? ", travel buffer" : "";
+  const policyMode = policyModes[state.policy.mode] || "";
+
+  const policyWindow =
+    state.policy.window < 1 ? "30 min" : `${state.policy.window}h`;
+
   const rows: SettingsRow[] = [
     {
       key: "business",
       label: "Business details",
-      sub:
-        (
-          {
-            shop: "Shop / salon",
-            chair: "Chair rental",
-            home: "Home-based",
-            mobile: "Mobile",
-          } as Record<string, string>
-        )[business.type] +
-        " · " +
-        (business.type === "mobile" ? business.v.basePc : business.v.pc),
+      subtitle: `${businessType} · ${businessArea}`,
       icon: "shop",
       path: "",
       isLocked: false,
-      go: () => openSub("business"),
+      onSelect: () => openSubpage("business"),
     },
     {
       key: "availability",
       label: "Manage availability",
-      sub: "Hours, blocked time, closed periods",
+      subtitle: "Hours, blocked time, closed periods",
       icon: "clock",
       path: "",
       isLocked: false,
-      go: () => openSub("availability"),
+      onSelect: () => openSubpage("availability"),
     },
     {
       key: "rules",
       label: "Booking rules",
-      sub:
-        "Booking window, extra time" +
-        (state.profile.mobile ? ", travel buffer" : ""),
+      subtitle: `Booking window, extra time${travelNote}`,
       icon: "rules",
       path: "",
       isLocked: false,
-      go: () => openSub("rules"),
+      onSelect: () => openSubpage("rules"),
     },
     {
       key: "policy",
       label: "Payment policy",
-      sub:
-        (policyModes[state.policy.mode] || "") +
-        " · " +
-        (state.policy.window < 1 ? "30 min" : state.policy.window + "h") +
-        " cancellation window",
+      subtitle: `${policyMode} · ${policyWindow} cancellation window`,
       icon: "card",
       path: "",
       isLocked: false,
-      go: () => openSub("policy"),
+      onSelect: () => openSubpage("policy"),
     },
     ...(isWide
       ? []
@@ -183,14 +196,14 @@ export const getSettingsView = (
           {
             key: "clients",
             label: "Clients",
-            sub: clientCount
+            subtitle: clientCount
               ? clientCount + (clientCount === 1 ? " client" : " clients")
               : "No clients yet",
             icon: "people" as SettingsIcon,
             path: "",
             isLocked: false,
-            go: () => {
-              setState({ tab: "clients", cliSel: null });
+            onSelect: () => {
+              setState({ tab: "clients", selectedClientId: null });
               scrollBody(0, false);
             },
           },
@@ -198,30 +211,33 @@ export const getSettingsView = (
     {
       key: "link",
       label: "Booking link",
-      sub: isGate ? "Off until setup is complete" : BOOKING_LINK,
+      subtitle: isGate ? "Off until setup is complete" : BOOKING_LINK,
       icon: "link",
       path: "",
       isLocked: isGate,
-      go: copyLink,
+      onSelect: copyLink,
     },
     {
       key: "profile",
       label: "View public profile",
-      sub: isGate
+      subtitle: isGate
         ? "Off until setup is complete"
         : "See your page as clients do",
       icon: "eye",
       path: "",
       isLocked: isGate,
-      go: () => {
+      onSelect: () => {
         if (isGate) {
-          toastMsg(GATE_REASON);
+          showToast(GATE_REASON);
+
           return;
         }
+
         navigate("/stylist?stylist=amara-beauty");
       },
     },
   ];
+
   const accountRows: SettingsRow[] = (
     [
       ["personal", "Personal details", "Name, login email and phone"],
@@ -230,17 +246,19 @@ export const getSettingsView = (
       ["payouts", "Payouts", "Stripe, bank account, tax details"],
       ["calendar", "Calendar sync", "Google, Apple, Outlook"],
     ] as [keyof typeof PATHS, string, string][]
-  ).map(([key, label, sub]) => ({
+  ).map(([key, label, subtitle]) => ({
     key,
     label,
-    sub,
+    subtitle,
     icon: "",
     path: PATHS[key],
     isLocked: false,
-    go: () => openSub(key),
+    onSelect: () => openSubpage(key),
   }));
+
   const pick = (labels: string[]) =>
     rows.filter(({ label }) => labels.includes(label));
+
   const rootGroups = [
     {
       key: "studio",
@@ -263,6 +281,7 @@ export const getSettingsView = (
   // ---- the wide settings nav ----
   const page: StudioPage | null = isWide ? state.page || "profile" : state.page;
   const isOn = state.tab === "settings";
+
   const navItem = (
     id: StudioPage,
     label: string,
@@ -274,11 +293,12 @@ export const getSettingsView = (
     icon,
     path,
     isCurrent: page === id,
-    go: () => {
+    onSelect: () => {
       setState({ page: id, pageFromSetup: false });
       scrollBody(0, false);
     },
   });
+
   const navGroups = [
     {
       key: "studio",
@@ -312,38 +332,51 @@ export const getSettingsView = (
       ],
     },
   ];
+
   const isAccountPage = !!page && ACCOUNT_PAGES.includes(page);
 
   // ---- booking rules ----
   const rules = state.rules;
+
   const setRules = (patch: Partial<typeof rules>) =>
     setState(({ rules: current }) => ({ rules: { ...current, ...patch } }));
+
   const minLabel = (MIN_OPTIONS.find(
     ([value]) => value === rules.minNotice * 60,
   ) ?? [0, "24 hours"])[1];
+
   const example = state.services.find(
-    ({ st, durH, durM }) => st === "active" && (durH || durM),
+    ({ status, durationHours, durationMinutes }) =>
+      status === "active" && (durationHours || durationMinutes),
   ) ?? {
     name: "silk press",
-    durH: 2,
-    durM: 30,
+    durationHours: 2,
+    durationMinutes: 30,
   };
-  const exampleMinutes = (example.durH || 0) * 60 + (example.durM || 0);
+
+  const exampleMinutes =
+    (example.durationHours || 0) * 60 + (example.durationMinutes || 0);
+
   const asBlock = (minutes: number) =>
-    fmtDur(Math.floor(minutes / 60), minutes % 60);
+    formatDuration(Math.floor(minutes / 60), minutes % 60);
+
   const saveRules = () => {
-    toastMsg("Booking rules saved");
+    showToast("Booking rules saved");
+
     if (state.page) leavePage();
   };
 
   // ---- pause online bookings ----
   const pause = state.pause || { on: false, until: "" };
+
   const setPause = (patch: Partial<typeof pause>) =>
     setState({ pause: { ...pause, ...patch } });
-  const untilDate = pause.until ? new Date(pause.until + "T00:00") : null;
+
+  const untilDate = pause.until ? new Date(`${pause.until}T00:00`) : null;
+
   const untilLabel =
     untilDate && !isNaN(untilDate.getTime())
-      ? untilDate.getDate() + " " + MONS3[untilDate.getMonth()]
+      ? `${untilDate.getDate()} ${SHORT_MONTH_NAMES[untilDate.getMonth()]}`
       : "";
 
   // ---- profile editor ----
@@ -352,12 +385,16 @@ export const getSettingsView = (
     done: (url: string) => void,
   ) => {
     const file = event.target.files?.[0];
+
     if (!file) return;
+
     const reader = new FileReader();
+
     reader.onload = () => done(String(reader.result));
     reader.readAsDataURL(file);
     event.target.value = "";
   };
+
   const store = (key: string, value: string) => {
     try {
       localStorage.setItem(key, value);
@@ -365,8 +402,22 @@ export const getSettingsView = (
       // storage can be blocked
     }
   };
+
   const setProfile = (patch: Partial<typeof state.profile>) =>
     setState(({ profile }) => ({ profile: { ...profile, ...patch } }));
+
+  const getExtraExample = () => {
+    if (!rules.extra)
+      return "Services block only their own duration unless you set extra time on them.";
+
+    const serviceBlock = asBlock(exampleMinutes);
+    const exampleName = example.name.toLowerCase();
+    const totalBlock = asBlock(exampleMinutes + rules.extra);
+
+    return `A ${serviceBlock} ${exampleName} blocks ${totalBlock} in your calendar.`;
+  };
+
+  const untilNote = untilLabel ? ` until ${untilLabel}` : "";
 
   return {
     isRootMobile: !isWide && state.tab === "settings" && !state.page,
@@ -375,7 +426,7 @@ export const getSettingsView = (
     navGroups,
     page,
     pageTitle: page ? TITLES[page] : "",
-    isAvail: isOn && page === "availability",
+    isAvailability: isOn && page === "availability",
     isProfile: isOn && page === "profile",
     isRules: isOn && page === "rules",
     isPolicy: isOn && page === "policy",
@@ -389,40 +440,32 @@ export const getSettingsView = (
     isAccountShown: isOn && isAccountPage,
     hasAccountSave:
       isOn && !!page && ["personal", "security", "payouts"].includes(page),
-    isNavDesk: isDesk,
+    isNavDesktop: isDesktop,
     copyLink,
     isShareLive: !isSetupOn || live,
-    signOut: () => toastMsg("Signed out. See you soon."),
+    signOut: () => showToast("Signed out. See you soon."),
     // rules
     rulesMaxLabel:
       rules.maxNotice + (rules.maxNotice === 1 ? " month" : " months"),
     rulesMinLabel:
-      rules.minNotice === 0 ? "the moment" : minLabel.toLowerCase() + " before",
+      rules.minNotice === 0 ? "the moment" : `${minLabel.toLowerCase()} before`,
     rulesMaxOptions: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12].map((months) => ({
-      v: String(months),
+      value: String(months),
       label: months + (months === 1 ? " month" : " months"),
     })),
     onRulesMax: (event: ChangeEvent<HTMLSelectElement>) =>
       setRules({ maxNotice: parseInt(event.target.value) }),
     rulesMinOptions: MIN_OPTIONS.map(([value, label]) => ({
-      v: String(value),
+      value: String(value),
       label,
     })),
     onRulesMin: (event: ChangeEvent<HTMLSelectElement>) =>
       setRules({ minNotice: parseInt(event.target.value) / 60 }),
-    rulesExtra: fmtMin(rules.extra),
+    rulesExtra: formatMinutes(rules.extra),
     rulesExtraDown: () => setRules({ extra: Math.max(0, rules.extra - 5) }),
     rulesExtraUp: () => setRules({ extra: Math.min(30, rules.extra + 5) }),
-    rulesExtraExample: rules.extra
-      ? "A " +
-        asBlock(exampleMinutes) +
-        " " +
-        example.name.toLowerCase() +
-        " blocks " +
-        asBlock(exampleMinutes + rules.extra) +
-        " in your calendar."
-      : "Services block only their own duration unless you set extra time on them.",
-    rulesTravel: fmtMin(rules.travel),
+    rulesExtraExample: getExtraExample(),
+    rulesTravel: formatMinutes(rules.travel),
     rulesTravelDown: () => setRules({ travel: Math.max(0, rules.travel - 5) }),
     rulesTravelUp: () => setRules({ travel: Math.min(120, rules.travel + 5) }),
     saveRules,
@@ -430,28 +473,29 @@ export const getSettingsView = (
     pause,
     togglePause: () => {
       setPause({ on: !pause.on });
-      toastMsg(
+
+      showToast(
         pause.on ? "Online bookings are back on" : "Online bookings paused",
       );
     },
     onPauseUntil: (event: ChangeEvent<HTMLInputElement>) => {
       const value = event.target.value;
+
       setPause({ until: value });
+
       if (value) {
-        const date = new Date(value + "T00:00");
-        toastMsg(
-          "Paused until " + date.getDate() + " " + MONS3[date.getMonth()],
+        const date = new Date(`${value}T00:00`);
+
+        showToast(
+          `Paused until ${date.getDate()} ${SHORT_MONTH_NAMES[date.getMonth()]}`,
         );
       }
     },
     clearPauseUntil: () => setPause({ until: "" }),
-    pauseBanner:
-      "Online bookings are paused" +
-      (untilLabel ? " until " + untilLabel : "") +
-      ". Clients see ‘Not taking online bookings right now’.",
+    pauseBanner: `Online bookings are paused${untilNote}. Clients see ‘Not taking online bookings right now’.`,
     // availability
     hourRows: state.hours.map((hours, index) => ({
-      key: hours.d,
+      key: hours.day,
       ...hours,
       toggle: () =>
         setState({
@@ -462,13 +506,13 @@ export const getSettingsView = (
       setStart: (event: ChangeEvent<HTMLSelectElement>) =>
         setState({
           hours: state.hours.map((item, itemIndex) =>
-            itemIndex === index ? { ...item, s: event.target.value } : item,
+            itemIndex === index ? { ...item, start: event.target.value } : item,
           ),
         }),
       setEnd: (event: ChangeEvent<HTMLSelectElement>) =>
         setState({
           hours: state.hours.map((item, itemIndex) =>
-            itemIndex === index ? { ...item, e: event.target.value } : item,
+            itemIndex === index ? { ...item, end: event.target.value } : item,
           ),
         }),
     })),
@@ -497,13 +541,14 @@ export const getSettingsView = (
       remove: () =>
         setState({
           confirm: {
-            body: period.span + " will open up for online booking again.",
+            body: `${period.span} will open up for online booking again.`,
             yes: () => {
               setState(({ closed }) => ({
                 closed: closed.filter(({ id }) => id !== period.id),
                 confirm: null,
               }));
-              toastMsg("Closed period removed");
+
+              showToast("Closed period removed");
             },
           },
         }),
@@ -514,9 +559,9 @@ export const getSettingsView = (
       }),
     openClosed: () =>
       openSheet("closed", { closedDraft: { from: "", to: "", reason: "" } }),
-    saveAvail: () => {
-      setState({ check: { ...state.check, avail: true } });
-      toastMsg("Availability saved");
+    saveAvailability: () => {
+      setState({ check: { ...state.check, availability: true } });
+      showToast("Availability saved");
       leavePage();
       checkDone();
     },
@@ -540,17 +585,20 @@ export const getSettingsView = (
           portfolio: portfolio.filter((item) => item.id !== id),
         })),
     })),
-    portCount: state.portfolio.length + " of 20",
+    portCount: `${state.portfolio.length} of 20`,
     canAddPhotos: state.portfolio.length < 20,
     onPortFiles: (event: ChangeEvent<HTMLInputElement>) => {
       const room = 20 - state.portfolio.length;
       const files = Array.from(event.target.files || []).slice(0, room);
+
       event.target.value = "";
+
       void Promise.all(
         files.map(
           (file) =>
             new Promise<string>((resolve) => {
               const reader = new FileReader();
+
               reader.onload = () => resolve(String(reader.result));
               reader.readAsDataURL(file);
             }),
@@ -560,7 +608,7 @@ export const getSettingsView = (
           setState(({ portfolio }) => ({
             portfolio: portfolio.concat(
               urls.map((src, index) => ({
-                id: "pf" + Date.now() + index,
+                id: `pf${Date.now()}${index}`,
                 src,
               })),
             ),
@@ -569,50 +617,55 @@ export const getSettingsView = (
     },
     saveProfile: () => {
       setState({ check: { ...state.check, profile: true } });
-      toastMsg("Profile saved");
+      showToast("Profile saved");
       leavePage();
       checkDone();
     },
     // embedded pages
     policyValue: state.policy,
     policyBookings: state.bookings.filter(
-      ({ off, status }) => (off || 0) >= 0 && status !== "cancelled",
+      ({ dayOffset, status }) =>
+        (dayOffset || 0) >= 0 && status !== "cancelled",
     ).length,
     onPolicySave: (value: PolicyValue) => {
       setState({ policy: { ...state.policy, ...value } });
-      toastMsg("Payment policy saved");
+      showToast("Payment policy saved");
     },
     // the embedded page reports whether it can save; the mobile header button calls back into it
     onPolicyState: (api: { canSave: boolean; save: () => void }) => {
-      context.memo.polApi = api;
-      if (!!api.canSave !== !!context.getState().polCanSave)
-        setState({ polCanSave: !!api.canSave });
+      context.memo.policyApi = api;
+
+      if (!!api.canSave !== !!context.getState().policyCanSave)
+        setState({ policyCanSave: !!api.canSave });
     },
     savePolicyHeader: () => {
-      if (context.memo.polApi?.canSave) context.memo.polApi.save();
+      if (context.memo.policyApi?.canSave) context.memo.policyApi.save();
     },
     onBusinessSave: (value: BusinessValue) => {
       setState({
         business: value,
         profile: { ...state.profile, mobile: value.type === "mobile" },
       });
-      toastMsg("Business details saved");
+
+      showToast("Business details saved");
     },
     onBusinessState: (api: { canSave: boolean; save: () => void }) => {
-      context.memo.bizApi = api;
-      if (!!api.canSave !== !!context.getState().bizCanSave)
-        setState({ bizCanSave: !!api.canSave });
+      context.memo.businessApi = api;
+
+      if (!!api.canSave !== !!context.getState().businessCanSave)
+        setState({ businessCanSave: !!api.canSave });
     },
     saveBusinessHeader: () => {
-      if (context.memo.bizApi?.canSave) context.memo.bizApi.save();
+      if (context.memo.businessApi?.canSave) context.memo.businessApi.save();
     },
     onAccountState: (api: { canSave: boolean; save: () => void }) => {
-      context.memo.accApi = api;
-      if (!!api.canSave !== !!context.getState().accCanSave)
-        setState({ accCanSave: !!api.canSave });
+      context.memo.accountApi = api;
+
+      if (!!api.canSave !== !!context.getState().accountCanSave)
+        setState({ accountCanSave: !!api.canSave });
     },
     saveAccountHeader: () => {
-      if (context.memo.accApi?.canSave) context.memo.accApi.save();
+      if (context.memo.accountApi?.canSave) context.memo.accountApi.save();
     },
     connectStripe: () => openSheet("stripe"),
     editTaxFromBusiness: () => {
@@ -626,32 +679,35 @@ export const getSettingsView = (
     accountUpcoming: isNew
       ? 0
       : state.bookings.filter(
-          ({ off, status }) => (off || 0) >= 0 && status !== "cancelled",
+          ({ dayOffset, status }) =>
+            (dayOffset || 0) >= 0 && status !== "cancelled",
         ).length,
     onAccountNav: (to: "business" | "earnings") => {
       if (to === "earnings") {
         setState({ tab: "earnings", page: null });
         scrollBody(0, false);
-      } else openSub(to);
+      } else openSubpage(to);
     },
-    onTaxEdit: () => openTf("taxcode", { flow: "info" }),
+    onTaxEdit: () => openTwoFactor("taxcode", { flow: "info" }),
     onTaxAdd: () => {
       if (!hasTwoFactor(state)) {
-        openTf("secure");
+        openTwoFactor("secure");
+
         return;
       }
+
       setState({ taxEdit: true });
     },
     onTaxSave: (value: TaxDetails) => {
       setState({ tax: value, taxEdit: false });
-      toastMsg("Tax details saved");
+      showToast("Tax details saved");
       checkDone();
     },
     onTaxCancel: () => setState({ taxEdit: false }),
-    onTaxLearn: () => openTf("learn", { flow: "info" }),
-    onTfaTurnOn: () => openTf("method", { flow: "settings" }),
-    onTfaAddBackup: () => openTf("backup", { flow: "add" }),
-    onTfaRemove: (name: string) => openTf("remove", { name }),
+    onTaxLearn: () => openTwoFactor("learn", { flow: "info" }),
+    onTwoFactorTurnOn: () => openTwoFactor("method", { flow: "settings" }),
+    onTwoFactorAddBackup: () => openTwoFactor("backup", { flow: "add" }),
+    onTwoFactorRemove: (name: string) => openTwoFactor("remove", { name }),
   };
 };
 

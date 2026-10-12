@@ -22,6 +22,7 @@ export const Tabs = ({
   className,
 }: TabsProps) => {
   const [current, setCurrent] = useControllable(active, defaultTab || tabs[0]);
+
   return (
     <div className={joinClassNames(styles.tabs, className)} style={style}>
       {tabs.map((tab) => (
