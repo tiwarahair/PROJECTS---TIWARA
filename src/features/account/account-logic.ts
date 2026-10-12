@@ -1,4 +1,4 @@
-// Account derived values (prototype Account.dc.html: priceOf, fee, fmtDate, addrLine, calc, validate, ics, download).
+// Account derived values: price, fee, dates, address line, booking details, validation, .ics and download.
 import { stylists } from "../../data";
 import type { SavedAddress } from "../../types/address";
 import type { Stylist } from "../../types/stylist";
@@ -16,7 +16,7 @@ type StylistLike = Pick<
 > &
   Partial<Stylist>;
 
-/** The stylist, or a placeholder like the prototype's st(). */
+/** The stylist, or a placeholder. */
 export const getAccountStylist = (id: string): StylistLike =>
   stylists.find((stylist) => stylist.id === id) ?? {
     id,
@@ -91,7 +91,7 @@ const STATUS_TAGS: Record<AccountBooking["status"], [string, string, string]> =
     ],
   };
 
-/** Where, status tag, paid / due copy and the receipt for a booking (prototype calc()). */
+/** Where, status tag, paid / due copy and the receipt for a booking. */
 export const getBookingMoney = (
   booking: AccountBooking,
   addresses: SavedAddress[],

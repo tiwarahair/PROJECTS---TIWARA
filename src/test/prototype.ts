@@ -1,4 +1,4 @@
-// Loads the untouched prototype scripts (design-import/, gitignored) so tests can diff the port against them.
+// Loads the untouched reference scripts (design-import/, gitignored) so tests can diff our helpers against them.
 import { existsSync, readFileSync } from "node:fs";
 import { join } from "node:path";
 import nodeVm from "node:vm";
@@ -10,11 +10,11 @@ export const PROTOTYPE_DIR = join(
 
 export const hasPrototype = existsSync(join(PROTOTYPE_DIR, "data.js"));
 
-/** Runs prototype data.js in a sandbox and returns window.TIWARA (untyped: it is the reference implementation). */
+/** Runs the reference data.js in a sandbox and returns its exported helpers and data (untyped). */
 export const loadPrototypeData = (search = ""): Record<string, unknown> => {
   const source = readFileSync(join(PROTOTYPE_DIR, "data.js"), "utf8");
 
-  // Share this realm's Date so fake timers (vi.setSystemTime) apply to the prototype too.
+  // Share this realm's Date so fake timers (vi.setSystemTime) apply to the reference too.
   const sandbox = {
     window: {} as Record<string, unknown>,
     location: { search },
@@ -30,7 +30,7 @@ export const loadPrototypeData = (search = ""): Record<string, unknown> => {
 export const toPlain = <T>(value: T): unknown =>
   JSON.parse(JSON.stringify(value));
 
-/** Deep-renames the prototype's short keys to the port's names (e.g. [["q", "question"]]) so parity checks compare like with like. */
+/** Deep-renames the reference implementation's short keys to our names (e.g. [["q", "question"]]) so parity checks compare like with like. */
 export const renameKeys = (
   value: unknown,
   names: [string, string][],

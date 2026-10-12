@@ -10,7 +10,7 @@ interface SizeGuideProps {
 
 /** "Choosing your size": Small / Medium / Large braid diagrams. */
 export const SizeGuide = ({ onClose }: SizeGuideProps) => (
-  // prototype: the scrim closes the guide; the panel stops the click
+  // the scrim closes the guide; the panel stops the click
   // eslint-disable-next-line jsx-a11y/click-events-have-key-events, jsx-a11y/no-static-element-interactions
   <div
     onClick={onClose}

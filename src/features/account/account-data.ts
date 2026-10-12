@@ -1,5 +1,5 @@
-// Account sections, icons and demo data, verbatim from prototype Account.dc.html (SECS, ICON, TAKEN, LEGACY,
-// seed(), quiz rows). The section rows are generated from the prototype source.
+// Account sections, icons and demo data (sections, icons, taken emails, legacy tab names, seed bookings,
+// quiz rows).
 
 export interface AccountSection {
   id: string;
@@ -134,7 +134,7 @@ const at = (days: number, hours: number, minutes: number): number => {
   return date.getTime();
 };
 
-/** Demo bookings (prototype seed()); some fixtures keep only past ones, bk-none has none. */
+/** Demo bookings; some fixtures keep only past ones, bk-none has none. */
 export const getSeedBookings = (fixture: string): AccountBooking[] => {
   const all: AccountBooking[] = [
     {

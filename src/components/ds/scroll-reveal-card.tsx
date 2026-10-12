@@ -110,7 +110,7 @@ export const ScrollRevealCard = ({
     "--reveal-rotate": `${rotate}deg`,
     "--reveal-scale": String(scale),
     "--reveal-lift": `${lift}px`,
-    // falsy height (including 0) falls back to the default track height, as in the prototype
+    // falsy height (including 0) falls back to the default track height
     ...(height
       ? {
           "--reveal-height":

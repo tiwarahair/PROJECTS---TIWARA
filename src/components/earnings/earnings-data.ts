@@ -1,5 +1,4 @@
-// Earnings demo ledger and its date helpers (prototype Earnings.dc.html: build, r2, gbp, fd, fdy, hm, day0, addWD, iso,
-// range, rangeLabel, buckets, stats). The ledger is generated from a seeded random sequence, so it is the same on every
+// Earnings demo ledger and its date helpers. The ledger is generated from a seeded random sequence, so it is the same on every
 // load of the same day.
 
 export type EarningsScenario =
@@ -190,11 +189,11 @@ export const getClient = (
   return list.find((client) => client.id === id) ?? { name: "Walk-in" };
 };
 
-/** Which ledger is current: the prototype rebuilds only when the scenario or the day changes. */
+/** Which ledger is current: it is rebuilt only when the scenario or the day changes. */
 export const getLedgerKey = (scenario: EarningsScenario): string =>
   `${scenario}|${new Date().toDateString()}`;
 
-/** The demo ledger for a scenario (prototype build()). */
+/** The demo ledger for a scenario. */
 const getMethodForRoll = (roll: number) => {
   if (roll < 0.34) return "Saved card";
 
@@ -700,7 +699,7 @@ export const buildLedger = (
   };
 };
 
-/** The period's [start, end) (prototype range()); week starts on Monday. */
+/** The period's [start, end); week starts on Monday. */
 export const getRange = (
   period: PeriodId,
   from?: string,
@@ -888,7 +887,7 @@ export const getTakings = (
 export const getMethodLabel = ({ isRecorded, method }: Transaction): string =>
   isRecorded ? `Recorded · ${method}` : method;
 
-/** Status tag colours (prototype STT): [background, text]. */
+/** Status tag colours: [background, text]. */
 export const STATUS_COLOURS: Record<
   TransactionStatus | PayoutState,
   [string, string]

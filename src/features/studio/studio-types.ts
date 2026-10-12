@@ -1,4 +1,4 @@
-// Studio state shapes (prototype Studio.dc.html: class Component state, CLIENTS, PAST, seed services/add-ons).
+// Studio state shapes: component state, clients, past bookings, seed services/add-ons.
 import type { BusinessValue } from "../../components/business-details/business-details-logic";
 import type { PolicyValue } from "../../components/payment-policy/payment-policy-logic";
 import type { TaxDetails } from "../../components/tax-details-form/tax-details-logic";

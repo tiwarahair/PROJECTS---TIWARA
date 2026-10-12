@@ -1,5 +1,5 @@
-// Step 4 (Your details) validation and the address / where copy, plus Step 6 card formatting and checks
-// (prototype Booking renderVals: E / fe, postcode travel check, whereRow, TYPO, pNum / pExp / payNow).
+// Step 4 (Your details) validation, the postcode travel check and the address / where copy, plus Step 6 card
+// formatting and checks.
 import { postcodes } from "../../data";
 import type { Stylist } from "../../types/stylist";
 import { isAddressValid } from "../../utils/address";

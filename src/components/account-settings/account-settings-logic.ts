@@ -1,4 +1,4 @@
-// AccountSettings demo data, validators and display tables (prototype AccountSettings.dc.html init() and renderVals()).
+// AccountSettings demo data, validators and display tables.
 import type { TaxDetails } from "../tax-details-form/tax-details-logic";
 
 export type SettingsPage =

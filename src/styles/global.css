@@ -1,14 +1,14 @@
 /*
- * Cascade layers mirror the prototype's cascade:
- *   base — design tokens + global reset (prototype: linked stylesheets)
+ * Cascade layers:
+ *   base — design tokens + global reset
  *   page — each page's <helmet> <style> rules, scoped to that page
- *   unlayered — component CSS modules, i.e. the prototype's inline styles, which beat both
+ *   unlayered — component CSS modules, which beat both
  */
 @layer base, page;
 
 @import "./design-system/styles.css" layer(base);
 
-/* Global reset, verbatim from the prototype helmet (HANDOFF §8 Task 1). */
+/* Global reset. */
 @layer base {
   html,
   body {

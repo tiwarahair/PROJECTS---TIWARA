@@ -3,12 +3,10 @@ import { getAssetUrl } from "./asset-url";
 
 describe("getAssetUrl", () => {
   it("resolves prototype-relative image and logo paths", () => {
-    expect(getAssetUrl("img/hero.jpg")).toContain("hero");
+    expect(getAssetUrl("img/old-hero.jpg")).toContain("hero");
     expect(getAssetUrl("img/new/ceo.jpeg")).toContain("ceo");
 
-    expect(getAssetUrl("_ds_assets/logo-crimson.png")).toContain(
-      "logo-crimson",
-    );
+    expect(getAssetUrl("logo-crimson.png")).toContain("logo-crimson");
   });
 
   it("accepts a leading ./ like the prototype markup", () => {

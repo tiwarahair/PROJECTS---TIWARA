@@ -1,4 +1,4 @@
-// The booking's "Edit service" step and its sub-steps (prototype editSvcVals, esaBuild): time, duration, extra time,
+// The booking's "Edit service" step and its sub-steps: time, duration, extra time,
 // price, add-ons, change service, add an add-on and the add-on edit dialog.
 import type { ChangeEvent, MouseEvent } from "react";
 import { getAddonPicker } from "./addon-picker";
@@ -30,7 +30,7 @@ const MINUTE_OPTIONS = Array.from({ length: 12 }, (_slot, index) => ({
   label: `${index * 5}m`,
 }));
 
-/** The per-booking add-on dialog's values (prototype esaBuild). */
+/** The per-booking add-on dialog's values. */
 export const getAddonDialog = (
   studio: StudioController,
   draft: AddonEditDraft,
@@ -142,7 +142,7 @@ export const getEditServiceView = (
 
     const clashTime = hhmm(draft.time);
 
-    // the prototype shows the clashing booking's client id here, not the name
+    // shows the clashing booking's client id here, not the name (kept on purpose)
     const clashWho =
       firstClash.kind === "booking"
         ? ` · ${firstClash.booking?.client}`

@@ -41,7 +41,7 @@ const Icon = ({
 
 const REFUND_ICON = "M9 14 4 9l5-5M4 9h11a5 5 0 0 1 0 10h-3";
 
-/** The status pill in the sheet header (prototype pastS.badge*). */
+/** The status pill in the sheet header. */
 export const PastBadge = ({ view }: { view: PastSheetView }) => (
   <span
     className={styles.badge}
@@ -63,7 +63,7 @@ const RefundTag = ({ label }: { label: string }) => (
   </span>
 );
 
-/** A finished, cancelled or no-show booking (prototype shPast). */
+/** A finished, cancelled or no-show booking. */
 export const PastSheetBody = ({ view }: { view: PastSheetView }) => (
   <div className={styles.body}>
     <div className={bookingStyles.clientRow}>
@@ -232,7 +232,7 @@ export const PastSheetBody = ({ view }: { view: PastSheetView }) => (
   </div>
 );
 
-/** Total, what was kept / paid, and Book again (prototype shPast footer). */
+/** Total, what was kept / paid, and Book again. */
 export const PastSheetFooter = ({ view }: { view: PastSheetView }) => (
   <div className={joinClassNames(sheet.footer, sheet.footerTall)}>
     <div className={sheet.totals}>
@@ -253,7 +253,7 @@ export const PastSheetFooter = ({ view }: { view: PastSheetView }) => (
   </div>
 );
 
-/** Receipt, resend or refund over the past sheet (prototype ckOn with pastCk). */
+/** Receipt, resend or refund over the past sheet. */
 export const PastCheckout = ({ studio }: { studio: StudioController }) => {
   const checkout = getPastCheckoutView(studio);
 

@@ -4,7 +4,7 @@ import { joinClassNames } from "../../utils/class-names";
 import page from "./home-page.module.css";
 import styles from "./meet-section.module.css";
 
-/** "Meet the founder" (prototype Home "Meet Tiwára"). */
+/** "Meet the founder". */
 export const MeetSection = () => (
   <section
     id="meet"

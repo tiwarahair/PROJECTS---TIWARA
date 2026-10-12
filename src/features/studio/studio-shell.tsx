@@ -86,7 +86,7 @@ export const NavIcon = ({ icon }: { icon: NavIconName }) => {
   );
 };
 
-/** The navigation entries and which one is current (prototype navDefs / navBtns). */
+/** The navigation entries and which one is current. */
 export const getNavItems = (studio: StudioController) => {
   const { state, isWide, setState, actions } = studio;
 
@@ -119,7 +119,7 @@ export const getNavItems = (studio: StudioController) => {
 };
 
 export const getAvatarSrc = ({ avatarUrl }: { avatarUrl: string | null }) =>
-  avatarUrl || getAssetUrl("img/hero.jpg");
+  avatarUrl || getAssetUrl("img/old-hero.jpg");
 
 export const StudioSidebar = ({ studio }: { studio: StudioController }) => {
   const { state, isDesktop, setState } = studio;
@@ -137,7 +137,7 @@ export const StudioSidebar = ({ studio }: { studio: StudioController }) => {
         {isOpen && (
           <img
             className={styles.logo}
-            src={getAssetUrl("_ds_assets/logo-crimson.png")}
+            src={getAssetUrl("logo-crimson.png")}
             alt="Tiwára's House"
           />
         )}
@@ -302,7 +302,7 @@ export const FooterNav = ({ studio }: { studio: StudioController }) => (
 
 const SETUP_KEYS = ["availability", "profile", "secure", "services"] as const;
 
-/** The four setup steps with their actions (prototype SETUP_ROWS). */
+/** The four setup steps with their actions. */
 export const getSetupRows = (studio: StudioController) => {
   const { setState, actions } = studio;
 

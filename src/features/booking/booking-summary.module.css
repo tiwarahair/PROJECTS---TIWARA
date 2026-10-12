@@ -1,4 +1,4 @@
-/* Values verbatim from prototype Booking.dc.html (inline styles; style-hover/active as !important like the prototype runtime). */
+/* Booking page styles; hover/active states use !important so they win over the base rules. */
 
 .aside {
   position: sticky;
@@ -209,7 +209,7 @@
   cursor: pointer;
 }
 
-/* previewShellStyle / previewBoxStyle / coverShellStyle / previewPool p.style (renderVals).
+/* AI preview shell, box, cover shell and photo pool.
    Durations: .34s on mobile (≤960px at render), .62s on desktop; the photos arrive as CSS custom properties. */
 .previewShell {
   overflow: hidden;

@@ -1,4 +1,4 @@
-// Password rules for every "create / change password" field, ported from data.js (TIWARA.password).
+// Password rules for every "create / change password" field.
 // Strength = zxcvbn-ts (guidance only, never blocks); loaded on first use, pages re-render once it's ready.
 // Real breached-password screening comes with the back end.
 import { passwordBlocklist } from "../data";

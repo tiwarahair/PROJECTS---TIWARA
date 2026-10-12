@@ -2,7 +2,7 @@ import { useEffect } from "react";
 import type { RefObject } from "react";
 
 /**
- * Browse by style: heading first, then the tiles a row at a time (prototype Home gridReveal).
+ * Browse by style: heading first, then the tiles a row at a time.
  * Always full motion: the reduced-motion toggle was removed.
  */
 export const useGridReveal = (

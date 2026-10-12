@@ -88,7 +88,7 @@ const NameBadges = ({
   </>
 );
 
-/** The client's profile: the narrow Clients page, or the wide "Client" sheet (prototype cp*). */
+/** The client's profile: the narrow Clients page, or the wide "Client" sheet. */
 export const ClientProfile = ({
   view,
   variant,
@@ -184,7 +184,7 @@ export const ClientProfile = ({
             <div className={styles.blockedText}>
               {`${profile.first} can't book online. You can still book them yourself.`}
             </div>
-            {/* the prototype's cpUnblock is not defined, so the button does nothing */}
+            {/* unblocking isn't wired up yet, so the button does nothing */}
             <button className={styles.textButton}>Unblock</button>
           </div>
         )}
@@ -352,7 +352,7 @@ export const ClientProfile = ({
   );
 };
 
-/** Studio → Clients (prototype Studio.dc.html lines 913–1100). */
+/** Studio → Clients. */
 export const StudioClients = ({ studio }: { studio: StudioController }) => {
   const { state, setState, isWide, isDesktop } = studio;
   const view = getClientsView(studio);

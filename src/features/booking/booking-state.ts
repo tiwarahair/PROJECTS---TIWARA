@@ -1,5 +1,5 @@
-// Booking state: the prototype's constructor (URL params, fixtures, saved addresses, draft resume) and the
-// localStorage draft (tw_bk_draft_<stylist>, 24h). Ported from Booking.dc.html class Component.
+// Booking state: the initial state (URL params, fixtures, saved addresses, draft resume) and the
+// localStorage draft (tw_bk_draft_<stylist>, 24h).
 import { stylists } from "../../data";
 import type { SavedAddress } from "../../types/address";
 import type { Service } from "../../types/service";
@@ -141,7 +141,7 @@ export interface BookingState {
   sizeGuide: boolean;
 }
 
-/** The demo customer (prototype ACCT). */
+/** The demo customer. */
 export const DEMO_DETAILS = {
   first: "Nia",
   last: "Okafor",
@@ -345,7 +345,7 @@ const pickLabel = (
         ?.label ?? null)
     : null;
 
-/** ?fixture= board states (prototype constructor). */
+/** ?fixture= board states. */
 const applyFixture = (
   state: BookingState,
   fixture: string,

@@ -54,7 +54,7 @@ export interface CheckoutSheetProps {
   onCancelLink?: () => void;
 }
 
-/** CheckoutSheet state and actions (prototype class Component: seed, go, toastMsg, startCk, complete, result). */
+/** CheckoutSheet state and actions. */
 export const useCheckout = (props: CheckoutSheetProps) => {
   const [state, setRawState] = useState(() =>
     getInitialCheckout({
@@ -171,7 +171,7 @@ export const useCheckout = (props: CheckoutSheetProps) => {
     );
   };
 
-  /** What the host gets when the stylist leaves the done screen (prototype result()). */
+  /** What the host gets when the stylist leaves the done screen. */
   const getResult = () => ({
     method: "none" as const,
     via: "",

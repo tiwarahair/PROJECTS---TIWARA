@@ -1,5 +1,4 @@
-// The service wizard's pricing options, own customisations, review grid and add-ons (prototype adjAbs / adjNeg /
-// adjSigned / adjErrs, mkVarView, the ownEd dialog values, cellFor / wizRev*, wizAvail / wa / wizSel / na*).
+// The service wizard's pricing options, own customisations, review grid and add-ons.
 import type { ChangeEvent, FocusEvent, MouseEvent } from "react";
 import { getAddonPicker } from "./addon-picker";
 import { getTaxonomy } from "./studio-service-actions";
@@ -27,7 +26,7 @@ export const toNumber = (value: unknown) => {
   return isNaN(parsed) ? 0 : parsed;
 };
 
-/** "−5", "05" → "5" (prototype adjAbs). */
+/** "−5", "05" → "5". */
 export const getAbsolute = (value: unknown) => {
   const clean = String(value == null ? "" : value)
     .replace(/[^0-9.]/g, "")
@@ -36,7 +35,7 @@ export const getAbsolute = (value: unknown) => {
   return clean === "" ? "0" : clean;
 };
 
-/** Whether a row takes off rather than adds (prototype adjNeg). */
+/** Whether a row takes off rather than adds. */
 export const isNegative = (row: {
   negative?: boolean;
   priceDelta?: string;
@@ -60,7 +59,7 @@ export const getSigned = (value: unknown, isNegativeValue: boolean) => {
   );
 };
 
-/** Takes off more than the base allows (prototype adjErrs). */
+/** Takes off more than the base allows. */
 export const getAdjustErrors = (
   isNegativeValue: boolean,
   price: string,
@@ -126,7 +125,7 @@ const getOwnErrors = (option: OwnOption, base: WizardBase) => {
   );
 };
 
-/** Sizes / lengths rows with their sign, inputs and errors (prototype mkVarView). */
+/** Sizes / lengths rows with their sign, inputs and errors. */
 export const getVariationRows = (
   studio: StudioController,
   key: "sizes" | "lengths",
@@ -224,7 +223,7 @@ export const getVariationRows = (
   });
 };
 
-/** The "Add / Edit a customisation" dialog (prototype wizOwn*). */
+/** The "Add / Edit a customisation" dialog. */
 export const getOwnEditor = (
   studio: StudioController,
   wizard: WizardState,
@@ -469,7 +468,7 @@ export const getOwnEditor = (
   };
 };
 
-/** Base + size + length → price and time (prototype cellFor). */
+/** Base + size + length → price and time. */
 const getCell = (
   base: WizardBase,
   size: VariationRow | null,
@@ -495,7 +494,7 @@ const getCell = (
   };
 };
 
-/** Every bookable combination (prototype wizRev*). */
+/** Every bookable combination. */
 export const getReview = (draft: WizardDraft, base: WizardBase) => {
   const sizes = draft.sizesOn ? (draft.sizes || []).filter(({ on }) => on) : [];
 
@@ -529,7 +528,7 @@ export const getReview = (draft: WizardDraft, base: WizardBase) => {
   };
 };
 
-/** Step 4: the add-on picker, the attached list with overrides, and New add-on (prototype wa, wizSel, na*). */
+/** Step 4: the add-on picker, the attached list with overrides, and New add-on. */
 export const getWizardAddons = (
   studio: StudioController,
   wizard: WizardState,

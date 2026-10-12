@@ -331,7 +331,7 @@ export const ChangeServiceStep = ({
   </div>
 );
 
-/** The add-on picker's search, category chips and grouped rows (prototype aa / aa2). */
+/** The add-on picker's search, category chips and grouped rows. */
 export const AddonPickerList = ({
   picker,
   className,
@@ -702,7 +702,7 @@ export const CancelStep = ({
   );
 };
 
-/** "Didn't turn up?" under the body (prototype bkNoShow panel). */
+/** "Didn't turn up?" under the body. */
 export const NoShowPanel = ({
   studio,
   view,

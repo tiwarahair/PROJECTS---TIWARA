@@ -1,5 +1,5 @@
 /*
- * Studio <helmet> <style> rules, verbatim values (prototype Studio.dc.html lines 20–66), in the page layer, scoped to
+ * Studio's page-wide <style> rules, in the page layer, scoped to
  * html.studio-page (set while mounted). The global reset lines identical to the base layer are omitted. The keyframes
  * are copied into the modules that use them.
  */

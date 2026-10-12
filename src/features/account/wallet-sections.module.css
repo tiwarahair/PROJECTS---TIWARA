@@ -1,4 +1,4 @@
-/* Account (prototype Account.dc.html), inline styles verbatim */
+/* Account page styles. */
 
 .card {
   padding: 18px 0;
@@ -315,7 +315,7 @@
   transform: scale(0.97) !important;
 }
 
-/* runtime states (prototype dotsBg, op) */
+/* runtime states: dots background, opacity */
 .dotsOpen {
   background: var(--fill-quiet);
 }

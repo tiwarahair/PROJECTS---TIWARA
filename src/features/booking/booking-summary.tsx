@@ -31,7 +31,7 @@ export const BookingSummary = ({ booking }: BookingSummaryProps) => {
   } = booking;
 
   const { showPrev, selection, step } = state;
-  // the prototype reads the window width on each render (no resize listener)
+  // reads the window width on each render (no resize listener)
   const isMobile = window.innerWidth <= 960;
   const canPreview = hasPreview(options.length.map(({ label }) => label));
   const previewIndex = getPreviewIndex(selection.length, selection.colour);

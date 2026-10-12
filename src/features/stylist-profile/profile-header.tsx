@@ -25,7 +25,7 @@ export const ProfileHeader = ({
     <div className={styles.bar}>
       <Link to="/" className={styles.logoLink}>
         <img
-          src={getAssetUrl("_ds_assets/logo-crimson.png")}
+          src={getAssetUrl("logo-crimson.png")}
           alt="Tiwára's House"
           className={styles.logo}
         />

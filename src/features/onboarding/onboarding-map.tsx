@@ -6,7 +6,7 @@ import styles from "./wizard-steps.module.css";
 interface OnboardingMapProps {
   /** Where the pin starts: the dragged pin, else the geocoded postcode, else central Manchester. */
   center: [number, number];
-  /** Re-centre when the geocoded postcode changes (prototype centerMap). */
+  /** Re-centre when the geocoded postcode changes. */
   geocodedLatLng: [number, number] | null;
   isDark: boolean;
   onPin: (latLng: [number, number]) => void;
@@ -18,7 +18,7 @@ const getTileUrl = (isDark: boolean) => {
   return `https://{s}.basemaps.cartocdn.com/${tileStyle}/{z}/{x}/{y}{r}.png`;
 };
 
-// the crimson pin, verbatim from the prototype's divIcon
+// the crimson pin, as a Leaflet divIcon
 const PIN_HTML =
   '<div style="width:30px;height:40px;filter:drop-shadow(0 6px 8px rgba(26,23,20,.35))"><svg width="30" height="40" viewBox="0 0 30 40"><path d="M15 39C15 39 28 24.5 28 14.5A13 13 0 0 0 2 14.5C2 24.5 15 39 15 39Z" fill="#8f1112" stroke="#fffefb" stroke-width="2.5"/><circle cx="15" cy="14.5" r="4.5" fill="#fffefb"/></svg></div>';
 

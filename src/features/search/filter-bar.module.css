@@ -1,4 +1,4 @@
-/* Values verbatim from prototype Search.dc.html (inline styles; style-hover/active as !important like the prototype runtime). */
+/* Search page styles; hover/active states use !important so they win over the base rules. */
 
 .wrap {
   padding: clamp(24px, 4vw, 44px) clamp(20px, 5vw, 48px) 0;

@@ -310,7 +310,7 @@ const MotionSpecimen = () => {
                   className={styles.motionTrack}
                   title={title}
                 >
-                  {/* the card's photo (assets/photo-braiding-lounge.jpeg) is not in the handoff bundle */}
+                  {/* the card's photo (assets/photo-braiding-lounge.jpeg) is not in the design bundle */}
                   <img src="" alt="" className={styles.motionImage} />
                 </ScrollRevealCard>
               </div>

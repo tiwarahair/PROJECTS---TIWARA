@@ -22,7 +22,7 @@ const TILES = [
   },
 ];
 
-/** Two full-height photo tiles linking to Search (prototype Home "Book a slot"). */
+/** Two full-height photo tiles linking to Search. */
 export const BookSlotTiles = () => (
   <div
     id="looks"

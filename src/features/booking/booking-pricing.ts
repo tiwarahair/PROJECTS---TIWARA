@@ -1,4 +1,4 @@
-// Price, duration and policy amounts for the chosen service (prototype Booking money() / delta / cust line).
+// Price, duration and policy amounts for the chosen service.
 import type { Stylist } from "../../types/stylist";
 import { money, policyLines } from "../../utils/pricing";
 import type { PolicySummary } from "../../utils/pricing";

@@ -1,4 +1,4 @@
-// CheckoutSheet derived values: booking detail, dialogs, footer and receipt (prototype renderVals()).
+// CheckoutSheet derived values: booking detail, dialogs, footer and receipt.
 import {
   ICONS,
   DEFAULT_STYLIST,
@@ -89,7 +89,7 @@ export const getAdjustNote = ({ adjustment, reason }: CheckoutLine): string => {
   return `${direction}${amount}: ${reason}`;
 };
 
-/** Everything the views read from the state (prototype renderVals body). */
+/** Everything the views read from the state. */
 export const getCheckoutView = (
   checkout: CheckoutController,
   props: CheckoutSheetProps,

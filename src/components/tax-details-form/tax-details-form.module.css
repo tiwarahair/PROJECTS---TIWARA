@@ -1,4 +1,4 @@
-/* TaxDetailsForm (prototype TaxDetailsForm.dc.html), inline styles verbatim */
+/* TaxDetailsForm styles. */
 
 .form {
   font-family: "Hanken Grotesk", sans-serif;
@@ -381,7 +381,7 @@
   transform: scale(0.98) !important;
 }
 
-/* runtime states (prototype tile(), chip(), fld() bd / tt / ls, dobPart w) */
+/* runtime states (tiles, chips, field borders / transitions, date-of-birth part widths) */
 .tileOn {
   border: 1px solid var(--accent-700);
   background: var(--accent-wash, rgba(143, 17, 18, 0.06));

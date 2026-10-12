@@ -30,7 +30,7 @@ const SUB_STEPS: BookingStep[] = [
   "payment",
 ];
 
-/** The sheet's title, back button and body sizing (prototype sheetTitle, shBack, shBackGo, shBody*). */
+/** The sheet's title, back button and body sizing. */
 export const getSheetFrame = (studio: StudioController) => {
   const { state, setState, isWide, actions } = studio;
   const { sheet, bookingStep } = state;
@@ -159,7 +159,7 @@ export interface SheetFrameProps {
   after?: ReactNode;
 }
 
-/** The scrim and side panel / bottom sheet every Studio sheet lives in (prototype Studio.dc.html lines 1546–1568). */
+/** The scrim and side panel / bottom sheet every Studio sheet lives in. */
 export const SheetFrame = ({
   studio,
   cover,

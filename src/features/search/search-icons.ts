@@ -1,4 +1,4 @@
-// Inline SVG bodies used by Search's suggestion rows (prototype Search ICONS), rendered as innerHTML like the prototype.
+// Inline SVG bodies used by Search's suggestion rows, rendered as innerHTML.
 export const SEARCH_ICONS: Record<string, string> = {
   grid: '<rect x="3" y="3" width="7" height="7" rx="1.5"></rect><rect x="14" y="3" width="7" height="7" rx="1.5"></rect><rect x="3" y="14" width="7" height="7" rx="1.5"></rect><path d="M17.5 14.5v6M14.5 17.5h6"></path>',
   braids:

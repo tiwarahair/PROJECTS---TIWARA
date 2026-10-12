@@ -48,7 +48,7 @@ export interface TextFieldProps {
   showError?: boolean;
 }
 
-/** Label, input and error line (prototype f.* fields). */
+/** Label, input and error line. */
 export const TextField = ({
   id,
   label,

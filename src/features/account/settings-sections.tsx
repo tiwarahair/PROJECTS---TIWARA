@@ -11,7 +11,7 @@ interface SwitchProps {
   onToggle: () => void;
 }
 
-/** On / off switch (prototype sw()). */
+/** On / off switch. */
 export const AccountSwitch = ({ id, labelId, on, onToggle }: SwitchProps) => (
   <button
     className={joinClassNames(ui.switch, on ? ui.switchOn : ui.switchOff)}

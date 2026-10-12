@@ -15,7 +15,7 @@ import type { OnboardingController } from "./use-onboarding";
 import type { ScreenProps } from "./screen-props";
 import styles from "./auth-screens.module.css";
 
-/** Strength meter view for the shell/wizard (prototype pm): a shown error replaces the hint. */
+/** Strength meter view for the shell/wizard: a shown error replaces the hint. */
 export const getOnboardingMeter = (
   onboarding: OnboardingController,
   isDark: boolean,

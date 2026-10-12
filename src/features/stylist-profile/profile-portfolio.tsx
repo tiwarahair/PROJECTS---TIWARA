@@ -25,7 +25,7 @@ export const ProfilePortfolio = ({
     <div className={styles.grid}>
       {portfolio.map((src, index) => (
         <div key={index} data-rv="" className={styles.tile}>
-          {/* prototype: a clickable <img> (keyboard users get "See all") */}
+          {/* a clickable <img> (keyboard users get "See all") */}
           {/* eslint-disable-next-line jsx-a11y/click-events-have-key-events, jsx-a11y/no-noninteractive-element-interactions */}
           <img
             loading="lazy"

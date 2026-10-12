@@ -1,6 +1,5 @@
 /*
- * Stylist Profile <helmet> <style> rules, verbatim values (prototype Stylist Profile.dc.html lines 20–101), in the
- * page layer so the component modules (the prototype's inline styles) still win. Page-wide rules are scoped to
+ * Stylist Profile page-wide rules, in the page layer so the component modules still win. Page-wide rules are scoped to
  * html.profile-page, which StylistProfilePage sets while mounted. The global reset lines identical to the base layer
  * are omitted.
  */

@@ -1,6 +1,6 @@
 import { useCallback, useSyncExternalStore } from "react";
 
-/** Whether a CSS media query matches, re-rendering when it changes (the prototype's matchMedia + forceUpdate). */
+/** Whether a CSS media query matches, re-rendering when it changes. */
 export const useMediaQuery = (query: string): boolean => {
   const subscribe = useCallback(
     (onChange: () => void) => {

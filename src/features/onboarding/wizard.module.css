@@ -1,4 +1,4 @@
-/* Values verbatim from prototype Onboarding.dc.html (inline styles; style-hover/active/focus as !important like the prototype runtime). */
+/* Onboarding component styles; hover/active/focus states are !important on purpose so they always win over the base rules. */
 
 .wizard {
   min-height: 100dvh;
@@ -298,7 +298,7 @@
   animation: obSpin 0.6s linear infinite;
 }
 
-/* wz (renderVals): the wizard re-themes the design tokens; bar and field colours as --ob-wz-* */
+/* wz: the wizard re-themes the design tokens; bar and field colours as --ob-wz-* */
 .wizardLight {
   --neutral-50: #faf6ee;
   --neutral-100: #fdfbf5;

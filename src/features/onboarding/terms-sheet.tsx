@@ -18,7 +18,7 @@ const TITLES: Record<TermsKind, string> = {
 /** Partner / Client Terms or Privacy Policy: centred dialog on desktop, bottom sheet on mobile. */
 export const TermsSheet = ({ kind, isDesktop, onClose }: TermsSheetProps) => (
   <>
-    {/* prototype: the scrim closes the sheet */}
+    {/* the scrim closes the sheet */}
     {/* eslint-disable-next-line jsx-a11y/click-events-have-key-events, jsx-a11y/no-static-element-interactions */}
     <div onClick={onClose} className={styles.scrim}></div>
     <div

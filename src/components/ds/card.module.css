@@ -1,4 +1,4 @@
-/* Values verbatim from design_system_source/components/display/Card.jsx.
+/* Card styles.
    Surfaces & elevation: level is assigned by behaviour, never appearance. */
 .card {
   padding: var(--card-padding);

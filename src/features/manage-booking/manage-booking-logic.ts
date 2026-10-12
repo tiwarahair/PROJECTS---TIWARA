@@ -1,4 +1,4 @@
-// Demo booking shown on the booking-link page (prototype Manage Booking.dc.html renderVals).
+// Demo booking shown on the booking-link page.
 import { stylists } from "../../data";
 import type { Stylist } from "../../types/stylist";
 import { getActiveServices, getServiceOptions } from "../../utils/services";
@@ -10,7 +10,7 @@ export interface SharedEntry {
 
 export const DEFAULT_STYLIST_ID = "amara-beauty";
 
-/** The stylist for an entry, or a placeholder name like the prototype. */
+/** The stylist for an entry, or a placeholder name. */
 export const getEntryStylist = (
   id: string,
 ): Pick<Stylist, "name" | "area"> & Partial<Stylist> =>
@@ -58,7 +58,7 @@ export const getDemoBooking = (stylistId: string): DemoBooking => {
 
   return {
     service: service ? service.name : "Knotless braids",
-    // the prototype adds the booking fee inline (50p + 1.5%), unrounded until toFixed
+    // the booking fee is added inline (50p + 1.5%), unrounded until toFixed
     total: service ? `£${(price + 0.5 + price * 0.015).toFixed(2)}` : "£142.60",
     options:
       service && options.size.length

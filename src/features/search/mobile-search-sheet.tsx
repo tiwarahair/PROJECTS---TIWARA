@@ -18,7 +18,7 @@ const HEADINGS: Record<string, string> = {
   date: "Date & time",
 };
 
-/** Full-screen mobile search: summary rows → What / Where / Date steps (prototype mob sheet). */
+/** Full-screen mobile search: summary rows → What / Where / Date steps. */
 export const MobileSearchSheet = ({ search }: MobileSearchSheetProps) => {
   const { state, refs, selection, place, what, where, actions } = search;
   const dateLabel = getMobileDateLabel(state);
@@ -141,7 +141,7 @@ export const MobileSearchSheet = ({ search }: MobileSearchSheetProps) => {
                           strokeWidth="1.7"
                           strokeLinecap="round"
                           strokeLinejoin="round"
-                          // prototype icon markup (static strings from SEARCH_ICONS)
+                          // static icon markup from SEARCH_ICONS
                           dangerouslySetInnerHTML={{ __html: icon }}
                         ></svg>
                       </span>
@@ -205,14 +205,14 @@ export const MobileSearchSheet = ({ search }: MobileSearchSheetProps) => {
                       onKeyDown={actions.keyWhat}
                       placeholder="All styles"
                       aria-label="Style or stylist"
-                      // prototype markup has no aria-controls on its comboboxes; kept as-is
+                      // no aria-controls on the comboboxes; kept as-is
                       // eslint-disable-next-line jsx-a11y/role-has-required-aria-props
                       role="combobox"
                       aria-expanded="true"
                       aria-autocomplete="list"
                       autoComplete="off"
                       enterKeyHint="search"
-                      // eslint-disable-next-line jsx-a11y/no-autofocus -- the step opens straight into typing, as in the prototype
+                      // eslint-disable-next-line jsx-a11y/no-autofocus -- the step opens straight into typing
                       autoFocus
                       className={styles.input}
                     />
@@ -259,14 +259,14 @@ export const MobileSearchSheet = ({ search }: MobileSearchSheetProps) => {
                       onKeyDown={actions.keyWhere}
                       placeholder="Current location"
                       aria-label="Area or postcode"
-                      // prototype markup has no aria-controls on its comboboxes; kept as-is
+                      // no aria-controls on the comboboxes; kept as-is
                       // eslint-disable-next-line jsx-a11y/role-has-required-aria-props
                       role="combobox"
                       aria-expanded="true"
                       aria-autocomplete="list"
                       autoComplete="off"
                       enterKeyHint="search"
-                      // eslint-disable-next-line jsx-a11y/no-autofocus -- the step opens straight into typing, as in the prototype
+                      // eslint-disable-next-line jsx-a11y/no-autofocus -- the step opens straight into typing
                       autoFocus
                       className={styles.input}
                     />

@@ -64,7 +64,7 @@ const getInitialState = (
 };
 
 /**
- * The booking-link page, route "/manage" (prototype Manage Booking.dc.html): booking summary and the allergies
+ * The booking-link page, route "/manage": booking summary and the allergies
  * shared with the stylist, with Edit / Remove + confirm + toast. ?view=account forwards to Account → Shared.
  */
 export const ManageBookingPage = ({
@@ -119,7 +119,7 @@ export const ManageBookingPage = ({
         <div className={styles.bar}>
           <Link to="/" className={styles.logoLink}>
             <img
-              src={getAssetUrl("_ds_assets/logo-crimson.png")}
+              src={getAssetUrl("logo-crimson.png")}
               alt="Tiwára's House"
               className={styles.logo}
             />

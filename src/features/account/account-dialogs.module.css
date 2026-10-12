@@ -1,4 +1,4 @@
-/* Account (prototype Account.dc.html), inline styles verbatim */
+/* Account page styles. */
 
 .overlay {
   position: fixed;
@@ -428,7 +428,7 @@
   transform: scale(0.98) !important;
 }
 
-/* runtime states (prototype dlgMax, cfBd, delCur / delOp) */
+/* runtime states: dialog max width, confirm border, delete cursor / opacity */
 .dialogWide {
   max-width: 460px;
 }

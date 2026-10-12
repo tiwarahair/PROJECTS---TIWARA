@@ -242,7 +242,7 @@ const DetailsStep = ({ view }: { view: WizardView }) => {
 
 type VariationRow = WizardView["sizeRows"][number];
 
-/** A size or length option card (prototype wizSizeRows / wizLenRows). */
+/** A size or length option card. */
 const VariationCard = ({
   view,
   title,
@@ -867,7 +867,7 @@ const AddonsStep = ({ view }: { view: WizardView }) => {
   );
 };
 
-/** The service wizard's body (prototype shWiz). */
+/** The service wizard's body. */
 export const WizardSheet = ({ view }: { view: WizardView }) => (
   <>
     {view.isAdd && (
@@ -906,7 +906,7 @@ export const WizardSheet = ({ view }: { view: WizardView }) => (
   </>
 );
 
-/** Back / Continue / Add service / Save service (prototype shWiz footer). */
+/** Back / Continue / Add service / Save service. */
 export const WizardFooter = ({ view }: { view: WizardView }) => (
   <div className={styles.footer}>
     <div className={styles.footerRow}>

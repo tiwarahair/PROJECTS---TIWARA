@@ -7,7 +7,7 @@ import page from "./home-page.module.css";
 import styles from "./looks-section.module.css";
 import { useGridReveal } from "./use-grid-reveal";
 
-/** Home's own photo per service group (renderVals lookTiles IMG), falling back to the group image. */
+/** Home's own photo per service group, falling back to the group image. */
 const LOOK_IMAGES: Record<string, string> = {
   braids: "img/w160944.jpg",
   wigs: "img/w160800.jpg",
@@ -17,7 +17,7 @@ const LOOK_IMAGES: Record<string, string> = {
   treatments: "img/w161244.jpg",
 };
 
-/** "Six ways to find your look" grid (prototype Home "Six looks"). */
+/** "Six ways to find your look" grid. */
 export const LooksSection = () => {
   const sectionRef = useRef<HTMLElement>(null);
 

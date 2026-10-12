@@ -22,7 +22,7 @@ export type {
 } from "./use-account-settings";
 
 /**
- * The confirm dialog, portalled to <body> (prototype mkDlg): Studio's animated ancestors keep a transform, which would
+ * The confirm dialog, portalled to <body>: Studio's animated ancestors keep a transform, which would
  * trap a fixed overlay inside the content column.
  */
 const ConfirmDialog = ({
@@ -95,7 +95,7 @@ const ConfirmDialog = ({
 };
 
 /**
- * Studio → Settings pages for the stylist's own account (prototype AccountSettings.dc.html): personal details,
+ * Studio → Settings pages for the stylist's own account: personal details,
  * login & security, notifications, payouts and calendar sync, with a save bar for the typed fields.
  */
 export const AccountSettings = (props: AccountSettingsProps) => {

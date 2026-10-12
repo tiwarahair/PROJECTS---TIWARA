@@ -1,4 +1,4 @@
-/* Values verbatim from prototype Home.dc.html (inline styles; style-hover/active as !important like the prototype runtime). */
+/* Home page styles; hover/active states use !important so they win over the base rules. */
 
 .morph {
   min-height: 100vh;
@@ -11,7 +11,7 @@
   background: transparent;
 }
 
-/* renderVals morphBg: the cream of the section in the middle of the viewport */
+/* morphing background: the cream of the section in the middle of the viewport */
 .morph {
   background: var(--morph-bg);
 }

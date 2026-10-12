@@ -50,7 +50,7 @@ export const toastSlice = createSlice({
     clearToast: (state, { payload }: PayloadAction<number>) => {
       if (state.current?.id === payload) state.current = null;
     },
-    /** A page unmounting takes its toast with it (the prototype's toast lived in the page DOM). */
+    /** A page unmounting takes its toast with it (a toast belongs to the page that raised it). */
     dismissToasts: (state) => {
       state.current = null;
     },

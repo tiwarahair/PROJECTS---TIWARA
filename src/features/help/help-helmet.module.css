@@ -1,5 +1,5 @@
 /*
- * Help <helmet> <style> rules, verbatim values (prototype Help.dc.html lines 21–28), in the page layer. The global
+ * Help page-wide rules, in the page layer. The global
  * reset lines identical to the base layer are omitted; .hp-mob / .hp-desk are this module's classes.
  */
 @layer page {

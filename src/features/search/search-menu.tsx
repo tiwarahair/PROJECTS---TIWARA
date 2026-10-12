@@ -6,7 +6,7 @@ import { useAppDispatch, useAppSelector } from "../../stores/hooks";
 import { logOut } from "../../stores/session-slice";
 import styles from "./search-nav.module.css";
 
-/** The nav's ☰ button and its pop-up menu (the prototype's Search menu button did nothing). */
+/** The nav's ☰ button and its pop-up menu. */
 export const SearchMenu = () => {
   const dispatch = useAppDispatch();
   const navigate = useNavigate();

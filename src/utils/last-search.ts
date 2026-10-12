@@ -1,4 +1,4 @@
-// "Back to results" memory shared by Search and Stylist Profile (prototype tw-fav.js lastSearch/summary/goBack).
+// "Back to results" memory shared by Search and Stylist Profile.
 import { serviceGroups, serviceTypes } from "../data";
 import {
   getSearchParams,

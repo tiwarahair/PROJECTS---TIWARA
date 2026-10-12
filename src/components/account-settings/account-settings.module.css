@@ -1,4 +1,4 @@
-/* AccountSettings (prototype AccountSettings.dc.html), inline styles verbatim */
+/* AccountSettings styles. */
 
 .root {
   position: relative;
@@ -267,7 +267,7 @@
   pointer-events: none;
 }
 
-/* runtime states (prototype inp() bd / ring, so* / c.* checkbox, sw(), save*, toast*) */
+/* runtime states (input border / ring, checkboxes, switches, save bar, toast) */
 .fieldOk {
   border: 1px solid var(--border-strong);
   box-shadow: none;
@@ -345,7 +345,7 @@
 }
 
 /*
- * helmet rules (prototype lines 11–18), scoped to this component's classes; [data-ac-in] elements carry .focusRing.
+ * helmet rules, scoped to this component's classes; [data-ac-in] elements carry .focusRing.
  * The reveal / skeleton reduced-motion rules live with those classes; pwIn lives with PasswordMeter.
  */
 @media (prefers-reduced-motion: reduce) {

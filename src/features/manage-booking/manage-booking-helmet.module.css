@@ -1,6 +1,5 @@
 /*
- * Manage Booking <helmet> <style> rules, verbatim values (prototype Manage Booking.dc.html lines 20–32), in the page
- * layer, scoped to html.manage-page (set while the page is mounted). The global reset lines identical to the base
+ * Manage Booking page-wide rules, in the page layer, scoped to html.manage-page (set while the page is mounted). The global reset lines identical to the base
  * layer are omitted; the keyframes live in the modules that use them.
  */
 @layer page {

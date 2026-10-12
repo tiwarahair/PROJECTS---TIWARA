@@ -12,8 +12,8 @@ const LocationProbe = () => {
 };
 
 /**
- * Renders inside a fresh store and a router at `url`. The shared helpers read window.location
- * (like the prototype), so the window URL is set to match before the store is created.
+ * Renders inside a fresh store and a router at `url`. The shared helpers read window.location,
+ * so the window URL is set to match before the store is created.
  */
 export const renderWithStore = (ui: ReactElement, url = "/") => {
   window.history.replaceState(null, "", url);

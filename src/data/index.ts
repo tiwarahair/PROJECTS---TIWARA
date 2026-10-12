@@ -1,6 +1,6 @@
-// Typed views over the JSON extracted from the prototype's data.js (scripts/extract-prototype-data.mjs).
+// Typed views over the JSON extracted from the reference data.js.
 // JSON imports widen tuples to arrays and literals to string, so datasets are asserted to their interfaces
-// (tuple-shaped ones via unknown). data.test.ts checks every value against the prototype.
+// (tuple-shaped ones via unknown). data.test.ts checks every value against the reference data.js.
 import type { DemoAddress, SavedAddress } from "../types/address";
 import type { CategoryColour } from "../types/category-colour";
 import type { ChatMessage } from "../types/chat";

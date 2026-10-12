@@ -1,4 +1,4 @@
-// The Manage categories and add-on sheets (prototype swatches, catsVals and the addonV block of renderVals).
+// The Manage categories and add-on sheets, and the category colour picker.
 import type { ChangeEvent } from "react";
 import type { SearchSelectOption } from "../../components/search-select/search-select";
 import { CATEGORY_COLOURS, NO_CATEGORY_TONE } from "./studio-data";
@@ -20,7 +20,7 @@ export interface Swatch {
   pick: () => void;
 }
 
-/** The category colour picker (prototype swatches). */
+/** The category colour picker. */
 export const getSwatches = (
   selected: string | null | undefined,
   onPick: (value: string) => void,
@@ -61,7 +61,7 @@ const toNumber = (value: unknown) => {
   return isNaN(parsed) ? 0 : parsed;
 };
 
-/** Manage categories: reorder, rename, recolour, delete and add (prototype catsVals). */
+/** Manage categories: reorder, rename, recolour, delete and add. */
 export const getCategoriesView = (studio: StudioController) => {
   const { state, setState, actions, serviceActions } = studio;
   const ui: Partial<CategoriesUi> = state.categoriesUi || {};
@@ -255,7 +255,7 @@ export const getCategoriesView = (studio: StudioController) => {
   };
 };
 
-/** Create or edit an add-on (prototype addonV). */
+/** Create or edit an add-on. */
 export const getAddonSheetView = (studio: StudioController) => {
   const { state, setState, actions, serviceActions } = studio;
   const draft = state.sheet === "addon" ? state.addonDraft : null;

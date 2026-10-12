@@ -620,7 +620,7 @@ const NotesStep = ({ view }: { view: AddBookingView }) => (
   </>
 );
 
-/** The New booking sheet's body and its in-body footer (prototype shAdd). */
+/** The New booking sheet's body and its in-body footer. */
 export const AddBookingSheet = ({
   studio,
   view,

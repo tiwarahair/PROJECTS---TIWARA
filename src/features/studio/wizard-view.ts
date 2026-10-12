@@ -1,4 +1,4 @@
-// The Add / Edit service wizard (prototype svcV in renderVals: steps, details, pricing, suggestions, footer).
+// The Add / Edit service wizard: steps, details, pricing, suggestions, footer.
 import type { ChangeEvent, FocusEvent, MouseEvent } from "react";
 import type { SearchSelectOption } from "../../components/search-select/search-select";
 import { serviceTypes } from "../../data";

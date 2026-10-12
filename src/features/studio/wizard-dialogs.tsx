@@ -32,7 +32,7 @@ const CloseIcon = ({
 
 const OWN_MINUTES = ["0", "5", "10", "15", "20", "30", "45", "60", "90", "120"];
 
-/** Quick-create an add-on from the wizard's Add-ons step (prototype wizNewOpen). */
+/** Quick-create an add-on from the wizard's Add-ons step. */
 const NewAddonDialog = ({ view }: { view: WizardView }) => {
   const { addons, isWide } = view;
   const draft = addons.newAddon;
@@ -151,7 +151,7 @@ const NewAddonDialog = ({ view }: { view: WizardView }) => {
   );
 };
 
-/** Suggested services: search the platform's service types (prototype wizSuggOn). */
+/** Suggested services: search the platform's service types. */
 const SuggestionsDialog = ({ view }: { view: WizardView }) => {
   if (!view.isSuggestionsOpen) return null;
 
@@ -281,7 +281,7 @@ const SuggestionsDialog = ({ view }: { view: WizardView }) => {
   );
 };
 
-/** Add or edit one of the service's own customisations (prototype wizOwnEd). */
+/** Add or edit one of the service's own customisations. */
 const CustomisationDialog = ({ view }: { view: WizardView }) => {
   const { own, isWide } = view;
   const { editor } = own;
@@ -312,7 +312,7 @@ const CustomisationDialog = ({ view }: { view: WizardView }) => {
           <input
             className={styles.nameInput}
             value={editor.name}
-            // the dialog opens to type a name straight away, as in the prototype
+            // the dialog opens to type a name straight away
             // eslint-disable-next-line jsx-a11y/no-autofocus
             autoFocus
             onChange={own.onName}
@@ -438,7 +438,7 @@ const CustomisationDialog = ({ view }: { view: WizardView }) => {
   );
 };
 
-/** The wizard's dialogs, rendered with the page's other dialogs in prototype order. */
+/** The wizard's dialogs, rendered in order with the page's other dialogs. */
 export const WizardNewAddonDialog = ({
   studio,
 }: {

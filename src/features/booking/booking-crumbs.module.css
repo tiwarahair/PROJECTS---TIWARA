@@ -1,4 +1,4 @@
-/* Values verbatim from prototype Booking.dc.html (inline styles; style-hover/active as !important like the prototype runtime). */
+/* Booking page styles; hover/active states use !important so they win over the base rules. */
 
 .crumbs {
   display: flex;
@@ -9,7 +9,7 @@
   font-size: 13.5px;
 }
 
-/* c.style (renderVals crumbs) */
+/* step crumbs */
 .crumb {
   background: none;
   border: none;

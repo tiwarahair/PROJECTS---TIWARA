@@ -34,7 +34,7 @@ const getInitialView = (
   return params.get("state") === "done" ? "done" : "form";
 };
 
-/** ?invite=demo|expired, ?state=done, ?email / first / last / pw seed the page (prototype constructor). */
+/** ?invite=demo|expired, ?state=done, ?email / first / last / pw seed the page. */
 const getInitialState = (): SaveDetailsState => {
   const params = getSearchParams();
   const invite = params.get("invite") || "demo";
@@ -68,7 +68,7 @@ const CheckIcon = ({ size }: { size: number }) => (
 );
 
 /**
- * Set a password for a guest booking, route "/save-details" (prototype Save Details.dc.html): the form,
+ * Set a password for a guest booking, route "/save-details": the form,
  * "Your details are saved" and "This link has expired".
  */
 export const SaveDetailsPage = () => {
@@ -123,7 +123,7 @@ export const SaveDetailsPage = () => {
         <div className={styles.bar}>
           <Link to="/" className={styles.logoLink}>
             <img
-              src={getAssetUrl("_ds_assets/logo-crimson.png")}
+              src={getAssetUrl("logo-crimson.png")}
               alt="Tiwára's House"
               className={styles.logo}
             />

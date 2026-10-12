@@ -3,7 +3,7 @@ import { faqs } from "../../data";
 import { joinClassNames } from "../../utils/class-names";
 import styles from "./faq-section.module.css";
 
-/** Accordion FAQ, one answer open at a time (prototype Home "FAQ"). */
+/** Accordion FAQ, one answer open at a time. */
 export const FaqSection = () => {
   const [openIndex, setOpenIndex] = useState(-1);
 

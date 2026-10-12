@@ -7,7 +7,7 @@ import { prefersReducedMotion } from "../utils/page-flags";
 
 export const FAVOURITES_HREF = "/account?section=favourites";
 
-/** Heart "pop" on save (prototype tw-fav.js F.pop). */
+/** Heart "pop" on save. */
 const popHeart = (element: Element) => {
   const svg = element.querySelector("svg") ?? element;
 

@@ -1,5 +1,5 @@
-/* Runtime style strings from prototype Search renderVals / baseVals (chipS, optS, rowVm, quickDays, calCells,
-   timePills), as classes with the same values. */
+/* Runtime states for the search controls: chips, options, suggestion rows, quick days, calendar cells and
+   time pills. */
 
 /* chipS(on) — 32px; chipS(on,36) adds .chipLarge */
 .chip {
@@ -148,7 +148,7 @@
   cursor: default;
 }
 
-/* value === selected date (blank cells match too while no date is set, as in the prototype) */
+/* value === selected date (blank cells match too while no date is set; kept on purpose) */
 .cellSelected {
   font-weight: 600;
 }

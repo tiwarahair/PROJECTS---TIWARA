@@ -18,7 +18,7 @@ interface FiltersSheetProps {
   search: SearchController;
 }
 
-/** Mobile/tablet filters bottom sheet: edits a draft, "Show n stylists" applies it (prototype fOpen). */
+/** Mobile/tablet filters bottom sheet: edits a draft, "Show n stylists" applies it. */
 export const FiltersSheet = ({ search }: FiltersSheetProps) => {
   const { state, filterDraft, draftCount, actions } = search;
 

@@ -37,7 +37,7 @@ import type { StudioController } from "./use-studio";
 import { WizardFooter, WizardSheet } from "./wizard";
 import { getWizardView } from "./wizard-view";
 
-/** The open sheet's body and footer inside the shared frame (prototype Studio.dc.html lines 1544–3418). */
+/** The open sheet's body and footer inside the shared frame. */
 export const StudioSheets = ({ studio }: { studio: StudioController }) => {
   const {
     sheet,

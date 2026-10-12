@@ -1,4 +1,4 @@
-/* CheckoutSheet (prototype CheckoutSheet.dc.html), inline styles verbatim */
+/* CheckoutSheet styles. */
 
 .outer {
   height: 100%;
@@ -369,7 +369,7 @@
   animation: cktoast 0.22s cubic-bezier(0.23, 1, 0.32, 1) both;
 }
 
-/* runtime states (prototype outerBg / topPad, sheetRad, titlePad, steps, anim, chip(), tile(), ftPadB, ftPri*, toastB) */
+/* runtime states */
 .outerPhone {
   background: #969491;
   padding-top: 40px;

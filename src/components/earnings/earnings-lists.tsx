@@ -28,7 +28,7 @@ const FILTERS: Record<string, (transaction: Transaction) => boolean> = {
     ].includes(description),
 };
 
-/** Status tag colours from the status table (prototype STT). */
+/** Status tag colours from the status table. */
 export const getStatusStyle = (
   status: keyof typeof STATUS_COLOURS,
 ): CSSProperties => {
@@ -48,7 +48,7 @@ export const getTransactionStatusStyle = (
       } as CSSProperties)
     : getStatusStyle(transaction.status);
 
-/** "Today", "Yesterday" or "14 Oct" (prototype dWord). */
+/** "Today", "Yesterday" or "14 Oct". */
 export const getDayWord = (date: Date, today: Date): string => {
   const key = date.toDateString();
   const yesterday = new Date(today.getTime() - DAY_MS);

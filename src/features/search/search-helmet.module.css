@@ -1,6 +1,5 @@
 /*
- * Search <helmet> <style> rules, verbatim values (prototype Search.dc.html lines 20–84), in the page layer so the
- * component modules (the prototype's inline styles) still win. Page-wide element rules are scoped to
+ * Search page-wide rules, in the page layer so the component modules still win. Page-wide element rules are scoped to
  * html.search-page, which SearchPage sets while mounted. The global reset lines identical to the base layer are omitted.
  */
 @layer page {

@@ -12,7 +12,7 @@ import { SearchNav } from "./search-nav";
 import styles from "./search-page.module.css";
 import { useSearch } from "./use-search";
 
-/** Search & results, route "/search" (prototype Search.dc.html). */
+/** Search & results, route "/search". */
 export const SearchPage = () => {
   const search = useSearch();
   const { state, place, selection, cards, suggestions, actions } = search;

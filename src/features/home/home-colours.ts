@@ -1,4 +1,4 @@
-// Colour helpers from prototype Home.dc.html (hexA, isDarkBg).
+// Colour helpers (hexA, isDarkBg).
 
 /** "#faf6ee", 0.85 → "rgba(250,246,238,0.85)" */
 export const hexToRgba = (hex: string, alpha: number): string => {

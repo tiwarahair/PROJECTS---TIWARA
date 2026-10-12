@@ -1,6 +1,5 @@
 /*
- * AccountSettings confirm dialog. The prototype builds it on <body> with inline styles (mkDlg) so Studio's animated
- * ancestors can't trap the fixed overlay; the port portals it to <body> with these verbatim values.
+ * AccountSettings confirm dialog, portalled to <body> so Studio's animated ancestors can't trap the fixed overlay.
  */
 .overlay {
   position: fixed;
@@ -98,7 +97,7 @@
   color: #fffefb;
 }
 
-/* helmet: [data-ac-dlg] under reduced motion. No element carries data-ac-dlg (as in the prototype), so it matches nothing */
+/* helmet: [data-ac-dlg] under reduced motion. No element carries data-ac-dlg, so it matches nothing */
 @media (prefers-reduced-motion: reduce) {
   .panel[data-ac-dlg] {
     transform: none !important;

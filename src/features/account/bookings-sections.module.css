@@ -1,4 +1,4 @@
-/* Account (prototype Account.dc.html), inline styles verbatim */
+/* Account page styles. */
 
 .nextCard {
   background: var(--accent-wash);
@@ -424,13 +424,13 @@
   font-weight: 600;
 }
 
-/* runtime states: the status tag colours come from the booking (prototype tagBg / tagFg) */
+/* runtime states: the status tag colours come from the booking */
 .tag {
   background: var(--tag-bg);
   color: var(--tag-fg);
 }
 
-/* prototype bkChips fw / fg / bar */
+/* booking filter chips: weight / colour / bar */
 .tabOn {
   font-weight: 600;
   color: var(--text-primary);

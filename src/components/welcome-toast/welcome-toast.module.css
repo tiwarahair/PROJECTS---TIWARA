@@ -1,4 +1,4 @@
-/* Post-auth welcome toast, values verbatim from prototype tw-toast.js. */
+/* Post-auth welcome toast. */
 .toast {
   position: fixed;
   left: 50%;

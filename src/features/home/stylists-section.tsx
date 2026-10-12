@@ -6,7 +6,7 @@ import page from "./home-page.module.css";
 import styles from "./stylists-section.module.css";
 import { useCentreSecondCard } from "./use-centre-second-card";
 
-/** "Book our stylists" row with the second card centred on load (prototype Home "Stylists"). */
+/** "Book our stylists" row with the second card centred on load. */
 export const StylistsSection = () => {
   const rowRef = useRef<HTMLDivElement>(null);
 

@@ -22,7 +22,7 @@ const PlusIcon = () => (
   </svg>
 );
 
-/** Settings → Your profile (prototype "Edit profile"). */
+/** Settings → Your profile. */
 export const ProfilePage = ({
   studio,
   view,

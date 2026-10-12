@@ -1,4 +1,4 @@
-/* Account (prototype Account.dc.html), inline styles verbatim */
+/* Account page styles. */
 
 .pwValue {
   margin-top: 4px;
@@ -141,7 +141,7 @@
   flex-wrap: wrap;
 }
 
-/* runtime colours from the password checker (prototype mv.s1–s3, msgC, msgW, labelC) */
+/* runtime colours from the password checker (strength bars, message, label) */
 .meterSegColour {
   background: var(--seg-bg);
 }

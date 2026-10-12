@@ -1,4 +1,4 @@
-// Search results logic, ported from prototype Search.dc.html (place, styleSel, band, firstSlot, calc, results).
+// Search results logic: place, selected style, price band, first slot, filtering and results.
 import {
   searchLocations,
   serviceGroups,
@@ -183,7 +183,7 @@ const VENUE_TYPES: Record<Venue, string[]> = {
   Mobile: ["mobile"],
 };
 
-/** Filter + sort stylists for the current state, optionally with draft filters (prototype calc). */
+/** Filter + sort stylists for the current state, optionally with draft filters. */
 export const getResults = (
   state: SearchState,
   overrides: Partial<FilterDraft> = {},
@@ -315,7 +315,7 @@ const getDistanceText = (
   return milesText + (milesText === "1" ? " mile away" : " miles away");
 };
 
-/** StylistCard props for each result (prototype renderVals results). */
+/** StylistCard props for each result. */
 export const getResultCards = (
   list: ResultEntry[],
   selection: StyleSelection,

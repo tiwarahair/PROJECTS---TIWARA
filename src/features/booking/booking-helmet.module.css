@@ -1,9 +1,7 @@
 /*
- * Booking <helmet> <style> rules, verbatim values (prototype Booking.dc.html lines 20–73), in the page layer so the
- * component modules (the prototype's inline styles) still win. Page-wide element rules are scoped to
- * html.booking-page, which BookingPage sets while mounted. The global reset lines identical to the base layer are
- * omitted. `.sumcover:not([style*="height: 0px"])` matched the inline height the prototype wrote while the AI
- * preview was open; the port marks that state with .sumcoverHidden instead.
+ * Booking page-wide rules, in the page layer so the component modules still win. Page-wide element rules are
+ * scoped to html.booking-page, which BookingPage sets while mounted. The global reset lines identical to the base
+ * layer are omitted. The cover state while the AI preview is open is marked with .sumcoverHidden.
  */
 @layer page {
   :global(html.booking-page) textarea {

@@ -1,5 +1,5 @@
-// Studio → Settings values (prototype renderVals: settingsRows / settingsGroups, setGroups, rules, pause, hourRows,
-// blockedList / closedList, the profile editor, the embedded pages' callbacks and the save actions).
+// Studio → Settings values: settings rows and groups, rules, pause, opening hours, blocked and closed lists, the
+// profile editor, the embedded pages' callbacks and the save actions.
 import type { ChangeEvent } from "react";
 import type { BusinessValue } from "../../components/business-details/business-details-logic";
 import type { PolicyValue } from "../../components/payment-policy/payment-policy-logic";

@@ -1,4 +1,4 @@
-/* CheckoutSheet (prototype CheckoutSheet.dc.html), inline styles verbatim */
+/* CheckoutSheet done, receipt and refund styles. */
 
 .doneView {
   padding: 12px 24px 32px;
@@ -361,7 +361,7 @@
   color: var(--neutral-700);
 }
 
-/* runtime states (prototype rc.lines pad / fs / fg, rsBorder, rfBorder / rfRing, rfReasonBorder) */
+/* runtime states (receipt lines, resend and refund borders / rings) */
 .doneLineItem {
   padding: 8px 0 0 0px;
   font-size: 15px;

@@ -1,4 +1,4 @@
-/* Values verbatim from prototype Booking.dc.html (inline styles; style-hover/active as !important like the prototype runtime). */
+/* Booking page styles; hover/active states use !important so they win over the base rules. */
 
 .reNote {
   margin: -12px 0 20px;
@@ -74,7 +74,7 @@
   flex-wrap: wrap;
 }
 
-/* d.style (renderVals calDays: CELL + state) */
+/* calendar day cells: base cell + state */
 .day {
   height: 40px;
   display: flex;
@@ -114,7 +114,7 @@
   font-weight: 500;
 }
 
-/* t.style (renderVals slots; slots are never off) */
+/* time slots (slots are never off) */
 .slot {
   border-radius: var(--radius-full);
   padding: 11px 20px;

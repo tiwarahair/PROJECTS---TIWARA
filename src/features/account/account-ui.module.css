@@ -1,4 +1,4 @@
-/* Account (prototype Account.dc.html), inline styles verbatim */
+/* Account page styles. */
 
 .list {
   display: flex;
@@ -354,7 +354,7 @@
   transition: transform 0.2s cubic-bezier(0.2, 0.8, 0.2, 1);
 }
 
-/* runtime states (prototype bd() borders, valColor, op, sw()) */
+/* runtime states: borders, value colour, opacity, switch */
 .inputOk {
   border: 1px solid var(--border-strong);
 }

@@ -1,4 +1,4 @@
-/* Values verbatim from prototype Home.dc.html (Nav + mobile menu) and renderVals navStyle / logo styles. */
+/* Home nav + mobile menu, including the runtime nav and logo states. */
 .nav {
   position: fixed;
   top: 0;

@@ -23,8 +23,8 @@ interface OpenMenu {
 }
 
 /**
- * Page-level host for the shared favourites / share / account-menu behaviour (prototype tw-fav.js),
- * rendered by every page that loaded that script: Home, Search, Stylist Profile, Account.
+ * Page-level host for the shared favourites / share / account-menu behaviour,
+ * rendered by Home, Search, Stylist Profile, Account.
  * Any element with data-tw-acct opens the account menu.
  */
 export const FavHost = () => {
@@ -114,8 +114,7 @@ export const FavHost = () => {
   }, [dispatch, store]);
 
   // any [data-tw-acct] trigger toggles the menu. Capture phase: it must run before a router <Link>'s own click
-  // handler, which navigates unless the default is already prevented (the prototype's plain <a> only navigated
-  // after the bubbling listener had prevented it)
+  // handler, which navigates unless the default is already prevented
   useEffect(() => {
     const handleClick = (event: MouseEvent) => {
       const anchor = (event.target as Element | null)?.closest?.<HTMLElement>(

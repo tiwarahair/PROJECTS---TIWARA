@@ -66,7 +66,7 @@ const getGoTo =
     onGo(id);
   };
 
-/** Wide screens: the sticky side nav (prototype "Your account" <nav>). */
+/** Wide screens: the sticky "Your account" side nav. */
 export const AccountSideNav = ({
   current,
   accountName,
@@ -133,7 +133,7 @@ export const AccountSideNav = ({
   );
 };
 
-/** Narrow screens without a section: the list of sections (prototype "Account list (mobile)"). */
+/** Narrow screens without a section: the list of sections. */
 export const AccountMobileList = ({
   accountName,
   initials,

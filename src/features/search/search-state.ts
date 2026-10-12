@@ -1,4 +1,4 @@
-// Search page state, initialised from the URL exactly like the prototype constructor.
+// Search page state, initialised from the URL.
 
 export type SortKey = "distance" | "earliest" | "price" | "price-desc";
 export type Venue = "Salon" | "Home-based" | "Mobile";
@@ -149,7 +149,7 @@ export const getInitialState = (
   return state;
 };
 
-/** The URL the page keeps in sync with its state (prototype componentDidUpdate). */
+/** The URL the page keeps in sync with its state. */
 export const getStateSearch = ({
   query,
   time,
@@ -186,7 +186,7 @@ export const getStateSearch = ({
   return params.toString() ? `?${params.toString()}` : "";
 };
 
-/** Board fixtures (prototype componentDidMount F map), applied 350ms after mount. */
+/** Board fixtures, applied 350ms after mount. */
 export const getFixturePatch = (
   fixture: string,
   state: SearchState,

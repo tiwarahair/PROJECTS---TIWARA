@@ -1,9 +1,9 @@
 import { useEffect, useRef } from "react";
 
 /**
- * Scroll reveal for every [data-rv] element (prototype Stylist Profile _sweep): once an element's top is within 92%
+ * Scroll reveal for every [data-rv] element: once an element's top is within 92%
  * of the viewport (or it is already above it), it gets revealClass with a 50ms stagger, capped at 250ms.
- * Re-sweeps on scroll, resize and after every render, like the prototype's componentDidUpdate.
+ * Re-sweeps on scroll, resize and after every render.
  */
 export const useRevealSweep = (revealClass: string): void => {
   const sweepRef = useRef<(() => void) | null>(null);

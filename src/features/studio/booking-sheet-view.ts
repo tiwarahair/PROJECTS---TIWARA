@@ -1,5 +1,4 @@
-// The booking sheet's values and actions (prototype renderVals: sheetB, bk*, cc, the status menu, cancel / no-show /
-// checkout, reschedule, payment).
+// The booking sheet's values and actions: the status menu, cancel / no-show / checkout, reschedule, payment.
 import type { ChangeEvent, MouseEvent } from "react";
 import type {
   CheckoutBooking,
@@ -90,7 +89,7 @@ const getCheckoutLabel = ({
   return refundAuto > 0 ? `Refunded £${refundAuto}` : "Paid";
 };
 
-/** The booking in the shape CheckoutSheet takes (prototype ckBookingOf). */
+/** The booking in the shape CheckoutSheet takes. */
 export const getCheckoutBooking = (
   state: StudioState,
   booking: DecoratedBooking,
@@ -197,7 +196,7 @@ export const getBookingSheetView = (studio: StudioController) => {
   const isClosed = CLOSED_STATUSES.includes(booking.status);
   const due = booking.due;
 
-  /** Moves the booking to Past with an undo (prototype finish). */
+  /** Moves the booking to Past with an undo. */
   const finish = (record: Partial<PastRecord>, message: string) => {
     const current = context.getState();
     const previousBookings = current.bookings;

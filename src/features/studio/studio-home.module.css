@@ -1,5 +1,4 @@
-/* Studio → Home — verbatim values from Studio.dc.html lines 140–401. Desk = 1024px and up, wide = 640px and up
-   (the prototype's _mqD / _mq); per-row colours and delays are runtime custom properties. */
+/* Studio → Home. Desk = 1024px and up, wide = 640px and up; per-row colours and delays are runtime custom properties. */
 
 .home {
   padding: 18px 18px 110px;

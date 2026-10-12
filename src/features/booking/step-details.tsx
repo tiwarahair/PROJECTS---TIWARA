@@ -50,7 +50,7 @@ interface FieldProps {
   prefix?: ReactNode;
 }
 
-/** Label, input and the inline error under it (prototype fe[key]). */
+/** Label, input and the inline error under it. */
 const DetailsField = ({
   fieldKey,
   label,

@@ -38,7 +38,7 @@ import styles from "./stylist-profile-page.module.css";
 import { useRevealSweep } from "./use-reveal-sweep";
 import { useStylistProfile } from "./use-stylist-profile";
 
-/** A stylist's public profile, route "/stylist?stylist=<id>" (prototype Stylist Profile.dc.html). */
+/** A stylist's public profile, route "/stylist?stylist=<id>". */
 export const StylistProfilePage = () => {
   const profile = useStylistProfile();
   const { id, shareAt, serviceModal, zoom, openZoom } = profile;
@@ -185,7 +185,7 @@ export const StylistProfilePage = () => {
         <Link to="/" className={styles.poweredBy}>
           Powered by{" "}
           <img
-            src={getAssetUrl("_ds_assets/logo-crimson.png")}
+            src={getAssetUrl("logo-crimson.png")}
             alt="Tiwára's House"
             className={styles.poweredLogo}
           />

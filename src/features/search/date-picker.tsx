@@ -161,7 +161,7 @@ const CustomTimes = ({
   </div>
 );
 
-/** Desktop When popover: quick days + month calendar, time of day, custom range (prototype dateOpen). */
+/** Desktop When popover: quick days + month calendar, time of day, custom range. */
 export const DatePopover = ({ search }: PickerProps) => (
   <div className={styles.overlay}>
     <div

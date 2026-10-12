@@ -1,4 +1,4 @@
-/* Earnings (prototype Earnings.dc.html), inline styles verbatim */
+/* Earnings styles. */
 
 .root {
   position: relative;
@@ -507,7 +507,7 @@
   max-width: 640px;
 }
 
-/* runtime states (prototype rootH / rootOv / rootBg, scrollOv / pad, ddChev, o.*, tileCols, t.w / t.c, barGap, b.*, tb.*, chip()) */
+/* runtime states (root, scroll area, dropdown, tiles, chart bars, chips) */
 .rootContained {
   height: 100dvh;
   overflow: hidden;

@@ -429,7 +429,7 @@ const TwoFactorBody = ({
   );
 };
 
-/** Get paid / two-step verification (prototype tfOpen). */
+/** Get paid / two-step verification. */
 export const TwoFactorDialog = ({ studio }: { studio: StudioController }) => {
   const view = getTwoFactorView(studio);
 

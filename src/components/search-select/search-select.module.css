@@ -1,4 +1,4 @@
-/* Values verbatim from prototype SearchSelect.jsx (style object S). */
+/* SearchSelect styles. */
 .wrap {
   position: relative;
   font-family: inherit;
@@ -73,7 +73,7 @@
   border-bottom: 1px solid var(--border-subtle);
 }
 
-/* outline/box-shadow repeated on :focus-visible: inline in the prototype, above the global focus ring */
+/* outline/box-shadow repeated on :focus-visible so they win over the global focus ring */
 .search,
 .search:focus-visible {
   width: 100%;

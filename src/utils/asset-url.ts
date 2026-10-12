@@ -1,4 +1,4 @@
-// The prototype references images by relative path ("img/hero.jpg", "_ds_assets/logo-crimson.png"),
+// Pages reference images by relative path ("img/hero.jpg", "logo-crimson.png"),
 // often built at runtime ('img/' + name). Map those exact strings to Vite-hashed URLs.
 const assetModules = import.meta.glob<string>(
   "../assets/**/*.{jpg,jpeg,png,webp}",
@@ -16,7 +16,7 @@ const assetUrls = new Map(
   ]),
 );
 
-/** Resolve a prototype-relative asset path (e.g. "img/w160524.jpg") to its bundled URL. */
+/** Resolve a relative asset path (e.g. "img/w160524.jpg") to its bundled URL. */
 export const getAssetUrl = (prototypePath: string): string => {
   const url = assetUrls.get(prototypePath.replace(/^\.?\//, ""));
 
@@ -25,6 +25,6 @@ export const getAssetUrl = (prototypePath: string): string => {
   return url;
 };
 
-/** Like getAssetUrl, but passes through anything that is not a bundled prototype asset (absolute URLs, data URIs). */
+/** Like getAssetUrl, but passes through anything that is not a bundled asset (absolute URLs, data URIs). */
 export const resolveAssetUrl = (path: string): string =>
   assetUrls.get(path.replace(/^\.?\//, "")) ?? path;

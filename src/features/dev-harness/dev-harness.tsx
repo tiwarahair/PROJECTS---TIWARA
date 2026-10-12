@@ -638,7 +638,7 @@ const HARNESSES: Record<string, () => ReactNode> = {
         className={isWide ? styles.wideBox : styles.phoneBox}
         data-fx={fixture}
       >
-        {/* the prototype's dc-import host block (height auto) */}
+        {/* host block (height auto) */}
         <div data-dc-host="">
           <BusinessDetails {...props} />
         </div>
@@ -651,7 +651,7 @@ const HARNESSES: Record<string, () => ReactNode> = {
         className={isWide ? styles.wideBox : styles.phoneBox}
         data-fx={fixture}
       >
-        {/* the prototype's dc-import host block (height auto) */}
+        {/* host block (height auto) */}
         <div data-dc-host="">
           <PaymentPolicy {...props} />
         </div>
@@ -664,7 +664,7 @@ const HARNESSES: Record<string, () => ReactNode> = {
         className={isWide ? styles.wideAutoBox : styles.phoneAutoBox}
         data-fx={fixture}
       >
-        {/* the prototype's dc-import host block */}
+        {/* host block */}
         <div data-dc-host="">
           <AccountSettings {...props} />
         </div>
@@ -677,7 +677,7 @@ const HARNESSES: Record<string, () => ReactNode> = {
         className={isWide ? styles.earningsBox : styles.phoneAutoBox}
         data-fx={fixture}
       >
-        {/* the prototype's dc-import host block */}
+        {/* host block */}
         <div data-dc-host="">
           <Earnings {...props} />
         </div>
@@ -686,7 +686,7 @@ const HARNESSES: Record<string, () => ReactNode> = {
   "checkout-sheet": () =>
     CHECKOUT_SHEETS.map(({ fixture, props }) => (
       <div key={fixture} className={styles.sheetBox} data-fx={fixture}>
-        {/* the prototype's dc-import host block */}
+        {/* host block */}
         <div data-dc-host="">
           <CheckoutSheet {...props} />
         </div>
@@ -700,7 +700,7 @@ const HARNESSES: Record<string, () => ReactNode> = {
     )),
 };
 
-/** Dev-only: renders a component in every fixture state, mirroring the prototype harness page for diffing. */
+/** Dev-only: renders a component in every fixture state, for side-by-side diffing. */
 export const DevHarness = () => {
   const { component = "" } = useParams();
   const render = HARNESSES[component];

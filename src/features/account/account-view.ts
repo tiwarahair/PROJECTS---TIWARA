@@ -1,4 +1,4 @@
-// Derived values for the Account page (prototype Account.dc.html renderVals()).
+// Derived values for the Account page.
 import { stylists } from "../../data";
 import { money } from "../../utils/pricing";
 import { QUIZ_DAYS_AGO, SECTIONS } from "./account-data";

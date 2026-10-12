@@ -1,5 +1,5 @@
-// Studio's core actions (prototype Studio.dc.html: toastMsg, openSheet, closeSheet, openActs, openPage, leavePage,
-// checkDone, the 2FA flow, setStatus, blocked time, patchPast, rebookFrom, scrolling).
+// Studio's core actions: toasts, sheets, the action menu, pages, setup steps, the 2FA flow, booking status, blocked
+// time, past bookings, rebooking and scrolling.
 import { ICONS } from "./studio-data";
 import { durationToMinutes, timeToMinutes } from "./studio-format";
 import { getServiceDuration, getSteps, getWorkingHours } from "./studio-model";
@@ -17,9 +17,9 @@ import type {
 export interface StudioContext {
   getState: () => StudioState;
   setState: (patch: StudioPatch) => void;
-  /** Named timeouts (the prototype's this._tt, this._st …). */
+  /** Named timeouts. */
   timers: Record<string, number>;
-  /** Instance fields the prototype keeps on `this` (seen setup steps, the clash override, the last pointer type). */
+  /** Values kept between renders (seen setup steps, the clash override, the last pointer type). */
   memo: {
     seenDone?: ReturnType<typeof getSteps>;
     clashOk?: boolean;
@@ -57,7 +57,7 @@ export interface StudioContext {
 const clear = (timers: Record<string, number>, key: string) =>
   window.clearTimeout(timers[key]);
 
-/** The nearest scrolling ancestor, else the Studio body (prototype scroller). */
+/** The nearest scrolling ancestor, else the Studio body. */
 const getScroller = (from?: Element | null): Element | null => {
   let element = from?.parentElement ?? null;
 
@@ -677,7 +677,7 @@ export const createStudioActions = (context: StudioContext) => {
     );
   };
 
-  /** Bookings that ended an hour ago are marked done-but-unpaid (prototype autoComplete). */
+  /** Bookings that ended an hour ago are marked done-but-unpaid. */
   const autoComplete = () => {
     const state = getState();
     const now = new Date();

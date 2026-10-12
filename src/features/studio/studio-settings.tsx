@@ -21,7 +21,7 @@ const STROKE = {
   strokeLinejoin: "round",
 } as const;
 
-/** The row / nav icons (prototype icClock, icRules, … or a single path). */
+/** The row / nav icons (a named icon or a single path). */
 const SettingsGlyph = ({
   icon,
   path,
@@ -147,7 +147,7 @@ const EyeIcon = () => (
   </svg>
 );
 
-/** The narrow "More" tab: profile card and grouped settings rows (prototype Studio.dc.html lines 1103–1148). */
+/** The narrow "More" tab: profile card and grouped settings rows. */
 const SettingsRoot = ({
   studio,
   view,
@@ -236,7 +236,7 @@ const SettingsRoot = ({
       <div className={styles.logoRow}>
         <img
           className={styles.logo}
-          src={getAssetUrl("_ds_assets/logo-crimson.png")}
+          src={getAssetUrl("logo-crimson.png")}
           alt="Tiwára's House"
         />
       </div>
@@ -376,7 +376,7 @@ const HostSave = ({
   </button>
 );
 
-/** One settings page with the wide nav or the narrow back bar (prototype Studio.dc.html lines 1150–1442). */
+/** One settings page with the wide nav or the narrow back bar. */
 const SettingsFrame = ({
   studio,
   view,
@@ -479,7 +479,7 @@ const SettingsFrame = ({
                 />
               </div>
             )}
-            {/* AccountSettings stays mounted on every settings page (hidden when not an account page), as in the prototype */}
+            {/* AccountSettings stays mounted on every settings page (hidden when not an account page) */}
             <div
               className={joinClassNames(
                 styles.embedded,

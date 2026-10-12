@@ -79,7 +79,7 @@ const readWelcomeMessage = (): { message: string; pinned: boolean } | null => {
 };
 
 /**
- * "Welcome back, {first}" after log in / sign up (prototype tw-toast.js, loaded by Home, Search,
+ * "Welcome back, {first}" after log in / sign up (shown on Home, Search,
  * Stylist Profile and Booking). Reads ?twtoast= (pinned, boards) or sessionStorage tw_toast once on mount.
  */
 export const WelcomeToast = () => {

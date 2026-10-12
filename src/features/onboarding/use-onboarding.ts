@@ -123,7 +123,7 @@ const getStartMode = (
   return prefersDark ? "dark" : "light";
 };
 
-/** The prototype's componentDidMount setup, computed up front (start screen, saved progress, board, fixture, mode). */
+/** The initial state, computed up front (start screen, saved progress, board, fixture, mode). */
 const getStartState = (props: ResolvedProps): OnboardingState => {
   const state: OnboardingState = {
     ...INITIAL_STATE,
@@ -192,7 +192,7 @@ const getStartState = (props: ResolvedProps): OnboardingState => {
       state.audience = "customer";
   }
 
-  // fixtures start from the blank form, not the saved / board one (the prototype read this.state.f before setState)
+  // fixtures start from the blank form, not the saved / board one
   if (props.fixture && props.fixture !== "none")
     Object.assign(state, getFixturePatch(props.fixture, INITIAL_STATE.form));
 
@@ -207,7 +207,7 @@ const getStartState = (props: ResolvedProps): OnboardingState => {
   return state;
 };
 
-/** Onboarding state and actions (prototype Onboarding.dc.html class Component). */
+/** Onboarding state and actions. */
 export const useOnboarding = (props: OnboardingProps) => {
   const [resolved] = useState(() => resolveProps(props));
   const [state, setRawState] = useState(() => getStartState(resolved));

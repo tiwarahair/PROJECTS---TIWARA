@@ -1,4 +1,4 @@
-/* CheckoutSheet (prototype CheckoutSheet.dc.html), inline styles verbatim */
+/* CheckoutSheet flow styles. */
 
 .viewGap26 {
   padding: 4px 24px 32px;
@@ -943,7 +943,7 @@
   color: var(--neutral-600);
 }
 
-/* runtime states: badge colours come from the tone table (prototype T); panel tone, r.fg, act(), adjFg, c.sfg */
+/* runtime states: badge colours come from the tone table; panel tone, row colours, actions and adjustments */
 .badge {
   background: var(--badge-bg);
   color: var(--badge-fg);

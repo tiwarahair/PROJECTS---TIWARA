@@ -17,7 +17,7 @@ import shared from "./checkout-sheet.module.css";
 export type { CheckoutSheetProps } from "./use-checkout";
 
 /**
- * Studio → booking checkout (prototype CheckoutSheet.dc.html): booking detail, items with price adjustments, payment
+ * Studio → booking checkout: booking detail, items with price adjustments, payment
  * method, tip and review, then done / receipt / resend / refund, plus the no-show fee flows.
  */
 export const CheckoutSheet = (props: CheckoutSheetProps) => {

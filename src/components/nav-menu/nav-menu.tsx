@@ -36,7 +36,7 @@ export interface NavMenuProps {
 }
 
 /**
- * A pop-up menu anchored under its trigger (prototype tw-fav.js F.openMenu): centred on the trigger and kept on
+ * A pop-up menu anchored under its trigger: centred on the trigger and kept on
  * screen, closes on outside click, resize, Tab and Escape, and moves focus with the arrow / Home / End keys.
  */
 export const NavMenu = ({
@@ -117,7 +117,7 @@ export const NavMenu = ({
     };
   }, [anchor, pinned, onClose]);
 
-  // keyboard handled on the document (capture) like the prototype, so a pinned menu without focus still responds
+  // keyboard handled on the document (capture), so a pinned menu without focus still responds
   useEffect(() => {
     const focusItem = (index: number) => itemRefs.current[index]?.focus();
 

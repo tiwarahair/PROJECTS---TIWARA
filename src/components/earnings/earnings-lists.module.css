@@ -1,4 +1,4 @@
-/* Earnings (prototype Earnings.dc.html), inline styles verbatim */
+/* Earnings transactions and payouts list styles. */
 
 .emptyTitle {
   font-size: 15px;
@@ -366,7 +366,7 @@
   white-space: nowrap;
 }
 
-/* runtime states (prototype txCols / poCols, t.rowBg, t.ac, stBg / stFg, subDisp / toDisp) */
+/* runtime states (columns, row background / accent, status colours, sub-line display) */
 .tableHead,
 .txRow {
   grid-template-columns:
@@ -398,7 +398,7 @@
   color: var(--text-primary);
 }
 
-/* the status colours come from the status table (prototype STT) */
+/* the status colours come from the status table */
 .statusTag,
 .statusSmall {
   background: var(--st-bg);

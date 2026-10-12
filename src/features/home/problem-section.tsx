@@ -7,7 +7,7 @@ import page from "./home-page.module.css";
 import styles from "./problem-section.module.css";
 import { useChatSequence } from "./use-chat-sequence";
 
-/** "Tired of the booking back-and-forth?" with the animated chat phone (prototype Home "The problem"). */
+/** "Tired of the booking back-and-forth?" with the animated chat phone. */
 export const ProblemSection = () => {
   const phoneRef = useRef<HTMLDivElement>(null);
   const listRef = useRef<HTMLDivElement>(null);

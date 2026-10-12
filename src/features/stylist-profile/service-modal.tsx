@@ -14,7 +14,7 @@ export const ServiceModal = ({
   service: { name, description, customisation, price, duration, href },
   onClose,
 }: ServiceModalProps) => (
-  // prototype: clicking anywhere on the scrim (panel included) closes it
+  // clicking anywhere on the scrim (panel included) closes it
   // eslint-disable-next-line jsx-a11y/click-events-have-key-events, jsx-a11y/no-static-element-interactions
   <div
     onClick={onClose}

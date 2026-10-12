@@ -26,8 +26,8 @@ const getTopmost = (elements: HTMLElement[]): HTMLElement => {
 };
 
 /**
- * Home's GSAP layer (prototype initGsap, setupParallax, setupWordReveal, setupHeroCrop): hero intro, per-section
- * [data-rv] reveals, [data-plx] image drift and the scrubbed word reveal, with the prototype's safety nets.
+ * Home's GSAP layer: hero intro, per-section [data-rv] reveals, [data-plx] image drift and the scrubbed word
+ * reveal, with safety nets.
  * Always full motion: the reduced-motion toggle was removed.
  */
 export const useHomeMotion = (

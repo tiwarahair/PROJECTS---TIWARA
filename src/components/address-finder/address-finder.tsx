@@ -117,7 +117,7 @@ const SearchIcon = ({
 
 /**
  * The ONE address field (Booking, Onboarding, BusinessDetails, TaxDetailsForm): finder with suggestions →
- * summary card + Edit → manual fields. Ported from prototype AddressFinder.dc.html.
+ * summary card + Edit → manual fields.
  */
 export const AddressFinder = ({
   label = "Address or postcode",

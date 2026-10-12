@@ -393,7 +393,7 @@ export const SettingsPayouts = ({ props }: PageProps) => {
             </>
           )}
           {taxEditing && (
-            // the prototype's dc-import host block
+            // host block for the embedded form
             <div data-dc-host="">
               <TaxDetailsForm
                 mode="settings"

@@ -27,7 +27,7 @@ import styles from "./account-page.module.css";
 export type AccountPageProps = AccountProps;
 
 /**
- * The customer account, route "/account" (prototype Account.dc.html): side nav (wide) or section list (narrow),
+ * The customer account, route "/account": side nav (wide) or section list (narrow),
  * eleven sections chosen by ?section= (legacy ?tab=), dialogs, toast, and the logged-out / deleted gate.
  */
 export const AccountPage = (props: AccountPageProps) => {

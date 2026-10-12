@@ -111,7 +111,7 @@ const INITIAL_STATE: EarningsState = {
   width: 0,
 };
 
-/** Earnings state and actions (prototype class Component: state, componentDidMount, toastMsg, drawers, export). */
+/** Earnings state and actions. */
 export const useEarnings = (props: EarningsProps) => {
   const { scenario = "default", layout = "auto" } = props;
   const [state, setRawState] = useState(INITIAL_STATE);
@@ -129,7 +129,7 @@ export const useEarnings = (props: EarningsProps) => {
       ...(typeof patch === "function" ? patch(current) : patch),
     }));
 
-  // rebuilt only when the scenario or the day changes (prototype build() cache)
+  // rebuilt only when the scenario or the day changes
   const getLedger = (): Ledger => {
     const key = getLedgerKey(scenario);
 
@@ -318,7 +318,7 @@ export const useEarnings = (props: EarningsProps) => {
       window.clearTimeout(pending.drawer);
       window.clearTimeout(pending.exportOut);
     };
-    // mount only (prototype componentDidMount)
+    // mount only
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 

@@ -62,7 +62,7 @@ export const ErrorLine = ({
   </div>
 );
 
-/** Grid-rows disclosure (prototype dis()). */
+/** Grid-rows disclosure. */
 export const Reveal = ({
   open,
   children,
@@ -82,7 +82,7 @@ export const Reveal = ({
   </div>
 );
 
-/** Radio ring + dot (prototype tile() ring / dot). */
+/** Radio ring + dot. */
 export const Ring = ({
   className,
   isOn,
@@ -102,7 +102,7 @@ export const Ring = ({
   </span>
 );
 
-/** Prototype tile() border + background. */
+/** Tile border + background. */
 export const getTileClass = (isOn: boolean) =>
   isOn ? styles.tileOn : styles.tileOff;
 export const getTextClass = (isOn: boolean) =>
@@ -264,7 +264,7 @@ export const FeeBlock = ({
                   {`Keep the deposit (${depositText}%)`}
                 </span>
               </button>
-              {/* the prototype's radio is a focusable div because it contains the percentage input */}
+              {/* the radio is a focusable div because it contains the percentage input */}
               <div
                 className={joinClassNames(
                   styles.pctOption,

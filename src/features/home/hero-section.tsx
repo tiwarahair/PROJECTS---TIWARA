@@ -5,7 +5,7 @@ import { ArrowIcon } from "./arrow-icon";
 import page from "./home-page.module.css";
 import styles from "./hero-section.module.css";
 
-/** Full-bleed hero with the flowing "Book now" CTA (prototype Home "Hero"). */
+/** Full-bleed hero with the flowing "Book now" CTA. */
 export const HeroSection = () => (
   <section
     id="hero"

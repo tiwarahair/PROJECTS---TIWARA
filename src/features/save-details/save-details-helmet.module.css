@@ -1,6 +1,5 @@
 /*
- * Save Details <helmet> <style> rules, verbatim values (prototype Save Details.dc.html lines 20–30), in the page
- * layer, scoped to html.save-details-page (set while mounted). Lines identical to the base layer are omitted; the
+ * Save Details page-wide rules, in the page layer, scoped to html.save-details-page (set while mounted). Lines identical to the base layer are omitted; the
  * pwIn keyframes and their reduced-motion rule live with PasswordMeter.
  */
 @layer page {

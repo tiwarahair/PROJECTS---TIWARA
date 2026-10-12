@@ -95,7 +95,7 @@ export const FilterSheet = ({
   );
 };
 
-/** The wide calendar's popover for a tapped slot or a blocked-time tile (prototype pop*). */
+/** The wide calendar's popover for a tapped slot or a blocked-time tile. */
 export const SlotPopover = ({ studio }: { studio: StudioController }) => {
   const { state, setState, actions } = studio;
   const { pop } = state;
@@ -243,7 +243,7 @@ export const SlotPopover = ({ studio }: { studio: StudioController }) => {
   );
 };
 
-/** The narrow calendar's sheet for a tapped slot (prototype qa*). */
+/** The narrow calendar's sheet for a tapped slot. */
 export const QuickActions = ({
   studio,
   view,

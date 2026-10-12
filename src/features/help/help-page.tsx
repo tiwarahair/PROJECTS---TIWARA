@@ -19,7 +19,7 @@ const LOGIN_HREF = `/login?screen=cust-email&return=${encodeURIComponent("/help"
 const HEART_PATH =
   "M12 20.5s-7.5-4.6-9.2-9.4C1.6 7.6 3.9 4.5 7.2 4.5c2 0 3.6 1.1 4.8 2.8 1.2-1.7 2.8-2.8 4.8-2.8 3.3 0 5.6 3.1 4.4 6.6-1.7 4.8-9.2 9.4-9.2 9.4z";
 
-/** Help & support, route "/help" (prototype Help.dc.html): FAQs (one open at a time) and the contact email. */
+/** Help & support, route "/help": FAQs (one open at a time) and the contact email. */
 export const HelpPage = () => {
   const [menuOpen, setMenuOpen] = useState(false);
   const [openFaq, setOpenFaq] = useState(-1);
@@ -49,7 +49,7 @@ export const HelpPage = () => {
           <Link className={styles.logoLink} to="/">
             <img
               className={styles.logo}
-              src={getAssetUrl("_ds_assets/logo-crimson.png")}
+              src={getAssetUrl("logo-crimson.png")}
               alt="Tiwára's House"
             />
           </Link>

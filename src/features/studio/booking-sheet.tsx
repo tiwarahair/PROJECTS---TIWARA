@@ -690,7 +690,7 @@ const PaymentStep = ({ view }: { view: BookingSheetView }) => {
   );
 };
 
-/** The booking sheet's body for every step (prototype Studio.dc.html lines 1819–2370). */
+/** The booking sheet's body for every step. */
 export const BookingSheetBody = ({
   studio,
   view,
@@ -909,7 +909,7 @@ export const BookingSheetAfter = ({
   );
 };
 
-/** The embedded checkout over the booking sheet (prototype ckOn, "Checkout"). */
+/** The embedded checkout over the booking sheet. */
 export const BookingCheckout = ({
   studio,
   view,
@@ -927,7 +927,7 @@ export const BookingCheckout = ({
   />
 );
 
-/** The add-on dialog over Edit service or New booking (rendered with the other dialogs, as in the prototype). */
+/** The add-on dialog over Edit service or New booking (rendered with the other dialogs). */
 export const BookingAddonDialog = ({
   studio,
 }: {

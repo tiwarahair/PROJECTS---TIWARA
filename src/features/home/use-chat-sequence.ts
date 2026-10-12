@@ -9,8 +9,8 @@ export interface ChatSequence {
 }
 
 /**
- * Plays the "booking back-and-forth" chat once the phone scrolls into view, then loops
- * (prototype Home startChatWatch / playChat). Always full motion: the reduced-motion toggle was removed.
+ * Plays the "booking back-and-forth" chat once the phone scrolls into view, then loops.
+ * Always full motion: the reduced-motion toggle was removed.
  */
 export const useChatSequence = (
   phoneRef: RefObject<HTMLElement | null>,

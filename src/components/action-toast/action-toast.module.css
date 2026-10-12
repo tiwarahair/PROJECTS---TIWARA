@@ -1,4 +1,4 @@
-/* Ink pill toast, values verbatim from prototype tw-fav.js F.toast(). */
+/* Ink pill toast. */
 .toast {
   position: fixed;
   left: 50%;
@@ -43,7 +43,7 @@
   transform: translate(-50%, 12px);
 }
 
-/* :hover repeats colour and text-decoration so the global a:hover rule cannot override them (inline style in the prototype). */
+/* :hover repeats colour and text-decoration so the global a:hover rule cannot override them. */
 .action,
 .action:hover {
   border: none;

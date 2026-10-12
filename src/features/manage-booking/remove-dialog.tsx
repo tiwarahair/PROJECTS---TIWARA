@@ -12,7 +12,7 @@ export const RemoveDialog = ({
   onCancel,
   onRemove,
 }: RemoveDialogProps) => (
-  // prototype: the scrim cancels on click; the panel stops the click
+  // the scrim cancels on click; the panel stops the click
   // eslint-disable-next-line jsx-a11y/click-events-have-key-events, jsx-a11y/no-static-element-interactions
   <div onClick={onCancel} data-mb-anim="1" className={styles.scrim}>
     {/* eslint-disable-next-line jsx-a11y/click-events-have-key-events, jsx-a11y/no-noninteractive-element-interactions */}

@@ -1,4 +1,4 @@
-// State and behaviour of the one address field, ported from prototype AddressFinder.dc.html (class Component).
+// State and behaviour of the one address field.
 import { useCallback, useEffect, useRef, useState } from "react";
 import type { ChangeEvent, KeyboardEvent, RefObject } from "react";
 import {
@@ -229,7 +229,7 @@ export const useAddressFinder = ({
       ref.current?.focus();
     }, 30);
 
-  // fixtures that seed an address report it once, like the prototype's componentDidMount
+  // fixtures that seed an address report it once, on mount
   useEffect(() => {
     if (fixture === "summary" || fixture === "manual")
       emit(state.draft, fixture === "manual" ? "manual" : "pick");

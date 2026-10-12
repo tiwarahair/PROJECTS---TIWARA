@@ -71,7 +71,7 @@ interface FieldProps {
   isCode?: boolean;
 }
 
-/** One labelled text field with its error (prototype fld()). */
+/** One labelled text field with its error. */
 const Field = ({
   id,
   label,
@@ -122,7 +122,7 @@ const Field = ({
 };
 
 /**
- * Legal and tax details before Stripe payouts (prototype TaxDetailsForm.dc.html, embedded in Studio):
+ * Legal and tax details before Stripe payouts (embedded in Studio):
  * sole trader (legal name, date of birth, home address, NI number) or limited company (name, number,
  * registered office).
  */
@@ -435,7 +435,7 @@ export const TaxDetailsForm = ({
         )}
         {!address.same && (
           <div className={styles.finder}>
-            {/* the prototype's dc-import host block */}
+            {/* host block for the embedded address finder */}
             <div data-dc-host="">
               <AddressFinder
                 idPrefix={`${uid}-${addressKey}`}

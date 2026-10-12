@@ -1,4 +1,4 @@
-/* Values verbatim from prototype Search.dc.html (inline styles; style-hover/active as !important like the prototype runtime). */
+/* Search page styles; hover/active states use !important so they win over the base rules. */
 
 .nav {
   position: sticky;
@@ -46,7 +46,7 @@
   width: 100%;
   margin: 0 auto;
   box-shadow: 0px 6px 20px 0px rgba(26, 23, 20, 0.13);
-  /* renderVals pillMax */
+  /* pill max width, set at runtime */
   max-width: var(--pill-max);
 }
 

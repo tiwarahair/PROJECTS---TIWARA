@@ -15,7 +15,7 @@ interface SuggestionButtonProps {
   onHover: (index: number) => void;
 }
 
-/** One What/Where suggestion: icon or avatar, label with the typed text in bold, optional sub-line (prototype rowVm). */
+/** One What/Where suggestion: icon or avatar, label with the typed text in bold, optional sub-line. */
 export const SuggestionButton = ({
   view: { row, index, before, match, after, isActive, isOn },
   onPick,
@@ -48,7 +48,7 @@ export const SuggestionButton = ({
           strokeWidth="1.7"
           strokeLinecap="round"
           strokeLinejoin="round"
-          // prototype icon markup (static strings from SEARCH_ICONS)
+          // static icon markup from SEARCH_ICONS
           dangerouslySetInnerHTML={{ __html: row.icon }}
         ></svg>
       </span>

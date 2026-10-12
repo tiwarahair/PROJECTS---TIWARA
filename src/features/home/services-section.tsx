@@ -5,7 +5,7 @@ import { joinClassNames } from "../../utils/class-names";
 import page from "./home-page.module.css";
 import styles from "./services-section.module.css";
 
-/** Numbered service-group list with hover photos (prototype Home "Services"; hidden unless showServices). */
+/** Numbered service-group list with hover photos (hidden unless showServices). */
 export const ServicesSection = () => (
   <section
     id="services"

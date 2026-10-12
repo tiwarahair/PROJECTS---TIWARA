@@ -1,4 +1,4 @@
-/* Values verbatim from prototype Stylist Profile.dc.html (inline styles; style-hover/active as !important like the prototype runtime). */
+/* Stylist Profile page styles; hover/active states use !important so they win over the base rules. */
 
 .wrap {
   max-width: 1040px;
@@ -112,7 +112,7 @@
   transform: scale(0.96) !important;
 }
 
-/* heroStyle (renderVals); the cover URL arrives as --hero-image */
+/* cover image; the cover URL arrives as --hero-image */
 .hero {
   width: 100%;
   aspect-ratio: 4 / 3;

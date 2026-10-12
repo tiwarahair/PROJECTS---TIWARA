@@ -1,4 +1,4 @@
-// Client account saved addresses (Account → Saved addresses, Booking for mobile stylists), ported from data.js.
+// Client account saved addresses (Account → Saved addresses, Booking for mobile stylists).
 // Board/fixture pages never persist; ?addrs=none = empty.
 import { seedAddresses } from "../data";
 import type { SavedAddress } from "../types/address";

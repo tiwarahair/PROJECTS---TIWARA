@@ -19,7 +19,7 @@ export const PortfolioLightbox = ({
   } as CSSProperties;
 
   return (
-    // prototype: the scrim closes on click; Escape is handled by the window key listener
+    // the scrim closes on click; Escape is handled by the window key listener
     // eslint-disable-next-line jsx-a11y/click-events-have-key-events, jsx-a11y/no-static-element-interactions
     <div
       onClick={close}

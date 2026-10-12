@@ -1,4 +1,4 @@
-/* Mirrors each design_system_source .card.html so the ported components can be diffed against them. */
+/* Mirrors each design_system_source .card.html so the components can be diffed against them. */
 .actionsBody {
   margin: 0;
   background: var(--neutral-50);

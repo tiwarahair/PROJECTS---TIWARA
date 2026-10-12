@@ -31,7 +31,7 @@ const getIsHidden = (
 };
 
 /**
- * Scroll-driven nav and page background (prototype Home _onScroll): the nav hides on the way down and returns
+ * Scroll-driven nav and page background: the nav hides on the way down and returns
  * on the way up, turns solid past 40px, follows the data-bg of the section under it, and the page background
  * cross-fades to the cream section in the middle of the viewport.
  */

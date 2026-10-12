@@ -17,7 +17,7 @@ const TIP_CHOICES: [TipChoice, string][] = [
   ["custom", "Custom"],
 ];
 
-/** Chip toggle (prototype chip()). */
+/** Chip toggle. */
 export const Chip = ({
   isOn,
   className,
@@ -38,7 +38,7 @@ export const Chip = ({
   </button>
 );
 
-/** Radio ring and dot (prototype tile() ring / dot). */
+/** Radio ring and dot. */
 export const RadioMark = ({
   isOn,
   className,

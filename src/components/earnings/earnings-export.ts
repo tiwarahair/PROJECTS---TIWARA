@@ -1,4 +1,4 @@
-// Earnings export (prototype Earnings.dc.html doExport): a CSV of the transactions, or a printable monthly statement.
+// Earnings export: a CSV of the transactions, or a printable monthly statement.
 import {
   formatGbp,
   formatTime,
@@ -102,7 +102,7 @@ export interface StatementOptions {
   bankLabel?: string;
 }
 
-/** The monthly statement as a printable HTML document (prototype doExport, PDF branch). */
+/** The monthly statement as a printable HTML document (the PDF export). */
 export const getStatementHtml = ({
   range,
   transactions,

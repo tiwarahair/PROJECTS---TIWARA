@@ -357,7 +357,7 @@ const getInitialState = ({
   return state;
 };
 
-/** Account state and actions (prototype Account.dc.html class Component). */
+/** Account state and actions. */
 export const useAccount = (props: AccountProps) => {
   const [state, setRawState] = useState(() => getInitialState(props));
   const stateRef = useRef(state);
@@ -426,7 +426,7 @@ export const useAccount = (props: AccountProps) => {
     (preferred || elements[1] || elements[0] || dialog).focus();
   }, [refs]);
 
-  /** Focus after the render settles (prototype fx()). */
+  /** Focus after the render settles. */
   const focusLater = useCallback(
     (target: string) => {
       window.setTimeout(() => {

@@ -84,7 +84,7 @@ export const ProfileCover = ({
         </div>
       )}
       <div className={joinClassNames(helmet.pfCw, styles.coverWrap)}>
-        {/* prototype: a role="img" div that toggles the overlay buttons on tap (mobile) */}
+        {/* a role="img" div that toggles the overlay buttons on tap (mobile) */}
         {/* eslint-disable-next-line jsx-a11y/click-events-have-key-events, jsx-a11y/no-noninteractive-element-interactions */}
         <div
           ref={heroRef}

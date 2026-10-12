@@ -1,4 +1,4 @@
-// Date & time picker model, ported from prototype Search baseVals (calendar cells, quick days, time pills, labels).
+// Date & time picker model: calendar cells, quick days, time pills and labels.
 import type { SearchState } from "./search-state";
 
 export const TIMES = [
@@ -121,7 +121,7 @@ export const getDateLabel = (state: SearchState): string =>
       })
     : "Any date") + (state.time !== "any" ? ` · ${getTimeLabel(state)}` : "");
 
-/** Mobile summary date label (prototype baseVals mobRows[2].label). */
+/** Mobile summary date label. */
 export const getMobileDateLabel = ({ query }: SearchState): string =>
   query.date
     ? new Date(`${query.date}T00:00:00`).toLocaleDateString("en-GB", {

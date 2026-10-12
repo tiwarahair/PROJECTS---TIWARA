@@ -1,5 +1,4 @@
-/* Manage categories and the add-on sheet — verbatim values from Studio.dc.html lines 3063–3169 and the add-on
-   footer (3410–3414). */
+/* Manage categories, the add-on sheet and its footer. */
 
 .cats {
   display: flex;

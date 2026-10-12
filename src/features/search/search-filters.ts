@@ -1,4 +1,4 @@
-// Filter helpers shared by the desktop filter bar and the mobile filters sheet (prototype renderVals filters).
+// Filter helpers shared by the desktop filter bar and the mobile filters sheet.
 import type { SortKey, Venue } from "./search-state";
 
 export const VENUES: Venue[] = ["Salon", "Home-based", "Mobile"];

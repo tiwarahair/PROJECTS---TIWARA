@@ -105,7 +105,7 @@ export const Section = ({
   </section>
 );
 
-/** Grid-rows disclosure (prototype dis()). */
+/** Grid-rows disclosure. */
 export const Reveal = ({
   open,
   children,
@@ -244,7 +244,7 @@ export const LocationCard = ({
   <div className={styles.card}>
     <Reveal open={type !== "mobile"}>
       <div className={styles.stack}>
-        {/* the prototype's dc-import host block */}
+        {/* host block for the embedded address finder */}
         <div data-dc-host="">
           <AddressFinder
             idPrefix={finderId}

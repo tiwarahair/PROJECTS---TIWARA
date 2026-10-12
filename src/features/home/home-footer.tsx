@@ -68,7 +68,7 @@ const SOCIAL_LINKS = [
   },
 ];
 
-/** Ink footer (prototype Home "Footer"). */
+/** Ink footer. */
 export const HomeFooter = () => (
   <footer data-screen-label="Footer" className={styles.footer}>
     <div className={styles.inner}>
@@ -76,7 +76,7 @@ export const HomeFooter = () => (
         <div className={styles.brand}>
           <a href="#" aria-label="Back to top" className={styles.logoLink}>
             <img
-              src={getAssetUrl("_ds_assets/logo-cream.png")}
+              src={getAssetUrl("logo-cream.png")}
               alt="Tiwára's House"
               className={styles.logo}
             />

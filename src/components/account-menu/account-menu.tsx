@@ -33,7 +33,7 @@ export interface AccountMenuProps {
   onClose: (refocus: boolean) => void;
 }
 
-/** The header account menu (prototype tw-fav.js F.openMenu): name, account sections, Log out. */
+/** The header account menu: name, account sections, Log out. */
 export const AccountMenu = ({ anchor, pinned, onClose }: AccountMenuProps) => {
   const dispatch = useAppDispatch();
   const navigate = useNavigate();

@@ -1,4 +1,4 @@
-// PaymentPolicy state, validation and save-bar summary (prototype PaymentPolicy.dc.html: base, key, init, renderVals).
+// PaymentPolicy state, validation and save-bar summary.
 import type { Policy, PolicyMode } from "../../types/policy";
 
 export type PolicyPreset =
@@ -61,7 +61,7 @@ const getBasePolicy = (): PolicyFields => ({
   extras: [],
 });
 
-/** Compares saved and current settings (prototype key()). */
+/** Compares saved and current settings. */
 export const getPolicyKey = (state: PolicyFields): string =>
   JSON.stringify([
     state.mode,

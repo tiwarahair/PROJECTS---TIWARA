@@ -1,4 +1,4 @@
-// Booking fee, money formatting and the client-facing policy lines, ported from data.js.
+// Booking fee, money formatting and the client-facing policy lines.
 // policyLines is the ONE client-facing builder (Studio preview and Booking Review/Pay/Confirmation).
 import { policyIcons } from "../data";
 import type { Policy, PolicyFee, PolicyMode } from "../types/policy";

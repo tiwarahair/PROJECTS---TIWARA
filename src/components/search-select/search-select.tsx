@@ -41,7 +41,7 @@ const Dot = ({ colour }: { colour: string }) => (
   />
 );
 
-/** Searchable select used by the Studio service wizard. Ported from prototype SearchSelect.jsx. */
+/** Searchable select used by the Studio service wizard. */
 export const SearchSelect = ({
   options = [],
   value = "",
@@ -98,7 +98,7 @@ export const SearchSelect = ({
     };
   }, [isOpen, measure]);
 
-  // keyed on isOpen only, as in the prototype: on the very first open the panel waits for its
+  // keyed on isOpen only: on the very first open the panel waits for its
   // measured rect, so the input is not mounted yet and focus stays on the trigger
   useEffect(() => {
     if (isOpen) inputRef.current?.focus();

@@ -12,7 +12,7 @@ export type AddonDialogView = ReturnType<typeof getAddonDialog> & {
   save: () => void;
 };
 
-/** "Already uses this phone / email" (prototype dup notice). */
+/** "Already uses this phone / email". */
 export const DuplicateNotice = ({ duplicate }: { duplicate: DuplicateView }) =>
   duplicate.isOn ? (
     <div className={styles.duplicate} role="alert">
@@ -27,7 +27,7 @@ export const DuplicateNotice = ({ duplicate }: { duplicate: DuplicateView }) =>
     </div>
   ) : null;
 
-/** Edits one add-on for this booking only (prototype esAddon dialog). */
+/** Edits one add-on for this booking only. */
 export const AddonEditDialog = ({
   studio,
   dialog,
@@ -184,7 +184,7 @@ export const AddonEditDialog = ({
   );
 };
 
-/** "Add a new client" from the booking's change-client step (prototype nc). */
+/** "Add a new client" from the booking's change-client step. */
 export const NewClientDialog = ({ studio }: { studio: StudioController }) => {
   const { state, setState, isWide, actions, context } = studio;
   const draft = state.newClient;

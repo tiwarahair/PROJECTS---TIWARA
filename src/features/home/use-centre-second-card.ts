@@ -1,7 +1,7 @@
 import { useEffect } from "react";
 import type { RefObject } from "react";
 
-/** On load, scroll the stylist row so the second card is centred (prototype Home centreSty). */
+/** On load, scroll the stylist row so the second card is centred. */
 export const useCentreSecondCard = (
   rowRef: RefObject<HTMLElement | null>,
   cardSelector: string,

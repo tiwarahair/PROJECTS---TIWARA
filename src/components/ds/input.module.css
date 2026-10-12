@@ -1,4 +1,4 @@
-/* Values verbatim from design_system_source/components/forms/Input.jsx */
+/* Input styles. */
 .field {
   display: block;
   font-family: var(--font-body);
@@ -26,7 +26,7 @@
   margin-top: 5px;
 }
 
-/* outline:none repeated on :focus-visible: inline in the prototype, it beat the global focus ring */
+/* outline:none repeated on :focus-visible so it wins over the global focus ring */
 .control,
 .control:focus-visible {
   font-family: var(--font-body);

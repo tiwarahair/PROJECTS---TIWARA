@@ -75,7 +75,7 @@ const getMeta = (
   return [...serviceNames, fromText].filter(Boolean).join(" · ");
 };
 
-/** Photo-led stylist card with a favourite heart, used by Home, Search and Account. Ported from StylistCard.dc.html. */
+/** Photo-led stylist card with a favourite heart, used by Home, Search and Account. */
 export const StylistCard = ({
   href = "#",
   cover = "",
@@ -108,7 +108,7 @@ export const StylistCard = ({
   };
 
   return (
-    // plain block wrapper = the prototype runtime's .sc-host: the card's height:100% resolves against it (auto)
+    // plain block wrapper: the card's height:100% resolves against it (auto)
     <div data-dc-host="">
       <div className={styles.card}>
         <CardLink href={href} className={styles.coverLink}>

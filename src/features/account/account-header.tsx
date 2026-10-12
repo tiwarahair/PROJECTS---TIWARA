@@ -49,7 +49,7 @@ export const AccountHeader = ({
         <Link className={styles.logoLink} to="/">
           <img
             className={styles.logo}
-            src={getAssetUrl("_ds_assets/logo-crimson.png")}
+            src={getAssetUrl("logo-crimson.png")}
             alt="Tiwára's House"
           />
         </Link>

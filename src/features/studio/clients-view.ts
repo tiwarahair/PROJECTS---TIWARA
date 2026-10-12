@@ -1,4 +1,4 @@
-// Studio → Clients values (prototype clientVals, cliStats, dupVals): the list, the profile and the add / edit sheet.
+// Studio → Clients values: the list, the profile and the add / edit sheet.
 import type { ChangeEvent, MouseEvent } from "react";
 import { PAST_TONE } from "./studio-data";
 import {
@@ -31,7 +31,7 @@ const CONTACT_ICONS = {
   mail: "M4 4h16a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2zM22 6l-10 7L2 6",
 };
 
-/** A client's bookings, past visits and money (prototype cliStats). */
+/** A client's bookings, past visits and money. */
 export const getClientStats = (
   state: StudioState,
   id: string | null,
@@ -107,7 +107,7 @@ export interface DuplicateView {
   onSelect?: () => void;
 }
 
-/** The "already uses this phone / email" notice (prototype dupVals). */
+/** The "already uses this phone / email" notice. */
 export const getDuplicateView = (
   hit: DuplicateHit | null,
   cta: string,

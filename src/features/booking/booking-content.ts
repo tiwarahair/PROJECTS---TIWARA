@@ -1,5 +1,5 @@
 // Booking copy and fixed content: the Privacy / Terms sheets, the size guide, policy sentences and the
-// AI preview photo pool (prototype Booking renderVals).
+// AI preview photo pool.
 import type { PolicyMode } from "../../types/policy";
 
 export interface LegalDocumentSection {
@@ -124,8 +124,8 @@ export const getCancelSentence = (mode: PolicyMode, windowText: string) =>
     ? `Please cancel or reschedule at least ${windowText} before your appointment.`
     : `Free cancellation up to ${windowText} before your appointment.`;
 
-// AI preview: knotless braid renders by length and colour. The prototype also pooled five reference photos
-// from uploads/ (not in the handoff bundle) for other braids; dropped, so the preview is knotless-only.
+// AI preview: knotless braid renders by length and colour. There are no reference photos for other braids,
+// so the preview is knotless-only.
 const AI_KEYS = [
   "bob-1b",
   "bob-30",

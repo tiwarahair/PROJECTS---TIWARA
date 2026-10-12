@@ -1,5 +1,4 @@
-// TaxDetailsForm state, validation and output (prototype TaxDetailsForm.dc.html: biz, blankAddr, init, fmtNi, fmtPc,
-// pcOk, akey, errors, submit).
+// TaxDetailsForm state, validation and output.
 import { formatPostcode, isPostcodeValid } from "../../utils/address";
 
 export type TaxKind = "sole" | "ltd";
@@ -76,7 +75,7 @@ export interface TaxState {
   companyNumber: string;
   home: TaxAddressState;
   registered: TaxAddressState;
-  /** Fields blurred or submitted (the prototype also marks "middle", which has no error). */
+  /** Fields blurred or submitted ("middle" is also marked, though it has no error). */
   touched: Partial<Record<TaxErrorKey | "middle", 1>>;
 }
 
@@ -334,7 +333,7 @@ export const getTaxErrors = (
 
 export const getTouchedAll = (): TaxState["touched"] => ({ ...ALL_TOUCHED });
 
-/** The submitted details (prototype submit()'s `out`). */
+/** The submitted details. */
 export const getTaxOutput = (
   state: TaxState,
   legalName: string,

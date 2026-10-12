@@ -1,5 +1,5 @@
 /*
- * Email Change Notice <helmet> <style> rule that differs from the base layer (prototype line 15): the page behind
+ * Email Change Notice page-wide rule that differs from the base layer: the page behind
  * the mock email. Scoped to html.email-notice-page (set while mounted).
  */
 @layer page {

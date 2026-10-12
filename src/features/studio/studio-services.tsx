@@ -199,7 +199,7 @@ const Groups = ({
     </div>
   ));
 
-/** Studio → Services and Add-ons (prototype Studio.dc.html lines 722–904). */
+/** Studio → Services and Add-ons. */
 export const StudioServices = ({ studio }: { studio: StudioController }) => {
   const { state, setState, isWide, isDesktop, serviceActions } = studio;
   const view = getServicesView(studio);

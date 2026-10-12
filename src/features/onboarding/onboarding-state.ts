@@ -1,5 +1,4 @@
-// Onboarding state, props, ?fixture= board states and validation (prototype Onboarding.dc.html: state, pp,
-// fixture(), errors(), backOf(), pwWho(), pwCheck()).
+// Onboarding state, props, ?fixture= board states and validation.
 import { checkPassword } from "../../utils/password";
 import type { PasswordCheck } from "../../utils/password";
 import { isPostcodeValid } from "../../utils/address";
@@ -54,7 +53,7 @@ const URL_BOOLEANS = new Map([
   ["false", false],
 ]);
 
-/** Props overlaid with every URL query param ("true"/"false" become booleans), like the prototype's pp. */
+/** Props overlaid with every URL query param ("true"/"false" become booleans). */
 export const resolveProps = (props: OnboardingProps): ResolvedProps => {
   const fromUrl: Record<string, string | boolean> = {};
 
@@ -211,7 +210,7 @@ const PASSWORD_FIXTURES: Record<string, string> = {
   "pw-repeat": "aaaaaaaaaaaaaaaaaaa",
 };
 
-/** ?fixture= board states (prototype fixture()). */
+/** ?fixture= board states. */
 export const getFixturePatch = (
   key: string,
   baseForm: OnboardingForm,
@@ -626,7 +625,7 @@ const isAddressOk = ({ line1, city, postcode }: OnboardingForm): boolean =>
 
 export type FormErrors = Record<string, string>;
 
-/** Field errors for the current screen (prototype errors()). */
+/** Field errors for the current screen. */
 export const getErrors = (state: OnboardingState): FormErrors => {
   const { form, screen } = state;
   const errors: FormErrors = {};
@@ -735,7 +734,7 @@ export const getErrors = (state: OnboardingState): FormErrors => {
   return errors;
 };
 
-/** Where Back goes from each screen (prototype backOf()). */
+/** Where Back goes from each screen. */
 export const getBackScreen = ({
   screen,
   audience,

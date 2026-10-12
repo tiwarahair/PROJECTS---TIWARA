@@ -1,4 +1,4 @@
-/* Earnings (prototype Earnings.dc.html), inline styles verbatim */
+/* Earnings drawer, modal and toast styles. */
 
 .dateLabel {
   display: flex;
@@ -527,7 +527,7 @@
   white-space: nowrap;
 }
 
-/* runtime states (prototype ovPos / z*, drawer and modal geometry + animations, dTx.ac, r.*, p.* chips, f.* formats, toast) */
+/* runtime states (overlay position / stacking, drawer and modal geometry + animations, accents, chips, formats, toast) */
 .fixed {
   position: fixed;
 }
@@ -640,7 +640,7 @@
   color: var(--text-primary);
 }
 
-/* the status colours come from the status table (prototype STT) */
+/* the status colours come from the status table */
 .statusTag {
   background: var(--st-bg);
   color: var(--st-fg);

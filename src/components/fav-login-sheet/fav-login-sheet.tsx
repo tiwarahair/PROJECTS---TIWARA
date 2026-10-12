@@ -150,7 +150,7 @@ const LoginSheetCard = ({ stylistId }: LoginSheetCardProps) => {
   );
 };
 
-/** Guests tapping a heart see this sheet (prototype tw-fav.js openLogin). */
+/** Guests tapping a heart see this sheet. */
 export const FavLoginSheet = () => {
   const stylistId = useAppSelector((state) => state.favourites.loginSheetFor);
 

@@ -62,7 +62,7 @@ const CalendarIcon = () => (
   </svg>
 );
 
-/** Month navigation for one of the sheets' calendars; it never goes before this month (prototype *CalPrev / *Next). */
+/** Month navigation for one of the sheets' calendars; it never goes before this month. */
 export const getMonthNav = (
   studio: StudioController,
   monthKey: MonthKey,
@@ -693,7 +693,7 @@ export const BlockSheet = ({ studio }: { studio: StudioController }) => {
   );
 };
 
-/** "Repeat until" — the block sheet's end-date calendar (prototype endCal). */
+/** "Repeat until" — the block sheet's end-date calendar. */
 export const EndDateDialog = ({ studio }: { studio: StudioController }) => {
   const { state, setState, isWide, context } = studio;
 
@@ -862,7 +862,7 @@ export const ClosedSheet = ({ studio }: { studio: StudioController }) => {
   );
 };
 
-/** The older "Client" sheet (prototype sheetC), still reachable from the booking flow. */
+/** The older "Client" sheet, still reachable from the booking flow. */
 export const ClientSheet = ({ studio }: { studio: StudioController }) => {
   const { state, actions, seedPast } = studio;
 

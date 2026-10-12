@@ -1,4 +1,4 @@
-// Step 3 (Pick a time): month grid, slots and date labels (prototype Booking renderVals calDays / slots / whenLine).
+// Step 3 (Pick a time): month grid, slots and date labels.
 import type { Stylist } from "../../types/stylist";
 import { slotsFor } from "../../utils/availability";
 

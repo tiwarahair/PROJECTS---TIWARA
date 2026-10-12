@@ -1,4 +1,4 @@
-/* Values verbatim from prototype Stylist Profile.dc.html (inline styles; style-hover/active as !important like the prototype runtime). */
+/* Stylist Profile page styles; hover/active states use !important so they win over the base rules. */
 
 .scrim {
   position: fixed;
@@ -81,7 +81,7 @@
   color: rgba(255, 254, 251, 0.7);
 }
 
-/* zoomImgStyle (renderVals); the photo URL arrives as --zoom-image */
+/* zoomed image; the photo URL arrives as --zoom-image */
 .image {
   position: relative;
   z-index: 1;

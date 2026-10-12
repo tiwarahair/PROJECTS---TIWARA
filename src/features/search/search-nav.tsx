@@ -39,7 +39,7 @@ export const SearchNav = ({ search }: SearchNavProps) => {
         <div className={joinClassNames(helmet.navRail, styles.railLeft)}>
           <Link to="/" className={styles.logoLink}>
             <img
-              src={getAssetUrl("_ds_assets/logo-crimson.png")}
+              src={getAssetUrl("logo-crimson.png")}
               alt="Tiwára's House"
               className={styles.logo}
             />
@@ -91,7 +91,7 @@ export const SearchNav = ({ search }: SearchNavProps) => {
                 onKeyDown={actions.keyWhat}
                 placeholder="All styles"
                 aria-label="Style or stylist"
-                // prototype markup has no aria-controls on its comboboxes; kept as-is
+                // no aria-controls on the comboboxes; kept as-is
                 // eslint-disable-next-line jsx-a11y/role-has-required-aria-props
                 role="combobox"
                 aria-expanded={state.whatOpen ? "true" : "false"}
@@ -129,7 +129,7 @@ export const SearchNav = ({ search }: SearchNavProps) => {
                 onKeyDown={actions.keyWhere}
                 placeholder="Current location"
                 aria-label="Area or postcode"
-                // prototype markup has no aria-controls on its comboboxes; kept as-is
+                // no aria-controls on the comboboxes; kept as-is
                 // eslint-disable-next-line jsx-a11y/role-has-required-aria-props
                 role="combobox"
                 aria-expanded={state.whereOpen ? "true" : "false"}

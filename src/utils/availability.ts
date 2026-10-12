@@ -1,4 +1,4 @@
-// Slot generation and distance, ported from data.js. Free windows per weekday minus a few seeded (hashed) bookings.
+// Slot generation and distance. Free windows per weekday minus a few seeded (hashed) bookings.
 import type { Stylist, Weekday } from "../types/stylist";
 
 const WEEKDAYS: Weekday[] = ["sun", "mon", "tue", "wed", "thu", "fri", "sat"];

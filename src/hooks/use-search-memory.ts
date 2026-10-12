@@ -18,7 +18,7 @@ const readSavedScroll = (): number => {
   }
 };
 
-/** Search remembers its URL and scroll position; returning via Back restores the scroll (prototype tw-fav.js). */
+/** Search remembers its URL and scroll position; returning via Back restores the scroll. */
 export const useSearchMemory = (): void => {
   useEffect(() => {
     if (isBoardView()) return;
@@ -45,8 +45,8 @@ export const useSearchMemory = (): void => {
       scrollTimer = window.setTimeout(record, 120);
     };
 
-    // Coming back via "Back to results": read the saved position before anything records over it (the
-    // prototype recorded first, which replaced it with 0). The flag is only cleared once the restore has run,
+    // Coming back via "Back to results": read the saved position before anything records over it (recording
+    // first would replace it with 0). The flag is only cleared once the restore has run,
     // so a remount (React StrictMode runs effects twice in development) still restores.
     const isBack = readSession(SEARCH_BACK_KEY) === "1";
     const targetY = isBack ? readSavedScroll() : 0;

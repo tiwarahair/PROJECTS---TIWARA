@@ -1,4 +1,4 @@
-/* Mirrors the prototype harness pages (design-import/…/prototype/__harness-*.dc.html). */
+/* Fixture harness pages: each component shown in every fixture state. */
 .page {
   padding: 24px;
 }

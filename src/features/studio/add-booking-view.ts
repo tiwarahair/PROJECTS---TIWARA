@@ -1,4 +1,4 @@
-// The "New booking" sheet's values and actions (prototype renderVals: shAdd, add*, asv, aa2, prot*, cal*).
+// The "New booking" sheet's values and actions.
 import type { ChangeEvent, MouseEvent } from "react";
 import { getAddonPicker } from "./addon-picker";
 import { getDuplicateView } from "./clients-view";
@@ -57,7 +57,7 @@ const toNumber = (value: unknown) => parseFloat(String(value ?? "")) || 0;
 const getAddonMinutes = ({ hours, min }: StudioAddon) =>
   (parseInt(String(hours)) || 0) * 60 + (parseInt(String(min)) || 0);
 
-/** New booking: who, service (+ edit / add-ons), when, protection, notes (prototype shAdd). */
+/** New booking: who, service (+ edit / add-ons), when, protection, notes. */
 export const getAddBookingView = (studio: StudioController) => {
   const { state, setState, actions, context } = studio;
   const { policy } = state;

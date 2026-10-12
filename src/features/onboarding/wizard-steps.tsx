@@ -68,7 +68,7 @@ const WizardField = ({
   </>
 );
 
-/** Selection tile colours (prototype tile(on)). */
+/** Selection tile colours. */
 const tileClass = (on: boolean) => (on ? styles.tileOn : styles.tileOff);
 
 /** Step 1: how you work; picking one moves on after 300ms. */

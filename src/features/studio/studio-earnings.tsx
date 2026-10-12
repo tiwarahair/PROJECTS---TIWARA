@@ -5,7 +5,7 @@ import { getClient, hasTwoFactor, isLive } from "./studio-model";
 import type { StudioController } from "./use-studio";
 import styles from "./studio-earnings.module.css";
 
-/** Studio → Earnings: the embedded Earnings dashboard (prototype Studio.dc.html line 906). */
+/** Studio → Earnings: the embedded Earnings dashboard. */
 export const StudioEarnings = ({ studio }: { studio: StudioController }) => {
   const { state, setState, props, isWide, isDesktop, isNew, actions } = studio;
   const live = isLive(state);

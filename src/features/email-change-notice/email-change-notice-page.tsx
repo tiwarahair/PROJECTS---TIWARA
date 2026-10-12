@@ -5,8 +5,8 @@ import "./email-change-notice-helmet.module.css";
 import styles from "./email-change-notice.module.css";
 
 /**
- * Mock of the email sent to the old address after an email change, route "/email/email-change-notice"
- * (prototype Email Change Notice.dc.html). Static copy.
+ * Mock of the email sent to the old address after an email change, route "/email/email-change-notice".
+ * Static copy.
  */
 export const EmailChangeNoticePage = () => {
   useLayoutEffect(() => {
@@ -38,7 +38,7 @@ export const EmailChangeNoticePage = () => {
         <div className={styles.card}>
           <img
             className={styles.logo}
-            src={getAssetUrl("_ds_assets/logo-crimson.png")}
+            src={getAssetUrl("logo-crimson.png")}
             alt="Tiwára's House"
           />
           <h1 className={styles.title}>Your email was changed</h1>

@@ -73,7 +73,7 @@ export interface PaymentPolicyProps {
 }
 
 /**
- * Studio → Settings → Payment & cancellation policy (prototype PaymentPolicy.dc.html): booking protection,
+ * Studio → Settings → Payment & cancellation policy: booking protection,
  * cancellation window and fees, grace period, additional policies (300 characters shared), a live client preview
  * and a save bar.
  */

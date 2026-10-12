@@ -1,4 +1,4 @@
-// Studio's pure time, money and drawing helpers (prototype Studio.dc.html class methods that don't read state).
+// Studio's pure time, money and drawing helpers (they don't read state).
 
 const DAY_NAMES = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
 
@@ -184,7 +184,7 @@ export const getInitials = (name: string | null | undefined): string =>
     .map((word) => (word[0] ?? "").toUpperCase())
     .join("");
 
-/** A client's photo, or an initials tile (prototype avSrc). */
+/** A client's photo, or an initials tile. */
 export const getAvatarSrc = (
   client: { img?: string; walkIn?: boolean; name?: string } | null | undefined,
 ): string => {
@@ -199,7 +199,7 @@ export const getAvatarSrc = (
   return `data:image/svg+xml;charset=utf-8,${encodeURIComponent(svg)}`;
 };
 
-/** The initials image stored on a client added from the New booking sheet (prototype initialsImg). */
+/** The initials image stored on a client added from the New booking sheet */
 export const getInitialsImage = (name: string): string => {
   const initials = name
     .trim()
@@ -231,7 +231,7 @@ const getCellColor = (isPast: boolean, isSelected: boolean) => {
   return isSelected ? "var(--neutral-100)" : "var(--text-primary)";
 };
 
-/** A Monday-first month grid of day offsets from today (prototype miniCalDays). */
+/** A Monday-first month grid of day offsets from today. */
 export const getMiniCalendarDays = (
   month: number,
   year: number,
@@ -286,7 +286,7 @@ export interface ChartPoint {
   value: number;
 }
 
-/** The Home revenue curve in a 340×120 box (prototype makeChart). */
+/** The Home revenue curve in a 340×120 box. */
 export const makeChart = (data: number[]) => {
   const width = 340;
   const padX = 8;
@@ -325,7 +325,7 @@ export const makeChart = (data: number[]) => {
 
 let qrCache: { key: string; background: string }[] | null = null;
 
-/** A seeded fake QR grid for the authenticator step (prototype qrCells). */
+/** A seeded fake QR grid for the authenticator step. */
 export const getQrCells = () => {
   if (qrCache) return qrCache;
 

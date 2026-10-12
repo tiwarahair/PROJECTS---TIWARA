@@ -5,7 +5,7 @@ const WORDS = (
   "texture takes minutes, not a week of messages. And so the stylists who do that work get paid properly for it."
 ).split(" ");
 
-/** Scroll-scrubbed word reveal (prototype Home "Why we exist"; hidden unless showWhy). */
+/** "Why we exist" scroll-scrubbed word reveal (hidden unless showWhy). */
 export const WhySection = () => (
   <section
     id="wordreveal"

@@ -1,4 +1,4 @@
-/* Values verbatim from prototype Home.dc.html (inline styles; style-hover/active as !important like the prototype runtime). */
+/* Home page styles; hover/active states use !important so they win over the base rules. */
 
 .section {
   position: relative;
@@ -62,7 +62,7 @@
   max-width: 60ch;
 }
 
-/* renderVals faq chevStyle / plusVStyle / bodyStyle */
+/* FAQ chevron, plus icon and answer body */
 .chevron {
   display: flex;
   flex-shrink: 0;

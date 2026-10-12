@@ -102,7 +102,7 @@ export const AppointmentAddress = ({ booking }: AppointmentAddressProps) => {
       <div className={fields.grid}>
         <div className={styles.finderColumn}>
           {(!saved.length || selectedAddressId === NEW_ADDRESS_ID) && (
-            // plain block wrapper = the prototype runtime's .sc-host around the embedded finder
+            // plain block wrapper around the embedded finder
             <div data-dc-host="">
               <AddressFinder
                 idPrefix="bk-addr"

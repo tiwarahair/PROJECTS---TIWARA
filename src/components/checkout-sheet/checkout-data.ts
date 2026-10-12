@@ -1,5 +1,4 @@
-// CheckoutSheet demo bookings and money maths (prototype CheckoutSheet.dc.html: BK, MENU, REASONS, RF_REASONS,
-// STYLIST, IC, f, f2, seed, money, finalize, result, rfCtx).
+// CheckoutSheet demo bookings and money maths.
 
 export type PaymentMode = "deposit" | "full" | "card" | "none";
 export type CheckoutView =
@@ -271,7 +270,7 @@ export const ICONS = {
 export const roundPounds = (value: number): number =>
   Math.round(value * 100) / 100;
 
-/** "£45", "£45.50", "−£20" (prototype f). */
+/** "£45", "£45.50", "−£20". */
 export const formatPounds = (value: number): string => {
   const rounded = roundPounds(value);
   const absolute = Math.abs(rounded);
@@ -281,11 +280,11 @@ export const formatPounds = (value: number): string => {
   return `${sign}£${amount}`;
 };
 
-/** Always two decimals (prototype f2), for receipts. */
+/** Always two decimals, for receipts. */
 export const formatPence = (value: number): string =>
   `${value < 0 ? "−" : ""}£${Math.abs(value).toFixed(2)}`;
 
-/** A typed amount as pounds (prototype money().num). */
+/** A typed amount as pounds. */
 export const parsePounds = (value: string): number => {
   const parsed = parseFloat(String(value || "").replace(/[^0-9.]/g, ""));
 
@@ -328,7 +327,7 @@ export interface CheckoutMoney {
   cardOk: boolean;
 }
 
-/** Totals, method and steps for the current state (prototype money()). */
+/** Totals, method and steps for the current state. */
 export const getMoney = (
   state: CheckoutState,
   booking: CheckoutBooking,
@@ -393,7 +392,7 @@ export const getMoney = (
   };
 };
 
-/** The checkout outcome, and the status it leaves (prototype finalize()). */
+/** The checkout outcome, and the status it leaves. */
 export const getFinalized = (
   state: CheckoutState,
   booking: CheckoutBooking,
@@ -412,7 +411,7 @@ export const getFinalized = (
   };
 };
 
-/** The initial state for a scenario or a host booking (prototype seed()). */
+/** The initial state for a scenario or a host booking. */
 export const getInitialCheckout = ({
   scenario = "arrived",
   booking: hostBooking,
@@ -670,7 +669,7 @@ export const getInitialCheckout = ({
   return state;
 };
 
-/** How much can be refunded through the platform, or recorded as refunded off it (prototype rfCtx()). */
+/** How much can be refunded through the platform, or recorded as refunded off it. */
 export const getRefundContext = (
   state: CheckoutState,
   booking: CheckoutBooking,

@@ -1,5 +1,4 @@
-// Services, add-ons, categories and the service wizard's actions (prototype Studio.dc.html: openCats, addCategory,
-// openWiz, suggFill, pickSugg, applySugg, setWiz, setDraft, setVarRow, svcActions, openAddon, addonActions, esOpen).
+// Services, add-ons, categories and the service wizard's actions.
 import { defaultAddons, platformCustomisations } from "../../data";
 import type { ServiceType } from "../../types/service-type";
 import { getSpec } from "../../utils/services";
@@ -200,7 +199,7 @@ export const createServiceActions = (
     });
   };
 
-  /** What a suggested service type fills in (prototype suggFill). */
+  /** What a suggested service type fills in. */
   const getSuggestionFill = (type: ServiceType) => {
     const spec = getSpec(type.name);
 
@@ -636,7 +635,7 @@ export const createServiceActions = (
   const getBookingAddons = (booking: { id: number }) =>
     getState().bookings.find(({ id }) => id === booking.id)?.addons || [];
 
-  /** Opens the booking's "Edit service" step with a draft of its service (prototype esOpen). */
+  /** Opens the booking's "Edit service" step with a draft of its service. */
   const openAddonEdit = (
     booking: StudioBooking & { durationMinutes: number },
   ) => {

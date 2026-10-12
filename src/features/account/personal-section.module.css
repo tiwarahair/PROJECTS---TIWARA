@@ -1,4 +1,4 @@
-/* Account (prototype Account.dc.html), inline styles verbatim */
+/* Account page styles. */
 
 .photoHead {
   display: flex;
@@ -369,7 +369,7 @@
   text-wrap: pretty;
 }
 
-/* runtime states (prototype codeBoxes bd, codeShake, resendColor) */
+/* runtime states: code box borders, code shake, resend colour */
 .codeBoxErr {
   border: 1px solid #b3261e;
 }

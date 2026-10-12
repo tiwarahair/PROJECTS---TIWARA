@@ -1,4 +1,4 @@
-// Google and Apple marks used by the wallet buttons and the "Save your details" row, verbatim from the prototype.
+// Google and Apple marks used by the wallet buttons and the "Save your details" row.
 
 interface BrandIconProps {
   size: number;

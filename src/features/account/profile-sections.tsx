@@ -33,7 +33,7 @@ export const FavouritesSection = ({
               verified,
               fromLabel,
             }) => (
-              // the prototype's dc-import host block, which the card's height:100% depends on
+              // plain block wrapper, which the card's height:100% depends on
               <div key={id} data-dc-host="">
                 <StylistCard
                   href={`/stylist?stylist=${id}`}

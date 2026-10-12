@@ -214,7 +214,7 @@ export const formatVatNumber = (digits: string): string => {
   return `GB ${grouped}`;
 };
 
-/** The legal details rows; with no `tax` prop the prototype shows a sole trader. */
+/** The legal details rows; with no `tax` prop a sole trader is shown. */
 export const getLegalRows = (
   tax: Partial<TaxDetails> | null | undefined,
 ): { label: string; value: string }[] => {

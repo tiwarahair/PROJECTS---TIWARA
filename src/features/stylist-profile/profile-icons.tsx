@@ -1,4 +1,4 @@
-// SVG paths repeated across the profile (heart, share arrow, back arrow), verbatim from the prototype markup.
+// SVG paths repeated across the profile (heart, share arrow, back arrow).
 
 export const HeartPath = () => (
   <path d="M12 20.5s-7.5-4.6-9.2-9.4C1.6 7.6 3.9 4.5 7.2 4.5c2 0 3.6 1.1 4.8 2.8 1.2-1.7 2.8-2.8 4.8-2.8 3.3 0 5.6 3.1 4.4 6.6-1.7 4.8-9.2 9.4-9.2 9.4z"></path>

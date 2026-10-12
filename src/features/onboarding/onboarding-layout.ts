@@ -1,4 +1,4 @@
-// Discrete layout states for the shell and wizard (prototype renderVals: desk, mid, compact, noPhoto, clipped,
+// Discrete layout states for the shell and wizard (desk, mid, compact, noPhoto, clipped,
 // heroH / heroScrim / authPad / contentMt …). Each becomes a data-* variant styled in the modules.
 import type { PhotoKey } from "./onboarding-data";
 import type { OnboardingState, ResolvedProps } from "./onboarding-state";

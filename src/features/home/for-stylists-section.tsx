@@ -5,7 +5,7 @@ import { ArrowIcon } from "./arrow-icon";
 import page from "./home-page.module.css";
 import styles from "./for-stylists-section.module.css";
 
-/** Remembers the list-your-business intent for Onboarding (renderVals goList). */
+/** Remembers the list-your-business intent for Onboarding. */
 const rememberListFlow = () => {
   try {
     sessionStorage.setItem("tw_flow", "list");
@@ -19,7 +19,7 @@ export interface ForStylistsSectionProps {
   variant: "photo" | "split";
 }
 
-/** "Run your chair like a business" (prototype Home "For stylists", prop stylistSection). */
+/** "Run your chair like a business" (prop stylistSection). */
 export const ForStylistsSection = ({ variant }: ForStylistsSectionProps) => (
   <section
     id="for-stylists"

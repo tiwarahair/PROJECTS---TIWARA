@@ -37,7 +37,7 @@ const getNotice = (name: string) => [
   },
 ];
 
-/** The allergy note opt-in field with a 200-char counter (from 150) and its privacy sheet. Ported from AllergyField.dc.html. */
+/** The allergy note opt-in field with a 200-char counter (from 150) and its privacy sheet. */
 export const AllergyField = ({
   stylistName,
   value = "",

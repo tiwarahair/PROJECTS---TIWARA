@@ -148,8 +148,8 @@ export const AuthShell = ({ onboarding, layout, children }: AuthShellProps) => {
               <img
                 src={getAssetUrl(
                   noPhoto && !isDark
-                    ? "_ds_assets/logo-crimson-sm.png"
-                    : "_ds_assets/logo-cream-sm.png",
+                    ? "logo-crimson-sm.png"
+                    : "logo-cream-sm.png",
                 )}
                 alt="Tiwára's House"
                 className={styles.heroLogo}
@@ -189,7 +189,7 @@ export const AuthShell = ({ onboarding, layout, children }: AuthShellProps) => {
             </button>
           </div>
         )}
-        {/* focus/blur bubble from the screen's inputs (prototype onFocus / onBlur on this column) */}
+        {/* focus/blur bubble up from the screen's inputs to this column */}
         <div
           onFocus={compactOn}
           onBlur={compactOff}
@@ -232,7 +232,7 @@ export const AuthShell = ({ onboarding, layout, children }: AuthShellProps) => {
               isDesktop ? styles.footerDesk : styles.footerMobile,
             )}
           >
-            {/* prototype placeholder links */}
+            {/* placeholder links */}
             {/* eslint-disable-next-line jsx-a11y/anchor-is-valid */}
             <a href="#" className={styles.footerLink}>
               Support

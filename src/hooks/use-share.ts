@@ -16,7 +16,7 @@ export interface ShareData {
   mail: string;
 }
 
-/** Clean profile URL plus WhatsApp / email links (prototype tw-fav.js shareData). */
+/** Clean profile URL plus WhatsApp / email links. */
 export const getShareData = ({ id, name, area }: ShareTarget): ShareData => {
   const url = `${window.location.origin}/stylist?stylist=${encodeURIComponent(id)}`;
   const title = `${name} on Tiwára’s House`;

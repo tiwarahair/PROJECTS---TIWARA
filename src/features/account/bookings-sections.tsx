@@ -229,7 +229,7 @@ export const BookingsSection = ({
 
   return (
     <section data-screen-label="Account: Bookings">
-      {/* the prototype handles the tabs' arrow keys on the tablist (the focused tab's keydown bubbles up) */}
+      {/* the tabs' arrow keys are handled on the tablist (the focused tab's keydown bubbles up) */}
       {/* eslint-disable-next-line jsx-a11y/interactive-supports-focus */}
       <div
         className={styles.tabs}

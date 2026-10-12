@@ -10,7 +10,7 @@ export interface PolicyExtra {
   text: string;
 }
 
-/** Booking protection shared by Payment policy, Booking, Profile and Search (data.js POL()). */
+/** Booking protection shared by Payment policy, Booking, Profile and Search. */
 export interface Policy {
   mode: PolicyMode;
   depositPercent: number;

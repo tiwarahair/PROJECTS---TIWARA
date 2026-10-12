@@ -1,4 +1,4 @@
-// What / Where dropdown models, ported from prototype Search renderVals (rows, chips, sections) and rowVm.
+// What / Where dropdown models (rows, chips, sections).
 import { searchLocations, serviceGroups, stylists } from "../../data";
 import type { ServiceGroup } from "../../types/service-group";
 import type { ServiceType } from "../../types/service-type";
@@ -35,7 +35,7 @@ export interface RowView {
   isOn: boolean;
 }
 
-/** Splits the label around the typed text so the match can be bolded (prototype rowVm). */
+/** Splits the label around the typed text so the match can be bolded. */
 export const getRowView = (
   row: SuggestionRow,
   index: number,

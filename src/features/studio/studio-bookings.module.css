@@ -1,5 +1,5 @@
-/* Studio → Bookings — verbatim values from Studio.dc.html lines 405–691. `.wide` / `.desk` on the root stand in for
-   the prototype's isWide / isDesk values; tile colours, positions and delays are runtime custom properties. */
+/* Studio → Bookings. `.wide` / `.desk` on the root switch the wide and desktop layouts; tile colours, positions and
+   delays are runtime custom properties. */
 
 .bookings {
   padding: 0 0 110px;

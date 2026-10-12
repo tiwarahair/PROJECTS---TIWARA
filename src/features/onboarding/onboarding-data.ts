@@ -1,5 +1,5 @@
-// Onboarding constants, verbatim from prototype Onboarding.dc.html (TYPES, CATS, SOURCES, RADII, PHOTOS,
-// NAMES, the benefit carousel, chooser cards and terms sheets). Generated from the prototype source.
+// Onboarding constants (types, categories, sources, radii, photos, names, the benefit carousel,
+// chooser cards and terms sheets).
 
 export interface ChoiceTile {
   key: string;

@@ -1,4 +1,4 @@
-// Demo address finder + UK postcode helpers, ported from data.js (TIWARA.address).
+// Demo address finder + UK postcode helpers.
 // Real version: an address lookup API with the back end.
 import { demoAddresses, postcodes } from "../data";
 import type { AddressValue, DemoAddress } from "../types/address";

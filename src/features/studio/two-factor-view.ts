@@ -1,4 +1,4 @@
-// "Get paid: 2FA, tax details and Stripe" and the two-step verification flow (prototype tfOpen / tf in renderVals).
+// "Get paid: 2FA, tax details and Stripe" and the two-step verification flow.
 import type { ChangeEvent } from "react";
 import type {
   TaxDetails,

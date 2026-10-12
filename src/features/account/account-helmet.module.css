@@ -1,7 +1,7 @@
 /*
- * Account <helmet> <style> rules, verbatim values (prototype Account.dc.html lines 21–36), in the page layer, scoped
- * to html.account-page (set while mounted). The global reset lines identical to the base layer are omitted. The
- * prototype's global .ac-mob / .ac-desk / .ac-foot / .ac-ov / .ac-dlg classes are this module's classes; components
+ * Account page-wide rules, in the page layer, scoped to html.account-page (set while mounted). The global reset
+ * lines identical to the base layer are omitted. The .ac-mob / .ac-desk / .ac-foot / .ac-ov / .ac-dlg classes are
+ * this module's classes; components
  * add them next to their own. acSheet and acFade live here because the rules below use them; the other keyframes
  * are copied into the modules that use them.
  */

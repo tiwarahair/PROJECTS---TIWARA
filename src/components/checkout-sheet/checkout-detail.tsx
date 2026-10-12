@@ -36,7 +36,7 @@ export const Icon = ({
   </svg>
 );
 
-/** Label (+ sub line) and amount (prototype row()). */
+/** Label (+ sub line) and amount. */
 export const AmountRow = ({
   row: { label, subtitle, value, isAlert },
   subtitleClassName,
@@ -93,7 +93,7 @@ export const CheckoutDetail = ({
       <div>
         <div className={flow.badges}>
           {badges.map(({ label, icon, tone }) => {
-            // the badge colours come from the tone table (prototype T)
+            // the badge colours come from the tone table
             const toneStyle = {
               "--badge-bg": TONES[tone].background,
               "--badge-fg": TONES[tone].foreground,

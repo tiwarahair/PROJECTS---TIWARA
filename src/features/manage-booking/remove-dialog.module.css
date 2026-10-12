@@ -1,4 +1,4 @@
-/* Values verbatim from prototype Manage Booking.dc.html (inline styles; style-hover/active as !important like the prototype runtime). */
+/* Manage Booking page styles; hover/active states use !important so they win over the base rules. */
 
 .scrim {
   position: fixed;

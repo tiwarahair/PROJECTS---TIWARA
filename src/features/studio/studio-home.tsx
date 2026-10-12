@@ -157,7 +157,7 @@ const SetupBanner = ({ studio }: { studio: StudioController }) => {
   );
 };
 
-/** Studio → Home (prototype Studio.dc.html lines 140–401). */
+/** Studio → Home. */
 export const StudioHome = ({ studio }: { studio: StudioController }) => {
   const { state, setState, isWide, isDesktop, isNew, actions } = studio;
   const { isSetupOn, isComplete } = getSetupProgress(studio);

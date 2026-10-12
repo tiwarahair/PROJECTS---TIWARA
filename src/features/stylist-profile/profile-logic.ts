@@ -1,4 +1,4 @@
-// Derived values for Stylist Profile (prototype Stylist Profile.dc.html renderVals / menu).
+// Derived values for Stylist Profile (including the service menu).
 import { reviews as allReviews, stylists } from "../../data";
 import type { Stylist } from "../../types/stylist";
 import { money } from "../../utils/pricing";
@@ -12,7 +12,7 @@ import {
 export const DEFAULT_STYLIST_ID = "tiwaras-house";
 const MENU_LIMIT = 6;
 
-/** The stylist for ?stylist=<id>, falling back to the first stylist like the prototype. */
+/** The stylist for ?stylist=<id>, falling back to the first stylist. */
 export const getStylist = (id: string): Stylist => {
   const stylist = stylists.find((item) => item.id === id) ?? stylists[0];
 
@@ -191,7 +191,7 @@ export interface HoursRow {
   shut: boolean;
 }
 
-// The aside's opening hours are static rows in the prototype (not OPEN_HOURS)
+// The aside's opening hours are static rows (not OPEN_HOURS)
 export const HOURS_ROWS: HoursRow[] = [
   { day: "Mon – Tue", time: "Closed" },
   { day: "Wed – Fri", time: "9:00 – 18:00" },

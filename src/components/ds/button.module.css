@@ -1,4 +1,4 @@
-/* Values verbatim from design_system_source/components/actions/Button.jsx */
+/* Button styles. */
 .button {
   font-family: var(--font-body);
   font-weight: 600;
@@ -79,7 +79,7 @@
   color: var(--text-primary);
 }
 
-/* outline fills ink on hover — the prototype's behaviour, adopted here */
+/* outline fills ink on hover */
 .primary:hover:not(:disabled) {
   background: var(--action-primary-hover);
   border-color: var(--action-primary-hover);

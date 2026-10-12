@@ -1,4 +1,4 @@
-/* PaymentPolicy (prototype PaymentPolicy.dc.html), inline styles verbatim */
+/* PaymentPolicy styles. */
 
 .root {
   height: 100%;
@@ -763,7 +763,7 @@
   transform: scale(0.98) !important;
 }
 
-/* runtime states (prototype tile(), dis(), dep / fee border + ring, boxBg / tick, count*, addColor, status*, save*) */
+/* runtime states (tiles, disclosures, deposit / fee border + ring, checkbox, counter, status, save bar) */
 .tileOn {
   border: 1px solid var(--accent-700);
   background: var(--accent-wash);
@@ -884,7 +884,7 @@
 }
 
 /*
- * helmet rules (prototype lines 12–22): scoped to this component's classes; [data-pp-in] elements carry .focusRing
+ * helmet rules: scoped to this component's classes; [data-pp-in] elements carry .focusRing
  */
 @media (prefers-reduced-motion: reduce) {
   .reveal {

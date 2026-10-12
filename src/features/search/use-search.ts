@@ -1,4 +1,4 @@
-// State + actions for the Search page (prototype Search class: constructor, lifecycle and renderVals closures).
+// State + actions for the Search page.
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import type { ChangeEvent, FocusEvent, KeyboardEvent } from "react";
 import { useNavigate } from "react-router";
@@ -49,7 +49,7 @@ const DEFAULT_DRAFT: FilterDraft = {
   sort: "distance",
 };
 
-/** Re-render on resize (pill width, mobile checks read window.innerWidth like the prototype). */
+/** Re-render on resize (pill width and mobile checks read window.innerWidth). */
 const useViewportWidth = () => {
   const [width, setWidth] = useState(() => window.innerWidth);
 
@@ -529,7 +529,7 @@ export const useSearch = () => {
     },
   };
 
-  // empty-state suggestions (prototype renderVals sugg)
+  // empty-state suggestions
   const nextRadius = RADII.find((radius) => radius > state.radius);
 
   const suggestions = [

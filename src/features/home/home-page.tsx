@@ -35,7 +35,7 @@ export interface HomePageProps {
 const HOME_FONTS =
   "https://fonts.googleapis.com/css2?family=Schibsted+Grotesk:wght@400..700&display=swap";
 
-/** Marketing home page, route "/" (prototype Home.dc.html). Prop defaults are the prototype's data-props defaults. */
+/** Marketing home page, route "/". */
 export const HomePage = ({
   order = "v2",
   stylistSection = "photo",

@@ -1,5 +1,5 @@
-/* Studio frame, sidebar, top bar, bottom nav and floating cards — verbatim values from Studio.dc.html lines 70–138
-   and 1444–1527. Variants stand in for the prototype's isWide / isDesk / sbOpen inline values. */
+/* Studio frame, sidebar, top bar, bottom nav and floating cards. Variants switch the wide, desktop and sidebar-open
+   layouts. */
 
 .tipLayer {
   position: fixed;

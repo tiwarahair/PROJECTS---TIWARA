@@ -1,4 +1,4 @@
-// The searchable add-on picker shared by Edit service, New booking and the service wizard (prototype aaBuild).
+// The searchable add-on picker shared by Edit service, New booking and the service wizard.
 import type { ChangeEvent } from "react";
 import {
   formatAddon,

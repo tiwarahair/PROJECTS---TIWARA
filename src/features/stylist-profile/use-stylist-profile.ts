@@ -35,7 +35,7 @@ const getSharePosition = (element: Element): SharePosition => {
   };
 };
 
-/** State, window listeners and the lightbox for Stylist Profile (prototype Component state + componentDidMount). */
+/** State, window listeners and the lightbox for Stylist Profile. */
 export const useStylistProfile = () => {
   // read once: StrictMode re-runs effects, and the URL is not rewritten here
   const [initial] = useState(readInitialParams);

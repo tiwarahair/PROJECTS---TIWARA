@@ -15,7 +15,7 @@ interface HomeNavProps {
   onToggleMenu: () => void;
 }
 
-/** Fixed marketing nav + full-screen mobile menu (prototype Home "Nav"). */
+/** Fixed marketing nav + full-screen mobile menu. */
 export const HomeNav = ({
   morph,
   loggedIn,
@@ -41,13 +41,13 @@ export const HomeNav = ({
           <Link to="/" className={styles.logoLink}>
             <span className={styles.logoStack}>
               <img
-                src={getAssetUrl("_ds_assets/logo-cream.png")}
+                src={getAssetUrl("logo-cream.png")}
                 alt="Tiwára's House"
                 className={styles.logoCream}
               />
               <span className={styles.logoMask}></span>
               <img
-                src={getAssetUrl("_ds_assets/logo-crimson.png")}
+                src={getAssetUrl("logo-crimson.png")}
                 alt=""
                 className={styles.logoCrimson}
               />
@@ -125,7 +125,7 @@ export const HomeNav = ({
         <div className={styles.menu}>
           <div className={styles.menuTop}>
             <img
-              src={getAssetUrl("_ds_assets/logo-crimson.png")}
+              src={getAssetUrl("logo-crimson.png")}
               alt="Tiwára's House"
               className={styles.menuLogo}
             />

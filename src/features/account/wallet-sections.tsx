@@ -183,7 +183,7 @@ const AddressFormFields = ({
           maxLength={30}
         />
       </label>
-      {/* the prototype's dc-import host block (the finder is not a flex item of the form) */}
+      {/* plain block wrapper (the finder is not a flex item of the form) */}
       <div data-dc-host="">
         <AddressFinder
           idPrefix="ac-addr"

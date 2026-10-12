@@ -1,4 +1,4 @@
-/* Values verbatim from prototype Onboarding.dc.html (inline styles; style-hover/active/focus as !important like the prototype runtime). */
+/* Onboarding component styles; hover/active/focus states are !important on purpose so they always win over the base rules. */
 
 .shell {
   display: flex;

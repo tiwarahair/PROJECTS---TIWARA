@@ -1,5 +1,4 @@
-/* Studio → Clients — verbatim values from Studio.dc.html lines 913–1100 (list and profile) and 1668–1767 (the
-   profile sheet). `.desk` stands in for the prototype's isDesk values. */
+/* Studio → Clients: the list, the profile and the profile sheet. `.desk` switches the desktop layout. */
 
 .clients {
   padding: 18px 18px 110px;

@@ -1,4 +1,4 @@
-/* Help (prototype Help.dc.html), inline styles verbatim */
+/* Help page styles. */
 
 .page {
   min-height: 100vh;
@@ -282,7 +282,7 @@
   transform: scale(0.97) !important;
 }
 
-/* runtime state (prototype f.rot) */
+/* runtime state: FAQ icon rotation */
 .chevronOpen {
   transform: rotate(180deg);
 }

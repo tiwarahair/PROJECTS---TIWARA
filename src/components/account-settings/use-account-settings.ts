@@ -62,7 +62,7 @@ export interface AccountSettingsProps {
 
 export type DialogPhase = "idle" | "open" | "closing";
 
-/** AccountSettings state and actions (prototype class Component: init, toast, ask, maybeLoad, report, save). */
+/** AccountSettings state and actions. */
 export const useAccountSettings = (props: AccountSettingsProps) => {
   const { page = "personal", signIn, isNew = false } = props;
 
@@ -266,7 +266,7 @@ export const useAccountSettings = (props: AccountSettingsProps) => {
     }
   };
 
-  // report after every render, like the prototype's componentDidMount / componentDidUpdate
+  // report after every render (on mount and on every update)
   useEffect(() => {
     props.onState?.({ canSave: isDirty && hasSave, save });
   });

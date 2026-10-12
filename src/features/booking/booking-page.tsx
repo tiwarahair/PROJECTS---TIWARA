@@ -30,7 +30,7 @@ const STEP_VIEWS = {
   6: StepPay,
 } as const;
 
-/** The 6-step booking flow and its confirmation, route "/book" (prototype Booking.dc.html). */
+/** The 6-step booking flow and its confirmation, route "/book". */
 export const BookingPage = () => {
   const booking = useBooking();
   const { state, stylist, holdOn, holdLeftMs, actions } = booking;

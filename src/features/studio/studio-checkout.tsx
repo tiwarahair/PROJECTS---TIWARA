@@ -30,7 +30,7 @@ export interface StudioCheckoutProps {
   onRefund?: (amount: number, reason: string) => void;
 }
 
-/** CheckoutSheet over a Studio sheet (prototype ckOn: ckBooking, ckStart, ckStylist, ckMenu …). */
+/** CheckoutSheet over a Studio sheet. */
 export const StudioCheckout = ({
   studio,
   booking,

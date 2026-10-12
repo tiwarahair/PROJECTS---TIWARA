@@ -6,14 +6,14 @@ import {
   writeSession,
 } from "../utils/page-flags";
 
-/** The demo customer account (prototype tw-fav.js ACCT). */
+/** The demo customer account. */
 export const DEMO_ACCOUNT = {
   email: "nia.okafor@gmail.com",
   first: "Nia",
   name: "Nia Okafor",
 } as const;
 
-/** "NO" — the avatar initials shown in every nav (prototype acctInitials). */
+/** "NO" — the avatar initials shown in every nav. */
 export const ACCOUNT_INITIALS = DEMO_ACCOUNT.name
   .split(" ")
   .filter(Boolean)
@@ -43,7 +43,7 @@ export const sessionSlice = createSlice({
   name: "session",
   initialState,
   reducers: {
-    /** Re-read the session for the current page (runs on each page mount, like the prototype's page load). */
+    /** Re-read the session for the current page (runs on each page mount). */
     syncSession: (state) => {
       const params = getSearchParams();
 

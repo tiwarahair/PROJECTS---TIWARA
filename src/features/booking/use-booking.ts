@@ -45,7 +45,7 @@ const DECLINED_CARD = "4000000000000002";
 const BANK_CHECK_CARD = "4000002760003184";
 const NETWORK_ERROR_CARD = "4000000000000119";
 
-/** Booking state and actions (prototype Booking.dc.html class Component). */
+/** Booking state and actions. */
 export const useBooking = () => {
   const [initial] = useState(getInitialBooking);
   const [state, setRawState] = useState(initial.state);
@@ -60,7 +60,7 @@ export const useBooking = () => {
   const focusTarget = useRef<string | null>(null);
   const payTimer = useRef(0);
 
-  /** setState with a merge patch and an optional callback after the render, like the prototype's setState. */
+  /** setState with a merge patch and an optional callback after the render. */
   const setState = useCallback((patch: StatePatch, callback?: () => void) => {
     if (callback) afterCommit.current.push(callback);
 

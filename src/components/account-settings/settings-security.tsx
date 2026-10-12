@@ -9,7 +9,7 @@ import styles from "./settings-security.module.css";
 
 const TickPath = () => <path d="M5 12.5l4.5 4.5L19 7.5"></path>;
 
-/** Checkbox row (prototype role=checkbox buttons). */
+/** Checkbox row (role=checkbox buttons). */
 export const CheckRow = ({
   isOn,
   onToggle,
@@ -53,7 +53,7 @@ export const CheckRow = ({
   </button>
 );
 
-/** On / off switch (prototype sw()). */
+/** On / off switch. */
 export const Switch = ({
   isOn,
   label,

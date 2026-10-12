@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 
 /**
  * Flips to true two animation frames after mount, so a CSS transition runs from the element's
- * initial (hidden) styles — the prototype's requestAnimationFrame(() => requestAnimationFrame(...)).
+ * initial (hidden) styles — a double requestAnimationFrame.
  */
 export const useEntered = (): boolean => {
   const [entered, setEntered] = useState(false);

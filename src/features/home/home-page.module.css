@@ -1,6 +1,6 @@
 /*
- * Home <helmet> <style> rules, verbatim values (prototype Home.dc.html lines 59–176), in the page layer so the
- * section modules (the prototype's inline styles) still win over them. Page-wide element rules are scoped to
+ * Home page-wide rules, in the page layer so the section modules still win over them. Page-wide element rules are
+ * scoped to
  * html.home-page, which HomePage sets while it is mounted.
  */
 @layer page {
@@ -410,7 +410,7 @@
   }
 
   /*
-   * Rules with no matching element on the current page — kept from the prototype in case they are needed later.
+   * Rules with no matching element on the current page — kept in case they are needed later.
    */
 
   /* Slide-over effect, off for now. To re-enable: add class="pinsec" to the wrapper of the section

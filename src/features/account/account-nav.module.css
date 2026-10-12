@@ -1,4 +1,4 @@
-/* Account (prototype Account.dc.html), inline styles verbatim */
+/* Account page styles. */
 
 .side {
   flex: 0 0 260px;
@@ -270,7 +270,7 @@
   cursor: pointer;
 }
 
-/* runtime states (prototype navItem fg/bg/fw) */
+/* runtime states: nav item colour / background / weight */
 .sideLinkCurrent {
   background: var(--accent-wash);
   color: var(--accent-700);

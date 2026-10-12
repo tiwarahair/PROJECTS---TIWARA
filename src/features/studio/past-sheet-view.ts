@@ -1,4 +1,4 @@
-// The past booking sheet's values and actions (prototype renderVals pastS, pastCkOf and the past checkout values).
+// The past booking sheet's values and actions, and the past checkout values.
 import type {
   CheckoutBooking,
   CheckoutView,
@@ -29,7 +29,7 @@ export interface PastCheckout {
   cap: number;
 }
 
-/** A past row in the shape CheckoutSheet takes, with what was charged (prototype pastCkOf). */
+/** A past row in the shape CheckoutSheet takes, with what was charged. */
 export const getPastCheckout = (
   state: StudioState,
   row: PastRecord,
@@ -163,7 +163,7 @@ const getRefundTag = (refunded: number, left: number) => {
   return "";
 };
 
-/** The past booking sheet (prototype pastS). */
+/** The past booking sheet. */
 export const getPastSheetView = (studio: StudioController) => {
   const { state, setState, actions, seedPast } = studio;
   const row = findPastRow(studio);
@@ -534,7 +534,7 @@ export const getPastSheetView = (studio: StudioController) => {
 
 export type PastSheetView = NonNullable<ReturnType<typeof getPastSheetView>>;
 
-/** CheckoutSheet's receipt / resend / refund over the past sheet (prototype ckBooking … onCkRefund for pastCk). */
+/** CheckoutSheet's receipt / resend / refund over the past sheet. */
 export const getPastCheckoutView = (studio: StudioController) => {
   const { state, setState, actions, seedPast } = studio;
 

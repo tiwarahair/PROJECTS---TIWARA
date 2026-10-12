@@ -45,7 +45,7 @@ export interface BusinessDetailsApi {
 
 export interface BusinessDetailsProps {
   preset?: BusinessPreset;
-  /** Accepted for the host; the prototype doesn't render it. */
+  /** Accepted for the host; not rendered. */
   stripe?: "connected" | "company" | "none" | "action";
   scrollTo?: "" | "type" | "location" | "vat" | "legal";
   embedded?: boolean;
@@ -62,7 +62,7 @@ export interface BusinessDetailsProps {
 }
 
 /**
- * Studio → Settings → Business details (prototype BusinessDetails.dc.html): business type, location (address,
+ * Studio → Settings → Business details: business type, location (address,
  * home-area preview or mobile base + radius), contact, VAT, legal details and a save bar.
  */
 export const BusinessDetails = ({
@@ -145,7 +145,7 @@ export const BusinessDetails = ({
       );
   };
 
-  // report after every render, like the prototype's componentDidMount / componentDidUpdate
+  // report after every render (on mount and on every update)
   useEffect(() => {
     onState?.({ canSave: isDirty, save });
   });
@@ -161,7 +161,7 @@ export const BusinessDetails = ({
       element.scrollTop = Math.max(0, target.offsetTop - 12);
 
     return () => window.clearTimeout(toastTimer.current);
-    // mount only (prototype componentDidMount)
+    // mount only
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 

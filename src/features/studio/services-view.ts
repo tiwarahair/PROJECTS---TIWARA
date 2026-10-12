@@ -1,4 +1,4 @@
-// Studio → Services values (prototype renderVals: serviceGroups, addonGroups, the category rows / chips and filters).
+// Studio → Services values: service groups, add-on groups, the category rows / chips and filters.
 import type { MouseEvent } from "react";
 import { NO_CATEGORY_TONE } from "./studio-data";
 import {

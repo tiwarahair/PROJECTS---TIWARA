@@ -1,4 +1,4 @@
-/* Values verbatim from prototype Stylist Profile.dc.html (inline styles; style-hover/active as !important like the prototype runtime). */
+/* Stylist Profile page styles; hover/active states use !important so they win over the base rules. */
 
 .aside {
   position: sticky;
@@ -110,7 +110,7 @@
   color: var(--text-secondary);
 }
 
-/* h.dotStyle / h.style (renderVals hours rows) */
+/* opening hours rows and their dots */
 .hoursDot {
   flex: none;
   width: 7px;

@@ -857,7 +857,7 @@ const BookingsList = ({ view }: { view: BookingsView }) => (
   </div>
 );
 
-/** Studio → Bookings (prototype Studio.dc.html lines 405–691). */
+/** Studio → Bookings. */
 export const StudioBookings = ({
   studio,
   view,

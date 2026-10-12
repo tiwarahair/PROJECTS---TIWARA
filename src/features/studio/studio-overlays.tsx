@@ -32,7 +32,7 @@ export const StudioTooltip = ({ studio }: { studio: StudioController }) => {
   );
 };
 
-/** The "…" action menu: anchored under its opener on wide screens, a sheet otherwise (prototype acts*). */
+/** The "…" action menu: anchored under its opener on wide screens, a sheet otherwise. */
 export const ActionsMenu = ({ studio }: { studio: StudioController }) => {
   const { state, isWide, actions } = studio;
   const { actionSheet } = state;

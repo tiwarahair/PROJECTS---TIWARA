@@ -1,4 +1,4 @@
-// A booking dressed for display: status, payment, colours and labels (prototype renderVals `decorate`).
+// A booking dressed for display: status, payment, colours and labels.
 import { getTaxonomy } from "./studio-service-actions";
 import {
   dayInfo,
@@ -344,7 +344,7 @@ export const decorateBooking = (
 
 export type DecoratedBooking = ReturnType<typeof decorateBooking>;
 
-/** Every booking, sorted by day then time and decorated (prototype `upcoming`); empty for a new account. */
+/** Every booking, sorted by day then time and decorated; empty for a new account. */
 export const getDecoratedBookings = (
   state: StudioState,
   isNew: boolean,

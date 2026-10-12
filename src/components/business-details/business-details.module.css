@@ -1,4 +1,4 @@
-/* BusinessDetails (prototype BusinessDetails.dc.html), inline styles verbatim */
+/* BusinessDetails styles. */
 
 .root {
   position: relative;
@@ -617,7 +617,7 @@
   transform: scale(0.98) !important;
 }
 
-/* runtime states (prototype bodyMt, sel(), dis(), fld() bd / ring / w, vatBox*, vatTick, r.bt, toast*, save*) */
+/* runtime states (body margin, selection, disclosures, field border / ring / width, VAT checkbox, row borders, toast, save bar) */
 .bodyEmbedded {
   margin-top: 8px;
 }
@@ -769,7 +769,7 @@
 }
 
 /*
- * helmet rules (prototype lines 12–22): scoped to this component's classes; [data-bd-in] elements carry .focusRing
+ * helmet rules: scoped to this component's classes; [data-bd-in] elements carry .focusRing
  */
 @media (prefers-reduced-motion: reduce) {
   .reveal {

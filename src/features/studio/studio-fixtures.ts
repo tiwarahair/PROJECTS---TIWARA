@@ -1,4 +1,4 @@
-// Studio's ?fixture= review states (prototype Studio.dc.html applyFixture). Each sets up one screen or sheet.
+// Studio's ?fixture= review states. Each sets up one screen or sheet.
 import { serviceTypes } from "../../data";
 import type { TaxDetails } from "../../components/tax-details-form/tax-details-logic";
 import type { StudioActions, StudioContext } from "./studio-actions";

@@ -1,4 +1,4 @@
-// Studio's state-reading helpers (prototype Studio.dc.html class methods that read this.state but don't set it).
+// Studio's state-reading helpers (they read state but don't set it).
 import { serviceTypes } from "../../data";
 import {
   BLOCK_COLORS,
@@ -40,7 +40,7 @@ const WALK_IN: StudioClient = {
   email: "",
 };
 
-/** A client with any Studio edits applied; null is a walk-in (prototype client()). */
+/** A client with any Studio edits applied; null is a walk-in. */
 export const getClient = (
   state: StudioState,
   id: string | null | undefined,
@@ -679,7 +679,7 @@ export interface DuplicateHit {
   field: "phone" | "email";
 }
 
-/** Another client already using this phone or email (prototype dupOf). */
+/** Another client already using this phone or email. */
 export const findDuplicate = (
   state: StudioState,
   phone: string | null | undefined,

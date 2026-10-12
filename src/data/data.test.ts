@@ -33,11 +33,11 @@ import {
 import { checkPassword, getPasswordView } from "../utils/password";
 import type { Policy } from "../types/policy";
 
-// The prototype's helpers are the reference implementation, so they stay untyped here.
+// The reference data.js in design-import/ is run in a VM and must match; its helpers stay untyped here.
 // eslint-disable-next-line @typescript-eslint/no-explicit-any -- dynamic reference object from vm
 type Reference = any;
 
-// The port spells out the prototype's abbreviated keys: [prototype name, port name].
+// Our data spells out the reference implementation's abbreviated keys: [reference name, our name].
 const SERVICE_KEYS: [string, string][] = [
   ["mins", "minutes"],
   ["minsDelta", "minutesDelta"],
@@ -55,7 +55,7 @@ const STYLIST_KEYS = [...SERVICE_KEYS, ...POLICY_KEYS];
 
 const SPEC_KEYS: [string, string][] = [...SERVICE_KEYS, ["add", "addedPrice"]];
 
-/** Reverses rename pairs, to hand port-shaped values to the prototype's helpers. */
+/** Reverses rename pairs, to hand our values to the reference helpers. */
 const toPrototypeKeys = (names: [string, string][]): [string, string][] =>
   names.map(([prototypeName, portName]) => [portName, prototypeName]);
 

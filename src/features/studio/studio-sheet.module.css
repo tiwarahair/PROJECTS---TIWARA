@@ -1,5 +1,4 @@
-/* Studio's sheet frame: panel, header, scrolling body and the footers — verbatim values from Studio.dc.html lines
-   1546–1568 and 3341–3417. Narrow = below 640px, where sheets rise from the bottom. */
+/* Studio's sheet frame: panel, header, scrolling body and the footers. Narrow = below 640px, where sheets rise from the bottom. */
 
 .scrim {
   position: fixed;
@@ -434,7 +433,7 @@
   flex: 1;
 }
 
-/* disabled primary actions fade (prototype *Op = .45) */
+/* disabled primary actions fade */
 .faded {
   opacity: 0.45;
 }

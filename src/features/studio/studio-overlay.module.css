@@ -1,6 +1,6 @@
 /*
- * Studio's shared overlay placement and motion (prototype renderVals ov*, dg*, ovAnim, scrim animations), verbatim
- * values. Narrow = below 640px (the prototype's _mq), where sheets rise from the bottom.
+ * Studio's shared overlay placement and motion (sheets, side panels, dialogs and scrim animations). Narrow = below
+ * 640px, where sheets rise from the bottom.
  */
 
 /* ---- scrims ---- */

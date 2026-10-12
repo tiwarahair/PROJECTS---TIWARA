@@ -43,7 +43,7 @@ const readWelcome = (): WelcomeNote | null => {
   }
 };
 
-/** A new account starts with categories from onboarding and two draft starter services (prototype mount). */
+/** A new account starts with categories from onboarding and two draft starter services. */
 const seedNewAccount = (
   state: StudioState,
   welcome: WelcomeNote | null,
@@ -112,7 +112,7 @@ const seedNewAccount = (
   };
 };
 
-/** Studio's state, actions and lifecycle (prototype Studio.dc.html class Component). */
+/** Studio's state, actions and lifecycle. */
 export const useStudio = (props: StudioProps) => {
   const isNew =
     (getQueryParam("account") || props.account || "populated") === "new";
@@ -140,7 +140,7 @@ export const useStudio = (props: StudioProps) => {
 
   wideRef.current = isWide;
 
-  // like the prototype's runtime, the new state is readable straight away (getState) and the render follows
+  // the new state is readable straight away (getState) and the render follows
   const setState = (patch: StudioPatch) => {
     const current = stateRef.current;
 
@@ -226,7 +226,7 @@ export const useStudio = (props: StudioProps) => {
       document.documentElement.style.overflow = "";
       document.body.style.overflow = "";
     };
-    // mount-only, like the prototype's componentDidMount
+    // mount-only
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 

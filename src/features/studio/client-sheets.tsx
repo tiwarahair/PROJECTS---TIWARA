@@ -6,7 +6,7 @@ import styles from "./client-sheets.module.css";
 import clientStyles from "./studio-clients.module.css";
 import sheet from "./studio-sheet.module.css";
 
-/** The client's profile in the side panel (prototype shCliView). */
+/** The client's profile in the side panel. */
 export const ClientViewSheet = ({ view }: { view: ClientsView }) => (
   <div className={clientStyles.profileSheet}>
     <ClientProfile view={view} variant="sheet" />
@@ -16,7 +16,7 @@ export const ClientViewSheet = ({ view }: { view: ClientsView }) => (
 type DraftField =
   "first" | "last" | "phone" | "email" | "products" | "sensitivities";
 
-/** Add or edit a client (prototype shClientEdit). */
+/** Add or edit a client. */
 export const ClientEditSheet = ({ view }: { view: ClientsView }) => {
   const fileRef = useRef<HTMLInputElement>(null);
   const { draft, draftImage, duplicate } = view;
@@ -185,7 +185,7 @@ export const ClientEditSheet = ({ view }: { view: ClientsView }) => {
   );
 };
 
-/** Cancel / Save under the client form (prototype shClientEdit footer). */
+/** Cancel / Save under the client form. */
 export const ClientEditFooter = ({ view }: { view: ClientsView }) => (
   <div className={sheet.footerRow}>
     <button className={sheet.cancel} onClick={view.cancelDraft}>

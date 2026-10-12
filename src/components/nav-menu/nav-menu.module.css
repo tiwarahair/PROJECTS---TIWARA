@@ -1,4 +1,4 @@
-/* Pop-up nav menu (the header account menu and the Search menu), values verbatim from prototype tw-fav.js F.openMenu(). */
+/* Pop-up nav menu (the header account menu and the Search menu). */
 .menu {
   position: fixed;
   top: var(--menu-top);
@@ -55,7 +55,7 @@
   margin-top: 2px;
 }
 
-/* :hover/:focus-visible repeat colour, decoration and outline: the prototype set these inline, above the global a/:focus-visible rules. */
+/* :hover/:focus-visible repeat colour, decoration and outline so they win over the global a/:focus-visible rules. */
 .row,
 .row:hover,
 .row:focus-visible {

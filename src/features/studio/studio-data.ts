@@ -1,4 +1,4 @@
-// Studio seed data and constants, verbatim from the prototype (Studio.dc.html class fields and initial state).
+// Studio seed data, constants and initial state.
 import {
   categoryColours,
   platformCustomisations,
@@ -201,7 +201,7 @@ export const BLOCK_COLORS: BlockColour[] = [
   { id: "grey", label: "Grey", hex: "#7d7465" },
 ];
 
-/** Seed past appointments; two are dated relative to now, as in the prototype's class field. */
+/** Seed past appointments; two are dated relative to now. */
 export const getSeedPast = (): PastRecord[] => [
   {
     pastId: "seed-fp",
@@ -451,7 +451,7 @@ export const ICONS = {
 
 export const NO_CATEGORY_TONE = "var(--neutral-300,#d8d2c6)";
 
-/** The shared catalogue grouped for Studio (prototype get TAXONOMY). */
+/** The shared catalogue grouped for Studio. */
 export const TAXONOMY: Taxonomy[] = serviceGroups.map(({ id, name }) => {
   const types = serviceTypes.filter(({ groupId }) => groupId === id);
 
@@ -473,7 +473,7 @@ export const TAXONOMY: Taxonomy[] = serviceGroups.map(({ id, name }) => {
 
 export const CATEGORY_COLOURS: CategoryColour[] = categoryColours;
 
-/** The prototype's initial state (class field `state`). */
+/** Studio's initial state. */
 export const getInitialStudioState = (): StudioState => {
   const readStored = (key: string) => {
     try {

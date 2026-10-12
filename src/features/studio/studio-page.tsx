@@ -40,7 +40,7 @@ import styles from "./studio-shell.module.css";
 export type StudioPageProps = StudioProps;
 
 /**
- * The stylist's Studio, route "/studio" (prototype Studio.dc.html): sidebar (wide) or footer nav (narrow), top bar,
+ * The stylist's Studio, route "/studio": sidebar (wide) or footer nav (narrow), top bar,
  * the Home / Bookings / Services / Earnings / Clients / Settings tabs, setup checklist, sheets and dialogs.
  */
 export const StudioPage = (props: StudioPageProps) => {

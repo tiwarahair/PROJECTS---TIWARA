@@ -30,7 +30,7 @@ const Chevron = ({ iconPath }: { iconPath: string }) => (
   </svg>
 );
 
-/** The category colour radio group (prototype swatches). */
+/** The category colour radio group. */
 export const Swatches = ({ swatches }: { swatches: Swatch[] }) => (
   <div
     className={styles.swatches}
@@ -69,7 +69,7 @@ export const Swatches = ({ swatches }: { swatches: Swatch[] }) => (
   </div>
 );
 
-/** Manage categories (prototype shCats). */
+/** Manage categories. */
 export const CategoriesSheet = ({
   studio,
   view,
@@ -240,7 +240,7 @@ export const CategoriesSheet = ({
   </div>
 );
 
-/** Create or edit an add-on (prototype shAddon). */
+/** Create or edit an add-on. */
 export const AddonSheet = ({ view }: { view: AddonSheetView }) => {
   const { newCategory } = view;
 
@@ -355,7 +355,7 @@ export const AddonSheet = ({ view }: { view: AddonSheetView }) => {
   );
 };
 
-/** Create / Save add-on (prototype shAddon footer). */
+/** Create / Save add-on. */
 export const AddonSheetFooter = ({ view }: { view: AddonSheetView }) => (
   <div className={styles.footer}>
     <button

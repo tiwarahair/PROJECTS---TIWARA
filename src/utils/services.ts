@@ -1,4 +1,4 @@
-// Service catalogue helpers, ported from data.js (TIWARA.services). Outputs are identical to the prototype.
+// Service catalogue helpers.
 import { serviceSpecs, serviceTypes } from "../data";
 import type {
   CustomisationGroup,
@@ -72,7 +72,7 @@ const getOnOptions = (
 ): CustomisationOption[] =>
   group?.on ? group.options.filter(({ on }) => on) : [];
 
-/** The customisations a client can pick for a service (data.js custOf). */
+/** The customisations a client can pick for a service. */
 export const getServiceOptions = (
   service: Service | null | undefined,
 ): ServiceOptions => {
