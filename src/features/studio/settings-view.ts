@@ -4,7 +4,12 @@ import type { ChangeEvent } from "react";
 import type { BusinessValue } from "../../components/business-details/business-details-logic";
 import type { PolicyValue } from "../../components/payment-policy/payment-policy-logic";
 import type { TaxDetails } from "../../components/tax-details-form/tax-details-logic";
-import { BOOKING_LINK, GATE_REASON, SHORT_MONTH_NAMES } from "./studio-data";
+import {
+  BOOKING_LINK,
+  GATE_REASON,
+  SHORT_MONTH_NAMES,
+  STUDIO_STYLIST_ID,
+} from "./studio-data";
 import { copyText, formatDuration, formatMinutes } from "./studio-format";
 import {
   getAllClients,
@@ -233,7 +238,7 @@ export const getSettingsView = (
           return;
         }
 
-        navigate("/stylist?stylist=amara-beauty");
+        navigate(`/stylist?stylist=${STUDIO_STYLIST_ID}`);
       },
     },
   ];

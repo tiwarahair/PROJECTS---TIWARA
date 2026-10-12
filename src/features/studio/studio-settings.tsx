@@ -8,7 +8,7 @@ import { joinClassNames } from "../../utils/class-names";
 import { AvailabilityPage, ProfilePage, RulesPage } from "./settings-pages";
 import { getSettingsView } from "./settings-view";
 import type { SettingsIcon, SettingsView } from "./settings-view";
-import { GATE_REASON } from "./studio-data";
+import { GATE_REASON, STUDIO_STYLIST_ID } from "./studio-data";
 import { getAvatarSrc } from "./studio-shell";
 import type { StudioController } from "./use-studio";
 import styles from "./studio-settings.module.css";
@@ -313,7 +313,7 @@ const SettingsNav = ({
               </button>
               <Link
                 className={styles.shareLink}
-                to="/stylist?stylist=amara-beauty"
+                to={`/stylist?stylist=${STUDIO_STYLIST_ID}`}
               >
                 <EyeIcon />
                 View public profile
@@ -495,7 +495,7 @@ const SettingsFrame = ({
                 taxEditing={!!state.taxEdit}
                 taxBusiness={state.business}
                 taxLegalName="Amara Okonkwo"
-                taxBusinessName="Amara Beauty Ltd"
+                taxBusinessName="Tiwára's House Ltd"
                 onTaxEdit={view.onTaxEdit}
                 onTaxAdd={view.onTaxAdd}
                 onTaxSave={view.onTaxSave}

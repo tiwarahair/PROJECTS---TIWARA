@@ -130,7 +130,7 @@ export const TaxDetailsForm = ({
   mode = "setup",
   fixture = "",
   legalName = "Amara Okonkwo",
-  businessName = "Amara Beauty Ltd",
+  businessName = "Tiwára's House Ltd",
   business,
   value,
   onSubmit,

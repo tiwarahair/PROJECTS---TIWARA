@@ -2,7 +2,12 @@ import type { CSSProperties } from "react";
 import { Link } from "react-router";
 import { getAssetUrl } from "../../utils/asset-url";
 import { joinClassNames } from "../../utils/class-names";
-import { BOOKING_LINK, WEEKDAYS, MONTHS } from "./studio-data";
+import {
+  BOOKING_LINK,
+  MONTHS,
+  STUDIO_STYLIST_ID,
+  WEEKDAYS,
+} from "./studio-data";
 import { copyText } from "./studio-format";
 import { getSteps, isLive } from "./studio-model";
 import type { StudioTab } from "./studio-types";
@@ -191,7 +196,7 @@ export const StudioSidebar = ({ studio }: { studio: StudioController }) => {
         {isOpen && (
           <span className={styles.grow}>
             <span className={styles.profileName}>Amara</span>
-            <span className={styles.profileArea}>Whalley Range</span>
+            <span className={styles.profileArea}>Ancoats</span>
           </span>
         )}
       </button>
@@ -541,7 +546,7 @@ export const LinkCardBody = ({ studio }: { studio: StudioController }) => {
       <div className={styles.linkActions}>
         <Link
           className={styles.previewProfile}
-          to="/stylist?stylist=amara-beauty"
+          to={`/stylist?stylist=${STUDIO_STYLIST_ID}`}
         >
           Preview profile
         </Link>

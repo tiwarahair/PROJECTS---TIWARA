@@ -15,7 +15,7 @@ export const HeroSection = () => (
   >
     <div id="heroframe" className={styles.frame}>
       <img
-        src={getAssetUrl("site/hero2.jpg")}
+        src={getAssetUrl("site/hero.jpg")}
         fetchPriority="high"
         alt="Stylist cornrowing a client at Tiwára's House"
         className={styles.image}

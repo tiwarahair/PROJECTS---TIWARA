@@ -49,7 +49,7 @@ export const HomePage = ({
 
   useHomeMotion(rootRef, showWhy);
 
-  const heroUrl = getAssetUrl("site/hero2.jpg");
+  const heroUrl = getAssetUrl("site/hero.jpg");
 
   // eslint-disable-next-line id-length -- React preload() option name
   preload(heroUrl, { as: "image", fetchPriority: "high" });

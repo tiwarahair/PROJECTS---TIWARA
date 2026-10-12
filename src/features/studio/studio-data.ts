@@ -75,6 +75,7 @@ export const TIMES = [
 ];
 export const SLOT_TIMES = ["09:00", "10:30", "13:00", "15:30", "17:00"];
 export const BOOKING_LINK = "tiwaras.house/book/tiwara";
+export const STUDIO_STYLIST_ID = "tiwaras-house";
 export const GATE_REASON =
   "Your booking link and payouts are off until you turn on two-step verification, add your tax details and connect Stripe.";
 
@@ -1082,8 +1083,8 @@ export const getInitialStudioState = (): StudioState => {
     profile: {
       salon: "Tiwára's House",
       about:
-        "Afro hair specialist in Whalley Range. Braids, locs and silk press in a calm home studio.",
-      address: "Whalley Range, Manchester",
+        "Afro hair specialist in Ancoats. Braids, locs and silk press in a calm home studio.",
+      address: "Ancoats, Manchester",
       mobile: false,
       site: "tiwarashouse.co.uk",
       instagram: "@tiwarashouse",
@@ -1094,14 +1095,14 @@ export const getInitialStudioState = (): StudioState => {
       type: "shop",
       vatOn: false,
       details: {
-        line1: "118 Wilmslow Road",
-        line2: "Unit 4",
+        line1: "14 Blossom Street",
+        line2: "",
         city: "Manchester",
-        postcode: "M14 5AJ",
-        basePostcode: "M14 5AJ",
+        postcode: "M4 6AJ",
+        basePostcode: "M4 6AJ",
         radius: "10",
         phone: "07700 900418",
-        email: "hello@amarabeauty.co.uk",
+        email: "hello@tiwarashouse.co.uk",
         vat: "",
       },
     },

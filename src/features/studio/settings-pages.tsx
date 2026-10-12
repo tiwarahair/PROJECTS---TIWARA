@@ -3,10 +3,14 @@ import type { CSSProperties } from "react";
 import { getAssetUrl } from "../../utils/asset-url";
 import { joinClassNames } from "../../utils/class-names";
 import type { SettingsView } from "./settings-view";
-import { TIMES } from "./studio-data";
+import { stylists } from "../../data";
+import { STUDIO_STYLIST_ID, TIMES } from "./studio-data";
 import { getAvatarSrc } from "./studio-shell";
 import type { StudioController } from "./use-studio";
 import styles from "./settings-pages.module.css";
+
+const DEMO_COVER =
+  stylists.find(({ id }) => id === STUDIO_STYLIST_ID)?.cover ?? "";
 
 const PlusIcon = () => (
   <svg
@@ -58,7 +62,7 @@ export const ProfilePage = ({
       <div className={styles.cover}>
         <img
           className={styles.coverImage}
-          src={state.coverUrl || getAssetUrl("site/reveal.jpg")}
+          src={state.coverUrl || getAssetUrl(DEMO_COVER)}
           alt="Cover"
         />
         <input

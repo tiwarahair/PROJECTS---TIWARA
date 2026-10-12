@@ -34,7 +34,7 @@ describe("checkout money", () => {
     expect(money.method).toBe("none");
   });
 
-  it("formats pounds like the prototype", () => {
+  it("formats whole pounds without pence and negatives with a minus sign", () => {
     expect(formatPounds(85)).toBe("£85");
     expect(formatPounds(-20.5)).toBe("−£20.50");
   });

@@ -207,7 +207,7 @@ const TwoFactorBody = ({
             value={state.tax ?? undefined}
             business={state.business}
             legalName="Amara Okonkwo"
-            businessName="Amara Beauty Ltd"
+            businessName="Tiwára's House Ltd"
             onSubmit={view.taxSubmit}
           />
         </div>

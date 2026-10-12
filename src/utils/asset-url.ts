@@ -1,4 +1,4 @@
-// Pages reference images by their path inside assets/ ("site/hero2.jpg", "logos/logo-crimson.png"),
+// Pages reference images by their path inside assets/ ("site/hero.jpg", "logos/logo-crimson.png"),
 // sometimes built at runtime (the AI preview renders). Map those exact strings to Vite-hashed URLs.
 const assetModules = import.meta.glob<string>(
   "../../assets/**/*.{jpg,jpeg,png,webp}",

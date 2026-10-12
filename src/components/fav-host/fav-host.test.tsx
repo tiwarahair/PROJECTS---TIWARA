@@ -34,7 +34,7 @@ const flush = async (ms = 0) => {
   });
 };
 
-describe("FavHost (tw-fav.js port)", () => {
+describe("FavHost", () => {
   beforeEach(() => {
     vi.useFakeTimers();
     sessionStorage.clear();

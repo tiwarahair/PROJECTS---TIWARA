@@ -146,14 +146,14 @@ export const MODE_KEY = "tw_ob_mode";
 // demo accounts
 export const KNOWN_CUSTOMERS = ["nia.okafor@gmail.com", "kemi.a@icloud.com"];
 export const KNOWN_PROS = [
-  "amara@amarabeauty.co.uk",
-  "hello@amarabeauty.co.uk",
+  "amara@tiwarashouse.co.uk",
+  "hello@tiwarashouse.co.uk",
 ];
 export const NAMES: Record<string, [string, string]> = {
   "nia.okafor@gmail.com": ["Nia", "Okafor"],
   "kemi.a@icloud.com": ["Kemi", "Adeyemi"],
-  "amara@amarabeauty.co.uk": ["Amara", "Okonkwo"],
-  "hello@amarabeauty.co.uk": ["Amara", "Okonkwo"],
+  "amara@tiwarashouse.co.uk": ["Amara", "Okonkwo"],
+  "hello@tiwarashouse.co.uk": ["Amara", "Okonkwo"],
 };
 
 // screens that run the invisible Turnstile check (fallback widget when ?turnstile=challenge|fail)

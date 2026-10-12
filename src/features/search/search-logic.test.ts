@@ -15,7 +15,7 @@ import {
 const stateFor = (search: string) => getInitialState(search, 1440);
 
 describe("search state", () => {
-  it("parses the URL like the prototype (legacy service, venues, price, distance, sort aliases)", () => {
+  it("parses the URL, including legacy service, venues, price, distance and sort aliases", () => {
     const state = stateFor(
       "?service=braids&venue=salon,mobile,bogus&maxPrice=80&dist=15&sort=soonest&time=9am-5pm",
     );
@@ -47,7 +47,7 @@ describe("search state", () => {
     expect(state.radius).toBe(10);
   });
 
-  it("writes the URL back in the prototype's order", () => {
+  it("writes the URL back in a fixed parameter order", () => {
     expect(
       getStateSearch(
         stateFor("?service=braids&loc=Chorlton&venue=salon&sort=price"),

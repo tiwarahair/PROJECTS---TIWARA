@@ -33,7 +33,7 @@ export const ForStylistsSection = ({ variant }: ForStylistsSectionProps) => (
           <img
             data-plx=""
             loading="lazy"
-            src={getAssetUrl("site/dsc03215.jpeg")}
+            src={getAssetUrl("site/list-your-business-image.jpeg")}
             alt="Barber at work"
             className={styles.photo}
           />

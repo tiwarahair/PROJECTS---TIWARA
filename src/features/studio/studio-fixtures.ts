@@ -29,14 +29,14 @@ const SOLE_TAX: Partial<TaxDetails> = {
 
 const LTD_TAX: Partial<TaxDetails> = {
   kind: "ltd",
-  companyName: "Amara Beauty Ltd",
+  companyName: "Tiwára's House Ltd",
   companyNumber: "14829307",
   isAddressSame: true,
   address: {
-    line1: "118 Wilmslow Road",
-    line2: "Unit 4",
+    line1: "14 Blossom Street",
+    line2: "",
     city: "Manchester",
-    postcode: "M14 5AJ",
+    postcode: "M4 6AJ",
   },
 };
 

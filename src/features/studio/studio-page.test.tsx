@@ -144,7 +144,7 @@ describe("StudioPage", () => {
 
     expect(
       within(card).getByRole("link", { name: "Preview profile" }),
-    ).toHaveAttribute("href", "/stylist?stylist=amara-beauty");
+    ).toHaveAttribute("href", "/stylist?stylist=tiwaras-house");
 
     fireEvent.click(within(card).getByRole("button", { name: "Copy link" }));
     expect(screen.getByText("Booking link copied")).toBeInTheDocument();

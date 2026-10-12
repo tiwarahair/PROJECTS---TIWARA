@@ -183,7 +183,7 @@ const getStartState = (props: ResolvedProps): OnboardingState => {
     state.form = {
       ...state.form,
       ...(isPro
-        ? { email: "amara@amarabeauty.co.uk", first: "Amara", last: "Okonkwo" }
+        ? { email: "amara@tiwarashouse.co.uk", first: "Amara", last: "Okonkwo" }
         : { email: "ama@example.com", first: "Ama", last: "Mensah" }),
     };
 
@@ -719,7 +719,7 @@ export const useOnboarding = (props: OnboardingProps) => {
               ? "k3x9wq2m7t@privaterelay.appleid.com"
               : "ama.studio@gmail.com";
 
-          form.email = isKnown ? "amara@amarabeauty.co.uk" : newProEmail;
+          form.email = isKnown ? "amara@tiwarashouse.co.uk" : newProEmail;
 
           if (!isKnown) {
             setState({ busy: false, form, serverErrors: { noBusiness: true } });

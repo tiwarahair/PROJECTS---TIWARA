@@ -45,7 +45,7 @@ describe("TaxDetailsForm", () => {
     render(<TaxDetailsForm fixture="ltd" />);
 
     expect(screen.getByLabelText("Company name")).toHaveValue(
-      "Amara Beauty Ltd",
+      "Tiwára's House Ltd",
     );
   });
 

@@ -229,7 +229,7 @@ const TAX_FORMS: { fixture: string; props: TaxDetailsFormProps }[] = [
       mode: "settings",
       value: {
         kind: "ltd",
-        companyName: "Amara Beauty Ltd",
+        companyName: "Tiwára's House Ltd",
         companyNumber: "SC123456",
         isAddressSame: true,
       },
@@ -269,7 +269,7 @@ const BUSINESS_DETAILS: {
     props: {
       tax: {
         kind: "ltd",
-        companyName: "Amara Beauty Ltd",
+        companyName: "Tiwára's House Ltd",
         companyNumber: "SC123456",
       },
     },
@@ -356,7 +356,7 @@ const SOLE_TAX = {
 
 const LTD_TAX = {
   kind: "ltd" as const,
-  companyName: "Amara Beauty Ltd",
+  companyName: "Tiwára's House Ltd",
   companyNumber: "SC123456",
   isAddressSame: true,
   address: {
@@ -466,7 +466,7 @@ const ACCOUNT_SETTINGS: {
       tax: SOLE_TAX,
       taxEditing: true,
       taxLegalName: "Amara Okonkwo",
-      taxBusinessName: "Amara Beauty Ltd",
+      taxBusinessName: "Tiwára's House Ltd",
     },
   },
   { fixture: "calendar", isWide: false, props: { page: "calendar" } },

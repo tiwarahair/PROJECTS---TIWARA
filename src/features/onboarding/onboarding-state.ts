@@ -224,11 +224,11 @@ export const getFixturePatch = (
     case "welcome":
       return { screen: "welcome", audience: "pro" };
     case "pro-2fa":
-      withForm({ email: "amara@amarabeauty.co.uk" });
+      withForm({ email: "amara@tiwarashouse.co.uk" });
 
       return { screen: "pro-2fa", form, codeKind: "2fa" };
     case "pro-2fa-backup":
-      withForm({ email: "amara@amarabeauty.co.uk" });
+      withForm({ email: "amara@tiwarashouse.co.uk" });
 
       return {
         screen: "pro-2fa",
@@ -287,7 +287,7 @@ export const getFixturePatch = (
       withForm({
         first: "Nia",
         last: "Okafor",
-        email: "amara@amarabeauty.co.uk",
+        email: "amara@tiwarashouse.co.uk",
         mobile: "7700 900412",
         password: "sunflower9",
         terms: true,
@@ -400,7 +400,7 @@ export const getFixturePatch = (
         type: "shop",
         first: "Amara",
         last: "Okonkwo",
-        email: "hello@amarabeauty.co.uk",
+        email: "hello@tiwarashouse.co.uk",
         mobile: "7700 900418",
         password: "tide2lam",
         terms: true,
