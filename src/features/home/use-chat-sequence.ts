@@ -2,7 +2,7 @@ import { useEffect, useLayoutEffect, useState } from "react";
 import type { RefObject } from "react";
 import { chatMessages } from "../../data";
 
-export interface ChatSequence {
+interface ChatSequence {
   shown: number;
   isTyping: boolean;
   isBooked: boolean;

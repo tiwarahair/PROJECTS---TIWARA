@@ -1,7 +1,7 @@
 import type { CSSProperties } from "react";
 import { hairColours } from "../../data";
 import { joinClassNames } from "../../utils/class-names";
-import { formatDuration } from "../../utils/services";
+import { formatServiceDuration } from "../../utils/services";
 import helmet from "../../styles/features/booking/booking-helmet.module.css";
 import { getDeltaLabel } from "./booking-pricing";
 import type { Selection } from "./booking-state";
@@ -228,7 +228,7 @@ export const StepCustomise = ({ booking }: StepCustomiseProps) => {
                   const on = selection.addons.includes(name);
 
                   const timeExtra = minutes
-                    ? ` · +${formatDuration(minutes)}`
+                    ? ` · +${formatServiceDuration(minutes)}`
                     : "";
 
                   return (

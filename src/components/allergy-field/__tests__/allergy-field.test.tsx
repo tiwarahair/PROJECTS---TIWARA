@@ -1,6 +1,14 @@
-import { fireEvent, render, screen } from "@testing-library/react";
-import { describe, expect, it, vi } from "vitest";
+import { render, screen } from "@testing-library/react";
+import { beforeEach, describe, expect, it, vi } from "vitest";
 import { AllergyField } from "../allergy-field";
+import type { UserEvent } from "@testing-library/user-event";
+import { setupUser } from "../../../test/setup-user";
+
+let user: UserEvent;
+
+beforeEach(() => {
+  user = setupUser();
+});
 
 describe("AllergyField", () => {
   it("default: label, hint for the stylist and no counter", () => {
@@ -27,38 +35,38 @@ describe("AllergyField", () => {
     expect(screen.getByText("150 / 200")).toBeInTheDocument();
   });
 
-  it("caps input at 200 characters", () => {
+  it("caps input at 200 characters", async () => {
     const handleChange = vi.fn();
 
     render(<AllergyField onChange={handleChange} />);
 
-    fireEvent.change(screen.getByLabelText("Allergies or sensitivities"), {
-      target: { value: "y".repeat(240) },
-    });
+    // the field is controlled by its parent, so a paste (one change) is what can exceed the cap here
+    await user.click(screen.getByLabelText("Allergies or sensitivities"));
+    await user.paste("y".repeat(240));
 
     expect(handleChange).toHaveBeenCalledWith("y".repeat(200));
   });
 
-  it("opens and closes the privacy sheet", () => {
+  it("opens and closes the privacy sheet", async () => {
     render(<AllergyField stylistName="Studio Zuri" />);
-    fireEvent.click(screen.getByRole("button", { name: "How we use it" }));
+    await user.click(screen.getByRole("button", { name: "How we use it" }));
 
     const dialog = screen.getByRole("dialog", {
       name: "How we use your allergy information",
     });
 
     expect(dialog).toHaveTextContent("Studio Zuri, on your bookings.");
-    fireEvent.click(screen.getByRole("button", { name: "Got it" }));
+    await user.click(screen.getByRole("button", { name: "Got it" }));
     expect(screen.queryByRole("dialog")).not.toBeInTheDocument();
   });
 
-  it("openPrivacy shows the sheet on load; the scrim closes it", () => {
+  it("openPrivacy shows the sheet on load; the scrim closes it", async () => {
     render(<AllergyField openPrivacy />);
     const dialog = screen.getByRole("dialog");
 
-    fireEvent.click(dialog);
+    await user.click(dialog);
     expect(screen.getByRole("dialog")).toBeInTheDocument();
-    fireEvent.click(dialog.parentElement as HTMLElement);
+    await user.click(dialog.parentElement as HTMLElement);
     expect(screen.queryByRole("dialog")).not.toBeInTheDocument();
   });
 

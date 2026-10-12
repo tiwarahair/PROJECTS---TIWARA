@@ -8,7 +8,7 @@ interface ShareTarget {
   area?: string;
 }
 
-export interface ShareData {
+interface ShareData {
   url: string;
   title: string;
   text: string;
@@ -33,7 +33,7 @@ export const getShareData = ({ id, name, area }: ShareTarget): ShareData => {
   };
 };
 
-export const canShareNatively = (): boolean => !!navigator.share;
+const canShareNatively = (): boolean => !!navigator.share;
 
 const copyWithTextarea = (url: string) => {
   const textarea = document.createElement("textarea");

@@ -2,6 +2,7 @@
 import type { ChangeEvent } from "react";
 import type { SearchSelectOption } from "../../components/search-select/search-select";
 import { CATEGORY_COLOURS, NO_CATEGORY_TONE } from "./studio-data";
+import { parseNumber, parseWholeNumber } from "./studio-format";
 import {
   getCategoryById,
   getCategoryNameError,
@@ -54,12 +55,6 @@ export const DURATION_MINUTE_OPTIONS = Array.from(
     label: index * 5 + (index * 5 === 1 ? " min" : " mins"),
   }),
 );
-
-const toNumber = (value: unknown) => {
-  const parsed = parseFloat(String(value));
-
-  return isNaN(parsed) ? 0 : parsed;
-};
 
 /** Manage categories: reorder, rename, recolour, delete and add. */
 export const getCategoriesView = (studio: StudioController) => {
@@ -262,7 +257,7 @@ export const getAddonSheetView = (studio: StudioController) => {
 
   if (!draft) return null;
 
-  const isBad = !String(draft.name).trim();
+  const isBad = !draft.name.trim();
 
   const patch = (value: Partial<typeof draft>) =>
     setState({ addonDraft: { ...draft, ...value } });
@@ -273,8 +268,8 @@ export const getAddonSheetView = (studio: StudioController) => {
     name: draft.name,
     onName: (event: ChangeEvent<HTMLInputElement>) =>
       patch({ name: event.target.value }),
-    hourValue: String(parseInt(String(draft.hours)) || 0),
-    minuteValue: String(parseInt(String(draft.min)) || 0),
+    hourValue: String(parseWholeNumber(draft.hours)),
+    minuteValue: String(parseWholeNumber(draft.min)),
     price: String(draft.price),
     onPrice: (event: ChangeEvent<HTMLInputElement>) =>
       patch({ price: event.target.value }),
@@ -369,10 +364,10 @@ export const getAddonSheetView = (studio: StudioController) => {
           ? draft.categoryId
           : null,
         status: draft.status || "active",
-        name: String(draft.name).trim(),
-        price: toNumber(draft.price),
-        hours: parseInt(String(draft.hours)) || 0,
-        min: parseInt(String(draft.min)) || 0,
+        name: draft.name.trim(),
+        price: parseNumber(draft.price),
+        hours: parseWholeNumber(draft.hours),
+        min: parseWholeNumber(draft.min),
       };
 
       setState({

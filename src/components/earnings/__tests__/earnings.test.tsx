@@ -1,13 +1,17 @@
-import { act, fireEvent, render, screen, within } from "@testing-library/react";
+import { act, render, screen, within } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { Earnings } from "../earnings";
-import {
-  buildLedger,
-  formatGbp,
-  getRange,
-  getRangeLabel,
-} from "../earnings-data";
+import { buildLedger, getRange, getRangeLabel } from "../earnings-data";
 import { getEarningsCsv } from "../earnings-export";
+import { formatMoney } from "../../../utils/money";
+import type { UserEvent } from "@testing-library/user-event";
+import { setupUser } from "../../../test/setup-user";
+
+let user: UserEvent;
+
+beforeEach(() => {
+  user = setupUser();
+});
 
 describe("Earnings ledger", () => {
   it("is deterministic for a scenario", () => {
@@ -33,7 +37,7 @@ describe("Earnings ledger", () => {
   });
 
   it("formats money and ranges", () => {
-    expect(formatGbp(-1234.5)).toBe("−£1,234.50");
+    expect(formatMoney(-1234.5, { pence: "always" })).toBe("−£1,234.50");
     const range = getRange("custom", "2026-09-28", "2026-10-04");
 
     expect(getRangeLabel(range)).toBe("28 Sept – 4 Oct 2026");
@@ -63,14 +67,14 @@ describe("Earnings", () => {
     );
   });
 
-  it("empty: offers to copy the booking link", () => {
+  it("empty: offers to copy the booking link", async () => {
     render(<Earnings scenario="empty" />);
     expect(screen.getByText("No earnings yet.")).toBeInTheDocument();
-    fireEvent.click(screen.getByRole("button", { name: "Copy booking link" }));
+    await user.click(screen.getByRole("button", { name: "Copy booking link" }));
     expect(screen.getByRole("status")).toHaveTextContent("Booking link copied");
   });
 
-  it("setup: asks to continue setup, or for tax details when on hold", () => {
+  it("setup: asks to continue setup, or for tax details when on hold", async () => {
     const onAddTax = vi.fn();
     const { unmount } = render(<Earnings scenario="setup" />);
 
@@ -80,7 +84,7 @@ describe("Earnings", () => {
 
     unmount();
     render(<Earnings scenario="setup" taxHold={true} onAddTax={onAddTax} />);
-    fireEvent.click(screen.getByRole("button", { name: "Add tax details" }));
+    await user.click(screen.getByRole("button", { name: "Add tax details" }));
     expect(onAddTax).toHaveBeenCalled();
   });
 
@@ -92,7 +96,7 @@ describe("Earnings", () => {
     ).toBeInTheDocument();
   });
 
-  it("opens the payout drawer on the payouts tab", () => {
+  it("opens the payout drawer on the payouts tab", async () => {
     render(<Earnings tab="po" period="lastmonth" />);
 
     const [firstPayout] = screen
@@ -103,7 +107,7 @@ describe("Earnings", () => {
           /Paid|Failed|In transit/.test(button.textContent ?? ""),
       );
 
-    fireEvent.click(firstPayout!);
+    await user.click(firstPayout!);
     const drawer = screen.getByRole("dialog", { name: "Payout" });
 
     expect(
@@ -111,13 +115,13 @@ describe("Earnings", () => {
     ).toBeInTheDocument();
   });
 
-  it("export: the dialog closes after download with a toast", () => {
+  it("export: the dialog closes after download with a toast", async () => {
     render(<Earnings open="export" />);
     const dialog = screen.getByRole("dialog", { name: "Export earnings" });
 
     URL.createObjectURL = vi.fn(() => "blob:test");
     URL.revokeObjectURL = vi.fn();
-    fireEvent.click(within(dialog).getByRole("button", { name: "Download" }));
+    await user.click(within(dialog).getByRole("button", { name: "Download" }));
     act(() => vi.advanceTimersByTime(180));
 
     expect(

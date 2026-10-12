@@ -5,7 +5,7 @@ import { serviceTypes } from "../../data";
 import type { ServiceType } from "../../types/service-type";
 import { getSwatches } from "./catalog-sheets-view";
 import { NO_CATEGORY_TONE, TAXONOMY } from "./studio-data";
-import { formatDuration, formatMinutes } from "./studio-format";
+import { formatMinutes } from "./studio-format";
 import {
   getCategoryById,
   getSortedCategories,
@@ -22,6 +22,7 @@ import {
   getWizardAddons,
   getWizardBase,
 } from "./wizard-options-view";
+import { formatDuration } from "../../utils/dates";
 
 const STEPS = [2, 3, 4];
 
@@ -164,7 +165,7 @@ export const getWizardView = (studio: StudioController) => {
       price: base.basePrice,
       durationHours: base.baseHours,
       durationMinutes: base.baseMinutes,
-      duration: formatDuration(base.baseHours, base.baseMinutes),
+      duration: formatDuration(base.totalMinutes),
       extraCustom: String(draft.extra || "") !== "",
       extra:
         String(draft.extra || "") === ""
@@ -423,12 +424,7 @@ export const getWizardView = (studio: StudioController) => {
         setWizard({ subcategoryTipOpen: !wizard.subcategoryTipOpen });
     },
     showSubcategoryTip: (event: MouseEvent | FocusEvent) =>
-      actions.tipShow(
-        event as unknown as { currentTarget: Element },
-        "subtype",
-        SUBCATEGORY_TIP,
-        true,
-      ),
+      actions.tipShow(event, "subtype", SUBCATEGORY_TIP, true),
     hideSubcategoryTip: () => actions.tipHide(),
     selectAll: (event: FocusEvent<HTMLInputElement>) => {
       const target = event.target;

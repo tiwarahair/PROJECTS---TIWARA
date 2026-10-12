@@ -1,4 +1,5 @@
 // CheckoutSheet demo bookings and money maths.
+import { roundToPence } from "../../utils/money";
 
 export type PaymentMode = "deposit" | "full" | "card" | "none";
 export type CheckoutView =
@@ -12,7 +13,7 @@ export type CheckoutView =
   | "receipt"
   | "refund"
   | "resend";
-export type CheckoutStatus =
+type CheckoutStatus =
   | "arrived"
   | "unpaid"
   | "paid"
@@ -21,10 +22,12 @@ export type CheckoutStatus =
   | "feeWaived"
   | "feeUnpaid"
   | "feeCollected";
+
 export type PayMethod = "card" | "link" | "record";
-export type RecordVia = "cash" | "bank" | "reader";
-export type DialogKind =
+type RecordVia = "cash" | "bank" | "reader";
+type DialogKind =
   "waive" | "refund" | "cancelLink" | "retryFee" | "recordFee" | "undoNs";
+
 export type TipChoice = "none" | "custom" | number;
 
 export interface CheckoutBooking {
@@ -211,17 +214,17 @@ export const DEFAULT_MENU: MenuGroup[] = [
   {
     title: "Add-ons",
     rows: [
-      ["Boho curls", 15, "+30 min"],
+      ["Boho curls", 15, "+30m"],
       ["Hair included", 20, "Pre-stretched, colour 1B"],
       ["Beads and cuffs", 8, "Gold or silver"],
-      ["Wash and condition", 12, "+20 min"],
+      ["Wash and condition", 12, "+20m"],
     ],
   },
   {
     title: "Services",
     rows: [
-      ["Braid takedown", 30, "1 h"],
-      ["Edges and baby hair", 10, "15 min"],
+      ["Braid takedown", 30, "1h"],
+      ["Edges and baby hair", 10, "15m"],
     ],
   },
 ];
@@ -267,28 +270,11 @@ export const ICONS = {
   send: "M22 2 11 13M22 2l-7 20-4-9-9-4z",
 };
 
-export const roundPounds = (value: number): number =>
-  Math.round(value * 100) / 100;
-
-/** "£45", "£45.50", "−£20". */
-export const formatPounds = (value: number): string => {
-  const rounded = roundPounds(value);
-  const absolute = Math.abs(rounded);
-  const sign = rounded < 0 ? "−" : "";
-  const amount = absolute % 1 === 0 ? String(absolute) : absolute.toFixed(2);
-
-  return `${sign}£${amount}`;
-};
-
-/** Always two decimals, for receipts. */
-export const formatPence = (value: number): string =>
-  `${value < 0 ? "−" : ""}£${Math.abs(value).toFixed(2)}`;
-
 /** A typed amount as pounds. */
 export const parsePounds = (value: string): number => {
   const parsed = parseFloat(String(value || "").replace(/[^0-9.]/g, ""));
 
-  return isNaN(parsed) ? 0 : roundPounds(parsed);
+  return isNaN(parsed) ? 0 : roundToPence(parsed);
 };
 
 export interface CheckoutSeedProps {
@@ -301,7 +287,7 @@ export interface CheckoutSeedProps {
 }
 
 /** Which demo booking a scenario uses; a host booking is "live". */
-export const getBookingKey = (scenario: string, hasBooking: boolean): string =>
+const getBookingKey = (scenario: string, hasBooking: boolean): string =>
   hasBooking
     ? "live"
     : ({
@@ -313,7 +299,7 @@ export const getBookingKey = (scenario: string, hasBooking: boolean): string =>
         unpaid: "tola",
       }[scenario] ?? (/^(fee|waive)/.test(scenario) ? "kemi" : "zainab"));
 
-export interface CheckoutMoney {
+interface CheckoutMoney {
   items: number;
   due: number;
   refundDue: number;
@@ -340,16 +326,16 @@ export const getMoney = (
   for (const { base, adjustment } of state.lines)
     lineTotal += base + adjustment;
 
-  const items = roundPounds(lineTotal);
-  const balance = roundPounds(items - state.paid);
+  const items = roundToPence(lineTotal);
+  const balance = roundToPence(items - state.paid);
   const due = Math.max(0, balance);
-  const refundDue = Math.max(0, roundPounds(-balance));
+  const refundDue = Math.max(0, roundToPence(-balance));
 
   const getSelectedTip = () => {
     if (state.tip === "custom") return parsePounds(state.tipCustom);
 
     if (typeof state.tip === "number")
-      return roundPounds((items * state.tip) / 100);
+      return roundToPence((items * state.tip) / 100);
 
     return 0;
   };
@@ -361,11 +347,11 @@ export const getMoney = (
   if (method === "card" && !isCardOk) method = "link";
 
   const tip = method === "link" || method === "none" ? 0 : selectedTip;
-  const charge = roundPounds(due + tip);
+  const charge = roundToPence(due + tip);
 
   const cardFee =
     (method === "card" || method === "link") && charge > 0
-      ? roundPounds(charge * 0.015 + 0.2)
+      ? roundToPence(charge * 0.015 + 0.2)
       : 0;
 
   const steps: CheckoutView[] = [
@@ -375,7 +361,7 @@ export const getMoney = (
     "review",
   ];
 
-  const bookFee = state.paid > 0 ? roundPounds(state.paid * 0.015 + 0.5) : 0;
+  const bookFee = state.paid > 0 ? roundToPence(state.paid * 0.015 + 0.5) : 0;
 
   return {
     items,

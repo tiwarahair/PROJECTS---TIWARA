@@ -1,13 +1,14 @@
 // Price, duration and policy amounts for the chosen service.
 import type { Stylist } from "../../types/stylist";
-import { money, policyLines } from "../../utils/pricing";
+import { policyLines } from "../../utils/pricing";
 import type { PolicySummary } from "../../utils/pricing";
-import { formatDuration } from "../../utils/services";
+import { formatServiceDuration } from "../../utils/services";
 import type { ServiceOptions } from "../../utils/services";
 import type { Service } from "../../types/service";
 import type { Selection } from "./booking-state";
+import { formatMoney } from "../../utils/money";
 
-export interface BookingMoney {
+interface BookingMoney {
   servicePrice: number;
   minutes: number;
   policy: PolicySummary;
@@ -71,13 +72,13 @@ export const getBookingMoney = (
     servicePrice,
     minutes,
     policy,
-    service: money(servicePrice),
-    fee: money(policy.fee),
-    total: money(servicePrice + policy.fee),
-    dueToday: money(policy.dueToday),
-    balance: money(policy.balance),
-    price: money(servicePrice),
-    duration: formatDuration(minutes),
+    service: formatMoney(servicePrice),
+    fee: formatMoney(policy.fee),
+    total: formatMoney(servicePrice + policy.fee),
+    dueToday: formatMoney(policy.dueToday),
+    balance: formatMoney(policy.balance),
+    price: formatMoney(servicePrice),
+    duration: formatServiceDuration(minutes),
   };
 };
 
@@ -86,7 +87,7 @@ interface DeltaOption {
   minutesDelta?: number;
 }
 
-/** "+£10 +1 hr" on an option chip; minutes only where showMins (own customisations). */
+/** "+£10 +1h" on an option chip; minutes only where showMins (own customisations). */
 export const getDeltaLabel = (
   { priceDelta, minutesDelta }: DeltaOption,
   showMinutes = false,
@@ -98,7 +99,9 @@ export const getDeltaLabel = (
   if (price) parts.push((price > 0 ? "+£" : "−£") + Math.abs(price));
 
   if (minutes && showMinutes)
-    parts.push((minutes > 0 ? "+" : "−") + formatDuration(Math.abs(minutes)));
+    parts.push(
+      (minutes > 0 ? "+" : "−") + formatServiceDuration(Math.abs(minutes)),
+    );
 
   return parts.join(" ");
 };

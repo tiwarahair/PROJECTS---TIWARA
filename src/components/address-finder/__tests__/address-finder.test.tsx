@@ -1,7 +1,15 @@
-import { act, fireEvent, render, screen } from "@testing-library/react";
+import { act, render, screen } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { AddressFinder } from "../address-finder";
 import type { AddressFixture } from "../use-address-finder";
+import type { UserEvent } from "@testing-library/user-event";
+import { setupUser } from "../../../test/setup-user";
+
+let user: UserEvent;
+
+beforeEach(() => {
+  user = setupUser();
+});
 
 const renderFinder = (fixture: AddressFixture = "", onChange = vi.fn()) => {
   render(<AddressFinder fixture={fixture} idPrefix="t" onChange={onChange} />);
@@ -60,14 +68,14 @@ describe("AddressFinder", () => {
     );
   });
 
-  it("nomatch: offers manual entry", () => {
+  it("nomatch: offers manual entry", async () => {
     renderFinder("nomatch");
 
     expect(screen.getByRole("status")).toHaveTextContent(
       "We can’t find that address",
     );
 
-    fireEvent.click(screen.getByRole("button", { name: "Enter it manually" }));
+    await user.click(screen.getByRole("button", { name: "Enter it manually" }));
 
     expect(screen.getByLabelText("Address line 1")).toHaveValue(
       "99 Nowhere Lane",
@@ -127,14 +135,14 @@ describe("AddressFinder", () => {
     ]);
   });
 
-  it("keyboard: arrow down then Enter picks a suggestion and moves focus to Edit", () => {
+  it("keyboard: arrow down then Enter picks a suggestion and moves focus to Edit", async () => {
     const onChange = renderFinder();
     const input = screen.getByRole("combobox");
 
-    fireEvent.change(input, { target: { value: "dickenson" } });
-    fireEvent.keyDown(input, { key: "ArrowDown" });
+    await user.type(input, "dickenson");
+    await user.keyboard("{ArrowDown}");
     expect(input).toHaveAttribute("aria-activedescendant", "t-opt-0");
-    fireEvent.keyDown(input, { key: "Enter" });
+    await user.keyboard("{Enter}");
 
     expect(onChange).toHaveBeenLastCalledWith(
       expect.objectContaining({ line1: "12 Dickenson Road", source: "pick" }),
@@ -144,35 +152,35 @@ describe("AddressFinder", () => {
     expect(screen.getByRole("button", { name: "Edit address" })).toHaveFocus();
   });
 
-  it("Escape closes the suggestions and the clear button empties the query", () => {
+  it("Escape closes the suggestions and the clear button empties the query", async () => {
     renderFinder("typing");
     const input = screen.getByRole("combobox");
 
-    fireEvent.keyDown(input, { key: "Escape" });
+    await user.type(input, "{Escape}");
     expect(screen.queryByRole("listbox")).not.toBeInTheDocument();
 
-    fireEvent.click(
+    await user.click(
       screen.getByRole("button", { name: "Clear address search" }),
     );
 
     expect(input).toHaveValue("");
   });
 
-  it("manual entry formats the postcode on blur and can return to search", () => {
+  it("manual entry formats the postcode on blur and can return to search", async () => {
     const onChange = renderFinder();
 
-    fireEvent.click(
+    await user.click(
       screen.getByRole("button", { name: "Enter address manually" }),
     );
 
     const postcode = screen.getByLabelText("Postcode");
 
-    fireEvent.change(postcode, { target: { value: "m146aj" } });
+    await user.type(postcode, "m146aj");
     expect(postcode).toHaveValue("M146AJ");
-    fireEvent.blur(postcode);
+    await user.tab();
     expect(postcode).toHaveValue("M14 6AJ");
 
-    fireEvent.click(
+    await user.click(
       screen.getByRole("button", { name: "Search for your address instead" }),
     );
 

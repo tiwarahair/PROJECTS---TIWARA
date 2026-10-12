@@ -1,19 +1,21 @@
 import { joinClassNames } from "../../utils/class-names";
 import {
   PERIODS,
-  formatDay,
-  formatGbp,
-  formatTime,
   getClient,
   getMethodLabel,
   getRange,
   getRangeLabel,
-  toIsoDate,
 } from "./earnings-data";
 import type { Payout, Transaction } from "./earnings-data";
 import { DEFAULT_BANK, getDayWord, getStatusStyle } from "./earnings-lists";
 import type { EarningsController, EarningsProps } from "./use-earnings";
 import styles from "../../styles/components/earnings/earnings-overlays.module.css";
+import { formatMoney } from "../../utils/money";
+import {
+  toIsoDate,
+  formatWeekdayDate,
+  formatClockTime,
+} from "../../utils/dates";
 
 const STRIPE_PAYOUTS = "https://dashboard.stripe.com/settings/payouts";
 
@@ -77,15 +79,15 @@ const getNoPayoutText = ({ isRecorded, status }: Transaction): string => {
 const getFeeText = ({ fee }: Transaction): string => {
   if (fee == null) return "Recorded";
 
-  return fee > 0 ? `Fee ${formatGbp(fee)}` : "No fee";
+  return fee > 0 ? `Fee ${formatMoney(fee, { pence: "always" })}` : "No fee";
 };
 
 const getPayoutNote = ({ status, arrive, sent }: Payout): string => {
-  if (status === "Paid") return `Arrived ${formatDay(arrive)}`;
+  if (status === "Paid") return `Arrived ${formatWeekdayDate(arrive)}`;
 
-  if (status === "Failed") return `Sent ${formatDay(sent)}`;
+  if (status === "Failed") return `Sent ${formatWeekdayDate(sent)}`;
 
-  return `Expected ${formatDay(arrive)}`;
+  return `Expected ${formatWeekdayDate(arrive)}`;
 };
 
 export const EarningsOverlays = ({
@@ -178,7 +180,7 @@ export const EarningsOverlays = ({
               amountClass(transaction.amount),
             )}
           >
-            {formatGbp(transaction.net)}
+            {formatMoney(transaction.net, { pence: "always" })}
           </div>
           <div className={styles.includedFee}>{getFeeText(transaction)}</div>
         </div>
@@ -192,8 +194,8 @@ export const EarningsOverlays = ({
       : undefined;
 
     const status = transaction.isRecorded ? "Recorded" : transaction.status;
-    const appointmentDay = formatDay(transaction.appointment);
-    const appointmentTime = formatTime(transaction.appointment);
+    const appointmentDay = formatWeekdayDate(transaction.appointment);
+    const appointmentTime = formatClockTime(transaction.appointment);
 
     return (
       <>
@@ -204,7 +206,7 @@ export const EarningsOverlays = ({
             amountClass(transaction.amount),
           )}
         >
-          {formatGbp(transaction.amount)}
+          {formatMoney(transaction.amount, { pence: "always" })}
         </div>
         <div className={styles.statusRow}>
           <span className={styles.statusTag} style={getStatusStyle(status)}>
@@ -253,7 +255,7 @@ export const EarningsOverlays = ({
           <div className={styles.fact}>
             <span className={styles.factLabel}>Taken</span>
             <span className={styles.factNumeric}>
-              {`${formatDay(transaction.at)}, ${formatTime(transaction.at)}`}
+              {`${formatWeekdayDate(transaction.at)}, ${formatClockTime(transaction.at)}`}
             </span>
           </div>
         </div>
@@ -261,13 +263,15 @@ export const EarningsOverlays = ({
           <div className={styles.moneyRow}>
             <span>Amount</span>
             <span className={styles.moneyValue}>
-              {formatGbp(transaction.amount)}
+              {formatMoney(transaction.amount, { pence: "always" })}
             </span>
           </div>
           <div className={styles.moneyRow}>
             <span>Card fee</span>
             <span className={styles.moneyValue}>
-              {transaction.fee == null ? "—" : formatGbp(transaction.fee)}
+              {transaction.fee == null
+                ? "—"
+                : formatMoney(transaction.fee, { pence: "always" })}
             </span>
           </div>
           <div className={styles.moneyNet}>
@@ -278,7 +282,7 @@ export const EarningsOverlays = ({
                 amountClass(transaction.amount),
               )}
             >
-              {formatGbp(transaction.net)}
+              {formatMoney(transaction.net, { pence: "always" })}
             </span>
           </div>
         </div>
@@ -289,7 +293,7 @@ export const EarningsOverlays = ({
               className={styles.payoutLink}
               onClick={() => openDrawer({ kind: "po", id: payout.id }, true)}
             >
-              {`${payout.id} · ${formatDay(payout.sent)}`}
+              {`${payout.id} · ${formatWeekdayDate(payout.sent)}`}
               <Chevron />
             </button>
           )}
@@ -378,7 +382,7 @@ export const EarningsOverlays = ({
                 <>
                   <div className={styles.mutedText}>{`To ${bank}`}</div>
                   <div className={styles.bigAmount}>
-                    {formatGbp(drawerPayout.amount)}
+                    {formatMoney(drawerPayout.amount, { pence: "always" })}
                   </div>
                   <div className={styles.poStatusRow}>
                     <span
@@ -436,7 +440,7 @@ export const EarningsOverlays = ({
                                 : styles.totalValue,
                             )}
                           >
-                            {formatGbp(value)}
+                            {formatMoney(value, { pence: "always" })}
                           </span>
                         </div>
                       );

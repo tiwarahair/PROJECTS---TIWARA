@@ -1,8 +1,8 @@
 // The service wizard's pricing options, own customisations, review grid and add-ons.
 import type { ChangeEvent, FocusEvent, MouseEvent } from "react";
 import { getAddonPicker } from "./addon-picker";
+import { parseNumber } from "./studio-format";
 import { getTaxonomy } from "./studio-service-actions";
-import { formatDuration } from "./studio-format";
 import {
   formatAddon,
   getCategoryById,
@@ -16,27 +16,20 @@ import type {
   WizardState,
 } from "./studio-types";
 import type { StudioController } from "./use-studio";
+import { formatDuration } from "../../utils/dates";
 
 const SIGN_ADD = "Adds to the base price and time. Click to take off instead.";
 const SIGN_OFF = "Takes off the base price and time. Click to add instead.";
 
-export const toNumber = (value: unknown) => {
-  const parsed = parseFloat(String(value));
-
-  return isNaN(parsed) ? 0 : parsed;
-};
-
 /** "−5", "05" → "5". */
-export const getAbsolute = (value: unknown) => {
-  const clean = String(value == null ? "" : value)
-    .replace(/[^0-9.]/g, "")
-    .replace(/^0+(?=\d)/, "");
+const getAbsolute = (value: string) => {
+  const clean = value.replace(/[^0-9.]/g, "").replace(/^0+(?=\d)/, "");
 
   return clean === "" ? "0" : clean;
 };
 
 /** Whether a row takes off rather than adds. */
-export const isNegative = (row: {
+const isNegative = (row: {
   negative?: boolean;
   priceDelta?: string;
   hoursDelta?: string;
@@ -46,11 +39,11 @@ export const isNegative = (row: {
     ? !!row.negative
     : [row.priceDelta, row.hoursDelta, row.minutesDelta].some(
         (value) =>
-          /^\s*[-−]/.test(String(value == null ? "" : value)) &&
-          parseFloat(String(value).replace(/[^0-9.]/g, "")) > 0,
+          /^\s*[-−]/.test(value ?? "") &&
+          parseFloat((value ?? "").replace(/[^0-9.]/g, "")) > 0,
       );
 
-export const getSigned = (value: unknown, isNegativeValue: boolean) => {
+const getSigned = (value: string, isNegativeValue: boolean) => {
   const absoluteValue = getAbsolute(value);
 
   return (
@@ -60,7 +53,7 @@ export const getSigned = (value: unknown, isNegativeValue: boolean) => {
 };
 
 /** Takes off more than the base allows. */
-export const getAdjustErrors = (
+const getAdjustErrors = (
   isNegativeValue: boolean,
   price: string,
   minutes: number,
@@ -77,7 +70,7 @@ export const getAdjustErrors = (
       : "",
 });
 
-export interface WizardBase {
+interface WizardBase {
   basePrice: number;
   baseHours: number;
   baseMinutes: number;
@@ -85,9 +78,9 @@ export interface WizardBase {
 }
 
 export const getWizardBase = (draft: WizardDraft): WizardBase => {
-  const basePrice = toNumber(draft.price);
-  const baseHours = toNumber(draft.durationHours);
-  const baseMinutes = toNumber(draft.durationMinutes);
+  const basePrice = parseNumber(draft.price);
+  const baseHours = parseNumber(draft.durationHours);
+  const baseMinutes = parseNumber(draft.durationMinutes);
 
   return {
     basePrice,
@@ -113,8 +106,8 @@ export const getVariationErrors = (row: VariationRow, base: WizardBase) => {
 const getOwnErrors = (option: OwnOption, base: WizardBase) => {
   const isNegativeValue =
     !!option.negative ||
-    /^\s*-/.test(String(option.priceDelta || "")) ||
-    /^\s*-/.test(String(option.minutesDelta || ""));
+    /^\s*-/.test(option.priceDelta) ||
+    /^\s*-/.test(option.minutesDelta);
 
   return getAdjustErrors(
     isNegativeValue,
@@ -179,17 +172,13 @@ export const getVariationRows = (
       tipSign: (event: MouseEvent | FocusEvent) => {
         if (row.on)
           actions.tipShow(
-            event as unknown as { currentTarget: Element },
+            event,
             `s${tipKey}`,
             isNegativeValue ? SIGN_OFF : SIGN_ADD,
           );
       },
       tipCheck: (event: MouseEvent | FocusEvent) =>
-        actions.tipShow(
-          event as unknown as { currentTarget: Element },
-          `c${tipKey}`,
-          `Offer this ${word}`,
-        ),
+        actions.tipShow(event, `c${tipKey}`, `Offer this ${word}`),
       blur: () => {
         actions.tipHide();
 
@@ -279,15 +268,14 @@ export const getOwnEditor = (
       ? editor.options.map((option, index) => {
           const isNegativeValue =
             !!option.negative ||
-            /^\s*-/.test(String(option.priceDelta || "")) ||
-            /^\s*-/.test(String(option.minutesDelta || ""));
+            /^\s*-/.test(option.priceDelta) ||
+            /^\s*-/.test(option.minutesDelta);
 
           const price = getAbsolute(option.priceDelta);
           const minutes = getAbsolute(option.minutesDelta);
           const errors = getOwnErrors(option, base);
 
-          const name =
-            String(option.label || "").trim() || `Option ${index + 1}`;
+          const name = option.label.trim() || `Option ${index + 1}`;
 
           const tipKey = `own${index}`;
 
@@ -324,7 +312,7 @@ export const getOwnEditor = (
             },
             tipSign: (event: MouseEvent | FocusEvent) =>
               actions.tipShow(
-                event as unknown as { currentTarget: Element },
+                event,
                 `s${tipKey}`,
                 isNegativeValue ? SIGN_OFF : SIGN_ADD,
               ),
@@ -416,12 +404,12 @@ export const getOwnEditor = (
     save: () => {
       if (!editor) return;
 
-      const name = String(editor.name || "").trim();
+      const name = editor.name.trim();
 
       const options = editor.options
         .map((option) => ({
           ...option,
-          label: String(option.label || "").trim(),
+          label: option.label.trim(),
         }))
         .filter(({ label }) => label);
 
@@ -476,21 +464,21 @@ const getCell = (
 ) => {
   const price =
     base.basePrice +
-    (size ? toNumber(size.priceDelta) : 0) +
-    (length ? toNumber(length.priceDelta) : 0);
+    (size ? parseNumber(size.priceDelta) : 0) +
+    (length ? parseNumber(length.priceDelta) : 0);
 
   const minutes =
     (base.baseHours +
-      (size ? toNumber(size.hoursDelta) : 0) +
-      (length ? toNumber(length.hoursDelta) : 0)) *
+      (size ? parseNumber(size.hoursDelta) : 0) +
+      (length ? parseNumber(length.hoursDelta) : 0)) *
       60 +
     base.baseMinutes +
-    (size ? toNumber(size.minutesDelta) : 0) +
-    (length ? toNumber(length.minutesDelta) : 0);
+    (size ? parseNumber(size.minutesDelta) : 0) +
+    (length ? parseNumber(length.minutesDelta) : 0);
 
   return {
     price: `£${price}`,
-    duration: formatDuration(Math.floor(minutes / 60), minutes % 60),
+    duration: formatDuration(minutes),
   };
 };
 
@@ -615,7 +603,7 @@ export const getWizardAddons = (
     newMinute: String(parseInt(newAddon?.min ?? "") || 0),
     cancelNew: () => setWizard({ newAddon: null }),
     createNew: () => {
-      if (!newAddon || !String(newAddon.name).trim()) {
+      if (!newAddon || !newAddon.name.trim()) {
         actions.showToast("Give the add-on a name first");
 
         return;
@@ -625,8 +613,8 @@ export const getWizardAddons = (
         id: `ad${Date.now()}`,
         categoryId:
           newAddon.categoryId !== undefined ? newAddon.categoryId : category,
-        name: String(newAddon.name).trim(),
-        price: toNumber(newAddon.price),
+        name: newAddon.name.trim(),
+        price: parseNumber(newAddon.price),
         hours: parseInt(newAddon.hours) || 0,
         min: parseInt(newAddon.min) || 0,
       };
@@ -662,8 +650,10 @@ export const getWizardAddons = (
 
         const isOpen = wizard.openAddon === link.addonId;
 
-        const pick = (override: unknown, fallback: unknown) =>
-          override != null && override !== "" ? override : fallback;
+        const pick = (
+          override: string | number | null,
+          fallback: string | number,
+        ) => (override != null && override !== "" ? override : fallback);
 
         const patchLink = (patch: Partial<typeof link>) =>
           setDraft({

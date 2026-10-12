@@ -1,7 +1,15 @@
-import { act, fireEvent, screen } from "@testing-library/react";
+import { act, screen } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { renderWithStore } from "../../../test/render-with-store";
 import { StudioPage } from "../studio-page";
+import type { UserEvent } from "@testing-library/user-event";
+import { setupUser } from "../../../test/setup-user";
+
+let user: UserEvent;
+
+beforeEach(() => {
+  user = setupUser();
+});
 
 const runNextTimer = () => act(() => void vi.advanceTimersToNextTimer());
 const advance = (ms: number) => act(() => vi.advanceTimersByTime(ms));
@@ -18,11 +26,11 @@ const setViewport = (width: number) => {
   });
 };
 
-const openNewBooking = () => {
+const openNewBooking = async () => {
   renderWithStore(<StudioPage />, "/studio");
   runNextTimer();
 
-  fireEvent.click(
+  await user.click(
     screen.getAllByRole("button", { name: "New booking" })[0] as HTMLElement,
   );
 
@@ -51,78 +59,79 @@ describe("Studio → New booking", { timeout: 15_000 }, () => {
 
   afterEach(() => vi.useRealTimers());
 
-  it("searches clients and offers to add an unknown name", () => {
-    openNewBooking();
+  it("searches clients and offers to add an unknown name", async () => {
+    await openNewBooking();
     expect(screen.getByText("Who is it for?")).toBeInTheDocument();
     expect(getContinue()).toBeDisabled();
 
-    fireEvent.change(screen.getByPlaceholderText("Search by name or phone"), {
-      target: { value: "Zed" },
-    });
+    await user.type(
+      screen.getByPlaceholderText("Search by name or phone"),
+      "Zed",
+    );
 
     expect(
       screen.getByRole("button", { name: "Add “Zed” as a new client" }),
     ).toBeInTheDocument();
   });
 
-  it("books a client through service, time and protection", () => {
-    openNewBooking();
+  it("books a client through service, time and protection", async () => {
+    await openNewBooking();
 
     // Home lists Nia too; the sheet comes last
-    fireEvent.click(
+    await user.click(
       screen
         .getAllByRole("button", { name: /^Nia Okafor/ })
         .at(-1) as HTMLElement,
     );
 
     // picking a client moves straight to the service list
-    fireEvent.click(screen.getByRole("button", { name: /^Knotless braids/ }));
+    await user.click(screen.getByRole("button", { name: /^Knotless braids/ }));
     expect(screen.getByText("Selected service")).toBeInTheDocument();
-    fireEvent.click(getContinue());
+    await user.click(getContinue());
     expect(screen.getByText("When?")).toBeInTheDocument();
 
-    fireEvent.click(
+    await user.click(
       screen.getAllByRole("button", { name: /^Tue/ })[0] as HTMLElement,
     );
 
-    fireEvent.click(
+    await user.click(
       screen
         .getAllByRole("button", { name: /^\d\d:\d\d$/ })
         .at(-1) as HTMLElement,
     );
 
-    fireEvent.click(getContinue());
+    await user.click(getContinue());
     expect(screen.getByText("Booking protection")).toBeInTheDocument();
-    fireEvent.click(getContinue());
+    await user.click(getContinue());
     expect(screen.getByText("Anything else?")).toBeInTheDocument();
-    fireEvent.click(screen.getByRole("button", { name: "Confirm booking" }));
+    await user.click(screen.getByRole("button", { name: "Confirm booking" }));
 
     expect(
       screen.getByText("Booking added for Nia. Payment link sent"),
     ).toBeInTheDocument();
   });
 
-  it("a walk-in skips booking protection", () => {
-    openNewBooking();
+  it("a walk-in skips booking protection", async () => {
+    await openNewBooking();
 
-    fireEvent.click(
+    await user.click(
       screen.getByRole("button", { name: "No client, this is a walk-in" }),
     );
 
-    fireEvent.click(screen.getByRole("button", { name: /^Knotless braids/ }));
-    fireEvent.click(getContinue());
+    await user.click(screen.getByRole("button", { name: /^Knotless braids/ }));
+    await user.click(getContinue());
 
-    fireEvent.click(
+    await user.click(
       screen.getAllByRole("button", { name: /^Tue/ })[0] as HTMLElement,
     );
 
-    fireEvent.click(
+    await user.click(
       screen
         .getAllByRole("button", { name: /^\d\d:\d\d$/ })
         .at(-1) as HTMLElement,
     );
 
-    fireEvent.click(getContinue());
+    await user.click(getContinue());
     expect(screen.getByText("Anything else?")).toBeInTheDocument();
   });
 });

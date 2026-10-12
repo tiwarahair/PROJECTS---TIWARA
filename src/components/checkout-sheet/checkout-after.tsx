@@ -1,12 +1,13 @@
 import { joinClassNames } from "../../utils/class-names";
 import { Icon, getViewAnimation } from "./checkout-detail";
-import { ICONS, REFUND_REASONS, formatPounds } from "./checkout-data";
+import { ICONS, REFUND_REASONS } from "./checkout-data";
 import { Chip, RadioMark } from "./checkout-payment";
 import { RECORD_VIA_LABELS } from "./checkout-view";
 import type { CheckoutViewModel } from "./checkout-view";
 import type { CheckoutController } from "./use-checkout";
 import after from "../../styles/components/checkout-sheet/checkout-after.module.css";
 import shared from "../../styles/components/checkout-sheet/checkout-sheet.module.css";
+import { formatMoney } from "../../utils/money";
 
 export const CheckoutDone = ({
   checkout: { state, setState, goTo, booking },
@@ -24,16 +25,16 @@ export const CheckoutDone = ({
 
   const getSummary = () => {
     if (done.method === "card")
-      return `${formatPounds(done.charged)} charged to ${cardText}.`;
+      return `${formatMoney(done.charged)} charged to ${cardText}.`;
 
     if (done.method === "link")
-      return `Payment link for ${formatPounds(done.charged)} sent by ${linkTarget}.`;
+      return `Payment link for ${formatMoney(done.charged)} sent by ${linkTarget}.`;
 
     if (done.method === "record")
-      return `${formatPounds(done.charged)} ${(RECORD_VIA_LABELS[done.via] || "").toLowerCase()} recorded.`;
+      return `${formatMoney(done.charged)} ${(RECORD_VIA_LABELS[done.via] || "").toLowerCase()} recorded.`;
 
     if (done.refundAuto > 0)
-      return `${formatPounds(done.refundAuto)} refund on its way to ${cardText}.`;
+      return `${formatMoney(done.refundAuto)} refund on its way to ${cardText}.`;
 
     return `Nothing to pay. ${name} had already paid.`;
   };
@@ -300,12 +301,12 @@ export const CheckoutRefund = ({
 
   const already =
     state.refunded > 0
-      ? ` ${formatPounds(state.refunded)} already refunded.`
+      ? ` ${formatMoney(state.refunded)} already refunded.`
       : "";
 
   const isFull = state.refundKind === "full";
-  const paidText = formatPounds(refundCapAll);
-  const capText = formatPounds(refundCap);
+  const paidText = formatMoney(refundCapAll);
+  const capText = formatMoney(refundCap);
 
   return (
     <div
@@ -345,7 +346,7 @@ export const CheckoutRefund = ({
               isFull ? shared.textOn : shared.textOff,
             )}
           >
-            {`Full refund (${formatPounds(refundCap)})`}
+            {`Full refund (${formatMoney(refundCap)})`}
           </span>
         </button>
         <div

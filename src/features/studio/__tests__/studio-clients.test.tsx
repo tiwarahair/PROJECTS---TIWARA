@@ -1,7 +1,15 @@
-import { act, fireEvent, screen, within } from "@testing-library/react";
+import { act, screen, within } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { renderWithStore } from "../../../test/render-with-store";
 import { StudioPage } from "../studio-page";
+import type { UserEvent } from "@testing-library/user-event";
+import { setupUser } from "../../../test/setup-user";
+
+let user: UserEvent;
+
+beforeEach(() => {
+  user = setupUser();
+});
 
 const getLabelled = (label: string) =>
   document.querySelector(`[data-screen-label="${label}"]`) as HTMLElement;
@@ -20,10 +28,10 @@ const setViewport = (width: number) => {
   });
 };
 
-const openTab = (label: string) => {
+const openTab = async (label: string) => {
   renderWithStore(<StudioPage />, "/studio");
   runNextTimer();
-  fireEvent.click(within(getLabelled("Sidebar")).getByTitle(label));
+  await user.click(within(getLabelled("Sidebar")).getByTitle(label));
 
   return getLabelled(label);
 };
@@ -47,8 +55,8 @@ describe("Studio → Clients and Earnings", () => {
 
   afterEach(() => vi.useRealTimers());
 
-  it("desk screens list clients in a table, sorted by next booking", () => {
-    const clients = openTab("Clients");
+  it("desk screens list clients in a table, sorted by next booking", async () => {
+    const clients = await openTab("Clients");
 
     expect(
       within(clients).getByText("Upcoming appointments"),
@@ -63,33 +71,33 @@ describe("Studio → Clients and Earnings", () => {
     expect(within(clients).getAllByText("Blocked").length).toBeGreaterThan(0);
   });
 
-  it("searches by phone digits and filters blocked clients", () => {
-    const clients = openTab("Clients");
+  it("searches by phone digits and filters blocked clients", async () => {
+    const clients = await openTab("Clients");
 
-    fireEvent.change(
+    await user.type(
       screen.getByLabelText("Search clients by name, phone or email"),
-      { target: { value: "07700 900655" } },
+      "07700 900655",
     );
 
     expect(within(clients).getByText("Kemi Adeyemi")).toBeInTheDocument();
     expect(within(clients).queryByText("Nia Okafor")).not.toBeInTheDocument();
-    fireEvent.click(screen.getByRole("button", { name: "Clear search" }));
-    fireEvent.click(within(clients).getByRole("button", { name: /^Blocked/ }));
+    await user.click(screen.getByRole("button", { name: "Clear search" }));
+    await user.click(within(clients).getByRole("button", { name: /^Blocked/ }));
     expect(within(clients).getByText("Tola Fashola")).toBeInTheDocument();
     expect(within(clients).queryByText("Kemi Adeyemi")).not.toBeInTheDocument();
   });
 
-  it("an empty search offers to clear it", () => {
-    const clients = openTab("Clients");
+  it("an empty search offers to clear it", async () => {
+    const clients = await openTab("Clients");
 
-    fireEvent.change(
+    await user.type(
       screen.getByLabelText("Search clients by name, phone or email"),
-      { target: { value: "zzz" } },
+      "zzz",
     );
 
     expect(within(clients).getByText("No clients match")).toBeInTheDocument();
 
-    fireEvent.click(
+    await user.click(
       within(clients)
         .getAllByRole("button", { name: "Clear search" })
         .at(-1) as HTMLElement,
@@ -98,8 +106,8 @@ describe("Studio → Clients and Earnings", () => {
     expect(within(clients).getByText("Nia Okafor")).toBeInTheDocument();
   });
 
-  it("the Earnings tab embeds the earnings dashboard", () => {
-    const earnings = openTab("Earnings");
+  it("the Earnings tab embeds the earnings dashboard", async () => {
+    const earnings = await openTab("Earnings");
 
     expect(within(earnings).getByText("Available")).toBeInTheDocument();
   });

@@ -32,6 +32,7 @@ import type {
   StudioState,
 } from "./studio-types";
 import type { StudioController } from "./use-studio";
+import { formatMoney } from "../../utils/money";
 
 const CLOSED_STATUSES = [
   "cancelled",
@@ -90,7 +91,7 @@ const getCheckoutLabel = ({
 };
 
 /** The booking in the shape CheckoutSheet takes. */
-export const getCheckoutBooking = (
+const getCheckoutBooking = (
   state: StudioState,
   booking: DecoratedBooking,
 ): CheckoutBooking => {
@@ -773,7 +774,7 @@ export const getBookingSheetView = (studio: StudioController) => {
       addonLines.map(({ key, label, value }) => ({ key, label, value })),
     ),
     payReceived: received,
-    payFeeLabel: `£${fee.toFixed(2)}`,
+    payFeeLabel: formatMoney(fee, { pence: "always" }),
     feeWho: booking.client ? booking.firstName : "the client",
     payRowLabel: booking.dueAmount > 0 ? "To pay" : "Paid",
     // footer

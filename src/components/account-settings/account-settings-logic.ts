@@ -12,7 +12,7 @@ export interface TwoFactorDevice {
   backup: boolean;
 }
 
-export interface SettingsSession {
+interface SettingsSession {
   id: string;
   device: string;
   location: string;
@@ -21,12 +21,12 @@ export interface SettingsSession {
   kind: "phone" | "laptop" | "tablet";
 }
 
-export interface ChannelSetting {
+interface ChannelSetting {
   email: boolean;
   sms: boolean;
 }
 
-export type NotificationKey =
+type NotificationKey =
   | "newBooking"
   | "clientCancelled"
   | "clientRescheduled"
@@ -231,7 +231,7 @@ export const CLIENT_MESSAGES = [
   "Review request",
 ];
 
-export interface PayoutStatusView {
+interface PayoutStatusView {
   title: string;
   body: string;
   icon: string;

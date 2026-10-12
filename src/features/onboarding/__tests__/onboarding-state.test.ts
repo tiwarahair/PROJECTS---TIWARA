@@ -1,8 +1,8 @@
 import { describe, expect, it } from "vitest";
+import { getFixturePatch } from "../onboarding-fixtures";
 import {
   getBackScreen,
   getErrors,
-  getFixturePatch,
   INITIAL_STATE,
   isValidMobile,
   isValidPostcode,

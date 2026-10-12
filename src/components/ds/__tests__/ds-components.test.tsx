@@ -1,5 +1,5 @@
-import { fireEvent, render, screen } from "@testing-library/react";
-import { describe, expect, it, vi } from "vitest";
+import { render, screen } from "@testing-library/react";
+import { beforeEach, describe, expect, it, vi } from "vitest";
 import { Avatar } from "../avatar";
 import { Badge } from "../badge";
 import { Button } from "../button";
@@ -17,9 +17,17 @@ import { Tabs } from "../tabs";
 import { Tag } from "../tag";
 import { Toast } from "../toast";
 import { Tooltip } from "../tooltip";
+import type { UserEvent } from "@testing-library/user-event";
+import { setupUser } from "../../../test/setup-user";
+
+let user: UserEvent;
+
+beforeEach(() => {
+  user = setupUser();
+});
 
 describe("design-system components", () => {
-  it("Button renders every variant and ignores clicks when disabled", () => {
+  it("Button renders every variant and ignores clicks when disabled", async () => {
     const handleClick = vi.fn();
 
     const variants = [
@@ -46,11 +54,10 @@ describe("design-system components", () => {
       </>,
     );
 
-    variants.forEach((variant) =>
-      fireEvent.click(screen.getByRole("button", { name: variant })),
-    );
+    for (const variant of variants)
+      await user.click(screen.getByRole("button", { name: variant }));
 
-    fireEvent.click(screen.getByRole("button", { name: "Booked" }));
+    await user.click(screen.getByRole("button", { name: "Booked" }));
     expect(handleClick).toHaveBeenCalledTimes(variants.length);
     expect(screen.getByRole("button", { name: "Booked" })).toBeDisabled();
   });
@@ -97,7 +104,7 @@ describe("design-system components", () => {
     );
   });
 
-  it("Card and Tag respond to clicks", () => {
+  it("Card and Tag respond to clicks", async () => {
     const handleCard = vi.fn();
     const handleTag = vi.fn();
 
@@ -113,13 +120,13 @@ describe("design-system components", () => {
       </>,
     );
 
-    fireEvent.click(screen.getByText("Amara"));
-    fireEvent.click(screen.getByRole("button", { name: "Starter locs" }));
+    await user.click(screen.getByText("Amara"));
+    await user.click(screen.getByRole("button", { name: "Starter locs" }));
     expect(handleCard).toHaveBeenCalledOnce();
     expect(handleTag).toHaveBeenCalledOnce();
   });
 
-  it("Dialog closes from the scrim and the close button, not from inside", () => {
+  it("Dialog closes from the scrim and the close button, not from inside", async () => {
     const handleClose = vi.fn();
 
     render(
@@ -128,9 +135,9 @@ describe("design-system components", () => {
       </Dialog>,
     );
 
-    fireEvent.click(screen.getByText("Your deposit is refundable."));
+    await user.click(screen.getByText("Your deposit is refundable."));
     expect(handleClose).not.toHaveBeenCalled();
-    fireEvent.click(screen.getByRole("button", { name: "Close" }));
+    await user.click(screen.getByRole("button", { name: "Close" }));
     expect(handleClose).toHaveBeenCalledOnce();
   });
 
@@ -139,21 +146,21 @@ describe("design-system components", () => {
     expect(screen.queryByText("Hidden")).not.toBeInTheDocument();
   });
 
-  it("Tooltip shows its label on hover", () => {
+  it("Tooltip shows its label on hover", async () => {
     render(
       <Tooltip label="Finish setup to share">
         <span>Share</span>
       </Tooltip>,
     );
 
-    fireEvent.mouseEnter(screen.getByText("Share"));
+    await user.hover(screen.getByText("Share"));
 
     expect(screen.getByRole("tooltip")).toHaveTextContent(
       "Finish setup to share",
     );
   });
 
-  it("Checkbox and Switch toggle uncontrolled and report changes", () => {
+  it("Checkbox and Switch toggle uncontrolled and report changes", async () => {
     const handleChange = vi.fn();
 
     render(
@@ -167,12 +174,12 @@ describe("design-system components", () => {
       </>,
     );
 
-    fireEvent.click(screen.getByText("Send me reminders"));
-    fireEvent.click(screen.getByText("Accept new clients"));
+    await user.click(screen.getByText("Send me reminders"));
+    await user.click(screen.getByText("Accept new clients"));
     expect(handleChange.mock.calls).toEqual([[true], [false]]);
   });
 
-  it("Radio selects an option", () => {
+  it("Radio selects an option", async () => {
     const handleChange = vi.fn();
 
     render(
@@ -183,7 +190,7 @@ describe("design-system components", () => {
       />,
     );
 
-    fireEvent.click(screen.getByText("Mobile"));
+    await user.click(screen.getByText("Mobile"));
     expect(handleChange).toHaveBeenCalledWith("Mobile");
   });
 
@@ -209,11 +216,11 @@ describe("design-system components", () => {
     );
   });
 
-  it("Tabs switch the active tab", () => {
+  it("Tabs switch the active tab", async () => {
     const handleChange = vi.fn();
 
     render(<Tabs tabs={["Upcoming", "Past"]} onChange={handleChange} />);
-    fireEvent.click(screen.getByRole("button", { name: "Past" }));
+    await user.click(screen.getByRole("button", { name: "Past" }));
     expect(handleChange).toHaveBeenCalledWith("Past");
   });
 

@@ -1,7 +1,15 @@
-import { act, fireEvent, screen, within } from "@testing-library/react";
+import { act, screen, within } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { renderWithStore } from "../../../test/render-with-store";
 import { StudioPage } from "../studio-page";
+import type { UserEvent } from "@testing-library/user-event";
+import { setupUser } from "../../../test/setup-user";
+
+let user: UserEvent;
+
+beforeEach(() => {
+  user = setupUser();
+});
 
 const getDialog = () =>
   document.querySelector(
@@ -63,33 +71,30 @@ describe("Studio → two-step verification", () => {
     ).not.toBeInTheDocument();
   });
 
-  it("a wrong code is rejected and the right one moves on to a backup", () => {
+  it("a wrong code is rejected and the right one moves on to a backup", async () => {
     renderFixture("tf-app");
     const dialog = getDialog();
 
-    fireEvent.change(within(dialog).getByLabelText("6-digit code"), {
-      target: { value: "111111" },
-    });
+    await user.type(within(dialog).getByLabelText("6-digit code"), "111111");
 
-    fireEvent.click(within(dialog).getByRole("button", { name: "Turn on" }));
+    await user.click(within(dialog).getByRole("button", { name: "Turn on" }));
 
     expect(within(dialog).getByRole("alert")).toHaveTextContent(
       "That code isn’t right",
     );
 
-    fireEvent.change(within(dialog).getByLabelText("6-digit code"), {
-      target: { value: "123456" },
-    });
+    await user.clear(within(dialog).getByLabelText("6-digit code"));
+    await user.type(within(dialog).getByLabelText("6-digit code"), "123456");
 
-    fireEvent.click(within(dialog).getByRole("button", { name: "Turn on" }));
+    await user.click(within(dialog).getByRole("button", { name: "Turn on" }));
     expect(within(getDialog()).getByText("Add a backup")).toBeInTheDocument();
   });
 
-  it("skipping the backup warns once, then finishes", () => {
+  it("skipping the backup warns once, then finishes", async () => {
     renderFixture("tf-backup");
     const dialog = getDialog();
 
-    fireEvent.click(
+    await user.click(
       within(dialog).getByRole("button", { name: "Skip for now" }),
     );
 
@@ -97,7 +102,7 @@ describe("Studio → two-step verification", () => {
       "Without a backup",
     );
 
-    fireEvent.click(
+    await user.click(
       within(dialog).getByRole("button", { name: "Skip for now" }),
     );
 

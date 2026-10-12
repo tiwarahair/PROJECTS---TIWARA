@@ -3,7 +3,7 @@
 // Real breached-password screening comes with the back end.
 import { passwordBlocklist } from "../data";
 
-export const PASSWORD_MAX = 64;
+const PASSWORD_MAX = 64;
 
 // ban site names from the password
 const SITE_NAMES = [
@@ -25,7 +25,7 @@ let checkerImport: Promise<PasswordChecker> | null = null;
 export const isPasswordCheckerReady = (): boolean => scorePassword !== null;
 
 /** Loads the checker once (every caller shares one import); a failed load is retried next time. */
-export const loadPasswordChecker = async (): Promise<void> => {
+const loadPasswordChecker = async (): Promise<void> => {
   checkerImport ??= import("./password-checker");
 
   try {
@@ -48,20 +48,17 @@ export const onPasswordCheckerReady = (listener: () => void): (() => void) => {
   };
 };
 
-const normaliseAccents = (value: unknown): string =>
-  String(value || "")
-    .toLowerCase()
-    .normalize("NFD")
-    .replace(/[̀-ͯ]/g, "");
+const normaliseAccents = (value = ""): string =>
+  value.toLowerCase().normalize("NFD").replace(/[̀-ͯ]/g, "");
 
-export interface PasswordCheckOptions {
+interface PasswordCheckOptions {
   min?: number;
   first?: string;
   last?: string;
   email?: string;
 }
 
-export type BlockKind = "" | "common" | "name" | "site";
+type BlockKind = "" | "common" | "name" | "site";
 
 export interface PasswordCheck {
   min: number;
@@ -142,10 +139,9 @@ const getPasswordError = ({
 };
 
 export const checkPassword = (
-  password: unknown,
+  value: string,
   options: PasswordCheckOptions = {},
 ): PasswordCheck => {
-  const value = String(password || "");
   const min = options.min || 15;
   const length = [...value].length;
   const lowered = normaliseAccents(value);
@@ -153,15 +149,13 @@ export const checkPassword = (
   const flat = lowered.replace(/\s+/g, "");
   const lettersOnly = flat.replace(/[^a-z]/g, "");
 
-  const toLetters = (text: unknown) =>
+  const toLetters = (text?: string) =>
     normaliseAccents(text).replace(/[^a-z]/g, "");
 
   const first = toLetters(options.first);
   const last = toLetters(options.last);
 
-  const email = String(options.email || "")
-    .toLowerCase()
-    .trim();
+  const email = (options.email || "").toLowerCase().trim();
 
   const emailName = email.split("@")[0] ?? "";
 
@@ -227,14 +221,14 @@ export const checkPassword = (
   };
 };
 
-export interface PasswordViewOptions {
+interface PasswordViewOptions {
   dark?: boolean;
   /** Whether to surface the error (field blurred or form submitted). */
   show?: boolean;
   errorColour?: string;
 }
 
-export interface MeterSegment {
+interface MeterSegment {
   key: number;
   background: string;
 }

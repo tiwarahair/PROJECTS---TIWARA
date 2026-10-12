@@ -6,11 +6,8 @@ import {
   getStyleSelection,
   toDayMinutes,
 } from "../search-logic";
-import {
-  getFixturePatch,
-  getInitialState,
-  getStateSearch,
-} from "../search-state";
+import { getFixturePatch } from "../search-fixtures";
+import { getInitialState, getStateSearch } from "../search-state";
 
 const stateFor = (search: string) => getInitialState(search, 1440);
 

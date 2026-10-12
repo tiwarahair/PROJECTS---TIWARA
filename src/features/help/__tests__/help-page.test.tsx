@@ -1,7 +1,15 @@
-import { fireEvent, screen } from "@testing-library/react";
+import { screen } from "@testing-library/react";
 import { beforeEach, describe, expect, it } from "vitest";
 import { renderWithStore } from "../../../test/render-with-store";
 import { HelpPage } from "../help-page";
+import type { UserEvent } from "@testing-library/user-event";
+import { setupUser } from "../../../test/setup-user";
+
+let user: UserEvent;
+
+beforeEach(() => {
+  user = setupUser();
+});
 
 describe("HelpPage", () => {
   beforeEach(() => sessionStorage.clear());
@@ -20,7 +28,7 @@ describe("HelpPage", () => {
     ).toHaveAttribute("href", "mailto:help@tiwarashouse.co.uk");
   });
 
-  it("opens one FAQ at a time", () => {
+  it("opens one FAQ at a time", async () => {
     renderWithStore(<HelpPage />, "/help");
     const first = screen.getByRole("button", { name: "How do deposits work?" });
 
@@ -28,9 +36,9 @@ describe("HelpPage", () => {
       name: "What if I need to cancel or reschedule?",
     });
 
-    fireEvent.click(first);
+    await user.click(first);
     expect(first).toHaveAttribute("aria-expanded", "true");
-    fireEvent.click(second);
+    await user.click(second);
     expect(first).toHaveAttribute("aria-expanded", "false");
     expect(second).toHaveAttribute("aria-expanded", "true");
   });
@@ -47,10 +55,10 @@ describe("HelpPage", () => {
     );
   });
 
-  it("the logged-in mobile menu heads its account links with Account, not the name", () => {
+  it("the logged-in mobile menu heads its account links with Account, not the name", async () => {
     sessionStorage.setItem("tw_cust", "1");
     renderWithStore(<HelpPage />, "/help");
-    fireEvent.click(screen.getByRole("button", { name: "Menu" }));
+    await user.click(screen.getByRole("button", { name: "Menu" }));
     expect(screen.getByText("Account")).toBeInTheDocument();
     expect(screen.queryByText("Nia Okafor")).not.toBeInTheDocument();
   });

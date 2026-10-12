@@ -1,7 +1,15 @@
-import { act, fireEvent, screen, within } from "@testing-library/react";
+import { act, screen, within } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { renderWithStore } from "../../../test/render-with-store";
 import { StudioPage } from "../studio-page";
+import type { UserEvent } from "@testing-library/user-event";
+import { setupUser } from "../../../test/setup-user";
+
+let user: UserEvent;
+
+beforeEach(() => {
+  user = setupUser();
+});
 
 const getLabelled = (label: string) =>
   document.querySelector(`[data-screen-label="${label}"]`) as HTMLElement;
@@ -48,7 +56,7 @@ describe("Studio → Bookings", () => {
 
   afterEach(() => vi.useRealTimers());
 
-  it("the day timeline shows the day's bookings and blocked time", () => {
+  it("the day timeline shows the day's bookings and blocked time", async () => {
     renderBookings();
     const bookings = getLabelled("Bookings");
 
@@ -65,7 +73,7 @@ describe("Studio → Bookings", () => {
       within(bookings).getByRole("button", { name: "Today" }),
     ).toBeDisabled();
 
-    fireEvent.click(
+    await user.click(
       within(bookings).getByRole("button", { name: "Next week" }),
     );
 
@@ -76,9 +84,9 @@ describe("Studio → Bookings", () => {
     ).toBeEnabled();
   });
 
-  it("switches to the week grid", () => {
+  it("switches to the week grid", async () => {
     renderBookings();
-    fireEvent.click(screen.getByRole("button", { name: "Week" }));
+    await user.click(screen.getByRole("button", { name: "Week" }));
     const week = getLabelled("Week view");
 
     expect(
@@ -88,9 +96,9 @@ describe("Studio → Bookings", () => {
     expect(within(week).getByText("Kemi Adeyemi")).toBeInTheDocument();
   });
 
-  it("the list groups upcoming bookings by day, searches and filters", () => {
+  it("the list groups upcoming bookings by day, searches and filters", async () => {
     renderBookings();
-    fireEvent.click(screen.getByRole("button", { name: "List" }));
+    await user.click(screen.getByRole("button", { name: "List" }));
     const bookings = getLabelled("Bookings");
 
     expect(
@@ -100,33 +108,32 @@ describe("Studio → Bookings", () => {
     expect(within(bookings).getByText("Today")).toBeInTheDocument();
     expect(within(bookings).getByText("Tomorrow")).toBeInTheDocument();
 
-    fireEvent.change(screen.getByPlaceholderText("Search client or service"), {
-      target: { value: "silk" },
-    });
+    await user.type(
+      screen.getByPlaceholderText("Search client or service"),
+      "silk",
+    );
 
     expect(
       within(bookings).getByText("2 bookings upcoming"),
     ).toBeInTheDocument();
 
-    fireEvent.change(screen.getByPlaceholderText("Search client or service"), {
-      target: { value: "" },
-    });
+    await user.clear(screen.getByPlaceholderText("Search client or service"));
 
-    fireEvent.click(screen.getByRole("button", { name: "Filter bookings" }));
-    fireEvent.click(screen.getByRole("button", { name: /^Paid in full/ }));
+    await user.click(screen.getByRole("button", { name: "Filter bookings" }));
+    await user.click(screen.getByRole("button", { name: /^Paid in full/ }));
 
     expect(
       screen.getByRole("button", { name: "Show 1 booking" }),
     ).toBeInTheDocument();
 
-    fireEvent.click(screen.getByRole("button", { name: "Show 1 booking" }));
+    await user.click(screen.getByRole("button", { name: "Show 1 booking" }));
     act(() => vi.advanceTimersByTime(210));
 
     expect(
       within(bookings).getByText("1 booking upcoming"),
     ).toBeInTheDocument();
 
-    fireEvent.click(
+    await user.click(
       within(bookings).getAllByRole("button", {
         name: "Clear all",
       })[0] as HTMLElement,
@@ -137,10 +144,10 @@ describe("Studio → Bookings", () => {
     ).toBeInTheDocument();
   });
 
-  it("the past list shows outcomes by month", () => {
+  it("the past list shows outcomes by month", async () => {
     renderBookings();
-    fireEvent.click(screen.getByRole("button", { name: "List" }));
-    fireEvent.click(screen.getByRole("button", { name: "Past" }));
+    await user.click(screen.getByRole("button", { name: "List" }));
+    await user.click(screen.getByRole("button", { name: "Past" }));
     const bookings = getLabelled("Bookings");
 
     expect(
@@ -152,7 +159,7 @@ describe("Studio → Bookings", () => {
     expect(within(bookings).getByText("Fee pending")).toBeInTheDocument();
   });
 
-  it("tapping the narrow timeline offers to book or block that slot", () => {
+  it("tapping the narrow timeline offers to book or block that slot", async () => {
     renderBookings();
 
     const timeline = document.getElementById("tl-h-09")
@@ -161,12 +168,17 @@ describe("Studio → Bookings", () => {
     timeline.getBoundingClientRect = () =>
       ({ top: 0, height: 3086 }) as DOMRect;
 
-    fireEvent.click(timeline, { clientY: 128 * 9 + 70 });
+    await user.pointer({
+      keys: "[MouseLeft]",
+      target: timeline,
+      coords: { clientY: 128 * 9 + 70 },
+    });
+
     expect(screen.getByText("Today · 09:30")).toBeInTheDocument();
     expect(screen.getByText("Book a client in at 09:30")).toBeInTheDocument();
     expect(screen.getByText("Keep 09:30 to 10:30 free")).toBeInTheDocument();
 
-    fireEvent.click(
+    await user.click(
       screen.getAllByRole("button", { name: "Close" }).at(-1) as HTMLElement,
     );
 
@@ -177,7 +189,7 @@ describe("Studio → Bookings", () => {
     ).not.toBeInTheDocument();
   });
 
-  it("wide screens open a popover on the tapped slot", () => {
+  it("wide screens open a popover on the tapped slot", async () => {
     setViewport(1440);
     renderBookings();
 
@@ -187,19 +199,24 @@ describe("Studio → Bookings", () => {
     timeline.getBoundingClientRect = () =>
       ({ top: 0, height: 3086 }) as DOMRect;
 
-    fireEvent.click(timeline, { clientX: 400, clientY: 128 * 20 + 10 });
+    await user.pointer({
+      keys: "[MouseLeft]",
+      target: timeline,
+      coords: { clientX: 400, clientY: 128 * 20 + 10 },
+    });
+
     expect(screen.getByText("20:00")).toBeInTheDocument();
     expect(screen.getByText("· outside working hours")).toBeInTheDocument();
   });
 
-  it("a new account sees the empty calendar card until it is closed", () => {
+  it("a new account sees the empty calendar card until it is closed", async () => {
     renderWithStore(<StudioPage />, "/studio?account=new");
     runNextTimer();
-    fireEvent.click(screen.getByRole("button", { name: "Bookings" }));
+    await user.click(screen.getByRole("button", { name: "Bookings" }));
     const empty = getLabelled("Calendar empty");
 
     expect(empty).toHaveTextContent("No appointments yet");
-    fireEvent.click(within(empty).getByRole("button", { name: "Close" }));
+    await user.click(within(empty).getByRole("button", { name: "Close" }));
     expect(getLabelled("Calendar empty")).toBeNull();
   });
 });

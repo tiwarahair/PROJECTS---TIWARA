@@ -166,6 +166,14 @@
   transform: scale(0.98) !important;
 }
 
+.secondary.wideButton {
+  flex-basis: 160px;
+}
+
+.primary.narrowButton {
+  flex-basis: 120px;
+}
+
 .confirmHead {
   display: flex;
   align-items: flex-start;

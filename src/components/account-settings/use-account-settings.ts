@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from "react";
+import { useLocation } from "react-router";
 import { usePasswordChecker } from "../../hooks/use-password-checker";
 import { checkPassword, getPasswordView } from "../../utils/password";
 import type {
@@ -60,14 +61,16 @@ export interface AccountSettingsProps {
   onTaxLearnMore?: () => void;
 }
 
-export type DialogPhase = "idle" | "open" | "closing";
+type DialogPhase = "idle" | "open" | "closing";
 
 /** AccountSettings state and actions. */
 export const useAccountSettings = (props: AccountSettingsProps) => {
   const { page = "personal", signIn, isNew = false } = props;
+  const { search } = useLocation();
 
+  // read once: ?pwnew= only prefills the initial state
   const [state, setRawState] = useState(() =>
-    getInitialSettingsState(isNew, window.location.search),
+    getInitialSettingsState(isNew, search),
   );
 
   const [dialog, setDialog] = useState<ConfirmDialog>({

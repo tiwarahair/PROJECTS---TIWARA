@@ -2,16 +2,16 @@
 import type { ChangeEvent, MouseEvent } from "react";
 import { getAddonPicker } from "./addon-picker";
 import { getDuplicateView } from "./clients-view";
-import { ICONS, MONTHS_LONG, SLOT_TIMES, TAXONOMY } from "./studio-data";
+import { ICONS, SLOT_TIMES, TAXONOMY } from "./studio-data";
 import {
   dayInfo,
   durationToMinutes,
   formatDateTime,
-  formatDuration,
   getAvatarSrc,
   getInitialsImage,
   getMiniCalendarDays,
-  minutesToDuration,
+  parseNumber,
+  parseWholeNumber,
   timeRange,
 } from "./studio-format";
 import {
@@ -33,6 +33,8 @@ import type {
   StudioService,
 } from "./studio-types";
 import type { StudioController } from "./use-studio";
+import { LONG_MONTHS, formatDuration } from "../../utils/dates";
+import { formatMoney } from "../../utils/money";
 
 const EXTRA_OPTIONS = [0, 5, 10, 15, 20, 25, 30, 45, 60].map((value) => ({
   key: value,
@@ -52,10 +54,8 @@ const MINUTE_OPTIONS = Array.from({ length: 12 }, (_slot, index) => ({
   label: `${index * 5}m`,
 }));
 
-const toNumber = (value: unknown) => parseFloat(String(value ?? "")) || 0;
-
 const getAddonMinutes = ({ hours, min }: StudioAddon) =>
-  (parseInt(String(hours)) || 0) * 60 + (parseInt(String(min)) || 0);
+  parseWholeNumber(hours) * 60 + parseWholeNumber(min);
 
 /** New booking: who, service (+ edit / add-ons), when, protection, notes. */
 export const getAddBookingView = (studio: StudioController) => {
@@ -129,7 +129,7 @@ export const getAddBookingView = (studio: StudioController) => {
   const stepCount = isProtectionSkipped ? 4 : 5;
 
   const currentPrice = () =>
-    toNumber(state.addPrice ?? (service ? service.price : 0));
+    parseNumber(state.addPrice ?? (service ? service.price : 0));
 
   const priceLabel = state.addPrice != null ? state.addPrice : service?.price;
 
@@ -150,7 +150,6 @@ export const getAddBookingView = (studio: StudioController) => {
     const first = getFirst();
     const total = getProtectionTotal(state, price);
     const { mode } = policy;
-    const money = (value: number) => `£${value.toFixed(2)}`;
 
     const expiry = formatDateTime(
       getProtectionExpiry(Date.now(), state.addDay, state.addTime),
@@ -161,7 +160,7 @@ export const getAddBookingView = (studio: StudioController) => {
         ? `${dayInfo(state.addDay).label}, ${state.addTime}`
         : "your appointment";
 
-    const totalLabel = money(total);
+    const totalLabel = formatMoney(total, { pence: "always" });
 
     const getSendSubtitle = () => {
       if (mode === "card")
@@ -279,7 +278,8 @@ export const getAddBookingView = (studio: StudioController) => {
     const override = overrides[addon.id];
 
     return {
-      price: override?.price != null ? override.price : toNumber(addon.price),
+      price:
+        override?.price != null ? override.price : parseNumber(addon.price),
       minutes:
         override?.minutes != null ? override.minutes : getAddonMinutes(addon),
       quantity: override?.quantity || 1,
@@ -311,7 +311,7 @@ export const getAddBookingView = (studio: StudioController) => {
     const value = getValue(addon);
 
     const next = {
-      price: toNumber(draft.price),
+      price: parseNumber(draft.price),
       minutes:
         (parseInt(draft.hours) || 0) * 60 + (parseInt(draft.minutes) || 0),
       quantity: parseInt(draft.quantity) || 1,
@@ -370,7 +370,7 @@ export const getAddBookingView = (studio: StudioController) => {
       const addonTotal = value.price * value.quantity;
 
       const timeNote = value.minutes
-        ? ` · ${minutesToDuration(value.minutes * value.quantity)}`
+        ? ` · ${formatDuration(value.minutes * value.quantity)}`
         : " · no extra time";
 
       const quantityNote = value.quantity > 1 ? ` · ×${value.quantity}` : "";
@@ -415,7 +415,7 @@ export const getAddBookingView = (studio: StudioController) => {
     });
 
   const foldAddon = (addon: StudioAddon) => ({
-    addPrice: String(Math.max(0, currentPrice() + toNumber(addon.price))),
+    addPrice: String(Math.max(0, currentPrice() + parseNumber(addon.price))),
     addDuration: Math.max(5, duration + getAddonMinutes(addon)),
   });
 
@@ -608,7 +608,7 @@ export const getAddBookingView = (studio: StudioController) => {
       id,
       dayOffset: state.addDay,
       time: state.addTime,
-      duration: minutesToDuration(duration),
+      duration: formatDuration(duration),
       client: state.addWalkIn ? null : state.addClient,
       service: service.name,
       price,
@@ -631,7 +631,7 @@ export const getAddBookingView = (studio: StudioController) => {
         .map((addon) => ({
           id: addon.id,
           name: addon.name,
-          price: toNumber(addon.price),
+          price: parseNumber(addon.price),
           quantity: 1,
         }));
 
@@ -688,7 +688,7 @@ export const getAddBookingView = (studio: StudioController) => {
       return "Pick a day and time to see the summary.";
 
     const { label: dayLabel } = dayInfo(state.addDay);
-    const slotRange = timeRange(state.addTime, minutesToDuration(duration));
+    const slotRange = timeRange(state.addTime, formatDuration(duration));
 
     return `${client.name} · ${service.name} · ${dayLabel}, ${slotRange} · £${priceLabel}`;
   };
@@ -784,7 +784,7 @@ export const getAddBookingView = (studio: StudioController) => {
     selectedName: service ? service.name : "",
     selectedMeta: service
       ? [
-          formatDuration(Math.floor(duration / 60), duration % 60),
+          formatDuration(duration),
           `£${priceLabel}`,
           selected.length
             ? selected.length + (selected.length === 1 ? " add-on" : " add-ons")
@@ -863,7 +863,7 @@ export const getAddBookingView = (studio: StudioController) => {
         calendarYear:
           state.calendarYear == null ? now.getFullYear() : state.calendarYear,
       }),
-    calendarTitle: `${MONTHS_LONG[calendarMonth]} ${calendarYear}`,
+    calendarTitle: `${LONG_MONTHS[calendarMonth]} ${calendarYear}`,
     calendarDays: getMiniCalendarDays(
       calendarMonth,
       calendarYear,

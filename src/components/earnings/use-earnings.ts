@@ -1,10 +1,5 @@
 import { useEffect, useRef, useState } from "react";
-import {
-  buildLedger,
-  getLedgerKey,
-  getRange,
-  toIsoDate,
-} from "./earnings-data";
+import { buildLedger, getLedgerKey, getRange } from "./earnings-data";
 import type {
   EarningsClient,
   EarningsScenario,
@@ -19,6 +14,7 @@ import {
   getStatementHtml,
   printHtml,
 } from "./earnings-export";
+import { toIsoDate } from "../../utils/dates";
 
 const DAY_MS = 86400000;
 const TOAST_MS = 2600;
@@ -52,12 +48,12 @@ export interface EarningsProps {
   onLearnMore?: () => void;
 }
 
-export interface DrawerRef {
+interface DrawerRef {
   kind: "tx" | "po";
   id: string;
 }
 
-export interface EarningsState {
+interface EarningsState {
   period: PeriodId | null;
   customFrom: string;
   customTo: string;

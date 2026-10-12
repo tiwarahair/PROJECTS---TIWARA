@@ -1,7 +1,15 @@
-import { fireEvent, screen } from "@testing-library/react";
+import { screen } from "@testing-library/react";
 import { beforeEach, describe, expect, it } from "vitest";
 import { renderWithStore } from "../../../test/render-with-store";
 import { StylistCard } from "../stylist-card";
+import type { UserEvent } from "@testing-library/user-event";
+import { setupUser } from "../../../test/setup-user";
+
+let user: UserEvent;
+
+beforeEach(() => {
+  user = setupUser();
+});
 
 const BASE = {
   href: "/stylist?stylist=amara-beauty",
@@ -71,7 +79,7 @@ describe("StylistCard", () => {
         rows={[
           {
             name: "Silk press",
-            meta: "2 hr · from £30.95",
+            meta: "2h · from £30.95",
             href: "/book?stylist=amara-beauty",
           },
         ]}
@@ -90,21 +98,21 @@ describe("StylistCard", () => {
     expect(screen.queryByText("from £50")).not.toBeInTheDocument();
   });
 
-  it("guests tapping the heart get the log-in sheet", () => {
+  it("guests tapping the heart get the log-in sheet", async () => {
     const { store } = renderWithStore(<StylistCard {...BASE} />);
 
-    fireEvent.click(
+    await user.click(
       screen.getByRole("button", { name: "Save Amara Beauty to favourites" }),
     );
 
     expect(store.getState().favourites.loginSheetFor).toBe("amara-beauty");
   });
 
-  it("logged-in customers toggle the favourite", () => {
+  it("logged-in customers toggle the favourite", async () => {
     sessionStorage.setItem("tw_cust", "1");
     renderWithStore(<StylistCard {...BASE} />);
 
-    fireEvent.click(
+    await user.click(
       screen.getByRole("button", { name: "Save Amara Beauty to favourites" }),
     );
 

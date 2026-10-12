@@ -7,7 +7,7 @@ import { getDialogPlacement, getOverlayAnimation } from "./studio-overlay";
 import type { StudioController } from "./use-studio";
 import styles from "../../styles/features/studio/booking-dialogs.module.css";
 
-export type AddonDialogView = ReturnType<typeof getAddonDialog> & {
+type AddonDialogView = ReturnType<typeof getAddonDialog> & {
   remove: () => void;
   save: () => void;
 };

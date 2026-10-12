@@ -4,13 +4,8 @@ import type { ChangeEvent } from "react";
 import type { BusinessValue } from "../../components/business-details/business-details-logic";
 import type { PolicyValue } from "../../components/payment-policy/payment-policy-logic";
 import type { TaxDetails } from "../../components/tax-details-form/tax-details-logic";
-import {
-  BOOKING_LINK,
-  GATE_REASON,
-  SHORT_MONTH_NAMES,
-  STUDIO_STYLIST_ID,
-} from "./studio-data";
-import { copyText, formatDuration, formatMinutes } from "./studio-format";
+import { BOOKING_LINK, GATE_REASON, STUDIO_STYLIST_ID } from "./studio-data";
+import { copyText, formatMinutes } from "./studio-format";
 import {
   getAllClients,
   getBlockColour,
@@ -19,6 +14,7 @@ import {
 } from "./studio-model";
 import type { StudioPage } from "./studio-types";
 import type { StudioController } from "./use-studio";
+import { SHORT_MONTHS_SEPT, formatDuration } from "../../utils/dates";
 
 export type SettingsIcon =
   | "clock"
@@ -82,7 +78,7 @@ const MIN_OPTIONS: [number, string][] = [
   [20160, "2 weeks"],
 ];
 
-export interface SettingsRow {
+interface SettingsRow {
   key: string;
   label: string;
   subtitle: string;
@@ -362,8 +358,7 @@ export const getSettingsView = (
   const exampleMinutes =
     (example.durationHours || 0) * 60 + (example.durationMinutes || 0);
 
-  const asBlock = (minutes: number) =>
-    formatDuration(Math.floor(minutes / 60), minutes % 60);
+  const asBlock = (minutes: number) => formatDuration(minutes);
 
   const saveRules = () => {
     showToast("Booking rules saved");
@@ -381,7 +376,7 @@ export const getSettingsView = (
 
   const untilLabel =
     untilDate && !isNaN(untilDate.getTime())
-      ? `${untilDate.getDate()} ${SHORT_MONTH_NAMES[untilDate.getMonth()]}`
+      ? `${untilDate.getDate()} ${SHORT_MONTHS_SEPT[untilDate.getMonth()]}`
       : "";
 
   // ---- profile editor ----
@@ -492,7 +487,7 @@ export const getSettingsView = (
         const date = new Date(`${value}T00:00`);
 
         showToast(
-          `Paused until ${date.getDate()} ${SHORT_MONTH_NAMES[date.getMonth()]}`,
+          `Paused until ${date.getDate()} ${SHORT_MONTHS_SEPT[date.getMonth()]}`,
         );
       }
     },

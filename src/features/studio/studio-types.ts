@@ -45,7 +45,7 @@ export type BookingStep =
   | "payment"
   | "done";
 
-export interface ClientNotes {
+interface ClientNotes {
   type?: string;
   size?: string;
   length?: string;
@@ -173,12 +173,12 @@ export interface OwnOption {
   minutesDelta: string;
 }
 
-export interface OwnGroup {
+interface OwnGroup {
   name: string;
   options: OwnOption[];
 }
 
-export interface ServiceAddonLink {
+interface ServiceAddonLink {
   addonId: string;
   priceOverride: string | number | null;
   hoursOverride: string | number | null;
@@ -238,7 +238,7 @@ export interface BlockedTime {
   color?: string;
 }
 
-export interface ClosedPeriod {
+interface ClosedPeriod {
   id: number;
   from: string;
   to: string;
@@ -246,14 +246,14 @@ export interface ClosedPeriod {
   reason: string;
 }
 
-export interface WorkingHours {
+interface WorkingHours {
   day: string;
   on: boolean;
   start: string;
   end: string;
 }
 
-export interface StudioProfile {
+interface StudioProfile {
   salon: string;
   about: string;
   address: string;
@@ -265,18 +265,18 @@ export interface StudioProfile {
   youtube?: string;
 }
 
-export interface StudioRules {
+interface StudioRules {
   maxNotice: number;
   minNotice: number;
   extra: number;
   travel: number;
 }
 
-export type StudioPolicy = Omit<PolicyValue, "extras"> & {
+type StudioPolicy = Omit<PolicyValue, "extras"> & {
   extras: PolicyValue["extras"];
 };
 
-export interface TwoFactorDevice {
+interface TwoFactorDevice {
   name: string;
   backup: boolean;
 }
@@ -314,7 +314,7 @@ export interface ActionItem {
   run: () => void;
 }
 
-export interface ActionAnchor {
+interface ActionAnchor {
   top?: number;
   right?: number;
   bottom?: number;
@@ -328,7 +328,7 @@ export interface ActionSheet {
   items: ActionItem[];
 }
 
-export interface Popover {
+interface Popover {
   kind?: "block";
   time?: string;
   x: number;
@@ -339,7 +339,7 @@ export interface Popover {
   block?: BlockedTime;
 }
 
-export interface Tooltip {
+interface Tooltip {
   key: string;
   text: string;
   x: number;
@@ -347,7 +347,7 @@ export interface Tooltip {
   below?: boolean;
 }
 
-export interface BlockDraft {
+interface BlockDraft {
   day: number;
   start: string;
   end: string;
@@ -361,14 +361,14 @@ export interface BlockDraft {
   force?: boolean;
 }
 
-export interface ClosedDraft {
+interface ClosedDraft {
   from: string;
   to: string;
   reason: string;
   editId?: number;
 }
 
-export interface ClientEditDraft {
+interface ClientEditDraft {
   id: string | null;
   first: string;
   last: string;
@@ -382,21 +382,21 @@ export interface ClientEditDraft {
   img?: string;
 }
 
-export interface NewClientDraft {
+interface NewClientDraft {
   first: string;
   last: string;
   email: string;
   phone: string;
 }
 
-export interface AddNewClient {
+interface AddNewClient {
   name: string;
   contact: string;
   email: string;
   address: string;
 }
 
-export interface EditServiceDraft {
+interface EditServiceDraft {
   serviceId: string | null;
   serviceName: string;
   taxonomyId: string | null;
@@ -421,7 +421,7 @@ export interface AddonEditDraft {
   quantity: string;
 }
 
-export interface CategoryDraft {
+interface CategoryDraft {
   name: string;
   colour: string;
   error: string;
@@ -437,7 +437,7 @@ export interface CategoriesUi {
   editError: string;
 }
 
-export interface AddonQuickDraft {
+interface AddonQuickDraft {
   name: string;
   price: string;
   hours: string;
@@ -445,7 +445,7 @@ export interface AddonQuickDraft {
   categoryId?: string | null;
 }
 
-export interface OwnEditDraft {
+interface OwnEditDraft {
   index: number;
   name: string;
   options: OwnOption[];
@@ -504,7 +504,7 @@ export interface Taxonomy {
   lengths: string[] | null;
 }
 
-export interface StudioCheck {
+interface StudioCheck {
   availability: boolean;
   profile: boolean;
   stripe: boolean;

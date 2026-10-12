@@ -1,14 +1,11 @@
 import type { CSSProperties, MouseEvent } from "react";
 import { joinClassNames } from "../../utils/class-names";
-import {
-  STATUS_COLOURS,
-  formatDay,
-  formatGbp,
-  getClient,
-} from "./earnings-data";
+import { STATUS_COLOURS, getClient } from "./earnings-data";
 import type { Payout, Transaction, TransactionStatus } from "./earnings-data";
 import type { EarningsController, EarningsProps } from "./use-earnings";
 import styles from "../../styles/components/earnings/earnings-lists.module.css";
+import { formatMoney } from "../../utils/money";
+import { formatWeekdayDate } from "../../utils/dates";
 
 const DAY_MS = 86400000;
 
@@ -38,9 +35,7 @@ export const getStatusStyle = (
 };
 
 /** Recorded (cash etc.) rows show "—" in a plain tag. */
-export const getTransactionStatusStyle = (
-  transaction: Transaction,
-): CSSProperties =>
+const getTransactionStatusStyle = (transaction: Transaction): CSSProperties =>
   transaction.isRecorded
     ? ({
         "--st-bg": "transparent",
@@ -165,7 +160,7 @@ export const EarningsLists = ({
                 >
                   <span className={styles.poDateCell}>
                     <span className={styles.poDate}>
-                      {formatDay(payout.sent)}
+                      {formatWeekdayDate(payout.sent)}
                     </span>
                     <span
                       className={joinClassNames(
@@ -177,7 +172,7 @@ export const EarningsLists = ({
                     </span>
                   </span>
                   <span className={styles.poAmount}>
-                    {formatGbp(payout.amount)}
+                    {formatMoney(payout.amount, { pence: "always" })}
                   </span>
                   <span
                     className={joinClassNames(
@@ -306,10 +301,12 @@ export const EarningsLists = ({
                     amountClass(transaction),
                   )}
                 >
-                  {formatGbp(transaction.amount)}
+                  {formatMoney(transaction.amount, { pence: "always" })}
                 </span>
                 <span className={styles.txFee}>
-                  {transaction.fee == null ? "—" : formatGbp(transaction.fee)}
+                  {transaction.fee == null
+                    ? "—"
+                    : formatMoney(transaction.fee, { pence: "always" })}
                 </span>
                 <span
                   className={joinClassNames(
@@ -317,7 +314,7 @@ export const EarningsLists = ({
                     amountClass(transaction),
                   )}
                 >
-                  {formatGbp(transaction.net)}
+                  {formatMoney(transaction.net, { pence: "always" })}
                 </span>
                 <span>
                   <span
@@ -368,7 +365,7 @@ export const EarningsLists = ({
                     amountClass(transaction),
                   )}
                 >
-                  {formatGbp(transaction.amount)}
+                  {formatMoney(transaction.amount, { pence: "always" })}
                 </span>
                 <span
                   className={styles.statusSmall}

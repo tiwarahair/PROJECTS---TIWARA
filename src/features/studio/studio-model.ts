@@ -9,8 +9,10 @@ import {
 import {
   dateAt,
   durationToMinutes,
-  formatDuration,
   hhmm,
+  parseAmountLabel,
+  parseNumber,
+  parseWholeNumber,
   timeRange,
   timeToMinutes,
 } from "./studio-format";
@@ -25,6 +27,8 @@ import type {
   StudioService,
   StudioState,
 } from "./studio-types";
+import { formatDuration } from "../../utils/dates";
+import { formatMoney, roundToPence } from "../../utils/money";
 
 const WALK_IN: StudioClient = {
   id: null,
@@ -182,19 +186,18 @@ export const getBookingBuffer = (state: StudioState, name: string): number =>
 export const getServiceDuration = (state: StudioState, name: string): string =>
   state.services.find((item) => item.name === name)?.duration || "";
 
-export const formatAddon = (addon: {
-  price: unknown;
-  hours: unknown;
-  min: unknown;
-}): string => {
-  const hasTime =
-    parseInt(String(addon.hours)) || 0 || parseInt(String(addon.min)) || 0;
+interface AddonAmounts {
+  price: string | number;
+  hours: string | number;
+  min: string | number;
+}
 
-  const price = parseFloat(String(addon.price)) || 0;
+export const formatAddon = (addon: AddonAmounts): string => {
+  const minutes =
+    parseWholeNumber(addon.hours) * 60 + parseWholeNumber(addon.min);
 
-  const timeLabel = hasTime
-    ? formatDuration(addon.hours, addon.min)
-    : "no extra time";
+  const price = parseNumber(addon.price);
+  const timeLabel = minutes ? formatDuration(minutes) : "no extra time";
 
   return `+£${price}, ${timeLabel}`;
 };
@@ -270,7 +273,7 @@ export const getBlockRange = (
   return [timeToMinutes(parts[0]), timeToMinutes(parts[1] || parts[0])];
 };
 
-export interface BusyRange {
+interface BusyRange {
   startMinutes: number;
   endMinutes: number;
   kind: "booking" | "block";
@@ -478,7 +481,7 @@ export const getProtectionNoun = ({ policy }: StudioState): string => {
   return policy.mode === "full" ? "full payment" : "";
 };
 
-export const getProtectionAmount = (
+const getProtectionAmount = (
   { policy }: StudioState,
   price: number,
 ): number => {
@@ -488,7 +491,7 @@ export const getProtectionAmount = (
   return policy.mode === "full" ? price : 0;
 };
 
-export const getBookingFee = (amount: number): number =>
+const getBookingFee = (amount: number): number =>
   amount > 0 ? Math.round((amount * 0.015 + 0.5) * 100) / 100 : 0;
 
 export const getProtectionTotal = (
@@ -525,7 +528,7 @@ export const getProtectionExpiry = (
   return Math.min(base, date.getTime() - 2 * 3600 * 1000);
 };
 
-export interface PolicyFee {
+interface PolicyFee {
   amount: number;
   label?: string;
   subtitle?: string;
@@ -542,20 +545,8 @@ export const getPolicyFee = (
   const mode = policy.mode || "none";
   const price = +booking.price || 0;
   const fee = policy[kind];
-  const round = (value: number) => Math.round(value * 100) / 100;
 
-  const format = (value: number) => {
-    const amountLabel =
-      Math.abs(value - Math.round(value)) < 0.005
-        ? Math.round(value)
-        : value.toFixed(2);
-
-    return `£${amountLabel}`;
-  };
-
-  const deposit = round(
-    (price * (parseFloat(String(policy.deposit)) || 0)) / 100,
-  );
+  const deposit = roundToPence((price * (policy.deposit || 0)) / 100);
 
   const getRefund = () => {
     if (mode === "deposit") return "Deposit refunded";
@@ -572,7 +563,7 @@ export const getPolicyFee = (
 
     if (mode === "deposit" && fee.kind === "keep") return deposit;
 
-    return round((price * (parseFloat(String(fee.percent)) || 0)) / 100);
+    return roundToPence((price * (fee.percent || 0)) / 100);
   };
 
   let amount = getBaseAmount();
@@ -587,30 +578,30 @@ export const getPolicyFee = (
   const getSubtitle = () => {
     if (mode === "deposit") {
       if (Math.abs(amount - deposit) < 0.005)
-        return `${format(deposit)} deposit kept`;
+        return `${formatMoney(deposit)} deposit kept`;
 
       if (amount < deposit) {
-        const refunded = format(deposit - amount);
+        const refunded = formatMoney(deposit - amount);
 
-        return `${format(amount)} kept from the deposit, ${refunded} refunded`;
+        return `${formatMoney(amount)} kept from the deposit, ${refunded} refunded`;
       }
 
-      const charged = format(amount - deposit);
+      const charged = formatMoney(amount - deposit);
 
-      return `${format(deposit)} deposit kept and ${charged} charged to the card on file`;
+      return `${formatMoney(deposit)} deposit kept and ${charged} charged to the card on file`;
     }
 
     if (mode === "full")
       return amount >= price
-        ? `${format(price)} kept, no refund`
-        : `${format(amount)} kept, ${format(price - amount)} refunded`;
+        ? `${formatMoney(price)} kept, no refund`
+        : `${formatMoney(amount)} kept, ${formatMoney(price - amount)} refunded`;
 
-    return `${format(amount)} charged to the card on file`;
+    return `${formatMoney(amount)} charged to the card on file`;
   };
 
   const subtitle = getSubtitle();
 
-  return { amount, label: format(amount), subtitle, refund };
+  return { amount, label: formatMoney(amount), subtitle, refund };
 };
 
 export const getWaiveConfirm = (
@@ -623,22 +614,15 @@ export const getWaiveConfirm = (
   const policy = state.policy;
   const first = (client?.name || "the client").split(" ")[0];
 
-  const toNumber = (value: unknown) =>
-    parseFloat(String(value || "").replace(/[^0-9.]/g, "")) || 0;
+  const fee = parseAmountLabel(row.feeLabel);
 
-  const fee = toNumber(row.feeLabel);
-
-  const deposit =
-    Math.round(row.price * (parseFloat(String(policy.deposit)) || 0)) / 100;
-
-  const format = (value: number) =>
-    `£${value % 1 === 0 ? value : value.toFixed(2)}`;
+  const deposit = Math.round(row.price * (policy.deposit || 0)) / 100;
 
   if (!isFresh)
     return {
-      title: `Refund ${format(fee)} to ${first}’s card ending 4242?`,
+      title: `Refund ${formatMoney(fee)} to ${first}’s card ending 4242?`,
       body: "It usually takes 5–10 business days to arrive. The card fee isn’t returned.",
-      yesLabel: `Refund ${format(fee)}`,
+      yesLabel: `Refund ${formatMoney(fee)}`,
       yes: run,
     };
 
@@ -647,11 +631,11 @@ export const getWaiveConfirm = (
   const getBody = () => {
     if (mode === "deposit")
       return policy.refundable
-        ? `Her ${format(deposit)} deposit will be refunded and she won’t be charged anything else.`
-        : `She won’t be charged the extra ${format(Math.max(0, fee - deposit))}. Her ${format(deposit)} deposit is non-refundable and will be kept.`;
+        ? `Her ${formatMoney(deposit)} deposit will be refunded and she won’t be charged anything else.`
+        : `She won’t be charged the extra ${formatMoney(Math.max(0, fee - deposit))}. Her ${formatMoney(deposit)} deposit is non-refundable and will be kept.`;
 
     if (mode === "full")
-      return `The ${format(fee)} will be refunded to her card.`;
+      return `The ${formatMoney(fee)} will be refunded to her card.`;
 
     return "She won’t be charged.";
   };
@@ -659,14 +643,14 @@ export const getWaiveConfirm = (
   const body = getBody();
 
   return {
-    title: `Waive ${first}’s ${format(fee)} fee?`,
+    title: `Waive ${first}’s ${formatMoney(fee)} fee?`,
     body: `${body} The booking fee isn’t refunded.`,
     yesLabel: "Waive fee",
     yes: run,
   };
 };
 
-export const normalisePhone = (phone: string | null | undefined): string => {
+const normalisePhone = (phone: string | null | undefined): string => {
   let digits = String(phone || "").replace(/\D/g, "");
 
   if (digits.startsWith("44")) digits = `0${digits.slice(2)}`;
@@ -710,4 +694,12 @@ export const findDuplicate = (
   }
 
   return null;
+};
+
+export const getQueryParam = (key: string) => {
+  try {
+    return new URLSearchParams(location.search).get(key);
+  } catch {
+    return null;
+  }
 };

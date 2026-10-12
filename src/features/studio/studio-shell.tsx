@@ -2,17 +2,13 @@ import type { CSSProperties } from "react";
 import { Link } from "react-router";
 import { getAssetUrl } from "../../utils/asset-url";
 import { joinClassNames } from "../../utils/class-names";
-import {
-  BOOKING_LINK,
-  MONTHS,
-  STUDIO_STYLIST_ID,
-  WEEKDAYS,
-} from "./studio-data";
+import { BOOKING_LINK, STUDIO_STYLIST_ID } from "./studio-data";
 import { copyText } from "./studio-format";
 import { getSteps, isLive } from "./studio-model";
 import type { StudioTab } from "./studio-types";
 import type { StudioController } from "./use-studio";
 import styles from "../../styles/features/studio/studio-shell.module.css";
+import { SHORT_MONTHS, SHORT_WEEKDAYS } from "../../utils/dates";
 
 type NavIconName =
   "home" | "cal" | "scis" | "pound" | "gear" | "people" | "more";
@@ -31,7 +27,7 @@ const STROKE = {
   strokeLinejoin: "round",
 } as const;
 
-export const NavIcon = ({ icon }: { icon: NavIconName }) => {
+const NavIcon = ({ icon }: { icon: NavIconName }) => {
   if (icon === "more")
     return (
       <svg width="19" height="19" viewBox="0 0 24 24" fill="currentColor">
@@ -92,7 +88,7 @@ export const NavIcon = ({ icon }: { icon: NavIconName }) => {
 };
 
 /** The navigation entries and which one is current. */
-export const getNavItems = (studio: StudioController) => {
+const getNavItems = (studio: StudioController) => {
   const { state, isWide, setState, actions } = studio;
 
   const navDefinitions: NavDefinition[] = [
@@ -245,7 +241,7 @@ export const StudioTopBar = ({ studio }: { studio: StudioController }) => {
       <div className={styles.grow}>
         <div className={styles.title}>{greeting}</div>
         <div className={styles.dateLine}>
-          {`${WEEKDAYS[now.getDay()]} ${now.getDate()} ${MONTHS[now.getMonth()]}`}
+          {`${SHORT_WEEKDAYS[now.getDay()]} ${now.getDate()} ${SHORT_MONTHS[now.getMonth()]}`}
         </div>
       </div>
       <button

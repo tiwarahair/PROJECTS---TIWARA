@@ -1,24 +1,12 @@
-// Booking fee, money formatting and the client-facing policy lines.
+// Booking fee and the client-facing policy lines.
 // policyLines is the ONE client-facing builder (Studio preview and Booking Review/Pay/Confirmation).
 import { policyIcons } from "../data";
 import type { Policy, PolicyFee, PolicyMode } from "../types/policy";
-
-export const roundPence = (amount: number): number =>
-  Math.round(amount * 100) / 100;
+import { formatMoney, roundToPence } from "./money";
 
 /** Client booking fee: £0.50 + 1.5%, rounded to the penny. */
 export const bookingFee = (price: number): number =>
-  roundPence(0.5 + 0.015 * price);
-
-/** "£45" for whole pounds, "£45.50" otherwise. */
-export const money = (amount: number): string => {
-  const amountText =
-    Math.abs(amount - Math.round(amount)) < 0.005
-      ? String(Math.round(amount))
-      : amount.toFixed(2);
-
-  return `£${amountText}`;
-};
+  roundToPence(0.5 + 0.015 * price);
 
 /** "48 hours", "1 hour", "30 minutes" */
 export const getWindowText = (hours: number): string => {
@@ -27,7 +15,7 @@ export const getWindowText = (hours: number): string => {
   return hours === 1 ? "1 hour" : `${hours} hours`;
 };
 
-export interface PolicyLine {
+interface PolicyLine {
   icon: string;
   text: string;
 }
@@ -65,49 +53,49 @@ export const policyLines = (
   const addLine = (icon: string, text: string) => lines.push({ icon, text });
 
   const deposit =
-    mode === "deposit" ? roundPence((price * depositPercent) / 100) : 0;
+    mode === "deposit" ? roundToPence((price * depositPercent) / 100) : 0;
 
   const windowText = getWindowText(freeWindowHours);
   let dueToday = fee;
   let balance = price;
 
   if (mode === "deposit") {
-    dueToday = roundPence(deposit + fee);
-    balance = roundPence(price - deposit);
+    dueToday = roundToPence(deposit + fee);
+    balance = roundToPence(price - deposit);
 
     addLine(
       policyIcons.payment,
-      `Pay ${money(dueToday)} today (${money(deposit)} deposit + ${money(fee)} booking fee). The ${money(balance)} balance is paid to ${stylistName} at your appointment.`,
+      `Pay ${formatMoney(dueToday)} today (${formatMoney(deposit)} deposit + ${formatMoney(fee)} booking fee). The ${formatMoney(balance)} balance is paid to ${stylistName} at your appointment.`,
     );
   }
 
   if (mode === "full") {
-    dueToday = roundPence(price + fee);
+    dueToday = roundToPence(price + fee);
     balance = 0;
 
     addLine(
       policyIcons.payment,
-      `Pay ${money(dueToday)} today (${money(price)} + ${money(fee)} booking fee). Nothing more to pay at your appointment.`,
+      `Pay ${formatMoney(dueToday)} today (${formatMoney(price)} + ${formatMoney(fee)} booking fee). Nothing more to pay at your appointment.`,
     );
   }
 
   if (mode === "card")
     addLine(
       policyIcons.payment,
-      `Pay ${money(fee)} booking fee today. Your card is saved and the ${money(price)} is paid to ${stylistName} at your appointment.`,
+      `Pay ${formatMoney(fee)} booking fee today. Your card is saved and the ${formatMoney(price)} is paid to ${stylistName} at your appointment.`,
     );
 
   if (mode === "none")
     addLine(
       policyIcons.payment,
-      `Pay ${money(fee)} booking fee today. The ${money(price)} is paid to ${stylistName} at your appointment.`,
+      `Pay ${formatMoney(fee)} booking fee today. The ${formatMoney(price)} is paid to ${stylistName} at your appointment.`,
     );
 
   const getCancellationText = (): string => {
     if (mode === "deposit")
       return refundable
         ? `Free cancellation up to ${windowText} before; your deposit is refunded.`
-        : `Cancel or reschedule up to ${windowText} before at no additional charge. Your ${money(deposit)} deposit is non-refundable.`;
+        : `Cancel or reschedule up to ${windowText} before at no additional charge. Your ${formatMoney(deposit)} deposit is non-refundable.`;
 
     if (mode === "full")
       return `Free cancellation up to ${windowText} before; you’re refunded in full.`;
@@ -127,7 +115,7 @@ export const policyLines = (
     const amount =
       mode === "deposit" && kind === "keep"
         ? deposit
-        : roundPence((price * percent) / 100);
+        : roundToPence((price * percent) / 100);
 
     const shownPercent =
       mode === "deposit" &&
@@ -143,22 +131,22 @@ export const policyLines = (
         Math.abs(amount - deposit) < 0.005 ||
         (!refundable && amount < deposit)
       )
-        return `${label}: ${money(deposit)} (your deposit is kept).`;
+        return `${label}: ${formatMoney(deposit)} (your deposit is kept).`;
 
       if (amount > deposit)
         return short
-          ? `${label}: ${money(amount)}.`
-          : `${label}: ${money(amount)} (your deposit is kept and ${money(amount - deposit)} charged to your card).`;
+          ? `${label}: ${formatMoney(amount)}.`
+          : `${label}: ${formatMoney(amount)} (your deposit is kept and ${formatMoney(amount - deposit)} charged to your card).`;
 
-      return `${label}: ${money(amount)} (kept from your deposit, ${money(deposit - amount)} refunded).`;
+      return `${label}: ${formatMoney(amount)} (kept from your deposit, ${formatMoney(deposit - amount)} refunded).`;
     }
 
     if (mode === "full")
       return amount >= price
-        ? `${label}: ${money(price)} kept, no refund.`
-        : `${label}: ${money(amount)} kept, rest refunded.`;
+        ? `${label}: ${formatMoney(price)} kept, no refund.`
+        : `${label}: ${formatMoney(amount)} kept, rest refunded.`;
 
-    return `${label}: ${money(amount)} charged to your card.`;
+    return `${label}: ${formatMoney(amount)} charged to your card.`;
   };
 
   const arriveText = graceMinutes

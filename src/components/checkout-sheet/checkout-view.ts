@@ -2,14 +2,12 @@
 import {
   ICONS,
   DEFAULT_STYLIST,
-  formatPence,
-  formatPounds,
   getRefundContext,
   parsePounds,
-  roundPounds,
 } from "./checkout-data";
 import type { CheckoutLine, CheckoutView, PayMethod } from "./checkout-data";
 import type { CheckoutController, CheckoutSheetProps } from "./use-checkout";
+import { formatMoney, roundToPence } from "../../utils/money";
 
 export interface DetailRow {
   key: string;
@@ -19,15 +17,15 @@ export interface DetailRow {
   isAlert: boolean;
 }
 
-export type Tone = "green" | "rust" | "red" | "neutral";
+type Tone = "green" | "rust" | "red" | "neutral";
 
-export interface Badge {
+interface Badge {
   label: string;
   icon: string;
   tone: Tone;
 }
 
-export interface DetailAction {
+interface DetailAction {
   label: string;
   run: () => void;
   kind: "primary" | "secondary" | "ghost";
@@ -84,7 +82,7 @@ const row = (
 
 export const getAdjustNote = ({ adjustment, reason }: CheckoutLine): string => {
   const direction = adjustment < 0 ? "Lowered " : "Raised ";
-  const amount = formatPounds(Math.abs(adjustment));
+  const amount = formatMoney(Math.abs(adjustment));
 
   return `${direction}${amount}: ${reason}`;
 };
@@ -116,14 +114,14 @@ export const getCheckoutView = (
           row(
             state.mode === "full" ? "Paid in full" : "Deposit paid",
             cardText + (booking.paidOn ? ` · ${booking.paidOn}` : ""),
-            formatPounds(-state.paid),
+            formatMoney(-state.paid),
           ),
         ]
       : [];
 
   const isRefund = money.refundDue > 0;
   const balanceLabel = isRefund ? "Refund due" : "Balance due";
-  const balanceValue = formatPounds(isRefund ? money.refundDue : money.due);
+  const balanceValue = formatMoney(isRefund ? money.refundDue : money.due);
   const isInCheckout = ["items", "tip", "pay", "review"].includes(state.view);
   const stepIndex = money.steps.indexOf(state.view);
 
@@ -150,11 +148,11 @@ export const getCheckoutView = (
   const refundContext = getRefundContext(state, booking);
   const isOffPlatform = !(refundContext.platform > 0);
 
-  const refundCapAll = roundPounds(
+  const refundCapAll = roundToPence(
     isOffPlatform ? refundContext.off : refundContext.platform,
   );
 
-  const refundCap = roundPounds(refundCapAll - state.refunded);
+  const refundCap = roundToPence(refundCapAll - state.refunded);
   const fee = booking.fee || 0;
   const feeExtra = Math.max(0, fee - state.paid);
 
@@ -192,7 +190,7 @@ export const getCheckoutView = (
     row(
       line.name,
       line.adjustment ? getAdjustNote(line) : line.subtitle,
-      formatPounds(line.base + line.adjustment),
+      formatMoney(line.base + line.adjustment),
     ),
   );
 
@@ -209,7 +207,7 @@ export const getCheckoutView = (
             label:
               refundCap <= 0
                 ? "Refunded"
-                : `Partially refunded ${formatPounds(state.refunded)}`,
+                : `Partially refunded ${formatMoney(state.refunded)}`,
             tone: "neutral",
             icon: ICONS.returnArrow,
           },
@@ -225,23 +223,23 @@ export const getCheckoutView = (
         row(
           "Deposit kept",
           `${cardText} · paid ${booking.paidOn}`,
-          formatPounds(state.paid),
+          formatMoney(state.paid),
         ),
         row(
           state.status === "feeUnpaid" ? "Unpaid" : chargeLabel,
           cardText,
-          formatPounds(feeExtra),
+          formatMoney(feeExtra),
           state.status === "feeUnpaid",
         ),
       ];
 
     if (state.mode === "full")
       return [
-        row("Kept from full payment", cardText, formatPounds(fee)),
-        row("Refunded", cardText, formatPounds(state.paid - fee)),
+        row("Kept from full payment", cardText, formatMoney(fee)),
+        row("Refunded", cardText, formatMoney(state.paid - fee)),
       ];
 
-    return [row(chargeLabel, cardText, formatPounds(fee))];
+    return [row(chargeLabel, cardText, formatMoney(fee))];
   };
 
   const feeRows = getFeeRows();
@@ -249,11 +247,11 @@ export const getCheckoutView = (
   const getWaiveWhat = () => {
     if (state.mode === "deposit")
       return state.isNonRefundable
-        ? `She won’t be charged the extra ${formatPounds(feeExtra)}. Her ${formatPounds(state.paid)} deposit is non-refundable and will be kept.`
-        : `Her ${formatPounds(state.paid)} deposit will be refunded and she won’t be charged anything else.`;
+        ? `She won’t be charged the extra ${formatMoney(feeExtra)}. Her ${formatMoney(state.paid)} deposit is non-refundable and will be kept.`
+        : `Her ${formatMoney(state.paid)} deposit will be refunded and she won’t be charged anything else.`;
 
     if (state.mode === "full")
-      return `The ${formatPounds(fee)} will be refunded to her card.`;
+      return `The ${formatMoney(fee)} will be refunded to her card.`;
 
     return "She won’t be charged.";
   };
@@ -263,11 +261,11 @@ export const getCheckoutView = (
   const getWaivedWhat = () => {
     if (state.mode === "deposit")
       return state.isNonRefundable
-        ? `${name} wasn’t charged the extra ${formatPounds(feeExtra)}. Her ${formatPounds(state.paid)} deposit is non-refundable and was kept.`
-        : `Her ${formatPounds(state.paid)} deposit was refunded and she wasn’t charged anything else.`;
+        ? `${name} wasn’t charged the extra ${formatMoney(feeExtra)}. Her ${formatMoney(state.paid)} deposit is non-refundable and was kept.`
+        : `Her ${formatMoney(state.paid)} deposit was refunded and she wasn’t charged anything else.`;
 
     if (state.mode === "full")
-      return `The ${formatPounds(fee)} was refunded to her card.`;
+      return `The ${formatMoney(fee)} was refunded to her card.`;
 
     return `${name} wasn’t charged.`;
   };
@@ -279,14 +277,14 @@ export const getCheckoutView = (
     done.method === "record" ? (RECORD_VIA_LABELS[done.via] ?? "") : cardText;
 
   const tipNote =
-    done.tip > 0 ? ` · includes ${formatPounds(done.tip)} tip` : "";
+    done.tip > 0 ? ` · includes ${formatMoney(done.tip)} tip` : "";
 
   const depositNote =
     state.paid > 0
-      ? ` Her ${formatPounds(state.paid)} deposit is kept towards it.`
+      ? ` Her ${formatMoney(state.paid)} deposit is kept towards it.`
       : "";
 
-  const feeExtraText = formatPounds(feeExtra);
+  const feeExtraText = formatMoney(feeExtra);
 
   switch (state.status) {
     case "arrived":
@@ -331,7 +329,7 @@ export const getCheckoutView = (
               ? "Paid in full at booking"
               : "Deposit paid at booking",
             `${cardText} · ${booking.paidOn}`,
-            formatPounds(state.paid),
+            formatMoney(state.paid),
           ),
         );
 
@@ -342,7 +340,7 @@ export const getCheckoutView = (
               ? "Recorded at checkout"
               : "Paid at checkout",
             `${doneVia} · 15:08${tipNote}`,
-            formatPounds(done.charged),
+            formatMoney(done.charged),
           ),
         );
 
@@ -351,7 +349,7 @@ export const getCheckoutView = (
           row(
             "Refunded automatically",
             cardText,
-            formatPounds(-done.refundAuto),
+            formatMoney(-done.refundAuto),
           ),
         );
 
@@ -360,13 +358,13 @@ export const getCheckoutView = (
           row(
             isOffPlatform ? "Refund recorded" : "Refund",
             state.refundLast,
-            formatPounds(-state.refunded),
+            formatMoney(-state.refunded),
           ),
         );
 
       total = {
         label: "Total paid",
-        value: formatPounds(
+        value: formatMoney(
           state.paid + done.charged - done.refundAuto - state.refunded,
         ),
       };
@@ -413,7 +411,7 @@ export const getCheckoutView = (
       };
 
       rows = [...lineRows, ...creditRows];
-      total = { label: "Awaiting payment", value: formatPounds(done.charged) };
+      total = { label: "Awaiting payment", value: formatMoney(done.charged) };
 
       actions = [
         {
@@ -445,16 +443,16 @@ export const getCheckoutView = (
       panel = {
         tone: "neutral",
         icon: ICONS.clock,
-        title: `${formatPounds(fee)} no-show fee`,
+        title: `${formatMoney(fee)} no-show fee`,
         body: `${name} didn’t turn up on ${booking.day}. The fee is charged automatically in 18h unless you waive it.`,
       };
 
       rows = feeRows;
-      total = { label: "No-show fee", value: formatPounds(fee) };
+      total = { label: "No-show fee", value: formatMoney(fee) };
 
       actions = [
         {
-          label: `Waive ${formatPounds(fee)} fee (applies in 18h)`,
+          label: `Waive ${formatMoney(fee)} fee (applies in 18h)`,
           run: () => setState({ dialog: "waive" }),
           kind: "secondary",
         },
@@ -471,7 +469,7 @@ export const getCheckoutView = (
         tone: "neutral",
         icon: ICONS.check,
         title: "Fee waived",
-        body: `You waived the ${formatPounds(fee)} fee today at 16:20. ${waivedWhat} The booking fee isn’t refunded.`,
+        body: `You waived the ${formatMoney(fee)} fee today at 16:20. ${waivedWhat} The booking fee isn’t refunded.`,
       };
 
       hasUndo = true;
@@ -485,11 +483,11 @@ export const getCheckoutView = (
         tone: "red",
         icon: ICONS.alert,
         title: "Card declined: insufficient funds",
-        body: `${feeExtraText} of ${name}’s ${formatPounds(fee)} fee couldn’t be charged to ${cardText}.${depositNote}`,
+        body: `${feeExtraText} of ${name}’s ${formatMoney(fee)} fee couldn’t be charged to ${cardText}.${depositNote}`,
       };
 
       rows = feeRows;
-      total = { label: "No-show fee", value: formatPounds(fee) };
+      total = { label: "No-show fee", value: formatMoney(fee) };
 
       actions = [
         {
@@ -528,12 +526,12 @@ export const getCheckoutView = (
 
       if (state.refunded > 0)
         rows.push(
-          row("Refund", state.refundLast, formatPounds(-state.refunded)),
+          row("Refund", state.refundLast, formatMoney(-state.refunded)),
         );
 
       total = {
         label: "Fee collected",
-        value: formatPounds(fee - state.refunded),
+        value: formatMoney(fee - state.refunded),
       };
 
       if (refundCap > 0)
@@ -548,7 +546,7 @@ export const getCheckoutView = (
 
   const overError =
     state.refundKind === "partial" && refundAmount > refundCap
-      ? `You can refund up to ${formatPounds(refundCap)}.`
+      ? `You can refund up to ${formatMoney(refundCap)}.`
       : "";
 
   const refundError =
@@ -562,7 +560,7 @@ export const getCheckoutView = (
 
   // review
   const noPayTotalLabel = isRefund ? "Refund due" : "Nothing to pay";
-  const noPayTotalValue = isRefund ? formatPounds(money.refundDue) : "£0";
+  const noPayTotalValue = isRefund ? formatMoney(money.refundDue) : "£0";
 
   const reviewTotalLabel =
     money.method === "none"
@@ -570,7 +568,7 @@ export const getCheckoutView = (
       : REVIEW_TOTAL_LABELS[money.method];
 
   const reviewTotalValue =
-    money.method === "none" ? noPayTotalValue : formatPounds(money.charge);
+    money.method === "none" ? noPayTotalValue : formatMoney(money.charge);
 
   // receipt
   const receiptDone = state.done ?? {
@@ -592,7 +590,7 @@ export const getCheckoutView = (
     receiptLines.push({
       key: `l${line.id}`,
       label: line.name,
-      value: formatPence(line.base),
+      value: formatMoney(line.base, { pence: "always" }),
       isAdjust: false,
     });
 
@@ -600,7 +598,7 @@ export const getCheckoutView = (
       receiptLines.push({
         key: `a${line.id}`,
         label: `Price adjusted: ${line.reason}`,
-        value: formatPence(line.adjustment),
+        value: formatMoney(line.adjustment, { pence: "always" }),
         isAdjust: true,
       });
   }
@@ -617,7 +615,7 @@ export const getCheckoutView = (
       key: "p",
       label: state.mode === "full" ? "Prepayment applied" : "Deposit applied",
       subtitle: `Paid at booking${booking.paidOn ? `, ${booking.paidOn}` : ""}`,
-      value: formatPence(-state.paid),
+      value: formatMoney(-state.paid, { pence: "always" }),
     });
 
   const receiptVia = RECORD_VIA_LABELS[receiptDone.via] ?? "";
@@ -631,7 +629,7 @@ export const getCheckoutView = (
         receiptDone.method === "record"
           ? `${receiptVia}, recorded by the stylist`
           : "",
-      value: formatPence(receiptDone.charged),
+      value: formatMoney(receiptDone.charged, { pence: "always" }),
     });
 
   if (receiptDone.refundAuto > 0)
@@ -639,7 +637,7 @@ export const getCheckoutView = (
       key: "ra",
       label: "Refunded to card",
       subtitle: "Price lowered after booking",
-      value: formatPence(receiptDone.refundAuto),
+      value: formatMoney(receiptDone.refundAuto, { pence: "always" }),
     });
 
   if (state.refunded > 0)
@@ -647,7 +645,7 @@ export const getCheckoutView = (
       key: "rf",
       label: "Refunded",
       subtitle: state.refundLast,
-      value: formatPence(state.refunded),
+      value: formatMoney(state.refunded, { pence: "always" }),
     });
 
   const receiptPaid =
@@ -676,11 +674,15 @@ export const getCheckoutView = (
     date: `${booking.day} 2026`,
     client: `For ${booking.client}`,
     lines: receiptLines,
-    subtotal: formatPence(money.items),
-    tip: receiptDone.tip > 0 ? formatPence(receiptDone.tip || 0) : "",
+    subtotal: formatMoney(money.items, { pence: "always" }),
+    tip:
+      receiptDone.tip > 0
+        ? formatMoney(receiptDone.tip || 0, { pence: "always" })
+        : "",
     pays: receiptPays,
-    fee: money.bookFee > 0 ? formatPence(money.bookFee) : "",
-    paid: formatPence(receiptPaid),
+    fee:
+      money.bookFee > 0 ? formatMoney(money.bookFee, { pence: "always" }) : "",
+    paid: formatMoney(receiptPaid, { pence: "always" }),
     method: getReceiptMethod(),
   };
 
@@ -696,7 +698,7 @@ export const getCheckoutView = (
   switch (state.dialog) {
     case "waive":
       dialog = {
-        title: `Waive ${name}’s ${formatPounds(fee)} fee?`,
+        title: `Waive ${name}’s ${formatMoney(fee)} fee?`,
         body: `${waiveWhat} The booking fee isn’t refunded.`,
         yes: "Waive fee",
         cancel: "Keep fee",
@@ -713,17 +715,17 @@ export const getCheckoutView = (
 
       dialog = {
         title: isOffPlatform
-          ? `Record a ${formatPounds(amount)} refund?`
-          : `Refund ${formatPounds(amount)} to ${name}’s card ending ${booking.card}?`,
+          ? `Record a ${formatMoney(amount)} refund?`
+          : `Refund ${formatMoney(amount)} to ${name}’s card ending ${booking.card}?`,
         body: isOffPlatform
           ? "Recorded only, refund the client directly."
           : "It usually takes 5–10 business days to arrive. The card fee isn’t returned.",
-        yes: isOffPlatform ? "Record refund" : `Refund ${formatPounds(amount)}`,
+        yes: isOffPlatform ? "Record refund" : `Refund ${formatMoney(amount)}`,
         cancel: "Cancel",
         run: () => {
           setState({
             dialog: null,
-            refunded: roundPounds(state.refunded + amount),
+            refunded: roundToPence(state.refunded + amount),
             refundLast: state.refundReason,
           });
 
@@ -733,7 +735,7 @@ export const getCheckoutView = (
           showToast(
             isOffPlatform
               ? "Refund recorded"
-              : `Refund of ${formatPounds(amount)} on its way`,
+              : `Refund of ${formatMoney(amount)} on its way`,
           );
         },
       };
@@ -757,20 +759,20 @@ export const getCheckoutView = (
       break;
     case "retryFee":
       dialog = {
-        title: `Charge ${formatPounds(feeExtra)} to ${name}’s card ending ${booking.card}?`,
+        title: `Charge ${formatMoney(feeExtra)} to ${name}’s card ending ${booking.card}?`,
         body: "This uses your last retry. If it’s declined again, send a payment link or record the payment instead.",
-        yes: `Charge ${formatPounds(feeExtra)}`,
+        yes: `Charge ${formatMoney(feeExtra)}`,
         cancel: "Not now",
         run: () => {
           setState({ dialog: null, status: "feeCollected" });
-          showToast(`${formatPounds(feeExtra)} charged`);
+          showToast(`${formatMoney(feeExtra)} charged`);
         },
       };
 
       break;
     case "recordFee":
       dialog = {
-        title: `Record ${formatPounds(feeExtra)} as paid?`,
+        title: `Record ${formatMoney(feeExtra)} as paid?`,
         body: "Recorded only, no money moves through Tiwára’s House.",
         yes: "Record as paid",
         cancel: "Cancel",
@@ -851,7 +853,7 @@ export const getCheckoutView = (
     setFooter({
       hasTotal: true,
       totalLabel: money.method === "record" ? "To record" : "To charge",
-      totalValue: formatPounds(money.charge),
+      totalValue: formatMoney(money.charge),
       primaryLabel: "Continue",
       primaryRun: goNext,
     });
@@ -861,8 +863,8 @@ export const getCheckoutView = (
       hasTotal: true,
       totalLabel: isRefund ? "Refund due" : "Balance due",
       totalValue: isRefund
-        ? formatPounds(money.refundDue)
-        : formatPounds(money.due),
+        ? formatMoney(money.refundDue)
+        : formatMoney(money.due),
       primaryLabel: "Continue",
       primaryRun: goNext,
     });
@@ -873,7 +875,7 @@ export const getCheckoutView = (
     if (state.decline === "soft")
       return `Retry card (${state.tries} of 2 left)`;
 
-    if (money.method === "card") return `Charge ${formatPounds(money.charge)}`;
+    if (money.method === "card") return `Charge ${formatMoney(money.charge)}`;
 
     if (money.method === "link") return "Send link and complete";
 
@@ -906,13 +908,13 @@ export const getCheckoutView = (
     setFooter({
       hasTotal: true,
       totalLabel: isOffPlatform ? "Refund to record" : "Refund",
-      totalValue: formatPounds(
+      totalValue: formatMoney(
         isRefundValid || refundAmount <= refundCap ? refundAmount : 0,
       ),
       primaryLabel:
         (isOffPlatform ? "Record refund" : "Refund") +
         (refundAmount > 0 && refundAmount <= refundCap
-          ? ` ${formatPounds(refundAmount)}`
+          ? ` ${formatMoney(refundAmount)}`
           : ""),
       primaryRun: () => {
         if (!isRefundValid) return setState({ refundTried: true });
@@ -957,7 +959,7 @@ export const getCheckoutView = (
     footer,
     leaveDone,
     refundNote: isRefund
-      ? `${formatPounds(money.refundDue)} goes back to ${name}’s ${cardText} automatically when you complete checkout.`
+      ? `${formatMoney(money.refundDue)} goes back to ${name}’s ${cardText} automatically when you complete checkout.`
       : "",
     linkTarget,
   };

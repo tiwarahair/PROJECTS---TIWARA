@@ -4,7 +4,11 @@ import type { TaxDetails } from "../../components/tax-details-form/tax-details-l
 import type { StudioActions, StudioContext } from "./studio-actions";
 import type { ServiceActions } from "./studio-service-actions";
 import { getTaxonomy, makeVariationRows } from "./studio-service-actions";
-import { getCategoryNameError, getNextCategoryColour } from "./studio-model";
+import {
+  getCategoryNameError,
+  getNextCategoryColour,
+  getQueryParam,
+} from "./studio-model";
 import type { StudioState } from "./studio-types";
 
 const WRONG_CODE =
@@ -38,14 +42,6 @@ const LTD_TAX: Partial<TaxDetails> = {
     city: "Manchester",
     postcode: "M4 6AJ",
   },
-};
-
-const getQueryParam = (key: string) => {
-  try {
-    return new URLSearchParams(location.search).get(key);
-  } catch {
-    return null;
-  }
 };
 
 /** Scrolls the first visible match to the top of its scroller once it renders. */
@@ -705,5 +701,3 @@ export const applyFixture = (
       break;
   }
 };
-
-export { getQueryParam };

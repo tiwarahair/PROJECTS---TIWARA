@@ -31,7 +31,7 @@ const SUB_STEPS: BookingStep[] = [
 ];
 
 /** The sheet's title, back button and body sizing. */
-export const getSheetFrame = (studio: StudioController) => {
+const getSheetFrame = (studio: StudioController) => {
   const { state, setState, isWide, actions } = studio;
   const { sheet, bookingStep } = state;
   const isBooking = sheet === "booking";

@@ -1,6 +1,6 @@
 // Studio → Bookings values: the calendar / list block, the timeline block, past groups and filters.
 import type { MouseEvent, TouchEvent } from "react";
-import { MONTHS_LONG, PAST_MONTHS, PAST_TONE } from "./studio-data";
+import { PAST_MONTHS, PAST_TONE } from "./studio-data";
 import { getDecoratedBookings } from "./studio-decorate";
 import type { DecoratedBooking } from "./studio-decorate";
 import {
@@ -30,6 +30,7 @@ import {
 } from "./studio-model";
 import type { PastRecord, StudioState } from "./studio-types";
 import type { StudioController } from "./use-studio";
+import { LONG_MONTHS } from "../../utils/dates";
 
 const DAY_PX = 128;
 const WEEK_PX = 88;
@@ -820,7 +821,7 @@ export const getBookingsView = (studio: StudioController) => {
     quickHint: isQuickOutside ? outsideHint : "What would you like to do here?",
     isQuickOutside,
     // date picker
-    pickerTitle: `${MONTHS_LONG[pickerMonth]} ${pickerYear}`,
+    pickerTitle: `${LONG_MONTHS[pickerMonth]} ${pickerYear}`,
     pickerDays,
     isPrevOff,
     swipeStart: (event: TouchEvent) => {

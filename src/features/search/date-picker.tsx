@@ -1,7 +1,6 @@
 import { joinClassNames } from "../../utils/class-names";
 import controls from "../../styles/features/search/search-controls.module.css";
 import {
-  WEEKDAY_LABELS,
   getCalendarCells,
   getQuickDays,
   getVisibleMonth,
@@ -11,6 +10,7 @@ import {
 import helmet from "../../styles/features/search/search-helmet.module.css";
 import styles from "../../styles/features/search/date-picker.module.css";
 import type { SearchController } from "./use-search";
+import { MONDAY_FIRST_WEEKDAYS } from "../../utils/dates";
 
 interface PickerProps {
   search: SearchController;
@@ -83,7 +83,7 @@ const MonthBar = ({
 const MonthGrid = ({ search: { state, actions } }: PickerProps) => (
   <>
     <div className={styles.dowRow}>
-      {WEEKDAY_LABELS.map((label) => (
+      {MONDAY_FIRST_WEEKDAYS.map((label) => (
         <div key={label} className={styles.dow}>
           {label}
         </div>

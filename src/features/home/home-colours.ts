@@ -11,9 +11,7 @@ export const hexToRgba = (hex: string, alpha: number): string => {
 };
 
 /** Relative luminance below .4 — ink bands get the cream nav treatment. */
-export const isDarkBackground = (hex: unknown): boolean => {
-  if (typeof hex !== "string") return false;
-
+export const isDarkBackground = (hex: string): boolean => {
   const digits = hex.trim().replace("#", "");
 
   if (digits.length !== 6) return false;

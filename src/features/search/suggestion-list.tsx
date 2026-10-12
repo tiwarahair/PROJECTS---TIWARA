@@ -16,7 +16,7 @@ interface SuggestionButtonProps {
 }
 
 /** One What/Where suggestion: icon or avatar, label with the typed text in bold, optional sub-line. */
-export const SuggestionButton = ({
+const SuggestionButton = ({
   view: { row, index, before, match, after, isActive, isOn },
   onPick,
   onHover,

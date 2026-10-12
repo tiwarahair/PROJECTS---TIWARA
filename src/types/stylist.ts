@@ -1,19 +1,20 @@
 import type { Policy } from "./policy";
 import type { Service } from "./service";
 
-export type BusinessType = "shop" | "chairRental" | "homeBased" | "mobile";
+type BusinessType = "shop" | "chairRental" | "homeBased" | "mobile";
+
 export type Weekday = "sun" | "mon" | "tue" | "wed" | "thu" | "fri" | "sat";
 /** Free window as ["HH:MM", "HH:MM"]. */
-export type AvailabilityWindow = [string, string];
+type AvailabilityWindow = [string, string];
 
-export interface StylistCategory {
+interface StylistCategory {
   id: string;
   name: string;
   sort: number;
   colour: string;
 }
 
-export interface StylistAddress {
+interface StylistAddress {
   line1: string;
   town: string;
   postcode: string;

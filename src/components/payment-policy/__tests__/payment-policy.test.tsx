@@ -1,4 +1,4 @@
-import { act, fireEvent, render, screen } from "@testing-library/react";
+import { act, render, screen } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { PaymentPolicy } from "../payment-policy";
 import type { PaymentPolicyApi } from "../payment-policy";
@@ -7,6 +7,14 @@ import {
   getPolicySummary,
 } from "../payment-policy-logic";
 import type { PolicyPreset } from "../payment-policy-logic";
+import type { UserEvent } from "@testing-library/user-event";
+import { setupUser } from "../../../test/setup-user";
+
+let user: UserEvent;
+
+beforeEach(() => {
+  user = setupUser();
+});
 
 describe("PaymentPolicy", () => {
   beforeEach(() => vi.useFakeTimers());
@@ -61,7 +69,7 @@ describe("PaymentPolicy", () => {
     expect(screen.getByText("Fix the error to save")).toBeInTheDocument();
   });
 
-  it("preset unsaved saves, reports to the host and flashes Saved", () => {
+  it("preset unsaved saves, reports to the host and flashes Saved", async () => {
     const onSave = vi.fn();
     const onState = vi.fn<(api: PaymentPolicyApi) => void>();
 
@@ -70,7 +78,7 @@ describe("PaymentPolicy", () => {
     );
 
     expect(onState.mock.lastCall?.[0].canSave).toBe(true);
-    fireEvent.click(screen.getByRole("button", { name: "Save policy" }));
+    await user.click(screen.getByRole("button", { name: "Save policy" }));
 
     expect(onSave).toHaveBeenCalledWith(
       expect.objectContaining({
@@ -90,13 +98,11 @@ describe("PaymentPolicy", () => {
     expect(screen.getByRole("button", { name: "Save policy" })).toBeDisabled();
   });
 
-  it("caps additional policies at 300 characters in total", () => {
+  it("caps additional policies at 300 characters in total", async () => {
     render(<PaymentPolicy />);
-    fireEvent.click(screen.getByRole("button", { name: "Add custom policy" }));
+    await user.click(screen.getByRole("button", { name: "Add custom policy" }));
 
-    fireEvent.change(screen.getByLabelText("Custom policy"), {
-      target: { value: "x".repeat(320) },
-    });
+    await user.type(screen.getByLabelText("Custom policy"), "x".repeat(320));
 
     expect(screen.getByText("Limit reached, 300 / 300")).toBeInTheDocument();
 

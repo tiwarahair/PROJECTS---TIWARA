@@ -7,17 +7,7 @@ import { CheckoutSheet } from "../../components/checkout-sheet/checkout-sheet";
 import type { CheckoutSheetProps } from "../../components/checkout-sheet/use-checkout";
 import type { StudioController } from "./use-studio";
 import sheet from "../../styles/features/studio/studio-sheet.module.css";
-
-const formatMinutes = (minutes: number) => {
-  const hours = Math.floor(minutes / 60);
-  const rest = minutes % 60;
-
-  return (
-    (hours ? `${hours}h` : "") +
-    (hours && rest ? " " : "") +
-    (rest ? `${rest}m` : "")
-  );
-};
+import { formatDuration } from "../../utils/dates";
 
 export interface StudioCheckoutProps {
   studio: StudioController;
@@ -53,7 +43,7 @@ export const StudioCheckout = ({
       return [
         name,
         Number(price) || 0,
-        minutes ? `+${formatMinutes(minutes)}` : "Add-on",
+        minutes ? `+${formatDuration(minutes)}` : "Add-on",
       ] as [string, number, string];
     });
 

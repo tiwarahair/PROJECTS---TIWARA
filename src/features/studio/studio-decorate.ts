@@ -16,6 +16,7 @@ import {
   isOngoing,
 } from "./studio-model";
 import type { StudioBooking, StudioClient, StudioState } from "./studio-types";
+import { formatMoney } from "../../utils/money";
 
 const INK = "#1a1714";
 const YELLOW = "var(--brand-yellow,#f2c94c)";
@@ -304,7 +305,10 @@ export const decorateBooking = (
     resendLabel: `Resend by email/SMS (${Math.max(0, 2 - resends)} of 2 left)`,
     canResend: resends < 2,
     resendOpacity: resends < 2 ? "1" : ".45",
-    protectionAmountLabel: `£${getProtectionTotal(state, booking.price).toFixed(2)}`,
+    protectionAmountLabel: formatMoney(
+      getProtectionTotal(state, booking.price),
+      { pence: "always" },
+    ),
     payLabel: getPayLabel(paid, booking.protectionMode),
     payBackground: payTone.background,
     payBorder: payTone.border,
@@ -335,7 +339,7 @@ export const decorateBooking = (
     priceLabel: `£${booking.price}`,
     dayShort: day.short,
     dayLabel: day.label,
-    deposit: `£${depositAmount.toFixed(2)}`,
+    deposit: formatMoney(depositAmount, { pence: "always" }),
     delay: `${(index * 0.05).toFixed(2)}s`,
     stripe: tileTone.bar,
     open: onOpen,

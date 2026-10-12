@@ -16,7 +16,3 @@ export const getOverlayAnimation = (
 /** Centred dialog on wide screens, bottom sheet on narrow ones. */
 export const getDialogPlacement = (isWide: boolean): string | undefined =>
   isWide ? overlay.dialogWide : overlay.dialogNarrow;
-
-/** Side panel on wide screens, full-width sheet on narrow ones. */
-export const getPanelPlacement = (isWide: boolean): string | undefined =>
-  isWide ? overlay.panelWide : overlay.panelNarrow;

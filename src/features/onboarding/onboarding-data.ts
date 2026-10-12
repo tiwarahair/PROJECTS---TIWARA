@@ -1,7 +1,7 @@
 // Onboarding constants (types, categories, sources, radii, photos, names, the benefit carousel,
 // chooser cards and terms sheets).
 
-export interface ChoiceTile {
+interface ChoiceTile {
   key: string;
   title: string;
   subtitle: string;

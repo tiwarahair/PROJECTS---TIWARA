@@ -10,14 +10,15 @@ import type { ServiceGroup } from "../../types/service-group";
 import type { ServiceType } from "../../types/service-type";
 import type { Stylist } from "../../types/stylist";
 import { miles, slotsFor, toMinutes } from "../../utils/availability";
-import { money } from "../../utils/pricing";
 import {
-  formatDuration,
+  formatServiceDuration,
   getActiveServices,
   getFromWithFee,
   getGroupId,
 } from "../../utils/services";
 import type { FilterDraft, SearchState, SortKey, Venue } from "./search-state";
+import { formatMoney } from "../../utils/money";
+import { formatWeekdayDate } from "../../utils/dates";
 
 export interface Place {
   name: string;
@@ -113,7 +114,7 @@ export const toDayMinutes = (time: string): number => {
 };
 
 /** [from, to, isCustom] in minutes for the chosen time of day, or null for any time. */
-export const getTimeBand = ({
+const getTimeBand = ({
   time,
   customFrom,
   customTo,
@@ -130,13 +131,13 @@ export const getTimeBand = ({
   return null;
 };
 
-export interface Slot {
+interface Slot {
   date: Date;
   time: string;
 }
 
 /** First slot on the chosen date (or within 28 days) that fits the time band. */
-export const getFirstSlot = (
+const getFirstSlot = (
   stylist: Stylist,
   durationMinutes: number,
   date: string,
@@ -169,7 +170,7 @@ export const getFirstSlot = (
   return null;
 };
 
-export interface ResultEntry {
+interface ResultEntry {
   stylist: Stylist;
   match: Service[];
   distance: number;
@@ -286,7 +287,7 @@ export const getResults = (
 };
 
 /** "Today" / "Tomorrow" / "Mon 12 Oct". */
-export const formatDay = (date: Date): string => {
+const formatDay = (date: Date): string => {
   const today = new Date();
 
   today.setHours(0, 0, 0, 0);
@@ -296,11 +297,7 @@ export const formatDay = (date: Date): string => {
 
   if (days === 1) return "Tomorrow";
 
-  return date.toLocaleDateString("en-GB", {
-    weekday: "short",
-    day: "numeric",
-    month: "short",
-  });
+  return formatWeekdayDate(date);
 };
 
 const getDistanceText = (
@@ -329,11 +326,11 @@ export const getResultCards = (
       href: `/stylist?stylist=${stylist.id}`,
       services: [],
       from: price,
-      meta: `From ${money(price)}`,
+      meta: `From ${formatMoney(price)}`,
       rows: selection.has
         ? match.slice(0, 2).map((service) => {
-            const fromPrice = money(getFromWithFee(service));
-            const duration = formatDuration(service.minutes);
+            const fromPrice = formatMoney(getFromWithFee(service));
+            const duration = formatServiceDuration(service.minutes);
             const serviceParam = encodeURIComponent(service.id);
 
             return {

@@ -1,4 +1,5 @@
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
+import { useLocation } from "react-router";
 import { useEntered } from "../../hooks/use-entered";
 import styles from "../../styles/components/welcome-toast/welcome-toast.module.css";
 
@@ -60,11 +61,11 @@ const WelcomeToastPill = ({
   );
 };
 
-const readWelcomeMessage = (): { message: string; pinned: boolean } | null => {
+const readWelcomeMessage = (
+  search: string,
+): { message: string; pinned: boolean } | null => {
   try {
-    const pinnedMessage = new URLSearchParams(window.location.search).get(
-      "twtoast",
-    );
+    const pinnedMessage = new URLSearchParams(search).get("twtoast");
 
     if (pinnedMessage) return { message: pinnedMessage, pinned: true };
 
@@ -90,9 +91,12 @@ export const WelcomeToast = () => {
 
   const [visible, setVisible] = useState(false);
   const handleDone = useCallback(() => setToast(null), []);
+  const { search } = useLocation();
+  // read once on mount, like the sessionStorage message
+  const mountSearch = useRef(search);
 
   useEffect(() => {
-    const welcome = readWelcomeMessage();
+    const welcome = readWelcomeMessage(mountSearch.current);
 
     if (!welcome) return;
 

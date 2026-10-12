@@ -1,18 +1,13 @@
 import { joinClassNames } from "../../utils/class-names";
 import { AmountRow, Icon, getViewAnimation } from "./checkout-detail";
-import {
-  ADJUST_REASONS,
-  DEFAULT_MENU,
-  formatPounds,
-  parsePounds,
-  roundPounds,
-} from "./checkout-data";
+import { ADJUST_REASONS, DEFAULT_MENU, parsePounds } from "./checkout-data";
 import { getAdjustNote } from "./checkout-view";
 import type { CheckoutLine } from "./checkout-data";
 import type { CheckoutViewModel } from "./checkout-view";
 import type { CheckoutController, CheckoutSheetProps } from "./use-checkout";
 import flow from "../../styles/components/checkout-sheet/checkout-flow.module.css";
 import shared from "../../styles/components/checkout-sheet/checkout-sheet.module.css";
+import { formatMoney, roundToPence } from "../../utils/money";
 
 const PLUS = "M12 5v14M5 12h14";
 
@@ -35,18 +30,18 @@ export const CheckoutItems = ({
   const adjustPreview = (() => {
     if (!line || String(state.adjustmentAmount).trim() === "") return "";
 
-    const delta = roundPounds(parsePounds(state.adjustmentAmount) - line.base);
+    const delta = roundToPence(parsePounds(state.adjustmentAmount) - line.base);
 
     return delta === 0
       ? "Same as booked price"
       : (delta < 0 ? "Lowered by " : "Raised by ") +
-          formatPounds(Math.abs(delta));
+          formatMoney(Math.abs(delta));
   })();
 
   const applyAdjustment = () => {
     if (!line) return;
 
-    const delta = roundPounds(parsePounds(state.adjustmentAmount) - line.base);
+    const delta = roundToPence(parsePounds(state.adjustmentAmount) - line.base);
     let error = "";
 
     if (String(state.adjustmentAmount).trim() === "")
@@ -115,12 +110,10 @@ export const CheckoutItems = ({
                 </div>
                 <div className={flow.itemPriceCell}>
                   {!!item.adjustment && (
-                    <div className={flow.itemWas}>
-                      {formatPounds(item.base)}
-                    </div>
+                    <div className={flow.itemWas}>{formatMoney(item.base)}</div>
                   )}
                   <div className={flow.itemPrice}>
-                    {formatPounds(item.base + item.adjustment)}
+                    {formatMoney(item.base + item.adjustment)}
                   </div>
                 </div>
               </div>
@@ -175,7 +168,7 @@ export const CheckoutItems = ({
             data-ck-m="1"
           >
             <div className={flow.strong15}>
-              {`Adjust ${line.name} (${formatPounds(line.base)})`}
+              {`Adjust ${line.name} (${formatMoney(line.base)})`}
             </div>
             <label className={shared.field}>
               <span className={shared.fieldLabel}>New price</span>
@@ -292,7 +285,7 @@ export const CheckoutItems = ({
         <div className={flow.rowTotal}>
           <span>Total</span>
           <span className={shared.numeric}>
-            {formatPounds(checkout.money.items)}
+            {formatMoney(checkout.money.items)}
           </span>
         </div>
         {view.creditRows.map((row) => (
@@ -367,7 +360,7 @@ export const CheckoutAdd = ({
                 <span className={flow.addName}>{name}</span>
                 <span className={flow.addMeta}>{meta}</span>
               </span>
-              <span className={flow.addPrice}>{formatPounds(price)}</span>
+              <span className={flow.addPrice}>{formatMoney(price)}</span>
               <Icon
                 path={PLUS}
                 size={18}

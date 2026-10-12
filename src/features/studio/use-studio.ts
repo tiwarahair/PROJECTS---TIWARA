@@ -8,8 +8,8 @@ import {
   getInitialStudioState,
   getSeedPast,
 } from "./studio-data";
-import { applyFixture, getQueryParam } from "./studio-fixtures";
-import { getSteps } from "./studio-model";
+import { applyFixture } from "./studio-fixtures";
+import { getQueryParam, getSteps } from "./studio-model";
 import { createServiceActions } from "./studio-service-actions";
 import type { StudioCategory, StudioPatch, StudioState } from "./studio-types";
 
@@ -205,7 +205,9 @@ export const useStudio = (props: StudioProps) => {
       window.setTimeout(() => {
         memo.seenDone = getSteps(currentContext.getState());
 
-        if (fixture) applyFixture(fixture, currentContext, current, services);
+        // demo states are dev-only; production builds drop this branch and the fixtures module
+        if (import.meta.env.DEV && fixture)
+          applyFixture(fixture, currentContext, current, services);
       }, 0),
     );
 

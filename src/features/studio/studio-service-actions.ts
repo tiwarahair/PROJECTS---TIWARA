@@ -274,8 +274,7 @@ export const createServiceActions = (
     const draft = wizard.draft;
     const fill = getSuggestionFill(type);
 
-    const isEmpty = (value: unknown) =>
-      !String(value == null ? "" : value).trim();
+    const isEmpty = (value: string) => !value.trim();
 
     const pending = (wizard.pendingAddons || []).slice();
     const addons = state.addons.concat(pending);

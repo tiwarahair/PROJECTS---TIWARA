@@ -1,4 +1,4 @@
-export type ServiceStatus = "active" | "draft" | "archived";
+type ServiceStatus = "active" | "draft" | "archived";
 
 export interface CustomisationOption {
   label: string;
@@ -12,12 +12,12 @@ export interface CustomisationGroup {
   options: CustomisationOption[];
 }
 
-export interface ServiceCustomisations {
+interface ServiceCustomisations {
   size: CustomisationGroup;
   length: CustomisationGroup;
 }
 
-export interface OwnCustomisationOption {
+interface OwnCustomisationOption {
   label: string;
   priceDelta: number;
   minutesDelta: number;

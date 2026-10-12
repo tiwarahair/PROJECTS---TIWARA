@@ -67,29 +67,6 @@
   border-radius: 24px 24px 0 0;
 }
 
-/* ---- ov*: side panel (wide) or full-width sheet (narrow) ---- */
-.panelWide {
-  top: 12px;
-  bottom: 12px;
-  left: auto;
-  right: 12px;
-  transform: none;
-  width: calc(100% - 24px);
-  max-width: 468px;
-  box-shadow: var(--shadow-modal, 0 24px 60px rgba(26, 23, 20, 0.3));
-}
-
-.panelNarrow {
-  top: 0;
-  bottom: 0;
-  left: 50%;
-  right: auto;
-  transform: translateX(-50%);
-  width: 100%;
-  max-width: 430px;
-  box-shadow: none;
-}
-
 @keyframes scrimin {
   from {
     opacity: 0;

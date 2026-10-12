@@ -1,7 +1,7 @@
 /** [label, £ delta, minutes delta] */
-export type CustomisationSeed = [string, number, number];
+type CustomisationSeed = [string, number, number];
 
-export interface PlatformCustomisationSet {
+interface PlatformCustomisationSet {
   size: CustomisationSeed[];
   length: CustomisationSeed[];
 }

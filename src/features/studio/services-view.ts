@@ -15,7 +15,7 @@ import type { StudioController } from "./use-studio";
 
 const ARCHIVED_TONE = "var(--neutral-300,#d8d2c6)";
 
-export interface ListRow {
+interface ListRow {
   key: string;
   name: string;
   meta: string;

@@ -1,8 +1,16 @@
-import { act, fireEvent, screen, within } from "@testing-library/react";
+import { act, screen, within } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { renderWithStore } from "../../../test/render-with-store";
 import { getGallery, getStylist } from "../profile-logic";
 import { StylistProfilePage } from "../stylist-profile-page";
+import type { UserEvent } from "@testing-library/user-event";
+import { setupUser } from "../../../test/setup-user";
+
+let user: UserEvent;
+
+beforeEach(() => {
+  user = setupUser();
+});
 
 describe("StylistProfilePage", () => {
   beforeEach(() => {
@@ -58,21 +66,21 @@ describe("StylistProfilePage", () => {
     ).not.toBeInTheDocument();
   });
 
-  it("a service row opens its details modal", () => {
+  it("a service row opens its details modal", async () => {
     renderWithStore(<StylistProfilePage />, "/stylist?stylist=tiwaras-house");
-    fireEvent.click(screen.getByRole("button", { name: /^Knotless braids/ }));
+    await user.click(screen.getByRole("button", { name: /^Knotless braids/ }));
 
     expect(
       screen.getByRole("heading", { level: 3, name: "Knotless braids" }),
     ).toBeInTheDocument();
 
-    fireEvent.click(screen.getByRole("button", { name: "Close" }));
+    await user.click(screen.getByRole("button", { name: "Close" }));
     expect(screen.queryByRole("heading", { level: 3 })).not.toBeInTheDocument();
   });
 
-  it("See all opens the lightbox; arrows step through the gallery and Escape closes it", () => {
+  it("See all opens the lightbox; arrows step through the gallery and Escape closes it", async () => {
     renderWithStore(<StylistProfilePage />, "/stylist?stylist=tiwaras-house");
-    fireEvent.click(screen.getByRole("button", { name: "See all" }));
+    await user.click(screen.getByRole("button", { name: "See all" }));
     const stylist = getStylist("tiwaras-house");
     const gallery = getGallery(stylist);
     const first = Math.max(0, gallery.indexOf(stylist.portfolio[0] ?? ""));
@@ -81,15 +89,15 @@ describe("StylistProfilePage", () => {
       `${(index % gallery.length) + 1} / ${gallery.length}`;
 
     expect(screen.getByText(getCounter(first))).toBeInTheDocument();
-    fireEvent.click(screen.getByRole("button", { name: "Next" }));
+    await user.click(screen.getByRole("button", { name: "Next" }));
     expect(screen.getByText(getCounter(first + 1))).toBeInTheDocument();
-    fireEvent.keyDown(window, { key: "ArrowLeft" });
+    await user.keyboard("{ArrowLeft}");
     expect(screen.getByText(getCounter(first))).toBeInTheDocument();
-    fireEvent.keyDown(window, { key: "Escape" });
+    await user.keyboard("{Escape}");
     expect(screen.queryByText(getCounter(first))).not.toBeInTheDocument();
   });
 
-  it("?share=open opens the share popover; Escape closes it", () => {
+  it("?share=open opens the share popover; Escape closes it", async () => {
     renderWithStore(
       <StylistProfilePage />,
       "/stylist?stylist=amara-beauty&share=open",
@@ -102,21 +110,21 @@ describe("StylistProfilePage", () => {
       within(popover).getByRole("link", { name: "WhatsApp" }),
     ).toHaveAttribute("href", expect.stringMatching(/^https:\/\/wa\.me\//));
 
-    fireEvent.keyDown(window, { key: "Escape" });
+    await user.keyboard("{Escape}");
 
     expect(
       screen.queryByRole("dialog", { name: "Share this stylist" }),
     ).not.toBeInTheDocument();
   });
 
-  it("the mobile menu toggles open and closed", () => {
+  it("the mobile menu toggles open and closed", async () => {
     renderWithStore(<StylistProfilePage />, "/stylist?stylist=tiwaras-house");
 
     expect(
       screen.getAllByRole("link", { name: "Find a stylist" }),
     ).toHaveLength(1);
 
-    fireEvent.click(screen.getByRole("button", { name: "Menu" }));
+    await user.click(screen.getByRole("button", { name: "Menu" }));
 
     expect(
       screen.getAllByRole("link", { name: "Find a stylist" }),

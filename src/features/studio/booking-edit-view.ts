@@ -4,12 +4,7 @@ import type { ChangeEvent, MouseEvent } from "react";
 import { getAddonPicker } from "./addon-picker";
 import type { DecoratedBooking } from "./studio-decorate";
 import { ICONS, TAXONOMY } from "./studio-data";
-import {
-  hhmm,
-  minutesToDuration,
-  parseNumber,
-  timeToMinutes,
-} from "./studio-format";
+import { hhmm, parseNumber, timeToMinutes } from "./studio-format";
 import { getBusy, getWorkingHours } from "./studio-model";
 import type {
   AddonEditDraft,
@@ -17,6 +12,7 @@ import type {
   StudioBooking,
 } from "./studio-types";
 import type { StudioController } from "./use-studio";
+import { formatDuration } from "../../utils/dates";
 
 const HOUR_OPTIONS = Array.from({ length: 13 }, (_slot, index) => ({
   key: index,
@@ -215,7 +211,7 @@ export const getEditServiceView = (
     const addonTotal = price * quantity;
 
     const timeNote = minutes
-      ? ` · ${minutesToDuration(minutes * quantity)}`
+      ? ` · ${formatDuration(minutes * quantity)}`
       : " · no extra time";
 
     return {
@@ -380,7 +376,7 @@ export const getEditServiceView = (
 
     patchBooking({
       price: parseNumber(draft.price) + addonsPrice,
-      duration: minutesToDuration(duration),
+      duration: formatDuration(duration),
       time: hhmm(draft.time),
       priceReason: (draft.priceReason || "").trim(),
     });
@@ -451,13 +447,13 @@ export const getEditServiceView = (
       return {
         key: (link.addonId ?? "") + index,
         name: addon.name || "Add-on",
-        meta: `+£${price}${minutes ? ` · ${minutesToDuration(minutes)}` : ""}`,
+        meta: `+£${price}${minutes ? ` · ${formatDuration(minutes)}` : ""}`,
       };
     }),
     // edit step
     categoryLabel: categoryName(draft.taxonomyId),
     serviceName: draft.serviceName || booking.service,
-    serviceMeta: `${minutesToDuration(duration)} · £${parseNumber(draft.price)}`,
+    serviceMeta: `${formatDuration(duration)} · £${parseNumber(draft.price)}`,
     openChange: () => {
       const old = getService(draft.serviceId);
       const changed: string[] = [];
@@ -556,7 +552,7 @@ export const getEditServiceView = (
         addAddonQuery: "",
         addAddonCategory: null,
       }),
-    totalLabel: `${minutesToDuration(totalMinutes)}  £${totalPrice}`,
+    totalLabel: `${formatDuration(totalMinutes)}  £${totalPrice}`,
     apply,
     // add an add-on
     picker: getAddonPicker(

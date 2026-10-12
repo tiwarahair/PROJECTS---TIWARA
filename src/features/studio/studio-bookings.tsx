@@ -8,8 +8,7 @@ import { copyText, dateAt } from "./studio-format";
 import { isGated } from "./studio-shell";
 import type { StudioController } from "./use-studio";
 import styles from "../../styles/features/studio/studio-bookings.module.css";
-
-const CALENDAR_WEEKDAYS = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
+import { MONDAY_FIRST_WEEKDAYS } from "../../utils/dates";
 
 const VIEW_SEGMENTS = [
   {
@@ -158,7 +157,7 @@ const DatePicker = ({
               </button>
             </div>
             <div className={styles.dows}>
-              {CALENDAR_WEEKDAYS.map((weekday) => (
+              {MONDAY_FIRST_WEEKDAYS.map((weekday) => (
                 <div key={weekday} className={styles.dow}>
                   {weekday}
                 </div>

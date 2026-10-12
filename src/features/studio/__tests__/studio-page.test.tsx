@@ -1,8 +1,16 @@
-import { act, fireEvent, screen, within } from "@testing-library/react";
+import { act, screen, within } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { renderWithStore } from "../../../test/render-with-store";
 import { GATE_REASON } from "../studio-data";
 import { StudioPage } from "../studio-page";
+import type { UserEvent } from "@testing-library/user-event";
+import { setupUser } from "../../../test/setup-user";
+
+let user: UserEvent;
+
+beforeEach(() => {
+  user = setupUser();
+});
 
 const advance = (ms: number) => act(() => vi.advanceTimersByTime(ms));
 
@@ -74,7 +82,7 @@ describe("StudioPage", () => {
     ).toBeInTheDocument();
   });
 
-  it("wide screens show the sidebar and the setup checklist, which minimises to a pill", () => {
+  it("wide screens show the sidebar and the setup checklist, which minimises to a pill", async () => {
     setViewport(1440);
     renderStudio();
     const sidebar = getLabelled("Sidebar") as HTMLElement;
@@ -86,13 +94,15 @@ describe("StudioPage", () => {
       screen.getByRole("region", { name: "Set up your studio" }),
     ).toHaveTextContent("1 of 4 done");
 
-    fireEvent.click(screen.getByRole("button", { name: "Minimise checklist" }));
+    await user.click(
+      screen.getByRole("button", { name: "Minimise checklist" }),
+    );
 
     expect(
       screen.queryByRole("region", { name: "Set up your studio" }),
     ).not.toBeInTheDocument();
 
-    fireEvent.click(
+    await user.click(
       screen.getByRole("button", { name: "Open setup checklist" }),
     );
 
@@ -101,11 +111,11 @@ describe("StudioPage", () => {
     ).toBeInTheDocument();
   });
 
-  it("the overview range switches the stats and the chart caption", () => {
+  it("the overview range switches the stats and the chart caption", async () => {
     renderStudio();
     expect(screen.getByText("Last 7 days")).toBeInTheDocument();
     expect(screen.getByText("£1,120")).toBeInTheDocument();
-    fireEvent.click(screen.getByRole("button", { name: "Today" }));
+    await user.click(screen.getByRole("button", { name: "Today" }));
     expect(screen.getByText("Today, by hour")).toBeInTheDocument();
     expect(screen.getByText("£240")).toBeInTheDocument();
 
@@ -124,18 +134,18 @@ describe("StudioPage", () => {
     expect(getLabelled("Today hero")).toHaveTextContent("2 appointments");
   });
 
-  it("a new account starts empty, and the gate stops the booking link", () => {
+  it("a new account starts empty, and the gate stops the booking link", async () => {
     renderStudio("?account=new");
     expect(screen.getByText("No appointments yet")).toBeInTheDocument();
     expect(screen.getByText("Nothing to chart yet")).toBeInTheDocument();
     expect(getLabelled("Today hero")).toHaveTextContent("Nothing booked");
-    fireEvent.click(screen.getByRole("button", { name: "Copy booking link" }));
+    await user.click(screen.getByRole("button", { name: "Copy booking link" }));
     expect(screen.getByText(GATE_REASON)).toBeInTheDocument();
     advance(2600);
     expect(screen.queryByText(GATE_REASON)).not.toBeInTheDocument();
   });
 
-  it("finishing setup celebrates with the booking link, then nudges for a policy", () => {
+  it("finishing setup celebrates with the booking link, then nudges for a policy", async () => {
     renderStudio("?fixture=all-done");
     runNextTimer();
     const card = getLabelled("Booking link ready") as HTMLElement;
@@ -146,14 +156,14 @@ describe("StudioPage", () => {
       within(card).getByRole("link", { name: "Preview profile" }),
     ).toHaveAttribute("href", "/stylist?stylist=tiwaras-house");
 
-    fireEvent.click(within(card).getByRole("button", { name: "Copy link" }));
+    await user.click(within(card).getByRole("button", { name: "Copy link" }));
     expect(screen.getByText("Booking link copied")).toBeInTheDocument();
 
     expect(getLabelled("Policy nudge")).toHaveTextContent(
       "Make your policy your own",
     );
 
-    fireEvent.click(screen.getByRole("button", { name: "Dismiss" }));
+    await user.click(screen.getByRole("button", { name: "Dismiss" }));
     expect(getLabelled("Policy nudge")).not.toBeInTheDocument();
   });
 

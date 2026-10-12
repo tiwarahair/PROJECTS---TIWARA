@@ -1,4 +1,4 @@
-export interface PostcodeDistrict {
+interface PostcodeDistrict {
   lat: number;
   lng: number;
   town: string;

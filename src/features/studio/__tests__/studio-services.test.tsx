@@ -1,7 +1,15 @@
-import { act, fireEvent, screen, within } from "@testing-library/react";
+import { act, screen, within } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { renderWithStore } from "../../../test/render-with-store";
 import { StudioPage } from "../studio-page";
+import type { UserEvent } from "@testing-library/user-event";
+import { setupUser } from "../../../test/setup-user";
+
+let user: UserEvent;
+
+beforeEach(() => {
+  user = setupUser();
+});
 
 const getLabelled = (label: string) =>
   document.querySelector(`[data-screen-label="${label}"]`) as HTMLElement;
@@ -64,10 +72,10 @@ describe("Studio → Services", () => {
     expect(within(services).getByText("Restore")).toBeInTheDocument();
   });
 
-  it("filters by category chip, search and status", () => {
+  it("filters by category chip, search and status", async () => {
     const services = renderServices();
 
-    fireEvent.click(within(services).getByRole("button", { name: /^Locs/ }));
+    await user.click(within(services).getByRole("button", { name: /^Locs/ }));
 
     expect(
       within(services).queryByText("Knotless braids"),
@@ -75,25 +83,23 @@ describe("Studio → Services", () => {
 
     expect(within(services).getByText("Loc retwist")).toBeInTheDocument();
 
-    fireEvent.click(
+    await user.click(
       within(services).getByRole("button", { name: /^All categories/ }),
     );
 
-    fireEvent.change(screen.getByPlaceholderText("Search services"), {
-      target: { value: "zzz" },
-    });
+    await user.type(screen.getByPlaceholderText("Search services"), "zzz");
 
     expect(within(services).getByText("Nothing matches")).toBeInTheDocument();
-    fireEvent.click(screen.getByRole("button", { name: "Clear search" }));
+    await user.click(screen.getByRole("button", { name: "Clear search" }));
 
     // the header's status button is hidden below 640px; the chip row has its own
-    fireEvent.click(
+    await user.click(
       screen.getAllByRole("button", {
         name: "Filter by status",
       })[1] as HTMLElement,
     );
 
-    fireEvent.click(
+    await user.click(
       screen.getAllByRole("button", { name: "Archived" }).at(-1) as HTMLElement,
     );
 
@@ -104,29 +110,29 @@ describe("Studio → Services", () => {
     ).not.toBeInTheDocument();
   });
 
-  it("the add-ons tab lists add-ons by category", () => {
+  it("the add-ons tab lists add-ons by category", async () => {
     const services = renderServices();
 
-    fireEvent.click(within(services).getByRole("button", { name: "Add-ons" }));
+    await user.click(within(services).getByRole("button", { name: "Add-ons" }));
     expect(within(services).getByText("Beads")).toBeInTheDocument();
     expect(within(services).getAllByText("+£10, 30m")).toHaveLength(2);
     expect(screen.getByPlaceholderText("Search add-ons")).toBeInTheDocument();
   });
 
-  it("the service menu archives and restores with a toast", () => {
+  it("the service menu archives and restores with a toast", async () => {
     const services = renderServices();
 
-    fireEvent.click(
+    await user.click(
       within(services).getAllByRole("button", {
         name: "Service options",
       })[0] as HTMLElement,
     );
 
-    fireEvent.click(screen.getByRole("button", { name: "Archive" }));
+    await user.click(screen.getByRole("button", { name: "Archive" }));
     act(() => vi.advanceTimersByTime(400));
     expect(screen.getByText("Knotless braids archived")).toBeInTheDocument();
 
-    fireEvent.click(
+    await user.click(
       within(getLabelled("Services")).getAllByText("Restore")[0] as HTMLElement,
     );
 

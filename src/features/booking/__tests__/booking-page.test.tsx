@@ -1,7 +1,15 @@
-import { act, fireEvent, screen } from "@testing-library/react";
+import { act, screen } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { renderWithStore } from "../../../test/render-with-store";
 import { BookingPage } from "../booking-page";
+import type { UserEvent } from "@testing-library/user-event";
+import { setupUser } from "../../../test/setup-user";
+
+let user: UserEvent;
+
+beforeEach(() => {
+  user = setupUser();
+});
 
 describe("BookingPage", () => {
   beforeEach(() => {
@@ -15,14 +23,14 @@ describe("BookingPage", () => {
 
   afterEach(() => vi.useRealTimers());
 
-  it("starts on Pick a service and moves to Customise for a braids service", () => {
+  it("starts on Pick a service and moves to Customise for a braids service", async () => {
     renderWithStore(<BookingPage />, "/book?stylist=tiwaras-house");
 
     expect(
       screen.getByRole("heading", { level: 1, name: "Pick a service" }),
     ).toBeInTheDocument();
 
-    fireEvent.click(screen.getByRole("button", { name: /^Knotless braids/ }));
+    await user.click(screen.getByRole("button", { name: /^Knotless braids/ }));
 
     expect(
       screen.getByRole("heading", { level: 1, name: "Make it yours" }),
@@ -53,25 +61,25 @@ describe("BookingPage", () => {
     ).toBeInTheDocument();
   });
 
-  it("pay: an incomplete card shows an error; the declined test card is declined", () => {
+  it("pay: an incomplete card shows an error; the declined test card is declined", async () => {
     renderWithStore(<BookingPage />, "/book?fixture=pay");
     const pay = screen.getByRole("button", { name: /^Pay £.* & confirm/ });
 
-    fireEvent.click(pay);
+    await user.click(pay);
 
     expect(screen.getByRole("alert")).toHaveTextContent(
       "Check the card number — it looks incomplete.",
     );
 
-    const type = (label: string, value: string) =>
-      fireEvent.change(screen.getByLabelText(label), { target: { value } });
+    const type = async (label: string, value: string) =>
+      await user.type(screen.getByLabelText(label), value);
 
-    type("Card number", "4000000000000002");
-    type("Expiry", "1229");
-    type("Security code", "123");
-    type("Name on card", "Nia Okafor");
-    type("Billing postcode", "M14 5TQ");
-    fireEvent.click(pay);
+    await type("Card number", "4000000000000002");
+    await type("Expiry", "1229");
+    await type("Security code", "123");
+    await type("Name on card", "Nia Okafor");
+    await type("Billing postcode", "M14 5TQ");
+    await user.click(pay);
     act(() => vi.advanceTimersByTime(900));
 
     expect(screen.getByRole("alert")).toHaveTextContent(
@@ -79,14 +87,14 @@ describe("BookingPage", () => {
     );
   });
 
-  it("confirm: shows You're booked in. and the guest save row", () => {
+  it("confirm: shows You're booked in. and the guest save row", async () => {
     renderWithStore(<BookingPage />, "/book?fixture=confirm");
 
     expect(
       screen.getByRole("heading", { level: 1, name: "You're booked in." }),
     ).toBeInTheDocument();
 
-    fireEvent.click(screen.getByRole("button", { name: "Save my details" }));
+    await user.click(screen.getByRole("button", { name: "Save my details" }));
     expect(screen.getByText("Check your email.")).toBeInTheDocument();
   });
 
@@ -108,13 +116,13 @@ describe("BookingPage", () => {
     ).toBeInTheDocument();
   });
 
-  it("a draft is saved and offered back on the next visit", () => {
+  it("a draft is saved and offered back on the next visit", async () => {
     const { unmount } = renderWithStore(
       <BookingPage />,
       "/book?stylist=tiwaras-house",
     );
 
-    fireEvent.click(screen.getByRole("button", { name: /^Knotless braids/ }));
+    await user.click(screen.getByRole("button", { name: /^Knotless braids/ }));
     unmount();
     renderWithStore(<BookingPage />, "/book?stylist=tiwaras-house");
 

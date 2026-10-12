@@ -104,7 +104,10 @@ export type Profile = typeof SEED_PROFILE;
 
 export const DEMO_PHOTO = "site/onboarding-client.jpg";
 
-export type BookingStatus =
+// demo: the signed-in client's current password
+export const CURRENT_PASSWORD = "sunflower9";
+
+type BookingStatus =
   "confirmed" | "awaiting" | "completed" | "cancelled" | "noshow";
 
 export interface AccountBooking {

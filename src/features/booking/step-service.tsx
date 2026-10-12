@@ -1,9 +1,13 @@
-import { money } from "../../utils/pricing";
-import { formatDuration, getFromWithFee, getMenu } from "../../utils/services";
+import {
+  formatServiceDuration,
+  getFromWithFee,
+  getMenu,
+} from "../../utils/services";
 import { joinClassNames } from "../../utils/class-names";
 import step from "../../styles/features/booking/booking-step.module.css";
 import styles from "../../styles/features/booking/step-service.module.css";
 import type { BookingController } from "./use-booking";
+import { formatMoney } from "../../utils/money";
 
 interface StepServiceProps {
   booking: BookingController;
@@ -37,10 +41,12 @@ export const StepService = ({ booking }: StepServiceProps) => {
               >
                 <span>
                   <span className={styles.name}>{name}</span>
-                  <span className={styles.meta}>{formatDuration(minutes)}</span>
+                  <span className={styles.meta}>
+                    {formatServiceDuration(minutes)}
+                  </span>
                 </span>
                 <span className={styles.price}>
-                  {`from ${money(getFromWithFee(service))}`}{" "}
+                  {`from ${formatMoney(getFromWithFee(service))}`}{" "}
                   {chosen ? (
                     <svg
                       width="17"

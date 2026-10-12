@@ -1,7 +1,15 @@
-import { act, fireEvent, screen, within } from "@testing-library/react";
+import { act, screen, within } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { renderWithStore } from "../../../test/render-with-store";
 import { StudioPage } from "../studio-page";
+import type { UserEvent } from "@testing-library/user-event";
+import { setupUser } from "../../../test/setup-user";
+
+let user: UserEvent;
+
+beforeEach(() => {
+  user = setupUser();
+});
 
 const getLabelled = (label: string) =>
   document.querySelector(`[data-screen-label="${label}"]`) as HTMLElement;
@@ -20,10 +28,10 @@ const setViewport = (width: number) => {
   });
 };
 
-const openServices = () => {
+const openServices = async () => {
   renderWithStore(<StudioPage />, "/studio");
   runNextTimer();
-  fireEvent.click(within(getLabelled("Sidebar")).getByTitle("Services"));
+  await user.click(within(getLabelled("Sidebar")).getByTitle("Services"));
 };
 
 describe("Studio → categories and add-on sheets", () => {
@@ -45,10 +53,10 @@ describe("Studio → categories and add-on sheets", () => {
 
   afterEach(() => vi.useRealTimers());
 
-  it("adds a category and rejects an empty name", () => {
-    openServices();
+  it("adds a category and rejects an empty name", async () => {
+    await openServices();
 
-    fireEvent.click(
+    await user.click(
       screen.getAllByRole("button", {
         name: "Manage categories",
       })[0] as HTMLElement,
@@ -56,17 +64,15 @@ describe("Studio → categories and add-on sheets", () => {
 
     const sheet = getLabelled("Manage categories");
 
-    fireEvent.click(
+    await user.click(
       within(sheet).getByRole("button", { name: "Add category" }),
     );
 
     expect(within(sheet).getByRole("alert")).toBeInTheDocument();
 
-    fireEvent.change(within(sheet).getByPlaceholderText("e.g. Kids"), {
-      target: { value: "Kids" },
-    });
+    await user.type(within(sheet).getByPlaceholderText("e.g. Kids"), "Kids");
 
-    fireEvent.click(
+    await user.click(
       within(sheet).getByRole("button", { name: "Add category" }),
     );
 
@@ -77,10 +83,10 @@ describe("Studio → categories and add-on sheets", () => {
     ).toBeInTheDocument();
   });
 
-  it("renames a category", () => {
-    openServices();
+  it("renames a category", async () => {
+    await openServices();
 
-    fireEvent.click(
+    await user.click(
       screen.getAllByRole("button", {
         name: "Manage categories",
       })[0] as HTMLElement,
@@ -88,33 +94,32 @@ describe("Studio → categories and add-on sheets", () => {
 
     const sheet = getLabelled("Manage categories");
 
-    fireEvent.click(
+    await user.click(
       within(sheet).getAllByRole("button", { name: "Edit" })[0] as HTMLElement,
     );
 
-    fireEvent.change(within(sheet).getByDisplayValue("Signature braids"), {
-      target: { value: "Braids" },
-    });
+    const name = within(sheet).getByDisplayValue("Signature braids");
 
-    fireEvent.click(within(sheet).getByRole("button", { name: "Save" }));
+    await user.clear(name);
+    await user.type(name, "Braids");
+
+    await user.click(within(sheet).getByRole("button", { name: "Save" }));
     expect(screen.getByText("Category saved")).toBeInTheDocument();
     expect(within(sheet).getByText("Braids")).toBeInTheDocument();
   });
 
-  it("an add-on needs a name before it can be created", () => {
-    openServices();
-    fireEvent.click(screen.getByRole("button", { name: "Add-ons" }));
-    fireEvent.click(screen.getByRole("button", { name: "Add add-on" }));
+  it("an add-on needs a name before it can be created", async () => {
+    await openServices();
+    await user.click(screen.getByRole("button", { name: "Add-ons" }));
+    await user.click(screen.getByRole("button", { name: "Add add-on" }));
     const create = screen.getByRole("button", { name: "Create add-on" });
 
     expect(create).toBeDisabled();
 
-    fireEvent.change(screen.getByPlaceholderText("e.g. Beads"), {
-      target: { value: "Cuffs" },
-    });
+    await user.type(screen.getByPlaceholderText("e.g. Beads"), "Cuffs");
 
     expect(create).toBeEnabled();
-    fireEvent.click(create);
+    await user.click(create);
     expect(screen.getByText("Cuffs added to your add-ons")).toBeInTheDocument();
   });
 });

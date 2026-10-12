@@ -6,6 +6,7 @@ import {
   readSession,
   writeSession,
 } from "./page-flags";
+import { formatWeekdayDate } from "./dates";
 
 export const LAST_SEARCH_KEY = "tw_last_search";
 export const SEARCH_SCROLL_KEY = "tw_search_y";
@@ -51,11 +52,7 @@ export const getSearchSummary = (href: string): string => {
   let when = "";
 
   if (date && /^\d{4}-\d{2}-\d{2}$/.test(date))
-    when = new Date(`${date}T12:00`).toLocaleDateString("en-GB", {
-      weekday: "short",
-      day: "numeric",
-      month: "short",
-    });
+    when = formatWeekdayDate(new Date(`${date}T12:00`));
 
   if (time && time !== "any")
     when +=

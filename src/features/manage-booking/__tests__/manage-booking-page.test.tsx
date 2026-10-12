@@ -1,8 +1,16 @@
-import { act, fireEvent, screen, within } from "@testing-library/react";
+import { act, screen, within } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { renderWithStore } from "../../../test/render-with-store";
 import { getDemoBooking } from "../manage-booking-logic";
 import { ManageBookingPage } from "../manage-booking-page";
+import type { UserEvent } from "@testing-library/user-event";
+import { setupUser } from "../../../test/setup-user";
+
+let user: UserEvent;
+
+beforeEach(() => {
+  user = setupUser();
+});
 
 describe("ManageBookingPage", () => {
   beforeEach(() => {
@@ -28,28 +36,27 @@ describe("ManageBookingPage", () => {
     ).toBeInTheDocument();
   });
 
-  it("Edit opens the allergy field; Save stores the text and shows a toast that clears", () => {
+  it("Edit opens the allergy field; Save stores the text and shows a toast that clears", async () => {
     renderWithStore(<ManageBookingPage />, "/manage");
-    fireEvent.click(screen.getByRole("button", { name: "Edit" }));
+    await user.click(screen.getByRole("button", { name: "Edit" }));
 
-    fireEvent.change(screen.getByRole("textbox"), {
-      target: { value: "Nut allergy" },
-    });
+    await user.clear(screen.getByRole("textbox"));
+    await user.type(screen.getByRole("textbox"), "Nut allergy");
 
-    fireEvent.click(screen.getByRole("button", { name: "Save" }));
+    await user.click(screen.getByRole("button", { name: "Save" }));
     expect(screen.getByText("Nut allergy")).toBeInTheDocument();
     expect(screen.getByRole("status")).toHaveTextContent("Saved");
     act(() => vi.advanceTimersByTime(2600));
     expect(screen.queryByText("Saved")).not.toBeInTheDocument();
   });
 
-  it("Remove asks first, then clears to None shared", () => {
+  it("Remove asks first, then clears to None shared", async () => {
     renderWithStore(<ManageBookingPage />, "/manage");
-    fireEvent.click(screen.getByRole("button", { name: "Remove" }));
+    await user.click(screen.getByRole("button", { name: "Remove" }));
     const dialog = screen.getByRole("alertdialog", { name: "Remove this?" });
 
     expect(dialog).toHaveTextContent("Amara Beauty won’t see it any more.");
-    fireEvent.click(within(dialog).getByRole("button", { name: "Remove" }));
+    await user.click(within(dialog).getByRole("button", { name: "Remove" }));
     expect(screen.getByText("None shared")).toBeInTheDocument();
     expect(screen.getByRole("button", { name: "Add" })).toBeInTheDocument();
   });

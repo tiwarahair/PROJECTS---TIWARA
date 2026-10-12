@@ -5,19 +5,19 @@ import { resolveAssetUrl } from "../../utils/asset-url";
 import { joinClassNames } from "../../utils/class-names";
 import styles from "../../styles/components/stylist-card/stylist-card.module.css";
 
-export interface StylistCardRow {
+interface StylistCardRow {
   name: string;
   meta: string;
   href: string;
 }
 
-export interface StylistCardFact {
+interface StylistCardFact {
   text: string;
   strong?: boolean;
 }
 
 /** A service shown on the card: a plain name, or a service object (only active ones are listed). */
-export type StylistCardService = string | { name: string; status?: string };
+type StylistCardService = string | { name: string; status?: string };
 
 export interface StylistCardProps {
   href?: string;

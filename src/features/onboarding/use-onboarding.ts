@@ -7,7 +7,8 @@ import {
   useState,
 } from "react";
 import type { ClipboardEvent, KeyboardEvent, RefObject } from "react";
-import { useNavigate } from "react-router";
+import { useLocation, useNavigate } from "react-router";
+import type { Location } from "react-router";
 import type { EmittedAddress } from "../../components/address-finder/use-address-finder";
 import { usePasswordChecker } from "../../hooks/use-password-checker";
 import { isAddressValid } from "../../utils/address";
@@ -21,13 +22,13 @@ import {
   STORAGE_KEY,
   TURNSTILE_SCREENS,
 } from "./onboarding-data";
+import { getFixturePatch } from "./onboarding-fixtures";
 import { getRouteForPath, ROUTE_START } from "./onboarding-routes";
 import type { OnboardingRoute } from "./onboarding-routes";
 import {
   EMPTY_CODE,
   getBackScreen,
   getErrors,
-  getFixturePatch,
   INITIAL_STATE,
   isCodeScreen,
   isValidPostcode,
@@ -70,9 +71,9 @@ const readStorage = (storage: Storage, key: string): string | null => {
 };
 
 /** Where to send customers after log in: ?return=, sessionStorage tw_return, a same-origin referrer, else Home. */
-const getReturnTo = (): string => {
+const getReturnTo = (search: string): string => {
   let returnTo =
-    new URLSearchParams(window.location.search).get("return") ||
+    new URLSearchParams(search).get("return") ||
     readStorage(sessionStorage, "tw_return");
 
   if (!returnTo) {
@@ -124,7 +125,10 @@ const getStartMode = (
 };
 
 /** The initial state, computed up front (start screen, saved progress, board, fixture, mode). */
-const getStartState = (props: ResolvedProps): OnboardingState => {
+const getStartState = (
+  props: ResolvedProps,
+  { pathname, search }: Pick<Location, "pathname" | "search">,
+): OnboardingState => {
   const state: OnboardingState = {
     ...INITIAL_STATE,
     width: document.documentElement.clientWidth,
@@ -148,14 +152,12 @@ const getStartState = (props: ResolvedProps): OnboardingState => {
     // storage unavailable
   }
 
-  const flow =
-    new URLSearchParams(window.location.search).get("flow") || handoff;
-
-  const route = getRouteForPath(window.location.pathname) ?? "login";
+  const flow = new URLSearchParams(search).get("flow") || handoff;
+  const route = getRouteForPath(pathname) ?? "login";
   const start = getStartScreen(flow, props, route);
 
   state.screen = start;
-  state.returnTo = getReturnTo();
+  state.returnTo = getReturnTo(search);
 
   if (start === "welcome" || start[0] === "w") state.audience = "pro";
 
@@ -193,7 +195,8 @@ const getStartState = (props: ResolvedProps): OnboardingState => {
   }
 
   // fixtures start from the blank form, not the saved / board one
-  if (props.fixture && props.fixture !== "none")
+  // demo states are dev-only; production builds drop this branch and the fixtures module
+  if (import.meta.env.DEV && props.fixture && props.fixture !== "none")
     Object.assign(state, getFixturePatch(props.fixture, INITIAL_STATE.form));
 
   const storedMode = readStorage(localStorage, MODE_KEY);
@@ -209,8 +212,15 @@ const getStartState = (props: ResolvedProps): OnboardingState => {
 
 /** Onboarding state and actions. */
 export const useOnboarding = (props: OnboardingProps) => {
-  const [resolved] = useState(() => resolveProps(props));
-  const [state, setRawState] = useState(() => getStartState(resolved));
+  const location = useLocation();
+
+  // read once: the start state comes from the URL the page opened with
+  const [resolved] = useState(() => resolveProps(props, location.search));
+
+  const [state, setRawState] = useState(() =>
+    getStartState(resolved, location),
+  );
+
   const navigate = useNavigate();
   const stateRef = useRef(state);
 

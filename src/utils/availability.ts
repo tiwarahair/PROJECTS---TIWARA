@@ -11,7 +11,7 @@ export const toMinutes = (time: string): number => {
   return hours * 60 + (minutes || 0);
 };
 
-export const formatClockTime = (minutes: number): string => {
+const formatClockTime = (minutes: number): string => {
   const hourPart = String(Math.floor(minutes / 60)).padStart(2, "0");
   const minutePart = String(minutes % 60).padStart(2, "0");
 

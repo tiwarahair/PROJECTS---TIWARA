@@ -79,10 +79,10 @@ const STYLIST_CARDS: { fixture: string; props: StylistCardProps }[] = [
       rows: [
         {
           name: "Silk press",
-          meta: "2 hr · from £30.95",
+          meta: "2h · from £30.95",
           href: "/book?stylist=naturallynia",
         },
-        { name: "Define curls", meta: "1 hr 45 · from £25.88", href: "#" },
+        { name: "Define curls", meta: "1h 45m · from £25.88", href: "#" },
       ],
       facts: [
         { text: "Travels to you", strong: true },

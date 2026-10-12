@@ -10,11 +10,11 @@ import {
 } from "../../utils/address";
 import type { AddressSuggestion } from "../../utils/address";
 
-export type AddressSource = "pick" | "manual";
+type AddressSource = "pick" | "manual";
 type FieldKey = "line1" | "line2" | "town" | "postcode";
 type Mode = "find" | "summary" | "manual";
 
-export interface AddressDraft {
+interface AddressDraft {
   line1: string;
   line2: string;
   town: string;
@@ -56,7 +56,7 @@ interface FinderState {
   sum: AddressDraft | null;
 }
 
-export interface UseAddressFinderOptions {
+interface UseAddressFinderOptions {
   value?: AddressFinderValue | null;
   onChange?: (address: EmittedAddress | null) => void;
   fixture?: AddressFixture;

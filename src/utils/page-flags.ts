@@ -1,7 +1,8 @@
 // URL "board" switches read by the shared favourites/account/search helpers.
 // login=1 · guest=1 · favs=id,id · favtoast=saved|removed|copied · favsheet=1 · acctmenu=1 · lastsearch=<url> · board=true
-export const getSearchParams = (): URLSearchParams =>
-  new URLSearchParams(window.location.search);
+export const getSearchParams = (
+  search: string = window.location.search,
+): URLSearchParams => new URLSearchParams(search);
 
 /** Board/fixture views never persist anything to session storage. */
 export const isBoardView = (params = getSearchParams()): boolean =>

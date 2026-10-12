@@ -19,7 +19,7 @@ const getFieldMessage = ({ hint, error }: FieldProps) => {
   return hint ? <span className={styles.hint}>{hint}</span> : null;
 };
 
-export const Field = ({ label, hint, error, children }: FieldProps) => (
+const Field = ({ label, hint, error, children }: FieldProps) => (
   <label className={styles.field}>
     {label && <span className={styles.label}>{label}</span>}
     {children}

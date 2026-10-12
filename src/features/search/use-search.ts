@@ -1,14 +1,10 @@
 // State + actions for the Search page.
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import type { ChangeEvent, FocusEvent, KeyboardEvent } from "react";
-import { useNavigate } from "react-router";
+import { useLocation, useNavigate } from "react-router";
 import { getResults, getResultCards } from "./search-logic";
-import {
-  getInitialState,
-  getFixturePatch,
-  getStateSearch,
-  RADII,
-} from "./search-state";
+import { getFixturePatch } from "./search-fixtures";
+import { getInitialState, getStateSearch, RADII } from "./search-state";
 import type {
   FilterDraft,
   SearchState,
@@ -66,16 +62,23 @@ const useViewportWidth = () => {
 
 export const useSearch = () => {
   const navigate = useNavigate();
+  const { search: locationSearch } = useLocation();
   const viewportWidth = useViewportWidth();
 
+  // read once: the state drives the URL from here on (the sync below), not the other way round
   const [state, setState] = useState<SearchState>(() =>
-    getInitialState(window.location.search, window.innerWidth),
+    getInitialState(locationSearch, window.innerWidth),
   );
 
   // read once from the URL the page opened with (the URL sync below drops ?fixture=)
   const [initialFixture] = useState(() =>
-    new URLSearchParams(window.location.search).get("fixture"),
+    new URLSearchParams(locationSearch).get("fixture"),
   );
+
+  // the sync below compares against the current URL without re-running when only the URL changes
+  const locationSearchRef = useRef(locationSearch);
+
+  locationSearchRef.current = locationSearch;
 
   const update = useCallback(
     (patch: Patch) =>
@@ -119,13 +122,15 @@ export const useSearch = () => {
 
     window.addEventListener("resize", setNavHeight);
 
-    const fixturePatch = initialFixture
-      ? getFixturePatch(
-          initialFixture,
-          stateRef.current,
-          window.innerWidth <= 720,
-        )
-      : null;
+    // demo states are dev-only; production builds drop this branch and the fixtures module
+    const fixturePatch =
+      import.meta.env.DEV && initialFixture
+        ? getFixturePatch(
+            initialFixture,
+            stateRef.current,
+            window.innerWidth <= 720,
+          )
+        : null;
 
     const fixtureTimer = fixturePatch
       ? window.setTimeout(() => update(fixturePatch), 350)
@@ -147,7 +152,7 @@ export const useSearch = () => {
   useEffect(() => {
     const search = getStateSearch(state);
 
-    if (search !== window.location.search)
+    if (search !== locationSearchRef.current)
       // URL sync only: keep the scroll position (ScrollRestoration resets it on other navigations)
       navigate({ search }, { replace: true, preventScrollReset: true });
   }, [state, navigate]);

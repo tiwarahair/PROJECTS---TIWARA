@@ -157,14 +157,17 @@ export const BookingDialogs = ({ booking }: BookingDialogsProps) => {
           title="Leave this booking?"
           text="We'll save your choices on this device, so you can pick up where you left off. Your held time will be released."
         >
-          <button onClick={actions.confirmLeave} className={styles.secondary}>
-            Leave
-          </button>
           <button
             onClick={() => setState({ leave: null })}
-            className={styles.primary}
+            className={joinClassNames(styles.secondary, styles.wideButton)}
           >
             Keep booking
+          </button>
+          <button
+            onClick={actions.confirmLeave}
+            className={joinClassNames(styles.primary, styles.narrowButton)}
+          >
+            Leave
           </button>
         </ConfirmDialog>
       )}

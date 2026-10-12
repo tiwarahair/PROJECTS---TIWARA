@@ -1,7 +1,15 @@
-import { act, fireEvent, screen, within } from "@testing-library/react";
+import { act, screen, within } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { renderWithStore } from "../../../test/render-with-store";
 import { StudioPage } from "../studio-page";
+import type { UserEvent } from "@testing-library/user-event";
+import { setupUser } from "../../../test/setup-user";
+
+let user: UserEvent;
+
+beforeEach(() => {
+  user = setupUser();
+});
 
 const getLabelled = (label: string) =>
   document.querySelector(`[data-screen-label="${label}"]`) as HTMLElement;
@@ -21,21 +29,21 @@ const setViewport = (width: number) => {
   });
 };
 
-const openNia = () => {
+const openNia = async () => {
   renderWithStore(<StudioPage />, "/studio?fixture=cal-day");
   runNextTimer();
-  fireEvent.click(within(getLabelled("Bookings")).getByText("Nia Okafor"));
+  await user.click(within(getLabelled("Bookings")).getByText("Nia Okafor"));
   advance(400);
 };
 
-const openMoreItem = (label: string) => {
-  fireEvent.click(
+const openMoreItem = async (label: string) => {
+  await user.click(
     screen
       .getAllByRole("button", { name: "More actions" })
       .at(-1) as HTMLElement,
   );
 
-  fireEvent.click(screen.getByRole("button", { name: label }));
+  await user.click(screen.getByRole("button", { name: label }));
   advance(400);
 };
 
@@ -61,8 +69,8 @@ describe("Studio → booking sheet", () => {
 
   afterEach(() => vi.useRealTimers());
 
-  it("opens a booking with its service and client", () => {
-    openNia();
+  it("opens a booking with its service and client", async () => {
+    await openNia();
 
     expect(
       screen.getByRole("button", { name: "Edit service" }),
@@ -73,11 +81,11 @@ describe("Studio → booking sheet", () => {
     ).toBeInTheDocument();
   });
 
-  it("edits the service and adjusts the price for this booking", () => {
-    openNia();
-    fireEvent.click(screen.getByRole("button", { name: "Edit service" }));
+  it("edits the service and adjusts the price for this booking", async () => {
+    await openNia();
+    await user.click(screen.getByRole("button", { name: "Edit service" }));
     advance(400);
-    fireEvent.click(screen.getByRole("button", { name: "Adjust price" }));
+    await user.click(screen.getByRole("button", { name: "Adjust price" }));
 
     expect(
       screen.getByPlaceholderText("e.g. Extra length added"),
@@ -86,20 +94,20 @@ describe("Studio → booking sheet", () => {
     expect(screen.getByRole("button", { name: "Apply" })).toBeInTheDocument();
   });
 
-  it("adds an add-on and edits it for this booking only", () => {
-    openNia();
-    fireEvent.click(screen.getByRole("button", { name: "Edit service" }));
+  it("adds an add-on and edits it for this booking only", async () => {
+    await openNia();
+    await user.click(screen.getByRole("button", { name: "Edit service" }));
     advance(400);
-    fireEvent.click(screen.getByRole("button", { name: "Add" }));
+    await user.click(screen.getByRole("button", { name: "Add" }));
     advance(400);
 
-    fireEvent.click(
+    await user.click(
       document.querySelector("button[aria-pressed]") as HTMLElement,
     );
 
-    fireEvent.click(screen.getByRole("button", { name: /^Done/ }));
+    await user.click(screen.getByRole("button", { name: /^Done/ }));
     advance(400);
-    fireEvent.click(document.querySelector("[data-aorow]") as HTMLElement);
+    await user.click(document.querySelector("[data-aorow]") as HTMLElement);
 
     expect(
       screen.getAllByText(
@@ -107,18 +115,18 @@ describe("Studio → booking sheet", () => {
       ),
     ).toHaveLength(1);
 
-    fireEvent.click(screen.getByRole("button", { name: "Remove add-on" }));
+    await user.click(screen.getByRole("button", { name: "Remove add-on" }));
     advance(400);
     expect(document.querySelector("[data-aorow]")).toBeNull();
   });
 
-  it("reschedule, cancel and no-show open from the more menu", () => {
-    openNia();
-    openMoreItem("Reschedule");
+  it("reschedule, cancel and no-show open from the more menu", async () => {
+    await openNia();
+    await openMoreItem("Reschedule");
     expect(screen.getAllByText("Reschedule").length).toBeGreaterThan(0);
-    fireEvent.click(screen.getByRole("button", { name: "Back" }));
+    await user.click(screen.getByRole("button", { name: "Back" }));
     advance(400);
-    openMoreItem("Cancel");
+    await openMoreItem("Cancel");
     expect(screen.getByText("I am cancelling")).toBeInTheDocument();
   });
 });

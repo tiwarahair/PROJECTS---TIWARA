@@ -1,7 +1,15 @@
-import { act, fireEvent, screen, within } from "@testing-library/react";
+import { act, screen, within } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { renderWithStore } from "../../../test/render-with-store";
 import { AccountPage } from "../account-page";
+import type { UserEvent } from "@testing-library/user-event";
+import { setupUser } from "../../../test/setup-user";
+
+let user: UserEvent;
+
+beforeEach(() => {
+  user = setupUser();
+});
 
 const advance = (ms: number) => act(() => vi.advanceTimersByTime(ms));
 
@@ -125,9 +133,9 @@ describe("AccountPage", () => {
     );
   });
 
-  it("the side nav switches section and updates the URL", () => {
+  it("the side nav switches section and updates the URL", async () => {
     renderAccount();
-    fireEvent.click(screen.getByRole("link", { name: "Payment methods" }));
+    await user.click(screen.getByRole("link", { name: "Payment methods" }));
 
     expect(
       screen.getByRole("heading", { level: 1, name: "Payment methods" }),
@@ -138,22 +146,17 @@ describe("AccountPage", () => {
     );
   });
 
-  it("changing the email sends a code; 123456 confirms it", () => {
+  it("changing the email sends a code; 123456 confirms it", async () => {
     renderAccount("&section=personal");
-    fireEvent.click(screen.getByRole("button", { name: "Edit email" }));
+    await user.click(screen.getByRole("button", { name: "Edit email" }));
 
-    fireEvent.change(screen.getByLabelText("New email"), {
-      target: { value: "nia@example.com" },
-    });
+    await user.type(screen.getByLabelText("New email"), "nia@example.com");
 
-    fireEvent.click(screen.getByRole("button", { name: "Continue" }));
+    await user.click(screen.getByRole("button", { name: "Continue" }));
     expect(getLabelled("Email code step")).toBeInTheDocument();
 
-    "123456".split("").forEach((digit, index) =>
-      fireEvent.change(screen.getByLabelText(`Digit ${index + 1}`), {
-        target: { value: digit },
-      }),
-    );
+    for (const [index, digit] of [..."123456"].entries())
+      await user.type(screen.getByLabelText(`Digit ${index + 1}`), digit);
 
     expect(screen.getByRole("status")).toHaveTextContent(
       "Email updated. We’ve let nia.okafor@gmail.com know.",
@@ -164,38 +167,32 @@ describe("AccountPage", () => {
     expect(screen.getByRole("status")).toHaveTextContent("");
   });
 
-  it("the add-card dialog validates, then saves the card", () => {
+  it("the add-card dialog validates, then saves the card", async () => {
     renderAccount("&fixture=add-card");
     const dialog = screen.getByRole("dialog");
 
-    fireEvent.click(within(dialog).getByRole("button", { name: "Save card" }));
+    await user.click(within(dialog).getByRole("button", { name: "Save card" }));
     expect(within(dialog).getByText("Enter your card number")).toBeVisible();
 
-    fireEvent.change(
+    await user.type(
       within(dialog).getByPlaceholderText("1234 1234 1234 1234"),
-      {
-        target: { value: "5555555555554444" },
-      },
+      "5555555555554444",
     );
 
-    fireEvent.change(within(dialog).getByPlaceholderText("MM / YY"), {
-      target: { value: "1240" },
-    });
+    await user.type(within(dialog).getByPlaceholderText("MM / YY"), "1240");
 
-    fireEvent.change(within(dialog).getByPlaceholderText("CVC"), {
-      target: { value: "123" },
-    });
+    await user.type(within(dialog).getByPlaceholderText("CVC"), "123");
 
-    fireEvent.click(within(dialog).getByRole("button", { name: "Save card" }));
+    await user.click(within(dialog).getByRole("button", { name: "Save card" }));
     expect(screen.queryByRole("dialog")).not.toBeInTheDocument();
     expect(screen.getAllByText("Mastercard •••• 4444")).toHaveLength(2);
   });
 
-  it("log out everywhere ends the session and shows the gate", () => {
+  it("log out everywhere ends the session and shows the gate", async () => {
     renderAccount("&fixture=logout-all");
     const dialog = screen.getByRole("dialog");
 
-    fireEvent.click(
+    await user.click(
       within(dialog).getByRole("button", { name: "Log out everywhere" }),
     );
 
@@ -206,7 +203,7 @@ describe("AccountPage", () => {
     ).toBeInTheDocument();
   });
 
-  it("delete stays disabled until DELETE is typed", () => {
+  it("delete stays disabled until DELETE is typed", async () => {
     renderAccount("&fixture=delete-allowed");
 
     const remove = within(screen.getByRole("dialog")).getByRole("button", {
@@ -215,21 +212,19 @@ describe("AccountPage", () => {
 
     expect(remove).toBeDisabled();
 
-    fireEvent.change(screen.getByLabelText("Type DELETE to confirm"), {
-      target: { value: "delete" },
-    });
+    await user.type(screen.getByLabelText("Type DELETE to confirm"), "delete");
 
     expect(remove).toBeEnabled();
-    fireEvent.click(remove);
+    await user.click(remove);
 
     expect(
       screen.getByRole("heading", { name: "Your account has been deleted" }),
     ).toBeInTheDocument();
   });
 
-  it("Escape closes the dialog", () => {
+  it("Escape closes the dialog", async () => {
     renderAccount("&fixture=sync-reset");
-    fireEvent.keyDown(document, { key: "Escape" });
+    await user.keyboard("{Escape}");
     expect(screen.queryByRole("dialog")).not.toBeInTheDocument();
   });
 });

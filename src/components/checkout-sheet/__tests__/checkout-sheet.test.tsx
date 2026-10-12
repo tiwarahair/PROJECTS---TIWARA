@@ -1,17 +1,21 @@
-import { act, fireEvent, render, screen, within } from "@testing-library/react";
+import { act, render, screen, within } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { CheckoutSheet } from "../checkout-sheet";
-import {
-  BOOKINGS,
-  formatPounds,
-  getInitialCheckout,
-  getMoney,
-} from "../checkout-data";
+import { BOOKINGS, getInitialCheckout, getMoney } from "../checkout-data";
+import { formatMoney } from "../../../utils/money";
+import type { UserEvent } from "@testing-library/user-event";
+import { setupUser } from "../../../test/setup-user";
+
+let user: UserEvent;
+
+beforeEach(() => {
+  user = setupUser();
+});
 
 const advance = (ms: number) => act(() => vi.advanceTimersByTime(ms));
 
-const click = (name: string | RegExp) =>
-  fireEvent.click(screen.getByRole("button", { name }));
+const click = async (name: string | RegExp) =>
+  await user.click(screen.getByRole("button", { name }));
 
 describe("checkout money", () => {
   it("charges the balance after the deposit, plus the tip and card fee", () => {
@@ -35,8 +39,8 @@ describe("checkout money", () => {
   });
 
   it("formats whole pounds without pence and negatives with a minus sign", () => {
-    expect(formatPounds(85)).toBe("£85");
-    expect(formatPounds(-20.5)).toBe("−£20.50");
+    expect(formatMoney(85)).toBe("£85");
+    expect(formatMoney(-20.5)).toBe("−£20.50");
   });
 });
 
@@ -50,14 +54,14 @@ describe("CheckoutSheet", () => {
     expect(screen.getAllByText("£80")[0]).toBeInTheDocument();
   });
 
-  it("checks out by card: items, payment, tip, review, done", () => {
+  it("checks out by card: items, payment, tip, review, done", async () => {
     render(<CheckoutSheet />);
-    click("Checkout");
-    click("Continue");
-    click("Continue");
-    fireEvent.click(screen.getByRole("radio", { name: /15%/ }));
-    click("Continue");
-    click("Charge £95");
+    await click("Checkout");
+    await click("Continue");
+    await click("Continue");
+    await user.click(screen.getByRole("radio", { name: /15%/ }));
+    await click("Continue");
+    await click("Charge £95");
     expect(screen.getByRole("button", { name: "Charging" })).toBeDisabled();
     advance(1100);
 
@@ -68,21 +72,21 @@ describe("CheckoutSheet", () => {
     expect(screen.getByText("£95 charged to Visa •••• 4242.")).toBeVisible();
   });
 
-  it("validates a price adjustment", () => {
+  it("validates a price adjustment", async () => {
     render(<CheckoutSheet scenario="items" />);
 
-    fireEvent.click(
+    await user.click(
       screen.getAllByRole("button", { name: "Adjust price" })[0]!,
     );
 
-    click("Apply");
+    await click("Apply");
     expect(screen.getByRole("alert")).toHaveTextContent("Enter the new price.");
   });
 
-  it("adds an item from the menu", () => {
+  it("adds an item from the menu", async () => {
     render(<CheckoutSheet scenario="items" />);
-    click("Add item");
-    click(/Beads and cuffs/);
+    await click("Add item");
+    await click(/Beads and cuffs/);
     expect(screen.getByText("Beads and cuffs")).toBeInTheDocument();
 
     expect(screen.getByRole("status")).toHaveTextContent(
@@ -102,22 +106,22 @@ describe("CheckoutSheet", () => {
     ).toBeInTheDocument();
   });
 
-  it("refund: rejects more than was paid", () => {
+  it("refund: rejects more than was paid", async () => {
     render(<CheckoutSheet scenario="refund" />);
-    fireEvent.change(screen.getByRole("textbox"), { target: { value: "999" } });
+    await user.type(screen.getByRole("textbox"), "999");
     expect(screen.getByRole("alert")).toHaveTextContent(/You can refund up to/);
   });
 
-  it("waives a no-show fee from the dialog", () => {
+  it("waives a no-show fee from the dialog", async () => {
     render(<CheckoutSheet scenario="waive-dep" />);
     const dialog = screen.getByRole("alertdialog");
 
-    fireEvent.click(within(dialog).getByRole("button", { name: "Waive fee" }));
+    await user.click(within(dialog).getByRole("button", { name: "Waive fee" }));
     expect(screen.getByText("No-show · Fee waived")).toBeInTheDocument();
     expect(screen.getByRole("status")).toHaveTextContent("Fee waived");
   });
 
-  it("embedded: finishing hands the result to the host", () => {
+  it("embedded: finishing hands the result to the host", async () => {
     const onComplete = vi.fn();
 
     render(
@@ -135,7 +139,7 @@ describe("CheckoutSheet", () => {
       />,
     );
 
-    click("Done");
+    await click("Done");
 
     expect(onComplete).toHaveBeenCalledWith(
       expect.objectContaining({ method: "card", charged: 80, total: 100 }),

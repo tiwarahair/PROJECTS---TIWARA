@@ -6,7 +6,7 @@ export interface PolicyFee {
   percent: number;
 }
 
-export interface PolicyExtra {
+interface PolicyExtra {
   text: string;
 }
 

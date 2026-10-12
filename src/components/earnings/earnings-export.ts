@@ -1,12 +1,9 @@
 // Earnings export: a CSV of the transactions, or a printable monthly statement.
 import {
-  formatGbp,
-  formatTime,
   getClient,
   getMethodLabel,
   getRangeLabel,
   getStats,
-  toIsoDate,
 } from "./earnings-data";
 import type {
   DateRange,
@@ -14,6 +11,8 @@ import type {
   Payout,
   Transaction,
 } from "./earnings-data";
+import { formatMoney } from "../../utils/money";
+import { toIsoDate, formatClockTime } from "../../utils/dates";
 
 const DAY_MS = 86400000;
 const DEFAULT_BANK = "Barclays •••• 4471";
@@ -26,11 +25,8 @@ export const getEarningsCsv = (
   transactions: Transaction[],
   clients?: EarningsClient[],
 ): string => {
-  const quote = (value: unknown) => {
-    const text = String(value == null ? "" : value);
-
-    return /[",\n]/.test(text) ? `"${text.replace(/"/g, '""')}"` : text;
-  };
+  const quote = (text: string) =>
+    /[",\n]/.test(text) ? `"${text.replace(/"/g, '""')}"` : text;
 
   const rows = [
     [
@@ -50,7 +46,7 @@ export const getEarningsCsv = (
     ],
     ...transactions.map((transaction) => [
       transaction.at.toLocaleDateString("en-GB"),
-      formatTime(transaction.at),
+      formatClockTime(transaction.at),
       transaction.id,
       transaction.bookingRef,
       getClient(transaction.client, clients).name,
@@ -91,7 +87,7 @@ const GROUPS: [string, (transaction: Transaction) => boolean][] = [
 const STATEMENT_STYLE =
   '@page{margin:16mm}body{font-family:"Hanken Grotesk",Helvetica,Arial,sans-serif;color:#1a1714;font-size:10pt;margin:0}h1{font-size:18pt;margin:0 0 6px;letter-spacing:-.02em}.hd{display:flex;justify-content:space-between;gap:24px;border-bottom:1px solid #d4cbb9;padding-bottom:14px;margin-bottom:6px}.hd p{margin:2px 0}.mu{color:#7d7465}section{page-break-after:always}section:last-child{page-break-after:auto}h2{font-size:13pt;margin:22px 0 4px}h3{font-size:10pt;margin:14px 0 4px;color:#575045}table{width:100%;border-collapse:collapse}td{padding:4px 6px;border-bottom:1px solid #eee6da;vertical-align:top}td.d{width:78px;white-space:nowrap}.r{text-align:right;font-variant-numeric:tabular-nums;white-space:nowrap}tr.st td{font-weight:600;border-bottom:none}.tot{max-width:320px;margin:16px 0 0 auto}.tot tr.n td{font-weight:700;border-top:1px solid #1a1714}';
 
-export interface StatementOptions {
+interface StatementOptions {
   range: DateRange;
   transactions: Transaction[];
   payouts: Payout[];
@@ -113,8 +109,8 @@ export const getStatementHtml = ({
   vatNumber,
   bankLabel,
 }: StatementOptions): string => {
-  const escape = (value: unknown) =>
-    String(value).replace(/&/g, "&amp;").replace(/</g, "&lt;");
+  const escape = (text: string) =>
+    text.replace(/&/g, "&amp;").replace(/</g, "&lt;");
 
   const months: { start: Date; end: Date; label: string }[] = [];
   let month = new Date(range.start.getFullYear(), range.start.getMonth(), 1);
@@ -168,19 +164,19 @@ export const getStatementHtml = ({
             transaction.at.toLocaleDateString("en-GB"),
             `${clientName} · ${transaction.service}`,
             getMethodLabel(transaction),
-            formatGbp(transaction.amount),
+            formatMoney(transaction.amount, { pence: "always" }),
           );
         })
         .join("");
 
       const groupName = title.toLowerCase();
-      const totalText = formatGbp(total);
+      const totalText = formatMoney(total, { pence: "always" });
 
       body += `<h3>${title}</h3><table>${groupLines}<tr class="st"><td></td><td>Total ${groupName}</td><td></td><td class="r">${totalText}</td></tr></table>`;
     }
 
     const feeRows = inMonth.filter(({ fee }) => (fee ?? 0) > 0);
-    const feesText = formatGbp(-stats.fees);
+    const feesText = formatMoney(-stats.fees, { pence: "always" });
 
     if (feeRows.length) {
       const feeLines = feeRows
@@ -192,7 +188,7 @@ export const getStatementHtml = ({
             transaction.at.toLocaleDateString("en-GB"),
             `Fee on ${feeWhat} · ${clientName}`,
             transaction.method,
-            formatGbp(-(transaction.fee ?? 0)),
+            formatMoney(-(transaction.fee ?? 0), { pence: "always" }),
           );
         })
         .join("");
@@ -200,9 +196,9 @@ export const getStatementHtml = ({
       body += `<h3>Card fees</h3><table>${feeLines}<tr class="st"><td></td><td>Total card fees</td><td></td><td class="r">${feesText}</td></tr></table>`;
     }
 
-    const takingsText = formatGbp(stats.takings);
-    const refundsText = formatGbp(stats.refunds);
-    const netText = formatGbp(stats.net);
+    const takingsText = formatMoney(stats.takings, { pence: "always" });
+    const refundsText = formatMoney(stats.refunds, { pence: "always" });
+    const netText = formatMoney(stats.net, { pence: "always" });
 
     body += `<table class="tot"><tr><td>Takings</td><td class="r">${takingsText}</td></tr><tr><td>Card fees</td><td class="r">${feesText}</td></tr><tr><td>Refunds</td><td class="r">${refundsText}</td></tr><tr class="n"><td>Net</td><td class="r">${netText}</td></tr></table>`;
 
@@ -217,7 +213,7 @@ export const getStatementHtml = ({
             payout.sent.toLocaleDateString("en-GB"),
             `To ${bankLabel || DEFAULT_BANK}`,
             payout.status,
-            formatGbp(payout.amount),
+            formatMoney(payout.amount, { pence: "always" }),
           ),
         )
         .join("");

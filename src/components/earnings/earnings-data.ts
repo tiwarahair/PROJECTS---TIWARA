@@ -1,12 +1,15 @@
 // Earnings demo ledger and its date helpers. The ledger is generated from a seeded random sequence, so it is the same on every
 // load of the same day.
+import { roundToPence } from "../../utils/money";
+import { formatWeekdayDate } from "../../utils/dates";
 
 export type EarningsScenario =
   "default" | "onhold" | "paused" | "setup" | "empty";
 export type TransactionStatus =
   "Pending" | "Available" | "On hold" | "Paid out" | "Refunded" | "Recorded";
-export type PayoutState = "Paid" | "In transit" | "Failed";
 export type PeriodId = "week" | "month" | "lastmonth" | "custom";
+
+type PayoutState = "Paid" | "In transit" | "Failed";
 
 export interface EarningsClient {
   id: string;
@@ -83,7 +86,7 @@ export const PERIODS: [PeriodId, string][] = [
   ["custom", "Custom"],
 ];
 
-export const DEFAULT_CLIENTS: EarningsClient[] = [
+const DEFAULT_CLIENTS: EarningsClient[] = [
   { id: "nia", name: "Nia Okafor", email: "nia.okafor@gmail.com" },
   { id: "ruth", name: "Ruth Mensah", email: "ruth.mensah@outlook.com" },
   { id: "kemi", name: "Kemi Adeyemi", email: "kemi.a@icloud.com" },
@@ -104,46 +107,15 @@ const DEFAULT_SERVICES = [
   { name: "Fulani braids", price: 80, hours: 4 },
 ];
 
-export const roundMoney = (value: number): number =>
-  Math.round(value * 100) / 100;
-
-/** "£1,234.50", "−£12.00" */
-export const formatGbp = (value: number): string => {
-  const rounded = roundMoney(value);
-  const sign = rounded < 0 ? "−" : "";
-
-  const amount = Math.abs(rounded).toLocaleString("en-GB", {
-    minimumFractionDigits: 2,
-    maximumFractionDigits: 2,
-  });
-
-  return `${sign}£${amount}`;
-};
-
-/** "Wed 14 Oct" */
-export const formatDay = (date: Date): string =>
-  date.toLocaleDateString("en-GB", {
-    weekday: "short",
-    day: "numeric",
-    month: "short",
-  });
-
 /** "14 Oct 2026" */
-export const formatDayYear = (date: Date): string =>
+const formatDayYear = (date: Date): string =>
   date.toLocaleDateString("en-GB", {
     day: "numeric",
     month: "short",
     year: "numeric",
   });
 
-export const formatTime = (date: Date): string => {
-  const hours = String(date.getHours()).padStart(2, "0");
-  const minutes = String(date.getMinutes()).padStart(2, "0");
-
-  return `${hours}:${minutes}`;
-};
-
-export const getDayStart = (date: Date): Date => {
+const getDayStart = (date: Date): Date => {
   const start = new Date(date);
 
   start.setHours(0, 0, 0, 0);
@@ -163,13 +135,6 @@ const addWorkingDays = (date: Date, count: number): Date => {
   }
 
   return next;
-};
-
-export const toIsoDate = (date: Date): string => {
-  const month = String(date.getMonth() + 1).padStart(2, "0");
-  const day = String(date.getDate()).padStart(2, "0");
-
-  return `${date.getFullYear()}-${month}-${day}`;
 };
 
 const sumOf = <T>(items: T[], getValue: (item: T) => number): number => {
@@ -259,13 +224,13 @@ export const buildLedger = (
       entry.amount > 0 &&
       (entry.method === "Saved card" || entry.method === "Payment link");
 
-    const cardFee = isFeeable ? roundMoney(entry.amount * 0.015 + 0.2) : 0;
+    const cardFee = isFeeable ? roundToPence(entry.amount * 0.015 + 0.2) : 0;
     const fee = entry.isRecorded ? null : cardFee;
 
     const transaction: Transaction = {
       id: `TX-${71200 + count}`,
       fee,
-      net: roundMoney(entry.amount - (fee || 0)),
+      net: roundToPence(entry.amount - (fee || 0)),
       status: "Pending",
       ...entry,
     };
@@ -333,7 +298,7 @@ export const buildLedger = (
 
     if (booked > now) return;
 
-    const deposit = roundMoney(service.price * 0.2);
+    const deposit = roundToPence(service.price * 0.2);
     const bookingRef = `BK-${5100 + count}`;
 
     const base = {
@@ -399,7 +364,7 @@ export const buildLedger = (
           description: "Cancellation fee",
           method: "Saved card",
           at: new Date(at.getTime() - 20 * 3600000),
-          amount: roundMoney(service.price * 0.3),
+          amount: roundToPence(service.price * 0.3),
           note: "Cancelled 20 hours before, inside your 48-hour window. Deposit kept and the rest of the 50% fee charged to the saved card.",
           ...base,
         });
@@ -420,7 +385,7 @@ export const buildLedger = (
         description: "No-show fee",
         method: "Saved card",
         at: new Date(at.getTime() + 15 * 60000 + 3600000),
-        amount: roundMoney(service.price * 0.3),
+        amount: roundToPence(service.price * 0.3),
         note: "Client didn’t arrive within the 15 minute grace period.",
         ...base,
       });
@@ -450,7 +415,7 @@ export const buildLedger = (
       method,
       isRecorded,
       at: new Date(end.getTime() + 60000),
-      amount: roundMoney(service.price - deposit),
+      amount: roundToPence(service.price - deposit),
       ...base,
     });
 
@@ -472,7 +437,7 @@ export const buildLedger = (
           description: "Refund",
           method,
           at: refundAt,
-          amount: -roundMoney((service.price - deposit) * 0.5),
+          amount: -roundToPence((service.price - deposit) * 0.5),
           note: "Partial refund. Client asked for a touch-up that couldn’t be booked in time.",
           ...base,
         });
@@ -572,23 +537,23 @@ export const buildLedger = (
         sent.setHours(8, 0, 0, 0);
         const arrive = addWorkingDays(sent, 1);
 
-        const gross = roundMoney(
+        const gross = roundToPence(
           sumOf(
             items.filter(({ amount }) => amount > 0),
             ({ amount }) => amount,
           ),
         );
 
-        const fees = roundMoney(sumOf(items, ({ fee }) => fee || 0));
+        const fees = roundToPence(sumOf(items, ({ fee }) => fee || 0));
 
-        const refunds = roundMoney(
+        const refunds = roundToPence(
           sumOf(
             items.filter(({ amount }) => amount < 0),
             ({ amount }) => amount,
           ),
         );
 
-        const amount = roundMoney(gross - fees + refunds);
+        const amount = roundToPence(gross - fees + refunds);
         const id = `PO-${38800 - index}`;
 
         const status: PayoutState =
@@ -636,7 +601,7 @@ export const buildLedger = (
   }
 
   const sumStatus = (status: TransactionStatus) =>
-    roundMoney(
+    roundToPence(
       sumOf(
         transactions.filter(
           (item) => item.status === status && !item.isRecorded,
@@ -657,9 +622,12 @@ export const buildLedger = (
           description === "Full payment" && status === "Paid out",
       ) ?? transactions.find(({ status }) => status === "Paid out");
 
-    const amount = roundMoney(available + 62.4);
+    const amount = roundToPence(available + 62.4);
     const at = new Date(now.getTime() - 5 * 3600000);
-    const disputedOn = disputed ? formatDay(disputed.at) : "an earlier payment";
+
+    const disputedOn = disputed
+      ? formatWeekdayDate(disputed.at)
+      : "an earlier payment";
 
     transactions.unshift({
       id: `TX-${71200 + ++count}`,
@@ -755,7 +723,7 @@ export const getRangeLabel = ({ start, end }: DateRange): string => {
   return `${startLabel} – ${formatDayYear(last)}`;
 };
 
-export interface Bucket {
+interface Bucket {
   start: Date;
   end: Date;
   label: string;
@@ -786,7 +754,7 @@ export const getBuckets = ({
           days <= 7
             ? start.toLocaleDateString("en-GB", { weekday: "short" })
             : String(start.getDate()),
-        long: formatDay(start),
+        long: formatWeekdayDate(start),
       });
     }
 
@@ -843,7 +811,7 @@ export const getBuckets = ({
   return { title: "Monthly takings", buckets };
 };
 
-export interface PeriodStats {
+interface PeriodStats {
   takings: number;
   fees: number;
   refunds: number;
@@ -851,23 +819,28 @@ export interface PeriodStats {
 }
 
 export const getStats = (transactions: Transaction[]): PeriodStats => {
-  const takings = roundMoney(
+  const takings = roundToPence(
     sumOf(
       transactions.filter(({ amount }) => amount > 0),
       ({ amount }) => amount,
     ),
   );
 
-  const fees = roundMoney(sumOf(transactions, ({ fee }) => fee || 0));
+  const fees = roundToPence(sumOf(transactions, ({ fee }) => fee || 0));
 
-  const refunds = roundMoney(
+  const refunds = roundToPence(
     sumOf(
       transactions.filter(({ amount }) => amount < 0),
       ({ amount }) => amount,
     ),
   );
 
-  return { takings, fees, refunds, net: roundMoney(takings - fees + refunds) };
+  return {
+    takings,
+    fees,
+    refunds,
+    net: roundToPence(takings - fees + refunds),
+  };
 };
 
 export const getTakings = (
@@ -875,7 +848,7 @@ export const getTakings = (
   start: Date,
   end: Date,
 ): number =>
-  roundMoney(
+  roundToPence(
     sumOf(
       transactions.filter(
         ({ at, amount }) => at >= start && at < end && amount > 0,

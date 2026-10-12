@@ -14,7 +14,7 @@ import { SearchPage } from "./features/search/search-page";
 import { StylistProfilePage } from "./features/stylist-profile/stylist-profile-page";
 import { StudioPage } from "./features/studio/studio-page";
 
-export const appRoutes: RouteObject[] = [
+const appRoutes: RouteObject[] = [
   { path: "/", element: <HomePage /> },
   { path: "/search", element: <SearchPage /> },
   { path: "/stylist", element: <StylistProfilePage /> },

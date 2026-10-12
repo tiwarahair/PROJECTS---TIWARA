@@ -1,6 +1,5 @@
 // Derived values for the Account page.
 import { stylists } from "../../data";
-import { money } from "../../utils/pricing";
 import { QUIZ_DAYS_AGO, SECTIONS } from "./account-data";
 import type { AccountBooking, AccountSection } from "./account-data";
 import {
@@ -11,6 +10,7 @@ import {
 } from "./account-logic";
 import type { BookingMoney } from "./account-logic";
 import type { AccountState } from "./use-account";
+import { formatMoney } from "../../utils/money";
 
 export interface BookingCardView {
   booking: AccountBooking;
@@ -211,7 +211,7 @@ export const getAccountView = (
           date: formatAccountDate(receiptBooking.booking.at, true),
           stylist: receiptBooking.money.stylist.name,
           where: receiptBooking.money.where,
-          total: money(receiptBooking.money.total),
+          total: formatMoney(receiptBooking.money.total),
           lines: receiptBooking.money.lines,
           payments: receiptBooking.money.payments,
         }

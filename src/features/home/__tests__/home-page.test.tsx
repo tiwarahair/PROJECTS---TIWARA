@@ -1,10 +1,18 @@
-import { act, fireEvent, screen, within } from "@testing-library/react";
+import { act, screen, within } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { installFakeIntersectionObserver } from "../../../test/helpers";
 import type { FakeIntersectionObserver } from "../../../test/helpers";
 import { renderWithStore } from "../../../test/render-with-store";
 import { HomePage } from "../home-page";
 import type { HomePageProps } from "../home-page";
+import type { UserEvent } from "@testing-library/user-event";
+import { setupUser } from "../../../test/setup-user";
+
+let user: UserEvent;
+
+beforeEach(() => {
+  user = setupUser();
+});
 
 let observer: FakeIntersectionObserver;
 
@@ -139,10 +147,10 @@ describe("HomePage", () => {
     ).toBeInTheDocument();
   });
 
-  it("List your business remembers the flow for onboarding", () => {
+  it("List your business remembers the flow for onboarding", async () => {
     renderHome();
 
-    fireEvent.click(
+    await user.click(
       screen.getAllByRole("link", {
         name: /List your business/,
       })[0] as HTMLElement,
@@ -151,7 +159,7 @@ describe("HomePage", () => {
     expect(sessionStorage.getItem("tw_flow")).toBe("list");
   });
 
-  it("FAQ opens one answer at a time", () => {
+  it("FAQ opens one answer at a time", async () => {
     renderHome();
 
     const first = screen.getByRole("button", {
@@ -162,9 +170,9 @@ describe("HomePage", () => {
       name: "How do deposits work?",
     });
 
-    fireEvent.click(first);
+    await user.click(first);
     expect(first.parentElement?.className).toMatch(/open/);
-    fireEvent.click(second);
+    await user.click(second);
     expect(first.parentElement?.className).not.toMatch(/open/);
     expect(second.parentElement?.className).toMatch(/open/);
   });
@@ -190,15 +198,15 @@ describe("HomePage", () => {
     );
   });
 
-  it("the burger opens and closes the mobile menu", () => {
+  it("the burger opens and closes the mobile menu", async () => {
     renderHome();
-    fireEvent.click(screen.getByRole("button", { name: "Menu" }));
+    await user.click(screen.getByRole("button", { name: "Menu" }));
 
     expect(
       screen.getByRole("link", { name: "Our stylists" }),
     ).toBeInTheDocument();
 
-    fireEvent.click(screen.getByRole("button", { name: "×" }));
+    await user.click(screen.getByRole("button", { name: "×" }));
 
     expect(
       screen.queryByRole("link", { name: "Our stylists" }),

@@ -1,5 +1,11 @@
-import { useEffect } from "react";
-import { isBoardView, readSession, writeSession } from "../utils/page-flags";
+import { useEffect, useRef } from "react";
+import { useLocation } from "react-router";
+import {
+  getSearchParams,
+  isBoardView,
+  readSession,
+  writeSession,
+} from "../utils/page-flags";
 import {
   LAST_SEARCH_KEY,
   SEARCH_BACK_KEY,
@@ -20,21 +26,26 @@ const readSavedScroll = (): number => {
 
 /** Search remembers its URL and scroll position; returning via Back restores the scroll. */
 export const useSearchMemory = (): void => {
+  const location = useLocation();
+  // the timers and listeners below run outside render, so they read the latest router location from a ref
+  const locationRef = useRef(location);
+
+  locationRef.current = location;
+
   useEffect(() => {
-    if (isBoardView()) return;
+    if (isBoardView(getSearchParams(locationRef.current.search))) return;
 
     const record = () => {
-      // the router changes the URL before Search unmounts; never record another page as the search
-      if (window.location.pathname !== "/search") return;
+      const { pathname, search } = locationRef.current;
 
-      writeSession(
-        LAST_SEARCH_KEY,
-        window.location.pathname + window.location.search,
-      );
+      // the router changes the URL before Search unmounts; never record another page as the search
+      if (pathname !== "/search") return;
+
+      writeSession(LAST_SEARCH_KEY, pathname + search);
 
       writeSession(
         SEARCH_SCROLL_KEY,
-        JSON.stringify({ search: window.location.search, y: window.scrollY }),
+        JSON.stringify({ search, y: window.scrollY }),
       );
     };
 

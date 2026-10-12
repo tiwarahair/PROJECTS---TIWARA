@@ -1,13 +1,14 @@
 import type { ReactNode } from "react";
 import { joinClassNames } from "../../utils/class-names";
 import { AmountRow, Icon, getViewAnimation } from "./checkout-detail";
-import { ICONS, formatPence, formatPounds, roundPounds } from "./checkout-data";
+import { ICONS } from "./checkout-data";
 import type { TipChoice } from "./checkout-data";
 import { RECORD_VIA_LABELS, getAdjustNote } from "./checkout-view";
 import type { CheckoutViewModel, DetailRow } from "./checkout-view";
 import type { CheckoutController } from "./use-checkout";
 import flow from "../../styles/components/checkout-sheet/checkout-flow.module.css";
 import shared from "../../styles/components/checkout-sheet/checkout-sheet.module.css";
+import { formatMoney, roundToPence } from "../../utils/money";
 
 const TIP_CHOICES: [TipChoice, string][] = [
   ["none", "No tip"],
@@ -69,10 +70,10 @@ export const CheckoutTip = ({
 
   const getTipSubtitle = (choice: TipChoice, isOn: boolean) => {
     if (typeof choice === "number")
-      return formatPounds(roundPounds((money.items * choice) / 100));
+      return formatMoney(roundToPence((money.items * choice) / 100));
 
     if (choice === "custom" && isOn && money.selectedTip > 0)
-      return formatPounds(money.selectedTip);
+      return formatMoney(money.selectedTip);
 
     return " ";
   };
@@ -91,7 +92,7 @@ export const CheckoutTip = ({
           {isRecord ? "Tip received?" : "Add a tip?"}
         </h2>
         <div className={flow.viewSub}>
-          {`Percentages of the ${formatPounds(money.items)} service total.`}
+          {`Percentages of the ${formatMoney(money.items)} service total.`}
         </div>
       </div>
       <div className={flow.tipGrid} role="radiogroup" aria-label="Tip">
@@ -294,7 +295,7 @@ export const CheckoutPay = ({
               <div className={flow.linkTo}>{`Sends to ${view.linkTarget}`}</div>
               {money.selectedTip > 0 && (
                 <div className={flow.linkTipDrop}>
-                  {`The ${formatPounds(money.selectedTip)} tip isn’t added. Your client can choose their own tip on the payment page.`}
+                  {`The ${formatMoney(money.selectedTip)} tip isn’t added. Your client can choose their own tip on the payment page.`}
                 </div>
               )}
             </div>
@@ -358,7 +359,7 @@ export const CheckoutReview = ({
     if (state.method === "record") return "Received in person";
 
     if (typeof state.tip === "number")
-      return `${state.tip}% of ${formatPounds(money.items)}`;
+      return `${state.tip}% of ${formatMoney(money.items)}`;
 
     return "Custom amount";
   };
@@ -383,10 +384,10 @@ export const CheckoutReview = ({
 
   if (money.tip > 0)
     extraRows.push({
-      key: `Tip${formatPounds(money.tip)}`,
+      key: `Tip${formatMoney(money.tip)}`,
       label: "Tip",
       subtitle: getTipRowSubtitle(),
-      value: formatPounds(money.tip),
+      value: formatMoney(money.tip),
       isAlert: false,
     });
 
@@ -461,12 +462,10 @@ export const CheckoutReview = ({
             </span>
             <span className={flow.reviewValue}>
               {!!line.adjustment && (
-                <span className={flow.reviewWas}>
-                  {formatPounds(line.base)}
-                </span>
+                <span className={flow.reviewWas}>{formatMoney(line.base)}</span>
               )}
               <span className={flow.reviewAmount}>
-                {formatPounds(line.base + line.adjustment)}
+                {formatMoney(line.base + line.adjustment)}
               </span>
             </span>
           </div>
@@ -508,7 +507,7 @@ export const CheckoutReview = ({
         <div className={flow.nothing}>
           <div className={flow.strong15}>Nothing to pay</div>
           <div className={flow.nothingText}>
-            {`${view.name} has already paid ${formatPounds(state.paid)}.`}
+            {`${view.name} has already paid ${formatMoney(state.paid)}.`}
           </div>
         </div>
       )}
@@ -542,7 +541,7 @@ export const CheckoutReview = ({
       )}
       <div className={flow.reviewNotes}>
         {money.cardFee > 0 && (
-          <span>{`Card fee of about ${formatPence(money.cardFee)} is deducted from your payout.`}</span>
+          <span>{`Card fee of about ${formatMoney(money.cardFee, { pence: "always" })} is deducted from your payout.`}</span>
         )}
         {money.method === "link" && (
           <span>{`${view.name} can choose their own tip on the payment page. The booking shows Awaiting payment until they pay.`}</span>

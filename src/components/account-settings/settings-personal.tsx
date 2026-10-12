@@ -49,7 +49,7 @@ export interface TextFieldProps {
 }
 
 /** Label, input and error line. */
-export const TextField = ({
+const TextField = ({
   id,
   label,
   value,

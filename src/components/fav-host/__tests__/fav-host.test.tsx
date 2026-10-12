@@ -1,9 +1,17 @@
-import { act, fireEvent, screen } from "@testing-library/react";
+import { act, screen } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { Link } from "react-router";
 import { useFavourites } from "../../../hooks/use-favourites";
 import { renderWithStore } from "../../../test/render-with-store";
 import { FavHost } from "../fav-host";
+import type { UserEvent } from "@testing-library/user-event";
+import { setupUser } from "../../../test/setup-user";
+
+let user: UserEvent;
+
+beforeEach(() => {
+  user = setupUser();
+});
 
 const FAVS_KEY = "tw_favs_nia.okafor@gmail.com";
 
@@ -45,13 +53,13 @@ describe("FavHost", () => {
 
   it("asks guests to log in and remembers the stylist for after log in", async () => {
     renderWithStore(<HeartPage />, "/search");
-    fireEvent.click(screen.getByRole("button", { name: "Save Amara" }));
+    await user.click(screen.getByRole("button", { name: "Save Amara" }));
 
     expect(
       screen.getByRole("dialog", { name: "Log in to save stylists" }),
     ).toBeInTheDocument();
 
-    fireEvent.click(screen.getByRole("button", { name: "Log in" }));
+    await user.click(screen.getByRole("button", { name: "Log in" }));
     expect(sessionStorage.getItem("tw_fav_pending")).toBe("amara-beauty");
     const encodedReturn = encodeURIComponent("/search?login=1");
 
@@ -65,7 +73,7 @@ describe("FavHost", () => {
     renderWithStore(<HeartPage />, "/search");
     const heart = screen.getByRole("button", { name: "Save Amara" });
 
-    fireEvent.click(heart);
+    await user.click(heart);
     expect(heart).toHaveTextContent("saved");
 
     expect(JSON.parse(localStorage.getItem(FAVS_KEY) ?? "[]")).toEqual([
@@ -79,14 +87,14 @@ describe("FavHost", () => {
       "/account?section=favourites",
     );
 
-    fireEvent.click(heart);
+    await user.click(heart);
     expect(heart).toHaveTextContent("not saved");
 
     expect(screen.getByRole("status")).toHaveTextContent(
       "Removed from favourites",
     );
 
-    fireEvent.click(screen.getByRole("button", { name: "Undo" }));
+    await user.click(screen.getByRole("button", { name: "Undo" }));
     expect(heart).toHaveTextContent("saved");
 
     await flush(5000);
@@ -126,7 +134,7 @@ describe("FavHost", () => {
   it("opens the account menu from [data-tw-acct], closes on Escape and logs out", async () => {
     sessionStorage.setItem("tw_cust", "1");
     renderWithStore(<HeartPage />, "/search");
-    fireEvent.click(screen.getByRole("link", { name: "Nia Okafor" }));
+    await user.click(screen.getByRole("link", { name: "Nia Okafor" }));
     const menu = screen.getByRole("menu", { name: "Nia Okafor" });
 
     expect(menu).toHaveTextContent("nia.okafor@gmail.com");
@@ -141,11 +149,11 @@ describe("FavHost", () => {
       "Log out",
     ]);
 
-    fireEvent.keyDown(document, { key: "Escape" });
+    await user.keyboard("{Escape}");
     expect(screen.queryByRole("menu")).not.toBeInTheDocument();
 
-    fireEvent.click(screen.getByRole("link", { name: "Nia Okafor" }));
-    fireEvent.click(screen.getByRole("menuitem", { name: "Log out" }));
+    await user.click(screen.getByRole("link", { name: "Nia Okafor" }));
+    await user.click(screen.getByRole("menuitem", { name: "Log out" }));
     expect(sessionStorage.getItem("tw_cust")).toBeNull();
     expect(screen.getByTestId("location")).toHaveTextContent(/^\/$/);
   });
@@ -163,7 +171,7 @@ describe("FavHost", () => {
       "/",
     );
 
-    fireEvent.click(screen.getByRole("link", { name: "Nia Okafor" }));
+    await user.click(screen.getByRole("link", { name: "Nia Okafor" }));
     await flush(50);
     expect(screen.getByRole("menu")).toBeInTheDocument();
     expect(screen.getByTestId("location")).toHaveTextContent(/^\/$/);

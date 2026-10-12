@@ -1,6 +1,14 @@
-import { fireEvent, render, screen } from "@testing-library/react";
-import { describe, expect, it, vi } from "vitest";
+import { render, screen } from "@testing-library/react";
+import { beforeEach, describe, expect, it, vi } from "vitest";
 import { SearchSelect } from "../search-select";
+import type { UserEvent } from "@testing-library/user-event";
+import { setupUser } from "../../../test/setup-user";
+
+let user: UserEvent;
+
+beforeEach(() => {
+  user = setupUser();
+});
 
 const TYPES = [
   {
@@ -33,15 +41,13 @@ describe("SearchSelect", () => {
     expect(screen.getByRole("button")).toHaveTextContent("Deep conditioning");
   });
 
-  it("opens a grouped list and filters by label or keyword", () => {
+  it("opens a grouped list and filters by label or keyword", async () => {
     render(<SearchSelect options={TYPES} />);
-    fireEvent.click(screen.getByRole("button", { name: "Select" }));
+    await user.click(screen.getByRole("button", { name: "Select" }));
     expect(screen.getByText("Braids & Twists")).toBeInTheDocument();
     expect(screen.getByText("Natural Hair")).toBeInTheDocument();
 
-    fireEvent.change(screen.getByPlaceholderText("Search"), {
-      target: { value: "press" },
-    });
+    await user.type(screen.getByPlaceholderText("Search"), "press");
 
     expect(
       screen.getByRole("button", { name: "Silk press" }),
@@ -51,14 +57,13 @@ describe("SearchSelect", () => {
       screen.queryByRole("button", { name: "Box braids" }),
     ).not.toBeInTheDocument();
 
-    fireEvent.change(screen.getByPlaceholderText("Search"), {
-      target: { value: "zzz" },
-    });
+    await user.clear(screen.getByPlaceholderText("Search"));
+    await user.type(screen.getByPlaceholderText("Search"), "zzz");
 
     expect(screen.getByText("No matches")).toBeInTheDocument();
   });
 
-  it("keeps action rows visible and reports the picked label", () => {
+  it("keeps action rows visible and reports the picked label", async () => {
     const handleChange = vi.fn();
 
     render(
@@ -71,27 +76,25 @@ describe("SearchSelect", () => {
       />,
     );
 
-    fireEvent.click(screen.getByRole("button", { name: "Select" }));
+    await user.click(screen.getByRole("button", { name: "Select" }));
 
-    fireEvent.change(screen.getByPlaceholderText("Search"), {
-      target: { value: "zzz" },
-    });
+    await user.type(screen.getByPlaceholderText("Search"), "zzz");
 
-    fireEvent.click(screen.getByRole("button", { name: "+ New category" }));
+    await user.click(screen.getByRole("button", { name: "+ New category" }));
     expect(handleChange).toHaveBeenCalledWith("+ New category");
     expect(screen.queryByPlaceholderText("Search")).not.toBeInTheDocument();
   });
 
-  it("closes when clicking outside", () => {
+  it("closes when clicking outside", async () => {
     render(<SearchSelect options={TYPES} />);
-    fireEvent.click(screen.getByRole("button", { name: "Select" }));
-    fireEvent.mouseDown(document.body);
+    await user.click(screen.getByRole("button", { name: "Select" }));
+    await user.click(document.body);
     expect(screen.queryByPlaceholderText("Search")).not.toBeInTheDocument();
   });
 
-  it("does not open when disabled", () => {
+  it("does not open when disabled", async () => {
     render(<SearchSelect options={TYPES} disabled />);
-    fireEvent.click(screen.getByRole("button", { name: "Select" }));
+    await user.click(screen.getByRole("button", { name: "Select" }));
     expect(screen.queryByPlaceholderText("Search")).not.toBeInTheDocument();
   });
 });

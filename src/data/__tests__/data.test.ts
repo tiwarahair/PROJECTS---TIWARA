@@ -9,7 +9,7 @@ import {
 import * as data from "../index";
 import {
   findService,
-  formatDuration,
+  formatServiceDuration,
   getCustomisationSummary,
   getFromPrice,
   getFromWithFee,
@@ -20,7 +20,7 @@ import {
   matchTypes,
 } from "../../utils/services";
 import { miles, slotsFor } from "../../utils/availability";
-import { bookingFee, money, policyLines } from "../../utils/pricing";
+import { bookingFee, policyLines } from "../../utils/pricing";
 import {
   formatPostcode,
   getAddressLines,
@@ -33,8 +33,8 @@ import {
 } from "../../utils/address";
 import { checkPassword, getPasswordView } from "../../utils/password";
 import type { Policy } from "../../types/policy";
+import { formatMoney } from "../../utils/money";
 
-// The reference data.js in design-import/ is run in a VM and must match; its helpers stay untyped here.
 // eslint-disable-next-line @typescript-eslint/no-explicit-any -- dynamic reference object from vm
 type Reference = any;
 
@@ -193,11 +193,25 @@ describe.skipIf(!hasPrototype)(
         );
       });
 
-      [0, 10, 14, 15, 44.6, 45, 59, 60, 61, 90, 120, 135, 240, 245].forEach(
-        (minutes) =>
-          expect(formatDuration(minutes)).toBe(
-            prototypeData.services.dur(minutes),
-          ),
+      (
+        [
+          [0, "15m"],
+          [10, "15m"],
+          [14, "15m"],
+          [15, "15m"],
+          [44.6, "45m"],
+          [45, "45m"],
+          [59, "59m"],
+          [60, "1h"],
+          [61, "1h 1m"],
+          [90, "1h 30m"],
+          [120, "2h"],
+          [135, "2h 15m"],
+          [240, "4h"],
+          [245, "4h 5m"],
+        ] as const
+      ).forEach(([minutes, expected]) =>
+        expect(formatServiceDuration(minutes)).toBe(expected),
       );
 
       [
@@ -244,7 +258,7 @@ describe.skipIf(!hasPrototype)(
     it("fees, money and policy lines match", () => {
       [0, 1, 9.99, 30, 45, 45.5, 56.33, 100, 133.335, 250].forEach((amount) => {
         expect(bookingFee(amount)).toBe(prototypeData.bookingFee(amount));
-        expect(money(amount)).toBe(prototypeData.money(amount));
+        expect(formatMoney(amount)).toBe(prototypeData.money(amount));
       });
 
       const variants: Partial<Policy>[] = [

@@ -1,13 +1,14 @@
 // Derived values for Stylist Profile (including the service menu).
 import { reviews as allReviews, stylists } from "../../data";
 import type { Stylist } from "../../types/stylist";
-import { money } from "../../utils/pricing";
 import {
-  formatDuration,
+  formatServiceDuration,
   getCustomisationSummary,
   getFromWithFee,
   getMenu,
 } from "../../utils/services";
+import { formatMoney } from "../../utils/money";
+import { LONG_WEEKDAYS } from "../../utils/dates";
 
 export const DEFAULT_STYLIST_ID = "tiwaras-house";
 const MENU_LIMIT = 6;
@@ -36,7 +37,7 @@ export interface ServiceModal {
   customisation: string;
 }
 
-export interface MenuItem {
+interface MenuItem {
   key: string;
   name: string;
   meta: string;
@@ -61,8 +62,8 @@ export const getMenuGroups = (stylist: Stylist): MenuGroup[] =>
     name,
     hasName: !!name,
     items: items.map((service) => {
-      const price = money(getFromWithFee(service));
-      const duration = formatDuration(service.minutes);
+      const price = formatMoney(getFromWithFee(service));
+      const duration = formatServiceDuration(service.minutes);
       const href = `${getBookHref(stylist.id)}&service=${encodeURIComponent(service.id)}`;
 
       return {
@@ -117,16 +118,6 @@ const OPEN_HOURS: Record<number, [number, number] | null> = {
   6: [9, 18],
 };
 
-const DAY_NAMES = [
-  "Sunday",
-  "Monday",
-  "Tuesday",
-  "Wednesday",
-  "Thursday",
-  "Friday",
-  "Saturday",
-];
-
 const toHourLabel = (hour: number): string =>
   `${String(hour).padStart(2, "0")}:00`;
 
@@ -151,7 +142,7 @@ export const getOpenStatus = (now = new Date()): OpenStatus => {
     const day = (now.getDay() + offset) % 7;
     const hours = OPEN_HOURS[day];
 
-    if (hours) nextDay = { name: DAY_NAMES[day] ?? "", from: hours[0] };
+    if (hours) nextDay = { name: LONG_WEEKDAYS[day] ?? "", from: hours[0] };
   }
 
   const nextDayLabel = nextDay
@@ -185,7 +176,7 @@ export const getOpenStatus = (now = new Date()): OpenStatus => {
   };
 };
 
-export interface HoursRow {
+interface HoursRow {
   day: string;
   time: string;
   shut: boolean;

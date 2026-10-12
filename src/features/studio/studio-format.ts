@@ -1,36 +1,11 @@
 // Studio's pure time, money and drawing helpers (they don't read state).
-
-const DAY_NAMES = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
-
-const MONTH_NAMES = [
-  "Jan",
-  "Feb",
-  "Mar",
-  "Apr",
-  "May",
-  "Jun",
-  "Jul",
-  "Aug",
-  "Sep",
-  "Oct",
-  "Nov",
-  "Dec",
-];
-
-const MONTH_NAMES_SEPT = [
-  "Jan",
-  "Feb",
-  "Mar",
-  "Apr",
-  "May",
-  "Jun",
-  "Jul",
-  "Aug",
-  "Sept",
-  "Oct",
-  "Nov",
-  "Dec",
-];
+import {
+  formatClockTime,
+  SHORT_MONTHS,
+  SHORT_MONTHS_SEPT,
+  SHORT_WEEKDAYS,
+  formatDuration,
+} from "../../utils/dates";
 
 const pad2 = (value: number) => (value < 10 ? "0" : "") + value;
 
@@ -50,18 +25,6 @@ export const hhmm = (minutes: number): string => {
   return `${pad2(Math.floor(wrapped / 60))}:${pad2(wrapped % 60)}`;
 };
 
-export const formatDuration = (hours: unknown, minutes: unknown): string => {
-  const hourCount = parseInt(String(hours)) || 0;
-  const minuteCount = parseInt(String(minutes)) || 0;
-
-  if (hourCount && minuteCount) return `${hourCount}h ${minuteCount}m`;
-
-  return hourCount ? `${hourCount}h` : `${minuteCount}m`;
-};
-
-export const minutesToDuration = (minutes: number): string =>
-  formatDuration(Math.floor(minutes / 60), minutes % 60);
-
 /** "4h 30m" → 270. */
 export const durationToMinutes = (
   duration: string | null | undefined,
@@ -74,14 +37,12 @@ export const durationToMinutes = (
   return +(hours ?? 0) * 60 + +(minutes ?? 0);
 };
 
-export const formatMinutes = (value: unknown): string => {
-  const minutes = parseInt(String(value)) || 0;
+export const formatMinutes = (value: number): string => {
+  const minutes = Math.trunc(value) || 0;
 
   if (!minutes) return "None";
 
-  return minutes >= 60
-    ? formatDuration(Math.floor(minutes / 60), minutes % 60)
-    : `${minutes} min`;
+  return formatDuration(minutes);
 };
 
 /** "10:30" + "4h 30m" → "10:30–15:00". */
@@ -101,7 +62,7 @@ export const timeRange = (
   return `${time}–${pad2(Math.floor(end / 60))}:${pad2(end % 60)}`;
 };
 
-export interface DayInfo {
+interface DayInfo {
   weekday: string;
   dayNumber: number;
   monthName: string;
@@ -116,9 +77,9 @@ export const dayInfo = (offset: number): DayInfo => {
   const date = new Date();
 
   date.setDate(date.getDate() + offset);
-  const weekday = DAY_NAMES[date.getDay()] ?? "";
+  const weekday = SHORT_WEEKDAYS[date.getDay()] ?? "";
   const dayNumber = date.getDate();
-  const monthName = MONTH_NAMES[date.getMonth()] ?? "";
+  const monthName = SHORT_MONTHS[date.getMonth()] ?? "";
   const label = DAY_LABELS[offset] ?? `${weekday} ${dayNumber} ${monthName}`;
 
   return {
@@ -135,8 +96,8 @@ export const dateLabel = (offset: number): string => {
   const date = new Date();
 
   date.setDate(date.getDate() + (offset || 0));
-  const dayName = DAY_NAMES[date.getDay()];
-  const monthName = MONTH_NAMES[date.getMonth()];
+  const dayName = SHORT_WEEKDAYS[date.getDay()];
+  const monthName = SHORT_MONTHS[date.getMonth()];
 
   return `${dayName} ${date.getDate()} ${monthName}`;
 };
@@ -153,12 +114,10 @@ export const dateAt = (offset: number): Date => {
 
 export const formatDateTime = (timestamp: number): string => {
   const date = new Date(timestamp);
-  const dayName = DAY_NAMES[date.getDay()];
-  const monthName = MONTH_NAMES_SEPT[date.getMonth()];
-  const hours = String(date.getHours()).padStart(2, "0");
-  const minutes = String(date.getMinutes()).padStart(2, "0");
+  const dayName = SHORT_WEEKDAYS[date.getDay()];
+  const monthName = SHORT_MONTHS_SEPT[date.getMonth()];
 
-  return `${dayName} ${date.getDate()} ${monthName}, ${hours}:${minutes}`;
+  return `${dayName} ${date.getDate()} ${monthName}, ${formatClockTime(date)}`;
 };
 
 export const hexWithAlpha = (hex: string, alpha: number): string => {
@@ -170,11 +129,20 @@ export const hexWithAlpha = (hex: string, alpha: number): string => {
   return `rgba(${red},${green},${blue},${alpha})`;
 };
 
-export const parseNumber = (value: unknown): number => {
-  const parsed = parseFloat(String(value));
+/** "12.5" → 12.5; blank or not a number → 0. */
+export const parseNumber = (value: string | number): number => {
+  const parsed = typeof value === "number" ? value : parseFloat(value);
 
   return isNaN(parsed) ? 0 : parsed;
 };
+
+/** "4.5" or 4.5 → 4; blank or not a number → 0. */
+export const parseWholeNumber = (value: string | number): number =>
+  (typeof value === "number" ? Math.trunc(value) : parseInt(value)) || 0;
+
+/** "£12.50" → 12.5; missing or no digits → 0. */
+export const parseAmountLabel = (label: string | undefined): number =>
+  parseFloat((label || "").replace(/[^0-9.]/g, "")) || 0;
 
 export const getInitials = (name: string | null | undefined): string =>
   (name || "?")
@@ -280,7 +248,7 @@ export const getMiniCalendarDays = (
   return cells;
 };
 
-export interface ChartPoint {
+interface ChartPoint {
   x: number;
   y: number;
   value: number;

@@ -1,21 +1,20 @@
 import type { CSSProperties } from "react";
 import { joinClassNames } from "../../utils/class-names";
 import {
-  formatDay,
   PERIODS,
-  formatGbp,
   getBuckets,
   getRange,
   getRangeLabel,
   getStats,
   getTakings,
-  toIsoDate,
 } from "./earnings-data";
 import { EarningsLists } from "./earnings-lists";
 import { EarningsOverlays } from "./earnings-overlays";
 import { useEarnings } from "./use-earnings";
 import type { EarningsProps } from "./use-earnings";
 import styles from "../../styles/components/earnings/earnings.module.css";
+import { formatMoney } from "../../utils/money";
+import { toIsoDate, formatWeekdayDate } from "../../utils/dates";
 
 export type { EarningsProps } from "./use-earnings";
 
@@ -110,10 +109,14 @@ export const Earnings = (props: EarningsProps) => {
     net: styles.tileValueNet,
   };
 
-  const pausedText = formatGbp(ledger.pausedAmount);
-  const availableText = formatGbp(ledger.available);
-  const nextPayoutDay = ledger.nextDate ? formatDay(ledger.nextDate) : "";
-  const onHoldText = formatGbp(ledger.onHold);
+  const pausedText = formatMoney(ledger.pausedAmount, { pence: "always" });
+  const availableText = formatMoney(ledger.available, { pence: "always" });
+
+  const nextPayoutDay = ledger.nextDate
+    ? formatWeekdayDate(ledger.nextDate)
+    : "";
+
+  const onHoldText = formatMoney(ledger.onHold, { pence: "always" });
 
   return (
     <div
@@ -152,7 +155,7 @@ export const Earnings = (props: EarningsProps) => {
           )}
           <div className={styles.availableLabel}>Available</div>
           <div className={styles.availableAmount}>
-            {formatGbp(ledger.available)}
+            {formatMoney(ledger.available, { pence: "always" })}
           </div>
           {!!ledger.nextDate && scenario !== "setup" && (
             <div className={styles.nextLine}>
@@ -391,7 +394,7 @@ export const Earnings = (props: EarningsProps) => {
                   tileClass[kind as keyof typeof tileClass],
                 )}
               >
-                {formatGbp(value)}
+                {formatMoney(value, { pence: "always" })}
               </div>
             </div>
           ))}
@@ -424,7 +427,7 @@ export const Earnings = (props: EarningsProps) => {
                   key={`b${index}`}
                   className={styles.bar}
                   onClick={() => setState({ bar: isSelected ? null : index })}
-                  aria-label={`${long}, ${formatGbp(value)}`}
+                  aria-label={`${long}, ${formatMoney(value, { pence: "always" })}`}
                 >
                   <span
                     className={joinClassNames(

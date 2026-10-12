@@ -104,7 +104,7 @@ describe("labels", () => {
     expect(getDeltaLabel({ priceDelta: 10, minutesDelta: 30 })).toBe("+£10");
 
     expect(getDeltaLabel({ priceDelta: -5, minutesDelta: -30 }, true)).toBe(
-      "−£5 −30 min",
+      "−£5 −30m",
     );
   });
 

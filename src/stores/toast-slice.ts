@@ -2,7 +2,7 @@ import { createSlice } from "@reduxjs/toolkit";
 import type { PayloadAction } from "@reduxjs/toolkit";
 
 /** Toast action: a link (View), an undo that re-saves a favourite, or a label with no handler (board demo). */
-export interface ToastAction {
+interface ToastAction {
   label: string;
   href?: string;
   undoFavouriteId?: string;

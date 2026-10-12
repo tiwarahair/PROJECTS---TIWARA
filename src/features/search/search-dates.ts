@@ -1,5 +1,6 @@
 // Date & time picker model: calendar cells, quick days, time pills and labels.
 import type { SearchState } from "./search-state";
+import { toIsoDate, formatWeekdayDate } from "../../utils/dates";
 
 export const TIMES = [
   { id: "any", label: "Any time", meta: "" },
@@ -22,20 +23,10 @@ export const HOURS = [
   "7pm",
   "8pm",
 ];
-export const WEEKDAY_LABELS = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
-
-/** Local YYYY-MM-DD. */
-export const toIsoDate = (date: Date): string => {
-  const month = String(date.getMonth() + 1).padStart(2, "0");
-  const day = String(date.getDate()).padStart(2, "0");
-
-  return `${date.getFullYear()}-${month}-${day}`;
-};
-
 export const getVisibleMonth = ({ calendarMonth }: SearchState): Date =>
   calendarMonth || new Date(new Date().getFullYear(), new Date().getMonth(), 1);
 
-export interface CalendarCell {
+interface CalendarCell {
   key: string;
   label: string;
   isDay: boolean;
@@ -93,20 +84,12 @@ export const getQuickDays = () =>
     return {
       key: `q${offset}`,
       label: offset === 0 ? "Today" : "Tomorrow",
-      meta: date.toLocaleDateString("en-GB", {
-        weekday: "short",
-        month: "short",
-        day: "numeric",
-      }),
+      meta: formatWeekdayDate(date),
       value: toIsoDate(date),
     };
   });
 
-export const getTimeLabel = ({
-  time,
-  customFrom,
-  customTo,
-}: SearchState): string =>
+const getTimeLabel = ({ time, customFrom, customTo }: SearchState): string =>
   time === "custom"
     ? `${customFrom} - ${customTo}`
     : (TIMES.find(({ id }) => id === time) || TIMES[0])?.label || "Any time";
@@ -114,19 +97,11 @@ export const getTimeLabel = ({
 /** Desktop When field: "Sat 12 Oct · Morning" or "Any date". */
 export const getDateLabel = (state: SearchState): string =>
   (state.query.date
-    ? new Date(`${state.query.date}T00:00:00`).toLocaleDateString("en-GB", {
-        weekday: "short",
-        day: "numeric",
-        month: "short",
-      })
+    ? formatWeekdayDate(new Date(`${state.query.date}T00:00:00`))
     : "Any date") + (state.time !== "any" ? ` · ${getTimeLabel(state)}` : "");
 
 /** Mobile summary date label. */
 export const getMobileDateLabel = ({ query }: SearchState): string =>
   query.date
-    ? new Date(`${query.date}T00:00:00`).toLocaleDateString("en-GB", {
-        weekday: "short",
-        day: "numeric",
-        month: "short",
-      })
+    ? formatWeekdayDate(new Date(`${query.date}T00:00:00`))
     : "Any time";

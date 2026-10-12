@@ -1,7 +1,15 @@
-import { act, fireEvent, screen, within } from "@testing-library/react";
+import { act, screen, within } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { renderWithStore } from "../../../test/render-with-store";
 import { StudioPage } from "../studio-page";
+import type { UserEvent } from "@testing-library/user-event";
+import { setupUser } from "../../../test/setup-user";
+
+let user: UserEvent;
+
+beforeEach(() => {
+  user = setupUser();
+});
 
 const getLabelled = (label: string) =>
   document.querySelector(`[data-screen-label="${label}"]`) as HTMLElement;
@@ -21,10 +29,10 @@ const setViewport = (width: number) => {
   });
 };
 
-const openClients = () => {
+const openClients = async () => {
   renderWithStore(<StudioPage />, "/studio");
   runNextTimer();
-  fireEvent.click(within(getLabelled("Sidebar")).getByTitle("Clients"));
+  await user.click(within(getLabelled("Sidebar")).getByTitle("Clients"));
 
   return getLabelled("Clients");
 };
@@ -48,10 +56,10 @@ describe("Studio → client sheets", () => {
 
   afterEach(() => vi.useRealTimers());
 
-  it("wide screens open a client's profile in the side panel", () => {
-    const clients = openClients();
+  it("wide screens open a client's profile in the side panel", async () => {
+    const clients = await openClients();
 
-    fireEvent.click(within(clients).getByText("Nia Okafor"));
+    await user.click(within(clients).getByText("Nia Okafor"));
 
     expect(
       screen.getByRole("heading", { name: "Nia Okafor" }),
@@ -62,10 +70,10 @@ describe("Studio → client sheets", () => {
     ).toBeInTheDocument();
   });
 
-  it("adding a client needs a first name and a phone or email", () => {
-    const clients = openClients();
+  it("adding a client needs a first name and a phone or email", async () => {
+    const clients = await openClients();
 
-    fireEvent.click(
+    await user.click(
       within(clients).getByRole("button", { name: "Add client" }),
     );
 
@@ -75,30 +83,30 @@ describe("Studio → client sheets", () => {
 
     expect(save).toBeDisabled();
 
-    fireEvent.change(screen.getByPlaceholderText("07700 900000"), {
-      target: { value: "07700 900123" },
-    });
+    await user.type(
+      screen.getByPlaceholderText("07700 900000"),
+      "07700 900123",
+    );
 
-    fireEvent.change(screen.getByLabelText("First name"), {
-      target: { value: "Ada" },
-    });
+    await user.type(screen.getByLabelText("First name"), "Ada");
 
     expect(save).toBeEnabled();
-    fireEvent.click(save);
+    await user.click(save);
     advance(300);
     expect(screen.getByText("Ada added")).toBeInTheDocument();
   });
 
-  it("a phone number already on file points to that client", () => {
-    const clients = openClients();
+  it("a phone number already on file points to that client", async () => {
+    const clients = await openClients();
 
-    fireEvent.click(
+    await user.click(
       within(clients).getByRole("button", { name: "Add client" }),
     );
 
-    fireEvent.change(screen.getByPlaceholderText("name@email.com"), {
-      target: { value: "nia.okafor@gmail.com" },
-    });
+    await user.type(
+      screen.getByPlaceholderText("name@email.com"),
+      "nia.okafor@gmail.com",
+    );
 
     expect(
       screen.getByRole("button", { name: "View Nia" }),

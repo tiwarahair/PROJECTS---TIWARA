@@ -1,7 +1,6 @@
 import { joinClassNames } from "../../utils/class-names";
 import {
   type CalendarDay,
-  WEEKDAY_LABELS,
   formatLongDate,
   formatMonthTitle,
   getCalendarDays,
@@ -12,6 +11,7 @@ import { getHoldKey } from "./booking-state";
 import step from "../../styles/features/booking/booking-step.module.css";
 import styles from "../../styles/features/booking/step-time.module.css";
 import type { BookingController } from "./use-booking";
+import { MONDAY_FIRST_WEEKDAYS } from "../../utils/dates";
 
 const getDayClass = ({
   day,
@@ -123,7 +123,7 @@ export const StepTime = ({ booking }: StepTimeProps) => {
           </button>
         </div>
         <div className={styles.weekdays}>
-          {WEEKDAY_LABELS.map((label) => (
+          {MONDAY_FIRST_WEEKDAYS.map((label) => (
             <div key={label} className={styles.weekday}>
               {label}
             </div>

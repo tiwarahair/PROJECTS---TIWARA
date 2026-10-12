@@ -1,9 +1,17 @@
-import { act, fireEvent, render, screen } from "@testing-library/react";
+import { act, render, screen } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { BusinessDetails } from "../business-details";
 import type { BusinessDetailsApi } from "../business-details";
 import { getAreaLabel, formatVatNumber } from "../business-details-logic";
 import type { BusinessPreset } from "../business-details-logic";
+import type { UserEvent } from "@testing-library/user-event";
+import { setupUser } from "../../../test/setup-user";
+
+let user: UserEvent;
+
+beforeEach(() => {
+  user = setupUser();
+});
 
 describe("BusinessDetails", () => {
   beforeEach(() => vi.useFakeTimers());
@@ -54,7 +62,7 @@ describe("BusinessDetails", () => {
     ).toBeInTheDocument();
   });
 
-  it("preset unsaved saves, reports and shows the toast for 2.4s", () => {
+  it("preset unsaved saves, reports and shows the toast for 2.4s", async () => {
     const onSave = vi.fn();
     const onState = vi.fn<(api: BusinessDetailsApi) => void>();
 
@@ -63,7 +71,7 @@ describe("BusinessDetails", () => {
     );
 
     expect(onState.mock.lastCall?.[0].canSave).toBe(true);
-    fireEvent.click(screen.getByRole("button", { name: "Save changes" }));
+    await user.click(screen.getByRole("button", { name: "Save changes" }));
 
     expect(onSave).toHaveBeenCalledWith(
       expect.objectContaining({
@@ -81,11 +89,11 @@ describe("BusinessDetails", () => {
     expect(screen.getByRole("status")).toHaveClass(/toastHidden/);
   });
 
-  it("without tax details offers to add them", () => {
+  it("without tax details offers to add them", async () => {
     const onEditTax = vi.fn();
 
     render(<BusinessDetails tax={null} onEditTax={onEditTax} />);
-    fireEvent.click(screen.getByRole("button", { name: "Add tax details" }));
+    await user.click(screen.getByRole("button", { name: "Add tax details" }));
     expect(onEditTax).toHaveBeenCalled();
   });
 

@@ -3,10 +3,12 @@ import { stylists } from "../../data";
 import type { SavedAddress } from "../../types/address";
 import type { Stylist } from "../../types/stylist";
 import { getAddressOneLine } from "../../utils/address";
-import { bookingFee, money } from "../../utils/pricing";
+import { bookingFee } from "../../utils/pricing";
 import { findService } from "../../utils/services";
 import { TAKEN_EMAILS } from "./account-data";
 import type { AccountBooking, Profile, SavedCard } from "./account-data";
+import { formatMoney } from "../../utils/money";
+import { formatWeekdayDate, formatClockTime } from "../../utils/dates";
 
 const DAY_MS = 864e5;
 
@@ -45,22 +47,15 @@ const getPrice = (booking: AccountBooking): number => {
 export const formatAccountDate = (time: number, withTime = false): string => {
   const date = new Date(time);
 
-  const day = date.toLocaleDateString("en-GB", {
-    weekday: "short",
-    day: "numeric",
-    month: "short",
-  });
+  const day = formatWeekdayDate(date);
 
-  const hours = String(date.getHours()).padStart(2, "0");
-  const minutes = String(date.getMinutes()).padStart(2, "0");
-
-  return withTime ? `${day}, ${hours}:${minutes}` : day;
+  return withTime ? `${day}, ${formatClockTime(date)}` : day;
 };
 
 export const getAddressLine = (address: SavedAddress | undefined): string =>
   address ? getAddressOneLine(address) : "";
 
-export interface ReceiptLine {
+interface ReceiptLine {
   label: string;
   subtitle: string;
   amount: string;
@@ -125,9 +120,9 @@ export const getBookingMoney = (
     {
       label: booking.service,
       subtitle: booking.customisation,
-      amount: money(price),
+      amount: formatMoney(price),
     },
-    { label: "Booking fee", subtitle: "", amount: money(fee) },
+    { label: "Booking fee", subtitle: "", amount: formatMoney(fee) },
   ];
 
   let payments: BookingMoney["payments"] = [];
@@ -135,23 +130,23 @@ export const getBookingMoney = (
 
   switch (booking.status) {
     case "confirmed":
-      paid = `${money(deposit + fee)} paid`;
-      due = ` · ${money(price - deposit)} to pay at your appointment`;
+      paid = `${formatMoney(deposit + fee)} paid`;
+      due = ` · ${formatMoney(price - deposit)} to pay at your appointment`;
       break;
     case "awaiting":
-      paid = `${money(fee)} booking fee paid`;
-      due = ` · ${money(price)} to pay at your appointment`;
+      paid = `${formatMoney(fee)} booking fee paid`;
+      due = ` · ${formatMoney(price)} to pay at your appointment`;
       break;
 
     case "completed": {
-      paid = `${money(price + fee)} paid`;
+      paid = `${formatMoney(price + fee)} paid`;
       const paidDate = formatAccountDate(booking.at - DAY_MS * 9);
       const paidCard = cardText(booking.card);
 
       payments = [
         {
           label: `Paid ${paidDate} · ${paidCard}`,
-          amount: money(price + fee),
+          amount: formatMoney(price + fee),
         },
       ];
 
@@ -159,18 +154,18 @@ export const getBookingMoney = (
     }
 
     case "cancelled":
-      paid = `Deposit of ${money(deposit)} refunded`;
+      paid = `Deposit of ${formatMoney(deposit)} refunded`;
 
       lines = [
         {
           label: `Deposit for ${booking.service}`,
           subtitle: booking.customisation,
-          amount: money(deposit),
+          amount: formatMoney(deposit),
         },
         {
           label: "Booking fee",
           subtitle: "Not refundable",
-          amount: money(fee),
+          amount: formatMoney(fee),
         },
       ];
 
@@ -179,26 +174,26 @@ export const getBookingMoney = (
       payments = [
         {
           label: `Paid · ${cardText(booking.card)}`,
-          amount: money(deposit + fee),
+          amount: formatMoney(deposit + fee),
         },
         {
           label: `Refunded ${formatAccountDate(booking.at - DAY_MS * 3)}`,
-          amount: `−${money(deposit)}`,
+          amount: `−${formatMoney(deposit)}`,
         },
       ];
 
       break;
     case "noshow":
-      paid = `${money(deposit + fee)} paid`;
+      paid = `${formatMoney(deposit + fee)} paid`;
       due = " · deposit kept as a no-show fee";
 
       lines = [
         {
           label: `Deposit for ${booking.service}`,
           subtitle: "Kept as a no-show fee",
-          amount: money(deposit),
+          amount: formatMoney(deposit),
         },
-        { label: "Booking fee", subtitle: "", amount: money(fee) },
+        { label: "Booking fee", subtitle: "", amount: formatMoney(fee) },
       ];
 
       total = deposit + fee;
@@ -206,7 +201,7 @@ export const getBookingMoney = (
       payments = [
         {
           label: `Paid · ${cardText(booking.card)}`,
-          amount: money(deposit + fee),
+          amount: formatMoney(deposit + fee),
         },
       ];
 
@@ -317,7 +312,7 @@ export const getCalendarFile = (
   ].join("\r\n");
 };
 
-export interface ReceiptView {
+interface ReceiptView {
   ref: string;
   date: string;
   stylist: string;

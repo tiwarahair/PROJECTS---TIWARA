@@ -5,9 +5,9 @@ import type { SavedAddress } from "../types/address";
 
 const STORAGE_KEY = "tw_addrs";
 
-const isBoard = (): boolean => {
+const isBoard = (search: string): boolean => {
   try {
-    const params = new URLSearchParams(window.location.search);
+    const params = new URLSearchParams(search);
 
     return (
       params.has("fixture") ||
@@ -19,13 +19,15 @@ const isBoard = (): boolean => {
   }
 };
 
-export const getSavedAddresses = (): SavedAddress[] => {
+export const getSavedAddresses = (
+  search: string = window.location.search,
+): SavedAddress[] => {
   try {
-    const params = new URLSearchParams(window.location.search);
+    const params = new URLSearchParams(search);
 
     if (params.get("addrs") === "none") return [];
 
-    if (!isBoard()) {
+    if (!isBoard(search)) {
       const stored = localStorage.getItem(STORAGE_KEY);
 
       if (stored) return JSON.parse(stored) as SavedAddress[];
@@ -37,8 +39,11 @@ export const getSavedAddresses = (): SavedAddress[] => {
   return seedAddresses.map((address) => ({ ...address }));
 };
 
-export const saveAddresses = (addresses: SavedAddress[]): void => {
-  if (isBoard()) return;
+export const saveAddresses = (
+  addresses: SavedAddress[],
+  search: string = window.location.search,
+): void => {
+  if (isBoard(search)) return;
 
   try {
     localStorage.setItem(STORAGE_KEY, JSON.stringify(addresses));

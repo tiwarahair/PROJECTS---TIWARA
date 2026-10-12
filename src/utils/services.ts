@@ -10,9 +10,11 @@ import type {
 import type { ServiceSpec } from "../types/service-spec";
 import type { ServiceType } from "../types/service-type";
 import type { Stylist } from "../types/stylist";
-import { bookingFee, roundPence } from "./pricing";
+import { bookingFee } from "./pricing";
+import { formatDuration } from "./dates";
+import { roundToPence } from "./money";
 
-const toLower = (value: unknown): string => String(value ?? "").toLowerCase();
+const toLower = (value: string): string => value.toLowerCase();
 
 export const getSpec = (name: string): ServiceSpec => {
   const key = toLower(name);
@@ -34,21 +36,14 @@ export const getSpec = (name: string): ServiceSpec => {
   };
 };
 
-export const formatDuration = (minutes: number): string => {
-  const roundedMinutes = Math.max(15, Math.round(minutes));
+/** A service readout: as formatDuration, but never under 15 minutes. */
+export const formatServiceDuration = (minutes: number): string =>
+  formatDuration(Math.max(15, Math.round(minutes)));
 
-  if (roundedMinutes < 60) return `${roundedMinutes} min`;
+const getTypeById = (id: string | null | undefined): ServiceType | null =>
+  serviceTypes.find((type) => type.id === id) ?? null;
 
-  return roundedMinutes % 60 === 0
-    ? `${roundedMinutes / 60} hr`
-    : `${Math.floor(roundedMinutes / 60)} hr ${roundedMinutes % 60}`;
-};
-
-export const getTypeById = (
-  id: string | null | undefined,
-): ServiceType | null => serviceTypes.find((type) => type.id === id) ?? null;
-
-export const isActive = (service: Service | null | undefined): boolean =>
+const isActive = (service: Service | null | undefined): boolean =>
   !!service && service.status === "active";
 
 export const getGroupId = (
@@ -112,7 +107,7 @@ export const getFromPrice = (service: Service): number => {
 export const getFromWithFee = (service: Service): number => {
   const fromPrice = getFromPrice(service);
 
-  return roundPence(fromPrice + bookingFee(fromPrice));
+  return roundToPence(fromPrice + bookingFee(fromPrice));
 };
 
 export const getCustomisationSummary = (service: Service): string => {
@@ -136,7 +131,7 @@ export const getCustomisationSummary = (service: Service): string => {
   return parts.join(" · ");
 };
 
-export interface MenuSection {
+interface MenuSection {
   id: string;
   name: string;
   items: Service[];

@@ -1,5 +1,5 @@
-import { fireEvent, render, screen } from "@testing-library/react";
-import { describe, expect, it, vi } from "vitest";
+import { render, screen } from "@testing-library/react";
+import { beforeEach, describe, expect, it, vi } from "vitest";
 import { TaxDetailsForm } from "../tax-details-form";
 import type { TaxFixture } from "../tax-details-logic";
 import {
@@ -7,6 +7,14 @@ import {
   getInitialTaxState,
   getTaxErrors,
 } from "../tax-details-logic";
+import type { UserEvent } from "@testing-library/user-event";
+import { setupUser } from "../../../test/setup-user";
+
+let user: UserEvent;
+
+beforeEach(() => {
+  user = setupUser();
+});
 
 describe("TaxDetailsForm", () => {
   it("renders the sole-trader form by default", () => {
@@ -62,7 +70,7 @@ describe("TaxDetailsForm", () => {
     ).toBe("Enter your home address");
   });
 
-  it("submits a limited company with the business address", () => {
+  it("submits a limited company with the business address", async () => {
     const onSubmit = vi.fn();
 
     render(
@@ -81,11 +89,12 @@ describe("TaxDetailsForm", () => {
       />,
     );
 
-    fireEvent.change(screen.getByLabelText("Company registration number"), {
-      target: { value: "sc123456" },
-    });
+    await user.type(
+      screen.getByLabelText("Company registration number"),
+      "sc123456",
+    );
 
-    fireEvent.click(screen.getByRole("button", { name: "Save" }));
+    await user.click(screen.getByRole("button", { name: "Save" }));
 
     expect(onSubmit).toHaveBeenCalledWith(
       expect.objectContaining({

@@ -14,7 +14,7 @@ export type TaxFixture =
   | "err-conum"
   | "err-pc";
 
-export interface TaxAddress {
+interface TaxAddress {
   line1: string;
   line2: string;
   city: string;

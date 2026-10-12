@@ -7,7 +7,6 @@ import styles from "../../styles/features/home/quiz-strip.module.css";
 
 const QUIZ_GROUP_IDS = ["braids", "locs", "natural", "wigs"];
 
-/** Ink "Not sure what your hair needs?" strip (#quiz). */
 export const QuizStrip = () => {
   const chips = QUIZ_GROUP_IDS.map((id) =>
     serviceGroups.find((group) => group.id === id),

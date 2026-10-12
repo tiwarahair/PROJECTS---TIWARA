@@ -8,7 +8,7 @@ import {
 import type { StudioAddon, StudioState } from "./studio-types";
 import type { StudioController } from "./use-studio";
 
-export interface AddonPickerOptions {
+interface AddonPickerOptions {
   /** Overrides for the wizard, which keeps its own query and category. */
   query?: string | null;
   category?: string | null;
@@ -18,7 +18,7 @@ export interface AddonPickerOptions {
   setCategory?: (value: string) => void;
 }
 
-export interface AddonPickerItem {
+interface AddonPickerItem {
   key: string;
   name: string;
   meta: string;

@@ -2,6 +2,8 @@
 import { stylists } from "../../data";
 import type { Stylist } from "../../types/stylist";
 import { getActiveServices, getServiceOptions } from "../../utils/services";
+import { formatWeekdayDate } from "../../utils/dates";
+import { formatMoney } from "../../utils/money";
 
 export interface SharedEntry {
   id: string;
@@ -19,7 +21,7 @@ export const getEntryStylist = (
     area: "",
   };
 
-export interface DemoBooking {
+interface DemoBooking {
   service: string;
   total: string;
   options: string;
@@ -50,16 +52,14 @@ export const getDemoBooking = (stylistId: string): DemoBooking => {
 
   date.setDate(date.getDate() + ((10 - date.getDay()) % 7 || 7));
 
-  const dateLabel = date.toLocaleDateString("en-GB", {
-    weekday: "short",
-    day: "numeric",
-    month: "short",
-  });
+  const dateLabel = formatWeekdayDate(date);
 
   return {
     service: service ? service.name : "Knotless braids",
     // the booking fee is added inline (50p + 1.5%), unrounded until toFixed
-    total: service ? `£${(price + 0.5 + price * 0.015).toFixed(2)}` : "£142.60",
+    total: service
+      ? formatMoney(price + 0.5 + price * 0.015, { pence: "always" })
+      : "£142.60",
     options:
       service && options.size.length
         ? "Medium · Shoulder · 1B Natural Black"

@@ -6,7 +6,7 @@ import type {
 } from "../../components/checkout-sheet/checkout-data";
 import type { CheckoutSheetProps } from "../../components/checkout-sheet/use-checkout";
 import { PAST_TONE } from "./studio-data";
-import { getAvatarSrc, timeRange } from "./studio-format";
+import { getAvatarSrc, parseAmountLabel, timeRange } from "./studio-format";
 import {
   getClient,
   getPastKey,
@@ -16,24 +16,18 @@ import {
 } from "./studio-model";
 import type { PastRecord, StudioState } from "./studio-types";
 import type { StudioController } from "./use-studio";
+import { roundToPence } from "../../utils/money";
 
 const DAY_MS = 86400000;
-const roundMoney = (value: number) => Math.round(value * 100) / 100;
 
-const toNumber = (value: unknown) =>
-  parseFloat(String(value || "").replace(/[^0-9.]/g, "")) || 0;
-
-export interface PastCheckout {
+interface PastCheckout {
   booking: CheckoutBooking;
   done: NonNullable<CheckoutSheetProps["done"]>;
   cap: number;
 }
 
 /** A past row in the shape CheckoutSheet takes, with what was charged. */
-export const getPastCheckout = (
-  state: StudioState,
-  row: PastRecord,
-): PastCheckout => {
+const getPastCheckout = (state: StudioState, row: PastRecord): PastCheckout => {
   const client = row.client ? getClient(state, row.client) : null;
   const { checkout } = row;
   const name = client?.name || "";
@@ -58,7 +52,7 @@ export const getPastCheckout = (
   };
 
   if (row.status !== "Completed") {
-    const fee = toNumber(row.feeLabel);
+    const fee = parseAmountLabel(row.feeLabel);
 
     return {
       booking: {
@@ -86,9 +80,7 @@ export const getPastCheckout = (
 
   const paid = checkout
     ? checkout.paid
-    : roundMoney(
-        (row.price * (parseFloat(String(state.policy.deposit)) || 20)) / 100,
-      );
+    : roundToPence((row.price * (state.policy.deposit || 20)) / 100);
 
   const lines = checkout?.lines
     ? checkout.lines
@@ -113,7 +105,7 @@ export const getPastCheckout = (
     : {
         method: "card",
         via: "",
-        charged: roundMoney(row.price - paid),
+        charged: roundToPence(row.price - paid),
         tip: 0,
         refundAuto: 0,
       };
@@ -123,7 +115,7 @@ export const getPastCheckout = (
     done.via = row.linkVia || "cash";
   }
 
-  const platform = roundMoney(
+  const platform = roundToPence(
     paid -
       (done.refundAuto || 0) +
       (done.method === "card" || done.method === "link" ? done.charged : 0),
@@ -216,8 +208,8 @@ export const getPastSheetView = (studio: StudioController) => {
   const isKept =
     (row.feeKept || row.feePending) && !row.waived && !row.feeUnpaid;
 
-  const feeNumber = toNumber(row.feeLabel);
-  const feeLeft = roundMoney(feeNumber - (row.refunded || 0));
+  const feeNumber = parseAmountLabel(row.feeLabel);
+  const feeLeft = roundToPence(feeNumber - (row.refunded || 0));
   // the fee gets its own action so a no-show can offer both "Undo no-show" and "Waive fee"
   let feeAction: (() => void) | null = null;
   let feeActionLabel = "";
@@ -271,10 +263,7 @@ export const getPastSheetView = (studio: StudioController) => {
   const extra =
     Math.max(
       0,
-      roundMoney(
-        feeNumber -
-          (row.price * (parseFloat(String(policy.deposit)) || 20)) / 100,
-      ),
+      roundToPence(feeNumber - (row.price * (policy.deposit || 20)) / 100),
     ) || feeNumber;
 
   const settle = (value: Partial<PastRecord>, message: string) => {
@@ -298,7 +287,7 @@ export const getPastSheetView = (studio: StudioController) => {
     const first = firstName("your client");
     const isAwaiting = checkout.done.method === "link";
     const refunded = row.refunded || 0;
-    const left = roundMoney(checkout.cap - refunded);
+    const left = roundToPence(checkout.cap - refunded);
 
     return {
       hasAwait: isAwaiting,
@@ -558,7 +547,7 @@ export const getPastCheckoutView = (studio: StudioController) => {
       actions.patchPast(
         row.pastId,
         (current) => ({
-          refunded: roundMoney((current.refunded || 0) + amount),
+          refunded: roundToPence((current.refunded || 0) + amount),
           refundReason: reason,
         }),
         seedPast,

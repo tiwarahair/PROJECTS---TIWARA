@@ -8,7 +8,7 @@ import { SEARCH_ICONS } from "./search-icons";
 import type { Place, StyleSelection } from "./search-logic";
 import type { SearchState, WhatChip } from "./search-state";
 
-export type RowKind =
+type RowKind =
   "all" | "group" | "type" | "stylist" | "all-results" | "current" | "location";
 
 export interface SuggestionRow {
@@ -36,7 +36,7 @@ export interface RowView {
 }
 
 /** Splits the label around the typed text so the match can be bolded. */
-export const getRowView = (
+const getRowView = (
   row: SuggestionRow,
   index: number,
   activeIndex: number,

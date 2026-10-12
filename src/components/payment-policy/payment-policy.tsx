@@ -1,7 +1,7 @@
 import { useEffect, useId, useRef, useState } from "react";
 import { stylists } from "../../data";
 import { joinClassNames } from "../../utils/class-names";
-import { money, policyLines } from "../../utils/pricing";
+import { policyLines } from "../../utils/pricing";
 import {
   EXTRAS_LIMIT,
   PREVIEW_PRICE,
@@ -33,6 +33,7 @@ import {
   getTileClass,
 } from "./payment-policy-sections";
 import styles from "../../styles/components/payment-policy/payment-policy.module.css";
+import { formatMoney } from "../../utils/money";
 
 const FLASH_MS = 1800;
 
@@ -581,7 +582,7 @@ export const PaymentPolicy = ({
                 <div className={styles.dueRow}>
                   <span className={styles.dueLabel}>Due today</span>
                   <span className={styles.dueAmount}>
-                    {money(preview.dueToday)}
+                    {formatMoney(preview.dueToday)}
                   </span>
                 </div>
                 <div className={styles.dividerTop}></div>

@@ -11,7 +11,7 @@ export interface FeeState {
   percent: string;
 }
 
-export interface ExtraState {
+interface ExtraState {
   id: number;
   type: ExtraType;
   text: string;
@@ -152,7 +152,7 @@ export const getInitialPolicyState = (
   };
 };
 
-export const getPercent = ({ percent }: FeeState): number => {
+const getPercent = ({ percent }: FeeState): number => {
   const value = parseInt(percent, 10);
 
   return isNaN(value) ? 0 : value;

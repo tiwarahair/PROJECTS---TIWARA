@@ -32,7 +32,7 @@ const CONTACT_ICONS = {
 };
 
 /** A client's bookings, past visits and money. */
-export const getClientStats = (
+const getClientStats = (
   state: StudioState,
   id: string | null,
   isNew: boolean,

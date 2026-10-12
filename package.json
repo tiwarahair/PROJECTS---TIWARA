@@ -21,13 +21,11 @@
   "dependencies": {
     "@hookform/resolvers": "^5.7.1",
     "@reduxjs/toolkit": "^2.12.0",
-    "@types/lodash": "^4.17.25",
     "@zxcvbn-ts/core": "3.0.4",
     "@zxcvbn-ts/language-common": "3.0.4",
     "@zxcvbn-ts/language-en": "3.0.2",
     "gsap": "3.12.5",
     "leaflet": "1.9.4",
-    "lodash": "^4.18.1",
     "react": "^19.2.8",
     "react-dom": "^19.2.8",
     "react-hook-form": "^7.84.0",

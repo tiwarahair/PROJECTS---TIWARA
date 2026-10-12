@@ -1,6 +1,7 @@
 // Step 3 (Pick a time): month grid, slots and date labels.
 import type { Stylist } from "../../types/stylist";
 import { slotsFor } from "../../utils/availability";
+import { formatWeekdayDate, LONG_WEEKDAYS } from "../../utils/dates";
 
 export interface CalendarDay {
   key: string;
@@ -60,16 +61,6 @@ export const getSlots = (
 
 const WEEKDAY_KEYS = ["sun", "mon", "tue", "wed", "thu", "fri", "sat"] as const;
 
-const WEEKDAY_PLURALS = [
-  "Sundays",
-  "Mondays",
-  "Tuesdays",
-  "Wednesdays",
-  "Thursdays",
-  "Fridays",
-  "Saturdays",
-];
-
 /** " Closed Mondays and Sundays." for weekdays with no availability, Monday first. */
 export const getClosedLine = ({ availability }: Stylist): string => {
   const closed = [1, 2, 3, 4, 5, 6, 0]
@@ -78,7 +69,7 @@ export const getClosedLine = ({ availability }: Stylist): string => {
 
       return !(key && (availability ?? {})[key]?.length);
     })
-    .map((index) => WEEKDAY_PLURALS[index] ?? "");
+    .map((index) => `${LONG_WEEKDAYS[index] ?? ""}s`);
 
   if (!closed.length) return "";
 
@@ -95,12 +86,7 @@ export const formatShortDate = (
   year: number,
   month: number,
   day: number,
-): string =>
-  new Date(year, month, day).toLocaleDateString("en-GB", {
-    weekday: "short",
-    day: "numeric",
-    month: "short",
-  });
+): string => formatWeekdayDate(new Date(year, month, day));
 
 /** "Wed 14 Oct · 10:30", or "Not chosen yet". */
 export const getWhenLine = (
@@ -131,5 +117,3 @@ export const formatMonthTitle = (year: number, month: number): string =>
     month: "long",
     year: "numeric",
   });
-
-export const WEEKDAY_LABELS = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];

@@ -5,17 +5,15 @@ import type { AddressValue, DemoAddress } from "../types/address";
 
 const MAX_RESULTS = 5;
 
-const normalise = (value: unknown): string =>
-  String(value || "")
+const normalise = (value: string): string =>
+  value
     .toLowerCase()
     .replace(/[^a-z0-9 ]/g, " ")
     .replace(/\s+/g, " ")
     .trim();
 
-const compact = (value: unknown): string =>
-  String(value || "")
-    .toUpperCase()
-    .replace(/[^A-Z0-9]/g, "");
+const compact = (value = ""): string =>
+  value.toUpperCase().replace(/[^A-Z0-9]/g, "");
 
 /** Levenshtein distance, capped: anything more than one length apart counts as 2. */
 const getEditDistance = (left: string, right: string): number => {
@@ -59,22 +57,22 @@ const isNearPrefix = (
     word.slice(0, Math.max(minPrefix, token.length - 1)),
   ) <= 1;
 
-export const formatPostcode = (value: unknown): string => {
+export const formatPostcode = (value?: string): string => {
   const code = compact(value);
 
   return code.length > 3 ? `${code.slice(0, -3)} ${code.slice(-3)}` : code;
 };
 
-export const isPostcodeValid = (value: unknown): boolean =>
+export const isPostcodeValid = (value?: string): boolean =>
   /^[A-Z]{1,2}\d[A-Z\d]?\d[A-Z]{2}$/.test(compact(value));
 
-export const getDistrict = (value: unknown): string => {
+export const getDistrict = (value: string): string => {
   const code = compact(value);
 
   return isPostcodeValid(code) ? code.slice(0, -3) : "";
 };
 
-export interface HighlightSegment {
+interface HighlightSegment {
   key: string;
   text: string;
   highlighted: boolean;
@@ -283,13 +281,13 @@ export const isAddressValid = (
     isPostcodeValid(address.postcode)
   );
 
-export interface PostcodeGeo {
+interface PostcodeGeo {
   district: string;
   lat: number | null;
   lng: number | null;
 }
 
-export const getPostcodeGeo = (postcode: unknown): PostcodeGeo => {
+export const getPostcodeGeo = (postcode: string): PostcodeGeo => {
   const district = getDistrict(postcode);
   const known = district ? postcodes[district] : undefined;
 

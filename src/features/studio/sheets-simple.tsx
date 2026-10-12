@@ -1,6 +1,6 @@
 import type { CSSProperties } from "react";
 import { joinClassNames } from "../../utils/class-names";
-import { MONTHS, MONTHS_LONG, NOTIFS } from "./studio-data";
+import { NOTIFS } from "./studio-data";
 import {
   dayInfo,
   durationToMinutes,
@@ -17,8 +17,11 @@ import type { StudioState } from "./studio-types";
 import type { StudioController } from "./use-studio";
 import overlay from "../../styles/features/studio/studio-overlay.module.css";
 import styles from "../../styles/features/studio/sheets-simple.module.css";
-
-const CALENDAR_WEEKDAYS = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
+import {
+  MONDAY_FIRST_WEEKDAYS,
+  LONG_MONTHS,
+  SHORT_MONTHS,
+} from "../../utils/dates";
 
 type MonthKey =
   | "blockCalendarMonth"
@@ -88,7 +91,7 @@ export const getMonthNav = (
   return {
     month,
     year,
-    title: `${MONTHS_LONG[month]} ${year}`,
+    title: `${LONG_MONTHS[month]} ${year}`,
     isPrevOff,
     prev: () => {
       if (isPrevOff) return;
@@ -150,7 +153,7 @@ export const MonthCalendar = ({
       </button>
     </div>
     <div className={joinClassNames(styles.dows, isLoose && styles.dowsLoose)}>
-      {CALENDAR_WEEKDAYS.map((weekday) => (
+      {MONDAY_FIRST_WEEKDAYS.map((weekday) => (
         <div key={weekday} className={styles.dow}>
           {weekday}
         </div>
@@ -788,7 +791,7 @@ export const ClosedSheet = ({ studio }: { studio: StudioController }) => {
     const format = (value: string) => {
       const date = new Date(`${value}T12:00:00`);
 
-      return `${date.getDate()} ${MONTHS[date.getMonth()]}`;
+      return `${date.getDate()} ${SHORT_MONTHS[date.getMonth()]}`;
     };
 
     const item = {

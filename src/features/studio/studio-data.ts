@@ -15,49 +15,6 @@ import type {
   Taxonomy,
 } from "./studio-types";
 
-export const MONTHS = [
-  "Jan",
-  "Feb",
-  "Mar",
-  "Apr",
-  "May",
-  "Jun",
-  "Jul",
-  "Aug",
-  "Sep",
-  "Oct",
-  "Nov",
-  "Dec",
-];
-export const MONTHS_LONG = [
-  "January",
-  "February",
-  "March",
-  "April",
-  "May",
-  "June",
-  "July",
-  "August",
-  "September",
-  "October",
-  "November",
-  "December",
-];
-export const SHORT_MONTH_NAMES = [
-  "Jan",
-  "Feb",
-  "Mar",
-  "Apr",
-  "May",
-  "Jun",
-  "Jul",
-  "Aug",
-  "Sept",
-  "Oct",
-  "Nov",
-  "Dec",
-];
-export const WEEKDAYS = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
 export const TIMES = [
   "08:00",
   "09:00",
@@ -186,7 +143,7 @@ export const CLIENTS: StudioClient[] = [
   },
 ];
 
-export interface BlockColour {
+interface BlockColour {
   id: string;
   label: string;
   hex: string;
@@ -313,7 +270,7 @@ export const PAST_MONTHS: Record<string, string> = {
   Jul: "July",
 };
 
-export interface PastTone {
+interface PastTone {
   background: string;
   color: string;
   icon: string;
@@ -380,7 +337,7 @@ export const NOTIFS = [
   },
 ];
 
-export interface RangeData {
+interface RangeData {
   caption: string;
   stats: Record<
     "bookings" | "revenue" | "occupancy" | "clients",

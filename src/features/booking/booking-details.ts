@@ -6,15 +6,9 @@ import { isAddressValid } from "../../utils/address";
 import { miles } from "../../utils/availability";
 import type { BookingAddress, Details, FieldKey } from "./booking-state";
 
-export const FIELD_KEYS: FieldKey[] = [
-  "address",
-  "first",
-  "last",
-  "email",
-  "phone",
-];
+const FIELD_KEYS: FieldKey[] = ["address", "first", "last", "email", "phone"];
 
-export interface AddressCheck {
+interface AddressCheck {
   postcodeLabel: string;
   isValid: boolean;
   inArea: boolean;
@@ -66,7 +60,7 @@ export const getAddressCheck = (
   };
 };
 
-export type FieldErrors = Partial<Record<FieldKey, string>>;
+type FieldErrors = Partial<Record<FieldKey, string>>;
 
 export const getFieldErrors = (
   details: Details,

@@ -2,7 +2,7 @@
 // AI preview photo pool.
 import type { PolicyMode } from "../../types/policy";
 
-export interface LegalDocumentSection {
+interface LegalDocumentSection {
   title: string;
   body: string;
 }
@@ -55,7 +55,7 @@ export const TERMS_SECTIONS: LegalDocumentSection[] = [
   },
 ];
 
-export interface SizeGuideEntry {
+interface SizeGuideEntry {
   name: string;
   description: string;
   /** Braid width in px; the diagram repeats it max(2, round(190 / (w + 8))) times. */
