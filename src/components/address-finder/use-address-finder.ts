@@ -1,14 +1,17 @@
 // State and behaviour of the one address field.
+import { useMapsLibrary } from "@vis.gl/react-google-maps";
 import { useCallback, useEffect, useRef, useState } from "react";
 import type { ChangeEvent, KeyboardEvent, RefObject } from "react";
+import { ADDRESS_TYPES, toPlaceAddress } from "../../lib/google-maps";
+import type { PlaceAddress } from "../../lib/google-maps";
 import {
   formatPostcode,
   getAddressLines,
-  getPostcodeGeo,
+  getDistrict,
   isPostcodeValid,
-  searchAddresses,
+  toSegments,
 } from "../../utils/address";
-import type { AddressSuggestion } from "../../utils/address";
+import type { HighlightSegment } from "../../utils/address";
 
 type AddressSource = "pick" | "manual";
 type FieldKey = "line1" | "line2" | "town" | "postcode";
@@ -26,13 +29,46 @@ export interface AddressFinderValue extends Partial<AddressDraft> {
   source?: string;
 }
 
-/** What onChange receives: the trimmed address plus district / lat / lng from the demo postcodes. */
+/** What onChange receives: the trimmed address, its district, and (when picked from Google) its location and area. */
 export interface EmittedAddress extends AddressDraft {
   source: AddressSource;
   district: string;
   lat: number | null;
   lng: number | null;
+  area: string | null;
 }
+
+/** One Google Places suggestion, with the matched text highlighted. */
+export interface AddressSuggestion {
+  id: string;
+  prediction: google.maps.places.PlacePrediction;
+  line: HighlightSegment[];
+  secondaryLine: HighlightSegment[];
+}
+
+const MAX_RESULTS = 5;
+const SEARCH_DELAY_MS = 200;
+
+const getRanges = (text?: google.maps.places.FormattableText | null) =>
+  (text?.matches ?? []).map(({ startOffset, endOffset }): [number, number] => [
+    startOffset,
+    endOffset,
+  ]);
+
+const toSuggestion = (
+  prediction: google.maps.places.PlacePrediction,
+): AddressSuggestion => ({
+  id: prediction.placeId,
+  prediction,
+  line: toSegments(
+    prediction.mainText?.text ?? prediction.text.text,
+    getRanges(prediction.mainText ?? prediction.text),
+  ),
+  secondaryLine: toSegments(
+    prediction.secondaryText?.text ?? "",
+    getRanges(prediction.secondaryText),
+  ),
+});
 
 export type AddressFixture =
   | ""
@@ -54,6 +90,9 @@ interface FinderState {
   touched: Partial<Record<FieldKey | "query", 1>>;
   draft: AddressDraft;
   sum: AddressDraft | null;
+  hits: AddressSuggestion[];
+  /** The query the hits belong to; the list opens once they arrive. */
+  searchedQuery: string;
 }
 
 interface UseAddressFinderOptions {
@@ -91,6 +130,8 @@ const getInitialState = (
     touched: {},
     draft: getBlank(),
     sum: null,
+    hits: [],
+    searchedQuery: "",
   };
 
   if (value && (value.line1 || value.postcode)) {
@@ -181,7 +222,17 @@ export const useAddressFinder = ({
 
   onChangeRef.current = onChange;
 
-  const emit = (address: AddressDraft | null, source?: AddressSource) => {
+  const places = useMapsLibrary("places");
+
+  const sessionRef = useRef<google.maps.places.AutocompleteSessionToken | null>(
+    null,
+  );
+
+  const emit = (
+    address: AddressDraft | null,
+    source?: AddressSource,
+    place?: PlaceAddress,
+  ) => {
     const callback = onChangeRef.current;
 
     if (!callback) return;
@@ -198,8 +249,6 @@ export const useAddressFinder = ({
       return;
     }
 
-    const { district, lat, lng } = getPostcodeGeo(address.postcode);
-
     callback({
       line1: address.line1.trim(),
       line2: (address.line2 || "").trim(),
@@ -208,9 +257,10 @@ export const useAddressFinder = ({
         ? formatPostcode(address.postcode)
         : address.postcode.trim().toUpperCase(),
       source: source ?? "manual",
-      district: district || "",
-      lat,
-      lng,
+      district: getDistrict(address.postcode),
+      lat: place?.location?.lat ?? null,
+      lng: place?.location?.lng ?? null,
+      area: place?.area ?? null,
     });
   };
 
@@ -272,9 +322,60 @@ export const useAddressFinder = ({
       update({ mode: "find", sum: null, draft: getBlank(), query: "" });
   }, [value, state.mode, update]);
 
-  const pick = (hit: AddressSuggestion) => {
-    const { line1, line2, town, postcode } = hit.address;
-    const draft = { line1, line2: line2 || "", town, postcode };
+  // Google suggestions for the query, a moment after typing stops
+  useEffect(() => {
+    const input = state.query.trim();
+
+    if (!places || state.mode !== "find" || input.length < 3) return;
+
+    let cancelled = false;
+
+    const timer = window.setTimeout(async () => {
+      sessionRef.current ??= new places.AutocompleteSessionToken();
+
+      const { suggestions } =
+        await places.AutocompleteSuggestion.fetchAutocompleteSuggestions({
+          input,
+          sessionToken: sessionRef.current,
+          includedRegionCodes: ["gb"],
+          includedPrimaryTypes: ADDRESS_TYPES,
+        });
+
+      if (cancelled) return;
+
+      update({
+        searchedQuery: input,
+        hits: suggestions
+          .flatMap(({ placePrediction }) =>
+            placePrediction ? [toSuggestion(placePrediction)] : [],
+          )
+          .slice(0, MAX_RESULTS),
+      });
+    }, SEARCH_DELAY_MS);
+
+    return () => {
+      cancelled = true;
+      window.clearTimeout(timer);
+    };
+  }, [places, state.query, state.mode, update]);
+
+  /** Fetches the picked place's address parts and location (this ends the billing session). */
+  const pick = async (hit: AddressSuggestion) => {
+    const place = hit.prediction.toPlace();
+
+    await place.fetchFields({ fields: ["addressComponents", "location"] });
+    sessionRef.current = null;
+
+    const found = toPlaceAddress(
+      (place.addressComponents ?? []).map(({ longText, types }) => ({
+        text: longText ?? "",
+        types,
+      })),
+      place.location?.toJSON() ?? null,
+    );
+
+    const { line1, line2, town, postcode } = found;
+    const draft = { line1, line2, town, postcode };
 
     update({
       mode: "summary",
@@ -286,7 +387,7 @@ export const useAddressFinder = ({
       touched: {},
     });
 
-    emit(draft, "pick");
+    emit(draft, "pick", found);
     focusLater("edit");
   };
 
@@ -329,8 +430,12 @@ export const useAddressFinder = ({
     focusLater("query");
   };
 
-  const hits = state.mode === "find" ? searchAddresses(state.query) : [];
-  const isOpen = state.open && state.query.trim().length >= 3;
+  const hits = state.mode === "find" ? state.hits : [];
+
+  const isOpen =
+    state.open &&
+    state.query.trim().length >= 3 &&
+    state.searchedQuery === state.query.trim();
 
   const isErrorShown = (key: FieldKey | "query") =>
     !!(showErrors || state.touched[key]);
@@ -405,8 +510,8 @@ export const useAddressFinder = ({
       event.preventDefault();
       const chosen = hits[state.highlightedIndex];
 
-      if (isOpen && state.highlightedIndex >= 0 && chosen) pick(chosen);
-      else if (isOpen && count === 1 && hits[0]) pick(hits[0]);
+      if (isOpen && state.highlightedIndex >= 0 && chosen) void pick(chosen);
+      else if (isOpen && count === 1 && hits[0]) void pick(hits[0]);
     } else if (event.key === "Escape" && isOpen) {
       event.preventDefault();
       event.stopPropagation();

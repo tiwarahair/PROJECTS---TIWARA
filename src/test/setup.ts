@@ -30,3 +30,13 @@ vi.mock("@marsidev/react-turnstile", async () => {
     },
   };
 });
+
+// No Google Maps in jsdom: providers render their children, maps render nothing, no libraries load
+vi.mock("@vis.gl/react-google-maps", () => ({
+  APIProvider: ({ children }: { children: React.ReactNode }) => children,
+  Map: () => null,
+  AdvancedMarker: () => null,
+  ColorScheme: { DARK: "DARK", LIGHT: "LIGHT" },
+  useMap: () => null,
+  useMapsLibrary: vi.fn(() => null),
+}));

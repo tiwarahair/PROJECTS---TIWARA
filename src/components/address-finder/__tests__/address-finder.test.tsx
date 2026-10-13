@@ -1,4 +1,5 @@
 import { act, render, screen } from "@testing-library/react";
+import { useMapsLibrary } from "@vis.gl/react-google-maps";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { AddressFinder } from "../address-finder";
 import type { AddressFixture } from "../use-address-finder";
@@ -7,9 +8,38 @@ import { setupUser } from "../../../test/setup-user";
 
 let user: UserEvent;
 
-beforeEach(() => {
-  user = setupUser();
+const buildPrediction = (
+  line1: string,
+  secondary: string,
+  postcode: string,
+) => ({
+  placeId: `place-${line1}`,
+  text: { text: `${line1}, ${secondary}`, matches: [] },
+  mainText: { text: line1, matches: [{ startOffset: 0, endOffset: 5 }] },
+  secondaryText: { text: secondary, matches: [] },
+  toPlace: () => ({
+    fetchFields: vi.fn().mockResolvedValue(undefined),
+    addressComponents: [
+      { longText: line1.split(" ")[0], types: ["street_number"] },
+      { longText: line1.split(" ").slice(1).join(" "), types: ["route"] },
+      { longText: "Manchester", types: ["postal_town"] },
+      { longText: postcode, types: ["postal_code"] },
+      { longText: "Rusholme", types: ["sublocality_level_1"] },
+    ],
+    location: { toJSON: () => ({ lat: 53.45, lng: -2.22 }) },
+  }),
 });
+
+let predictions: ReturnType<typeof buildPrediction>[] = [];
+
+const fakePlaces = {
+  AutocompleteSessionToken: class {},
+  AutocompleteSuggestion: {
+    fetchAutocompleteSuggestions: vi.fn(async () => ({
+      suggestions: predictions.map((placePrediction) => ({ placePrediction })),
+    })),
+  },
+};
 
 const renderFinder = (fixture: AddressFixture = "", onChange = vi.fn()) => {
   render(<AddressFinder fixture={fixture} idPrefix="t" onChange={onChange} />);
@@ -17,8 +47,24 @@ const renderFinder = (fixture: AddressFixture = "", onChange = vi.fn()) => {
   return onChange;
 };
 
+/** Lets the 200ms search delay pass and Google's (fake) reply arrive. */
+const waitForSearch = () => act(() => vi.advanceTimersByTimeAsync(250));
+
 describe("AddressFinder", () => {
-  beforeEach(() => vi.useFakeTimers());
+  beforeEach(() => {
+    user = setupUser();
+    vi.useFakeTimers();
+
+    vi.mocked(useMapsLibrary).mockReturnValue(
+      fakePlaces as unknown as ReturnType<typeof useMapsLibrary>,
+    );
+
+    predictions = [
+      buildPrediction("12 Dickenson Road", "Manchester M14 5TQ, UK", "M14 5TQ"),
+      buildPrediction("14 Dickenson Road", "Manchester M14 5TQ, UK", "M14 5TQ"),
+    ];
+  });
+
   afterEach(() => vi.useRealTimers());
 
   it("default: empty finder with label, placeholder and manual link", () => {
@@ -35,41 +81,33 @@ describe("AddressFinder", () => {
     expect(screen.queryByRole("listbox")).not.toBeInTheDocument();
   });
 
-  it("typing: highlights matches for the query", () => {
-    renderFinder("typing");
-    const options = screen.getAllByRole("option");
-
-    expect(options[0]).toHaveTextContent("14 Blossom Street");
-
-    expect(screen.getByRole("combobox")).toHaveAttribute(
-      "aria-expanded",
-      "true",
-    );
-  });
-
-  it("postcode: lists addresses in the postcode district", () => {
-    renderFinder("postcode");
+  it("lists Google's UK address suggestions for the query", async () => {
+    renderFinder();
+    await user.type(screen.getByRole("combobox"), "dickenson");
+    await waitForSearch();
 
     expect(
       screen.getAllByRole("option").map((option) => option.textContent),
     ).toEqual([
-      "12 Dickenson RoadManchester, M14 5TQ",
-      "14 Dickenson Road, Flat 2Manchester, M14 5TQ",
-      "27 Heald PlaceManchester, M14 5TL",
-      "118 Wilmslow Road, Unit 4Manchester, M14 5AJ",
+      "12 Dickenson RoadManchester M14 5TQ, UK",
+      "14 Dickenson RoadManchester M14 5TQ, UK",
     ]);
-  });
 
-  it("typo: still finds Blossom Street", () => {
-    renderFinder("typo");
-
-    expect(screen.getAllByRole("option")[0]).toHaveTextContent(
-      "14 Blossom Street",
+    expect(
+      fakePlaces.AutocompleteSuggestion.fetchAutocompleteSuggestions,
+    ).toHaveBeenLastCalledWith(
+      expect.objectContaining({
+        input: "dickenson",
+        includedRegionCodes: ["gb"],
+      }),
     );
   });
 
-  it("nomatch: offers manual entry", async () => {
-    renderFinder("nomatch");
+  it("no match: offers manual entry", async () => {
+    predictions = [];
+    renderFinder();
+    await user.type(screen.getByRole("combobox"), "99 Nowhere Lane");
+    await waitForSearch();
 
     expect(screen.getByRole("status")).toHaveTextContent(
       "We can’t find that address",
@@ -99,8 +137,9 @@ describe("AddressFinder", () => {
       postcode: "M4 6AJ",
       source: "pick",
       district: "M4",
-      lat: 53.484,
-      lng: -2.227,
+      lat: null,
+      lng: null,
+      area: null,
     });
   });
 
@@ -135,27 +174,38 @@ describe("AddressFinder", () => {
     ]);
   });
 
-  it("keyboard: arrow down then Enter picks a suggestion and moves focus to Edit", async () => {
+  it("keyboard: arrow down then Enter picks a suggestion with its location and moves focus to Edit", async () => {
     const onChange = renderFinder();
     const input = screen.getByRole("combobox");
 
     await user.type(input, "dickenson");
+    await waitForSearch();
     await user.keyboard("{ArrowDown}");
     expect(input).toHaveAttribute("aria-activedescendant", "t-opt-0");
     await user.keyboard("{Enter}");
+    await act(() => vi.advanceTimersByTimeAsync(30));
 
-    expect(onChange).toHaveBeenLastCalledWith(
-      expect.objectContaining({ line1: "12 Dickenson Road", source: "pick" }),
-    );
+    expect(onChange).toHaveBeenLastCalledWith({
+      line1: "12 Dickenson Road",
+      line2: "",
+      town: "Manchester",
+      postcode: "M14 5TQ",
+      source: "pick",
+      district: "M14",
+      lat: 53.45,
+      lng: -2.22,
+      area: "Rusholme, M14",
+    });
 
-    act(() => vi.advanceTimersByTime(30));
     expect(screen.getByRole("button", { name: "Edit address" })).toHaveFocus();
   });
 
   it("Escape closes the suggestions and the clear button empties the query", async () => {
-    renderFinder("typing");
+    renderFinder();
     const input = screen.getByRole("combobox");
 
+    await user.type(input, "dickenson");
+    await waitForSearch();
     await user.type(input, "{Escape}");
     expect(screen.queryByRole("listbox")).not.toBeInTheDocument();
 

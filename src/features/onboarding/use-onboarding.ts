@@ -29,6 +29,7 @@ import {
   verifySecondFactor,
 } from "../../lib/auth";
 import type { StylistDetails } from "../../lib/auth";
+import { geocodeAddress } from "../../lib/google-maps";
 import { rememberDevice } from "../../lib/supabase";
 import type { Location } from "react-router";
 import type { EmittedAddress } from "../../components/address-finder/use-address-finder";
@@ -39,7 +40,7 @@ import { MODE_KEY, PHOTOS, STORAGE_KEY } from "./onboarding-data";
 import { getFixturePatch } from "./onboarding-fixtures";
 import { getRouteForPath, ROUTE_START } from "./onboarding-routes";
 import type { OnboardingRoute } from "./onboarding-routes";
-import { getScreenSchema, isValidPostcode } from "./onboarding-schemas";
+import { getScreenSchema } from "./onboarding-schemas";
 import {
   EMPTY_CODE,
   getBackScreen,
@@ -63,7 +64,7 @@ type StatePatch =
 const LOCK_MS = 9e5;
 const MAX_ATTEMPTS = 5;
 const DEFAULT_LAT_LNG: [number, number] = [53.4486, -2.2237];
-const NEXT_WIZARD_SCREEN = { w1: "w2", w2: "w3", w3: "w4" };
+const NEXT_WIZARD_SCREEN = { w1: "w2", w2: "w3" };
 
 const BUSINESS_TYPES: Record<string, StylistDetails["businessType"]> = {
   shop: "shop",
@@ -614,7 +615,12 @@ export const useOnboarding = (props: OnboardingProps) => {
 
   const getStylistDetails = (form: OnboardingForm): StylistDetails => {
     const { pinLatLng, geocodedLatLng, area } = stateRef.current;
-    const [lat, lng] = pinLatLng ?? geocodedLatLng ?? DEFAULT_LAT_LNG;
+    const location = pinLatLng ?? geocodedLatLng;
+
+    // w3 can't be passed without a location; saved progress always carries it
+    if (!location) throw new Error("The business location is missing");
+
+    const [lat, lng] = location;
     const isMobile = form.type === "mobile";
 
     return {
@@ -678,7 +684,27 @@ export const useOnboarding = (props: OnboardingProps) => {
     const form = getValues();
     const email = form.email.trim().toLowerCase();
 
-    if (screen === "w1" || screen === "w2" || screen === "w3") {
+    if (screen === "w3")
+      return run(async () => {
+        const { geocodedLatLng, pinLatLng } = stateRef.current;
+
+        if (
+          (form.type === "mobile" || !(pinLatLng ?? geocodedLatLng)) &&
+          !(await geocode())
+        )
+          return setState({
+            busy: false,
+            serverErrors: {
+              [form.type === "mobile" ? "postcode" : "address"]:
+                "We can’t find that. Check it and try again.",
+            },
+          });
+
+        save();
+        goTo("w4");
+      });
+
+    if (screen === "w1" || screen === "w2") {
       save();
       goTo(NEXT_WIZARD_SCREEN[screen]);
 
@@ -907,39 +933,24 @@ export const useOnboarding = (props: OnboardingProps) => {
     });
   };
 
-  /** Re-centres the pin on the postcode via postcodes.io (live). */
-  const geocodeOnly = async () => {
-    const postcode = getValues("postcode").trim().toUpperCase();
+  /** Geocodes the address (or a mobile stylist's postcode) once; false when Google can't place it. */
+  const geocode = async () => {
+    const { type, line1, city, postcode } = getValues();
 
-    if (!isValidPostcode(postcode)) return;
+    const place = await geocodeAddress(
+      type === "mobile" ? postcode : [line1, city, postcode].join(", "),
+    );
 
-    try {
-      const response = await fetch(
-        `https://api.postcodes.io/postcodes/${encodeURIComponent(postcode)}`,
-      );
+    if (!place?.location) return false;
 
-      if (!response.ok) return;
+    const { lat, lng } = place.location;
 
-      const { result } = (await response.json()) as {
-        result: {
-          latitude: number;
-          longitude: number;
-          admin_ward?: string;
-          outcode: string;
-        };
-      };
+    setState(
+      { geocodedLatLng: [lat, lng], pinLatLng: null, area: place.area },
+      save,
+    );
 
-      setState(
-        {
-          geocodedLatLng: [result.latitude, result.longitude],
-          pinLatLng: null,
-          area: `${result.admin_ward || "Manchester"}, ${result.outcode}`,
-        },
-        save,
-      );
-    } catch {
-      // offline: keep the current pin
-    }
+    return true;
   };
 
   const setAddress = (address: EmittedAddress | null) => {
@@ -961,6 +972,8 @@ export const useOnboarding = (props: OnboardingProps) => {
         ? [address.lat, address.lng]
         : null;
 
+    const isNewPlace = fields.postcode !== previousPostcode;
+
     for (const [key, value] of Object.entries(fields))
       setValue(key as FieldPath<OnboardingForm>, value);
 
@@ -971,14 +984,19 @@ export const useOnboarding = (props: OnboardingProps) => {
         addressOpen: isOk,
         addressSource: address ? address.source : "",
         addressFinderFixture: "",
-        ...(addressLatLng && fields.postcode !== previousPostcode
-          ? { geocodedLatLng: addressLatLng, pinLatLng: null, area: null }
+        ...(addressLatLng && isNewPlace
+          ? {
+              geocodedLatLng: addressLatLng,
+              pinLatLng: null,
+              area: address?.area ?? null,
+            }
           : {}),
       }),
       () => {
         save();
 
-        if (isOk && fields.postcode !== previousPostcode) void geocodeOnly();
+        // a typed address has no location yet: place it so the pin starts there
+        if (isOk && isNewPlace && !addressLatLng) void geocode();
       },
     );
   };
@@ -1014,7 +1032,7 @@ export const useOnboarding = (props: OnboardingProps) => {
       handleCodeKey,
       pasteCode,
       setAddress,
-      geocodeOnly,
+
       save,
       toStudio,
       setMode,

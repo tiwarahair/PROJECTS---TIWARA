@@ -3,6 +3,7 @@ import { joinClassNames } from "../../utils/class-names";
 import { WIZARD_TITLES } from "./onboarding-data";
 import { BackIcon, ModeIcon } from "./onboarding-fields";
 import type { ScreenProps } from "./screen-props";
+import { MapsProvider } from "../../lib/google-maps";
 import {
   StepAccount,
   StepDetails,
@@ -15,7 +16,11 @@ import styles from "../../styles/features/onboarding/wizard.module.css";
 const STEPS = {
   w1: StepType,
   w2: StepServices,
-  w3: StepDetails,
+  w3: (props: ScreenProps) => (
+    <MapsProvider>
+      <StepDetails {...props} />
+    </MapsProvider>
+  ),
   w4: StepAccount,
   w5: StepSource,
 } as const;

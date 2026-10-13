@@ -26,10 +26,8 @@ import {
   getAddressLines,
   getAddressOneLine,
   getDistrict,
-  getPostcodeGeo,
   isAddressValid,
   isPostcodeValid,
-  searchAddresses,
 } from "../../utils/address";
 import { checkPassword, getPasswordView } from "../../utils/password";
 import type { Policy } from "../../types/policy";
@@ -111,7 +109,6 @@ describe.skipIf(!hasPrototype)(
 
       expect(data.searchLocations).toEqual(toPlain(prototypeData.locations));
       expect(data.postcodes).toEqual(toPlain(prototypeData.postcodes));
-      expect(data.demoAddresses).toEqual(toPlain(prototypeData.addresses));
 
       expect(data.policyIcons).toEqual(
         renameKeys(toPlain(prototypeData.policyIcons), [
@@ -324,43 +321,7 @@ describe.skipIf(!hasPrototype)(
       );
     });
 
-    it("address finder and postcode helpers match", () => {
-      const queries = [
-        "",
-        "ab",
-        "14 b",
-        "blossom",
-        "blosom",
-        "blossom st",
-        "dickenson",
-        "dikenson",
-        "flat 2",
-        "M14",
-        "M14 5",
-        "m4 6aj",
-        "WA14",
-        "BL1 4QR",
-        "M1",
-        "wilmslow",
-        "manchester",
-        "salford quays",
-        "apartment",
-        "zzz street",
-        "12",
-        "42 nowhere",
-      ];
-
-      queries.forEach((query) =>
-        expect(toPlain(searchAddresses(query))).toEqual(
-          renameKeys(toPlain(prototypeData.address.search(query)), [
-            ["a", "address"],
-            ["t", "text"],
-            ["hl", "highlighted"],
-            ["sub", "secondaryLine"],
-          ]),
-        ),
-      );
-
+    it("postcode and address helpers match", () => {
       const postcodeInputs = [
         "m14 5tq",
         "M145TQ",
@@ -376,10 +337,6 @@ describe.skipIf(!hasPrototype)(
         expect(formatPostcode(code)).toBe(prototypeData.address.fmtPc(code));
         expect(isPostcodeValid(code)).toBe(prototypeData.address.pcOk(code));
         expect(getDistrict(code)).toBe(prototypeData.address.district(code));
-
-        expect(getPostcodeGeo(code)).toEqual(
-          toPlain(prototypeData.address.geo(code)),
-        );
       });
 
       const addresses = [

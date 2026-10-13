@@ -2,6 +2,7 @@ import { useState } from "react";
 import type { CSSProperties, MouseEvent } from "react";
 import { joinClassNames } from "../../utils/class-names";
 import styles from "../../styles/components/address-finder/address-finder.module.css";
+import { MapsProvider } from "../../lib/google-maps";
 import { useAddressFinder } from "./use-address-finder";
 import type {
   AddressFinderValue,
@@ -119,7 +120,7 @@ const SearchIcon = ({
  * The ONE address field (Booking, Onboarding, BusinessDetails, TaxDetailsForm): finder with suggestions →
  * summary card + Edit → manual fields.
  */
-export const AddressFinder = ({
+const AddressFinderField = ({
   label = "Address or postcode",
   value,
   onChange,
@@ -249,7 +250,7 @@ export const AddressFinder = ({
                   >
                     {hits.map((hit, index) => (
                       <div
-                        key={hit.address.id}
+                        key={hit.id}
                         id={`${prefix}-opt-${index}`}
                         role="option"
                         tabIndex={-1}
@@ -426,3 +427,10 @@ export const AddressFinder = ({
     </div>
   );
 };
+
+/** Loads Google Maps only where an address field is on screen. */
+export const AddressFinder = (props: AddressFinderProps) => (
+  <MapsProvider>
+    <AddressFinderField {...props} />
+  </MapsProvider>
+);

@@ -210,12 +210,3 @@ export const FOOTER_SCREENS = [
   "forgot-reset",
   "forgot-done",
 ];
-
-// area names for the home-based privacy note when the postcode lookup gave none
-export const AREA_NAMES: Record<string, string> = {
-  M14: "Rusholme",
-  M21: "Chorlton",
-  M20: "Didsbury",
-  M16: "Whalley Range",
-  M15: "Hulme",
-};

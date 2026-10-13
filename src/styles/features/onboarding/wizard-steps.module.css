@@ -238,6 +238,12 @@
   margin-bottom: 12px;
 }
 
+/* the crimson pin on the Google map */
+.mapPin {
+  display: block;
+  filter: drop-shadow(0 6px 8px rgba(26, 23, 20, 0.35));
+}
+
 .map {
   height: 240px;
   border-radius: var(--radius-md);

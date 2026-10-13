@@ -4,13 +4,7 @@ import type { AddressFixture } from "../../components/address-finder/use-address
 import { PasswordMeter } from "../../components/password-meter/password-meter";
 import { joinClassNames } from "../../utils/class-names";
 import { getOnboardingMeter } from "./auth-screens-account";
-import {
-  AREA_NAMES,
-  BUSINESS_TYPES,
-  CATEGORIES,
-  RADII,
-  SOURCES,
-} from "./onboarding-data";
+import { BUSINESS_TYPES, CATEGORIES, RADII, SOURCES } from "./onboarding-data";
 import { OnboardingTurnstile } from "./onboarding-turnstile";
 import { OnboardingMap } from "./onboarding-map";
 import type { ScreenProps } from "./screen-props";
@@ -204,13 +198,7 @@ export const StepDetails = ({ onboarding, layout, view }: ScreenProps) => {
   const radiusBase = form.postcode ? form.postcode.toUpperCase() : "your base";
 
   const areaHint =
-    state.area ||
-    (() => {
-      const district =
-        (form.postcode || "M14").toUpperCase().split(/\s/)[0] ?? "";
-
-      return `${AREA_NAMES[district] || "Rusholme"}, ${district}`;
-    })();
+    state.area || (form.postcode || "").toUpperCase().split(/\s/)[0] || "";
 
   return (
     <>
