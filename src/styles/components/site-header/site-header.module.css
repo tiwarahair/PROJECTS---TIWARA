@@ -111,6 +111,31 @@
   font-size: 13px;
   letter-spacing: 0;
   opacity: 1;
+  overflow: hidden;
+}
+
+.avatarImage {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center 25%;
+  display: block;
+}
+
+/* account menu button: avatar and chevron, opens the account menu */
+.accountButton {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  height: 40px;
+  padding: 0 6px 0 2px;
+  border: none;
+  background: none;
+  color: inherit;
+  font: inherit;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
 }
 
 .mobilePanel {
@@ -130,6 +155,32 @@
   text-decoration: none;
 }
 
+.mobileLinkCurrent {
+  padding: 13px 0;
+  color: inherit;
+  text-decoration: none;
+  font-weight: 600;
+}
+
+.mobileHeading {
+  margin-top: 8px;
+  padding-top: 14px;
+  border-top: 1px solid var(--border-subtle);
+  font-size: 13.5px;
+  color: var(--neutral-600);
+}
+
+.logOut {
+  padding: 13px 0;
+  border: none;
+  background: none;
+  text-align: left;
+  font: inherit;
+  font-size: 17px;
+  color: inherit;
+  cursor: pointer;
+}
+
 /* margin-left is -12px when logged in, else auto */
 .menuButtonLoggedIn {
   margin-left: -12px;
@@ -141,6 +192,22 @@
 
 .mobilePanel {
   animation: drop 200ms var(--e-out) both;
+}
+
+/* the account-page style: tighter mobile menu with no shadow or drop-in, no press scale on the menu button */
+.accountMode .menuButton:active {
+  transform: none;
+}
+
+.accountMode .mobilePanel {
+  gap: 0;
+  padding-top: 4px;
+  box-shadow: none;
+  animation: none;
+}
+
+.accountMode .mobileLink {
+  padding: 13px 0;
 }
 
 @media (max-width: 760px) {

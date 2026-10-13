@@ -42,7 +42,6 @@ export const useStylistProfile = () => {
   const [zoomList, setZoomList] = useState<string[]>([]);
   const [zoomIndex, setZoomIndex] = useState<number | null>(null);
   const [serviceModal, setServiceModal] = useState<ServiceModal | null>(null);
-  const [menuOpen, setMenuOpen] = useState(false);
   const [shareAt, setShareAt] = useState<SharePosition | null>(null);
   const [sticky, setSticky] = useState(initial.sticky);
   const [coverActionsOn, setCoverActionsOn] = useState(false);
@@ -138,8 +137,6 @@ export const useStylistProfile = () => {
     id: initial.id,
     heroRef,
     shareButtonRef,
-    menuOpen,
-    toggleMenu: () => setMenuOpen((open) => !open),
     coverActionsOn: coverActionsOn || !!shareAt,
     toggleCoverActions: () => setCoverActionsOn((on) => !on),
     sticky,

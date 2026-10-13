@@ -1,6 +1,6 @@
 /*
  * Account page-wide rules, in the page layer, scoped to html.account-page (set while mounted). The global reset
- * lines identical to the base layer are omitted. The .ac-mob / .ac-desk / .ac-foot / .ac-ov / .ac-dlg classes are
+ * lines identical to the base layer are omitted. The .ac-foot / .ac-ov / .ac-dlg classes are
  * this module's classes; components
  * add them next to their own. acSheet and acFade live here because the rules below use them; the other keyframes
  * are copied into the modules that use them.
@@ -10,17 +10,7 @@
     font-family: "Hanken Grotesk", sans-serif;
   }
 
-  .acMob {
-    display: none !important;
-  }
-
   @media (max-width: 760px) {
-    .acDesk {
-      display: none !important;
-    }
-    .acMob {
-      display: flex !important;
-    }
     :global(html.account-page) input {
       font-size: 16px !important;
     }

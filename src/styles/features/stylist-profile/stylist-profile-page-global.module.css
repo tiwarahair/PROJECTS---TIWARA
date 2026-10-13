@@ -40,17 +40,6 @@
     }
   }
 
-  @keyframes scpDrop {
-    from {
-      opacity: 0;
-      transform: translateY(-6px);
-    }
-    to {
-      opacity: 1;
-      transform: none;
-    }
-  }
-
   @keyframes scpRise {
     from {
       transform: translateY(100%);
@@ -89,10 +78,6 @@
   .scpPanel {
     animation: scpPanel 240ms var(--e-out) both;
     transform-origin: center;
-  }
-
-  .scpMobPanel {
-    animation: scpDrop 200ms var(--e-out) both;
   }
 
   .bookbar {
@@ -169,8 +154,7 @@
     .scpPanel,
     .scpHero,
     .scpLede > *,
-    .bookbar,
-    .scpMobPanel {
+    .bookbar {
       animation: scpFade 200ms ease both;
     }
     :global(html.profile-page) [data-rv] {
@@ -244,10 +228,6 @@
     }
   }
 
-  .scpMobPanel {
-    display: none !important;
-  }
-
   @media (max-width: 900px) {
     .profbody {
       padding-left: calc(clamp(20px, 5vw, 48px) + 8px) !important;
@@ -263,18 +243,6 @@
       border-top: none !important;
       margin-top: 0 !important;
       padding-top: 0 !important;
-    }
-  }
-
-  @media (max-width: 760px) {
-    .scpDesk {
-      display: none !important;
-    }
-    .scpMob {
-      display: flex !important;
-    }
-    .scpMobPanel {
-      display: flex !important;
     }
   }
 

@@ -2,6 +2,7 @@ import { useLayoutEffect, useMemo } from "react";
 import type { MouseEvent } from "react";
 import { Link, useNavigate } from "react-router";
 import { FavHost } from "../../components/fav-host/fav-host";
+import { SiteHeader } from "../../components/site-header/site-header";
 import { WelcomeToast } from "../../components/welcome-toast/welcome-toast";
 import { useFavourites } from "../../hooks/use-favourites";
 import { getShareData, useShare } from "../../hooks/use-share";
@@ -12,7 +13,6 @@ import { BookingAside } from "./booking-aside";
 import { PortfolioLightbox } from "./portfolio-lightbox";
 import { ProfileCover } from "./profile-cover";
 import type { ProfileActions } from "./profile-cover";
-import { ProfileHeader } from "./profile-header";
 import { ProfileLede } from "./profile-lede";
 import {
   countServices,
@@ -43,7 +43,7 @@ export const StylistProfilePage = () => {
   const profile = useStylistProfile();
   const { id, shareAt, serviceModal, zoom, openZoom } = profile;
   const navigate = useNavigate();
-  const { loggedIn, isFavourite, toggleFavourite } = useFavourites();
+  const { isFavourite, toggleFavourite } = useFavourites();
   const { share, copyLink } = useShare();
 
   useRevealSweep(pageGlobal.rvIn ?? "");
@@ -105,12 +105,7 @@ export const StylistProfilePage = () => {
 
   return (
     <div data-screen-label="Stylist profile" className={styles.page}>
-      <ProfileHeader
-        loggedIn={loggedIn}
-        loginHref={getLoginHref(stylist.id)}
-        menuOpen={profile.menuOpen}
-        onToggleMenu={profile.toggleMenu}
-      />
+      <SiteHeader loginHref={getLoginHref(stylist.id)} />
       <ProfileCover
         name={name}
         coverUrl={cover ? resolveAssetUrl(cover) : ""}

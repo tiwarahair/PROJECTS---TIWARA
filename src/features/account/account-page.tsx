@@ -1,10 +1,10 @@
 import { useLayoutEffect } from "react";
 import { Link } from "react-router";
 import { FavHost } from "../../components/fav-host/fav-host";
+import { SiteHeader } from "../../components/site-header/site-header";
 import { useAppSelector } from "../../stores/hooks";
 import { joinClassNames } from "../../utils/class-names";
 import { AccountDialogs } from "./account-dialogs";
-import { AccountHeader } from "./account-header";
 import { downloadFile, getCalendarFile } from "./account-logic";
 import { AccountMobileList, AccountSideNav } from "./account-nav";
 import { getAccountView } from "./account-view";
@@ -61,18 +61,15 @@ export const AccountPage = (props: AccountPageProps) => {
 
   return (
     <div className={styles.page} data-screen-label={view.screenLabel}>
-      <AccountHeader
-        loggedIn={loggedIn}
+      <SiteHeader
         loginHref={view.loginHref}
-        accountName={accountName}
-        initials={initials}
-        photo={state.photo}
-        menuOpen={state.menuOpen}
-        onToggleMenu={() =>
-          setState(({ menuOpen }) => ({ menuOpen: !menuOpen }))
-        }
-        onGo={goToSection}
-        onLogOut={actions.logout}
+        signedIn={loggedIn}
+        accountMenu={{
+          label: accountName,
+          initials,
+          photo: state.photo,
+          onSection: goToSection,
+        }}
       />
       {!loggedIn && (
         <main

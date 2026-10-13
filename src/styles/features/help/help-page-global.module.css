@@ -1,6 +1,6 @@
 /*
  * Help page-wide rules, in the page layer. The global
- * reset lines identical to the base layer are omitted; .hp-mob / .hp-desk are this module's classes.
+ * reset lines identical to the base layer are omitted.
  */
 @layer page {
   /* this page has no input/select/button font reset: controls without font:inherit keep the browser font */
@@ -8,18 +8,5 @@
   :global(html.help-page) select,
   :global(html.help-page) button {
     font-family: revert;
-  }
-
-  .hpMob {
-    display: none !important;
-  }
-
-  @media (max-width: 760px) {
-    .hpDesk {
-      display: none !important;
-    }
-    .hpMob {
-      display: flex !important;
-    }
   }
 }

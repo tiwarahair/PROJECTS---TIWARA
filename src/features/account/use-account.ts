@@ -69,7 +69,6 @@ export interface AccountState {
   fixture: string;
   sectionId: string | null;
   wide: boolean;
-  menuOpen: boolean;
   dialog: DialogState | null;
   toast: string;
   bookings: AccountBooking[];
@@ -173,7 +172,6 @@ const getInitialState = (
     fixture,
     sectionId: readSection(params, section),
     wide: window.innerWidth >= WIDE_PX,
-    menuOpen: false,
     dialog: null,
     toast: "",
     bookings: isDemo ? getSeedBookings(fixture) : [],
@@ -408,7 +406,6 @@ export const useAccount = (props: AccountProps) => {
       setState(
         {
           sectionId: id,
-          menuOpen: false,
           edit: null,
           allergyEdit: -1,
           addressForm: null,
@@ -548,14 +545,8 @@ export const useAccount = (props: AccountProps) => {
         return;
       }
 
-      if (event.key === "Escape" && current.addressMenu) {
+      if (event.key === "Escape" && current.addressMenu)
         setState({ addressMenu: null });
-
-        return;
-      }
-
-      if (event.key === "Escape" && current.menuOpen)
-        setState({ menuOpen: false });
     };
 
     document.addEventListener("keydown", handleKey);
