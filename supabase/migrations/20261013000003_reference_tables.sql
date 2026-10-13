@@ -18,7 +18,8 @@ create table public.service_types (
   default_minutes integer check (default_minutes > 0),
   -- Typical amount above a stylist's "from" price for the group.
   added_price_pence integer check (added_price_pence >= 0),
-  default_description text
+  default_description text,
+  sort smallint not null
 );
 
 create index service_types_group_id_idx on public.service_types (group_id);
