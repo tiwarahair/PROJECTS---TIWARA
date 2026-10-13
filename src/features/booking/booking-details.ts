@@ -5,6 +5,7 @@ import type { Stylist } from "../../types/stylist";
 import { isAddressValid } from "../../utils/address";
 import { miles } from "../../utils/availability";
 import type { BookingAddress, Details, FieldKey } from "./booking-state";
+import { isValidEmail, isValidMobile } from "../../utils/validation";
 
 const FIELD_KEYS: FieldKey[] = ["address", "first", "last", "email", "phone"];
 
@@ -68,7 +69,6 @@ export const getFieldErrors = (
   addressValid: boolean,
 ): FieldErrors => {
   const errors: FieldErrors = {};
-  const digits = (details.phone || "").replace(/\D/g, "").replace(/^44/, "");
 
   if (isMobile && !addressValid) errors.address = "Enter your address";
 
@@ -76,10 +76,10 @@ export const getFieldErrors = (
 
   if (!details.last.trim()) errors.last = "Enter your last name";
 
-  if (!/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(details.email.trim()))
+  if (!isValidEmail(details.email))
     errors.email = "Enter an email address";
 
-  if (!/^0?7\d{9}$/.test(digits)) errors.phone = "Enter a UK mobile number";
+  if (!isValidMobile(details.phone || "")) errors.phone = "Enter a UK mobile number";
 
   return errors;
 };

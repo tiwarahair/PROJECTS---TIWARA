@@ -7,16 +7,14 @@ import { getOnboardingMeter } from "./auth-screens-account";
 import { BUSINESS_TYPES, CATEGORIES, RADII, SOURCES } from "./onboarding-data";
 import { OnboardingTurnstile } from "./onboarding-turnstile";
 import { OnboardingMap } from "./onboarding-map";
+import type { FieldBinding } from "./onboarding-fields";
 import type { ScreenProps } from "./screen-props";
 import styles from "../../styles/features/onboarding/wizard-steps.module.css";
 
-interface WizardFieldProps {
+interface WizardFieldProps extends FieldBinding {
   id: string;
   label: string;
   spacing?: "first" | "next";
-  value: string;
-  onChange: (event: ChangeEvent<HTMLInputElement>) => void;
-  onBlur: () => void;
   error: string;
   type?: string;
   inputMode?: "email";
@@ -27,6 +25,7 @@ const WizardField = ({
   id,
   label,
   spacing = "first",
+  name,
   value,
   onChange,
   onBlur,
@@ -34,6 +33,7 @@ const WizardField = ({
   type,
   inputMode,
   autoComplete,
+  ref,
 }: WizardFieldProps) => (
   <>
     <label
@@ -47,6 +47,8 @@ const WizardField = ({
       type={type}
       inputMode={inputMode}
       autoComplete={autoComplete}
+      ref={ref}
+      name={name}
       value={value}
       onChange={onChange}
       onBlur={onBlur}
@@ -208,11 +210,7 @@ export const StepDetails = ({ onboarding, layout, view }: ScreenProps) => {
       <input
         id="ob-biz"
         autoComplete="organization"
-        value={form.businessName}
-        onChange={(event) =>
-          actions.setField("businessName", event.target.value)
-        }
-        onBlur={() => actions.touch("businessName")}
+        {...actions.field("businessName")}
         aria-invalid={shown.businessName ? "true" : "false"}
         aria-describedby="ob-biz-help"
         className={joinClassNames(
@@ -240,11 +238,7 @@ export const StepDetails = ({ onboarding, layout, view }: ScreenProps) => {
             id="ob-bpc"
             autoComplete="postal-code"
             autoCapitalize="characters"
-            value={form.postcode}
-            onChange={(event) =>
-              actions.setField("postcode", event.target.value)
-            }
-            onBlur={() => actions.touch("postcode")}
+            {...actions.field("postcode")}
             aria-invalid={shown.postcode ? "true" : "false"}
             className={joinClassNames(
               styles.postcodeInput,
@@ -400,10 +394,7 @@ export const StepAccount = ({ onboarding, layout, view }: ScreenProps) => {
   const { shown } = view;
 
   const text = (key: "first" | "last" | "email") => ({
-    value: form[key],
-    onChange: (event: ChangeEvent<HTMLInputElement>) =>
-      actions.setField(key, event.target.value),
-    onBlur: () => actions.touch(key),
+    ...actions.field(key),
     error: shown[key] ?? "",
   });
 
@@ -457,9 +448,7 @@ export const StepAccount = ({ onboarding, layout, view }: ScreenProps) => {
           type="tel"
           inputMode="tel"
           autoComplete="tel-national"
-          value={form.mobile}
-          onChange={(event) => actions.setField("mobile", event.target.value)}
-          onBlur={() => actions.touch("mobile")}
+          {...actions.field("mobile")}
           aria-invalid={shown.mobile ? "true" : "false"}
           className={styles.mobileInput}
         />
@@ -475,9 +464,7 @@ export const StepAccount = ({ onboarding, layout, view }: ScreenProps) => {
           id="ob-wpw"
           type={state.passwordShown ? "text" : "password"}
           autoComplete="new-password"
-          value={form.password}
-          onChange={(event) => actions.setField("password", event.target.value)}
-          onBlur={() => actions.touch("password")}
+          {...actions.field("password")}
           aria-invalid={shown.password ? "true" : "false"}
           aria-describedby="ob-wpw-hint"
           className={joinClassNames(
@@ -515,10 +502,7 @@ export const StepAccount = ({ onboarding, layout, view }: ScreenProps) => {
             type="tel"
             inputMode="tel"
             autoComplete="off"
-            value={form.businessPhone}
-            onChange={(event) =>
-              actions.setField("businessPhone", event.target.value)
-            }
+            {...actions.field("businessPhone")}
             className={styles.bizInput}
           />
           <label htmlFor="ob-bem" className={styles.bizEmailLabel}>
@@ -529,10 +513,7 @@ export const StepAccount = ({ onboarding, layout, view }: ScreenProps) => {
             type="email"
             inputMode="email"
             autoComplete="off"
-            value={form.businessEmail}
-            onChange={(event) =>
-              actions.setField("businessEmail", event.target.value)
-            }
+            {...actions.field("businessEmail")}
             className={styles.bizInput}
           />
           <div
@@ -647,10 +628,7 @@ export const StepSource = ({ onboarding, layout }: ScreenProps) => {
           </label>
           <input
             id="ob-other"
-            value={form.referralSourceOther}
-            onChange={(event) =>
-              actions.setField("referralSourceOther", event.target.value)
-            }
+            {...actions.field("referralSourceOther")}
             maxLength={80}
             className={styles.otherInput}
           />

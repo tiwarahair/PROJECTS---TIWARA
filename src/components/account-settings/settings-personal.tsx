@@ -1,10 +1,7 @@
 import type { ChangeEvent, ReactNode } from "react";
 import { joinClassNames } from "../../utils/class-names";
-import {
-  getCloseReason,
-  isEmailValid,
-  isMobileValid,
-} from "./account-settings-logic";
+import { isValidEmail, isValidMobile } from "../../utils/validation";
+import { getCloseReason } from "./account-settings-logic";
 import type { AccountSettingsProps } from "./use-account-settings";
 import type { AccountSettingsController } from "./use-account-settings";
 import shared from "../../styles/components/account-settings/account-settings.module.css";
@@ -145,7 +142,7 @@ export const SettingsPersonal = ({
 
   const emailErrors = {
     newEmail:
-      state.emailTouched && !isEmailValid(state.newEmail)
+      state.emailTouched && !isValidEmail(state.newEmail)
         ? "Enter an email address, like name@example.co.uk."
         : "",
     password:
@@ -159,7 +156,7 @@ export const SettingsPersonal = ({
 
   const phoneNext = () => {
     if (state.phoneFlow === "edit") {
-      if (!isMobileValid(state.newPhone))
+      if (!isValidMobile(state.newPhone))
         return setState({
           phoneError: "Enter a UK mobile number, like 07700 900418.",
         });
@@ -340,7 +337,7 @@ export const SettingsPersonal = ({
                   )}
                   data-ac-in="1"
                   onClick={() => {
-                    if (!isEmailValid(state.newEmail) || !state.emailPassword)
+                    if (!isValidEmail(state.newEmail) || !state.emailPassword)
                       return setState({ emailTouched: true });
 
                     setState({

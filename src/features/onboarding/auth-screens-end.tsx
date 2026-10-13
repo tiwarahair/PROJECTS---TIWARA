@@ -84,7 +84,6 @@ export const ForgotSentScreen = ({ onboarding, layout }: ScreenProps) => {
 
 export const ResetScreen = ({ onboarding, layout, view }: ScreenProps) => {
   const { state, actions } = onboarding;
-  const { form } = state;
 
   const { meter, role } = getOnboardingMeter(
     onboarding,
@@ -100,13 +99,11 @@ export const ResetScreen = ({ onboarding, layout, view }: ScreenProps) => {
       </label>
       <PasswordInput
         id="ob-rpw"
-        value={form.password}
         shown={state.passwordShown}
         onToggle={() =>
           actions.setState({ passwordShown: !state.passwordShown })
         }
-        onChange={(event) => actions.setField("password", event.target.value)}
-        onBlur={() => actions.touch("password")}
+        {...actions.field("password")}
         autoComplete="new-password"
         invalid={!!view.shown.password}
         describedBy="ob-rpw-hint"
@@ -118,11 +115,7 @@ export const ResetScreen = ({ onboarding, layout, view }: ScreenProps) => {
         spacing="gap"
         type={state.passwordShown ? "text" : "password"}
         autoComplete="new-password"
-        value={form.passwordConfirm}
-        onChange={(event) =>
-          actions.setField("passwordConfirm", event.target.value)
-        }
-        onBlur={() => actions.touch("passwordConfirm")}
+        {...actions.field("passwordConfirm")}
         onKeyDown={(event) => {
           if (event.key === "Enter") actions.submit();
         }}

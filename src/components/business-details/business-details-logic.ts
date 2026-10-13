@@ -1,6 +1,7 @@
 // BusinessDetails state, validation and display values
 import { formatPostcode, isPostcodeValid } from "../../utils/address";
 import type { TaxDetails } from "../tax-details-form/tax-details-logic";
+import { isValidEmail } from "../../utils/validation";
 
 export type BusinessType = "shop" | "chair" | "home" | "mobile";
 export type BusinessPreset =
@@ -144,7 +145,7 @@ const getEmailError = (email: string, phone: string): string => {
   if (!email.trim())
     return !phone.trim() ? "Enter a phone number or an email address." : "";
 
-  return !/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(email.trim())
+  return !isValidEmail(email)
     ? "Enter an email address, like name@example.co.uk."
     : "";
 };

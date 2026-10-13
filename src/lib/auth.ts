@@ -31,9 +31,6 @@ export interface StylistDetails extends PersonDetails {
   referralSource: string;
 }
 
-/** Thrown for failures the screens show as a connection problem. */
-export class AuthRequestError extends Error {}
-
 const getRedirect = (flow: string) =>
   `${window.location.origin}/login?flow=${flow}`;
 
@@ -50,13 +47,13 @@ const getPersonMetadata = ({
   terms_version: TERMS_VERSION,
 });
 
-/** Returns the error code for expected failures; throws for the rest. */
+/** Returns the error code for expected failures; throws the rest (screens show them as a connection problem). */
 const getErrorCode = (error: AuthError | null, expected: string[]) => {
   if (!error) return null;
 
   if (error.code && expected.includes(error.code)) return error.code;
 
-  throw new AuthRequestError(error.message);
+  throw new Error(error.message);
 };
 
 export const getAccountKind = async (email: string, captchaToken: string) => {
@@ -64,7 +61,7 @@ export const getAccountKind = async (email: string, captchaToken: string) => {
     kind: AccountKind;
   }>("email-status", { body: { email, captchaToken } });
 
-  if (error || !data) throw new AuthRequestError("email-status failed");
+  if (error || !data) throw new Error("email-status failed");
 
   return data.kind;
 };
@@ -261,7 +258,7 @@ export const completeClientProfile = async (details: PersonDetails) => {
     })
     .eq("id", user?.id ?? "");
 
-  if (error) throw new AuthRequestError(error.message);
+  if (error) throw new Error(error.message);
 };
 
 export const signOut = () => supabase.auth.signOut();

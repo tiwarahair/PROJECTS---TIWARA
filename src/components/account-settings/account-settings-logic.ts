@@ -163,12 +163,6 @@ export const getInitialSettingsState = (
   };
 };
 
-export const isEmailValid = (value: string): boolean =>
-  /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(value.trim());
-
-export const isMobileValid = (value: string): boolean =>
-  /^(?:\+44|0)7\d{9}$/.test(value.replace(/[\s()-]/g, ""));
-
 /** Why the account can't be closed yet, else "". */
 export const getCloseReason = (upcoming: number, owed: boolean): string => {
   if (upcoming)

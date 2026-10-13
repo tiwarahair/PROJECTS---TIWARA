@@ -20,7 +20,7 @@ import { SCREEN_LABELS, TURNSTILE_SCREENS } from "./onboarding-data";
 import "../../styles/features/onboarding/onboarding-page-global.module.css";
 import { getLayout } from "./onboarding-layout";
 import styles from "../../styles/features/onboarding/onboarding-page.module.css";
-import { getErrors } from "./onboarding-schemas";
+import { getErrors } from "./onboarding-screen-schemas";
 import { isCodeScreen } from "./onboarding-state";
 import type { OnboardingProps } from "./onboarding-state";
 import type { ScreenProps, ScreenView } from "./screen-props";

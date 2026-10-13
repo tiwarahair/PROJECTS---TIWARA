@@ -1,4 +1,4 @@
-// Onboarding state and props (validation lives in onboarding-schemas.ts).
+// Onboarding state and props (validation lives in onboarding-field-schemas.ts and onboarding-screen-schemas.ts).
 
 export interface OnboardingProps {
   screen?: string;

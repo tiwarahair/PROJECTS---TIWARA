@@ -10,7 +10,7 @@ import {
   Spinner,
   SubmitButton,
 } from "./onboarding-fields";
-import { getPasswordCheck } from "./onboarding-schemas";
+import { getPasswordCheck } from "./onboarding-field-schemas";
 import type { OnboardingController } from "./use-onboarding";
 import type { ScreenProps } from "./screen-props";
 import styles from "../../styles/features/onboarding/auth-screens.module.css";
@@ -56,16 +56,12 @@ const getCommonFields = ({ onboarding, view }: ScreenProps) => {
       <NameFields
         idPrefix={idPrefix}
         first={{
-          value: form.first,
-          onChange: (event) => actions.setField("first", event.target.value),
-          onBlur: () => actions.touch("first"),
+          ...actions.field("first"),
           error: shown.first ?? "",
           invalid: !!shown.first,
         }}
         last={{
-          value: form.last,
-          onChange: (event) => actions.setField("last", event.target.value),
-          onBlur: () => actions.touch("last"),
+          ...actions.field("last"),
           error: shown.last ?? "",
           invalid: !!shown.last,
         }}
@@ -74,9 +70,7 @@ const getCommonFields = ({ onboarding, view }: ScreenProps) => {
     mobile: (id: string) => (
       <MobileField
         id={id}
-        value={form.mobile}
-        onChange={(event) => actions.setField("mobile", event.target.value)}
-        onBlur={() => actions.touch("mobile")}
+        {...actions.field("mobile")}
         error={shown.mobile ?? ""}
         invalid={!!shown.mobile}
       />
@@ -131,13 +125,11 @@ export const CreateScreen = (props: ScreenProps) => {
       </label>
       <PasswordInput
         id="ob-npw"
-        value={form.password}
         shown={state.passwordShown}
         onToggle={() =>
           actions.setState({ passwordShown: !state.passwordShown })
         }
-        onChange={(event) => actions.setField("password", event.target.value)}
-        onBlur={() => actions.touch("password")}
+        {...actions.field("password")}
         autoComplete="new-password"
         invalid={!!view.shown.password}
         describedBy="ob-npw-hint"

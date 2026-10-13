@@ -8,44 +8,22 @@ import {
 } from "react";
 import type { ClipboardEvent, KeyboardEvent, RefObject } from "react";
 import { useForm } from "react-hook-form";
-import type { FieldPath } from "react-hook-form";
+import type { FieldPath, PathValue, UseFormReturn } from "react-hook-form";
 import { useLocation, useNavigate } from "react-router";
+import type { NavigateFunction } from "react-router";
 import { zodResolver } from "@hookform/resolvers/zod";
 import type { TurnstileInstance } from "@marsidev/react-turnstile";
-import {
-  completeClientProfile,
-  getAccountKind,
-  getSignedInAccount,
-  needsSecondFactor,
-  resendEmailCode,
-  sendPasswordReset,
-  setNewPassword,
-  signIn,
-  signOut,
-  signUpClient,
-  signUpStylist,
-  startGoogleSignIn,
-  verifyEmailCode,
-  verifySecondFactor,
-} from "../../lib/auth";
-import type { StylistDetails } from "../../lib/auth";
-import { geocodeAddress } from "../../lib/google-maps";
-import { rememberDevice } from "../../lib/supabase";
-import type { Location } from "react-router";
-import type { EmittedAddress } from "../../components/address-finder/use-address-finder";
+import type { FieldBinding } from "./onboarding-fields";
 import { usePasswordChecker } from "../../hooks/use-password-checker";
-import { isAddressValid } from "../../utils/address";
 import { getAssetUrl } from "../../utils/asset-url";
 import { MODE_KEY, PHOTOS, STORAGE_KEY } from "./onboarding-data";
-import { getFixturePatch } from "./onboarding-fixtures";
-import { getRouteForPath, ROUTE_START } from "./onboarding-routes";
-import type { OnboardingRoute } from "./onboarding-routes";
-import { getScreenSchema } from "./onboarding-schemas";
+import { getStartState, readStorage } from "./onboarding-start";
+import { getScreenSchema } from "./onboarding-screen-schemas";
+import { useOnboardingAddress } from "./use-onboarding-address";
+import { useOnboardingSubmit } from "./use-onboarding-submit";
 import {
   EMPTY_CODE,
   getBackScreen,
-  INITIAL_FORM,
-  INITIAL_STATE,
   isCodeScreen,
   resolveProps,
 } from "./onboarding-state";
@@ -54,189 +32,36 @@ import type {
   OnboardingProps,
   OnboardingState,
   ResolvedProps,
-  StartState,
 } from "./onboarding-state";
+
+/** Form fields typed into text inputs. */
+type TextFieldName = {
+  [K in keyof OnboardingForm]: OnboardingForm[K] extends string ? K : never;
+}[keyof OnboardingForm];
 
 type StatePatch =
   | Partial<OnboardingState>
   | ((state: OnboardingState) => Partial<OnboardingState>);
 
-const LOCK_MS = 9e5;
-const MAX_ATTEMPTS = 5;
-const DEFAULT_LAT_LNG: [number, number] = [53.4486, -2.2237];
-const NEXT_WIZARD_SCREEN = { w1: "w2", w2: "w3" };
-
-const BUSINESS_TYPES: Record<string, StylistDetails["businessType"]> = {
-  shop: "shop",
-  chair: "chair_rental",
-  home: "home_based",
-  mobile: "mobile",
-};
-
-interface SavedProgress {
-  form?: Partial<OnboardingForm>;
-  addressOpen?: boolean;
-  pinLatLng?: [number, number] | null;
-  geocodedLatLng?: [number, number] | null;
-  area?: string | null;
+/** What the submit and address hooks share with the main onboarding hook. */
+export interface OnboardingCore {
+  stateRef: RefObject<OnboardingState>;
+  setState: (patch: StatePatch, callback?: () => void) => void;
+  goTo: (screen: string, direction?: "fwd" | "back") => void;
+  later: (name: string, callback: () => void, delay: number) => void;
+  save: () => void;
+  clearSaved: () => void;
+  navigate: NavigateFunction;
+  resolved: ResolvedProps;
+  startFlow: string | null;
+  turnstileRef: RefObject<TurnstileInstance | null>;
+  formApi: Pick<
+    UseFormReturn<OnboardingForm>,
+    "getValues" | "setValue" | "reset" | "handleSubmit"
+  >;
 }
 
-const readStorage = (storage: Storage, key: string): string | null => {
-  try {
-    return storage.getItem(key);
-  } catch {
-    return null;
-  }
-};
-
-/** Where to send customers after log in: ?return=, sessionStorage tw_return, a same-origin referrer, else Home. */
-const getReturnTo = (search: string): string => {
-  let returnTo =
-    new URLSearchParams(search).get("return") ||
-    readStorage(sessionStorage, "tw_return");
-
-  if (!returnTo) {
-    try {
-      const referrer = document.referrer ? new URL(document.referrer) : null;
-
-      if (
-        referrer &&
-        referrer.origin === window.location.origin &&
-        !/onboarding|^\/(login|signup|join)$/i.test(
-          decodeURIComponent(referrer.pathname),
-        )
-      )
-        returnTo = referrer.pathname + referrer.search;
-    } catch {
-      // unreadable referrer
-    }
-  }
-
-  return returnTo || "/";
-};
-
-/** A ?flow= / handed-off flow wins, then an explicit screen prop, then the route's own start. */
-const getStartScreen = (
-  flow: string | null,
-  { screen }: ResolvedProps,
-  route: OnboardingRoute,
-) => {
-  if (flow === "list") return "welcome";
-
-  if (flow === "pro") return "pro-email";
-
-  if (flow === "reset") return "forgot-reset";
-
-  // back from Google: wait on the chooser while the account is checked
-  if (flow === "social" || flow === "social-pro") return "chooser";
-
-  if (screen && screen !== "auto") return screen;
-
-  return ROUTE_START[route];
-};
-
-/** The theme prop wins, then the stored mode, then the system preference. */
-const getStartMode = (
-  { theme }: ResolvedProps,
-  storedMode: string | null,
-  prefersDark: boolean,
-) => {
-  if (theme && theme !== "auto") return theme;
-
-  if (storedMode === "dark" || storedMode === "light") return storedMode;
-
-  return prefersDark ? "dark" : "light";
-};
-
-/** The initial state, computed up front (start screen, saved progress, board, fixture, mode). */
-const getStartState = (
-  props: ResolvedProps,
-  { pathname, search }: Pick<Location, "pathname" | "search">,
-): StartState => {
-  const state: StartState = {
-    ...INITIAL_STATE,
-    form: INITIAL_FORM,
-    touched: {},
-    flow: null,
-    width: document.documentElement.clientWidth,
-  };
-
-  let saved: SavedProgress | null = null;
-
-  try {
-    saved = JSON.parse(
-      readStorage(localStorage, STORAGE_KEY) || "null",
-    ) as SavedProgress | null;
-  } catch {
-    // unreadable progress: start fresh
-  }
-
-  const handoff = readStorage(sessionStorage, "tw_flow");
-
-  try {
-    sessionStorage.removeItem("tw_flow");
-  } catch {
-    // storage unavailable
-  }
-
-  const flow = new URLSearchParams(search).get("flow") || handoff;
-  const route = getRouteForPath(pathname) ?? "login";
-  const start = getStartScreen(flow, props, route);
-
-  state.screen = start;
-  state.flow = flow;
-  state.returnTo = getReturnTo(search);
-
-  if (start === "welcome" || start[0] === "w") state.audience = "pro";
-
-  if (saved && saved.form && !props.board) {
-    state.form = {
-      ...state.form,
-      ...saved.form,
-      password: "",
-      passwordConfirm: "",
-      terms: false,
-    };
-
-    if (saved.addressOpen) state.addressOpen = true;
-
-    if (saved.pinLatLng) state.pinLatLng = saved.pinLatLng;
-
-    if (saved.geocodedLatLng) state.geocodedLatLng = saved.geocodedLatLng;
-
-    if (saved.area) state.area = saved.area;
-  }
-
-  if (props.board) {
-    const isPro = /^(pro-|w)/.test(start);
-
-    state.form = {
-      ...state.form,
-      ...(isPro
-        ? { email: "amara@tiwarashouse.co.uk", first: "Amara", last: "Okonkwo" }
-        : { email: "ama@example.com", first: "Ama", last: "Mensah" }),
-    };
-
-    if (isPro) state.audience = "pro";
-    else if (start !== "welcome" && start !== "chooser")
-      state.audience = "customer";
-  }
-
-  // fixtures start from the blank form, not the saved / board one
-  // demo states are dev-only; production builds drop this branch and the fixtures module
-  if (import.meta.env.DEV && props.fixture && props.fixture !== "none")
-    Object.assign(state, getFixturePatch(props.fixture, INITIAL_FORM));
-
-  const storedMode = readStorage(localStorage, MODE_KEY);
-
-  const prefersDark =
-    !!window.matchMedia &&
-    window.matchMedia("(prefers-color-scheme: dark)").matches;
-
-  state.mode = getStartMode(props, storedMode, prefersDark);
-
-  return state;
-};
+const DEFAULT_LAT_LNG: [number, number] = [53.4486, -2.2237];
 
 export const useOnboarding = (props: OnboardingProps) => {
   const location = useLocation();
@@ -259,12 +84,14 @@ export const useOnboarding = (props: OnboardingProps) => {
     formState,
     getValues,
     handleSubmit,
+    register,
     reset,
     setValue,
     trigger,
     watch,
   } = useForm<OnboardingForm>({
     defaultValues: startForm,
+    mode: "onTouched",
     resolver: (values, context, options) =>
       zodResolver(getScreenSchema({ ...stateRef.current, form: values }))(
         values,
@@ -274,6 +101,9 @@ export const useOnboarding = (props: OnboardingProps) => {
   });
 
   const form = watch();
+  const formStateRef = useRef(formState);
+
+  formStateRef.current = formState;
   const afterCommit = useRef<(() => void)[]>([]);
   const rootRef = useRef<HTMLDivElement>(null);
 
@@ -465,420 +295,77 @@ export const useOnboarding = (props: OnboardingProps) => {
     }
   };
 
-  /** Re-checks every field already showing (touched or in error); after a submit, the whole screen. */
-  const revalidate = (key?: keyof OnboardingForm) => {
-    const { touchedFields, errors, isSubmitted } = formState;
+  /** Binds a text input: react-hook-form tracks it, checking it on blur and then as it changes. */
+  const field = (name: TextFieldName): FieldBinding => ({
+    ...register(name),
+    value: form[name],
+  });
 
-    if (isSubmitted) return void trigger();
-
-    const names = new Set([
-      ...Object.keys(touchedFields),
-      ...Object.keys(errors),
-    ]);
-
-    if (key) names.add(key);
-
-    if (names.size) void trigger([...names] as FieldPath<OnboardingForm>[]);
-  };
-
-  /** Sets a field (optionally touching it); clears its server error; wizard screens save progress. */
-  const setField = <K extends keyof OnboardingForm>(
+  /** Buttons and checkboxes set their value directly (touch: check it straight away). */
+  const setField = <K extends FieldPath<OnboardingForm>>(
     key: K,
-    value: OnboardingForm[K],
+    value: PathValue<OnboardingForm, K>,
     touch = false,
-  ) => {
-    setValue(key as FieldPath<OnboardingForm>, value, { shouldTouch: touch });
-    revalidate(touch ? key : undefined);
+  ) => setValue(key, value, { shouldTouch: touch, shouldValidate: touch });
 
-    setState(
-      (current) => ({
-        serverErrors: {
-          ...current.serverErrors,
-          [key]: undefined,
-          exists: undefined,
-          noBusiness: undefined,
+  // any change: clear its server error, re-check what's already showing, save wizard progress
+  useEffect(() => {
+    const { unsubscribe } = watch((_values, { name }) => {
+      if (!name) return;
+
+      const { touchedFields, errors, isSubmitted } = formStateRef.current;
+      const shown = Object.keys({ ...touchedFields, ...errors });
+
+      if (isSubmitted) void trigger();
+      else if (shown.length) void trigger(shown as FieldPath<OnboardingForm>[]);
+
+      setState(
+        (current) => ({
+          serverErrors: {
+            ...current.serverErrors,
+            [name]: undefined,
+            exists: undefined,
+            noBusiness: undefined,
+          },
+        }),
+        () => {
+          if (stateRef.current.screen?.[0] === "w") save();
         },
-      }),
-      () => {
-        if (stateRef.current.screen?.[0] === "w") save();
-      },
-    );
-  };
-
-  const touch = (key: keyof OnboardingForm) => {
-    setValue(key as FieldPath<OnboardingForm>, getValues(key), {
-      shouldTouch: true,
+      );
     });
 
-    revalidate(key);
-  };
+    return unsubscribe;
+  }, [watch, trigger, setState, save]);
 
-  // fixture boards open with some fields already touched
+  // fixture boards open with some fields already showing their errors
   useEffect(() => {
-    const keys = Object.keys(startTouched) as (keyof OnboardingForm)[];
+    const keys = Object.keys(startTouched) as FieldPath<OnboardingForm>[];
 
-    keys.forEach((key) => touch(key));
+    if (keys.length) void trigger(keys);
     // mount only
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  /** Uses up the current Turnstile token and asks the widget for a fresh one. */
-  const takeCaptchaToken = () => {
-    const token = stateRef.current.captchaToken ?? "";
-
-    setState({ captchaToken: null });
-    turnstileRef.current?.reset();
-
-    return token;
+  const core: OnboardingCore = {
+    stateRef,
+    setState,
+    goTo,
+    later,
+    save,
+    clearSaved,
+    navigate,
+    resolved,
+    startFlow: start.flow,
+    turnstileRef,
+    formApi: { getValues, setValue, reset, handleSubmit },
   };
 
-  /** Runs a server call with the busy state; unexpected failures show the connection error. */
-  const run = (task: () => Promise<void>) => {
-    setState({ busy: true, networkError: false });
-
-    task().catch(() => setState({ busy: false, networkError: true }));
-  };
-
-  const toStudio = (isNew: boolean) => {
-    goTo("studio");
-
-    if (!resolved.stayOnDone)
-      later(
-        "studio",
-        () => navigate(`/studio${isNew ? "?welcome=1" : ""}`),
-        500,
-      );
-  };
-
-  const finish = (
-    kind: "customer-login" | "customer-new" | "newpro" | "pro",
-  ) => {
-    if (kind === "customer-login" || kind === "customer-new") {
-      const first = getValues("first").trim();
-
-      const message =
-        kind === "customer-new"
-          ? `Welcome to Tiwára’s House${first ? `, ${first}` : ""}`
-          : `Welcome back${first ? `, ${first}` : ""}`;
-
-      if (resolved.stayOnDone) {
-        setState({ busy: false, toast: message });
-
-        return;
-      }
-
-      try {
-        sessionStorage.setItem("tw_toast", message);
-        sessionStorage.removeItem("tw_return");
-      } catch {
-        // storage unavailable
-      }
-
-      setState({ busy: true });
-      navigate(stateRef.current.returnTo || "/");
-
-      return;
-    }
-
-    if (kind === "newpro") {
-      const form = getValues();
-
-      try {
-        localStorage.setItem(
-          "tw_welcome",
-          JSON.stringify({
-            first: form.first,
-            cats: form.categories,
-            drafts: 2,
-            at: Date.now(),
-          }),
-        );
-      } catch {
-        // storage unavailable
-      }
-
-      clearSaved();
-      setState({ busy: false });
-      goTo("pro-done");
-
-      return;
-    }
-
-    toStudio(false);
-  };
-
-  const afterProAuth = async () => {
-    if (await needsSecondFactor())
-      setState({ codeKind: "2fa" }, () => goTo("pro-2fa"));
-    else finish("pro");
-  };
-
-  const getStylistDetails = (form: OnboardingForm): StylistDetails => {
-    const { pinLatLng, geocodedLatLng, area } = stateRef.current;
-    const location = pinLatLng ?? geocodedLatLng;
-
-    // w3 can't be passed without a location; saved progress always carries it
-    if (!location) throw new Error("The business location is missing");
-
-    const [lat, lng] = location;
-    const isMobile = form.type === "mobile";
-
-    return {
-      ...form,
-      businessName: form.businessName,
-      businessType: BUSINESS_TYPES[form.type] ?? "shop",
-      lat,
-      lng,
-      areaLabel: area,
-      travelRadiusMiles: isMobile ? form.radius : null,
-      contactEmail: form.useContact ? form.email : form.businessEmail || null,
-      contactPhone: form.useContact ? form.mobile : form.businessPhone || null,
-      referralSource:
-        form.referralSource === "Other"
-          ? form.referralSourceOther
-          : form.referralSource,
-    };
-  };
-
-  const showWrongPassword = () => {
-    const attempts = stateRef.current.attempts + 1;
-
-    if (attempts >= MAX_ATTEMPTS)
-      setState({
-        busy: false,
-        attempts,
-        lockedUntil: Date.now() + LOCK_MS,
-        serverErrors: {
-          password: "Too many attempts. Try again in 15 minutes.",
-        },
-      });
-    else
-      setState((state) => ({
-        busy: false,
-        attempts,
-        shake: state.shake + 1,
-        serverErrors: {
-          password: "That password isn’t right. Try again or reset it.",
-        },
-      }));
-  };
-
-  const showWrongCode = () =>
-    setState((state) => ({
-      busy: false,
-      shake: state.shake + 1,
-      codeError: "That code isn’t right",
-    }));
-
-  const submit = () => {
-    const { busy, lockedUntil } = stateRef.current;
-
-    if (busy || lockedUntil > Date.now()) return;
-
-    void handleSubmit(submitValid)();
-  };
-
-  const submitValid = () => {
-    const current = stateRef.current;
-    const { screen } = current;
-    const form = getValues();
-    const email = form.email.trim().toLowerCase();
-
-    if (screen === "w3")
-      return run(async () => {
-        const { geocodedLatLng, pinLatLng } = stateRef.current;
-
-        if (
-          (form.type === "mobile" || !(pinLatLng ?? geocodedLatLng)) &&
-          !(await geocode())
-        )
-          return setState({
-            busy: false,
-            serverErrors: {
-              [form.type === "mobile" ? "postcode" : "address"]:
-                "We can’t find that. Check it and try again.",
-            },
-          });
-
-        save();
-        goTo("w4");
-      });
-
-    if (screen === "w1" || screen === "w2") {
-      save();
-      goTo(NEXT_WIZARD_SCREEN[screen]);
-
-      return;
-    }
-
-    if (screen === "cust-email")
-      return run(async () => {
-        const kind = await getAccountKind(email, takeCaptchaToken());
-
-        goTo(kind === "none" ? "cust-create" : "cust-password");
-      });
-
-    if (screen === "pro-email" || screen === "w4")
-      return run(async () => {
-        const kind = await getAccountKind(email, takeCaptchaToken());
-
-        if (screen === "w4") {
-          if (kind === "none")
-            setState({ audience: "newpro" }, () => goTo("w5"));
-          else setState({ busy: false, serverErrors: { exists: true } });
-        } else if (kind === "stylist") goTo("pro-password");
-        else setState({ busy: false, serverErrors: { noBusiness: true } });
-      });
-
-    if (screen === "cust-password" || screen === "pro-password")
-      return run(async () => {
-        const error = await signIn(email, form.password, takeCaptchaToken());
-
-        if (error === "invalid_credentials") return showWrongPassword();
-
-        if (error === "email_not_confirmed")
-          return setState({ codeKind: "verify", resendIn: 0 }, () =>
-            goTo("verify"),
-          );
-
-        if (screen === "pro-password") await afterProAuth();
-        else finish("customer-login");
-      });
-
-    if (screen === "cust-create")
-      return run(async () => {
-        const isNew = await signUpClient(
-          email,
-          form.password,
-          takeCaptchaToken(),
-          form,
-        );
-
-        if (!isNew)
-          return setState({ busy: false, serverErrors: { exists: true } });
-
-        setState({ codeKind: "verify", audience: "customer" }, () =>
-          goTo("verify"),
-        );
-      });
-
-    if (screen === "w5")
-      return run(async () => {
-        await signUpStylist(
-          email,
-          form.password,
-          takeCaptchaToken(),
-          getStylistDetails(form),
-        );
-
-        setState({ codeKind: "verify" }, () => goTo("verify"));
-      });
-
-    if (screen === "cust-social")
-      return run(async () => {
-        await completeClientProfile(form);
-        finish("customer-new");
-      });
-
-    if (screen === "forgot-email")
-      return run(async () => {
-        await sendPasswordReset(email, takeCaptchaToken());
-        goTo("forgot-sent");
-      });
-
-    if (screen === "forgot-reset")
-      return run(async () => {
-        const error = await setNewPassword(form.password);
-
-        if (error)
-          return setState({
-            busy: false,
-            serverErrors: {
-              password:
-                error === "same_password"
-                  ? "Choose a password you haven’t used before"
-                  : "Choose a stronger password",
-            },
-          });
-
-        goTo("forgot-done");
-      });
-
-    if (isCodeScreen(screen)) {
-      const code = current.code.join("");
-
-      if (code.length < 6) {
-        setState({ busy: false, codeError: "Enter the 6-digit code" });
-
-        return;
-      }
-
-      return run(async () => {
-        const isRight =
-          screen === "pro-2fa"
-            ? await verifySecondFactor(code, current.twoFaMethod === "backup")
-            : await verifyEmailCode(email, code);
-
-        if (!isRight) return showWrongCode();
-
-        await rememberDevice(form.remember);
-
-        if (screen === "pro-2fa") finish("pro");
-        else
-          finish(current.audience === "customer" ? "customer-new" : "newpro");
-      });
-    }
-  };
-
-  /** Resend the sign-up code (verify) or the reset link (forgot-sent). */
-  const resend = () =>
-    run(async () => {
-      const email = getValues("email").trim().toLowerCase();
-
-      if (stateRef.current.screen === "forgot-sent")
-        await sendPasswordReset(email, takeCaptchaToken());
-      else await resendEmailCode(email, takeCaptchaToken());
-
-      setState({ busy: false, resendIn: 30, codeError: "", code: EMPTY_CODE });
-    });
-
-  /** Google redirects away; the return lands on /login?flow=social(-pro). */
-  const socialSignIn = (isPro: boolean) => run(() => startGoogleSignIn(isPro));
-
-  // back from Google: stylists go on to 2FA, new customers finish their profile
-  useEffect(() => {
-    const { flow } = start;
-
-    if (flow !== "social" && flow !== "social-pro") return;
-
-    run(async () => {
-      const account = await getSignedInAccount();
-
-      if (!account) return setState({ busy: false, networkError: true });
-
-      reset({ ...getValues(), ...account });
-
-      if (flow === "social-pro") {
-        if (account.isStylist) return afterProAuth();
-
-        await signOut();
-
-        return setState(
-          { busy: false, serverErrors: { noBusiness: true } },
-          () => goTo("pro-email"),
-        );
-      }
-
-      if (account.hasProfile || account.isStylist)
-        return finish("customer-login");
-
-      setState({ audience: "customer", socialProvider: "google" }, () =>
-        goTo("cust-social"),
-      );
-    });
-    // mount only
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  const { geocode, setAddress } = useOnboardingAddress(core);
+
+  const { submit, resend, socialSignIn, toStudio } = useOnboardingSubmit({
+    ...core,
+    geocode,
+  });
 
   /** One digit per box: advance on input, submit when all six are filled. */
   const setCodeDigit = (index: number, value: string) => {
@@ -933,74 +420,6 @@ export const useOnboarding = (props: OnboardingProps) => {
     });
   };
 
-  /** Geocodes the address (or a mobile stylist's postcode) once; false when Google can't place it. */
-  const geocode = async () => {
-    const { type, line1, city, postcode } = getValues();
-
-    const place = await geocodeAddress(
-      type === "mobile" ? postcode : [line1, city, postcode].join(", "),
-    );
-
-    if (!place?.location) return false;
-
-    const { lat, lng } = place.location;
-
-    setState(
-      { geocodedLatLng: [lat, lng], pinLatLng: null, area: place.area },
-      save,
-    );
-
-    return true;
-  };
-
-  const setAddress = (address: EmittedAddress | null) => {
-    const previousPostcode = getValues("postcode");
-
-    const fields = address
-      ? {
-          line1: address.line1,
-          line2: address.line2 || "",
-          city: address.town,
-          postcode: address.postcode,
-        }
-      : { line1: "", line2: "", city: "", postcode: "" };
-
-    const isOk = !!address && isAddressValid(address);
-
-    const addressLatLng: [number, number] | null =
-      address && address.lat != null && address.lng != null
-        ? [address.lat, address.lng]
-        : null;
-
-    const isNewPlace = fields.postcode !== previousPostcode;
-
-    for (const [key, value] of Object.entries(fields))
-      setValue(key as FieldPath<OnboardingForm>, value);
-
-    revalidate();
-
-    setState(
-      () => ({
-        addressOpen: isOk,
-        addressSource: address ? address.source : "",
-        addressFinderFixture: "",
-        ...(addressLatLng && isNewPlace
-          ? {
-              geocodedLatLng: addressLatLng,
-              pinLatLng: null,
-              area: address?.area ?? null,
-            }
-          : {}),
-      }),
-      () => {
-        save();
-
-        // a typed address has no location yet: place it so the pin starts there
-        if (isOk && isNewPlace && !addressLatLng) void geocode();
-      },
-    );
-  };
-
   const back = () => {
     const target = getBackScreen(stateRef.current);
     const { screen } = stateRef.current;
@@ -1021,8 +440,8 @@ export const useOnboarding = (props: OnboardingProps) => {
       setState,
       goTo,
       back,
+      field,
       setField,
-      touch,
       submit,
       socialSignIn,
       resend,

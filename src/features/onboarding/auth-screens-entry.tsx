@@ -261,9 +261,7 @@ export const EmailScreen = (props: ScreenProps) => {
         type="email"
         inputMode="email"
         autoComplete="email"
-        value={state.form.email}
-        onChange={(event) => actions.setField("email", event.target.value)}
-        onBlur={() => actions.touch("email")}
+        {...actions.field("email")}
         onKeyDown={enterSubmit}
         error={view.shown.email ?? ""}
         invalid={!!view.shown.email}
@@ -340,12 +338,11 @@ export const PasswordScreen = ({ onboarding, layout, view }: ScreenProps) => {
       </label>
       <PasswordInput
         id="ob-pw"
-        value={state.form.password}
         shown={state.passwordShown}
         onToggle={() =>
           actions.setState({ passwordShown: !state.passwordShown })
         }
-        onChange={(event) => actions.setField("password", event.target.value)}
+        {...actions.field("password")}
         onKeyDown={(event) => {
           if (event.key === "Enter") actions.submit();
         }}

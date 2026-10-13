@@ -1,4 +1,4 @@
-import type { ChangeEvent, KeyboardEvent } from "react";
+import type { ChangeEvent, FocusEvent, KeyboardEvent, Ref } from "react";
 import { joinClassNames } from "../../utils/class-names";
 import styles from "../../styles/features/onboarding/onboarding-fields.module.css";
 
@@ -94,14 +94,20 @@ export const SubmitButton = ({
   </button>
 );
 
-interface TextFieldProps {
+/** What actions.field(name) returns: the value plus react-hook-form's handlers and ref. */
+export interface FieldBinding {
+  name?: string;
+  value: string;
+  onChange: (event: ChangeEvent<HTMLInputElement>) => void;
+  onBlur?: (event: FocusEvent<HTMLInputElement>) => void;
+  ref?: Ref<HTMLInputElement>;
+}
+
+interface TextFieldProps extends FieldBinding {
   id: string;
   label: string;
   /** Label spacing: "first" (8px under), "next" (10px above), "gap" (16px above). */
   spacing?: "first" | "next" | "gap";
-  value: string;
-  onChange: (event: ChangeEvent<HTMLInputElement>) => void;
-  onBlur?: () => void;
   onKeyDown?: (event: KeyboardEvent<HTMLInputElement>) => void;
   error: string;
   invalid: boolean;
@@ -125,6 +131,7 @@ export const TextField = ({
   id,
   label,
   spacing = "first",
+  name,
   value,
   onChange,
   onBlur,
@@ -138,6 +145,7 @@ export const TextField = ({
   animated,
   errorId,
   errorLive,
+  ref,
 }: TextFieldProps) => (
   <>
     <label htmlFor={id} className={LABEL_CLASS[spacing]}>
@@ -148,6 +156,8 @@ export const TextField = ({
       type={type}
       inputMode={inputMode}
       autoComplete={autoComplete}
+      ref={ref}
+      name={name}
       value={value}
       onChange={onChange}
       onBlur={onBlur}
@@ -200,13 +210,10 @@ export const NameFields = ({
   </div>
 );
 
-interface PasswordInputProps {
+interface PasswordInputProps extends FieldBinding {
   id: string;
-  value: string;
   shown: boolean;
   onToggle: () => void;
-  onChange: (event: ChangeEvent<HTMLInputElement>) => void;
-  onBlur?: () => void;
   onKeyDown?: (event: KeyboardEvent<HTMLInputElement>) => void;
   autoComplete: string;
   invalid: boolean;
@@ -218,6 +225,7 @@ interface PasswordInputProps {
 
 export const PasswordInput = ({
   id,
+  name,
   value,
   shown,
   onToggle,
@@ -229,12 +237,15 @@ export const PasswordInput = ({
   describedBy,
   shake,
   animated,
+  ref,
 }: PasswordInputProps) => (
   <div className={joinClassNames(styles.passwordWrap, shake && styles.shake)}>
     <input
       id={id}
       type={shown ? "text" : "password"}
       autoComplete={autoComplete}
+      ref={ref}
+      name={name}
       value={value}
       onChange={onChange}
       onBlur={onBlur}
@@ -256,22 +267,21 @@ export const PasswordInput = ({
   </div>
 );
 
-interface MobileFieldProps {
+interface MobileFieldProps extends FieldBinding {
   id: string;
-  value: string;
-  onChange: (event: ChangeEvent<HTMLInputElement>) => void;
-  onBlur: () => void;
   error: string;
   invalid: boolean;
 }
 
 export const MobileField = ({
   id,
+  name,
   value,
   onChange,
   onBlur,
   error,
   invalid,
+  ref,
 }: MobileFieldProps) => (
   <>
     <label htmlFor={id} className={styles.labelGap}>
@@ -289,6 +299,8 @@ export const MobileField = ({
         type="tel"
         inputMode="tel"
         autoComplete="tel-national"
+        ref={ref}
+        name={name}
         value={value}
         onChange={onChange}
         onBlur={onBlur}

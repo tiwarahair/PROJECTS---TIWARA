@@ -1,10 +1,8 @@
 import { describe, expect, it } from "vitest";
 import { getFixturePatch } from "../onboarding-fixtures";
-import {
-  getErrors,
-  isValidMobile,
-  isValidPostcode,
-} from "../onboarding-schemas";
+import { isPostcodeValid } from "../../../utils/address";
+import { isValidMobile } from "../../../utils/validation";
+import { getErrors } from "../onboarding-screen-schemas";
 import {
   getBackScreen,
   INITIAL_FORM,
@@ -62,7 +60,7 @@ describe("onboarding validation", () => {
     expect(isValidMobile("7700 900123")).toBe(true);
     expect(isValidMobile("07700 900123")).toBe(true);
     expect(isValidMobile("12")).toBe(false);
-    expect(isValidPostcode("m14 5tq")).toBe(true);
+    expect(isPostcodeValid("m14 5tq")).toBe(true);
   });
 
   it("Back follows the flow; verify returns to the right form", () => {

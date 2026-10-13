@@ -9,6 +9,7 @@ import { TAKEN_EMAILS } from "./account-data";
 import type { AccountBooking, Profile, SavedCard } from "./account-data";
 import { formatMoney } from "../../utils/money";
 import { formatWeekdayDate, formatClockTime } from "../../utils/dates";
+import { isValidEmail, isValidMobile } from "../../utils/validation";
 
 const DAY_MS = 864e5;
 
@@ -241,7 +242,7 @@ export const validateEdit = (
   if (key === "email") {
     const value = draft.email.trim().toLowerCase();
 
-    if (!/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(value))
+    if (!isValidEmail(value))
       errors.email = "Enter an email address like name@example.com";
     else if (value === currentEmail) errors.email = "That’s already your email";
     else if (TAKEN_EMAILS.includes(value))
@@ -249,9 +250,7 @@ export const validateEdit = (
   }
 
   if (key === "mobile") {
-    const value = draft.mobile.replace(/\D/g, "").replace(/^0/, "");
-
-    if (!/^7\d{9}$/.test(value))
+    if (!isValidMobile(draft.mobile))
       errors.mobile = "Enter a UK mobile number, like 07700 900123";
   }
 
