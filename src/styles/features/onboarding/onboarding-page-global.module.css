@@ -23,9 +23,4 @@
   :global(html.onboarding-page) button {
     font-family: revert;
   }
-
-  :global(html.onboarding-page) :global(.leaflet-container) {
-    font-family: inherit;
-    background: #efe8db;
-  }
 }

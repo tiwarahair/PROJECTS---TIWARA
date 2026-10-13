@@ -333,13 +333,16 @@ export const useAddressFinder = ({
     const timer = window.setTimeout(async () => {
       sessionRef.current ??= new places.AutocompleteSessionToken();
 
-      const { suggestions } =
+      // Google unreachable: show "can't find", which offers manual entry
+      const suggestions =
         await places.AutocompleteSuggestion.fetchAutocompleteSuggestions({
           input,
           sessionToken: sessionRef.current,
           includedRegionCodes: ["gb"],
           includedPrimaryTypes: ADDRESS_TYPES,
-        });
+        })
+          .then((result) => result.suggestions)
+          .catch(() => []);
 
       if (cancelled) return;
 
@@ -363,8 +366,14 @@ export const useAddressFinder = ({
   const pick = async (hit: AddressSuggestion) => {
     const place = hit.prediction.toPlace();
 
-    await place.fetchFields({ fields: ["addressComponents", "location"] });
+    const fetched = await place
+      .fetchFields({ fields: ["addressComponents", "location"] })
+      .then(() => true)
+      .catch(() => false);
+
     sessionRef.current = null;
+
+    if (!fetched) return toManual();
 
     const found = toPlaceAddress(
       (place.addressComponents ?? []).map(({ longText, types }) => ({

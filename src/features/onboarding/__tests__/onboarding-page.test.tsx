@@ -9,6 +9,7 @@ import * as auth from "../../../lib/auth";
 vi.mock("../../../lib/auth", async (importOriginal) => ({
   ...(await importOriginal<typeof import("../../../lib/auth")>()),
   getAccountKind: vi.fn(),
+  getSignedInAccount: vi.fn(),
   signIn: vi.fn(),
   verifyEmailCode: vi.fn(),
 }));
@@ -110,6 +111,19 @@ describe("OnboardingPage", () => {
     expect(screen.getAllByRole("alert")[0]).toHaveTextContent(
       "That password isn’t right. Try again or reset it.",
     );
+  });
+
+  it("backing out of Google sign-in returns to the chooser without an error", async () => {
+    vi.mocked(auth.getSignedInAccount).mockResolvedValue(null);
+    renderWithStore(<OnboardingPage />, "/login?flow=social");
+
+    await vi.waitFor(() => expect(auth.getSignedInAccount).toHaveBeenCalled());
+
+    expect(
+      screen.getByRole("heading", { name: "Log in or sign up" }),
+    ).toBeInTheDocument();
+
+    expect(screen.queryByText(/couldn’t connect/)).not.toBeInTheDocument();
   });
 
   it("the wizard picks a business type and moves on after 300ms", async () => {

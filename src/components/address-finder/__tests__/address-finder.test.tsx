@@ -120,6 +120,44 @@ describe("AddressFinder", () => {
     );
   });
 
+  it("Google failing to answer shows the manual-entry fallback", async () => {
+    fakePlaces.AutocompleteSuggestion.fetchAutocompleteSuggestions.mockRejectedValueOnce(
+      new Error("offline"),
+    );
+
+    renderFinder();
+    await user.type(screen.getByRole("combobox"), "dickenson");
+    await waitForSearch();
+
+    expect(screen.getByRole("status")).toHaveTextContent(
+      "We can’t find that address",
+    );
+  });
+
+  it("a pick whose details can't be fetched opens manual entry", async () => {
+    const [first] = predictions;
+
+    predictions = [
+      {
+        ...first!,
+        toPlace: () => ({
+          ...first!.toPlace(),
+          fetchFields: vi.fn().mockRejectedValue(new Error("quota")),
+        }),
+      },
+    ];
+
+    renderFinder();
+    await user.type(screen.getByRole("combobox"), "12 dickenson road");
+    await waitForSearch();
+    await user.click(screen.getAllByRole("option")[0]!);
+    await act(() => vi.advanceTimersByTimeAsync(30));
+
+    expect(screen.getByLabelText("Address line 1")).toHaveValue(
+      "12 dickenson road",
+    );
+  });
+
   it("summary: shows the picked address and reports it once", () => {
     const onChange = renderFinder("summary");
 

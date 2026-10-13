@@ -13,30 +13,39 @@ if (!supabaseUrl || !supabaseKey)
 
 const REMEMBER_KEY = "tw_remember";
 
-const isRemembered = () => {
+/** Storage can throw (blocked site data, some private modes): treat that as empty. */
+const attempt = <T>(task: () => T, fallback: T): T => {
   try {
-    return localStorage.getItem(REMEMBER_KEY) !== "0";
+    return task();
   } catch {
-    return true;
+    return fallback;
   }
 };
+
+const isRemembered = () =>
+  attempt(() => localStorage.getItem(REMEMBER_KEY) !== "0", true);
 
 /** "Remember this device" off: the session lives in sessionStorage and ends with the browser. */
 const sessionStore = {
   getItem: (key: string) =>
-    sessionStorage.getItem(key) ?? localStorage.getItem(key),
-  setItem: (key: string, value: string) => {
-    const [keep, drop] = isRemembered()
-      ? [localStorage, sessionStorage]
-      : [sessionStorage, localStorage];
+    attempt(
+      () => sessionStorage.getItem(key) ?? localStorage.getItem(key),
+      null,
+    ),
+  setItem: (key: string, value: string) =>
+    attempt(() => {
+      const [keep, drop] = isRemembered()
+        ? [localStorage, sessionStorage]
+        : [sessionStorage, localStorage];
 
-    drop.removeItem(key);
-    keep.setItem(key, value);
-  },
-  removeItem: (key: string) => {
-    localStorage.removeItem(key);
-    sessionStorage.removeItem(key);
-  },
+      drop.removeItem(key);
+      keep.setItem(key, value);
+    }, undefined),
+  removeItem: (key: string) =>
+    attempt(() => {
+      localStorage.removeItem(key);
+      sessionStorage.removeItem(key);
+    }, undefined),
 };
 
 export const supabase = createClient<Database>(supabaseUrl, supabaseKey, {
@@ -45,6 +54,10 @@ export const supabase = createClient<Database>(supabaseUrl, supabaseKey, {
 
 /** Moves the current session to the chosen storage by re-saving it. */
 export const rememberDevice = async (remember: boolean) => {
-  localStorage.setItem(REMEMBER_KEY, remember ? "1" : "0");
+  attempt(
+    () => localStorage.setItem(REMEMBER_KEY, remember ? "1" : "0"),
+    undefined,
+  );
+
   await supabase.auth.refreshSession();
 };

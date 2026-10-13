@@ -23,6 +23,12 @@ const supabase = createClient(
   Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!,
 );
 
+/** Cloudflare's header can't be set by the caller; X-Forwarded-For can, so it's only the local fallback. */
+const getClientIp = ({ headers }: Request) =>
+  headers.get("cf-connecting-ip") ??
+  headers.get("x-forwarded-for")?.split(",")[0]?.trim() ??
+  "unknown";
+
 const isHuman = async (token: string, ip: string) => {
   const response = await fetch(
     "https://challenges.cloudflare.com/turnstile/v0/siteverify",
@@ -70,7 +76,7 @@ Deno.serve(async (request) => {
   if (!parsed.success) return respond(startedAt, 400, { error: "invalid_request" });
 
   const { email, captchaToken } = parsed.data;
-  const ip = request.headers.get("x-forwarded-for")?.split(",")[0]?.trim() ?? "unknown";
+  const ip = getClientIp(request);
 
   try {
     if (!(await isHuman(captchaToken, ip))) return respond(startedAt, 403, { error: "captcha_failed" });

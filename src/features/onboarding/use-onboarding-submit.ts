@@ -389,7 +389,8 @@ export const useOnboardingSubmit = ({
     run(async () => {
       const account = await getSignedInAccount();
 
-      if (!account) return setState({ busy: false, networkError: true });
+      // no session: they backed out at Google, so just show the chooser
+      if (!account) return setState({ busy: false });
 
       reset({ ...getValues(), ...account });
 
