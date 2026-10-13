@@ -1,12 +1,28 @@
 <!doctype html>
 <html lang="en">
-  <body style="margin:0;padding:32px 16px;background:#faf6f0;font-family:Georgia,'Times New Roman',serif;color:#1f1a17">
-    <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="max-width:480px;margin:0 auto;background:#ffffff;border-radius:16px;padding:32px">
-      <tr><td style="font-size:22px;font-weight:bold;color:#8b3a00;padding-bottom:24px">Tiwára’s House</td></tr>
-      <tr><td style="font-size:18px;padding-bottom:12px">Confirm your email address</td></tr>
-      <tr><td style="font-family:Arial,sans-serif;font-size:15px;padding-bottom:20px">Enter this code to continue. It expires in 1 hour.</td></tr>
-      <tr><td style="font-family:'Courier New',monospace;font-size:34px;letter-spacing:8px;font-weight:bold;color:#1b4332;padding:16px 0;text-align:center;background:#f2ede6;border-radius:12px">{{ .Token }}</td></tr>
-      <tr><td style="padding-top:32px;font-size:13px;color:#6b625b;font-family:Arial,sans-serif">If you didn’t ask for this, you can ignore this email. Questions? Reply to this email.</td></tr>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Confirm your email</title>
+  </head>
+  <body style="margin:0;padding:0;background:#efebe4">
+    <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background:#efebe4">
+      <tr>
+        <td align="center" style="padding:40px 12px">
+          <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="max-width:560px;background:#fffefb;border-radius:16px">
+            <tr>
+              <td style="padding:40px;font-family:'Schibsted Grotesk', Helvetica, Arial, sans-serif;color:#1a1714">
+                <img src="https://www.tiwarashouse.com/email/logo-crimson.png" alt="Tiwára’s House" height="26" style="display:block;height:26px;width:auto;border:0;color:#8f1112;font-weight:600;font-size:18px" />
+                <h1 style="margin:20px 0 0;font-family:'Schibsted Grotesk', Helvetica, Arial, sans-serif;font-weight:600;letter-spacing:-0.02em;font-size:24px;line-height:1.2;color:#1a1714">Confirm your email</h1>
+                <p style="margin:20px 0 0;font-size:15.5px;line-height:1.6">Enter this code to finish creating your Tiwára’s House account. It expires in 1 hour.</p>
+                <p style="margin:20px 0 0;padding:16px 0;background:#efebe4;border-radius:16px;text-align:center;font-family:'Courier New', monospace;font-size:32px;font-weight:700;letter-spacing:8px;color:#1a1714">{{ .Token }}</p>
+
+                <p style="margin:20px 0 0;padding-top:16px;border-top:1px solid #e9e2d3;font-size:13px;line-height:1.55;color:#575045">If you didn’t create an account, you can ignore this email.</p>
+              </td>
+            </tr>
+          </table>
+        </td>
+      </tr>
     </table>
   </body>
 </html>
