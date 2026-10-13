@@ -124,21 +124,6 @@
   margin-top: 14px;
 }
 
-/* the crimson pin on the Google map */
-.mapPin {
-  display: block;
-  filter: drop-shadow(0 6px 8px rgba(26, 23, 20, 0.35));
-}
-
-.map {
-  height: 240px;
-  border-radius: var(--radius-md);
-  overflow: hidden;
-  background: #efe8db;
-  position: relative;
-  z-index: 0;
-}
-
 .sources {
   display: flex;
   flex-direction: column;

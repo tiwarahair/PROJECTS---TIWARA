@@ -6,7 +6,7 @@ import {
 } from "@vis.gl/react-google-maps";
 import { useEffect } from "react";
 import { MAP_ID } from "../../lib/google-maps";
-import styles from "../../styles/features/onboarding/wizard-steps.module.css";
+import styles from "../../styles/features/onboarding/onboarding-map.module.css";
 
 interface OnboardingMapProps {
   /** Where the pin is: the dragged pin, else the geocoded address, else central Manchester. */
