@@ -175,6 +175,27 @@ describe("AccountPage", () => {
     );
   });
 
+  it("leaving a section with an unsaved edit asks first; Keep editing stays, Discard leaves", async () => {
+    renderAccount("&section=personal");
+    await user.click(screen.getByRole("button", { name: "Edit email" }));
+    await user.type(screen.getByLabelText("New email"), "nia@example.com");
+    await user.click(screen.getByRole("link", { name: "Payment methods" }));
+
+    expect(
+      screen.getByRole("heading", { name: "Discard changes?" }),
+    ).toBeInTheDocument();
+
+    await user.click(screen.getByRole("button", { name: "Keep editing" }));
+    expect(screen.getByLabelText("New email")).toHaveValue("nia@example.com");
+
+    await user.click(screen.getByRole("link", { name: "Payment methods" }));
+    await user.click(screen.getByRole("button", { name: "Discard" }));
+
+    expect(
+      screen.getByRole("heading", { level: 1, name: "Payment methods" }),
+    ).toBeInTheDocument();
+  });
+
   it("changing the email sends a code; 123456 confirms it", async () => {
     renderAccount("&section=personal");
     await user.click(screen.getByRole("button", { name: "Edit email" }));

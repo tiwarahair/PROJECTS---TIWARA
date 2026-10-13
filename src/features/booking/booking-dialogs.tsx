@@ -158,7 +158,7 @@ export const BookingDialogs = ({ booking }: BookingDialogsProps) => {
           text="We'll save your choices on this device, so you can pick up where you left off. Your held time will be released."
         >
           <button
-            onClick={() => setState({ leave: null })}
+            onClick={actions.keepBooking}
             className={joinClassNames(styles.secondary, styles.wideButton)}
           >
             Keep booking

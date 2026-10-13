@@ -1,0 +1,56 @@
+.inputGroup {
+  display: flex;
+  align-items: center;
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-sm);
+  height: 44px;
+  padding-left: 13px;
+  overflow: hidden;
+}
+
+.inputGroup:focus-within {
+  border-color: var(--text-primary);
+}
+
+.inputGroup:has(.input:disabled) {
+  background: var(--fill-quiet);
+  cursor: not-allowed;
+}
+
+.input:disabled,
+.inputGroup:has(.input:disabled) .prefix {
+  color: var(--text-muted);
+  cursor: not-allowed;
+}
+
+.prefix {
+  color: var(--text-secondary);
+  font-size: 16px;
+  white-space: nowrap;
+}
+
+.input {
+  flex: 1;
+  min-width: 0;
+  height: 100%;
+  border: 0;
+  background: transparent;
+  padding: 0 13px 0 0;
+  font-size: 16px;
+  outline: none;
+}
+
+.status {
+  font-size: 13.5px;
+  margin-top: 4px;
+  line-height: 1.45;
+  color: var(--text-secondary);
+}
+
+.available {
+  color: var(--status-success);
+}
+
+.taken {
+  color: var(--status-danger);
+}

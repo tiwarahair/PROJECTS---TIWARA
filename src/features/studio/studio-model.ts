@@ -2,6 +2,7 @@
 import { serviceTypes } from "../../data";
 import {
   BLOCK_COLORS,
+  BOOKING_LINK,
   CATEGORY_COLOURS,
   CLIENTS,
   NO_CATEGORY_TONE,
@@ -465,6 +466,12 @@ export const hasTwoFactor = (state: StudioState): boolean =>
 
 export const isLive = (state: StudioState): boolean =>
   hasTwoFactor(state) && !!state.tax && !!state.check.stripe;
+
+export const getBookingLink = ({ account }: StudioState) =>
+  account ? `tiwarashouse.com/${account.slug}` : BOOKING_LINK;
+
+/** Real stylists' public pages arrive in Phase 3; until then only dev boards link to one. */
+export const hasPublicProfile = ({ account }: StudioState) => !account;
 
 export const getSteps = (state: StudioState) => ({
   availability: !!state.check.availability,

@@ -431,3 +431,7 @@ enabled = true
 # Public endpoint: guarded by Turnstile and rate limits, not a user JWT.
 [functions.email-status]
 verify_jwt = false
+
+# called by pg_cron with x-cron-secret, not a user's token
+[functions.purge-closed-businesses]
+verify_jwt = false

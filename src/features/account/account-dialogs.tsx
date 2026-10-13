@@ -1,4 +1,5 @@
 import type { ChangeEvent, ReactNode } from "react";
+import { DISCARD_PROMPT } from "../../hooks/use-unsaved-changes";
 import { joinClassNames } from "../../utils/class-names";
 import {
   downloadFile,
@@ -60,6 +61,7 @@ export const AccountDialogs = ({ account, view }: AccountDialogsProps) => {
     text: string,
     action: string,
     onConfirm: () => void,
+    cancel = "Cancel",
   ) => (
     <>
       <h2 className={styles.title} id="ac-dlg-t">
@@ -68,7 +70,7 @@ export const AccountDialogs = ({ account, view }: AccountDialogsProps) => {
       <p className={styles.text}>{text}</p>
       <div className={styles.actions}>
         <button className={styles.secondary} onClick={closeDialog}>
-          Cancel
+          {cancel}
         </button>
         <button className={styles.primary} onClick={onConfirm}>
           {action}
@@ -340,6 +342,15 @@ export const AccountDialogs = ({ account, view }: AccountDialogsProps) => {
           </button>
         </div>
       </div>
+    );
+
+  if (dialog.kind === "discard")
+    content = confirm(
+      DISCARD_PROMPT.title,
+      DISCARD_PROMPT.body,
+      DISCARD_PROMPT.discard,
+      dialog.then,
+      DISCARD_PROMPT.keep,
     );
 
   if (dialog.kind === "logoutAll")

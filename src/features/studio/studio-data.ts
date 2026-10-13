@@ -34,7 +34,7 @@ export const SLOT_TIMES = ["09:00", "10:30", "13:00", "15:30", "17:00"];
 export const BOOKING_LINK = "tiwaras.house/book/tiwara";
 export const STUDIO_STYLIST_ID = "tiwaras-house";
 export const GATE_REASON =
-  "Your booking link and payouts are off until you turn on two-step verification, add your tax details and connect Stripe.";
+  "Finish setting up your studio to turn on your booking link.";
 
 export const CLIENTS: StudioClient[] = [
   {
@@ -441,6 +441,7 @@ export const getInitialStudioState = (): StudioState => {
   };
 
   return {
+    account: null,
     owner: {
       first: "Amara",
       last: "Okonkwo",
@@ -1028,7 +1029,7 @@ export const getInitialStudioState = (): StudioState => {
     ],
     blocked: [
       {
-        id: 1,
+        id: "1",
         day: "Today",
         dayIndex: 0,
         span: "13:00 to 14:00",

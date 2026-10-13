@@ -2,9 +2,14 @@ import type { CSSProperties } from "react";
 import { Link } from "react-router";
 import { getAssetUrl } from "../../utils/asset-url";
 import { joinClassNames } from "../../utils/class-names";
-import { BOOKING_LINK, STUDIO_STYLIST_ID } from "./studio-data";
+import { STUDIO_STYLIST_ID } from "./studio-data";
 import { copyText } from "./studio-format";
-import { getSteps, isLive } from "./studio-model";
+import {
+  getBookingLink,
+  getSteps,
+  hasPublicProfile,
+  isLive,
+} from "./studio-model";
 import type { StudioTab } from "./studio-types";
 import type { StudioController } from "./use-studio";
 import styles from "../../styles/features/studio/studio-shell.module.css";
@@ -514,7 +519,7 @@ const CloseIcon = () => (
 
 /** "Your booking link is ready to share" — the wide floating card, or (narrow) the Home banner's body. */
 export const LinkCardBody = ({ studio }: { studio: StudioController }) => {
-  const { setState, actions } = studio;
+  const { state, setState, actions } = studio;
 
   return (
     <>
@@ -538,18 +543,20 @@ export const LinkCardBody = ({ studio }: { studio: StudioController }) => {
           <CloseIcon />
         </button>
       </div>
-      <div className={styles.linkUrl}>{BOOKING_LINK}</div>
+      <div className={styles.linkUrl}>{getBookingLink(state)}</div>
       <div className={styles.linkActions}>
-        <Link
-          className={styles.previewProfile}
-          to={`/stylist?stylist=${STUDIO_STYLIST_ID}`}
-        >
-          Preview profile
-        </Link>
+        {hasPublicProfile(state) && (
+          <Link
+            className={styles.previewProfile}
+            to={`/stylist?stylist=${STUDIO_STYLIST_ID}`}
+          >
+            Preview profile
+          </Link>
+        )}
         <button
           className={styles.copyLink}
           onClick={() => {
-            copyText(BOOKING_LINK);
+            copyText(getBookingLink(state));
             actions.showToast("Booking link copied");
             setState({ linkCard: false });
           }}

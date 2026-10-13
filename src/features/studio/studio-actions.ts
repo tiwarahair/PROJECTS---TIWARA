@@ -3,6 +3,13 @@
 import { ICONS } from "./studio-data";
 import { durationToMinutes, timeToMinutes } from "./studio-format";
 import { getServiceDuration, getSteps, getWorkingHours } from "./studio-model";
+import type { StudioSync } from "./studio-sync";
+import {
+  getDiscardConfirm,
+  getSheetDraft,
+  hasUnsavedSheet,
+} from "./studio-unsaved";
+import type { SavedSettings } from "./studio-unsaved";
 import type {
   ActionSheet,
   BlockedTime,
@@ -11,15 +18,21 @@ import type {
   StudioPage,
   StudioPatch,
   StudioState,
-  TwoFactorFlow,
 } from "./studio-types";
+import { removeBlock as removeBlockRow } from "../../lib/studio-api";
+import { createTwoFactorActions } from "./studio-two-factor-actions";
 
 export interface StudioContext {
   getState: () => StudioState;
   setState: (patch: StudioPatch) => void;
+  /** setState without the "Discard changes?" check, for leaving a page after saving it. */
+  applyState: (patch: StudioPatch) => void;
+  /** Saves a real stylist's changes; null on demo boards. */
+  sync: StudioSync | null;
   timers: Record<string, number>;
   /** Values kept between renders (seen setup steps, the clash override, the last pointer type). */
   memo: {
+    saveSlug?: () => Promise<boolean>;
     seenDone?: ReturnType<typeof getSteps>;
     clashOk?: boolean;
     lastPointer?: string;
@@ -45,8 +58,12 @@ export interface StudioContext {
     weekScrolledKey?: string | null;
     locked?: boolean;
     weekKey?: number;
-    policyApi?: { canSave: boolean; save: () => void };
-    accountApi?: { canSave: boolean; save: () => void };
+    saved?: SavedSettings;
+    isSlugEdited?: boolean;
+    isTaxEdited?: boolean;
+    sheetDraft?: string;
+    policyApi?: { canSave: boolean; isDirty: boolean; save: () => void };
+    accountApi?: { canSave: boolean; save: () => void; discard: () => void };
     businessApi?: { canSave: boolean; save: () => void };
   };
   isWide: () => boolean;
@@ -75,7 +92,7 @@ const getScroller = (from?: Element | null): Element | null => {
 };
 
 export const createStudioActions = (context: StudioContext) => {
-  const { getState, setState, timers, memo, isWide } = context;
+  const { getState, setState, applyState, timers, memo, isWide } = context;
 
   const showToast = (message: string, undo?: () => void) => {
     clear(timers, "toast");
@@ -267,7 +284,22 @@ export const createStudioActions = (context: StudioContext) => {
       });
 
     setState({ ...base, ...patch });
+    memo.sheetDraft = getSheetDraft(getState());
   };
+
+  // runs `proceed` straight away, or after "Discard" when the open sheet's draft has changed
+  const guardSheet = (proceed: () => void) => {
+    if (!hasUnsavedSheet(getState(), memo)) return proceed();
+
+    setState({
+      confirm: getDiscardConfirm(() => {
+        setState({ confirm: null });
+        proceed();
+      }),
+    });
+  };
+
+  const requestCloseSheet = () => guardSheet(closeSheet);
 
   const closeSheet = () => {
     if (!getState().sheet) return;
@@ -319,7 +351,7 @@ export const createStudioActions = (context: StudioContext) => {
         : { page: null, pageFromSetup: false };
     };
 
-    setState(getLeavePatch());
+    applyState(getLeavePatch());
     scrollBody(0, false);
   };
 
@@ -378,136 +410,6 @@ export const createStudioActions = (context: StudioContext) => {
     }, 0);
   };
 
-  const openTwoFactor = (step: string, extra: Partial<TwoFactorFlow> = {}) => {
-    clear(timers, "twoFactor");
-
-    setState({
-      twoFactor: {
-        step,
-        kind: "main",
-        name: "Main phone",
-        code: "",
-        error: "",
-        errorMessage: "",
-        keyShown: false,
-        option: "device",
-        skipWarn: false,
-        flow: "setup",
-        ...extra,
-      },
-      twoFactorOut: false,
-    });
-  };
-
-  const closeTwoFactor = () => {
-    if (!getState().twoFactor) return;
-
-    setState({ twoFactorOut: true });
-    clear(timers, "twoFactor");
-
-    timers.twoFactor = window.setTimeout(
-      () => setState({ twoFactor: null, twoFactorOut: false }),
-      160,
-    );
-  };
-
-  const setTwoFactor = (patch: Partial<TwoFactorFlow>) =>
-    setState(({ twoFactor }) => ({
-      twoFactor: twoFactor ? { ...twoFactor, ...patch } : twoFactor,
-    }));
-
-  const WRONG_CODE =
-    "That code isn’t right. Enter the latest code from your app.";
-
-  const verifyTwoFactor = () => {
-    const { twoFactor, twoFactorSettings } = getState();
-
-    if (!twoFactor) return;
-
-    const devices = twoFactorSettings.devices;
-    const name = (twoFactor.name || "").trim();
-
-    if (!name)
-      return setTwoFactor({ error: "name", errorMessage: "Name this device" });
-
-    if (
-      devices.some((device) => device.name.toLowerCase() === name.toLowerCase())
-    )
-      return setTwoFactor({
-        error: "name",
-        errorMessage: "You already have a device with this name",
-      });
-
-    if ((twoFactor.code || "").length < 6)
-      return setTwoFactor({
-        error: "code",
-        errorMessage: "Enter the 6-digit code",
-      });
-
-    if (twoFactor.code !== "123456")
-      return setTwoFactor({ error: "code", errorMessage: WRONG_CODE });
-
-    setState({
-      twoFactorSettings: {
-        devices: devices.concat([
-          { name, backup: twoFactor.kind === "backup" },
-        ]),
-      },
-    });
-
-    if (twoFactor.kind === "main")
-      setTwoFactor({
-        step: "backup",
-        code: "",
-        error: "",
-        errorMessage: "",
-        option: "device",
-        skipWarn: false,
-        keyShown: false,
-      });
-    else if (twoFactor.flow === "add") {
-      closeTwoFactor();
-      showToast("Backup added");
-    } else
-      setTwoFactor({ step: "done", code: "", error: "", errorMessage: "" });
-
-    checkDone();
-  };
-
-  const removeTwoFactorDevice = () => {
-    const { twoFactor, twoFactorSettings } = getState();
-
-    if (!twoFactor) return;
-
-    const devices = twoFactorSettings.devices;
-
-    if (devices.length <= 1) {
-      closeTwoFactor();
-
-      return;
-    }
-
-    if ((twoFactor.code || "").length < 6)
-      return setTwoFactor({
-        error: "code",
-        errorMessage: "Enter the 6-digit code",
-      });
-
-    if (twoFactor.code !== "123456")
-      return setTwoFactor({ error: "code", errorMessage: WRONG_CODE });
-
-    let next = devices.filter((device) => device.name !== twoFactor.name);
-
-    if (!next.some(({ backup }) => !backup))
-      next = next.map((device, index) =>
-        index === 0 ? { ...device, backup: false } : device,
-      );
-
-    setState({ twoFactorSettings: { devices: next } });
-    closeTwoFactor();
-    showToast(`${twoFactor.name} removed`);
-  };
-
   const setStatus = (
     id: number,
     status: string,
@@ -529,9 +431,11 @@ export const createStudioActions = (context: StudioContext) => {
     const isAllDay = block.span === "All day";
     const parts = isAllDay ? ["09:00", "18:00"] : block.span.split(" to ");
 
-    const reason = (block.reason || "")
-      .replace(/( · )?Repeats (daily|weekly|monthly)( until [^·]*)?/, "")
-      .trim();
+    const reason =
+      block.note ??
+      (block.reason || "")
+        .replace(/( · )?Repeats (daily|weekly|monthly)( until [^·]*)?/, "")
+        .trim();
 
     openSheet("block", {
       blockDraft: {
@@ -557,10 +461,16 @@ export const createStudioActions = (context: StudioContext) => {
         yesLabel: "Remove",
         noLabel: "Keep it",
         yes: () => {
+          const before = context.getState().blocked;
+
           setState(({ blocked }) => ({
             blocked: blocked.filter(({ id }) => id !== block.id),
             confirm: null,
           }));
+
+          context.sync?.save(() => removeBlockRow(block.id), {
+            blocked: before,
+          });
 
           showToast("Blocked time removed");
         },
@@ -782,6 +692,7 @@ export const createStudioActions = (context: StudioContext) => {
   };
 
   return {
+    ...createTwoFactorActions(context, { showToast, checkDone }),
     showToast,
     scrollBody,
     scrollCalendarToNow,
@@ -792,15 +703,12 @@ export const createStudioActions = (context: StudioContext) => {
     closeActionSheet,
     openSheet,
     closeSheet,
+    guardSheet,
+    requestCloseSheet,
     openPage,
     closePage,
     leavePage,
     checkDone,
-    openTwoFactor,
-    closeTwoFactor,
-    setTwoFactor,
-    verifyTwoFactor,
-    removeTwoFactorDevice,
     setStatus,
     editBlock,
     removeBlock,

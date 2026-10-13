@@ -174,7 +174,7 @@ export interface OwnOption {
   minutesDelta: string;
 }
 
-interface OwnGroup {
+export interface OwnGroup {
   name: string;
   options: OwnOption[];
 }
@@ -228,7 +228,7 @@ export interface StudioCategory {
 }
 
 export interface BlockedTime {
-  id: number;
+  id: string;
   day: string;
   dayIndex: number;
   span: string;
@@ -237,10 +237,12 @@ export interface BlockedTime {
   ends?: string;
   endDayOffset?: number | null;
   color?: string;
+  /** The reason as typed (reason adds the repeat label). */
+  note?: string;
 }
 
 interface ClosedPeriod {
-  id: number;
+  id: string;
   from: string;
   to: string;
   span: string;
@@ -358,7 +360,7 @@ interface BlockDraft {
   ends?: string;
   endDayOffset?: number | null;
   color?: string;
-  editId?: number;
+  editId?: string;
   force?: boolean;
 }
 
@@ -366,7 +368,7 @@ interface ClosedDraft {
   from: string;
   to: string;
   reason: string;
-  editId?: number;
+  editId?: string;
 }
 
 interface ClientEditDraft {
@@ -512,6 +514,12 @@ interface StudioCheck {
 }
 
 export interface StudioState {
+  /** A real stylist's ids (null on demo boards, which never save). */
+  account: {
+    stylistId: string;
+    slug: string;
+    slugChangedAt: string | null;
+  } | null;
   /** The signed-in stylist (demo: Amara). */
   owner: {
     first: string;
@@ -556,7 +564,7 @@ export interface StudioState {
   setupExit: "hold" | "out" | null;
   linkCard: boolean;
   lastDone: string | null;
-  portfolio: { id: string; src: string }[];
+  portfolio: { id: string; src: string; path?: string }[];
   chartIndex: number | null;
   dayIndex: number;
   bookingsLayout: string;

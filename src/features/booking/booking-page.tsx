@@ -51,7 +51,6 @@ export const BookingPage = () => {
     >
       <BookingNav
         exitHref={`/stylist?stylist=${stylist.id}`}
-        onLeaveLink={actions.onLeaveLink}
         holdBar={
           holdOn && (
             <HoldBar variant="nav" time={state.time} leftMs={holdLeftMs} />

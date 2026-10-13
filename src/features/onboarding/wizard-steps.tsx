@@ -19,6 +19,7 @@ interface WizardFieldProps extends FieldBinding {
   type?: string;
   inputMode?: "email";
   autoComplete: string;
+  readOnly?: boolean;
 }
 
 const WizardField = ({
@@ -34,6 +35,7 @@ const WizardField = ({
   inputMode,
   autoComplete,
   ref,
+  readOnly,
 }: WizardFieldProps) => (
   <>
     <label
@@ -52,6 +54,7 @@ const WizardField = ({
       value={value}
       onChange={onChange}
       onBlur={onBlur}
+      readOnly={readOnly}
       aria-invalid={error ? "true" : "false"}
       className={joinClassNames(
         styles.input,
@@ -389,13 +392,14 @@ const Checkbox = ({
 
 /** Step 4: the stylist's account (8+ character password), business contact and Partner Terms. */
 export const StepAccount = ({ onboarding, layout, view }: ScreenProps) => {
-  const { state, actions } = onboarding;
+  const { state, actions, isUpgrade } = onboarding;
   const { form } = state;
   const { shown } = view;
 
   const text = (key: "first" | "last" | "email") => ({
     ...actions.field(key),
     error: shown[key] ?? "",
+    readOnly: isUpgrade,
   });
 
   const { meter, role } = getOnboardingMeter(
@@ -449,6 +453,7 @@ export const StepAccount = ({ onboarding, layout, view }: ScreenProps) => {
           inputMode="tel"
           autoComplete="tel-national"
           {...actions.field("mobile")}
+          readOnly={isUpgrade}
           aria-invalid={shown.mobile ? "true" : "false"}
           className={styles.mobileInput}
         />
@@ -456,33 +461,39 @@ export const StepAccount = ({ onboarding, layout, view }: ScreenProps) => {
       <div role="alert" className={styles.error}>
         {shown.mobile ?? ""}
       </div>
-      <label htmlFor="ob-wpw" className={styles.labelNext}>
-        Password
-      </label>
-      <div className={styles.passwordWrap}>
-        <input
-          id="ob-wpw"
-          type={state.passwordShown ? "text" : "password"}
-          autoComplete="new-password"
-          {...actions.field("password")}
-          aria-invalid={shown.password ? "true" : "false"}
-          aria-describedby="ob-wpw-hint"
-          className={joinClassNames(
-            styles.passwordInput,
-            shown.password ? styles.borderError : styles.border,
-          )}
-        />
-        <button
-          onClick={() =>
-            actions.setState({ passwordShown: !state.passwordShown })
-          }
-          aria-label={state.passwordShown ? "Hide password" : "Show password"}
-          className={styles.passwordToggle}
-        >
-          {state.passwordShown ? "Hide" : "Show"}
-        </button>
-      </div>
-      <PasswordMeter id="ob-wpw-hint" view={meter} messageRole={role} />
+      {!isUpgrade && (
+        <>
+          <label htmlFor="ob-wpw" className={styles.labelNext}>
+            Password
+          </label>
+          <div className={styles.passwordWrap}>
+            <input
+              id="ob-wpw"
+              type={state.passwordShown ? "text" : "password"}
+              autoComplete="new-password"
+              {...actions.field("password")}
+              aria-invalid={shown.password ? "true" : "false"}
+              aria-describedby="ob-wpw-hint"
+              className={joinClassNames(
+                styles.passwordInput,
+                shown.password ? styles.borderError : styles.border,
+              )}
+            />
+            <button
+              onClick={() =>
+                actions.setState({ passwordShown: !state.passwordShown })
+              }
+              aria-label={
+                state.passwordShown ? "Hide password" : "Show password"
+              }
+              className={styles.passwordToggle}
+            >
+              {state.passwordShown ? "Hide" : "Show"}
+            </button>
+          </div>
+          <PasswordMeter id="ob-wpw-hint" view={meter} messageRole={role} />
+        </>
+      )}
       <Checkbox
         checked={form.useContact}
         onChange={(event) =>

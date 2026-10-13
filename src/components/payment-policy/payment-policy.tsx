@@ -59,6 +59,7 @@ const DEFAULT_STYLIST = stylists.find(({ id }) => id === "amara-beauty");
 /** What the host (Studio) gets after every render to drive its own save button. */
 export interface PaymentPolicyApi {
   canSave: boolean;
+  isDirty: boolean;
   save: () => void;
 }
 
@@ -148,7 +149,7 @@ export const PaymentPolicy = ({
 
   // tells the host (Studio) whether a save is possible, so its own header button can mirror the state
   useEffect(() => {
-    onState?.({ canSave, save });
+    onState?.({ canSave, isDirty, save });
 
     if (focusExtra.current !== null) {
       rootRef.current

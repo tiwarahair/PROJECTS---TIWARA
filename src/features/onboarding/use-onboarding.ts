@@ -14,6 +14,7 @@ import type { NavigateFunction } from "react-router";
 import { zodResolver } from "@hookform/resolvers/zod";
 import type { TurnstileInstance } from "@marsidev/react-turnstile";
 import type { FieldBinding } from "./onboarding-fields";
+import { useIdentity } from "../../hooks/use-identity";
 import { usePasswordChecker } from "../../hooks/use-password-checker";
 import { getAssetUrl } from "../../utils/asset-url";
 import { MODE_KEY, PHOTOS, STORAGE_KEY } from "./onboarding-data";
@@ -46,6 +47,7 @@ type StatePatch =
 /** What the submit and address hooks share with the main onboarding hook. */
 export interface OnboardingCore {
   stateRef: RefObject<OnboardingState>;
+  isUpgrade: boolean;
   setState: (patch: StatePatch, callback?: () => void) => void;
   goTo: (screen: string, direction?: "fwd" | "back") => void;
   later: (name: string, callback: () => void, delay: number) => void;
@@ -76,6 +78,11 @@ export const useOnboarding = (props: OnboardingProps) => {
 
   const navigate = useNavigate();
   const stateRef = useRef(state);
+  const identity = useIdentity();
+  const isUpgrade = !!identity && !identity.user.isStylist;
+  const isUpgradeRef = useRef(isUpgrade);
+
+  isUpgradeRef.current = isUpgrade;
 
   stateRef.current = state;
 
@@ -93,11 +100,13 @@ export const useOnboarding = (props: OnboardingProps) => {
     defaultValues: startForm,
     mode: "onTouched",
     resolver: (values, context, options) =>
-      zodResolver(getScreenSchema({ ...stateRef.current, form: values }))(
-        values,
-        context,
-        options,
-      ),
+      zodResolver(
+        getScreenSchema({
+          ...stateRef.current,
+          isUpgrade: isUpgradeRef.current,
+          form: values,
+        }),
+      )(values, context, options),
   });
 
   const form = watch();
@@ -347,8 +356,23 @@ export const useOnboarding = (props: OnboardingProps) => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
+  // a signed-in account's own details fill (and lock) the account step
+  const { first, last, email, mobile } = identity ?? {};
+
+  useEffect(() => {
+    if (!isUpgrade || !identity?.isLoaded) return;
+
+    setValue("first", first ?? "");
+    setValue("last", last ?? "");
+    setValue("email", email ?? "");
+    setValue("mobile", mobile ?? "");
+    // only a newly loaded identity refills the fields
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isUpgrade, identity?.isLoaded]);
+
   const core: OnboardingCore = {
     stateRef,
+    isUpgrade,
     setState,
     goTo,
     later,
@@ -481,6 +505,7 @@ export const useOnboarding = (props: OnboardingProps) => {
       cancelCompact: () => window.clearTimeout(timers.current.compact),
     },
     defaultLatLng: DEFAULT_LAT_LNG,
+    isUpgrade,
   };
 };
 

@@ -92,9 +92,11 @@ const getSheetFrame = (studio: StudioController) => {
     }
 
     if (sheet === "clientEdit" && state.clientEditFromView) {
-      actions.openSheet("cliView", {
-        selectedClientId: state.clientEdit?.id ?? null,
-      });
+      actions.guardSheet(() =>
+        actions.openSheet("cliView", {
+          selectedClientId: state.clientEdit?.id ?? null,
+        }),
+      );
 
       return;
     }
@@ -178,7 +180,7 @@ export const SheetFrame = ({
           styles.scrim,
           state.out ? overlay.scrimOut21 : overlay.scrimIn26,
         )}
-        onClick={actions.closeSheet}
+        onClick={actions.requestCloseSheet}
       ></div>
       <div
         className={joinClassNames(
@@ -231,7 +233,7 @@ export const SheetFrame = ({
           {headerBadge}
           <button
             className={styles.close}
-            onClick={actions.closeSheet}
+            onClick={actions.requestCloseSheet}
             aria-label="Close"
           >
             <svg

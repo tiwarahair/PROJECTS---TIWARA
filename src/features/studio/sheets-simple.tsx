@@ -16,11 +16,13 @@ import type { StudioState } from "./studio-types";
 import type { StudioController } from "./use-studio";
 import overlay from "../../styles/features/studio/studio-overlay.module.css";
 import styles from "../../styles/features/studio/sheets-simple.module.css";
+import { MONDAY_FIRST_WEEKDAYS, LONG_MONTHS } from "../../utils/dates";
+import { saveBlock, saveClosedPeriod } from "../../lib/studio-api";
 import {
-  MONDAY_FIRST_WEEKDAYS,
-  LONG_MONTHS,
-  SHORT_MONTHS,
-} from "../../utils/dates";
+  buildBlockedTime,
+  formatClosedSpan,
+  fromBlockedTime,
+} from "./studio-blocked-time";
 
 type MonthKey =
   | "blockCalendarMonth"
@@ -357,15 +359,8 @@ export const StripeSheet = ({ studio }: { studio: StudioController }) => {
   );
 };
 
-const FREQUENCY_LABELS: Record<string, string> = {
-  none: "",
-  daily: "Repeats daily",
-  weekly: "Repeats weekly",
-  monthly: "Repeats monthly",
-};
-
 export const BlockSheet = ({ studio }: { studio: StudioController }) => {
-  const { state, setState, actions } = studio;
+  const { state, setState, actions, context } = studio;
   const draft = state.blockDraft;
 
   const setDraft = (patch: Partial<StudioState["blockDraft"]>) =>
@@ -457,33 +452,20 @@ export const BlockSheet = ({ studio }: { studio: StudioController }) => {
       return;
     }
 
-    const info = dayInfo(block.day);
-    const frequency = block.frequency || "none";
-    let frequencyLabel = FREQUENCY_LABELS[frequency] ?? "";
-
-    if (
-      frequencyLabel &&
-      (block.ends || "never") === "date" &&
-      block.endDayOffset != null
-    ) {
-      const end = dayInfo(block.endDayOffset);
-
-      frequencyLabel += ` until ${end.dayNumber} ${end.monthName}`;
-    }
-
-    const item = {
-      id: block.editId || Date.now(),
-      day: `${info.weekday} ${info.dayNumber} ${info.monthName}`,
+    const item = buildBlockedTime({
+      id: block.editId || crypto.randomUUID(),
       dayIndex: block.day,
-      span: block.allDay ? "All day" : `${block.start} to ${block.end}`,
-      frequency,
+      allDay: !!block.allDay,
+      start: block.start,
+      end: block.end,
+      note: block.reason,
+      frequency: block.frequency || "none",
       ends: block.ends || "never",
       endDayOffset: block.endDayOffset,
       color: block.color || "purple",
-      reason:
-        [block.reason, frequencyLabel].filter(Boolean).join(" · ") ||
-        block.reason,
-    };
+    });
+
+    const before = current.blocked;
 
     setState({
       blocked: block.editId
@@ -492,6 +474,11 @@ export const BlockSheet = ({ studio }: { studio: StudioController }) => {
           )
         : current.blocked.concat([item]),
     });
+
+    context.sync?.save(
+      (stylistId) => saveBlock(fromBlockedTime(item, stylistId)),
+      { blocked: before },
+    );
 
     actions.showToast(block.editId ? "Blocked time updated" : "Time blocked");
     actions.closeSheet();
@@ -774,7 +761,7 @@ export const EndDateDialog = ({ studio }: { studio: StudioController }) => {
 };
 
 export const ClosedSheet = ({ studio }: { studio: StudioController }) => {
-  const { state, setState, actions } = studio;
+  const { state, setState, actions, context } = studio;
   const draft = state.closedDraft;
 
   const setDraft = (patch: Partial<StudioState["closedDraft"]>) =>
@@ -787,19 +774,15 @@ export const ClosedSheet = ({ studio }: { studio: StudioController }) => {
   const save = () => {
     if (!isReady) return;
 
-    const format = (value: string) => {
-      const date = new Date(`${value}T12:00:00`);
-
-      return `${date.getDate()} ${SHORT_MONTHS[date.getMonth()]}`;
-    };
-
     const item = {
-      id: draft.editId || Date.now(),
+      id: draft.editId || crypto.randomUUID(),
       from: draft.from,
       to: draft.to,
-      span: `${format(draft.from)} to ${format(draft.to)}`,
+      span: formatClosedSpan(draft.from, draft.to),
       reason: draft.reason,
     };
+
+    const before = state.closed;
 
     setState({
       closed: draft.editId
@@ -808,6 +791,18 @@ export const ClosedSheet = ({ studio }: { studio: StudioController }) => {
           )
         : state.closed.concat([item]),
     });
+
+    context.sync?.save(
+      (stylistId) =>
+        saveClosedPeriod({
+          id: item.id,
+          stylist_id: stylistId,
+          starts_on: item.from,
+          ends_on: item.to,
+          reason: item.reason,
+        }),
+      { closed: before },
+    );
 
     actions.showToast(
       draft.editId

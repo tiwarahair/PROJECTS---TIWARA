@@ -10,6 +10,7 @@ import type { ChangeEvent, ClipboardEvent, KeyboardEvent } from "react";
 import { useNavigate, useSearchParams } from "react-router";
 import { ACCOUNT_TAB_EVENT } from "../../components/account-menu/account-menu";
 import { useIdentity } from "../../hooks/use-identity";
+import { useUnsavedChanges } from "../../hooks/use-unsaved-changes";
 import { usePasswordChecker } from "../../hooks/use-password-checker";
 import { useAppDispatch, useAppSelector } from "../../stores/hooks";
 import { logOut } from "../../stores/session-slice";
@@ -20,6 +21,7 @@ import { getSearchParams } from "../../utils/page-flags";
 import { checkPassword, getPasswordMin } from "../../utils/password";
 import { getSavedAddresses, saveAddresses } from "../../utils/saved-addresses";
 import { applyFixture } from "./account-fixtures";
+import { getDiscardPatch, hasUnsavedEdits } from "./account-unsaved";
 import {
   CURRENT_PASSWORD,
   DEMO_PHOTO,
@@ -36,6 +38,7 @@ import type { EditKey } from "./account-logic";
 
 type DialogState =
   | { kind: "receipt"; id: string }
+  | { kind: "discard"; then: () => void; keep?: () => void }
   | { kind: "allergy"; index: number }
   | { kind: "card"; id: string }
   | { kind: "address"; id: string }
@@ -396,7 +399,7 @@ export const useAccount = (props: AccountProps) => {
   const stopResendCountdown = () => window.clearInterval(resendTimer.current);
 
   /** Switch section: replace the URL on wide screens, push it (and scroll up) on narrow ones. */
-  const goToSection = useCallback(
+  const showSection = useCallback(
     (id: string | null) => {
       if (id && !SECTION_IDS.includes(id)) return;
 
@@ -432,6 +435,35 @@ export const useAccount = (props: AccountProps) => {
     [focusLater, navigate, searchParams, setState],
   );
 
+  /** "Discard changes?": Discard closes the edit forms, then carries on. */
+  const askDiscard = useCallback(
+    (proceed: () => void, keep?: () => void) => {
+      returnFocus.current = document.activeElement;
+
+      setState({
+        dialog: {
+          kind: "discard",
+          then: () => {
+            setState({ ...getDiscardPatch(stateRef.current), dialog: null });
+            proceed();
+          },
+          keep,
+        },
+      });
+    },
+    [setState],
+  );
+
+  // an open edit with changes asks before it's dropped
+  const goToSection = useCallback(
+    (id: string | null) => {
+      if (!hasUnsavedEdits(stateRef.current)) return showSection(id);
+
+      askDiscard(() => showSection(id));
+    },
+    [askDiscard, showSection],
+  );
+
   useEffect(() => {
     const handleTab = (event: Event) =>
       goToSection((event as CustomEvent<string>).detail);
@@ -457,13 +489,25 @@ export const useAccount = (props: AccountProps) => {
     };
   }, [goToSection, setState]);
 
-  const closeDialog = useCallback(
-    () =>
-      setState({ dialog: null, deleteText: "", cardFormErrors: {} }, () =>
-        focusLater("returnFocus"),
-      ),
-    [focusLater, setState],
-  );
+  const closeDialog = useCallback(() => {
+    const { dialog } = stateRef.current;
+
+    if (dialog?.kind === "discard") dialog.keep?.();
+
+    setState({ dialog: null, deleteText: "", cardFormErrors: {} }, () =>
+      focusLater("returnFocus"),
+    );
+  }, [focusLater, setState]);
+
+  const hasUnsaved = useCallback(() => hasUnsavedEdits(stateRef.current), []);
+  const blocker = useUnsavedChanges(hasUnsaved);
+
+  // leaving the page (links, back) with unsaved edits
+  useEffect(() => {
+    if (blocker.state !== "blocked" || stateRef.current.dialog) return;
+
+    askDiscard(blocker.proceed, blocker.reset);
+  }, [askDiscard, blocker]);
 
   // Escape closes the dialog (Tab stays inside it), then the address menu, then the mobile menu
   useEffect(() => {

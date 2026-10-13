@@ -34,6 +34,131 @@ export type Database = {
   };
   public: {
     Tables: {
+      addons: {
+        Row: {
+          category_id: string | null;
+          created_at: string;
+          id: string;
+          minutes: number;
+          name: string;
+          price_pence: number;
+          service_group_id: string | null;
+          status: string;
+          stylist_id: string;
+        };
+        ComputedFields: never;
+        Insert: {
+          category_id?: string | null;
+          created_at?: string;
+          id?: string;
+          minutes?: number;
+          name: string;
+          price_pence?: number;
+          service_group_id?: string | null;
+          status?: string;
+          stylist_id: string;
+        };
+        Update: {
+          category_id?: string | null;
+          created_at?: string;
+          id?: string;
+          minutes?: number;
+          name?: string;
+          price_pence?: number;
+          service_group_id?: string | null;
+          status?: string;
+          stylist_id?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "addons_category_id_fkey";
+            columns: ["category_id"];
+            isOneToOne: false;
+            referencedRelation: "stylist_categories";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "addons_service_group_id_fkey";
+            columns: ["service_group_id"];
+            isOneToOne: false;
+            referencedRelation: "service_groups";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "addons_stylist_id_fkey";
+            columns: ["stylist_id"];
+            isOneToOne: false;
+            referencedRelation: "stylists";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
+      booking_rules: {
+        Row: {
+          default_extra_minutes: number;
+          max_notice_months: number;
+          min_notice_hours: number;
+          stylist_id: string;
+          travel_buffer_minutes: number;
+        };
+        ComputedFields: never;
+        Insert: {
+          default_extra_minutes?: number;
+          max_notice_months?: number;
+          min_notice_hours?: number;
+          stylist_id: string;
+          travel_buffer_minutes?: number;
+        };
+        Update: {
+          default_extra_minutes?: number;
+          max_notice_months?: number;
+          min_notice_hours?: number;
+          stylist_id?: string;
+          travel_buffer_minutes?: number;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "booking_rules_stylist_id_fkey";
+            columns: ["stylist_id"];
+            isOneToOne: true;
+            referencedRelation: "stylists";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
+      closed_periods: {
+        Row: {
+          ends_on: string;
+          id: string;
+          reason: string;
+          starts_on: string;
+          stylist_id: string;
+        };
+        ComputedFields: never;
+        Insert: {
+          ends_on: string;
+          id?: string;
+          reason?: string;
+          starts_on: string;
+          stylist_id: string;
+        };
+        Update: {
+          ends_on?: string;
+          id?: string;
+          reason?: string;
+          starts_on?: string;
+          stylist_id?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "closed_periods_stylist_id_fkey";
+            columns: ["stylist_id"];
+            isOneToOne: false;
+            referencedRelation: "stylists";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
       customisation_options: {
         Row: {
           group_id: string;
@@ -109,6 +234,102 @@ export type Database = {
           },
         ];
       };
+      payment_policies: {
+        Row: {
+          created_at: string;
+          deposit_percent: number;
+          extras: NonNullable<Json>;
+          free_window_hours: number;
+          grace_minutes: number;
+          id: string;
+          late_kind: string;
+          late_on: boolean;
+          late_percent: number;
+          mode: string;
+          no_show_kind: string;
+          no_show_on: boolean;
+          no_show_percent: number;
+          refundable: boolean;
+          stylist_id: string;
+        };
+        ComputedFields: never;
+        Insert: {
+          created_at?: string;
+          deposit_percent?: number;
+          extras?: NonNullable<Json>;
+          free_window_hours?: number;
+          grace_minutes?: number;
+          id?: string;
+          late_kind?: string;
+          late_on?: boolean;
+          late_percent?: number;
+          mode: string;
+          no_show_kind?: string;
+          no_show_on?: boolean;
+          no_show_percent?: number;
+          refundable?: boolean;
+          stylist_id: string;
+        };
+        Update: {
+          created_at?: string;
+          deposit_percent?: number;
+          extras?: NonNullable<Json>;
+          free_window_hours?: number;
+          grace_minutes?: number;
+          id?: string;
+          late_kind?: string;
+          late_on?: boolean;
+          late_percent?: number;
+          mode?: string;
+          no_show_kind?: string;
+          no_show_on?: boolean;
+          no_show_percent?: number;
+          refundable?: boolean;
+          stylist_id?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "payment_policies_stylist_id_fkey";
+            columns: ["stylist_id"];
+            isOneToOne: false;
+            referencedRelation: "stylists";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
+      portfolio_photos: {
+        Row: {
+          created_at: string;
+          id: string;
+          path: string;
+          sort: number;
+          stylist_id: string;
+        };
+        ComputedFields: never;
+        Insert: {
+          created_at?: string;
+          id?: string;
+          path: string;
+          sort: number;
+          stylist_id: string;
+        };
+        Update: {
+          created_at?: string;
+          id?: string;
+          path?: string;
+          sort?: number;
+          stylist_id?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "portfolio_photos_stylist_id_fkey";
+            columns: ["stylist_id"];
+            isOneToOne: false;
+            referencedRelation: "stylists";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
       profiles: {
         Row: {
           client_terms_accepted_at: string | null;
@@ -161,6 +382,56 @@ export type Database = {
           window_start?: string;
         };
         Relationships: [];
+      };
+      reserved_slugs: {
+        Row: {
+          slug: string;
+        };
+        ComputedFields: never;
+        Insert: {
+          slug: string;
+        };
+        Update: {
+          slug?: string;
+        };
+        Relationships: [];
+      };
+      service_addons: {
+        Row: {
+          addon_id: string;
+          minutes_override: number | null;
+          price_override_pence: number | null;
+          service_id: string;
+        };
+        ComputedFields: never;
+        Insert: {
+          addon_id: string;
+          minutes_override?: number | null;
+          price_override_pence?: number | null;
+          service_id: string;
+        };
+        Update: {
+          addon_id?: string;
+          minutes_override?: number | null;
+          price_override_pence?: number | null;
+          service_id?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "service_addons_addon_id_fkey";
+            columns: ["addon_id"];
+            isOneToOne: false;
+            referencedRelation: "addons";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "service_addons_service_id_fkey";
+            columns: ["service_id"];
+            isOneToOne: false;
+            referencedRelation: "services";
+            referencedColumns: ["id"];
+          },
+        ];
       };
       service_groups: {
         Row: {
@@ -238,6 +509,51 @@ export type Database = {
           },
         ];
       };
+      service_variations: {
+        Row: {
+          group_name: string | null;
+          id: string;
+          kind: string;
+          label: string;
+          minutes_delta: number;
+          offered: boolean;
+          price_delta_pence: number;
+          service_id: string;
+          sort: number;
+        };
+        ComputedFields: never;
+        Insert: {
+          group_name?: string | null;
+          id?: string;
+          kind: string;
+          label: string;
+          minutes_delta?: number;
+          offered?: boolean;
+          price_delta_pence?: number;
+          service_id: string;
+          sort: number;
+        };
+        Update: {
+          group_name?: string | null;
+          id?: string;
+          kind?: string;
+          label?: string;
+          minutes_delta?: number;
+          offered?: boolean;
+          price_delta_pence?: number;
+          service_id?: string;
+          sort?: number;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "service_variations_service_id_fkey";
+            columns: ["service_id"];
+            isOneToOne: false;
+            referencedRelation: "services";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
       services: {
         Row: {
           category_id: string | null;
@@ -245,10 +561,12 @@ export type Database = {
           duration_min: number | null;
           extra_time_min: number | null;
           id: string;
+          lengths_on: boolean;
           name: string;
           price_pence: number | null;
           service_group_id: string;
           service_type_id: string;
+          sizes_on: boolean;
           sort: number;
           status: string;
           stylist_id: string;
@@ -260,10 +578,12 @@ export type Database = {
           duration_min?: number | null;
           extra_time_min?: number | null;
           id?: string;
+          lengths_on?: boolean;
           name: string;
           price_pence?: number | null;
           service_group_id: string;
           service_type_id: string;
+          sizes_on?: boolean;
           sort: number;
           status?: string;
           stylist_id: string;
@@ -274,10 +594,12 @@ export type Database = {
           duration_min?: number | null;
           extra_time_min?: number | null;
           id?: string;
+          lengths_on?: boolean;
           name?: string;
           price_pence?: number | null;
           service_group_id?: string;
           service_type_id?: string;
+          sizes_on?: boolean;
           sort?: number;
           status?: string;
           stylist_id?: string;
@@ -389,61 +711,130 @@ export type Database = {
           },
         ];
       };
+      stylist_slug_history: {
+        Row: {
+          retired_at: string;
+          slug: string;
+          stylist_id: string;
+        };
+        ComputedFields: never;
+        Insert: {
+          retired_at?: string;
+          slug: string;
+          stylist_id: string;
+        };
+        Update: {
+          retired_at?: string;
+          slug?: string;
+          stylist_id?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "stylist_slug_history_stylist_id_fkey";
+            columns: ["stylist_id"];
+            isOneToOne: false;
+            referencedRelation: "stylists";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
       stylists: {
         Row: {
           area_label: string | null;
+          availability_confirmed_at: string | null;
+          avatar_path: string | null;
           bio: string | null;
           business_name: string;
           business_type: string;
+          closed_at: string | null;
           contact_email: string | null;
           contact_phone: string | null;
+          cover_path: string | null;
           created_at: string;
           id: string;
+          instagram: string | null;
           location: unknown;
-          owner_id: string;
+          owner_id: string | null;
           partner_terms_accepted_at: string;
           partner_terms_version: string;
+          pause_on: boolean;
+          pause_until: string | null;
+          profile_confirmed_at: string | null;
           referral_source: string | null;
           slug: string;
+          slug_changed_at: string | null;
           status: string;
+          tiktok: string | null;
           travel_radius_miles: number | null;
+          vat_number: string | null;
+          vat_registered: boolean;
+          website: string | null;
+          youtube: string | null;
         };
         ComputedFields: never;
         Insert: {
           area_label?: string | null;
+          availability_confirmed_at?: string | null;
+          avatar_path?: string | null;
           bio?: string | null;
           business_name: string;
           business_type: string;
+          closed_at?: string | null;
           contact_email?: string | null;
           contact_phone?: string | null;
+          cover_path?: string | null;
           created_at?: string;
           id?: string;
-          location: unknown;
-          owner_id: string;
+          instagram?: string | null;
+          location?: unknown;
+          owner_id?: string | null;
           partner_terms_accepted_at?: string;
           partner_terms_version: string;
+          pause_on?: boolean;
+          pause_until?: string | null;
+          profile_confirmed_at?: string | null;
           referral_source?: string | null;
           slug: string;
+          slug_changed_at?: string | null;
           status?: string;
+          tiktok?: string | null;
           travel_radius_miles?: number | null;
+          vat_number?: string | null;
+          vat_registered?: boolean;
+          website?: string | null;
+          youtube?: string | null;
         };
         Update: {
           area_label?: string | null;
+          availability_confirmed_at?: string | null;
+          avatar_path?: string | null;
           bio?: string | null;
           business_name?: string;
           business_type?: string;
+          closed_at?: string | null;
           contact_email?: string | null;
           contact_phone?: string | null;
+          cover_path?: string | null;
           created_at?: string;
           id?: string;
+          instagram?: string | null;
           location?: unknown;
-          owner_id?: string;
+          owner_id?: string | null;
           partner_terms_accepted_at?: string;
           partner_terms_version?: string;
+          pause_on?: boolean;
+          pause_until?: string | null;
+          profile_confirmed_at?: string | null;
           referral_source?: string | null;
           slug?: string;
+          slug_changed_at?: string | null;
           status?: string;
+          tiktok?: string | null;
           travel_radius_miles?: number | null;
+          vat_number?: string | null;
+          vat_registered?: boolean;
+          website?: string | null;
+          youtube?: string | null;
         };
         Relationships: [
           {
@@ -455,17 +846,132 @@ export type Database = {
           },
         ];
       };
+      time_blocks: {
+        Row: {
+          all_day: boolean;
+          colour: string;
+          end_time: string | null;
+          id: string;
+          reason: string;
+          repeat: string;
+          repeat_until: string | null;
+          start_time: string | null;
+          starts_on: string;
+          stylist_id: string;
+        };
+        ComputedFields: never;
+        Insert: {
+          all_day?: boolean;
+          colour?: string;
+          end_time?: string | null;
+          id?: string;
+          reason?: string;
+          repeat?: string;
+          repeat_until?: string | null;
+          start_time?: string | null;
+          starts_on: string;
+          stylist_id: string;
+        };
+        Update: {
+          all_day?: boolean;
+          colour?: string;
+          end_time?: string | null;
+          id?: string;
+          reason?: string;
+          repeat?: string;
+          repeat_until?: string | null;
+          start_time?: string | null;
+          starts_on?: string;
+          stylist_id?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "time_blocks_stylist_id_fkey";
+            columns: ["stylist_id"];
+            isOneToOne: false;
+            referencedRelation: "stylists";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
+      working_hours: {
+        Row: {
+          end_time: string;
+          is_open: boolean;
+          start_time: string;
+          stylist_id: string;
+          weekday: number;
+        };
+        ComputedFields: never;
+        Insert: {
+          end_time: string;
+          is_open?: boolean;
+          start_time: string;
+          stylist_id: string;
+          weekday: number;
+        };
+        Update: {
+          end_time?: string;
+          is_open?: boolean;
+          start_time?: string;
+          stylist_id?: string;
+          weekday?: number;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "working_hours_stylist_id_fkey";
+            columns: ["stylist_id"];
+            isOneToOne: false;
+            referencedRelation: "stylists";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
     };
     Views: {
       [_ in never]: never;
     };
     Functions: {
+      become_stylist: { Args: { details: Json }; Returns: undefined };
+      change_slug: { Args: { new_slug: string }; Returns: string };
+      close_business: { Args: Record<PropertyKey, never>; Returns: undefined };
+      create_stylist_business: {
+        Args: { meta: Json; new_owner_id: string };
+        Returns: string;
+      };
+      get_account_kind: { Args: { lookup_email: string }; Returns: string };
+      get_due_closure_photos: {
+        Args: Record<PropertyKey, never>;
+        Returns: string[];
+      };
+      get_due_closures: { Args: Record<PropertyKey, never>; Returns: string[] };
+      get_unique_slug: { Args: { business_name: string }; Returns: string };
+      hit_rate_limit: {
+        Args: { limit_key: string; max_hits: number; window_seconds: number };
+        Returns: boolean;
+      };
       is_aal2: { Args: Record<PropertyKey, never>; Returns: boolean };
       is_admin: { Args: Record<PropertyKey, never>; Returns: boolean };
+      is_service_owner: {
+        Args: { target_service_id: string };
+        Returns: boolean;
+      };
+      is_slug_free: {
+        Args: { candidate: string; for_stylist?: string };
+        Returns: boolean;
+      };
       is_stylist_owner: {
         Args: { target_stylist_id: string };
         Returns: boolean;
       };
+      is_valid_slug: { Args: { candidate: string }; Returns: boolean };
+      owns_photo_path: { Args: { object_name: string }; Returns: boolean };
+      purge_closed_businesses: {
+        Args: Record<PropertyKey, never>;
+        Returns: undefined;
+      };
+      reopen_business: { Args: Record<PropertyKey, never>; Returns: undefined };
+      resolve_slug: { Args: { lookup: string }; Returns: string };
       slugify: { Args: { value: string }; Returns: string };
     };
     Enums: {

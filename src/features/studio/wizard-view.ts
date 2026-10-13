@@ -149,7 +149,7 @@ export const getWizardView = (studio: StudioController) => {
 
   const save = () => {
     const service = {
-      id: wizard.editId || `svc${Date.now()}`,
+      id: wizard.editId || crypto.randomUUID(),
       taxonomyId: draft.taxonomyId,
       subcategory: draft.subcategory || "",
       typeId: draft.typeId || null,

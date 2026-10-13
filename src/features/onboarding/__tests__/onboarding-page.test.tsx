@@ -41,6 +41,23 @@ describe("OnboardingPage", () => {
 
   afterEach(() => vi.useRealTimers());
 
+  it("a signed-in customer's account step shows their own details, locked, with no password", () => {
+    renderWithStore(<OnboardingPage />, "/join?fixture=w4-bizcontact", {
+      signedIn: true,
+    });
+
+    expect(
+      screen.getByRole("heading", { name: "Your details" }),
+    ).toBeInTheDocument();
+
+    expect(screen.getByLabelText("Email address")).toHaveValue(
+      "nia.okafor@gmail.com",
+    );
+
+    expect(screen.getByLabelText("Email address")).toHaveAttribute("readonly");
+    expect(screen.queryByLabelText("Password")).not.toBeInTheDocument();
+  });
+
   it("starts on the chooser; For customers asks for an email", async () => {
     renderWithStore(<OnboardingPage />, "/login");
 

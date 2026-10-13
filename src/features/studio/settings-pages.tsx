@@ -8,6 +8,7 @@ import { STUDIO_STYLIST_ID, TIMES } from "./studio-data";
 import { getAvatarSrc } from "./studio-shell";
 import type { StudioController } from "./use-studio";
 import styles from "../../styles/features/studio/settings-pages.module.css";
+import { BookingLinkField } from "./booking-link-field";
 
 const DEMO_COVER =
   stylists.find(({ id }) => id === STUDIO_STYLIST_ID)?.cover ?? "";
@@ -116,6 +117,7 @@ export const ProfilePage = ({
         {field("Salon name", profile.salon, (salon) =>
           view.setProfile({ salon }),
         )}
+        <BookingLinkField studio={studio} />
         <label className={styles.field}>
           <span className={styles.fieldLabel}>About</span>
           <textarea

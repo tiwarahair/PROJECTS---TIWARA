@@ -1,0 +1,34 @@
+.reveal {
+  display: grid;
+}
+
+.revealInner {
+  overflow: hidden;
+  min-height: 0;
+}
+
+.revealOpen {
+  grid-template-rows: 1fr;
+  opacity: 1;
+  visibility: visible;
+  transition:
+    grid-template-rows 280ms var(--ease-inout, cubic-bezier(0.65, 0, 0.35, 1)),
+    opacity 220ms var(--ease-out) 60ms,
+    visibility 0s;
+}
+
+.revealClosed {
+  grid-template-rows: 0fr;
+  opacity: 0;
+  visibility: hidden;
+  transition:
+    grid-template-rows 240ms var(--ease-inout, cubic-bezier(0.65, 0, 0.35, 1)),
+    opacity 140ms var(--ease-out),
+    visibility 0s linear 240ms;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .reveal {
+    transition-property: opacity, visibility !important;
+  }
+}

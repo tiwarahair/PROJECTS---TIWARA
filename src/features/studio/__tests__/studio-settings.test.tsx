@@ -83,7 +83,7 @@ describe("Studio → Settings", () => {
     await user.click(screen.getByRole("button", { name: /^Booking link/ }));
 
     expect(
-      screen.getByText(/Your booking link and payouts are off/),
+      screen.getByText(/Finish setting up your studio/),
     ).toBeInTheDocument();
   });
 

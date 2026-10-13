@@ -2,13 +2,14 @@ import type { CSSProperties } from "react";
 import { joinClassNames } from "../../utils/class-names";
 import { getBlockTone, getBookingsView } from "./bookings-view";
 import type { BookingsView } from "./bookings-view";
-import { BOOKING_LINK, GATE_REASON } from "./studio-data";
+import { GATE_REASON } from "./studio-data";
 import type { DecoratedBooking } from "./studio-decorate";
 import { copyText, dateAt } from "./studio-format";
 import { isGated } from "./studio-shell";
 import type { StudioController } from "./use-studio";
 import styles from "../../styles/features/studio/studio-bookings.module.css";
 import { MONDAY_FIRST_WEEKDAYS } from "../../utils/dates";
+import { getBookingLink } from "./studio-model";
 
 const VIEW_SEGMENTS = [
   {
@@ -872,7 +873,7 @@ export const StudioBookings = ({
       return;
     }
 
-    copyText(BOOKING_LINK);
+    copyText(getBookingLink(state));
     actions.showToast("Booking link copied");
   };
 

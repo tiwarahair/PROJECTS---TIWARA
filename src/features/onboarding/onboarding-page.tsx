@@ -70,7 +70,7 @@ export const OnboardingPage = (props: OnboardingProps) => {
     return () => document.documentElement.classList.remove("onboarding-page");
   }, []);
 
-  const errors = getErrors(state);
+  const errors = getErrors({ ...state, isUpgrade: onboarding.isUpgrade });
   const shown: Record<string, string> = {};
 
   for (const [key, error] of Object.entries(onboarding.formErrors))
@@ -82,8 +82,10 @@ export const OnboardingPage = (props: OnboardingProps) => {
   // resend screens load the check only once Resend is tapped; their own submit never needs it
   const isResendScreen = RESEND_SCREENS.includes(screen);
 
+  // a signed-in account becoming a stylist makes no sign-up, so needs no check
   const turnstileShown =
-    TURNSTILE_SCREENS.includes(screen) || (isResendScreen && state.resendArmed);
+    (TURNSTILE_SCREENS.includes(screen) && !onboarding.isUpgrade) ||
+    (isResendScreen && state.resendArmed);
 
   const needsToken = turnstileShown && !isResendScreen;
 

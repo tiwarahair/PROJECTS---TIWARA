@@ -1,3 +1,4 @@
+import { bySort } from "./sort";
 // Service catalogue helpers.
 import { serviceSpecs, serviceTypes } from "../data";
 import type {
@@ -142,9 +143,7 @@ interface MenuSection {
 export const getMenu = (stylist: Stylist | null | undefined): MenuSection[] => {
   const active = getActiveServices(stylist);
 
-  const categories = (stylist?.categories ?? [])
-    .slice()
-    .sort((left, right) => left.sort - right.sort);
+  const categories = (stylist?.categories ?? []).slice().sort(bySort);
 
   if (!categories.length)
     return active.length

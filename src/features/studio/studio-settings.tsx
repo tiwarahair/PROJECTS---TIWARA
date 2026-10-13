@@ -12,6 +12,8 @@ import { GATE_REASON, STUDIO_STYLIST_ID } from "./studio-data";
 import { getAvatarSrc } from "./studio-shell";
 import type { StudioController } from "./use-studio";
 import styles from "../../styles/features/studio/studio-settings.module.css";
+import { hasPublicProfile } from "./studio-model";
+import { useAccountBackend } from "./use-account-backend";
 
 const STROKE = {
   fill: "none",
@@ -311,13 +313,15 @@ const SettingsNav = ({
                 <LinkIcon />
                 Copy booking link
               </button>
-              <Link
-                className={styles.shareLink}
-                to={`/stylist?stylist=${STUDIO_STYLIST_ID}`}
-              >
-                <EyeIcon />
-                View public profile
-              </Link>
+              {hasPublicProfile(state) && (
+                <Link
+                  className={styles.shareLink}
+                  to={`/stylist?stylist=${STUDIO_STYLIST_ID}`}
+                >
+                  <EyeIcon />
+                  View public profile
+                </Link>
+              )}
             </>
           )}
           {!view.isShareLive && (
@@ -334,20 +338,24 @@ const SettingsNav = ({
                   label: "View public profile",
                   icon: <EyeIcon />,
                 },
-              ].map(({ key, label, icon }) => (
-                <button
-                  key={key}
-                  className={styles.shareLocked}
-                  aria-disabled="true"
-                  aria-describedby="share-tip"
-                  onFocus={showTip}
-                  onBlur={hideTip}
-                  onClick={() => setState({ shareTip: !state.shareTip })}
-                >
-                  {icon}
-                  {label}
-                </button>
-              ))}
+              ]
+                .filter(
+                  ({ key }) => key !== "profile" || hasPublicProfile(state),
+                )
+                .map(({ key, label, icon }) => (
+                  <button
+                    key={key}
+                    className={styles.shareLocked}
+                    aria-disabled="true"
+                    aria-describedby="share-tip"
+                    onFocus={showTip}
+                    onBlur={hideTip}
+                    onClick={() => setState({ shareTip: !state.shareTip })}
+                  >
+                    {icon}
+                    {label}
+                  </button>
+                ))}
             </>
           )}
         </div>
@@ -385,6 +393,7 @@ const SettingsFrame = ({
   view: SettingsView;
 }) => {
   const { state, isWide, isDesktop, isNew, props, actions } = studio;
+  const account = useAccountBackend(studio);
 
   return (
     <div
@@ -501,8 +510,10 @@ const SettingsFrame = ({
                 onTaxAdd={view.onTaxAdd}
                 onTaxSave={view.onTaxSave}
                 onTaxCancel={view.onTaxCancel}
+                onTaxDirty={view.onTaxDirty}
                 onTaxLearnMore={view.onTaxLearn}
-                signIn={props.signIn || "email"}
+                signIn={account.signIn ?? props.signIn ?? "email"}
+                backend={account.backend}
                 isNew={isNew}
                 upcoming={view.accountUpcoming}
                 onNavigate={view.onAccountNav}

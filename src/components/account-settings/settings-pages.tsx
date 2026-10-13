@@ -10,8 +10,7 @@ import {
 } from "./account-settings-logic";
 import type { AccountSettingsProps } from "./use-account-settings";
 import type { AccountSettingsController } from "./use-account-settings";
-import { InfoIcon, SettingsSection } from "./settings-personal";
-import { CheckRow, Switch } from "./settings-security";
+import { CheckRow, InfoIcon, SettingsSection, Switch } from "./settings-fields";
 import shared from "../../styles/components/account-settings/account-settings.module.css";
 import calendar from "../../styles/components/account-settings/settings-calendar.module.css";
 import notifications from "../../styles/components/account-settings/settings-notifications.module.css";
@@ -403,6 +402,7 @@ export const SettingsPayouts = ({ props }: PageProps) => {
                 businessName={props.taxBusinessName || ""}
                 onSubmit={(details) => props.onTaxSave?.(details)}
                 onCancel={() => props.onTaxCancel?.()}
+                onDirtyChange={props.onTaxDirty}
               />
             </div>
           )}

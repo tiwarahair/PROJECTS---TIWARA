@@ -1,7 +1,7 @@
 import type { ReactElement } from "react";
 import { render } from "@testing-library/react";
 import { Provider } from "react-redux";
-import { MemoryRouter, Route, Routes, useLocation } from "react-router";
+import { RouterProvider, createMemoryRouter, useLocation } from "react-router";
 import { api } from "../stores/api-slice";
 import { sessionChanged } from "../stores/session-slice";
 import { createStore } from "../stores/store";
@@ -58,14 +58,25 @@ export const renderWithStore = (
     );
   }
 
+  // a data router, so pages can use useBlocker
+  const router = createMemoryRouter(
+    [
+      {
+        path: "*",
+        element: (
+          <>
+            {ui}
+            <LocationProbe />
+          </>
+        ),
+      },
+    ],
+    { initialEntries: [url] },
+  );
+
   const result = render(
     <Provider store={store}>
-      <MemoryRouter initialEntries={[url]}>
-        <Routes>
-          <Route path="*" element={ui} />
-        </Routes>
-        <LocationProbe />
-      </MemoryRouter>
+      <RouterProvider router={router} />
     </Provider>,
   );
 

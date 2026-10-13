@@ -1,5 +1,13 @@
-import { useEffect, useLayoutEffect, useRef, useState } from "react";
+import {
+  useCallback,
+  useEffect,
+  useLayoutEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
 import { useMediaQuery } from "../../hooks/use-media-query";
+import { useUnsavedChanges } from "../../hooks/use-unsaved-changes";
 import { createStudioActions } from "./studio-actions";
 import type { StudioContext } from "./studio-actions";
 import {
@@ -11,15 +19,19 @@ import {
 import { applyFixture } from "./studio-fixtures";
 import { getQueryParam, getSteps } from "./studio-model";
 import { createServiceActions } from "./studio-service-actions";
-import type {
-  StudioCategory,
-  StudioPatch,
-  StudioService,
-  StudioState,
-} from "./studio-types";
-import type { StylistStudio, StylistStudioService } from "../../types/profile";
-import { formatDuration } from "../../utils/dates";
-import type { BusinessType } from "../../components/business-details/business-details-logic";
+import type { StylistStudio } from "../../lib/studio-api";
+import { toStudioPatch } from "./studio-records";
+import { useCatalogueSync } from "./studio-catalogue-sync";
+import { createStudioSync } from "./studio-sync";
+import {
+  getDiscardConfirm,
+  getDiscardPatch,
+  getSavedSettings,
+  hasUnsavedPage,
+  hasUnsavedSheet,
+  isLeavingPage,
+} from "./studio-unsaved";
+import type { StudioCategory, StudioPatch, StudioState } from "./studio-types";
 
 export interface StudioProps {
   /** A signed-in stylist's own data; without it Studio shows the demo. */
@@ -44,89 +56,30 @@ export interface StudioSeed {
 const getCategoryColour = (sort: number) =>
   CATEGORY_COLOURS[sort % CATEGORY_COLOURS.length]?.value ?? "";
 
-const toStudioService = ({
-  id,
-  name,
-  description,
-  groupId,
-  typeId,
-  categoryId,
-  durationMin,
-  pricePence,
-}: StylistStudioService): StudioService => {
-  const minutes = durationMin ?? 0;
-
-  return {
-    id,
-    taxonomyId: groupId,
-    subcategory: name,
-    typeId,
-    categoryId,
-    name,
-    description: description ?? "",
-    price: (pricePence ?? 0) / 100,
-    durationHours: Math.floor(minutes / 60),
-    durationMinutes: minutes % 60,
-    duration: minutes ? formatDuration(minutes) : "",
-    status: "draft",
-    sizesOn: false,
-    lengthsOn: false,
-    sizes: [],
-    lengths: [],
-    addons: [],
-    own: [],
-  };
-};
-
-/** A real account: its categories and draft services from sign-up; nothing booked yet. */
-const BUSINESS_TYPES: Record<string, BusinessType> = {
-  shop: "shop",
-  chair_rental: "chair",
-  home_based: "home",
-  mobile: "mobile",
-};
-
+/** A real account: everything from the database; nothing booked yet. */
 const seedFromAccount = (
   state: StudioState,
   { owner, studio }: StudioSeed,
-): StudioState => ({
-  ...state,
-  owner,
-  notifications: [],
-  profile: {
-    ...state.profile,
-    salon: studio.businessName,
-    about: "",
-    address: studio.areaLabel ?? "",
-    mobile: studio.businessType === "mobile",
-    site: "",
-    instagram: "",
-    tiktok: "",
-    email: studio.contactEmail ?? "",
-  },
-  business: {
-    ...state.business,
-    type: BUSINESS_TYPES[studio.businessType] ?? "shop",
-    details: {
-      ...state.business.details,
-      ...studio.address,
-      basePostcode: studio.address.postcode,
-      radius: String(studio.travelRadiusMiles ?? ""),
-      phone: studio.contactPhone ?? "",
-      email: studio.contactEmail ?? "",
-      vat: "",
+): StudioState => {
+  const patch = toStudioPatch(studio, state);
+
+  return {
+    ...state,
+    ...patch,
+    owner,
+    account: {
+      stylistId: studio.id,
+      slug: studio.slug,
+      slugChangedAt: studio.slug_changed_at,
     },
-  },
-  policy: { ...state.policy, mode: "none" },
-  twoFactorSettings: { devices: [] },
-  categories: studio.categories.map(({ id, name, sort, colour }) => ({
-    id,
-    name,
-    sort,
-    colour: colour ?? getCategoryColour(sort),
-  })),
-  services: studio.services.map(toStudioService),
-});
+    notifications: [],
+    twoFactorSettings: { devices: [] },
+    categories: (patch.categories ?? []).map((category) => ({
+      ...category,
+      colour: category.colour || getCategoryColour(category.sort),
+    })),
+  };
+};
 
 /** Demo boards (?account=new): a new account picked braids at sign-up. */
 const seedNewAccount = (state: StudioState): StudioState => {
@@ -214,8 +167,12 @@ export const useStudio = (props: StudioProps) => {
 
   wideRef.current = isWide;
 
+  const memo = memoRef.current;
+
+  memo.saved ??= getSavedSettings(state);
+
   // the new state is readable straight away (getState) and the render follows
-  const setState = (patch: StudioPatch) => {
+  const applyState = (patch: StudioPatch) => {
     const current = stateRef.current;
 
     const next = {
@@ -227,19 +184,88 @@ export const useStudio = (props: StudioProps) => {
     setRawState(next);
   };
 
+  // leaving a settings page with unsaved edits asks first
+  const setState = (patch: StudioPatch) => {
+    const current = stateRef.current;
+    const changes = typeof patch === "function" ? patch(current) : patch;
+
+    if (!isLeavingPage(current, changes) || !hasUnsavedPage(current, memo))
+      return applyState(changes);
+
+    applyState({
+      confirm: getDiscardConfirm(() =>
+        applyState({
+          ...getDiscardPatch(stateRef.current, memo),
+          confirm: null,
+          ...changes,
+        }),
+      ),
+    });
+  };
+
+  const hasUnsaved = useCallback(() => {
+    const current = stateRef.current;
+
+    return (
+      hasUnsavedPage(current, memoRef.current) ||
+      (!!current.sheet && hasUnsavedSheet(current, memoRef.current))
+    );
+  }, []);
+
+  const blocker = useUnsavedChanges(hasUnsaved);
+
+  const stylistId = state.account?.stylistId;
+
+  // one sync per stylist for Studio's lifetime, so its save queue survives re-renders
+  const sync = useMemo(
+    () =>
+      stylistId
+        ? createStudioSync(
+            stylistId,
+            (patch) => latest.current.context.applyState(patch),
+            (message) => latest.current.actions.showToast(message),
+          )
+        : null,
+    [stylistId],
+  );
+
   const context: StudioContext = {
     getState: () => stateRef.current,
     setState,
+    applyState,
+    sync,
     timers,
     memo: memoRef.current,
     isWide: () => wideRef.current,
   };
+
+  useCatalogueSync(state, context.sync);
 
   const actions = createStudioActions(context);
   const serviceActions = createServiceActions(context, actions);
   const latest = useRef({ actions, serviceActions, context });
 
   latest.current = { actions, serviceActions, context };
+
+  // leaving Studio (sign out, links) with unsaved edits
+  useEffect(() => {
+    const { applyState: apply, getState } = latest.current.context;
+
+    if (blocker.state !== "blocked" || getState().confirm) return;
+
+    apply({
+      confirm: getDiscardConfirm(
+        () => {
+          apply({ confirm: null });
+          blocker.proceed();
+        },
+        () => {
+          blocker.reset();
+          apply({ confirm: null });
+        },
+      ),
+    });
+  }, [blocker]);
 
   useEffect(() => {
     const {

@@ -52,16 +52,21 @@ export interface SettingsState {
   email: string;
   emailFlow: "edit" | null;
   newEmail: string;
-  emailPassword: string;
   emailTouched: boolean;
   pendingEmail: string;
+  /** The codes sent to the current and the new address. */
+  emailCodes: { current: string; next: string };
+  isCurrentEmailConfirmed: boolean;
+  emailError: string;
   phone: string;
-  phoneFlow: "edit" | "code" | null;
+  phoneFlow: "edit" | null;
   newPhone: string;
-  code: string;
   phoneError: string;
   isSettingPassword: boolean;
-  password: { current: string; next: string; confirm: string };
+  /** `code` is the one emailed to confirm it's them. */
+  password: { code: string; next: string; confirm: string };
+  isPasswordCodeSent: boolean;
+  passwordError: string;
   passwordTouched: boolean;
   newPasswordBlurred: boolean;
   signOthers: boolean;
@@ -95,6 +100,8 @@ const DEMO_PERSON: SettingsPerson = {
 };
 
 /** ?pwnew= prefills the new password (and the current one) for the meter boards. */
+export const EMPTY_PASSWORD = { code: "", next: "", confirm: "" };
+
 export const getInitialSettingsState = (
   isNew: boolean,
   search: string,
@@ -111,20 +118,19 @@ export const getInitialSettingsState = (
     email,
     emailFlow: null,
     newEmail: "",
-    emailPassword: "",
     emailTouched: false,
     pendingEmail: "",
+    emailCodes: { current: "", next: "" },
+    isCurrentEmailConfirmed: false,
+    emailError: "",
     phone,
     phoneFlow: null,
     newPhone: "",
-    code: "",
     phoneError: "",
     isSettingPassword: false,
-    password: {
-      current: prefilled ? "sunflower9" : "",
-      next: prefilled,
-      confirm: "",
-    },
+    password: { code: prefilled ? "123456" : "", next: prefilled, confirm: "" },
+    isPasswordCodeSent: !!prefilled,
+    passwordError: "",
     passwordTouched: false,
     newPasswordBlurred: false,
     signOthers: true,

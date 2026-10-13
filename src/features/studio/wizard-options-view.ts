@@ -610,7 +610,7 @@ export const getWizardAddons = (
       }
 
       const addon: StudioAddon = {
-        id: `ad${Date.now()}`,
+        id: crypto.randomUUID(),
         categoryId:
           newAddon.categoryId !== undefined ? newAddon.categoryId : category,
         name: newAddon.name.trim(),

@@ -359,7 +359,7 @@ export const getAddonSheetView = (studio: StudioController) => {
       if (isBad) return;
 
       const addon = {
-        id: draft.id || `ad${Date.now()}`,
+        id: draft.id || crypto.randomUUID(),
         categoryId: getCategoryById(state, draft.categoryId)
           ? draft.categoryId
           : null,

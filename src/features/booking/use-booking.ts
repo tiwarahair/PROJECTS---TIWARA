@@ -1,8 +1,8 @@
 import { useCallback, useEffect, useRef, useState } from "react";
-import type { MouseEvent } from "react";
 import { useNavigate } from "react-router";
 import { logOut as logOutSession } from "../../stores/session-slice";
 import { useIdentity } from "../../hooks/use-identity";
+import { useUnsavedChanges } from "../../hooks/use-unsaved-changes";
 import { useAppDispatch } from "../../stores/hooks";
 import { getServiceOptions, findService, hasStep2 } from "../../utils/services";
 import { getBookingMoney, getCustomisationLine } from "./booking-pricing";
@@ -69,6 +69,25 @@ export const useBooking = () => {
       ...(typeof patch === "function" ? patch(current) : patch),
     }));
   }, []);
+
+  // once a service is picked, leaving (any link, back, reload) asks first
+  const isLeaving = useRef(false);
+
+  const hasStarted = useCallback(() => {
+    const { serviceId, confirmed } = stateRef.current;
+
+    return !isLeaving.current && !!serviceId && !confirmed;
+  }, []);
+
+  const blocker = useUnsavedChanges(hasStarted);
+
+  useEffect(() => {
+    if (blocker.state !== "blocked" || stateRef.current.leave) return;
+
+    const { pathname, search } = blocker.location;
+
+    setState({ leave: pathname + search });
+  }, [blocker, setState]);
 
   useEffect(() => {
     const callbacks = afterCommit.current.splice(0);
@@ -319,17 +338,19 @@ export const useBooking = () => {
       }));
     },
     saveDraftNow: () => saveDraft(stateRef.current),
-    onLeaveLink: (event: MouseEvent<HTMLAnchorElement>) => {
-      if (state.serviceId && !state.confirmed) {
-        event.preventDefault();
-        setState({ leave: event.currentTarget.getAttribute("href") });
-      }
+    keepBooking: () => {
+      if (blocker.state === "blocked") blocker.reset();
+
+      setState({ leave: null });
     },
     confirmLeave: () => {
       const href = state.leave;
 
+      isLeaving.current = true;
+
       setState({ hold: null, leave: null }, () => {
-        if (href) navigate(href);
+        if (blocker.state === "blocked") blocker.proceed();
+        else if (href) navigate(href);
       });
     },
     resumeContinue: () => {

@@ -1,10 +1,10 @@
 // What each onboarding screen sends to the server, and where it goes next.
 import { useEffect, useRef } from "react";
+import { becomeStylist } from "../../lib/account-changes";
 import {
   completeClientProfile,
   getAccountKind,
   getSignedInAccount,
-  needsSecondFactor,
   resendEmailCode,
   sendPasswordReset,
   setNewPassword,
@@ -14,9 +14,10 @@ import {
   signUpStylist,
   startGoogleSignIn,
   verifyEmailCode,
-  verifySecondFactor,
 } from "../../lib/auth";
-import type { StylistDetails } from "../../lib/auth";
+import { needsSecondFactor, verifySecondFactor } from "../../lib/two-factor";
+import type { StylistDetails } from "../../types/auth";
+import { toStoredBusinessType } from "../../utils/business-type";
 import { rememberDevice } from "../../lib/supabase";
 import { EMPTY_CODE, isCodeScreen } from "./onboarding-state";
 import type { OnboardingForm } from "./onboarding-state";
@@ -26,13 +27,6 @@ const LOCK_MS = 9e5;
 const MAX_ATTEMPTS = 5;
 const NEXT_WIZARD_SCREEN = { w1: "w2", w2: "w3" };
 
-const BUSINESS_TYPES: Record<string, StylistDetails["businessType"]> = {
-  shop: "shop",
-  chair: "chair_rental",
-  home: "home_based",
-  mobile: "mobile",
-};
-
 interface SubmitCore extends OnboardingCore {
   /** Places the address (or mobile postcode); false when Google can't. */
   geocode: () => Promise<boolean>;
@@ -40,6 +34,7 @@ interface SubmitCore extends OnboardingCore {
 
 export const useOnboardingSubmit = ({
   stateRef,
+  isUpgrade,
   setState,
   goTo,
   later,
@@ -140,7 +135,7 @@ export const useOnboardingSubmit = ({
     return {
       ...form,
       businessName: form.businessName,
-      businessType: BUSINESS_TYPES[form.type] ?? "shop",
+      businessType: toStoredBusinessType(form.type),
       lat,
       lng,
       areaLabel: area,
@@ -189,11 +184,22 @@ export const useOnboardingSubmit = ({
     run(async () => {
       const form = getValues();
 
+      const details = getStylistDetails(
+        skipSource ? { ...form, referralSource: "" } : form,
+      );
+
+      // already signed in: add the business to this account, no new sign-up or email code
+      if (isUpgrade) {
+        await becomeStylist(details);
+
+        return finish("newpro");
+      }
+
       const isNew = await signUpStylist(
         form.email.trim().toLowerCase(),
         form.password,
         takeCaptchaToken(),
-        getStylistDetails(skipSource ? { ...form, referralSource: "" } : form),
+        details,
       );
 
       // the email already has an account: back to w4, which explains and offers log in

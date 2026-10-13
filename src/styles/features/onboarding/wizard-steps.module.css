@@ -303,6 +303,19 @@
   overflow: hidden;
 }
 
+/* account details from a signed-in account: shown, not editable */
+.input:read-only,
+.mobileWrap:has(.mobileInput:read-only) {
+  background: var(--fill-quiet);
+  color: var(--text-muted);
+  cursor: not-allowed;
+}
+
+.mobileInput:read-only {
+  color: var(--text-muted);
+  cursor: not-allowed;
+}
+
 .mobileWrap:focus-within {
   border-color: var(--accent-700) !important;
   box-shadow: 0 0 0 3px var(--accent-glow) !important;

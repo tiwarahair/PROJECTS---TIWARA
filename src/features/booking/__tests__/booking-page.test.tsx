@@ -116,6 +116,23 @@ describe("BookingPage", () => {
     ).toBeInTheDocument();
   });
 
+  it("leaving after picking a service asks first; Keep booking stays, Leave goes", async () => {
+    renderWithStore(<BookingPage />, "/book?stylist=tiwaras-house");
+    await user.click(screen.getByRole("button", { name: /^Knotless braids/ }));
+    await user.click(screen.getByRole("link", { name: /Exit booking/ }));
+
+    expect(
+      screen.getByRole("dialog", { name: "Leave this booking?" }),
+    ).toBeInTheDocument();
+
+    await user.click(screen.getByRole("button", { name: "Keep booking" }));
+    expect(screen.getByTestId("location")).toHaveTextContent("/book");
+
+    await user.click(screen.getByRole("link", { name: /Exit booking/ }));
+    await user.click(screen.getByRole("button", { name: "Leave" }));
+    expect(screen.getByTestId("location")).not.toHaveTextContent("/book");
+  });
+
   it("a draft is saved and offered back on the next visit", async () => {
     const { unmount } = renderWithStore(
       <BookingPage />,

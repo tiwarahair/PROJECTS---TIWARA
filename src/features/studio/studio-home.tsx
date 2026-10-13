@@ -1,7 +1,7 @@
 import type { CSSProperties, PointerEvent } from "react";
 import { getAssetUrl } from "../../utils/asset-url";
 import { joinClassNames } from "../../utils/class-names";
-import { BOOKING_LINK, GATE_REASON, RANGE_DATA } from "./studio-data";
+import { GATE_REASON, RANGE_DATA } from "./studio-data";
 import { getDecoratedBookings } from "./studio-decorate";
 import type { DecoratedBooking } from "./studio-decorate";
 import { copyText, makeChart } from "./studio-format";
@@ -13,6 +13,7 @@ import {
 } from "./studio-shell";
 import type { StudioController } from "./use-studio";
 import styles from "../../styles/features/studio/studio-home.module.css";
+import { getBookingLink } from "./studio-model";
 
 const RANGES = [
   { id: "today", label: "Today" },
@@ -233,7 +234,7 @@ export const StudioHome = ({ studio }: { studio: StudioController }) => {
       return;
     }
 
-    copyText(BOOKING_LINK);
+    copyText(getBookingLink(state));
     actions.showToast("Booking link copied");
   };
 

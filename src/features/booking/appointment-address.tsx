@@ -163,7 +163,6 @@ export const AppointmentAddress = ({ booking }: AppointmentAddressProps) => {
                   {`This address is outside ${stylist.name}'s travel area (up to ${stylist.travelMiles} miles). Try another address or find a stylist near you.`}{" "}
                   <Link
                     to={`/search?loc=${encodeURIComponent(address.postcodeLabel)}`}
-                    onClick={actions.onLeaveLink}
                     className={styles.nearLink}
                   >
                     Find stylists near this address

@@ -36,33 +36,61 @@ describe("AccountSettings", () => {
 
     expect(onState.mock.lastCall?.[0].canSave).toBe(true);
     await user.click(screen.getByRole("button", { name: "Save changes" }));
-    expect(screen.getByText("Personal details saved")).toBeInTheDocument();
+
+    expect(
+      await screen.findByText("Personal details saved"),
+    ).toBeInTheDocument();
+
     expect(onState.mock.lastCall?.[0].canSave).toBe(false);
   });
 
-  it("changes the login phone with a code; 000000 is rejected", async () => {
+  it("saves a new mobile straight away, no code", async () => {
     render(<AccountSettings />, { wrapper: MemoryRouter });
     await user.click(screen.getAllByRole("button", { name: "Change" })[1]!);
-
     await user.type(screen.getByLabelText("New phone number"), "07700 900999");
+    await user.click(screen.getByRole("button", { name: "Save" }));
 
-    await user.click(screen.getByRole("button", { name: "Send code" }));
-    const code = screen.getByLabelText("Enter the code sent to 07700 900999");
-
-    await user.type(code, "000000");
-    await user.click(screen.getByRole("button", { name: "Verify" }));
-
-    expect(screen.getByRole("alert")).toHaveTextContent(
-      "That code didn’t match. Check the latest text and try again.",
-    );
-
-    await user.clear(code);
-    await user.type(code, "123456");
-    await user.click(screen.getByRole("button", { name: "Verify" }));
-    expect(screen.getByText("07700 900999")).toBeInTheDocument();
+    expect(await screen.findByText("07700 900999")).toBeInTheDocument();
+    expect(screen.getByText("Mobile updated")).toBeInTheDocument();
   });
 
-  it("blocks closing the account while bookings are upcoming", () => {
+  it("changes the login email with a code from each address", async () => {
+    render(<AccountSettings />, { wrapper: MemoryRouter });
+    await user.click(screen.getAllByRole("button", { name: "Change" })[0]!);
+    await user.type(screen.getByLabelText("New email"), "amara@example.com");
+    await user.click(screen.getByRole("button", { name: "Send codes" }));
+
+    await user.type(
+      await screen.findByLabelText("Code sent to amara.okonkwo@gmail.com"),
+      "000000",
+    );
+
+    await user.type(
+      screen.getByLabelText("Code sent to amara@example.com"),
+      "123456",
+    );
+
+    await user.click(screen.getByRole("button", { name: "Confirm" }));
+
+    expect(await screen.findByRole("alert")).toHaveTextContent(
+      "The code sent to amara.okonkwo@gmail.com isn’t right or has expired.",
+    );
+
+    await user.clear(
+      screen.getByLabelText("Code sent to amara.okonkwo@gmail.com"),
+    );
+
+    await user.type(
+      screen.getByLabelText("Code sent to amara.okonkwo@gmail.com"),
+      "123456",
+    );
+
+    await user.click(screen.getByRole("button", { name: "Confirm" }));
+    expect(await screen.findByText("Login email updated")).toBeInTheDocument();
+    expect(screen.getByText("amara@example.com")).toBeInTheDocument();
+  });
+
+  it("blocks closing the business while bookings are upcoming", () => {
     render(<AccountSettings upcoming={2} />, { wrapper: MemoryRouter });
 
     expect(
@@ -72,16 +100,16 @@ describe("AccountSettings", () => {
     ).toBeInTheDocument();
 
     expect(
-      screen.getByRole("button", { name: "Close account" }),
+      screen.getByRole("button", { name: "Close business" }),
     ).toBeDisabled();
   });
 
-  it("confirms closing the account in a dialog on <body>", async () => {
+  it("confirms closing the business in a dialog on <body>", async () => {
     render(<AccountSettings />, { wrapper: MemoryRouter });
-    await user.click(screen.getByRole("button", { name: "Close account" }));
+    await user.click(screen.getByRole("button", { name: "Close business" }));
 
     const dialog = screen.getByRole("alertdialog", {
-      name: "Close your account?",
+      name: "Close your business?",
     });
 
     expect(dialog.closest("[data-ac-portal]")?.parentElement).toBe(
@@ -89,10 +117,10 @@ describe("AccountSettings", () => {
     );
 
     await user.click(
-      within(dialog).getByRole("button", { name: "Close account" }),
+      within(dialog).getByRole("button", { name: "Close business" }),
     );
 
-    expect(screen.getByText("Account closed")).toBeInTheDocument();
+    expect(await screen.findByText("Business closed")).toBeInTheDocument();
   });
 
   it("security: loads the sessions, then signs out of one", async () => {
@@ -105,6 +133,39 @@ describe("AccountSettings", () => {
     );
 
     expect(screen.getByText("Signed out of iPad")).toBeInTheDocument();
+  });
+
+  it("security: when Supabase asks, the password change needs the emailed code", async () => {
+    render(<AccountSettings page="security" />, { wrapper: MemoryRouter });
+
+    expect(
+      screen.queryByLabelText("Code from your email"),
+    ).not.toBeInTheDocument();
+
+    await user.type(screen.getByLabelText("New password"), "tide2lamp-violet");
+
+    await user.type(
+      screen.getByLabelText("Confirm new password"),
+      "tide2lamp-violet",
+    );
+
+    await user.click(screen.getByRole("button", { name: "Save changes" }));
+
+    expect(
+      await screen.findByText("We emailed a code to amara.okonkwo@gmail.com"),
+    ).toBeInTheDocument();
+
+    await user.type(screen.getByLabelText("Code from your email"), "111111");
+    await user.click(screen.getByRole("button", { name: "Save changes" }));
+
+    expect(await screen.findByRole("alert")).toHaveTextContent(
+      "That code isn’t right or has expired.",
+    );
+
+    await user.clear(screen.getByLabelText("Code from your email"));
+    await user.type(screen.getByLabelText("Code from your email"), "123456");
+    await user.click(screen.getByRole("button", { name: "Save changes" }));
+    expect(await screen.findByText(/^Password updated/)).toBeInTheDocument();
   });
 
   it("security: a social sign-in offers to set a password", () => {

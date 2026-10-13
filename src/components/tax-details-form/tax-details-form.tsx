@@ -1,4 +1,4 @@
-import { useId, useRef, useState } from "react";
+import { useEffect, useId, useRef, useState } from "react";
 import type { ChangeEvent } from "react";
 import { joinClassNames } from "../../utils/class-names";
 import { AddressFinder } from "../address-finder/address-finder";
@@ -32,6 +32,8 @@ export interface TaxDetailsFormProps {
   value?: Partial<TaxDetails>;
   onSubmit?: (details: TaxDetails) => void;
   onCancel?: () => void;
+  /** Whether the fields differ from how the form opened. */
+  onDirtyChange?: (isDirty: boolean) => void;
 }
 
 const KINDS: [TaxKind, string][] = [
@@ -135,6 +137,7 @@ export const TaxDetailsForm = ({
   value,
   onSubmit,
   onCancel,
+  onDirtyChange,
 }: TaxDetailsFormProps) => {
   const uid = `tx${useId().replace(/[^a-zA-Z0-9]/g, "")}`;
 
@@ -143,6 +146,14 @@ export const TaxDetailsForm = ({
   );
 
   const dobRefs = useRef<(HTMLInputElement | null)[]>([]);
+  const opened = useRef(state);
+
+  const getFields = (taxState: TaxState) =>
+    JSON.stringify({ ...taxState, touched: null });
+
+  const isDirty = getFields(state) !== getFields(opened.current);
+
+  useEffect(() => onDirtyChange?.(isDirty), [isDirty, onDirtyChange]);
 
   const setState = (patch: Partial<TaxState>) =>
     setRawState((current) => ({ ...current, ...patch }));

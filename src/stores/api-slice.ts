@@ -1,10 +1,26 @@
 import { createApi, fakeBaseQuery } from "@reduxjs/toolkit/query/react";
 import { supabase } from "../lib/supabase";
-import type { Profile, StylistStudio } from "../types/profile";
+import {
+  closeBusiness,
+  fetchStylistStudio,
+  reopenBusiness,
+} from "../lib/studio-api";
+import type { StylistStudio } from "../lib/studio-api";
+import type { Profile } from "../types/profile";
+
+/** RTK Query's result shape for a promise that may throw. */
+const toQueryResult = <T>(task: Promise<T>) =>
+  task.then(
+    (data) => ({ data }),
+    (error: unknown) => ({
+      error: error instanceof Error ? error : new Error(String(error)),
+    }),
+  );
 
 export const api = createApi({
   reducerPath: "api",
   baseQuery: fakeBaseQuery<Error>(),
+  tagTypes: ["Studio"],
   endpoints: (build) => ({
     getProfile: build.query<Profile, string>({
       queryFn: async (userId) => {
@@ -26,52 +42,54 @@ export const api = createApi({
         };
       },
     }),
-    getStylistStudio: build.query<StylistStudio, string>({
-      queryFn: async (userId) => {
-        const { data, error } = await supabase
-          .from("stylists")
-          .select(
-            "business_name, business_type, area_label, travel_radius_miles, contact_email, contact_phone, stylist_private(line1, line2, city, postcode), stylist_categories(id, name, sort, colour), services(id, name, description, service_group_id, service_type_id, category_id, duration_min, price_pence, sort)",
-          )
-          .eq("owner_id", userId)
-          .single();
+    updateProfile: build.mutation<
+      null,
+      {
+        userId: string;
+        patch: Partial<Pick<Profile, "first" | "last" | "mobile">>;
+      }
+    >({
+      queryFn: async ({ userId, patch: { first, last, mobile } }) => {
+        const { error } = await supabase
+          .from("profiles")
+          .update({ first_name: first, last_name: last, phone: mobile })
+          .eq("id", userId);
 
-        if (error) return { error };
-
-        return {
-          data: {
-            businessName: data.business_name,
-            businessType: data.business_type,
-            areaLabel: data.area_label,
-            travelRadiusMiles: data.travel_radius_miles,
-            contactEmail: data.contact_email,
-            contactPhone: data.contact_phone,
-            address: {
-              line1: data.stylist_private?.line1 ?? "",
-              line2: data.stylist_private?.line2 ?? "",
-              city: data.stylist_private?.city ?? "",
-              postcode: data.stylist_private?.postcode ?? "",
-            },
-            categories: [...data.stylist_categories].sort(
-              (left, right) => left.sort - right.sort,
-            ),
-            services: [...data.services]
-              .sort((left, right) => left.sort - right.sort)
-              .map((service) => ({
-                id: service.id,
-                name: service.name,
-                description: service.description,
-                groupId: service.service_group_id,
-                typeId: service.service_type_id,
-                categoryId: service.category_id,
-                durationMin: service.duration_min,
-                pricePence: service.price_pence,
-              })),
-          },
-        };
+        return error ? { error } : { data: null };
       },
+      // the header, Studio and Account read the profile from this cache
+      onQueryStarted: async (
+        { userId, patch },
+        { dispatch, queryFulfilled },
+      ) => {
+        await queryFulfilled;
+
+        dispatch(
+          api.util.updateQueryData("getProfile", userId, (profile) => ({
+            ...profile,
+            ...patch,
+          })),
+        );
+      },
+    }),
+    // closing or reopening reloads Studio, which then shows the closed screen or the dashboard
+    setBusinessClosed: build.mutation<null, boolean>({
+      queryFn: (isClosed) =>
+        toQueryResult<null>(
+          (isClosed ? closeBusiness() : reopenBusiness()).then(() => null),
+        ),
+      invalidatesTags: ["Studio"],
+    }),
+    getStylistStudio: build.query<StylistStudio, string>({
+      providesTags: ["Studio"],
+      queryFn: (ownerId) => toQueryResult(fetchStylistStudio(ownerId)),
     }),
   }),
 });
 
-export const { useGetProfileQuery, useGetStylistStudioQuery } = api;
+export const {
+  useGetProfileQuery,
+  useGetStylistStudioQuery,
+  useUpdateProfileMutation,
+  useSetBusinessClosedMutation,
+} = api;

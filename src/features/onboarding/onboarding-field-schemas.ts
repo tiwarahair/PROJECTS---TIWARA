@@ -6,6 +6,8 @@ import type { OnboardingForm, OnboardingState } from "./onboarding-state";
 
 export type ValidationInput = Pick<OnboardingState, "screen" | "audience"> & {
   form: OnboardingForm;
+  /** A signed-in account becoming a stylist: no new password. */
+  isUpgrade?: boolean;
 };
 
 /** Every field with no rules; each screen extends it with its own. */

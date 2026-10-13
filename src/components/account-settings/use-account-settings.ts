@@ -6,7 +6,12 @@ import type {
   TaxBusiness,
   TaxDetails,
 } from "../tax-details-form/tax-details-logic";
-import { getInitialSettingsState } from "./account-settings-logic";
+import { DEMO_BACKEND } from "./account-settings-backend";
+import type { AccountSettingsBackend } from "./account-settings-backend";
+import {
+  EMPTY_PASSWORD,
+  getInitialSettingsState,
+} from "./account-settings-logic";
 import type { SettingsPerson } from "./account-settings-logic";
 import type {
   ConfirmDialog,
@@ -21,10 +26,18 @@ const TOAST_MS = 2400;
 const SESSIONS_LOAD_MS = 700;
 const PASSWORD_MIN = 8;
 
+const PASSWORD_FAILURES: Record<string, string> = {
+  reauthentication_not_valid: "That code isn’t right or has expired.",
+  same_password: "That’s your current password. Choose a new one.",
+  weak_password: "Choose a stronger password.",
+  failed: "Your password couldn’t be changed. Try again.",
+};
+
 /** What the host (Studio) gets after every render to drive its own save button. */
 export interface AccountSettingsApi {
   canSave: boolean;
   save: () => void;
+  discard: () => void;
 }
 
 export interface AccountSettingsProps {
@@ -61,6 +74,9 @@ export interface AccountSettingsProps {
   onTaxAdd?: () => void;
   onTaxSave?: (details: TaxDetails) => void;
   onTaxCancel?: () => void;
+  onTaxDirty?: (isDirty: boolean) => void;
+  /** Where the changes save; demo boards leave it out. */
+  backend?: AccountSettingsBackend;
   onTaxLearnMore?: () => void;
 }
 
@@ -185,10 +201,11 @@ export const useAccountSettings = (props: AccountSettingsProps) => {
   });
 
   const passwordErrors = {
-    current:
-      state.passwordTouched && !isSocial && !state.password.current
-        ? "Enter your current password."
-        : "",
+    code:
+      state.passwordError ||
+      (state.passwordTouched && state.isPasswordCodeSent && !state.password.code
+        ? "Enter the code we emailed you."
+        : ""),
     next: passwordView.hasError ? passwordCheck.error : "",
     confirm:
       state.passwordTouched && state.password.confirm !== state.password.next
@@ -208,7 +225,7 @@ export const useAccountSettings = (props: AccountSettingsProps) => {
   // ---- save bar (only pages with typed fields)
   const isPasswordDirty =
     showPasswordFields &&
-    !!(state.password.current || state.password.next || state.password.confirm);
+    !!(state.password.code || state.password.next || state.password.confirm);
 
   const isDirty =
     page === "personal" ? isNameDirty : page === "security" && isPasswordDirty;
@@ -221,38 +238,60 @@ export const useAccountSettings = (props: AccountSettingsProps) => {
       ? !!(getNameError("first") || getNameError("last"))
       : page === "security" &&
         !!(
-          passwordErrors.current ||
+          passwordErrors.code ||
           passwordErrors.next ||
           passwordErrors.confirm
         );
 
-  const save = () => {
+  const backend = props.backend ?? DEMO_BACKEND;
+
+  const save = async () => {
     if (page === "personal") {
-      if (!state.first.trim() || !state.last.trim())
-        return setState({ nameTouched: true });
+      const first = state.first.trim();
+      const last = state.last.trim();
 
-      setState({
-        savedName: [state.first.trim(), state.last.trim()],
-        nameTouched: false,
-      });
+      if (!first || !last) return setState({ nameTouched: true });
 
+      try {
+        await backend.saveName(first, last);
+      } catch {
+        return toast("Your name couldn’t be saved. Try again.");
+      }
+
+      setState({ savedName: [first, last], nameTouched: false });
       toast("Personal details saved");
     }
 
     if (page === "security") {
+      const { code, next, confirm } = state.password;
+
       if (
-        (!isSocial && !state.password.current) ||
+        (state.isPasswordCodeSent && !code) ||
         !passwordCheck.valid ||
-        state.password.confirm !== state.password.next
+        confirm !== next
       )
         return setState({ passwordTouched: true });
+
+      const failure = await backend
+        .changePassword(next, code, state.signOthers)
+        .catch(() => "failed");
+
+      // signed in over 24 hours ago: Supabase wants the emailed code first
+      if (failure === "reauthentication_needed") return sendPasswordCode();
+
+      if (failure)
+        return setState({
+          passwordError: PASSWORD_FAILURES[failure] ?? PASSWORD_FAILURES.failed,
+        });
 
       const others = state.signOthers
         ? state.sessions.filter(({ isCurrent }) => !isCurrent).length
         : 0;
 
       setState({
-        password: { current: "", next: "", confirm: "" },
+        password: EMPTY_PASSWORD,
+        isPasswordCodeSent: false,
+        passwordError: "",
         passwordTouched: false,
         newPasswordBlurred: false,
         isSettingPassword: false,
@@ -271,9 +310,29 @@ export const useAccountSettings = (props: AccountSettingsProps) => {
     }
   };
 
+  const discard = () =>
+    setState({
+      first: state.savedName[0],
+      last: state.savedName[1],
+      nameTouched: false,
+      password: EMPTY_PASSWORD,
+      passwordError: "",
+      passwordTouched: false,
+      newPasswordBlurred: false,
+    });
+
+  const sendPasswordCode = () =>
+    backend
+      .sendPasswordCode()
+      .then(() => {
+        setState({ isPasswordCodeSent: true, passwordError: "" });
+        toast(`We emailed a code to ${state.email}`);
+      })
+      .catch(() => toast("The code couldn’t be sent. Try again."));
+
   // report after every render (on mount and on every update)
   useEffect(() => {
-    props.onState?.({ canSave: isDirty && hasSave, save });
+    props.onState?.({ canSave: isDirty && hasSave, save, discard });
   });
 
   const connectGoogle = () => {
@@ -305,6 +364,8 @@ export const useAccountSettings = (props: AccountSettingsProps) => {
     hasSave,
     hasBarError,
     save,
+    sendPasswordCode,
+    backend,
     connectGoogle,
   };
 };

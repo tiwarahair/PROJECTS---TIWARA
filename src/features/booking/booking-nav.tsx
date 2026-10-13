@@ -1,30 +1,25 @@
-import type { MouseEvent, ReactNode } from "react";
+import type { ReactNode } from "react";
 import { Link } from "react-router";
 import { getAssetUrl } from "../../utils/asset-url";
 import styles from "../../styles/features/booking/booking-nav.module.css";
 
 interface BookingNavProps {
   exitHref: string;
-  onLeaveLink: (event: MouseEvent<HTMLAnchorElement>) => void;
   holdBar: ReactNode;
 }
 
 /** Logo and "Exit booking" (both ask before leaving once a service is chosen), plus the mobile hold bar. */
-export const BookingNav = ({
-  exitHref,
-  onLeaveLink,
-  holdBar,
-}: BookingNavProps) => (
+export const BookingNav = ({ exitHref, holdBar }: BookingNavProps) => (
   <nav className={styles.nav}>
     <div className={styles.bar}>
-      <Link to="/" onClick={onLeaveLink} className={styles.logoLink}>
+      <Link to="/" className={styles.logoLink}>
         <img
           src={getAssetUrl("logos/logo-crimson.png")}
           alt="Tiwára's House"
           className={styles.logo}
         />
       </Link>
-      <Link to={exitHref} onClick={onLeaveLink} className={styles.exit}>
+      <Link to={exitHref} className={styles.exit}>
         Exit booking{" "}
         <svg
           width="15"

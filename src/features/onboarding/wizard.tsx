@@ -25,7 +25,11 @@ const STEPS = {
   w5: StepSource,
 } as const;
 
-const getSubtitle = (screen: string, businessType: string): string =>
+const getSubtitle = (
+  screen: string,
+  businessType: string,
+  isUpgrade: boolean,
+): string =>
   ({
     w1: "Choose where you do most of your appointments.",
     w2: "Tap your main category first, then any others you offer.",
@@ -33,7 +37,9 @@ const getSubtitle = (screen: string, businessType: string): string =>
       businessType === "mobile"
         ? "Clients see your travel area, not your address."
         : "Clients use this to find and book you.",
-    w4: "You’ll use these to log in to Tiwára’s Studio.",
+    w4: isUpgrade
+      ? "From your account. You can change them in your account settings."
+      : "You’ll use these to log in to Tiwára’s Studio.",
     w5: "Optional. It helps us reach more stylists like you.",
   })[screen] ?? "";
 
@@ -51,7 +57,10 @@ export const Wizard = (props: ScreenProps) => {
   const Step = STEPS[screen as keyof typeof STEPS];
   const modeLabel = isDark ? "Switch to light mode" : "Switch to dark mode";
   const toggleMode = () => actions.setMode(isDark ? "light" : "dark");
-  const submitLabel = screen === "w4" ? "Create account" : "Continue";
+
+  const submitLabel =
+    screen === "w4" && !onboarding.isUpgrade ? "Create account" : "Continue";
+
   const isSkippable = screen === "w5";
 
   const submitClass = (base: string | undefined) =>
@@ -185,8 +194,14 @@ export const Wizard = (props: ScreenProps) => {
             state.direction === "back" ? styles.enterBack : styles.enterForward,
           )}
         >
-          <h1 className={styles.title}>{WIZARD_TITLES[screen] ?? ""}</h1>
-          <p className={styles.sub}>{getSubtitle(screen, state.form.type)}</p>
+          <h1 className={styles.title}>
+            {screen === "w4" && onboarding.isUpgrade
+              ? "Your details"
+              : (WIZARD_TITLES[screen] ?? "")}
+          </h1>
+          <p className={styles.sub}>
+            {getSubtitle(screen, state.form.type, onboarding.isUpgrade)}
+          </p>
           {Step && <Step {...props} />}
         </div>
       </div>

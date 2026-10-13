@@ -71,7 +71,7 @@ export const getScreenSchema = (input: ValidationInput) => {
       return formSchema
         .extend({ ...names, email, mobile, terms })
         .superRefine((form, context) => {
-          checkPasswordField(input, form, context);
+          if (!input.isUpgrade) checkPasswordField(input, form, context);
 
           if (
             !form.useContact &&

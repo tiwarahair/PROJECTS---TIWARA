@@ -87,7 +87,7 @@ export const createServiceActions = (
     if (error) return { error };
 
     const categories = state.categories;
-    const id = `c${Date.now().toString(36)}`;
+    const id = crypto.randomUUID();
 
     const category = {
       id,
@@ -280,7 +280,7 @@ export const createServiceActions = (
     const addons = state.addons.concat(pending);
     const links: WizardDraft["addons"] = [];
 
-    fill.addonDefinitions.forEach(([name, price, minutes], index) => {
+    fill.addonDefinitions.forEach(([name, price, minutes]) => {
       let addon = addons.find(
         (item) =>
           (item.status || "active") !== "archived" &&
@@ -289,7 +289,7 @@ export const createServiceActions = (
 
       if (!addon) {
         addon = {
-          id: `ad${Date.now()}${index}`,
+          id: crypto.randomUUID(),
           categoryId: getCategoryById(state, draft.categoryId)
             ? draft.categoryId
             : null,
@@ -467,7 +467,7 @@ export const createServiceActions = (
 
             const copy = {
               ...service,
-              id: `${service.id}-copy-${Date.now()}`,
+              id: crypto.randomUUID(),
               name: `${service.name} (copy)`,
               sizes: (service.sizes || []).map((row) => ({ ...row })),
               lengths: (service.lengths || []).map((row) => ({ ...row })),
@@ -565,7 +565,7 @@ export const createServiceActions = (
 
             list.splice(index + 1, 0, {
               ...addon,
-              id: `${addon.id}-copy-${Date.now()}`,
+              id: crypto.randomUUID(),
               name: `${addon.name} (copy)`,
             });
 
