@@ -284,6 +284,49 @@
   justify-content: center;
 }
 
+.emptyState {
+  max-width: 420px;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 20px;
+}
+
+.emptyButton {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--accent-700);
+  color: var(--neutral-50);
+  font-weight: 600;
+  font-size: 15px;
+  padding: 13px 26px;
+  border-radius: var(--radius-full);
+  transition:
+    background-color 200ms cubic-bezier(0.2, 0.8, 0.2, 1),
+    transform 160ms cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+
+.emptyButton:hover {
+  background: #7a0e0f !important;
+  color: var(--neutral-50) !important;
+}
+
+.emptyButton:active {
+  transform: scale(0.97) !important;
+}
+
+/* narrow screens: centred, with a full-width button */
+.emptyStateCentred {
+  max-width: none;
+  align-items: center;
+  text-align: center;
+}
+
+.emptyStateCentred .emptyButton {
+  align-self: stretch;
+}
+
 .emptyText {
   margin: 0;
   font-size: 16.5px;

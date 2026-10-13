@@ -220,3 +220,28 @@
 .dangerButton:active {
   transform: scale(0.97) !important;
 }
+
+/* Shared with stylists: nothing to share before a first booking */
+.sharedEmptyTitle {
+  margin: 0 0 6px;
+  font-family: "Schibsted Grotesk", sans-serif;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  font-size: 19px;
+  color: var(--text-primary);
+}
+
+.sharedEmptyLink {
+  padding: 0;
+  border: 0;
+  background: none;
+  font-size: 14px;
+  color: var(--text-secondary);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  cursor: pointer;
+}
+
+.sharedEmptyLink:hover {
+  color: var(--text-primary);
+}

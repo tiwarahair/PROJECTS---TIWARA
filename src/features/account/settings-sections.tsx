@@ -1,4 +1,7 @@
+import { useState } from "react";
+import { Link } from "react-router";
 import { AllergyField } from "../../components/allergy-field/allergy-field";
+import { AllergyPrivacySheet } from "../../components/allergy-privacy-sheet/allergy-privacy-sheet";
 import { joinClassNames } from "../../utils/class-names";
 import type { AccountController } from "./use-account";
 import styles from "../../styles/features/account/settings-sections.module.css";
@@ -32,12 +35,65 @@ interface SharedSectionProps {
   getStylistName: (id: string) => string;
 }
 
+/** Before a first booking there's no stylist to share anything with. */
+const SharedEmpty = ({ isWide }: { isWide: boolean }) => {
+  const [isPrivacyOpen, setPrivacyOpen] = useState(false);
+
+  return (
+    <div
+      className={joinClassNames(ui.emptyState, !isWide && ui.emptyStateCentred)}
+      data-screen-label="Shared with stylists empty"
+    >
+      <div className={ui.emptyIcon}>
+        <svg
+          width="24"
+          height="24"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          strokeWidth="2"
+          strokeLinejoin="round"
+          aria-hidden="true"
+        >
+          <path d="M12 3l7 3v6c0 4.5-3 7.5-7 9-4-1.5-7-4.5-7-9V6z"></path>
+        </svg>
+      </div>
+      <div>
+        <h2 className={styles.sharedEmptyTitle}>Nothing shared yet</h2>
+        <p className={ui.emptyText}>
+          When you book, you can choose to share allergies or sensitivities with
+          your stylist so they can keep you safe. Only that stylist will see it.
+        </p>
+      </div>
+      <Link className={ui.emptyButton} to="/search">
+        Find a stylist
+      </Link>
+      <button
+        className={styles.sharedEmptyLink}
+        onClick={() => setPrivacyOpen(true)}
+      >
+        How we use this information
+      </button>
+      {isPrivacyOpen && (
+        <AllergyPrivacySheet onClose={() => setPrivacyOpen(false)} />
+      )}
+    </div>
+  );
+};
+
 export const SharedSection = ({
   account: { state, actions },
   getStylistName,
 }: SharedSectionProps) => {
   const { entries, allergyEdit, allergyDraft } = state;
   const { setState, showToast } = actions;
+
+  if (!entries.length)
+    return (
+      <section data-screen-label="Account: Shared with stylists">
+        <SharedEmpty isWide={state.wide} />
+      </section>
+    );
 
   return (
     <section data-screen-label="Account: Shared with stylists">

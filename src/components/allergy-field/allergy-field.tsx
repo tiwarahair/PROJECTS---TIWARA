@@ -1,5 +1,6 @@
 import { useEffect, useLayoutEffect, useRef, useState } from "react";
 import { joinClassNames } from "../../utils/class-names";
+import { AllergyPrivacySheet } from "../allergy-privacy-sheet/allergy-privacy-sheet";
 import styles from "../../styles/components/allergy-field/allergy-field.module.css";
 
 const MAX_LENGTH = 200;
@@ -14,29 +15,6 @@ export interface AllergyFieldProps {
   autoFocus?: boolean;
 }
 
-const getNotice = (name: string) => [
-  {
-    key: "a",
-    term: "What we keep",
-    text: `Only what you type in this field, linked to your bookings with ${name}.`,
-  },
-  {
-    key: "b",
-    term: "Who sees it",
-    text: `${name}, on your bookings. It isn’t shown to other stylists or on your reviews.`,
-  },
-  {
-    key: "c",
-    term: "Why",
-    text: `So ${name} can choose products and methods that are safe for you.`,
-  },
-  {
-    key: "d",
-    term: "How long",
-    text: "Until you remove it. Edit or remove it any time from your booking link or your account.",
-  },
-];
-
 /** The allergy note opt-in field with a 200-char counter (from 150) and its privacy sheet. */
 export const AllergyField = ({
   stylistName,
@@ -48,10 +26,6 @@ export const AllergyField = ({
   const [uid] = useState(() => `al${Math.random().toString(36).slice(2, 7)}`);
   const [isSheetOpen, setSheetOpen] = useState(openPrivacy);
 
-  const [viewportWidth, setViewportWidth] = useState(() =>
-    typeof window !== "undefined" ? window.innerWidth : 1200,
-  );
-
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const name = stylistName || "your stylist";
   const length = value.length;
@@ -60,17 +34,10 @@ export const AllergyField = ({
     field: `${uid}-f`,
     hint: `${uid}-h`,
     count: `${uid}-c`,
-    title: `${uid}-t`,
   };
 
   useEffect(() => {
-    const handleResize = () => setViewportWidth(window.innerWidth);
-
-    window.addEventListener("resize", handleResize);
-
     if (autoFocus) textareaRef.current?.focus({ preventScroll: true });
-
-    return () => window.removeEventListener("resize", handleResize);
     // autoFocus only applies on mount
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
@@ -131,65 +98,7 @@ export const AllergyField = ({
       </div>
 
       {isSheetOpen && (
-        <div
-          className={joinClassNames(
-            styles.scrim,
-            viewportWidth <= 960 && styles.mobile,
-          )}
-          onClick={closeSheet}
-        >
-          <div
-            role="dialog"
-            aria-modal="true"
-            aria-labelledby={ids.title}
-            className={styles.dialog}
-            onClick={(event) => event.stopPropagation()}
-          >
-            {viewportWidth <= 960 && (
-              <div aria-hidden="true" className={styles.grab}></div>
-            )}
-            <div className={styles.header}>
-              <div>
-                <div className={styles.eyebrow}>Privacy</div>
-                <h3 id={ids.title} className={styles.title}>
-                  How we use your allergy information
-                </h3>
-              </div>
-              <button
-                className={styles.close}
-                onClick={closeSheet}
-                aria-label="Close"
-              >
-                <svg
-                  width="20"
-                  height="20"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="2"
-                  strokeLinecap="round"
-                >
-                  <path d="M6 6l12 12M18 6L6 18"></path>
-                </svg>
-              </button>
-            </div>
-            <dl className={styles.notice}>
-              {getNotice(name).map(({ key, term, text }) => (
-                <div key={key} className={styles.noticeRow}>
-                  <dt className={styles.noticeTerm}>{term}</dt>
-                  <dd className={styles.noticeText}>{text}</dd>
-                </div>
-              ))}
-            </dl>
-            <p className={styles.footnote}>
-              This is health information, so we only keep it with your consent.
-              You can withdraw it at any time by removing it.
-            </p>
-            <button className={styles.done} onClick={closeSheet}>
-              Got it
-            </button>
-          </div>
-        </div>
+        <AllergyPrivacySheet stylistName={name} onClose={closeSheet} />
       )}
     </div>
   );

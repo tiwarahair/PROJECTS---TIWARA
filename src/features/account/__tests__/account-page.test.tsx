@@ -48,6 +48,32 @@ describe("AccountPage", () => {
     expect(getLabelled("Account: Overview")).toBeInTheDocument();
   });
 
+  it("a real account with no bookings shows Nothing shared yet and how the information is used", async () => {
+    renderWithStore(<AccountPage />, "/account?section=shared", {
+      signedIn: true,
+    });
+
+    expect(
+      screen.getByRole("heading", { name: "Nothing shared yet" }),
+    ).toBeInTheDocument();
+
+    const empty = getLabelled("Shared with stylists empty") as HTMLElement;
+
+    expect(
+      within(empty).getByRole("link", { name: "Find a stylist" }),
+    ).toHaveAttribute("href", "/search");
+
+    await user.click(
+      screen.getByRole("button", { name: "How we use this information" }),
+    );
+
+    expect(
+      screen.getByRole("dialog", {
+        name: "How we use your allergy information",
+      }),
+    ).toBeInTheDocument();
+  });
+
   it("logged out shows the log-in gate with the return link", () => {
     renderWithStore(<AccountPage />, "/account?section=bookings");
 

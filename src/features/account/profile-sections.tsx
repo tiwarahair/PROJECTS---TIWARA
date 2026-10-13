@@ -54,7 +54,7 @@ export const FavouritesSection = ({
       </>
     )}
     {!favourites.length && (
-      <div className={styles.favEmpty} data-screen-label="Favourites empty">
+      <div className={ui.emptyState} data-screen-label="Favourites empty">
         <div className={ui.emptyIcon}>
           <svg
             width="24"
@@ -72,7 +72,7 @@ export const FavouritesSection = ({
         <p className={ui.emptyText}>
           No favourites yet. Tap the heart on any stylist to save them here.
         </p>
-        <Link className={styles.favFind} to="/search">
+        <Link className={ui.emptyButton} to="/search">
           Find a stylist
         </Link>
       </div>
