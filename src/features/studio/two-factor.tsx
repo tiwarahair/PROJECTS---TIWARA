@@ -67,9 +67,11 @@ const SmsRow = () => (
 /** The 6-digit code field shared by the tax-code, app and remove steps. */
 const CodeField = ({ view, label }: { view: TwoFactorView; label: string }) => (
   <>
-    {}
-    <label className={styles.label}>{label}</label>
+    <label className={styles.label} htmlFor="tf-code">
+      {label}
+    </label>
     <input
+      id="tf-code"
       className={joinClassNames(
         styles.code,
         view.isCodeError && styles.inputError,
@@ -81,7 +83,6 @@ const CodeField = ({ view, label }: { view: TwoFactorView; label: string }) => (
       maxLength={6}
       placeholder="000000"
       aria-invalid={view.isCodeError ? "true" : "false"}
-      aria-label="6-digit code"
     />
     {view.isCodeError && (
       <div className={styles.error} role="alert">
@@ -299,15 +300,36 @@ const TwoFactorBody = ({
               {view.errorMessage}
             </div>
           )}
-          {view.isOpenAppShown && (
+          {view.isOpenAppShown && view.appLink && (
+            <a className={styles.openApp} href={view.appLink}>
+              <PhoneIcon />
+              Open in authenticator app
+            </a>
+          )}
+          {view.isOpenAppShown && !view.appLink && !view.isQrLoading && (
             <button className={styles.openApp} onClick={view.openApp}>
               <PhoneIcon />
               Open in authenticator app
             </button>
           )}
           <div className={styles.qrWrap}>
+            {view.qrImage && (
+              <img
+                className={styles.qrImage}
+                src={view.qrImage}
+                alt="QR code for your authenticator app"
+              />
+            )}
+            {view.isQrLoading && (
+              <div className={styles.qrLoading} role="status">
+                Getting your QR code…
+              </div>
+            )}
             <div
-              className={styles.qr}
+              className={joinClassNames(
+                styles.qr,
+                !view.qrCells.length && styles.hidden,
+              )}
               role="img"
               aria-label="QR code for your authenticator app"
             >
@@ -329,7 +351,7 @@ const TwoFactorBody = ({
             </button>
             {view.isKeyOn && (
               <div className={styles.key}>
-                <span className={styles.keyText}>JBSW Y3DP EHPK 3PXP K4ZX</span>
+                <span className={styles.keyText}>{view.keyText}</span>
                 <button className={styles.copy} onClick={view.copyKey}>
                   Copy
                 </button>

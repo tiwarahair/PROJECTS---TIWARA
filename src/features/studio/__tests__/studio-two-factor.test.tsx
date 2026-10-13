@@ -74,20 +74,22 @@ describe("Studio → two-step verification", () => {
   it("a wrong code is rejected and the right one moves on to a backup", async () => {
     renderFixture("tf-app");
     const dialog = getDialog();
+    const codeLabel = "Enter the 6-digit code from the app";
 
-    await user.type(within(dialog).getByLabelText("6-digit code"), "111111");
-
+    await user.type(within(dialog).getByLabelText(codeLabel), "111111");
     await user.click(within(dialog).getByRole("button", { name: "Turn on" }));
 
-    expect(within(dialog).getByRole("alert")).toHaveTextContent(
+    expect(await within(dialog).findByRole("alert")).toHaveTextContent(
       "That code isn’t right",
     );
 
-    await user.clear(within(dialog).getByLabelText("6-digit code"));
-    await user.type(within(dialog).getByLabelText("6-digit code"), "123456");
-
+    await user.clear(within(dialog).getByLabelText(codeLabel));
+    await user.type(within(dialog).getByLabelText(codeLabel), "123456");
     await user.click(within(dialog).getByRole("button", { name: "Turn on" }));
-    expect(within(getDialog()).getByText("Add a backup")).toBeInTheDocument();
+
+    expect(
+      await within(getDialog()).findByText("Add a backup"),
+    ).toBeInTheDocument();
   });
 
   it("skipping the backup warns once, then finishes", async () => {

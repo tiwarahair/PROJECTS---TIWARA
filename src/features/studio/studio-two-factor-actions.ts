@@ -1,9 +1,24 @@
 // The two-step verification dialog: open, step through, add an app, remove one.
+import {
+  confirmTwoFactorEnrolment,
+  hasRecentSecondFactor,
+  listTwoFactorDevices,
+  removeTwoFactorApp,
+  startTwoFactorEnrolment,
+  verifySecondFactor,
+} from "../../lib/two-factor";
+import { FunctionsHttpError } from "@supabase/supabase-js";
+import type { TaxDetails } from "../../components/tax-details-form/tax-details-logic";
+import { saveTaxDetails } from "../../lib/studio-api";
 import type { StudioContext } from "./studio-actions";
 import type { TwoFactorFlow } from "./studio-types";
 
+const DEMO_CODE = "123456";
+
 const WRONG_CODE =
   "That code isn’t right. Enter the latest code from your app.";
+
+const FAILED = "That didn’t work. Check your connection and try again.";
 
 export const createTwoFactorActions = (
   { getState, setState, timers }: StudioContext,
@@ -50,6 +65,57 @@ export const createTwoFactorActions = (
       twoFactor: twoFactor ? { ...twoFactor, ...patch } : twoFactor,
     }));
 
+  const isReal = () => !!getState().account;
+
+  /** Checks the dialog's code (Supabase for a real account, 123456 on demo boards), then carries on. */
+  const withCode = async (
+    check: (code: string) => Promise<boolean>,
+    onPass: () => void | Promise<void>,
+  ) => {
+    const { twoFactor } = getState();
+
+    if (!twoFactor || twoFactor.isBusy) return;
+
+    const code = twoFactor.code || "";
+
+    if (code.length < 6)
+      return setTwoFactor({
+        error: "code",
+        errorMessage: "Enter the 6-digit code",
+      });
+
+    setTwoFactor({ isBusy: true });
+
+    try {
+      const isRight = isReal() ? await check(code) : code === DEMO_CODE;
+
+      setTwoFactor({ isBusy: false });
+
+      if (!isRight)
+        return setTwoFactor({ error: "code", errorMessage: WRONG_CODE });
+
+      await onPass();
+    } catch {
+      setTwoFactor({ isBusy: false, error: "code", errorMessage: FAILED });
+    }
+  };
+
+  /** The app step: a real account gets its QR code and key from Supabase. */
+  const beginEnrolment = (patch: Partial<TwoFactorFlow>) => {
+    setTwoFactor({ ...patch, step: "app", enrolment: null });
+
+    if (!isReal()) return;
+
+    startTwoFactorEnrolment()
+      .then((enrolment) => setTwoFactor({ enrolment }))
+      .catch(() =>
+        setTwoFactor({
+          error: "code",
+          errorMessage: "Two-step verification couldn’t start. Try again.",
+        }),
+      );
+  };
+
   const verifyTwoFactor = () => {
     const { twoFactor, twoFactorSettings } = getState();
 
@@ -69,40 +135,46 @@ export const createTwoFactorActions = (
         errorMessage: "You already have a device with this name",
       });
 
-    if ((twoFactor.code || "").length < 6)
+    const { enrolment } = twoFactor;
+
+    if (isReal() && !enrolment)
       return setTwoFactor({
         error: "code",
-        errorMessage: "Enter the 6-digit code",
+        errorMessage: "The QR code is still loading. Try again in a moment.",
       });
 
-    if (twoFactor.code !== "123456")
-      return setTwoFactor({ error: "code", errorMessage: WRONG_CODE });
+    void withCode(
+      (code) =>
+        confirmTwoFactorEnrolment(enrolment?.factorId ?? "", code, name),
+      async () => {
+        setState({
+          twoFactorSettings: {
+            devices: isReal()
+              ? await listTwoFactorDevices()
+              : devices.concat([{ name, backup: twoFactor.kind === "backup" }]),
+          },
+        });
 
-    setState({
-      twoFactorSettings: {
-        devices: devices.concat([
-          { name, backup: twoFactor.kind === "backup" },
-        ]),
+        if (twoFactor.kind === "main")
+          setTwoFactor({
+            step: "backup",
+            code: "",
+            error: "",
+            errorMessage: "",
+            option: "device",
+            skipWarn: false,
+            keyShown: false,
+            enrolment: null,
+          });
+        else if (twoFactor.flow === "add") {
+          closeTwoFactor();
+          showToast("Backup added");
+        } else
+          setTwoFactor({ step: "done", code: "", error: "", errorMessage: "" });
+
+        checkDone();
       },
-    });
-
-    if (twoFactor.kind === "main")
-      setTwoFactor({
-        step: "backup",
-        code: "",
-        error: "",
-        errorMessage: "",
-        option: "device",
-        skipWarn: false,
-        keyShown: false,
-      });
-    else if (twoFactor.flow === "add") {
-      closeTwoFactor();
-      showToast("Backup added");
-    } else
-      setTwoFactor({ step: "done", code: "", error: "", errorMessage: "" });
-
-    checkDone();
+    );
   };
 
   const removeTwoFactorDevice = () => {
@@ -112,38 +184,92 @@ export const createTwoFactorActions = (
 
     const devices = twoFactorSettings.devices;
 
-    if (devices.length <= 1) {
-      closeTwoFactor();
+    if (devices.length <= 1) return closeTwoFactor();
 
-      return;
+    const device = devices.find(({ name }) => name === twoFactor.name);
+
+    void withCode(
+      (code) => removeTwoFactorApp(device?.id ?? "", code),
+      async () => {
+        let next = isReal()
+          ? await listTwoFactorDevices()
+          : devices.filter((item) => item !== device);
+
+        if (!next.some(({ backup }) => !backup))
+          next = next.map((item, index) =>
+            index === 0 ? { ...item, backup: false } : item,
+          );
+
+        setState({ twoFactorSettings: { devices: next } });
+        closeTwoFactor();
+        showToast(`${twoFactor.name} removed`);
+      },
+    );
+  };
+
+  /** Tax details need an app code from the last 30 days; within that, no code is asked for. */
+  const openTaxEdit = async () => {
+    if (isReal() && (await hasRecentSecondFactor().catch(() => false)))
+      return setState({ taxEdit: true });
+
+    openTwoFactor("taxcode", { flow: "info" });
+  };
+
+  /** Saves tax details (encrypted on the server for a real account); false when they didn't save. */
+  const saveTax = async (value: TaxDetails) => {
+    if (!isReal()) {
+      setState({ tax: value });
+      showToast("Tax details saved");
+      checkDone();
+
+      return true;
     }
 
-    if ((twoFactor.code || "").length < 6)
-      return setTwoFactor({
-        error: "code",
-        errorMessage: "Enter the 6-digit code",
+    try {
+      const nationalInsuranceHint = await saveTaxDetails(value);
+
+      setState({
+        tax: { ...value, nationalInsuranceNumber: "", nationalInsuranceHint },
       });
 
-    if (twoFactor.code !== "123456")
-      return setTwoFactor({ error: "code", errorMessage: WRONG_CODE });
+      showToast("Tax details saved");
+      checkDone();
 
-    let next = devices.filter((device) => device.name !== twoFactor.name);
+      return true;
+    } catch (error) {
+      const isLapsed =
+        error instanceof FunctionsHttpError && error.context.status === 403;
 
-    if (!next.some(({ backup }) => !backup))
-      next = next.map((device, index) =>
-        index === 0 ? { ...device, backup: false } : device,
+      showToast(
+        isLapsed
+          ? "For your security, enter a code from your authenticator app, then save again."
+          : "Your tax details couldn’t be saved. Try again.",
       );
 
-    setState({ twoFactorSettings: { devices: next } });
-    closeTwoFactor();
-    showToast(`${twoFactor.name} removed`);
+      if (isLapsed) openTwoFactor("taxcode", { flow: "info" });
+
+      return false;
+    }
   };
+
+  const confirmTaxCode = () =>
+    withCode(
+      (code) => verifySecondFactor(code),
+      () => {
+        closeTwoFactor();
+        setState({ taxEdit: true });
+      },
+    );
 
   return {
     openTwoFactor,
     closeTwoFactor,
     setTwoFactor,
+    beginEnrolment,
     verifyTwoFactor,
     removeTwoFactorDevice,
+    openTaxEdit,
+    confirmTaxCode,
+    saveTax,
   };
 };

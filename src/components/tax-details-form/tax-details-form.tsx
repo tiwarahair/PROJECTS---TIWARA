@@ -490,7 +490,9 @@ export const TaxDetailsForm = ({
             National Insurance number
           </label>
           <div className={styles.help}>
-            Used for tax reporting. It looks like QQ 12 34 56 C.
+            {state.nationalInsuranceHint
+              ? `Saved: ${state.nationalInsuranceHint}. Leave blank to keep it.`
+              : "Used for tax reporting. It looks like QQ 12 34 56 C."}
           </div>
           <div className={styles.niWrap}>
             <input
@@ -511,7 +513,7 @@ export const TaxDetailsForm = ({
               onBlur={() => touch("nationalInsuranceNumber")}
               autoComplete="off"
               spellCheck="false"
-              placeholder="QQ 12 34 56 C"
+              placeholder={state.nationalInsuranceHint || "QQ 12 34 56 C"}
               aria-invalid={nationalInsuranceError ? "true" : "false"}
               aria-describedby={fieldId("ni-e")}
             />

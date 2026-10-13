@@ -10,7 +10,12 @@ import {
   toOffset,
 } from "./studio-blocked-time";
 import { toStudioAddon, toStudioService } from "./studio-service-records";
-import { toExtras, toFeeKind, toPolicyMode } from "./studio-settings-records";
+import {
+  toExtras,
+  toFeeKind,
+  toPolicyMode,
+  toTaxDetails,
+} from "./studio-settings-records";
 import type { StudioState } from "./studio-types";
 
 const getClockTime = (time: string | null) => (time ?? "").slice(0, 5);
@@ -125,6 +130,9 @@ export const toStudioPatch = (
         }
       : state.policy,
     pause: { on: studio.pause_on, until: studio.pause_until ?? "" },
+    tax: studio.stylist_tax_details
+      ? toTaxDetails(studio.stylist_tax_details)
+      : null,
     check: {
       ...state.check,
       availability: !!studio.availability_confirmed_at,

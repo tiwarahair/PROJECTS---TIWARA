@@ -1,5 +1,6 @@
 // Studio's reads and writes against Supabase (row shapes; studio-records converts them).
 import imageCompression from "browser-image-compression";
+import type { TaxDetails } from "../components/tax-details-form/tax-details-logic";
 import type { Tables, TablesInsert, TablesUpdate } from "../types/database";
 import { supabase } from "./supabase";
 
@@ -15,7 +16,9 @@ const STUDIO_SELECT = `*,
   closed_periods(*),
   booking_rules(*),
   payment_policies(*),
-  portfolio_photos(*)`;
+  portfolio_photos(*),
+  stylist_tax_details(kind, first_name, middle_name, last_name, legal_name, date_of_birth, ni_hint,
+    company_name, company_number, is_address_same, line1, line2, city, postcode)`;
 
 /** Everything Studio shows for the signed-in stylist, in one request. */
 export const fetchStylistStudio = async (ownerId: string) => {
@@ -166,6 +169,17 @@ export const isSlugFree = (slug: string, stylistId: string) =>
 /** Returns the new slug; throws with the server's reason (taken, reserved, 30-day limit). */
 export const changeSlug = (slug: string) =>
   check(supabase.rpc("change_slug", { new_slug: slug }));
+
+/** Saves through the Edge Function (it encrypts the NI number); returns the saved number's masked hint. */
+export const saveTaxDetails = async (details: TaxDetails) => {
+  const { data, error } = await supabase.functions.invoke<{
+    nationalInsuranceHint: string | null;
+  }>("save-tax-details", { body: details });
+
+  if (error) throw error;
+
+  return data?.nationalInsuranceHint ?? "";
+};
 
 /** Takes the booking page offline; it can be reopened for 15 days. */
 export const closeBusiness = () => check(supabase.rpc("close_business"));

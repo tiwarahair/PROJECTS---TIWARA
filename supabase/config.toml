@@ -435,3 +435,7 @@ verify_jwt = false
 # called by pg_cron with x-cron-secret, not a user's token
 [functions.purge-closed-businesses]
 verify_jwt = false
+
+# checks the caller's token itself (getClaims), including the recent 2FA rule
+[functions.save-tax-details]
+verify_jwt = false

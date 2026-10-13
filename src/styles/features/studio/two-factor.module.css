@@ -525,6 +525,32 @@
   border: 1px solid var(--border-subtle);
 }
 
+.qrImage {
+  display: block;
+  width: 192px;
+  height: 192px;
+  padding: 8px;
+  box-sizing: border-box;
+  background: #fff;
+  border-radius: var(--radius-md);
+  border: 1px solid var(--border-subtle);
+}
+
+.qrLoading {
+  display: grid;
+  place-items: center;
+  width: 192px;
+  height: 192px;
+  border-radius: var(--radius-md);
+  border: 1px dashed var(--border-subtle);
+  color: var(--text-secondary);
+  font-size: 13.5px;
+}
+
+.hidden {
+  display: none;
+}
+
 .qrCell {
   background: var(--cell);
 }

@@ -22,14 +22,8 @@ export const getSettingsView = (
 ) => {
   const { state, setState, props, isDesktop, isNew, actions, context } = studio;
 
-  const {
-    showToast,
-    openSubpage,
-    openSheet,
-    openTwoFactor,
-    scrollBody,
-    checkDone,
-  } = actions;
+  const { showToast, openSubpage, openSheet, openTwoFactor, scrollBody } =
+    actions;
 
   const { sync } = context;
   const nav = getSettingsNav(studio, navigate);
@@ -146,7 +140,7 @@ export const getSettingsView = (
         scrollBody(0, false);
       } else openSubpage(to);
     },
-    onTaxEdit: () => openTwoFactor("taxcode", { flow: "info" }),
+    onTaxEdit: () => void actions.openTaxEdit(),
     onTaxAdd: () => {
       if (!hasTwoFactor(state)) {
         openTwoFactor("secure");
@@ -156,12 +150,13 @@ export const getSettingsView = (
 
       setState({ taxEdit: true });
     },
-    onTaxSave: (value: TaxDetails) => {
-      context.memo.isTaxEdited = false;
-      setState({ tax: value, taxEdit: false });
-      showToast("Tax details saved");
-      checkDone();
-    },
+    onTaxSave: (value: TaxDetails) =>
+      void actions.saveTax(value).then((isSaved) => {
+        if (!isSaved) return;
+
+        context.memo.isTaxEdited = false;
+        setState({ taxEdit: false });
+      }),
     onTaxCancel: () => setState({ taxEdit: false }),
     onTaxDirty: (isDirty: boolean) => {
       context.memo.isTaxEdited = isDirty;

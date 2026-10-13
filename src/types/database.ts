@@ -234,6 +234,60 @@ export type Database = {
           },
         ];
       };
+      notifications: {
+        Row: {
+          attempts: number;
+          channel: string;
+          created_at: string;
+          id: string;
+          last_error: string | null;
+          payload: NonNullable<Json>;
+          send_after: string;
+          sent_at: string | null;
+          status: string;
+          template: string;
+          to_address: string;
+          user_id: string | null;
+        };
+        ComputedFields: never;
+        Insert: {
+          attempts?: number;
+          channel: string;
+          created_at?: string;
+          id?: string;
+          last_error?: string | null;
+          payload?: NonNullable<Json>;
+          send_after?: string;
+          sent_at?: string | null;
+          status?: string;
+          template: string;
+          to_address: string;
+          user_id?: string | null;
+        };
+        Update: {
+          attempts?: number;
+          channel?: string;
+          created_at?: string;
+          id?: string;
+          last_error?: string | null;
+          payload?: NonNullable<Json>;
+          send_after?: string;
+          sent_at?: string | null;
+          status?: string;
+          template?: string;
+          to_address?: string;
+          user_id?: string | null;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "notifications_user_id_fkey";
+            columns: ["user_id"];
+            isOneToOne: false;
+            referencedRelation: "profiles";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
       payment_policies: {
         Row: {
           created_at: string;
@@ -738,6 +792,75 @@ export type Database = {
           },
         ];
       };
+      stylist_tax_details: {
+        Row: {
+          city: string | null;
+          company_name: string | null;
+          company_number: string | null;
+          date_of_birth: string | null;
+          first_name: string | null;
+          is_address_same: boolean;
+          kind: string;
+          last_name: string | null;
+          legal_name: string | null;
+          line1: string | null;
+          line2: string | null;
+          middle_name: string | null;
+          ni_ciphertext: string | null;
+          ni_hint: string | null;
+          postcode: string | null;
+          stylist_id: string;
+          updated_at: string;
+        };
+        ComputedFields: never;
+        Insert: {
+          city?: string | null;
+          company_name?: string | null;
+          company_number?: string | null;
+          date_of_birth?: string | null;
+          first_name?: string | null;
+          is_address_same?: boolean;
+          kind: string;
+          last_name?: string | null;
+          legal_name?: string | null;
+          line1?: string | null;
+          line2?: string | null;
+          middle_name?: string | null;
+          ni_ciphertext?: string | null;
+          ni_hint?: string | null;
+          postcode?: string | null;
+          stylist_id: string;
+          updated_at?: string;
+        };
+        Update: {
+          city?: string | null;
+          company_name?: string | null;
+          company_number?: string | null;
+          date_of_birth?: string | null;
+          first_name?: string | null;
+          is_address_same?: boolean;
+          kind?: string;
+          last_name?: string | null;
+          legal_name?: string | null;
+          line1?: string | null;
+          line2?: string | null;
+          middle_name?: string | null;
+          ni_ciphertext?: string | null;
+          ni_hint?: string | null;
+          postcode?: string | null;
+          stylist_id?: string;
+          updated_at?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "stylist_tax_details_stylist_id_fkey";
+            columns: ["stylist_id"];
+            isOneToOne: true;
+            referencedRelation: "stylists";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
       stylists: {
         Row: {
           area_label: string | null;
@@ -934,6 +1057,29 @@ export type Database = {
     Functions: {
       become_stylist: { Args: { details: Json }; Returns: undefined };
       change_slug: { Args: { new_slug: string }; Returns: string };
+      claim_notifications: {
+        Args: { batch_size?: number };
+        Returns: {
+          attempts: number;
+          channel: string;
+          created_at: string;
+          id: string;
+          last_error: string | null;
+          payload: NonNullable<Json>;
+          send_after: string;
+          sent_at: string | null;
+          status: string;
+          template: string;
+          to_address: string;
+          user_id: string | null;
+        }[];
+        SetofOptions: {
+          from: "*";
+          to: "notifications";
+          isOneToOne: false;
+          isSetofReturn: true;
+        };
+      };
       close_business: { Args: Record<PropertyKey, never>; Returns: undefined };
       create_stylist_business: {
         Args: { meta: Json; new_owner_id: string };
@@ -946,6 +1092,11 @@ export type Database = {
       };
       get_due_closures: { Args: Record<PropertyKey, never>; Returns: string[] };
       get_unique_slug: { Args: { business_name: string }; Returns: string };
+      has_recent_second_factor: {
+        Args: Record<PropertyKey, never>;
+        Returns: boolean;
+      };
+      has_second_factor: { Args: Record<PropertyKey, never>; Returns: boolean };
       hit_rate_limit: {
         Args: { limit_key: string; max_hits: number; window_seconds: number };
         Returns: boolean;
@@ -965,10 +1116,27 @@ export type Database = {
         Returns: boolean;
       };
       is_valid_slug: { Args: { candidate: string }; Returns: boolean };
+      mark_notification_failed: {
+        Args: { error: string; notification_id: string };
+        Returns: undefined;
+      };
+      mark_notification_sent: {
+        Args: { notification_id: string };
+        Returns: undefined;
+      };
       owns_photo_path: { Args: { object_name: string }; Returns: boolean };
       purge_closed_businesses: {
         Args: Record<PropertyKey, never>;
         Returns: undefined;
+      };
+      queue_email: {
+        Args: {
+          payload: Json;
+          template: string;
+          to_address: string;
+          user_id?: string;
+        };
+        Returns: string;
       };
       reopen_business: { Args: Record<PropertyKey, never>; Returns: undefined };
       resolve_slug: { Args: { lookup: string }; Returns: string };

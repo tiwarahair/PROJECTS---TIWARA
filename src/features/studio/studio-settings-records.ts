@@ -1,5 +1,7 @@
 // Settings pages ⇄ database rows: working hours and the payment policy.
 import type { PolicyValue } from "../../components/payment-policy/payment-policy-logic";
+import type { TaxDetails } from "../../components/tax-details-form/tax-details-logic";
+import type { StylistStudio } from "../../lib/studio-api";
 import type { Json, TablesInsert } from "../../types/database";
 import type { StudioState } from "./studio-types";
 
@@ -51,3 +53,35 @@ export const fromPolicy = (
   no_show_percent: policy.noShow.percent,
   extras: policy.extras,
 });
+
+/** Saved tax details back into the form's shape; the NI number itself never leaves the server. */
+export const toTaxDetails = (
+  row: NonNullable<StylistStudio["stylist_tax_details"]>,
+): TaxDetails => {
+  const [year = "", month = "", day = ""] = (row.date_of_birth ?? "").split(
+    "-",
+  );
+
+  return {
+    kind: row.kind === "ltd" ? "ltd" : "sole",
+    nameYes: !row.first_name,
+    first: row.first_name ?? "",
+    middle: row.middle_name ?? "",
+    last: row.last_name ?? "",
+    legalName: row.legal_name ?? "",
+    day,
+    month,
+    year,
+    nationalInsuranceNumber: "",
+    nationalInsuranceHint: row.ni_hint ?? "",
+    companyName: row.company_name ?? "",
+    companyNumber: row.company_number ?? "",
+    isAddressSame: row.is_address_same,
+    address: {
+      line1: row.line1 ?? "",
+      line2: row.line2 ?? "",
+      city: row.city ?? "",
+      postcode: row.postcode ?? "",
+    },
+  };
+};

@@ -7,6 +7,7 @@ import {
   useState,
 } from "react";
 import { useMediaQuery } from "../../hooks/use-media-query";
+import { listTwoFactorDevices } from "../../lib/two-factor";
 import { useUnsavedChanges } from "../../hooks/use-unsaved-changes";
 import { createStudioActions } from "./studio-actions";
 import type { StudioContext } from "./studio-actions";
@@ -246,6 +247,17 @@ export const useStudio = (props: StudioProps) => {
   const latest = useRef({ actions, serviceActions, context });
 
   latest.current = { actions, serviceActions, context };
+
+  // a real account's authenticator apps (the setup checklist's 2FA step reads these)
+  useEffect(() => {
+    if (!stylistId) return;
+
+    listTwoFactorDevices()
+      .then((devices) =>
+        latest.current.context.applyState({ twoFactorSettings: { devices } }),
+      )
+      .catch(() => undefined);
+  }, [stylistId]);
 
   // leaving Studio (sign out, links) with unsaved edits
   useEffect(() => {

@@ -39,6 +39,8 @@ export interface TaxDetails {
   month: string;
   year: string;
   nationalInsuranceNumber: string;
+  /** A saved NI number, masked ("QQ •• •• 56 C"); the form may then be left blank to keep it. */
+  nationalInsuranceHint?: string;
   companyName: string;
   companyNumber: string;
   isAddressSame: boolean;
@@ -70,6 +72,7 @@ export interface TaxState {
   month: string;
   year: string;
   nationalInsuranceNumber: string;
+  nationalInsuranceHint: string;
   showNationalInsurance: boolean;
   companyName: string;
   companyNumber: string;
@@ -133,6 +136,7 @@ export const getInitialTaxState = ({
     month: "",
     year: "",
     nationalInsuranceNumber: "",
+    nationalInsuranceHint: "",
     showNationalInsurance: false,
     companyName: businessName,
     companyNumber: "",
@@ -152,6 +156,7 @@ export const getInitialTaxState = ({
       month: value.month || "",
       year: value.year || "",
       nationalInsuranceNumber: value.nationalInsuranceNumber || "",
+      nationalInsuranceHint: value.nationalInsuranceHint || "",
       companyName: value.companyName || state.companyName,
       companyNumber: value.companyNumber || "",
     });
@@ -292,9 +297,10 @@ export const getTaxErrors = (
       .replace(/\s/g, "")
       .toUpperCase();
 
-    if (!nationalInsuranceNumber)
-      errors.nationalInsuranceNumber = "Enter your National Insurance number";
-    else if (
+    if (!nationalInsuranceNumber) {
+      if (!state.nationalInsuranceHint)
+        errors.nationalInsuranceNumber = "Enter your National Insurance number";
+    } else if (
       !/^(?!BG|GB|NK|KN|TN|NT|ZZ)[A-CEGHJ-PR-TW-Z][A-CEGHJ-NPR-TW-Z]\d{6}[A-D]$/.test(
         nationalInsuranceNumber,
       )

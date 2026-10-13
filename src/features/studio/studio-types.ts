@@ -2,6 +2,7 @@ import type { NOTIFS } from "./studio-data";
 // Studio state shapes: component state, clients, past bookings, seed services/add-ons.
 import type { BusinessValue } from "../../components/business-details/business-details-logic";
 import type { PolicyValue } from "../../components/payment-policy/payment-policy-logic";
+import type { TwoFactorEnrolment } from "../../lib/two-factor";
 import type { TaxDetails } from "../../components/tax-details-form/tax-details-logic";
 import type { ServiceType } from "../../types/service-type";
 
@@ -280,6 +281,8 @@ type StudioPolicy = Omit<PolicyValue, "extras"> & {
 };
 
 interface TwoFactorDevice {
+  /** The Supabase factor; demo boards have none. */
+  id?: string;
   name: string;
   backup: boolean;
 }
@@ -297,6 +300,9 @@ export interface TwoFactorFlow {
   flow: string;
   from?: string;
   fixture?: string;
+  /** A real account's app being added: its QR code and key. */
+  enrolment?: TwoFactorEnrolment | null;
+  isBusy?: boolean;
 }
 
 export interface ConfirmDialog {

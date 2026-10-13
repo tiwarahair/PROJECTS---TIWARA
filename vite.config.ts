@@ -6,6 +6,8 @@ import react from "@vitejs/plugin-react";
 export default defineConfig({
   plugins: [react()],
   build: { outDir: "dist", sourcemap: true },
+  // other sessions' git worktrees live under .claude/worktrees; their edits shouldn't reload this app
+  server: { watch: { ignored: ["**/.claude/**"] } },
   test: {
     environment: "jsdom",
     globals: true,

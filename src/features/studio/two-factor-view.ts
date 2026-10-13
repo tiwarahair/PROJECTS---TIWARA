@@ -7,11 +7,10 @@ import type {
 import { getQrCells } from "./studio-format";
 import type { StudioController } from "./use-studio";
 
-const WRONG_CODE =
-  "That code isn’t right. Enter the latest code from your app.";
+const DEMO_KEY = "JBSWY3DPEHPK3PXPK4ZX";
 
 export const getTwoFactorView = (studio: StudioController) => {
-  const { state, setState, isWide, actions } = studio;
+  const { state, isWide, actions } = studio;
   const flow = state.twoFactor;
 
   if (!flow) return null;
@@ -22,6 +21,7 @@ export const getTwoFactorView = (studio: StudioController) => {
   const isStripe = !!state.check.stripe;
   const { step } = flow;
   const isBackup = flow.kind === "backup";
+  const { enrolment } = flow;
   const main = devices.find(({ backup }) => !backup) || devices[0];
 
   const getOption = (key: string) => ({
@@ -148,27 +148,14 @@ export const getTwoFactorView = (studio: StudioController) => {
       if (flow.from === "tax") setTwoFactor({ step: "tax" });
       else closeTwoFactor();
     },
-    taxSubmit: (value: TaxDetails) => {
-      setState({ tax: value });
-      actions.showToast("Tax details saved");
-      actions.checkDone();
+    taxSubmit: (value: TaxDetails) =>
+      void actions.saveTax(value).then((isSaved) => {
+        if (!isSaved) return;
 
-      if (isStripe) closeTwoFactor();
-      else toStripe();
-    },
-    taxCodeGo: () => {
-      if ((flow.code || "").length < 6)
-        return setTwoFactor({
-          error: "code",
-          errorMessage: "Enter the 6-digit code",
-        });
-
-      if (flow.code !== "123456")
-        return setTwoFactor({ error: "code", errorMessage: WRONG_CODE });
-
-      closeTwoFactor();
-      setState({ taxEdit: true });
-    },
+        if (isStripe) closeTwoFactor();
+        else toStripe();
+      }),
+    taxCodeGo: actions.confirmTaxCode,
     isSecure: step === "secure",
     isMethod: step === "method",
     isApp: step === "app",
@@ -195,8 +182,7 @@ export const getTwoFactorView = (studio: StudioController) => {
       else setTwoFactor({ step: "secure" });
     },
     toApp: () =>
-      setTwoFactor({
-        step: "app",
+      actions.beginEnrolment({
         kind: "main",
         name: "Main phone",
         code: "",
@@ -226,9 +212,10 @@ export const getTwoFactorView = (studio: StudioController) => {
     },
     isKeyOn: !!flow.keyShown,
     toggleKey: () => setTwoFactor({ keyShown: !flow.keyShown }),
+    keyText: (enrolment?.secret ?? DEMO_KEY).replace(/(.{4})(?=.)/g, "$1 "),
     copyKey: () => {
       try {
-        void navigator.clipboard.writeText("JBSWY3DPEHPK3PXPK4ZX");
+        void navigator.clipboard.writeText(enrolment?.secret ?? DEMO_KEY);
       } catch {
         // clipboard not available; the toast still confirms
       }
@@ -236,15 +223,18 @@ export const getTwoFactorView = (studio: StudioController) => {
       actions.showToast("Key copied");
     },
     isOpenAppShown: !isWide,
+    appLink: enrolment?.uri ?? "",
     openApp: () => actions.showToast("Opening your authenticator app"),
-    qrCells: getQrCells(),
+    qrImage: enrolment?.qrCode ?? "",
+    isQrLoading: !!state.account && !enrolment,
+    qrCells: state.account ? [] : getQrCells(),
+    isBusy: !!flow.isBusy,
     verify: actions.verifyTwoFactor,
     verifyLabel: isBackup ? "Add backup" : "Turn on",
     optionDevice: getOption("device"),
     optionManager: getOption("pm"),
     addBackup: () =>
-      setTwoFactor({
-        step: "app",
+      actions.beginEnrolment({
         kind: "backup",
         name: flow.option === "pm" ? "Password manager" : "Backup phone",
         code: "",
