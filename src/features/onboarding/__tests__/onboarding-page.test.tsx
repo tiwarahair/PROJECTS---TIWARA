@@ -4,6 +4,19 @@ import { renderWithStore } from "../../../test/render-with-store";
 import { OnboardingPage } from "../onboarding-page";
 import type { UserEvent } from "@testing-library/user-event";
 import { setupUser } from "../../../test/setup-user";
+import * as auth from "../../../lib/auth";
+
+vi.mock("../../../lib/auth", async (importOriginal) => ({
+  ...(await importOriginal<typeof import("../../../lib/auth")>()),
+  getAccountKind: vi.fn(),
+  signIn: vi.fn(),
+  verifyEmailCode: vi.fn(),
+}));
+
+vi.mock("../../../lib/supabase", async (importOriginal) => ({
+  ...(await importOriginal<typeof import("../../../lib/supabase")>()),
+  rememberDevice: vi.fn(),
+}));
 
 let user: UserEvent;
 
@@ -39,30 +52,53 @@ describe("OnboardingPage", () => {
     ).toBeInTheDocument();
   });
 
-  it("a known customer email goes to the password; the demo password logs in and returns", async () => {
+  it("an existing customer's email goes to the password; logging in returns to the page they came from", async () => {
+    vi.mocked(auth.getAccountKind).mockResolvedValue("customer");
+    vi.mocked(auth.signIn).mockResolvedValue(null);
+
     renderWithStore(
       <OnboardingPage />,
       "/login?screen=cust-email&return=%2Fsearch",
     );
 
-    await user.type(
-      screen.getByLabelText("Email address"),
-      "nia.okafor@gmail.com",
-    );
-
+    await user.type(screen.getByLabelText("Email address"), "nia@example.com");
     await user.click(screen.getByRole("button", { name: "Continue" }));
-    advance(650);
 
     expect(
-      screen.getByRole("heading", { name: "Welcome back" }),
+      await screen.findByRole("heading", { name: "Welcome back" }),
     ).toBeInTheDocument();
 
-    await user.type(screen.getByLabelText("Password"), "sunflower9");
+    expect(auth.getAccountKind).toHaveBeenCalledWith(
+      "nia@example.com",
+      "test-captcha-token",
+    );
 
+    await user.type(screen.getByLabelText("Password"), "a long password");
     await user.click(screen.getByRole("button", { name: "Log in" }));
-    advance(650);
-    expect(screen.getByTestId("location")).toHaveTextContent("/search");
-    expect(sessionStorage.getItem("tw_toast")).toBe("Welcome back, Nia");
+
+    await vi.waitFor(() =>
+      expect(screen.getByTestId("location")).toHaveTextContent("/search"),
+    );
+
+    expect(sessionStorage.getItem("tw_toast")).toBe("Welcome back");
+  });
+
+  it("a wrong password from the server shows the error", async () => {
+    vi.mocked(auth.signIn).mockResolvedValue("invalid_credentials");
+
+    renderWithStore(
+      <OnboardingPage />,
+      "/login?screen=cust-password&board=true",
+    );
+
+    await user.type(screen.getByLabelText("Password"), "not my password");
+    await user.click(screen.getByRole("button", { name: "Log in" }));
+
+    expect(
+      await screen.findByText(
+        "That password isn’t right. Try again or reset it.",
+      ),
+    ).toBeInTheDocument();
   });
 
   it("a wrong password shows the error", () => {
@@ -86,16 +122,25 @@ describe("OnboardingPage", () => {
     ).toBeInTheDocument();
   });
 
-  it("the code screen accepts 123456 typed into the boxes and signs the customer in", async () => {
+  it("a code the server accepts signs the new customer in", async () => {
+    vi.mocked(auth.verifyEmailCode).mockResolvedValue(true);
+
     renderWithStore(
       <OnboardingPage />,
-      "/signup?screen=verify&board=true&stayOnDone=true&code=strict",
+      "/signup?screen=verify&board=true&stayOnDone=true",
     );
 
-    for (const [index, digit] of [..."123456"].entries())
+    for (const [index, digit] of [..."482913"].entries())
       await user.type(screen.getByLabelText(`Digit ${index + 1}`), digit);
 
-    advance(650);
+    await vi.waitFor(() =>
+      expect(screen.getByRole("status")).toBeInTheDocument(),
+    );
+
+    expect(auth.verifyEmailCode).toHaveBeenCalledWith(
+      "ama@example.com",
+      "482913",
+    );
 
     // a board's verify screen is a customer sign-up: it ends with the welcome toast
     expect(screen.getByRole("status")).toHaveTextContent(
@@ -149,11 +194,11 @@ describe("OnboardingPage", () => {
         "new.person@example.com",
       );
 
+      vi.mocked(auth.getAccountKind).mockResolvedValue("none");
       await user.click(screen.getByRole("button", { name: "Continue" }));
-      advance(650);
 
       expect(
-        screen.getByRole("heading", { name: "Create account" }),
+        await screen.findByRole("heading", { name: "Create account" }),
       ).toBeInTheDocument();
 
       expect(screen.getByText(/new.person@example.com/)).toBeInTheDocument();

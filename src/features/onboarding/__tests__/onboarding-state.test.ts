@@ -15,6 +15,7 @@ import type { StartState } from "../onboarding-state";
 const buildState = (patch: Partial<StartState>): StartState => ({
   ...INITIAL_STATE,
   touched: {},
+  flow: null,
   ...patch,
   form: { ...INITIAL_FORM, ...patch.form },
 });

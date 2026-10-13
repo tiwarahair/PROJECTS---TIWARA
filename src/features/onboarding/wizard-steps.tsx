@@ -590,10 +590,9 @@ export const StepAccount = ({ onboarding, layout, view }: ScreenProps) => {
       </div>
       {view.turnstileShown && (
         <OnboardingTurnstile
-          status={state.turnstile}
           isDark={layout.isDark}
-          onCheck={actions.checkTurnstile}
-          inWizard
+          widgetRef={onboarding.turnstileRef}
+          onToken={actions.setCaptchaToken}
         />
       )}
       {!!state.serverErrors.exists && (
@@ -620,7 +619,7 @@ export const StepAccount = ({ onboarding, layout, view }: ScreenProps) => {
 };
 
 /** Step 5: how they heard about us (optional; Skip goes straight to verify). */
-export const StepSource = ({ onboarding }: ScreenProps) => {
+export const StepSource = ({ onboarding, layout }: ScreenProps) => {
   const { state, actions } = onboarding;
   const { form } = state;
 
@@ -669,6 +668,11 @@ export const StepSource = ({ onboarding }: ScreenProps) => {
           />
         </div>
       )}
+      <OnboardingTurnstile
+        isDark={layout.isDark}
+        widgetRef={onboarding.turnstileRef}
+        onToken={actions.setCaptchaToken}
+      />
     </>
   );
 };

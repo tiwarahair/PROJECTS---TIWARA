@@ -341,22 +341,6 @@ export const getFixturePatch = (
       withForm({ referralSource: "Instagram" });
 
       return { screen: "w5", audience: "pro", form };
-    case "turnstile":
-      withForm({
-        first: "Ama",
-        last: "Mensah",
-        email: "ama@example.com",
-        password: "sunflower9",
-        mobile: "7700 900123",
-        terms: true,
-      });
-
-      return {
-        screen: "cust-create",
-        audience: "customer",
-        form,
-        turnstileMode: "challenge",
-      };
   }
 
   if (key.startsWith("pw-")) {

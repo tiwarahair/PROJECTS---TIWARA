@@ -143,26 +143,18 @@ export const TERMS_BODY = {
 export const STORAGE_KEY = "tw_onboarding_v1";
 export const MODE_KEY = "tw_ob_mode";
 
-// demo accounts
-export const KNOWN_CUSTOMERS = ["nia.okafor@gmail.com", "kemi.a@icloud.com"];
-export const KNOWN_PROS = [
-  "amara@tiwarashouse.co.uk",
-  "hello@tiwarashouse.co.uk",
-];
-export const NAMES: Record<string, [string, string]> = {
-  "nia.okafor@gmail.com": ["Nia", "Okafor"],
-  "kemi.a@icloud.com": ["Kemi", "Adeyemi"],
-  "amara@tiwarashouse.co.uk": ["Amara", "Okonkwo"],
-  "hello@tiwarashouse.co.uk": ["Amara", "Okonkwo"],
-};
-
-// screens that run the invisible Turnstile check (fallback widget when ?turnstile=challenge|fail)
+// screens whose server call needs a Turnstile token (verify and forgot-sent only for Resend)
 export const TURNSTILE_SCREENS = [
-  "cust-create",
-  "w4",
+  "cust-email",
+  "pro-email",
   "cust-password",
   "pro-password",
+  "cust-create",
+  "w4",
+  "w5",
   "forgot-email",
+  "verify",
+  "forgot-sent",
 ];
 
 export type PhotoKey = "welcome" | "client" | "stylist";

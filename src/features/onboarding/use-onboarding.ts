@@ -11,20 +11,31 @@ import { useForm } from "react-hook-form";
 import type { FieldPath } from "react-hook-form";
 import { useLocation, useNavigate } from "react-router";
 import { zodResolver } from "@hookform/resolvers/zod";
+import type { TurnstileInstance } from "@marsidev/react-turnstile";
+import {
+  completeClientProfile,
+  getAccountKind,
+  getSignedInAccount,
+  needsSecondFactor,
+  resendEmailCode,
+  sendPasswordReset,
+  setNewPassword,
+  signIn,
+  signOut,
+  signUpClient,
+  signUpStylist,
+  startGoogleSignIn,
+  verifyEmailCode,
+  verifySecondFactor,
+} from "../../lib/auth";
+import type { StylistDetails } from "../../lib/auth";
+import { rememberDevice } from "../../lib/supabase";
 import type { Location } from "react-router";
 import type { EmittedAddress } from "../../components/address-finder/use-address-finder";
 import { usePasswordChecker } from "../../hooks/use-password-checker";
 import { isAddressValid } from "../../utils/address";
 import { getAssetUrl } from "../../utils/asset-url";
-import {
-  KNOWN_CUSTOMERS,
-  KNOWN_PROS,
-  MODE_KEY,
-  NAMES,
-  PHOTOS,
-  STORAGE_KEY,
-  TURNSTILE_SCREENS,
-} from "./onboarding-data";
+import { MODE_KEY, PHOTOS, STORAGE_KEY } from "./onboarding-data";
 import { getFixturePatch } from "./onboarding-fixtures";
 import { getRouteForPath, ROUTE_START } from "./onboarding-routes";
 import type { OnboardingRoute } from "./onboarding-routes";
@@ -49,14 +60,17 @@ type StatePatch =
   | Partial<OnboardingState>
   | ((state: OnboardingState) => Partial<OnboardingState>);
 
-const SUBMIT_MS = 650;
-const CORRECT_PASSWORD = "sunflower9";
-const CORRECT_CODE = "123456";
-const EXPIRED_CODE = "000000";
 const LOCK_MS = 9e5;
 const MAX_ATTEMPTS = 5;
 const DEFAULT_LAT_LNG: [number, number] = [53.4486, -2.2237];
 const NEXT_WIZARD_SCREEN = { w1: "w2", w2: "w3", w3: "w4" };
+
+const BUSINESS_TYPES: Record<string, StylistDetails["businessType"]> = {
+  shop: "shop",
+  chair: "chair_rental",
+  home: "home_based",
+  mobile: "mobile",
+};
 
 interface SavedProgress {
   form?: Partial<OnboardingForm>;
@@ -110,6 +124,11 @@ const getStartScreen = (
 
   if (flow === "pro") return "pro-email";
 
+  if (flow === "reset") return "forgot-reset";
+
+  // back from Google: wait on the chooser while the account is checked
+  if (flow === "social" || flow === "social-pro") return "chooser";
+
   if (screen && screen !== "auto") return screen;
 
   return ROUTE_START[route];
@@ -137,6 +156,7 @@ const getStartState = (
     ...INITIAL_STATE,
     form: INITIAL_FORM,
     touched: {},
+    flow: null,
     width: document.documentElement.clientWidth,
   };
 
@@ -163,6 +183,7 @@ const getStartState = (
   const start = getStartScreen(flow, props, route);
 
   state.screen = start;
+  state.flow = flow;
   state.returnTo = getReturnTo(search);
 
   if (start === "welcome" || start[0] === "w") state.audience = "pro";
@@ -223,6 +244,7 @@ export const useOnboarding = (props: OnboardingProps) => {
   const [resolved] = useState(() => resolveProps(props, location.search));
 
   const [start] = useState(() => getStartState(resolved, location));
+  // the start flow stays in state unused; only the mount effect below reads it
   const { form: startForm, touched: startTouched, ...startState } = start;
   const [state, setRawState] = useState<OnboardingState>(startState);
 
@@ -260,6 +282,7 @@ export const useOnboarding = (props: OnboardingProps) => {
   );
 
   const timers = useRef<Record<string, number>>({});
+  const turnstileRef = useRef<TurnstileInstance | null>(null);
   const carouselHeld = useRef(false);
   const carouselTouchedAt = useRef(0);
 
@@ -431,7 +454,7 @@ export const useOnboarding = (props: OnboardingProps) => {
       resendIn: 30,
       compact: false,
       passwordShown: false,
-      turnstile: "idle",
+      captchaToken: null,
     });
 
     try {
@@ -498,25 +521,21 @@ export const useOnboarding = (props: OnboardingProps) => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  const getTurnstileMode = () =>
-    stateRef.current.turnstileMode || resolved.turnstile || "pass";
+  /** Uses up the current Turnstile token and asks the widget for a fresh one. */
+  const takeCaptchaToken = () => {
+    const token = stateRef.current.captchaToken ?? "";
 
-  const isTurnstileBlocked = () => {
-    const { screen, turnstile } = stateRef.current;
+    setState({ captchaToken: null });
+    turnstileRef.current?.reset();
 
-    return (
-      getTurnstileMode() !== "pass" &&
-      TURNSTILE_SCREENS.includes(screen ?? "") &&
-      turnstile !== "passed"
-    );
+    return token;
   };
 
-  const getFirstName = () => {
-    const form = getValues();
+  /** Runs a server call with the busy state; unexpected failures show the connection error. */
+  const run = (task: () => Promise<void>) => {
+    setState({ busy: true, networkError: false });
 
-    if (form.first && form.first.trim()) return form.first.trim();
-
-    return NAMES[form.email.trim().toLowerCase()]?.[0] ?? "";
+    task().catch(() => setState({ busy: false, networkError: true }));
   };
 
   const toStudio = (isNew: boolean) => {
@@ -534,7 +553,7 @@ export const useOnboarding = (props: OnboardingProps) => {
     kind: "customer-login" | "customer-new" | "newpro" | "pro",
   ) => {
     if (kind === "customer-login" || kind === "customer-new") {
-      const first = getFirstName();
+      const first = getValues("first").trim();
 
       const message =
         kind === "customer-new"
@@ -587,10 +606,63 @@ export const useOnboarding = (props: OnboardingProps) => {
     toStudio(false);
   };
 
-  const afterProAuth = () => {
-    if (resolved.twoFa === "off") finish("pro");
-    else setState({ codeKind: "2fa" }, () => goTo("pro-2fa"));
+  const afterProAuth = async () => {
+    if (await needsSecondFactor())
+      setState({ codeKind: "2fa" }, () => goTo("pro-2fa"));
+    else finish("pro");
   };
+
+  const getStylistDetails = (form: OnboardingForm): StylistDetails => {
+    const { pinLatLng, geocodedLatLng, area } = stateRef.current;
+    const [lat, lng] = pinLatLng ?? geocodedLatLng ?? DEFAULT_LAT_LNG;
+    const isMobile = form.type === "mobile";
+
+    return {
+      ...form,
+      businessName: form.businessName,
+      businessType: BUSINESS_TYPES[form.type] ?? "shop",
+      lat,
+      lng,
+      areaLabel: area,
+      travelRadiusMiles: isMobile ? form.radius : null,
+      contactEmail: form.useContact ? form.email : form.businessEmail || null,
+      contactPhone: form.useContact ? form.mobile : form.businessPhone || null,
+      referralSource:
+        form.referralSource === "Other"
+          ? form.referralSourceOther
+          : form.referralSource,
+    };
+  };
+
+  const showWrongPassword = () => {
+    const attempts = stateRef.current.attempts + 1;
+
+    if (attempts >= MAX_ATTEMPTS)
+      setState({
+        busy: false,
+        attempts,
+        lockedUntil: Date.now() + LOCK_MS,
+        serverErrors: {
+          password: "Too many attempts. Try again in 15 minutes.",
+        },
+      });
+    else
+      setState((state) => ({
+        busy: false,
+        attempts,
+        shake: state.shake + 1,
+        serverErrors: {
+          password: "That password isn’t right. Try again or reset it.",
+        },
+      }));
+  };
+
+  const showWrongCode = () =>
+    setState((state) => ({
+      busy: false,
+      shake: state.shake + 1,
+      codeError: "That code isn’t right",
+    }));
 
   const submit = () => {
     const { busy, lockedUntil } = stateRef.current;
@@ -601,8 +673,6 @@ export const useOnboarding = (props: OnboardingProps) => {
   };
 
   const submitValid = () => {
-    if (isTurnstileBlocked()) return;
-
     const current = stateRef.current;
     const { screen } = current;
     const form = getValues();
@@ -615,93 +685,98 @@ export const useOnboarding = (props: OnboardingProps) => {
       return;
     }
 
-    if (screen === "w5") {
-      setState({ codeKind: "verify" }, () => goTo("verify"));
-
-      return;
-    }
-
-    setState({ busy: true, networkError: false });
-
-    // simulated round trip; ?network=offline shows the connection error
-    const done = (callback: () => void) =>
-      later(
-        "busy",
-        () => {
-          if (resolved.network === "offline") {
-            setState({ busy: false, networkError: true });
-
-            return;
-          }
-
-          callback();
-        },
-        SUBMIT_MS,
-      );
-
     if (screen === "cust-email")
-      return done(() =>
-        goTo(KNOWN_CUSTOMERS.includes(email) ? "cust-password" : "cust-create"),
-      );
+      return run(async () => {
+        const kind = await getAccountKind(email, takeCaptchaToken());
 
-    if (screen === "pro-email")
-      return done(() => {
-        if (KNOWN_PROS.includes(email)) goTo("pro-password");
+        goTo(kind === "none" ? "cust-create" : "cust-password");
+      });
+
+    if (screen === "pro-email" || screen === "w4")
+      return run(async () => {
+        const kind = await getAccountKind(email, takeCaptchaToken());
+
+        if (screen === "w4") {
+          if (kind === "none")
+            setState({ audience: "newpro" }, () => goTo("w5"));
+          else setState({ busy: false, serverErrors: { exists: true } });
+        } else if (kind === "stylist") goTo("pro-password");
         else setState({ busy: false, serverErrors: { noBusiness: true } });
       });
 
     if (screen === "cust-password" || screen === "pro-password")
-      return done(() => {
-        if (
-          form.password === CORRECT_PASSWORD ||
-          resolved.password === "accept"
-        ) {
-          if (screen === "pro-password") afterProAuth();
-          else finish("customer-login");
+      return run(async () => {
+        const error = await signIn(email, form.password, takeCaptchaToken());
 
-          return;
-        }
+        if (error === "invalid_credentials") return showWrongPassword();
 
-        const attempts = current.attempts + 1;
+        if (error === "email_not_confirmed")
+          return setState({ codeKind: "verify", resendIn: 0 }, () =>
+            goTo("verify"),
+          );
 
-        if (attempts >= MAX_ATTEMPTS)
-          setState({
-            busy: false,
-            attempts,
-            lockedUntil: Date.now() + LOCK_MS,
-            serverErrors: {
-              password: "Too many attempts. Try again in 15 minutes.",
-            },
-          });
-        else
-          setState((state) => ({
-            busy: false,
-            attempts,
-            shake: state.shake + 1,
-            serverErrors: {
-              password: "That password isn’t right. Try again or reset it.",
-            },
-          }));
+        if (screen === "pro-password") await afterProAuth();
+        else finish("customer-login");
       });
 
     if (screen === "cust-create")
-      return done(() => {
-        if (KNOWN_CUSTOMERS.includes(email)) {
-          setState({ busy: false, serverErrors: { exists: true } });
+      return run(async () => {
+        const isNew = await signUpClient(
+          email,
+          form.password,
+          takeCaptchaToken(),
+          form,
+        );
 
-          return;
-        }
+        if (!isNew)
+          return setState({ busy: false, serverErrors: { exists: true } });
 
         setState({ codeKind: "verify", audience: "customer" }, () =>
           goTo("verify"),
         );
       });
 
-    if (screen === "cust-social") return done(() => finish("customer-new"));
+    if (screen === "w5")
+      return run(async () => {
+        await signUpStylist(
+          email,
+          form.password,
+          takeCaptchaToken(),
+          getStylistDetails(form),
+        );
 
-    if (screen === "forgot-email") return done(() => goTo("forgot-sent"));
+        setState({ codeKind: "verify" }, () => goTo("verify"));
+      });
 
-    if (screen === "forgot-reset") return done(() => goTo("forgot-done"));
+    if (screen === "cust-social")
+      return run(async () => {
+        await completeClientProfile(form);
+        finish("customer-new");
+      });
+
+    if (screen === "forgot-email")
+      return run(async () => {
+        await sendPasswordReset(email, takeCaptchaToken());
+        goTo("forgot-sent");
+      });
+
+    if (screen === "forgot-reset")
+      return run(async () => {
+        const error = await setNewPassword(form.password);
+
+        if (error)
+          return setState({
+            busy: false,
+            serverErrors: {
+              password:
+                error === "same_password"
+                  ? "Choose a password you haven’t used before"
+                  : "Choose a stronger password",
+            },
+          });
+
+        goTo("forgot-done");
+      });
 
     if (isCodeScreen(screen)) {
       const code = current.code.join("");
@@ -712,141 +787,72 @@ export const useOnboarding = (props: OnboardingProps) => {
         return;
       }
 
-      return done(() => {
-        if (code === EXPIRED_CODE) {
-          setState({
-            busy: false,
-            codeError: "That code has expired. Send a new one.",
-            resendIn: 0,
-          });
+      return run(async () => {
+        const isRight =
+          screen === "pro-2fa"
+            ? await verifySecondFactor(code, current.twoFaMethod === "backup")
+            : await verifyEmailCode(email, code);
 
-          return;
-        }
+        if (!isRight) return showWrongCode();
 
-        if (code !== CORRECT_CODE && resolved.code !== "accept") {
-          setState((state) => ({
-            busy: false,
-            shake: state.shake + 1,
-            codeError: "That code isn’t right",
-          }));
-
-          return;
-        }
+        await rememberDevice(form.remember);
 
         if (screen === "pro-2fa") finish("pro");
         else
           finish(current.audience === "customer" ? "customer-new" : "newpro");
       });
     }
-
-    if (screen === "w4")
-      return done(() => {
-        if (KNOWN_PROS.includes(email)) {
-          setState({ busy: false, serverErrors: { exists: true } });
-
-          return;
-        }
-
-        setState({ audience: "newpro" }, () => goTo("w5"));
-      });
-
-    setState({ busy: false });
   };
 
-  /** Simulated Google / Apple sign-in (?socialEmail=unknown, ?appleName=withheld). */
-  const socialSignIn = (provider: "google" | "apple", isPro: boolean) => {
-    if (stateRef.current.busy) return;
+  /** Resend the sign-up code (verify) or the reset link (forgot-sent). */
+  const resend = () =>
+    run(async () => {
+      const email = getValues("email").trim().toLowerCase();
 
-    const isKnown = resolved.socialEmail !== "unknown";
+      if (stateRef.current.screen === "forgot-sent")
+        await sendPasswordReset(email, takeCaptchaToken());
+      else await resendEmailCode(email, takeCaptchaToken());
 
-    setState({ busy: true, networkError: false, serverErrors: {} });
+      setState({ busy: false, resendIn: 30, codeError: "", code: EMPTY_CODE });
+    });
 
-    later(
-      "busy",
-      () => {
-        if (resolved.network === "offline") {
-          setState({ busy: false, networkError: true });
+  /** Google redirects away; the return lands on /login?flow=social(-pro). */
+  const socialSignIn = (isPro: boolean) => run(() => startGoogleSignIn(isPro));
 
-          return;
-        }
+  // back from Google: stylists go on to 2FA, new customers finish their profile
+  useEffect(() => {
+    const { flow } = start;
 
-        const form = getValues();
+    if (flow !== "social" && flow !== "social-pro") return;
 
-        if (isPro) {
-          const newProEmail =
-            provider === "apple"
-              ? "k3x9wq2m7t@privaterelay.appleid.com"
-              : "ama.studio@gmail.com";
+    run(async () => {
+      const account = await getSignedInAccount();
 
-          form.email = isKnown ? "amara@tiwarashouse.co.uk" : newProEmail;
+      if (!account) return setState({ busy: false, networkError: true });
 
-          reset(form);
+      reset({ ...getValues(), ...account });
 
-          if (!isKnown) {
-            setState({ busy: false, serverErrors: { noBusiness: true } });
+      if (flow === "social-pro") {
+        if (account.isStylist) return afterProAuth();
 
-            return;
-          }
+        await signOut();
 
-          setState({ busy: false }, afterProAuth);
-
-          return;
-        }
-
-        if (isKnown) {
-          const email =
-            provider === "apple" ? "kemi.a@icloud.com" : "nia.okafor@gmail.com";
-
-          const [first = "", last = ""] = NAMES[email] ?? [];
-
-          reset({ ...form, email, first, last });
-          finish("customer-login");
-
-          return;
-        }
-
-        const sharesName =
-          provider === "google" || resolved.appleName !== "withheld";
-
-        reset({
-          ...form,
-          email:
-            provider === "apple"
-              ? "x7k2m9q4pd@privaterelay.appleid.com"
-              : "ama.mensah@gmail.com",
-          first: sharesName ? "Ama" : "",
-          last: sharesName ? "Mensah" : "",
-          mobile: "",
-          terms: false,
-          marketing: false,
-        });
-
-        setState(
-          {
-            socialProvider: provider,
-            audience: "customer",
-          },
-          () => goTo("cust-social"),
+        return setState(
+          { busy: false, serverErrors: { noBusiness: true } },
+          () => goTo("pro-email"),
         );
-      },
-      SUBMIT_MS,
-    );
-  };
+      }
 
-  const checkTurnstile = () => {
-    if (stateRef.current.turnstile !== "idle") return;
+      if (account.hasProfile || account.isStylist)
+        return finish("customer-login");
 
-    setState({ turnstile: "checking" });
-
-    later(
-      "turnstile",
-      () =>
-        setState({
-          turnstile: getTurnstileMode() === "fail" ? "fail" : "passed",
-        }),
-      1100,
-    );
-  };
+      setState({ audience: "customer", socialProvider: "google" }, () =>
+        goTo("cust-social"),
+      );
+    });
+    // mount only
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   /** One digit per box: advance on input, submit when all six are filled. */
   const setCodeDigit = (index: number, value: string) => {
@@ -991,6 +997,7 @@ export const useOnboarding = (props: OnboardingProps) => {
     formErrors: formState.errors,
     props: resolved,
     rootRef: rootRef as RefObject<HTMLDivElement>,
+    turnstileRef,
     codeRefs,
     actions: {
       setState,
@@ -1000,7 +1007,9 @@ export const useOnboarding = (props: OnboardingProps) => {
       touch,
       submit,
       socialSignIn,
-      checkTurnstile,
+      resend,
+      setCaptchaToken: (captchaToken: string | null) =>
+        setState({ captchaToken }),
       setCodeDigit,
       handleCodeKey,
       pasteCode,

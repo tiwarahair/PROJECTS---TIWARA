@@ -163,9 +163,9 @@ export const CreateScreen = (props: ScreenProps) => {
       )}
       {view.turnstileShown && (
         <OnboardingTurnstile
-          status={state.turnstile}
           isDark={layout.isDark}
-          onCheck={actions.checkTurnstile}
+          widgetRef={onboarding.turnstileRef}
+          onToken={actions.setCaptchaToken}
         />
       )}
       <SubmitButton
@@ -240,7 +240,7 @@ const getCodeBoxClass = (hasError: boolean, digit: string) => {
 };
 
 /** Verify email (after sign-up) and pro 2FA: six digit boxes, resend countdown and help links. */
-export const CodeScreen = ({ onboarding, view }: ScreenProps) => {
+export const CodeScreen = ({ onboarding, layout, view }: ScreenProps) => {
   const { state, actions, codeRefs } = onboarding;
   const { form, code, codeError } = state;
   const is2fa = state.screen === "pro-2fa";
@@ -337,6 +337,13 @@ export const CodeScreen = ({ onboarding, view }: ScreenProps) => {
           <span>Remember this device for 30 days</span>
         </label>
       )}
+      {view.turnstileShown && (
+        <OnboardingTurnstile
+          isDark={layout.isDark}
+          widgetRef={onboarding.turnstileRef}
+          onToken={actions.setCaptchaToken}
+        />
+      )}
       <SubmitButton
         label="Continue"
         onClick={actions.submit}
@@ -348,12 +355,7 @@ export const CodeScreen = ({ onboarding, view }: ScreenProps) => {
         {!is2fa && (
           <button
             onClick={() => {
-              if (!resendOff)
-                actions.setState({
-                  resendIn: 30,
-                  codeError: "",
-                  code: ["", "", "", "", "", ""],
-                });
+              if (!resendOff) actions.resend();
             }}
             aria-disabled={resendOff ? "true" : "false"}
             className={joinClassNames(

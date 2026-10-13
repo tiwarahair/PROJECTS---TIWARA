@@ -75,10 +75,9 @@ export const OnboardingPage = (props: OnboardingProps) => {
   for (const [key, value] of Object.entries(state.serverErrors))
     if (value && typeof value === "string") shown[key] = value;
 
-  const turnstileMode = state.turnstileMode || resolved.turnstile || "pass";
-
-  const turnstileShown =
-    turnstileMode !== "pass" && TURNSTILE_SCREENS.includes(screen);
+  const turnstileShown = TURNSTILE_SCREENS.includes(screen);
+  // verify's own submit doesn't need a token; only its Resend does
+  const needsToken = turnstileShown && screen !== "verify";
 
   const view: ScreenView = {
     shown,
@@ -88,7 +87,7 @@ export const OnboardingPage = (props: OnboardingProps) => {
       !(state.lockedUntil > Date.now()) &&
       Object.keys(errors).length === 0 &&
       !(isCodeScreen(screen) && state.code.join("").length < 6) &&
-      !(turnstileShown && state.turnstile !== "passed"),
+      !(needsToken && !state.captchaToken),
   };
 
   const screenProps: ScreenProps = { onboarding, layout, view };

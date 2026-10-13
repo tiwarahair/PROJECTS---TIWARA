@@ -2,6 +2,7 @@ import { PasswordMeter } from "../../components/password-meter/password-meter";
 import { joinClassNames } from "../../utils/class-names";
 import { getOnboardingMeter } from "./auth-screens-account";
 import { PasswordInput, SubmitButton, TextField } from "./onboarding-fields";
+import { OnboardingTurnstile } from "./onboarding-turnstile";
 import type { ScreenProps } from "./screen-props";
 import styles from "../../styles/features/onboarding/auth-screens.module.css";
 
@@ -22,7 +23,7 @@ const DoneBadge = () => (
   </span>
 );
 
-export const ForgotSentScreen = ({ onboarding }: ScreenProps) => {
+export const ForgotSentScreen = ({ onboarding, layout }: ScreenProps) => {
   const { state, actions } = onboarding;
   const resendOff = state.resendIn > 0;
 
@@ -48,21 +49,15 @@ export const ForgotSentScreen = ({ onboarding }: ScreenProps) => {
         <strong className={styles.strongEmail}>{state.form.email}</strong>. The
         link works for 30 minutes.
       </p>
-      <button
-        onClick={() => actions.goTo("forgot-reset")}
-        className={styles.openLink}
-      >
-        Open reset link (demo)
-      </button>
+      <OnboardingTurnstile
+        isDark={layout.isDark}
+        widgetRef={onboarding.turnstileRef}
+        onToken={actions.setCaptchaToken}
+      />
       <div className={styles.sentLinks}>
         <button
           onClick={() => {
-            if (!resendOff)
-              actions.setState({
-                resendIn: 30,
-                codeError: "",
-                code: ["", "", "", "", "", ""],
-              });
+            if (!resendOff) actions.resend();
           }}
           className={joinClassNames(
             styles.resend,

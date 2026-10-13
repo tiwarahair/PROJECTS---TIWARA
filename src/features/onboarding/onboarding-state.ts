@@ -6,16 +6,7 @@ export interface OnboardingProps {
   /** Mobile photo: full-bleed fade or a clipped card. */
   photo?: "full" | "clipped";
   layout?: "auto" | "desktop" | "mobile";
-  network?: "online" | "offline";
-  /** "accept": any password logs in (demo). */
-  password?: "strict" | "accept";
-  /** "accept": any 6-digit code works (demo). */
-  code?: "strict" | "accept";
   addressLookup?: "ok" | "fail";
-  twoFa?: "on" | "off";
-  socialEmail?: "known" | "unknown";
-  appleName?: "shared" | "withheld";
-  turnstile?: "pass" | "challenge" | "fail";
   theme?: "auto" | "light" | "dark";
   /** Board view: no saving/restoring and demo names. */
   board?: boolean;
@@ -30,14 +21,7 @@ const DEFAULT_PROPS: Required<
   fixture: "none",
   photo: "clipped",
   layout: "auto",
-  network: "online",
-  password: "strict",
-  code: "accept",
   addressLookup: "ok",
-  twoFa: "on",
-  socialEmail: "known",
-  appleName: "shared",
-  turnstile: "pass",
 };
 
 export type ResolvedProps = typeof DEFAULT_PROPS &
@@ -91,7 +75,6 @@ export interface OnboardingForm {
 type Audience = "pro" | "customer" | "newpro";
 
 export type TermsKind = "client" | "partner" | "privacy";
-export type TurnstileState = "idle" | "checking" | "passed" | "fail";
 
 interface ServerError {
   password?: string;
@@ -124,8 +107,8 @@ export interface OnboardingState {
   width: number;
   audience: Audience;
   compact: boolean;
-  turnstile: TurnstileState;
-  turnstileMode: "challenge" | "fail" | null;
+  /** The current single-use Turnstile token (null until the widget passes, and after each use). */
+  captchaToken: string | null;
   returnTo: string;
   toast: string | null;
   socialProvider: "google" | "apple" | null;
@@ -137,6 +120,8 @@ export interface OnboardingState {
 export interface StartState extends OnboardingState {
   form: OnboardingForm;
   touched: Partial<Record<keyof OnboardingForm, boolean>>;
+  /** ?flow= the page opened with (list, pro, reset, social, social-pro). */
+  flow: string | null;
 }
 
 export const EMPTY_CODE = ["", "", "", "", "", ""];
@@ -191,8 +176,7 @@ export const INITIAL_STATE: OnboardingState = {
   width: 0,
   audience: "pro",
   compact: false,
-  turnstile: "idle",
-  turnstileMode: null,
+  captchaToken: null,
   returnTo: "/",
   toast: null,
   socialProvider: null,
