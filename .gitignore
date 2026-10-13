@@ -6,3 +6,5 @@ coverage
 
 .env
 design-import
+IMPLEMENTATION_PLAN.local.md
+BACKEND_PLAN.local.md
