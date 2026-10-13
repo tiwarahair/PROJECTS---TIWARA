@@ -80,26 +80,41 @@ export interface SettingsState {
   toastText: string;
 }
 
+export interface SettingsPerson {
+  first: string;
+  last: string;
+  email: string;
+  phone: string;
+}
+
+const DEMO_PERSON: SettingsPerson = {
+  first: "Amara",
+  last: "Okonkwo",
+  email: "amara.okonkwo@gmail.com",
+  phone: "07700 900418",
+};
+
 /** ?pwnew= prefills the new password (and the current one) for the meter boards. */
 export const getInitialSettingsState = (
   isNew: boolean,
   search: string,
+  { first, last, email, phone }: SettingsPerson = DEMO_PERSON,
 ): SettingsState => {
   const prefilled = new URLSearchParams(search).get("pwnew") || "";
   const channel = (): ChannelSetting => ({ email: true, sms: false });
 
   return {
-    first: "Amara",
-    last: "Okonkwo",
-    savedName: ["Amara", "Okonkwo"],
+    first,
+    last,
+    savedName: [first, last],
     nameTouched: false,
-    email: "amara.okonkwo@gmail.com",
+    email,
     emailFlow: null,
     newEmail: "",
     emailPassword: "",
     emailTouched: false,
     pendingEmail: "",
-    phone: "07700 900418",
+    phone,
     phoneFlow: null,
     newPhone: "",
     code: "",

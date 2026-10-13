@@ -206,8 +206,8 @@ const TwoFactorBody = ({
             fixture={view.taxFixture}
             value={state.tax ?? undefined}
             business={state.business}
-            legalName="Amara Okonkwo"
-            businessName="Tiwára's House Ltd"
+            legalName={state.owner.name}
+            businessName={state.profile.salon}
             onSubmit={view.taxSubmit}
           />
         </div>

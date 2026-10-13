@@ -1,8 +1,8 @@
 import type { Session } from "@supabase/supabase-js";
-import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+import { describe, expect, it, vi } from "vitest";
 import { supabase } from "../../lib/supabase";
 import { toSessionUser } from "../auth-listener";
-import { logOut, sessionChanged, syncSession } from "../session-slice";
+import { logOut, sessionChanged } from "../session-slice";
 import { createStore } from "../store";
 
 const buildSession = (appMetadata: Record<string, unknown>) =>
@@ -11,26 +11,29 @@ const buildSession = (appMetadata: Record<string, unknown>) =>
   }) as unknown as Session;
 
 describe("session slice", () => {
-  beforeEach(() => {
-    sessionStorage.clear();
-    window.history.replaceState(null, "", "/");
-  });
-
-  afterEach(() => vi.unstubAllEnvs());
-
-  it("maps a Supabase session and its capability flags", () => {
-    expect(toSessionUser(buildSession({ is_stylist: true }))).toEqual({
+  it("maps a Supabase session, its capability flags and sign-in methods", () => {
+    expect(
+      toSessionUser(buildSession({ is_stylist: true, providers: ["email"] })),
+    ).toEqual({
       id: "user-1",
       email: "ada@example.com",
       isStylist: true,
       isAdmin: false,
+      providers: ["email"],
     });
 
     expect(toSessionUser(null)).toBeNull();
   });
 
-  it("logs in from a Supabase session", () => {
+  it("starts logged out until Supabase reports a session", () => {
     const store = createStore();
+
+    expect(store.getState().session).toEqual({
+      loggedIn: false,
+      user: null,
+      ready: false,
+    });
+
     const user = toSessionUser(buildSession({}));
 
     store.dispatch(sessionChanged(user));
@@ -42,20 +45,10 @@ describe("session slice", () => {
     });
   });
 
-  it("honours the ?login=1 demo login in development", () => {
+  it("ignores the old ?login=1 demo switch", () => {
     window.history.replaceState(null, "", "/?login=1");
 
-    expect(createStore().getState().session.loggedIn).toBe(true);
-  });
-
-  it("ignores the demo login outside development", () => {
-    vi.stubEnv("DEV", false);
-    window.history.replaceState(null, "", "/?login=1");
-    const store = createStore();
-
-    store.dispatch(syncSession());
-
-    expect(store.getState().session.loggedIn).toBe(false);
+    expect(createStore().getState().session.loggedIn).toBe(false);
   });
 
   it("signs out of Supabase and clears the session", () => {

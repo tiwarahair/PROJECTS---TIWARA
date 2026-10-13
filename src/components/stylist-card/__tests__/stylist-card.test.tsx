@@ -109,8 +109,7 @@ describe("StylistCard", () => {
   });
 
   it("logged-in customers toggle the favourite", async () => {
-    sessionStorage.setItem("tw_cust", "1");
-    renderWithStore(<StylistCard {...BASE} />);
+    renderWithStore(<StylistCard {...BASE} />, "/", { signedIn: true });
 
     await user.click(
       screen.getByRole("button", { name: "Save Amara Beauty to favourites" }),

@@ -253,9 +253,7 @@ export const getReviews = (): ReviewView[] =>
   }));
 
 export const getLoginHref = (stylistId: string): string => {
-  const returnPath = encodeURIComponent(
-    `/stylist?stylist=${stylistId}&login=1`,
-  );
+  const returnPath = encodeURIComponent(`/stylist?stylist=${stylistId}`);
 
   return `/login?screen=cust-email&return=${returnPath}`;
 };

@@ -6,7 +6,6 @@ import {
   syncFavourites,
 } from "../../stores/favourites-slice";
 import { useAppDispatch, useAppStore } from "../../stores/hooks";
-import { syncSession } from "../../stores/session-slice";
 import { dismissToasts, showToast } from "../../stores/toast-slice";
 import {
   getSearchParams,
@@ -42,7 +41,6 @@ export const FavHost = () => {
 
   // page "load": sync session + favourites, then the boot behaviours
   useEffect(() => {
-    dispatch(syncSession());
     dispatch(syncFavourites());
     const params = getSearchParams();
     const timers: number[] = [];

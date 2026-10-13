@@ -2,6 +2,7 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import type { MouseEvent } from "react";
 import { useNavigate } from "react-router";
 import { logOut as logOutSession } from "../../stores/session-slice";
+import { useIdentity } from "../../hooks/use-identity";
 import { useAppDispatch } from "../../stores/hooks";
 import { getServiceOptions, findService, hasStep2 } from "../../utils/services";
 import { getBookingMoney, getCustomisationLine } from "./booking-pricing";
@@ -74,6 +75,23 @@ export const useBooking = () => {
 
     for (const callback of callbacks) callback();
   });
+
+  const identity = useIdentity();
+  const signedIn = identity?.isLoaded ? identity : null;
+
+  // signed in: book as them, with their details filled in
+  useEffect(() => {
+    if (!signedIn) return;
+
+    const { first, last, email, mobile } = signedIn;
+
+    setState(({ details }) => ({
+      loggedIn: true,
+      details: { ...details, first, last, email, phone: mobile },
+    }));
+    // once per signed-in account
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [signedIn?.user.id, setState]);
 
   /** Step changes scroll so the step title sits at the top. */
   const scrollToTitle = useCallback(() => {

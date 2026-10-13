@@ -4,7 +4,6 @@ import { stylists } from "../../data";
 import type { SavedAddress } from "../../types/address";
 import type { Service } from "../../types/service";
 import type { Stylist } from "../../types/stylist";
-import { readDemoLogin } from "../../stores/session-slice";
 import { getSearchParams } from "../../utils/page-flags";
 import { getSavedAddresses } from "../../utils/saved-addresses";
 import { applyFixture } from "./booking-fixtures";
@@ -138,7 +137,7 @@ export interface BookingState {
   sizeGuide: boolean;
 }
 
-/** The demo customer. */
+/** The demo customer (dev fixtures only). */
 export const DEMO_DETAILS = {
   first: "Nia",
   last: "Okafor",
@@ -333,7 +332,8 @@ export const getInitialBooking = (): InitialBooking => {
 
   const fixture = params.get("fixture") || "";
   const board = !!fixture || params.get("board") === "true";
-  const loggedIn = readDemoLogin();
+  // the signed-in person fills in once their profile loads (use-booking)
+  const loggedIn = false;
   const turnstile = params.get("turnstile");
   const today = new Date();
 
@@ -438,8 +438,6 @@ export const getInitialBooking = (): InitialBooking => {
       else state.resumeDraft = draft;
     }
   }
-
-  if (state.loggedIn) state.details = { ...state.details, ...DEMO_DETAILS };
 
   return { state, openPrivacy };
 };

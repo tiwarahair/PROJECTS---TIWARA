@@ -1,6 +1,7 @@
 import { useLocation, useNavigate } from "react-router";
 import { useAppDispatch } from "../../stores/hooks";
-import { DEMO_ACCOUNT, logOut } from "../../stores/session-slice";
+import { useIdentity } from "../../hooks/use-identity";
+import { logOut } from "../../stores/session-slice";
 import { NavMenu, NavMenuAccountHead } from "../nav-menu/nav-menu";
 import type { NavMenuItem } from "../nav-menu/nav-menu";
 
@@ -35,6 +36,7 @@ export interface AccountMenuProps {
 
 /** The header account menu: name, account sections, Log out. */
 export const AccountMenu = ({ anchor, pinned, onClose }: AccountMenuProps) => {
+  const identity = useIdentity();
   const dispatch = useAppDispatch();
   const navigate = useNavigate();
   const { pathname, search } = useLocation();
@@ -84,11 +86,11 @@ export const AccountMenu = ({ anchor, pinned, onClose }: AccountMenuProps) => {
   return (
     <NavMenu
       anchor={anchor}
-      label={DEMO_ACCOUNT.name}
+      label={identity?.name ?? ""}
       head={
         <NavMenuAccountHead
-          name={DEMO_ACCOUNT.name}
-          email={DEMO_ACCOUNT.email}
+          name={identity?.name ?? ""}
+          email={identity?.email ?? ""}
         />
       }
       items={items}

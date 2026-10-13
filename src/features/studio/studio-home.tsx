@@ -1,7 +1,7 @@
 import type { CSSProperties, PointerEvent } from "react";
 import { getAssetUrl } from "../../utils/asset-url";
 import { joinClassNames } from "../../utils/class-names";
-import { BOOKING_LINK, GATE_REASON, NOTIFS, RANGE_DATA } from "./studio-data";
+import { BOOKING_LINK, GATE_REASON, RANGE_DATA } from "./studio-data";
 import { getDecoratedBookings } from "./studio-decorate";
 import type { DecoratedBooking } from "./studio-decorate";
 import { copyText, makeChart } from "./studio-format";
@@ -217,7 +217,7 @@ export const StudioHome = ({ studio }: { studio: StudioController }) => {
     delay: `${(index * 0.05).toFixed(2)}s`,
   }));
 
-  const feed = NOTIFS.slice(0, 4);
+  const feed = state.notifications.slice(0, 4);
   const isGate = isGated(studio);
 
   const goCalendarToday = () => {

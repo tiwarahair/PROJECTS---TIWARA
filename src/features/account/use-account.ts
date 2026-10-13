@@ -9,6 +9,7 @@ import {
 import type { ChangeEvent, ClipboardEvent, KeyboardEvent } from "react";
 import { useNavigate, useSearchParams } from "react-router";
 import { ACCOUNT_TAB_EVENT } from "../../components/account-menu/account-menu";
+import { useIdentity } from "../../hooks/use-identity";
 import { usePasswordChecker } from "../../hooks/use-password-checker";
 import { useAppDispatch, useAppSelector } from "../../stores/hooks";
 import { logOut } from "../../stores/session-slice";
@@ -143,6 +144,12 @@ const readSection = (
   return SECTION_IDS.includes(section) ? section : null;
 };
 
+const EMPTY_PROFILE = { first: "", last: "", email: "", mobile: "" };
+
+/** Demo data only on dev boards; a real account starts empty and fills in from the profile. */
+const isDemoAccount = (params: URLSearchParams, fixture: string) =>
+  import.meta.env.DEV && (!!fixture || params.get("board") === "true");
+
 const getInitialState = (
   {
     section,
@@ -154,6 +161,7 @@ const getInitialState = (
   params: URLSearchParams,
 ): AccountState => {
   const fixture = params.get("fixture") || propFixture || "";
+  const isDemo = isDemoAccount(params, fixture);
 
   const flag = (key: string, fallback: boolean) =>
     params.has(key) ? params.get(key) === "1" : fallback;
@@ -165,16 +173,16 @@ const getInitialState = (
     menuOpen: false,
     dialog: null,
     toast: "",
-    bookings: getSeedBookings(fixture),
-    entries: SHARED_ENTRIES.map((entry) => ({ ...entry })),
+    bookings: isDemo ? getSeedBookings(fixture) : [],
+    entries: isDemo ? SHARED_ENTRIES.map((entry) => ({ ...entry })) : [],
     allergyEdit: -1,
     allergyDraft: "",
-    profile: SEED_PROFILE,
-    photo: flag("photo", photo) ? DEMO_PHOTO : null,
+    profile: isDemo ? SEED_PROFILE : EMPTY_PROFILE,
+    photo: isDemo && flag("photo", photo) ? DEMO_PHOTO : null,
     photoError: "",
-    quiz: flag("quiz", hairQuiz),
+    quiz: isDemo && flag("quiz", hairQuiz),
     edit: null,
-    draft: { ...SEED_PROFILE },
+    draft: isDemo ? { ...SEED_PROFILE } : EMPTY_PROFILE,
     fieldErrors: {},
     emailStep: "",
     code: EMPTY_CODE,
@@ -191,9 +199,9 @@ const getInitialState = (
       blur: false,
       currentError: "",
     },
-    googleConnected: true,
+    googleConnected: isDemo,
     appleConnected: false,
-    cards: SEED_CARDS.map((card) => ({ ...card })),
+    cards: isDemo ? SEED_CARDS.map((card) => ({ ...card })) : [],
     cardForm: { number: "", expiry: "", cvc: "", isDefault: false },
     cardFormErrors: {},
     addresses: getSavedAddresses(params.toString()),
@@ -269,6 +277,31 @@ export const useAccount = (props: AccountProps) => {
 
     for (const callback of callbacks) callback();
   });
+
+  const identity = useIdentity();
+
+  const signedIn =
+    identity?.isLoaded && !isDemoAccount(searchParams, state.fixture)
+      ? identity
+      : null;
+
+  // a real account shows the signed-in person's details and sign-in methods
+  useEffect(() => {
+    if (!signedIn) return;
+
+    const { first, last, email, mobile, marketing, user } = signedIn;
+    const profile = { first, last, email, mobile };
+
+    setState(({ password }) => ({
+      profile,
+      draft: { ...profile },
+      marketing,
+      password: { ...password, has: user.providers.includes("email") },
+      googleConnected: user.providers.includes("google"),
+    }));
+    // once per signed-in account
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [signedIn?.user.id, setState]);
 
   const focusables = (root: HTMLElement) =>
     [

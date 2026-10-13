@@ -2,7 +2,7 @@ import { act, screen } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { Link } from "react-router";
 import { useFavourites } from "../../../hooks/use-favourites";
-import { renderWithStore } from "../../../test/render-with-store";
+import { renderWithStore, TEST_USER } from "../../../test/render-with-store";
 import { FavHost } from "../fav-host";
 import type { UserEvent } from "@testing-library/user-event";
 import { setupUser } from "../../../test/setup-user";
@@ -13,7 +13,7 @@ beforeEach(() => {
   user = setupUser();
 });
 
-const FAVS_KEY = "tw_favs_nia.okafor@gmail.com";
+const FAVS_KEY = `tw_favs_${TEST_USER.id}`;
 
 const HeartPage = () => {
   const { isFavourite, toggleFavourite } = useFavourites();
@@ -61,7 +61,7 @@ describe("FavHost", () => {
 
     await user.click(screen.getByRole("button", { name: "Log in" }));
     expect(sessionStorage.getItem("tw_fav_pending")).toBe("amara-beauty");
-    const encodedReturn = encodeURIComponent("/search?login=1");
+    const encodedReturn = encodeURIComponent("/search");
 
     expect(screen.getByTestId("location")).toHaveTextContent(
       `/login?screen=cust-email&return=${encodedReturn}`,
@@ -69,8 +69,7 @@ describe("FavHost", () => {
   });
 
   it("saves, removes and undoes a favourite for a logged-in customer", async () => {
-    sessionStorage.setItem("tw_cust", "1");
-    renderWithStore(<HeartPage />, "/search");
+    renderWithStore(<HeartPage />, "/search", { signedIn: true });
     const heart = screen.getByRole("button", { name: "Save Amara" });
 
     await user.click(heart);
@@ -103,9 +102,8 @@ describe("FavHost", () => {
   });
 
   it("saves the pending stylist after log in and confirms above the page", async () => {
-    sessionStorage.setItem("tw_cust", "1");
     sessionStorage.setItem("tw_fav_pending", "amara-beauty");
-    renderWithStore(<HeartPage />, "/search?login=1");
+    renderWithStore(<HeartPage />, "/search", { signedIn: true });
     await flush(0);
 
     expect(
@@ -132,8 +130,10 @@ describe("FavHost", () => {
   });
 
   it("opens the account menu from [data-tw-acct], closes on Escape and logs out", async () => {
-    sessionStorage.setItem("tw_cust", "1");
-    renderWithStore(<HeartPage />, "/search");
+    const { store } = renderWithStore(<HeartPage />, "/search", {
+      signedIn: true,
+    });
+
     await user.click(screen.getByRole("link", { name: "Nia Okafor" }));
     const menu = screen.getByRole("menu", { name: "Nia Okafor" });
 
@@ -154,13 +154,11 @@ describe("FavHost", () => {
 
     await user.click(screen.getByRole("link", { name: "Nia Okafor" }));
     await user.click(screen.getByRole("menuitem", { name: "Log out" }));
-    expect(sessionStorage.getItem("tw_cust")).toBeNull();
+    expect(store.getState().session.loggedIn).toBe(false);
     expect(screen.getByTestId("location")).toHaveTextContent(/^\/$/);
   });
 
   it("a router <Link> trigger opens the menu instead of navigating", async () => {
-    sessionStorage.setItem("tw_cust", "1");
-
     renderWithStore(
       <>
         <Link to="/account" data-tw-acct="1" aria-label="Nia Okafor">
@@ -169,6 +167,7 @@ describe("FavHost", () => {
         <FavHost />
       </>,
       "/",
+      { signedIn: true },
     );
 
     await user.click(screen.getByRole("link", { name: "Nia Okafor" }));

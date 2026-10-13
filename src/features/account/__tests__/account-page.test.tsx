@@ -13,8 +13,11 @@ beforeEach(() => {
 
 const advance = (ms: number) => act(() => vi.advanceTimersByTime(ms));
 
+// board=true: the demo account (Nia), as a signed-in customer
 const renderAccount = (query = "") =>
-  renderWithStore(<AccountPage />, `/account?login=1${query}`);
+  renderWithStore(<AccountPage />, `/account?board=true${query}`, {
+    signedIn: true,
+  });
 
 const getLabelled = (label: string) =>
   document.querySelector(`[data-screen-label="${label}"]`);
@@ -53,7 +56,7 @@ describe("AccountPage", () => {
     ).toBeInTheDocument();
 
     const gate = screen.getByRole("main");
-    const returnParam = encodeURIComponent("/account?section=bookings&login=1");
+    const returnParam = encodeURIComponent("/account?section=bookings");
 
     expect(within(gate).getByRole("link", { name: "Log in" })).toHaveAttribute(
       "href",
@@ -142,7 +145,7 @@ describe("AccountPage", () => {
     ).toBeInTheDocument();
 
     expect(screen.getByTestId("location")).toHaveTextContent(
-      "/account?login=1&section=payments",
+      "/account?board=true&section=payments",
     );
   });
 

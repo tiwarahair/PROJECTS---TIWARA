@@ -5,7 +5,6 @@ import { joinClassNames } from "../../utils/class-names";
 import { AppointmentAddress } from "./appointment-address";
 import { getEmailFix } from "./booking-details";
 import type { AllergyState, Details, FieldKey } from "./booking-state";
-import { DEMO_DETAILS } from "./booking-state";
 import fields from "../../styles/features/booking/booking-fields.module.css";
 import step from "../../styles/features/booking/booking-step.module.css";
 import { CheckBox } from "./step-customise";
@@ -102,7 +101,7 @@ export const StepDetails = ({ booking }: StepDetailsProps) => {
   const emailFix = getEmailFix(details.email);
 
   const loginReturn = encodeURIComponent(
-    `/book?stylist=${stylist.id}&login=1&resume=1`,
+    `/book?stylist=${stylist.id}&resume=1`,
   );
 
   const isShown = (key: FieldKey) =>
@@ -142,7 +141,7 @@ export const StepDetails = ({ booking }: StepDetailsProps) => {
           <span>
             Booking as{" "}
             <strong className={styles.accountName}>
-              {`${DEMO_DETAILS.first} ${DEMO_DETAILS.last}`}
+              {`${details.first} ${details.last}`}
             </strong>
           </span>
           <span aria-hidden="true">·</span>

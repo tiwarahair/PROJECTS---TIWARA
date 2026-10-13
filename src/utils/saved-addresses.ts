@@ -33,10 +33,13 @@ export const getSavedAddresses = (
       if (stored) return JSON.parse(stored) as SavedAddress[];
     }
   } catch {
-    // storage unavailable: fall back to the seed
+    // storage unavailable: start empty
   }
 
-  return seedAddresses.map((address) => ({ ...address }));
+  // demo addresses are for dev boards only
+  return import.meta.env.DEV && isBoard(search)
+    ? seedAddresses.map((address) => ({ ...address }))
+    : [];
 };
 
 export const saveAddresses = (

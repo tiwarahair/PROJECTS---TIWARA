@@ -82,7 +82,7 @@ export const getAccountView = (
     ({ id }) => id === current,
   );
 
-  const returnTo = `/account${current ? `?section=${current}&` : "?"}login=1`;
+  const returnTo = `/account${current ? `?section=${current}` : ""}`;
   const loginHref = `/login?screen=cust-email&return=${encodeURIComponent(returnTo)}`;
 
   const withMoney = bookings.map((booking) => ({

@@ -5,10 +5,10 @@ import { joinClassNames } from "../../utils/class-names";
 import { HELP_ICON, LOG_OUT_ICON, SECTIONS } from "./account-data";
 import type { AccountSection } from "./account-data";
 import styles from "../../styles/features/account/account-nav.module.css";
+import { useIdentity } from "../../hooks/use-identity";
 
 const APPOINTMENTS = SECTIONS.slice(0, 4);
 const SETTINGS = SECTIONS.slice(4);
-const MEMBER_SINCE = "Member since March 2024";
 
 interface AccountNavProps {
   current: string | null;
@@ -66,6 +66,20 @@ const getGoTo =
     onGo(id);
   };
 
+/** "Member since March 2024", from when the account was created. */
+const useMemberSince = () => {
+  const identity = useIdentity();
+
+  if (!identity) return "";
+
+  const since = new Date(identity.user.createdAt).toLocaleDateString("en-GB", {
+    month: "long",
+    year: "numeric",
+  });
+
+  return `Member since ${since}`;
+};
+
 /** Wide screens: the sticky "Your account" side nav. */
 export const AccountSideNav = ({
   current,
@@ -76,6 +90,7 @@ export const AccountSideNav = ({
   onLogOut,
 }: AccountNavProps) => {
   const goTo = getGoTo(onGo);
+  const memberSince = useMemberSince();
 
   const renderLinks = (sections: AccountSection[]) => (
     <div className={styles.sideLinks}>
@@ -107,7 +122,7 @@ export const AccountSideNav = ({
           />
           <div className={styles.profileText}>
             <div className={styles.sideName}>{accountName}</div>
-            <div className={styles.memberSince}>{MEMBER_SINCE}</div>
+            <div className={styles.memberSince}>{memberSince}</div>
           </div>
         </div>
       </div>
@@ -142,6 +157,7 @@ export const AccountMobileList = ({
   onLogOut,
 }: Omit<AccountNavProps, "current">) => {
   const goTo = getGoTo(onGo);
+  const memberSince = useMemberSince();
 
   const renderRows = (sections: AccountSection[]) => (
     <div className={styles.list}>
@@ -172,7 +188,7 @@ export const AccountMobileList = ({
         />
         <div className={styles.profileText}>
           <div className={styles.listName}>{accountName}</div>
-          <div className={styles.memberSince}>{MEMBER_SINCE}</div>
+          <div className={styles.memberSince}>{memberSince}</div>
         </div>
       </div>
       <h2 className={styles.listHeading}>Your account</h2>

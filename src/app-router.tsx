@@ -12,7 +12,7 @@ import { HelpPage } from "./features/help/help-page";
 import { HomePage } from "./features/home/home-page";
 import { SearchPage } from "./features/search/search-page";
 import { StylistProfilePage } from "./features/stylist-profile/stylist-profile-page";
-import { StudioPage } from "./features/studio/studio-page";
+import { StudioRoute } from "./features/studio/studio-route";
 
 const appRoutes: RouteObject[] = [
   { path: "/", element: <HomePage /> },
@@ -31,7 +31,7 @@ const appRoutes: RouteObject[] = [
     element: <OnboardingPage />,
     children: [{ path: "/login" }, { path: "/signup" }, { path: "/join" }],
   },
-  { path: "/studio", element: <StudioPage /> },
+  { path: "/studio", element: <StudioRoute /> },
   // dev-only: design-system gallery (mirrors each .card.html) and per-component fixture harnesses
   ...(import.meta.env.DEV
     ? [

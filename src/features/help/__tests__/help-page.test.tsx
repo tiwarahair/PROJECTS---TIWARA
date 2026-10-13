@@ -56,8 +56,7 @@ describe("HelpPage", () => {
   });
 
   it("the logged-in mobile menu heads its account links with Account, not the name", async () => {
-    sessionStorage.setItem("tw_cust", "1");
-    renderWithStore(<HelpPage />, "/help");
+    renderWithStore(<HelpPage />, "/help", { signedIn: true });
     await user.click(screen.getByRole("button", { name: "Menu" }));
     expect(screen.getByText("Account")).toBeInTheDocument();
     expect(screen.queryByText("Nia Okafor")).not.toBeInTheDocument();

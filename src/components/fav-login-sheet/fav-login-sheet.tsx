@@ -51,14 +51,13 @@ const LoginSheetCard = ({ stylistId }: LoginSheetCardProps) => {
     return () => window.clearTimeout(timer);
   }, [closing, dispatch]);
 
-  // after log in the stylist is saved and the guest lands back on this page with login=1
+  // after log in the stylist is saved and the guest lands back on this page
   const goToOnboarding = (screen: string) => {
-    let returnTo = (pathname + search)
+    const returnTo = (pathname + search)
       .replace(/([?&])(guest|login|favsheet|favtoast)=[^&]*/g, "$1")
       .replace(/[?&]+$/, "")
       .replace("?&", "?");
 
-    returnTo += `${returnTo.indexOf("?") > -1 ? "&" : "?"}login=1`;
     writeSession("tw_fav_pending", stylistId);
     dispatch(closeLoginSheet());
     const screenPath = getScreenPath(screen);

@@ -11,9 +11,19 @@ import {
 import { applyFixture } from "./studio-fixtures";
 import { getQueryParam, getSteps } from "./studio-model";
 import { createServiceActions } from "./studio-service-actions";
-import type { StudioCategory, StudioPatch, StudioState } from "./studio-types";
+import type {
+  StudioCategory,
+  StudioPatch,
+  StudioService,
+  StudioState,
+} from "./studio-types";
+import type { StylistStudio, StylistStudioService } from "../../types/profile";
+import { formatDuration } from "../../utils/dates";
+import type { BusinessType } from "../../components/business-details/business-details-logic";
 
 export interface StudioProps {
+  /** A signed-in stylist's own data; without it Studio shows the demo. */
+  seed?: StudioSeed;
   account?: "populated" | "new";
   setup?: boolean;
   payouts?: "verifying" | "action" | "paused" | "active";
@@ -25,33 +35,102 @@ export interface StudioProps {
   fixture?: string;
 }
 
-interface WelcomeNote {
-  at: number;
-  first?: string;
-  cats?: string[];
+/** The signed-in stylist and their business, loaded before Studio opens. */
+export interface StudioSeed {
+  owner: StudioState["owner"];
+  studio: StylistStudio;
 }
 
-const readWelcome = (): WelcomeNote | null => {
-  try {
-    const note = JSON.parse(
-      localStorage.getItem("tw_welcome") || "null",
-    ) as WelcomeNote | null;
+const getCategoryColour = (sort: number) =>
+  CATEGORY_COLOURS[sort % CATEGORY_COLOURS.length]?.value ?? "";
 
-    return note && Date.now() - note.at < 864e5 ? note : null;
-  } catch {
-    return null;
-  }
+const toStudioService = ({
+  id,
+  name,
+  description,
+  groupId,
+  typeId,
+  categoryId,
+  durationMin,
+  pricePence,
+}: StylistStudioService): StudioService => {
+  const minutes = durationMin ?? 0;
+
+  return {
+    id,
+    taxonomyId: groupId,
+    subcategory: name,
+    typeId,
+    categoryId,
+    name,
+    description: description ?? "",
+    price: (pricePence ?? 0) / 100,
+    durationHours: Math.floor(minutes / 60),
+    durationMinutes: minutes % 60,
+    duration: minutes ? formatDuration(minutes) : "",
+    status: "draft",
+    sizesOn: false,
+    lengthsOn: false,
+    sizes: [],
+    lengths: [],
+    addons: [],
+    own: [],
+  };
 };
 
-/** A new account starts with categories from onboarding and two draft starter services. */
-const seedNewAccount = (
-  state: StudioState,
-  welcome: WelcomeNote | null,
-): StudioState => {
-  let picked = ["braids"];
+/** A real account: its categories and draft services from sign-up; nothing booked yet. */
+const BUSINESS_TYPES: Record<string, BusinessType> = {
+  shop: "shop",
+  chair_rental: "chair",
+  home_based: "home",
+  mobile: "mobile",
+};
 
-  if (welcome && Array.isArray(welcome.cats) && welcome.cats.length)
-    picked = welcome.cats;
+const seedFromAccount = (
+  state: StudioState,
+  { owner, studio }: StudioSeed,
+): StudioState => ({
+  ...state,
+  owner,
+  notifications: [],
+  profile: {
+    ...state.profile,
+    salon: studio.businessName,
+    about: "",
+    address: studio.areaLabel ?? "",
+    mobile: studio.businessType === "mobile",
+    site: "",
+    instagram: "",
+    tiktok: "",
+    email: studio.contactEmail ?? "",
+  },
+  business: {
+    ...state.business,
+    type: BUSINESS_TYPES[studio.businessType] ?? "shop",
+    details: {
+      ...state.business.details,
+      ...studio.address,
+      basePostcode: studio.address.postcode,
+      radius: String(studio.travelRadiusMiles ?? ""),
+      phone: studio.contactPhone ?? "",
+      email: studio.contactEmail ?? "",
+      vat: "",
+    },
+  },
+  policy: { ...state.policy, mode: "none" },
+  twoFactorSettings: { devices: [] },
+  categories: studio.categories.map(({ id, name, sort, colour }) => ({
+    id,
+    name,
+    sort,
+    colour: colour ?? getCategoryColour(sort),
+  })),
+  services: studio.services.map(toStudioService),
+});
+
+/** Demo boards (?account=new): a new account picked braids at sign-up. */
+const seedNewAccount = (state: StudioState): StudioState => {
+  const picked = ["braids"];
 
   const categories: StudioCategory[] = [];
 
@@ -63,9 +142,7 @@ const seedNewAccount = (
         id: `c${categories.length + 1}`,
         name: group.name,
         sort: categories.length,
-        colour:
-          CATEGORY_COLOURS[categories.length % CATEGORY_COLOURS.length]
-            ?.value ?? "",
+        colour: getCategoryColour(categories.length),
       });
   });
 
@@ -112,17 +189,17 @@ const seedNewAccount = (
 
 export const useStudio = (props: StudioProps) => {
   const isNew =
+    !!props.seed ||
     (getQueryParam("account") || props.account || "populated") === "new";
 
   const memoRef = useRef<StudioContext["memo"]>({});
 
   const [state, setRawState] = useState(() => {
-    const welcome = readWelcome();
-
-    memoRef.current.welcome = welcome;
     const initial = getInitialStudioState();
 
-    return isNew ? seedNewAccount(initial, welcome) : initial;
+    if (props.seed) return seedFromAccount(initial, props.seed);
+
+    return isNew ? seedNewAccount(initial) : initial;
   });
 
   const [seedPast] = useState(getSeedPast);
@@ -174,27 +251,17 @@ export const useStudio = (props: StudioProps) => {
     const memo = currentContext.memo;
     const mountTimers: number[] = [];
 
-    if (memo.welcome) {
-      const welcome = memo.welcome;
-
-      try {
-        localStorage.removeItem("tw_welcome");
-      } catch {
-        // storage can be blocked
-      }
-
+    // just signed up (?welcome=1): open Home with a greeting
+    if (getQueryParam("welcome") === "1")
       mountTimers.push(
         window.setTimeout(() => {
-          memo.welcome = null;
           currentContext.setState({ tab: "home", setupMinimised: false });
-          const welcomeName = welcome.first || "there";
 
           current.showToast(
-            `Welcome, ${welcomeName}. Let’s get you ready to take bookings.`,
+            `Welcome, ${currentContext.getState().owner.first || "there"}. Let’s get you ready to take bookings.`,
           );
         }, 600),
       );
-    }
 
     const fixture = props.fixture || getQueryParam("fixture");
 

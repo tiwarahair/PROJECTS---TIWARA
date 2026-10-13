@@ -40,7 +40,7 @@ export const StudioEarnings = ({ studio }: { studio: StudioController }) => {
           email,
         }))}
         services={state.services}
-        businessName={state.profile.salon || "Tiwára's House"}
+        businessName={state.profile.salon}
         onOpenBooking={(_bookingRef, clientId) => {
           setState({
             tab: "bookings",

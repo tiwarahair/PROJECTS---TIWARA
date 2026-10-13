@@ -7,13 +7,20 @@ import type { AppStore } from "./store";
 export const toSessionUser = (session: Session | null): SessionUser | null => {
   if (!session) return null;
 
-  const { id, email = "", app_metadata: appMetadata } = session.user;
+  const {
+    id,
+    email = "",
+    app_metadata: appMetadata,
+    created_at: createdAt,
+  } = session.user;
 
   return {
     id,
     email,
     isStylist: appMetadata.is_stylist === true,
     isAdmin: appMetadata.is_admin === true,
+    providers: appMetadata.providers ?? [],
+    createdAt,
   };
 };
 

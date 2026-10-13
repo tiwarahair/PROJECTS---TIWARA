@@ -39,9 +39,7 @@ describe("StylistProfilePage", () => {
       "/stylist?stylist=tiwaras-house&guest=1",
     );
 
-    const returnParam = encodeURIComponent(
-      "/stylist?stylist=tiwaras-house&login=1",
-    );
+    const returnParam = encodeURIComponent("/stylist?stylist=tiwaras-house");
 
     expect(screen.getAllByRole("link", { name: "Log in" })[0]).toHaveAttribute(
       "href",
@@ -50,10 +48,9 @@ describe("StylistProfilePage", () => {
 
     unmount();
 
-    renderWithStore(
-      <StylistProfilePage />,
-      "/stylist?stylist=tiwaras-house&login=1",
-    );
+    renderWithStore(<StylistProfilePage />, "/stylist?stylist=tiwaras-house", {
+      signedIn: true,
+    });
 
     const accountLinks = screen.getAllByRole("link", { name: "Account" });
 

@@ -441,6 +441,15 @@ export const getInitialStudioState = (): StudioState => {
   };
 
   return {
+    owner: {
+      first: "Amara",
+      last: "Okonkwo",
+      name: "Amara Okonkwo",
+      area: "Ancoats",
+      email: "amara.okonkwo@gmail.com",
+      phone: "07700 900418",
+    },
+    notifications: NOTIFS,
     avatarUrl: readStored("studio.avatar"),
     coverUrl: readStored("studio.cover"),
     tab: "home",

@@ -1,3 +1,4 @@
+import type { NOTIFS } from "./studio-data";
 // Studio state shapes: component state, clients, past bookings, seed services/add-ons.
 import type { BusinessValue } from "../../components/business-details/business-details-logic";
 import type { PolicyValue } from "../../components/payment-policy/payment-policy-logic";
@@ -511,6 +512,17 @@ interface StudioCheck {
 }
 
 export interface StudioState {
+  /** The signed-in stylist (demo: Amara). */
+  owner: {
+    first: string;
+    last: string;
+    name: string;
+    area: string;
+    email: string;
+    phone: string;
+  };
+  /** Home feed and notifications sheet; a new account has none. */
+  notifications: typeof NOTIFS;
   avatarUrl: string | null;
   coverUrl: string | null;
   tab: StudioTab;

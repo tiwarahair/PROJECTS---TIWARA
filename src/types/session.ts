@@ -4,4 +4,8 @@ export interface SessionUser {
   email: string;
   isStylist: boolean;
   isAdmin: boolean;
+  /** Sign-in methods on the account: "email", "google". */
+  providers: string[];
+  /** ISO time the account was created. */
+  createdAt: string;
 }

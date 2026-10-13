@@ -7,6 +7,7 @@ import type {
   TaxDetails,
 } from "../tax-details-form/tax-details-logic";
 import { getInitialSettingsState } from "./account-settings-logic";
+import type { SettingsPerson } from "./account-settings-logic";
 import type {
   ConfirmDialog,
   PayoutStatus,
@@ -37,6 +38,8 @@ export interface AccountSettingsProps {
   pauseReason?: string;
   embedded?: boolean;
   hideSave?: boolean;
+  /** Whose account this is (the demo stylist when not given). */
+  person?: SettingsPerson;
   /** Account name, used by the password checker when the name fields are empty. */
   name?: string;
   legalName?: string;
@@ -69,7 +72,7 @@ export const useAccountSettings = (props: AccountSettingsProps) => {
 
   // read once: ?pwnew= only prefills the initial state
   const [state, setRawState] = useState(() =>
-    getInitialSettingsState(isNew, search),
+    getInitialSettingsState(isNew, search, props.person),
   );
 
   const [dialog, setDialog] = useState<ConfirmDialog>({

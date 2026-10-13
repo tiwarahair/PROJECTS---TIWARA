@@ -16,8 +16,8 @@ beforeEach(() => {
 
 let observer: FakeIntersectionObserver;
 
-const renderHome = (props: HomePageProps = {}, url = "/") =>
-  renderWithStore(<HomePage {...props} />, url);
+const renderHome = (props: HomePageProps = {}, url = "/", signedIn = false) =>
+  renderWithStore(<HomePage {...props} />, url, { signedIn });
 
 describe("HomePage", () => {
   beforeEach(() => {
@@ -92,8 +92,7 @@ describe("HomePage", () => {
       "/login",
     );
 
-    sessionStorage.setItem("tw_cust", "1");
-    renderHome();
+    renderHome({}, "/", true);
 
     const accountLinks = screen.getAllByRole("link", { name: "Account" });
 

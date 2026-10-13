@@ -1,22 +1,25 @@
 import { createSlice } from "@reduxjs/toolkit";
 import type { PayloadAction } from "@reduxjs/toolkit";
 import { getSearchParams } from "../utils/page-flags";
-import { DEMO_ACCOUNT, readDemoLogin } from "./session-slice";
+import { sessionChanged } from "./session-slice";
 
-const STORAGE_KEY = `tw_favs_${DEMO_ACCOUNT.email}`;
+// kept on the device per account until favourites move to the database (Phase 6)
+const getStorageKey = (ownerId: string) => `tw_favs_${ownerId}`;
 
 interface FavouritesState {
   ids: string[];
   /** ?favs=a,b keeps favourites in memory only (boards). */
   inMemory: boolean;
+  /** The signed-in account the saved list belongs to. */
+  ownerId: string | null;
   /** Guest tapped a heart: the "Log in to save stylists" sheet is open for this stylist. */
   loginSheetFor: string | null;
 }
 
-const readStored = (): string[] => {
+const readStored = (ownerId: string): string[] => {
   try {
     return JSON.parse(
-      window.localStorage.getItem(STORAGE_KEY) || "[]",
+      window.localStorage.getItem(getStorageKey(ownerId)) || "[]",
     ) as string[];
   } catch {
     return [];
@@ -24,7 +27,9 @@ const readStored = (): string[] => {
 };
 
 /** Favourites for the current page: ?favs= list, else the logged-in account's saved list, else none. */
-export const readFavourites = (): Pick<FavouritesState, "ids" | "inMemory"> => {
+export const readFavourites = (
+  ownerId: string | null,
+): Pick<FavouritesState, "ids" | "inMemory"> => {
   const params = getSearchParams();
   const favouritesParam = params.get("favs");
 
@@ -34,12 +39,13 @@ export const readFavourites = (): Pick<FavouritesState, "ids" | "inMemory"> => {
       inMemory: true,
     };
 
-  return { ids: readDemoLogin() ? readStored() : [], inMemory: false };
+  return { ids: ownerId ? readStored(ownerId) : [], inMemory: false };
 };
 
 const initialState: FavouritesState = {
   ids: [],
   inMemory: false,
+  ownerId: null,
   loginSheetFor: null,
 };
 
@@ -48,7 +54,7 @@ export const favouritesSlice = createSlice({
   initialState,
   reducers: {
     syncFavourites: (state) => {
-      Object.assign(state, readFavourites());
+      Object.assign(state, readFavourites(state.ownerId));
     },
     setFavourite: (
       state,
@@ -60,9 +66,12 @@ export const favouritesSlice = createSlice({
 
       state.ids = ids;
 
-      if (!state.inMemory)
+      if (!state.inMemory && state.ownerId)
         try {
-          window.localStorage.setItem(STORAGE_KEY, JSON.stringify(ids));
+          window.localStorage.setItem(
+            getStorageKey(state.ownerId),
+            JSON.stringify(ids),
+          );
         } catch {
           // storage unavailable
         }
@@ -74,6 +83,11 @@ export const favouritesSlice = createSlice({
       state.loginSheetFor = null;
     },
   },
+  extraReducers: (builder) =>
+    builder.addCase(sessionChanged, (state, { payload }) => {
+      state.ownerId = payload?.id ?? null;
+      Object.assign(state, readFavourites(state.ownerId));
+    }),
 });
 
 export const { syncFavourites, setFavourite, openLoginSheet, closeLoginSheet } =

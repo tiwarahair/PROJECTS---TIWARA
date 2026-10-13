@@ -153,8 +153,10 @@ describe("SearchPage", () => {
   });
 
   it("logged in, the menu lists the account links and logs out", async () => {
-    sessionStorage.setItem("tw_cust", "1");
-    renderWithStore(<SearchPage />, "/search");
+    const { store } = renderWithStore(<SearchPage />, "/search", {
+      signedIn: true,
+    });
+
     await user.click(screen.getByRole("button", { name: "Menu" }));
     const menu = screen.getByRole("menu", { name: "Menu" });
 
@@ -165,6 +167,6 @@ describe("SearchPage", () => {
     ).toHaveAttribute("href", "/account?section=bookings");
 
     await user.click(within(menu).getByRole("menuitem", { name: "Log out" }));
-    expect(sessionStorage.getItem("tw_cust")).toBeNull();
+    expect(store.getState().session.loggedIn).toBe(false);
   });
 });

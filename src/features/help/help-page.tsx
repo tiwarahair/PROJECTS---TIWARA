@@ -3,7 +3,8 @@ import { Link, useNavigate } from "react-router";
 import { FavHost } from "../../components/fav-host/fav-host";
 import { faqs } from "../../data";
 import { useAppDispatch, useAppSelector } from "../../stores/hooks";
-import { ACCOUNT_INITIALS, logOut } from "../../stores/session-slice";
+import { useIdentity } from "../../hooks/use-identity";
+import { logOut } from "../../stores/session-slice";
 import { getAssetUrl } from "../../utils/asset-url";
 import { joinClassNames } from "../../utils/class-names";
 import { getSearchParams } from "../../utils/page-flags";
@@ -21,6 +22,7 @@ const HEART_PATH =
 
 /** Help & support, route "/help": FAQs (one open at a time) and the contact email. */
 export const HelpPage = () => {
+  const identity = useIdentity();
   const [menuOpen, setMenuOpen] = useState(false);
   const [openFaq, setOpenFaq] = useState(-1);
   const loggedIn = useAppSelector(({ session }) => session.loggedIn);
@@ -100,7 +102,7 @@ export const HelpPage = () => {
                 aria-expanded="false"
               >
                 <span className={styles.accountAvatar} aria-hidden="true">
-                  {ACCOUNT_INITIALS}
+                  {identity?.initials}
                 </span>
                 <svg
                   width="14"

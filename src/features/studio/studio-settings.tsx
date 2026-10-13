@@ -163,7 +163,7 @@ const SettingsRoot = ({
         <img
           className={styles.profileAvatar}
           src={getAvatarSrc(state)}
-          alt="Amara"
+          alt={state.owner.first}
         />
         <div className={styles.grow}>
           <div className={styles.salonRow}>
@@ -494,8 +494,9 @@ const SettingsFrame = ({
                 tax={state.tax}
                 taxEditing={!!state.taxEdit}
                 taxBusiness={state.business}
-                taxLegalName="Amara Okonkwo"
-                taxBusinessName="Tiwára's House Ltd"
+                taxLegalName={state.owner.name}
+                person={state.owner}
+                taxBusinessName={state.profile.salon}
                 onTaxEdit={view.onTaxEdit}
                 onTaxAdd={view.onTaxAdd}
                 onTaxSave={view.onTaxSave}

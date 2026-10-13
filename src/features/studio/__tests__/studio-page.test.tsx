@@ -167,19 +167,12 @@ describe("StudioPage", () => {
     expect(getLabelled("Policy nudge")).not.toBeInTheDocument();
   });
 
-  it("a welcome note from onboarding greets the stylist once", () => {
-    localStorage.setItem(
-      "tw_welcome",
-      JSON.stringify({ at: Date.now(), first: "Amara" }),
-    );
-
-    renderStudio();
+  it("arriving from sign-up (?welcome=1) greets the stylist by name", () => {
+    renderStudio("?welcome=1");
     advance(600);
 
     expect(
       screen.getByText("Welcome, Amara. Let’s get you ready to take bookings."),
     ).toBeInTheDocument();
-
-    expect(localStorage.getItem("tw_welcome")).toBeNull();
   });
 });

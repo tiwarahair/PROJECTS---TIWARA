@@ -1,6 +1,5 @@
 import type { CSSProperties } from "react";
 import { joinClassNames } from "../../utils/class-names";
-import { NOTIFS } from "./studio-data";
 import {
   dayInfo,
   durationToMinutes,
@@ -249,7 +248,7 @@ export const NotificationsSheet = ({
 
   return (
     <div className={styles.stack8}>
-      {NOTIFS.map(({ title, body, time, unread }, index) => (
+      {state.notifications.map(({ title, body, time, unread }, index) => (
         <button
           key={title}
           className={styles.notif}

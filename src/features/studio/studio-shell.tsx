@@ -191,8 +191,8 @@ export const StudioSidebar = ({ studio }: { studio: StudioController }) => {
         />
         {isOpen && (
           <span className={styles.grow}>
-            <span className={styles.profileName}>Amara</span>
-            <span className={styles.profileArea}>Ancoats</span>
+            <span className={styles.profileName}>{state.owner.first}</span>
+            <span className={styles.profileArea}>{state.owner.area}</span>
           </span>
         )}
       </button>
@@ -210,7 +210,7 @@ export const StudioTopBar = ({ studio }: { studio: StudioController }) => {
   const { state, isWide, isDesktop, setState, actions } = studio;
   const now = new Date();
   const hour = now.getHours();
-  const greeting = `${getDayPart(hour)}, Amara`;
+  const greeting = `${getDayPart(hour)}, ${state.owner.first}`;
   const hasUnread = !state.notifAllRead;
 
   const isHidden =
@@ -234,7 +234,7 @@ export const StudioTopBar = ({ studio }: { studio: StudioController }) => {
           <img
             className={styles.avatar42}
             src={getAvatarSrc(state)}
-            alt="Amara"
+            alt={state.owner.first}
           />
         </button>
       )}

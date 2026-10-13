@@ -24,7 +24,6 @@ export interface StudioContext {
     clashOk?: boolean;
     lastPointer?: string;
     tipListening?: boolean;
-    welcome?: { at: number; first?: string; cats?: string[] } | null;
     swipe?: { x: number; y: number } | null;
     slideFrame?: number;
     applyEdit?: () => void;

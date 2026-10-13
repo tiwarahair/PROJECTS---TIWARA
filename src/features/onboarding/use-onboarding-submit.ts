@@ -111,22 +111,6 @@ export const useOnboardingSubmit = ({
     }
 
     if (kind === "newpro") {
-      const form = getValues();
-
-      try {
-        localStorage.setItem(
-          "tw_welcome",
-          JSON.stringify({
-            first: form.first,
-            cats: form.categories,
-            drafts: 2,
-            at: Date.now(),
-          }),
-        );
-      } catch {
-        // storage unavailable
-      }
-
       clearSaved();
       setState({ busy: false });
       goTo("pro-done");

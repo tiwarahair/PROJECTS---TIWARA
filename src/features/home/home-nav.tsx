@@ -1,6 +1,6 @@
 import type { CSSProperties } from "react";
 import { Link } from "react-router";
-import { ACCOUNT_INITIALS } from "../../stores/session-slice";
+import { useIdentity } from "../../hooks/use-identity";
 import { getAssetUrl } from "../../utils/asset-url";
 import { joinClassNames } from "../../utils/class-names";
 import { hexToRgba } from "./home-colours";
@@ -22,6 +22,8 @@ export const HomeNav = ({
   menuOpen,
   onToggleMenu,
 }: HomeNavProps) => {
+  const identity = useIdentity();
+
   const { navSolid, navDark, navHidden, navBackground } = morph;
 
   return (
@@ -96,7 +98,7 @@ export const HomeNav = ({
                   className={styles.account}
                 >
                   <span aria-hidden="true" className={styles.avatar}>
-                    {ACCOUNT_INITIALS}
+                    {identity?.initials}
                   </span>
                 </Link>
               )}
