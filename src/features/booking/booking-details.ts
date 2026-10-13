@@ -76,10 +76,10 @@ export const getFieldErrors = (
 
   if (!details.last.trim()) errors.last = "Enter your last name";
 
-  if (!isValidEmail(details.email))
-    errors.email = "Enter an email address";
+  if (!isValidEmail(details.email)) errors.email = "Enter an email address";
 
-  if (!isValidMobile(details.phone || "")) errors.phone = "Enter a UK mobile number";
+  if (!isValidMobile(details.phone || ""))
+    errors.phone = "Enter a UK mobile number";
 
   return errors;
 };

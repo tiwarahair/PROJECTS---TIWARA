@@ -362,10 +362,11 @@ export const useOnboarding = (props: OnboardingProps) => {
 
   const { geocode, setAddress } = useOnboardingAddress(core);
 
-  const { submit, resend, socialSignIn, toStudio } = useOnboardingSubmit({
-    ...core,
-    geocode,
-  });
+  const { submit, resend, socialSignIn, toStudio, createStylist } =
+    useOnboardingSubmit({
+      ...core,
+      geocode,
+    });
 
   /** One digit per box: advance on input, submit when all six are filled. */
   const setCodeDigit = (index: number, value: string) => {
@@ -454,6 +455,7 @@ export const useOnboarding = (props: OnboardingProps) => {
 
       save,
       toStudio,
+      skipSource: () => createStylist(true),
       setMode,
       autoNext: (to: string, after?: () => void) =>
         later(

@@ -54,11 +54,6 @@ export const Wizard = (props: ScreenProps) => {
   const submitLabel = screen === "w4" ? "Create account" : "Continue";
   const isSkippable = screen === "w5";
 
-  const skip = () => {
-    actions.setState({ codeKind: "verify" });
-    actions.goTo("verify");
-  };
-
   const submitClass = (base: string | undefined) =>
     joinClassNames(
       base,
@@ -113,7 +108,10 @@ export const Wizard = (props: ScreenProps) => {
                 <ModeIcon isDark={isDark} />
               </button>
               {isSkippable && (
-                <button onClick={skip} className={styles.deskSkip}>
+                <button
+                  onClick={actions.skipSource}
+                  className={styles.deskSkip}
+                >
                   Skip
                 </button>
               )}
@@ -164,7 +162,10 @@ export const Wizard = (props: ScreenProps) => {
               <ModeIcon isDark={isDark} />
             </button>
             {isSkippable && (
-              <button onClick={skip} className={styles.mobileSkip}>
+              <button
+                onClick={actions.skipSource}
+                className={styles.mobileSkip}
+              >
                 Skip
               </button>
             )}

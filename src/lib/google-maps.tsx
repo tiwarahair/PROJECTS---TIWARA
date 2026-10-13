@@ -50,13 +50,17 @@ export const toPlaceAddress = (
   const getPart = (type: string) =>
     parts.find(({ types }) => types.includes(type))?.text ?? "";
 
-  const street = [getPart("street_number"), getPart("route")]
-    .filter(Boolean)
-    .join(" ");
+  const number = getPart("street_number");
+  const street = [number, getPart("route")].filter(Boolean).join(" ");
 
   const building = [getPart("subpremise"), getPart("premise")]
     .filter(Boolean)
     .join(", ");
+
+  // UK order: "12 High Street, Flat 3" but "Stopford Building, Oxford Road"
+  const [line1, line2] = number
+    ? [street, building]
+    : [building || street, building ? street : ""];
 
   const town = getPart("postal_town") || getPart("locality");
   const postcode = getPart("postal_code");
@@ -65,8 +69,8 @@ export const toPlaceAddress = (
     getPart("sublocality_level_1") || getPart("neighborhood") || town;
 
   return {
-    line1: street || building,
-    line2: street ? building : "",
+    line1,
+    line2,
     town,
     postcode,
     area:

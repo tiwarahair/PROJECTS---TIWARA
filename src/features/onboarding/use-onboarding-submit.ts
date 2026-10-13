@@ -200,6 +200,21 @@ export const useOnboardingSubmit = ({
       codeError: "That code isn’t right",
     }));
 
+  /** w5's Continue and Skip both create the stylist (Skip without a referral source). */
+  const createStylist = (skipSource = false) =>
+    run(async () => {
+      const form = getValues();
+
+      await signUpStylist(
+        form.email.trim().toLowerCase(),
+        form.password,
+        takeCaptchaToken(),
+        getStylistDetails(skipSource ? { ...form, referralSource: "" } : form),
+      );
+
+      setState({ codeKind: "verify" }, () => goTo("verify"));
+    });
+
   const submit = () => {
     const { busy, lockedUntil } = stateRef.current;
 
@@ -292,17 +307,7 @@ export const useOnboardingSubmit = ({
         );
       });
 
-    if (screen === "w5")
-      return run(async () => {
-        await signUpStylist(
-          email,
-          form.password,
-          takeCaptchaToken(),
-          getStylistDetails(form),
-        );
-
-        setState({ codeKind: "verify" }, () => goTo("verify"));
-      });
+    if (screen === "w5") return createStylist();
 
     if (screen === "cust-social")
       return run(async () => {
@@ -410,5 +415,5 @@ export const useOnboardingSubmit = ({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  return { submit, resend, socialSignIn, toStudio };
+  return { submit, resend, socialSignIn, toStudio, createStylist };
 };
