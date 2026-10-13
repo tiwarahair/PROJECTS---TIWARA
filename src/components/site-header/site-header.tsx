@@ -111,21 +111,23 @@ export const SiteHeader = ({
               Log in
             </Link>
           )}
-          {isSignedIn && accountMenu && <AccountMenuButton {...accountMenu} />}
-          {isSignedIn && !accountMenu && (
-            <Link
-              to="/account"
-              data-tw-acct="1"
-              aria-label="Account"
-              aria-haspopup="menu"
-              aria-expanded="false"
-              className={styles.account}
-            >
-              <span aria-hidden="true" className={styles.avatar}>
-                {identity?.initials}
-              </span>
-            </Link>
-          )}
+          {isSignedIn &&
+            (accountMenu ? (
+              <AccountMenuButton {...accountMenu} />
+            ) : (
+              <Link
+                to="/account"
+                data-tw-acct="1"
+                aria-label="Account"
+                aria-haspopup="menu"
+                aria-expanded="false"
+                className={styles.account}
+              >
+                <span aria-hidden="true" className={styles.avatar}>
+                  {identity?.initials}
+                </span>
+              </Link>
+            ))}
         </nav>
       </div>
       {isMenuOpen && (
@@ -140,12 +142,17 @@ export const SiteHeader = ({
               Log in
             </Link>
           )}
-          {isSignedIn && accountMenu && <AccountMenuLinks {...accountMenu} />}
-          {isSignedIn && !accountMenu && (
-            <Link to="/account?section=personal" className={styles.mobileLink}>
-              Account
-            </Link>
-          )}
+          {isSignedIn &&
+            (accountMenu ? (
+              <AccountMenuLinks {...accountMenu} />
+            ) : (
+              <Link
+                to="/account?section=personal"
+                className={styles.mobileLink}
+              >
+                Account
+              </Link>
+            ))}
         </div>
       )}
     </header>

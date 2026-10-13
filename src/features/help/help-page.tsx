@@ -2,7 +2,6 @@ import { useLayoutEffect, useState } from "react";
 import { FavHost } from "../../components/fav-host/fav-host";
 import { SiteHeader } from "../../components/site-header/site-header";
 import { faqs } from "../../data";
-import { useIdentity } from "../../hooks/use-identity";
 import { joinClassNames } from "../../utils/class-names";
 import { getSearchParams } from "../../utils/page-flags";
 import "../../styles/features/help/help-page-global.module.css";
@@ -16,7 +15,6 @@ const LOGIN_HREF = `/login?screen=cust-email&return=${encodeURIComponent("/help"
 
 /** Help & support, route "/help": FAQs (one open at a time) and the contact email. */
 export const HelpPage = () => {
-  const identity = useIdentity();
   const [openFaq, setOpenFaq] = useState(-1);
   const [bookingRef] = useState(() => getSearchParams().get("booking") || "");
   const mailSubject = encodeURIComponent(`Help with booking ${bookingRef}`);
@@ -31,10 +29,7 @@ export const HelpPage = () => {
 
   return (
     <div className={styles.page} data-screen-label="Help and support">
-      <SiteHeader
-        loginHref={LOGIN_HREF}
-        accountMenu={{ label: "Account", initials: identity?.initials ?? "" }}
-      />
+      <SiteHeader loginHref={LOGIN_HREF} accountMenu={{ label: "Account" }} />
 
       <main className={styles.main}>
         <h1 className={styles.title}>Help & support</h1>

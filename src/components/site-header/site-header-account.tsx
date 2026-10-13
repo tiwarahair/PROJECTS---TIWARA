@@ -1,5 +1,6 @@
 import type { MouseEvent } from "react";
 import { Link, useLocation, useNavigate } from "react-router";
+import { useIdentity } from "../../hooks/use-identity";
 import { useAppDispatch } from "../../stores/hooks";
 import { logOut } from "../../stores/session-slice";
 import { resolveAssetUrl } from "../../utils/asset-url";
@@ -9,7 +10,8 @@ import styles from "../../styles/components/site-header/site-header.module.css";
 export interface SiteHeaderAccountMenu {
   /** The account button's label and the mobile menu's account heading. */
   label: string;
-  initials: string;
+  /** Defaults to the signed-in person's initials. */
+  initials?: string;
   photo?: string | null;
   /** Opens an account section in place instead of following its link. */
   onSection?: (section: string) => void;
@@ -36,40 +38,44 @@ export const AccountMenuButton = ({
   label,
   initials,
   photo,
-}: SiteHeaderAccountMenu) => (
-  <button
-    className={styles.accountButton}
-    data-tw-acct="1"
-    aria-label={label}
-    aria-haspopup="menu"
-    aria-expanded="false"
-  >
-    <span className={styles.avatar} aria-hidden="true">
-      {photo ? (
-        <img
-          className={styles.avatarImage}
-          src={resolveAssetUrl(photo)}
-          alt=""
-        />
-      ) : (
-        initials
-      )}
-    </span>
-    <svg
-      width="14"
-      height="14"
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="1.7"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      aria-hidden="true"
+}: SiteHeaderAccountMenu) => {
+  const identity = useIdentity();
+
+  return (
+    <button
+      className={styles.accountButton}
+      data-tw-acct="1"
+      aria-label={label}
+      aria-haspopup="menu"
+      aria-expanded="false"
     >
-      <path d="m6 9 6 6 6-6"></path>
-    </svg>
-  </button>
-);
+      <span className={styles.avatar} aria-hidden="true">
+        {photo ? (
+          <img
+            className={styles.avatarImage}
+            src={resolveAssetUrl(photo)}
+            alt=""
+          />
+        ) : (
+          (initials ?? identity?.initials)
+        )}
+      </span>
+      <svg
+        width="14"
+        height="14"
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="1.7"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        aria-hidden="true"
+      >
+        <path d="m6 9 6 6 6-6"></path>
+      </svg>
+    </button>
+  );
+};
 
 /** Mobile menu account links: the account heading, its sections, Help & support and Log out. */
 export const AccountMenuLinks = ({
