@@ -16,7 +16,11 @@ import {
   ResetScreen,
   StudioScreen,
 } from "./auth-screens-end";
-import { SCREEN_LABELS, TURNSTILE_SCREENS } from "./onboarding-data";
+import {
+  RESEND_SCREENS,
+  SCREEN_LABELS,
+  TURNSTILE_SCREENS,
+} from "./onboarding-data";
 import "../../styles/features/onboarding/onboarding-page-global.module.css";
 import { getLayout } from "./onboarding-layout";
 import styles from "../../styles/features/onboarding/onboarding-page.module.css";
@@ -75,9 +79,13 @@ export const OnboardingPage = (props: OnboardingProps) => {
   for (const [key, value] of Object.entries(state.serverErrors))
     if (value && typeof value === "string") shown[key] = value;
 
-  const turnstileShown = TURNSTILE_SCREENS.includes(screen);
-  // verify's own submit doesn't need a token; only its Resend does
-  const needsToken = turnstileShown && screen !== "verify";
+  // resend screens load the check only once Resend is tapped; their own submit never needs it
+  const isResendScreen = RESEND_SCREENS.includes(screen);
+
+  const turnstileShown =
+    TURNSTILE_SCREENS.includes(screen) || (isResendScreen && state.resendArmed);
+
+  const needsToken = turnstileShown && !isResendScreen;
 
   const view: ScreenView = {
     shown,

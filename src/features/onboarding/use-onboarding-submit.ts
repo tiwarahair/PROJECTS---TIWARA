@@ -1,5 +1,5 @@
 // What each onboarding screen sends to the server, and where it goes next.
-import { useEffect } from "react";
+import { useEffect, useRef } from "react";
 import {
   completeClientProfile,
   getAccountKind,
@@ -189,12 +189,19 @@ export const useOnboardingSubmit = ({
     run(async () => {
       const form = getValues();
 
-      await signUpStylist(
+      const isNew = await signUpStylist(
         form.email.trim().toLowerCase(),
         form.password,
         takeCaptchaToken(),
         getStylistDetails(skipSource ? { ...form, referralSource: "" } : form),
       );
+
+      // the email already has an account: back to w4, which explains and offers log in
+      if (!isNew) {
+        goTo("w4", "back");
+
+        return setState({ serverErrors: { exists: true } });
+      }
 
       setState({ codeKind: "verify" }, () => goTo("verify"));
     });
@@ -247,15 +254,15 @@ export const useOnboardingSubmit = ({
         goTo(kind === "none" ? "cust-create" : "cust-password");
       });
 
-    if (screen === "pro-email" || screen === "w4")
+    // w4 makes no server call: w5's sign-up is the stylist flow's one Turnstile check
+    if (screen === "w4")
+      return setState({ audience: "newpro" }, () => goTo("w5"));
+
+    if (screen === "pro-email")
       return run(async () => {
         const kind = await getAccountKind(email, takeCaptchaToken());
 
-        if (screen === "w4") {
-          if (kind === "none")
-            setState({ audience: "newpro" }, () => goTo("w5"));
-          else setState({ busy: false, serverErrors: { exists: true } });
-        } else if (kind === "stylist") goTo("pro-password");
+        if (kind === "stylist") goTo("pro-password");
         else setState({ busy: false, serverErrors: { noBusiness: true } });
       });
 
@@ -350,16 +357,38 @@ export const useOnboardingSubmit = ({
   };
 
   /** Resend the sign-up code (verify) or the reset link (forgot-sent). */
-  const resend = () =>
+  const resending = useRef(false);
+
+  /** Sends the code (verify) or reset link (forgot-sent) again with this token. */
+  const sendAgain = (token: string) => {
+    if (resending.current) return;
+
+    resending.current = true;
+    setState({ resendArmed: false, captchaToken: null });
+    turnstileRef.current?.reset();
+
     run(async () => {
       const email = getValues("email").trim().toLowerCase();
 
-      if (stateRef.current.screen === "forgot-sent")
-        await sendPasswordReset(email, takeCaptchaToken());
-      else await resendEmailCode(email, takeCaptchaToken());
+      try {
+        if (stateRef.current.screen === "forgot-sent")
+          await sendPasswordReset(email, token);
+        else await resendEmailCode(email, token);
+      } finally {
+        resending.current = false;
+      }
 
       setState({ busy: false, resendIn: 30, codeError: "", code: EMPTY_CODE });
     });
+  };
+
+  /** Without a token yet, Resend first loads the check; its token then sends (setCaptchaToken). */
+  const resend = () => {
+    const { captchaToken } = stateRef.current;
+
+    if (captchaToken) sendAgain(captchaToken);
+    else setState({ resendArmed: true });
+  };
 
   /** Google redirects away; the return lands on /login?flow=social(-pro). */
   const socialSignIn = (isPro: boolean) => run(() => startGoogleSignIn(isPro));
@@ -400,5 +429,5 @@ export const useOnboardingSubmit = ({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  return { submit, resend, socialSignIn, toStudio, createStylist };
+  return { submit, resend, sendAgain, socialSignIn, toStudio, createStylist };
 };

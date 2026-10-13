@@ -109,6 +109,8 @@ export interface OnboardingState {
   compact: boolean;
   /** The current single-use Turnstile token (null until the widget passes, and after each use). */
   captchaToken: string | null;
+  /** Resend was tapped before a Turnstile token existed: send once the check passes. */
+  resendArmed: boolean;
   returnTo: string;
   toast: string | null;
   socialProvider: "google" | "apple" | null;
@@ -177,6 +179,7 @@ export const INITIAL_STATE: OnboardingState = {
   audience: "pro",
   compact: false,
   captchaToken: null,
+  resendArmed: false,
   returnTo: "/",
   toast: null,
   socialProvider: null,

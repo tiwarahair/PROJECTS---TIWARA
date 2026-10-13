@@ -286,6 +286,7 @@ export const useOnboarding = (props: OnboardingProps) => {
       compact: false,
       passwordShown: false,
       captchaToken: null,
+      resendArmed: false,
     });
 
     try {
@@ -362,7 +363,7 @@ export const useOnboarding = (props: OnboardingProps) => {
 
   const { geocode, setAddress } = useOnboardingAddress(core);
 
-  const { submit, resend, socialSignIn, toStudio, createStylist } =
+  const { submit, resend, sendAgain, socialSignIn, toStudio, createStylist } =
     useOnboardingSubmit({
       ...core,
       geocode,
@@ -446,8 +447,11 @@ export const useOnboarding = (props: OnboardingProps) => {
       submit,
       socialSignIn,
       resend,
-      setCaptchaToken: (captchaToken: string | null) =>
-        setState({ captchaToken }),
+      setCaptchaToken: (captchaToken: string | null) => {
+        if (captchaToken && stateRef.current.resendArmed)
+          sendAgain(captchaToken);
+        else setState({ captchaToken });
+      },
       setCodeDigit,
       handleCodeKey,
       pasteCode,

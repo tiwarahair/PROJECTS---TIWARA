@@ -23,7 +23,7 @@ const DoneBadge = () => (
   </span>
 );
 
-export const ForgotSentScreen = ({ onboarding, layout }: ScreenProps) => {
+export const ForgotSentScreen = ({ onboarding, layout, view }: ScreenProps) => {
   const { state, actions } = onboarding;
   const resendOff = state.resendIn > 0;
 
@@ -49,11 +49,13 @@ export const ForgotSentScreen = ({ onboarding, layout }: ScreenProps) => {
         <strong className={styles.strongEmail}>{state.form.email}</strong>. The
         link works for 30 minutes.
       </p>
-      <OnboardingTurnstile
-        isDark={layout.isDark}
-        widgetRef={onboarding.turnstileRef}
-        onToken={actions.setCaptchaToken}
-      />
+      {view.turnstileShown && (
+        <OnboardingTurnstile
+          isDark={layout.isDark}
+          widgetRef={onboarding.turnstileRef}
+          onToken={actions.setCaptchaToken}
+        />
+      )}
       <div className={styles.sentLinks}>
         <button
           onClick={() => {

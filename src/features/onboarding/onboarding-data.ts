@@ -143,19 +143,18 @@ export const TERMS_BODY = {
 export const STORAGE_KEY = "tw_onboarding_v1";
 export const MODE_KEY = "tw_ob_mode";
 
-// screens whose server call needs a Turnstile token (verify and forgot-sent only for Resend)
+// screens whose server call needs a Turnstile token (verify and forgot-sent add one only once Resend is tapped)
 export const TURNSTILE_SCREENS = [
   "cust-email",
   "pro-email",
   "cust-password",
   "pro-password",
   "cust-create",
-  "w4",
   "w5",
   "forgot-email",
-  "verify",
-  "forgot-sent",
 ];
+
+export const RESEND_SCREENS = ["verify", "forgot-sent"];
 
 export type PhotoKey = "welcome" | "client" | "stylist";
 export const PHOTOS: Record<PhotoKey, [string, string]> = {

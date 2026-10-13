@@ -10,6 +10,7 @@ vi.mock("../../../lib/auth", async (importOriginal) => ({
   ...(await importOriginal<typeof import("../../../lib/auth")>()),
   getAccountKind: vi.fn(),
   getSignedInAccount: vi.fn(),
+  resendEmailCode: vi.fn(),
   signIn: vi.fn(),
   verifyEmailCode: vi.fn(),
 }));
@@ -35,6 +36,7 @@ describe("OnboardingPage", () => {
 
     localStorage.clear();
     sessionStorage.clear();
+    vi.clearAllMocks();
   });
 
   afterEach(() => vi.useRealTimers());
@@ -124,6 +126,40 @@ describe("OnboardingPage", () => {
     ).toBeInTheDocument();
 
     expect(screen.queryByText(/couldn’t connect/)).not.toBeInTheDocument();
+  });
+
+  it("the stylist account step moves on without a server check", async () => {
+    renderWithStore(<OnboardingPage />, "/join?screen=w4&board=true");
+
+    await user.type(screen.getByLabelText("Mobile"), "7700900456");
+    await user.type(screen.getByLabelText("Password"), "copper meadow 47");
+    await user.click(screen.getByRole("checkbox", { name: /Partner Terms/ }));
+    await user.click(screen.getByRole("button", { name: "Create account" }));
+
+    expect(
+      await screen.findByRole("heading", {
+        name: "How did you hear about us?",
+      }),
+    ).toBeInTheDocument();
+
+    expect(auth.getAccountKind).not.toHaveBeenCalled();
+  });
+
+  it("the code screen loads the human check only when Resend is tapped", async () => {
+    vi.mocked(auth.resendEmailCode).mockResolvedValue();
+    renderWithStore(<OnboardingPage />, "/signup?screen=verify&board=true");
+
+    advance(30_000);
+    expect(auth.resendEmailCode).not.toHaveBeenCalled();
+
+    await user.click(screen.getByRole("button", { name: "Resend code" }));
+
+    await vi.waitFor(() =>
+      expect(auth.resendEmailCode).toHaveBeenCalledWith(
+        "ama@example.com",
+        "test-captcha-token",
+      ),
+    );
   });
 
   it("the wizard picks a business type and moves on after 300ms", async () => {
