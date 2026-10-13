@@ -1,5 +1,5 @@
 // Onboarding's ?fixture= board states (dev-only).
-import type { OnboardingForm, OnboardingState } from "./onboarding-state";
+import type { OnboardingForm, StartState } from "./onboarding-state";
 
 const PASSWORD_FIXTURES: Record<string, string> = {
   "pw-empty": "",
@@ -16,7 +16,7 @@ const PASSWORD_FIXTURES: Record<string, string> = {
 export const getFixturePatch = (
   key: string,
   baseForm: OnboardingForm,
-): Partial<OnboardingState> => {
+): Partial<StartState> => {
   const form = { ...baseForm };
 
   const withForm = (patch: Partial<OnboardingForm>) =>

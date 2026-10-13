@@ -1,18 +1,22 @@
 import { describe, expect, it } from "vitest";
 import { getFixturePatch } from "../onboarding-fixtures";
 import {
-  getBackScreen,
   getErrors,
-  INITIAL_STATE,
   isValidMobile,
   isValidPostcode,
+} from "../onboarding-schemas";
+import {
+  getBackScreen,
+  INITIAL_FORM,
+  INITIAL_STATE,
 } from "../onboarding-state";
-import type { OnboardingState } from "../onboarding-state";
+import type { StartState } from "../onboarding-state";
 
-const buildState = (patch: Partial<OnboardingState>): OnboardingState => ({
+const buildState = (patch: Partial<StartState>): StartState => ({
   ...INITIAL_STATE,
+  touched: {},
   ...patch,
-  form: { ...INITIAL_STATE.form, ...patch.form },
+  form: { ...INITIAL_FORM, ...patch.form },
 });
 
 describe("onboarding validation", () => {
@@ -34,7 +38,7 @@ describe("onboarding validation", () => {
         buildState({
           screen: "w3",
           form: {
-            ...INITIAL_STATE.form,
+            ...INITIAL_FORM,
             businessName: "Crown",
             type: "mobile",
             postcode: "nope",
@@ -47,7 +51,7 @@ describe("onboarding validation", () => {
       getErrors(
         buildState({
           screen: "w3",
-          form: { ...INITIAL_STATE.form, businessName: "Crown", type: "shop" },
+          form: { ...INITIAL_FORM, businessName: "Crown", type: "shop" },
         }),
       ),
     ).toEqual({ address: "Enter your address" });
@@ -73,12 +77,12 @@ describe("onboarding validation", () => {
   });
 
   it("fixtures seed board states", () => {
-    expect(getFixturePatch("w2", INITIAL_STATE.form)).toMatchObject({
+    expect(getFixturePatch("w2", INITIAL_FORM)).toMatchObject({
       screen: "w2",
       form: { categories: ["braids", "natural", "locs"] },
     });
 
-    expect(getFixturePatch("pw-good", INITIAL_STATE.form)).toMatchObject({
+    expect(getFixturePatch("pw-good", INITIAL_FORM)).toMatchObject({
       screen: "cust-create",
       form: { password: "sunflower house" },
       passwordShown: true,

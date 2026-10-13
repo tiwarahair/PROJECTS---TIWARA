@@ -1,7 +1,4 @@
-// Onboarding state, props and validation.
-import { checkPassword } from "../../utils/password";
-import type { PasswordCheck } from "../../utils/password";
-import { isPostcodeValid } from "../../utils/address";
+// Onboarding state and props (validation lives in onboarding-schemas.ts).
 
 export interface OnboardingProps {
   screen?: string;
@@ -105,8 +102,6 @@ interface ServerError {
 export interface OnboardingState {
   screen: string | null;
   direction: "fwd" | "back";
-  form: OnboardingForm;
-  touched: Record<string, boolean>;
   serverErrors: ServerError & Record<string, string | boolean | undefined>;
   busy: boolean;
   passwordShown: boolean;
@@ -138,9 +133,15 @@ export interface OnboardingState {
   benefitIndex: number;
 }
 
+/** The start state plus the form's initial values and touched fields (fixtures, saved progress). */
+export interface StartState extends OnboardingState {
+  form: OnboardingForm;
+  touched: Partial<Record<keyof OnboardingForm, boolean>>;
+}
+
 export const EMPTY_CODE = ["", "", "", "", "", ""];
 
-const INITIAL_FORM: OnboardingForm = {
+export const INITIAL_FORM: OnboardingForm = {
   email: "",
   password: "",
   passwordConfirm: "",
@@ -168,8 +169,6 @@ const INITIAL_FORM: OnboardingForm = {
 export const INITIAL_STATE: OnboardingState = {
   screen: null,
   direction: "fwd",
-  form: INITIAL_FORM,
-  touched: {},
   serverErrors: {},
   busy: false,
   passwordShown: false,
@@ -203,156 +202,6 @@ export const INITIAL_STATE: OnboardingState = {
 
 export const isCodeScreen = (screen: string | null): boolean =>
   screen === "verify" || screen === "pro-2fa";
-
-const isValidEmail = (value: string): boolean =>
-  /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(value.trim());
-
-export const isValidMobile = (value: string): boolean => {
-  const digits = value.replace(/\D/g, "");
-
-  return /^7\d{9}$/.test(digits) || /^07\d{9}$/.test(digits);
-};
-
-export const isValidPostcode = (value: string): boolean =>
-  /^[A-Z]{1,2}\d[A-Z\d]?\s*\d[A-Z]{2}$/i.test(value.trim());
-
-/** Pros need 8+ characters, clients 15+. */
-const getPasswordWho = ({
-  screen,
-  audience,
-}: OnboardingState): "pro" | "client" => {
-  if (screen === "w4") return "pro";
-
-  if (screen === "cust-create") return "client";
-
-  return audience === "customer" ? "client" : "pro";
-};
-
-export const getPasswordCheck = (state: OnboardingState): PasswordCheck => {
-  const { form } = state;
-  const min = getPasswordWho(state) === "pro" ? 8 : 15;
-
-  return checkPassword(form.password, {
-    min,
-    first: form.first,
-    last: form.last,
-    email: form.email,
-  });
-};
-
-const isAddressOk = ({ line1, city, postcode }: OnboardingForm): boolean =>
-  !!line1.trim() && !!city.trim() && isPostcodeValid(postcode);
-
-type FormErrors = Record<string, string>;
-
-/** Field errors for the current screen. */
-export const getErrors = (state: OnboardingState): FormErrors => {
-  const { form, screen } = state;
-  const errors: FormErrors = {};
-
-  const checkEmail = () => {
-    if (!form.email.trim()) errors.email = "Enter your email address";
-    else if (!isValidEmail(form.email))
-      errors.email = "Enter a valid email address, like name@example.com";
-  };
-
-  const checkPasswordField = () => {
-    const { error } = getPasswordCheck(state);
-
-    if (error) errors.password = error;
-  };
-
-  const checkNames = () => {
-    if (!form.first.trim()) errors.first = "Enter your first name";
-
-    if (!form.last.trim()) errors.last = "Enter your last name";
-  };
-
-  const checkMobile = () => {
-    if (!form.mobile.trim()) errors.mobile = "Enter your mobile number";
-    else if (!isValidMobile(form.mobile))
-      errors.mobile = "Enter a valid UK mobile, like 7700 900123";
-  };
-
-  const termsError = "Agree to the terms to continue";
-
-  if (
-    screen === "cust-email" ||
-    screen === "pro-email" ||
-    screen === "forgot-email"
-  )
-    checkEmail();
-
-  if (screen === "cust-password" || screen === "pro-password")
-    if (!form.password) errors.password = "Enter your password";
-
-  if (screen === "cust-create") {
-    checkNames();
-    checkPasswordField();
-    checkMobile();
-
-    if (!form.terms) errors.terms = termsError;
-  }
-
-  if (screen === "cust-social") {
-    checkNames();
-    checkMobile();
-
-    if (!form.terms) errors.terms = termsError;
-  }
-
-  if (screen === "w5") {
-    if (!form.referralSource) errors.referralSource = "Choose an option";
-    else if (
-      form.referralSource === "Other" &&
-      !form.referralSourceOther.trim()
-    )
-      errors.referralSourceOther = "Tell us where";
-  }
-
-  if (screen === "forgot-reset") {
-    checkPasswordField();
-
-    if (!form.passwordConfirm)
-      errors.passwordConfirm = "Confirm your new password";
-    else if (form.password !== form.passwordConfirm)
-      errors.passwordConfirm = "Passwords don’t match";
-  }
-
-  if (screen === "w1" && !form.type) errors.type = "Choose how you work";
-
-  if (screen === "w2" && !form.categories.length)
-    errors.categories = "Choose at least one";
-
-  if (screen === "w3") {
-    if (!form.businessName.trim())
-      errors.businessName = "Enter your business name";
-
-    if (form.type === "mobile") {
-      if (!form.postcode.trim()) errors.postcode = "Enter your base postcode";
-      else if (!isValidPostcode(form.postcode))
-        errors.postcode = "Enter a valid UK postcode, like M14 5TQ";
-    } else if (!isAddressOk(form)) errors.address = "Enter your address";
-  }
-
-  if (screen === "w4") {
-    checkNames();
-    checkEmail();
-    checkMobile();
-    checkPasswordField();
-
-    if (!form.terms) errors.terms = termsError;
-
-    if (
-      !form.useContact &&
-      !form.businessPhone.trim() &&
-      !form.businessEmail.trim()
-    )
-      errors.businessContact = "Add at least one";
-  }
-
-  return errors;
-};
 
 /** Where Back goes from each screen. */
 export const getBackScreen = ({

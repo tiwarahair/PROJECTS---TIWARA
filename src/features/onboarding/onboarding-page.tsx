@@ -20,7 +20,8 @@ import { SCREEN_LABELS, TURNSTILE_SCREENS } from "./onboarding-data";
 import "../../styles/features/onboarding/onboarding-page-global.module.css";
 import { getLayout } from "./onboarding-layout";
 import styles from "../../styles/features/onboarding/onboarding-page.module.css";
-import { getErrors, isCodeScreen } from "./onboarding-state";
+import { getErrors } from "./onboarding-schemas";
+import { isCodeScreen } from "./onboarding-state";
 import type { OnboardingProps } from "./onboarding-state";
 import type { ScreenProps, ScreenView } from "./screen-props";
 import { TermsSheet } from "./terms-sheet";
@@ -68,8 +69,8 @@ export const OnboardingPage = (props: OnboardingProps) => {
   const errors = getErrors(state);
   const shown: Record<string, string> = {};
 
-  for (const [key, message] of Object.entries(errors))
-    if (state.touched[key]) shown[key] = message;
+  for (const [key, error] of Object.entries(onboarding.formErrors))
+    if (error?.message) shown[key] = error.message;
 
   for (const [key, value] of Object.entries(state.serverErrors))
     if (value && typeof value === "string") shown[key] = value;

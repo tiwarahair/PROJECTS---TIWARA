@@ -10,7 +10,7 @@ import {
   Spinner,
   SubmitButton,
 } from "./onboarding-fields";
-import { getPasswordCheck } from "./onboarding-state";
+import { getPasswordCheck } from "./onboarding-schemas";
 import type { OnboardingController } from "./use-onboarding";
 import type { ScreenProps } from "./screen-props";
 import styles from "../../styles/features/onboarding/auth-screens.module.css";

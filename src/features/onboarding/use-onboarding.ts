@@ -7,7 +7,10 @@ import {
   useState,
 } from "react";
 import type { ClipboardEvent, KeyboardEvent, RefObject } from "react";
+import { useForm } from "react-hook-form";
+import type { FieldPath } from "react-hook-form";
 import { useLocation, useNavigate } from "react-router";
+import { zodResolver } from "@hookform/resolvers/zod";
 import type { Location } from "react-router";
 import type { EmittedAddress } from "../../components/address-finder/use-address-finder";
 import { usePasswordChecker } from "../../hooks/use-password-checker";
@@ -25,13 +28,13 @@ import {
 import { getFixturePatch } from "./onboarding-fixtures";
 import { getRouteForPath, ROUTE_START } from "./onboarding-routes";
 import type { OnboardingRoute } from "./onboarding-routes";
+import { getScreenSchema, isValidPostcode } from "./onboarding-schemas";
 import {
   EMPTY_CODE,
   getBackScreen,
-  getErrors,
+  INITIAL_FORM,
   INITIAL_STATE,
   isCodeScreen,
-  isValidPostcode,
   resolveProps,
 } from "./onboarding-state";
 import type {
@@ -39,6 +42,7 @@ import type {
   OnboardingProps,
   OnboardingState,
   ResolvedProps,
+  StartState,
 } from "./onboarding-state";
 
 type StatePatch =
@@ -128,9 +132,11 @@ const getStartMode = (
 const getStartState = (
   props: ResolvedProps,
   { pathname, search }: Pick<Location, "pathname" | "search">,
-): OnboardingState => {
-  const state: OnboardingState = {
+): StartState => {
+  const state: StartState = {
     ...INITIAL_STATE,
+    form: INITIAL_FORM,
+    touched: {},
     width: document.documentElement.clientWidth,
   };
 
@@ -197,7 +203,7 @@ const getStartState = (
   // fixtures start from the blank form, not the saved / board one
   // demo states are dev-only; production builds drop this branch and the fixtures module
   if (import.meta.env.DEV && props.fixture && props.fixture !== "none")
-    Object.assign(state, getFixturePatch(props.fixture, INITIAL_STATE.form));
+    Object.assign(state, getFixturePatch(props.fixture, INITIAL_FORM));
 
   const storedMode = readStorage(localStorage, MODE_KEY);
 
@@ -216,14 +222,35 @@ export const useOnboarding = (props: OnboardingProps) => {
   // read once: the start state comes from the URL the page opened with
   const [resolved] = useState(() => resolveProps(props, location.search));
 
-  const [state, setRawState] = useState(() =>
-    getStartState(resolved, location),
-  );
+  const [start] = useState(() => getStartState(resolved, location));
+  const { form: startForm, touched: startTouched, ...startState } = start;
+  const [state, setRawState] = useState<OnboardingState>(startState);
 
   const navigate = useNavigate();
   const stateRef = useRef(state);
 
   stateRef.current = state;
+
+  // the form's values, touched fields and errors; the rules come from the current screen's schema
+  const {
+    formState,
+    getValues,
+    handleSubmit,
+    reset,
+    setValue,
+    trigger,
+    watch,
+  } = useForm<OnboardingForm>({
+    defaultValues: startForm,
+    resolver: (values, context, options) =>
+      zodResolver(getScreenSchema({ ...stateRef.current, form: values }))(
+        values,
+        context,
+        options,
+      ),
+  });
+
+  const form = watch();
   const afterCommit = useRef<(() => void)[]>([]);
   const rootRef = useRef<HTMLDivElement>(null);
 
@@ -262,14 +289,13 @@ export const useOnboarding = (props: OnboardingProps) => {
   const save = useCallback(() => {
     if (resolved.board) return;
 
-    const { form, addressOpen, pinLatLng, geocodedLatLng, area } =
-      stateRef.current;
+    const { addressOpen, pinLatLng, geocodedLatLng, area } = stateRef.current;
 
     try {
       localStorage.setItem(
         STORAGE_KEY,
         JSON.stringify({
-          form: { ...form, password: "", passwordConfirm: "" },
+          form: { ...getValues(), password: "", passwordConfirm: "" },
           addressOpen,
           pinLatLng,
           geocodedLatLng,
@@ -279,7 +305,7 @@ export const useOnboarding = (props: OnboardingProps) => {
     } catch {
       // storage unavailable
     }
-  }, [resolved.board]);
+  }, [resolved.board, getValues]);
 
   const clearSaved = () => {
     try {
@@ -391,12 +417,12 @@ export const useOnboarding = (props: OnboardingProps) => {
 
   const goTo = (screen: string, direction: "fwd" | "back" = "fwd") => {
     window.clearTimeout(timers.current.auto);
+    reset(getValues());
 
     setState({
       screen,
       direction,
       serverErrors: {},
-      touched: {},
       busy: false,
       networkError: false,
       shake: 0,
@@ -415,16 +441,33 @@ export const useOnboarding = (props: OnboardingProps) => {
     }
   };
 
+  /** Re-checks every field already showing (touched or in error); after a submit, the whole screen. */
+  const revalidate = (key?: keyof OnboardingForm) => {
+    const { touchedFields, errors, isSubmitted } = formState;
+
+    if (isSubmitted) return void trigger();
+
+    const names = new Set([
+      ...Object.keys(touchedFields),
+      ...Object.keys(errors),
+    ]);
+
+    if (key) names.add(key);
+
+    if (names.size) void trigger([...names] as FieldPath<OnboardingForm>[]);
+  };
+
   /** Sets a field (optionally touching it); clears its server error; wizard screens save progress. */
   const setField = <K extends keyof OnboardingForm>(
     key: K,
     value: OnboardingForm[K],
     touch = false,
-  ) =>
+  ) => {
+    setValue(key as FieldPath<OnboardingForm>, value, { shouldTouch: touch });
+    revalidate(touch ? key : undefined);
+
     setState(
       (current) => ({
-        form: { ...current.form, [key]: value },
-        touched: touch ? { ...current.touched, [key]: true } : current.touched,
         serverErrors: {
           ...current.serverErrors,
           [key]: undefined,
@@ -436,9 +479,24 @@ export const useOnboarding = (props: OnboardingProps) => {
         if (stateRef.current.screen?.[0] === "w") save();
       },
     );
+  };
 
-  const touch = (key: string) =>
-    setState((current) => ({ touched: { ...current.touched, [key]: true } }));
+  const touch = (key: keyof OnboardingForm) => {
+    setValue(key as FieldPath<OnboardingForm>, getValues(key), {
+      shouldTouch: true,
+    });
+
+    revalidate(key);
+  };
+
+  // fixture boards open with some fields already touched
+  useEffect(() => {
+    const keys = Object.keys(startTouched) as (keyof OnboardingForm)[];
+
+    keys.forEach((key) => touch(key));
+    // mount only
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   const getTurnstileMode = () =>
     stateRef.current.turnstileMode || resolved.turnstile || "pass";
@@ -454,7 +512,7 @@ export const useOnboarding = (props: OnboardingProps) => {
   };
 
   const getFirstName = () => {
-    const { form } = stateRef.current;
+    const form = getValues();
 
     if (form.first && form.first.trim()) return form.first.trim();
 
@@ -503,7 +561,7 @@ export const useOnboarding = (props: OnboardingProps) => {
     }
 
     if (kind === "newpro") {
-      const { form } = stateRef.current;
+      const form = getValues();
 
       try {
         localStorage.setItem(
@@ -535,27 +593,19 @@ export const useOnboarding = (props: OnboardingProps) => {
   };
 
   const submit = () => {
-    const current = stateRef.current;
+    const { busy, lockedUntil } = stateRef.current;
 
-    if (current.busy) return;
+    if (busy || lockedUntil > Date.now()) return;
 
-    if (current.lockedUntil > Date.now()) return;
+    void handleSubmit(submitValid)();
+  };
 
-    const errorKeys = Object.keys(getErrors(current));
-
-    if (errorKeys.length) {
-      const touched: Record<string, boolean> = {};
-
-      for (const key of errorKeys) touched[key] = true;
-
-      setState((state) => ({ touched: { ...state.touched, ...touched } }));
-
-      return;
-    }
-
+  const submitValid = () => {
     if (isTurnstileBlocked()) return;
 
-    const { screen, form } = current;
+    const current = stateRef.current;
+    const { screen } = current;
+    const form = getValues();
     const email = form.email.trim().toLowerCase();
 
     if (screen === "w1" || screen === "w2" || screen === "w3") {
@@ -720,7 +770,7 @@ export const useOnboarding = (props: OnboardingProps) => {
           return;
         }
 
-        const form = { ...stateRef.current.form };
+        const form = getValues();
 
         if (isPro) {
           const newProEmail =
@@ -730,13 +780,15 @@ export const useOnboarding = (props: OnboardingProps) => {
 
           form.email = isKnown ? "amara@tiwarashouse.co.uk" : newProEmail;
 
+          reset(form);
+
           if (!isKnown) {
-            setState({ busy: false, form, serverErrors: { noBusiness: true } });
+            setState({ busy: false, serverErrors: { noBusiness: true } });
 
             return;
           }
 
-          setState({ busy: false, form }, afterProAuth);
+          setState({ busy: false }, afterProAuth);
 
           return;
         }
@@ -747,9 +799,8 @@ export const useOnboarding = (props: OnboardingProps) => {
 
           const [first = "", last = ""] = NAMES[email] ?? [];
 
-          setState({ form: { ...form, email, first, last } }, () =>
-            finish("customer-login"),
-          );
+          reset({ ...form, email, first, last });
+          finish("customer-login");
 
           return;
         }
@@ -757,20 +808,21 @@ export const useOnboarding = (props: OnboardingProps) => {
         const sharesName =
           provider === "google" || resolved.appleName !== "withheld";
 
+        reset({
+          ...form,
+          email:
+            provider === "apple"
+              ? "x7k2m9q4pd@privaterelay.appleid.com"
+              : "ama.mensah@gmail.com",
+          first: sharesName ? "Ama" : "",
+          last: sharesName ? "Mensah" : "",
+          mobile: "",
+          terms: false,
+          marketing: false,
+        });
+
         setState(
           {
-            form: {
-              ...form,
-              email:
-                provider === "apple"
-                  ? "x7k2m9q4pd@privaterelay.appleid.com"
-                  : "ama.mensah@gmail.com",
-              first: sharesName ? "Ama" : "",
-              last: sharesName ? "Mensah" : "",
-              mobile: "",
-              terms: false,
-              marketing: false,
-            },
             socialProvider: provider,
             audience: "customer",
           },
@@ -851,7 +903,7 @@ export const useOnboarding = (props: OnboardingProps) => {
 
   /** Re-centres the pin on the postcode via postcodes.io (live). */
   const geocodeOnly = async () => {
-    const postcode = stateRef.current.form.postcode.trim().toUpperCase();
+    const postcode = getValues("postcode").trim().toUpperCase();
 
     if (!isValidPostcode(postcode)) return;
 
@@ -885,7 +937,7 @@ export const useOnboarding = (props: OnboardingProps) => {
   };
 
   const setAddress = (address: EmittedAddress | null) => {
-    const previousPostcode = stateRef.current.form.postcode;
+    const previousPostcode = getValues("postcode");
 
     const fields = address
       ? {
@@ -903,9 +955,13 @@ export const useOnboarding = (props: OnboardingProps) => {
         ? [address.lat, address.lng]
         : null;
 
+    for (const [key, value] of Object.entries(fields))
+      setValue(key as FieldPath<OnboardingForm>, value);
+
+    revalidate();
+
     setState(
-      (current) => ({
-        form: { ...current.form, ...fields },
+      () => ({
         addressOpen: isOk,
         addressSource: address ? address.source : "",
         addressFinderFixture: "",
@@ -931,7 +987,8 @@ export const useOnboarding = (props: OnboardingProps) => {
   };
 
   return {
-    state,
+    state: { ...state, form },
+    formErrors: formState.errors,
     props: resolved,
     rootRef: rootRef as RefObject<HTMLDivElement>,
     codeRefs,

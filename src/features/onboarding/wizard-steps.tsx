@@ -321,7 +321,7 @@ export const StepDetails = ({ onboarding, layout, view }: ScreenProps) => {
                   : null
               }
               onChange={actions.setAddress}
-              showErrors={!!state.touched.address}
+              showErrors={!!shown.address}
               fixture={(state.addressFinderFixture || "") as AddressFixture}
               fieldHeight={54}
               labelSize={14}
