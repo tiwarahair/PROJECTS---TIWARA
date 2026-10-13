@@ -1,5 +1,5 @@
 begin;
-select plan(13);
+select plan(14);
 
 -- Every public table must have RLS on.
 select is(
@@ -25,15 +25,19 @@ select throws_ok(
   'anon cannot insert service groups'
 );
 
-select is_empty(
-  $$update public.service_types set name = 'x' returning id$$,
+select throws_ok(
+  $$update public.service_types set name = 'x'$$,
+  '42501',
+  null,
   'anon cannot update service types'
 );
 
 set local role authenticated;
 
-select is_empty(
-  $$delete from public.default_addons returning id$$,
+select throws_ok(
+  $$delete from public.default_addons$$,
+  '42501',
+  null,
   'authenticated users cannot delete default add-ons'
 );
 
@@ -55,6 +59,16 @@ select is(
 set local request.jwt.claims = '{"aal": "aal2", "app_metadata": {"is_admin": true}}';
 
 select ok(public.is_admin() and public.is_aal2(), 'is_admin and is_aal2 read the JWT claims');
+
+reset role;
+
+create table public.grants_probe (id int);
+
+select ok(
+  not has_table_privilege('anon', 'public.grants_probe', 'select')
+    and not has_table_privilege('authenticated', 'public.grants_probe', 'select'),
+  'new tables are not exposed to anon or authenticated by default'
+);
 
 select * from finish();
 rollback;
