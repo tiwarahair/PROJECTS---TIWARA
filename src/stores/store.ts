@@ -1,6 +1,6 @@
 import { configureStore } from "@reduxjs/toolkit";
 import { favouritesSlice, readFavourites } from "./favourites-slice";
-import { readLoggedIn, sessionSlice } from "./session-slice";
+import { readDemoLogin, sessionSlice } from "./session-slice";
 import { toastSlice } from "./toast-slice";
 
 export const createStore = () =>
@@ -11,7 +11,7 @@ export const createStore = () =>
       toast: toastSlice.reducer,
     },
     preloadedState: {
-      session: { loggedIn: readLoggedIn() },
+      session: { loggedIn: readDemoLogin(), user: null, ready: false },
       favourites: { ...readFavourites(), loginSheetFor: null },
       toast: { current: null },
     },

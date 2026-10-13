@@ -51,9 +51,7 @@ const seedNewAccount = (
   let picked = ["braids"];
 
   if (welcome && Array.isArray(welcome.cats) && welcome.cats.length)
-    picked = welcome.cats.map((category) =>
-      category === "weave" ? "weaves" : category,
-    );
+    picked = welcome.cats;
 
   const categories: StudioCategory[] = [];
 

@@ -1,7 +1,7 @@
 import { createSlice } from "@reduxjs/toolkit";
 import type { PayloadAction } from "@reduxjs/toolkit";
 import { getSearchParams } from "../utils/page-flags";
-import { DEMO_ACCOUNT, readLoggedIn } from "./session-slice";
+import { DEMO_ACCOUNT, readDemoLogin } from "./session-slice";
 
 const STORAGE_KEY = `tw_favs_${DEMO_ACCOUNT.email}`;
 
@@ -34,7 +34,7 @@ export const readFavourites = (): Pick<FavouritesState, "ids" | "inMemory"> => {
       inMemory: true,
     };
 
-  return { ids: readLoggedIn() ? readStored() : [], inMemory: false };
+  return { ids: readDemoLogin() ? readStored() : [], inMemory: false };
 };
 
 const initialState: FavouritesState = {

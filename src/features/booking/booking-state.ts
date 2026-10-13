@@ -4,6 +4,7 @@ import { stylists } from "../../data";
 import type { SavedAddress } from "../../types/address";
 import type { Service } from "../../types/service";
 import type { Stylist } from "../../types/stylist";
+import { readDemoLogin } from "../../stores/session-slice";
 import { getSearchParams } from "../../utils/page-flags";
 import { getSavedAddresses } from "../../utils/saved-addresses";
 import { applyFixture } from "./booking-fixtures";
@@ -307,21 +308,6 @@ export const getDraftPatch = (
   return patch;
 };
 
-const readLoggedIn = (params: URLSearchParams, board: boolean): boolean => {
-  let loggedIn = params.get("login") === "1";
-
-  try {
-    if (!board) {
-      if (loggedIn) sessionStorage.setItem("tw_cust", "1");
-      else loggedIn = sessionStorage.getItem("tw_cust") === "1";
-    }
-  } catch {
-    // storage unavailable
-  }
-
-  return loggedIn;
-};
-
 interface InitialBooking {
   state: BookingState;
   /** ?fixture=privacy opens the allergy field's privacy sheet. */
@@ -347,7 +333,7 @@ export const getInitialBooking = (): InitialBooking => {
 
   const fixture = params.get("fixture") || "";
   const board = !!fixture || params.get("board") === "true";
-  const loggedIn = readLoggedIn(params, board);
+  const loggedIn = readDemoLogin();
   const turnstile = params.get("turnstile");
   const today = new Date();
 

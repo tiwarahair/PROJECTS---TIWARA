@@ -1,4 +1,10 @@
-import { createSlice } from "@reduxjs/toolkit";
+import {
+  createSlice,
+  type Dispatch,
+  type PayloadAction,
+} from "@reduxjs/toolkit";
+import { supabase } from "../lib/supabase";
+import type { SessionUser } from "../types/session";
 import {
   getSearchParams,
   isBoardView,
@@ -24,20 +30,38 @@ export const ACCOUNT_INITIALS = DEMO_ACCOUNT.name
 
 const SESSION_KEY = "tw_cust";
 
-/** Logged in = not forced guest, and ?login=1 or sessionStorage tw_cust === '1'. */
-export const readLoggedIn = (): boolean => {
+/**
+ * DEV-only demo login (removed in Phase 1): not forced guest, and ?login=1 or
+ * sessionStorage tw_cust === '1'. ?login=1 is remembered outside board views.
+ */
+export const readDemoLogin = (): boolean => {
+  if (!import.meta.env.DEV) return false;
+
   const params = getSearchParams();
 
   if (params.get("guest") === "1") return false;
 
-  return params.get("login") === "1" || readSession(SESSION_KEY) === "1";
+  if (params.get("login") === "1") {
+    if (!isBoardView(params)) writeSession(SESSION_KEY, "1");
+
+    return true;
+  }
+
+  return readSession(SESSION_KEY) === "1";
 };
 
 interface SessionState {
   loggedIn: boolean;
+  user: SessionUser | null;
+  /** True once Supabase has reported the initial session. */
+  ready: boolean;
 }
 
-const initialState: SessionState = { loggedIn: false };
+const initialState: SessionState = {
+  loggedIn: false,
+  user: null,
+  ready: false,
+};
 
 export const sessionSlice = createSlice({
   name: "session",
@@ -45,23 +69,25 @@ export const sessionSlice = createSlice({
   reducers: {
     /** Re-read the session for the current page (runs on each page mount). */
     syncSession: (state) => {
-      const params = getSearchParams();
-
-      if (params.get("login") === "1" && !isBoardView(params))
-        writeSession(SESSION_KEY, "1");
-
-      state.loggedIn = readLoggedIn();
+      state.loggedIn = !!state.user || readDemoLogin();
     },
-    logOut: (state) => {
-      try {
-        window.sessionStorage.removeItem(SESSION_KEY);
-      } catch {
-        // storage unavailable
-      }
-
-      state.loggedIn = false;
+    sessionChanged: (state, { payload }: PayloadAction<SessionUser | null>) => {
+      state.user = payload;
+      state.loggedIn = !!payload || readDemoLogin();
+      state.ready = true;
     },
   },
 });
 
-export const { syncSession, logOut } = sessionSlice.actions;
+export const { syncSession, sessionChanged } = sessionSlice.actions;
+
+export const logOut = () => (dispatch: Dispatch) => {
+  try {
+    window.sessionStorage.removeItem(SESSION_KEY);
+  } catch {
+    // storage unavailable
+  }
+
+  dispatch(sessionChanged(null));
+  void supabase.auth.signOut();
+};

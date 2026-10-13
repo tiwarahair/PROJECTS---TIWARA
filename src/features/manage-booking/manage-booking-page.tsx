@@ -36,7 +36,10 @@ const getInitialState = (
 ): ManageState => {
   const params = getSearchParams();
   const view = params.get("view") || propView || "booking";
-  const fixture = params.get("fixture") || propFixture || "";
+
+  const fixture =
+    (import.meta.env.DEV && params.get("fixture")) || propFixture || "";
+
   const id = params.get("stylist") || DEFAULT_STYLIST_ID;
 
   const entries =

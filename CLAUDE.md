@@ -31,7 +31,7 @@ React 19.x and TypeScript 5.9, Redux Tool Kit
 - Prefer arrow functions
 
 - Do not commit to main
-- All new changes should be on a separate branch (NOT main), always checkout from the most up to date main, if you are already on a separate branch ignore this and stay on this branch (only if this branch is up to date with the latest main)
+- All new changes should be on a separate branch (NOT main), always checkout from the most up to date `develop` (the integration branch; `develop` → `main` at release points), if you are already on a separate branch ignore this and stay on this branch (only if this branch is up to date with the latest `develop`)
 
 - If there is a well-known package out there that can achieve a certain piece of logic, outsource this logic to the package, but ASK FIRST, before you decide to install it
 - don't recreate logic/data that already exists in the codebase

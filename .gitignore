@@ -5,6 +5,8 @@ coverage
 *.tsbuildinfo
 
 .env
+.env.*
+!.env.example
 design-import
 IMPLEMENTATION_PLAN.local.md
 BACKEND_PLAN.local.md
