@@ -4,13 +4,9 @@ import { WIZARD_TITLES } from "./onboarding-data";
 import { BackIcon, ModeIcon } from "./onboarding-fields";
 import type { ScreenProps } from "./screen-props";
 import { MapsProvider } from "../../lib/google-maps";
-import {
-  StepAccount,
-  StepDetails,
-  StepServices,
-  StepSource,
-  StepType,
-} from "./wizard-steps";
+import { StepAccount } from "./step-account";
+import { StepDetails } from "./step-details";
+import { StepServices, StepSource, StepType } from "./wizard-steps";
 import styles from "../../styles/features/onboarding/wizard.module.css";
 
 const STEPS = {

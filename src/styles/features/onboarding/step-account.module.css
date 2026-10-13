@@ -1,0 +1,252 @@
+.nameRow {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}
+
+.nameCell {
+  min-width: 0;
+}
+
+.mobileWrap {
+  display: flex;
+  align-items: stretch;
+  height: 54px;
+  border-radius: var(--radius-sm);
+  overflow: hidden;
+}
+
+/* account details from a signed-in account: shown, not editable */
+.mobileWrap:has(.mobileInput:read-only) {
+  background: var(--fill-quiet);
+  color: var(--text-muted);
+  cursor: not-allowed;
+}
+
+.mobileInput:read-only {
+  color: var(--text-muted);
+  cursor: not-allowed;
+}
+
+.mobileWrap:focus-within {
+  border-color: var(--accent-700) !important;
+  box-shadow: 0 0 0 3px var(--accent-glow) !important;
+}
+
+.prefix {
+  display: flex;
+  align-items: center;
+  padding: 0 14px;
+  font-size: 16px;
+  font-weight: 500;
+  color: var(--text-secondary);
+  border-right: 1px solid var(--border-subtle);
+}
+
+.mobileInput {
+  flex: 1;
+  min-width: 0;
+  border: none;
+  background: transparent;
+  color: var(--text-primary);
+  padding: 0 14px;
+  font: inherit;
+  font-size: 16px;
+  outline: none;
+  box-shadow: none;
+}
+
+.passwordWrap {
+  position: relative;
+}
+
+.passwordInput {
+  width: 100%;
+  box-sizing: border-box;
+  height: 54px;
+  border-radius: var(--radius-sm);
+  background: transparent;
+  color: var(--text-primary);
+  padding: 0 72px 0 16px;
+  font: inherit;
+  font-size: 16px;
+  outline: none;
+}
+
+.passwordInput:focus {
+  border-color: var(--accent-700) !important;
+  box-shadow: 0 0 0 3px var(--accent-glow) !important;
+}
+
+.passwordToggle {
+  position: absolute;
+  right: 6px;
+  top: 5px;
+  height: 44px;
+  padding: 0 12px;
+  border: none;
+  background: none;
+  font: inherit;
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--text-secondary);
+  cursor: pointer;
+}
+
+.useContact {
+  display: flex;
+  gap: 12px;
+  align-items: flex-start;
+  margin-top: 22px;
+  font-size: 15px;
+  line-height: 1.5;
+  cursor: pointer;
+}
+
+.checkbox {
+  flex: 0 0 auto;
+  width: 20px;
+  height: 20px;
+  margin: 2px 0 0;
+  accent-color: var(--accent-700);
+}
+
+.bizContact {
+  padding: 16px;
+  margin-top: 6px;
+  border-radius: var(--radius-md);
+  background: var(--fill-quiet);
+  animation: obRise 0.28s cubic-bezier(0.23, 1, 0.32, 1) both;
+}
+
+.bizInput {
+  width: 100%;
+  box-sizing: border-box;
+  height: 52px;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--border-strong);
+  color: var(--text-primary);
+  padding: 0 16px;
+  font: inherit;
+  font-size: 16px;
+  outline: none;
+}
+
+.bizInput:focus {
+  border-color: var(--accent-700) !important;
+  box-shadow: 0 0 0 3px var(--accent-glow) !important;
+}
+
+.bizEmailLabel {
+  display: block;
+  font-size: 14px;
+  font-weight: 600;
+  margin: 14px 0 8px;
+}
+
+.bizHelp {
+  font-size: 13.5px;
+  margin-top: 8px;
+}
+
+.termsLabel {
+  display: flex;
+  gap: 12px;
+  align-items: flex-start;
+  margin-top: 12px;
+  font-size: 14.5px;
+  line-height: 1.5;
+  cursor: pointer;
+}
+
+.termsLink {
+  border: none;
+  background: none;
+  padding: 0;
+  font: inherit;
+  font-weight: 600;
+  color: var(--accent-700);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  cursor: pointer;
+}
+
+.termsError {
+  font-size: 13.5px;
+  color: var(--accent-700);
+  margin: 4px 0 0 32px;
+}
+
+.exists {
+  margin-top: 16px;
+  padding: 16px;
+  border-radius: var(--radius-md);
+  background: var(--accent-wash);
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+  animation: obRise 0.28s cubic-bezier(0.23, 1, 0.32, 1) both;
+}
+
+.existsText {
+  flex: 1 1 220px;
+}
+
+.existsTitle {
+  display: block;
+  font-size: 15px;
+  font-weight: 600;
+}
+
+.existsSub {
+  display: block;
+  font-size: 14px;
+  color: var(--neutral-600);
+  margin-top: 2px;
+}
+
+.loginInstead {
+  height: 42px;
+  padding: 0 18px;
+  border-radius: var(--radius-full);
+  border: 1px solid var(--accent-line);
+  background: transparent;
+  color: var(--accent-700);
+  font: inherit;
+  font-size: 14.5px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.bizHelpMuted {
+  color: var(--neutral-600);
+}
+
+.bizInput {
+  background: var(--ob-wz-field);
+}
+
+/* keyframes are scoped per file in CSS modules, so shared ones are repeated */
+@keyframes obRise {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+/* under reduced motion the slides, rises and shake become fades */
+@media (prefers-reduced-motion: reduce) {
+  @keyframes obRise {
+    from {
+      opacity: 0;
+    }
+    to {
+      opacity: 1;
+    }
+  }
+}
