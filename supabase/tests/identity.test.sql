@@ -18,7 +18,7 @@ as $$
 $$;
 
 select lives_ok(
-  $$select pg_temp.sign_up('11111111-1111-1111-1111-111111111111', 'ada@example.com',
+  $$select pg_temp.sign_up('11111111-1111-1111-1111-111111111111', 'ada@identity.test',
     '{"account_type": "client", "first_name": "Ada", "last_name": "Obi", "phone": "07700 900123", "terms_version": "2026-10"}')$$,
   'a client signs up'
 );
@@ -30,10 +30,10 @@ select results_eq(
 );
 
 select lives_ok(
-  $$select pg_temp.sign_up('22222222-2222-2222-2222-222222222222', 'kemi@example.com', '{
+  $$select pg_temp.sign_up('22222222-2222-2222-2222-222222222222', 'kemi@identity.test', '{
     "account_type": "stylist", "first_name": "Kemi", "last_name": "Ade", "phone": "7700900456", "terms_version": "2026-10",
-    "stylist": {"business_name": "Crowned by Kemi", "business_type": "shop", "line1": "1 High St", "city": "Manchester",
-      "postcode": "m14 5tq", "lat": 53.45, "lng": -2.22, "categories": ["locs", "braids"], "contact_email": "kemi@example.com"}
+    "stylist": {"business_name": "Identity Test Studio", "business_type": "shop", "line1": "1 High St", "city": "Manchester",
+      "postcode": "m14 5tq", "lat": 53.45, "lng": -2.22, "categories": ["locs", "braids"], "contact_email": "kemi@identity.test"}
   }')$$,
   'a stylist signs up'
 );
@@ -47,39 +47,41 @@ select is(
 select results_eq(
   $$select slug::text, status, (select postcode from public.stylist_private where stylist_id = stylists.id)
     from public.stylists where owner_id = '22222222-2222-2222-2222-222222222222'$$,
-  $$values ('crowned-by-kemi', 'draft', 'M14 5TQ')$$,
+  $$values ('identity-test-studio', 'draft', 'M14 5TQ')$$,
   'a draft stylist with a slug and private address is created'
 );
 
 select results_eq(
-  $$select service_group_id from public.stylist_categories order by sort$$,
+  $$select service_group_id from public.stylist_categories
+    where stylist_id = (select id from public.stylists where owner_id = '22222222-2222-2222-2222-222222222222') order by sort$$,
   $$values ('locs'::text), ('braids')$$,
   'categories follow the picked order'
 );
 
 select results_eq(
-  $$select status, service_group_id, count(*)::int from public.services group by 1, 2$$,
+  $$select status, service_group_id, count(*)::int from public.services
+    where stylist_id = (select id from public.stylists where owner_id = '22222222-2222-2222-2222-222222222222') group by 1, 2$$,
   $$values ('draft'::text, 'locs'::text, 2)$$,
   'two draft services come from the primary group'
 );
 
 select throws_ok(
-  $$select pg_temp.sign_up('33333333-3333-3333-3333-333333333333', 'bad@example.com',
+  $$select pg_temp.sign_up('33333333-3333-3333-3333-333333333333', 'bad@identity.test',
     '{"account_type": "client", "first_name": "Bad", "last_name": "Phone", "phone": "12", "terms_version": "2026-10"}')$$,
   'a valid UK mobile is required'
 );
 
 select throws_ok(
-  $$select pg_temp.sign_up('44444444-4444-4444-4444-444444444444', 'nocats@example.com', '{
+  $$select pg_temp.sign_up('44444444-4444-4444-4444-444444444444', 'nocats@identity.test', '{
     "account_type": "stylist", "first_name": "No", "last_name": "Cats", "phone": "07700900789", "terms_version": "2026-10",
     "stylist": {"business_name": "Empty", "business_type": "shop", "postcode": "M1 1AA", "lat": 53, "lng": -2, "categories": [],
-      "contact_email": "nocats@example.com"}
+      "contact_email": "nocats@identity.test"}
   }')$$,
   'stylist details and at least one category are required'
 );
 
 select lives_ok(
-  $$select pg_temp.sign_up('55555555-5555-5555-5555-555555555555', 'google@example.com', '{"full_name": "Goo Gle"}')$$,
+  $$select pg_temp.sign_up('55555555-5555-5555-5555-555555555555', 'google@identity.test', '{"full_name": "Goo Gle"}')$$,
   'a Google sign-up gets an empty profile to finish later'
 );
 
