@@ -29,6 +29,7 @@ React 19.x and TypeScript 5.9, Redux Tool Kit
 - Files should not be too long
 - Destructure objects where you can without errors & destructure map object arguments where you can
 - Prefer arrow functions
+- only comment if absolutely necessary
 
 - Do not commit to main
 - All new changes should be on a separate branch (NOT main), always checkout from the most up to date `develop` (the integration branch; `develop` → `main` at release points), if you are already on a separate branch ignore this and stay on this branch (only if this branch is up to date with the latest `develop`)
