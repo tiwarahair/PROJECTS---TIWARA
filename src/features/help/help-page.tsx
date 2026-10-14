@@ -19,7 +19,8 @@ export const HelpPage = () => {
   const [bookingRef] = useState(() => getSearchParams().get("booking") || "");
   const mailSubject = encodeURIComponent(`Help with booking ${bookingRef}`);
   const mailQuery = bookingRef ? `?subject=${mailSubject}` : "";
-  const mailHref = `mailto:help@tiwarashouse.co.uk${mailQuery}`;
+  // TO DO: add an actual support email
+  const mailHref = `mailto:info@tiwarashouse.co.uk${mailQuery}`;
 
   useLayoutEffect(() => {
     document.documentElement.classList.add("help-page");
@@ -102,7 +103,7 @@ export const HelpPage = () => {
             <rect x="3" y="5" width="18" height="14" rx="2"></rect>
             <path d="m3 7 9 6 9-6"></path>
           </svg>
-          help@tiwarashouse.co.uk
+          info@tiwarashouse.co.uk
         </a>
       </main>
       <FavHost />

@@ -84,20 +84,6 @@
   background: rgba(26, 23, 20, 0.08);
 }
 
-/* call to action: a filled pill at the foot of the menu */
-.row.primary {
-  justify-content: center;
-  margin-top: 6px;
-  border-radius: 100px;
-  background: var(--accent-700);
-  color: var(--neutral-50);
-  font-weight: 600;
-}
-
-.row.primary.active {
-  background: var(--accent-900);
-}
-
 .separator {
   height: 1px;
   background: rgba(26, 23, 20, 0.1);
