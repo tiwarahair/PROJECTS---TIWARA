@@ -187,9 +187,13 @@ export const getStateSearch = ({
   else if (query.group) params.set("group", query.group);
   else if (query.freeText) params.set("q", query.freeText);
 
-  if (query.location !== "Current location" && query.lat != null) {
+  if (
+    query.location !== "Current location" &&
+    query.lat != null &&
+    query.lng != null
+  ) {
     params.set("loc", query.location);
-    params.set("ll", `${query.lat.toFixed(4)},${query.lng?.toFixed(4)}`);
+    params.set("ll", `${query.lat.toFixed(4)},${query.lng.toFixed(4)}`);
   }
 
   if (query.date) params.set("date", query.date);

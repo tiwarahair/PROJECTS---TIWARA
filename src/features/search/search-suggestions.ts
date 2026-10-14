@@ -79,7 +79,7 @@ export interface WhatChipView {
 export const getWhatModel = (
   state: SearchState,
   selection: StyleSelection,
-  stylists: SearchRow[],
+  stylists: { rows: SearchRow[]; isLoading: boolean; isSlow: boolean },
 ) => {
   const raw = state.whatTyped ? String(state.whatText || "").trim() : "";
   const query = raw.toLowerCase();
@@ -121,7 +121,7 @@ export const getWhatModel = (
     ];
   }
 
-  const stylistRows = stylists.map(
+  const stylistRows = stylists.rows.map(
     ({ slug, business_name, area_label, cover_path }): SuggestionRow => ({
       kind: "stylist",
       slug,
@@ -139,10 +139,13 @@ export const getWhatModel = (
   if (chip !== "stylists" && styleRows.length)
     sections.push({ key: "styles", title: "Styles", rows: styleRows });
 
-  if (chip !== "styles" && stylistCount && (query || chip === "stylists"))
+  const isStylistsShown = chip !== "styles" && (!!query || chip === "stylists");
+  const isLoadingStylists = isStylistsShown && stylists.isSlow;
+
+  if (isStylistsShown && !stylists.isLoading && stylistCount)
     sections.push({ key: "stylists", title: "Stylists", rows: stylistRows });
 
-  const isEmpty = !!query && !sections.length;
+  const isEmpty = !!query && !sections.length && !stylists.isLoading;
   const flat = sections.flatMap(({ rows }) => rows);
 
   if (query && !isEmpty)
@@ -188,6 +191,7 @@ export const getWhatModel = (
     chips,
     sections: sectionViews,
     seeAll,
+    isLoadingStylists,
     isEmpty,
     emptyText: `No styles or stylists match ‘${raw}’. Try a broader term like braids or locs.`,
   };
@@ -197,7 +201,11 @@ export const getWhatModel = (
 export const getWhereModel = (
   state: SearchState,
   place: Place,
-  places: { suggestions: PlaceSuggestion[]; isSearching: boolean },
+  places: {
+    suggestions: PlaceSuggestion[];
+    isSearching: boolean;
+    isSlow: boolean;
+  },
 ) => {
   const raw = state.whereTyped ? String(state.whereText || "").trim() : "";
   const query = raw.toLowerCase();
@@ -234,6 +242,7 @@ export const getWhereModel = (
     rows: locationRows.map((row, index) =>
       getRowView(row, index + currentRows.length, state.whereIndex, query),
     ),
+    isLoading: !!query && places.isSlow,
     isEmpty: !!query && !places.isSearching && !locationRows.length,
     emptyText: `No places match ‘${raw}’. Try a town, area or postcode.`,
     display: place.current ? "" : place.name,

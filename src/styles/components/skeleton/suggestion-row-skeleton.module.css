@@ -1,0 +1,14 @@
+.row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-height: 52px;
+  padding: 8px 10px;
+}
+
+.text {
+  flex: 1;
+  display: grid;
+  gap: 4px;
+  line-height: 1;
+}

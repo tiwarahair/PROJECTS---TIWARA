@@ -1,3 +1,4 @@
+import { SuggestionRowSkeleton } from "../../components/skeleton/suggestion-row-skeleton";
 import { resolveAssetUrl } from "../../utils/asset-url";
 import { joinClassNames } from "../../utils/class-names";
 import controls from "../../styles/features/search/search-controls.module.css";
@@ -75,6 +76,8 @@ export interface WhatListProps {
   chips: WhatChipView[];
   sections: { key: string; title: string; rows: RowView[] }[];
   seeAll: RowView[];
+  /** Stylists are still loading: a Stylists section of placeholders. */
+  isLoadingStylists: boolean;
   isEmpty: boolean;
   emptyText: string;
   onPickChip: (chip: WhatChip) => void;
@@ -87,6 +90,7 @@ export const WhatList = ({
   chips,
   sections,
   seeAll,
+  isLoadingStylists,
   isEmpty,
   emptyText,
   onPickChip,
@@ -121,6 +125,13 @@ export const WhatList = ({
         ))}
       </div>
     ))}
+    {isLoadingStylists && (
+      <div className={styles.section}>
+        <div className={styles.sectionTitle}>Stylists</div>
+        <SuggestionRowSkeleton />
+        <SuggestionRowSkeleton />
+      </div>
+    )}
     {seeAll.length > 0 && (
       <div className={styles.seeAll}>
         {seeAll.map((view) => (
@@ -144,6 +155,8 @@ export const WhatList = ({
 export interface WhereListProps {
   current: RowView[];
   rows: RowView[];
+  /** Google is still looking up places. */
+  isLoading: boolean;
   isEmpty: boolean;
   emptyText: string;
   onPick: (row: SuggestionRow) => void;
@@ -154,6 +167,7 @@ export interface WhereListProps {
 export const WhereList = ({
   current,
   rows,
+  isLoading,
   isEmpty,
   emptyText,
   onPick,
@@ -176,6 +190,13 @@ export const WhereList = ({
         onHover={onHover}
       />
     ))}
+    {isLoading && (
+      <>
+        <SuggestionRowSkeleton />
+        <SuggestionRowSkeleton />
+        <SuggestionRowSkeleton />
+      </>
+    )}
     {isEmpty && (
       <div role="status" className={styles.whereEmpty}>
         {emptyText}
@@ -190,6 +211,7 @@ export const getWhatListProps = (
     chips: WhatChipView[];
     sections: { key: string; title: string; rows: RowView[] }[];
     seeAll: RowView[];
+    isLoadingStylists: boolean;
     isEmpty: boolean;
     emptyText: string;
   },
@@ -202,6 +224,7 @@ export const getWhatListProps = (
   chips: what.chips,
   sections: what.sections,
   seeAll: what.seeAll,
+  isLoadingStylists: what.isLoadingStylists,
   isEmpty: what.isEmpty,
   emptyText: what.emptyText,
   onPickChip: actions.pickWhatChip,

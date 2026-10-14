@@ -84,7 +84,8 @@ export const usePlaceSuggestions = (text: string) => {
 
   return {
     suggestions: found.input === input ? found.suggestions : [],
-    isSearching: input.length >= 2 && found.input !== input,
+    // without Google (failed to load) there is nothing to wait for
+    isSearching: !!places && input.length >= 2 && found.input !== input,
     resolve,
   };
 };

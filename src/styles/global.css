@@ -9,6 +9,15 @@
 @layer base, page;
 
 @import "./design-system/styles.css" layer(base);
+@import "react-loading-skeleton/dist/skeleton.css" layer(base);
+
+/* Loading skeletons (react-loading-skeleton) in the warm neutrals. */
+@layer base {
+  .react-loading-skeleton {
+    --base-color: color-mix(in srgb, var(--neutral-200) 50%, var(--neutral-50));
+    --highlight-color: var(--neutral-50);
+  }
+}
 
 /* Global reset. */
 @layer base {

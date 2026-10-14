@@ -1,5 +1,6 @@
 // Search's live data: the place, Google suggestions, result pages, the filter sheet's total and stylist suggestions.
 import { useDebouncedValue } from "../../hooks/use-debounced-value";
+import { useIsSlow } from "../../hooks/use-is-slow";
 import {
   usePeekStylistsQuery,
   useSearchStylistsInfiniteQuery,
@@ -31,9 +32,8 @@ export const useSearchData = (state: SearchState, filterDraft: FilterDraft) => {
     { skip: !state.filtersOpen },
   );
 
-  const whatText = useDebouncedValue(
-    state.whatTyped ? (state.whatText ?? "").trim() : "",
-  );
+  const typedWhat = state.whatTyped ? (state.whatText ?? "").trim() : "";
+  const whatText = useDebouncedValue(typedWhat);
 
   const stylistPeek = usePeekStylistsQuery(
     {
@@ -47,21 +47,37 @@ export const useSearchData = (state: SearchState, filterDraft: FilterDraft) => {
     { skip: !state.whatOpen },
   );
 
-  const rows = results.data?.pages.flat() ?? [];
+  // currentData: only these filters' pages (never the previous search's while new ones load)
+  const rows = results.currentData?.pages.flat() ?? [];
+  const isLoading = results.isFetching && !results.isFetchingNextPage;
+  const isStylistsLoading = whatText !== typedWhat || stylistPeek.isFetching;
+
+  // placeholders only once a wait is noticeable
+  const isSlow = useIsSlow(isLoading && !rows.length);
+  const isSlowMore = useIsSlow(results.isFetchingNextPage);
+  const isPlacesSlow = useIsSlow(places.isSearching);
+  const isStylistsSlow = useIsSlow(isStylistsLoading);
 
   return {
     location,
     place,
     selection,
-    places,
+    places: { ...places, isSlow: isPlacesSlow },
     cards: toResultCards(rows, selection),
     total: Number(rows[0]?.total_count ?? 0),
-    isLoading: results.isFetching && !results.isFetchingNextPage,
+    isLoading,
+    isSlow,
     isError: results.isError,
     hasMore: !!results.hasNextPage,
     isLoadingMore: results.isFetchingNextPage,
+    isSlowMore,
     loadMore: () => void results.fetchNextPage(),
     draftCount: Number(draftPeek.data?.[0]?.total_count ?? 0),
-    stylistSuggestions: stylistPeek.data ?? [],
+    stylistSuggestions: {
+      rows: stylistPeek.currentData ?? [],
+      // still typing (debounce) or fetching
+      isLoading: isStylistsLoading,
+      isSlow: isStylistsSlow,
+    },
   };
 };

@@ -1,5 +1,6 @@
 import { useLayoutEffect } from "react";
 import { FavHost } from "../../components/fav-host/fav-host";
+import { StylistCardSkeleton } from "../../components/skeleton/stylist-card-skeleton";
 import { StylistCard } from "../../components/stylist-card/stylist-card";
 import { WelcomeToast } from "../../components/welcome-toast/welcome-toast";
 import { useLoadMore } from "../../hooks/use-load-more";
@@ -14,12 +15,24 @@ import pageGlobal from "../../styles/features/search/search-page-global.module.c
 import { SearchNav } from "./search-nav";
 import styles from "../../styles/features/search/search-page.module.css";
 import { useSearch } from "./use-search";
+import type { SearchController } from "./use-search";
+
+/** Placeholder cards: a page's worth while results load, a row while more load. */
+const getLoadingCount = ({ isSlow, isSlowMore }: SearchController) => {
+  if (isSlow) return 6;
+
+  return isSlowMore ? 3 : 0;
+};
 
 /** Search & results, route "/search". */
 const SearchView = () => {
   const search = useSearch();
   const { state, place, selection, cards, suggestions, actions } = search;
-  const sentinelRef = useLoadMore(search.loadMore, search.hasMore);
+
+  const sentinelRef = useLoadMore(
+    search.loadMore,
+    search.hasMore && !search.isLoadingMore,
+  );
 
   useSearchMemory();
 
@@ -32,6 +45,9 @@ const SearchView = () => {
 
   const locationName = place.current ? "you" : place.name;
   const isEmpty = !search.isLoading && !search.isError && !cards.length;
+
+  const loadingCards = [...Array(getLoadingCount(search)).keys()];
+
   const serviceText = selection.name ? ` for ${selection.name}` : "";
 
   return (
@@ -55,16 +71,19 @@ const SearchView = () => {
               <StylistCard stylistName={name} {...card} />
             </div>
           ))}
+          {loadingCards.map((key) => (
+            <div key={key} className={pageGlobal.rescard}>
+              <StylistCardSkeleton />
+            </div>
+          ))}
         </div>
         {search.hasMore && (
           <div ref={sentinelRef} className={styles.more}>
-            <button
-              onClick={search.loadMore}
-              disabled={search.isLoadingMore}
-              className={styles.suggestion}
-            >
-              {search.isLoadingMore ? "Loading…" : "Show more"}
-            </button>
+            {!search.isLoadingMore && (
+              <button onClick={search.loadMore} className={styles.suggestion}>
+                Show more
+              </button>
+            )}
           </div>
         )}
         {isEmpty && (

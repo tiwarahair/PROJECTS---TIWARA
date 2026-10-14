@@ -1,3 +1,4 @@
+import Skeleton from "react-loading-skeleton";
 import type { CSSProperties } from "react";
 import { joinClassNames } from "../../utils/class-names";
 import { CheckIcon, ChevronIcon } from "./check-icon";
@@ -30,6 +31,7 @@ export const FilterBar = ({ search }: FilterBarProps) => {
 
   const pluralSuffix = count === 1 ? "" : "s";
   const isFinding = search.isLoading && !search.cards.length;
+  const findingPlaceholder = search.isSlow ? <Skeleton width={150} /> : null;
   const serviceText = selection.name ? ` for ${selection.name}` : "";
 
   const hasFilter =
@@ -215,16 +217,18 @@ export const FilterBar = ({ search }: FilterBarProps) => {
             role="status"
             className={joinClassNames(pageGlobal.rlLine, styles.resultLine)}
           >
-            <span className={pageGlobal.rlFull}>
-              {isFinding
-                ? "Finding stylists…"
-                : `${count} stylist${pluralSuffix}${serviceText}${nearText}`}
-            </span>
-            <span className={pageGlobal.rlShort}>
-              {isFinding
-                ? "Finding stylists…"
-                : `${count} stylist${pluralSuffix}${nearText}`}
-            </span>
+            {isFinding ? (
+              findingPlaceholder
+            ) : (
+              <>
+                <span className={pageGlobal.rlFull}>
+                  {`${count} stylist${pluralSuffix}${serviceText}${nearText}`}
+                </span>
+                <span className={pageGlobal.rlShort}>
+                  {`${count} stylist${pluralSuffix}${nearText}`}
+                </span>
+              </>
+            )}
           </div>
           <div className={styles.actions}>
             <button

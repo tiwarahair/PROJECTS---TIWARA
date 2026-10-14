@@ -1,0 +1,19 @@
+.page {
+  max-width: 1040px;
+  margin: 0 auto;
+  padding: clamp(20px, 3vw, 32px) clamp(20px, 5vw, 48px);
+}
+
+.cover {
+  display: block;
+  height: min(60vh, 520px);
+  border-radius: var(--radius-lg);
+}
+
+.title {
+  margin-top: 28px;
+}
+
+.bio {
+  margin-top: 8px;
+}

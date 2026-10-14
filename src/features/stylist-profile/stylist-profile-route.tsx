@@ -1,7 +1,9 @@
 import { useMemo } from "react";
 import { Link, Navigate, useLocation } from "react-router";
 import { SiteHeader } from "../../components/site-header/site-header";
+import { ProfileSkeleton } from "../../components/skeleton/profile-skeleton";
 import { toPublicStylist } from "../../lib/public-stylist";
+import { useIsSlow } from "../../hooks/use-is-slow";
 import { useGetStylistProfileQuery } from "../../stores/api-slice";
 import { getLoginHref } from "./profile-facts";
 import { StylistProfileView } from "./stylist-profile-page";
@@ -17,7 +19,9 @@ export const StylistProfilePage = () => {
     currentData: data,
     isError,
     isFetching,
-  } = useGetStylistProfileQuery(slug);
+  } = useGetStylistProfileQuery(slug, { refetchOnMountOrArgChange: true });
+
+  const isSlow = useIsSlow(isFetching && !data);
 
   const publicStylist = useMemo(
     () => (data?.profile ? toPublicStylist(data.profile) : null),
@@ -33,6 +37,7 @@ export const StylistProfilePage = () => {
   return (
     <div className={styles.page} aria-busy={isFetching}>
       <SiteHeader loginHref={getLoginHref(slug)} />
+      {isSlow && <ProfileSkeleton />}
       {!isFetching && (
         <div className={styles.message}>
           <h1 className={styles.title}>
