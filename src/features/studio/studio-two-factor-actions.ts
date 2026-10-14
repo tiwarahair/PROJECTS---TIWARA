@@ -15,6 +15,13 @@ const WRONG_CODE =
 
 const FAILED = "That didn’t work. Check your connection and try again.";
 
+const CLEARED_INPUT = {
+  code: "",
+  error: "",
+  errorMessage: "",
+  keyCopied: false,
+};
+
 export const createTwoFactorActions = (
   { getState, setState, timers, memo }: StudioContext,
   {
@@ -72,10 +79,7 @@ export const createTwoFactorActions = (
       return {
         twoFactor: {
           ...current,
-          code: "",
-          error: "",
-          errorMessage: "",
-          keyCopied: false,
+          ...CLEARED_INPUT,
           ...patch,
           step,
           history: [...history, current],
@@ -94,10 +98,7 @@ export const createTwoFactorActions = (
       return {
         twoFactor: {
           ...previous,
-          code: "",
-          error: "",
-          errorMessage: "",
-          keyCopied: false,
+          ...CLEARED_INPUT,
           history: twoFactor.history?.slice(0, -1),
         },
       };
@@ -142,12 +143,15 @@ export const createTwoFactorActions = (
     try {
       const isRight = isReal() ? await check(code) : code === DEMO_CODE;
 
-      setTwoFactor({ isBusy: false });
-
       if (!isRight)
-        return setTwoFactor({ error: "code", errorMessage: WRONG_CODE });
+        return setTwoFactor({
+          isBusy: false,
+          error: "code",
+          errorMessage: WRONG_CODE,
+        });
 
       await onPass();
+      setTwoFactor({ isBusy: false });
     } catch {
       setTwoFactor({ isBusy: false, error: "code", errorMessage: FAILED });
     }

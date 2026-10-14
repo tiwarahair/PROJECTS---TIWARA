@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { useLocation } from "react-router";
 import { useEntered } from "../../hooks/use-entered";
+import { joinClassNames } from "../../utils/class-names";
 import styles from "../../styles/components/welcome-toast/welcome-toast.module.css";
 
 interface WelcomeToastPillProps {
@@ -33,16 +34,15 @@ const WelcomeToastPill = ({
     return () => window.clearTimeout(removeTimer);
   }, [closing, onDone]);
 
-  const className = [
-    styles.toast,
-    entered && !closing && styles.entered,
-    closing && styles.closing,
-  ]
-    .filter(Boolean)
-    .join(" ");
-
   return (
-    <div role="status" className={className}>
+    <div
+      role="status"
+      className={joinClassNames(
+        styles.toast,
+        entered && !closing && styles.entered,
+        closing && styles.closing,
+      )}
+    >
       <svg
         className={styles.icon}
         width="18"
@@ -74,9 +74,12 @@ export const queueSiteToast = (message: string) => {
   window.dispatchEvent(new CustomEvent(TOAST_EVENT, { detail: message }));
 };
 
-const readWelcomeMessage = (
-  search: string,
-): { message: string; pinned: boolean } | null => {
+interface WelcomeMessage {
+  message: string;
+  pinned: boolean;
+}
+
+const readWelcomeMessage = (search: string): WelcomeMessage | null => {
   try {
     const pinnedMessage = new URLSearchParams(search).get("twtoast");
 
@@ -95,10 +98,7 @@ const readWelcomeMessage = (
  * Stylist Profile and Booking). Reads ?twtoast= (pinned, boards) or sessionStorage tw_toast once on mount.
  */
 export const WelcomeToast = () => {
-  const [toast, setToast] = useState<{
-    message: string;
-    pinned: boolean;
-  } | null>(null);
+  const [toast, setToast] = useState<WelcomeMessage | null>(null);
 
   const [visible, setVisible] = useState(false);
   const handleDone = useCallback(() => setToast(null), []);
@@ -112,7 +112,7 @@ export const WelcomeToast = () => {
     let showTimer = 0;
 
     // the stored message is cleared once it shows, so a page that remounts straight away still gets it
-    const show = (message: { message: string; pinned: boolean }) => {
+    const show = (message: WelcomeMessage) => {
       setToast(message);
       window.clearTimeout(showTimer);
 

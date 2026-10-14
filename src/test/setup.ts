@@ -6,7 +6,11 @@ Object.assign(globalThis, {
 });
 
 /** Set isHeld before rendering to keep the first token back until release() (a slow check). */
-export const turnstileStub: { isHeld: boolean; release?: () => void } = {
+export const turnstileStub: {
+  isHeld: boolean;
+  release?: () => void;
+  fail?: () => void;
+} = {
   isHeld: false,
 };
 
@@ -16,14 +20,17 @@ vi.mock("@marsidev/react-turnstile", async () => {
 
   interface TurnstileStubProps {
     onSuccess?: (token: string) => void;
+    onError?: () => void;
     ref?: React.Ref<{ reset: () => void }>;
   }
 
   return {
-    Turnstile: ({ onSuccess, ref }: TurnstileStubProps) => {
+    Turnstile: ({ onSuccess, onError, ref }: TurnstileStubProps) => {
       const latest = useRef(onSuccess);
+      const latestError = useRef(onError);
 
       latest.current = onSuccess;
+      latestError.current = onError;
 
       useImperativeHandle(ref, () => ({
         reset: () => latest.current?.("test-captcha-token"),
@@ -31,6 +38,8 @@ vi.mock("@marsidev/react-turnstile", async () => {
 
       useEffect(() => {
         const pass = () => latest.current?.("test-captcha-token");
+
+        turnstileStub.fail = () => latestError.current?.();
 
         if (turnstileStub.isHeld) turnstileStub.release = pass;
         else pass();

@@ -501,6 +501,12 @@ export const useOnboarding = (props: OnboardingProps) => {
         const { resendArmed, submitArmed } = stateRef.current;
 
         if (captchaToken && resendArmed) sendAgain(captchaToken);
+        else if (resendArmed)
+          setState({
+            resendArmed: false,
+            failure: "botCheck",
+            isResendFailure: true,
+          });
         else if (!submitArmed) setState({ captchaToken });
         else if (captchaToken)
           setState({ captchaToken, busy: false, submitArmed: false }, submit);

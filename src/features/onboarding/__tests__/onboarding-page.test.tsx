@@ -309,6 +309,25 @@ describe("OnboardingPage", () => {
     );
   });
 
+  it("a failed bot check on Resend says so, and Resend can be tapped again", async () => {
+    vi.mocked(auth.resendEmailCode).mockResolvedValue();
+    turnstileStub.isHeld = true;
+    renderWithStore(<OnboardingPage />, "/signup?screen=verify&board=true");
+
+    advance(30_000);
+    await user.click(screen.getByRole("button", { name: "Resend code" }));
+    act(() => turnstileStub.fail?.());
+
+    expect(
+      screen.getByText("We couldn’t confirm you’re human. Please try again."),
+    ).toBeInTheDocument();
+
+    turnstileStub.isHeld = false;
+    await user.click(screen.getByRole("button", { name: "Resend code" }));
+
+    await vi.waitFor(() => expect(auth.resendEmailCode).toHaveBeenCalled());
+  });
+
   it("the wizard picks a business type and moves on after 300ms", async () => {
     renderWithStore(<OnboardingPage />, "/join?screen=w1&board=true");
     await user.click(screen.getByRole("radio", { name: /Mobile/ }));

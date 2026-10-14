@@ -1,5 +1,6 @@
 import { act, render, screen } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+import { StrictMode } from "react";
 import { MemoryRouter } from "react-router";
 import { queueSiteToast, WelcomeToast } from "../welcome-toast";
 
@@ -49,6 +50,21 @@ describe("WelcomeToast", () => {
     expect(screen.getByRole("status")).toHaveTextContent(
       "Welcome to Tiwára's House, Nia",
     );
+  });
+
+  it("shows the stored welcome under StrictMode too", async () => {
+    sessionStorage.setItem("tw_toast", "Welcome back, Nia");
+
+    render(
+      <StrictMode>
+        <MemoryRouter>
+          <WelcomeToast />
+        </MemoryRouter>
+      </StrictMode>,
+    );
+
+    await act(async () => vi.advanceTimersByTime(600));
+    expect(screen.getByRole("status")).toHaveTextContent("Welcome back, Nia");
   });
 
   it("renders nothing without a message", () => {
