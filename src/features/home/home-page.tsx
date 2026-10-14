@@ -1,4 +1,4 @@
-import { useLayoutEffect, useRef, useState } from "react";
+import { useLayoutEffect, useRef } from "react";
 import type { CSSProperties } from "react";
 import { preload } from "react-dom";
 import { FavHost } from "../../components/fav-host/fav-host";
@@ -43,7 +43,6 @@ export const HomePage = ({
   showWhy = false,
 }: HomePageProps) => {
   const rootRef = useRef<HTMLDivElement>(null);
-  const [menuOpen, setMenuOpen] = useState(false);
   const loggedIn = useAppSelector((state) => state.session.loggedIn);
   const morph = useNavMorph();
 
@@ -87,8 +86,6 @@ export const HomePage = ({
     };
   }, []);
 
-  const toggleMenu = () => setMenuOpen((open) => !open);
-
   return (
     <div ref={rootRef} className={layout.page}>
       <link rel="preconnect" href="https://fonts.googleapis.com" />
@@ -101,12 +98,7 @@ export const HomePage = ({
         // --morph-bg: cream of the section in the middle of the viewport
         style={{ "--morph-bg": morph.morphBackground } as CSSProperties}
       >
-        <HomeNav
-          morph={morph}
-          loggedIn={loggedIn}
-          menuOpen={menuOpen}
-          onToggleMenu={toggleMenu}
-        />
+        <HomeNav morph={morph} loggedIn={loggedIn} />
         <HeroSection />
         <StylesMarquee />
       </div>

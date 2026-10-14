@@ -196,19 +196,25 @@ describe("HomePage", () => {
     );
   });
 
-  it("the burger opens and closes the mobile menu", async () => {
+  it("the burger opens the site menu, whose Services link scrolls to the grid", async () => {
+    const scrollIntoView = vi.fn();
+
+    Element.prototype.scrollIntoView = scrollIntoView;
     renderHome();
     await user.click(screen.getByRole("button", { name: "Menu" }));
+    const menu = screen.getByRole("menu", { name: "Menu" });
 
     expect(
-      screen.getByRole("link", { name: "Our stylists" }),
-    ).toBeInTheDocument();
-
-    await user.click(screen.getByRole("button", { name: "×" }));
-
-    expect(
-      screen.queryByRole("link", { name: "Our stylists" }),
+      within(menu).queryByRole("menuitem", { name: "Book now" }),
     ).not.toBeInTheDocument();
+
+    await user.click(within(menu).getByRole("menuitem", { name: "Services" }));
+
+    expect(scrollIntoView.mock.contexts.at(-1)).toBe(
+      document.getElementById("stylegrid"),
+    );
+
+    expect(screen.queryByRole("menu")).not.toBeInTheDocument();
   });
 
   it("the chat plays message by message once in view", async () => {

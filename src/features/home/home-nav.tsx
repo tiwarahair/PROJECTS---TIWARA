@@ -12,20 +12,10 @@ import type { NavMorphState } from "./use-nav-morph";
 interface HomeNavProps {
   morph: NavMorphState;
   loggedIn: boolean;
-  menuOpen: boolean;
-  onToggleMenu: () => void;
 }
 
-/**
- * Fixed marketing nav: centre links, Log in or the account menu, Book now,
- * and for guests on mobile the menu button and its full-screen menu.
- */
-export const HomeNav = ({
-  morph,
-  loggedIn,
-  menuOpen,
-  onToggleMenu,
-}: HomeNavProps) => {
+/** Fixed marketing nav: centre links, Log in or the account menu, Book now, and the site menu button on mobile. */
+export const HomeNav = ({ morph, loggedIn }: HomeNavProps) => {
   const identity = useIdentity();
 
   const { navSolid, navDark, navHidden, navBackground } = morph;
@@ -101,10 +91,9 @@ export const HomeNav = ({
                 />
               </SiteMenu>
             ) : (
-              <button
+              <SiteMenu
+                isSignedIn={false}
                 className={joinClassNames(page.mqMob, styles.burger)}
-                onClick={onToggleMenu}
-                aria-label="Menu"
               >
                 <span
                   className={joinClassNames(
@@ -113,7 +102,7 @@ export const HomeNav = ({
                   )}
                 ></span>
                 <span className={styles.burgerLine}></span>
-              </button>
+              </SiteMenu>
             )}
             <Link
               to="/search"
@@ -124,54 +113,6 @@ export const HomeNav = ({
           </div>
         </div>
       </nav>
-
-      {/* the dropdown menu is only different on home  */}
-      {menuOpen && !loggedIn && (
-        <div className={styles.menu}>
-          <div className={styles.menuTop}>
-            <img
-              src={getAssetUrl("logos/logo-crimson.png")}
-              alt="Tiwára's House"
-              className={styles.menuLogo}
-            />
-            <button className={styles.menuClose} onClick={onToggleMenu}>
-              ×
-            </button>
-          </div>
-          <div className={joinClassNames(page.nolinks, styles.menuLinks)}>
-            <Link to="/search" className={styles.menuLink}>
-              Find a stylist
-            </Link>
-            <a
-              href="#stylegrid"
-              onClick={onToggleMenu}
-              className={styles.menuLink}
-            >
-              Services
-            </a>
-            <a
-              href="#stylists"
-              onClick={onToggleMenu}
-              className={styles.menuLink}
-            >
-              Our stylists
-            </a>
-            <a
-              href="#for-stylists"
-              onClick={onToggleMenu}
-              className={styles.menuLink}
-            >
-              For stylists
-            </a>
-            <Link to="/login" className={styles.menuLink}>
-              Log in
-            </Link>
-          </div>
-          <Link to="/search" className={styles.menuBook}>
-            Book now
-          </Link>
-        </div>
-      )}
     </>
   );
 };
