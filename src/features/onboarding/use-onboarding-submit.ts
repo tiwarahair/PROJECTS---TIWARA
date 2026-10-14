@@ -361,7 +361,7 @@ export const useOnboardingSubmit = ({
       return run(async () => {
         const isRight =
           screen === "pro-2fa"
-            ? await verifySecondFactor(code, current.twoFaMethod === "backup")
+            ? await verifySecondFactor(code)
             : await verifyEmailCode(email, code);
 
         if (!isRight) return showWrongCode();

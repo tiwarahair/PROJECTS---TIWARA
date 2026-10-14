@@ -70,7 +70,6 @@ export interface SettingsState {
   passwordTouched: boolean;
   newPasswordBlurred: boolean;
   signOthers: boolean;
-  twoFactorDevices: TwoFactorDevice[];
   sessions: SettingsSession[];
   sessionsLoading: boolean;
   alerts: boolean;
@@ -134,7 +133,6 @@ export const getInitialSettingsState = (
     passwordTouched: false,
     newPasswordBlurred: false,
     signOthers: true,
-    twoFactorDevices: [],
     sessions: [
       {
         id: "s1",

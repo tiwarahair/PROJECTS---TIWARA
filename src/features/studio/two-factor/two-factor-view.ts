@@ -64,6 +64,17 @@ export const getTwoFactorView = (studio: StudioController) => {
 
   const mainName = main ? main.name : "your app";
 
+  const getAppSubtitle = () => {
+    if (isSetUp) return "";
+
+    if (!isBackup)
+      return "Scan the QR code with your authenticator app, then enter the 6-digit code it shows.";
+
+    return flow.option === "pm"
+      ? "Add this to your password manager by scanning the QR code or entering the key, then enter the 6-digit code it shows."
+      : "Open your authenticator app on your backup phone or tablet, scan this QR code, then enter the 6-digit code it shows.";
+  };
+
   const subtitles: Record<string, string> = {
     secure: "Secure your account and set up payouts. Takes about 5 minutes.",
     tax: "We’re required to collect this for tax reporting.",
@@ -72,9 +83,7 @@ export const getTwoFactorView = (studio: StudioController) => {
       CODE_REASONS[flow.from ?? ""] ?? "edit your tax details"
     }.`,
     method: "Choose how you’ll get a code each time you sign in.",
-    app: isSetUp
-      ? ""
-      : "Scan the QR code with your authenticator app, then enter the 6-digit code it shows.",
+    app: getAppSubtitle(),
     backup: "If you lose your phone, you’ll use this to log in.",
     done: `You’ll enter a code from ${mainName} each time you sign in.`,
     remove: "Enter a code from your authenticator app to confirm.",

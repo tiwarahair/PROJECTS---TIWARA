@@ -6,6 +6,7 @@ import { joinClassNames } from "../../utils/class-names";
 import { getSearchParams } from "../../utils/page-flags";
 import "../../styles/features/help/help-page-global.module.css";
 import styles from "../../styles/features/help/help-page.module.css";
+import { getSupportMailto, SUPPORT_EMAIL } from "../../utils/support";
 
 const HELP_FAQS = faqs.filter(({ question }) =>
   /cancel or reschedule|deposits work|How do I pay/.test(question),
@@ -17,10 +18,11 @@ const LOGIN_HREF = `/login?screen=cust-email&return=${encodeURIComponent("/help"
 export const HelpPage = () => {
   const [openFaq, setOpenFaq] = useState(-1);
   const [bookingRef] = useState(() => getSearchParams().get("booking") || "");
-  const mailSubject = encodeURIComponent(`Help with booking ${bookingRef}`);
-  const mailQuery = bookingRef ? `?subject=${mailSubject}` : "";
+
   // TO DO: add an actual support email
-  const mailHref = `mailto:info@tiwarashouse.co.uk${mailQuery}`;
+  const mailHref = getSupportMailto(
+    bookingRef ? `Help with booking ${bookingRef}` : undefined,
+  );
 
   useLayoutEffect(() => {
     document.documentElement.classList.add("help-page");
@@ -103,7 +105,7 @@ export const HelpPage = () => {
             <rect x="3" y="5" width="18" height="14" rx="2"></rect>
             <path d="m3 7 9 6 9-6"></path>
           </svg>
-          info@tiwarashouse.co.uk
+          {SUPPORT_EMAIL}
         </a>
       </main>
       <FavHost />

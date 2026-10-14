@@ -80,10 +80,8 @@ const getVerifiedApps = async () => {
 };
 
 /** True when the code matches any of the account's apps. */
-export const verifySecondFactor = async (code: string, useBackup = false) => {
-  const apps = await getVerifiedApps();
-
-  for (const { id } of useBackup ? apps.reverse() : apps) {
+export const verifySecondFactor = async (code: string) => {
+  for (const { id } of await getVerifiedApps()) {
     const { error } = await supabase.auth.mfa.challengeAndVerify({
       factorId: id,
       code,

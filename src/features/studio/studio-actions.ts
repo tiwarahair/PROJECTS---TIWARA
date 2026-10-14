@@ -21,6 +21,7 @@ import type {
 } from "./studio-types";
 import { removeBlock as removeBlockRow } from "../../lib/studio-api";
 import { createStripeActions } from "./studio-stripe-actions";
+import { createTaxActions } from "./studio-tax-actions";
 import { createTwoFactorActions } from "./studio-two-factor-actions";
 
 export interface StudioContext {
@@ -699,6 +700,7 @@ export const createStudioActions = (context: StudioContext) => {
 
   return {
     ...twoFactor,
+    ...createTaxActions(context, { showToast, checkDone, twoFactor }),
     ...createStripeActions(context, {
       showToast,
       openTwoFactor: twoFactor.openTwoFactor,

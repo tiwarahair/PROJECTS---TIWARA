@@ -24,8 +24,8 @@ describe("HelpPage", () => {
     expect(screen.getAllByRole("heading", { level: 3 })).toHaveLength(3);
 
     expect(
-      screen.getByRole("link", { name: "info@tiwarashouse.co.uk" }),
-    ).toHaveAttribute("href", "mailto:info@tiwarashouse.co.uk");
+      screen.getByRole("link", { name: "info@tiwarashouse.com" }),
+    ).toHaveAttribute("href", "mailto:info@tiwarashouse.com");
   });
 
   it("opens one FAQ at a time", async () => {
@@ -48,10 +48,10 @@ describe("HelpPage", () => {
     expect(screen.getByText("TH-48213")).toBeInTheDocument();
 
     expect(
-      screen.getByRole("link", { name: "info@tiwarashouse.co.uk" }),
+      screen.getByRole("link", { name: "info@tiwarashouse.com" }),
     ).toHaveAttribute(
       "href",
-      "mailto:info@tiwarashouse.co.uk?subject=Help%20with%20booking%20TH-48213",
+      "mailto:info@tiwarashouse.com?subject=Help%20with%20booking%20TH-48213",
     );
   });
 

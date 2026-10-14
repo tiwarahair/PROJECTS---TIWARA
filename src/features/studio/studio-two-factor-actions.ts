@@ -1,15 +1,10 @@
 // The two-step verification dialog: open, step through, add an app, remove one.
 import {
   confirmTwoFactorEnrolment,
-  hasRecentSecondFactor,
   listTwoFactorDevices,
   removeTwoFactorApp,
   startTwoFactorEnrolment,
-  verifySecondFactor,
 } from "../../lib/two-factor";
-import { FunctionsHttpError } from "@supabase/supabase-js";
-import type { TaxDetails } from "../../components/tax-details-form/tax-details-logic";
-import { saveTaxDetails } from "../../lib/studio-api";
 import type { StudioContext } from "./studio-actions";
 import type { TwoFactorFlow } from "./studio-types";
 
@@ -265,16 +260,13 @@ export const createTwoFactorActions = (
     void withCode(
       (code) => removeTwoFactorApp(device?.id ?? "", code),
       async () => {
-        const kept = devices.filter((item) => item !== device);
+        const kept = devices
+          .filter((item) => item !== device)
+          .map((item, index) => ({ ...item, backup: index > 0 }));
 
-        let next = isReal()
+        const next = isReal()
           ? await listTwoFactorDevices().catch(() => kept)
           : kept;
-
-        if (!next.some(({ backup }) => !backup))
-          next = next.map((item, index) =>
-            index === 0 ? { ...item, backup: false } : item,
-          );
 
         setState({ twoFactorSettings: { devices: next } });
         closeTwoFactor();
@@ -282,57 +274,6 @@ export const createTwoFactorActions = (
       },
     );
   };
-
-  /** Tax details need an app code from the last 30 days; within that, no code is asked for. */
-  const openTaxEdit = async () => {
-    memo.afterSecondFactor = undefined;
-
-    if (isReal() && (await hasRecentSecondFactor().catch(() => false)))
-      return setState({ taxEdit: true });
-
-    openTwoFactor("taxcode", { flow: "info" });
-  };
-
-  /** Saves tax details (encrypted on the server for a real account). */
-  const saveTax = async (value: TaxDetails, onSaved?: () => void) => {
-    try {
-      const tax = isReal()
-        ? {
-            ...value,
-            nationalInsuranceNumber: "",
-            nationalInsuranceHint: await saveTaxDetails(value),
-          }
-        : value;
-
-      setState({ tax });
-      showToast("Tax details saved");
-      checkDone();
-      onSaved?.();
-    } catch (error) {
-      const isLapsed =
-        error instanceof FunctionsHttpError && error.context.status === 403;
-
-      if (!isLapsed)
-        return showToast("Your tax details couldn’t be saved. Try again.");
-
-      showToast("For your security, enter a code from your authenticator app.");
-      openTwoFactor("taxcode", { flow: "info" });
-      memo.afterSecondFactor = () => void saveTax(value, onSaved);
-    }
-  };
-
-  const confirmTaxCode = () =>
-    withCode(
-      (code) => verifySecondFactor(code),
-      () => {
-        const next = memo.afterSecondFactor;
-
-        closeTwoFactor();
-
-        if (next) next();
-        else setState({ taxEdit: true });
-      },
-    );
 
   return {
     openTwoFactor,
@@ -345,8 +286,6 @@ export const createTwoFactorActions = (
     retryEnrolment,
     verifyTwoFactor,
     removeTwoFactorDevice,
-    openTaxEdit,
-    confirmTaxCode,
-    saveTax,
+    withCode,
   };
 };

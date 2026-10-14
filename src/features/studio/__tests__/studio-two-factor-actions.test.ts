@@ -8,6 +8,7 @@ import {
 } from "../../../lib/two-factor";
 import type { TwoFactorEnrolment } from "../../../lib/two-factor";
 import type { StudioContext } from "../studio-actions";
+import { createTaxActions } from "../studio-tax-actions";
 import { createTwoFactorActions } from "../studio-two-factor-actions";
 import type { StudioPatch, StudioState } from "../studio-types";
 
@@ -42,10 +43,13 @@ const setup = () => {
 
   const showToast = vi.fn();
 
-  const actions = createTwoFactorActions(context, {
-    showToast,
-    checkDone: vi.fn(),
-  });
+  const checkDone = vi.fn();
+  const twoFactor = createTwoFactorActions(context, { showToast, checkDone });
+
+  const actions = {
+    ...twoFactor,
+    ...createTaxActions(context, { showToast, checkDone, twoFactor }),
+  };
 
   return { actions, showToast, getState: () => state };
 };

@@ -93,7 +93,6 @@ export interface OnboardingState {
   shake: number;
   resendIn: number;
   codeKind: "verify" | "2fa";
-  twoFaMethod: "app" | "backup";
   attempts: number;
   lockedUntil: number;
   addressOpen: boolean;
@@ -166,7 +165,6 @@ export const INITIAL_STATE: OnboardingState = {
   shake: 0,
   resendIn: 30,
   codeKind: "verify",
-  twoFaMethod: "app",
   attempts: 0,
   lockedUntil: 0,
   addressOpen: false,

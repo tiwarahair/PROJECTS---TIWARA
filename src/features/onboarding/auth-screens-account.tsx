@@ -1,6 +1,7 @@
 import { PasswordMeter } from "../../components/password-meter/password-meter";
 import { joinClassNames } from "../../utils/class-names";
 import { getPasswordView } from "../../utils/password";
+import { getSupportMailto } from "../../utils/support";
 import { OnboardingTurnstile } from "./onboarding-turnstile";
 import {
   ClientConsent,
@@ -237,26 +238,17 @@ export const CodeScreen = ({ onboarding, layout, view }: ScreenProps) => {
   const { form, code, codeError } = state;
   const is2fa = state.screen === "pro-2fa";
   const resendOff = state.resendIn > 0;
-  const isBackup = state.twoFaMethod === "backup";
 
   const links = is2fa
     ? [
         {
-          key: "b",
-          label: isBackup
-            ? "Use your authenticator app"
-            : "Use your backup authenticator",
-          onSelect: () =>
-            actions.setState({
-              twoFaMethod: isBackup ? "app" : "backup",
-              code: ["", "", "", "", "", ""],
-              codeError: "",
-            }),
-        },
-        {
           key: "c",
           label: "Lost your phone? Contact support",
-          onSelect: () => {},
+          onSelect: () => {
+            window.location.href = getSupportMailto(
+              `Lost my authenticator app (${form.email})`,
+            );
+          },
         },
       ]
     : [
@@ -271,9 +263,7 @@ export const CodeScreen = ({ onboarding, layout, view }: ScreenProps) => {
         },
       ];
 
-  const twoFactorSub = isBackup
-    ? "Enter the code from your backup authenticator."
-    : "Enter the code from your authenticator app.";
+  const twoFactorSub = "Enter a code from your authenticator app.";
 
   return (
     <>

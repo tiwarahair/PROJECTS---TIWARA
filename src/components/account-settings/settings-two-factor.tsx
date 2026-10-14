@@ -1,25 +1,16 @@
 import { joinClassNames } from "../../utils/class-names";
 import { SettingsSection, TickPath } from "./settings-fields";
 import type { AccountSettingsProps } from "./use-account-settings";
-import type { AccountSettingsController } from "./use-account-settings";
 import shared from "../../styles/components/account-settings/account-settings.module.css";
 import styles from "../../styles/components/account-settings/settings-two-factor.module.css";
 
 interface SettingsTwoFactorProps {
-  settings: AccountSettingsController;
   props: AccountSettingsProps;
 }
 
 /** Settings → Security → two-step verification: the authenticator apps and backups. */
-export const SettingsTwoFactor = ({
-  settings,
-  props,
-}: SettingsTwoFactorProps) => {
-  const { state, setState, toast } = settings;
-
-  const twoFactorDevices = Array.isArray(props.twoFactorDevices)
-    ? props.twoFactorDevices
-    : state.twoFactorDevices;
+export const SettingsTwoFactor = ({ props }: SettingsTwoFactorProps) => {
+  const twoFactorDevices = props.twoFactorDevices ?? [];
 
   const isTwoFactorOn = twoFactorDevices.length > 0;
 
@@ -62,15 +53,7 @@ export const SettingsTwoFactor = ({
             <button
               className={joinClassNames(styles.turnOn, shared.focusRing)}
               data-ac-in="1"
-              onClick={() => {
-                if (props.onTwoFactorTurnOn) return props.onTwoFactorTurnOn();
-
-                setState({
-                  twoFactorDevices: [{ name: "Main phone", backup: false }],
-                });
-
-                toast("Two-step verification is on");
-              }}
+              onClick={props.onTwoFactorTurnOn}
             >
               Turn on
             </button>
@@ -91,18 +74,7 @@ export const SettingsTwoFactor = ({
                   shared.focusRing,
                 )}
                 data-ac-in="1"
-                onClick={() => {
-                  if (props.onTwoFactorRemove)
-                    return props.onTwoFactorRemove(device.name);
-
-                  setState({
-                    twoFactorDevices: twoFactorDevices.filter(
-                      (item) => item !== device,
-                    ),
-                  });
-
-                  toast(`${device.name} removed`);
-                }}
+                onClick={() => props.onTwoFactorRemove?.(device.name)}
                 aria-label={`Remove ${device.name}`}
               >
                 Remove
@@ -119,18 +91,7 @@ export const SettingsTwoFactor = ({
             <button
               className={joinClassNames(shared.outlineButton, shared.focusRing)}
               data-ac-in="1"
-              onClick={() => {
-                if (props.onTwoFactorAddBackup)
-                  return props.onTwoFactorAddBackup();
-
-                setState({
-                  twoFactorDevices: twoFactorDevices.concat([
-                    { name: "Backup phone", backup: true },
-                  ]),
-                });
-
-                toast("Backup added");
-              }}
+              onClick={props.onTwoFactorAddBackup}
             >
               Add backup
             </button>
@@ -176,22 +137,6 @@ export const SettingsTwoFactor = ({
             <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path>
           </svg>
           Required to keep your account and payouts secure.
-        </div>
-        <div className={styles.codeNote}>
-          <svg
-            className={shared.infoIcon}
-            width="15"
-            height="15"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            strokeWidth="1.5"
-            strokeLinecap="round"
-          >
-            <circle cx="12" cy="12" r="10"></circle>
-            <path d="M12 11v5M12 7.5v.5"></path>
-          </svg>
-          We’ll always email you a code when you sign in from a new device.
         </div>
       </div>
     </SettingsSection>

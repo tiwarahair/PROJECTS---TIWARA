@@ -170,6 +170,20 @@ describe("Studio → two-step verification", () => {
     ).toBeInTheDocument();
   });
 
+  it("the backup's QR step says where to scan it", async () => {
+    renderFixture("tf-backup");
+
+    await user.click(
+      within(getDialog()).getByRole("button", { name: "Add backup" }),
+    );
+
+    expect(
+      within(getDialog()).getByText(
+        "Open your authenticator app on your backup phone or tablet, scan this QR code, then enter the 6-digit code it shows.",
+      ),
+    ).toBeInTheDocument();
+  });
+
   it("skipping the backup warns once, then finishes", async () => {
     renderFixture("tf-backup");
     const dialog = getDialog();

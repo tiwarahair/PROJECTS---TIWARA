@@ -171,7 +171,7 @@ export const SettingsSecurity = ({
         </div>
       </SettingsSection>
 
-      <SettingsTwoFactor settings={settings} props={props} />
+      <SettingsTwoFactor props={props} />
       <SettingsSessions settings={settings} />
     </>
   );

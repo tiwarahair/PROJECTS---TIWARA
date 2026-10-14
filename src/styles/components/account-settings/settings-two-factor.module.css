@@ -117,13 +117,3 @@
   line-height: 1.45;
   color: var(--neutral-600);
 }
-
-.codeNote {
-  display: flex;
-  gap: 8px;
-  align-items: flex-start;
-  margin-top: 8px;
-  font-size: 14px;
-  line-height: 1.45;
-  color: var(--neutral-600);
-}

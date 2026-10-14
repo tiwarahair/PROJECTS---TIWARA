@@ -126,6 +126,22 @@ describe("OnboardingPage", () => {
     await vi.waitFor(() => expect(auth.signIn).toHaveBeenCalled());
   });
 
+  it("the login code step takes a code from any app and offers support", () => {
+    renderWithStore(<OnboardingPage />, "/login?fixture=pro-2fa");
+
+    expect(
+      screen.getByText("Enter a code from your authenticator app."),
+    ).toBeInTheDocument();
+
+    expect(
+      screen.getByRole("button", { name: "Lost your phone? Contact support" }),
+    ).toBeInTheDocument();
+
+    expect(
+      screen.queryByRole("button", { name: "Use your backup authenticator" }),
+    ).not.toBeInTheDocument();
+  });
+
   it("a wrong password from the server shows the error", async () => {
     vi.mocked(auth.signIn).mockResolvedValue("invalid_credentials");
 

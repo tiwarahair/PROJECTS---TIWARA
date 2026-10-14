@@ -29,15 +29,6 @@ export const getFixturePatch = (
       withForm({ email: "amara@tiwarashouse.co.uk" });
 
       return { screen: "pro-2fa", form, codeKind: "2fa" };
-    case "pro-2fa-backup":
-      withForm({ email: "amara@tiwarashouse.co.uk" });
-
-      return {
-        screen: "pro-2fa",
-        form,
-        codeKind: "2fa",
-        twoFaMethod: "backup",
-      };
     case "pro-unknown":
       withForm({ email: "someone@example.com" });
 
