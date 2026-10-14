@@ -21,7 +21,6 @@ const getPayoutBank = async (accountId: string) => {
 
     return bank?.object === "bank_account" ? `${bank.bank_name ?? "Bank"} •••• ${bank.last4}` : null;
   } catch {
-    // left out of the update, so a failed read doesn't wipe the saved bank
     return undefined;
   }
 };
@@ -49,10 +48,7 @@ export const getAccountState = async (account: Account) => {
 const STATE_COLUMNS =
   "stripe_account_id, charges_enabled, payouts_enabled, details_submitted, stripe_requirements, payout_bank";
 
-/**
- * Re-reads a connected account and saves it unless a newer read already has. `saved` is null when no business here
- * has the account (yet); `stylistId` is the business it was made for.
- */
+/** Re-reads and saves a connected account unless a newer read is already saved. */
 export const syncAccount = async (admin: SupabaseClient, accountId: string) => {
   const syncedAt = new Date().toISOString();
   const account = await retrieveAccount(accountId);

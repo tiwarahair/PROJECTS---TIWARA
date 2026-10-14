@@ -99,7 +99,6 @@ Deno.serve(async (request) => {
   if (!secret || request.headers.get("x-cron-secret") !== secret)
     return new Response("Forbidden", { status: 403 });
 
-  // hosted projects run over https; there, a missing key would send everything to a Mailpit that isn't there
   if (!resendKey && Deno.env.get("SUPABASE_URL")?.startsWith("https://")) {
     console.error("RESEND_API_KEY is not set: emails stay queued");
 

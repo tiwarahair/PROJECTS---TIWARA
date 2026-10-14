@@ -70,7 +70,6 @@ export interface PaymentPolicyProps {
   value?: Partial<PolicyValue>;
   bookingsCount?: number;
   stylistName?: string;
-  /** Resolving to false holds the save: the form stays unsaved (Studio first asks for a fresh 2FA code). */
   onSave?: (value: PolicyValue) => void | Promise<boolean>;
   onState?: (api: PaymentPolicyApi) => void;
 }

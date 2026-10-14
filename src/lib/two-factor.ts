@@ -68,7 +68,7 @@ export const hasRecentSecondFactor = async () => {
   );
 };
 
-/** The verified apps, oldest (the main one) first: Supabase returns them in no set order. */
+// oldest (the main app) first; Supabase returns them in no set order
 const getVerifiedApps = async () => {
   const { data, error } = await supabase.auth.mfa.listFactors();
 
@@ -79,10 +79,7 @@ const getVerifiedApps = async () => {
   );
 };
 
-/**
- * True when the code matches one of the account's apps. The one they picked (main, or backup with `useBackup`)
- * is tried first, so a code from any of their apps works.
- */
+/** True when the code matches any of the account's apps. */
 export const verifySecondFactor = async (code: string, useBackup = false) => {
   const apps = await getVerifiedApps();
 
@@ -105,7 +102,6 @@ export const listTwoFactorDevices = async (): Promise<TwoFactorDevice[]> => {
     getDeviceNames(),
   ]);
 
-  // friendly_name is a random id (the chosen names live on the account), so it's never shown
   return apps.map(({ id }, index) => ({
     id,
     name: names[id] ?? (index ? "Backup app" : "Authenticator app"),
@@ -156,7 +152,6 @@ export const confirmTwoFactorEnrolment = async (
 
   if (getErrorCode(error, ["mfa_verification_failed"])) return false;
 
-  // the app is on now; a name that fails to save shows as "Authenticator app" rather than undoing that
   try {
     const names = await getDeviceNames();
 
@@ -170,7 +165,7 @@ export const confirmTwoFactorEnrolment = async (
   return true;
 };
 
-/** Removes an app after a code from any of their apps (the lost one may be the main); false when the code is wrong. */
+/** Removes an app after a code from any of their apps; false when the code is wrong. */
 export const removeTwoFactorApp = async (factorId: string, code: string) => {
   if (!(await verifySecondFactor(code))) return false;
 

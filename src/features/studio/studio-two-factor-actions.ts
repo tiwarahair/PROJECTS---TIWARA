@@ -113,7 +113,6 @@ export const createTwoFactorActions = (
 
     if (!isReal()) return;
 
-    // only the latest request fills the dialog (a slow earlier one is dropped)
     const request = (memo.enrolmentRequest ?? 0) + 1;
 
     memo.enrolmentRequest = request;
@@ -237,7 +236,7 @@ export const createTwoFactorActions = (
     openTwoFactor("taxcode", { flow: "info" });
   };
 
-  /** Saves tax details (encrypted on the server for a real account), then carries on with onSaved. */
+  /** Saves tax details (encrypted on the server for a real account). */
   const saveTax = async (value: TaxDetails, onSaved?: () => void) => {
     try {
       const tax = isReal()
@@ -261,7 +260,6 @@ export const createTwoFactorActions = (
 
       showToast("For your security, enter a code from your authenticator app.");
       openTwoFactor("taxcode", { flow: "info" });
-      // after the code, the same details save again
       memo.afterSecondFactor = () => void saveTax(value, onSaved);
     }
   };

@@ -264,7 +264,7 @@ export const useStudio = (props: StudioProps) => {
     void latest.current.actions.catchUpWithStripe(reason);
   }, [stylistId]);
 
-  // back from Stripe with the browser's Back button: the page is restored as it was, mid-redirect
+  // back from Stripe via the browser's Back button
   useEffect(() => {
     const onPageShow = ({ persisted }: PageTransitionEvent) => {
       if (persisted) latest.current.context.applyState({ stripeBusy: false });

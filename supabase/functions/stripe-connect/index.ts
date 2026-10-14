@@ -126,7 +126,6 @@ Deno.serve(async (request) => {
   if (!accountId) {
     const syncedAt = new Date().toISOString();
 
-    // the same key makes a double click (or a second tab) get the same account back
     const account = await stripe.v2.core.accounts.create({
       contact_email: stylist.contact_email ?? undefined,
       display_name: stylist.business_name,
@@ -152,7 +151,6 @@ Deno.serve(async (request) => {
 
     if (error) return respond(500, { error: "not_saved" });
 
-    // another request saved its account first: carry on with that one
     const { data: current } = saved.length
       ? { data: saved[0] }
       : await admin.from("stylists").select("stripe_account_id").eq("id", stylist.id).single();

@@ -121,7 +121,6 @@ Deno.serve(async (request) => {
       user_id: userId,
     });
 
-    // the details are saved either way; a missing email shows in the function's logs
     if (emailError) console.error("tax_details_updated email not queued", emailError.message);
   }
 

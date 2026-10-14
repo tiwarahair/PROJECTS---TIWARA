@@ -87,7 +87,6 @@ create trigger stylists_go_live
   on public.stylists
   for each row execute function public.on_go_live_change();
 
--- a reopened business (back to draft) goes live again if it's ready
 create trigger stylists_reopened_go_live
   after update of status on public.stylists
   for each row when (old.status = 'closed' and new.status = 'draft')

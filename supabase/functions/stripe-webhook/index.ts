@@ -40,16 +40,13 @@ Deno.serve(async (request) => {
     try {
       const { saved, stylistId } = await syncAccount(admin, accountId);
 
-      // its business is here but hasn't saved the account id yet (that happens just after the account is made);
-      // otherwise the account is from another environment sharing this Stripe sandbox, so there's nothing to do
+      // an unknown business means the account is from another environment sharing this Stripe sandbox
       if (!saved && stylistId && (await hasBusiness(stylistId))) throw new Error(`${accountId} isn't saved yet`);
     } catch (error) {
-      // not recorded, so Stripe's retry is handled
       return new Response(error instanceof Error ? error.message : "failed", { status: 500 });
     }
   }
 
-  // a duplicate delivered at the same moment is harmless: the account was re-read either way
   await admin.from("stripe_events").insert({ id: notification.id, type: notification.type });
 
   return Response.json({ received: true });

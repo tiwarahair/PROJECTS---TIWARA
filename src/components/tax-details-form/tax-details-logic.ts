@@ -357,7 +357,6 @@ export const getTaxOutput = (
       }
     : { ...fields, postcode: formatPostcode(fields.postcode) };
 
-  // names typed before switching to "yes" aren't kept
   const getName = (part: string) => (state.nameYes ? "" : part.trim());
   const first = getName(state.first);
   const middle = getName(state.middle);

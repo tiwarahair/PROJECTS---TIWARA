@@ -86,7 +86,6 @@ export const api = createApi({
       providesTags: ["Studio"],
       queryFn: (ownerId) => toQueryResult(fetchStylistStudio(ownerId)),
     }),
-    // keyed by user, so a different sign-in never sees the last one's apps
     getTwoFactorDevices: build.query<TwoFactorDevice[], string>({
       queryFn: () => toQueryResult(listTwoFactorDevices()),
     }),

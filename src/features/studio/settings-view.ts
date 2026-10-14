@@ -42,7 +42,6 @@ export const getSettingsView = (
     showToast("Payment policy saved");
   };
 
-  // once 2FA is on, a policy change needs an app code from the last 30 days; false holds the form's save
   const checkPolicy = async (value: PolicyValue) => {
     if (
       !sync ||
@@ -56,7 +55,6 @@ export const getSettingsView = (
 
     showToast("For your security, enter a code from your authenticator app.");
     openTwoFactor("taxcode", { flow: "info", from: "policy" });
-    // the form saves itself again, now with a fresh code
     context.memo.afterSecondFactor = () => context.memo.policyApi?.save();
 
     return false;
