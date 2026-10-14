@@ -2,16 +2,24 @@ import { act, screen, within } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { installFakeIntersectionObserver } from "../../../test/helpers";
 import type { FakeIntersectionObserver } from "../../../test/helpers";
+import { searchStylists } from "../../../lib/search-api";
 import { renderWithStore } from "../../../test/render-with-store";
+import { fakeSearch } from "../../../test/search-rows";
 import { HomePage } from "../home-page";
 import type { HomePageProps } from "../home-page";
 import type { UserEvent } from "@testing-library/user-event";
 import { setupUser } from "../../../test/setup-user";
 
+vi.mock("../../../lib/search-api", async (importOriginal) => ({
+  ...(await importOriginal<typeof import("../../../lib/search-api")>()),
+  searchStylists: vi.fn(),
+}));
+
 let user: UserEvent;
 
 beforeEach(() => {
   user = setupUser();
+  vi.mocked(searchStylists).mockReset().mockImplementation(fakeSearch);
 });
 
 let observer: FakeIntersectionObserver;
@@ -70,18 +78,32 @@ describe("HomePage", () => {
     expect(document.documentElement).toHaveClass("home-page");
   });
 
-  it("lists every stylist with a link to their profile", () => {
+  it("lists the newest live stylists with a link to their profile", async () => {
     renderHome();
+
+    const [link] = await screen.findAllByRole("link", { name: "NaturallyNia" });
+
+    expect(link).toHaveAttribute("href", "/naturallynia");
+    expect(searchStylists).toHaveBeenCalledWith({ sort: "newest" }, 0, 8);
 
     const stylists = document.querySelector(
       '[data-screen-label="Stylists"]',
     ) as HTMLElement;
 
-    expect(
-      within(stylists).getAllByRole("link", { name: "Amara Beauty" })[0],
-    ).toHaveAttribute("href", "/amara-beauty");
+    expect(within(stylists).getByText(/from £30\.95/)).toBeInTheDocument();
+  });
 
-    expect(within(stylists).getByText("from £81.70")).toBeInTheDocument();
+  it("hides the stylists row when no one is live yet", async () => {
+    vi.mocked(searchStylists).mockResolvedValue([]);
+    renderHome();
+
+    await vi.waitFor(() => expect(searchStylists).toHaveBeenCalled());
+
+    await vi.waitFor(() =>
+      expect(
+        document.querySelector('[data-screen-label="Stylists"]'),
+      ).toBeNull(),
+    );
   });
 
   it("guests see Log in; logged-in customers see their initials menu", () => {

@@ -12,7 +12,7 @@
     "start": "vite",
     "build": "tsc -b && vite build",
     "preview": "vite preview",
-    "typecheck": "tsc -b",
+    "typecheck": "tsc -b && tsc -p api",
     "test": "vitest run",
     "test:watch": "vitest",
     "lint": "eslint src",

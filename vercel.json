@@ -6,6 +6,17 @@
   "installCommand": "yarn install --frozen-lockfile",
   "rewrites": [
     {
+      "source": "/:slug([^/.]+)",
+      "has": [
+        {
+          "type": "header",
+          "key": "user-agent",
+          "value": "(?i).*(facebookexternalhit|facebot|whatsapp|twitterbot|slackbot|linkedinbot|discordbot|telegrambot|pinterest|applebot|skypeuripreview|embedly|redditbot).*"
+        }
+      ],
+      "destination": "/api/link-preview?slug=:slug"
+    },
+    {
       "source": "/(.*)",
       "destination": "/index.html"
     }
