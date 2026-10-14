@@ -15,7 +15,17 @@ export const OnboardingTurnstile = ({
   widgetRef,
   onToken,
 }: OnboardingTurnstileProps) => (
-  <div className={styles.wrap}>
+  // the hidden check can take focus as it runs; give it back to the field being typed in
+  <div
+    className={styles.wrap}
+    onFocus={({ currentTarget, relatedTarget }) => {
+      if (
+        !currentTarget.offsetHeight &&
+        relatedTarget instanceof HTMLInputElement
+      )
+        relatedTarget.focus();
+    }}
+  >
     <Turnstile
       ref={widgetRef}
       siteKey={import.meta.env.VITE_TURNSTILE_SITE_KEY}
