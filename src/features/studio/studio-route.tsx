@@ -20,11 +20,11 @@ export const StudioRoute = () => {
   const { ready, user } = useAppSelector(({ session }) => session);
   const identity = useIdentity();
 
-  // always fresh: Studio saves don't update this cache, so a cached copy could write old values back
-  const { data: studio } = useGetStylistStudioQuery(
-    user?.isStylist ? user.id : skipToken,
-    { refetchOnMountOrArgChange: true },
-  );
+  // Studio waits for a fresh copy: its saves don't update this cache, so a cached copy could write old values back
+  const { data: studio, isFetching: isStudioFetching } =
+    useGetStylistStudioQuery(user?.isStylist ? user.id : skipToken, {
+      refetchOnMountOrArgChange: true,
+    });
 
   // the setup checklist's 2FA step reads these; Studio waits for a fresh list, as it changes them without this cache
   const {
@@ -45,6 +45,7 @@ export const StudioRoute = () => {
 
   if (
     !studio ||
+    isStudioFetching ||
     !identity?.isLoaded ||
     isDevicesFetching ||
     (!devices && !isDevicesError)
