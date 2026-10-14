@@ -1,5 +1,6 @@
 import { Turnstile } from "@marsidev/react-turnstile";
 import type { TurnstileInstance } from "@marsidev/react-turnstile";
+import { useEffect, useRef } from "react";
 import type { RefObject } from "react";
 import styles from "../../styles/features/onboarding/onboarding-turnstile.module.css";
 
@@ -14,29 +15,42 @@ export const OnboardingTurnstile = ({
   isDark,
   widgetRef,
   onToken,
-}: OnboardingTurnstileProps) => (
-  // the hidden check can take focus as it runs; give it back to the field being typed in
-  <div
-    className={styles.wrap}
-    onFocus={({ currentTarget, relatedTarget }) => {
-      if (
-        !currentTarget.offsetHeight &&
-        relatedTarget instanceof HTMLInputElement
-      )
-        relatedTarget.focus();
-    }}
-  >
-    <Turnstile
-      ref={widgetRef}
-      siteKey={import.meta.env.VITE_TURNSTILE_SITE_KEY}
-      options={{
-        appearance: "interaction-only",
-        theme: isDark ? "dark" : "light",
-        size: "flexible",
-      }}
-      onSuccess={onToken}
-      onExpire={() => onToken(null)}
-      onError={() => onToken(null)}
-    />
-  </div>
-);
+}: OnboardingTurnstileProps) => {
+  const wrapRef = useRef<HTMLDivElement>(null);
+
+  // the check's frame can take focus as it loads (focus moving into a frame fires no event here); give it
+  // back to the field, unless the pointer is on the check itself
+  useEffect(() => {
+    const onFocusOut = ({ target }: FocusEvent) => {
+      if (!(target instanceof HTMLInputElement)) return;
+
+      window.setTimeout(() => {
+        const wrap = wrapRef.current;
+
+        if (wrap?.contains(document.activeElement) && !wrap.matches(":hover"))
+          target.focus();
+      });
+    };
+
+    document.addEventListener("focusout", onFocusOut);
+
+    return () => document.removeEventListener("focusout", onFocusOut);
+  }, []);
+
+  return (
+    <div ref={wrapRef} className={styles.wrap}>
+      <Turnstile
+        ref={widgetRef}
+        siteKey={import.meta.env.VITE_TURNSTILE_SITE_KEY}
+        options={{
+          appearance: "interaction-only",
+          theme: isDark ? "dark" : "light",
+          size: "flexible",
+        }}
+        onSuccess={onToken}
+        onExpire={() => onToken(null)}
+        onError={() => onToken(null)}
+      />
+    </div>
+  );
+};
