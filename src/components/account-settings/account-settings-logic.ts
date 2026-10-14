@@ -21,12 +21,12 @@ interface SettingsSession {
   kind: "phone" | "laptop" | "tablet";
 }
 
-interface ChannelSetting {
+export interface ChannelSetting {
   email: boolean;
   sms: boolean;
 }
 
-type NotificationKey =
+export type NotificationKey =
   | "newBooking"
   | "clientCancelled"
   | "clientRescheduled"
@@ -101,10 +101,13 @@ const DEMO_PERSON: SettingsPerson = {
 /** ?pwnew= prefills the new password (and the current one) for the meter boards. */
 export const EMPTY_PASSWORD = { code: "", next: "", confirm: "" };
 
+export type NotificationSettings = Record<NotificationKey, ChannelSetting>;
+
 export const getInitialSettingsState = (
   isNew: boolean,
   search: string,
   { first, last, email, phone }: SettingsPerson = DEMO_PERSON,
+  savedNotifications: Partial<NotificationSettings> = {},
 ): SettingsState => {
   const prefilled = new URLSearchParams(search).get("pwnew") || "";
   const channel = (): ChannelSetting => ({ email: true, sms: false });
@@ -170,6 +173,7 @@ export const getInitialSettingsState = (
       autoCancelSoon: channel(),
       autoCancelled: channel(),
       reviewReceived: channel(),
+      ...savedNotifications,
     },
     google: {
       state: isNew ? "off" : "on",

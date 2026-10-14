@@ -12,6 +12,7 @@ import {
   toVariationRow,
 } from "../studio-service-records";
 import { fromHours } from "../studio-settings-records";
+import { toNotificationEvent, toNotificationKey } from "../studio-records";
 
 const SERVICE_ROW: ServiceRow = {
   id: "service-1",
@@ -243,5 +244,12 @@ describe("studio-records", () => {
     expect(toShownBusinessType("chair_rental")).toBe("chair");
     expect(toStoredBusinessType("home")).toBe("home_based");
     expect(toShownBusinessType("unknown")).toBe("shop");
+  });
+});
+
+describe("notification event names", () => {
+  it("convert between the database and Settings", () => {
+    expect(toNotificationKey("auto_cancel_soon")).toBe("autoCancelSoon");
+    expect(toNotificationEvent("autoCancelSoon")).toBe("auto_cancel_soon");
   });
 });

@@ -506,6 +506,7 @@ const SettingsFrame = ({
                 taxBusiness={state.business}
                 taxLegalName={state.owner.name}
                 person={state.owner}
+                notifications={state.notificationPrefs}
                 taxBusinessName={state.profile.salon}
                 onTaxEdit={view.onTaxEdit}
                 onTaxAdd={view.onTaxAdd}

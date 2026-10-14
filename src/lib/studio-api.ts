@@ -17,6 +17,7 @@ const STUDIO_SELECT = `*,
   booking_rules(*),
   payment_policies(*),
   portfolio_photos(*),
+  notification_preferences(event, email, sms),
   stylist_tax_details(kind, first_name, middle_name, last_name, legal_name, date_of_birth, ni_hint,
     company_name, company_number, is_address_same, line1, line2, city, postcode)`;
 
@@ -154,6 +155,10 @@ export const saveBookingRules = (row: TablesInsert<"booking_rules">) =>
 /** Policies are history: each save adds the new current one. */
 export const addPaymentPolicy = (row: TablesInsert<"payment_policies">) =>
   check(supabase.from("payment_policies").insert(row));
+
+export const saveNotificationPreference = (
+  row: TablesInsert<"notification_preferences">,
+) => check(supabase.from("notification_preferences").upsert(row));
 
 export const addPortfolioPhoto = (row: TablesInsert<"portfolio_photos">) =>
   check(supabase.from("portfolio_photos").insert(row));

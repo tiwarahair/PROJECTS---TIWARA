@@ -1,6 +1,7 @@
 import { act, render, screen, within } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { MemoryRouter } from "react-router";
+import { DEMO_BACKEND } from "../account-settings-backend";
 import { AccountSettings } from "../account-settings";
 import type { AccountSettingsApi } from "../account-settings";
 import type { PayoutStatus } from "../account-settings-logic";
@@ -211,6 +212,83 @@ describe("AccountSettings", () => {
 
     await user.click(sms);
     expect(sms).toHaveAttribute("aria-checked", "true");
+  });
+
+  it("notifications start from the saved choices and save each toggle", async () => {
+    const saveNotification = vi.fn(() => Promise.resolve());
+
+    render(
+      <AccountSettings
+        page="notifications"
+        notifications={{ newBooking: { email: false, sms: true } }}
+        backend={{ ...DEMO_BACKEND, saveNotification }}
+      />,
+      { wrapper: MemoryRouter },
+    );
+
+    const email = screen.getByRole("switch", { name: "New booking by email" });
+
+    expect(email).toHaveAttribute("aria-checked", "false");
+    await user.click(email);
+
+    expect(saveNotification).toHaveBeenCalledWith("newBooking", {
+      email: true,
+      sms: true,
+    });
+  });
+
+  it("a notification toggle that doesn't save goes back", async () => {
+    render(
+      <AccountSettings
+        page="notifications"
+        backend={{
+          ...DEMO_BACKEND,
+          saveNotification: () => Promise.reject(new Error("offline")),
+        }}
+      />,
+      { wrapper: MemoryRouter },
+    );
+
+    const sms = screen.getByRole("switch", { name: "New booking by SMS" });
+
+    await user.click(sms);
+
+    await vi.waitFor(() =>
+      expect(sms).toHaveAttribute("aria-checked", "false"),
+    );
+  });
+
+  it("a failed save doesn't undo a later toggle of the same row", async () => {
+    const saveNotification = vi
+      .fn()
+      .mockRejectedValueOnce(new Error("offline"))
+      .mockResolvedValueOnce(undefined);
+
+    render(
+      <AccountSettings
+        page="notifications"
+        backend={{ ...DEMO_BACKEND, saveNotification }}
+      />,
+      { wrapper: MemoryRouter },
+    );
+
+    await user.click(
+      screen.getByRole("switch", { name: "New booking by SMS" }),
+    );
+
+    await user.click(
+      screen.getByRole("switch", { name: "New booking by email" }),
+    );
+
+    await vi.waitFor(() => expect(saveNotification).toHaveBeenCalledTimes(2));
+
+    expect(
+      screen.getByRole("switch", { name: "New booking by email" }),
+    ).toHaveAttribute("aria-checked", "false");
+
+    expect(
+      screen.getByRole("switch", { name: "New booking by SMS" }),
+    ).toHaveAttribute("aria-checked", "true");
   });
 
   it("calendar connects Google after a short wait", async () => {

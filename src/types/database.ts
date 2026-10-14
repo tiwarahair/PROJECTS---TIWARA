@@ -234,6 +234,39 @@ export type Database = {
           },
         ];
       };
+      notification_preferences: {
+        Row: {
+          email: boolean;
+          event: string;
+          sms: boolean;
+          stylist_id: string;
+          updated_at: string;
+        };
+        ComputedFields: never;
+        Insert: {
+          email?: boolean;
+          event: string;
+          sms?: boolean;
+          stylist_id: string;
+          updated_at?: string;
+        };
+        Update: {
+          email?: boolean;
+          event?: string;
+          sms?: boolean;
+          stylist_id?: string;
+          updated_at?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "notification_preferences_stylist_id_fkey";
+            columns: ["stylist_id"];
+            isOneToOne: false;
+            referencedRelation: "stylists";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
       notifications: {
         Row: {
           attempts: number;
@@ -912,6 +945,7 @@ export type Database = {
           status: string;
           stripe_account_id: string | null;
           stripe_requirements: string;
+          stripe_synced_at: string | null;
           tiktok: string | null;
           travel_radius_miles: number | null;
           vat_number: string | null;
@@ -951,6 +985,7 @@ export type Database = {
           status?: string;
           stripe_account_id?: string | null;
           stripe_requirements?: string;
+          stripe_synced_at?: string | null;
           tiktok?: string | null;
           travel_radius_miles?: number | null;
           vat_number?: string | null;
@@ -989,6 +1024,7 @@ export type Database = {
           status?: string;
           stripe_account_id?: string | null;
           stripe_requirements?: string;
+          stripe_synced_at?: string | null;
           tiktok?: string | null;
           travel_radius_miles?: number | null;
           vat_number?: string | null;
@@ -1165,6 +1201,10 @@ export type Database = {
       purge_closed_businesses: {
         Args: Record<PropertyKey, never>;
         Returns: undefined;
+      };
+      purge_old_notifications: {
+        Args: Record<PropertyKey, never>;
+        Returns: number;
       };
       queue_email: {
         Args: {

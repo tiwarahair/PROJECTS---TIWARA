@@ -157,9 +157,7 @@ describe("OnboardingPage", () => {
     await user.tab();
 
     expect(
-      await screen.findByText(
-        "Enter a valid email address, like name@example.com",
-      ),
+      await screen.findByText("Enter a valid email address"),
     ).toBeInTheDocument();
   });
 
