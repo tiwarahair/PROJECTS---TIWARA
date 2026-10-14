@@ -383,22 +383,29 @@ export const useOnboardingSubmit = ({
     if (resending.current) return;
 
     resending.current = true;
-    setState({ resendArmed: false, captchaToken: null });
+
+    setState({
+      resendArmed: false,
+      captchaToken: null,
+      resendIn: 30,
+      codeError: "",
+      code: EMPTY_CODE,
+    });
+
     turnstileRef.current?.reset();
 
-    run(async () => {
-      const email = getValues("email").trim().toLowerCase();
+    const email = getValues("email").trim().toLowerCase();
 
-      try {
-        if (stateRef.current.screen === "forgot-sent")
-          await sendPasswordReset(email, token);
-        else await resendEmailCode(email, token);
-      } finally {
+    const sending =
+      stateRef.current.screen === "forgot-sent"
+        ? sendPasswordReset(email, token)
+        : resendEmailCode(email, token);
+
+    sending
+      .catch(() => setState({ networkError: true, resendIn: 0 }))
+      .finally(() => {
         resending.current = false;
-      }
-
-      setState({ busy: false, resendIn: 30, codeError: "", code: EMPTY_CODE });
-    });
+      });
   };
 
   /** Without a token yet, Resend first loads the check; its token then sends (setCaptchaToken). */
