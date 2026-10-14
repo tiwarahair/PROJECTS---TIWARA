@@ -1,6 +1,5 @@
 import { act, screen } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import { Link } from "react-router";
 import { useFavourites } from "../../../hooks/use-favourites";
 import { renderWithStore, TEST_USER } from "../../../test/render-with-store";
 import { FavHost } from "../fav-host";
@@ -27,9 +26,6 @@ const HeartPage = () => {
       >
         {isFavourite("amara-beauty") ? "saved" : "not saved"}
       </button>
-      <a href="/account" data-tw-acct="1" aria-label="Nia Okafor">
-        Nia
-      </a>
       <FavHost />
     </>
   );
@@ -127,52 +123,5 @@ describe("FavHost", () => {
     await flush(10000);
     expect(screen.getByRole("status")).toHaveTextContent("Link copied");
     expect(localStorage.getItem(FAVS_KEY)).toBeNull();
-  });
-
-  it("opens the account menu from [data-tw-acct], closes on Escape and logs out", async () => {
-    const { store } = renderWithStore(<HeartPage />, "/search", {
-      signedIn: true,
-    });
-
-    await user.click(screen.getByRole("link", { name: "Nia Okafor" }));
-    const menu = screen.getByRole("menu", { name: "Nia Okafor" });
-
-    expect(menu).toHaveTextContent("nia.okafor@gmail.com");
-
-    expect(
-      screen.getAllByRole("menuitem").map((item) => item.textContent),
-    ).toEqual([
-      "Bookings",
-      "Favourites",
-      "Account settings",
-      "Help & support",
-      "Log out",
-    ]);
-
-    await user.keyboard("{Escape}");
-    expect(screen.queryByRole("menu")).not.toBeInTheDocument();
-
-    await user.click(screen.getByRole("link", { name: "Nia Okafor" }));
-    await user.click(screen.getByRole("menuitem", { name: "Log out" }));
-    expect(store.getState().session.loggedIn).toBe(false);
-    expect(screen.getByTestId("location")).toHaveTextContent(/^\/$/);
-  });
-
-  it("a router <Link> trigger opens the menu instead of navigating", async () => {
-    renderWithStore(
-      <>
-        <Link to="/account" data-tw-acct="1" aria-label="Nia Okafor">
-          NO
-        </Link>
-        <FavHost />
-      </>,
-      "/",
-      { signedIn: true },
-    );
-
-    await user.click(screen.getByRole("link", { name: "Nia Okafor" }));
-    await flush(50);
-    expect(screen.getByRole("menu")).toBeInTheDocument();
-    expect(screen.getByTestId("location")).toHaveTextContent(/^\/$/);
   });
 });

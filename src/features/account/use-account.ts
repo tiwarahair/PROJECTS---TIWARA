@@ -8,7 +8,7 @@ import {
 } from "react";
 import type { ChangeEvent, ClipboardEvent, KeyboardEvent } from "react";
 import { useNavigate, useSearchParams } from "react-router";
-import { ACCOUNT_TAB_EVENT } from "../../components/account-menu/account-menu";
+import { ACCOUNT_TAB_EVENT } from "../../components/site-menu/site-menu";
 import { useIdentity } from "../../hooks/use-identity";
 import { useUnsavedChanges } from "../../hooks/use-unsaved-changes";
 import { usePasswordChecker } from "../../hooks/use-password-checker";

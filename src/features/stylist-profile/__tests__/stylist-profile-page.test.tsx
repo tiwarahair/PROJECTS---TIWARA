@@ -33,7 +33,7 @@ describe("StylistProfilePage", () => {
     ).toHaveAttribute("href", "/book?stylist=naturallynia");
   });
 
-  it("guests get Log in returning to this profile; logged-in users get the account link", () => {
+  it("guests get Log in returning to this profile; logged-in users get the account menu", () => {
     const { unmount } = renderWithStore(
       <StylistProfilePage />,
       "/stylist?stylist=tiwaras-house&guest=1",
@@ -52,14 +52,12 @@ describe("StylistProfilePage", () => {
       signedIn: true,
     });
 
-    const accountLinks = screen.getAllByRole("link", { name: "Account" });
-
-    expect(accountLinks.map((link) => link.getAttribute("href"))).toContain(
-      "/account",
+    expect(screen.getByRole("button", { name: "Account" })).toHaveTextContent(
+      "NO",
     );
 
     expect(
-      screen.queryByRole("link", { name: "Nia Okafor" }),
+      screen.queryByRole("button", { name: "Menu" }),
     ).not.toBeInTheDocument();
   });
 
@@ -114,17 +112,14 @@ describe("StylistProfilePage", () => {
     ).not.toBeInTheDocument();
   });
 
-  it("the mobile menu toggles open and closed", async () => {
+  it("the menu button toggles the site menu open and closed", async () => {
     renderWithStore(<StylistProfilePage />, "/stylist?stylist=tiwaras-house");
+    const button = screen.getByRole("button", { name: "Menu" });
 
-    expect(
-      screen.getAllByRole("link", { name: "Find a stylist" }),
-    ).toHaveLength(1);
+    await user.click(button);
+    expect(screen.getByRole("menu", { name: "Menu" })).toBeInTheDocument();
 
-    await user.click(screen.getByRole("button", { name: "Menu" }));
-
-    expect(
-      screen.getAllByRole("link", { name: "Find a stylist" }),
-    ).toHaveLength(2);
+    await user.click(button);
+    expect(screen.queryByRole("menu")).not.toBeInTheDocument();
   });
 });

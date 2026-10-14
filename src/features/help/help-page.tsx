@@ -29,7 +29,7 @@ export const HelpPage = () => {
 
   return (
     <div className={styles.page} data-screen-label="Help and support">
-      <SiteHeader loginHref={LOGIN_HREF} accountMenu={{ label: "Account" }} />
+      <SiteHeader loginHref={LOGIN_HREF} />
 
       <main className={styles.main}>
         <h1 className={styles.title}>Help & support</h1>

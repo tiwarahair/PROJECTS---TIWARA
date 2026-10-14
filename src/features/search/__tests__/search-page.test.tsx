@@ -152,15 +152,19 @@ describe("SearchPage", () => {
     ).not.toBeInTheDocument();
   });
 
-  it("logged in, the menu lists the account links and logs out", async () => {
+  it("logged in, the account button replaces ☰ and its menu lists the account links and logs out", async () => {
     const { store } = renderWithStore(<SearchPage />, "/search", {
       signedIn: true,
     });
 
-    await user.click(screen.getByRole("button", { name: "Menu" }));
-    const menu = screen.getByRole("menu", { name: "Menu" });
+    expect(
+      screen.queryByRole("button", { name: "Menu" }),
+    ).not.toBeInTheDocument();
 
-    expect(within(menu).getByText("Account")).toBeInTheDocument();
+    await user.click(screen.getByRole("button", { name: "Account" }));
+    const menu = screen.getByRole("menu", { name: "Nia Okafor" });
+
+    expect(menu).toHaveTextContent("nia.okafor@gmail.com");
 
     expect(
       within(menu).getByRole("menuitem", { name: "Bookings" }),

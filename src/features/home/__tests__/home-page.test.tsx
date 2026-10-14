@@ -85,23 +85,22 @@ describe("HomePage", () => {
   });
 
   it("guests see Log in; logged-in customers see their initials menu", () => {
-    renderHome();
+    const { unmount } = renderHome();
 
     expect(screen.getAllByRole("link", { name: "Log in" })[0]).toHaveAttribute(
       "href",
       "/login",
     );
 
+    unmount();
     renderHome({}, "/", true);
 
-    const accountLinks = screen.getAllByRole("link", { name: "Account" });
+    expect(screen.getByRole("button", { name: "Account" })).toHaveTextContent(
+      "NO",
+    );
 
     expect(
-      accountLinks.find((link) => link.getAttribute("href") === "/account"),
-    ).toHaveTextContent("NO");
-
-    expect(
-      screen.queryByRole("link", { name: "Nia Okafor" }),
+      screen.queryByRole("button", { name: "Menu" }),
     ).not.toBeInTheDocument();
   });
 
@@ -197,19 +196,21 @@ describe("HomePage", () => {
     );
   });
 
-  it("the burger opens and closes the mobile menu", async () => {
+  it("the burger opens the site menu, whose Services link scrolls to the grid", async () => {
+    const scrollIntoView = vi.fn();
+
+    Element.prototype.scrollIntoView = scrollIntoView;
     renderHome();
     await user.click(screen.getByRole("button", { name: "Menu" }));
+    const menu = screen.getByRole("menu", { name: "Menu" });
 
-    expect(
-      screen.getByRole("link", { name: "Our stylists" }),
-    ).toBeInTheDocument();
+    await user.click(within(menu).getByRole("menuitem", { name: "Services" }));
 
-    await user.click(screen.getByRole("button", { name: "×" }));
+    expect(scrollIntoView.mock.contexts.at(-1)).toBe(
+      document.getElementById("stylegrid"),
+    );
 
-    expect(
-      screen.queryByRole("link", { name: "Our stylists" }),
-    ).not.toBeInTheDocument();
+    expect(screen.queryByRole("menu")).not.toBeInTheDocument();
   });
 
   it("the chat plays message by message once in view", async () => {

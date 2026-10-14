@@ -1,11 +1,12 @@
 import type { CSSProperties } from "react";
 import { Link } from "react-router";
+import { AccountAvatar, SiteMenu } from "../../components/site-menu/site-menu";
+import { useIdentity } from "../../hooks/use-identity";
 import { useAppSelector } from "../../stores/hooks";
 import { getAssetUrl } from "../../utils/asset-url";
 import { joinClassNames } from "../../utils/class-names";
 import { ClearButton } from "./clear-button";
 import { getDateLabel, getMobileDateLabel } from "./search-dates";
-import { SearchMenu } from "./search-menu";
 import pageGlobal from "../../styles/features/search/search-page-global.module.css";
 import styles from "../../styles/features/search/search-nav.module.css";
 import { getWhatListProps, WhatList, WhereList } from "./suggestion-list";
@@ -21,6 +22,7 @@ export const SearchNav = ({ search }: SearchNavProps) => {
     search;
 
   const loggedIn = useAppSelector((root) => root.session.loggedIn);
+  const identity = useIdentity();
   const isMobileSheet = !!state.mobileView;
   const whatValue = state.whatText != null ? state.whatText : selection.display;
   const whereValue = state.whereText != null ? state.whereText : where.display;
@@ -220,7 +222,16 @@ export const SearchNav = ({ search }: SearchNavProps) => {
               </svg>
             </Link>
           )}
-          <SearchMenu />
+          {loggedIn ? (
+            <SiteMenu isSignedIn>
+              <AccountAvatar initials={identity?.initials ?? ""} />
+            </SiteMenu>
+          ) : (
+            <SiteMenu isSignedIn={false} className={styles.menuButton}>
+              <span className={styles.menuLine}></span>
+              <span className={styles.menuLine}></span>
+            </SiteMenu>
+          )}
         </div>
       </div>
     </nav>

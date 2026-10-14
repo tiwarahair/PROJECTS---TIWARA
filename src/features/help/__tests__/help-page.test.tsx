@@ -55,10 +55,12 @@ describe("HelpPage", () => {
     );
   });
 
-  it("the logged-in mobile menu heads its account links with Account, not the name", async () => {
+  it("the account menu marks Help & support as the current page", async () => {
     renderWithStore(<HelpPage />, "/help", { signedIn: true });
-    await user.click(screen.getByRole("button", { name: "Menu" }));
-    expect(screen.getByText("Account")).toBeInTheDocument();
-    expect(screen.queryByText("Nia Okafor")).not.toBeInTheDocument();
+    await user.click(screen.getByRole("button", { name: "Account" }));
+
+    expect(
+      screen.getByRole("menuitem", { name: "Help & support" }),
+    ).toHaveAttribute("aria-current", "page");
   });
 });

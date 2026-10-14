@@ -64,12 +64,8 @@ export const AccountPage = (props: AccountPageProps) => {
       <SiteHeader
         loginHref={view.loginHref}
         signedIn={loggedIn}
-        accountMenu={{
-          label: accountName,
-          initials,
-          photo: state.photo,
-          onSection: goToSection,
-        }}
+        initials={initials}
+        photo={state.photo}
       />
       {!loggedIn && (
         <main

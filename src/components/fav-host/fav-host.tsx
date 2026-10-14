@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from "react";
+import { useEffect } from "react";
 import { FAVOURITES_HREF } from "../../hooks/use-favourites";
 import {
   openLoginSheet,
@@ -12,32 +12,16 @@ import {
   readSession,
   writeSession,
 } from "../../utils/page-flags";
-import { AccountMenu } from "../account-menu/account-menu";
 import { ActionToast } from "../action-toast/action-toast";
 import { FavLoginSheet } from "../fav-login-sheet/fav-login-sheet";
 
-interface OpenMenu {
-  anchor: HTMLElement;
-  pinned: boolean;
-}
-
 /**
- * Page-level host for the shared favourites / share / account-menu behaviour,
- * rendered by Home, Search, Stylist Profile, Account.
- * Any element with data-tw-acct opens the account menu.
+ * Page-level host for the shared favourites and share behaviour,
+ * rendered by Home, Search, Stylist Profile, Account and Help.
  */
 export const FavHost = () => {
   const dispatch = useAppDispatch();
   const store = useAppStore();
-  const [menu, setMenu] = useState<OpenMenu | null>(null);
-
-  const closeMenu = useCallback((refocus: boolean) => {
-    setMenu((open) => {
-      if (open && refocus) open.anchor.focus();
-
-      return null;
-    });
-  }, []);
 
   // page "load": sync session + favourites, then the boot behaviours
   useEffect(() => {
@@ -93,15 +77,6 @@ export const FavHost = () => {
           dispatch(showToast("Link copied", null, { pinned: true }));
       }, 500);
 
-    if (params.get("acctmenu") === "1")
-      later(() => {
-        const anchor = [
-          ...document.querySelectorAll<HTMLElement>("[data-tw-acct]"),
-        ].find((element) => element.offsetParent !== null);
-
-        if (anchor) setMenu({ anchor, pinned: true });
-      }, 900);
-
     if (params.get("favsheet") === "1")
       later(() => dispatch(openLoginSheet("demo")), 500);
 
@@ -111,36 +86,10 @@ export const FavHost = () => {
     };
   }, [dispatch, store]);
 
-  // any [data-tw-acct] trigger toggles the menu. Capture phase: it must run before a router <Link>'s own click
-  // handler, which navigates unless the default is already prevented
-  useEffect(() => {
-    const handleClick = (event: MouseEvent) => {
-      const anchor = (event.target as Element | null)?.closest?.<HTMLElement>(
-        "[data-tw-acct]",
-      );
-
-      if (!anchor) return;
-
-      event.preventDefault();
-      setMenu((open) => (open ? null : { anchor, pinned: false }));
-    };
-
-    document.addEventListener("click", handleClick, true);
-
-    return () => document.removeEventListener("click", handleClick, true);
-  }, []);
-
   return (
     <>
       <ActionToast />
       <FavLoginSheet />
-      {menu && (
-        <AccountMenu
-          anchor={menu.anchor}
-          pinned={menu.pinned}
-          onClose={closeMenu}
-        />
-      )}
     </>
   );
 };
