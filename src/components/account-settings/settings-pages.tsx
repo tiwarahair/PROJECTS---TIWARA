@@ -1,5 +1,16 @@
 import { useRef } from "react";
 import type { CSSProperties } from "react";
+import {
+  ArrowRight,
+  ArrowUpRight,
+  Bell,
+  Check,
+  ChevronDown,
+  Copy,
+  Info,
+  Lock,
+  TriangleAlert,
+} from "lucide-react";
 import { joinClassNames } from "../../utils/class-names";
 import { TaxDetailsForm } from "../tax-details-form/tax-details-form";
 import {
@@ -12,7 +23,7 @@ import {
 import type { ChannelSetting, NotificationKey } from "./account-settings-logic";
 import type { AccountSettingsProps } from "./use-account-settings";
 import type { AccountSettingsController } from "./use-account-settings";
-import { CheckRow, InfoIcon, SettingsSection, Switch } from "./settings-fields";
+import { CheckRow, SettingsSection, Switch } from "./settings-fields";
 import shared from "../../styles/components/account-settings/account-settings.module.css";
 import calendar from "../../styles/components/account-settings/settings-calendar.module.css";
 import notifications from "../../styles/components/account-settings/settings-notifications.module.css";
@@ -23,61 +34,6 @@ interface PageProps {
   uid: string;
   props: AccountSettingsProps;
 }
-
-const TickIcon = ({
-  size,
-  strokeWidth,
-  className,
-}: {
-  size: number;
-  strokeWidth: string;
-  className?: string;
-}) => (
-  <svg
-    className={className}
-    width={size}
-    height={size}
-    viewBox="0 0 24 24"
-    fill="none"
-    stroke="currentColor"
-    strokeWidth={strokeWidth}
-    strokeLinecap="round"
-    strokeLinejoin="round"
-  >
-    <path d="M5 12.5l4.5 4.5L19 7.5"></path>
-  </svg>
-);
-
-const LockIcon = () => (
-  <svg
-    width="14"
-    height="14"
-    viewBox="0 0 24 24"
-    fill="none"
-    stroke="currentColor"
-    strokeWidth="1.5"
-    strokeLinecap="round"
-    strokeLinejoin="round"
-  >
-    <rect x="5" y="11" width="14" height="10" rx="2"></rect>
-    <path d="M8 11V7a4 4 0 0 1 8 0v4"></path>
-  </svg>
-);
-
-const ExternalIcon = () => (
-  <svg
-    width="15"
-    height="15"
-    viewBox="0 0 24 24"
-    fill="none"
-    stroke="currentColor"
-    strokeWidth="1.7"
-    strokeLinecap="round"
-    strokeLinejoin="round"
-  >
-    <path d="M7 17 17 7M9 7h8v8"></path>
-  </svg>
-);
 
 export const SettingsNotifications = ({
   settings: { state, setState, toast, backend },
@@ -156,7 +112,7 @@ export const SettingsNotifications = ({
             <div key={label} className={notifications.alwaysRow}>
               <span className={notifications.alwaysLabel}>{label}</span>
               <span className={notifications.alwaysTag}>
-                <LockIcon />
+                <Lock size={14} strokeWidth={1.5} />
                 Always on
               </span>
             </div>
@@ -175,19 +131,11 @@ export const SettingsNotifications = ({
           <div className={shared.actions}>
             {CLIENT_MESSAGES.map((message) => (
               <span key={message} className={notifications.clientChip}>
-                <svg
+                <Check
                   className={notifications.clientTick}
-                  width="13"
-                  height="13"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="2"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                >
-                  <path d="M5 12.5l4.5 4.5L19 7.5"></path>
-                </svg>
+                  size={13}
+                  strokeWidth={2}
+                />
                 {message}
               </span>
             ))}
@@ -195,18 +143,7 @@ export const SettingsNotifications = ({
         </div>
       </SettingsSection>
       <p className={notifications.bellNote}>
-        <svg
-          width="16"
-          height="16"
-          viewBox="0 0 24 24"
-          fill="none"
-          stroke="currentColor"
-          strokeWidth="1.7"
-          strokeLinecap="round"
-          strokeLinejoin="round"
-        >
-          <path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9M10.3 21a1.9 1.9 0 0 0 3.4 0"></path>
-        </svg>
+        <Bell size={16} strokeWidth={1.7} />
         Everything also appears in your notification bell.
       </p>
     </>
@@ -216,6 +153,7 @@ export const SettingsNotifications = ({
 export const SettingsPayouts = ({ props }: PageProps) => {
   const status = props.payoutStatus || "active";
   const view = getPayoutStatus(status, props.pauseReason);
+  const { icon: StatusIcon } = view;
 
   // the status palette comes from getPayoutStatus
   const statusStyle = {
@@ -236,18 +174,7 @@ export const SettingsPayouts = ({ props }: PageProps) => {
       <SettingsSection label="Payout status" heading="Status">
         <div className={payouts.statusCard} role="status" style={statusStyle}>
           <span className={payouts.statusChip}>
-            <svg
-              width="20"
-              height="20"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="1.8"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-            >
-              <path d={view.icon}></path>
-            </svg>
+            <StatusIcon size={20} strokeWidth={1.8} />
           </span>
           <div className={payouts.statusText}>
             <div className={payouts.statusTitle}>{view.title}</div>
@@ -263,7 +190,7 @@ export const SettingsPayouts = ({ props }: PageProps) => {
             }}
           >
             {view.buttonLabel}
-            <ExternalIcon />
+            <ArrowUpRight size={15} strokeWidth={1.7} />
           </button>
         </div>
       </SettingsSection>
@@ -273,7 +200,7 @@ export const SettingsPayouts = ({ props }: PageProps) => {
           <div className={payouts.bankCard}>
             <div className={shared.rowText}>
               <div className={payouts.managed}>
-                <LockIcon />
+                <Lock size={14} strokeWidth={1.5} />
                 Managed in Stripe
               </div>
               <div className={payouts.bankName}>
@@ -292,7 +219,7 @@ export const SettingsPayouts = ({ props }: PageProps) => {
               onClick={props.onOpenStripe}
             >
               Update in Stripe
-              <ExternalIcon />
+              <ArrowUpRight size={15} strokeWidth={1.7} />
             </button>
           </div>
         </SettingsSection>
@@ -306,7 +233,7 @@ export const SettingsPayouts = ({ props }: PageProps) => {
           </p>
           {!!props.isNew && (
             <div className={payouts.firstPayout}>
-              <InfoIcon className={shared.infoIcon} />
+              <Info className={shared.infoIcon} size={16} strokeWidth={1.7} />
               Your first payout can take 7 to 14 days. Payments for your first 5
               bookings are released 24 hours after each appointment.
             </div>
@@ -321,18 +248,7 @@ export const SettingsPayouts = ({ props }: PageProps) => {
             onClick={() => props.onNavigate?.("earnings")}
           >
             View payout history in Earnings
-            <svg
-              width="15"
-              height="15"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="1.7"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-            >
-              <path d="M5 12h14M13 6l6 6-6 6"></path>
-            </svg>
+            <ArrowRight size={15} strokeWidth={1.7} />
           </button>
         </div>
       </SettingsSection>
@@ -357,20 +273,11 @@ export const SettingsPayouts = ({ props }: PageProps) => {
           {!tax && !taxEditing && (
             <div className={payouts.taxHold} role="alert">
               <span className={payouts.taxHoldText}>
-                <svg
+                <TriangleAlert
                   className={payouts.taxHoldIcon}
-                  width="18"
-                  height="18"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="1.7"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                >
-                  <path d="M10.3 3.9 1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0z"></path>
-                  <path d="M12 9v4M12 17v.01"></path>
-                </svg>
+                  size={18}
+                  strokeWidth={1.7}
+                />
                 Payouts on hold. Add your tax details to get paid.
               </span>
               <button
@@ -386,7 +293,7 @@ export const SettingsPayouts = ({ props }: PageProps) => {
             <>
               <div className={payouts.taxHead}>
                 <span className={payouts.completeTag}>
-                  <TickIcon size={13} strokeWidth="2.4" />
+                  <Check size={13} strokeWidth={2.4} />
                   Complete
                 </span>
                 <button
@@ -490,7 +397,7 @@ export const SettingsCalendar = ({
                   <div className={shared.badgeRow}>
                     <span className={shared.rowValue}>{GOOGLE_EMAIL}</span>
                     <span className={calendar.connectedTag}>
-                      <TickIcon size={12} strokeWidth="2.4" />
+                      <Check size={12} strokeWidth={2.4} />
                       Connected
                     </span>
                   </div>
@@ -549,20 +456,11 @@ export const SettingsCalendar = ({
                   </option>
                   <option value="main">{GOOGLE_EMAIL}</option>
                 </select>
-                <svg
+                <ChevronDown
                   className={calendar.selectChevron}
-                  width="16"
-                  height="16"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="2"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  aria-hidden="true"
-                >
-                  <path d="m6 9 6 6 6-6"></path>
-                </svg>
+                  size={16}
+                  strokeWidth={2}
+                />
               </span>
               <div className={calendar.disconnectRow}>
                 <button
@@ -623,19 +521,7 @@ export const SettingsCalendar = ({
                 toast("Link copied");
               }}
             >
-              <svg
-                width="15"
-                height="15"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="1.7"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-              >
-                <rect x="9" y="9" width="12" height="12" rx="2"></rect>
-                <path d="M5 15V5a2 2 0 0 1 2-2h10"></path>
-              </svg>
+              <Copy size={15} strokeWidth={1.7} />
               Copy link
             </button>
             <button

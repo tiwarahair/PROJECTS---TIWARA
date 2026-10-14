@@ -1,5 +1,6 @@
+import { Check, Shield, TriangleAlert } from "lucide-react";
 import { joinClassNames } from "../../utils/class-names";
-import { SettingsSection, TickPath } from "./settings-fields";
+import { SettingsSection } from "./settings-fields";
 import type { AccountSettingsProps } from "./use-account-settings";
 import shared from "../../styles/components/account-settings/account-settings.module.css";
 import styles from "../../styles/components/account-settings/settings-two-factor.module.css";
@@ -33,18 +34,7 @@ export const SettingsTwoFactor = ({ props }: SettingsTwoFactorProps) => {
             )}
             {isTwoFactorOn && (
               <div className={styles.tfaOn}>
-                <svg
-                  width="14"
-                  height="14"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="2.2"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                >
-                  <TickPath />
-                </svg>
+                <Check size={14} strokeWidth={2.2} />
                 On
               </div>
             )}
@@ -105,37 +95,17 @@ export const SettingsTwoFactor = ({ props }: SettingsTwoFactorProps) => {
         </div>
         {isTwoFactorOn && !twoFactorDevices.some(({ backup }) => backup) && (
           <div className={styles.backupNote} role="note">
-            <svg
+            <TriangleAlert
               className={shared.infoIcon}
-              width="15"
-              height="15"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="var(--accent-500,#b5541f)"
-              strokeWidth="1.8"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-            >
-              <path d="M12 9v4M12 17h.01"></path>
-              <path d="M10.3 3.9 1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0z"></path>
-            </svg>
+              size={15}
+              color="var(--accent-500,#b5541f)"
+              strokeWidth={1.8}
+            />
             Add a backup so you don’t get locked out.
           </div>
         )}
         <div className={styles.requiredNote}>
-          <svg
-            className={shared.infoIcon}
-            width="15"
-            height="15"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            strokeWidth="1.5"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-          >
-            <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path>
-          </svg>
+          <Shield className={shared.infoIcon} size={15} strokeWidth={1.5} />
           Required to keep your account and payouts secure.
         </div>
       </div>

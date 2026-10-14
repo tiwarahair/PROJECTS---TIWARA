@@ -1,4 +1,5 @@
 import type { ChangeEvent, KeyboardEvent, ReactNode } from "react";
+import { Check, ChevronDown, CircleAlert } from "lucide-react";
 import type { PolicyMode } from "../../types/policy";
 import { joinClassNames } from "../../utils/class-names";
 import type { FeeState } from "./payment-policy-logic";
@@ -45,19 +46,7 @@ export const ErrorLine = ({
   children: ReactNode;
 }) => (
   <div className={className} role="alert">
-    <svg
-      className={styles.errorIcon}
-      width="15"
-      height="15"
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="1.5"
-      strokeLinecap="round"
-    >
-      <circle cx="12" cy="12" r="10"></circle>
-      <path d="M12 7v6M12 16.5v.5"></path>
-    </svg>
+    <CircleAlert className={styles.errorIcon} size={15} strokeWidth={1.5} />
     {children}
   </div>
 );
@@ -135,20 +124,7 @@ export const Select = ({
         </option>
       ))}
     </select>
-    <svg
-      className={styles.selectChevron}
-      width="16"
-      height="16"
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="2"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      aria-hidden="true"
-    >
-      <path d="m6 9 6 6 6-6"></path>
-    </svg>
+    <ChevronDown className={styles.selectChevron} size={16} strokeWidth={2} />
   </span>
 );
 
@@ -216,22 +192,15 @@ export const FeeBlock = ({
             fee.on ? styles.boxOn : styles.boxOff,
           )}
         >
-          <svg
+          <Check
             className={joinClassNames(
               styles.feeTick,
               fee.on ? styles.tickOn : styles.tickOff,
             )}
-            width="14"
-            height="14"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="#fffefb"
-            strokeWidth="3"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-          >
-            <path d="M5 12.5l4.5 4.5L19 7.5"></path>
-          </svg>
+            size={14}
+            color="#fffefb"
+            strokeWidth={3}
+          />
         </span>
         <span className={styles.feeLabel}>{label}</span>
       </button>

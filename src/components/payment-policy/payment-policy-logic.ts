@@ -1,5 +1,18 @@
 // PaymentPolicy state, validation and save-bar summary.
+import { Calendar, Clock, CreditCard, Info, UserX } from "lucide-react";
+import type { LucideIcon } from "lucide-react";
+import { policyIcons } from "../../data";
 import type { Policy, PolicyMode } from "../../types/policy";
+
+const POLICY_LINE_ICONS: Record<string, LucideIcon> = {
+  [policyIcons.payment]: CreditCard,
+  [policyIcons.calendar]: Calendar,
+  [policyIcons.late]: Clock,
+  [policyIcons.noShow]: UserX,
+};
+
+export const getPolicyLineIcon = (path: string): LucideIcon =>
+  POLICY_LINE_ICONS[path] ?? Info;
 
 export type PolicyPreset =
   "default" | "full" | "card" | "none" | "error" | "unsaved";

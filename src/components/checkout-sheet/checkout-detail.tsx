@@ -1,40 +1,11 @@
 import type { CSSProperties } from "react";
+import { ChevronRight } from "lucide-react";
 import { joinClassNames } from "../../utils/class-names";
 import { TONES } from "./checkout-view";
 import type { CheckoutViewModel, DetailRow } from "./checkout-view";
 import type { CheckoutController } from "./use-checkout";
 import flow from "../../styles/components/checkout-sheet/checkout-flow.module.css";
 import shared from "../../styles/components/checkout-sheet/checkout-sheet.module.css";
-
-export const Icon = ({
-  path,
-  size,
-  stroke = "currentColor",
-  strokeWidth,
-  className,
-  isRound = true,
-}: {
-  path: string;
-  size: number;
-  stroke?: string;
-  strokeWidth: string;
-  className?: string;
-  isRound?: boolean;
-}) => (
-  <svg
-    className={className}
-    width={size}
-    height={size}
-    viewBox="0 0 24 24"
-    fill="none"
-    stroke={stroke}
-    strokeWidth={strokeWidth}
-    strokeLinecap="round"
-    strokeLinejoin={isRound ? "round" : undefined}
-  >
-    <path d={path}></path>
-  </svg>
-);
 
 /** Label (+ sub line) and amount. */
 export const AmountRow = ({
@@ -92,7 +63,7 @@ export const CheckoutDetail = ({
     >
       <div>
         <div className={flow.badges}>
-          {badges.map(({ label, icon, tone }) => {
+          {badges.map(({ label, icon: BadgeIcon, tone }) => {
             // the badge colours come from the tone table
             const toneStyle = {
               "--badge-bg": TONES[tone].background,
@@ -105,7 +76,7 @@ export const CheckoutDetail = ({
                 className={joinClassNames(flow.badge)}
                 style={toneStyle}
               >
-                <Icon path={icon} size={14} strokeWidth="2" />
+                <BadgeIcon size={14} strokeWidth={2} />
                 {label}
               </span>
             );
@@ -134,14 +105,13 @@ export const CheckoutDetail = ({
             panel.tone === "red" ? flow.panelRed : flow.panelNeutral,
           )}
         >
-          <Icon
+          <panel.icon
             className={shared.iconTop2}
-            path={panel.icon}
             size={18}
-            stroke={
+            color={
               panel.tone === "red" ? "var(--accent-700)" : "var(--neutral-700)"
             }
-            strokeWidth="1.7"
+            strokeWidth={1.7}
           />
           <div className={shared.minWidth}>
             <div
@@ -176,20 +146,18 @@ export const CheckoutDetail = ({
       )}
       {links.length > 0 && (
         <div className={flow.stack8}>
-          {links.map(({ key, label, icon, run }) => (
+          {links.map(({ key, label, icon: LinkIcon, run }) => (
             <button key={key} className={flow.linkRow} onClick={run}>
-              <Icon
-                path={icon}
+              <LinkIcon
                 size={18}
-                stroke="var(--neutral-600)"
-                strokeWidth="1.7"
+                color="var(--neutral-600)"
+                strokeWidth={1.7}
               />
               <span className={flow.linkLabel}>{label}</span>
-              <Icon
-                path="m9 18 6-6-6-6"
+              <ChevronRight
                 size={16}
-                stroke="var(--neutral-500)"
-                strokeWidth="1.7"
+                color="var(--neutral-500)"
+                strokeWidth={1.7}
               />
             </button>
           ))}

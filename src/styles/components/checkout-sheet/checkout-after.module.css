@@ -19,8 +19,8 @@
   animation: ckpop 0.32s cubic-bezier(0.23, 1, 0.32, 1) both;
 }
 
-.doneTickPath {
-  stroke-dasharray: 26;
+.doneTick path {
+  stroke-dasharray: 23;
   animation: ckdraw 0.36s 0.12s cubic-bezier(0.23, 1, 0.32, 1) both;
 }
 
@@ -429,7 +429,7 @@
 
 @keyframes ckdraw {
   from {
-    stroke-dashoffset: 26;
+    stroke-dashoffset: 23;
   }
   to {
     stroke-dashoffset: 0;

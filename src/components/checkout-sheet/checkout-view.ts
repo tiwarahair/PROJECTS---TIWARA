@@ -6,6 +6,7 @@ import {
   parsePounds,
 } from "./checkout-data";
 import type { CheckoutLine, CheckoutView, PayMethod } from "./checkout-data";
+import type { LucideIcon } from "lucide-react";
 import type { CheckoutController, CheckoutSheetProps } from "./use-checkout";
 import { formatMoney, roundToPence } from "../../utils/money";
 
@@ -21,7 +22,7 @@ type Tone = "green" | "rust" | "red" | "neutral";
 
 interface Badge {
   label: string;
-  icon: string;
+  icon: LucideIcon;
   tone: Tone;
 }
 
@@ -172,7 +173,7 @@ export const getCheckoutView = (
 
   let panel: {
     tone: "red" | "neutral";
-    icon: string;
+    icon: LucideIcon;
     title: string;
     body: string;
   } | null = null;
@@ -180,8 +181,12 @@ export const getCheckoutView = (
   let rows: DetailRow[] = [];
   let total = { label: "", value: "" };
 
-  let links: { key: string; label: string; icon: string; run: () => void }[] =
-    [];
+  let links: {
+    key: string;
+    label: string;
+    icon: LucideIcon;
+    run: () => void;
+  }[] = [];
 
   let actions: DetailAction[] = [];
   let hasUndo = false;

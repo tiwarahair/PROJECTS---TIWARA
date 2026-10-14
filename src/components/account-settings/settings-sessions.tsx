@@ -1,3 +1,4 @@
+import { LogOut } from "lucide-react";
 import { joinClassNames } from "../../utils/class-names";
 import { SESSION_ICONS } from "./account-settings-logic";
 import { SettingsSection, Switch } from "./settings-fields";
@@ -37,70 +38,54 @@ export const SettingsSessions = ({
           {!state.sessionsLoading && (
             <>
               {state.sessions.map(
-                ({ id, device, location, last, isCurrent, kind }) => (
-                  <div key={id} className={styles.sessionRow}>
-                    <span className={styles.sessionIcon}>
-                      <svg
-                        width="18"
-                        height="18"
-                        viewBox="0 0 24 24"
-                        fill="none"
-                        stroke="currentColor"
-                        strokeWidth="1.7"
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                      >
-                        <path d={SESSION_ICONS[kind]}></path>
-                      </svg>
-                    </span>
-                    <div className={styles.sessionBody}>
-                      <div className={styles.sessionMain}>
-                        <div className={shared.badgeRow}>
-                          <span className={shared.strongText}>{device}</span>
-                          {isCurrent && (
-                            <span className={styles.currentTag}>Current</span>
-                          )}
-                        </div>
-                        <div className={shared.rowLabel}>{location}</div>
-                      </div>
-                      <div className={styles.sessionLast}>{last}</div>
-                    </div>
-                    {!isCurrent && (
-                      <button
-                        className={joinClassNames(
-                          styles.signOut,
-                          shared.focusRing,
-                        )}
-                        data-ac-in="1"
-                        onClick={() => {
-                          setState(({ sessions }) => ({
-                            sessions: sessions.filter((item) => item.id !== id),
-                          }));
+                ({ id, device, location, last, isCurrent, kind }) => {
+                  const SessionIcon = SESSION_ICONS[kind];
 
-                          toast(`Signed out of ${device.split(",")[0]}`);
-                        }}
-                        aria-label={`Sign out of ${device}`}
-                        title="Sign out"
-                      >
-                        <svg
-                          width="17"
-                          height="17"
-                          viewBox="0 0 24 24"
-                          fill="none"
-                          stroke="currentColor"
-                          strokeWidth="1.7"
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
+                  return (
+                    <div key={id} className={styles.sessionRow}>
+                      <span className={styles.sessionIcon}>
+                        <SessionIcon size={18} strokeWidth={1.7} />
+                      </span>
+                      <div className={styles.sessionBody}>
+                        <div className={styles.sessionMain}>
+                          <div className={shared.badgeRow}>
+                            <span className={shared.strongText}>{device}</span>
+                            {isCurrent && (
+                              <span className={styles.currentTag}>Current</span>
+                            )}
+                          </div>
+                          <div className={shared.rowLabel}>{location}</div>
+                        </div>
+                        <div className={styles.sessionLast}>{last}</div>
+                      </div>
+                      {!isCurrent && (
+                        <button
+                          className={joinClassNames(
+                            styles.signOut,
+                            shared.focusRing,
+                          )}
+                          data-ac-in="1"
+                          onClick={() => {
+                            setState(({ sessions }) => ({
+                              sessions: sessions.filter(
+                                (item) => item.id !== id,
+                              ),
+                            }));
+
+                            toast(`Signed out of ${device.split(",")[0]}`);
+                          }}
+                          aria-label={`Sign out of ${device}`}
+                          title="Sign out"
                         >
-                          <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4M16 17l5-5-5-5M21 12H9"></path>
-                        </svg>
-                      </button>
-                    )}
-                    {isCurrent && (
-                      <span className={styles.signOutSpacer}></span>
-                    )}
-                  </div>
-                ),
+                          <LogOut size={17} strokeWidth={1.7} />
+                        </button>
+                      )}
+                      {isCurrent && (
+                        <span className={styles.signOutSpacer}></span>
+                      )}
+                    </div>
+                  );
+                },
               )}
               {!hasOthers && (
                 <p className={styles.noOthers}>

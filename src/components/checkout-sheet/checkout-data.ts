@@ -1,4 +1,17 @@
 // CheckoutSheet demo bookings and money maths.
+import {
+  Banknote,
+  Check,
+  Clock,
+  CreditCard,
+  Link,
+  Receipt,
+  Send,
+  TriangleAlert,
+  Undo2,
+  UserCheck,
+} from "lucide-react";
+import type { LucideIcon } from "lucide-react";
 import { roundToPence } from "../../utils/money";
 
 export type PaymentMode = "deposit" | "full" | "card" | "none";
@@ -256,19 +269,17 @@ export const DEFAULT_STYLIST: CheckoutStylist = {
 };
 
 export const ICONS = {
-  check: "M20 6 9 17l-5-5",
-  clock: "M12 22a10 10 0 1 0 0-20 10 10 0 0 0 0 20zM12 6v6l4 2",
-  alert:
-    "M12 9v4M12 17h.01M10.3 3.9 1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0Z",
-  person:
-    "M16 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2M10 11a4 4 0 1 0 0-8 4 4 0 0 0 0 8zM16 11l2 2 4-4",
-  card: "M3 5h18a1 1 0 0 1 1 1v12a1 1 0 0 1-1 1H3a1 1 0 0 1-1-1V6a1 1 0 0 1 1-1zM2 10h20",
-  link: "M10 13a5 5 0 0 0 7.5.5l3-3a5 5 0 0 0-7-7l-1.7 1.7M14 11a5 5 0 0 0-7.5-.5l-3 3a5 5 0 0 0 7 7l1.7-1.7",
-  cash: "M2 7h20v10H2zM12 15a3 3 0 1 0 0-6 3 3 0 0 0 0 6z",
-  returnArrow: "M9 14 4 9l5-5M4 9h11a5 5 0 0 1 0 10h-3",
-  receipt: "M5 3h14v18l-3-2-2 2-2-2-2 2-2-2-3 2zM9 8h6M9 12h6",
-  send: "M22 2 11 13M22 2l-7 20-4-9-9-4z",
-};
+  check: Check,
+  clock: Clock,
+  alert: TriangleAlert,
+  person: UserCheck,
+  card: CreditCard,
+  link: Link,
+  cash: Banknote,
+  returnArrow: Undo2,
+  receipt: Receipt,
+  send: Send,
+} satisfies Record<string, LucideIcon>;
 
 export const parsePounds = (value: string): number => {
   const parsed = parseFloat(String(value || "").replace(/[^0-9.]/g, ""));
