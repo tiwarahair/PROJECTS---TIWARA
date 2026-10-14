@@ -3,7 +3,7 @@
 // email goes to Mailpit, so nothing local is ever delivered for real.
 import { createClient } from "npm:@supabase/supabase-js@2";
 import { renderEmail } from "./templates.ts";
-import type { RenderedEmail } from "./templates.ts";
+import type { RenderedEmail } from "../_shared/email-layout.ts";
 
 const FROM_EMAIL = "info@tiwarashouse.com";
 const FROM_NAME = "Tiwára’s House";
