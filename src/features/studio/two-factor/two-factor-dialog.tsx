@@ -104,6 +104,7 @@ export const TwoFactorDialog = ({ studio }: TwoFactorDialogProps) => {
         className={joinClassNames(
           styles.dialog,
           isWide && styles.dialogWide,
+          view.isTax && styles.dialogTax,
           getOverlayAnimation(view.isOut, "dialog", isWide),
         )}
         role="dialog"
@@ -148,11 +149,6 @@ export const TwoFactorDialog = ({ studio }: TwoFactorDialogProps) => {
           >
             {view.title}
           </h2>
-          {view.isFinishLater && (
-            <button className={styles.finishLater} onClick={view.close}>
-              Finish later
-            </button>
-          )}
           {view.isCloseShown && (
             <button
               className={joinClassNames(styles.iconButton, styles.headClose)}

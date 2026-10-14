@@ -159,8 +159,7 @@ export const getTwoFactorView = (studio: StudioController) => {
     isProgressShown:
       flow.flow === "setup" && step !== "done" && step !== "learn",
     progress: `${[isOn, !!tax, isStripe].filter(Boolean).length} of 3 done`,
-    isFinishLater: step === "tax" && flow.flow === "setup",
-    isCloseShown: step !== "done" && !(step === "tax" && flow.flow === "setup"),
+    isCloseShown: step !== "done",
     hasLearn: step === "tax",
     openLearn: () => goStep("learn", { from: "tax" }),
     learnLabel: flow.from === "tax" ? "Back to tax details" : "Close",

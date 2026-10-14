@@ -71,6 +71,21 @@ describe("Studio → two-step verification", () => {
     ).not.toBeInTheDocument();
   });
 
+  it("the tax details step closes with the X, not Finish later", async () => {
+    renderFixture("secure-unlocked");
+    await user.click(within(getDialog()).getByRole("button", { name: "Add" }));
+
+    const dialog = getDialog();
+
+    expect(within(dialog).getByText("Tax details")).toBeInTheDocument();
+
+    expect(
+      within(dialog).getByRole("button", { name: "Close" }),
+    ).toBeInTheDocument();
+
+    expect(within(dialog).queryByText("Finish later")).not.toBeInTheDocument();
+  });
+
   it("a wrong code is rejected and the right one moves on to a backup", async () => {
     renderFixture("tf-app");
     const dialog = getDialog();

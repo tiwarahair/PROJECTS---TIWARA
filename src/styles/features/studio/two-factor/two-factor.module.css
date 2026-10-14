@@ -35,6 +35,12 @@
   border-radius: var(--radius-lg, 24px);
 }
 
+@media (min-width: 1024px) {
+  .dialogTax {
+    max-width: 560px;
+  }
+}
+
 .doneClose {
   position: absolute;
   top: 14px;
@@ -111,25 +117,6 @@
   text-wrap: pretty;
   hyphens: manual;
   text-align: left;
-}
-
-.finishLater {
-  flex: 0 0 auto;
-  height: 36px;
-  padding: 0 4px;
-  margin: -4px -4px 0 8px;
-  border: none;
-  background: none;
-  font: inherit;
-  font-size: 14.5px;
-  font-weight: 600;
-  color: var(--text-secondary);
-  cursor: pointer;
-  white-space: nowrap;
-}
-
-.finishLater:hover {
-  color: var(--text-primary) !important;
 }
 
 .sub {
