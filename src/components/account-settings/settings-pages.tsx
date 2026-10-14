@@ -238,7 +238,9 @@ export const SettingsPayouts = ({ props }: PageProps) => {
             className={joinClassNames(payouts.statusButton, shared.focusRing)}
             data-ac-in="1"
             onClick={() => {
-              if (status === "none") props.onConnectStripe?.();
+              if (status === "none" || status === "action")
+                props.onConnectStripe?.();
+              else props.onOpenStripe?.();
             }}
           >
             {view.buttonLabel}
@@ -256,12 +258,19 @@ export const SettingsPayouts = ({ props }: PageProps) => {
                 Managed in Stripe
               </div>
               <div className={payouts.bankName}>
-                Monzo <span className={payouts.bankDigits}>•••• 4821</span>
+                {props.payoutBank === undefined ? (
+                  <>
+                    Monzo <span className={payouts.bankDigits}>•••• 4821</span>
+                  </>
+                ) : (
+                  (props.payoutBank ?? "No bank account yet")
+                )}
               </div>
             </div>
             <button
               className={joinClassNames(payouts.updateStripe, shared.focusRing)}
               data-ac-in="1"
+              onClick={props.onOpenStripe}
             >
               Update in Stripe
               <ExternalIcon />

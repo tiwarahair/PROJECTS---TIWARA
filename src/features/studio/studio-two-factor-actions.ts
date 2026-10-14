@@ -21,7 +21,7 @@ const WRONG_CODE =
 const FAILED = "That didn’t work. Check your connection and try again.";
 
 export const createTwoFactorActions = (
-  { getState, setState, timers }: StudioContext,
+  { getState, setState, timers, memo }: StudioContext,
   {
     showToast,
     checkDone,
@@ -209,6 +209,8 @@ export const createTwoFactorActions = (
 
   /** Tax details need an app code from the last 30 days; within that, no code is asked for. */
   const openTaxEdit = async () => {
+    memo.afterSecondFactor = undefined;
+
     if (isReal() && (await hasRecentSecondFactor().catch(() => false)))
       return setState({ taxEdit: true });
 
@@ -257,7 +259,13 @@ export const createTwoFactorActions = (
       (code) => verifySecondFactor(code),
       () => {
         closeTwoFactor();
-        setState({ taxEdit: true });
+
+        const next = memo.afterSecondFactor;
+
+        memo.afterSecondFactor = undefined;
+
+        if (next) next();
+        else setState({ taxEdit: true });
       },
     );
 

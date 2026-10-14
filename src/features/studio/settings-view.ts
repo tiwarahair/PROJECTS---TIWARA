@@ -124,10 +124,12 @@ export const getSettingsView = (
       setState({ page: "payouts" });
       scrollBody(0, false);
     },
-    payoutStatus: (!state.check?.stripe
-      ? "none"
-      : props.payouts || "active") as
-      "none" | "verifying" | "action" | "paused" | "active",
+    payoutStatus:
+      state.payoutStatus ??
+      ((!state.check?.stripe ? "none" : props.payouts || "active") as
+        "none" | "verifying" | "action" | "paused" | "active"),
+    payoutBank: state.payoutBank,
+    openStripeDashboard: () => void actions.openStripeDashboard(),
     accountUpcoming: isNew
       ? 0
       : state.bookings.filter(

@@ -257,6 +257,17 @@ export const useStudio = (props: StudioProps) => {
         latest.current.context.applyState({ twoFactorSettings: { devices } }),
       )
       .catch(() => undefined);
+
+    // back from Stripe: ?stripe=return (or refresh, when its link expired)
+    const reason = getQueryParam("stripe");
+
+    if (!reason) return;
+
+    const url = new URL(window.location.href);
+
+    url.searchParams.delete("stripe");
+    window.history.replaceState(window.history.state, "", url);
+    void latest.current.actions.catchUpWithStripe(reason);
   }, [stylistId]);
 
   // leaving Studio (sign out, links) with unsaved edits

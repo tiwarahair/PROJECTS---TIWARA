@@ -1,5 +1,6 @@
 // The stylist's business from the database → the parts of Studio's state it fills.
-import type { StylistStudio } from "../../lib/studio-api";
+import type { PayoutStatus } from "../../components/account-settings/account-settings-logic";
+import type { StripeAccountState, StylistStudio } from "../../lib/studio-api";
 import { getPhotoUrl } from "../../lib/studio-api";
 import { toShownBusinessType } from "../../utils/business-type";
 import { MONDAY_FIRST_WEEKDAYS } from "../../utils/dates";
@@ -17,6 +18,21 @@ import {
   toTaxDetails,
 } from "./studio-settings-records";
 import type { StudioState } from "./studio-types";
+
+export const getPayoutStatus = ({
+  stripe_account_id,
+  charges_enabled,
+  payouts_enabled,
+  details_submitted,
+  stripe_requirements,
+}: StripeAccountState): PayoutStatus => {
+  if (!stripe_account_id) return "none";
+
+  // anything Stripe still needs from them (new accounts start "past due") sends them back to Stripe
+  if (stripe_requirements !== "none" || !details_submitted) return "action";
+
+  return charges_enabled && payouts_enabled ? "active" : "verifying";
+};
 
 const getClockTime = (time: string | null) => (time ?? "").slice(0, 5);
 
@@ -137,6 +153,9 @@ export const toStudioPatch = (
       ...state.check,
       availability: !!studio.availability_confirmed_at,
       profile: !!studio.profile_confirmed_at,
+      stripe: studio.charges_enabled && studio.payouts_enabled,
     },
+    payoutStatus: getPayoutStatus(studio),
+    payoutBank: studio.payout_bank,
   };
 };

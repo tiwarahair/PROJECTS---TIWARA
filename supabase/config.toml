@@ -439,3 +439,10 @@ verify_jwt = false
 # checks the caller's token itself (getClaims), including the recent 2FA rule
 [functions.save-tax-details]
 verify_jwt = false
+
+[functions.stripe-connect]
+verify_jwt = false
+
+# Stripe calls it; the signature is the check
+[functions.stripe-webhook]
+verify_jwt = false

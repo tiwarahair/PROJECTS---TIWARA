@@ -296,6 +296,8 @@ export const StripeSheet = ({ studio }: { studio: StudioController }) => {
   const { state, setState, actions } = studio;
 
   const connect = () => {
+    if (state.account) return void actions.startStripe();
+
     if (state.stripeBusy) return;
 
     setState({ stripeBusy: true });

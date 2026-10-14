@@ -474,6 +474,8 @@ export const getInitialStudioState = (): StudioState => {
     twoFactorOut: false,
     shareTip: false,
     stripeBusy: false,
+    payoutStatus: null,
+    payoutBank: null,
     nudge: true,
     serviceNudge: true,
     celebrated: false,

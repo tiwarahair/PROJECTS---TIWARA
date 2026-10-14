@@ -20,6 +20,7 @@ import type {
   StudioState,
 } from "./studio-types";
 import { removeBlock as removeBlockRow } from "../../lib/studio-api";
+import { createStripeActions } from "./studio-stripe-actions";
 import { createTwoFactorActions } from "./studio-two-factor-actions";
 
 export interface StudioContext {
@@ -33,6 +34,8 @@ export interface StudioContext {
   /** Values kept between renders (seen setup steps, the clash override, the last pointer type). */
   memo: {
     saveSlug?: () => Promise<boolean>;
+    /** What a confirmed app code goes on to (e.g. back to Stripe). */
+    afterSecondFactor?: () => void;
     seenDone?: ReturnType<typeof getSteps>;
     clashOk?: boolean;
     lastPointer?: string;
@@ -691,8 +694,14 @@ export const createStudioActions = (context: StudioContext) => {
     if (tip && tip.key === key) setState({ tip: { ...tip, text } });
   };
 
+  const twoFactor = createTwoFactorActions(context, { showToast, checkDone });
+
   return {
-    ...createTwoFactorActions(context, { showToast, checkDone }),
+    ...twoFactor,
+    ...createStripeActions(context, {
+      showToast,
+      openTwoFactor: twoFactor.openTwoFactor,
+    }),
     showToast,
     scrollBody,
     scrollCalendarToNow,

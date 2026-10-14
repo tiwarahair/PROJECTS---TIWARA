@@ -61,7 +61,9 @@ export const getTwoFactorView = (studio: StudioController) => {
     tax: "We’re required to collect this for tax reporting.",
     learn: "",
     taxcode:
-      "Enter a code from your authenticator app to edit your tax details.",
+      flow.from === "stripe"
+        ? "Enter a code from your authenticator app to continue to Stripe."
+        : "Enter a code from your authenticator app to edit your tax details.",
     method: "Choose how you’ll get a code each time you sign in.",
     app: "Scan the QR code with your authenticator app, then enter the 6-digit code it shows.",
     backup: "If you lose your phone, you’ll use this to log in.",

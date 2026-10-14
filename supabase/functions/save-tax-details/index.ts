@@ -2,15 +2,10 @@
 // encrypted here (AES-GCM, key in TAX_ENCRYPTION_KEY) and never returned, only a masked hint.
 import { createClient } from "npm:@supabase/supabase-js@2";
 import { z } from "npm:zod@4";
+import { corsHeaders, respond } from "../_shared/cors.ts";
+import { getRecentUser } from "../_shared/recent-user.ts";
 
-const RECENT_SECONDS = 30 * 86400;
 const NI_PATTERN = /^(?!BG|GB|NK|KN|TN|NT|ZZ)[A-CEGHJ-PR-TW-Z][A-CEGHJ-NPR-TW-Z]\d{6}[A-D]$/;
-
-const corsHeaders = {
-  "Access-Control-Allow-Origin": "*",
-  "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
-  "Access-Control-Allow-Methods": "POST, OPTIONS",
-};
 
 const text = (max: number) => z.string().trim().max(max);
 
@@ -40,9 +35,6 @@ const admin = createClient(
   Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!,
 );
 
-const respond = (status: number, body: object) =>
-  Response.json(body, { status, headers: corsHeaders });
-
 const toBase64 = (bytes: Uint8Array) => btoa(String.fromCharCode(...bytes));
 
 const encrypt = async (plain: string) => {
@@ -61,27 +53,10 @@ const encrypt = async (plain: string) => {
 /** "QQ123456C" → "QQ •• •• 56 C". */
 const getHint = (number: string) => `${number.slice(0, 2)} •• •• ${number.slice(6, 8)} ${number.slice(8)}`;
 
-/** The caller, if their session passed 2FA with an app code in the last 30 days. */
-const getRecentUser = async (request: Request) => {
-  const token = request.headers.get("Authorization")?.replace(/^Bearer /, "") ?? "";
-  const { data } = await admin.auth.getClaims(token);
-  const claims = data?.claims;
-
-  if (!claims?.sub || claims.aal !== "aal2") return null;
-
-  const cutoff = Date.now() / 1000 - RECENT_SECONDS;
-
-  const isRecent = (claims.amr ?? []).some(
-    (entry) => typeof entry === "object" && entry.method === "totp" && entry.timestamp > cutoff,
-  );
-
-  return isRecent ? claims.sub : null;
-};
-
 Deno.serve(async (request) => {
   if (request.method === "OPTIONS") return new Response("ok", { headers: corsHeaders });
 
-  const userId = await getRecentUser(request);
+  const userId = await getRecentUser(admin, request);
 
   if (!userId) return respond(403, { error: "second_factor_required" });
 

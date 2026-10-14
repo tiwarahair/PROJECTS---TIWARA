@@ -75,6 +75,10 @@ export interface AccountSettingsProps {
   onTaxSave?: (details: TaxDetails) => void;
   onTaxCancel?: () => void;
   onTaxDirty?: (isDirty: boolean) => void;
+  /** Opens the stylist's Stripe Express dashboard. */
+  onOpenStripe?: () => void;
+  /** The payout bank Stripe reports, e.g. "Monzo •••• 4821". */
+  payoutBank?: string | null;
   /** Where the changes save; demo boards leave it out. */
   backend?: AccountSettingsBackend;
   onTaxLearnMore?: () => void;

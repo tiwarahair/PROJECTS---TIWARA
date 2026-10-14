@@ -181,6 +181,30 @@ export const saveTaxDetails = async (details: TaxDetails) => {
   return data?.nationalInsuranceHint ?? "";
 };
 
+/** Stripe Connect: an onboarding or dashboard link, or the account's refreshed status. */
+export interface StripeAccountState {
+  url?: string;
+  stripe_account_id?: string | null;
+  charges_enabled?: boolean;
+  payouts_enabled?: boolean;
+  details_submitted?: boolean;
+  stripe_requirements?: string;
+  payout_bank?: string | null;
+}
+
+export const callStripe = async (
+  action: "onboard" | "dashboard" | "refresh",
+) => {
+  const { data, error } = await supabase.functions.invoke<StripeAccountState>(
+    "stripe-connect",
+    { body: { action } },
+  );
+
+  if (error) throw error;
+
+  return data ?? {};
+};
+
 /** Takes the booking page offline; it can be reopened for 15 days. */
 export const closeBusiness = () => check(supabase.rpc("close_business"));
 

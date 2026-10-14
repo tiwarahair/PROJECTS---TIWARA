@@ -689,6 +689,25 @@ export type Database = {
           },
         ];
       };
+      stripe_events: {
+        Row: {
+          id: string;
+          received_at: string;
+          type: string;
+        };
+        ComputedFields: never;
+        Insert: {
+          id: string;
+          received_at?: string;
+          type: string;
+        };
+        Update: {
+          id?: string;
+          received_at?: string;
+          type?: string;
+        };
+        Relationships: [];
+      };
       stylist_categories: {
         Row: {
           colour: string | null;
@@ -869,11 +888,13 @@ export type Database = {
           bio: string | null;
           business_name: string;
           business_type: string;
+          charges_enabled: boolean;
           closed_at: string | null;
           contact_email: string | null;
           contact_phone: string | null;
           cover_path: string | null;
           created_at: string;
+          details_submitted: boolean;
           id: string;
           instagram: string | null;
           location: unknown;
@@ -882,11 +903,15 @@ export type Database = {
           partner_terms_version: string;
           pause_on: boolean;
           pause_until: string | null;
+          payout_bank: string | null;
+          payouts_enabled: boolean;
           profile_confirmed_at: string | null;
           referral_source: string | null;
           slug: string;
           slug_changed_at: string | null;
           status: string;
+          stripe_account_id: string | null;
+          stripe_requirements: string;
           tiktok: string | null;
           travel_radius_miles: number | null;
           vat_number: string | null;
@@ -902,11 +927,13 @@ export type Database = {
           bio?: string | null;
           business_name: string;
           business_type: string;
+          charges_enabled?: boolean;
           closed_at?: string | null;
           contact_email?: string | null;
           contact_phone?: string | null;
           cover_path?: string | null;
           created_at?: string;
+          details_submitted?: boolean;
           id?: string;
           instagram?: string | null;
           location?: unknown;
@@ -915,11 +942,15 @@ export type Database = {
           partner_terms_version: string;
           pause_on?: boolean;
           pause_until?: string | null;
+          payout_bank?: string | null;
+          payouts_enabled?: boolean;
           profile_confirmed_at?: string | null;
           referral_source?: string | null;
           slug: string;
           slug_changed_at?: string | null;
           status?: string;
+          stripe_account_id?: string | null;
+          stripe_requirements?: string;
           tiktok?: string | null;
           travel_radius_miles?: number | null;
           vat_number?: string | null;
@@ -934,11 +965,13 @@ export type Database = {
           bio?: string | null;
           business_name?: string;
           business_type?: string;
+          charges_enabled?: boolean;
           closed_at?: string | null;
           contact_email?: string | null;
           contact_phone?: string | null;
           cover_path?: string | null;
           created_at?: string;
+          details_submitted?: boolean;
           id?: string;
           instagram?: string | null;
           location?: unknown;
@@ -947,11 +980,15 @@ export type Database = {
           partner_terms_version?: string;
           pause_on?: boolean;
           pause_until?: string | null;
+          payout_bank?: string | null;
+          payouts_enabled?: boolean;
           profile_confirmed_at?: string | null;
           referral_source?: string | null;
           slug?: string;
           slug_changed_at?: string | null;
           status?: string;
+          stripe_account_id?: string | null;
+          stripe_requirements?: string;
           tiktok?: string | null;
           travel_radius_miles?: number | null;
           vat_number?: string | null;
@@ -1138,6 +1175,7 @@ export type Database = {
         };
         Returns: string;
       };
+      refresh_go_live: { Args: { target: string }; Returns: undefined };
       reopen_business: { Args: Record<PropertyKey, never>; Returns: undefined };
       resolve_slug: { Args: { lookup: string }; Returns: string };
       slugify: { Args: { value: string }; Returns: string };

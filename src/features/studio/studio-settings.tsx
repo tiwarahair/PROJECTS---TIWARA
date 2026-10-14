@@ -520,6 +520,8 @@ const SettingsFrame = ({
                 onToast={(text) => actions.showToast(text)}
                 onState={view.onAccountState}
                 onConnectStripe={view.connectStripe}
+                onOpenStripe={view.openStripeDashboard}
+                payoutBank={view.payoutBank}
                 twoFactorDevices={state.twoFactorSettings.devices}
                 onTwoFactorTurnOn={view.onTwoFactorTurnOn}
                 onTwoFactorAddBackup={view.onTwoFactorAddBackup}

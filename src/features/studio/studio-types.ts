@@ -3,6 +3,7 @@ import type { NOTIFS } from "./studio-data";
 import type { BusinessValue } from "../../components/business-details/business-details-logic";
 import type { PolicyValue } from "../../components/payment-policy/payment-policy-logic";
 import type { TwoFactorEnrolment } from "../../lib/two-factor";
+import type { PayoutStatus } from "../../components/account-settings/account-settings-logic";
 import type { TaxDetails } from "../../components/tax-details-form/tax-details-logic";
 import type { ServiceType } from "../../types/service-type";
 
@@ -561,6 +562,9 @@ export interface StudioState {
   twoFactorOut: boolean;
   shareTip: boolean;
   stripeBusy: boolean;
+  /** A real account's Stripe status and payout bank (demo boards derive the status from check.stripe). */
+  payoutStatus: PayoutStatus | null;
+  payoutBank: string | null;
   nudge: boolean;
   serviceNudge: boolean;
   celebrated: boolean;
