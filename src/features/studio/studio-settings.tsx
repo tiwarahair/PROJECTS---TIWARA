@@ -80,8 +80,8 @@ const SettingsRoot = ({
                   <span className={styles.rowIcon}>
                     <RowIcon
                       className={styles.blockIcon}
-                      size={15}
-                      strokeWidth={1.7}
+                      size={18}
+                      strokeWidth={1.8}
                     />
                   </span>
                   <span className={styles.grow}>
