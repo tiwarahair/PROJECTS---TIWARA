@@ -11,12 +11,15 @@ interface SessionState {
   user: SessionUser | null;
   /** True once Supabase has reported the initial session. */
   ready: boolean;
+  /** They signed out themselves, so signed-in pages send them home rather than to log in. */
+  hasSignedOut: boolean;
 }
 
 const initialState: SessionState = {
   loggedIn: false,
   user: null,
   ready: false,
+  hasSignedOut: false,
 };
 
 export const sessionSlice = createSlice({
@@ -27,13 +30,20 @@ export const sessionSlice = createSlice({
       state.user = payload;
       state.loggedIn = !!payload;
       state.ready = true;
+
+      if (payload) state.hasSignedOut = false;
+    },
+    signedOut: (state) => {
+      state.user = null;
+      state.loggedIn = false;
+      state.hasSignedOut = true;
     },
   },
 });
 
-export const { sessionChanged } = sessionSlice.actions;
+export const { sessionChanged, signedOut } = sessionSlice.actions;
 
 export const logOut = () => (dispatch: Dispatch) => {
-  dispatch(sessionChanged(null));
+  dispatch(signedOut());
   void supabase.auth.signOut();
 };

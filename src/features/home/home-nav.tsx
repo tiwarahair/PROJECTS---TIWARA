@@ -9,6 +9,9 @@ import page from "../../styles/features/home/home-page.module.css";
 import styles from "../../styles/features/home/home-nav.module.css";
 import type { NavMorphState } from "./use-nav-morph";
 
+/** The centre links show from this width (home-page.module.css .mqDesk hides them up to 900px). */
+const NAV_LINKS_FROM = 901;
+
 interface HomeNavProps {
   morph: NavMorphState;
   loggedIn: boolean;
@@ -83,7 +86,11 @@ export const HomeNav = ({ morph, loggedIn }: HomeNavProps) => {
               </Link>
             )}
             {loggedIn ? (
-              <SiteMenu isSignedIn className={styles.account}>
+              <SiteMenu
+                isSignedIn
+                className={styles.account}
+                linksShownFrom={NAV_LINKS_FROM}
+              >
                 <AccountAvatar
                   initials={identity?.initials ?? ""}
                   hasChevron={false}
@@ -94,6 +101,7 @@ export const HomeNav = ({ morph, loggedIn }: HomeNavProps) => {
               <SiteMenu
                 isSignedIn={false}
                 className={joinClassNames(page.mqMob, styles.burger)}
+                linksShownFrom={NAV_LINKS_FROM}
               >
                 <span
                   className={joinClassNames(

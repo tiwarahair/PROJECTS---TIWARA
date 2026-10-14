@@ -143,7 +143,14 @@ describe("SearchPage", () => {
       within(menu)
         .getAllByRole("menuitem")
         .map((item) => item.textContent),
-    ).toEqual(["Find a stylist", "Services", "Log in", "Help & support"]);
+    ).toEqual([
+      "Find a stylist",
+      "Services",
+      "About",
+      "For stylists",
+      "Log in",
+      "Help & support",
+    ]);
 
     await user.keyboard("{Escape}");
 

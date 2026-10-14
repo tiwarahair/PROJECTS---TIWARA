@@ -61,6 +61,19 @@ const WelcomeToastPill = ({
   );
 };
 
+const TOAST_EVENT = "tw-toast";
+
+/** Shows a message in the toast on the next page, or on this one if it's already showing a toast spot. */
+export const queueSiteToast = (message: string) => {
+  try {
+    window.sessionStorage.setItem("tw_toast", message);
+  } catch {
+    // storage unavailable: the event below still reaches a mounted toast
+  }
+
+  window.dispatchEvent(new CustomEvent(TOAST_EVENT, { detail: message }));
+};
+
 const readWelcomeMessage = (
   search: string,
 ): { message: string; pinned: boolean } | null => {
@@ -70,8 +83,6 @@ const readWelcomeMessage = (
     if (pinnedMessage) return { message: pinnedMessage, pinned: true };
 
     const stored = window.sessionStorage.getItem("tw_toast");
-
-    window.sessionStorage.removeItem("tw_toast");
 
     return stored ? { message: stored, pinned: false } : null;
   } catch {
@@ -98,12 +109,36 @@ export const WelcomeToast = () => {
   useEffect(() => {
     const welcome = readWelcomeMessage(mountSearch.current);
 
-    if (!welcome) return;
+    let showTimer = 0;
 
-    setToast(welcome);
-    const showTimer = window.setTimeout(() => setVisible(true), 600);
+    // the stored message is cleared once it shows, so a page that remounts straight away still gets it
+    const show = (message: { message: string; pinned: boolean }) => {
+      setToast(message);
+      window.clearTimeout(showTimer);
 
-    return () => window.clearTimeout(showTimer);
+      showTimer = window.setTimeout(() => {
+        try {
+          window.sessionStorage.removeItem("tw_toast");
+        } catch {
+          // storage unavailable: nothing to clear
+        }
+
+        setVisible(true);
+      }, 600);
+    };
+
+    // a message queued while this page is already open (e.g. logging out on Home)
+    const onQueued = (event: Event) =>
+      show({ message: (event as CustomEvent<string>).detail, pinned: false });
+
+    if (welcome) show(welcome);
+
+    window.addEventListener(TOAST_EVENT, onQueued);
+
+    return () => {
+      window.clearTimeout(showTimer);
+      window.removeEventListener(TOAST_EVENT, onQueued);
+    };
   }, []);
 
   if (!toast || !visible) return null;

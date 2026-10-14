@@ -11,8 +11,7 @@ export type AuthFailure =
 
 export const AUTH_FAILURE_MESSAGES: Record<AuthFailure, string> = {
   rateLimited: "Too many attempts. Please try again later.",
-  emailLimit:
-    "We’ve sent too many emails to this address. Please try again later.",
+  emailLimit: "We’ve sent too many emails. Please try again later.",
   botCheck: "We couldn’t confirm you’re human. Please try again.",
   network: "We can’t connect right now. Check your connection and try again.",
   unknown: "Something went wrong. Please try again.",

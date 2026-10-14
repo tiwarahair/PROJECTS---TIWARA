@@ -2,7 +2,7 @@ import type { Session } from "@supabase/supabase-js";
 import { describe, expect, it, vi } from "vitest";
 import { supabase } from "../../lib/supabase";
 import { toSessionUser } from "../auth-listener";
-import { logOut, sessionChanged } from "../session-slice";
+import { logOut, sessionChanged, signedOut } from "../session-slice";
 import { createStore } from "../store";
 
 const buildSession = (appMetadata: Record<string, unknown>) =>
@@ -32,6 +32,7 @@ describe("session slice", () => {
       loggedIn: false,
       user: null,
       ready: false,
+      hasSignedOut: false,
     });
 
     const user = toSessionUser(buildSession({}));
@@ -42,7 +43,20 @@ describe("session slice", () => {
       loggedIn: true,
       user,
       ready: true,
+      hasSignedOut: false,
     });
+  });
+
+  it("remembers that they signed out themselves until they sign in again", () => {
+    const store = createStore();
+    const user = toSessionUser(buildSession({}));
+
+    store.dispatch(sessionChanged(user));
+    store.dispatch(signedOut());
+    expect(store.getState().session.hasSignedOut).toBe(true);
+
+    store.dispatch(sessionChanged(user));
+    expect(store.getState().session.hasSignedOut).toBe(false);
   });
 
   it("ignores the old ?login=1 demo switch", () => {

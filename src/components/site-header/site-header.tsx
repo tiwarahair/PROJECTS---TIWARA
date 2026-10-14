@@ -9,6 +9,9 @@ import {
 } from "../site-menu/site-menu";
 import styles from "../../styles/components/site-header/site-header.module.css";
 
+/** The nav links show from this width (site-header.module.css hides them up to 760px). */
+const NAV_LINKS_FROM = 761;
+
 const LINKS = [
   ["/search", "Find a stylist"],
   ["/#stylegrid", "Services"],
@@ -74,7 +77,7 @@ export const SiteHeader = ({
             </Link>
           ))}
           {isSignedIn ? (
-            <SiteMenu isSignedIn>
+            <SiteMenu isSignedIn linksShownFrom={NAV_LINKS_FROM}>
               <AccountAvatar
                 initials={initials ?? identity?.initials ?? ""}
                 photo={photo}
@@ -88,6 +91,7 @@ export const SiteHeader = ({
               <SiteMenu
                 isSignedIn={false}
                 loginHref={loginHref}
+                linksShownFrom={NAV_LINKS_FROM}
                 className={styles.menuButton}
               >
                 <span className={styles.menuLine}></span>

@@ -1,9 +1,9 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import type { MouseEvent, ReactNode } from "react";
-import { useLocation, useNavigate } from "react-router";
+import { useLocation } from "react-router";
 import { useIdentity } from "../../hooks/use-identity";
-import { useAppDispatch } from "../../stores/hooks";
-import { logOut } from "../../stores/session-slice";
+import { useMediaQuery } from "../../hooks/use-media-query";
+import { useSignOut } from "../../hooks/use-sign-out";
 import { resolveAssetUrl } from "../../utils/asset-url";
 import { getSearchParams } from "../../utils/page-flags";
 import { NavMenu, NavMenuAccountHead } from "../nav-menu/nav-menu";
@@ -11,6 +11,9 @@ import type { NavMenuItem } from "../nav-menu/nav-menu";
 import styles from "../../styles/components/site-menu/site-menu.module.css";
 
 export const ACCOUNT_TAB_EVENT = "tw-acct-tab";
+
+/** The site header shows its nav links from 761px. */
+const MOBILE_UP_TO = 760;
 
 const ACCOUNT_SECTIONS = [
   ["bookings", "Bookings"],
@@ -95,6 +98,8 @@ interface SiteMenuProps {
   className?: string;
   /** The trigger's contents: an AccountAvatar when signed in, burger lines when not. */
   children: ReactNode;
+  /** From this width the page's own nav shows Find a stylist and Services, so the menu leaves them out. */
+  linksShownFrom?: number;
 }
 
 /**
@@ -106,13 +111,17 @@ export const SiteMenu = ({
   loginHref = "/login",
   className = styles.accountButton,
   children,
+  linksShownFrom,
 }: SiteMenuProps) => {
   const identity = useIdentity();
-  const dispatch = useAppDispatch();
-  const navigate = useNavigate();
+  const signOut = useSignOut();
   const { pathname, search } = useLocation();
   const buttonRef = useRef<HTMLButtonElement>(null);
   const [menu, setMenu] = useState<{ pinned: boolean } | null>(null);
+
+  const isWide = useMediaQuery(
+    `(min-width: ${linksShownFrom ?? MOBILE_UP_TO + 1}px)`,
+  );
 
   const close = useCallback((refocus: boolean) => {
     setMenu(null);
@@ -133,39 +142,66 @@ export const SiteMenu = ({
 
   const closeOnClick = () => close(false);
 
-  // on the page with the services grid, scroll to it instead of reloading the page
-  const goToServices = (event: MouseEvent) => {
-    const grid = document.getElementById("stylegrid");
+  // on the home page, scroll to the section instead of reloading the page
+  const goToSection = (id: string) => (event: MouseEvent) => {
+    const section = document.getElementById(id);
 
     close(false);
 
-    if (!grid) return;
+    if (!section) return;
 
     event.preventDefault();
-    grid.scrollIntoView({ behavior: "smooth" });
+    section.scrollIntoView({ behavior: "smooth" });
   };
+
+  const getSectionItem = (id: string, label: string): NavMenuItem => ({
+    kind: "link",
+    key: id,
+    label,
+    to: `/#${id}`,
+    onClick: goToSection(id),
+  });
 
   const currentSection =
     pathname === "/account" ? getCurrentSection(search) : "";
 
+  const navItems: NavMenuItem[] =
+    isWide && linksShownFrom
+      ? []
+      : [
+          {
+            kind: "link",
+            key: "search",
+            label: "Find a stylist",
+            to: "/search",
+            isCurrent: pathname === "/search",
+            onClick: closeOnClick,
+          },
+          getSectionItem("stylegrid", "Services"),
+        ];
+
   const siteItems: NavMenuItem[] = [
-    {
-      kind: "link",
-      key: "search",
-      label: "Find a stylist",
-      to: "/search",
-      isCurrent: pathname === "/search",
-      onClick: closeOnClick,
-    },
-    {
-      kind: "link",
-      key: "services",
-      label: "Services",
-      to: "/#stylegrid",
-      onClick: goToServices,
-    },
-    { kind: "separator", key: "site-separator" },
+    ...navItems,
+    ...(isWide
+      ? []
+      : [
+          getSectionItem("stylists", "About"),
+          getSectionItem("for-stylists", "For stylists"),
+        ]),
   ];
+
+  const studioItem: NavMenuItem[] = identity?.user.isStylist
+    ? [
+        {
+          kind: "link",
+          key: "studio",
+          label: "Studio",
+          to: "/studio",
+          isCurrent: pathname === "/studio",
+          onClick: closeOnClick,
+        },
+      ]
+    : [];
 
   const helpItem: NavMenuItem = {
     kind: "link",
@@ -177,6 +213,7 @@ export const SiteMenu = ({
   };
 
   const accountItems: NavMenuItem[] = [
+    ...studioItem,
     ...ACCOUNT_SECTIONS.map(([section, label]): NavMenuItem => ({
       kind: "link",
       key: section,
@@ -198,8 +235,7 @@ export const SiteMenu = ({
       onClick: (event) => {
         event.preventDefault();
         close(false);
-        dispatch(logOut());
-        navigate("/");
+        signOut();
       },
     },
   ];
@@ -240,7 +276,13 @@ export const SiteMenu = ({
               />
             )
           }
-          items={[...siteItems, ...(isSignedIn ? accountItems : guestItems)]}
+          items={[
+            ...siteItems,
+            ...(siteItems.length
+              ? [{ kind: "separator", key: "site-separator" } as const]
+              : []),
+            ...(isSignedIn ? accountItems : guestItems),
+          ]}
           pinned={menu.pinned}
           onClose={close}
         />

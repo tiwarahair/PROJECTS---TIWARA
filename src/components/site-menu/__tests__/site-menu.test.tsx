@@ -1,7 +1,8 @@
 import { screen } from "@testing-library/react";
 import type { UserEvent } from "@testing-library/user-event";
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import { renderWithStore } from "../../../test/render-with-store";
+import { renderWithStore, TEST_USER } from "../../../test/render-with-store";
+import { sessionChanged } from "../../../stores/session-slice";
 import { setupUser } from "../../../test/setup-user";
 import { ACCOUNT_TAB_EVENT, AccountAvatar, SiteMenu } from "../site-menu";
 
@@ -33,6 +34,8 @@ describe("SiteMenu", () => {
     expect(getItemLabels()).toEqual([
       "Find a stylist",
       "Services",
+      "About",
+      "For stylists",
       "Bookings",
       "Favourites",
       "Account settings",
@@ -61,6 +64,8 @@ describe("SiteMenu", () => {
     expect(getItemLabels()).toEqual([
       "Find a stylist",
       "Services",
+      "About",
+      "For stylists",
       "Log in",
       "Help & support",
     ]);
@@ -68,6 +73,44 @@ describe("SiteMenu", () => {
     expect(screen.getByRole("menuitem", { name: "Log in" })).toHaveAttribute(
       "href",
       "/login?return=%2Fhelp",
+    );
+  });
+
+  it("on a wide screen, leaves out the links the page's nav already shows", async () => {
+    const original = window.matchMedia;
+
+    window.matchMedia = vi.fn().mockImplementation(() => ({
+      matches: true,
+      addEventListener: vi.fn(),
+      removeEventListener: vi.fn(),
+    }));
+
+    renderWithStore(
+      <SiteMenu isSignedIn={false} linksShownFrom={761}>
+        ☰
+      </SiteMenu>,
+    );
+
+    await user.click(screen.getByRole("button", { name: "Menu" }));
+    expect(getItemLabels()).toEqual(["Log in", "Help & support"]);
+    window.matchMedia = original;
+  });
+
+  it("stylists get a link to Studio", async () => {
+    const { store } = renderWithStore(
+      <SiteMenu isSignedIn>
+        <AccountAvatar initials="NO" />
+      </SiteMenu>,
+      "/",
+      { signedIn: true },
+    );
+
+    store.dispatch(sessionChanged({ ...TEST_USER, isStylist: true }));
+    await user.click(screen.getByRole("button", { name: "Account" }));
+
+    expect(screen.getByRole("menuitem", { name: "Studio" })).toHaveAttribute(
+      "href",
+      "/studio",
     );
   });
 

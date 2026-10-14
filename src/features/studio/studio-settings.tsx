@@ -14,6 +14,7 @@ import type { StudioController } from "./use-studio";
 import styles from "../../styles/features/studio/studio-settings.module.css";
 import { hasPublicProfile } from "./studio-model";
 import { useAccountBackend } from "./use-account-backend";
+import { useSignOut } from "../../hooks/use-sign-out";
 
 const STROKE = {
   fill: "none",
@@ -582,7 +583,8 @@ const SettingsFrame = ({
 /** Studio → Settings: the narrow root menu or a settings page. */
 export const StudioSettings = ({ studio }: { studio: StudioController }) => {
   const navigate = useNavigate();
-  const view = getSettingsView(studio, navigate);
+  const signOut = useSignOut();
+  const view = getSettingsView(studio, navigate, signOut);
 
   return (
     <>

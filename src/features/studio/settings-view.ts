@@ -20,6 +20,7 @@ export type { SettingsIcon } from "./settings-nav-view";
 export const getSettingsView = (
   studio: StudioController,
   navigate: (to: string) => void,
+  signOut: () => void,
 ) => {
   const { state, setState, props, isDesktop, isNew, actions, context } = studio;
 
@@ -79,7 +80,7 @@ export const getSettingsView = (
     hasAccountSave:
       isOn && !!page && ["personal", "security", "payouts"].includes(page),
     isNavDesktop: isDesktop,
-    signOut: () => showToast("Signed out. See you soon."),
+    signOut,
     ...getRulesView(studio),
     ...getAvailabilityView(studio),
     ...getProfileView(studio),

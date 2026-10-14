@@ -1,7 +1,7 @@
 import { act, render, screen } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { MemoryRouter } from "react-router";
-import { WelcomeToast } from "../welcome-toast";
+import { queueSiteToast, WelcomeToast } from "../welcome-toast";
 
 const renderAt = (url = "/") =>
   render(
@@ -21,13 +21,25 @@ describe("WelcomeToast", () => {
   it("shows the stored welcome once, 600ms after load, then hides after 4s", async () => {
     sessionStorage.setItem("tw_toast", "Welcome back, Nia");
     renderAt();
-    expect(sessionStorage.getItem("tw_toast")).toBeNull();
     expect(screen.queryByRole("status")).not.toBeInTheDocument();
     await act(async () => vi.advanceTimersByTime(600));
+    expect(sessionStorage.getItem("tw_toast")).toBeNull();
     expect(screen.getByRole("status")).toHaveTextContent("Welcome back, Nia");
     await act(async () => vi.advanceTimersByTime(4000));
     await act(async () => vi.advanceTimersByTime(260));
     expect(screen.queryByRole("status")).not.toBeInTheDocument();
+  });
+
+  it("shows a message queued while the page is already open (logging out on Home)", async () => {
+    renderAt();
+    act(() => queueSiteToast("Signed out. See you soon."));
+    await act(async () => vi.advanceTimersByTime(600));
+
+    expect(screen.getByRole("status")).toHaveTextContent(
+      "Signed out. See you soon.",
+    );
+
+    expect(sessionStorage.getItem("tw_toast")).toBeNull();
   });
 
   it("pins the ?twtoast= message for boards", async () => {

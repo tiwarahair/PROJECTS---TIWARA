@@ -17,7 +17,10 @@ const isDemoStudio = () =>
 
 /** "/studio" is for stylists: it loads their business, then opens Studio with it. */
 export const StudioRoute = () => {
-  const { ready, user } = useAppSelector(({ session }) => session);
+  const { ready, user, hasSignedOut } = useAppSelector(
+    ({ session }) => session,
+  );
+
   const identity = useIdentity();
 
   // always fresh: Studio saves don't update this cache, so a cached copy could write old values back
@@ -38,7 +41,8 @@ export const StudioRoute = () => {
 
   if (!ready) return null;
 
-  if (!user) return <Navigate to="/login?flow=pro" replace />;
+  if (!user)
+    return <Navigate to={hasSignedOut ? "/" : "/login?flow=pro"} replace />;
 
   if (!user.isStylist) return <Navigate to="/join" replace />;
 
