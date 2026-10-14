@@ -70,7 +70,8 @@ export const useOnboardingSubmit = ({
     if (!resolved.stayOnDone)
       later(
         "studio",
-        () => navigate(`/studio${isNew ? "?welcome=1" : ""}`),
+        () =>
+          navigate(`/studio${isNew ? "?welcome=1" : ""}`, { replace: true }),
         500,
       );
   };
@@ -100,7 +101,7 @@ export const useOnboardingSubmit = ({
       }
 
       setState({ busy: true });
-      navigate(stateRef.current.returnTo || "/");
+      navigate(stateRef.current.returnTo || "/", { replace: true });
 
       return;
     }
@@ -209,6 +210,7 @@ export const useOnboardingSubmit = ({
         return setState({ serverErrors: { exists: true } });
       }
 
+      clearSaved();
       setState({ codeKind: "verify" }, () => goTo("verify"));
     });
 
@@ -279,9 +281,10 @@ export const useOnboardingSubmit = ({
         if (error === "invalid_credentials") return showWrongPassword();
 
         if (error === "email_not_confirmed")
-          return setState({ codeKind: "verify", resendIn: 0 }, () =>
-            goTo("verify"),
-          );
+          return setState({ codeKind: "verify", resendIn: 0 }, () => {
+            goTo("verify");
+            resend();
+          });
 
         if (screen === "pro-password") await afterProAuth();
         else finish("customer-login");

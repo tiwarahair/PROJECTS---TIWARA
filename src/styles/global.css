@@ -36,3 +36,8 @@
     font-family: "Hanken Grotesk", sans-serif;
   }
 }
+
+/* Hanken Grotesk masks passwords with squares */
+input[type="password"] {
+  font-family: system-ui, sans-serif;
+}
