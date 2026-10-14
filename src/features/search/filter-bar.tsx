@@ -21,10 +21,15 @@ interface FilterBarProps {
 
 /** Venue / price / distance chips (desktop), result count, Filters button (mobile) and Sort. */
 export const FilterBar = ({ search }: FilterBarProps) => {
-  const { state, selection, place, cards, actions } = search;
-  const count = cards.length;
-  const locationName = place.current ? "you" : place.name;
+  const { state, selection, place, actions } = search;
+  const count = search.total;
+
+  const nearText = place.point
+    ? ` near ${place.current ? "you" : place.name}`
+    : "";
+
   const pluralSuffix = count === 1 ? "" : "s";
+  const isFinding = search.isLoading && !search.cards.length;
   const serviceText = selection.name ? ` for ${selection.name}` : "";
 
   const hasFilter =
@@ -211,10 +216,14 @@ export const FilterBar = ({ search }: FilterBarProps) => {
             className={joinClassNames(pageGlobal.rlLine, styles.resultLine)}
           >
             <span className={pageGlobal.rlFull}>
-              {`${count} stylist${pluralSuffix}${serviceText} near ${locationName}`}
+              {isFinding
+                ? "Finding stylists…"
+                : `${count} stylist${pluralSuffix}${serviceText}${nearText}`}
             </span>
             <span className={pageGlobal.rlShort}>
-              {`${count} stylist${pluralSuffix} near ${locationName}`}
+              {isFinding
+                ? "Finding stylists…"
+                : `${count} stylist${pluralSuffix}${nearText}`}
             </span>
           </div>
           <div className={styles.actions}>

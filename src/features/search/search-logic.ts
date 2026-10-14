@@ -1,55 +1,29 @@
-// Search results logic: place, selected style, price band, first slot, filtering and results.
-import {
-  searchLocations,
-  serviceGroups,
-  serviceTypes,
-  stylists,
-} from "../../data";
-import type { Service } from "../../types/service";
+// What the search state asks for: the place, the chosen style and the search_stylists arguments.
+import { serviceGroups, serviceTypes } from "../../data";
+import type { LatLng } from "../../lib/google-maps";
+import type { SearchArgs } from "../../lib/search-api";
 import type { ServiceGroup } from "../../types/service-group";
 import type { ServiceType } from "../../types/service-type";
-import type { Stylist } from "../../types/stylist";
-import { miles, slotsFor, toMinutes } from "../../utils/availability";
-import {
-  formatServiceDuration,
-  getActiveServices,
-  getFromWithFee,
-  getGroupId,
-} from "../../utils/services";
-import type { FilterDraft, SearchState, SortKey, Venue } from "./search-state";
-import { formatMoney } from "../../utils/money";
-import { formatWeekdayDate } from "../../utils/dates";
+import type { FilterDraft, SearchState, Venue } from "./search-state";
 
+/** A typed area (with its point once picked) or the device's location (null until known). */
 export interface Place {
   name: string;
-  lat: number;
-  lng: number;
-  current?: boolean;
+  current: boolean;
+  point: LatLng | null;
 }
 
-const CITY_CENTRE: Place = {
-  name: "Manchester city centre",
-  lat: 53.4808,
-  lng: -2.2426,
-};
-
-/** The searched area; "Current location" (or blank) means the city centre. */
-export const getPlace = (location: string): Place => {
-  const city = searchLocations[0] || CITY_CENTRE;
-
-  const needle = String(location || "")
-    .trim()
-    .toLowerCase();
-
-  if (!needle || needle === "current location")
-    return { ...city, current: true };
-
-  return (
-    searchLocations.find(({ name }) => name.toLowerCase() === needle) ||
-    searchLocations.find(({ name }) => name.toLowerCase().includes(needle)) ||
-    city
-  );
-};
+export const getPlace = (
+  { location, lat, lng }: SearchState["query"],
+  position: LatLng | null,
+): Place =>
+  location === "Current location"
+    ? { name: location, current: true, point: position }
+    : {
+        name: location,
+        current: false,
+        point: lat != null && lng != null ? { lat, lng } : null,
+      };
 
 export interface StyleSelection {
   serviceType: ServiceType | null;
@@ -113,243 +87,57 @@ export const toDayMinutes = (time: string): number => {
   return hours * 60 + (Number(match[2]) || 0);
 };
 
-/** [from, to, isCustom] in minutes for the chosen time of day, or null for any time. */
-const getTimeBand = ({
-  time,
-  customFrom,
-  customTo,
-}: SearchState): [number, number, boolean?] | null => {
-  if (time === "morning") return [0, 720];
+const toClock = (minutes: number) =>
+  `${String(Math.floor(minutes / 60)).padStart(2, "0")}:${String(minutes % 60).padStart(2, "0")}`;
 
-  if (time === "afternoon") return [720, 1080];
-
-  if (time === "evening") return [1080, 1440];
-
-  if (time === "custom")
-    return [toDayMinutes(customFrom), toDayMinutes(customTo), true];
-
-  return null;
-};
-
-interface Slot {
-  date: Date;
-  time: string;
-}
-
-/** First slot on the chosen date (or within 28 days) that fits the time band. */
-const getFirstSlot = (
-  stylist: Stylist,
-  durationMinutes: number,
-  date: string,
-  band: ReturnType<typeof getTimeBand>,
-): Slot | null => {
-  const fits = (time: string) => {
-    if (!band) return true;
-
-    const minutes = toMinutes(time);
-
-    return (
-      minutes >= band[0] &&
-      (band[2] ? minutes + durationMinutes <= band[1] : minutes < band[1])
-    );
+/** The chosen time of day as ["HH:MM", "HH:MM"], or null for any time. */
+const getTimeBand = ({ time, customFrom, customTo }: SearchState) => {
+  const bands: Record<string, [number, number]> = {
+    morning: [0, 720],
+    afternoon: [720, 1080],
+    evening: [1080, 1440],
+    custom: [toDayMinutes(customFrom), toDayMinutes(customTo)],
   };
 
-  const startDay = date ? new Date(`${date}T00:00:00`) : new Date();
+  const band = bands[time];
 
-  startDay.setHours(0, 0, 0, 0);
-
-  for (let offset = 0; offset < (date ? 1 : 28); offset++) {
-    const day = new Date(startDay);
-
-    day.setDate(startDay.getDate() + offset);
-    const time = slotsFor(stylist, day, durationMinutes).find(fits);
-
-    if (time) return { date: day, time };
-  }
-
-  return null;
+  return band ? band.map(toClock) : null;
 };
 
-interface ResultEntry {
-  stylist: Stylist;
-  match: Service[];
-  distance: number;
-  nextSlot: Slot | null;
-  price: number;
-}
-
 const VENUE_TYPES: Record<Venue, string[]> = {
-  Salon: ["shop", "chairRental"],
-  "Home-based": ["homeBased"],
+  Salon: ["shop", "chair_rental"],
+  "Home-based": ["home_based"],
   Mobile: ["mobile"],
 };
 
-/** Filter + sort stylists for the current state, optionally with draft filters. */
-export const getResults = (
+/** search_stylists arguments for the current state, optionally with the filter sheet's draft. */
+export const toSearchArgs = (
   state: SearchState,
+  point: LatLng | null,
   overrides: Partial<FilterDraft> = {},
-) => {
-  const selection = getStyleSelection(state);
-  const place = getPlace(state.query.location);
-  const venues = overrides.venues || state.venues;
+): SearchArgs => {
+  const { serviceType, group, isGroup, freeText } = getStyleSelection(state);
+  const venues = overrides.venues ?? state.venues;
 
   const maxPrice =
-    "maxPrice" in overrides ? (overrides.maxPrice ?? null) : state.maxPrice;
+    "maxPrice" in overrides ? overrides.maxPrice : state.maxPrice;
 
-  const sort: SortKey = overrides.sort || state.sort;
-  const radius = overrides.radius || state.radius;
+  const [timeFrom, timeTo] = getTimeBand(state) ?? [];
 
-  const venueTypes = venues.length
-    ? venues.flatMap((venue) => VENUE_TYPES[venue] || [])
-    : null;
-
-  const needle = selection.freeText.toLowerCase();
-  const band = getTimeBand(state);
-  const list: ResultEntry[] = [];
-
-  stylists.forEach((stylist) => {
-    const active = getActiveServices(stylist);
-
-    if (!active.length) return;
-
-    let match = active;
-
-    if (selection.serviceType)
-      match = active.filter(
-        ({ serviceTypeId }) => serviceTypeId === selection.serviceType?.id,
-      );
-    else if (selection.isGroup)
-      match = active.filter(
-        (service) => getGroupId(service) === selection.group?.id,
-      );
-    else if (needle) {
-      const named = active.filter(({ name }) =>
-        name.toLowerCase().includes(needle),
-      );
-
-      if (named.length) match = named;
-      else match = stylist.name.toLowerCase().includes(needle) ? active : [];
-    }
-
-    if (!match.length) return;
-
-    if (venueTypes && !venueTypes.includes(stylist.businessType)) return;
-
-    const distance = miles(place.lat, place.lng, stylist.lat, stylist.lng);
-
-    if (stylist.businessType === "mobile") {
-      if (distance > (stylist.travelMiles || 0)) return;
-    } else if (distance > radius) return;
-
-    const next = getFirstSlot(
-      stylist,
-      Math.min(...match.map(({ minutes }) => minutes)),
-      state.query.date,
-      band,
-    );
-
-    if ((state.query.date || state.time !== "any") && !next) return;
-
-    const price = Math.min(...match.map(getFromWithFee));
-
-    if (maxPrice != null && price > maxPrice) return;
-
-    list.push({ stylist, match, distance, nextSlot: next, price });
-  });
-
-  const getStart = ({ nextSlot }: ResultEntry) =>
-    nextSlot
-      ? nextSlot.date.getTime() + toMinutes(nextSlot.time) * 6e4
-      : Infinity;
-
-  // mobile stylists travel to you, so they count as 0 miles
-  const getDistance = ({ stylist, distance }: ResultEntry) =>
-    stylist.businessType === "mobile" ? 0 : distance;
-
-  const comparators: Record<
-    SortKey,
-    (left: ResultEntry, right: ResultEntry) => number
-  > = {
-    distance: (left, right) =>
-      getDistance(left) - getDistance(right) || left.distance - right.distance,
-    earliest: (left, right) =>
-      getStart(left) - getStart(right) ||
-      getDistance(left) - getDistance(right),
-    price: (left, right) =>
-      left.price - right.price || getDistance(left) - getDistance(right),
-    "price-desc": (left, right) =>
-      right.price - left.price || getDistance(left) - getDistance(right),
+  return {
+    lat: point?.lat,
+    lng: point?.lng,
+    radius_miles: overrides.radius ?? state.radius,
+    service_type: serviceType?.id,
+    service_group: isGroup ? group?.id : undefined,
+    search_text: freeText || undefined,
+    venues: venues.length
+      ? venues.flatMap((venue) => VENUE_TYPES[venue])
+      : undefined,
+    max_price_pence: maxPrice == null ? undefined : maxPrice * 100,
+    on_date: state.query.date || undefined,
+    time_from: timeFrom,
+    time_to: timeTo,
+    sort: overrides.sort ?? state.sort,
   };
-
-  list.sort(comparators[sort] || comparators.distance);
-
-  return { list, selection, place };
 };
-
-/** "Today" / "Tomorrow" / "Mon 12 Oct". */
-const formatDay = (date: Date): string => {
-  const today = new Date();
-
-  today.setHours(0, 0, 0, 0);
-  const days = Math.round((date.getTime() - today.getTime()) / 864e5);
-
-  if (days === 0) return "Today";
-
-  if (days === 1) return "Tomorrow";
-
-  return formatWeekdayDate(date);
-};
-
-const getDistanceText = (
-  businessType: Stylist["businessType"],
-  distance: number,
-  milesText: string,
-): string => {
-  if (businessType === "mobile") return "Travels to you";
-
-  if (distance < 1) return "Under 1 mile away";
-
-  return milesText + (milesText === "1" ? " mile away" : " miles away");
-};
-
-/** StylistCard props for each result. */
-export const getResultCards = (
-  list: ResultEntry[],
-  selection: StyleSelection,
-) =>
-  list.map(({ stylist, match, distance, nextSlot, price }) => {
-    const milesText = distance.toFixed(1).replace(/\.0$/, "");
-
-    return {
-      ...stylist,
-      key: stylist.id,
-      href: `/${stylist.id}`,
-      services: [],
-      from: price,
-      meta: `From ${formatMoney(price)}`,
-      rows: selection.has
-        ? match.slice(0, 2).map((service) => {
-            const fromPrice = formatMoney(getFromWithFee(service));
-            const duration = formatServiceDuration(service.minutes);
-            const serviceParam = encodeURIComponent(service.id);
-
-            return {
-              name: service.name,
-              meta: `from ${fromPrice} · ${duration}`,
-              href: `/book?stylist=${stylist.id}&service=${serviceParam}`,
-            };
-          })
-        : [],
-      facts: [
-        {
-          text: getDistanceText(stylist.businessType, distance, milesText),
-        },
-        nextSlot
-          ? {
-              text: `Next available: ${formatDay(nextSlot.date)} ${nextSlot.time}`,
-              strong: true,
-            }
-          : null,
-      ].filter((fact): fact is { text: string; strong?: boolean } => !!fact),
-    };
-  });

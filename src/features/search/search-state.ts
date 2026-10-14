@@ -11,6 +11,9 @@ interface SearchQuery {
   type: string;
   date: string;
   location: string;
+  /** The typed area's point; null for "Current location". */
+  lat: number | null;
+  lng: number | null;
   freeText: string;
 }
 
@@ -77,6 +80,12 @@ const SORT_PARAMS: Record<string, SortKey> = {
 
 export const RADII = [5, 10, 15, 25];
 
+export const CURRENT_PLACE = {
+  location: "Current location",
+  lat: null,
+  lng: null,
+};
+
 export const getInitialState = (
   search: string,
   viewportWidth: number,
@@ -86,13 +95,24 @@ export const getInitialState = (
   const isCustom = /^\d/.test(time);
   const maxPrice = parseInt(params.get("maxPrice") ?? "", 10);
   const distance = Number(params.get("dist"));
+  const [lat, lng] = (params.get("ll") ?? "").split(",").map(Number);
+
+  const hasPoint =
+    Number.isFinite(lat) && Number.isFinite(lng) && !!params.get("loc");
 
   const state: SearchState = {
     query: {
       group: params.get("group") || params.get("service") || "",
       type: params.get("type") || "",
       date: params.get("date") || "",
-      location: params.get("loc") || "Current location",
+      ...CURRENT_PLACE,
+      ...(hasPoint
+        ? {
+            location: params.get("loc") ?? "",
+            lat: lat ?? null,
+            lng: lng ?? null,
+          }
+        : {}),
       freeText: params.get("q") || "",
     },
     day: params.get("date") || "",
@@ -167,8 +187,10 @@ export const getStateSearch = ({
   else if (query.group) params.set("group", query.group);
   else if (query.freeText) params.set("q", query.freeText);
 
-  if (query.location && query.location !== "Current location")
+  if (query.location !== "Current location" && query.lat != null) {
     params.set("loc", query.location);
+    params.set("ll", `${query.lat.toFixed(4)},${query.lng?.toFixed(4)}`);
+  }
 
   if (query.date) params.set("date", query.date);
 

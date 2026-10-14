@@ -25,7 +25,7 @@ const BUSINESS_TYPES: Record<string, Stylist["businessType"]> = {
 };
 
 // demo stylists (local seed) point at bundled assets instead of Storage
-const toPhotoUrl = (path: string) =>
+export const toPhotoUrl = (path: string) =>
   path.startsWith("demo/") ? path : getPhotoUrl(path);
 
 const toFee = (on: boolean, kind: string, percent: number): PolicyFee => ({

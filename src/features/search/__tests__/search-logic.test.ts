@@ -1,10 +1,9 @@
 import { describe, expect, it } from "vitest";
 import {
-  getResults,
   getPlace,
-  getResultCards,
   getStyleSelection,
   toDayMinutes,
+  toSearchArgs,
 } from "../search-logic";
 import { getFixturePatch } from "../search-fixtures";
 import { getInitialState, getStateSearch } from "../search-state";
@@ -22,6 +21,8 @@ describe("search state", () => {
       type: "",
       date: "",
       location: "Current location",
+      lat: null,
+      lng: null,
       freeText: "",
     });
 
@@ -47,9 +48,15 @@ describe("search state", () => {
   it("writes the URL back in a fixed parameter order", () => {
     expect(
       getStateSearch(
-        stateFor("?service=braids&loc=Chorlton&venue=salon&sort=price"),
+        stateFor(
+          "?service=braids&loc=Chorlton&ll=53.44,-2.27&venue=salon&sort=price",
+        ),
       ),
-    ).toBe("?group=braids&loc=Chorlton&venue=salon&sort=price");
+    ).toBe(
+      "?group=braids&loc=Chorlton&ll=53.4400%2C-2.2700&venue=salon&sort=price",
+    );
+
+    expect(getStateSearch(stateFor("?loc=Chorlton"))).toBe("");
 
     expect(getStateSearch(stateFor(""))).toBe("");
   });
@@ -77,14 +84,22 @@ describe("search state", () => {
 });
 
 describe("search logic", () => {
-  it("resolves places, defaulting to the city centre", () => {
-    expect(getPlace("Current location")).toMatchObject({
-      name: "Manchester city centre",
+  it("uses a typed area's point, or the device's for Current location", () => {
+    const position = { lat: 53.48, lng: -2.24 };
+
+    expect(getPlace(stateFor("").query, position)).toEqual({
+      name: "Current location",
       current: true,
+      point: position,
     });
 
-    expect(getPlace("chor").name).toBe("Chorlton");
-    expect(getPlace("Nowhere").name).toBe("Manchester city centre");
+    expect(
+      getPlace(stateFor("?loc=Chorlton&ll=53.44,-2.27").query, position),
+    ).toEqual({
+      name: "Chorlton",
+      current: false,
+      point: { lat: 53.44, lng: -2.27 },
+    });
   });
 
   it("describes the style selection", () => {
@@ -111,65 +126,40 @@ describe("search logic", () => {
     ]).toEqual([480, 720, 0, 1080]);
   });
 
-  it("filters by style, venue and price, and sorts mobile stylists as 0 miles", () => {
-    const all = getResults(stateFor("")).list;
-
-    expect(all.length).toBeGreaterThan(0);
-
-    const firstMobile = all.findIndex(
-      ({ stylist }) => stylist.businessType === "mobile",
+  it("turns the state into search_stylists arguments", () => {
+    const state = stateFor(
+      "?group=locs&venue=salon,mobile&maxPrice=80&dist=15&date=2026-10-20&time=9am-5pm&sort=price",
     );
 
-    expect(firstMobile).toBe(0);
-    const salons = getResults(stateFor("?venue=salon")).list;
-
-    expect(
-      salons.every(({ stylist }) =>
-        ["shop", "chairRental"].includes(stylist.businessType),
-      ),
-    ).toBe(true);
-
-    const cheap = getResults(stateFor("?maxPrice=40")).list;
-
-    expect(cheap.every(({ price }) => price <= 40)).toBe(true);
-    const locs = getResults(stateFor("?group=locs")).list;
-
-    expect(locs.map(({ stylist }) => stylist.id)).toEqual(["locd-and-lovely"]);
+    expect(toSearchArgs(state, { lat: 53.48, lng: -2.24 })).toEqual({
+      lat: 53.48,
+      lng: -2.24,
+      radius_miles: 15,
+      service_type: undefined,
+      service_group: "locs",
+      search_text: undefined,
+      venues: ["shop", "chair_rental", "mobile"],
+      max_price_pence: 8000,
+      on_date: "2026-10-20",
+      time_from: "09:00",
+      time_to: "17:00",
+      sort: "price",
+    });
   });
 
-  it("sorts by price low to high and high to low, keeping the URL param", () => {
-    const getPrices = (search: string) =>
-      getResults(stateFor(search)).list.map(({ price }) => price);
+  it("the filter sheet's draft overrides venues, price, distance and sort", () => {
+    const args = toSearchArgs(stateFor("?maxPrice=80"), null, {
+      venues: ["Home-based"],
+      maxPrice: null,
+      radius: 25,
+      sort: "earliest",
+    });
 
-    const ascending = getPrices("?sort=price");
-    const descending = getPrices("?sort=price-desc");
-
-    expect(ascending.length).toBeGreaterThan(1);
-
-    expect(ascending).toEqual(
-      [...ascending].sort((left, right) => left - right),
-    );
-
-    expect(descending).toEqual(
-      [...descending].sort((left, right) => right - left),
-    );
-
-    expect(getStateSearch(stateFor("?sort=price-desc"))).toBe(
-      "?sort=price-desc",
-    );
-  });
-
-  it("builds result cards with facts and service rows when a style is chosen", () => {
-    const state = stateFor("?group=locs");
-    const { list, selection } = getResults(state);
-    const [card] = getResultCards(list, selection);
-
-    expect(card?.href).toBe("/locd-and-lovely");
-
-    expect(card?.rows[0]?.href).toMatch(
-      /^\/book\?stylist=locd-and-lovely&service=/,
-    );
-
-    expect(card?.facts[0]?.text).toMatch(/miles? away|Under 1 mile away/);
+    expect(args).toMatchObject({
+      venues: ["home_based"],
+      max_price_pence: undefined,
+      radius_miles: 25,
+      sort: "earliest",
+    });
   });
 });

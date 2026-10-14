@@ -176,7 +176,14 @@ export const StylistCard = ({
               >
                 <path d="M12 2l3 6.6 7 .7-5.3 4.7 1.6 7-6.3-3.8L5.7 21l1.6-7L2 9.3l7-.7z"></path>
               </svg>
-              {rating} <span className={styles.reviewCount}>({reviews})</span>
+              {reviews ? (
+                <>
+                  {rating}{" "}
+                  <span className={styles.reviewCount}>({reviews})</span>
+                </>
+              ) : (
+                "New"
+              )}
             </span>
           </div>
           <div className={styles.areaRow}>

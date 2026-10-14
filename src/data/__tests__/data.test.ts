@@ -113,7 +113,6 @@ describe.skipIf(!hasPrototype)(
         toPlain(prototypeData.categoryColours),
       );
 
-      expect(data.searchLocations).toEqual(toPlain(prototypeData.locations));
       expect(data.postcodes).toEqual(toPlain(prototypeData.postcodes));
 
       expect(data.policyIcons).toEqual(

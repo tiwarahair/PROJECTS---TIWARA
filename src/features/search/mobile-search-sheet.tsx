@@ -284,7 +284,6 @@ export const MobileSearchSheet = ({ search }: MobileSearchSheetProps) => {
                 <WhereList
                   current={where.current}
                   rows={where.rows}
-                  showPopular={where.showPopular}
                   isEmpty={where.isEmpty}
                   emptyText={where.emptyText}
                   onPick={actions.pickLocation}

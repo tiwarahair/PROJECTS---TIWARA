@@ -144,18 +144,16 @@ export const WhatList = ({
 export interface WhereListProps {
   current: RowView[];
   rows: RowView[];
-  showPopular: boolean;
   isEmpty: boolean;
   emptyText: string;
   onPick: (row: SuggestionRow) => void;
   onHover: (index: number) => void;
 }
 
-/** Current location, "Popular areas" and matching areas. */
+/** Current location, or the places matching what was typed. */
 export const WhereList = ({
   current,
   rows,
-  showPopular,
   isEmpty,
   emptyText,
   onPick,
@@ -170,7 +168,6 @@ export const WhereList = ({
         onHover={onHover}
       />
     ))}
-    {showPopular && <div className={styles.popularAreas}>Popular areas</div>}
     {rows.map((view) => (
       <SuggestionButton
         key={view.key}

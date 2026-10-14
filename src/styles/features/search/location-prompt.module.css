@@ -1,0 +1,30 @@
+.prompt {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 12px 16px;
+  margin-bottom: 24px;
+  padding: 14px 18px;
+  border-radius: var(--radius-lg);
+  background: var(--fill-quiet);
+  color: var(--text-secondary);
+  font-size: 14.5px;
+}
+
+.button {
+  background: var(--neutral-900);
+  color: var(--neutral-50);
+  border: none;
+  font: inherit;
+  font-weight: 600;
+  font-size: 14px;
+  padding: 10px 18px;
+  border-radius: var(--radius-full);
+  cursor: pointer;
+  transition: transform 160ms ease-out;
+}
+
+.button:active {
+  transform: scale(0.98);
+}

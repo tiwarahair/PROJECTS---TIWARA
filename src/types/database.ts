@@ -1249,7 +1249,6 @@ export type Database = {
         };
         Returns: {
           area_label: string;
-          avatar_path: string;
           business_name: string;
           business_type: string;
           cover_path: string;
@@ -1260,7 +1259,6 @@ export type Database = {
           next_start: string;
           slug: string;
           total_count: number;
-          travel_radius_miles: number;
         }[];
       };
       service_from_pence: { Args: { target: string }; Returns: number };

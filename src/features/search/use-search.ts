@@ -1,10 +1,14 @@
 // State + actions for the Search page.
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import type { ChangeEvent, FocusEvent, KeyboardEvent } from "react";
 import { useLocation, useNavigate } from "react-router";
-import { getResults, getResultCards } from "./search-logic";
 import { getFixturePatch } from "./search-fixtures";
-import { getInitialState, getStateSearch, RADII } from "./search-state";
+import {
+  CURRENT_PLACE,
+  getInitialState,
+  getStateSearch,
+  RADII,
+} from "./search-state";
 import type {
   FilterDraft,
   SearchState,
@@ -14,6 +18,7 @@ import type {
 } from "./search-state";
 import { getWhatModel, getWhereModel } from "./search-suggestions";
 import type { SuggestionRow } from "./search-suggestions";
+import { useSearchData } from "./use-search-data";
 
 type Patch =
   Partial<SearchState> | ((state: SearchState) => Partial<SearchState>);
@@ -157,18 +162,19 @@ export const useSearch = () => {
       navigate({ search }, { replace: true, preventScrollReset: true });
   }, [state, navigate]);
 
-  const results = useMemo(() => getResults(state), [state]);
-  const { selection, place } = results;
-  const what = getWhatModel(state, selection);
-  const where = getWhereModel(state, place);
+  const filterDraft = state.filtersDraft || DEFAULT_DRAFT;
+  const data = useSearchData(state, filterDraft);
+  const { selection, place } = data;
+  const what = getWhatModel(state, selection, data.stylistSuggestions);
+  const where = getWhereModel(state, place, data.places);
   const isMobileSheet = !!state.mobileView;
 
   const focusLater = (ref: { current: HTMLInputElement | null }) =>
     window.setTimeout(() => ref.current?.focus(), 0);
 
   const pickWhat = (row: SuggestionRow) => {
-    if (row.kind === "stylist" && row.stylist) {
-      navigate(`/${row.stylist.id}`);
+    if (row.kind === "stylist" && row.slug) {
+      navigate(`/${row.slug}`);
 
       return;
     }
@@ -187,18 +193,28 @@ export const useSearch = () => {
     }));
   };
 
-  const pickLocation = (row: SuggestionRow) =>
+  const closeWhere = (placeQuery: Partial<SearchState["query"]> = {}) =>
     update((current) => ({
-      query: {
-        ...current.query,
-        location: row.kind === "current" ? "Current location" : row.label,
-      },
+      query: { ...current.query, ...placeQuery },
       whereText: null,
       whereTyped: false,
       whereOpen: false,
       whereIndex: -1,
       ...(current.mobileView ? { mobileView: "menu" as const } : {}),
     }));
+
+  // a Google place is searched once its point arrives
+  const pickLocation = ({ kind, label, place: suggestion }: SuggestionRow) => {
+    closeWhere(kind === "current" ? CURRENT_PLACE : {});
+
+    if (suggestion)
+      void data.places.resolve(suggestion).then((point) => {
+        if (point)
+          update((current) => ({
+            query: { ...current.query, location: label, ...point },
+          }));
+      });
+  };
 
   const getKeyHandler =
     (
@@ -255,8 +271,6 @@ export const useSearch = () => {
     later(() => update(finished), SHEET_CLOSE_MS);
   };
 
-  const filterDraft = state.filtersDraft || DEFAULT_DRAFT;
-
   const setFilterDraft = (patch: Partial<FilterDraft>) =>
     update((current) => ({
       filtersDraft: { ...(current.filtersDraft || DEFAULT_DRAFT), ...patch },
@@ -305,7 +319,7 @@ export const useSearch = () => {
       })),
     clearArea: () =>
       update((current) => ({
-        query: { ...current.query, location: "Current location" },
+        query: { ...current.query, ...CURRENT_PLACE },
         whereText: null,
         whereTyped: false,
       })),
@@ -412,7 +426,7 @@ export const useSearch = () => {
     }),
     clearWhere: () => {
       update((current) => ({
-        query: { ...current.query, location: "Current location" },
+        query: { ...current.query, ...CURRENT_PLACE },
         whereText: "",
         whereTyped: false,
         whereOpen: true,
@@ -481,7 +495,7 @@ export const useSearch = () => {
           type: "",
           freeText: "",
           date: "",
-          location: "Current location",
+          ...CURRENT_PLACE,
         },
         day: "",
         time: "any",
@@ -585,10 +599,15 @@ export const useSearch = () => {
     place,
     what,
     where,
-    cards: getResultCards(results.list, selection),
-    draftCount: state.filtersOpen
-      ? getResults(state, filterDraft).list.length
-      : 0,
+    location: data.location,
+    cards: data.cards,
+    total: data.total,
+    isLoading: data.isLoading,
+    isError: data.isError,
+    hasMore: data.hasMore,
+    isLoadingMore: data.isLoadingMore,
+    loadMore: data.loadMore,
+    draftCount: data.draftCount,
     filterDraft,
     suggestions,
     actions,

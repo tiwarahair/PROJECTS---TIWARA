@@ -23,6 +23,12 @@
   gap: 24px;
 }
 
+.more {
+  display: flex;
+  justify-content: center;
+  padding-top: 32px;
+}
+
 .empty {
   text-align: center;
   padding: 80px 24px 88px;

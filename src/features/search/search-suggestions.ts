@@ -1,12 +1,14 @@
 // What / Where dropdown models (rows, chips, sections).
-import { searchLocations, serviceGroups, stylists } from "../../data";
+import { serviceGroups } from "../../data";
+import type { SearchRow } from "../../lib/search-api";
+import { toPhotoUrl } from "../../lib/public-stylist";
 import type { ServiceGroup } from "../../types/service-group";
 import type { ServiceType } from "../../types/service-type";
-import type { Stylist } from "../../types/stylist";
 import { matchTypes } from "../../utils/services";
 import { SEARCH_ICONS } from "./search-icons";
 import type { Place, StyleSelection } from "./search-logic";
 import type { SearchState, WhatChip } from "./search-state";
+import type { PlaceSuggestion } from "./use-place-suggestions";
 
 type RowKind =
   "all" | "group" | "type" | "stylist" | "all-results" | "current" | "location";
@@ -20,7 +22,9 @@ export interface SuggestionRow {
   on?: boolean;
   group?: ServiceGroup;
   serviceType?: ServiceType;
-  stylist?: Stylist;
+  /** A stylist row's profile slug. */
+  slug?: string;
+  place?: PlaceSuggestion;
   raw?: string;
 }
 
@@ -42,7 +46,7 @@ const getRowView = (
   activeIndex: number,
   query: string,
 ): RowView => {
-  const { label, kind } = row;
+  const { label, kind, subtitle = "" } = row;
   const at = query ? label.toLowerCase().indexOf(query) : -1;
 
   const parts =
@@ -55,7 +59,7 @@ const getRowView = (
         };
 
   return {
-    key: `${kind}:${label}`,
+    key: `${kind}:${label}:${subtitle}`,
     row,
     index,
     ...parts,
@@ -71,7 +75,12 @@ export interface WhatChipView {
   on: boolean;
 }
 
-export const getWhatModel = (state: SearchState, selection: StyleSelection) => {
+/** stylists: matching live stylists from search_stylists (all of them when nothing is typed). */
+export const getWhatModel = (
+  state: SearchState,
+  selection: StyleSelection,
+  stylists: SearchRow[],
+) => {
   const raw = state.whatTyped ? String(state.whatText || "").trim() : "";
   const query = raw.toLowerCase();
 
@@ -84,7 +93,6 @@ export const getWhatModel = (state: SearchState, selection: StyleSelection) => {
   });
 
   let styleRows: SuggestionRow[];
-  let stylistList: Stylist[];
 
   if (!query) {
     styleRows = [
@@ -96,10 +104,6 @@ export const getWhatModel = (state: SearchState, selection: StyleSelection) => {
       },
       ...serviceGroups.map(groupRow),
     ];
-
-    stylistList = stylists
-      .slice()
-      .sort((left, right) => left.name.localeCompare(right.name));
   } else {
     styleRows = [
       ...serviceGroups
@@ -115,19 +119,17 @@ export const getWhatModel = (state: SearchState, selection: StyleSelection) => {
           on: !!selection.serviceType && selection.serviceType.id === type.id,
         })),
     ];
-
-    stylistList = stylists.filter(({ name }) =>
-      name.toLowerCase().includes(query),
-    );
   }
 
-  const stylistRows = stylistList.map((stylist): SuggestionRow => ({
-    kind: "stylist",
-    stylist,
-    label: stylist.name,
-    subtitle: stylist.area,
-    image: stylist.cover,
-  }));
+  const stylistRows = stylists.map(
+    ({ slug, business_name, area_label, cover_path }): SuggestionRow => ({
+      kind: "stylist",
+      slug,
+      label: business_name,
+      subtitle: area_label ?? "",
+      image: cover_path ? toPhotoUrl(cover_path) : "",
+    }),
+  );
 
   const styleCount = styleRows.filter(({ kind }) => kind !== "all").length;
   const stylistCount = stylistRows.length;
@@ -191,21 +193,24 @@ export const getWhatModel = (state: SearchState, selection: StyleSelection) => {
   };
 };
 
-export const getWhereModel = (state: SearchState, place: Place) => {
+/** Empty: just "Current location". Typed: Google's matching areas, towns and postcodes. */
+export const getWhereModel = (
+  state: SearchState,
+  place: Place,
+  places: { suggestions: PlaceSuggestion[]; isSearching: boolean },
+) => {
   const raw = state.whereTyped ? String(state.whereText || "").trim() : "";
   const query = raw.toLowerCase();
 
-  const locationRows = (
-    query
-      ? searchLocations.filter(({ name }) => name.toLowerCase().includes(query))
-      : searchLocations
-  ).map(({ name }): SuggestionRow => ({
-    kind: "location",
-    label: name,
-    subtitle: query ? "Manchester, UK" : "",
-    icon: SEARCH_ICONS.pin,
-    on: !place.current && place.name === name,
-  }));
+  const locationRows = query
+    ? places.suggestions.map((suggestion): SuggestionRow => ({
+        kind: "location",
+        label: suggestion.label,
+        subtitle: suggestion.subtitle,
+        icon: SEARCH_ICONS.pin,
+        place: suggestion,
+      }))
+    : [];
 
   const currentRows: SuggestionRow[] = query
     ? []
@@ -214,7 +219,7 @@ export const getWhereModel = (state: SearchState, place: Place) => {
           kind: "current",
           label: "Current location",
           icon: SEARCH_ICONS.arrow,
-          on: !!place.current,
+          on: place.current,
         },
       ];
 
@@ -229,9 +234,8 @@ export const getWhereModel = (state: SearchState, place: Place) => {
     rows: locationRows.map((row, index) =>
       getRowView(row, index + currentRows.length, state.whereIndex, query),
     ),
-    showPopular: !query,
-    isEmpty: !!query && !locationRows.length,
-    emptyText: `No areas match ‘${raw}’. Try an area like Chorlton or Salford.`,
+    isEmpty: !!query && !places.isSearching && !locationRows.length,
+    emptyText: `No places match ‘${raw}’. Try a town, area or postcode.`,
     display: place.current ? "" : place.name,
   };
 };

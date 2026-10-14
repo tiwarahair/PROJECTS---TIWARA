@@ -1,5 +1,7 @@
 import { createApi, fakeBaseQuery } from "@reduxjs/toolkit/query/react";
 import { lookUpProfile } from "../lib/public-profiles";
+import { SEARCH_PAGE_SIZE, searchStylists } from "../lib/search-api";
+import type { SearchArgs, SearchRow } from "../lib/search-api";
 import type { ProfileLookup } from "../lib/public-profiles";
 import { supabase } from "../lib/supabase";
 import {
@@ -91,6 +93,23 @@ export const api = createApi({
     getStylistProfile: build.query<ProfileLookup, string>({
       queryFn: (slug) => toQueryResult(lookUpProfile(slug)),
     }),
+    // results pages for the Search list; each row carries the total
+    searchStylists: build.infiniteQuery<SearchRow[], SearchArgs, number>({
+      infiniteQueryOptions: {
+        initialPageParam: 0,
+        getNextPageParam: (lastPage, _allPages, lastPageParam) =>
+          (lastPageParam + 1) * SEARCH_PAGE_SIZE <
+          Number(lastPage[0]?.total_count ?? 0)
+            ? lastPageParam + 1
+            : undefined,
+      },
+      queryFn: ({ queryArg, pageParam }) =>
+        toQueryResult(searchStylists(queryArg, pageParam)),
+    }),
+    // a few rows only: the filter sheet's total and the What dropdown's stylists
+    peekStylists: build.query<SearchRow[], { args: SearchArgs; size: number }>({
+      queryFn: ({ args, size }) => toQueryResult(searchStylists(args, 0, size)),
+    }),
     getTwoFactorDevices: build.query<TwoFactorDevice[], string>({
       queryFn: () => toQueryResult(listTwoFactorDevices()),
     }),
@@ -100,6 +119,8 @@ export const api = createApi({
 export const {
   useGetProfileQuery,
   useGetStylistProfileQuery,
+  usePeekStylistsQuery,
+  useSearchStylistsInfiniteQuery,
   useGetStylistStudioQuery,
   useGetTwoFactorDevicesQuery,
   useUpdateProfileMutation,

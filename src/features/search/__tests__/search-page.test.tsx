@@ -1,14 +1,22 @@
 import { act, screen, within } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+import { searchStylists } from "../../../lib/search-api";
 import { renderWithStore } from "../../../test/render-with-store";
+import { fakeSearch } from "../../../test/search-rows";
 import { SearchPage } from "../search-page";
 import type { UserEvent } from "@testing-library/user-event";
 import { setupUser } from "../../../test/setup-user";
+
+vi.mock("../../../lib/search-api", async (importOriginal) => ({
+  ...(await importOriginal<typeof import("../../../lib/search-api")>()),
+  searchStylists: vi.fn(),
+}));
 
 let user: UserEvent;
 
 beforeEach(() => {
   user = setupUser();
+  vi.mocked(searchStylists).mockReset().mockImplementation(fakeSearch);
 });
 
 describe("SearchPage", () => {
@@ -21,18 +29,66 @@ describe("SearchPage", () => {
     localStorage.clear();
   });
 
-  afterEach(() => vi.useRealTimers());
+  afterEach(() => {
+    vi.useRealTimers();
+    vi.unstubAllGlobals();
+  });
 
-  it("lists stylists near the current location", () => {
+  it("without a location it lists every stylist and offers to use the location", async () => {
     renderWithStore(<SearchPage />, "/search");
 
-    expect(screen.getAllByRole("status")[0]).toHaveTextContent(
-      /\d+ stylists near you/,
+    expect(
+      (await screen.findAllByRole("link", { name: "NaturallyNia" }))[0],
+    ).toHaveAttribute("href", "/naturallynia");
+
+    const count = screen.getAllByRole("status")[0];
+
+    expect(count).toHaveTextContent("2 stylists");
+    expect(count).not.toHaveTextContent("near");
+    expect(screen.getByText(/Location is off/)).toBeInTheDocument();
+  });
+
+  it("asks for the location as soon as Search opens and sorts by distance", async () => {
+    const getCurrentPosition = vi.fn((found: PositionCallback) =>
+      found({
+        coords: { latitude: 53.48, longitude: -2.24 },
+      } as GeolocationPosition),
     );
 
-    expect(
-      screen.getAllByRole("link", { name: "NaturallyNia" })[0],
-    ).toHaveAttribute("href", "/naturallynia");
+    vi.stubGlobal("navigator", {
+      ...navigator,
+      geolocation: { getCurrentPosition },
+    });
+
+    renderWithStore(<SearchPage />, "/search");
+
+    expect(await screen.findAllByText("2 stylists near you")).not.toHaveLength(
+      0,
+    );
+
+    expect(getCurrentPosition).toHaveBeenCalledTimes(1);
+
+    expect(searchStylists).toHaveBeenLastCalledWith(
+      expect.objectContaining({ lat: 53.48, lng: -2.24 }),
+      0,
+    );
+  });
+
+  it("a typed area searches around its point", async () => {
+    renderWithStore(<SearchPage />, "/search?loc=Chorlton&ll=53.44,-2.27");
+
+    await screen.findAllByRole("link", { name: "NaturallyNia" });
+
+    expect(searchStylists).toHaveBeenCalledWith(
+      expect.objectContaining({ lat: 53.44, lng: -2.27, radius_miles: 10 }),
+      0,
+    );
+
+    expect(screen.getAllByRole("status")[0]).toHaveTextContent(
+      "2 stylists near Chorlton",
+    );
+
+    expect(screen.queryByText(/Location is off/)).not.toBeInTheDocument();
   });
 
   it("typing in What opens matching styles and stylists; picking a group filters the results", async () => {
@@ -44,18 +100,21 @@ describe("SearchPage", () => {
 
     await user.click(within(list).getByRole("option", { name: /^Locs/ }));
 
-    expect(screen.getAllByRole("status")[0]).toHaveTextContent(
-      "1 stylist for Locs near you",
-    );
+    expect(await screen.findByText("1 stylist for Locs")).toBeInTheDocument();
   });
 
   it("shows the empty state with suggestions and Clear filters", async () => {
     renderWithStore(<SearchPage />, "/search?maxPrice=5");
-    expect(screen.getByText("No stylists match that yet")).toBeInTheDocument();
+
+    expect(
+      await screen.findByText("No stylists match that yet"),
+    ).toBeInTheDocument();
 
     await user.click(
       screen.getByRole("button", { name: "Remove price limit" }),
     );
+
+    await screen.findAllByRole("link", { name: "NaturallyNia" });
 
     expect(
       screen.queryByText("No stylists match that yet"),

@@ -2,10 +2,13 @@ import { useLayoutEffect } from "react";
 import { FavHost } from "../../components/fav-host/fav-host";
 import { StylistCard } from "../../components/stylist-card/stylist-card";
 import { WelcomeToast } from "../../components/welcome-toast/welcome-toast";
+import { useLoadMore } from "../../hooks/use-load-more";
 import { useSearchMemory } from "../../hooks/use-search-memory";
+import { MapsProvider } from "../../lib/google-maps";
 import { DatePopover } from "./date-picker";
 import { FilterBar } from "./filter-bar";
 import { FiltersSheet } from "./filters-sheet";
+import { LocationPrompt } from "./location-prompt";
 import { MobileSearchSheet } from "./mobile-search-sheet";
 import pageGlobal from "../../styles/features/search/search-page-global.module.css";
 import { SearchNav } from "./search-nav";
@@ -13,9 +16,10 @@ import styles from "../../styles/features/search/search-page.module.css";
 import { useSearch } from "./use-search";
 
 /** Search & results, route "/search". */
-export const SearchPage = () => {
+const SearchView = () => {
   const search = useSearch();
   const { state, place, selection, cards, suggestions, actions } = search;
+  const sentinelRef = useLoadMore(search.loadMore, search.hasMore);
 
   useSearchMemory();
 
@@ -27,6 +31,7 @@ export const SearchPage = () => {
   }, []);
 
   const locationName = place.current ? "you" : place.name;
+  const isEmpty = !search.isLoading && !search.isError && !cards.length;
   const serviceText = selection.name ? ` for ${selection.name}` : "";
 
   return (
@@ -43,43 +48,26 @@ export const SearchPage = () => {
       <FilterBar search={search} />
 
       <div className={styles.results}>
-        <div className={styles.grid}>
-          {cards.map(
-            ({
-              key,
-              href,
-              cover,
-              name,
-              rating,
-              reviews,
-              area,
-              services,
-              meta,
-              rows,
-              facts,
-              from,
-              verified,
-            }) => (
-              <div key={key} className={pageGlobal.rescard}>
-                <StylistCard
-                  href={href}
-                  cover={cover}
-                  stylistName={name}
-                  rating={rating}
-                  reviews={reviews}
-                  area={area}
-                  services={services}
-                  meta={meta}
-                  rows={rows}
-                  facts={facts}
-                  from={from}
-                  verified={verified}
-                />
-              </div>
-            ),
-          )}
+        <LocationPrompt search={search} />
+        <div className={styles.grid} aria-busy={search.isLoading}>
+          {cards.map(({ key, name, ...card }) => (
+            <div key={key} className={pageGlobal.rescard}>
+              <StylistCard stylistName={name} {...card} />
+            </div>
+          ))}
         </div>
-        {cards.length === 0 && (
+        {search.hasMore && (
+          <div ref={sentinelRef} className={styles.more}>
+            <button
+              onClick={search.loadMore}
+              disabled={search.isLoadingMore}
+              className={styles.suggestion}
+            >
+              {search.isLoadingMore ? "Loading…" : "Show more"}
+            </button>
+          </div>
+        )}
+        {isEmpty && (
           <div className={styles.empty}>
             <div className={styles.emptyTitle}>No stylists match that yet</div>
             <div className={styles.emptyText}>
@@ -105,3 +93,9 @@ export const SearchPage = () => {
     </div>
   );
 };
+
+export const SearchPage = () => (
+  <MapsProvider>
+    <SearchView />
+  </MapsProvider>
+);

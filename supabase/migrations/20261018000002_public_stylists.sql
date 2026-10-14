@@ -111,9 +111,7 @@ returns table (
   business_name text,
   area_label text,
   business_type text,
-  travel_radius_miles smallint,
   cover_path text,
-  avatar_path text,
   distance_miles double precision,
   from_pence integer,
   next_start timestamptz,
@@ -175,7 +173,7 @@ as $$
       and (max_price_pence is null or priced.from_pence <= max_price_pence)
   )
   select timed.id, timed.slug::text, timed.business_name, timed.area_label, timed.business_type,
-    timed.travel_radius_miles, timed.cover_path, timed.avatar_path, timed.distance, timed.from_pence,
+    timed.cover_path, timed.distance, timed.from_pence,
     timed.next_start, timed.matches, count(*) over ()
   from timed
   where (on_date is null and time_from is null) or timed.next_start is not null

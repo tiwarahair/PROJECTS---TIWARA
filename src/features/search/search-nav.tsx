@@ -157,7 +157,6 @@ export const SearchNav = ({ search }: SearchNavProps) => {
                 <WhereList
                   current={where.current}
                   rows={where.rows}
-                  showPopular={where.showPopular}
                   isEmpty={where.isEmpty}
                   emptyText={where.emptyText}
                   onPick={actions.pickLocation}
