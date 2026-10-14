@@ -509,6 +509,11 @@
   margin-top: 10px;
 }
 
+.codeErrorTight:empty {
+  min-height: 0;
+  margin-top: 0;
+}
+
 .remember {
   display: flex;
   gap: 12px;

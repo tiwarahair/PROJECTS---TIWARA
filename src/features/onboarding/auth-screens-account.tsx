@@ -303,7 +303,14 @@ export const CodeScreen = ({ onboarding, layout, view }: ScreenProps) => {
           />
         ))}
       </div>
-      <div role="alert" aria-live="assertive" className={styles.codeError}>
+      <div
+        role="alert"
+        aria-live="assertive"
+        className={joinClassNames(
+          styles.codeError,
+          is2fa && styles.codeErrorTight,
+        )}
+      >
         {codeError}
       </div>
       {is2fa && (
