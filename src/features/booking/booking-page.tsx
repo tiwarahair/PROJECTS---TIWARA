@@ -50,7 +50,7 @@ export const BookingPage = () => {
       className={joinClassNames(pageGlobal.bkpage, styles.page)}
     >
       <BookingNav
-        exitHref={`/stylist?stylist=${stylist.id}`}
+        exitHref={`/${stylist.id}`}
         holdBar={
           holdOn && (
             <HoldBar variant="nav" time={state.time} leftMs={holdLeftMs} />

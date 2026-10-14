@@ -1,4 +1,6 @@
 import { createApi, fakeBaseQuery } from "@reduxjs/toolkit/query/react";
+import { lookUpProfile } from "../lib/public-profiles";
+import type { ProfileLookup } from "../lib/public-profiles";
 import { supabase } from "../lib/supabase";
 import {
   closeBusiness,
@@ -86,6 +88,9 @@ export const api = createApi({
       providesTags: ["Studio"],
       queryFn: (ownerId) => toQueryResult(fetchStylistStudio(ownerId)),
     }),
+    getStylistProfile: build.query<ProfileLookup, string>({
+      queryFn: (slug) => toQueryResult(lookUpProfile(slug)),
+    }),
     getTwoFactorDevices: build.query<TwoFactorDevice[], string>({
       queryFn: () => toQueryResult(listTwoFactorDevices()),
     }),
@@ -94,6 +99,7 @@ export const api = createApi({
 
 export const {
   useGetProfileQuery,
+  useGetStylistProfileQuery,
   useGetStylistStudioQuery,
   useGetTwoFactorDevicesQuery,
   useUpdateProfileMutation,

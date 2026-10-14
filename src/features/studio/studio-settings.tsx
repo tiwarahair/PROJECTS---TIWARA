@@ -8,11 +8,11 @@ import { joinClassNames } from "../../utils/class-names";
 import { AvailabilityPage, ProfilePage, RulesPage } from "./settings-pages";
 import { getSettingsView } from "./settings-view";
 import type { SettingsIcon, SettingsView } from "./settings-view";
-import { GATE_REASON, STUDIO_STYLIST_ID } from "./studio-data";
+import { GATE_REASON } from "./studio-data";
 import { getAvatarSrc } from "./studio-shell";
 import type { StudioController } from "./use-studio";
 import styles from "../../styles/features/studio/studio-settings.module.css";
-import { hasPublicProfile } from "./studio-model";
+import { getProfilePath } from "./studio-model";
 import { useAccountBackend } from "./use-account-backend";
 import { useSignOut } from "../../hooks/use-sign-out";
 
@@ -314,15 +314,10 @@ const SettingsNav = ({
                 <LinkIcon />
                 Copy booking link
               </button>
-              {hasPublicProfile(state) && (
-                <Link
-                  className={styles.shareLink}
-                  to={`/stylist?stylist=${STUDIO_STYLIST_ID}`}
-                >
-                  <EyeIcon />
-                  View public profile
-                </Link>
-              )}
+              <Link className={styles.shareLink} to={getProfilePath(state)}>
+                <EyeIcon />
+                View public profile
+              </Link>
             </>
           )}
           {!view.isShareLive && (
@@ -339,24 +334,20 @@ const SettingsNav = ({
                   label: "View public profile",
                   icon: <EyeIcon />,
                 },
-              ]
-                .filter(
-                  ({ key }) => key !== "profile" || hasPublicProfile(state),
-                )
-                .map(({ key, label, icon }) => (
-                  <button
-                    key={key}
-                    className={styles.shareLocked}
-                    aria-disabled="true"
-                    aria-describedby="share-tip"
-                    onFocus={showTip}
-                    onBlur={hideTip}
-                    onClick={() => setState({ shareTip: !state.shareTip })}
-                  >
-                    {icon}
-                    {label}
-                  </button>
-                ))}
+              ].map(({ key, label, icon }) => (
+                <button
+                  key={key}
+                  className={styles.shareLocked}
+                  aria-disabled="true"
+                  aria-describedby="share-tip"
+                  onFocus={showTip}
+                  onBlur={hideTip}
+                  onClick={() => setState({ shareTip: !state.shareTip })}
+                >
+                  {icon}
+                  {label}
+                </button>
+              ))}
             </>
           )}
         </div>

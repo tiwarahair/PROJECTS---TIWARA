@@ -1,6 +1,6 @@
 import { Link } from "react-router";
 import { joinClassNames } from "../../utils/class-names";
-import type { MenuGroup, ServiceModal } from "./profile-logic";
+import type { MenuGroup, ServiceModal } from "./profile-menu";
 import styles from "../../styles/features/stylist-profile/profile-services.module.css";
 import pageGlobal from "../../styles/features/stylist-profile/stylist-profile-page-global.module.css";
 

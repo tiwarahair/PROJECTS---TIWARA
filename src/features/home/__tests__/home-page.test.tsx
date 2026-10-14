@@ -79,7 +79,7 @@ describe("HomePage", () => {
 
     expect(
       within(stylists).getAllByRole("link", { name: "Amara Beauty" })[0],
-    ).toHaveAttribute("href", "/stylist?stylist=amara-beauty");
+    ).toHaveAttribute("href", "/amara-beauty");
 
     expect(within(stylists).getByText("from £81.70")).toBeInTheDocument();
   });

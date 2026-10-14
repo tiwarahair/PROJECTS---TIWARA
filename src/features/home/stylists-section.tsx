@@ -45,7 +45,7 @@ export const StylistsSection = () => {
                 className={joinClassNames(page.stycard, styles.card)}
               >
                 <StylistCard
-                  href={`/stylist?stylist=${id}`}
+                  href={`/${id}`}
                   cover={cover}
                   stylistName={name}
                   rating={rating}

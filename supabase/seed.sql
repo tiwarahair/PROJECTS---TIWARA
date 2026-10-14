@@ -509,10 +509,11 @@ from (values
 join public.stylists on stylists.owner_id = day.owner::uuid
 where working_hours.stylist_id = stylists.id and working_hours.weekday = day.weekday;
 
+-- a second later than the sign-up default, so it's the current policy
 insert into public.payment_policies (stylist_id, mode, deposit_percent, refundable, free_window_hours, grace_minutes,
-  late_on, late_kind, late_percent, no_show_on, no_show_kind, no_show_percent, extras)
+  late_on, late_kind, late_percent, no_show_on, no_show_kind, no_show_percent, extras, created_at)
 select stylists.id, mode, deposit, refundable, free_window, grace, late_on, late_kind, late_percent,
-  no_show_on, no_show_kind, no_show_percent, extras::jsonb
+  no_show_on, no_show_kind, no_show_percent, extras::jsonb, now() + interval '1 second'
 from (values
   ('75ec667d-ca56-5c1b-85b6-9be9cc448f6e', 'deposit', 20, true, 48, 0, false, 'pct', 50, false, 'pct', 50, '[]'),
   ('b03ff09f-c011-5b7b-b33c-48ed9d19dbae', 'deposit', 25, true, 48, 0, true, 'pct', 50, true, 'pct', 100, '[]'),

@@ -36,7 +36,7 @@ export const MeetSection = () => (
           handled, so the chair stays full and the messages stay quiet.
         </p>
         <div data-rv="" className={styles.actions}>
-          <Link to="/stylist?stylist=tiwaras-house" className={styles.book}>
+          <Link to="/tiwaras-house" className={styles.book}>
             Book with Tiwára
           </Link>
           <span className={styles.location}>Ancoats, Manchester</span>

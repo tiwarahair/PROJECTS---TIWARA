@@ -1,6 +1,6 @@
 import { Link } from "react-router";
 import { joinClassNames } from "../../utils/class-names";
-import type { ServiceModal as ServiceModalData } from "./profile-logic";
+import type { ServiceModal as ServiceModalData } from "./profile-menu";
 import styles from "../../styles/features/stylist-profile/service-modal.module.css";
 import pageGlobal from "../../styles/features/stylist-profile/stylist-profile-page-global.module.css";
 

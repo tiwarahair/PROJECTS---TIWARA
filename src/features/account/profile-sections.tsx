@@ -36,7 +36,7 @@ export const FavouritesSection = ({
               // plain block wrapper, which the card's height:100% depends on
               <div key={id} data-dc-host="">
                 <StylistCard
-                  href={`/stylist?stylist=${id}`}
+                  href={`/${id}`}
                   bookHref={`/book?stylist=${id}`}
                   stylistId={id}
                   cover={cover}

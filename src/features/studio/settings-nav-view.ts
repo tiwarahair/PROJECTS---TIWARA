@@ -1,10 +1,10 @@
 // Studio → Settings navigation: the narrow root menu, the wide nav, page titles and the share rows.
-import { GATE_REASON, STUDIO_STYLIST_ID } from "./studio-data";
+import { GATE_REASON } from "./studio-data";
 import { copyText } from "./studio-format";
 import {
   getAllClients,
   getBookingLink,
-  hasPublicProfile,
+  getProfilePath,
   isLive,
 } from "./studio-model";
 import type { StudioPage } from "./studio-types";
@@ -119,7 +119,7 @@ export const getSettingsNav = (
   const policyWindow =
     state.policy.window < 1 ? "30 min" : `${state.policy.window}h`;
 
-  const allRows: SettingsRow[] = [
+  const rows: SettingsRow[] = [
     {
       key: "business",
       label: "Business details",
@@ -199,14 +199,10 @@ export const getSettingsNav = (
           return;
         }
 
-        navigate(`/stylist?stylist=${STUDIO_STYLIST_ID}`);
+        navigate(getProfilePath(state));
       },
     },
   ];
-
-  const rows = allRows.filter(
-    ({ key }) => key !== "profile" || hasPublicProfile(state),
-  );
 
   const accountRows: SettingsRow[] = (
     [

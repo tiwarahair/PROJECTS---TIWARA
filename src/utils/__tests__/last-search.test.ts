@@ -5,7 +5,7 @@ import { getLastSearch, getSearchSummary } from "../last-search";
 describe("last search", () => {
   beforeEach(() => {
     sessionStorage.clear();
-    window.history.replaceState(null, "", "/stylist?stylist=amara-beauty");
+    window.history.replaceState(null, "", "/amara-beauty");
   });
 
   it("summarises what, where and when", () => {
@@ -52,7 +52,7 @@ describe("last search", () => {
       area: "Hulme, Manchester",
     });
 
-    expect(url).toBe(`${window.location.origin}/stylist?stylist=amara-beauty`);
+    expect(url).toBe(`${window.location.origin}/amara-beauty`);
     expect(title).toBe("Amara Beauty on Tiwára’s House");
 
     const shareText = encodeURIComponent(

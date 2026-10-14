@@ -1,6 +1,7 @@
 import type { Stylist } from "../../types/stylist";
 import { joinClassNames } from "../../utils/class-names";
-import type { OpenStatus, ProfileFacts } from "./profile-logic";
+import type { ProfileFacts } from "./profile-facts";
+import type { OpenStatus } from "./profile-hours";
 import styles from "../../styles/features/stylist-profile/profile-lede.module.css";
 import pageGlobal from "../../styles/features/stylist-profile/stylist-profile-page-global.module.css";
 
@@ -54,7 +55,14 @@ export const ProfileLede = ({
                   fill="var(--brand-yellow)"
                 ></path>
               </svg>
-              {rating} <span className={styles.reviewCount}>({reviews})</span>
+              {reviews ? (
+                <>
+                  {rating}{" "}
+                  <span className={styles.reviewCount}>({reviews})</span>
+                </>
+              ) : (
+                "New"
+              )}
             </span>
           </h1>
         </div>

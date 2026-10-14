@@ -201,7 +201,6 @@ security definer
 set search_path = ''
 as $$
   select jsonb_build_object(
-    'id', stylist.id,
     'slug', stylist.slug,
     'business_name', stylist.business_name,
     'business_type', stylist.business_type,
@@ -211,14 +210,14 @@ as $$
     'contact_email', stylist.contact_email,
     'instagram', stylist.instagram,
     'tiktok', stylist.tiktok,
-    'youtube', stylist.youtube,
     'website', stylist.website,
     'cover_path', stylist.cover_path,
-    'avatar_path', stylist.avatar_path,
     'status', stylist.status,
     'pause_on', stylist.pause_on,
     'pause_until', stylist.pause_until,
-    'created_at', stylist.created_at,
+    'next_start', public.get_next_start(stylist.id, (
+      select min(duration_min) from public.services where stylist_id = stylist.id and status = 'active'
+    ), null, null, null),
     'stylist_categories', (
       select coalesce(jsonb_agg(category order by category.sort), '[]')
       from public.stylist_categories as category where category.stylist_id = stylist.id
@@ -250,12 +249,9 @@ as $$
       from public.closed_periods as period
       where period.stylist_id = stylist.id and period.ends_on >= (now() at time zone 'Europe/London')::date
     ),
-    'payment_policies', (
-      select coalesce(jsonb_agg(policy), '[]')
-      from (
-        select * from public.payment_policies
-        where stylist_id = stylist.id order by created_at desc limit 1
-      ) as policy
+    'payment_policy', (
+      select to_jsonb(policy) from public.payment_policies as policy
+      where policy.stylist_id = stylist.id order by policy.created_at desc limit 1
     ),
     'portfolio_photos', (
       select coalesce(jsonb_agg(photo order by photo.sort), '[]')

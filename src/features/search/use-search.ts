@@ -168,7 +168,7 @@ export const useSearch = () => {
 
   const pickWhat = (row: SuggestionRow) => {
     if (row.kind === "stylist" && row.stylist) {
-      navigate(`/stylist?stylist=${row.stylist.id}`);
+      navigate(`/${row.stylist.id}`);
 
       return;
     }

@@ -1,15 +1,27 @@
-import { act, screen, within } from "@testing-library/react";
+import { act, screen, waitFor, within } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+import { lookUpProfile } from "../../../lib/public-profiles";
+import { toPublicStylist } from "../../../lib/public-stylist";
+import { PUBLIC_PROFILE } from "../../../test/public-profile";
 import { renderWithStore } from "../../../test/render-with-store";
-import { getGallery, getStylist } from "../profile-logic";
-import { StylistProfilePage } from "../stylist-profile-page";
+import { getGallery } from "../profile-facts";
+import { StylistProfilePage } from "../stylist-profile-route";
 import type { UserEvent } from "@testing-library/user-event";
 import { setupUser } from "../../../test/setup-user";
+
+vi.mock("../../../lib/public-profiles", async (importOriginal) => ({
+  ...(await importOriginal<typeof import("../../../lib/public-profiles")>()),
+  lookUpProfile: vi.fn(),
+}));
 
 let user: UserEvent;
 
 beforeEach(() => {
   user = setupUser();
+
+  vi.mocked(lookUpProfile)
+    .mockReset()
+    .mockResolvedValue({ profile: PUBLIC_PROFILE, currentSlug: null });
 });
 
 describe("StylistProfilePage", () => {
@@ -21,25 +33,93 @@ describe("StylistProfilePage", () => {
 
   afterEach(() => vi.useRealTimers());
 
-  it("renders the stylist named in the URL with a Book now link", () => {
-    renderWithStore(<StylistProfilePage />, "/stylist?stylist=naturallynia");
+  it("renders the stylist named in the URL with a Book now link", async () => {
+    renderWithStore(<StylistProfilePage />, "/tiwaras-house");
 
     expect(
-      screen.getByRole("heading", { level: 1, name: /NaturallyNia/ }),
+      await screen.findByRole("heading", { level: 1, name: /Tiwára's House/ }),
     ).toBeInTheDocument();
+
+    expect(lookUpProfile).toHaveBeenCalledWith("tiwaras-house");
 
     expect(
       screen.getAllByRole("link", { name: "Book now" })[0],
-    ).toHaveAttribute("href", "/book?stylist=naturallynia");
+    ).toHaveAttribute("href", "/book?stylist=tiwaras-house");
+
+    expect(screen.getByText("New")).toBeInTheDocument();
   });
 
-  it("guests get Log in returning to this profile; logged-in users get the account menu", () => {
+  it("a paused stylist has no Book now", async () => {
+    vi.mocked(lookUpProfile).mockResolvedValue({
+      profile: { ...PUBLIC_PROFILE, pause_on: true },
+      currentSlug: null,
+    });
+
+    renderWithStore(<StylistProfilePage />, "/tiwaras-house");
+
+    expect(
+      await screen.findAllByText(/Not taking bookings right now/),
+    ).not.toHaveLength(0);
+
+    expect(
+      screen.queryByRole("link", { name: "Book now" }),
+    ).not.toBeInTheDocument();
+  });
+
+  it("a retired slug redirects to the current one", async () => {
+    vi.mocked(lookUpProfile).mockResolvedValue({
+      profile: null,
+      currentSlug: "tiwaras-house",
+    });
+
+    renderWithStore(<StylistProfilePage />, "/old-name");
+
+    await waitFor(() =>
+      expect(screen.getByTestId("location")).toHaveTextContent(
+        "/tiwaras-house",
+      ),
+    );
+  });
+
+  it("a malformed link shows not found instead of crashing", async () => {
+    vi.mocked(lookUpProfile).mockResolvedValue({
+      profile: null,
+      currentSlug: null,
+    });
+
+    renderWithStore(<StylistProfilePage />, "/%E0");
+
+    expect(
+      await screen.findByRole("heading", {
+        name: "We couldn’t find this stylist",
+      }),
+    ).toBeInTheDocument();
+  });
+
+  it("an unknown slug shows not found", async () => {
+    vi.mocked(lookUpProfile).mockResolvedValue({
+      profile: null,
+      currentSlug: null,
+    });
+
+    renderWithStore(<StylistProfilePage />, "/nobody");
+
+    expect(
+      await screen.findByRole("heading", {
+        name: "We couldn’t find this stylist",
+      }),
+    ).toBeInTheDocument();
+  });
+
+  it("guests get Log in returning to this profile; logged-in users get the account menu", async () => {
     const { unmount } = renderWithStore(
       <StylistProfilePage />,
-      "/stylist?stylist=tiwaras-house&guest=1",
+      "/tiwaras-house?guest=1",
     );
 
-    const returnParam = encodeURIComponent("/stylist?stylist=tiwaras-house");
+    const returnParam = encodeURIComponent("/tiwaras-house");
+
+    await screen.findByRole("heading", { level: 1 });
 
     expect(screen.getAllByRole("link", { name: "Log in" })[0]).toHaveAttribute(
       "href",
@@ -48,13 +128,13 @@ describe("StylistProfilePage", () => {
 
     unmount();
 
-    renderWithStore(<StylistProfilePage />, "/stylist?stylist=tiwaras-house", {
+    renderWithStore(<StylistProfilePage />, "/tiwaras-house", {
       signedIn: true,
     });
 
-    expect(screen.getByRole("button", { name: "Account" })).toHaveTextContent(
-      "NO",
-    );
+    expect(
+      await screen.findByRole("button", { name: "Account" }),
+    ).toHaveTextContent("NO");
 
     expect(
       screen.queryByRole("button", { name: "Menu" }),
@@ -62,8 +142,11 @@ describe("StylistProfilePage", () => {
   });
 
   it("a service row opens its details modal", async () => {
-    renderWithStore(<StylistProfilePage />, "/stylist?stylist=tiwaras-house");
-    await user.click(screen.getByRole("button", { name: /^Knotless braids/ }));
+    renderWithStore(<StylistProfilePage />, "/tiwaras-house");
+
+    await user.click(
+      await screen.findByRole("button", { name: /^Knotless braids/ }),
+    );
 
     expect(
       screen.getByRole("heading", { level: 3, name: "Knotless braids" }),
@@ -74,9 +157,9 @@ describe("StylistProfilePage", () => {
   });
 
   it("See all opens the lightbox; arrows step through the gallery and Escape closes it", async () => {
-    renderWithStore(<StylistProfilePage />, "/stylist?stylist=tiwaras-house");
-    await user.click(screen.getByRole("button", { name: "See all" }));
-    const stylist = getStylist("tiwaras-house");
+    renderWithStore(<StylistProfilePage />, "/tiwaras-house");
+    await user.click(await screen.findByRole("button", { name: "See all" }));
+    const { stylist } = toPublicStylist(PUBLIC_PROFILE);
     const gallery = getGallery(stylist);
     const first = Math.max(0, gallery.indexOf(stylist.portfolio[0] ?? ""));
 
@@ -93,11 +176,9 @@ describe("StylistProfilePage", () => {
   });
 
   it("?share=open opens the share popover; Escape closes it", async () => {
-    renderWithStore(
-      <StylistProfilePage />,
-      "/stylist?stylist=amara-beauty&share=open",
-    );
+    renderWithStore(<StylistProfilePage />, "/tiwaras-house?share=open");
 
+    await screen.findByRole("heading", { level: 1 });
     act(() => vi.advanceTimersByTime(700));
     const popover = screen.getByRole("dialog", { name: "Share this stylist" });
 
@@ -113,7 +194,8 @@ describe("StylistProfilePage", () => {
   });
 
   it("the menu button toggles the site menu open and closed", async () => {
-    renderWithStore(<StylistProfilePage />, "/stylist?stylist=tiwaras-house");
+    renderWithStore(<StylistProfilePage />, "/tiwaras-house");
+    await screen.findByRole("heading", { level: 1 });
     const button = screen.getByRole("button", { name: "Menu" });
 
     await user.click(button);

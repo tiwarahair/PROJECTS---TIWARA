@@ -164,7 +164,7 @@ describe("search logic", () => {
     const { list, selection } = getResults(state);
     const [card] = getResultCards(list, selection);
 
-    expect(card?.href).toBe("/stylist?stylist=locd-and-lovely");
+    expect(card?.href).toBe("/locd-and-lovely");
 
     expect(card?.rows[0]?.href).toMatch(
       /^\/book\?stylist=locd-and-lovely&service=/,

@@ -1,4 +1,4 @@
-import { useLayoutEffect, useMemo } from "react";
+import { useLayoutEffect, useMemo, useState } from "react";
 import type { MouseEvent } from "react";
 import { Link, useNavigate } from "react-router";
 import { FavHost } from "../../components/fav-host/fav-host";
@@ -14,21 +14,17 @@ import { PortfolioLightbox } from "./portfolio-lightbox";
 import { ProfileCover } from "./profile-cover";
 import type { ProfileActions } from "./profile-cover";
 import { ProfileLede } from "./profile-lede";
+import { getGallery, getLoginHref, getProfileFacts } from "./profile-facts";
+import { getHoursRows, getOpenStatus } from "./profile-hours";
+import type { ServiceModal as ServiceModalData } from "./profile-menu";
 import {
   countServices,
   getBookHref,
-  getGallery,
-  getLoginHref,
   getMenuGroups,
-  getOpenStatus,
-  getProfileFacts,
-  getReviews,
-  getStylist,
   hasMoreServices,
   limitMenuGroups,
-} from "./profile-logic";
+} from "./profile-menu";
 import { ProfilePortfolio } from "./profile-portfolio";
-import { ProfileReviews } from "./profile-reviews";
 import { ProfileServices } from "./profile-services";
 import { ProfileStickyBar } from "./profile-sticky-bar";
 import { ServiceModal } from "./service-modal";
@@ -36,12 +32,27 @@ import { SharePopover } from "./share-popover";
 import pageGlobal from "../../styles/features/stylist-profile/stylist-profile-page-global.module.css";
 import styles from "../../styles/features/stylist-profile/stylist-profile-page.module.css";
 import { useRevealSweep } from "./use-reveal-sweep";
-import { useStylistProfile } from "./use-stylist-profile";
+import { useSharePopover } from "./use-share-popover";
+import { useStickyBar } from "./use-sticky-bar";
+import type { PublicStylist } from "../../lib/public-stylist";
 
-/** A stylist's public profile, route "/stylist?stylist=<id>". */
-export const StylistProfilePage = () => {
-  const profile = useStylistProfile();
-  const { id, shareAt, serviceModal, zoom, openZoom } = profile;
+interface StylistProfileViewProps {
+  publicStylist: PublicStylist;
+}
+
+/** A stylist's public profile, route "/{slug}". */
+export const StylistProfileView = ({
+  publicStylist: { stylist, hours, nextStart, isTakingBookings, socials },
+}: StylistProfileViewProps) => {
+  const { shareAt, shareButtonRef, openShare, closeShare } = useSharePopover();
+  const { heroRef, isShown: isStickyShown } = useStickyBar();
+
+  const [serviceModal, setServiceModal] = useState<ServiceModalData | null>(
+    null,
+  );
+
+  const [zoomIndex, setZoomIndex] = useState<number | null>(null);
+  const [isCoverActionsOn, setIsCoverActionsOn] = useState(false);
   const navigate = useNavigate();
   const { isFavourite, toggleFavourite } = useFavourites();
   const { share, copyLink } = useShare();
@@ -55,15 +66,13 @@ export const StylistProfilePage = () => {
     return () => document.documentElement.classList.remove("profile-page");
   }, []);
 
-  const stylist = getStylist(id);
   const { name, area, cover, portfolio = [], fromLabel } = stylist;
   const gallery = useMemo(() => getGallery(stylist), [stylist]);
   const menuGroups = useMemo(() => getMenuGroups(stylist), [stylist]);
-  const facts = getProfileFacts(stylist);
-  const status = getOpenStatus();
-  const reviews = useMemo(getReviews, []);
+  const facts = getProfileFacts(stylist, socials);
+  const status = getOpenStatus(hours, nextStart);
   const back = getLastSearch();
-  const bookHref = getBookHref(stylist.id);
+  const bookHref = isTakingBookings ? getBookHref(stylist.id) : "";
   const shareData = getShareData({ id: stylist.id, name, area });
   const saved = isFavourite(stylist.id);
 
@@ -76,7 +85,8 @@ export const StylistProfilePage = () => {
     navigate(back.href);
   };
 
-  const zoomTo = (src: string) => openZoom(gallery, gallery.indexOf(src));
+  const zoomTo = (src: string) =>
+    setZoomIndex(Math.max(0, gallery.indexOf(src)));
 
   const actions: ProfileActions = {
     shareLabel: `Share ${name}`,
@@ -85,14 +95,14 @@ export const StylistProfilePage = () => {
       event.stopPropagation();
 
       if (shareAt) {
-        profile.closeShare();
+        closeShare();
 
         return;
       }
 
       if (share({ id: stylist.id, name, area })) return;
 
-      profile.openShare(event.currentTarget);
+      openShare(event.currentTarget);
     },
     saved,
     saveLabel:
@@ -111,10 +121,10 @@ export const StylistProfilePage = () => {
         coverUrl={cover ? resolveAssetUrl(cover) : ""}
         back={back}
         onBack={goBack}
-        heroRef={profile.heroRef}
-        shareButtonRef={profile.shareButtonRef}
-        coverActionsOn={profile.coverActionsOn}
-        onToggleCoverActions={profile.toggleCoverActions}
+        heroRef={heroRef}
+        shareButtonRef={shareButtonRef}
+        coverActionsOn={isCoverActionsOn || !!shareAt}
+        onToggleCoverActions={() => setIsCoverActionsOn((isOn) => !isOn)}
         actions={actions}
       />
       <div className={joinClassNames(pageGlobal.profbody, styles.body)}>
@@ -125,24 +135,24 @@ export const StylistProfilePage = () => {
               groups={limitMenuGroups(menuGroups)}
               hasMore={hasMoreServices(menuGroups)}
               showAllLabel={`Show all ${countServices(menuGroups)} services`}
-              bookHref={bookHref}
-              onOpenService={profile.openServiceModal}
+              bookHref={getBookHref(stylist.id)}
+              onOpenService={setServiceModal}
             />
             <ProfilePortfolio
               portfolio={portfolio}
               onZoom={zoomTo}
               onSeeAll={() => zoomTo(portfolio[0] ?? "")}
             />
-            <ProfileReviews reviews={reviews} />
           </div>
           <BookingAside
             fromLabel={fromLabel}
             bookHref={bookHref}
             facts={facts}
+            hoursRows={getHoursRows(hours)}
           />
         </div>
       </div>
-      {profile.sticky && (
+      {isStickyShown && (
         <ProfileStickyBar
           name={name}
           back={back}
@@ -157,25 +167,36 @@ export const StylistProfilePage = () => {
           mailHref={shareData.mail}
           onCopy={() => {
             copyLink(shareData.url);
-            profile.closeShare();
+            closeShare();
           }}
-          onClose={profile.closeShare}
+          onClose={closeShare}
         />
       )}
       <div className={joinClassNames(pageGlobal.bookbar, styles.bookbar)}>
         <div className={styles.barInner}>
           <div className={styles.barText}>
             <span className={styles.barNext}>
-              {`Next available: ${status.nextAvailable}`}
+              {bookHref
+                ? `Next available: ${status.nextAvailable}`
+                : "Not taking bookings right now"}
             </span>
             <span className={styles.barFrom}>{`from ${fromLabel}`}</span>
           </div>
-          <Link to={bookHref} className={styles.barBook}>
-            Book now
-          </Link>
+          {bookHref && (
+            <Link to={bookHref} className={styles.barBook}>
+              Book now
+            </Link>
+          )}
         </div>
       </div>
-      {zoom.src && <PortfolioLightbox zoom={zoom} />}{" "}
+      {zoomIndex != null && (
+        <PortfolioLightbox
+          photos={gallery}
+          index={zoomIndex}
+          onIndexChange={setZoomIndex}
+          onClose={() => setZoomIndex(null)}
+        />
+      )}
       <div className={styles.footer}>
         <Link to="/" className={styles.poweredBy}>
           Powered by{" "}
@@ -189,7 +210,7 @@ export const StylistProfilePage = () => {
       {serviceModal && (
         <ServiceModal
           service={serviceModal}
-          onClose={profile.closeServiceModal}
+          onClose={() => setServiceModal(null)}
         />
       )}
       <WelcomeToast />

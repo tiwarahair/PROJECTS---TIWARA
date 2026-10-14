@@ -94,8 +94,8 @@ export const StylistCard = ({
 }: StylistCardProps) => {
   const { isFavourite, toggleFavourite } = useFavourites();
 
-  const id =
-    stylistId || (String(href).match(/stylist=([^&]+)/) || [])[1] || "";
+  // profile links are "/{slug}"
+  const id = stylistId || String(href).split(/[/?]/)[1] || "";
 
   const isSaved = !!id && isFavourite(id);
   const metaText = meta ?? getMeta(services, from);

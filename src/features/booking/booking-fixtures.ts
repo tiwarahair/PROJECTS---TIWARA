@@ -232,7 +232,7 @@ export const applyFixture = (
 
   if (fixture === "hold-expired") state.holdExpired = true;
 
-  if (fixture === "leave") state.leave = `/stylist?stylist=${state.id}`;
+  if (fixture === "leave") state.leave = `/${state.id}`;
 
   if (fixture === "time") {
     state.step = 3;

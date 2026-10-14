@@ -32,7 +32,7 @@ describe("SearchPage", () => {
 
     expect(
       screen.getAllByRole("link", { name: "NaturallyNia" })[0],
-    ).toHaveAttribute("href", "/stylist?stylist=naturallynia");
+    ).toHaveAttribute("href", "/naturallynia");
   });
 
   it("typing in What opens matching styles and stylists; picking a group filters the results", async () => {

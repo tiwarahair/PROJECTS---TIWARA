@@ -323,7 +323,7 @@ export const getResultCards = (
     return {
       ...stylist,
       key: stylist.id,
-      href: `/stylist?stylist=${stylist.id}`,
+      href: `/${stylist.id}`,
       services: [],
       from: price,
       meta: `From ${formatMoney(price)}`,

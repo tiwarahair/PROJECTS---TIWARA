@@ -2,12 +2,11 @@ import type { CSSProperties } from "react";
 import { Link } from "react-router";
 import { getAssetUrl } from "../../utils/asset-url";
 import { joinClassNames } from "../../utils/class-names";
-import { STUDIO_STYLIST_ID } from "./studio-data";
 import { copyText } from "./studio-format";
 import {
   getBookingLink,
+  getProfilePath,
   getSteps,
-  hasPublicProfile,
   isLive,
 } from "./studio-model";
 import type { StudioTab } from "./studio-types";
@@ -545,14 +544,9 @@ export const LinkCardBody = ({ studio }: { studio: StudioController }) => {
       </div>
       <div className={styles.linkUrl}>{getBookingLink(state)}</div>
       <div className={styles.linkActions}>
-        {hasPublicProfile(state) && (
-          <Link
-            className={styles.previewProfile}
-            to={`/stylist?stylist=${STUDIO_STYLIST_ID}`}
-          >
-            Preview profile
-          </Link>
-        )}
+        <Link className={styles.previewProfile} to={getProfilePath(state)}>
+          Preview profile
+        </Link>
         <button
           className={styles.copyLink}
           onClick={() => {

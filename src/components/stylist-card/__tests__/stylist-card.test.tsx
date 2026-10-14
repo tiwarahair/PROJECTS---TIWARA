@@ -12,7 +12,7 @@ beforeEach(() => {
 });
 
 const BASE = {
-  href: "/stylist?stylist=amara-beauty",
+  href: "/amara-beauty",
   cover: "demo/stylists/w161154.jpg",
   stylistName: "Amara Beauty",
   rating: "4.8",
@@ -37,9 +37,7 @@ describe("StylistCard", () => {
     // the cover and the title both link to the profile
     screen
       .getAllByRole("link", { name: "Amara Beauty" })
-      .forEach((link) =>
-        expect(link).toHaveAttribute("href", "/stylist?stylist=amara-beauty"),
-      );
+      .forEach((link) => expect(link).toHaveAttribute("href", "/amara-beauty"));
 
     expect(screen.getByText("(146)")).toBeInTheDocument();
     expect(screen.getByText("Hulme, Manchester")).toBeInTheDocument();

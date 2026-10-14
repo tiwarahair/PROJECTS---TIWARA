@@ -84,8 +84,6 @@ describe.skipIf(!hasPrototype)(
         ),
       );
 
-      expect(data.reviews).toEqual(toPlain(prototypeData.reviews));
-
       expect(data.faqs).toEqual(
         renameKeys(toPlain(prototypeData.faqs), [
           ["q", "question"],

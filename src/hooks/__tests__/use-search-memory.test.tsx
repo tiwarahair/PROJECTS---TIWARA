@@ -60,7 +60,7 @@ describe("useSearchMemory", () => {
     );
 
     act(() => {
-      void result.current("/stylist?stylist=amara-beauty");
+      void result.current("/amara-beauty");
     });
 
     vi.advanceTimersByTime(800);
