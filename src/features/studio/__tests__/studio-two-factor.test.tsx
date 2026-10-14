@@ -88,7 +88,85 @@ describe("Studio → two-step verification", () => {
     await user.click(within(dialog).getByRole("button", { name: "Turn on" }));
 
     expect(
-      await within(getDialog()).findByText("Add a backup"),
+      await within(getDialog()).findByRole("status", {
+        name: "Main phone added",
+      }),
+    ).toBeInTheDocument();
+
+    act(() => void vi.advanceTimersByTime(900));
+
+    expect(within(getDialog()).getByText("Add a backup")).toBeInTheDocument();
+
+    await user.click(within(getDialog()).getByRole("button", { name: "Back" }));
+
+    expect(
+      within(getDialog()).getByText("Set up as “Main phone”"),
+    ).toBeInTheDocument();
+
+    expect(
+      within(getDialog()).queryByRole("status", { name: "Main phone added" }),
+    ).not.toBeInTheDocument();
+
+    await user.click(
+      within(getDialog()).getByRole("button", { name: "Continue" }),
+    );
+
+    expect(within(getDialog()).getByText("Add a backup")).toBeInTheDocument();
+  });
+
+  it("back returns to the screen before, one step at a time", async () => {
+    renderFixture("secure-locked");
+
+    await user.click(
+      within(getDialog()).getByRole("button", { name: "Turn on" }),
+    );
+
+    expect(
+      within(getDialog()).getByText("Turn on two‑step verification"),
+    ).toBeInTheDocument();
+
+    await user.click(
+      within(getDialog()).getByRole("button", { name: "Continue" }),
+    );
+
+    await user.click(within(getDialog()).getByRole("button", { name: "Back" }));
+
+    expect(
+      within(getDialog()).getByText("Turn on two‑step verification"),
+    ).toBeInTheDocument();
+
+    await user.click(within(getDialog()).getByRole("button", { name: "Back" }));
+
+    expect(
+      within(getDialog()).getByText("Get paid: 2FA, tax details and Stripe"),
+    ).toBeInTheDocument();
+
+    expect(
+      within(getDialog()).queryByRole("button", { name: "Back" }),
+    ).not.toBeInTheDocument();
+  });
+
+  it("copying the key swaps the icon to a tick, then back", async () => {
+    renderFixture("tf-app");
+
+    await user.click(
+      within(getDialog()).getByRole("button", {
+        name: "Can’t scan? Enter this key instead",
+      }),
+    );
+
+    await user.click(
+      within(getDialog()).getByRole("button", { name: "Copy key" }),
+    );
+
+    expect(
+      await within(getDialog()).findByRole("button", { name: "Key copied" }),
+    ).toBeInTheDocument();
+
+    act(() => void vi.advanceTimersByTime(1500));
+
+    expect(
+      within(getDialog()).getByRole("button", { name: "Copy key" }),
     ).toBeInTheDocument();
   });
 
@@ -105,7 +183,7 @@ describe("Studio → two-step verification", () => {
     );
 
     await user.click(
-      within(dialog).getByRole("button", { name: "Skip for now" }),
+      within(dialog).getByRole("button", { name: "Skip anyway" }),
     );
 
     expect(

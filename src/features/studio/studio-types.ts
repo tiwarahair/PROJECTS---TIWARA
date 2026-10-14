@@ -304,7 +304,12 @@ export interface TwoFactorFlow {
   /** A real account's app being added: its QR code and key. */
   enrolment?: TwoFactorEnrolment | null;
   isEnrolmentFailed?: boolean;
+  isVerified?: boolean;
+  isJustVerified?: boolean;
   isBusy?: boolean;
+  keyCopied?: boolean;
+  /** The screens before this one, newest last; Back restores the last. */
+  history?: TwoFactorFlow[];
 }
 
 export interface ConfirmDialog {

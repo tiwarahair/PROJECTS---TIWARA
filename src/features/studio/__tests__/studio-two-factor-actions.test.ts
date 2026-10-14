@@ -2,7 +2,10 @@ import { FunctionsHttpError } from "@supabase/supabase-js";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import type { TaxDetails } from "../../../components/tax-details-form/tax-details-logic";
 import { saveTaxDetails } from "../../../lib/studio-api";
-import { startTwoFactorEnrolment } from "../../../lib/two-factor";
+import {
+  startTwoFactorEnrolment,
+  verifySecondFactor,
+} from "../../../lib/two-factor";
 import type { TwoFactorEnrolment } from "../../../lib/two-factor";
 import type { StudioContext } from "../studio-actions";
 import { createTwoFactorActions } from "../studio-two-factor-actions";
@@ -69,6 +72,29 @@ describe("two-step verification actions", () => {
 
     expect(saveTaxDetails).toHaveBeenLastCalledWith(value);
     expect(getState().tax?.nationalInsuranceHint).toBe("QQ •• •• 56 C");
+  });
+
+  it("the code step is busy while the code is checked", async () => {
+    let finishCheck: (isRight: boolean) => void = () => undefined;
+
+    vi.mocked(verifySecondFactor).mockReturnValueOnce(
+      new Promise((resolve) => {
+        finishCheck = resolve;
+      }),
+    );
+
+    const { actions, getState } = setup();
+
+    actions.openTwoFactor("taxcode", { flow: "info" });
+    actions.setTwoFactor({ code: "123456" });
+
+    const checking = actions.confirmTaxCode();
+
+    expect(getState().twoFactor?.isBusy).toBe(true);
+
+    finishCheck(true);
+    await checking;
+    expect(getState().twoFactor?.isBusy).toBe(false);
   });
 
   it("closing the code step forgets what it was going to do", async () => {

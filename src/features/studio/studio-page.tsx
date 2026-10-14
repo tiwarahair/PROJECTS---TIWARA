@@ -9,7 +9,7 @@ import { StudioServices } from "./studio-services";
 import { StudioSettings } from "./studio-settings";
 import { EndDateDialog } from "./sheets-simple";
 import { StudioSheets } from "./studio-sheets";
-import { TwoFactorDialog } from "./two-factor";
+import { TwoFactorDialog } from "./two-factor/two-factor-dialog";
 import { BookingAddonDialog } from "./booking-sheet";
 import { NewClientDialog } from "./booking-dialogs";
 import {

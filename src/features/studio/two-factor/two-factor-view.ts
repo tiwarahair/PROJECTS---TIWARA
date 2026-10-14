@@ -3,9 +3,9 @@ import type { ChangeEvent } from "react";
 import type {
   TaxDetails,
   TaxFixture,
-} from "../../components/tax-details-form/tax-details-logic";
-import { getQrCells } from "./studio-format";
-import type { StudioController } from "./use-studio";
+} from "../../../components/tax-details-form/tax-details-logic";
+import { getQrCells } from "../studio-format";
+import type { StudioController } from "../use-studio";
 
 const DEMO_KEY = "JBSWY3DPEHPK3PXPK4ZX";
 
@@ -20,7 +20,7 @@ export const getTwoFactorView = (studio: StudioController) => {
 
   if (!flow) return null;
 
-  const { closeTwoFactor, setTwoFactor } = actions;
+  const { closeTwoFactor, setTwoFactor, goStep } = actions;
   const devices = state.twoFactorSettings?.devices || [];
   const isOn = devices.length > 0;
   const isStripe = !!state.check.stripe;
@@ -28,6 +28,9 @@ export const getTwoFactorView = (studio: StudioController) => {
   const isBackup = flow.kind === "backup";
   const { enrolment } = flow;
   const main = devices.find(({ backup }) => !backup) || devices[0];
+  const isVerified = step === "app" && !!flow.isVerified;
+  const isSetUp = isVerified && !flow.isJustVerified;
+  const isAdding = flow.flow === "add";
 
   const getOption = (key: string) => ({
     isOn: flow.option === key,
@@ -69,7 +72,9 @@ export const getTwoFactorView = (studio: StudioController) => {
       CODE_REASONS[flow.from ?? ""] ?? "edit your tax details"
     }.`,
     method: "Choose how you’ll get a code each time you sign in.",
-    app: "Scan the QR code with your authenticator app, then enter the 6-digit code it shows.",
+    app: isSetUp
+      ? ""
+      : "Scan the QR code with your authenticator app, then enter the 6-digit code it shows.",
     backup: "If you lose your phone, you’ll use this to log in.",
     done: `You’ll enter a code from ${mainName} each time you sign in.`,
     remove: "Enter a code from your authenticator app to confirm.",
@@ -118,7 +123,7 @@ export const getTwoFactorView = (studio: StudioController) => {
           ? `On · ${devices.map(({ name }) => name).join(", ")}`
           : "A code from your phone each time you sign in",
         buttonLabel: "Turn on",
-        onSelect: () => setTwoFactor({ step: "method" }),
+        onSelect: () => goStep("method"),
         isUnlocked: true,
       },
       {
@@ -128,7 +133,7 @@ export const getTwoFactorView = (studio: StudioController) => {
         isDone: !!tax,
         subtitle: getTaxSubtitle(),
         buttonLabel: "Add",
-        onSelect: () => setTwoFactor({ step: "tax" }),
+        onSelect: () => goStep("tax"),
         isUnlocked: isOn,
       },
       {
@@ -148,10 +153,10 @@ export const getTwoFactorView = (studio: StudioController) => {
     isFinishLater: step === "tax" && flow.flow === "setup",
     isCloseShown: step !== "done" && !(step === "tax" && flow.flow === "setup"),
     hasLearn: step === "tax",
-    openLearn: () => setTwoFactor({ step: "learn", from: "tax" }),
+    openLearn: () => goStep("learn", { from: "tax" }),
     learnLabel: flow.from === "tax" ? "Back to tax details" : "Close",
     learnGo: () => {
-      if (flow.from === "tax") setTwoFactor({ step: "tax" });
+      if (flow.from === "tax") actions.backTwoFactor();
       else closeTwoFactor();
     },
     taxSubmit: (value: TaxDetails) =>
@@ -167,21 +172,10 @@ export const getTwoFactorView = (studio: StudioController) => {
     subtitle: subtitles[step] || "",
     isCentred: step === "done",
     canBack:
-      step === "app" ||
-      (step === "method" && flow.flow === "setup") ||
-      (step === "tax" && flow.flow === "setup") ||
-      (step === "learn" && flow.from === "tax"),
-    back: () => {
-      if (step === "app")
-        setTwoFactor({
-          step: isBackup ? "backup" : "method",
-          error: "",
-          errorMessage: "",
-          code: "",
-        });
-      else if (step === "learn") setTwoFactor({ step: "tax" });
-      else setTwoFactor({ step: "secure" });
-    },
+      !!flow.history?.length &&
+      !isVerified &&
+      !["done", "taxcode", "remove"].includes(step),
+    back: actions.backTwoFactor,
     toApp: () =>
       actions.beginEnrolment({
         kind: "main",
@@ -214,15 +208,8 @@ export const getTwoFactorView = (studio: StudioController) => {
     isKeyOn: !!flow.keyShown,
     toggleKey: () => setTwoFactor({ keyShown: !flow.keyShown }),
     keyText: (enrolment?.secret ?? DEMO_KEY).replace(/(.{4})(?=.)/g, "$1 "),
-    copyKey: () => {
-      try {
-        void navigator.clipboard.writeText(enrolment?.secret ?? DEMO_KEY);
-      } catch {
-        // clipboard not available; the toast still confirms
-      }
-
-      actions.showToast("Key copied");
-    },
+    isKeyCopied: !!flow.keyCopied,
+    copyKey: () => actions.copyTwoFactorKey(enrolment?.secret ?? DEMO_KEY),
     isOpenAppShown: !isWide,
     appLink: enrolment?.uri ?? "",
     openApp: () => actions.showToast("Opening your authenticator app"),
@@ -234,6 +221,9 @@ export const getTwoFactorView = (studio: StudioController) => {
     isBusy: !!flow.isBusy,
     verify: actions.verifyTwoFactor,
     verifyLabel: isBackup ? "Add backup" : "Turn on",
+    isVerified,
+    isSetUp,
+    toBackup: () => goStep("backup", { option: "device", skipWarn: false }),
     optionDevice: getOption("device"),
     optionManager: getOption("pm"),
     addBackup: () =>
@@ -246,15 +236,20 @@ export const getTwoFactorView = (studio: StudioController) => {
         keyShown: false,
         skipWarn: false,
       }),
-    isSkipShown: flow.flow !== "add",
+    isSkipShown: !isAdding,
     isSkipWarn: !!flow.skipWarn,
+    skipLabel: flow.skipWarn ? "Skip anyway" : "Skip for now",
     skip: () => {
       if (!flow.skipWarn) setTwoFactor({ skipWarn: true });
-      else setTwoFactor({ step: "done", skipWarn: false });
+      else goStep("done", { skipWarn: false });
     },
     doneLabel: getDoneLabel(),
     doneGo: () => {
-      if (flow.flow === "setup" && !tax) setTwoFactor({ step: "tax" });
+      if (flow.flow === "setup" && !tax)
+        setTwoFactor({
+          step: "tax",
+          history: [{ ...flow, step: "secure", history: [] }],
+        });
       else if (flow.flow === "setup" && !isStripe) toStripe();
       else closeTwoFactor();
     },

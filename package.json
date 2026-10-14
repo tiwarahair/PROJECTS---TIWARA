@@ -33,6 +33,7 @@
     "@zxcvbn-ts/language-en": "3.0.2",
     "browser-image-compression": "^2.0.2",
     "gsap": "3.12.5",
+    "lucide-react": "^1.57.0",
     "react": "^19.2.8",
     "react-dom": "^19.2.8",
     "react-hook-form": "^7.84.0",

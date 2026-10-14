@@ -52,6 +52,7 @@ export const createTwoFactorActions = (
     if (!getState().twoFactor) return;
 
     memo.afterSecondFactor = undefined;
+    window.clearTimeout(timers.twoFactorNext);
 
     setState({ twoFactorOut: true });
     window.clearTimeout(timers.twoFactor);
@@ -66,6 +67,61 @@ export const createTwoFactorActions = (
     setState(({ twoFactor }) => ({
       twoFactor: twoFactor ? { ...twoFactor, ...patch } : twoFactor,
     }));
+
+  const goStep = (step: string, patch: Partial<TwoFactorFlow> = {}) =>
+    setState(({ twoFactor }) => {
+      if (!twoFactor) return { twoFactor };
+
+      const { history = [], ...current } = twoFactor;
+
+      return {
+        twoFactor: {
+          ...current,
+          code: "",
+          error: "",
+          errorMessage: "",
+          keyCopied: false,
+          ...patch,
+          step,
+          history: [...history, current],
+        },
+      };
+    });
+
+  const backTwoFactor = () => {
+    memo.enrolmentRequest = (memo.enrolmentRequest ?? 0) + 1;
+
+    setState(({ twoFactor }) => {
+      const previous = twoFactor?.history?.at(-1);
+
+      if (!twoFactor || !previous) return { twoFactor };
+
+      return {
+        twoFactor: {
+          ...previous,
+          code: "",
+          error: "",
+          errorMessage: "",
+          keyCopied: false,
+          history: twoFactor.history?.slice(0, -1),
+        },
+      };
+    });
+  };
+
+  const copyTwoFactorKey = (secret: string) =>
+    void navigator.clipboard?.writeText(secret).then(
+      () => {
+        window.clearTimeout(timers.keyCopied);
+        setTwoFactor({ keyCopied: true });
+
+        timers.keyCopied = window.setTimeout(
+          () => setTwoFactor({ keyCopied: false }),
+          1500,
+        );
+      },
+      () => undefined,
+    );
 
   const isReal = () => !!getState().account;
 
@@ -103,14 +159,7 @@ export const createTwoFactorActions = (
   };
 
   /** The app step: a real account gets its QR code and key from Supabase. */
-  const beginEnrolment = (patch: Partial<TwoFactorFlow>) => {
-    setTwoFactor({
-      ...patch,
-      step: "app",
-      enrolment: null,
-      isEnrolmentFailed: false,
-    });
-
+  const startEnrolment = () => {
     if (!isReal()) return;
 
     const request = (memo.enrolmentRequest ?? 0) + 1;
@@ -127,7 +176,21 @@ export const createTwoFactorActions = (
       });
   };
 
-  const retryEnrolment = () => beginEnrolment({});
+  const beginEnrolment = (patch: Partial<TwoFactorFlow>) => {
+    goStep("app", {
+      ...patch,
+      enrolment: null,
+      isEnrolmentFailed: false,
+      isVerified: false,
+    });
+
+    startEnrolment();
+  };
+
+  const retryEnrolment = () => {
+    setTwoFactor({ enrolment: null, isEnrolmentFailed: false });
+    startEnrolment();
+  };
 
   const verifyTwoFactor = () => {
     const { twoFactor, twoFactorSettings } = getState();
@@ -172,22 +235,16 @@ export const createTwoFactorActions = (
           },
         });
 
-        if (twoFactor.kind === "main")
-          setTwoFactor({
-            step: "backup",
-            code: "",
-            error: "",
-            errorMessage: "",
-            option: "device",
-            skipWarn: false,
-            keyShown: false,
-            enrolment: null,
-          });
-        else if (twoFactor.flow === "add") {
-          closeTwoFactor();
-          showToast("Backup added");
-        } else
-          setTwoFactor({ step: "done", code: "", error: "", errorMessage: "" });
+        if (twoFactor.kind === "main" || twoFactor.flow === "add") {
+          setTwoFactor({ isVerified: true, isJustVerified: true });
+
+          timers.twoFactorNext = window.setTimeout(() => {
+            if (twoFactor.flow === "add") return closeTwoFactor();
+
+            setTwoFactor({ isJustVerified: false });
+            goStep("backup", { option: "device", skipWarn: false });
+          }, 900);
+        } else goStep("done");
 
         checkDone();
       },
@@ -281,6 +338,9 @@ export const createTwoFactorActions = (
     openTwoFactor,
     closeTwoFactor,
     setTwoFactor,
+    goStep,
+    backTwoFactor,
+    copyTwoFactorKey,
     beginEnrolment,
     retryEnrolment,
     verifyTwoFactor,

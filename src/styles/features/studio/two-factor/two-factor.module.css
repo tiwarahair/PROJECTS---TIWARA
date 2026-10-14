@@ -281,6 +281,9 @@
 }
 
 .primary {
+  display: flex;
+  align-items: center;
+  justify-content: center;
   width: 100%;
   height: 50px;
   margin-top: 20px;
@@ -300,6 +303,34 @@
 
 .primary:active {
   transform: scale(0.98) !important;
+}
+
+.primary:disabled,
+.remove:disabled {
+  cursor: progress;
+}
+
+.verified {
+  cursor: default;
+}
+
+.verified svg {
+  animation: tickin 0.2s var(--ease-out) both;
+}
+
+.verified path {
+  stroke-dasharray: 23;
+  stroke-dashoffset: 23;
+  animation: tickdraw 0.3s var(--ease-out) 0.1s forwards;
+}
+
+.spinner {
+  width: 16px;
+  height: 16px;
+  border-radius: var(--radius-full);
+  border: 2px solid rgba(246, 240, 228, 0.3);
+  border-top-color: var(--neutral-100);
+  animation: spin 0.7s linear infinite;
 }
 
 .label {
@@ -592,17 +623,24 @@
 }
 
 .copy {
+  display: grid;
+  place-items: center;
   flex: 0 0 auto;
+  width: 34px;
   height: 34px;
-  padding: 0 14px;
+  padding: 0;
   border: 1px solid var(--border-strong, #d8d2c6);
   border-radius: var(--radius-full);
   background: transparent;
-  font: inherit;
-  font-size: 13.5px;
-  font-weight: 600;
   color: var(--text-primary);
   cursor: pointer;
+}
+
+.copyIcon {
+  grid-area: 1 / 1;
+  transition:
+    opacity 150ms var(--ease-out),
+    transform 150ms var(--ease-out);
 }
 
 .option {
@@ -743,6 +781,9 @@
 }
 
 .remove {
+  display: flex;
+  align-items: center;
+  justify-content: center;
   flex: 1;
   height: 48px;
   border: none;
@@ -766,6 +807,11 @@
 
 .locked {
   opacity: 0.45;
+}
+
+.copyIconOut {
+  opacity: 0;
+  transform: scale(0.8);
 }
 
 .inputError {
@@ -792,5 +838,45 @@
   }
   100% {
     transform: scale(1);
+  }
+}
+
+@keyframes tickin {
+  from {
+    opacity: 0;
+    transform: scale(0.85);
+  }
+}
+
+@keyframes tickfade {
+  from {
+    opacity: 0;
+  }
+}
+
+@keyframes tickdraw {
+  to {
+    stroke-dashoffset: 0;
+  }
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .verified svg {
+    animation-name: tickfade;
+  }
+
+  .verified path {
+    animation: none;
+    stroke-dashoffset: 0;
+  }
+
+  .copyIconOut {
+    transform: none;
   }
 }
