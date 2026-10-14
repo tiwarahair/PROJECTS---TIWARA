@@ -36,6 +36,7 @@ export interface StudioContext {
     saveSlug?: () => Promise<boolean>;
     /** What a confirmed app code goes on to (e.g. back to Stripe). */
     afterSecondFactor?: () => void;
+    enrolmentRequest?: number;
     seenDone?: ReturnType<typeof getSteps>;
     clashOk?: boolean;
     lastPointer?: string;

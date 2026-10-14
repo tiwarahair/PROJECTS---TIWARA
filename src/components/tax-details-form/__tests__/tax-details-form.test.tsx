@@ -6,6 +6,7 @@ import {
   formatNationalInsuranceNumber,
   getInitialTaxState,
   getTaxErrors,
+  getTaxOutput,
 } from "../tax-details-logic";
 import type { UserEvent } from "@testing-library/user-event";
 import { setupUser } from "../../../test/setup-user";
@@ -62,6 +63,22 @@ describe("TaxDetailsForm", () => {
 
     state.home.fields.postcode = "m14-5tq";
     expect(getTaxErrors(state).address).toBeUndefined();
+  });
+
+  it("drops names typed before choosing the account name", () => {
+    const state = {
+      ...getInitialTaxState({ fixture: "name-no" }),
+      first: "Old",
+      last: "Name",
+      nameYes: true,
+    };
+
+    expect(getTaxOutput(state, "Amara Okonkwo")).toMatchObject({
+      first: "",
+      middle: "",
+      last: "",
+      legalName: "Amara Okonkwo",
+    });
   });
 
   it("fixture err-pc flags the address", () => {

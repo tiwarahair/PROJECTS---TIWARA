@@ -82,6 +82,8 @@ Deno.serve(async (request) => {
   if (isSole && nationalInsurance && !NI_PATTERN.test(nationalInsurance))
     return respond(400, { error: "invalid_ni_number" });
 
+  if (isSole && !details.legalName) return respond(400, { error: "legal_name_required" });
+
   if (isSole && !nationalInsurance && !saved?.ni_ciphertext) return respond(400, { error: "ni_number_required" });
 
   const pad = (value: string) => value.padStart(2, "0");
@@ -89,9 +91,9 @@ Deno.serve(async (request) => {
   const row = {
     stylist_id: stylist.id,
     kind: details.kind,
-    first_name: isSole ? details.first : null,
+    first_name: isSole ? details.first || null : null,
     middle_name: isSole ? details.middle || null : null,
-    last_name: isSole ? details.last : null,
+    last_name: isSole ? details.last || null : null,
     legal_name: isSole ? details.legalName : null,
     date_of_birth: isSole ? `${details.year}-${pad(details.month)}-${pad(details.day)}` : null,
     ni_ciphertext: isSole ? (nationalInsurance ? await encrypt(nationalInsurance) : saved?.ni_ciphertext) : null,
@@ -111,13 +113,17 @@ Deno.serve(async (request) => {
   // "Your tax details were updated" to their login email, in case it wasn't them
   const { data: owner } = await admin.auth.admin.getUserById(userId);
 
-  if (owner.user?.email)
-    await admin.rpc("queue_email", {
+  if (owner.user?.email) {
+    const { error: emailError } = await admin.rpc("queue_email", {
       to_address: owner.user.email,
       template: "tax_details_updated",
       payload: { changed_at: row.updated_at },
       user_id: userId,
     });
+
+    // the details are saved either way; a missing email shows in the function's logs
+    if (emailError) console.error("tax_details_updated email not queued", emailError.message);
+  }
 
   return respond(200, { nationalInsuranceHint: row.ni_hint });
 });

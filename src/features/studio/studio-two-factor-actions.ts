@@ -51,6 +51,8 @@ export const createTwoFactorActions = (
   const closeTwoFactor = () => {
     if (!getState().twoFactor) return;
 
+    memo.afterSecondFactor = undefined;
+
     setState({ twoFactorOut: true });
     window.clearTimeout(timers.twoFactor);
 
@@ -102,19 +104,31 @@ export const createTwoFactorActions = (
 
   /** The app step: a real account gets its QR code and key from Supabase. */
   const beginEnrolment = (patch: Partial<TwoFactorFlow>) => {
-    setTwoFactor({ ...patch, step: "app", enrolment: null });
+    setTwoFactor({
+      ...patch,
+      step: "app",
+      enrolment: null,
+      isEnrolmentFailed: false,
+    });
 
     if (!isReal()) return;
 
+    // only the latest request fills the dialog (a slow earlier one is dropped)
+    const request = (memo.enrolmentRequest ?? 0) + 1;
+
+    memo.enrolmentRequest = request;
+
     startTwoFactorEnrolment()
-      .then((enrolment) => setTwoFactor({ enrolment }))
-      .catch(() =>
-        setTwoFactor({
-          error: "code",
-          errorMessage: "Two-step verification couldn’t start. Try again.",
-        }),
-      );
+      .then((enrolment) => {
+        if (memo.enrolmentRequest === request) setTwoFactor({ enrolment });
+      })
+      .catch(() => {
+        if (memo.enrolmentRequest === request)
+          setTwoFactor({ isEnrolmentFailed: true });
+      });
   };
+
+  const retryEnrolment = () => beginEnrolment({});
 
   const verifyTwoFactor = () => {
     const { twoFactor, twoFactorSettings } = getState();
@@ -143,6 +157,10 @@ export const createTwoFactorActions = (
         errorMessage: "The QR code is still loading. Try again in a moment.",
       });
 
+    const added = devices.concat([
+      { name, backup: twoFactor.kind === "backup" },
+    ]);
+
     void withCode(
       (code) =>
         confirmTwoFactorEnrolment(enrolment?.factorId ?? "", code, name),
@@ -150,8 +168,8 @@ export const createTwoFactorActions = (
         setState({
           twoFactorSettings: {
             devices: isReal()
-              ? await listTwoFactorDevices()
-              : devices.concat([{ name, backup: twoFactor.kind === "backup" }]),
+              ? await listTwoFactorDevices().catch(() => added)
+              : added,
           },
         });
 
@@ -191,9 +209,11 @@ export const createTwoFactorActions = (
     void withCode(
       (code) => removeTwoFactorApp(device?.id ?? "", code),
       async () => {
+        const kept = devices.filter((item) => item !== device);
+
         let next = isReal()
-          ? await listTwoFactorDevices()
-          : devices.filter((item) => item !== device);
+          ? await listTwoFactorDevices().catch(() => kept)
+          : kept;
 
         if (!next.some(({ backup }) => !backup))
           next = next.map((item, index) =>
@@ -217,40 +237,32 @@ export const createTwoFactorActions = (
     openTwoFactor("taxcode", { flow: "info" });
   };
 
-  /** Saves tax details (encrypted on the server for a real account); false when they didn't save. */
-  const saveTax = async (value: TaxDetails) => {
-    if (!isReal()) {
-      setState({ tax: value });
-      showToast("Tax details saved");
-      checkDone();
-
-      return true;
-    }
-
+  /** Saves tax details (encrypted on the server for a real account), then carries on with onSaved. */
+  const saveTax = async (value: TaxDetails, onSaved?: () => void) => {
     try {
-      const nationalInsuranceHint = await saveTaxDetails(value);
+      const tax = isReal()
+        ? {
+            ...value,
+            nationalInsuranceNumber: "",
+            nationalInsuranceHint: await saveTaxDetails(value),
+          }
+        : value;
 
-      setState({
-        tax: { ...value, nationalInsuranceNumber: "", nationalInsuranceHint },
-      });
-
+      setState({ tax });
       showToast("Tax details saved");
       checkDone();
-
-      return true;
+      onSaved?.();
     } catch (error) {
       const isLapsed =
         error instanceof FunctionsHttpError && error.context.status === 403;
 
-      showToast(
-        isLapsed
-          ? "For your security, enter a code from your authenticator app, then save again."
-          : "Your tax details couldn’t be saved. Try again.",
-      );
+      if (!isLapsed)
+        return showToast("Your tax details couldn’t be saved. Try again.");
 
-      if (isLapsed) openTwoFactor("taxcode", { flow: "info" });
-
-      return false;
+      showToast("For your security, enter a code from your authenticator app.");
+      openTwoFactor("taxcode", { flow: "info" });
+      // after the code, the same details save again
+      memo.afterSecondFactor = () => void saveTax(value, onSaved);
     }
   };
 
@@ -258,11 +270,9 @@ export const createTwoFactorActions = (
     withCode(
       (code) => verifySecondFactor(code),
       () => {
-        closeTwoFactor();
-
         const next = memo.afterSecondFactor;
 
-        memo.afterSecondFactor = undefined;
+        closeTwoFactor();
 
         if (next) next();
         else setState({ taxEdit: true });
@@ -274,6 +284,7 @@ export const createTwoFactorActions = (
     closeTwoFactor,
     setTwoFactor,
     beginEnrolment,
+    retryEnrolment,
     verifyTwoFactor,
     removeTwoFactorDevice,
     openTaxEdit,

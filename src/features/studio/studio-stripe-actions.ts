@@ -2,6 +2,7 @@
 import { FunctionsHttpError } from "@supabase/supabase-js";
 import { callStripe } from "../../lib/studio-api";
 import type { StudioContext } from "./studio-actions";
+import { hasTwoFactor } from "./studio-model";
 import { getPayoutStatus } from "./studio-records";
 import type { TwoFactorFlow } from "./studio-types";
 
@@ -28,8 +29,10 @@ export const createStripeActions = (
       setState({ stripeBusy: false });
 
       if (error instanceof FunctionsHttpError && error.context.status === 403) {
-        memo.afterSecondFactor = () => void goToStripe(action);
+        if (!hasTwoFactor(getState())) return openTwoFactor("secure");
+
         openTwoFactor("taxcode", { flow: "info", from: "stripe" });
+        memo.afterSecondFactor = () => void goToStripe(action);
 
         return;
       }

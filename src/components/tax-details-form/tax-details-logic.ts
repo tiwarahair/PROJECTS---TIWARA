@@ -357,18 +357,21 @@ export const getTaxOutput = (
       }
     : { ...fields, postcode: formatPostcode(fields.postcode) };
 
+  // names typed before switching to "yes" aren't kept
+  const getName = (part: string) => (state.nameYes ? "" : part.trim());
+  const first = getName(state.first);
+  const middle = getName(state.middle);
+  const last = getName(state.last);
+
   return {
     kind: state.kind,
     nameYes: state.nameYes,
-    first: state.first.trim(),
-    middle: state.middle.trim(),
-    last: state.last.trim(),
+    first,
+    middle,
+    last,
     legalName: state.nameYes
       ? legalName || ""
-      : [state.first, state.middle, state.last]
-          .map((part) => part.trim())
-          .filter(Boolean)
-          .join(" "),
+      : [first, middle, last].filter(Boolean).join(" "),
     day: state.day,
     month: state.month,
     year: state.year,

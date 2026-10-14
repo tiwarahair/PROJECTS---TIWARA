@@ -303,6 +303,7 @@ export interface TwoFactorFlow {
   fixture?: string;
   /** A real account's app being added: its QR code and key. */
   enrolment?: TwoFactorEnrolment | null;
+  isEnrolmentFailed?: boolean;
   isBusy?: boolean;
 }
 

@@ -9,6 +9,11 @@ import type { StudioController } from "./use-studio";
 
 const DEMO_KEY = "JBSWY3DPEHPK3PXPK4ZX";
 
+const CODE_REASONS: Record<string, string> = {
+  stripe: "continue to Stripe",
+  policy: "save your payment policy",
+};
+
 export const getTwoFactorView = (studio: StudioController) => {
   const { state, isWide, actions } = studio;
   const flow = state.twoFactor;
@@ -60,10 +65,9 @@ export const getTwoFactorView = (studio: StudioController) => {
     secure: "Secure your account and set up payouts. Takes about 5 minutes.",
     tax: "We’re required to collect this for tax reporting.",
     learn: "",
-    taxcode:
-      flow.from === "stripe"
-        ? "Enter a code from your authenticator app to continue to Stripe."
-        : "Enter a code from your authenticator app to edit your tax details.",
+    taxcode: `Enter a code from your authenticator app to ${
+      CODE_REASONS[flow.from ?? ""] ?? "edit your tax details"
+    }.`,
     method: "Choose how you’ll get a code each time you sign in.",
     app: "Scan the QR code with your authenticator app, then enter the 6-digit code it shows.",
     backup: "If you lose your phone, you’ll use this to log in.",
@@ -151,12 +155,7 @@ export const getTwoFactorView = (studio: StudioController) => {
       else closeTwoFactor();
     },
     taxSubmit: (value: TaxDetails) =>
-      void actions.saveTax(value).then((isSaved) => {
-        if (!isSaved) return;
-
-        if (isStripe) closeTwoFactor();
-        else toStripe();
-      }),
+      void actions.saveTax(value, isStripe ? closeTwoFactor : toStripe),
     taxCodeGo: actions.confirmTaxCode,
     isSecure: step === "secure",
     isMethod: step === "method",
@@ -228,7 +227,9 @@ export const getTwoFactorView = (studio: StudioController) => {
     appLink: enrolment?.uri ?? "",
     openApp: () => actions.showToast("Opening your authenticator app"),
     qrImage: enrolment?.qrCode ?? "",
-    isQrLoading: !!state.account && !enrolment,
+    isQrLoading: !!state.account && !enrolment && !flow.isEnrolmentFailed,
+    isQrFailed: !!flow.isEnrolmentFailed,
+    retryQr: actions.retryEnrolment,
     qrCells: state.account ? [] : getQrCells(),
     isBusy: !!flow.isBusy,
     verify: actions.verifyTwoFactor,

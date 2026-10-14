@@ -6,6 +6,8 @@ import {
   reopenBusiness,
 } from "../lib/studio-api";
 import type { StylistStudio } from "../lib/studio-api";
+import { listTwoFactorDevices } from "../lib/two-factor";
+import type { TwoFactorDevice } from "../lib/two-factor";
 import type { Profile } from "../types/profile";
 
 /** RTK Query's result shape for a promise that may throw. */
@@ -84,12 +86,17 @@ export const api = createApi({
       providesTags: ["Studio"],
       queryFn: (ownerId) => toQueryResult(fetchStylistStudio(ownerId)),
     }),
+    // keyed by user, so a different sign-in never sees the last one's apps
+    getTwoFactorDevices: build.query<TwoFactorDevice[], string>({
+      queryFn: () => toQueryResult(listTwoFactorDevices()),
+    }),
   }),
 });
 
 export const {
   useGetProfileQuery,
   useGetStylistStudioQuery,
+  useGetTwoFactorDevicesQuery,
   useUpdateProfileMutation,
   useSetBusinessClosedMutation,
 } = api;

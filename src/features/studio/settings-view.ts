@@ -5,6 +5,7 @@ import type { PaymentPolicyApi } from "../../components/payment-policy/payment-p
 import type { AccountSettingsApi } from "../../components/account-settings/use-account-settings";
 import type { TaxDetails } from "../../components/tax-details-form/tax-details-logic";
 import { addPaymentPolicy } from "../../lib/studio-api";
+import { hasRecentSecondFactor } from "../../lib/two-factor";
 import { getAvailabilityView } from "./settings-availability-view";
 import { getSettingsNav } from "./settings-nav-view";
 import { getProfileView } from "./settings-profile-view";
@@ -28,6 +29,32 @@ export const getSettingsView = (
   const { sync } = context;
   const nav = getSettingsNav(studio, navigate);
   const { page, isOn, isAccountPage } = nav;
+
+  const savePolicy = (value: PolicyValue) => {
+    const { policy } = context.getState();
+
+    setState({ policy: { ...policy, ...value } });
+
+    sync?.save((stylistId) => addPaymentPolicy(fromPolicy(value, stylistId)), {
+      policy,
+    });
+
+    showToast("Payment policy saved");
+  };
+
+  // once 2FA is on, a policy change needs an app code from the last 30 days
+  const checkPolicy = async (value: PolicyValue) => {
+    if (
+      !sync ||
+      !hasTwoFactor(state) ||
+      (await hasRecentSecondFactor().catch(() => false))
+    )
+      return savePolicy(value);
+
+    showToast("For your security, enter a code from your authenticator app.");
+    openTwoFactor("taxcode", { flow: "info", from: "policy" });
+    context.memo.afterSecondFactor = () => savePolicy(value);
+  };
 
   return {
     ...nav,
@@ -57,20 +84,8 @@ export const getSettingsView = (
       ({ dayOffset, status }) =>
         (dayOffset || 0) >= 0 && status !== "cancelled",
     ).length,
-    onPolicySave: (value: PolicyValue) => {
-      const before = state.policy;
+    onPolicySave: (value: PolicyValue) => void checkPolicy(value),
 
-      setState({ policy: { ...state.policy, ...value } });
-
-      sync?.save(
-        (stylistId) => addPaymentPolicy(fromPolicy(value, stylistId)),
-        {
-          policy: before,
-        },
-      );
-
-      showToast("Payment policy saved");
-    },
     // the embedded page reports whether it can save; the mobile header button calls back into it
     onPolicyState: (api: PaymentPolicyApi) => {
       context.memo.policyApi = api;
@@ -153,9 +168,7 @@ export const getSettingsView = (
       setState({ taxEdit: true });
     },
     onTaxSave: (value: TaxDetails) =>
-      void actions.saveTax(value).then((isSaved) => {
-        if (!isSaved) return;
-
+      void actions.saveTax(value, () => {
         context.memo.isTaxEdited = false;
         setState({ taxEdit: false });
       }),

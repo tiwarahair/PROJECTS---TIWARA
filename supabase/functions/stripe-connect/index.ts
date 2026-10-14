@@ -5,7 +5,7 @@ import { createClient } from "npm:@supabase/supabase-js@2";
 import { z } from "npm:zod@4";
 import { corsHeaders, respond } from "../_shared/cors.ts";
 import { getRecentUser } from "../_shared/recent-user.ts";
-import { getAccountState, retrieveAccount, stripe } from "../_shared/stripe.ts";
+import { getAccountState, stripe, syncAccount } from "../_shared/stripe.ts";
 
 const SITES = ["https://dev.tiwarashouse.com", "https://tiwarashouse.com", "https://www.tiwarashouse.com"];
 
@@ -110,11 +110,7 @@ Deno.serve(async (request) => {
   if (action === "refresh") {
     if (!accountId) return respond(200, { connected: false });
 
-    const state = await getAccountState(await retrieveAccount(accountId));
-
-    await admin.from("stylists").update(state).eq("id", stylist.id);
-
-    return respond(200, { connected: true, ...state });
+    return respond(200, { connected: true, ...(await syncAccount(admin, accountId)) });
   }
 
   if (action === "dashboard") {
@@ -126,6 +122,9 @@ Deno.serve(async (request) => {
   }
 
   if (!accountId) {
+    const syncedAt = new Date().toISOString();
+
+    // the same key makes a double click (or a second tab) get the same account back
     const account = await stripe.v2.core.accounts.create({
       contact_email: stylist.contact_email ?? undefined,
       display_name: stylist.business_name,
@@ -140,14 +139,25 @@ Deno.serve(async (request) => {
       },
       metadata: { stylist_id: stylist.id },
       include: ["configuration.recipient", "requirements"],
-    });
+    }, { idempotencyKey: `onboard-${stylist.id}` });
 
-    accountId = account.id;
-
-    await admin
+    const { data: saved, error } = await admin
       .from("stylists")
-      .update({ stripe_account_id: accountId, ...(await getAccountState(account)) })
-      .eq("id", stylist.id);
+      .update({ stripe_account_id: account.id, stripe_synced_at: syncedAt, ...(await getAccountState(account)) })
+      .eq("id", stylist.id)
+      .is("stripe_account_id", null)
+      .select("stripe_account_id");
+
+    if (error) return respond(500, { error: "not_saved" });
+
+    // another request saved its account first: carry on with that one
+    const { data: current } = saved.length
+      ? { data: saved[0] }
+      : await admin.from("stylists").select("stripe_account_id").eq("id", stylist.id).single();
+
+    accountId = current?.stripe_account_id;
+
+    if (!accountId) return respond(500, { error: "not_saved" });
   }
 
   const site = getReturnSite(request.headers.get("Origin") ?? "");

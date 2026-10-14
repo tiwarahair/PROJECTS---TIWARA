@@ -306,12 +306,15 @@ const TwoFactorBody = ({
               Open in authenticator app
             </a>
           )}
-          {view.isOpenAppShown && !view.appLink && !view.isQrLoading && (
-            <button className={styles.openApp} onClick={view.openApp}>
-              <PhoneIcon />
-              Open in authenticator app
-            </button>
-          )}
+          {view.isOpenAppShown &&
+            !view.appLink &&
+            !view.isQrLoading &&
+            !view.isQrFailed && (
+              <button className={styles.openApp} onClick={view.openApp}>
+                <PhoneIcon />
+                Open in authenticator app
+              </button>
+            )}
           <div className={styles.qrWrap}>
             {view.qrImage && (
               <img
@@ -323,6 +326,14 @@ const TwoFactorBody = ({
             {view.isQrLoading && (
               <div className={styles.qrLoading} role="status">
                 Getting your QR code…
+              </div>
+            )}
+            {view.isQrFailed && (
+              <div className={styles.qrLoading} role="alert">
+                Your QR code couldn’t load.
+                <button className={styles.keyToggle} onClick={view.retryQr}>
+                  Try again
+                </button>
               </div>
             )}
             <div

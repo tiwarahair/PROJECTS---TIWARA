@@ -7,7 +7,7 @@ import {
   useState,
 } from "react";
 import { useMediaQuery } from "../../hooks/use-media-query";
-import { listTwoFactorDevices } from "../../lib/two-factor";
+import type { TwoFactorDevice } from "../../lib/two-factor";
 import { useUnsavedChanges } from "../../hooks/use-unsaved-changes";
 import { createStudioActions } from "./studio-actions";
 import type { StudioContext } from "./studio-actions";
@@ -52,6 +52,7 @@ export interface StudioProps {
 export interface StudioSeed {
   owner: StudioState["owner"];
   studio: StylistStudio;
+  devices: TwoFactorDevice[];
 }
 
 const getCategoryColour = (sort: number) =>
@@ -60,7 +61,7 @@ const getCategoryColour = (sort: number) =>
 /** A real account: everything from the database; nothing booked yet. */
 const seedFromAccount = (
   state: StudioState,
-  { owner, studio }: StudioSeed,
+  { owner, studio, devices }: StudioSeed,
 ): StudioState => {
   const patch = toStudioPatch(studio, state);
 
@@ -74,7 +75,7 @@ const seedFromAccount = (
       slugChangedAt: studio.slug_changed_at,
     },
     notifications: [],
-    twoFactorSettings: { devices: [] },
+    twoFactorSettings: { devices },
     categories: (patch.categories ?? []).map((category) => ({
       ...category,
       colour: category.colour || getCategoryColour(category.sort),
@@ -248,15 +249,8 @@ export const useStudio = (props: StudioProps) => {
 
   latest.current = { actions, serviceActions, context };
 
-  // a real account's authenticator apps (the setup checklist's 2FA step reads these)
   useEffect(() => {
     if (!stylistId) return;
-
-    listTwoFactorDevices()
-      .then((devices) =>
-        latest.current.context.applyState({ twoFactorSettings: { devices } }),
-      )
-      .catch(() => undefined);
 
     // back from Stripe: ?stripe=return (or refresh, when its link expired)
     const reason = getQueryParam("stripe");
@@ -269,6 +263,17 @@ export const useStudio = (props: StudioProps) => {
     window.history.replaceState(window.history.state, "", url);
     void latest.current.actions.catchUpWithStripe(reason);
   }, [stylistId]);
+
+  // back from Stripe with the browser's Back button: the page is restored as it was, mid-redirect
+  useEffect(() => {
+    const onPageShow = ({ persisted }: PageTransitionEvent) => {
+      if (persisted) latest.current.context.applyState({ stripeBusy: false });
+    };
+
+    window.addEventListener("pageshow", onPageShow);
+
+    return () => window.removeEventListener("pageshow", onPageShow);
+  }, []);
 
   // leaving Studio (sign out, links) with unsaved edits
   useEffect(() => {

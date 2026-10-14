@@ -1,7 +1,10 @@
 import { skipToken } from "@reduxjs/toolkit/query";
 import { Navigate } from "react-router";
 import { useIdentity } from "../../hooks/use-identity";
-import { useGetStylistStudioQuery } from "../../stores/api-slice";
+import {
+  useGetStylistStudioQuery,
+  useGetTwoFactorDevicesQuery,
+} from "../../stores/api-slice";
 import { useAppSelector } from "../../stores/hooks";
 import { ClosedBusiness } from "./closed-business";
 import { getQueryParam } from "./studio-model";
@@ -23,6 +26,12 @@ export const StudioRoute = () => {
     { refetchOnMountOrArgChange: true },
   );
 
+  // the setup checklist's 2FA step reads these, so Studio waits for them
+  const { data: devices, isError: isDevicesError } =
+    useGetTwoFactorDevicesQuery(user?.isStylist ? user.id : skipToken, {
+      refetchOnMountOrArgChange: true,
+    });
+
   if (isDemoStudio()) return <StudioPage />;
 
   if (!ready) return null;
@@ -31,7 +40,8 @@ export const StudioRoute = () => {
 
   if (!user.isStylist) return <Navigate to="/join" replace />;
 
-  if (!studio || !identity?.isLoaded) return null;
+  if (!studio || !identity?.isLoaded || (!devices && !isDevicesError))
+    return null;
 
   if (studio.status === "closed" && studio.closed_at)
     return <ClosedBusiness closedAt={studio.closed_at} />;
@@ -48,6 +58,7 @@ export const StudioRoute = () => {
           phone: identity.mobile,
         },
         studio,
+        devices: devices ?? [],
       }}
     />
   );

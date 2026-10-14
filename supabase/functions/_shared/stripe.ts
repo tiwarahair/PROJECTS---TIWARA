@@ -1,4 +1,5 @@
 // Stripe for Connect (Accounts v2): marketplace "recipient" accounts that receive transfers and pay out.
+import type { SupabaseClient } from "npm:@supabase/supabase-js@2";
 import Stripe from "npm:stripe@22.6.2";
 
 export const stripe = new Stripe(Deno.env.get("STRIPE_SECRET_KEY") ?? "", {
@@ -20,7 +21,8 @@ const getPayoutBank = async (accountId: string) => {
 
     return bank?.object === "bank_account" ? `${bank.bank_name ?? "Bank"} •••• ${bank.last4}` : null;
   } catch {
-    return null;
+    // left out of the update, so a failed read doesn't wipe the saved bank
+    return undefined;
   }
 };
 
@@ -42,4 +44,31 @@ export const getAccountState = async (account: Account) => {
     stripe_requirements: isOwed("past_due") ? "past_due" : isOwed("currently_due") ? "due" : "none",
     payout_bank: await getPayoutBank(account.id),
   };
+};
+
+const STATE_COLUMNS =
+  "stripe_account_id, charges_enabled, payouts_enabled, details_submitted, stripe_requirements, payout_bank";
+
+/** Re-reads a connected account and saves it unless a newer read already has; null when no business has it (yet). */
+export const syncAccount = async (admin: SupabaseClient, accountId: string) => {
+  const syncedAt = new Date().toISOString();
+  const state = await getAccountState(await retrieveAccount(accountId));
+
+  const { error } = await admin
+    .from("stylists")
+    .update({ ...state, stripe_synced_at: syncedAt })
+    .eq("stripe_account_id", accountId)
+    .or(`stripe_synced_at.is.null,stripe_synced_at.lt."${syncedAt}"`);
+
+  if (error) throw error;
+
+  const { data, error: readError } = await admin
+    .from("stylists")
+    .select(STATE_COLUMNS)
+    .eq("stripe_account_id", accountId)
+    .maybeSingle();
+
+  if (readError) throw readError;
+
+  return data;
 };

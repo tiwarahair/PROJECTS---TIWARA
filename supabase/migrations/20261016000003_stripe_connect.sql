@@ -9,7 +9,9 @@ alter table public.stylists
   add column stripe_requirements text not null default 'none'
     check (stripe_requirements in ('none', 'due', 'past_due')),
   -- e.g. "Monzo •••• 4821": the payout bank as Stripe reports it
-  add column payout_bank text;
+  add column payout_bank text,
+  -- when Stripe was last read, so an older read never overwrites a newer one
+  add column stripe_synced_at timestamptz;
 
 -- each Stripe event is applied once, however often or late it arrives
 create table public.stripe_events (
@@ -84,6 +86,12 @@ create trigger stylists_go_live
   after update of availability_confirmed_at, profile_confirmed_at, charges_enabled, payouts_enabled, stripe_requirements
   on public.stylists
   for each row execute function public.on_go_live_change();
+
+-- a reopened business (back to draft) goes live again if it's ready
+create trigger stylists_reopened_go_live
+  after update of status on public.stylists
+  for each row when (old.status = 'closed' and new.status = 'draft')
+  execute function public.on_go_live_change();
 
 create trigger services_go_live
   after insert or update of status or delete on public.services

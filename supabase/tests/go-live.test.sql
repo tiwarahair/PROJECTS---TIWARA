@@ -1,5 +1,5 @@
 begin;
-select plan(7);
+select plan(8);
 
 insert into auth.users (id, instance_id, aud, role, email, raw_user_meta_data, raw_app_meta_data)
 values ('c1111111-1111-1111-1111-111111111111', '00000000-0000-0000-0000-000000000000', 'authenticated', 'authenticated',
@@ -54,6 +54,10 @@ update public.services set status = 'active' where id = (select service from ids
 update public.stylists set status = 'closed', closed_at = now() where id = (select stylist from ids);
 update public.stylists set charges_enabled = false where id = (select stylist from ids);
 select is(pg_temp.status(), 'closed', 'a closed business is left alone');
+
+update public.stylists set charges_enabled = true where id = (select stylist from ids);
+update public.stylists set status = 'draft', closed_at = null where id = (select stylist from ids);
+select is(pg_temp.status(), 'live', 'reopened and still ready: live again');
 
 select * from finish();
 rollback;

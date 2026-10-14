@@ -68,40 +68,49 @@ export const hasRecentSecondFactor = async () => {
   );
 };
 
-/** Verifies a code from the main (or backup) authenticator app. */
-export const verifySecondFactor = async (code: string, useBackup = false) => {
+/** The verified apps, oldest (the main one) first: Supabase returns them in no set order. */
+const getVerifiedApps = async () => {
   const { data, error } = await supabase.auth.mfa.listFactors();
 
   getErrorCode(error, []);
 
-  const factor = data?.totp[useBackup ? 1 : 0];
+  return [...(data?.totp ?? [])].sort((left, right) =>
+    left.created_at.localeCompare(right.created_at),
+  );
+};
 
-  if (!factor) return false;
+/**
+ * True when the code matches one of the account's apps. The one they picked (main, or backup with `useBackup`)
+ * is tried first, so a code from any of their apps works.
+ */
+export const verifySecondFactor = async (code: string, useBackup = false) => {
+  const apps = await getVerifiedApps();
 
-  const { error: verifyError } = await supabase.auth.mfa.challengeAndVerify({
-    factorId: factor.id,
-    code,
-  });
+  for (const { id } of useBackup ? apps.reverse() : apps) {
+    const { error } = await supabase.auth.mfa.challengeAndVerify({
+      factorId: id,
+      code,
+    });
 
-  return !getErrorCode(verifyError, ["mfa_verification_failed"]);
+    if (!getErrorCode(error, ["mfa_verification_failed"])) return true;
+  }
+
+  return false;
 };
 
 /** The account's authenticator apps, oldest (the main one) first. */
 export const listTwoFactorDevices = async (): Promise<TwoFactorDevice[]> => {
-  const [{ data, error }, names] = await Promise.all([
-    supabase.auth.mfa.listFactors(),
+  const [apps, names] = await Promise.all([
+    getVerifiedApps(),
     getDeviceNames(),
   ]);
 
-  getErrorCode(error, []);
-
-  return [...(data?.totp ?? [])]
-    .sort((left, right) => left.created_at.localeCompare(right.created_at))
-    .map(({ id, friendly_name }, index) => ({
-      id,
-      name: names[id] ?? friendly_name ?? "Authenticator app",
-      backup: index > 0,
-    }));
+  // friendly_name is a random id (the chosen names live on the account), so it's never shown
+  return apps.map(({ id }, index) => ({
+    id,
+    name: names[id] ?? (index ? "Backup app" : "Authenticator app"),
+    backup: index > 0,
+  }));
 };
 
 /** Starts adding an app; any set-up abandoned earlier is cleared first. */
@@ -147,18 +156,21 @@ export const confirmTwoFactorEnrolment = async (
 
   if (getErrorCode(error, ["mfa_verification_failed"])) return false;
 
-  const names = await getDeviceNames();
+  // the app is on now; a name that fails to save shows as "Authenticator app" rather than undoing that
+  try {
+    const names = await getDeviceNames();
 
-  const { error: nameError } = await supabase.auth.updateUser({
-    data: { mfa_names: { ...names, [factorId]: name } },
-  });
-
-  getErrorCode(nameError, []);
+    await supabase.auth.updateUser({
+      data: { mfa_names: { ...names, [factorId]: name } },
+    });
+  } catch {
+    // the name is only a label
+  }
 
   return true;
 };
 
-/** Removes an app after a code from the main one; false when the code is wrong. */
+/** Removes an app after a code from any of their apps (the lost one may be the main); false when the code is wrong. */
 export const removeTwoFactorApp = async (factorId: string, code: string) => {
   if (!(await verifySecondFactor(code))) return false;
 

@@ -2,7 +2,7 @@
 // re-reads the account so stylists' payout status stays current whatever order events arrive in.
 import { createClient } from "npm:@supabase/supabase-js@2";
 import Stripe from "npm:stripe@22.6.2";
-import { getAccountState, retrieveAccount, stripe } from "../_shared/stripe.ts";
+import { stripe, syncAccount } from "../_shared/stripe.ts";
 
 const admin = createClient(Deno.env.get("SUPABASE_URL")!, Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!);
 const cryptoProvider = Stripe.createSubtleCryptoProvider();
@@ -22,29 +22,24 @@ Deno.serve(async (request) => {
     return new Response("Bad signature", { status: 400 });
   }
 
-  const { error: seenError } = await admin
-    .from("stripe_events")
-    .insert({ id: notification.id, type: notification.type });
+  const { data: seen } = await admin.from("stripe_events").select("id").eq("id", notification.id).maybeSingle();
 
-  if (seenError?.code === "23505") return Response.json({ received: true, duplicate: true });
-
-  if (seenError) return new Response(seenError.message, { status: 500 });
+  if (seen) return Response.json({ received: true, duplicate: true });
 
   const accountId = notification.related_object?.id;
 
   if (notification.type.startsWith("v2.core.account") && accountId?.startsWith("acct_")) {
     try {
-      const state = await getAccountState(await retrieveAccount(accountId));
-      const { error } = await admin.from("stylists").update(state).eq("stripe_account_id", accountId);
-
-      if (error) throw error;
+      // the business may not have its account id yet: it's saved just after the account is made
+      if (!(await syncAccount(admin, accountId))) throw new Error(`no business has ${accountId}`);
     } catch (error) {
-      // forget the event so Stripe's retry isn't skipped
-      await admin.from("stripe_events").delete().eq("id", notification.id);
-
+      // not recorded, so Stripe's retry is handled
       return new Response(error instanceof Error ? error.message : "failed", { status: 500 });
     }
   }
+
+  // a duplicate delivered at the same moment is harmless: the account was re-read either way
+  await admin.from("stripe_events").insert({ id: notification.id, type: notification.type });
 
   return Response.json({ received: true });
 });
