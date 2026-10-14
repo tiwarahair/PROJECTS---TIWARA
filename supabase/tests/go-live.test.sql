@@ -11,7 +11,9 @@ values ('c1111111-1111-1111-1111-111111111111', '00000000-0000-0000-0000-0000000
   ), '{}');
 
 create temp table ids as
-select id as stylist from public.stylists where owner_id = 'c1111111-1111-1111-1111-111111111111';
+select id as stylist,
+  (select id from public.services where stylist_id = stylists.id order by sort limit 1) as service
+from public.stylists where owner_id = 'c1111111-1111-1111-1111-111111111111';
 
 create function pg_temp.status()
 returns text
@@ -29,7 +31,7 @@ insert into public.stylist_tax_details (stylist_id, kind, company_name, company_
 values ((select stylist from ids), 'ltd', 'Go Live Ltd', '12345678');
 
 update public.services set status = 'active', price_pence = 5000, duration_min = 60
-where id = (select id from public.services where stylist_id = (select stylist from ids) limit 1);
+where id = (select service from ids);
 
 select is(pg_temp.status(), 'draft', 'not live until Stripe can take payments and pay out');
 
@@ -48,8 +50,7 @@ select is(pg_temp.status(), 'live', 'sorted out: live again');
 update public.services set status = 'draft' where stylist_id = (select stylist from ids);
 select is(pg_temp.status(), 'draft', 'no active service: back to draft');
 
-update public.services set status = 'active'
-where id = (select id from public.services where stylist_id = (select stylist from ids) limit 1);
+update public.services set status = 'active' where id = (select service from ids);
 update public.stylists set status = 'closed', closed_at = now() where id = (select stylist from ids);
 update public.stylists set charges_enabled = false where id = (select stylist from ids);
 select is(pg_temp.status(), 'closed', 'a closed business is left alone');

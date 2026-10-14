@@ -108,5 +108,16 @@ Deno.serve(async (request) => {
 
   if (error) return respond(400, { error: "invalid_details" });
 
+  // "Your tax details were updated" to their login email, in case it wasn't them
+  const { data: owner } = await admin.auth.admin.getUserById(userId);
+
+  if (owner.user?.email)
+    await admin.rpc("queue_email", {
+      to_address: owner.user.email,
+      template: "tax_details_updated",
+      payload: { changed_at: row.updated_at },
+      user_id: userId,
+    });
+
   return respond(200, { nationalInsuranceHint: row.ni_hint });
 });
