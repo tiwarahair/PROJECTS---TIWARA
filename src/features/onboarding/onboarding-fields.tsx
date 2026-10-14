@@ -1,6 +1,8 @@
 import type { ChangeEvent, FocusEvent, KeyboardEvent, Ref } from "react";
 import { joinClassNames } from "../../utils/class-names";
 import styles from "../../styles/features/onboarding/onboarding-fields.module.css";
+import type { AuthFailure } from "../../lib/auth-errors";
+import { AuthAlert } from "./auth-alert";
 
 /** Sun (shown in dark mode) / moon (light mode) for the theme toggle. */
 export const ModeIcon = ({ isDark }: { isDark: boolean }) =>
@@ -65,6 +67,8 @@ interface SubmitButtonProps {
   busy: boolean;
   /** Spacing variant: "tight" (14px, email), "loose" (20px), "code" (14px, no colour transition). */
   variant: "tight" | "loose" | "code";
+  failure: AuthFailure | null;
+  onRetry: () => void;
 }
 
 const SUBMIT_VARIANT_CLASSES = {
@@ -79,19 +83,24 @@ export const SubmitButton = ({
   canSubmit,
   busy,
   variant,
+  failure,
+  onRetry,
 }: SubmitButtonProps) => (
-  <button
-    onClick={onClick}
-    disabled={!canSubmit}
-    className={joinClassNames(
-      SUBMIT_VARIANT_CLASSES[variant],
-      canSubmit || busy ? styles.submitOn : styles.submitOff,
-      canSubmit ? styles.submitReady : styles.submitInert,
-    )}
-  >
-    {busy && <Spinner />}
-    <span>{label}</span>
-  </button>
+  <>
+    <AuthAlert failure={failure} onRetry={onRetry} />
+    <button
+      onClick={onClick}
+      disabled={!canSubmit}
+      className={joinClassNames(
+        SUBMIT_VARIANT_CLASSES[variant],
+        canSubmit || busy ? styles.submitOn : styles.submitOff,
+        canSubmit ? styles.submitReady : styles.submitInert,
+      )}
+    >
+      {busy && <Spinner />}
+      <span>{label}</span>
+    </button>
+  </>
 );
 
 /** What actions.field(name) returns: the value plus react-hook-form's handlers and ref. */

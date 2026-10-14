@@ -1,6 +1,7 @@
 import { Turnstile } from "@marsidev/react-turnstile";
 import type { TurnstileInstance } from "@marsidev/react-turnstile";
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
+import { joinClassNames } from "../../utils/class-names";
 import type { RefObject } from "react";
 import styles from "../../styles/features/onboarding/onboarding-turnstile.module.css";
 
@@ -17,6 +18,7 @@ export const OnboardingTurnstile = ({
   onToken,
 }: OnboardingTurnstileProps) => {
   const wrapRef = useRef<HTMLDivElement>(null);
+  const [isShown, setShown] = useState(false);
 
   // the check's frame can take focus as it loads (focus moving into a frame fires no event here); give it
   // back to the field, unless the pointer is on the check itself
@@ -38,7 +40,10 @@ export const OnboardingTurnstile = ({
   }, []);
 
   return (
-    <div ref={wrapRef} className={styles.wrap}>
+    <div
+      ref={wrapRef}
+      className={joinClassNames(styles.wrap, isShown && styles.wrapShown)}
+    >
       <Turnstile
         ref={widgetRef}
         siteKey={import.meta.env.VITE_TURNSTILE_SITE_KEY}
@@ -50,6 +55,8 @@ export const OnboardingTurnstile = ({
         onSuccess={onToken}
         onExpire={() => onToken(null)}
         onError={() => onToken(null)}
+        onBeforeInteractive={() => setShown(true)}
+        onAfterInteractive={() => setShown(false)}
       />
     </div>
   );

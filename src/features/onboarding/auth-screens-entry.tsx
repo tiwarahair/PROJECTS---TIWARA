@@ -298,6 +298,8 @@ export const EmailScreen = (props: ScreenProps) => {
         onClick={actions.submit}
         canSubmit={view.canSubmit}
         busy={state.busy}
+        failure={state.failure}
+        onRetry={actions.retry}
         variant="tight"
       />
       {!isForgot && <SocialButtons {...props} />}
@@ -378,6 +380,8 @@ export const PasswordScreen = ({ onboarding, layout, view }: ScreenProps) => {
         onClick={actions.submit}
         canSubmit={view.canSubmit}
         busy={state.busy}
+        failure={state.failure}
+        onRetry={actions.retry}
         variant="loose"
       />
     </>

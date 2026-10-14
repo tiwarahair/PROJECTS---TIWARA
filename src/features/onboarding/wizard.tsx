@@ -8,6 +8,7 @@ import { StepAccount } from "./step-account";
 import { StepDetails } from "./step-details";
 import { StepServices, StepSource, StepType } from "./wizard-steps";
 import styles from "../../styles/features/onboarding/wizard.module.css";
+import { AuthAlert } from "./auth-alert";
 
 const STEPS = {
   w1: StepType,
@@ -199,6 +200,7 @@ export const Wizard = (props: ScreenProps) => {
             {getSubtitle(screen, state.form.type, onboarding.isUpgrade)}
           </p>
           {Step && <Step {...props} />}
+          <AuthAlert failure={state.failure} onRetry={actions.retry} />
         </div>
       </div>
       {!isDesktop && (

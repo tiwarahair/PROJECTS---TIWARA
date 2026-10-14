@@ -17,7 +17,9 @@ export const getAccountKind = async (email: string, captchaToken: string) => {
     kind: AccountKind;
   }>("email-status", { body: { email, captchaToken } });
 
-  if (error || !data) throw new Error("email-status failed");
+  if (error) throw error;
+
+  if (!data) throw new Error("email-status returned nothing");
 
   return data.kind;
 };

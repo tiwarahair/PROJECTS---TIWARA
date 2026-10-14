@@ -298,7 +298,7 @@ export const useOnboarding = (props: OnboardingProps) => {
       direction,
       serverErrors: {},
       busy: false,
-      networkError: false,
+      failure: null,
       shake: 0,
       code: EMPTY_CODE,
       codeError: "",
@@ -348,6 +348,7 @@ export const useOnboarding = (props: OnboardingProps) => {
 
       setState(
         (current) => ({
+          failure: null,
           serverErrors: {
             ...current.serverErrors,
             [name]: undefined,
@@ -488,6 +489,14 @@ export const useOnboarding = (props: OnboardingProps) => {
       submit,
       socialSignIn,
       resend,
+      retry: () => {
+        const { isResendFailure } = stateRef.current;
+
+        setState({ failure: null });
+
+        if (isResendFailure) resend();
+        else submit();
+      },
       setCaptchaToken: (captchaToken: string | null) => {
         const { resendArmed, submitArmed } = stateRef.current;
 
@@ -495,7 +504,7 @@ export const useOnboarding = (props: OnboardingProps) => {
         else if (!submitArmed) setState({ captchaToken });
         else if (captchaToken)
           setState({ captchaToken, busy: false, submitArmed: false }, submit);
-        else setState({ busy: false, submitArmed: false, networkError: true });
+        else setState({ busy: false, submitArmed: false, failure: "botCheck" });
       },
       setCodeDigit,
       handleCodeKey,

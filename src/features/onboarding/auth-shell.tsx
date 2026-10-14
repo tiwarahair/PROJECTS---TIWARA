@@ -205,22 +205,6 @@ export const AuthShell = ({ onboarding, layout, children }: AuthShellProps) => {
                 : styles.enterForward,
             )}
           >
-            {state.networkError && (
-              <div role="alert" className={styles.netError}>
-                <span className={styles.grow}>
-                  We couldn’t connect. Check your signal and try again.
-                </span>
-                <button
-                  onClick={() => {
-                    setState({ networkError: false });
-                    actions.submit();
-                  }}
-                  className={styles.retry}
-                >
-                  Try again
-                </button>
-              </div>
-            )}
             {children}
           </div>
         </div>

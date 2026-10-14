@@ -5,6 +5,7 @@ import { PasswordInput, SubmitButton, TextField } from "./onboarding-fields";
 import { OnboardingTurnstile } from "./onboarding-turnstile";
 import type { ScreenProps } from "./screen-props";
 import styles from "../../styles/features/onboarding/auth-screens.module.css";
+import { AuthAlert } from "./auth-alert";
 
 const DoneBadge = () => (
   <span className={styles.doneBadge}>
@@ -56,6 +57,7 @@ export const ForgotSentScreen = ({ onboarding, layout, view }: ScreenProps) => {
           onToken={actions.setCaptchaToken}
         />
       )}
+      <AuthAlert failure={state.failure} onRetry={actions.retry} />
       <div className={styles.sentLinks}>
         <button
           onClick={() => {
@@ -129,6 +131,8 @@ export const ResetScreen = ({ onboarding, layout, view }: ScreenProps) => {
         onClick={actions.submit}
         canSubmit={view.canSubmit}
         busy={state.busy}
+        failure={state.failure}
+        onRetry={actions.retry}
         variant="loose"
       />
     </>

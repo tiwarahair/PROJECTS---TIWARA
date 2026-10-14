@@ -15,6 +15,7 @@ import { getPasswordCheck } from "./onboarding-field-schemas";
 import type { OnboardingController } from "./use-onboarding";
 import type { ScreenProps } from "./screen-props";
 import styles from "../../styles/features/onboarding/auth-screens.module.css";
+import { AuthAlert } from "./auth-alert";
 
 /** Strength meter view for the shell/wizard: a shown error replaces the hint. */
 export const getOnboardingMeter = (
@@ -166,6 +167,8 @@ export const CreateScreen = (props: ScreenProps) => {
         onClick={actions.submit}
         canSubmit={view.canSubmit}
         busy={state.busy}
+        failure={state.failure}
+        onRetry={actions.retry}
         variant="loose"
       />
     </>
@@ -214,6 +217,7 @@ export const SocialScreen = (props: ScreenProps) => {
       )}
       {mobile("ob-smob")}
       {consent}
+      <AuthAlert failure={state.failure} onRetry={actions.retry} />
       <button
         onClick={actions.submit}
         aria-disabled={view.canSubmit ? "false" : "true"}
@@ -338,6 +342,8 @@ export const CodeScreen = ({ onboarding, layout, view }: ScreenProps) => {
         onClick={actions.submit}
         canSubmit={view.canSubmit}
         busy={state.busy}
+        failure={state.failure}
+        onRetry={actions.retry}
         variant="code"
       />
       <div className={styles.codeLinks}>

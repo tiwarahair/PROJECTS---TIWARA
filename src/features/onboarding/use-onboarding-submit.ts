@@ -19,6 +19,7 @@ import { needsSecondFactor, verifySecondFactor } from "../../lib/two-factor";
 import type { StylistDetails } from "../../types/auth";
 import { toStoredBusinessType } from "../../utils/business-type";
 import { rememberDevice } from "../../lib/supabase";
+import { getAuthFailure } from "../../lib/auth-errors";
 import { TURNSTILE_SCREENS } from "./onboarding-data";
 import { EMPTY_CODE, isCodeScreen } from "./onboarding-state";
 import type { OnboardingForm } from "./onboarding-state";
@@ -58,11 +59,19 @@ export const useOnboardingSubmit = ({
     return token;
   };
 
-  /** Runs a server call with the busy state; unexpected failures show the connection error. */
+  /** Runs a server call with the busy state; unexpected failures show what went wrong above the button. */
   const run = (task: () => Promise<void>) => {
-    setState({ busy: true, networkError: false });
+    setState({ busy: true });
 
-    task().catch(() => setState({ busy: false, networkError: true }));
+    task().then(
+      () => setState({ failure: null }),
+      (error: unknown) =>
+        setState({
+          busy: false,
+          failure: getAuthFailure(error),
+          isResendFailure: false,
+        }),
+    );
   };
 
   const toStudio = (isNew: boolean) => {
@@ -402,7 +411,15 @@ export const useOnboardingSubmit = ({
         : resendEmailCode(email, token);
 
     sending
-      .catch(() => setState({ networkError: true, resendIn: 0 }))
+      .then(
+        () => setState({ failure: null }),
+        (error: unknown) =>
+          setState({
+            failure: getAuthFailure(error),
+            isResendFailure: true,
+            resendIn: 0,
+          }),
+      )
       .finally(() => {
         resending.current = false;
       });

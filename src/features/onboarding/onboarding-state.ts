@@ -1,4 +1,5 @@
 // Onboarding state and props (validation lives in onboarding-field-schemas.ts and onboarding-screen-schemas.ts).
+import type { AuthFailure } from "../../lib/auth-errors";
 
 export interface OnboardingProps {
   screen?: string;
@@ -102,7 +103,10 @@ export interface OnboardingState {
   pinLatLng: [number, number] | null;
   area: string | null;
   termsOn: TermsKind | null;
-  networkError: boolean;
+  /** Why the last server call failed (cleared by a change to the form or a call that works). */
+  failure: AuthFailure | null;
+  /** The failure came from sending a code or link again, so Try again resends. */
+  isResendFailure: boolean;
   width: number;
   audience: Audience;
   compact: boolean;
@@ -174,7 +178,8 @@ export const INITIAL_STATE: OnboardingState = {
   pinLatLng: null,
   area: null,
   termsOn: null,
-  networkError: false,
+  failure: null,
+  isResendFailure: false,
   width: 0,
   audience: "pro",
   compact: false,

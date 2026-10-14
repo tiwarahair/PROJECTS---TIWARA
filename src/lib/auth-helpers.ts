@@ -6,13 +6,13 @@ import { supabase } from "./supabase";
 /** Version of the Client / Partner Terms a new account accepts. */
 export const TERMS_VERSION = "2026-10";
 
-/** Returns the error code for expected failures; throws the rest (screens show them as a connection problem). */
+/** Returns the error code for expected failures; throws the rest as they came (see auth-errors.ts). */
 export const getErrorCode = (error: AuthError | null, expected: string[]) => {
   if (!error) return null;
 
   if (error.code && expected.includes(error.code)) return error.code;
 
-  throw new Error(error.message);
+  throw error;
 };
 
 /** True when the 6-digit code matched. */

@@ -1,4 +1,5 @@
 import { act, screen } from "@testing-library/react";
+import { FunctionsFetchError, FunctionsHttpError } from "@supabase/supabase-js";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { renderWithStore } from "../../../test/render-with-store";
 import { OnboardingPage } from "../onboarding-page";
@@ -162,6 +163,76 @@ describe("OnboardingPage", () => {
     ).toBeInTheDocument();
   });
 
+  describe("when the email lookup fails", () => {
+    const failWith = (error: Error) =>
+      vi.mocked(auth.getAccountKind).mockRejectedValue(error);
+
+    const submitEmail = async () => {
+      renderWithStore(<OnboardingPage />, "/login?screen=cust-email");
+
+      await user.type(
+        screen.getByLabelText("Email address"),
+        "ama@example.com",
+      );
+
+      await user.click(screen.getByRole("button", { name: "Continue" }));
+    };
+
+    it("rate limited: says so, keeps the email and lets them try again", async () => {
+      failWith(new FunctionsHttpError(new Response(null, { status: 429 })));
+      await submitEmail();
+
+      expect(
+        await screen.findByText("Too many attempts. Please try again later."),
+      ).toBeInTheDocument();
+
+      expect(screen.getByLabelText("Email address")).toHaveValue(
+        "ama@example.com",
+      );
+
+      expect(screen.getByRole("button", { name: "Continue" })).toBeEnabled();
+
+      expect(
+        screen.queryByRole("button", { name: "Try again" }),
+      ).not.toBeInTheDocument();
+    });
+
+    it("bot check: asks them to try again", async () => {
+      failWith(new FunctionsHttpError(new Response(null, { status: 403 })));
+      await submitEmail();
+
+      expect(
+        await screen.findByText(
+          "We couldn’t confirm you’re human. Please try again.",
+        ),
+      ).toBeInTheDocument();
+    });
+
+    it("network: offers Try again, which tries the lookup again", async () => {
+      failWith(new FunctionsFetchError(new TypeError("Failed to fetch")));
+      await submitEmail();
+
+      await user.click(
+        await screen.findByRole("button", { name: "Try again" }),
+      );
+
+      await vi.waitFor(() =>
+        expect(auth.getAccountKind).toHaveBeenCalledTimes(2),
+      );
+    });
+
+    it("the alert goes once the email changes", async () => {
+      failWith(new FunctionsHttpError(new Response(null, { status: 429 })));
+      await submitEmail();
+      await screen.findByText("Too many attempts. Please try again later.");
+      await user.type(screen.getByLabelText("Email address"), "x");
+
+      expect(
+        screen.queryByText("Too many attempts. Please try again later."),
+      ).not.toBeInTheDocument();
+    });
+  });
+
   it("a wrong password from the server shows the error", async () => {
     vi.mocked(auth.signIn).mockResolvedValue("invalid_credentials");
 
@@ -201,7 +272,7 @@ describe("OnboardingPage", () => {
       screen.getByRole("heading", { name: "Log in or sign up" }),
     ).toBeInTheDocument();
 
-    expect(screen.queryByText(/couldn’t connect/)).not.toBeInTheDocument();
+    expect(screen.queryByText(/can’t connect/)).not.toBeInTheDocument();
   });
 
   it("the stylist account step moves on without a server check", async () => {

@@ -1,11 +1,11 @@
 // Settings → Personal: the login email (a code to each address) and the mobile (saved straight away).
+import { AUTH_FAILURE_MESSAGES } from "../../lib/auth-errors";
 import { isValidEmail, isValidMobile } from "../../utils/validation";
 import type { AccountSettingsController } from "./use-account-settings";
 
 const EMAIL_FAILURES: Record<string, string> = {
   email_exists: "That email is already used by another account.",
-  over_email_send_rate_limit:
-    "Too many emails sent. Wait a minute, then try again.",
+  over_email_send_rate_limit: AUTH_FAILURE_MESSAGES.emailLimit,
   failed: "The codes couldn’t be sent. Try again.",
 };
 

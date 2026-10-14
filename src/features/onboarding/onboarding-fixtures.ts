@@ -1,5 +1,6 @@
 // Onboarding's ?fixture= board states (dev-only).
 import type { OnboardingForm, StartState } from "./onboarding-state";
+import type { AuthFailure } from "../../lib/auth-errors";
 
 const PASSWORD_FIXTURES: Record<string, string> = {
   "pw-empty": "",
@@ -11,6 +12,12 @@ const PASSWORD_FIXTURES: Record<string, string> = {
   "pw-good": "sunflower house",
   "pw-strong": "orbit-velvet-ochre-tulip-47",
   "pw-repeat": "aaaaaaaaaaaaaaaaaaa",
+};
+
+const FIXTURE_FAILURES: Record<string, AuthFailure> = {
+  network: "network",
+  "rate-limited": "rateLimited",
+  "bot-check": "botCheck",
 };
 
 export const getFixturePatch = (
@@ -239,13 +246,24 @@ export const getFixturePatch = (
         touched: { email: true },
       };
     case "network":
+    case "rate-limited":
+    case "bot-check":
       withForm({ email: "ama@example.com" });
 
       return {
         screen: "cust-email",
         audience: "customer",
         form,
-        networkError: true,
+        failure: FIXTURE_FAILURES[key],
+      };
+    case "email-limit":
+      withForm({ email: "ama@example.com" });
+
+      return {
+        screen: "forgot-email",
+        audience: "customer",
+        form,
+        failure: "emailLimit",
       };
     case "reset-mismatch":
       withForm({ password: "sunflower9", passwordConfirm: "sunflower8" });
