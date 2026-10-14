@@ -34,6 +34,8 @@ const post = async (
     method: "POST",
     headers: { "content-type": "application/json", ...headers },
     body: JSON.stringify(body),
+    // a hung request mustn't use up the run; the row is retried instead
+    signal: AbortSignal.timeout(15_000),
   });
 
   if (!response.ok)
@@ -80,6 +82,17 @@ const send = async ({
     : sendWithMailpit(toAddress, email));
 };
 
+// supabase-js reports errors in the result instead of throwing. If this fails the row stays 'sending' and is
+// claimed again after its 5-minute hold (Resend's idempotency key stops a second send).
+const record = async (
+  name: "mark_notification_sent" | "mark_notification_failed",
+  args: Record<string, string>,
+) => {
+  const { error } = await supabase.rpc(name, args);
+
+  if (error) console.error(`${name} failed`, error.message);
+};
+
 Deno.serve(async (request) => {
   const secret = Deno.env.get("CRON_SECRET");
 
@@ -97,19 +110,21 @@ Deno.serve(async (request) => {
   for (const notification of notifications as Notification[]) {
     try {
       await send(notification);
-      await supabase.rpc("mark_notification_sent", {
-        notification_id: notification.id,
-      });
-      sent += 1;
     } catch (sendError) {
       const message =
         sendError instanceof Error ? sendError.message : String(sendError);
 
-      await supabase.rpc("mark_notification_failed", {
+      await record("mark_notification_failed", {
         notification_id: notification.id,
         error: message,
       });
+      continue;
     }
+
+    await record("mark_notification_sent", {
+      notification_id: notification.id,
+    });
+    sent += 1;
   }
 
   return Response.json({ claimed: notifications.length, sent });
