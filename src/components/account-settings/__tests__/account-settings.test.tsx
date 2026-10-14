@@ -258,6 +258,39 @@ describe("AccountSettings", () => {
     );
   });
 
+  it("a failed save doesn't undo a later toggle of the same row", async () => {
+    const saveNotification = vi
+      .fn()
+      .mockRejectedValueOnce(new Error("offline"))
+      .mockResolvedValueOnce(undefined);
+
+    render(
+      <AccountSettings
+        page="notifications"
+        backend={{ ...DEMO_BACKEND, saveNotification }}
+      />,
+      { wrapper: MemoryRouter },
+    );
+
+    await user.click(
+      screen.getByRole("switch", { name: "New booking by SMS" }),
+    );
+
+    await user.click(
+      screen.getByRole("switch", { name: "New booking by email" }),
+    );
+
+    await vi.waitFor(() => expect(saveNotification).toHaveBeenCalledTimes(2));
+
+    expect(
+      screen.getByRole("switch", { name: "New booking by email" }),
+    ).toHaveAttribute("aria-checked", "false");
+
+    expect(
+      screen.getByRole("switch", { name: "New booking by SMS" }),
+    ).toHaveAttribute("aria-checked", "true");
+  });
+
   it("calendar connects Google after a short wait", async () => {
     render(<AccountSettings page="calendar" isNew={true} />, {
       wrapper: MemoryRouter,

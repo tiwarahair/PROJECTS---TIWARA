@@ -1,3 +1,4 @@
+import { useRef } from "react";
 import type { CSSProperties } from "react";
 import { joinClassNames } from "../../utils/class-names";
 import { TaxDetailsForm } from "../tax-details-form/tax-details-form";
@@ -8,7 +9,7 @@ import {
   getPayoutStatus,
   getTaxRows,
 } from "./account-settings-logic";
-import type { ChannelSetting } from "./account-settings-logic";
+import type { ChannelSetting, NotificationKey } from "./account-settings-logic";
 import type { AccountSettingsProps } from "./use-account-settings";
 import type { AccountSettingsController } from "./use-account-settings";
 import { CheckRow, InfoIcon, SettingsSection, Switch } from "./settings-fields";
@@ -80,129 +81,137 @@ const ExternalIcon = () => (
 
 export const SettingsNotifications = ({
   settings: { state, setState, toast, backend },
-}: PageProps) => (
-  <>
-    {NOTIFICATION_GROUPS.map(([title, rows]) => (
-      <SettingsSection key={title} label={title} heading={title}>
-        <div className={notifications.groupCard}>
-          <div className={notifications.groupHead} aria-hidden="true">
-            <span></span>
-            <span>Email</span>
-            <span>SMS</span>
+}: PageProps) => {
+  // saves run one at a time, in order
+  const saving = useRef(Promise.resolve());
+
+  const toggle = (key: NotificationKey, channel: keyof ChannelSetting) => {
+    const before = state.notifications[key];
+    const next = { ...before, [channel]: !before[channel] };
+
+    setState(({ notifications: current }) => ({
+      notifications: { ...current, [key]: next },
+    }));
+
+    saving.current = saving.current
+      .then(() => backend.saveNotification(key, next))
+      .then(
+        () => toast("Notification settings saved"),
+        () => {
+          setState(({ notifications: current }) =>
+            current[key] === next
+              ? { notifications: { ...current, [key]: before } }
+              : {},
+          );
+
+          toast("Your notification settings couldn’t be saved. Try again.");
+        },
+      );
+  };
+
+  return (
+    <>
+      {NOTIFICATION_GROUPS.map(([title, rows]) => (
+        <SettingsSection key={title} label={title} heading={title}>
+          <div className={notifications.groupCard}>
+            <div className={notifications.groupHead} aria-hidden="true">
+              <span></span>
+              <span>Email</span>
+              <span>SMS</span>
+            </div>
+            {rows.map(([key, label]) => (
+              <div key={key} className={notifications.groupRow}>
+                <span className={notifications.rowLabel}>{label}</span>
+                {(
+                  [
+                    ["email", " by email"],
+                    ["sms", " by SMS"],
+                  ] as const
+                ).map(([channel, suffix]) => (
+                  <Switch
+                    key={channel}
+                    isOn={state.notifications[key][channel]}
+                    label={label + suffix}
+                    className={notifications.switchCell}
+                    onToggle={() => toggle(key, channel)}
+                  />
+                ))}
+              </div>
+            ))}
           </div>
-          {rows.map(([key, label]) => (
-            <div key={key} className={notifications.groupRow}>
-              <span className={notifications.rowLabel}>{label}</span>
-              {(
-                [
-                  ["email", " by email"],
-                  ["sms", " by SMS"],
-                ] as const
-              ).map(([channel, suffix]) => (
-                <Switch
-                  key={channel}
-                  isOn={state.notifications[key][channel]}
-                  label={label + suffix}
-                  className={notifications.switchCell}
-                  onToggle={() => {
-                    const before = state.notifications[key];
-                    const next = { ...before, [channel]: !before[channel] };
+        </SettingsSection>
+      ))}
 
-                    const show = (setting: ChannelSetting) =>
-                      setState(({ notifications: current }) => ({
-                        notifications: { ...current, [key]: setting },
-                      }));
-
-                    show(next);
-
-                    backend.saveNotification(key, next).then(
-                      () => toast("Notification settings saved"),
-                      () => {
-                        show(before);
-
-                        toast(
-                          "Your notification settings couldn’t be saved. Try again.",
-                        );
-                      },
-                    );
-                  }}
-                />
-              ))}
+      <SettingsSection
+        label="Always on"
+        heading="Always on"
+        intro={
+          <p className={shared.introText}>
+            Sent by email and SMS. These can’t be turned off.
+          </p>
+        }
+      >
+        <div className={notifications.alwaysCard}>
+          {ALWAYS_ON.map((label) => (
+            <div key={label} className={notifications.alwaysRow}>
+              <span className={notifications.alwaysLabel}>{label}</span>
+              <span className={notifications.alwaysTag}>
+                <LockIcon />
+                Always on
+              </span>
             </div>
           ))}
         </div>
       </SettingsSection>
-    ))}
 
-    <SettingsSection
-      label="Always on"
-      heading="Always on"
-      intro={
-        <p className={shared.introText}>
-          Sent by email and SMS. These can’t be turned off.
-        </p>
-      }
-    >
-      <div className={notifications.alwaysCard}>
-        {ALWAYS_ON.map((label) => (
-          <div key={label} className={notifications.alwaysRow}>
-            <span className={notifications.alwaysLabel}>{label}</span>
-            <span className={notifications.alwaysTag}>
-              <LockIcon />
-              Always on
-            </span>
-          </div>
-        ))}
-      </div>
-    </SettingsSection>
-
-    <SettingsSection
-      label="Messages clients receive"
-      heading="Messages your clients receive"
-    >
-      <div className={shared.quietCard}>
-        <p className={notifications.clientText}>
-          Clients always get these, so they know where they stand.
-        </p>
-        <div className={shared.actions}>
-          {CLIENT_MESSAGES.map((message) => (
-            <span key={message} className={notifications.clientChip}>
-              <svg
-                className={notifications.clientTick}
-                width="13"
-                height="13"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="2"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-              >
-                <path d="M5 12.5l4.5 4.5L19 7.5"></path>
-              </svg>
-              {message}
-            </span>
-          ))}
-        </div>
-      </div>
-    </SettingsSection>
-    <p className={notifications.bellNote}>
-      <svg
-        width="16"
-        height="16"
-        viewBox="0 0 24 24"
-        fill="none"
-        stroke="currentColor"
-        strokeWidth="1.7"
-        strokeLinecap="round"
-        strokeLinejoin="round"
+      <SettingsSection
+        label="Messages clients receive"
+        heading="Messages your clients receive"
       >
-        <path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9M10.3 21a1.9 1.9 0 0 0 3.4 0"></path>
-      </svg>
-      Everything also appears in your notification bell.
-    </p>
-  </>
-);
+        <div className={shared.quietCard}>
+          <p className={notifications.clientText}>
+            Clients always get these, so they know where they stand.
+          </p>
+          <div className={shared.actions}>
+            {CLIENT_MESSAGES.map((message) => (
+              <span key={message} className={notifications.clientChip}>
+                <svg
+                  className={notifications.clientTick}
+                  width="13"
+                  height="13"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                >
+                  <path d="M5 12.5l4.5 4.5L19 7.5"></path>
+                </svg>
+                {message}
+              </span>
+            ))}
+          </div>
+        </div>
+      </SettingsSection>
+      <p className={notifications.bellNote}>
+        <svg
+          width="16"
+          height="16"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          strokeWidth="1.7"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+        >
+          <path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9M10.3 21a1.9 1.9 0 0 0 3.4 0"></path>
+        </svg>
+        Everything also appears in your notification bell.
+      </p>
+    </>
+  );
+};
 
 export const SettingsPayouts = ({ props }: PageProps) => {
   const status = props.payoutStatus || "active";

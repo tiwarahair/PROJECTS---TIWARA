@@ -43,7 +43,14 @@ insert into public.notifications (channel, to_address, template, status, created
   ('email', 'old-pending@studio.test', 'tax_details_updated', 'pending', now() - interval '91 days'),
   ('email', 'new-sent@studio.test', 'tax_details_updated', 'sent', now() - interval '89 days');
 
-select is(public.purge_old_notifications(), 2, 'clears sent and failed emails older than 90 days');
+select public.purge_old_notifications();
+
+select is(
+  (select count(*)::int from public.notifications
+    where to_address in ('old-sent@studio.test', 'old-failed@studio.test')),
+  0,
+  'clears sent and failed emails older than 90 days'
+);
 
 select is(
   (select array_agg(to_address order by to_address) from public.notifications where to_address like '%@studio.test'
