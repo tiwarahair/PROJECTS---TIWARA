@@ -296,6 +296,7 @@ export const useOnboarding = (props: OnboardingProps) => {
       passwordShown: false,
       captchaToken: null,
       resendArmed: false,
+      submitArmed: false,
     });
 
     try {
@@ -472,9 +473,13 @@ export const useOnboarding = (props: OnboardingProps) => {
       socialSignIn,
       resend,
       setCaptchaToken: (captchaToken: string | null) => {
-        if (captchaToken && stateRef.current.resendArmed)
-          sendAgain(captchaToken);
-        else setState({ captchaToken });
+        const { resendArmed, submitArmed } = stateRef.current;
+
+        if (captchaToken && resendArmed) sendAgain(captchaToken);
+        else if (!submitArmed) setState({ captchaToken });
+        else if (captchaToken)
+          setState({ captchaToken, busy: false, submitArmed: false }, submit);
+        else setState({ busy: false, submitArmed: false, networkError: true });
       },
       setCodeDigit,
       handleCodeKey,

@@ -87,8 +87,6 @@ export const OnboardingPage = (props: OnboardingProps) => {
     (TURNSTILE_SCREENS.includes(screen) && !onboarding.isUpgrade) ||
     (isResendScreen && state.resendArmed);
 
-  const needsToken = turnstileShown && !isResendScreen;
-
   const view: ScreenView = {
     shown,
     turnstileShown,
@@ -96,8 +94,7 @@ export const OnboardingPage = (props: OnboardingProps) => {
       !state.busy &&
       !(state.lockedUntil > Date.now()) &&
       Object.keys(errors).length === 0 &&
-      !(isCodeScreen(screen) && state.code.join("").length < 6) &&
-      !(needsToken && !state.captchaToken),
+      !(isCodeScreen(screen) && state.code.join("").length < 6),
   };
 
   const screenProps: ScreenProps = { onboarding, layout, view };

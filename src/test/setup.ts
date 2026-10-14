@@ -5,6 +5,11 @@ Object.assign(globalThis, {
   jest: { advanceTimersByTime: (ms: number) => vi.advanceTimersByTime(ms) },
 });
 
+/** Set isHeld before rendering to keep the first token back until release() (a slow check). */
+export const turnstileStub: { isHeld: boolean; release?: () => void } = {
+  isHeld: false,
+};
+
 // Turnstile can't load Cloudflare's script in jsdom: hand out a token on mount and on reset()
 vi.mock("@marsidev/react-turnstile", async () => {
   const { useEffect, useImperativeHandle, useRef } = await import("react");
@@ -24,7 +29,12 @@ vi.mock("@marsidev/react-turnstile", async () => {
         reset: () => latest.current?.("test-captcha-token"),
       }));
 
-      useEffect(() => latest.current?.("test-captcha-token"), []);
+      useEffect(() => {
+        const pass = () => latest.current?.("test-captcha-token");
+
+        if (turnstileStub.isHeld) turnstileStub.release = pass;
+        else pass();
+      }, []);
 
       return null;
     },

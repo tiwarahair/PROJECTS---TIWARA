@@ -19,6 +19,7 @@ import { needsSecondFactor, verifySecondFactor } from "../../lib/two-factor";
 import type { StylistDetails } from "../../types/auth";
 import { toStoredBusinessType } from "../../utils/business-type";
 import { rememberDevice } from "../../lib/supabase";
+import { TURNSTILE_SCREENS } from "./onboarding-data";
 import { EMPTY_CODE, isCodeScreen } from "./onboarding-state";
 import type { OnboardingForm } from "./onboarding-state";
 import type { OnboardingCore } from "./use-onboarding";
@@ -225,6 +226,15 @@ export const useOnboardingSubmit = ({
   const submitValid = () => {
     const current = stateRef.current;
     const { screen } = current;
+
+    const isWaitingForCheck =
+      !!screen &&
+      TURNSTILE_SCREENS.includes(screen) &&
+      !isUpgrade &&
+      !current.captchaToken;
+
+    if (isWaitingForCheck) return setState({ busy: true, submitArmed: true });
+
     const form = getValues();
     const email = form.email.trim().toLowerCase();
 

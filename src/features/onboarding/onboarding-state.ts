@@ -111,6 +111,8 @@ export interface OnboardingState {
   captchaToken: string | null;
   /** Resend was tapped before a Turnstile token existed: send once the check passes. */
   resendArmed: boolean;
+  /** Submitted before a Turnstile token existed: submit again once the check passes. */
+  submitArmed: boolean;
   returnTo: string;
   toast: string | null;
   socialProvider: "google" | "apple" | null;
@@ -180,6 +182,7 @@ export const INITIAL_STATE: OnboardingState = {
   compact: false,
   captchaToken: null,
   resendArmed: false,
+  submitArmed: false,
   returnTo: "/",
   toast: null,
   socialProvider: null,

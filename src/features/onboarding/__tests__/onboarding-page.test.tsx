@@ -4,6 +4,7 @@ import { renderWithStore } from "../../../test/render-with-store";
 import { OnboardingPage } from "../onboarding-page";
 import type { UserEvent } from "@testing-library/user-event";
 import { setupUser } from "../../../test/setup-user";
+import { turnstileStub } from "../../../test/setup";
 import * as auth from "../../../lib/auth";
 
 vi.mock("../../../lib/auth", async (importOriginal) => ({
@@ -39,7 +40,10 @@ describe("OnboardingPage", () => {
     vi.clearAllMocks();
   });
 
-  afterEach(() => vi.useRealTimers());
+  afterEach(() => {
+    vi.useRealTimers();
+    turnstileStub.isHeld = false;
+  });
 
   it("a signed-in customer's account step shows their own details, locked, with no password", () => {
     renderWithStore(<OnboardingPage />, "/join?fixture=w4-bizcontact", {
@@ -101,6 +105,25 @@ describe("OnboardingPage", () => {
     );
 
     expect(sessionStorage.getItem("tw_toast")).toBe("Welcome back");
+  });
+
+  it("Log in can be tapped before the bot check passes, then logs in once it does", async () => {
+    vi.mocked(auth.signIn).mockResolvedValue(null);
+    turnstileStub.isHeld = true;
+
+    renderWithStore(
+      <OnboardingPage />,
+      "/login?screen=cust-password&board=true",
+    );
+
+    await user.type(screen.getByLabelText("Password"), "a long password");
+    await user.click(screen.getByRole("button", { name: "Log in" }));
+    await act(async () => undefined);
+    expect(auth.signIn).not.toHaveBeenCalled();
+
+    act(() => turnstileStub.release?.());
+
+    await vi.waitFor(() => expect(auth.signIn).toHaveBeenCalled());
   });
 
   it("a wrong password from the server shows the error", async () => {
