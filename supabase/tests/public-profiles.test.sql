@@ -1,5 +1,5 @@
 begin;
-select plan(18);
+select plan(19);
 
 create function pg_temp.open_business(user_id uuid, business text, business_type text, lat float8, radius int)
 returns uuid
@@ -127,6 +127,16 @@ select ok(
   'a profile has no location, phone or owner'
 );
 select is(public.get_stylist_profile('public-draft-test'), null, 'a draft profile is hidden');
+
+reset role;
+insert into public.stylist_slug_history (slug, stylist_id) values ('old-public-shop', (select shop from ids));
+set local role anon;
+
+select is(
+  public.get_stylist_profile('old-public-shop') ->> 'slug',
+  'public-shop-test',
+  'a retired slug finds the profile, with its current slug'
+);
 
 reset role;
 select set_config('request.jwt.claims', json_build_object('sub', 'd3333333-3333-3333-3333-333333333333', 'role', 'authenticated')::text, true);

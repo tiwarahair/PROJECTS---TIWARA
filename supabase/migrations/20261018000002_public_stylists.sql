@@ -257,9 +257,15 @@ as $$
     )
   )
   from public.stylists as stylist
-  where stylist.slug = lookup::extensions.citext
+  where stylist.id = coalesce(
+      (select id from public.stylists where slug = lookup::extensions.citext),
+      (select stylist_id from public.stylist_slug_history where slug = lookup::extensions.citext)
+    )
     and (stylist.status in ('live', 'paused') or stylist.owner_id = auth.uid())
 $$;
+
+-- get_stylist_profile resolves retired slugs itself
+drop function public.resolve_slug(text);
 
 revoke execute on function
   public.booking_fee_pence(integer),

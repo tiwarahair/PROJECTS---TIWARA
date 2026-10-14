@@ -1,6 +1,6 @@
 import { act, screen, waitFor, within } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import { lookUpProfile } from "../../../lib/public-profiles";
+import { fetchPublicProfile } from "../../../lib/public-profiles";
 import { toPublicStylist } from "../../../lib/public-stylist";
 import { PUBLIC_PROFILE } from "../../../test/public-profile";
 import { renderWithStore } from "../../../test/render-with-store";
@@ -11,7 +11,7 @@ import { setupUser } from "../../../test/setup-user";
 
 vi.mock("../../../lib/public-profiles", async (importOriginal) => ({
   ...(await importOriginal<typeof import("../../../lib/public-profiles")>()),
-  lookUpProfile: vi.fn(),
+  fetchPublicProfile: vi.fn(),
 }));
 
 let user: UserEvent;
@@ -19,9 +19,7 @@ let user: UserEvent;
 beforeEach(() => {
   user = setupUser();
 
-  vi.mocked(lookUpProfile)
-    .mockReset()
-    .mockResolvedValue({ profile: PUBLIC_PROFILE, currentSlug: null });
+  vi.mocked(fetchPublicProfile).mockReset().mockResolvedValue(PUBLIC_PROFILE);
 });
 
 describe("StylistProfilePage", () => {
@@ -40,7 +38,7 @@ describe("StylistProfilePage", () => {
       await screen.findByRole("heading", { level: 1, name: /Tiwára's House/ }),
     ).toBeInTheDocument();
 
-    expect(lookUpProfile).toHaveBeenCalledWith("tiwaras-house");
+    expect(fetchPublicProfile).toHaveBeenCalledWith("tiwaras-house");
 
     expect(
       screen.getAllByRole("link", { name: "Book now" })[0],
@@ -50,9 +48,9 @@ describe("StylistProfilePage", () => {
   });
 
   it("a paused stylist has no Book now", async () => {
-    vi.mocked(lookUpProfile).mockResolvedValue({
-      profile: { ...PUBLIC_PROFILE, pause_on: true },
-      currentSlug: null,
+    vi.mocked(fetchPublicProfile).mockResolvedValue({
+      ...PUBLIC_PROFILE,
+      pause_on: true,
     });
 
     renderWithStore(<StylistProfilePage />, "/tiwaras-house");
@@ -67,10 +65,7 @@ describe("StylistProfilePage", () => {
   });
 
   it("a retired slug redirects to the current one", async () => {
-    vi.mocked(lookUpProfile).mockResolvedValue({
-      profile: null,
-      currentSlug: "tiwaras-house",
-    });
+    vi.mocked(fetchPublicProfile).mockResolvedValue(PUBLIC_PROFILE);
 
     renderWithStore(<StylistProfilePage />, "/old-name");
 
@@ -82,10 +77,7 @@ describe("StylistProfilePage", () => {
   });
 
   it("a malformed link shows not found instead of crashing", async () => {
-    vi.mocked(lookUpProfile).mockResolvedValue({
-      profile: null,
-      currentSlug: null,
-    });
+    vi.mocked(fetchPublicProfile).mockResolvedValue(null);
 
     renderWithStore(<StylistProfilePage />, "/%E0");
 
@@ -97,10 +89,7 @@ describe("StylistProfilePage", () => {
   });
 
   it("an unknown slug shows not found", async () => {
-    vi.mocked(lookUpProfile).mockResolvedValue({
-      profile: null,
-      currentSlug: null,
-    });
+    vi.mocked(fetchPublicProfile).mockResolvedValue(null);
 
     renderWithStore(<StylistProfilePage />, "/nobody");
 

@@ -86,7 +86,7 @@ select ok(not public.is_slug_free('studio'), 'route names are reserved');
 select ok(not public.is_slug_free('ab'), 'slugs are at least 3 characters');
 select throws_ok($$select public.change_slug('Bad Slug!')$$, 'P0001', 'that booking link is not available', 'invalid slugs are refused');
 select is(public.change_slug('crowned-one'), 'crowned-one', 'an owner changes their slug');
-select is(public.resolve_slug('studio-one-test'), 'crowned-one', 'the old slug resolves to the new one');
+select is(public.get_stylist_profile('studio-one-test') ->> 'slug', 'crowned-one', 'the old slug finds the profile under its new one');
 select throws_ok($$select public.change_slug('another-one')$$, 'P0001', 'the booking link can change once every 30 days', 'one change per 30 days');
 
 reset role;

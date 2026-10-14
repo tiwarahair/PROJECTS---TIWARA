@@ -19,20 +19,20 @@ export const StylistProfilePage = () => {
     currentData: data,
     isError,
     isFetching,
-  } = useGetStylistProfileQuery(slug, { refetchOnMountOrArgChange: true });
+  } = useGetStylistProfileQuery(slug, { refetchOnMountOrArgChange: 10 });
 
   const isSlow = useIsSlow(isFetching && !data);
 
   const publicStylist = useMemo(
-    () => (data?.profile ? toPublicStylist(data.profile) : null),
+    () => (data ? toPublicStylist(data) : null),
     [data],
   );
 
+  if (data && data.slug !== slug)
+    return <Navigate to={`/${data.slug}`} replace />;
+
   if (publicStylist)
     return <StylistProfileView key={slug} publicStylist={publicStylist} />;
-
-  if (data?.currentSlug && data.currentSlug !== slug)
-    return <Navigate to={`/${data.currentSlug}`} replace />;
 
   return (
     <div className={styles.page} aria-busy={isFetching}>

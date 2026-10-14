@@ -35,27 +35,13 @@ export interface PublicProfile extends Pick<
   portfolio_photos: Tables<"portfolio_photos">[];
 }
 
-/** The profile, or null when it isn't public; then currentSlug is set if the slug was renamed. */
-export interface ProfileLookup {
-  profile: PublicProfile | null;
-  currentSlug: string | null;
-}
+export const fetchPublicProfile = async (slug: string) => {
+  const { data, error } = await supabase.rpc("get_stylist_profile", {
+    lookup: slug,
+  });
 
-export const lookUpProfile = async (slug: string): Promise<ProfileLookup> => {
-  const profile = await supabase.rpc("get_stylist_profile", { lookup: slug });
+  if (error) throw error;
 
-  if (profile.error) throw profile.error;
-
-  if (profile.data)
-    // the function returns jsonb, which the generated types only know as Json
-    return {
-      profile: profile.data as unknown as PublicProfile,
-      currentSlug: null,
-    };
-
-  const current = await supabase.rpc("resolve_slug", { lookup: slug });
-
-  if (current.error) throw current.error;
-
-  return { profile: null, currentSlug: current.data };
+  // the function returns jsonb, which the generated types only know as Json
+  return data as unknown as PublicProfile | null;
 };

@@ -1229,7 +1229,6 @@ export type Database = {
       };
       refresh_go_live: { Args: { target: string }; Returns: undefined };
       reopen_business: { Args: Record<PropertyKey, never>; Returns: undefined };
-      resolve_slug: { Args: { lookup: string }; Returns: string };
       search_stylists: {
         Args: {
           lat?: number;

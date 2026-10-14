@@ -1,8 +1,8 @@
 import { createApi, fakeBaseQuery } from "@reduxjs/toolkit/query/react";
-import { lookUpProfile } from "../lib/public-profiles";
+import { fetchPublicProfile } from "../lib/public-profiles";
 import { SEARCH_PAGE_SIZE, searchStylists } from "../lib/search-api";
 import type { SearchArgs, SearchRow } from "../lib/search-api";
-import type { ProfileLookup } from "../lib/public-profiles";
+import type { PublicProfile } from "../lib/public-profiles";
 import { supabase } from "../lib/supabase";
 import {
   closeBusiness,
@@ -90,8 +90,19 @@ export const api = createApi({
       providesTags: ["Studio"],
       queryFn: (ownerId) => toQueryResult(fetchStylistStudio(ownerId)),
     }),
-    getStylistProfile: build.query<ProfileLookup, string>({
-      queryFn: (slug) => toQueryResult(lookUpProfile(slug)),
+    getStylistProfile: build.query<PublicProfile | null, string>({
+      queryFn: (slug) => toQueryResult(fetchPublicProfile(slug)),
+      // a retired slug's result is also the current slug's, so its redirect needs no second request
+      onQueryStarted: (slug, { dispatch, queryFulfilled }) => {
+        queryFulfilled
+          .then(({ data }) => {
+            if (data && data.slug !== slug)
+              void dispatch(
+                api.util.upsertQueryData("getStylistProfile", data.slug, data),
+              );
+          })
+          .catch(() => undefined);
+      },
     }),
     // results pages for the Search list; each row carries the total
     searchStylists: build.infiniteQuery<SearchRow[], SearchArgs, number>({
