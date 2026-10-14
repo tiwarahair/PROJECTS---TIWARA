@@ -207,7 +207,7 @@ const getSiteHref = (site?: string): string => {
 };
 
 export const getProfileFacts = ({
-  id,
+  email,
   policies,
   site,
 }: Stylist): ProfileFacts => {
@@ -220,14 +220,12 @@ export const getProfileFacts = ({
     none: "",
   };
 
-  const handle = id.replace(/-/g, "");
-
   return {
     depositChip: depositChips[mode],
     hasPayChip: mode !== "none",
     cancelChip: `Free cancellation up to ${freeWindowHours}h`,
     cancelHours: freeWindowHours,
-    mailto: `mailto:${handle}@tiwarashouse.com`,
+    mailto: email ? `mailto:${email}` : "",
     site: site || "",
     siteHref: getSiteHref(site),
   };

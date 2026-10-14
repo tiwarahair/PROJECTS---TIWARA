@@ -23,6 +23,7 @@ interface StylistAddress {
 export interface Stylist {
   id: string;
   site?: string;
+  email?: string;
   name: string;
   area: string;
   businessType: BusinessType;

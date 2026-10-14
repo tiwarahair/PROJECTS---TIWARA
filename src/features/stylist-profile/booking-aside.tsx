@@ -95,19 +95,21 @@ export const BookingAside = ({
               <path d="M13.4 7.4c.3 1.3 1.3 2.2 2.6 2.3"></path>
             </svg>
           </a>
-          <a href={mailto} aria-label="Email" className={styles.linkIcon}>
-            <svg
-              width="15"
-              height="15"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="1.5"
-            >
-              <rect x="2" y="4" width="20" height="16" rx="3"></rect>
-              <path d="m3 6 9 7 9-7"></path>
-            </svg>
-          </a>
+          {mailto && (
+            <a href={mailto} aria-label="Email" className={styles.linkIcon}>
+              <svg
+                width="15"
+                height="15"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="1.5"
+              >
+                <rect x="2" y="4" width="20" height="16" rx="3"></rect>
+                <path d="m3 6 9 7 9-7"></path>
+              </svg>
+            </a>
+          )}
           {site && (
             <a
               href={siteHref}

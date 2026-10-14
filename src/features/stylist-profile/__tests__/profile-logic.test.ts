@@ -91,6 +91,10 @@ describe("profile facts", () => {
     );
 
     expect(facts.hasPayChip).toBe(stylist.policies.mode !== "none");
-    expect(facts.mailto).toBe("mailto:tiwarashouse@tiwarashouse.com");
+    expect(facts.mailto).toBe("");
+
+    expect(
+      getProfileFacts({ ...stylist, email: "hello@crowned.studio" }).mailto,
+    ).toBe("mailto:hello@crowned.studio");
   });
 });
