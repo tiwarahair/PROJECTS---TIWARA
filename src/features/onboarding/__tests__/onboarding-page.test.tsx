@@ -142,6 +142,26 @@ describe("OnboardingPage", () => {
     ).not.toBeInTheDocument();
   });
 
+  it("an empty field only shows its error after Continue, not when focus leaves it", async () => {
+    renderWithStore(<OnboardingPage />, "/login?screen=pro-email&board=true");
+
+    await user.click(screen.getByLabelText("Email address"));
+    await user.tab();
+
+    expect(
+      screen.queryByText("Enter your email address"),
+    ).not.toBeInTheDocument();
+
+    await user.type(screen.getByLabelText("Email address"), "nia@");
+    await user.tab();
+
+    expect(
+      await screen.findByText(
+        "Enter a valid email address, like name@example.com",
+      ),
+    ).toBeInTheDocument();
+  });
+
   it("a wrong password from the server shows the error", async () => {
     vi.mocked(auth.signIn).mockResolvedValue("invalid_credentials");
 

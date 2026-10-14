@@ -278,6 +278,17 @@ export const useOnboarding = (props: OnboardingProps) => {
     return () => window.clearTimeout(timer);
   }, [state.screen, codeRefs]);
 
+  // an empty field that loses focus isn't wrong yet: errors show once it's been changed, or on Continue
+  const getShownErrors = () => {
+    const { errors, dirtyFields, isSubmitted } = formState;
+
+    return Object.fromEntries(
+      Object.entries(errors).filter(
+        ([key]) => isSubmitted || key in dirtyFields,
+      ),
+    );
+  };
+
   const goTo = (screen: string, direction: "fwd" | "back" = "fwd") => {
     window.clearTimeout(timers.current.auto);
     reset(getValues());
@@ -317,7 +328,12 @@ export const useOnboarding = (props: OnboardingProps) => {
     key: K,
     value: PathValue<OnboardingForm, K>,
     touch = false,
-  ) => setValue(key, value, { shouldTouch: touch, shouldValidate: touch });
+  ) =>
+    setValue(key, value, {
+      shouldTouch: touch,
+      shouldDirty: touch,
+      shouldValidate: touch,
+    });
 
   // any change: clear its server error, re-check what's already showing, save wizard progress
   useEffect(() => {
@@ -458,7 +474,7 @@ export const useOnboarding = (props: OnboardingProps) => {
 
   return {
     state: { ...state, form },
-    formErrors: formState.errors,
+    formErrors: getShownErrors(),
     props: resolved,
     rootRef: rootRef as RefObject<HTMLDivElement>,
     turnstileRef,
