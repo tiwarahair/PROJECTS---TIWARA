@@ -384,7 +384,6 @@ export const useOnboardingSubmit = ({
     }
   };
 
-  /** Resend the sign-up code (verify) or the reset link (forgot-sent). */
   const resending = useRef(false);
 
   /** Sends the code (verify) or reset link (forgot-sent) again with this token. */

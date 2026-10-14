@@ -42,17 +42,23 @@ const KINDS: [TaxKind, string][] = [
 ];
 
 const DOB_PARTS = [
-  { key: "day", label: "DD", aria: "Day", max: 2, autoComplete: "bday-day" },
+  {
+    key: "day",
+    placeholder: "DD",
+    aria: "Day",
+    max: 2,
+    autoComplete: "bday-day",
+  },
   {
     key: "month",
-    label: "MM",
+    placeholder: "MM",
     aria: "Month",
     max: 2,
     autoComplete: "bday-month",
   },
   {
     key: "year",
-    label: "YYYY",
+    placeholder: "YYYY",
     aria: "Year",
     max: 4,
     autoComplete: "bday-year",
@@ -339,43 +345,36 @@ export const TaxDetailsForm = ({
             <legend className={styles.dobLegend}>Date of birth</legend>
             <div className={styles.dobRow}>
               {DOB_PARTS.map(
-                ({ key, label, aria, max, autoComplete }, index) => (
-                  <label
+                ({ key, placeholder, aria, max, autoComplete }, index) => (
+                  <input
                     key={key}
                     className={joinClassNames(
-                      styles.dobPart,
+                      styles.dobInput,
                       max === 4 ? styles.dobLong : styles.dobShort,
+                      dobError ? styles.fieldErr : styles.fieldOk,
                     )}
-                  >
-                    <span className={styles.dobLabel}>{label}</span>
-                    <input
-                      className={joinClassNames(
-                        styles.dobInput,
-                        dobError ? styles.fieldErr : styles.fieldOk,
-                      )}
-                      ref={(element) => {
-                        dobRefs.current[index] = element;
-                      }}
-                      value={state[key]}
-                      onChange={(event) => {
-                        const digits = event.target.value
-                          .replace(/\D/g, "")
-                          .slice(0, max);
+                    ref={(element) => {
+                      dobRefs.current[index] = element;
+                    }}
+                    value={state[key]}
+                    onChange={(event) => {
+                      const digits = event.target.value
+                        .replace(/\D/g, "")
+                        .slice(0, max);
 
-                        setState({ [key]: digits });
+                      setState({ [key]: digits });
 
-                        if (digits.length === max && index < 2)
-                          dobRefs.current[index + 1]?.focus();
-                      }}
-                      onBlur={() => touch("dob")}
-                      inputMode="numeric"
-                      autoComplete={autoComplete}
-                      maxLength={max}
-                      placeholder={label}
-                      aria-label={aria}
-                      aria-invalid={dobError ? "true" : "false"}
-                    />
-                  </label>
+                      if (digits.length === max && index < 2)
+                        dobRefs.current[index + 1]?.focus();
+                    }}
+                    onBlur={() => touch("dob")}
+                    inputMode="numeric"
+                    autoComplete={autoComplete}
+                    maxLength={max}
+                    placeholder={placeholder}
+                    aria-label={aria}
+                    aria-invalid={dobError ? "true" : "false"}
+                  />
                 ),
               )}
             </div>

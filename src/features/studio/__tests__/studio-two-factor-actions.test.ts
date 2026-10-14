@@ -3,10 +3,14 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 import type { TaxDetails } from "../../../components/tax-details-form/tax-details-logic";
 import { saveTaxDetails } from "../../../lib/studio-api";
 import {
+  listTwoFactorDevices,
   startTwoFactorEnrolment,
   verifySecondFactor,
 } from "../../../lib/two-factor";
-import type { TwoFactorEnrolment } from "../../../lib/two-factor";
+import type {
+  TwoFactorDevice,
+  TwoFactorEnrolment,
+} from "../../../lib/two-factor";
 import type { StudioContext } from "../studio-actions";
 import { createTaxActions } from "../studio-tax-actions";
 import { createTwoFactorActions } from "../studio-two-factor-actions";
@@ -15,6 +19,8 @@ import type { StudioPatch, StudioState } from "../studio-types";
 vi.mock("../../../lib/studio-api", () => ({ saveTaxDetails: vi.fn() }));
 
 vi.mock("../../../lib/two-factor", () => ({
+  confirmTwoFactorEnrolment: vi.fn(() => Promise.resolve(true)),
+  listTwoFactorDevices: vi.fn(),
   startTwoFactorEnrolment: vi.fn(),
   verifySecondFactor: vi.fn(() => Promise.resolve(true)),
 }));
@@ -98,6 +104,41 @@ describe("two-step verification actions", () => {
 
     finishCheck(true);
     await checking;
+    expect(getState().twoFactor?.isBusy).toBe(false);
+  });
+
+  it("a new app's button stays busy until the app list has reloaded", async () => {
+    let finishList: (devices: TwoFactorDevice[]) => void = () => undefined;
+
+    vi.mocked(startTwoFactorEnrolment).mockResolvedValueOnce({
+      factorId: "new",
+      qrCode: "",
+      secret: "",
+      uri: "",
+    });
+
+    vi.mocked(listTwoFactorDevices).mockReturnValueOnce(
+      new Promise((resolve) => {
+        finishList = resolve;
+      }),
+    );
+
+    const { actions, getState } = setup();
+
+    actions.openTwoFactor("method");
+    actions.beginEnrolment({ kind: "main", name: "Main phone" });
+
+    await vi.waitFor(() =>
+      expect(getState().twoFactor?.enrolment).toBeTruthy(),
+    );
+
+    actions.setTwoFactor({ code: "123456" });
+    actions.verifyTwoFactor();
+    await vi.waitFor(() => expect(listTwoFactorDevices).toHaveBeenCalled());
+    expect(getState().twoFactor?.isBusy).toBe(true);
+
+    finishList([{ id: "new", name: "Main phone", backup: false }]);
+    await vi.waitFor(() => expect(getState().twoFactor?.isVerified).toBe(true));
     expect(getState().twoFactor?.isBusy).toBe(false);
   });
 

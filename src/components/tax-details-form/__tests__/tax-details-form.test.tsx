@@ -34,6 +34,21 @@ describe("TaxDetailsForm", () => {
     ).toBeInTheDocument();
   });
 
+  it("date of birth boxes are labelled for screen readers, with no visible DD / MM / YYYY headings", () => {
+    render(<TaxDetailsForm />);
+
+    expect(screen.getByLabelText("Day")).toHaveAttribute("placeholder", "DD");
+    expect(screen.getByLabelText("Month")).toHaveAttribute("placeholder", "MM");
+
+    expect(screen.getByLabelText("Year")).toHaveAttribute(
+      "placeholder",
+      "YYYY",
+    );
+
+    expect(screen.queryByText("DD")).not.toBeInTheDocument();
+    expect(screen.queryByText("YYYY")).not.toBeInTheDocument();
+  });
+
   it.each<[TaxFixture, string]>([
     ["err-empty", "Enter your date of birth"],
     ["err-initials", "Enter your full name, not initials."],

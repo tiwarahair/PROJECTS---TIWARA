@@ -1,6 +1,7 @@
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { useLocation } from "react-router";
 import { useEntered } from "../../hooks/use-entered";
+import { joinClassNames } from "../../utils/class-names";
 import styles from "../../styles/components/welcome-toast/welcome-toast.module.css";
 
 interface WelcomeToastPillProps {
@@ -33,16 +34,15 @@ const WelcomeToastPill = ({
     return () => window.clearTimeout(removeTimer);
   }, [closing, onDone]);
 
-  const className = [
-    styles.toast,
-    entered && !closing && styles.entered,
-    closing && styles.closing,
-  ]
-    .filter(Boolean)
-    .join(" ");
-
   return (
-    <div role="status" className={className}>
+    <div
+      role="status"
+      className={joinClassNames(
+        styles.toast,
+        entered && !closing && styles.entered,
+        closing && styles.closing,
+      )}
+    >
       <svg
         className={styles.icon}
         width="18"
@@ -61,9 +61,12 @@ const WelcomeToastPill = ({
   );
 };
 
-const readWelcomeMessage = (
-  search: string,
-): { message: string; pinned: boolean } | null => {
+interface WelcomeMessage {
+  message: string;
+  pinned: boolean;
+}
+
+const readWelcomeMessage = (search: string): WelcomeMessage | null => {
   try {
     const pinnedMessage = new URLSearchParams(search).get("twtoast");
 
@@ -84,27 +87,19 @@ const readWelcomeMessage = (
  * Stylist Profile and Booking). Reads ?twtoast= (pinned, boards) or sessionStorage tw_toast once on mount.
  */
 export const WelcomeToast = () => {
-  const [toast, setToast] = useState<{
-    message: string;
-    pinned: boolean;
-  } | null>(null);
-
+  const { search } = useLocation();
+  const [toast, setToast] = useState(() => readWelcomeMessage(search));
   const [visible, setVisible] = useState(false);
   const handleDone = useCallback(() => setToast(null), []);
-  const { search } = useLocation();
-  // read once on mount, like the sessionStorage message
-  const mountSearch = useRef(search);
+  const hasToast = !!toast;
 
   useEffect(() => {
-    const welcome = readWelcomeMessage(mountSearch.current);
+    if (!hasToast) return;
 
-    if (!welcome) return;
-
-    setToast(welcome);
     const showTimer = window.setTimeout(() => setVisible(true), 600);
 
     return () => window.clearTimeout(showTimer);
-  }, []);
+  }, [hasToast]);
 
   if (!toast || !visible) return null;
 
