@@ -49,10 +49,14 @@ export const getAccountState = async (account: Account) => {
 const STATE_COLUMNS =
   "stripe_account_id, charges_enabled, payouts_enabled, details_submitted, stripe_requirements, payout_bank";
 
-/** Re-reads a connected account and saves it unless a newer read already has; null when no business has it (yet). */
+/**
+ * Re-reads a connected account and saves it unless a newer read already has. `saved` is null when no business here
+ * has the account (yet); `stylistId` is the business it was made for.
+ */
 export const syncAccount = async (admin: SupabaseClient, accountId: string) => {
   const syncedAt = new Date().toISOString();
-  const state = await getAccountState(await retrieveAccount(accountId));
+  const account = await retrieveAccount(accountId);
+  const state = await getAccountState(account);
 
   const { error } = await admin
     .from("stylists")
@@ -70,5 +74,5 @@ export const syncAccount = async (admin: SupabaseClient, accountId: string) => {
 
   if (readError) throw readError;
 
-  return data;
+  return { saved: data, stylistId: account.metadata?.stylist_id };
 };

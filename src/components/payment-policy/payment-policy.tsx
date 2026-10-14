@@ -70,7 +70,8 @@ export interface PaymentPolicyProps {
   value?: Partial<PolicyValue>;
   bookingsCount?: number;
   stylistName?: string;
-  onSave?: (value: PolicyValue) => void;
+  /** Resolving to false holds the save: the form stays unsaved (Studio first asks for a fresh 2FA code). */
+  onSave?: (value: PolicyValue) => void | Promise<boolean>;
   onState?: (api: PaymentPolicyApi) => void;
 }
 
@@ -137,14 +138,21 @@ export const PaymentPolicy = ({
   const save = () => {
     if (!canSave) return;
 
-    window.clearTimeout(flashTimer.current);
-    onSave?.(getPolicyOutput(state));
-    setState({ saved: getPolicyKey(state), flash: true });
+    const markSaved = () => {
+      window.clearTimeout(flashTimer.current);
+      setState({ saved: getPolicyKey(state), flash: true });
 
-    flashTimer.current = window.setTimeout(
-      () => setState({ flash: false }),
-      FLASH_MS,
-    );
+      flashTimer.current = window.setTimeout(
+        () => setState({ flash: false }),
+        FLASH_MS,
+      );
+    };
+
+    const result = onSave?.(getPolicyOutput(state));
+
+    if (result instanceof Promise)
+      void result.then((isSaved) => isSaved && markSaved());
+    else markSaved();
   };
 
   // tells the host (Studio) whether a save is possible, so its own header button can mirror the state

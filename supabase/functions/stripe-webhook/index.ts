@@ -7,6 +7,14 @@ import { stripe, syncAccount } from "../_shared/stripe.ts";
 const admin = createClient(Deno.env.get("SUPABASE_URL")!, Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!);
 const cryptoProvider = Stripe.createSubtleCryptoProvider();
 
+const hasBusiness = async (stylistId: string) => {
+  const { data, error } = await admin.from("stylists").select("id").eq("id", stylistId).maybeSingle();
+
+  if (error) throw error;
+
+  return !!data;
+};
+
 Deno.serve(async (request) => {
   let notification: Awaited<ReturnType<typeof stripe.parseEventNotificationAsync>>;
 
@@ -30,8 +38,11 @@ Deno.serve(async (request) => {
 
   if (notification.type.startsWith("v2.core.account") && accountId?.startsWith("acct_")) {
     try {
-      // the business may not have its account id yet: it's saved just after the account is made
-      if (!(await syncAccount(admin, accountId))) throw new Error(`no business has ${accountId}`);
+      const { saved, stylistId } = await syncAccount(admin, accountId);
+
+      // its business is here but hasn't saved the account id yet (that happens just after the account is made);
+      // otherwise the account is from another environment sharing this Stripe sandbox, so there's nothing to do
+      if (!saved && stylistId && (await hasBusiness(stylistId))) throw new Error(`${accountId} isn't saved yet`);
     } catch (error) {
       // not recorded, so Stripe's retry is handled
       return new Response(error instanceof Error ? error.message : "failed", { status: 500 });

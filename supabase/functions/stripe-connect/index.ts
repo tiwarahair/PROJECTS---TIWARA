@@ -110,7 +110,9 @@ Deno.serve(async (request) => {
   if (action === "refresh") {
     if (!accountId) return respond(200, { connected: false });
 
-    return respond(200, { connected: true, ...(await syncAccount(admin, accountId)) });
+    const { saved } = await syncAccount(admin, accountId);
+
+    return respond(200, { connected: true, ...saved });
   }
 
   if (action === "dashboard") {

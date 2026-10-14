@@ -42,18 +42,24 @@ export const getSettingsView = (
     showToast("Payment policy saved");
   };
 
-  // once 2FA is on, a policy change needs an app code from the last 30 days
+  // once 2FA is on, a policy change needs an app code from the last 30 days; false holds the form's save
   const checkPolicy = async (value: PolicyValue) => {
     if (
       !sync ||
       !hasTwoFactor(state) ||
       (await hasRecentSecondFactor().catch(() => false))
-    )
-      return savePolicy(value);
+    ) {
+      savePolicy(value);
+
+      return true;
+    }
 
     showToast("For your security, enter a code from your authenticator app.");
     openTwoFactor("taxcode", { flow: "info", from: "policy" });
-    context.memo.afterSecondFactor = () => savePolicy(value);
+    // the form saves itself again, now with a fresh code
+    context.memo.afterSecondFactor = () => context.memo.policyApi?.save();
+
+    return false;
   };
 
   return {
@@ -84,7 +90,7 @@ export const getSettingsView = (
       ({ dayOffset, status }) =>
         (dayOffset || 0) >= 0 && status !== "cancelled",
     ).length,
-    onPolicySave: (value: PolicyValue) => void checkPolicy(value),
+    onPolicySave: checkPolicy,
 
     // the embedded page reports whether it can save; the mobile header button calls back into it
     onPolicyState: (api: PaymentPolicyApi) => {

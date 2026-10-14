@@ -26,11 +26,14 @@ export const StudioRoute = () => {
     { refetchOnMountOrArgChange: true },
   );
 
-  // the setup checklist's 2FA step reads these, so Studio waits for them
-  const { data: devices, isError: isDevicesError } =
-    useGetTwoFactorDevicesQuery(user?.isStylist ? user.id : skipToken, {
-      refetchOnMountOrArgChange: true,
-    });
+  // the setup checklist's 2FA step reads these; Studio waits for a fresh list, as it changes them without this cache
+  const {
+    data: devices,
+    isError: isDevicesError,
+    isFetching: isDevicesFetching,
+  } = useGetTwoFactorDevicesQuery(user?.isStylist ? user.id : skipToken, {
+    refetchOnMountOrArgChange: true,
+  });
 
   if (isDemoStudio()) return <StudioPage />;
 
@@ -40,7 +43,12 @@ export const StudioRoute = () => {
 
   if (!user.isStylist) return <Navigate to="/join" replace />;
 
-  if (!studio || !identity?.isLoaded || (!devices && !isDevicesError))
+  if (
+    !studio ||
+    !identity?.isLoaded ||
+    isDevicesFetching ||
+    (!devices && !isDevicesError)
+  )
     return null;
 
   if (studio.status === "closed" && studio.closed_at)

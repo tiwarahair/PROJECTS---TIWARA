@@ -98,6 +98,16 @@ describe("PaymentPolicy", () => {
     expect(screen.getByRole("button", { name: "Save policy" })).toBeDisabled();
   });
 
+  it("stays unsaved when the host holds the save", async () => {
+    render(
+      <PaymentPolicy preset="unsaved" onSave={() => Promise.resolve(false)} />,
+    );
+
+    await user.click(screen.getByRole("button", { name: "Save policy" }));
+
+    expect(screen.getByRole("button", { name: "Save policy" })).toBeEnabled();
+  });
+
   it("caps additional policies at 300 characters in total", async () => {
     render(<PaymentPolicy />);
     await user.click(screen.getByRole("button", { name: "Add custom policy" }));
