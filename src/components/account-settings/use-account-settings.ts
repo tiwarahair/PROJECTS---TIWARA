@@ -12,7 +12,10 @@ import {
   EMPTY_PASSWORD,
   getInitialSettingsState,
 } from "./account-settings-logic";
-import type { SettingsPerson } from "./account-settings-logic";
+import type {
+  SettingsPerson,
+  NotificationSettings,
+} from "./account-settings-logic";
 import type {
   ConfirmDialog,
   PayoutStatus,
@@ -53,6 +56,8 @@ export interface AccountSettingsProps {
   hideSave?: boolean;
   /** Whose account this is (the demo stylist when not given). */
   person?: SettingsPerson;
+  /** Saved email / SMS choices (Studio); missing events use the defaults. */
+  notifications?: Partial<NotificationSettings>;
   /** Account name, used by the password checker when the name fields are empty. */
   name?: string;
   legalName?: string;
@@ -92,7 +97,7 @@ export const useAccountSettings = (props: AccountSettingsProps) => {
 
   // read once: ?pwnew= only prefills the initial state
   const [state, setRawState] = useState(() =>
-    getInitialSettingsState(isNew, search, props.person),
+    getInitialSettingsState(isNew, search, props.person, props.notifications),
   );
 
   const [dialog, setDialog] = useState<ConfirmDialog>({

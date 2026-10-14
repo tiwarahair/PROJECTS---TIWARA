@@ -6,6 +6,7 @@ import type { TwoFactorEnrolment } from "../../lib/two-factor";
 import type { PayoutStatus } from "../../components/account-settings/account-settings-logic";
 import type { TaxDetails } from "../../components/tax-details-form/tax-details-logic";
 import type { ServiceType } from "../../types/service-type";
+import type { NotificationSettings } from "../../components/account-settings/account-settings-logic";
 
 export type StudioTab =
   "home" | "bookings" | "services" | "earnings" | "clients" | "settings";
@@ -571,6 +572,8 @@ export interface StudioState {
   /** A real account's Stripe status and payout bank (demo boards derive the status from check.stripe). */
   payoutStatus: PayoutStatus | null;
   payoutBank: string | null;
+  /** A real account's saved notification choices (Settings → Notifications). */
+  notificationPrefs: Partial<NotificationSettings>;
   nudge: boolean;
   serviceNudge: boolean;
   celebrated: boolean;

@@ -47,7 +47,7 @@ export const email = z
   .string()
   .trim()
   .min(1, "Enter your email address")
-  .refine(isValidEmail, "Enter a valid email address, like name@example.com");
+  .refine(isValidEmail, "Enter a valid email address");
 
 export const mobile = z
   .string()

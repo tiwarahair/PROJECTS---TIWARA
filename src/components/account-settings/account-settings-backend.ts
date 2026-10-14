@@ -1,4 +1,6 @@
 // What Account settings saves through: a real account passes its own; demo boards use the stand-in.
+import type { ChannelSetting, NotificationKey } from "./account-settings-logic";
+
 export interface AccountSettingsBackend {
   saveName: (first: string, last: string) => Promise<void>;
   savePhone: (phone: string) => Promise<void>;
@@ -6,6 +8,10 @@ export interface AccountSettingsBackend {
   sendEmailCodes: (email: string) => Promise<string | null>;
   verifyEmailCode: (email: string, code: string) => Promise<boolean>;
   sendPasswordCode: () => Promise<void>;
+  saveNotification: (
+    key: NotificationKey,
+    setting: ChannelSetting,
+  ) => Promise<void>;
   /** Takes the booking page offline (reopenable for 15 days). */
   closeBusiness: () => Promise<void>;
   /** An error code when the password wasn't changed; `reauthentication_needed` asks for the emailed code. */
@@ -26,6 +32,7 @@ export const DEMO_BACKEND: AccountSettingsBackend = {
     Promise.resolve(!!email && code === DEMO_CODE),
   sendPasswordCode: () => Promise.resolve(),
   closeBusiness: () => Promise.resolve(),
+  saveNotification: () => Promise.resolve(),
   changePassword: (password, code) => {
     if (!code) return Promise.resolve("reauthentication_needed");
 

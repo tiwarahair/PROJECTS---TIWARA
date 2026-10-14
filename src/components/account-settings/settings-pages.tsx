@@ -8,6 +8,7 @@ import {
   getPayoutStatus,
   getTaxRows,
 } from "./account-settings-logic";
+import type { ChannelSetting } from "./account-settings-logic";
 import type { AccountSettingsProps } from "./use-account-settings";
 import type { AccountSettingsController } from "./use-account-settings";
 import { CheckRow, InfoIcon, SettingsSection, Switch } from "./settings-fields";
@@ -78,7 +79,7 @@ const ExternalIcon = () => (
 );
 
 export const SettingsNotifications = ({
-  settings: { state, setState, toast },
+  settings: { state, setState, toast, backend },
 }: PageProps) => (
   <>
     {NOTIFICATION_GROUPS.map(([title, rows]) => (
@@ -104,17 +105,26 @@ export const SettingsNotifications = ({
                   label={label + suffix}
                   className={notifications.switchCell}
                   onToggle={() => {
-                    setState(({ notifications: currentNotifications }) => ({
-                      notifications: {
-                        ...currentNotifications,
-                        [key]: {
-                          ...currentNotifications[key],
-                          [channel]: !currentNotifications[key][channel],
-                        },
-                      },
-                    }));
+                    const before = state.notifications[key];
+                    const next = { ...before, [channel]: !before[channel] };
 
-                    toast("Notification settings saved");
+                    const show = (setting: ChannelSetting) =>
+                      setState(({ notifications: current }) => ({
+                        notifications: { ...current, [key]: setting },
+                      }));
+
+                    show(next);
+
+                    backend.saveNotification(key, next).then(
+                      () => toast("Notification settings saved"),
+                      () => {
+                        show(before);
+
+                        toast(
+                          "Your notification settings couldn’t be saved. Try again.",
+                        );
+                      },
+                    );
                   }}
                 />
               ))}

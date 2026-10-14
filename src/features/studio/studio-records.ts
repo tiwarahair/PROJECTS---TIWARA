@@ -37,6 +37,13 @@ export const getPayoutStatus = ({
 const getClockTime = (time: string | null) => (time ?? "").slice(0, 5);
 
 /** The parts of Studio's state that come from the stylist's own data. */
+/** "new_booking" ↔ "newBooking": the database names events in snake case, Settings in camel case. */
+export const toNotificationKey = (event: string) =>
+  event.replace(/_(\w)/g, (_match, letter: string) => letter.toUpperCase());
+
+export const toNotificationEvent = (key: string) =>
+  key.replace(/[A-Z]/g, (letter) => `_${letter.toLowerCase()}`);
+
 export const toStudioPatch = (
   studio: StylistStudio,
   state: StudioState,
@@ -157,5 +164,11 @@ export const toStudioPatch = (
     },
     payoutStatus: getPayoutStatus(studio),
     payoutBank: studio.payout_bank,
+    notificationPrefs: Object.fromEntries(
+      studio.notification_preferences.map(({ event, email, sms }) => [
+        toNotificationKey(event),
+        { email, sms },
+      ]),
+    ),
   };
 };
