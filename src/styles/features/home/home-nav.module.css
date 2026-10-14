@@ -203,16 +203,3 @@
 .burgerLineFirst {
   font-weight: 400;
 }
-
-/* mobile: a smaller Book now, before the account or menu button */
-@media (max-width: 900px) {
-  .right {
-    gap: 12px;
-  }
-
-  .bookNow {
-    order: -1;
-    padding: 8px 14px;
-    font-size: 10px;
-  }
-}

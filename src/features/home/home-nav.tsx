@@ -1,6 +1,7 @@
 import type { CSSProperties } from "react";
 import { Link } from "react-router";
 import { useIdentity } from "../../hooks/use-identity";
+import type { NavMenuItem } from "../../components/nav-menu/nav-menu";
 import { AccountAvatar, SiteMenu } from "../../components/site-menu/site-menu";
 import { getAssetUrl } from "../../utils/asset-url";
 import { joinClassNames } from "../../utils/class-names";
@@ -8,6 +9,16 @@ import { hexToRgba } from "./home-colours";
 import page from "../../styles/features/home/home-page.module.css";
 import styles from "../../styles/features/home/home-nav.module.css";
 import type { NavMorphState } from "./use-nav-morph";
+
+const BOOK_NOW: NavMenuItem[] = [
+  {
+    kind: "link",
+    key: "book-now",
+    label: "Book now",
+    to: "/search",
+    isPrimary: true,
+  },
+];
 
 interface HomeNavProps {
   morph: NavMorphState;
@@ -82,7 +93,11 @@ export const HomeNav = ({ morph, loggedIn }: HomeNavProps) => {
             </Link>
           )}
           {loggedIn ? (
-            <SiteMenu isSignedIn className={styles.account}>
+            <SiteMenu
+              isSignedIn
+              className={styles.account}
+              extraItems={BOOK_NOW}
+            >
               <AccountAvatar
                 initials={identity?.initials ?? ""}
                 hasChevron={false}
@@ -93,6 +108,7 @@ export const HomeNav = ({ morph, loggedIn }: HomeNavProps) => {
             <SiteMenu
               isSignedIn={false}
               className={joinClassNames(page.mqMob, styles.burger)}
+              extraItems={BOOK_NOW}
             >
               <span
                 className={joinClassNames(
@@ -103,7 +119,10 @@ export const HomeNav = ({ morph, loggedIn }: HomeNavProps) => {
               <span className={styles.burgerLine}></span>
             </SiteMenu>
           )}
-          <Link to="/search" className={styles.bookNow}>
+          <Link
+            to="/search"
+            className={joinClassNames(page.mqDesk, styles.bookNow)}
+          >
             Book now
           </Link>
         </div>

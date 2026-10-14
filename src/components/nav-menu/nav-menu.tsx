@@ -11,6 +11,8 @@ export type NavMenuItem =
       label: string;
       to: string;
       isCurrent?: boolean;
+      /** A filled call-to-action row, e.g. Book now. */
+      isPrimary?: boolean;
       dataTab?: string;
       onClick?: (event: MouseEvent) => void;
     }
@@ -194,6 +196,7 @@ export const NavMenu = ({
 
         const index = focusIndex++;
         const isCurrent = item.kind === "link" && !!item.isCurrent;
+        const isPrimary = item.kind === "link" && !!item.isPrimary;
 
         const rowProps = {
           role: "menuitem",
@@ -204,6 +207,7 @@ export const NavMenu = ({
           className: [
             styles.row,
             isCurrent && styles.current,
+            isPrimary && styles.primary,
             activeIndex === index && styles.active,
           ]
             .filter(Boolean)

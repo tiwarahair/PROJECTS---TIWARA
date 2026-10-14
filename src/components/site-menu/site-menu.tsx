@@ -93,6 +93,8 @@ interface SiteMenuProps {
   loginHref?: string;
   /** The trigger button's class; defaults to the avatar-and-chevron button. */
   className?: string;
+  /** Rows added at the foot of the menu, e.g. Home's Book now. */
+  extraItems?: NavMenuItem[];
   /** The trigger's contents: an AccountAvatar when signed in, burger lines when not. */
   children: ReactNode;
 }
@@ -105,6 +107,7 @@ export const SiteMenu = ({
   isSignedIn,
   loginHref = "/login",
   className = styles.accountButton,
+  extraItems = [],
   children,
 }: SiteMenuProps) => {
   const identity = useIdentity();
@@ -240,7 +243,11 @@ export const SiteMenu = ({
               />
             )
           }
-          items={[...siteItems, ...(isSignedIn ? accountItems : guestItems)]}
+          items={[
+            ...siteItems,
+            ...(isSignedIn ? accountItems : guestItems),
+            ...extraItems,
+          ]}
           pinned={menu.pinned}
           onClose={close}
         />
