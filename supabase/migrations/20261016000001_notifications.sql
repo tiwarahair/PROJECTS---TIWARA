@@ -2,7 +2,9 @@
 -- renders the template and sends it. Failed sends retry with backoff, then stop as 'failed'.
 create table public.notifications (
   id uuid primary key default gen_random_uuid(),
-  user_id uuid references public.profiles (id) on delete set null,
+  -- a deleted account takes its emails with it, sent or not; queue anything meant to arrive after the deletion
+  -- (e.g. "your account was deleted") without a user_id
+  user_id uuid references public.profiles (id) on delete cascade,
   channel text not null check (channel in ('email', 'sms')),
   to_address text not null,
   template text not null,

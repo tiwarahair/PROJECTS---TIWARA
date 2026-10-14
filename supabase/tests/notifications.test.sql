@@ -1,5 +1,5 @@
 begin;
-select plan(25);
+select plan(27);
 
 -- Grants: clients never touch the outbox or its functions.
 select ok(
@@ -172,6 +172,29 @@ select results_eq(
   $$select status, last_error from public.notifications where id = current_setting('test.stuck')::uuid$$,
   $$values ('failed', 'sender stopped before finishing')$$,
   'an abandoned last attempt is marked failed'
+);
+
+-- Deleting an account deletes its emails; emails queued without a user stay.
+insert into auth.users (id, instance_id, aud, role, email, raw_user_meta_data, raw_app_meta_data)
+values (
+  'b1111111-1111-1111-1111-111111111111', '00000000-0000-0000-0000-000000000000', 'authenticated', 'authenticated',
+  'leaving@outbox.test',
+  '{"account_type": "client", "first_name": "Lea", "last_name": "Ving", "phone": "07700900789", "terms_version": "2026-10"}',
+  '{}'
+);
+select public.queue_email('leaving@outbox.test', 'tax_details_updated', '{}', 'b1111111-1111-1111-1111-111111111111');
+select public.queue_email('goodbye@outbox.test', 'tax_details_updated', '{}');
+
+delete from auth.users where id = 'b1111111-1111-1111-1111-111111111111';
+
+select is_empty(
+  $$select 1 from public.notifications where to_address = 'leaving@outbox.test'$$,
+  'deleting an account deletes its emails'
+);
+
+select isnt_empty(
+  $$select 1 from public.notifications where to_address = 'goodbye@outbox.test'$$,
+  'emails queued without a user are kept'
 );
 
 select * from finish();
