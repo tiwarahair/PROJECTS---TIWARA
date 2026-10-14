@@ -1129,6 +1129,7 @@ export type Database = {
     };
     Functions: {
       become_stylist: { Args: { details: Json }; Returns: undefined };
+      booking_fee_pence: { Args: { price_pence: number }; Returns: number };
       change_slug: { Args: { new_slug: string }; Returns: string };
       claim_notifications: {
         Args: { batch_size?: number };
@@ -1164,6 +1165,17 @@ export type Database = {
         Returns: string[];
       };
       get_due_closures: { Args: Record<PropertyKey, never>; Returns: string[] };
+      get_next_start: {
+        Args: {
+          minutes: number;
+          on_date: string;
+          target: string;
+          time_from: string;
+          time_to: string;
+        };
+        Returns: string;
+      };
+      get_stylist_profile: { Args: { lookup: string }; Returns: Json };
       get_unique_slug: { Args: { business_name: string }; Returns: string };
       has_recent_second_factor: {
         Args: Record<PropertyKey, never>;
@@ -1218,6 +1230,40 @@ export type Database = {
       refresh_go_live: { Args: { target: string }; Returns: undefined };
       reopen_business: { Args: Record<PropertyKey, never>; Returns: undefined };
       resolve_slug: { Args: { lookup: string }; Returns: string };
+      search_stylists: {
+        Args: {
+          lat?: number;
+          lng?: number;
+          max_price_pence?: number;
+          on_date?: string;
+          page?: number;
+          page_size?: number;
+          radius_miles?: number;
+          search_text?: string;
+          service_group?: string;
+          service_type?: string;
+          sort?: string;
+          time_from?: string;
+          time_to?: string;
+          venues?: string[];
+        };
+        Returns: {
+          area_label: string;
+          avatar_path: string;
+          business_name: string;
+          business_type: string;
+          cover_path: string;
+          distance_miles: number;
+          from_pence: number;
+          id: string;
+          matches: Json;
+          next_start: string;
+          slug: string;
+          total_count: number;
+          travel_radius_miles: number;
+        }[];
+      };
+      service_from_pence: { Args: { target: string }; Returns: number };
       slugify: { Args: { value: string }; Returns: string };
     };
     Enums: {
