@@ -151,7 +151,7 @@ export const getStartState = (
     state.form = {
       ...state.form,
       ...(isPro
-        ? { email: "amara@tiwarashouse.co.uk", first: "Amara", last: "Okonkwo" }
+        ? { email: "amara@tiwarashouse.com", first: "Amara", last: "Okonkwo" }
         : { email: "ama@example.com", first: "Ama", last: "Mensah" }),
     };
 

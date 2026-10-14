@@ -1,6 +1,7 @@
 import { useLayoutEffect } from "react";
 import { Link } from "react-router";
 import { getAssetUrl } from "../../utils/asset-url";
+import { SUPPORT_EMAIL } from "../../utils/support";
 import "../../styles/features/email-change-notice/email-change-notice-page-global.module.css";
 import styles from "../../styles/features/email-change-notice/email-change-notice.module.css";
 
@@ -24,7 +25,7 @@ export const EmailChangeNoticePage = () => {
         <div className={styles.meta}>
           <div>
             <strong className={styles.metaLabel}>From:</strong>
-            {" Tiwára's House <hello@tiwarashouse.co.uk>"}
+            {` Tiwára's House <${SUPPORT_EMAIL}>`}
           </div>
           <div>
             <strong className={styles.metaLabel}>To:</strong>

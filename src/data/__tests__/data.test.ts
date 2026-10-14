@@ -72,8 +72,16 @@ describe.skipIf(!hasPrototype)(
     afterAll(() => vi.useRealTimers());
 
     it("datasets are identical", () => {
+      // the live domain is .com; the prototype used .co.uk
       expect(data.stylists).toEqual(
-        renameKeys(toAssetPaths(toPlain(prototypeData.stylists)), STYLIST_KEYS),
+        JSON.parse(
+          JSON.stringify(
+            renameKeys(
+              toAssetPaths(toPlain(prototypeData.stylists)),
+              STYLIST_KEYS,
+            ),
+          ).replaceAll("tiwarashouse.co.uk", "tiwarashouse.com"),
+        ),
       );
 
       expect(data.reviews).toEqual(toPlain(prototypeData.reviews));

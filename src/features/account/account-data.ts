@@ -91,7 +91,7 @@ export const LEGACY_TABS: Record<string, string> = {
 };
 
 // demo: emails another account already uses
-export const TAKEN_EMAILS = ["kemi.a@icloud.com", "amara@tiwarashouse.co.uk"];
+export const TAKEN_EMAILS = ["kemi.a@icloud.com", "amara@tiwarashouse.com"];
 
 export const SEED_PROFILE = {
   first: "Nia",

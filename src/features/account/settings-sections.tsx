@@ -193,7 +193,7 @@ export const CommunicationSection = ({
 }: {
   account: AccountController;
 }) => {
-  const syncUrl = `webcal://tiwarashouse.co.uk/cal/${state.sync}.ics`;
+  const syncUrl = `webcal://tiwarashouse.com/cal/${state.sync}.ics`;
 
   return (
     <section data-screen-label="Account: Communication">

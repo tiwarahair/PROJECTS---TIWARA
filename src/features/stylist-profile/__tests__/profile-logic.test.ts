@@ -91,6 +91,6 @@ describe("profile facts", () => {
     );
 
     expect(facts.hasPayChip).toBe(stylist.policies.mode !== "none");
-    expect(facts.mailto).toBe("mailto:tiwarashouse@tiwarashouse.co.uk");
+    expect(facts.mailto).toBe("mailto:tiwarashouse@tiwarashouse.com");
   });
 });

@@ -139,7 +139,7 @@ export const ProfilePage = ({
         {field("Website", profile.site, (site) => view.setProfile({ site }), {
           type: "url",
           inputMode: "url",
-          placeholder: "tiwarashouse.co.uk",
+          placeholder: "tiwarashouse.com",
           autoComplete: "url",
         })}
         {field(

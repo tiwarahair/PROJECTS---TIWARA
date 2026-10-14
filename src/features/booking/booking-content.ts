@@ -1,6 +1,7 @@
 // Booking copy and fixed content: the Privacy / Terms sheets, the size guide, policy sentences and the
 // AI preview photo pool.
 import type { PolicyMode } from "../../types/policy";
+import { SUPPORT_EMAIL } from "../../utils/support";
 
 interface LegalDocumentSection {
   title: string;
@@ -28,7 +29,8 @@ export const getPrivacySections = (
   },
   {
     title: "Your rights",
-    body: "You can ask for a copy of your data, correct it or delete it by emailing privacy@tiwarashouse.co.uk.",
+    // TO DO: add a privacy email
+    body: `You can ask for a copy of your data, correct it or delete it by emailing ${SUPPORT_EMAIL}.`,
   },
 ];
 

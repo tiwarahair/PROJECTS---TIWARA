@@ -46,7 +46,7 @@ const getBaseBusiness = (): BusinessValue => ({
     basePostcode: "M14 5AJ",
     radius: "10",
     phone: "07700 900418",
-    email: "hello@tiwarashouse.co.uk",
+    email: "info@tiwarashouse.com",
     vat: "",
   },
 });

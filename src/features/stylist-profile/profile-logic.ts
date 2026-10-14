@@ -227,7 +227,7 @@ export const getProfileFacts = ({
     hasPayChip: mode !== "none",
     cancelChip: `Free cancellation up to ${freeWindowHours}h`,
     cancelHours: freeWindowHours,
-    mailto: `mailto:${handle}@tiwarashouse.co.uk`,
+    mailto: `mailto:${handle}@tiwarashouse.com`,
     site: site || "",
     siteHref: getSiteHref(site),
   };

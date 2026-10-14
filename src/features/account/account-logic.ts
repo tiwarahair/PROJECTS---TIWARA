@@ -299,7 +299,7 @@ export const getCalendarFile = (
     "VERSION:2.0",
     "PRODID:-//Tiwaras House//Bookings//EN",
     "BEGIN:VEVENT",
-    `UID:${booking.id}@tiwarashouse.co.uk`,
+    `UID:${booking.id}@tiwarashouse.com`,
     `DTSTAMP:${format(Date.now())}`,
     `DTSTART:${format(booking.at)}`,
     `DTEND:${format(booking.at + booking.minutes * 6e4)}`,
