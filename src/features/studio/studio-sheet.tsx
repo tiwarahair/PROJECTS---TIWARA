@@ -1,4 +1,5 @@
 import type { ReactNode } from "react";
+import { ChevronLeft, X } from "lucide-react";
 import { joinClassNames } from "../../utils/class-names";
 import { getOverlayAnimation } from "./studio-overlay";
 import type { BookingStep } from "./studio-types";
@@ -202,18 +203,7 @@ export const SheetFrame = ({
               onClick={frame.goBack}
               aria-label="Back"
             >
-              <svg
-                width="19"
-                height="19"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="2"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-              >
-                <path d="m15 18-6-6 6-6"></path>
-              </svg>
+              <ChevronLeft size={19} strokeWidth={2} />
             </button>
           )}
           <div className={styles.titleRow}>
@@ -236,18 +226,7 @@ export const SheetFrame = ({
             onClick={actions.requestCloseSheet}
             aria-label="Close"
           >
-            <svg
-              width="19"
-              height="19"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="2"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-            >
-              <path d="M18 6 6 18M6 6l12 12"></path>
-            </svg>
+            <X size={19} strokeWidth={2} />
           </button>
         </div>
         <div

@@ -1,4 +1,5 @@
 import type { CSSProperties } from "react";
+import { Clock, Lock, Pencil, Plus, Trash, X } from "lucide-react";
 import { joinClassNames } from "../../utils/class-names";
 import type { BookingsView } from "./bookings-view";
 import { dayInfo, hhmm, timeToMinutes } from "./studio-format";
@@ -6,21 +7,6 @@ import { getDialogPlacement, getOverlayAnimation } from "./studio-overlay";
 import type { StudioController } from "./use-studio";
 import overlay from "../../styles/features/studio/studio-overlay.module.css";
 import styles from "../../styles/features/studio/bookings-overlays.module.css";
-
-const CloseIcon = () => (
-  <svg
-    width="19"
-    height="19"
-    viewBox="0 0 24 24"
-    fill="none"
-    stroke="currentColor"
-    strokeWidth="2"
-    strokeLinecap="round"
-    strokeLinejoin="round"
-  >
-    <path d="M18 6 6 18M6 6l12 12"></path>
-  </svg>
-);
 
 export const FilterSheet = ({
   studio,
@@ -55,7 +41,7 @@ export const FilterSheet = ({
             onClick={view.closeFilter}
             aria-label="Close"
           >
-            <CloseIcon />
+            <X size={19} strokeWidth={2} />
           </button>
         </div>
         <div className={styles.sections}>
@@ -160,18 +146,7 @@ export const SlotPopover = ({ studio }: { studio: StudioController }) => {
                 if (pop.block) actions.editBlock(pop.block);
               }}
             >
-              <svg
-                width="16"
-                height="16"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="1.7"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-              >
-                <path d="M17 3a2.8 2.8 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5z"></path>
-              </svg>
+              <Pencil size={16} strokeWidth={1.7} />
               Edit
             </button>
             <button
@@ -182,18 +157,7 @@ export const SlotPopover = ({ studio }: { studio: StudioController }) => {
                 if (pop.block) actions.removeBlock(pop.block);
               }}
             >
-              <svg
-                width="16"
-                height="16"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="1.7"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-              >
-                <path d="M3 6h18M8 6V4h8v2M6 6l1 14h10l1-14"></path>
-              </svg>
+              <Trash size={16} strokeWidth={1.7} />
               Remove
             </button>
           </>
@@ -207,33 +171,11 @@ export const SlotPopover = ({ studio }: { studio: StudioController }) => {
               )}
             </div>
             <button className={styles.popItem} onClick={book}>
-              <svg
-                width="16"
-                height="16"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="1.7"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-              >
-                <path d="M12 5v14M5 12h14"></path>
-              </svg>
+              <Plus size={16} strokeWidth={1.7} />
               New booking
             </button>
             <button className={styles.popItem} onClick={block}>
-              <svg
-                width="16"
-                height="16"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="1.7"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-              >
-                <path d="M3 11h18v11H3zM7 11V7a5 5 0 0 1 10 0v4"></path>
-              </svg>
+              <Lock size={16} strokeWidth={1.7} />
               Block time
             </button>
           </>
@@ -336,24 +278,17 @@ export const QuickActions = ({
             </div>
           </div>
           <button className={styles.close} onClick={close} aria-label="Close">
-            <CloseIcon />
+            <X size={19} strokeWidth={2} />
           </button>
         </div>
         <div>
           <button className={styles.quickItem} onClick={add}>
-            <svg
+            <Plus
               className={styles.noShrink}
-              width="17"
-              height="17"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="var(--text-primary)"
-              strokeWidth="1.7"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-            >
-              <path d="M12 5v14M5 12h14"></path>
-            </svg>
+              size={17}
+              strokeWidth={1.7}
+              color="var(--text-primary)"
+            />
             <span className={styles.flex1}>
               <span className={styles.quickLabel}>Add appointment</span>
               <span className={styles.quickSub}>
@@ -364,20 +299,12 @@ export const QuickActions = ({
             </span>
           </button>
           <button className={styles.quickItem} onClick={block}>
-            <svg
+            <Clock
               className={styles.noShrink}
-              width="17"
-              height="17"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="var(--text-primary)"
-              strokeWidth="1.7"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-            >
-              <circle cx="12" cy="12" r="9"></circle>
-              <path d="M12 7v5l3 3"></path>
-            </svg>
+              size={17}
+              strokeWidth={1.7}
+              color="var(--text-primary)"
+            />
             <span className={styles.flex1}>
               <span className={styles.quickLabel}>Block time</span>
               <span className={styles.quickSub}>{getBlockSubtitle()}</span>

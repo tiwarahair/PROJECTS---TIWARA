@@ -15,8 +15,6 @@ import { hasTwoFactor } from "./studio-model";
 import { fromPolicy } from "./studio-settings-records";
 import type { StudioController } from "./use-studio";
 
-export type { SettingsIcon } from "./settings-nav-view";
-
 export const getSettingsView = (
   studio: StudioController,
   navigate: (to: string) => void,

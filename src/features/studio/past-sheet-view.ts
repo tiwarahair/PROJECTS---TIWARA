@@ -167,7 +167,7 @@ export const getPastSheetView = (studio: StudioController) => {
   const tone = PAST_TONE[row.status] ?? {
     background: "",
     color: "",
-    icon: "",
+    icon: null,
     meta: "",
   };
 

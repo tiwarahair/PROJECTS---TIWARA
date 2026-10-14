@@ -1,6 +1,8 @@
 // Studio → Clients values: the list, the profile and the add / edit sheet.
 import type { ChangeEvent, MouseEvent } from "react";
-import { PAST_TONE } from "./studio-data";
+import { Ban, Trash } from "lucide-react";
+import type { LucideIcon } from "lucide-react";
+import { CONTACT_ICONS, PAST_TONE } from "./studio-data";
 import {
   dateLabel,
   getAvatarSrc,
@@ -24,12 +26,6 @@ import type {
 import type { StudioController } from "./use-studio";
 
 const WARN = "#b5541f";
-
-const CONTACT_ICONS = {
-  call: "M22 16.9v3a2 2 0 0 1-2.2 2 19.8 19.8 0 0 1-8.6-3.1 19.5 19.5 0 0 1-6-6A19.8 19.8 0 0 1 2.1 4.2 2 2 0 0 1 4.1 2h3a2 2 0 0 1 2 1.7c.1.9.4 1.8.7 2.7a2 2 0 0 1-.5 2.1L8 9.8a16 16 0 0 0 6 6l1.3-1.3a2 2 0 0 1 2.1-.4c.9.3 1.8.6 2.7.7a2 2 0 0 1 1.7 2z",
-  text: "M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z",
-  mail: "M4 4h16a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2zM22 6l-10 7L2 6",
-};
 
 /** A client's bookings, past visits and money. */
 const getClientStats = (
@@ -470,7 +466,7 @@ export const getClientsView = (studio: StudioController) => {
         key: string;
         label: string;
         href: string;
-        iconPath: string;
+        icon: LucideIcon;
       }[];
     }[] = [];
 
@@ -484,13 +480,13 @@ export const getClientsView = (studio: StudioController) => {
             key: "c",
             label: `Call ${first}`,
             href: `tel:${phone}`,
-            iconPath: CONTACT_ICONS.call,
+            icon: CONTACT_ICONS.call,
           },
           {
             key: "t",
             label: `Text ${first}`,
             href: `sms:${phone}`,
-            iconPath: CONTACT_ICONS.text,
+            icon: CONTACT_ICONS.text,
           },
         ],
       });
@@ -505,7 +501,7 @@ export const getClientsView = (studio: StudioController) => {
             key: "e",
             label: `Email ${first}`,
             href: `mailto:${client.email}`,
-            iconPath: CONTACT_ICONS.mail,
+            icon: CONTACT_ICONS.mail,
           },
         ],
       });
@@ -736,13 +732,12 @@ export const getClientsView = (studio: StudioController) => {
         items: [
           {
             label: selected.blocked ? "Unblock" : "Block from online booking",
-            iconPath:
-              "M4.9 4.9l14.2 14.2M12 22a10 10 0 1 0 0-20 10 10 0 0 0 0 20z",
+            icon: Ban,
             run: () => block(selected),
           },
           {
             label: "Delete client",
-            iconPath: "M3 6h18M8 6V4h8v2M19 6l-1 14H6L5 6",
+            icon: Trash,
             danger: true,
             run: () => remove(selected),
           },

@@ -1,5 +1,14 @@
 // The booking sheet's values and actions: the status menu, cancel / no-show / checkout, reschedule, payment.
 import type { ChangeEvent, MouseEvent } from "react";
+import {
+  Check,
+  CreditCard,
+  Link,
+  Send,
+  TriangleAlert,
+  Undo,
+  X,
+} from "lucide-react";
 import type {
   CheckoutBooking,
   PaymentMode,
@@ -295,19 +304,12 @@ export const getBookingSheetView = (studio: StudioController) => {
   const fee = Math.round((booking.price * 0.015 + 0.5) * 100) / 100;
 
   // ---- the status menu ----
-  const items: {
-    label: string;
-    iconPath: string;
-    subtitle?: string;
-    disabled?: boolean;
-    danger?: boolean;
-    run: () => void;
-  }[] = [];
+  const items: ActionItem[] = [];
 
   if (booking.awaiting) {
     items.push({
       label: "Confirmed",
-      iconPath: "M20 6 9 17l-5-5",
+      icon: Check,
       subtitle: "Confirm without protection",
       run: () =>
         setStatus(booking.id, "confirmed", "Marked as confirmed", {
@@ -318,7 +320,7 @@ export const getBookingSheetView = (studio: StudioController) => {
 
     items.push({
       label: booking.canResend ? "Resend payment link" : "No resends left",
-      iconPath: "m22 2-7 20-4-9-9-4Z",
+      icon: Send,
       disabled: !booking.canResend,
       run: () => {
         const count = (booking.resends || 0) + 1;
@@ -350,7 +352,7 @@ export const getBookingSheetView = (studio: StudioController) => {
 
     items.push({
       label: "Cancel",
-      iconPath: "M18 6 6 18M6 6l12 12",
+      icon: X,
       danger: true,
       run: () =>
         setState({
@@ -363,7 +365,7 @@ export const getBookingSheetView = (studio: StudioController) => {
   } else if (booking.autoX) {
     items.push({
       label: "Send a new link",
-      iconPath: "m22 2-7 20-4-9-9-4Z",
+      icon: Send,
       subtitle: "Starts a fresh 48 hrs",
       run: () => {
         const sentAt = Date.now();
@@ -388,7 +390,7 @@ export const getBookingSheetView = (studio: StudioController) => {
   } else if (booking.status !== "arrived") {
     items.push({
       label: "Arrived",
-      iconPath: "M20 6 9 17l-5-5",
+      icon: Check,
       disabled: !booking.canArrive,
       subtitle: getOnTheDaySubtitle(
         booking.canArrive,
@@ -400,8 +402,7 @@ export const getBookingSheetView = (studio: StudioController) => {
 
     items.push({
       label: "No-show",
-      iconPath:
-        "M12 9v4M12 17h.01M10.3 3.9 1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0Z",
+      icon: TriangleAlert,
       disabled: !booking.canNoShow,
       danger: true,
       subtitle: getOnTheDaySubtitle(
@@ -414,7 +415,7 @@ export const getBookingSheetView = (studio: StudioController) => {
 
     items.push({
       label: "Cancel",
-      iconPath: "M18 6 6 18M6 6l12 12",
+      icon: X,
       danger: true,
       run: () =>
         setState({
@@ -427,14 +428,14 @@ export const getBookingSheetView = (studio: StudioController) => {
   } else {
     items.push({
       label: "Completed",
-      iconPath: "M2 7h20v12H2zM2 11h20",
+      icon: CreditCard,
       subtitle: due > 0 ? `Collect £${due}` : "Nothing left to collect",
       run: () => setState({ bookingStep: "checkout", checkoutMethod: null }),
     });
 
     items.push({
       label: "Confirmed",
-      iconPath: "M3 7v6h6M21 17a9 9 0 0 0-15-6.7L3 13",
+      icon: Undo,
       subtitle: "Undo arrived",
       run: () => setStatus(booking.id, "confirmed", "Back to confirmed"),
     });
@@ -798,8 +799,7 @@ export const getBookingSheetView = (studio: StudioController) => {
         ? [
             {
               label: "Copy guest management link",
-              iconPath:
-                "M10 13a5 5 0 0 0 7.5.5l3-3a5 5 0 0 0-7-7l-1.7 1.7M14 11a5 5 0 0 0-7.5-.5l-3 3a5 5 0 0 0 7 7l1.7-1.7",
+              icon: Link,
               run: () => {
                 copyText(`tiwaras.house/manage/${booking.id}`);
                 showToast(`Guest link copied for ${booking.firstName}`);
@@ -815,7 +815,7 @@ export const getBookingSheetView = (studio: StudioController) => {
         items: guest.concat([
           {
             label: "Reschedule",
-            iconPath: "M3 7v6h6M21 17a9 9 0 0 0-15-6.7L3 13",
+            icon: Undo,
             run: () =>
               setState({
                 bookingStep: "resched",
@@ -827,7 +827,7 @@ export const getBookingSheetView = (studio: StudioController) => {
           },
           {
             label: "Cancel",
-            iconPath: "M18 6 6 18M6 6l12 12",
+            icon: X,
             danger: true,
             run: () =>
               setState({
@@ -840,8 +840,7 @@ export const getBookingSheetView = (studio: StudioController) => {
           },
           {
             label: "No-show",
-            iconPath:
-              "M12 9v4M12 17h.01M10.3 3.9 1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0Z",
+            icon: TriangleAlert,
             danger: true,
             run: () => {
               if (booking.canNoShow)

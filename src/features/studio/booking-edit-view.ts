@@ -243,10 +243,10 @@ export const getEditServiceView = (
           subtitle: `+£${price * quantity}${quantity > 1 ? ` · ×${quantity}` : ""}`,
           anchor,
           items: [
-            { label: "Edit", iconPath: ICONS.edit, run: openEdit },
+            { label: "Edit", icon: ICONS.edit, run: openEdit },
             {
               label: "Remove",
-              iconPath: ICONS.trash,
+              icon: ICONS.trash,
               danger: true,
               run: () =>
                 patchServiceEdit({

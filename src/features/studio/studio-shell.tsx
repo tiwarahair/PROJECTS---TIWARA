@@ -1,4 +1,22 @@
 import type { CSSProperties } from "react";
+import {
+  Bell,
+  Calendar,
+  Check,
+  ChevronDown,
+  ChevronRight,
+  Ellipsis,
+  House,
+  Link2,
+  PanelLeft,
+  Plus,
+  PoundSterling,
+  Scissors,
+  Settings,
+  Users,
+  X,
+} from "lucide-react";
+import type { LucideIcon } from "lucide-react";
 import { Link } from "react-router";
 import { Avatar } from "../../components/ds/avatar";
 import { getAssetUrl } from "../../utils/asset-url";
@@ -15,98 +33,29 @@ import type { StudioController } from "./use-studio";
 import styles from "../../styles/features/studio/studio-shell.module.css";
 import { SHORT_MONTHS, SHORT_WEEKDAYS } from "../../utils/dates";
 
-type NavIconName =
-  "home" | "cal" | "scis" | "pound" | "gear" | "people" | "more";
-
 interface NavDefinition {
   id: StudioTab;
   label: string;
-  icon: NavIconName;
+  icon: LucideIcon;
 }
-
-const STROKE = {
-  fill: "none",
-  stroke: "currentColor",
-  strokeWidth: "1.8",
-  strokeLinecap: "round",
-  strokeLinejoin: "round",
-} as const;
-
-const NavIcon = ({ icon }: { icon: NavIconName }) => {
-  if (icon === "more")
-    return (
-      <svg width="19" height="19" viewBox="0 0 24 24" fill="currentColor">
-        <circle cx="5" cy="12" r="1.9"></circle>
-        <circle cx="12" cy="12" r="1.9"></circle>
-        <circle cx="19" cy="12" r="1.9"></circle>
-      </svg>
-    );
-
-  return (
-    <svg width="19" height="19" viewBox="0 0 24 24" {...STROKE}>
-      {icon === "home" && (
-        <>
-          <path d="M15 21v-8a1 1 0 0 0-1-1h-4a1 1 0 0 0-1 1v8"></path>
-          <path d="M3 10a2 2 0 0 1 .709-1.528l7-5.999a2 2 0 0 1 2.582 0l7 5.999A2 2 0 0 1 21 10v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path>
-        </>
-      )}
-      {icon === "cal" && (
-        <>
-          <path d="M8 2v4"></path>
-          <path d="M16 2v4"></path>
-          <rect width="18" height="18" x="3" y="4" rx="2"></rect>
-          <path d="M3 10h18"></path>
-        </>
-      )}
-      {icon === "scis" && (
-        <>
-          <path d="M20 4 8.12 15.88"></path>
-          <path d="M14.47 14.48 20 20"></path>
-          <path d="M8.12 8.12 12 12"></path>
-          <circle cx="6" cy="6" r="3"></circle>
-          <circle cx="6" cy="18" r="3"></circle>
-        </>
-      )}
-      {icon === "pound" && (
-        <>
-          <path d="M18 7c0-5.333-8-5.333-8 0"></path>
-          <path d="M10 7v14"></path>
-          <path d="M6 21h12"></path>
-          <path d="M6 13h10"></path>
-        </>
-      )}
-      {icon === "gear" && (
-        <>
-          <path d="M9.671 4.136a2.34 2.34 0 0 1 4.659 0 2.34 2.34 0 0 0 3.319 1.915 2.34 2.34 0 0 1 2.33 4.033 2.34 2.34 0 0 0 0 3.831 2.34 2.34 0 0 1-2.33 4.033 2.34 2.34 0 0 0-3.319 1.915 2.34 2.34 0 0 1-4.659 0 2.34 2.34 0 0 0-3.32-1.915 2.34 2.34 0 0 1-2.33-4.033 2.34 2.34 0 0 0 0-3.831A2.34 2.34 0 0 1 6.35 6.051a2.34 2.34 0 0 0 3.319-1.915"></path>
-          <circle cx="12" cy="12" r="3"></circle>
-        </>
-      )}
-      {icon === "people" && (
-        <>
-          <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"></path>
-          <circle cx="9" cy="7" r="4"></circle>
-          <path d="M22 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"></path>
-        </>
-      )}
-    </svg>
-  );
-};
 
 /** The navigation entries and which one is current. */
 const getNavItems = (studio: StudioController) => {
   const { state, isWide, setState, actions } = studio;
 
   const navDefinitions: NavDefinition[] = [
-    { id: "home", label: "Home", icon: "home" },
-    { id: "bookings", label: "Bookings", icon: "cal" },
-    { id: "services", label: "Services", icon: "scis" },
-    { id: "earnings", label: "Earnings", icon: "pound" },
+    { id: "home", label: "Home", icon: House },
+    { id: "bookings", label: "Bookings", icon: Calendar },
+    { id: "services", label: "Services", icon: Scissors },
+    { id: "earnings", label: "Earnings", icon: PoundSterling },
     ...(isWide
       ? ([
-          { id: "clients", label: "Clients", icon: "people" },
-          { id: "settings", label: "Settings", icon: "gear" },
+          { id: "clients", label: "Clients", icon: Users },
+          { id: "settings", label: "Settings", icon: Settings },
         ] as NavDefinition[])
-      : ([{ id: "settings", label: "More", icon: "more" }] as NavDefinition[])),
+      : ([
+          { id: "settings", label: "More", icon: Ellipsis },
+        ] as NavDefinition[])),
   ];
 
   return navDefinitions.map((navDefinition) => ({
@@ -152,30 +101,29 @@ export const StudioSidebar = ({ studio }: { studio: StudioController }) => {
           onClick={() => setState({ sidebarOpen: !isOpen })}
           aria-label="Toggle sidebar"
         >
-          <svg width="18" height="18" viewBox="0 0 24 24" {...STROKE}>
-            <rect width="18" height="18" x="3" y="3" rx="2"></rect>
-            <path d="M9 3v18"></path>
-          </svg>
+          <PanelLeft size={18} strokeWidth={1.8} />
         </button>
       </div>
       <nav className={styles.nav}>
-        {getNavItems(studio).map(({ id, label, icon, isOn, onSelect }) => (
-          <button
-            key={id}
-            className={joinClassNames(
-              styles.navButton,
-              isOpen ? styles.navOpen : styles.navClosed,
-              isOn ? styles.navOn : styles.navOff,
-            )}
-            onClick={onSelect}
-            title={label}
-          >
-            <span className={styles.navIcon}>
-              <NavIcon icon={icon} />
-            </span>
-            {isOpen && <span className={styles.navLabel}>{label}</span>}
-          </button>
-        ))}
+        {getNavItems(studio).map(
+          ({ id, label, icon: NavItemIcon, isOn, onSelect }) => (
+            <button
+              key={id}
+              className={joinClassNames(
+                styles.navButton,
+                isOpen ? styles.navOpen : styles.navClosed,
+                isOn ? styles.navOn : styles.navOff,
+              )}
+              onClick={onSelect}
+              title={label}
+            >
+              <span className={styles.navIcon}>
+                <NavItemIcon size={19} strokeWidth={1.8} />
+              </span>
+              {isOpen && <span className={styles.navLabel}>{label}</span>}
+            </button>
+          ),
+        )}
       </nav>
       <div className={styles.spacer}></div>
       <button
@@ -254,16 +202,7 @@ export const StudioTopBar = ({ studio }: { studio: StudioController }) => {
         onClick={() => actions.openSheet("notif")}
         aria-label="Notifications"
       >
-        <svg
-          width="19"
-          height="19"
-          viewBox="0 0 24 24"
-          {...STROKE}
-          strokeWidth="1.7"
-        >
-          <path d="M18 8a6 6 0 0 0-12 0c0 7-3 9-3 9h18s-3-2-3-9"></path>
-          <path d="M13.7 21a2 2 0 0 1-3.4 0"></path>
-        </svg>
+        <Bell size={19} strokeWidth={1.7} />
         {hasUnread && <span className={styles.unreadDot}></span>}
       </button>
       {isWide && !(state.tab === "clients" && state.selectedClientId) && (
@@ -271,18 +210,7 @@ export const StudioTopBar = ({ studio }: { studio: StudioController }) => {
           className={styles.newBooking}
           onClick={() => actions.openSheet("add")}
         >
-          <svg
-            width="14"
-            height="14"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            strokeWidth="2.2"
-            strokeLinecap="round"
-          >
-            <path d="M12 5v14M5 12h14"></path>
-          </svg>{" "}
-          New booking
+          <Plus size={14} strokeWidth={2.2} /> New booking
         </button>
       )}
     </div>
@@ -291,18 +219,23 @@ export const StudioTopBar = ({ studio }: { studio: StudioController }) => {
 
 export const FooterNav = ({ studio }: { studio: StudioController }) => (
   <nav className={styles.footerNav}>
-    {getNavItems(studio).map(({ id, label, icon, isOn, onSelect }) => (
-      <button
-        key={id}
-        className={joinClassNames(styles.footerButton, isOn && styles.footerOn)}
-        onClick={onSelect}
-      >
-        <span className={styles.footerPill}>
-          <NavIcon icon={icon} />
-        </span>
-        <span className={styles.footerLabel}>{label}</span>
-      </button>
-    ))}
+    {getNavItems(studio).map(
+      ({ id, label, icon: NavItemIcon, isOn, onSelect }) => (
+        <button
+          key={id}
+          className={joinClassNames(
+            styles.footerButton,
+            isOn && styles.footerOn,
+          )}
+          onClick={onSelect}
+        >
+          <span className={styles.footerPill}>
+            <NavItemIcon size={19} strokeWidth={1.8} />
+          </span>
+          <span className={styles.footerLabel}>{label}</span>
+        </button>
+      ),
+    )}
   </nav>
 );
 
@@ -399,18 +332,7 @@ export const SetupCard = ({ studio }: { studio: StudioController }) => {
           onClick={() => setState({ setupMinimised: true })}
           aria-label="Minimise checklist"
         >
-          <svg
-            width="18"
-            height="18"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            strokeWidth="2"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-          >
-            <path d="m6 9 6 6 6-6"></path>
-          </svg>
+          <ChevronDown size={18} strokeWidth={2} />
         </button>
       </div>
       <div className={styles.progressTrack}>
@@ -429,19 +351,11 @@ export const SetupCard = ({ studio }: { studio: StudioController }) => {
                   isDone && state.lastDone === key && styles.tickPop,
                 )}
               >
-                <svg
+                <Check
                   className={styles.tickMark}
-                  width="11"
-                  height="11"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="3.2"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                >
-                  <path d="M20 6 9 17l-5-5"></path>
-                </svg>
+                  size={11}
+                  strokeWidth={3.2}
+                />
               </span>
               <span
                 className={joinClassNames(
@@ -452,19 +366,12 @@ export const SetupCard = ({ studio }: { studio: StudioController }) => {
                 <span className={styles.rowLabel}>{label}</span>
                 <span className={styles.rowSub}>{subtitle}</span>
               </span>
-              <svg
+              <ChevronRight
                 className={styles.noShrink}
-                width="15"
-                height="15"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="rgba(246,240,228,.55)"
-                strokeWidth="1.7"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-              >
-                <path d="m9 18 6-6-6-6"></path>
-              </svg>
+                size={15}
+                strokeWidth={1.7}
+                color="rgba(246,240,228,.55)"
+              />
             </button>
           );
         })}
@@ -486,37 +393,6 @@ export const SetupPill = ({ studio }: { studio: StudioController }) => (
   </button>
 );
 
-const LinkIcon = () => (
-  <svg
-    width="18"
-    height="18"
-    viewBox="0 0 24 24"
-    fill="none"
-    stroke="currentColor"
-    strokeWidth="1.9"
-    strokeLinecap="round"
-    strokeLinejoin="round"
-  >
-    <path d="M9 17H7A5 5 0 0 1 7 7h2"></path>
-    <path d="M15 7h2a5 5 0 1 1 0 10h-2"></path>
-    <line x1="8" x2="16" y1="12" y2="12"></line>
-  </svg>
-);
-
-const CloseIcon = () => (
-  <svg
-    width="15"
-    height="15"
-    viewBox="0 0 24 24"
-    fill="none"
-    stroke="currentColor"
-    strokeWidth="1.8"
-    strokeLinecap="round"
-  >
-    <path d="M18 6 6 18M6 6l12 12"></path>
-  </svg>
-);
-
 /** "Your booking link is ready to share" — the wide floating card, or (narrow) the Home banner's body. */
 export const LinkCardBody = ({ studio }: { studio: StudioController }) => {
   const { state, setState, actions } = studio;
@@ -525,7 +401,7 @@ export const LinkCardBody = ({ studio }: { studio: StudioController }) => {
     <>
       <div className={styles.cardHead}>
         <span className={styles.linkIcon}>
-          <LinkIcon />
+          <Link2 size={18} strokeWidth={1.9} />
         </span>
         <div className={styles.grow}>
           <div className={styles.linkTitle}>
@@ -540,7 +416,7 @@ export const LinkCardBody = ({ studio }: { studio: StudioController }) => {
           onClick={() => setState({ linkCard: false })}
           aria-label="Dismiss"
         >
-          <CloseIcon />
+          <X size={15} strokeWidth={1.8} />
         </button>
       </div>
       <div className={styles.linkUrl}>{getBookingLink(state)}</div>
@@ -603,17 +479,7 @@ export const Fab = ({ studio }: { studio: StudioController }) => {
 
   return (
     <button className={styles.fab} onClick={onAdd} aria-label={label}>
-      <svg
-        width="24"
-        height="24"
-        viewBox="0 0 24 24"
-        fill="none"
-        stroke="currentColor"
-        strokeWidth="2.2"
-        strokeLinecap="round"
-      >
-        <path d="M12 5v14M5 12h14"></path>
-      </svg>
+      <Plus size={24} strokeWidth={2.2} />
     </button>
   );
 };

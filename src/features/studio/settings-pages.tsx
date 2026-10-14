@@ -1,6 +1,7 @@
 import { ResponsiveImage } from "../../components/responsive-image/responsive-image";
 import { useRef } from "react";
 import type { CSSProperties } from "react";
+import { Camera, CirclePause, Minus, Plus, X } from "lucide-react";
 import { Avatar } from "../../components/ds/avatar";
 import { joinClassNames } from "../../utils/class-names";
 import type { SettingsView } from "./settings-view";
@@ -8,20 +9,6 @@ import { TIMES } from "./studio-data";
 import type { StudioController } from "./use-studio";
 import styles from "../../styles/features/studio/settings-pages.module.css";
 import { BookingLinkField } from "./booking-link-field";
-
-const PlusIcon = () => (
-  <svg
-    width="13"
-    height="13"
-    viewBox="0 0 24 24"
-    fill="none"
-    stroke="currentColor"
-    strokeWidth="2.2"
-    strokeLinecap="round"
-  >
-    <path d="M12 5v14M5 12h14"></path>
-  </svg>
-);
 
 /** Settings → Your profile. */
 export const ProfilePage = ({
@@ -103,19 +90,7 @@ export const ProfilePage = ({
             size={52}
           />
           <span className={styles.camera}>
-            <svg
-              width="11"
-              height="11"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="#fff"
-              strokeWidth="2.4"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-            >
-              <path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"></path>
-              <circle cx="12" cy="13" r="4"></circle>
-            </svg>
+            <Camera size={11} strokeWidth={2.4} color="#fff" />
           </span>
         </button>
       </div>
@@ -188,17 +163,7 @@ export const ProfilePage = ({
                   onClick={remove}
                   aria-label="Remove photo"
                 >
-                  <svg
-                    width="13"
-                    height="13"
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    stroke="currentColor"
-                    strokeWidth="2.4"
-                    strokeLinecap="round"
-                  >
-                    <path d="M18 6 6 18M6 6l12 12"></path>
-                  </svg>
+                  <X size={13} strokeWidth={2.4} />
                 </button>
               </div>
             ))}
@@ -207,17 +172,7 @@ export const ProfilePage = ({
                 className={styles.addPhotos}
                 onClick={() => portInput.current?.click()}
               >
-                <svg
-                  width="18"
-                  height="18"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="2"
-                  strokeLinecap="round"
-                >
-                  <path d="M12 5v14M5 12h14"></path>
-                </svg>
+                <Plus size={18} strokeWidth={2} />
                 Add photos
               </button>
             )}
@@ -293,19 +248,11 @@ export const AvailabilityPage = ({
               )}
             </div>
             <div className={styles.pauseBanner} role="status">
-              <svg
+              <CirclePause
                 className={styles.bannerIcon}
-                width="17"
-                height="17"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="1.8"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-              >
-                <path d="M10 15V9M14 15V9M12 22a10 10 0 1 0 0-20 10 10 0 0 0 0 20z"></path>
-              </svg>
+                size={17}
+                strokeWidth={1.8}
+              />
               {view.pauseBanner}
             </div>
             <div className={styles.seeLabel}>What clients see</div>
@@ -393,7 +340,7 @@ export const AvailabilityPage = ({
           </div>
         </div>
         <button className={styles.add} onClick={view.openBlock}>
-          <PlusIcon />
+          <Plus size={13} strokeWidth={2.2} />
           Add
         </button>
       </div>
@@ -431,7 +378,7 @@ export const AvailabilityPage = ({
           </div>
         </div>
         <button className={styles.add} onClick={view.openClosed}>
-          <PlusIcon />
+          <Plus size={13} strokeWidth={2.2} />
           Add
         </button>
       </div>
@@ -457,21 +404,6 @@ export const AvailabilityPage = ({
     </div>
   );
 };
-
-const StepIcon = ({ isPlus }: { isPlus: boolean }) => (
-  <svg
-    className={styles.blockSvg}
-    width="16"
-    height="16"
-    viewBox="0 0 24 24"
-    fill="none"
-    stroke="currentColor"
-    strokeWidth="2"
-    strokeLinecap="round"
-  >
-    <path d={isPlus ? "M12 5v14M5 12h14" : "M5 12h14"}></path>
-  </svg>
-);
 
 /** Settings → Booking rules: booking window, default extra time, travel buffer. */
 export const RulesPage = ({
@@ -548,7 +480,7 @@ export const RulesPage = ({
             onClick={view.rulesExtraDown}
             aria-label="Less extra time"
           >
-            <StepIcon isPlus={false} />
+            <Minus className={styles.blockSvg} size={16} strokeWidth={2} />
           </button>
           <div className={styles.stepValue}>{view.rulesExtra}</div>
           <button
@@ -559,7 +491,7 @@ export const RulesPage = ({
             onClick={view.rulesExtraUp}
             aria-label="More extra time"
           >
-            <StepIcon isPlus={true} />
+            <Plus className={styles.blockSvg} size={16} strokeWidth={2} />
           </button>
         </div>
       </div>
@@ -585,7 +517,7 @@ export const RulesPage = ({
               onClick={view.rulesTravelDown}
               aria-label="Less travel time"
             >
-              <StepIcon isPlus={false} />
+              <Minus className={styles.blockSvg} size={16} strokeWidth={2} />
             </button>
             <div className={styles.stepValue}>{view.rulesTravel}</div>
             <button
@@ -596,7 +528,7 @@ export const RulesPage = ({
               onClick={view.rulesTravelUp}
               aria-label="More travel time"
             >
-              <StepIcon isPlus={true} />
+              <Plus className={styles.blockSvg} size={16} strokeWidth={2} />
             </button>
           </div>
         </div>

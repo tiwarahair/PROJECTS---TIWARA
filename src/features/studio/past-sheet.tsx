@@ -1,6 +1,15 @@
 import type { CSSProperties } from "react";
+import {
+  ChevronRight,
+  Link,
+  Receipt,
+  Send,
+  TriangleAlert,
+  Undo,
+  Undo2,
+} from "lucide-react";
 import { joinClassNames } from "../../utils/class-names";
-import { ChevronRight, ContactLinks } from "./booking-sheet";
+import { ContactLinks } from "./booking-sheet";
 import { getPastCheckoutView } from "./past-sheet-view";
 import type { PastSheetView } from "./past-sheet-view";
 import { StudioCheckout } from "./studio-checkout";
@@ -11,54 +20,28 @@ import sheet from "../../styles/features/studio/studio-sheet.module.css";
 
 const asStyle = (values: Record<string, string>) => values as CSSProperties;
 
-const Icon = ({
-  iconPath,
-  size = 18,
-  stroke = "currentColor",
-  width = "1.7",
-  className,
-}: {
-  iconPath: string;
-  size?: number;
-  stroke?: string;
-  width?: string;
-  className?: string;
-}) => (
-  <svg
-    className={className}
-    width={size}
-    height={size}
-    viewBox="0 0 24 24"
-    fill="none"
-    stroke={stroke}
-    strokeWidth={width}
-    strokeLinecap="round"
-    strokeLinejoin="round"
-  >
-    <path d={iconPath}></path>
-  </svg>
-);
-
-const REFUND_ICON = "M9 14 4 9l5-5M4 9h11a5 5 0 0 1 0 10h-3";
-
 /** The status pill in the sheet header. */
-export const PastBadge = ({ view }: { view: PastSheetView }) => (
-  <span
-    className={styles.badge}
-    // the status tone comes from PAST_TONE at runtime
-    style={asStyle({
-      "--badge-bg": view.badgeBackground,
-      "--badge-color": view.badgeColor,
-    })}
-  >
-    <Icon iconPath={view.badgeIcon} size={11} width="2.6" />
-    {view.status}
-  </span>
-);
+export const PastBadge = ({ view }: { view: PastSheetView }) => {
+  const { badgeIcon: BadgeIcon } = view;
+
+  return (
+    <span
+      className={styles.badge}
+      // the status tone comes from PAST_TONE at runtime
+      style={asStyle({
+        "--badge-bg": view.badgeBackground,
+        "--badge-color": view.badgeColor,
+      })}
+    >
+      {BadgeIcon && <BadgeIcon size={11} strokeWidth={2.6} />}
+      {view.status}
+    </span>
+  );
+};
 
 const RefundTag = ({ label }: { label: string }) => (
   <span className={styles.tag}>
-    <Icon iconPath={REFUND_ICON} size={14} width="2" />
+    <Undo2 size={14} strokeWidth={2} />
     {label}
   </span>
 );
@@ -90,7 +73,14 @@ export const PastSheetBody = ({ view }: { view: PastSheetView }) => (
             hasEmail={view.hasEmail}
           />
         )}
-        {view.canOpen && <ChevronRight />}
+        {view.canOpen && (
+          <ChevronRight
+            className={bookingStyles.noShrink}
+            size={18}
+            strokeWidth={1.7}
+            color="var(--neutral-500)"
+          />
+        )}
       </div>
     </div>
     <div className={styles.service}>
@@ -110,10 +100,11 @@ export const PastSheetBody = ({ view }: { view: PastSheetView }) => (
     {view.feeUnpaid && (
       <div className={styles.unpaid} role="alert">
         <div className={styles.alertRow}>
-          <Icon
+          <TriangleAlert
             className={styles.alertIcon}
-            stroke="var(--accent-700)"
-            iconPath="M12 9v4M12 17h.01M10.3 3.9 1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0Z"
+            size={18}
+            strokeWidth={1.7}
+            color="var(--accent-700)"
           />
           <div className={styles.minWidth}>
             <div className={styles.unpaidTitle}>{view.feeUnpaidTitle}</div>
@@ -160,7 +151,7 @@ export const PastSheetBody = ({ view }: { view: PastSheetView }) => (
           </div>
         )}
         <button className={styles.act} onClick={view.action ?? undefined}>
-          <Icon iconPath="M3 7v6h6M21 17a9 9 0 0 0-15-6.7L3 13" size={14} />
+          <Undo size={14} strokeWidth={1.7} />
           {view.actionLabel}
         </button>
       </div>
@@ -168,10 +159,11 @@ export const PastSheetBody = ({ view }: { view: PastSheetView }) => (
     {view.hasAwait && (
       <div className={styles.awaiting}>
         <div className={styles.alertRow}>
-          <Icon
+          <Link
             className={styles.alertIcon}
-            stroke="var(--neutral-700)"
-            iconPath="M10 13a5 5 0 0 0 7.5.5l3-3a5 5 0 0 0-7-7l-1.7 1.7M14 11a5 5 0 0 0-7.5-.5l-3 3a5 5 0 0 0 7 7l1.7-1.7"
+            size={18}
+            strokeWidth={1.7}
+            color="var(--neutral-700)"
           />
           <div className={styles.minWidth}>
             <div className={styles.awaitingTitle}>
@@ -199,27 +191,21 @@ export const PastSheetBody = ({ view }: { view: PastSheetView }) => (
     {view.hasLinks && (
       <div className={styles.links}>
         <button className={styles.linkRow} onClick={view.viewReceipt}>
-          <Icon
-            stroke="var(--neutral-600)"
-            iconPath="M5 3h14v18l-3-2-2 2-2-2-2 2-2-2-3 2zM9 8h6M9 12h6"
-          />
+          <Receipt size={18} strokeWidth={1.7} color="var(--neutral-600)" />
           <span className={styles.linkLabel}>View receipt</span>
-          <Icon
+          <ChevronRight
             size={16}
-            stroke="var(--neutral-500)"
-            iconPath="m9 18 6-6-6-6"
+            strokeWidth={1.7}
+            color="var(--neutral-500)"
           />
         </button>
         <button className={styles.linkRow} onClick={view.resendReceipt}>
-          <Icon
-            stroke="var(--neutral-600)"
-            iconPath="M22 2 11 13M22 2l-7 20-4-9-9-4z"
-          />
+          <Send size={18} strokeWidth={1.7} color="var(--neutral-600)" />
           <span className={styles.linkLabel}>Resend receipt</span>
-          <Icon
+          <ChevronRight
             size={16}
-            stroke="var(--neutral-500)"
-            iconPath="m9 18 6-6-6-6"
+            strokeWidth={1.7}
+            color="var(--neutral-500)"
           />
         </button>
       </div>

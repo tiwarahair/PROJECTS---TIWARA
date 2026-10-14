@@ -455,12 +455,12 @@ export const createServiceActions = (
       items: [
         {
           label: "Edit",
-          iconPath: ICONS.edit,
+          icon: ICONS.edit,
           run: () => openWizard("edit", service),
         },
         {
           label: "Duplicate",
-          iconPath: ICONS.copy,
+          icon: ICONS.copy,
           run: () => {
             const services = getState().services;
             const index = services.findIndex(({ id }) => id === service.id);
@@ -483,13 +483,13 @@ export const createServiceActions = (
         },
         {
           label: "Quick booking link",
-          iconPath: ICONS.link,
+          icon: ICONS.link,
           run: () => showToast(`Booking link for ${service.name} copied`),
         },
         isArchived
           ? {
               label: "Restore",
-              iconPath: ICONS.restore,
+              icon: ICONS.restore,
               run: () => {
                 setState(({ services }) => ({
                   services: services.map((item) =>
@@ -504,7 +504,7 @@ export const createServiceActions = (
             }
           : {
               label: "Archive",
-              iconPath: ICONS.archive,
+              icon: ICONS.archive,
               run: () => {
                 setState(({ services }) => ({
                   services: services.map((item) =>
@@ -519,7 +519,7 @@ export const createServiceActions = (
             },
         {
           label: "Delete",
-          iconPath: ICONS.trash,
+          icon: ICONS.trash,
           danger: true,
           run: () =>
             setState({
@@ -554,10 +554,10 @@ export const createServiceActions = (
       subtitle: formatAddon(addon),
       anchor: getAnchor(event),
       items: [
-        { label: "Edit", iconPath: ICONS.edit, run: () => openAddon(addon) },
+        { label: "Edit", icon: ICONS.edit, run: () => openAddon(addon) },
         {
           label: "Duplicate",
-          iconPath: ICONS.copy,
+          icon: ICONS.copy,
           run: () => {
             const addons = getState().addons;
             const index = addons.findIndex(({ id }) => id === addon.id);
@@ -576,7 +576,7 @@ export const createServiceActions = (
         isArchived
           ? {
               label: "Restore",
-              iconPath: ICONS.restore,
+              icon: ICONS.restore,
               run: () => {
                 setState(({ addons }) => ({
                   addons: addons.map((item) =>
@@ -589,7 +589,7 @@ export const createServiceActions = (
             }
           : {
               label: "Archive",
-              iconPath: ICONS.archive,
+              icon: ICONS.archive,
               run: () => {
                 setState(({ addons }) => ({
                   addons: addons.map((item) =>
@@ -604,7 +604,7 @@ export const createServiceActions = (
             },
         {
           label: "Delete",
-          iconPath: ICONS.trash,
+          icon: ICONS.trash,
           danger: true,
           run: () =>
             setState({

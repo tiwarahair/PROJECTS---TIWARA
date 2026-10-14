@@ -487,10 +487,10 @@ export const createStudioActions = (context: StudioContext) => {
       title: block.reason || "Blocked time",
       subtitle: `${block.day} · ${block.span}`,
       items: [
-        { label: "Edit", iconPath: ICONS.edit, run: () => editBlock(block) },
+        { label: "Edit", icon: ICONS.edit, run: () => editBlock(block) },
         {
           label: "Delete",
-          iconPath: ICONS.trash,
+          icon: ICONS.trash,
           danger: true,
           run: () => removeBlock(block),
         },

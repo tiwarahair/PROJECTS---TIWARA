@@ -1,3 +1,11 @@
+import {
+  Check,
+  ChevronRight,
+  CircleAlert,
+  EllipsisVertical,
+  Plus,
+  Search,
+} from "lucide-react";
 import { joinClassNames } from "../../utils/class-names";
 import type { AddonPicker } from "./addon-picker";
 import type { EditServiceView } from "./booking-edit-view";
@@ -6,26 +14,6 @@ import { CalendarToggle, MonthCalendar, getMonthNav } from "./sheets-simple";
 import { getMiniCalendarDays } from "./studio-format";
 import type { StudioController } from "./use-studio";
 import styles from "../../styles/features/studio/booking-steps.module.css";
-
-const PlusIcon = ({
-  size = "15",
-  strokeWidth = "1.9",
-}: {
-  size?: string;
-  strokeWidth?: string;
-}) => (
-  <svg
-    width={size}
-    height={size}
-    viewBox="0 0 24 24"
-    fill="none"
-    stroke="currentColor"
-    strokeWidth={strokeWidth}
-    strokeLinecap="round"
-  >
-    <path d="M12 5v14M5 12h14"></path>
-  </svg>
-);
 
 const SearchField = ({
   value,
@@ -37,19 +25,12 @@ const SearchField = ({
   placeholder: string;
 }) => (
   <label className={styles.search}>
-    <svg
+    <Search
       className={styles.searchIcon}
-      width="16"
-      height="16"
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="var(--text-secondary)"
-      strokeWidth="1.7"
-      strokeLinecap="round"
-    >
-      <circle cx="11" cy="11" r="7"></circle>
-      <path d="m20 20-3.5-3.5"></path>
-    </svg>
+      size={16}
+      strokeWidth={1.7}
+      color="var(--text-secondary)"
+    />
     <input
       className={styles.searchInput}
       value={value}
@@ -78,18 +59,7 @@ export const EditServiceStep = ({
       </span>
       <span className={styles.changeLink}>
         Change
-        <svg
-          width="16"
-          height="16"
-          viewBox="0 0 24 24"
-          fill="none"
-          stroke="currentColor"
-          strokeWidth="1.7"
-          strokeLinecap="round"
-          strokeLinejoin="round"
-        >
-          <path d="m9 18 6-6-6-6"></path>
-        </svg>
+        <ChevronRight size={16} strokeWidth={1.7} />
       </span>
     </button>
     <div className={styles.twoCols}>
@@ -143,20 +113,7 @@ export const EditServiceStep = ({
     {!!edit.clashText && (
       <>
         <div className={styles.clash}>
-          <svg
-            className={styles.iconTop}
-            width="15"
-            height="15"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            strokeWidth="1.7"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-          >
-            <circle cx="12" cy="12" r="9"></circle>
-            <path d="M12 8v4M12 16h.01"></path>
-          </svg>
+          <CircleAlert className={styles.iconTop} size={15} strokeWidth={1.7} />
           <span>{edit.clashText}</span>
         </div>
         <div className={styles.nextFree}>
@@ -197,7 +154,7 @@ export const EditServiceStep = ({
     </div>
     {!edit.hasExtra && (
       <button className={styles.outlineButton} onClick={edit.addExtra}>
-        <PlusIcon />
+        <Plus size={15} strokeWidth={1.9} />
         Add extra time
       </button>
     )}
@@ -264,11 +221,7 @@ export const EditServiceStep = ({
             onClick={menu}
             aria-label="Add-on options"
           >
-            <svg width="17" height="17" viewBox="0 0 24 24" fill="currentColor">
-              <circle cx="12" cy="5" r="1.7"></circle>
-              <circle cx="12" cy="12" r="1.7"></circle>
-              <circle cx="12" cy="19" r="1.7"></circle>
-            </svg>
+            <EllipsisVertical size={17} />
           </button>
         </div>
       ))}
@@ -277,7 +230,7 @@ export const EditServiceStep = ({
       className={joinClassNames(styles.outlineButton, styles.addButton)}
       onClick={edit.openAddAddon}
     >
-      <PlusIcon />
+      <Plus size={15} strokeWidth={1.9} />
       Add
     </button>
   </div>
@@ -378,19 +331,7 @@ export const AddonPickerList = ({
                 <span className={styles.optionSub}>{item.meta}</span>
               </span>
               <span className={styles.tick}>
-                <svg
-                  className={styles.tickMark}
-                  width="12"
-                  height="12"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="3"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                >
-                  <path d="M20 6 9 17l-5-5"></path>
-                </svg>
+                <Check className={styles.tickMark} size={12} strokeWidth={3} />
               </span>
             </button>
           ))}
@@ -433,7 +374,7 @@ export const ChangeClientStep = ({
       />
       <button className={styles.newClient} onClick={view.openNewClient}>
         <span className={styles.plusDisc}>
-          <PlusIcon size="17" />
+          <Plus size={17} strokeWidth={1.9} />
         </span>
         <span className={styles.grow}>
           <span className={styles.optionName}>Add a new client</span>
@@ -442,7 +383,7 @@ export const ChangeClientStep = ({
       {view.canAddTyped && (
         <button className={styles.addTyped} onClick={view.addTypedClient}>
           <span className={styles.plusDiscLight}>
-            <PlusIcon size="17" />
+            <Plus size={17} strokeWidth={1.9} />
           </span>
           <span className={styles.grow}>
             <span className={styles.addTypedLabel}>
@@ -597,7 +538,7 @@ export const RescheduleStep = ({
             )}
             onClick={view.toggleCustom}
           >
-            <PlusIcon size="13" strokeWidth="2" />
+            <Plus size={13} strokeWidth={2} />
             Custom time
           </button>
         </div>
@@ -675,18 +616,7 @@ export const CancelStep = ({
                 state.cancelFee && styles.checkboxOn,
               )}
             >
-              <svg
-                width="12"
-                height="12"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="var(--neutral-100)"
-                strokeWidth="3"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-              >
-                <path d="M20 6 9 17l-5-5"></path>
-              </svg>
+              <Check size={12} strokeWidth={3} color="var(--neutral-100)" />
             </span>
             <span className={styles.feeLabel}>{view.feeLabel}</span>
           </button>

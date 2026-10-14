@@ -1,4 +1,13 @@
 import type { CSSProperties } from "react";
+import {
+  ArrowLeft,
+  Check,
+  ChevronRight,
+  EllipsisVertical,
+  Plus,
+  Search,
+  Shield,
+} from "lucide-react";
 import { joinClassNames } from "../../utils/class-names";
 import type { AddBookingView } from "./add-booking-view";
 import { DuplicateNotice } from "./booking-dialogs";
@@ -10,51 +19,6 @@ import stepStyles from "../../styles/features/studio/booking-steps.module.css";
 
 const asStyle = (values: Record<string, string>) => values as CSSProperties;
 
-const SearchIcon = ({
-  className,
-  size = "15",
-  strokeWidth = "2",
-}: {
-  className?: string;
-  size?: string;
-  strokeWidth?: string;
-}) => (
-  <svg
-    className={className}
-    width={size}
-    height={size}
-    viewBox="0 0 24 24"
-    fill="none"
-    stroke="var(--text-secondary)"
-    strokeWidth={strokeWidth}
-    strokeLinecap="round"
-    strokeLinejoin="round"
-  >
-    <circle cx="11" cy="11" r="7"></circle>
-    <path d="m20 20-3.5-3.5"></path>
-  </svg>
-);
-
-const PlusIcon = ({
-  size,
-  strokeWidth,
-}: {
-  size: string;
-  strokeWidth: string;
-}) => (
-  <svg
-    width={size}
-    height={size}
-    viewBox="0 0 24 24"
-    fill="none"
-    stroke="currentColor"
-    strokeWidth={strokeWidth}
-    strokeLinecap="round"
-  >
-    <path d="M12 5v14M5 12h14"></path>
-  </svg>
-);
-
 /** Step 1: pick a client, add a new one, or make it a walk-in. */
 const WhoStep = ({ view }: { view: AddBookingView }) => {
   const { newClient } = view;
@@ -65,7 +29,12 @@ const WhoStep = ({ view }: { view: AddBookingView }) => {
       {!newClient && (
         <>
           <div className={styles.searchWrap}>
-            <SearchIcon className={styles.searchIcon} />
+            <Search
+              className={styles.searchIcon}
+              size={15}
+              strokeWidth={2}
+              color="var(--text-secondary)"
+            />
             <input
               className={styles.searchInput}
               value={view.clientQuery}
@@ -76,7 +45,7 @@ const WhoStep = ({ view }: { view: AddBookingView }) => {
           <div className={styles.clientList}>
             <button className={styles.newRow} onClick={view.toggleNew}>
               <span className={styles.newIcon}>
-                <PlusIcon size="15" strokeWidth="2.2" />
+                <Plus size={15} strokeWidth={2.2} />
               </span>
               <span className={styles.newLabel}>{view.newLabel}</span>
             </button>
@@ -98,18 +67,11 @@ const WhoStep = ({ view }: { view: AddBookingView }) => {
                     <span className={styles.clientSub}>{subtitle}</span>
                   </span>
                   {isOn && (
-                    <svg
-                      width="16"
-                      height="16"
-                      viewBox="0 0 24 24"
-                      fill="none"
-                      stroke="var(--accent-700)"
-                      strokeWidth="2.4"
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                    >
-                      <path d="M20 6 9 17l-5-5"></path>
-                    </svg>
+                    <Check
+                      size={16}
+                      strokeWidth={2.4}
+                      color="var(--accent-700)"
+                    />
                   )}
                 </button>
               ),
@@ -214,7 +176,12 @@ const WhoStep = ({ view }: { view: AddBookingView }) => {
 const ServiceList = ({ view }: { view: AddBookingView }) => (
   <>
     <label className={styles.searchField}>
-      <SearchIcon className={styles.noShrink} size="16" strokeWidth="1.7" />
+      <Search
+        className={styles.noShrink}
+        size={16}
+        strokeWidth={1.7}
+        color="var(--text-secondary)"
+      />
       <input
         className={styles.searchFieldInput}
         value={view.serviceQuery}
@@ -281,18 +248,7 @@ const ServiceEdit = ({ view }: { view: AddBookingView }) => (
       </span>
       <span className={styles.change}>
         Change
-        <svg
-          width="16"
-          height="16"
-          viewBox="0 0 24 24"
-          fill="none"
-          stroke="currentColor"
-          strokeWidth="1.7"
-          strokeLinecap="round"
-          strokeLinejoin="round"
-        >
-          <path d="m9 18 6-6-6-6"></path>
-        </svg>
+        <ChevronRight size={16} strokeWidth={1.7} />
       </span>
     </button>
     <div className={styles.editGrid}>
@@ -377,22 +333,13 @@ const ServiceEdit = ({ view }: { view: AddBookingView }) => (
               onClick={menu}
               aria-label="Add-on options"
             >
-              <svg
-                width="17"
-                height="17"
-                viewBox="0 0 24 24"
-                fill="currentColor"
-              >
-                <circle cx="12" cy="5" r="1.7"></circle>
-                <circle cx="12" cy="12" r="1.7"></circle>
-                <circle cx="12" cy="19" r="1.7"></circle>
-              </svg>
+              <EllipsisVertical size={17} />
             </button>
           </div>
         ))}
       </div>
       <button className={styles.addButton} onClick={view.openAddons}>
-        <PlusIcon size="15" strokeWidth="1.9" />
+        <Plus size={15} strokeWidth={1.9} />
         Add
       </button>
     </div>
@@ -467,7 +414,7 @@ const WhenStep = ({
           )}
           onClick={view.toggleCustom}
         >
-          <PlusIcon size="13" strokeWidth="2" />
+          <Plus size={13} strokeWidth={2} />
           Custom time
         </button>
       </div>
@@ -507,18 +454,7 @@ const WhenStep = ({
                 view.isOverlapAllowed && styles.checkboxOn,
               )}
             >
-              <svg
-                width="12"
-                height="12"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="var(--neutral-100)"
-                strokeWidth="3"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-              >
-                <path d="M20 6 9 17l-5-5"></path>
-              </svg>
+              <Check size={12} strokeWidth={3} color="var(--neutral-100)" />
             </span>
             <span className={styles.overlapLabel}>Book it anyway</span>
           </button>
@@ -534,19 +470,12 @@ const ProtectionStep = ({ view }: { view: AddBookingView }) => (
   <>
     <div className={styles.label145}>Booking protection</div>
     <div className={styles.policyRow}>
-      <svg
+      <Shield
         className={styles.policyIcon}
-        width="16"
-        height="16"
-        viewBox="0 0 24 24"
-        fill="none"
-        stroke="var(--text-secondary)"
-        strokeWidth="1.7"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-      >
-        <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10Z"></path>
-      </svg>
+        size={16}
+        strokeWidth={1.7}
+        color="var(--text-secondary)"
+      />
       <div className={styles.policyText}>
         Your policy requires{" "}
         <span className={styles.strong}>{view.protectionNoun}</span> to confirm.
@@ -649,18 +578,7 @@ export const AddBookingSheet = ({
     <div className={styles.footer}>
       {view.canBack && (
         <button className={styles.back} onClick={view.back}>
-          <svg
-            width="14"
-            height="14"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            strokeWidth="2.2"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-          >
-            <path d="M19 12H5M12 19l-7-7 7-7"></path>
-          </svg>
+          <ArrowLeft size={14} strokeWidth={2.2} />
           Back
         </button>
       )}

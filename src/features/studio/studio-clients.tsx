@@ -1,4 +1,15 @@
 import type { CSSProperties } from "react";
+import {
+  ArrowDownWideNarrow,
+  Camera,
+  ChevronDown,
+  ChevronLeft,
+  Ellipsis,
+  Plus,
+  Search,
+  TriangleAlert,
+  X,
+} from "lucide-react";
 import { joinClassNames } from "../../utils/class-names";
 import { getClientsView } from "./clients-view";
 import type { ClientsView } from "./clients-view";
@@ -7,69 +18,6 @@ import styles from "../../styles/features/studio/studio-clients.module.css";
 
 const asStyle = (values: Record<string, string | null | undefined>) =>
   values as CSSProperties;
-
-const BackIcon = () => (
-  <svg
-    width="18"
-    height="18"
-    viewBox="0 0 24 24"
-    fill="none"
-    stroke="currentColor"
-    strokeWidth="1.7"
-    strokeLinecap="round"
-    strokeLinejoin="round"
-  >
-    <path d="m15 18-6-6 6-6"></path>
-  </svg>
-);
-
-const WarnIcon = ({
-  size,
-  stroke,
-  strokeWidth,
-  className,
-}: {
-  size: string;
-  stroke: string;
-  strokeWidth: string;
-  className?: string;
-}) => (
-  <svg
-    className={className}
-    width={size}
-    height={size}
-    viewBox="0 0 24 24"
-    fill="none"
-    stroke={stroke}
-    strokeWidth={strokeWidth}
-    strokeLinecap="round"
-    strokeLinejoin="round"
-  >
-    <path d="M10.3 3.9 1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0zM12 9v4M12 17h.01"></path>
-  </svg>
-);
-
-const CameraIcon = ({
-  size,
-  strokeWidth,
-}: {
-  size: string;
-  strokeWidth: string;
-}) => (
-  <svg
-    width={size}
-    height={size}
-    viewBox="0 0 24 24"
-    fill="none"
-    stroke="currentColor"
-    strokeWidth={strokeWidth}
-    strokeLinecap="round"
-    strokeLinejoin="round"
-  >
-    <path d="M14.5 4h-5L7 7H4a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2h-3z"></path>
-    <circle cx="12" cy="13" r="3"></circle>
-  </svg>
-);
 
 const NameBadges = ({
   hasSensitivities,
@@ -81,7 +29,7 @@ const NameBadges = ({
   <>
     {hasSensitivities && (
       <span className={styles.sens} title="Has an allergy or sensitivity">
-        <WarnIcon size="14" stroke="currentColor" strokeWidth="1.5" />
+        <TriangleAlert size={14} strokeWidth={1.5} />
       </span>
     )}
     {isBlocked && <span className={styles.blocked}>Blocked</span>}
@@ -119,10 +67,10 @@ export const ClientProfile = ({
               <span className={styles.initials64}>{profile.initials}</span>
             )}
             <span className={styles.photoHover} aria-hidden="true">
-              <CameraIcon size="20" strokeWidth="2" />
+              <Camera size={20} strokeWidth={2} />
             </span>
             <span className={styles.photoBadge} aria-hidden="true">
-              <CameraIcon size="13" strokeWidth="1.5" />
+              <Camera size={13} strokeWidth={1.5} />
             </span>
             <input
               className={styles.fileInput}
@@ -152,7 +100,12 @@ export const ClientProfile = ({
                   <div className={styles.value}>{value}</div>
                 </div>
                 {contactActions.map(
-                  ({ key: actionKey, label: actionLabel, href, iconPath }) => (
+                  ({
+                    key: actionKey,
+                    label: actionLabel,
+                    href,
+                    icon: ActionIcon,
+                  }) => (
                     <a
                       key={actionKey}
                       className={styles.contactAction}
@@ -160,18 +113,7 @@ export const ClientProfile = ({
                       aria-label={actionLabel}
                       title={actionLabel}
                     >
-                      <svg
-                        width="16"
-                        height="16"
-                        viewBox="0 0 24 24"
-                        fill="none"
-                        stroke="currentColor"
-                        strokeWidth="1.7"
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                      >
-                        <path d={iconPath}></path>
-                      </svg>
+                      <ActionIcon size={16} strokeWidth={1.7} />
                     </a>
                   ),
                 )}
@@ -200,21 +142,17 @@ export const ClientProfile = ({
             onClick={view.moreSelected}
             aria-label="More actions"
           >
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
-              <circle cx="5" cy="12" r="1.7"></circle>
-              <circle cx="12" cy="12" r="1.7"></circle>
-              <circle cx="19" cy="12" r="1.7"></circle>
-            </svg>
+            <Ellipsis size={18} />
           </button>
         </div>
       </section>
       {!!profile.sensitivities && (
         <div className={styles.sensBox}>
-          <WarnIcon
+          <TriangleAlert
             className={styles.sensIcon}
-            size="18"
-            stroke="#b5541f"
-            strokeWidth="1.7"
+            size={18}
+            strokeWidth={1.7}
+            color="#b5541f"
           />
           <div className={styles.grow}>
             <div className={styles.sensLabel}>Allergy or sensitivity</div>
@@ -372,26 +310,13 @@ export const StudioClients = ({ studio }: { studio: StudioController }) => {
               className={styles.back}
               onClick={() => setState({ tab: "settings" })}
             >
-              <BackIcon />
+              <ChevronLeft size={18} strokeWidth={1.7} />
               More
             </button>
           )}
           <div className={styles.controls}>
             <label className={styles.search}>
-              <svg
-                className={styles.noShrink}
-                width="15"
-                height="15"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="1.5"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-              >
-                <circle cx="11" cy="11" r="7"></circle>
-                <path d="m20 20-3.5-3.5"></path>
-              </svg>
+              <Search className={styles.noShrink} size={15} strokeWidth={1.5} />
               <input
                 className={styles.searchInput}
                 value={state.clientListQuery}
@@ -407,33 +332,12 @@ export const StudioClients = ({ studio }: { studio: StudioController }) => {
                   onClick={() => setState({ clientListQuery: "" })}
                   aria-label="Clear search"
                 >
-                  <svg
-                    width="15"
-                    height="15"
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    stroke="currentColor"
-                    strokeWidth="1.7"
-                    strokeLinecap="round"
-                  >
-                    <path d="M18 6 6 18M6 6l12 12"></path>
-                  </svg>
+                  <X size={15} strokeWidth={1.7} />
                 </button>
               )}
             </label>
             <label className={styles.sort}>
-              <svg
-                width="15"
-                height="15"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="1.5"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-              >
-                <path d="M3 6h13M3 12h9M3 18h5M17 10v10M14 17l3 3 3-3"></path>
-              </svg>
+              <ArrowDownWideNarrow size={15} strokeWidth={1.5} />
               <select
                 className={styles.sortSelect}
                 value={state.clientSort}
@@ -447,32 +351,14 @@ export const StudioClients = ({ studio }: { studio: StudioController }) => {
                 <option value="visits">Most visits</option>
                 <option value="az">A–Z</option>
               </select>
-              <svg
+              <ChevronDown
                 className={styles.sortChevron}
-                width="14"
-                height="14"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="1.7"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-              >
-                <path d="m6 9 6 6 6-6"></path>
-              </svg>
+                size={14}
+                strokeWidth={1.7}
+              />
             </label>
             <button className={styles.addClient} onClick={view.addClient}>
-              <svg
-                width="14"
-                height="14"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="2.2"
-                strokeLinecap="round"
-              >
-                <path d="M12 5v14M5 12h14"></path>
-              </svg>
+              <Plus size={14} strokeWidth={2.2} />
               Add client
             </button>
           </div>
@@ -612,7 +498,7 @@ export const StudioClients = ({ studio }: { studio: StudioController }) => {
             className={joinClassNames(styles.back, styles.backProfile)}
             onClick={() => setState({ selectedClientId: null })}
           >
-            <BackIcon />
+            <ChevronLeft size={18} strokeWidth={1.7} />
             Clients
           </button>
           <ClientProfile view={view} variant="page" />
