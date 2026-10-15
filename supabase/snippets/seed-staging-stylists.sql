@@ -119,7 +119,9 @@ insert into seed_stylist values
     'Braids, installs and a treatment menu, all under one roof on Wilmslow Road. Student discount on weekdays.');
 
 -- signing up runs handle_new_user, which creates the profile, business, categories, hours and default policy
-insert into auth.users (id, instance_id, aud, role, email, raw_user_meta_data, raw_app_meta_data, email_confirmed_at, created_at, updated_at)
+-- (the token columns must be '' not null, or Supabase Auth fails to list or load users)
+insert into auth.users (id, instance_id, aud, role, email, raw_user_meta_data, raw_app_meta_data, email_confirmed_at, created_at, updated_at,
+  confirmation_token, recovery_token, email_change, email_change_token_new)
 select md5('tiwara-staging-seed-' || n)::uuid, '00000000-0000-0000-0000-000000000000', 'authenticated', 'authenticated',
   'staging-seed-' || n || '@example.com',
   jsonb_build_object(
@@ -142,7 +144,7 @@ select md5('tiwara-staging-seed-' || n)::uuid, '00000000-0000-0000-0000-00000000
       'contact_email', 'staging-seed-' || n || '@example.com'
     )
   ),
-  '{}', now(), now(), now()
+  '{}', now(), now(), now(), '', '', '', ''
 from seed_stylist;
 
 create temp table seeded on commit drop as
