@@ -47,7 +47,7 @@ export const LooksSection = () => {
             >
               <ResponsiveImage
                 src={LOOK_IMAGES[id] || image}
-                sizes="(max-width: 900px) 50vw, 380px"
+                sizes="(max-width: 900px) 50vw, 420px"
                 alt={name}
                 className={joinClassNames(page.lookimg, styles.image)}
               />

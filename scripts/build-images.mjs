@@ -1,7 +1,7 @@
 // `yarn images`: AVIF, WebP and JPEG copies of the bundled photos at three widths, for <picture> srcset.
 // Needs ImageMagick 7 (`magick`) with AVIF support. Outputs are committed: the build server doesn't run this.
 import { execFileSync } from "node:child_process";
-import { existsSync, mkdirSync, readdirSync, statSync, writeFileSync } from "node:fs";
+import { existsSync, mkdirSync, readFileSync, readdirSync, statSync, writeFileSync } from "node:fs";
 import { dirname, join, relative } from "node:path";
 
 const ASSETS = "assets";
@@ -12,14 +12,23 @@ const SETS = [
   { folder: "demo", widths: [400, 800, 1200], skip: [] },
 ];
 
+// AVIF keeps full colour detail (4:4:4): 4:2:0 softens hair and edges
 const FORMATS = [
-  { extension: "avif", options: ["-quality", "50", "-define", "heic:speed=6"] },
-  { extension: "webp", options: ["-quality", "75"] },
+  {
+    extension: "avif",
+    options: ["-quality", "65", "-define", "heic:speed=6", "-define", "heic:chroma=444"],
+  },
+  { extension: "webp", options: ["-quality", "82"] },
   {
     extension: "jpg",
-    options: ["-quality", "80", "-interlace", "Plane", "-sampling-factor", "4:2:0"],
+    options: ["-quality", "85", "-interlace", "Plane", "-sampling-factor", "4:2:0"],
   },
 ];
+
+// changing FORMATS regenerates every copy
+const SETTINGS_FILE = join(OUTPUT, "settings.json");
+const settings = JSON.stringify(FORMATS);
+const isSameSettings = existsSync(SETTINGS_FILE) && readFileSync(SETTINGS_FILE, "utf8") === settings;
 
 const listPhotos = (folder) =>
   readdirSync(folder, { withFileTypes: true }).flatMap((entry) => {
@@ -40,7 +49,7 @@ const getSize = (path) => {
 };
 
 const isFresh = (output, source) =>
-  existsSync(output) && statSync(output).mtimeMs >= statSync(source).mtimeMs;
+  isSameSettings && existsSync(output) && statSync(output).mtimeMs >= statSync(source).mtimeMs;
 
 const manifest = {};
 let written = 0;
@@ -72,4 +81,5 @@ for (const { folder, widths, skip } of SETS) {
 }
 
 writeFileSync(join(OUTPUT, "manifest.json"), `${JSON.stringify(manifest, null, 2)}\n`);
+writeFileSync(SETTINGS_FILE, settings);
 console.log(`${Object.keys(manifest).length} photos, ${written} files written`);

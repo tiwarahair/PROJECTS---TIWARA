@@ -1,0 +1,1 @@
+[{"extension":"avif","options":["-quality","65","-define","heic:speed=6","-define","heic:chroma=444"]},{"extension":"webp","options":["-quality","82"]},{"extension":"jpg","options":["-quality","85","-interlace","Plane","-sampling-factor","4:2:0"]}]

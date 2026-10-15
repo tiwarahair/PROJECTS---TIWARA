@@ -55,7 +55,7 @@ interface CardLinkProps {
   onIntent?: () => void;
 }
 
-const COVER_SIZES = "(max-width: 700px) 90vw, 400px";
+const COVER_SIZES = "(max-width: 700px) 90vw, 460px";
 
 /** Internal routes use the router; "#" and anything else stay plain anchors. */
 const CardLink = ({
