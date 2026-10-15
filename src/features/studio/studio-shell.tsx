@@ -140,7 +140,7 @@ export const StudioSidebar = ({ studio }: { studio: StudioController }) => {
         {isOpen && (
           <img
             className={styles.logo}
-            src={getAssetUrl("logos/logo-crimson.png")}
+            src={getAssetUrl("logos/logo-crimson-sm.png")}
             alt="Tiwára's House"
           />
         )}

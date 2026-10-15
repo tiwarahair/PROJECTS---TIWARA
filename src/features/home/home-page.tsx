@@ -32,9 +32,6 @@ export interface HomePageProps {
   showWhy?: boolean;
 }
 
-const HOME_FONTS =
-  "https://fonts.googleapis.com/css2?family=Schibsted+Grotesk:wght@400..700&display=swap";
-
 /** Marketing home page, route "/". */
 export const HomePage = ({
   order = "v2",
@@ -88,9 +85,6 @@ export const HomePage = ({
 
   return (
     <div ref={rootRef} className={layout.page}>
-      <link rel="preconnect" href="https://fonts.googleapis.com" />
-      <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="" />
-      <link rel="stylesheet" href={HOME_FONTS} precedence="default" />
       <div
         id="morph"
         data-screen-label="Home"

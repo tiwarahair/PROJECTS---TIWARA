@@ -13,6 +13,8 @@ const waitForChecker = () =>
     });
 
     if (isPasswordCheckerReady()) resolve();
+    // the checker loads on the first typed password
+    else checkPassword("a");
   });
 
 describe("checkPassword with zxcvbn loaded", () => {

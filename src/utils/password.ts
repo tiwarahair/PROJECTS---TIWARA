@@ -24,27 +24,30 @@ let checkerImport: Promise<PasswordChecker> | null = null;
 
 export const isPasswordCheckerReady = (): boolean => scorePassword !== null;
 
+const readyListeners = new Set<() => void>();
+
 /** Loads the checker once (every caller shares one import); a failed load is retried next time. */
 const loadPasswordChecker = async (): Promise<void> => {
   checkerImport ??= import("./password-checker");
 
   try {
-    ({ scorePassword } = await checkerImport);
+    const checker = await checkerImport;
+
+    if (scorePassword) return;
+
+    scorePassword = checker.scorePassword;
+    readyListeners.forEach((listener) => listener());
   } catch {
     checkerImport = null;
   }
 };
 
-/** Calls the listener once the checker has loaded; returns a function that cancels it. */
+/** Calls the listener when the checker finishes loading (it loads on the first typed password); returns a function that cancels it. */
 export const onPasswordCheckerReady = (listener: () => void): (() => void) => {
-  let isCancelled = false;
-
-  void loadPasswordChecker().then(() => {
-    if (!isCancelled && scorePassword) listener();
-  });
+  readyListeners.add(listener);
 
   return () => {
-    isCancelled = true;
+    readyListeners.delete(listener);
   };
 };
 
@@ -173,7 +176,7 @@ export const checkPassword = (
   const short = length < min;
   const long = length > PASSWORD_MAX;
 
-  void loadPasswordChecker();
+  if (length) void loadPasswordChecker();
 
   let score: number | null = null;
   let warning = "";

@@ -1,4 +1,5 @@
 // Two-step verification with an authenticator app (Supabase MFA, TOTP): log in, set up, remove, re-confirm.
+import type { User } from "@supabase/supabase-js";
 import { getErrorCode } from "./auth-helpers";
 import { supabase } from "./supabase";
 
@@ -22,11 +23,7 @@ export interface TwoFactorEnrolment {
 }
 
 /** Supabase can't rename a factor, so the names people choose live on their account. */
-const getDeviceNames = async (): Promise<Record<string, string>> => {
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-
+const toDeviceNames = (user: User | null): Record<string, string> => {
   const names: unknown = user?.user_metadata.mfa_names;
 
   return names && typeof names === "object"
@@ -36,6 +33,14 @@ const getDeviceNames = async (): Promise<Record<string, string>> => {
         ),
       )
     : {};
+};
+
+const getDeviceNames = async () => {
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+
+  return toDeviceNames(user);
 };
 
 /** True when the account has 2FA set up but this session hasn't passed it yet. */
@@ -69,14 +74,19 @@ export const hasRecentSecondFactor = async () => {
 };
 
 // oldest (the main app) first; Supabase returns them in no set order
+const sortOldestFirst = <Factor extends { created_at: string }>(
+  apps: Factor[],
+) =>
+  [...apps].sort((left, right) =>
+    left.created_at.localeCompare(right.created_at),
+  );
+
 const getVerifiedApps = async () => {
   const { data, error } = await supabase.auth.mfa.listFactors();
 
   getErrorCode(error, []);
 
-  return [...(data?.totp ?? [])].sort((left, right) =>
-    left.created_at.localeCompare(right.created_at),
-  );
+  return sortOldestFirst(data?.totp ?? []);
 };
 
 /** True when the code matches any of the account's apps. */
@@ -95,10 +105,22 @@ export const verifySecondFactor = async (code: string) => {
 
 /** The account's authenticator apps, oldest (the main one) first. */
 export const listTwoFactorDevices = async (): Promise<TwoFactorDevice[]> => {
-  const [apps, names] = await Promise.all([
-    getVerifiedApps(),
-    getDeviceNames(),
-  ]);
+  // one getUser() for both: listFactors() would fetch the user again
+  const {
+    data: { user },
+    error,
+  } = await supabase.auth.getUser();
+
+  getErrorCode(error, []);
+
+  const names = toDeviceNames(user);
+
+  const apps = sortOldestFirst(
+    (user?.factors ?? []).filter(
+      ({ factor_type, status }) =>
+        factor_type === "totp" && status === "verified",
+    ),
+  );
 
   return apps.map(({ id }, index) => ({
     id,

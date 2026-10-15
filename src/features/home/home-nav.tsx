@@ -40,13 +40,13 @@ export const HomeNav = ({ morph, loggedIn }: HomeNavProps) => {
           <Link to="/" className={styles.logoLink}>
             <span className={styles.logoStack}>
               <img
-                src={getAssetUrl("logos/logo-cream.png")}
+                src={getAssetUrl("logos/logo-cream-sm.png")}
                 alt="Tiwára's House"
                 className={styles.logoCream}
               />
               <span className={styles.logoMask}></span>
               <img
-                src={getAssetUrl("logos/logo-crimson.png")}
+                src={getAssetUrl("logos/logo-crimson-sm.png")}
                 alt=""
                 className={styles.logoCrimson}
               />

@@ -239,7 +239,7 @@ const SettingsRoot = ({
       <div className={styles.logoRow}>
         <img
           className={styles.logo}
-          src={getAssetUrl("logos/logo-crimson.png")}
+          src={getAssetUrl("logos/logo-crimson-sm.png")}
           alt="Tiwára's House"
         />
       </div>

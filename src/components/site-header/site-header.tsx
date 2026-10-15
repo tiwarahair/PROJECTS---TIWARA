@@ -44,7 +44,7 @@ export const SiteHeader = ({
       <div className={styles.bar}>
         <Link to="/" className={styles.logoLink}>
           <img
-            src={getAssetUrl("logos/logo-crimson.png")}
+            src={getAssetUrl("logos/logo-crimson-sm.png")}
             alt="Tiwára's House"
             className={styles.logo}
           />

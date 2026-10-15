@@ -25,28 +25,21 @@ export const StudioRoute = () => {
 
   const identity = useIdentity();
 
-  // always fresh: Studio saves don't update this cache, so a cached copy could write old values back
-  const { data: studio, isFetching: isStudioFetching } =
-    useGetStylistStudioQuery(user?.isStylist ? user.id : skipToken, {
-      refetchOnMountOrArgChange: true,
-    });
+  // every Studio save invalidates this cache (onStudioWrite), so a cached copy is never older than the last save
+  const { data: studio } = useGetStylistStudioQuery(
+    user?.isStylist ? user.id : skipToken,
+    { refetchOnMountOrArgChange: 30 },
+  );
 
-  const {
-    data: devices,
-    isError: isDevicesError,
-    isFetching: isDevicesFetching,
-  } = useGetTwoFactorDevicesQuery(user?.isStylist ? user.id : skipToken, {
-    refetchOnMountOrArgChange: true,
-  });
+  const { data: devices, isError: isDevicesError } =
+    useGetTwoFactorDevicesQuery(user?.isStylist ? user.id : skipToken, {
+      refetchOnMountOrArgChange: 30,
+    });
 
   const isLoading =
     !ready ||
     (!!user?.isStylist &&
-      (!studio ||
-        isStudioFetching ||
-        !identity?.isLoaded ||
-        isDevicesFetching ||
-        (!devices && !isDevicesError)));
+      (!studio || !identity?.isLoaded || (!devices && !isDevicesError)));
 
   const isSlow = useIsSlow(isLoading);
 

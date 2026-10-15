@@ -1,4 +1,5 @@
 // Search's live data: the place, Google suggestions, result pages, the filter sheet's total and stylist suggestions.
+import { skipToken } from "@reduxjs/toolkit/query";
 import { useDebouncedValue } from "../../hooks/use-debounced-value";
 import { useIsSlow } from "../../hooks/use-is-slow";
 import {
@@ -23,8 +24,11 @@ export const useSearchData = (state: SearchState, filterDraft: FilterDraft) => {
     state.whereTyped ? (state.whereText ?? "") : "",
   );
 
+  // "Current location": hold the search briefly for the position rather than searching twice
+  const isWaitingForPlace = location.isWaiting && !place.point;
+
   const results = useSearchStylistsInfiniteQuery(
-    toSearchArgs(state, place.point),
+    isWaitingForPlace ? skipToken : toSearchArgs(state, place.point),
   );
 
   const draftPeek = usePeekStylistsQuery(
@@ -49,7 +53,10 @@ export const useSearchData = (state: SearchState, filterDraft: FilterDraft) => {
 
   // currentData: only these filters' pages (never the previous search's while new ones load)
   const rows = results.currentData?.pages.flat() ?? [];
-  const isLoading = results.isFetching && !results.isFetchingNextPage;
+
+  const isLoading =
+    isWaitingForPlace || (results.isFetching && !results.isFetchingNextPage);
+
   const isStylistsLoading = whatText !== typedWhat || stylistPeek.isFetching;
 
   // placeholders only once a wait is noticeable

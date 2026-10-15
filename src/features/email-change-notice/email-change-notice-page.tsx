@@ -39,7 +39,7 @@ export const EmailChangeNoticePage = () => {
         <div className={styles.card}>
           <img
             className={styles.logo}
-            src={getAssetUrl("logos/logo-crimson.png")}
+            src={getAssetUrl("logos/logo-crimson-sm.png")}
             alt="Tiwára's House"
           />
           <h1 className={styles.title}>Your email was changed</h1>
