@@ -1,7 +1,7 @@
+import { ResponsiveImage } from "../../components/responsive-image/responsive-image";
 import { useRef } from "react";
 import { Link } from "react-router";
 import { serviceGroups } from "../../data";
-import { getAssetUrl } from "../../utils/asset-url";
 import { joinClassNames } from "../../utils/class-names";
 import page from "../../styles/features/home/home-page.module.css";
 import styles from "../../styles/features/home/looks-section.module.css";
@@ -45,9 +45,9 @@ export const LooksSection = () => {
               to={`/search?group=${slug}`}
               className={joinClassNames(page.looktile, styles.tile)}
             >
-              <img
-                loading="lazy"
-                src={getAssetUrl(LOOK_IMAGES[id] || image)}
+              <ResponsiveImage
+                src={LOOK_IMAGES[id] || image}
+                sizes="(max-width: 900px) 50vw, 380px"
                 alt={name}
                 className={joinClassNames(page.lookimg, styles.image)}
               />

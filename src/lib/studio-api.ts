@@ -1,6 +1,11 @@
 // Studio's reads and writes against Supabase (row shapes; studio-records converts them).
 import type { TaxDetails } from "../components/tax-details-form/tax-details-logic";
 import type { Tables, TablesInsert, TablesUpdate } from "../types/database";
+import {
+  UPLOAD_WIDTHS,
+  isUploadOriginal,
+  toUploadVariant,
+} from "../utils/image-sources";
 import { notifyStudioWrite } from "./studio-writes";
 import { supabase } from "./supabase";
 
@@ -70,29 +75,96 @@ export const getPhotoUrl = (path: string) =>
 export const getPhotoPath = (url: string) =>
   url.split(`/${PHOTO_BUCKET}/`)[1] ?? null;
 
-/** Resizes in the browser (long side 2000px for covers and portfolio, 600px for avatars), then uploads. */
-export const uploadPhoto = async (path: string, file: File, maxSide = 2000) => {
+type CompressOptions = Parameters<
+  typeof import("browser-image-compression").default
+>[1];
+
+const compress = async (file: File, options: CompressOptions) => {
   const { default: imageCompression } =
     await import("browser-image-compression");
 
-  const resized = await imageCompression(file, {
+  return imageCompression(file, { useWebWorker: true, ...options });
+};
+
+// names are unique per upload, so browsers and the CDN can keep a file for a year
+const putFile = async (path: string, file: Blob, contentType: string) => {
+  const { error } = await supabase.storage
+    .from(PHOTO_BUCKET)
+    .upload(path, file, {
+      upsert: true,
+      contentType,
+      cacheControl: "31536000",
+    });
+
+  if (error) throw error;
+};
+
+/** Resizes in the browser (long side 2000px for covers and portfolio, 600px for avatars), then uploads. */
+export const uploadPhoto = async (path: string, file: File, maxSide = 2000) => {
+  const resized = await compress(file, {
     maxWidthOrHeight: maxSide,
     maxSizeMB: 1.5,
     fileType: "image/jpeg",
-    useWebWorker: true,
   });
 
-  const { error } = await supabase.storage
-    .from(PHOTO_BUCKET)
-    .upload(path, resized, { upsert: true, contentType: "image/jpeg" });
-
-  if (error) throw error;
+  await putFile(path, resized, "image/jpeg");
 
   return path;
 };
 
+/** uploadPhoto, plus WebP and JPEG copies at UPLOAD_WIDTHS beside it for srcset; `path` ends "-full.jpg". */
+export const uploadPhotoWithCopies = async (path: string, file: File) => {
+  await uploadPhoto(path, file);
+
+  const bitmap = await createImageBitmap(file);
+  const { width, height } = bitmap;
+
+  bitmap.close();
+
+  // the compressor sizes by the long side: convert each width to it
+  const longSidePerWidth = Math.max(width, height) / width;
+
+  const copies = UPLOAD_WIDTHS.flatMap((copyWidth) =>
+    (["webp", "jpg"] as const).map(async (extension) => {
+      const copy = await compress(file, {
+        maxWidthOrHeight: Math.round(
+          Math.min(copyWidth, width) * longSidePerWidth,
+        ),
+        maxSizeMB: 1,
+        fileType: extension === "webp" ? "image/webp" : "image/jpeg",
+      });
+
+      // a browser that can't encode WebP hands back a JPEG: it still goes under the .webp name, so that source loads
+      await putFile(
+        toUploadVariant(path, copyWidth, extension),
+        copy,
+        copy.type,
+      );
+    }),
+  );
+
+  await Promise.all(copies);
+
+  return path;
+};
+
+/** Deletes a photo and, for one with copies, the copies too. */
 export const removePhoto = (path: string) =>
-  check(supabase.storage.from(PHOTO_BUCKET).remove([path]));
+  check(
+    supabase.storage
+      .from(PHOTO_BUCKET)
+      .remove(
+        isUploadOriginal(path)
+          ? [
+              path,
+              ...UPLOAD_WIDTHS.flatMap((copyWidth) => [
+                toUploadVariant(path, copyWidth, "webp"),
+                toUploadVariant(path, copyWidth, "jpg"),
+              ]),
+            ]
+          : [path],
+      ),
+  );
 
 export const updateStylist = (id: string, patch: TablesUpdate<"stylists">) =>
   write(supabase.from("stylists").update(patch).eq("id", id));

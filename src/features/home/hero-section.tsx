@@ -1,5 +1,5 @@
+import { ResponsiveImage } from "../../components/responsive-image/responsive-image";
 import { Link } from "react-router";
-import { getAssetUrl } from "../../utils/asset-url";
 import { joinClassNames } from "../../utils/class-names";
 import { ArrowIcon } from "./arrow-icon";
 import page from "../../styles/features/home/home-page.module.css";
@@ -14,8 +14,10 @@ export const HeroSection = () => (
     className={joinClassNames(page.hero, styles.hero)}
   >
     <div id="heroframe" className={styles.frame}>
-      <img
-        src={getAssetUrl("site/hero.jpg")}
+      <ResponsiveImage
+        src="site/hero.jpg"
+        sizes="100vw"
+        loading="eager"
         fetchPriority="high"
         alt="Stylist cornrowing a client at Tiwára's House"
         className={styles.image}

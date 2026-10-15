@@ -7,6 +7,7 @@ import {
   removePortfolioPhoto,
   updateStylist,
   uploadPhoto,
+  uploadPhotoWithCopies,
 } from "../../lib/studio-api";
 import type { StudioContext } from "./studio-actions";
 
@@ -29,11 +30,16 @@ export const replacePhoto = (
   setState(toPatch(previewUrl));
 
   sync?.save(async (stylistId) => {
-    const path = await uploadPhoto(
-      `${stylistId}/${kind}-${Date.now()}.jpg`,
-      file,
-      isCover ? undefined : AVATAR_SIDE,
-    );
+    const path = isCover
+      ? await uploadPhotoWithCopies(
+          `${stylistId}/cover-${Date.now()}-full.jpg`,
+          file,
+        )
+      : await uploadPhoto(
+          `${stylistId}/avatar-${Date.now()}.jpg`,
+          file,
+          AVATAR_SIDE,
+        );
 
     await updateStylist(
       stylistId,
@@ -68,8 +74,8 @@ export const addPortfolioPhotos = (
   sync?.save(
     async (stylistId) => {
       for (const [index, { id, file }] of uploads.entries()) {
-        const path = await uploadPhoto(
-          `${stylistId}/portfolio/${id}.jpg`,
+        const path = await uploadPhotoWithCopies(
+          `${stylistId}/portfolio/${id}-full.jpg`,
           file,
         );
 

@@ -16,7 +16,7 @@ import type { TurnstileInstance } from "@marsidev/react-turnstile";
 import type { FieldBinding } from "./onboarding-fields";
 import { useIdentity } from "../../hooks/use-identity";
 import { usePasswordChecker } from "../../hooks/use-password-checker";
-import { getAssetUrl } from "../../utils/asset-url";
+import { getAssetImageSet, getAssetUrl } from "../../utils/asset-url";
 import { MODE_KEY, PHOTOS, STORAGE_KEY } from "./onboarding-data";
 import { getStartState, readStorage } from "./onboarding-start";
 import { getScreenSchema } from "./onboarding-screen-schemas";
@@ -231,7 +231,8 @@ export const useOnboarding = (props: OnboardingProps) => {
   useEffect(() => {
     const preload = window.setTimeout(() => {
       for (const [src] of Object.values(PHOTOS))
-        new Image().src = getAssetUrl(src);
+        new Image().src =
+          getAssetImageSet(src, 1080)?.avifUrl ?? getAssetUrl(src);
     }, 1200);
 
     const carousel = window.setInterval(() => {

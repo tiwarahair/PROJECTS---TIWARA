@@ -1,5 +1,5 @@
+import { ResponsiveImage } from "../../components/responsive-image/responsive-image";
 import { Link } from "react-router";
-import { getAssetUrl } from "../../utils/asset-url";
 import { joinClassNames } from "../../utils/class-names";
 import { ArrowIcon } from "./arrow-icon";
 import page from "../../styles/features/home/home-page.module.css";
@@ -30,10 +30,10 @@ export const ForStylistsSection = ({ variant }: ForStylistsSectionProps) => (
     {variant === "photo" && (
       <div className={styles.photoWrap}>
         <div id="fsframe" className={styles.frame}>
-          <img
+          <ResponsiveImage
             data-plx=""
-            loading="lazy"
-            src={getAssetUrl("site/list-your-business-image.jpeg")}
+            src="site/list-your-business-image.jpeg"
+            sizes="100vw"
             alt="Barber at work"
             className={styles.photo}
           />
@@ -94,9 +94,9 @@ export const ForStylistsSection = ({ variant }: ForStylistsSectionProps) => (
             </div>
           </div>
           <div data-rv="" className={styles.splitPhotoFrame}>
-            <img
-              loading="lazy"
-              src={getAssetUrl("demo/stylists/w161154.jpg")}
+            <ResponsiveImage
+              src="demo/stylists/w161154.jpg"
+              sizes="(max-width: 860px) 100vw, 45vw"
               alt="Stylist at work in the chair"
               className={styles.splitPhoto}
             />

@@ -1,6 +1,6 @@
+import { ResponsiveImage } from "../../components/responsive-image/responsive-image";
 import type { CSSProperties, KeyboardEvent, MouseEvent } from "react";
 import { Link } from "react-router";
-import { resolveAssetUrl } from "../../utils/asset-url";
 import { joinClassNames } from "../../utils/class-names";
 import type { BookingCardView, QuickAction } from "./account-view";
 import styles from "../../styles/features/account/bookings-sections.module.css";
@@ -108,9 +108,10 @@ export const OverviewSection = ({
         aria-label={card.aria}
       >
         <div className={styles.cardTop}>
-          <img
+          <ResponsiveImage
             className={styles.cover}
-            src={resolveAssetUrl(card.money.stylist.cover)}
+            src={card.money.stylist.cover}
+            sizes="88px"
             alt=""
           />
           <div className={styles.cardBody}>
@@ -275,9 +276,10 @@ export const BookingsSection = ({
               aria-label={card.aria}
             >
               <div className={styles.cardTop}>
-                <img
+                <ResponsiveImage
                   className={styles.cover}
-                  src={resolveAssetUrl(card.money.stylist.cover)}
+                  src={card.money.stylist.cover}
+                  sizes="88px"
                   alt=""
                 />
                 <div className={styles.cardBody}>
@@ -342,9 +344,10 @@ export const BookingsSection = ({
               className={styles.pastCard}
               aria-label={card.aria}
             >
-              <img
+              <ResponsiveImage
                 className={styles.pastCover}
-                src={resolveAssetUrl(card.money.stylist.cover)}
+                src={card.money.stylist.cover}
+                sizes="56px"
                 alt=""
               />
               <div className={styles.pastBody}>

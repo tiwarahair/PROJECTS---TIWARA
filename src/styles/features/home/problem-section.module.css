@@ -85,7 +85,14 @@
   right: 0;
   border-radius: var(--radius-md, 16px);
   overflow: hidden;
-  background-image: url("../../../../assets/site/problem.jpeg");
+  background-image: url("../../../../assets/generated/site/problem-1080.jpg");
+  background-image: image-set(
+    url("../../../../assets/generated/site/problem-1080.avif")
+      type("image/avif"),
+    url("../../../../assets/generated/site/problem-1080.webp")
+      type("image/webp"),
+    url("../../../../assets/generated/site/problem-1080.jpg") type("image/jpeg")
+  );
   background-size: cover;
   background-position: 38% center;
 }

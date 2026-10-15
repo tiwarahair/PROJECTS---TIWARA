@@ -479,10 +479,17 @@
   );
 }
 
-/* the photo arrives as --ob-photo; its position is set per photo */
+/* the photo arrives as --ob-photo (a JPEG) and --ob-photo-set (AVIF / WebP / JPEG); its position is set per photo */
 .heroPhoto,
 .photo {
   background-image: var(--ob-photo);
+}
+
+@supports (background-image: image-set(url("x.png") type("image/png"))) {
+  .heroPhoto,
+  .photo {
+    background-image: var(--ob-photo-set);
+  }
 }
 
 .photoWelcome {

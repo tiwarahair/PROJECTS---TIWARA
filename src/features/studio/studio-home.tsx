@@ -1,5 +1,5 @@
+import { ResponsiveImage } from "../../components/responsive-image/responsive-image";
 import type { CSSProperties, PointerEvent } from "react";
-import { getAssetUrl } from "../../utils/asset-url";
 import { joinClassNames } from "../../utils/class-names";
 import { GATE_REASON, RANGE_DATA } from "./studio-data";
 import { getDecoratedBookings } from "./studio-decorate";
@@ -370,9 +370,12 @@ export const StudioHome = ({ studio }: { studio: StudioController }) => {
         className={joinClassNames(styles.hero, styles.main)}
         data-screen-label="Today hero"
       >
-        <img
+        <ResponsiveImage
           className={styles.heroImage}
-          src={getAssetUrl("site/hero.jpg")}
+          src="site/hero.jpg"
+          sizes="(min-width: 1024px) 900px, 100vw"
+          loading="eager"
+          fetchPriority="high"
           alt=""
         />
         <div className={styles.heroShade}></div>

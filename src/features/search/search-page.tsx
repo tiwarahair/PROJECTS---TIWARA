@@ -17,6 +17,9 @@ import styles from "../../styles/features/search/search-page.module.css";
 import { useSearch } from "./use-search";
 import type { SearchController } from "./use-search";
 
+// the first row of results is above the fold: their covers load straight away
+const FIRST_ROW = 3;
+
 /** Placeholder cards: a page's worth while results load, a row while more load. */
 const getLoadingCount = ({ isSlow, isSlowMore }: SearchController) => {
   if (isSlow) return 6;
@@ -66,9 +69,13 @@ const SearchView = () => {
       <div className={styles.results}>
         <LocationPrompt search={search} />
         <div className={styles.grid} aria-busy={search.isLoading}>
-          {cards.map(({ key, name, ...card }) => (
+          {cards.map(({ key, name, ...card }, index) => (
             <div key={key} className={pageGlobal.rescard}>
-              <StylistCard stylistName={name} {...card} />
+              <StylistCard
+                stylistName={name}
+                priority={index < FIRST_ROW}
+                {...card}
+              />
             </div>
           ))}
           {loadingCards.map((key) => (

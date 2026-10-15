@@ -1,6 +1,5 @@
-import { LoadingImage } from "../../components/loading-image/loading-image";
+import { ResponsiveImage } from "../../components/responsive-image/responsive-image";
 import { joinClassNames } from "../../utils/class-names";
-import { resolveAssetUrl } from "../../utils/asset-url";
 import styles from "../../styles/features/stylist-profile/profile-portfolio.module.css";
 import pageGlobal from "../../styles/features/stylist-profile/stylist-profile-page-global.module.css";
 
@@ -27,9 +26,10 @@ export const ProfilePortfolio = ({
       {portfolio.map((src, index) => (
         <div key={index} data-rv="" className={styles.tile}>
           {/* a clickable <img> (keyboard users get "See all") */}
-          <LoadingImage
-            loading="lazy"
-            src={resolveAssetUrl(src)}
+          <ResponsiveImage
+            hasShimmer
+            src={src}
+            sizes="(max-width: 600px) 50vw, 240px"
             alt="Portfolio"
             onClick={() => onZoom(src)}
             className={joinClassNames(pageGlobal.pfimg, styles.image)}

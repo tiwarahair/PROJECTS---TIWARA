@@ -1,7 +1,7 @@
-import type { CSSProperties, MouseEvent, RefObject } from "react";
+import type { MouseEvent, RefObject } from "react";
 import { Link } from "react-router";
-import { loadingImageClassName } from "../../components/loading-image/loading-image";
-import { useImageLoaded } from "../../hooks/use-image-loaded";
+import { ResponsiveImage } from "../../components/responsive-image/responsive-image";
+import { PROFILE_COVER_SIZES } from "../../utils/image-sources";
 import { joinClassNames } from "../../utils/class-names";
 import type { LastSearch } from "../../utils/last-search";
 import { BackPath, HeartPath, SharePaths } from "./profile-icons";
@@ -53,13 +53,6 @@ export const ProfileCover = ({
     onToggleSaved,
   } = actions;
 
-  const isCoverLoaded = useImageLoaded(coverUrl);
-
-  // the stylist's cover photo; without one the CSS shows the brand placeholder
-  const heroStyle = (
-    coverUrl && isCoverLoaded ? { "--hero-image": `url("${coverUrl}")` } : {}
-  ) as CSSProperties;
-
   return (
     <div className={styles.wrap}>
       {back.has && (
@@ -95,13 +88,21 @@ export const ProfileCover = ({
           role="img"
           aria-label={name}
           onClick={onToggleCoverActions}
-          className={joinClassNames(
-            pageGlobal.scpHero,
-            styles.hero,
-            !isCoverLoaded && loadingImageClassName,
+          className={joinClassNames(pageGlobal.scpHero, styles.hero)}
+        >
+          {/* without a cover the CSS shows the brand placeholder */}
+          {coverUrl && (
+            <ResponsiveImage
+              hasShimmer
+              className={styles.heroImage}
+              src={coverUrl}
+              sizes={PROFILE_COVER_SIZES}
+              loading="eager"
+              fetchPriority="high"
+              alt=""
+            />
           )}
-          style={heroStyle}
-        ></div>
+        </div>
         <div
           data-on={coverActionsOn ? "true" : "false"}
           className={joinClassNames(pageGlobal.pfCov, styles.coverActions)}

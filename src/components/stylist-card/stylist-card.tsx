@@ -1,10 +1,12 @@
+import {
+  ResponsiveImage,
+  preloadImage,
+} from "../responsive-image/responsive-image";
+import { PROFILE_COVER_SIZES } from "../../utils/image-sources";
 import type { MouseEvent, ReactNode } from "react";
-import { preload } from "react-dom";
 import { Link } from "react-router";
-import { LoadingImage } from "../loading-image/loading-image";
 import { api } from "../../stores/api-slice";
 import { useFavourites } from "../../hooks/use-favourites";
-import { resolveAssetUrl } from "../../utils/asset-url";
 import { joinClassNames } from "../../utils/class-names";
 import styles from "../../styles/components/stylist-card/stylist-card.module.css";
 
@@ -39,6 +41,8 @@ export interface StylistCardProps {
   services?: StylistCardService[];
   stylistId?: string;
   bookHref?: string;
+  /** Above the fold (the first search results): load the cover straight away. */
+  priority?: boolean;
 }
 
 interface CardLinkProps {
@@ -50,6 +54,8 @@ interface CardLinkProps {
   /** Hover, focus or touch: the visitor is about to open it. */
   onIntent?: () => void;
 }
+
+const COVER_SIZES = "(max-width: 700px) 90vw, 400px";
 
 /** Internal routes use the router; "#" and anything else stay plain anchors. */
 const CardLink = ({
@@ -109,6 +115,7 @@ export const StylistCard = ({
   services = [],
   stylistId,
   bookHref = "",
+  priority = false,
 }: StylistCardProps) => {
   const { isFavourite, toggleFavourite } = useFavourites();
 
@@ -125,8 +132,7 @@ export const StylistCard = ({
 
     prefetchProfile(slug, { ifOlderThan: 60 });
 
-    // eslint-disable-next-line id-length -- React preload() option name
-    if (cover) preload(resolveAssetUrl(cover), { as: "image" });
+    if (cover) preloadImage(cover, PROFILE_COVER_SIZES);
   };
 
   const isSaved = !!id && isFavourite(id);
@@ -151,10 +157,13 @@ export const StylistCard = ({
         >
           {/* stycover / rescover: Home and Search style the cover from outside */}
           {cover ? (
-            <LoadingImage
+            <ResponsiveImage
+              hasShimmer
               className={joinClassNames("stycover rescover", styles.cover)}
-              loading="lazy"
-              src={resolveAssetUrl(cover)}
+              loading={priority ? "eager" : "lazy"}
+              fetchPriority={priority ? "high" : undefined}
+              src={cover}
+              sizes={COVER_SIZES}
               alt={stylistName}
             />
           ) : (

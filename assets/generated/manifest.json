@@ -1,0 +1,290 @@
+{
+  "site/ceo.jpeg": {
+    "width": 1536,
+    "height": 2304,
+    "widths": [
+      640,
+      1080,
+      1536
+    ]
+  },
+  "site/duo-comb.jpeg": {
+    "width": 1536,
+    "height": 2304,
+    "widths": [
+      640,
+      1080,
+      1536
+    ]
+  },
+  "site/duo-lounge.jpeg": {
+    "width": 1536,
+    "height": 2304,
+    "widths": [
+      640,
+      1080,
+      1536
+    ]
+  },
+  "site/hero.jpg": {
+    "width": 1536,
+    "height": 2304,
+    "widths": [
+      640,
+      1080,
+      1536
+    ]
+  },
+  "site/list-your-business-image.jpeg": {
+    "width": 1536,
+    "height": 2304,
+    "widths": [
+      640,
+      1080,
+      1536
+    ]
+  },
+  "site/onboarding-client.jpg": {
+    "width": 1100,
+    "height": 1650,
+    "widths": [
+      640,
+      1080,
+      1100
+    ]
+  },
+  "site/onboarding-stylist.jpg": {
+    "width": 1100,
+    "height": 1650,
+    "widths": [
+      640,
+      1080,
+      1100
+    ]
+  },
+  "site/onboarding-welcome.jpg": {
+    "width": 1100,
+    "height": 1650,
+    "widths": [
+      640,
+      1080,
+      1100
+    ]
+  },
+  "site/problem.jpeg": {
+    "width": 2304,
+    "height": 1536,
+    "widths": [
+      640,
+      1080,
+      1536
+    ]
+  },
+  "demo/portfolio/IMG_1538.jpg": {
+    "width": 733,
+    "height": 1100,
+    "widths": [
+      400,
+      733
+    ]
+  },
+  "demo/portfolio/IMG_1572.jpg": {
+    "width": 733,
+    "height": 1100,
+    "widths": [
+      400,
+      733
+    ]
+  },
+  "demo/portfolio/IMG_1581.jpg": {
+    "width": 733,
+    "height": 1100,
+    "widths": [
+      400,
+      733
+    ]
+  },
+  "demo/portfolio/IMG_1599.jpg": {
+    "width": 733,
+    "height": 1100,
+    "widths": [
+      400,
+      733
+    ]
+  },
+  "demo/portfolio/IMG_1772.jpg": {
+    "width": 733,
+    "height": 1100,
+    "widths": [
+      400,
+      733
+    ]
+  },
+  "demo/portfolio/home-locs-twists.jpg": {
+    "width": 825,
+    "height": 1100,
+    "widths": [
+      400,
+      800,
+      825
+    ]
+  },
+  "demo/portfolio/natural-cornrows.jpg": {
+    "width": 1290,
+    "height": 1715,
+    "widths": [
+      400,
+      800,
+      1200
+    ]
+  },
+  "demo/portfolio/w160800.jpg": {
+    "width": 733,
+    "height": 1100,
+    "widths": [
+      400,
+      733
+    ]
+  },
+  "demo/portfolio/w160826.jpg": {
+    "width": 733,
+    "height": 1100,
+    "widths": [
+      400,
+      733
+    ]
+  },
+  "demo/portfolio/w160846.jpg": {
+    "width": 733,
+    "height": 1100,
+    "widths": [
+      400,
+      733
+    ]
+  },
+  "demo/portfolio/w160945.jpg": {
+    "width": 733,
+    "height": 1100,
+    "widths": [
+      400,
+      733
+    ]
+  },
+  "demo/portfolio/w161025.jpg": {
+    "width": 733,
+    "height": 1100,
+    "widths": [
+      400,
+      733
+    ]
+  },
+  "demo/portfolio/w161027.jpg": {
+    "width": 733,
+    "height": 1100,
+    "widths": [
+      400,
+      733
+    ]
+  },
+  "demo/portfolio/w161153.jpg": {
+    "width": 733,
+    "height": 1100,
+    "widths": [
+      400,
+      733
+    ]
+  },
+  "demo/portfolio/w161156.jpg": {
+    "width": 733,
+    "height": 1100,
+    "widths": [
+      400,
+      733
+    ]
+  },
+  "demo/portfolio/w161907.jpg": {
+    "width": 733,
+    "height": 1100,
+    "widths": [
+      400,
+      733
+    ]
+  },
+  "demo/portfolio/w162139.jpg": {
+    "width": 825,
+    "height": 1100,
+    "widths": [
+      400,
+      800,
+      825
+    ]
+  },
+  "demo/stylists/IMG_0013.jpg": {
+    "width": 1100,
+    "height": 733,
+    "widths": [
+      400,
+      800,
+      1100
+    ]
+  },
+  "demo/stylists/w160524.jpg": {
+    "width": 825,
+    "height": 1100,
+    "widths": [
+      400,
+      800,
+      825
+    ]
+  },
+  "demo/stylists/w160944.jpg": {
+    "width": 733,
+    "height": 1100,
+    "widths": [
+      400,
+      733
+    ]
+  },
+  "demo/stylists/w161154.jpg": {
+    "width": 733,
+    "height": 1100,
+    "widths": [
+      400,
+      733
+    ]
+  },
+  "demo/stylists/w161244.jpg": {
+    "width": 733,
+    "height": 1100,
+    "widths": [
+      400,
+      733
+    ]
+  },
+  "demo/stylists/w161512.jpg": {
+    "width": 733,
+    "height": 1100,
+    "widths": [
+      400,
+      733
+    ]
+  },
+  "demo/stylists/w161942.jpg": {
+    "width": 825,
+    "height": 1100,
+    "widths": [
+      400,
+      800,
+      825
+    ]
+  },
+  "demo/stylists/w162031.jpg": {
+    "width": 825,
+    "height": 1100,
+    "widths": [
+      400,
+      800,
+      825
+    ]
+  }
+}

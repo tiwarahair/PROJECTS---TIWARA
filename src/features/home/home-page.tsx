@@ -1,10 +1,9 @@
+import { preloadImage } from "../../components/responsive-image/responsive-image";
 import { useLayoutEffect, useRef } from "react";
 import type { CSSProperties } from "react";
-import { preload } from "react-dom";
 import { FavHost } from "../../components/fav-host/fav-host";
 import { WelcomeToast } from "../../components/welcome-toast/welcome-toast";
 import { useAppSelector } from "../../stores/hooks";
-import { getAssetUrl } from "../../utils/asset-url";
 import { BookSlotTiles } from "./book-slot-tiles";
 import { FaqSection } from "./faq-section";
 import { ForStylistsSection } from "./for-stylists-section";
@@ -45,10 +44,7 @@ export const HomePage = ({
 
   useHomeMotion(rootRef, showWhy);
 
-  const heroUrl = getAssetUrl("site/hero.jpg");
-
-  // eslint-disable-next-line id-length -- React preload() option name
-  preload(heroUrl, { as: "image", fetchPriority: "high" });
+  preloadImage("site/hero.jpg", "100vw", "high");
 
   // page-wide rules (body background, colour tokens, smooth scroll) apply while Home is mounted
   useLayoutEffect(() => {

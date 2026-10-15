@@ -1,5 +1,5 @@
+import { ResponsiveImage } from "../../components/responsive-image/responsive-image";
 import { Link } from "react-router";
-import { getAssetUrl } from "../../utils/asset-url";
 import { joinClassNames } from "../../utils/class-names";
 import { ArrowIcon } from "./arrow-icon";
 import page from "../../styles/features/home/home-page.module.css";
@@ -37,9 +37,9 @@ export const BookSlotTiles = () => (
           to="/search"
           className={joinClassNames(page.duotile, styles.tile)}
         >
-          <img
-            loading="lazy"
-            src={getAssetUrl(image)}
+          <ResponsiveImage
+            src={image}
+            sizes="(max-width: 760px) 100vw, 50vw"
             alt={alt}
             className={imageClass}
           />

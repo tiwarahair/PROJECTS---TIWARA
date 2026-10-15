@@ -1,6 +1,6 @@
+import { ResponsiveImage } from "../../components/responsive-image/responsive-image";
 import { Link } from "react-router";
 import { serviceGroups } from "../../data";
-import { getAssetUrl } from "../../utils/asset-url";
 import { joinClassNames } from "../../utils/class-names";
 import page from "../../styles/features/home/home-page.module.css";
 import styles from "../../styles/features/home/services-section.module.css";
@@ -59,9 +59,9 @@ export const ServicesSection = () => (
               </span>
             </div>
             {image && (
-              <img
-                loading="lazy"
-                src={getAssetUrl(image)}
+              <ResponsiveImage
+                src={image}
+                sizes="190px"
                 alt={name}
                 className={joinClassNames(page.svcmedia, styles.media)}
               />

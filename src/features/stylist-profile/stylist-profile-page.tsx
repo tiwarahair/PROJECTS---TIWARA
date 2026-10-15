@@ -6,7 +6,7 @@ import { SiteHeader } from "../../components/site-header/site-header";
 import { WelcomeToast } from "../../components/welcome-toast/welcome-toast";
 import { useFavourites } from "../../hooks/use-favourites";
 import { getShareData, useShare } from "../../hooks/use-share";
-import { getAssetUrl, resolveAssetUrl } from "../../utils/asset-url";
+import { getAssetUrl } from "../../utils/asset-url";
 import { joinClassNames } from "../../utils/class-names";
 import { getLastSearch, markSearchBack } from "../../utils/last-search";
 import { BookingAside } from "./booking-aside";
@@ -118,7 +118,7 @@ export const StylistProfileView = ({
       <SiteHeader loginHref={getLoginHref(stylist.id)} />
       <ProfileCover
         name={name}
-        coverUrl={cover ? resolveAssetUrl(cover) : ""}
+        coverUrl={cover}
         back={back}
         onBack={goBack}
         heroRef={heroRef}

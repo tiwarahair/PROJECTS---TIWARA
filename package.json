@@ -17,6 +17,7 @@
     "test:watch": "vitest",
     "lint": "eslint src",
     "format": "prettier --write src",
+    "images": "node scripts/build-images.mjs",
     "db:start": "supabase start",
     "db:reset": "supabase db reset",
     "db:test": "supabase test db",

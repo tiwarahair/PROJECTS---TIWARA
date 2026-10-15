@@ -1,3 +1,4 @@
+import { ResponsiveImage } from "../../components/responsive-image/responsive-image";
 import { useRef } from "react";
 import type { CSSProperties } from "react";
 import { Avatar } from "../../components/ds/avatar";
@@ -57,7 +58,12 @@ export const ProfilePage = ({
     <div className={styles.profile} data-screen-label="Edit profile">
       <div className={styles.cover}>
         {state.coverUrl ? (
-          <img className={styles.coverImage} src={state.coverUrl} alt="Cover" />
+          <ResponsiveImage
+            className={styles.coverImage}
+            src={state.coverUrl}
+            sizes="(min-width: 1024px) 640px, 100vw"
+            alt="Cover"
+          />
         ) : (
           <div
             className={styles.coverPlaceholder}
@@ -171,9 +177,10 @@ export const ProfilePage = ({
           <div className={styles.photos}>
             {view.portfolio.map(({ key, src, remove }) => (
               <div key={key} className={styles.photo}>
-                <img
+                <ResponsiveImage
                   className={styles.photoImage}
                   src={src}
+                  sizes="(min-width: 1024px) 200px, 33vw"
                   alt="Portfolio photo"
                 />
                 <button

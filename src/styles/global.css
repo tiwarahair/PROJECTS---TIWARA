@@ -34,6 +34,10 @@
     margin: 0;
     max-width: 100%;
   }
+  /* <picture> only picks the file: its <img> lays out as if the wrapper weren't there */
+  picture {
+    display: contents;
+  }
   body {
     font-family: "Hanken Grotesk", sans-serif;
     color: var(--text-primary);

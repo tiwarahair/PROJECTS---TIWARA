@@ -1,5 +1,5 @@
+import { ResponsiveImage } from "../../components/responsive-image/responsive-image";
 import { Link } from "react-router";
-import { getAssetUrl } from "../../utils/asset-url";
 import { joinClassNames } from "../../utils/class-names";
 import page from "../../styles/features/home/home-page.module.css";
 import styles from "../../styles/features/home/meet-section.module.css";
@@ -14,10 +14,10 @@ export const MeetSection = () => (
   >
     <div className={joinClassNames(page.meetgrid, styles.grid)}>
       <div data-rv="" className={styles.photoFrame}>
-        <img
+        <ResponsiveImage
           data-plx=""
-          loading="lazy"
-          src={getAssetUrl("site/ceo.jpeg")}
+          src="site/ceo.jpeg"
+          sizes="(max-width: 860px) 100vw, 600px"
           alt="Kashope in the salon"
           className={styles.photo}
         />

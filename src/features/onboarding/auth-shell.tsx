@@ -1,5 +1,5 @@
 import type { CSSProperties, FocusEvent, ReactNode } from "react";
-import { getAssetUrl } from "../../utils/asset-url";
+import { getAssetImageSet, getAssetUrl } from "../../utils/asset-url";
 import { joinClassNames } from "../../utils/class-names";
 import { BENEFITS, FOOTER_SCREENS, PHOTOS } from "./onboarding-data";
 import type { OnboardingLayout } from "./onboarding-layout";
@@ -29,8 +29,12 @@ const HeroPhoto = ({
 }) => {
   const [src] = PHOTOS[photoKey];
 
+  const imageSet = getAssetImageSet(src, 1080);
+  const plainPhoto = `url('${getAssetUrl(src)}')`;
+
   const photoStyle = {
-    "--ob-photo": `url('${getAssetUrl(src)}')`,
+    "--ob-photo": imageSet?.jpeg ?? plainPhoto,
+    "--ob-photo-set": imageSet?.imageSet ?? plainPhoto,
   } as CSSProperties;
 
   return (

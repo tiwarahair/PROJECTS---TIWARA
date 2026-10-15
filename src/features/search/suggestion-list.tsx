@@ -1,6 +1,5 @@
-import { LoadingImage } from "../../components/loading-image/loading-image";
+import { ResponsiveImage } from "../../components/responsive-image/responsive-image";
 import { SuggestionRowSkeleton } from "../../components/skeleton/suggestion-row-skeleton";
-import { resolveAssetUrl } from "../../utils/asset-url";
 import { joinClassNames } from "../../utils/class-names";
 import controls from "../../styles/features/search/search-controls.module.css";
 import type { WhatChip } from "./search-state";
@@ -56,8 +55,10 @@ const SuggestionButton = ({
       </span>
     )}
     {!!row.image && (
-      <LoadingImage
-        src={resolveAssetUrl(row.image)}
+      <ResponsiveImage
+        hasShimmer
+        src={row.image}
+        sizes="36px"
         alt=""
         className={styles.rowAvatar}
       />

@@ -1,5 +1,6 @@
 import Skeleton from "react-loading-skeleton";
-import { resolveAssetUrl } from "../../utils/asset-url";
+import { ResponsiveImage } from "../responsive-image/responsive-image";
+import { PROFILE_COVER_SIZES } from "../../utils/image-sources";
 import { joinClassNames } from "../../utils/class-names";
 import styles from "../../styles/components/skeleton/profile-skeleton.module.css";
 
@@ -18,9 +19,12 @@ export interface ProfileSkeletonProps {
 export const ProfileSkeleton = ({ preview }: ProfileSkeletonProps) => (
   <div aria-hidden="true" className={styles.page}>
     {preview?.cover && (
-      <img
+      <ResponsiveImage
         className={joinClassNames(styles.cover, styles.coverImage)}
-        src={resolveAssetUrl(preview.cover)}
+        src={preview.cover}
+        sizes={PROFILE_COVER_SIZES}
+        loading="eager"
+        fetchPriority="high"
         alt=""
       />
     )}

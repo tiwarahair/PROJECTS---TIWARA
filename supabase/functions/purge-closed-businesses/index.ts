@@ -5,6 +5,21 @@ import { createClient } from "npm:@supabase/supabase-js@2";
 const PHOTO_BUCKET = "stylist-photos";
 const BATCH = 100;
 
+// covers and portfolio photos ("…-full.jpg") have copies beside them: same widths as src/utils/image-sources.ts
+const UPLOAD_WIDTHS = [400, 800, 1200];
+
+const withCopies = (path: string) =>
+  path.endsWith("-full.jpg")
+    ? [
+        path,
+        ...UPLOAD_WIDTHS.flatMap((width) =>
+          ["webp", "jpg"].map((extension) =>
+            path.replace(/-full\.jpg$/, `-${width}.${extension}`),
+          ),
+        ),
+      ]
+    : [path];
+
 const supabase = createClient(
   Deno.env.get("SUPABASE_URL")!,
   Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!,
@@ -16,9 +31,13 @@ Deno.serve(async (request) => {
   if (!secret || request.headers.get("x-cron-secret") !== secret)
     return new Response("Forbidden", { status: 403 });
 
-  const { data: photos, error } = await supabase.rpc("get_due_closure_photos");
+  const { data: closurePhotos, error } = await supabase.rpc(
+    "get_due_closure_photos",
+  );
 
   if (error) return new Response(error.message, { status: 500 });
+
+  const photos: string[] = closurePhotos.flatMap(withCopies);
 
   for (let start = 0; start < photos.length; start += BATCH) {
     const { error: removeError } = await supabase.storage
