@@ -1,4 +1,4 @@
-// Search's live data: the place, Google suggestions, result pages, the filter sheet's total and stylist suggestions.
+// Search's live data: the place, Google suggestions (from PlacesBridge), result pages, the filter sheet's total and stylist suggestions.
 import { skipToken } from "@reduxjs/toolkit/query";
 import { useDebouncedValue } from "../../hooks/use-debounced-value";
 import { useIsSlow } from "../../hooks/use-is-slow";
@@ -10,19 +10,19 @@ import { toResultCards } from "./search-cards";
 import { getPlace, getStyleSelection, toSearchArgs } from "./search-logic";
 import type { FilterDraft, SearchState } from "./search-state";
 import { useCurrentPosition } from "./use-current-position";
-import { usePlaceSuggestions } from "./use-place-suggestions";
+import type { PlaceSuggestions } from "./use-place-suggestions";
 
 const STYLIST_SUGGESTIONS = 8;
 
-export const useSearchData = (state: SearchState, filterDraft: FilterDraft) => {
+export const useSearchData = (
+  state: SearchState,
+  filterDraft: FilterDraft,
+  places: PlaceSuggestions,
+) => {
   const location = useCurrentPosition();
 
   const place = getPlace(state.query, location.position);
   const selection = getStyleSelection(state);
-
-  const places = usePlaceSuggestions(
-    state.whereTyped ? (state.whereText ?? "") : "",
-  );
 
   // "Current location": hold the search briefly for the position rather than searching twice
   const isWaitingForPlace = location.isWaiting && !place.point;

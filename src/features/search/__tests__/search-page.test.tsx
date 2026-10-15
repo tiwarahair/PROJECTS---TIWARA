@@ -1,4 +1,5 @@
 import { act, screen, within } from "@testing-library/react";
+import { useMapsLibrary } from "@vis.gl/react-google-maps";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { searchStylists } from "../../../lib/search-api";
 import { renderWithStore } from "../../../test/render-with-store";
@@ -32,6 +33,21 @@ describe("SearchPage", () => {
   afterEach(() => {
     vi.useRealTimers();
     vi.unstubAllGlobals();
+  });
+
+  it("loads Google's places only once Where is opened", async () => {
+    vi.mocked(useMapsLibrary).mockClear();
+    renderWithStore(<SearchPage />, "/search");
+
+    await screen.findAllByRole("link", { name: "NaturallyNia" });
+
+    expect(useMapsLibrary).not.toHaveBeenCalled();
+
+    await user.click(
+      screen.getByRole("combobox", { name: "Area or postcode" }),
+    );
+
+    expect(useMapsLibrary).toHaveBeenCalledWith("places");
   });
 
   it("without a location it lists every stylist and offers to use the location", async () => {

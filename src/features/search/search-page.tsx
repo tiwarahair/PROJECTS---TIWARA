@@ -5,7 +5,6 @@ import { StylistCard } from "../../components/stylist-card/stylist-card";
 import { WelcomeToast } from "../../components/welcome-toast/welcome-toast";
 import { useLoadMore } from "../../hooks/use-load-more";
 import { useSearchMemory } from "../../hooks/use-search-memory";
-import { MapsProvider } from "../../lib/google-maps";
 import { DatePopover } from "./date-picker";
 import { FilterBar } from "./filter-bar";
 import { FiltersSheet } from "./filters-sheet";
@@ -14,6 +13,7 @@ import { MobileSearchSheet } from "./mobile-search-sheet";
 import pageGlobal from "../../styles/features/search/search-page-global.module.css";
 import { SearchNav } from "./search-nav";
 import styles from "../../styles/features/search/search-page.module.css";
+import { PlacesBridge } from "./places-bridge";
 import { useSearch } from "./use-search";
 import type { SearchController } from "./use-search";
 
@@ -28,7 +28,7 @@ const getLoadingCount = ({ isSlow, isSlowMore }: SearchController) => {
 };
 
 /** Search & results, route "/search". */
-const SearchView = () => {
+export const SearchPage = () => {
   const search = useSearch();
   const { state, place, selection, cards, suggestions, actions } = search;
 
@@ -55,6 +55,7 @@ const SearchView = () => {
 
   return (
     <div data-screen-label="Search" className={styles.page}>
+      {search.placesBridge && <PlacesBridge {...search.placesBridge} />}
       {!state.mobileView && (state.whatOpen || state.whereOpen) && (
         <div
           onClick={actions.closeDropdowns}
@@ -119,9 +120,3 @@ const SearchView = () => {
     </div>
   );
 };
-
-export const SearchPage = () => (
-  <MapsProvider>
-    <SearchView />
-  </MapsProvider>
-);

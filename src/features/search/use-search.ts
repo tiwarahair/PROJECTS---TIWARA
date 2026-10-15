@@ -12,6 +12,7 @@ import { getWhatModel, getWhereModel } from "./search-suggestions";
 import { CLOSE_ALL, DEFAULT_DRAFT } from "./search-update";
 import type { Update } from "./search-update";
 import { useSearchData } from "./use-search-data";
+import { NO_PLACES } from "./use-place-suggestions";
 
 const SHEET_CLOSE_MS = 330;
 
@@ -113,7 +114,14 @@ export const useSearch = () => {
   }, [state, navigate]);
 
   const filterDraft = state.filtersDraft || DEFAULT_DRAFT;
-  const data = useSearchData(state, filterDraft);
+
+  // Google Maps loads once Where is first opened (PlacesBridge), not on every visit
+  const [places, setPlaces] = useState(NO_PLACES);
+  const [isPlacesWanted, setIsPlacesWanted] = useState(false);
+
+  if (!isPlacesWanted && state.whereOpen) setIsPlacesWanted(true);
+
+  const data = useSearchData(state, filterDraft, places);
   const { selection, place } = data;
   const what = getWhatModel(state, selection, data.stylistSuggestions);
   const where = getWhereModel(state, place, data.places);
@@ -182,6 +190,12 @@ export const useSearch = () => {
 
   return {
     ...data,
+    placesBridge: isPlacesWanted
+      ? {
+          text: state.whereTyped ? (state.whereText ?? "") : "",
+          onChange: setPlaces,
+        }
+      : null,
     state,
     refs,
     viewportWidth,

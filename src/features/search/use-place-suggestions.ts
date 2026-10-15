@@ -1,5 +1,5 @@
 import { useMapsLibrary } from "@vis.gl/react-google-maps";
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import type { LatLng } from "../../lib/google-maps";
 
 export interface PlaceSuggestion {
@@ -10,6 +10,9 @@ export interface PlaceSuggestion {
 
 const SEARCH_DELAY_MS = 200;
 
+// one empty list, so "no suggestions" doesn't look like a change on every render
+const NO_SUGGESTIONS: PlaceSuggestion[] = [];
+
 /** UK areas, towns and postcodes from Google for the typed text; resolve() gets a picked one's point. */
 export const usePlaceSuggestions = (text: string) => {
   const places = useMapsLibrary("places");
@@ -17,7 +20,7 @@ export const usePlaceSuggestions = (text: string) => {
 
   const [found, setFound] = useState({
     input: "",
-    suggestions: [] as PlaceSuggestion[],
+    suggestions: NO_SUGGESTIONS,
   });
 
   const sessionRef = useRef<google.maps.places.AutocompleteSessionToken | null>(
@@ -82,10 +85,24 @@ export const usePlaceSuggestions = (text: string) => {
     [],
   );
 
-  return {
-    suggestions: found.input === input ? found.suggestions : [],
-    // without Google (failed to load) there is nothing to wait for
-    isSearching: !!places && input.length >= 2 && found.input !== input,
-    resolve,
-  };
+  const suggestions =
+    found.input === input ? found.suggestions : NO_SUGGESTIONS;
+
+  // without Google (failed to load) there is nothing to wait for
+  const isSearching = !!places && input.length >= 2 && found.input !== input;
+
+  // stable while nothing changes: PlacesBridge passes it up on every change
+  return useMemo(
+    () => ({ suggestions, isSearching, resolve }),
+    [suggestions, isSearching, resolve],
+  );
+};
+
+export type PlaceSuggestions = ReturnType<typeof usePlaceSuggestions>;
+
+/** Before Google has loaded: no suggestions yet. */
+export const NO_PLACES: PlaceSuggestions = {
+  suggestions: NO_SUGGESTIONS,
+  isSearching: false,
+  resolve: async () => null,
 };
