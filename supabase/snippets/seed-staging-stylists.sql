@@ -1,6 +1,6 @@
 -- Staging only: 30 made-up stylists around Greater Manchester, live and bookable.
 -- Run in the Supabase SQL editor for staging. Safe to re-run: it replaces the same 30 (staging-seed-N@example.com).
--- Covers are app assets (demo/stylists/*, the dev covers); profile photos are left empty.
+-- Covers and portfolios are app assets (the dev demo/stylists and demo/portfolio photos); profile photos are left empty.
 -- remove-staging-stylists.sql deletes them again.
 
 -- one do block, so the SQL editor runs it as a single statement (all or nothing)
@@ -204,6 +204,18 @@ select stylist_id,
   (array[0, 0, 15, 0])[n % 4 + 1],
   now() + interval '1 second'
 from seeded;
+
+-- 3–6 portfolio photos each, cycling through the 17 dev portfolio photos
+insert into public.portfolio_photos (stylist_id, path, sort)
+select stylist_id,
+  'demo/portfolio/' || (array[
+    'IMG_1538.jpg', 'IMG_1572.jpg', 'IMG_1581.jpg', 'IMG_1599.jpg', 'IMG_1772.jpg', 'home-locs-twists.jpg',
+    'natural-cornrows.jpg', 'w160800.jpg', 'w160826.jpg', 'w160846.jpg', 'w160945.jpg', 'w161025.jpg',
+    'w161027.jpg', 'w161153.jpg', 'w161156.jpg', 'w161907.jpg', 'w162139.jpg'
+  ])[(n * 3 + photo) % 17 + 1],
+  photo
+from seeded
+cross join generate_series(0, 2 + n % 4) as photo;
 
 -- last, because service and confirmation changes re-check go-live (these accounts have no Stripe or 2FA)
 update public.stylists set status = 'live' where id in (select stylist_id from seeded);

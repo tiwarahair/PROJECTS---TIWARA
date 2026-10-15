@@ -1,5 +1,5 @@
 begin;
-select plan(34);
+select plan(36);
 
 create function pg_temp.sign_up(user_id uuid, user_email text, meta jsonb)
 returns void
@@ -128,6 +128,14 @@ select (select one from ids), 'p/' || n, n from generate_series(1, 20) as n;
 select throws_ok(
   $$insert into public.portfolio_photos (stylist_id, path, sort) values ((select one from ids), 'p/21', 21)$$,
   'P0001', 'a portfolio holds up to 20 photos', 'portfolios hold up to 20 photos'
+);
+select lives_ok(
+  $$insert into public.portfolio_photos (stylist_id, path, sort) values ((select two from ids), 'p/1', 0)$$,
+  'another stylist can use the same photo path'
+);
+select throws_ok(
+  $$insert into public.portfolio_photos (stylist_id, path, sort) values ((select two from ids), 'p/1', 1)$$,
+  '23505', null, 'a stylist can''t list the same photo twice'
 );
 
 -- closing a business
