@@ -1,5 +1,4 @@
 // Studio's reads and writes against Supabase (row shapes; studio-records converts them).
-import imageCompression from "browser-image-compression";
 import type { TaxDetails } from "../components/tax-details-form/tax-details-logic";
 import type { Tables, TablesInsert, TablesUpdate } from "../types/database";
 import { supabase } from "./supabase";
@@ -61,6 +60,9 @@ export const getPhotoPath = (url: string) =>
 
 /** Resizes in the browser (long side 2000px for covers and portfolio, 600px for avatars), then uploads. */
 export const uploadPhoto = async (path: string, file: File, maxSide = 2000) => {
+  const { default: imageCompression } =
+    await import("browser-image-compression");
+
   const resized = await imageCompression(file, {
     maxWidthOrHeight: maxSide,
     maxSizeMB: 1.5,

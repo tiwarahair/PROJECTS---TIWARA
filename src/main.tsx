@@ -11,6 +11,9 @@ const rootElement = document.getElementById("root");
 
 if (!rootElement) throw new Error("Missing #root element");
 
+// a deploy replaced the page chunks this tab expects: reload to get the new ones
+window.addEventListener("vite:preloadError", () => window.location.reload());
+
 const store = createStore();
 
 startAuthListener(store);

@@ -1,18 +1,6 @@
 import { Navigate, createBrowserRouter } from "react-router";
 import type { RouteObject } from "react-router";
 import { AppLayout } from "./app-layout";
-import { AccountPage } from "./features/account/account-page";
-import { BookingPage } from "./features/booking/booking-page";
-import { DevHarness } from "./features/dev-harness/dev-harness";
-import { DsSpecimens } from "./features/ds-specimens/ds-specimens";
-import { ManageBookingPage } from "./features/manage-booking/manage-booking-page";
-import { SaveDetailsPage } from "./features/save-details/save-details-page";
-import { OnboardingPage } from "./features/onboarding/onboarding-page";
-import { HelpPage } from "./features/help/help-page";
-import { HomePage } from "./features/home/home-page";
-import { SearchPage } from "./features/search/search-page";
-import { StylistProfilePage } from "./features/stylist-profile/stylist-profile-route";
-import { StudioRoute } from "./features/studio/studio-route";
 
 // preserve links shared before profiles moved to /{slug}
 const OldProfileLink = () => (
@@ -23,29 +11,98 @@ const OldProfileLink = () => (
 );
 
 const appRoutes: RouteObject[] = [
-  { path: "/", element: <HomePage /> },
-  { path: "/search", element: <SearchPage /> },
+  {
+    path: "/",
+    lazy: () =>
+      import("./features/home/home-page").then(({ HomePage }) => ({
+        Component: HomePage,
+      })),
+  },
+  {
+    path: "/search",
+    lazy: () =>
+      import("./features/search/search-page").then(({ SearchPage }) => ({
+        Component: SearchPage,
+      })),
+  },
   { path: "/stylist", element: <OldProfileLink /> },
-  { path: "/book", element: <BookingPage /> },
-  { path: "/manage", element: <ManageBookingPage /> },
-  { path: "/save-details", element: <SaveDetailsPage /> },
-  { path: "/account", element: <AccountPage /> },
-  { path: "/help", element: <HelpPage /> },
+  {
+    path: "/book",
+    lazy: () =>
+      import("./features/booking/booking-page").then(({ BookingPage }) => ({
+        Component: BookingPage,
+      })),
+  },
+  {
+    path: "/manage",
+    lazy: () =>
+      import("./features/manage-booking/manage-booking-page").then(
+        ({ ManageBookingPage }) => ({ Component: ManageBookingPage }),
+      ),
+  },
+  {
+    path: "/save-details",
+    lazy: () =>
+      import("./features/save-details/save-details-page").then(
+        ({ SaveDetailsPage }) => ({ Component: SaveDetailsPage }),
+      ),
+  },
+  {
+    path: "/account",
+    lazy: () =>
+      import("./features/account/account-page").then(({ AccountPage }) => ({
+        Component: AccountPage,
+      })),
+  },
+  {
+    path: "/help",
+    lazy: () =>
+      import("./features/help/help-page").then(({ HelpPage }) => ({
+        Component: HelpPage,
+      })),
+  },
   // {
   //   path: "/email/email-change-notice",
   //   element: <EmailChangeNoticePage />,
   // } /* ^ TO DO - MAKE THIS AN ACTUAL EMAIL */,
   {
-    element: <OnboardingPage />,
+    lazy: () =>
+      import("./features/onboarding/onboarding-page").then(
+        ({ OnboardingPage }) => ({ Component: OnboardingPage }),
+      ),
     children: [{ path: "/login" }, { path: "/signup" }, { path: "/join" }],
   },
-  { path: "/studio", element: <StudioRoute /> },
-  { path: "/:slug", element: <StylistProfilePage /> },
+  {
+    path: "/studio",
+    lazy: () =>
+      import("./features/studio/studio-route").then(({ StudioRoute }) => ({
+        Component: StudioRoute,
+      })),
+  },
+  {
+    path: "/:slug",
+    lazy: () =>
+      import("./features/stylist-profile/stylist-profile-route").then(
+        ({ StylistProfilePage }) => ({ Component: StylistProfilePage }),
+      ),
+  },
   // dev-only: design-system gallery (mirrors each .card.html) and per-component fixture harnesses
   ...(import.meta.env.DEV
     ? [
-        { path: "/__ds/:card", element: <DsSpecimens /> },
-        { path: "/__harness/:component", element: <DevHarness /> },
+        {
+          path: "/__ds/:card",
+          lazy: () =>
+            import("./features/ds-specimens/ds-specimens").then(
+              ({ DsSpecimens }) => ({ Component: DsSpecimens }),
+            ),
+        },
+        {
+          path: "/__harness/:component",
+          lazy: () =>
+            import("./features/dev-harness/dev-harness").then(
+              ({ DevHarness }) => ({ Component: DevHarness }),
+            ),
+        },
       ]
     : []),
 ];
