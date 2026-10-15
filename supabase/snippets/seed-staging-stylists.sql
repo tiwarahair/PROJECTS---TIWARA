@@ -3,7 +3,9 @@
 -- Covers are app assets (demo/stylists/*, the dev covers); profile photos are left empty.
 -- remove-staging-stylists.sql deletes them again.
 
-begin;
+-- one do block, so the SQL editor runs it as a single statement (all or nothing)
+do $$
+begin
 
 delete from auth.users where email like 'staging-seed-%@example.com';
 
@@ -204,4 +206,5 @@ from seeded;
 -- last, because service and confirmation changes re-check go-live (these accounts have no Stripe or 2FA)
 update public.stylists set status = 'live' where id in (select stylist_id from seeded);
 
-commit;
+end
+$$;
