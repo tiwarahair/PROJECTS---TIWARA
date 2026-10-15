@@ -25,9 +25,12 @@ const FORMATS = [
   },
 ];
 
-// changing FORMATS regenerates every copy
+// drops metadata but keeps the colour profile: wide-colour (Display P3) photos shift colour without it
+const COMMON_OPTIONS = ["-auto-orient", "+profile", "!icc,*"];
+
+// changing these options regenerates every copy
 const SETTINGS_FILE = join(OUTPUT, "settings.json");
-const settings = JSON.stringify(FORMATS);
+const settings = JSON.stringify({ COMMON_OPTIONS, FORMATS });
 const isSameSettings = existsSync(SETTINGS_FILE) && readFileSync(SETTINGS_FILE, "utf8") === settings;
 
 const listPhotos = (folder) =>
@@ -71,7 +74,7 @@ for (const { folder, widths, skip } of SETS) {
 
         if (isFresh(output, source)) continue;
 
-        execFileSync("magick", [source, "-strip", "-resize", `${targetWidth}x>`, ...options, output]);
+        execFileSync("magick", [source, ...COMMON_OPTIONS, "-resize", `${targetWidth}x>`, ...options, output]);
         written++;
       }
     }

@@ -17,7 +17,7 @@ export const MeetSection = () => (
         <ResponsiveImage
           data-plx=""
           src="site/ceo.jpeg"
-          sizes="(max-width: 860px) 100vw, 600px"
+          sizes="(max-width: 860px) 100vw, 720px"
           alt="Kashope in the salon"
           className={styles.photo}
         />
