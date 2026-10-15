@@ -52,6 +52,19 @@ export const supabase = createClient<Database>(supabaseUrl, supabaseKey, {
   auth: { storage: sessionStore },
 });
 
+/**
+ * For data that's the same for everyone (search). It carries no login, so a request never waits for an expired
+ * session to be refreshed first. Anything that depends on who's signed in must use `supabase`.
+ */
+export const publicSupabase = createClient<Database>(supabaseUrl, supabaseKey, {
+  auth: {
+    persistSession: false,
+    autoRefreshToken: false,
+    detectSessionInUrl: false,
+    storageKey: "tw-public",
+  },
+});
+
 /** Moves the current session to the chosen storage by re-saving it. */
 export const rememberDevice = async (remember: boolean) => {
   attempt(

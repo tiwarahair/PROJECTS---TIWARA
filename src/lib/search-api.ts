@@ -1,6 +1,6 @@
 // Searching live stylists (search_stylists), a page at a time.
 import type { Database } from "../types/database";
-import { supabase } from "./supabase";
+import { publicSupabase } from "./supabase";
 
 type SearchFunction = Database["public"]["Functions"]["search_stylists"];
 
@@ -24,7 +24,8 @@ export const searchStylists = async (
   page = 0,
   pageSize = SEARCH_PAGE_SIZE,
 ): Promise<SearchRow[]> => {
-  const { data, error } = await supabase.rpc("search_stylists", {
+  // the same for everyone: no need to wait on the visitor's login
+  const { data, error } = await publicSupabase.rpc("search_stylists", {
     ...args,
     page,
     page_size: pageSize,
