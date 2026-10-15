@@ -62,7 +62,13 @@ export const useHomeMotion = (
 
       // images drift against the scroll inside their own frame — the frame clips, so nothing gaps
       images.forEach((image) => {
-        const frame = image.parentElement;
+        const wrapper = image.parentElement;
+
+        // a <picture> has no box of its own (display: contents): the frame is the element around it
+        const frame =
+          wrapper instanceof HTMLPictureElement
+            ? wrapper.parentElement
+            : wrapper;
 
         const tween = gsap.fromTo(
           image,
