@@ -1,18 +1,43 @@
-:root{
-/* Easing — the house curve is the gentlest of the three the product converged on.
+:root {
+  /* Easing — the house curve is the gentlest of the three the product converged on.
    Applied from audit A1; replaces the single cubic-bezier(.22,.61,.36,1). */
---ease-out:cubic-bezier(.2,.8,.2,1);        /* default: entries, hovers, colour */
---ease-in:cubic-bezier(.4,0,.7,.2);         /* exits only — sheets, dialogs dismissing */
---ease-drawer:cubic-bezier(.32,.72,0,1);    /* sheets and sticky bars arriving */
---ease-inout:cubic-bezier(.4,0,.2,1);       /* layout: width, margin, grid rows */
---ease-spring:cubic-bezier(.34,1.56,.64,1); /* one overshoot, used sparingly */
-/* Durations */
---duration-fast:160ms;   /* press, small colour shifts */
---duration-base:220ms;   /* hovers, menus, popovers */
---duration-mid:280ms;    /* dialogs, staggered entries */
---duration-slow:360ms;   /* sheets, drawers */
---duration-slower:520ms; /* hero reveals */
---duration-scenic:700ms; /* image scale, card arrivals */
-/* Stagger step for grouped entries */
---stagger-step:60ms;
+  --ease-out: cubic-bezier(
+    0.2,
+    0.8,
+    0.2,
+    1
+  ); /* default: entries, hovers, colour */
+  --ease-in: cubic-bezier(
+    0.4,
+    0,
+    0.7,
+    0.2
+  ); /* exits only — sheets, dialogs dismissing */
+  --ease-drawer: cubic-bezier(
+    0.32,
+    0.72,
+    0,
+    1
+  ); /* sheets and sticky bars arriving */
+  --ease-inout: cubic-bezier(
+    0.4,
+    0,
+    0.2,
+    1
+  ); /* layout: width, margin, grid rows */
+  --ease-spring: cubic-bezier(
+    0.34,
+    1.56,
+    0.64,
+    1
+  ); /* one overshoot, used sparingly */
+  /* Durations */
+  --duration-fast: 160ms; /* press, small colour shifts */
+  --duration-base: 220ms; /* hovers, menus, popovers */
+  --duration-mid: 280ms; /* dialogs, staggered entries */
+  --duration-slow: 360ms; /* sheets, drawers */
+  --duration-slower: 520ms; /* hero reveals */
+  --duration-scenic: 700ms; /* image scale, card arrivals */
+  /* Stagger step for grouped entries */
+  --stagger-step: 60ms;
 }
