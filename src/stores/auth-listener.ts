@@ -26,13 +26,18 @@ export const toSessionUser = (session: Session | null): SessionUser | null => {
 };
 
 /** Keeps the session slice in step with Supabase Auth; fires once on start with the stored session. */
-export const startAuthListener = ({ dispatch, getState }: AppStore) =>
-  supabase.auth.onAuthStateChange((_event, session) => {
-    const previousId = getState().session.user?.id;
+export const startAuthListener = ({ dispatch }: AppStore) => {
+  // its own record: logOut() clears the session slice before Supabase reports the sign-out
+  let lastUserId: string | undefined;
+
+  return supabase.auth.onAuthStateChange((_event, session) => {
     const user = toSessionUser(session);
 
-    if (previousId && previousId !== user?.id)
+    // signed out or switched account: nothing cached for the last one may show
+    if (lastUserId && lastUserId !== user?.id)
       dispatch(api.util.resetApiState());
 
+    lastUserId = user?.id;
     dispatch(sessionChanged(user));
   });
+};

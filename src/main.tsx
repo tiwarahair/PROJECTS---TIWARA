@@ -1,3 +1,4 @@
+import { setupListeners } from "@reduxjs/toolkit/query";
 import { StrictMode } from "react";
 import { createRoot } from "react-dom/client";
 import { Provider } from "react-redux";
@@ -19,6 +20,7 @@ const store = createStore();
 
 startAuthListener(store);
 startCacheListener(store);
+setupListeners(store.dispatch);
 
 createRoot(rootElement).render(
   <StrictMode>

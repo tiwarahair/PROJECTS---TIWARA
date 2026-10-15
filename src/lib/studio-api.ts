@@ -75,13 +75,37 @@ export const getPhotoUrl = (path: string) =>
 export const getPhotoPath = (url: string) =>
   url.split(`/${PHOTO_BUCKET}/`)[1] ?? null;
 
+let isWebpEncodable: boolean | null = null;
+
+const canEncodeWebp = () => {
+  if (isWebpEncodable !== null) return isWebpEncodable;
+
+  try {
+    isWebpEncodable = document
+      .createElement("canvas")
+      .toDataURL("image/webp")
+      .startsWith("data:image/webp");
+  } catch {
+    // no canvas to try with: stick to JPEG
+    isWebpEncodable = false;
+  }
+
+  return isWebpEncodable;
+};
+
 type CompressOptions = Parameters<
   typeof import("browser-image-compression").default
 >[1];
 
+// loaded on the first upload, once: most visitors never upload
+let compressorImport: Promise<
+  typeof import("browser-image-compression")
+> | null = null;
+
 const compress = async (file: File, options: CompressOptions) => {
-  const { default: imageCompression } =
-    await import("browser-image-compression");
+  compressorImport ??= import("browser-image-compression");
+
+  const { default: imageCompression } = await compressorImport;
 
   return imageCompression(file, { useWebWorker: true, ...options });
 };
@@ -124,24 +148,31 @@ export const uploadPhotoWithCopies = async (path: string, file: File) => {
   // the compressor sizes by the long side: convert each width to it
   const longSidePerWidth = Math.max(width, height) / width;
 
-  const copies = UPLOAD_WIDTHS.flatMap((copyWidth) =>
-    (["webp", "jpg"] as const).map(async (extension) => {
-      const copy = await compress(file, {
-        maxWidthOrHeight: Math.round(
-          Math.min(copyWidth, width) * longSidePerWidth,
-        ),
-        maxSizeMB: 1,
-        fileType: extension === "webp" ? "image/webp" : "image/jpeg",
-      });
+  const copies = UPLOAD_WIDTHS.map(async (copyWidth) => {
+    const maxWidthOrHeight = Math.round(
+      Math.min(copyWidth, width) * longSidePerWidth,
+    );
 
-      // a browser that can't encode WebP hands back a JPEG: it still goes under the .webp name, so that source loads
-      await putFile(
-        toUploadVariant(path, copyWidth, extension),
-        copy,
-        copy.type,
-      );
-    }),
-  );
+    const jpeg = await compress(file, {
+      maxWidthOrHeight,
+      maxSizeMB: 1,
+      fileType: "image/jpeg",
+    });
+
+    // a browser that can't encode WebP (Safari) stores the JPEG under the .webp name, so that source still loads
+    const webp = canEncodeWebp()
+      ? await compress(file, {
+          maxWidthOrHeight,
+          maxSizeMB: 1,
+          fileType: "image/webp",
+        })
+      : jpeg;
+
+    await Promise.all([
+      putFile(toUploadVariant(path, copyWidth, "jpg"), jpeg, "image/jpeg"),
+      putFile(toUploadVariant(path, copyWidth, "webp"), webp, webp.type),
+    ]);
+  });
 
   await Promise.all(copies);
 
@@ -191,23 +222,26 @@ export const saveService = async (
 ) => {
   const serviceId = service.id ?? "";
 
-  await check(supabase.from("services").upsert(service));
+  // even a half-finished save has changed the menu
+  try {
+    await check(supabase.from("services").upsert(service));
 
-  await check(
-    supabase.from("service_variations").delete().eq("service_id", serviceId),
-  );
+    await check(
+      supabase.from("service_variations").delete().eq("service_id", serviceId),
+    );
 
-  await check(
-    supabase.from("service_addons").delete().eq("service_id", serviceId),
-  );
+    await check(
+      supabase.from("service_addons").delete().eq("service_id", serviceId),
+    );
 
-  if (variations.length)
-    await check(supabase.from("service_variations").insert(variations));
+    if (variations.length)
+      await check(supabase.from("service_variations").insert(variations));
 
-  if (addonLinks.length)
-    await check(supabase.from("service_addons").insert(addonLinks));
-
-  notifyStudioWrite();
+    if (addonLinks.length)
+      await check(supabase.from("service_addons").insert(addonLinks));
+  } finally {
+    notifyStudioWrite();
+  }
 };
 
 export const saveServiceStatus = (id: string, status: string) =>
