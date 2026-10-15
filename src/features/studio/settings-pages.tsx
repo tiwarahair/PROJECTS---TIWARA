@@ -3,6 +3,7 @@ import { useRef } from "react";
 import type { CSSProperties } from "react";
 import { Avatar } from "../../components/ds/avatar";
 import { joinClassNames } from "../../utils/class-names";
+import { PORTFOLIO_ERROR_ID } from "./settings-profile-view";
 import type { SettingsView } from "./settings-view";
 import { TIMES } from "./studio-data";
 import type { StudioController } from "./use-studio";
@@ -166,6 +167,11 @@ export const ProfilePage = ({
           <div className={styles.mutedTop}>
             Up to twenty photos of your work, shown on your public profile.
           </div>
+          {view.portfolioError && (
+            <div id={PORTFOLIO_ERROR_ID} className={styles.error} role="alert">
+              {view.portfolioError}
+            </div>
+          )}
           <input
             className={styles.hiddenInput}
             type="file"

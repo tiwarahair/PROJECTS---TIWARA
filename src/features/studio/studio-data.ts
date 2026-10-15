@@ -487,6 +487,7 @@ export const getInitialStudioState = (): StudioState => {
     linkCard: false,
     lastDone: null,
     portfolio: [],
+    isPortfolioErrorShown: false,
     chartIndex: null,
     dayIndex: 0,
     bookingsLayout: "cal",

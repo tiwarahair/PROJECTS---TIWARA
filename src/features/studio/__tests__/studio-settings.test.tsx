@@ -103,6 +103,49 @@ describe("Studio → Settings", () => {
     ).toHaveTextContent(/^[A-Z]{1,2}$/);
   });
 
+  it("saving the profile needs at least 2 portfolio photos", async () => {
+    Element.prototype.scrollIntoView = vi.fn();
+    setViewport(1440);
+    renderStudio();
+    await user.click(within(getLabelled("Sidebar")).getByTitle("Settings"));
+
+    const saveProfile = () =>
+      user.click(
+        screen
+          .getAllByRole("button", { name: "Save changes" })
+          .at(-1) as HTMLElement,
+      );
+
+    await saveProfile();
+
+    expect(screen.getByRole("alert")).toHaveTextContent(
+      "Provide at least 2 portfolio images",
+    );
+
+    expect(screen.queryByText("Profile saved")).not.toBeInTheDocument();
+
+    const photoInput = getLabelled("Edit profile").querySelector(
+      "input[type=file][multiple]",
+    ) as HTMLInputElement;
+
+    await user.upload(photoInput, [
+      new File(["a"], "a.jpg", { type: "image/jpeg" }),
+      new File(["b"], "b.jpg", { type: "image/jpeg" }),
+    ]);
+
+    // the photos are read as previews (FileReader) before they're added
+    vi.useRealTimers();
+    await screen.findByText("2 of 20");
+
+    expect(
+      screen.queryByText("Provide at least 2 portfolio images"),
+    ).not.toBeInTheDocument();
+
+    await saveProfile();
+
+    expect(screen.getByText("Profile saved")).toBeInTheDocument();
+  });
+
   it("wide screens open on the profile page with the settings nav", async () => {
     setViewport(1440);
     renderStudio();

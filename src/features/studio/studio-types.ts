@@ -584,6 +584,8 @@ export interface StudioState {
   linkCard: boolean;
   lastDone: string | null;
   portfolio: { id: string; src: string; path?: string }[];
+  /** Saving the profile was tried with too few portfolio photos. */
+  isPortfolioErrorShown: boolean;
   chartIndex: number | null;
   dayIndex: number;
   bookingsLayout: string;

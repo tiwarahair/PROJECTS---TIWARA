@@ -735,3 +735,10 @@
     transform: scale(1) translateY(0);
   }
 }
+
+.error {
+  margin-top: 8px;
+  font-size: 13.5px;
+  font-weight: 600;
+  color: var(--accent-700);
+}
