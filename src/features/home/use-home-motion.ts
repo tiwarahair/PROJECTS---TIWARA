@@ -175,7 +175,7 @@ export const useHomeMotion = (
         heroIntroDone = true;
 
         gsap.fromTo(
-          "#heroframe > img",
+          "#heroframe img",
           { scale: 1.12 },
           { scale: 1, duration: 2.3, ease: "power2.out" },
         );
