@@ -1,4 +1,7 @@
-import { useLayoutEffect } from "react";
+import { useEffect, useLayoutEffect } from "react";
+import { onStudioWrite } from "../../lib/studio-writes";
+import { api } from "../../stores/api-slice";
+import { useAppDispatch } from "../../stores/hooks";
 import { joinClassNames } from "../../utils/class-names";
 import { FilterSheet, QuickActions, SlotPopover } from "./bookings-overlays";
 import { StudioBookings, getBookingsView } from "./studio-bookings";
@@ -45,6 +48,7 @@ export type StudioPageProps = StudioProps;
  */
 export const StudioPage = (props: StudioPageProps) => {
   const studio = useStudio(props);
+  const dispatch = useAppDispatch();
   const { state, isWide } = studio;
   const { isSetupOn, isComplete } = getSetupProgress(studio);
 
@@ -56,6 +60,18 @@ export const StudioPage = (props: StudioPageProps) => {
 
     return () => document.documentElement.classList.remove("studio-page");
   }, []);
+
+  // Studio's own data loaded before this visit's saves: drop it on the way out so the next visit loads afresh
+  useEffect(() => {
+    let hasSaved = false;
+    const stopListening = onStudioWrite(() => (hasSaved = true));
+
+    return () => {
+      stopListening();
+
+      if (hasSaved) dispatch(api.util.invalidateTags(["Studio", "TwoFactor"]));
+    };
+  }, [dispatch]);
 
   return (
     <>

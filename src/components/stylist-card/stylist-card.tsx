@@ -1,6 +1,8 @@
 import type { MouseEvent, ReactNode } from "react";
+import { preload } from "react-dom";
 import { Link } from "react-router";
 import { LoadingImage } from "../loading-image/loading-image";
+import { api } from "../../stores/api-slice";
 import { useFavourites } from "../../hooks/use-favourites";
 import { resolveAssetUrl } from "../../utils/asset-url";
 import { joinClassNames } from "../../utils/class-names";
@@ -39,18 +41,33 @@ export interface StylistCardProps {
   bookHref?: string;
 }
 
+interface CardLinkProps {
+  href: string;
+  className?: string;
+  children: ReactNode;
+  /** Router state for the page it opens (the profile's preview). */
+  state?: unknown;
+  /** Hover, focus or touch: the visitor is about to open it. */
+  onIntent?: () => void;
+}
+
 /** Internal routes use the router; "#" and anything else stay plain anchors. */
 const CardLink = ({
   href,
   className,
   children,
-}: {
-  href: string;
-  className?: string;
-  children: ReactNode;
-}) =>
+  state,
+  onIntent,
+}: CardLinkProps) =>
   href.startsWith("/") ? (
-    <Link to={href} className={className}>
+    <Link
+      to={href}
+      state={state}
+      className={className}
+      onPointerEnter={onIntent}
+      onFocus={onIntent}
+      onTouchStart={onIntent}
+    >
       {children}
     </Link>
   ) : (
@@ -98,6 +115,20 @@ export const StylistCard = ({
   // profile links are "/{slug}"
   const id = stylistId || String(href).split(/[/?]/)[1] || "";
 
+  const prefetchProfile = api.usePrefetch("getStylistProfile");
+  const slug = href.startsWith("/") ? (href.split(/[/?#]/)[1] ?? "") : "";
+  const profileState = { preview: { name: stylistName, area, cover } };
+
+  // the profile's data and cover start loading before the click
+  const handleIntent = () => {
+    if (!slug) return;
+
+    prefetchProfile(slug, { ifOlderThan: 60 });
+
+    // eslint-disable-next-line id-length -- React preload() option name
+    if (cover) preload(resolveAssetUrl(cover), { as: "image" });
+  };
+
   const isSaved = !!id && isFavourite(id);
   const metaText = meta ?? getMeta(services, from);
 
@@ -112,7 +143,12 @@ export const StylistCard = ({
     // plain block wrapper: the card's height:100% resolves against it (auto)
     <div data-dc-host="">
       <div className={styles.card}>
-        <CardLink href={href} className={styles.coverLink}>
+        <CardLink
+          href={href}
+          className={styles.coverLink}
+          state={profileState}
+          onIntent={handleIntent}
+        >
           {/* stycover / rescover: Home and Search style the cover from outside */}
           {cover ? (
             <LoadingImage
@@ -159,7 +195,12 @@ export const StylistCard = ({
         </button>
         <div className={styles.body}>
           <div className={styles.titleRow}>
-            <CardLink href={href} className={styles.name}>
+            <CardLink
+              href={href}
+              className={styles.name}
+              state={profileState}
+              onIntent={handleIntent}
+            >
               {stylistName}
             </CardLink>
             {verified && (

@@ -1,6 +1,7 @@
 // Two-step verification with an authenticator app (Supabase MFA, TOTP): log in, set up, remove, re-confirm.
 import type { User } from "@supabase/supabase-js";
 import { getErrorCode } from "./auth-helpers";
+import { notifyStudioWrite } from "./studio-writes";
 import { supabase } from "./supabase";
 
 /** How recently a code must have been entered for sensitive changes (tax details, payouts). */
@@ -182,6 +183,8 @@ export const confirmTwoFactorEnrolment = async (
     // the name is only a label
   }
 
+  notifyStudioWrite();
+
   return true;
 };
 
@@ -192,6 +195,8 @@ export const removeTwoFactorApp = async (factorId: string, code: string) => {
   const { error } = await supabase.auth.mfa.unenroll({ factorId });
 
   getErrorCode(error, []);
+
+  notifyStudioWrite();
 
   return true;
 };

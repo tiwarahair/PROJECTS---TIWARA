@@ -26,9 +26,11 @@ const toQueryResult = <T>(task: Promise<T>) =>
 export const api = createApi({
   reducerPath: "api",
   baseQuery: fakeBaseQuery<Error>(),
-  tagTypes: ["Studio"],
+  tagTypes: ["Studio", "StylistProfile", "Search", "TwoFactor"],
+  refetchOnReconnect: true,
   endpoints: (build) => ({
     getProfile: build.query<Profile, string>({
+      keepUnusedDataFor: 600,
       queryFn: async (userId) => {
         const { data, error } = await supabase
           .from("profiles")
@@ -84,13 +86,15 @@ export const api = createApi({
         toQueryResult<null>(
           (isClosed ? closeBusiness() : reopenBusiness()).then(() => null),
         ),
-      invalidatesTags: ["Studio"],
+      invalidatesTags: ["Studio", "StylistProfile", "Search"],
     }),
     getStylistStudio: build.query<StylistStudio, string>({
       providesTags: ["Studio"],
       queryFn: (ownerId) => toQueryResult(fetchStylistStudio(ownerId)),
     }),
     getStylistProfile: build.query<PublicProfile | null, string>({
+      providesTags: ["StylistProfile"],
+      keepUnusedDataFor: 300,
       queryFn: (slug) => toQueryResult(fetchPublicProfile(slug)),
       // a retired slug's result is also the current slug's, so its redirect needs no second request
       onQueryStarted: (slug, { dispatch, queryFulfilled }) => {
@@ -106,6 +110,8 @@ export const api = createApi({
     }),
     // results pages for the Search list; each row carries the total
     searchStylists: build.infiniteQuery<SearchRow[], SearchArgs, number>({
+      providesTags: ["Search"],
+      keepUnusedDataFor: 300,
       infiniteQueryOptions: {
         initialPageParam: 0,
         getNextPageParam: (lastPage, _allPages, lastPageParam) =>
@@ -119,9 +125,12 @@ export const api = createApi({
     }),
     // a few rows only: the filter sheet's total and the What dropdown's stylists
     peekStylists: build.query<SearchRow[], { args: SearchArgs; size: number }>({
+      providesTags: ["Search"],
+      keepUnusedDataFor: 300,
       queryFn: ({ args, size }) => toQueryResult(searchStylists(args, 0, size)),
     }),
     getTwoFactorDevices: build.query<TwoFactorDevice[], string>({
+      providesTags: ["TwoFactor"],
       queryFn: () => toQueryResult(listTwoFactorDevices()),
     }),
   }),

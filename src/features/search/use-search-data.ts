@@ -29,6 +29,7 @@ export const useSearchData = (state: SearchState, filterDraft: FilterDraft) => {
 
   const results = useSearchStylistsInfiniteQuery(
     isWaitingForPlace ? skipToken : toSearchArgs(state, place.point),
+    { refetchOnMountOrArgChange: 60 },
   );
 
   const draftPeek = usePeekStylistsQuery(

@@ -5,6 +5,7 @@ import { RouterProvider } from "react-router";
 import "./styles/global.css";
 import { appRouter } from "./app-router";
 import { startAuthListener } from "./stores/auth-listener";
+import { startCacheListener } from "./stores/cache-listener";
 import { createStore } from "./stores/store";
 
 const rootElement = document.getElementById("root");
@@ -17,6 +18,7 @@ window.addEventListener("vite:preloadError", () => window.location.reload());
 const store = createStore();
 
 startAuthListener(store);
+startCacheListener(store);
 
 createRoot(rootElement).render(
   <StrictMode>

@@ -1,6 +1,7 @@
 import type { Session } from "@supabase/supabase-js";
 import { supabase } from "../lib/supabase";
 import type { SessionUser } from "../types/session";
+import { api } from "./api-slice";
 import { sessionChanged } from "./session-slice";
 import type { AppStore } from "./store";
 
@@ -25,7 +26,13 @@ export const toSessionUser = (session: Session | null): SessionUser | null => {
 };
 
 /** Keeps the session slice in step with Supabase Auth; fires once on start with the stored session. */
-export const startAuthListener = ({ dispatch }: AppStore) =>
+export const startAuthListener = ({ dispatch, getState }: AppStore) =>
   supabase.auth.onAuthStateChange((_event, session) => {
-    dispatch(sessionChanged(toSessionUser(session)));
+    const previousId = getState().session.user?.id;
+    const user = toSessionUser(session);
+
+    if (previousId && previousId !== user?.id)
+      dispatch(api.util.resetApiState());
+
+    dispatch(sessionChanged(user));
   });

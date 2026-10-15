@@ -5,6 +5,7 @@ import { RouterProvider, createMemoryRouter, useLocation } from "react-router";
 import { api } from "../stores/api-slice";
 import { sessionChanged } from "../stores/session-slice";
 import { createStore } from "../stores/store";
+import { startCacheListener } from "../stores/cache-listener";
 import type { Profile } from "../types/profile";
 import type { SessionUser } from "../types/session";
 
@@ -47,6 +48,8 @@ export const renderWithStore = (
 ) => {
   window.history.replaceState(null, "", url);
   const store = createStore();
+
+  startCacheListener(store);
 
   if (signedIn) {
     store.dispatch(sessionChanged(TEST_USER));

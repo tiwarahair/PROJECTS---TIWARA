@@ -15,7 +15,11 @@ const FEATURED = { args: { sort: "newest" }, size: 8 };
 /** "book our stylists": the newest live stylists, the second card centred on load; hidden when there are none. */
 export const StylistsSection = () => {
   const rowRef = useRef<HTMLDivElement>(null);
-  const { data: stylists, isLoading } = usePeekStylistsQuery(FEATURED);
+
+  const { data: stylists, isLoading } = usePeekStylistsQuery(FEATURED, {
+    refetchOnMountOrArgChange: 60,
+  });
+
   const isSlow = useIsSlow(isLoading);
 
   useCentreSecondCard(rowRef, `.${page.stycard}`);

@@ -2,6 +2,7 @@ import { useMemo } from "react";
 import { Link, Navigate, useLocation } from "react-router";
 import { SiteHeader } from "../../components/site-header/site-header";
 import { ProfileSkeleton } from "../../components/skeleton/profile-skeleton";
+import type { ProfilePreview } from "../../components/skeleton/profile-skeleton";
 import { toPublicStylist } from "../../lib/public-stylist";
 import { useIsSlow } from "../../hooks/use-is-slow";
 import { useGetStylistProfileQuery } from "../../stores/api-slice";
@@ -11,7 +12,8 @@ import styles from "../../styles/features/stylist-profile/stylist-profile-route.
 
 /** Route "/{slug}": loads the profile; a retired slug redirects to the current one. */
 export const StylistProfilePage = () => {
-  const { pathname } = useLocation();
+  const { pathname, state } = useLocation();
+  const preview = (state as { preview?: ProfilePreview } | null)?.preview;
   const slug = pathname.split("/")[1] ?? "";
 
   // currentData: only this slug's result, never the previous profile's
@@ -19,7 +21,7 @@ export const StylistProfilePage = () => {
     currentData: data,
     isError,
     isFetching,
-  } = useGetStylistProfileQuery(slug, { refetchOnMountOrArgChange: 10 });
+  } = useGetStylistProfileQuery(slug, { refetchOnMountOrArgChange: 60 });
 
   const isSlow = useIsSlow(isFetching && !data);
 
@@ -37,7 +39,9 @@ export const StylistProfilePage = () => {
   return (
     <div className={styles.page} aria-busy={isFetching}>
       <SiteHeader loginHref={getLoginHref(slug)} />
-      {isSlow && <ProfileSkeleton />}
+      {(isSlow || (isFetching && preview)) && (
+        <ProfileSkeleton preview={preview} />
+      )}
       {!isFetching && (
         <div className={styles.message}>
           <h1 className={styles.title}>

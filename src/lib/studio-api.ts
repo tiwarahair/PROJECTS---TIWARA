@@ -1,6 +1,7 @@
 // Studio's reads and writes against Supabase (row shapes; studio-records converts them).
 import type { TaxDetails } from "../components/tax-details-form/tax-details-logic";
 import type { Tables, TablesInsert, TablesUpdate } from "../types/database";
+import { notifyStudioWrite } from "./studio-writes";
 import { supabase } from "./supabase";
 
 const PHOTO_BUCKET = "stylist-photos";
@@ -51,6 +52,17 @@ const check = async <T>(
   return data;
 };
 
+/** check() for a write: tells cached reads the data changed. */
+const write = async <T>(
+  request: PromiseLike<{ data: T; error: Error | null }>,
+) => {
+  const data = await check(request);
+
+  notifyStudioWrite();
+
+  return data;
+};
+
 export const getPhotoUrl = (path: string) =>
   supabase.storage.from(PHOTO_BUCKET).getPublicUrl(path).data.publicUrl;
 
@@ -83,21 +95,21 @@ export const removePhoto = (path: string) =>
   check(supabase.storage.from(PHOTO_BUCKET).remove([path]));
 
 export const updateStylist = (id: string, patch: TablesUpdate<"stylists">) =>
-  check(supabase.from("stylists").update(patch).eq("id", id));
+  write(supabase.from("stylists").update(patch).eq("id", id));
 
 export const updateStylistAddress = (
   stylistId: string,
   patch: TablesUpdate<"stylist_private">,
 ) =>
-  check(
+  write(
     supabase.from("stylist_private").update(patch).eq("stylist_id", stylistId),
   );
 
 export const saveCategories = (rows: TablesInsert<"stylist_categories">[]) =>
-  check(supabase.from("stylist_categories").upsert(rows));
+  write(supabase.from("stylist_categories").upsert(rows));
 
 export const removeCategory = (id: string) =>
-  check(supabase.from("stylist_categories").delete().eq("id", id));
+  write(supabase.from("stylist_categories").delete().eq("id", id));
 
 /** A service and its sizes / lengths / own options / add-on links, replaced as a whole. */
 export const saveService = async (
@@ -122,51 +134,53 @@ export const saveService = async (
 
   if (addonLinks.length)
     await check(supabase.from("service_addons").insert(addonLinks));
+
+  notifyStudioWrite();
 };
 
 export const saveServiceStatus = (id: string, status: string) =>
-  check(supabase.from("services").update({ status }).eq("id", id));
+  write(supabase.from("services").update({ status }).eq("id", id));
 
 export const removeService = (id: string) =>
-  check(supabase.from("services").delete().eq("id", id));
+  write(supabase.from("services").delete().eq("id", id));
 
 export const saveAddon = (row: TablesInsert<"addons">) =>
-  check(supabase.from("addons").upsert(row));
+  write(supabase.from("addons").upsert(row));
 
 export const removeAddon = (id: string) =>
-  check(supabase.from("addons").delete().eq("id", id));
+  write(supabase.from("addons").delete().eq("id", id));
 
 export const saveHours = (rows: TablesInsert<"working_hours">[]) =>
-  check(supabase.from("working_hours").upsert(rows));
+  write(supabase.from("working_hours").upsert(rows));
 
 export const saveBlock = (row: TablesInsert<"time_blocks">) =>
-  check(supabase.from("time_blocks").upsert(row));
+  write(supabase.from("time_blocks").upsert(row));
 
 export const removeBlock = (id: string) =>
-  check(supabase.from("time_blocks").delete().eq("id", id));
+  write(supabase.from("time_blocks").delete().eq("id", id));
 
 export const saveClosedPeriod = (row: TablesInsert<"closed_periods">) =>
-  check(supabase.from("closed_periods").upsert(row));
+  write(supabase.from("closed_periods").upsert(row));
 
 export const removeClosedPeriod = (id: string) =>
-  check(supabase.from("closed_periods").delete().eq("id", id));
+  write(supabase.from("closed_periods").delete().eq("id", id));
 
 export const saveBookingRules = (row: TablesInsert<"booking_rules">) =>
-  check(supabase.from("booking_rules").upsert(row));
+  write(supabase.from("booking_rules").upsert(row));
 
 /** Policies are history: each save adds the new current one. */
 export const addPaymentPolicy = (row: TablesInsert<"payment_policies">) =>
-  check(supabase.from("payment_policies").insert(row));
+  write(supabase.from("payment_policies").insert(row));
 
 export const saveNotificationPreference = (
   row: TablesInsert<"notification_preferences">,
 ) => check(supabase.from("notification_preferences").upsert(row));
 
 export const addPortfolioPhoto = (row: TablesInsert<"portfolio_photos">) =>
-  check(supabase.from("portfolio_photos").insert(row));
+  write(supabase.from("portfolio_photos").insert(row));
 
 export const removePortfolioPhoto = (id: string) =>
-  check(supabase.from("portfolio_photos").delete().eq("id", id));
+  write(supabase.from("portfolio_photos").delete().eq("id", id));
 
 export const isSlugFree = (slug: string, stylistId: string) =>
   check(
@@ -175,7 +189,7 @@ export const isSlugFree = (slug: string, stylistId: string) =>
 
 /** Returns the new slug; throws with the server's reason (taken, reserved, 30-day limit). */
 export const changeSlug = (slug: string) =>
-  check(supabase.rpc("change_slug", { new_slug: slug }));
+  write(supabase.rpc("change_slug", { new_slug: slug }));
 
 /** Saves through the Edge Function (it encrypts the NI number); returns the saved number's masked hint. */
 export const saveTaxDetails = async (details: TaxDetails) => {
@@ -184,6 +198,8 @@ export const saveTaxDetails = async (details: TaxDetails) => {
   }>("save-tax-details", { body: details });
 
   if (error) throw error;
+
+  notifyStudioWrite();
 
   return data?.nationalInsuranceHint ?? "";
 };
@@ -209,13 +225,15 @@ export const callStripe = async (
 
   if (error) throw error;
 
+  notifyStudioWrite();
+
   return data ?? {};
 };
 
 /** Takes the booking page offline; it can be reopened for 15 days. */
-export const closeBusiness = () => check(supabase.rpc("close_business"));
+export const closeBusiness = () => write(supabase.rpc("close_business"));
 
-export const reopenBusiness = () => check(supabase.rpc("reopen_business"));
+export const reopenBusiness = () => write(supabase.rpc("reopen_business"));
 
 export type ServiceRow = Tables<"services"> & {
   service_variations: Tables<"service_variations">[];

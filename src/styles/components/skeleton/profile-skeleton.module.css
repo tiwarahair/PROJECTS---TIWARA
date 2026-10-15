@@ -17,3 +17,27 @@
 .bio {
   margin-top: 8px;
 }
+
+.coverImage {
+  width: 100%;
+  object-fit: cover;
+  object-position: center 25%;
+}
+
+.coverPlaceholder {
+  background: var(--cover-placeholder);
+}
+
+.name {
+  margin: 28px 0 6px;
+  font-family: var(--font-display);
+  font-size: 40px;
+  font-weight: 600;
+  line-height: 1.1;
+  color: var(--text-primary);
+}
+
+.area {
+  margin: 0;
+  color: var(--text-secondary);
+}
