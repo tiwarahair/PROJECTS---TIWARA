@@ -1,4 +1,8 @@
-import { useMapsLibrary } from "@vis.gl/react-google-maps";
+import {
+  APILoadingStatus,
+  useApiLoadingStatus,
+  useMapsLibrary,
+} from "@vis.gl/react-google-maps";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import type { LatLng } from "../../lib/google-maps";
 
@@ -16,6 +20,7 @@ const NO_SUGGESTIONS: PlaceSuggestion[] = [];
 /** UK areas, towns and postcodes from Google for the typed text; resolve() gets a picked one's point. */
 export const usePlaceSuggestions = (text: string) => {
   const places = useMapsLibrary("places");
+  const status = useApiLoadingStatus();
   const input = text.trim();
 
   const [found, setFound] = useState({
@@ -88,8 +93,13 @@ export const usePlaceSuggestions = (text: string) => {
   const suggestions =
     found.input === input ? found.suggestions : NO_SUGGESTIONS;
 
-  // without Google (failed to load) there is nothing to wait for
-  const isSearching = !!places && input.length >= 2 && found.input !== input;
+  // still loading Google counts as searching; only a failed load means there is nothing to wait for
+  const isGoogleDown =
+    status === APILoadingStatus.FAILED ||
+    status === APILoadingStatus.AUTH_FAILURE;
+
+  const isSearching =
+    (!!places || !isGoogleDown) && input.length >= 2 && found.input !== input;
 
   // stable while nothing changes: PlacesBridge passes it up on every change
   return useMemo(

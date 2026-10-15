@@ -58,4 +58,13 @@ vi.mock("@vis.gl/react-google-maps", () => ({
   ColorScheme: { DARK: "DARK", LIGHT: "LIGHT" },
   useMap: () => null,
   useMapsLibrary: vi.fn(() => null),
+  // tests without a fake library behave as if Google couldn't load
+  useApiLoadingStatus: vi.fn(() => "FAILED"),
+  APILoadingStatus: {
+    NOT_LOADED: "NOT_LOADED",
+    LOADING: "LOADING",
+    LOADED: "LOADED",
+    FAILED: "FAILED",
+    AUTH_FAILURE: "AUTH_FAILURE",
+  },
 }));
