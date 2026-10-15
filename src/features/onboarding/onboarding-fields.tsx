@@ -1,4 +1,5 @@
 import type { ChangeEvent, FocusEvent, KeyboardEvent, Ref } from "react";
+import { Moon, Sun } from "lucide-react";
 import { joinClassNames } from "../../utils/class-names";
 import styles from "../../styles/features/onboarding/onboarding-fields.module.css";
 import type { AuthFailure } from "../../lib/auth-errors";
@@ -7,50 +8,10 @@ import { AuthAlert } from "./auth-alert";
 /** Sun (shown in dark mode) / moon (light mode) for the theme toggle. */
 export const ModeIcon = ({ isDark }: { isDark: boolean }) =>
   isDark ? (
-    <svg
-      width="19"
-      height="19"
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="1.8"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      className={styles.modeIcon}
-    >
-      <circle cx="12" cy="12" r="4"></circle>
-      <path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"></path>
-    </svg>
+    <Sun size={19} strokeWidth={1.8} className={styles.modeIcon} />
   ) : (
-    <svg
-      width="19"
-      height="19"
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="1.8"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      className={styles.modeIcon}
-    >
-      <path d="M20 14.5A8 8 0 0 1 9.5 4a8 8 0 1 0 10.5 10.5z"></path>
-    </svg>
+    <Moon size={19} strokeWidth={1.8} className={styles.modeIcon} />
   );
-
-export const BackIcon = ({ size = 20 }: { size?: number }) => (
-  <svg
-    width={size}
-    height={size}
-    viewBox="0 0 24 24"
-    fill="none"
-    stroke="currentColor"
-    strokeWidth="2"
-    strokeLinecap="round"
-    strokeLinejoin="round"
-  >
-    <path d="M15 18l-6-6 6-6"></path>
-  </svg>
-);
 
 export const Spinner = ({ small }: { small?: boolean }) => (
   <span

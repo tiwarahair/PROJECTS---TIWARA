@@ -21,7 +21,7 @@ export const StepType = ({ onboarding, layout }: ScreenProps) => {
         layout.isTabletOrWider ? styles.typeGridMid : styles.typeGridNarrow,
       )}
     >
-      {BUSINESS_TYPES.map(({ key, title, subtitle, iconPath }) => {
+      {BUSINESS_TYPES.map(({ key, title, subtitle, icon: TypeIcon }) => {
         const on = state.form.type === key;
 
         return (
@@ -36,18 +36,7 @@ export const StepType = ({ onboarding, layout }: ScreenProps) => {
             className={joinClassNames(styles.typeTile, tileClass(on))}
           >
             <span className={styles.typeIcon}>
-              <svg
-                width="20"
-                height="20"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="1.7"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-              >
-                <path d={iconPath}></path>
-              </svg>
+              <TypeIcon size={20} strokeWidth={1.7} />
             </span>
             <span className={styles.tileText}>
               <span className={styles.tileTitle}>{title}</span>
@@ -76,7 +65,7 @@ export const StepServices = ({ onboarding, layout, view }: ScreenProps) => {
           layout.isTabletOrWider ? styles.catGridMid : styles.catGridNarrow,
         )}
       >
-        {CATEGORIES.map(({ key, title, iconPath }) => {
+        {CATEGORIES.map(({ key, title, icon: CategoryIcon }) => {
           const index = categories.indexOf(key);
           const on = index >= 0;
 
@@ -96,18 +85,7 @@ export const StepServices = ({ onboarding, layout, view }: ScreenProps) => {
               className={joinClassNames(styles.catTile, tileClass(on))}
             >
               <span className={styles.catIcon}>
-                <svg
-                  width="20"
-                  height="20"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="1.7"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                >
-                  <path d={iconPath}></path>
-                </svg>
+                <CategoryIcon size={20} strokeWidth={1.7} />
               </span>
               <span className={joinClassNames(styles.tileText, styles.catText)}>
                 <span className={styles.tileTitle}>{title}</span>

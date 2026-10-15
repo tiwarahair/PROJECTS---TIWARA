@@ -1,6 +1,7 @@
 import type { KeyboardEvent } from "react";
 import { joinClassNames } from "../../utils/class-names";
-import { CHOOSER_PATHS } from "./onboarding-data";
+import { ArrowRight } from "lucide-react";
+import { CHOOSER_ICONS } from "./onboarding-data";
 import { OnboardingTurnstile } from "./onboarding-turnstile";
 import { PasswordInput, SubmitButton, TextField } from "./onboarding-fields";
 import type { ScreenProps } from "./screen-props";
@@ -57,7 +58,7 @@ export const ChooserScreen = ({ onboarding }: ScreenProps) => {
   const cards = [
     {
       key: "c",
-      iconPath: CHOOSER_PATHS.customer,
+      icon: CHOOSER_ICONS.customer,
       title: "For customers",
       subtitle: "Book afro-hair stylists near you",
       audience: "customer" as const,
@@ -65,7 +66,7 @@ export const ChooserScreen = ({ onboarding }: ScreenProps) => {
     },
     {
       key: "p",
-      iconPath: CHOOSER_PATHS.pro,
+      icon: CHOOSER_ICONS.pro,
       title: "For professionals",
       subtitle: "Manage and grow your business",
       audience: "pro" as const,
@@ -77,48 +78,31 @@ export const ChooserScreen = ({ onboarding }: ScreenProps) => {
     <>
       <h1 className={styles.chooserTitle}>Log in or sign up</h1>
       <div className={styles.chooserCards}>
-        {cards.map(({ key, iconPath, title, subtitle, audience, screen }) => (
-          <button
-            key={key}
-            onClick={() => {
-              actions.setState({ audience });
-              actions.goTo(screen);
-            }}
-            className={styles.chooserCard}
-          >
-            <span className={styles.chooserIcon}>
-              <svg
-                width="20"
-                height="20"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="1.7"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-              >
-                <path d={iconPath}></path>
-              </svg>
-            </span>
-            <span className={styles.chooserText}>
-              <span className={styles.chooserCardTitle}>{title}</span>
-              <span className={styles.chooserCardSub}>{subtitle}</span>
-            </span>
-            <svg
-              width="20"
-              height="20"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="1.7"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              className={styles.subIcon}
+        {cards.map(
+          ({ key, icon: CardIcon, title, subtitle, audience, screen }) => (
+            <button
+              key={key}
+              onClick={() => {
+                actions.setState({ audience });
+                actions.goTo(screen);
+              }}
+              className={styles.chooserCard}
             >
-              <path d="M5 12h14M13 6l6 6-6 6"></path>
-            </svg>
-          </button>
-        ))}
+              <span className={styles.chooserIcon}>
+                <CardIcon size={20} strokeWidth={1.7} />
+              </span>
+              <span className={styles.chooserText}>
+                <span className={styles.chooserCardTitle}>{title}</span>
+                <span className={styles.chooserCardSub}>{subtitle}</span>
+              </span>
+              <ArrowRight
+                size={20}
+                strokeWidth={1.7}
+                className={styles.subIcon}
+              />
+            </button>
+          ),
+        )}
       </div>
     </>
   );
