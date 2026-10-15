@@ -44,6 +44,14 @@ describe("StylistCard", () => {
     expect(screen.getByText("from £81.70")).toBeInTheDocument();
   });
 
+  it("without a cover, shows the placeholder instead of a broken photo", () => {
+    renderWithStore(<StylistCard {...BASE} cover="" />);
+
+    expect(
+      screen.getByRole("img", { name: "Amara Beauty" }),
+    ).not.toHaveAttribute("src");
+  });
+
   it("builds the meta line from active services and a numeric from price", () => {
     renderWithStore(
       <StylistCard

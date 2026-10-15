@@ -238,10 +238,6 @@
 }
 
 .profileAvatar {
-  width: 32px;
-  height: 32px;
-  border-radius: var(--radius-full);
-  object-fit: cover;
   flex: 0 0 auto;
 }
 
@@ -327,11 +323,7 @@
 }
 
 .avatar42 {
-  width: 42px;
-  height: 42px;
-  border-radius: var(--radius-full);
-  object-fit: cover;
-  display: block;
+  display: flex;
   border: 2px solid #fff;
   box-shadow: var(--shadow-card);
 }

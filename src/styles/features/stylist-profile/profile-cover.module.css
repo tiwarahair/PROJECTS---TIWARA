@@ -118,7 +118,7 @@
   border-radius: 24px;
   overflow: hidden;
   background-color: var(--neutral-100);
-  background-image: var(--hero-image);
+  background-image: var(--hero-image, var(--cover-placeholder));
   background-size: cover;
   background-position: center 25%;
 }

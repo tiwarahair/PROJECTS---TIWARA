@@ -1,5 +1,6 @@
 import { Fragment } from "react";
 import { Link, useNavigate } from "react-router";
+import { Avatar } from "../../components/ds/avatar";
 import { AccountSettings } from "../../components/account-settings/account-settings";
 import { BusinessDetails } from "../../components/business-details/business-details";
 import { PaymentPolicy } from "../../components/payment-policy/payment-policy";
@@ -9,7 +10,6 @@ import { AvailabilityPage, ProfilePage, RulesPage } from "./settings-pages";
 import { getSettingsView } from "./settings-view";
 import type { SettingsIcon, SettingsView } from "./settings-view";
 import { GATE_REASON } from "./studio-data";
-import { getAvatarSrc } from "./studio-shell";
 import type { StudioController } from "./use-studio";
 import styles from "../../styles/features/studio/studio-settings.module.css";
 import { getProfilePath } from "./studio-model";
@@ -163,10 +163,10 @@ const SettingsRoot = ({
   return (
     <div className={styles.root} data-screen-label="Settings">
       <div className={styles.profileCard}>
-        <img
-          className={styles.profileAvatar}
-          src={getAvatarSrc(state)}
-          alt={state.owner.first}
+        <Avatar
+          src={state.avatarUrl ?? undefined}
+          name={state.owner.name}
+          size={54}
         />
         <div className={styles.grow}>
           <div className={styles.salonRow}>

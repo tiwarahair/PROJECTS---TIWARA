@@ -13,9 +13,17 @@
 
 /* Loading skeletons (react-loading-skeleton) in the warm neutrals. */
 @layer base {
+  :root {
+    --skeleton-base: color-mix(
+      in srgb,
+      var(--neutral-200) 30%,
+      var(--neutral-50)
+    );
+    --skeleton-highlight: var(--neutral-50);
+  }
   .react-loading-skeleton {
-    --base-color: color-mix(in srgb, var(--neutral-200) 50%, var(--neutral-50));
-    --highlight-color: var(--neutral-50);
+    --base-color: var(--skeleton-base);
+    --highlight-color: var(--skeleton-highlight);
   }
 }
 

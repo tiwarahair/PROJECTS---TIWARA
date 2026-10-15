@@ -23,6 +23,11 @@
   transition: transform 0.7s cubic-bezier(0.2, 0.7, 0.2, 1);
 }
 
+.coverPlaceholder {
+  display: block;
+  background: var(--cover-placeholder);
+}
+
 .cover:hover {
   transform: scale(1.045) !important;
 }

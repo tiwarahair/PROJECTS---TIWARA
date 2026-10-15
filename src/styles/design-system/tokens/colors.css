@@ -18,6 +18,8 @@
 --accent-select:rgba(143,17,18,.16);      /* ::selection */
 --accent-line:rgba(143,17,18,.28);        /* border on an accent-washed panel */
 --accent-glow:rgba(143,17,18,.35);        /* focus ring, pulse */
+/* Stand-in for a stylist cover that hasn't been uploaded yet */
+--cover-placeholder:radial-gradient(120% 90% at 85% 15%,rgba(223,207,62,.14),transparent 55%),linear-gradient(135deg,var(--accent-900),var(--accent-700) 55%,var(--accent-500));
 /* Neutral scale — warm paper neutrals, light to dark */
 --neutral-0:#ffffff;
 --neutral-50:#fffefb;  /* page background */

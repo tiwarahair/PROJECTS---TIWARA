@@ -1,5 +1,7 @@
 import type { CSSProperties, MouseEvent, RefObject } from "react";
 import { Link } from "react-router";
+import { loadingImageClassName } from "../../components/loading-image/loading-image";
+import { useImageLoaded } from "../../hooks/use-image-loaded";
 import { joinClassNames } from "../../utils/class-names";
 import type { LastSearch } from "../../utils/last-search";
 import { BackPath, HeartPath, SharePaths } from "./profile-icons";
@@ -51,10 +53,12 @@ export const ProfileCover = ({
     onToggleSaved,
   } = actions;
 
-  // the stylist's cover photo
-  const heroStyle = {
-    "--hero-image": coverUrl ? `url("${coverUrl}")` : "none",
-  } as CSSProperties;
+  const isCoverLoaded = useImageLoaded(coverUrl);
+
+  // the stylist's cover photo; without one the CSS shows the brand placeholder
+  const heroStyle = (
+    coverUrl && isCoverLoaded ? { "--hero-image": `url("${coverUrl}")` } : {}
+  ) as CSSProperties;
 
   return (
     <div className={styles.wrap}>
@@ -91,7 +95,11 @@ export const ProfileCover = ({
           role="img"
           aria-label={name}
           onClick={onToggleCoverActions}
-          className={joinClassNames(pageGlobal.scpHero, styles.hero)}
+          className={joinClassNames(
+            pageGlobal.scpHero,
+            styles.hero,
+            !isCoverLoaded && loadingImageClassName,
+          )}
           style={heroStyle}
         ></div>
         <div

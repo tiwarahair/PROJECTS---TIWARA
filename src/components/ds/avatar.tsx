@@ -8,6 +8,8 @@ export interface AvatarProps {
   name?: string;
   /** Pixel size, default 40 */
   size?: number;
+  /** Hidden from screen readers when the name is already shown beside it */
+  isDecorative?: boolean;
   style?: CSSProperties;
   className?: string;
 }
@@ -16,6 +18,7 @@ export const Avatar = ({
   src,
   name = "",
   size = 40,
+  isDecorative = false,
   style,
   className,
 }: AvatarProps) => {
@@ -33,7 +36,7 @@ export const Avatar = ({
     return (
       <img
         src={src}
-        alt={name}
+        alt={isDecorative ? "" : name}
         className={joinClassNames(styles.avatar, className)}
         style={sizeStyle}
       />
@@ -43,6 +46,7 @@ export const Avatar = ({
     <span
       className={joinClassNames(styles.avatar, styles.initials, className)}
       style={sizeStyle}
+      aria-hidden={isDecorative || undefined}
     >
       {initials}
     </span>

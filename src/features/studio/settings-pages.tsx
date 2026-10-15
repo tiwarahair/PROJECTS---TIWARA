@@ -1,17 +1,12 @@
 import { useRef } from "react";
 import type { CSSProperties } from "react";
-import { getAssetUrl } from "../../utils/asset-url";
+import { Avatar } from "../../components/ds/avatar";
 import { joinClassNames } from "../../utils/class-names";
 import type { SettingsView } from "./settings-view";
-import { stylists } from "../../data";
-import { STUDIO_STYLIST_ID, TIMES } from "./studio-data";
-import { getAvatarSrc } from "./studio-shell";
+import { TIMES } from "./studio-data";
 import type { StudioController } from "./use-studio";
 import styles from "../../styles/features/studio/settings-pages.module.css";
 import { BookingLinkField } from "./booking-link-field";
-
-const DEMO_COVER =
-  stylists.find(({ id }) => id === STUDIO_STYLIST_ID)?.cover ?? "";
 
 const PlusIcon = () => (
   <svg
@@ -61,11 +56,15 @@ export const ProfilePage = ({
   return (
     <div className={styles.profile} data-screen-label="Edit profile">
       <div className={styles.cover}>
-        <img
-          className={styles.coverImage}
-          src={state.coverUrl || getAssetUrl(DEMO_COVER)}
-          alt="Cover"
-        />
+        {state.coverUrl ? (
+          <img className={styles.coverImage} src={state.coverUrl} alt="Cover" />
+        ) : (
+          <div
+            className={styles.coverPlaceholder}
+            role="img"
+            aria-label="Cover"
+          />
+        )}
         <input
           className={styles.hiddenInput}
           type="file"
@@ -91,10 +90,11 @@ export const ProfilePage = ({
           onClick={() => avatarInput.current?.click()}
           aria-label="Change profile photo"
         >
-          <img
+          <Avatar
             className={styles.avatar}
-            src={getAvatarSrc(state)}
-            alt="Profile"
+            src={state.avatarUrl ?? undefined}
+            name={state.owner.name}
+            size={52}
           />
           <span className={styles.camera}>
             <svg

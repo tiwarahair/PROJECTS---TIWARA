@@ -1,5 +1,6 @@
 import type { MouseEvent, ReactNode } from "react";
 import { Link } from "react-router";
+import { LoadingImage } from "../loading-image/loading-image";
 import { useFavourites } from "../../hooks/use-favourites";
 import { resolveAssetUrl } from "../../utils/asset-url";
 import { joinClassNames } from "../../utils/class-names";
@@ -113,12 +114,24 @@ export const StylistCard = ({
       <div className={styles.card}>
         <CardLink href={href} className={styles.coverLink}>
           {/* stycover / rescover: Home and Search style the cover from outside */}
-          <img
-            className={joinClassNames("stycover rescover", styles.cover)}
-            loading="lazy"
-            src={resolveAssetUrl(cover)}
-            alt={stylistName}
-          />
+          {cover ? (
+            <LoadingImage
+              className={joinClassNames("stycover rescover", styles.cover)}
+              loading="lazy"
+              src={resolveAssetUrl(cover)}
+              alt={stylistName}
+            />
+          ) : (
+            <span
+              role="img"
+              aria-label={stylistName}
+              className={joinClassNames(
+                "stycover rescover",
+                styles.cover,
+                styles.coverPlaceholder,
+              )}
+            />
+          )}
         </CardLink>
         <button
           type="button"

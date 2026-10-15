@@ -1,3 +1,4 @@
+import { LoadingImage } from "../../components/loading-image/loading-image";
 import { joinClassNames } from "../../utils/class-names";
 import { resolveAssetUrl } from "../../utils/asset-url";
 import styles from "../../styles/features/stylist-profile/profile-portfolio.module.css";
@@ -26,8 +27,7 @@ export const ProfilePortfolio = ({
       {portfolio.map((src, index) => (
         <div key={index} data-rv="" className={styles.tile}>
           {/* a clickable <img> (keyboard users get "See all") */}
-          {/* eslint-disable-next-line jsx-a11y/click-events-have-key-events, jsx-a11y/no-noninteractive-element-interactions */}
-          <img
+          <LoadingImage
             loading="lazy"
             src={resolveAssetUrl(src)}
             alt="Portfolio"

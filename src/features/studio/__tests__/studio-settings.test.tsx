@@ -87,14 +87,20 @@ describe("Studio → Settings", () => {
     ).toBeInTheDocument();
   });
 
-  it("the profile cover defaults to the stylist's public profile cover", async () => {
+  it("without uploads, the profile shows a placeholder cover and initials", async () => {
     setViewport(1440);
     renderStudio();
     await user.click(within(getLabelled("Sidebar")).getByTitle("Settings"));
 
+    const editProfile = getLabelled("Edit profile");
+
     expect(
-      within(getLabelled("Edit profile")).getByRole("img", { name: "Cover" }),
-    ).toHaveAttribute("src", expect.stringContaining("w160944"));
+      within(editProfile).getByRole("img", { name: "Cover" }),
+    ).not.toHaveAttribute("src");
+
+    expect(
+      within(editProfile).getByRole("button", { name: "Change profile photo" }),
+    ).toHaveTextContent(/^[A-Z]{1,2}$/);
   });
 
   it("wide screens open on the profile page with the settings nav", async () => {

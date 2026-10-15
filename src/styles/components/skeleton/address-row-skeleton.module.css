@@ -1,0 +1,13 @@
+.row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 12px;
+}
+
+.text {
+  flex: 1;
+  display: grid;
+  gap: 4px;
+  line-height: 1;
+}

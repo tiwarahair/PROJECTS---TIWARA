@@ -2,6 +2,7 @@
 import { useMapsLibrary } from "@vis.gl/react-google-maps";
 import { useCallback, useEffect, useRef, useState } from "react";
 import type { ChangeEvent, KeyboardEvent, RefObject } from "react";
+import { useIsSlow } from "../../hooks/use-is-slow";
 import { ADDRESS_TYPES, toPlaceAddress } from "../../lib/google-maps";
 import type { PlaceAddress } from "../../lib/google-maps";
 import {
@@ -446,6 +447,14 @@ export const useAddressFinder = ({
     state.query.trim().length >= 3 &&
     state.searchedQuery === state.query.trim();
 
+  const isSearching = useIsSlow(
+    !!places &&
+      state.open &&
+      state.mode === "find" &&
+      state.query.trim().length >= 3 &&
+      state.searchedQuery !== state.query.trim(),
+  );
+
   const isErrorShown = (key: FieldKey | "query") =>
     !!(showErrors || state.touched[key]);
 
@@ -521,7 +530,7 @@ export const useAddressFinder = ({
 
       if (isOpen && state.highlightedIndex >= 0 && chosen) void pick(chosen);
       else if (isOpen && count === 1 && hits[0]) void pick(hits[0]);
-    } else if (event.key === "Escape" && isOpen) {
+    } else if (event.key === "Escape" && (isOpen || isSearching)) {
       event.preventDefault();
       event.stopPropagation();
       update({ open: false, highlightedIndex: -1 });
@@ -532,6 +541,7 @@ export const useAddressFinder = ({
     state,
     hits,
     isOpen,
+    isSearching,
     queryError,
     fieldErrors,
     isErrorShown,

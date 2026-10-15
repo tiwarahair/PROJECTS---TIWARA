@@ -19,13 +19,6 @@
   box-shadow: var(--shadow-panel);
 }
 
-.profileAvatar {
-  width: 54px;
-  height: 54px;
-  border-radius: var(--radius-full);
-  object-fit: cover;
-}
-
 .grow {
   flex: 1;
   min-width: 0;

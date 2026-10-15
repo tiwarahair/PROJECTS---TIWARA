@@ -1,0 +1,37 @@
+.image:not([data-loaded]) {
+  background: linear-gradient(
+      90deg,
+      var(--skeleton-base),
+      var(--skeleton-highlight),
+      var(--skeleton-base)
+    )
+    0 0 / 200% 100% var(--skeleton-base);
+  animation: shimmer 1.5s ease-in-out infinite;
+}
+
+.image[data-loaded] {
+  animation: fade-in 320ms ease-out;
+}
+
+@keyframes shimmer {
+  from {
+    background-position: 100% 0;
+  }
+
+  to {
+    background-position: -100% 0;
+  }
+}
+
+@keyframes fade-in {
+  from {
+    opacity: 0;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .image:not([data-loaded]),
+  .image[data-loaded] {
+    animation: none;
+  }
+}

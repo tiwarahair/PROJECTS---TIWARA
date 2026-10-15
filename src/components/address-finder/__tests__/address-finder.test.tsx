@@ -103,6 +103,64 @@ describe("AddressFinder", () => {
     );
   });
 
+  it("shows loading rows while Google is slow to answer", async () => {
+    vi.mocked(
+      fakePlaces.AutocompleteSuggestion.fetchAutocompleteSuggestions,
+    ).mockImplementationOnce(
+      () =>
+        new Promise((resolve) =>
+          setTimeout(
+            () =>
+              resolve({
+                suggestions: predictions.map((placePrediction) => ({
+                  placePrediction,
+                })),
+              }),
+            1000,
+          ),
+        ),
+    );
+
+    const { container } = render(
+      <AddressFinder fixture="" idPrefix="t" onChange={vi.fn()} />,
+    );
+
+    await user.type(screen.getByRole("combobox"), "dickenson");
+    await act(() => vi.advanceTimersByTimeAsync(600));
+
+    expect(container.querySelector('[aria-busy="true"]')).toBeInTheDocument();
+    expect(screen.queryByRole("option")).not.toBeInTheDocument();
+
+    await act(() => vi.advanceTimersByTimeAsync(1000));
+
+    expect(
+      container.querySelector('[aria-busy="true"]'),
+    ).not.toBeInTheDocument();
+
+    expect(screen.getAllByRole("option")).toHaveLength(2);
+  });
+
+  it("Escape closes the loading rows", async () => {
+    vi.mocked(
+      fakePlaces.AutocompleteSuggestion.fetchAutocompleteSuggestions,
+    ).mockImplementationOnce(() => new Promise(() => {}));
+
+    const { container } = render(
+      <AddressFinder fixture="" idPrefix="t" onChange={vi.fn()} />,
+    );
+
+    await user.type(screen.getByRole("combobox"), "dickenson");
+    await act(() => vi.advanceTimersByTimeAsync(600));
+
+    expect(container.querySelector('[aria-busy="true"]')).toBeInTheDocument();
+
+    await user.keyboard("{Escape}");
+
+    expect(
+      container.querySelector('[aria-busy="true"]'),
+    ).not.toBeInTheDocument();
+  });
+
   it("no match: offers manual entry", async () => {
     predictions = [];
     renderFinder();

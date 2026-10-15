@@ -1,5 +1,6 @@
 import type { CSSProperties } from "react";
 import { Link } from "react-router";
+import { Avatar } from "../../components/ds/avatar";
 import { getAssetUrl } from "../../utils/asset-url";
 import { joinClassNames } from "../../utils/class-names";
 import { copyText } from "./studio-format";
@@ -123,9 +124,6 @@ const getNavItems = (studio: StudioController) => {
   }));
 };
 
-export const getAvatarSrc = ({ avatarUrl }: { avatarUrl: string | null }) =>
-  avatarUrl || getAssetUrl("site/old-hero.jpg");
-
 export const StudioSidebar = ({ studio }: { studio: StudioController }) => {
   const { state, isDesktop, setState } = studio;
   const isOpen = state.sidebarOpen == null ? isDesktop : state.sidebarOpen;
@@ -188,10 +186,12 @@ export const StudioSidebar = ({ studio }: { studio: StudioController }) => {
         onClick={() => setState({ tab: "settings", page: null })}
         title="Profile"
       >
-        <img
+        <Avatar
           className={styles.profileAvatar}
-          src={getAvatarSrc(state)}
-          alt=""
+          src={state.avatarUrl ?? undefined}
+          name={state.owner.name}
+          size={32}
+          isDecorative
         />
         {isOpen && (
           <span className={styles.grow}>
@@ -235,10 +235,11 @@ export const StudioTopBar = ({ studio }: { studio: StudioController }) => {
           onClick={() => setState({ tab: "settings", page: null })}
           aria-label="Profile and settings"
         >
-          <img
+          <Avatar
             className={styles.avatar42}
-            src={getAvatarSrc(state)}
-            alt={state.owner.first}
+            src={state.avatarUrl ?? undefined}
+            name={state.owner.name}
+            size={42}
           />
         </button>
       )}

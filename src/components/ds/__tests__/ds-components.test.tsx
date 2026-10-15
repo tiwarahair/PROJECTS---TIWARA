@@ -87,6 +87,18 @@ describe("design-system components", () => {
     );
   });
 
+  it("a decorative Avatar is hidden from screen readers", () => {
+    const { container } = render(
+      <>
+        <Avatar name="Zuri Okafor" isDecorative />
+        <Avatar src="/amara.jpg" name="Amara Osei" isDecorative />
+      </>,
+    );
+
+    expect(screen.getByText("ZO")).toHaveAttribute("aria-hidden", "true");
+    expect(container.querySelector("img")).toHaveAttribute("alt", "");
+  });
+
   it("Badge, IconChip and Toast render their content", () => {
     render(
       <>

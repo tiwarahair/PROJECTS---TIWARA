@@ -1,6 +1,8 @@
 import { skipToken } from "@reduxjs/toolkit/query";
 import { Navigate } from "react-router";
+import { StudioSkeleton } from "../../components/skeleton/studio-skeleton";
 import { useIdentity } from "../../hooks/use-identity";
+import { useIsSlow } from "../../hooks/use-is-slow";
 import {
   useGetStylistStudioQuery,
   useGetTwoFactorDevicesQuery,
@@ -37,23 +39,28 @@ export const StudioRoute = () => {
     refetchOnMountOrArgChange: true,
   });
 
+  const isLoading =
+    !ready ||
+    (!!user?.isStylist &&
+      (!studio ||
+        isStudioFetching ||
+        !identity?.isLoaded ||
+        isDevicesFetching ||
+        (!devices && !isDevicesError)));
+
+  const isSlow = useIsSlow(isLoading);
+
   if (isDemoStudio()) return <StudioPage />;
 
-  if (!ready) return null;
+  if (!ready) return isSlow ? <StudioSkeleton /> : null;
 
   if (!user)
     return <Navigate to={hasSignedOut ? "/" : "/login?flow=pro"} replace />;
 
   if (!user.isStylist) return <Navigate to="/join" replace />;
 
-  if (
-    !studio ||
-    isStudioFetching ||
-    !identity?.isLoaded ||
-    isDevicesFetching ||
-    (!devices && !isDevicesError)
-  )
-    return null;
+  if (isLoading || !studio || !identity?.isLoaded)
+    return isSlow ? <StudioSkeleton /> : null;
 
   if (studio.status === "closed" && studio.closed_at)
     return <ClosedBusiness closedAt={studio.closed_at} />;

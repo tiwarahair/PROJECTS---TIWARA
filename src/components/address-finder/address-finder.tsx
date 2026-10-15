@@ -1,6 +1,7 @@
 import { useState } from "react";
 import type { CSSProperties, MouseEvent } from "react";
 import { joinClassNames } from "../../utils/class-names";
+import { AddressRowSkeleton } from "../skeleton/address-row-skeleton";
 import styles from "../../styles/components/address-finder/address-finder.module.css";
 import { MapsProvider } from "../../lib/google-maps";
 import { useAddressFinder } from "./use-address-finder";
@@ -156,6 +157,7 @@ const AddressFinderField = ({
     state,
     hits,
     isOpen,
+    isSearching,
     queryError,
     fieldErrors,
     isErrorShown,
@@ -239,7 +241,14 @@ const AddressFinderField = ({
                 </span>
               </button>
             )}
-            {isOpen && (
+            {isSearching && (
+              <div className={styles.popover} aria-busy="true">
+                {[1, 2, 3].map((row) => (
+                  <AddressRowSkeleton key={row} />
+                ))}
+              </div>
+            )}
+            {isOpen && !isSearching && (
               <div className={styles.popover}>
                 {hits.length > 0 && (
                   <div

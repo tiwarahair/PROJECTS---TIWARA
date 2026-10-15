@@ -1,3 +1,4 @@
+import { LoadingImage } from "../../components/loading-image/loading-image";
 import { SuggestionRowSkeleton } from "../../components/skeleton/suggestion-row-skeleton";
 import { resolveAssetUrl } from "../../utils/asset-url";
 import { joinClassNames } from "../../utils/class-names";
@@ -55,7 +56,7 @@ const SuggestionButton = ({
       </span>
     )}
     {!!row.image && (
-      <img
+      <LoadingImage
         src={resolveAssetUrl(row.image)}
         alt=""
         className={styles.rowAvatar}
