@@ -103,7 +103,13 @@ let compressorImport: Promise<
 > | null = null;
 
 const compress = async (file: File, options: CompressOptions) => {
-  compressorImport ??= import("browser-image-compression");
+  compressorImport ??= import("browser-image-compression").catch(
+    (error: unknown) => {
+      // a failed download is retried on the next upload
+      compressorImport = null;
+      throw error;
+    },
+  );
 
   const { default: imageCompression } = await compressorImport;
 
