@@ -3,6 +3,7 @@ import { joinClassNames } from "../../utils/class-names";
 import { getViewAnimation } from "./detail";
 import { REFUND_REASONS } from "./data";
 import { RadioMark } from "./controls";
+import { getRefundOverError } from "./schemas";
 import type { CheckoutViewModel } from "./view";
 import type { CheckoutController } from "./use-checkout";
 import styles from "../../styles/components/checkout/refund.module.css";
@@ -25,7 +26,9 @@ export const CheckoutRefund = ({
     formState: { errors },
   } = refundForm;
 
-  const refundError = errors.amount?.message ?? "";
+  const refundError =
+    getRefundOverError(refundValues, refundCap) || errors.amount?.message || "";
+
   const reasonError = errors.reason?.message ?? "";
 
   const already =

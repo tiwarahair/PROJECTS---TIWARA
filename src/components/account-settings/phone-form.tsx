@@ -25,10 +25,12 @@ export const PhoneForm = ({ settings, login, uid }: PhoneFormProps) => {
     handleSubmit,
     reset,
     setError,
+    clearErrors,
     formState: { errors },
   } = useForm<PhoneValues>({
     defaultValues: { phone: "" },
     resolver: zodResolver(phoneSchema),
+    reValidateMode: "onSubmit",
   });
 
   useEffect(() => {
@@ -65,7 +67,7 @@ export const PhoneForm = ({ settings, login, uid }: PhoneFormProps) => {
           inputMode="tel"
           autoComplete="tel"
           aria-invalid={error ? "true" : "false"}
-          {...register("phone")}
+          {...register("phone", { onChange: () => clearErrors("phone") })}
         />
         {!!error && (
           <div className={shared.error} role="alert">

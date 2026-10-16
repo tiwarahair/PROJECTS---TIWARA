@@ -100,7 +100,6 @@ export const useCheckout = (props: CheckoutSheetProps) => {
   const refundForm = useForm<RefundValues>({
     defaultValues: state.refund,
     resolver: zodResolver(getRefundSchema(refundCap)),
-    mode: "onChange",
   });
 
   const refundValues = refundForm.watch();

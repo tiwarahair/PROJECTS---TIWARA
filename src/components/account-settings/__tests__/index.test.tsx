@@ -117,6 +117,57 @@ describe("AccountSettings", () => {
     ).toBeInTheDocument();
   });
 
+  it("a mobile error clears while typing", async () => {
+    render(<AccountSettings />, { wrapper: MemoryRouter });
+    await user.click(screen.getAllByRole("button", { name: "Change" })[1]!);
+    await user.type(screen.getByLabelText("New phone number"), "0");
+    await user.click(screen.getByRole("button", { name: "Save" }));
+
+    expect(
+      await screen.findByText("Enter a UK mobile number, like 07700 900418."),
+    ).toBeInTheDocument();
+
+    await user.type(screen.getByLabelText("New phone number"), "7");
+
+    expect(
+      screen.queryByText("Enter a UK mobile number, like 07700 900418."),
+    ).not.toBeInTheDocument();
+  });
+
+  it("resending the email codes clears the old codes and error", async () => {
+    render(<AccountSettings />, { wrapper: MemoryRouter });
+    await user.click(screen.getAllByRole("button", { name: "Change" })[0]!);
+    await user.type(screen.getByLabelText("New email"), "amara@example.com");
+    await user.click(screen.getByRole("button", { name: "Send codes" }));
+
+    const current = await screen.findByLabelText(
+      "Code sent to amara.okonkwo@gmail.com",
+    );
+
+    await user.type(current, "000000");
+
+    await user.type(
+      screen.getByLabelText("Code sent to amara@example.com"),
+      "123456",
+    );
+
+    await user.click(screen.getByRole("button", { name: "Confirm" }));
+    expect(await screen.findByRole("alert")).toBeInTheDocument();
+
+    await user.type(current, "{Backspace}");
+    expect(screen.queryByRole("alert")).not.toBeInTheDocument();
+
+    await user.click(screen.getByRole("button", { name: "Resend codes" }));
+
+    await waitFor(() =>
+      expect(
+        screen.getByLabelText("Code sent to amara@example.com"),
+      ).toHaveValue(""),
+    );
+
+    expect(screen.queryByRole("alert")).not.toBeInTheDocument();
+  });
+
   it("changes the login email with a code from each address", async () => {
     render(<AccountSettings />, { wrapper: MemoryRouter });
     await user.click(screen.getAllByRole("button", { name: "Change" })[0]!);
@@ -266,6 +317,52 @@ describe("AccountSettings", () => {
     expect(
       await screen.findByText("Passwords don’t match."),
     ).toBeInTheDocument();
+  });
+
+  it("security: errors clear once the password is edited", async () => {
+    render(
+      <AccountSettings
+        page="security"
+        backend={{
+          ...DEMO_BACKEND,
+          changePassword: () => Promise.resolve("same_password"),
+        }}
+      />,
+      { wrapper: MemoryRouter },
+    );
+
+    const next = screen.getByLabelText("New password");
+    const confirm = screen.getByLabelText("Confirm new password");
+
+    await user.type(next, "tide2lamp-violetx");
+    await user.type(confirm, "tide2lamp-violet");
+    await user.click(screen.getByRole("button", { name: "Save changes" }));
+
+    expect(
+      await screen.findByText("Passwords don’t match."),
+    ).toBeInTheDocument();
+
+    await user.type(next, "{Backspace}");
+
+    await waitFor(() =>
+      expect(
+        screen.queryByText("Passwords don’t match."),
+      ).not.toBeInTheDocument(),
+    );
+
+    await user.click(screen.getByRole("button", { name: "Save changes" }));
+
+    expect(
+      await screen.findByText(
+        "That’s your current password. Choose a new one.",
+      ),
+    ).toBeInTheDocument();
+
+    await user.type(next, "s");
+
+    expect(
+      screen.queryByText("That’s your current password. Choose a new one."),
+    ).not.toBeInTheDocument();
   });
 
   it("security: a social sign-in offers to set a password", () => {

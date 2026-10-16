@@ -88,20 +88,28 @@ export const ClosedSheet = ({ studio }: { studio: StudioController }) => {
             {...register("from")}
           />
         </label>
-        <label className={styles.block}>
-          <span className={fields.fieldLabel}>To</span>
+        <div className={styles.block}>
+          <label className={fields.fieldLabel} htmlFor="closed-to">
+            To
+          </label>
           <input
             className={styles.dateInput}
+            id="closed-to"
             type="date"
             aria-invalid={errors.to ? "true" : "false"}
+            aria-describedby={errors.to ? "closed-to-error" : undefined}
             {...register("to")}
           />
           {errors.to?.message && (
-            <span className={fields.fieldError} role="alert">
+            <span
+              id="closed-to-error"
+              className={fields.fieldError}
+              role="alert"
+            >
               {errors.to.message}
             </span>
           )}
-        </label>
+        </div>
       </div>
       <label className={fields.field}>
         <span className={fields.fieldLabel}>Reason</span>

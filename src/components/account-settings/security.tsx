@@ -32,7 +32,8 @@ export const SettingsSecurity = ({
 
   const provider = props.signIn === "apple" ? "Apple" : "Google";
 
-  const { register, setValue } = passwordForm;
+  const { register, setValue, clearErrors } = passwordForm;
+  const clearServerError = () => clearErrors("root");
 
   const passwordFields = [
     {
@@ -90,7 +91,10 @@ export const SettingsSecurity = ({
                       autoComplete={autoComplete}
                       aria-invalid={error ? "true" : "false"}
                       aria-describedby={isNew ? `${id}-hint` : ""}
-                      {...register(key)}
+                      {...register(key, {
+                        onChange: clearServerError,
+                        deps: isNew ? ["confirm"] : [],
+                      })}
                     />
                     {/* the new password's error shows in the meter, not as a line */}
                     {!isNew && !!error && (
@@ -122,11 +126,14 @@ export const SettingsSecurity = ({
                       autoComplete="one-time-code"
                       aria-invalid={passwordErrors.code ? "true" : "false"}
                       {...register("code", {
-                        onChange: (event: { target: { value: string } }) =>
+                        onChange: (event: { target: { value: string } }) => {
+                          clearServerError();
+
                           setValue(
                             "code",
                             event.target.value.replace(/\D/g, "").slice(0, 6),
-                          ),
+                          );
+                        },
                       })}
                     />
                     <button

@@ -28,10 +28,12 @@ export const EmailCodesForm = ({
     handleSubmit,
     setError,
     clearErrors,
+    reset,
     formState: { errors },
   } = useForm<EmailCodesValues>({
     defaultValues: { current: "", next: "" },
     resolver: zodResolver(getEmailCodesSchema(isCurrentEmailConfirmed)),
+    reValidateMode: "onSubmit",
   });
 
   const error = errors.root?.message ?? errors.next?.message;
@@ -107,7 +109,12 @@ export const EmailCodesForm = ({
           type="button"
           className={joinClassNames(styles.resend, shared.focusRing)}
           data-ac-in="1"
-          onClick={async () => showFailure(await login.resendEmailCodes())}
+          onClick={async () => {
+            const failure = await login.resendEmailCodes();
+
+            if (failure) showFailure(failure);
+            else reset({ current: "", next: "" });
+          }}
         >
           Resend codes
         </button>

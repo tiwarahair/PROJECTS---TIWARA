@@ -189,6 +189,23 @@ describe("Studio sheets", () => {
     ).toBeDisabled();
   });
 
+  it("clearing a closed period's end date asks for one", async () => {
+    renderStudio();
+    await openAvailability();
+
+    await user.click(
+      screen.getAllByRole("button", { name: "Add" })[1] as HTMLElement,
+    );
+
+    const [, to] =
+      document.querySelectorAll<HTMLInputElement>('input[type="date"]');
+
+    await user.type(to as HTMLInputElement, "2026-12-28");
+    await user.clear(to as HTMLInputElement);
+
+    expect(await screen.findByText("Choose an end date.")).toBeInTheDocument();
+  });
+
   it("editing a closed period saves rather than adds", async () => {
     renderStudio();
     await openAvailability();

@@ -39,6 +39,11 @@ export const resendSchema = z.object({
 export const getRefundAmount = ({ kind, amount }: RefundValues, cap: number) =>
   kind === "full" ? cap : parsePounds(amount);
 
+export const getRefundOverError = (values: RefundValues, cap: number) =>
+  values.kind === "partial" && getRefundAmount(values, cap) > cap
+    ? `You can refund up to ${formatMoney(cap)}.`
+    : "";
+
 export const getRefundSchema = (cap: number) =>
   z
     .object({
@@ -50,11 +55,11 @@ export const getRefundSchema = (cap: number) =>
       const flag = (path: keyof RefundValues, message: string) =>
         context.addIssue({ code: "custom", path: [path], message });
 
-      const amount = getRefundAmount(values, cap);
+      const overError = getRefundOverError(values, cap);
 
-      if (values.kind === "partial" && amount > cap)
-        flag("amount", `You can refund up to ${formatMoney(cap)}.`);
-      else if (!(amount > 0)) flag("amount", "Enter an amount.");
+      if (overError) flag("amount", overError);
+      else if (!(getRefundAmount(values, cap) > 0))
+        flag("amount", "Enter an amount.");
 
       if (!values.reason) flag("reason", "Choose a reason.");
     }) satisfies z.ZodType<RefundValues>;

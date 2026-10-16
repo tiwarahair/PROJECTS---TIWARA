@@ -1,4 +1,4 @@
-import { useRef } from "react";
+import { useId, useRef } from "react";
 import { Camera, User } from "lucide-react";
 import { joinClassNames } from "../../../utils/class-names";
 import type { ClientForm } from "./use-client-form";
@@ -15,9 +15,14 @@ export const ClientViewSheet = ({ view }: { view: ClientsView }) => (
   </div>
 );
 
-const FieldError = ({ message }: { message: string | undefined }) =>
+interface FieldErrorProps {
+  id: string;
+  message: string | undefined;
+}
+
+const FieldError = ({ id, message }: FieldErrorProps) =>
   message ? (
-    <span className={styles.fieldError} role="alert">
+    <span id={id} className={styles.fieldError} role="alert">
       {message}
     </span>
   ) : null;
@@ -33,6 +38,7 @@ interface ClientEditProps {
 /** Add or edit a client. */
 export const ClientEditSheet = ({ view, form }: ClientEditProps) => {
   const fileRef = useRef<HTMLInputElement>(null);
+  const uid = useId();
   const { draft, draftImage, duplicate } = view;
   const { errors } = form.formState;
 
@@ -95,16 +101,23 @@ export const ClientEditSheet = ({ view, form }: ClientEditProps) => {
         </div>
       </div>
       <div className={styles.names}>
-        <label className={styles.field}>
-          <span className={styles.label}>First name</span>
+        <div className={styles.field}>
+          <label className={styles.label} htmlFor={`${uid}-first`}>
+            First name
+          </label>
           <input
             className={styles.input}
             {...onField("first")}
             autoComplete="off"
+            id={`${uid}-first`}
             aria-invalid={errors.first ? "true" : "false"}
+            aria-describedby={errors.first ? `${uid}-first-error` : undefined}
           />
-          <FieldError message={errors.first?.message} />
-        </label>
+          <FieldError
+            id={`${uid}-first-error`}
+            message={errors.first?.message}
+          />
+        </div>
         <label className={styles.field}>
           <span className={styles.label}>Last name</span>
           <input
@@ -114,28 +127,36 @@ export const ClientEditSheet = ({ view, form }: ClientEditProps) => {
           />
         </label>
       </div>
-      <label className={styles.field}>
-        <span className={styles.label}>Phone</span>
+      <div className={styles.field}>
+        <label className={styles.label} htmlFor={`${uid}-phone`}>
+          Phone
+        </label>
         <input
           className={styles.input}
           type="tel"
           {...onField("phone")}
           placeholder="07700 900000"
+          id={`${uid}-phone`}
           aria-invalid={errors.phone ? "true" : "false"}
+          aria-describedby={errors.phone ? `${uid}-phone-error` : undefined}
         />
-        <FieldError message={errors.phone?.message} />
-      </label>
-      <label className={styles.field}>
-        <span className={styles.label}>Email</span>
+        <FieldError id={`${uid}-phone-error`} message={errors.phone?.message} />
+      </div>
+      <div className={styles.field}>
+        <label className={styles.label} htmlFor={`${uid}-email`}>
+          Email
+        </label>
         <input
           className={styles.input}
           type="email"
           {...onField("email")}
           placeholder="name@email.com"
+          id={`${uid}-email`}
           aria-invalid={errors.email ? "true" : "false"}
+          aria-describedby={errors.email ? `${uid}-email-error` : undefined}
         />
-        <FieldError message={errors.email?.message} />
-      </label>
+        <FieldError id={`${uid}-email-error`} message={errors.email?.message} />
+      </div>
       {duplicate.isOn && (
         <div className={styles.duplicate} role="alert">
           <img className={styles.duplicateAvatar} src={duplicate.img} alt="" />

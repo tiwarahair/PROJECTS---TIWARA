@@ -170,6 +170,35 @@ describe("PaymentPolicy", () => {
     ).toHaveAttribute("aria-checked", "false");
   });
 
+  it("keeps edits made while a save is still pending", async () => {
+    let finish: (isSaved: boolean) => void = () => {};
+
+    render(
+      <PaymentPolicy
+        onSave={() =>
+          new Promise<boolean>((resolve) => {
+            finish = resolve;
+          })
+        }
+      />,
+    );
+
+    const deposit = screen.getByLabelText("Deposit amount");
+
+    await user.clear(deposit);
+    await user.type(deposit, "30");
+    await settle();
+    await user.click(screen.getByRole("button", { name: "Save policy" }));
+    await settle();
+    await user.clear(deposit);
+    await user.type(deposit, "35");
+    await act(async () => finish(true));
+    await settle();
+
+    expect(deposit).toHaveValue("35");
+    expect(screen.getByRole("button", { name: /Save/ })).toBeEnabled();
+  });
+
   it("says how many existing bookings keep their policy", () => {
     render(<PaymentPolicy bookingsCount={1} />);
 

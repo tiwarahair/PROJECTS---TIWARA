@@ -2,7 +2,7 @@ import { useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import type { StudioProfile } from "../../core/types";
-import { getProfileValues, profileSchema } from "./schema";
+import { SOCIAL_PLATFORMS, getProfileValues, profileSchema } from "./schema";
 import type { ProfileValues } from "./schema";
 
 export const PROFILE_FORM_ID = "profile-form";
@@ -26,6 +26,10 @@ export const useProfileForm = (
     trigger,
     formState: { isSubmitted },
   } = form;
+
+  useEffect(() => {
+    void trigger([...SOCIAL_PLATFORMS]);
+  }, [trigger]);
 
   useEffect(() => {
     if (isSubmitted) void trigger("portfolioCount");

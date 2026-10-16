@@ -55,7 +55,14 @@ export const usePaymentPolicy = ({
   const submit = handleSubmit((submitted) => {
     const markSaved = () => {
       window.clearTimeout(flashTimer.current);
+
+      const current = getValues();
+
       reset(submitted);
+
+      if (JSON.stringify(current) !== JSON.stringify(submitted))
+        reset(current, { keepDefaultValues: true });
+
       setIsFlashing(true);
 
       flashTimer.current = window.setTimeout(
