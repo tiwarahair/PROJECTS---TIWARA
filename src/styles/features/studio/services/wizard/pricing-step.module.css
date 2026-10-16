@@ -1,0 +1,402 @@
+/* ---- pricing ---- */
+
+.sectionTitle {
+  font-family: "Schibsted Grotesk", sans-serif;
+  font-size: 18px;
+  font-weight: 600;
+  letter-spacing: -0.02em;
+  line-height: 1.2;
+  margin-bottom: 10px;
+}
+
+.baseBox {
+  flex: 0 0 auto;
+  animation: rowin 0.22s cubic-bezier(0.2, 0.8, 0.2, 1) both;
+}
+
+.stack16 {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.priceBox {
+  display: flex;
+  align-items: center;
+  height: 46px;
+  padding: 0 14px;
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-sm);
+  box-sizing: border-box;
+  background: transparent;
+  gap: 4px;
+}
+
+.pound {
+  font-size: 16px;
+  font-weight: 500;
+  color: var(--text-secondary);
+}
+
+.priceInput {
+  flex: 1;
+  min-width: 0;
+  border: none;
+  background: none;
+  padding: 0;
+  font: inherit;
+  font-size: 16px;
+  font-weight: 500;
+  outline: none;
+  color: var(--text-primary);
+  font-variant-numeric: tabular-nums;
+}
+
+.durationGrid {
+  border-radius: var(--radius-sm);
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  gap: 10px;
+}
+
+.selectWrap {
+  position: relative;
+  display: block;
+  min-width: 0;
+}
+
+.select {
+  appearance: none;
+  -webkit-appearance: none;
+  width: 100%;
+  display: flex;
+  align-items: center;
+  height: 46px;
+  padding: 0 14px;
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-sm);
+  box-sizing: border-box;
+  background: transparent;
+  padding-right: 38px;
+  font: inherit;
+  font-size: 16px;
+  font-weight: 500;
+  color: var(--text-primary);
+  outline: none;
+  cursor: pointer;
+}
+
+.extraSelect {
+  appearance: none;
+  -webkit-appearance: none;
+  width: 100%;
+  display: flex;
+  align-items: center;
+  height: 46px;
+  padding: 0 14px;
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-sm);
+  box-sizing: border-box;
+  background: transparent;
+  padding-right: 38px;
+  font: inherit;
+  font-size: 16px;
+  font-weight: 500;
+  outline: none;
+  cursor: pointer;
+  color: var(--text-secondary);
+}
+
+.selectChevron {
+  position: absolute;
+  right: 14px;
+  top: 15px;
+  pointer-events: none;
+  color: var(--text-secondary);
+}
+
+.extraNote {
+  display: block;
+  font-size: 13.5px;
+  color: var(--text-secondary);
+  margin-top: 6px;
+  line-height: 1.4;
+}
+
+.extraHelp {
+  display: block;
+  font-size: 13.5px;
+  color: var(--accent-700);
+  margin-top: 4px;
+  line-height: 1.4;
+}
+
+.collapsed {
+  flex: 0 0 auto;
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  gap: 10px;
+  background: transparent;
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-md);
+  padding: 12px 14px;
+  animation: rowin 0.22s cubic-bezier(0.2, 0.8, 0.2, 1) both;
+}
+
+.collapsedTitle {
+  font-size: 14.5px;
+  font-weight: 500;
+}
+
+.segments {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: nowrap;
+  min-width: 0;
+}
+
+.segmentsWrap {
+  flex-wrap: wrap;
+}
+
+.pricePill {
+  flex: 0 0 auto;
+  display: flex;
+  align-items: center;
+  background: var(--neutral-100, #fdfbf5);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-sm);
+  height: 32px;
+  padding: 0 4px 0 10px;
+}
+
+.pillPound {
+  font-size: 14.5px;
+  color: var(--text-secondary);
+  font-weight: 500;
+}
+
+.pillInput {
+  min-width: 34px;
+  border: none;
+  background: none;
+  padding: 0 3px;
+  font-size: 16px;
+  font-weight: 600;
+  text-align: center;
+  outline: none;
+  color: var(--text-primary);
+  field-sizing: content;
+  width: var(--width);
+}
+
+.pill {
+  flex: 0 0 auto;
+  display: flex;
+  align-items: center;
+  background: var(--neutral-100, #fdfbf5);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-sm);
+  height: 32px;
+  overflow: hidden;
+}
+
+.pillHours {
+  border: none;
+  background: none;
+  height: 32px;
+  padding: 0 2px 0 8px;
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--text-primary);
+  font-family: inherit;
+  outline: none;
+}
+
+.pillDivider {
+  width: 1px;
+  height: 16px;
+  background: var(--border-subtle);
+}
+
+.pillMinutes {
+  border: none;
+  background: none;
+  height: 32px;
+  padding: 0 6px 0 8px;
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--text-primary);
+  font-family: inherit;
+  outline: none;
+}
+
+.pillExtra {
+  border: none;
+  background: none;
+  height: 32px;
+  padding: 0 6px;
+  font-size: 16px;
+  font-weight: 600;
+  font-family: inherit;
+  outline: none;
+  color: var(--text-secondary);
+}
+
+.customTitle {
+  font-family: "Schibsted Grotesk", sans-serif;
+  font-size: 18px;
+  font-weight: 600;
+  letter-spacing: -0.02em;
+  line-height: 1.2;
+  margin: 22px 0 10px;
+}
+
+.own {
+  margin-top: 22px;
+}
+
+.ownTitle {
+  font-family: "Schibsted Grotesk", sans-serif;
+  font-size: 18px;
+  font-weight: 600;
+  letter-spacing: -0.02em;
+  line-height: 1.2;
+}
+
+.ownIntro {
+  font-size: 13.5px;
+  color: var(--text-secondary);
+  margin: 4px 0 10px;
+  line-height: 1.45;
+}
+
+.ownRow {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 12px 0;
+  border-top: 1px solid var(--border-subtle);
+}
+
+.ownName {
+  display: block;
+  font-size: 15px;
+  font-weight: 600;
+}
+
+.ownMeta {
+  display: block;
+  font-size: 13.5px;
+  color: var(--text-secondary);
+  margin-top: 2px;
+  font-variant-numeric: tabular-nums;
+}
+
+.ownEdit {
+  height: 34px;
+  padding: 0 12px;
+  border: none;
+  background: none;
+  border-radius: var(--radius-full);
+  font: inherit;
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--accent-700);
+  cursor: pointer;
+}
+
+.ownEdit:hover {
+  background: var(--quiet) !important;
+}
+
+.ownDelete {
+  height: 34px;
+  padding: 0 12px;
+  border: none;
+  background: none;
+  border-radius: var(--radius-full);
+  font: inherit;
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--text-secondary);
+  cursor: pointer;
+}
+
+.ownDelete:hover {
+  background: var(--quiet) !important;
+  color: var(--accent-700) !important;
+}
+
+.ownAdd {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+  margin-top: 8px;
+  box-sizing: border-box;
+  background: none;
+  border: 1px dashed var(--border-strong, #d8d2c6);
+  border-radius: var(--radius-full);
+  padding: 12px 16px;
+  font: inherit;
+  font-size: 14.5px;
+  font-weight: 600;
+  color: var(--accent-700);
+  cursor: pointer;
+}
+
+.ownAdd:active {
+  transform: scale(0.98) !important;
+}
+
+.reviewButton {
+  width: 100%;
+  margin-top: 14px;
+  border: 1.5px solid var(--accent-700);
+  background: var(--accent-wash, rgba(143, 17, 18, 0.06));
+  color: var(--accent-700);
+  border-radius: var(--radius-full);
+  padding: 12px 0;
+  font-size: 15px;
+  font-weight: 600;
+  animation: glowp 2.2s ease-in-out infinite;
+  opacity: 1;
+}
+
+.reviewButton:active {
+  transform: scale(0.98) !important;
+}
+
+.reviewOff {
+  opacity: 0.45;
+}
+
+/* after .extraSelect and .pillExtra, so a typed value wins */
+
+.extraTyped {
+  color: var(--text-primary);
+}
+
+@keyframes rowin {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes glowp {
+  0%,
+  100% {
+    box-shadow: 0 0 0 0 rgba(143, 17, 18, 0);
+  }
+  50% {
+    box-shadow: 0 0 16px 2px rgba(143, 17, 18, 0.28);
+  }
+}
