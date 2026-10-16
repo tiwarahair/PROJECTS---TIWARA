@@ -1,0 +1,19 @@
+.textarea {
+  width: 100%;
+  box-sizing: border-box;
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-sm);
+  background: transparent;
+  padding: 11px 13px;
+  font-size: 17px;
+  outline: none;
+  resize: none;
+  font-family: "Hanken Grotesk", sans-serif;
+  line-height: 1.45;
+}
+
+.stack12 {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
