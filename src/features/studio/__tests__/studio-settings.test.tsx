@@ -1,4 +1,4 @@
-import { act, screen, within } from "@testing-library/react";
+import { act, screen, waitFor, within } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { renderWithStore } from "../../../test/render-with-store";
 import { StudioPage } from "../studio-page";
@@ -103,6 +103,66 @@ describe("Studio → Settings", () => {
     ).toHaveTextContent(/^[A-Z]{1,2}$/);
   });
 
+  it("saving the profile needs at least 2 portfolio photos", async () => {
+    Element.prototype.scrollIntoView = vi.fn();
+    setViewport(1440);
+    renderStudio();
+    await user.click(within(getLabelled("Sidebar")).getByTitle("Settings"));
+
+    const saveProfile = async () => {
+      await user.click(
+        screen
+          .getAllByRole("button", { name: "Save changes" })
+          .at(-1) as HTMLElement,
+      );
+
+      await act(() => Promise.resolve());
+    };
+
+    await saveProfile();
+
+    expect(screen.getByRole("alert")).toHaveTextContent(
+      "Provide at least 2 portfolio images",
+    );
+
+    expect(screen.queryByText("Profile saved")).not.toBeInTheDocument();
+
+    const nav = getLabelled("Settings nav");
+
+    await user.click(within(nav).getByRole("button", { name: "Availability" }));
+    await user.click(within(nav).getByRole("button", { name: "Profile" }));
+
+    expect(
+      screen.queryByText("Provide at least 2 portfolio images"),
+    ).not.toBeInTheDocument();
+
+    await saveProfile();
+
+    expect(screen.getByRole("alert")).toBeInTheDocument();
+
+    const photoInput = getLabelled("Edit profile").querySelector(
+      "input[type=file][multiple]",
+    ) as HTMLInputElement;
+
+    await user.upload(photoInput, [
+      new File(["a"], "a.jpg", { type: "image/jpeg" }),
+      new File(["b"], "b.jpg", { type: "image/jpeg" }),
+    ]);
+
+    vi.useRealTimers();
+    await screen.findByText("2 of 20");
+
+    await waitFor(() =>
+      expect(
+        screen.queryByText("Provide at least 2 portfolio images"),
+      ).not.toBeInTheDocument(),
+    );
+
+    await saveProfile();
+
+    expect(screen.getByText("Profile saved")).toBeInTheDocument();
+  });
+
   it("wide screens open on the profile page with the settings nav", async () => {
     setViewport(1440);
     renderStudio();
@@ -148,7 +208,7 @@ describe("Studio → Settings", () => {
     );
 
     expect(
-      screen.getByText("Check your social usernames first."),
+      await screen.findByText("Check your social usernames first."),
     ).toBeInTheDocument();
   });
 

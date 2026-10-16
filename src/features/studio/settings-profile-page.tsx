@@ -5,6 +5,7 @@ import { Camera, Plus, X } from "lucide-react";
 import { Avatar } from "../../components/ds/avatar";
 import { joinClassNames } from "../../utils/class-names";
 import type { SocialPlatform } from "../../utils/social-handles";
+import { PROFILE_FORM_ID, useProfileForm } from "./use-profile-form";
 import type { SettingsView } from "./settings-view";
 import type { StudioController } from "./use-studio";
 import { Field } from "./settings-page-parts";
@@ -89,9 +90,30 @@ export const ProfilePage = ({ studio, view }: ProfilePageProps) => {
   const coverInput = useRef<HTMLInputElement>(null);
   const avatarInput = useRef<HTMLInputElement>(null);
   const portInput = useRef<HTMLInputElement>(null);
+  const portfolioRef = useRef<HTMLDivElement>(null);
+
+  const {
+    handleSubmit,
+    formState: { errors },
+  } = useProfileForm(state.portfolio.length);
+
+  const showErrors = () => {
+    view.flagSocialErrors();
+
+    portfolioRef.current?.scrollIntoView({
+      block: "center",
+      behavior: "smooth",
+    });
+  };
 
   return (
-    <div className={styles.profile} data-screen-label="Edit profile">
+    <form
+      id={PROFILE_FORM_ID}
+      className={styles.profile}
+      data-screen-label="Edit profile"
+      noValidate
+      onSubmit={handleSubmit(view.saveProfile, showErrors)}
+    >
       <div className={styles.cover}>
         {state.coverUrl ? (
           <ResponsiveImage
@@ -115,6 +137,7 @@ export const ProfilePage = ({ studio, view }: ProfilePageProps) => {
           onChange={view.onCoverFile}
         />
         <button
+          type="button"
           className={styles.changeCover}
           onClick={() => coverInput.current?.click()}
         >
@@ -128,6 +151,7 @@ export const ProfilePage = ({ studio, view }: ProfilePageProps) => {
           onChange={view.onAvatarFile}
         />
         <button
+          type="button"
           className={styles.avatarButton}
           onClick={() => avatarInput.current?.click()}
           aria-label="Change profile photo"
@@ -192,7 +216,7 @@ export const ProfilePage = ({ studio, view }: ProfilePageProps) => {
           value={profile.youtube}
           view={view}
         />
-        <div className={styles.portfolio}>
+        <div ref={portfolioRef} className={styles.portfolio}>
           <div className={styles.portfolioHead}>
             <span className={parts.title15}>Portfolio</span>
             <span className={parts.muted}>{view.portCount}</span>
@@ -200,6 +224,11 @@ export const ProfilePage = ({ studio, view }: ProfilePageProps) => {
           <div className={parts.mutedTop}>
             Up to twenty photos of your work, shown on your public profile.
           </div>
+          {errors.portfolioCount && (
+            <div className={styles.error} role="alert">
+              {errors.portfolioCount.message}
+            </div>
+          )}
           <input
             className={styles.hiddenInput}
             type="file"
@@ -218,6 +247,7 @@ export const ProfilePage = ({ studio, view }: ProfilePageProps) => {
                   alt="Portfolio photo"
                 />
                 <button
+                  type="button"
                   className={styles.removePhoto}
                   onClick={remove}
                   aria-label="Remove photo"
@@ -228,6 +258,7 @@ export const ProfilePage = ({ studio, view }: ProfilePageProps) => {
             ))}
             {view.canAddPhotos && (
               <button
+                type="button"
                 className={styles.addPhotos}
                 onClick={() => portInput.current?.click()}
               >
@@ -238,6 +269,6 @@ export const ProfilePage = ({ studio, view }: ProfilePageProps) => {
           </div>
         </div>
       </div>
-    </div>
+    </form>
   );
 };

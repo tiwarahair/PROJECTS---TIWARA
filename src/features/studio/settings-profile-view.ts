@@ -47,6 +47,14 @@ export const getProfileView = (studio: StudioController) => {
     youtube: getSocialHandleError("youtube", state.profile.youtube ?? ""),
   };
 
+  const flagSocialErrors = () => {
+    const hasErrors = Object.values(socialErrors).some(Boolean);
+
+    if (hasErrors) showToast("Check your social usernames first.");
+
+    return hasErrors;
+  };
+
   return {
     onCoverFile: (event: ChangeEvent<HTMLInputElement>) =>
       readFile(event, (url, file) => {
@@ -64,6 +72,7 @@ export const getProfileView = (studio: StudioController) => {
       }),
     setProfile,
     socialErrors,
+    flagSocialErrors,
     portfolio: state.portfolio.map(({ id, src }) => ({
       key: id,
       src,
@@ -115,8 +124,7 @@ export const getProfileView = (studio: StudioController) => {
       });
     },
     saveProfile: async () => {
-      if (Object.values(socialErrors).some(Boolean))
-        return showToast("Check your social usernames first.");
+      if (flagSocialErrors()) return;
 
       if (context.memo.saveSlug && !(await context.memo.saveSlug())) return;
 
