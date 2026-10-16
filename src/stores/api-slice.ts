@@ -13,6 +13,29 @@ import type {
   HoldRequest,
   SlotRequest,
 } from "../lib/booking-api";
+import {
+  cancelBooking,
+  getManagedBooking,
+  secureBookingLink,
+  sendBookingCode,
+  verifyBookingCode,
+  getRescheduleSlots,
+  rescheduleBooking,
+  updateBookingAllergies,
+} from "../lib/manage-booking-api";
+import {
+  claimBookingInvite,
+  getBookingInvite,
+  getOwnerManageToken,
+  renewBookingInvite,
+} from "../lib/booking-invite-api";
+import type { BookingInvite } from "../lib/booking-invite-api";
+import type {
+  CancellationTerms,
+  CodeCheck,
+  ManagedBooking,
+  RescheduleSlotsRequest,
+} from "../lib/manage-booking-api";
 import { fetchPublicProfile } from "../lib/public-profiles";
 import { SEARCH_PAGE_SIZE, searchStylists } from "../lib/search-api";
 import type { SearchArgs, SearchRow } from "../lib/search-api";
@@ -28,32 +51,35 @@ import { listTwoFactorDevices } from "../lib/two-factor";
 import type { TwoFactorDevice } from "../lib/two-factor";
 import type { Profile } from "../types/profile";
 
-/** Errors are kept as plain data: the store must stay serializable. */
 export interface ApiError {
   message: string;
 }
 
-/** RTK Query's result shape for a promise that may throw. */
-const toQueryResult = <T>(task: Promise<T>) =>
-  task.then(
-    (data) => ({ data }),
-    (error: unknown) => ({
-      error: {
-        message: error instanceof Error ? error.message : String(error),
-      },
-    }),
-  );
-
-/** An unwrapped request's error message ("slot_taken", …), or "" when there's none. */
 export const getErrorMessage = (error: unknown) =>
   typeof error === "object" && error !== null && "message" in error
     ? String(error.message)
     : "";
 
+/** RTK Query's result shape for a promise that may throw. Supabase rpc errors are plain objects, not Errors. */
+const toQueryResult = <T>(task: Promise<T>) =>
+  task.then(
+    (data) => ({ data }),
+    (error: unknown) => ({
+      error: { message: getErrorMessage(error) || String(error) },
+    }),
+  );
+
 export const api = createApi({
   reducerPath: "api",
   baseQuery: fakeBaseQuery<ApiError>(),
-  tagTypes: ["Studio", "StylistProfile", "Search", "TwoFactor", "Slots"],
+  tagTypes: [
+    "Studio",
+    "StylistProfile",
+    "Search",
+    "TwoFactor",
+    "Slots",
+    "ManagedBooking",
+  ],
   refetchOnReconnect: true,
   endpoints: (build) => ({
     getProfile: build.query<Profile, string>({
@@ -160,7 +186,6 @@ export const api = createApi({
       providesTags: ["Slots"],
       queryFn: (request) => toQueryResult(getAvailableSlots(request)),
     }),
-    // held or refused (taken), the open times have changed either way
     holdBooking: build.mutation<HeldBooking, HoldRequest>({
       invalidatesTags: () => ["Slots"],
       queryFn: (request) => toQueryResult(holdBooking(request)),
@@ -181,6 +206,66 @@ export const api = createApi({
       keepUnusedDataFor: 0,
       queryFn: (hold) => toQueryResult(getBookingStatus(hold)),
     }),
+    getManagedBooking: build.query<ManagedBooking | null, string>({
+      providesTags: ["ManagedBooking"],
+      queryFn: (token) => toQueryResult(getManagedBooking(token)),
+    }),
+    getRescheduleSlots: build.query<string[], RescheduleSlotsRequest>({
+      providesTags: ["ManagedBooking"],
+      queryFn: (request) => toQueryResult(getRescheduleSlots(request)),
+    }),
+    rescheduleBooking: build.mutation<
+      void,
+      { token: string; startsAt: string }
+    >({
+      invalidatesTags: () => ["ManagedBooking"],
+      queryFn: (request) => toQueryResult(rescheduleBooking(request)),
+    }),
+    updateBookingAllergies: build.mutation<
+      void,
+      { token: string; allergies: string; consent: boolean }
+    >({
+      invalidatesTags: () => ["ManagedBooking"],
+      queryFn: (request) => toQueryResult(updateBookingAllergies(request)),
+    }),
+    sendBookingCode: build.mutation<{ email: string; sent: boolean }, string>({
+      queryFn: (token) => toQueryResult(sendBookingCode(token)),
+    }),
+    verifyBookingCode: build.mutation<
+      CodeCheck,
+      { token: string; code: string }
+    >({
+      invalidatesTags: (result) =>
+        result === "verified" ? ["ManagedBooking"] : [],
+      queryFn: (request) => toQueryResult(verifyBookingCode(request)),
+    }),
+    secureBookingLink: build.mutation<
+      { email: string; stylist_name: string },
+      string
+    >({
+      queryFn: (token) => toQueryResult(secureBookingLink(token)),
+    }),
+    cancelBooking: build.mutation<CancellationTerms, string>({
+      invalidatesTags: () => ["ManagedBooking"],
+      queryFn: (token) => toQueryResult(cancelBooking(token)),
+    }),
+    getOwnerManageToken: build.query<string, string>({
+      keepUnusedDataFor: 0,
+      queryFn: (ref) => toQueryResult(getOwnerManageToken(ref)),
+    }),
+    getBookingInvite: build.query<BookingInvite, string>({
+      keepUnusedDataFor: 0,
+      queryFn: (token) => toQueryResult(getBookingInvite(token)),
+    }),
+    renewBookingInvite: build.mutation<{ email: string }, string>({
+      queryFn: (token) => toQueryResult(renewBookingInvite(token)),
+    }),
+    claimBookingInvite: build.mutation<
+      { tokenHash: string },
+      { token: string; password: string }
+    >({
+      queryFn: (request) => toQueryResult(claimBookingInvite(request)),
+    }),
     getTwoFactorDevices: build.query<TwoFactorDevice[], string>({
       providesTags: ["TwoFactor"],
       queryFn: () => toQueryResult(listTwoFactorDevices()),
@@ -189,6 +274,18 @@ export const api = createApi({
 });
 
 export const {
+  useCancelBookingMutation,
+  useSecureBookingLinkMutation,
+  useSendBookingCodeMutation,
+  useVerifyBookingCodeMutation,
+  useClaimBookingInviteMutation,
+  useGetBookingInviteQuery,
+  useGetOwnerManageTokenQuery,
+  useRenewBookingInviteMutation,
+  useGetManagedBookingQuery,
+  useGetRescheduleSlotsQuery,
+  useRescheduleBookingMutation,
+  useUpdateBookingAllergiesMutation,
   useGetAvailableSlotsQuery,
   useGetBookingStatusQuery,
   useStartCheckoutMutation,

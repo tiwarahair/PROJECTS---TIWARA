@@ -36,16 +36,16 @@ const appRoutes: RouteObject[] = [
   {
     path: "/manage",
     lazy: () =>
-      import("./features/manage-booking/manage-booking-page").then(
-        ({ ManageBookingPage }) => ({ Component: ManageBookingPage }),
-      ),
+      import("./features/manage-booking").then(({ ManageBookingPage }) => ({
+        Component: ManageBookingPage,
+      })),
   },
   {
     path: "/save-details",
     lazy: () =>
-      import("./features/save-details/save-details-page").then(
-        ({ SaveDetailsPage }) => ({ Component: SaveDetailsPage }),
-      ),
+      import("./features/save-details").then(({ SaveDetailsPage }) => ({
+        Component: SaveDetailsPage,
+      })),
   },
   {
     path: "/account",

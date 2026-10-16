@@ -1,6 +1,5 @@
 import { vi } from "vitest";
 
-/** vi.mock factories for the profile and booking calls (vi.mock can't take imported values, so they import these). */
 export const mockPublicProfiles = async (
   original: () => Promise<typeof import("../lib/public-profiles")>,
 ) => {
@@ -44,3 +43,46 @@ export const mockBookingApi = async (
     ),
   };
 };
+
+export const mockManageBookingApi = async (
+  original: () => Promise<typeof import("../lib/manage-booking-api")>,
+) => ({
+  ...(await original()),
+  getManagedBooking: vi.fn(),
+  getRescheduleSlots: vi.fn(() => Promise.resolve([])),
+  rescheduleBooking: vi.fn(() => Promise.resolve()),
+  updateBookingAllergies: vi.fn(() => Promise.resolve()),
+  sendBookingCode: vi.fn(() =>
+    Promise.resolve({ email: "n•••@gmail.com", sent: true }),
+  ),
+  verifyBookingCode: vi.fn(() => Promise.resolve("verified")),
+  secureBookingLink: vi.fn(() =>
+    Promise.resolve({
+      email: "n•••@gmail.com",
+      stylist_name: "Tiwára's House",
+    }),
+  ),
+  cancelBooking: vi.fn(() =>
+    Promise.resolve({ refund_pence: 1500, kept_pence: 0, charge_pence: 0 }),
+  ),
+});
+
+export const mockBookingInviteApi = async (
+  original: () => Promise<typeof import("../lib/booking-invite-api")>,
+) => ({
+  ...(await original()),
+  getBookingInvite: vi.fn(() =>
+    Promise.resolve({
+      state: "valid",
+      first: "Nia",
+      last: "Okafor",
+      email: "nia.okafor@gmail.com",
+    }),
+  ),
+  renewBookingInvite: vi.fn(() =>
+    Promise.resolve({ email: "nia.okafor@gmail.com" }),
+  ),
+  claimBookingInvite: vi.fn(() => Promise.resolve({ tokenHash: "hash" })),
+  signInWithInvite: vi.fn(() => Promise.resolve()),
+  getOwnerManageToken: vi.fn(() => Promise.resolve("owner-token")),
+});

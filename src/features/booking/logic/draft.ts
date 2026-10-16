@@ -1,4 +1,3 @@
-// The booking so far, kept in localStorage (tw_bk_draft_<stylist>) for a day.
 import { DRAFT_TTL_MS } from "./constants";
 import type { BookingDraft, BookingState } from "./types";
 

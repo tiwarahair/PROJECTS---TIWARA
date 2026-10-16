@@ -5,18 +5,11 @@ import { createClient } from "npm:@supabase/supabase-js@2";
 import { z } from "npm:zod@4";
 import { corsHeaders, respond } from "../_shared/cors.ts";
 import { getRecentUser } from "../_shared/recent-user.ts";
+import { getSite } from "../_shared/site.ts";
 import { getAccountState, stripe, syncAccount } from "../_shared/stripe.ts";
 
-const SITES = ["https://dev.tiwarashouse.com", "https://tiwarashouse.com", "https://www.tiwarashouse.com"];
-
 /** Stripe only sends people back to https addresses, so local development returns over https too. */
-const getReturnSite = (origin: string) => {
-  if (SITES.includes(origin)) return origin;
-
-  return /^http:\/\/(localhost|127\.0\.0\.1):\d+$/.test(origin)
-    ? origin.replace("http:", "https:")
-    : "https://www.tiwarashouse.com";
-};
+const getReturnSite = (origin: string) => getSite(origin).replace(/^http:/, "https:");
 
 const requestSchema = z.object({ action: z.enum(["onboard", "dashboard", "refresh"]) });
 

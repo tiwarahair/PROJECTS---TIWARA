@@ -1,4 +1,3 @@
-/** Cloudflare Turnstile's server check; each token passes once. */
 export const isHuman = async (token: string, ip: string) => {
   const response = await fetch(
     "https://challenges.cloudflare.com/turnstile/v0/siteverify",

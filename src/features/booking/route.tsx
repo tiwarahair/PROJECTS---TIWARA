@@ -8,7 +8,6 @@ import { getSearchParams } from "../../utils/page-flags";
 import { BookingFlow } from "./page";
 import styles from "../../styles/features/booking/route.module.css";
 
-/** Route "/book?stylist={slug}": loads the stylist, then the booking flow (with Google for mobile stylists' addresses). */
 export const BookingPage = () => {
   const [slug] = useState(() => getSearchParams().get("stylist") ?? "");
 

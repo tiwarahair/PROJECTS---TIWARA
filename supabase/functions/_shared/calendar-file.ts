@@ -1,5 +1,3 @@
-// "Add to calendar" for a confirmed booking: an .ics file (RFC 5545) and a Google Calendar link.
-
 export interface CalendarEvent {
   ref: string;
   title: string;
@@ -9,7 +7,6 @@ export interface CalendarEvent {
   description: string;
 }
 
-/** 2026-10-20T09:00:00Z → 20261020T090000Z */
 const toUtcStamp = (iso: string) =>
   new Date(iso)
     .toISOString()
@@ -23,7 +20,6 @@ const escapeText = (text: string) =>
 
 const encoder = new TextEncoder();
 
-/** Lines longer than 75 octets continue on the next line after a space. */
 const foldLine = (line: string) => {
   const parts: string[] = [];
   let current = "";

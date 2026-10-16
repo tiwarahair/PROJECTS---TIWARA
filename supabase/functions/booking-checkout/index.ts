@@ -1,19 +1,16 @@
-// Pay for a held booking: checks the person (Turnstile) and the hold, saves the details, and returns a
-// PaymentIntent for the Payment Element. Only Stripe's webhook confirms the booking.
 import { admin } from "../_shared/admin.ts";
 import { getClientIp } from "../_shared/client-ip.ts";
 import { corsHeaders, respond } from "../_shared/cors.ts";
 import { isWithinLimit } from "../_shared/rate-limit.ts";
+import { getSite } from "../_shared/site.ts";
 import { isHuman } from "../_shared/turnstile.ts";
 import { savesCard } from "./payment-params.ts";
 import type { CheckoutQuote } from "./payment-params.ts";
 import { requestSchema } from "./request.ts";
 import { getCustomerId, getPaymentIntent } from "./stripe-payment.ts";
 
-// checkout_booking's own errors, passed on for the page to explain
 const CHECKOUT_ERRORS = ["hold_not_found", "already_paid", "address_required", "outside_area"];
 
-/** The signed-in client, if the caller sent their session. */
 const getClientId = async (request: Request) => {
   const token = request.headers.get("Authorization")?.replace(/^Bearer /, "");
   const { data } = token ? await admin.auth.getUser(token) : { data: null };
@@ -28,7 +25,7 @@ Deno.serve(async (request) => {
 
   if (!parsed.success) return respond(400, { error: "invalid_request" });
 
-  const { hold, contact, notes, address, turnstileToken } = parsed.data;
+  const { hold, contact, notes, allergies, address, turnstileToken } = parsed.data;
   const ip = getClientIp(request);
 
   try {
@@ -63,7 +60,13 @@ Deno.serve(async (request) => {
 
     await admin
       .from("bookings")
-      .update({ stripe_payment_intent_id: intent.id, stripe_customer_id: customerId })
+      .update({
+        stripe_payment_intent_id: intent.id,
+        stripe_customer_id: customerId,
+        site: getSite(request.headers.get("Origin")),
+        allergies: allergies || null,
+        allergies_consented_at: allergies ? new Date().toISOString() : null,
+      })
       .eq("id", quote.id);
 
     return respond(200, { clientSecret: intent.client_secret });

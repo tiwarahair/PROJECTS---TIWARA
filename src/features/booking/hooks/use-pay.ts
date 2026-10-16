@@ -26,7 +26,6 @@ interface PayOptions {
   onConfirm: () => void;
 }
 
-/** Pays with Stripe, then waits for the webhook to confirm the booking. */
 export const usePay = ({ flow, point, onConfirm }: PayOptions) => {
   const { state, stateRef, setState } = flow;
   const turnstileRef = useRef<TurnstileInstance | null>(null);
@@ -40,7 +39,7 @@ export const usePay = ({ flow, point, onConfirm }: PayOptions) => {
   );
 
   useEffect(() => {
-    if (!confirming) return;
+    if (!confirming || !hold) return;
 
     if (booked?.status === "refunded")
       return setState({
@@ -61,6 +60,8 @@ export const usePay = ({ flow, point, onConfirm }: PayOptions) => {
         hold: null,
         holdExpired: false,
         booked: {
+          id: hold.id,
+          secret: hold.secret,
           ref: booked.ref,
           startsAt: booked.starts_at,
           endsAt: booked.ends_at,
@@ -68,15 +69,13 @@ export const usePay = ({ flow, point, onConfirm }: PayOptions) => {
       },
       () => window.scrollTo(0, 0),
     );
-    // onConfirm is a fresh function each render
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [confirming, booked, setState]);
+  }, [confirming, hold, booked, setState]);
 
   useEffect(() => {
     if (!confirming) return;
 
     const timer = window.setTimeout(
-      // still polling: it confirms (or refunds) as soon as the webhook has run
       () => setState({ payKind: "pending", payError: PAY_ERRORS.pending }),
       CONFIRM_WAIT_MS,
     );
@@ -87,7 +86,6 @@ export const usePay = ({ flow, point, onConfirm }: PayOptions) => {
   const fail = (payKind: string, payError = PAY_ERRORS.network) =>
     setState({ paying: false, payKind, payError });
 
-  /** The PaymentIntent's client secret, or null when the server refused (already explained on the page). */
   const checkout = async (request: CheckoutRequest) => {
     try {
       return (await startCheckout(request).unwrap()).clientSecret;
@@ -103,13 +101,11 @@ export const usePay = ({ flow, point, onConfirm }: PayOptions) => {
 
       return null;
     } finally {
-      // each check passes once
       setTurnstileToken(null);
       turnstileRef.current?.reset();
     }
   };
 
-  /** Checks the card, saves the booking's details, then confirms the payment (3D Secure in a modal). */
   const pay = async (stripe: Stripe, elements: StripeElements) => {
     const request =
       turnstileToken &&

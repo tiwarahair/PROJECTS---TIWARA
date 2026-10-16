@@ -1,4 +1,3 @@
-// Step 4 (Your details) error focus and the address / where copy, plus Step 6 card formatting and checks.
 import type { Stylist } from "../../../types/stylist";
 import {
   formatPostcode,
@@ -9,7 +8,6 @@ import type { BookingAddress, Details, FieldKey } from "./types";
 
 const FIELD_KEYS: FieldKey[] = ["address", "first", "last", "email", "phone"];
 
-/** The client's address for mobile stylists: complete?, "M14 5AB", and the one-line address. */
 export const getAddressCheck = (address: BookingAddress) => {
   const { postcode } = address;
 

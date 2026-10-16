@@ -2,7 +2,6 @@ import { z } from "npm:zod@4";
 
 const text = (max: number) => z.string().trim().max(max);
 
-// a UK mobile in any common format, as the sign-up form allows
 const isUkMobile = (value: string) => /^7\d{9}$/.test(value.replace(/\D/g, "").replace(/^44/, "").replace(/^0/, ""));
 
 export const requestSchema = z.object({
@@ -14,6 +13,7 @@ export const requestSchema = z.object({
     phone: z.string().refine(isUkMobile),
   }),
   notes: text(500),
+  allergies: text(1000),
   address: z
     .object({
       line1: text(120).min(1),

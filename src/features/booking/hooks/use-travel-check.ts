@@ -5,7 +5,6 @@ import { useIsInTravelAreaQuery } from "../../../stores/api-slice";
 import { isAddressValid } from "../../../utils/address";
 import type { BookingAddress } from "../logic/types";
 
-/** Mobile stylists: the address's point (Google's when it was picked, else geocoded) and whether it's in their travel area. */
 export const useTravelCheck = (
   serviceId: string,
   address: BookingAddress,

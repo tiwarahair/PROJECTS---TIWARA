@@ -1,6 +1,5 @@
 type ServiceStatus = "active" | "draft" | "archived";
 
-/** `id`: the database row (real stylists); the demo data has none. */
 export interface CustomisationOption {
   id?: string;
   label: string;

@@ -435,8 +435,16 @@ verify_jwt = false
 [functions.booking-hold]
 verify_jwt = false
 
-# Turnstile, the hold's secret and rate limits; a signed-in client's token is read if sent
 [functions.booking-checkout]
+verify_jwt = false
+
+[functions.booking-cancel]
+verify_jwt = false
+
+[functions.booking-calendar]
+verify_jwt = false
+
+[functions.booking-invite]
 verify_jwt = false
 
 # called by pg_cron with x-cron-secret, not a user's token

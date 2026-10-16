@@ -61,51 +61,29 @@
   text-wrap: balance;
 }
 
-.card {
-  margin-top: 24px;
-  background: var(--accent-wash);
-  border-radius: var(--radius-md);
-  padding: 22px 24px;
+.cancelledNote {
+  margin-top: 18px;
+  font-size: 15px;
+  line-height: 1.55;
 }
 
-.cardHead {
-  display: flex;
-  justify-content: space-between;
-  gap: 12px;
-  flex-wrap: wrap;
-  align-items: baseline;
+.cancelledNote p {
+  margin: 0 0 6px;
 }
 
-.service {
-  font-family: "Schibsted Grotesk", sans-serif;
-  font-weight: 600;
-  font-size: 20px;
-  letter-spacing: -0.01em;
-}
-
-.total {
-  font-weight: 600;
-}
-
-.options {
-  margin-top: 6px;
-  font-size: 14.5px;
-  color: var(--neutral-600);
-}
-
-.facts {
-  border-top: 1px solid var(--border-subtle);
-  margin-top: 16px;
-  padding-top: 16px;
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-  font-size: 14.5px;
-  color: var(--neutral-600);
-}
-
-.fact {
-  display: flex;
+.bookAgain {
+  margin-top: 14px;
+  display: inline-flex;
   align-items: center;
-  gap: 9px;
+  height: 46px;
+  padding: 0 26px;
+  border-radius: var(--radius-full);
+  background: var(--accent-700);
+  color: var(--neutral-50);
+  font-weight: 600;
+  text-decoration: none;
+}
+
+.bookAgain:hover {
+  background: var(--accent-900);
 }

@@ -31,7 +31,6 @@ interface StepPayProps {
   booking: BookingController;
 }
 
-/** Step 6 (Pay): Apple / Google Pay, the card form, saved-card note, errors and Pay & confirm, all through Stripe. */
 export const StepPay = ({ booking }: StepPayProps) => {
   const { state, money } = booking;
 
@@ -112,7 +111,6 @@ const PayForm = ({ booking }: StepPayProps) => {
         <PaymentElement
           options={{
             layout: "tabs",
-            // Apple Pay and Google Pay are the quick checkout above; Link would ask for the details again
             wallets: { applePay: "never", googlePay: "never", link: "never" },
           }}
           onChange={() => {
@@ -171,7 +169,7 @@ const PayForm = ({ booking }: StepPayProps) => {
           widgetRef={pay.turnstileRef}
           onToken={pay.onTurnstileToken}
         />
-        <div className={joinClassNames(styles.payRow, styles.payRowLoose)}>
+        <div className={styles.payRow}>
           <button
             onClick={actions.goBack}
             aria-label="Back"

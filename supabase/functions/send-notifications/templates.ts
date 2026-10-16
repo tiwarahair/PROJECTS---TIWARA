@@ -1,6 +1,17 @@
 // One builder per template key; each turns a row's payload into a notice (layout in _shared/email-layout.ts).
 import { renderNotice, SUPPORT_EMAIL } from "../_shared/email-layout.ts";
 import type { RenderedEmail } from "../_shared/email-layout.ts";
+import { bookingConfirmed, newBooking } from "./booking-emails.ts";
+import type { BookingDetails, ConfirmedBooking } from "./booking-emails.ts";
+import {
+  bookingCancelled,
+  bookingCode,
+  bookingLinkReset,
+  bookingRescheduled,
+  clientCancelled,
+  clientRescheduled,
+} from "./change-emails.ts";
+import type { ChangedBooking } from "./change-emails.ts";
 
 type TemplateBuilder = (payload: Record<string, unknown>) => RenderedEmail;
 
@@ -50,10 +61,31 @@ const authenticatorChanged =
     });
   };
 
+/** Payload: `first`, `save_details_url`. A new link after the first one expired. */
+const bookingInvite: TemplateBuilder = ({ first, save_details_url: url }) =>
+  renderNotice({
+    title: "Save your details",
+    paragraphs: [
+      `Hi ${first}, here’s your new link. Create a password to book faster and see all your bookings in one place.`,
+      "The link works for 24 hours.",
+    ],
+    button: { label: "Save my details", url: String(url) },
+    footnote: "If you didn’t ask for this, you can ignore this email.",
+  });
+
 const templates: Record<string, TemplateBuilder> = {
   tax_details_updated: taxDetailsUpdated,
   authenticator_added: authenticatorChanged(true),
   authenticator_removed: authenticatorChanged(false),
+  booking_confirmed: (payload) => bookingConfirmed(payload as unknown as ConfirmedBooking),
+  new_booking: (payload) => newBooking(payload as unknown as BookingDetails & { studio_url: string }),
+  booking_cancelled: (payload) => bookingCancelled(payload as unknown as ChangedBooking),
+  booking_rescheduled: (payload) => bookingRescheduled(payload as unknown as ChangedBooking),
+  client_cancelled: (payload) => clientCancelled(payload as unknown as Parameters<typeof clientCancelled>[0]),
+  booking_invite: bookingInvite,
+  booking_code: (payload) => bookingCode(payload as unknown as Parameters<typeof bookingCode>[0]),
+  booking_link_reset: (payload) => bookingLinkReset(payload as unknown as Parameters<typeof bookingLinkReset>[0]),
+  client_rescheduled: (payload) => clientRescheduled(payload as unknown as Parameters<typeof clientRescheduled>[0]),
 };
 
 export const renderEmail = (

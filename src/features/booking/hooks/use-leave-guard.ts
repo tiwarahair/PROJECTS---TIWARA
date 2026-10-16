@@ -3,7 +3,6 @@ import { useNavigate } from "react-router";
 import { useUnsavedChanges } from "../../../hooks/use-unsaved-changes";
 import type { FlowState } from "./use-flow-state";
 
-/** Once a service is picked, leaving (any link, back, reload) asks first. */
 export const useLeaveGuard = ({ state, stateRef, setState }: FlowState) => {
   const navigate = useNavigate();
   const isLeaving = useRef(false);

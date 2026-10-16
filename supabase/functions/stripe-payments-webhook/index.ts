@@ -1,4 +1,3 @@
-// Stripe's payment events (classic snapshot events, their own endpoint and secret), each handled once.
 import Stripe from "npm:stripe@22.6.2";
 import { stripe } from "../_shared/stripe.ts";
 import { isHandled, markHandled } from "../_shared/stripe-events.ts";

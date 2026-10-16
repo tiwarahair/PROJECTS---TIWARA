@@ -4,10 +4,8 @@ import { getPaymentParams } from "./payment-params.ts";
 import type { CheckoutQuote } from "./payment-params.ts";
 import type { Contact } from "./request.ts";
 
-// a PaymentIntent still waiting for the client can take a new amount and choices
 const OPEN_STATUSES = ["requires_payment_method", "requires_confirmation", "requires_action"];
 
-/** The client's Stripe Customer: kept on a signed-in client's profile, or on a guest's booking. */
 export const getCustomerId = async (quote: CheckoutQuote, contact: Contact, clientId: string | null) => {
   const { data: profile } = clientId
     ? await admin.from("profiles").select("stripe_customer_id").eq("id", clientId).single()
@@ -27,7 +25,6 @@ export const getCustomerId = async (quote: CheckoutQuote, contact: Contact, clie
   return customer.id;
 };
 
-/** The booking's PaymentIntent: created once, then kept up to date while the client hasn't paid. */
 export const getPaymentIntent = async (quote: CheckoutQuote, customerId: string | null, keepCard: boolean) => {
   const params = getPaymentParams(quote, customerId, keepCard);
 

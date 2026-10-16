@@ -57,7 +57,6 @@ export const useFlowState = (stylist: Stylist) => {
         return;
       }
 
-      // a payment under way decides for itself whether the time is still theirs
       if (!hold || confirmed || holdExpired || paying || confirming) return;
 
       if (Date.now() >= hold.until)

@@ -33,10 +33,8 @@ vi.mock("../../../lib/booking-api", async (original) => ({
   isInTravelArea: vi.fn(),
 }));
 
-// Silk press has nothing to customise, so the flow opens on Pick a time
 const SILK = "stylist=tiwaras-house&service=tiwaras-house--silk-press";
 
-// 20 October 2026 is BST: 10:00 and 10:30 in London
 const OPEN_TIMES = ["2026-10-20T09:00:00Z", "2026-10-20T09:30:00Z"];
 
 let user: UserEvent;
@@ -250,6 +248,7 @@ describe("booking on real data", () => {
         phone: "07700900123",
       },
       notes: "",
+      allergies: "",
       keepCard: false,
       turnstileToken: "test-captcha-token",
     });

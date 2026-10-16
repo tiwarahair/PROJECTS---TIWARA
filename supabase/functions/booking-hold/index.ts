@@ -1,5 +1,3 @@
-// Holds a start for 10 minutes while the client books, or moves their hold when they pick another time.
-// The database does the work (hold_booking); this only checks the request and rate-limits by IP.
 import { z } from "npm:zod@4";
 import { admin } from "../_shared/admin.ts";
 import { getClientIp } from "../_shared/client-ip.ts";
@@ -9,7 +7,6 @@ import { isWithinLimit } from "../_shared/rate-limit.ts";
 const IP_LIMIT = 30;
 const WINDOW_SECONDS = 600;
 
-// hold_booking's own errors, passed on for the page to explain
 const BOOKING_ERRORS = [
   "not_bookable",
   "invalid_choices",

@@ -1,0 +1,126 @@
+import { getCalendarFile } from "../_shared/calendar-file.ts";
+import { renderNotice } from "../_shared/email-layout.ts";
+import type { RenderedEmail } from "../_shared/email-layout.ts";
+import { formatWhen, pounds } from "./booking-emails.ts";
+import type { BookingDetails } from "./booking-emails.ts";
+
+interface Cancellation {
+  refund_pence: number;
+  kept_pence: number;
+  charge_pence: number;
+}
+
+export interface ChangedBooking extends BookingDetails {
+  cancellation: Cancellation | null;
+  fee_pence: number;
+  manage_url: string;
+  secure_url: string;
+}
+
+const NOT_ME = "This wasn’t me";
+
+type StylistNotice = BookingDetails & { cancellation: Cancellation | null; studio_url: string };
+
+const getMoneyLines = ({ refund_pence: refund, kept_pence: kept, charge_pence: charge }: Cancellation, stylist: string) => [
+  ...(refund ? [`${pounds(refund)} is refunded to your card. It can take 5–10 working days to show.`] : []),
+  ...(kept ? [`${pounds(kept)} is kept under ${stylist}’s cancellation policy.`] : []),
+  ...(charge ? [`A ${pounds(charge)} late cancellation fee is due under ${stylist}’s policy. We’ll email you about paying it.`] : []),
+];
+
+export const bookingCancelled = (booking: ChangedBooking): RenderedEmail =>
+  renderNotice({
+    title: "Your booking is cancelled",
+    paragraphs: [
+      `${booking.service_name} with ${booking.stylist_name} on ${formatWhen(booking.starts_at)} (UK time) is cancelled.`,
+      ...(booking.cancellation ? getMoneyLines(booking.cancellation, booking.stylist_name) : []),
+      `Booking reference: ${booking.ref}`,
+    ],
+    link: { label: NOT_ME, url: booking.secure_url },
+    footnote: `If you didn’t cancel this booking, tap “${NOT_ME}” so your old booking link stops working, then reply to this email.`,
+  });
+
+export const bookingRescheduled = (booking: ChangedBooking): RenderedEmail => {
+  const { ref, service_name: service, stylist_name: stylist, starts_at: startsAt, ends_at: endsAt, where } = booking;
+
+  return {
+    ...renderNotice({
+      title: "Your booking has moved",
+      paragraphs: [
+        `${service} with ${stylist} is now on ${formatWhen(startsAt)} (UK time).`,
+        booking.is_mobile ? `${stylist} will come to you at ${where}.` : `Where: ${where}.`,
+        `Booking reference: ${ref}`,
+      ],
+      button: { label: "Manage your booking", url: booking.manage_url },
+      link: { label: NOT_ME, url: booking.secure_url },
+      footnote: `The attached calendar file has the new time. If you didn’t make this change, tap “${NOT_ME}”, then reply to this email.`,
+    }),
+    attachments: [
+      {
+        filename: `${ref}.ics`,
+        contentType: "text/calendar",
+        content: getCalendarFile({
+          ref,
+          title: `${service} with ${stylist}`,
+          startsAt,
+          endsAt,
+          location: where,
+          description: `Booking ${ref}. Manage or cancel it from your booking email.`,
+        }),
+      },
+    ],
+  };
+};
+
+export const clientCancelled = (booking: StylistNotice): RenderedEmail => {
+  const { refund_pence: refund = 0, kept_pence: kept = 0 } = booking.cancellation ?? {};
+
+  return renderNotice({
+    title: `Cancelled: ${booking.service_name}`,
+    paragraphs: [
+      `${booking.client_name} cancelled ${booking.service_name} on ${formatWhen(booking.starts_at)} (UK time). The time is free again.`,
+      ...(refund ? [`${pounds(refund)} was refunded to them.`] : []),
+      ...(kept ? [`You keep ${pounds(kept)} under your cancellation policy.`] : []),
+      `Booking reference: ${booking.ref}`,
+    ],
+    button: { label: "Open Studio", url: booking.studio_url },
+    footnote: "You can choose which booking emails and texts you get in Studio → Settings → Notifications.",
+  });
+};
+
+export const clientRescheduled = (booking: StylistNotice): RenderedEmail =>
+  renderNotice({
+    title: `Moved: ${booking.service_name}`,
+    paragraphs: [
+      `${booking.client_name} moved ${booking.service_name} to ${formatWhen(booking.starts_at)} (UK time).`,
+      `Booking reference: ${booking.ref}`,
+    ],
+    button: { label: "Open Studio", url: booking.studio_url },
+    footnote: "You can choose which booking emails and texts you get in Studio → Settings → Notifications.",
+  });
+
+export const bookingCode = (booking: BookingDetails & { code: string; secure_url: string }): RenderedEmail =>
+  renderNotice({
+    title: `Your code is ${booking.code}`,
+    paragraphs: [
+      `Enter this code to change or cancel ${booking.service_name} with ${booking.stylist_name} on ${formatWhen(booking.starts_at)} (UK time).`,
+      "It works for 10 minutes.",
+    ],
+    link: { label: NOT_ME, url: booking.secure_url },
+    footnote: `If you didn’t ask for this code, someone may have your booking link. Nothing changes without the code, but tap “${NOT_ME}” to stop that link working.`,
+  });
+
+export const bookingLinkReset = (
+  booking: BookingDetails & { manage_url: string; save_details_url: string | null },
+): RenderedEmail =>
+  renderNotice({
+    title: "Your new booking link",
+    paragraphs: [
+      `Your old link for ${booking.service_name} with ${booking.stylist_name} on ${formatWhen(booking.starts_at)} (UK time) no longer works. Use this one from now on.`,
+      `Booking reference: ${booking.ref}`,
+    ],
+    button: { label: "Manage your booking", url: booking.manage_url },
+    ...(booking.save_details_url
+      ? { link: { label: "Save your details for next time", url: booking.save_details_url } }
+      : {}),
+    footnote: "If your booking was changed or cancelled and you didn’t do it, reply to this email.",
+  });
