@@ -23,14 +23,14 @@ const booking: ChangedBooking = {
 const studio = { studio_url: "https://dev.tiwarashouse.com/studio" };
 
 describe("cancellation emails", () => {
-  it("tell the client what's refunded, what's kept and that the booking fee stays", () => {
+  it("tell the client what's refunded and what's kept", () => {
     const { subject, text } = bookingCancelled(booking);
 
     expect(subject).toBe("Your booking is cancelled");
     expect(text).toContain("Silk press with Tiwára's House on Thursday 22 October at 17:30 (UK time) is cancelled.");
     expect(text).toContain("£20.00 is refunded to your card.");
     expect(text).toContain("£10.00 is kept under Tiwára's House’s cancellation policy.");
-    expect(text).toContain("The £1.63 booking fee isn’t refunded.");
+    expect(text).not.toContain("booking fee");
     expect(text).not.toContain("late cancellation fee");
   });
 

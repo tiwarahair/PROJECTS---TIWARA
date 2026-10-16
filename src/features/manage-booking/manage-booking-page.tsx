@@ -1,86 +1,49 @@
-import { useEffect, useLayoutEffect, useRef, useState } from "react";
-import { Calendar, Check, MapPin } from "lucide-react";
-import { Link, useNavigate } from "react-router";
+import { useLayoutEffect, useState } from "react";
+import { Link, Navigate } from "react-router";
+import { PageMessage } from "../../components/page-message/page-message";
+import { ManageBookingSkeleton } from "../../components/skeleton/manage-booking-skeleton";
+import { useIsSlow } from "../../hooks/use-is-slow";
+import { useGetManagedBookingQuery } from "../../stores/api-slice";
 import { getAssetUrl } from "../../utils/asset-url";
 import { getSearchParams } from "../../utils/page-flags";
 import "../../styles/features/manage-booking/manage-booking-page-global.module.css";
-import {
-  DEFAULT_STYLIST_ID,
-  getDemoBooking,
-  getEntryStylist,
-} from "./manage-booking-logic";
-import type { SharedEntry } from "./manage-booking-logic";
+import { ManagedBooking } from "./managed-booking";
 import styles from "../../styles/features/manage-booking/manage-booking-page.module.css";
-import toastStyles from "../../styles/features/manage-booking/manage-toast.module.css";
-import { RemoveDialog } from "./remove-dialog";
-import { SharedDetails } from "./shared-details";
 
 export interface ManageBookingPageProps {
   view?: "booking" | "account";
-  fixture?: "" | "edit" | "confirm" | "removed";
 }
 
-interface ManageState {
-  view: string;
-  entries: SharedEntry[];
-  editing: number;
-  draft: string;
-  confirm: number;
-  toast: string;
-}
-
-const TOAST_MS = 2600;
-
-const getInitialState = (
-  propView: string,
-  propFixture: string,
-): ManageState => {
-  const params = getSearchParams();
-  const view = params.get("view") || propView || "booking";
-
-  const fixture =
-    (import.meta.env.DEV && params.get("fixture")) || propFixture || "";
-
-  const id = params.get("stylist") || DEFAULT_STYLIST_ID;
-
-  const entries =
-    view === "account"
-      ? [
-          { id, text: "Sensitive scalp" },
-          { id: "crowned-by-kemi", text: "" },
-        ]
-      : [{ id, text: "Sensitive scalp" }];
-
-  const isEdit = fixture === "edit";
-  const isRemoved = fixture === "removed";
-
-  if (isRemoved) entries[0] = { id, text: "" };
-
-  return {
-    view,
-    entries,
-    editing: isEdit ? 0 : -1,
-    draft: isEdit ? "Sensitive scalp" : "",
-    confirm: fixture === "confirm" ? 0 : -1,
-    // ?fixture=removed pins the toast (no timer)
-    toast: isRemoved ? "Removed" : "",
-  };
-};
+const getMessage = (isError: boolean) =>
+  isError
+    ? {
+        title: "We couldn’t load your booking",
+        text: "Check your connection and try again.",
+      }
+    : {
+        title: "This link isn’t valid",
+        text: "Manage links work until 30 days after the appointment. Use the link in your latest booking email.",
+      };
 
 /**
- * The booking-link page, route "/manage": booking summary and the allergies
- * shared with the stylist, with Edit / Remove + confirm + toast. ?view=account forwards to Account → Shared.
+ * The booking-link page, route "/manage?token=": the booking, changing its time once, cancelling, and the
+ * allergies shared with the stylist. ?view=account forwards to Account → Shared.
  */
 export const ManageBookingPage = ({
   view = "booking",
-  fixture = "",
 }: ManageBookingPageProps) => {
-  const [state, setState] = useState(() => getInitialState(view, fixture));
-  const toastTimer = useRef(0);
-  const navigate = useNavigate();
-  const isAccount = state.view === "account";
-  const first = getEntryStylist(state.entries[0]?.id ?? DEFAULT_STYLIST_ID);
-  const booking = getDemoBooking(state.entries[0]?.id ?? DEFAULT_STYLIST_ID);
+  const [params] = useState(getSearchParams);
+  const token = params.get("token") ?? "";
+  const isAccount = (params.get("view") || view) === "account";
+
+  const {
+    currentData: booking,
+    isFetching,
+    isError,
+    refetch,
+  } = useGetManagedBookingQuery(token, { skip: !token || isAccount });
+
+  const isSlow = useIsSlow(isFetching && !booking);
 
   useLayoutEffect(() => {
     document.documentElement.classList.add("manage-page");
@@ -88,37 +51,33 @@ export const ManageBookingPage = ({
     return () => document.documentElement.classList.remove("manage-page");
   }, []);
 
-  useEffect(() => {
-    if (isAccount) navigate("/account?section=shared", { replace: true });
-  }, [isAccount, navigate]);
+  if (isAccount) return <Navigate to="/account?section=shared" replace />;
 
-  useEffect(() => () => window.clearTimeout(toastTimer.current), []);
+  const getContent = () => {
+    if (booking)
+      return (
+        <ManagedBooking
+          booking={booking}
+          token={token}
+          onRefresh={() => void refetch()}
+        />
+      );
 
-  const showToast = (toast: string) => {
-    window.clearTimeout(toastTimer.current);
-    setState((current) => ({ ...current, toast }));
+    if (isSlow) return <ManageBookingSkeleton />;
 
-    toastTimer.current = window.setTimeout(
-      () => setState((current) => ({ ...current, toast: "" })),
-      TOAST_MS,
+    if (isFetching) return null;
+
+    return (
+      <PageMessage
+        {...getMessage(isError)}
+        linkLabel="Go to Tiwára’s House"
+        linkHref="/"
+      />
     );
   };
 
-  const setEntry = (index: number, text: string) =>
-    setState((current) => ({
-      ...current,
-      entries: current.entries.map((entry, entryIndex) =>
-        entryIndex === index ? { ...entry, text } : entry,
-      ),
-    }));
-
-  const confirmEntry = state.entries[state.confirm];
-
   return (
-    <div
-      data-screen-label={isAccount ? "Client account" : "Manage booking"}
-      className={styles.page}
-    >
+    <div data-screen-label="Manage booking" className={styles.page}>
       <nav className={styles.nav}>
         <div className={styles.bar}>
           <Link to="/" className={styles.logoLink}>
@@ -128,92 +87,14 @@ export const ManageBookingPage = ({
               className={styles.logo}
             />
           </Link>
-          <span className={styles.who}>
-            {isAccount ? "Nia Okafor" : "Booking ref TH-48213"}
-          </span>
+          {!!booking && (
+            <span className={styles.who}>{`Booking ref ${booking.ref}`}</span>
+          )}
         </div>
       </nav>
-      <main className={styles.main}>
-        <div className={styles.eyebrow}>
-          {isAccount ? "Your account" : "Your booking"}
-        </div>
-        <h1 className={styles.title}>
-          {isAccount
-            ? "Your details for stylists"
-            : `You’re booked with ${first.name}`}
-        </h1>
-        {!isAccount && (
-          <div className={styles.card}>
-            <div className={styles.cardHead}>
-              <div className={styles.service}>{booking.service}</div>
-              <div className={styles.total}>{booking.total}</div>
-            </div>
-            <div className={styles.options}>{booking.options}</div>
-            <div className={styles.facts}>
-              <span className={styles.fact}>
-                <Calendar size={15} strokeWidth={1.5} />
-                {booking.when}
-              </span>
-              <span className={styles.fact}>
-                <MapPin size={15} strokeWidth={1.8} />
-                {`${booking.stylist} · ${booking.area}`}
-              </span>
-            </div>
-          </div>
-        )}
-        <SharedDetails
-          isAccount={isAccount}
-          title={
-            isAccount
-              ? "Allergies or sensitivities"
-              : `Shared with ${first.name}`
-          }
-          subtitle={
-            isAccount
-              ? "Each stylist only sees what you’ve shared with them."
-              : `Only ${first.name} sees this, on your booking.`
-          }
-          entries={state.entries}
-          editing={state.editing}
-          draft={state.draft}
-          onEdit={(index) =>
-            setState((current) => ({
-              ...current,
-              editing: index,
-              draft: current.entries[index]?.text ?? "",
-            }))
-          }
-          onRemove={(index) =>
-            setState((current) => ({ ...current, confirm: index }))
-          }
-          onDraft={(draft) => setState((current) => ({ ...current, draft }))}
-          onSave={(index) => {
-            const text = state.draft.trim();
-
-            setEntry(index, text);
-            setState((current) => ({ ...current, editing: -1 }));
-            showToast(text ? "Saved" : "Removed");
-          }}
-          onCancel={() => setState((current) => ({ ...current, editing: -1 }))}
-        />
+      <main className={styles.main} aria-busy={isFetching}>
+        {getContent()}
       </main>
-      {confirmEntry && (
-        <RemoveDialog
-          text={`${getEntryStylist(confirmEntry.id).name} won’t see it any more.`}
-          onCancel={() => setState((current) => ({ ...current, confirm: -1 }))}
-          onRemove={() => {
-            setEntry(state.confirm, "");
-            setState((current) => ({ ...current, confirm: -1 }));
-            showToast("Removed");
-          }}
-        />
-      )}
-      {!!state.toast && (
-        <div role="status" data-mb-anim="1" className={toastStyles.toast}>
-          <Check size={18} strokeWidth={2.2} color="var(--brand-yellow)" />
-          {state.toast}
-        </div>
-      )}
     </div>
   );
 };

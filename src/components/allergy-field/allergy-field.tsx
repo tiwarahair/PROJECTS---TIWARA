@@ -57,15 +57,13 @@ export const AllergyField = ({
   return (
     <div data-screen-label="Allergies field" className={styles.root}>
       <div className={styles.field}>
-        <label htmlFor={ids.field} className={styles.label}>
-          Allergies or sensitivities
-        </label>
         <div id={ids.hint} className={styles.hint}>
           e.g. sensitive scalp, allergic to certain products. Only {name} will
           see this.
         </div>
         <textarea
           id={ids.field}
+          aria-label="Allergies or sensitivities"
           ref={textareaRef}
           className={styles.textarea}
           value={value}

@@ -39,7 +39,7 @@ export const usePay = ({ flow, point, onConfirm }: PayOptions) => {
   );
 
   useEffect(() => {
-    if (!confirming) return;
+    if (!confirming || !hold) return;
 
     if (booked?.status === "refunded")
       return setState({
@@ -60,6 +60,8 @@ export const usePay = ({ flow, point, onConfirm }: PayOptions) => {
         hold: null,
         holdExpired: false,
         booked: {
+          id: hold.id,
+          secret: hold.secret,
           ref: booked.ref,
           startsAt: booked.starts_at,
           endsAt: booked.ends_at,
@@ -68,7 +70,7 @@ export const usePay = ({ flow, point, onConfirm }: PayOptions) => {
       () => window.scrollTo(0, 0),
     );
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [confirming, booked, setState]);
+  }, [confirming, hold, booked, setState]);
 
   useEffect(() => {
     if (!confirming) return;

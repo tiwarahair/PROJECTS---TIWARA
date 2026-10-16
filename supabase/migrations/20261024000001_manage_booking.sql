@@ -86,6 +86,8 @@ as $$
     'paid_pence', booking.due_today_pence,
     'terms', booking.terms,
     'allergies', booking.allergies,
+    'reschedule_count', booking.reschedule_count,
+    'cancelled_at', booking.cancelled_at,
     'can_cancel', booking.status = 'confirmed' and booking.starts_at > now(),
     'can_reschedule', booking.status = 'confirmed' and booking.reschedule_count < 1
       and now() < (booking.terms ->> 'free_cancel_until')::timestamptz,

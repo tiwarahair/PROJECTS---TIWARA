@@ -43,3 +43,16 @@ export const mockBookingApi = async (
     ),
   };
 };
+
+export const mockManageBookingApi = async (
+  original: () => Promise<typeof import("../lib/manage-booking-api")>,
+) => ({
+  ...(await original()),
+  getManagedBooking: vi.fn(),
+  getRescheduleSlots: vi.fn(() => Promise.resolve([])),
+  rescheduleBooking: vi.fn(() => Promise.resolve()),
+  updateBookingAllergies: vi.fn(() => Promise.resolve()),
+  cancelBooking: vi.fn(() =>
+    Promise.resolve({ refund_pence: 1500, kept_pence: 0, charge_pence: 0 }),
+  ),
+});

@@ -86,6 +86,29 @@
   margin-top: 14px;
 }
 
+.consent {
+  margin-top: 14px;
+  display: flex;
+  gap: 12px;
+  align-items: flex-start;
+  text-align: left;
+  background: transparent;
+  border: none;
+  padding: 4px 0;
+  cursor: pointer;
+  font: inherit;
+  font-size: 14.5px;
+  line-height: 1.5;
+  color: var(--text-primary);
+}
+
+.error {
+  margin: 10px 0 0;
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--status-danger);
+}
+
 .editorActions {
   display: flex;
   gap: 10px;
@@ -112,6 +135,11 @@
 
 .save:active {
   transform: scale(0.98) !important;
+}
+
+.save:disabled {
+  opacity: 0.6;
+  cursor: default;
 }
 
 .cancel {

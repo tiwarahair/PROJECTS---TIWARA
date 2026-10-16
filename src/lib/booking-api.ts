@@ -58,7 +58,7 @@ export interface BookingStatus {
 
 export class BookingError extends Error {}
 
-const invokeBookingFunction = async <T>(name: string, body: object) => {
+export const invokeBookingFunction = async <T>(name: string, body: object) => {
   const { data, error } = await supabase.functions.invoke<T>(name, { body });
 
   if (error instanceof FunctionsHttpError) {

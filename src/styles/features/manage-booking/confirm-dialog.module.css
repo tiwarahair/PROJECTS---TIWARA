@@ -37,6 +37,17 @@
   color: var(--neutral-700, #3d3730);
 }
 
+.text + .text {
+  margin-top: 6px;
+}
+
+.error {
+  margin: 12px 0 0;
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--status-danger);
+}
+
 .actions {
   display: flex;
   gap: 10px;
@@ -65,7 +76,7 @@
   transform: scale(0.98) !important;
 }
 
-.remove {
+.confirm {
   flex: 1 1 120px;
   height: 48px;
   border: none;
@@ -78,12 +89,18 @@
   cursor: pointer;
 }
 
-.remove:hover {
+.confirm:hover {
   background: var(--accent-900) !important;
 }
 
-.remove:active {
+.confirm:active {
   transform: scale(0.98) !important;
+}
+
+.cancel:disabled,
+.confirm:disabled {
+  opacity: 0.6;
+  cursor: default;
 }
 
 /* keyframes are scoped per file in CSS modules, so shared ones are repeated */

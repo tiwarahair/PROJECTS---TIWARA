@@ -30,7 +30,6 @@ export const bookingCancelled = (booking: ChangedBooking): RenderedEmail =>
     paragraphs: [
       `${booking.service_name} with ${booking.stylist_name} on ${formatWhen(booking.starts_at)} (UK time) is cancelled.`,
       ...(booking.cancellation ? getMoneyLines(booking.cancellation, booking.stylist_name) : []),
-      `The ${pounds(booking.fee_pence)} booking fee isn’t refunded.`,
       `Booking reference: ${booking.ref}`,
     ],
     footnote: "If you didn’t cancel this booking, reply to this email straight away.",

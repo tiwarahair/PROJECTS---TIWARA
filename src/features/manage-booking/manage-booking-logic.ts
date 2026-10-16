@@ -1,71 +1,95 @@
-// Demo booking shown on the booking-link page.
-import { stylists } from "../../data";
-import type { Stylist } from "../../types/stylist";
-import { getActiveServices, getServiceOptions } from "../../utils/services";
-import { formatWeekdayDate } from "../../utils/dates";
+import type {
+  CancellationTerms,
+  ManagedBooking,
+} from "../../lib/manage-booking-api";
 import { formatMoney } from "../../utils/money";
 
-export interface SharedEntry {
-  id: string;
-  text: string;
-}
+const londonParts = new Intl.DateTimeFormat("en-GB", {
+  timeZone: "Europe/London",
+  weekday: "short",
+  day: "numeric",
+  month: "short",
+  hour: "2-digit",
+  minute: "2-digit",
+  hourCycle: "h23",
+});
 
-export const DEFAULT_STYLIST_ID = "amara-beauty";
+const getParts = (iso: string) =>
+  Object.fromEntries(
+    londonParts
+      .formatToParts(new Date(iso))
+      .map(({ type, value }) => [type, value]),
+  );
 
-/** The stylist for an entry, or a placeholder name. */
-export const getEntryStylist = (
-  id: string,
-): Pick<Stylist, "name" | "area"> & Partial<Stylist> =>
-  stylists.find((stylist) => stylist.id === id) ?? {
-    name: "your stylist",
-    area: "",
-  };
+export const formatWhen = (iso: string) => {
+  const { weekday, day, month, hour, minute } = getParts(iso);
 
-interface DemoBooking {
-  service: string;
-  total: string;
-  options: string;
-  when: string;
-  stylist: string;
-  area: string;
-}
+  return `${weekday} ${day} ${month}, ${hour}:${minute}`;
+};
 
-/** Knotless braids (else the first active service), Shoulder length, next Wednesday at 10:30. */
-export const getDemoBooking = (stylistId: string): DemoBooking => {
-  const stylist = getEntryStylist(stylistId);
-  const active = stylist.services ? getActiveServices(stylist as Stylist) : [];
+export const toPounds = (pence: number) =>
+  formatMoney(pence / 100, { pence: "always" });
 
-  const service =
-    active.find(({ serviceTypeId }) => serviceTypeId === "knotless-braids") ??
-    active[0] ??
-    null;
+export const getOptionsLine = ({ snapshot }: ManagedBooking) =>
+  [
+    ...snapshot.options.map(({ label }) => label),
+    snapshot.colour,
+    ...snapshot.addons.map(({ name }) => name),
+  ]
+    .filter(Boolean)
+    .join(" · ");
 
-  const options = getServiceOptions(service);
+export const getTermsLine = ({ cancellation }: ManagedBooking) =>
+  cancellation.is_late
+    ? "The free cancellation time has passed, so late cancellation terms apply."
+    : `Free cancellation until ${formatWhen(cancellation.free_cancel_until)}`;
 
-  const price = service
-    ? service.price +
-      (options.length.find(({ label }) => label === "Shoulder")?.priceDelta ||
-        0)
-    : 0;
+export const getRescheduleNote = (booking: ManagedBooking) =>
+  booking.reschedule_count > 0
+    ? "You've already used your 1 free reschedule."
+    : "You can't reschedule after the free cancellation time.";
 
-  const date = new Date();
+const getKeptLine = (
+  { terms, stylist_name: stylist }: ManagedBooking,
+  kept: number,
+) => {
+  if (terms.mode !== "deposit")
+    return `${toPounds(kept)} is kept under ${stylist}'s policy.`;
 
-  date.setDate(date.getDate() + ((10 - date.getDay()) % 7 || 7));
+  return kept === terms.deposit_pence
+    ? `Your ${toPounds(kept)} deposit is kept under ${stylist}'s policy.`
+    : `${toPounds(kept)} of your deposit is kept under ${stylist}'s policy.`;
+};
 
-  const dateLabel = formatWeekdayDate(date);
+export const getCancelLines = (
+  booking: ManagedBooking,
+  {
+    is_late: isLate,
+    refund_pence: refund,
+    kept_pence: kept,
+    charge_pence: charge,
+  }: CancellationTerms,
+) => {
+  const { terms, stylist_name: stylist } = booking;
 
-  return {
-    service: service ? service.name : "Knotless braids",
-    // the booking fee is added inline (50p + 1.5%), unrounded until toFixed
-    total: service
-      ? formatMoney(price + 0.5 + price * 0.015, { pence: "always" })
-      : "£142.60",
-    options:
-      service && options.size.length
-        ? "Medium · Shoulder · 1B Natural Black"
-        : "",
-    when: `${dateLabel} · 10:30`,
-    stylist: stylist.name,
-    area: stylist.area,
-  };
+  const isWholeDeposit =
+    terms.mode === "deposit" && refund === terms.deposit_pence;
+
+  return [
+    ...(isLate ? ["It's past the free cancellation time."] : []),
+    ...(refund
+      ? [
+          isWholeDeposit
+            ? `Your ${toPounds(refund)} deposit is refunded to your card.`
+            : `${toPounds(refund)} is refunded to your card.`,
+        ]
+      : []),
+    ...(kept ? [getKeptLine(booking, kept)] : []),
+    ...(charge
+      ? [
+          `A ${toPounds(charge)} late cancellation fee is due under ${stylist}'s policy.`,
+        ]
+      : []),
+    ...(refund || kept || charge ? [] : ["Nothing more to pay."]),
+  ];
 };

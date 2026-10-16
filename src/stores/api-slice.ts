@@ -13,6 +13,18 @@ import type {
   HoldRequest,
   SlotRequest,
 } from "../lib/booking-api";
+import {
+  cancelBooking,
+  getManagedBooking,
+  getRescheduleSlots,
+  rescheduleBooking,
+  updateBookingAllergies,
+} from "../lib/manage-booking-api";
+import type {
+  CancellationTerms,
+  ManagedBooking,
+  RescheduleSlotsRequest,
+} from "../lib/manage-booking-api";
 import { fetchPublicProfile } from "../lib/public-profiles";
 import { SEARCH_PAGE_SIZE, searchStylists } from "../lib/search-api";
 import type { SearchArgs, SearchRow } from "../lib/search-api";
@@ -51,7 +63,14 @@ export const getErrorMessage = (error: unknown) =>
 export const api = createApi({
   reducerPath: "api",
   baseQuery: fakeBaseQuery<ApiError>(),
-  tagTypes: ["Studio", "StylistProfile", "Search", "TwoFactor", "Slots"],
+  tagTypes: [
+    "Studio",
+    "StylistProfile",
+    "Search",
+    "TwoFactor",
+    "Slots",
+    "ManagedBooking",
+  ],
   refetchOnReconnect: true,
   endpoints: (build) => ({
     getProfile: build.query<Profile, string>({
@@ -178,6 +197,32 @@ export const api = createApi({
       keepUnusedDataFor: 0,
       queryFn: (hold) => toQueryResult(getBookingStatus(hold)),
     }),
+    getManagedBooking: build.query<ManagedBooking | null, string>({
+      providesTags: ["ManagedBooking"],
+      queryFn: (token) => toQueryResult(getManagedBooking(token)),
+    }),
+    getRescheduleSlots: build.query<string[], RescheduleSlotsRequest>({
+      providesTags: ["ManagedBooking"],
+      queryFn: (request) => toQueryResult(getRescheduleSlots(request)),
+    }),
+    rescheduleBooking: build.mutation<
+      void,
+      { token: string; startsAt: string }
+    >({
+      invalidatesTags: () => ["ManagedBooking"],
+      queryFn: (request) => toQueryResult(rescheduleBooking(request)),
+    }),
+    updateBookingAllergies: build.mutation<
+      void,
+      { token: string; allergies: string; consent: boolean }
+    >({
+      invalidatesTags: () => ["ManagedBooking"],
+      queryFn: (request) => toQueryResult(updateBookingAllergies(request)),
+    }),
+    cancelBooking: build.mutation<CancellationTerms, string>({
+      invalidatesTags: () => ["ManagedBooking"],
+      queryFn: (token) => toQueryResult(cancelBooking(token)),
+    }),
     getTwoFactorDevices: build.query<TwoFactorDevice[], string>({
       providesTags: ["TwoFactor"],
       queryFn: () => toQueryResult(listTwoFactorDevices()),
@@ -186,6 +231,11 @@ export const api = createApi({
 });
 
 export const {
+  useCancelBookingMutation,
+  useGetManagedBookingQuery,
+  useGetRescheduleSlotsQuery,
+  useRescheduleBookingMutation,
+  useUpdateBookingAllergiesMutation,
   useGetAvailableSlotsQuery,
   useGetBookingStatusQuery,
   useStartCheckoutMutation,

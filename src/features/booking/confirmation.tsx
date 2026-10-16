@@ -2,11 +2,8 @@ import { Calendar, Check, Clock, Mail, MapPin } from "lucide-react";
 import { Link } from "react-router";
 import { AppleLogo, GoogleLogo } from "../../components/icons/brand-icons";
 import { joinClassNames } from "../../utils/class-names";
-import {
-  getCalendarFile,
-  getGoogleCalendarUrl,
-} from "../../../supabase/functions/_shared/calendar-file";
-import { downloadFile } from "../../utils/download-file";
+import { getGoogleCalendarUrl } from "../../../supabase/functions/_shared/calendar-file";
+import { getCalendarFileUrl } from "../../lib/manage-booking-api";
 import { getWindowText } from "../../utils/pricing";
 import { getCancelSentence, getPaySubtitle } from "./logic/content";
 import { getWhenLine } from "./logic/calendar";
@@ -43,15 +40,6 @@ export const BookingConfirmation = ({ booking }: BookingConfirmationProps) => {
     title: `${service ? service.name : "Appointment"} with ${name}`,
     location: isMobile ? address.clientAddress : `${name}, ${addressFull}`,
     description: `Booking ${state.booked.ref}. Manage or cancel it from your confirmation email.`,
-  };
-
-  const downloadCalendarFile = () => {
-    if (calendarEvent)
-      downloadFile(
-        `${calendarEvent.ref}.ics`,
-        getCalendarFile(calendarEvent),
-        "text/calendar",
-      );
   };
 
   return (
@@ -154,12 +142,19 @@ export const BookingConfirmation = ({ booking }: BookingConfirmationProps) => {
         </p>
       </div>
       <div className={styles.calendarRow}>
-        <button
-          onClick={downloadCalendarFile}
+        <a
+          href={
+            state.booked
+              ? getCalendarFileUrl({
+                  booking: state.booked.id,
+                  secret: state.booked.secret,
+                })
+              : undefined
+          }
           className={styles.calendarButton}
         >
           + Apple Calendar
-        </button>
+        </a>
         <a
           href={calendarEvent ? getGoogleCalendarUrl(calendarEvent) : undefined}
           target="_blank"

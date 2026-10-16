@@ -1,0 +1,66 @@
+.actions {
+  margin-top: 18px;
+}
+
+.terms {
+  margin: 0;
+  font-size: 14.5px;
+  font-weight: 600;
+}
+
+.note {
+  margin: 18px 0 0;
+  font-size: 14.5px;
+  color: var(--neutral-600);
+}
+
+.actions .note {
+  margin-top: 6px;
+}
+
+.buttons {
+  margin-top: 16px;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px 20px;
+}
+
+.change {
+  height: 46px;
+  padding: 0 24px;
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius-full);
+  background: transparent;
+  color: var(--text-primary);
+  font: inherit;
+  font-size: 15px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.16s cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+
+.change:hover {
+  background: var(--fill-quiet);
+}
+
+.change:active {
+  transform: scale(0.98);
+}
+
+.cancel {
+  padding: 8px 0;
+  border: none;
+  background: transparent;
+  color: var(--accent-700);
+  font: inherit;
+  font-size: 15px;
+  font-weight: 600;
+  cursor: pointer;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+.cancel:hover {
+  color: var(--accent-900);
+}

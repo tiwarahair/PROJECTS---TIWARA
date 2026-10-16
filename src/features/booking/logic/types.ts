@@ -34,6 +34,8 @@ interface Hold {
 }
 
 interface BookedTimes {
+  id: string;
+  secret: string;
   ref: string;
   startsAt: string;
   endsAt: string;

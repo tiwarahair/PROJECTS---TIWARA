@@ -55,6 +55,8 @@ export const applyFixture = (
     startsAt.setHours(10, 30, 0, 0);
 
     state.booked = {
+      id: "",
+      secret: "",
       ref: "TH-48213",
       startsAt: startsAt.toISOString(),
       endsAt: new Date(startsAt.getTime() + 2 * 36e5).toISOString(),
