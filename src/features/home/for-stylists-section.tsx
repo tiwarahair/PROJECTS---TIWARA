@@ -1,7 +1,7 @@
 import { ResponsiveImage } from "../../components/responsive-image/responsive-image";
+import { ArrowRight } from "lucide-react";
 import { Link } from "react-router";
 import { joinClassNames } from "../../utils/class-names";
-import { ArrowIcon } from "./arrow-icon";
 import page from "../../styles/features/home/home-page.module.css";
 import styles from "../../styles/features/home/for-stylists-section.module.css";
 
@@ -58,7 +58,7 @@ export const ForStylistsSection = ({ variant }: ForStylistsSectionProps) => (
                 className={styles.cta}
               >
                 List your business
-                <ArrowIcon />
+                <ArrowRight size={16} strokeWidth={2} />
               </Link>
             </div>
           </div>

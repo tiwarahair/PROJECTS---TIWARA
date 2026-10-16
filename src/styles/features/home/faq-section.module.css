@@ -68,13 +68,13 @@
   color: var(--neutral-900);
 }
 
-.plusVertical {
+.chevron path:last-child {
   transform-origin: 12px 12px;
   transform: scaleY(1);
   transition: transform 0.3s ease;
 }
 
-.open .plusVertical {
+.open .chevron path:last-child {
   transform: scaleY(0);
 }
 

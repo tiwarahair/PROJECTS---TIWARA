@@ -1,7 +1,7 @@
+import { ArrowRight } from "lucide-react";
 import { Link } from "react-router";
 import { serviceGroups } from "../../data";
 import { joinClassNames } from "../../utils/class-names";
-import { ArrowIcon } from "./arrow-icon";
 import page from "../../styles/features/home/home-page.module.css";
 import styles from "../../styles/features/home/quiz-strip.module.css";
 
@@ -29,7 +29,7 @@ export const QuizStrip = () => {
           ))}
           <Link to="/search" className={styles.cta}>
             Take the hair quiz
-            <ArrowIcon strokeWidth="1.7" />
+            <ArrowRight size={16} strokeWidth={1.7} />
           </Link>
         </div>
       </div>
