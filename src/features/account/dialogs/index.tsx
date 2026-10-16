@@ -1,21 +1,21 @@
 import { ArrowDownToLine, Lock, X } from "lucide-react";
 import { useFormState } from "react-hook-form";
 import type { ChangeEvent, ReactNode } from "react";
-import { DISCARD_PROMPT } from "../../hooks/use-unsaved-changes";
-import { joinClassNames } from "../../utils/class-names";
-import { downloadFile } from "../../utils/download-file";
+import { DISCARD_PROMPT } from "../../../hooks/use-unsaved-changes";
+import { joinClassNames } from "../../../utils/class-names";
+import { downloadFile } from "../../../utils/download-file";
 import {
   formatCardDigits,
   formatCardExpiry,
   getAddressLine,
   getReceiptHtml,
-} from "./account-logic";
-import type { AccountView } from "./account-view";
-import { AccountSwitch } from "./settings-sections";
-import type { AccountController } from "./use-account";
-import styles from "../../styles/features/account/account-dialogs.module.css";
-import pageGlobal from "../../styles/features/account/account-page-global.module.css";
-import ui from "../../styles/features/account/account-ui.module.css";
+} from "../logic";
+import type { AccountView } from "../view";
+import { AccountSwitch } from "../settings-sections";
+import type { AccountController } from "../use-account";
+import styles from "../../../styles/features/account/dialogs/index.module.css";
+import pageGlobal from "../../../styles/features/account/index-global.module.css";
+import ui from "../../../styles/features/account/ui.module.css";
 
 const WIDE_DIALOGS = ["receipt", "delete", "cookies"];
 

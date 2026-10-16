@@ -3,9 +3,9 @@ import type { AddressValue } from "../../types/address";
 import { isAddressValid } from "../../utils/address";
 import { checkPassword, getPasswordMin } from "../../utils/password";
 import { isValidEmail, isValidMobile } from "../../utils/validation";
-import { CURRENT_PASSWORD, TAKEN_EMAILS } from "./account-data";
-import type { Profile } from "./account-data";
-import type { EditKey } from "./account-logic";
+import { CURRENT_PASSWORD, TAKEN_EMAILS } from "./data";
+import type { Profile } from "./data";
+import type { EditKey } from "./logic";
 
 const profileSchema = z.object({
   first: z.string(),

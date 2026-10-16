@@ -3,7 +3,7 @@ import type { CSSProperties, MouseEvent } from "react";
 import { CircleAlert, MapPin, Search, X } from "lucide-react";
 import { joinClassNames } from "../../utils/class-names";
 import { AddressRowSkeleton } from "../skeleton/address-row-skeleton";
-import styles from "../../styles/components/address-finder/address-finder.module.css";
+import styles from "../../styles/components/address-finder/index.module.css";
 import { MapsProvider } from "../../lib/google-maps";
 import { useAddressFinder } from "./use-address-finder";
 import type {

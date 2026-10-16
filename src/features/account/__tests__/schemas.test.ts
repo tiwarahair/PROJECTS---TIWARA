@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 import type { z } from "zod";
-import { SEED_PROFILE } from "../account-data";
-import { cardSchema, getEditSchema } from "../account-schemas";
+import { SEED_PROFILE } from "../data";
+import { cardSchema, getEditSchema } from "../schemas";
 
 const getMessages = (result: z.ZodSafeParseResult<unknown>) =>
   Object.fromEntries(

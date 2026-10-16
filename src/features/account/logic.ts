@@ -5,7 +5,7 @@ import type { Stylist } from "../../types/stylist";
 import { getAddressOneLine } from "../../utils/address";
 import { bookingFee } from "../../utils/pricing";
 import { findService } from "../../utils/services";
-import type { AccountBooking, Profile, SavedCard } from "./account-data";
+import type { AccountBooking, Profile, SavedCard } from "./data";
 import { formatMoney } from "../../utils/money";
 import { formatWeekdayDate, formatClockTime } from "../../utils/dates";
 import { getCalendarFile } from "../../utils/calendar-file";

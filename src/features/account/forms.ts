@@ -1,19 +1,19 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useMemo } from "react";
 import { useForm } from "react-hook-form";
-import type { Profile } from "./account-data";
-import type { EditKey } from "./account-logic";
+import type { Profile } from "./data";
+import type { EditKey } from "./logic";
 import {
   addressSchema,
   cardSchema,
   getEditSchema,
   getPasswordSchema,
-} from "./account-schemas";
+} from "./schemas";
 import type {
   AddressFormValues,
   CardFormValues,
   PasswordFormValues,
-} from "./account-schemas";
+} from "./schemas";
 
 interface FormContext {
   edit: EditKey | null;

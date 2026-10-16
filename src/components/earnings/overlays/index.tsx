@@ -1,22 +1,22 @@
 import { ChevronLeft, ChevronRight, X } from "lucide-react";
-import { joinClassNames } from "../../utils/class-names";
+import { joinClassNames } from "../../../utils/class-names";
 import {
   PERIODS,
   getClient,
   getMethodLabel,
   getRange,
   getRangeLabel,
-} from "./earnings-data";
-import type { Payout, Transaction } from "./earnings-data";
-import { DEFAULT_BANK, getDayWord, getStatusStyle } from "./earnings-lists";
-import type { EarningsController, EarningsProps } from "./use-earnings";
-import styles from "../../styles/components/earnings/earnings-overlays.module.css";
-import { formatMoney } from "../../utils/money";
+} from "../data";
+import type { Payout, Transaction } from "../data";
+import { DEFAULT_BANK, getDayWord, getStatusStyle } from "../lists";
+import type { EarningsController, EarningsProps } from "../use-earnings";
+import styles from "../../../styles/components/earnings/overlays/index.module.css";
+import { formatMoney } from "../../../utils/money";
 import {
   toIsoDate,
   formatWeekdayDate,
   formatClockTime,
-} from "../../utils/dates";
+} from "../../../utils/dates";
 
 const STRIPE_PAYOUTS = "https://dashboard.stripe.com/settings/payouts";
 

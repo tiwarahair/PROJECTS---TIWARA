@@ -3,11 +3,11 @@ import { useFormState } from "react-hook-form";
 import { Fragment } from "react";
 import { resolveAssetUrl } from "../../utils/asset-url";
 import { joinClassNames } from "../../utils/class-names";
-import type { EditKey } from "./account-logic";
-import type { Profile } from "./account-data";
+import type { EditKey } from "./logic";
+import type { Profile } from "./data";
 import type { AccountController } from "./use-account";
 import styles from "../../styles/features/account/personal-section.module.css";
-import ui from "../../styles/features/account/account-ui.module.css";
+import ui from "../../styles/features/account/ui.module.css";
 
 const EMPTY_CODE = ["", "", "", "", "", ""];
 

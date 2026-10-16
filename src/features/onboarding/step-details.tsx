@@ -1,5 +1,5 @@
 import { Shield } from "lucide-react";
-import { AddressFinder } from "../../components/address-finder/address-finder";
+import { AddressFinder } from "../../components/address-finder";
 import type { AddressFixture } from "../../components/address-finder/use-address-finder";
 import { joinClassNames } from "../../utils/class-names";
 import { RADII } from "./onboarding-data";

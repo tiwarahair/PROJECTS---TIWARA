@@ -1,11 +1,7 @@
 import { describe, expect, it } from "vitest";
-import { SEED_CARDS, getSeedBookings } from "../account-data";
-import type { AccountBooking } from "../account-data";
-import {
-  formatCardDigits,
-  formatCardExpiry,
-  getBookingMoney,
-} from "../account-logic";
+import { SEED_CARDS, getSeedBookings } from "../data";
+import type { AccountBooking } from "../data";
+import { formatCardDigits, formatCardExpiry, getBookingMoney } from "../logic";
 
 const getBooking = (id: string): AccountBooking => {
   const booking = getSeedBookings("").find((item) => item.id === id);

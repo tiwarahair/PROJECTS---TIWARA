@@ -1,7 +1,7 @@
 import { act, render, screen } from "@testing-library/react";
 import { useMapsLibrary } from "@vis.gl/react-google-maps";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import { AddressFinder } from "../address-finder";
+import { AddressFinder } from "..";
 import type { AddressFixture } from "../use-address-finder";
 import type { UserEvent } from "@testing-library/user-event";
 import { setupUser } from "../../../test/setup-user";

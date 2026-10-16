@@ -3,9 +3,9 @@ import type { MouseEvent } from "react";
 import { Link } from "react-router";
 import { resolveAssetUrl } from "../../utils/asset-url";
 import { joinClassNames } from "../../utils/class-names";
-import { SECTIONS } from "./account-data";
-import type { AccountSection } from "./account-data";
-import styles from "../../styles/features/account/account-nav.module.css";
+import { SECTIONS } from "./data";
+import type { AccountSection } from "./data";
+import styles from "../../styles/features/account/nav.module.css";
 import { useIdentity } from "../../hooks/use-identity";
 
 const APPOINTMENTS = SECTIONS.slice(0, 4);

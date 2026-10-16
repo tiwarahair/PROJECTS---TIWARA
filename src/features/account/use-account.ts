@@ -18,11 +18,11 @@ import type { SavedAddress } from "../../types/address";
 import { formatPostcode } from "../../utils/address";
 import { getSearchParams } from "../../utils/page-flags";
 import { getSavedAddresses, saveAddresses } from "../../utils/saved-addresses";
-import { applyFixture } from "./account-fixtures";
-import type { FixtureForms } from "./account-fixtures";
-import { EMPTY_CARD, EMPTY_PASSWORD, useAccountForms } from "./account-forms";
-import type { AddressFormValues, CardFormValues } from "./account-schemas";
-import { getDiscardPatch, hasUnsavedEdits } from "./account-unsaved";
+import { applyFixture } from "./fixtures";
+import type { FixtureForms } from "./fixtures";
+import { EMPTY_CARD, EMPTY_PASSWORD, useAccountForms } from "./forms";
+import type { AddressFormValues, CardFormValues } from "./schemas";
+import { getDiscardPatch, hasUnsavedEdits } from "./unsaved";
 import {
   DEMO_PHOTO,
   getSeedBookings,
@@ -31,9 +31,9 @@ import {
   SECTION_IDS,
   SEED_CARDS,
   SHARED_ENTRIES,
-} from "./account-data";
-import type { AccountBooking, Profile, SavedCard } from "./account-data";
-import type { EditKey } from "./account-logic";
+} from "./data";
+import type { AccountBooking, Profile, SavedCard } from "./data";
+import type { EditKey } from "./logic";
 
 type DialogState =
   | { kind: "receipt"; id: string }

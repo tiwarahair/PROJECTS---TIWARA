@@ -13,12 +13,12 @@ import {
   getRangeLabel,
   getStats,
   getTakings,
-} from "./earnings-data";
-import { EarningsLists } from "./earnings-lists";
-import { EarningsOverlays } from "./earnings-overlays";
+} from "./data";
+import { EarningsLists } from "./lists";
+import { EarningsOverlays } from "./overlays";
 import { useEarnings } from "./use-earnings";
 import type { EarningsProps } from "./use-earnings";
-import styles from "../../styles/components/earnings/earnings.module.css";
+import styles from "../../styles/components/earnings/index.module.css";
 import { formatMoney } from "../../utils/money";
 import { toIsoDate, formatWeekdayDate } from "../../utils/dates";
 

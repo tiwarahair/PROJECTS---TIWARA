@@ -1,10 +1,10 @@
 import type { CSSProperties, MouseEvent } from "react";
 import { Copy, Landmark } from "lucide-react";
 import { joinClassNames } from "../../utils/class-names";
-import { STATUS_COLOURS, getClient } from "./earnings-data";
-import type { Payout, Transaction, TransactionStatus } from "./earnings-data";
+import { STATUS_COLOURS, getClient } from "./data";
+import type { Payout, Transaction, TransactionStatus } from "./data";
 import type { EarningsController, EarningsProps } from "./use-earnings";
-import styles from "../../styles/components/earnings/earnings-lists.module.css";
+import styles from "../../styles/components/earnings/lists.module.css";
 import { formatMoney } from "../../utils/money";
 import { formatWeekdayDate } from "../../utils/dates";
 

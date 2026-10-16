@@ -1,7 +1,7 @@
 // Account's ?fixture= board states (dev-only).
-import { CURRENT_PASSWORD, DEMO_PHOTO, SEED_PROFILE } from "./account-data";
-import type { Profile } from "./account-data";
-import type { AddressFormValues, PasswordFormValues } from "./account-schemas";
+import { CURRENT_PASSWORD, DEMO_PHOTO, SEED_PROFILE } from "./data";
+import type { Profile } from "./data";
+import type { AddressFormValues, PasswordFormValues } from "./schemas";
 import type { AccountState } from "./use-account";
 
 export interface FixtureForms {

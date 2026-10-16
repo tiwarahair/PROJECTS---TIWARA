@@ -5,12 +5,12 @@ import { FavHost } from "../../components/fav-host/fav-host";
 import { SiteHeader } from "../../components/site-header/site-header";
 import { useAppSelector } from "../../stores/hooks";
 import { joinClassNames } from "../../utils/class-names";
-import { AccountDialogs } from "./account-dialogs";
+import { AccountDialogs } from "./dialogs";
 import { downloadFile } from "../../utils/download-file";
-import { getBookingCalendarFile } from "./account-logic";
-import { AccountMobileList, AccountSideNav } from "./account-nav";
-import { getAccountView } from "./account-view";
-import type { BookingCardView } from "./account-view";
+import { getBookingCalendarFile } from "./logic";
+import { AccountMobileList, AccountSideNav } from "./nav";
+import { getAccountView } from "./view";
+import type { BookingCardView } from "./view";
 import { BookingsSection, OverviewSection } from "./bookings-sections";
 import { PersonalSection } from "./personal-section";
 import { FavouritesSection, HairSection } from "./profile-sections";
@@ -23,8 +23,8 @@ import {
 import { useAccount } from "./use-account";
 import type { AccountProps } from "./use-account";
 import { AddressesSection, PaymentsSection } from "./wallet-sections";
-import pageGlobal from "../../styles/features/account/account-page-global.module.css";
-import styles from "../../styles/features/account/account-page.module.css";
+import pageGlobal from "../../styles/features/account/index-global.module.css";
+import styles from "../../styles/features/account/index.module.css";
 
 export type AccountPageProps = AccountProps;
 

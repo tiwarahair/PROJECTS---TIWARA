@@ -1,16 +1,6 @@
 // Earnings export: a CSV of the transactions, or a printable monthly statement.
-import {
-  getClient,
-  getMethodLabel,
-  getRangeLabel,
-  getStats,
-} from "./earnings-data";
-import type {
-  DateRange,
-  EarningsClient,
-  Payout,
-  Transaction,
-} from "./earnings-data";
+import { getClient, getMethodLabel, getRangeLabel, getStats } from "./data";
+import type { DateRange, EarningsClient, Payout, Transaction } from "./data";
 import { formatMoney } from "../../utils/money";
 import { toIsoDate, formatClockTime } from "../../utils/dates";
 

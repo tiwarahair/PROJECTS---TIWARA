@@ -2,15 +2,15 @@
 import { Heart, RotateCcw, Sparkles } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
 import { stylists } from "../../data";
-import { QUIZ_DAYS_AGO, SECTIONS } from "./account-data";
-import type { AccountBooking, AccountSection } from "./account-data";
+import { QUIZ_DAYS_AGO, SECTIONS } from "./data";
+import type { AccountBooking, AccountSection } from "./data";
 import {
   formatAccountDate,
   getAccountStylist,
   getAddressLine,
   getBookingMoney,
-} from "./account-logic";
-import type { BookingMoney } from "./account-logic";
+} from "./logic";
+import type { BookingMoney } from "./logic";
 import type { AccountState } from "./use-account";
 import { formatMoney } from "../../utils/money";
 
