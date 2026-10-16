@@ -8,6 +8,7 @@ import { getAssetUrl } from "../../utils/asset-url";
 import { joinClassNames } from "../../utils/class-names";
 import { AvailabilityPage, ProfilePage, RulesPage } from "./settings-pages";
 import { getSettingsView } from "./settings-view";
+import { PROFILE_FORM_ID } from "./use-profile-form";
 import type { SettingsIcon, SettingsView } from "./settings-view";
 import { GATE_REASON } from "./studio-data";
 import type { StudioController } from "./use-studio";
@@ -419,7 +420,11 @@ const SettingsFrame = ({
                 </button>
               )}
               {view.isProfile && (
-                <button className={styles.save} onClick={view.saveProfile}>
+                <button
+                  className={styles.save}
+                  type="submit"
+                  form={PROFILE_FORM_ID}
+                >
                   Save
                 </button>
               )}
@@ -550,7 +555,8 @@ const SettingsFrame = ({
                 {view.isProfile && (
                   <button
                     className={styles.saveChanges}
-                    onClick={view.saveProfile}
+                    type="submit"
+                    form={PROFILE_FORM_ID}
                   >
                     Save changes
                   </button>

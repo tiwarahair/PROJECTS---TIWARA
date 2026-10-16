@@ -3,7 +3,7 @@ import { useRef } from "react";
 import type { CSSProperties } from "react";
 import { Avatar } from "../../components/ds/avatar";
 import { joinClassNames } from "../../utils/class-names";
-import { PORTFOLIO_ERROR_ID } from "./settings-profile-view";
+import { PROFILE_FORM_ID, useProfileForm } from "./use-profile-form";
 import type { SettingsView } from "./settings-view";
 import { TIMES } from "./studio-data";
 import type { StudioController } from "./use-studio";
@@ -37,6 +37,18 @@ export const ProfilePage = ({
   const coverInput = useRef<HTMLInputElement>(null);
   const avatarInput = useRef<HTMLInputElement>(null);
   const portInput = useRef<HTMLInputElement>(null);
+  const portfolioRef = useRef<HTMLDivElement>(null);
+
+  const {
+    handleSubmit,
+    formState: { errors },
+  } = useProfileForm(state.portfolio.length);
+
+  const showPortfolio = () =>
+    portfolioRef.current?.scrollIntoView({
+      block: "center",
+      behavior: "smooth",
+    });
 
   const field = (
     label: string,
@@ -56,7 +68,13 @@ export const ProfilePage = ({
   );
 
   return (
-    <div className={styles.profile} data-screen-label="Edit profile">
+    <form
+      id={PROFILE_FORM_ID}
+      className={styles.profile}
+      data-screen-label="Edit profile"
+      noValidate
+      onSubmit={handleSubmit(view.saveProfile, showPortfolio)}
+    >
       <div className={styles.cover}>
         {state.coverUrl ? (
           <ResponsiveImage
@@ -80,6 +98,7 @@ export const ProfilePage = ({
           onChange={view.onCoverFile}
         />
         <button
+          type="button"
           className={styles.changeCover}
           onClick={() => coverInput.current?.click()}
         >
@@ -93,6 +112,7 @@ export const ProfilePage = ({
           onChange={view.onAvatarFile}
         />
         <button
+          type="button"
           className={styles.avatarButton}
           onClick={() => avatarInput.current?.click()}
           aria-label="Change profile photo"
@@ -159,7 +179,7 @@ export const ProfilePage = ({
             placeholder: "Channel link",
           },
         )}
-        <div className={styles.portfolio}>
+        <div ref={portfolioRef} className={styles.portfolio}>
           <div className={styles.portfolioHead}>
             <span className={styles.title15}>Portfolio</span>
             <span className={styles.muted}>{view.portCount}</span>
@@ -167,9 +187,9 @@ export const ProfilePage = ({
           <div className={styles.mutedTop}>
             Up to twenty photos of your work, shown on your public profile.
           </div>
-          {view.portfolioError && (
-            <div id={PORTFOLIO_ERROR_ID} className={styles.error} role="alert">
-              {view.portfolioError}
+          {errors.portfolioCount && (
+            <div className={styles.error} role="alert">
+              {errors.portfolioCount.message}
             </div>
           )}
           <input
@@ -190,6 +210,7 @@ export const ProfilePage = ({
                   alt="Portfolio photo"
                 />
                 <button
+                  type="button"
                   className={styles.removePhoto}
                   onClick={remove}
                   aria-label="Remove photo"
@@ -210,6 +231,7 @@ export const ProfilePage = ({
             ))}
             {view.canAddPhotos && (
               <button
+                type="button"
                 className={styles.addPhotos}
                 onClick={() => portInput.current?.click()}
               >
@@ -230,7 +252,7 @@ export const ProfilePage = ({
           </div>
         </div>
       </div>
-    </div>
+    </form>
   );
 };
 

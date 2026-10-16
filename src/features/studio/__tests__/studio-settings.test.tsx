@@ -1,4 +1,4 @@
-import { act, screen, within } from "@testing-library/react";
+import { act, screen, waitFor, within } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { renderWithStore } from "../../../test/render-with-store";
 import { StudioPage } from "../studio-page";
@@ -109,12 +109,15 @@ describe("Studio → Settings", () => {
     renderStudio();
     await user.click(within(getLabelled("Sidebar")).getByTitle("Settings"));
 
-    const saveProfile = () =>
-      user.click(
+    const saveProfile = async () => {
+      await user.click(
         screen
           .getAllByRole("button", { name: "Save changes" })
           .at(-1) as HTMLElement,
       );
+
+      await act(() => Promise.resolve());
+    };
 
     await saveProfile();
 
@@ -123,6 +126,19 @@ describe("Studio → Settings", () => {
     );
 
     expect(screen.queryByText("Profile saved")).not.toBeInTheDocument();
+
+    const nav = getLabelled("Settings nav");
+
+    await user.click(within(nav).getByRole("button", { name: "Availability" }));
+    await user.click(within(nav).getByRole("button", { name: "Profile" }));
+
+    expect(
+      screen.queryByText("Provide at least 2 portfolio images"),
+    ).not.toBeInTheDocument();
+
+    await saveProfile();
+
+    expect(screen.getByRole("alert")).toBeInTheDocument();
 
     const photoInput = getLabelled("Edit profile").querySelector(
       "input[type=file][multiple]",
@@ -133,13 +149,14 @@ describe("Studio → Settings", () => {
       new File(["b"], "b.jpg", { type: "image/jpeg" }),
     ]);
 
-    // the photos are read as previews (FileReader) before they're added
     vi.useRealTimers();
     await screen.findByText("2 of 20");
 
-    expect(
-      screen.queryByText("Provide at least 2 portfolio images"),
-    ).not.toBeInTheDocument();
+    await waitFor(() =>
+      expect(
+        screen.queryByText("Provide at least 2 portfolio images"),
+      ).not.toBeInTheDocument(),
+    );
 
     await saveProfile();
 

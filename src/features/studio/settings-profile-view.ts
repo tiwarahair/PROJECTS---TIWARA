@@ -9,11 +9,6 @@ import {
 import { getSavedSettings } from "./studio-unsaved";
 import type { StudioController } from "./use-studio";
 
-/** The fewest portfolio photos a profile can be saved with. */
-const MIN_PORTFOLIO = 2;
-
-export const PORTFOLIO_ERROR_ID = "portfolio-error";
-
 export const getProfileView = (studio: StudioController) => {
   const { state, setState, actions, context } = studio;
   const { showToast, leavePage, checkDone } = actions;
@@ -73,10 +68,6 @@ export const getProfileView = (studio: StudioController) => {
       },
     })),
     portCount: `${state.portfolio.length} of 20`,
-    portfolioError:
-      state.isPortfolioErrorShown && state.portfolio.length < MIN_PORTFOLIO
-        ? `Provide at least ${MIN_PORTFOLIO} portfolio images`
-        : "",
     canAddPhotos: state.portfolio.length < 20,
     onPortFiles: (event: ChangeEvent<HTMLInputElement>) => {
       const room = 20 - state.portfolio.length;
@@ -116,19 +107,6 @@ export const getProfileView = (studio: StudioController) => {
       });
     },
     saveProfile: async () => {
-      if (state.portfolio.length < MIN_PORTFOLIO) {
-        setState({ isPortfolioErrorShown: true });
-
-        // the message sits by the photos, often below the fold: bring it into view once it renders
-        window.setTimeout(() =>
-          document
-            .getElementById(PORTFOLIO_ERROR_ID)
-            ?.scrollIntoView({ block: "center", behavior: "smooth" }),
-        );
-
-        return;
-      }
-
       if (context.memo.saveSlug && !(await context.memo.saveSlug())) return;
 
       const { profile, business, check } = state;
