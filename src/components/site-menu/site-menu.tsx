@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import type { MouseEvent, ReactNode } from "react";
+import { ChevronDown } from "lucide-react";
 import { useLocation } from "react-router";
 import { useIdentity } from "../../hooks/use-identity";
 import { useMediaQuery } from "../../hooks/use-media-query";
@@ -73,21 +74,7 @@ export const AccountAvatar = ({
         initials
       )}
     </span>
-    {hasChevron && (
-      <svg
-        width="14"
-        height="14"
-        viewBox="0 0 24 24"
-        fill="none"
-        stroke="currentColor"
-        strokeWidth="1.7"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-        aria-hidden="true"
-      >
-        <path d="m6 9 6 6 6-6"></path>
-      </svg>
-    )}
+    {hasChevron && <ChevronDown size={14} strokeWidth={1.7} />}
   </>
 );
 

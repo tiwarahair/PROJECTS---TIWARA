@@ -1,5 +1,6 @@
 import { useFormState } from "react-hook-form";
 import type { CSSProperties } from "react";
+import { AppleLogo, GoogleLogo } from "../../components/icons/brand-icons";
 import { joinClassNames } from "../../utils/class-names";
 import {
   checkPassword,
@@ -56,14 +57,14 @@ export const SecuritySection = ({
     {
       key: "googleConnected" as const,
       name: "Google",
-      mark: "G",
+      Logo: GoogleLogo,
       on: googleConnected,
       subtitle: profile.email,
     },
     {
       key: "appleConnected" as const,
       name: "Apple",
-      mark: "A",
+      Logo: AppleLogo,
       on: appleConnected,
       subtitle: "",
     },
@@ -228,13 +229,13 @@ export const SecuritySection = ({
         Log in with Google or Apple instead of a password.
       </p>
       <div className={ui.list}>
-        {socials.map(({ key, name, mark, on, subtitle }) => {
+        {socials.map(({ key, name, Logo, on, subtitle }) => {
           const isLast = on && methods <= 1;
 
           return (
             <div key={key} className={styles.social}>
               <span className={styles.socialMark} aria-hidden="true">
-                {mark}
+                <Logo size={18} />
               </span>
               <div className={styles.socialText}>
                 <div className={ui.itemTitle}>{name}</div>

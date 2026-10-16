@@ -1,4 +1,20 @@
 import type { CSSProperties } from "react";
+import {
+  ArrowRightLeft,
+  Check,
+  ChevronDown,
+  ChevronRight,
+  Clock,
+  EllipsisVertical,
+  MapPin,
+  PenLine,
+  Plus,
+  Send,
+  ShieldOff,
+  Trash,
+  TriangleAlert,
+} from "lucide-react";
+import type { LucideIcon } from "lucide-react";
 import { joinClassNames } from "../../utils/class-names";
 import { getAddBookingView } from "./add-booking-view";
 import { getAddonDialog, getEditServiceView } from "./booking-edit-view";
@@ -16,18 +32,13 @@ import {
   RescheduleStep,
 } from "./booking-steps";
 import { StudioCheckout } from "./studio-checkout";
+import { CONTACT_ICONS } from "./studio-data";
 import type { StudioController } from "./use-studio";
 import styles from "../../styles/features/studio/booking-sheet.module.css";
 import stepStyles from "../../styles/features/studio/booking-steps.module.css";
 import sheet from "../../styles/features/studio/studio-sheet.module.css";
 
 const asStyle = (values: Record<string, string>) => values as CSSProperties;
-
-const CONTACT_ICONS = {
-  call: "M22 16.9v3a2 2 0 0 1-2.2 2 19.8 19.8 0 0 1-8.6-3.1 19.5 19.5 0 0 1-6-6A19.8 19.8 0 0 1 2.1 4.2 2 2 0 0 1 4.1 2h3a2 2 0 0 1 2 1.7c.1.9.4 1.8.7 2.7a2 2 0 0 1-.5 2.1L8.1 9.8a16 16 0 0 0 6 6l1.3-1.3a2 2 0 0 1 2.1-.4c.9.3 1.8.6 2.7.7a2 2 0 0 1 1.8 2.1z",
-  text: "M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z",
-  mail: "M4 4h16a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2zM22 7l-10 7L2 7",
-};
 
 /** Call / text / email buttons beside a client (booking and past sheets). */
 export const ContactLinks = ({
@@ -43,7 +54,7 @@ export const ContactLinks = ({
   hasPhone: boolean;
   hasEmail: boolean;
 }) => {
-  const link = (href: string, label: string, iconPath: string) => (
+  const link = (href: string, label: string, ContactIcon: LucideIcon) => (
     <a
       className={styles.contact}
       href={href}
@@ -52,18 +63,7 @@ export const ContactLinks = ({
       title={label}
     >
       <span className={styles.hitArea} aria-hidden="true"></span>
-      <svg
-        width="18"
-        height="18"
-        viewBox="0 0 24 24"
-        fill="none"
-        stroke="currentColor"
-        strokeWidth="1.7"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-      >
-        <path d={iconPath}></path>
-      </svg>
+      <ContactIcon size={18} strokeWidth={1.7} />
     </a>
   );
 
@@ -75,26 +75,6 @@ export const ContactLinks = ({
     </span>
   );
 };
-
-const ChevronRight = ({
-  stroke = "var(--neutral-500)",
-}: {
-  stroke?: string;
-}) => (
-  <svg
-    className={styles.noShrink}
-    width="18"
-    height="18"
-    viewBox="0 0 24 24"
-    fill="none"
-    stroke={stroke}
-    strokeWidth="1.7"
-    strokeLinecap="round"
-    strokeLinejoin="round"
-  >
-    <path d="m9 18 6-6-6-6"></path>
-  </svg>
-);
 
 const BookingMain = ({
   studio,
@@ -161,7 +141,12 @@ const BookingMain = ({
                 hasEmail={booking.hasEmail}
               />
             )}
-            <ChevronRight />
+            <ChevronRight
+              className={styles.noShrink}
+              size={18}
+              strokeWidth={1.7}
+              color="var(--neutral-500)"
+            />
           </div>
           {hasClientActions && (
             <span className={styles.clientActions}>
@@ -170,18 +155,7 @@ const BookingMain = ({
                 onClick={view.changeClient}
                 aria-label="Change client"
               >
-                <svg
-                  width="16"
-                  height="16"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="1.7"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                >
-                  <path d="M3 8h13l-3-3M21 16H8l3 3"></path>
-                </svg>
+                <ArrowRightLeft size={16} strokeWidth={1.7} />
               </button>
               {!!booking.client && (
                 <button
@@ -192,18 +166,7 @@ const BookingMain = ({
                   onClick={view.clearClient}
                   aria-label="Make this a walk-in"
                 >
-                  <svg
-                    width="16"
-                    height="16"
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    stroke="currentColor"
-                    strokeWidth="1.7"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                  >
-                    <path d="M3 6h18M8 6V4h8v2M19 6l-1 14H6L5 6"></path>
-                  </svg>
+                  <Trash size={16} strokeWidth={1.7} />
                 </button>
               )}
             </span>
@@ -214,18 +177,7 @@ const BookingMain = ({
           <span className={styles.statusEnd}>
             {booking.unpaidFlag && (
               <span className={styles.unpaid}>
-                <svg
-                  width="12"
-                  height="12"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="2"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                >
-                  <path d="M12 9v4M12 17h.01M10.3 3.9 1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0Z"></path>
-                </svg>
+                <TriangleAlert size={12} strokeWidth={2} />
                 Unpaid
               </span>
             )}
@@ -243,22 +195,14 @@ const BookingMain = ({
               >
                 {booking.statusDot && <span className={styles.pulse}></span>}
                 {booking.statusLabel}
-                <svg
+                <ChevronDown
                   className={joinClassNames(
                     styles.chevron,
                     state.statusMenuOpen && styles.chevronOpen,
                   )}
-                  width="13"
-                  height="13"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="2.2"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                >
-                  <path d="m6 9 6 6 6-6"></path>
-                </svg>
+                  size={13}
+                  strokeWidth={2.2}
+                />
               </button>
               {state.statusMenuOpen && (
                 <>
@@ -271,7 +215,7 @@ const BookingMain = ({
                     {view.statusItems.map(
                       ({
                         label,
-                        iconPath,
+                        icon: ItemIcon,
                         subtitle,
                         disabled,
                         danger,
@@ -286,19 +230,12 @@ const BookingMain = ({
                           onClick={run}
                           disabled={!!disabled}
                         >
-                          <svg
+                          <ItemIcon
                             className={styles.menuIcon}
-                            width="16"
-                            height="16"
-                            viewBox="0 0 24 24"
-                            fill="none"
-                            stroke={danger ? "#a12a2a" : "var(--text-primary)"}
-                            strokeWidth="1.8"
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                          >
-                            <path d={iconPath}></path>
-                          </svg>
+                            size={16}
+                            strokeWidth={1.8}
+                            color={danger ? "#a12a2a" : "var(--text-primary)"}
+                          />
                           <span className={styles.grow}>
                             <span
                               className={joinClassNames(
@@ -334,19 +271,12 @@ const BookingMain = ({
       </div>
       {!!view.sensitivities && (
         <div className={styles.sens}>
-          <svg
+          <TriangleAlert
             className={styles.noShrink}
-            width="16"
-            height="16"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="#b5541f"
-            strokeWidth="1.7"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-          >
-            <path d="M10.3 3.9 1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0zM12 9v4M12 17h.01"></path>
-          </svg>
+            size={16}
+            strokeWidth={1.7}
+            color="#b5541f"
+          />
           {view.sensitivities}
         </div>
       )}
@@ -396,18 +326,7 @@ const BookingMain = ({
                   onClick={() => studio.serviceActions.openAddonEdit(booking)}
                   aria-label="Edit service"
                 >
-                  <svg
-                    width="16"
-                    height="16"
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    stroke="currentColor"
-                    strokeWidth="1.7"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                  >
-                    <path d="M12 20h9M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4Z"></path>
-                  </svg>
+                  <PenLine size={16} strokeWidth={1.7} />
                 </button>
               </div>
             )}
@@ -426,20 +345,12 @@ const BookingMain = ({
       </div>
       {booking.awaiting && (
         <div className={styles.awaiting}>
-          <svg
+          <Clock
             className={styles.noShrink}
-            width="17"
-            height="17"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="#6b5a10"
-            strokeWidth="1.8"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-          >
-            <circle cx="12" cy="12" r="9"></circle>
-            <path d="M12 7v5l3 2"></path>
-          </svg>
+            size={17}
+            strokeWidth={1.8}
+            color="#6b5a10"
+          />
           <div className={styles.grow}>
             <div className={styles.awaitingTitle}>
               {`Auto-cancels ${booking.expiryLabel}`}
@@ -450,20 +361,12 @@ const BookingMain = ({
       )}
       {state.profile.mobile && (
         <div className={styles.panel}>
-          <svg
+          <MapPin
             className={styles.panelIcon}
-            width="16"
-            height="16"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="var(--text-secondary)"
-            strokeWidth="1.7"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-          >
-            <path d="M20 10c0 6-8 12-8 12S4 16 4 10a8 8 0 0 1 16 0z"></path>
-            <circle cx="12" cy="10" r="3"></circle>
-          </svg>
+            size={16}
+            strokeWidth={1.7}
+            color="var(--text-secondary)"
+          />
           <div className={styles.grow}>
             <div className={styles.panelLabel}>Client location</div>
             {!state.bookingAddressOn && (
@@ -494,20 +397,12 @@ const BookingMain = ({
       )}
       {booking.awaiting && (
         <div className={styles.panel}>
-          <svg
+          <Send
             className={styles.panelIcon}
-            width="16"
-            height="16"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="var(--text-secondary)"
-            strokeWidth="1.7"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-          >
-            <path d="m22 2-7 20-4-9-9-4Z"></path>
-            <path d="M22 2 11 13"></path>
-          </svg>
+            size={16}
+            strokeWidth={1.7}
+            color="var(--text-secondary)"
+          />
           <div className={styles.grow}>
             <div className={styles.panelLabel}>{booking.protectionWord}</div>
             <div className={styles.panelValue}>
@@ -533,20 +428,12 @@ const BookingMain = ({
       )}
       {booking.noProtect && !booking.autoX && (
         <div className={styles.noProtect}>
-          <svg
+          <ShieldOff
             className={styles.menuIcon}
-            width="16"
-            height="16"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="var(--text-secondary)"
-            strokeWidth="1.7"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-          >
-            <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10Z"></path>
-            <path d="m4 3 16 18"></path>
-          </svg>
+            size={16}
+            strokeWidth={1.7}
+            color="var(--text-secondary)"
+          />
           <div className={styles.noProtectText}>
             <span className={styles.strong}>No booking protection.</span>
             {" Cancellation and no-show fees can't be charged."}
@@ -577,17 +464,7 @@ const BookingMain = ({
             })
           }
         >
-          <svg
-            width="13"
-            height="13"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            strokeWidth="2.2"
-            strokeLinecap="round"
-          >
-            <path d="M12 5v14M5 12h14"></path>
-          </svg>
+          <Plus size={13} strokeWidth={2.2} />
           Add a note only you can see
         </button>
       )}
@@ -708,18 +585,7 @@ export const BookingSheetBody = ({
       {state.bookingStep === "done" && (
         <div className={styles.done}>
           <div className={styles.doneIcon}>
-            <svg
-              width="26"
-              height="26"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="2.4"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-            >
-              <path d="M20 6 9 17l-5-5"></path>
-            </svg>
+            <Check size={26} strokeWidth={2.4} />
           </div>
           <div className={styles.doneTitle}>{view.doneTitle}</div>
           <div className={styles.doneBody}>{view.doneBody}</div>
@@ -821,18 +687,7 @@ export const BookingSheetAfter = ({
             >
               <span className={sheet.payLabel}>
                 {view.payRowLabel}
-                <svg
-                  width="16"
-                  height="16"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="1.7"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                >
-                  <path d="m9 18 6-6-6-6"></path>
-                </svg>
+                <ChevronRight size={16} strokeWidth={1.7} />
               </span>
               <span className={sheet.amount}>{booking.dueLabel}</span>
             </button>
@@ -844,16 +699,7 @@ export const BookingSheetAfter = ({
                 onClick={view.more}
                 aria-label="More actions"
               >
-                <svg
-                  width="18"
-                  height="18"
-                  viewBox="0 0 24 24"
-                  fill="currentColor"
-                >
-                  <circle cx="12" cy="5" r="1.8"></circle>
-                  <circle cx="12" cy="12" r="1.8"></circle>
-                  <circle cx="12" cy="19" r="1.8"></circle>
-                </svg>
+                <EllipsisVertical size={18} />
               </button>
             )}
             <button className={sheet.secondary} onClick={view.bookAgain}>
@@ -962,5 +808,3 @@ export const BookingAddonDialog = ({
     <AddonEditDialog studio={studio} dialog={addonDialog} />
   ) : null;
 };
-
-export { ChevronRight };

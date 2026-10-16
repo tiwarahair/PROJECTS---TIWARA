@@ -1,6 +1,7 @@
 // Booking fee and the client-facing policy lines.
 // policyLines is the ONE client-facing builder (Studio preview and Booking Review/Pay/Confirmation).
-import { policyIcons } from "../data";
+import { Calendar, Clock, CreditCard, UserX } from "lucide-react";
+import type { LucideIcon } from "lucide-react";
 import type { Policy, PolicyFee, PolicyMode } from "../types/policy";
 import { formatMoney, roundToPence } from "./money";
 
@@ -16,7 +17,7 @@ export const getWindowText = (hours: number): string => {
 };
 
 interface PolicyLine {
-  icon: string;
+  icon: LucideIcon;
   text: string;
 }
 
@@ -50,7 +51,9 @@ export const policyLines = (
 
   const fee = bookingFee(price);
   const lines: PolicyLine[] = [];
-  const addLine = (icon: string, text: string) => lines.push({ icon, text });
+
+  const addLine = (icon: LucideIcon, text: string) =>
+    lines.push({ icon, text });
 
   const deposit =
     mode === "deposit" ? roundToPence((price * depositPercent) / 100) : 0;
@@ -64,7 +67,7 @@ export const policyLines = (
     balance = roundToPence(price - deposit);
 
     addLine(
-      policyIcons.payment,
+      CreditCard,
       `Pay ${formatMoney(dueToday)} today (${formatMoney(deposit)} deposit + ${formatMoney(fee)} booking fee). The ${formatMoney(balance)} balance is paid to ${stylistName} at your appointment.`,
     );
   }
@@ -74,20 +77,20 @@ export const policyLines = (
     balance = 0;
 
     addLine(
-      policyIcons.payment,
+      CreditCard,
       `Pay ${formatMoney(dueToday)} today (${formatMoney(price)} + ${formatMoney(fee)} booking fee). Nothing more to pay at your appointment.`,
     );
   }
 
   if (mode === "card")
     addLine(
-      policyIcons.payment,
+      CreditCard,
       `Pay ${formatMoney(fee)} booking fee today. Your card is saved and the ${formatMoney(price)} is paid to ${stylistName} at your appointment.`,
     );
 
   if (mode === "none")
     addLine(
-      policyIcons.payment,
+      CreditCard,
       `Pay ${formatMoney(fee)} booking fee today. The ${formatMoney(price)} is paid to ${stylistName} at your appointment.`,
     );
 
@@ -105,7 +108,7 @@ export const policyLines = (
     return `Please cancel or reschedule at least ${windowText} before.`;
   };
 
-  addLine(policyIcons.calendar, getCancellationText());
+  addLine(Calendar, getCancellationText());
 
   const getFeeLine = (
     { kind, percent }: PolicyFee,
@@ -154,7 +157,7 @@ export const policyLines = (
     : "Please arrive on time.";
 
   if (mode !== "none" && late.on)
-    addLine(policyIcons.late, getFeeLine(late, "Late cancellation"));
+    addLine(Clock, getFeeLine(late, "Late cancellation"));
 
   if (mode !== "none" && noShow.on) {
     const noShowLine = getFeeLine(noShow, "No-show", true);
@@ -163,8 +166,8 @@ export const policyLines = (
       ? `Please arrive within ${graceMinutes} minutes, as after that ${stylistName} may mark it as a no-show.`
       : arriveText;
 
-    addLine(policyIcons.noShow, `${noShowLine} ${noShowArrive}`);
-  } else addLine(policyIcons.late, arriveText);
+    addLine(UserX, `${noShowLine} ${noShowArrive}`);
+  } else addLine(Clock, arriveText);
 
   return {
     dueToday,

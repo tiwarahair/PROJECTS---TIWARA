@@ -1,5 +1,6 @@
 import { ResponsiveImage } from "../../components/responsive-image/responsive-image";
 import type { CSSProperties, PointerEvent } from "react";
+import { Check, ChevronRight, Lock, TriangleAlert, X } from "lucide-react";
 import { joinClassNames } from "../../utils/class-names";
 import { GATE_REASON, RANGE_DATA } from "./studio-data";
 import { getDecoratedBookings } from "./studio-decorate";
@@ -33,27 +34,6 @@ const STAT_SUBTITLES: Record<string, string> = {
 const RANGE_DAYS: Record<string, number> = { today: 1, week: 7 };
 
 const getZeroStat = (label: string) => (label === "Revenue" ? "£0" : "0");
-
-const Chevron = ({
-  stroke = "currentColor",
-  strokeWidth = "1.7",
-}: {
-  stroke?: string;
-  strokeWidth?: string;
-}) => (
-  <svg
-    width="15"
-    height="15"
-    viewBox="0 0 24 24"
-    fill="none"
-    stroke={stroke}
-    strokeWidth={strokeWidth}
-    strokeLinecap="round"
-    strokeLinejoin="round"
-  >
-    <path d="m9 18 6-6-6-6"></path>
-  </svg>
-);
 
 const getTileStyle = (booking: DecoratedBooking) =>
   // runtime: the service category's tile colours and the booking's status tone
@@ -126,18 +106,7 @@ const SetupBanner = ({ studio }: { studio: StudioController }) => {
                 )}
               >
                 {isDone && (
-                  <svg
-                    width="11"
-                    height="11"
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    stroke="#1a1714"
-                    strokeWidth="3.2"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                  >
-                    <path d="M20 6 9 17l-5-5"></path>
-                  </svg>
+                  <Check size={11} strokeWidth={3.2} color="#1a1714" />
                 )}
               </span>
               <span
@@ -149,7 +118,11 @@ const SetupBanner = ({ studio }: { studio: StudioController }) => {
                 <span className={styles.setupLabel}>{label}</span>
                 <span className={styles.setupRowSub}>{subtitle}</span>
               </span>
-              <Chevron stroke="rgba(246,240,228,.55)" />
+              <ChevronRight
+                size={15}
+                strokeWidth={1.7}
+                color="rgba(246,240,228,.55)"
+              />
             </button>
           );
         })}
@@ -283,19 +256,7 @@ export const StudioHome = ({ studio }: { studio: StudioController }) => {
           data-screen-label="Go-live banner"
         >
           <span className={styles.gateIcon}>
-            <svg
-              width="17"
-              height="17"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="1.7"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-            >
-              <rect x="4" y="11" width="16" height="10" rx="2"></rect>
-              <path d="M8 11V7a4 4 0 0 1 8 0v4"></path>
-            </svg>
+            <Lock size={17} strokeWidth={1.7} />
           </span>
           <div className={styles.gateText}>
             <span className={styles.bold}>Finish setup to go live</span> — your
@@ -342,17 +303,7 @@ export const StudioHome = ({ studio }: { studio: StudioController }) => {
                 onClick={() => setState({ nudge: false })}
                 aria-label="Dismiss"
               >
-                <svg
-                  width="15"
-                  height="15"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="1.8"
-                  strokeLinecap="round"
-                >
-                  <path d="M18 6 6 18M6 6l12 12"></path>
-                </svg>
+                <X size={15} strokeWidth={1.8} />
               </button>
             </div>
             <div className={styles.nudgeActions}>
@@ -392,7 +343,7 @@ export const StudioHome = ({ studio }: { studio: StudioController }) => {
           </div>
           <button className={styles.heroButton} onClick={goCalendarToday}>
             Open calendar
-            <Chevron strokeWidth="2" />
+            <ChevronRight size={15} strokeWidth={2} />
           </button>
         </div>
       </section>
@@ -600,18 +551,7 @@ export const StudioHome = ({ studio }: { studio: StudioController }) => {
                     <span className={styles.dueMetaRow}>
                       {booking.unpaidFlag && (
                         <span className={styles.unpaid}>
-                          <svg
-                            width="12"
-                            height="12"
-                            viewBox="0 0 24 24"
-                            fill="none"
-                            stroke="currentColor"
-                            strokeWidth="2"
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                          >
-                            <path d="M12 9v4M12 17h.01M10.3 3.9 1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0Z"></path>
-                          </svg>
+                          <TriangleAlert size={12} strokeWidth={2} />
                           Unpaid
                         </span>
                       )}

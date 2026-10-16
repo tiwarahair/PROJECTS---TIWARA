@@ -1,3 +1,4 @@
+import { Plus, X } from "lucide-react";
 import type { CSSProperties } from "react";
 import { AllergyField } from "../../components/allergy-field/allergy-field";
 import { AppointmentAddress } from "./appointment-address";
@@ -150,33 +151,13 @@ export const StepDetails = ({ booking }: StepDetailsProps) => {
                   aria-label="Remove photo"
                   className={styles.removePhoto}
                 >
-                  <svg
-                    width="11"
-                    height="11"
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    stroke="currentColor"
-                    strokeWidth="2.6"
-                    strokeLinecap="round"
-                  >
-                    <path d="M6 6l12 12M18 6L6 18"></path>
-                  </svg>
+                  <X size={11} strokeWidth={2.6} />
                 </button>
               </span>
             );
           })}
           <label className={styles.addPhoto}>
-            <svg
-              width="19"
-              height="19"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="1.6"
-              strokeLinecap="round"
-            >
-              <path d="M12 5v14M5 12h14"></path>
-            </svg>
+            <Plus size={19} strokeWidth={1.6} />
             <span className={styles.addLabel}>Add</span>
             <input
               type="file"

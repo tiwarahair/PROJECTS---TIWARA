@@ -1,3 +1,4 @@
+import { ArrowRight, Check } from "lucide-react";
 import type { CSSProperties } from "react";
 import { hairColours } from "../../data";
 import { joinClassNames } from "../../utils/class-names";
@@ -50,20 +51,7 @@ const getChooseHint = (needSize: boolean, needLength: boolean): string => {
 
 export const CheckBox = ({ on }: { on: boolean }) => (
   <span className={joinClassNames(step.box, on ? step.boxOn : step.boxOff)}>
-    {on && (
-      <svg
-        width="11"
-        height="11"
-        viewBox="0 0 24 24"
-        fill="none"
-        stroke="#fffefb"
-        strokeWidth="3.2"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-      >
-        <path d="M20 6 9 17l-5-5"></path>
-      </svg>
-    )}
+    {on && <Check size={11} strokeWidth={3.2} color="#fffefb" />}
   </span>
 );
 
@@ -100,19 +88,7 @@ export const StepCustomise = ({ booking }: StepCustomiseProps) => {
                   onClick={() => setState({ sizeGuide: true })}
                   className={styles.sizeGuide}
                 >
-                  Size guide{" "}
-                  <svg
-                    width="14"
-                    height="14"
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    stroke="currentColor"
-                    strokeWidth="2"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                  >
-                    <path d="M5 12h13M13 6.5 18.5 12 13 17.5"></path>
-                  </svg>
+                  Size guide <ArrowRight size={14} strokeWidth={2} />
                 </button>
               </div>
               <div className={styles.chips}>

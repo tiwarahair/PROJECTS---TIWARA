@@ -21,10 +21,3 @@ export interface Policy {
   graceMinutes: number;
   extras: PolicyExtra[];
 }
-
-export interface PolicyIcons {
-  payment: string;
-  calendar: string;
-  late: string;
-  noShow: string;
-}

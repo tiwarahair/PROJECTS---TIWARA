@@ -1,5 +1,12 @@
 import { useState } from "react";
 import { useParams } from "react-router";
+import {
+  Calendar,
+  ChevronRight,
+  Link as LinkIcon,
+  Navigation,
+  Search,
+} from "lucide-react";
 import { Avatar } from "../../components/ds/avatar";
 import { Badge } from "../../components/ds/badge";
 import { Button } from "../../components/ds/button";
@@ -17,42 +24,6 @@ import { Tag } from "../../components/ds/tag";
 import { Toast } from "../../components/ds/toast";
 import { joinClassNames } from "../../utils/class-names";
 import styles from "../../styles/features/ds-specimens/ds-specimens.module.css";
-
-interface SpecimenIconProps {
-  paths: string;
-  size?: number;
-  strokeWidth?: string;
-}
-
-const SpecimenIcon = ({
-  paths,
-  size = 16,
-  strokeWidth = "1.8",
-}: SpecimenIconProps) => (
-  <svg
-    width={size}
-    height={size}
-    viewBox="0 0 24 24"
-    fill="none"
-    stroke="currentColor"
-    strokeWidth={strokeWidth}
-    strokeLinecap="round"
-    strokeLinejoin="round"
-  >
-    {paths.split("|").map((path) => (
-      <path key={path} d={path} />
-    ))}
-  </svg>
-);
-
-const CALENDAR =
-  "M8 3v4M16 3v4M3 11h18|M6 5h12a3 3 0 0 1 3 3v11a3 3 0 0 1-3 3H6a3 3 0 0 1-3-3V8a3 3 0 0 1 3-3z";
-
-const SEARCH = "M16.7 16.7 21 21|M11 18a7 7 0 1 0 0-14 7 7 0 0 0 0 14z";
-const NEXT = "m10 6 6 6-6 6";
-
-const SHARE =
-  "M10 13a5 5 0 0 0 7.5.5l3-3a5 5 0 0 0-7-7l-1.7 1.7|M14 11a5 5 0 0 0-7.5-.5l-3 3a5 5 0 0 0 7 7l1.7-1.7";
 
 const ActionsSpecimen = () => (
   <div className={styles.actionsBody}>
@@ -84,7 +55,10 @@ const ActionsSpecimen = () => (
           <Button variant="primary" size="lg">
             Large
           </Button>
-          <Button variant="secondary" icon={<SpecimenIcon paths={CALENDAR} />}>
+          <Button
+            variant="secondary"
+            icon={<Calendar size={16} strokeWidth={1.8} />}
+          >
             Add to calendar
           </Button>
         </div>
@@ -116,22 +90,22 @@ const ActionsSpecimen = () => (
         </p>
         <div className={styles.row}>
           <IconButton label="Share">
-            <SpecimenIcon paths={SHARE} size={18} />
+            <LinkIcon size={18} strokeWidth={1.8} />
           </IconButton>
           <IconButton label="Search" variant="tint">
-            <SpecimenIcon paths={SEARCH} size={18} />
+            <Search size={18} strokeWidth={1.8} />
           </IconButton>
           <IconButton label="Next" variant="outline">
-            <SpecimenIcon paths={NEXT} size={18} />
+            <ChevronRight size={18} strokeWidth={1.8} />
           </IconButton>
           <IconButton label="Add" variant="primary">
-            <SpecimenIcon paths={CALENDAR} size={18} />
+            <Calendar size={18} strokeWidth={1.8} />
           </IconButton>
           <IconButton label="Search small" variant="tint" size="sm">
-            <SpecimenIcon paths={SEARCH} size={16} />
+            <Search size={16} strokeWidth={1.8} />
           </IconButton>
           <IconButton label="Next large" variant="outline" size="lg">
-            <SpecimenIcon paths={NEXT} size={20} />
+            <ChevronRight size={20} strokeWidth={1.8} />
           </IconButton>
         </div>
       </div>
@@ -186,17 +160,13 @@ const DisplaySpecimen = () => (
         </div>
         <div className={styles.centreRow}>
           <IconChip size="sm">
-            <SpecimenIcon paths={SEARCH} size={16} strokeWidth="1.7" />
+            <Search size={16} strokeWidth={1.7} />
           </IconChip>
           <IconChip>
-            <SpecimenIcon paths={CALENDAR} size={18} strokeWidth="1.7" />
+            <Calendar size={18} strokeWidth={1.7} />
           </IconChip>
           <IconChip size="lg" tone="muted">
-            <SpecimenIcon
-              paths="M3 11l18-8-8 18-2-7-8-3z"
-              size={20}
-              strokeWidth="1.7"
-            />
+            <Navigation size={20} strokeWidth={1.7} />
           </IconChip>
           <span className={styles.chipNote}>
             IconChip — static, non-interactive

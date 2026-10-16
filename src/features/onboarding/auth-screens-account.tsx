@@ -1,3 +1,4 @@
+import { Lock } from "lucide-react";
 import { PasswordMeter } from "../../components/password-meter/password-meter";
 import { joinClassNames } from "../../utils/class-names";
 import { getPasswordView } from "../../utils/password";
@@ -194,20 +195,7 @@ export const SocialScreen = (props: ScreenProps) => {
       <div className={styles.readonlyLabel}>Email address</div>
       <div aria-readonly="true" className={styles.readonlyEmail}>
         <span className={styles.readonlyText}>{form.email}</span>
-        <svg
-          width="16"
-          height="16"
-          viewBox="0 0 24 24"
-          fill="none"
-          stroke="currentColor"
-          strokeWidth="1.7"
-          strokeLinecap="round"
-          strokeLinejoin="round"
-          aria-hidden="true"
-          className={styles.subIcon}
-        >
-          <path d="M6 11h12v10H6zM8.5 11V8a3.5 3.5 0 0 1 7 0v3"></path>
-        </svg>
+        <Lock size={16} strokeWidth={1.7} className={styles.subIcon} />
       </div>
       {/privaterelay\.appleid\.com$/i.test(form.email) && (
         <div className={styles.relayNote}>

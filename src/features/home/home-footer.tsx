@@ -1,4 +1,5 @@
 import { Link } from "react-router";
+import { SOCIAL_ICONS, SocialIcon } from "../../components/icons/brand-icons";
 import { getAssetUrl } from "../../utils/asset-url";
 import { joinClassNames } from "../../utils/class-names";
 import page from "../../styles/features/home/home-page.module.css";
@@ -35,36 +36,19 @@ const SOCIAL_LINKS = [
     label: "Instagram",
     href: "https://www.instagram.com/tiwarashouse/",
     size: 18,
-    icon: (
-      <>
-        <rect x="3" y="3" width="18" height="18" rx="5"></rect>
-        <circle cx="12" cy="12" r="4"></circle>
-        <circle cx="17.2" cy="6.8" r="1"></circle>
-      </>
-    ),
+    icon: SOCIAL_ICONS.instagram,
   },
   {
     label: "TikTok",
     href: "https://www.tiktok.com/@tiwarashouse",
     size: 18,
-    icon: (
-      <>
-        <rect x="3" y="3" width="18" height="18" rx="5"></rect>
-        <path d="M13.4 7.4v6.1a2.3 2.3 0 1 1-2.3-2.3"></path>
-        <path d="M13.4 7.4c.3 1.3 1.3 2.2 2.6 2.3"></path>
-      </>
-    ),
+    icon: SOCIAL_ICONS.tiktok,
   },
   {
     label: "YouTube",
     href: "https://www.youtube.com/@TiwarasHouse",
     size: 21,
-    icon: (
-      <>
-        <rect x="2" y="5" width="20" height="14" rx="4"></rect>
-        <path d="M10.4 9.2l4.4 2.8-4.4 2.8z"></path>
-      </>
-    ),
+    icon: SOCIAL_ICONS.youtube,
   },
 ];
 
@@ -116,18 +100,7 @@ export const HomeFooter = () => (
                 aria-label={label}
                 className={styles.socialLink}
               >
-                <svg
-                  width={size}
-                  height={size}
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="1.6"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                >
-                  {icon}
-                </svg>
+                <SocialIcon icon={icon} size={size} />
               </a>
             ))}
           </div>

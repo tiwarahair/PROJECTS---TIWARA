@@ -1,3 +1,4 @@
+import { ArrowLeft, Check } from "lucide-react";
 import { useLayoutEffect } from "react";
 import { Link } from "react-router";
 import { FavHost } from "../../components/fav-host/fav-host";
@@ -125,20 +126,11 @@ export const AccountPage = (props: AccountPageProps) => {
                       onClick={() => goToSection(null)}
                       aria-label="Back to your account"
                     >
-                      <svg
+                      <ArrowLeft
                         className={styles.icon}
-                        width="22"
-                        height="22"
-                        viewBox="0 0 24 24"
-                        fill="none"
-                        stroke="currentColor"
-                        strokeWidth="2"
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        aria-hidden="true"
-                      >
-                        <path d="M19 12H5M11 18l-6-6 6-6"></path>
-                      </svg>
+                        size={22}
+                        strokeWidth={2}
+                      />
                     </button>
                   )}
                   <h1 className={styles.title} id="ac-title" tabIndex={-1}>
@@ -243,19 +235,12 @@ export const AccountPage = (props: AccountPageProps) => {
       </div>
       {!!state.toast && (
         <div className={styles.toast} aria-hidden="true" data-a="1">
-          <svg
+          <Check
             className={styles.icon}
-            width="18"
-            height="18"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="var(--brand-yellow)"
-            strokeWidth="2.2"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-          >
-            <path d="M5 12l5 5L20 7"></path>
-          </svg>
+            size={18}
+            strokeWidth={2.2}
+            color="var(--brand-yellow)"
+          />
           <span className={styles.toastText}>{state.toast}</span>
         </div>
       )}

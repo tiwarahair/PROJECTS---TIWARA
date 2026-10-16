@@ -1,6 +1,8 @@
 import type { ReactNode } from "react";
+import { Plus } from "lucide-react";
+import type { LucideIcon } from "lucide-react";
 import { joinClassNames } from "../../utils/class-names";
-import { AmountRow, Icon, getViewAnimation } from "./checkout-detail";
+import { AmountRow, getViewAnimation } from "./checkout-detail";
 import { ICONS } from "./checkout-data";
 import type { TipChoice } from "./checkout-data";
 import { RECORD_VIA_LABELS, getAdjustNote } from "./checkout-view";
@@ -154,12 +156,11 @@ export const CheckoutTip = ({
       </div>
       {money.method === "card" && (
         <div className={flow.cardNote}>
-          <Icon
+          <ICONS.card
             className={flow.iconTop3}
-            path={ICONS.card}
             size={16}
-            stroke="var(--neutral-700)"
-            strokeWidth="1.5"
+            color="var(--neutral-700)"
+            strokeWidth={1.5}
           />
           <div className={flow.cardNoteText}>
             <span className={flow.cardNoteTitle}>
@@ -191,7 +192,7 @@ export const CheckoutPay = ({
     isOn: boolean,
     title: string,
     subtitle: string,
-    icon: string,
+    OptionIcon: LucideIcon,
     onPick: () => void,
     extra: ReactNode,
     isDisabled = false,
@@ -225,12 +226,11 @@ export const CheckoutPay = ({
           </span>
           <span className={flow.optionSub}>{subtitle}</span>
         </span>
-        <Icon
+        <OptionIcon
           className={flow.optionIcon}
-          path={icon}
           size={20}
-          stroke="var(--neutral-600)"
-          strokeWidth="1.7"
+          color="var(--neutral-600)"
+          strokeWidth={1.7}
         />
       </button>
       {extra}
@@ -392,6 +392,7 @@ export const CheckoutReview = ({
 
   extraRows.push(...view.creditRows);
   const method = getMethod();
+  const { icon: MethodIcon } = method;
   const isHard = state.decline === "hard";
 
   return (
@@ -410,12 +411,11 @@ export const CheckoutReview = ({
           data-ck-m="1"
         >
           <div className={flow.declinedHead}>
-            <Icon
+            <ICONS.alert
               className={shared.iconTop2}
-              path={ICONS.alert}
               size={18}
-              stroke="var(--accent-700)"
-              strokeWidth="1.7"
+              color="var(--accent-700)"
+              strokeWidth={1.7}
             />
             <div>
               <div className={flow.declinedTitle}>
@@ -482,11 +482,10 @@ export const CheckoutReview = ({
           <div className={flow.sectionLabelLoose}>Payment method</div>
           <div className={flow.rowCenter}>
             <span className={flow.methodIcon}>
-              <Icon
-                path={method.icon}
+              <MethodIcon
                 size={18}
-                stroke="var(--neutral-700)"
-                strokeWidth="1.7"
+                color="var(--neutral-700)"
+                strokeWidth={1.7}
               />
             </span>
             <div className={shared.flexCell}>
@@ -512,11 +511,10 @@ export const CheckoutReview = ({
       )}
       {view.isRefund && (
         <div className={flow.reviewRefund}>
-          <Icon
+          <ICONS.returnArrow
             className={flow.iconTop3}
-            path={ICONS.returnArrow}
             size={16}
-            strokeWidth="1.7"
+            strokeWidth={1.7}
           />
           <span>{view.refundNote}</span>
         </div>
@@ -529,12 +527,7 @@ export const CheckoutReview = ({
             goTo("pay", 1);
           }}
         >
-          <Icon
-            path="M12 5v14M5 12h14"
-            size={15}
-            strokeWidth="1.7"
-            isRound={false}
-          />
+          <Plus size={15} strokeWidth={1.7} />
           Add a tip
         </button>
       )}

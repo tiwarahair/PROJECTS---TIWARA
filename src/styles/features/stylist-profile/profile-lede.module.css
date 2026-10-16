@@ -40,6 +40,11 @@
   flex: 1 1 auto;
 }
 
+.verified {
+  flex: 0 0 auto;
+  color: var(--accent-700);
+}
+
 .rating {
   display: flex;
   align-items: center;

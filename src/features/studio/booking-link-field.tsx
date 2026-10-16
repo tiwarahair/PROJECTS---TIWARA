@@ -3,7 +3,7 @@ import { changeSlug, isSlugFree } from "../../lib/studio-api";
 import { joinClassNames } from "../../utils/class-names";
 import { SHORT_MONTHS } from "../../utils/dates";
 import type { StudioController } from "./use-studio";
-import pages from "../../styles/features/studio/settings-pages.module.css";
+import pages from "../../styles/features/studio/settings-page-parts.module.css";
 import styles from "../../styles/features/studio/booking-link-field.module.css";
 
 const DAYS_BETWEEN_CHANGES = 30;

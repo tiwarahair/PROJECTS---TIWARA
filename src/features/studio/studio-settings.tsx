@@ -1,154 +1,23 @@
 import { Fragment } from "react";
 import { Link, useNavigate } from "react-router";
+import { ChevronLeft, Eye, Link2, LogOut, Pencil, Truck } from "lucide-react";
 import { Avatar } from "../../components/ds/avatar";
 import { AccountSettings } from "../../components/account-settings/account-settings";
 import { BusinessDetails } from "../../components/business-details/business-details";
 import { PaymentPolicy } from "../../components/payment-policy/payment-policy";
 import { getAssetUrl } from "../../utils/asset-url";
 import { joinClassNames } from "../../utils/class-names";
-import { AvailabilityPage, ProfilePage, RulesPage } from "./settings-pages";
+import { AvailabilityPage } from "./settings-availability-page";
+import { ProfilePage } from "./settings-profile-page";
+import { RulesPage } from "./settings-rules-page";
 import { getSettingsView } from "./settings-view";
-import type { SettingsIcon, SettingsView } from "./settings-view";
+import type { SettingsView } from "./settings-view";
 import { GATE_REASON } from "./studio-data";
 import type { StudioController } from "./use-studio";
 import styles from "../../styles/features/studio/studio-settings.module.css";
 import { getProfilePath } from "./studio-model";
 import { useAccountBackend } from "./use-account-backend";
 import { useSignOut } from "../../hooks/use-sign-out";
-
-const STROKE = {
-  fill: "none",
-  stroke: "currentColor",
-  strokeWidth: "1.7",
-  strokeLinecap: "round",
-  strokeLinejoin: "round",
-} as const;
-
-/** The row / nav icons (a named icon or a single path). */
-const SettingsGlyph = ({
-  icon,
-  path,
-  size,
-  className,
-}: {
-  icon: SettingsIcon;
-  path: string;
-  size: string;
-  className?: string;
-}) => {
-  if (path)
-    return (
-      <svg
-        className={className}
-        width={size}
-        height={size}
-        viewBox="0 0 24 24"
-        {...STROKE}
-      >
-        <path d={path}></path>
-      </svg>
-    );
-
-  return (
-    <svg
-      className={className}
-      width={size}
-      height={size}
-      viewBox="0 0 24 24"
-      {...STROKE}
-    >
-      {icon === "clock" && (
-        <>
-          <path d="M12 6v6l4 2"></path>
-          <circle cx="12" cy="12" r="10"></circle>
-        </>
-      )}
-      {icon === "rules" && (
-        <>
-          <path d="m3 17 2 2 4-4"></path>
-          <path d="m3 7 2 2 4-4"></path>
-          <path d="M13 6h8"></path>
-          <path d="M13 12h8"></path>
-          <path d="M13 18h8"></path>
-        </>
-      )}
-      {icon === "card" && (
-        <>
-          <rect width="20" height="14" x="2" y="5" rx="2"></rect>
-          <line x1="2" x2="22" y1="10" y2="10"></line>
-        </>
-      )}
-      {icon === "shop" && (
-        <path d="M4 10v10h16V10M3 10l1.6-6h14.8L21 10M3 10c0 1.7 1.3 3 3 3s3-1.3 3-3c0 1.7 1.3 3 3 3s3-1.3 3-3c0 1.7 1.3 3 3 3s3-1.3 3-3"></path>
-      )}
-      {icon === "people" && (
-        <>
-          <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"></path>
-          <path d="M16 3.128a4 4 0 0 1 0 7.744"></path>
-          <path d="M22 21v-2a4 4 0 0 0-3-3.87"></path>
-          <circle cx="9" cy="7" r="4"></circle>
-        </>
-      )}
-      {icon === "link" && (
-        <>
-          <path d="M9 17H7A5 5 0 0 1 7 7h2"></path>
-          <path d="M15 7h2a5 5 0 1 1 0 10h-2"></path>
-          <line x1="8" x2="16" y1="12" y2="12"></line>
-        </>
-      )}
-      {icon === "eye" && (
-        <>
-          <path d="M2.062 12.348a1 1 0 0 1 0-.696 10.75 10.75 0 0 1 19.876 0 1 1 0 0 1 0 .696 10.75 10.75 0 0 1-19.876 0"></path>
-          <circle cx="12" cy="12" r="3"></circle>
-        </>
-      )}
-      {icon === "user" && (
-        <>
-          <path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"></path>
-          <circle cx="12" cy="7" r="4"></circle>
-        </>
-      )}
-      {icon === "scis" && (
-        <>
-          <path d="M20 4 8.12 15.88"></path>
-          <path d="M14.47 14.48 20 20"></path>
-          <path d="M8.12 8.12 12 12"></path>
-          <circle cx="6" cy="6" r="3"></circle>
-          <circle cx="6" cy="18" r="3"></circle>
-        </>
-      )}
-    </svg>
-  );
-};
-
-const SignOutIcon = () => (
-  <svg
-    className={styles.noShrink}
-    width="16"
-    height="16"
-    viewBox="0 0 24 24"
-    {...STROKE}
-  >
-    <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path>
-    <path d="m16 17 5-5-5-5"></path>
-    <path d="M21 12H9"></path>
-  </svg>
-);
-
-const LinkIcon = () => (
-  <svg width="15" height="15" viewBox="0 0 24 24" {...STROKE} strokeWidth="1.8">
-    <path d="M9 17H7A5 5 0 0 1 7 7h2"></path>
-    <path d="M15 7h2a5 5 0 1 1 0 10h-2"></path>
-    <line x1="8" x2="16" y1="12" y2="12"></line>
-  </svg>
-);
-
-const EyeIcon = () => (
-  <svg width="15" height="15" viewBox="0 0 24 24" {...STROKE} strokeWidth="1.8">
-    <path d="M2.062 12.348a1 1 0 0 1 0-.696 10.75 10.75 0 0 1 19.876 0 1 1 0 0 1 0 .696 10.75 10.75 0 0 1-19.876 0"></path>
-    <circle cx="12" cy="12" r="3"></circle>
-  </svg>
-);
 
 /** The narrow "More" tab: profile card and grouped settings rows. */
 const SettingsRoot = ({
@@ -173,18 +42,7 @@ const SettingsRoot = ({
             <span className={styles.salon}>{state.profile.salon}</span>
             {state.profile.mobile && (
               <span className={styles.mobileBadge}>
-                <svg
-                  width="11"
-                  height="11"
-                  viewBox="0 0 24 24"
-                  {...STROKE}
-                  strokeWidth="1.8"
-                >
-                  <path d="M3 17V7a2 2 0 0 1 2-2h9v12"></path>
-                  <path d="M14 9h4l3 4v4h-7"></path>
-                  <circle cx="7.5" cy="17.5" r="2"></circle>
-                  <circle cx="17.5" cy="17.5" r="2"></circle>
-                </svg>
+                <Truck size={11} strokeWidth={1.8} />
                 Mobile
               </span>
             )}
@@ -195,9 +53,7 @@ const SettingsRoot = ({
           className={styles.editProfile}
           onClick={() => actions.openSubpage("profile")}
         >
-          <svg width="13" height="13" viewBox="0 0 24 24" {...STROKE}>
-            <path d="M17 3a2.8 2.8 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z"></path>
-          </svg>
+          <Pencil size={13} strokeWidth={1.7} />
           Edit
         </button>
       </div>
@@ -205,35 +61,43 @@ const SettingsRoot = ({
         <Fragment key={key}>
           <div className={styles.groupLabel}>{label}</div>
           <div className={styles.group}>
-            {rows.map((row) => (
-              <button
-                key={row.key}
-                className={joinClassNames(
-                  styles.row,
-                  row.isLocked && styles.rowLocked,
-                )}
-                onClick={row.onSelect}
-                aria-disabled={row.isLocked ? "true" : "false"}
-              >
-                <span className={styles.rowIcon}>
-                  <SettingsGlyph
-                    className={styles.blockIcon}
-                    icon={row.icon}
-                    path={row.path}
-                    size="15"
-                  />
-                </span>
-                <span className={styles.grow}>
-                  <span className={styles.rowLabel}>{row.label}</span>
-                  <span className={styles.rowSub}>{row.subtitle}</span>
-                </span>
-              </button>
-            ))}
+            {rows.map(
+              ({
+                key: rowKey,
+                label: rowLabel,
+                subtitle,
+                icon: RowIcon,
+                isLocked,
+                onSelect,
+              }) => (
+                <button
+                  key={rowKey}
+                  className={joinClassNames(
+                    styles.row,
+                    isLocked && styles.rowLocked,
+                  )}
+                  onClick={onSelect}
+                  aria-disabled={isLocked ? "true" : "false"}
+                >
+                  <span className={styles.rowIcon}>
+                    <RowIcon
+                      className={styles.blockIcon}
+                      size={18}
+                      strokeWidth={1.8}
+                    />
+                  </span>
+                  <span className={styles.grow}>
+                    <span className={styles.rowLabel}>{rowLabel}</span>
+                    <span className={styles.rowSub}>{subtitle}</span>
+                  </span>
+                </button>
+              ),
+            )}
           </div>
         </Fragment>
       ))}
       <button className={styles.signOut} onClick={view.signOut}>
-        <SignOutIcon />
+        <LogOut className={styles.noShrink} size={16} strokeWidth={1.7} />
         Sign out
       </button>
       <div className={styles.logoRow}>
@@ -283,21 +147,29 @@ const SettingsNav = ({
         >
           <div className={styles.navGroupLabel}>{label}</div>
           <div className={styles.navList}>
-            {items.map((item) => (
-              <button
-                key={item.key}
-                className={joinClassNames(
-                  styles.navItem,
-                  item.isCurrent && styles.navItemOn,
-                )}
-                onClick={item.onSelect}
-              >
-                <span className={styles.navIcon}>
-                  <SettingsGlyph icon={item.icon} path={item.path} size="16" />
-                </span>
-                <span className={styles.navLabel}>{item.label}</span>
-              </button>
-            ))}
+            {items.map(
+              ({
+                key: itemKey,
+                label: itemLabel,
+                icon: ItemIcon,
+                isCurrent,
+                onSelect,
+              }) => (
+                <button
+                  key={itemKey}
+                  className={joinClassNames(
+                    styles.navItem,
+                    isCurrent && styles.navItemOn,
+                  )}
+                  onClick={onSelect}
+                >
+                  <span className={styles.navIcon}>
+                    <ItemIcon size={16} strokeWidth={1.7} />
+                  </span>
+                  <span className={styles.navLabel}>{itemLabel}</span>
+                </button>
+              ),
+            )}
           </div>
         </div>
       ))}
@@ -311,11 +183,11 @@ const SettingsNav = ({
           {view.isShareLive && (
             <>
               <button className={styles.shareButton} onClick={view.copyLink}>
-                <LinkIcon />
+                <Link2 size={15} strokeWidth={1.8} />
                 Copy booking link
               </button>
               <Link className={styles.shareLink} to={getProfilePath(state)}>
-                <EyeIcon />
+                <Eye size={15} strokeWidth={1.8} />
                 View public profile
               </Link>
             </>
@@ -328,11 +200,15 @@ const SettingsNav = ({
                 </div>
               )}
               {[
-                { key: "link", label: "Copy booking link", icon: <LinkIcon /> },
+                {
+                  key: "link",
+                  label: "Copy booking link",
+                  icon: <Link2 size={15} strokeWidth={1.8} />,
+                },
                 {
                   key: "profile",
                   label: "View public profile",
-                  icon: <EyeIcon />,
+                  icon: <Eye size={15} strokeWidth={1.8} />,
                 },
               ].map(({ key, label, icon }) => (
                 <button
@@ -352,7 +228,7 @@ const SettingsNav = ({
           )}
         </div>
         <button className={styles.navSignOut} onClick={view.signOut}>
-          <SignOutIcon />
+          <LogOut className={styles.noShrink} size={16} strokeWidth={1.7} />
           Sign out
         </button>
       </div>
@@ -401,15 +277,7 @@ const SettingsFrame = ({
           <div className={styles.backBar}>
             <div className={styles.backRow}>
               <button className={styles.backButton} onClick={actions.closePage}>
-                <svg
-                  width="18"
-                  height="18"
-                  viewBox="0 0 24 24"
-                  {...STROKE}
-                  strokeWidth="2"
-                >
-                  <path d="m15 18-6-6 6-6"></path>
-                </svg>
+                <ChevronLeft size={18} strokeWidth={2} />
                 Settings
               </button>
               <div className={styles.spacer}></div>

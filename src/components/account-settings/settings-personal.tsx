@@ -1,6 +1,7 @@
+import { Info } from "lucide-react";
 import { joinClassNames } from "../../utils/class-names";
 import { getCloseReason } from "./account-settings-logic";
-import { InfoIcon, SettingsSection, TextField } from "./settings-fields";
+import { SettingsSection, TextField } from "./settings-fields";
 import { SettingsLoginDetails } from "./settings-login-details";
 import type { AccountSettingsProps } from "./use-account-settings";
 import type { AccountSettingsController } from "./use-account-settings";
@@ -62,7 +63,7 @@ export const SettingsPersonal = ({
           </p>
           {!!closeReason && (
             <div className={styles.closeReason}>
-              <InfoIcon className={shared.infoIcon} />
+              <Info className={shared.infoIcon} size={16} strokeWidth={1.7} />
               {closeReason}
             </div>
           )}

@@ -5,6 +5,22 @@ import {
   serviceGroups,
   serviceTypes,
 } from "../../data";
+import {
+  Archive,
+  ArchiveRestore,
+  Check,
+  Copy,
+  CreditCard,
+  Link2,
+  Mail,
+  MessageSquare,
+  Pencil,
+  Phone,
+  Trash,
+  TriangleAlert,
+  X,
+} from "lucide-react";
+import type { LucideIcon } from "lucide-react";
 import type { CategoryColour } from "../../types/category-colour";
 import { resolveAssetUrl } from "../../utils/asset-url";
 import { dateLabel } from "./studio-format";
@@ -273,7 +289,7 @@ export const PAST_MONTHS: Record<string, string> = {
 interface PastTone {
   background: string;
   color: string;
-  icon: string;
+  icon: LucideIcon;
   meta: string;
 }
 
@@ -281,25 +297,25 @@ export const PAST_TONE: Record<string, PastTone> = {
   Completed: {
     background: "rgba(46,125,79,.1)",
     color: "#2e7d4f",
-    icon: "M20 6 9 17l-5-5",
+    icon: Check,
     meta: "Paid",
   },
   Cancelled: {
     background: "var(--neutral-100)",
     color: "var(--text-secondary)",
-    icon: "M18 6 6 18M6 6l12 12",
+    icon: X,
     meta: "Refunded",
   },
   "No show": {
     background: "rgba(181,84,31,.12)",
     color: "var(--accent-500)",
-    icon: "M12 9v4M12 17h.01M10.3 3.9 1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0Z",
+    icon: TriangleAlert,
     meta: "Deposit kept",
   },
   "Payment failed": {
     background: "rgba(143,17,18,.08)",
     color: "var(--accent-700)",
-    icon: "M2 7h20v12H2zM2 11h20M8 16h4",
+    icon: CreditCard,
     meta: "Unpaid",
   },
 };
@@ -399,12 +415,18 @@ export const RANGE_DATA: Record<"today" | "week" | "month", RangeData> = {
 };
 
 export const ICONS = {
-  edit: "M17 3a2.83 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z",
-  copy: "M8 8h12v12H8Z M16 8V4H4v12h4",
-  archive: "M3 3h18v5H3Z M5 8v13h14V8 M10 12h4",
-  restore: "M3 3h18v5H3Z M5 8v13h14V8 M12 17v-5 M9.5 14.5 12 12l2.5 2.5",
-  trash: "M3 6h18 M8 6V4h8v2 M19 6l-1 14H6L5 6 M10 11v6 M14 11v6",
-  link: "M9 17H7A5 5 0 0 1 7 7h2 M15 7h2a5 5 0 1 1 0 10h-2 M8 12h8",
+  edit: Pencil,
+  copy: Copy,
+  archive: Archive,
+  restore: ArchiveRestore,
+  trash: Trash,
+  link: Link2,
+};
+
+export const CONTACT_ICONS = {
+  call: Phone,
+  text: MessageSquare,
+  mail: Mail,
 };
 
 export const NO_CATEGORY_TONE = "var(--neutral-300,#d8d2c6)";
@@ -1056,8 +1078,8 @@ export const getInitialStudioState = (): StudioState => {
       address: "Ancoats, Manchester",
       mobile: false,
       site: "tiwarashouse.com",
-      instagram: "@tiwarashouse",
-      tiktok: "@tiwarashouse",
+      instagram: "tiwarashouse",
+      tiktok: "tiwarashouse",
       email: "hello@tiwaras.house",
     },
     business: {

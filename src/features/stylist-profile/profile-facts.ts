@@ -1,6 +1,7 @@
 // The profile's policy chips, contact / social links, gallery and log-in link.
 import type { PublicStylist } from "../../lib/public-stylist";
 import type { Stylist } from "../../types/stylist";
+import { getSocialUrl } from "../../utils/social-handles";
 
 export interface ProfileFacts {
   depositChip: string;
@@ -12,18 +13,19 @@ export interface ProfileFacts {
   siteHref: string;
   instagramHref: string;
   tiktokHref: string;
+  youtubeHref: string;
 }
 
-/** "tiwarashouse.com", "@handle" or a full link → a full link. */
-const toLink = (value: string | undefined, base: string) => {
+/** "tiwarashouse.com" or a full link → a full link. */
+const toLink = (value: string | undefined) => {
   if (!value) return "";
 
-  return /^https?:/.test(value) ? value : base + value.replace(/^@/, "");
+  return /^https?:/.test(value) ? value : `https://${value}`;
 };
 
 export const getProfileFacts = (
   { email, policies, site }: Stylist,
-  { instagram, tiktok }: PublicStylist["socials"],
+  { instagram, tiktok, youtube }: PublicStylist["socials"],
 ): ProfileFacts => {
   const { mode, depositPercent, refundable, freeWindowHours } = policies;
 
@@ -41,9 +43,10 @@ export const getProfileFacts = (
     cancelHours: freeWindowHours,
     mailto: email ? `mailto:${email}` : "",
     site: site || "",
-    siteHref: toLink(site, "https://"),
-    instagramHref: toLink(instagram, "https://www.instagram.com/"),
-    tiktokHref: toLink(tiktok, "https://www.tiktok.com/@"),
+    siteHref: toLink(site),
+    instagramHref: getSocialUrl("instagram", instagram),
+    tiktokHref: getSocialUrl("tiktok", tiktok),
+    youtubeHref: getSocialUrl("youtube", youtube),
   };
 };
 

@@ -1,4 +1,5 @@
 import { useLayoutEffect, useState } from "react";
+import { ChevronDown, Mail } from "lucide-react";
 import { FavHost } from "../../components/fav-host/fav-host";
 import { SiteHeader } from "../../components/site-header/site-header";
 import { faqs } from "../../data";
@@ -59,23 +60,14 @@ export const HelpPage = () => {
                     aria-controls={`faq-a-${index}`}
                   >
                     {question}
-                    <svg
+                    <ChevronDown
                       className={joinClassNames(
                         styles.chevron,
                         isOpen ? styles.chevronOpen : styles.chevronClosed,
                       )}
-                      width="18"
-                      height="18"
-                      viewBox="0 0 24 24"
-                      fill="none"
-                      stroke="currentColor"
-                      strokeWidth="1.7"
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      aria-hidden="true"
-                    >
-                      <path d="m6 9 6 6 6-6"></path>
-                    </svg>
+                      size={18}
+                      strokeWidth={1.7}
+                    />
                   </button>
                 </h3>
                 {isOpen && (
@@ -92,19 +84,7 @@ export const HelpPage = () => {
           Email us and we’ll reply within one working day.
         </p>
         <a className={styles.mail} href={mailHref}>
-          <svg
-            width="17"
-            height="17"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            strokeWidth="1.7"
-            strokeLinejoin="round"
-            aria-hidden="true"
-          >
-            <rect x="3" y="5" width="18" height="14" rx="2"></rect>
-            <path d="m3 7 9 6 9-6"></path>
-          </svg>
+          <Mail size={17} strokeWidth={1.7} />
           {SUPPORT_EMAIL}
         </a>
       </main>

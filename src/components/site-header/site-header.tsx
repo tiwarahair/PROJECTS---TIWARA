@@ -1,3 +1,4 @@
+import { FavouritesHeartIcon } from "../icons/custom-icons";
 import { Link } from "react-router";
 import { FAVOURITES_HREF } from "../../hooks/use-favourites";
 import { useIdentity } from "../../hooks/use-identity";
@@ -57,18 +58,7 @@ export const SiteHeader = ({
               aria-label="Favourites"
               className={styles.favourites}
             >
-              <svg
-                width="20"
-                height="20"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="2"
-                strokeLinejoin="round"
-                aria-hidden="true"
-              >
-                <path d="M12 20.5s-7.5-4.6-9.2-9.4C1.6 7.6 3.9 4.5 7.2 4.5c2 0 3.6 1.1 4.8 2.8 1.2-1.7 2.8-2.8 4.8-2.8 3.3 0 5.6 3.1 4.4 6.6-1.7 4.8-9.2 9.4-9.2 9.4z" />
-              </svg>
+              <FavouritesHeartIcon size={20} strokeWidth={2} />
             </Link>
           )}
           {LINKS.map(([to, label]) => (

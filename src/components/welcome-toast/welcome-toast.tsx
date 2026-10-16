@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from "react";
+import { Check } from "lucide-react";
 import { useLocation } from "react-router";
 import { useEntered } from "../../hooks/use-entered";
 import { joinClassNames } from "../../utils/class-names";
@@ -43,19 +44,12 @@ const WelcomeToastPill = ({
         closing && styles.closing,
       )}
     >
-      <svg
+      <Check
         className={styles.icon}
-        width="18"
-        height="18"
-        viewBox="0 0 24 24"
-        fill="none"
-        stroke="#DFCF3E"
-        strokeWidth="2.2"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-      >
-        <path d="M5 12l5 5L20 7"></path>
-      </svg>
+        size={18}
+        color="#DFCF3E"
+        strokeWidth={2.2}
+      />
       <span>{message}</span>
     </div>
   );

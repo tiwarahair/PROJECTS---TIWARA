@@ -1,3 +1,4 @@
+import { Check, CircleAlert } from "lucide-react";
 import { useFormState } from "react-hook-form";
 import { Link } from "react-router";
 import { AddressFinder } from "../../components/address-finder/address-finder";
@@ -131,36 +132,17 @@ export const AppointmentAddress = ({ booking }: AppointmentAddressProps) => {
           <div id="bk-area" aria-live="polite">
             {address.inArea && (
               <div className={styles.areaIn}>
-                <svg
-                  width="15"
-                  height="15"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="2"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                >
-                  <path d="M5 12.5l4.5 4.5L19 7.5"></path>
-                </svg>
+                <Check size={15} strokeWidth={2} />
                 {`Inside ${stylist.name}'s travel area`}
               </div>
             )}
             {address.outBlock && (
               <div role="alert" className={styles.areaOut}>
-                <svg
-                  width="15"
-                  height="15"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="1.5"
-                  strokeLinecap="round"
+                <CircleAlert
+                  size={15}
+                  strokeWidth={1.5}
                   className={fields.errorIcon}
-                >
-                  <circle cx="12" cy="12" r="10"></circle>
-                  <path d="M12 7v6M12 16.5v.5"></path>
-                </svg>
+                />
                 <span>
                   {`This address is outside ${stylist.name}'s travel area (up to ${stylist.travelMiles} miles). Try another address or find a stylist near you.`}{" "}
                   <Link

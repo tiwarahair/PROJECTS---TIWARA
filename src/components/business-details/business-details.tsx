@@ -1,4 +1,5 @@
 import { useEffect, useId, useRef, useState } from "react";
+import { Check, ChevronLeft, ChevronRight, CircleAlert } from "lucide-react";
 import { formatPostcode } from "../../utils/address";
 import { joinClassNames } from "../../utils/class-names";
 import type { TaxDetails } from "../tax-details-form/tax-details-logic";
@@ -19,12 +20,10 @@ import type {
   BusinessValue,
 } from "./business-details-logic";
 import {
-  ErrorIcon,
   FieldError,
   LocationCard,
   Reveal,
   Section,
-  TickIcon,
   TypeTiles,
 } from "./business-details-sections";
 import type { FieldView } from "./business-details-sections";
@@ -211,18 +210,7 @@ export const BusinessDetails = ({
                 className={joinClassNames(styles.back, styles.focusRing)}
                 data-bd-in="1"
               >
-                <svg
-                  width="20"
-                  height="20"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="2"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                >
-                  <path d="m15 18-6-6 6-6"></path>
-                </svg>
+                <ChevronLeft size={20} strokeWidth={2} />
                 Settings
               </button>
               <h1 className={styles.title}>Business details</h1>
@@ -346,14 +334,14 @@ export const BusinessDetails = ({
                       vatOn ? styles.vatBoxOn : styles.vatBoxOff,
                     )}
                   >
-                    <TickIcon
+                    <Check
                       className={joinClassNames(
                         styles.vatTick,
                         vatOn ? styles.vatTickOn : styles.vatTickOff,
                       )}
                       size={14}
-                      strokeWidth="3"
-                      stroke="#fffefb"
+                      strokeWidth={3}
+                      color="#fffefb"
                     />
                   </span>
                   <span className={styles.areaText}>I’m VAT registered</span>
@@ -400,13 +388,17 @@ export const BusinessDetails = ({
                     </span>
                     {!!vatError && (
                       <div className={styles.error} role="alert">
-                        <ErrorIcon className={styles.errorIcon} />
+                        <CircleAlert
+                          className={styles.errorIcon}
+                          size={15}
+                          strokeWidth={1.5}
+                        />
                         {vatError}
                       </div>
                     )}
                     {vatOn && !rules.vat && vatDigits.length > 0 && (
                       <div className={styles.vatOk}>
-                        <TickIcon size={15} strokeWidth="2" />
+                        <Check size={15} strokeWidth={2} />
                         {formatVatNumber(vatDigits)}
                       </div>
                     )}
@@ -454,18 +446,7 @@ export const BusinessDetails = ({
                   onClick={() => onEditTax?.()}
                 >
                   {hasLegal ? "Edit in Tax details" : "Add tax details"}
-                  <svg
-                    width="15"
-                    height="15"
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    stroke="currentColor"
-                    strokeWidth="1.8"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                  >
-                    <path d="m9 18 6-6-6-6"></path>
-                  </svg>
+                  <ChevronRight size={15} strokeWidth={1.8} />
                 </button>
               </div>
             </Section>
@@ -487,13 +468,17 @@ export const BusinessDetails = ({
           role="status"
           aria-live="polite"
         >
-          <TickIcon size={16} strokeWidth="2" />
+          <Check size={16} strokeWidth={2} />
           Business details saved
         </div>
         <div className={styles.barInner} data-bd-barin="1">
           {shown.length > 0 && (
             <div className={styles.barError}>
-              <ErrorIcon className={styles.barErrorIcon} />
+              <CircleAlert
+                className={styles.barErrorIcon}
+                size={15}
+                strokeWidth={1.5}
+              />
               {shown.length === 1
                 ? "Fix the highlighted field to save"
                 : `Fix the ${shown.length} highlighted fields to save`}

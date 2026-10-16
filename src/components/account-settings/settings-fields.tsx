@@ -1,5 +1,6 @@
 // The pieces every account settings page is built from: sections, fields, disclosures, checkboxes and switches.
 import type { ChangeEvent, ReactNode } from "react";
+import { Check } from "lucide-react";
 import { joinClassNames } from "../../utils/class-names";
 import shared from "../../styles/components/account-settings/account-settings.module.css";
 import fields from "../../styles/components/account-settings/settings-fields.module.css";
@@ -99,39 +100,6 @@ export const Reveal = ({
   </div>
 );
 
-export const ArrowIcon = () => (
-  <svg
-    width="15"
-    height="15"
-    viewBox="0 0 24 24"
-    fill="none"
-    stroke="currentColor"
-    strokeWidth="1.7"
-    strokeLinecap="round"
-    strokeLinejoin="round"
-  >
-    <path d="M5 12h14M13 6l6 6-6 6"></path>
-  </svg>
-);
-
-export const InfoIcon = ({ className }: { className: string | undefined }) => (
-  <svg
-    className={className}
-    width="16"
-    height="16"
-    viewBox="0 0 24 24"
-    fill="none"
-    stroke="currentColor"
-    strokeWidth="1.7"
-    strokeLinecap="round"
-  >
-    <circle cx="12" cy="12" r="10"></circle>
-    <path d="M12 11v5M12 7.5v.5"></path>
-  </svg>
-);
-
-export const TickPath = () => <path d="M5 12.5l4.5 4.5L19 7.5"></path>;
-
 /** Checkbox row (role=checkbox buttons). */
 export const CheckRow = ({
   isOn,
@@ -155,22 +123,15 @@ export const CheckRow = ({
         isOn ? shared.checkOn : shared.checkOff,
       )}
     >
-      <svg
+      <Check
         className={joinClassNames(
           shared.checkTick,
           isOn ? shared.tickOn : shared.tickOff,
         )}
-        width="14"
-        height="14"
-        viewBox="0 0 24 24"
-        fill="none"
-        stroke="#fffefb"
-        strokeWidth="3"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-      >
-        <TickPath />
-      </svg>
+        size={14}
+        color="#fffefb"
+        strokeWidth={3}
+      />
     </span>
     {children}
   </button>

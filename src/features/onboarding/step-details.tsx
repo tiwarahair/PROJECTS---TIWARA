@@ -1,3 +1,4 @@
+import { Shield } from "lucide-react";
 import { AddressFinder } from "../../components/address-finder/address-finder";
 import type { AddressFixture } from "../../components/address-finder/use-address-finder";
 import { joinClassNames } from "../../utils/class-names";
@@ -145,19 +146,11 @@ export const StepDetails = ({ onboarding, layout, view }: ScreenProps) => {
               />
               {form.type === "home" && (
                 <div className={styles.homeNote}>
-                  <svg
-                    width="18"
-                    height="18"
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    stroke="currentColor"
-                    strokeWidth="1.7"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
+                  <Shield
+                    size={18}
+                    strokeWidth={1.7}
                     className={styles.homeNoteIcon}
-                  >
-                    <path d="M12 3l8 3v6c0 4.5-3.4 8-8 9-4.6-1-8-4.5-8-9V6z"></path>
-                  </svg>
+                  />
                   <span>
                     Clients only see your area ({areaHint}) until their booking
                     is confirmed.

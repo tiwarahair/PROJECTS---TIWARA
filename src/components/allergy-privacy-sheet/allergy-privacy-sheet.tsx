@@ -1,4 +1,5 @@
 import { useEffect, useId, useState } from "react";
+import { X } from "lucide-react";
 import { joinClassNames } from "../../utils/class-names";
 import styles from "../../styles/components/allergy-privacy-sheet/allergy-privacy-sheet.module.css";
 
@@ -68,17 +69,7 @@ export const AllergyPrivacySheet = ({
             </h3>
           </div>
           <button className={styles.close} onClick={onClose} aria-label="Close">
-            <svg
-              width="20"
-              height="20"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="2"
-              strokeLinecap="round"
-            >
-              <path d="M6 6l12 12M18 6L6 18"></path>
-            </svg>
+            <X size={20} strokeWidth={2} />
           </button>
         </div>
         <dl className={styles.notice}>

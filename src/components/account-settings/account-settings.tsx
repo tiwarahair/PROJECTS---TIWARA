@@ -1,4 +1,5 @@
 import { useEffect, useId, useRef } from "react";
+import { Check } from "lucide-react";
 import { createPortal } from "react-dom";
 import { joinClassNames } from "../../utils/class-names";
 import { SettingsPersonal } from "./settings-personal";
@@ -151,18 +152,7 @@ export const AccountSettings = (props: AccountSettingsProps) => {
         role="status"
         aria-live="polite"
       >
-        <svg
-          width="16"
-          height="16"
-          viewBox="0 0 24 24"
-          fill="none"
-          stroke="currentColor"
-          strokeWidth="2"
-          strokeLinecap="round"
-          strokeLinejoin="round"
-        >
-          <path d="M5 12.5l4.5 4.5L19 7.5"></path>
-        </svg>
+        <Check size={16} strokeWidth={2} />
         {state.toastText}
       </div>
       <ConfirmDialog settings={settings} uid={uid} />

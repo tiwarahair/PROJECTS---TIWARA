@@ -1,11 +1,12 @@
 // What / Where dropdown models (rows, chips, sections).
+import type { LucideIcon } from "lucide-react";
 import { serviceGroups } from "../../data";
 import type { SearchRow } from "../../lib/search-api";
 import { toPhotoUrl } from "../../lib/public-stylist";
 import type { ServiceGroup } from "../../types/service-group";
 import type { ServiceType } from "../../types/service-type";
 import { matchTypes } from "../../utils/services";
-import { SEARCH_ICONS } from "./search-icons";
+import { getGroupIcon, SEARCH_ICONS } from "./search-icons";
 import type { Place, StyleSelection } from "./search-logic";
 import type { SearchState, WhatChip } from "./search-state";
 import type { PlaceSuggestion } from "./use-place-suggestions";
@@ -17,7 +18,7 @@ export interface SuggestionRow {
   kind: RowKind;
   label: string;
   subtitle?: string;
-  icon?: string;
+  icon?: LucideIcon;
   image?: string;
   on?: boolean;
   group?: ServiceGroup;
@@ -88,7 +89,7 @@ export const getWhatModel = (
     kind: "group",
     group,
     label: group.name,
-    icon: SEARCH_ICONS[group.id] || SEARCH_ICONS.grid,
+    icon: getGroupIcon(group.id),
     on: selection.isGroup && selection.group?.id === group.id,
   });
 

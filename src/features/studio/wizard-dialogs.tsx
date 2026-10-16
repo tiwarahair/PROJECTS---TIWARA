@@ -1,3 +1,4 @@
+import { ChevronRight, Search, X } from "lucide-react";
 import { joinClassNames } from "../../utils/class-names";
 import {
   DURATION_HOUR_OPTIONS,
@@ -8,27 +9,6 @@ import type { StudioController } from "./use-studio";
 import { getWizardView } from "./wizard-view";
 import type { WizardView } from "./wizard-view";
 import styles from "../../styles/features/studio/wizard-dialogs.module.css";
-
-const CloseIcon = ({
-  size,
-  strokeWidth,
-}: {
-  size: string;
-  strokeWidth: string;
-}) => (
-  <svg
-    width={size}
-    height={size}
-    viewBox="0 0 24 24"
-    fill="none"
-    stroke="currentColor"
-    strokeWidth={strokeWidth}
-    strokeLinecap="round"
-    strokeLinejoin="round"
-  >
-    <path d="M18 6 6 18M6 6l12 12"></path>
-  </svg>
-);
 
 const OWN_MINUTES = ["0", "5", "10", "15", "20", "30", "45", "60", "90", "120"];
 
@@ -53,7 +33,7 @@ const NewAddonDialog = ({ view }: { view: WizardView }) => {
             onClick={addons.cancelNew}
             aria-label="Close"
           >
-            <CloseIcon size="19" strokeWidth="2" />
+            <X size={19} strokeWidth={2} />
           </button>
         </div>
         <div className={styles.stack12}>
@@ -181,35 +161,17 @@ const SuggestionsDialog = ({ view }: { view: WizardView }) => {
             onClick={view.closeSuggestions}
             aria-label="Close"
           >
-            <svg
-              width="20"
-              height="20"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="2"
-              strokeLinecap="round"
-            >
-              <path d="M18 6 6 18M6 6l12 12"></path>
-            </svg>
+            <X size={20} strokeWidth={2} />
           </button>
         </div>
         <div className={styles.suggBody}>
           <div className={styles.searchWrap}>
-            <svg
+            <Search
               className={styles.searchIcon}
-              width="16"
-              height="16"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="var(--text-secondary)"
-              strokeWidth="1.8"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-            >
-              <circle cx="11" cy="11" r="7"></circle>
-              <path d="m20 20-3.5-3.5"></path>
-            </svg>
+              size={16}
+              strokeWidth={1.8}
+              color="var(--text-secondary)"
+            />
             <input
               className={joinClassNames(
                 styles.search,
@@ -226,7 +188,7 @@ const SuggestionsDialog = ({ view }: { view: WizardView }) => {
                 onClick={view.clearSearch}
                 aria-label="Clear search"
               >
-                <CloseIcon size="14" strokeWidth="2.2" />
+                <X size={14} strokeWidth={2.2} />
               </button>
             )}
           </div>
@@ -251,19 +213,12 @@ const SuggestionsDialog = ({ view }: { view: WizardView }) => {
                   onClick={item.pick}
                 >
                   <span className={styles.itemName}>{item.name}</span>
-                  <svg
+                  <ChevronRight
                     className={styles.itemChevron}
-                    width="15"
-                    height="15"
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    stroke="var(--text-secondary)"
-                    strokeWidth="2"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                  >
-                    <path d="m9 18 6-6-6-6"></path>
-                  </svg>
+                    size={15}
+                    strokeWidth={2}
+                    color="var(--text-secondary)"
+                  />
                 </button>
               ))}
             </div>
@@ -381,17 +336,7 @@ const CustomisationDialog = ({ view }: { view: WizardView }) => {
                   onClick={option.remove}
                   aria-label="Remove option"
                 >
-                  <svg
-                    width="14"
-                    height="14"
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    stroke="currentColor"
-                    strokeWidth="2"
-                    strokeLinecap="round"
-                  >
-                    <path d="M18 6 6 18M6 6l12 12"></path>
-                  </svg>
+                  <X size={14} strokeWidth={2} />
                 </button>
               )}
             </div>

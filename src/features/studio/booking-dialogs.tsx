@@ -1,3 +1,4 @@
+import { Minus, Plus, Trash } from "lucide-react";
 import { joinClassNames } from "../../utils/class-names";
 import type { getAddonDialog } from "./booking-edit-view";
 import { getDuplicateView } from "./clients-view";
@@ -91,34 +92,14 @@ export const AddonEditDialog = ({
                   disabled={dialog.isMinQuantity}
                   aria-label="Fewer"
                 >
-                  <svg
-                    width="17"
-                    height="17"
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    stroke="currentColor"
-                    strokeWidth="2"
-                    strokeLinecap="round"
-                  >
-                    <path d="M5 12h14"></path>
-                  </svg>
+                  <Minus size={17} strokeWidth={2} />
                 </button>
                 <button
                   className={styles.more}
                   onClick={dialog.quantityUp}
                   aria-label="More"
                 >
-                  <svg
-                    width="17"
-                    height="17"
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    stroke="currentColor"
-                    strokeWidth="2"
-                    strokeLinecap="round"
-                  >
-                    <path d="M12 5v14M5 12h14"></path>
-                  </svg>
+                  <Plus size={17} strokeWidth={2} />
                 </button>
               </span>
             </span>
@@ -159,18 +140,7 @@ export const AddonEditDialog = ({
             onClick={dialog.remove}
             aria-label="Remove add-on"
           >
-            <svg
-              width="18"
-              height="18"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="1.7"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-            >
-              <path d="M3 6h18M8 6V4h8v2M19 6l-1 14H6L5 6M10 11v5M14 11v5"></path>
-            </svg>
+            <Trash size={18} strokeWidth={1.7} />
           </button>
           <button className={styles.cancel} onClick={dialog.close}>
             Cancel

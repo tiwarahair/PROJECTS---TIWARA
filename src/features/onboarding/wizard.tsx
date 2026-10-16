@@ -1,7 +1,8 @@
 import { getAssetUrl } from "../../utils/asset-url";
 import { joinClassNames } from "../../utils/class-names";
 import { WIZARD_TITLES } from "./onboarding-data";
-import { BackIcon, ModeIcon } from "./onboarding-fields";
+import { ChevronLeft } from "lucide-react";
+import { ModeIcon } from "./onboarding-fields";
 import type { ScreenProps } from "./screen-props";
 import { MapsProvider } from "../../lib/google-maps";
 import { StepAccount } from "./step-account";
@@ -93,7 +94,7 @@ export const Wizard = (props: ScreenProps) => {
                 aria-label="Back"
                 className={styles.deskBack}
               >
-                <BackIcon />
+                <ChevronLeft size={20} strokeWidth={2} />
               </button>
               <img
                 src={getAssetUrl(
@@ -144,7 +145,7 @@ export const Wizard = (props: ScreenProps) => {
               aria-label="Back"
               className={styles.mobileBack}
             >
-              <BackIcon size={22} />
+              <ChevronLeft size={22} strokeWidth={2} />
             </button>
             <div
               role="progressbar"

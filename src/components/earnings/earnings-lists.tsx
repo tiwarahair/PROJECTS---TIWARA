@@ -1,4 +1,5 @@
 import type { CSSProperties, MouseEvent } from "react";
+import { Copy, Landmark } from "lucide-react";
 import { joinClassNames } from "../../utils/class-names";
 import { STATUS_COLOURS, getClient } from "./earnings-data";
 import type { Payout, Transaction, TransactionStatus } from "./earnings-data";
@@ -106,18 +107,7 @@ export const EarningsLists = ({
         {ledger.payouts.length === 0 && (
           <div className={styles.emptyAll}>
             <div className={styles.poEmptyIcon}>
-              <svg
-                width="20"
-                height="20"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="2"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-              >
-                <path d="M3 10h18M5 10v8M9 10v8M15 10v8M19 10v8M3 20h18M12 3l9 5H3l9-5z"></path>
-              </svg>
+              <Landmark size={20} strokeWidth={2} />
             </div>
             <div className={styles.poEmptyText}>
               Your first payout can take 7–14 days while Stripe sets up your
@@ -231,19 +221,7 @@ export const EarningsLists = ({
               showToast("Booking link copied");
             }}
           >
-            <svg
-              width="16"
-              height="16"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="1.7"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-            >
-              <rect x="9" y="9" width="11" height="11" rx="2"></rect>
-              <path d="M5 15V5a1 1 0 0 1 1-1h9"></path>
-            </svg>
+            <Copy size={16} strokeWidth={1.7} />
             Copy booking link
           </button>
         </div>

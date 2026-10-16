@@ -1,3 +1,4 @@
+import { Star, Sun } from "lucide-react";
 import type { CSSProperties } from "react";
 import { resolveAssetUrl } from "../../utils/asset-url";
 import { joinClassNames } from "../../utils/class-names";
@@ -126,7 +127,14 @@ export const BookingSummary = ({ booking }: BookingSummaryProps) => {
           <div className={styles.body}>
             <div className={styles.name}>{stylist.name}</div>
             <div className={styles.meta}>
-              {`${stylist.area} · ★ ${stylist.rating}`}
+              {`${stylist.area} · `}
+              <Star
+                className={styles.ratingStar}
+                size={12}
+                strokeWidth={0}
+                fill="var(--brand-yellow)"
+              />{" "}
+              {stylist.rating}
             </div>
             <div className={styles.section}>
               <div className={styles.row}>
@@ -210,20 +218,7 @@ export const BookingSummary = ({ booking }: BookingSummaryProps) => {
           onClick={() => actions.setState({ showPrev: true })}
           className={joinClassNames(pageGlobal.aiBtn, styles.aiButton)}
         >
-          <svg
-            width="16"
-            height="16"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            strokeWidth="1.6"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-          >
-            <path d="M12 3v2M12 19v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M3 12h2M19 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"></path>
-            <circle cx="12" cy="12" r="4"></circle>
-          </svg>{" "}
-          See AI preview
+          <Sun size={16} strokeWidth={1.6} /> See AI preview
         </button>
       )}
     </div>

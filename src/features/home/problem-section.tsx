@@ -1,8 +1,9 @@
 import { useRef } from "react";
+import { Check, ChevronLeft, ChevronRight, Plus, WifiHigh } from "lucide-react";
+import { CtaArrowIcon } from "../../components/icons/custom-icons";
 import { Link } from "react-router";
 import { chatMessages } from "../../data";
 import { joinClassNames } from "../../utils/class-names";
-import { ArrowIcon } from "./arrow-icon";
 import page from "../../styles/features/home/home-page.module.css";
 import styles from "../../styles/features/home/problem-section.module.css";
 import { useChatSequence } from "./use-chat-sequence";
@@ -33,7 +34,7 @@ export const ProblemSection = () => {
           </p>
           <Link data-rv="" to="/search" className={styles.bookNow}>
             Book now
-            <ArrowIcon roundJoin={false} />
+            <CtaArrowIcon size={16} strokeWidth={2} strokeLinejoin="miter" />
           </Link>
         </div>
         <div data-rv="" className={joinClassNames(page.probvis, styles.visual)}>
@@ -57,19 +58,7 @@ export const ProblemSection = () => {
                   <span>9:41</span>
                   <div className={styles.island}></div>
                   <div className={styles.statusIcons}>
-                    <svg
-                      width="16"
-                      height="16"
-                      viewBox="0 0 24 24"
-                      fill="none"
-                      stroke="currentColor"
-                      strokeWidth="2"
-                      strokeLinecap="round"
-                    >
-                      <path d="M5 12.55a11 11 0 0 1 14 0"></path>
-                      <path d="M8.5 16.05a6 6 0 0 1 7 0"></path>
-                      <path d="M12 19.5h.01"></path>
-                    </svg>
+                    <WifiHigh size={16} strokeWidth={2} />
                     <svg width="22" height="12" viewBox="0 0 26 13">
                       <rect
                         x="0.5"
@@ -99,36 +88,22 @@ export const ProblemSection = () => {
                 </div>
                 <div className={styles.chatHeader}>
                   <div className={styles.back}>
-                    <svg
-                      width="17"
-                      height="17"
-                      viewBox="0 0 24 24"
-                      fill="none"
-                      stroke="var(--text-secondary)"
-                      strokeWidth="2.4"
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                    >
-                      <path d="m15 19-7-7 7-7"></path>
-                    </svg>
+                    <ChevronLeft
+                      size={17}
+                      strokeWidth={2.4}
+                      color="var(--text-secondary)"
+                    />
                     <span className={styles.unreadBadge}>2</span>
                   </div>
                   <div className={styles.contact}>
                     <div className={styles.contactAvatar}>S</div>
                     <div className={styles.contactName}>
                       Stylist
-                      <svg
-                        width="12"
-                        height="12"
-                        viewBox="0 0 24 24"
-                        fill="none"
-                        stroke="var(--text-muted)"
-                        strokeWidth="3"
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                      >
-                        <path d="m9 5 7 7-7 7"></path>
-                      </svg>
+                      <ChevronRight
+                        size={12}
+                        strokeWidth={3}
+                        color="var(--text-muted)"
+                      />
                     </div>
                   </div>
                   <div className={styles.videoCall}>
@@ -171,37 +146,23 @@ export const ProblemSection = () => {
                   )}
                   {isBooked && (
                     <div className={styles.booked}>
-                      <svg
+                      <Check
                         className={styles.bookedIcon}
-                        width="15"
-                        height="15"
-                        viewBox="0 0 24 24"
-                        fill="none"
-                        stroke="var(--status-success)"
-                        strokeWidth="2.5"
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                      >
-                        <path d="M20 6 9 17l-5-5"></path>
-                      </svg>
+                        size={15}
+                        strokeWidth={2.5}
+                        color="var(--status-success)"
+                      />
                       Booked in 2 minutes, Sat 10:00
                     </div>
                   )}
                 </div>
                 <div className={styles.composer}>
                   <div className={styles.composerPlus}>
-                    <svg
+                    <Plus
                       className={styles.composerPlusIcon}
-                      width="13"
-                      height="13"
-                      viewBox="0 0 24 24"
-                      fill="none"
-                      stroke="currentColor"
-                      strokeWidth="2"
-                      strokeLinecap="round"
-                    >
-                      <path d="M12 5v14M5 12h14"></path>
-                    </svg>
+                      size={13}
+                      strokeWidth={2}
+                    />
                   </div>
                   <div className={styles.composerField}>Message</div>
                 </div>

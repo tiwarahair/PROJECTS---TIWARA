@@ -1,3 +1,4 @@
+import { Copy, Shield } from "lucide-react";
 import { useState } from "react";
 import { Link } from "react-router";
 import { AllergyField } from "../../components/allergy-field/allergy-field";
@@ -45,18 +46,7 @@ const SharedEmpty = ({ isWide }: { isWide: boolean }) => {
       data-screen-label="Shared with stylists empty"
     >
       <div className={ui.emptyIcon}>
-        <svg
-          width="24"
-          height="24"
-          viewBox="0 0 24 24"
-          fill="none"
-          stroke="currentColor"
-          strokeWidth="2"
-          strokeLinejoin="round"
-          aria-hidden="true"
-        >
-          <path d="M12 3l7 3v6c0 4.5-3 7.5-7 9-4-1.5-7-4.5-7-9V6z"></path>
-        </svg>
+        <Shield size={24} strokeWidth={2} />
       </div>
       <div>
         <h2 className={styles.sharedEmptyTitle}>Nothing shared yet</h2>
@@ -242,20 +232,7 @@ export const CommunicationSection = ({
               className={styles.copy}
               onClick={() => actions.copy(syncUrl, "Calendar link copied")}
             >
-              <svg
-                className={ui.icon}
-                width="16"
-                height="16"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="1.7"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                aria-hidden="true"
-              >
-                <path d="M9 9h10v10H9zM5 15V5h10"></path>
-              </svg>
+              <Copy className={ui.icon} size={16} strokeWidth={1.7} />
               Copy calendar link
             </button>
             <button

@@ -1,5 +1,6 @@
+import { CircleAlert, Plus, Undo2 } from "lucide-react";
 import { joinClassNames } from "../../utils/class-names";
-import { AmountRow, Icon, getViewAnimation } from "./checkout-detail";
+import { AmountRow, getViewAnimation } from "./checkout-detail";
 import { ADJUST_REASONS, DEFAULT_MENU, parsePounds } from "./checkout-data";
 import { getAdjustNote } from "./checkout-view";
 import type { CheckoutLine } from "./checkout-data";
@@ -8,8 +9,6 @@ import type { CheckoutController, CheckoutSheetProps } from "./use-checkout";
 import flow from "../../styles/components/checkout-sheet/checkout-flow.module.css";
 import shared from "../../styles/components/checkout-sheet/checkout-sheet.module.css";
 import { formatMoney, roundToPence } from "../../utils/money";
-
-const PLUS = "M12 5v14M5 12h14";
 
 const getAdjustReason = ({ adjustment, reason }: CheckoutLine) => {
   if (!adjustment) return "";
@@ -227,19 +226,11 @@ export const CheckoutItems = ({
             )}
             {!!state.adjustmentError && (
               <div className={flow.adjustError} role="alert">
-                <svg
+                <CircleAlert
                   className={shared.iconTop2}
-                  width="15"
-                  height="15"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="1.5"
-                  strokeLinecap="round"
-                >
-                  <circle cx="12" cy="12" r="10"></circle>
-                  <path d="M12 7v6M12 16.5v.5"></path>
-                </svg>
+                  size={15}
+                  strokeWidth={1.5}
+                />
                 {state.adjustmentError}
               </div>
             )}
@@ -277,7 +268,7 @@ export const CheckoutItems = ({
           </div>
         )}
         <button className={flow.addItem} onClick={() => goTo("add", 1)}>
-          <Icon path={PLUS} size={16} strokeWidth="1.7" isRound={false} />
+          <Plus size={16} strokeWidth={1.7} />
           Add item
         </button>
       </div>
@@ -297,12 +288,7 @@ export const CheckoutItems = ({
         </div>
         {view.isRefund && (
           <div className={flow.refundNote}>
-            <Icon
-              className={flow.iconTop3}
-              path="M9 14 4 9l5-5M4 9h11a5 5 0 0 1 0 10h-3"
-              size={16}
-              strokeWidth="1.7"
-            />
+            <Undo2 className={flow.iconTop3} size={16} strokeWidth={1.7} />
             <span>{view.refundNote}</span>
           </div>
         )}
@@ -361,13 +347,7 @@ export const CheckoutAdd = ({
                 <span className={flow.addMeta}>{meta}</span>
               </span>
               <span className={flow.addPrice}>{formatMoney(price)}</span>
-              <Icon
-                path={PLUS}
-                size={18}
-                stroke="var(--accent-700)"
-                strokeWidth="1.7"
-                isRound={false}
-              />
+              <Plus size={18} color="var(--accent-700)" strokeWidth={1.7} />
             </button>
           ))}
         </div>

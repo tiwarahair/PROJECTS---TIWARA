@@ -1,10 +1,10 @@
 import type { MouseEvent, RefObject } from "react";
+import { ArrowLeft, Heart, Share } from "lucide-react";
 import { Link } from "react-router";
 import { ResponsiveImage } from "../../components/responsive-image/responsive-image";
 import { PROFILE_COVER_SIZES } from "../../utils/image-sources";
 import { joinClassNames } from "../../utils/class-names";
 import type { LastSearch } from "../../utils/last-search";
-import { BackPath, HeartPath, SharePaths } from "./profile-icons";
 import styles from "../../styles/features/stylist-profile/profile-cover.module.css";
 import pageGlobal from "../../styles/features/stylist-profile/stylist-profile-page-global.module.css";
 
@@ -61,19 +61,7 @@ export const ProfileCover = ({
           className={joinClassNames(pageGlobal.pfDeskonly, styles.backRow)}
         >
           <Link to={back.href} onClick={onBack} className={styles.backLink}>
-            <svg
-              width="15"
-              height="15"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="1.5"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              aria-hidden="true"
-            >
-              <BackPath />
-            </svg>
+            <ArrowLeft size={15} strokeWidth={1.5} />
             {back.label}
           </Link>
           <span aria-hidden="true" className={styles.backDivider}></span>
@@ -117,19 +105,7 @@ export const ProfileCover = ({
                 styles.mobileBack,
               )}
             >
-              <svg
-                width="20"
-                height="20"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="2"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                aria-hidden="true"
-              >
-                <BackPath />
-              </svg>
+              <ArrowLeft size={20} strokeWidth={2} />
             </Link>
           )}
           <div className={styles.coverButtons}>
@@ -142,19 +118,7 @@ export const ProfileCover = ({
               aria-expanded={shareExpanded}
               className={joinClassNames(pageGlobal.pfOvb, styles.coverButton)}
             >
-              <svg
-                width="20"
-                height="20"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="2"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                aria-hidden="true"
-              >
-                <SharePaths />
-              </svg>
+              <Share size={20} strokeWidth={2} />
               <span className={pageGlobal.pfOvl}>Share</span>
             </button>
             <button
@@ -164,18 +128,12 @@ export const ProfileCover = ({
               aria-pressed={saved ? "true" : "false"}
               className={joinClassNames(pageGlobal.pfOvb, styles.coverButton)}
             >
-              <svg
-                width="20"
-                height="20"
-                viewBox="0 0 24 24"
+              <Heart
+                size={20}
+                strokeWidth={2}
                 fill={saved ? "var(--accent-700)" : "none"}
-                stroke={saved ? "#fffefb" : "currentColor"}
-                strokeWidth="2"
-                strokeLinejoin="round"
-                aria-hidden="true"
-              >
-                <HeartPath />
-              </svg>
+                color={saved ? "#fffefb" : "currentColor"}
+              />
               <span className={pageGlobal.pfOvl}>{saveTip}</span>
             </button>
           </div>

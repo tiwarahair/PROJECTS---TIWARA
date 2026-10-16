@@ -1,4 +1,12 @@
 import type { CSSProperties } from "react";
+import {
+  EllipsisVertical,
+  ListFilter,
+  Plus,
+  Search,
+  TextAlignStart,
+  X,
+} from "lucide-react";
 import { joinClassNames } from "../../utils/class-names";
 import { getServicesView } from "./services-view";
 import type { ListGroup, ServicesView } from "./services-view";
@@ -7,37 +15,6 @@ import styles from "../../styles/features/studio/studio-services.module.css";
 
 const asStyle = (values: Record<string, string | null | undefined>) =>
   values as CSSProperties;
-
-const FilterIcon = ({ size }: { size: string }) => (
-  <svg
-    width={size}
-    height={size}
-    viewBox="0 0 24 24"
-    fill="none"
-    stroke="currentColor"
-    strokeWidth="1.8"
-    strokeLinecap="round"
-  >
-    <path d="M4 6h16M6 12h12M9 18h6"></path>
-  </svg>
-);
-
-const MoreIcon = () => (
-  <svg
-    width="17"
-    height="17"
-    viewBox="0 0 24 24"
-    fill="none"
-    stroke="currentColor"
-    strokeWidth="2"
-    strokeLinecap="round"
-    strokeLinejoin="round"
-  >
-    <circle cx="12" cy="5" r="1"></circle>
-    <circle cx="12" cy="12" r="1"></circle>
-    <circle cx="12" cy="19" r="1"></circle>
-  </svg>
-);
 
 const StatusMenu = ({
   studio,
@@ -104,7 +81,7 @@ const Groups = ({
               onClick={menu}
               aria-label="Category options"
             >
-              <MoreIcon />
+              <EllipsisVertical size={17} strokeWidth={2} />
             </button>
           )}
         </span>
@@ -189,7 +166,7 @@ const Groups = ({
                   onClick={item.menu}
                   aria-label={isAddons ? "Add-on options" : "Service options"}
                 >
-                  <MoreIcon />
+                  <EllipsisVertical size={17} strokeWidth={2} />
                 </button>
               )}
             </span>
@@ -236,20 +213,12 @@ export const StudioServices = ({ studio }: { studio: StudioController }) => {
             ))}
           </div>
           <div className={styles.search}>
-            <svg
+            <Search
               className={styles.searchIcon}
-              width="15"
-              height="15"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="var(--text-secondary)"
-              strokeWidth="2"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-            >
-              <circle cx="11" cy="11" r="7"></circle>
-              <path d="m20 20-3.5-3.5"></path>
-            </svg>
+              size={15}
+              strokeWidth={2}
+              color="var(--text-secondary)"
+            />
             <input
               className={joinClassNames(
                 styles.searchInput,
@@ -267,18 +236,7 @@ export const StudioServices = ({ studio }: { studio: StudioController }) => {
                 onClick={() => setState({ serviceQuery: "" })}
                 aria-label="Clear search"
               >
-                <svg
-                  width="13"
-                  height="13"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="2.2"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                >
-                  <path d="M18 6 6 18M6 6l12 12"></path>
-                </svg>
+                <X size={13} strokeWidth={2.2} />
               </button>
             )}
           </div>
@@ -291,7 +249,7 @@ export const StudioServices = ({ studio }: { studio: StudioController }) => {
               onClick={toggleStatus}
               aria-label="Filter by status"
             >
-              <FilterIcon size="15" />
+              <ListFilter size={15} strokeWidth={1.8} />
               {view.statusLabel}
             </button>
             {state.serviceStatusOpen && (
@@ -299,17 +257,7 @@ export const StudioServices = ({ studio }: { studio: StudioController }) => {
             )}
           </div>
           <button className={styles.addButton} onClick={view.add}>
-            <svg
-              width="14"
-              height="14"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="2.2"
-              strokeLinecap="round"
-            >
-              <path d="M12 5v14M5 12h14"></path>
-            </svg>
+            <Plus size={14} strokeWidth={2.2} />
             {view.addLabel}
           </button>
         </div>
@@ -352,7 +300,7 @@ export const StudioServices = ({ studio }: { studio: StudioController }) => {
                 onClick={toggleStatus}
                 aria-label="Filter by status"
               >
-                <FilterIcon size="14" />
+                <ListFilter size={14} strokeWidth={1.8} />
                 {view.statusShort}
               </button>
               {state.serviceStatusOpen && (
@@ -392,18 +340,7 @@ export const StudioServices = ({ studio }: { studio: StudioController }) => {
               className={styles.manageRow}
               onClick={serviceActions.openCategories}
             >
-              <svg
-                width="16"
-                height="16"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="1.7"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-              >
-                <path d="M4 6h16M4 12h16M4 18h10"></path>
-              </svg>
+              <TextAlignStart size={16} strokeWidth={1.7} />
               Manage categories
             </button>
           </aside>

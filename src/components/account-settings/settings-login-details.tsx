@@ -1,11 +1,7 @@
+import { ArrowRight, Clock } from "lucide-react";
 import { joinClassNames } from "../../utils/class-names";
 import { isValidEmail } from "../../utils/validation";
-import {
-  ArrowIcon,
-  Reveal,
-  SettingsSection,
-  TextField,
-} from "./settings-fields";
+import { Reveal, SettingsSection, TextField } from "./settings-fields";
 import { getLoginDetailsActions } from "./login-details-actions";
 import type { AccountSettingsProps } from "./use-account-settings";
 import type { AccountSettingsController } from "./use-account-settings";
@@ -51,7 +47,7 @@ export const SettingsLoginDetails = ({
             onClick={() => props.onNavigate?.("business")}
           >
             Business details
-            <ArrowIcon />
+            <ArrowRight size={15} strokeWidth={1.7} />
           </button>
         </>
       }
@@ -82,18 +78,7 @@ export const SettingsLoginDetails = ({
         {!!state.pendingEmail && (
           <div className={styles.pending} role="status">
             <div className={styles.pendingTitle}>
-              <svg
-                width="16"
-                height="16"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="1.7"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-              >
-                <path d="M12 22a10 10 0 1 0 0-20 10 10 0 0 0 0 20zM12 6v6l4 2"></path>
-              </svg>
+              <Clock size={16} strokeWidth={1.7} />
               Confirm your new email
             </div>
             <p className={styles.pendingText}>

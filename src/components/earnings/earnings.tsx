@@ -1,4 +1,10 @@
 import type { CSSProperties } from "react";
+import {
+  ArrowDownToLine,
+  ChevronDown,
+  Lock,
+  TriangleAlert,
+} from "lucide-react";
 import { joinClassNames } from "../../utils/class-names";
 import {
   PERIODS,
@@ -24,22 +30,6 @@ const FILTERS = [
   ["recorded", "Recorded"],
   ["fees", "Fees & refunds"],
 ] as const;
-
-const WarningIcon = ({ className }: { className: string | undefined }) => (
-  <svg
-    className={className}
-    width="18"
-    height="18"
-    viewBox="0 0 24 24"
-    fill="none"
-    stroke="var(--brand-yellow)"
-    strokeWidth="1.7"
-    strokeLinecap="round"
-    strokeLinejoin="round"
-  >
-    <path d="M12 3 2 20h20L12 3zM12 10v4M12 17.5v.01"></path>
-  </svg>
-);
 
 /**
  * Studio → Earnings: balance, period picker, totals, takings chart, transactions and
@@ -137,7 +127,12 @@ export const Earnings = (props: EarningsProps) => {
         <div className={styles.balance}>
           {scenario === "paused" && (
             <div className={styles.pausedBanner}>
-              <WarningIcon className={styles.bannerIcon} />
+              <TriangleAlert
+                className={styles.bannerIcon}
+                size={18}
+                color="var(--brand-yellow)"
+                strokeWidth={1.7}
+              />
               <div className={styles.pausedText}>
                 {`Payouts paused — ${pausedText} being recovered from a refund or dispute`}
               </div>
@@ -165,20 +160,7 @@ export const Earnings = (props: EarningsProps) => {
           )}
           {ledger.onHold > 0 && (
             <div className={styles.holdLine}>
-              <svg
-                className={styles.holdIcon}
-                width="15"
-                height="15"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="1.5"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-              >
-                <rect x="5" y="11" width="14" height="9" rx="2"></rect>
-                <path d="M8 11V8a4 4 0 0 1 8 0v3"></path>
-              </svg>
+              <Lock className={styles.holdIcon} size={15} strokeWidth={1.5} />
               <span>
                 {`${onHoldText} on hold · released 24 hours after each appointment (first 5 bookings)`}
               </span>
@@ -186,7 +168,12 @@ export const Earnings = (props: EarningsProps) => {
           )}
           {!!props.taxHold && (
             <div className={styles.taxBanner} role="status">
-              <WarningIcon className={styles.taxIcon} />
+              <TriangleAlert
+                className={styles.taxIcon}
+                size={18}
+                color="var(--brand-yellow)"
+                strokeWidth={1.7}
+              />
               <div className={styles.taxText}>
                 Payouts on hold until you add your tax details
               </div>
@@ -236,24 +223,16 @@ export const Earnings = (props: EarningsProps) => {
               aria-expanded={state.dropdownOpen}
             >
               {periodLabel}
-              <svg
+              <ChevronDown
                 className={joinClassNames(
                   styles.periodChevron,
                   state.dropdownOpen
                     ? styles.chevronOpen
                     : styles.chevronClosed,
                 )}
-                width="16"
-                height="16"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="1.7"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-              >
-                <path d="m6 9 6 6 6-6"></path>
-              </svg>
+                size={16}
+                strokeWidth={1.7}
+              />
             </button>
             {state.dropdownOpen && (
               <>
@@ -363,18 +342,7 @@ export const Earnings = (props: EarningsProps) => {
           <div className={styles.rangeLabel}>{getRangeLabel(range)}</div>
           <span className={styles.spacer}></span>
           <button className={styles.export} onClick={earnings.openExport}>
-            <svg
-              width="16"
-              height="16"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="1.7"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-            >
-              <path d="M12 4v11M7 10l5 5 5-5M5 20h14"></path>
-            </svg>
+            <ArrowDownToLine size={16} strokeWidth={1.7} />
             Export
           </button>
         </div>

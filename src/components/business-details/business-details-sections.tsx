@@ -1,4 +1,15 @@
 import type { ChangeEvent, ReactNode } from "react";
+import {
+  Armchair,
+  Car,
+  ChevronDown,
+  CircleAlert,
+  House,
+  Lock,
+  MapPin,
+  Store,
+} from "lucide-react";
+import type { LucideIcon } from "lucide-react";
 import { joinClassNames } from "../../utils/class-names";
 import { AddressFinder } from "../address-finder/address-finder";
 import type { AddressFinderValue } from "../address-finder/use-address-finder";
@@ -10,77 +21,35 @@ const TYPES: {
   key: BusinessType;
   title: string;
   description: string;
-  icon: string;
+  icon: LucideIcon;
 }[] = [
   {
     key: "shop",
     title: "Shop / salon",
     description: "Clients come to your salon",
-    icon: "M4 10v10h16V10M3 10l1.6-6h14.8L21 10M3 10c0 1.7 1.3 3 3 3s3-1.3 3-3c0 1.7 1.3 3 3 3s3-1.3 3-3c0 1.7 1.3 3 3 3s3-1.3 3-3M10 20v-5h4v5",
+    icon: Store,
   },
   {
     key: "chair",
     title: "Chair rental",
     description: "You rent a chair in someone else’s salon",
-    icon: "M8 3h8a1 1 0 0 1 1 1v6H7V4a1 1 0 0 1 1-1zM5 10h14v4H5zM12 14v4M8 21h8M12 18v3",
+    icon: Armchair,
   },
   {
     key: "home",
     title: "Home-based",
     description: "Clients come to your home",
-    icon: "M3 11l9-7 9 7M5 9.5V20h14V9.5M10 20v-6h4v6",
+    icon: House,
   },
   {
     key: "mobile",
     title: "Mobile",
     description: "You travel to your clients",
-    icon: "M3 16V11l2.2-5h9.3l4 5H21v5M3 16h2M9 16h6M19 16h2M7 18a2 2 0 1 0 0-4 2 2 0 0 0 0 4zM17 18a2 2 0 1 0 0-4 2 2 0 0 0 0 4z",
+    icon: Car,
   },
 ];
 
 const RADIUS_OPTIONS = ["3", "5", "10", "15", "20", "30"];
-
-export const ErrorIcon = ({ className }: { className?: string }) => (
-  <svg
-    className={className}
-    width="15"
-    height="15"
-    viewBox="0 0 24 24"
-    fill="none"
-    stroke="currentColor"
-    strokeWidth="1.5"
-    strokeLinecap="round"
-  >
-    <circle cx="12" cy="12" r="10"></circle>
-    <path d="M12 7v6M12 16.5v.5"></path>
-  </svg>
-);
-
-export const TickIcon = ({
-  className,
-  size,
-  strokeWidth,
-  stroke = "currentColor",
-}: {
-  className?: string;
-  size: number;
-  strokeWidth: string;
-  stroke?: string;
-}) => (
-  <svg
-    className={className}
-    width={size}
-    height={size}
-    viewBox="0 0 24 24"
-    fill="none"
-    stroke={stroke}
-    strokeWidth={strokeWidth}
-    strokeLinecap="round"
-    strokeLinejoin="round"
-  >
-    <path d="M5 12.5l4.5 4.5L19 7.5"></path>
-  </svg>
-);
 
 /** Section with the heading column on the left (wraps above on narrow containers). */
 export const Section = ({
@@ -138,7 +107,7 @@ export interface FieldView {
 export const FieldError = ({ id, error }: { id: string; error: string }) =>
   error ? (
     <div className={styles.error} id={id} role="alert">
-      <ErrorIcon className={styles.errorIcon} />
+      <CircleAlert className={styles.errorIcon} size={15} strokeWidth={1.5} />
       {error}
     </div>
   ) : null;
@@ -151,7 +120,7 @@ export const TypeTiles = ({
   onPick: (type: BusinessType) => void;
 }) => (
   <div className={styles.types} role="radiogroup" aria-label="Business type">
-    {TYPES.map(({ key, title, description, icon }) => {
+    {TYPES.map(({ key, title, description, icon: TypeIcon }) => {
       const isOn = type === key;
 
       return (
@@ -173,18 +142,7 @@ export const TypeTiles = ({
               isOn ? styles.tileIconOn : styles.tileIconOff,
             )}
           >
-            <svg
-              width="20"
-              height="20"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="1.7"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-            >
-              <path d={icon}></path>
-            </svg>
+            <TypeIcon size={20} strokeWidth={1.7} />
           </span>
           <span className={styles.tileText}>
             <span
@@ -267,20 +225,7 @@ export const LocationCard = ({
     <Reveal open={type === "home"}>
       <div className={styles.homeStack}>
         <div className={styles.privacy} role="note">
-          <svg
-            className={styles.privacyIcon}
-            width="18"
-            height="18"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            strokeWidth="1.7"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-          >
-            <rect x="5" y="11" width="14" height="10" rx="2"></rect>
-            <path d="M8 11V7a4 4 0 0 1 8 0v4"></path>
-          </svg>
+          <Lock className={styles.privacyIcon} size={18} strokeWidth={1.7} />
           <span>
             Only your area is shown publicly (e.g. Rusholme, M14). Clients see
             your full address once their booking is confirmed.
@@ -293,20 +238,7 @@ export const LocationCard = ({
               <span className={styles.radius}></span>
             </div>
             <div className={styles.area}>
-              <svg
-                className={styles.areaIcon}
-                width="16"
-                height="16"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="1.7"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-              >
-                <path d="M12 21s-7-6.3-7-12a7 7 0 0 1 14 0c0 5.7-7 12-7 12z"></path>
-                <circle cx="12" cy="9" r="2.5"></circle>
-              </svg>
+              <MapPin className={styles.areaIcon} size={16} strokeWidth={1.7} />
               <span className={styles.areaText}>{areaLabel}</span>
             </div>
           </div>
@@ -356,20 +288,11 @@ export const LocationCard = ({
                 </option>
               ))}
             </select>
-            <svg
+            <ChevronDown
               className={styles.selectChevron}
-              width="16"
-              height="16"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="2"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              aria-hidden="true"
-            >
-              <path d="m6 9 6 6 6-6"></path>
-            </svg>
+              size={16}
+              strokeWidth={2}
+            />
           </span>
         </div>
         <div className={styles.note}>

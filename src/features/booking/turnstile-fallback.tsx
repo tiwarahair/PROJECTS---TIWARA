@@ -1,3 +1,4 @@
+import { Check, X } from "lucide-react";
 import { joinClassNames } from "../../utils/class-names";
 import styles from "../../styles/features/booking/turnstile-fallback.module.css";
 import type { BookingController } from "./use-booking";
@@ -56,35 +57,12 @@ export const TurnstileFallback = ({ booking }: TurnstileFallbackProps) => {
           )}
           {turnstileStatus === "passed" && (
             <span aria-hidden="true" className={styles.ok}>
-              <svg
-                width="14"
-                height="14"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="3"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                className={styles.markIcon}
-              >
-                <path d="M5 12l5 5L20 7"></path>
-              </svg>
+              <Check size={14} strokeWidth={3} className={styles.markIcon} />
             </span>
           )}
           {turnstileStatus === "fail" && (
             <span aria-hidden="true" className={styles.failed}>
-              <svg
-                width="14"
-                height="14"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="3"
-                strokeLinecap="round"
-                className={styles.markIcon}
-              >
-                <path d="M18 6 6 18M6 6l12 12"></path>
-              </svg>
+              <X size={14} strokeWidth={3} className={styles.markIcon} />
             </span>
           )}
           <span role="status" aria-live="polite" className={styles.status}>

@@ -1,4 +1,6 @@
 // Derived values for the Account page.
+import { Heart, RotateCcw, Sparkles } from "lucide-react";
+import type { LucideIcon } from "lucide-react";
 import { stylists } from "../../data";
 import { QUIZ_DAYS_AGO, SECTIONS } from "./account-data";
 import type { AccountBooking, AccountSection } from "./account-data";
@@ -28,7 +30,7 @@ export interface QuickAction {
   label: string;
   subtitle: string;
   href: string;
-  icon: string;
+  icon: LucideIcon;
   /** Switches section in place instead of following the link. */
   section?: string;
 }
@@ -51,9 +53,6 @@ const getBookingCard = (
     again: `/book?stylist=${stylistId}&service=${encodeURIComponent(service)}`,
   };
 };
-
-const getSectionIcon = (id: string): string =>
-  SECTIONS.find((section) => section.id === id)?.icon ?? "";
 
 /** The page's derived values; `favouriteIds` comes from the favourites store. */
 export const getAccountView = (
@@ -134,7 +133,7 @@ export const getAccountView = (
       label: `Book again with ${lastDone.money.stylist.name}`,
       subtitle: service,
       href: `/book?stylist=${stylistId}&service=${serviceParam}`,
-      icon: "M3 12a9 9 0 1 0 3-6.7L3 8M3 3v5h5",
+      icon: RotateCcw,
     });
   }
 
@@ -145,7 +144,7 @@ export const getAccountView = (
       ? "Stylists you’ve saved"
       : "Save stylists you love",
     href: "/account?section=favourites",
-    icon: getSectionIcon("favourites"),
+    icon: Heart,
     section: "favourites",
   });
 
@@ -156,7 +155,7 @@ export const getAccountView = (
       ? `Last taken ${quizDate}`
       : "Find styles that suit your hair",
     href: "/#quiz",
-    icon: getSectionIcon("hair"),
+    icon: Sparkles,
   });
 
   const getScreenLabel = () => {

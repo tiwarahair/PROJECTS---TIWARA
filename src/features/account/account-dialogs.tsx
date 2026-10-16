@@ -1,3 +1,4 @@
+import { ArrowDownToLine, Lock, X } from "lucide-react";
 import { useFormState } from "react-hook-form";
 import type { ChangeEvent, ReactNode } from "react";
 import { DISCARD_PROMPT } from "../../hooks/use-unsaved-changes";
@@ -160,19 +161,7 @@ export const AccountDialogs = ({ account, view }: AccountDialogsProps) => {
               showToast("Receipt downloaded");
             }}
           >
-            <svg
-              width="17"
-              height="17"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="1.7"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              aria-hidden="true"
-            >
-              <path d="M12 4v11M7 10l5 5 5-5M5 20h14"></path>
-            </svg>
+            <ArrowDownToLine size={17} strokeWidth={1.7} />
             Download
           </button>
           <button className={styles.secondary} onClick={closeDialog}>
@@ -305,18 +294,7 @@ export const AccountDialogs = ({ account, view }: AccountDialogsProps) => {
             </label>
           )}
           <div className={styles.stripeNote}>
-            <svg
-              width="14"
-              height="14"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="1.5"
-              aria-hidden="true"
-            >
-              <rect x="4" y="11" width="16" height="10" rx="2"></rect>
-              <path d="M8 11V7a4 4 0 0 1 8 0v4"></path>
-            </svg>
+            <Lock size={14} strokeWidth={1.5} />
             Your card details are stored securely by Stripe.
           </div>
         </div>
@@ -595,18 +573,7 @@ export const AccountDialogs = ({ account, view }: AccountDialogsProps) => {
           onClick={closeDialog}
           aria-label="Close"
         >
-          <svg
-            width="20"
-            height="20"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            strokeWidth="2"
-            strokeLinecap="round"
-            aria-hidden="true"
-          >
-            <path d="M18 6 6 18M6 6l12 12"></path>
-          </svg>
+          <X size={20} strokeWidth={2} />
         </button>
         {content}
       </div>

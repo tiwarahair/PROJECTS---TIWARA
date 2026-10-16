@@ -1,17 +1,17 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import type { TurnstileInstance } from "@marsidev/react-turnstile";
+import { X } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import { useForm } from "react-hook-form";
+import { GoogleLogo } from "../../components/icons/brand-icons";
 import { useIsSlow } from "../../hooks/use-is-slow";
 import { getAccountKind, signIn } from "../../lib/auth";
 import { AUTH_FAILURE_MESSAGES, getAuthFailure } from "../../lib/auth-errors";
 import { joinClassNames } from "../../utils/class-names";
 import { Spinner } from "../onboarding/onboarding-fields";
 import { OnboardingTurnstile } from "../onboarding/onboarding-turnstile";
-import { CloseIcon } from "./booking-dialogs";
 import { loginEmailSchema, loginPasswordSchema } from "./booking-schemas";
 import type { LoginValues } from "./booking-schemas";
-import { GoogleIcon } from "./brand-icons";
 import { ErrorIcon } from "./details-field";
 import fields from "../../styles/features/booking/booking-fields.module.css";
 import pageGlobal from "../../styles/features/booking/booking-page-global.module.css";
@@ -185,7 +185,7 @@ export const LoginDialog = ({ booking }: LoginDialogProps) => {
             aria-label="Close"
             className={dialogs.confirmClose}
           >
-            <CloseIcon />
+            <X size={20} strokeWidth={2} />
           </button>
         </div>
         {step === "choice" && (
@@ -305,7 +305,7 @@ export const LoginDialog = ({ booking }: LoginDialogProps) => {
                   onClick={() => run(() => actions.googleLogin())}
                   className={joinClassNames(dialogs.secondary, styles.google)}
                 >
-                  <GoogleIcon size={18} />
+                  <GoogleLogo size={18} />
                   Continue with Google
                 </button>
               </>

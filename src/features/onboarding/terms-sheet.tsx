@@ -1,3 +1,4 @@
+import { X } from "lucide-react";
 import { joinClassNames } from "../../utils/class-names";
 import { TERMS_BODY } from "./onboarding-data";
 import type { TermsKind } from "./onboarding-state";
@@ -38,17 +39,7 @@ export const TermsSheet = ({ kind, isDesktop, onClose }: TermsSheetProps) => (
           <div className={styles.version}>Effective 1 September 2026</div>
         </div>
         <button onClick={onClose} aria-label="Close" className={styles.close}>
-          <svg
-            width="20"
-            height="20"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            strokeWidth="2"
-            strokeLinecap="round"
-          >
-            <path d="M18 6 6 18M6 6l12 12"></path>
-          </svg>
+          <X size={20} strokeWidth={2} />
         </button>
       </div>
       <div className={styles.body}>

@@ -1,3 +1,4 @@
+import { Plus } from "lucide-react";
 import { useState } from "react";
 import { faqs } from "../../data";
 import { joinClassNames } from "../../utils/class-names";
@@ -36,18 +37,7 @@ export const FaqSection = () => {
               >
                 {question}
                 <span className={styles.chevron}>
-                  <svg
-                    width="22"
-                    height="22"
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    stroke="currentColor"
-                    strokeWidth="1.6"
-                    strokeLinecap="round"
-                  >
-                    <path d="M4 12h16"></path>
-                    <path d="M12 4v16" className={styles.plusVertical}></path>
-                  </svg>
+                  <Plus size={22} strokeWidth={1.6} />
                 </span>
               </button>
               <div className={styles.answerBody}>

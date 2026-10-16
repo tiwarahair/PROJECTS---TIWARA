@@ -22,8 +22,6 @@ interface ConfirmDialogProps {
   children: ReactNode;
 }
 
-export const CloseIcon = () => <X size={20} strokeWidth={2} />;
-
 /** The small modal (bottom sheet under 640px) used by Leave, Hold expired, Bank check and the wallet sheet. */
 const ConfirmDialog = ({
   screenLabel,
@@ -67,7 +65,7 @@ const ConfirmDialog = ({
               aria-label="Close"
               className={styles.confirmClose}
             >
-              <CloseIcon />
+              <X size={20} strokeWidth={2} />
             </button>
           </div>
         ) : (
@@ -122,7 +120,7 @@ export const BookingDialogs = ({ booking }: BookingDialogsProps) => {
                 aria-label="Close"
                 className={styles.docClose}
               >
-                <CloseIcon />
+                <X size={20} strokeWidth={2} />
               </button>
             </div>
             <div className={styles.docBody}>
