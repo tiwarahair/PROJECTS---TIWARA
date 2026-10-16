@@ -18,7 +18,16 @@ interface SuggestionButtonProps {
 
 /** One What/Where suggestion: icon or avatar, label with the typed text in bold, optional sub-line. */
 const SuggestionButton = ({
-  view: { row, index, before, match, after, isActive, isOn },
+  view: {
+    row,
+    row: { icon: RowIcon },
+    index,
+    before,
+    match,
+    after,
+    isActive,
+    isOn,
+  },
   onPick,
   onHover,
 }: SuggestionButtonProps) => (
@@ -34,24 +43,12 @@ const SuggestionButton = ({
       isOn && controls.rowOn,
     )}
   >
-    {!!row.icon && (
+    {!!RowIcon && (
       <span
         aria-hidden="true"
         className={joinClassNames(styles.rowIcon, controls.rowIconBg)}
       >
-        <svg
-          className={styles.iconBlock}
-          width="17"
-          height="17"
-          viewBox="0 0 24 24"
-          fill="none"
-          stroke="currentColor"
-          strokeWidth="1.7"
-          strokeLinecap="round"
-          strokeLinejoin="round"
-          // static icon markup from SEARCH_ICONS
-          dangerouslySetInnerHTML={{ __html: row.icon }}
-        ></svg>
+        <RowIcon className={styles.iconBlock} size={17} strokeWidth={1.7} />
       </span>
     )}
     {!!row.image && (

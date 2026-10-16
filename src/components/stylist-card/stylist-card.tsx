@@ -1,4 +1,5 @@
-import { Star } from "lucide-react";
+import { ChevronRight, Heart, MapPin, Star } from "lucide-react";
+import { VerifiedBadgeIcon } from "../icons/custom-icons";
 import {
   ResponsiveImage,
   preloadImage,
@@ -190,18 +191,12 @@ export const StylistCard = ({
           aria-pressed={isSaved ? "true" : "false"}
           onClick={handleHeart}
         >
-          <svg
-            width="20"
-            height="20"
-            viewBox="0 0 24 24"
+          <Heart
+            size={20}
+            strokeWidth={2}
             fill={isSaved ? "var(--accent-700)" : "none"}
-            stroke={isSaved ? "#fffefb" : "currentColor"}
-            strokeWidth="2"
-            strokeLinejoin="round"
-            aria-hidden="true"
-          >
-            <path d="M12 20.5s-7.5-4.6-9.2-9.4C1.6 7.6 3.9 4.5 7.2 4.5c2 0 3.6 1.1 4.8 2.8 1.2-1.7 2.8-2.8 4.8-2.8 3.3 0 5.6 3.1 4.4 6.6-1.7 4.8-9.2 9.4-9.2 9.4z"></path>
-          </svg>
+            color={isSaved ? "#fffefb" : "currentColor"}
+          />
         </button>
         <div className={styles.body}>
           <div className={styles.titleRow}>
@@ -214,22 +209,7 @@ export const StylistCard = ({
               {stylistName}
             </CardLink>
             {verified && (
-              <svg
-                width="15"
-                height="15"
-                viewBox="0 0 24 24"
-                fill="var(--accent-700)"
-              >
-                <path d="M12 2l2.4 2.1 3.1-.4 1 3 2.9 1.2-.6 3.1L23 12l-2.2 2.3.6 3.1-2.9 1.2-1 3-3.1-.4L12 22l-2.4-2.1-3.1.4-1-3-2.9-1.2.6-3.1L1 12l2.2-2.3-.6-3.1 2.9-1.2 1-3 3.1.4z"></path>
-                <path
-                  d="M9.5 12.2l1.8 1.8 3.6-3.8"
-                  stroke="#fffefb"
-                  strokeWidth="1.8"
-                  fill="none"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                ></path>
-              </svg>
+              <VerifiedBadgeIcon size={15} className={styles.verified} />
             )}
             <span className={styles.rating}>
               <Star size={14} strokeWidth={0} fill="var(--brand-yellow)" />
@@ -244,20 +224,7 @@ export const StylistCard = ({
             </span>
           </div>
           <div className={styles.areaRow}>
-            <svg
-              className={styles.areaIcon}
-              width="14"
-              height="14"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="1.5"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-            >
-              <path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0z"></path>
-              <circle cx="12" cy="10" r="3"></circle>
-            </svg>
+            <MapPin className={styles.areaIcon} size={14} strokeWidth={1.8} />
             <span className={styles.area}>{area}</span>
             {!rows.length && <span className={styles.meta}>{metaText}</span>}
           </div>
@@ -285,19 +252,11 @@ export const StylistCard = ({
                     <span className={styles.rowName}>{name}</span>
                     <span className={styles.rowMeta}>{rowMeta}</span>
                   </span>
-                  <svg
+                  <ChevronRight
                     className={styles.chevron}
-                    width="15"
-                    height="15"
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    stroke="currentColor"
-                    strokeWidth="1.5"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                  >
-                    <path d="m9 5 7 7-7 7"></path>
-                  </svg>
+                    size={15}
+                    strokeWidth={1.5}
+                  />
                 </CardLink>
               ))}
             </div>

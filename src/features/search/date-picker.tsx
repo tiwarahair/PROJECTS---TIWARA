@@ -1,3 +1,4 @@
+import { ChevronLeft, ChevronRight } from "lucide-react";
 import { joinClassNames } from "../../utils/class-names";
 import controls from "../../styles/features/search/search-controls.module.css";
 import {
@@ -44,17 +45,7 @@ const MonthBar = ({
         aria-label="Previous month"
         className={styles.monthNav}
       >
-        <svg
-          width="20"
-          height="20"
-          viewBox="0 0 24 24"
-          fill="none"
-          stroke="currentColor"
-          strokeWidth="2"
-          strokeLinecap="round"
-        >
-          <path d="m15 18-6-6 6-6"></path>
-        </svg>
+        <ChevronLeft size={20} strokeWidth={2} />
       </button>
       <div className={styles.monthLabel}>
         {month.toLocaleDateString("en-GB", { month: "long", year: "numeric" })}
@@ -64,17 +55,7 @@ const MonthBar = ({
         aria-label="Next month"
         className={styles.monthNav}
       >
-        <svg
-          width="20"
-          height="20"
-          viewBox="0 0 24 24"
-          fill="none"
-          stroke="currentColor"
-          strokeWidth="2"
-          strokeLinecap="round"
-        >
-          <path d="m9 18 6-6-6-6"></path>
-        </svg>
+        <ChevronRight size={20} strokeWidth={2} />
       </button>
     </div>
   );

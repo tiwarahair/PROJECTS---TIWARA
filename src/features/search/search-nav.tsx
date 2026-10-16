@@ -1,3 +1,4 @@
+import { ArrowLeft, Heart, Search } from "lucide-react";
 import type { CSSProperties } from "react";
 import { Link } from "react-router";
 import { AccountAvatar, SiteMenu } from "../../components/site-menu/site-menu";
@@ -59,19 +60,7 @@ export const SearchNav = ({ search }: SearchNavProps) => {
             )}
           >
             <Link to="/" aria-label="Back" className={styles.mobileBack}>
-              <svg
-                width="20"
-                height="20"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="2"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-              >
-                <path d="M19 12H5"></path>
-                <path d="m12 19-7-7 7-7"></path>
-              </svg>
+              <ArrowLeft size={20} strokeWidth={2} />
             </Link>
             <button
               onClick={actions.openMobileSheet}
@@ -181,18 +170,7 @@ export const SearchNav = ({ search }: SearchNavProps) => {
             aria-label="Search"
             className={joinClassNames(pageGlobal.spBtn, styles.searchButton)}
           >
-            <svg
-              width="17"
-              height="17"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="2"
-              strokeLinecap="round"
-            >
-              <circle cx="11" cy="11" r="7"></circle>
-              <path d="m21 21-4.3-4.3"></path>
-            </svg>
+            <Search size={17} strokeWidth={2} />
             <span
               className={joinClassNames(pageGlobal.spLabel, styles.searchLabel)}
             >
@@ -208,18 +186,7 @@ export const SearchNav = ({ search }: SearchNavProps) => {
               title="Favourites"
               className={styles.favourites}
             >
-              <svg
-                width="20"
-                height="20"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="2"
-                strokeLinejoin="round"
-                aria-hidden="true"
-              >
-                <path d="M12 20.5s-7.5-4.6-9.2-9.4C1.6 7.6 3.9 4.5 7.2 4.5c2 0 3.6 1.1 4.8 2.8 1.2-1.7 2.8-2.8 4.8-2.8 3.3 0 5.6 3.1 4.4 6.6-1.7 4.8-9.2 9.4-9.2 9.4z"></path>
-              </svg>
+              <Heart size={20} strokeWidth={2} />
             </Link>
           )}
           {loggedIn ? (

@@ -1,7 +1,7 @@
+import { Check, ChevronDown, Settings2 } from "lucide-react";
 import Skeleton from "react-loading-skeleton";
 import type { CSSProperties } from "react";
 import { joinClassNames } from "../../utils/class-names";
-import { CheckIcon, ChevronIcon } from "./check-icon";
 import controls from "../../styles/features/search/search-controls.module.css";
 import {
   formatMaxPrice,
@@ -76,7 +76,13 @@ export const FilterBar = ({ search }: FilterBarProps) => {
                   isOn && controls.chipOn,
                 )}
               >
-                {isOn && <CheckIcon className={styles.iconBlock} />}
+                {isOn && (
+                  <Check
+                    className={styles.iconBlock}
+                    size={14}
+                    strokeWidth={2.4}
+                  />
+                )}
                 {venue}
               </button>
             );
@@ -94,7 +100,11 @@ export const FilterBar = ({ search }: FilterBarProps) => {
               )}
             >
               {state.maxPrice != null ? `Up to £${state.maxPrice}` : "Price"}
-              <ChevronIcon className={styles.iconBlock} />
+              <ChevronDown
+                className={styles.iconBlock}
+                size={14}
+                strokeWidth={2}
+              />
             </button>
             {state.priceOpen && (
               <>
@@ -159,7 +169,11 @@ export const FilterBar = ({ search }: FilterBarProps) => {
               )}
             >
               {`Within ${state.radius} miles`}
-              <ChevronIcon className={styles.iconBlock} />
+              <ChevronDown
+                className={styles.iconBlock}
+                size={14}
+                strokeWidth={2}
+              />
             </button>
             {state.distanceOpen && (
               <>
@@ -192,7 +206,11 @@ export const FilterBar = ({ search }: FilterBarProps) => {
                           {`Within ${radius} miles`}
                         </span>
                         {isSelected && (
-                          <CheckIcon className={styles.iconBlock} />
+                          <Check
+                            className={styles.iconBlock}
+                            size={14}
+                            strokeWidth={2.4}
+                          />
                         )}
                       </button>
                     );
@@ -236,20 +254,11 @@ export const FilterBar = ({ search }: FilterBarProps) => {
               onClick={actions.openFilters}
               className={joinClassNames(pageGlobal.flMob, styles.pillButton)}
             >
-              <svg
+              <Settings2
                 className={styles.iconBlock}
-                width="16"
-                height="16"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="1.7"
-                strokeLinecap="round"
-              >
-                <path d="M4 7h10M18 7h2M4 17h4M12 17h8"></path>
-                <circle cx="16" cy="7" r="2"></circle>
-                <circle cx="10" cy="17" r="2"></circle>
-              </svg>
+                size={16}
+                strokeWidth={1.7}
+              />
               {`Filters${filterCount ? ` · ${filterCount}` : ""}`}
             </button>
             <div className={styles.sortAnchor}>
@@ -261,7 +270,11 @@ export const FilterBar = ({ search }: FilterBarProps) => {
                 className={styles.pillButton}
               >
                 {`Sort: ${sortLabel}`}
-                <ChevronIcon className={styles.iconBlock} />
+                <ChevronDown
+                  className={styles.iconBlock}
+                  size={14}
+                  strokeWidth={2}
+                />
               </button>
               {state.sortOpen && (
                 <>
@@ -292,7 +305,11 @@ export const FilterBar = ({ search }: FilterBarProps) => {
                         >
                           <span className={styles.optionLabel}>{label}</span>
                           {isSelected && (
-                            <CheckIcon className={styles.iconBlock} />
+                            <Check
+                              className={styles.iconBlock}
+                              size={14}
+                              strokeWidth={2.4}
+                            />
                           )}
                         </button>
                       );
