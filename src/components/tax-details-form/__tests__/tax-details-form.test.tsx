@@ -4,10 +4,10 @@ import { TaxDetailsForm } from "../tax-details-form";
 import type { TaxFixture } from "../tax-details-logic";
 import {
   formatNationalInsuranceNumber,
-  getInitialTaxState,
-  getTaxErrors,
+  getInitialTax,
   getTaxOutput,
 } from "../tax-details-logic";
+import { getTaxSchema } from "../tax-details-schema";
 import type { UserEvent } from "@testing-library/user-event";
 import { setupUser } from "../../../test/setup-user";
 
@@ -56,9 +56,9 @@ describe("TaxDetailsForm", () => {
     ["err-under18", "You must be 18 or over to receive payouts."],
     ["err-ni", "Enter a National Insurance number like QQ 12 34 56 C."],
     ["err-conum", "Enter your 8-character company registration number."],
-  ])("fixture %s shows its error", (fixture, message) => {
+  ])("fixture %s shows its error", async (fixture, message) => {
     render(<TaxDetailsForm fixture={fixture} />);
-    expect(screen.getAllByText(message)[0]).toBeInTheDocument();
+    expect((await screen.findAllByText(message))[0]).toBeInTheDocument();
   });
 
   it("fixtures name-no and ltd open their fields", () => {
@@ -74,15 +74,20 @@ describe("TaxDetailsForm", () => {
   });
 
   it("accepts postcodes typed with punctuation, like every other form", () => {
-    const state = getInitialTaxState({ fixture: "err-pc" });
+    const { values } = getInitialTax({ fixture: "err-pc" });
 
-    state.home.fields.postcode = "m14-5tq";
-    expect(getTaxErrors(state).address).toBeUndefined();
+    values.home.fields.postcode = "m14-5tq";
+
+    expect(
+      getTaxSchema("")
+        .safeParse(values)
+        .error?.issues.some(({ path }) => path.join(".") === "home.fields"),
+    ).toBe(false);
   });
 
   it("drops names typed before choosing the account name", () => {
     const state = {
-      ...getInitialTaxState({ fixture: "name-no" }),
+      ...getInitialTax({ fixture: "name-no" }).values,
       first: "Old",
       last: "Name",
       nameYes: true,
@@ -97,9 +102,45 @@ describe("TaxDetailsForm", () => {
   });
 
   it("fixture err-pc flags the address", () => {
+    const issue = getTaxSchema("")
+      .safeParse(getInitialTax({ fixture: "err-pc" }).values)
+      .error?.issues.find(({ path }) => path.join(".") === "home.fields");
+
+    expect(issue?.message).toBe("Enter your home address");
+  });
+
+  it("checks every field on submit and doesn't send an invalid form", async () => {
+    const onSubmit = vi.fn();
+
+    render(<TaxDetailsForm onSubmit={onSubmit} />);
+
+    await user.click(
+      screen.getByRole("button", { name: "Continue to Stripe" }),
+    );
+
     expect(
-      getTaxErrors(getInitialTaxState({ fixture: "err-pc" })).address,
-    ).toBe("Enter your home address");
+      await screen.findByText("Enter your date of birth"),
+    ).toBeInTheDocument();
+
+    expect(
+      screen.getByText("Enter your National Insurance number"),
+    ).toBeInTheDocument();
+
+    expect(onSubmit).not.toHaveBeenCalled();
+  });
+
+  it("a saved NI number can be left blank", () => {
+    const { values } = getInitialTax({
+      value: { kind: "sole", nationalInsuranceHint: "QQ •• •• 56 C" },
+    });
+
+    const paths = (hint: string) =>
+      getTaxSchema(hint)
+        .safeParse(values)
+        .error?.issues.map(({ path }) => path.join("."));
+
+    expect(paths("QQ •• •• 56 C")).not.toContain("nationalInsuranceNumber");
+    expect(paths("")).toContain("nationalInsuranceNumber");
   });
 
   it("submits a limited company with the business address", async () => {
@@ -141,6 +182,20 @@ describe("TaxDetailsForm", () => {
         },
       }),
     );
+  });
+
+  it("reports unsaved changes, and none once they're undone", async () => {
+    const onDirtyChange = vi.fn();
+
+    render(<TaxDetailsForm mode="settings" onDirtyChange={onDirtyChange} />);
+
+    const year = screen.getByLabelText("Year");
+
+    await user.type(year, "1990");
+    expect(onDirtyChange).toHaveBeenLastCalledWith(true);
+
+    await user.clear(year);
+    expect(onDirtyChange).toHaveBeenLastCalledWith(false);
   });
 
   it("formats the NI number as you type", () => {
