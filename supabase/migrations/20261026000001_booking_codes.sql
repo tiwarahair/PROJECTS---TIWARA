@@ -177,7 +177,7 @@ begin
 
   update public.booking_tokens set used_at = now() where id = secure.id;
 
-  delete from public.booking_tokens where booking_id = booking.id and purpose = 'manage';
+  delete from public.booking_tokens where booking_id = booking.id and purpose in ('manage', 'invite');
 
   delete from public.booking_codes where booking_id = booking.id and used_at is null;
 
@@ -192,7 +192,9 @@ begin
     'booking_link_reset',
     public.get_booking_details(booking.id) || jsonb_build_object(
       'manage_url', booking.site || '/manage?token='
-        || public.create_booking_token(booking.id, 'manage', booking.starts_at + interval '30 days')
+        || public.create_booking_token(booking.id, 'manage', booking.starts_at + interval '30 days'),
+      'save_details_url', case when booking.client_id is null then booking.site || '/save-details?token='
+        || public.create_booking_token(booking.id, 'invite', now() + interval '24 hours') end
     ),
     booking.client_id
   );

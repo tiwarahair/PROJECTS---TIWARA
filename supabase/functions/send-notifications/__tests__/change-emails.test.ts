@@ -106,10 +106,15 @@ describe("link safety emails", () => {
     expect(text).toContain("https://dev.tiwarashouse.com/manage?secure=xyz");
   });
 
-  it("the new link email carries the new manage link", () => {
-    const { subject, text } = bookingLinkReset(booking);
+  it("the new link email carries the new manage link, and a guest's new save-details link", () => {
+    const { subject, text } = bookingLinkReset({ ...booking, save_details_url: null });
 
     expect(subject).toBe("Your new booking link");
     expect(text).toContain("https://dev.tiwarashouse.com/manage?token=abc");
+    expect(text).not.toContain("Save your details");
+
+    const guest = bookingLinkReset({ ...booking, save_details_url: "https://dev.tiwarashouse.com/save-details?token=new" });
+
+    expect(guest.text).toContain("https://dev.tiwarashouse.com/save-details?token=new");
   });
 });

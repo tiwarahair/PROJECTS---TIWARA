@@ -627,6 +627,22 @@ describe("the manage booking page", () => {
     ).toBeInTheDocument();
   });
 
+  it("an owner link that fails to load says so, not that the link is invalid", async () => {
+    vi.mocked(getOwnerManageToken).mockRejectedValueOnce(
+      new Error("Failed to fetch"),
+    );
+
+    renderWithStore(<ManageBookingPage />, "/manage?ref=TH-ABC123", {
+      signedIn: true,
+    });
+
+    expect(
+      await screen.findByRole("heading", {
+        name: "We couldn’t load your booking",
+      }),
+    ).toBeInTheDocument();
+  });
+
   it("?view=account forwards to Account → Shared", async () => {
     renderPage("?view=account");
 

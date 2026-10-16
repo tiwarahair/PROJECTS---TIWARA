@@ -1,5 +1,5 @@
 begin;
-select plan(19);
+select plan(20);
 
 insert into auth.users (id, instance_id, aud, role, email, raw_user_meta_data, raw_app_meta_data)
 values ('c1111111-1111-1111-1111-111111111111', '00000000-0000-0000-0000-000000000000', 'authenticated', 'authenticated',
@@ -100,6 +100,11 @@ select is(
   (select public.get_booking_invite(split_part(payload ->> 'save_details_url', 'token=', 2)) ->> 'state'
    from public.notifications where template = 'booking_invite' and to_address = 'ade@invite.test'),
   'valid', 'the new link is emailed and valid');
+
+select public.renew_booking_invite(late ->> 'invite') from b;
+
+select is((select count(*)::int from public.notifications where template = 'booking_invite' and to_address = 'ade@invite.test'), 1,
+  'pressing again on the old link doesn''t send another while the new one works');
 
 grant select on b to authenticated, anon;
 

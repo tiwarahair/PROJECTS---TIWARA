@@ -109,7 +109,9 @@ export const bookingCode = (booking: BookingDetails & { code: string; secure_url
     footnote: `If you didn’t ask for this code, someone may have your booking link. Nothing changes without the code, but tap “${NOT_ME}” to stop that link working.`,
   });
 
-export const bookingLinkReset = (booking: BookingDetails & { manage_url: string }): RenderedEmail =>
+export const bookingLinkReset = (
+  booking: BookingDetails & { manage_url: string; save_details_url: string | null },
+): RenderedEmail =>
   renderNotice({
     title: "Your new booking link",
     paragraphs: [
@@ -117,5 +119,8 @@ export const bookingLinkReset = (booking: BookingDetails & { manage_url: string 
       `Booking reference: ${booking.ref}`,
     ],
     button: { label: "Manage your booking", url: booking.manage_url },
+    ...(booking.save_details_url
+      ? { link: { label: "Save your details for next time", url: booking.save_details_url } }
+      : {}),
     footnote: "If your booking was changed or cancelled and you didn’t do it, reply to this email.",
   });

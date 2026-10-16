@@ -5,6 +5,7 @@ import { ManageBookingSkeleton } from "../../components/skeleton/manage-booking-
 import { useIsSlow } from "../../hooks/use-is-slow";
 import { usePrivateLink } from "../../hooks/use-private-link";
 import {
+  getErrorMessage,
   useGetManagedBookingQuery,
   useGetOwnerManageTokenQuery,
 } from "../../stores/api-slice";
@@ -46,8 +47,11 @@ export const ManageBookingPage = ({
   const secureToken = usePrivateLink({ param: "secure" });
   const isOwnerLink = !!ref && !params.get("token");
 
+  // each call makes a new token, so it isn't refetched behind the page
   const owner = useGetOwnerManageTokenQuery(ref, {
     skip: !isOwnerLink || !loggedIn,
+    refetchOnFocus: false,
+    refetchOnReconnect: false,
   });
 
   const token = isOwnerLink ? (owner.currentData ?? "") : linkToken;
@@ -62,6 +66,11 @@ export const ManageBookingPage = ({
   });
 
   const isLoading = isFetching || owner.isFetching || (isOwnerLink && !ready);
+
+  const isLoadError =
+    isError ||
+    (owner.isError && getErrorMessage(owner.error) !== "link_not_valid");
+
   const isSlow = useIsSlow(isLoading && !booking);
 
   useLayoutEffect(() => {
@@ -73,7 +82,7 @@ export const ManageBookingPage = ({
   if (isAccount) return <Navigate to="/account?section=shared" replace />;
 
   if (isOwnerLink && ready && !loggedIn) {
-    const back = encodeURIComponent(`/manage?ref=${ref}`);
+    const back = encodeURIComponent(`/manage?ref=${encodeURIComponent(ref)}`);
 
     return <Navigate to={`/login?screen=cust-email&return=${back}`} replace />;
   }
@@ -96,7 +105,7 @@ export const ManageBookingPage = ({
 
     return (
       <PageMessage
-        {...getMessage(isError)}
+        {...getMessage(isLoadError)}
         linkLabel="Go to Tiwára’s House"
         linkHref="/"
       />

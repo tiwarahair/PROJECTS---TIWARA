@@ -1,5 +1,5 @@
 begin;
-select plan(29);
+select plan(31);
 
 insert into auth.users (id, instance_id, aud, role, email, raw_user_meta_data, raw_app_meta_data)
 values ('d1111111-1111-1111-1111-111111111111', '00000000-0000-0000-0000-000000000000', 'authenticated', 'authenticated',
@@ -154,6 +154,18 @@ select is(
   (select public.get_managed_booking(split_part(payload ->> 'manage_url', 'token=', 2)) ->> 'ref'
    from public.notifications where template = 'booking_link_reset' and payload ->> 'ref' = (select one ->> 'ref' from b)),
   (select one ->> 'ref' from b), 'a new, working link is emailed');
+
+select throws_ok(
+  $$ select public.get_booking_invite((
+    select split_part(payload ->> 'save_details_url', 'token=', 2) from public.notifications
+    where template = 'booking_confirmed' and payload ->> 'ref' = (select one ->> 'ref' from b)
+  )) $$,
+  'link_not_valid', 'the save-details link from the confirmation stops working too');
+
+select ok(
+  (select payload ->> 'save_details_url' like '%/save-details?token=%' from public.notifications
+   where template = 'booking_link_reset' and payload ->> 'ref' = (select one ->> 'ref' from b)),
+  'and a guest gets a fresh one with the new link');
 
 select throws_ok($$ select public.secure_booking_link(current_setting('test.secure')) $$, 'already_used',
   'the reset works once');

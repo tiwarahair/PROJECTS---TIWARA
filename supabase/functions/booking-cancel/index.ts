@@ -2,6 +2,7 @@ import { z } from "npm:zod@4";
 import { admin } from "../_shared/admin.ts";
 import { getClientIp } from "../_shared/client-ip.ts";
 import { corsHeaders, respond } from "../_shared/cors.ts";
+import { findEarlierRefund } from "./earlier-refund.ts";
 import { isWithinLimit } from "../_shared/rate-limit.ts";
 import { stripe } from "../_shared/stripe.ts";
 
@@ -19,6 +20,11 @@ interface Cancellation {
 
 const refund = async ({ id, payment_intent_id: paymentIntentId, refund_pence: amount }: Cancellation) => {
   if (!amount || !paymentIntentId) return null;
+
+  const { data: earlier } = await stripe.refunds.list({ payment_intent: paymentIntentId, limit: 100 });
+  const madeBefore = findEarlierRefund(earlier);
+
+  if (madeBefore) return madeBefore.id;
 
   const intent = await stripe.paymentIntents.retrieve(paymentIntentId);
 
@@ -57,14 +63,17 @@ Deno.serve(async (request) => {
     const cancellation = data as Cancellation;
     const refundId = await refund(cancellation);
 
+    const { refund_pence, kept_pence, charge_pence } = cancellation;
+
     const { error: cancelError } = await admin.rpc("cancel_managed_booking", {
       token,
-      cancellation: { ...cancellation, refund_id: refundId },
+      cancellation: { ...cancellation, id: undefined, payment_intent_id: undefined, refund_id: refundId },
     });
 
-    if (cancelError) throw cancelError;
+    if (cancelError && ERRORS[cancelError.message])
+      return respond(ERRORS[cancelError.message], { error: cancelError.message });
 
-    const { refund_pence, kept_pence, charge_pence } = cancellation;
+    if (cancelError) throw cancelError;
 
     return respond(200, { refund_pence, kept_pence, charge_pence });
   } catch (error) {

@@ -80,9 +80,17 @@ begin
     raise exception 'cannot_renew';
   end if;
 
-  select * into booking from public.bookings where id = invite.booking_id;
+  select * into booking from public.bookings where id = invite.booking_id for update;
 
   update public.booking_tokens set used_at = now() where id = invite.id;
+
+  -- a link sent less than 24 hours ago still works, so pressing again doesn't send another
+  if exists (
+    select 1 from public.booking_tokens
+    where booking_id = booking.id and purpose = 'invite' and used_at is null and expires_at > now()
+  ) then
+    return;
+  end if;
 
   perform public.queue_email(
     booking.contact ->> 'email',
