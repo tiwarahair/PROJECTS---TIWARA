@@ -1,0 +1,85 @@
+// Holds a start for 10 minutes while the client books, or moves their hold when they pick another time.
+// The database does the work (hold_booking); this only checks the request and rate-limits by IP.
+import { createClient } from "npm:@supabase/supabase-js@2";
+import { z } from "npm:zod@4";
+import { getClientIp } from "../_shared/client-ip.ts";
+import { corsHeaders, respond } from "../_shared/cors.ts";
+
+const IP_LIMIT = 30;
+const WINDOW_SECONDS = 600;
+
+// hold_booking's own errors, passed on for the page to explain
+const BOOKING_ERRORS = [
+  "not_bookable",
+  "invalid_choices",
+  "address_required",
+  "outside_area",
+  "hold_not_found",
+  "slot_taken",
+];
+
+const requestSchema = z.object({
+  serviceId: z.uuid(),
+  choices: z.object({
+    variations: z.array(z.uuid()).max(20),
+    addons: z.array(z.uuid()).max(20),
+    colour: z.string().max(40).optional(),
+  }),
+  startsAt: z.iso.datetime({ offset: true }),
+  location: z.object({ lat: z.number(), lng: z.number() }).optional(),
+  hold: z
+    .object({ id: z.uuid(), secret: z.string().min(1).max(100) })
+    .optional(),
+});
+
+const supabase = createClient(
+  Deno.env.get("SUPABASE_URL")!,
+  Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!,
+);
+
+Deno.serve(async (request) => {
+  if (request.method === "OPTIONS")
+    return new Response("ok", { headers: corsHeaders });
+
+  const parsed = requestSchema.safeParse(
+    await request.json().catch(() => null),
+  );
+
+  if (!parsed.success) return respond(400, { error: "invalid_request" });
+
+  const { data: isWithinLimit, error: limitError } = await supabase.rpc(
+    "hit_rate_limit",
+    {
+      limit_key: `booking-hold:${getClientIp(request)}`,
+      max_hits: IP_LIMIT,
+      window_seconds: WINDOW_SECONDS,
+    },
+  );
+
+  if (limitError) return respond(500, { error: "unknown" });
+
+  if (!isWithinLimit) return respond(429, { error: "rate_limited" });
+
+  const { serviceId, choices, startsAt, location, hold } = parsed.data;
+
+  const { data, error } = await supabase.rpc("hold_booking", {
+    target_service: serviceId,
+    choices,
+    slot_start: startsAt,
+    client_lat: location?.lat ?? null,
+    client_lng: location?.lng ?? null,
+    hold_id: hold?.id ?? null,
+    hold_secret: hold?.secret ?? null,
+  });
+
+  if (error && BOOKING_ERRORS.includes(error.message))
+    return respond(409, { error: error.message });
+
+  if (error) {
+    console.error("hold_booking failed", error.code);
+
+    return respond(500, { error: "unknown" });
+  }
+
+  return respond(200, data);
+});

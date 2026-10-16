@@ -93,6 +93,39 @@ export type Database = {
           },
         ];
       };
+      booking_events: {
+        Row: {
+          booking_id: string;
+          created_at: string;
+          data: NonNullable<Json>;
+          id: number;
+          kind: string;
+        };
+        ComputedFields: never;
+        Insert: {
+          booking_id: string;
+          created_at?: string;
+          data?: NonNullable<Json>;
+          id?: never;
+          kind: string;
+        };
+        Update: {
+          booking_id?: string;
+          created_at?: string;
+          data?: NonNullable<Json>;
+          id?: never;
+          kind?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "booking_events_booking_id_fkey";
+            columns: ["booking_id"];
+            isOneToOne: false;
+            referencedRelation: "bookings";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
       booking_rules: {
         Row: {
           default_extra_minutes: number;
@@ -121,6 +154,104 @@ export type Database = {
             foreignKeyName: "booking_rules_stylist_id_fkey";
             columns: ["stylist_id"];
             isOneToOne: true;
+            referencedRelation: "stylists";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
+      bookings: {
+        Row: {
+          address: Json | null;
+          block_ends_at: string;
+          block_range: unknown;
+          buffer_minutes: number;
+          choices: NonNullable<Json>;
+          client_id: string | null;
+          created_at: string;
+          details: NonNullable<Json>;
+          ends_at: string;
+          fee_pence: number;
+          hold_expires_at: string | null;
+          hold_secret_hash: string | null;
+          id: string;
+          location: unknown;
+          minutes: number;
+          price_pence: number;
+          ref: string;
+          reschedule_count: number;
+          service_id: string | null;
+          starts_at: string;
+          status: string;
+          stylist_id: string;
+        };
+        ComputedFields: never;
+        Insert: {
+          address?: Json | null;
+          block_ends_at: string;
+          block_range?: never;
+          buffer_minutes?: number;
+          choices: NonNullable<Json>;
+          client_id?: string | null;
+          created_at?: string;
+          details: NonNullable<Json>;
+          ends_at: string;
+          fee_pence: number;
+          hold_expires_at?: string | null;
+          hold_secret_hash?: string | null;
+          id?: string;
+          location?: unknown;
+          minutes: number;
+          price_pence: number;
+          ref?: string;
+          reschedule_count?: number;
+          service_id?: string | null;
+          starts_at: string;
+          status?: string;
+          stylist_id: string;
+        };
+        Update: {
+          address?: Json | null;
+          block_ends_at?: string;
+          block_range?: never;
+          buffer_minutes?: number;
+          choices?: NonNullable<Json>;
+          client_id?: string | null;
+          created_at?: string;
+          details?: NonNullable<Json>;
+          ends_at?: string;
+          fee_pence?: number;
+          hold_expires_at?: string | null;
+          hold_secret_hash?: string | null;
+          id?: string;
+          location?: unknown;
+          minutes?: number;
+          price_pence?: number;
+          ref?: string;
+          reschedule_count?: number;
+          service_id?: string | null;
+          starts_at?: string;
+          status?: string;
+          stylist_id?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "bookings_client_id_fkey";
+            columns: ["client_id"];
+            isOneToOne: false;
+            referencedRelation: "profiles";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "bookings_service_id_fkey";
+            columns: ["service_id"];
+            isOneToOne: false;
+            referencedRelation: "services";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "bookings_stylist_id_fkey";
+            columns: ["stylist_id"];
+            isOneToOne: false;
             referencedRelation: "stylists";
             referencedColumns: ["id"];
           },
@@ -1159,7 +1290,30 @@ export type Database = {
         Args: { meta: Json; new_owner_id: string };
         Returns: string;
       };
+      expire_booking_holds: {
+        Args: Record<PropertyKey, never>;
+        Returns: undefined;
+      };
       get_account_kind: { Args: { lookup_email: string }; Returns: string };
+      get_available_slots: {
+        Args: {
+          choices: Json;
+          from_date: string;
+          target_service: string;
+          to_date: string;
+        };
+        Returns: string[];
+      };
+      get_day_slots: {
+        Args: {
+          buffer_minutes: number;
+          check_day: string;
+          ignore_booking?: string;
+          minutes: number;
+          target: string;
+        };
+        Returns: string[];
+      };
       get_due_closure_photos: {
         Args: Record<PropertyKey, never>;
         Returns: string[];
@@ -1186,6 +1340,18 @@ export type Database = {
         Args: { limit_key: string; max_hits: number; window_seconds: number };
         Returns: boolean;
       };
+      hold_booking: {
+        Args: {
+          choices: Json;
+          client_lat?: number;
+          client_lng?: number;
+          hold_id?: string;
+          hold_secret?: string;
+          slot_start: string;
+          target_service: string;
+        };
+        Returns: Json;
+      };
       is_aal2: { Args: Record<PropertyKey, never>; Returns: boolean };
       is_admin: { Args: Record<PropertyKey, never>; Returns: boolean };
       is_service_owner: {
@@ -1210,6 +1376,10 @@ export type Database = {
         Returns: undefined;
       };
       owns_photo_path: { Args: { object_name: string }; Returns: boolean };
+      price_booking: {
+        Args: { choices: Json; target_service: string };
+        Returns: Json;
+      };
       purge_closed_businesses: {
         Args: Record<PropertyKey, never>;
         Returns: undefined;

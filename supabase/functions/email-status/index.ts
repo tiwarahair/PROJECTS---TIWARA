@@ -1,6 +1,7 @@
 // Email-first log in: "does this email have an account, and what kind?" Turnstile + rate limits, constant-ish time.
 import { createClient } from "npm:@supabase/supabase-js@2";
 import { z } from "npm:zod@4";
+import { getClientIp } from "../_shared/client-ip.ts";
 
 const MIN_RESPONSE_MS = 600;
 const IP_LIMIT = 10;
@@ -22,12 +23,6 @@ const supabase = createClient(
   Deno.env.get("SUPABASE_URL")!,
   Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!,
 );
-
-/** Cloudflare's header can't be set by the caller; X-Forwarded-For can, so it's only the local fallback. */
-const getClientIp = ({ headers }: Request) =>
-  headers.get("cf-connecting-ip") ??
-  headers.get("x-forwarded-for")?.split(",")[0]?.trim() ??
-  "unknown";
 
 const isHuman = async (token: string, ip: string) => {
   const response = await fetch(
