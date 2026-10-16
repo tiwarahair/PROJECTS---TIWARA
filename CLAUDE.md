@@ -61,6 +61,7 @@ Always run `yarn format && yarn lint` after code changes.
 - `assets/` (project root) — images and logos, resolved with `getAssetUrl`
 - `src/data/` — re-usable data used in the front-end kept in json files
 - `src/styles/` — all CSS lives here, never next to components. Global styles and design tokens at the top level; CSS modules mirror the source tree, e.g. `src/features/home/hero-section.tsx` → `src/styles/features/home/hero-section.module.css`
+- Files inside a folder don't repeat the folder's name: `business-details/schema.ts`, not `business-details/business-details-schema.ts`. A folder's main component lives in `index.tsx` (`index.ts` when it has no JSX) and is imported from the folder (`components/business-details`); its styles follow the same names (`styles/components/business-details/index.module.css`)
 
 ## Component Conventions
 

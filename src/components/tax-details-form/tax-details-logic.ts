@@ -1,5 +1,5 @@
-// TaxDetailsForm state, validation and output.
-import { formatPostcode, isPostcodeValid } from "../../utils/address";
+// TaxDetailsForm values, fixtures and output.
+import { formatPostcode } from "../../utils/address";
 
 export type TaxKind = "sole" | "ltd";
 export type TaxFixture =
@@ -47,22 +47,13 @@ export interface TaxDetails {
   address: TaxAddress;
 }
 
-export interface TaxAddressState {
+export interface TaxAddressValues {
   same: boolean;
   fields: TaxAddress;
   src: string;
 }
 
-export type TaxErrorKey =
-  | "first"
-  | "last"
-  | "dob"
-  | "address"
-  | "nationalInsuranceNumber"
-  | "companyName"
-  | "companyNumber";
-
-export interface TaxState {
+export interface TaxFormValues {
   kind: TaxKind;
   nameYes: boolean;
   first: string;
@@ -72,25 +63,39 @@ export interface TaxState {
   month: string;
   year: string;
   nationalInsuranceNumber: string;
-  nationalInsuranceHint: string;
-  showNationalInsurance: boolean;
   companyName: string;
   companyNumber: string;
-  home: TaxAddressState;
-  registered: TaxAddressState;
-  /** Fields blurred or submitted ("middle" is also marked, though it has no error). */
-  touched: Partial<Record<TaxErrorKey | "middle", 1>>;
+  home: TaxAddressValues;
+  registered: TaxAddressValues;
 }
 
-const ALL_TOUCHED: TaxState["touched"] = {
-  first: 1,
-  last: 1,
-  dob: 1,
-  address: 1,
-  nationalInsuranceNumber: 1,
-  companyName: 1,
-  companyNumber: 1,
-};
+export type TaxFieldName =
+  | "first"
+  | "last"
+  | "day"
+  | "nationalInsuranceNumber"
+  | "companyName"
+  | "companyNumber"
+  | "home.fields"
+  | "registered.fields";
+
+interface InitialTax {
+  values: TaxFormValues;
+  nationalInsuranceHint: string;
+  showNationalInsurance: boolean;
+  shownErrors: TaxFieldName[];
+}
+
+const ALL_FIELDS: TaxFieldName[] = [
+  "first",
+  "last",
+  "day",
+  "nationalInsuranceNumber",
+  "companyName",
+  "companyNumber",
+  "home.fields",
+  "registered.fields",
+];
 
 /** A chair rental counts as a shop. */
 export const getTaxBusiness = (business?: TaxBusiness) => {
@@ -112,7 +117,7 @@ export const getBlankAddress = (): TaxAddress => ({
 export const getAddressKey = (kind: TaxKind): "home" | "registered" =>
   kind === "ltd" ? "registered" : "home";
 
-export const getInitialTaxState = ({
+export const getInitialTax = ({
   fixture = "",
   businessName = "",
   business,
@@ -122,11 +127,11 @@ export const getInitialTaxState = ({
   businessName?: string;
   business?: TaxBusiness;
   value?: Partial<TaxDetails>;
-}): TaxState => {
+}): InitialTax => {
   const { type } = getTaxBusiness(business);
   const sameOk = type === "home" || type === "shop";
 
-  const state: TaxState = {
+  const values: TaxFormValues = {
     kind: "sole",
     nameYes: true,
     first: "",
@@ -136,17 +141,21 @@ export const getInitialTaxState = ({
     month: "",
     year: "",
     nationalInsuranceNumber: "",
-    nationalInsuranceHint: "",
-    showNationalInsurance: false,
     companyName: businessName,
     companyNumber: "",
     home: { same: type === "home", fields: getBlankAddress(), src: "" },
     registered: { same: sameOk, fields: getBlankAddress(), src: "" },
-    touched: {},
+  };
+
+  const initial: InitialTax = {
+    values,
+    nationalInsuranceHint: value?.nationalInsuranceHint || "",
+    showNationalInsurance: false,
+    shownErrors: [],
   };
 
   if (value?.kind) {
-    Object.assign(state, {
+    Object.assign(values, {
       kind: value.kind,
       nameYes: value.nameYes !== false,
       first: value.first || "",
@@ -156,15 +165,14 @@ export const getInitialTaxState = ({
       month: value.month || "",
       year: value.year || "",
       nationalInsuranceNumber: value.nationalInsuranceNumber || "",
-      nationalInsuranceHint: value.nationalInsuranceHint || "",
-      companyName: value.companyName || state.companyName,
+      companyName: value.companyName || values.companyName,
       companyNumber: value.companyNumber || "",
     });
 
     const key = getAddressKey(value.kind);
 
-    state[key] = {
-      ...state[key],
+    values[key] = {
+      ...values[key],
       same: !!value.isAddressSame,
       src: "pick",
       fields: value.isAddressSame
@@ -173,53 +181,45 @@ export const getInitialTaxState = ({
     };
   }
 
-  if (fixture === "name-no") state.nameYes = false;
+  if (fixture === "name-no") values.nameYes = false;
 
-  if (fixture === "ltd") state.kind = "ltd";
+  if (fixture === "ltd") values.kind = "ltd";
 
-  if (fixture === "err-empty") state.touched = ALL_TOUCHED;
+  if (fixture === "err-empty") initial.shownErrors = ALL_FIELDS;
 
-  if (fixture === "err-initials")
-    Object.assign(state, {
-      nameYes: false,
-      first: "A",
-      last: "Okonkwo",
-      touched: { first: 1, last: 1 },
-    });
+  if (fixture === "err-initials") {
+    Object.assign(values, { nameYes: false, first: "A", last: "Okonkwo" });
+    initial.shownErrors = ["first", "last"];
+  }
 
-  if (fixture === "err-dob")
-    Object.assign(state, {
-      day: "31",
-      month: "02",
-      year: "1994",
-      touched: { dob: 1 },
-    });
+  if (fixture === "err-dob") {
+    Object.assign(values, { day: "31", month: "02", year: "1994" });
+    initial.shownErrors = ["day"];
+  }
 
-  if (fixture === "err-under18")
-    Object.assign(state, {
+  if (fixture === "err-under18") {
+    Object.assign(values, {
       day: "14",
       month: "03",
       year: String(new Date().getFullYear() - 16),
-      touched: { dob: 1 },
     });
 
-  if (fixture === "err-ni")
-    Object.assign(state, {
-      nationalInsuranceNumber: "QQ 12 34 5",
-      showNationalInsurance: true,
-      touched: { nationalInsuranceNumber: 1 },
-    });
+    initial.shownErrors = ["day"];
+  }
 
-  if (fixture === "err-conum")
-    Object.assign(state, {
-      kind: "ltd",
-      companyNumber: "1482930",
-      touched: { companyNumber: 1 },
-    });
+  if (fixture === "err-ni") {
+    values.nationalInsuranceNumber = "QQ 12 34 5";
+    initial.showNationalInsurance = true;
+    initial.shownErrors = ["nationalInsuranceNumber"];
+  }
+
+  if (fixture === "err-conum") {
+    Object.assign(values, { kind: "ltd", companyNumber: "1482930" });
+    initial.shownErrors = ["companyNumber"];
+  }
 
   if (fixture === "err-pc") {
-    state.home = {
-      ...state.home,
+    values.home = {
       same: false,
       src: "manual",
       fields: {
@@ -230,10 +230,10 @@ export const getInitialTaxState = ({
       },
     };
 
-    state.touched = { address: 1 };
+    initial.shownErrors = ["home.fields"];
   }
 
-  return state;
+  return initial;
 };
 
 /** "QQ 12 34 56 C" as you type. */
@@ -250,98 +250,9 @@ export const formatNationalInsuranceNumber = (value: string): string => {
   );
 };
 
-const isNameBad = (value: string) =>
-  !/^[A-Za-zÀ-ÿ' -]+$/.test(value.trim()) ||
-  value.trim().replace(/[^A-Za-zÀ-ÿ]/g, "").length < 2;
-
-export const getTaxErrors = (
-  state: TaxState,
-): Partial<Record<TaxErrorKey, string>> => {
-  const errors: Partial<Record<TaxErrorKey, string>> = {};
-  const isSole = state.kind === "sole";
-
-  if (isSole && !state.nameYes) {
-    if (!state.first.trim()) errors.first = "Enter your legal first name";
-    else if (isNameBad(state.first))
-      errors.first = "Enter your full name, not initials.";
-
-    if (!state.last.trim()) errors.last = "Enter your legal last name";
-    else if (isNameBad(state.last))
-      errors.last = "Enter your full name, not initials.";
-  }
-
-  if (isSole) {
-    if (!state.day || !state.month || !state.year)
-      errors.dob = "Enter your date of birth";
-    else {
-      const day = +state.day;
-      const month = +state.month;
-      const year = +state.year;
-      const date = new Date(year, month - 1, day);
-      const now = new Date();
-
-      if (
-        state.year.length < 4 ||
-        year < 1900 ||
-        date.getFullYear() !== year ||
-        date.getMonth() !== month - 1 ||
-        date.getDate() !== day ||
-        date > now
-      )
-        errors.dob = "Enter a real date of birth.";
-      else if (new Date(year + 18, month - 1, day) > now)
-        errors.dob = "You must be 18 or over to receive payouts.";
-    }
-
-    const nationalInsuranceNumber = state.nationalInsuranceNumber
-      .replace(/\s/g, "")
-      .toUpperCase();
-
-    if (!nationalInsuranceNumber) {
-      if (!state.nationalInsuranceHint)
-        errors.nationalInsuranceNumber = "Enter your National Insurance number";
-    } else if (
-      !/^(?!BG|GB|NK|KN|TN|NT|ZZ)[A-CEGHJ-PR-TW-Z][A-CEGHJ-NPR-TW-Z]\d{6}[A-D]$/.test(
-        nationalInsuranceNumber,
-      )
-    )
-      errors.nationalInsuranceNumber =
-        "Enter a National Insurance number like QQ 12 34 56 C.";
-  } else {
-    if (!state.companyName.trim())
-      errors.companyName = "Enter your company name";
-
-    const companyNumber = state.companyNumber.replace(/\s/g, "").toUpperCase();
-
-    if (!companyNumber)
-      errors.companyNumber = "Enter your company registration number";
-    else if (!/^([0-9]{8}|[A-Z]{2}[0-9]{6})$/.test(companyNumber))
-      errors.companyNumber =
-        "Enter your 8-character company registration number.";
-  }
-
-  const { same, fields } = state[getAddressKey(state.kind)];
-
-  if (
-    !same &&
-    !(
-      fields.line1.trim() &&
-      fields.city.trim() &&
-      isPostcodeValid(fields.postcode)
-    )
-  )
-    errors.address = isSole
-      ? "Enter your home address"
-      : "Enter your registered office address";
-
-  return errors;
-};
-
-export const getTouchedAll = (): TaxState["touched"] => ({ ...ALL_TOUCHED });
-
 /** The submitted details. */
 export const getTaxOutput = (
-  state: TaxState,
+  state: TaxFormValues,
   legalName: string,
   business?: TaxBusiness,
 ): TaxDetails => {

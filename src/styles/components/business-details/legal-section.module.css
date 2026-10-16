@@ -1,0 +1,65 @@
+.legalCard {
+  flex: 999 1 420px;
+  min-width: 0;
+  background: var(--fill-quiet);
+  border-radius: var(--radius-lg);
+  padding: clamp(18px, 3cqi, 24px);
+  box-sizing: border-box;
+}
+
+.legalList {
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+.legalRow {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  gap: 4px 16px;
+  padding: 12px 0;
+}
+
+.legalKey {
+  font-size: 14px;
+  color: var(--neutral-600);
+}
+
+.legalValue {
+  margin: 0;
+  font-size: 15px;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+}
+
+.legalNone {
+  margin: 0;
+  font-size: 15px;
+  line-height: 1.5;
+  color: var(--neutral-700);
+  max-width: 44ch;
+}
+
+.legalLink {
+  margin-top: 8px;
+  border: none;
+  background: none;
+  padding: 10px 0;
+  font: inherit;
+  font-size: 14.5px;
+  font-weight: 600;
+  color: var(--accent-700);
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.legalRowFirst {
+  border-top: none;
+}
+
+.legalRowNext {
+  border-top: 1px solid rgba(26, 23, 20, 0.08);
+}

@@ -75,7 +75,7 @@ const appRoutes: RouteObject[] = [
   {
     path: "/studio",
     lazy: () =>
-      import("./features/studio/studio-route").then(({ StudioRoute }) => ({
+      import("./features/studio/route").then(({ StudioRoute }) => ({
         Component: StudioRoute,
       })),
   },

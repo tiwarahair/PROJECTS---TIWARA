@@ -1,0 +1,43 @@
+.field {
+  display: block;
+  margin-top: 12px;
+}
+
+.fieldLabel {
+  display: block;
+  font-size: 13.5px;
+  font-weight: 500;
+  margin-bottom: 6px;
+}
+
+.input {
+  width: 100%;
+  box-sizing: border-box;
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-sm);
+  background: transparent;
+  padding: 12px 14px;
+  font-size: 16px;
+  outline: none;
+}
+
+.submit {
+  width: 100%;
+  margin-top: 14px;
+  border: none;
+  background: var(--accent-700);
+  color: var(--neutral-100);
+  border-radius: var(--radius-full);
+  padding: 13px 0;
+  font-size: 15px;
+  font-weight: 600;
+  opacity: 1;
+}
+
+.submit:active {
+  transform: scale(0.98) !important;
+}
+
+.submitOff {
+  opacity: 0.45;
+}
