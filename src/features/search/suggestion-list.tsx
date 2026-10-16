@@ -9,6 +9,7 @@ import type {
   WhatChipView,
 } from "./search-suggestions";
 import styles from "../../styles/features/search/suggestion-list.module.css";
+import { getRowStrokeWidth } from "./search-icons";
 
 interface SuggestionButtonProps {
   view: RowView;
@@ -48,7 +49,11 @@ const SuggestionButton = ({
         aria-hidden="true"
         className={joinClassNames(styles.rowIcon, controls.rowIconBg)}
       >
-        <RowIcon className={styles.iconBlock} size={17} strokeWidth={1.7} />
+        <RowIcon
+          className={styles.iconBlock}
+          size={17}
+          strokeWidth={getRowStrokeWidth(RowIcon)}
+        />
       </span>
     )}
     {!!row.image && (

@@ -4,7 +4,7 @@ import { ClearButton } from "./clear-button";
 import { DatePickerMobile } from "./date-picker";
 import { getMobileDateLabel } from "./search-dates";
 import pageGlobal from "../../styles/features/search/search-page-global.module.css";
-import { SEARCH_ICONS } from "./search-icons";
+import { getRowStrokeWidth, SEARCH_ICONS } from "./search-icons";
 import styles from "../../styles/features/search/mobile-search-sheet.module.css";
 import { getWhatListProps, WhatList, WhereList } from "./suggestion-list";
 import type { SearchController } from "./use-search";
@@ -110,7 +110,10 @@ export const MobileSearchSheet = ({ search }: MobileSearchSheetProps) => {
                   <div key={key} className={styles.row}>
                     <button onClick={open} className={styles.rowButton}>
                       <span className={styles.rowIcon}>
-                        <RowIcon size={20} strokeWidth={1.7} />
+                        <RowIcon
+                          size={20}
+                          strokeWidth={getRowStrokeWidth(RowIcon)}
+                        />
                       </span>
                       <span className={styles.rowText}>
                         <span className={styles.rowCaption}>{caption}</span>

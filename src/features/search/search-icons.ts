@@ -34,3 +34,6 @@ const GROUP_ICONS: Record<string, LucideIcon> = {
 
 export const getGroupIcon = (groupId: string) =>
   GROUP_ICONS[groupId] ?? SEARCH_ICONS.grid;
+
+export const getRowStrokeWidth = (icon: LucideIcon) =>
+  icon === SEARCH_ICONS.pin ? 1.8 : 1.7;
