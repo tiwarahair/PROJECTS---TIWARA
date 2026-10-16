@@ -258,7 +258,11 @@ const AddressFinderField = ({
               </div>
             )}
           </div>
-          <div id={ids.queryError} aria-live="polite">
+          <div
+            id={ids.queryError}
+            aria-live="polite"
+            className={styles.errorSlot}
+          >
             {queryError && (
               <div role="alert" className={styles.error}>
                 <CircleAlert

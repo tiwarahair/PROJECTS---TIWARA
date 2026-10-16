@@ -171,7 +171,7 @@ const PayForm = ({ booking }: StepPayProps) => {
           widgetRef={pay.turnstileRef}
           onToken={pay.onTurnstileToken}
         />
-        <div className={joinClassNames(styles.payRow, styles.payRowLoose)}>
+        <div className={styles.payRow}>
           <button
             onClick={actions.goBack}
             aria-label="Back"
