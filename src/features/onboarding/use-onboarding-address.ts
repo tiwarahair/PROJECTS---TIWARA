@@ -1,6 +1,6 @@
 // The wizard's business address: picked or typed, then placed on the map.
 import type { FieldPath } from "react-hook-form";
-import type { EmittedAddress } from "../../components/address-finder/use-address-finder";
+import type { EmittedAddress } from "../../components/address-finder/data";
 import { geocodeAddress } from "../../lib/google-maps";
 import { isAddressValid } from "../../utils/address";
 import type { OnboardingForm } from "./onboarding-state";

@@ -10,7 +10,7 @@ import type {
   AddressFinderValue,
   AddressFixture,
   EmittedAddress,
-} from "./use-address-finder";
+} from "./data";
 
 export interface AddressFinderProps {
   label?: string;
