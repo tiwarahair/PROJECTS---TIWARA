@@ -233,6 +233,10 @@
   margin-top: 1px;
 }
 
+.errorSlot:empty {
+  margin-top: -8px;
+}
+
 .textLink {
   border: none;
   background: none;
