@@ -59,17 +59,10 @@ export interface ConfirmDialog {
 export interface SettingsState {
   email: string;
   emailFlow: "edit" | null;
-  newEmail: string;
-  emailTouched: boolean;
   pendingEmail: string;
-  /** The codes sent to the current and the new address. */
-  emailCodes: { current: string; next: string };
   isCurrentEmailConfirmed: boolean;
-  emailError: string;
   phone: string;
   phoneFlow: "edit" | null;
-  newPhone: string;
-  phoneError: string;
   isSettingPassword: boolean;
   /** `code` is the one emailed to confirm it's them. */
   password: { code: string; next: string; confirm: string };
@@ -128,16 +121,10 @@ export const getInitialSettingsState = (
   return {
     email,
     emailFlow: null,
-    newEmail: "",
-    emailTouched: false,
     pendingEmail: "",
-    emailCodes: { current: "", next: "" },
     isCurrentEmailConfirmed: false,
-    emailError: "",
     phone,
     phoneFlow: null,
-    newPhone: "",
-    phoneError: "",
     isSettingPassword: false,
     password: { code: prefilled ? "123456" : "", next: prefilled, confirm: "" },
     isPasswordCodeSent: !!prefilled,

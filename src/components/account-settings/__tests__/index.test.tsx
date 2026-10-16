@@ -85,6 +85,38 @@ describe("AccountSettings", () => {
     expect(screen.getByText("Mobile updated")).toBeInTheDocument();
   });
 
+  it("checks the new login email and mobile before sending anything", async () => {
+    render(<AccountSettings />, { wrapper: MemoryRouter });
+    await user.click(screen.getAllByRole("button", { name: "Change" })[0]!);
+    await user.type(screen.getByLabelText("New email"), "amara@");
+    await user.click(screen.getByRole("button", { name: "Send codes" }));
+
+    expect(
+      await screen.findByText(
+        "Enter an email address, like name@example.co.uk.",
+      ),
+    ).toBeInTheDocument();
+
+    await user.clear(screen.getByLabelText("New email"));
+
+    await user.type(
+      screen.getByLabelText("New email"),
+      "Amara.Okonkwo@gmail.com",
+    );
+
+    expect(
+      await screen.findByText("That’s already your login email."),
+    ).toBeInTheDocument();
+
+    await user.click(screen.getAllByRole("button", { name: "Change" })[0]!);
+    await user.type(screen.getByLabelText("New phone number"), "12345");
+    await user.click(screen.getByRole("button", { name: "Save" }));
+
+    expect(
+      await screen.findByText("Enter a UK mobile number, like 07700 900418."),
+    ).toBeInTheDocument();
+  });
+
   it("changes the login email with a code from each address", async () => {
     render(<AccountSettings />, { wrapper: MemoryRouter });
     await user.click(screen.getAllByRole("button", { name: "Change" })[0]!);
