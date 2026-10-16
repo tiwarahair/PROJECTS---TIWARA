@@ -23,9 +23,11 @@ export const useTwoFactorForm = ({ state }: StudioController) => {
 
   const { reset } = form;
 
+  const isOpen = !!flow && !state.twoFactorOut;
+
   useEffect(() => {
     reset();
-  }, [flow?.step, reset]);
+  }, [flow?.step, isOpen, reset]);
 
   return form;
 };

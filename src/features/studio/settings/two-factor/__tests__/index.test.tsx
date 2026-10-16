@@ -1,4 +1,4 @@
-import { act, screen, within } from "@testing-library/react";
+import { act, screen, waitFor, within } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { renderWithStore } from "../../../../../test/render-with-store";
 import { StudioPage } from "../../..";
@@ -160,6 +160,26 @@ describe("Studio → two-step verification", () => {
     expect(within(dialog).getByRole("alert")).toHaveTextContent(
       "Enter the 6-digit code",
     );
+  });
+
+  it("a name error replaces an earlier wrong-code error", async () => {
+    renderFixture("tf-app-error");
+    const dialog = getDialog();
+
+    await user.clear(within(dialog).getByLabelText("Name this device"));
+    await user.click(within(dialog).getByRole("button", { name: "Turn on" }));
+
+    await waitFor(() =>
+      expect(
+        within(dialog)
+          .getAllByRole("alert")
+          .map(({ textContent }) => textContent),
+      ).toEqual(["Name this device"]),
+    );
+
+    expect(
+      within(dialog).getByLabelText("Enter the 6-digit code from the app"),
+    ).toHaveAttribute("aria-invalid", "false");
   });
 
   it("back returns to the screen before, one step at a time", async () => {

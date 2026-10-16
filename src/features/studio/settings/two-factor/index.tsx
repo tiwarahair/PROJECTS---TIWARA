@@ -98,8 +98,8 @@ export const TwoFactorDialog = ({ studio }: TwoFactorDialogProps) => {
 
   const view: TwoFactorView = {
     ...baseView,
-    isNameError: !!errors.name || baseView.isNameError,
-    isCodeError: !!errors.code || baseView.isCodeError,
+    isNameError: !!errors.name || (!errors.code && baseView.isNameError),
+    isCodeError: !!errors.code || (!errors.name && baseView.isCodeError),
     errorMessage: formError || baseView.errorMessage,
     onName: (event) => {
       form.clearErrors("name");
