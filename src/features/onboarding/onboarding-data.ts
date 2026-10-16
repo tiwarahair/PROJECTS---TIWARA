@@ -5,21 +5,23 @@ import {
   Armchair,
   Car,
   Clock,
-  Cloud,
   CreditCard,
-  Crown,
   DollarSign,
-  Dna,
   House,
   Milk,
-  Scissors,
   Search,
-  Spool,
   Store,
   UserRound,
-  WavesVertical,
 } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
+import {
+  BraidsIcon,
+  LocsIcon,
+  NaturalHairIcon,
+  StylistIcon,
+  WeaveIcon,
+  WigIcon,
+} from "../../components/icons/custom-icons";
 
 interface ChoiceTile {
   key: string;
@@ -60,31 +62,31 @@ export const CATEGORIES: ChoiceTile[] = [
     key: "braids",
     title: "Braids & Twists",
     subtitle: "Knotless, goddess, fulani, passion twists…",
-    icon: Dna,
+    icon: BraidsIcon,
   },
   {
     key: "wigs",
     title: "Wigs",
     subtitle: "Installs, construction, revamps, customisation",
-    icon: Crown,
+    icon: WigIcon,
   },
   {
     key: "weaves",
     title: "Weave extensions & Sew-ins",
     subtitle: "Sew-ins, quick weaves, tape-ins, ponytails",
-    icon: Spool,
+    icon: WeaveIcon,
   },
   {
     key: "locs",
     title: "Locs",
     subtitle: "Starter locs, re-twists, repairs, extensions",
-    icon: WavesVertical,
+    icon: LocsIcon,
   },
   {
     key: "natural",
     title: "Natural Hair",
     subtitle: "Wash & style, silk press, cornrows, twist outs…",
-    icon: Cloud,
+    icon: NaturalHairIcon,
   },
   {
     key: "treatments",
@@ -131,7 +133,7 @@ export const BENEFITS: Omit<ChoiceTile, "key">[] = [
 
 export const CHOOSER_ICONS = {
   customer: UserRound,
-  pro: Scissors,
+  pro: StylistIcon,
 };
 
 export const TERMS_BODY = {

@@ -1,5 +1,6 @@
 import type { ChangeEvent, FocusEvent, KeyboardEvent, Ref } from "react";
-import { Moon, Sun } from "lucide-react";
+import { Sun } from "lucide-react";
+import { MoonIcon } from "../../components/icons/custom-icons";
 import { joinClassNames } from "../../utils/class-names";
 import styles from "../../styles/features/onboarding/onboarding-fields.module.css";
 import type { AuthFailure } from "../../lib/auth-errors";
@@ -10,7 +11,7 @@ export const ModeIcon = ({ isDark }: { isDark: boolean }) =>
   isDark ? (
     <Sun size={19} strokeWidth={1.8} className={styles.modeIcon} />
   ) : (
-    <Moon size={19} strokeWidth={1.8} className={styles.modeIcon} />
+    <MoonIcon size={19} strokeWidth={1.8} className={styles.modeIcon} />
   );
 
 export const Spinner = ({ small }: { small?: boolean }) => (
