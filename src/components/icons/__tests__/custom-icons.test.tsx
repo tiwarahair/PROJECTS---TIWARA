@@ -1,20 +1,26 @@
 import { render } from "@testing-library/react";
 import { describe, expect, it } from "vitest";
 import {
+  AllStylesIcon,
   BraidsIcon,
+  FavouritesHeartIcon,
   MoonIcon,
   NaturalHairIcon,
   StylistIcon,
+  TreatmentIcon,
   VerifiedBadgeIcon,
   WigIcon,
 } from "../custom-icons";
 
 describe("custom icons", () => {
   it.each([
+    AllStylesIcon,
     BraidsIcon,
+    FavouritesHeartIcon,
     MoonIcon,
     NaturalHairIcon,
     StylistIcon,
+    TreatmentIcon,
     VerifiedBadgeIcon,
     WigIcon,
   ])("draws its path and takes lucide's size and stroke props", (Icon) => {

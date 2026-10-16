@@ -1,4 +1,4 @@
-import { Heart } from "lucide-react";
+import { FavouritesHeartIcon } from "../icons/custom-icons";
 import { Link } from "react-router";
 import { FAVOURITES_HREF } from "../../hooks/use-favourites";
 import { useIdentity } from "../../hooks/use-identity";
@@ -58,7 +58,7 @@ export const SiteHeader = ({
               aria-label="Favourites"
               className={styles.favourites}
             >
-              <Heart size={20} strokeWidth={2} />
+              <FavouritesHeartIcon size={20} strokeWidth={2} />
             </Link>
           )}
           {LINKS.map(([to, label]) => (

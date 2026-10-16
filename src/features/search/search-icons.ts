@@ -1,7 +1,5 @@
 import {
   Calendar,
-  Droplet,
-  Grid2x2Plus,
   MapPin,
   Navigation,
   Search,
@@ -10,13 +8,15 @@ import {
   type LucideIcon,
 } from "lucide-react";
 import {
+  AllStylesIcon,
   BraidsIcon,
   NaturalHairIcon,
+  TreatmentIcon,
   WigIcon,
 } from "../../components/icons/custom-icons";
 
 export const SEARCH_ICONS = {
-  grid: Grid2x2Plus,
+  grid: AllStylesIcon,
   pin: MapPin,
   arrow: Navigation,
   search: Search,
@@ -29,7 +29,7 @@ const GROUP_ICONS: Record<string, LucideIcon> = {
   weaves: Spool,
   locs: WavesVertical,
   natural: NaturalHairIcon,
-  treatments: Droplet,
+  treatments: TreatmentIcon,
 };
 
 export const getGroupIcon = (groupId: string) =>

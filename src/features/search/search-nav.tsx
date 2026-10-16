@@ -1,4 +1,5 @@
-import { ArrowLeft, Heart, Search } from "lucide-react";
+import { ArrowLeft, Search } from "lucide-react";
+import { FavouritesHeartIcon } from "../../components/icons/custom-icons";
 import type { CSSProperties } from "react";
 import { Link } from "react-router";
 import { AccountAvatar, SiteMenu } from "../../components/site-menu/site-menu";
@@ -186,7 +187,7 @@ export const SearchNav = ({ search }: SearchNavProps) => {
               title="Favourites"
               className={styles.favourites}
             >
-              <Heart size={20} strokeWidth={2} />
+              <FavouritesHeartIcon size={20} strokeWidth={2} />
             </Link>
           )}
           {loggedIn ? (
