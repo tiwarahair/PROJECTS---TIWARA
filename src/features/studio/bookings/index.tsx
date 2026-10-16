@@ -11,7 +11,8 @@ import {
   X,
 } from "lucide-react";
 import { joinClassNames } from "../../../utils/class-names";
-import { getBlockTone, getBookingsView } from "./view";
+import { getBlockTone } from "./timeline";
+import { getBookingsView } from "./view";
 import type { BookingsView } from "./view";
 import { GATE_REASON } from "../core/constants";
 import type { DecoratedBooking } from "./decorate";
