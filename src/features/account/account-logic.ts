@@ -8,7 +8,7 @@ import { findService } from "../../utils/services";
 import type { AccountBooking, Profile, SavedCard } from "./account-data";
 import { formatMoney } from "../../utils/money";
 import { formatWeekdayDate, formatClockTime } from "../../utils/dates";
-import { getCalendarFile } from "../../utils/calendar-file";
+import { getCalendarFile } from "../../../supabase/functions/_shared/calendar-file";
 
 const DAY_MS = 864e5;
 

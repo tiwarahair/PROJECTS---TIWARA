@@ -1,0 +1,186 @@
+-- Messages when a booking is confirmed: the client's email (manage link, calendar file, and for guests a "save
+-- your details" link) and text, and the stylist's "new booking" email and text as their preferences say.
+
+-- Single-use links: only the hash is kept; the link itself goes out in the message.
+create table public.booking_tokens (
+  id uuid primary key default gen_random_uuid(),
+  booking_id uuid not null references public.bookings (id) on delete cascade,
+  purpose text not null check (purpose in ('manage', 'invite')),
+  token_hash bytea not null unique,
+  expires_at timestamptz not null,
+  used_at timestamptz,
+  created_at timestamptz not null default now()
+);
+
+create index booking_tokens_booking_id_idx on public.booking_tokens (booking_id);
+
+-- No client policies: only security definer functions and the service role read tokens.
+alter table public.booking_tokens enable row level security;
+
+-- the site the client booked on (local, staging or live), so the links in their messages go back to it
+alter table public.bookings add column site text not null default 'https://www.tiwarashouse.com';
+
+/** For other SQL functions and Edge Functions: queues a text for the next sender run. */
+create function public.queue_sms(to_address text, template text, payload jsonb, user_id uuid default null)
+returns uuid
+language sql
+security definer
+set search_path = ''
+as $$
+  insert into public.notifications (user_id, channel, to_address, template, payload)
+  values (queue_sms.user_id, 'sms', queue_sms.to_address, queue_sms.template, queue_sms.payload)
+  returning id
+$$;
+
+/** Fails a message at once, without retries (e.g. texts while SMS isn't set up). */
+create function public.mark_notification_failed_now(notification_id uuid, error text)
+returns void
+language sql
+security definer
+set search_path = ''
+as $$
+  update public.notifications set status = 'failed', last_error = error
+  where id = notification_id and status = 'sending'
+$$;
+
+/** A new single-use link for the booking; returns the token, which isn't stored. */
+create function public.create_booking_token(target uuid, purpose text, expires_at timestamptz)
+returns text
+language plpgsql
+security definer
+set search_path = ''
+as $$
+declare
+  -- 24 random bytes as URL-safe base64: 32 characters, so links stay short enough for a text
+  token text := translate(encode(extensions.gen_random_bytes(24), 'base64'), '+/', '-_');
+begin
+  insert into public.booking_tokens (booking_id, purpose, token_hash, expires_at)
+  values (target, create_booking_token.purpose, sha256(convert_to(token, 'UTF8')), create_booking_token.expires_at);
+
+  return token;
+end;
+$$;
+
+/** Queues the confirmation messages for a booking that has just been paid. */
+create function public.queue_booking_messages(target uuid)
+returns void
+language plpgsql
+security definer
+set search_path = ''
+as $$
+declare
+  booking public.bookings;
+  stylist public.stylists;
+  place public.stylist_private;
+  owner_email text;
+  preference public.notification_preferences;
+  details jsonb;
+  manage_url text;
+begin
+  select * into booking from public.bookings where id = target;
+  select * into stylist from public.stylists where id = booking.stylist_id;
+  select * into place from public.stylist_private where stylist_id = stylist.id;
+  select email into owner_email from auth.users where id = stylist.owner_id;
+  select * into preference from public.notification_preferences where stylist_id = stylist.id and event = 'new_booking';
+
+  manage_url := booking.site || '/manage?token='
+    || public.create_booking_token(booking.id, 'manage', booking.starts_at + interval '30 days');
+
+  details := jsonb_build_object(
+    'ref', booking.ref,
+    'service_name', booking.snapshot ->> 'service_name',
+    'stylist_name', stylist.business_name,
+    'starts_at', booking.starts_at,
+    'ends_at', booking.ends_at,
+    'is_mobile', stylist.business_type = 'mobile',
+    'where', case
+      when stylist.business_type = 'mobile'
+        then concat_ws(', ', booking.address ->> 'line1', nullif(booking.address ->> 'line2', ''), booking.address ->> 'postcode')
+      else concat_ws(', ', stylist.business_name, place.line1, nullif(place.line2, ''), place.city, place.postcode)
+    end,
+    'client_name', concat_ws(' ', booking.contact ->> 'first', booking.contact ->> 'last'),
+    'client_phone', booking.contact ->> 'phone',
+    'notes', booking.notes
+  );
+
+  perform public.queue_email(
+    booking.contact ->> 'email',
+    'booking_confirmed',
+    details || jsonb_build_object(
+      'terms', booking.terms,
+      'price_pence', booking.price_pence,
+      'fee_pence', booking.fee_pence,
+      'paid_pence', booking.due_today_pence,
+      'manage_url', manage_url,
+      -- guests can turn the booking into an account
+      'save_details_url', case when booking.client_id is null then booking.site || '/save-details?token='
+        || public.create_booking_token(booking.id, 'invite', now() + interval '24 hours') end
+    ),
+    booking.client_id
+  );
+
+  perform public.queue_sms(
+    booking.contact ->> 'phone', 'booking_confirmed', details || jsonb_build_object('manage_url', manage_url), booking.client_id
+  );
+
+  if owner_email is not null and coalesce(preference.email, true) then
+    perform public.queue_email(
+      owner_email, 'new_booking', details || jsonb_build_object('studio_url', booking.site || '/studio'), stylist.owner_id
+    );
+  end if;
+
+  if stylist.contact_phone is not null and coalesce(preference.sms, false) then
+    perform public.queue_sms(stylist.contact_phone, 'new_booking', details, stylist.owner_id);
+  end if;
+end;
+$$;
+
+create or replace function public.confirm_booking_payment(intent text)
+returns text
+language plpgsql
+security definer
+set search_path = ''
+as $$
+declare
+  booking public.bookings;
+begin
+  select * into booking from public.bookings where stripe_payment_intent_id = intent for update;
+
+  if booking.id is null then
+    raise exception 'booking_not_found';
+  end if;
+
+  if booking.status <> 'held' and booking.status <> 'expired' then
+    return 'duplicate';
+  end if;
+
+  begin
+    update public.bookings
+    set status = 'confirmed', paid_at = now(), hold_expires_at = null
+    where id = booking.id;
+  exception when exclusion_violation then
+    insert into public.booking_events (booking_id, kind) values (booking.id, 'paid_after_slot_taken');
+
+    return 'slot_taken';
+  end;
+
+  insert into public.booking_events (booking_id, kind, data)
+  values (booking.id, 'confirmed', jsonb_build_object('payment_intent', intent));
+
+  perform public.queue_booking_messages(booking.id);
+
+  return 'confirmed';
+end;
+$$;
+
+revoke execute on function
+  public.queue_sms(text, text, jsonb, uuid),
+  public.mark_notification_failed_now(uuid, text),
+  public.create_booking_token(uuid, text, timestamptz),
+  public.queue_booking_messages(uuid)
+  from public, anon, authenticated;
+
+grant execute on function
+  public.queue_sms(text, text, jsonb, uuid),
+  public.mark_notification_failed_now(uuid, text)
+  to service_role;

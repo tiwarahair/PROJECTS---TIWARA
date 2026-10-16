@@ -1,6 +1,8 @@
 // One builder per template key; each turns a row's payload into a notice (layout in _shared/email-layout.ts).
 import { renderNotice, SUPPORT_EMAIL } from "../_shared/email-layout.ts";
 import type { RenderedEmail } from "../_shared/email-layout.ts";
+import { bookingConfirmed, newBooking } from "./booking-emails.ts";
+import type { BookingDetails, ConfirmedBooking } from "./booking-emails.ts";
 
 type TemplateBuilder = (payload: Record<string, unknown>) => RenderedEmail;
 
@@ -54,6 +56,8 @@ const templates: Record<string, TemplateBuilder> = {
   tax_details_updated: taxDetailsUpdated,
   authenticator_added: authenticatorChanged(true),
   authenticator_removed: authenticatorChanged(false),
+  booking_confirmed: (payload) => bookingConfirmed(payload as unknown as ConfirmedBooking),
+  new_booking: (payload) => newBooking(payload as unknown as BookingDetails & { studio_url: string }),
 };
 
 export const renderEmail = (

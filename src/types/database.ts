@@ -161,6 +161,45 @@ export type Database = {
           },
         ];
       };
+      booking_tokens: {
+        Row: {
+          booking_id: string;
+          created_at: string;
+          expires_at: string;
+          id: string;
+          purpose: string;
+          token_hash: string;
+          used_at: string | null;
+        };
+        ComputedFields: never;
+        Insert: {
+          booking_id: string;
+          created_at?: string;
+          expires_at: string;
+          id?: string;
+          purpose: string;
+          token_hash: string;
+          used_at?: string | null;
+        };
+        Update: {
+          booking_id?: string;
+          created_at?: string;
+          expires_at?: string;
+          id?: string;
+          purpose?: string;
+          token_hash?: string;
+          used_at?: string | null;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "booking_tokens_booking_id_fkey";
+            columns: ["booking_id"];
+            isOneToOne: false;
+            referencedRelation: "bookings";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
       bookings: {
         Row: {
           address: Json | null;
@@ -186,6 +225,7 @@ export type Database = {
           ref: string;
           reschedule_count: number;
           service_id: string | null;
+          site: string;
           snapshot: NonNullable<Json>;
           starts_at: string;
           status: string;
@@ -219,6 +259,7 @@ export type Database = {
           ref?: string;
           reschedule_count?: number;
           service_id?: string | null;
+          site?: string;
           snapshot: NonNullable<Json>;
           starts_at: string;
           status?: string;
@@ -251,6 +292,7 @@ export type Database = {
           ref?: string;
           reschedule_count?: number;
           service_id?: string | null;
+          site?: string;
           snapshot?: NonNullable<Json>;
           starts_at?: string;
           status?: string;
@@ -1336,6 +1378,10 @@ export type Database = {
       };
       close_business: { Args: Record<PropertyKey, never>; Returns: undefined };
       confirm_booking_payment: { Args: { intent: string }; Returns: string };
+      create_booking_token: {
+        Args: { expires_at: string; purpose: string; target: string };
+        Returns: string;
+      };
       create_stylist_business: {
         Args: { meta: Json; new_owner_id: string };
         Returns: string;
@@ -1430,6 +1476,10 @@ export type Database = {
         Args: { error: string; notification_id: string };
         Returns: undefined;
       };
+      mark_notification_failed_now: {
+        Args: { error: string; notification_id: string };
+        Returns: undefined;
+      };
       mark_notification_sent: {
         Args: { notification_id: string };
         Returns: undefined;
@@ -1447,7 +1497,17 @@ export type Database = {
         Args: Record<PropertyKey, never>;
         Returns: number;
       };
+      queue_booking_messages: { Args: { target: string }; Returns: undefined };
       queue_email: {
+        Args: {
+          payload: Json;
+          template: string;
+          to_address: string;
+          user_id?: string;
+        };
+        Returns: string;
+      };
+      queue_sms: {
         Args: {
           payload: Json;
           template: string;

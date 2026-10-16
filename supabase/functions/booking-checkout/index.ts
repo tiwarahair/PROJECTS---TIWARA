@@ -4,6 +4,7 @@ import { admin } from "../_shared/admin.ts";
 import { getClientIp } from "../_shared/client-ip.ts";
 import { corsHeaders, respond } from "../_shared/cors.ts";
 import { isWithinLimit } from "../_shared/rate-limit.ts";
+import { getSite } from "../_shared/site.ts";
 import { isHuman } from "../_shared/turnstile.ts";
 import { savesCard } from "./payment-params.ts";
 import type { CheckoutQuote } from "./payment-params.ts";
@@ -63,7 +64,11 @@ Deno.serve(async (request) => {
 
     await admin
       .from("bookings")
-      .update({ stripe_payment_intent_id: intent.id, stripe_customer_id: customerId })
+      .update({
+        stripe_payment_intent_id: intent.id,
+        stripe_customer_id: customerId,
+        site: getSite(request.headers.get("Origin")),
+      })
       .eq("id", quote.id);
 
     return respond(200, { clientSecret: intent.client_secret });

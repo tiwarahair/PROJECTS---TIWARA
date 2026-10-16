@@ -5,7 +5,7 @@ import { joinClassNames } from "../../utils/class-names";
 import {
   getCalendarFile,
   getGoogleCalendarUrl,
-} from "../../utils/calendar-file";
+} from "../../../supabase/functions/_shared/calendar-file";
 import { downloadFile } from "../../utils/download-file";
 import { getWindowText } from "../../utils/pricing";
 import { getCancelSentence, getPaySubtitle } from "./logic/content";
