@@ -1,0 +1,104 @@
+.ownNote {
+  display: block;
+  width: 100%;
+  box-sizing: border-box;
+  text-align: left;
+  background: transparent;
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-sm);
+  padding: 11px 14px;
+  margin-top: 10px;
+  font-size: 14.5px;
+  color: var(--text-secondary);
+  line-height: 1.45;
+}
+
+.ownNote:active {
+  background: var(--quiet) !important;
+}
+
+.addNote {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+  box-sizing: border-box;
+  background: none;
+  border: 1px dashed var(--border-strong, #d8d2c6);
+  border-radius: var(--radius-sm);
+  padding: 10px 14px;
+  margin-top: 10px;
+  font-size: 14.5px;
+  font-weight: 600;
+  color: var(--text-secondary);
+  text-align: left;
+}
+
+.addNote:active {
+  background: var(--quiet) !important;
+}
+
+.noteEditor {
+  margin-top: 10px;
+  animation: rowin 0.2s cubic-bezier(0.23, 1, 0.32, 1) both;
+}
+
+.noteInput {
+  width: 100%;
+  box-sizing: border-box;
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-sm);
+  background: transparent;
+  padding: 11px 13px;
+  font-size: 17px;
+  outline: none;
+  resize: none;
+  font-family: "Hanken Grotesk", sans-serif;
+  line-height: 1.45;
+}
+
+.noteActions {
+  display: flex;
+  gap: 8px;
+  margin-top: 8px;
+}
+
+.noteCancel {
+  flex: 1;
+  border: 1px solid var(--border-strong, #d8d2c6);
+  background: transparent;
+  border-radius: var(--radius-full);
+  padding: 9px 0;
+  font-size: 14.5px;
+  font-weight: 600;
+}
+
+.noteCancel:active {
+  transform: scale(0.97) !important;
+}
+
+.noteSave {
+  flex: 1;
+  border: none;
+  background: #1a1714;
+  color: var(--neutral-100);
+  border-radius: var(--radius-full);
+  padding: 9px 0;
+  font-size: 14.5px;
+  font-weight: 600;
+}
+
+.noteSave:active {
+  transform: scale(0.97) !important;
+}
+
+@keyframes rowin {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
