@@ -69,7 +69,31 @@ as $$
   where bookings.id = target
 $$;
 
-/** Queues the confirmation messages for a booking that has just been paid. */
+create function public.get_booking_details(target uuid)
+returns jsonb
+language sql
+stable
+security definer
+set search_path = ''
+as $$
+  select jsonb_build_object(
+    'ref', bookings.ref,
+    'service_name', bookings.snapshot ->> 'service_name',
+    'stylist_name', stylists.business_name,
+    'starts_at', bookings.starts_at,
+    'ends_at', bookings.ends_at,
+    'is_mobile', stylists.business_type = 'mobile',
+    'where', public.get_booking_where(bookings.id),
+    'client_name', concat_ws(' ', bookings.contact ->> 'first', bookings.contact ->> 'last'),
+    'client_phone', bookings.contact ->> 'phone',
+    'notes', bookings.notes,
+    'address_notes', nullif(bookings.address ->> 'notes', '')
+  )
+  from public.bookings
+  join public.stylists on stylists.id = bookings.stylist_id
+  where bookings.id = target
+$$;
+
 create function public.queue_booking_messages(target uuid)
 returns void
 language plpgsql
@@ -92,18 +116,7 @@ begin
   manage_url := booking.site || '/manage?token='
     || public.create_booking_token(booking.id, 'manage', booking.starts_at + interval '30 days');
 
-  details := jsonb_build_object(
-    'ref', booking.ref,
-    'service_name', booking.snapshot ->> 'service_name',
-    'stylist_name', stylist.business_name,
-    'starts_at', booking.starts_at,
-    'ends_at', booking.ends_at,
-    'is_mobile', stylist.business_type = 'mobile',
-    'where', public.get_booking_where(booking.id),
-    'client_name', concat_ws(' ', booking.contact ->> 'first', booking.contact ->> 'last'),
-    'client_phone', booking.contact ->> 'phone',
-    'address_notes', nullif(booking.address ->> 'notes', '')
-  );
+  details := public.get_booking_details(booking.id);
 
   perform public.queue_email(
     booking.contact ->> 'email',
@@ -114,7 +127,6 @@ begin
       'fee_pence', booking.fee_pence,
       'paid_pence', booking.due_today_pence,
       'manage_url', manage_url,
-      -- guests can turn the booking into an account
       'save_details_url', case when booking.client_id is null then booking.site || '/save-details?token='
         || public.create_booking_token(booking.id, 'invite', now() + interval '24 hours') end
     ),
@@ -182,6 +194,7 @@ revoke execute on function
   public.mark_notification_failed_now(uuid, text),
   public.create_booking_token(uuid, text, timestamptz),
   public.get_booking_where(uuid),
+  public.get_booking_details(uuid),
   public.queue_booking_messages(uuid)
   from public, anon, authenticated;
 

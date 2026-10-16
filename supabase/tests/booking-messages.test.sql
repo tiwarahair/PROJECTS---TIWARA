@@ -1,5 +1,5 @@
 begin;
-select plan(19);
+select plan(20);
 
 insert into auth.users (id, instance_id, aud, role, email, raw_user_meta_data, raw_app_meta_data)
 values ('a1111111-1111-1111-1111-111111111111', '00000000-0000-0000-0000-000000000000', 'authenticated', 'authenticated',
@@ -30,7 +30,7 @@ declare
   );
 begin
   perform public.checkout_booking((held ->> 'id')::uuid, held ->> 'secret',
-    '{"first":"Nia","last":"Okafor","email":"nia@msg.test","phone":"07700900123"}', '', null, null, null, client);
+    '{"first":"Nia","last":"Okafor","email":"nia@msg.test","phone":"07700900123"}', 'Tender scalp', null, null, null, client);
 
   update public.bookings set stripe_payment_intent_id = intent, site = 'https://dev.tiwarashouse.com'
   where id = (held ->> 'id')::uuid;
@@ -100,6 +100,9 @@ select ok((pg_temp.message((select id from guest), 'sms', 'booking_confirmed')) 
 
 select is((pg_temp.message((select id from guest), 'email', 'new_booking')).to_address, 'owner@msg.test',
   'the stylist is emailed about the new booking by default');
+
+select is((pg_temp.message((select id from guest), 'email', 'new_booking')).payload ->> 'notes', 'Tender scalp',
+  'the stylist sees the client''s notes');
 
 select ok((pg_temp.message((select id from guest), 'sms', 'new_booking')) is null,
   'the stylist isn''t texted unless they turned texts on');
