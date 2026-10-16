@@ -11,7 +11,7 @@ import { useState } from "react";
 import { stripePromise } from "../../lib/stripe";
 import { joinClassNames } from "../../utils/class-names";
 import { OnboardingTurnstile } from "../onboarding/onboarding-turnstile";
-import { getPayIntro, getPaySubtitle } from "./logic/content";
+import { getPayIntro } from "./logic/content";
 import {
   getPaymentAppearance,
   getPaymentFonts,
@@ -120,14 +120,6 @@ const PayForm = ({ booking }: StepPayProps) => {
               setState({ payError: "", payKind: "" });
           }}
         />
-        {policy.cardSaved && (
-          <div data-screen-label="Card saved line" className={styles.savedLine}>
-            <Lock size={15} strokeWidth={1.5} className={styles.savedIcon} />
-            <span>
-              {`Your card is saved securely for this booking's balance and any fees under ${stylist.name}'s policy.`}
-            </span>
-          </div>
-        )}
         {state.loggedIn && !policy.cardSaved && (
           <button
             role="checkbox"
@@ -202,14 +194,6 @@ const PayForm = ({ booking }: StepPayProps) => {
               : `Pay ${money.dueToday} & confirm`}{" "}
             <ArrowRight size={17} strokeWidth={2} />
           </button>
-        </div>
-        <div data-screen-label="Pay sub-line" className={styles.paySub}>
-          {getPaySubtitle(
-            policy.mode,
-            money.balance,
-            money.price,
-            stylist.name,
-          )}
         </div>
         <div className={styles.encrypted}>
           <Lock size={12} strokeWidth={2} /> Encrypted and processed by Stripe.

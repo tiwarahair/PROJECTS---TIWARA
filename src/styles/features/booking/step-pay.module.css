@@ -50,22 +50,6 @@
   background: var(--border-subtle);
 }
 
-.savedLine {
-  display: flex;
-  gap: 10px;
-  align-items: flex-start;
-  padding-top: 6px;
-  font-size: 14px;
-  line-height: 1.5;
-  color: var(--neutral-600);
-  text-wrap: pretty;
-}
-
-.savedIcon {
-  flex: none;
-  margin-top: 3px;
-}
-
 .future {
   display: flex;
   align-items: center;
@@ -140,15 +124,6 @@
   color: var(--neutral-900);
   border-radius: var(--radius-full);
   cursor: pointer;
-}
-
-.paySub {
-  text-align: center;
-  font-size: 14px;
-  line-height: 1.5;
-  color: var(--neutral-600);
-  margin-top: 2px;
-  text-wrap: pretty;
 }
 
 .encrypted {
