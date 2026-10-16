@@ -5,9 +5,18 @@ import {
   getActiveServices,
   getServiceOptions,
 } from "../../../utils/services";
-import { DEMO_DETAILS, EMPTY_DETAILS } from "./constants";
+import { EMPTY_DETAILS } from "./constants";
 import { getFreshSelection } from "./state";
-import type { BookingState } from "./types";
+import type { BookingState, Details } from "./types";
+
+/** The demo customer. */
+const DEMO_DETAILS: Details = {
+  first: "Nia",
+  last: "Okafor",
+  email: "nia.okafor@gmail.com",
+  phone: "07700 900123",
+  notes: "",
+};
 
 /** Next week's Wednesday: the demo date every fixture books. */
 const getFixtureDate = (): Date => {
@@ -27,6 +36,10 @@ const pickLabel = (
         ?.label ?? null)
     : null;
 
+/** The named service, else the stylist's first active one. */
+const findServiceOrFirst = (stylist: Stylist, name: string) =>
+  findService(stylist, name) ?? getActiveServices(stylist)[0];
+
 export const applyFixture = (
   state: BookingState,
   fixture: string,
@@ -42,9 +55,7 @@ export const applyFixture = (
   };
 
   if (!state.serviceId) {
-    const service =
-      findService(defaultStylist, "Knotless braids") ??
-      getActiveServices(defaultStylist)[0];
+    const service = findServiceOrFirst(defaultStylist, "Knotless braids");
 
     state.serviceId = service ? service.id : "";
     state.selection = getFreshSelection(service);
@@ -59,7 +70,7 @@ export const applyFixture = (
     state.selection.length = pickLabel(options.length, "Shoulder");
   }
 
-  state.details = { ...DEMO_DETAILS, notes: "" };
+  state.details = { ...DEMO_DETAILS };
   state.step = 4;
   state.guest = true;
 
@@ -95,9 +106,7 @@ export const applyFixture = (
 
   // with ?stylist=naturallynia: a service with nothing to customise
   if (fixture === "natural") {
-    const service =
-      findService(defaultStylist, "Wash & style") ??
-      getActiveServices(defaultStylist)[0];
+    const service = findServiceOrFirst(defaultStylist, "Wash & style");
 
     state.serviceId = service?.id ?? "";
     state.selection = getFreshSelection(service);
@@ -113,13 +122,8 @@ export const applyFixture = (
     if (fixture === "custom-after") {
       const { size, length } = getServiceOptions(service);
 
-      state.selection.size = size.find(({ label }) => label === "Medium")
-        ? "Medium"
-        : (size[0]?.label ?? null);
-
-      state.selection.length = length.find(({ label }) => label === "Bra")
-        ? "Bra"
-        : (length[0]?.label ?? null);
+      state.selection.size = pickLabel(size, "Medium");
+      state.selection.length = pickLabel(length, "Bra");
     }
   }
 

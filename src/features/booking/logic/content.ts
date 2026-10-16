@@ -163,16 +163,13 @@ export const getPreviewIndex = (
   length: string | null,
   colour: string,
 ): number => {
-  const lengthValue = String(length || "").toLowerCase();
+  const lengthValue = (length ?? "").toLowerCase();
 
   const aiLength =
     ["bob", "bra", "waist"].find((prefix) => lengthValue.startsWith(prefix)) ??
     "shoulder";
 
-  const colourValue =
-    String(colour || "")
-      .toLowerCase()
-      .split(" ")[0] ?? "";
+  const colourValue = colour.toLowerCase().split(" ")[0] ?? "";
 
   const aiColour = ["30", "33", "4", "613"].includes(colourValue)
     ? colourValue

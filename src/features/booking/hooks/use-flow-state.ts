@@ -67,19 +67,13 @@ export const useFlowState = (stylist: Stylist) => {
   }, [setState]);
 
   // after every update: keep the draft (or drop it once confirmed)
-  const isFirstRender = useRef(true);
-
   useEffect(() => {
-    if (isFirstRender.current) {
-      isFirstRender.current = false;
-
-      return;
-    }
+    if (state === initial.state) return;
 
     if (state.confirmed) {
       if (!state.board) clearDraft(state.id);
     } else saveDraft(state);
-  }, [state]);
+  }, [state, initial]);
 
   return { initial, state, stateRef, setState, crumbsRef, scrollToTitle };
 };

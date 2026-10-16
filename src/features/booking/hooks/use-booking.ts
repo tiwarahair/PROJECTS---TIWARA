@@ -12,7 +12,7 @@ import { getAddressCheck, getFirstErrorTarget } from "../logic/details";
 import { clearDraft, getDraftPatch, saveDraft } from "../logic/draft";
 import { focusLater } from "../logic/focus";
 import { getBookingMoney, getCustomisationLine } from "../logic/pricing";
-import { getFreshSelection } from "../logic/state";
+import { getFreshSelection, getStartStep } from "../logic/state";
 import type { Details } from "../logic/types";
 import { useAccount } from "./use-account";
 import { useDemoPay } from "./use-demo-pay";
@@ -110,7 +110,7 @@ export const useBooking = ({ stylist, hours }: PublicStylist) => {
       setState(
         {
           serviceId,
-          step: picked && hasStep2(picked) ? 2 : 3,
+          step: getStartStep(picked),
           selection: getFreshSelection(picked),
           showPrev: false,
           date: null,

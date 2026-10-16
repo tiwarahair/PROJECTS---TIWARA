@@ -16,6 +16,14 @@ interface HoldOptions {
   canListTimes: boolean;
 }
 
+const BACK_TO_TIME: Partial<BookingState> = {
+  step: 3,
+  time: null,
+  hold: null,
+  payError: "",
+  payKind: "",
+};
+
 /** The month's open times and holding the chosen one on the server. */
 export const useHold = ({ flow, choices, canListTimes }: HoldOptions) => {
   const { state, setState, scrollToTitle } = flow;
@@ -96,29 +104,11 @@ export const useHold = ({ flow, choices, canListTimes }: HoldOptions) => {
   const actions = {
     pickAgain: () =>
       setState(
-        {
-          holdExpired: false,
-          hold: null,
-          time: null,
-          step: 3,
-          repickNote: false,
-          payError: "",
-          payKind: "",
-        },
+        { ...BACK_TO_TIME, holdExpired: false, repickNote: false },
         scrollToTitle,
       ),
     pickAnother: () =>
-      setState(
-        {
-          step: 3,
-          time: null,
-          hold: null,
-          payError: "",
-          payKind: "",
-          taken: false,
-        },
-        scrollToTitle,
-      ),
+      setState({ ...BACK_TO_TIME, taken: false }, scrollToTitle),
   };
 
   return {

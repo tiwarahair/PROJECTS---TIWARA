@@ -157,18 +157,14 @@ export const BookingConfirmation = ({ booking }: BookingConfirmationProps) => {
               Save my details
             </button>
             <button
-              onClick={() =>
-                setState({ account: { ...account, saved: true, error: "" } })
-              }
+              onClick={() => setState({ account: { ...account, saved: true } })}
               aria-label="Continue with Google"
               className={styles.socialButton}
             >
               <GoogleLogo size={17} />
             </button>
             <button
-              onClick={() =>
-                setState({ account: { ...account, saved: true, error: "" } })
-              }
+              onClick={() => setState({ account: { ...account, saved: true } })}
               aria-label="Continue with Apple"
               className={styles.socialButton}
             >

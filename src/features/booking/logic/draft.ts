@@ -4,6 +4,14 @@ import type { BookingDraft, BookingState } from "./types";
 
 const getDraftKey = (stylistId: string): string => `tw_bk_draft_${stylistId}`;
 
+export const clearDraft = (stylistId: string): void => {
+  try {
+    localStorage.removeItem(getDraftKey(stylistId));
+  } catch {
+    // storage unavailable
+  }
+};
+
 export const readDraft = (stylistId: string): BookingDraft | null => {
   try {
     const draft = JSON.parse(
@@ -13,7 +21,7 @@ export const readDraft = (stylistId: string): BookingDraft | null => {
     if (!draft || !draft.serviceId) return null;
 
     if (Date.now() - draft.at > DRAFT_TTL_MS) {
-      localStorage.removeItem(getDraftKey(stylistId));
+      clearDraft(stylistId);
 
       return null;
     }
@@ -26,11 +34,9 @@ export const readDraft = (stylistId: string): BookingDraft | null => {
 
 /** Saves the booking so far (no card, photos or allergy text); boards, no service or confirmed never save. */
 export const saveDraft = (state: BookingState): void => {
-  const { board, serviceId, confirmed, details, hold } = state;
+  const { board, serviceId, confirmed, hold } = state;
 
   if (board || !serviceId || confirmed) return;
-
-  const { first, last, email, phone, notes } = details;
 
   const draft: BookingDraft = {
     at: Date.now(),
@@ -41,7 +47,7 @@ export const saveDraft = (state: BookingState): void => {
     calendarYear: state.calendarYear,
     date: state.date,
     time: state.time,
-    details: { first, last, email, phone, notes },
+    details: state.details,
     appointmentAddress: state.appointmentAddress,
     holdUntil: hold ? hold.until : null,
     holdId: hold?.id,
@@ -56,45 +62,30 @@ export const saveDraft = (state: BookingState): void => {
   }
 };
 
-export const clearDraft = (stylistId: string): void => {
-  try {
-    localStorage.removeItem(getDraftKey(stylistId));
-  } catch {
-    // storage unavailable
-  }
-};
-
 /** Restores a draft; a past or released time sends the client back to Time ("Pick your time again"). */
 export const getDraftPatch = (
   draft: BookingDraft,
   state: BookingState,
 ): Partial<BookingState> => {
+  const { calendarYear, calendarMonth, date, time, step, holdUntil } = draft;
   const now = Date.now();
-  let past = false;
+  const [hours = 0, minutes = 0] = (time ?? "").split(":").map(Number);
 
-  if (draft.date && draft.time) {
-    const [hours = 0, minutes = 0] = draft.time.split(":").map(Number);
+  const past =
+    !!(date && time) &&
+    new Date(calendarYear, calendarMonth, date, hours, minutes).getTime() < now;
 
-    past =
-      new Date(
-        draft.calendarYear,
-        draft.calendarMonth,
-        draft.date,
-        hours,
-        minutes,
-      ).getTime() < now;
-  }
+  const holdOk = !!holdUntil && holdUntil > now;
+  const repick = !!time && (past || !holdOk);
 
-  const holdOk = !!(draft.holdUntil && draft.holdUntil > now);
-
-  const patch: Partial<BookingState> = {
+  return {
     serviceId: draft.serviceId,
     selection: draft.selection,
-    step: draft.step,
-    calendarMonth: draft.calendarMonth,
-    calendarYear: draft.calendarYear,
-    date: draft.date,
-    time: draft.time,
+    step: repick ? Math.min(step, 3) : step,
+    calendarMonth,
+    calendarYear,
+    date: past ? null : date,
+    time: repick ? null : time,
     details: { ...state.details, ...draft.details },
     guest: draft.guest ?? !!(draft.details.first || draft.details.email),
     appointmentAddress: {
@@ -102,27 +93,14 @@ export const getDraftPatch = (
       ...draft.appointmentAddress,
     },
     hold:
-      holdOk && draft.holdUntil
+      holdOk && !repick
         ? {
             id: draft.holdId ?? "",
             secret: draft.holdSecret ?? "",
-            until: draft.holdUntil,
+            until: holdUntil,
           }
         : null,
     resumeDraft: null,
-    repickNote: false,
+    repickNote: repick && step >= 3,
   };
-
-  if (draft.time && (past || !holdOk)) {
-    Object.assign(patch, {
-      step: Math.min(draft.step, 3),
-      time: null,
-      hold: null,
-      repickNote: draft.step >= 3,
-    });
-
-    if (past) patch.date = null;
-  }
-
-  return patch;
 };

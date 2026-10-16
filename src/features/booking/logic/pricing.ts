@@ -9,16 +9,18 @@ import type { Selection } from "./types";
 import { formatMoney } from "../../../utils/money";
 
 interface BookingMoney {
-  servicePrice: number;
-  minutes: number;
   policy: PolicySummary;
-  service: string;
   fee: string;
   total: string;
   dueToday: string;
   balance: string;
   price: string;
   duration: string;
+}
+
+interface DeltaOption {
+  priceDelta?: number;
+  minutesDelta?: number;
 }
 
 const EMPTY_POLICY: PolicySummary = {
@@ -43,7 +45,7 @@ export const getBookingMoney = (
   let servicePrice = service ? service.price : 0;
   let minutes = service ? service.minutes : 0;
 
-  const add = (option?: { priceDelta?: number; minutesDelta?: number }) => {
+  const add = (option?: DeltaOption) => {
     if (!option) return;
 
     servicePrice += option.priceDelta || 0;
@@ -57,10 +59,8 @@ export const getBookingMoney = (
     add(ownOptions.find(({ label }) => label === selection.own[name]));
 
   for (const { name, price, minutes: addonMinutes } of options.addons)
-    if (selection.addons.includes(name)) {
-      servicePrice += price;
-      minutes += addonMinutes || 0;
-    }
+    if (selection.addons.includes(name))
+      add({ priceDelta: price, minutesDelta: addonMinutes });
 
   const ready = !!stylist.policies?.mode;
 
@@ -69,10 +69,7 @@ export const getBookingMoney = (
     : EMPTY_POLICY;
 
   return {
-    servicePrice,
-    minutes,
     policy,
-    service: formatMoney(servicePrice),
     fee: formatMoney(policy.fee),
     total: formatMoney(servicePrice + policy.fee),
     dueToday: formatMoney(policy.dueToday),
@@ -81,11 +78,6 @@ export const getBookingMoney = (
     duration: formatServiceDuration(minutes),
   };
 };
-
-interface DeltaOption {
-  priceDelta?: number;
-  minutesDelta?: number;
-}
 
 /** "+£10 +1h" on an option chip; minutes only where showMins (own customisations). */
 export const getDeltaLabel = (

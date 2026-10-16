@@ -46,9 +46,6 @@ interface Hold {
 }
 
 interface AccountSave {
-  password: string;
-  show: boolean;
-  error: string;
   saved: boolean;
   hidden: boolean;
   sent: boolean;
@@ -59,7 +56,6 @@ export interface AllergyState {
   on: boolean;
   text: string;
   prior: boolean;
-  editing: boolean;
   focus: boolean;
 }
 
@@ -77,7 +73,7 @@ export interface BookingDraft {
   calendarYear: number;
   date: number | null;
   time: string | null;
-  details: Omit<Details, "notes"> & { notes: string };
+  details: Details;
   appointmentAddress: BookingAddress;
   holdUntil: number | null;
   holdId?: string;
@@ -93,7 +89,6 @@ export interface BookingState {
   id: string;
   serviceId: string;
   step: number;
-  policyOpen: boolean;
   selection: Selection;
   showPrev: boolean;
   calendarMonth: number;

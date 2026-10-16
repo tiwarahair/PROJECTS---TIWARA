@@ -42,6 +42,8 @@ export const getCalendarDays = (
   return days;
 };
 
+const CLOSED_DAYS_LIST = new Intl.ListFormat("en-GB", { type: "conjunction" });
+
 /** " Closed Mondays and Sundays." for the stylist's closed weekdays, Monday first. */
 export const getClosedLine = (hours: WorkingHours[]): string => {
   // weekday 0 is Monday; LONG_WEEKDAYS starts on Sunday
@@ -51,12 +53,7 @@ export const getClosedLine = (hours: WorkingHours[]): string => {
 
   if (!closed.length) return "";
 
-  const closedDays =
-    closed.length > 1
-      ? `${closed.slice(0, -1).join(", ")} and ${closed[closed.length - 1]}`
-      : closed[0];
-
-  return ` Closed ${closedDays}.`;
+  return ` Closed ${CLOSED_DAYS_LIST.format(closed)}.`;
 };
 
 /** "Wed 14 Oct" */

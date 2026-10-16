@@ -1,18 +1,21 @@
 // Step 4 (Your details) error focus and the address / where copy, plus Step 6 card formatting and checks.
 import type { Stylist } from "../../../types/stylist";
-import { isAddressValid } from "../../../utils/address";
+import {
+  formatPostcode,
+  isAddressValid,
+  isPostcodeValid,
+} from "../../../utils/address";
 import type { BookingAddress, Details, FieldKey } from "./types";
 
 const FIELD_KEYS: FieldKey[] = ["address", "first", "last", "email", "phone"];
 
 /** The client's address for mobile stylists: complete?, "M14 5AB", and the one-line address. */
 export const getAddressCheck = (address: BookingAddress) => {
-  const raw = (address.postcode || "").toUpperCase().replace(/\s+/g, "");
-  const match = raw.match(/^([A-Z]{1,2}\d[A-Z\d]?)(\d[A-Z]{2})$/);
+  const { postcode } = address;
 
-  const postcodeLabel = match
-    ? `${match[1]} ${match[2]}`
-    : (address.postcode || "").toUpperCase().trim();
+  const postcodeLabel = isPostcodeValid(postcode)
+    ? formatPostcode(postcode)
+    : postcode.toUpperCase().trim();
 
   const clientAddress = address.line1.trim()
     ? [address.line1, address.line2, address.town]
@@ -34,7 +37,7 @@ export const getFirstErrorTarget = (
   errors: FieldErrors,
   outBlock: boolean,
 ): string | null => {
-  const [first] = FIELD_KEYS.filter((key) => errors[key]);
+  const first = FIELD_KEYS.find((key) => errors[key]);
 
   if (first) return first === "address" ? "@address" : `bk-${first}`;
 

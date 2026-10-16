@@ -4,14 +4,6 @@ import type { BookingAddress, Details } from "./types";
 export const DRAFT_TTL_MS = 864e5;
 export const DEFAULT_HOLD_SECONDS = 600;
 
-/** The demo customer (dev fixtures only). */
-export const DEMO_DETAILS = {
-  first: "Nia",
-  last: "Okafor",
-  email: "nia.okafor@gmail.com",
-  phone: "07700 900123",
-};
-
 export const EMPTY_DETAILS: Details = {
   first: "",
   last: "",

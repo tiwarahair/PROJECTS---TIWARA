@@ -62,8 +62,8 @@ describe("getBookingMoney", () => {
       },
     );
 
-    expect(money.servicePrice).toBe(163);
-    expect(money.minutes).toBe(215);
+    expect(money.price).toBe("£163");
+    expect(money.duration).toBe("3h 35m");
     expect(money.policy.fee).toBe(2.95);
   });
 });

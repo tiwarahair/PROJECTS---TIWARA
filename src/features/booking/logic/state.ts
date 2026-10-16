@@ -33,7 +33,7 @@ interface InitialBooking {
 }
 
 /** Skip straight past steps the preselected service doesn't need. */
-const getStartStep = (service: Service | null): number => {
+export const getStartStep = (service: Service | null): number => {
   if (!service) return 1;
 
   return hasStep2(service) ? 2 : 3;
@@ -77,7 +77,6 @@ export const getInitialBooking = (stylist: Stylist): InitialBooking => {
     id: stylist.id,
     serviceId: service ? service.id : serviceParam,
     step: getStartStep(service),
-    policyOpen: false,
     selection: getFreshSelection(service),
     showPrev: false,
     calendarMonth: today.getMonth(),
@@ -113,9 +112,6 @@ export const getInitialBooking = (stylist: Stylist): InitialBooking => {
     wallet: null,
     payKind: "",
     account: {
-      password: "",
-      show: false,
-      error: "",
       saved: false,
       hidden: false,
       sent: false,
@@ -133,7 +129,6 @@ export const getInitialBooking = (stylist: Stylist): InitialBooking => {
       on: false,
       text: "",
       prior: false,
-      editing: false,
       focus: false,
     },
     saved: [],

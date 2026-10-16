@@ -175,7 +175,7 @@ export const BookingSummary = ({ booking }: BookingSummaryProps) => {
               <div className={styles.section}>
                 <div className={styles.moneyRow}>
                   <span className={styles.muted}>Service</span>
-                  <span>{money.service}</span>
+                  <span>{money.price}</span>
                 </div>
                 <div className={styles.moneyRow}>
                   <span className={styles.muted}>Booking fee</span>

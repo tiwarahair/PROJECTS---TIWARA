@@ -112,7 +112,7 @@ export const StepReview = ({ booking }: StepReviewProps) => {
         <div className={styles.totals}>
           <div className={styles.totalRow}>
             <span className={styles.muted}>Service</span>
-            <span>{money.service}</span>
+            <span>{money.price}</span>
           </div>
           <div className={styles.totalRow}>
             <span className={styles.muted}>Booking fee (50p + 1.5%)</span>
