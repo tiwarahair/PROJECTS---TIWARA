@@ -1,5 +1,6 @@
 import { useLayoutEffect } from "react";
 import { WelcomeToast } from "../../components/welcome-toast/welcome-toast";
+import type { PublicStylist } from "../../lib/public-stylist";
 import { joinClassNames } from "../../utils/class-names";
 import { BookingConfirmation } from "./booking-confirmation";
 import { BookingCrumbs } from "./booking-crumbs";
@@ -31,9 +32,13 @@ const STEP_VIEWS = {
   6: StepPay,
 } as const;
 
-/** The 6-step booking flow and its confirmation, route "/book". */
-export const BookingPage = () => {
-  const booking = useBooking();
+interface BookingFlowProps {
+  publicStylist: PublicStylist;
+}
+
+/** The 6-step booking flow and its confirmation, for a loaded stylist (route "/book", booking-route.tsx). */
+export const BookingFlow = ({ publicStylist }: BookingFlowProps) => {
+  const booking = useBooking(publicStylist);
   const { state, stylist, holdOn, holdLeftMs, actions } = booking;
   const { step, confirmed } = state;
   const StepView = STEP_VIEWS[step as keyof typeof STEP_VIEWS];

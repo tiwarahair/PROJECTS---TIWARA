@@ -1,5 +1,4 @@
-// Booking's ?fixture= board states (dev-only).
-import { stylists } from "../../data";
+// Booking's ?fixture= board states (dev-only), on whichever stylist ?stylist= loads.
 import type { Stylist } from "../../types/stylist";
 import {
   findService,
@@ -10,8 +9,6 @@ import {
   DEMO_DETAILS,
   EMPTY_DETAILS,
   getFreshSelection,
-  getHoldKey,
-  getStylist,
 } from "./booking-state";
 import type { BookingState } from "./booking-state";
 
@@ -99,11 +96,12 @@ export const applyFixture = (
       prior: true,
     });
 
+  // with ?stylist=naturallynia: a service with nothing to customise
   if (fixture === "natural") {
-    const natural = getStylist("naturallynia");
-    const service = findService(natural, "Wash & style");
+    const service =
+      findService(defaultStylist, "Wash & style") ??
+      getActiveServices(defaultStylist)[0];
 
-    state.id = natural.id;
     state.serviceId = service?.id ?? "";
     state.selection = getFreshSelection(service);
     state.step = 3;
@@ -145,10 +143,7 @@ export const applyFixture = (
     setFixtureDate();
   }
 
-  const fixtureStylist =
-    stylists.find(({ id }) => id === state.id) ?? defaultStylist;
-
-  const isMobileStylist = fixtureStylist.businessType === "mobile";
+  const isMobileStylist = defaultStylist.businessType === "mobile";
 
   if (["address", "address-out", "address-empty"].includes(fixture))
     state.step = 4;
@@ -230,12 +225,8 @@ export const applyFixture = (
 
   if (state.step >= 4 && !state.confirmed && state.time)
     state.hold = {
-      key: getHoldKey(
-        state.calendarYear,
-        state.calendarMonth,
-        state.date,
-        state.time,
-      ),
+      id: "",
+      secret: "",
       // hold-amber starts with 95 seconds left
       until:
         Date.now() +

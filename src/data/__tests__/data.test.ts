@@ -19,7 +19,6 @@ import {
   hasStep2,
   matchTypes,
 } from "../../utils/services";
-import { miles, slotsFor } from "../../utils/availability";
 import { bookingFee, policyLines } from "../../utils/pricing";
 import {
   formatPostcode,
@@ -112,8 +111,6 @@ describe.skipIf(!hasPrototype)(
       expect(data.categoryColours).toEqual(
         toPlain(prototypeData.categoryColours),
       );
-
-      expect(data.postcodes).toEqual(toPlain(prototypeData.postcodes));
 
       expect(data.seedAddresses).toEqual(
         renameKeys(toPlain(prototypeData.account.seedAddresses), [
@@ -224,28 +221,6 @@ describe.skipIf(!hasPrototype)(
         expect(toPlain(matchTypes(query))).toEqual(
           toPlain(prototypeData.services.matchTypes(query)),
         ),
-      );
-    });
-
-    it("availability matches over two weeks", () => {
-      data.stylists.forEach((stylist, index) => {
-        const prototypeStylist = prototypeData.stylists[index];
-
-        for (let offset = 0; offset < 14; offset++) {
-          const day = new Date(2026, 9, 9 + offset);
-
-          [30, 60, 120, 240, 300].forEach((minutes) =>
-            expect(slotsFor(stylist, day, minutes)).toEqual(
-              toPlain(
-                prototypeData.services.slotsFor(prototypeStylist, day, minutes),
-              ),
-            ),
-          );
-        }
-      });
-
-      expect(miles(53.4808, -2.2426, 53.4166, -2.231)).toBe(
-        prototypeData.services.miles(53.4808, -2.2426, 53.4166, -2.231),
       );
     });
 

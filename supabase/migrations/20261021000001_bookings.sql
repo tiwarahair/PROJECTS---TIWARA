@@ -253,8 +253,11 @@ begin
 end;
 $$;
 
--- The booking page's times for a service and picks, between two London dates (at most two months).
-create function public.get_available_slots(target_service uuid, choices jsonb, from_date date, to_date date)
+-- The booking page's times for a service and picks, between two London dates (at most two months). The client's
+-- own hold (by id) doesn't hide its times, so they can pick it again or move nearby; moving still needs its secret.
+create function public.get_available_slots(
+  target_service uuid, choices jsonb, from_date date, to_date date, own_hold uuid default null
+)
 returns setof timestamptz
 language sql
 stable
@@ -265,14 +268,15 @@ as $$
   from public.price_booking(target_service, choices) as quote,
     generate_series(from_date, least(to_date, from_date + 61), interval '1 day') as days (day),
     lateral public.get_day_slots(
-      (quote ->> 'stylist_id')::uuid, (quote ->> 'minutes')::integer, (quote ->> 'buffer_minutes')::integer, day::date
+      (quote ->> 'stylist_id')::uuid, (quote ->> 'minutes')::integer, (quote ->> 'buffer_minutes')::integer, day::date,
+      own_hold
     ) as slot
   order by slot
 $$;
 
 -- Holds a start for 10 minutes (called by the booking-hold function, which rate-limits by IP). Clears this
 -- stylist's lapsed holds first; with the hold's id and secret it moves that hold instead of making another.
--- Errors: not_bookable, invalid_choices, address_required, outside_area, hold_not_found, slot_taken.
+-- Errors: not_bookable, invalid_choices, outside_area, hold_not_found, slot_taken.
 create function public.hold_booking(
   target_service uuid,
   choices jsonb,
@@ -303,11 +307,8 @@ declare
 begin
   select * into stylist from public.stylists where id = (quote ->> 'stylist_id')::uuid;
 
-  if stylist.business_type = 'mobile' then
-    if client_lat is null or client_lng is null then
-      raise exception 'address_required';
-    end if;
-
+  -- the time comes before the address, so a mobile hold may not have one yet (checkout requires it)
+  if stylist.business_type = 'mobile' and client_lat is not null and client_lng is not null then
     point := extensions.st_setsrid(extensions.st_makepoint(client_lng, client_lat), 4326)::extensions.geography;
 
     if not extensions.st_dwithin(stylist.location, point, stylist.travel_radius_miles * 1609.344) then
@@ -391,6 +392,24 @@ begin
 end;
 $$;
 
+-- Mobile stylists: is the client's address (its Google point) inside the stylist's travel radius?
+create function public.is_in_travel_area(target_service uuid, lat double precision, lng double precision)
+returns boolean
+language sql
+stable
+security definer
+set search_path = ''
+as $$
+  select extensions.st_dwithin(
+    stylists.location,
+    extensions.st_setsrid(extensions.st_makepoint(lng, lat), 4326)::extensions.geography,
+    stylists.travel_radius_miles * 1609.344
+  )
+  from public.services
+  join public.stylists on stylists.id = services.stylist_id
+  where services.id = target_service and stylists.status = 'live' and stylists.business_type = 'mobile'
+$$;
+
 -- Lapsed holds (the hold function also clears a stylist's own before holding).
 create function public.expire_booking_holds()
 returns void
@@ -413,5 +432,11 @@ grant execute on function
   public.hold_booking(uuid, jsonb, timestamptz, double precision, double precision, uuid, text)
   to service_role;
 
-revoke execute on function public.get_available_slots(uuid, jsonb, date, date) from public;
-grant execute on function public.get_available_slots(uuid, jsonb, date, date) to anon, authenticated;
+revoke execute on function
+  public.get_available_slots(uuid, jsonb, date, date, uuid),
+  public.is_in_travel_area(uuid, double precision, double precision)
+  from public;
+grant execute on function
+  public.get_available_slots(uuid, jsonb, date, date, uuid),
+  public.is_in_travel_area(uuid, double precision, double precision)
+  to anon, authenticated;

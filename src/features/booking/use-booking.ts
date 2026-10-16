@@ -1,18 +1,26 @@
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useForm } from "react-hook-form";
 import type { FieldErrors } from "react-hook-form";
 import { useNavigate } from "react-router";
 import { getScreenPath } from "../onboarding/onboarding-routes";
 import { startGoogleSignIn } from "../../lib/auth";
-import { useUpdateProfileMutation } from "../../stores/api-slice";
+import type { PublicStylist } from "../../lib/public-stylist";
+import {
+  useGetAvailableSlotsQuery,
+  useHoldBookingMutation,
+  useUpdateProfileMutation,
+} from "../../stores/api-slice";
 import { writeSession } from "../../utils/page-flags";
 import { logOut as logOutSession } from "../../stores/session-slice";
 import { useIdentity } from "../../hooks/use-identity";
 import { useUnsavedChanges } from "../../hooks/use-unsaved-changes";
 import { useAppDispatch } from "../../stores/hooks";
 import { getServiceOptions, findService, hasStep2 } from "../../utils/services";
+import { toChoices } from "./booking-choices";
 import { getBookingMoney, getCustomisationLine } from "./booking-pricing";
+import { getClosedLine } from "./booking-calendar";
+import { getMonthRange, groupSlotsByDay } from "./booking-slots";
 import {
   getAddressCheck,
   getContactChanges,
@@ -24,12 +32,12 @@ import {
   EMPTY_ADDRESS,
   getDraftPatch,
   getFreshSelection,
-  getHoldKey,
   getInitialBooking,
-  getStylist,
+  getSavedAddressPatch,
   saveDraft,
 } from "./booking-state";
 import type { BookingState, Details } from "./booking-state";
+import { useTravelCheck } from "./use-travel-check";
 
 type StatePatch =
   Partial<BookingState> | ((state: BookingState) => Partial<BookingState>);
@@ -54,8 +62,8 @@ const DECLINED_CARD = "4000000000000002";
 const BANK_CHECK_CARD = "4000002760003184";
 const NETWORK_ERROR_CARD = "4000000000000119";
 
-export const useBooking = () => {
-  const [initial] = useState(getInitialBooking);
+export const useBooking = ({ stylist, hours }: PublicStylist) => {
+  const [initial] = useState(() => getInitialBooking(stylist));
   const [state, setRawState] = useState(initial.state);
   const [, setTick] = useState(0);
   const navigate = useNavigate();
@@ -142,12 +150,16 @@ export const useBooking = () => {
     const isLeavingTime = !!loginStart && step === 3;
 
     setState(
-      {
+      (current) => ({
         loggedIn: true,
         editContact: false,
         loginStart: null,
         step: isLeavingTime ? 4 : step,
-      },
+        // their saved addresses, unless they've already entered one
+        ...(current.board || current.appointmentAddress.line1
+          ? {}
+          : getSavedAddressPatch(current.appointmentAddress)),
+      }),
       isLeavingTime ? scrollToTitle : undefined,
     );
     // once per signed-in account
@@ -223,19 +235,49 @@ export const useBooking = () => {
     }, 60);
   };
 
-  const stylist = getStylist(state.id);
   const service = findService(stylist, state.serviceId);
   const options = getServiceOptions(service);
   const money = getBookingMoney(stylist, service, options, state.selection);
   const isMobileStylist = stylist.businessType === "mobile";
-  const address = getAddressCheck(stylist, state.appointmentAddress);
+  const choices = toChoices(options, state.selection);
+
+  const travel = useTravelCheck(
+    state.serviceId,
+    state.appointmentAddress,
+    isMobileStylist,
+  );
+
+  const address = {
+    ...getAddressCheck(state.appointmentAddress),
+    inArea: travel.inArea,
+    outBlock: travel.outBlock,
+  };
 
   const isAddressMissing = isMobileStylist && !address.isValid;
   const hasCustomiseStep = !!(service && hasStep2(service));
   const needSize = options.size.length > 0 && !state.selection.size;
   const needLength = options.length.length > 0 && !state.selection.length;
 
+  // the month on screen; options must be complete for the server to know the length
+  const slots = useGetAvailableSlotsQuery(
+    {
+      serviceId: state.serviceId,
+      choices,
+      ...getMonthRange(state.calendarYear, state.calendarMonth),
+      ...(state.hold?.id ? { ownHold: state.hold.id } : {}),
+    },
+    { skip: state.step !== 3 || !service || needSize || needLength },
+  );
+
+  const slotsByDay = useMemo(
+    () => groupSlotsByDay(slots.currentData ?? []),
+    [slots.currentData],
+  );
+
+  const [holdTime] = useHoldBookingMutation();
+
   const nextDisabled =
+    state.holding ||
     (state.step === 2 && (needSize || needLength)) ||
     (state.step === 3 && !(state.date && state.time));
 
@@ -333,19 +375,65 @@ export const useBooking = () => {
     navigate(loginReturn, { replace: true });
   };
 
-  const goToNextStep = () => {
-    const extra: Partial<BookingState> = {};
-
-    if (state.step === 3 && state.time && !state.hold)
-      extra.hold = {
-        key: getHoldKey(
-          state.calendarYear,
-          state.calendarMonth,
-          state.date,
-          state.time,
-        ),
-        until: Date.now() + state.holdSeconds * 1000,
+  /** Holds the chosen time on the server (dev boards fake it); null when it couldn't be held. */
+  const holdChosenTime = async (): Promise<Partial<BookingState> | null> => {
+    if (state.board)
+      return {
+        hold: state.hold ?? {
+          id: "",
+          secret: "",
+          until: Date.now() + state.holdSeconds * 1000,
+        },
       };
+
+    const startsAt = slotsByDay
+      .get(state.date ?? 0)
+      ?.find(({ time }) => time === state.time)?.startsAt;
+
+    if (!startsAt) {
+      setState({ holdError: "failed" });
+
+      return null;
+    }
+
+    setState({ holding: true, holdError: null });
+
+    try {
+      const held = await holdTime({
+        serviceId: state.serviceId,
+        choices,
+        startsAt,
+        // picking again moves the same hold
+        ...(state.hold?.id
+          ? { hold: { id: state.hold.id, secret: state.hold.secret } }
+          : {}),
+      }).unwrap();
+
+      return {
+        holding: false,
+        hold: {
+          id: held.id,
+          secret: held.secret,
+          until: Date.parse(held.hold_expires_at),
+        },
+      };
+    } catch (error) {
+      const isTaken = error instanceof Error && error.message === "slot_taken";
+
+      setState({
+        holding: false,
+        holdError: isTaken ? "taken" : "failed",
+        ...(isTaken ? { time: null } : {}),
+      });
+
+      return null;
+    }
+  };
+
+  const goToNextStep = async () => {
+    const extra = state.step === 3 ? await holdChosenTime() : {};
+
+    if (!extra) return;
 
     if (state.step === 3 && !hasSession && !state.guest) {
       setState({ ...extra, loginStart: "choice", repickNote: false });
@@ -396,7 +484,7 @@ export const useBooking = () => {
     goNext: () => {
       if (nextDisabled) return;
 
-      if (state.step !== 4) return goToNextStep();
+      if (state.step !== 4) return void goToNextStep();
 
       const focusFirstError = (errors: FieldErrors<Details>) => {
         if (state.loggedIn && Object.keys(errors).length)
@@ -413,7 +501,7 @@ export const useBooking = () => {
       void detailsForm.handleSubmit(() => {
         if (isAddressMissing || address.outBlock) return focusFirstError({});
 
-        goToNextStep();
+        void goToNextStep();
       }, focusFirstError)();
     },
     logOut: () => {
@@ -581,6 +669,9 @@ export const useBooking = () => {
     turnstileBlocking,
     payDisabled,
     holdOn: !!state.hold && !!state.time && !state.confirmed,
+    slotsByDay,
+    isLoadingSlots: slots.isFetching,
+    closedLine: getClosedLine(hours),
     holdLeftMs,
     steps: STEPS.filter(
       ({ stepNumber }) => stepNumber !== 2 || hasCustomiseStep,

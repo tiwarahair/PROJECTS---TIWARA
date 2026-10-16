@@ -134,7 +134,7 @@ export const BookingSummary = ({ booking }: BookingSummaryProps) => {
                 strokeWidth={0}
                 fill="var(--brand-yellow)"
               />{" "}
-              {stylist.rating}
+              {stylist.reviews ? stylist.rating : "New"}
             </div>
             <div className={styles.section}>
               <div className={styles.row}>

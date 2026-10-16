@@ -1,9 +1,16 @@
 import { act, screen, within } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import { renderWithStore } from "../../../test/render-with-store";
-import { BookingPage } from "../booking-page";
+import { renderBooking } from "../../../test/render-booking";
 import type { UserEvent } from "@testing-library/user-event";
 import { setupUser } from "../../../test/setup-user";
+
+vi.mock("../../../lib/public-profiles", async (original) =>
+  (await import("../../../test/booking-mocks")).mockPublicProfiles(original),
+);
+
+vi.mock("../../../lib/booking-api", async (original) =>
+  (await import("../../../test/booking-mocks")).mockBookingApi(original),
+);
 
 let user: UserEvent;
 
@@ -24,7 +31,7 @@ describe("BookingPage", () => {
   afterEach(() => vi.useRealTimers());
 
   it("starts on Pick a service and moves to Customise for a braids service", async () => {
-    renderWithStore(<BookingPage />, "/book?stylist=tiwaras-house");
+    await renderBooking("stylist=tiwaras-house");
 
     expect(
       screen.getByRole("heading", { level: 1, name: "Pick a service" }),
@@ -42,14 +49,14 @@ describe("BookingPage", () => {
   });
 
   it("details-errors: Continue shows every field error", async () => {
-    renderWithStore(<BookingPage />, "/book?fixture=details-errors");
+    await renderBooking("fixture=details-errors");
     await act(() => Promise.resolve());
     expect(screen.getByText("Enter your first name")).toBeInTheDocument();
     expect(screen.getByText("Enter a UK mobile number")).toBeInTheDocument();
   });
 
   it("details: errors clear as fields are fixed, then Continue goes to Review", async () => {
-    renderWithStore(<BookingPage />, "/book?fixture=details-errors");
+    await renderBooking("fixture=details-errors");
     await act(() => Promise.resolve());
 
     await user.type(screen.getByLabelText("First name"), "Nia");
@@ -73,12 +80,12 @@ describe("BookingPage", () => {
   });
 
   it("time-picked: Continue asks to log in or continue as guest before Your details", async () => {
-    renderWithStore(<BookingPage />, "/book?fixture=time-picked");
+    await renderBooking("fixture=time-picked");
 
     await user.click(screen.getAllByRole("button", { name: /^Continue$/ })[0]!);
 
     const dialog = within(
-      screen.getByRole("dialog", { name: "Have an account?" }),
+      await screen.findByRole("dialog", { name: "Have an account?" }),
     );
 
     expect(dialog.getByRole("button", { name: "Log in" })).toBeInTheDocument();
@@ -94,22 +101,22 @@ describe("BookingPage", () => {
   });
 
   it("time-picked: closing the account sheet stays on Time", async () => {
-    renderWithStore(<BookingPage />, "/book?fixture=time-picked");
+    await renderBooking("fixture=time-picked");
 
     await user.click(screen.getAllByRole("button", { name: /^Continue$/ })[0]!);
-    await user.click(screen.getByRole("button", { name: "Close" }));
+    await user.click(await screen.findByRole("button", { name: "Close" }));
 
     expect(screen.queryByRole("dialog")).not.toBeInTheDocument();
     expect(screen.queryByLabelText("First name")).not.toBeInTheDocument();
   });
 
   it("time-picked: the account sheet closes when the hold runs out", async () => {
-    renderWithStore(<BookingPage />, "/book?fixture=time-picked&hold=2");
+    await renderBooking("fixture=time-picked&hold=2");
 
     await user.click(screen.getAllByRole("button", { name: /^Continue$/ })[0]!);
 
     expect(
-      screen.getByRole("dialog", { name: "Have an account?" }),
+      await screen.findByRole("dialog", { name: "Have an account?" }),
     ).toBeInTheDocument();
 
     const later = Date.now() + 3000;
@@ -126,7 +133,7 @@ describe("BookingPage", () => {
   });
 
   it("details-card: shows the logged-in contact card, edits name and mobile, and logs out", async () => {
-    renderWithStore(<BookingPage />, "/book?fixture=details-card");
+    await renderBooking("fixture=details-card");
 
     expect(screen.getByText("Nia Okafor")).toBeInTheDocument();
     expect(screen.queryByLabelText("First name")).not.toBeInTheDocument();
@@ -153,8 +160,8 @@ describe("BookingPage", () => {
     expect(screen.getByLabelText("First name")).toHaveValue("");
   });
 
-  it("review: shows the policy card and Continue to payment", () => {
-    renderWithStore(<BookingPage />, "/book?fixture=review");
+  it("review: shows the policy card and Continue to payment", async () => {
+    await renderBooking("fixture=review");
 
     expect(
       screen.getByRole("heading", { level: 1, name: "Review your booking" }),
@@ -168,7 +175,7 @@ describe("BookingPage", () => {
   });
 
   it("pay: an incomplete card shows an error; the declined test card is declined", async () => {
-    renderWithStore(<BookingPage />, "/book?fixture=pay");
+    await renderBooking("fixture=pay");
     const pay = screen.getByRole("button", { name: /^Pay £.* & confirm/ });
 
     await user.click(pay);
@@ -194,7 +201,7 @@ describe("BookingPage", () => {
   });
 
   it("confirm: shows You're booked in. and the guest save row", async () => {
-    renderWithStore(<BookingPage />, "/book?fixture=confirm");
+    await renderBooking("fixture=confirm");
 
     expect(
       screen.getByRole("heading", { level: 1, name: "You're booked in." }),
@@ -204,18 +211,15 @@ describe("BookingPage", () => {
     expect(screen.getByText("Check your email.")).toBeInTheDocument();
   });
 
-  it("hold-expired and leave fixtures open their dialogs", () => {
-    const { unmount } = renderWithStore(
-      <BookingPage />,
-      "/book?fixture=hold-expired",
-    );
+  it("hold-expired and leave fixtures open their dialogs", async () => {
+    const { unmount } = await renderBooking("fixture=hold-expired");
 
     expect(
       screen.getByRole("alertdialog", { name: "Your slot is no longer held" }),
     ).toBeInTheDocument();
 
     unmount();
-    renderWithStore(<BookingPage />, "/book?fixture=leave");
+    await renderBooking("fixture=leave");
 
     expect(
       screen.getByRole("dialog", { name: "Leave this booking?" }),
@@ -223,7 +227,7 @@ describe("BookingPage", () => {
   });
 
   it("leaving after picking a service asks first; Keep booking stays, Leave goes", async () => {
-    renderWithStore(<BookingPage />, "/book?stylist=tiwaras-house");
+    await renderBooking("stylist=tiwaras-house");
     await user.click(screen.getByRole("button", { name: /^Knotless braids/ }));
     await user.click(screen.getByRole("link", { name: /Exit booking/ }));
 
@@ -240,14 +244,11 @@ describe("BookingPage", () => {
   });
 
   it("a draft is saved and offered back on the next visit", async () => {
-    const { unmount } = renderWithStore(
-      <BookingPage />,
-      "/book?stylist=tiwaras-house",
-    );
+    const { unmount } = await renderBooking("stylist=tiwaras-house");
 
     await user.click(screen.getByRole("button", { name: /^Knotless braids/ }));
     unmount();
-    renderWithStore(<BookingPage />, "/book?stylist=tiwaras-house");
+    await renderBooking("stylist=tiwaras-house");
 
     expect(
       screen.getByRole("region", { name: "Unfinished booking" }),

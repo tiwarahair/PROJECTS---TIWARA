@@ -12,7 +12,6 @@ const WINDOW_SECONDS = 600;
 const BOOKING_ERRORS = [
   "not_bookable",
   "invalid_choices",
-  "address_required",
   "outside_area",
   "hold_not_found",
   "slot_taken",

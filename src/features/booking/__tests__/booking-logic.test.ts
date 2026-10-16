@@ -1,5 +1,4 @@
 import { describe, expect, it } from "vitest";
-import { getStylist } from "../booking-state";
 import { getClosedLine, getWhenLine } from "../booking-calendar";
 import { getPreviewIndex, hasPreview, PREVIEW_POOL } from "../booking-content";
 import {
@@ -57,27 +56,23 @@ describe("details", () => {
     expect(getEmailFix("kemi@example.co.uk")).toBe("");
   });
 
-  it("checks a mobile stylist's travel area by postcode district", () => {
-    const stylist = getStylist("amara-beauty");
-    const base = { line2: "", notes: "", source: "pick" };
-
+  it("labels the postcode and joins the address for a mobile stylist", () => {
     expect(
-      getAddressCheck(stylist, {
-        ...base,
-        line1: "12 Dickenson Road",
-        town: "Manchester",
-        postcode: "M14 5TQ",
-      }).inArea,
-    ).toBe(true);
-
-    expect(
-      getAddressCheck(stylist, {
-        ...base,
+      getAddressCheck({
         line1: "12 Chorley New Road",
+        line2: "",
         town: "Bolton",
         postcode: "bl14qr",
+        notes: "",
+        source: "pick",
+        lat: null,
+        lng: null,
       }),
-    ).toMatchObject({ outBlock: true, postcodeLabel: "BL1 4QR" });
+    ).toEqual({
+      postcodeLabel: "BL1 4QR",
+      isValid: true,
+      clientAddress: "12 Chorley New Road, Bolton BL1 4QR",
+    });
   });
 });
 
@@ -121,9 +116,15 @@ describe("labels", () => {
   });
 
   it("names the closed weekdays and the chosen time", () => {
-    expect(getClosedLine(getStylist("tiwaras-house"))).toMatch(
-      /^( Closed .+\.)?$/,
-    );
+    const hours = [0, 1, 2, 3, 4, 5, 6].map((weekday) => ({
+      stylist_id: "stylist",
+      weekday,
+      is_open: weekday !== 0 && weekday !== 6,
+      start_time: "10:00:00",
+      end_time: "18:00:00",
+    }));
+
+    expect(getClosedLine(hours)).toMatch(/^( Closed .+\.)?$/);
 
     expect(getWhenLine(2026, 9, null, null)).toBe("Not chosen yet");
     expect(getWhenLine(2026, 9, 14, "10:30")).toBe("Wed 14 Oct · 10:30");

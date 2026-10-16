@@ -1,4 +1,10 @@
 import { createApi, fakeBaseQuery } from "@reduxjs/toolkit/query/react";
+import {
+  getAvailableSlots,
+  holdBooking,
+  isInTravelArea,
+} from "../lib/booking-api";
+import type { HeldBooking, HoldRequest, SlotRequest } from "../lib/booking-api";
 import { fetchPublicProfile } from "../lib/public-profiles";
 import { SEARCH_PAGE_SIZE, searchStylists } from "../lib/search-api";
 import type { SearchArgs, SearchRow } from "../lib/search-api";
@@ -26,7 +32,7 @@ const toQueryResult = <T>(task: Promise<T>) =>
 export const api = createApi({
   reducerPath: "api",
   baseQuery: fakeBaseQuery<Error>(),
-  tagTypes: ["Studio", "StylistProfile", "Search", "TwoFactor"],
+  tagTypes: ["Studio", "StylistProfile", "Search", "TwoFactor", "Slots"],
   refetchOnReconnect: true,
   endpoints: (build) => ({
     getProfile: build.query<Profile, string>({
@@ -129,6 +135,21 @@ export const api = createApi({
       keepUnusedDataFor: 300,
       queryFn: ({ args, size }) => toQueryResult(searchStylists(args, 0, size)),
     }),
+    getAvailableSlots: build.query<string[], SlotRequest>({
+      providesTags: ["Slots"],
+      queryFn: (request) => toQueryResult(getAvailableSlots(request)),
+    }),
+    // held or refused (taken), the open times have changed either way
+    holdBooking: build.mutation<HeldBooking, HoldRequest>({
+      invalidatesTags: () => ["Slots"],
+      queryFn: (request) => toQueryResult(holdBooking(request)),
+    }),
+    isInTravelArea: build.query<
+      boolean,
+      { serviceId: string; lat: number; lng: number }
+    >({
+      queryFn: (request) => toQueryResult(isInTravelArea(request)),
+    }),
     getTwoFactorDevices: build.query<TwoFactorDevice[], string>({
       providesTags: ["TwoFactor"],
       queryFn: () => toQueryResult(listTwoFactorDevices()),
@@ -137,6 +158,9 @@ export const api = createApi({
 });
 
 export const {
+  useGetAvailableSlotsQuery,
+  useHoldBookingMutation,
+  useIsInTravelAreaQuery,
   useGetProfileQuery,
   useGetStylistProfileQuery,
   usePeekStylistsQuery,

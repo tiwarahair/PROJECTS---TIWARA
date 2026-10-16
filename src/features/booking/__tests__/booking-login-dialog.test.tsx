@@ -2,9 +2,8 @@ import { screen, within } from "@testing-library/react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import type { UserEvent } from "@testing-library/user-event";
 import * as auth from "../../../lib/auth";
-import { renderWithStore } from "../../../test/render-with-store";
+import { renderBooking } from "../../../test/render-booking";
 import { setupUser } from "../../../test/setup-user";
-import { BookingPage } from "../booking-page";
 
 vi.mock("../../../lib/auth", async (importOriginal) => ({
   ...(await importOriginal<typeof import("../../../lib/auth")>()),
@@ -12,13 +11,22 @@ vi.mock("../../../lib/auth", async (importOriginal) => ({
   signIn: vi.fn(),
 }));
 
+vi.mock("../../../lib/public-profiles", async (original) =>
+  (await import("../../../test/booking-mocks")).mockPublicProfiles(original),
+);
+
+vi.mock("../../../lib/booking-api", async (original) =>
+  (await import("../../../test/booking-mocks")).mockBookingApi(original),
+);
+
 let user: UserEvent;
 
 const getDialog = () => within(screen.getByRole("dialog"));
 
 const openLogin = async () => {
-  renderWithStore(<BookingPage />, "/book?fixture=time-picked");
+  await renderBooking("fixture=time-picked");
   await user.click(screen.getAllByRole("button", { name: /^Continue$/ })[0]!);
+  await screen.findByRole("dialog");
   await user.click(getDialog().getByRole("button", { name: "Log in" }));
 };
 

@@ -1,6 +1,8 @@
 type ServiceStatus = "active" | "draft" | "archived";
 
+/** `id`: the database row (real stylists); the demo data has none. */
 export interface CustomisationOption {
+  id?: string;
   label: string;
   on: boolean;
   priceDelta: number;
@@ -18,6 +20,7 @@ interface ServiceCustomisations {
 }
 
 interface OwnCustomisationOption {
+  id?: string;
   label: string;
   priceDelta: number;
   minutesDelta: number;
@@ -29,6 +32,7 @@ export interface OwnCustomisation {
 }
 
 export interface ServiceAddon {
+  id?: string;
   name: string;
   price: number;
   minutes: number;

@@ -1,5 +1,5 @@
 begin;
-select plan(50);
+select plan(53);
 
 create function pg_temp.open_business(user_id uuid, business text, business_type text, lat float8, radius int)
 returns uuid
@@ -140,6 +140,12 @@ select is(
 select throws_ok($$select pg_temp.hold((select shop from svc), (select day from ids), '10:00')$$, 'slot_taken', 'the same start can''t be held twice');
 select throws_ok($$select pg_temp.hold((select shop from svc), (select day from ids), '10:30')$$, 'slot_taken', 'an overlapping start can''t be held');
 select ok(not pg_temp.times((select shop from svc), (select day from ids)) && array['09:30', '10:00', '10:30'], 'held times leave the list');
+select ok(
+  (select array_agg(to_char(slot at time zone 'Europe/London', 'HH24:MI'))
+   from public.get_available_slots((select shop from svc), '{}', (select day from ids), (select day from ids), (select (first ->> 'id')::uuid from holds)) as slot)
+    @> array['09:30', '10:00', '10:30'],
+  'the client''s own hold keeps its times in their list'
+);
 select lives_ok($$select pg_temp.hold((select second from svc), (select day from ids), '10:00')$$, 'another stylist can be booked at the same time');
 
 alter table holds add column later jsonb;
@@ -191,7 +197,9 @@ select throws_ok(
 );
 
 -- mobile stylists and drafts
-select throws_ok($$select pg_temp.hold((select mobile from svc), (select day from ids), '16:00')$$, 'address_required', 'mobile bookings need the address');
+select lives_ok($$select pg_temp.hold((select mobile from svc), (select day from ids) + 1, '16:00')$$, 'a mobile hold can come before the address');
+select ok(public.is_in_travel_area((select mobile from svc), 53.52, -2.24), 'an address inside the radius is in the travel area');
+select ok(not public.is_in_travel_area((select mobile from svc), 53.40, -2.24), 'one outside it isn''t');
 select throws_ok($$select pg_temp.hold((select mobile from svc), (select day from ids), '16:00', null, null, 53.40, -2.24)$$, 'outside_area', 'outside the travel radius is refused');
 select lives_ok($$select pg_temp.hold((select mobile from svc), (select day from ids), '16:00', null, null, 53.52, -2.24)$$, 'inside the radius is held');
 select throws_ok($$select pg_temp.hold((select draft from svc), (select day from ids), '10:00')$$, 'not_bookable', 'draft businesses can''t be booked');

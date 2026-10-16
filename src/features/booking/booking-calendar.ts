@@ -1,6 +1,5 @@
-// Step 3 (Pick a time): month grid, slots and date labels.
-import type { Stylist } from "../../types/stylist";
-import { slotsFor } from "../../utils/availability";
+// Step 3 (Pick a time): month grid and date labels.
+import type { WorkingHours } from "../../lib/public-profiles";
 import { formatWeekdayDate, LONG_WEEKDAYS } from "../../utils/dates";
 
 export interface CalendarDay {
@@ -11,19 +10,15 @@ export interface CalendarDay {
   selected: boolean;
 }
 
-/** Monday-first grid: blank cells, then each day; past days and days with no slot for this duration are off. */
+/** Monday-first grid: blank cells, then each day; days without an open time are off. */
 export const getCalendarDays = (
-  stylist: Stylist,
   year: number,
   month: number,
-  minutes: number,
+  openDays: Set<number>,
   selectedDay: number | null,
 ): CalendarDay[] => {
   const daysIn = new Date(year, month + 1, 0).getDate();
   const firstWeekday = (new Date(year, month, 1).getDay() + 6) % 7;
-  const today = new Date();
-
-  today.setHours(0, 0, 0, 0);
   const days: CalendarDay[] = [];
 
   for (let index = 0; index < firstWeekday; index++)
@@ -35,41 +30,24 @@ export const getCalendarDays = (
       selected: false,
     });
 
-  for (let day = 1; day <= daysIn; day++) {
-    const date = new Date(year, month, day);
-
+  for (let day = 1; day <= daysIn; day++)
     days.push({
       key: `day-${day}`,
       label: `${day}`,
       day,
-      off: date < today || !slotsFor(stylist, date, minutes).length,
+      off: !openDays.has(day),
       selected: selectedDay === day,
     });
-  }
 
   return days;
 };
 
-export const getSlots = (
-  stylist: Stylist,
-  year: number,
-  month: number,
-  day: number | null,
-  minutes: number,
-): string[] =>
-  day ? slotsFor(stylist, new Date(year, month, day), minutes) : [];
-
-const WEEKDAY_KEYS = ["sun", "mon", "tue", "wed", "thu", "fri", "sat"] as const;
-
-/** " Closed Mondays and Sundays." for weekdays with no availability, Monday first. */
-export const getClosedLine = ({ availability }: Stylist): string => {
-  const closed = [1, 2, 3, 4, 5, 6, 0]
-    .filter((index) => {
-      const key = WEEKDAY_KEYS[index];
-
-      return !(key && (availability ?? {})[key]?.length);
-    })
-    .map((index) => `${LONG_WEEKDAYS[index] ?? ""}s`);
+/** " Closed Mondays and Sundays." for the stylist's closed weekdays, Monday first. */
+export const getClosedLine = (hours: WorkingHours[]): string => {
+  // weekday 0 is Monday; LONG_WEEKDAYS starts on Sunday
+  const closed = hours
+    .filter(({ is_open }) => !is_open)
+    .map(({ weekday }) => `${LONG_WEEKDAYS[(weekday + 1) % 7] ?? ""}s`);
 
   if (!closed.length) return "";
 

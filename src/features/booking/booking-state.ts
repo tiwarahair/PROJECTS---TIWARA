@@ -1,6 +1,5 @@
 // Booking state: the initial state (URL params, fixtures, saved addresses, draft resume) and the
 // localStorage draft (tw_bk_draft_<stylist>, 24h).
-import { stylists } from "../../data";
 import type { SavedAddress } from "../../types/address";
 import type { Service } from "../../types/service";
 import type { Stylist } from "../../types/stylist";
@@ -9,7 +8,6 @@ import { getSavedAddresses } from "../../utils/saved-addresses";
 import { applyFixture } from "./booking-fixtures";
 import { findService, hasStep2 } from "../../utils/services";
 
-const DEFAULT_STYLIST_ID = "tiwaras-house";
 const DRAFT_TTL_MS = 864e5;
 const DEFAULT_HOLD_SECONDS = 600;
 
@@ -45,10 +43,15 @@ export interface BookingAddress {
   town: string;
   notes: string;
   source: string;
+  /** Google's point for the address (picked from suggestions); null until known. */
+  lat: number | null;
+  lng: number | null;
 }
 
+/** The server's hold on the chosen time (dev boards fake one with empty id and secret). */
 interface Hold {
-  key: string;
+  id: string;
+  secret: string;
   until: number;
 }
 
@@ -87,7 +90,8 @@ interface BookingDraft {
   details: Omit<Details, "notes"> & { notes: string };
   appointmentAddress: BookingAddress;
   holdUntil: number | null;
-  holdKey?: string | null;
+  holdId?: string;
+  holdSecret?: string;
   guest?: boolean;
 }
 
@@ -116,6 +120,9 @@ export interface BookingState {
   board: boolean;
   holdSeconds: number;
   hold: Hold | null;
+  holding: boolean;
+  /** Why the chosen time couldn't be held: taken by someone else, or anything else. */
+  holdError: "taken" | "failed" | null;
   holdExpired: boolean;
   taken: boolean;
   appointmentAddress: BookingAddress;
@@ -131,7 +138,6 @@ export interface BookingState {
   turnstileStatus: TurnstileState;
   paying: boolean;
   payError: string;
-  agreed: { cancel: boolean; deposit: boolean };
   confirmed: boolean;
   allergy: AllergyState;
   saved: SavedAddress[];
@@ -162,14 +168,8 @@ export const EMPTY_ADDRESS: BookingAddress = {
   town: "",
   notes: "",
   source: "",
-};
-
-export const getStylist = (id: string): Stylist => {
-  const stylist = stylists.find((item) => item.id === id) ?? stylists[0];
-
-  if (!stylist) throw new Error("No stylists in the seed data");
-
-  return stylist;
+  lat: null,
+  lng: null,
 };
 
 /** Default picks for a service: first option of each own customisation, colour 30 Auburn. */
@@ -183,13 +183,6 @@ export const getFreshSelection = (
 
   return { size: null, length: null, colour: "30 Auburn", own, addons: [] };
 };
-
-export const getHoldKey = (
-  year: number,
-  month: number,
-  day: number | null,
-  time: string,
-): string => `${year}-${month}-${day} ${time}`;
 
 const getDraftKey = (stylistId: string): string => `tw_bk_draft_${stylistId}`;
 
@@ -233,7 +226,8 @@ export const saveDraft = (state: BookingState): void => {
     details: { first, last, email, phone, notes },
     appointmentAddress: state.appointmentAddress,
     holdUntil: hold ? hold.until : null,
-    holdKey: hold ? hold.key : null,
+    holdId: hold?.id,
+    holdSecret: hold?.secret,
     guest: state.guest,
   };
 
@@ -291,7 +285,11 @@ export const getDraftPatch = (
     },
     hold:
       holdOk && draft.holdUntil
-        ? { key: draft.holdKey ?? "", until: draft.holdUntil }
+        ? {
+            id: draft.holdId ?? "",
+            secret: draft.holdSecret ?? "",
+            until: draft.holdUntil,
+          }
         : null,
     resumeDraft: null,
     repickNote: false,
@@ -325,25 +323,42 @@ const getStartStep = (service: Service | null): number => {
   return hasStep2(service) ? 2 : 3;
 };
 
-export const getInitialBooking = (): InitialBooking => {
+/** Signed-in clients' saved addresses, the default one filled in. */
+export const getSavedAddressPatch = (
+  current: BookingAddress,
+): Pick<BookingState, "saved" | "selectedAddressId" | "appointmentAddress"> => {
+  const saved = getSavedAddresses();
+  const defaultAddress = saved.find(({ isDefault }) => isDefault) ?? saved[0];
+
+  return {
+    saved,
+    selectedAddressId: defaultAddress ? defaultAddress.id : "new",
+    appointmentAddress: defaultAddress
+      ? {
+          ...current,
+          line1: defaultAddress.line1,
+          line2: defaultAddress.line2 || "",
+          town: defaultAddress.town,
+          postcode: defaultAddress.postcode,
+          source: "saved",
+          lat: null,
+          lng: null,
+        }
+      : current,
+  };
+};
+
+export const getInitialBooking = (stylist: Stylist): InitialBooking => {
   const params = getSearchParams();
   const serviceParam = params.get("service") || "";
-  const stylistId = params.get("stylist") || DEFAULT_STYLIST_ID;
-  const defaultStylist = getStylist(stylistId);
-
-  const service = serviceParam
-    ? findService(defaultStylist, serviceParam)
-    : null;
-
+  const service = serviceParam ? findService(stylist, serviceParam) : null;
   const fixture = params.get("fixture") || "";
   const board = !!fixture || params.get("board") === "true";
-  // the signed-in person fills in once their profile loads (use-booking)
-  const loggedIn = false;
   const turnstile = params.get("turnstile");
   const today = new Date();
 
   const state: BookingState = {
-    id: stylistId,
+    id: stylist.id,
     serviceId: service ? service.id : serviceParam,
     step: getStartStep(service),
     policyOpen: false,
@@ -363,13 +378,16 @@ export const getInitialBooking = (): InitialBooking => {
       postcode: "",
       future: false,
     },
-    loggedIn,
+    // the signed-in person fills in once their profile loads (use-booking)
+    loggedIn: false,
     guest: false,
     editContact: false,
     loginStart: null,
     board,
     holdSeconds: parseInt(params.get("hold") ?? "", 10) || DEFAULT_HOLD_SECONDS,
     hold: null,
+    holding: false,
+    holdError: null,
     holdExpired: false,
     taken: params.get("taken") === "1",
     appointmentAddress: { ...EMPTY_ADDRESS },
@@ -394,7 +412,6 @@ export const getInitialBooking = (): InitialBooking => {
     turnstileStatus: "idle",
     paying: false,
     payError: "",
-    agreed: { cancel: false, deposit: false },
     confirmed: false,
     allergy: {
       on: false,
@@ -408,37 +425,16 @@ export const getInitialBooking = (): InitialBooking => {
     sizeGuide: false,
   };
 
-  // logged-in clients get their saved addresses, the default one preselected
-  const saved =
-    loggedIn && (!fixture || fixture === "saved-addr")
-      ? getSavedAddresses()
-      : [];
-
-  const defaultAddress = saved.find(({ isDefault }) => isDefault) ?? saved[0];
-
-  state.saved = saved;
-  state.selectedAddressId = defaultAddress ? defaultAddress.id : "new";
-
-  if (defaultAddress)
-    state.appointmentAddress = {
-      ...state.appointmentAddress,
-      line1: defaultAddress.line1,
-      line2: defaultAddress.line2 || "",
-      town: defaultAddress.town,
-      postcode: defaultAddress.postcode,
-      source: "saved",
-    };
+  // dev board of the saved-address cards (signed-in clients get theirs in use-booking)
+  if (fixture === "saved-addr")
+    Object.assign(state, getSavedAddressPatch(state.appointmentAddress));
 
   let openPrivacy = false;
   let showErrors = false;
 
   // demo states are dev-only; production builds drop this branch and the fixtures module
   if (import.meta.env.DEV && fixture)
-    ({ openPrivacy, showErrors } = applyFixture(
-      state,
-      fixture,
-      defaultStylist,
-    ));
+    ({ openPrivacy, showErrors } = applyFixture(state, fixture, stylist));
 
   if (!state.board) {
     const draft = readDraft(state.id);

@@ -1,49 +1,18 @@
-// Step 4 (Your details) error focus, the postcode travel check and the address / where copy, plus Step 6 card
-// formatting and checks.
-import { postcodes } from "../../data";
+// Step 4 (Your details) error focus and the address / where copy, plus Step 6 card formatting and checks.
 import type { Stylist } from "../../types/stylist";
 import { isAddressValid } from "../../utils/address";
-import { miles } from "../../utils/availability";
 import type { BookingAddress, Details, FieldKey } from "./booking-state";
 
 const FIELD_KEYS: FieldKey[] = ["address", "first", "last", "email", "phone"];
 
-interface AddressCheck {
-  postcodeLabel: string;
-  isValid: boolean;
-  inArea: boolean;
-  outBlock: boolean;
-  clientAddress: string;
-}
-
-/** Mobile stylists: is the client's postcode a known district within the stylist's travelMiles? */
-export const getAddressCheck = (
-  stylist: Stylist,
-  address: BookingAddress,
-): AddressCheck => {
-  const isMobile = stylist.businessType === "mobile";
+/** The client's address for mobile stylists: complete?, "M14 5AB", and the one-line address. */
+export const getAddressCheck = (address: BookingAddress) => {
   const raw = (address.postcode || "").toUpperCase().replace(/\s+/g, "");
   const match = raw.match(/^([A-Z]{1,2}\d[A-Z\d]?)(\d[A-Z]{2})$/);
 
   const postcodeLabel = match
     ? `${match[1]} ${match[2]}`
     : (address.postcode || "").toUpperCase().trim();
-
-  const district = match?.[1];
-  const info = district ? (postcodes[district] ?? null) : null;
-
-  const distance = info
-    ? miles(stylist.lat, stylist.lng, info.lat, info.lng)
-    : null;
-
-  const isValid = isAddressValid(address);
-  const checked = isMobile && !!info && isValid;
-
-  const inArea =
-    checked &&
-    distance != null &&
-    stylist.travelMiles != null &&
-    distance <= stylist.travelMiles;
 
   const clientAddress = address.line1.trim()
     ? [address.line1, address.line2, address.town]
@@ -53,9 +22,7 @@ export const getAddressCheck = (
 
   return {
     postcodeLabel,
-    isValid,
-    inArea,
-    outBlock: checked && !inArea,
+    isValid: isAddressValid(address),
     clientAddress,
   };
 };
