@@ -94,7 +94,7 @@ const PayForm = ({ booking }: StepPayProps) => {
         >
           <div className={styles.quickCheckout}>Quick checkout</div>
           <ExpressCheckoutElement
-            options={{ buttonHeight: 48 }}
+            options={{ buttonHeight: 48, paymentMethods: { link: "never" } }}
             onReady={({ availablePaymentMethods }) =>
               setHasWallets(!!availablePaymentMethods)
             }
@@ -112,7 +112,8 @@ const PayForm = ({ booking }: StepPayProps) => {
         <PaymentElement
           options={{
             layout: "tabs",
-            wallets: { applePay: "never", googlePay: "never" },
+            // Apple Pay and Google Pay are the quick checkout above; Link would ask for the details again
+            wallets: { applePay: "never", googlePay: "never", link: "never" },
           }}
           onChange={() => {
             if (payError && state.payKind !== "taken")
