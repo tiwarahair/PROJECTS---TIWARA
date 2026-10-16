@@ -2,7 +2,6 @@ import { render } from "@testing-library/react";
 import { describe, expect, it } from "vitest";
 import {
   BraidsIcon,
-  LocationPinIcon,
   MoonIcon,
   NaturalHairIcon,
   StylistIcon,
@@ -13,7 +12,6 @@ import {
 describe("custom icons", () => {
   it.each([
     BraidsIcon,
-    LocationPinIcon,
     MoonIcon,
     NaturalHairIcon,
     StylistIcon,

@@ -1,8 +1,5 @@
-import { Star, Truck } from "lucide-react";
-import {
-  LocationPinIcon,
-  VerifiedBadgeIcon,
-} from "../../components/icons/custom-icons";
+import { MapPin, Star, Truck } from "lucide-react";
+import { VerifiedBadgeIcon } from "../../components/icons/custom-icons";
 import type { Stylist } from "../../types/stylist";
 import { joinClassNames } from "../../utils/class-names";
 import type { ProfileFacts } from "./profile-facts";
@@ -48,7 +45,7 @@ export const ProfileLede = ({
         </div>
         <div className={styles.meta}>
           <span className={styles.area}>
-            <LocationPinIcon size={14} strokeWidth={1.5} />
+            <MapPin size={14} strokeWidth={1.8} />
             {area}
           </span>
           {mobile && (
