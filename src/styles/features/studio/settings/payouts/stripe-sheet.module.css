@@ -1,0 +1,89 @@
+/* ---- Stripe ---- */
+.stripeCard {
+  background: transparent;
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-md);
+  padding: 18px;
+}
+
+.title15 {
+  font-size: 15px;
+  font-weight: 600;
+}
+
+.stripeBody {
+  font-size: 14.5px;
+  color: var(--text-secondary);
+  margin-top: 6px;
+  line-height: 1.55;
+}
+
+.bullets {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-top: 14px;
+}
+
+.bullet {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 14.5px;
+}
+
+.bulletDot {
+  width: 6px;
+  height: 6px;
+  border-radius: var(--radius-full);
+  background: var(--accent-500);
+}
+
+.filled {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 12px;
+  font-size: 13.5px;
+  line-height: 1.45;
+  color: var(--neutral-600);
+}
+
+.noShrink {
+  flex: 0 0 auto;
+}
+
+.stripeButton {
+  width: 100%;
+  margin-top: 14px;
+  border: none;
+  background: #1a1714;
+  color: var(--neutral-100);
+  border-radius: var(--radius-full);
+  padding: 13px 0;
+  font-size: 15px;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+}
+
+.stripeButton:active {
+  transform: scale(0.98) !important;
+}
+
+.spinner {
+  width: 14px;
+  height: 14px;
+  border-radius: var(--radius-full);
+  border: 2px solid rgba(246, 240, 228, 0.3);
+  border-top-color: var(--neutral-100);
+  animation: spin 0.7s linear infinite;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
