@@ -212,6 +212,42 @@ describe("Studio → Settings", () => {
     ).toBeInTheDocument();
   });
 
+  it("checks the profile email and website", async () => {
+    setViewport(1440);
+    renderStudio();
+    await user.click(within(getLabelled("Sidebar")).getByTitle("Settings"));
+
+    const email = screen.getByLabelText("Email");
+    const website = screen.getByLabelText("Website");
+
+    await user.clear(email);
+    await user.type(email, "amara@");
+    await user.clear(website);
+    await user.type(website, "my salon");
+    await user.tab();
+
+    expect(
+      await screen.findByText(
+        "Enter an email address, like name@example.co.uk.",
+      ),
+    ).toBeInTheDocument();
+
+    expect(
+      await screen.findByText(
+        "Enter a website address, like tiwarashouse.com.",
+      ),
+    ).toBeInTheDocument();
+
+    await user.clear(website);
+    await user.type(website, "tiwarashouse.com");
+
+    await waitFor(() =>
+      expect(
+        screen.queryByText("Enter a website address, like tiwarashouse.com."),
+      ).not.toBeInTheDocument(),
+    );
+  });
+
   it("pausing online bookings shows what clients see", async () => {
     setViewport(1440);
     renderStudio();

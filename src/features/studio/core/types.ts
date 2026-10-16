@@ -260,7 +260,7 @@ interface WorkingHours {
   end: string;
 }
 
-interface StudioProfile {
+export interface StudioProfile {
   salon: string;
   about: string;
   address: string;
