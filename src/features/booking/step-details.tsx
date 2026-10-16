@@ -1,11 +1,9 @@
-import type { CSSProperties, ReactNode } from "react";
-import { Controller, useFormState } from "react-hook-form";
-import { Link } from "react-router";
+import type { CSSProperties } from "react";
 import { AllergyField } from "../../components/allergy-field/allergy-field";
-import { joinClassNames } from "../../utils/class-names";
 import { AppointmentAddress } from "./appointment-address";
-import { getEmailFix } from "./booking-details";
-import type { AllergyState, FieldKey } from "./booking-state";
+import type { AllergyState } from "./booking-state";
+import { ContactFields } from "./contact-fields";
+import { ContactSummary } from "./contact-summary";
 import fields from "../../styles/features/booking/booking-fields.module.css";
 import step from "../../styles/features/booking/booking-step.module.css";
 import { CheckBox } from "./step-customise";
@@ -18,221 +16,36 @@ interface StepDetailsProps {
 
 const MAX_PHOTOS = 8;
 
-const ErrorIcon = () => (
-  <svg
-    width="15"
-    height="15"
-    viewBox="0 0 24 24"
-    fill="none"
-    stroke="currentColor"
-    strokeWidth="1.5"
-    strokeLinecap="round"
-    className={fields.errorIcon}
-  >
-    <circle cx="12" cy="12" r="10"></circle>
-    <path d="M12 7v6M12 16.5v.5"></path>
-  </svg>
-);
-
-interface FieldProps {
-  fieldKey: Exclude<FieldKey, "address">;
-  label: string;
-  wide?: boolean;
-  error: string;
-  showError: boolean;
-  /** The input itself, given the id, error state and border class. */
-  renderInput: (props: {
-    id: string;
-    invalid: "true" | "false";
-    describedBy: string;
-    borderClass: string | undefined;
-  }) => ReactNode;
-  prefix?: ReactNode;
-}
-
-/** Label, input and the inline error under it. */
-const DetailsField = ({
-  fieldKey,
-  label,
-  wide,
-  error,
-  showError,
-  renderInput,
-  prefix,
-}: FieldProps) => {
-  const id = `bk-${fieldKey}`;
-
-  const input = renderInput({
-    id,
-    invalid: showError ? "true" : "false",
-    describedBy: `${id}-err`,
-    borderClass: showError ? fields.borderError : fields.border,
-  });
-
-  return (
-    <div className={wide ? fields.fieldWide : fields.field}>
-      <label htmlFor={id} className={fields.label}>
-        {label}
-      </label>
-      {prefix ? (
-        <span className={styles.phoneWrap}>
-          {prefix}
-          {input}
-        </span>
-      ) : (
-        input
-      )}
-      {showError && (
-        <div id={`${id}-err`} role="alert" className={fields.error}>
-          <ErrorIcon />
-          {error}
-        </div>
-      )}
-    </div>
-  );
-};
-
-/** Step 4 (Your details): log in / booking-as line, mobile address, contact fields, allergies and photos. */
+/** Step 4 (Your details): log-in line or booking-as card, mobile address, contact fields, allergies and photos. */
 export const StepDetails = ({ booking }: StepDetailsProps) => {
-  const { state, stylist, detailsForm, isMobileStylist, actions, openPrivacy } =
-    booking;
+  const {
+    state,
+    stylist,
+    detailsForm,
+    isMobileStylist,
+    showContactFields,
+    needsMobile,
+    actions,
+    openPrivacy,
+  } = booking;
 
-  const { register, setValue, control } = detailsForm;
-  const { errors } = useFormState({ control });
+  const { register } = detailsForm;
   const { setState } = actions;
-  const { details, loggedIn, allergy, photos } = state;
-  const emailFix = getEmailFix(details.email);
-
-  const loginReturn = encodeURIComponent(
-    `/book?stylist=${stylist.id}&resume=1`,
-  );
+  const { loggedIn, allergy, photos } = state;
 
   const setAllergy = (patch: Partial<AllergyState>) =>
     setState((current) => ({ allergy: { ...current.allergy, ...patch } }));
 
-  const fieldProps = (key: Exclude<FieldKey, "address">) => ({
-    fieldKey: key,
-    error: errors[key]?.message ?? "",
-    showError: !!errors[key],
-  });
-
   return (
     <>
       <h1 className={step.title}>Your details</h1>
-      {!loggedIn && (
-        <p data-screen-label="Log in line" className={styles.loginLine}>
-          Already have an account?{" "}
-          <Link
-            to={`/login?screen=cust-email&return=${loginReturn}`}
-            onClick={actions.saveDraftNow}
-            className={styles.loginLink}
-          >
-            Log in
-          </Link>
-        </p>
+      <ContactSummary booking={booking} />
+      {isMobileStylist && <AppointmentAddress booking={booking} />}
+      {isMobileStylist && (showContactFields || needsMobile) && (
+        <h2 className={fields.heading}>Your contact details</h2>
       )}
-      {loggedIn && (
-        <div data-screen-label="Booking as" className={styles.bookingAs}>
-          <span>
-            Booking as{" "}
-            <strong className={styles.accountName}>
-              {`${details.first} ${details.last}`}
-            </strong>
-          </span>
-          <span aria-hidden="true">·</span>
-          <span>
-            Not you?{" "}
-            <button onClick={actions.logOut} className={fields.linkButton}>
-              Log out
-            </button>
-          </span>
-        </div>
-      )}
-      {isMobileStylist && (
-        <>
-          <AppointmentAddress booking={booking} />
-          <h2 className={fields.heading}>Your contact details</h2>
-        </>
-      )}
+      <ContactFields booking={booking} />
       <div className={fields.grid}>
-        {(
-          [
-            ["first", "First name", "given-name"],
-            ["last", "Last name", "family-name"],
-            ["email", "Email", "email"],
-          ] as const
-        ).map(([key, label, autoComplete]) => (
-          <DetailsField
-            key={key}
-            {...fieldProps(key)}
-            label={label}
-            wide={key === "email"}
-            renderInput={({ id, invalid, describedBy, borderClass }) => (
-              <input
-                id={id}
-                type={key === "email" ? "email" : "text"}
-                autoComplete={autoComplete}
-                {...register(key)}
-                aria-invalid={invalid}
-                aria-describedby={describedBy}
-                className={joinClassNames(fields.input, borderClass)}
-              />
-            )}
-          />
-        ))}
-        {!!emailFix && (
-          <div
-            data-screen-label="Email typo suggestion"
-            role="status"
-            className={styles.emailFix}
-          >
-            Did you mean{" "}
-            <button
-              onClick={() =>
-                setValue("email", emailFix, { shouldValidate: true })
-              }
-              className={styles.emailFixButton}
-            >
-              {emailFix}
-            </button>
-            ?
-          </div>
-        )}
-        <DetailsField
-          {...fieldProps("phone")}
-          label="Mobile"
-          wide
-          prefix={
-            <span aria-hidden="true" className={styles.phonePrefix}>
-              +44
-            </span>
-          }
-          renderInput={({ id, invalid, describedBy, borderClass }) => (
-            <Controller
-              name="phone"
-              control={control}
-              render={({ field: { onChange, ...field } }) => (
-                <input
-                  {...field}
-                  id={id}
-                  type="tel"
-                  inputMode="numeric"
-                  autoComplete="tel-national"
-                  placeholder="07700 900123"
-                  onChange={(event) =>
-                    onChange(
-                      event.target.value.replace(/[^\d ]/g, "").slice(0, 13),
-                    )
-                  }
-                  aria-invalid={invalid}
-                  aria-describedby={describedBy}
-                  aria-label="Mobile, UK number"
-                  className={joinClassNames(styles.phoneInput, borderClass)}
-                />
-              )}
-            />
-          )}
-        />
         <label className={fields.fieldWide}>
           <span className={fields.label}>
             Notes for your stylist{" "}

@@ -1,0 +1,67 @@
+.form,
+.stack {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  margin-top: 20px;
+}
+
+.form > button,
+.stack > button {
+  flex: 0 0 auto;
+}
+
+.forgot {
+  align-self: flex-start;
+  margin-top: -4px;
+  font-size: 14px;
+}
+
+.textLink {
+  align-self: center;
+  font-size: 14px;
+}
+
+.note {
+  margin: 0;
+  text-align: center;
+  font-size: 13.5px;
+  color: var(--neutral-600);
+}
+
+.failure {
+  margin: 0;
+  font-size: 14px;
+  line-height: 1.45;
+  color: var(--accent-700);
+}
+
+.divider {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  font-size: 13px;
+  color: var(--neutral-600);
+}
+
+.divider::before,
+.divider::after {
+  content: "";
+  flex: 1;
+  height: 1px;
+  background: var(--border-subtle);
+}
+
+.google {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+}
+
+.submit {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 50px;
+}

@@ -1,4 +1,4 @@
-import { act, screen } from "@testing-library/react";
+import { act, screen, within } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { renderWithStore } from "../../../test/render-with-store";
 import { BookingPage } from "../booking-page";
@@ -70,6 +70,87 @@ describe("BookingPage", () => {
     expect(
       screen.getByRole("heading", { level: 1, name: "Review your booking" }),
     ).toBeInTheDocument();
+  });
+
+  it("time-picked: Continue asks to log in or continue as guest before Your details", async () => {
+    renderWithStore(<BookingPage />, "/book?fixture=time-picked");
+
+    await user.click(screen.getAllByRole("button", { name: /^Continue$/ })[0]!);
+
+    const dialog = within(
+      screen.getByRole("dialog", { name: "Have an account?" }),
+    );
+
+    expect(dialog.getByRole("button", { name: "Log in" })).toBeInTheDocument();
+
+    await user.click(dialog.getByRole("button", { name: "Continue as guest" }));
+
+    expect(
+      screen.getByRole("heading", { level: 1, name: "Your details" }),
+    ).toBeInTheDocument();
+
+    expect(screen.getByLabelText("First name")).toBeInTheDocument();
+    expect(screen.queryByRole("dialog")).not.toBeInTheDocument();
+  });
+
+  it("time-picked: closing the account sheet stays on Time", async () => {
+    renderWithStore(<BookingPage />, "/book?fixture=time-picked");
+
+    await user.click(screen.getAllByRole("button", { name: /^Continue$/ })[0]!);
+    await user.click(screen.getByRole("button", { name: "Close" }));
+
+    expect(screen.queryByRole("dialog")).not.toBeInTheDocument();
+    expect(screen.queryByLabelText("First name")).not.toBeInTheDocument();
+  });
+
+  it("time-picked: the account sheet closes when the hold runs out", async () => {
+    renderWithStore(<BookingPage />, "/book?fixture=time-picked&hold=2");
+
+    await user.click(screen.getAllByRole("button", { name: /^Continue$/ })[0]!);
+
+    expect(
+      screen.getByRole("dialog", { name: "Have an account?" }),
+    ).toBeInTheDocument();
+
+    const later = Date.now() + 3000;
+
+    vi.spyOn(Date, "now").mockReturnValue(later);
+    act(() => vi.advanceTimersByTime(1000));
+    vi.mocked(Date.now).mockRestore();
+
+    expect(screen.queryByRole("dialog")).not.toBeInTheDocument();
+
+    expect(
+      screen.getByRole("alertdialog", { name: "Your slot is no longer held" }),
+    ).toBeInTheDocument();
+  });
+
+  it("details-card: shows the logged-in contact card, edits name and mobile, and logs out", async () => {
+    renderWithStore(<BookingPage />, "/book?fixture=details-card");
+
+    expect(screen.getByText("Nia Okafor")).toBeInTheDocument();
+    expect(screen.queryByLabelText("First name")).not.toBeInTheDocument();
+
+    await user.click(screen.getByRole("button", { name: "Edit your details" }));
+
+    expect(screen.getByLabelText("First name")).toHaveValue("Nia");
+
+    expect(
+      screen.queryByRole("textbox", { name: "Email" }),
+    ).not.toBeInTheDocument();
+
+    expect(
+      screen.getByRole("link", { name: "Change your email in Account" }),
+    ).toHaveAttribute("href", "/account?section=personal");
+
+    await user.click(screen.getByRole("button", { name: "Cancel" }));
+
+    expect(screen.getByText("07700 900123")).toBeInTheDocument();
+
+    await user.click(screen.getByRole("button", { name: "Log out" }));
+
+    expect(screen.getByRole("button", { name: "Log in" })).toBeInTheDocument();
+    expect(screen.getByLabelText("First name")).toHaveValue("");
   });
 
   it("review: shows the policy card and Continue to payment", () => {

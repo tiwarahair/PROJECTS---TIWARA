@@ -3,13 +3,21 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { useForm } from "react-hook-form";
 import type { FieldErrors } from "react-hook-form";
 import { useNavigate } from "react-router";
+import { getScreenPath } from "../onboarding/onboarding-routes";
+import { startGoogleSignIn } from "../../lib/auth";
+import { useUpdateProfileMutation } from "../../stores/api-slice";
+import { writeSession } from "../../utils/page-flags";
 import { logOut as logOutSession } from "../../stores/session-slice";
 import { useIdentity } from "../../hooks/use-identity";
 import { useUnsavedChanges } from "../../hooks/use-unsaved-changes";
 import { useAppDispatch } from "../../stores/hooks";
 import { getServiceOptions, findService, hasStep2 } from "../../utils/services";
 import { getBookingMoney, getCustomisationLine } from "./booking-pricing";
-import { getAddressCheck, getFirstErrorTarget } from "./booking-details";
+import {
+  getAddressCheck,
+  getContactChanges,
+  getFirstErrorTarget,
+} from "./booking-details";
 import { detailsSchema } from "./booking-schemas";
 import {
   clearDraft,
@@ -112,7 +120,9 @@ export const useBooking = () => {
   });
 
   const identity = useIdentity();
-  const signedIn = identity?.isLoaded ? identity : null;
+  const hasSession = !!identity && !state.board;
+  const signedIn = identity?.isLoaded && hasSession ? identity : null;
+  const [updateProfile] = useUpdateProfileMutation();
 
   // signed in: book as them, with their details filled in
   useEffect(() => {
@@ -128,7 +138,18 @@ export const useBooking = () => {
       phone: mobile,
     });
 
-    setState({ loggedIn: true });
+    const { step, loginStart } = stateRef.current;
+    const isLeavingTime = !!loginStart && step === 3;
+
+    setState(
+      {
+        loggedIn: true,
+        editContact: false,
+        loginStart: null,
+        step: isLeavingTime ? 4 : step,
+      },
+      isLeavingTime ? scrollToTitle : undefined,
+    );
     // once per signed-in account
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [signedIn?.user.id, setState]);
@@ -161,7 +182,8 @@ export const useBooking = () => {
 
       if (!hold || confirmed || holdExpired) return;
 
-      if (Date.now() >= hold.until) setState({ holdExpired: true });
+      if (Date.now() >= hold.until)
+        setState({ holdExpired: true, loginStart: null });
       else setTick((tick) => tick + 1);
     }, 1000);
 
@@ -217,6 +239,21 @@ export const useBooking = () => {
     (state.step === 2 && (needSize || needLength)) ||
     (state.step === 3 && !(state.date && state.time));
 
+  const needsMobile = state.loggedIn && !!signedIn && !signedIn.mobile;
+  const showContactFields = state.loggedIn ? state.editContact : true;
+
+  const saveContactToAccount = () => {
+    if (!signedIn) return;
+
+    const patch = getContactChanges(detailsForm.getValues(), signedIn);
+
+    if (!Object.keys(patch).length) return;
+
+    updateProfile({ userId: signedIn.user.id, patch })
+      .unwrap()
+      .catch(() => undefined);
+  };
+
   const showTurnstile = !!state.turnstileMode && state.step === 6;
   const turnstileBlocking = showTurnstile && state.turnstileStatus !== "passed";
   const payDisabled = state.paying || turnstileBlocking;
@@ -225,7 +262,9 @@ export const useBooking = () => {
     ? Math.max(0, state.hold.until - Date.now())
     : 0;
 
-  const confirmNow = () =>
+  const confirmNow = () => {
+    saveContactToAccount();
+
     setState(
       {
         confirmed: true,
@@ -237,6 +276,7 @@ export const useBooking = () => {
       },
       () => window.scrollTo(0, 0),
     );
+  };
 
   /** Simulated Stripe: 900ms, then the outcome for the test card (or success). */
   const attemptPay = (card: string) => {
@@ -277,6 +317,22 @@ export const useBooking = () => {
 
   const goToStep = (step: number) => setState({ step }, scrollToTitle);
 
+  const loginReturn = `/book?stylist=${stylist.id}&resume=1`;
+
+  const prepareLoginRedirect = () => {
+    const current = stateRef.current;
+
+    saveDraft(
+      current.loginStart && current.step === 3
+        ? { ...current, step: 4 }
+        : current,
+    );
+
+    writeSession("tw_return", loginReturn);
+    isLeaving.current = true;
+    navigate(loginReturn, { replace: true });
+  };
+
   const goToNextStep = () => {
     const extra: Partial<BookingState> = {};
 
@@ -290,6 +346,12 @@ export const useBooking = () => {
         ),
         until: Date.now() + state.holdSeconds * 1000,
       };
+
+    if (state.step === 3 && !hasSession && !state.guest) {
+      setState({ ...extra, loginStart: "choice", repickNote: false });
+
+      return;
+    }
 
     setState(
       ({ step }) => ({
@@ -336,13 +398,17 @@ export const useBooking = () => {
 
       if (state.step !== 4) return goToNextStep();
 
-      const focusFirstError = (errors: FieldErrors<Details>) =>
+      const focusFirstError = (errors: FieldErrors<Details>) => {
+        if (state.loggedIn && Object.keys(errors).length)
+          setState({ editContact: true });
+
         focusLater(
           getFirstErrorTarget(
             { address: isAddressMissing, ...errors },
             address.outBlock,
           ),
         );
+      };
 
       void detailsForm.handleSubmit(() => {
         if (isAddressMissing || address.outBlock) return focusFirstError({});
@@ -361,9 +427,57 @@ export const useBooking = () => {
         phone: "",
       });
 
-      setState({ loggedIn: false });
+      setState({ loggedIn: false, guest: false, editContact: false });
+    },
+    openContactEdit: () => {
+      setState({ editContact: true });
+      focusLater("bk-first");
+    },
+    cancelContactEdit: () => {
+      if (signedIn)
+        detailsForm.reset({
+          ...detailsForm.getValues(),
+          first: signedIn.first,
+          last: signedIn.last,
+          phone: signedIn.mobile,
+        });
+
+      setState({ editContact: false });
     },
     saveDraftNow: () => saveDraft(stateRef.current),
+    openLogin: () => setState({ loginStart: "email" }),
+    closeLogin: () => setState({ loginStart: null }),
+    continueAsGuestWith: (email: string) => {
+      if (email) detailsForm.setValue("email", email);
+
+      setState(
+        ({ step }) => ({
+          guest: true,
+          loginStart: null,
+          step: step === 3 ? 4 : step,
+        }),
+        scrollToTitle,
+      );
+
+      focusLater("bk-first");
+    },
+    leaveForLogin: (screen: string) => {
+      prepareLoginRedirect();
+
+      navigate(
+        `${getScreenPath(screen)}?screen=${screen}&return=${encodeURIComponent(loginReturn)}`,
+      );
+    },
+    googleLogin: async () => {
+      prepareLoginRedirect();
+
+      try {
+        await startGoogleSignIn(false);
+      } catch (error) {
+        isLeaving.current = false;
+        throw error;
+      }
+    },
     keepBooking: () => {
       if (blocker.state === "blocked") blocker.reset();
 
@@ -457,6 +571,8 @@ export const useBooking = () => {
     isMobileStylist,
     address,
     detailsForm,
+    needsMobile,
+    showContactFields,
     hasCustomiseStep,
     needSize,
     needLength,

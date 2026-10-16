@@ -4,7 +4,7 @@ import { postcodes } from "../../data";
 import type { Stylist } from "../../types/stylist";
 import { isAddressValid } from "../../utils/address";
 import { miles } from "../../utils/availability";
-import type { BookingAddress, FieldKey } from "./booking-state";
+import type { BookingAddress, Details, FieldKey } from "./booking-state";
 
 const FIELD_KEYS: FieldKey[] = ["address", "first", "last", "email", "phone"];
 
@@ -72,6 +72,29 @@ export const getFirstErrorTarget = (
   if (first) return first === "address" ? "@address" : `bk-${first}`;
 
   return outBlock ? "@address" : null;
+};
+
+interface ContactProfile {
+  first: string;
+  last: string;
+  mobile: string;
+}
+
+export const getContactChanges = (
+  { first, last, phone }: Details,
+  profile: ContactProfile,
+) => ({
+  ...(first.trim() !== profile.first && { first: first.trim() }),
+  ...(last.trim() !== profile.last && { last: last.trim() }),
+  ...(phone.trim() !== profile.mobile && { mobile: phone.trim() }),
+});
+
+export const formatMobile = (value: string) => {
+  const digits = value.replace(/\D/g, "").replace(/^44/, "").replace(/^0/, "");
+
+  return /^7\d{9}$/.test(digits)
+    ? `0${digits.slice(0, 4)} ${digits.slice(4)}`
+    : value;
 };
 
 const EMAIL_TYPOS: Record<string, string> = {

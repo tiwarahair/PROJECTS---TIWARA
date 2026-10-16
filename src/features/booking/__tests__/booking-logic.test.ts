@@ -6,6 +6,7 @@ import {
   formatCardNumber,
   formatExpiry,
   getAddressCheck,
+  getContactChanges,
   getCardBrand,
   getCardError,
   getEmailFix,
@@ -16,6 +17,35 @@ describe("details", () => {
   it("suggests the fixed email domain", () => {
     expect(getEmailFix("nia.okafor@gmial.com")).toBe("nia.okafor@gmail.com");
     expect(getEmailFix("nia.okafor@gmail.com")).toBe("");
+  });
+
+  it("lists only the contact fields that differ from the profile", () => {
+    const profile = { first: "Nia", last: "Okafor", mobile: "07700 900123" };
+
+    const details = {
+      ...profile,
+      email: "nia@gmail.com",
+      phone: "",
+      notes: "",
+    };
+
+    expect(
+      getContactChanges({ ...details, phone: "07700 900123" }, profile),
+    ).toEqual({});
+
+    expect(
+      getContactChanges(
+        { ...details, first: " Nia ", phone: "07700 900456" },
+        profile,
+      ),
+    ).toEqual({ mobile: "07700 900456" });
+
+    expect(
+      getContactChanges(
+        { ...details, phone: "07700 900123" },
+        { ...profile, mobile: "" },
+      ),
+    ).toEqual({ mobile: "07700 900123" });
   });
 
   it("suggests the fixed ending, alone or with the domain", () => {
