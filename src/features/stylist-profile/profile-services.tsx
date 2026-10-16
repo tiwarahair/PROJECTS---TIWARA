@@ -1,3 +1,4 @@
+import { ChevronRight } from "lucide-react";
 import { Link } from "react-router";
 import { joinClassNames } from "../../utils/class-names";
 import type { MenuGroup, ServiceModal } from "./profile-menu";
@@ -77,19 +78,7 @@ export const ProfileServices = ({
     ))}
     {hasMore && (
       <Link to={bookHref} className={styles.showAll}>
-        {showAllLabel}{" "}
-        <svg
-          width="15"
-          height="15"
-          viewBox="0 0 24 24"
-          fill="none"
-          stroke="currentColor"
-          strokeWidth="1.9"
-          strokeLinecap="round"
-          strokeLinejoin="round"
-        >
-          <path d="M9.5 5.5L16 12l-6.5 6.5"></path>
-        </svg>
+        {showAllLabel} <ChevronRight size={15} strokeWidth={1.9} />
       </Link>
     )}
   </>

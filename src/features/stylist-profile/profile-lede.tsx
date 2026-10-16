@@ -1,4 +1,4 @@
-import { Star } from "lucide-react";
+import { BadgeCheck, MapPin, Star, Truck } from "lucide-react";
 import type { Stylist } from "../../types/stylist";
 import { joinClassNames } from "../../utils/class-names";
 import type { ProfileFacts } from "./profile-facts";
@@ -26,22 +26,11 @@ export const ProfileLede = ({
             <span className={styles.name}>
               {name}{" "}
               {verified && (
-                <svg
-                  width="24"
-                  height="24"
-                  viewBox="0 0 24 24"
-                  fill="var(--accent-700)"
-                >
-                  <path d="M12 2l2.4 2.1 3.1-.4 1 3 2.9 1.2-.6 3.1L23 12l-2.2 2.3.6 3.1-2.9 1.2-1 3-3.1-.4L12 22l-2.4-2.1-3.1.4-1-3-2.9-1.2.6-3.1L1 12l2.2-2.3-.6-3.1 2.9-1.2 1-3 3.1.4z"></path>
-                  <path
-                    d="M9.5 12.2l1.8 1.8 3.6-3.8"
-                    stroke="#fffefb"
-                    strokeWidth="1.8"
-                    fill="none"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                  ></path>
-                </svg>
+                <BadgeCheck
+                  size={24}
+                  strokeWidth={1.8}
+                  color="var(--accent-700)"
+                />
               )}
             </span>
             <span className={styles.rating}>
@@ -59,36 +48,12 @@ export const ProfileLede = ({
         </div>
         <div className={styles.meta}>
           <span className={styles.area}>
-            <svg
-              width="14"
-              height="14"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="1.5"
-            >
-              <path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0z"></path>
-              <circle cx="12" cy="10" r="3"></circle>
-            </svg>
+            <MapPin size={14} strokeWidth={1.5} />
             {area}
           </span>
           {mobile && (
             <span className={styles.travels}>
-              <svg
-                width="13"
-                height="13"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="1.7"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-              >
-                <path d="M3 17V7a2 2 0 0 1 2-2h9v12"></path>
-                <path d="M14 9h4l3 4v4h-7"></path>
-                <circle cx="7.5" cy="17.5" r="2"></circle>
-                <circle cx="17.5" cy="17.5" r="2"></circle>
-              </svg>
+              <Truck size={13} strokeWidth={1.7} />
               Travels to you
             </span>
           )}

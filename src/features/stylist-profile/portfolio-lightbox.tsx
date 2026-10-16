@@ -1,5 +1,6 @@
 import { useEffect, useRef } from "react";
 import type { CSSProperties, MouseEvent } from "react";
+import { ChevronLeft, ChevronRight } from "lucide-react";
 import { joinClassNames } from "../../utils/class-names";
 import { resolveAssetUrl } from "../../utils/asset-url";
 import styles from "../../styles/features/stylist-profile/portfolio-lightbox.module.css";
@@ -73,17 +74,7 @@ export const PortfolioLightbox = ({
         aria-label="Previous"
         className={styles.prev}
       >
-        <svg
-          width="22"
-          height="22"
-          viewBox="0 0 24 24"
-          fill="none"
-          stroke="currentColor"
-          strokeWidth="1.8"
-          strokeLinecap="round"
-        >
-          <path d="m14 6-6 6 6 6"></path>
-        </svg>
+        <ChevronLeft size={22} strokeWidth={1.8} />
       </button>
       {/* eslint-disable-next-line jsx-a11y/click-events-have-key-events, jsx-a11y/no-noninteractive-element-interactions */}
       <div
@@ -98,17 +89,7 @@ export const PortfolioLightbox = ({
         aria-label="Next"
         className={styles.next}
       >
-        <svg
-          width="22"
-          height="22"
-          viewBox="0 0 24 24"
-          fill="none"
-          stroke="currentColor"
-          strokeWidth="1.8"
-          strokeLinecap="round"
-        >
-          <path d="m10 6 6 6-6 6"></path>
-        </svg>
+        <ChevronRight size={22} strokeWidth={1.8} />
       </button>
       <div className={styles.counter}>{`${index + 1} / ${photos.length}`}</div>
     </div>
