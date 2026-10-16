@@ -11,7 +11,7 @@ import {
 import { joinClassNames } from "../../../../utils/class-names";
 import type { AddBookingView } from "./view";
 import { DuplicateNotice } from "../dialogs";
-import { AddonPickerList } from "../steps";
+import { AddonPickerList, CustomTime, DayStrip, TimeSlots } from "../steps";
 import {
   CalendarToggle,
   getMonthNav,
@@ -19,7 +19,6 @@ import {
 } from "../../shell/month-calendar";
 import type { StudioController } from "../../core/use-studio";
 import styles from "../../../../styles/features/studio/bookings/add/index.module.css";
-import stepStyles from "../../../../styles/features/studio/bookings/steps.module.css";
 
 const asStyle = (values: Record<string, string>) => values as CSSProperties;
 
@@ -374,78 +373,26 @@ const WhenStep = ({
           onClick={view.toggleCalendar}
         />
       </div>
-      {!view.isCalendarOpen && (
-        <div className={stepStyles.dayStrip}>
-          {view.days.map(({ key, weekday, dayNumber, isOn, pick }) => (
-            <button
-              key={key}
-              className={joinClassNames(
-                stepStyles.dayChip,
-                isOn && stepStyles.dayChipOn,
-              )}
-              onClick={pick}
-            >
-              <div className={stepStyles.chipDow}>{weekday}</div>
-              <div className={stepStyles.chipNum}>{dayNumber}</div>
-            </button>
-          ))}
-        </div>
-      )}
+      {!view.isCalendarOpen && <DayStrip days={view.days} />}
       {view.isCalendarOpen && (
         <MonthCalendar monthNav={monthNav} days={view.calendarDays} isLoose />
       )}
-      <div className={stepStyles.timesLabel}>Available times</div>
-      <div className={stepStyles.times}>
-        {view.isNoSlots && (
-          <span className={stepStyles.noSlots}>{view.noSlotsText}</span>
-        )}
-        {view.times.map(({ key, label, isOn, pick }) => (
-          <button
-            key={key}
-            className={joinClassNames(
-              stepStyles.time,
-              isOn && stepStyles.timeOn,
-            )}
-            onClick={pick}
-          >
-            {label}
-          </button>
-        ))}
-        <button
-          className={joinClassNames(
-            stepStyles.custom,
-            view.isCustom && stepStyles.customOn,
-          )}
-          onClick={view.toggleCustom}
-        >
-          <Plus size={13} strokeWidth={2} />
-          Custom time
-        </button>
-      </div>
+      <TimeSlots
+        times={view.times}
+        isEmpty={view.isNoSlots}
+        emptyText={view.noSlotsText}
+        isCustom={view.isCustom}
+        toggleCustom={view.toggleCustom}
+      />
       {view.isCustom && (
-        <div className={stepStyles.customRow}>
-          <div className={stepStyles.grow}>
-            <div className={stepStyles.label145}>Start time</div>
-            <div
-              className={joinClassNames(
-                stepStyles.customHint,
-                view.isCustomWarn && stepStyles.customHintWarn,
-              )}
-            >
-              {view.customHint}
-            </div>
-          </div>
-          <input
-            className={stepStyles.timeInput}
-            type="time"
-            step="300"
-            min={view.customMinutes}
-            max={view.customMax}
-            value={view.customTime}
-            onChange={view.onCustomTime}
-            aria-label="Custom start time"
-          />
-        </div>
+        <CustomTime
+          hint={view.customHint}
+          isWarn={view.isCustomWarn}
+          value={view.customTime}
+          onChange={view.onCustomTime}
+          min={view.customMinutes}
+          max={view.customMax}
+        />
       )}
       {view.hasConflict && (
         <div className={styles.conflict}>

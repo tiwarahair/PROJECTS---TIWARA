@@ -1,0 +1,58 @@
+/* ---- reschedule / cancel ---- */
+.summary {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-top: 16px;
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-md);
+  padding: 14px;
+  animation: rowin 0.24s cubic-bezier(0.2, 0.8, 0.2, 1) both;
+}
+
+.avatar42 {
+  width: 42px;
+  height: 42px;
+  border-radius: var(--radius-full);
+  object-fit: cover;
+  flex: 0 0 auto;
+  background: var(--quiet);
+}
+
+.summaryName {
+  font-size: 15px;
+  font-weight: 600;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.summaryMeta {
+  font-size: 13.5px;
+  color: var(--text-secondary);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.summaryEnd {
+  text-align: right;
+  flex: 0 0 auto;
+}
+
+.summaryTime {
+  font-size: 13.5px;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+}
+
+@keyframes rowin {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}

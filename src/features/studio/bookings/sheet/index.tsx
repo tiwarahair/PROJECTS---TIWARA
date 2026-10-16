@@ -13,7 +13,7 @@ import { DoneStep } from "./done";
 import { BookingMain } from "./main";
 import { PaymentStep } from "./payment";
 import type { BookingSheetView } from "./view";
-import stepStyles from "../../../../styles/features/studio/bookings/steps.module.css";
+import stepStyles from "../../../../styles/features/studio/bookings/steps/index.module.css";
 
 interface BookingSheetBodyProps {
   studio: StudioController;
