@@ -37,25 +37,15 @@ export const StepTime = ({ booking }: StepTimeProps) => {
 
   const changeMonth = (delta: number) =>
     setState(({ calendarMonth: month, calendarYear: year }) => {
-      const next = month + delta;
+      const next = new Date(year, month + delta, 1);
 
-      if (next < 0)
-        return {
-          calendarMonth: 11,
-          calendarYear: year - 1,
-          date: null,
-          time: null,
-        };
-
-      if (next > 11)
-        return {
-          calendarMonth: 0,
-          calendarYear: year + 1,
-          date: null,
-          time: null,
-        };
-
-      return { calendarMonth: next, date: null, time: null };
+      return {
+        calendarMonth: next.getMonth(),
+        calendarYear: next.getFullYear(),
+        date: null,
+        time: null,
+        holdError: null,
+      };
     });
 
   return (

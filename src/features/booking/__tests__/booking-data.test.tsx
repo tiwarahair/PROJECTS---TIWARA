@@ -168,6 +168,49 @@ describe("booking on real data", () => {
     );
   });
 
+  it("a resumed booking whose time has gone since says it was just booked", async () => {
+    localStorage.setItem(
+      "tw_bk_draft_tiwaras-house",
+      JSON.stringify({
+        at: Date.now(),
+        step: 3,
+        serviceId: "tiwaras-house--silk-press",
+        selection: {
+          size: null,
+          length: null,
+          colour: "",
+          own: {},
+          addons: [],
+        },
+        calendarMonth: 9,
+        calendarYear: 2026,
+        date: 20,
+        time: "11:00",
+        details: { first: "", last: "", email: "", phone: "", notes: "" },
+        appointmentAddress: { ...EMPTY_ADDRESS },
+        holdUntil: Date.now() + 300_000,
+        holdId: "hold-1",
+        holdSecret: "secret",
+      }),
+    );
+
+    await renderBooking(`${SILK}&resume=1`);
+
+    await waitFor(() =>
+      expect(
+        screen.getAllByRole("button", { name: /^Continue$/ })[0],
+      ).toBeEnabled(),
+    );
+
+    await continueFromTime();
+
+    expect(await screen.findByRole("alert")).toHaveTextContent(
+      "Sorry, that time was just booked. Pick another.",
+    );
+
+    expect(holdBooking).not.toHaveBeenCalled();
+  });
+
   it("an unknown stylist is not found; one who isn't taking bookings says so", async () => {
     vi.mocked(fetchPublicProfile).mockResolvedValueOnce(null);
 

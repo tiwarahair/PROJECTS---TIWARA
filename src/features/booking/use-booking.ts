@@ -279,7 +279,8 @@ export const useBooking = ({ stylist, hours }: PublicStylist) => {
   const nextDisabled =
     state.holding ||
     (state.step === 2 && (needSize || needLength)) ||
-    (state.step === 3 && !(state.date && state.time));
+    (state.step === 3 &&
+      (!(state.date && state.time) || (!state.board && slots.isFetching)));
 
   const needsMobile = state.loggedIn && !!signedIn && !signedIn.mobile;
   const showContactFields = state.loggedIn ? state.editContact : true;
@@ -390,8 +391,9 @@ export const useBooking = ({ stylist, hours }: PublicStylist) => {
       .get(state.date ?? 0)
       ?.find(({ time }) => time === state.time)?.startsAt;
 
+    // a time missing from the loaded list (a resumed booking's, say) has gone since
     if (!startsAt) {
-      setState({ holdError: "failed" });
+      setState({ holdError: "taken", time: null });
 
       return null;
     }
