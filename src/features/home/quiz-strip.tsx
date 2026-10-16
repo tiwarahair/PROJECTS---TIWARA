@@ -1,4 +1,4 @@
-import { ArrowRight } from "lucide-react";
+import { CtaArrowIcon } from "../../components/icons/custom-icons";
 import { Link } from "react-router";
 import { serviceGroups } from "../../data";
 import { joinClassNames } from "../../utils/class-names";
@@ -29,7 +29,7 @@ export const QuizStrip = () => {
           ))}
           <Link to="/search" className={styles.cta}>
             Take the hair quiz
-            <ArrowRight size={16} strokeWidth={1.7} />
+            <CtaArrowIcon size={16} strokeWidth={1.7} />
           </Link>
         </div>
       </div>

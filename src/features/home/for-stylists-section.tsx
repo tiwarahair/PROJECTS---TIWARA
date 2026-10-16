@@ -1,5 +1,5 @@
 import { ResponsiveImage } from "../../components/responsive-image/responsive-image";
-import { ArrowRight } from "lucide-react";
+import { CtaArrowIcon } from "../../components/icons/custom-icons";
 import { Link } from "react-router";
 import { joinClassNames } from "../../utils/class-names";
 import page from "../../styles/features/home/home-page.module.css";
@@ -58,7 +58,7 @@ export const ForStylistsSection = ({ variant }: ForStylistsSectionProps) => (
                 className={styles.cta}
               >
                 List your business
-                <ArrowRight size={16} strokeWidth={2} />
+                <CtaArrowIcon size={16} strokeWidth={2} />
               </Link>
             </div>
           </div>
