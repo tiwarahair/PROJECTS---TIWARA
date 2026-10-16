@@ -467,7 +467,9 @@ export const useOnboarding = (props: OnboardingProps) => {
 
   const back = () => {
     const target = getBackScreen(stateRef.current);
-    const { screen } = stateRef.current;
+    const { screen, entryScreen, exitTo } = stateRef.current;
+
+    if (exitTo && screen === entryScreen) return navigate(exitTo);
 
     if (target) goTo(target, "back");
     else if (screen === "chooser" || screen === "welcome") navigate("/");

@@ -4,6 +4,7 @@ import { joinClassNames } from "../../utils/class-names";
 import { BookingConfirmation } from "./booking-confirmation";
 import { BookingCrumbs } from "./booking-crumbs";
 import { BookingDialogs } from "./booking-dialogs";
+import { LoginDialog } from "./booking-login-dialog";
 import pageGlobal from "../../styles/features/booking/booking-page-global.module.css";
 import { BookingNav } from "./booking-nav";
 import styles from "../../styles/features/booking/booking-page.module.css";
@@ -75,6 +76,9 @@ export const BookingPage = () => {
         </>
       )}
       <BookingDialogs booking={booking} />
+      {!!state.loginStart && (
+        <LoginDialog key={state.loginStart} booking={booking} />
+      )}
       {state.sizeGuide && (
         <SizeGuide onClose={() => actions.setState({ sizeGuide: false })} />
       )}

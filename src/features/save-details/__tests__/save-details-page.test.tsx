@@ -35,6 +35,7 @@ describe("SaveDetailsPage", () => {
     await user.type(screen.getByLabelText("Create a password"), "short");
 
     await user.click(screen.getByRole("button", { name: "Save my details" }));
+    await act(() => Promise.resolve());
     expect(screen.getByRole("alert")).toHaveTextContent("15");
 
     expect(screen.getByLabelText("Create a password")).toHaveAttribute(

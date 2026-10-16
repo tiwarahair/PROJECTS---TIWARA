@@ -1,12 +1,10 @@
 import { describe, expect, it } from "vitest";
-import { SEED_PROFILE, SEED_CARDS, getSeedBookings } from "../account-data";
+import { SEED_CARDS, getSeedBookings } from "../account-data";
 import type { AccountBooking } from "../account-data";
 import {
   formatCardDigits,
   formatCardExpiry,
   getBookingMoney,
-  getCardErrors,
-  validateEdit,
 } from "../account-logic";
 
 const getBooking = (id: string): AccountBooking => {
@@ -39,56 +37,8 @@ describe("account logic", () => {
     expect(money.where).toMatch(/^.+(, | will come to your address)/);
   });
 
-  it("validates the personal details edits", () => {
-    expect(
-      validateEdit("name", { ...SEED_PROFILE, first: " " }, SEED_PROFILE.email),
-    ).toEqual({
-      first: "Enter your first name",
-    });
-
-    expect(validateEdit("email", SEED_PROFILE, SEED_PROFILE.email)).toEqual({
-      email: "That’s already your email",
-    });
-
-    expect(
-      validateEdit(
-        "email",
-        { ...SEED_PROFILE, email: "kemi.a@icloud.com" },
-        SEED_PROFILE.email,
-      ),
-    ).toEqual({ email: "This email is already used by another account" });
-
-    expect(
-      validateEdit(
-        "mobile",
-        { ...SEED_PROFILE, mobile: "07700 900123" },
-        SEED_PROFILE.email,
-      ),
-    ).toEqual({});
-
-    expect(
-      validateEdit(
-        "mobile",
-        { ...SEED_PROFILE, mobile: "0123" },
-        SEED_PROFILE.email,
-      ),
-    ).toEqual({
-      mobile: "Enter a UK mobile number, like 07700 900123",
-    });
-  });
-
-  it("formats and validates card details", () => {
+  it("formats card details", () => {
     expect(formatCardDigits("4242424242424242999")).toBe("4242 4242 4242 4242");
     expect(formatCardExpiry("0828")).toBe("08 / 28");
-
-    expect(getCardErrors({ number: "4242", expiry: "13", cvc: "1" })).toEqual({
-      number: "Enter your card number",
-      expiry: "Enter the expiry date",
-      cvc: "Enter the 3 or 4-digit code",
-    });
-
-    expect(
-      getCardErrors({ number: "4242424242424242", expiry: "0101", cvc: "123" }),
-    ).toEqual({ expiry: "This card has expired" });
   });
 });

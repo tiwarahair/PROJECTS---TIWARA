@@ -88,6 +88,7 @@ interface BookingDraft {
   appointmentAddress: BookingAddress;
   holdUntil: number | null;
   holdKey?: string | null;
+  guest?: boolean;
 }
 
 export type FieldKey = "address" | "first" | "last" | "email" | "phone";
@@ -109,13 +110,14 @@ export interface BookingState {
   photos: Photo[];
   pay: PayFields;
   loggedIn: boolean;
+  guest: boolean;
+  editContact: boolean;
+  loginStart: "choice" | "email" | null;
   board: boolean;
   holdSeconds: number;
   hold: Hold | null;
   holdExpired: boolean;
   taken: boolean;
-  touched: Partial<Record<FieldKey, boolean>>;
-  showErrors: boolean;
   appointmentAddress: BookingAddress;
   legalDocument: LegalDocumentKind | null;
   leave: string | null;
@@ -232,6 +234,7 @@ export const saveDraft = (state: BookingState): void => {
     appointmentAddress: state.appointmentAddress,
     holdUntil: hold ? hold.until : null,
     holdKey: hold ? hold.key : null,
+    guest: state.guest,
   };
 
   try {
@@ -281,6 +284,7 @@ export const getDraftPatch = (
     date: draft.date,
     time: draft.time,
     details: { ...state.details, ...draft.details },
+    guest: draft.guest ?? !!(draft.details.first || draft.details.email),
     appointmentAddress: {
       ...state.appointmentAddress,
       ...draft.appointmentAddress,
@@ -311,6 +315,7 @@ interface InitialBooking {
   state: BookingState;
   /** ?fixture=privacy opens the allergy field's privacy sheet. */
   openPrivacy: boolean;
+  showErrors: boolean;
 }
 
 /** Skip straight past steps the preselected service doesn't need. */
@@ -359,13 +364,14 @@ export const getInitialBooking = (): InitialBooking => {
       future: false,
     },
     loggedIn,
+    guest: false,
+    editContact: false,
+    loginStart: null,
     board,
     holdSeconds: parseInt(params.get("hold") ?? "", 10) || DEFAULT_HOLD_SECONDS,
     hold: null,
     holdExpired: false,
     taken: params.get("taken") === "1",
-    touched: {},
-    showErrors: false,
     appointmentAddress: { ...EMPTY_ADDRESS },
     legalDocument: null,
     leave: null,
@@ -424,10 +430,15 @@ export const getInitialBooking = (): InitialBooking => {
     };
 
   let openPrivacy = false;
+  let showErrors = false;
 
   // demo states are dev-only; production builds drop this branch and the fixtures module
   if (import.meta.env.DEV && fixture)
-    ({ openPrivacy } = applyFixture(state, fixture, defaultStylist));
+    ({ openPrivacy, showErrors } = applyFixture(
+      state,
+      fixture,
+      defaultStylist,
+    ));
 
   if (!state.board) {
     const draft = readDraft(state.id);
@@ -439,5 +450,5 @@ export const getInitialBooking = (): InitialBooking => {
     }
   }
 
-  return { state, openPrivacy };
+  return { state, openPrivacy, showErrors };
 };

@@ -124,6 +124,8 @@ export const getStartState = (
   state.screen = start;
   state.flow = flow;
   state.returnTo = getReturnTo(search);
+  state.entryScreen = start;
+  state.exitTo = new URLSearchParams(search).get("return");
 
   if (start === "welcome" || start[0] === "w") state.audience = "pro";
 

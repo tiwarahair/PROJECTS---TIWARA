@@ -37,7 +37,7 @@ export const applyFixture = (
   state: BookingState,
   fixture: string,
   defaultStylist: Stylist,
-): { openPrivacy: boolean } => {
+): { openPrivacy: boolean; showErrors: boolean } => {
   const fixtureDate = getFixtureDate();
 
   const setFixtureDate = () => {
@@ -67,6 +67,21 @@ export const applyFixture = (
 
   state.details = { ...DEMO_DETAILS, notes: "" };
   state.step = 4;
+  state.guest = true;
+
+  if (fixture === "time-picked" || fixture === "details-login") {
+    state.details = { ...EMPTY_DETAILS };
+    state.guest = false;
+  }
+
+  if (fixture === "details-login") state.loginStart = "email";
+
+  if (fixture === "time-picked") {
+    state.step = 3;
+    setFixtureDate();
+  }
+
+  if (fixture === "details-card") state.loggedIn = true;
 
   if (fixture === "details-empty") state.allergy.on = true;
 
@@ -163,10 +178,7 @@ export const applyFixture = (
       source: "pick",
     };
 
-  if (fixture === "details-errors") {
-    state.details = { ...EMPTY_DETAILS };
-    state.showErrors = true;
-  }
+  if (fixture === "details-errors") state.details = { ...EMPTY_DETAILS };
 
   if (
     [
@@ -267,5 +279,8 @@ export const applyFixture = (
     });
   }
 
-  return { openPrivacy: fixture === "privacy" };
+  return {
+    openPrivacy: fixture === "privacy",
+    showErrors: fixture === "details-errors",
+  };
 };

@@ -105,6 +105,7 @@ Do not change UI without asking.
 - Typography: Avoid generic fonts like Arial and Inter; opt instead for distinctive choices that elevate the frontend's aesthetics.
 - Color & Theme: Commit to a cohesive aesthetic. Use CSS variables for consistency. The Design should be consistent throughout the app (using re-usable components etc.)
 - Motion: Use animations for effects and micro-interactions.
+- Icons: Use lucide icons (`lucide-react`), keeping each icon's size and stroke width. Brand logos (Google, Apple, payment brands), illustrations and hair-specific drawings with no close lucide match stay as SVG.
 - Should adapt to different screen sized: Desktop, Mobile, Tablet etc.
 
 ## Do NOT

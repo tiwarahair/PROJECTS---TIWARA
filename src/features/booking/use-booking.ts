@@ -1,5 +1,12 @@
+import { zodResolver } from "@hookform/resolvers/zod";
 import { useCallback, useEffect, useRef, useState } from "react";
+import { useForm } from "react-hook-form";
+import type { FieldErrors } from "react-hook-form";
 import { useNavigate } from "react-router";
+import { getScreenPath } from "../onboarding/onboarding-routes";
+import { startGoogleSignIn } from "../../lib/auth";
+import { useUpdateProfileMutation } from "../../stores/api-slice";
+import { writeSession } from "../../utils/page-flags";
 import { logOut as logOutSession } from "../../stores/session-slice";
 import { useIdentity } from "../../hooks/use-identity";
 import { useUnsavedChanges } from "../../hooks/use-unsaved-changes";
@@ -8,9 +15,10 @@ import { getServiceOptions, findService, hasStep2 } from "../../utils/services";
 import { getBookingMoney, getCustomisationLine } from "./booking-pricing";
 import {
   getAddressCheck,
-  getFieldErrors,
+  getContactChanges,
   getFirstErrorTarget,
 } from "./booking-details";
+import { detailsSchema } from "./booking-schemas";
 import {
   clearDraft,
   EMPTY_ADDRESS,
@@ -21,7 +29,7 @@ import {
   getStylist,
   saveDraft,
 } from "./booking-state";
-import type { BookingState, FieldKey } from "./booking-state";
+import type { BookingState, Details } from "./booking-state";
 
 type StatePatch =
   Partial<BookingState> | ((state: BookingState) => Partial<BookingState>);
@@ -57,7 +65,6 @@ export const useBooking = () => {
   stateRef.current = state;
   const afterCommit = useRef<(() => void)[]>([]);
   const crumbsRef = useRef<HTMLDivElement>(null);
-  const focusTarget = useRef<string | null>(null);
   const payTimer = useRef(0);
 
   /** setState with a merge patch and an optional callback after the render. */
@@ -69,6 +76,23 @@ export const useBooking = () => {
       ...(typeof patch === "function" ? patch(current) : patch),
     }));
   }, []);
+
+  const detailsForm = useForm<Details>({
+    defaultValues: initial.state.details,
+    mode: "onTouched",
+    resolver: zodResolver(detailsSchema),
+    shouldFocusError: false,
+  });
+
+  useEffect(() => {
+    const { unsubscribe } = detailsForm.watch(() =>
+      setState({ details: detailsForm.getValues() }),
+    );
+
+    if (initial.showErrors) void detailsForm.handleSubmit(() => undefined)();
+
+    return unsubscribe;
+  }, [detailsForm, initial, setState]);
 
   // once a service is picked, leaving (any link, back, reload) asks first
   const isLeaving = useRef(false);
@@ -96,7 +120,9 @@ export const useBooking = () => {
   });
 
   const identity = useIdentity();
-  const signedIn = identity?.isLoaded ? identity : null;
+  const hasSession = !!identity && !state.board;
+  const signedIn = identity?.isLoaded && hasSession ? identity : null;
+  const [updateProfile] = useUpdateProfileMutation();
 
   // signed in: book as them, with their details filled in
   useEffect(() => {
@@ -104,10 +130,26 @@ export const useBooking = () => {
 
     const { first, last, email, mobile } = signedIn;
 
-    setState(({ details }) => ({
-      loggedIn: true,
-      details: { ...details, first, last, email, phone: mobile },
-    }));
+    detailsForm.reset({
+      ...detailsForm.getValues(),
+      first,
+      last,
+      email,
+      phone: mobile,
+    });
+
+    const { step, loginStart } = stateRef.current;
+    const isLeavingTime = !!loginStart && step === 3;
+
+    setState(
+      {
+        loggedIn: true,
+        editContact: false,
+        loginStart: null,
+        step: isLeavingTime ? 4 : step,
+      },
+      isLeavingTime ? scrollToTitle : undefined,
+    );
     // once per signed-in account
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [signedIn?.user.id, setState]);
@@ -140,7 +182,8 @@ export const useBooking = () => {
 
       if (!hold || confirmed || holdExpired) return;
 
-      if (Date.now() >= hold.until) setState({ holdExpired: true });
+      if (Date.now() >= hold.until)
+        setState({ holdExpired: true, loginStart: null });
       else setTick((tick) => tick + 1);
     }, 1000);
 
@@ -150,7 +193,7 @@ export const useBooking = () => {
     };
   }, [setState]);
 
-  // after every update: keep the draft (or drop it once confirmed), then focus the first error if asked
+  // after every update: keep the draft (or drop it once confirmed)
   const isFirstRender = useRef(true);
 
   useEffect(() => {
@@ -163,12 +206,10 @@ export const useBooking = () => {
     if (state.confirmed) {
       if (!state.board) clearDraft(state.id);
     } else saveDraft(state);
+  }, [state]);
 
-    const target = focusTarget.current;
-
-    if (target == null) return;
-
-    focusTarget.current = null;
+  const focusLater = (target: string | null) => {
+    if (!target) return;
 
     window.setTimeout(() => {
       const element =
@@ -180,7 +221,7 @@ export const useBooking = () => {
 
       element?.focus();
     }, 60);
-  }, [state]);
+  };
 
   const stylist = getStylist(state.id);
   const service = findService(stylist, state.serviceId);
@@ -189,14 +230,7 @@ export const useBooking = () => {
   const isMobileStylist = stylist.businessType === "mobile";
   const address = getAddressCheck(stylist, state.appointmentAddress);
 
-  const errors = getFieldErrors(
-    state.details,
-    isMobileStylist,
-    address.isValid,
-  );
-
-  const firstError = getFirstErrorTarget(errors, address.outBlock);
-  const hasErrors = Object.keys(errors).length > 0;
+  const isAddressMissing = isMobileStylist && !address.isValid;
   const hasCustomiseStep = !!(service && hasStep2(service));
   const needSize = options.size.length > 0 && !state.selection.size;
   const needLength = options.length.length > 0 && !state.selection.length;
@@ -204,6 +238,21 @@ export const useBooking = () => {
   const nextDisabled =
     (state.step === 2 && (needSize || needLength)) ||
     (state.step === 3 && !(state.date && state.time));
+
+  const needsMobile = state.loggedIn && !!signedIn && !signedIn.mobile;
+  const showContactFields = state.loggedIn ? state.editContact : true;
+
+  const saveContactToAccount = () => {
+    if (!signedIn) return;
+
+    const patch = getContactChanges(detailsForm.getValues(), signedIn);
+
+    if (!Object.keys(patch).length) return;
+
+    updateProfile({ userId: signedIn.user.id, patch })
+      .unwrap()
+      .catch(() => undefined);
+  };
 
   const showTurnstile = !!state.turnstileMode && state.step === 6;
   const turnstileBlocking = showTurnstile && state.turnstileStatus !== "passed";
@@ -213,7 +262,9 @@ export const useBooking = () => {
     ? Math.max(0, state.hold.until - Date.now())
     : 0;
 
-  const confirmNow = () =>
+  const confirmNow = () => {
+    saveContactToAccount();
+
     setState(
       {
         confirmed: true,
@@ -225,6 +276,7 @@ export const useBooking = () => {
       },
       () => window.scrollTo(0, 0),
     );
+  };
 
   /** Simulated Stripe: 900ms, then the outcome for the test card (or success). */
   const attemptPay = (card: string) => {
@@ -265,6 +317,52 @@ export const useBooking = () => {
 
   const goToStep = (step: number) => setState({ step }, scrollToTitle);
 
+  const loginReturn = `/book?stylist=${stylist.id}&resume=1`;
+
+  const prepareLoginRedirect = () => {
+    const current = stateRef.current;
+
+    saveDraft(
+      current.loginStart && current.step === 3
+        ? { ...current, step: 4 }
+        : current,
+    );
+
+    writeSession("tw_return", loginReturn);
+    isLeaving.current = true;
+    navigate(loginReturn, { replace: true });
+  };
+
+  const goToNextStep = () => {
+    const extra: Partial<BookingState> = {};
+
+    if (state.step === 3 && state.time && !state.hold)
+      extra.hold = {
+        key: getHoldKey(
+          state.calendarYear,
+          state.calendarMonth,
+          state.date,
+          state.time,
+        ),
+        until: Date.now() + state.holdSeconds * 1000,
+      };
+
+    if (state.step === 3 && !hasSession && !state.guest) {
+      setState({ ...extra, loginStart: "choice", repickNote: false });
+
+      return;
+    }
+
+    setState(
+      ({ step }) => ({
+        ...extra,
+        step: Math.min(6, step + 1),
+        repickNote: false,
+      }),
+      scrollToTitle,
+    );
+  };
+
   const actions = {
     setState,
     scrollToTitle,
@@ -298,46 +396,88 @@ export const useBooking = () => {
     goNext: () => {
       if (nextDisabled) return;
 
-      if (state.step === 4 && (hasErrors || address.outBlock)) {
-        focusTarget.current = firstError;
-        setState({ showErrors: true });
+      if (state.step !== 4) return goToNextStep();
 
-        return;
-      }
+      const focusFirstError = (errors: FieldErrors<Details>) => {
+        if (state.loggedIn && Object.keys(errors).length)
+          setState({ editContact: true });
 
-      const extra: Partial<BookingState> = {};
-
-      if (state.step === 3 && state.time && !state.hold)
-        extra.hold = {
-          key: getHoldKey(
-            state.calendarYear,
-            state.calendarMonth,
-            state.date,
-            state.time,
+        focusLater(
+          getFirstErrorTarget(
+            { address: isAddressMissing, ...errors },
+            address.outBlock,
           ),
-          until: Date.now() + state.holdSeconds * 1000,
-        };
+        );
+      };
 
-      setState(
-        ({ step }) => ({
-          ...extra,
-          step: Math.min(6, step + 1),
-          repickNote: false,
-        }),
-        scrollToTitle,
-      );
+      void detailsForm.handleSubmit(() => {
+        if (isAddressMissing || address.outBlock) return focusFirstError({});
+
+        goToNextStep();
+      }, focusFirstError)();
     },
-    touchField: (key: FieldKey) =>
-      setState(({ touched }) => ({ touched: { ...touched, [key]: true } })),
     logOut: () => {
       dispatch(logOutSession());
 
-      setState(({ details }) => ({
-        loggedIn: false,
-        details: { ...details, first: "", last: "", email: "", phone: "" },
-      }));
+      detailsForm.reset({
+        ...detailsForm.getValues(),
+        first: "",
+        last: "",
+        email: "",
+        phone: "",
+      });
+
+      setState({ loggedIn: false, guest: false, editContact: false });
+    },
+    openContactEdit: () => {
+      setState({ editContact: true });
+      focusLater("bk-first");
+    },
+    cancelContactEdit: () => {
+      if (signedIn)
+        detailsForm.reset({
+          ...detailsForm.getValues(),
+          first: signedIn.first,
+          last: signedIn.last,
+          phone: signedIn.mobile,
+        });
+
+      setState({ editContact: false });
     },
     saveDraftNow: () => saveDraft(stateRef.current),
+    openLogin: () => setState({ loginStart: "email" }),
+    closeLogin: () => setState({ loginStart: null }),
+    continueAsGuestWith: (email: string) => {
+      if (email) detailsForm.setValue("email", email);
+
+      setState(
+        ({ step }) => ({
+          guest: true,
+          loginStart: null,
+          step: step === 3 ? 4 : step,
+        }),
+        scrollToTitle,
+      );
+
+      focusLater("bk-first");
+    },
+    leaveForLogin: (screen: string) => {
+      prepareLoginRedirect();
+
+      navigate(
+        `${getScreenPath(screen)}?screen=${screen}&return=${encodeURIComponent(loginReturn)}`,
+      );
+    },
+    googleLogin: async () => {
+      prepareLoginRedirect();
+
+      try {
+        await startGoogleSignIn(false);
+      } catch (error) {
+        isLeaving.current = false;
+        throw error;
+      }
+    },
     keepBooking: () => {
       if (blocker.state === "blocked") blocker.reset();
 
@@ -354,8 +494,13 @@ export const useBooking = () => {
       });
     },
     resumeContinue: () => {
-      if (state.resumeDraft)
-        setState(getDraftPatch(state.resumeDraft, state), scrollToTitle);
+      if (!state.resumeDraft) return;
+
+      const patch = getDraftPatch(state.resumeDraft, state);
+
+      if (patch.details) detailsForm.reset(patch.details);
+
+      setState(patch, scrollToTitle);
     },
     resumeStartOver: () => {
       clearDraft(state.id);
@@ -425,7 +570,9 @@ export const useBooking = () => {
     customisationLine: getCustomisationLine(options, state.selection),
     isMobileStylist,
     address,
-    errors,
+    detailsForm,
+    needsMobile,
+    showContactFields,
     hasCustomiseStep,
     needSize,
     needLength,

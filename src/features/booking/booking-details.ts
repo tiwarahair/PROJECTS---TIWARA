@@ -1,11 +1,10 @@
-// Step 4 (Your details) validation, the postcode travel check and the address / where copy, plus Step 6 card
+// Step 4 (Your details) error focus, the postcode travel check and the address / where copy, plus Step 6 card
 // formatting and checks.
 import { postcodes } from "../../data";
 import type { Stylist } from "../../types/stylist";
 import { isAddressValid } from "../../utils/address";
 import { miles } from "../../utils/availability";
 import type { BookingAddress, Details, FieldKey } from "./booking-state";
-import { isValidEmail, isValidMobile } from "../../utils/validation";
 
 const FIELD_KEYS: FieldKey[] = ["address", "first", "last", "email", "phone"];
 
@@ -61,28 +60,7 @@ export const getAddressCheck = (
   };
 };
 
-type FieldErrors = Partial<Record<FieldKey, string>>;
-
-export const getFieldErrors = (
-  details: Details,
-  isMobile: boolean,
-  addressValid: boolean,
-): FieldErrors => {
-  const errors: FieldErrors = {};
-
-  if (isMobile && !addressValid) errors.address = "Enter your address";
-
-  if (!details.first.trim()) errors.first = "Enter your first name";
-
-  if (!details.last.trim()) errors.last = "Enter your last name";
-
-  if (!isValidEmail(details.email)) errors.email = "Enter an email address";
-
-  if (!isValidMobile(details.phone || ""))
-    errors.phone = "Enter a UK mobile number";
-
-  return errors;
-};
+type FieldErrors = Partial<Record<FieldKey, unknown>>;
 
 /** The element to focus after a failed Continue: "@address" for the address finder, else the input id. */
 export const getFirstErrorTarget = (
@@ -96,6 +74,29 @@ export const getFirstErrorTarget = (
   return outBlock ? "@address" : null;
 };
 
+interface ContactProfile {
+  first: string;
+  last: string;
+  mobile: string;
+}
+
+export const getContactChanges = (
+  { first, last, phone }: Details,
+  profile: ContactProfile,
+) => ({
+  ...(first.trim() !== profile.first && { first: first.trim() }),
+  ...(last.trim() !== profile.last && { last: last.trim() }),
+  ...(phone.trim() !== profile.mobile && { mobile: phone.trim() }),
+});
+
+export const formatMobile = (value: string) => {
+  const digits = value.replace(/\D/g, "").replace(/^44/, "").replace(/^0/, "");
+
+  return /^7\d{9}$/.test(digits)
+    ? `0${digits.slice(0, 4)} ${digits.slice(4)}`
+    : value;
+};
+
 const EMAIL_TYPOS: Record<string, string> = {
   "gmial.com": "gmail.com",
   "gamil.com": "gmail.com",
@@ -105,13 +106,29 @@ const EMAIL_TYPOS: Record<string, string> = {
   "icloud.co": "icloud.com",
 };
 
-/** "nia@gmial.com" → "nia@gmail.com"; empty when the domain looks fine. */
+const ENDING_TYPOS: [RegExp, string][] = [
+  [/\.com[a-z]{1,2}$/, ".com"],
+  [/\.(con|cmo|ocm|cpm|vom|xom|coom)$/, ".com"],
+  [/\.co\.uk[a-z]+$/, ".co.uk"],
+  [/\.(co\.uj|co\.ul|co\.yk)$/, ".co.uk"],
+];
+
+/** "nia@gmial.com" → "nia@gmail.com", "nia@gmail.comss" → "nia@gmail.com"; empty when the domain looks fine. */
 export const getEmailFix = (email: string): string => {
   const trimmed = email.trim();
   const at = trimmed.lastIndexOf("@");
-  const fix = at > 0 ? EMAIL_TYPOS[trimmed.slice(at + 1).toLowerCase()] : "";
 
-  return fix ? trimmed.slice(0, at + 1) + fix : "";
+  if (at <= 0) return "";
+
+  const typed = trimmed.slice(at + 1).toLowerCase();
+
+  const [pattern, ending = ""] =
+    ENDING_TYPOS.find(([typo]) => typo.test(typed)) ?? [];
+
+  const domain = pattern ? typed.replace(pattern, ending) : typed;
+  const fix = EMAIL_TYPOS[domain] ?? domain;
+
+  return fix === typed ? "" : trimmed.slice(0, at + 1) + fix;
 };
 
 /** Where wording by business type: [row value, row sub-line]. */

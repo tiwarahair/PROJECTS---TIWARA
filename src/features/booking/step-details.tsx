@@ -1,11 +1,10 @@
-import { CircleAlert, Plus, X } from "lucide-react";
-import type { ChangeEvent, CSSProperties, ReactNode } from "react";
-import { Link } from "react-router";
+import { Plus, X } from "lucide-react";
+import type { CSSProperties } from "react";
 import { AllergyField } from "../../components/allergy-field/allergy-field";
-import { joinClassNames } from "../../utils/class-names";
 import { AppointmentAddress } from "./appointment-address";
-import { getEmailFix } from "./booking-details";
-import type { AllergyState, Details, FieldKey } from "./booking-state";
+import type { AllergyState } from "./booking-state";
+import { ContactFields } from "./contact-fields";
+import { ContactSummary } from "./contact-summary";
 import fields from "../../styles/features/booking/booking-fields.module.css";
 import step from "../../styles/features/booking/booking-step.module.css";
 import { CheckBox } from "./step-customise";
@@ -18,218 +17,43 @@ interface StepDetailsProps {
 
 const MAX_PHOTOS = 8;
 
-interface FieldProps {
-  fieldKey: Exclude<FieldKey, "address">;
-  label: string;
-  wide?: boolean;
-  error: string;
-  showError: boolean;
-  /** The input itself, given the id, error state and border class. */
-  renderInput: (props: {
-    id: string;
-    invalid: "true" | "false";
-    describedBy: string;
-    borderClass: string | undefined;
-  }) => ReactNode;
-  prefix?: ReactNode;
-}
-
-/** Label, input and the inline error under it. */
-const DetailsField = ({
-  fieldKey,
-  label,
-  wide,
-  error,
-  showError,
-  renderInput,
-  prefix,
-}: FieldProps) => {
-  const id = `bk-${fieldKey}`;
-
-  const input = renderInput({
-    id,
-    invalid: showError ? "true" : "false",
-    describedBy: `${id}-err`,
-    borderClass: showError ? fields.borderError : fields.border,
-  });
-
-  return (
-    <div className={wide ? fields.fieldWide : fields.field}>
-      <label htmlFor={id} className={fields.label}>
-        {label}
-      </label>
-      {prefix ? (
-        <span className={styles.phoneWrap}>
-          {prefix}
-          {input}
-        </span>
-      ) : (
-        input
-      )}
-      {showError && (
-        <div id={`${id}-err`} role="alert" className={fields.error}>
-          <CircleAlert
-            size={15}
-            strokeWidth={1.5}
-            className={fields.errorIcon}
-          />
-          {error}
-        </div>
-      )}
-    </div>
-  );
-};
-
-/** Step 4 (Your details): log in / booking-as line, mobile address, contact fields, allergies and photos. */
+/** Step 4 (Your details): log-in line or booking-as card, mobile address, contact fields, allergies and photos. */
 export const StepDetails = ({ booking }: StepDetailsProps) => {
-  const { state, stylist, errors, isMobileStylist, actions, openPrivacy } =
-    booking;
+  const {
+    state,
+    stylist,
+    detailsForm,
+    isMobileStylist,
+    showContactFields,
+    needsMobile,
+    actions,
+    openPrivacy,
+  } = booking;
 
-  const { setState, touchField } = actions;
-  const { details, loggedIn, allergy, photos } = state;
-  const emailFix = getEmailFix(details.email);
-
-  const loginReturn = encodeURIComponent(
-    `/book?stylist=${stylist.id}&resume=1`,
-  );
-
-  const isShown = (key: FieldKey) =>
-    (state.showErrors || !!state.touched[key]) && !!errors[key];
-
-  const setDetail =
-    (key: keyof Details, clean: (value: string) => string = (value) => value) =>
-    (event: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) =>
-      setState({ details: { ...details, [key]: clean(event.target.value) } });
+  const { register } = detailsForm;
+  const { setState } = actions;
+  const { loggedIn, allergy, photos } = state;
 
   const setAllergy = (patch: Partial<AllergyState>) =>
     setState((current) => ({ allergy: { ...current.allergy, ...patch } }));
 
-  const fieldProps = (key: Exclude<FieldKey, "address">) => ({
-    fieldKey: key,
-    error: errors[key] ?? "",
-    showError: isShown(key),
-  });
-
   return (
     <>
       <h1 className={step.title}>Your details</h1>
-      {!loggedIn && (
-        <p data-screen-label="Log in line" className={styles.loginLine}>
-          Already have an account?{" "}
-          <Link
-            to={`/login?screen=cust-email&return=${loginReturn}`}
-            onClick={actions.saveDraftNow}
-            className={styles.loginLink}
-          >
-            Log in
-          </Link>
-        </p>
+      <ContactSummary booking={booking} />
+      {isMobileStylist && <AppointmentAddress booking={booking} />}
+      {isMobileStylist && (showContactFields || needsMobile) && (
+        <h2 className={fields.heading}>Your contact details</h2>
       )}
-      {loggedIn && (
-        <div data-screen-label="Booking as" className={styles.bookingAs}>
-          <span>
-            Booking as{" "}
-            <strong className={styles.accountName}>
-              {`${details.first} ${details.last}`}
-            </strong>
-          </span>
-          <span aria-hidden="true">·</span>
-          <span>
-            Not you?{" "}
-            <button onClick={actions.logOut} className={fields.linkButton}>
-              Log out
-            </button>
-          </span>
-        </div>
-      )}
-      {isMobileStylist && (
-        <>
-          <AppointmentAddress booking={booking} />
-          <h2 className={fields.heading}>Your contact details</h2>
-        </>
-      )}
+      <ContactFields booking={booking} />
       <div className={fields.grid}>
-        {(
-          [
-            ["first", "First name", "given-name"],
-            ["last", "Last name", "family-name"],
-            ["email", "Email", "email"],
-          ] as const
-        ).map(([key, label, autoComplete]) => (
-          <DetailsField
-            key={key}
-            {...fieldProps(key)}
-            label={label}
-            wide={key === "email"}
-            renderInput={({ id, invalid, describedBy, borderClass }) => (
-              <input
-                id={id}
-                type={key === "email" ? "email" : "text"}
-                autoComplete={autoComplete}
-                value={details[key]}
-                onChange={setDetail(key)}
-                onBlur={() => touchField(key)}
-                aria-invalid={invalid}
-                aria-describedby={describedBy}
-                className={joinClassNames(fields.input, borderClass)}
-              />
-            )}
-          />
-        ))}
-        {!!emailFix && (
-          <div
-            data-screen-label="Email typo suggestion"
-            role="status"
-            className={styles.emailFix}
-          >
-            Did you mean{" "}
-            <button
-              onClick={() =>
-                setState({ details: { ...details, email: emailFix } })
-              }
-              className={styles.emailFixButton}
-            >
-              {emailFix}
-            </button>
-            ?
-          </div>
-        )}
-        <DetailsField
-          {...fieldProps("phone")}
-          label="Mobile"
-          wide
-          prefix={
-            <span aria-hidden="true" className={styles.phonePrefix}>
-              +44
-            </span>
-          }
-          renderInput={({ id, invalid, describedBy, borderClass }) => (
-            <input
-              id={id}
-              type="tel"
-              inputMode="numeric"
-              autoComplete="tel-national"
-              placeholder="07700 900123"
-              value={details.phone}
-              onChange={setDetail("phone", (value) =>
-                value.replace(/[^\d ]/g, "").slice(0, 13),
-              )}
-              onBlur={() => touchField("phone")}
-              aria-invalid={invalid}
-              aria-describedby={describedBy}
-              aria-label="Mobile, UK number"
-              className={joinClassNames(styles.phoneInput, borderClass)}
-            />
-          )}
-        />
         <label className={fields.fieldWide}>
           <span className={fields.label}>
             Notes for your stylist{" "}
             <span className={fields.optional}>(optional)</span>
           </span>
           <textarea
-            value={details.notes}
-            onChange={setDetail("notes")}
+            {...register("notes")}
             rows={3}
             className={styles.notes}
           ></textarea>

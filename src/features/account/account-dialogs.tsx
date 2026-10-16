@@ -1,4 +1,5 @@
 import { ArrowDownToLine, Lock, X } from "lucide-react";
+import { useFormState } from "react-hook-form";
 import type { ChangeEvent, ReactNode } from "react";
 import { DISCARD_PROMPT } from "../../hooks/use-unsaved-changes";
 import { joinClassNames } from "../../utils/class-names";
@@ -36,14 +37,12 @@ interface AccountDialogsProps {
 
 /** Overlay + dialog for receipts, confirmations, add card, cookie settings and delete account. */
 export const AccountDialogs = ({ account, view }: AccountDialogsProps) => {
-  const { state, refs, actions } = account;
+  const { state, refs, actions, forms } = account;
 
   const {
     dialog,
     cards,
     addresses,
-    cardForm,
-    cardFormErrors,
     cookiesDraft,
     deleteText,
     profile,
@@ -51,6 +50,9 @@ export const AccountDialogs = ({ account, view }: AccountDialogsProps) => {
   } = state;
 
   const { setState, closeDialog, showToast, focusLater } = actions;
+
+  const { register, setValue, clearErrors, control } = forms.card;
+  const { errors: cardErrors } = useFormState({ control });
 
   if (!dialog) return null;
 
@@ -83,20 +85,16 @@ export const AccountDialogs = ({ account, view }: AccountDialogsProps) => {
   const closeThen = (patch: Parameters<typeof setState>[0]) =>
     setState(patch, () => focusLater("returnFocus"));
 
-  const setCardField =
-    (key: "number" | "expiry" | "cvc") =>
-    (event: ChangeEvent<HTMLInputElement>) => {
-      const { value } = event.target;
-      const formatted = getFormattedCardField(key, value);
+  const cardField = (key: "number" | "expiry" | "cvc") =>
+    register(key, {
+      onChange: (event: ChangeEvent<HTMLInputElement>) => {
+        clearErrors(key);
+        setValue(key, getFormattedCardField(key, event.target.value));
+      },
+    });
 
-      setState(({ cardForm: current, cardFormErrors: errors }) => ({
-        cardForm: { ...current, [key]: formatted },
-        cardFormErrors: { ...errors, [key]: "" },
-      }));
-    };
-
-  const cardBorder = (key: string) =>
-    cardFormErrors[key] ? ui.inputErr : ui.inputOk;
+  const cardBorder = (key: "number" | "expiry" | "cvc") =>
+    cardErrors[key] ? ui.inputErr : ui.inputOk;
 
   let content: ReactNode = null;
 
@@ -236,16 +234,15 @@ export const AccountDialogs = ({ account, view }: AccountDialogsProps) => {
             Card number{" "}
             <input
               className={joinClassNames(styles.cardInput, cardBorder("number"))}
-              value={cardForm.number}
-              onChange={setCardField("number")}
+              {...cardField("number")}
               inputMode="numeric"
               autoComplete="cc-number"
               placeholder="1234 1234 1234 1234"
-              aria-invalid={cardFormErrors.number ? "true" : "false"}
+              aria-invalid={cardErrors.number ? "true" : "false"}
               aria-describedby="ac-e-num"
             />
             <span className={ui.error} id="ac-e-num">
-              {cardFormErrors.number}
+              {cardErrors.number?.message}
             </span>
           </label>
           <div className={styles.cardGrid}>
@@ -256,16 +253,15 @@ export const AccountDialogs = ({ account, view }: AccountDialogsProps) => {
                   styles.cardInputSmall,
                   cardBorder("expiry"),
                 )}
-                value={cardForm.expiry}
-                onChange={setCardField("expiry")}
+                {...cardField("expiry")}
                 inputMode="numeric"
                 autoComplete="cc-exp"
                 placeholder="MM / YY"
-                aria-invalid={cardFormErrors.expiry ? "true" : "false"}
+                aria-invalid={cardErrors.expiry ? "true" : "false"}
                 aria-describedby="ac-e-exp"
               />
               <span className={ui.error} id="ac-e-exp">
-                {cardFormErrors.expiry}
+                {cardErrors.expiry?.message}
               </span>
             </label>
             <label className={ui.label}>
@@ -275,16 +271,15 @@ export const AccountDialogs = ({ account, view }: AccountDialogsProps) => {
                   styles.cardInputSmall,
                   cardBorder("cvc"),
                 )}
-                value={cardForm.cvc}
-                onChange={setCardField("cvc")}
+                {...cardField("cvc")}
                 inputMode="numeric"
                 autoComplete="cc-csc"
                 placeholder="CVC"
-                aria-invalid={cardFormErrors.cvc ? "true" : "false"}
+                aria-invalid={cardErrors.cvc ? "true" : "false"}
                 aria-describedby="ac-e-cvc"
               />
               <span className={ui.error} id="ac-e-cvc">
-                {cardFormErrors.cvc}
+                {cardErrors.cvc?.message}
               </span>
             </label>
           </div>
@@ -293,15 +288,7 @@ export const AccountDialogs = ({ account, view }: AccountDialogsProps) => {
               <input
                 className={ui.checkbox}
                 type="checkbox"
-                checked={cardForm.isDefault}
-                onChange={(event) => {
-                  const isDefault = event.target.checked;
-
-                  setState(({ cardForm: current, cardFormErrors: errors }) => ({
-                    cardForm: { ...current, isDefault },
-                    cardFormErrors: { ...errors, isDefault: "" },
-                  }));
-                }}
+                {...register("isDefault")}
               />
               Make this my default card
             </label>
@@ -312,7 +299,10 @@ export const AccountDialogs = ({ account, view }: AccountDialogsProps) => {
           </div>
         </div>
         <div className={styles.actions}>
-          <button className={styles.saveCard} onClick={actions.saveCard}>
+          <button
+            className={styles.saveCard}
+            onClick={() => void actions.saveCard()}
+          >
             Save card
           </button>
           <button className={styles.secondary} onClick={closeDialog}>

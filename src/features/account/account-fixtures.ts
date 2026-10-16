@@ -1,16 +1,55 @@
 // Account's ?fixture= board states (dev-only).
 import { CURRENT_PASSWORD, DEMO_PHOTO, SEED_PROFILE } from "./account-data";
+import type { Profile } from "./account-data";
+import type { AddressFormValues, PasswordFormValues } from "./account-schemas";
 import type { AccountState } from "./use-account";
 
-export const applyFixture = (state: AccountState, fixture: string): void => {
-  const openPassword = {
-    ...state.password,
-    open: true,
-    current: CURRENT_PASSWORD,
-    next: "braids in the sun on sunday",
-  };
+export interface FixtureForms {
+  draft?: Profile;
+  draftError?: { field: keyof Profile; message: string };
+  password?: PasswordFormValues;
+  address?: AddressFormValues;
+}
 
+export const applyFixture = (
+  state: AccountState,
+  fixture: string,
+): FixtureForms => {
   const pendingDraft = { ...SEED_PROFILE, email: "nia.okafor@outlook.com" };
+
+  const forms: Record<string, FixtureForms> = {
+    "email-edit": { draft: { ...SEED_PROFILE, email: "" } },
+    "email-invalid": {
+      draft: { ...SEED_PROFILE, email: "nia.okafor@gmail" },
+      draftError: {
+        field: "email",
+        message: "Enter an email address like name@example.com",
+      },
+    },
+    "email-same": {
+      draft: { ...SEED_PROFILE, email: "nia.okafor@gmail.com" },
+      draftError: { field: "email", message: "That’s already your email" },
+    },
+    "email-taken": {
+      draft: { ...SEED_PROFILE, email: "kemi.a@icloud.com" },
+      draftError: {
+        field: "email",
+        message: "This email is already used by another account",
+      },
+    },
+    "email-wrong": { draft: pendingDraft },
+    "email-expired": { draft: pendingDraft },
+    "email-code": { draft: pendingDraft },
+    "pw-open": {
+      password: {
+        current: CURRENT_PASSWORD,
+        next: "braids in the sun on sunday",
+      },
+    },
+    "addr-add": {
+      address: { label: "Mum’s", address: null, isDefault: false },
+    },
+  };
 
   const fixtures: Record<string, Partial<AccountState>> = {
     "ov-empty": { sectionId: "overview" },
@@ -36,29 +75,10 @@ export const applyFixture = (state: AccountState, fixture: string): void => {
       photoError: "That photo is too big. Choose one under 10MB.",
     },
     "personal-edit": { sectionId: "personal", edit: "name" },
-    "email-edit": {
-      sectionId: "personal",
-      edit: "email",
-      draft: { ...SEED_PROFILE, email: "" },
-    },
-    "email-invalid": {
-      sectionId: "personal",
-      edit: "email",
-      draft: { ...SEED_PROFILE, email: "nia.okafor@gmail" },
-      fieldErrors: { email: "Enter an email address like name@example.com" },
-    },
-    "email-same": {
-      sectionId: "personal",
-      edit: "email",
-      draft: { ...SEED_PROFILE, email: "nia.okafor@gmail.com" },
-      fieldErrors: { email: "That’s already your email" },
-    },
-    "email-taken": {
-      sectionId: "personal",
-      edit: "email",
-      draft: { ...SEED_PROFILE, email: "kemi.a@icloud.com" },
-      fieldErrors: { email: "This email is already used by another account" },
-    },
+    "email-edit": { sectionId: "personal", edit: "email" },
+    "email-invalid": { sectionId: "personal", edit: "email" },
+    "email-same": { sectionId: "personal", edit: "email" },
+    "email-taken": { sectionId: "personal", edit: "email" },
     "email-wrong": {
       sectionId: "personal",
       edit: "email",
@@ -67,7 +87,6 @@ export const applyFixture = (state: AccountState, fixture: string): void => {
       resendIn: 18,
       code: ["1", "1", "1", "1", "1", "1"],
       codeError: "That code isn’t right",
-      draft: pendingDraft,
     },
     "email-expired": {
       sectionId: "personal",
@@ -77,7 +96,6 @@ export const applyFixture = (state: AccountState, fixture: string): void => {
       resendIn: 0,
       code: ["0", "0", "0", "0", "0", "0"],
       codeError: "That code has expired. Send a new one.",
-      draft: pendingDraft,
     },
     "email-pending": {
       sectionId: "personal",
@@ -94,9 +112,11 @@ export const applyFixture = (state: AccountState, fixture: string): void => {
       emailStep: "code",
       pendingEmail: "nia.okafor@outlook.com",
       resendIn: 24,
-      draft: pendingDraft,
     },
-    "pw-open": { sectionId: "security", password: openPassword },
+    "pw-open": {
+      sectionId: "security",
+      password: { ...state.password, open: true },
+    },
     nopw: {
       sectionId: "security",
       password: { ...state.password, has: false },
@@ -109,16 +129,7 @@ export const applyFixture = (state: AccountState, fixture: string): void => {
     },
     "add-card": { sectionId: "payments", dialog: { kind: "addCard" } },
     "addr-empty": { sectionId: "addresses", addresses: [] },
-    "addr-add": {
-      sectionId: "addresses",
-      addressForm: {
-        mode: "add",
-        label: "Mum’s",
-        address: null,
-        isDefault: false,
-        tried: false,
-      },
-    },
+    "addr-add": { sectionId: "addresses", addressForm: { mode: "add" } },
     "addr-edit": { sectionId: "addresses" },
     "addr-remove": { sectionId: "addresses" },
     "mkt-on": { sectionId: "communication", marketing: true },
@@ -132,22 +143,26 @@ export const applyFixture = (state: AccountState, fixture: string): void => {
   Object.assign(state, fixtures[fixture] ?? {});
   const [first, second] = state.addresses;
 
-  if (fixture === "addr-edit" && first)
-    state.addressForm = {
-      mode: "edit",
-      id: first.id,
-      label: first.label,
-      address: {
-        line1: first.line1,
-        line2: first.line2,
-        town: first.town,
-        postcode: first.postcode,
-        source: "manual",
-      },
-      isDefault: first.isDefault,
-      tried: false,
-    };
-
   if (fixture === "addr-remove" && second)
     state.dialog = { kind: "address", id: second.id };
+
+  if (fixture === "addr-edit" && first) {
+    state.addressForm = { mode: "edit", id: first.id };
+
+    return {
+      address: {
+        label: first.label,
+        address: {
+          line1: first.line1,
+          line2: first.line2,
+          town: first.town,
+          postcode: first.postcode,
+          source: "manual",
+        },
+        isDefault: first.isDefault,
+      },
+    };
+  }
+
+  return forms[fixture] ?? {};
 };
