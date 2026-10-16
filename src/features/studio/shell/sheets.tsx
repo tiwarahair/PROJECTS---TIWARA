@@ -2,11 +2,9 @@ import { useClientForm } from "../clients/use-client-form";
 import { useAddonForm } from "../services/use-addon-form";
 import { AddBookingSheet } from "../bookings/add";
 import { getAddBookingView } from "../bookings/add/view";
-import {
-  BookingCheckout,
-  BookingSheetAfter,
-  BookingSheetBody,
-} from "../bookings/sheet";
+import { BookingSheetBody } from "../bookings/sheet";
+import { BookingCheckout } from "../bookings/sheet/checkout";
+import { BookingSheetAfter } from "../bookings/sheet/footer";
 import { getBookingSheetView } from "../bookings/sheet/view";
 import {
   AddonSheet,

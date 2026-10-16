@@ -1,0 +1,140 @@
+.weekArrow {
+  width: 34px;
+  height: 34px;
+  border: none;
+  background: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--text-primary);
+  padding: 0;
+  line-height: 0;
+  box-sizing: border-box;
+  opacity: 1;
+}
+
+.weekArrow:active {
+  transform: scale(0.9) !important;
+}
+
+.weekArrowNext {
+  flex: 0 0 auto;
+}
+
+.dateButton {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  border: none;
+  background: none;
+  font-family: "Schibsted Grotesk", sans-serif;
+  font-size: 18px;
+  font-weight: 600;
+  letter-spacing: -0.02em;
+  color: var(--text-primary);
+  padding: 6px 8px;
+  border-radius: var(--radius-full);
+  max-width: 100%;
+}
+
+.dateButton:active {
+  background: var(--quiet) !important;
+}
+
+.dateLabel {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  line-height: 1.5;
+}
+
+.chevron {
+  flex: 0 0 auto;
+  transition: transform 0.2s cubic-bezier(0.23, 1, 0.32, 1);
+  transform: none;
+}
+
+.chevronOpen {
+  transform: rotate(180deg);
+}
+
+.pickerScrim {
+  position: fixed;
+  inset: 0;
+  z-index: 30;
+}
+
+.pickerHead {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 8px;
+}
+
+.monthArrow {
+  width: 30px;
+  height: 30px;
+  border-radius: var(--radius-full);
+  border: none;
+  background: var(--quiet);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--text-primary);
+}
+
+.monthArrow:active {
+  transform: scale(0.9) !important;
+}
+
+.monthArrowOff {
+  opacity: 0.4;
+}
+
+.h3 {
+  font-family: "Schibsted Grotesk", sans-serif;
+  font-size: 18px;
+  font-weight: 600;
+  letter-spacing: -0.02em;
+}
+
+.dows {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 4px;
+  margin-bottom: 4px;
+}
+
+.dow {
+  text-align: center;
+  font-size: 12.5px;
+  color: var(--text-secondary);
+  padding: 3px 0;
+}
+
+.days {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 4px;
+}
+
+.calDay {
+  height: 40px;
+  border-radius: var(--radius-full);
+  border: none;
+  font-size: 14.5px;
+  font-variant-numeric: tabular-nums;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 1px;
+  /* runtime: selected / past / today state from the month grid */
+  background: var(--day-bg);
+  color: var(--day-color);
+  font-weight: var(--day-weight);
+}
+
+.calDay:active {
+  transform: scale(0.92) !important;
+}
