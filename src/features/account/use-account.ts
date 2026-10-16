@@ -280,7 +280,7 @@ export const useAccount = (props: AccountProps) => {
     const { first, last, email, mobile, marketing, user } = signedIn;
     const profile = { first, last, email, mobile };
 
-    forms.edit.reset({ ...profile });
+    forms.edit.reset({ ...profile }, { keepDirtyValues: true });
 
     setState(({ password }) => ({
       profile,
