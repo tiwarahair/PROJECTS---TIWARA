@@ -10,16 +10,16 @@ import {
   House,
   Milk,
   Search,
+  Spool,
   Store,
   UserRound,
+  WavesVertical,
 } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
 import {
   BraidsIcon,
-  LocsIcon,
   NaturalHairIcon,
   StylistIcon,
-  WeaveIcon,
   WigIcon,
 } from "../../components/icons/custom-icons";
 
@@ -74,13 +74,13 @@ export const CATEGORIES: ChoiceTile[] = [
     key: "weaves",
     title: "Weave extensions & Sew-ins",
     subtitle: "Sew-ins, quick weaves, tape-ins, ponytails",
-    icon: WeaveIcon,
+    icon: Spool,
   },
   {
     key: "locs",
     title: "Locs",
     subtitle: "Starter locs, re-twists, repairs, extensions",
-    icon: LocsIcon,
+    icon: WavesVertical,
   },
   {
     key: "natural",
