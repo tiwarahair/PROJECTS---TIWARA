@@ -1,5 +1,5 @@
 // The stylist's business from the database → the parts of Studio's state it fills.
-import type { PayoutStatus } from "../../../components/account-settings/account-settings-logic";
+import type { PayoutStatus } from "../../../components/account-settings/logic";
 import type {
   StripeAccountState,
   StylistStudio,

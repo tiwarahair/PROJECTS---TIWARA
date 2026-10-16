@@ -1,0 +1,39 @@
+.windowField {
+  margin-top: 18px;
+}
+
+.windowRow {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-top: 8px;
+}
+
+.selectWrap {
+  position: relative;
+  display: inline-block;
+}
+
+.help {
+  margin-top: 6px;
+  font-size: 14px;
+  color: var(--neutral-600);
+}
+
+.fees {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+  padding-top: 24px;
+}
+
+.graceField {
+  margin-top: 24px;
+}
+
+.graceSelectWrap {
+  position: relative;
+  display: inline-block;
+  margin-top: 8px;
+}

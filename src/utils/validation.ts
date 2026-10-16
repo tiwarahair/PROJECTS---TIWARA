@@ -11,3 +11,8 @@ export const isValidMobile = (value: string): boolean =>
   /^7\d{9}$/.test(
     value.replace(/\D/g, "").replace(/^44/, "").replace(/^0/, ""),
   );
+
+const websitePattern = /^(https?:\/\/)?([a-z0-9-]+\.)+[a-z]{2,}(\/\S*)?$/i;
+
+export const isValidWebsite = (value: string): boolean =>
+  websitePattern.test(value.trim());

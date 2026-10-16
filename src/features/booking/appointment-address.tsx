@@ -1,7 +1,7 @@
 import { Check, CircleAlert } from "lucide-react";
 import { useFormState } from "react-hook-form";
 import { Link } from "react-router";
-import { AddressFinder } from "../../components/address-finder/address-finder";
+import { AddressFinder } from "../../components/address-finder";
 import { joinClassNames } from "../../utils/class-names";
 import { EMPTY_ADDRESS } from "./logic/constants";
 import fields from "../../styles/features/booking/fields.module.css";

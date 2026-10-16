@@ -1,0 +1,171 @@
+/* ---- status ---- */
+.statusRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  min-height: 56px;
+  margin-top: 18px;
+  border-top: 1px solid var(--border-subtle);
+  border-bottom: 1px solid var(--border-subtle);
+}
+
+.statusLabel {
+  font-size: 15px;
+  color: var(--neutral-600);
+}
+
+.statusEnd {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+}
+
+.unpaid {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  height: 28px;
+  padding: 0 9px;
+  border-radius: var(--radius-xs);
+  background: rgba(181, 84, 31, 0.1);
+  color: var(--accent-500);
+  font-size: 12.5px;
+  font-weight: 600;
+}
+
+.statusHolder {
+  position: relative;
+  flex: 0 0 auto;
+}
+
+.statusButton {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  border-radius: var(--radius-full);
+  padding: 6px 10px 6px 12px;
+  font-size: 13.5px;
+  font-weight: 600;
+  line-height: 1;
+  transition:
+    background 0.2s cubic-bezier(0.23, 1, 0.32, 1),
+    color 0.2s cubic-bezier(0.23, 1, 0.32, 1);
+  /* runtime: the booking's status tone */
+  background: var(--st-bg);
+  border: 1px solid var(--st-border);
+  color: var(--st-color);
+}
+
+.statusButton:active {
+  transform: scale(0.96) !important;
+}
+
+.pulse {
+  width: 6px;
+  height: 6px;
+  border-radius: var(--radius-full);
+  background: currentColor;
+  animation: pulsedot 1.6s ease-in-out infinite;
+}
+
+.chevron {
+  display: block;
+  margin-top: -1px;
+  transition: transform 0.2s cubic-bezier(0.23, 1, 0.32, 1);
+  transform: none;
+}
+
+.chevronOpen {
+  transform: rotate(180deg);
+}
+
+.menuScrim {
+  position: fixed;
+  inset: 0;
+  z-index: 30;
+}
+
+.statusMenu {
+  position: absolute;
+  top: calc(100% + 6px);
+  right: 0;
+  z-index: 31;
+  width: 262px;
+  display: block;
+  background: #fff;
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-popover, 0 12px 28px -8px rgba(26, 23, 20, 0.35));
+  padding: 6px;
+  animation: popin 0.16s cubic-bezier(0.23, 1, 0.32, 1) both;
+}
+
+.menuItem {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  width: 100%;
+  text-align: left;
+  border: none;
+  background: transparent;
+  border-radius: var(--radius-sm);
+  padding: 9px 10px;
+  opacity: 1;
+  cursor: pointer;
+}
+
+.menuItem:hover {
+  background: var(--quiet) !important;
+}
+
+.menuItemOff {
+  opacity: 0.45;
+  cursor: default;
+}
+
+.dangerText {
+  color: #a12a2a;
+}
+
+.menuLabel {
+  display: block;
+  font-size: 14.5px;
+  font-weight: 500;
+  line-height: 1.3;
+  color: var(--text-primary);
+}
+
+.menuLabel.dangerText {
+  color: #a12a2a;
+}
+
+.menuSub {
+  display: block;
+  font-size: 12.5px;
+  color: var(--text-secondary);
+  margin-top: 2px;
+  line-height: 1.35;
+}
+
+@keyframes popin {
+  from {
+    opacity: 0;
+    transform: scale(0.96) translateY(-4px);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+}
+
+@keyframes pulsedot {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.35;
+  }
+}

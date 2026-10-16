@@ -7,10 +7,11 @@ import {
   getPasswordMin,
   getPasswordView,
 } from "../../utils/password";
-import { EMPTY_PASSWORD } from "./account-forms";
-import type { AccountController, PasswordState } from "./use-account";
+import { EMPTY_PASSWORD } from "./forms";
+import type { PasswordState } from "./state";
+import type { AccountController } from "./use-account";
 import styles from "../../styles/features/account/security-section.module.css";
-import ui from "../../styles/features/account/account-ui.module.css";
+import ui from "../../styles/features/account/ui.module.css";
 
 const getPasswordStatus = ({ has, changed }: PasswordState) => {
   if (!has) return "Not set. You log in with Google.";

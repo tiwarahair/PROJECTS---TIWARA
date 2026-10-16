@@ -1,4 +1,4 @@
-import { act, screen, within } from "@testing-library/react";
+import { act, screen, waitFor, within } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { renderWithStore } from "../../../../../test/render-with-store";
 import { StudioPage } from "../../..";
@@ -127,6 +127,59 @@ describe("Studio → two-step verification", () => {
     );
 
     expect(within(getDialog()).getByText("Add a backup")).toBeInTheDocument();
+  });
+
+  it("asks for a device name and a full code before checking", async () => {
+    renderFixture("tf-app");
+    const dialog = getDialog();
+    const name = within(dialog).getByLabelText("Name this device");
+
+    const code = within(dialog).getByLabelText(
+      "Enter the 6-digit code from the app",
+    );
+
+    await user.clear(name);
+    await user.click(within(dialog).getByRole("button", { name: "Turn on" }));
+
+    expect(await within(dialog).findByRole("alert")).toHaveTextContent(
+      "Name this device",
+    );
+
+    await user.type(name, "Work phone");
+    expect(within(dialog).queryByRole("alert")).not.toBeInTheDocument();
+
+    await user.type(code, "123");
+    await user.click(within(dialog).getByRole("button", { name: "Turn on" }));
+
+    expect(await within(dialog).findByRole("alert")).toHaveTextContent(
+      "Enter the 6-digit code",
+    );
+
+    await user.type(name, " 2");
+
+    expect(within(dialog).getByRole("alert")).toHaveTextContent(
+      "Enter the 6-digit code",
+    );
+  });
+
+  it("a name error replaces an earlier wrong-code error", async () => {
+    renderFixture("tf-app-error");
+    const dialog = getDialog();
+
+    await user.clear(within(dialog).getByLabelText("Name this device"));
+    await user.click(within(dialog).getByRole("button", { name: "Turn on" }));
+
+    await waitFor(() =>
+      expect(
+        within(dialog)
+          .getAllByRole("alert")
+          .map(({ textContent }) => textContent),
+      ).toEqual(["Name this device"]),
+    );
+
+    expect(
+      within(dialog).getByLabelText("Enter the 6-digit code from the app"),
+    ).toHaveAttribute("aria-invalid", "false");
   });
 
   it("back returns to the screen before, one step at a time", async () => {

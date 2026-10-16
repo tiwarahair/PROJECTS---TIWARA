@@ -2,7 +2,7 @@ import { renderHook, waitFor } from "@testing-library/react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import * as studioApi from "../../../../lib/studio-api";
 import { useCatalogueSync } from "../catalogue-sync";
-import { getInitialStudioState } from "../../core/data";
+import { getInitialStudioState } from "../../core/initial-state";
 import { createStudioSync } from "../../core/sync";
 import type { StudioState } from "../../core/types";
 

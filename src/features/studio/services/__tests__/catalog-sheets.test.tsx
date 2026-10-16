@@ -114,12 +114,24 @@ describe("Studio → categories and add-on sheets", () => {
     await user.click(screen.getByRole("button", { name: "Add add-on" }));
     const create = screen.getByRole("button", { name: "Create add-on" });
 
-    expect(create).toBeDisabled();
+    await user.click(create);
+
+    expect(
+      await screen.findByText("Enter a name for the add-on."),
+    ).toBeInTheDocument();
+
+    await user.click(screen.getByRole("button", { name: "Close" }));
+    await user.click(screen.getByRole("button", { name: "Add add-on" }));
+
+    expect(
+      screen.queryByText("Enter a name for the add-on."),
+    ).not.toBeInTheDocument();
 
     await user.type(screen.getByPlaceholderText("e.g. Beads"), "Cuffs");
+    await user.click(screen.getByRole("button", { name: "Create add-on" }));
 
-    expect(create).toBeEnabled();
-    await user.click(create);
-    expect(screen.getByText("Cuffs added to your add-ons")).toBeInTheDocument();
+    expect(
+      await screen.findByText("Cuffs added to your add-ons"),
+    ).toBeInTheDocument();
   });
 });

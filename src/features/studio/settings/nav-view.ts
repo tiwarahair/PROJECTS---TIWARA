@@ -15,7 +15,7 @@ import {
   Users,
 } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
-import { GATE_REASON } from "../core/data";
+import { GATE_REASON } from "../core/constants";
 import { copyText } from "../core/format";
 import {
   getAllClients,

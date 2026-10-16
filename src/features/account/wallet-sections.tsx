@@ -1,11 +1,11 @@
 import { Ellipsis, Info, Lock, Plus } from "lucide-react";
 import { Controller, useFormState } from "react-hook-form";
-import { AddressFinder } from "../../components/address-finder/address-finder";
+import { AddressFinder } from "../../components/address-finder";
 import { joinClassNames } from "../../utils/class-names";
-import { getAddressLine } from "./account-logic";
+import { getAddressLine } from "./logic";
 import type { AccountController } from "./use-account";
 import styles from "../../styles/features/account/wallet-sections.module.css";
-import ui from "../../styles/features/account/account-ui.module.css";
+import ui from "../../styles/features/account/ui.module.css";
 
 interface PaymentsSectionProps {
   account: AccountController;

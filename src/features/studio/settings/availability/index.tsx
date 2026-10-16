@@ -2,9 +2,13 @@ import type { ChangeEvent, CSSProperties } from "react";
 import { CirclePause, Plus } from "lucide-react";
 import { joinClassNames } from "../../../../utils/class-names";
 import type { SettingsView } from "../view";
-import { TIMES } from "../../core/data";
+import { TIMES } from "../../core/constants";
 import type { StudioController } from "../../core/use-studio";
 import { Field } from "../page-parts";
+import {
+  AVAILABILITY_FORM_ID,
+  useAvailabilityForm,
+} from "./use-availability-form";
 import parts from "../../../../styles/features/studio/settings/page-parts.module.css";
 import styles from "../../../../styles/features/studio/settings/availability/index.module.css";
 
@@ -46,7 +50,7 @@ const SectionHead = ({
       <div className={parts.mutedTop}>{note}</div>
     </div>
     {onAdd && (
-      <button className={styles.add} onClick={onAdd}>
+      <button type="button" className={styles.add} onClick={onAdd}>
         <Plus size={13} strokeWidth={2.2} />
         Add
       </button>
@@ -75,10 +79,10 @@ const ItemRow = ({ title, reason, hex, edit, remove }: ItemRowProps) => (
       <div className={styles.itemTitle}>{title}</div>
       <div className={parts.muted}>{reason}</div>
     </div>
-    <button className={styles.edit} onClick={edit}>
+    <button type="button" className={styles.edit} onClick={edit}>
       Edit
     </button>
-    <button className={styles.remove} onClick={remove}>
+    <button type="button" className={styles.remove} onClick={remove}>
       Remove
     </button>
   </div>
@@ -93,8 +97,19 @@ interface AvailabilityPageProps {
 export const AvailabilityPage = ({ studio, view }: AvailabilityPageProps) => {
   const { pause } = view;
 
+  const {
+    handleSubmit,
+    formState: { errors },
+  } = useAvailabilityForm(studio.state.hours);
+
   return (
-    <div className={styles.availability} data-screen-label="Availability">
+    <form
+      id={AVAILABILITY_FORM_ID}
+      className={styles.availability}
+      data-screen-label="Availability"
+      noValidate
+      onSubmit={handleSubmit(view.saveAvailability)}
+    >
       <div
         className={styles.pauseCard}
         data-screen-label="Pause online bookings"
@@ -108,6 +123,7 @@ export const AvailabilityPage = ({ studio, view }: AvailabilityPageProps) => {
             </div>
           </div>
           <button
+            type="button"
             className={styles.switchHit}
             onClick={view.togglePause}
             role="switch"
@@ -143,6 +159,7 @@ export const AvailabilityPage = ({ studio, view }: AvailabilityPageProps) => {
               </Field>
               {!!pause.until && (
                 <button
+                  type="button"
                   className={styles.clearDate}
                   onClick={view.clearPauseUntil}
                 >
@@ -179,34 +196,42 @@ export const AvailabilityPage = ({ studio, view }: AvailabilityPageProps) => {
       />
       <div className={styles.list}>
         {view.hourRows.map(
-          ({ key, day, on, start, end, toggle, setStart, setEnd }) => (
-            <div key={key} className={styles.hourRow}>
-              <button
-                className={joinClassNames(
-                  styles.daySwitch,
-                  on && styles.daySwitchOn,
+          ({ key, day, on, start, end, toggle, setStart, setEnd }, index) => (
+            <div key={key} className={styles.hourItem}>
+              <div className={styles.hourRow}>
+                <button
+                  type="button"
+                  className={joinClassNames(
+                    styles.daySwitch,
+                    on && styles.daySwitchOn,
+                  )}
+                  onClick={toggle}
+                  aria-label="Toggle day"
+                >
+                  <span className={styles.dayKnob}></span>
+                </button>
+                <div
+                  className={joinClassNames(
+                    styles.dayName,
+                    on && styles.dayNameOn,
+                  )}
+                >
+                  {day}
+                </div>
+                {on && (
+                  <>
+                    <TimeSelect value={start} onChange={setStart} />
+                    <span className={styles.to}>to</span>
+                    <TimeSelect value={end} onChange={setEnd} />
+                  </>
                 )}
-                onClick={toggle}
-                aria-label="Toggle day"
-              >
-                <span className={styles.dayKnob}></span>
-              </button>
-              <div
-                className={joinClassNames(
-                  styles.dayName,
-                  on && styles.dayNameOn,
-                )}
-              >
-                {day}
+                {!on && <span className={styles.closed}>Closed</span>}
               </div>
-              {on && (
-                <>
-                  <TimeSelect value={start} onChange={setStart} />
-                  <span className={styles.to}>to</span>
-                  <TimeSelect value={end} onChange={setEnd} />
-                </>
+              {errors.hours?.[index]?.end && (
+                <span className={styles.hourError} role="alert">
+                  {errors.hours[index].end.message}
+                </span>
               )}
-              {!on && <span className={styles.closed}>Closed</span>}
             </div>
           ),
         )}
@@ -254,6 +279,6 @@ export const AvailabilityPage = ({ studio, view }: AvailabilityPageProps) => {
           />
         ))}
       </div>
-    </div>
+    </form>
   );
 };

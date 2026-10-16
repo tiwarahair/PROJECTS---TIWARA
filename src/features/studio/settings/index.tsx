@@ -2,18 +2,19 @@ import { Fragment } from "react";
 import { Link, useNavigate } from "react-router";
 import { ChevronLeft, Eye, Link2, LogOut, Pencil, Truck } from "lucide-react";
 import { Avatar } from "../../../components/ds/avatar";
-import { AccountSettings } from "../../../components/account-settings/account-settings";
+import { AccountSettings } from "../../../components/account-settings";
 import { BusinessDetails } from "../../../components/business-details";
-import { PaymentPolicy } from "../../../components/payment-policy/payment-policy";
+import { PaymentPolicy } from "../../../components/payment-policy";
 import { getAssetUrl } from "../../../utils/asset-url";
 import { joinClassNames } from "../../../utils/class-names";
 import { AvailabilityPage } from "./availability";
 import { ProfilePage } from "./profile";
 import { RulesPage } from "./rules";
 import { getSettingsView } from "./view";
+import { AVAILABILITY_FORM_ID } from "./availability/use-availability-form";
 import { PROFILE_FORM_ID } from "./profile/use-profile-form";
 import type { SettingsView } from "./view";
-import { GATE_REASON } from "../core/data";
+import { GATE_REASON } from "../core/constants";
 import type { StudioController } from "../core/use-studio";
 import styles from "../../../styles/features/studio/settings/index.module.css";
 import { getProfilePath } from "../core/model";
@@ -283,7 +284,11 @@ const SettingsFrame = ({
               </button>
               <div className={styles.spacer}></div>
               {view.isAvailability && (
-                <button className={styles.save} onClick={view.saveAvailability}>
+                <button
+                  className={styles.save}
+                  type="submit"
+                  form={AVAILABILITY_FORM_ID}
+                >
                   Save
                 </button>
               )}
@@ -415,7 +420,8 @@ const SettingsFrame = ({
                 {view.isAvailability && (
                   <button
                     className={styles.saveChanges}
-                    onClick={view.saveAvailability}
+                    type="submit"
+                    form={AVAILABILITY_FORM_ID}
                   >
                     Save changes
                   </button>

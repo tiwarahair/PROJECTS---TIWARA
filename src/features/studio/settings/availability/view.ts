@@ -30,26 +30,9 @@ export const getAvailabilityView = (studio: StudioController) => {
 
   return {
     pause,
-    togglePause: () => {
-      setPause({ on: !pause.on });
-
-      showToast(
-        pause.on ? "Online bookings are back on" : "Online bookings paused",
-      );
-    },
-    onPauseUntil: (event: ChangeEvent<HTMLInputElement>) => {
-      const value = event.target.value;
-
-      setPause({ until: value });
-
-      if (value) {
-        const date = new Date(`${value}T00:00`);
-
-        showToast(
-          `Paused until ${date.getDate()} ${SHORT_MONTHS_SEPT[date.getMonth()]}`,
-        );
-      }
-    },
+    togglePause: () => setPause({ on: !pause.on }),
+    onPauseUntil: (event: ChangeEvent<HTMLInputElement>) =>
+      setPause({ until: event.target.value }),
     clearPauseUntil: () => setPause({ until: "" }),
     pauseBanner: `Online bookings are paused${untilNote}. Clients see ‘Not taking online bookings right now’.`,
     // availability

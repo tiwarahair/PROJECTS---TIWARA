@@ -1,0 +1,119 @@
+.strongText {
+  font-size: 15px;
+  font-weight: 600;
+}
+
+.alignRight {
+  text-align: right;
+}
+
+.rowName {
+  font-size: 14.5px;
+  font-weight: 600;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.rowText {
+  flex: 1;
+  min-width: 0;
+}
+
+.rowSub {
+  font-size: 13px;
+  color: var(--text-secondary);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.poStatusRow {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 8px;
+}
+
+.failed {
+  margin-top: 14px;
+  background: var(--accent-wash);
+  border-radius: var(--radius-md);
+  padding: 12px 14px;
+}
+
+.failedText {
+  font-size: 14.5px;
+  line-height: 1.5;
+  color: var(--text-primary);
+}
+
+.failedLink {
+  display: inline-block;
+  margin-top: 8px;
+  font-size: 14.5px;
+  font-weight: 600;
+  color: var(--accent-700);
+}
+
+.totalRow {
+  display: flex;
+  justify-content: space-between;
+  padding: 9px 0;
+}
+
+.includedHead {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  margin: 20px 0 4px;
+}
+
+.includedRow {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+  text-align: left;
+  padding: 11px 0;
+  border: none;
+  border-bottom: 1px solid var(--border-subtle);
+  background: transparent;
+  font: inherit;
+  color: inherit;
+  cursor: pointer;
+}
+
+.includedNet {
+  font-size: 14.5px;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+}
+
+.includedFee {
+  font-size: 12.5px;
+  color: var(--text-secondary);
+  font-variant-numeric: tabular-nums;
+}
+
+.totalRow {
+  border-top: 0;
+  font-size: 14.5px;
+  font-weight: 400;
+  color: var(--neutral-600);
+}
+
+.totalRowNet {
+  border-top: 1px solid rgba(26, 23, 20, 0.1);
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.totalValue {
+  color: var(--text-primary);
+}
+
+.totalValueNegative {
+  color: var(--accent-700);
+}

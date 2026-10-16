@@ -1,0 +1,134 @@
+.overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 300;
+  background: var(--scrim-modal, rgba(26, 23, 20, 0.45));
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+  box-sizing: border-box;
+  animation: acFade 0.2s cubic-bezier(0.2, 0.8, 0.2, 1) both;
+}
+
+.dialog {
+  position: relative;
+  width: 100%;
+  max-height: calc(100dvh - 48px);
+  overflow-y: auto;
+  background: var(--neutral-50);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-modal);
+  padding: 28px 24px 24px;
+  box-sizing: border-box;
+  animation: acPop 0.26s cubic-bezier(0.2, 0.8, 0.2, 1) both;
+}
+
+.closeIcon {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  width: 44px;
+  height: 44px;
+  border: none;
+  background: transparent;
+  border-radius: var(--radius-full);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--neutral-600);
+  cursor: pointer;
+}
+
+.closeIcon:hover {
+  background: var(--fill-quiet) !important;
+}
+
+.secondary {
+  flex: 1 1 120px;
+  height: 48px;
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius-full);
+  background: transparent;
+  color: var(--text-primary);
+  font: inherit;
+  font-size: 15px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.secondary:hover {
+  background: var(--fill-quiet) !important;
+}
+
+.secondary:active {
+  transform: scale(0.98) !important;
+}
+
+.title {
+  margin: 0 44px 0 0;
+  font-family: "Schibsted Grotesk", sans-serif;
+  font-weight: 600;
+  letter-spacing: -0.02em;
+  font-size: 22px;
+}
+
+.actions {
+  display: flex;
+  gap: 10px;
+  margin-top: 22px;
+  flex-wrap: wrap;
+}
+
+.saveCard {
+  flex: 1 1 140px;
+  height: 48px;
+  border: none;
+  border-radius: var(--radius-full);
+  background: var(--accent-700);
+  color: var(--neutral-50);
+  font: inherit;
+  font-size: 15px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.saveCard:hover {
+  background: var(--accent-900) !important;
+}
+
+.saveCard:active {
+  transform: scale(0.98) !important;
+}
+
+/* runtime states: dialog max width, confirm border, delete cursor / opacity */
+
+.dialogWide {
+  max-width: 460px;
+}
+
+.dialogNarrow {
+  max-width: 420px;
+}
+
+/* keyframes are scoped per file in CSS modules, so shared ones are repeated */
+
+@keyframes acFade {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes acPop {
+  from {
+    opacity: 0;
+    transform: scale(0.97) translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}

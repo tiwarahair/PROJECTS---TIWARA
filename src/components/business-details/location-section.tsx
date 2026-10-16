@@ -1,6 +1,6 @@
 import { ChevronDown, Lock, MapPin } from "lucide-react";
 import { joinClassNames } from "../../utils/class-names";
-import { AddressFinder } from "../address-finder/address-finder";
+import { AddressFinder } from "../address-finder";
 import { getAreaLabel } from "./display";
 import { FieldError, Reveal, Section } from "./parts";
 import type { BusinessType } from "./types";

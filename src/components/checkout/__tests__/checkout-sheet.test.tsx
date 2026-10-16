@@ -154,7 +154,36 @@ describe("CheckoutSheet", () => {
   it("refund: rejects more than was paid", async () => {
     render(<CheckoutSheet scenario="refund" />);
     await user.type(screen.getByRole("textbox"), "999");
-    expect(screen.getByRole("alert")).toHaveTextContent(/You can refund up to/);
+
+    expect(await screen.findByRole("alert")).toHaveTextContent(
+      /You can refund up to/,
+    );
+  });
+
+  it("refund: an empty amount only complains after trying", async () => {
+    render(<CheckoutSheet scenario="refund" />);
+    await user.clear(screen.getByRole("textbox"));
+
+    expect(screen.queryByText("Enter an amount.")).not.toBeInTheDocument();
+
+    await user.click(screen.getByRole("button", { name: /^Refund/ }));
+    expect(await screen.findByText("Enter an amount.")).toBeInTheDocument();
+  });
+
+  it("refund: needs a reason, then asks to confirm", async () => {
+    render(<CheckoutSheet scenario="refund" />);
+    await user.click(screen.getByRole("radio", { name: /Full refund/ }));
+    await user.selectOptions(screen.getByRole("combobox"), "");
+    await user.click(screen.getByRole("button", { name: /^Refund £/ }));
+
+    expect(await screen.findByText("Choose a reason.")).toBeInTheDocument();
+
+    await user.selectOptions(screen.getByRole("combobox"), "Service issue");
+    await user.click(screen.getByRole("button", { name: /^Refund £/ }));
+
+    expect(await screen.findByRole("alertdialog")).toHaveTextContent(
+      /Refund £/,
+    );
   });
 
   it("waives a no-show fee from the dialog", async () => {

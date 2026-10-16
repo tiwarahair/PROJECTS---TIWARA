@@ -1,0 +1,42 @@
+.badge {
+  flex: 0 0 auto;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  line-height: 1;
+  gap: 4px;
+  font-size: 12.5px;
+  font-weight: 500;
+  letter-spacing: 0.02em;
+  padding: 2px 8px;
+  border-radius: var(--radius-full);
+  /* runtime: the booking's status tone */
+  background: var(--badge-bg);
+  border: 1px solid var(--badge-border);
+  color: var(--badge-color);
+}
+
+.pulse {
+  width: 5px;
+  height: 5px;
+  border-radius: var(--radius-full);
+  background: currentColor;
+  animation: pulsedot 1.6s ease-in-out infinite;
+}
+
+.sub {
+  font-size: 12.5px;
+  font-weight: 500;
+  margin-top: 2px;
+  color: var(--accent-500);
+}
+
+@keyframes pulsedot {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.35;
+  }
+}

@@ -1,0 +1,140 @@
+/* ---- payment breakdown ---- */
+.payment {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+  margin-top: 8px;
+  animation: rowin 0.24s cubic-bezier(0.2, 0.8, 0.2, 1) both;
+}
+
+.paymentHead {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.secondary145 {
+  font-size: 14.5px;
+  color: var(--text-secondary);
+}
+
+.payBadge {
+  flex: 0 0 auto;
+  display: inline-flex;
+  align-items: center;
+  height: 28px;
+  box-sizing: border-box;
+  padding: 0 11px;
+  border-radius: var(--radius-xs);
+  font-size: 12.5px;
+  font-weight: 500;
+  /* runtime: the payment state's tone */
+  background: var(--pay-bg);
+  color: var(--pay-color);
+}
+
+.sectionLabel {
+  font-size: 12.5px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.18em;
+  color: var(--text-secondary);
+  margin-bottom: 6px;
+}
+
+.line {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 10px;
+  padding: 9px 0;
+  border-bottom: 1px solid var(--border-subtle);
+  font-size: 14.5px;
+}
+
+.numeric {
+  font-variant-numeric: tabular-nums;
+}
+
+.lineTotal {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 10px;
+  padding: 10px 0 0;
+  font-size: 15px;
+  font-weight: 600;
+}
+
+.minWidth {
+  min-width: 0;
+}
+
+.blockPrimary {
+  display: block;
+  color: var(--text-primary);
+}
+
+.lineSub {
+  display: block;
+  font-size: 12.5px;
+  color: var(--text-secondary);
+  margin-top: 1px;
+}
+
+.received {
+  font-variant-numeric: tabular-nums;
+  color: var(--text-secondary);
+}
+
+.receivedPaid {
+  color: #2e7d4f;
+}
+
+.receivedFailed {
+  color: var(--accent-700);
+}
+
+.feeBox {
+  background: var(--quiet);
+  border-radius: var(--radius-md);
+  padding: 12px 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.feeLine {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 10px;
+  font-size: 14.5px;
+}
+
+.ink700 {
+  color: var(--neutral-700, #3d3833);
+}
+
+.inkNumeric {
+  font-variant-numeric: tabular-nums;
+  color: var(--neutral-700, #3d3833);
+}
+
+.feeNote {
+  font-size: 13.5px;
+  color: var(--neutral-600, #5c564e);
+  line-height: 1.45;
+}
+
+@keyframes rowin {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}

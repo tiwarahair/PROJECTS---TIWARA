@@ -12,7 +12,7 @@ import { StudioSettings } from "./settings";
 import { EndDateDialog } from "./settings/availability/block-sheet";
 import { StudioSheets } from "./shell/sheets";
 import { TwoFactorDialog } from "./settings/two-factor";
-import { BookingAddonDialog } from "./bookings/sheet";
+import { BookingAddonDialog } from "./bookings/sheet/addon-dialog";
 import { NewClientDialog } from "./bookings/dialogs";
 import {
   WizardNewAddonDialog,

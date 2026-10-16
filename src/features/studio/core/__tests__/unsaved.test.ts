@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { getInitialStudioState } from "../data";
+import { getInitialStudioState } from "../initial-state";
 import {
   getDiscardPatch,
   getSavedSettings,

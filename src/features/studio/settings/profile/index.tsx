@@ -1,10 +1,11 @@
 import { ResponsiveImage } from "../../../../components/responsive-image/responsive-image";
 import { useRef } from "react";
-import type { InputHTMLAttributes } from "react";
 import { Camera, Plus, X } from "lucide-react";
 import { Avatar } from "../../../../components/ds/avatar";
-import { joinClassNames } from "../../../../utils/class-names";
-import type { SocialPlatform } from "../../../../utils/social-handles";
+import type { FieldErrors } from "react-hook-form";
+import { ProfileField } from "./fields";
+import { SOCIAL_PLATFORMS } from "./schema";
+import type { ProfileValues } from "./schema";
 import { PROFILE_FORM_ID, useProfileForm } from "./use-profile-form";
 import type { SettingsView } from "../view";
 import type { StudioController } from "../../core/use-studio";
@@ -12,71 +13,6 @@ import { Field } from "../page-parts";
 import parts from "../../../../styles/features/studio/settings/page-parts.module.css";
 import styles from "../../../../styles/features/studio/settings/profile/index.module.css";
 import { BookingLinkField } from "./booking-link-field";
-
-interface TextFieldProps extends Omit<
-  InputHTMLAttributes<HTMLInputElement>,
-  "value" | "onChange"
-> {
-  label: string;
-  value: string | undefined;
-  onChange: (value: string) => void;
-}
-
-const TextField = ({
-  label,
-  value,
-  onChange,
-  ...inputProps
-}: TextFieldProps) => (
-  <Field label={label}>
-    <input
-      className={styles.input}
-      value={value ?? ""}
-      onChange={(event) => onChange(event.target.value)}
-      {...inputProps}
-    />
-  </Field>
-);
-
-interface UsernameFieldProps {
-  platform: SocialPlatform;
-  label: string;
-  value: string | undefined;
-  view: SettingsView;
-}
-
-const UsernameField = ({
-  platform,
-  label,
-  value,
-  view,
-}: UsernameFieldProps) => {
-  const error = view.socialErrors[platform];
-  const errorId = `${platform}-error`;
-
-  return (
-    <Field label={label}>
-      <input
-        className={joinClassNames(styles.input, error && styles.inputError)}
-        value={value ?? ""}
-        onChange={(event) =>
-          view.setProfile({ [platform]: event.target.value })
-        }
-        placeholder={`${label} username`}
-        autoCapitalize="none"
-        autoComplete="off"
-        spellCheck={false}
-        aria-invalid={error ? "true" : "false"}
-        aria-describedby={error ? errorId : undefined}
-      />
-      {error && (
-        <span id={errorId} role="alert" className={styles.fieldError}>
-          {error}
-        </span>
-      )}
-    </Field>
-  );
-};
 
 interface ProfilePageProps {
   studio: StudioController;
@@ -92,13 +28,18 @@ export const ProfilePage = ({ studio, view }: ProfilePageProps) => {
   const portInput = useRef<HTMLInputElement>(null);
   const portfolioRef = useRef<HTMLDivElement>(null);
 
+  const form = useProfileForm(profile, state.portfolio.length);
+
   const {
     handleSubmit,
     formState: { errors },
-  } = useProfileForm(state.portfolio.length);
+  } = form;
 
-  const showErrors = () => {
-    view.flagSocialErrors();
+  const showErrors = (invalid: FieldErrors<ProfileValues>) => {
+    if (SOCIAL_PLATFORMS.some((platform) => invalid[platform]))
+      studio.actions.showToast("Check your social usernames first.");
+
+    if (!invalid.portfolioCount) return;
 
     portfolioRef.current?.scrollIntoView({
       block: "center",
@@ -168,10 +109,11 @@ export const ProfilePage = ({ studio, view }: ProfilePageProps) => {
         </button>
       </div>
       <div className={styles.fields}>
-        <TextField
+        <ProfileField
+          name="salon"
           label="Salon name"
-          value={profile.salon}
-          onChange={(salon) => view.setProfile({ salon })}
+          profileForm={form}
+          view={view}
         />
         <BookingLinkField studio={studio} />
         <Field label="About">
@@ -183,38 +125,57 @@ export const ProfilePage = ({ studio, view }: ProfilePageProps) => {
           ></textarea>
         </Field>
         <div className={styles.twoCols}>
-          <UsernameField
-            platform="instagram"
+          <ProfileField
+            name="instagram"
             label="Instagram"
-            value={profile.instagram}
+            profileForm={form}
             view={view}
+            isLive={true}
+            placeholder="Instagram username"
+            autoCapitalize="none"
+            autoComplete="off"
+            spellCheck={false}
           />
-          <UsernameField
-            platform="tiktok"
+          <ProfileField
+            name="tiktok"
             label="TikTok"
-            value={profile.tiktok}
+            profileForm={form}
             view={view}
+            isLive={true}
+            placeholder="TikTok username"
+            autoCapitalize="none"
+            autoComplete="off"
+            spellCheck={false}
           />
         </div>
-        <TextField
+        <ProfileField
+          name="email"
           label="Email"
-          value={profile.email}
-          onChange={(email) => view.setProfile({ email })}
+          profileForm={form}
+          view={view}
+          type="email"
+          autoComplete="email"
         />
-        <TextField
+        <ProfileField
+          name="site"
           label="Website"
-          value={profile.site}
-          onChange={(site) => view.setProfile({ site })}
+          profileForm={form}
+          view={view}
           type="url"
           inputMode="url"
           placeholder="tiwarashouse.com"
           autoComplete="url"
         />
-        <UsernameField
-          platform="youtube"
+        <ProfileField
+          name="youtube"
           label="YouTube"
-          value={profile.youtube}
+          profileForm={form}
           view={view}
+          isLive={true}
+          placeholder="YouTube username"
+          autoCapitalize="none"
+          autoComplete="off"
+          spellCheck={false}
         />
         <div ref={portfolioRef} className={styles.portfolio}>
           <div className={styles.portfolioHead}>

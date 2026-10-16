@@ -1,5 +1,6 @@
 import type { CheckoutView } from "./data";
-import { getRefundCheck, getReviewTotal } from "./view";
+import { getRefundAmount } from "./schemas";
+import { getReviewTotal } from "./view";
 import type { CheckoutViewModel } from "./view";
 import type { CheckoutController } from "./use-checkout";
 import { formatMoney } from "../../utils/money";
@@ -92,24 +93,29 @@ const FOOTERS: Partial<Record<CheckoutView, FooterBuilder>> = {
     primaryLabel: "Done",
     primaryRun: () => view.leaveDone("done"),
   }),
-  refund: (checkout, view) => {
-    const { amount, overError, isValid } = getRefundCheck(checkout, view);
-    const { isOffPlatform, refundCap } = view;
+  refund: (
+    { refundForm, refundValues, setState },
+    { isOffPlatform, refundCap },
+  ) => {
+    const amount = getRefundAmount(refundValues, refundCap);
     const isWithinCap = amount > 0 && amount <= refundCap;
 
     return {
       hasTotal: true,
       totalLabel: isOffPlatform ? "Refund to record" : "Refund",
-      totalValue: formatMoney(isValid || amount <= refundCap ? amount : 0),
+      totalValue: formatMoney(amount <= refundCap ? amount : 0),
       primaryLabel:
         (isOffPlatform ? "Record refund" : "Refund") +
         (isWithinCap ? ` ${formatMoney(amount)}` : ""),
-      primaryRun: () => {
-        if (!isValid) return checkout.setState({ refundTried: true });
-
-        checkout.setState({ dialog: "refund", refundFinal: amount });
-      },
-      isPrimaryDisabled: !!overError,
+      primaryRun: () =>
+        void refundForm.handleSubmit((refund) =>
+          setState({
+            dialog: "refund",
+            refundFinal: getRefundAmount(refund, refundCap),
+            refund,
+          }),
+        )(),
+      isPrimaryDisabled: amount > refundCap,
     };
   },
   resend: ({ props, resendForm, showToast, goTo }) => ({

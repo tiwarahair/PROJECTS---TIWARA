@@ -9,6 +9,7 @@ import { StepLearn } from "./step-learn";
 import { StepMethod } from "./step-method";
 import { StepSecure } from "./step-secure";
 import { BusyButton, CodeField } from "./fields";
+import { useTwoFactorForm } from "./use-two-factor-form";
 import { getTwoFactorView } from "./view";
 import type { TwoFactorView } from "./view";
 import overlay from "../../../../styles/features/studio/shell/overlay.module.css";
@@ -84,9 +85,34 @@ interface TwoFactorDialogProps {
 }
 
 export const TwoFactorDialog = ({ studio }: TwoFactorDialogProps) => {
-  const view = getTwoFactorView(studio);
+  const form = useTwoFactorForm(studio);
+  const baseView = getTwoFactorView(studio);
 
-  if (!view) return null;
+  if (!baseView) return null;
+
+  const { errors } = form.formState;
+  const formError = errors.name?.message || errors.code?.message || "";
+
+  const checked = (run: () => unknown) => () =>
+    void form.handleSubmit(() => void run())();
+
+  const view: TwoFactorView = {
+    ...baseView,
+    isNameError: !!errors.name || (!errors.code && baseView.isNameError),
+    isCodeError: !!errors.code || (!errors.name && baseView.isCodeError),
+    errorMessage: formError || baseView.errorMessage,
+    onName: (event) => {
+      form.clearErrors("name");
+      baseView.onName(event);
+    },
+    onCode: (event) => {
+      form.clearErrors("code");
+      baseView.onCode(event);
+    },
+    verify: checked(baseView.verify),
+    taxCodeGo: checked(baseView.taxCodeGo),
+    removeGo: checked(baseView.removeGo),
+  };
 
   const { isWide } = view;
 

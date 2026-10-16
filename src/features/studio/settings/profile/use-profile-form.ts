@@ -1,35 +1,41 @@
 import { useEffect } from "react";
 import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import type { StudioProfile } from "../../core/types";
+import { SOCIAL_PLATFORMS, getProfileValues, profileSchema } from "./schema";
+import type { ProfileValues } from "./schema";
 
 export const PROFILE_FORM_ID = "profile-form";
 
-const MIN_PORTFOLIO = 2;
-
-interface ProfileForm {
-  portfolioCount: number;
-}
-
-export const useProfileForm = (portfolioCount: number) => {
-  const form = useForm<ProfileForm>({ defaultValues: { portfolioCount } });
+export const useProfileForm = (
+  profile: StudioProfile,
+  portfolioCount: number,
+) => {
+  const form = useForm<ProfileValues>({
+    values: getProfileValues(profile, portfolioCount),
+    resetOptions: {
+      keepErrors: true,
+      keepIsSubmitted: true,
+      keepTouched: true,
+    },
+    resolver: zodResolver(profileSchema),
+    mode: "onTouched",
+  });
 
   const {
-    register,
-    setValue,
+    trigger,
     formState: { isSubmitted },
   } = form;
 
   useEffect(() => {
-    register("portfolioCount", {
-      min: {
-        value: MIN_PORTFOLIO,
-        message: `Provide at least ${MIN_PORTFOLIO} portfolio images`,
-      },
-    });
-  }, [register]);
+    void trigger([...SOCIAL_PLATFORMS]);
+  }, [trigger]);
 
   useEffect(() => {
-    setValue("portfolioCount", portfolioCount, { shouldValidate: isSubmitted });
-  }, [portfolioCount, isSubmitted, setValue]);
+    if (isSubmitted) void trigger("portfolioCount");
+  }, [portfolioCount, isSubmitted, trigger]);
 
   return form;
 };
+
+export type ProfileForm = ReturnType<typeof useProfileForm>;

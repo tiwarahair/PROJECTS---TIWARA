@@ -3,7 +3,7 @@ import { useForm, useWatch } from "react-hook-form";
 import type { RegisterOptions } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { formatPostcode } from "../../utils/address";
-import type { EmittedAddress } from "../address-finder/use-address-finder";
+import type { EmittedAddress } from "../address-finder/data";
 import { cleanVatInput } from "./display";
 import { getInitialBusiness, toBusinessValue } from "./initial";
 import { businessSchema } from "./schema";

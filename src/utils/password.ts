@@ -54,7 +54,7 @@ export const onPasswordCheckerReady = (listener: () => void): (() => void) => {
 const normaliseAccents = (value = ""): string =>
   value.toLowerCase().normalize("NFD").replace(/[̀-ͯ]/g, "");
 
-interface PasswordCheckOptions {
+export interface PasswordCheckOptions {
   min?: number;
   first?: string;
   last?: string;
