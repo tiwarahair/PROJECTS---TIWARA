@@ -14,6 +14,7 @@ export const useTwoFactorForm = ({ state }: StudioController) => {
 
   const form = useForm<TwoFactorValues>({
     values: { name: flow?.name ?? "", code: flow?.code ?? "" },
+    resetOptions: { keepErrors: true },
     resolver: zodResolver(
       getTwoFactorSchema({ isNaming: flow?.step === "app", deviceNames }),
     ),

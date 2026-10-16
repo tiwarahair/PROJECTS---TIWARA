@@ -101,6 +101,14 @@ export const TwoFactorDialog = ({ studio }: TwoFactorDialogProps) => {
     isNameError: !!errors.name || baseView.isNameError,
     isCodeError: !!errors.code || baseView.isCodeError,
     errorMessage: formError || baseView.errorMessage,
+    onName: (event) => {
+      form.clearErrors("name");
+      baseView.onName(event);
+    },
+    onCode: (event) => {
+      form.clearErrors("code");
+      baseView.onCode(event);
+    },
     verify: checked(baseView.verify),
     taxCodeGo: checked(baseView.taxCodeGo),
     removeGo: checked(baseView.removeGo),

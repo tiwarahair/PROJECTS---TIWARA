@@ -154,6 +154,12 @@ describe("Studio → two-step verification", () => {
     expect(await within(dialog).findByRole("alert")).toHaveTextContent(
       "Enter the 6-digit code",
     );
+
+    await user.type(name, " 2");
+
+    expect(within(dialog).getByRole("alert")).toHaveTextContent(
+      "Enter the 6-digit code",
+    );
   });
 
   it("back returns to the screen before, one step at a time", async () => {

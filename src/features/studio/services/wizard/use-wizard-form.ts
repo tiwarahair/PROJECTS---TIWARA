@@ -10,14 +10,17 @@ export const useWizardForm = ({ state }: StudioController) => {
   const draft = wizard?.draft;
   const isEdit = wizard?.mode === "edit";
 
+  const values = {
+    name: draft?.name ?? "",
+    typeId: draft?.taxonomyId ? (draft.typeId ?? "") : "",
+    price: String(draft?.price ?? ""),
+    durationHours: String(draft?.durationHours ?? ""),
+    durationMinutes: String(draft?.durationMinutes ?? ""),
+  };
+
   const form = useForm<WizardValues>({
-    values: {
-      name: draft?.name ?? "",
-      typeId: draft?.taxonomyId ? (draft.typeId ?? "") : "",
-      price: String(draft?.price ?? ""),
-      durationHours: String(draft?.durationHours ?? ""),
-      durationMinutes: String(draft?.durationMinutes ?? ""),
-    },
+    values,
+    resetOptions: { keepErrors: true, keepIsSubmitted: true },
     resolver: zodResolver(
       getWizardSchema({
         isDetails: isEdit || wizard?.step === 2,
@@ -26,12 +29,34 @@ export const useWizardForm = ({ state }: StudioController) => {
     ),
   });
 
-  const { reset } = form;
+  const {
+    reset,
+    trigger,
+    formState: { isSubmitted },
+  } = form;
+
   const isOpen = !!wizard && !state.out;
+  const { name, typeId, price, durationHours, durationMinutes } = values;
 
   useEffect(() => {
     if (!isOpen) reset();
   }, [isOpen, reset]);
+
+  useEffect(() => {
+    if (!isEdit) reset();
+  }, [wizard?.step, wizard?.review, isEdit, reset]);
+
+  useEffect(() => {
+    if (isSubmitted) void trigger();
+  }, [
+    name,
+    typeId,
+    price,
+    durationHours,
+    durationMinutes,
+    isSubmitted,
+    trigger,
+  ]);
 
   return form;
 };

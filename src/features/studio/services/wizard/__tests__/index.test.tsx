@@ -1,4 +1,4 @@
-import { act, screen, within } from "@testing-library/react";
+import { act, screen, waitFor, within } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { renderWithStore } from "../../../../../test/render-with-store";
 import { StudioPage } from "../../..";
@@ -76,6 +76,17 @@ describe("Studio → service wizard", () => {
     expect(await screen.findByText("Name this service.")).toBeInTheDocument();
     expect(screen.getByText("Choose the service type.")).toBeInTheDocument();
     expect(screen.getByText("Details")).toBeInTheDocument();
+
+    await user.type(
+      screen.getByPlaceholderText("e.g. Knotless braids"),
+      "Cornrows",
+    );
+
+    await waitFor(() =>
+      expect(screen.queryByText("Name this service.")).not.toBeInTheDocument(),
+    );
+
+    expect(screen.getByText("Choose the service type.")).toBeInTheDocument();
   });
 
   it("a suggestion fills the form and the wizard adds the service", async () => {
