@@ -1,3 +1,6 @@
+import { useEffect } from "react";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
 import { Calendar, X } from "lucide-react";
 import { joinClassNames } from "../../../../utils/class-names";
 import {
@@ -22,6 +25,8 @@ import {
   MonthCalendar,
   CalendarToggle,
 } from "../../shell/month-calendar";
+import { blockSchema, isBlockTimeValid } from "./block-schema";
+import type { BlockValues } from "./block-schema";
 
 export const BlockSheet = ({ studio }: { studio: StudioController }) => {
   const { state, setState, actions, context } = studio;
@@ -49,7 +54,21 @@ export const BlockSheet = ({ studio }: { studio: StudioController }) => {
   });
 
   times.sort();
-  const isDisabled = !draft.allDay && draft.start >= draft.end;
+
+  const {
+    trigger,
+    formState: { errors },
+  } = useForm<BlockValues>({
+    values: { allDay: !!draft.allDay, start: draft.start, end: draft.end },
+    resetOptions: { keepErrors: true },
+    resolver: zodResolver(blockSchema),
+  });
+
+  useEffect(() => {
+    void trigger();
+  }, [draft.allDay, draft.start, draft.end, trigger]);
+
+  const isDisabled = !isBlockTimeValid(draft);
   const isRepeating = (draft.frequency || "none") !== "none";
 
   const endDayInfo =
@@ -59,7 +78,7 @@ export const BlockSheet = ({ studio }: { studio: StudioController }) => {
     const current = studio.context.getState();
     const block = current.blockDraft;
 
-    if (!block.allDay && block.start >= block.end) return;
+    if (!isBlockTimeValid(block)) return;
 
     const from = block.allDay ? 0 : timeToMinutes(block.start);
     const to = block.allDay ? 1440 : timeToMinutes(block.end);
@@ -253,6 +272,11 @@ export const BlockSheet = ({ studio }: { studio: StudioController }) => {
             ))}
           </select>
         </div>
+      )}
+      {!draft.allDay && errors.end?.message && (
+        <span className={fields.fieldError} role="alert">
+          {errors.end.message}
+        </span>
       )}
       <label className={fields.field}>
         <span className={fields.fieldLabel}>Repeats</span>

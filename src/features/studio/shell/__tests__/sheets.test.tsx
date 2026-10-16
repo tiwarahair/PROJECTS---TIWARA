@@ -110,6 +110,32 @@ describe("Studio sheets", () => {
     expect(screen.getByText("Dentist")).toBeInTheDocument();
   });
 
+  it("blocked time says why it can't end before it starts", async () => {
+    renderStudio();
+    await openAvailability();
+
+    await user.click(
+      screen.getAllByRole("button", { name: "Add" })[0] as HTMLElement,
+    );
+
+    const [start, end] = screen
+      .getAllByRole<HTMLSelectElement>("combobox")
+      .filter((select) =>
+        [...select.options].some(({ value }) => value === "06:00"),
+      );
+
+    await user.selectOptions(start!, "15:00");
+    await user.selectOptions(end!, "14:00");
+
+    expect(
+      await screen.findByText("The end time must be after the start time."),
+    ).toBeInTheDocument();
+
+    expect(
+      screen.getByRole("button", { name: "Block this time" }),
+    ).toBeDisabled();
+  });
+
   it("a closed period needs both dates", async () => {
     renderStudio();
     await openAvailability();
