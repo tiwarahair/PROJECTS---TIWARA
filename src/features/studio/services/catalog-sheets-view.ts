@@ -257,8 +257,6 @@ export const getAddonSheetView = (studio: StudioController) => {
 
   if (!draft) return null;
 
-  const isBad = !draft.name.trim();
-
   const patch = (value: Partial<typeof draft>) =>
     setState({ addonDraft: { ...draft, ...value } });
 
@@ -354,10 +352,7 @@ export const getAddonSheetView = (studio: StudioController) => {
     },
     cancelNewCategory: () => setState({ addonNewCategory: null }),
     cta: draft.id ? "Save add-on" : "Create add-on",
-    isDisabled: isBad,
     save: () => {
-      if (isBad) return;
-
       const addon = {
         id: draft.id || crypto.randomUUID(),
         categoryId: getCategoryById(state, draft.categoryId)

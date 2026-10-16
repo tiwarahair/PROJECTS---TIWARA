@@ -430,10 +430,6 @@
   transform: scale(0.98) !important;
 }
 
-.faded {
-  opacity: 0.45;
-}
-
 @keyframes rowin {
   from {
     opacity: 0;

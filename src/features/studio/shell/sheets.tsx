@@ -1,3 +1,4 @@
+import { useAddonForm } from "../services/use-addon-form";
 import { AddBookingSheet } from "../bookings/add";
 import { getAddBookingView } from "../bookings/add/view";
 import {
@@ -51,6 +52,12 @@ export const StudioSheets = ({ studio }: { studio: StudioController }) => {
   const addView = sheet === "add" ? getAddBookingView(studio) : null;
   const categoriesView = sheet === "cats" ? getCategoriesView(studio) : null;
   const addonView = sheet === "addon" ? getAddonSheetView(studio) : null;
+
+  const addonForm = useAddonForm(
+    studio.state.addonDraft?.name ?? "",
+    !!addonView && !studio.state.out,
+  );
+
   const wizardView = sheet === "svcwiz" ? getWizardView(studio) : null;
 
   const clientsView =
@@ -76,7 +83,9 @@ export const StudioSheets = ({ studio }: { studio: StudioController }) => {
 
     if (wizardView) return <WizardFooter view={wizardView} />;
 
-    return addonView ? <AddonSheetFooter view={addonView} /> : null;
+    return addonView ? (
+      <AddonSheetFooter view={addonView} form={addonForm} />
+    ) : null;
   };
 
   return (
@@ -98,7 +107,7 @@ export const StudioSheets = ({ studio }: { studio: StudioController }) => {
       {categoriesView && (
         <CategoriesSheet studio={studio} view={categoriesView} />
       )}
-      {addonView && <AddonSheet view={addonView} />}
+      {addonView && <AddonSheet view={addonView} form={addonForm} />}
       {sheet === "stripe" && <StripeSheet studio={studio} />}
       {sheet === "block" && <BlockSheet studio={studio} />}
       {sheet === "closed" && <ClosedSheet studio={studio} />}
