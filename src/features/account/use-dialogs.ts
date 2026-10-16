@@ -1,8 +1,8 @@
 import { useCallback, useEffect } from "react";
 import type { DialogState } from "./state";
-import type { AccountCore } from "./use-account-core";
-import { getFocusables } from "./use-account-feedback";
-import type { AccountFeedback } from "./use-account-feedback";
+import type { AccountCore } from "./use-core";
+import { getFocusables } from "./use-feedback";
+import type { AccountFeedback } from "./use-feedback";
 
 export const useAccountDialogs = (
   { stateRef, setState, forms, refs, returnFocus }: AccountCore,

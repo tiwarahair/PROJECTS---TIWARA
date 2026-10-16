@@ -1,10 +1,10 @@
 import { getEditActions } from "./edit-actions";
 import { getSaveActions } from "./save-actions";
 import type { AccountProps } from "./state";
-import { useAccountCore } from "./use-account-core";
-import { useAccountDialogs } from "./use-account-dialogs";
-import { useAccountFeedback } from "./use-account-feedback";
-import { useAccountNavigation } from "./use-account-navigation";
+import { useAccountCore } from "./use-core";
+import { useAccountDialogs } from "./use-dialogs";
+import { useAccountFeedback } from "./use-feedback";
+import { useAccountNavigation } from "./use-navigation";
 
 export const useAccount = (props: AccountProps) => {
   const core = useAccountCore(props);

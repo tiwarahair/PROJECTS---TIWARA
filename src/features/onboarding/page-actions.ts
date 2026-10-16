@@ -1,5 +1,5 @@
 import { getBackScreen } from "./onboarding-state";
-import type { OnboardingBase } from "./use-onboarding-base";
+import type { OnboardingBase } from "./use-base";
 
 interface SubmitActions {
   submit: () => void;

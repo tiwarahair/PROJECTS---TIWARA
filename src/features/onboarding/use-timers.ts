@@ -3,7 +3,7 @@ import { getAssetImageSet, getAssetUrl } from "../../utils/asset-url";
 import { MODE_KEY, PHOTOS } from "./onboarding-data";
 import { readStorage } from "./onboarding-start";
 import { isCodeScreen } from "./onboarding-state";
-import type { OnboardingBase } from "./use-onboarding-base";
+import type { OnboardingBase } from "./use-base";
 
 export const useOnboardingTimers = (
   {

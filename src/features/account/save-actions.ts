@@ -5,8 +5,8 @@ import { saveAddresses } from "../../utils/saved-addresses";
 import { EMPTY_CARD, EMPTY_PASSWORD } from "./forms";
 import { getSavedAddressList, toSavedCard } from "./saves";
 import type { AddressFormValues, CardFormValues } from "./schemas";
-import type { AccountCore } from "./use-account-core";
-import type { AccountFeedback } from "./use-account-feedback";
+import type { AccountCore } from "./use-core";
+import type { AccountFeedback } from "./use-feedback";
 
 export const getSaveActions = (
   { searchParams, stateRef, setState, forms, navigate, dispatch }: AccountCore,

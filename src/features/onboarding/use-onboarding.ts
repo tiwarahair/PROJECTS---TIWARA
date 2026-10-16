@@ -4,13 +4,13 @@ import type { NavigateFunction } from "react-router";
 import type { TurnstileInstance } from "@marsidev/react-turnstile";
 import { getCodeEntry } from "./code-entry";
 import { getPageActions } from "./page-actions";
-import { useOnboardingAddress } from "./use-onboarding-address";
-import { useOnboardingBase } from "./use-onboarding-base";
-import type { StatePatch } from "./use-onboarding-base";
-import { useOnboardingForm } from "./use-onboarding-form";
-import { useOnboardingStorage } from "./use-onboarding-storage";
-import { useOnboardingSubmit } from "./use-onboarding-submit";
-import { useOnboardingTimers } from "./use-onboarding-timers";
+import { useOnboardingAddress } from "./use-address";
+import { useOnboardingBase } from "./use-base";
+import type { StatePatch } from "./use-base";
+import { useOnboardingForm } from "./use-form";
+import { useOnboardingStorage } from "./use-storage";
+import { useOnboardingSubmit } from "./use-submit";
+import { useOnboardingTimers } from "./use-timers";
 import type {
   OnboardingForm,
   OnboardingProps,

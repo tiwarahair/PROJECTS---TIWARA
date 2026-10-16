@@ -1,6 +1,6 @@
 import { useCallback } from "react";
 import { TOAST_MS } from "./state";
-import type { AccountCore } from "./use-account-core";
+import type { AccountCore } from "./use-core";
 
 export const getFocusables = (root: HTMLElement) =>
   [

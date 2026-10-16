@@ -3,8 +3,8 @@ import type { Profile } from "./data";
 import type { EditKey } from "./logic";
 import { getSavedMobile } from "./saves";
 import { CORRECT_CODE, EMPTY_CODE, EXPIRED_CODE } from "./state";
-import type { AccountCore } from "./use-account-core";
-import type { AccountFeedback } from "./use-account-feedback";
+import type { AccountCore } from "./use-core";
+import type { AccountFeedback } from "./use-feedback";
 
 export const getEditActions = (
   { stateRef, setState, forms, refs }: AccountCore,

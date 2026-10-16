@@ -1,6 +1,6 @@
 import type { ClipboardEvent, KeyboardEvent } from "react";
 import { EMPTY_CODE } from "./onboarding-state";
-import type { OnboardingBase } from "./use-onboarding-base";
+import type { OnboardingBase } from "./use-base";
 
 export const getCodeEntry = (
   { codeRefs, stateRef, setState }: OnboardingBase,

@@ -7,8 +7,8 @@ import { EMPTY_PASSWORD } from "./forms";
 import { readSection } from "./initial-state";
 import { WIDE_PX } from "./state";
 import { getDiscardPatch, hasUnsavedEdits } from "./unsaved";
-import type { AccountCore } from "./use-account-core";
-import type { AccountFeedback } from "./use-account-feedback";
+import type { AccountCore } from "./use-core";
+import type { AccountFeedback } from "./use-feedback";
 
 export const useAccountNavigation = (
   {
