@@ -117,6 +117,8 @@ export interface OnboardingState {
   /** Submitted before a Turnstile token existed: submit again once the check passes. */
   submitArmed: boolean;
   returnTo: string;
+  entryScreen: string;
+  exitTo: string | null;
   toast: string | null;
   socialProvider: "google" | "apple" | null;
   mode: "light" | "dark" | null;
@@ -187,6 +189,8 @@ export const INITIAL_STATE: OnboardingState = {
   resendArmed: false,
   submitArmed: false,
   returnTo: "/",
+  entryScreen: "",
+  exitTo: null,
   toast: null,
   socialProvider: null,
   mode: null,
