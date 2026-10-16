@@ -9,12 +9,17 @@ import {
   updateBookingAllergies,
 } from "../../../lib/manage-booking-api";
 import type { ManagedBooking } from "../../../lib/manage-booking-api";
+import { getOwnerManageToken } from "../../../lib/booking-invite-api";
 import { renderWithStore } from "../../../test/render-with-store";
 import { setupUser } from "../../../test/setup-user";
-import { ManageBookingPage } from "../manage-booking-page";
+import { ManageBookingPage } from "..";
 
 vi.mock("../../../lib/manage-booking-api", async (original) =>
   (await import("../../../test/booking-mocks")).mockManageBookingApi(original),
+);
+
+vi.mock("../../../lib/booking-invite-api", async (original) =>
+  (await import("../../../test/booking-mocks")).mockBookingInviteApi(original),
 );
 
 const booking: ManagedBooking = {
@@ -43,6 +48,7 @@ const booking: ManagedBooking = {
   },
   allergies: "Sensitive scalp",
   reschedule_count: 0,
+  calendar_key: "cal-key",
   cancelled_at: null,
   can_cancel: true,
   can_reschedule: true,
@@ -68,6 +74,7 @@ describe("the manage booking page", () => {
     });
 
     vi.clearAllMocks();
+    sessionStorage.clear();
     vi.mocked(getManagedBooking).mockResolvedValue(booking);
     user = setupUser();
   });
@@ -101,7 +108,7 @@ describe("the manage booking page", () => {
       screen.getByRole("link", { name: "Apple Calendar" }),
     ).toHaveAttribute(
       "href",
-      expect.stringContaining("/functions/v1/booking-calendar?token=tok"),
+      expect.stringContaining("/functions/v1/booking-calendar?key=cal-key"),
     );
 
     expect(
@@ -353,6 +360,33 @@ describe("the manage booking page", () => {
     expect(
       screen.queryByRole("button", { name: "Cancel booking" }),
     ).not.toBeInTheDocument();
+  });
+
+  it("a signed-in client opens their own booking from its ref", async () => {
+    renderWithStore(<ManageBookingPage />, "/manage?ref=TH-ABC123", {
+      signedIn: true,
+    });
+
+    expect(
+      await screen.findByText("Booking ref TH-ABC123"),
+    ).toBeInTheDocument();
+
+    expect(getOwnerManageToken).toHaveBeenCalledWith("TH-ABC123");
+    expect(getManagedBooking).toHaveBeenCalledWith("owner-token");
+  });
+
+  it("someone else's booking ref isn't valid", async () => {
+    vi.mocked(getOwnerManageToken).mockRejectedValueOnce(
+      new Error("link_not_valid"),
+    );
+
+    renderWithStore(<ManageBookingPage />, "/manage?ref=TH-OTHER1", {
+      signedIn: true,
+    });
+
+    expect(
+      await screen.findByRole("heading", { name: "This link isn’t valid" }),
+    ).toBeInTheDocument();
   });
 
   it("?view=account forwards to Account → Shared", async () => {

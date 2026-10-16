@@ -56,3 +56,23 @@ export const mockManageBookingApi = async (
     Promise.resolve({ refund_pence: 1500, kept_pence: 0, charge_pence: 0 }),
   ),
 });
+
+export const mockBookingInviteApi = async (
+  original: () => Promise<typeof import("../lib/booking-invite-api")>,
+) => ({
+  ...(await original()),
+  getBookingInvite: vi.fn(() =>
+    Promise.resolve({
+      state: "valid",
+      first: "Nia",
+      last: "Okafor",
+      email: "nia.okafor@gmail.com",
+    }),
+  ),
+  renewBookingInvite: vi.fn(() =>
+    Promise.resolve({ email: "nia.okafor@gmail.com" }),
+  ),
+  claimBookingInvite: vi.fn(() => Promise.resolve({ tokenHash: "hash" })),
+  signInWithInvite: vi.fn(() => Promise.resolve()),
+  getOwnerManageToken: vi.fn(() => Promise.resolve("owner-token")),
+});

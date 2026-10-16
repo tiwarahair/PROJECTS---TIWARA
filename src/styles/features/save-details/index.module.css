@@ -239,3 +239,28 @@
   color: var(--neutral-600);
   cursor: default;
 }
+
+.error {
+  margin: 0;
+  font-size: 13.5px;
+  font-weight: 500;
+  color: var(--accent-700);
+}
+
+.terms {
+  margin: 0;
+  font-size: 13px;
+  line-height: 1.5;
+  color: var(--text-secondary);
+  text-align: center;
+}
+
+.termsLink {
+  padding: 0;
+  border: 0;
+  background: none;
+  font: inherit;
+  font-weight: 600;
+  color: var(--accent-700);
+  cursor: pointer;
+}

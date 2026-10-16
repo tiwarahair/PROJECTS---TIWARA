@@ -59,7 +59,7 @@ export const bookingRescheduled = (booking: ChangedBooking): RenderedEmail => {
           startsAt,
           endsAt,
           location: where,
-          description: `Booking ${ref}. Manage or cancel it: ${booking.manage_url}`,
+          description: `Booking ${ref}. Manage or cancel it from your booking email.`,
         }),
       },
     ],

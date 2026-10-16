@@ -9,7 +9,7 @@ import {
 import { getMonthRange, groupSlotsByDay } from "../booking/logic/slots";
 import type { Slot } from "../booking/logic/slots";
 import { SlotCalendar } from "../booking/slot-calendar";
-import { formatWhen } from "./manage-booking-logic";
+import { formatWhen } from "./logic";
 import styles from "../../styles/features/manage-booking/reschedule-sheet.module.css";
 
 const ERRORS: Record<string, string> = {

@@ -54,6 +54,18 @@ const authenticatorChanged =
     });
   };
 
+/** Payload: `first`, `save_details_url`. A new link after the first one expired. */
+const bookingInvite: TemplateBuilder = ({ first, save_details_url: url }) =>
+  renderNotice({
+    title: "Save your details",
+    paragraphs: [
+      `Hi ${first}, here’s your new link. Create a password to book faster and see all your bookings in one place.`,
+      "The link works for 24 hours.",
+    ],
+    button: { label: "Save my details", url: String(url) },
+    footnote: "If you didn’t ask for this, you can ignore this email.",
+  });
+
 const templates: Record<string, TemplateBuilder> = {
   tax_details_updated: taxDetailsUpdated,
   authenticator_added: authenticatorChanged(true),
@@ -63,6 +75,7 @@ const templates: Record<string, TemplateBuilder> = {
   booking_cancelled: (payload) => bookingCancelled(payload as unknown as ChangedBooking),
   booking_rescheduled: (payload) => bookingRescheduled(payload as unknown as ChangedBooking),
   client_cancelled: (payload) => clientCancelled(payload as unknown as Parameters<typeof clientCancelled>[0]),
+  booking_invite: bookingInvite,
   client_rescheduled: (payload) => clientRescheduled(payload as unknown as Parameters<typeof clientRescheduled>[0]),
 };
 

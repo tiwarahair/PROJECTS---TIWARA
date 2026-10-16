@@ -5,7 +5,7 @@ Deno.serve(async (request) => {
   const params = new URL(request.url).searchParams;
 
   const { data } = await admin.rpc("get_booking_calendar", {
-    token: params.get("token"),
+    calendar_key: params.get("key"),
     target: params.get("booking"),
     secret: params.get("secret"),
   });

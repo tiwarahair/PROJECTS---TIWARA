@@ -48,7 +48,7 @@ const getBookingCard = (
     aria: `${service} with ${bookingMoney.stylist.name}, ${when}, ${bookingMoney.tag[0]}`,
     when,
     profile: `/${stylistId}`,
-    manage: `/manage?view=booking&stylist=${stylistId}`,
+    manage: `/manage?ref=${id}`,
     help: `/help?booking=${id}`,
     again: `/book?stylist=${stylistId}&service=${encodeURIComponent(service)}`,
   };

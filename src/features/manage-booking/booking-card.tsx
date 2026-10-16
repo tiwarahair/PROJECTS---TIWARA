@@ -2,15 +2,14 @@ import { Calendar, MapPin } from "lucide-react";
 import { getGoogleCalendarUrl } from "../../../supabase/functions/_shared/calendar-file";
 import { getCalendarFileUrl } from "../../lib/manage-booking-api";
 import type { ManagedBooking } from "../../lib/manage-booking-api";
-import { formatWhen, getOptionsLine, toPounds } from "./manage-booking-logic";
+import { formatWhen, getOptionsLine, toPounds } from "./logic";
 import styles from "../../styles/features/manage-booking/booking-card.module.css";
 
 interface BookingCardProps {
   booking: ManagedBooking;
-  token: string;
 }
 
-export const BookingCard = ({ booking, token }: BookingCardProps) => {
+export const BookingCard = ({ booking }: BookingCardProps) => {
   const isCancelled = booking.status === "cancelled";
   const isUpcoming = booking.status === "confirmed" && booking.can_cancel;
   const optionsLine = getOptionsLine(booking);
@@ -53,7 +52,7 @@ export const BookingCard = ({ booking, token }: BookingCardProps) => {
           Add to calendar
           <div className={styles.calendarLinks}>
             <a
-              href={getCalendarFileUrl({ token })}
+              href={getCalendarFileUrl({ key: booking.calendar_key })}
               className={styles.calendarLink}
             >
               Apple Calendar

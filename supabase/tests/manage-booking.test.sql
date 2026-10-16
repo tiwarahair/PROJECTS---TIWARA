@@ -1,5 +1,5 @@
 begin;
-select plan(37);
+select plan(38);
 
 insert into auth.users (id, instance_id, aud, role, email, raw_user_meta_data, raw_app_meta_data)
 values ('b1111111-1111-1111-1111-111111111111', '00000000-0000-0000-0000-000000000000', 'authenticated', 'authenticated',
@@ -208,8 +208,12 @@ select is(
   'booking_cancelled,client_cancelled', 'client and stylist are emailed'
 );
 
-select is(public.get_booking_calendar((select deposit from b) ->> 'token', null, null) ->> 'ref', (select deposit from b) ->> 'ref',
-  'by the manage link');
+select is(
+  public.get_booking_calendar(public.get_managed_booking((select deposit from b) ->> 'token') ->> 'calendar_key', null, null) ->> 'ref',
+  (select deposit from b) ->> 'ref', 'by the calendar key the manage page shows');
+
+select is(public.get_booking_calendar((select deposit from b) ->> 'token', null, null), null,
+  'the manage link itself doesn''t open the calendar file');
 
 select is(public.get_booking_calendar(null, ((select deposit from b) ->> 'id')::uuid, (select deposit from b) ->> 'secret') ->> 'ref',
   (select deposit from b) ->> 'ref', 'or by the paying browser''s booking and secret');

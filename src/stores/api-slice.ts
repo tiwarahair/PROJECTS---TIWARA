@@ -20,6 +20,13 @@ import {
   rescheduleBooking,
   updateBookingAllergies,
 } from "../lib/manage-booking-api";
+import {
+  claimBookingInvite,
+  getBookingInvite,
+  getOwnerManageToken,
+  renewBookingInvite,
+} from "../lib/booking-invite-api";
+import type { BookingInvite } from "../lib/booking-invite-api";
 import type {
   CancellationTerms,
   ManagedBooking,
@@ -223,6 +230,23 @@ export const api = createApi({
       invalidatesTags: () => ["ManagedBooking"],
       queryFn: (token) => toQueryResult(cancelBooking(token)),
     }),
+    getOwnerManageToken: build.query<string, string>({
+      keepUnusedDataFor: 0,
+      queryFn: (ref) => toQueryResult(getOwnerManageToken(ref)),
+    }),
+    getBookingInvite: build.query<BookingInvite, string>({
+      keepUnusedDataFor: 0,
+      queryFn: (token) => toQueryResult(getBookingInvite(token)),
+    }),
+    renewBookingInvite: build.mutation<{ email: string }, string>({
+      queryFn: (token) => toQueryResult(renewBookingInvite(token)),
+    }),
+    claimBookingInvite: build.mutation<
+      { tokenHash: string },
+      { token: string; password: string }
+    >({
+      queryFn: (request) => toQueryResult(claimBookingInvite(request)),
+    }),
     getTwoFactorDevices: build.query<TwoFactorDevice[], string>({
       providesTags: ["TwoFactor"],
       queryFn: () => toQueryResult(listTwoFactorDevices()),
@@ -232,6 +256,10 @@ export const api = createApi({
 
 export const {
   useCancelBookingMutation,
+  useClaimBookingInviteMutation,
+  useGetBookingInviteQuery,
+  useGetOwnerManageTokenQuery,
+  useRenewBookingInviteMutation,
   useGetManagedBookingQuery,
   useGetRescheduleSlotsQuery,
   useRescheduleBookingMutation,

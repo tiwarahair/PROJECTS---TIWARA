@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import type { ManagedBooking } from "../../../lib/manage-booking-api";
-import { getCancelLines } from "../manage-booking-logic";
+import { getCancelLines } from "../logic";
 
 const booking = {
   stylist_name: "Tiwára's House",

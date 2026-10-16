@@ -61,6 +61,7 @@ describe("the client's confirmation email", () => {
     const [file] = email.attachments ?? [];
 
     expect(file).toMatchObject({ filename: "TH-ABC123.ics", contentType: "text/calendar" });
+    expect(file?.content).not.toContain("token=");
     expect(file?.content).toContain("DTSTART:20261022T163000Z");
     expect(file?.content).toContain("DTEND:20261022T183000Z");
   });

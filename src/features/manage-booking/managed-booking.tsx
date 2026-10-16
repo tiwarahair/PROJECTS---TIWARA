@@ -10,10 +10,10 @@ import {
 import { BookingCard } from "./booking-card";
 import { ConfirmDialog } from "./confirm-dialog";
 import { ManageActions } from "./manage-actions";
-import { getCancelLines, toPounds } from "./manage-booking-logic";
+import { getCancelLines, toPounds } from "./logic";
 import { RescheduleSheet } from "./reschedule-sheet";
 import { SharedDetails } from "./shared-details";
-import styles from "../../styles/features/manage-booking/manage-booking-page.module.css";
+import styles from "../../styles/features/manage-booking/index.module.css";
 import toastStyles from "../../styles/features/manage-booking/manage-toast.module.css";
 
 const TOAST_MS = 2600;
@@ -116,7 +116,7 @@ export const ManagedBooking = ({
     <>
       <div className={styles.eyebrow}>Your booking</div>
       <h1 className={styles.title}>{getTitle(isCancelled, isPast, stylist)}</h1>
-      <BookingCard booking={booking} token={token} />
+      <BookingCard booking={booking} />
       {isCancelled && (
         <div className={styles.cancelledNote}>
           {!!refunded && (

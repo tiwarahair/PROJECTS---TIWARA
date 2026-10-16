@@ -3,7 +3,9 @@ alter table public.bookings
   add column allergies_consented_at timestamptz,
   add column cancelled_at timestamptz,
   add column cancelled_by text check (cancelled_by in ('client', 'stylist')),
-  add column cancellation jsonb;
+  add column cancellation jsonb,
+  add column calendar_key text not null unique
+    default translate(encode(extensions.gen_random_bytes(18), 'base64'), '+/', '-_');
 
 create function public.get_booking_by_token(token text)
 returns public.bookings
@@ -87,6 +89,7 @@ as $$
     'terms', booking.terms,
     'allergies', booking.allergies,
     'reschedule_count', booking.reschedule_count,
+    'calendar_key', booking.calendar_key,
     'cancelled_at', booking.cancelled_at,
     'can_cancel', booking.status = 'confirmed' and booking.starts_at > now(),
     'can_reschedule', booking.status = 'confirmed' and booking.reschedule_count < 1
@@ -291,7 +294,7 @@ begin
 end;
 $$;
 
-create function public.get_booking_calendar(token text, target uuid, secret text)
+create function public.get_booking_calendar(calendar_key text, target uuid, secret text)
 returns jsonb
 language sql
 stable
@@ -301,7 +304,7 @@ as $$
   select public.get_booking_details(bookings.id)
   from public.bookings
   where status = 'confirmed' and (
-    id = (public.get_booking_by_token(token)).id
+    bookings.calendar_key = get_booking_calendar.calendar_key
     or (id = target and hold_secret_hash = sha256(convert_to(coalesce(secret, ''), 'UTF8')))
   )
   limit 1

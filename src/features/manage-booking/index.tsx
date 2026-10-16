@@ -3,12 +3,17 @@ import { Link, Navigate } from "react-router";
 import { PageMessage } from "../../components/page-message/page-message";
 import { ManageBookingSkeleton } from "../../components/skeleton/manage-booking-skeleton";
 import { useIsSlow } from "../../hooks/use-is-slow";
-import { useGetManagedBookingQuery } from "../../stores/api-slice";
+import { usePrivateLink } from "../../hooks/use-private-link";
+import {
+  useGetManagedBookingQuery,
+  useGetOwnerManageTokenQuery,
+} from "../../stores/api-slice";
+import { useAppSelector } from "../../stores/hooks";
 import { getAssetUrl } from "../../utils/asset-url";
 import { getSearchParams } from "../../utils/page-flags";
-import "../../styles/features/manage-booking/manage-booking-page-global.module.css";
+import "../../styles/features/manage-booking/global.module.css";
 import { ManagedBooking } from "./managed-booking";
-import styles from "../../styles/features/manage-booking/manage-booking-page.module.css";
+import styles from "../../styles/features/manage-booking/index.module.css";
 
 export interface ManageBookingPageProps {
   view?: "booking" | "account";
@@ -27,14 +32,23 @@ const getMessage = (isError: boolean) =>
 
 /**
  * The booking-link page, route "/manage?token=": the booking, changing its time once, cancelling, and the
- * allergies shared with the stylist. ?view=account forwards to Account → Shared.
+ * allergies shared with the stylist. ?ref= opens a signed-in client's own booking; ?view=account forwards to Account → Shared.
  */
 export const ManageBookingPage = ({
   view = "booking",
 }: ManageBookingPageProps) => {
   const [params] = useState(getSearchParams);
-  const token = params.get("token") ?? "";
+  const ref = params.get("ref") ?? "";
   const isAccount = (params.get("view") || view) === "account";
+  const { ready, loggedIn } = useAppSelector(({ session }) => session);
+  const linkToken = usePrivateLink("tw_manage_token");
+  const isOwnerLink = !!ref && !params.get("token");
+
+  const owner = useGetOwnerManageTokenQuery(ref, {
+    skip: !isOwnerLink || !loggedIn,
+  });
+
+  const token = isOwnerLink ? (owner.currentData ?? "") : linkToken;
 
   const {
     currentData: booking,
@@ -43,7 +57,8 @@ export const ManageBookingPage = ({
     refetch,
   } = useGetManagedBookingQuery(token, { skip: !token || isAccount });
 
-  const isSlow = useIsSlow(isFetching && !booking);
+  const isLoading = isFetching || owner.isFetching || (isOwnerLink && !ready);
+  const isSlow = useIsSlow(isLoading && !booking);
 
   useLayoutEffect(() => {
     document.documentElement.classList.add("manage-page");
@@ -52,6 +67,12 @@ export const ManageBookingPage = ({
   }, []);
 
   if (isAccount) return <Navigate to="/account?section=shared" replace />;
+
+  if (isOwnerLink && ready && !loggedIn) {
+    const back = encodeURIComponent(`/manage?ref=${ref}`);
+
+    return <Navigate to={`/login?screen=cust-email&return=${back}`} replace />;
+  }
 
   const getContent = () => {
     if (booking)
@@ -65,7 +86,7 @@ export const ManageBookingPage = ({
 
     if (isSlow) return <ManageBookingSkeleton />;
 
-    if (isFetching) return null;
+    if (isLoading) return null;
 
     return (
       <PageMessage
@@ -92,7 +113,7 @@ export const ManageBookingPage = ({
           )}
         </div>
       </nav>
-      <main className={styles.main} aria-busy={isFetching}>
+      <main className={styles.main} aria-busy={isLoading}>
         {getContent()}
       </main>
     </div>

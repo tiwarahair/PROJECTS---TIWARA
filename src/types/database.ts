@@ -208,6 +208,7 @@ export type Database = {
           block_ends_at: string;
           block_range: unknown;
           buffer_minutes: number;
+          calendar_key: string;
           cancellation: Json | null;
           cancelled_at: string | null;
           cancelled_by: string | null;
@@ -248,6 +249,7 @@ export type Database = {
           block_ends_at: string;
           block_range?: never;
           buffer_minutes?: number;
+          calendar_key?: string;
           cancellation?: Json | null;
           cancelled_at?: string | null;
           cancelled_by?: string | null;
@@ -286,6 +288,7 @@ export type Database = {
           block_ends_at?: string;
           block_range?: never;
           buffer_minutes?: number;
+          calendar_key?: string;
           cancellation?: Json | null;
           cancelled_at?: string | null;
           cancelled_by?: string | null;
@@ -1373,6 +1376,10 @@ export type Database = {
         };
         Returns: Json;
       };
+      claim_booking_invite: {
+        Args: { token: string; user_id: string };
+        Returns: number;
+      };
       claim_notifications: {
         Args: { batch_size?: number };
         Returns: {
@@ -1430,6 +1437,7 @@ export type Database = {
           block_ends_at: string;
           block_range: unknown;
           buffer_minutes: number;
+          calendar_key: string;
           cancellation: Json | null;
           cancelled_at: string | null;
           cancelled_by: string | null;
@@ -1469,10 +1477,11 @@ export type Database = {
         };
       };
       get_booking_calendar: {
-        Args: { secret: string; target: string; token: string };
+        Args: { calendar_key: string; secret: string; target: string };
         Returns: Json;
       };
       get_booking_details: { Args: { target: string }; Returns: Json };
+      get_booking_invite: { Args: { token: string }; Returns: Json };
       get_booking_status: {
         Args: { secret: string; target: string };
         Returns: Json;
@@ -1503,6 +1512,24 @@ export type Database = {
         Returns: string[];
       };
       get_due_closures: { Args: Record<PropertyKey, never>; Returns: string[] };
+      get_invite_token: {
+        Args: { token: string };
+        Returns: {
+          booking_id: string;
+          created_at: string;
+          expires_at: string;
+          id: string;
+          purpose: string;
+          token_hash: string;
+          used_at: string | null;
+        };
+        SetofOptions: {
+          from: "*";
+          to: "booking_tokens";
+          isOneToOne: true;
+          isSetofReturn: false;
+        };
+      };
       get_managed_booking: { Args: { token: string }; Returns: Json };
       get_next_start: {
         Args: {
@@ -1514,6 +1541,7 @@ export type Database = {
         };
         Returns: string;
       };
+      get_owner_manage_token: { Args: { ref: string }; Returns: string };
       get_reschedule_slots: {
         Args: { from_date: string; to_date: string; token: string };
         Returns: string[];
@@ -1581,6 +1609,10 @@ export type Database = {
         Args: Record<PropertyKey, never>;
         Returns: undefined;
       };
+      purge_expired_booking_tokens: {
+        Args: Record<PropertyKey, never>;
+        Returns: number;
+      };
       purge_old_notifications: {
         Args: Record<PropertyKey, never>;
         Returns: number;
@@ -1613,6 +1645,7 @@ export type Database = {
         Returns: string;
       };
       refresh_go_live: { Args: { target: string }; Returns: undefined };
+      renew_booking_invite: { Args: { token: string }; Returns: undefined };
       reopen_business: { Args: Record<PropertyKey, never>; Returns: undefined };
       reschedule_managed_booking: {
         Args: { slot_start: string; token: string };

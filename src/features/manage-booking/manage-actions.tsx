@@ -1,5 +1,5 @@
 import type { ManagedBooking } from "../../lib/manage-booking-api";
-import { getRescheduleNote, getTermsLine } from "./manage-booking-logic";
+import { getRescheduleNote, getTermsLine } from "./logic";
 import styles from "../../styles/features/manage-booking/manage-actions.module.css";
 
 interface ManageActionsProps {

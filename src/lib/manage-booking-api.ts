@@ -40,6 +40,7 @@ export interface ManagedBooking {
   };
   allergies: string | null;
   reschedule_count: number;
+  calendar_key: string;
   cancelled_at: string | null;
   can_cancel: boolean;
   can_reschedule: boolean;
