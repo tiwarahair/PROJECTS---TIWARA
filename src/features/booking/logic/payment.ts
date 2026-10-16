@@ -12,13 +12,11 @@ export const PAY_ERRORS = {
     "Your payment went through and we're confirming your booking. We'll email you as soon as it's done.",
 };
 
-/** Paid after the hold ran out and someone else had taken the time: the payment was refunded. */
 export const getRefundedError = (time: string | null) => ({
   payKind: "taken",
   payError: `Sorry, ${time ?? "that time"} was booked by someone else while you paid. We've refunded you in full.`,
 });
 
-/** The checkout's refusal as the Pay step shows it: its kind and message. */
 export const getCheckoutError = (code: string, time: string | null) => {
   if (code === "hold_not_found")
     return {
@@ -74,7 +72,6 @@ export const getCheckoutRequest = (
 
 export const toPence = (pounds: number) => Math.round(pounds * 100);
 
-/** The Payment Element in the booking's fonts and colours (it can't read the page's CSS). */
 export const getPaymentAppearance = (): Appearance => ({
   theme: "stripe",
   variables: {

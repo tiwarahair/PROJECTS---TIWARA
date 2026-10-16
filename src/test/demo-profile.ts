@@ -19,7 +19,6 @@ const LONDON_HOUR = new Intl.DateTimeFormat("en-GB", {
   hourCycle: "h23",
 });
 
-/** A demo stylist (src/data/stylists.json) as get_stylist_profile returns it, with made-up row ids. */
 export const getDemoProfile = (slug: string): PublicProfile => {
   const stylist = stylists.find(({ id }) => id === slug);
 
@@ -165,7 +164,6 @@ export const getDemoProfile = (slug: string): PublicProfile => {
   };
 };
 
-/** Open times every 30 minutes, 9:00–17:00 London time, every day from `from` to `to` (future ones only). */
 export const getDemoSlots = ({ from, to }: { from: string; to: string }) => {
   const slots: string[] = [];
   const last = new Date(`${to}T12:00:00Z`);
@@ -175,7 +173,6 @@ export const getDemoSlots = ({ from, to }: { from: string; to: string }) => {
     day <= last;
     day.setUTCDate(day.getUTCDate() + 1)
   ) {
-    // London is UTC or UTC+1 depending on the day
     const offset = Number(LONDON_HOUR.format(day)) - 12;
 
     for (let minutes = 9 * 60; minutes <= 17 * 60; minutes += 30) {

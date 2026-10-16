@@ -1,5 +1,3 @@
-// Every minute (pg_cron): claims due rows from the notifications outbox, renders and sends each email or text, then
-// marks it sent or failed (the database retries failed rows with backoff; a FinalError fails it at once).
 import { admin } from "../_shared/admin.ts";
 import { resendKey, sendEmail } from "./email.ts";
 import { FinalError, renderSms, sendSms } from "./sms.ts";

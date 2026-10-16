@@ -1,4 +1,3 @@
-// Booking's ?fixture= board states (dev-only), on whichever stylist ?stylist= loads.
 import type { Stylist } from "../../../types/stylist";
 import {
   findService,
@@ -9,7 +8,6 @@ import { EMPTY_DETAILS } from "./constants";
 import { getFreshSelection } from "./state";
 import type { BookingState, Details } from "./types";
 
-/** The demo customer. */
 const DEMO_DETAILS: Details = {
   first: "Nia",
   last: "Okafor",
@@ -36,7 +34,6 @@ const pickLabel = (
         ?.label ?? null)
     : null;
 
-/** The named service, else the stylist's first active one. */
 const findServiceOrFirst = (stylist: Stylist, name: string) =>
   findService(stylist, name) ?? getActiveServices(stylist)[0];
 
@@ -114,7 +111,6 @@ export const applyFixture = (
       prior: true,
     });
 
-  // with ?stylist=naturallynia: a service with nothing to customise
   if (fixture === "natural") {
     const service = findServiceOrFirst(defaultStylist, "Wash & style");
 

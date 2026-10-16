@@ -1,4 +1,3 @@
-// Emails through Resend, or Mailpit on the local stack (no RESEND_API_KEY), so nothing local is ever delivered.
 import type { Attachment, RenderedEmail } from "../_shared/email-layout.ts";
 
 const FROM_EMAIL = "info@tiwarashouse.com";

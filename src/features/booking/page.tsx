@@ -36,7 +36,6 @@ interface BookingFlowProps {
   publicStylist: PublicStylist;
 }
 
-/** The 6-step booking flow and its confirmation, for a loaded stylist (route "/book", booking-route.tsx). */
 export const BookingFlow = ({ publicStylist }: BookingFlowProps) => {
   const booking = useBooking(publicStylist);
   const { state, stylist, holdOn, holdLeftMs, actions } = booking;

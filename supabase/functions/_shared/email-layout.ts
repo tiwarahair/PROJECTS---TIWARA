@@ -1,5 +1,4 @@
 // The notice layout shared by every email, matching supabase/templates/*.html: logo, title, paragraphs, an
-// optional button and link, and a small footnote. Text is plain (escaped here), so names clients type are safe.
 export interface Attachment {
   filename: string;
   content: string;

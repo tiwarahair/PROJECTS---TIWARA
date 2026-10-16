@@ -1,4 +1,3 @@
-// The booking emails: the client's confirmation (with the calendar file) and the stylist's "new booking".
 import { getCalendarFile } from "../_shared/calendar-file.ts";
 import { renderNotice } from "../_shared/email-layout.ts";
 import type { RenderedEmail } from "../_shared/email-layout.ts";
@@ -46,7 +45,6 @@ const londonClock = new Intl.DateTimeFormat("en-GB", {
   minute: "2-digit",
 });
 
-/** "Thursday 22 October at 17:30" (UK time) */
 export const formatWhen = (iso: string) => `${londonDay.format(new Date(iso))} at ${londonClock.format(new Date(iso))}`;
 
 const pounds = (pence: number) => `£${(pence / 100).toFixed(2)}`;

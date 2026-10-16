@@ -1,7 +1,3 @@
--- Messages when a booking is confirmed: the client's email (manage link, calendar file, and for guests a "save
--- your details" link), and the stylist's "new booking" email and text as their preferences say.
-
--- Single-use links: only the hash is kept; the link itself goes out in the message.
 create table public.booking_tokens (
   id uuid primary key default gen_random_uuid(),
   booking_id uuid not null references public.bookings (id) on delete cascade,
@@ -14,13 +10,10 @@ create table public.booking_tokens (
 
 create index booking_tokens_booking_id_idx on public.booking_tokens (booking_id);
 
--- No client policies: only security definer functions and the service role read tokens.
 alter table public.booking_tokens enable row level security;
 
--- the site the client booked on (local, staging or live), so the links in their messages go back to it
 alter table public.bookings add column site text not null default 'https://www.tiwarashouse.com';
 
-/** For other SQL functions and Edge Functions: queues a text for the next sender run. */
 create function public.queue_sms(to_address text, template text, payload jsonb, user_id uuid default null)
 returns uuid
 language sql
@@ -32,7 +25,6 @@ as $$
   returning id
 $$;
 
-/** Fails a message at once, without retries (e.g. texts while SMS isn't set up). */
 create function public.mark_notification_failed_now(notification_id uuid, error text)
 returns void
 language sql
@@ -43,7 +35,6 @@ as $$
   where id = notification_id and status = 'sending'
 $$;
 
-/** A new single-use link for the booking; returns the token, which isn't stored. */
 create function public.create_booking_token(target uuid, purpose text, expires_at timestamptz)
 returns text
 language plpgsql
@@ -51,7 +42,6 @@ security definer
 set search_path = ''
 as $$
 declare
-  -- 24 random bytes as URL-safe base64: 32 characters, so links stay short enough for a text
   token text := translate(encode(extensions.gen_random_bytes(24), 'base64'), '+/', '-_');
 begin
   insert into public.booking_tokens (booking_id, purpose, token_hash, expires_at)
@@ -59,6 +49,24 @@ begin
 
   return token;
 end;
+$$;
+
+create function public.get_booking_where(target uuid)
+returns text
+language sql
+stable
+security definer
+set search_path = ''
+as $$
+  select case
+    when stylists.business_type = 'mobile'
+      then concat_ws(', ', bookings.address ->> 'line1', nullif(bookings.address ->> 'line2', ''), bookings.address ->> 'postcode')
+    else concat_ws(', ', stylists.business_name, place.line1, nullif(place.line2, ''), place.city, place.postcode)
+  end
+  from public.bookings
+  join public.stylists on stylists.id = bookings.stylist_id
+  left join public.stylist_private as place on place.stylist_id = stylists.id
+  where bookings.id = target
 $$;
 
 /** Queues the confirmation messages for a booking that has just been paid. */
@@ -71,7 +79,6 @@ as $$
 declare
   booking public.bookings;
   stylist public.stylists;
-  place public.stylist_private;
   owner_email text;
   preference public.notification_preferences;
   details jsonb;
@@ -79,7 +86,6 @@ declare
 begin
   select * into booking from public.bookings where id = target;
   select * into stylist from public.stylists where id = booking.stylist_id;
-  select * into place from public.stylist_private where stylist_id = stylist.id;
   select email into owner_email from auth.users where id = stylist.owner_id;
   select * into preference from public.notification_preferences where stylist_id = stylist.id and event = 'new_booking';
 
@@ -93,14 +99,9 @@ begin
     'starts_at', booking.starts_at,
     'ends_at', booking.ends_at,
     'is_mobile', stylist.business_type = 'mobile',
-    'where', case
-      when stylist.business_type = 'mobile'
-        then concat_ws(', ', booking.address ->> 'line1', nullif(booking.address ->> 'line2', ''), booking.address ->> 'postcode')
-      else concat_ws(', ', stylist.business_name, place.line1, nullif(place.line2, ''), place.city, place.postcode)
-    end,
+    'where', public.get_booking_where(booking.id),
     'client_name', concat_ws(' ', booking.contact ->> 'first', booking.contact ->> 'last'),
     'client_phone', booking.contact ->> 'phone',
-    'notes', booking.notes,
     'address_notes', nullif(booking.address ->> 'notes', '')
   );
 
@@ -180,6 +181,7 @@ revoke execute on function
   public.queue_sms(text, text, jsonb, uuid),
   public.mark_notification_failed_now(uuid, text),
   public.create_booking_token(uuid, text, timestamptz),
+  public.get_booking_where(uuid),
   public.queue_booking_messages(uuid)
   from public, anon, authenticated;
 

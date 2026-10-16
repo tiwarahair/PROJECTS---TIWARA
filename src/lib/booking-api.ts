@@ -1,8 +1,6 @@
-// Booking's reads and writes: open times, holding a time, the mobile travel check, checkout and its status.
 import { FunctionsHttpError } from "@supabase/supabase-js";
 import { supabase } from "./supabase";
 
-/** The picks sent to the server: chosen option ids, add-on ids and (braids) the colour. */
 export interface BookingChoices {
   variations: string[];
   addons: string[];
@@ -12,10 +10,8 @@ export interface BookingChoices {
 export interface SlotRequest {
   serviceId: string;
   choices: BookingChoices;
-  /** London dates, "YYYY-MM-DD" */
   from: string;
   to: string;
-  /** The client's hold: its own times stay in the list. */
   ownHold?: string;
 }
 
@@ -48,7 +44,6 @@ export interface CheckoutRequest {
     lat: number;
     lng: number;
   };
-  /** A signed-in client asked to save the card for future bookings. */
   keepCard: boolean;
   turnstileToken: string;
 }
@@ -60,10 +55,8 @@ export interface BookingStatus {
   ends_at: string;
 }
 
-/** A refusal from a booking function ("slot_taken", "rate_limited", …); anything else is "unknown". */
 export class BookingError extends Error {}
 
-/** Calls a booking Edge Function, turning its refusals into a BookingError. */
 const invokeBookingFunction = async <T>(name: string, body: object) => {
   const { data, error } = await supabase.functions.invoke<T>(name, { body });
 

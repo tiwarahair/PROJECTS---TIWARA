@@ -46,7 +46,6 @@ as $$
   select public.hold_booking(service, '{}', (day + at_time::time) at time zone 'Europe/London', lat, lng, hold, secret)
 $$;
 
--- the next last-Sunday-of-<month> at least 2 days away
 create function pg_temp.next_change(month int)
 returns date
 language sql
@@ -81,7 +80,6 @@ select
   pg_temp.service_of((select mobile from ids), 0) as mobile,
   pg_temp.service_of((select draft from ids), 0) as draft;
 
--- open times
 select is(array_length(pg_temp.times((select shop from svc), (select day from ids)), 1), 17, '30-minute grid: 17 starts for an hour in 9–6');
 select is((pg_temp.times((select shop from svc), (select day from ids)))[1], '09:00', 'the first start is opening time');
 select is((pg_temp.times((select shop from svc), (select day from ids)))[17], '17:00', 'the last start still ends by closing');
@@ -115,7 +113,6 @@ update public.stylists set pause_on = true where id = (select second from ids);
 select is(pg_temp.times((select second from svc), (select day from ids)), null, 'paused online bookings have no starts');
 update public.stylists set pause_on = false where id = (select second from ids);
 
--- clock changes (London)
 update public.booking_rules set max_notice_months = 12 where stylist_id = (select mobile from ids);
 select is(array_length(pg_temp.times((select mobile from svc), pg_temp.next_change(10)), 1), 17, 'clocks going back: the same 17 starts');
 select is(
@@ -129,7 +126,6 @@ select is(
   8, 'after clocks go forward, 9:00 in London is 8:00 UTC'
 );
 
--- holding a start
 create temp table holds as select pg_temp.hold((select shop from svc), (select day from ids), '10:00') as first;
 
 select ok((select first ->> 'secret' from holds) is not null, 'a hold returns its secret');
@@ -179,7 +175,6 @@ select is(
   'search''s next start is the first bookable start'
 );
 
--- lapsed holds
 update public.bookings set hold_expires_at = now() - interval '1 minute' where id = (select (later ->> 'id')::uuid from holds);
 select ok('11:00' = any (pg_temp.times((select shop from svc), (select day from ids))), 'a lapsed hold no longer blocks');
 select lives_ok($$select pg_temp.hold((select shop from svc), (select day from ids), '11:00')$$, 'someone else can hold a lapsed start');
@@ -196,7 +191,6 @@ select throws_ok(
   '23P01', null, 'the database itself refuses overlapping bookings'
 );
 
--- mobile stylists and drafts
 select lives_ok($$select pg_temp.hold((select mobile from svc), (select day from ids) + 1, '16:00')$$, 'a mobile hold can come before the address');
 select ok(public.is_in_travel_area((select mobile from svc), 53.52, -2.24), 'an address inside the radius is in the travel area');
 select ok(not public.is_in_travel_area((select mobile from svc), 53.40, -2.24), 'one outside it isn''t');
@@ -204,7 +198,6 @@ select throws_ok($$select pg_temp.hold((select mobile from svc), (select day fro
 select lives_ok($$select pg_temp.hold((select mobile from svc), (select day from ids), '16:00', null, null, 53.52, -2.24)$$, 'inside the radius is held');
 select throws_ok($$select pg_temp.hold((select draft from svc), (select day from ids), '10:00')$$, 'not_bookable', 'draft businesses can''t be booked');
 
--- price from the picks
 update public.services set sizes_on = true, lengths_on = true where id = (select priced from svc);
 insert into public.service_variations (service_id, kind, group_name, label, offered, price_delta_pence, minutes_delta, sort) values
   ((select priced from svc), 'size', null, 'Small', true, 4500, 60, 0),
@@ -247,7 +240,6 @@ select throws_ok($$select public.price_booking((select priced from svc), pg_temp
 select throws_ok($$select public.price_booking((select priced from svc), pg_temp.picks(array['Small', 'Medium', 'Waist', 'Zig-zag']))$$, 'invalid_choices', 'only one size');
 select throws_ok($$select public.price_booking((select priced from svc), pg_temp.picks(array['Small', 'Waist', 'Zig-zag'], array['Unlinked']))$$, 'invalid_choices', 'add-ons must belong to the service');
 
--- who can do what
 insert into auth.users (id, instance_id, aud, role, email, raw_user_meta_data, raw_app_meta_data)
 values ('e5555555-5555-5555-5555-555555555555', '00000000-0000-0000-0000-000000000000', 'authenticated', 'authenticated',
   'client@book.test', jsonb_build_object('account_type', 'client', 'first_name', 'Cli', 'last_name', 'Ent', 'phone', '07700900123', 'terms_version', '2026-10'), '{}');
@@ -279,7 +271,6 @@ select throws_ok(
   '42501', null, 'nobody writes bookings directly'
 );
 
--- a clashing random reference is drawn again
 reset role;
 create sequence public.test_ref_draws;
 alter table public.bookings alter column ref

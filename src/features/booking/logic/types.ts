@@ -1,4 +1,3 @@
-// The booking flow's state and its parts.
 import type { SavedAddress } from "../../../types/address";
 
 export interface Selection {
@@ -24,19 +23,16 @@ export interface BookingAddress {
   town: string;
   notes: string;
   source: string;
-  /** Google's point for the address (picked from suggestions); null until known. */
   lat: number | null;
   lng: number | null;
 }
 
-/** The server's hold on the chosen time (dev boards fake one with empty id and secret). */
 interface Hold {
   id: string;
   secret: string;
   until: number;
 }
 
-/** The confirmed booking, as the server has it. */
 interface BookedTimes {
   ref: string;
   startsAt: string;
@@ -94,7 +90,6 @@ export interface BookingState {
   time: string | null;
   details: Details;
   photos: Photo[];
-  /** A signed-in client asked to save the card for future bookings. */
   keepCard: boolean;
   loggedIn: boolean;
   guest: boolean;
@@ -104,7 +99,6 @@ export interface BookingState {
   holdSeconds: number;
   hold: Hold | null;
   holding: boolean;
-  /** Why the chosen time couldn't be held: taken by someone else, or anything else. */
   holdError: "taken" | "failed" | null;
   holdExpired: boolean;
   appointmentAddress: BookingAddress;
@@ -115,7 +109,6 @@ export interface BookingState {
   resumeDraft: BookingDraft | null;
   repickNote: boolean;
   paying: boolean;
-  /** Paid; waiting for the server to confirm the booking. */
   confirming: boolean;
   booked: BookedTimes | null;
   payError: string;

@@ -1,6 +1,5 @@
 import { vi } from "vitest";
 
-/** vi.mock factories for the profile and booking calls (vi.mock can't take imported values, so they import these). */
 export const mockPublicProfiles = async (
   original: () => Promise<typeof import("../lib/public-profiles")>,
 ) => {

@@ -1,6 +1,5 @@
 import type { BookingAddress, Details } from "./types";
 
-/** Drafts are kept for a day. */
 export const DRAFT_TTL_MS = 864e5;
 export const DEFAULT_HOLD_SECONDS = 600;
 

@@ -1,4 +1,3 @@
-// Step 3 (Pick a time): month grid and date labels.
 import type { WorkingHours } from "../../../lib/public-profiles";
 import { formatWeekdayDate, LONG_WEEKDAYS } from "../../../utils/dates";
 
@@ -10,7 +9,6 @@ export interface CalendarDay {
   selected: boolean;
 }
 
-/** Monday-first grid: blank cells, then each day; days without an open time are off. */
 export const getCalendarDays = (
   year: number,
   month: number,
@@ -44,7 +42,6 @@ export const getCalendarDays = (
 
 const CLOSED_DAYS_LIST = new Intl.ListFormat("en-GB", { type: "conjunction" });
 
-/** " Closed Mondays and Sundays." for the stylist's closed weekdays, Monday first. */
 export const getClosedLine = (hours: WorkingHours[]): string => {
   // weekday 0 is Monday; LONG_WEEKDAYS starts on Sunday
   const closed = hours

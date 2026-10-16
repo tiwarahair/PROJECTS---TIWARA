@@ -4,7 +4,6 @@ import type { Service } from "../../../../types/service";
 import { getServiceOptions } from "../../../../utils/services";
 import { getBookingMoney } from "../pricing";
 
-// the same service and picks as price_booking's test in supabase/tests/bookings.test.sql
 const SERVICE: Service = {
   id: "priced",
   name: "Knotless braids",

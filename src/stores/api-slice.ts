@@ -28,7 +28,6 @@ import { listTwoFactorDevices } from "../lib/two-factor";
 import type { TwoFactorDevice } from "../lib/two-factor";
 import type { Profile } from "../types/profile";
 
-/** Errors are kept as plain data: the store must stay serializable. */
 export interface ApiError {
   message: string;
 }
@@ -44,7 +43,6 @@ const toQueryResult = <T>(task: Promise<T>) =>
     }),
   );
 
-/** An unwrapped request's error message ("slot_taken", …), or "" when there's none. */
 export const getErrorMessage = (error: unknown) =>
   typeof error === "object" && error !== null && "message" in error
     ? String(error.message)
@@ -160,7 +158,6 @@ export const api = createApi({
       providesTags: ["Slots"],
       queryFn: (request) => toQueryResult(getAvailableSlots(request)),
     }),
-    // held or refused (taken), the open times have changed either way
     holdBooking: build.mutation<HeldBooking, HoldRequest>({
       invalidatesTags: () => ["Slots"],
       queryFn: (request) => toQueryResult(holdBooking(request)),

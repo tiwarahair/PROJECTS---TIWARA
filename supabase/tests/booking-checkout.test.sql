@@ -65,13 +65,11 @@ select
   pg_temp.hold((select shop from ids), '13:00') as fee_only,
   pg_temp.hold((select mobile from ids), '09:00') as mobile;
 
--- the hold's secret is the only way in
 select throws_ok(
   format('select public.checkout_booking(%L, %L, ''{}'', null, null, null, null, null)', (select deposit ->> 'id' from holds), 'wrong'),
   'hold_not_found', 'a wrong secret is refused'
 );
 
--- amounts follow the current policy (price 5000, fee round(50 + 1.5%) = 125)
 select pg_temp.set_policy((select shop from ids), 'deposit', 30);
 
 create temp table deposit as select pg_temp.checkout((select deposit from holds)) as result;
@@ -105,7 +103,6 @@ select is((pg_temp.checkout((select fee_only from holds)) ->> 'due_today_pence')
 select pg_temp.set_policy((select shop from ids), 'none');
 select is((pg_temp.checkout((select fee_only from holds)) ->> 'due_today_pence')::int, 125, 'pay at the appointment: the fee only');
 
--- mobile stylists need the client's address inside their travel area
 select throws_ok(
   format('select pg_temp.checkout(%L::jsonb)', (select mobile from holds)),
   'address_required', 'mobile: an address is needed'
@@ -126,7 +123,6 @@ select is(
   '2 Low St', 'mobile: the address is kept'
 );
 
--- a lapsed hold can't check out
 update public.bookings set hold_expires_at = now() - interval '1 second'
 where id = (select (full_price ->> 'id')::uuid from holds);
 
@@ -135,7 +131,6 @@ select throws_ok(
   'hold_not_found', 'a lapsed hold is refused'
 );
 
--- only the payment confirms
 update public.bookings set stripe_payment_intent_id = 'pi_deposit' where id = (select (deposit ->> 'id')::uuid from holds);
 
 select is(public.confirm_booking_payment('pi_deposit'), 'confirmed', 'a successful payment confirms the booking');
@@ -148,7 +143,6 @@ select is(
 select is(public.confirm_booking_payment('pi_deposit'), 'duplicate', 'a repeated event changes nothing');
 select throws_ok('select public.confirm_booking_payment(''pi_unknown'')', 'booking_not_found', 'an unknown payment is refused');
 
--- paid after the hold lapsed: confirmed if the time is still free, refunded if someone took it
 update public.bookings set status = 'expired', stripe_payment_intent_id = 'pi_late'
 where id = (select (full_price ->> 'id')::uuid from holds);
 
@@ -162,7 +156,6 @@ select pg_temp.hold((select shop from ids), '13:00');
 select is(public.confirm_booking_payment('pi_taken'), 'slot_taken', 'paid late with the time taken: refund');
 select is((select status from public.bookings where stripe_payment_intent_id = 'pi_taken'), 'expired', 'and the booking stays expired');
 
--- the paying browser can read its booking's status, nothing else
 select is(
   public.get_booking_status((select (deposit ->> 'id')::uuid from holds), (select deposit ->> 'secret' from holds)) ->> 'status',
   'confirmed', 'the status is readable with the secret'

@@ -12,7 +12,6 @@ import type { FlowState } from "./use-flow-state";
 interface HoldOptions {
   flow: FlowState;
   choices: BookingChoices;
-  /** The service is picked and its options are complete, so the server knows the length. */
   canListTimes: boolean;
 }
 
@@ -24,7 +23,6 @@ const BACK_TO_TIME: Partial<BookingState> = {
   payKind: "",
 };
 
-/** The month's open times and holding the chosen one on the server. */
 export const useHold = ({ flow, choices, canListTimes }: HoldOptions) => {
   const { state, setState, scrollToTitle } = flow;
 
@@ -45,7 +43,6 @@ export const useHold = ({ flow, choices, canListTimes }: HoldOptions) => {
 
   const [holdTime] = useHoldBookingMutation();
 
-  /** Holds the chosen time on the server (dev boards fake it); null when it couldn't be held. */
   const holdChosenTime = async (): Promise<Partial<BookingState> | null> => {
     if (state.board)
       return {
@@ -60,7 +57,6 @@ export const useHold = ({ flow, choices, canListTimes }: HoldOptions) => {
       .get(state.date ?? 0)
       ?.find(({ time }) => time === state.time)?.startsAt;
 
-    // a time missing from the loaded list (a resumed booking's, say) has gone since
     if (!startsAt) {
       setState({ holdError: "taken", time: null });
 
@@ -74,7 +70,6 @@ export const useHold = ({ flow, choices, canListTimes }: HoldOptions) => {
         serviceId: state.serviceId,
         choices,
         startsAt,
-        // picking again moves the same hold
         ...(state.hold?.id
           ? { hold: { id: state.hold.id, secret: state.hold.secret } }
           : {}),

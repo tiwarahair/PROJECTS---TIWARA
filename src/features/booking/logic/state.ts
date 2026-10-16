@@ -1,4 +1,3 @@
-// Booking's starting state: URL params, fixtures, saved addresses and the draft to resume.
 import type { Service } from "../../../types/service";
 import type { Stylist } from "../../../types/stylist";
 import { getSearchParams } from "../../../utils/page-flags";
@@ -39,7 +38,6 @@ export const getStartStep = (service: Service | null): number => {
   return hasStep2(service) ? 2 : 3;
 };
 
-/** Signed-in clients' saved addresses, the default one filled in. */
 export const getSavedAddressPatch = (
   current: BookingAddress,
 ): Pick<BookingState, "saved" | "selectedAddressId" | "appointmentAddress"> => {
@@ -85,7 +83,6 @@ export const getInitialBooking = (stylist: Stylist): InitialBooking => {
     details: { ...EMPTY_DETAILS },
     photos: [],
     keepCard: false,
-    // the signed-in person fills in once their profile loads (use-booking)
     loggedIn: false,
     guest: false,
     editContact: false,
@@ -124,7 +121,6 @@ export const getInitialBooking = (stylist: Stylist): InitialBooking => {
     sizeGuide: false,
   };
 
-  // dev board of the saved-address cards (signed-in clients get theirs in use-booking)
   if (fixture === "saved-addr")
     Object.assign(state, getSavedAddressPatch(state.appointmentAddress));
 

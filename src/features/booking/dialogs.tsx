@@ -22,7 +22,6 @@ interface ConfirmDialogProps {
   children: ReactNode;
 }
 
-/** The small modal (bottom sheet under 640px) used by Leave and Hold expired. */
 const ConfirmDialog = ({
   screenLabel,
   role = "dialog",
@@ -78,7 +77,6 @@ const ConfirmDialog = ({
   );
 };
 
-/** Privacy / Terms sheet and the Leave and Hold expired dialogs. */
 export const BookingDialogs = ({ booking }: BookingDialogsProps) => {
   const { state, stylist, actions } = booking;
   const { setState } = actions;

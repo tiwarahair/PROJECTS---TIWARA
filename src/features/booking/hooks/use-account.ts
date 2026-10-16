@@ -23,7 +23,6 @@ interface AccountOptions {
   stylistId: string;
 }
 
-/** Signing in, logging out, guests and the signed-in contact card. */
 export const useAccount = ({
   flow,
   detailsForm,
@@ -61,7 +60,6 @@ export const useAccount = ({
         editContact: false,
         loginStart: null,
         step: isLeavingTime ? 4 : step,
-        // their saved addresses, unless they've already entered one
         ...(current.board || current.appointmentAddress.line1
           ? {}
           : getSavedAddressPatch(current.appointmentAddress)),

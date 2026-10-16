@@ -59,7 +59,6 @@ $$;
 
 create temp table guest as select pg_temp.book('10:00', 'pi_guest') as id;
 
--- the client's email
 select is((pg_temp.message((select id from guest), 'email', 'booking_confirmed')).to_address, 'nia@msg.test',
   'the client is emailed their confirmation');
 
@@ -97,23 +96,19 @@ select is((pg_temp.message((select id from guest), 'email', 'booking_confirmed')
 select is((select count(*)::int from public.booking_tokens where booking_id = (select id from guest) and token_hash is not null), 2,
   'only hashes are kept: one manage and one invite token');
 
--- clients get the email only
 select ok((pg_temp.message((select id from guest), 'sms', 'booking_confirmed')) is null, 'clients aren''t texted');
 
--- the stylist
 select is((pg_temp.message((select id from guest), 'email', 'new_booking')).to_address, 'owner@msg.test',
   'the stylist is emailed about the new booking by default');
 
 select ok((pg_temp.message((select id from guest), 'sms', 'new_booking')) is null,
   'the stylist isn''t texted unless they turned texts on');
 
--- a repeated payment event sends nothing more
 select is(public.confirm_booking_payment('pi_guest'), 'duplicate', 'a repeated confirmation is a duplicate');
 
 select is((select count(*)::int from public.notifications where payload ->> 'ref' = (select ref from public.bookings where id = (select id from guest))), 2,
   'and queues no more messages');
 
--- a signed-in client, and a stylist who wants texts instead of emails
 insert into public.notification_preferences (stylist_id, event, email, sms)
 select id, 'new_booking', false, true from public.stylists where slug = 'message-test';
 
@@ -132,7 +127,6 @@ select ok((pg_temp.message((select id from member), 'email', 'new_booking')) is 
 select is((pg_temp.message((select id from member), 'sms', 'new_booking')).to_address, '07700900999',
   'a stylist who turned texts on is texted at their business number');
 
--- texts while SMS isn't set up fail at once, without retries
 update public.notifications set status = 'sending'
 where id = (pg_temp.message((select id from member), 'sms', 'new_booking')).id;
 
@@ -143,7 +137,6 @@ select is(
   'failed: SMS off', 'a text that can''t be sent is failed straight away'
 );
 
--- a message that can't be queued never undoes a paid booking
 create temp table broken as select pg_temp.book('15:00', 'pi_broken_hold') as id;
 
 update public.bookings set status = 'held', paid_at = null, stripe_payment_intent_id = 'pi_broken', contact = contact - 'email'
