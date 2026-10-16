@@ -9,3 +9,17 @@ export const detailsSchema = z.object({
   phone: z.string().refine(isValidMobile, "Enter a UK mobile number"),
   notes: z.string(),
 }) satisfies z.ZodType<Details>;
+
+export interface LoginValues {
+  email: string;
+  password: string;
+}
+
+export const loginEmailSchema = z.object({
+  email: z.string().refine(isValidEmail, "Enter an email address"),
+  password: z.string(),
+}) satisfies z.ZodType<LoginValues>;
+
+export const loginPasswordSchema = loginEmailSchema.extend({
+  password: z.string().min(1, "Enter your password"),
+});

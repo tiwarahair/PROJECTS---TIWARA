@@ -108,6 +108,19 @@ describe("OnboardingPage", () => {
     expect(sessionStorage.getItem("tw_toast")).toBe("Welcome back");
   });
 
+  it("Back on the screen they arrived on returns to the page that sent them", async () => {
+    renderWithStore(
+      <OnboardingPage />,
+      "/signup?screen=cust-create&return=%2Fbook%3Fstylist%3Dtiwaras-house%26resume%3D1",
+    );
+
+    await user.click(screen.getAllByRole("button", { name: "Back" })[0]!);
+
+    expect(screen.getByTestId("location")).toHaveTextContent(
+      "/book?stylist=tiwaras-house&resume=1",
+    );
+  });
+
   it("Log in can be tapped before the bot check passes, then logs in once it does", async () => {
     vi.mocked(auth.signIn).mockResolvedValue(null);
     turnstileStub.isHeld = true;
