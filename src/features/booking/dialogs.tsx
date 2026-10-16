@@ -22,7 +22,7 @@ interface ConfirmDialogProps {
   children: ReactNode;
 }
 
-/** The small modal (bottom sheet under 640px) used by Leave, Hold expired, Bank check and the wallet sheet. */
+/** The small modal (bottom sheet under 640px) used by Leave and Hold expired. */
 const ConfirmDialog = ({
   screenLabel,
   role = "dialog",
@@ -78,9 +78,9 @@ const ConfirmDialog = ({
   );
 };
 
-/** Privacy / Terms sheet and the Leave, Hold expired, Bank check and wallet dialogs. */
+/** Privacy / Terms sheet and the Leave and Hold expired dialogs. */
 export const BookingDialogs = ({ booking }: BookingDialogsProps) => {
-  const { state, stylist, money, actions } = booking;
+  const { state, stylist, actions } = booking;
   const { setState } = actions;
 
   const { legalDocument, time, date, calendarYear, calendarMonth, confirmed } =
@@ -168,40 +168,6 @@ export const BookingDialogs = ({ booking }: BookingDialogsProps) => {
         >
           <button onClick={actions.pickAgain} className={styles.primary}>
             Pick a time again
-          </button>
-        </ConfirmDialog>
-      )}
-      {state.bank && (
-        <ConfirmDialog
-          screenLabel="Bank check"
-          titleId="bankOpen-t"
-          title="Confirm with your bank"
-          text={`Your bank wants to check this payment of ${money.dueToday}. In the real flow this is your bank's own screen; here you choose the outcome.`}
-          onClose={actions.bankFail}
-        >
-          <button onClick={actions.bankFail} className={styles.secondary}>
-            Fail
-          </button>
-          <button onClick={actions.bankApprove} className={styles.primary}>
-            Approve
-          </button>
-        </ConfirmDialog>
-      )}
-      {!!state.wallet && (
-        <ConfirmDialog
-          screenLabel="Wallet sheet"
-          titleId="walletOpen-t"
-          title={state.wallet}
-          text={`Pay ${money.dueToday} to Tiwára's House for your booking with ${stylist.name}. Demo sheet.`}
-        >
-          <button
-            onClick={() => setState({ wallet: null })}
-            className={styles.secondary}
-          >
-            Cancel
-          </button>
-          <button onClick={actions.walletPay} className={styles.walletPay}>
-            {`Pay ${money.dueToday}`}
           </button>
         </ConfirmDialog>
       )}

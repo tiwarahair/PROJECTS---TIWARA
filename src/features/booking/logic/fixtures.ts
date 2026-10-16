@@ -52,6 +52,16 @@ export const applyFixture = (
     state.calendarYear = fixtureDate.getFullYear();
     state.date = fixtureDate.getDate();
     state.time = "10:30";
+
+    const startsAt = new Date(fixtureDate);
+
+    startsAt.setHours(10, 30, 0, 0);
+
+    state.booked = {
+      ref: "TH-48213",
+      startsAt: startsAt.toISOString(),
+      endsAt: new Date(startsAt.getTime() + 2 * 36e5).toISOString(),
+    };
   };
 
   if (!state.serviceId) {
@@ -129,13 +139,10 @@ export const applyFixture = (
 
   if (fixture === "email-typo") state.details.email = "nia.okafor@gmial.com";
 
-  if (["pay", "turnstile", "confirm"].includes(fixture)) {
+  if (["pay", "confirm"].includes(fixture)) {
     state.step = 6;
     setFixtureDate();
   }
-
-  if (fixture === "turnstile" && !state.turnstileMode)
-    state.turnstileMode = "challenge";
 
   if (fixture === "confirm") state.confirmed = true;
 
@@ -176,30 +183,13 @@ export const applyFixture = (
 
   if (fixture === "details-errors") state.details = { ...EMPTY_DETAILS };
 
-  if (
-    [
-      "pay-declined",
-      "pay-bank",
-      "pay-bankfail",
-      "pay-network",
-      "pay-taken",
-    ].includes(fixture)
-  )
+  if (["pay-declined", "pay-network", "pay-taken"].includes(fixture))
     state.step = 6;
 
   if (fixture === "pay-declined")
     Object.assign(state, {
       payError: "Your card was declined. Try another card or payment method.",
       payKind: "declined",
-    });
-
-  if (fixture === "pay-bank") state.bank = true;
-
-  if (fixture === "pay-bankfail")
-    Object.assign(state, {
-      payError:
-        "We couldn't confirm this payment with your bank. Try again or use another card.",
-      payKind: "bank",
     });
 
   if (fixture === "pay-network")

@@ -33,5 +33,14 @@ export const mockBookingApi = async (
         hold_expires_at: new Date(Date.now() + 600_000).toISOString(),
       }),
     ),
+    startCheckout: vi.fn(() => Promise.resolve({ clientSecret: "pi_secret" })),
+    getBookingStatus: vi.fn(() =>
+      Promise.resolve({
+        status: "confirmed",
+        ref: "TH-TEST01",
+        starts_at: "2026-10-20T09:30:00Z",
+        ends_at: "2026-10-20T11:30:00Z",
+      }),
+    ),
   };
 };

@@ -1,15 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { getClosedLine, getWhenLine } from "../calendar";
 import { getPreviewIndex, hasPreview, PREVIEW_POOL } from "../content";
-import {
-  formatCardNumber,
-  formatExpiry,
-  getAddressCheck,
-  getContactChanges,
-  getCardBrand,
-  getCardError,
-  getEmailFix,
-} from "../details";
+import { getAddressCheck, getContactChanges, getEmailFix } from "../details";
 import { getDeltaLabel } from "../pricing";
 
 describe("details", () => {
@@ -73,36 +65,6 @@ describe("details", () => {
       isValid: true,
       clientAddress: "12 Chorley New Road, Bolton BL1 4QR",
     });
-  });
-});
-
-describe("card fields", () => {
-  it("formats card numbers, Amex 4-6-5", () => {
-    expect(formatCardNumber("4242424242424242999")).toBe("4242 4242 4242 4242");
-    expect(formatCardNumber("378282246310005")).toBe("3782 822463 10005");
-    expect(getCardBrand("5555")).toBe("Mastercard");
-  });
-
-  it("formats expiry and reports the first problem", () => {
-    expect(formatExpiry("929")).toBe("09 / 29");
-
-    const card = {
-      number: "4242 4242 4242 4242",
-      expiry: "12 / 29",
-      cvc: "123",
-      name: "Nia",
-      postcode: "M14 5TQ",
-    };
-
-    expect(getCardError(card)).toBe("");
-
-    expect(getCardError({ ...card, expiry: "13 / 29" })).toBe(
-      "Check the expiry date.",
-    );
-
-    expect(getCardError({ ...card, postcode: "M1" })).toBe(
-      "Add your billing postcode.",
-    );
   });
 });
 

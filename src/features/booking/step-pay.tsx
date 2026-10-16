@@ -1,69 +1,82 @@
+import {
+  Elements,
+  ExpressCheckoutElement,
+  PaymentElement,
+  useElements,
+  useStripe,
+} from "@stripe/react-stripe-js";
+import type { StripeExpressCheckoutElementConfirmEvent } from "@stripe/stripe-js";
 import { ArrowLeft, ArrowRight, Check, CircleAlert, Lock } from "lucide-react";
-import type { ChangeEvent } from "react";
+import { useState } from "react";
+import { stripePromise } from "../../lib/stripe";
 import { joinClassNames } from "../../utils/class-names";
-import { AppleLogo, GoogleLogo } from "../../components/icons/brand-icons";
+import { OnboardingTurnstile } from "../onboarding/onboarding-turnstile";
 import { getPayIntro, getPaySubtitle } from "./logic/content";
 import {
-  formatCardNumber,
-  formatExpiry,
-  getCardBrand,
-  getCardError,
-  getCvcLabel,
-} from "./logic/details";
-import type { PayFields } from "./logic/types";
-import fields from "../../styles/features/booking/fields.module.css";
-import step from "../../styles/features/booking/step.module.css";
+  getPaymentAppearance,
+  getPaymentFonts,
+  toPence,
+} from "./logic/payment";
 import styles from "../../styles/features/booking/step-pay.module.css";
-import { TurnstileFallback } from "./turnstile-fallback";
+import step from "../../styles/features/booking/step.module.css";
 import type { BookingController } from "./hooks/use-booking";
 
-const getPayButtonClass = (paying: boolean, turnstileBlocking: boolean) => {
+const getPayButtonClass = (paying: boolean, isBlocked: boolean) => {
   if (paying) return styles.payButtonPaying;
 
-  return turnstileBlocking ? styles.payButtonBlocked : styles.payButtonReady;
+  return isBlocked ? styles.payButtonBlocked : styles.payButtonReady;
 };
 
 interface StepPayProps {
   booking: BookingController;
 }
 
-/** Step 6 (Pay): Apple / Google Pay, card fields, saved-card note, errors, the Turnstile fallback and Pay & confirm. */
+/** Step 6 (Pay): Apple / Google Pay, the card form, saved-card note, errors and Pay & confirm, all through Stripe. */
 export const StepPay = ({ booking }: StepPayProps) => {
-  const {
-    state,
-    stylist,
-    money,
-    showTurnstile,
-    turnstileBlocking,
-    payDisabled,
-    actions,
-  } = booking;
+  const { state, money } = booking;
 
+  const savesCard =
+    money.policy.cardSaved || (state.loggedIn && state.keepCard);
+
+  return (
+    <Elements
+      stripe={stripePromise}
+      options={{
+        mode: "payment",
+        amount: toPence(money.policy.dueToday),
+        currency: "gbp",
+        allowedPaymentMethodTypes: ["card"],
+        setupFutureUsage: savesCard ? "off_session" : null,
+        appearance: getPaymentAppearance(),
+        fonts: getPaymentFonts(),
+      }}
+    >
+      <PayForm booking={booking} />
+    </Elements>
+  );
+};
+
+const PayForm = ({ booking }: StepPayProps) => {
+  const { state, stylist, money, pay, actions } = booking;
   const { setState } = actions;
-  const { pay, paying, payError } = state;
+  const { paying, payError, confirming } = state;
   const { policy } = money;
-
-  // every card edit clears the last payment error
-  const setPay =
-    (key: keyof PayFields, clean: (value: string) => string) =>
-    (event: ChangeEvent<HTMLInputElement>) =>
-      setState({
-        pay: { ...pay, [key]: clean(event.target.value) },
-        payError: "",
-      });
+  const stripe = useStripe();
+  const elements = useElements();
+  const [hasWallets, setHasWallets] = useState(false);
+  const isBlocked = !pay.hasTurnstileToken || !stripe;
+  const payDisabled = pay.payDisabled || !stripe;
 
   const payNow = () => {
-    if (payDisabled) return;
+    if (stripe && elements && !payDisabled) void pay.pay(stripe, elements);
+  };
 
-    const error = getCardError(pay);
+  const payWithWallet = async ({
+    paymentFailed,
+  }: StripeExpressCheckoutElementConfirmEvent) => {
+    const isPaid = !!stripe && !!elements && (await pay.pay(stripe, elements));
 
-    if (error) {
-      setState({ payError: error });
-
-      return;
-    }
-
-    actions.attemptPay(pay.number.replace(/\D/g, ""));
+    if (!isPaid) paymentFailed({ reason: "fail" });
   };
 
   return (
@@ -73,93 +86,39 @@ export const StepPay = ({ booking }: StepPayProps) => {
         {getPayIntro(policy.mode, stylist.policies.depositPercent)}
       </p>
       <div className={styles.form}>
-        <div className={styles.quickCheckout}>Quick checkout</div>
-        <button
-          onClick={() => actions.openWallet("Apple Pay")}
-          disabled={payDisabled}
-          aria-label="Pay with Apple Pay"
-          className={styles.applePay}
+        <div
+          className={joinClassNames(
+            styles.wallets,
+            !hasWallets && styles.walletsHidden,
+          )}
         >
-          <AppleLogo size={19} />
-          Pay
-        </button>
-        <button
-          onClick={() => actions.openWallet("Google Pay")}
-          disabled={payDisabled}
-          aria-label="Pay with Google Pay"
-          className={styles.googlePay}
-        >
-          <GoogleLogo size={18} />
-          Pay
-        </button>
-        <div className={styles.divider}>
-          <span className={styles.dividerLine}></span>
-          or pay by card
-          <span className={styles.dividerLine}></span>
-        </div>
-        <label className={fields.field}>
-          <span className={fields.label}>Card number</span>
-          <span className={styles.cardWrap}>
-            <input
-              type="text"
-              inputMode="numeric"
-              autoComplete="cc-number"
-              placeholder="1234 5678 9012 3456"
-              value={pay.number}
-              onChange={setPay("number", formatCardNumber)}
-              className={styles.cardInput}
-            />
-            <span className={styles.cardBrand}>{getCardBrand(pay.number)}</span>
-          </span>
-        </label>
-        <div className={styles.pair}>
-          <label className={styles.pairField}>
-            <span className={fields.label}>Expiry</span>
-            <input
-              type="text"
-              inputMode="numeric"
-              autoComplete="cc-exp"
-              placeholder="MM / YY"
-              value={pay.expiry}
-              onChange={setPay("expiry", formatExpiry)}
-              className={styles.input}
-            />
-          </label>
-          <label className={styles.pairField}>
-            <span className={fields.label}>Security code</span>
-            <input
-              type="text"
-              inputMode="numeric"
-              autoComplete="cc-csc"
-              placeholder={getCvcLabel(pay.number)}
-              value={pay.cvc}
-              onChange={setPay("cvc", (value) =>
-                value.replace(/\D/g, "").slice(0, 4),
-              )}
-              className={styles.input}
-            />
-          </label>
-        </div>
-        <label className={fields.field}>
-          <span className={fields.label}>Name on card</span>
-          <input
-            type="text"
-            autoComplete="cc-name"
-            value={pay.name}
-            onChange={setPay("name", (value) => value)}
-            className={styles.input}
+          <div className={styles.quickCheckout}>Quick checkout</div>
+          <ExpressCheckoutElement
+            options={{ buttonHeight: 48 }}
+            onReady={({ availablePaymentMethods }) =>
+              setHasWallets(!!availablePaymentMethods)
+            }
+            onClick={({ resolve }) => {
+              if (!payDisabled) resolve();
+            }}
+            onConfirm={payWithWallet}
           />
-        </label>
-        <label className={fields.field}>
-          <span className={fields.label}>Billing postcode</span>
-          <input
-            type="text"
-            autoComplete="postal-code"
-            value={pay.postcode}
-            onChange={setPay("postcode", (value) => value.toUpperCase())}
-            className={styles.input}
-          />
-        </label>
+          <div className={styles.divider}>
+            <span className={styles.dividerLine}></span>
+            or pay by card
+            <span className={styles.dividerLine}></span>
+          </div>
+        </div>
+        <PaymentElement
+          options={{
+            layout: "tabs",
+            wallets: { applePay: "never", googlePay: "never" },
+          }}
+          onChange={() => {
+            if (payError && state.payKind !== "taken")
+              setState({ payError: "", payKind: "" });
+          }}
+        />
         {policy.cardSaved && (
           <div data-screen-label="Card saved line" className={styles.savedLine}>
             <Lock size={15} strokeWidth={1.5} className={styles.savedIcon} />
@@ -168,20 +127,20 @@ export const StepPay = ({ booking }: StepPayProps) => {
             </span>
           </div>
         )}
-        {state.loggedIn && (
+        {state.loggedIn && !policy.cardSaved && (
           <button
             role="checkbox"
-            aria-checked={pay.future ? "true" : "false"}
-            onClick={() => setState({ pay: { ...pay, future: !pay.future } })}
+            aria-checked={state.keepCard ? "true" : "false"}
+            onClick={() => setState({ keepCard: !state.keepCard })}
             className={styles.future}
           >
             <span
               className={joinClassNames(
                 styles.futureBox,
-                pay.future ? styles.futureBoxOn : styles.futureBoxOff,
+                state.keepCard ? styles.futureBoxOn : styles.futureBoxOff,
               )}
             >
-              {pay.future && (
+              {state.keepCard && (
                 <Check size={11} strokeWidth={3} color="#fffefb" />
               )}
             </span>{" "}
@@ -214,13 +173,12 @@ export const StepPay = ({ booking }: StepPayProps) => {
             </div>
           )}
         </div>
-        {showTurnstile && <TurnstileFallback booking={booking} />}
-        <div
-          className={joinClassNames(
-            styles.payRow,
-            showTurnstile ? styles.payRowTight : styles.payRowLoose,
-          )}
-        >
+        <OnboardingTurnstile
+          isDark={false}
+          widgetRef={pay.turnstileRef}
+          onToken={pay.onTurnstileToken}
+        />
+        <div className={joinClassNames(styles.payRow, styles.payRowLoose)}>
           <button
             onClick={actions.goBack}
             aria-label="Back"
@@ -233,12 +191,14 @@ export const StepPay = ({ booking }: StepPayProps) => {
             disabled={payDisabled}
             className={joinClassNames(
               styles.payButton,
-              getPayButtonClass(paying, turnstileBlocking),
-              turnstileBlocking && styles.payButtonBlockedText,
+              getPayButtonClass(paying, isBlocked),
+              isBlocked && styles.payButtonBlockedText,
               payDisabled && styles.payButtonDisabled,
             )}
           >
-            {paying ? "Confirming…" : `Pay ${money.dueToday} & confirm`}{" "}
+            {paying || confirming
+              ? "Confirming…"
+              : `Pay ${money.dueToday} & confirm`}{" "}
             <ArrowRight size={17} strokeWidth={2} />
           </button>
         </div>

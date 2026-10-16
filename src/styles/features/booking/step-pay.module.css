@@ -12,6 +12,19 @@
   max-width: 460px;
 }
 
+.wallets {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+/* kept mounted so Stripe can say whether Apple Pay or Google Pay is available */
+.walletsHidden {
+  visibility: hidden;
+  height: 0;
+  overflow: hidden;
+}
+
 .quickCheckout {
   font-size: 11.5px;
   font-weight: 600;
@@ -20,60 +33,6 @@
   color: var(--text-secondary);
   margin-bottom: 2px;
   text-align: center;
-}
-
-.applePay {
-  background: var(--neutral-900);
-  color: var(--neutral-50);
-  border: none;
-  font-family: inherit;
-  font-weight: 600;
-  font-size: 16px;
-  padding: 15px;
-  border-radius: var(--radius-full);
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 7px;
-  transition:
-    background 200ms ease,
-    transform 160ms ease-out;
-}
-
-.applePay:hover {
-  background: #000 !important;
-}
-
-.applePay:active {
-  transform: scale(0.98) !important;
-}
-
-.googlePay {
-  background: transparent;
-  color: var(--neutral-900);
-  border: 1px solid var(--border-strong);
-  font-family: inherit;
-  font-weight: 600;
-  font-size: 16px;
-  padding: 15px;
-  border-radius: var(--radius-full);
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 8px;
-  transition:
-    background 200ms ease,
-    transform 160ms ease-out;
-}
-
-.googlePay:hover {
-  background: var(--neutral-100) !important;
-}
-
-.googlePay:active {
-  transform: scale(0.98) !important;
 }
 
 .divider {
@@ -89,63 +48,6 @@
   flex: 1;
   height: 1px;
   background: var(--border-subtle);
-}
-
-.cardWrap {
-  position: relative;
-  display: block;
-}
-
-.cardInput {
-  border: 1px solid var(--border-strong);
-  border-radius: var(--radius-sm);
-  padding: 14px 16px;
-  font-size: 15px;
-  font-family: inherit;
-  color: var(--text-primary);
-  background: transparent;
-  width: 100%;
-  box-sizing: border-box;
-  min-width: 0;
-  padding-right: 74px;
-}
-
-.cardBrand {
-  position: absolute;
-  right: 14px;
-  top: 50%;
-  transform: translateY(-50%);
-  font-size: 11px;
-  font-weight: 600;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-  color: var(--text-secondary);
-}
-
-.pair {
-  display: flex;
-  gap: 10px;
-}
-
-.pairField {
-  display: flex;
-  flex-direction: column;
-  gap: 6px;
-  min-width: 0;
-  flex: 1;
-}
-
-.input {
-  border: 1px solid var(--border-strong);
-  border-radius: var(--radius-sm);
-  padding: 14px 16px;
-  font-size: 15px;
-  font-family: inherit;
-  color: var(--text-primary);
-  background: transparent;
-  width: 100%;
-  box-sizing: border-box;
-  min-width: 0;
 }
 
 .savedLine {
@@ -278,11 +180,6 @@
 .futureBoxOff {
   background: transparent;
   border: 1px solid var(--border-strong);
-}
-
-/* 16px under the Turnstile widget, else 30px */
-.payRowTight {
-  margin-top: 16px;
 }
 
 .payRowLoose {

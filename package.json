@@ -30,6 +30,8 @@
     "@hookform/resolvers": "^5.7.1",
     "@marsidev/react-turnstile": "^1.6.2",
     "@reduxjs/toolkit": "^2.12.0",
+    "@stripe/react-stripe-js": "7.0.0",
+    "@stripe/stripe-js": "10.1.0",
     "@supabase/supabase-js": "^2.117.3",
     "@vis.gl/react-google-maps": "^1.10.1",
     "@zxcvbn-ts/core": "3.0.4",

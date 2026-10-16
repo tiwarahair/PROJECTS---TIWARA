@@ -49,6 +49,7 @@ export const useTravelCheck = (
   );
 
   return {
+    point,
     inArea: inArea === true,
     outBlock: inArea === false,
   };

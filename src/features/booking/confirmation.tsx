@@ -2,6 +2,11 @@ import { Calendar, Check, Clock, Mail, MapPin } from "lucide-react";
 import { Link } from "react-router";
 import { AppleLogo, GoogleLogo } from "../../components/icons/brand-icons";
 import { joinClassNames } from "../../utils/class-names";
+import {
+  getCalendarFile,
+  getGoogleCalendarUrl,
+} from "../../utils/calendar-file";
+import { downloadFile } from "../../utils/download-file";
 import { getWindowText } from "../../utils/pricing";
 import { getCancelSentence, getPaySubtitle } from "./logic/content";
 import { getWhenLine } from "./logic/calendar";
@@ -33,7 +38,21 @@ export const BookingConfirmation = ({ booking }: BookingConfirmationProps) => {
   const resendWaitMs = 30000 - (Date.now() - account.sentAt);
   const resendOff = resendWaitMs > 0;
 
-  const noop = () => {};
+  const calendarEvent = state.booked && {
+    ...state.booked,
+    title: `${service ? service.name : "Appointment"} with ${name}`,
+    location: isMobile ? address.clientAddress : `${name}, ${addressFull}`,
+    description: `Booking ${state.booked.ref}. Manage or cancel it from your confirmation email.`,
+  };
+
+  const downloadCalendarFile = () => {
+    if (calendarEvent)
+      downloadFile(
+        `${calendarEvent.ref}.ics`,
+        getCalendarFile(calendarEvent),
+        "text/calendar",
+      );
+  };
 
   return (
     <div data-screen-label="Confirmation" className={styles.confirmation}>
@@ -45,6 +64,13 @@ export const BookingConfirmation = ({ booking }: BookingConfirmationProps) => {
         A confirmation email is on its way to{" "}
         <strong className={styles.email}>{details.email}</strong> with the
         address and your receipt.
+        {!!state.booked && (
+          <>
+            {" "}
+            Your booking reference is{" "}
+            <strong className={styles.email}>{state.booked.ref}</strong>.
+          </>
+        )}
       </p>
       <div className={styles.card}>
         <div className={styles.cardHead}>
@@ -128,12 +154,20 @@ export const BookingConfirmation = ({ booking }: BookingConfirmationProps) => {
         </p>
       </div>
       <div className={styles.calendarRow}>
-        <button onClick={noop} className={styles.calendarButton}>
+        <button
+          onClick={downloadCalendarFile}
+          className={styles.calendarButton}
+        >
           + Apple Calendar
         </button>
-        <button onClick={noop} className={styles.calendarButton}>
+        <a
+          href={calendarEvent ? getGoogleCalendarUrl(calendarEvent) : undefined}
+          target="_blank"
+          rel="noopener noreferrer"
+          className={styles.calendarButton}
+        >
           + Google Calendar
-        </button>
+        </a>
       </div>
       {!loggedIn && !account.saved && !account.hidden && !account.sent && (
         <div data-screen-label="Save your details" className={styles.saveRow}>

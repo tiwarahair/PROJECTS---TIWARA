@@ -1,0 +1,69 @@
+import { describe, expect, it } from "vitest";
+import { getPaymentParams } from "../booking-payment";
+import type { CheckoutQuote } from "../booking-payment";
+
+const quote = (mode: CheckoutQuote["mode"], due: number): CheckoutQuote => ({
+  id: "booking-1",
+  ref: "TH-ABC123",
+  mode,
+  due_today_pence: due,
+  fee_pence: 163,
+  service_name: "Silk press",
+  stylist_account: "acct_stylist",
+  stylist_name: "Tiwára's House",
+});
+
+describe("the booking's payment", () => {
+  it("deposit: a destination charge of deposit + fee, the fee kept, the card saved", () => {
+    expect(getPaymentParams(quote("deposit", 2413), "cus_1")).toMatchObject({
+      amount: 2413,
+      currency: "gbp",
+      customer: "cus_1",
+      setup_future_usage: "off_session",
+      application_fee_amount: 163,
+      transfer_data: { destination: "acct_stylist" },
+      metadata: { booking_id: "booking-1", booking_ref: "TH-ABC123" },
+    });
+  });
+
+  it("full: a destination charge of price + fee, the card not saved", () => {
+    const params = getPaymentParams(quote("full", 7663), null);
+
+    expect(params).toMatchObject({
+      amount: 7663,
+      application_fee_amount: 163,
+      transfer_data: { destination: "acct_stylist" },
+    });
+
+    expect(params).not.toHaveProperty("setup_future_usage");
+    expect(params).not.toHaveProperty("customer");
+  });
+
+  it("card on file: the fee only, for the platform, with the card saved", () => {
+    const params = getPaymentParams(quote("card", 163), "cus_1");
+
+    expect(params).toMatchObject({ amount: 163, setup_future_usage: "off_session" });
+    expect(params).not.toHaveProperty("transfer_data");
+    expect(params).not.toHaveProperty("application_fee_amount");
+  });
+
+  it("pay at the appointment: the fee only, for the platform, nothing saved", () => {
+    const params = getPaymentParams(quote("none", 163), null);
+
+    expect(params).toMatchObject({ amount: 163 });
+    expect(params).not.toHaveProperty("transfer_data");
+    expect(params).not.toHaveProperty("setup_future_usage");
+  });
+
+  it("a signed-in client can keep the card whatever the mode", () => {
+    expect(getPaymentParams(quote("full", 7663), "cus_1", true)).toMatchObject({
+      setup_future_usage: "off_session",
+    });
+  });
+
+  it("only takes cards, so paying never leaves the page", () => {
+    expect(getPaymentParams(quote("none", 163), null)).toMatchObject({
+      allowed_payment_method_types: ["card"],
+    });
+  });
+});

@@ -198,20 +198,3 @@
 .confirmClose:hover {
   background: var(--fill-quiet) !important;
 }
-
-.walletPay {
-  flex: 1 1 160px;
-  border: none;
-  background: var(--neutral-900);
-  color: var(--neutral-50);
-  font-family: inherit;
-  font-weight: 600;
-  font-size: 15px;
-  padding: 14px 20px;
-  border-radius: var(--radius-full);
-  cursor: pointer;
-}
-
-.walletPay:active {
-  transform: scale(0.98) !important;
-}

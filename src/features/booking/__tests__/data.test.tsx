@@ -6,14 +6,17 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import {
   BookingError,
   getAvailableSlots,
+  getBookingStatus,
   holdBooking,
   isInTravelArea,
+  startCheckout,
 } from "../../../lib/booking-api";
 import { fetchPublicProfile } from "../../../lib/public-profiles";
 import { createStore } from "../../../stores/store";
 import { getDemoProfile } from "../../../test/demo-profile";
 import { renderBooking } from "../../../test/render-booking";
 import { renderWithStore } from "../../../test/render-with-store";
+import { stripeStub } from "../../../test/setup";
 import { setupUser } from "../../../test/setup-user";
 import { EMPTY_ADDRESS } from "../logic/constants";
 import { BookingPage } from "../route";
@@ -48,6 +51,27 @@ const pickTime = async (time: string) => {
 
 const continueFromTime = () =>
   user.click(screen.getAllByRole("button", { name: /^Continue$/ })[0]!);
+
+const payAsGuest = async () => {
+  await pickTime("10:30");
+  await continueFromTime();
+
+  await user.click(
+    await screen.findByRole("button", { name: "Continue as guest" }),
+  );
+
+  await user.type(screen.getByLabelText("First name"), "Nia");
+  await user.type(screen.getByLabelText("Last name"), "Okafor");
+  await user.type(screen.getByLabelText("Email"), "nia@gmail.com");
+  await user.type(screen.getByLabelText("Mobile, UK number"), "07700900123");
+  await user.click(screen.getAllByRole("button", { name: /^Continue/ })[0]!);
+
+  await user.click(
+    (await screen.findAllByRole("button", { name: /Continue to payment/ }))[0]!,
+  );
+
+  await user.click(screen.getByRole("button", { name: /^Pay £.* & confirm/ }));
+};
 
 describe("booking on real data", () => {
   beforeEach(() => {
@@ -209,6 +233,115 @@ describe("booking on real data", () => {
     );
 
     expect(holdBooking).not.toHaveBeenCalled();
+  });
+
+  it("paying sends the hold, details and Turnstile token; only the server's confirmation books it", async () => {
+    await renderBooking(SILK);
+    await payAsGuest();
+
+    await waitFor(() => expect(startCheckout).toHaveBeenCalled());
+
+    expect(startCheckout).toHaveBeenCalledWith({
+      hold: { id: "hold-1", secret: "secret" },
+      contact: {
+        first: "Nia",
+        last: "Okafor",
+        email: "nia@gmail.com",
+        phone: "07700900123",
+      },
+      notes: "",
+      keepCard: false,
+      turnstileToken: "test-captcha-token",
+    });
+
+    expect(
+      await screen.findByRole("heading", { name: "You're booked in." }),
+    ).toBeInTheDocument();
+
+    expect(stripeStub.confirmPayment).toHaveBeenCalledWith(
+      expect.objectContaining({
+        clientSecret: "pi_secret",
+        redirect: "if_required",
+      }),
+    );
+
+    expect(getBookingStatus).toHaveBeenCalledWith({
+      id: "hold-1",
+      secret: "secret",
+    });
+
+    expect(screen.getByText("TH-TEST01")).toBeInTheDocument();
+
+    expect(
+      screen.getByRole("link", { name: "+ Google Calendar" }),
+    ).toHaveAttribute(
+      "href",
+      expect.stringContaining("dates=20261020T093000Z%2F20261020T113000Z"),
+    );
+  });
+
+  it("a paid booking waits for the server before it shows as booked", async () => {
+    vi.mocked(getBookingStatus).mockResolvedValue({
+      status: "held",
+      ref: "TH-TEST01",
+      starts_at: "2026-10-20T09:30:00Z",
+      ends_at: "2026-10-20T11:30:00Z",
+    });
+
+    await renderBooking(SILK);
+    await payAsGuest();
+
+    expect(
+      await screen.findByRole("button", { name: /Confirming…/ }),
+    ).toBeDisabled();
+
+    expect(
+      screen.queryByRole("heading", { name: "You're booked in." }),
+    ).not.toBeInTheDocument();
+  });
+
+  it("a hold that ran out before paying says so, with nothing charged", async () => {
+    vi.mocked(startCheckout).mockRejectedValueOnce(
+      new BookingError("hold_not_found"),
+    );
+
+    await renderBooking(SILK);
+    await payAsGuest();
+
+    expect(await screen.findByRole("alert")).toHaveTextContent(
+      "Sorry, 10:30 is no longer held for you. You haven't been charged.",
+    );
+
+    expect(stripeStub.confirmPayment).not.toHaveBeenCalled();
+
+    expect(
+      screen.getByRole("button", { name: "Pick another time" }),
+    ).toBeInTheDocument();
+  });
+
+  it("a failed Turnstile check blocks paying, and a fresh check lets them try again", async () => {
+    vi.mocked(startCheckout).mockRejectedValueOnce(
+      new BookingError("turnstile_failed"),
+    );
+
+    await renderBooking(SILK);
+    await payAsGuest();
+
+    expect(await screen.findByRole("alert")).toHaveTextContent(
+      "We couldn't check this browser. Try again.",
+    );
+
+    expect(stripeStub.confirmPayment).not.toHaveBeenCalled();
+
+    await user.click(
+      screen.getByRole("button", { name: /^Pay £.* & confirm/ }),
+    );
+
+    expect(startCheckout).toHaveBeenCalledTimes(2);
+
+    await waitFor(() =>
+      expect(stripeStub.confirmPayment).toHaveBeenCalledTimes(1),
+    );
   });
 
   it("an unknown stylist is not found; one who isn't taking bookings says so", async () => {

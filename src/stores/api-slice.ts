@@ -1,10 +1,18 @@
 import { createApi, fakeBaseQuery } from "@reduxjs/toolkit/query/react";
 import {
   getAvailableSlots,
+  getBookingStatus,
   holdBooking,
   isInTravelArea,
+  startCheckout,
 } from "../lib/booking-api";
-import type { HeldBooking, HoldRequest, SlotRequest } from "../lib/booking-api";
+import type {
+  BookingStatus,
+  CheckoutRequest,
+  HeldBooking,
+  HoldRequest,
+  SlotRequest,
+} from "../lib/booking-api";
 import { fetchPublicProfile } from "../lib/public-profiles";
 import { SEARCH_PAGE_SIZE, searchStylists } from "../lib/search-api";
 import type { SearchArgs, SearchRow } from "../lib/search-api";
@@ -36,12 +44,11 @@ const toQueryResult = <T>(task: Promise<T>) =>
     }),
   );
 
-/** Whether an unwrapped request failed with this message. */
-export const hasErrorMessage = (error: unknown, message: string) =>
-  typeof error === "object" &&
-  error !== null &&
-  "message" in error &&
-  error.message === message;
+/** An unwrapped request's error message ("slot_taken", …), or "" when there's none. */
+export const getErrorMessage = (error: unknown) =>
+  typeof error === "object" && error !== null && "message" in error
+    ? String(error.message)
+    : "";
 
 export const api = createApi({
   reducerPath: "api",
@@ -164,6 +171,16 @@ export const api = createApi({
     >({
       queryFn: (request) => toQueryResult(isInTravelArea(request)),
     }),
+    startCheckout: build.mutation<{ clientSecret: string }, CheckoutRequest>({
+      queryFn: (request) => toQueryResult(startCheckout(request)),
+    }),
+    getBookingStatus: build.query<
+      BookingStatus | null,
+      { id: string; secret: string }
+    >({
+      keepUnusedDataFor: 0,
+      queryFn: (hold) => toQueryResult(getBookingStatus(hold)),
+    }),
     getTwoFactorDevices: build.query<TwoFactorDevice[], string>({
       providesTags: ["TwoFactor"],
       queryFn: () => toQueryResult(listTwoFactorDevices()),
@@ -173,6 +190,8 @@ export const api = createApi({
 
 export const {
   useGetAvailableSlotsQuery,
+  useGetBookingStatusQuery,
+  useStartCheckoutMutation,
   useHoldBookingMutation,
   useIsInTravelAreaQuery,
   useGetProfileQuery,

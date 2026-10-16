@@ -6,7 +6,8 @@ import { SiteHeader } from "../../components/site-header/site-header";
 import { useAppSelector } from "../../stores/hooks";
 import { joinClassNames } from "../../utils/class-names";
 import { AccountDialogs } from "./account-dialogs";
-import { downloadFile, getCalendarFile } from "./account-logic";
+import { downloadFile } from "../../utils/download-file";
+import { getBookingCalendarFile } from "./account-logic";
 import { AccountMobileList, AccountSideNav } from "./account-nav";
 import { getAccountView } from "./account-view";
 import type { BookingCardView } from "./account-view";
@@ -48,7 +49,7 @@ export const AccountPage = (props: AccountPageProps) => {
   const onCalendar = ({ booking, money }: BookingCardView) => {
     downloadFile(
       `tiwaras-house-${booking.id}.ics`,
-      getCalendarFile(booking, money),
+      getBookingCalendarFile(booking, money),
       "text/calendar",
     );
 
