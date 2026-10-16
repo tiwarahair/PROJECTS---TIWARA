@@ -1,6 +1,6 @@
 // CheckoutSheet money maths and initial state.
 import { roundToPence } from "../../utils/money";
-import { BOOKINGS } from "./data";
+import { BOOKINGS, EMPTY_REFUND } from "./data";
 import type {
   CheckoutBooking,
   CheckoutMoney,
@@ -168,10 +168,7 @@ export const getInitialCheckout = ({
     tries: 2,
     busy: false,
     fromDone: false,
-    refundKind: "full",
-    refundAmount: "",
-    refundReason: "",
-    refundTried: false,
+    refund: EMPTY_REFUND,
     refundFinal: 0,
     refunded: 0,
     refundLast: "",
@@ -254,9 +251,7 @@ export const getInitialCheckout = ({
 
       Object.assign(state, {
         view: "refund",
-        refundKind: "partial",
-        refundAmount: "20",
-        refundReason: "Service issue",
+        refund: { kind: "partial", amount: "20", reason: "Service issue" },
       });
 
       break;
@@ -377,5 +372,23 @@ export const getRefundContext = (
       (done.refundAuto || 0) +
       (done.method === "card" || done.method === "link" ? done.charged : 0),
     off: done.method === "record" ? done.charged : 0,
+  };
+};
+
+export const getRefundCap = (
+  state: CheckoutState,
+  booking: CheckoutBooking,
+) => {
+  const refundContext = getRefundContext(state, booking);
+  const isOffPlatform = !(refundContext.platform > 0);
+
+  const refundCapAll = roundToPence(
+    isOffPlatform ? refundContext.off : refundContext.platform,
+  );
+
+  return {
+    isOffPlatform,
+    refundCapAll,
+    refundCap: roundToPence(refundCapAll - state.refunded),
   };
 };

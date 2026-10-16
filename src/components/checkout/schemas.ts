@@ -1,5 +1,6 @@
 import { z } from "zod";
-import { roundToPence } from "../../utils/money";
+import { formatMoney, roundToPence } from "../../utils/money";
+import type { RefundValues } from "./data";
 import { parsePounds } from "./logic";
 
 export interface AdjustValues {
@@ -34,3 +35,26 @@ export interface ResendValues {
 export const resendSchema = z.object({
   to: z.string().trim().min(1, "Enter where to send it."),
 }) satisfies z.ZodType<ResendValues>;
+
+export const getRefundAmount = ({ kind, amount }: RefundValues, cap: number) =>
+  kind === "full" ? cap : parsePounds(amount);
+
+export const getRefundSchema = (cap: number) =>
+  z
+    .object({
+      kind: z.enum(["full", "partial"]),
+      amount: z.string(),
+      reason: z.string(),
+    })
+    .superRefine((values, context) => {
+      const flag = (path: keyof RefundValues, message: string) =>
+        context.addIssue({ code: "custom", path: [path], message });
+
+      const amount = getRefundAmount(values, cap);
+
+      if (values.kind === "partial" && amount > cap)
+        flag("amount", `You can refund up to ${formatMoney(cap)}.`);
+      else if (!(amount > 0)) flag("amount", "Enter an amount.");
+
+      if (!values.reason) flag("reason", "Choose a reason.");
+    }) satisfies z.ZodType<RefundValues>;

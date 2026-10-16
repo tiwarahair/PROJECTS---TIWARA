@@ -3,7 +3,6 @@ import { joinClassNames } from "../../utils/class-names";
 import { getViewAnimation } from "./detail";
 import { REFUND_REASONS } from "./data";
 import { RadioMark } from "./controls";
-import { getRefundCheck } from "./view";
 import type { CheckoutViewModel } from "./view";
 import type { CheckoutController } from "./use-checkout";
 import styles from "../../styles/components/checkout/refund.module.css";
@@ -18,16 +17,23 @@ export const CheckoutRefund = ({
   view: CheckoutViewModel;
 }) => {
   const { refundCap, refundCapAll, isOffPlatform, cardText } = view;
-  const { state, setState, booking } = checkout;
-  const refundError = getRefundCheck(checkout, view).error;
-  const isReasonMissing = state.refundTried && !state.refundReason;
+  const { state, booking, refundForm, refundValues, pickRefundKind } = checkout;
+
+  const {
+    register,
+    setValue,
+    formState: { errors },
+  } = refundForm;
+
+  const refundError = errors.amount?.message ?? "";
+  const reasonError = errors.reason?.message ?? "";
 
   const already =
     state.refunded > 0
       ? ` ${formatMoney(state.refunded)} already refunded.`
       : "";
 
-  const isFull = state.refundKind === "full";
+  const isFull = refundValues.kind === "full";
   const paidText = formatMoney(refundCapAll);
   const capText = formatMoney(refundCap);
 
@@ -60,7 +66,7 @@ export const CheckoutRefund = ({
           )}
           role="radio"
           aria-checked={isFull ? "true" : "false"}
-          onClick={() => setState({ refundKind: "full" })}
+          onClick={() => pickRefundKind("full")}
         >
           <RadioMark isOn={isFull} className={styles.refundRing} />
           <span
@@ -82,7 +88,7 @@ export const CheckoutRefund = ({
             className={styles.refundPartial}
             role="radio"
             aria-checked={!isFull ? "true" : "false"}
-            onClick={() => setState({ refundKind: "partial" })}
+            onClick={() => pickRefundKind("partial")}
           >
             <RadioMark isOn={!isFull} className={styles.refundRing} />
             <span
@@ -108,14 +114,13 @@ export const CheckoutRefund = ({
                     refundError ? styles.refundInputErr : styles.refundInputOk,
                   )}
                   inputMode="decimal"
-                  value={state.refundAmount}
-                  onChange={(event) =>
-                    setState({
-                      refundAmount: event.target.value
-                        .replace(/[^0-9.]/g, "")
-                        .slice(0, 7),
-                    })
-                  }
+                  {...register("amount", {
+                    onChange: (event: { target: { value: string } }) =>
+                      setValue(
+                        "amount",
+                        event.target.value.replace(/[^0-9.]/g, "").slice(0, 7),
+                      ),
+                  })}
                   aria-invalid={refundError ? "true" : "false"}
                   placeholder="0.00"
                 />
@@ -139,10 +144,9 @@ export const CheckoutRefund = ({
         <select
           className={joinClassNames(
             styles.refundSelect,
-            isReasonMissing ? shared.borderErr : shared.borderOk,
+            reasonError ? shared.borderErr : shared.borderOk,
           )}
-          value={state.refundReason}
-          onChange={(event) => setState({ refundReason: event.target.value })}
+          {...register("reason")}
         >
           <option value="">Choose a reason</option>
           {REFUND_REASONS.map((reason) => (
@@ -151,9 +155,9 @@ export const CheckoutRefund = ({
             </option>
           ))}
         </select>
-        {isReasonMissing && (
+        {!!reasonError && (
           <span className={shared.fieldError} role="alert">
-            Choose a reason.
+            {reasonError}
           </span>
         )}
       </label>

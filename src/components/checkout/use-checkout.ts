@@ -1,10 +1,16 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useEffect, useRef, useState } from "react";
 import { useForm } from "react-hook-form";
-import { resendSchema } from "./schemas";
+import { getRefundSchema, resendSchema } from "./schemas";
 import type { ResendValues } from "./schemas";
-import { BOOKINGS } from "./data";
-import { getFinalized, getInitialCheckout, getMoney } from "./logic";
+import { BOOKINGS, EMPTY_REFUND } from "./data";
+import type { RefundValues } from "./data";
+import {
+  getFinalized,
+  getInitialCheckout,
+  getMoney,
+  getRefundCap,
+} from "./logic";
 import type {
   CheckoutBooking,
   CheckoutResult,
@@ -88,6 +94,25 @@ export const useCheckout = (props: CheckoutSheetProps) => {
     defaultValues: { to: getResendTo(state.resendVia) },
     resolver: zodResolver(resendSchema),
   });
+
+  const { refundCap } = getRefundCap(state, booking);
+
+  const refundForm = useForm<RefundValues>({
+    defaultValues: state.refund,
+    resolver: zodResolver(getRefundSchema(refundCap)),
+    mode: "onChange",
+  });
+
+  const refundValues = refundForm.watch();
+
+  const pickRefundKind = (kind: RefundValues["kind"]) => {
+    refundForm.setValue("kind", kind);
+
+    if (refundForm.getFieldState("amount").error)
+      void refundForm.trigger("amount");
+  };
+
+  const startRefund = () => refundForm.reset(EMPTY_REFUND);
 
   const startResend = (via: CheckoutState["resendVia"]) => {
     setState({ resendVia: via });
@@ -217,6 +242,10 @@ export const useCheckout = (props: CheckoutSheetProps) => {
     showToast,
     resendForm,
     startResend,
+    refundForm,
+    refundValues,
+    pickRefundKind,
+    startRefund,
     startCheckout,
     complete,
     getResult,

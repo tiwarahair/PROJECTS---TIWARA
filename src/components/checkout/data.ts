@@ -82,6 +82,18 @@ export interface CheckoutResult {
   refundAuto: number;
 }
 
+export interface RefundValues {
+  kind: "full" | "partial";
+  amount: string;
+  reason: string;
+}
+
+export const EMPTY_REFUND: RefundValues = {
+  kind: "full",
+  amount: "",
+  reason: "",
+};
+
 export interface CheckoutState {
   bookingKey: string;
   mode: PaymentMode;
@@ -104,10 +116,7 @@ export interface CheckoutState {
   tries: number;
   busy: boolean;
   fromDone: boolean;
-  refundKind: "full" | "partial";
-  refundAmount: string;
-  refundReason: string;
-  refundTried: boolean;
+  refund: RefundValues;
   refundFinal: number;
   refunded: number;
   refundLast: string;

@@ -1,8 +1,8 @@
 // CheckoutSheet derived values shared by every view.
-import { getRefundContext, parsePounds } from "./logic";
+import { getRefundCap } from "./logic";
 import type { CheckoutLine, CheckoutView, PayMethod } from "./data";
 import type { CheckoutController } from "./use-checkout";
-import { formatMoney, roundToPence } from "../../utils/money";
+import { formatMoney } from "../../utils/money";
 
 export interface DetailRow {
   key: string;
@@ -109,11 +109,9 @@ export const getCheckoutView = (checkout: CheckoutController) => {
     else goTo("detail", -1);
   };
 
-  const refundContext = getRefundContext(state, booking);
-  const isOffPlatform = !(refundContext.platform > 0);
-
-  const refundCapAll = roundToPence(
-    isOffPlatform ? refundContext.off : refundContext.platform,
+  const { isOffPlatform, refundCapAll, refundCap } = getRefundCap(
+    state,
+    booking,
   );
 
   const fee = booking.fee || 0;
@@ -140,7 +138,7 @@ export const getCheckoutView = (checkout: CheckoutController) => {
     },
     isOffPlatform,
     refundCapAll,
-    refundCap: roundToPence(refundCapAll - state.refunded),
+    refundCap,
     fee,
     feeExtra: Math.max(0, fee - state.paid),
     linkTarget: state.linkVia === "sms" ? booking.phone : booking.email,
@@ -151,29 +149,6 @@ export const getCheckoutView = (checkout: CheckoutController) => {
 };
 
 export type CheckoutViewModel = ReturnType<typeof getCheckoutView>;
-
-export const getRefundCheck = (
-  { state }: CheckoutController,
-  { refundCap }: CheckoutViewModel,
-) => {
-  const amount =
-    state.refundKind === "full" ? refundCap : parsePounds(state.refundAmount);
-
-  const overError =
-    state.refundKind === "partial" && amount > refundCap
-      ? `You can refund up to ${formatMoney(refundCap)}.`
-      : "";
-
-  const isMissing =
-    state.refundTried && state.refundKind === "partial" && !(amount > 0);
-
-  return {
-    amount,
-    overError,
-    error: overError || (isMissing ? "Enter an amount." : ""),
-    isValid: amount > 0 && amount <= refundCap && !!state.refundReason,
-  };
-};
 
 export const getReviewTotal = (
   { money }: CheckoutController,

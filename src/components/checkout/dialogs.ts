@@ -59,10 +59,10 @@ const DIALOGS: Record<
         setState({
           dialog: null,
           refunded: roundToPence(state.refunded + amount),
-          refundLast: state.refundReason,
+          refundLast: state.refund.reason,
         });
 
-        props.onRefund?.(amount, state.refundReason, isOffPlatform);
+        props.onRefund?.(amount, state.refund.reason, isOffPlatform);
         goTo("detail", -1);
 
         showToast(
