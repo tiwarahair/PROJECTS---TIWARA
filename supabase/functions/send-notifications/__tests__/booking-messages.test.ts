@@ -121,24 +121,15 @@ describe("the stylist's new booking email", () => {
 });
 
 describe("texts", () => {
-  const text = renderSms("booking_confirmed", { ...booking });
+  it("tell the stylist about a new booking in one plain-letter text", () => {
+    const text = renderSms("new_booking", { ...booking });
 
-  it("fits one text in the GSM-7 alphabet, with the manage link", () => {
-    expect(text).toBe(
-      `Booked with Tiwara's House, Thu 22 Oct, 17:30. Ref TH-ABC123. Manage: ${booking.manage_url}`,
-    );
-
+    expect(text).toBe("New booking: Nia Okafor, Silk press, Thu 22 Oct, 17:30. Ref TH-ABC123.");
     expect(text.length).toBeLessThanOrEqual(160);
     expect(text).toMatch(/^[\x20-\x7E]+$/);
   });
 
-  it("tells the stylist about a new booking", () => {
-    expect(renderSms("new_booking", { ...booking })).toBe(
-      "New booking: Nia Okafor, Silk press, Thu 22 Oct, 17:30. Ref TH-ABC123.",
-    );
-  });
-
-  it("sends to UK mobiles in international format", () => {
+  it("send to UK mobiles in international format", () => {
     expect(toE164("07700 900123")).toBe("+447700900123");
     expect(toE164("+44 7700 900123")).toBe("+447700900123");
     expect(toE164("7700900123")).toBe("+447700900123");

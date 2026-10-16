@@ -1,5 +1,5 @@
 -- Messages when a booking is confirmed: the client's email (manage link, calendar file, and for guests a "save
--- your details" link) and text, and the stylist's "new booking" email and text as their preferences say.
+-- your details" link), and the stylist's "new booking" email and text as their preferences say.
 
 -- Single-use links: only the hash is kept; the link itself goes out in the message.
 create table public.booking_tokens (
@@ -118,10 +118,6 @@ begin
         || public.create_booking_token(booking.id, 'invite', now() + interval '24 hours') end
     ),
     booking.client_id
-  );
-
-  perform public.queue_sms(
-    booking.contact ->> 'phone', 'booking_confirmed', details || jsonb_build_object('manage_url', manage_url), booking.client_id
   );
 
   if owner_email is not null and coalesce(preference.email, true) then

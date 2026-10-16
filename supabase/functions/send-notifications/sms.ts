@@ -1,4 +1,4 @@
-// Texts through Twilio's REST API from the "Tiwaras" sender ID, which names us (one-way, so texts link to the manage page).
+// Texts to stylists (when they turn them on) through Twilio's REST API from the "Tiwaras" sender ID, which names us.
 // Without TWILIO_ACCOUNT_SID and TWILIO_AUTH_TOKEN, SMS is off and texts fail at once instead of being retried.
 import type { BookingDetails } from "./booking-emails.ts";
 
@@ -34,11 +34,6 @@ export const toE164 = (phone: string) => `+44${phone.replace(/\D/g, "").replace(
 type SmsBuilder = (payload: Record<string, unknown>) => string;
 
 const templates: Record<string, SmsBuilder> = {
-  booking_confirmed: (payload) => {
-    const booking = payload as unknown as BookingDetails & { manage_url: string };
-
-    return `Booked with ${booking.stylist_name}, ${getShortWhen(booking.starts_at)}. Ref ${booking.ref}. Manage: ${booking.manage_url}`;
-  },
   new_booking: (payload) => {
     const booking = payload as unknown as BookingDetails;
 

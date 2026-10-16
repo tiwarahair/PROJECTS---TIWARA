@@ -97,9 +97,8 @@ select is((pg_temp.message((select id from guest), 'email', 'booking_confirmed')
 select is((select count(*)::int from public.booking_tokens where booking_id = (select id from guest) and token_hash is not null), 2,
   'only hashes are kept: one manage and one invite token');
 
--- the client's text
-select is((pg_temp.message((select id from guest), 'sms', 'booking_confirmed')).to_address, '07700900123',
-  'the client is texted too');
+-- clients get the email only
+select ok((pg_temp.message((select id from guest), 'sms', 'booking_confirmed')) is null, 'clients aren''t texted');
 
 -- the stylist
 select is((pg_temp.message((select id from guest), 'email', 'new_booking')).to_address, 'owner@msg.test',
@@ -111,7 +110,7 @@ select ok((pg_temp.message((select id from guest), 'sms', 'new_booking')) is nul
 -- a repeated payment event sends nothing more
 select is(public.confirm_booking_payment('pi_guest'), 'duplicate', 'a repeated confirmation is a duplicate');
 
-select is((select count(*)::int from public.notifications where payload ->> 'ref' = (select ref from public.bookings where id = (select id from guest))), 3,
+select is((select count(*)::int from public.notifications where payload ->> 'ref' = (select ref from public.bookings where id = (select id from guest))), 2,
   'and queues no more messages');
 
 -- a signed-in client, and a stylist who wants texts instead of emails
@@ -135,12 +134,12 @@ select is((pg_temp.message((select id from member), 'sms', 'new_booking')).to_ad
 
 -- texts while SMS isn't set up fail at once, without retries
 update public.notifications set status = 'sending'
-where id = (pg_temp.message((select id from member), 'sms', 'booking_confirmed')).id;
+where id = (pg_temp.message((select id from member), 'sms', 'new_booking')).id;
 
-select public.mark_notification_failed_now((pg_temp.message((select id from member), 'sms', 'booking_confirmed')).id, 'SMS off');
+select public.mark_notification_failed_now((pg_temp.message((select id from member), 'sms', 'new_booking')).id, 'SMS off');
 
 select is(
-  (select status || ': ' || last_error from public.notifications where id = (pg_temp.message((select id from member), 'sms', 'booking_confirmed')).id),
+  (select status || ': ' || last_error from public.notifications where id = (pg_temp.message((select id from member), 'sms', 'new_booking')).id),
   'failed: SMS off', 'a text that can''t be sent is failed straight away'
 );
 
