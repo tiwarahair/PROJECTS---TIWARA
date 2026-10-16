@@ -3,8 +3,8 @@ import { useFormState } from "react-hook-form";
 import type { ChangeEvent, ReactNode } from "react";
 import { DISCARD_PROMPT } from "../../hooks/use-unsaved-changes";
 import { joinClassNames } from "../../utils/class-names";
+import { downloadFile } from "../../utils/download-file";
 import {
-  downloadFile,
   formatCardDigits,
   formatCardExpiry,
   getAddressLine,

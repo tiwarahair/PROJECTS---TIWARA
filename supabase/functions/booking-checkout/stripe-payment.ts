@@ -1,0 +1,48 @@
+import { admin } from "../_shared/admin.ts";
+import { stripe } from "../_shared/stripe.ts";
+import { getPaymentParams } from "./payment-params.ts";
+import type { CheckoutQuote } from "./payment-params.ts";
+import type { Contact } from "./request.ts";
+
+// a PaymentIntent still waiting for the client can take a new amount and choices
+const OPEN_STATUSES = ["requires_payment_method", "requires_confirmation", "requires_action"];
+
+/** The client's Stripe Customer: kept on a signed-in client's profile, or on a guest's booking. */
+export const getCustomerId = async (quote: CheckoutQuote, contact: Contact, clientId: string | null) => {
+  const { data: profile } = clientId
+    ? await admin.from("profiles").select("stripe_customer_id").eq("id", clientId).single()
+    : { data: null };
+
+  const savedId = clientId ? profile?.stripe_customer_id : quote.customer_id;
+
+  if (savedId) return savedId as string;
+
+  const customer = await stripe.customers.create(
+    { email: contact.email, name: `${contact.first} ${contact.last}`, phone: contact.phone },
+    { idempotencyKey: clientId ? `profile:${clientId}:customer` : `booking:${quote.id}:customer` },
+  );
+
+  if (clientId) await admin.from("profiles").update({ stripe_customer_id: customer.id }).eq("id", clientId);
+
+  return customer.id;
+};
+
+/** The booking's PaymentIntent: created once, then kept up to date while the client hasn't paid. */
+export const getPaymentIntent = async (quote: CheckoutQuote, customerId: string | null, keepCard: boolean) => {
+  const params = getPaymentParams(quote, customerId, keepCard);
+
+  if (!quote.payment_intent_id) return stripe.paymentIntents.create(params, { idempotencyKey: `booking:${quote.id}:pi` });
+
+  const existing = await stripe.paymentIntents.retrieve(quote.payment_intent_id);
+
+  if (!OPEN_STATUSES.includes(existing.status)) return existing;
+
+  const { amount, application_fee_amount, customer, setup_future_usage } = params;
+
+  return stripe.paymentIntents.update(existing.id, {
+    amount,
+    ...(application_fee_amount ? { application_fee_amount } : {}),
+    ...(customer ? { customer } : {}),
+    setup_future_usage: setup_future_usage ?? "",
+  });
+};

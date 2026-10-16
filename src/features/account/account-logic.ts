@@ -8,6 +8,7 @@ import { findService } from "../../utils/services";
 import type { AccountBooking, Profile, SavedCard } from "./account-data";
 import { formatMoney } from "../../utils/money";
 import { formatWeekdayDate, formatClockTime } from "../../utils/dates";
+import { getCalendarFile } from "../../utils/calendar-file";
 
 const DAY_MS = 864e5;
 
@@ -224,59 +225,19 @@ export const getBookingMoney = (
 
 export type EditKey = "name" | "email" | "mobile";
 
-/** Saves text as a file download. */
-export const downloadFile = (name: string, text: string, type: string) => {
-  try {
-    const url = URL.createObjectURL(new Blob([text], { type }));
-    const link = document.createElement("a");
-
-    link.href = url;
-    link.download = name;
-    document.body.appendChild(link);
-    link.click();
-    link.remove();
-    window.setTimeout(() => URL.revokeObjectURL(url), 1000);
-  } catch {
-    // downloads unavailable
-  }
-};
-
 /** An .ics calendar event for the booking. */
-export const getCalendarFile = (
+export const getBookingCalendarFile = (
   booking: AccountBooking,
   { stylist, where }: BookingMoney,
-): string => {
-  const pad = (value: number) => String(value).padStart(2, "0");
-
-  const format = (time: number) => {
-    const date = new Date(time);
-
-    const datePart =
-      date.getUTCFullYear() +
-      pad(date.getUTCMonth() + 1) +
-      pad(date.getUTCDate());
-
-    const timePart = pad(date.getUTCHours()) + pad(date.getUTCMinutes());
-
-    return `${datePart}T${timePart}00Z`;
-  };
-
-  return [
-    "BEGIN:VCALENDAR",
-    "VERSION:2.0",
-    "PRODID:-//Tiwaras House//Bookings//EN",
-    "BEGIN:VEVENT",
-    `UID:${booking.id}@tiwarashouse.com`,
-    `DTSTAMP:${format(Date.now())}`,
-    `DTSTART:${format(booking.at)}`,
-    `DTEND:${format(booking.at + booking.minutes * 6e4)}`,
-    `SUMMARY:${booking.service} with ${stylist.name}`,
-    `LOCATION:${where.replace(/,/g, "\\,")}`,
-    `DESCRIPTION:Booking ${booking.id}`,
-    "END:VEVENT",
-    "END:VCALENDAR",
-  ].join("\r\n");
-};
+) =>
+  getCalendarFile({
+    ref: booking.id,
+    title: `${booking.service} with ${stylist.name}`,
+    startsAt: new Date(booking.at).toISOString(),
+    endsAt: new Date(booking.at + booking.minutes * 6e4).toISOString(),
+    location: where,
+    description: `Booking ${booking.id}`,
+  });
 
 interface ReceiptView {
   ref: string;

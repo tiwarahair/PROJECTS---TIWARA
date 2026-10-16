@@ -1,5 +1,6 @@
 import { useMemo } from "react";
-import { Link, Navigate, useLocation } from "react-router";
+import { Navigate, useLocation } from "react-router";
+import { PageMessage } from "../../components/page-message/page-message";
 import { SiteHeader } from "../../components/site-header/site-header";
 import { ProfileSkeleton } from "../../components/skeleton/profile-skeleton";
 import type { ProfilePreview } from "../../components/skeleton/profile-skeleton";
@@ -43,21 +44,20 @@ export const StylistProfilePage = () => {
         <ProfileSkeleton preview={preview} />
       )}
       {!isFetching && (
-        <div className={styles.message}>
-          <h1 className={styles.title}>
-            {isError
+        <PageMessage
+          title={
+            isError
               ? "We couldn’t load this page"
-              : "We couldn’t find this stylist"}
-          </h1>
-          <p className={styles.text}>
-            {isError
+              : "We couldn’t find this stylist"
+          }
+          text={
+            isError
               ? "Check your connection and try again."
-              : "The link may be wrong, or they’re no longer taking bookings here."}
-          </p>
-          <Link to="/search" className={styles.search}>
-            Find a stylist
-          </Link>
-        </div>
+              : "The link may be wrong, or they’re no longer taking bookings here."
+          }
+          linkLabel="Find a stylist"
+          linkHref="/search"
+        />
       )}
     </div>
   );

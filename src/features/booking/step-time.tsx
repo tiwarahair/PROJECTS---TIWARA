@@ -5,13 +5,10 @@ import {
   formatLongDate,
   formatMonthTitle,
   getCalendarDays,
-  getClosedLine,
-  getSlots,
-} from "./booking-calendar";
-import { getHoldKey } from "./booking-state";
-import step from "../../styles/features/booking/booking-step.module.css";
+} from "./logic/calendar";
+import step from "../../styles/features/booking/step.module.css";
 import styles from "../../styles/features/booking/step-time.module.css";
-import type { BookingController } from "./use-booking";
+import type { BookingController } from "./hooks/use-booking";
 import { MONDAY_FIRST_WEEKDAYS } from "../../utils/dates";
 
 const getDayClass = ({
@@ -32,31 +29,23 @@ interface StepTimeProps {
 
 /** Step 3 (Pick a time): month calendar of days with slots, then that day's start times. */
 export const StepTime = ({ booking }: StepTimeProps) => {
-  const { state, stylist, money, actions } = booking;
+  const { state, stylist, money, slotsByDay, isLoadingSlots, actions } =
+    booking;
+
   const { setState } = actions;
   const { calendarYear, calendarMonth, date, time } = state;
 
   const changeMonth = (delta: number) =>
     setState(({ calendarMonth: month, calendarYear: year }) => {
-      const next = month + delta;
+      const next = new Date(year, month + delta, 1);
 
-      if (next < 0)
-        return {
-          calendarMonth: 11,
-          calendarYear: year - 1,
-          date: null,
-          time: null,
-        };
-
-      if (next > 11)
-        return {
-          calendarMonth: 0,
-          calendarYear: year + 1,
-          date: null,
-          time: null,
-        };
-
-      return { calendarMonth: next, date: null, time: null };
+      return {
+        calendarMonth: next.getMonth(),
+        calendarYear: next.getFullYear(),
+        date: null,
+        time: null,
+        holdError: null,
+      };
     });
 
   return (
@@ -64,12 +53,20 @@ export const StepTime = ({ booking }: StepTimeProps) => {
       <h1 className={step.title}>Pick a time</h1>
       <p className={step.lead}>
         {`${stylist.name}'s live availability for ${money.duration}`}.
-        {getClosedLine(stylist)}
+        {booking.closedLine}
       </p>
       {state.repickNote && (
         <div role="status" className={styles.reNote}>
           <Clock size={15} strokeWidth={1.5} />
           Pick your time again
+        </div>
+      )}
+      {state.holdError && (
+        <div role="alert" className={styles.reNote}>
+          <Clock size={15} strokeWidth={1.5} />
+          {state.holdError === "taken"
+            ? "Sorry, that time was just booked. Pick another."
+            : "We couldn't hold that time. Try again."}
         </div>
       )}
       <div className={styles.calendar}>
@@ -99,18 +96,17 @@ export const StepTime = ({ booking }: StepTimeProps) => {
             </div>
           ))}
         </div>
-        <div className={styles.days}>
+        <div className={styles.days} aria-busy={isLoadingSlots}>
           {getCalendarDays(
-            stylist,
             calendarYear,
             calendarMonth,
-            money.minutes,
+            new Set(slotsByDay.keys()),
             date,
           ).map(({ key, label, day, off, selected }) => (
             <button
               key={key}
               onClick={() => {
-                if (day) setState({ date: day, time: null, hold: null });
+                if (day) setState({ date: day, time: null, holdError: null });
               }}
               disabled={off}
               className={joinClassNames(
@@ -128,32 +124,10 @@ export const StepTime = ({ booking }: StepTimeProps) => {
               {`Times on ${formatLongDate(calendarYear, calendarMonth, date)}`}
             </div>
             <div className={styles.slots}>
-              {getSlots(
-                stylist,
-                calendarYear,
-                calendarMonth,
-                date,
-                money.minutes,
-              ).map((slot) => (
+              {(slotsByDay.get(date) ?? []).map(({ time: slot }) => (
                 <button
                   key={slot}
-                  onClick={() =>
-                    setState((current) => ({
-                      time: slot,
-                      // keep the hold when coming back to the same held slot
-                      hold:
-                        current.hold &&
-                        current.hold.key ===
-                          getHoldKey(
-                            current.calendarYear,
-                            current.calendarMonth,
-                            current.date,
-                            slot,
-                          )
-                          ? current.hold
-                          : null,
-                    }))
-                  }
+                  onClick={() => setState({ time: slot, holdError: null })}
                   disabled={false}
                   className={joinClassNames(
                     styles.slot,

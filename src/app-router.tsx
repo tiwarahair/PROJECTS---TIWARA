@@ -29,7 +29,7 @@ const appRoutes: RouteObject[] = [
   {
     path: "/book",
     lazy: () =>
-      import("./features/booking/booking-page").then(({ BookingPage }) => ({
+      import("./features/booking/route").then(({ BookingPage }) => ({
         Component: BookingPage,
       })),
   },

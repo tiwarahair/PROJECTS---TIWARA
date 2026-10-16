@@ -3,10 +3,10 @@ import { useFormState } from "react-hook-form";
 import { Link } from "react-router";
 import { AddressFinder } from "../../components/address-finder/address-finder";
 import { joinClassNames } from "../../utils/class-names";
-import { EMPTY_ADDRESS } from "./booking-state";
-import fields from "../../styles/features/booking/booking-fields.module.css";
+import { EMPTY_ADDRESS } from "./logic/constants";
+import fields from "../../styles/features/booking/fields.module.css";
 import styles from "../../styles/features/booking/appointment-address.module.css";
-import type { BookingController } from "./use-booking";
+import type { BookingController } from "./hooks/use-booking";
 
 interface AppointmentAddressProps {
   booking: BookingController;
@@ -55,6 +55,8 @@ export const AppointmentAddress = ({ booking }: AppointmentAddressProps) => {
           postcode: picked.postcode,
           source: "saved",
           notes: current.notes,
+          lat: null,
+          lng: null,
         },
       }));
   };

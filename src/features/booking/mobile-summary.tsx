@@ -1,9 +1,9 @@
 import { ArrowLeft, ArrowRight } from "lucide-react";
 import { joinClassNames } from "../../utils/class-names";
-import pageGlobal from "../../styles/features/booking/booking-page-global.module.css";
+import pageGlobal from "../../styles/features/booking/page-global.module.css";
 import next from "../../styles/features/booking/next-button.module.css";
 import styles from "../../styles/features/booking/mobile-summary.module.css";
-import type { BookingController } from "./use-booking";
+import type { BookingController } from "./hooks/use-booking";
 
 interface MobileSummaryProps {
   booking: BookingController;

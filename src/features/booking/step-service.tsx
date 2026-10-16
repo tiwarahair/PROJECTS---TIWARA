@@ -5,9 +5,9 @@ import {
   getMenu,
 } from "../../utils/services";
 import { joinClassNames } from "../../utils/class-names";
-import step from "../../styles/features/booking/booking-step.module.css";
+import step from "../../styles/features/booking/step.module.css";
 import styles from "../../styles/features/booking/step-service.module.css";
-import type { BookingController } from "./use-booking";
+import type { BookingController } from "./hooks/use-booking";
 import { formatMoney } from "../../utils/money";
 
 interface StepServiceProps {

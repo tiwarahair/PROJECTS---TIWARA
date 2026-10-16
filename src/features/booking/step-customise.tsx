@@ -3,12 +3,12 @@ import type { CSSProperties } from "react";
 import { hairColours } from "../../data";
 import { joinClassNames } from "../../utils/class-names";
 import { formatServiceDuration } from "../../utils/services";
-import pageGlobal from "../../styles/features/booking/booking-page-global.module.css";
-import { getDeltaLabel } from "./booking-pricing";
-import type { Selection } from "./booking-state";
-import step from "../../styles/features/booking/booking-step.module.css";
+import pageGlobal from "../../styles/features/booking/page-global.module.css";
+import { getDeltaLabel } from "./logic/pricing";
+import type { Selection } from "./logic/types";
+import step from "../../styles/features/booking/step.module.css";
 import styles from "../../styles/features/booking/step-customise.module.css";
-import type { BookingController } from "./use-booking";
+import type { BookingController } from "./hooks/use-booking";
 
 interface StepCustomiseProps {
   booking: BookingController;

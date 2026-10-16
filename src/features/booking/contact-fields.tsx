@@ -1,12 +1,12 @@
 import { Controller, useFormState } from "react-hook-form";
 import { Link } from "react-router";
 import { joinClassNames } from "../../utils/class-names";
-import { getEmailFix } from "./booking-details";
-import type { FieldKey } from "./booking-state";
+import { getEmailFix } from "./logic/details";
+import type { FieldKey } from "./logic/types";
 import { DetailsField } from "./details-field";
-import fields from "../../styles/features/booking/booking-fields.module.css";
+import fields from "../../styles/features/booking/fields.module.css";
 import styles from "../../styles/features/booking/contact-fields.module.css";
-import type { BookingController } from "./use-booking";
+import type { BookingController } from "./hooks/use-booking";
 
 interface ContactFieldsProps {
   booking: BookingController;

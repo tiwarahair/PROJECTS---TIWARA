@@ -1,8 +1,8 @@
 import { X } from "lucide-react";
 import { findService } from "../../utils/services";
-import { formatShortDate } from "./booking-calendar";
+import { formatShortDate } from "./logic/calendar";
 import styles from "../../styles/features/booking/resume-banner.module.css";
-import type { BookingController } from "./use-booking";
+import type { BookingController } from "./hooks/use-booking";
 
 interface ResumeBannerProps {
   booking: BookingController;

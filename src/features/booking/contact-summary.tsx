@@ -1,8 +1,8 @@
 import { joinClassNames } from "../../utils/class-names";
-import { formatMobile } from "./booking-details";
-import fields from "../../styles/features/booking/booking-fields.module.css";
+import { formatMobile } from "./logic/details";
+import fields from "../../styles/features/booking/fields.module.css";
 import styles from "../../styles/features/booking/contact-summary.module.css";
-import type { BookingController } from "./use-booking";
+import type { BookingController } from "./hooks/use-booking";
 
 interface ContactSummaryProps {
   booking: BookingController;

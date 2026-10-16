@@ -7,7 +7,8 @@ import type { ServiceRow } from "./public-profiles";
 type VariationRow = Tables<"service_variations">;
 
 const toOptions = (rows: VariationRow[]): CustomisationOption[] =>
-  rows.map(({ label, offered, price_delta_pence, minutes_delta }) => ({
+  rows.map(({ id, label, offered, price_delta_pence, minutes_delta }) => ({
+    id,
     label,
     on: offered,
     priceDelta: price_delta_pence / 100,
@@ -19,7 +20,8 @@ const toAddons = (row: ServiceRow, addons: Tables<"addons">[]) =>
     ({ addon_id, price_override_pence, minutes_override }) =>
       addons
         .filter(({ id }) => id === addon_id)
-        .map(({ name, price_pence, minutes }) => ({
+        .map(({ id, name, price_pence, minutes }) => ({
+          id,
           name,
           price: (price_override_pence ?? price_pence) / 100,
           minutes: minutes_override ?? minutes,

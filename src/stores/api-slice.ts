@@ -1,4 +1,18 @@
 import { createApi, fakeBaseQuery } from "@reduxjs/toolkit/query/react";
+import {
+  getAvailableSlots,
+  getBookingStatus,
+  holdBooking,
+  isInTravelArea,
+  startCheckout,
+} from "../lib/booking-api";
+import type {
+  BookingStatus,
+  CheckoutRequest,
+  HeldBooking,
+  HoldRequest,
+  SlotRequest,
+} from "../lib/booking-api";
 import { fetchPublicProfile } from "../lib/public-profiles";
 import { SEARCH_PAGE_SIZE, searchStylists } from "../lib/search-api";
 import type { SearchArgs, SearchRow } from "../lib/search-api";
@@ -14,19 +28,32 @@ import { listTwoFactorDevices } from "../lib/two-factor";
 import type { TwoFactorDevice } from "../lib/two-factor";
 import type { Profile } from "../types/profile";
 
+/** Errors are kept as plain data: the store must stay serializable. */
+export interface ApiError {
+  message: string;
+}
+
 /** RTK Query's result shape for a promise that may throw. */
 const toQueryResult = <T>(task: Promise<T>) =>
   task.then(
     (data) => ({ data }),
     (error: unknown) => ({
-      error: error instanceof Error ? error : new Error(String(error)),
+      error: {
+        message: error instanceof Error ? error.message : String(error),
+      },
     }),
   );
 
+/** An unwrapped request's error message ("slot_taken", …), or "" when there's none. */
+export const getErrorMessage = (error: unknown) =>
+  typeof error === "object" && error !== null && "message" in error
+    ? String(error.message)
+    : "";
+
 export const api = createApi({
   reducerPath: "api",
-  baseQuery: fakeBaseQuery<Error>(),
-  tagTypes: ["Studio", "StylistProfile", "Search", "TwoFactor"],
+  baseQuery: fakeBaseQuery<ApiError>(),
+  tagTypes: ["Studio", "StylistProfile", "Search", "TwoFactor", "Slots"],
   refetchOnReconnect: true,
   endpoints: (build) => ({
     getProfile: build.query<Profile, string>({
@@ -129,6 +156,31 @@ export const api = createApi({
       keepUnusedDataFor: 300,
       queryFn: ({ args, size }) => toQueryResult(searchStylists(args, 0, size)),
     }),
+    getAvailableSlots: build.query<string[], SlotRequest>({
+      providesTags: ["Slots"],
+      queryFn: (request) => toQueryResult(getAvailableSlots(request)),
+    }),
+    // held or refused (taken), the open times have changed either way
+    holdBooking: build.mutation<HeldBooking, HoldRequest>({
+      invalidatesTags: () => ["Slots"],
+      queryFn: (request) => toQueryResult(holdBooking(request)),
+    }),
+    isInTravelArea: build.query<
+      boolean,
+      { serviceId: string; lat: number; lng: number }
+    >({
+      queryFn: (request) => toQueryResult(isInTravelArea(request)),
+    }),
+    startCheckout: build.mutation<{ clientSecret: string }, CheckoutRequest>({
+      queryFn: (request) => toQueryResult(startCheckout(request)),
+    }),
+    getBookingStatus: build.query<
+      BookingStatus | null,
+      { id: string; secret: string }
+    >({
+      keepUnusedDataFor: 0,
+      queryFn: (hold) => toQueryResult(getBookingStatus(hold)),
+    }),
     getTwoFactorDevices: build.query<TwoFactorDevice[], string>({
       providesTags: ["TwoFactor"],
       queryFn: () => toQueryResult(listTwoFactorDevices()),
@@ -137,6 +189,11 @@ export const api = createApi({
 });
 
 export const {
+  useGetAvailableSlotsQuery,
+  useGetBookingStatusQuery,
+  useStartCheckoutMutation,
+  useHoldBookingMutation,
+  useIsInTravelAreaQuery,
   useGetProfileQuery,
   useGetStylistProfileQuery,
   usePeekStylistsQuery,

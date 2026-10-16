@@ -68,3 +68,27 @@ vi.mock("@vis.gl/react-google-maps", () => ({
     AUTH_FAILURE: "AUTH_FAILURE",
   },
 }));
+
+/** The fake Stripe the booking Pay step talks to; tests set what confirmPayment and submit return. */
+export const stripeStub = {
+  confirmPayment: vi.fn(() => Promise.resolve({})),
+  submit: vi.fn(() => Promise.resolve({})),
+};
+
+// No Stripe.js in jsdom: Elements renders its children and the card form is a placeholder
+vi.mock("@stripe/stripe-js", () => ({
+  loadStripe: () => Promise.resolve(null),
+}));
+
+vi.mock("@stripe/react-stripe-js", async () => {
+  const { createElement } = await import("react");
+
+  return {
+    Elements: ({ children }: { children: React.ReactNode }) => children,
+    PaymentElement: () =>
+      createElement("div", { "data-testid": "payment-element" }),
+    ExpressCheckoutElement: () => null,
+    useStripe: () => ({ confirmPayment: stripeStub.confirmPayment }),
+    useElements: () => ({ submit: stripeStub.submit }),
+  };
+});
