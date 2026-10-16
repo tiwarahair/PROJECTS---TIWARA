@@ -115,14 +115,6 @@ describe.skipIf(!hasPrototype)(
 
       expect(data.postcodes).toEqual(toPlain(prototypeData.postcodes));
 
-      expect(data.policyIcons).toEqual(
-        renameKeys(toPlain(prototypeData.policyIcons), [
-          ["ns", "noShow"],
-          ["pay", "payment"],
-          ["cal", "calendar"],
-        ]),
-      );
-
       expect(data.seedAddresses).toEqual(
         renameKeys(toPlain(prototypeData.account.seedAddresses), [
           ["def", "isDefault"],
@@ -311,10 +303,18 @@ describe.skipIf(!hasPrototype)(
         })),
       ];
 
+      const withoutIcons = (summary: object) => {
+        const { lines, ...rest } = toPlain(summary) as {
+          lines: { text: string }[];
+        };
+
+        return { ...rest, lines: lines.map(({ text }) => text) };
+      };
+
       policies.forEach((policy) =>
         [20, 45, 120, 133.33].forEach((price) =>
-          expect(toPlain(policyLines(policy, price, "Amara"))).toEqual(
-            toPlain(
+          expect(withoutIcons(policyLines(policy, price, "Amara"))).toEqual(
+            withoutIcons(
               prototypeData.policyLines(
                 renameKeys(policy, toPrototypeKeys(POLICY_KEYS)),
                 price,

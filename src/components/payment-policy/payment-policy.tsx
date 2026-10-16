@@ -13,7 +13,6 @@ import {
   getInitialPolicyState,
   getPolicyKey,
   getPolicyOutput,
-  getPolicyLineIcon,
   getPolicySummary,
   getPreviewPolicy,
 } from "./payment-policy-logic";
@@ -561,20 +560,16 @@ export const PaymentPolicy = ({
                 </div>
                 <div className={styles.dividerTop}></div>
                 <div className={styles.lines}>
-                  {preview.lines.map(({ icon, text }, index) => {
-                    const LineIcon = getPolicyLineIcon(icon);
-
-                    return (
-                      <div key={index} className={styles.line}>
-                        <LineIcon
-                          className={styles.lineIcon}
-                          size={16}
-                          strokeWidth={1.7}
-                        />
-                        <span className={styles.lineText}>{text}</span>
-                      </div>
-                    );
-                  })}
+                  {preview.lines.map(({ icon: LineIcon, text }, index) => (
+                    <div key={index} className={styles.line}>
+                      <LineIcon
+                        className={styles.lineIcon}
+                        size={16}
+                        strokeWidth={1.7}
+                      />
+                      <span className={styles.lineText}>{text}</span>
+                    </div>
+                  ))}
                 </div>
                 {notes.length > 0 && (
                   <>
