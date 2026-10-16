@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
-import { getPaymentParams } from "../booking-payment";
-import type { CheckoutQuote } from "../booking-payment";
+import { getPaymentParams } from "../payment-params";
+import type { CheckoutQuote } from "../payment-params";
 
 const quote = (mode: CheckoutQuote["mode"], due: number): CheckoutQuote => ({
   id: "booking-1",
@@ -11,6 +11,8 @@ const quote = (mode: CheckoutQuote["mode"], due: number): CheckoutQuote => ({
   service_name: "Silk press",
   stylist_account: "acct_stylist",
   stylist_name: "Tiwára's House",
+  customer_id: null,
+  payment_intent_id: null,
 });
 
 describe("the booking's payment", () => {

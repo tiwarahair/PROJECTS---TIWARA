@@ -10,6 +10,8 @@ export interface CheckoutQuote {
   service_name: string;
   stylist_account: string;
   stylist_name: string;
+  customer_id: string | null;
+  payment_intent_id: string | null;
 }
 
 /** Deposit and card-on-file bookings keep the card for the balance and any fees under the policy. */

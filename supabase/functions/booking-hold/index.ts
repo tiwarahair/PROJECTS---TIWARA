@@ -1,9 +1,10 @@
 // Holds a start for 10 minutes while the client books, or moves their hold when they pick another time.
 // The database does the work (hold_booking); this only checks the request and rate-limits by IP.
-import { createClient } from "npm:@supabase/supabase-js@2";
 import { z } from "npm:zod@4";
+import { admin } from "../_shared/admin.ts";
 import { getClientIp } from "../_shared/client-ip.ts";
 import { corsHeaders, respond } from "../_shared/cors.ts";
+import { isWithinLimit } from "../_shared/rate-limit.ts";
 
 const IP_LIMIT = 30;
 const WINDOW_SECONDS = 600;
@@ -31,11 +32,6 @@ const requestSchema = z.object({
     .optional(),
 });
 
-const supabase = createClient(
-  Deno.env.get("SUPABASE_URL")!,
-  Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!,
-);
-
 Deno.serve(async (request) => {
   if (request.method === "OPTIONS")
     return new Response("ok", { headers: corsHeaders });
@@ -46,22 +42,19 @@ Deno.serve(async (request) => {
 
   if (!parsed.success) return respond(400, { error: "invalid_request" });
 
-  const { data: isWithinLimit, error: limitError } = await supabase.rpc(
-    "hit_rate_limit",
-    {
-      limit_key: `booking-hold:${getClientIp(request)}`,
-      max_hits: IP_LIMIT,
-      window_seconds: WINDOW_SECONDS,
-    },
-  );
+  const isAllowed = await isWithinLimit(
+    `booking-hold:${getClientIp(request)}`,
+    IP_LIMIT,
+    WINDOW_SECONDS,
+  ).catch(() => null);
 
-  if (limitError) return respond(500, { error: "unknown" });
+  if (isAllowed === null) return respond(500, { error: "unknown" });
 
-  if (!isWithinLimit) return respond(429, { error: "rate_limited" });
+  if (!isAllowed) return respond(429, { error: "rate_limited" });
 
   const { serviceId, choices, startsAt, location, hold } = parsed.data;
 
-  const { data, error } = await supabase.rpc("hold_booking", {
+  const { data, error } = await admin.rpc("hold_booking", {
     target_service: serviceId,
     choices,
     slot_start: startsAt,
