@@ -1,4 +1,4 @@
-import type { AccountSettingsBackend } from "../../../components/account-settings/account-settings-backend";
+import type { AccountSettingsBackend } from "../../../components/account-settings/backend";
 import {
   changePassword,
   sendEmailChangeCodes,

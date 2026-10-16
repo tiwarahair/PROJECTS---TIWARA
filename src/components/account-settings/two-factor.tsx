@@ -1,9 +1,9 @@
 import { Check, Shield, TriangleAlert } from "lucide-react";
 import { joinClassNames } from "../../utils/class-names";
-import { SettingsSection } from "./settings-fields";
+import { SettingsSection } from "./fields";
 import type { AccountSettingsProps } from "./use-account-settings";
-import shared from "../../styles/components/account-settings/account-settings.module.css";
-import styles from "../../styles/components/account-settings/settings-two-factor.module.css";
+import shared from "../../styles/components/account-settings/index.module.css";
+import styles from "../../styles/components/account-settings/two-factor.module.css";
 
 interface SettingsTwoFactorProps {
   props: AccountSettingsProps;

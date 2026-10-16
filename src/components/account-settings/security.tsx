@@ -2,11 +2,11 @@ import { joinClassNames } from "../../utils/class-names";
 import { PasswordMeter } from "../password-meter/password-meter";
 import type { AccountSettingsProps } from "./use-account-settings";
 import type { AccountSettingsController } from "./use-account-settings";
-import { CheckRow, SettingsSection } from "./settings-fields";
-import { SettingsSessions } from "./settings-sessions";
-import { SettingsTwoFactor } from "./settings-two-factor";
-import shared from "../../styles/components/account-settings/account-settings.module.css";
-import styles from "../../styles/components/account-settings/settings-security.module.css";
+import { CheckRow, SettingsSection } from "./fields";
+import { SettingsSessions } from "./sessions";
+import { SettingsTwoFactor } from "./two-factor";
+import shared from "../../styles/components/account-settings/index.module.css";
+import styles from "../../styles/components/account-settings/security.module.css";
 
 interface SettingsSecurityProps {
   settings: AccountSettingsController;

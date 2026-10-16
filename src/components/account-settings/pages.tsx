@@ -19,15 +19,15 @@ import {
   NOTIFICATION_GROUPS,
   getPayoutStatus,
   getTaxRows,
-} from "./account-settings-logic";
-import type { ChannelSetting, NotificationKey } from "./account-settings-logic";
+} from "./logic";
+import type { ChannelSetting, NotificationKey } from "./logic";
 import type { AccountSettingsProps } from "./use-account-settings";
 import type { AccountSettingsController } from "./use-account-settings";
-import { CheckRow, SettingsSection, Switch } from "./settings-fields";
-import shared from "../../styles/components/account-settings/account-settings.module.css";
-import calendar from "../../styles/components/account-settings/settings-calendar.module.css";
-import notifications from "../../styles/components/account-settings/settings-notifications.module.css";
-import payouts from "../../styles/components/account-settings/settings-payouts.module.css";
+import { CheckRow, SettingsSection, Switch } from "./fields";
+import shared from "../../styles/components/account-settings/index.module.css";
+import calendar from "../../styles/components/account-settings/calendar.module.css";
+import notifications from "../../styles/components/account-settings/notifications.module.css";
+import payouts from "../../styles/components/account-settings/payouts.module.css";
 
 interface PageProps {
   settings: AccountSettingsController;

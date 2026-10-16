@@ -1,12 +1,12 @@
 import { ArrowRight, Clock } from "lucide-react";
 import { joinClassNames } from "../../utils/class-names";
 import { isValidEmail } from "../../utils/validation";
-import { Reveal, SettingsSection, TextField } from "./settings-fields";
+import { Reveal, SettingsSection, TextField } from "./fields";
 import { getLoginDetailsActions } from "./login-details-actions";
 import type { AccountSettingsProps } from "./use-account-settings";
 import type { AccountSettingsController } from "./use-account-settings";
-import shared from "../../styles/components/account-settings/account-settings.module.css";
-import styles from "../../styles/components/account-settings/settings-login-details.module.css";
+import shared from "../../styles/components/account-settings/index.module.css";
+import styles from "../../styles/components/account-settings/login-details.module.css";
 
 interface SettingsLoginDetailsProps {
   settings: AccountSettingsController;

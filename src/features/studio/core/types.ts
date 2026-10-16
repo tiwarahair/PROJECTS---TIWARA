@@ -3,10 +3,10 @@ import type { NOTIFS } from "./seed-dashboard";
 import type { BusinessValue } from "../../../components/business-details/types";
 import type { PolicyValue } from "../../../components/payment-policy/types";
 import type { TwoFactorEnrolment } from "../../../lib/two-factor";
-import type { PayoutStatus } from "../../../components/account-settings/account-settings-logic";
+import type { PayoutStatus } from "../../../components/account-settings/logic";
 import type { TaxDetails } from "../../../components/tax-details-form/tax-details-logic";
 import type { ServiceType } from "../../../types/service-type";
-import type { NotificationSettings } from "../../../components/account-settings/account-settings-logic";
+import type { NotificationSettings } from "../../../components/account-settings/logic";
 import type { LucideIcon } from "lucide-react";
 
 export type StudioTab =

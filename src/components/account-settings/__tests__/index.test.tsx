@@ -1,10 +1,10 @@
-import { act, render, screen, within } from "@testing-library/react";
+import { act, render, screen, waitFor, within } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { MemoryRouter } from "react-router";
-import { DEMO_BACKEND } from "../account-settings-backend";
-import { AccountSettings } from "../account-settings";
-import type { AccountSettingsApi } from "../account-settings";
-import type { PayoutStatus } from "../account-settings-logic";
+import { DEMO_BACKEND } from "../backend";
+import { AccountSettings } from "..";
+import type { AccountSettingsApi } from "..";
+import type { PayoutStatus } from "../logic";
 import type { UserEvent } from "@testing-library/user-event";
 import { setupUser } from "../../../test/setup-user";
 
@@ -42,6 +42,36 @@ describe("AccountSettings", () => {
       await screen.findByText("Personal details saved"),
     ).toBeInTheDocument();
 
+    expect(onState.mock.lastCall?.[0].canSave).toBe(false);
+  });
+
+  it("a blank name shows its error on save until it's filled in", async () => {
+    render(<AccountSettings />, { wrapper: MemoryRouter });
+
+    await user.clear(screen.getByLabelText("Last name"));
+    await user.click(screen.getByRole("button", { name: "Save changes" }));
+
+    expect(
+      await screen.findByText("Enter your last name."),
+    ).toBeInTheDocument();
+
+    await user.type(screen.getByLabelText("Last name"), "Okafor");
+
+    await waitFor(() =>
+      expect(
+        screen.queryByText("Enter your last name."),
+      ).not.toBeInTheDocument(),
+    );
+  });
+
+  it("discarding puts the saved name back", async () => {
+    const onState = vi.fn<(api: AccountSettingsApi) => void>();
+
+    render(<AccountSettings onState={onState} />, { wrapper: MemoryRouter });
+    await user.type(screen.getByLabelText("First name"), "x");
+    act(() => onState.mock.lastCall?.[0].discard());
+
+    expect(screen.getByLabelText("First name")).toHaveValue("Amara");
     expect(onState.mock.lastCall?.[0].canSave).toBe(false);
   });
 

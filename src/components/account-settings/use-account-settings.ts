@@ -1,4 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from "react";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
 import { useLocation } from "react-router";
 import { usePasswordChecker } from "../../hooks/use-password-checker";
 import { checkPassword, getPasswordView } from "../../utils/password";
@@ -6,16 +8,16 @@ import type {
   TaxBusiness,
   TaxDetails,
 } from "../tax-details-form/tax-details-logic";
-import { DEMO_BACKEND } from "./account-settings-backend";
-import type { AccountSettingsBackend } from "./account-settings-backend";
+import { DEMO_BACKEND } from "./backend";
+import { nameSchema } from "./name-schema";
+import type { NameValues } from "./name-schema";
+import type { AccountSettingsBackend } from "./backend";
 import {
   EMPTY_PASSWORD,
+  getInitialName,
   getInitialSettingsState,
-} from "./account-settings-logic";
-import type {
-  SettingsPerson,
-  NotificationSettings,
-} from "./account-settings-logic";
+} from "./logic";
+import type { SettingsPerson, NotificationSettings } from "./logic";
 import type {
   ConfirmDialog,
   PayoutStatus,
@@ -23,7 +25,7 @@ import type {
   SettingsState,
   SignIn,
   TwoFactorDevice,
-} from "./account-settings-logic";
+} from "./logic";
 
 const TOAST_MS = 2400;
 const SESSIONS_LOAD_MS = 700;
@@ -115,6 +117,17 @@ export const useAccountSettings = (props: AccountSettingsProps) => {
 
   usePasswordChecker();
 
+  const nameForm = useForm<NameValues>({
+    defaultValues: getInitialName(props.person),
+    resolver: zodResolver(nameSchema),
+  });
+
+  const {
+    formState: { errors: nameErrors, isDirty: isNameDirty },
+  } = nameForm;
+
+  const [first, last] = nameForm.watch(["first", "last"]);
+
   const setState = (
     patch:
       | Partial<SettingsState>
@@ -199,8 +212,8 @@ export const useAccountSettings = (props: AccountSettingsProps) => {
 
   const passwordCheck = checkPassword(state.password.next, {
     min: PASSWORD_MIN,
-    first: state.first || nameParts[0],
-    last: state.last || nameParts.slice(1).join(" "),
+    first: first || nameParts[0],
+    last: last || nameParts.slice(1).join(" "),
     email: state.email,
   });
 
@@ -223,13 +236,8 @@ export const useAccountSettings = (props: AccountSettingsProps) => {
   };
 
   // ---- personal
-  const getNameError = (key: "first" | "last") =>
-    state.nameTouched && !state[key].trim()
-      ? `Enter your ${key === "first" ? "first" : "last"} name.`
-      : "";
-
-  const isNameDirty =
-    state.first !== state.savedName[0] || state.last !== state.savedName[1];
+  const getNameError = (key: keyof NameValues) =>
+    nameErrors[key]?.message ?? "";
 
   // ---- save bar (only pages with typed fields)
   const isPasswordDirty =
@@ -244,7 +252,7 @@ export const useAccountSettings = (props: AccountSettingsProps) => {
 
   const hasBarError =
     page === "personal"
-      ? !!(getNameError("first") || getNameError("last"))
+      ? !!(nameErrors.first || nameErrors.last)
       : page === "security" &&
         !!(
           passwordErrors.code ||
@@ -255,21 +263,17 @@ export const useAccountSettings = (props: AccountSettingsProps) => {
   const backend = props.backend ?? DEMO_BACKEND;
 
   const save = async () => {
-    if (page === "personal") {
-      const first = state.first.trim();
-      const last = state.last.trim();
+    if (page === "personal")
+      return nameForm.handleSubmit(async (name) => {
+        try {
+          await backend.saveName(name.first, name.last);
+        } catch {
+          return toast("Your name couldn’t be saved. Try again.");
+        }
 
-      if (!first || !last) return setState({ nameTouched: true });
-
-      try {
-        await backend.saveName(first, last);
-      } catch {
-        return toast("Your name couldn’t be saved. Try again.");
-      }
-
-      setState({ savedName: [first, last], nameTouched: false });
-      toast("Personal details saved");
-    }
+        nameForm.reset(name);
+        toast("Personal details saved");
+      })();
 
     if (page === "security") {
       const { code, next, confirm } = state.password;
@@ -319,16 +323,16 @@ export const useAccountSettings = (props: AccountSettingsProps) => {
     }
   };
 
-  const discard = () =>
+  const discard = () => {
+    nameForm.reset();
+
     setState({
-      first: state.savedName[0],
-      last: state.savedName[1],
-      nameTouched: false,
       password: EMPTY_PASSWORD,
       passwordError: "",
       passwordTouched: false,
       newPasswordBlurred: false,
     });
+  };
 
   const sendPasswordCode = () =>
     backend
@@ -368,6 +372,7 @@ export const useAccountSettings = (props: AccountSettingsProps) => {
     showPasswordFields,
     passwordView,
     passwordErrors,
+    nameForm,
     getNameError,
     isDirty,
     hasSave,

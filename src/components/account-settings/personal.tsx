@@ -1,12 +1,13 @@
+import { Controller } from "react-hook-form";
 import { Info } from "lucide-react";
 import { joinClassNames } from "../../utils/class-names";
-import { getCloseReason } from "./account-settings-logic";
-import { SettingsSection, TextField } from "./settings-fields";
-import { SettingsLoginDetails } from "./settings-login-details";
+import { getCloseReason } from "./logic";
+import { SettingsSection, TextField } from "./fields";
+import { SettingsLoginDetails } from "./login-details";
 import type { AccountSettingsProps } from "./use-account-settings";
 import type { AccountSettingsController } from "./use-account-settings";
-import shared from "../../styles/components/account-settings/account-settings.module.css";
-import styles from "../../styles/components/account-settings/settings-personal.module.css";
+import shared from "../../styles/components/account-settings/index.module.css";
+import styles from "../../styles/components/account-settings/personal.module.css";
 
 interface SettingsPersonalProps {
   settings: AccountSettingsController;
@@ -19,7 +20,7 @@ export const SettingsPersonal = ({
   uid,
   props,
 }: SettingsPersonalProps) => {
-  const { state, setState, toast, ask, getNameError } = settings;
+  const { nameForm, toast, ask, getNameError } = settings;
 
   const closeReason = getCloseReason(props.upcoming || 0, !!props.owed);
 
@@ -33,15 +34,21 @@ export const SettingsPersonal = ({
               ["last", "Last name", "family-name"],
             ] as const
           ).map(([key, label, autoComplete]) => (
-            <TextField
+            <Controller
               key={key}
-              id={`${uid}-${key}`}
-              label={label}
-              value={state[key]}
-              error={getNameError(key)}
-              onChange={(event) => setState({ [key]: event.target.value })}
-              className={styles.input}
-              autoComplete={autoComplete}
+              control={nameForm.control}
+              name={key}
+              render={({ field: { value, onChange } }) => (
+                <TextField
+                  id={`${uid}-${key}`}
+                  label={label}
+                  value={value}
+                  error={getNameError(key)}
+                  onChange={onChange}
+                  className={styles.input}
+                  autoComplete={autoComplete}
+                />
+              )}
             />
           ))}
         </div>

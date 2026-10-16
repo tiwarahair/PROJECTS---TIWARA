@@ -1,7 +1,7 @@
 import type { ReactNode } from "react";
 import { useParams } from "react-router";
-import { AccountSettings } from "../../components/account-settings/account-settings";
-import type { AccountSettingsProps } from "../../components/account-settings/account-settings";
+import { AccountSettings } from "../../components/account-settings";
+import type { AccountSettingsProps } from "../../components/account-settings";
 import { AddressFinder } from "../../components/address-finder/address-finder";
 import { AllergyField } from "../../components/allergy-field/allergy-field";
 import { BusinessDetails } from "../../components/business-details";

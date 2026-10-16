@@ -1,10 +1,10 @@
 import { LogOut } from "lucide-react";
 import { joinClassNames } from "../../utils/class-names";
-import { SESSION_ICONS } from "./account-settings-logic";
-import { SettingsSection, Switch } from "./settings-fields";
+import { SESSION_ICONS } from "./logic";
+import { SettingsSection, Switch } from "./fields";
 import type { AccountSettingsController } from "./use-account-settings";
-import shared from "../../styles/components/account-settings/account-settings.module.css";
-import styles from "../../styles/components/account-settings/settings-sessions.module.css";
+import shared from "../../styles/components/account-settings/index.module.css";
+import styles from "../../styles/components/account-settings/sessions.module.css";
 
 /** Settings → Security: where you're signed in, and login alerts. */
 export const SettingsSessions = ({

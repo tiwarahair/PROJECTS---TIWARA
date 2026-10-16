@@ -1,4 +1,5 @@
 // AccountSettings demo data, validators and display tables.
+import type { NameValues } from "./name-schema";
 import {
   Check,
   CircleMinus,
@@ -56,10 +57,6 @@ export interface ConfirmDialog {
 }
 
 export interface SettingsState {
-  first: string;
-  last: string;
-  savedName: [string, string];
-  nameTouched: boolean;
   email: string;
   emailFlow: "edit" | null;
   newEmail: string;
@@ -109,6 +106,11 @@ const DEMO_PERSON: SettingsPerson = {
   phone: "07700 900418",
 };
 
+export const getInitialName = ({
+  first,
+  last,
+}: SettingsPerson = DEMO_PERSON): NameValues => ({ first, last });
+
 /** ?pwnew= prefills the new password (and the current one) for the meter boards. */
 export const EMPTY_PASSWORD = { code: "", next: "", confirm: "" };
 
@@ -117,17 +119,13 @@ export type NotificationSettings = Record<NotificationKey, ChannelSetting>;
 export const getInitialSettingsState = (
   isNew: boolean,
   search: string,
-  { first, last, email, phone }: SettingsPerson = DEMO_PERSON,
+  { email, phone }: SettingsPerson = DEMO_PERSON,
   savedNotifications: Partial<NotificationSettings> = {},
 ): SettingsState => {
   const prefilled = new URLSearchParams(search).get("pwnew") || "";
   const channel = (): ChannelSetting => ({ email: true, sms: false });
 
   return {
-    first,
-    last,
-    savedName: [first, last],
-    nameTouched: false,
     email,
     emailFlow: null,
     newEmail: "",

@@ -2,8 +2,8 @@
 import type { ChangeEvent, ReactNode } from "react";
 import { Check } from "lucide-react";
 import { joinClassNames } from "../../utils/class-names";
-import shared from "../../styles/components/account-settings/account-settings.module.css";
-import fields from "../../styles/components/account-settings/settings-fields.module.css";
+import shared from "../../styles/components/account-settings/index.module.css";
+import fields from "../../styles/components/account-settings/fields.module.css";
 
 /** Section with the heading column on the left (wraps above on narrow containers). */
 export const SettingsSection = ({

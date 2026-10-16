@@ -1,5 +1,5 @@
 // What Account settings saves through: a real account passes its own; demo boards use the stand-in.
-import type { ChannelSetting, NotificationKey } from "./account-settings-logic";
+import type { ChannelSetting, NotificationKey } from "./logic";
 
 export interface AccountSettingsBackend {
   saveName: (first: string, last: string) => Promise<void>;

@@ -2,20 +2,20 @@ import { useEffect, useId, useRef } from "react";
 import { Check } from "lucide-react";
 import { createPortal } from "react-dom";
 import { joinClassNames } from "../../utils/class-names";
-import { SettingsPersonal } from "./settings-personal";
+import { SettingsPersonal } from "./personal";
 import {
   SettingsCalendar,
   SettingsNotifications,
   SettingsPayouts,
-} from "./settings-pages";
-import { SettingsSecurity } from "./settings-security";
+} from "./pages";
+import { SettingsSecurity } from "./security";
 import { useAccountSettings } from "./use-account-settings";
 import type {
   AccountSettingsController,
   AccountSettingsProps,
 } from "./use-account-settings";
-import shared from "../../styles/components/account-settings/account-settings.module.css";
-import dialogStyles from "../../styles/components/account-settings/settings-dialog.module.css";
+import shared from "../../styles/components/account-settings/index.module.css";
+import dialogStyles from "../../styles/components/account-settings/dialog.module.css";
 
 export type {
   AccountSettingsApi,
