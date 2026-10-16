@@ -1,5 +1,5 @@
 begin;
-select plan(49);
+select plan(50);
 
 create function pg_temp.open_business(user_id uuid, business text, business_type text, lat float8, radius int)
 returns uuid
@@ -184,7 +184,7 @@ select public.expire_booking_holds();
 select is((select status from public.bookings where id = (select (first ->> 'id')::uuid from holds)), 'expired', 'the minute job expires lapsed holds');
 
 select throws_ok(
-  $$insert into public.bookings (stylist_id, choices, details, price_pence, fee_pence, minutes, starts_at, ends_at, block_ends_at, status)
+  $$insert into public.bookings (stylist_id, choices, snapshot, price_pence, fee_pence, minutes, starts_at, ends_at, block_ends_at, status)
     select (select shop from ids), '{}', '{}', 5000, 125, 60, starts_at, ends_at, block_ends_at, 'confirmed'
     from public.bookings where stylist_id = (select shop from ids) and status = 'held' limit 1$$,
   '23P01', null, 'the database itself refuses overlapping bookings'
@@ -266,9 +266,20 @@ select ok(
   'an owner reads only their own business''s bookings'
 );
 select throws_ok(
-  $$insert into public.bookings (stylist_id, choices, details, price_pence, fee_pence, minutes, starts_at, ends_at, block_ends_at)
+  $$insert into public.bookings (stylist_id, choices, snapshot, price_pence, fee_pence, minutes, starts_at, ends_at, block_ends_at)
     values ((select shop from ids), '{}', '{}', 0, 0, 60, now(), now() + interval '1 hour', now() + interval '1 hour')$$,
   '42501', null, 'nobody writes bookings directly'
+);
+
+-- a clashing random reference is drawn again
+reset role;
+create sequence public.test_ref_draws;
+alter table public.bookings alter column ref
+  set default ('TH-CLASH' || case when nextval('public.test_ref_draws') = 1 then '' else 'ED' end);
+update public.bookings set ref = 'TH-CLASH' where id = (select (later ->> 'id')::uuid from holds);
+select is(
+  pg_temp.hold((select second from svc), (select day from ids) + 2, '10:00') ->> 'ref',
+  'TH-CLASHED', 'a reference already in use is drawn again'
 );
 
 select * from finish();

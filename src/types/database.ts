@@ -168,7 +168,6 @@ export type Database = {
           choices: NonNullable<Json>;
           client_id: string | null;
           created_at: string;
-          details: NonNullable<Json>;
           ends_at: string;
           fee_pence: number;
           hold_expires_at: string | null;
@@ -180,6 +179,7 @@ export type Database = {
           ref: string;
           reschedule_count: number;
           service_id: string | null;
+          snapshot: NonNullable<Json>;
           starts_at: string;
           status: string;
           stylist_id: string;
@@ -193,7 +193,6 @@ export type Database = {
           choices: NonNullable<Json>;
           client_id?: string | null;
           created_at?: string;
-          details: NonNullable<Json>;
           ends_at: string;
           fee_pence: number;
           hold_expires_at?: string | null;
@@ -205,6 +204,7 @@ export type Database = {
           ref?: string;
           reschedule_count?: number;
           service_id?: string | null;
+          snapshot: NonNullable<Json>;
           starts_at: string;
           status?: string;
           stylist_id: string;
@@ -217,7 +217,6 @@ export type Database = {
           choices?: NonNullable<Json>;
           client_id?: string | null;
           created_at?: string;
-          details?: NonNullable<Json>;
           ends_at?: string;
           fee_pence?: number;
           hold_expires_at?: string | null;
@@ -229,6 +228,7 @@ export type Database = {
           ref?: string;
           reschedule_count?: number;
           service_id?: string | null;
+          snapshot?: NonNullable<Json>;
           starts_at?: string;
           status?: string;
           stylist_id?: string;

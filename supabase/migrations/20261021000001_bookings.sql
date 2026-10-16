@@ -6,9 +6,9 @@ create table public.bookings (
   stylist_id uuid not null references public.stylists (id) on delete cascade,
   client_id uuid references public.profiles (id) on delete set null,
   service_id uuid references public.services (id) on delete set null,
-  -- what was booked, as it was then: service name, chosen options and add-ons (ids, labels, prices)
+  -- the picks (ids), and what they were then: service name, options and add-ons with labels and prices
   choices jsonb not null,
-  details jsonb not null,
+  snapshot jsonb not null,
   price_pence integer not null check (price_pence >= 0),
   fee_pence integer not null check (fee_pence >= 0),
   minutes integer not null check (minutes > 0),
@@ -364,23 +364,34 @@ begin
     if held.id is null then
       secret := encode(extensions.gen_random_bytes(24), 'hex');
 
-      insert into public.bookings (
-        stylist_id, service_id, choices, details, price_pence, fee_pence, minutes, buffer_minutes,
-        starts_at, ends_at, block_ends_at, hold_expires_at, hold_secret_hash, location
-      )
-      values (
-        stylist.id, target_service, choices, quote - 'price_pence' - 'fee_pence' - 'minutes' - 'buffer_minutes',
-        (quote ->> 'price_pence')::integer, (quote ->> 'fee_pence')::integer, (quote ->> 'minutes')::integer,
-        (quote ->> 'buffer_minutes')::integer, slot_start, slot_end,
-        slot_end + make_interval(mins => (quote ->> 'buffer_minutes')::integer),
-        now() + interval '10 minutes', sha256(convert_to(secret, 'UTF8')), point
-      )
-      returning * into held;
+      -- the reference is random, so on the rare clash with an existing one, draw again
+      for attempt in 1..3 loop
+        begin
+          insert into public.bookings (
+            stylist_id, service_id, choices, snapshot, price_pence, fee_pence, minutes, buffer_minutes,
+            starts_at, ends_at, block_ends_at, hold_expires_at, hold_secret_hash, location
+          )
+          values (
+            stylist.id, target_service, choices, quote - 'price_pence' - 'fee_pence' - 'minutes' - 'buffer_minutes',
+            (quote ->> 'price_pence')::integer, (quote ->> 'fee_pence')::integer, (quote ->> 'minutes')::integer,
+            (quote ->> 'buffer_minutes')::integer, slot_start, slot_end,
+            slot_end + make_interval(mins => (quote ->> 'buffer_minutes')::integer),
+            now() + interval '10 minutes', sha256(convert_to(secret, 'UTF8')), point
+          )
+          returning * into held;
+
+          exit;
+        exception when unique_violation then
+          if attempt = 3 then
+            raise;
+          end if;
+        end;
+      end loop;
     else
       update public.bookings
       set service_id = target_service,
         choices = hold_booking.choices,
-        details = quote - 'price_pence' - 'fee_pence' - 'minutes' - 'buffer_minutes',
+        snapshot = quote - 'price_pence' - 'fee_pence' - 'minutes' - 'buffer_minutes',
         price_pence = (quote ->> 'price_pence')::integer,
         fee_pence = (quote ->> 'fee_pence')::integer,
         minutes = (quote ->> 'minutes')::integer,
