@@ -5,7 +5,7 @@ import type {
   PaymentMode,
 } from "../../../../components/checkout/data";
 import type { CheckoutSheetProps } from "../../../../components/checkout/use-checkout";
-import { PAST_TONE } from "../../core/data";
+import { PAST_TONE } from "../../core/constants";
 import { getAvatarSrc, parseAmountLabel, timeRange } from "../../core/format";
 import {
   getClient,

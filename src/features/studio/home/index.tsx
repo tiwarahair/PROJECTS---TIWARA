@@ -2,7 +2,8 @@ import { ResponsiveImage } from "../../../components/responsive-image/responsive
 import type { CSSProperties, PointerEvent } from "react";
 import { Check, ChevronRight, Lock, TriangleAlert, X } from "lucide-react";
 import { joinClassNames } from "../../../utils/class-names";
-import { GATE_REASON, RANGE_DATA } from "../core/data";
+import { GATE_REASON } from "../core/constants";
+import { RANGE_DATA } from "../core/seed-dashboard";
 import { getDecoratedBookings } from "../bookings/decorate";
 import type { DecoratedBooking } from "../bookings/decorate";
 import { copyText, makeChart } from "../core/format";

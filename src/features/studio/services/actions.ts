@@ -3,7 +3,7 @@ import { defaultAddons, platformCustomisations } from "../../../data";
 import type { ServiceType } from "../../../types/service-type";
 import { getSpec } from "../../../utils/services";
 import type { StudioActions, StudioContext } from "../core/actions";
-import { ICONS, TAXONOMY } from "../core/data";
+import { ICONS, TAXONOMY } from "../core/constants";
 import { timeToMinutes } from "../core/format";
 import {
   formatAddon,

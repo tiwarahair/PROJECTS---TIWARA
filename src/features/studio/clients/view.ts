@@ -2,7 +2,7 @@
 import type { ChangeEvent, MouseEvent } from "react";
 import { Ban, Trash } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
-import { CONTACT_ICONS, PAST_TONE } from "../core/data";
+import { CONTACT_ICONS, PAST_TONE } from "../core/constants";
 import {
   dateLabel,
   getAvatarSrc,

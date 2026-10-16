@@ -4,10 +4,10 @@ import {
   BLOCK_COLORS,
   BOOKING_LINK,
   CATEGORY_COLOURS,
-  CLIENTS,
   NO_CATEGORY_TONE,
   STUDIO_STYLIST_ID,
-} from "./data";
+} from "./constants";
+import { CLIENTS } from "./seed-clients";
 import {
   dateAt,
   durationToMinutes,

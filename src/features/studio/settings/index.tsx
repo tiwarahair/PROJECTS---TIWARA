@@ -13,7 +13,7 @@ import { RulesPage } from "./rules";
 import { getSettingsView } from "./view";
 import { PROFILE_FORM_ID } from "./profile/use-profile-form";
 import type { SettingsView } from "./view";
-import { GATE_REASON } from "../core/data";
+import { GATE_REASON } from "../core/constants";
 import type { StudioController } from "../core/use-studio";
 import styles from "../../../styles/features/studio/settings/index.module.css";
 import { getProfilePath } from "../core/model";

@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { CLIENTS } from "../data";
+import { CLIENTS } from "../seed-clients";
 
 describe("Studio seed clients", () => {
   it("client photos point at bundled assets, not raw img/ paths", () => {

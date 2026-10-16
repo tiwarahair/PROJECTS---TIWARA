@@ -4,7 +4,7 @@ import type { SearchSelectOption } from "../../../../components/search-select/se
 import { serviceTypes } from "../../../../data";
 import type { ServiceType } from "../../../../types/service-type";
 import { getSwatches } from "../catalog-sheets-view";
-import { NO_CATEGORY_TONE, TAXONOMY } from "../../core/data";
+import { NO_CATEGORY_TONE, TAXONOMY } from "../../core/constants";
 import { formatMinutes } from "../../core/format";
 import {
   getCategoryById,

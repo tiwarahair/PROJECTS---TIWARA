@@ -1,6 +1,6 @@
 // Studio's core actions: toasts, sheets, the action menu, pages, setup steps, the 2FA flow, booking status, blocked
 // time, past bookings, rebooking and scrolling.
-import { ICONS } from "./data";
+import { ICONS } from "./constants";
 import { durationToMinutes, timeToMinutes } from "./format";
 import { getServiceDuration, getSteps, getWorkingHours } from "./model";
 import type { StudioSync } from "./sync";
