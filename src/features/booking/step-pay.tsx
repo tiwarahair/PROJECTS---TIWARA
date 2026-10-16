@@ -6,7 +6,7 @@ import {
   useStripe,
 } from "@stripe/react-stripe-js";
 import type { StripeExpressCheckoutElementConfirmEvent } from "@stripe/stripe-js";
-import { ArrowLeft, ArrowRight, Check, CircleAlert, Lock } from "lucide-react";
+import { ArrowLeft, ArrowRight, Check, CircleAlert } from "lucide-react";
 import { useState } from "react";
 import { stripePromise } from "../../lib/stripe";
 import { joinClassNames } from "../../utils/class-names";
@@ -194,10 +194,6 @@ const PayForm = ({ booking }: StepPayProps) => {
               : `Pay ${money.dueToday} & confirm`}{" "}
             <ArrowRight size={17} strokeWidth={2} />
           </button>
-        </div>
-        <div className={styles.encrypted}>
-          <Lock size={12} strokeWidth={2} /> Encrypted and processed by Stripe.
-          We never see your card details.
         </div>
       </div>
     </>
