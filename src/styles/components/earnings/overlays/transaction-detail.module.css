@@ -1,0 +1,127 @@
+.statusRow {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-top: 8px;
+}
+
+.note {
+  margin-top: 14px;
+  background: var(--fill-quiet);
+  border-radius: var(--radius-md);
+  padding: 12px 14px;
+  font-size: 14.5px;
+  line-height: 1.5;
+  color: var(--neutral-600);
+}
+
+.facts {
+  margin-top: 14px;
+}
+
+.fact {
+  display: flex;
+  justify-content: space-between;
+  gap: 14px;
+  padding: 11px 0;
+  border-bottom: 1px solid var(--border-subtle);
+  font-size: 14.5px;
+}
+
+.factLabel {
+  color: var(--text-secondary);
+}
+
+.factStrong {
+  font-weight: 600;
+  text-align: right;
+}
+
+.factValue {
+  font-weight: 500;
+  text-align: right;
+}
+
+.factButton {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 14px;
+  width: 100%;
+  padding: 11px 0;
+  border: none;
+  border-bottom: 1px solid var(--border-subtle);
+  background: transparent;
+  font: inherit;
+  font-size: 14.5px;
+  color: inherit;
+  cursor: pointer;
+  text-align: left;
+}
+
+.factLink {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-weight: 600;
+  color: var(--accent-700);
+}
+
+.factNumeric {
+  font-weight: 500;
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+}
+
+.moneyRow {
+  display: flex;
+  justify-content: space-between;
+  padding: 9px 0;
+  font-size: 14.5px;
+  color: var(--neutral-600);
+}
+
+.moneyValue {
+  font-variant-numeric: tabular-nums;
+  color: var(--text-primary);
+}
+
+.moneyNet {
+  display: flex;
+  justify-content: space-between;
+  padding: 9px 0;
+  border-top: 1px solid rgba(26, 23, 20, 0.1);
+  font-size: 15px;
+  font-weight: 600;
+}
+
+.payoutRow {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 14px;
+  padding: 13px 0;
+  margin-top: 6px;
+  border-bottom: 1px solid var(--border-subtle);
+  font-size: 14.5px;
+}
+
+.payoutLink {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  border: none;
+  background: none;
+  padding: 0;
+  font: inherit;
+  font-size: 14.5px;
+  font-weight: 600;
+  color: var(--accent-700);
+  cursor: pointer;
+}
+
+.payoutNone {
+  font-weight: 500;
+  text-align: right;
+  color: var(--neutral-600);
+}

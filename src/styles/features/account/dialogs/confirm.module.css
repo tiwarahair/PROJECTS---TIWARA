@@ -1,0 +1,27 @@
+.text {
+  margin: 8px 0 0;
+  font-size: 15px;
+  line-height: 1.55;
+  color: var(--neutral-700, #3d3730);
+}
+
+.primary {
+  flex: 1 1 120px;
+  height: 48px;
+  border: none;
+  border-radius: var(--radius-full);
+  background: var(--accent-700);
+  color: var(--neutral-50);
+  font: inherit;
+  font-size: 15px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.primary:hover {
+  background: var(--accent-900) !important;
+}
+
+.primary:active {
+  transform: scale(0.98) !important;
+}

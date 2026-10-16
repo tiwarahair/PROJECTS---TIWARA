@@ -1,0 +1,366 @@
+.dateLabel {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  font-size: 12.5px;
+  font-weight: 600;
+  color: var(--neutral-600);
+}
+
+.modal {
+  overflow-y: auto;
+  background: #fff;
+  box-shadow: var(--shadow-modal);
+}
+
+.modalBody {
+  padding: 20px 22px 0;
+}
+
+.modalHead {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.modalTitle {
+  font-size: 17px;
+  font-weight: 600;
+}
+
+.modalClose {
+  width: 34px;
+  height: 34px;
+  border-radius: var(--radius-full);
+  border: 1px solid var(--border-strong);
+  background: transparent;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--text-primary);
+  cursor: pointer;
+}
+
+.sectionLabel {
+  font-size: 14px;
+  font-weight: 600;
+  margin: 18px 0 8px;
+}
+
+.periods {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.periodChip {
+  height: 34px;
+  padding: 0 14px;
+  border-radius: var(--radius-full);
+  font: inherit;
+  font-size: 13.5px;
+  font-weight: 600;
+  cursor: pointer;
+  transition:
+    background-color 0.16s cubic-bezier(0.2, 0.8, 0.2, 1),
+    color 0.16s;
+}
+
+.customDates {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+  margin-top: 10px;
+}
+
+.dateInput {
+  height: 40px;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--border-strong);
+  padding: 0 10px;
+  font: inherit;
+  font-size: 14.5px;
+  color: var(--text-primary);
+  background: #fff;
+}
+
+.exportRange {
+  font-size: 13.5px;
+  color: var(--text-secondary);
+  margin-top: 8px;
+  font-variant-numeric: tabular-nums;
+}
+
+.formats {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.format {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  width: 100%;
+  text-align: left;
+  padding: 12px 14px;
+  border-radius: var(--radius-md);
+  font: inherit;
+  cursor: pointer;
+  transition:
+    background-color 0.16s cubic-bezier(0.2, 0.8, 0.2, 1),
+    border-color 0.16s;
+}
+
+.ring {
+  width: 18px;
+  height: 18px;
+  border-radius: var(--radius-full);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex: 0 0 auto;
+  margin-top: 1px;
+}
+
+.dot {
+  width: 8px;
+  height: 8px;
+  border-radius: var(--radius-full);
+  background: var(--accent-700);
+  transition: opacity 0.14s;
+}
+
+.formatLabel {
+  display: block;
+  font-size: 15px;
+  font-weight: 600;
+}
+
+.formatSub {
+  display: block;
+  font-size: 13.5px;
+  color: var(--text-secondary);
+  margin-top: 1px;
+}
+
+.modalActions {
+  display: flex;
+  gap: 8px;
+  padding: 20px 22px 22px;
+}
+
+.cancel {
+  flex: 1;
+  height: 44px;
+  border-radius: var(--radius-full);
+  border: 1px solid var(--border-strong);
+  background: transparent;
+  font: inherit;
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--text-primary);
+  cursor: pointer;
+}
+
+.cancel:hover {
+  background: var(--fill-quiet) !important;
+}
+
+.download {
+  flex: 1.4;
+  height: 44px;
+  border-radius: var(--radius-full);
+  border: none;
+  background: var(--accent-700);
+  font: inherit;
+  font-size: 15px;
+  font-weight: 600;
+  color: #fff;
+  cursor: pointer;
+  transition:
+    background-color 0.16s,
+    transform 0.12s cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+
+.download:hover {
+  background: var(--action-primary-hover) !important;
+}
+
+.download:active {
+  transform: scale(0.98) !important;
+}
+
+.exportScrimIn {
+  animation: eFadeIn 0.2s cubic-bezier(0.2, 0.8, 0.2, 1) both;
+}
+
+.exportScrimOut {
+  animation: eFadeOut 0.18s cubic-bezier(0.4, 0, 0.7, 0.2) both;
+}
+
+.modalDesk {
+  top: 50%;
+  left: 50%;
+  right: auto;
+  bottom: auto;
+  width: min(460px, calc(100% - 32px));
+  max-height: calc(100% - 48px);
+  border-radius: var(--radius-lg);
+  animation: eModIn 0.2s cubic-bezier(0.23, 1, 0.32, 1) both;
+}
+
+.modalMobile {
+  top: auto;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  width: auto;
+  max-height: 90%;
+  border-radius: var(--radius-lg) var(--radius-lg) 0 0;
+  animation: eDrU 0.32s cubic-bezier(0.32, 0.72, 0, 1) both;
+}
+
+.modalDesk.out {
+  animation: eModOut 0.16s cubic-bezier(0.4, 0, 0.7, 0.2) both;
+}
+
+.modalMobile.out {
+  animation: eDrUo 0.2s cubic-bezier(0.4, 0, 0.7, 0.2) both;
+}
+
+.chipOn {
+  border: 1px solid #1a1714;
+  background: #1a1714;
+  color: var(--neutral-100);
+}
+
+.chipOff {
+  border: 1px solid var(--border-strong);
+  background: transparent;
+  color: var(--text-primary);
+}
+
+.formatOn {
+  border: 1px solid var(--accent-700);
+  background: var(--accent-wash);
+}
+
+.formatOff {
+  border: 1px solid var(--border-subtle);
+  background: transparent;
+}
+
+.ringOn {
+  border: 1.5px solid var(--accent-700);
+}
+
+.ringOff {
+  border: 1.5px solid var(--border-strong);
+}
+
+.dotOn {
+  opacity: 1;
+}
+
+.dotOff {
+  opacity: 0;
+}
+
+.formatLabelOn {
+  color: var(--accent-700);
+}
+
+.formatLabelOff {
+  color: var(--text-primary);
+}
+
+/* keyframes are scoped per file in CSS modules, so shared ones are repeated */
+
+@keyframes eDrU {
+  from {
+    transform: translateY(100%);
+  }
+  to {
+    transform: none;
+  }
+}
+
+@keyframes eDrUo {
+  from {
+    transform: none;
+  }
+  to {
+    transform: translateY(100%);
+  }
+}
+
+@keyframes eFadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes eFadeOut {
+  from {
+    opacity: 1;
+  }
+  to {
+    opacity: 0;
+  }
+}
+
+@keyframes eModIn {
+  from {
+    opacity: 0;
+    transform: translate(-50%, -50%) scale(0.96);
+  }
+  to {
+    opacity: 1;
+    transform: translate(-50%, -50%) scale(1);
+  }
+}
+
+@keyframes eModOut {
+  from {
+    opacity: 1;
+    transform: translate(-50%, -50%) scale(1);
+  }
+  to {
+    opacity: 0;
+    transform: translate(-50%, -50%) scale(0.97);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  @keyframes eDrU {
+    from {
+      opacity: 0;
+    }
+    to {
+      opacity: 1;
+    }
+  }
+  @keyframes eDrUo {
+    from {
+      opacity: 1;
+    }
+    to {
+      opacity: 0;
+    }
+  }
+  @keyframes eModIn {
+    from {
+      opacity: 0;
+      transform: translate(-50%, -50%);
+    }
+    to {
+      opacity: 1;
+      transform: translate(-50%, -50%);
+    }
+  }
+}

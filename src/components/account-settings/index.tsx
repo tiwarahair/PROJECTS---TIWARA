@@ -3,11 +3,9 @@ import { Check } from "lucide-react";
 import { createPortal } from "react-dom";
 import { joinClassNames } from "../../utils/class-names";
 import { SettingsPersonal } from "./personal";
-import {
-  SettingsCalendar,
-  SettingsNotifications,
-  SettingsPayouts,
-} from "./pages";
+import { SettingsCalendar } from "./calendar";
+import { SettingsNotifications } from "./notifications";
+import { SettingsPayouts } from "./payouts";
 import { SettingsSecurity } from "./security";
 import { useAccountSettings } from "./use-account-settings";
 import type {

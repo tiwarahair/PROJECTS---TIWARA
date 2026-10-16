@@ -3,9 +3,9 @@ import { ResponsiveImage } from "../../components/responsive-image/responsive-im
 import type { CSSProperties, KeyboardEvent, MouseEvent } from "react";
 import { Link } from "react-router";
 import { joinClassNames } from "../../utils/class-names";
-import type { BookingCardView, QuickAction } from "./account-view";
+import type { BookingCardView, QuickAction } from "./view";
 import styles from "../../styles/features/account/bookings-sections.module.css";
-import ui from "../../styles/features/account/account-ui.module.css";
+import ui from "../../styles/features/account/ui.module.css";
 
 const CalendarIcon = () => (
   <Calendar className={styles.factIcon} size={15} strokeWidth={1.5} />

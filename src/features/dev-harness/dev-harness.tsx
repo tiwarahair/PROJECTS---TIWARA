@@ -2,14 +2,14 @@ import type { ReactNode } from "react";
 import { useParams } from "react-router";
 import { AccountSettings } from "../../components/account-settings";
 import type { AccountSettingsProps } from "../../components/account-settings";
-import { AddressFinder } from "../../components/address-finder/address-finder";
+import { AddressFinder } from "../../components/address-finder";
 import { AllergyField } from "../../components/allergy-field/allergy-field";
 import { BusinessDetails } from "../../components/business-details";
 import type { BusinessDetailsProps } from "../../components/business-details";
 import { CheckoutSheet } from "../../components/checkout/checkout-sheet";
 import type { CheckoutSheetProps } from "../../components/checkout/checkout-sheet";
-import { Earnings } from "../../components/earnings/earnings";
-import type { EarningsProps } from "../../components/earnings/earnings";
+import { Earnings } from "../../components/earnings";
+import type { EarningsProps } from "../../components/earnings";
 import { PaymentPolicy } from "../../components/payment-policy";
 import type { PaymentPolicyProps } from "../../components/payment-policy";
 import { SearchSelect } from "../../components/search-select/search-select";
@@ -18,7 +18,7 @@ import { StylistCard } from "../../components/stylist-card/stylist-card";
 import { TaxDetailsForm } from "../../components/tax-details-form/tax-details-form";
 import type { TaxDetailsFormProps } from "../../components/tax-details-form/tax-details-form";
 import type { StylistCardProps } from "../../components/stylist-card/stylist-card";
-import type { AddressFixture } from "../../components/address-finder/use-address-finder";
+import type { AddressFixture } from "../../components/address-finder/data";
 import styles from "../../styles/features/dev-harness/dev-harness.module.css";
 
 const ADDRESS_FIXTURES: AddressFixture[] = [

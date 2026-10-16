@@ -3,7 +3,7 @@ import { Link } from "react-router";
 import { StylistCard } from "../../components/stylist-card/stylist-card";
 import type { Stylist } from "../../types/stylist";
 import styles from "../../styles/features/account/profile-sections.module.css";
-import ui from "../../styles/features/account/account-ui.module.css";
+import ui from "../../styles/features/account/ui.module.css";
 
 export const FavouritesSection = ({
   favourites,

@@ -1,4 +1,4 @@
-import { Earnings } from "../../../components/earnings/earnings";
+import { Earnings } from "../../../components/earnings";
 import { joinClassNames } from "../../../utils/class-names";
 import { CLIENTS } from "../core/seed-clients";
 import { getClient, hasTwoFactor, isLive } from "../core/model";

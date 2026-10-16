@@ -1,0 +1,169 @@
+.drawer {
+  right: 0;
+  bottom: 0;
+  background: #fff;
+  box-shadow: var(--shadow-sheet);
+  display: flex;
+  flex-direction: column;
+}
+
+.drawerHead {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 14px 18px;
+  border-bottom: 1px solid var(--border-subtle);
+}
+
+.iconButton {
+  width: 36px;
+  height: 36px;
+  border-radius: var(--radius-full);
+  border: 1px solid var(--border-strong);
+  background: transparent;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--text-primary);
+  cursor: pointer;
+  flex: 0 0 auto;
+}
+
+.drawerTitle {
+  flex: 1;
+  font-size: 16.5px;
+  font-weight: 600;
+}
+
+.drawerBody {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  padding: 18px 20px 26px;
+}
+
+.scrimIn {
+  animation: eFadeIn 0.24s cubic-bezier(0.2, 0.8, 0.2, 1) both;
+}
+
+.scrimOut {
+  animation: eFadeOut 0.2s cubic-bezier(0.4, 0, 0.7, 0.2) both;
+}
+
+.drawerDesk {
+  top: 0;
+  left: auto;
+  width: min(440px, 100%);
+  max-height: none;
+  border-radius: var(--radius-lg) 0 0 var(--radius-lg);
+  animation: eDrR 0.3s cubic-bezier(0.32, 0.72, 0, 1) both;
+}
+
+.drawerMobile {
+  top: auto;
+  left: 0;
+  width: auto;
+  max-height: 88%;
+  border-radius: var(--radius-lg) var(--radius-lg) 0 0;
+  animation: eDrU 0.32s cubic-bezier(0.32, 0.72, 0, 1) both;
+}
+
+.drawerDesk.out {
+  animation: eDrRo 0.2s cubic-bezier(0.4, 0, 0.7, 0.2) both;
+}
+
+.drawerMobile.out {
+  animation: eDrUo 0.2s cubic-bezier(0.4, 0, 0.7, 0.2) both;
+}
+
+/* keyframes are scoped per file in CSS modules, so shared ones are repeated */
+
+@keyframes eDrR {
+  from {
+    transform: translateX(100%);
+  }
+  to {
+    transform: none;
+  }
+}
+
+@keyframes eDrRo {
+  from {
+    transform: none;
+  }
+  to {
+    transform: translateX(100%);
+  }
+}
+
+@keyframes eDrU {
+  from {
+    transform: translateY(100%);
+  }
+  to {
+    transform: none;
+  }
+}
+
+@keyframes eDrUo {
+  from {
+    transform: none;
+  }
+  to {
+    transform: translateY(100%);
+  }
+}
+
+@keyframes eFadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes eFadeOut {
+  from {
+    opacity: 1;
+  }
+  to {
+    opacity: 0;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  @keyframes eDrR {
+    from {
+      opacity: 0;
+    }
+    to {
+      opacity: 1;
+    }
+  }
+  @keyframes eDrU {
+    from {
+      opacity: 0;
+    }
+    to {
+      opacity: 1;
+    }
+  }
+  @keyframes eDrRo {
+    from {
+      opacity: 1;
+    }
+    to {
+      opacity: 0;
+    }
+  }
+  @keyframes eDrUo {
+    from {
+      opacity: 1;
+    }
+    to {
+      opacity: 0;
+    }
+  }
+}
