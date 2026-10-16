@@ -1,4 +1,5 @@
 import { useEffect, useLayoutEffect, useRef, useState } from "react";
+import { Check } from "lucide-react";
 import { Link } from "react-router";
 import { usePasswordChecker } from "../../hooks/use-password-checker";
 import { PasswordMeter } from "../../components/password-meter/password-meter";
@@ -51,21 +52,6 @@ const getInitialState = (): SaveDetailsState => {
     resent: false,
   };
 };
-
-const CheckIcon = ({ size }: { size: number }) => (
-  <svg
-    width={size}
-    height={size}
-    viewBox="0 0 24 24"
-    fill="none"
-    stroke="#fffefb"
-    strokeWidth="2.5"
-    strokeLinecap="round"
-    strokeLinejoin="round"
-  >
-    <path d="M20 6 9 17l-5-5"></path>
-  </svg>
-);
 
 /**
  * Set a password for a guest booking, route "/save-details": the form,
@@ -201,7 +187,7 @@ export const SaveDetailsPage = () => {
             className={styles.done}
           >
             <div className={styles.badge}>
-              <CheckIcon size={30} />
+              <Check size={30} strokeWidth={2.5} color="#fffefb" />
             </div>
             <h1 className={styles.title}>Your details are saved</h1>
             <p className={styles.lead}>
@@ -228,19 +214,12 @@ export const SaveDetailsPage = () => {
             </p>
             {resent && (
               <div role="status" className={styles.sentNote}>
-                <svg
-                  width="16"
-                  height="16"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="var(--accent-700)"
-                  strokeWidth="2.2"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
+                <Check
+                  size={16}
+                  strokeWidth={2.2}
+                  color="var(--accent-700)"
                   className={styles.sentIcon}
-                >
-                  <path d="M20 6 9 17l-5-5"></path>
-                </svg>
+                />
                 <span>
                   {`Check your email. We've sent a new link to ${email}.`}
                 </span>

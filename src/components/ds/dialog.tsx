@@ -1,4 +1,5 @@
 import type { CSSProperties, ReactNode } from "react";
+import { X } from "lucide-react";
 import styles from "../../styles/components/ds/dialog.module.css";
 
 /** Modal dialog: 24px radius, overlay shadow, scrim click closes. */
@@ -38,17 +39,7 @@ export const Dialog = ({
             onClick={onClose}
             aria-label="Close"
           >
-            <svg
-              width="20"
-              height="20"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="2"
-              strokeLinecap="round"
-            >
-              <path d="M18 6 6 18M6 6l12 12" />
-            </svg>
+            <X size={20} strokeWidth={2} />
           </button>
         </div>
         <div className={styles.body}>{children}</div>

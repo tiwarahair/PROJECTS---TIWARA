@@ -1,10 +1,12 @@
 import { useEffect, useRef, useState } from "react";
+import { X } from "lucide-react";
 import { useLocation, useNavigate } from "react-router";
 import { useEntered } from "../../hooks/use-entered";
 import { closeLoginSheet } from "../../stores/favourites-slice";
 import { useAppDispatch, useAppSelector } from "../../stores/hooks";
 import { getScreenPath } from "../../features/onboarding/onboarding-routes";
 import { writeSession } from "../../utils/page-flags";
+import { FavouritesHeartIcon } from "../icons/custom-icons";
 
 import styles from "../../styles/components/fav-login-sheet/fav-login-sheet.module.css";
 
@@ -94,31 +96,11 @@ const LoginSheetCard = ({ stylistId }: LoginSheetCardProps) => {
           aria-label="Close"
           onClick={() => setClosing(true)}
         >
-          <svg
-            width="20"
-            height="20"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            strokeWidth="2"
-            strokeLinecap="round"
-          >
-            <path d="M18 6 6 18M6 6l12 12" />
-          </svg>
+          <X size={20} strokeWidth={2} />
         </button>
         <div className={styles.header}>
           <div className={styles.icon}>
-            <svg
-              width="22"
-              height="22"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="2"
-              strokeLinejoin="round"
-            >
-              <path d="M12 20.5s-7.5-4.6-9.2-9.4C1.6 7.6 3.9 4.5 7.2 4.5c2 0 3.6 1.1 4.8 2.8 1.2-1.7 2.8-2.8 4.8-2.8 3.3 0 5.6 3.1 4.4 6.6-1.7 4.8-9.2 9.4-9.2 9.4z" />
-            </svg>
+            <FavouritesHeartIcon size={22} strokeWidth={2} />
           </div>
           <h2 id="twfav-h" className={styles.title}>
             Log in to save stylists

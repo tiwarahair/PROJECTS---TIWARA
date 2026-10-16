@@ -1,4 +1,5 @@
 import type { ReactNode } from "react";
+import { Check } from "lucide-react";
 import { joinClassNames } from "../../utils/class-names";
 import styles from "../../styles/components/ds/choice.module.css";
 import { useControllable } from "./use-controllable";
@@ -41,20 +42,7 @@ export const Checkbox = ({
       <span
         className={joinClassNames(styles.box, isChecked && styles.boxChecked)}
       >
-        {isChecked && (
-          <svg
-            width="12"
-            height="12"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="#fffefb"
-            strokeWidth="3"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-          >
-            <path d="M20 6 9 17l-5-5" />
-          </svg>
-        )}
+        {isChecked && <Check size={12} strokeWidth={3} color="#fffefb" />}
       </span>
       {label}
     </label>

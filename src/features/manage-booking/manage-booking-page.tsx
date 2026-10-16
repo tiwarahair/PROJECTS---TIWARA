@@ -1,4 +1,5 @@
 import { useEffect, useLayoutEffect, useRef, useState } from "react";
+import { Calendar, Check, MapPin } from "lucide-react";
 import { Link, useNavigate } from "react-router";
 import { getAssetUrl } from "../../utils/asset-url";
 import { getSearchParams } from "../../utils/page-flags";
@@ -150,31 +151,11 @@ export const ManageBookingPage = ({
             <div className={styles.options}>{booking.options}</div>
             <div className={styles.facts}>
               <span className={styles.fact}>
-                <svg
-                  width="15"
-                  height="15"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="1.5"
-                >
-                  <rect x="3" y="4" width="18" height="18" rx="3"></rect>
-                  <path d="M3 10h18M8 2v4M16 2v4"></path>
-                </svg>
+                <Calendar size={15} strokeWidth={1.5} />
                 {booking.when}
               </span>
               <span className={styles.fact}>
-                <svg
-                  width="15"
-                  height="15"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="1.5"
-                >
-                  <path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0z"></path>
-                  <circle cx="12" cy="10" r="3"></circle>
-                </svg>
+                <MapPin size={15} strokeWidth={1.8} />
                 {`${booking.stylist} · ${booking.area}`}
               </span>
             </div>
@@ -229,18 +210,7 @@ export const ManageBookingPage = ({
       )}
       {!!state.toast && (
         <div role="status" data-mb-anim="1" className={toastStyles.toast}>
-          <svg
-            width="18"
-            height="18"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="var(--brand-yellow)"
-            strokeWidth="2.2"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-          >
-            <path d="M5 12l5 5L20 7"></path>
-          </svg>
+          <Check size={18} strokeWidth={2.2} color="var(--brand-yellow)" />
           {state.toast}
         </div>
       )}
