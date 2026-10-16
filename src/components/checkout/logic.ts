@@ -1,0 +1,381 @@
+// CheckoutSheet money maths and initial state.
+import { roundToPence } from "../../utils/money";
+import { BOOKINGS } from "./data";
+import type {
+  CheckoutBooking,
+  CheckoutMoney,
+  CheckoutSeedProps,
+  CheckoutState,
+  CheckoutView,
+  PayMethod,
+  RecordVia,
+} from "./data";
+
+export const parsePounds = (value: string): number => {
+  const parsed = parseFloat(String(value || "").replace(/[^0-9.]/g, ""));
+
+  return isNaN(parsed) ? 0 : roundToPence(parsed);
+};
+
+/** Which demo booking a scenario uses; a host booking is "live". */
+const getBookingKey = (scenario: string, hasBooking: boolean): string =>
+  hasBooking
+    ? "live"
+    : ({
+        reduce: "nia",
+        "reduce-review": "nia",
+        link: "chi",
+        awaiting: "chi",
+        cash: "tola",
+        unpaid: "tola",
+      }[scenario] ?? (/^(fee|waive)/.test(scenario) ? "kemi" : "zainab"));
+
+/** Totals, method and steps for the current state. */
+export const getMoney = (
+  state: CheckoutState,
+  booking: CheckoutBooking,
+): CheckoutMoney => {
+  const isCardOk =
+    !!booking.card && (state.mode === "deposit" || state.mode === "card");
+
+  let lineTotal = 0;
+
+  for (const { base, adjustment } of state.lines)
+    lineTotal += base + adjustment;
+
+  const items = roundToPence(lineTotal);
+  const balance = roundToPence(items - state.paid);
+  const due = Math.max(0, balance);
+  const refundDue = Math.max(0, roundToPence(-balance));
+
+  const getSelectedTip = () => {
+    if (state.tip === "custom") return parsePounds(state.tipCustom);
+
+    if (typeof state.tip === "number")
+      return roundToPence((items * state.tip) / 100);
+
+    return 0;
+  };
+
+  const selectedTip = getSelectedTip();
+  const isPayNeeded = due > 0 || selectedTip > 0 || !!state.tipOpen;
+  let method: PayMethod | "none" = isPayNeeded ? state.method : "none";
+
+  if (method === "card" && !isCardOk) method = "link";
+
+  const tip = method === "link" || method === "none" ? 0 : selectedTip;
+  const charge = roundToPence(due + tip);
+
+  const cardFee =
+    (method === "card" || method === "link") && charge > 0
+      ? roundToPence(charge * 0.015 + 0.2)
+      : 0;
+
+  const steps: CheckoutView[] = [
+    "items",
+    ...(isPayNeeded ? (["pay"] as const) : []),
+    ...(isPayNeeded && method !== "link" ? (["tip"] as const) : []),
+    "review",
+  ];
+
+  const bookFee = state.paid > 0 ? roundToPence(state.paid * 0.015 + 0.5) : 0;
+
+  return {
+    items,
+    due,
+    refundDue,
+    selectedTip,
+    tip,
+    charge,
+    cardFee,
+    method,
+    steps,
+    bookFee,
+    cardOk: isCardOk,
+  };
+};
+
+/** The checkout outcome, and the status it leaves. */
+export const getFinalized = (
+  state: CheckoutState,
+  booking: CheckoutBooking,
+): Pick<CheckoutState, "done" | "status"> => {
+  const money = getMoney(state, booking);
+
+  return {
+    done: {
+      method: money.method,
+      via: state.method === "link" ? state.linkVia : state.recordVia,
+      charged: money.charge,
+      tip: money.tip,
+      refundAuto: money.refundDue,
+    },
+    status: money.method === "link" ? "awaiting" : "paid",
+  };
+};
+
+/** The initial state for a scenario or a host booking. */
+export const getInitialCheckout = ({
+  scenario = "arrived",
+  booking: hostBooking,
+  start,
+  done,
+  refunded,
+  linkPaid,
+}: CheckoutSeedProps): CheckoutState => {
+  const bookingKey = getBookingKey(scenario, !!hostBooking);
+  const booking = hostBooking ?? BOOKINGS[bookingKey]!;
+
+  const state: CheckoutState = {
+    bookingKey,
+    mode: booking.mode,
+    paid: booking.paid,
+    isNonRefundable: false,
+    view: "detail",
+    direction: 0,
+    lines: [
+      {
+        id: 1,
+        name: booking.service,
+        subtitle: booking.meta,
+        base: booking.price,
+        adjustment: 0,
+        reason: "",
+      },
+      ...booking.addons.map(([name, price], index) => ({
+        id: index + 2,
+        name,
+        subtitle: "Add-on",
+        base: price,
+        adjustment: 0,
+        reason: "",
+      })),
+    ],
+    nextLineId: 10,
+    adjustingLineId: null,
+    tip: "none",
+    tipCustom: "",
+    tipOpen: false,
+    method:
+      booking.card && (booking.mode === "deposit" || booking.mode === "card")
+        ? "card"
+        : "link",
+    linkVia: "sms",
+    recordVia: "cash",
+    tipReceived: "",
+    status: "arrived",
+    decline: null,
+    tries: 2,
+    busy: false,
+    fromDone: false,
+    refundKind: "full",
+    refundAmount: "",
+    refundReason: "",
+    refundTried: false,
+    refundFinal: 0,
+    refunded: 0,
+    refundLast: "",
+    dialog: null,
+    resendVia: "email",
+    toast: "",
+    done: null,
+  };
+
+  const finalize = () => Object.assign(state, getFinalized(state, booking));
+
+  if (hostBooking) {
+    if (Array.isArray(hostBooking.lines))
+      state.lines = hostBooking.lines.map((line, index) => ({
+        id: index + 1,
+        adjustment: 0,
+        reason: "",
+        name: "",
+        subtitle: "",
+        base: 0,
+        ...line,
+      }));
+
+    state.view = start || "items";
+
+    if (done) {
+      state.done = {
+        method: done.method ?? "none",
+        via: done.via ?? "",
+        charged: done.charged ?? 0,
+        tip: done.tip ?? 0,
+        refundAuto: done.refundAuto ?? 0,
+      };
+
+      state.status = done.method === "link" && !linkPaid ? "awaiting" : "paid";
+
+      if (done.tip && typeof done.tip === "number") {
+        state.tip = "custom";
+        state.tipCustom = String(done.tip);
+      }
+
+      if (done.method === "record") {
+        state.method = "record";
+        state.recordVia = (done.via as RecordVia) || "cash";
+      }
+
+      if (done.method === "link")
+        state.linkVia = (done.via as "sms" | "email") || "sms";
+    }
+
+    state.refunded = refunded || 0;
+
+    return state;
+  }
+
+  switch (scenario) {
+    case "items":
+      state.view = "items";
+      break;
+    case "tip":
+      state.view = "tip";
+      state.tip = 15;
+      break;
+    case "review":
+      state.view = "review";
+      state.tip = 15;
+      break;
+    case "done":
+      state.tip = 15;
+      finalize();
+      state.view = "done";
+      break;
+    case "paid":
+      state.tip = 15;
+      finalize();
+      break;
+    case "refund":
+      state.tip = 15;
+      finalize();
+
+      Object.assign(state, {
+        view: "refund",
+        refundKind: "partial",
+        refundAmount: "20",
+        refundReason: "Service issue",
+      });
+
+      break;
+    case "receipt":
+      state.tip = 15;
+      finalize();
+      state.view = "receipt";
+      break;
+    case "resend":
+      state.tip = 15;
+      finalize();
+
+      Object.assign(state, { view: "resend", resendVia: "sms" });
+
+      break;
+    case "reduce":
+    case "reduce-review":
+      state.lines[0]!.adjustment = -20;
+      state.lines[0]!.reason = "Service shortened";
+      state.view = scenario === "reduce" ? "items" : "review";
+      break;
+    case "link":
+      state.method = "link";
+      state.view = "pay";
+      break;
+    case "awaiting":
+      state.method = "link";
+      finalize();
+      break;
+    case "cash":
+      Object.assign(state, {
+        method: "record",
+        view: "tip",
+        tip: "custom",
+        tipCustom: "5",
+      });
+
+      break;
+    case "unpaid":
+      state.status = "unpaid";
+      break;
+    case "declined":
+      Object.assign(state, {
+        tip: 15,
+        view: "review",
+        decline: "soft",
+        tries: 1,
+      });
+
+      break;
+    case "declined-hard":
+      Object.assign(state, {
+        tip: 15,
+        view: "review",
+        decline: "hard",
+        tries: 0,
+      });
+
+      break;
+    case "fee-pending":
+      state.status = "feePending";
+      break;
+    case "fee-waived":
+      state.status = "feeWaived";
+      break;
+    case "fee-unpaid":
+      state.status = "feeUnpaid";
+      break;
+    case "fee-collected":
+      state.status = "feeCollected";
+      break;
+    case "waive-dep":
+      Object.assign(state, { status: "feePending", dialog: "waive" });
+      break;
+    case "waive-nonref":
+      Object.assign(state, {
+        status: "feePending",
+        isNonRefundable: true,
+        dialog: "waive",
+      });
+
+      break;
+    case "waive-full":
+      Object.assign(state, {
+        status: "feePending",
+        mode: "full",
+        paid: 100,
+        dialog: "waive",
+      });
+
+      break;
+    case "waive-card":
+      Object.assign(state, {
+        status: "feePending",
+        mode: "card",
+        paid: 0,
+        dialog: "waive",
+      });
+
+      break;
+  }
+
+  return state;
+};
+
+/** How much can be refunded through the platform, or recorded as refunded off it. */
+export const getRefundContext = (
+  state: CheckoutState,
+  booking: CheckoutBooking,
+): { platform: number; off: number } => {
+  if (/^fee/.test(state.status)) return { platform: booking.fee || 0, off: 0 };
+
+  const done = state.done ?? { charged: 0, refundAuto: 0, method: "none" };
+
+  return {
+    platform:
+      state.paid -
+      (done.refundAuto || 0) +
+      (done.method === "card" || done.method === "link" ? done.charged : 0),
+    off: done.method === "record" ? done.charged : 0,
+  };
+};

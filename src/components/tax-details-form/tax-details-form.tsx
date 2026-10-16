@@ -1,27 +1,25 @@
+import { zodResolver } from "@hookform/resolvers/zod";
 import { useEffect, useId, useRef, useState } from "react";
-import type { ChangeEvent } from "react";
+import { Controller, useForm, useWatch } from "react-hook-form";
 import { Eye, EyeOff, Lock } from "lucide-react";
 import { joinClassNames } from "../../utils/class-names";
 import { AddressFinder } from "../address-finder/address-finder";
+import { DOB_PARTS, Field, KINDS } from "./tax-details-field";
 import {
   getAddressKey,
   getBlankAddress,
-  getInitialTaxState,
+  getInitialTax,
   getTaxBusiness,
-  getTaxErrors,
   getTaxOutput,
-  getTouchedAll,
   formatNationalInsuranceNumber,
 } from "./tax-details-logic";
 import type {
-  TaxAddressState,
   TaxBusiness,
   TaxDetails,
-  TaxErrorKey,
   TaxFixture,
-  TaxKind,
-  TaxState,
+  TaxFormValues,
 } from "./tax-details-logic";
+import { getTaxSchema } from "./tax-details-schema";
 import styles from "../../styles/components/tax-details-form/tax-details-form.module.css";
 
 export interface TaxDetailsFormProps {
@@ -36,99 +34,6 @@ export interface TaxDetailsFormProps {
   /** Whether the fields differ from how the form opened. */
   onDirtyChange?: (isDirty: boolean) => void;
 }
-
-const KINDS: [TaxKind, string][] = [
-  ["sole", "Sole trader / self-employed"],
-  ["ltd", "Limited company"],
-];
-
-const DOB_PARTS = [
-  {
-    key: "day",
-    placeholder: "DD",
-    aria: "Day",
-    max: 2,
-    autoComplete: "bday-day",
-  },
-  {
-    key: "month",
-    placeholder: "MM",
-    aria: "Month",
-    max: 2,
-    autoComplete: "bday-month",
-  },
-  {
-    key: "year",
-    placeholder: "YYYY",
-    aria: "Year",
-    max: 4,
-    autoComplete: "bday-year",
-  },
-] as const;
-
-interface FieldProps {
-  id: string;
-  label: string;
-  value: string;
-  error: string;
-  onChange: (event: ChangeEvent<HTMLInputElement>) => void;
-  onBlur: () => void;
-  autoComplete?: string;
-  optional?: boolean;
-  help?: string;
-  placeholder?: string;
-  isCode?: boolean;
-}
-
-/** One labelled text field with its error. */
-const Field = ({
-  id,
-  label,
-  value,
-  error,
-  onChange,
-  onBlur,
-  autoComplete = "off",
-  optional = false,
-  help,
-  placeholder,
-  isCode = false,
-}: FieldProps) => {
-  const errorId = `${id}-e`;
-
-  return (
-    <div>
-      <label
-        className={help === undefined ? styles.label : styles.labelTight}
-        htmlFor={id}
-      >
-        {label}
-        {optional && <span className={styles.optional}> (optional)</span>}
-      </label>
-      {help !== undefined && <div className={styles.help}>{help}</div>}
-      <input
-        className={joinClassNames(
-          styles.input,
-          error ? styles.fieldErr : styles.fieldOk,
-          help !== undefined && (isCode ? styles.textCode : styles.textPlain),
-        )}
-        id={id}
-        value={value}
-        onChange={onChange}
-        onBlur={onBlur}
-        autoComplete={autoComplete}
-        placeholder={placeholder}
-        aria-invalid={error ? "true" : "false"}
-        aria-describedby={errorId}
-      />
-      {!!error && (
-        <div className={styles.error} role="alert" id={errorId}>
-          {error}
-        </div>
-      )}
-    </div>
-  );
-};
 
 /**
  * Legal and tax details before Stripe payouts (embedded in Studio):
@@ -148,46 +53,47 @@ export const TaxDetailsForm = ({
 }: TaxDetailsFormProps) => {
   const uid = `tx${useId().replace(/[^a-zA-Z0-9]/g, "")}`;
 
-  const [state, setRawState] = useState(() =>
-    getInitialTaxState({ fixture, businessName, business, value }),
+  const [initial] = useState(() =>
+    getInitialTax({ fixture, businessName, business, value }),
+  );
+
+  const [showNationalInsurance, setShowNationalInsurance] = useState(
+    initial.showNationalInsurance,
   );
 
   const dobRefs = useRef<(HTMLInputElement | null)[]>([]);
-  const opened = useRef(state);
 
-  const getFields = (taxState: TaxState) =>
-    JSON.stringify({ ...taxState, touched: null });
-
-  const isDirty = getFields(state) !== getFields(opened.current);
+  const {
+    register,
+    control,
+    handleSubmit,
+    setValue,
+    clearErrors,
+    trigger,
+    getFieldState,
+    formState: { errors, isDirty },
+  } = useForm<TaxFormValues>({
+    defaultValues: initial.values,
+    mode: "onTouched",
+    resolver: zodResolver(getTaxSchema(initial.nationalInsuranceHint)),
+  });
 
   useEffect(() => onDirtyChange?.(isDirty), [isDirty, onDirtyChange]);
 
-  const setState = (patch: Partial<TaxState>) =>
-    setRawState((current) => ({ ...current, ...patch }));
+  useEffect(() => {
+    if (initial.shownErrors.length) void trigger(initial.shownErrors);
+  }, [initial, trigger]);
 
-  const touch = (key: TaxErrorKey | "middle") =>
-    setRawState((current) => ({
-      ...current,
-      touched: { ...current.touched, [key]: 1 },
-    }));
+  const [kind, nameYes] = useWatch({ control, name: ["kind", "nameYes"] });
+  const isSole = kind === "sole";
+  const addressKey = getAddressKey(kind);
 
-  const isSole = state.kind === "sole";
-  const addressKey = getAddressKey(state.kind);
-  const address = state[addressKey];
-
-  const setAddress = (patch: Partial<TaxAddressState>) =>
-    setRawState((current) => ({
-      ...current,
-      [addressKey]: { ...current[addressKey], ...patch },
-    }));
-
-  const errors = getTaxErrors(state);
-
-  const getError = (key: TaxErrorKey) =>
-    (state.touched[key] && errors[key]) || "";
+  const [isSame, addressSource] = useWatch({
+    control,
+    name: [`${addressKey}.same`, `${addressKey}.src`],
+  });
 
   const fieldId = (key: string) => `${uid}-${key}`;
-
   const { type, details } = getTaxBusiness(business);
 
   const showSame = isSole
@@ -203,38 +109,35 @@ export const TaxDetailsForm = ({
     .filter(Boolean)
     .join(", ");
 
-  const dobError = getError("dob");
-  const nationalInsuranceError = getError("nationalInsuranceNumber");
+  const dobError = errors.day?.message ?? "";
+  const nationalInsuranceError = errors.nationalInsuranceNumber?.message ?? "";
   const isSettings = mode === "settings";
 
-  const submit = () => {
-    if (Object.keys(errors).length) {
-      setState({ touched: getTouchedAll() });
-
-      return;
-    }
-
-    onSubmit?.(getTaxOutput(state, legalName, business));
-  };
+  const submit = handleSubmit((values) =>
+    onSubmit?.(getTaxOutput(values, legalName, business)),
+  );
 
   return (
     <div className={styles.form} data-screen-label="Tax details form">
       <fieldset className={styles.fieldset}>
         <legend className={styles.legend}>How is your business set up?</legend>
         <div className={styles.kinds} role="radiogroup">
-          {KINDS.map(([kind, label]) => {
-            const isOn = state.kind === kind;
+          {KINDS.map(([tileKind, label]) => {
+            const isOn = kind === tileKind;
 
             return (
               <button
-                key={kind}
+                key={tileKind}
                 className={joinClassNames(
                   styles.tile,
                   isOn ? styles.tileOn : styles.tileOff,
                 )}
                 role="radio"
                 aria-checked={isOn ? "true" : "false"}
-                onClick={() => setState({ kind, touched: {} })}
+                onClick={() => {
+                  setValue("kind", tileKind, { shouldDirty: true });
+                  clearErrors();
+                }}
               >
                 <span
                   className={joinClassNames(
@@ -281,7 +184,7 @@ export const TaxDetailsForm = ({
                   ["no", "No", false],
                 ] as const
               ).map(([key, label, isYes]) => {
-                const isOn = state.nameYes === isYes;
+                const isOn = nameYes === isYes;
 
                 return (
                   <button
@@ -292,14 +195,18 @@ export const TaxDetailsForm = ({
                     )}
                     role="radio"
                     aria-checked={isOn ? "true" : "false"}
-                    onClick={() => setState({ nameYes: isYes })}
+                    onClick={() => {
+                      setValue("nameYes", isYes, { shouldDirty: true });
+
+                      if (isYes) clearErrors(["first", "last"]);
+                    }}
                   >
                     {label}
                   </button>
                 );
               })}
             </div>
-            {!state.nameYes && (
+            {!nameYes && (
               <div className={styles.nameFields} data-tx-anim="1">
                 <div className={styles.hint}>
                   As it appears on your passport or driving licence.
@@ -307,29 +214,23 @@ export const TaxDetailsForm = ({
                 <Field
                   id={fieldId("first")}
                   label="Legal first name"
-                  value={state.first}
-                  error={getError("first")}
-                  onChange={(event) => setState({ first: event.target.value })}
-                  onBlur={() => touch("first")}
+                  error={errors.first?.message ?? ""}
+                  inputProps={register("first")}
                   autoComplete="given-name"
                 />
                 <Field
                   id={fieldId("middle")}
                   label="Middle name(s)"
-                  value={state.middle}
                   error=""
-                  onChange={(event) => setState({ middle: event.target.value })}
-                  onBlur={() => touch("middle")}
+                  inputProps={register("middle")}
                   autoComplete="additional-name"
                   optional={true}
                 />
                 <Field
                   id={fieldId("last")}
                   label="Legal last name"
-                  value={state.last}
-                  error={getError("last")}
-                  onChange={(event) => setState({ last: event.target.value })}
-                  onBlur={() => touch("last")}
+                  error={errors.last?.message ?? ""}
+                  inputProps={register("last")}
                   autoComplete="family-name"
                 />
                 <div className={styles.hint}>
@@ -347,34 +248,45 @@ export const TaxDetailsForm = ({
             <div className={styles.dobRow}>
               {DOB_PARTS.map(
                 ({ key, placeholder, aria, max, autoComplete }, index) => (
-                  <input
+                  <Controller
                     key={key}
-                    className={joinClassNames(
-                      styles.dobInput,
-                      max === 4 ? styles.dobLong : styles.dobShort,
-                      dobError ? styles.fieldErr : styles.fieldOk,
+                    name={key}
+                    control={control}
+                    rules={key === "day" ? undefined : { deps: ["day"] }}
+                    render={({ field }) => (
+                      <input
+                        className={joinClassNames(
+                          styles.dobInput,
+                          max === 4 ? styles.dobLong : styles.dobShort,
+                          dobError ? styles.fieldErr : styles.fieldOk,
+                        )}
+                        name={field.name}
+                        ref={(element) => {
+                          field.ref(element);
+                          dobRefs.current[index] = element;
+                        }}
+                        value={field.value}
+                        onChange={(event) => {
+                          const digits = event.target.value
+                            .replace(/\D/g, "")
+                            .slice(0, max);
+
+                          field.onChange(digits);
+
+                          if (getFieldState("day").error) void trigger("day");
+
+                          if (digits.length === max && index < 2)
+                            dobRefs.current[index + 1]?.focus();
+                        }}
+                        onBlur={field.onBlur}
+                        inputMode="numeric"
+                        autoComplete={autoComplete}
+                        maxLength={max}
+                        placeholder={placeholder}
+                        aria-label={aria}
+                        aria-invalid={dobError ? "true" : "false"}
+                      />
                     )}
-                    ref={(element) => {
-                      dobRefs.current[index] = element;
-                    }}
-                    value={state[key]}
-                    onChange={(event) => {
-                      const digits = event.target.value
-                        .replace(/\D/g, "")
-                        .slice(0, max);
-
-                      setState({ [key]: digits });
-
-                      if (digits.length === max && index < 2)
-                        dobRefs.current[index + 1]?.focus();
-                    }}
-                    onBlur={() => touch("dob")}
-                    inputMode="numeric"
-                    autoComplete={autoComplete}
-                    maxLength={max}
-                    placeholder={placeholder}
-                    aria-label={aria}
-                    aria-invalid={dobError ? "true" : "false"}
                   />
                 ),
               )}
@@ -393,30 +305,34 @@ export const TaxDetailsForm = ({
           <Field
             id={fieldId("coName")}
             label="Company name"
-            value={state.companyName}
-            error={getError("companyName")}
-            onChange={(event) => setState({ companyName: event.target.value })}
-            onBlur={() => touch("companyName")}
+            error={errors.companyName?.message ?? ""}
+            inputProps={register("companyName")}
             help="As registered at Companies House."
             placeholder=""
           />
-          <Field
-            id={fieldId("coNum")}
-            label="Company registration number"
-            value={state.companyNumber}
-            error={getError("companyNumber")}
-            onChange={(event) =>
-              setState({
-                companyNumber: event.target.value
-                  .toUpperCase()
-                  .replace(/[^A-Z0-9]/g, "")
-                  .slice(0, 8),
-              })
-            }
-            onBlur={() => touch("companyNumber")}
-            help="8 characters, like 12345678 or SC123456."
-            placeholder="12345678"
-            isCode={true}
+          <Controller
+            name="companyNumber"
+            control={control}
+            render={({ field }) => (
+              <Field
+                id={fieldId("coNum")}
+                label="Company registration number"
+                error={errors.companyNumber?.message ?? ""}
+                inputProps={{
+                  ...field,
+                  onChange: (event) =>
+                    field.onChange(
+                      event.target.value
+                        .toUpperCase()
+                        .replace(/[^A-Z0-9]/g, "")
+                        .slice(0, 8),
+                    ),
+                }}
+                help="8 characters, like 12345678 or SC123456."
+                placeholder="12345678"
+                isCode={true}
+              />
+            )}
           />
         </div>
       )}
@@ -436,48 +352,60 @@ export const TaxDetailsForm = ({
               <input
                 className={styles.checkbox}
                 type="checkbox"
-                checked={address.same}
-                onChange={(event) => setAddress({ same: event.target.checked })}
+                {...register(`${addressKey}.same`, {
+                  deps: [`${addressKey}.fields`],
+                })}
               />
               <span>Same as my business address</span>
             </label>
-            {address.same && <div className={styles.sameText}>{sameText}</div>}
+            {isSame && <div className={styles.sameText}>{sameText}</div>}
           </>
         )}
-        {!address.same && (
+        {!isSame && (
           <div className={styles.finder}>
             {/* host block for the embedded address finder */}
             <div data-dc-host="">
-              <AddressFinder
-                idPrefix={`${uid}-${addressKey}`}
-                label="Address or postcode"
-                value={
-                  address.fields.line1
-                    ? {
-                        line1: address.fields.line1,
-                        line2: address.fields.line2,
-                        town: address.fields.city,
-                        postcode: address.fields.postcode,
-                        source: address.src || "pick",
-                      }
-                    : null
-                }
-                onChange={(picked) =>
-                  setAddress({
-                    src: picked ? picked.source : "",
-                    fields: picked
-                      ? {
-                          line1: picked.line1,
-                          line2: picked.line2 || "",
-                          city: picked.town,
-                          postcode: picked.postcode,
-                        }
-                      : getBlankAddress(),
-                  })
-                }
-                showErrors={!!state.touched.address}
-                fieldHeight={50}
-                labelSize={13.5}
+              <Controller
+                key={addressKey}
+                name={`${addressKey}.fields`}
+                control={control}
+                render={({ field }) => (
+                  <AddressFinder
+                    idPrefix={`${uid}-${addressKey}`}
+                    label="Address or postcode"
+                    value={
+                      field.value.line1
+                        ? {
+                            line1: field.value.line1,
+                            line2: field.value.line2,
+                            town: field.value.city,
+                            postcode: field.value.postcode,
+                            source: addressSource || "pick",
+                          }
+                        : null
+                    }
+                    onChange={(picked) => {
+                      setValue(
+                        `${addressKey}.src`,
+                        picked ? picked.source : "",
+                      );
+
+                      field.onChange(
+                        picked
+                          ? {
+                              line1: picked.line1,
+                              line2: picked.line2 || "",
+                              city: picked.town,
+                              postcode: picked.postcode,
+                            }
+                          : getBlankAddress(),
+                      );
+                    }}
+                    showErrors={!!errors[addressKey]?.fields}
+                    fieldHeight={50}
+                    labelSize={13.5}
+                  />
+                )}
               />
             </div>
           </div>
@@ -490,53 +418,48 @@ export const TaxDetailsForm = ({
             National Insurance number
           </label>
           <div className={styles.help}>
-            {state.nationalInsuranceHint
-              ? `Saved: ${state.nationalInsuranceHint}. Leave blank to keep it.`
+            {initial.nationalInsuranceHint
+              ? `Saved: ${initial.nationalInsuranceHint}. Leave blank to keep it.`
               : "Used for tax reporting. It looks like QQ 12 34 56 C."}
           </div>
           <div className={styles.niWrap}>
-            <input
-              className={joinClassNames(
-                styles.niInput,
-                nationalInsuranceError ? styles.fieldErr : styles.fieldOk,
+            <Controller
+              name="nationalInsuranceNumber"
+              control={control}
+              render={({ field }) => (
+                <input
+                  {...field}
+                  className={joinClassNames(
+                    styles.niInput,
+                    nationalInsuranceError ? styles.fieldErr : styles.fieldOk,
+                  )}
+                  id={fieldId("ni")}
+                  type={showNationalInsurance ? "text" : "password"}
+                  onChange={(event) =>
+                    field.onChange(
+                      formatNationalInsuranceNumber(event.target.value),
+                    )
+                  }
+                  autoComplete="off"
+                  spellCheck="false"
+                  placeholder={initial.nationalInsuranceHint || "QQ 12 34 56 C"}
+                  aria-invalid={nationalInsuranceError ? "true" : "false"}
+                  aria-describedby={fieldId("ni-e")}
+                />
               )}
-              id={fieldId("ni")}
-              type={state.showNationalInsurance ? "text" : "password"}
-              value={state.nationalInsuranceNumber}
-              onChange={(event) =>
-                setState({
-                  nationalInsuranceNumber: formatNationalInsuranceNumber(
-                    event.target.value,
-                  ),
-                })
-              }
-              onBlur={() => touch("nationalInsuranceNumber")}
-              autoComplete="off"
-              spellCheck="false"
-              placeholder={state.nationalInsuranceHint || "QQ 12 34 56 C"}
-              aria-invalid={nationalInsuranceError ? "true" : "false"}
-              aria-describedby={fieldId("ni-e")}
             />
             <button
               className={styles.niToggle}
-              onClick={() =>
-                setState({
-                  showNationalInsurance: !state.showNationalInsurance,
-                })
-              }
+              onClick={() => setShowNationalInsurance((isShown) => !isShown)}
               aria-label={
-                state.showNationalInsurance
+                showNationalInsurance
                   ? "Hide National Insurance number"
                   : "Show National Insurance number"
               }
-              aria-pressed={state.showNationalInsurance}
+              aria-pressed={showNationalInsurance}
             >
-              {!state.showNationalInsurance && (
-                <Eye size={18} strokeWidth={1.7} />
-              )}
-              {state.showNationalInsurance && (
-                <EyeOff size={18} strokeWidth={1.7} />
-              )}
+              {!showNationalInsurance && <Eye size={18} strokeWidth={1.7} />}
+              {showNationalInsurance && <EyeOff size={18} strokeWidth={1.7} />}
             </button>
           </div>
           {!!nationalInsuranceError && (
@@ -558,7 +481,7 @@ export const TaxDetailsForm = ({
             Cancel
           </button>
         )}
-        <button className={styles.submit} onClick={submit}>
+        <button className={styles.submit} onClick={() => void submit()}>
           {isSettings ? "Save" : "Continue to Stripe"}
         </button>
       </div>

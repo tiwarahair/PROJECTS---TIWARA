@@ -1,0 +1,28 @@
+/* ---- Closed period ---- */
+.closedIntro {
+  font-size: 14.5px;
+  color: var(--text-secondary);
+  margin-bottom: 12px;
+  line-height: 1.5;
+}
+
+.twoCols {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}
+
+.block {
+  display: block;
+}
+
+.dateInput {
+  width: 100%;
+  box-sizing: border-box;
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-sm);
+  background: transparent;
+  padding: 10px 12px;
+  font-size: 16px;
+  outline: none;
+}

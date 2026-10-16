@@ -4,10 +4,10 @@ import { AccountSettings } from "../../components/account-settings/account-setti
 import type { AccountSettingsProps } from "../../components/account-settings/account-settings";
 import { AddressFinder } from "../../components/address-finder/address-finder";
 import { AllergyField } from "../../components/allergy-field/allergy-field";
-import { BusinessDetails } from "../../components/business-details/business-details";
-import type { BusinessDetailsProps } from "../../components/business-details/business-details";
-import { CheckoutSheet } from "../../components/checkout-sheet/checkout-sheet";
-import type { CheckoutSheetProps } from "../../components/checkout-sheet/checkout-sheet";
+import { BusinessDetails } from "../../components/business-details";
+import type { BusinessDetailsProps } from "../../components/business-details";
+import { CheckoutSheet } from "../../components/checkout/checkout-sheet";
+import type { CheckoutSheetProps } from "../../components/checkout/checkout-sheet";
 import { Earnings } from "../../components/earnings/earnings";
 import type { EarningsProps } from "../../components/earnings/earnings";
 import { PaymentPolicy } from "../../components/payment-policy/payment-policy";

@@ -1,0 +1,230 @@
+.root {
+  position: relative;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  background: var(--neutral-50, #fffefb);
+  font-family: var(--font-body);
+  color: var(--text-primary);
+  container-type: inline-size;
+  overflow: hidden;
+}
+
+.scroll {
+  position: relative;
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+}
+
+.pad {
+  max-width: 980px;
+  margin: 0 auto;
+  padding: clamp(12px, 3cqi, 36px) clamp(20px, 4cqi, 48px) 48px;
+  box-sizing: border-box;
+}
+
+.back {
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+  height: 44px;
+  padding: 0 14px 0 6px;
+  margin-left: -6px;
+  border: none;
+  background: none;
+  border-radius: var(--radius-full);
+  font: inherit;
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--text-primary);
+  cursor: pointer;
+}
+
+.back:hover {
+  background: var(--fill-quiet) !important;
+}
+
+.back:active {
+  transform: scale(0.98) !important;
+}
+
+.title {
+  margin: 10px 0 0;
+  font-family: var(--font-display);
+  font-weight: 600;
+  font-size: clamp(26px, 3.4cqi, 34px);
+  letter-spacing: -0.03em;
+  line-height: 1.1;
+}
+
+.body {
+  display: flex;
+  flex-direction: column;
+  gap: clamp(36px, 5cqi, 48px);
+}
+
+.saveBar {
+  position: relative;
+  flex: 0 0 auto;
+  background: rgba(255, 254, 251, 0.85);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  box-shadow: var(--shadow-hairline-up);
+}
+
+.toast {
+  position: absolute;
+  left: 50%;
+  bottom: calc(100% + 12px);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 12px 18px;
+  border-radius: var(--radius-full);
+  background: var(--neutral-900, #1a1714);
+  color: #fffefb;
+  font-size: 14.5px;
+  font-weight: 600;
+  white-space: nowrap;
+  box-shadow: var(--shadow-popover);
+  pointer-events: none;
+}
+
+.barInner {
+  max-width: 980px;
+  margin: 0 auto;
+  padding: 14px clamp(20px, 4cqi, 48px) 16px;
+  box-sizing: border-box;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 10px 24px;
+}
+
+.barError {
+  flex: 100 1 240px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--accent-700);
+}
+
+.barErrorIcon {
+  flex: 0 0 auto;
+}
+
+.saveButton {
+  flex: 1 0 180px;
+  max-width: 100%;
+  height: 48px;
+  border: none;
+  border-radius: var(--radius-full);
+  font: inherit;
+  font-size: 15px;
+  font-weight: 600;
+  transition:
+    background-color 160ms var(--ease-out),
+    color 160ms var(--ease-out),
+    transform 160ms var(--ease-out);
+}
+
+.saveButton:active {
+  transform: scale(0.98) !important;
+}
+
+/* runtime states (body margin, selection, disclosures, field border / ring / width, VAT checkbox, row borders, toast, save bar) */
+.bodyEmbedded {
+  margin-top: 8px;
+}
+
+.bodyStandalone {
+  margin-top: clamp(24px, 4cqi, 36px);
+}
+
+.toastShown {
+  opacity: 1;
+  visibility: visible;
+  transform: translateX(-50%) translateY(0);
+  transition:
+    opacity 220ms var(--ease-out),
+    transform 220ms var(--ease-out),
+    visibility 0s;
+}
+
+.toastHidden {
+  opacity: 0;
+  visibility: hidden;
+  transform: translateX(-50%) translateY(8px);
+  transition:
+    opacity 160ms var(--ease-in, cubic-bezier(0.4, 0, 0.7, 0.2)),
+    transform 160ms var(--ease-in, cubic-bezier(0.4, 0, 0.7, 0.2)),
+    visibility 0s linear 160ms;
+}
+
+.saveDirty {
+  background: var(--accent-700);
+  color: #fffefb;
+  cursor: pointer;
+}
+
+.saveClean {
+  background: var(--neutral-200, #ece6db);
+  color: var(--neutral-600);
+  cursor: not-allowed;
+}
+
+.root[data-bd-emb="1"] {
+  height: auto !important;
+  overflow: visible !important;
+  background: transparent !important;
+}
+
+.root[data-bd-emb="1"] .scroll {
+  overflow: visible !important;
+  flex: none !important;
+}
+
+.root[data-bd-emb="1"] .pad {
+  padding: 0 !important;
+  max-width: none !important;
+}
+
+.root[data-bd-emb="1"] .saveBar {
+  background: transparent !important;
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+  box-shadow: none !important;
+  border-top: 1px solid var(--border-subtle);
+  margin-top: 32px;
+}
+
+.root[data-bd-emb="1"] .barInner {
+  padding: 18px 0 0 !important;
+  max-width: none !important;
+}
+
+.root[data-bd-hidesave="1"] .saveButton {
+  display: none !important;
+}
+
+.root[data-bd-emb="1"] .saveButton {
+  flex: 0 0 auto !important;
+  height: 44px !important;
+  padding: 0 24px !important;
+  font-size: 14.5px !important;
+}
+
+.root[data-bd-emb="1"] .barInner {
+  padding-top: 18px !important;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .toast {
+    transform: translateX(-50%) !important;
+  }
+}

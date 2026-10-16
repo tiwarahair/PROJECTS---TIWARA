@@ -1,0 +1,106 @@
+/* ---- legacy client sheet ---- */
+.clientHead {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+.clientAvatar {
+  width: 54px;
+  height: 54px;
+  border-radius: var(--radius-full);
+  object-fit: cover;
+  background: var(--quiet-strong);
+  flex: 0 0 auto;
+}
+
+.flex1 {
+  flex: 1;
+}
+
+.clientName {
+  font-size: 16.5px;
+  font-weight: 600;
+}
+
+.muted {
+  font-size: 14.5px;
+  color: var(--text-secondary);
+}
+
+.clientStats {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  gap: 8px;
+  margin-top: 14px;
+}
+
+.clientStat {
+  background: var(--quiet);
+  border-radius: var(--radius-sm);
+  padding: 10px;
+  text-align: center;
+}
+
+.statValue {
+  font-size: 18px;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+}
+
+.statSmall {
+  font-size: 14.5px;
+  font-weight: 500;
+  margin-top: 3px;
+}
+
+.statLabel {
+  font-size: 12.5px;
+  color: var(--text-secondary);
+}
+
+.historyTitle {
+  font-size: 14.5px;
+  font-weight: 500;
+  margin: 16px 0 8px;
+}
+
+.history {
+  background: transparent;
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-sm);
+  overflow: hidden;
+}
+
+.historyRow {
+  display: flex;
+  justify-content: space-between;
+  gap: 10px;
+  padding: 11px 14px;
+  border-bottom: 1px solid var(--border-subtle);
+  font-size: 14.5px;
+}
+
+.bold {
+  font-weight: 600;
+}
+
+.secondary {
+  color: var(--text-secondary);
+}
+
+.bookButton {
+  width: 100%;
+  margin-top: 16px;
+  border: none;
+  background: var(--accent-700);
+  color: var(--neutral-100);
+  border-radius: var(--radius-full);
+  padding: 13px 0;
+  font-size: 15px;
+  font-weight: 600;
+}
+
+.bookButton:active {
+  transform: scale(0.98) !important;
+}

@@ -238,7 +238,7 @@
 }
 
 .sameText {
-  margin: 10px 0 0 32px;
+  margin: 10px 0 0;
   padding: 12px 14px;
   border-radius: var(--radius-sm);
   background: var(--fill-quiet, rgba(26, 23, 20, 0.05));
