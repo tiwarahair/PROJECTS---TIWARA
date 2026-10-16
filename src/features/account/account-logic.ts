@@ -5,11 +5,9 @@ import type { Stylist } from "../../types/stylist";
 import { getAddressOneLine } from "../../utils/address";
 import { bookingFee } from "../../utils/pricing";
 import { findService } from "../../utils/services";
-import { TAKEN_EMAILS } from "./account-data";
 import type { AccountBooking, Profile, SavedCard } from "./account-data";
 import { formatMoney } from "../../utils/money";
 import { formatWeekdayDate, formatClockTime } from "../../utils/dates";
-import { isValidEmail, isValidMobile } from "../../utils/validation";
 
 const DAY_MS = 864e5;
 
@@ -226,37 +224,6 @@ export const getBookingMoney = (
 
 export type EditKey = "name" | "email" | "mobile";
 
-export const validateEdit = (
-  key: EditKey,
-  draft: Profile,
-  currentEmail: string,
-): Record<string, string> => {
-  const errors: Record<string, string> = {};
-
-  if (key === "name") {
-    if (!draft.first.trim()) errors.first = "Enter your first name";
-
-    if (!draft.last.trim()) errors.last = "Enter your last name";
-  }
-
-  if (key === "email") {
-    const value = draft.email.trim().toLowerCase();
-
-    if (!isValidEmail(value))
-      errors.email = "Enter an email address like name@example.com";
-    else if (value === currentEmail) errors.email = "That’s already your email";
-    else if (TAKEN_EMAILS.includes(value))
-      errors.email = "This email is already used by another account";
-  }
-
-  if (key === "mobile") {
-    if (!isValidMobile(draft.mobile))
-      errors.mobile = "Enter a UK mobile number, like 07700 900123";
-  }
-
-  return errors;
-};
-
 /** Saves text as a file download. */
 export const downloadFile = (name: string, text: string, type: string) => {
   try {
@@ -360,33 +327,4 @@ export const formatCardExpiry = (value: string): string => {
   return digits.length > 2
     ? `${digits.slice(0, 2)} / ${digits.slice(2)}`
     : digits;
-};
-
-export const getCardErrors = (form: {
-  number: string;
-  expiry: string;
-  cvc: string;
-}): Record<string, string> => {
-  const errors: Record<string, string> = {};
-  const number = form.number.replace(/\D/g, "");
-  const expiry = form.expiry.replace(/\D/g, "");
-
-  if (number.length < 15) errors.number = "Enter your card number";
-
-  const month = Number(expiry.slice(0, 2));
-  const year = Number(expiry.slice(2, 4));
-  const now = new Date();
-  const currentYear = now.getFullYear() % 100;
-
-  if (expiry.length < 4 || month < 1 || month > 12)
-    errors.expiry = "Enter the expiry date";
-  else if (
-    year < currentYear ||
-    (year === currentYear && month < now.getMonth() + 1)
-  )
-    errors.expiry = "This card has expired";
-
-  if (!/^\d{3,4}$/.test(form.cvc)) errors.cvc = "Enter the 3 or 4-digit code";
-
-  return errors;
 };

@@ -15,15 +15,15 @@ import { usePasswordChecker } from "../../hooks/use-password-checker";
 import { useAppDispatch, useAppSelector } from "../../stores/hooks";
 import { logOut } from "../../stores/session-slice";
 import type { SavedAddress } from "../../types/address";
-import { formatPostcode, isAddressValid } from "../../utils/address";
-import type { AddressValue } from "../../types/address";
+import { formatPostcode } from "../../utils/address";
 import { getSearchParams } from "../../utils/page-flags";
-import { checkPassword, getPasswordMin } from "../../utils/password";
 import { getSavedAddresses, saveAddresses } from "../../utils/saved-addresses";
 import { applyFixture } from "./account-fixtures";
+import type { FixtureForms } from "./account-fixtures";
+import { EMPTY_CARD, EMPTY_PASSWORD, useAccountForms } from "./account-forms";
+import type { AddressFormValues, CardFormValues } from "./account-schemas";
 import { getDiscardPatch, hasUnsavedEdits } from "./account-unsaved";
 import {
-  CURRENT_PASSWORD,
   DEMO_PHOTO,
   getSeedBookings,
   LEGACY_TABS,
@@ -33,7 +33,6 @@ import {
   SHARED_ENTRIES,
 } from "./account-data";
 import type { AccountBooking, Profile, SavedCard } from "./account-data";
-import { getCardErrors, validateEdit } from "./account-logic";
 import type { EditKey } from "./account-logic";
 
 type DialogState =
@@ -47,21 +46,12 @@ type DialogState =
 export interface AddressForm {
   mode: "add" | "edit";
   id?: string;
-  label: string;
-  address: (AddressValue & { source?: string }) | null;
-  isDefault: boolean;
-  tried: boolean;
 }
 
 export interface PasswordState {
   has: boolean;
   open: boolean;
-  current: string;
-  next: string;
   show: boolean;
-  tried: boolean;
-  blur: boolean;
-  currentError: string;
   changed?: boolean;
 }
 
@@ -81,8 +71,6 @@ export interface AccountState {
   photoError: string;
   quiz: boolean;
   edit: EditKey | null;
-  draft: Profile;
-  fieldErrors: Record<string, string>;
   emailStep: "" | "code";
   pendingEmail?: string;
   code: string[];
@@ -93,8 +81,6 @@ export interface AccountState {
   googleConnected: boolean;
   appleConnected: boolean;
   cards: SavedCard[];
-  cardForm: { number: string; expiry: string; cvc: string; isDefault: boolean };
-  cardFormErrors: Record<string, string>;
   addresses: SavedAddress[];
   addressForm: AddressForm | null;
   addressMenu?: string | null;
@@ -161,7 +147,7 @@ const getInitialState = (
     marketing = false,
   }: AccountProps,
   params: URLSearchParams,
-): AccountState => {
+): { state: AccountState; fixtureForms: FixtureForms } => {
   const fixture = params.get("fixture") || propFixture || "";
   const isDemo = isDemoAccount(params, fixture);
 
@@ -183,28 +169,15 @@ const getInitialState = (
     photoError: "",
     quiz: isDemo && flag("quiz", hairQuiz),
     edit: null,
-    draft: isDemo ? { ...SEED_PROFILE } : EMPTY_PROFILE,
-    fieldErrors: {},
     emailStep: "",
     code: EMPTY_CODE,
     codeError: "",
     shake: 0,
     resendIn: 0,
-    password: {
-      has: true,
-      open: false,
-      current: "",
-      next: "",
-      show: false,
-      tried: false,
-      blur: false,
-      currentError: "",
-    },
+    password: { has: true, open: false, show: false },
     googleConnected: isDemo,
     appleConnected: false,
     cards: isDemo ? SEED_CARDS.map((card) => ({ ...card })) : [],
-    cardForm: { number: "", expiry: "", cvc: "", isDefault: false },
-    cardFormErrors: {},
     addresses: getSavedAddresses(params.toString()),
     addressForm: null,
     marketing: flag("mkt", marketing),
@@ -217,26 +190,35 @@ const getInitialState = (
   };
 
   // demo states are dev-only; production builds drop this branch and the fixtures module
-  if (import.meta.env.DEV && fixture) applyFixture(state, fixture);
+  const fixtureForms =
+    import.meta.env.DEV && fixture ? applyFixture(state, fixture) : {};
 
   const fromUrl = readSection(params, section);
 
   if (fromUrl) state.sectionId = fromUrl;
 
-  return state;
+  return { state, fixtureForms };
 };
 
 export const useAccount = (props: AccountProps) => {
   const [searchParams] = useSearchParams();
 
   // read once: later URL changes move between sections via goToSection / popstate, not a re-initialise
-  const [state, setRawState] = useState(() =>
-    getInitialState(props, searchParams),
-  );
-
+  const [initial] = useState(() => getInitialState(props, searchParams));
+  const [state, setRawState] = useState(initial.state);
   const stateRef = useRef(state);
 
   stateRef.current = state;
+
+  const forms = useAccountForms(
+    initial.fixtureForms.draft ?? { ...initial.state.profile },
+    () => ({
+      edit: stateRef.current.edit,
+      profile: stateRef.current.profile,
+      hasPassword: stateRef.current.password.has,
+    }),
+  );
+
   const afterCommit = useRef<(() => void)[]>([]);
   const navigate = useNavigate();
   const dispatch = useAppDispatch();
@@ -245,14 +227,8 @@ export const useAccount = (props: AccountProps) => {
   const refs = useMemo(
     () => ({
       dialog: createRef<HTMLDivElement>(),
-      first: createRef<HTMLInputElement>(),
-      email: createRef<HTMLInputElement>(),
-      mobile: createRef<HTMLInputElement>(),
-      current: createRef<HTMLInputElement>(),
-      next: createRef<HTMLInputElement>(),
       deleteConfirm: createRef<HTMLInputElement>(),
       file: createRef<HTMLInputElement>(),
-      addressLabel: createRef<HTMLInputElement>(),
       code: EMPTY_CODE.map(() => createRef<HTMLInputElement>()),
     }),
     [],
@@ -279,6 +255,17 @@ export const useAccount = (props: AccountProps) => {
     for (const callback of callbacks) callback();
   });
 
+  useEffect(() => {
+    const { draftError, password, address } = initial.fixtureForms;
+
+    if (draftError)
+      forms.edit.setError(draftError.field, { message: draftError.message });
+
+    if (password) forms.password.reset(password);
+
+    if (address) forms.address.reset(address);
+  }, [initial, forms]);
+
   const identity = useIdentity();
 
   const signedIn =
@@ -293,9 +280,10 @@ export const useAccount = (props: AccountProps) => {
     const { first, last, email, mobile, marketing, user } = signedIn;
     const profile = { first, last, email, mobile };
 
+    forms.edit.reset({ ...profile });
+
     setState(({ password }) => ({
       profile,
-      draft: { ...profile },
       marketing,
       password: { ...password, has: user.providers.includes("email") },
       googleConnected: user.providers.includes("google"),
@@ -345,25 +333,22 @@ export const useAccount = (props: AccountProps) => {
           if (element?.focus && document.contains(element)) element.focus();
         }
 
-        if (target === "edit") {
-          const ref = {
-            name: refs.first,
-            email: refs.email,
-            mobile: refs.mobile,
-          }[current.edit ?? "name"];
-
-          ref?.current?.focus();
-        }
+        if (target === "edit")
+          forms.edit.setFocus(
+            ({ name: "first", email: "email", mobile: "mobile" } as const)[
+              current.edit ?? "name"
+            ],
+          );
 
         if (target === "code") refs.code[0]?.current?.focus();
 
         if (target === "password")
-          (current.password.has ? refs.current : refs.next).current?.focus();
+          forms.password.setFocus(current.password.has ? "current" : "next");
 
-        if (target === "address") refs.addressLabel.current?.focus();
+        if (target === "address") forms.address.setFocus("label");
       }, 40);
     },
-    [focusDialog, refs],
+    [focusDialog, refs, forms],
   );
 
   const showToast = useCallback(
@@ -441,6 +426,8 @@ export const useAccount = (props: AccountProps) => {
         dialog: {
           kind: "discard",
           then: () => {
+            forms.edit.clearErrors();
+            forms.password.reset(EMPTY_PASSWORD);
             setState({ ...getDiscardPatch(stateRef.current), dialog: null });
             proceed();
           },
@@ -448,17 +435,27 @@ export const useAccount = (props: AccountProps) => {
         },
       });
     },
-    [setState],
+    [setState, forms],
+  );
+
+  const getFormValues = useCallback(
+    () => ({
+      draft: forms.edit.getValues(),
+      password: forms.password.getValues(),
+      address: forms.address.getValues(),
+    }),
+    [forms],
   );
 
   // an open edit with changes asks before it's dropped
   const goToSection = useCallback(
     (id: string | null) => {
-      if (!hasUnsavedEdits(stateRef.current)) return showSection(id);
+      if (!hasUnsavedEdits(stateRef.current, getFormValues()))
+        return showSection(id);
 
       askDiscard(() => showSection(id));
     },
-    [askDiscard, showSection],
+    [askDiscard, showSection, getFormValues],
   );
 
   useEffect(() => {
@@ -491,12 +488,16 @@ export const useAccount = (props: AccountProps) => {
 
     if (dialog?.kind === "discard") dialog.keep?.();
 
-    setState({ dialog: null, deleteText: "", cardFormErrors: {} }, () =>
-      focusLater("returnFocus"),
-    );
-  }, [focusLater, setState]);
+    forms.card.clearErrors();
 
-  const hasUnsaved = useCallback(() => hasUnsavedEdits(stateRef.current), []);
+    setState({ dialog: null, deleteText: "" }, () => focusLater("returnFocus"));
+  }, [focusLater, setState, forms]);
+
+  const hasUnsaved = useCallback(
+    () => hasUnsavedEdits(stateRef.current, getFormValues()),
+    [getFormValues],
+  );
+
   const blocker = useUnsavedChanges(hasUnsaved);
 
   // leaving the page (links, back) with unsaved edits
@@ -597,7 +598,7 @@ export const useAccount = (props: AccountProps) => {
     setState({
       profile: {
         ...current.profile,
-        email: current.draft.email.trim().toLowerCase(),
+        email: forms.edit.getValues("email").trim().toLowerCase(),
       },
       pendingEmail: "",
       edit: null,
@@ -609,27 +610,15 @@ export const useAccount = (props: AccountProps) => {
     showToast(`Email updated. We’ve let ${previous} know.`);
   };
 
-  const saveEdit = () => {
-    const current = stateRef.current;
-    const key = current.edit;
-
-    if (!key) return;
-
-    if (key === "email" && current.emailStep === "code") return checkCode();
-
-    const errors = validateEdit(key, current.draft, current.profile.email);
-
-    if (Object.keys(errors).length) return setState({ fieldErrors: errors });
-
+  const applyEdit = (key: EditKey, draft: Profile) => {
     if (key === "email") {
       setState(
         {
           emailStep: "code",
-          pendingEmail: current.draft.email.trim().toLowerCase(),
+          pendingEmail: draft.email.trim().toLowerCase(),
           code: EMPTY_CODE,
           codeError: "",
           resendIn: 30,
-          fieldErrors: {},
         },
         () => focusLater("code"),
       );
@@ -639,21 +628,33 @@ export const useAccount = (props: AccountProps) => {
       return;
     }
 
-    const profile = { ...current.profile };
+    const profile = { ...stateRef.current.profile };
 
     if (key === "name") {
-      profile.first = current.draft.first.trim();
-      profile.last = current.draft.last.trim();
+      profile.first = draft.first.trim();
+      profile.last = draft.last.trim();
     }
 
     if (key === "mobile") {
-      const digits = current.draft.mobile.replace(/\D/g, "").replace(/^0/, "");
+      const digits = draft.mobile.replace(/\D/g, "").replace(/^0/, "");
 
       profile.mobile = `${digits.slice(0, 4)} ${digits.slice(4)}`;
     }
 
-    setState({ profile, edit: null, fieldErrors: {} });
+    setState({ profile, edit: null });
     showToast("Your details are updated");
+  };
+
+  const saveEdit = () => {
+    const { edit: key, emailStep } = stateRef.current;
+
+    if (!key) return;
+
+    if (key === "email" && emailStep === "code") return checkCode();
+
+    void forms.edit.handleSubmit(() =>
+      applyEdit(key, forms.edit.getValues()),
+    )();
   };
 
   const fillCode = (digits: string) => {
@@ -694,60 +695,22 @@ export const useAccount = (props: AccountProps) => {
     );
   };
 
-  const savePassword = () => {
-    const { password, profile } = stateRef.current;
+  const savePassword = forms.password.handleSubmit(() => {
+    const hadPassword = stateRef.current.password.has;
 
-    const check = checkPassword(password.next, {
-      min: getPasswordMin("client"),
-      first: profile.first,
-      last: profile.last,
-      email: profile.email,
-    });
-
-    const wrongCurrentError = password.current
-      ? "That password isn’t right"
-      : "Enter your current password";
-
-    const currentError =
-      password.has && password.current !== CURRENT_PASSWORD
-        ? wrongCurrentError
-        : "";
-
-    if (currentError || !check.valid) {
-      setState({ password: { ...password, tried: true, currentError } }, () =>
-        (currentError ? refs.current : refs.next).current?.focus(),
-      );
-
-      return;
-    }
-
-    const hadPassword = password.has;
+    forms.password.reset(EMPTY_PASSWORD);
 
     setState({
-      password: {
-        has: true,
-        open: false,
-        current: "",
-        next: "",
-        show: false,
-        tried: false,
-        blur: false,
-        currentError: "",
-        changed: true,
-      },
+      password: { has: true, open: false, show: false, changed: true },
     });
 
     showToast(
       hadPassword ? "Your password is updated" : "Your password is set",
     );
-  };
+  });
 
-  const saveCard = () => {
-    const { cardForm, cards } = stateRef.current;
-    const errors = getCardErrors(cardForm);
-
-    if (Object.keys(errors).length) return setState({ cardFormErrors: errors });
-
+  const saveCard = forms.card.handleSubmit((cardForm: CardFormValues) => {
+    const { cards } = stateRef.current;
     const number = cardForm.number.replace(/\D/g, "");
     const expiry = cardForm.expiry.replace(/\D/g, "");
     const brand = CARD_BRANDS[number.charAt(0)] ?? "Card";
@@ -761,6 +724,8 @@ export const useAccount = (props: AccountProps) => {
       isDefault,
     };
 
+    forms.card.reset(EMPTY_CARD);
+
     setState(
       (current) => ({
         cards: [
@@ -770,29 +735,24 @@ export const useAccount = (props: AccountProps) => {
           card,
         ],
         dialog: null,
-        cardForm: { number: "", expiry: "", cvc: "", isDefault: false },
-        cardFormErrors: {},
       }),
       () => focusLater("returnFocus"),
     );
 
     showToast("Card saved");
-  };
+  });
 
   const setAddresses = (list: SavedAddress[]) => {
     saveAddresses(list, searchParams.toString());
     setState({ addresses: list });
   };
 
-  const saveAddress = () => {
+  const saveAddress = forms.address.handleSubmit((form: AddressFormValues) => {
     const { addressForm, addresses } = stateRef.current;
 
-    if (!addressForm) return;
+    if (!addressForm || !form.address) return;
 
-    const address = addressForm.address;
-
-    if (!address || !isAddressValid(address))
-      return setState({ addressForm: { ...addressForm, tried: true } });
+    const { address } = form;
 
     const clean = {
       line1: address.line1 ?? "",
@@ -801,14 +761,19 @@ export const useAccount = (props: AccountProps) => {
       postcode: formatPostcode(address.postcode),
     };
 
-    const label = addressForm.label.trim() || "Address";
+    const label = form.label.trim() || "Address";
     let list = addresses.slice();
-    const isDefault = !list.length || addressForm.isDefault;
+    const isDefault = !list.length || form.isDefault;
 
     if (addressForm.mode === "edit")
       list = list.map((item) =>
         item.id === addressForm.id
-          ? { ...item, ...clean, label, isDefault: isDefault || item.isDefault }
+          ? {
+              ...item,
+              ...clean,
+              label,
+              isDefault: isDefault || item.isDefault,
+            }
           : item,
       );
     else list.push({ id: `a${Date.now()}`, label, ...clean, isDefault });
@@ -825,7 +790,7 @@ export const useAccount = (props: AccountProps) => {
     setAddresses(list);
     setState({ addressForm: null });
     showToast("Address saved");
-  };
+  });
 
   const onPhoto = (event: ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
@@ -873,6 +838,7 @@ export const useAccount = (props: AccountProps) => {
   return {
     state,
     refs,
+    forms,
     loggedIn: sessionLoggedIn && !state.loggedOut && !state.deleted,
     actions: {
       setState,

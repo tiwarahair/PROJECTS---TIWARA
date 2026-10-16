@@ -1,11 +1,15 @@
 // Unsaved edits on the Account page: an open edit form whose values differ from what's saved.
-import type { AddressForm, AccountState } from "./use-account";
+import type { Profile } from "./account-data";
+import type { AddressFormValues, PasswordFormValues } from "./account-schemas";
+import type { AccountState } from "./use-account";
 
-const getAddressFields = ({
-  label,
-  isDefault,
-  address,
-}: Pick<AddressForm, "label" | "isDefault" | "address">) =>
+interface FormValues {
+  draft: Profile;
+  password: PasswordFormValues;
+  address: AddressFormValues;
+}
+
+const getAddressFields = ({ label, isDefault, address }: AddressFormValues) =>
   JSON.stringify([
     label,
     isDefault,
@@ -15,7 +19,10 @@ const getAddressFields = ({
     address?.postcode ?? "",
   ]);
 
-const hasUnsavedAddress = ({ addressForm, addresses }: AccountState) => {
+const hasUnsavedAddress = (
+  { addressForm, addresses }: AccountState,
+  values: AddressFormValues,
+) => {
   if (!addressForm) return false;
 
   const saved = addresses.find(({ id }) => id === addressForm.id);
@@ -24,18 +31,17 @@ const hasUnsavedAddress = ({ addressForm, addresses }: AccountState) => {
     ? { label: saved.label, isDefault: saved.isDefault, address: saved }
     : { label: "", isDefault: false, address: null };
 
-  return getAddressFields(addressForm) !== getAddressFields(opened);
+  return getAddressFields(values) !== getAddressFields(opened);
 };
 
-export const hasUnsavedEdits = (state: AccountState) => {
-  const { edit, draft, profile, password, allergyEdit, allergyDraft, entries } =
-    state;
+export const hasUnsavedEdits = (state: AccountState, values: FormValues) => {
+  const { edit, profile, password, allergyEdit, allergyDraft, entries } = state;
 
   return (
-    (!!edit && JSON.stringify(draft) !== JSON.stringify(profile)) ||
-    (password.open && !!(password.current || password.next)) ||
+    (!!edit && JSON.stringify(values.draft) !== JSON.stringify(profile)) ||
+    (password.open && !!(values.password.current || values.password.next)) ||
     (allergyEdit >= 0 && allergyDraft !== (entries[allergyEdit]?.text ?? "")) ||
-    hasUnsavedAddress(state)
+    hasUnsavedAddress(state, values.address)
   );
 };
 
@@ -44,9 +50,8 @@ export const getDiscardPatch = ({
   password,
 }: AccountState): Partial<AccountState> => ({
   edit: null,
-  fieldErrors: {},
   emailStep: "",
   allergyEdit: -1,
   addressForm: null,
-  password: { ...password, open: false, current: "", next: "", tried: false },
+  password: { ...password, open: false },
 });

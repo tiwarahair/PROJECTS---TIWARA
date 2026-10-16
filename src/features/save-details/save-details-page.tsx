@@ -1,4 +1,5 @@
 import { useEffect, useLayoutEffect, useRef, useState } from "react";
+import { useForm } from "react-hook-form";
 import { Link } from "react-router";
 import { usePasswordChecker } from "../../hooks/use-password-checker";
 import { PasswordMeter } from "../../components/password-meter/password-meter";
@@ -20,9 +21,11 @@ interface SaveDetailsState {
   last: string;
   password: string;
   show: boolean;
-  shown: boolean;
-  saving: boolean;
   resent: boolean;
+}
+
+interface SaveDetailsForm {
+  password: string;
 }
 
 const getInitialView = (
@@ -46,8 +49,6 @@ const getInitialState = (): SaveDetailsState => {
     last: params.get("last") || "Okafor",
     password: params.get("pw") || "",
     show: !!params.get("pw"),
-    shown: false,
-    saving: false,
     resent: false,
   };
 };
@@ -74,7 +75,19 @@ const CheckIcon = ({ size }: { size: number }) => (
 export const SaveDetailsPage = () => {
   const [state, setState] = useState(getInitialState);
   const saveTimer = useRef(0);
-  const { view, email, password, show, shown, saving, resent } = state;
+  const { view, email, show, resent } = state;
+
+  const {
+    register,
+    handleSubmit,
+    watch,
+    formState: { errors, isSubmitting },
+  } = useForm<SaveDetailsForm>({
+    defaultValues: { password: state.password },
+    mode: "onTouched",
+  });
+
+  const password = watch("password");
 
   const set = (patch: Partial<SaveDetailsState>) =>
     setState((current) => ({ ...current, ...patch }));
@@ -92,30 +105,32 @@ export const SaveDetailsPage = () => {
     return () => window.clearTimeout(saveTimer.current);
   }, []);
 
-  const check = checkPassword(password, {
-    min: CLIENT_MIN,
-    first: state.first,
-    last: state.last,
-    email,
-  });
+  const getCheck = (value: string) =>
+    checkPassword(value, {
+      min: CLIENT_MIN,
+      first: state.first,
+      last: state.last,
+      email,
+    });
+
+  const check = getCheck(password);
 
   const meter = getPasswordView(check, {
-    show: shown,
+    show: !!errors.password,
     errorColour: "var(--accent-700)",
   });
 
-  const save = () => {
-    if (saving) return;
+  const passwordField = register("password", {
+    validate: (value) => getCheck(value).valid,
+  });
 
-    if (!check.valid) return set({ shown: true });
-
-    set({ saving: true, shown: false });
-
-    saveTimer.current = window.setTimeout(
-      () => set({ saving: false, view: "done" }),
-      SAVE_MS,
-    );
-  };
+  const save = () =>
+    new Promise<void>((resolve) => {
+      saveTimer.current = window.setTimeout(() => {
+        set({ view: "done" });
+        resolve();
+      }, SAVE_MS);
+    });
 
   return (
     <div data-screen-label="Save details" className={styles.page}>
@@ -138,7 +153,11 @@ export const SaveDetailsPage = () => {
               Create a password to book faster and see all your bookings in one
               place.
             </p>
-            <div className={styles.fields}>
+            <form
+              className={styles.fields}
+              noValidate
+              onSubmit={handleSubmit(save)}
+            >
               <div className={styles.field}>
                 <span className={styles.label}>Email</span>
                 <div aria-readonly="true" className={styles.readonly}>
@@ -154,13 +173,9 @@ export const SaveDetailsPage = () => {
                     id="sd-pw"
                     type={show ? "text" : "password"}
                     autoComplete="new-password"
-                    value={password}
-                    onChange={(event) => set({ password: event.target.value })}
-                    onKeyDown={(event) => {
-                      if (event.key === "Enter") save();
-                    }}
-                    onBlur={() => {
-                      if (password) set({ shown: true });
+                    {...passwordField}
+                    onBlur={(event) => {
+                      if (event.target.value) void passwordField.onBlur(event);
                     }}
                     aria-describedby="sd-pw-help"
                     aria-invalid={meter.hasError ? "true" : "false"}
@@ -172,6 +187,7 @@ export const SaveDetailsPage = () => {
                     )}
                   />
                   <button
+                    type="button"
                     onClick={() => set({ show: !show })}
                     aria-label={show ? "Hide password" : "Show password"}
                     className={styles.toggle}
@@ -182,16 +198,16 @@ export const SaveDetailsPage = () => {
                 <PasswordMeter id="sd-pw-help" view={meter} />
               </div>
               <button
-                onClick={save}
-                disabled={saving}
+                type="submit"
+                disabled={isSubmitting}
                 className={joinClassNames(
                   styles.save,
-                  saving ? styles.saveBusy : styles.saveReady,
+                  isSubmitting ? styles.saveBusy : styles.saveReady,
                 )}
               >
-                {saving ? "Saving…" : "Save my details"}
+                {isSubmitting ? "Saving…" : "Save my details"}
               </button>
-            </div>
+            </form>
           </div>
         )}
         {view === "done" && (

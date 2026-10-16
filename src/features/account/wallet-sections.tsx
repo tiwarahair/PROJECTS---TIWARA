@@ -1,7 +1,8 @@
+import { Controller, useFormState } from "react-hook-form";
 import { AddressFinder } from "../../components/address-finder/address-finder";
 import { joinClassNames } from "../../utils/class-names";
 import { getAddressLine } from "./account-logic";
-import type { AddressForm, AccountController } from "./use-account";
+import type { AccountController } from "./use-account";
 import styles from "../../styles/features/account/wallet-sections.module.css";
 import ui from "../../styles/features/account/account-ui.module.css";
 
@@ -151,17 +152,16 @@ export const PaymentsSection = ({
 
 interface AddressFormFieldsProps {
   account: AccountController;
-  form: AddressForm;
   showDefault: boolean;
 }
 
 /** Label, AddressFinder, default checkbox and Save / Cancel (shared by add and edit). */
 const AddressFormFields = ({
-  account: { refs, actions },
-  form,
+  account: { actions, forms },
   showDefault,
 }: AddressFormFieldsProps) => {
-  const { setState } = actions;
+  const { register, control } = forms.address;
+  const { isSubmitted } = useFormState({ control });
 
   return (
     <>
@@ -170,34 +170,26 @@ const AddressFormFields = ({
         <span className={styles.optionalHint}>Optional</span>
         <input
           className={styles.labelInput}
-          ref={refs.addressLabel}
-          value={form.label}
-          onChange={(event) => {
-            const label = event.target.value.slice(0, 30);
-
-            setState(({ addressForm }) => ({
-              addressForm: addressForm && { ...addressForm, label },
-            }));
-          }}
+          {...register("label")}
           placeholder="e.g. Home"
           maxLength={30}
         />
       </label>
       {/* plain block wrapper (the finder is not a flex item of the form) */}
       <div data-dc-host="">
-        <AddressFinder
-          idPrefix="ac-addr"
-          label="Address or postcode"
-          value={form.address}
-          onChange={(address) =>
-            setState(({ addressForm }) => ({
-              addressForm: addressForm
-                ? { ...addressForm, address }
-                : addressForm,
-            }))
-          }
-          showErrors={form.tried}
-          fieldHeight={48}
+        <Controller
+          name="address"
+          control={control}
+          render={({ field }) => (
+            <AddressFinder
+              idPrefix="ac-addr"
+              label="Address or postcode"
+              value={field.value}
+              onChange={field.onChange}
+              showErrors={isSubmitted}
+              fieldHeight={48}
+            />
+          )}
         />
       </div>
       {showDefault && (
@@ -205,25 +197,18 @@ const AddressFormFields = ({
           <input
             className={ui.checkbox}
             type="checkbox"
-            checked={form.isDefault}
-            onChange={(event) => {
-              const isDefault = event.target.checked;
-
-              setState(({ addressForm }) => ({
-                addressForm: addressForm && { ...addressForm, isDefault },
-              }));
-            }}
+            {...register("isDefault")}
           />
           Make this my default address
         </label>
       )}
       <div className={ui.actions}>
-        <button className={ui.save} onClick={actions.saveAddress}>
+        <button className={ui.save} onClick={() => void actions.saveAddress()}>
           Save address
         </button>
         <button
           className={ui.cancel}
-          onClick={() => setState({ addressForm: null })}
+          onClick={() => actions.setState({ addressForm: null })}
         >
           Cancel
         </button>
@@ -237,7 +222,7 @@ export const AddressesSection = ({
 }: {
   account: AccountController;
 }) => {
-  const { state, actions } = account;
+  const { state, actions, forms } = account;
   const { addresses, addressForm: form, addressMenu } = state;
   const { setState, showToast, focusLater } = actions;
   const isEditing = form?.mode === "edit";
@@ -323,28 +308,27 @@ export const AddressesSection = ({
                             <button
                               className={styles.menuItem}
                               role="menuitem"
-                              onClick={() =>
+                              onClick={() => {
+                                forms.address.reset({
+                                  label,
+                                  address: {
+                                    line1: address.line1,
+                                    line2: address.line2,
+                                    town: address.town,
+                                    postcode: address.postcode,
+                                    source: "manual",
+                                  },
+                                  isDefault,
+                                });
+
                                 setState(
                                   {
                                     addressMenu: null,
-                                    addressForm: {
-                                      mode: "edit",
-                                      id,
-                                      label,
-                                      address: {
-                                        line1: address.line1,
-                                        line2: address.line2,
-                                        town: address.town,
-                                        postcode: address.postcode,
-                                        source: "manual",
-                                      },
-                                      isDefault,
-                                      tried: false,
-                                    },
+                                    addressForm: { mode: "edit", id },
                                   },
                                   () => focusLater("address"),
-                                )
-                              }
+                                );
+                              }}
                             >
                               Edit
                             </button>
@@ -392,7 +376,6 @@ export const AddressesSection = ({
                       <div className={ui.strongText}>Edit address</div>
                       <AddressFormFields
                         account={account}
-                        form={form}
                         showDefault={showDefault}
                       />
                     </div>
@@ -412,31 +395,20 @@ export const AddressesSection = ({
         <div className={styles.addPanel} data-screen-label="Add an address">
           <div className={styles.addrForm}>
             <h2 className={styles.addTitle}>Add an address</h2>
-            <AddressFormFields
-              account={account}
-              form={form}
-              showDefault={showDefault}
-            />
+            <AddressFormFields account={account} showDefault={showDefault} />
           </div>
         </div>
       )}
       {!form && (
         <button
           className={styles.addAddress}
-          onClick={() =>
-            setState(
-              {
-                addressForm: {
-                  mode: "add",
-                  label: "",
-                  address: null,
-                  isDefault: false,
-                  tried: false,
-                },
-              },
-              () => focusLater("address"),
-            )
-          }
+          onClick={() => {
+            forms.address.reset({ label: "", address: null, isDefault: false });
+
+            setState({ addressForm: { mode: "add" } }, () =>
+              focusLater("address"),
+            );
+          }}
         >
           <svg
             className={ui.icon}

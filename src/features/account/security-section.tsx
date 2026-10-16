@@ -1,3 +1,4 @@
+import { useFormState } from "react-hook-form";
 import type { CSSProperties } from "react";
 import { joinClassNames } from "../../utils/class-names";
 import {
@@ -5,6 +6,7 @@ import {
   getPasswordMin,
   getPasswordView,
 } from "../../utils/password";
+import { EMPTY_PASSWORD } from "./account-forms";
 import type { AccountController, PasswordState } from "./use-account";
 import styles from "../../styles/features/account/security-section.module.css";
 import ui from "../../styles/features/account/account-ui.module.css";
@@ -17,23 +19,27 @@ const getPasswordStatus = ({ has, changed }: PasswordState) => {
 
 /** Login & security: password (change / set, with the strength meter), Google / Apple, log out everywhere. */
 export const SecuritySection = ({
-  account: { state, refs, actions },
+  account: { state, actions, forms },
 }: {
   account: AccountController;
 }) => {
   const { password, profile, googleConnected, appleConnected } = state;
   const { setState, showToast } = actions;
 
-  const check = checkPassword(password.next, {
+  const { register, watch, reset, clearErrors, control } = forms.password;
+  const { errors } = useFormState({ control });
+
+  const currentField = register("current");
+  const nextField = register("next");
+
+  const check = checkPassword(watch("next"), {
     min: getPasswordMin("client"),
     first: profile.first,
     last: profile.last,
     email: profile.email,
   });
 
-  const meter = getPasswordView(check, {
-    show: password.tried || (password.blur && check.typed),
-  });
+  const meter = getPasswordView(check, { show: !!errors.next });
 
   const methods =
     (password.has ? 1 : 0) +
@@ -108,28 +114,21 @@ export const SecuritySection = ({
                   <input
                     className={joinClassNames(
                       ui.input,
-                      password.currentError ? ui.inputErr : ui.inputOk,
+                      errors.current ? ui.inputErr : ui.inputOk,
                     )}
-                    ref={refs.current}
                     type={password.show ? "text" : "password"}
-                    value={password.current}
+                    name={currentField.name}
+                    ref={currentField.ref}
                     onChange={(event) => {
-                      const { value } = event.target;
-
-                      setState(({ password: current }) => ({
-                        password: {
-                          ...current,
-                          current: value,
-                          currentError: "",
-                        },
-                      }));
+                      clearErrors("current");
+                      void currentField.onChange(event);
                     }}
                     autoComplete="current-password"
-                    aria-invalid={password.currentError ? "true" : "false"}
+                    aria-invalid={errors.current ? "true" : "false"}
                     aria-describedby="ac-e-cur"
                   />
                   <span className={ui.error} id="ac-e-cur">
-                    {password.currentError}
+                    {errors.current?.message}
                   </span>
                 </label>
               )}
@@ -144,21 +143,11 @@ export const SecuritySection = ({
                       meter.hasError ? ui.inputErr : ui.inputOk,
                     )}
                     id="ac-newpw"
-                    ref={refs.next}
                     type={password.show ? "text" : "password"}
-                    value={password.next}
-                    onChange={(event) => {
-                      const { value } = event.target;
-
-                      setState(({ password: current }) => ({
-                        password: { ...current, next: value },
-                      }));
+                    {...nextField}
+                    onBlur={(event) => {
+                      if (event.target.value) void nextField.onBlur(event);
                     }}
-                    onBlur={() =>
-                      setState(({ password: current }) => ({
-                        password: { ...current, blur: true },
-                      }))
-                    }
                     autoComplete="new-password"
                     aria-invalid={meter.hasError}
                     aria-describedby="ac-pw-msg"
@@ -211,24 +200,21 @@ export const SecuritySection = ({
                 )}
               </div>
               <div className={ui.actions}>
-                <button className={ui.save} onClick={actions.savePassword}>
+                <button
+                  className={ui.save}
+                  onClick={() => void actions.savePassword()}
+                >
                   Save
                 </button>
                 <button
                   className={ui.cancel}
-                  onClick={() =>
+                  onClick={() => {
+                    reset(EMPTY_PASSWORD);
+
                     setState(({ password: current }) => ({
-                      password: {
-                        ...current,
-                        open: false,
-                        current: "",
-                        next: "",
-                        tried: false,
-                        blur: false,
-                        currentError: "",
-                      },
-                    }))
-                  }
+                      password: { ...current, open: false },
+                    }));
+                  }}
                 >
                   Cancel
                 </button>

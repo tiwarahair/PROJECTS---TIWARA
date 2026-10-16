@@ -22,6 +22,11 @@ const renderAccount = (query = "") =>
 const getLabelled = (label: string) =>
   document.querySelector(`[data-screen-label="${label}"]`);
 
+const settle = () =>
+  act(async () => {
+    for (let tick = 0; tick < 5; tick++) await Promise.resolve();
+  });
+
 describe("AccountPage", () => {
   beforeEach(() => {
     vi.useFakeTimers({
@@ -203,6 +208,7 @@ describe("AccountPage", () => {
     await user.type(screen.getByLabelText("New email"), "nia@example.com");
 
     await user.click(screen.getByRole("button", { name: "Continue" }));
+    await settle();
     expect(getLabelled("Email code step")).toBeInTheDocument();
 
     for (const [index, digit] of [..."123456"].entries())
@@ -222,6 +228,7 @@ describe("AccountPage", () => {
     const dialog = screen.getByRole("dialog");
 
     await user.click(within(dialog).getByRole("button", { name: "Save card" }));
+    await settle();
     expect(within(dialog).getByText("Enter your card number")).toBeVisible();
 
     await user.type(
@@ -234,6 +241,7 @@ describe("AccountPage", () => {
     await user.type(within(dialog).getByPlaceholderText("CVC"), "123");
 
     await user.click(within(dialog).getByRole("button", { name: "Save card" }));
+    await settle();
     expect(screen.queryByRole("dialog")).not.toBeInTheDocument();
     expect(screen.getAllByText("Mastercard •••• 4444")).toHaveLength(2);
   });

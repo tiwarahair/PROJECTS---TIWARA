@@ -1,5 +1,5 @@
+import { useFormState } from "react-hook-form";
 import { Fragment } from "react";
-import type { ChangeEvent } from "react";
 import { resolveAssetUrl } from "../../utils/asset-url";
 import { joinClassNames } from "../../utils/class-names";
 import type { EditKey } from "./account-logic";
@@ -23,20 +23,10 @@ interface PersonalSectionProps {
 
 /** Personal details: profile photo, name / email / mobile rows with inline edit, and the email-change code step. */
 export const PersonalSection = ({
-  account: { state, refs, actions },
+  account: { state, refs, actions, forms },
   initials,
 }: PersonalSectionProps) => {
-  const {
-    profile,
-    edit,
-    draft,
-    fieldErrors,
-    emailStep,
-    code,
-    codeError,
-    shake,
-    resendIn,
-  } = state;
+  const { profile, edit, emailStep, code, codeError, shake, resendIn } = state;
 
   const { setState, focusLater, showToast, saveEdit } = actions;
   const codeStep = edit === "email" && emailStep === "code";
@@ -48,22 +38,16 @@ export const PersonalSection = ({
     ["mobile", "Mobile", `+44 ${profile.mobile}`],
   ];
 
-  const setDraft =
-    (key: keyof Profile) => (event: ChangeEvent<HTMLInputElement>) => {
-      const { value } = event.target;
+  const { register, reset, watch, clearErrors, control } = forms.edit;
+  const { errors } = useFormState({ control });
 
-      setState(({ draft: current, fieldErrors: errors }) => ({
-        draft: { ...current, [key]: value },
-        fieldErrors: { ...errors, [key]: "" },
-      }));
-    };
-
-  const borderOf = (key: string) =>
-    fieldErrors[key] ? ui.inputErr : ui.inputOk;
+  const borderOf = (key: keyof Profile) =>
+    errors[key] ? ui.inputErr : ui.inputOk;
 
   const cancelEdit = () => {
     actions.stopResendCountdown();
-    setState({ edit: null, fieldErrors: {}, emailStep: "", codeError: "" });
+    clearErrors();
+    setState({ edit: null, emailStep: "", codeError: "" });
   };
 
   return (
@@ -173,22 +157,22 @@ export const PersonalSection = ({
                               <div className={styles.pendingActions}>
                                 <button
                                   className={styles.linkButton}
-                                  onClick={() =>
+                                  onClick={() => {
+                                    reset({
+                                      ...profile,
+                                      email: state.pendingEmail ?? "",
+                                    });
+
                                     setState(
-                                      ({ profile: current, pendingEmail }) => ({
+                                      {
                                         edit: "email",
                                         emailStep: "code",
-                                        draft: {
-                                          ...current,
-                                          email: pendingEmail ?? "",
-                                        },
                                         code: EMPTY_CODE,
                                         codeError: "",
-                                        fieldErrors: {},
-                                      }),
+                                      },
                                       () => focusLater("code"),
-                                    )
-                                  }
+                                    );
+                                  }}
                                 >
                                   Enter code
                                 </button>
@@ -233,19 +217,17 @@ export const PersonalSection = ({
                               borderOf("email"),
                             )}
                             id="ac-new-email"
-                            ref={refs.email}
                             type="email"
                             inputMode="email"
                             autoComplete="email"
-                            value={draft.email}
-                            onChange={setDraft("email")}
+                            {...register("email")}
                             onKeyDown={(event) => {
                               if (event.key !== "Enter") return;
 
                               event.preventDefault();
                               saveEdit();
                             }}
-                            aria-invalid={fieldErrors.email ? "true" : "false"}
+                            aria-invalid={errors.email ? "true" : "false"}
                             aria-describedby="ac-e-email"
                           />
                           <div
@@ -253,7 +235,7 @@ export const PersonalSection = ({
                             id="ac-e-email"
                             role="alert"
                           >
-                            {fieldErrors.email}
+                            {errors.email?.message}
                           </div>
                         </div>
                         <div className={ui.actions}>
@@ -276,7 +258,10 @@ export const PersonalSection = ({
                       >
                         <p className={styles.codeIntro}>
                           We’ve sent a code to{" "}
-                          <strong className={ui.strong}>{draft.email}</strong>.
+                          <strong className={ui.strong}>
+                            {watch("email")}
+                          </strong>
+                          .
                         </p>
                         <div
                           className={joinClassNames(
@@ -389,20 +374,16 @@ export const PersonalSection = ({
                         ui.outlineButton,
                         isLocked && ui.dimmed,
                       )}
-                      onClick={() =>
-                        setState(
-                          {
-                            edit: key,
-                            draft: {
-                              ...profile,
-                              email: key === "email" ? "" : profile.email,
-                            },
-                            fieldErrors: {},
-                            emailStep: "",
-                          },
-                          () => focusLater("edit"),
-                        )
-                      }
+                      onClick={() => {
+                        reset({
+                          ...profile,
+                          email: key === "email" ? "" : profile.email,
+                        });
+
+                        setState({ edit: key, emailStep: "" }, () =>
+                          focusLater("edit"),
+                        );
+                      }}
                       aria-label={`Edit ${label.toLowerCase()}`}
                       disabled={isLocked}
                     >
@@ -416,29 +397,26 @@ export const PersonalSection = ({
                       First name{" "}
                       <input
                         className={joinClassNames(ui.input, borderOf("first"))}
-                        ref={refs.first}
-                        value={draft.first}
-                        onChange={setDraft("first")}
+                        {...register("first")}
                         autoComplete="given-name"
-                        aria-invalid={fieldErrors.first ? "true" : "false"}
+                        aria-invalid={errors.first ? "true" : "false"}
                         aria-describedby="ac-e-first"
                       />
                       <span className={ui.error} id="ac-e-first">
-                        {fieldErrors.first}
+                        {errors.first?.message}
                       </span>
                     </label>
                     <label className={ui.label}>
                       Last name{" "}
                       <input
                         className={joinClassNames(ui.input, borderOf("last"))}
-                        value={draft.last}
-                        onChange={setDraft("last")}
+                        {...register("last")}
                         autoComplete="family-name"
-                        aria-invalid={fieldErrors.last ? "true" : "false"}
+                        aria-invalid={errors.last ? "true" : "false"}
                         aria-describedby="ac-e-last"
                       />
                       <span className={ui.error} id="ac-e-last">
-                        {fieldErrors.last}
+                        {errors.last?.message}
                       </span>
                     </label>
                   </div>
@@ -458,17 +436,15 @@ export const PersonalSection = ({
                       <input
                         className={styles.mobileInput}
                         id="ac-mob"
-                        ref={refs.mobile}
                         type="tel"
-                        value={draft.mobile}
-                        onChange={setDraft("mobile")}
+                        {...register("mobile")}
                         autoComplete="tel-national"
-                        aria-invalid={fieldErrors.mobile ? "true" : "false"}
+                        aria-invalid={errors.mobile ? "true" : "false"}
                         aria-describedby="ac-e-mob"
                       />
                     </div>
                     <div className={styles.mobileError} id="ac-e-mob">
-                      {fieldErrors.mobile}
+                      {errors.mobile?.message}
                     </div>
                   </div>
                 )}
