@@ -2,7 +2,7 @@
 import { CURRENT_PASSWORD, DEMO_PHOTO, SEED_PROFILE } from "./data";
 import type { Profile } from "./data";
 import type { AddressFormValues, PasswordFormValues } from "./schemas";
-import type { AccountState } from "./use-account";
+import type { AccountState } from "./state";
 
 export interface FixtureForms {
   draft?: Profile;

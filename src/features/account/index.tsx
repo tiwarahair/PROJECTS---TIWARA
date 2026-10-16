@@ -21,7 +21,7 @@ import {
   SharedSection,
 } from "./settings-sections";
 import { useAccount } from "./use-account";
-import type { AccountProps } from "./use-account";
+import type { AccountProps } from "./state";
 import { AddressesSection, PaymentsSection } from "./wallet-sections";
 import pageGlobal from "../../styles/features/account/index-global.module.css";
 import styles from "../../styles/features/account/index.module.css";

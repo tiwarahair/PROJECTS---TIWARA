@@ -1,7 +1,7 @@
 // Unsaved edits on the Account page: an open edit form whose values differ from what's saved.
 import type { Profile } from "./data";
 import type { AddressFormValues, PasswordFormValues } from "./schemas";
-import type { AccountState } from "./use-account";
+import type { AccountState } from "./state";
 
 interface FormValues {
   draft: Profile;

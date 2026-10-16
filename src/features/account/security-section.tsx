@@ -8,7 +8,8 @@ import {
   getPasswordView,
 } from "../../utils/password";
 import { EMPTY_PASSWORD } from "./forms";
-import type { AccountController, PasswordState } from "./use-account";
+import type { PasswordState } from "./state";
+import type { AccountController } from "./use-account";
 import styles from "../../styles/features/account/security-section.module.css";
 import ui from "../../styles/features/account/ui.module.css";
 

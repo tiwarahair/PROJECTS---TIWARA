@@ -11,7 +11,7 @@ import {
   getBookingMoney,
 } from "./logic";
 import type { BookingMoney } from "./logic";
-import type { AccountState } from "./use-account";
+import type { AccountState } from "./state";
 import { formatMoney } from "../../utils/money";
 
 export interface BookingCardView {
