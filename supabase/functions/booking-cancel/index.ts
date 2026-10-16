@@ -5,7 +5,7 @@ import { corsHeaders, respond } from "../_shared/cors.ts";
 import { isWithinLimit } from "../_shared/rate-limit.ts";
 import { stripe } from "../_shared/stripe.ts";
 
-const ERRORS: Record<string, number> = { link_not_valid: 404, cannot_cancel: 409 };
+const ERRORS: Record<string, number> = { link_not_valid: 404, cannot_cancel: 409, confirm_needed: 403 };
 
 const requestSchema = z.object({ token: z.string().min(1).max(100) });
 

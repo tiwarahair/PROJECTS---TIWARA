@@ -7,14 +7,22 @@ import {
 } from "../utils/page-flags";
 
 /**
- * A page opened from an emailed link whose ?token= acts as a password: the token moves into this tab's
- * session (so a reload still works) and out of the address bar, and the page sends no referrer.
+ * A page opened from an emailed link whose ?token= (or another param) acts as a password: the token leaves the
+ * address bar, the page sends no referrer and, given a storage key, a reload in the same tab still works.
  */
-export const usePrivateLink = (storageKey: string) => {
+export const usePrivateLink = ({
+  param = "token",
+  storageKey,
+}: {
+  param?: string;
+  storageKey?: string;
+}) => {
   const navigate = useNavigate();
 
   const [token] = useState(() => {
-    const fromUrl = getSearchParams().get("token");
+    const fromUrl = getSearchParams().get(param);
+
+    if (!storageKey) return fromUrl ?? "";
 
     if (fromUrl) writeSession(storageKey, fromUrl);
 
@@ -34,13 +42,13 @@ export const usePrivateLink = (storageKey: string) => {
   useEffect(() => {
     const params = getSearchParams();
 
-    if (!params.has("token")) return;
+    if (!params.has(param)) return;
 
-    params.delete("token");
+    params.delete(param);
     const search = params.toString();
 
     void navigate({ search: search ? `?${search}` : "" }, { replace: true });
-  }, [navigate]);
+  }, [navigate, param]);
 
   return token;
 };

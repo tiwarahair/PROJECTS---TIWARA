@@ -21,7 +21,7 @@ const getStateOutcome = (state: string): SaveOutcome | null => {
 
 /** Route "/save-details?token=": a guest sets a password and their bookings move into the new account. */
 export const SaveDetailsPage = () => {
-  const token = usePrivateLink("tw_invite_token");
+  const token = usePrivateLink({ storageKey: "tw_invite_token" });
   const [outcome, setOutcome] = useState<SaveOutcome | null>(null);
 
   const {

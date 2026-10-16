@@ -48,6 +48,9 @@ begin
   update public.bookings set stripe_payment_intent_id = 'pi_' || (held ->> 'ref') where id = (held ->> 'id')::uuid;
   perform public.confirm_booking_payment('pi_' || (held ->> 'ref'));
 
+  update public.booking_tokens set verified_until = now() + interval '1 hour'
+  where booking_id = (held ->> 'id')::uuid and purpose = 'manage';
+
   return held || jsonb_build_object('token', (
     select split_part(payload ->> 'manage_url', 'token=', 2) from public.notifications
     where template = 'booking_confirmed' and payload ->> 'ref' = held ->> 'ref'

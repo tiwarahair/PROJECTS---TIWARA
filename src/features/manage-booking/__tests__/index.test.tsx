@@ -6,7 +6,10 @@ import {
   getManagedBooking,
   getRescheduleSlots,
   rescheduleBooking,
+  secureBookingLink,
+  sendBookingCode,
   updateBookingAllergies,
+  verifyBookingCode,
 } from "../../../lib/manage-booking-api";
 import type { ManagedBooking } from "../../../lib/manage-booking-api";
 import { getOwnerManageToken } from "../../../lib/booking-invite-api";
@@ -49,6 +52,7 @@ const booking: ManagedBooking = {
   allergies: "Sensitive scalp",
   reschedule_count: 0,
   calendar_key: "cal-key",
+  is_verified: true,
   cancelled_at: null,
   can_cancel: true,
   can_reschedule: true,
@@ -264,7 +268,11 @@ describe("the manage booking page", () => {
 
   it("a time taken meanwhile says so", async () => {
     vi.mocked(getRescheduleSlots).mockResolvedValue(["2026-10-24T09:00:00Z"]);
-    vi.mocked(rescheduleBooking).mockRejectedValueOnce(new Error("slot_taken"));
+
+    vi.mocked(rescheduleBooking).mockRejectedValueOnce({
+      code: "P0001",
+      message: "slot_taken",
+    });
 
     renderPage();
 
@@ -386,6 +394,236 @@ describe("the manage booking page", () => {
 
     expect(
       await screen.findByRole("heading", { name: "This link isn’t valid" }),
+    ).toBeInTheDocument();
+  });
+
+  it("an unconfirmed link asks for the emailed code before rescheduling", async () => {
+    vi.mocked(getManagedBooking).mockResolvedValue({
+      ...booking,
+      is_verified: false,
+    });
+
+    vi.mocked(verifyBookingCode).mockResolvedValueOnce("wrong_code");
+    renderPage();
+
+    await user.click(await screen.findByRole("button", { name: "Reschedule" }));
+
+    const dialog = within(
+      screen.getByRole("dialog", { name: "Check your email" }),
+    );
+
+    expect(
+      await dialog.findByText(
+        "We sent a 6-digit code to n•••@gmail.com. Enter it to reschedule your booking.",
+      ),
+    ).toBeInTheDocument();
+
+    expect(sendBookingCode).toHaveBeenCalledWith("tok");
+
+    expect(
+      screen.queryByRole("dialog", { name: "Pick a new time" }),
+    ).toBeNull();
+
+    await user.type(dialog.getByLabelText("6-digit code"), "111111");
+    await user.click(dialog.getByRole("button", { name: "Confirm" }));
+
+    expect(await dialog.findByRole("alert")).toHaveTextContent(
+      "That code isn’t right.",
+    );
+
+    await user.clear(dialog.getByLabelText("6-digit code"));
+    await user.type(dialog.getByLabelText("6-digit code"), "042817");
+    await user.click(dialog.getByRole("button", { name: "Confirm" }));
+
+    expect(
+      await screen.findByRole("dialog", { name: "Pick a new time" }),
+    ).toBeInTheDocument();
+
+    expect(verifyBookingCode).toHaveBeenLastCalledWith({
+      token: "tok",
+      code: "042817",
+    });
+
+    expect(
+      screen.queryByRole("dialog", { name: "Check your email" }),
+    ).toBeNull();
+  });
+
+  it("an unconfirmed link asks for the code before the cancel dialog", async () => {
+    vi.mocked(getManagedBooking).mockResolvedValue({
+      ...booking,
+      is_verified: false,
+    });
+
+    renderPage();
+
+    await user.click(
+      await screen.findByRole("button", { name: "Cancel booking" }),
+    );
+
+    const dialog = within(
+      screen.getByRole("dialog", { name: "Check your email" }),
+    );
+
+    expect(
+      await dialog.findByText(/Enter it to cancel your booking/),
+    ).toBeInTheDocument();
+
+    await user.type(dialog.getByLabelText("6-digit code"), "042817");
+    await user.click(dialog.getByRole("button", { name: "Confirm" }));
+
+    expect(
+      await screen.findByRole("alertdialog", { name: "Cancel this booking?" }),
+    ).toBeInTheDocument();
+
+    expect(cancelBooking).not.toHaveBeenCalled();
+  });
+
+  it("a short code is caught before checking, and Not now closes", async () => {
+    vi.mocked(getManagedBooking).mockResolvedValue({
+      ...booking,
+      is_verified: false,
+    });
+
+    renderPage();
+
+    await user.click(await screen.findByRole("button", { name: "Reschedule" }));
+
+    const dialog = within(
+      screen.getByRole("dialog", { name: "Check your email" }),
+    );
+
+    await user.type(dialog.getByLabelText("6-digit code"), "12a3");
+    expect(dialog.getByLabelText("6-digit code")).toHaveValue("123");
+    await user.click(dialog.getByRole("button", { name: "Confirm" }));
+
+    expect(dialog.getByRole("alert")).toHaveTextContent(
+      "Enter the 6-digit code from the email.",
+    );
+
+    expect(verifyBookingCode).not.toHaveBeenCalled();
+    await user.click(dialog.getByRole("button", { name: "Not now" }));
+
+    expect(
+      screen.queryByRole("dialog", { name: "Check your email" }),
+    ).toBeNull();
+  });
+
+  it("too many codes says to wait", async () => {
+    vi.mocked(getManagedBooking).mockResolvedValue({
+      ...booking,
+      is_verified: false,
+    });
+
+    vi.mocked(sendBookingCode).mockRejectedValueOnce(
+      new Error("too_many_codes"),
+    );
+
+    renderPage();
+
+    await user.click(await screen.findByRole("button", { name: "Reschedule" }));
+
+    expect(await screen.findByRole("alert")).toHaveTextContent(
+      "You’ve asked for a lot of codes. Try again in an hour.",
+    );
+  });
+
+  it("if the confirmation lapses, rescheduling asks for a new code", async () => {
+    vi.mocked(getRescheduleSlots).mockResolvedValue(["2026-10-24T09:30:00Z"]);
+
+    vi.mocked(rescheduleBooking).mockRejectedValueOnce({
+      code: "P0001",
+      message: "confirm_needed",
+    });
+
+    renderPage();
+
+    await user.click(await screen.findByRole("button", { name: "Reschedule" }));
+
+    const day = await screen.findByRole("button", { name: "24" });
+
+    await waitFor(() => expect(day).toBeEnabled());
+    await user.click(day);
+    await user.click(screen.getByRole("button", { name: "10:30" }));
+    await user.click(screen.getByRole("button", { name: "Confirm new time" }));
+
+    expect(
+      await screen.findByRole("dialog", { name: "Check your email" }),
+    ).toBeInTheDocument();
+
+    expect(
+      screen.queryByRole("dialog", { name: "Pick a new time" }),
+    ).toBeNull();
+  });
+
+  it("if the confirmation lapses, cancelling asks for a new code", async () => {
+    vi.mocked(cancelBooking).mockRejectedValueOnce(new Error("confirm_needed"));
+    renderPage();
+
+    await user.click(
+      await screen.findByRole("button", { name: "Cancel booking" }),
+    );
+
+    await user.click(
+      within(
+        screen.getByRole("alertdialog", { name: "Cancel this booking?" }),
+      ).getByRole("button", { name: "Cancel booking" }),
+    );
+
+    expect(
+      await screen.findByRole("dialog", { name: "Check your email" }),
+    ).toBeInTheDocument();
+
+    expect(screen.queryByRole("alertdialog")).toBeNull();
+  });
+
+  it("This wasn't me stops the old link after a tap, and leaves the address bar clean", async () => {
+    renderPage("?secure=sec-1");
+
+    expect(
+      await screen.findByRole("heading", {
+        name: "Stop your old booking link",
+      }),
+    ).toBeInTheDocument();
+
+    await waitFor(() =>
+      expect(screen.getByTestId("location")).toHaveTextContent(/^\/manage$/),
+    );
+
+    expect(secureBookingLink).not.toHaveBeenCalled();
+    expect(getManagedBooking).not.toHaveBeenCalled();
+
+    await user.click(
+      screen.getByRole("button", { name: "Send me a new link" }),
+    );
+
+    expect(secureBookingLink).toHaveBeenCalledWith("sec-1");
+
+    expect(
+      await screen.findByRole("heading", {
+        name: "Your old link no longer works",
+      }),
+    ).toBeInTheDocument();
+
+    expect(
+      screen.getByText(/We’ve emailed a new booking link to n•••@gmail.com/),
+    ).toBeInTheDocument();
+  });
+
+  it("a used This wasn't me link says so", async () => {
+    vi.mocked(secureBookingLink).mockRejectedValueOnce({
+      code: "P0001",
+      message: "already_used",
+    });
+
+    renderPage("?secure=sec-1");
+
+    await user.click(
+      await screen.findByRole("button", { name: "Send me a new link" }),
+    );
+
+    expect(
+      await screen.findByRole("heading", { name: "You’ve already done this" }),
     ).toBeInTheDocument();
   });
 

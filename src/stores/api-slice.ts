@@ -16,6 +16,9 @@ import type {
 import {
   cancelBooking,
   getManagedBooking,
+  secureBookingLink,
+  sendBookingCode,
+  verifyBookingCode,
   getRescheduleSlots,
   rescheduleBooking,
   updateBookingAllergies,
@@ -29,6 +32,7 @@ import {
 import type { BookingInvite } from "../lib/booking-invite-api";
 import type {
   CancellationTerms,
+  CodeCheck,
   ManagedBooking,
   RescheduleSlotsRequest,
 } from "../lib/manage-booking-api";
@@ -51,21 +55,19 @@ export interface ApiError {
   message: string;
 }
 
-/** RTK Query's result shape for a promise that may throw. */
-const toQueryResult = <T>(task: Promise<T>) =>
-  task.then(
-    (data) => ({ data }),
-    (error: unknown) => ({
-      error: {
-        message: error instanceof Error ? error.message : String(error),
-      },
-    }),
-  );
-
 export const getErrorMessage = (error: unknown) =>
   typeof error === "object" && error !== null && "message" in error
     ? String(error.message)
     : "";
+
+/** RTK Query's result shape for a promise that may throw. Supabase rpc errors are plain objects, not Errors. */
+const toQueryResult = <T>(task: Promise<T>) =>
+  task.then(
+    (data) => ({ data }),
+    (error: unknown) => ({
+      error: { message: getErrorMessage(error) || String(error) },
+    }),
+  );
 
 export const api = createApi({
   reducerPath: "api",
@@ -226,6 +228,23 @@ export const api = createApi({
       invalidatesTags: () => ["ManagedBooking"],
       queryFn: (request) => toQueryResult(updateBookingAllergies(request)),
     }),
+    sendBookingCode: build.mutation<{ email: string; sent: boolean }, string>({
+      queryFn: (token) => toQueryResult(sendBookingCode(token)),
+    }),
+    verifyBookingCode: build.mutation<
+      CodeCheck,
+      { token: string; code: string }
+    >({
+      invalidatesTags: (result) =>
+        result === "verified" ? ["ManagedBooking"] : [],
+      queryFn: (request) => toQueryResult(verifyBookingCode(request)),
+    }),
+    secureBookingLink: build.mutation<
+      { email: string; stylist_name: string },
+      string
+    >({
+      queryFn: (token) => toQueryResult(secureBookingLink(token)),
+    }),
     cancelBooking: build.mutation<CancellationTerms, string>({
       invalidatesTags: () => ["ManagedBooking"],
       queryFn: (token) => toQueryResult(cancelBooking(token)),
@@ -256,6 +275,9 @@ export const api = createApi({
 
 export const {
   useCancelBookingMutation,
+  useSecureBookingLinkMutation,
+  useSendBookingCodeMutation,
+  useVerifyBookingCodeMutation,
   useClaimBookingInviteMutation,
   useGetBookingInviteQuery,
   useGetOwnerManageTokenQuery,

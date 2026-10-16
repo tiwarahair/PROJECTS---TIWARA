@@ -8,6 +8,7 @@ import {
   useUpdateBookingAllergiesMutation,
 } from "../../stores/api-slice";
 import { BookingCard } from "./booking-card";
+import { CodeDialog } from "./code-dialog";
 import { ConfirmDialog } from "./confirm-dialog";
 import { ManageActions } from "./manage-actions";
 import { getCancelLines, toPounds } from "./logic";
@@ -26,6 +27,8 @@ const getTitle = (isCancelled: boolean, isPast: boolean, stylist: string) => {
     : `You’re booked with ${stylist}`;
 };
 
+type Action = "reschedule" | "cancel";
+
 interface ManagedBookingProps {
   booking: Booking;
   token: string;
@@ -39,6 +42,7 @@ export const ManagedBooking = ({
 }: ManagedBookingProps) => {
   const [dialog, setDialog] = useState<"cancel" | "remove" | null>(null);
   const [isRescheduling, setRescheduling] = useState(false);
+  const [confirming, setConfirming] = useState<Action | null>(null);
 
   const [editing, setEditing] = useState({
     on: false,
@@ -67,6 +71,23 @@ export const ManagedBooking = ({
     window.clearTimeout(toastTimer.current);
     setToast(text);
     toastTimer.current = window.setTimeout(() => setToast(""), TOAST_MS);
+  };
+
+  const runAction = (action: Action) => {
+    if (action === "reschedule") return setRescheduling(true);
+
+    setCancelError("");
+    setDialog("cancel");
+    onRefresh();
+  };
+
+  const startAction = (action: Action) =>
+    booking.is_verified ? runAction(action) : setConfirming(action);
+
+  const askForCode = (action: Action) => {
+    setRescheduling(false);
+    setDialog(null);
+    setConfirming(action);
   };
 
   const updateAllergies = async (allergies: string, consent: boolean) => {
@@ -105,7 +126,10 @@ export const ManagedBooking = ({
       await cancelBooking(token).unwrap();
       setDialog(null);
       showToast("Booking cancelled");
-    } catch {
+    } catch (error) {
+      if (getErrorMessage(error) === "confirm_needed")
+        return askForCode("cancel");
+
       setCancelError("We couldn't cancel your booking. Try again.");
     }
   };
@@ -133,12 +157,8 @@ export const ManagedBooking = ({
       {!isCancelled && (
         <ManageActions
           booking={booking}
-          onReschedule={() => setRescheduling(true)}
-          onCancel={() => {
-            setCancelError("");
-            setDialog("cancel");
-            onRefresh();
-          }}
+          onReschedule={() => startAction("reschedule")}
+          onCancel={() => startAction("cancel")}
         />
       )}
       {!isCancelled && isRescheduling && (
@@ -146,6 +166,7 @@ export const ManagedBooking = ({
           booking={booking}
           token={token}
           onClose={() => setRescheduling(false)}
+          onConfirmNeeded={() => askForCode("reschedule")}
           onDone={() => {
             setRescheduling(false);
             showToast("Booking rescheduled");
@@ -182,6 +203,17 @@ export const ManagedBooking = ({
           onCancel={() => {
             setAllergyError("");
             setEditing({ on: false, draft: "", consent: false });
+          }}
+        />
+      )}
+      {!isCancelled && !!confirming && (
+        <CodeDialog
+          token={token}
+          action={confirming}
+          onClose={() => setConfirming(null)}
+          onVerified={() => {
+            setConfirming(null);
+            runAction(confirming);
           }}
         />
       )}

@@ -104,6 +104,7 @@ set search_path = ''
 as $$
 declare
   target uuid;
+  token text;
 begin
   select id into target from public.bookings
   where bookings.ref = get_owner_manage_token.ref and client_id = auth.uid() and status not in ('held', 'expired');
@@ -112,7 +113,11 @@ begin
     raise exception 'link_not_valid';
   end if;
 
-  return public.create_booking_token(target, 'manage', now() + interval '1 day');
+  token := public.create_booking_token(target, 'manage', now() + interval '1 day');
+
+  update public.booking_tokens set verified_until = expires_at where token_hash = sha256(convert_to(token, 'UTF8'));
+
+  return token;
 end;
 $$;
 

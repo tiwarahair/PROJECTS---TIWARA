@@ -20,6 +20,19 @@ as $$
   where token_hash = sha256(convert_to(coalesce(token, ''), 'UTF8')) and purpose = 'manage' and expires_at > now()
 $$;
 
+create function public.is_manage_verified(token text)
+returns boolean
+language sql
+stable
+security definer
+set search_path = ''
+as $$
+  select exists (
+    select 1 from public.booking_tokens
+    where token_hash = sha256(convert_to(coalesce(token, ''), 'UTF8')) and purpose = 'manage' and verified_until > now()
+  )
+$$;
+
 create function public.get_cancellation_terms(booking public.bookings)
 returns jsonb
 language plpgsql
@@ -90,6 +103,7 @@ as $$
     'allergies', booking.allergies,
     'reschedule_count', booking.reschedule_count,
     'calendar_key', booking.calendar_key,
+    'is_verified', public.is_manage_verified(token),
     'cancelled_at', booking.cancelled_at,
     'can_cancel', booking.status = 'confirmed' and booking.starts_at > now(),
     'can_reschedule', booking.status = 'confirmed' and booking.reschedule_count < 1
@@ -140,7 +154,9 @@ begin
       'cancellation', booking.cancellation,
       'fee_pence', booking.fee_pence,
       'manage_url', booking.site || '/manage?token='
-        || public.create_booking_token(booking.id, 'manage', booking.starts_at + interval '30 days')
+        || public.create_booking_token(booking.id, 'manage', booking.starts_at + interval '30 days'),
+      'secure_url', booking.site || '/manage?secure='
+        || public.create_booking_token(booking.id, 'secure', now() + interval '30 days')
     ),
     booking.client_id
   );
@@ -172,6 +188,10 @@ declare
 begin
   if booking.id is null then
     raise exception 'link_not_valid';
+  end if;
+
+  if not public.is_manage_verified(token) then
+    raise exception 'confirm_needed';
   end if;
 
   select * into booking from public.bookings where id = booking.id for update;
@@ -258,6 +278,10 @@ begin
     raise exception 'cannot_cancel';
   end if;
 
+  if not public.is_manage_verified(token) then
+    raise exception 'confirm_needed';
+  end if;
+
   return public.get_cancellation_terms(booking) || jsonb_build_object(
     'id', booking.id,
     'payment_intent_id', booking.stripe_payment_intent_id
@@ -312,6 +336,7 @@ $$;
 
 revoke execute on function
   public.get_booking_by_token(text),
+  public.is_manage_verified(text),
   public.get_cancellation_terms(public.bookings),
   public.get_managed_booking(text),
   public.get_reschedule_slots(text, date, date),

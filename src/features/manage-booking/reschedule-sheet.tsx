@@ -22,6 +22,7 @@ interface RescheduleSheetProps {
   token: string;
   onDone: () => void;
   onClose: () => void;
+  onConfirmNeeded: () => void;
 }
 
 export const RescheduleSheet = ({
@@ -29,6 +30,7 @@ export const RescheduleSheet = ({
   token,
   onDone,
   onClose,
+  onConfirmNeeded,
 }: RescheduleSheetProps) => {
   const [month, setMonth] = useState(() => {
     const today = new Date();
@@ -78,6 +80,9 @@ export const RescheduleSheet = ({
       await reschedule({ token, startsAt: slot.startsAt }).unwrap();
       onDone();
     } catch (rescheduleError) {
+      if (getErrorMessage(rescheduleError) === "confirm_needed")
+        return onConfirmNeeded();
+
       setSlot(null);
 
       setError(

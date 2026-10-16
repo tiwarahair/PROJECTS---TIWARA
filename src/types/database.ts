@@ -95,6 +95,45 @@ export type Database = {
           },
         ];
       };
+      booking_codes: {
+        Row: {
+          attempts: number;
+          booking_id: string;
+          code_hash: string;
+          created_at: string;
+          expires_at: string;
+          id: string;
+          used_at: string | null;
+        };
+        ComputedFields: never;
+        Insert: {
+          attempts?: number;
+          booking_id: string;
+          code_hash: string;
+          created_at?: string;
+          expires_at: string;
+          id?: string;
+          used_at?: string | null;
+        };
+        Update: {
+          attempts?: number;
+          booking_id?: string;
+          code_hash?: string;
+          created_at?: string;
+          expires_at?: string;
+          id?: string;
+          used_at?: string | null;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "booking_codes_booking_id_fkey";
+            columns: ["booking_id"];
+            isOneToOne: false;
+            referencedRelation: "bookings";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
       booking_events: {
         Row: {
           booking_id: string;
@@ -170,6 +209,7 @@ export type Database = {
           purpose: string;
           token_hash: string;
           used_at: string | null;
+          verified_until: string | null;
         };
         ComputedFields: never;
         Insert: {
@@ -180,6 +220,7 @@ export type Database = {
           purpose: string;
           token_hash: string;
           used_at?: string | null;
+          verified_until?: string | null;
         };
         Update: {
           booking_id?: string;
@@ -189,6 +230,7 @@ export type Database = {
           purpose?: string;
           token_hash?: string;
           used_at?: string | null;
+          verified_until?: string | null;
         };
         Relationships: [
           {
@@ -1522,6 +1564,7 @@ export type Database = {
           purpose: string;
           token_hash: string;
           used_at: string | null;
+          verified_until: string | null;
         };
         SetofOptions: {
           from: "*";
@@ -1553,6 +1596,10 @@ export type Database = {
         Returns: boolean;
       };
       has_second_factor: { Args: Record<PropertyKey, never>; Returns: boolean };
+      hash_booking_code: {
+        Args: { code: string; target: string };
+        Returns: string;
+      };
       hit_rate_limit: {
         Args: { limit_key: string; max_hits: number; window_seconds: number };
         Returns: boolean;
@@ -1575,6 +1622,7 @@ export type Database = {
         Args: { lat: number; lng: number; target_service: string };
         Returns: boolean;
       };
+      is_manage_verified: { Args: { token: string }; Returns: boolean };
       is_service_owner: {
         Args: { target_service_id: string };
         Returns: boolean;
@@ -1600,6 +1648,7 @@ export type Database = {
         Args: { notification_id: string };
         Returns: undefined;
       };
+      mask_email: { Args: { email: string }; Returns: string };
       owns_photo_path: { Args: { object_name: string }; Returns: boolean };
       price_booking: {
         Args: { choices: Json; target_service: string };
@@ -1682,11 +1731,21 @@ export type Database = {
           total_count: number;
         }[];
       };
+      secure_booking_link: { Args: { token: string }; Returns: Json };
+      send_booking_code: { Args: { token: string }; Returns: Json };
+      send_notifications_now: {
+        Args: Record<PropertyKey, never>;
+        Returns: undefined;
+      };
       service_from_pence: { Args: { target: string }; Returns: number };
       slugify: { Args: { value: string }; Returns: string };
       update_booking_allergies: {
         Args: { allergies: string; consent: boolean; token: string };
         Returns: undefined;
+      };
+      verify_booking_code: {
+        Args: { code: string; token: string };
+        Returns: string;
       };
     };
     Enums: {

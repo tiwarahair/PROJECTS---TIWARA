@@ -1,10 +1,11 @@
 create table public.booking_tokens (
   id uuid primary key default gen_random_uuid(),
   booking_id uuid not null references public.bookings (id) on delete cascade,
-  purpose text not null check (purpose in ('manage', 'invite')),
+  purpose text not null check (purpose in ('manage', 'invite', 'secure')),
   token_hash bytea not null unique,
   expires_at timestamptz not null,
   used_at timestamptz,
+  verified_until timestamptz,
   created_at timestamptz not null default now()
 );
 

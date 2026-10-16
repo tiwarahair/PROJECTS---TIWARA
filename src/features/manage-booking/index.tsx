@@ -13,6 +13,7 @@ import { getAssetUrl } from "../../utils/asset-url";
 import { getSearchParams } from "../../utils/page-flags";
 import "../../styles/features/manage-booking/global.module.css";
 import { ManagedBooking } from "./managed-booking";
+import { SecureLink } from "./secure-link";
 import styles from "../../styles/features/manage-booking/index.module.css";
 
 export interface ManageBookingPageProps {
@@ -41,7 +42,8 @@ export const ManageBookingPage = ({
   const ref = params.get("ref") ?? "";
   const isAccount = (params.get("view") || view) === "account";
   const { ready, loggedIn } = useAppSelector(({ session }) => session);
-  const linkToken = usePrivateLink("tw_manage_token");
+  const linkToken = usePrivateLink({ storageKey: "tw_manage_token" });
+  const secureToken = usePrivateLink({ param: "secure" });
   const isOwnerLink = !!ref && !params.get("token");
 
   const owner = useGetOwnerManageTokenQuery(ref, {
@@ -55,7 +57,9 @@ export const ManageBookingPage = ({
     isFetching,
     isError,
     refetch,
-  } = useGetManagedBookingQuery(token, { skip: !token || isAccount });
+  } = useGetManagedBookingQuery(token, {
+    skip: !token || isAccount || !!secureToken,
+  });
 
   const isLoading = isFetching || owner.isFetching || (isOwnerLink && !ready);
   const isSlow = useIsSlow(isLoading && !booking);
@@ -75,6 +79,8 @@ export const ManageBookingPage = ({
   }
 
   const getContent = () => {
+    if (secureToken) return <SecureLink token={secureToken} />;
+
     if (booking)
       return (
         <ManagedBooking

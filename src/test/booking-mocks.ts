@@ -52,6 +52,16 @@ export const mockManageBookingApi = async (
   getRescheduleSlots: vi.fn(() => Promise.resolve([])),
   rescheduleBooking: vi.fn(() => Promise.resolve()),
   updateBookingAllergies: vi.fn(() => Promise.resolve()),
+  sendBookingCode: vi.fn(() =>
+    Promise.resolve({ email: "n•••@gmail.com", sent: true }),
+  ),
+  verifyBookingCode: vi.fn(() => Promise.resolve("verified")),
+  secureBookingLink: vi.fn(() =>
+    Promise.resolve({
+      email: "n•••@gmail.com",
+      stylist_name: "Tiwára's House",
+    }),
+  ),
   cancelBooking: vi.fn(() =>
     Promise.resolve({ refund_pence: 1500, kept_pence: 0, charge_pence: 0 }),
   ),

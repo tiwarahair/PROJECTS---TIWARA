@@ -1,5 +1,12 @@
 import { describe, expect, it } from "vitest";
-import { bookingCancelled, bookingRescheduled, clientCancelled, clientRescheduled } from "../change-emails";
+import {
+  bookingCancelled,
+  bookingCode,
+  bookingLinkReset,
+  bookingRescheduled,
+  clientCancelled,
+  clientRescheduled,
+} from "../change-emails";
 import type { ChangedBooking } from "../change-emails";
 import { renderSms } from "../sms";
 
@@ -18,6 +25,7 @@ const booking: ChangedBooking = {
   cancellation: { refund_pence: 2000, kept_pence: 1000, charge_pence: 0 },
   fee_pence: 163,
   manage_url: "https://dev.tiwarashouse.com/manage?token=abc",
+  secure_url: "https://dev.tiwarashouse.com/manage?secure=xyz",
 };
 
 const studio = { studio_url: "https://dev.tiwarashouse.com/studio" };
@@ -79,5 +87,29 @@ describe("stylist texts", () => {
     expect(renderSms("client_rescheduled", { ...booking })).toBe(
       "Moved: Nia Okafor, Silk press, now Thu 22 Oct, 17:30. Ref TH-ABC123.",
     );
+  });
+});
+
+describe("link safety emails", () => {
+  it("cancellation and reschedule emails offer This wasn’t me", () => {
+    for (const { text } of [bookingCancelled(booking), bookingRescheduled(booking)]) {
+      expect(text).toContain("This wasn’t me");
+      expect(text).toContain("https://dev.tiwarashouse.com/manage?secure=xyz");
+    }
+  });
+
+  it("the code email gives the code, how long it lasts and This wasn’t me", () => {
+    const { subject, text } = bookingCode({ ...booking, code: "042817" });
+
+    expect(subject).toBe("Your code is 042817");
+    expect(text).toContain("It works for 10 minutes.");
+    expect(text).toContain("https://dev.tiwarashouse.com/manage?secure=xyz");
+  });
+
+  it("the new link email carries the new manage link", () => {
+    const { subject, text } = bookingLinkReset(booking);
+
+    expect(subject).toBe("Your new booking link");
+    expect(text).toContain("https://dev.tiwarashouse.com/manage?token=abc");
   });
 });

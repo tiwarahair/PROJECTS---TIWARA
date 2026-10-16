@@ -41,6 +41,7 @@ export interface ManagedBooking {
   allergies: string | null;
   reschedule_count: number;
   calendar_key: string;
+  is_verified: boolean;
   cancelled_at: string | null;
   can_cancel: boolean;
   can_reschedule: boolean;
@@ -108,6 +109,42 @@ export const updateBookingAllergies = async ({
   });
 
   if (error) throw error;
+};
+
+export type CodeCheck =
+  "verified" | "wrong_code" | "expired" | "too_many_attempts";
+
+export const sendBookingCode = async (token: string) => {
+  const { data, error } = await supabase.rpc("send_booking_code", { token });
+
+  if (error) throw error;
+
+  return data as unknown as { email: string; sent: boolean };
+};
+
+export const verifyBookingCode = async ({
+  token,
+  code,
+}: {
+  token: string;
+  code: string;
+}) => {
+  const { data, error } = await supabase.rpc("verify_booking_code", {
+    token,
+    code,
+  });
+
+  if (error) throw error;
+
+  return data as CodeCheck;
+};
+
+export const secureBookingLink = async (token: string) => {
+  const { data, error } = await supabase.rpc("secure_booking_link", { token });
+
+  if (error) throw error;
+
+  return data as unknown as { email: string; stylist_name: string };
 };
 
 export const cancelBooking = (token: string) =>
