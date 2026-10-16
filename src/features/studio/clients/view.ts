@@ -569,16 +569,10 @@ export const getClientsView = (studio: StudioController) => {
       clientEdit: clientEdit ? { ...clientEdit, ...patch } : clientEdit,
     }));
 
-  const draftPhone = (draft?.phone || "").replace(/\s/g, "");
-  const draftEmail = (draft?.email || "").trim().toLowerCase();
-
   const duplicate =
     state.sheet === "clientEdit" && draft
       ? findDuplicate(state, draft.phone, draft.email, draft.id)
       : null;
-
-  const isDraftValid =
-    !!(draft?.first || "").trim() && !!(draftPhone || draftEmail) && !duplicate;
 
   // clientEdit.img: undefined = untouched (use the client's saved photo), '' = removed, data URL = new pick
   const savedImage = draft?.id ? getClient(state, draft.id).img || "" : "";
@@ -601,7 +595,7 @@ export const getClientsView = (studio: StudioController) => {
   };
 
   const saveDraft = () => {
-    if (!isDraftValid || !draft) return;
+    if (!draft || duplicate) return;
 
     const name = [(draft.first || "").trim(), (draft.last || "").trim()]
       .filter(Boolean)
@@ -752,7 +746,6 @@ export const getClientsView = (studio: StudioController) => {
     duplicate: getDuplicateView(duplicate, "View {f}", (client) =>
       openSheet("cliView", { selectedClientId: client.id }),
     ),
-    isDraftValid,
     saveLabel: draft?.id ? "Save changes" : "Add client",
     saveDraft,
     cancelDraft: () => {

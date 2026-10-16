@@ -15,7 +15,6 @@ const getLabelled = (label: string) =>
   document.querySelector(`[data-screen-label="${label}"]`) as HTMLElement;
 
 const runNextTimer = () => act(() => void vi.advanceTimersToNextTimer());
-const advance = (ms: number) => act(() => vi.advanceTimersByTime(ms));
 
 const setViewport = (width: number) => {
   window.matchMedia = vi.fn().mockImplementation((query: string) => {
@@ -81,7 +80,15 @@ describe("Studio → client sheets", () => {
       .getAllByRole("button", { name: "Add client" })
       .at(-1) as HTMLElement;
 
-    expect(save).toBeDisabled();
+    await user.click(save);
+
+    expect(
+      await screen.findByText("Enter their first name."),
+    ).toBeInTheDocument();
+
+    expect(
+      screen.getByText("Add a phone number or an email address."),
+    ).toBeInTheDocument();
 
     await user.type(
       screen.getByPlaceholderText("07700 900000"),
@@ -89,10 +96,8 @@ describe("Studio → client sheets", () => {
     );
 
     await user.type(screen.getByLabelText("First name"), "Ada");
-
-    expect(save).toBeEnabled();
     await user.click(save);
-    advance(300);
+    await act(() => vi.advanceTimersByTimeAsync(300));
     expect(screen.getByText("Ada added")).toBeInTheDocument();
   });
 

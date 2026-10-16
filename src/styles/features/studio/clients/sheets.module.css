@@ -219,3 +219,11 @@
     transform: translateY(0);
   }
 }
+
+.fieldError {
+  display: block;
+  font-size: 13.5px;
+  margin-top: 4px;
+  line-height: 1.45;
+  color: var(--status-danger);
+}

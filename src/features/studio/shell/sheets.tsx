@@ -1,3 +1,4 @@
+import { useClientForm } from "../clients/use-client-form";
 import { useAddonForm } from "../services/use-addon-form";
 import { AddBookingSheet } from "../bookings/add";
 import { getAddBookingView } from "../bookings/add/view";
@@ -53,6 +54,17 @@ export const StudioSheets = ({ studio }: { studio: StudioController }) => {
   const categoriesView = sheet === "cats" ? getCategoriesView(studio) : null;
   const addonView = sheet === "addon" ? getAddonSheetView(studio) : null;
 
+  const clientDraft = studio.state.clientEdit;
+
+  const clientForm = useClientForm(
+    {
+      first: clientDraft?.first ?? "",
+      phone: clientDraft?.phone ?? "",
+      email: clientDraft?.email ?? "",
+    },
+    sheet === "clientEdit" && !studio.state.out,
+  );
+
   const addonForm = useAddonForm(
     studio.state.addonDraft?.name ?? "",
     !!addonView && !studio.state.out,
@@ -79,7 +91,7 @@ export const StudioSheets = ({ studio }: { studio: StudioController }) => {
     if (pastView) return <PastSheetFooter view={pastView} />;
 
     if (clientsView && sheet === "clientEdit")
-      return <ClientEditFooter view={clientsView} />;
+      return <ClientEditFooter view={clientsView} form={clientForm} />;
 
     if (wizardView) return <WizardFooter view={wizardView} />;
 
@@ -99,7 +111,7 @@ export const StudioSheets = ({ studio }: { studio: StudioController }) => {
       {pastView && <PastSheetBody view={pastView} />}
       {clientsView?.isProfileSheet && <ClientViewSheet view={clientsView} />}
       {clientsView && sheet === "clientEdit" && (
-        <ClientEditSheet view={clientsView} />
+        <ClientEditSheet view={clientsView} form={clientForm} />
       )}
       {sheet === "notif" && <NotificationsSheet studio={studio} />}
       {addView && <AddBookingSheet studio={studio} view={addView} />}

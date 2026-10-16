@@ -1,6 +1,7 @@
 import { useRef } from "react";
 import { Camera, User } from "lucide-react";
 import { joinClassNames } from "../../../utils/class-names";
+import type { ClientForm } from "./use-client-form";
 import type { ClientsView } from "./view";
 import { ClientProfile } from ".";
 import styles from "../../../styles/features/studio/clients/sheets.module.css";
@@ -14,13 +15,26 @@ export const ClientViewSheet = ({ view }: { view: ClientsView }) => (
   </div>
 );
 
+const FieldError = ({ message }: { message: string | undefined }) =>
+  message ? (
+    <span className={styles.fieldError} role="alert">
+      {message}
+    </span>
+  ) : null;
+
 type DraftField =
   "first" | "last" | "phone" | "email" | "products" | "sensitivities";
 
+interface ClientEditProps {
+  view: ClientsView;
+  form: ClientForm;
+}
+
 /** Add or edit a client. */
-export const ClientEditSheet = ({ view }: { view: ClientsView }) => {
+export const ClientEditSheet = ({ view, form }: ClientEditProps) => {
   const fileRef = useRef<HTMLInputElement>(null);
   const { draft, draftImage, duplicate } = view;
+  const { errors } = form.formState;
 
   if (!draft) return null;
 
@@ -87,7 +101,9 @@ export const ClientEditSheet = ({ view }: { view: ClientsView }) => {
             className={styles.input}
             {...onField("first")}
             autoComplete="off"
+            aria-invalid={errors.first ? "true" : "false"}
           />
+          <FieldError message={errors.first?.message} />
         </label>
         <label className={styles.field}>
           <span className={styles.label}>Last name</span>
@@ -105,7 +121,9 @@ export const ClientEditSheet = ({ view }: { view: ClientsView }) => {
           type="tel"
           {...onField("phone")}
           placeholder="07700 900000"
+          aria-invalid={errors.phone ? "true" : "false"}
         />
+        <FieldError message={errors.phone?.message} />
       </label>
       <label className={styles.field}>
         <span className={styles.label}>Email</span>
@@ -114,7 +132,9 @@ export const ClientEditSheet = ({ view }: { view: ClientsView }) => {
           type="email"
           {...onField("email")}
           placeholder="name@email.com"
+          aria-invalid={errors.email ? "true" : "false"}
         />
+        <FieldError message={errors.email?.message} />
       </label>
       {duplicate.isOn && (
         <div className={styles.duplicate} role="alert">
@@ -163,7 +183,7 @@ export const ClientEditSheet = ({ view }: { view: ClientsView }) => {
 };
 
 /** Cancel / Save under the client form. */
-export const ClientEditFooter = ({ view }: { view: ClientsView }) => (
+export const ClientEditFooter = ({ view, form }: ClientEditProps) => (
   <div className={sheet.footerRow}>
     <button className={sheet.cancel} onClick={view.cancelDraft}>
       Cancel
@@ -171,10 +191,10 @@ export const ClientEditFooter = ({ view }: { view: ClientsView }) => (
     <button
       className={joinClassNames(
         sheet.save48,
-        !view.isDraftValid && sheet.faded,
+        view.duplicate.isOn && sheet.faded,
       )}
-      onClick={view.saveDraft}
-      disabled={!view.isDraftValid}
+      onClick={() => void form.handleSubmit(view.saveDraft)()}
+      disabled={view.duplicate.isOn}
     >
       {view.saveLabel}
     </button>
