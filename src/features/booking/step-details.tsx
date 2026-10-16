@@ -1,3 +1,4 @@
+import { CircleAlert, Plus, X } from "lucide-react";
 import type { ChangeEvent, CSSProperties, ReactNode } from "react";
 import { Link } from "react-router";
 import { AllergyField } from "../../components/allergy-field/allergy-field";
@@ -16,22 +17,6 @@ interface StepDetailsProps {
 }
 
 const MAX_PHOTOS = 8;
-
-const ErrorIcon = () => (
-  <svg
-    width="15"
-    height="15"
-    viewBox="0 0 24 24"
-    fill="none"
-    stroke="currentColor"
-    strokeWidth="1.5"
-    strokeLinecap="round"
-    className={fields.errorIcon}
-  >
-    <circle cx="12" cy="12" r="10"></circle>
-    <path d="M12 7v6M12 16.5v.5"></path>
-  </svg>
-);
 
 interface FieldProps {
   fieldKey: Exclude<FieldKey, "address">;
@@ -83,7 +68,11 @@ const DetailsField = ({
       )}
       {showError && (
         <div id={`${id}-err`} role="alert" className={fields.error}>
-          <ErrorIcon />
+          <CircleAlert
+            size={15}
+            strokeWidth={1.5}
+            className={fields.errorIcon}
+          />
           {error}
         </div>
       )}
@@ -338,33 +327,13 @@ export const StepDetails = ({ booking }: StepDetailsProps) => {
                   aria-label="Remove photo"
                   className={styles.removePhoto}
                 >
-                  <svg
-                    width="11"
-                    height="11"
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    stroke="currentColor"
-                    strokeWidth="2.6"
-                    strokeLinecap="round"
-                  >
-                    <path d="M6 6l12 12M18 6L6 18"></path>
-                  </svg>
+                  <X size={11} strokeWidth={2.6} />
                 </button>
               </span>
             );
           })}
           <label className={styles.addPhoto}>
-            <svg
-              width="19"
-              height="19"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="1.6"
-              strokeLinecap="round"
-            >
-              <path d="M12 5v14M5 12h14"></path>
-            </svg>
+            <Plus size={19} strokeWidth={1.6} />
             <span className={styles.addLabel}>Add</span>
             <input
               type="file"

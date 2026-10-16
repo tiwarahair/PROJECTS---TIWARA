@@ -1,3 +1,4 @@
+import { Check, ChevronRight } from "lucide-react";
 import {
   formatServiceDuration,
   getFromWithFee,
@@ -48,30 +49,13 @@ export const StepService = ({ booking }: StepServiceProps) => {
                 <span className={styles.price}>
                   {`from ${formatMoney(getFromWithFee(service))}`}{" "}
                   {chosen ? (
-                    <svg
-                      width="17"
-                      height="17"
-                      viewBox="0 0 24 24"
-                      fill="none"
-                      stroke="var(--accent-700)"
-                      strokeWidth="2.4"
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                    >
-                      <path d="M4 12.5l5 5L20 6.5"></path>
-                    </svg>
+                    <Check
+                      size={17}
+                      strokeWidth={2.4}
+                      color="var(--accent-700)"
+                    />
                   ) : (
-                    <svg
-                      width="16"
-                      height="16"
-                      viewBox="0 0 24 24"
-                      fill="none"
-                      stroke="currentColor"
-                      strokeWidth="2"
-                      strokeLinecap="round"
-                    >
-                      <path d="m9 5 7 7-7 7"></path>
-                    </svg>
+                    <ChevronRight size={16} strokeWidth={2} />
                   )}
                 </span>
               </button>

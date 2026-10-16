@@ -1,3 +1,4 @@
+import { ArrowLeft, ArrowRight, Check, CircleAlert, Lock } from "lucide-react";
 import type { ChangeEvent } from "react";
 import { joinClassNames } from "../../utils/class-names";
 import { AppleIcon, GoogleIcon } from "./brand-icons";
@@ -161,19 +162,7 @@ export const StepPay = ({ booking }: StepPayProps) => {
         </label>
         {policy.cardSaved && (
           <div data-screen-label="Card saved line" className={styles.savedLine}>
-            <svg
-              width="15"
-              height="15"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="1.5"
-              strokeLinecap="round"
-              className={styles.savedIcon}
-            >
-              <rect x="4" y="10" width="16" height="11" rx="2"></rect>
-              <path d="M8 10V7a4 4 0 0 1 8 0v3"></path>
-            </svg>
+            <Lock size={15} strokeWidth={1.5} className={styles.savedIcon} />
             <span>
               {`Your card is saved securely for this booking's balance and any fees under ${stylist.name}'s policy.`}
             </span>
@@ -193,18 +182,7 @@ export const StepPay = ({ booking }: StepPayProps) => {
               )}
             >
               {pay.future && (
-                <svg
-                  width="11"
-                  height="11"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="#fffefb"
-                  strokeWidth="3"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                >
-                  <path d="M20 6 9 17l-5-5"></path>
-                </svg>
+                <Check size={11} strokeWidth={3} color="#fffefb" />
               )}
             </span>{" "}
             Also save this card for future bookings
@@ -217,19 +195,11 @@ export const StepPay = ({ booking }: StepPayProps) => {
               role="alert"
               className={styles.error}
             >
-              <svg
-                width="16"
-                height="16"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="1.7"
-                strokeLinecap="round"
+              <CircleAlert
+                size={16}
+                strokeWidth={1.7}
                 className={styles.errorIcon}
-              >
-                <circle cx="12" cy="12" r="9"></circle>
-                <path d="M12 8v5M12 16.2v.1"></path>
-              </svg>
+              />
               <span className={styles.errorBody}>
                 <span>{payError}</span>
                 {state.payKind === "taken" && (
@@ -256,19 +226,7 @@ export const StepPay = ({ booking }: StepPayProps) => {
             aria-label="Back"
             className={styles.back}
           >
-            <svg
-              width="18"
-              height="18"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="2"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-            >
-              <path d="M19 12H5"></path>
-              <path d="m12 19-7-7 7-7"></path>
-            </svg>
+            <ArrowLeft size={18} strokeWidth={2} />
           </button>
           <button
             onClick={payNow}
@@ -281,19 +239,7 @@ export const StepPay = ({ booking }: StepPayProps) => {
             )}
           >
             {paying ? "Confirming…" : `Pay ${money.dueToday} & confirm`}{" "}
-            <svg
-              width="17"
-              height="17"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="2"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-            >
-              <path d="M5 12h14"></path>
-              <path d="m13 6 6 6-6 6"></path>
-            </svg>
+            <ArrowRight size={17} strokeWidth={2} />
           </button>
         </div>
         <div data-screen-label="Pay sub-line" className={styles.paySub}>
@@ -305,18 +251,8 @@ export const StepPay = ({ booking }: StepPayProps) => {
           )}
         </div>
         <div className={styles.encrypted}>
-          <svg
-            width="12"
-            height="12"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            strokeWidth="2"
-          >
-            <rect x="4" y="10" width="16" height="11" rx="2"></rect>
-            <path d="M8 10V7a4 4 0 0 1 8 0v3"></path>
-          </svg>{" "}
-          Encrypted and processed by Stripe. We never see your card details.
+          <Lock size={12} strokeWidth={2} /> Encrypted and processed by Stripe.
+          We never see your card details.
         </div>
       </div>
     </>

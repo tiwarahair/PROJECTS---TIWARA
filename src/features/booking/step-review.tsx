@@ -1,3 +1,4 @@
+import { getPolicyLineIcon } from "../../components/payment-policy/payment-policy-logic";
 import { getWhenLine } from "./booking-calendar";
 import { getWhereRow } from "./booking-details";
 import fields from "../../styles/features/booking/booking-fields.module.css";
@@ -153,24 +154,20 @@ export const StepReview = ({ booking }: StepReviewProps) => {
         )}
         <div className={styles.rule}></div>
         <div className={styles.lines}>
-          {policy.lines.map(({ icon, text }) => (
-            <div key={text} className={styles.line}>
-              <svg
-                width="16"
-                height="16"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="1.7"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                className={styles.lineIcon}
-              >
-                <path d={icon}></path>
-              </svg>
-              <span className={styles.lineText}>{text}</span>
-            </div>
-          ))}
+          {policy.lines.map(({ icon, text }) => {
+            const LineIcon = getPolicyLineIcon(icon);
+
+            return (
+              <div key={text} className={styles.line}>
+                <LineIcon
+                  className={styles.lineIcon}
+                  size={16}
+                  strokeWidth={1.7}
+                />
+                <span className={styles.lineText}>{text}</span>
+              </div>
+            );
+          })}
         </div>
         {policy.notes.length > 0 && (
           <>
