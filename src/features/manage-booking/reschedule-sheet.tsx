@@ -9,7 +9,7 @@ import {
 import { getMonthRange, groupSlotsByDay } from "../booking/logic/slots";
 import type { Slot } from "../booking/logic/slots";
 import { SlotCalendar } from "../booking/slot-calendar";
-import { formatWhen } from "./logic";
+import { formatWhen, getLateRescheduleWarning } from "./logic";
 import styles from "../../styles/features/manage-booking/reschedule-sheet.module.css";
 
 const ERRORS: Record<string, string> = {
@@ -62,6 +62,10 @@ export const RescheduleSheet = ({
 
     return () => document.removeEventListener("keydown", onKey);
   }, [isSaving, onClose]);
+
+  const lateWarning = slot
+    ? getLateRescheduleWarning(booking, slot.startsAt)
+    : null;
 
   const changeMonth = (delta: number) => {
     const next = new Date(month.year, month.month + delta, 1);
@@ -141,6 +145,7 @@ export const RescheduleSheet = ({
               {`${formatWhen(slot.startsAt)} instead of ${formatWhen(booking.starts_at)}`}
             </p>
           )}
+          {!!lateWarning && <p className={styles.warning}>{lateWarning}</p>}
           <div className={styles.buttons}>
             <button onClick={onClose} className={styles.keep}>
               Keep current time

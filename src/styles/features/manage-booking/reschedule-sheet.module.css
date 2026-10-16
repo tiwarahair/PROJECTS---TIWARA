@@ -90,6 +90,13 @@
   font-weight: 600;
 }
 
+.warning {
+  margin: -6px 0 12px;
+  font-size: 14px;
+  line-height: 1.45;
+  color: var(--status-danger);
+}
+
 .buttons {
   display: flex;
   flex-wrap: wrap;

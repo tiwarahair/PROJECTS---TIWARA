@@ -48,6 +48,7 @@ const booking: ManagedBooking = {
     mode: "deposit",
     deposit_pence: 1500,
     free_cancel_until: "2026-10-20T16:30:00Z",
+    free_window_hours: 48,
   },
   allergies: "Sensitive scalp",
   reschedule_count: 0,
@@ -241,6 +242,8 @@ describe("the manage booking page", () => {
       screen.getByText("Sat 24 Oct, 10:30 instead of Thu 22 Oct, 17:30"),
     ).toBeInTheDocument();
 
+    expect(screen.queryByText(/free cancellation won’t apply/)).toBeNull();
+
     vi.mocked(getManagedBooking).mockResolvedValue({
       ...booking,
       starts_at: "2026-10-24T09:30:00Z",
@@ -264,6 +267,26 @@ describe("the manage booking page", () => {
     expect(
       screen.queryByRole("button", { name: "Reschedule" }),
     ).not.toBeInTheDocument();
+  });
+
+  it("a new time inside the free cancellation window is flagged before confirming", async () => {
+    vi.mocked(getRescheduleSlots).mockResolvedValue(["2026-10-15T09:30:00Z"]);
+
+    renderPage();
+
+    await user.click(await screen.findByRole("button", { name: "Reschedule" }));
+
+    const day = await screen.findByRole("button", { name: "15" });
+
+    await waitFor(() => expect(day).toBeEnabled());
+    await user.click(day);
+    await user.click(screen.getByRole("button", { name: "10:30" }));
+
+    expect(
+      screen.getByText(
+        "This time is within 48 hours, so free cancellation won’t apply and you can’t reschedule again.",
+      ),
+    ).toBeInTheDocument();
   });
 
   it("a time taken meanwhile says so", async () => {

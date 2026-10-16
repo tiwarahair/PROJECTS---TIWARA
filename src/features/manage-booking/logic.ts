@@ -3,6 +3,7 @@ import type {
   ManagedBooking,
 } from "../../lib/manage-booking-api";
 import { formatMoney } from "../../utils/money";
+import { getWindowText } from "../../utils/pricing";
 
 const londonParts = new Intl.DateTimeFormat("en-GB", {
   timeZone: "Europe/London",
@@ -48,6 +49,22 @@ export const getRescheduleNote = (booking: ManagedBooking) =>
   booking.reschedule_count > 0
     ? "You've already used your 1 free reschedule."
     : "You can't reschedule after the free cancellation time.";
+
+/**
+ * EDGE CASE: a user trying to reschedule a booking that is close to the start time e.g. selecting a booking for the next day (so it's already within the cancellation window - free cancellation is gone)
+ * so we're telling them => free cancellation doesnt apply if you reschedule to this time
+ */
+export const getLateRescheduleWarning = (
+  { terms }: ManagedBooking,
+  startsAt: string,
+  now = Date.now(),
+) => {
+  const hours = terms.free_window_hours;
+
+  if (Date.parse(startsAt) - hours * 3_600_000 > now) return null;
+
+  return `This time is within ${getWindowText(hours)}, so free cancellation won’t apply and you can’t reschedule again.`;
+};
 
 const getKeptLine = (
   { terms, stylist_name: stylist }: ManagedBooking,

@@ -37,6 +37,7 @@ export interface ManagedBooking {
     mode: "none" | "deposit" | "full" | "card";
     deposit_pence: number;
     free_cancel_until: string;
+    free_window_hours: number;
   };
   allergies: string | null;
   reschedule_count: number;

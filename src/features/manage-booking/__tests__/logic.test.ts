@@ -1,11 +1,16 @@
 import { describe, expect, it } from "vitest";
 import type { ManagedBooking } from "../../../lib/manage-booking-api";
-import { getCancelLines } from "../logic";
+import { getCancelLines, getLateRescheduleWarning } from "../logic";
 
 const booking = {
   stylist_name: "Tiwára's House",
   fee_pence: 163,
-  terms: { mode: "deposit", deposit_pence: 1500, free_cancel_until: "" },
+  terms: {
+    mode: "deposit",
+    deposit_pence: 1500,
+    free_cancel_until: "",
+    free_window_hours: 48,
+  },
 } as ManagedBooking;
 
 const terms = (
@@ -61,5 +66,37 @@ describe("the cancel preview", () => {
     expect(getCancelLines(booking, terms(0, 0, 0, false))).toEqual([
       "Nothing more to pay.",
     ]);
+  });
+});
+
+describe("the late reschedule warning", () => {
+  const now = Date.parse("2026-10-14T09:00:00Z");
+
+  const withWindow = (hours: number) =>
+    ({
+      ...booking,
+      terms: { ...booking.terms, free_window_hours: hours },
+    }) as ManagedBooking;
+
+  it("warns when the new time is inside the free cancellation window", () => {
+    expect(getLateRescheduleWarning(booking, "2026-10-15T12:00:00Z", now)).toBe(
+      "This time is within 48 hours, so free cancellation won’t apply and you can’t reschedule again.",
+    );
+  });
+
+  it("says nothing when free cancellation still applies", () => {
+    expect(
+      getLateRescheduleWarning(booking, "2026-10-17T12:00:00Z", now),
+    ).toBeNull();
+  });
+
+  it("names short windows in minutes or as one hour", () => {
+    expect(
+      getLateRescheduleWarning(withWindow(0.5), "2026-10-14T09:15:00Z", now),
+    ).toContain("within 30 minutes,");
+
+    expect(
+      getLateRescheduleWarning(withWindow(1), "2026-10-14T09:30:00Z", now),
+    ).toContain("within 1 hour,");
   });
 });
