@@ -1,0 +1,61 @@
+.h3Spaced {
+  font-family: "Schibsted Grotesk", sans-serif;
+  font-size: 18px;
+  font-weight: 600;
+  letter-spacing: -0.02em;
+  margin: 22px 0 10px;
+}
+
+.stack8 {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.addonRow {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-sm);
+  padding: 12px 8px 12px 14px;
+  cursor: pointer;
+}
+
+.addonRow:hover {
+  background: var(--quiet) !important;
+}
+
+.addonName {
+  display: block;
+  font-size: 14.5px;
+  font-weight: 500;
+}
+
+.addonMeta {
+  display: block;
+  font-size: 13.5px;
+  color: var(--text-secondary);
+  font-variant-numeric: tabular-nums;
+}
+
+.addonMenu {
+  width: 34px;
+  height: 34px;
+  flex: 0 0 auto;
+  border: none;
+  background: none;
+  border-radius: var(--radius-full);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--text-secondary);
+}
+
+.addonMenu:hover {
+  background: var(--quiet) !important;
+}
+
+.addonMenu:active {
+  transform: scale(0.92) !important;
+}

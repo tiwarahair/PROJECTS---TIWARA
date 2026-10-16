@@ -1,0 +1,250 @@
+.editPane {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+  animation: rowin 0.22s cubic-bezier(0.23, 1, 0.32, 1) both;
+}
+
+.editHead {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  text-align: left;
+  background: var(--accent-wash);
+  border: none;
+  border-radius: var(--radius-md);
+  padding: 14px 16px;
+  font: inherit;
+  color: inherit;
+  cursor: pointer;
+}
+
+.editHead:active {
+  transform: scale(0.99) !important;
+}
+
+.editName {
+  display: block;
+  font-size: 16px;
+  font-weight: 600;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.editMeta {
+  display: block;
+  font-size: 13.5px;
+  color: var(--neutral-700, #3d3833);
+  margin-top: 2px;
+}
+
+.change {
+  flex: 0 0 auto;
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  font-size: 13.5px;
+  font-weight: 600;
+  color: var(--accent-700);
+}
+
+.editGrid {
+  display: grid;
+  grid-template-columns: 2.2fr 1fr;
+  gap: 10px;
+}
+
+.label135 {
+  font-size: 13.5px;
+  font-weight: 500;
+  margin-bottom: 6px;
+}
+
+.row6 {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.select {
+  flex: 1;
+  min-width: 0;
+  height: 42px;
+  padding: 0 10px;
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-sm);
+  background: transparent;
+  font-family: inherit;
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--text-primary);
+  outline: none;
+}
+
+.fieldLabel6 {
+  display: block;
+  font-size: 13.5px;
+  font-weight: 500;
+  margin-bottom: 6px;
+}
+
+.moneyBox {
+  display: flex;
+  align-items: center;
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-sm);
+  padding: 0 12px;
+  height: 42px;
+  box-sizing: border-box;
+  background: transparent;
+}
+
+.pound {
+  font-size: 15px;
+  font-weight: 500;
+  color: var(--text-secondary);
+}
+
+.moneyInput {
+  flex: 1;
+  min-width: 0;
+  border: none;
+  background: none;
+  padding: 0 0 0 4px;
+  font-size: 17px;
+  font-weight: 600;
+  font-family: inherit;
+  outline: none;
+  color: var(--text-primary);
+}
+
+.extraField {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.label135Plain {
+  font-size: 13.5px;
+  font-weight: 500;
+}
+
+.selectWide {
+  width: 100%;
+  height: 42px;
+  padding: 0 10px;
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-sm);
+  background: transparent;
+  font-family: inherit;
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--text-primary);
+  outline: none;
+}
+
+.note135 {
+  font-size: 13.5px;
+  color: var(--text-secondary);
+  line-height: 1.45;
+}
+
+.addonsTitle {
+  font-family: "Schibsted Grotesk", sans-serif;
+  font-size: 18px;
+  font-weight: 600;
+  letter-spacing: -0.02em;
+  margin-bottom: 10px;
+}
+
+.stack8 {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.addonRow {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-sm);
+  padding: 12px 8px 12px 14px;
+  cursor: pointer;
+}
+
+.addonRow:hover {
+  background: var(--quiet) !important;
+}
+
+.addonName {
+  display: block;
+  font-size: 14.5px;
+  font-weight: 500;
+}
+
+.addonMenu {
+  width: 34px;
+  height: 34px;
+  flex: 0 0 auto;
+  border: none;
+  background: none;
+  border-radius: var(--radius-full);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--text-secondary);
+}
+
+.addonMenu:hover {
+  background: var(--quiet) !important;
+}
+
+.addonMenu:active {
+  transform: scale(0.92) !important;
+}
+
+.addButton {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 10px;
+  border: 1px solid var(--border-strong, #d8d2c6);
+  background: transparent;
+  border-radius: var(--radius-full);
+  padding: 10px 16px;
+  font-size: 14.5px;
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.addButton:hover {
+  background: var(--quiet) !important;
+}
+
+.addButton:active {
+  transform: scale(0.97) !important;
+}
+
+.reset {
+  align-self: flex-start;
+  border: none;
+  background: none;
+  color: var(--accent-700);
+  font-size: 14.5px;
+  font-weight: 600;
+  padding: 4px 0;
+}
+
+@keyframes rowin {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}

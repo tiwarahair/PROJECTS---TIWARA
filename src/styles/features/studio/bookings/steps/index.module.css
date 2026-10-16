@@ -1,0 +1,242 @@
+/* The booking sheet's sub-steps: edit / change service, change client, add an add-on, reschedule, cancel and the
+   no-show panel. */
+
+.pane {
+  margin-top: 14px;
+  animation: panein 0.26s cubic-bezier(0.23, 1, 0.32, 1) both;
+}
+
+.paneOut {
+  animation: paneout 0.22s cubic-bezier(0.4, 0, 0.7, 0.2) both;
+}
+
+.grow {
+  flex: 1;
+  min-width: 0;
+}
+
+.field {
+  display: block;
+  min-width: 0;
+}
+
+.fieldLabel {
+  display: block;
+  font-size: 13.5px;
+  font-weight: 500;
+  margin-bottom: 6px;
+}
+
+.minWidth {
+  min-width: 0;
+}
+
+.muted135 {
+  font-size: 13.5px;
+  color: var(--text-secondary);
+}
+
+.outlineButton {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 12px;
+  border: 1px solid var(--border-strong, #d8d2c6);
+  background: transparent;
+  border-radius: var(--radius-full);
+  padding: 10px 16px;
+  font-size: 14.5px;
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.outlineButton:hover {
+  background: var(--quiet) !important;
+}
+
+.outlineButton:active {
+  transform: scale(0.97) !important;
+}
+
+.addButton {
+  margin-top: 10px;
+}
+
+.option {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  text-align: left;
+  border-radius: var(--radius-sm);
+  padding: 12px 14px;
+  background: transparent;
+  border: 1px solid var(--border-subtle);
+}
+
+.option:hover {
+  background: var(--quiet) !important;
+}
+
+.option:active {
+  transform: scale(0.99) !important;
+}
+
+.optionOn {
+  background: var(--accent-wash);
+  border-color: var(--accent-700);
+}
+
+.optionName {
+  display: block;
+  font-size: 14.5px;
+  font-weight: 500;
+  color: var(--text-primary);
+}
+
+.optionOn .optionName,
+.optionOn .optionPrice,
+.optionOn .optionTag {
+  color: var(--accent-700);
+}
+
+.optionSub {
+  display: block;
+  font-size: 13.5px;
+  color: var(--text-secondary);
+}
+
+.optionPrice {
+  font-size: 14.5px;
+  font-weight: 600;
+  flex: 0 0 auto;
+  font-variant-numeric: tabular-nums;
+  color: var(--text-primary);
+}
+
+.clientOption {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  text-align: left;
+  border-radius: var(--radius-sm);
+  padding: 10px 14px;
+  background: transparent;
+  border: 1px solid var(--border-subtle);
+}
+
+.clientOption:hover {
+  background: var(--quiet) !important;
+}
+
+.clientOption:active {
+  transform: scale(0.99) !important;
+}
+
+.optionTag {
+  font-size: 13.5px;
+  font-weight: 500;
+  flex: 0 0 auto;
+  color: var(--text-primary);
+}
+
+.pick {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  text-align: left;
+  border-radius: var(--radius-sm);
+  padding: 12px 14px;
+  cursor: pointer;
+  transition:
+    background 0.16s cubic-bezier(0.2, 0.8, 0.2, 1),
+    border-color 0.16s cubic-bezier(0.2, 0.8, 0.2, 1);
+  background: transparent;
+  border: 1px solid var(--border-subtle);
+}
+
+.pick:active {
+  transform: scale(0.99) !important;
+}
+
+.pickOn {
+  background: var(--accent-wash);
+  border-color: var(--accent-700);
+}
+
+.pickOn .optionName {
+  color: var(--accent-700);
+}
+
+.tick {
+  flex: 0 0 auto;
+  width: 22px;
+  height: 22px;
+  border-radius: var(--radius-full);
+  box-sizing: border-box;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #fff;
+  transition:
+    background 0.16s cubic-bezier(0.2, 0.8, 0.2, 1),
+    border-color 0.16s cubic-bezier(0.2, 0.8, 0.2, 1);
+  border: 1.5px solid var(--border-strong, #d8d2c6);
+  background: transparent;
+}
+
+.pickOn .tick {
+  border-color: var(--accent-700);
+  background: var(--accent-700);
+}
+
+.tickMark {
+  transition: opacity 0.16s cubic-bezier(0.2, 0.8, 0.2, 1);
+  opacity: 0;
+}
+
+.pickOn .tickMark {
+  opacity: 1;
+}
+
+.stepBody {
+  margin-top: 16px;
+  animation: rowin 0.24s cubic-bezier(0.2, 0.8, 0.2, 1) both;
+}
+
+.label145 {
+  font-size: 14.5px;
+  font-weight: 500;
+}
+
+@keyframes rowin {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes panein {
+  from {
+    opacity: 0;
+    transform: translateX(26px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes paneout {
+  from {
+    opacity: 1;
+    transform: translateX(0);
+  }
+  to {
+    opacity: 0;
+    transform: translateX(30px);
+  }
+}

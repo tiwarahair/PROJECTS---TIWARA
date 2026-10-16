@@ -1,0 +1,46 @@
+.customRow {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  background: transparent;
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-sm);
+  padding: 10px 12px 10px 14px;
+  margin-top: 10px;
+  animation: rowin 0.22s cubic-bezier(0.2, 0.8, 0.2, 1) both;
+}
+
+.customHint {
+  font-size: 13.5px;
+  margin-top: 1px;
+  line-height: 1.4;
+  color: var(--text-secondary);
+}
+
+.customHintWarn {
+  color: var(--accent-500);
+}
+
+.timeInput {
+  flex: 0 0 auto;
+  background: transparent;
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-sm);
+  padding: 8px 10px;
+  font-size: 17px;
+  font-weight: 600;
+  font-family: inherit;
+  color: var(--text-primary);
+  font-variant-numeric: tabular-nums;
+}
+
+@keyframes rowin {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}

@@ -1,0 +1,126 @@
+.tableHead {
+  display: grid;
+  grid-template-columns:
+    minmax(0, 2.2fr) minmax(0, 1fr) minmax(0, 1.4fr)
+    164px 88px;
+  gap: 16px;
+  padding: 0 12px 10px;
+  margin-bottom: 4px;
+  font-size: 12.5px;
+  font-weight: 500;
+  color: var(--text-secondary);
+  border-bottom: 1px solid var(--border-subtle);
+}
+
+.right {
+  text-align: right;
+}
+
+.nowrapRight {
+  text-align: right;
+  white-space: nowrap;
+}
+
+.tableRow {
+  width: 100%;
+  display: grid;
+  grid-template-columns:
+    minmax(0, 2.2fr) minmax(0, 1fr) minmax(0, 1.4fr)
+    164px 88px;
+  gap: 16px;
+  align-items: center;
+  padding: 12px;
+  border: none;
+  border-radius: var(--radius-sm);
+  background: transparent;
+  text-align: left;
+  cursor: pointer;
+  font: inherit;
+  color: inherit;
+  transition: background 0.16s cubic-bezier(0.2, 0.8, 0.2, 1);
+  /* runtime: staggered entry */
+  animation: rowin 0.28s cubic-bezier(0.2, 0.8, 0.2, 1) var(--delay) both;
+}
+
+.tableRow:hover {
+  background: var(--quiet) !important;
+}
+
+.clientCell {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-width: 0;
+}
+
+.avatar40 {
+  width: 40px;
+  height: 40px;
+  border-radius: var(--radius-full);
+  object-fit: cover;
+  flex: 0 0 auto;
+  background: var(--quiet);
+}
+
+.initials40 {
+  width: 40px;
+  height: 40px;
+  border-radius: var(--radius-full);
+  background: var(--quiet);
+  color: var(--neutral-700, #3d3833);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 14.5px;
+  font-weight: 500;
+  flex: 0 0 auto;
+}
+
+.nameStack {
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+}
+
+.cell {
+  font-size: 14.5px;
+  color: var(--text-secondary);
+}
+
+.nextCell {
+  font-size: 14.5px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  color: var(--text-secondary);
+}
+
+.upCell {
+  font-size: 14.5px;
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+  color: var(--text-secondary);
+}
+
+.hasNext {
+  color: var(--text-primary);
+}
+
+.spendCell {
+  font-size: 14.5px;
+  text-align: right;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+}
+
+@keyframes rowin {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}

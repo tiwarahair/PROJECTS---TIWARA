@@ -1,0 +1,21 @@
+.nameLine {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  min-width: 0;
+}
+
+.name {
+  font-size: 15px;
+  font-weight: 600;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.sens {
+  flex: 0 0 auto;
+  display: inline-flex;
+  color: #b5541f;
+  line-height: 0;
+}

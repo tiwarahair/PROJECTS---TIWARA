@@ -3,7 +3,7 @@ import { Camera, User } from "lucide-react";
 import { joinClassNames } from "../../../utils/class-names";
 import type { ClientForm } from "./use-client-form";
 import type { ClientsView } from "./view";
-import { ClientProfile } from ".";
+import { ClientProfile } from "./profile";
 import styles from "../../../styles/features/studio/clients/sheets.module.css";
 import clientStyles from "../../../styles/features/studio/clients/index.module.css";
 import sheet from "../../../styles/features/studio/shell/sheet-frame.module.css";

@@ -1,0 +1,48 @@
+.sectionHead {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.inlineLink {
+  border: none;
+  background: none;
+  padding: 4px 0;
+  color: var(--accent-700);
+  font-size: 14.5px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.private {
+  font-size: 13.5px;
+  color: var(--text-secondary);
+  margin-top: 2px;
+}
+
+.products {
+  margin-top: 12px;
+  font-size: 15px;
+  line-height: 1.55;
+  text-wrap: pretty;
+  white-space: pre-line;
+}
+
+.noNotes {
+  font-size: 14.5px;
+  color: var(--text-secondary);
+  margin-top: 12px;
+  line-height: 1.5;
+}
+
+.addSens {
+  margin-top: 10px;
+  border: none;
+  background: none;
+  padding: 4px 0;
+  color: var(--accent-700);
+  font-size: 14.5px;
+  font-weight: 600;
+  cursor: pointer;
+}
