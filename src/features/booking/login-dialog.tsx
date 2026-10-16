@@ -10,14 +10,14 @@ import { AUTH_FAILURE_MESSAGES, getAuthFailure } from "../../lib/auth-errors";
 import { joinClassNames } from "../../utils/class-names";
 import { Spinner } from "../onboarding/onboarding-fields";
 import { OnboardingTurnstile } from "../onboarding/onboarding-turnstile";
-import { loginEmailSchema, loginPasswordSchema } from "./booking-schemas";
-import type { LoginValues } from "./booking-schemas";
+import { loginEmailSchema, loginPasswordSchema } from "./logic/schemas";
+import type { LoginValues } from "./logic/schemas";
 import { ErrorIcon } from "./details-field";
-import fields from "../../styles/features/booking/booking-fields.module.css";
-import pageGlobal from "../../styles/features/booking/booking-page-global.module.css";
-import dialogs from "../../styles/features/booking/booking-dialogs.module.css";
-import styles from "../../styles/features/booking/booking-login-dialog.module.css";
-import type { BookingController } from "./use-booking";
+import fields from "../../styles/features/booking/fields.module.css";
+import pageGlobal from "../../styles/features/booking/page-global.module.css";
+import dialogs from "../../styles/features/booking/dialogs.module.css";
+import styles from "../../styles/features/booking/login-dialog.module.css";
+import type { BookingController } from "./hooks/use-booking";
 
 interface LoginDialogProps {
   booking: BookingController;

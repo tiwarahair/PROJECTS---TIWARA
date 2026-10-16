@@ -1,6 +1,6 @@
 // Step 3 (Pick a time): month grid and date labels.
-import type { WorkingHours } from "../../lib/public-profiles";
-import { formatWeekdayDate, LONG_WEEKDAYS } from "../../utils/dates";
+import type { WorkingHours } from "../../../lib/public-profiles";
+import { formatWeekdayDate, LONG_WEEKDAYS } from "../../../utils/dates";
 
 export interface CalendarDay {
   key: string;

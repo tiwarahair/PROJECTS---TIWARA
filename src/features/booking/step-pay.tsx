@@ -2,20 +2,20 @@ import { ArrowLeft, ArrowRight, Check, CircleAlert, Lock } from "lucide-react";
 import type { ChangeEvent } from "react";
 import { joinClassNames } from "../../utils/class-names";
 import { AppleLogo, GoogleLogo } from "../../components/icons/brand-icons";
-import { getPayIntro, getPaySubtitle } from "./booking-content";
+import { getPayIntro, getPaySubtitle } from "./logic/content";
 import {
   formatCardNumber,
   formatExpiry,
   getCardBrand,
   getCardError,
   getCvcLabel,
-} from "./booking-details";
-import type { PayFields } from "./booking-state";
-import fields from "../../styles/features/booking/booking-fields.module.css";
-import step from "../../styles/features/booking/booking-step.module.css";
+} from "./logic/details";
+import type { PayFields } from "./logic/types";
+import fields from "../../styles/features/booking/fields.module.css";
+import step from "../../styles/features/booking/step.module.css";
 import styles from "../../styles/features/booking/step-pay.module.css";
 import { TurnstileFallback } from "./turnstile-fallback";
-import type { BookingController } from "./use-booking";
+import type { BookingController } from "./hooks/use-booking";
 
 const getPayButtonClass = (paying: boolean, turnstileBlocking: boolean) => {
   if (paying) return styles.payButtonPaying;

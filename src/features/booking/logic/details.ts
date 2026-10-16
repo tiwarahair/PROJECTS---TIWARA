@@ -1,7 +1,7 @@
 // Step 4 (Your details) error focus and the address / where copy, plus Step 6 card formatting and checks.
-import type { Stylist } from "../../types/stylist";
-import { isAddressValid } from "../../utils/address";
-import type { BookingAddress, Details, FieldKey } from "./booking-state";
+import type { Stylist } from "../../../types/stylist";
+import { isAddressValid } from "../../../utils/address";
+import type { BookingAddress, Details, FieldKey } from "./types";
 
 const FIELD_KEYS: FieldKey[] = ["address", "first", "last", "email", "phone"];
 

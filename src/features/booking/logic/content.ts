@@ -1,7 +1,7 @@
 // Booking copy and fixed content: the Privacy / Terms sheets, the size guide, policy sentences and the
 // AI preview photo pool.
-import type { PolicyMode } from "../../types/policy";
-import { SUPPORT_EMAIL } from "../../utils/support";
+import type { PolicyMode } from "../../../types/policy";
+import { SUPPORT_EMAIL } from "../../../utils/support";
 
 interface LegalDocumentSection {
   title: string;

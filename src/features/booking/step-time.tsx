@@ -5,10 +5,10 @@ import {
   formatLongDate,
   formatMonthTitle,
   getCalendarDays,
-} from "./booking-calendar";
-import step from "../../styles/features/booking/booking-step.module.css";
+} from "./logic/calendar";
+import step from "../../styles/features/booking/step.module.css";
 import styles from "../../styles/features/booking/step-time.module.css";
-import type { BookingController } from "./use-booking";
+import type { BookingController } from "./hooks/use-booking";
 import { MONDAY_FIRST_WEEKDAYS } from "../../utils/dates";
 
 const getDayClass = ({

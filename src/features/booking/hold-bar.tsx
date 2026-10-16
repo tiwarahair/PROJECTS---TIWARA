@@ -1,6 +1,6 @@
 import { Clock } from "lucide-react";
 import { joinClassNames } from "../../utils/class-names";
-import pageGlobal from "../../styles/features/booking/booking-page-global.module.css";
+import pageGlobal from "../../styles/features/booking/page-global.module.css";
 import styles from "../../styles/features/booking/hold-bar.module.css";
 
 interface HoldBarProps {

@@ -1,8 +1,8 @@
 import { X } from "lucide-react";
 import type { CSSProperties } from "react";
 import { joinClassNames } from "../../utils/class-names";
-import { getBarCount, SIZE_GUIDE } from "./booking-content";
-import pageGlobal from "../../styles/features/booking/booking-page-global.module.css";
+import { getBarCount, SIZE_GUIDE } from "./logic/content";
+import pageGlobal from "../../styles/features/booking/page-global.module.css";
 import styles from "../../styles/features/booking/size-guide.module.css";
 
 interface SizeGuideProps {

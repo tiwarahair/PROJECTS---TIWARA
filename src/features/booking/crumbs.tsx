@@ -1,9 +1,9 @@
 import { ChevronRight } from "lucide-react";
 import { Fragment } from "react";
 import { joinClassNames } from "../../utils/class-names";
-import pageGlobal from "../../styles/features/booking/booking-page-global.module.css";
-import styles from "../../styles/features/booking/booking-crumbs.module.css";
-import type { BookingController } from "./use-booking";
+import pageGlobal from "../../styles/features/booking/page-global.module.css";
+import styles from "../../styles/features/booking/crumbs.module.css";
+import type { BookingController } from "./hooks/use-booking";
 
 interface BookingCrumbsProps {
   booking: BookingController;

@@ -2,14 +2,14 @@ import { Plus, X } from "lucide-react";
 import type { CSSProperties } from "react";
 import { AllergyField } from "../../components/allergy-field/allergy-field";
 import { AppointmentAddress } from "./appointment-address";
-import type { AllergyState } from "./booking-state";
+import type { AllergyState } from "./logic/types";
 import { ContactFields } from "./contact-fields";
 import { ContactSummary } from "./contact-summary";
-import fields from "../../styles/features/booking/booking-fields.module.css";
-import step from "../../styles/features/booking/booking-step.module.css";
+import fields from "../../styles/features/booking/fields.module.css";
+import step from "../../styles/features/booking/step.module.css";
 import { CheckBox } from "./step-customise";
 import styles from "../../styles/features/booking/step-details.module.css";
-import type { BookingController } from "./use-booking";
+import type { BookingController } from "./hooks/use-booking";
 
 interface StepDetailsProps {
   booking: BookingController;

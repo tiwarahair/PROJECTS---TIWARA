@@ -2,7 +2,7 @@ import { X } from "lucide-react";
 import type { ReactNode } from "react";
 import { Link } from "react-router";
 import { getAssetUrl } from "../../utils/asset-url";
-import styles from "../../styles/features/booking/booking-nav.module.css";
+import styles from "../../styles/features/booking/nav.module.css";
 
 interface BookingNavProps {
   exitHref: string;

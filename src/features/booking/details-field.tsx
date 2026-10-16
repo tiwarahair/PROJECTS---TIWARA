@@ -1,7 +1,7 @@
 import { CircleAlert } from "lucide-react";
 import type { ReactNode } from "react";
-import type { FieldKey } from "./booking-state";
-import fields from "../../styles/features/booking/booking-fields.module.css";
+import type { FieldKey } from "./logic/types";
+import fields from "../../styles/features/booking/fields.module.css";
 import styles from "../../styles/features/booking/details-field.module.css";
 
 export const ErrorIcon = () => (

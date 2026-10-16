@@ -1,12 +1,12 @@
 // Price, duration and policy amounts for the chosen service.
-import type { Stylist } from "../../types/stylist";
-import { policyLines } from "../../utils/pricing";
-import type { PolicySummary } from "../../utils/pricing";
-import { formatServiceDuration } from "../../utils/services";
-import type { ServiceOptions } from "../../utils/services";
-import type { Service } from "../../types/service";
-import type { Selection } from "./booking-state";
-import { formatMoney } from "../../utils/money";
+import type { Stylist } from "../../../types/stylist";
+import { policyLines } from "../../../utils/pricing";
+import type { PolicySummary } from "../../../utils/pricing";
+import { formatServiceDuration } from "../../../utils/services";
+import type { ServiceOptions } from "../../../utils/services";
+import type { Service } from "../../../types/service";
+import type { Selection } from "./types";
+import { formatMoney } from "../../../utils/money";
 
 interface BookingMoney {
   servicePrice: number;

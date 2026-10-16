@@ -2,13 +2,13 @@ import { Star, Sun } from "lucide-react";
 import type { CSSProperties } from "react";
 import { resolveAssetUrl } from "../../utils/asset-url";
 import { joinClassNames } from "../../utils/class-names";
-import { getWhenLine } from "./booking-calendar";
-import { getPreviewIndex, hasPreview, PREVIEW_POOL } from "./booking-content";
-import { getSummaryWhere } from "./booking-details";
-import pageGlobal from "../../styles/features/booking/booking-page-global.module.css";
+import { getWhenLine } from "./logic/calendar";
+import { getPreviewIndex, hasPreview, PREVIEW_POOL } from "./logic/content";
+import { getSummaryWhere } from "./logic/details";
+import pageGlobal from "../../styles/features/booking/page-global.module.css";
 import { HoldBar } from "./hold-bar";
-import styles from "../../styles/features/booking/booking-summary.module.css";
-import type { BookingController } from "./use-booking";
+import styles from "../../styles/features/booking/summary.module.css";
+import type { BookingController } from "./hooks/use-booking";
 
 interface BookingSummaryProps {
   booking: BookingController;

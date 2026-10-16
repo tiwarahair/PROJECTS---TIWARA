@@ -1,16 +1,13 @@
 // Booking's ?fixture= board states (dev-only), on whichever stylist ?stylist= loads.
-import type { Stylist } from "../../types/stylist";
+import type { Stylist } from "../../../types/stylist";
 import {
   findService,
   getActiveServices,
   getServiceOptions,
-} from "../../utils/services";
-import {
-  DEMO_DETAILS,
-  EMPTY_DETAILS,
-  getFreshSelection,
-} from "./booking-state";
-import type { BookingState } from "./booking-state";
+} from "../../../utils/services";
+import { DEMO_DETAILS, EMPTY_DETAILS } from "./constants";
+import { getFreshSelection } from "./state";
+import type { BookingState } from "./types";
 
 /** Next week's Wednesday: the demo date every fixture books. */
 const getFixtureDate = (): Date => {

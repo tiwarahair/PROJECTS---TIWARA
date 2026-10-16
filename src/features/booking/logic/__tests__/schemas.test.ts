@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { detailsSchema } from "../booking-schemas";
+import { detailsSchema } from "../schemas";
 
 const getErrorKeys = (details: Record<string, string>) =>
   detailsSchema

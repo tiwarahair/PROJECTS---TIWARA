@@ -1,11 +1,11 @@
 import { X } from "lucide-react";
 import type { ReactNode } from "react";
 import { joinClassNames } from "../../utils/class-names";
-import { formatShortDate } from "./booking-calendar";
-import { getPrivacySections, TERMS_SECTIONS } from "./booking-content";
-import pageGlobal from "../../styles/features/booking/booking-page-global.module.css";
-import styles from "../../styles/features/booking/booking-dialogs.module.css";
-import type { BookingController } from "./use-booking";
+import { formatShortDate } from "./logic/calendar";
+import { getPrivacySections, TERMS_SECTIONS } from "./logic/content";
+import pageGlobal from "../../styles/features/booking/page-global.module.css";
+import styles from "../../styles/features/booking/dialogs.module.css";
+import type { BookingController } from "./hooks/use-booking";
 
 interface BookingDialogsProps {
   booking: BookingController;

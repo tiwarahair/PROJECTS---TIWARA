@@ -3,10 +3,10 @@ import { Link } from "react-router";
 import { AppleLogo, GoogleLogo } from "../../components/icons/brand-icons";
 import { joinClassNames } from "../../utils/class-names";
 import { getWindowText } from "../../utils/pricing";
-import { getCancelSentence, getPaySubtitle } from "./booking-content";
-import { getWhenLine } from "./booking-calendar";
-import styles from "../../styles/features/booking/booking-confirmation.module.css";
-import type { BookingController } from "./use-booking";
+import { getCancelSentence, getPaySubtitle } from "./logic/content";
+import { getWhenLine } from "./logic/calendar";
+import styles from "../../styles/features/booking/confirmation.module.css";
+import type { BookingController } from "./hooks/use-booking";
 
 interface BookingConfirmationProps {
   booking: BookingController;

@@ -1,8 +1,8 @@
 import { describe, expect, it } from "vitest";
-import { stylists } from "../../../data";
-import type { Service } from "../../../types/service";
-import { getServiceOptions } from "../../../utils/services";
-import { getBookingMoney } from "../booking-pricing";
+import { stylists } from "../../../../data";
+import type { Service } from "../../../../types/service";
+import { getServiceOptions } from "../../../../utils/services";
+import { getBookingMoney } from "../pricing";
 
 // the same service and picks as price_booking's test in supabase/tests/bookings.test.sql
 const SERVICE: Service = {

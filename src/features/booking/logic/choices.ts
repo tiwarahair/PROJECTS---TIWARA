@@ -1,7 +1,7 @@
 // The client's picks as the server reads them: chosen option ids, add-on ids and (braids) the colour.
-import type { BookingChoices } from "../../lib/booking-api";
-import type { ServiceOptions } from "../../utils/services";
-import type { Selection } from "./booking-state";
+import type { BookingChoices } from "../../../lib/booking-api";
+import type { ServiceOptions } from "../../../utils/services";
+import type { Selection } from "./types";
 
 export const toChoices = (
   options: ServiceOptions,

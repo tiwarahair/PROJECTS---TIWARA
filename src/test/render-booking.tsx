@@ -1,5 +1,5 @@
 import { vi } from "vitest";
-import { BookingPage } from "../features/booking/booking-route";
+import { BookingPage } from "../features/booking/route";
 import { renderWithStore } from "./render-with-store";
 
 /** Renders /book?{query} (tiwaras-house unless ?stylist= says otherwise) and waits for the flow to load. */

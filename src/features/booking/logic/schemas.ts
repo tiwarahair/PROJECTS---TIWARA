@@ -1,6 +1,6 @@
 import { z } from "zod";
-import { isValidEmail, isValidMobile } from "../../utils/validation";
-import type { Details } from "./booking-state";
+import { isValidEmail, isValidMobile } from "../../../utils/validation";
+import type { Details } from "./types";
 
 export const detailsSchema = z.object({
   first: z.string().trim().min(1, "Enter your first name"),

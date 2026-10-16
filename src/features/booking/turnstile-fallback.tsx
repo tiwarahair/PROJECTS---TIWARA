@@ -1,7 +1,7 @@
 import { Check, X } from "lucide-react";
 import { joinClassNames } from "../../utils/class-names";
 import styles from "../../styles/features/booking/turnstile-fallback.module.css";
-import type { BookingController } from "./use-booking";
+import type { BookingController } from "./hooks/use-booking";
 
 interface TurnstileFallbackProps {
   booking: BookingController;

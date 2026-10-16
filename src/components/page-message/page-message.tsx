@@ -8,7 +8,6 @@ interface PageMessageProps {
   linkHref: string;
 }
 
-/** A centred page-level message with one way on ("We couldn't find this stylist" → Find a stylist). */
 export const PageMessage = ({
   title,
   text,

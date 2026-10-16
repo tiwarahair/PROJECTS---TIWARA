@@ -15,9 +15,9 @@ import { getDemoProfile } from "../../../test/demo-profile";
 import { renderBooking } from "../../../test/render-booking";
 import { renderWithStore } from "../../../test/render-with-store";
 import { setupUser } from "../../../test/setup-user";
-import { EMPTY_ADDRESS } from "../booking-state";
-import { BookingPage } from "../booking-route";
-import { useTravelCheck } from "../use-travel-check";
+import { EMPTY_ADDRESS } from "../logic/constants";
+import { BookingPage } from "../route";
+import { useTravelCheck } from "../hooks/use-travel-check";
 
 vi.mock("../../../lib/public-profiles", async (original) =>
   (await import("../../../test/booking-mocks")).mockPublicProfiles(original),

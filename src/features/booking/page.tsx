@@ -2,14 +2,14 @@ import { useLayoutEffect } from "react";
 import { WelcomeToast } from "../../components/welcome-toast/welcome-toast";
 import type { PublicStylist } from "../../lib/public-stylist";
 import { joinClassNames } from "../../utils/class-names";
-import { BookingConfirmation } from "./booking-confirmation";
-import { BookingCrumbs } from "./booking-crumbs";
-import { BookingDialogs } from "./booking-dialogs";
-import { LoginDialog } from "./booking-login-dialog";
-import pageGlobal from "../../styles/features/booking/booking-page-global.module.css";
-import { BookingNav } from "./booking-nav";
-import styles from "../../styles/features/booking/booking-page.module.css";
-import { BookingSummary } from "./booking-summary";
+import { BookingConfirmation } from "./confirmation";
+import { BookingCrumbs } from "./crumbs";
+import { BookingDialogs } from "./dialogs";
+import { LoginDialog } from "./login-dialog";
+import pageGlobal from "../../styles/features/booking/page-global.module.css";
+import { BookingNav } from "./nav";
+import styles from "../../styles/features/booking/page.module.css";
+import { BookingSummary } from "./summary";
 import { HoldBar } from "./hold-bar";
 import { MobileSummary } from "./mobile-summary";
 import { ResumeBanner } from "./resume-banner";
@@ -21,7 +21,7 @@ import { StepPay } from "./step-pay";
 import { StepReview } from "./step-review";
 import { StepService } from "./step-service";
 import { StepTime } from "./step-time";
-import { useBooking } from "./use-booking";
+import { useBooking } from "./hooks/use-booking";
 
 const STEP_VIEWS = {
   1: StepService,

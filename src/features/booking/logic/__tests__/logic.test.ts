@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
-import { getClosedLine, getWhenLine } from "../booking-calendar";
-import { getPreviewIndex, hasPreview, PREVIEW_POOL } from "../booking-content";
+import { getClosedLine, getWhenLine } from "../calendar";
+import { getPreviewIndex, hasPreview, PREVIEW_POOL } from "../content";
 import {
   formatCardNumber,
   formatExpiry,
@@ -9,8 +9,8 @@ import {
   getCardBrand,
   getCardError,
   getEmailFix,
-} from "../booking-details";
-import { getDeltaLabel } from "../booking-pricing";
+} from "../details";
+import { getDeltaLabel } from "../pricing";
 
 describe("details", () => {
   it("suggests the fixed email domain", () => {

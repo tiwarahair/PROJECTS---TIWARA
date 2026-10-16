@@ -1,8 +1,8 @@
 import { describe, expect, it } from "vitest";
-import { toPublicStylist } from "../../../lib/public-stylist";
-import { getDemoProfile } from "../../../test/demo-profile";
-import { findService, getServiceOptions } from "../../../utils/services";
-import { toChoices } from "../booking-choices";
+import { toPublicStylist } from "../../../../lib/public-stylist";
+import { getDemoProfile } from "../../../../test/demo-profile";
+import { findService, getServiceOptions } from "../../../../utils/services";
+import { toChoices } from "../choices";
 
 const { stylist } = toPublicStylist(getDemoProfile("tiwaras-house"));
 const knotless = findService(stylist, "Knotless braids");

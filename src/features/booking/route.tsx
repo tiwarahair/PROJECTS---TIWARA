@@ -5,8 +5,8 @@ import { MapsProvider } from "../../lib/google-maps";
 import { toPublicStylist } from "../../lib/public-stylist";
 import { useGetStylistProfileQuery } from "../../stores/api-slice";
 import { getSearchParams } from "../../utils/page-flags";
-import { BookingFlow } from "./booking-page";
-import styles from "../../styles/features/booking/booking-route.module.css";
+import { BookingFlow } from "./page";
+import styles from "../../styles/features/booking/route.module.css";
 
 /** Route "/book?stylist={slug}": loads the stylist, then the booking flow (with Google for mobile stylists' addresses). */
 export const BookingPage = () => {

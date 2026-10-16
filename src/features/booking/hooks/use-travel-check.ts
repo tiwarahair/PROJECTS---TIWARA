@@ -1,9 +1,9 @@
 import { useMapsLibrary } from "@vis.gl/react-google-maps";
 import { useEffect, useState } from "react";
-import type { LatLng } from "../../lib/google-maps";
-import { useIsInTravelAreaQuery } from "../../stores/api-slice";
-import { isAddressValid } from "../../utils/address";
-import type { BookingAddress } from "./booking-state";
+import type { LatLng } from "../../../lib/google-maps";
+import { useIsInTravelAreaQuery } from "../../../stores/api-slice";
+import { isAddressValid } from "../../../utils/address";
+import type { BookingAddress } from "../logic/types";
 
 /** Mobile stylists: the address's point (Google's when it was picked, else geocoded) and whether it's in their travel area. */
 export const useTravelCheck = (
