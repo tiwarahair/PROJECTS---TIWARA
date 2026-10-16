@@ -17,15 +17,6 @@ export interface Details {
   notes: string;
 }
 
-export interface PayFields {
-  number: string;
-  expiry: string;
-  cvc: string;
-  name: string;
-  postcode: string;
-  future: boolean;
-}
-
 export interface BookingAddress {
   postcode: string;
   line1: string;
@@ -43,6 +34,13 @@ interface Hold {
   id: string;
   secret: string;
   until: number;
+}
+
+/** The confirmed booking, as the server has it. */
+interface BookedTimes {
+  ref: string;
+  startsAt: string;
+  endsAt: string;
 }
 
 interface AccountSave {
@@ -87,7 +85,6 @@ export interface BookingDraft {
 
 export type FieldKey = "address" | "first" | "last" | "email" | "phone";
 type LegalDocumentKind = "terms" | "privacy";
-type TurnstileState = "idle" | "checking" | "passed" | "fail";
 
 export interface BookingState {
   id: string;
@@ -102,7 +99,8 @@ export interface BookingState {
   time: string | null;
   details: Details;
   photos: Photo[];
-  pay: PayFields;
+  /** A signed-in client asked to save the card for future bookings. */
+  keepCard: boolean;
   loggedIn: boolean;
   guest: boolean;
   editContact: boolean;
@@ -114,19 +112,17 @@ export interface BookingState {
   /** Why the chosen time couldn't be held: taken by someone else, or anything else. */
   holdError: "taken" | "failed" | null;
   holdExpired: boolean;
-  taken: boolean;
   appointmentAddress: BookingAddress;
   legalDocument: LegalDocumentKind | null;
   leave: string | null;
-  bank: boolean;
-  wallet: string | null;
   payKind: string;
   account: AccountSave;
   resumeDraft: BookingDraft | null;
   repickNote: boolean;
-  turnstileMode: "challenge" | "fail" | null;
-  turnstileStatus: TurnstileState;
   paying: boolean;
+  /** Paid; waiting for the server to confirm the booking. */
+  confirming: boolean;
+  booked: BookedTimes | null;
   payError: string;
   confirmed: boolean;
   allergy: AllergyState;

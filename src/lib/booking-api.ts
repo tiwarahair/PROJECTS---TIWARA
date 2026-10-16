@@ -1,4 +1,4 @@
-// Booking's reads and writes: open times, holding a time, the mobile travel check.
+// Booking's reads and writes: open times, holding a time, the mobile travel check, checkout and its status.
 import { FunctionsHttpError } from "@supabase/supabase-js";
 import { supabase } from "./supabase";
 
@@ -35,8 +35,50 @@ export interface HeldBooking {
   starts_at: string;
 }
 
+export interface CheckoutRequest {
+  hold: { id: string; secret: string };
+  contact: { first: string; last: string; email: string; phone: string };
+  notes: string;
+  address?: {
+    line1: string;
+    line2: string;
+    town: string;
+    postcode: string;
+    notes: string;
+    lat: number;
+    lng: number;
+  };
+  /** A signed-in client asked to save the card for future bookings. */
+  keepCard: boolean;
+  turnstileToken: string;
+}
+
+export interface BookingStatus {
+  status: string;
+  ref: string;
+  starts_at: string;
+  ends_at: string;
+}
+
 /** A refusal from a booking function ("slot_taken", "rate_limited", …); anything else is "unknown". */
 export class BookingError extends Error {}
+
+/** Calls a booking Edge Function, turning its refusals into a BookingError. */
+const invokeBookingFunction = async <T>(name: string, body: object) => {
+  const { data, error } = await supabase.functions.invoke<T>(name, { body });
+
+  if (error instanceof FunctionsHttpError) {
+    const response = (await error.context.json().catch(() => ({}))) as {
+      error?: string;
+    };
+
+    throw new BookingError(response.error ?? "unknown");
+  }
+
+  if (error || !data) throw new BookingError("unknown");
+
+  return data;
+};
 
 export const getAvailableSlots = async ({
   serviceId,
@@ -58,23 +100,27 @@ export const getAvailableSlots = async ({
   return data;
 };
 
-export const holdBooking = async (request: HoldRequest) => {
-  const { data, error } = await supabase.functions.invoke<HeldBooking>(
-    "booking-hold",
-    { body: request },
-  );
+export const holdBooking = (request: HoldRequest) =>
+  invokeBookingFunction<HeldBooking>("booking-hold", request);
 
-  if (error instanceof FunctionsHttpError) {
-    const body = (await error.context.json().catch(() => ({}))) as {
-      error?: string;
-    };
+export const startCheckout = (request: CheckoutRequest) =>
+  invokeBookingFunction<{ clientSecret: string }>("booking-checkout", request);
 
-    throw new BookingError(body.error ?? "unknown");
-  }
+export const getBookingStatus = async ({
+  id,
+  secret,
+}: {
+  id: string;
+  secret: string;
+}) => {
+  const { data, error } = await supabase.rpc("get_booking_status", {
+    target: id,
+    secret,
+  });
 
-  if (error || !data) throw new BookingError("unknown");
+  if (error) throw error;
 
-  return data;
+  return data as BookingStatus | null;
 };
 
 export const isInTravelArea = async ({

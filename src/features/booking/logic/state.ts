@@ -70,7 +70,6 @@ export const getInitialBooking = (stylist: Stylist): InitialBooking => {
   const service = serviceParam ? findService(stylist, serviceParam) : null;
   const fixture = params.get("fixture") || "";
   const board = !!fixture || params.get("board") === "true";
-  const turnstile = params.get("turnstile");
   const today = new Date();
 
   const state: BookingState = {
@@ -86,14 +85,7 @@ export const getInitialBooking = (stylist: Stylist): InitialBooking => {
     time: null,
     details: { ...EMPTY_DETAILS },
     photos: [],
-    pay: {
-      number: "",
-      expiry: "",
-      cvc: "",
-      name: "",
-      postcode: "",
-      future: false,
-    },
+    keepCard: false,
     // the signed-in person fills in once their profile loads (use-booking)
     loggedIn: false,
     guest: false,
@@ -105,12 +97,9 @@ export const getInitialBooking = (stylist: Stylist): InitialBooking => {
     holding: false,
     holdError: null,
     holdExpired: false,
-    taken: params.get("taken") === "1",
     appointmentAddress: { ...EMPTY_ADDRESS },
     legalDocument: null,
     leave: null,
-    bank: false,
-    wallet: null,
     payKind: "",
     account: {
       password: "",
@@ -123,10 +112,9 @@ export const getInitialBooking = (stylist: Stylist): InitialBooking => {
     },
     resumeDraft: null,
     repickNote: false,
-    turnstileMode:
-      turnstile === "challenge" || turnstile === "fail" ? turnstile : null,
-    turnstileStatus: "idle",
     paying: false,
+    confirming: false,
+    booked: null,
     payError: "",
     confirmed: false,
     allergy: {

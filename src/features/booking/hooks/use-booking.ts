@@ -15,11 +15,11 @@ import { getBookingMoney, getCustomisationLine } from "../logic/pricing";
 import { getFreshSelection } from "../logic/state";
 import type { Details } from "../logic/types";
 import { useAccount } from "./use-account";
-import { useDemoPay } from "./use-demo-pay";
 import { useDetailsForm } from "./use-details-form";
 import { useFlowState } from "./use-flow-state";
 import { useHold } from "./use-hold";
 import { useLeaveGuard } from "./use-leave-guard";
+import { usePay } from "./use-pay";
 import { useTravelCheck } from "./use-travel-check";
 
 export const useBooking = ({ stylist, hours }: PublicStylist) => {
@@ -51,13 +51,17 @@ export const useBooking = ({ stylist, hours }: PublicStylist) => {
     canListTimes: !!service && !needSize && !needLength,
   });
 
-  const pay = useDemoPay(flow, account.saveContactToAccount);
-
   const travel = useTravelCheck(
     state.serviceId,
     state.appointmentAddress,
     isMobileStylist,
   );
+
+  const pay = usePay({
+    flow,
+    point: travel.point,
+    onConfirm: account.saveContactToAccount,
+  });
 
   const address = {
     ...getAddressCheck(state.appointmentAddress),
@@ -100,7 +104,6 @@ export const useBooking = ({ stylist, hours }: PublicStylist) => {
     ...leave.actions,
     ...account.actions,
     ...hold.actions,
-    ...pay.actions,
     setState,
     scrollToTitle,
     goToStep,
@@ -193,9 +196,7 @@ export const useBooking = ({ stylist, hours }: PublicStylist) => {
     needSize,
     needLength,
     nextDisabled,
-    showTurnstile: pay.showTurnstile,
-    turnstileBlocking: pay.turnstileBlocking,
-    payDisabled: pay.payDisabled,
+    pay,
     holdOn: hold.holdOn,
     slotsByDay: hold.slotsByDay,
     isLoadingSlots: hold.isLoadingSlots,

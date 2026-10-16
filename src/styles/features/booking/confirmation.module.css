@@ -154,6 +154,7 @@
 
 .calendarButton {
   border: 1px solid var(--neutral-900);
+  text-decoration: none;
   background: transparent;
   color: var(--neutral-900);
   font-weight: 600;

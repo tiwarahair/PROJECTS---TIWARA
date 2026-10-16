@@ -3,6 +3,8 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { renderBooking } from "../../../test/render-booking";
 import type { UserEvent } from "@testing-library/user-event";
 import { setupUser } from "../../../test/setup-user";
+import { stripeStub } from "../../../test/setup";
+import { startCheckout } from "../../../lib/booking-api";
 
 vi.mock("../../../lib/public-profiles", async (original) =>
   (await import("../../../test/booking-mocks")).mockPublicProfiles(original),
@@ -26,6 +28,7 @@ describe("BookingPage", () => {
 
     sessionStorage.clear();
     localStorage.clear();
+    vi.clearAllMocks();
   });
 
   afterEach(() => vi.useRealTimers());
@@ -174,30 +177,44 @@ describe("BookingPage", () => {
     ).toBeInTheDocument();
   });
 
-  it("pay: an incomplete card shows an error; the declined test card is declined", async () => {
+  it("pay: Stripe's decline shows its message and keeps the hold", async () => {
+    stripeStub.confirmPayment.mockResolvedValueOnce({
+      error: { type: "card_error", message: "Your card was declined." },
+    });
+
     await renderBooking("fixture=pay");
-    const pay = screen.getByRole("button", { name: /^Pay £.* & confirm/ });
 
-    await user.click(pay);
+    expect(screen.getByTestId("payment-element")).toBeInTheDocument();
 
-    expect(screen.getByRole("alert")).toHaveTextContent(
-      "Check the card number — it looks incomplete.",
+    await user.click(
+      screen.getByRole("button", { name: /^Pay £.* & confirm/ }),
     );
 
-    const type = async (label: string, value: string) =>
-      await user.type(screen.getByLabelText(label), value);
-
-    await type("Card number", "4000000000000002");
-    await type("Expiry", "1229");
-    await type("Security code", "123");
-    await type("Name on card", "Nia Okafor");
-    await type("Billing postcode", "M14 5TQ");
-    await user.click(pay);
-    act(() => vi.advanceTimersByTime(900));
-
-    expect(screen.getByRole("alert")).toHaveTextContent(
+    expect(await screen.findByRole("alert")).toHaveTextContent(
       "Your card was declined.",
     );
+
+    expect(
+      screen.getAllByRole("timer", { hidden: true })[0],
+    ).toBeInTheDocument();
+  });
+
+  it("pay: an incomplete card is Stripe's to explain, and nothing is sent", async () => {
+    stripeStub.submit.mockResolvedValueOnce({
+      error: { message: "Your card number is incomplete." },
+    });
+
+    await renderBooking("fixture=pay");
+
+    await user.click(
+      screen.getByRole("button", { name: /^Pay £.* & confirm/ }),
+    );
+
+    expect(await screen.findByRole("alert")).toHaveTextContent(
+      "Your card number is incomplete.",
+    );
+
+    expect(startCheckout).not.toHaveBeenCalled();
   });
 
   it("confirm: shows You're booked in. and the guest save row", async () => {
