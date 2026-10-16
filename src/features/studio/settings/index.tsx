@@ -4,7 +4,7 @@ import { ChevronLeft, Eye, Link2, LogOut, Pencil, Truck } from "lucide-react";
 import { Avatar } from "../../../components/ds/avatar";
 import { AccountSettings } from "../../../components/account-settings/account-settings";
 import { BusinessDetails } from "../../../components/business-details";
-import { PaymentPolicy } from "../../../components/payment-policy/payment-policy";
+import { PaymentPolicy } from "../../../components/payment-policy";
 import { getAssetUrl } from "../../../utils/asset-url";
 import { joinClassNames } from "../../../utils/class-names";
 import { AvailabilityPage } from "./availability";

@@ -1,0 +1,136 @@
+.feeToggle {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-height: 44px;
+  padding: 0;
+  border: none;
+  background: none;
+  font: inherit;
+  cursor: pointer;
+  text-align: left;
+  border-radius: var(--radius-xs);
+}
+
+.feeBox {
+  flex: 0 0 auto;
+  width: 22px;
+  height: 22px;
+  box-sizing: border-box;
+  border-radius: var(--radius-xs);
+  display: grid;
+  place-items: center;
+  transition:
+    background-color 160ms var(--ease-out),
+    border-color 160ms var(--ease-out);
+}
+
+.feeTick {
+  transition:
+    opacity 140ms var(--ease-out),
+    transform 180ms var(--ease-out);
+}
+
+.feeLabel {
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.feeBody {
+  padding: 8px 0 2px 34px;
+}
+
+.feeOptions {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.keepLabel {
+  font-size: 15px;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+}
+
+.pctOption {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 10px 12px;
+  min-height: 52px;
+  padding: 8px 16px;
+  box-sizing: border-box;
+  cursor: pointer;
+  border-radius: var(--radius-sm);
+  transition:
+    background-color 160ms var(--ease-out),
+    border-color 160ms var(--ease-out);
+}
+
+.pctFieldWrap {
+  position: relative;
+  width: 84px;
+}
+
+.pctInput {
+  width: 100%;
+  height: 44px;
+  box-sizing: border-box;
+  padding: 0 30px 0 12px;
+  border-radius: var(--radius-sm);
+  background: #fff;
+  font: inherit;
+  font-size: 16px;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+  color: var(--text-primary);
+  outline: none;
+}
+
+.pctFieldSign {
+  position: absolute;
+  right: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  font-size: 15px;
+  color: var(--neutral-600);
+  pointer-events: none;
+}
+
+.pctSingle {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 10px 12px;
+}
+
+.feeError {
+  display: flex;
+  align-items: flex-start;
+  gap: 6px;
+  margin-top: 8px;
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--accent-700);
+}
+
+.boxOn {
+  border: 1.5px solid var(--accent-700);
+  background: var(--accent-700);
+}
+
+.boxOff {
+  border: 1.5px solid var(--border-strong);
+  background: #fff;
+}
+
+.tickOn {
+  opacity: 1;
+  transform: scale(1);
+}
+
+.tickOff {
+  opacity: 0;
+  transform: scale(0);
+}

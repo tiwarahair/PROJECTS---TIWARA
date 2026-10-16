@@ -1,140 +1,21 @@
-import type { ChangeEvent, KeyboardEvent, ReactNode } from "react";
-import { Check, ChevronDown, CircleAlert } from "lucide-react";
+import type { KeyboardEvent } from "react";
+import type { UseFormRegisterReturn } from "react-hook-form";
+import { Check } from "lucide-react";
 import type { PolicyMode } from "../../types/policy";
 import { joinClassNames } from "../../utils/class-names";
-import type { FeeState } from "./payment-policy-logic";
-import styles from "../../styles/components/payment-policy/payment-policy.module.css";
-
-export const MODES: {
-  key: PolicyMode;
-  title: string;
-  description: string;
-  isRecommended: boolean;
-}[] = [
-  {
-    key: "deposit",
-    title: "Deposit",
-    description: "Clients pay part now, the rest to you at the appointment",
-    isRecommended: true,
-  },
-  {
-    key: "full",
-    title: "Full payment",
-    description: "Clients pay the full price when they book",
-    isRecommended: false,
-  },
-  {
-    key: "card",
-    title: "Card protection",
-    description:
-      "Nothing upfront. Card saved to cover late cancellations and no-shows",
-    isRecommended: false,
-  },
-  {
-    key: "none",
-    title: "No protection",
-    description: "Nothing upfront. No card saved",
-    isRecommended: false,
-  },
-];
-
-export const ErrorLine = ({
-  className,
-  children,
-}: {
-  className: string | undefined;
-  children: ReactNode;
-}) => (
-  <div className={className} role="alert">
-    <CircleAlert className={styles.errorIcon} size={15} strokeWidth={1.5} />
-    {children}
-  </div>
-);
-
-/** Grid-rows disclosure. */
-export const Reveal = ({
-  open,
-  children,
-}: {
-  open: boolean;
-  children: ReactNode;
-}) => (
-  <div
-    className={joinClassNames(
-      styles.reveal,
-      open ? styles.revealOpen : styles.revealClosed,
-    )}
-    data-pp-anim="1"
-    aria-hidden={open ? "false" : "true"}
-  >
-    <div className={styles.revealInner}>{children}</div>
-  </div>
-);
-
-/** Radio ring + dot. */
-export const Ring = ({
-  className,
-  isOn,
-}: {
-  className: string | undefined;
-  isOn: boolean;
-}) => (
-  <span
-    className={joinClassNames(className, isOn ? styles.ringOn : styles.ringOff)}
-  >
-    <span
-      className={joinClassNames(
-        styles.dot,
-        isOn ? styles.dotOn : styles.dotOff,
-      )}
-    ></span>
-  </span>
-);
-
-/** Tile border + background. */
-export const getTileClass = (isOn: boolean) =>
-  isOn ? styles.tileOn : styles.tileOff;
-export const getTextClass = (isOn: boolean) =>
-  isOn ? styles.textOn : styles.textOff;
-
-export const Select = ({
-  id,
-  value,
-  options,
-  onChange,
-  wrapClassName,
-}: {
-  id: string;
-  value: string;
-  options: { value: string; label: string }[];
-  onChange: (value: string) => void;
-  wrapClassName: string | undefined;
-}) => (
-  <span className={wrapClassName}>
-    <select
-      className={joinClassNames(styles.select, styles.focusRing)}
-      data-pp-in="1"
-      id={id}
-      value={value}
-      onChange={(event) => onChange(event.target.value)}
-    >
-      {options.map(({ value: optionValue, label }) => (
-        <option key={optionValue} value={optionValue}>
-          {label}
-        </option>
-      ))}
-    </select>
-    <ChevronDown className={styles.selectChevron} size={16} strokeWidth={2} />
-  </span>
-);
+import { ErrorLine, Reveal, Ring, getTextClass, getTileClass } from "./parts";
+import type { FeeValues } from "./types";
+import styles from "../../styles/components/payment-policy/fee-block.module.css";
+import parts from "../../styles/components/payment-policy/parts.module.css";
 
 interface FeeBlockProps {
   label: string;
-  fee: FeeState;
+  fee: FeeValues;
   mode: PolicyMode;
   depositText: string;
   error: string;
-  onUpdate: (patch: Partial<FeeState>) => void;
+  percentInput: UseFormRegisterReturn;
+  onUpdate: (patch: Partial<FeeValues>) => void;
 }
 
 /** "Late cancellation fee" / "No-show fee": checkbox, then keep-the-deposit or a percentage. */
@@ -144,6 +25,7 @@ export const FeeBlock = ({
   mode,
   depositText,
   error,
+  percentInput: percentField,
   onUpdate,
 }: FeeBlockProps) => {
   const isKeep = fee.kind === "keep";
@@ -157,19 +39,13 @@ export const FeeBlock = ({
       <input
         className={joinClassNames(
           styles.pctInput,
-          styles.focusRing,
-          error ? styles.fieldErr : styles.fieldOk,
+          parts.focusRing,
+          error ? parts.fieldErr : parts.fieldOk,
         )}
         data-pp-in="1"
         inputMode="numeric"
         aria-label={`${label} percentage of service`}
-        value={fee.percent}
-        onChange={(event: ChangeEvent<HTMLInputElement>) =>
-          onUpdate({
-            percent: event.target.value.replace(/\D/g, "").slice(0, 3),
-            kind: "pct",
-          })
-        }
+        {...percentField}
         onFocus={withFocus ? pickPercent : undefined}
         aria-invalid={error ? "true" : "false"}
       />
@@ -180,7 +56,7 @@ export const FeeBlock = ({
   return (
     <div>
       <button
-        className={joinClassNames(styles.feeToggle, styles.focusRing)}
+        className={joinClassNames(styles.feeToggle, parts.focusRing)}
         data-pp-in="1"
         role="checkbox"
         aria-checked={fee.on ? "true" : "false"}
@@ -214,8 +90,8 @@ export const FeeBlock = ({
             >
               <button
                 className={joinClassNames(
-                  styles.option,
-                  styles.focusRing,
+                  parts.option,
+                  parts.focusRing,
                   getTileClass(isKeep),
                 )}
                 data-pp-in="1"
@@ -223,7 +99,7 @@ export const FeeBlock = ({
                 aria-checked={isKeep ? "true" : "false"}
                 onClick={() => onUpdate({ kind: "keep" })}
               >
-                <Ring className={styles.ring} isOn={isKeep} />
+                <Ring className={parts.ring} isOn={isKeep} />
                 <span
                   className={joinClassNames(
                     styles.keepLabel,
@@ -237,7 +113,7 @@ export const FeeBlock = ({
               <div
                 className={joinClassNames(
                   styles.pctOption,
-                  styles.focusRing,
+                  parts.focusRing,
                   getTileClass(!isKeep),
                 )}
                 data-pp-in="1"
@@ -255,25 +131,25 @@ export const FeeBlock = ({
                   }
                 }}
               >
-                <Ring className={styles.ring} isOn={!isKeep} />
+                <Ring className={parts.ring} isOn={!isKeep} />
                 <span
                   className={joinClassNames(
-                    styles.strong,
+                    parts.strong,
                     getTextClass(!isKeep),
                   )}
                 >
                   Charge
                 </span>
                 {percentInput(true)}
-                <span className={styles.muted}>of service</span>
+                <span className={parts.muted}>of service</span>
               </div>
             </div>
           )}
           {mode !== "deposit" && (
             <div className={styles.pctSingle}>
-              <span className={styles.strong}>Charge</span>
+              <span className={parts.strong}>Charge</span>
               {percentInput(false)}
-              <span className={styles.muted}>of service</span>
+              <span className={parts.muted}>of service</span>
             </div>
           )}
           {!!error && (

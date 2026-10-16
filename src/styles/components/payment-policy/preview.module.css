@@ -1,0 +1,87 @@
+.preview {
+  flex: 1 1 300px;
+  max-width: 100%;
+  min-width: 0;
+  position: sticky;
+  top: 24px;
+}
+
+.previewCard {
+  margin-top: 16px;
+  background: #fff;
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-rail);
+  padding: 22px 22px 24px;
+}
+
+.dueRow {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.dueLabel {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--neutral-600);
+}
+
+.dueAmount {
+  font-family: var(--font-display);
+  font-weight: 600;
+  font-size: 30px;
+  letter-spacing: -0.03em;
+  font-variant-numeric: tabular-nums;
+}
+
+.dividerTop {
+  height: 1px;
+  background: var(--border-subtle);
+  margin: 16px 0 18px;
+}
+
+.lines {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.line {
+  display: flex;
+  gap: 12px;
+  align-items: flex-start;
+}
+
+.lineIcon {
+  flex: 0 0 auto;
+  margin-top: 3px;
+  color: var(--neutral-600);
+}
+
+.lineText {
+  font-size: 14.5px;
+  line-height: 1.5;
+  color: var(--neutral-900);
+  text-wrap: pretty;
+}
+
+.dividerNotes {
+  height: 1px;
+  background: var(--border-subtle);
+  margin: 18px 0 16px;
+}
+
+.notes {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-top: 8px;
+}
+
+.noteText {
+  font-size: 14.5px;
+  line-height: 1.5;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}

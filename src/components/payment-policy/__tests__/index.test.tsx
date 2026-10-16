@@ -1,16 +1,16 @@
 import { act, render, screen } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import { PaymentPolicy } from "../payment-policy";
-import type { PaymentPolicyApi } from "../payment-policy";
-import {
-  getInitialPolicyState,
-  getPolicySummary,
-} from "../payment-policy-logic";
-import type { PolicyPreset } from "../payment-policy-logic";
+import { PaymentPolicy } from "..";
+import type { PaymentPolicyApi } from "..";
+import { getPolicySummary } from "../summary";
+import type { PolicyPreset } from "../types";
+import { getInitialPolicy } from "../values";
 import type { UserEvent } from "@testing-library/user-event";
 import { setupUser } from "../../../test/setup-user";
 
 let user: UserEvent;
+
+const settle = () => act(() => vi.advanceTimersByTimeAsync(0));
 
 beforeEach(() => {
   user = setupUser();
@@ -54,11 +54,12 @@ describe("PaymentPolicy", () => {
       "25% deposit, free cancellation until 48h before, 50% late cancellation fee, deposit kept for no-shows",
     ],
   ])("preset %s summarises the policy", (preset, summary) => {
-    expect(getPolicySummary(getInitialPolicyState(preset))).toBe(summary);
+    expect(getPolicySummary(getInitialPolicy(preset).values)).toBe(summary);
   });
 
-  it("preset error blocks saving", () => {
+  it("preset error blocks saving", async () => {
     render(<PaymentPolicy preset="error" />);
+    await settle();
 
     expect(
       screen.getByText(
@@ -78,7 +79,9 @@ describe("PaymentPolicy", () => {
     );
 
     expect(onState.mock.lastCall?.[0].canSave).toBe(true);
+    await settle();
     await user.click(screen.getByRole("button", { name: "Save policy" }));
+    await settle();
 
     expect(onSave).toHaveBeenCalledWith(
       expect.objectContaining({
@@ -119,6 +122,52 @@ describe("PaymentPolicy", () => {
     expect(
       screen.getByRole("button", { name: "Add preparation note" }),
     ).toBeDisabled();
+  });
+
+  it("focuses a new additional policy and removes it again", async () => {
+    render(<PaymentPolicy />);
+
+    await user.click(
+      screen.getByRole("button", { name: "Add preparation note" }),
+    );
+
+    expect(screen.getByLabelText("Preparation note")).toHaveFocus();
+
+    await user.click(
+      screen.getByRole("button", { name: "Remove preparation note" }),
+    );
+
+    expect(screen.queryByLabelText("Preparation note")).not.toBeInTheDocument();
+  });
+
+  it("clears the deposit error once the deposit is made refundable", async () => {
+    render(<PaymentPolicy preset="error" />);
+    await settle();
+
+    await user.click(
+      screen.getByRole("radio", { name: /Refundable according/ }),
+    );
+
+    await settle();
+
+    expect(screen.queryByRole("alert")).not.toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Save policy" })).toBeEnabled();
+  });
+
+  it("typing a fee percentage switches the fee to a charge", async () => {
+    render(<PaymentPolicy />);
+    await user.click(screen.getByRole("checkbox", { name: "No-show fee" }));
+
+    const percent = screen.getByLabelText("No-show fee percentage of service");
+
+    await user.clear(percent);
+    await user.type(percent, "3a0");
+
+    expect(percent).toHaveValue("30");
+
+    expect(
+      screen.getByRole("radio", { name: /Keep the deposit/ }),
+    ).toHaveAttribute("aria-checked", "false");
   });
 
   it("says how many existing bookings keep their policy", () => {
