@@ -25,7 +25,7 @@ Deno.serve(async (request) => {
 
   if (!parsed.success) return respond(400, { error: "invalid_request" });
 
-  const { hold, contact, notes, address, turnstileToken } = parsed.data;
+  const { hold, contact, notes, allergies, address, turnstileToken } = parsed.data;
   const ip = getClientIp(request);
 
   try {
@@ -64,6 +64,8 @@ Deno.serve(async (request) => {
         stripe_payment_intent_id: intent.id,
         stripe_customer_id: customerId,
         site: getSite(request.headers.get("Origin")),
+        allergies: allergies || null,
+        allergies_consented_at: allergies ? new Date().toISOString() : null,
       })
       .eq("id", quote.id);
 

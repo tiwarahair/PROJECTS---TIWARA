@@ -203,9 +203,14 @@ export type Database = {
       bookings: {
         Row: {
           address: Json | null;
+          allergies: string | null;
+          allergies_consented_at: string | null;
           block_ends_at: string;
           block_range: unknown;
           buffer_minutes: number;
+          cancellation: Json | null;
+          cancelled_at: string | null;
+          cancelled_by: string | null;
           choices: NonNullable<Json>;
           client_id: string | null;
           contact: Json | null;
@@ -233,13 +238,19 @@ export type Database = {
           stripe_payment_intent_id: string | null;
           stylist_id: string;
           terms: Json | null;
+          get_cancellation_terms: Json | null;
         };
-        ComputedFields: never;
+        ComputedFields: "get_cancellation_terms";
         Insert: {
           address?: Json | null;
+          allergies?: string | null;
+          allergies_consented_at?: string | null;
           block_ends_at: string;
           block_range?: never;
           buffer_minutes?: number;
+          cancellation?: Json | null;
+          cancelled_at?: string | null;
+          cancelled_by?: string | null;
           choices: NonNullable<Json>;
           client_id?: string | null;
           contact?: Json | null;
@@ -270,9 +281,14 @@ export type Database = {
         };
         Update: {
           address?: Json | null;
+          allergies?: string | null;
+          allergies_consented_at?: string | null;
           block_ends_at?: string;
           block_range?: never;
           buffer_minutes?: number;
+          cancellation?: Json | null;
+          cancelled_at?: string | null;
+          cancelled_by?: string | null;
           choices?: NonNullable<Json>;
           client_id?: string | null;
           contact?: Json | null;
@@ -1339,6 +1355,10 @@ export type Database = {
     Functions: {
       become_stylist: { Args: { details: Json }; Returns: undefined };
       booking_fee_pence: { Args: { price_pence: number }; Returns: number };
+      cancel_managed_booking: {
+        Args: { cancellation: Json; token: string };
+        Returns: undefined;
+      };
       change_slug: { Args: { new_slug: string }; Returns: string };
       checkout_booking: {
         Args: {
@@ -1401,8 +1421,71 @@ export type Database = {
         };
         Returns: string[];
       };
+      get_booking_by_token: {
+        Args: { token: string };
+        Returns: {
+          address: Json | null;
+          allergies: string | null;
+          allergies_consented_at: string | null;
+          block_ends_at: string;
+          block_range: unknown;
+          buffer_minutes: number;
+          cancellation: Json | null;
+          cancelled_at: string | null;
+          cancelled_by: string | null;
+          choices: NonNullable<Json>;
+          client_id: string | null;
+          contact: Json | null;
+          created_at: string;
+          due_today_pence: number | null;
+          ends_at: string;
+          fee_pence: number;
+          hold_expires_at: string | null;
+          hold_secret_hash: string | null;
+          id: string;
+          location: unknown;
+          minutes: number;
+          notes: string | null;
+          paid_at: string | null;
+          policy_id: string | null;
+          price_pence: number;
+          ref: string;
+          reschedule_count: number;
+          service_id: string | null;
+          site: string;
+          snapshot: NonNullable<Json>;
+          starts_at: string;
+          status: string;
+          stripe_customer_id: string | null;
+          stripe_payment_intent_id: string | null;
+          stylist_id: string;
+          terms: Json | null;
+        };
+        SetofOptions: {
+          from: "*";
+          to: "bookings";
+          isOneToOne: true;
+          isSetofReturn: false;
+        };
+      };
+      get_booking_calendar: {
+        Args: { secret: string; target: string; token: string };
+        Returns: Json;
+      };
+      get_booking_details: { Args: { target: string }; Returns: Json };
       get_booking_status: {
         Args: { secret: string; target: string };
+        Returns: Json;
+      };
+      get_booking_where: { Args: { target: string }; Returns: string };
+      get_cancellation: { Args: { token: string }; Returns: Json };
+      get_cancellation_terms: {
+        Args: {
+          booking: Omit<
+            Database["public"]["Tables"]["bookings"]["Row"],
+            Database["public"]["Tables"]["bookings"]["ComputedFields"]
+          >;
+        };
         Returns: Json;
       };
       get_day_slots: {
@@ -1420,6 +1503,7 @@ export type Database = {
         Returns: string[];
       };
       get_due_closures: { Args: Record<PropertyKey, never>; Returns: string[] };
+      get_managed_booking: { Args: { token: string }; Returns: Json };
       get_next_start: {
         Args: {
           minutes: number;
@@ -1429,6 +1513,10 @@ export type Database = {
           time_to: string;
         };
         Returns: string;
+      };
+      get_reschedule_slots: {
+        Args: { from_date: string; to_date: string; token: string };
+        Returns: string[];
       };
       get_stylist_profile: { Args: { lookup: string }; Returns: Json };
       get_unique_slug: { Args: { business_name: string }; Returns: string };
@@ -1497,6 +1585,14 @@ export type Database = {
         Args: Record<PropertyKey, never>;
         Returns: number;
       };
+      queue_booking_change: {
+        Args: {
+          client_template: string;
+          stylist_event: string;
+          target: string;
+        };
+        Returns: undefined;
+      };
       queue_booking_messages: { Args: { target: string }; Returns: undefined };
       queue_email: {
         Args: {
@@ -1518,6 +1614,10 @@ export type Database = {
       };
       refresh_go_live: { Args: { target: string }; Returns: undefined };
       reopen_business: { Args: Record<PropertyKey, never>; Returns: undefined };
+      reschedule_managed_booking: {
+        Args: { slot_start: string; token: string };
+        Returns: Json;
+      };
       search_stylists: {
         Args: {
           lat?: number;
@@ -1551,6 +1651,10 @@ export type Database = {
       };
       service_from_pence: { Args: { target: string }; Returns: number };
       slugify: { Args: { value: string }; Returns: string };
+      update_booking_allergies: {
+        Args: { allergies: string; consent: boolean; token: string };
+        Returns: undefined;
+      };
     };
     Enums: {
       [_ in never]: never;

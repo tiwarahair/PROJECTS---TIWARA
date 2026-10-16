@@ -248,6 +248,7 @@ describe("booking on real data", () => {
         phone: "07700900123",
       },
       notes: "",
+      allergies: "",
       keepCard: false,
       turnstileToken: "test-captcha-token",
     });

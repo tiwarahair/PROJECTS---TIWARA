@@ -21,18 +21,22 @@ const getShortWhen = (iso: string) => {
 };
 
 const toPlain = (text: string) =>
-  text.normalize("NFD").replace(/[̀-ͯ]/g, "").replace(/[’‘]/g, "'").replace(/[^\x20-\x7E]/g, "");
+  text.normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/[’‘]/g, "'").replace(/[^\x20-\x7E]/g, "");
 
 export const toE164 = (phone: string) => `+44${phone.replace(/\D/g, "").replace(/^44/, "").replace(/^0/, "")}`;
 
-type SmsBuilder = (payload: Record<string, unknown>) => string;
+const getLine =
+  (label: string, prefix = "") =>
+  (payload: Record<string, unknown>) => {
+    const { client_name: client, service_name: service, starts_at: startsAt, ref } = payload as unknown as BookingDetails;
 
-const templates: Record<string, SmsBuilder> = {
-  new_booking: (payload) => {
-    const booking = payload as unknown as BookingDetails;
+    return `${label}: ${client}, ${service}, ${prefix}${getShortWhen(startsAt)}. Ref ${ref}.`;
+  };
 
-    return `New booking: ${booking.client_name}, ${booking.service_name}, ${getShortWhen(booking.starts_at)}. Ref ${booking.ref}.`;
-  },
+const templates: Record<string, (payload: Record<string, unknown>) => string> = {
+  new_booking: getLine("New booking"),
+  client_cancelled: getLine("Cancelled"),
+  client_rescheduled: getLine("Moved", "now "),
 };
 
 export const renderSms = (template: string, payload: Record<string, unknown>) => {

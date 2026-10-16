@@ -35,6 +35,7 @@ export interface CheckoutRequest {
   hold: { id: string; secret: string };
   contact: { first: string; last: string; email: string; phone: string };
   notes: string;
+  allergies: string;
   address?: {
     line1: string;
     line2: string;

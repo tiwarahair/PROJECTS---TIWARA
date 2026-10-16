@@ -41,7 +41,8 @@ export const getCheckoutRequest = (
   point: LatLng | null,
   turnstileToken: string,
 ): CheckoutRequest | null => {
-  const { hold, details, appointmentAddress, loggedIn, keepCard } = state;
+  const { hold, details, appointmentAddress, loggedIn, keepCard, allergy } =
+    state;
 
   if (!hold) return null;
 
@@ -53,6 +54,7 @@ export const getCheckoutRequest = (
     hold: { id: hold.id, secret: hold.secret },
     contact,
     notes,
+    allergies: allergy.on ? allergy.text.trim() : "",
     ...(point && line1
       ? {
           address: {

@@ -47,7 +47,7 @@ const londonClock = new Intl.DateTimeFormat("en-GB", {
 
 export const formatWhen = (iso: string) => `${londonDay.format(new Date(iso))} at ${londonClock.format(new Date(iso))}`;
 
-const pounds = (pence: number) => `£${(pence / 100).toFixed(2)}`;
+export const pounds = (pence: number) => `£${(pence / 100).toFixed(2)}`;
 
 const getPaidLine = ({ terms, price_pence: price, fee_pence: fee, paid_pence: paid, stylist_name: stylist }: ConfirmedBooking) => {
   if (terms.mode === "deposit")

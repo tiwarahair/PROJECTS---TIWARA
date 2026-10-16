@@ -13,6 +13,7 @@ export const requestSchema = z.object({
     phone: z.string().refine(isUkMobile),
   }),
   notes: text(500),
+  allergies: text(1000),
   address: z
     .object({
       line1: text(120).min(1),
