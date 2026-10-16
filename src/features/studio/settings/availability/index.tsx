@@ -2,7 +2,7 @@ import type { ChangeEvent, CSSProperties } from "react";
 import { CirclePause, Plus } from "lucide-react";
 import { joinClassNames } from "../../../../utils/class-names";
 import type { SettingsView } from "../view";
-import { TIMES } from "../../core/data";
+import { TIMES } from "../../core/constants";
 import type { StudioController } from "../../core/use-studio";
 import { Field } from "../page-parts";
 import parts from "../../../../styles/features/studio/settings/page-parts.module.css";

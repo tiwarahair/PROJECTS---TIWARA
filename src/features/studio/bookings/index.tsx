@@ -13,7 +13,7 @@ import {
 import { joinClassNames } from "../../../utils/class-names";
 import { getBlockTone, getBookingsView } from "./view";
 import type { BookingsView } from "./view";
-import { GATE_REASON } from "../core/data";
+import { GATE_REASON } from "../core/constants";
 import type { DecoratedBooking } from "./decorate";
 import { copyText, dateAt } from "../core/format";
 import { isGated } from "../shell";

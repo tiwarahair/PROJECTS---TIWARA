@@ -1,6 +1,6 @@
 import { Earnings } from "../../../components/earnings/earnings";
 import { joinClassNames } from "../../../utils/class-names";
-import { CLIENTS } from "../core/data";
+import { CLIENTS } from "../core/seed-clients";
 import { getClient, hasTwoFactor, isLive } from "../core/model";
 import type { StudioController } from "../core/use-studio";
 import styles from "../../../styles/features/studio/earnings/index.module.css";

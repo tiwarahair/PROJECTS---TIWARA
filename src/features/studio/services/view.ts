@@ -1,7 +1,7 @@
 // Studio → Services values: service groups, add-on groups, the category rows / chips and filters.
 import type { MouseEvent } from "react";
 import { ListFilter, Plus, TextAlignStart } from "lucide-react";
-import { NO_CATEGORY_TONE } from "../core/data";
+import { NO_CATEGORY_TONE } from "../core/constants";
 import {
   formatAddon,
   getAddonCategory,

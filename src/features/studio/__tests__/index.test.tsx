@@ -1,7 +1,7 @@
 import { act, screen, within } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { renderWithStore } from "../../../test/render-with-store";
-import { GATE_REASON } from "../core/data";
+import { GATE_REASON } from "../core/constants";
 import { StudioPage } from "..";
 import type { UserEvent } from "@testing-library/user-event";
 import { setupUser } from "../../../test/setup-user";

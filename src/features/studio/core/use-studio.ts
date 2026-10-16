@@ -11,12 +11,9 @@ import type { TwoFactorDevice } from "../../../lib/two-factor";
 import { useUnsavedChanges } from "../../../hooks/use-unsaved-changes";
 import { createStudioActions } from "./actions";
 import type { StudioContext } from "./actions";
-import {
-  CATEGORY_COLOURS,
-  TAXONOMY,
-  getInitialStudioState,
-  getSeedPast,
-} from "./data";
+import { CATEGORY_COLOURS, TAXONOMY } from "./constants";
+import { getInitialStudioState } from "./initial-state";
+import { getSeedPast } from "./seed-bookings";
 import { applyFixture } from "./fixtures";
 import { getQueryParam, getSteps } from "./model";
 import { createServiceActions } from "../services/actions";

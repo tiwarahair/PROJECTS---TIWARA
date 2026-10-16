@@ -1,6 +1,6 @@
 // Studio → Bookings values: the calendar / list block, the timeline block, past groups and filters.
 import type { MouseEvent, TouchEvent } from "react";
-import { PAST_MONTHS, PAST_TONE } from "../core/data";
+import { PAST_MONTHS, PAST_TONE } from "../core/constants";
 import { getDecoratedBookings } from "./decorate";
 import type { DecoratedBooking } from "./decorate";
 import {

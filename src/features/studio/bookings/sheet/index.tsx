@@ -32,7 +32,7 @@ import {
   RescheduleStep,
 } from "../steps";
 import { StudioCheckout } from "../checkout";
-import { CONTACT_ICONS } from "../../core/data";
+import { CONTACT_ICONS } from "../../core/constants";
 import type { StudioController } from "../../core/use-studio";
 import styles from "../../../../styles/features/studio/bookings/sheet/index.module.css";
 import stepStyles from "../../../../styles/features/studio/bookings/steps.module.css";

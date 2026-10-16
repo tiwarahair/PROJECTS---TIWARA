@@ -2,7 +2,7 @@
 import type { ChangeEvent, MouseEvent } from "react";
 import { getAddonPicker } from "../../services/addon-picker";
 import { getDuplicateView } from "../../clients/view";
-import { ICONS, SLOT_TIMES, TAXONOMY } from "../../core/data";
+import { ICONS, SLOT_TIMES, TAXONOMY } from "../../core/constants";
 import {
   dayInfo,
   durationToMinutes,

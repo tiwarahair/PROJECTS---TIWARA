@@ -13,7 +13,8 @@ import type {
   CheckoutBooking,
   PaymentMode,
 } from "../../../../components/checkout/data";
-import { CLIENTS, SLOT_TIMES } from "../../core/data";
+import { CLIENTS } from "../../core/seed-clients";
+import { SLOT_TIMES } from "../../core/constants";
 import { decorateBooking, getDecoratedBookings } from "../decorate";
 import type { DecoratedBooking } from "../decorate";
 import {

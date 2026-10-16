@@ -3,7 +3,7 @@
 import type { ChangeEvent, MouseEvent } from "react";
 import { getAddonPicker } from "../services/addon-picker";
 import type { DecoratedBooking } from "./decorate";
-import { ICONS, TAXONOMY } from "../core/data";
+import { ICONS, TAXONOMY } from "../core/constants";
 import { hhmm, parseNumber, timeToMinutes } from "../core/format";
 import { getBusy, getWorkingHours } from "../core/model";
 import type {

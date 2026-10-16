@@ -1,4 +1,4 @@
-import type { NOTIFS } from "./data";
+import type { NOTIFS } from "./seed-dashboard";
 // Studio state shapes: component state, clients, past bookings, seed services/add-ons.
 import type { BusinessValue } from "../../../components/business-details/types";
 import type { PolicyValue } from "../../../components/payment-policy/payment-policy-logic";
