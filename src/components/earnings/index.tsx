@@ -6,14 +6,9 @@ import {
   TriangleAlert,
 } from "lucide-react";
 import { joinClassNames } from "../../utils/class-names";
-import {
-  PERIODS,
-  getBuckets,
-  getRange,
-  getRangeLabel,
-  getStats,
-  getTakings,
-} from "./data";
+import { PERIODS } from "./data";
+import { getBuckets, getRange, getRangeLabel } from "./dates";
+import { getStats, getTakings } from "./logic";
 import { EarningsLists } from "./lists";
 import { EarningsOverlays } from "./overlays";
 import { useEarnings } from "./use-earnings";

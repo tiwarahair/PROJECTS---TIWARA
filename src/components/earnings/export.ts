@@ -1,11 +1,10 @@
 // Earnings export: a CSV of the transactions, or a printable monthly statement.
-import { getClient, getMethodLabel, getRangeLabel, getStats } from "./data";
+import { DAY_MS, DEFAULT_BANK } from "./data";
+import { getRangeLabel } from "./dates";
+import { getClient, getMethodLabel, getStats } from "./logic";
 import type { DateRange, EarningsClient, Payout, Transaction } from "./data";
 import { formatMoney } from "../../utils/money";
 import { toIsoDate, formatClockTime } from "../../utils/dates";
-
-const DAY_MS = 86400000;
-const DEFAULT_BANK = "Barclays •••• 4471";
 
 export const getExportSlug = ({ start, end }: DateRange): string =>
   `${toIsoDate(start)}-to-${toIsoDate(new Date(end.getTime() - DAY_MS))}`;

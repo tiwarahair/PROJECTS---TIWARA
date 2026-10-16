@@ -1,17 +1,13 @@
 import type { CSSProperties, MouseEvent } from "react";
 import { Copy, Landmark } from "lucide-react";
 import { joinClassNames } from "../../utils/class-names";
-import { STATUS_COLOURS, getClient } from "./data";
+import { DAY_MS, DEFAULT_BANK, STATUS_COLOURS, STRIPE_PAYOUTS } from "./data";
+import { getClient } from "./logic";
 import type { Payout, Transaction, TransactionStatus } from "./data";
 import type { EarningsController, EarningsProps } from "./use-earnings";
 import styles from "../../styles/components/earnings/lists.module.css";
 import { formatMoney } from "../../utils/money";
 import { formatWeekdayDate } from "../../utils/dates";
-
-const DAY_MS = 86400000;
-
-export const DEFAULT_BANK = "Barclays •••• 4471";
-const STRIPE_PAYOUTS = "https://dashboard.stripe.com/settings/payouts";
 
 const FILTERS: Record<string, (transaction: Transaction) => boolean> = {
   all: () => true,

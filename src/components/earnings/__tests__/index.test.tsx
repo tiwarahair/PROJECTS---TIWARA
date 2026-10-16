@@ -1,7 +1,8 @@
 import { act, render, screen, within } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { Earnings } from "..";
-import { buildLedger, getRange, getRangeLabel } from "../data";
+import { getRange, getRangeLabel } from "../dates";
+import { buildLedger } from "../ledger";
 import { getEarningsCsv } from "../export";
 import { formatMoney } from "../../../utils/money";
 import type { UserEvent } from "@testing-library/user-event";
