@@ -1,19 +1,21 @@
 import type { CSSProperties } from "react";
 import { ChevronLeft, X } from "lucide-react";
 import { joinClassNames } from "../../utils/class-names";
-import {
-  CheckoutDone,
-  CheckoutReceipt,
-  CheckoutRefund,
-  CheckoutResend,
-} from "./checkout-after";
-import { CheckoutDetail } from "./checkout-detail";
-import { CheckoutAdd, CheckoutItems } from "./checkout-items";
-import { CheckoutPay, CheckoutReview, CheckoutTip } from "./checkout-payment";
-import { STEP_LABELS, VIEW_TITLES, getCheckoutView } from "./checkout-view";
+import { CheckoutDone } from "./done";
+import { CheckoutReceipt } from "./receipt";
+import { CheckoutRefund } from "./refund";
+import { CheckoutResend } from "./resend";
+import { CheckoutDetail } from "./detail";
+import { CheckoutAdd, CheckoutItems } from "./items";
+import { CheckoutPay } from "./pay";
+import { CheckoutReview } from "./review";
+import { CheckoutTip } from "./tip";
+import { getDialog } from "./dialogs";
+import { getFooter } from "./footer";
+import { STEP_LABELS, VIEW_TITLES, getCheckoutView } from "./view";
 import { useCheckout } from "./use-checkout";
 import type { CheckoutSheetProps } from "./use-checkout";
-import shared from "../../styles/components/checkout-sheet/checkout-sheet.module.css";
+import shared from "../../styles/components/checkout/checkout-sheet.module.css";
 
 export type { CheckoutSheetProps } from "./use-checkout";
 
@@ -24,11 +26,12 @@ export type { CheckoutSheetProps } from "./use-checkout";
 export const CheckoutSheet = (props: CheckoutSheetProps) => {
   const checkout = useCheckout(props);
   const { state, setState, money, isEmbedded, scrollRef, goTo } = checkout;
-  const view = getCheckoutView(checkout, props);
+  const view = getCheckoutView(checkout);
   const isMobile = (props.layout || "mobile") !== "desktop";
   const isPhoneFrame = isMobile && !isEmbedded;
   const hasBack = state.view !== "detail" && state.view !== "done";
-  const { footer, dialog } = view;
+  const footer = getFooter(checkout, view);
+  const dialog = getDialog(checkout, view);
   const ownRadius = isMobile ? "24px 24px 0 0" : "24px";
 
   // embedded, the host decides the sheet's corners

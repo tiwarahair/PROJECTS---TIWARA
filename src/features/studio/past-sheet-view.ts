@@ -3,8 +3,8 @@ import type {
   CheckoutBooking,
   CheckoutView,
   PaymentMode,
-} from "../../components/checkout-sheet/checkout-data";
-import type { CheckoutSheetProps } from "../../components/checkout-sheet/use-checkout";
+} from "../../components/checkout/data";
+import type { CheckoutSheetProps } from "../../components/checkout/use-checkout";
 import { PAST_TONE } from "./studio-data";
 import { getAvatarSrc, parseAmountLabel, timeRange } from "./studio-format";
 import {

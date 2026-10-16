@@ -1,0 +1,191 @@
+// CheckoutSheet derived values shared by every view.
+import { getRefundContext, parsePounds } from "./logic";
+import type { CheckoutLine, CheckoutView, PayMethod } from "./data";
+import type { CheckoutController } from "./use-checkout";
+import { formatMoney, roundToPence } from "../../utils/money";
+
+export interface DetailRow {
+  key: string;
+  label: string;
+  subtitle: string;
+  value: string;
+  isAlert: boolean;
+}
+
+export const RECORD_VIA_LABELS: Record<string, string> = {
+  cash: "Cash",
+  bank: "Bank transfer",
+  reader: "Own card reader",
+};
+
+const REVIEW_TOTAL_LABELS: Record<PayMethod, string> = {
+  card: "To charge",
+  link: "Payment link for",
+  record: "To record",
+};
+
+export const STEP_LABELS: Partial<Record<CheckoutView, string>> = {
+  items: "Items",
+  tip: "Tip",
+  pay: "Payment",
+  review: "Review",
+};
+
+export const VIEW_TITLES: Record<CheckoutView, string> = {
+  detail: "Booking",
+  items: "Checkout",
+  tip: "Checkout",
+  pay: "Checkout",
+  review: "Checkout",
+  done: "",
+  receipt: "Receipt",
+  refund: "Refund",
+  resend: "Resend receipt",
+  add: "Add item",
+};
+
+export const row = (
+  label: string,
+  subtitle: string,
+  value: string,
+  isAlert = false,
+): DetailRow => ({ key: label + value, label, subtitle, value, isAlert });
+
+export const getAdjustNote = ({ adjustment, reason }: CheckoutLine): string => {
+  const direction = adjustment < 0 ? "Lowered " : "Raised ";
+  const amount = formatMoney(Math.abs(adjustment));
+
+  return `${direction}${amount}: ${reason}`;
+};
+
+export const getCheckoutView = (checkout: CheckoutController) => {
+  const { props, state, booking, money, goTo, showToast, isEmbedded } =
+    checkout;
+
+  const { first: name } = booking;
+  const cardText = booking.card ? `${booking.brand} •••• ${booking.card}` : "";
+  let bookedTotal = booking.price;
+
+  for (const [, price] of booking.addons) bookedTotal += price;
+
+  const modeLabel = {
+    deposit: `${Math.round((state.paid / bookedTotal) * 100)}% deposit`,
+    full: "Full payment",
+    card: "Card protection",
+    none: "No protection",
+  }[state.mode];
+
+  const creditRows =
+    state.paid > 0
+      ? [
+          row(
+            state.mode === "full" ? "Paid in full" : "Deposit paid",
+            cardText + (booking.paidOn ? ` · ${booking.paidOn}` : ""),
+            formatMoney(-state.paid),
+          ),
+        ]
+      : [];
+
+  const isRefund = money.refundDue > 0;
+  const isInCheckout = ["items", "tip", "pay", "review"].includes(state.view);
+  const stepIndex = money.steps.indexOf(state.view);
+
+  const goNext = () =>
+    goTo(money.steps[Math.min(stepIndex + 1, money.steps.length - 1)]!, 1);
+
+  const back = () => {
+    if (isInCheckout) {
+      if (stepIndex > 0) goTo(money.steps[stepIndex - 1]!, -1);
+      else goTo("detail", -1);
+    } else if (state.view === "add") goTo("items", -1);
+    else if (state.view === "receipt" && state.fromDone) goTo("done", -1);
+    else goTo("detail", -1);
+  };
+
+  const leaveDone = (action: "done" | "rebook") => {
+    if (isEmbedded && props.onComplete)
+      props.onComplete(checkout.getResult(), action);
+    else if (action === "rebook") showToast(`New booking for ${name} started`);
+    else goTo("detail", -1);
+  };
+
+  const refundContext = getRefundContext(state, booking);
+  const isOffPlatform = !(refundContext.platform > 0);
+
+  const refundCapAll = roundToPence(
+    isOffPlatform ? refundContext.off : refundContext.platform,
+  );
+
+  const fee = booking.fee || 0;
+
+  return {
+    name,
+    cardText,
+    modeLabel,
+    creditRows,
+    isRefund,
+    balanceLabel: isRefund ? "Refund due" : "Balance due",
+    balanceValue: formatMoney(isRefund ? money.refundDue : money.due),
+    isInCheckout,
+    stepIndex,
+    goNext,
+    back,
+    leaveDone,
+    done: state.done ?? {
+      method: "none" as const,
+      via: "",
+      charged: 0,
+      tip: 0,
+      refundAuto: 0,
+    },
+    isOffPlatform,
+    refundCapAll,
+    refundCap: roundToPence(refundCapAll - state.refunded),
+    fee,
+    feeExtra: Math.max(0, fee - state.paid),
+    linkTarget: state.linkVia === "sms" ? booking.phone : booking.email,
+    refundNote: isRefund
+      ? `${formatMoney(money.refundDue)} goes back to ${name}’s ${cardText} automatically when you complete checkout.`
+      : "",
+  };
+};
+
+export type CheckoutViewModel = ReturnType<typeof getCheckoutView>;
+
+export const getRefundCheck = (
+  { state }: CheckoutController,
+  { refundCap }: CheckoutViewModel,
+) => {
+  const amount =
+    state.refundKind === "full" ? refundCap : parsePounds(state.refundAmount);
+
+  const overError =
+    state.refundKind === "partial" && amount > refundCap
+      ? `You can refund up to ${formatMoney(refundCap)}.`
+      : "";
+
+  const isMissing =
+    state.refundTried && state.refundKind === "partial" && !(amount > 0);
+
+  return {
+    amount,
+    overError,
+    error: overError || (isMissing ? "Enter an amount." : ""),
+    isValid: amount > 0 && amount <= refundCap && !!state.refundReason,
+  };
+};
+
+export const getReviewTotal = (
+  { money }: CheckoutController,
+  { isRefund }: CheckoutViewModel,
+) => {
+  if (money.method !== "none")
+    return {
+      label: REVIEW_TOTAL_LABELS[money.method],
+      value: formatMoney(money.charge),
+    };
+
+  return isRefund
+    ? { label: "Refund due", value: formatMoney(money.refundDue) }
+    : { label: "Nothing to pay", value: "£0" };
+};

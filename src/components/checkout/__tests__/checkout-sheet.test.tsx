@@ -1,7 +1,8 @@
 import { act, render, screen, within } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { CheckoutSheet } from "../checkout-sheet";
-import { BOOKINGS, getInitialCheckout, getMoney } from "../checkout-data";
+import { BOOKINGS } from "../data";
+import { getInitialCheckout, getMoney } from "../logic";
 import { formatMoney } from "../../../utils/money";
 import type { UserEvent } from "@testing-library/user-event";
 import { setupUser } from "../../../test/setup-user";
@@ -80,7 +81,51 @@ describe("CheckoutSheet", () => {
     );
 
     await click("Apply");
-    expect(screen.getByRole("alert")).toHaveTextContent("Enter the new price.");
+
+    expect(await screen.findByRole("alert")).toHaveTextContent(
+      "Enter the new price.",
+    );
+
+    await user.type(screen.getByLabelText(/New price/), "80");
+    await user.selectOptions(screen.getByLabelText(/Reason/), "Other");
+
+    await vi.waitFor(() =>
+      expect(screen.queryByRole("alert")).not.toBeInTheDocument(),
+    );
+
+    await click("Apply");
+
+    await vi.waitFor(() =>
+      expect(screen.getByRole("alert")).toHaveTextContent(
+        "Describe the reason.",
+      ),
+    );
+
+    await user.type(screen.getByLabelText("Describe the reason"), "Loyalty");
+    await click("Apply");
+
+    expect(await screen.findByText("Price adjusted")).toBeInTheDocument();
+    expect(screen.getByText("£80")).toBeInTheDocument();
+  });
+
+  it("resend: asks where to send the receipt", async () => {
+    const onResent = vi.fn();
+
+    render(<CheckoutSheet scenario="resend" onResent={onResent} />);
+    await user.clear(screen.getByLabelText(/Mobile number/));
+    await click("Send receipt");
+
+    expect(await screen.findByRole("alert")).toHaveTextContent(
+      "Enter where to send it.",
+    );
+
+    await user.click(screen.getByRole("button", { name: "Email" }));
+    expect(screen.queryByRole("alert")).not.toBeInTheDocument();
+    await click("Send receipt");
+
+    await vi.waitFor(() =>
+      expect(onResent).toHaveBeenCalledWith(expect.stringContaining("@")),
+    );
   });
 
   it("adds an item from the menu", async () => {

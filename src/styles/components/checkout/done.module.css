@@ -1,0 +1,172 @@
+/* Done screen. */
+.doneView {
+  padding: 12px 24px 32px;
+  display: flex;
+  flex-direction: column;
+  gap: 22px;
+}
+
+.doneTick {
+  width: 60px;
+  height: 60px;
+  border-radius: var(--radius-full);
+  background: rgba(47, 122, 77, 0.12);
+  color: #2f7a4d;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  animation: ckpop 0.32s cubic-bezier(0.23, 1, 0.32, 1) both;
+}
+
+.doneTick path {
+  stroke-dasharray: 23;
+  animation: ckdraw 0.36s 0.12s cubic-bezier(0.23, 1, 0.32, 1) both;
+}
+
+.doneHead {
+  animation: ckup 0.3s 0.06s cubic-bezier(0.23, 1, 0.32, 1) both;
+}
+
+.doneTitle {
+  margin: 0;
+  font-family: "Schibsted Grotesk", sans-serif;
+  font-size: 28px;
+  font-weight: 600;
+  letter-spacing: -0.03em;
+}
+
+.doneSub {
+  font-size: 15.5px;
+  color: var(--neutral-700);
+  margin-top: 6px;
+  line-height: 1.5;
+  text-wrap: pretty;
+}
+
+.awaitingTag {
+  margin-top: 12px;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  height: 30px;
+  padding: 0 11px;
+  border-radius: var(--radius-xs);
+  background: rgba(181, 84, 31, 0.1);
+  color: var(--accent-500);
+  font-size: 13.5px;
+  font-weight: 600;
+}
+
+.doneReceipt {
+  background: var(--surface-cream);
+  border-radius: var(--radius-md);
+  padding: 18px;
+  animation: ckup 0.3s 0.12s cubic-bezier(0.23, 1, 0.32, 1) both;
+}
+
+.doneReceiptHead {
+  display: flex;
+  justify-content: space-between;
+  gap: 10px;
+  font-size: 13.5px;
+  color: var(--neutral-700);
+}
+
+.doneStylist {
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.doneLines {
+  margin-top: 10px;
+  border-top: 1px solid rgba(26, 23, 20, 0.1);
+}
+
+.doneExtra {
+  display: flex;
+  justify-content: space-between;
+  gap: 10px;
+  padding-top: 8px;
+  font-size: 15px;
+}
+
+.donePaid {
+  display: flex;
+  justify-content: space-between;
+  gap: 10px;
+  margin-top: 12px;
+  padding-top: 12px;
+  border-top: 1px solid rgba(26, 23, 20, 0.1);
+  font-size: 16px;
+  font-weight: 600;
+}
+
+.doneMethod {
+  font-size: 13.5px;
+  color: var(--neutral-700);
+  margin-top: 2px;
+}
+
+.viewReceipt {
+  margin: 8px 0 -6px -2px;
+  height: 40px;
+  padding: 0 2px;
+  border: none;
+  background: transparent;
+  font: inherit;
+  font-size: 14.5px;
+  font-weight: 600;
+  color: var(--accent-700);
+  cursor: pointer;
+}
+
+.doneNote {
+  font-size: 14px;
+  line-height: 1.5;
+  color: var(--neutral-600);
+}
+
+/* runtime states */
+.doneLineItem {
+  padding: 8px 0 0 0px;
+  font-size: 15px;
+  color: var(--text-primary);
+}
+
+.doneLineAdjust {
+  padding: 8px 0 0 14px;
+  font-size: 14px;
+  color: var(--neutral-700);
+}
+
+/* keyframes are scoped per file in CSS modules, so shared ones are repeated */
+@keyframes ckup {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@keyframes ckpop {
+  from {
+    opacity: 0;
+    transform: scale(0.9);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+@keyframes ckdraw {
+  from {
+    stroke-dashoffset: 23;
+  }
+  to {
+    stroke-dashoffset: 0;
+  }
+}

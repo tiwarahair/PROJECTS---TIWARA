@@ -2,9 +2,9 @@ import type {
   CheckoutBooking,
   CheckoutView,
   MenuGroup,
-} from "../../components/checkout-sheet/checkout-data";
-import { CheckoutSheet } from "../../components/checkout-sheet/checkout-sheet";
-import type { CheckoutSheetProps } from "../../components/checkout-sheet/use-checkout";
+} from "../../components/checkout/data";
+import { CheckoutSheet } from "../../components/checkout/checkout-sheet";
+import type { CheckoutSheetProps } from "../../components/checkout/use-checkout";
 import type { StudioController } from "./use-studio";
 import sheet from "../../styles/features/studio/studio-sheet.module.css";
 import { formatDuration } from "../../utils/dates";

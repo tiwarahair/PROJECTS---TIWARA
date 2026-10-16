@@ -12,7 +12,7 @@ import {
 import type {
   CheckoutBooking,
   PaymentMode,
-} from "../../components/checkout-sheet/checkout-data";
+} from "../../components/checkout/data";
 import { CLIENTS, SLOT_TIMES } from "./studio-data";
 import { decorateBooking, getDecoratedBookings } from "./studio-decorate";
 import type { DecoratedBooking } from "./studio-decorate";

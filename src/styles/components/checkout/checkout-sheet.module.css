@@ -579,3 +579,23 @@
     animation-name: ckfade !important;
   }
 }
+
+.receiptLine {
+  display: flex;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.fieldError {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--accent-700);
+}
+
+.borderOk {
+  border: 1px solid var(--border-strong);
+}
+
+.borderErr {
+  border: 1px solid var(--accent-700);
+}

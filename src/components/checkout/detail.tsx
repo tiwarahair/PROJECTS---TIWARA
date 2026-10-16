@@ -1,11 +1,12 @@
 import type { CSSProperties } from "react";
 import { ChevronRight } from "lucide-react";
 import { joinClassNames } from "../../utils/class-names";
-import { TONES } from "./checkout-view";
-import type { CheckoutViewModel, DetailRow } from "./checkout-view";
+import { getDetailView } from "./detail-view";
+import { TONES } from "./detail-view/types";
+import type { CheckoutViewModel, DetailRow } from "./view";
 import type { CheckoutController } from "./use-checkout";
-import flow from "../../styles/components/checkout-sheet/checkout-flow.module.css";
-import shared from "../../styles/components/checkout-sheet/checkout-sheet.module.css";
+import flow from "../../styles/components/checkout/flow.module.css";
+import shared from "../../styles/components/checkout/checkout-sheet.module.css";
 
 /** Label (+ sub line) and amount. */
 export const AmountRow = ({
@@ -44,13 +45,18 @@ const ACTION_CLASSES = {
 };
 
 export const CheckoutDetail = ({
-  checkout: { state, setState, booking },
+  checkout,
   view,
 }: {
   checkout: CheckoutController;
   view: CheckoutViewModel;
 }) => {
-  const { badges, panel, rows, total, links, actions, hasUndo } = view.detail;
+  const { state, setState, booking } = checkout;
+
+  const { badges, panel, rows, total, links, actions, hasUndo } = getDetailView(
+    checkout,
+    view,
+  );
 
   return (
     <div

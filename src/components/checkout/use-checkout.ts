@@ -1,10 +1,10 @@
+import { zodResolver } from "@hookform/resolvers/zod";
 import { useEffect, useRef, useState } from "react";
-import {
-  BOOKINGS,
-  getFinalized,
-  getInitialCheckout,
-  getMoney,
-} from "./checkout-data";
+import { useForm } from "react-hook-form";
+import { resendSchema } from "./schemas";
+import type { ResendValues } from "./schemas";
+import { BOOKINGS } from "./data";
+import { getFinalized, getInitialCheckout, getMoney } from "./logic";
 import type {
   CheckoutBooking,
   CheckoutResult,
@@ -12,7 +12,7 @@ import type {
   CheckoutStylist,
   CheckoutView,
   MenuGroup,
-} from "./checkout-data";
+} from "./data";
 
 const TOAST_MS = 2400;
 const CHARGE_MS = 1100;
@@ -81,6 +81,19 @@ export const useCheckout = (props: CheckoutSheetProps) => {
 
   const money = getMoney(state, booking);
 
+  const getResendTo = (via: CheckoutState["resendVia"]) =>
+    via === "email" ? booking.email : booking.phone;
+
+  const resendForm = useForm<ResendValues>({
+    defaultValues: { to: getResendTo(state.resendVia) },
+    resolver: zodResolver(resendSchema),
+  });
+
+  const startResend = (via: CheckoutState["resendVia"]) => {
+    setState({ resendVia: via });
+    resendForm.reset({ to: getResendTo(via) });
+  };
+
   const setState = (
     patch:
       | Partial<CheckoutState>
@@ -109,7 +122,8 @@ export const useCheckout = (props: CheckoutSheetProps) => {
   const goTo = (view: CheckoutView, direction = 1) => {
     if (view === "detail" && isEmbedded) return exit();
 
-    setState({ view, direction, adjustingLineId: null, resendTried: false });
+    setState({ view, direction, adjustingLineId: null });
+    resendForm.clearErrors();
     scrollTop();
   };
 
@@ -191,6 +205,7 @@ export const useCheckout = (props: CheckoutSheetProps) => {
   });
 
   return {
+    props,
     state,
     setState,
     booking,
@@ -200,6 +215,8 @@ export const useCheckout = (props: CheckoutSheetProps) => {
     goTo,
     exit,
     showToast,
+    resendForm,
+    startResend,
     startCheckout,
     complete,
     getResult,

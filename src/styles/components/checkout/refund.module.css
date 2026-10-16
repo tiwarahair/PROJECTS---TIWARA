@@ -1,0 +1,122 @@
+/* Refund screen. */
+.refundSub {
+  font-size: 15px;
+  color: var(--neutral-600);
+  margin-top: 4px;
+  line-height: 1.5;
+}
+
+.refundFull {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  width: 100%;
+  padding: 16px;
+  border-radius: var(--radius-md);
+  text-align: left;
+  font: inherit;
+  color: var(--text-primary);
+  cursor: pointer;
+  transition:
+    background-color 0.18s cubic-bezier(0.23, 1, 0.32, 1),
+    border-color 0.18s cubic-bezier(0.23, 1, 0.32, 1);
+}
+
+.refundRing {
+  flex: 0 0 auto;
+  width: 20px;
+  height: 20px;
+  box-sizing: border-box;
+  border-radius: var(--radius-full);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.refundPartial {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  width: 100%;
+  padding: 16px;
+  border: none;
+  background: transparent;
+  text-align: left;
+  font: inherit;
+  color: var(--text-primary);
+  cursor: pointer;
+}
+
+.refundAmount {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: 0 16px 16px 50px;
+  animation: ckup 0.2s cubic-bezier(0.23, 1, 0.32, 1) both;
+}
+
+.refundInput {
+  width: 100%;
+  box-sizing: border-box;
+  height: 48px;
+  padding: 0 14px 0 30px;
+  border-radius: var(--radius-sm);
+  background: #fff;
+  font: inherit;
+  font-size: 17px;
+  outline: none;
+  color: var(--text-primary);
+}
+
+.refundError {
+  display: flex;
+  gap: 6px;
+  align-items: flex-start;
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--accent-700);
+}
+
+.refundSelect {
+  width: 100%;
+  box-sizing: border-box;
+  height: 48px;
+  padding: 0 12px;
+  border-radius: var(--radius-sm);
+  background: #fff;
+  font: inherit;
+  font-size: 17px;
+  color: var(--text-primary);
+}
+
+.refundOff {
+  background: var(--fill-quiet);
+  border-radius: var(--radius-md);
+  padding: 12px 14px;
+  font-size: 14.5px;
+  line-height: 1.5;
+  color: var(--neutral-700);
+}
+
+/* runtime states */
+.refundInputOk {
+  border: 1px solid var(--border-strong);
+  box-shadow: none;
+}
+
+.refundInputErr {
+  border: 1px solid var(--accent-700);
+  box-shadow: 0 0 0 1px var(--accent-700);
+}
+
+/* keyframes are scoped per file in CSS modules, so shared ones are repeated */
+@keyframes ckup {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
