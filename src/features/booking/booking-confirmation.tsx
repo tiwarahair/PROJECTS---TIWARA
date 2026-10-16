@@ -1,6 +1,6 @@
 import { Calendar, Check, Clock, Mail, MapPin } from "lucide-react";
 import { Link } from "react-router";
-import { AppleIcon, GoogleIcon } from "./brand-icons";
+import { AppleLogo, GoogleLogo } from "../../components/icons/brand-icons";
 import { joinClassNames } from "../../utils/class-names";
 import { getWindowText } from "../../utils/pricing";
 import { getCancelSentence, getPaySubtitle } from "./booking-content";
@@ -163,7 +163,7 @@ export const BookingConfirmation = ({ booking }: BookingConfirmationProps) => {
               aria-label="Continue with Google"
               className={styles.socialButton}
             >
-              <GoogleIcon size={17} />
+              <GoogleLogo size={17} />
             </button>
             <button
               onClick={() =>
@@ -172,7 +172,7 @@ export const BookingConfirmation = ({ booking }: BookingConfirmationProps) => {
               aria-label="Continue with Apple"
               className={styles.socialButton}
             >
-              <AppleIcon size={17} />
+              <AppleLogo size={17} />
             </button>
             <button
               onClick={() =>

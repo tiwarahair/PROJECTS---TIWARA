@@ -1,4 +1,5 @@
 import type { CSSProperties } from "react";
+import { SOCIAL_ICONS, SocialIcon } from "../../components/icons/brand-icons";
 import { LinkIcon, Mail } from "lucide-react";
 import { joinClassNames } from "../../utils/class-names";
 import styles from "../../styles/features/stylist-profile/share-popover.module.css";
@@ -44,7 +45,7 @@ export const SharePopover = ({
     >
       <div className={styles.title}>Share this stylist</div>
       <button onClick={onCopy} className={styles.copy}>
-        <LinkIcon size={18} strokeWidth={1.7} />
+        <LinkIcon size={18} strokeWidth={2.25} />
         Copy link
       </button>
       <a
@@ -54,24 +55,11 @@ export const SharePopover = ({
         onClick={onClose}
         className={styles.link}
       >
-        <svg
-          width="18"
-          height="18"
-          viewBox="0 0 24 24"
-          fill="none"
-          stroke="currentColor"
-          strokeWidth="1.7"
-          strokeLinecap="round"
-          strokeLinejoin="round"
-          aria-hidden="true"
-        >
-          <path d="M3.5 20.5l1.3-4.2A8.5 8.5 0 1 1 8 19.3z"></path>
-          <path d="M9 8.8c0 3.3 2.9 6.2 6.2 6.2l1.1-1.6-2-1-1 .8a4.3 4.3 0 0 1-2.5-2.5l.8-1-1-2z"></path>
-        </svg>
+        <SocialIcon icon={SOCIAL_ICONS.whatsapp} size={18} />
         WhatsApp
       </a>
       <a href={mailHref} onClick={onClose} className={styles.link}>
-        <Mail size={18} strokeWidth={1.7} />
+        <Mail size={18} strokeWidth={2.25} />
         Email
       </a>
     </div>

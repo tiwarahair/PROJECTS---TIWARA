@@ -1,7 +1,7 @@
 import { ArrowLeft, ArrowRight, Check, CircleAlert, Lock } from "lucide-react";
 import type { ChangeEvent } from "react";
 import { joinClassNames } from "../../utils/class-names";
-import { AppleIcon, GoogleIcon } from "./brand-icons";
+import { AppleLogo, GoogleLogo } from "../../components/icons/brand-icons";
 import { getPayIntro, getPaySubtitle } from "./booking-content";
 import {
   formatCardNumber,
@@ -80,7 +80,7 @@ export const StepPay = ({ booking }: StepPayProps) => {
           aria-label="Pay with Apple Pay"
           className={styles.applePay}
         >
-          <AppleIcon size={19} />
+          <AppleLogo size={19} />
           Pay
         </button>
         <button
@@ -89,7 +89,7 @@ export const StepPay = ({ booking }: StepPayProps) => {
           aria-label="Pay with Google Pay"
           className={styles.googlePay}
         >
-          <GoogleIcon size={18} />
+          <GoogleLogo size={18} />
           Pay
         </button>
         <div className={styles.divider}>
