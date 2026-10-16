@@ -24,6 +24,7 @@ export const SettingsSecurity = ({
     setState,
     isSocial,
     showPasswordFields,
+    passwordForm,
     passwordView,
     passwordErrors,
     sendPasswordCode,
@@ -31,11 +32,7 @@ export const SettingsSecurity = ({
 
   const provider = props.signIn === "apple" ? "Apple" : "Google";
 
-  const setPassword = (key: "code" | "next" | "confirm", value: string) =>
-    setState(({ password }) => ({
-      password: { ...password, [key]: value },
-      passwordError: "",
-    }));
+  const { register, setValue } = passwordForm;
 
   const passwordFields = [
     {
@@ -90,15 +87,10 @@ export const SettingsSecurity = ({
                       data-ac-in="1"
                       id={id}
                       type="password"
-                      value={state.password[key]}
-                      onChange={(event) => setPassword(key, event.target.value)}
-                      onBlur={() => {
-                        if (isNew && state.password.next)
-                          setState({ newPasswordBlurred: true });
-                      }}
                       autoComplete={autoComplete}
                       aria-invalid={error ? "true" : "false"}
                       aria-describedby={isNew ? `${id}-hint` : ""}
+                      {...register(key)}
                     />
                     {/* the new password's error shows in the meter, not as a line */}
                     {!isNew && !!error && (
@@ -128,14 +120,14 @@ export const SettingsSecurity = ({
                       id={`${uid}-pc`}
                       inputMode="numeric"
                       autoComplete="one-time-code"
-                      value={state.password.code}
-                      onChange={(event) =>
-                        setPassword(
-                          "code",
-                          event.target.value.replace(/\D/g, "").slice(0, 6),
-                        )
-                      }
                       aria-invalid={passwordErrors.code ? "true" : "false"}
+                      {...register("code", {
+                        onChange: (event: { target: { value: string } }) =>
+                          setValue(
+                            "code",
+                            event.target.value.replace(/\D/g, "").slice(0, 6),
+                          ),
+                      })}
                     />
                     <button
                       className={joinClassNames(
@@ -156,6 +148,11 @@ export const SettingsSecurity = ({
                   <div className={shared.help}>
                     {`It’s been a while since you signed in, so we emailed a code to ${state.email} to check it’s you.`}
                   </div>
+                </div>
+              )}
+              {!!passwordErrors.server && (
+                <div className={shared.error} role="alert">
+                  {passwordErrors.server}
                 </div>
               )}
               <CheckRow

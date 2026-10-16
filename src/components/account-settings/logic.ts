@@ -64,12 +64,7 @@ export interface SettingsState {
   phone: string;
   phoneFlow: "edit" | null;
   isSettingPassword: boolean;
-  /** `code` is the one emailed to confirm it's them. */
-  password: { code: string; next: string; confirm: string };
   isPasswordCodeSent: boolean;
-  passwordError: string;
-  passwordTouched: boolean;
-  newPasswordBlurred: boolean;
   signOthers: boolean;
   sessions: SettingsSession[];
   sessionsLoading: boolean;
@@ -104,9 +99,6 @@ export const getInitialName = ({
   last,
 }: SettingsPerson = DEMO_PERSON): NameValues => ({ first, last });
 
-/** ?pwnew= prefills the new password (and the current one) for the meter boards. */
-export const EMPTY_PASSWORD = { code: "", next: "", confirm: "" };
-
 export type NotificationSettings = Record<NotificationKey, ChannelSetting>;
 
 export const getInitialSettingsState = (
@@ -126,11 +118,7 @@ export const getInitialSettingsState = (
     phone,
     phoneFlow: null,
     isSettingPassword: false,
-    password: { code: prefilled ? "123456" : "", next: prefilled, confirm: "" },
     isPasswordCodeSent: !!prefilled,
-    passwordError: "",
-    passwordTouched: false,
-    newPasswordBlurred: false,
     signOthers: true,
     sessions: [
       {

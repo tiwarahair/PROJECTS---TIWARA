@@ -231,6 +231,43 @@ describe("AccountSettings", () => {
     expect(await screen.findByText(/^Password updated/)).toBeInTheDocument();
   });
 
+  it("security: a rejected password says why, even without a code", async () => {
+    render(
+      <AccountSettings
+        page="security"
+        backend={{
+          ...DEMO_BACKEND,
+          changePassword: () => Promise.resolve("same_password"),
+        }}
+      />,
+      { wrapper: MemoryRouter },
+    );
+
+    await user.type(screen.getByLabelText("New password"), "tide2lamp-violet");
+
+    await user.type(
+      screen.getByLabelText("Confirm new password"),
+      "tide2lamp-violet",
+    );
+
+    await user.click(screen.getByRole("button", { name: "Save changes" }));
+
+    expect(await screen.findByRole("alert")).toHaveTextContent(
+      "That’s your current password. Choose a new one.",
+    );
+  });
+
+  it("security: the passwords must match", async () => {
+    render(<AccountSettings page="security" />, { wrapper: MemoryRouter });
+    await user.type(screen.getByLabelText("New password"), "tide2lamp-violet");
+    await user.type(screen.getByLabelText("Confirm new password"), "tide2lamp");
+    await user.click(screen.getByRole("button", { name: "Save changes" }));
+
+    expect(
+      await screen.findByText("Passwords don’t match."),
+    ).toBeInTheDocument();
+  });
+
   it("security: a social sign-in offers to set a password", () => {
     render(<AccountSettings page="security" signIn="apple" />, {
       wrapper: MemoryRouter,
