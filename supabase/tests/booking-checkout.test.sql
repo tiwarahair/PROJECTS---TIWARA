@@ -1,5 +1,5 @@
 begin;
-select plan(24);
+select plan(26);
 
 create function pg_temp.open_business(user_id uuid, business_type text, radius int)
 returns uuid
@@ -166,6 +166,16 @@ select is((select status from public.bookings where stripe_payment_intent_id = '
 select is(
   public.get_booking_status((select (deposit ->> 'id')::uuid from holds), (select deposit ->> 'secret' from holds)) ->> 'status',
   'confirmed', 'the status is readable with the secret'
+);
+
+select throws_ok(
+  format('select pg_temp.checkout(%L::jsonb)', (select deposit from holds)),
+  'already_paid', 'checking out a paid booking again says it is paid'
+);
+
+select is(
+  public.get_booking_status((select (fee_only ->> 'id')::uuid from holds), (select fee_only ->> 'secret' from holds)) ->> 'status',
+  'refunded', 'paid after the time was taken: the browser is told it was refunded'
 );
 
 select ok(

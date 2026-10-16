@@ -12,6 +12,7 @@ import {
 import {
   getCheckoutError,
   getCheckoutRequest,
+  getRefundedError,
   PAY_ERRORS,
 } from "../logic/payment";
 import type { FlowState } from "./use-flow-state";
@@ -39,7 +40,16 @@ export const usePay = ({ flow, point, onConfirm }: PayOptions) => {
   );
 
   useEffect(() => {
-    if (!confirming || booked?.status !== "confirmed") return;
+    if (!confirming) return;
+
+    if (booked?.status === "refunded")
+      return setState({
+        confirming: false,
+        paying: false,
+        ...getRefundedError(stateRef.current.time),
+      });
+
+    if (booked?.status !== "confirmed") return;
 
     onConfirm();
 
@@ -66,13 +76,8 @@ export const usePay = ({ flow, point, onConfirm }: PayOptions) => {
     if (!confirming) return;
 
     const timer = window.setTimeout(
-      () =>
-        setState({
-          confirming: false,
-          paying: false,
-          payKind: "pending",
-          payError: PAY_ERRORS.pending,
-        }),
+      // still polling: it confirms (or refunds) as soon as the webhook has run
+      () => setState({ payKind: "pending", payError: PAY_ERRORS.pending }),
       CONFIRM_WAIT_MS,
     );
 

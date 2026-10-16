@@ -46,6 +46,15 @@ begin
   for update;
 
   if held.id is null then
+    -- paid already (a reload while the payment was confirming): say so rather than "not held"
+    if exists (
+      select 1 from public.bookings
+      where id = target and status = 'confirmed'
+        and hold_secret_hash = sha256(convert_to(coalesce(secret, ''), 'UTF8'))
+    ) then
+      raise exception 'already_paid';
+    end if;
+
     raise exception 'hold_not_found';
   end if;
 
@@ -150,7 +159,7 @@ begin
 end;
 $$;
 
-/** For the paying browser: its booking's status, by the hold's id and secret. */
+/** For the paying browser: its booking's status ('refunded' when the time went while they paid), by the hold's id and secret. */
 create function public.get_booking_status(target uuid, secret text)
 returns jsonb
 language sql
@@ -158,7 +167,15 @@ stable
 security definer
 set search_path = ''
 as $$
-  select jsonb_build_object('status', status, 'ref', ref, 'starts_at', starts_at, 'ends_at', ends_at)
+  select jsonb_build_object(
+    'status',
+    case
+      when exists (select 1 from public.booking_events where booking_id = bookings.id and kind = 'paid_after_slot_taken')
+        then 'refunded'
+      else status
+    end,
+    'ref', ref, 'starts_at', starts_at, 'ends_at', ends_at
+  )
   from public.bookings
   where id = target and hold_secret_hash = sha256(convert_to(coalesce(secret, ''), 'UTF8'))
 $$;

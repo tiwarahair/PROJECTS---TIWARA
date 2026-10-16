@@ -48,7 +48,8 @@ export const useFlowState = (stylist: Stylist) => {
   // 1s tick: the hold countdown (and its expiry) and the "Resend email (Ns)" countdown
   useEffect(() => {
     const interval = window.setInterval(() => {
-      const { confirmed, account, hold, holdExpired } = stateRef.current;
+      const { confirmed, account, hold, holdExpired, paying, confirming } =
+        stateRef.current;
 
       if (confirmed && account.sent && Date.now() - account.sentAt < 31000) {
         setTick((tick) => tick + 1);
@@ -56,7 +57,8 @@ export const useFlowState = (stylist: Stylist) => {
         return;
       }
 
-      if (!hold || confirmed || holdExpired) return;
+      // a payment under way decides for itself whether the time is still theirs
+      if (!hold || confirmed || holdExpired || paying || confirming) return;
 
       if (Date.now() >= hold.until)
         setState({ holdExpired: true, loginStart: null });

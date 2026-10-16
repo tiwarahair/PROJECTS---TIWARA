@@ -13,7 +13,7 @@ const IP_LIMIT = 20;
 const WINDOW_SECONDS = 600;
 
 // checkout_booking's own errors, passed on for the page to explain
-const CHECKOUT_ERRORS = ["hold_not_found", "address_required", "outside_area"];
+const CHECKOUT_ERRORS = ["hold_not_found", "already_paid", "address_required", "outside_area"];
 
 // a PaymentIntent still waiting for the client can take new amounts and choices
 const OPEN_STATUSES = ["requires_payment_method", "requires_confirmation", "requires_action"];

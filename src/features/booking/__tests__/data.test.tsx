@@ -1,4 +1,4 @@
-import { renderHook, screen, waitFor } from "@testing-library/react";
+import { act, renderHook, screen, waitFor } from "@testing-library/react";
 import type { UserEvent } from "@testing-library/user-event";
 import type { ReactNode } from "react";
 import { Provider } from "react-redux";
@@ -298,6 +298,63 @@ describe("booking on real data", () => {
     expect(
       screen.queryByRole("heading", { name: "You're booked in." }),
     ).not.toBeInTheDocument();
+  });
+
+  it("a slow confirmation says the payment went through, keeps waiting, and never expires the hold", async () => {
+    vi.mocked(getBookingStatus).mockResolvedValue({
+      status: "held",
+      ref: "TH-TEST01",
+      starts_at: "2026-10-20T09:30:00Z",
+      ends_at: "2026-10-20T11:30:00Z",
+    });
+
+    await renderBooking(SILK);
+    await payAsGuest();
+    await waitFor(() => expect(getBookingStatus).toHaveBeenCalled());
+    await act(() => vi.advanceTimersByTimeAsync(11 * 60_000));
+
+    expect(screen.getByRole("alert")).toHaveTextContent(
+      "Your payment went through and we're confirming your booking.",
+    );
+
+    expect(
+      screen.queryByRole("alertdialog", {
+        name: "Your slot is no longer held",
+      }),
+    ).not.toBeInTheDocument();
+
+    vi.mocked(getBookingStatus).mockResolvedValue({
+      status: "confirmed",
+      ref: "TH-TEST01",
+      starts_at: "2026-10-20T09:30:00Z",
+      ends_at: "2026-10-20T11:30:00Z",
+    });
+
+    await act(() => vi.advanceTimersByTimeAsync(2000));
+
+    expect(
+      screen.getByRole("heading", { name: "You're booked in." }),
+    ).toBeInTheDocument();
+  });
+
+  it("paid after someone else took the time: says it was refunded", async () => {
+    vi.mocked(getBookingStatus).mockResolvedValue({
+      status: "refunded",
+      ref: "TH-TEST01",
+      starts_at: "2026-10-20T09:30:00Z",
+      ends_at: "2026-10-20T11:30:00Z",
+    });
+
+    await renderBooking(SILK);
+    await payAsGuest();
+
+    expect(await screen.findByRole("alert")).toHaveTextContent(
+      "Sorry, 10:30 was booked by someone else while you paid. We've refunded you in full.",
+    );
+
+    expect(
+      screen.getByRole("button", { name: "Pick another time" }),
+    ).toBeInTheDocument();
   });
 
   it("a hold that ran out before paying says so, with nothing charged", async () => {
