@@ -1,0 +1,121 @@
+/* ---- setup banner (narrow) ---- */
+.setup {
+  grid-column: 1/-1;
+  background: var(--surface-ink, #1a1714);
+  background-color: #1a1714;
+  border-radius: var(--radius-lg);
+  padding: 18px;
+  color: var(--neutral-100);
+}
+
+.setupHead {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.setupTitle {
+  font-family: "Schibsted Grotesk", sans-serif;
+  font-size: 18px;
+  font-weight: 600;
+  letter-spacing: -0.02em;
+}
+
+.setupCount {
+  font-size: 13.5px;
+  color: rgba(246, 240, 228, 0.7);
+}
+
+.setupSub {
+  font-size: 14.5px;
+  color: rgba(246, 240, 228, 0.7);
+  margin-top: 3px;
+}
+
+.setupTrack {
+  height: 5px;
+  border-radius: var(--radius-full);
+  background: rgba(246, 240, 228, 0.16);
+  margin: 14px 0 6px;
+  overflow: hidden;
+}
+
+.setupBar {
+  height: 100%;
+  border-radius: var(--radius-full);
+  background: var(--brand-yellow);
+  transition: width 0.52s cubic-bezier(0.2, 0.8, 0.2, 1);
+  /* runtime: the share of setup steps done */
+  width: var(--setup-pct);
+}
+
+.column {
+  display: flex;
+  flex-direction: column;
+}
+
+.setupRow {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  background: none;
+  border: none;
+  border-bottom: 1px solid rgba(246, 240, 228, 0.1);
+  padding: 13px 0;
+  text-align: left;
+  color: var(--neutral-100);
+  transition: opacity 0.16s;
+}
+
+.setupRow:active {
+  opacity: 0.7 !important;
+}
+
+.setupTick {
+  width: 22px;
+  height: 22px;
+  border-radius: var(--radius-full);
+  flex: 0 0 auto;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 0.22s cubic-bezier(0.2, 0.8, 0.2, 1);
+  border: 1.5px solid rgba(246, 240, 228, 0.4);
+  background: transparent;
+}
+
+.setupTickDone {
+  border: 1.5px solid var(--brand-yellow);
+  background: var(--brand-yellow);
+}
+
+.setupText {
+  flex: 1;
+  min-width: 0;
+  opacity: 1;
+}
+
+.setupTextDone {
+  opacity: 0.6;
+}
+
+.setupLabel {
+  display: block;
+  font-size: 15px;
+  font-weight: 500;
+  text-decoration: none;
+}
+
+.setupTextDone .setupLabel {
+  text-decoration: line-through;
+}
+
+.setupRowSub {
+  display: block;
+  font-size: 13.5px;
+  line-height: 1.4;
+  color: rgba(246, 240, 228, 0.7);
+  margin-top: 2px;
+  text-wrap: pretty;
+}

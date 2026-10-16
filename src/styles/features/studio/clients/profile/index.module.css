@@ -1,0 +1,52 @@
+.card {
+  background: #fff;
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-panel);
+  padding: 20px;
+}
+
+.cardNext {
+  margin-top: 16px;
+}
+
+.sheetCard {
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-md);
+  padding: 16px;
+}
+
+.sheetCardNext {
+  margin-top: 12px;
+}
+
+.grow {
+  flex: 1;
+  min-width: 0;
+}
+
+.h3 {
+  font-family: "Schibsted Grotesk", sans-serif;
+  font-size: 18px;
+  font-weight: 600;
+  letter-spacing: -0.02em;
+}
+
+.tiles {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px;
+  margin-top: 12px;
+}
+
+.tile {
+  background: var(--quiet);
+  border-radius: var(--radius-sm);
+  padding: 12px 14px;
+  min-width: 0;
+}
+
+.tileLabel {
+  font-size: 13.5px;
+  color: var(--neutral-600, #5b544a);
+  margin-top: 1px;
+}

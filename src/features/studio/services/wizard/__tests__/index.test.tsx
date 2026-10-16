@@ -1,4 +1,4 @@
-import { act, screen, within } from "@testing-library/react";
+import { act, screen, waitFor, within } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { renderWithStore } from "../../../../../test/render-with-store";
 import { StudioPage } from "../../..";
@@ -71,7 +71,22 @@ describe("Studio → service wizard", () => {
   it("needs a name and service type before Continue", async () => {
     await openWizard();
     expect(screen.getByText("Details")).toBeInTheDocument();
-    expect(getContinue()).toBeDisabled();
+    await user.click(getContinue());
+
+    expect(await screen.findByText("Name this service.")).toBeInTheDocument();
+    expect(screen.getByText("Choose the service type.")).toBeInTheDocument();
+    expect(screen.getByText("Details")).toBeInTheDocument();
+
+    await user.type(
+      screen.getByPlaceholderText("e.g. Knotless braids"),
+      "Cornrows",
+    );
+
+    await waitFor(() =>
+      expect(screen.queryByText("Name this service.")).not.toBeInTheDocument(),
+    );
+
+    expect(screen.getByText("Choose the service type.")).toBeInTheDocument();
   });
 
   it("a suggestion fills the form and the wizard adds the service", async () => {
@@ -79,7 +94,7 @@ describe("Studio → service wizard", () => {
     await pickSuggestion("Knotless braids");
     expect(screen.getByDisplayValue("Knotless braids")).toBeInTheDocument();
     await user.click(getContinue());
-    expect(screen.getByText("Pricing")).toBeInTheDocument();
+    expect(await screen.findByText("Pricing")).toBeInTheDocument();
     expect(screen.getByText("Add size options")).toBeInTheDocument();
 
     await user.click(
@@ -88,7 +103,10 @@ describe("Studio → service wizard", () => {
 
     expect(screen.getByText("Review prices")).toBeInTheDocument();
     await user.click(getContinue());
-    expect(screen.getByText("Added to this service")).toBeInTheDocument();
+
+    expect(
+      await screen.findByText("Added to this service"),
+    ).toBeInTheDocument();
 
     // the Services header has its own "Add service" button; the footer's comes last
     await user.click(
@@ -98,8 +116,26 @@ describe("Studio → service wizard", () => {
     );
 
     expect(
-      screen.getByText("Knotless braids added to your services"),
+      await screen.findByText("Knotless braids added to your services"),
     ).toBeInTheDocument();
+  });
+
+  it("editing jumps to the tab with a missing price on save", async () => {
+    renderWithStore(<StudioPage />, "/studio");
+    runNextTimer();
+    await user.click(within(getLabelled("Sidebar")).getByTitle("Services"));
+    await user.click(screen.getAllByText("Knotless braids")[0] as HTMLElement);
+    advance(300);
+    await user.click(screen.getByRole("button", { name: "Pricing" }));
+    await user.clear(screen.getAllByLabelText("Base price")[0] as HTMLElement);
+
+    await user.click(
+      screen.getAllByRole("button", { name: "Add-ons" }).at(-1) as HTMLElement,
+    );
+
+    await user.click(screen.getByRole("button", { name: "Save service" }));
+
+    expect(await screen.findByText("Enter a price.")).toBeInTheDocument();
   });
 
   it("a customisation needs a name and two options", async () => {
@@ -108,7 +144,7 @@ describe("Studio → service wizard", () => {
     await user.click(getContinue());
 
     await user.click(
-      screen.getByRole("button", { name: "Add a customisation" }),
+      await screen.findByRole("button", { name: "Add a customisation" }),
     );
 
     const dialog = getLabelled("Customisation dialog");

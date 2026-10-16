@@ -1,0 +1,77 @@
+.weekStrip {
+  display: none;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 2px;
+  padding-bottom: 8px;
+  touch-action: pan-y;
+  order: 3;
+  flex: 0 0 100%;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.stripDay {
+  border: none;
+  background: none;
+  padding: 2px 0 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 3px;
+}
+
+.stripDay:active {
+  transform: scale(0.94) !important;
+}
+
+.stripDow {
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.18em;
+  color: var(--text-secondary);
+}
+
+.stripDowToday {
+  color: var(--accent-700);
+}
+
+.stripDowPast {
+  color: var(--neutral-300, #c9c1b3);
+}
+
+.stripNum {
+  width: 32px;
+  height: 32px;
+  border-radius: var(--radius-full);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  line-height: 1;
+  padding-top: 1.5px;
+  box-sizing: border-box;
+  font-size: 15px;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+  transition:
+    background 0.2s cubic-bezier(0.23, 1, 0.32, 1),
+    color 0.2s cubic-bezier(0.23, 1, 0.32, 1);
+  background: transparent;
+  color: var(--text-primary);
+  box-shadow: none;
+}
+
+.stripNumToday {
+  color: var(--accent-700);
+  box-shadow: inset 0 0 0 1.5px var(--accent-line);
+}
+
+.stripNumPast {
+  color: var(--neutral-300, #c9c1b3);
+}
+
+.stripNumOn {
+  background: #1a1714;
+  color: var(--neutral-100);
+  box-shadow: none;
+}

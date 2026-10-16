@@ -1,0 +1,40 @@
+export type StudioTab =
+  "home" | "bookings" | "services" | "earnings" | "clients" | "settings";
+export type StudioPage =
+  | "availability"
+  | "profile"
+  | "business"
+  | "rules"
+  | "policy"
+  | "personal"
+  | "security"
+  | "notifications"
+  | "payouts"
+  | "calendar";
+export type SheetKind =
+  | "booking"
+  | "past"
+  | "add"
+  | "svcwiz"
+  | "addon"
+  | "cats"
+  | "notif"
+  | "profile"
+  | "stripe"
+  | "block"
+  | "closed"
+  | "client"
+  | "clientEdit"
+  | "cliView";
+export type BookingStep =
+  | "view"
+  | "resched"
+  | "cancel"
+  | "editsvc"
+  | "changesvc"
+  | "addaddon"
+  | "changeclient"
+  | "checkout"
+  | "noshow"
+  | "payment"
+  | "done";

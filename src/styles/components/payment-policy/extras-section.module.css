@@ -1,0 +1,121 @@
+.optional {
+  font-family: var(--font-body);
+  font-size: 15px;
+  font-weight: 400;
+  letter-spacing: 0;
+  color: var(--neutral-600);
+}
+
+.extras {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  margin-top: 18px;
+}
+
+.extraHead {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.removeExtra {
+  width: 36px;
+  height: 36px;
+  flex: 0 0 auto;
+  display: grid;
+  place-items: center;
+  padding: 0;
+  border-radius: var(--radius-full);
+  border: 1px solid var(--border-strong);
+  background: transparent;
+  color: var(--text-primary);
+  cursor: pointer;
+}
+
+.removeExtra:hover {
+  background: var(--fill-quiet) !important;
+}
+
+.removeExtra:active {
+  transform: scale(0.96) !important;
+}
+
+.removeIcon {
+  display: block;
+}
+
+.extraText {
+  display: block;
+  width: 100%;
+  margin-top: 8px;
+  min-height: 92px;
+  box-sizing: border-box;
+  padding: 12px 14px;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--border-strong);
+  background: #fff;
+  font: inherit;
+  font-size: 16px;
+  line-height: 1.45;
+  color: var(--text-primary);
+  resize: vertical;
+  outline: none;
+}
+
+.count {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+  font-size: 13.5px;
+  font-variant-numeric: tabular-nums;
+}
+
+.addRow {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 16px;
+}
+
+.addButton {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  height: 44px;
+  padding: 0 18px 0 14px;
+  border-radius: var(--radius-full);
+  border: 1px solid var(--border-strong);
+  background: transparent;
+  font: inherit;
+  font-size: 14.5px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.addButton:hover {
+  background: var(--fill-quiet) !important;
+}
+
+.addButton:active {
+  transform: scale(0.98) !important;
+}
+
+.countFull {
+  color: var(--accent-700);
+  font-weight: 600;
+}
+
+.countOpen {
+  color: var(--neutral-600);
+  font-weight: 400;
+}
+
+.addFull {
+  color: var(--neutral-400);
+}
+
+.addOpen {
+  color: var(--text-primary);
+}

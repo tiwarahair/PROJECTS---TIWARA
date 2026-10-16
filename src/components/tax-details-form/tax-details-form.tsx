@@ -3,7 +3,7 @@ import { useEffect, useId, useRef, useState } from "react";
 import { Controller, useForm, useWatch } from "react-hook-form";
 import { Eye, EyeOff, Lock } from "lucide-react";
 import { joinClassNames } from "../../utils/class-names";
-import { AddressFinder } from "../address-finder/address-finder";
+import { AddressFinder } from "../address-finder";
 import { DOB_PARTS, Field, KINDS } from "./tax-details-field";
 import {
   getAddressKey,

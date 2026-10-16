@@ -1,8 +1,9 @@
-import { useRef } from "react";
+import { useId, useRef } from "react";
 import { Camera, User } from "lucide-react";
 import { joinClassNames } from "../../../utils/class-names";
+import type { ClientForm } from "./use-client-form";
 import type { ClientsView } from "./view";
-import { ClientProfile } from ".";
+import { ClientProfile } from "./profile";
 import styles from "../../../styles/features/studio/clients/sheets.module.css";
 import clientStyles from "../../../styles/features/studio/clients/index.module.css";
 import sheet from "../../../styles/features/studio/shell/sheet-frame.module.css";
@@ -14,13 +15,32 @@ export const ClientViewSheet = ({ view }: { view: ClientsView }) => (
   </div>
 );
 
+interface FieldErrorProps {
+  id: string;
+  message: string | undefined;
+}
+
+const FieldError = ({ id, message }: FieldErrorProps) =>
+  message ? (
+    <span id={id} className={styles.fieldError} role="alert">
+      {message}
+    </span>
+  ) : null;
+
 type DraftField =
   "first" | "last" | "phone" | "email" | "products" | "sensitivities";
 
+interface ClientEditProps {
+  view: ClientsView;
+  form: ClientForm;
+}
+
 /** Add or edit a client. */
-export const ClientEditSheet = ({ view }: { view: ClientsView }) => {
+export const ClientEditSheet = ({ view, form }: ClientEditProps) => {
   const fileRef = useRef<HTMLInputElement>(null);
+  const uid = useId();
   const { draft, draftImage, duplicate } = view;
+  const { errors } = form.formState;
 
   if (!draft) return null;
 
@@ -81,14 +101,23 @@ export const ClientEditSheet = ({ view }: { view: ClientsView }) => {
         </div>
       </div>
       <div className={styles.names}>
-        <label className={styles.field}>
-          <span className={styles.label}>First name</span>
+        <div className={styles.field}>
+          <label className={styles.label} htmlFor={`${uid}-first`}>
+            First name
+          </label>
           <input
             className={styles.input}
             {...onField("first")}
             autoComplete="off"
+            id={`${uid}-first`}
+            aria-invalid={errors.first ? "true" : "false"}
+            aria-describedby={errors.first ? `${uid}-first-error` : undefined}
           />
-        </label>
+          <FieldError
+            id={`${uid}-first-error`}
+            message={errors.first?.message}
+          />
+        </div>
         <label className={styles.field}>
           <span className={styles.label}>Last name</span>
           <input
@@ -98,24 +127,36 @@ export const ClientEditSheet = ({ view }: { view: ClientsView }) => {
           />
         </label>
       </div>
-      <label className={styles.field}>
-        <span className={styles.label}>Phone</span>
+      <div className={styles.field}>
+        <label className={styles.label} htmlFor={`${uid}-phone`}>
+          Phone
+        </label>
         <input
           className={styles.input}
           type="tel"
           {...onField("phone")}
           placeholder="07700 900000"
+          id={`${uid}-phone`}
+          aria-invalid={errors.phone ? "true" : "false"}
+          aria-describedby={errors.phone ? `${uid}-phone-error` : undefined}
         />
-      </label>
-      <label className={styles.field}>
-        <span className={styles.label}>Email</span>
+        <FieldError id={`${uid}-phone-error`} message={errors.phone?.message} />
+      </div>
+      <div className={styles.field}>
+        <label className={styles.label} htmlFor={`${uid}-email`}>
+          Email
+        </label>
         <input
           className={styles.input}
           type="email"
           {...onField("email")}
           placeholder="name@email.com"
+          id={`${uid}-email`}
+          aria-invalid={errors.email ? "true" : "false"}
+          aria-describedby={errors.email ? `${uid}-email-error` : undefined}
         />
-      </label>
+        <FieldError id={`${uid}-email-error`} message={errors.email?.message} />
+      </div>
       {duplicate.isOn && (
         <div className={styles.duplicate} role="alert">
           <img className={styles.duplicateAvatar} src={duplicate.img} alt="" />
@@ -163,7 +204,7 @@ export const ClientEditSheet = ({ view }: { view: ClientsView }) => {
 };
 
 /** Cancel / Save under the client form. */
-export const ClientEditFooter = ({ view }: { view: ClientsView }) => (
+export const ClientEditFooter = ({ view, form }: ClientEditProps) => (
   <div className={sheet.footerRow}>
     <button className={sheet.cancel} onClick={view.cancelDraft}>
       Cancel
@@ -171,10 +212,10 @@ export const ClientEditFooter = ({ view }: { view: ClientsView }) => (
     <button
       className={joinClassNames(
         sheet.save48,
-        !view.isDraftValid && sheet.faded,
+        view.duplicate.isOn && sheet.faded,
       )}
-      onClick={view.saveDraft}
-      disabled={!view.isDraftValid}
+      onClick={() => void form.handleSubmit(view.saveDraft)()}
+      disabled={view.duplicate.isOn}
     >
       {view.saveLabel}
     </button>

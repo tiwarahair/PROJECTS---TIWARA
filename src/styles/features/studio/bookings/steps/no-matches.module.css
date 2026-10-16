@@ -1,0 +1,18 @@
+.empty {
+  border: 1px dashed var(--border-strong, #d8d2c6);
+  border-radius: var(--radius-md);
+  padding: 28px 20px;
+  text-align: center;
+  margin-top: 16px;
+}
+
+.emptyTitle {
+  font-size: 15px;
+  font-weight: 600;
+}
+
+.emptyBody {
+  font-size: 13.5px;
+  color: var(--text-secondary);
+  margin-top: 4px;
+}

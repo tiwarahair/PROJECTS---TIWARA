@@ -50,7 +50,7 @@ const appRoutes: RouteObject[] = [
   {
     path: "/account",
     lazy: () =>
-      import("./features/account/account-page").then(({ AccountPage }) => ({
+      import("./features/account").then(({ AccountPage }) => ({
         Component: AccountPage,
       })),
   },

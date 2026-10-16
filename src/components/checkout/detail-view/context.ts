@@ -9,7 +9,7 @@ export const getContext = (
   checkout: CheckoutController,
   view: CheckoutViewModel,
 ) => {
-  const { state, setState, goTo } = checkout;
+  const { state, goTo, startRefund } = checkout;
   const { cardText, fee, feeExtra, refundCap, modeLabel } = view;
   const { booking } = checkout;
 
@@ -42,13 +42,7 @@ export const getContext = (
   };
 
   const openRefund = () => {
-    setState({
-      refundKind: "full",
-      refundAmount: "",
-      refundReason: "",
-      refundTried: false,
-    });
-
+    startRefund();
     goTo("refund", 1);
   };
 

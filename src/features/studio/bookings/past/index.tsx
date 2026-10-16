@@ -9,7 +9,7 @@ import {
   Undo2,
 } from "lucide-react";
 import { joinClassNames } from "../../../../utils/class-names";
-import { ContactLinks } from "../sheet";
+import { ContactLinks } from "../sheet/contact-links";
 import { getPastCheckoutView } from "./view";
 import type { PastSheetView } from "./view";
 import { StudioCheckout } from "../checkout";

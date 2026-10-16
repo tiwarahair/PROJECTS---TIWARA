@@ -1,0 +1,22 @@
+.addressInput {
+  width: 100%;
+  box-sizing: border-box;
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-xs);
+  background: transparent;
+  padding: 7px 10px;
+  font-size: 17px;
+  font-family: inherit;
+  outline: none;
+  margin-top: 4px;
+}
+
+.textAction {
+  flex: 0 0 auto;
+  border: none;
+  background: none;
+  color: var(--accent-700);
+  font-size: 13.5px;
+  font-weight: 600;
+  padding: 4px 0;
+}

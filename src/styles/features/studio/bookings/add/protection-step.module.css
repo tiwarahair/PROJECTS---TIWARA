@@ -1,0 +1,120 @@
+.policyRow {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  margin-top: 6px;
+}
+
+.policyIcon {
+  flex: 0 0 auto;
+  margin-top: 2px;
+}
+
+.policyText {
+  flex: 1;
+  font-size: 14.5px;
+  color: var(--text-secondary);
+  line-height: 1.45;
+}
+
+.strong {
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.protOptions {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-top: 18px;
+}
+
+.protOption {
+  display: flex;
+  align-items: flex-start;
+  gap: 11px;
+  text-align: left;
+  background: transparent;
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-sm);
+  padding: 13px 14px;
+  transition: background 0.2s cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+
+.protOption:hover {
+  background: var(--quiet) !important;
+}
+
+.protOptionOn {
+  background: var(--accent-wash);
+  border-color: var(--accent-700);
+}
+
+.radio {
+  flex: 0 0 auto;
+  width: 20px;
+  height: 20px;
+  margin-top: 1px;
+  border-radius: var(--radius-full);
+  border: 2px solid var(--border-strong, #d8d2c6);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.protOptionOn .radio {
+  border-color: var(--accent-700);
+}
+
+.dot {
+  width: 9px;
+  height: 9px;
+  border-radius: var(--radius-full);
+  background: transparent;
+}
+
+.protOptionOn .dot {
+  background: var(--accent-700);
+}
+
+.protLabel {
+  display: block;
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.protOptionOn .protLabel {
+  color: var(--accent-700);
+}
+
+.protSub {
+  display: block;
+  font-size: 13.5px;
+  color: var(--text-secondary);
+  line-height: 1.45;
+  margin-top: 2px;
+}
+
+.protFoot {
+  font-size: 13.5px;
+  color: var(--text-secondary);
+  line-height: 1.5;
+  margin-top: 28px;
+}
+
+.receives {
+  font-size: 14.5px;
+  font-weight: 500;
+  margin-top: 16px;
+}
+
+.preview {
+  background: var(--quiet);
+  border-radius: var(--radius-sm);
+  padding: 12px 14px;
+  margin-top: 8px;
+  font-size: 13.5px;
+  color: var(--text-primary);
+  line-height: 1.5;
+}

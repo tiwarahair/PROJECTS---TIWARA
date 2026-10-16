@@ -169,7 +169,7 @@ export const getTwoFactorView = (studio: StudioController) => {
     },
     taxSubmit: (value: TaxDetails) =>
       void actions.saveTax(value, isStripe ? closeTwoFactor : toStripe),
-    taxCodeGo: actions.confirmTaxCode,
+    taxCodeGo: () => void actions.confirmTaxCode(),
     isSecure: step === "secure",
     isMethod: step === "method",
     isApp: step === "app",

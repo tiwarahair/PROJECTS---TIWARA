@@ -1,0 +1,154 @@
+.twoCols {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+  margin-top: 16px;
+}
+
+.timeSelect {
+  width: 100%;
+  height: 44px;
+  padding: 0 10px;
+  border-radius: var(--radius-sm);
+  background: transparent;
+  font-family: inherit;
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--text-primary);
+  outline: none;
+  font-variant-numeric: tabular-nums;
+  border: 1px solid var(--border-subtle);
+}
+
+.timeSelectClash {
+  border-color: var(--accent-500, #b5541f);
+}
+
+.label135 {
+  font-size: 13.5px;
+  font-weight: 500;
+  margin-bottom: 6px;
+}
+
+.row8 {
+  display: flex;
+  gap: 8px;
+}
+
+.durSelect {
+  flex: 1;
+  min-width: 0;
+  height: 44px;
+  padding: 0 8px;
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-sm);
+  background: transparent;
+  font-family: inherit;
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--text-primary);
+  outline: none;
+}
+
+.clash {
+  display: flex;
+  align-items: flex-start;
+  gap: 7px;
+  margin-top: 8px;
+  color: var(--accent-500, #b5541f);
+  font-size: 13.5px;
+  line-height: 1.45;
+  animation: rowin 0.2s cubic-bezier(0.23, 1, 0.32, 1) both;
+}
+
+.iconTop {
+  flex: 0 0 auto;
+  margin-top: 1px;
+}
+
+.nextFree {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+  margin-top: 10px;
+  background: var(--quiet);
+  border-radius: var(--radius-md);
+  padding: 10px 12px;
+}
+
+.nextLabel {
+  font-size: 13.5px;
+  color: var(--text-primary);
+}
+
+.nextTime {
+  border: 1px solid var(--accent-line);
+  background: transparent;
+  color: var(--accent-700);
+  border-radius: var(--radius-full);
+  padding: 6px 12px;
+  font-size: 13.5px;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+}
+
+.nextTime:hover {
+  background: var(--accent-wash) !important;
+}
+
+.nextTime:active {
+  transform: scale(0.96) !important;
+}
+
+.extraGrid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+  margin-top: 12px;
+  align-items: end;
+}
+
+.extraLabel {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 6px;
+  font-size: 13.5px;
+  font-weight: 500;
+  margin-bottom: 6px;
+}
+
+.removeLink {
+  border: none;
+  background: none;
+  color: var(--accent-700);
+  font-size: 12.5px;
+  font-weight: 600;
+  padding: 0;
+}
+
+.select {
+  width: 100%;
+  height: 44px;
+  padding: 0 10px;
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-sm);
+  background: transparent;
+  font-family: inherit;
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--text-primary);
+  outline: none;
+}
+
+@keyframes rowin {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}

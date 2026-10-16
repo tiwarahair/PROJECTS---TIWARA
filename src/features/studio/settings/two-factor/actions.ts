@@ -132,12 +132,6 @@ export const createTwoFactorActions = (
 
     const code = twoFactor.code || "";
 
-    if (code.length < 6)
-      return setTwoFactor({
-        error: "code",
-        errorMessage: "Enter the 6-digit code",
-      });
-
     setTwoFactor({ isBusy: true });
 
     try {
@@ -198,18 +192,6 @@ export const createTwoFactorActions = (
 
     const devices = twoFactorSettings.devices;
     const name = (twoFactor.name || "").trim();
-
-    if (!name)
-      return setTwoFactor({ error: "name", errorMessage: "Name this device" });
-
-    if (
-      devices.some((device) => device.name.toLowerCase() === name.toLowerCase())
-    )
-      return setTwoFactor({
-        error: "name",
-        errorMessage: "You already have a device with this name",
-      });
-
     const { enrolment } = twoFactor;
 
     if (isReal() && !enrolment)

@@ -1,0 +1,88 @@
+.cardRow {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px;
+  border: none;
+  border-radius: var(--radius-sm);
+  background: transparent;
+  text-align: left;
+  cursor: pointer;
+  font: inherit;
+  color: inherit;
+  /* runtime: staggered entry */
+  animation: rowin 0.28s cubic-bezier(0.2, 0.8, 0.2, 1) var(--delay) both;
+}
+
+.cardRow:active {
+  background: var(--quiet) !important;
+}
+
+.avatar44 {
+  width: 44px;
+  height: 44px;
+  border-radius: var(--radius-full);
+  object-fit: cover;
+  flex: 0 0 auto;
+  background: var(--quiet);
+}
+
+.initials44 {
+  width: 44px;
+  height: 44px;
+  border-radius: var(--radius-full);
+  background: var(--quiet);
+  color: var(--neutral-700, #3d3833);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 15px;
+  font-weight: 600;
+  flex: 0 0 auto;
+}
+
+.cardMain {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.cardEnd {
+  flex: 0 0 auto;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 3px;
+}
+
+.cardSpend {
+  font-size: 15px;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+}
+
+.noShows {
+  font-size: 12.5px;
+  white-space: nowrap;
+  font-weight: 400;
+  color: var(--text-secondary);
+}
+
+.noShowsSome {
+  font-weight: 600;
+  color: #b5541f;
+}
+
+@keyframes rowin {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}

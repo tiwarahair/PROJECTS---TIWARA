@@ -1,3 +1,4 @@
+import type { AddonForm } from "./use-addon-form";
 import type { CSSProperties } from "react";
 import { Check, ChevronDown, ChevronUp, Plus, Trash } from "lucide-react";
 import { SearchSelect } from "../../../components/search-select/search-select";
@@ -193,8 +194,14 @@ export const CategoriesSheet = ({
 );
 
 /** Create or edit an add-on. */
-export const AddonSheet = ({ view }: { view: AddonSheetView }) => {
+interface AddonSheetProps {
+  view: AddonSheetView;
+  form: AddonForm;
+}
+
+export const AddonSheet = ({ view, form }: AddonSheetProps) => {
   const { newCategory } = view;
+  const nameError = form.formState.errors.name?.message;
 
   return (
     <div className={styles.addon}>
@@ -205,7 +212,13 @@ export const AddonSheet = ({ view }: { view: AddonSheetView }) => {
           value={view.name}
           onChange={view.onName}
           placeholder="e.g. Beads"
+          aria-invalid={nameError ? "true" : "false"}
         />
+        {nameError && (
+          <span className={styles.error} role="alert">
+            {nameError}
+          </span>
+        )}
       </label>
       <div>
         <span className={styles.fieldLabel}>
@@ -308,15 +321,11 @@ export const AddonSheet = ({ view }: { view: AddonSheetView }) => {
 };
 
 /** Create / Save add-on. */
-export const AddonSheetFooter = ({ view }: { view: AddonSheetView }) => (
+export const AddonSheetFooter = ({ view, form }: AddonSheetProps) => (
   <div className={styles.footer}>
     <button
-      className={joinClassNames(
-        styles.saveAddon,
-        view.isDisabled && styles.faded,
-      )}
-      onClick={view.save}
-      disabled={view.isDisabled}
+      className={styles.saveAddon}
+      onClick={() => void form.handleSubmit(view.save)()}
     >
       {view.cta}
     </button>

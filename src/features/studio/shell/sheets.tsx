@@ -1,10 +1,11 @@
+import { useClientForm } from "../clients/use-client-form";
+import { useAddonForm } from "../services/use-addon-form";
+import { useWizardForm } from "../services/wizard/use-wizard-form";
 import { AddBookingSheet } from "../bookings/add";
 import { getAddBookingView } from "../bookings/add/view";
-import {
-  BookingCheckout,
-  BookingSheetAfter,
-  BookingSheetBody,
-} from "../bookings/sheet";
+import { BookingSheetBody } from "../bookings/sheet";
+import { BookingCheckout } from "../bookings/sheet/checkout";
+import { BookingSheetAfter } from "../bookings/sheet/footer";
 import { getBookingSheetView } from "../bookings/sheet/view";
 import {
   AddonSheet,
@@ -51,6 +52,25 @@ export const StudioSheets = ({ studio }: { studio: StudioController }) => {
   const addView = sheet === "add" ? getAddBookingView(studio) : null;
   const categoriesView = sheet === "cats" ? getCategoriesView(studio) : null;
   const addonView = sheet === "addon" ? getAddonSheetView(studio) : null;
+
+  const clientDraft = studio.state.clientEdit;
+
+  const clientForm = useClientForm(
+    {
+      first: clientDraft?.first ?? "",
+      phone: clientDraft?.phone ?? "",
+      email: clientDraft?.email ?? "",
+    },
+    sheet === "clientEdit" && !studio.state.out,
+  );
+
+  const wizardForm = useWizardForm(studio);
+
+  const addonForm = useAddonForm(
+    studio.state.addonDraft?.name ?? "",
+    !!addonView && !studio.state.out,
+  );
+
   const wizardView = sheet === "svcwiz" ? getWizardView(studio) : null;
 
   const clientsView =
@@ -72,11 +92,13 @@ export const StudioSheets = ({ studio }: { studio: StudioController }) => {
     if (pastView) return <PastSheetFooter view={pastView} />;
 
     if (clientsView && sheet === "clientEdit")
-      return <ClientEditFooter view={clientsView} />;
+      return <ClientEditFooter view={clientsView} form={clientForm} />;
 
-    if (wizardView) return <WizardFooter view={wizardView} />;
+    if (wizardView) return <WizardFooter view={wizardView} form={wizardForm} />;
 
-    return addonView ? <AddonSheetFooter view={addonView} /> : null;
+    return addonView ? (
+      <AddonSheetFooter view={addonView} form={addonForm} />
+    ) : null;
   };
 
   return (
@@ -90,15 +112,15 @@ export const StudioSheets = ({ studio }: { studio: StudioController }) => {
       {pastView && <PastSheetBody view={pastView} />}
       {clientsView?.isProfileSheet && <ClientViewSheet view={clientsView} />}
       {clientsView && sheet === "clientEdit" && (
-        <ClientEditSheet view={clientsView} />
+        <ClientEditSheet view={clientsView} form={clientForm} />
       )}
       {sheet === "notif" && <NotificationsSheet studio={studio} />}
       {addView && <AddBookingSheet studio={studio} view={addView} />}
-      {wizardView && <WizardSheet view={wizardView} />}
+      {wizardView && <WizardSheet view={wizardView} form={wizardForm} />}
       {categoriesView && (
         <CategoriesSheet studio={studio} view={categoriesView} />
       )}
-      {addonView && <AddonSheet view={addonView} />}
+      {addonView && <AddonSheet view={addonView} form={addonForm} />}
       {sheet === "stripe" && <StripeSheet studio={studio} />}
       {sheet === "block" && <BlockSheet studio={studio} />}
       {sheet === "closed" && <ClosedSheet studio={studio} />}

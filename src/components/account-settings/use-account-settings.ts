@@ -1,21 +1,20 @@
 import { useCallback, useEffect, useRef, useState } from "react";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
 import { useLocation } from "react-router";
 import { usePasswordChecker } from "../../hooks/use-password-checker";
-import { checkPassword, getPasswordView } from "../../utils/password";
 import type {
   TaxBusiness,
   TaxDetails,
 } from "../tax-details-form/tax-details-logic";
-import { DEMO_BACKEND } from "./account-settings-backend";
-import type { AccountSettingsBackend } from "./account-settings-backend";
-import {
-  EMPTY_PASSWORD,
-  getInitialSettingsState,
-} from "./account-settings-logic";
-import type {
-  SettingsPerson,
-  NotificationSettings,
-} from "./account-settings-logic";
+import { DEMO_BACKEND } from "./backend";
+import { nameSchema } from "./name-schema";
+import { EMPTY_PASSWORD } from "./password-schema";
+import { usePasswordForm } from "./use-password-form";
+import type { NameValues } from "./name-schema";
+import type { AccountSettingsBackend } from "./backend";
+import { getInitialName, getInitialSettingsState } from "./logic";
+import type { SettingsPerson, NotificationSettings } from "./logic";
 import type {
   ConfirmDialog,
   PayoutStatus,
@@ -23,7 +22,7 @@ import type {
   SettingsState,
   SignIn,
   TwoFactorDevice,
-} from "./account-settings-logic";
+} from "./logic";
 
 const TOAST_MS = 2400;
 const SESSIONS_LOAD_MS = 700;
@@ -115,6 +114,17 @@ export const useAccountSettings = (props: AccountSettingsProps) => {
 
   usePasswordChecker();
 
+  const nameForm = useForm<NameValues>({
+    defaultValues: getInitialName(props.person),
+    resolver: zodResolver(nameSchema),
+  });
+
+  const {
+    formState: { errors: nameErrors, isDirty: isNameDirty },
+  } = nameForm;
+
+  const [first, last] = nameForm.watch(["first", "last"]);
+
   const setState = (
     patch:
       | Partial<SettingsState>
@@ -197,44 +207,24 @@ export const useAccountSettings = (props: AccountSettingsProps) => {
     .trim()
     .split(/\s+/);
 
-  const passwordCheck = checkPassword(state.password.next, {
-    min: PASSWORD_MIN,
-    first: state.first || nameParts[0],
-    last: state.last || nameParts.slice(1).join(" "),
-    email: state.email,
-  });
-
-  const passwordView = getPasswordView(passwordCheck, {
-    show: state.passwordTouched || state.newPasswordBlurred,
-    errorColour: "var(--accent-700)",
-  });
-
-  const passwordErrors = {
-    code:
-      state.passwordError ||
-      (state.passwordTouched && state.isPasswordCodeSent && !state.password.code
-        ? "Enter the code we emailed you."
-        : ""),
-    next: passwordView.hasError ? passwordCheck.error : "",
-    confirm:
-      state.passwordTouched && state.password.confirm !== state.password.next
-        ? "Passwords don’t match."
-        : "",
-  };
+  const { passwordForm, passwordView, passwordErrors, isPasswordFilled } =
+    usePasswordForm({
+      search,
+      isCodeSent: state.isPasswordCodeSent,
+      checkOptions: {
+        min: PASSWORD_MIN,
+        first: first || nameParts[0],
+        last: last || nameParts.slice(1).join(" "),
+        email: state.email,
+      },
+    });
 
   // ---- personal
-  const getNameError = (key: "first" | "last") =>
-    state.nameTouched && !state[key].trim()
-      ? `Enter your ${key === "first" ? "first" : "last"} name.`
-      : "";
-
-  const isNameDirty =
-    state.first !== state.savedName[0] || state.last !== state.savedName[1];
+  const getNameError = (key: keyof NameValues) =>
+    nameErrors[key]?.message ?? "";
 
   // ---- save bar (only pages with typed fields)
-  const isPasswordDirty =
-    showPasswordFields &&
-    !!(state.password.code || state.password.next || state.password.confirm);
+  const isPasswordDirty = showPasswordFields && isPasswordFilled;
 
   const isDirty =
     page === "personal" ? isNameDirty : page === "security" && isPasswordDirty;
@@ -244,97 +234,80 @@ export const useAccountSettings = (props: AccountSettingsProps) => {
 
   const hasBarError =
     page === "personal"
-      ? !!(getNameError("first") || getNameError("last"))
+      ? !!(nameErrors.first || nameErrors.last)
       : page === "security" &&
         !!(
           passwordErrors.code ||
           passwordErrors.next ||
-          passwordErrors.confirm
+          passwordErrors.confirm ||
+          passwordErrors.server
         );
 
   const backend = props.backend ?? DEMO_BACKEND;
 
   const save = async () => {
-    if (page === "personal") {
-      const first = state.first.trim();
-      const last = state.last.trim();
+    if (page === "personal")
+      return nameForm.handleSubmit(async (name) => {
+        try {
+          await backend.saveName(name.first, name.last);
+        } catch {
+          return toast("Your name couldn’t be saved. Try again.");
+        }
 
-      if (!first || !last) return setState({ nameTouched: true });
+        nameForm.reset(name);
+        toast("Personal details saved");
+      })();
 
-      try {
-        await backend.saveName(first, last);
-      } catch {
-        return toast("Your name couldn’t be saved. Try again.");
-      }
+    if (page === "security")
+      return passwordForm.handleSubmit(async ({ code, next }) => {
+        const failure = await backend
+          .changePassword(next, code, state.signOthers)
+          .catch(() => "failed");
 
-      setState({ savedName: [first, last], nameTouched: false });
-      toast("Personal details saved");
-    }
+        // signed in over 24 hours ago: Supabase wants the emailed code first
+        if (failure === "reauthentication_needed") return sendPasswordCode();
 
-    if (page === "security") {
-      const { code, next, confirm } = state.password;
+        if (failure)
+          return passwordForm.setError(
+            failure === "reauthentication_not_valid" ? "code" : "root",
+            { message: PASSWORD_FAILURES[failure] ?? PASSWORD_FAILURES.failed },
+          );
 
-      if (
-        (state.isPasswordCodeSent && !code) ||
-        !passwordCheck.valid ||
-        confirm !== next
-      )
-        return setState({ passwordTouched: true });
+        const others = state.signOthers
+          ? state.sessions.filter(({ isCurrent }) => !isCurrent).length
+          : 0;
 
-      const failure = await backend
-        .changePassword(next, code, state.signOthers)
-        .catch(() => "failed");
+        passwordForm.reset(EMPTY_PASSWORD);
 
-      // signed in over 24 hours ago: Supabase wants the emailed code first
-      if (failure === "reauthentication_needed") return sendPasswordCode();
-
-      if (failure)
-        return setState({
-          passwordError: PASSWORD_FAILURES[failure] ?? PASSWORD_FAILURES.failed,
+        setState({
+          isPasswordCodeSent: false,
+          isSettingPassword: false,
+          sessions: state.signOthers
+            ? state.sessions.filter(({ isCurrent }) => isCurrent)
+            : state.sessions,
         });
 
-      const others = state.signOthers
-        ? state.sessions.filter(({ isCurrent }) => !isCurrent).length
-        : 0;
+        const deviceSuffix = others === 1 ? "" : "s";
 
-      setState({
-        password: EMPTY_PASSWORD,
-        isPasswordCodeSent: false,
-        passwordError: "",
-        passwordTouched: false,
-        newPasswordBlurred: false,
-        isSettingPassword: false,
-        sessions: state.signOthers
-          ? state.sessions.filter(({ isCurrent }) => isCurrent)
-          : state.sessions,
-      });
+        const updatedText = others
+          ? `Password updated. Signed out of ${others} other device${deviceSuffix}`
+          : "Password updated";
 
-      const deviceSuffix = others === 1 ? "" : "s";
-
-      const updatedText = others
-        ? `Password updated. Signed out of ${others} other device${deviceSuffix}`
-        : "Password updated";
-
-      toast(isSocial ? "Password set" : updatedText);
-    }
+        toast(isSocial ? "Password set" : updatedText);
+      })();
   };
 
-  const discard = () =>
-    setState({
-      first: state.savedName[0],
-      last: state.savedName[1],
-      nameTouched: false,
-      password: EMPTY_PASSWORD,
-      passwordError: "",
-      passwordTouched: false,
-      newPasswordBlurred: false,
-    });
+  const discard = () => {
+    nameForm.reset();
+    passwordForm.reset(EMPTY_PASSWORD);
+  };
 
   const sendPasswordCode = () =>
     backend
       .sendPasswordCode()
       .then(() => {
-        setState({ isPasswordCodeSent: true, passwordError: "" });
+        passwordForm.clearErrors("root");
+        setState({ isPasswordCodeSent: true });
         toast(`We emailed a code to ${state.email}`);
       })
       .catch(() => toast("The code couldn’t be sent. Try again."));
@@ -366,8 +339,10 @@ export const useAccountSettings = (props: AccountSettingsProps) => {
     confirmDialog,
     isSocial,
     showPasswordFields,
+    passwordForm,
     passwordView,
     passwordErrors,
+    nameForm,
     getNameError,
     isDirty,
     hasSave,

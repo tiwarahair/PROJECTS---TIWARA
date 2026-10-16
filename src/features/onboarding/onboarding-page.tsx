@@ -31,7 +31,7 @@ import type { OnboardingProps } from "./onboarding-state";
 import type { ScreenProps, ScreenView } from "./screen-props";
 import { TermsSheet } from "./terms-sheet";
 import { useOnboarding } from "./use-onboarding";
-import { useOnboardingRoute } from "./use-onboarding-route";
+import { useOnboardingRoute } from "./use-route";
 import { Wizard } from "./wizard";
 
 const SHELL_SCREENS: Record<string, ComponentType<ScreenProps>> = {

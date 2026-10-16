@@ -1,0 +1,117 @@
+.emptyHolder {
+  position: sticky;
+  top: 0;
+  z-index: 6;
+  height: 0;
+}
+
+.emptyCard {
+  pointer-events: auto;
+  width: 100%;
+  max-width: 340px;
+  box-sizing: border-box;
+  text-align: center;
+  background: #fff;
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-float, 0 18px 44px -18px rgba(26, 23, 20, 0.35));
+  padding: 24px 22px;
+  animation: popin 0.22s cubic-bezier(0.23, 1, 0.32, 1) both;
+  position: relative;
+}
+
+.emptyClose {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  width: 34px;
+  height: 34px;
+  border-radius: var(--radius-full);
+  border: none;
+  background: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--text-secondary);
+  padding: 0;
+}
+
+.emptyClose:hover {
+  background: var(--fill-quiet, rgba(26, 23, 20, 0.05)) !important;
+}
+
+.emptyClose:active {
+  transform: scale(0.92) !important;
+}
+
+.emptyIcon {
+  width: 46px;
+  height: 46px;
+  border-radius: var(--radius-full);
+  background: var(--accent-wash);
+  color: var(--accent-700);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.emptyTitle {
+  font-family: "Schibsted Grotesk", sans-serif;
+  font-size: 18px;
+  font-weight: 600;
+  letter-spacing: -0.02em;
+  margin-top: 12px;
+}
+
+.emptyBody {
+  font-size: 14.5px;
+  color: var(--text-secondary);
+  margin-top: 4px;
+  line-height: 1.5;
+  text-wrap: pretty;
+}
+
+.emptyActions {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-top: 16px;
+}
+
+.primary {
+  height: 44px;
+  border: none;
+  border-radius: var(--radius-full);
+  background: var(--accent-700);
+  color: var(--neutral-100);
+  font-size: 14.5px;
+  font-weight: 600;
+}
+
+.primary:active {
+  transform: scale(0.97) !important;
+}
+
+.secondary {
+  height: 44px;
+  border: 1px solid var(--border-strong, #d8d2c6);
+  border-radius: var(--radius-full);
+  background: transparent;
+  font-size: 14.5px;
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.secondary:active {
+  transform: scale(0.97) !important;
+}
+
+@keyframes popin {
+  from {
+    opacity: 0;
+    transform: scale(0.96) translateY(-4px);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+}
