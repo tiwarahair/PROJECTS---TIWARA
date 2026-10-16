@@ -61,8 +61,9 @@ create policy "Owners read their stylist's booking events" on public.booking_eve
 
 grant select on public.bookings, public.booking_events to authenticated;
 
--- Price, length and buffer for a service with the client's picks: one size / length / answer per own question
--- (each switched-on question answered), add-ons linked to the service. Raises invalid_choices otherwise.
+-- Price, length and buffer for a live business's service with the client's picks: one size / length / answer per
+-- own question (each switched-on question answered), add-ons linked to the service. Raises not_bookable or
+-- invalid_choices; every booking function starts here.
 create function public.price_booking(target_service uuid, choices jsonb)
 returns jsonb
 language plpgsql
@@ -81,10 +82,10 @@ declare
   total_minutes integer;
 begin
   select * into service from public.services where id = target_service and status = 'active';
-  select * into stylist from public.stylists where id = service.stylist_id;
+  select * into stylist from public.stylists where id = service.stylist_id and status = 'live';
   select * into rules from public.booking_rules where stylist_id = service.stylist_id;
 
-  if service.id is null then
+  if stylist.id is null then
     raise exception 'not_bookable';
   end if;
 
@@ -141,6 +142,7 @@ begin
   where addon.id = any (extra_ids);
 
   return jsonb_build_object(
+    'stylist_id', stylist.id,
     'service_name', service.name,
     'options', options,
     'addons', extras,
@@ -254,34 +256,18 @@ $$;
 -- The booking page's times for a service and picks, between two London dates (at most two months).
 create function public.get_available_slots(target_service uuid, choices jsonb, from_date date, to_date date)
 returns setof timestamptz
-language plpgsql
+language sql
 stable
 security definer
 set search_path = ''
 as $$
-declare
-  stylist_id uuid;
-  quote jsonb;
-begin
-  select services.stylist_id into stylist_id
-  from public.services
-  join public.stylists on stylists.id = services.stylist_id
-  where services.id = target_service and services.status = 'active' and stylists.status = 'live';
-
-  if stylist_id is null then
-    raise exception 'not_bookable';
-  end if;
-
-  quote := public.price_booking(target_service, choices);
-
-  return query
-    select slot
-    from generate_series(from_date, least(to_date, from_date + 61), interval '1 day') as days (day)
-    cross join lateral public.get_day_slots(
-      stylist_id, (quote ->> 'minutes')::integer, (quote ->> 'buffer_minutes')::integer, day::date
+  select slot
+  from public.price_booking(target_service, choices) as quote,
+    generate_series(from_date, least(to_date, from_date + 61), interval '1 day') as days (day),
+    lateral public.get_day_slots(
+      (quote ->> 'stylist_id')::uuid, (quote ->> 'minutes')::integer, (quote ->> 'buffer_minutes')::integer, day::date
     ) as slot
-    order by slot;
-end;
+  order by slot
 $$;
 
 -- Holds a start for 10 minutes (called by the booking-hold function, which rate-limits by IP). Clears this
@@ -302,23 +288,20 @@ security definer
 set search_path = ''
 as $$
 declare
+  quote jsonb := public.price_booking(target_service, choices);
+  summary jsonb := quote - 'stylist_id' - 'price_pence' - 'fee_pence' - 'minutes' - 'buffer_minutes';
+  price integer := (quote ->> 'price_pence')::integer;
+  fee integer := (quote ->> 'fee_pence')::integer;
+  service_minutes integer := (quote ->> 'minutes')::integer;
+  buffer integer := (quote ->> 'buffer_minutes')::integer;
+  slot_end timestamptz := slot_start + make_interval(mins => service_minutes);
+  block_end timestamptz := slot_end + make_interval(mins => buffer);
   stylist public.stylists;
-  quote jsonb;
   held public.bookings;
   point extensions.geography;
   secret text := hold_secret;
-  slot_end timestamptz;
 begin
-  select stylists.* into stylist
-  from public.stylists
-  join public.services on services.stylist_id = stylists.id
-  where services.id = target_service and services.status = 'active' and stylists.status = 'live';
-
-  if stylist.id is null then
-    raise exception 'not_bookable';
-  end if;
-
-  quote := public.price_booking(target_service, choices);
+  select * into stylist from public.stylists where id = (quote ->> 'stylist_id')::uuid;
 
   if stylist.business_type = 'mobile' then
     if client_lat is null or client_lng is null then
@@ -349,16 +332,11 @@ begin
 
   if not exists (
     select 1
-    from public.get_day_slots(
-      stylist.id, (quote ->> 'minutes')::integer, (quote ->> 'buffer_minutes')::integer,
-      (slot_start at time zone 'Europe/London')::date, held.id
-    ) as slot
+    from public.get_day_slots(stylist.id, service_minutes, buffer, (slot_start at time zone 'Europe/London')::date, held.id) as slot
     where slot = slot_start
   ) then
     raise exception 'slot_taken';
   end if;
-
-  slot_end := slot_start + make_interval(mins => (quote ->> 'minutes')::integer);
 
   begin
     if held.id is null then
@@ -372,11 +350,8 @@ begin
             starts_at, ends_at, block_ends_at, hold_expires_at, hold_secret_hash, location
           )
           values (
-            stylist.id, target_service, choices, quote - 'price_pence' - 'fee_pence' - 'minutes' - 'buffer_minutes',
-            (quote ->> 'price_pence')::integer, (quote ->> 'fee_pence')::integer, (quote ->> 'minutes')::integer,
-            (quote ->> 'buffer_minutes')::integer, slot_start, slot_end,
-            slot_end + make_interval(mins => (quote ->> 'buffer_minutes')::integer),
-            now() + interval '10 minutes', sha256(convert_to(secret, 'UTF8')), point
+            stylist.id, target_service, choices, summary, price, fee, service_minutes, buffer,
+            slot_start, slot_end, block_end, now() + interval '10 minutes', sha256(convert_to(secret, 'UTF8')), point
           )
           returning * into held;
 
@@ -389,19 +364,10 @@ begin
       end loop;
     else
       update public.bookings
-      set service_id = target_service,
-        choices = hold_booking.choices,
-        snapshot = quote - 'price_pence' - 'fee_pence' - 'minutes' - 'buffer_minutes',
-        price_pence = (quote ->> 'price_pence')::integer,
-        fee_pence = (quote ->> 'fee_pence')::integer,
-        minutes = (quote ->> 'minutes')::integer,
-        buffer_minutes = (quote ->> 'buffer_minutes')::integer,
-        starts_at = slot_start,
-        ends_at = slot_end,
-        block_ends_at = slot_end + make_interval(mins => (quote ->> 'buffer_minutes')::integer),
-        status = 'held',
-        hold_expires_at = now() + interval '10 minutes',
-        location = point
+      set service_id = target_service, choices = hold_booking.choices, snapshot = summary,
+        price_pence = price, fee_pence = fee, minutes = service_minutes, buffer_minutes = buffer,
+        starts_at = slot_start, ends_at = slot_end, block_ends_at = block_end,
+        status = 'held', hold_expires_at = now() + interval '10 minutes', location = point
       where id = held.id
       returning * into held;
     end if;
