@@ -1,5 +1,5 @@
 begin;
-select plan(17);
+select plan(19);
 
 insert into auth.users (id, instance_id, aud, role, email, raw_user_meta_data, raw_app_meta_data)
 values ('a1111111-1111-1111-1111-111111111111', '00000000-0000-0000-0000-000000000000', 'authenticated', 'authenticated',
@@ -142,6 +142,19 @@ select public.mark_notification_failed_now((pg_temp.message((select id from memb
 select is(
   (select status || ': ' || last_error from public.notifications where id = (pg_temp.message((select id from member), 'sms', 'booking_confirmed')).id),
   'failed: SMS off', 'a text that can''t be sent is failed straight away'
+);
+
+-- a message that can't be queued never undoes a paid booking
+create temp table broken as select pg_temp.book('15:00', 'pi_broken_hold') as id;
+
+update public.bookings set status = 'held', paid_at = null, stripe_payment_intent_id = 'pi_broken', contact = contact - 'email'
+where id = (select id from broken);
+
+select is(public.confirm_booking_payment('pi_broken'), 'confirmed', 'a booking whose messages fail is still confirmed');
+
+select is(
+  (select count(*)::int from public.booking_events where booking_id = (select id from broken) and kind = 'messages_failed'), 1,
+  'and the failure is logged'
 );
 
 select * from finish();

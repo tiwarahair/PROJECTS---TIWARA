@@ -14,6 +14,7 @@ const booking: ConfirmedBooking = {
   client_name: "Nia Okafor",
   client_phone: "07700 900123",
   notes: "<b>Tender scalp</b>",
+  address_notes: null,
   terms: {
     mode: "deposit",
     refundable: true,
@@ -90,6 +91,19 @@ describe("the client's confirmation email", () => {
 });
 
 describe("the stylist's new booking email", () => {
+  it("gives a mobile stylist the client's address and how to get in", () => {
+    const { text } = newBooking({
+      ...booking,
+      is_mobile: true,
+      where: "12 Dickenson Road, M14 5TQ",
+      address_notes: "Buzzer 3, side door",
+      studio_url: "https://dev.tiwarashouse.com/studio",
+    });
+
+    expect(text).toContain("Their address: 12 Dickenson Road, M14 5TQ.");
+    expect(text).toContain("Getting in: Buzzer 3, side door");
+  });
+
   const email = newBooking({ ...booking, studio_url: "https://dev.tiwarashouse.com/studio" });
 
   it("has who, what, when, their mobile and notes, with a link to Studio", () => {

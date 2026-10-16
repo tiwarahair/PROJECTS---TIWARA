@@ -14,6 +14,7 @@ export interface BookingDetails {
   client_name: string;
   client_phone: string;
   notes: string | null;
+  address_notes: string | null;
 }
 
 interface Terms {
@@ -120,6 +121,7 @@ export const newBooking = (booking: BookingDetails & { studio_url: string }): Re
       `${booking.client_name} booked ${booking.service_name} on ${formatWhen(booking.starts_at)} (UK time).`,
       `Mobile: ${booking.client_phone}`,
       ...(booking.is_mobile ? [`Their address: ${booking.where}.`] : []),
+      ...(booking.address_notes ? [`Getting in: ${booking.address_notes}`] : []),
       ...(booking.notes ? [`Notes: ${booking.notes}`] : []),
       `Booking reference: ${booking.ref}`,
     ],

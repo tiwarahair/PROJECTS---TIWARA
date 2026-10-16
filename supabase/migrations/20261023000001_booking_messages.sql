@@ -100,7 +100,8 @@ begin
     end,
     'client_name', concat_ws(' ', booking.contact ->> 'first', booking.contact ->> 'last'),
     'client_phone', booking.contact ->> 'phone',
-    'notes', booking.notes
+    'notes', booking.notes,
+    'address_notes', nullif(booking.address ->> 'notes', '')
   );
 
   perform public.queue_email(
@@ -167,7 +168,13 @@ begin
   insert into public.booking_events (booking_id, kind, data)
   values (booking.id, 'confirmed', jsonb_build_object('payment_intent', intent));
 
-  perform public.queue_booking_messages(booking.id);
+  -- a message that can't be queued is logged, never undoing the paid booking
+  begin
+    perform public.queue_booking_messages(booking.id);
+  exception when others then
+    insert into public.booking_events (booking_id, kind, data)
+    values (booking.id, 'messages_failed', jsonb_build_object('error', sqlerrm));
+  end;
 
   return 'confirmed';
 end;
