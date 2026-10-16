@@ -1,3 +1,4 @@
+import { useFormState } from "react-hook-form";
 import { Link } from "react-router";
 import { AddressFinder } from "../../components/address-finder/address-finder";
 import { joinClassNames } from "../../utils/class-names";
@@ -14,7 +15,8 @@ const NEW_ADDRESS_ID = "new";
 
 /** Mobile stylists: saved-address cards (logged in), the address finder, the travel-area check and access notes. */
 export const AppointmentAddress = ({ booking }: AppointmentAddressProps) => {
-  const { state, stylist, address, actions } = booking;
+  const { state, stylist, address, actions, detailsForm } = booking;
+  const { isSubmitted } = useFormState({ control: detailsForm.control });
   const { setState } = actions;
   const { saved, selectedAddressId, appointmentAddress } = state;
 
@@ -119,7 +121,7 @@ export const AppointmentAddress = ({ booking }: AppointmentAddressProps) => {
                       : { ...EMPTY_ADDRESS, notes: current.notes },
                   }))
                 }
-                showErrors={state.showErrors}
+                showErrors={isSubmitted}
                 fieldHeight={50}
                 labelSize={12.5}
                 labelColor="secondary"

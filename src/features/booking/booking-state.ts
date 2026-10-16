@@ -114,8 +114,6 @@ export interface BookingState {
   hold: Hold | null;
   holdExpired: boolean;
   taken: boolean;
-  touched: Partial<Record<FieldKey, boolean>>;
-  showErrors: boolean;
   appointmentAddress: BookingAddress;
   legalDocument: LegalDocumentKind | null;
   leave: string | null;
@@ -311,6 +309,7 @@ interface InitialBooking {
   state: BookingState;
   /** ?fixture=privacy opens the allergy field's privacy sheet. */
   openPrivacy: boolean;
+  showErrors: boolean;
 }
 
 /** Skip straight past steps the preselected service doesn't need. */
@@ -364,8 +363,6 @@ export const getInitialBooking = (): InitialBooking => {
     hold: null,
     holdExpired: false,
     taken: params.get("taken") === "1",
-    touched: {},
-    showErrors: false,
     appointmentAddress: { ...EMPTY_ADDRESS },
     legalDocument: null,
     leave: null,
@@ -424,10 +421,15 @@ export const getInitialBooking = (): InitialBooking => {
     };
 
   let openPrivacy = false;
+  let showErrors = false;
 
   // demo states are dev-only; production builds drop this branch and the fixtures module
   if (import.meta.env.DEV && fixture)
-    ({ openPrivacy } = applyFixture(state, fixture, defaultStylist));
+    ({ openPrivacy, showErrors } = applyFixture(
+      state,
+      fixture,
+      defaultStylist,
+    ));
 
   if (!state.board) {
     const draft = readDraft(state.id);
@@ -439,5 +441,5 @@ export const getInitialBooking = (): InitialBooking => {
     }
   }
 
-  return { state, openPrivacy };
+  return { state, openPrivacy, showErrors };
 };

@@ -1,10 +1,11 @@
-import type { ChangeEvent, CSSProperties, ReactNode } from "react";
+import type { CSSProperties, ReactNode } from "react";
+import { Controller, useFormState } from "react-hook-form";
 import { Link } from "react-router";
 import { AllergyField } from "../../components/allergy-field/allergy-field";
 import { joinClassNames } from "../../utils/class-names";
 import { AppointmentAddress } from "./appointment-address";
 import { getEmailFix } from "./booking-details";
-import type { AllergyState, Details, FieldKey } from "./booking-state";
+import type { AllergyState, FieldKey } from "./booking-state";
 import fields from "../../styles/features/booking/booking-fields.module.css";
 import step from "../../styles/features/booking/booking-step.module.css";
 import { CheckBox } from "./step-customise";
@@ -93,10 +94,12 @@ const DetailsField = ({
 
 /** Step 4 (Your details): log in / booking-as line, mobile address, contact fields, allergies and photos. */
 export const StepDetails = ({ booking }: StepDetailsProps) => {
-  const { state, stylist, errors, isMobileStylist, actions, openPrivacy } =
+  const { state, stylist, detailsForm, isMobileStylist, actions, openPrivacy } =
     booking;
 
-  const { setState, touchField } = actions;
+  const { register, setValue, control } = detailsForm;
+  const { errors } = useFormState({ control });
+  const { setState } = actions;
   const { details, loggedIn, allergy, photos } = state;
   const emailFix = getEmailFix(details.email);
 
@@ -104,21 +107,13 @@ export const StepDetails = ({ booking }: StepDetailsProps) => {
     `/book?stylist=${stylist.id}&resume=1`,
   );
 
-  const isShown = (key: FieldKey) =>
-    (state.showErrors || !!state.touched[key]) && !!errors[key];
-
-  const setDetail =
-    (key: keyof Details, clean: (value: string) => string = (value) => value) =>
-    (event: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) =>
-      setState({ details: { ...details, [key]: clean(event.target.value) } });
-
   const setAllergy = (patch: Partial<AllergyState>) =>
     setState((current) => ({ allergy: { ...current.allergy, ...patch } }));
 
   const fieldProps = (key: Exclude<FieldKey, "address">) => ({
     fieldKey: key,
-    error: errors[key] ?? "",
-    showError: isShown(key),
+    error: errors[key]?.message ?? "",
+    showError: !!errors[key],
   });
 
   return (
@@ -177,9 +172,7 @@ export const StepDetails = ({ booking }: StepDetailsProps) => {
                 id={id}
                 type={key === "email" ? "email" : "text"}
                 autoComplete={autoComplete}
-                value={details[key]}
-                onChange={setDetail(key)}
-                onBlur={() => touchField(key)}
+                {...register(key)}
                 aria-invalid={invalid}
                 aria-describedby={describedBy}
                 className={joinClassNames(fields.input, borderClass)}
@@ -196,7 +189,7 @@ export const StepDetails = ({ booking }: StepDetailsProps) => {
             Did you mean{" "}
             <button
               onClick={() =>
-                setState({ details: { ...details, email: emailFix } })
+                setValue("email", emailFix, { shouldValidate: true })
               }
               className={styles.emailFixButton}
             >
@@ -215,21 +208,28 @@ export const StepDetails = ({ booking }: StepDetailsProps) => {
             </span>
           }
           renderInput={({ id, invalid, describedBy, borderClass }) => (
-            <input
-              id={id}
-              type="tel"
-              inputMode="numeric"
-              autoComplete="tel-national"
-              placeholder="07700 900123"
-              value={details.phone}
-              onChange={setDetail("phone", (value) =>
-                value.replace(/[^\d ]/g, "").slice(0, 13),
+            <Controller
+              name="phone"
+              control={control}
+              render={({ field: { onChange, ...field } }) => (
+                <input
+                  {...field}
+                  id={id}
+                  type="tel"
+                  inputMode="numeric"
+                  autoComplete="tel-national"
+                  placeholder="07700 900123"
+                  onChange={(event) =>
+                    onChange(
+                      event.target.value.replace(/[^\d ]/g, "").slice(0, 13),
+                    )
+                  }
+                  aria-invalid={invalid}
+                  aria-describedby={describedBy}
+                  aria-label="Mobile, UK number"
+                  className={joinClassNames(styles.phoneInput, borderClass)}
+                />
               )}
-              onBlur={() => touchField("phone")}
-              aria-invalid={invalid}
-              aria-describedby={describedBy}
-              aria-label="Mobile, UK number"
-              className={joinClassNames(styles.phoneInput, borderClass)}
             />
           )}
         />
@@ -239,8 +239,7 @@ export const StepDetails = ({ booking }: StepDetailsProps) => {
             <span className={fields.optional}>(optional)</span>
           </span>
           <textarea
-            value={details.notes}
-            onChange={setDetail("notes")}
+            {...register("notes")}
             rows={3}
             className={styles.notes}
           ></textarea>

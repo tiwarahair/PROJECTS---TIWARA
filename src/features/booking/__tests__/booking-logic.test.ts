@@ -9,40 +9,22 @@ import {
   getCardBrand,
   getCardError,
   getEmailFix,
-  getFieldErrors,
 } from "../booking-details";
 import { getDeltaLabel } from "../booking-pricing";
 
-describe("details validation", () => {
-  it("flags every empty contact field and a non-UK mobile", () => {
-    const empty = { first: "", last: "", email: "", phone: "", notes: "" };
-
-    expect(Object.keys(getFieldErrors(empty, true, false))).toEqual([
-      "address",
-      "first",
-      "last",
-      "email",
-      "phone",
-    ]);
-
-    expect(
-      getFieldErrors(
-        {
-          first: "Nia",
-          last: "Okafor",
-          email: "nia@gmail.com",
-          phone: "+44 7700 900123",
-          notes: "",
-        },
-        false,
-        false,
-      ),
-    ).toEqual({});
-  });
-
+describe("details", () => {
   it("suggests the fixed email domain", () => {
     expect(getEmailFix("nia.okafor@gmial.com")).toBe("nia.okafor@gmail.com");
     expect(getEmailFix("nia.okafor@gmail.com")).toBe("");
+  });
+
+  it("suggests the fixed ending, alone or with the domain", () => {
+    expect(getEmailFix("kemi@example.comss")).toBe("kemi@example.com");
+    expect(getEmailFix("kemi@example.con")).toBe("kemi@example.com");
+    expect(getEmailFix("kemi@gmial.coms")).toBe("kemi@gmail.com");
+    expect(getEmailFix("kemi@example.co.ukk")).toBe("kemi@example.co.uk");
+    expect(getEmailFix("kemi@example.community")).toBe("");
+    expect(getEmailFix("kemi@example.co.uk")).toBe("");
   });
 
   it("checks a mobile stylist's travel area by postcode district", () => {

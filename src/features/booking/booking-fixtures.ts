@@ -37,7 +37,7 @@ export const applyFixture = (
   state: BookingState,
   fixture: string,
   defaultStylist: Stylist,
-): { openPrivacy: boolean } => {
+): { openPrivacy: boolean; showErrors: boolean } => {
   const fixtureDate = getFixtureDate();
 
   const setFixtureDate = () => {
@@ -163,10 +163,7 @@ export const applyFixture = (
       source: "pick",
     };
 
-  if (fixture === "details-errors") {
-    state.details = { ...EMPTY_DETAILS };
-    state.showErrors = true;
-  }
+  if (fixture === "details-errors") state.details = { ...EMPTY_DETAILS };
 
   if (
     [
@@ -267,5 +264,8 @@ export const applyFixture = (
     });
   }
 
-  return { openPrivacy: fixture === "privacy" };
+  return {
+    openPrivacy: fixture === "privacy",
+    showErrors: fixture === "details-errors",
+  };
 };

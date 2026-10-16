@@ -41,10 +41,35 @@ describe("BookingPage", () => {
     );
   });
 
-  it("details-errors: Continue shows every field error", () => {
+  it("details-errors: Continue shows every field error", async () => {
     renderWithStore(<BookingPage />, "/book?fixture=details-errors");
+    await act(() => Promise.resolve());
     expect(screen.getByText("Enter your first name")).toBeInTheDocument();
     expect(screen.getByText("Enter a UK mobile number")).toBeInTheDocument();
+  });
+
+  it("details: errors clear as fields are fixed, then Continue goes to Review", async () => {
+    renderWithStore(<BookingPage />, "/book?fixture=details-errors");
+    await act(() => Promise.resolve());
+
+    await user.type(screen.getByLabelText("First name"), "Nia");
+    await act(() => Promise.resolve());
+    expect(screen.queryByText("Enter your first name")).not.toBeInTheDocument();
+
+    await user.type(screen.getByLabelText("Last name"), "Okafor");
+    await user.type(screen.getByLabelText("Email"), "nia@gmail.com");
+    await user.type(screen.getByLabelText("Mobile, UK number"), "07700a900123");
+
+    expect(screen.getByLabelText("Mobile, UK number")).toHaveValue(
+      "07700900123",
+    );
+
+    await user.click(screen.getAllByRole("button", { name: /^Continue/ })[0]!);
+    await act(() => Promise.resolve());
+
+    expect(
+      screen.getByRole("heading", { level: 1, name: "Review your booking" }),
+    ).toBeInTheDocument();
   });
 
   it("review: shows the policy card and Continue to payment", () => {
