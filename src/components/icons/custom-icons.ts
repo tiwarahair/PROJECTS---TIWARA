@@ -27,3 +27,29 @@ export const MoonIcon = createPathIcon(
   "moon",
   "M20 14.5A8 8 0 0 1 9.5 4a8 8 0 1 0 10.5 10.5z",
 );
+
+export const LocationPinIcon = createPathIcon(
+  "location-pin",
+  "M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0zM15 10a3 3 0 1 1-6 0 3 3 0 0 1 6 0z",
+);
+
+export const VerifiedBadgeIcon = createLucideIcon("verified-badge", [
+  [
+    "path",
+    {
+      d: "M12 2l2.4 2.1 3.1-.4 1 3 2.9 1.2-.6 3.1L23 12l-2.2 2.3.6 3.1-2.9 1.2-1 3-3.1-.4L12 22l-2.4-2.1-3.1.4-1-3-2.9-1.2.6-3.1L1 12l2.2-2.3-.6-3.1 2.9-1.2 1-3 3.1.4z",
+      fill: "currentColor",
+      stroke: "none",
+      key: "rosette",
+    },
+  ],
+  [
+    "path",
+    {
+      d: "M9.5 12.2l1.8 1.8 3.6-3.8",
+      stroke: "#fffefb",
+      strokeWidth: "1.8",
+      key: "tick",
+    },
+  ],
+]);
