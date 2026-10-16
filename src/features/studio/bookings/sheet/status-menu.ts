@@ -127,6 +127,7 @@ const STATUS_ITEMS: Record<
   ],
 };
 
+// ---- the status menu ----
 export const getStatusMenu = (context: SheetContext) => ({
   statusItems: STATUS_ITEMS[getStatusMenuKind(context.booking)](context).map(
     (item) => ({

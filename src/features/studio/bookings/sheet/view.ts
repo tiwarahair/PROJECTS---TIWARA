@@ -28,12 +28,18 @@ export const getBookingSheetView = (studio: StudioController) => {
     ...getStepsView(context),
     ...getClientView(context),
     ...getStatusMenu(context),
+    // payment
     ...getPaymentView(context),
+    // footer
     ...getFooterView(context),
     ...getPanelsView(context),
+    // change client
     ...getChangeClientView(context),
+    // reschedule
     ...getRescheduleView(context),
+    // cancel
     ...getCancelView(context),
+    // no-show
     ...getNoShowView(context),
     ...getCheckoutView(context),
   };

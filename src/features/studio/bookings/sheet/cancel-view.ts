@@ -47,6 +47,7 @@ const getCancelBody = ({ state, booking, isLate, lateFee }: SheetContext) => {
   return `${firstName} is cancelling inside your ${windowText} window. Your policy has no late cancellation fee: ${refundNote}. The slot opens up.`;
 };
 
+// ---- cancel ----
 export const getCancelView = (context: SheetContext) => {
   const { state, actions, memo, booking, hoursToStart, isLate, lateFee } =
     context;

@@ -16,6 +16,7 @@ const getVisitsMeta = ({ visits, area }: { visits?: number; area?: string }) =>
   (visits === 1 ? " visit" : " visits") +
   (area ? ` · ${area}` : "");
 
+// ---- change client ----
 export const getChangeClientView = (context: SheetContext) => {
   const { state, setState, actions, memo, booking } = context;
   const changeQuery = (state.changeClientQuery || "").trim();

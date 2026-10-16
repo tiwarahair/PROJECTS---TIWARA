@@ -44,6 +44,7 @@ const getReceived = (booking: DecoratedBooking): ReceivedLine => {
   };
 };
 
+// ---- the payment breakdown ----
 export const getPaymentView = ({
   booking,
   addonLines,
