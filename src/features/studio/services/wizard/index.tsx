@@ -3,11 +3,17 @@ import { AddonsStep } from "./addons-step";
 import { DetailsStep } from "./details-step";
 import { PricingStep } from "./pricing-step";
 import { ReviewStep } from "./review-step";
+import type { WizardForm } from "./use-wizard-form";
 import type { WizardView } from "./view";
 import styles from "../../../../styles/features/studio/services/wizard/index.module.css";
 
+interface WizardProps {
+  view: WizardView;
+  form: WizardForm;
+}
+
 /** The service wizard's body. */
-export const WizardSheet = ({ view }: { view: WizardView }) => (
+export const WizardSheet = ({ view, form }: WizardProps) => (
   <>
     {view.isAdd && (
       <>
@@ -38,15 +44,15 @@ export const WizardSheet = ({ view }: { view: WizardView }) => (
         ))}
       </div>
     )}
-    {view.isStep2 && <DetailsStep view={view} />}
-    {view.isPricing && <PricingStep view={view} />}
+    {view.isStep2 && <DetailsStep view={view} form={form} />}
+    {view.isPricing && <PricingStep view={view} form={form} />}
     {view.isReview && <ReviewStep view={view} />}
     {view.isStep4 && <AddonsStep view={view} />}
   </>
 );
 
 /** Back / Continue / Add service / Save service. */
-export const WizardFooter = ({ view }: { view: WizardView }) => (
+export const WizardFooter = ({ view, form }: WizardProps) => (
   <div className={styles.footer}>
     <div className={styles.footerRow}>
       {view.canBack && (
@@ -59,7 +65,13 @@ export const WizardFooter = ({ view }: { view: WizardView }) => (
           styles.next,
           view.isDisabled && styles.nextOff,
         )}
-        onClick={view.next}
+        onClick={() =>
+          void form.handleSubmit(view.next, (errors) => {
+            if (!view.isEdit) return;
+
+            view.showStep(errors.name || errors.typeId ? 2 : 3);
+          })()
+        }
         disabled={view.isDisabled}
       >
         {view.cta}

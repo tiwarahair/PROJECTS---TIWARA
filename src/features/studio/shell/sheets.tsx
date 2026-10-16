@@ -1,5 +1,6 @@
 import { useClientForm } from "../clients/use-client-form";
 import { useAddonForm } from "../services/use-addon-form";
+import { useWizardForm } from "../services/wizard/use-wizard-form";
 import { AddBookingSheet } from "../bookings/add";
 import { getAddBookingView } from "../bookings/add/view";
 import { BookingSheetBody } from "../bookings/sheet";
@@ -63,6 +64,8 @@ export const StudioSheets = ({ studio }: { studio: StudioController }) => {
     sheet === "clientEdit" && !studio.state.out,
   );
 
+  const wizardForm = useWizardForm(studio);
+
   const addonForm = useAddonForm(
     studio.state.addonDraft?.name ?? "",
     !!addonView && !studio.state.out,
@@ -91,7 +94,7 @@ export const StudioSheets = ({ studio }: { studio: StudioController }) => {
     if (clientsView && sheet === "clientEdit")
       return <ClientEditFooter view={clientsView} form={clientForm} />;
 
-    if (wizardView) return <WizardFooter view={wizardView} />;
+    if (wizardView) return <WizardFooter view={wizardView} form={wizardForm} />;
 
     return addonView ? (
       <AddonSheetFooter view={addonView} form={addonForm} />
@@ -113,7 +116,7 @@ export const StudioSheets = ({ studio }: { studio: StudioController }) => {
       )}
       {sheet === "notif" && <NotificationsSheet studio={studio} />}
       {addView && <AddBookingSheet studio={studio} view={addView} />}
-      {wizardView && <WizardSheet view={wizardView} />}
+      {wizardView && <WizardSheet view={wizardView} form={wizardForm} />}
       {categoriesView && (
         <CategoriesSheet studio={studio} view={categoriesView} />
       )}

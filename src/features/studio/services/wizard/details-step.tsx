@@ -2,16 +2,19 @@ import { ImageIcon, Sparkles } from "lucide-react";
 import { SearchSelect } from "../../../../components/search-select/search-select";
 import { joinClassNames } from "../../../../utils/class-names";
 import { Swatches } from "../catalog-sheets";
+import type { WizardForm } from "./use-wizard-form";
 import type { WizardView } from "./view";
 import parts from "../../../../styles/features/studio/services/wizard/parts.module.css";
 import styles from "../../../../styles/features/studio/services/wizard/details-step.module.css";
 
 interface DetailsStepProps {
   view: WizardView;
+  form: WizardForm;
 }
 
 /** Step 2: name, description, category, service type and images. */
-export const DetailsStep = ({ view }: DetailsStepProps) => {
+export const DetailsStep = ({ view, form }: DetailsStepProps) => {
+  const { errors } = form.formState;
   const { draft, newCategory } = view;
 
   return (
@@ -42,8 +45,14 @@ export const DetailsStep = ({ view }: DetailsStepProps) => {
           value={draft.name}
           onChange={view.onName}
           placeholder="e.g. Knotless braids"
+          aria-invalid={errors.name ? "true" : "false"}
         />
       </label>
+      {errors.name && (
+        <div className={parts.varError} role="alert">
+          {errors.name.message}
+        </div>
+      )}
       <label className={parts.block}>
         <span className={parts.fieldLabel}>
           Description <span className={styles.optionalGrey}>(optional)</span>
@@ -142,6 +151,11 @@ export const DetailsStep = ({ view }: DetailsStepProps) => {
               onChange={view.pickType}
             />
           </div>
+          {errors.typeId && (
+            <div className={parts.varError} role="alert">
+              {errors.typeId.message}
+            </div>
+          )}
           {view.isSubcategoryTipOpen && (
             // eslint-disable-next-line jsx-a11y/click-events-have-key-events, jsx-a11y/no-static-element-interactions
             <div className={styles.subTip} onClick={view.toggleSubcategoryTip}>

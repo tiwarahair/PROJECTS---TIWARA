@@ -2,6 +2,7 @@ import type { CSSProperties } from "react";
 import { ChevronDown, Plus } from "lucide-react";
 import { joinClassNames } from "../../../../utils/class-names";
 import { VariationCard } from "./parts";
+import type { WizardForm } from "./use-wizard-form";
 import type { WizardView } from "./view";
 import parts from "../../../../styles/features/studio/services/wizard/parts.module.css";
 import styles from "../../../../styles/features/studio/services/wizard/pricing-step.module.css";
@@ -10,11 +11,18 @@ const asStyle = (values: Record<string, string>) => values as CSSProperties;
 
 interface PricingStepProps {
   view: WizardView;
+  form: WizardForm;
 }
 
 /** Step 3: base price and time, size / length options and own customisations. */
-export const PricingStep = ({ view }: PricingStepProps) => {
+export const PricingStep = ({ view, form }: PricingStepProps) => {
   const { draft, own } = view;
+  const { errors } = form.formState;
+
+  const baseErrors = [
+    errors.price?.message,
+    errors.durationHours?.message,
+  ].filter((message) => !!message);
 
   return (
     <>
@@ -195,6 +203,11 @@ export const PricingStep = ({ view }: PricingStepProps) => {
           </div>
         </div>
       )}
+      {baseErrors.map((message) => (
+        <div key={message} className={parts.varError} role="alert">
+          {message}
+        </div>
+      ))}
       {view.hasPlatform && (
         <div className={styles.customTitle}>Customisations</div>
       )}

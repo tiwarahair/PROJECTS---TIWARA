@@ -205,24 +205,11 @@ export const getWizardView = (studio: StudioController) => {
   };
 
   const getIsDisabled = () => {
-    if (wizard.mode === "edit")
-      return !(
-        draft.name.trim() &&
-        draft.taxonomyId &&
-        draft.typeId &&
-        isStep3Valid &&
-        !isVariationBad
-      );
+    if (wizard.mode === "edit") return isVariationBad;
 
     if (wizard.step === 1) return true;
 
-    if (wizard.step === 2)
-      return !(draft.name.trim() && draft.taxonomyId && draft.typeId);
-
-    if (wizard.step === 3 && !wizard.review)
-      return !(isStep3Valid && !isVariationBad);
-
-    return false;
+    return wizard.step === 3 && !wizard.review && isVariationBad;
   };
 
   const isDisabled = getIsDisabled();
@@ -566,6 +553,7 @@ export const getWizardView = (studio: StudioController) => {
       save();
     },
     isDisabled,
+    showStep: (step: number) => setWizard({ step, review: false }),
     cta: getCta(),
     isWide,
   };
