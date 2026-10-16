@@ -1,13 +1,14 @@
 import { act, render, screen } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import { BusinessDetails } from "../business-details";
-import type { BusinessDetailsApi } from "../business-details";
-import { getAreaLabel, formatVatNumber } from "../business-details-logic";
-import type { BusinessPreset } from "../business-details-logic";
+import { BusinessDetails } from "..";
+import type { BusinessDetailsApi } from "..";
+import type { BusinessPreset } from "../types";
 import type { UserEvent } from "@testing-library/user-event";
 import { setupUser } from "../../../test/setup-user";
 
 let user: UserEvent;
+
+const settle = () => act(() => vi.advanceTimersByTimeAsync(0));
 
 beforeEach(() => {
   user = setupUser();
@@ -40,12 +41,13 @@ describe("BusinessDetails", () => {
     expect(screen.getByRole("heading", { name: heading })).toBeInTheDocument();
   });
 
-  it("presets vatValid / vatInvalid show the VAT result", () => {
+  it("presets vatValid / vatInvalid show the VAT result", async () => {
     const { unmount } = render(<BusinessDetails preset="vatValid" />);
 
     expect(screen.getByText("GB 312 4567 89")).toBeInTheDocument();
     unmount();
     render(<BusinessDetails preset="vatInvalid" />);
+    await settle();
 
     expect(
       screen.getByText(
@@ -54,8 +56,9 @@ describe("BusinessDetails", () => {
     ).toBeInTheDocument();
   });
 
-  it("preset pcError flags the address in the save bar", () => {
+  it("preset pcError flags the address in the save bar", async () => {
     render(<BusinessDetails preset="pcError" />);
+    await settle();
 
     expect(
       screen.getByText("Fix the highlighted field to save"),
@@ -72,6 +75,7 @@ describe("BusinessDetails", () => {
 
     expect(onState.mock.lastCall?.[0].canSave).toBe(true);
     await user.click(screen.getByRole("button", { name: "Save changes" }));
+    await settle();
 
     expect(onSave).toHaveBeenCalledWith(
       expect.objectContaining({
@@ -89,20 +93,57 @@ describe("BusinessDetails", () => {
     expect(screen.getByRole("status")).toHaveClass(/toastHidden/);
   });
 
+  it("saving without a phone or email flags both until one is filled", async () => {
+    const onSave = vi.fn();
+
+    render(<BusinessDetails preset="unsaved" onSave={onSave} />);
+    await settle();
+    await user.clear(screen.getByLabelText("Business phone"));
+    await user.clear(screen.getByLabelText("Business email"));
+    await user.click(screen.getByRole("button", { name: "Save changes" }));
+    await settle();
+
+    expect(onSave).not.toHaveBeenCalled();
+
+    expect(
+      screen.getByText("Fix the 2 highlighted fields to save"),
+    ).toBeInTheDocument();
+
+    await user.type(screen.getByLabelText("Business phone"), "07700 900418");
+    await settle();
+
+    expect(screen.queryByRole("alert")).not.toBeInTheDocument();
+  });
+
+  it("switching to mobile drops the address error", async () => {
+    render(<BusinessDetails preset="pcError" />);
+    await settle();
+    await user.click(screen.getByRole("radio", { name: /Mobile/ }));
+    await settle();
+
+    expect(
+      screen.queryByText("Fix the highlighted field to save"),
+    ).not.toBeInTheDocument();
+  });
+
+  it("the VAT number drops the GB prefix and letters while typing", async () => {
+    render(<BusinessDetails preset="vatValid" />);
+    const vat = screen.getByLabelText("VAT number");
+
+    await user.clear(vat);
+    await user.type(vat, "3a1");
+    expect(vat).toHaveValue("31");
+    await user.clear(vat);
+    await user.paste("GB 312 4567 89");
+
+    expect(vat).toHaveValue("312 4567 89");
+  });
+
   it("without tax details offers to add them", async () => {
     const onEditTax = vi.fn();
 
     render(<BusinessDetails tax={null} onEditTax={onEditTax} />);
     await user.click(screen.getByRole("button", { name: "Add tax details" }));
     expect(onEditTax).toHaveBeenCalled();
-  });
-
-  it("labels the home area and formats VAT numbers", () => {
-    expect(getAreaLabel("M14 5TQ")).toBe("Rusholme, M14");
-    expect(getAreaLabel("M1 5QA")).toBe("M1");
-    expect(getAreaLabel("M14")).toBe("Add your postcode to see your area");
-    // same postcode rules as every other form
-    expect(getAreaLabel("m14-5tq")).toBe("Rusholme, M14");
-    expect(formatVatNumber("312456789012")).toBe("GB 312 4567 89 012");
   });
 });

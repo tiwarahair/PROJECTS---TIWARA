@@ -1,6 +1,6 @@
 import type { NOTIFS } from "./studio-data";
 // Studio state shapes: component state, clients, past bookings, seed services/add-ons.
-import type { BusinessValue } from "../../components/business-details/business-details-logic";
+import type { BusinessValue } from "../../components/business-details/types";
 import type { PolicyValue } from "../../components/payment-policy/payment-policy-logic";
 import type { TwoFactorEnrolment } from "../../lib/two-factor";
 import type { PayoutStatus } from "../../components/account-settings/account-settings-logic";

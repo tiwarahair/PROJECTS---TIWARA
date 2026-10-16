@@ -1,4 +1,4 @@
-import type { BusinessValue } from "../../components/business-details/business-details-logic";
+import type { BusinessValue } from "../../components/business-details/types";
 import { geocodeAddress } from "../../lib/google-maps";
 import { updateStylist, updateStylistAddress } from "../../lib/studio-api";
 import { toStoredBusinessType } from "../../utils/business-type";

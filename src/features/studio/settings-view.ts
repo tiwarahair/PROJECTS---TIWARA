@@ -1,5 +1,5 @@
 // Studio → Settings: composes the page views and wires the embedded pages (policy, business, account, tax).
-import type { BusinessValue } from "../../components/business-details/business-details-logic";
+import type { BusinessValue } from "../../components/business-details/types";
 import type { PolicyValue } from "../../components/payment-policy/payment-policy-logic";
 import type { PaymentPolicyApi } from "../../components/payment-policy/payment-policy";
 import type { AccountSettingsApi } from "../../components/account-settings/use-account-settings";
