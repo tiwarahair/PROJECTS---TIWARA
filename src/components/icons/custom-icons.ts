@@ -63,3 +63,8 @@ export const FavouritesHeartIcon = createPathIcon(
   "favourites-heart",
   "M12 20.5s-7.5-4.6-9.2-9.4C1.6 7.6 3.9 4.5 7.2 4.5c2 0 3.6 1.1 4.8 2.8 1.2-1.7 2.8-2.8 4.8-2.8 3.3 0 5.6 3.1 4.4 6.6-1.7 4.8-9.2 9.4-9.2 9.4z",
 );
+
+export const CtaArrowIcon = createPathIcon(
+  "cta-arrow",
+  "M5 12h14M13 6l6 6-6 6",
+);

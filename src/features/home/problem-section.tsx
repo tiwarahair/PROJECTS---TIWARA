@@ -1,12 +1,6 @@
 import { useRef } from "react";
-import {
-  ArrowRight,
-  Check,
-  ChevronLeft,
-  ChevronRight,
-  Plus,
-  WifiHigh,
-} from "lucide-react";
+import { Check, ChevronLeft, ChevronRight, Plus, WifiHigh } from "lucide-react";
+import { CtaArrowIcon } from "../../components/icons/custom-icons";
 import { Link } from "react-router";
 import { chatMessages } from "../../data";
 import { joinClassNames } from "../../utils/class-names";
@@ -40,7 +34,7 @@ export const ProblemSection = () => {
           </p>
           <Link data-rv="" to="/search" className={styles.bookNow}>
             Book now
-            <ArrowRight size={16} strokeWidth={2} strokeLinejoin="miter" />
+            <CtaArrowIcon size={16} strokeWidth={2} strokeLinejoin="miter" />
           </Link>
         </div>
         <div data-rv="" className={joinClassNames(page.probvis, styles.visual)}>

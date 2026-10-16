@@ -3,6 +3,7 @@ import { describe, expect, it } from "vitest";
 import {
   AllStylesIcon,
   BraidsIcon,
+  CtaArrowIcon,
   FavouritesHeartIcon,
   MoonIcon,
   NaturalHairIcon,
@@ -16,6 +17,7 @@ describe("custom icons", () => {
   it.each([
     AllStylesIcon,
     BraidsIcon,
+    CtaArrowIcon,
     FavouritesHeartIcon,
     MoonIcon,
     NaturalHairIcon,

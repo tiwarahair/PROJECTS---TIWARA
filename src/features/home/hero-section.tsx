@@ -1,5 +1,5 @@
 import { ResponsiveImage } from "../../components/responsive-image/responsive-image";
-import { ArrowRight } from "lucide-react";
+import { CtaArrowIcon } from "../../components/icons/custom-icons";
 import { Link } from "react-router";
 import { joinClassNames } from "../../utils/class-names";
 import page from "../../styles/features/home/home-page.module.css";
@@ -41,14 +41,14 @@ export const HeroSection = () => (
           to="/search"
           className={joinClassNames(page.flowbtn, styles.bookNow)}
         >
-          <ArrowRight
+          <CtaArrowIcon
             size={16}
             strokeWidth={2}
             className={joinClassNames(page.fbArrow, page.fbArrowLeft)}
           />
           <span className={page.fbCircle}></span>
           <span className={page.fbText}>Book now</span>
-          <ArrowRight
+          <CtaArrowIcon
             size={16}
             strokeWidth={2}
             className={joinClassNames(page.fbArrow, page.fbArrowRight)}
