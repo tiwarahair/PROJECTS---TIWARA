@@ -1,0 +1,85 @@
+.panel {
+  background: #fff;
+  border-radius: var(--radius-lg);
+  padding: 16px 16px 10px;
+  box-shadow: var(--shadow-panel);
+  height: 100%;
+  box-sizing: border-box;
+}
+
+.chartHead {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.chartTitle {
+  font-family: "Schibsted Grotesk", sans-serif;
+  font-size: 18px;
+  font-weight: 600;
+  letter-spacing: -0.02em;
+}
+
+.chartEmpty {
+  padding: 30px 8px 26px;
+  text-align: center;
+}
+
+.emptyBody {
+  font-size: 14.5px;
+  color: var(--text-secondary);
+  margin-top: 3px;
+  line-height: 1.45;
+}
+
+.chart {
+  position: relative;
+  margin-top: 10px;
+}
+
+.chartSvg {
+  width: 100%;
+  height: auto;
+  display: block;
+  animation: chartin 0.4s ease-out both;
+  touch-action: none;
+}
+
+.chartTip {
+  position: absolute;
+  top: -6px;
+  transform: translateX(-50%);
+  background: #1a1714;
+  color: var(--neutral-100);
+  border-radius: var(--radius-full);
+  padding: 4px 10px;
+  font-size: 12.5px;
+  font-weight: 500;
+  white-space: nowrap;
+  pointer-events: none;
+  box-shadow: var(--shadow-pill);
+  /* runtime: over the hovered point */
+  left: var(--tip-left);
+}
+
+.chartLabels {
+  display: flex;
+  justify-content: space-between;
+  padding: 6px 4px 4px;
+}
+
+.chartLabel {
+  font-size: 12.5px;
+  color: var(--text-secondary);
+}
+
+@keyframes chartin {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}

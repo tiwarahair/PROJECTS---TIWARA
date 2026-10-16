@@ -1,0 +1,54 @@
+/* ---- go-live gate ---- */
+.gate {
+  grid-column: 1/-1;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 12px 16px;
+  background: rgba(181, 84, 31, 0.08);
+  border-radius: var(--radius-lg);
+  padding: 16px 18px;
+}
+
+.gateIcon {
+  width: 36px;
+  height: 36px;
+  border-radius: var(--radius-full);
+  background: rgba(181, 84, 31, 0.14);
+  color: var(--accent-500, #b5541f);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex: 0 0 auto;
+}
+
+.gateText {
+  flex: 1 1 260px;
+  min-width: 0;
+  font-size: 14.5px;
+  line-height: 1.5;
+  color: var(--text-primary);
+  text-wrap: pretty;
+}
+
+.bold {
+  font-weight: 600;
+}
+
+.gateButton {
+  flex: 0 0 auto;
+  height: 40px;
+  padding: 0 18px;
+  border: none;
+  border-radius: var(--radius-full);
+  background: #1a1714;
+  color: var(--neutral-100);
+  font: inherit;
+  font-size: 14.5px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.gateButton:active {
+  transform: scale(0.97) !important;
+}

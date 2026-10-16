@@ -1,0 +1,69 @@
+/* ---- policy nudge ---- */
+.nudge {
+  grid-column: 1/-1;
+  background: #fff;
+  box-shadow: var(--shadow-panel);
+  border-radius: var(--radius-lg);
+  padding: 16px 18px;
+  animation: rowin 0.3s cubic-bezier(0.2, 0.8, 0.2, 1) both;
+}
+
+.nudgeHead {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+}
+
+.nudgeTitle {
+  font-size: 15px;
+  font-weight: 600;
+}
+
+.nudgeBody {
+  font-size: 14.5px;
+  color: var(--text-secondary);
+  margin-top: 3px;
+  line-height: 1.5;
+  max-width: 68ch;
+  text-wrap: pretty;
+}
+
+.nudgeClose {
+  border: none;
+  background: none;
+  color: var(--text-secondary);
+  padding: 2px;
+  flex: 0 0 auto;
+}
+
+.nudgeActions {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  margin-top: 12px;
+}
+
+.nudgeButton {
+  border: none;
+  background: var(--accent-700);
+  color: var(--neutral-100);
+  border-radius: var(--radius-full);
+  padding: 8px 16px;
+  font-size: 14.5px;
+  font-weight: 600;
+}
+
+.nudgeButton:active {
+  transform: scale(0.97) !important;
+}
+
+@keyframes rowin {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}

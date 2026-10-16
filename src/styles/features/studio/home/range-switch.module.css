@@ -1,0 +1,28 @@
+.ranges {
+  display: flex;
+  background: var(--quiet);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-full);
+  padding: 3px;
+  gap: 2px;
+}
+
+.range {
+  border: none;
+  border-radius: var(--radius-full);
+  padding: 5px 11px;
+  font-size: 13.5px;
+  font-weight: 600;
+  transition:
+    background 0.22s cubic-bezier(0.2, 0.8, 0.2, 1),
+    color 0.22s;
+  background: transparent;
+  color: var(--text-secondary);
+  box-shadow: none;
+}
+
+.rangeOn {
+  background: #1a1714;
+  color: var(--neutral-100);
+  box-shadow: 0 2px 6px rgba(26, 23, 20, 0.25);
+}
