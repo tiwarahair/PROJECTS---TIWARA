@@ -20,18 +20,32 @@ import { listTwoFactorDevices } from "../lib/two-factor";
 import type { TwoFactorDevice } from "../lib/two-factor";
 import type { Profile } from "../types/profile";
 
+/** Errors are kept as plain data: the store must stay serializable. */
+export interface ApiError {
+  message: string;
+}
+
 /** RTK Query's result shape for a promise that may throw. */
 const toQueryResult = <T>(task: Promise<T>) =>
   task.then(
     (data) => ({ data }),
     (error: unknown) => ({
-      error: error instanceof Error ? error : new Error(String(error)),
+      error: {
+        message: error instanceof Error ? error.message : String(error),
+      },
     }),
   );
 
+/** Whether an unwrapped request failed with this message. */
+export const hasErrorMessage = (error: unknown, message: string) =>
+  typeof error === "object" &&
+  error !== null &&
+  "message" in error &&
+  error.message === message;
+
 export const api = createApi({
   reducerPath: "api",
-  baseQuery: fakeBaseQuery<Error>(),
+  baseQuery: fakeBaseQuery<ApiError>(),
   tagTypes: ["Studio", "StylistProfile", "Search", "TwoFactor", "Slots"],
   refetchOnReconnect: true,
   endpoints: (build) => ({

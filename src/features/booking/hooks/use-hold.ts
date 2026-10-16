@@ -1,6 +1,7 @@
 import { useMemo } from "react";
 import type { BookingChoices } from "../../../lib/booking-api";
 import {
+  hasErrorMessage,
   useGetAvailableSlotsQuery,
   useHoldBookingMutation,
 } from "../../../stores/api-slice";
@@ -80,7 +81,7 @@ export const useHold = ({ flow, choices, canListTimes }: HoldOptions) => {
         },
       };
     } catch (error) {
-      const isTaken = error instanceof Error && error.message === "slot_taken";
+      const isTaken = hasErrorMessage(error, "slot_taken");
 
       setState({
         holding: false,
