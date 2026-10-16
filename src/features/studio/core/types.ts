@@ -253,7 +253,7 @@ interface ClosedPeriod {
   reason: string;
 }
 
-interface WorkingHours {
+export interface WorkingHours {
   day: string;
   on: boolean;
   start: string;

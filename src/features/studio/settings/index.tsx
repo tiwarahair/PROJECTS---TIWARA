@@ -11,6 +11,7 @@ import { AvailabilityPage } from "./availability";
 import { ProfilePage } from "./profile";
 import { RulesPage } from "./rules";
 import { getSettingsView } from "./view";
+import { AVAILABILITY_FORM_ID } from "./availability/use-availability-form";
 import { PROFILE_FORM_ID } from "./profile/use-profile-form";
 import type { SettingsView } from "./view";
 import { GATE_REASON } from "../core/constants";
@@ -283,7 +284,11 @@ const SettingsFrame = ({
               </button>
               <div className={styles.spacer}></div>
               {view.isAvailability && (
-                <button className={styles.save} onClick={view.saveAvailability}>
+                <button
+                  className={styles.save}
+                  type="submit"
+                  form={AVAILABILITY_FORM_ID}
+                >
                   Save
                 </button>
               )}
@@ -415,7 +420,8 @@ const SettingsFrame = ({
                 {view.isAvailability && (
                   <button
                     className={styles.saveChanges}
-                    onClick={view.saveAvailability}
+                    type="submit"
+                    form={AVAILABILITY_FORM_ID}
                   >
                     Save changes
                   </button>

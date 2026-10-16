@@ -263,11 +263,48 @@ describe("Studio → Settings", () => {
       screen.getByRole("switch", { name: "Pause online bookings" }),
     );
 
-    expect(screen.getByText("Online bookings paused")).toBeInTheDocument();
-
     expect(
       screen.getByText("Not taking online bookings right now"),
     ).toBeInTheDocument();
+
+    expect(
+      screen.queryByText("Online bookings paused"),
+    ).not.toBeInTheDocument();
+
+    await user.click(
+      screen.getAllByRole("button", { name: "Save changes" }).at(-1)!,
+    );
+
+    expect(await screen.findByText("Availability saved")).toBeInTheDocument();
+  });
+
+  it("a working day must close after it opens", async () => {
+    setViewport(1440);
+    renderStudio();
+    await user.click(within(getLabelled("Sidebar")).getByTitle("Settings"));
+
+    await user.click(
+      within(getLabelled("Settings nav")).getByRole("button", {
+        name: "Availability",
+      }),
+    );
+
+    const [start, end] = within(getLabelled("Availability")).getAllByRole(
+      "combobox",
+    );
+
+    await user.selectOptions(start!, "18:00");
+    await user.selectOptions(end!, "09:00");
+
+    expect(
+      await screen.findByText("Closing time must be after opening time."),
+    ).toBeInTheDocument();
+
+    await user.click(
+      screen.getAllByRole("button", { name: "Save changes" }).at(-1)!,
+    );
+
+    expect(screen.queryByText("Availability saved")).not.toBeInTheDocument();
   });
 
   it("booking rules step the default extra time and explain it", async () => {

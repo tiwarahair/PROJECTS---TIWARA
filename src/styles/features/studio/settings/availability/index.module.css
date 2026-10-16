@@ -189,12 +189,15 @@
   overflow: hidden;
 }
 
+.hourItem {
+  border-bottom: 1px solid var(--border-subtle);
+}
+
 .hourRow {
   display: flex;
   align-items: center;
   gap: 10px;
   padding: 12px 14px;
-  border-bottom: 1px solid var(--border-subtle);
 }
 
 .daySwitch {
@@ -334,4 +337,12 @@
     opacity: 1;
     transform: translateY(0);
   }
+}
+
+.hourError {
+  display: block;
+  padding: 0 14px 12px;
+  font-size: 13.5px;
+  line-height: 1.45;
+  color: var(--status-danger);
 }
