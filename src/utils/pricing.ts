@@ -51,6 +51,7 @@ export const policyLines = (
 
   const fee = bookingFee(price);
   const lines: PolicyLine[] = [];
+
   const addLine = (icon: LucideIcon, text: string) =>
     lines.push({ icon, text });
 
