@@ -1,8 +1,9 @@
+import { ChevronRight, CircleQuestionMark, LogOut } from "lucide-react";
 import type { MouseEvent } from "react";
 import { Link } from "react-router";
 import { resolveAssetUrl } from "../../utils/asset-url";
 import { joinClassNames } from "../../utils/class-names";
-import { HELP_ICON, LOG_OUT_ICON, SECTIONS } from "./account-data";
+import { SECTIONS } from "./account-data";
 import type { AccountSection } from "./account-data";
 import styles from "../../styles/features/account/account-nav.module.css";
 import { useIdentity } from "../../hooks/use-identity";
@@ -37,26 +38,9 @@ const Avatar = ({
   </span>
 );
 
-const Icon = ({ path, size }: { path: string; size: number }) => (
-  <svg
-    className={styles.icon}
-    width={size}
-    height={size}
-    viewBox="0 0 24 24"
-    fill="none"
-    stroke="currentColor"
-    strokeWidth="1.7"
-    strokeLinecap="round"
-    strokeLinejoin="round"
-    aria-hidden="true"
-  >
-    <path d={path}></path>
-  </svg>
-);
-
 const Chevron = () => (
   <span className={styles.chevron}>
-    <Icon path="m9 6 6 6-6 6" size={18} />
+    <ChevronRight className={styles.icon} size={18} strokeWidth={1.7} />
   </span>
 );
 
@@ -136,11 +120,15 @@ export const AccountSideNav = ({
       </div>
       <div className={styles.sideFoot}>
         <Link className={styles.sideHelp} to="/help">
-          <Icon path={HELP_ICON} size={18} />
+          <CircleQuestionMark
+            className={styles.icon}
+            size={18}
+            strokeWidth={1.7}
+          />
           Help & support
         </Link>
         <button className={styles.sideLogOut} onClick={onLogOut}>
-          <Icon path={LOG_OUT_ICON} size={18} />
+          <LogOut className={styles.icon} size={18} strokeWidth={1.7} />
           Log out
         </button>
       </div>
@@ -161,7 +149,7 @@ export const AccountMobileList = ({
 
   const renderRows = (sections: AccountSection[]) => (
     <div className={styles.list}>
-      {sections.map(({ id, label, icon }) => (
+      {sections.map(({ id, label, icon: ItemIcon, strokeWidth = 1.7 }) => (
         <Link
           key={id}
           className={styles.row}
@@ -169,7 +157,11 @@ export const AccountMobileList = ({
           to={`/account?section=${id}`}
           onClick={goTo(id)}
         >
-          <Icon path={icon} size={20} />
+          <ItemIcon
+            className={styles.icon}
+            size={20}
+            strokeWidth={strokeWidth}
+          />
           <span className={styles.rowLabel}>{label}</span>
           <Chevron />
         </Link>
@@ -197,12 +189,16 @@ export const AccountMobileList = ({
       {renderRows(SETTINGS)}
       <div className={styles.listFoot}>
         <Link className={styles.footRow} to="/help">
-          <Icon path={HELP_ICON} size={20} />
+          <CircleQuestionMark
+            className={styles.icon}
+            size={20}
+            strokeWidth={1.7}
+          />
           <span className={styles.footRowLabel}>Help & support</span>
           <Chevron />
         </Link>
         <button className={styles.footLogOut} onClick={onLogOut}>
-          <Icon path={LOG_OUT_ICON} size={20} />
+          <LogOut className={styles.icon} size={20} strokeWidth={1.7} />
           <span className={styles.footRowLabel}>Log out</span>
         </button>
       </div>
