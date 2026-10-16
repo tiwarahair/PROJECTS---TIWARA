@@ -1,3 +1,4 @@
+import { ChevronRight } from "lucide-react";
 import { Fragment } from "react";
 import { joinClassNames } from "../../utils/class-names";
 import pageGlobal from "../../styles/features/booking/booking-page-global.module.css";
@@ -40,17 +41,11 @@ export const BookingCrumbs = ({ booking }: BookingCrumbsProps) => {
             {label}
           </button>
           {index < steps.length - 1 && (
-            <svg
-              width="13"
-              height="13"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="var(--neutral-400)"
-              strokeWidth="2"
-              strokeLinecap="round"
-            >
-              <path d="m9 5 7 7-7 7"></path>
-            </svg>
+            <ChevronRight
+              size={13}
+              strokeWidth={2}
+              color="var(--neutral-400)"
+            />
           )}
         </Fragment>
       ))}

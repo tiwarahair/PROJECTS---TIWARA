@@ -1,4 +1,5 @@
 import { useEffect, useId, useRef, useState } from "react";
+import { Check, ChevronLeft, Info, Plus, X } from "lucide-react";
 import { stylists } from "../../data";
 import { joinClassNames } from "../../utils/class-names";
 import { policyLines } from "../../utils/pricing";
@@ -199,18 +200,7 @@ export const PaymentPolicy = ({
           {!embedded && (
             <>
               <button className={styles.back}>
-                <svg
-                  width="20"
-                  height="20"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="2"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                >
-                  <path d="m15 18-6-6 6-6"></path>
-                </svg>
+                <ChevronLeft size={20} strokeWidth={2} />
                 Settings
               </button>
               <h1 className={styles.title}>Payment & cancellation policy</h1>
@@ -358,19 +348,11 @@ export const PaymentPolicy = ({
 
                 <Reveal open={mode === "none"}>
                   <div className={styles.note} role="note">
-                    <svg
+                    <Info
                       className={styles.noteIcon}
-                      width="18"
-                      height="18"
-                      viewBox="0 0 24 24"
-                      fill="none"
-                      stroke="currentColor"
-                      strokeWidth="1.7"
-                      strokeLinecap="round"
-                    >
-                      <circle cx="12" cy="12" r="10"></circle>
-                      <path d="M12 11v5M12 7.5v.5"></path>
-                    </svg>
+                      size={18}
+                      strokeWidth={1.7}
+                    />
                     <span>
                       You won’t be able to charge fees for late cancellations or
                       no-shows.
@@ -486,18 +468,11 @@ export const PaymentPolicy = ({
                                 })
                               }
                             >
-                              <svg
+                              <X
                                 className={styles.removeIcon}
-                                width="16"
-                                height="16"
-                                viewBox="0 0 24 24"
-                                fill="none"
-                                stroke="currentColor"
-                                strokeWidth="1.7"
-                                strokeLinecap="round"
-                              >
-                                <path d="M18 6 6 18M6 6l12 12"></path>
-                              </svg>
+                                size={16}
+                                strokeWidth={1.7}
+                              />
                             </button>
                           </div>
                           <textarea
@@ -562,17 +537,7 @@ export const PaymentPolicy = ({
                       disabled={isFull}
                       onClick={() => addExtra(type)}
                     >
-                      <svg
-                        width="16"
-                        height="16"
-                        viewBox="0 0 24 24"
-                        fill="none"
-                        stroke="currentColor"
-                        strokeWidth="1.7"
-                        strokeLinecap="round"
-                      >
-                        <path d="M12 5v14M5 12h14"></path>
-                      </svg>
+                      <Plus size={16} strokeWidth={1.7} />
                       {label}
                     </button>
                   ))}
@@ -595,21 +560,13 @@ export const PaymentPolicy = ({
                 </div>
                 <div className={styles.dividerTop}></div>
                 <div className={styles.lines}>
-                  {preview.lines.map(({ icon, text }, index) => (
+                  {preview.lines.map(({ icon: LineIcon, text }, index) => (
                     <div key={index} className={styles.line}>
-                      <svg
+                      <LineIcon
                         className={styles.lineIcon}
-                        width="16"
-                        height="16"
-                        viewBox="0 0 24 24"
-                        fill="none"
-                        stroke="currentColor"
-                        strokeWidth="1.7"
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                      >
-                        <path d={icon}></path>
-                      </svg>
+                        size={16}
+                        strokeWidth={1.7}
+                      />
                       <span className={styles.lineText}>{text}</span>
                     </div>
                   ))}
@@ -674,20 +631,7 @@ export const PaymentPolicy = ({
             disabled={!canSave}
             onClick={save}
           >
-            {flash && (
-              <svg
-                width="17"
-                height="17"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="2"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-              >
-                <path d="M5 12.5l4.5 4.5L19 7.5"></path>
-              </svg>
-            )}
+            {flash && <Check size={17} strokeWidth={2} />}
             {flash && !isDirty ? "Saved" : "Save policy"}
           </button>
         </div>

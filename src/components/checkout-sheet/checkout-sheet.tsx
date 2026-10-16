@@ -1,4 +1,5 @@
 import type { CSSProperties } from "react";
+import { ChevronLeft, X } from "lucide-react";
 import { joinClassNames } from "../../utils/class-names";
 import {
   CheckoutDone,
@@ -6,7 +7,7 @@ import {
   CheckoutRefund,
   CheckoutResend,
 } from "./checkout-after";
-import { CheckoutDetail, Icon } from "./checkout-detail";
+import { CheckoutDetail } from "./checkout-detail";
 import { CheckoutAdd, CheckoutItems } from "./checkout-items";
 import { CheckoutPay, CheckoutReview, CheckoutTip } from "./checkout-payment";
 import { STEP_LABELS, VIEW_TITLES, getCheckoutView } from "./checkout-view";
@@ -71,7 +72,7 @@ export const CheckoutSheet = (props: CheckoutSheetProps) => {
               onClick={view.back}
               aria-label="Back"
             >
-              <Icon path="m15 18-6-6 6-6" size={20} strokeWidth="2" />
+              <ChevronLeft size={20} strokeWidth={2} />
             </button>
           )}
           <div
@@ -87,12 +88,7 @@ export const CheckoutSheet = (props: CheckoutSheetProps) => {
             onClick={close}
             aria-label="Close"
           >
-            <Icon
-              path="M18 6 6 18M6 6l12 12"
-              size={20}
-              strokeWidth="2"
-              isRound={false}
-            />
+            <X size={20} strokeWidth={2} />
           </button>
         </div>
         {view.isInCheckout && (

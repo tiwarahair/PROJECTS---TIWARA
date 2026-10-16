@@ -1,4 +1,14 @@
 import type { CSSProperties } from "react";
+import {
+  Check,
+  ChevronDown,
+  ChevronRight,
+  ImageIcon,
+  Plus,
+  Search,
+  Sparkles,
+  X,
+} from "lucide-react";
 import { SearchSelect } from "../../components/search-select/search-select";
 import { joinClassNames } from "../../utils/class-names";
 import { Swatches } from "./catalog-sheets";
@@ -6,52 +16,6 @@ import type { WizardView } from "./wizard-view";
 import styles from "../../styles/features/studio/wizard.module.css";
 
 const asStyle = (values: Record<string, string>) => values as CSSProperties;
-
-const SelectChevron = () => (
-  <svg
-    className={styles.selectChevron}
-    width="16"
-    height="16"
-    viewBox="0 0 24 24"
-    fill="none"
-    stroke="currentColor"
-    strokeWidth="1.7"
-    strokeLinecap="round"
-    strokeLinejoin="round"
-  >
-    <path d="m6 9 6 6 6-6"></path>
-  </svg>
-);
-
-const Tick = ({ size }: { size: string }) => (
-  <svg
-    width={size}
-    height={size}
-    viewBox="0 0 24 24"
-    fill="none"
-    stroke="#fff"
-    strokeWidth="3"
-    strokeLinecap="round"
-    strokeLinejoin="round"
-  >
-    <path d="M20 6 9 17l-5-5"></path>
-  </svg>
-);
-
-const Plus = ({ className }: { className?: string }) => (
-  <svg
-    className={className}
-    width="14"
-    height="14"
-    viewBox="0 0 24 24"
-    fill="none"
-    stroke="currentColor"
-    strokeWidth="2.2"
-    strokeLinecap="round"
-  >
-    <path d="M12 5v14M5 12h14"></path>
-  </svg>
-);
 
 /** Step 2: name, description, category, service type and images. */
 const DetailsStep = ({ view }: { view: WizardView }) => {
@@ -66,20 +30,7 @@ const DetailsStep = ({ view }: { view: WizardView }) => {
             type="button"
             onClick={view.openSuggestions}
           >
-            <svg
-              width="17"
-              height="17"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="1.7"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              aria-hidden="true"
-            >
-              <path d="M12 3l1.6 4.4L18 9l-4.4 1.6L12 15l-1.6-4.4L6 9l4.4-1.6z"></path>
-              <path d="M19 15l.8 2.2L22 18l-2.2.8L19 21l-.8-2.2L16 18l2.2-.8z"></path>
-            </svg>
+            <Sparkles size={17} strokeWidth={1.7} />
             Suggested services
           </button>
           <div className={styles.suggestHint}>
@@ -212,21 +163,12 @@ const DetailsStep = ({ view }: { view: WizardView }) => {
           Images <span className={styles.optional}>(optional)</span>
         </span>
         <div className={styles.images}>
-          <svg
+          <ImageIcon
             className={styles.block}
-            width="22"
-            height="22"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="var(--text-primary)"
-            strokeWidth="1.8"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-          >
-            <rect width="18" height="18" x="3" y="3" rx="2"></rect>
-            <circle cx="9" cy="9" r="2"></circle>
-            <path d="m21 15-4.6-4.6a2 2 0 0 0-2.8 0L3 21"></path>
-          </svg>
+            size={22}
+            strokeWidth={1.8}
+            color="var(--text-primary)"
+          />
           <span className={styles.imagesTitle}>Add your images here</span>
           <button className={styles.chooseFile} onClick={view.pickImages}>
             Choose a file
@@ -383,7 +325,7 @@ const VariationCard = ({
                   onMouseLeave={view.hideSubcategoryTip}
                   onBlur={view.hideSubcategoryTip}
                 >
-                  {row.isOn && <Tick size="11" />}
+                  {row.isOn && <Check size={11} strokeWidth={3} color="#fff" />}
                 </button>
               </div>
               <div aria-live="polite">
@@ -459,7 +401,11 @@ const PricingStep = ({ view }: { view: WizardView }) => {
                         </option>
                       ))}
                     </select>
-                    <SelectChevron />
+                    <ChevronDown
+                      className={styles.selectChevron}
+                      size={16}
+                      strokeWidth={1.7}
+                    />
                   </span>
                   <span className={styles.selectWrap}>
                     <select
@@ -474,7 +420,11 @@ const PricingStep = ({ view }: { view: WizardView }) => {
                         </option>
                       ))}
                     </select>
-                    <SelectChevron />
+                    <ChevronDown
+                      className={styles.selectChevron}
+                      size={16}
+                      strokeWidth={1.7}
+                    />
                   </span>
                 </div>
               </div>
@@ -496,7 +446,11 @@ const PricingStep = ({ view }: { view: WizardView }) => {
                       </option>
                     ))}
                   </select>
-                  <SelectChevron />
+                  <ChevronDown
+                    className={styles.selectChevron}
+                    size={16}
+                    strokeWidth={1.7}
+                  />
                 </span>
                 <span className={styles.extraNote}>
                   Blocked out for clean-down.
@@ -631,7 +585,7 @@ const PricingStep = ({ view }: { view: WizardView }) => {
             type="button"
             onClick={own.startNew}
           >
-            <Plus />
+            <Plus size={14} strokeWidth={2.2} />
             Add a customisation
           </button>
         )}
@@ -712,24 +666,17 @@ const AddonsStep = ({ view }: { view: WizardView }) => {
         <div className={styles.addonHead}>
           <div className={styles.addonTitle}>Add-ons</div>
           <button className={styles.newButton} onClick={addons.toggleNew}>
-            <Plus className={styles.block} />
+            <Plus className={styles.block} size={14} strokeWidth={2.2} />
             New
           </button>
         </div>
         <label className={styles.searchField}>
-          <svg
+          <Search
             className={styles.noShrink}
-            width="16"
-            height="16"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="var(--text-secondary)"
-            strokeWidth="1.7"
-            strokeLinecap="round"
-          >
-            <circle cx="11" cy="11" r="7"></circle>
-            <path d="m20 20-3.5-3.5"></path>
-          </svg>
+            size={16}
+            strokeWidth={1.7}
+            color="var(--text-secondary)"
+          />
           <input
             className={styles.searchInput}
             value={picker.query}
@@ -790,22 +737,15 @@ const AddonsStep = ({ view }: { view: WizardView }) => {
         <div key={item.key} className={styles.attached}>
           <div className={styles.attachedRow}>
             <button className={styles.attachedOpen} onClick={item.toggle}>
-              <svg
+              <ChevronRight
                 className={joinClassNames(
                   styles.chevron,
                   item.isOpen && styles.chevronOpen,
                 )}
-                width="14"
-                height="14"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="var(--text-secondary)"
-                strokeWidth="2"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-              >
-                <path d="m9 18 6-6-6-6"></path>
-              </svg>
+                size={14}
+                strokeWidth={2}
+                color="var(--text-secondary)"
+              />
               <span className={styles.grow}>
                 <span className={styles.attachedName}>{item.name}</span>
                 <span className={styles.addonPickMeta}>{item.meta}</span>
@@ -816,17 +756,7 @@ const AddonsStep = ({ view }: { view: WizardView }) => {
               onClick={item.remove}
               aria-label="Remove add-on"
             >
-              <svg
-                width="14"
-                height="14"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="2"
-                strokeLinecap="round"
-              >
-                <path d="M18 6 6 18M6 6l12 12"></path>
-              </svg>
+              <X size={14} strokeWidth={2} />
             </button>
           </div>
           {item.isOpen && (

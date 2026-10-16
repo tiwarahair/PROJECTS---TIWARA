@@ -1,3 +1,4 @@
+import { Calendar, CreditCard, MapPin } from "lucide-react";
 import { ResponsiveImage } from "../../components/responsive-image/responsive-image";
 import type { CSSProperties, KeyboardEvent, MouseEvent } from "react";
 import { Link } from "react-router";
@@ -7,51 +8,15 @@ import styles from "../../styles/features/account/bookings-sections.module.css";
 import ui from "../../styles/features/account/account-ui.module.css";
 
 const CalendarIcon = () => (
-  <svg
-    className={styles.factIcon}
-    width="15"
-    height="15"
-    viewBox="0 0 24 24"
-    fill="none"
-    stroke="currentColor"
-    strokeWidth="1.5"
-    aria-hidden="true"
-  >
-    <rect x="3" y="4" width="18" height="18" rx="3"></rect>
-    <path d="M3 10h18M8 2v4M16 2v4"></path>
-  </svg>
+  <Calendar className={styles.factIcon} size={15} strokeWidth={1.5} />
 );
 
 const PinIcon = () => (
-  <svg
-    className={styles.factIcon}
-    width="15"
-    height="15"
-    viewBox="0 0 24 24"
-    fill="none"
-    stroke="currentColor"
-    strokeWidth="1.5"
-    aria-hidden="true"
-  >
-    <path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0z"></path>
-    <circle cx="12" cy="10" r="3"></circle>
-  </svg>
+  <MapPin className={styles.factIcon} size={15} strokeWidth={1.8} />
 );
 
 const CardIcon = () => (
-  <svg
-    className={styles.factIcon}
-    width="15"
-    height="15"
-    viewBox="0 0 24 24"
-    fill="none"
-    stroke="currentColor"
-    strokeWidth="1.5"
-    aria-hidden="true"
-  >
-    <rect x="2" y="5" width="20" height="14" rx="2"></rect>
-    <path d="M2 10h20"></path>
-  </svg>
+  <CreditCard className={styles.factIcon} size={15} strokeWidth={1.5} />
 );
 
 /** Status tag; its colours come from the booking's status (runtime values). */
@@ -151,7 +116,7 @@ export const OverviewSection = ({
     )}
     <h2 className={ui.headingSpaced}>Quick actions</h2>
     <div className={styles.quickGrid}>
-      {quick.map(({ key, label, subtitle, href, icon, section }) => (
+      {quick.map(({ key, label, subtitle, href, icon: ItemIcon, section }) => (
         <Link
           key={key}
           className={styles.quickLink}
@@ -164,20 +129,7 @@ export const OverviewSection = ({
           }}
         >
           <span className={styles.quickIcon}>
-            <svg
-              className={ui.icon}
-              width="18"
-              height="18"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="1.7"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              aria-hidden="true"
-            >
-              <path d={icon}></path>
-            </svg>
+            <ItemIcon className={ui.icon} size={18} strokeWidth={1.7} />
           </span>
           <span className={styles.quickText}>
             <span className={styles.quickLabel}>{label}</span>

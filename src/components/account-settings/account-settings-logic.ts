@@ -1,4 +1,15 @@
 // AccountSettings demo data, validators and display tables.
+import {
+  Check,
+  CircleMinus,
+  CirclePause,
+  Clock,
+  Laptop,
+  Smartphone,
+  Tablet,
+  TriangleAlert,
+} from "lucide-react";
+import type { LucideIcon } from "lucide-react";
 import type { TaxDetails } from "../tax-details-form/tax-details-logic";
 
 export type SettingsPage =
@@ -196,12 +207,10 @@ export const getCloseReason = (upcoming: number, owed: boolean): string => {
     : "";
 };
 
-export const SESSION_ICONS: Record<SettingsSession["kind"], string> = {
-  phone:
-    "M7 2h10a2 2 0 0 1 2 2v16a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2zM11 18h2",
-  laptop: "M4 5h16v10H4zM2 19h20",
-  tablet:
-    "M5 2h14a1 1 0 0 1 1 1v18a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V3a1 1 0 0 1 1-1zM11 18h2",
+export const SESSION_ICONS: Record<SettingsSession["kind"], LucideIcon> = {
+  phone: Smartphone,
+  laptop: Laptop,
+  tablet: Tablet,
 };
 
 export const NOTIFICATION_GROUPS: [string, [NotificationKey, string][]][] = [
@@ -251,7 +260,7 @@ export const CLIENT_MESSAGES = [
 interface PayoutStatusView {
   title: string;
   body: string;
-  icon: string;
+  icon: LucideIcon;
   foreground: string;
   background: string;
   chip: string;
@@ -270,7 +279,7 @@ export const getPayoutStatus = (
     none: {
       title: "Not connected",
       body: "Connect Stripe to take deposits and get paid.",
-      icon: "M12 22a10 10 0 1 0 0-20 10 10 0 0 0 0 20zM8 12h8",
+      icon: CircleMinus,
       foreground: INK,
       background: "#fff",
       chip: "var(--fill-quiet)",
@@ -280,7 +289,7 @@ export const getPayoutStatus = (
     verifying: {
       title: "Stripe is checking your details",
       body: "We’ll let you know when it’s done. You can keep taking bookings.",
-      icon: "M12 22a10 10 0 1 0 0-20 10 10 0 0 0 0 20zM12 6v6l4 2",
+      icon: Clock,
       foreground: INK,
       background: "#fff",
       chip: "var(--fill-quiet)",
@@ -289,7 +298,7 @@ export const getPayoutStatus = (
     action: {
       title: "Stripe needs more information",
       body: "Finish the missing steps so your payouts keep running.",
-      icon: "M10.3 3.9 1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0zM12 9v4M12 17v.01",
+      icon: TriangleAlert,
       foreground: "#7a3511",
       background: "rgba(181,84,31,.13)",
       chip: "rgba(181,84,31,.16)",
@@ -303,7 +312,7 @@ export const getPayoutStatus = (
         pauseReason === "review"
           ? "Your account is under review. Stripe will email you if they need anything."
           : "A negative balance is being recovered from your payouts.",
-      icon: "M10 15V9M14 15V9M12 22a10 10 0 1 0 0-20 10 10 0 0 0 0 20z",
+      icon: CirclePause,
       foreground: "var(--accent-700)",
       background: "var(--accent-wash)",
       chip: "rgba(143,17,18,.10)",
@@ -313,7 +322,7 @@ export const getPayoutStatus = (
     active: {
       title: "Payouts active",
       body: "Stripe pays out to your bank automatically.",
-      icon: "M5 12.5l4.5 4.5L19 7.5",
+      icon: Check,
       foreground: "#2f6b3e",
       background: "#fff",
       chip: "rgba(47,107,62,.12)",

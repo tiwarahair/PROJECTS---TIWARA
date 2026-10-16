@@ -7,6 +7,7 @@ import type { PayoutStatus } from "../../components/account-settings/account-set
 import type { TaxDetails } from "../../components/tax-details-form/tax-details-logic";
 import type { ServiceType } from "../../types/service-type";
 import type { NotificationSettings } from "../../components/account-settings/account-settings-logic";
+import type { LucideIcon } from "lucide-react";
 
 export type StudioTab =
   "home" | "bookings" | "services" | "earnings" | "clients" | "settings";
@@ -324,7 +325,7 @@ export interface ConfirmDialog {
 
 export interface ActionItem {
   label: string;
-  iconPath: string;
+  icon: LucideIcon;
   subtitle?: string;
   disabled?: boolean;
   danger?: boolean;

@@ -1,0 +1,337 @@
+.availability {
+  margin-top: 20px;
+}
+
+.pauseCard {
+  background: #fff;
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-panel);
+  padding: 14px 16px 16px;
+  margin-bottom: 28px;
+}
+
+.row12 {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.switchHit {
+  flex: 0 0 auto;
+  width: 52px;
+  height: 44px;
+  display: grid;
+  place-items: center;
+  padding: 0;
+  border: none;
+  background: none;
+  border-radius: var(--radius-full);
+}
+
+.switchTrack {
+  position: relative;
+  width: 44px;
+  height: 26px;
+  border-radius: var(--radius-full);
+  transition: background-color 0.2s cubic-bezier(0.2, 0.8, 0.2, 1);
+  background: var(--neutral-300, #d8d2c6);
+}
+
+.switchTrackOn {
+  background: var(--accent-700);
+}
+
+.switchKnob {
+  position: absolute;
+  top: 3px;
+  left: 3px;
+  width: 20px;
+  height: 20px;
+  border-radius: var(--radius-full);
+  background: #fff;
+  box-shadow: 0 1px 2px rgba(26, 23, 20, 0.22);
+  transition: transform 0.2s cubic-bezier(0.2, 0.8, 0.2, 1);
+  transform: translateX(0);
+}
+
+.switchTrackOn .switchKnob {
+  transform: translateX(18px);
+}
+
+.pausePanel {
+  animation: rowin 0.28s cubic-bezier(0.2, 0.8, 0.2, 1) both;
+}
+
+.untilRow {
+  display: flex;
+  align-items: flex-end;
+  flex-wrap: wrap;
+  gap: 8px 10px;
+  margin-top: 14px;
+}
+
+.optional {
+  color: var(--text-secondary);
+}
+
+.dateInput {
+  height: 44px;
+  box-sizing: border-box;
+  padding: 0 12px;
+  border: 1px solid var(--border-strong, #d8d2c6);
+  border-radius: var(--radius-sm);
+  background: #fff;
+  font: inherit;
+  font-size: 16px;
+  color: var(--text-primary);
+}
+
+.clearDate {
+  height: 44px;
+  padding: 0 14px;
+  border: none;
+  background: none;
+  border-radius: var(--radius-full);
+  font-size: 14.5px;
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.pauseBanner {
+  display: flex;
+  gap: 10px;
+  align-items: flex-start;
+  margin-top: 14px;
+  background: rgba(181, 84, 31, 0.13);
+  border-radius: var(--radius-md);
+  padding: 12px 14px;
+  font-size: 14.5px;
+  line-height: 1.45;
+  font-weight: 600;
+  color: #7a3511;
+}
+
+.bannerIcon {
+  flex: 0 0 auto;
+  margin-top: 1px;
+}
+
+.seeLabel {
+  margin-top: 14px;
+  font-size: 13.5px;
+  font-weight: 600;
+  color: var(--text-secondary);
+}
+
+.preview {
+  margin-top: 8px;
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-md);
+  padding: 14px;
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 10px 14px;
+}
+
+.previewMain {
+  flex: 1 1 160px;
+  min-width: 0;
+}
+
+.previewSalon {
+  font-size: 15.5px;
+  font-weight: 600;
+}
+
+.notTaking {
+  display: inline-flex;
+  margin-top: 6px;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--neutral-700);
+  background: var(--fill-quiet);
+  border-radius: var(--radius-xs);
+  padding: 4px 8px;
+}
+
+.previewBook {
+  flex: 0 0 auto;
+  height: 40px;
+  padding: 0 18px;
+  display: inline-flex;
+  align-items: center;
+  border-radius: var(--radius-full);
+  background: var(--neutral-200, #ece6db);
+  color: var(--neutral-600);
+  font-size: 14.5px;
+  font-weight: 600;
+}
+
+.sectionHead {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  margin-bottom: 10px;
+}
+
+.sectionHeadSpaced {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  margin: 24px 0 10px;
+}
+
+.list {
+  background: #fff;
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-panel);
+  overflow: hidden;
+}
+
+.hourRow {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 12px 14px;
+  border-bottom: 1px solid var(--border-subtle);
+}
+
+.daySwitch {
+  flex: 0 0 auto;
+  width: 44px;
+  height: 26px;
+  border-radius: var(--radius-full);
+  border: none;
+  position: relative;
+  transition: background 0.22s cubic-bezier(0.2, 0.8, 0.2, 1);
+  background: var(--neutral-300, #d8d2c6);
+}
+
+.daySwitchOn {
+  background: var(--accent-700);
+}
+
+.dayKnob {
+  position: absolute;
+  top: 3px;
+  width: 20px;
+  height: 20px;
+  border-radius: var(--radius-full);
+  background: #fff;
+  border: 1px solid var(--border-subtle);
+  box-sizing: border-box;
+  transition: left 0.22s cubic-bezier(0.2, 0.8, 0.2, 1);
+  left: 3px;
+}
+
+.daySwitchOn .dayKnob {
+  left: 21px;
+}
+
+.dayName {
+  flex: 1;
+  font-size: 15px;
+  font-weight: 600;
+  opacity: 0.5;
+}
+
+.dayNameOn {
+  opacity: 1;
+}
+
+.timeSelect {
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-sm);
+  background: transparent;
+  height: 44px;
+  box-sizing: border-box;
+  padding: 0 10px;
+  font-size: 16px;
+  font-weight: 600;
+}
+
+.to {
+  color: var(--text-secondary);
+  font-size: 13.5px;
+}
+
+.closed {
+  font-size: 14.5px;
+  color: var(--text-secondary);
+}
+
+.add {
+  flex: 0 0 auto;
+  height: 36px;
+  box-sizing: border-box;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  border: 1px solid var(--border-strong, #d8d2c6);
+  background: transparent;
+  border-radius: var(--radius-full);
+  padding: 0 14px;
+  font-size: 13.5px;
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.add:active {
+  transform: scale(0.96) !important;
+}
+
+.itemRow {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 14px;
+  border-bottom: 1px solid var(--border-subtle);
+}
+
+.dot {
+  flex: 0 0 auto;
+  width: 10px;
+  height: 10px;
+  border-radius: var(--radius-full);
+  /* runtime: the blocked time's colour */
+  background: var(--dot);
+}
+
+.flex1 {
+  flex: 1;
+}
+
+.itemTitle {
+  font-size: 14.5px;
+  font-weight: 500;
+}
+
+.edit {
+  border: none;
+  background: none;
+  color: var(--accent-700);
+  font-size: 13.5px;
+  font-weight: 600;
+  padding: 4px;
+}
+
+.remove {
+  border: none;
+  background: none;
+  color: var(--text-secondary);
+  font-size: 13.5px;
+  font-weight: 600;
+  padding: 4px;
+}
+
+@keyframes rowin {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}

@@ -1,11 +1,26 @@
 // Account sections, icons and demo data (sections, icons, taken emails, legacy tab names, seed bookings,
 // quiz rows).
+import {
+  Calendar,
+  CreditCard,
+  Heart,
+  House,
+  Lock,
+  Mail,
+  MapPin,
+  Shield,
+  Sparkles,
+  User,
+  Users,
+} from "lucide-react";
+import type { LucideIcon } from "lucide-react";
 
 export interface AccountSection {
   id: string;
   label: string;
   description: string;
-  icon: string;
+  icon: LucideIcon;
+  strokeWidth?: number;
 }
 
 export const SECTIONS: AccountSection[] = [
@@ -13,74 +28,70 @@ export const SECTIONS: AccountSection[] = [
     id: "overview",
     label: "Overview",
     description: "Your next appointment and quick links.",
-    icon: "M3 10.5 12 3l9 7.5V20a1 1 0 0 1-1 1h-5v-6h-6v6H4a1 1 0 0 1-1-1z",
+    icon: House,
   },
   {
     id: "bookings",
     label: "Bookings",
     description: "Upcoming, past and cancelled appointments.",
-    icon: "M3 7a3 3 0 0 1 3-3h12a3 3 0 0 1 3 3v12a3 3 0 0 1-3 3H6a3 3 0 0 1-3-3zM3 10h18M8 2v4M16 2v4",
+    icon: Calendar,
   },
   {
     id: "favourites",
     label: "Favourites",
     description: "Stylists you’ve saved.",
-    icon: "M12 20.5s-7.5-4.6-9.2-9.4C1.6 7.6 3.9 4.5 7.2 4.5c2 0 3.6 1.1 4.8 2.8 1.2-1.7 2.8-2.8 4.8-2.8 3.3 0 5.6 3.1 4.4 6.6-1.7 4.8-9.2 9.4-9.2 9.4z",
+    icon: Heart,
   },
   {
     id: "hair",
     label: "Hair profile",
     description: "Your hair quiz results, so we can suggest styles.",
-    icon: "M12 3l1.8 4.9L19 9.7l-5.2 1.8L12 16.5l-1.8-5L5 9.7l5.2-1.8zM19 15l.8 2.2L22 18l-2.2.8L19 21l-.8-2.2L16 18l2.2-.8z",
+    icon: Sparkles,
   },
   {
     id: "personal",
     label: "Personal details",
     description: "Your name and how stylists can contact you.",
-    icon: "M20 21v-1a5 5 0 0 0-5-5H9a5 5 0 0 0-5 5v1M12 11a4 4 0 1 0 0-8 4 4 0 0 0 0 8z",
+    icon: User,
   },
   {
     id: "security",
     label: "Login & security",
     description: "Your password and the ways you log in.",
-    icon: "M5 11h14v10H5zM8 11V7a4 4 0 0 1 8 0v4",
+    icon: Lock,
   },
   {
     id: "payments",
     label: "Payment methods",
     description: "Cards saved for deposits and payments.",
-    icon: "M2 7a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v10a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2zM2 10h20",
+    icon: CreditCard,
   },
   {
     id: "addresses",
     label: "Saved addresses",
     description: "Where mobile stylists come to you.",
-    icon: "M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0zM12 13a3 3 0 1 0 0-6 3 3 0 0 0 0 6z",
+    icon: MapPin,
+    strokeWidth: 1.8,
   },
   {
     id: "shared",
     label: "Shared with stylists",
     description: "Allergies or sensitivities you’ve shared.",
-    icon: "M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2M9 11a4 4 0 1 0 0-8 4 4 0 0 0 0 8zM22 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75",
+    icon: Users,
   },
   {
     id: "communication",
     label: "Communication",
     description: "Emails from us and your bookings calendar.",
-    icon: "M3 6a1 1 0 0 1 1-1h16a1 1 0 0 1 1 1v12a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1zM3 7l9 6 9-6",
+    icon: Mail,
   },
   {
     id: "privacy",
     label: "Privacy & data",
     description: "Your data, cookies and your account.",
-    icon: "M12 3l8 3v6c0 5-3.5 8-8 9-4.5-1-8-4-8-9V6z",
+    icon: Shield,
   },
 ];
-
-export const HELP_ICON =
-  "M12 21a9 9 0 1 0 0-18 9 9 0 0 0 0 18zM9.5 9a2.5 2.5 0 0 1 4.9.7c0 1.7-2.4 2.3-2.4 3.8M12 17h.01";
-export const LOG_OUT_ICON =
-  "M15 4h4a1 1 0 0 1 1 1v14a1 1 0 0 1-1 1h-4M10 17l5-5-5-5M15 12H3";
 
 export const SECTION_IDS = SECTIONS.map(({ id }) => id);
 

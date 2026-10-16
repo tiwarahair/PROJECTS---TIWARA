@@ -1,9 +1,10 @@
+import { ArrowLeft, CircleX, MapPin, Search, X } from "lucide-react";
 import { joinClassNames } from "../../utils/class-names";
 import { ClearButton } from "./clear-button";
 import { DatePickerMobile } from "./date-picker";
 import { getMobileDateLabel } from "./search-dates";
 import pageGlobal from "../../styles/features/search/search-page-global.module.css";
-import { SEARCH_ICONS } from "./search-icons";
+import { getRowStrokeWidth, SEARCH_ICONS } from "./search-icons";
 import styles from "../../styles/features/search/mobile-search-sheet.module.css";
 import { getWhatListProps, WhatList, WhereList } from "./suggestion-list";
 import type { SearchController } from "./use-search";
@@ -28,7 +29,7 @@ export const MobileSearchSheet = ({ search }: MobileSearchSheetProps) => {
       key: "w",
       caption: "Search",
       label: selection.display || "All styles",
-      icon: SEARCH_ICONS.search ?? "",
+      icon: SEARCH_ICONS.search,
       open: actions.openMobileWhat,
       hasClear: !!selection.display,
       clearLabel: "Clear style or stylist",
@@ -38,7 +39,7 @@ export const MobileSearchSheet = ({ search }: MobileSearchSheetProps) => {
       key: "l",
       caption: "Location",
       label: where.display || "Current location",
-      icon: SEARCH_ICONS.pin ?? "",
+      icon: SEARCH_ICONS.pin,
       open: actions.openMobileWhere,
       hasClear: !place.current,
       clearLabel: "Clear area",
@@ -48,7 +49,7 @@ export const MobileSearchSheet = ({ search }: MobileSearchSheetProps) => {
       key: "d",
       caption: "Date & time",
       label: dateLabel,
-      icon: SEARCH_ICONS.calendar ?? "",
+      icon: SEARCH_ICONS.calendar,
       open: actions.openMobileDate,
       hasClear: !!state.query.date || state.time !== "any",
       clearLabel: "Clear date",
@@ -76,19 +77,7 @@ export const MobileSearchSheet = ({ search }: MobileSearchSheetProps) => {
               aria-label="Back"
               className={styles.headerButton}
             >
-              <svg
-                width="24"
-                height="24"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="2"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-              >
-                <path d="M19 12H5"></path>
-                <path d="m12 19-7-7 7-7"></path>
-              </svg>
+              <ArrowLeft size={24} strokeWidth={2} />
             </button>
           )}
           <div className={styles.spacer}></div>
@@ -97,18 +86,7 @@ export const MobileSearchSheet = ({ search }: MobileSearchSheetProps) => {
             aria-label="Close"
             className={styles.headerButton}
           >
-            <svg
-              width="24"
-              height="24"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="2"
-              strokeLinecap="round"
-            >
-              <path d="M18 6 6 18"></path>
-              <path d="m6 6 12 12"></path>
-            </svg>
+            <X size={24} strokeWidth={2} />
           </button>
         </div>
         <div className={styles.body}>
@@ -123,7 +101,7 @@ export const MobileSearchSheet = ({ search }: MobileSearchSheetProps) => {
                   key,
                   caption,
                   label,
-                  icon,
+                  icon: RowIcon,
                   open,
                   hasClear,
                   clearLabel,
@@ -132,18 +110,10 @@ export const MobileSearchSheet = ({ search }: MobileSearchSheetProps) => {
                   <div key={key} className={styles.row}>
                     <button onClick={open} className={styles.rowButton}>
                       <span className={styles.rowIcon}>
-                        <svg
-                          width="20"
-                          height="20"
-                          viewBox="0 0 24 24"
-                          fill="none"
-                          stroke="currentColor"
-                          strokeWidth="1.7"
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                          // static icon markup from SEARCH_ICONS
-                          dangerouslySetInnerHTML={{ __html: icon }}
-                        ></svg>
+                        <RowIcon
+                          size={20}
+                          strokeWidth={getRowStrokeWidth(RowIcon)}
+                        />
                       </span>
                       <span className={styles.rowText}>
                         <span className={styles.rowCaption}>{caption}</span>
@@ -157,19 +127,11 @@ export const MobileSearchSheet = ({ search }: MobileSearchSheetProps) => {
                         aria-label={clearLabel}
                         className={styles.rowClear}
                       >
-                        <svg
+                        <CircleX
                           className={styles.iconBlock}
-                          width="22"
-                          height="22"
-                          viewBox="0 0 24 24"
-                          fill="none"
-                          stroke="currentColor"
-                          strokeWidth="1.7"
-                          strokeLinecap="round"
-                        >
-                          <circle cx="12" cy="12" r="9.5"></circle>
-                          <path d="m15 9-6 6M9 9l6 6"></path>
-                        </svg>
+                          size={22}
+                          strokeWidth={1.7}
+                        />
                       </button>
                     )}
                   </div>
@@ -181,20 +143,11 @@ export const MobileSearchSheet = ({ search }: MobileSearchSheetProps) => {
           {state.mobileView === "service" && (
             <>
               <div className={styles.searchField}>
-                <svg
+                <Search
                   className={styles.searchFieldIcon}
-                  width="19"
-                  height="19"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="1.7"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                >
-                  <circle cx="11" cy="11" r="7"></circle>
-                  <path d="m21 21-4.3-4.3"></path>
-                </svg>
+                  size={19}
+                  strokeWidth={1.7}
+                />
                 <div className={styles.searchFieldInner}>
                   <div className={styles.fieldRow}>
                     <input
@@ -235,20 +188,11 @@ export const MobileSearchSheet = ({ search }: MobileSearchSheetProps) => {
           {state.mobileView === "location" && (
             <>
               <div className={styles.searchField}>
-                <svg
+                <MapPin
                   className={styles.searchFieldIcon}
-                  width="19"
-                  height="19"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="1.7"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                >
-                  <path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0z"></path>
-                  <circle cx="12" cy="10" r="3"></circle>
-                </svg>
+                  size={19}
+                  strokeWidth={1.8}
+                />
                 <div className={styles.searchFieldInner}>
                   <div className={styles.fieldRow}>
                     <input
@@ -302,18 +246,7 @@ export const MobileSearchSheet = ({ search }: MobileSearchSheetProps) => {
               onClick={actions.closeMobileSheet}
               className={styles.searchButton}
             >
-              <svg
-                width="17"
-                height="17"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="2"
-                strokeLinecap="round"
-              >
-                <circle cx="11" cy="11" r="7"></circle>
-                <path d="m21 21-4.3-4.3"></path>
-              </svg>
+              <Search size={17} strokeWidth={2} />
               Search
             </button>
           </div>

@@ -1,9 +1,9 @@
 import type { MouseEvent } from "react";
+import { ArrowLeft, Heart, Share } from "lucide-react";
 import { Link } from "react-router";
 import { joinClassNames } from "../../utils/class-names";
 import type { LastSearch } from "../../utils/last-search";
 import type { ProfileActions } from "./profile-cover";
-import { BackPath, HeartPath, SharePaths } from "./profile-icons";
 import styles from "../../styles/features/stylist-profile/profile-sticky-bar.module.css";
 import pageGlobal from "../../styles/features/stylist-profile/stylist-profile-page-global.module.css";
 
@@ -44,19 +44,7 @@ export const ProfileStickyBar = ({
         aria-label={back.label}
         className={styles.back}
       >
-        <svg
-          width="20"
-          height="20"
-          viewBox="0 0 24 24"
-          fill="none"
-          stroke="currentColor"
-          strokeWidth="2"
-          strokeLinecap="round"
-          strokeLinejoin="round"
-          aria-hidden="true"
-        >
-          <BackPath />
-        </svg>
+        <ArrowLeft size={20} strokeWidth={2} />
       </Link>
     )}
     <span className={styles.name}>{name}</span>
@@ -68,19 +56,7 @@ export const ProfileStickyBar = ({
       aria-expanded={shareExpanded}
       className={styles.iconButton}
     >
-      <svg
-        width="18"
-        height="18"
-        viewBox="0 0 24 24"
-        fill="none"
-        stroke="currentColor"
-        strokeWidth="1.7"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-        aria-hidden="true"
-      >
-        <SharePaths />
-      </svg>
+      <Share size={18} strokeWidth={1.7} />
     </button>
     <button
       data-tip={saveTip}
@@ -89,18 +65,12 @@ export const ProfileStickyBar = ({
       aria-pressed={saved ? "true" : "false"}
       className={styles.iconButton}
     >
-      <svg
-        width="18"
-        height="18"
-        viewBox="0 0 24 24"
+      <Heart
+        size={18}
+        strokeWidth={1.7}
         fill={saved ? "var(--accent-700)" : "none"}
-        stroke={saved ? "var(--accent-700)" : "currentColor"}
-        strokeWidth="1.7"
-        strokeLinejoin="round"
-        aria-hidden="true"
-      >
-        <HeartPath />
-      </svg>
+        color={saved ? "var(--accent-700)" : "currentColor"}
+      />
     </button>
   </div>
 );

@@ -1,4 +1,5 @@
 import type { CSSProperties } from "react";
+import { Check, ChevronDown, ChevronUp, Plus, Trash } from "lucide-react";
 import { SearchSelect } from "../../components/search-select/search-select";
 import { joinClassNames } from "../../utils/class-names";
 import {
@@ -14,21 +15,6 @@ import type { StudioController } from "./use-studio";
 import styles from "../../styles/features/studio/catalog-sheets.module.css";
 
 const asStyle = (values: Record<string, string>) => values as CSSProperties;
-
-const Chevron = ({ iconPath }: { iconPath: string }) => (
-  <svg
-    width="16"
-    height="16"
-    viewBox="0 0 24 24"
-    fill="none"
-    stroke="currentColor"
-    strokeWidth="1.8"
-    strokeLinecap="round"
-    strokeLinejoin="round"
-  >
-    <path d={iconPath}></path>
-  </svg>
-);
 
 /** The category colour radio group. */
 export const Swatches = ({ swatches }: { swatches: Swatch[] }) => (
@@ -50,20 +36,7 @@ export const Swatches = ({ swatches }: { swatches: Swatch[] }) => (
         // runtime: each swatch is its own colour, ringed when picked
         style={asStyle({ "--swatch-bg": background, "--swatch-ring": ring })}
       >
-        {isOn && (
-          <svg
-            width="14"
-            height="14"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="#fff"
-            strokeWidth="3"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-          >
-            <path d="M20 6 9 17l-5-5"></path>
-          </svg>
-        )}
+        {isOn && <Check size={14} strokeWidth={3} color="#fff" />}
       </button>
     ))}
   </div>
@@ -107,7 +80,7 @@ export const CategoriesSheet = ({
                 disabled={row.isMoveUpDisabled}
                 aria-label={`Move ${row.name} up`}
               >
-                <Chevron iconPath="m6 15 6-6 6 6" />
+                <ChevronUp size={16} strokeWidth={1.8} />
               </button>
               <button
                 className={joinClassNames(
@@ -119,7 +92,7 @@ export const CategoriesSheet = ({
                 disabled={row.isMoveDownDisabled}
                 aria-label={`Move ${row.name} down`}
               >
-                <Chevron iconPath="m6 9 6 6 6-6" />
+                <ChevronDown size={16} strokeWidth={1.8} />
               </button>
               <button className={styles.edit} type="button" onClick={row.edit}>
                 Edit
@@ -130,18 +103,7 @@ export const CategoriesSheet = ({
                 onClick={row.remove}
                 aria-label={`Delete ${row.name}`}
               >
-                <svg
-                  width="16"
-                  height="16"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="1.7"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                >
-                  <path d="M3 6h18M8 6V4h8v2M19 6l-1 14H6L5 6"></path>
-                </svg>
+                <Trash size={16} strokeWidth={1.7} />
               </button>
             </div>
           )}
@@ -216,17 +178,7 @@ export const CategoriesSheet = ({
       <div className={styles.label135}>Colour</div>
       <Swatches swatches={view.newSwatches} />
       <button className={styles.addCategory} type="button" onClick={view.add}>
-        <svg
-          width="14"
-          height="14"
-          viewBox="0 0 24 24"
-          fill="none"
-          stroke="currentColor"
-          strokeWidth="2.2"
-          strokeLinecap="round"
-        >
-          <path d="M12 5v14M5 12h14"></path>
-        </svg>
+        <Plus size={14} strokeWidth={2.2} />
         Add category
       </button>
     </div>

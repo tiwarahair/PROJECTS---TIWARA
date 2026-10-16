@@ -1,12 +1,9 @@
+import { Heart, Sparkles } from "lucide-react";
 import { Link } from "react-router";
 import { StylistCard } from "../../components/stylist-card/stylist-card";
 import type { Stylist } from "../../types/stylist";
-import { SECTIONS } from "./account-data";
 import styles from "../../styles/features/account/profile-sections.module.css";
 import ui from "../../styles/features/account/account-ui.module.css";
-
-const getIcon = (id: string) =>
-  SECTIONS.find((section) => section.id === id)?.icon ?? "";
 
 export const FavouritesSection = ({
   favourites,
@@ -56,18 +53,7 @@ export const FavouritesSection = ({
     {!favourites.length && (
       <div className={ui.emptyState} data-screen-label="Favourites empty">
         <div className={ui.emptyIcon}>
-          <svg
-            width="24"
-            height="24"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            strokeWidth="2"
-            strokeLinejoin="round"
-            aria-hidden="true"
-          >
-            <path d={getIcon("favourites")}></path>
-          </svg>
+          <Heart size={24} strokeWidth={2} />
         </div>
         <p className={ui.emptyText}>
           No favourites yet. Tap the heart on any stylist to save them here.
@@ -117,20 +103,7 @@ export const HairSection = ({
           data-screen-label="Hair profile: not taken"
         >
           <div className={ui.emptyIcon}>
-            <svg
-              className={ui.icon}
-              width="24"
-              height="24"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="2"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              aria-hidden="true"
-            >
-              <path d={getIcon("hair")}></path>
-            </svg>
+            <Sparkles className={ui.icon} size={24} strokeWidth={2} />
           </div>
           <p className={styles.quizEmptyText}>
             Find styles that suit your hair

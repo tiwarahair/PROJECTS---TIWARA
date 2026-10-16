@@ -1,3 +1,4 @@
+import { X } from "lucide-react";
 import type { ReactNode } from "react";
 import { joinClassNames } from "../../utils/class-names";
 import { formatShortDate } from "./booking-calendar";
@@ -20,20 +21,6 @@ interface ConfirmDialogProps {
   onClose?: () => void;
   children: ReactNode;
 }
-
-const CloseIcon = () => (
-  <svg
-    width="20"
-    height="20"
-    viewBox="0 0 24 24"
-    fill="none"
-    stroke="currentColor"
-    strokeWidth="2"
-    strokeLinecap="round"
-  >
-    <path d="M6 6l12 12M18 6L6 18"></path>
-  </svg>
-);
 
 /** The small modal (bottom sheet under 640px) used by Leave, Hold expired, Bank check and the wallet sheet. */
 const ConfirmDialog = ({
@@ -78,7 +65,7 @@ const ConfirmDialog = ({
               aria-label="Close"
               className={styles.confirmClose}
             >
-              <CloseIcon />
+              <X size={20} strokeWidth={2} />
             </button>
           </div>
         ) : (
@@ -133,7 +120,7 @@ export const BookingDialogs = ({ booking }: BookingDialogsProps) => {
                 aria-label="Close"
                 className={styles.docClose}
               >
-                <CloseIcon />
+                <X size={20} strokeWidth={2} />
               </button>
             </div>
             <div className={styles.docBody}>

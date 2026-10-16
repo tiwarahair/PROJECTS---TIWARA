@@ -153,21 +153,13 @@ export const StepReview = ({ booking }: StepReviewProps) => {
         )}
         <div className={styles.rule}></div>
         <div className={styles.lines}>
-          {policy.lines.map(({ icon, text }) => (
+          {policy.lines.map(({ icon: LineIcon, text }) => (
             <div key={text} className={styles.line}>
-              <svg
-                width="16"
-                height="16"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="1.7"
-                strokeLinecap="round"
-                strokeLinejoin="round"
+              <LineIcon
                 className={styles.lineIcon}
-              >
-                <path d={icon}></path>
-              </svg>
+                size={16}
+                strokeWidth={1.7}
+              />
               <span className={styles.lineText}>{text}</span>
             </div>
           ))}

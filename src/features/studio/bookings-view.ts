@@ -658,7 +658,6 @@ export const getBookingsView = (studio: StudioController) => {
     const tone = PAST_TONE[row.status] ?? {
       background: "var(--quiet)",
       color: "var(--text-secondary)",
-      icon: "",
       meta: "",
     };
 

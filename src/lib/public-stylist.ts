@@ -14,7 +14,7 @@ export interface PublicStylist {
   hours: WorkingHours[];
   nextStart: Date | null;
   isTakingBookings: boolean;
-  socials: { instagram: string; tiktok: string };
+  socials: { instagram: string; tiktok: string; youtube: string };
 }
 
 const BUSINESS_TYPES: Record<string, Stylist["businessType"]> = {
@@ -116,6 +116,7 @@ export const toPublicStylist = (profile: PublicProfile): PublicStylist => {
     socials: {
       instagram: profile.instagram ?? "",
       tiktok: profile.tiktok ?? "",
+      youtube: profile.youtube ?? "",
     },
   };
 };

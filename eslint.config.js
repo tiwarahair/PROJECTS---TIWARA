@@ -48,7 +48,7 @@ export default defineConfig([
         {
           min: 3,
           properties: "always",
-          exceptions: ["id", "x", "y", "to", "on", "at", "ms", "ui"],
+          exceptions: ["id", "x", "y", "d", "to", "on", "at", "ms", "ui"],
           // the onboarding wizard's screen ids, which appear in ?screen= URLs
           exceptionPatterns: ["^w[1-5]$"],
         },

@@ -1,5 +1,6 @@
 import { useEffect, useId, useRef, useState } from "react";
 import type { ChangeEvent } from "react";
+import { Eye, EyeOff, Lock } from "lucide-react";
 import { joinClassNames } from "../../utils/class-names";
 import { AddressFinder } from "../address-finder/address-finder";
 import {
@@ -531,33 +532,10 @@ export const TaxDetailsForm = ({
               aria-pressed={state.showNationalInsurance}
             >
               {!state.showNationalInsurance && (
-                <svg
-                  width="18"
-                  height="18"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="1.7"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                >
-                  <path d="M2.062 12.348a1 1 0 0 1 0-.696 10.75 10.75 0 0 1 19.876 0 1 1 0 0 1 0 .696 10.75 10.75 0 0 1-19.876 0"></path>
-                  <circle cx="12" cy="12" r="3"></circle>
-                </svg>
+                <Eye size={18} strokeWidth={1.7} />
               )}
               {state.showNationalInsurance && (
-                <svg
-                  width="18"
-                  height="18"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="1.7"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                >
-                  <path d="M10.7 5.1A10.7 10.7 0 0 1 21.9 11.7a1 1 0 0 1 0 .7 10.8 10.8 0 0 1-1.4 2.6M14.1 14.2a3 3 0 0 1-4.2-4.2M17.5 17.5A10.8 10.8 0 0 1 2.1 12.3a1 1 0 0 1 0-.7 10.8 10.8 0 0 1 4.4-5.1M2 2l20 20"></path>
-                </svg>
+                <EyeOff size={18} strokeWidth={1.7} />
               )}
             </button>
           </div>
@@ -570,20 +548,7 @@ export const TaxDetailsForm = ({
       )}
 
       <div className={styles.note}>
-        <svg
-          className={styles.noteIcon}
-          width="16"
-          height="16"
-          viewBox="0 0 24 24"
-          fill="none"
-          stroke="currentColor"
-          strokeWidth="1.6"
-          strokeLinecap="round"
-          strokeLinejoin="round"
-        >
-          <rect x="4" y="11" width="16" height="10" rx="2"></rect>
-          <path d="M8 11V7a4 4 0 0 1 8 0v4"></path>
-        </svg>
+        <Lock className={styles.noteIcon} size={16} strokeWidth={1.6} />
         <span>Stored securely and only shared with HMRC.</span>
       </div>
 

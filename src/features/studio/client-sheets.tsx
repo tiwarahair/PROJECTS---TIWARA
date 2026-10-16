@@ -1,4 +1,5 @@
 import { useRef } from "react";
+import { Camera, User } from "lucide-react";
 import { joinClassNames } from "../../utils/class-names";
 import type { ClientsView } from "./clients-view";
 import { ClientProfile } from "./studio-clients";
@@ -55,35 +56,11 @@ export const ClientEditSheet = ({ view }: { view: ClientsView }) => {
             />
           ) : (
             <span className={styles.placeholder}>
-              <svg
-                width="22"
-                height="22"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="1.8"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-              >
-                <path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"></path>
-                <circle cx="12" cy="7" r="4"></circle>
-              </svg>
+              <User size={22} strokeWidth={1.8} />
             </span>
           )}
           <span className={styles.camera}>
-            <svg
-              width="11"
-              height="11"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="2.4"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-            >
-              <path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"></path>
-              <circle cx="12" cy="13" r="4"></circle>
-            </svg>
+            <Camera size={11} strokeWidth={2.4} />
           </span>
         </button>
         <div className={styles.grow}>

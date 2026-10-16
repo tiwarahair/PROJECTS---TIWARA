@@ -1,5 +1,6 @@
+import { Check, CircleAlert } from "lucide-react";
 import { joinClassNames } from "../../utils/class-names";
-import { Icon, getViewAnimation } from "./checkout-detail";
+import { getViewAnimation } from "./checkout-detail";
 import { ICONS, REFUND_REASONS } from "./checkout-data";
 import { Chip, RadioMark } from "./checkout-payment";
 import { RECORD_VIA_LABELS } from "./checkout-view";
@@ -47,18 +48,7 @@ export const CheckoutDone = ({
         className={joinClassNames(after.doneTick, shared.motion)}
         data-ck-m="1"
       >
-        <svg
-          width="28"
-          height="28"
-          viewBox="0 0 24 24"
-          fill="none"
-          stroke="currentColor"
-          strokeWidth="2.4"
-          strokeLinecap="round"
-          strokeLinejoin="round"
-        >
-          <path className={after.doneTickPath} d="M20 6 9 17l-5-5"></path>
-        </svg>
+        <Check size={28} strokeWidth={2.4} />
       </span>
       <div
         className={joinClassNames(after.doneHead, shared.motion)}
@@ -68,7 +58,7 @@ export const CheckoutDone = ({
         <div className={after.doneSub}>{summary}</div>
         {done.method === "link" && (
           <span className={after.awaitingTag}>
-            <Icon path={ICONS.clock} size={14} strokeWidth="2" />
+            <ICONS.clock size={14} strokeWidth={2} />
             Completed · Awaiting payment
           </span>
         )}
@@ -214,7 +204,7 @@ export const CheckoutReceipt = ({
         goTo("resend", 1);
       }}
     >
-      <Icon path={ICONS.send} size={16} strokeWidth="1.7" />
+      <ICONS.send size={16} strokeWidth={1.7} />
       Resend receipt
     </button>
   </div>
@@ -399,19 +389,11 @@ export const CheckoutRefund = ({
               </span>
               {!!refundError && (
                 <span className={after.refundError} role="alert">
-                  <svg
+                  <CircleAlert
                     className={shared.iconTop2}
-                    width="15"
-                    height="15"
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    stroke="currentColor"
-                    strokeWidth="1.5"
-                    strokeLinecap="round"
-                  >
-                    <circle cx="12" cy="12" r="10"></circle>
-                    <path d="M12 7v6M12 16.5v.5"></path>
-                  </svg>
+                    size={15}
+                    strokeWidth={1.5}
+                  />
                   {refundError}
                 </span>
               )}

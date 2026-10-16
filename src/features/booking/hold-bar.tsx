@@ -1,3 +1,4 @@
+import { Clock } from "lucide-react";
 import { joinClassNames } from "../../utils/class-names";
 import pageGlobal from "../../styles/features/booking/booking-page-global.module.css";
 import styles from "../../styles/features/booking/hold-bar.module.css";
@@ -27,19 +28,7 @@ export const HoldBar = ({ variant, time, leftMs }: HoldBarProps) => {
         leftMs < 120000 && styles.toneAmber,
       )}
     >
-      <svg
-        width="15"
-        height="15"
-        viewBox="0 0 24 24"
-        fill="none"
-        stroke="currentColor"
-        strokeWidth="1.5"
-        strokeLinecap="round"
-        className={styles.icon}
-      >
-        <circle cx="12" cy="12" r="9"></circle>
-        <path d="M12 7v5l3 2"></path>
-      </svg>
+      <Clock size={15} strokeWidth={1.5} className={styles.icon} />
       <span>
         {`We're holding ${time} for you · `}
         <span className={styles.countdown}>

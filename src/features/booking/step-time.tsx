@@ -1,3 +1,4 @@
+import { ChevronLeft, ChevronRight, Clock } from "lucide-react";
 import { joinClassNames } from "../../utils/class-names";
 import {
   type CalendarDay,
@@ -67,18 +68,7 @@ export const StepTime = ({ booking }: StepTimeProps) => {
       </p>
       {state.repickNote && (
         <div role="status" className={styles.reNote}>
-          <svg
-            width="15"
-            height="15"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            strokeWidth="1.5"
-            strokeLinecap="round"
-          >
-            <circle cx="12" cy="12" r="9"></circle>
-            <path d="M12 7v5l3 2"></path>
-          </svg>
+          <Clock size={15} strokeWidth={1.5} />
           Pick your time again
         </div>
       )}
@@ -89,17 +79,7 @@ export const StepTime = ({ booking }: StepTimeProps) => {
             aria-label="Previous month"
             className={styles.monthButton}
           >
-            <svg
-              width="20"
-              height="20"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="2"
-              strokeLinecap="round"
-            >
-              <path d="m15 18-6-6 6-6"></path>
-            </svg>
+            <ChevronLeft size={20} strokeWidth={2} />
           </button>
           <div className={styles.monthTitle}>
             {formatMonthTitle(calendarYear, calendarMonth)}
@@ -109,17 +89,7 @@ export const StepTime = ({ booking }: StepTimeProps) => {
             aria-label="Next month"
             className={styles.monthButton}
           >
-            <svg
-              width="20"
-              height="20"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="2"
-              strokeLinecap="round"
-            >
-              <path d="m9 18 6-6-6-6"></path>
-            </svg>
+            <ChevronRight size={20} strokeWidth={2} />
           </button>
         </div>
         <div className={styles.weekdays}>

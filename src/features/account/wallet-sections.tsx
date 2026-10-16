@@ -1,3 +1,4 @@
+import { Ellipsis, Info, Lock, Plus } from "lucide-react";
 import { AddressFinder } from "../../components/address-finder/address-finder";
 import { joinClassNames } from "../../utils/class-names";
 import { getAddressLine } from "./account-logic";
@@ -49,18 +50,7 @@ export const PaymentsSection = ({
                 </div>
                 {!!inUse && (
                   <div className={styles.inUse}>
-                    <svg
-                      width="14"
-                      height="14"
-                      viewBox="0 0 24 24"
-                      fill="none"
-                      stroke="currentColor"
-                      strokeWidth="1.5"
-                      aria-hidden="true"
-                    >
-                      <rect x="4" y="11" width="16" height="10" rx="2"></rect>
-                      <path d="M8 11V7a4 4 0 0 1 8 0v4"></path>
-                    </svg>
+                    <Lock size={14} strokeWidth={1.5} />
                     <span>{`In use for your booking on ${inUse}`}</span>
                   </div>
                 )}
@@ -103,18 +93,7 @@ export const PaymentsSection = ({
                     aria-label="This card is needed for your booking until it’s over"
                     title="This card is needed for your booking until it’s over"
                   >
-                    <svg
-                      width="18"
-                      height="18"
-                      viewBox="0 0 24 24"
-                      fill="none"
-                      stroke="currentColor"
-                      strokeWidth="1.7"
-                      aria-hidden="true"
-                    >
-                      <circle cx="12" cy="12" r="9"></circle>
-                      <path d="M12 11v5M12 8h.01"></path>
-                    </svg>
+                    <Info size={18} strokeWidth={1.7} />
                   </span>
                 )}
               </div>
@@ -132,18 +111,7 @@ export const PaymentsSection = ({
       className={styles.addCard}
       onClick={() => actions.openDialog({ kind: "addCard" })}
     >
-      <svg
-        width="16"
-        height="16"
-        viewBox="0 0 24 24"
-        fill="none"
-        stroke="currentColor"
-        strokeWidth="1.7"
-        strokeLinecap="round"
-        aria-hidden="true"
-      >
-        <path d="M12 5v14M5 12h14"></path>
-      </svg>
+      <Plus size={16} strokeWidth={1.7} />
       Add a card
     </button>
   </section>
@@ -296,17 +264,7 @@ export const AddressesSection = ({
                         aria-haspopup="menu"
                         aria-expanded={isOpen ? "true" : "false"}
                       >
-                        <svg
-                          width="18"
-                          height="18"
-                          viewBox="0 0 24 24"
-                          fill="currentColor"
-                          aria-hidden="true"
-                        >
-                          <circle cx="5" cy="12" r="1.8"></circle>
-                          <circle cx="12" cy="12" r="1.8"></circle>
-                          <circle cx="19" cy="12" r="1.8"></circle>
-                        </svg>
+                        <Ellipsis size={18} />
                       </button>
                       {isOpen && (
                         <>
@@ -438,20 +396,7 @@ export const AddressesSection = ({
             )
           }
         >
-          <svg
-            className={ui.icon}
-            width="16"
-            height="16"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            strokeWidth="1.7"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            aria-hidden="true"
-          >
-            <path d="M12 5v14M5 12h14"></path>
-          </svg>
+          <Plus className={ui.icon} size={16} strokeWidth={1.7} />
           Add an address
         </button>
       )}

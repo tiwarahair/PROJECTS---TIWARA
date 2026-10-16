@@ -7,6 +7,7 @@ import {
   replacePhoto,
 } from "./studio-photos";
 import { getSavedSettings } from "./studio-unsaved";
+import { getSocialHandleError } from "../../utils/social-handles";
 import type { StudioController } from "./use-studio";
 
 export const getProfileView = (studio: StudioController) => {
@@ -40,6 +41,12 @@ export const getProfileView = (studio: StudioController) => {
   const setProfile = (patch: Partial<typeof state.profile>) =>
     setState(({ profile }) => ({ profile: { ...profile, ...patch } }));
 
+  const socialErrors = {
+    instagram: getSocialHandleError("instagram", state.profile.instagram),
+    tiktok: getSocialHandleError("tiktok", state.profile.tiktok),
+    youtube: getSocialHandleError("youtube", state.profile.youtube ?? ""),
+  };
+
   return {
     onCoverFile: (event: ChangeEvent<HTMLInputElement>) =>
       readFile(event, (url, file) => {
@@ -56,6 +63,7 @@ export const getProfileView = (studio: StudioController) => {
         store("studio.avatar", url);
       }),
     setProfile,
+    socialErrors,
     portfolio: state.portfolio.map(({ id, src }) => ({
       key: id,
       src,
@@ -107,6 +115,9 @@ export const getProfileView = (studio: StudioController) => {
       });
     },
     saveProfile: async () => {
+      if (Object.values(socialErrors).some(Boolean))
+        return showToast("Check your social usernames first.");
+
       if (context.memo.saveSlug && !(await context.memo.saveSlug())) return;
 
       const { profile, business, check } = state;
@@ -126,9 +137,9 @@ export const getProfileView = (studio: StudioController) => {
         {
           business_name: salon.trim() || undefined,
           bio: about,
-          instagram: instagram || null,
-          tiktok: tiktok || null,
-          youtube: youtube || null,
+          instagram: instagram.trim() || null,
+          tiktok: tiktok.trim() || null,
+          youtube: youtube?.trim() || null,
           website: site || null,
           contact_email: email || null,
           profile_confirmed_at: new Date().toISOString(),

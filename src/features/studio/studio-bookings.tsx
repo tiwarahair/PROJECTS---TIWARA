@@ -1,4 +1,15 @@
 import type { CSSProperties } from "react";
+import {
+  Calendar,
+  ChevronDown,
+  ChevronLeft,
+  ChevronRight,
+  List,
+  ListFilter,
+  Lock,
+  Search,
+  X,
+} from "lucide-react";
 import { joinClassNames } from "../../utils/class-names";
 import { getBlockTone, getBookingsView } from "./bookings-view";
 import type { BookingsView } from "./bookings-view";
@@ -15,32 +26,17 @@ const VIEW_SEGMENTS = [
   {
     id: "cal",
     label: "Calendar",
-    iconPath: "M3 5h18v16H3zM16 3v4M8 3v4M3 11h18",
+    icon: Calendar,
   },
   {
     id: "list",
     label: "List",
-    iconPath: "M8 6h13M8 12h13M8 18h13M3 6h.01M3 12h.01M3 18h.01",
+    icon: List,
   },
 ];
 
 const asStyle = (values: Record<string, string | null | undefined>) =>
   values as CSSProperties;
-
-const Arrow = ({ iconPath }: { iconPath: string }) => (
-  <svg
-    width="15"
-    height="15"
-    viewBox="0 0 24 24"
-    fill="none"
-    stroke="currentColor"
-    strokeWidth="2"
-    strokeLinecap="round"
-    strokeLinejoin="round"
-  >
-    <path d={iconPath}></path>
-  </svg>
-);
 
 const DatePicker = ({
   studio,
@@ -103,33 +99,25 @@ const DatePicker = ({
         disabled={false}
         aria-label="Previous week"
       >
-        <Arrow iconPath="m15 18-6-6 6-6" />
+        <ChevronLeft size={15} strokeWidth={2} />
       </button>
       <button className={styles.dateButton} onClick={toggle}>
         <span className={styles.dateLabel}>{view.calendarDateLabel}</span>
-        <svg
+        <ChevronDown
           className={joinClassNames(
             styles.chevron,
             state.datePickerOpen && styles.chevronOpen,
           )}
-          width="13"
-          height="13"
-          viewBox="0 0 24 24"
-          fill="none"
-          stroke="currentColor"
-          strokeWidth="2.2"
-          strokeLinecap="round"
-          strokeLinejoin="round"
-        >
-          <path d="m6 9 6 6 6-6"></path>
-        </svg>
+          size={13}
+          strokeWidth={2.2}
+        />
       </button>
       <button
         className={joinClassNames(styles.weekArrow, styles.weekArrowNext)}
         onClick={() => studio.actions.setDay({ dayIndex: state.dayIndex + 7 })}
         aria-label="Next week"
       >
-        <Arrow iconPath="m9 18 6-6-6-6" />
+        <ChevronRight size={15} strokeWidth={2} />
       </button>
       {state.datePickerOpen && (
         <>
@@ -146,7 +134,7 @@ const DatePicker = ({
                 disabled={view.isPrevOff}
                 aria-label="Previous month"
               >
-                <Arrow iconPath="m15 18-6-6 6-6" />
+                <ChevronLeft size={15} strokeWidth={2} />
               </button>
               <div className={styles.h3}>{view.pickerTitle}</div>
               <button
@@ -154,7 +142,7 @@ const DatePicker = ({
                 onClick={goNext}
                 aria-label="Next month"
               >
-                <Arrow iconPath="m9 18 6-6-6-6" />
+                <ChevronRight size={15} strokeWidth={2} />
               </button>
             </div>
             <div className={styles.dows}>
@@ -226,7 +214,7 @@ const BookingsHeader = ({
       <div className={styles.controls}>
         <div className={styles.controlRow}>
           <div className={styles.segments}>
-            {VIEW_SEGMENTS.map(({ id, label, iconPath }) => (
+            {VIEW_SEGMENTS.map(({ id, label, icon: SegmentIcon }) => (
               <button
                 key={id}
                 className={joinClassNames(
@@ -243,19 +231,11 @@ const BookingsHeader = ({
                 title={label}
                 aria-label={label}
               >
-                <svg
+                <SegmentIcon
                   className={styles.noShrink}
-                  width="16"
-                  height="16"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="1.8"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                >
-                  <path d={iconPath}></path>
-                </svg>
+                  size={16}
+                  strokeWidth={1.8}
+                />
                 {isWide && <span>{label}</span>}
               </button>
             ))}
@@ -373,20 +353,12 @@ const BookingsHeader = ({
       {view.isList && (
         <div className={styles.search}>
           <div className={styles.searchField}>
-            <svg
+            <Search
               className={styles.searchIcon}
-              width="15"
-              height="15"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="var(--text-secondary)"
-              strokeWidth="2"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-            >
-              <circle cx="11" cy="11" r="7"></circle>
-              <path d="m20 20-3.5-3.5"></path>
-            </svg>
+              size={15}
+              strokeWidth={2}
+              color="var(--text-secondary)"
+            />
             <input
               className={styles.searchInput}
               value={state.bookingsQuery || ""}
@@ -404,17 +376,7 @@ const BookingsHeader = ({
             onClick={() => setState({ filterOpen: true, filterOut: false })}
             aria-label="Filter bookings"
           >
-            <svg
-              width="15"
-              height="15"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="1.8"
-              strokeLinecap="round"
-            >
-              <path d="M4 6h16M6 12h12M9 18h6"></path>
-            </svg>
+            <ListFilter size={15} strokeWidth={1.8} />
             Filter
             {view.filterCount && (
               <span className={styles.filterCount}>{view.filterCount}</span>
@@ -621,20 +583,12 @@ const DayView = ({
             style={asStyle({ "--top": top, "--h": height, "--hex": hex })}
             onClick={open}
           >
-            <svg
+            <Lock
               className={styles.lockIcon}
-              width="12"
-              height="12"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke={hex}
-              strokeWidth="2"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-            >
-              <rect x="3" y="11" width="18" height="11" rx="2"></rect>
-              <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
-            </svg>
+              size={12}
+              strokeWidth={2}
+              color={hex}
+            />
             <span className={styles.dayBlockedLabel}>{label}</span>
           </button>
         ))}
@@ -704,17 +658,7 @@ const BookingsList = ({ view }: { view: BookingsView }) => (
         {view.filterChips.map(({ label, clear }) => (
           <button key={label} className={styles.chip} onClick={clear}>
             {label}
-            <svg
-              width="11"
-              height="11"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="2.4"
-              strokeLinecap="round"
-            >
-              <path d="M18 6 6 18M6 6l12 12"></path>
-            </svg>
+            <X size={11} strokeWidth={2.4} />
           </button>
         ))}
         <button className={styles.clearAll} onClick={view.clearFilter}>
@@ -906,34 +850,10 @@ export const StudioBookings = ({
                     onClick={() => setState({ calendarEmptyHidden: true })}
                     aria-label="Close"
                   >
-                    <svg
-                      width="16"
-                      height="16"
-                      viewBox="0 0 24 24"
-                      fill="none"
-                      stroke="currentColor"
-                      strokeWidth="2"
-                      strokeLinecap="round"
-                    >
-                      <path d="M18 6 6 18M6 6l12 12"></path>
-                    </svg>
+                    <X size={16} strokeWidth={2} />
                   </button>
                   <span className={styles.emptyIcon}>
-                    <svg
-                      width="20"
-                      height="20"
-                      viewBox="0 0 24 24"
-                      fill="none"
-                      stroke="currentColor"
-                      strokeWidth="2"
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                    >
-                      <path d="M8 2v4"></path>
-                      <path d="M16 2v4"></path>
-                      <rect width="18" height="18" x="3" y="4" rx="2"></rect>
-                      <path d="M3 10h18"></path>
-                    </svg>
+                    <Calendar size={20} strokeWidth={2} />
                   </span>
                   <div className={styles.emptyTitle}>No appointments yet</div>
                   <div className={styles.emptyBody}>

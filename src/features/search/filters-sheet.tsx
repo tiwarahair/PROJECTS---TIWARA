@@ -1,6 +1,6 @@
+import { Check, X } from "lucide-react";
 import type { CSSProperties } from "react";
 import { joinClassNames } from "../../utils/class-names";
-import { CheckIcon } from "./check-icon";
 import controls from "../../styles/features/search/search-controls.module.css";
 import {
   formatMaxPrice,
@@ -45,18 +45,7 @@ export const FiltersSheet = ({ search }: FiltersSheetProps) => {
             aria-label="Close"
             className={styles.close}
           >
-            <svg
-              width="24"
-              height="24"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="2"
-              strokeLinecap="round"
-            >
-              <path d="M18 6 6 18"></path>
-              <path d="m6 6 12 12"></path>
-            </svg>
+            <X size={24} strokeWidth={2} />
           </button>
         </div>
         <div className={styles.body}>
@@ -82,7 +71,13 @@ export const FiltersSheet = ({ search }: FiltersSheetProps) => {
                       isOn && controls.chipOn,
                     )}
                   >
-                    {isOn && <CheckIcon className={styles.iconBlock} />}
+                    {isOn && (
+                      <Check
+                        className={styles.iconBlock}
+                        size={14}
+                        strokeWidth={2.4}
+                      />
+                    )}
                     {venue}
                   </button>
                 );

@@ -1,6 +1,7 @@
 import { Fragment, useCallback, useEffect, useRef, useState } from "react";
 import type { CSSProperties } from "react";
 import { createPortal } from "react-dom";
+import { ChevronDown } from "lucide-react";
 import { joinClassNames } from "../../utils/class-names";
 import styles from "../../styles/components/search-select/search-select.module.css";
 
@@ -153,18 +154,7 @@ export const SearchSelect = ({
             {value ? toSentenceCase(value) : placeholder}
           </span>
         </span>
-        <svg
-          width="15"
-          height="15"
-          viewBox="0 0 24 24"
-          fill="none"
-          stroke="var(--text-muted)"
-          strokeWidth="1.9"
-          strokeLinecap="round"
-          strokeLinejoin="round"
-        >
-          <path d="M6 9.5l6 6 6-6" />
-        </svg>
+        <ChevronDown size={15} color="var(--text-muted)" strokeWidth={1.9} />
       </button>
       {isOpen &&
         !disabled &&

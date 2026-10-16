@@ -1,5 +1,6 @@
 // Studio → Services values: service groups, add-on groups, the category rows / chips and filters.
 import type { MouseEvent } from "react";
+import { ListFilter, Plus, TextAlignStart } from "lucide-react";
 import { NO_CATEGORY_TONE } from "./studio-data";
 import {
   formatAddon,
@@ -91,7 +92,7 @@ export const getServicesView = (studio: StudioController) => {
         items: [
           {
             label: addHere.label,
-            iconPath: "M12 5v14M5 12h14",
+            icon: Plus,
             run: addHere.run,
           },
           ...(currentFilter === categoryId
@@ -99,13 +100,13 @@ export const getServicesView = (studio: StudioController) => {
             : [
                 {
                   label: "Show only this category",
-                  iconPath: "M4 6h16M6 12h12M9 18h6",
+                  icon: ListFilter,
                   run: showOnly,
                 },
               ]),
           {
             label: "Manage categories",
-            iconPath: "M4 6h16M4 12h16M4 18h10",
+            icon: TextAlignStart,
             run: () => openCategories(),
           },
         ],

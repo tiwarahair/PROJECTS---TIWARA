@@ -1,3 +1,5 @@
+import { Globe, Mail } from "lucide-react";
+import { SOCIAL_ICONS, SocialIcon } from "../../components/icons/brand-icons";
 import { Link } from "react-router";
 import { joinClassNames } from "../../utils/class-names";
 import type { ProfileFacts } from "./profile-facts";
@@ -16,7 +18,15 @@ interface BookingAsideProps {
 export const BookingAside = ({
   fromLabel,
   bookHref,
-  facts: { cancelHours, mailto, site, siteHref, instagramHref, tiktokHref },
+  facts: {
+    cancelHours,
+    mailto,
+    site,
+    siteHref,
+    instagramHref,
+    tiktokHref,
+    youtubeHref,
+  },
   hoursRows,
 }: BookingAsideProps) => (
   <div className={joinClassNames(pageGlobal.bookaside, styles.aside)}>
@@ -67,20 +77,7 @@ export const BookingAside = ({
               aria-label="Instagram"
               className={styles.linkIcon}
             >
-              <svg
-                width="15"
-                height="15"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="1.5"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-              >
-                <rect x="3" y="3" width="18" height="18" rx="5"></rect>
-                <circle cx="12" cy="12" r="4"></circle>
-                <circle cx="17.2" cy="6.8" r="1"></circle>
-              </svg>
+              <SocialIcon icon={SOCIAL_ICONS.instagram} size={15} />
             </a>
           )}
           {tiktokHref && (
@@ -91,35 +88,23 @@ export const BookingAside = ({
               aria-label="TikTok"
               className={styles.linkIcon}
             >
-              <svg
-                width="15"
-                height="15"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="1.5"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-              >
-                <rect x="3" y="3" width="18" height="18" rx="5"></rect>
-                <path d="M13.4 7.4v6.1a2.3 2.3 0 1 1-2.3-2.3"></path>
-                <path d="M13.4 7.4c.3 1.3 1.3 2.2 2.6 2.3"></path>
-              </svg>
+              <SocialIcon icon={SOCIAL_ICONS.tiktok} size={15} />
+            </a>
+          )}
+          {youtubeHref && (
+            <a
+              href={youtubeHref}
+              target="_blank"
+              rel="noopener"
+              aria-label="YouTube"
+              className={styles.linkIcon}
+            >
+              <SocialIcon icon={SOCIAL_ICONS.youtube} size={15} />
             </a>
           )}
           {mailto && (
             <a href={mailto} aria-label="Email" className={styles.linkIcon}>
-              <svg
-                width="15"
-                height="15"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="1.5"
-              >
-                <rect x="2" y="4" width="20" height="16" rx="3"></rect>
-                <path d="m3 6 9 7 9-7"></path>
-              </svg>
+              <Mail size={15} strokeWidth={2.25} />
             </a>
           )}
           {site && (
@@ -130,20 +115,7 @@ export const BookingAside = ({
               aria-label="Website"
               className={styles.linkIcon}
             >
-              <svg
-                width="15"
-                height="15"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="1.5"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-              >
-                <circle cx="12" cy="12" r="9"></circle>
-                <path d="M3.2 9h17.6M3.2 15h17.6"></path>
-                <path d="M12 3c2.4 2.4 3.6 5.4 3.6 9s-1.2 6.6-3.6 9c-2.4-2.4-3.6-5.4-3.6-9S9.6 5.4 12 3z"></path>
-              </svg>
+              <Globe size={15} strokeWidth={2.25} />
             </a>
           )}
         </div>

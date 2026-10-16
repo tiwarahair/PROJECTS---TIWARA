@@ -1,3 +1,4 @@
+import { X } from "lucide-react";
 import type { CSSProperties } from "react";
 import { joinClassNames } from "../../utils/class-names";
 import { getBarCount, SIZE_GUIDE } from "./booking-content";
@@ -27,17 +28,7 @@ export const SizeGuide = ({ onClose }: SizeGuideProps) => (
           <h3 className={styles.title}>Choosing your size</h3>
         </div>
         <button onClick={onClose} aria-label="Close" className={styles.close}>
-          <svg
-            width="20"
-            height="20"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            strokeWidth="1.9"
-            strokeLinecap="round"
-          >
-            <path d="M6 6l12 12M18 6L6 18"></path>
-          </svg>
+          <X size={20} strokeWidth={1.9} />
         </button>
       </div>
       <div className={joinClassNames(pageGlobal.sizeguide, styles.grid)}>

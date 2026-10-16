@@ -1,4 +1,5 @@
 import type { CSSProperties } from "react";
+import { X } from "lucide-react";
 import { joinClassNames } from "../../utils/class-names";
 import { getDialogPlacement, getOverlayAnimation } from "./studio-overlay";
 import type { StudioController } from "./use-studio";
@@ -92,23 +93,12 @@ export const ActionsMenu = ({ studio }: { studio: StudioController }) => {
             onClick={actions.closeActionSheet}
             aria-label="Close"
           >
-            <svg
-              width="19"
-              height="19"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="2"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-            >
-              <path d="M18 6 6 18M6 6l12 12"></path>
-            </svg>
+            <X size={19} strokeWidth={2} />
           </button>
         </div>
         <div className={styles.actsList}>
           {actionSheet.items.map(
-            ({ label, iconPath, disabled, danger, run }) => (
+            ({ label, icon: ItemIcon, disabled, danger, run }) => (
               <button
                 key={label}
                 className={joinClassNames(
@@ -124,19 +114,11 @@ export const ActionsMenu = ({ studio }: { studio: StudioController }) => {
                 }}
                 disabled={!!disabled}
               >
-                <svg
+                <ItemIcon
                   className={styles.noShrink}
-                  width="17"
-                  height="17"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="1.7"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                >
-                  <path d={iconPath}></path>
-                </svg>
+                  size={17}
+                  strokeWidth={1.7}
+                />
                 <span className={styles.grow}>{label}</span>
               </button>
             ),

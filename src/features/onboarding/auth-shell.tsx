@@ -3,7 +3,8 @@ import { getAssetImageSet, getAssetUrl } from "../../utils/asset-url";
 import { joinClassNames } from "../../utils/class-names";
 import { BENEFITS, FOOTER_SCREENS, PHOTOS } from "./onboarding-data";
 import type { OnboardingLayout } from "./onboarding-layout";
-import { BackIcon, ModeIcon } from "./onboarding-fields";
+import { ChevronLeft } from "lucide-react";
+import { ModeIcon } from "./onboarding-fields";
 import styles from "../../styles/features/onboarding/auth-shell.module.css";
 import type { OnboardingController } from "./use-onboarding";
 
@@ -145,7 +146,7 @@ export const AuthShell = ({ onboarding, layout, children }: AuthShellProps) => {
                     noPhoto ? styles.heroButtonPlain : styles.heroButtonPhoto,
                   )}
                 >
-                  <BackIcon />
+                  <ChevronLeft size={20} strokeWidth={2} />
                 </button>
               )}
               <img
@@ -179,7 +180,7 @@ export const AuthShell = ({ onboarding, layout, children }: AuthShellProps) => {
                 aria-label="Back"
                 className={styles.deskBack}
               >
-                <BackIcon />
+                <ChevronLeft size={20} strokeWidth={2} />
               </button>
             )}
             <button
@@ -260,19 +261,11 @@ export const AuthShell = ({ onboarding, layout, children }: AuthShellProps) => {
                       className={styles.benefit}
                     >
                       <span className={styles.benefitIcon}>
-                        <svg
-                          width="20"
-                          height="20"
-                          viewBox="0 0 24 24"
-                          fill="none"
-                          stroke="currentColor"
-                          strokeWidth="2"
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
+                        <benefit.icon
+                          size={20}
+                          strokeWidth={2}
                           className={styles.benefitSvg}
-                        >
-                          <path d={benefit.iconPath}></path>
-                        </svg>
+                        />
                       </span>
                       <span className={styles.benefitText}>
                         <span className={styles.benefitTitle}>

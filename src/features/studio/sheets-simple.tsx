@@ -1,4 +1,5 @@
 import type { CSSProperties } from "react";
+import { Calendar, Check, ChevronLeft, ChevronRight, X } from "lucide-react";
 import { joinClassNames } from "../../utils/class-names";
 import {
   dayInfo,
@@ -34,37 +35,6 @@ type YearKey =
   | "calendarYear"
   | "rescheduleCalendarYear"
   | "endCalendarYear";
-
-const Arrow = ({ iconPath }: { iconPath: string }) => (
-  <svg
-    width="15"
-    height="15"
-    viewBox="0 0 24 24"
-    fill="none"
-    stroke="currentColor"
-    strokeWidth="2"
-    strokeLinecap="round"
-    strokeLinejoin="round"
-  >
-    <path d={iconPath}></path>
-  </svg>
-);
-
-const CalendarIcon = () => (
-  <svg
-    width="16"
-    height="16"
-    viewBox="0 0 24 24"
-    fill="none"
-    stroke="currentColor"
-    strokeWidth="1.7"
-    strokeLinecap="round"
-    strokeLinejoin="round"
-  >
-    <rect x="3" y="5" width="18" height="16" rx="2"></rect>
-    <path d="M16 3v4M8 3v4M3 11h18"></path>
-  </svg>
-);
 
 /** Month navigation for one of the sheets' calendars; it never goes before this month. */
 export const getMonthNav = (
@@ -142,7 +112,7 @@ export const MonthCalendar = ({
         disabled={monthNav.isPrevOff}
         aria-label="Previous month"
       >
-        <Arrow iconPath="m15 18-6-6 6-6" />
+        <ChevronLeft size={15} strokeWidth={2} />
       </button>
       <div className={styles.h3}>{monthNav.title}</div>
       <button
@@ -150,7 +120,7 @@ export const MonthCalendar = ({
         onClick={monthNav.next}
         aria-label="Next month"
       >
-        <Arrow iconPath="m9 18 6-6-6-6" />
+        <ChevronRight size={15} strokeWidth={2} />
       </button>
     </div>
     <div className={joinClassNames(styles.dows, isLoose && styles.dowsLoose)}>
@@ -197,7 +167,7 @@ export const CalendarToggle = ({
     onClick={onClick}
     aria-label="Open calendar"
   >
-    <CalendarIcon />
+    <Calendar size={16} strokeWidth={1.7} />
   </button>
 );
 
@@ -273,19 +243,12 @@ export const NotificationsSheet = ({
             </span>
             <span className={styles.notifBody}>{body}</span>
           </span>
-          <svg
+          <ChevronRight
             className={styles.chevron}
-            width="15"
-            height="15"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="var(--text-secondary)"
-            strokeWidth="1.7"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-          >
-            <path d="m9 18 6-6-6-6"></path>
-          </svg>
+            size={15}
+            strokeWidth={1.7}
+            color="var(--text-secondary)"
+          />
         </button>
       ))}
     </div>
@@ -334,19 +297,7 @@ export const StripeSheet = ({ studio }: { studio: StudioController }) => {
         </div>
       </div>
       <div className={styles.filled}>
-        <svg
-          className={styles.noShrink}
-          width="15"
-          height="15"
-          viewBox="0 0 24 24"
-          fill="none"
-          stroke="currentColor"
-          strokeWidth="1.7"
-          strokeLinecap="round"
-          strokeLinejoin="round"
-        >
-          <path d="M20 6 9 17l-5-5"></path>
-        </svg>
+        <Check className={styles.noShrink} size={15} strokeWidth={1.7} />
         We’ve filled in your details for you.
       </div>
       <button
@@ -644,19 +595,7 @@ export const BlockSheet = ({ studio }: { studio: StudioController }) => {
               {endDayInfo
                 ? `${endDayInfo.weekday} ${endDayInfo.dayNumber} ${endDayInfo.monthName}`
                 : "Pick a date"}
-              <svg
-                width="15"
-                height="15"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="1.7"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-              >
-                <rect x="3" y="5" width="18" height="16" rx="2"></rect>
-                <path d="M16 3v4M8 3v4M3 11h18"></path>
-              </svg>
+              <Calendar size={15} strokeWidth={1.7} />
             </button>
           )}
         </>
@@ -742,18 +681,7 @@ export const EndDateDialog = ({ studio }: { studio: StudioController }) => {
         <div className={styles.endHead}>
           <div className={styles.h3}>Repeat until</div>
           <button className={styles.close} onClick={close} aria-label="Close">
-            <svg
-              width="19"
-              height="19"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="2"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-            >
-              <path d="M18 6 6 18M6 6l12 12"></path>
-            </svg>
+            <X size={19} strokeWidth={2} />
           </button>
         </div>
         <MonthCalendar monthNav={monthNav} days={days} />

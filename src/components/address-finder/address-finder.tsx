@@ -1,5 +1,6 @@
 import { useState } from "react";
 import type { CSSProperties, MouseEvent } from "react";
+import { CircleAlert, MapPin, Search, X } from "lucide-react";
 import { joinClassNames } from "../../utils/class-names";
 import { AddressRowSkeleton } from "../skeleton/address-row-skeleton";
 import styles from "../../styles/components/address-finder/address-finder.module.css";
@@ -57,65 +58,6 @@ const MANUAL_FIELDS = [
 
 /** Keeps focus in the input while a suggestion or link is pressed. */
 const keepFocus = (event: MouseEvent) => event.preventDefault();
-
-const ErrorIcon = () => (
-  <svg
-    className={styles.errorIcon}
-    width="15"
-    height="15"
-    viewBox="0 0 24 24"
-    fill="none"
-    stroke="currentColor"
-    strokeWidth="1.5"
-    strokeLinecap="round"
-  >
-    <circle cx="12" cy="12" r="10"></circle>
-    <path d="M12 7v6M12 16.5v.5"></path>
-  </svg>
-);
-
-const PinIcon = ({ className, size }: { className?: string; size: number }) => (
-  <svg
-    className={className}
-    width={size}
-    height={size}
-    viewBox="0 0 24 24"
-    fill="none"
-    stroke="currentColor"
-    strokeWidth="1.7"
-    strokeLinecap="round"
-    strokeLinejoin="round"
-    aria-hidden="true"
-  >
-    <path d="M12 21s-7-6.3-7-12a7 7 0 0 1 14 0c0 5.7-7 12-7 12z"></path>
-    <circle cx="12" cy="9" r="2.5"></circle>
-  </svg>
-);
-
-const SearchIcon = ({
-  className,
-  size,
-  strokeWidth,
-}: {
-  className?: string;
-  size: number;
-  strokeWidth: string;
-}) => (
-  <svg
-    className={className}
-    width={size}
-    height={size}
-    viewBox="0 0 24 24"
-    fill="none"
-    stroke="currentColor"
-    strokeWidth={strokeWidth}
-    strokeLinecap="round"
-    aria-hidden="true"
-  >
-    <circle cx="11" cy="11" r="7"></circle>
-    <path d="m21 21-4.3-4.3"></path>
-  </svg>
-);
 
 /**
  * The ONE address field (Booking, Onboarding, BusinessDetails, TaxDetailsForm): finder with suggestions →
@@ -187,11 +129,7 @@ const AddressFinderField = ({
             {label}
           </label>
           <div className={styles.inputWrap}>
-            <SearchIcon
-              className={styles.searchIcon}
-              size={18}
-              strokeWidth="1.7"
-            />
+            <Search className={styles.searchIcon} size={18} strokeWidth={1.7} />
             <input
               ref={finder.queryRef}
               id={ids.query}
@@ -227,17 +165,7 @@ const AddressFinderField = ({
                 aria-label="Clear address search"
               >
                 <span className={styles.clearDot}>
-                  <svg
-                    width="12"
-                    height="12"
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    stroke="currentColor"
-                    strokeWidth="2.4"
-                    strokeLinecap="round"
-                  >
-                    <path d="M18 6 6 18M6 6l12 12"></path>
-                  </svg>
+                  <X size={12} strokeWidth={2.4} />
                 </span>
               </button>
             )}
@@ -275,7 +203,11 @@ const AddressFinderField = ({
                         onClick={() => finder.pick(hit)}
                         onMouseEnter={() => finder.setActiveIndex(index)}
                       >
-                        <PinIcon className={styles.pinIcon} size={16} />
+                        <MapPin
+                          className={styles.pinIcon}
+                          size={16}
+                          strokeWidth={1.7}
+                        />
                         <span className={styles.optionText}>
                           <span className={styles.optionLine}>
                             {hit.line.map(({ key, text, highlighted }) => (
@@ -329,7 +261,11 @@ const AddressFinderField = ({
           <div id={ids.queryError} aria-live="polite">
             {queryError && (
               <div role="alert" className={styles.error}>
-                <ErrorIcon />
+                <CircleAlert
+                  className={styles.errorIcon}
+                  size={15}
+                  strokeWidth={1.5}
+                />
                 {queryError}
               </div>
             )}
@@ -349,7 +285,7 @@ const AddressFinderField = ({
       {state.mode === "summary" && (
         <div className={styles.summaryStack}>
           <div className={styles.summaryCard}>
-            <PinIcon className={styles.summaryPin} size={18} />
+            <MapPin className={styles.summaryPin} size={18} strokeWidth={1.7} />
             <address className={styles.address}>
               {summaryLines.map((line, index) => (
                 <div
@@ -412,7 +348,11 @@ const AddressFinderField = ({
                   <div id={`${fieldId}-err`} aria-live="polite">
                     {error && (
                       <div role="alert" className={styles.error}>
-                        <ErrorIcon />
+                        <CircleAlert
+                          className={styles.errorIcon}
+                          size={15}
+                          strokeWidth={1.5}
+                        />
                         {error}
                       </div>
                     )}
@@ -427,7 +367,7 @@ const AddressFinderField = ({
               className={joinClassNames(styles.textLink, styles.toFind)}
               onClick={finder.toFind}
             >
-              <SearchIcon size={15} strokeWidth="1.8" />
+              <Search size={15} strokeWidth={1.8} />
               Search for your address instead
             </button>
           </div>

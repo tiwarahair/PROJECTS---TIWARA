@@ -1,3 +1,4 @@
+import { ChevronLeft, ChevronRight, X } from "lucide-react";
 import { joinClassNames } from "../../utils/class-names";
 import {
   PERIODS,
@@ -31,41 +32,6 @@ const FORMATS = [
     "Monthly statement with each type on its own dated lines, totals and payouts.",
   ],
 ] as const;
-
-const Chevron = () => (
-  <svg
-    width="15"
-    height="15"
-    viewBox="0 0 24 24"
-    fill="none"
-    stroke="currentColor"
-    strokeWidth="1.7"
-    strokeLinecap="round"
-    strokeLinejoin="round"
-  >
-    <path d="m9 6 6 6-6 6"></path>
-  </svg>
-);
-
-const CloseIcon = ({
-  size,
-  strokeWidth,
-}: {
-  size: number;
-  strokeWidth: string;
-}) => (
-  <svg
-    width={size}
-    height={size}
-    viewBox="0 0 24 24"
-    fill="none"
-    stroke="currentColor"
-    strokeWidth={strokeWidth}
-    strokeLinecap="round"
-  >
-    <path d="M18 6 6 18M6 6l12 12"></path>
-  </svg>
-);
 
 /** "Not paid out yet", "Next payout" … for a transaction without a payout. */
 const getNoPayoutText = ({ isRecorded, status }: Transaction): string => {
@@ -243,7 +209,7 @@ export const EarningsOverlays = ({
             <span className={styles.factLabel}>Appointment</span>
             <span className={styles.factLink}>
               {`${appointmentDay}, ${appointmentTime}`}
-              <Chevron />
+              <ChevronRight size={15} strokeWidth={1.7} />
             </span>
           </button>
           <div className={styles.fact}>
@@ -294,7 +260,7 @@ export const EarningsOverlays = ({
               onClick={() => openDrawer({ kind: "po", id: payout.id }, true)}
             >
               {`${payout.id} · ${formatWeekdayDate(payout.sent)}`}
-              <Chevron />
+              <ChevronRight size={15} strokeWidth={1.7} />
             </button>
           )}
           {!payout && (
@@ -351,18 +317,7 @@ export const EarningsOverlays = ({
                   }
                   aria-label="Back"
                 >
-                  <svg
-                    width="18"
-                    height="18"
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    stroke="currentColor"
-                    strokeWidth="1.7"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                  >
-                    <path d="m15 6-6 6 6 6"></path>
-                  </svg>
+                  <ChevronLeft size={18} strokeWidth={1.7} />
                 </button>
               )}
               <div className={styles.drawerTitle}>
@@ -373,7 +328,7 @@ export const EarningsOverlays = ({
                 onClick={closeDrawer}
                 aria-label="Close"
               >
-                <CloseIcon size={18} strokeWidth="2" />
+                <X size={18} strokeWidth={2} />
               </button>
             </div>
             <div className={styles.drawerBody}>
@@ -507,7 +462,7 @@ export const EarningsOverlays = ({
                   onClick={closeExport}
                   aria-label="Close"
                 >
-                  <CloseIcon size={16} strokeWidth="1.7" />
+                  <X size={16} strokeWidth={1.7} />
                 </button>
               </div>
               <div className={styles.sectionLabel}>Date range</div>
