@@ -1,40 +1,54 @@
+import { useEffect } from "react";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
 import { joinClassNames } from "../../../../utils/class-names";
-import type { StudioState } from "../../core/types";
 import type { StudioController } from "../../core/use-studio";
 import styles from "../../../../styles/features/studio/settings/availability/closed-sheet.module.css";
 import fields from "../../../../styles/features/studio/settings/availability/sheet-fields.module.css";
 import { saveClosedPeriod } from "../../../../lib/studio-api";
 import { formatClosedSpan } from "../../core/blocked-time";
+import { closedSchema } from "./closed-schema";
+import type { ClosedValues } from "./closed-schema";
 
 export const ClosedSheet = ({ studio }: { studio: StudioController }) => {
   const { state, setState, actions, context } = studio;
-  const draft = state.closedDraft;
+  const { from, to, reason, editId } = state.closedDraft;
 
-  const setDraft = (patch: Partial<StudioState["closedDraft"]>) =>
-    setState(({ closedDraft }) => ({
-      closedDraft: { ...closedDraft, ...patch },
-    }));
+  const {
+    register,
+    handleSubmit,
+    watch,
+    formState: { errors, isValid },
+  } = useForm<ClosedValues>({
+    defaultValues: { from, to, reason },
+    resolver: zodResolver(closedSchema),
+    mode: "onChange",
+  });
 
-  const isReady = !!(draft.from && draft.to);
+  useEffect(() => {
+    const subscription = watch((values) =>
+      setState(({ closedDraft }) => ({
+        closedDraft: { ...closedDraft, ...values },
+      })),
+    );
 
-  const save = () => {
-    if (!isReady) return;
+    return () => subscription.unsubscribe();
+  }, [watch, setState]);
 
+  const save = handleSubmit((values) => {
     const item = {
-      id: draft.editId || crypto.randomUUID(),
-      from: draft.from,
-      to: draft.to,
-      span: formatClosedSpan(draft.from, draft.to),
-      reason: draft.reason,
+      id: editId || crypto.randomUUID(),
+      from: values.from,
+      to: values.to,
+      span: formatClosedSpan(values.from, values.to),
+      reason: values.reason,
     };
 
     const before = state.closed;
 
     setState({
-      closed: draft.editId
-        ? state.closed.map((period) =>
-            period.id === draft.editId ? item : period,
-          )
+      closed: editId
+        ? state.closed.map((period) => (period.id === editId ? item : period))
         : state.closed.concat([item]),
     });
 
@@ -51,13 +65,13 @@ export const ClosedSheet = ({ studio }: { studio: StudioController }) => {
     );
 
     actions.showToast(
-      draft.editId
+      editId
         ? "Closed period updated"
         : "Closed period added. Online booking blocked",
     );
 
     actions.closeSheet();
-  };
+  });
 
   return (
     <>
@@ -71,8 +85,7 @@ export const ClosedSheet = ({ studio }: { studio: StudioController }) => {
           <input
             className={styles.dateInput}
             type="date"
-            value={draft.from}
-            onChange={(event) => setDraft({ from: event.target.value })}
+            {...register("from")}
           />
         </label>
         <label className={styles.block}>
@@ -80,26 +93,30 @@ export const ClosedSheet = ({ studio }: { studio: StudioController }) => {
           <input
             className={styles.dateInput}
             type="date"
-            value={draft.to}
-            onChange={(event) => setDraft({ to: event.target.value })}
+            aria-invalid={errors.to ? "true" : "false"}
+            {...register("to")}
           />
+          {errors.to?.message && (
+            <span className={fields.fieldError} role="alert">
+              {errors.to.message}
+            </span>
+          )}
         </label>
       </div>
       <label className={fields.field}>
         <span className={fields.fieldLabel}>Reason</span>
         <input
           className={fields.input}
-          value={draft.reason}
-          onChange={(event) => setDraft({ reason: event.target.value })}
+          {...register("reason")}
           placeholder="e.g. Holiday (optional)"
         />
       </label>
       <button
-        className={joinClassNames(fields.submit, !isReady && fields.submitOff)}
-        onClick={save}
-        disabled={!isReady}
+        className={joinClassNames(fields.submit, !isValid && fields.submitOff)}
+        onClick={() => void save()}
+        disabled={!isValid}
       >
-        Add closed period
+        {editId ? "Save closed period" : "Add closed period"}
       </button>
     </>
   );

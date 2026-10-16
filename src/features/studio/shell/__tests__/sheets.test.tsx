@@ -1,4 +1,4 @@
-import { act, screen, within } from "@testing-library/react";
+import { act, screen, waitFor, within } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { renderWithStore } from "../../../../test/render-with-store";
 import { StudioPage } from "../..";
@@ -128,15 +128,69 @@ describe("Studio sheets", () => {
     await user.type(from as HTMLInputElement, "2026-12-24");
 
     await user.type(to as HTMLInputElement, "2026-12-28");
+    await waitFor(() => expect(add).toBeEnabled());
 
     await user.click(add);
 
     expect(
-      screen.getByText("Closed period added. Online booking blocked"),
+      await screen.findByText("Closed period added. Online booking blocked"),
     ).toBeInTheDocument();
 
     advance(220);
     expect(screen.getByText("24 Dec to 28 Dec")).toBeInTheDocument();
+  });
+
+  it("a closed period can't end before it starts", async () => {
+    renderStudio();
+    await openAvailability();
+
+    await user.click(
+      screen.getAllByRole("button", { name: "Add" })[1] as HTMLElement,
+    );
+
+    const [from, to] =
+      document.querySelectorAll<HTMLInputElement>('input[type="date"]');
+
+    await user.type(from as HTMLInputElement, "2026-12-28");
+    await user.type(to as HTMLInputElement, "2026-12-24");
+
+    expect(
+      await screen.findByText("The end date can’t be before the start date."),
+    ).toBeInTheDocument();
+
+    expect(
+      screen.getByRole("button", { name: "Add closed period" }),
+    ).toBeDisabled();
+  });
+
+  it("editing a closed period saves rather than adds", async () => {
+    renderStudio();
+    await openAvailability();
+
+    await user.click(
+      screen.getAllByRole("button", { name: "Add" })[1] as HTMLElement,
+    );
+
+    const [from, to] =
+      document.querySelectorAll<HTMLInputElement>('input[type="date"]');
+
+    await user.type(from as HTMLInputElement, "2026-12-24");
+    await user.type(to as HTMLInputElement, "2026-12-28");
+
+    const add = screen.getByRole("button", { name: "Add closed period" });
+
+    await waitFor(() => expect(add).toBeEnabled());
+    await user.click(add);
+    advance(220);
+
+    const row = (await screen.findByText("24 Dec to 28 Dec")).parentElement
+      ?.parentElement as HTMLElement;
+
+    await user.click(within(row).getByRole("button", { name: "Edit" }));
+
+    expect(
+      await screen.findByRole("button", { name: "Save closed period" }),
+    ).toBeInTheDocument();
   });
 
   it("connecting Stripe ticks the payouts step", async () => {
