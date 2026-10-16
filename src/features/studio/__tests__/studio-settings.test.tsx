@@ -127,6 +127,31 @@ describe("Studio → Settings", () => {
     expect(screen.getByText("Lunch")).toBeInTheDocument();
   });
 
+  it("social fields take just the username", async () => {
+    setViewport(1440);
+    renderStudio();
+    await user.click(within(getLabelled("Sidebar")).getByTitle("Settings"));
+    const instagram = screen.getByPlaceholderText("Instagram username");
+
+    expect(screen.getByPlaceholderText("TikTok username")).toBeInTheDocument();
+    expect(screen.getByPlaceholderText("YouTube username")).toBeInTheDocument();
+
+    await user.clear(instagram);
+    await user.type(instagram, "@tiwarashouse");
+
+    expect(screen.getByRole("alert")).toHaveTextContent(
+      "Leave out the @, just your username",
+    );
+
+    await user.click(
+      screen.getAllByRole("button", { name: "Save changes" }).at(-1)!,
+    );
+
+    expect(
+      screen.getByText("Check your social usernames first."),
+    ).toBeInTheDocument();
+  });
+
   it("pausing online bookings shows what clients see", async () => {
     setViewport(1440);
     renderStudio();

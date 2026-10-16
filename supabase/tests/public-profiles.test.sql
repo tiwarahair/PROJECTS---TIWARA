@@ -1,5 +1,5 @@
 begin;
-select plan(19);
+select plan(21);
 
 create function pg_temp.open_business(user_id uuid, business text, business_type text, lat float8, radius int)
 returns uuid
@@ -127,6 +127,24 @@ select ok(
   'a profile has no location, phone or owner'
 );
 select is(public.get_stylist_profile('public-draft-test'), null, 'a draft profile is hidden');
+
+reset role;
+update public.stylists set youtube = 'Public-Shop' where id = (select shop from ids);
+
+select throws_ok(
+  $$update public.stylists set instagram = '@publicshop' where id = (select shop from ids)$$,
+  '23514',
+  null,
+  'social fields only take a username'
+);
+
+set local role anon;
+
+select is(
+  public.get_stylist_profile('public-shop-test') ->> 'youtube',
+  'Public-Shop',
+  'a profile includes the YouTube username'
+);
 
 reset role;
 insert into public.stylist_slug_history (slug, stylist_id) values ('old-public-shop', (select shop from ids));

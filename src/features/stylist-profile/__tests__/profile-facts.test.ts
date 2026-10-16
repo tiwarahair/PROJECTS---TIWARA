@@ -22,6 +22,19 @@ describe("profile facts", () => {
     expect(facts.siteHref).toBe("https://tiwarashouse.com");
     expect(facts.instagramHref).toBe("https://www.instagram.com/tiwarashouse");
     expect(facts.tiktokHref).toBe("");
+    expect(facts.youtubeHref).toBe("");
+
+    const withSocials = getProfileFacts(stylist, {
+      instagram: "tiwarashouse",
+      tiktok: "tiwara.house",
+      youtube: "TiwarasHouse",
+    });
+
+    expect(withSocials.tiktokHref).toBe("https://www.tiktok.com/@tiwara.house");
+
+    expect(withSocials.youtubeHref).toBe(
+      "https://www.youtube.com/@TiwarasHouse",
+    );
 
     expect(
       getProfileFacts({ ...stylist, email: "hello@crowned.studio" }, socials)

@@ -20,6 +20,7 @@ export interface PublicProfile extends Pick<
   | "contact_email"
   | "instagram"
   | "tiktok"
+  | "youtube"
   | "website"
   | "cover_path"
   | "status"

@@ -7,7 +7,9 @@ import { BusinessDetails } from "../../components/business-details/business-deta
 import { PaymentPolicy } from "../../components/payment-policy/payment-policy";
 import { getAssetUrl } from "../../utils/asset-url";
 import { joinClassNames } from "../../utils/class-names";
-import { AvailabilityPage, ProfilePage, RulesPage } from "./settings-pages";
+import { AvailabilityPage } from "./settings-availability-page";
+import { ProfilePage } from "./settings-profile-page";
+import { RulesPage } from "./settings-rules-page";
 import { getSettingsView } from "./settings-view";
 import type { SettingsView } from "./settings-view";
 import { GATE_REASON } from "./studio-data";

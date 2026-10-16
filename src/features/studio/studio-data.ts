@@ -1078,8 +1078,8 @@ export const getInitialStudioState = (): StudioState => {
       address: "Ancoats, Manchester",
       mobile: false,
       site: "tiwarashouse.com",
-      instagram: "@tiwarashouse",
-      tiktok: "@tiwarashouse",
+      instagram: "tiwarashouse",
+      tiktok: "tiwarashouse",
       email: "hello@tiwaras.house",
     },
     business: {
