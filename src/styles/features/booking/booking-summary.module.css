@@ -84,6 +84,10 @@
   margin-top: 2px;
 }
 
+.ratingStar {
+  vertical-align: -1px;
+}
+
 .section {
   border-top: 1px solid var(--border-subtle);
   margin-top: 14px;

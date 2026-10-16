@@ -1,4 +1,4 @@
-import { Sun } from "lucide-react";
+import { Star, Sun } from "lucide-react";
 import type { CSSProperties } from "react";
 import { resolveAssetUrl } from "../../utils/asset-url";
 import { joinClassNames } from "../../utils/class-names";
@@ -127,7 +127,14 @@ export const BookingSummary = ({ booking }: BookingSummaryProps) => {
           <div className={styles.body}>
             <div className={styles.name}>{stylist.name}</div>
             <div className={styles.meta}>
-              {`${stylist.area} · ★ ${stylist.rating}`}
+              {`${stylist.area} · `}
+              <Star
+                className={styles.ratingStar}
+                size={12}
+                strokeWidth={0}
+                fill="var(--brand-yellow)"
+              />{" "}
+              {stylist.rating}
             </div>
             <div className={styles.section}>
               <div className={styles.row}>

@@ -1,3 +1,4 @@
+import { Star } from "lucide-react";
 import {
   ResponsiveImage,
   preloadImage,
@@ -231,14 +232,7 @@ export const StylistCard = ({
               </svg>
             )}
             <span className={styles.rating}>
-              <svg
-                width="14"
-                height="14"
-                viewBox="0 0 24 24"
-                fill="var(--brand-yellow)"
-              >
-                <path d="M12 2l3 6.6 7 .7-5.3 4.7 1.6 7-6.3-3.8L5.7 21l1.6-7L2 9.3l7-.7z"></path>
-              </svg>
+              <Star size={14} strokeWidth={0} fill="var(--brand-yellow)" />
               {reviews ? (
                 <>
                   {rating}{" "}

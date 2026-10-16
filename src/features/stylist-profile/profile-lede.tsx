@@ -1,3 +1,4 @@
+import { Star } from "lucide-react";
 import type { Stylist } from "../../types/stylist";
 import { joinClassNames } from "../../utils/class-names";
 import type { ProfileFacts } from "./profile-facts";
@@ -44,17 +45,7 @@ export const ProfileLede = ({
               )}
             </span>
             <span className={styles.rating}>
-              <svg
-                width="16"
-                height="16"
-                viewBox="0 0 24 24"
-                fill="var(--neutral-900)"
-              >
-                <path
-                  d="M12 2l3 6.6 7 .7-5.3 4.7 1.6 7-6.3-3.8L5.7 21l1.6-7L2 9.3l7-.7z"
-                  fill="var(--brand-yellow)"
-                ></path>
-              </svg>
+              <Star size={16} strokeWidth={0} fill="var(--brand-yellow)" />
               {reviews ? (
                 <>
                   {rating}{" "}
