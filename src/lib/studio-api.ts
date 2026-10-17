@@ -6,7 +6,7 @@ import {
   isUploadOriginal,
   toUploadVariant,
 } from "../utils/image-sources";
-import { notifyStudioWrite } from "./studio-writes";
+import { SaveError, notifyStudioWrite } from "./studio-writes";
 import { supabase } from "./supabase";
 
 const PHOTO_BUCKET = "stylist-photos";
@@ -340,6 +340,81 @@ export const callStripe = async (
   notifyStudioWrite();
 
   return data ?? {};
+};
+
+const BOOKING_SELECT = `id, status, starts_at, minutes, price_pence, snapshot, contact, notes, address, terms,
+  reschedule_count, cancelled_at, cancelled_by, cancellation, no_show_at, overlap_ok`;
+
+/** Studio's bookings from `fromDate` on (anything still being paid for is left out). */
+export const fetchStudioBookings = async (
+  stylistId: string,
+  fromDate: string,
+) => {
+  const rows = await check(
+    supabase
+      .from("bookings")
+      .select(BOOKING_SELECT)
+      .eq("stylist_id", stylistId)
+      .gte("starts_at", fromDate)
+      .not("status", "in", "(held,expired)")
+      .order("starts_at"),
+  );
+
+  return rows ?? [];
+};
+
+export type StudioBookingRow = Awaited<
+  ReturnType<typeof fetchStudioBookings>
+>[number];
+
+export const setBookingStatus = (id: string, status: "arrived" | "confirmed") =>
+  write(
+    supabase.rpc("set_booking_status", { target: id, next_status: status }),
+  );
+
+export const markNoShow = (id: string, isChargingFee: boolean) =>
+  write(
+    supabase.rpc("mark_no_show", { target: id, charge_fee: isChargingFee }),
+  );
+
+export const undoNoShow = (id: string) =>
+  write(supabase.rpc("undo_no_show", { target: id }));
+
+export const rescheduleStudioBooking = async (
+  id: string,
+  startsAt: string,
+  allowOverlap: boolean,
+) => {
+  const { error } = await supabase.rpc("reschedule_studio_booking", {
+    target: id,
+    slot_start: startsAt,
+    allow_overlap: allowOverlap,
+  });
+
+  if (error?.message === "slot_taken")
+    throw new SaveError("That time was just booked. Pick another time.");
+
+  if (error) throw error;
+
+  notifyStudioWrite();
+};
+
+export interface StudioCancel {
+  bookingId: string;
+  who: "stylist" | "client";
+  waiveFee: boolean;
+  reason: string;
+}
+
+/** Cancels through the Edge Function, which refunds the client first. */
+export const cancelStudioBooking = async (cancel: StudioCancel) => {
+  const { error } = await supabase.functions.invoke("studio-booking-cancel", {
+    body: cancel,
+  });
+
+  if (error) throw error;
+
+  notifyStudioWrite();
 };
 
 /** Takes the booking page offline; it can be reopened for 15 days. */

@@ -9,6 +9,11 @@ export interface BookingAddon {
 
 export interface StudioBooking {
   id: number;
+  remoteId?: string;
+  startsAt?: string;
+  overlapOk?: boolean;
+  grace?: number;
+  freeCancelUntil?: string;
   dayOffset: number;
   time: string;
   duration: string;

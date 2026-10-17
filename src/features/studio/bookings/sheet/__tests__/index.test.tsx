@@ -129,4 +129,38 @@ describe("Studio → booking sheet", () => {
     await openMoreItem("Cancel");
     expect(screen.getByText("I am cancelling")).toBeInTheDocument();
   });
+
+  it("asks before moving onto another booking, and Go back keeps it", async () => {
+    await openNia();
+    await openMoreItem("Reschedule");
+
+    await user.click(
+      screen
+        .getAllByRole("button", { name: /^mon\s*7$/i })
+        .at(-1) as HTMLElement,
+    );
+
+    await user.click(screen.getByRole("button", { name: "Custom time" }));
+    await user.type(screen.getByLabelText("Custom start time"), "15:00");
+    await user.click(screen.getByRole("button", { name: "Move booking" }));
+
+    expect(
+      screen.getByText("This time clashes with another booking"),
+    ).toBeInTheDocument();
+
+    expect(
+      screen.getByText(/^Overlaps Ruth/, { selector: "strong" }),
+    ).toBeInTheDocument();
+
+    await user.click(screen.getByRole("button", { name: "Go back" }));
+    advance(400);
+
+    expect(screen.queryByText(/^Moved to/)).toBeNull();
+
+    await user.click(screen.getByRole("button", { name: "Move booking" }));
+    await user.click(screen.getByRole("button", { name: "Move anyway" }));
+    advance(400);
+
+    expect(screen.getByText(/^Moved to Today, 15:00/)).toBeInTheDocument();
+  });
 });

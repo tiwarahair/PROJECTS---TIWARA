@@ -6,7 +6,7 @@ let openStudios = 0;
 let isStudioCacheStale = false;
 
 const dropStudioCache = (dispatch: AppDispatch) =>
-  dispatch(api.util.invalidateTags(["Studio", "TwoFactor"]));
+  dispatch(api.util.invalidateTags(["Studio", "Bookings", "TwoFactor"]));
 
 /**
  * A Studio save changes what profiles and search show, so their cached copies are dropped. Studio's own copy is

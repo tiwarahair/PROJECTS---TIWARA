@@ -103,6 +103,7 @@ export const getInitialStudioState = (): StudioState => {
     noShowCharge: "deposit",
     toastUndo: null,
     extraClients: [],
+    bookingClients: [],
     clientAddresses: {},
     addStep: 1,
     addClient: null,

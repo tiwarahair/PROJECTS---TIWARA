@@ -42,10 +42,11 @@ import type { PublicProfile } from "../lib/public-profiles";
 import { supabase } from "../lib/supabase";
 import {
   closeBusiness,
+  fetchStudioBookings,
   fetchStylistStudio,
   reopenBusiness,
 } from "../lib/studio-api";
-import type { StylistStudio } from "../lib/studio-api";
+import type { StudioBookingRow, StylistStudio } from "../lib/studio-api";
 import { listTwoFactorDevices } from "../lib/two-factor";
 import type { TwoFactorDevice } from "../lib/two-factor";
 import type { Profile } from "../types/profile";
@@ -78,6 +79,7 @@ export const api = createApi({
     "TwoFactor",
     "Slots",
     "ManagedBooking",
+    "Bookings",
   ],
   refetchOnReconnect: true,
   endpoints: (build) => ({
@@ -143,6 +145,14 @@ export const api = createApi({
     getStylistStudio: build.query<StylistStudio, string>({
       providesTags: ["Studio"],
       queryFn: (ownerId) => toQueryResult(fetchStylistStudio(ownerId)),
+    }),
+    getStudioBookings: build.query<
+      StudioBookingRow[],
+      { stylistId: string; fromDate: string }
+    >({
+      providesTags: ["Bookings"],
+      queryFn: ({ stylistId, fromDate }) =>
+        toQueryResult(fetchStudioBookings(stylistId, fromDate)),
     }),
     getStylistProfile: build.query<PublicProfile | null, string>({
       providesTags: ["StylistProfile"],
@@ -287,6 +297,7 @@ export const {
   usePeekStylistsQuery,
   useSearchStylistsInfiniteQuery,
   useGetStylistStudioQuery,
+  useGetStudioBookingsQuery,
   useGetTwoFactorDevicesQuery,
   useUpdateProfileMutation,
   useSetBusinessClosedMutation,

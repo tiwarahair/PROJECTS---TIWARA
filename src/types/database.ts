@@ -247,17 +247,21 @@ export type Database = {
           address: Json | null;
           allergies: string | null;
           allergies_consented_at: string | null;
+          arrived_at: string | null;
           block_ends_at: string;
           block_range: unknown;
           buffer_minutes: number;
           calendar_key: string;
+          cancel_reason: string | null;
           cancellation: Json | null;
           cancelled_at: string | null;
           cancelled_by: string | null;
           choices: NonNullable<Json>;
           client_id: string | null;
+          completed_at: string | null;
           contact: Json | null;
           created_at: string;
+          created_by: string;
           due_today_pence: number | null;
           ends_at: string;
           fee_pence: number;
@@ -266,7 +270,9 @@ export type Database = {
           id: string;
           location: unknown;
           minutes: number;
+          no_show_at: string | null;
           notes: string | null;
+          overlap_ok: boolean;
           paid_at: string | null;
           policy_id: string | null;
           price_pence: number;
@@ -288,17 +294,21 @@ export type Database = {
           address?: Json | null;
           allergies?: string | null;
           allergies_consented_at?: string | null;
+          arrived_at?: string | null;
           block_ends_at: string;
           block_range?: never;
           buffer_minutes?: number;
           calendar_key?: string;
+          cancel_reason?: string | null;
           cancellation?: Json | null;
           cancelled_at?: string | null;
           cancelled_by?: string | null;
           choices: NonNullable<Json>;
           client_id?: string | null;
+          completed_at?: string | null;
           contact?: Json | null;
           created_at?: string;
+          created_by?: string;
           due_today_pence?: number | null;
           ends_at: string;
           fee_pence: number;
@@ -307,7 +317,9 @@ export type Database = {
           id?: string;
           location?: unknown;
           minutes: number;
+          no_show_at?: string | null;
           notes?: string | null;
+          overlap_ok?: boolean;
           paid_at?: string | null;
           policy_id?: string | null;
           price_pence: number;
@@ -327,17 +339,21 @@ export type Database = {
           address?: Json | null;
           allergies?: string | null;
           allergies_consented_at?: string | null;
+          arrived_at?: string | null;
           block_ends_at?: string;
           block_range?: never;
           buffer_minutes?: number;
           calendar_key?: string;
+          cancel_reason?: string | null;
           cancellation?: Json | null;
           cancelled_at?: string | null;
           cancelled_by?: string | null;
           choices?: NonNullable<Json>;
           client_id?: string | null;
+          completed_at?: string | null;
           contact?: Json | null;
           created_at?: string;
+          created_by?: string;
           due_today_pence?: number | null;
           ends_at?: string;
           fee_pence?: number;
@@ -346,7 +362,9 @@ export type Database = {
           id?: string;
           location?: unknown;
           minutes?: number;
+          no_show_at?: string | null;
           notes?: string | null;
+          overlap_ok?: boolean;
           paid_at?: string | null;
           policy_id?: string | null;
           price_pence?: number;
@@ -1404,6 +1422,16 @@ export type Database = {
         Args: { cancellation: Json; token: string };
         Returns: undefined;
       };
+      cancel_studio_booking: {
+        Args: {
+          cancellation: Json;
+          owner: string;
+          reason: string;
+          target: string;
+          who: string;
+        };
+        Returns: undefined;
+      };
       change_slug: { Args: { new_slug: string }; Returns: string };
       checkout_booking: {
         Args: {
@@ -1476,17 +1504,21 @@ export type Database = {
           address: Json | null;
           allergies: string | null;
           allergies_consented_at: string | null;
+          arrived_at: string | null;
           block_ends_at: string;
           block_range: unknown;
           buffer_minutes: number;
           calendar_key: string;
+          cancel_reason: string | null;
           cancellation: Json | null;
           cancelled_at: string | null;
           cancelled_by: string | null;
           choices: NonNullable<Json>;
           client_id: string | null;
+          completed_at: string | null;
           contact: Json | null;
           created_at: string;
+          created_by: string;
           due_today_pence: number | null;
           ends_at: string;
           fee_pence: number;
@@ -1495,7 +1527,9 @@ export type Database = {
           id: string;
           location: unknown;
           minutes: number;
+          no_show_at: string | null;
           notes: string | null;
+          overlap_ok: boolean;
           paid_at: string | null;
           policy_id: string | null;
           price_pence: number;
@@ -1589,6 +1623,15 @@ export type Database = {
         Args: { from_date: string; to_date: string; token: string };
         Returns: string[];
       };
+      get_studio_cancellation: {
+        Args: {
+          charge_fee: boolean;
+          owner: string;
+          target: string;
+          who: string;
+        };
+        Returns: Json;
+      };
       get_stylist_profile: { Args: { lookup: string }; Returns: Json };
       get_unique_slug: { Args: { business_name: string }; Returns: string };
       has_recent_second_factor: {
@@ -1636,6 +1679,64 @@ export type Database = {
         Returns: boolean;
       };
       is_valid_slug: { Args: { candidate: string }; Returns: boolean };
+      lock_own_booking: {
+        Args: { target: string };
+        Returns: {
+          address: Json | null;
+          allergies: string | null;
+          allergies_consented_at: string | null;
+          arrived_at: string | null;
+          block_ends_at: string;
+          block_range: unknown;
+          buffer_minutes: number;
+          calendar_key: string;
+          cancel_reason: string | null;
+          cancellation: Json | null;
+          cancelled_at: string | null;
+          cancelled_by: string | null;
+          choices: NonNullable<Json>;
+          client_id: string | null;
+          completed_at: string | null;
+          contact: Json | null;
+          created_at: string;
+          created_by: string;
+          due_today_pence: number | null;
+          ends_at: string;
+          fee_pence: number;
+          hold_expires_at: string | null;
+          hold_secret_hash: string | null;
+          id: string;
+          location: unknown;
+          minutes: number;
+          no_show_at: string | null;
+          notes: string | null;
+          overlap_ok: boolean;
+          paid_at: string | null;
+          policy_id: string | null;
+          price_pence: number;
+          ref: string;
+          reschedule_count: number;
+          service_id: string | null;
+          site: string;
+          snapshot: NonNullable<Json>;
+          starts_at: string;
+          status: string;
+          stripe_customer_id: string | null;
+          stripe_payment_intent_id: string | null;
+          stylist_id: string;
+          terms: Json | null;
+        };
+        SetofOptions: {
+          from: "*";
+          to: "bookings";
+          isOneToOne: true;
+          isSetofReturn: false;
+        };
+      };
+      mark_no_show: {
+        Args: { charge_fee: boolean; target: string };
+        Returns: undefined;
+      };
       mark_notification_failed: {
         Args: { error: string; notification_id: string };
         Returns: undefined;
@@ -1700,6 +1801,10 @@ export type Database = {
         Args: { slot_start: string; token: string };
         Returns: Json;
       };
+      reschedule_studio_booking: {
+        Args: { allow_overlap: boolean; slot_start: string; target: string };
+        Returns: Json;
+      };
       search_stylists: {
         Args: {
           lat?: number;
@@ -1738,7 +1843,12 @@ export type Database = {
         Returns: undefined;
       };
       service_from_pence: { Args: { target: string }; Returns: number };
+      set_booking_status: {
+        Args: { next_status: string; target: string };
+        Returns: undefined;
+      };
       slugify: { Args: { value: string }; Returns: string };
+      undo_no_show: { Args: { target: string }; Returns: undefined };
       verify_booking_code: {
         Args: { code: string; token: string };
         Returns: string;

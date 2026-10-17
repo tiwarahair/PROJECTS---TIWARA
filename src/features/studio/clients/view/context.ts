@@ -54,7 +54,7 @@ export const getContext = (studio: StudioController) => {
       ? (all.find(({ id }) => id === state.selectedClientId) ?? null)
       : null,
     setOverride,
-    getStats: (id: string | null) => getClientStats(state, id, isNew, seedPast),
+    getStats: (id: string | null) => getClientStats(state, id, seedPast),
   };
 };
 

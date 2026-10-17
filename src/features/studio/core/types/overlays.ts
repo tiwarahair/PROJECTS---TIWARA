@@ -3,6 +3,8 @@ import type { BlockedTime } from "./availability";
 
 export interface ConfirmDialog {
   title?: string;
+  /** Shown in bold above the body. */
+  emphasis?: string;
   body: string;
   yesLabel?: string;
   noLabel?: string;

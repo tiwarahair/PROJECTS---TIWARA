@@ -1,81 +1,144 @@
 import type { ChangeEvent } from "react";
+import { rescheduleStudioBooking } from "../../../../lib/studio-api";
 import { SLOT_TIMES } from "../../core/constants";
-import { dayInfo } from "../../core/format";
+import { dayInfo, timeToMinutes } from "../../core/format";
 import {
   getBookingBuffer,
   getConflicts,
+  getNowMinutes,
   getSlots,
   getWorkingHours,
 } from "../../core/model";
+import { toStartsAt } from "../records";
 import { getTimeHints } from "../time-hints";
+import type { StudioBooking } from "../../core/types";
 import type { SheetContext } from "./context";
+
+/** The free-cancellation deadline moves with the booking, as it does when saved. */
+const getMovedDeadline = (
+  { startsAt, freeCancelUntil }: StudioBooking,
+  newStartsAt: string,
+) => {
+  if (!startsAt || !freeCancelUntil) return freeCancelUntil;
+
+  const windowMs = Date.parse(startsAt) - Date.parse(freeCancelUntil);
+
+  return new Date(Date.parse(newStartsAt) - windowMs).toISOString();
+};
 
 // ---- reschedule ----
 export const getRescheduleView = ({
+  studio,
   state,
   setState,
   actions,
-  memo,
   booking,
 }: SheetContext) => {
   const { rescheduleDay, rescheduleTime } = state;
+  const buffer = getBookingBuffer(state, booking.service);
 
   const slots = getSlots(
     state,
     rescheduleDay,
     booking.durationMinutes,
-    getBookingBuffer(state, booking.service),
+    buffer,
     booking.id,
   );
 
+  // the buffer counts, as it does when the booking is saved
   const conflicts = getConflicts(
     state,
     rescheduleDay,
     rescheduleTime,
-    booking.durationMinutes,
+    booking.durationMinutes + buffer,
     booking.id,
   );
 
   const customTime = rescheduleTime || "";
   const isCustom = !!state.rescheduleCustom;
 
-  const canMove = rescheduleDay != null && !!rescheduleTime;
+  const isPastTime =
+    rescheduleDay === 0 &&
+    !!rescheduleTime &&
+    timeToMinutes(rescheduleTime) <= getNowMinutes();
 
-  const reschedule = () => {
-    if (!canMove) return;
+  const canMove = rescheduleDay != null && !!rescheduleTime && !isPastTime;
+  const isDoubleBooking = conflicts.some(({ kind }) => kind === "booking");
 
+  const conflictList = conflicts
+    .map(({ name, range }) => `${name} (${range})`)
+    .join(", ");
+
+  const move = () => {
     const previous = state.bookings;
+    const day = rescheduleDay ?? 0;
+    const time = rescheduleTime ?? booking.time;
+    const startsAt = toStartsAt(day, time);
+    const { remoteId, startsAt: oldStartsAt } = booking;
+    const { sync } = studio.context;
+
+    const next = state.bookings.map((item) =>
+      item.id === state.sheetBookingId
+        ? {
+            ...item,
+            dayOffset: day,
+            time,
+            startsAt: remoteId ? startsAt : item.startsAt,
+            freeCancelUntil: getMovedDeadline(item, startsAt),
+            status: item.status === "arrived" ? "confirmed" : item.status,
+            pending: false,
+          }
+        : item,
+    );
+
+    const save = (at: string, revert: typeof next, allowOverlap: boolean) => {
+      if (remoteId)
+        sync?.save(() => rescheduleStudioBooking(remoteId, at, allowOverlap), {
+          bookings: revert,
+        });
+    };
 
     setState({
-      bookings: state.bookings.map((item) =>
-        item.id === state.sheetBookingId
-          ? {
-              ...item,
-              dayOffset: rescheduleDay ?? 0,
-              time: rescheduleTime ?? item.time,
-              pending: false,
-            }
-          : item,
-      ),
-      dayIndex: rescheduleDay ?? 0,
+      confirm: null,
+      bookings: next,
+      dayIndex: day,
       bookingsLayout: "cal",
     });
 
-    const { label: dayLabel } = dayInfo(rescheduleDay ?? 0);
+    save(startsAt, previous, isDoubleBooking);
+
+    const { label: dayLabel } = dayInfo(day);
 
     actions.showToast(
-      `Moved to ${dayLabel}, ${rescheduleTime}. ${booking.firstName} notified`,
-      () => setState({ bookings: previous }),
+      `Moved to ${dayLabel}, ${time}. ${booking.firstName} notified`,
+      () => {
+        setState({ bookings: previous });
+
+        if (oldStartsAt) save(oldStartsAt, next, !!booking.overlapOk);
+      },
     );
 
     actions.closeSheet();
   };
 
-  memo.applyReschedule = reschedule;
+  const reschedule = () => {
+    if (!canMove) return;
 
-  const conflictList = conflicts
-    .map(({ name, range }) => `${name} (${range})`)
-    .join(", ");
+    if (!isDoubleBooking) return move();
+
+    const { label: dayLabel } = dayInfo(rescheduleDay ?? 0);
+
+    setState({
+      confirm: {
+        title: "This time clashes with another booking",
+        emphasis: `Overlaps ${conflictList}`,
+        body: `Are you sure you want to move ${booking.firstName} to ${dayLabel}, ${rescheduleTime}? Both bookings will stay in your calendar.`,
+        yesLabel: "Move anyway",
+        noLabel: "Go back",
+        yes: move,
+      },
+    });
+  };
 
   return {
     rescheduleDays: Array.from({ length: 8 }, (_slot, offset) => {
@@ -101,6 +164,12 @@ export const getRescheduleView = ({
       isCustom,
       customTime,
     ),
+    ...(isPastTime
+      ? {
+          customHint: "That time has passed. Pick a later one.",
+          isCustomWarn: true,
+        }
+      : {}),
     isCustom,
     toggleCustom: () =>
       setState({

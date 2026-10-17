@@ -141,9 +141,9 @@ export const getPastCheckout = (
 };
 
 export const findPastRow = (studio: StudioController) => {
-  const { state, isNew, seedPast } = studio;
+  const { state, seedPast } = studio;
 
-  return getPastRows(state, isNew, seedPast).find(
+  return getPastRows(state, seedPast).find(
     (row) => getPastKey(row) === state.selectedPastId,
   );
 };

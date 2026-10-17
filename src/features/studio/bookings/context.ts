@@ -4,7 +4,7 @@ import type { StudioController } from "../core/use-studio";
 import { isUpcomingMatch } from "./filters";
 
 export const getContext = (studio: StudioController) => {
-  const { state, isNew, actions, seedPast } = studio;
+  const { state, actions, seedPast } = studio;
   const now = new Date();
   const isList = state.bookingsLayout === "list";
   const isPast = isList && (state.listScope || "upcoming") === "past";
@@ -16,7 +16,7 @@ export const getContext = (studio: StudioController) => {
     name.toLowerCase().includes(query) ||
     service.toLowerCase().includes(query);
 
-  const upcoming = getDecoratedBookings(state, isNew, (booking) =>
+  const upcoming = getDecoratedBookings(state, (booking) =>
     actions.openSheet("booking", { sheetBookingId: booking.id }),
   );
 
@@ -24,7 +24,7 @@ export const getContext = (studio: StudioController) => {
     matchesQuery(booking.clientName, booking.service),
   );
 
-  const pastBase = getPastRows(state, isNew, seedPast).filter((row) =>
+  const pastBase = getPastRows(state, seedPast).filter((row) =>
     matchesQuery(getClient(state, row.client).name, row.service),
   );
 

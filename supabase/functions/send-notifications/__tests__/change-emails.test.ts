@@ -1,8 +1,10 @@
 import { describe, expect, it } from "vitest";
 import {
   bookingCancelled,
+  bookingCancelledByStylist,
   bookingCode,
   bookingLinkReset,
+  bookingMovedByStylist,
   bookingRescheduled,
   clientCancelled,
   clientRescheduled,
@@ -52,6 +54,17 @@ describe("cancellation emails", () => {
     expect(text).not.toContain("refunded to your card");
   });
 
+  it("tell the client the stylist cancelled and everything is refunded", () => {
+    const { subject, text } = bookingCancelledByStylist({
+      ...booking,
+      cancellation: { refund_pence: 3163, kept_pence: 0, charge_pence: 0 },
+    });
+
+    expect(subject).toBe("Tiwára's House cancelled your booking");
+    expect(text).toContain("£31.63 is refunded to your card, including the booking fee.");
+    expect(text).not.toContain("This wasn’t me");
+  });
+
   it("tell the stylist the time is free and what they keep", () => {
     const { subject, text } = clientCancelled({ ...booking, ...studio });
 
@@ -68,6 +81,15 @@ describe("reschedule emails", () => {
 
     expect(email.text).toContain("Silk press with Tiwára's House is now on Thursday 22 October at 17:30 (UK time).");
     expect(email.text).toContain(`Manage your booking: ${booking.manage_url}`);
+    expect(email.attachments?.[0]?.content).toContain("DTSTART:20261022T163000Z");
+  });
+
+  it("tell the client the stylist moved it, without asking if it was them", () => {
+    const email = bookingMovedByStylist(booking);
+
+    expect(email.subject).toBe("Tiwára's House moved your booking");
+    expect(email.text).toContain(`Manage your booking: ${booking.manage_url}`);
+    expect(email.text).not.toContain("This wasn’t me");
     expect(email.attachments?.[0]?.content).toContain("DTSTART:20261022T163000Z");
   });
 

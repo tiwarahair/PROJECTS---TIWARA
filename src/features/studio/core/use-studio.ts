@@ -17,7 +17,8 @@ import { getSeedPast } from "./seed-bookings";
 import { applyFixture } from "./fixtures";
 import { getQueryParam, getSteps } from "./model";
 import { createServiceActions } from "../services/actions";
-import type { StylistStudio } from "../../../lib/studio-api";
+import type { StudioBookingRow, StylistStudio } from "../../../lib/studio-api";
+import { toStudioBookings } from "../bookings/records";
 import { toStudioPatch } from "./records";
 import { useCatalogueSync } from "../services/catalogue-sync";
 import { createStudioSync } from "./sync";
@@ -49,22 +50,24 @@ export interface StudioProps {
 export interface StudioSeed {
   owner: StudioState["owner"];
   studio: StylistStudio;
+  bookings: StudioBookingRow[];
   devices: TwoFactorDevice[];
 }
 
 const getCategoryColour = (sort: number) =>
   CATEGORY_COLOURS[sort % CATEGORY_COLOURS.length]?.value ?? "";
 
-/** A real account: everything from the database; nothing booked yet. */
+/** A real account: everything from the database. */
 const seedFromAccount = (
   state: StudioState,
-  { owner, studio, devices }: StudioSeed,
+  { owner, studio, bookings, devices }: StudioSeed,
 ): StudioState => {
   const patch = toStudioPatch(studio, state);
 
   return {
     ...state,
     ...patch,
+    ...toStudioBookings(bookings),
     owner,
     account: {
       stylistId: studio.id,
@@ -132,6 +135,7 @@ const seedNewAccount = (state: StudioState): StudioState => {
 
   return {
     ...state,
+    bookings: [],
     policy: { ...state.policy, mode: "none" },
     twoFactorSettings: { devices: [] },
     categories,
@@ -154,7 +158,7 @@ export const useStudio = (props: StudioProps) => {
     return isNew ? seedNewAccount(initial) : initial;
   });
 
-  const [seedPast] = useState(getSeedPast);
+  const [seedPast] = useState(() => (isNew ? [] : getSeedPast()));
   const [, setTick] = useState(0);
   const stateRef = useRef(state);
 
@@ -327,10 +331,12 @@ export const useStudio = (props: StudioProps) => {
     );
 
     const tick = window.setInterval(() => {
+      latest.current.actions.followToday();
       latest.current.actions.autoComplete();
       setTick((count) => count + 1);
     }, 30000);
 
+    current.followToday();
     current.autoComplete();
 
     if (currentContext.getState().tab === "bookings")

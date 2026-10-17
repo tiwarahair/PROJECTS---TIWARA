@@ -9,5 +9,8 @@ export const onStudioWrite = (listener: () => void) => {
   };
 };
 
+/** A failed save whose message can be shown to the stylist as it is. */
+export class SaveError extends Error {}
+
 export const notifyStudioWrite = () =>
   listeners.forEach((listener) => listener());

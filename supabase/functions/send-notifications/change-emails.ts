@@ -39,20 +39,35 @@ export const bookingCancelled = (booking: ChangedBooking): RenderedEmail =>
     footnote: `If you didn’t cancel this booking, tap “${NOT_ME}” so your old booking link stops working, then reply to this email.`,
   });
 
-export const bookingRescheduled = (booking: ChangedBooking): RenderedEmail => {
+export const bookingCancelledByStylist = (booking: ChangedBooking): RenderedEmail =>
+  renderNotice({
+    title: `${booking.stylist_name} cancelled your booking`,
+    paragraphs: [
+      `${booking.stylist_name} had to cancel ${booking.service_name} on ${formatWhen(booking.starts_at)} (UK time). Sorry for the change of plans.`,
+      ...(booking.cancellation?.refund_pence
+        ? [`${pounds(booking.cancellation.refund_pence)} is refunded to your card, including the booking fee. It can take 5–10 working days to show.`]
+        : []),
+      `Booking reference: ${booking.ref}`,
+    ],
+    footnote: "Questions about this cancellation? Reply to this email.",
+  });
+
+const getMovedEmail = (booking: ChangedBooking, isByStylist: boolean): RenderedEmail => {
   const { ref, service_name: service, stylist_name: stylist, starts_at: startsAt, ends_at: endsAt, where } = booking;
 
   return {
     ...renderNotice({
-      title: "Your booking has moved",
+      title: isByStylist ? `${stylist} moved your booking` : "Your booking has moved",
       paragraphs: [
         `${service} with ${stylist} is now on ${formatWhen(startsAt)} (UK time).`,
         booking.is_mobile ? `${stylist} will come to you at ${where}.` : `Where: ${where}.`,
         `Booking reference: ${ref}`,
       ],
       button: { label: "Manage your booking", url: booking.manage_url },
-      link: { label: NOT_ME, url: booking.secure_url },
-      footnote: `The attached calendar file has the new time. If you didn’t make this change, tap “${NOT_ME}”, then reply to this email.`,
+      ...(isByStylist ? {} : { link: { label: NOT_ME, url: booking.secure_url } }),
+      footnote: isByStylist
+        ? "The attached calendar file has the new time. If it doesn’t suit you, manage or cancel your booking from the button above."
+        : `The attached calendar file has the new time. If you didn’t make this change, tap “${NOT_ME}”, then reply to this email.`,
     }),
     attachments: [
       {
@@ -70,6 +85,10 @@ export const bookingRescheduled = (booking: ChangedBooking): RenderedEmail => {
     ],
   };
 };
+
+export const bookingRescheduled = (booking: ChangedBooking) => getMovedEmail(booking, false);
+
+export const bookingMovedByStylist = (booking: ChangedBooking) => getMovedEmail(booking, true);
 
 export const clientCancelled = (booking: StylistNotice): RenderedEmail => {
   const { refund_pence: refund = 0, kept_pence: kept = 0 } = booking.cancellation ?? {};

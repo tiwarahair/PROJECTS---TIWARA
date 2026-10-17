@@ -205,7 +205,8 @@ export const decorateBooking = (
   const canArrive =
     isPre && booking.dayOffset === 0 && startMinutes - nowMinutes <= 60;
 
-  const graceEnd = startMinutes + (state.policy.grace || 0);
+  const graceMinutes = booking.grace ?? (state.policy.grace || 0);
+  const graceEnd = startMinutes + graceMinutes;
   const canNoShow = isPre && booking.dayOffset === 0 && nowMinutes >= graceEnd;
   const depositAmount = Math.round(booking.price * state.policy.deposit) / 100;
 
@@ -248,6 +249,7 @@ export const decorateBooking = (
     canArrive,
     canNoShow,
     startMinutes,
+    graceMinutes,
     graceEnd,
     durationMinutes: durationToMinutes(duration),
     depositAmount,
@@ -348,21 +350,18 @@ export const decorateBooking = (
 
 export type DecoratedBooking = ReturnType<typeof decorateBooking>;
 
-/** Every booking, sorted by day then time and decorated; empty for a new account. */
+/** Every booking, sorted by day then time and decorated. */
 export const getDecoratedBookings = (
   state: StudioState,
-  isNew: boolean,
   onOpen: (booking: StudioBooking) => void,
 ): DecoratedBooking[] =>
-  isNew
-    ? []
-    : state.bookings
-        .slice()
-        .sort(
-          (first, second) =>
-            first.dayOffset - second.dayOffset ||
-            first.time.localeCompare(second.time),
-        )
-        .map((booking, index) =>
-          decorateBooking(state, booking, index, () => onOpen(booking)),
-        );
+  state.bookings
+    .slice()
+    .sort(
+      (first, second) =>
+        first.dayOffset - second.dayOffset ||
+        first.time.localeCompare(second.time),
+    )
+    .map((booking, index) =>
+      decorateBooking(state, booking, index, () => onOpen(booking)),
+    );

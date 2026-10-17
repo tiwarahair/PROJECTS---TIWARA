@@ -20,12 +20,11 @@ export interface StudioContext {
     seenDone?: ReturnType<typeof getSteps>;
     clashOk?: boolean;
     lastPointer?: string;
+    today?: string;
     tipListening?: boolean;
     swipe?: { x: number; y: number } | null;
     slideFrame?: number;
     applyEdit?: () => void;
-    cancelBooking?: () => void;
-    applyReschedule?: () => void;
     setChangeClient?: (id: string | null) => void;
     saveAddonEdit?: (draft: NonNullable<StudioState["addonEdit"]>) => void;
     removeAddonEdit?: (id: string) => void;

@@ -22,10 +22,9 @@ export const getClient = (
 ): StudioClient => {
   if (id === null) return WALK_IN;
 
-  const base =
-    CLIENTS.find((client) => client.id === id) ??
-    state.extraClients.find((client) => client.id === id) ??
-    (CLIENTS[0] as StudioClient);
+  const base = CLIENTS.concat(state.extraClients, state.bookingClients).find(
+    (client) => client.id === id,
+  ) ?? { id: id ?? "", name: "Client", first: "Client" };
 
   const override = state.clientOverrides[base.id ?? ""];
   const client = override ? { ...base, ...override } : base;

@@ -23,7 +23,7 @@ const getZeroStat = (label: string) => (label === "Revenue" ? "£0" : "0");
 export const getHomeView = (studio: StudioController) => {
   const { state, setState, isDesktop, isNew, actions } = studio;
 
-  const upcoming = getDecoratedBookings(state, isNew, (booking) =>
+  const upcoming = getDecoratedBookings(state, (booking) =>
     actions.openSheet("booking", { sheetBookingId: booking.id }),
   );
 

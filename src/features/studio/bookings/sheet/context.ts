@@ -9,6 +9,11 @@ import {
   getSheetBooking,
 } from "./booking";
 
+interface RemoteFinish {
+  save: (remoteId: string) => Promise<unknown>;
+  undo?: (remoteId: string) => Promise<unknown>;
+}
+
 export const getContext = (studio: StudioController) => {
   const { state, setState, actions, context } = studio;
   const { showToast, closeSheet } = actions;
@@ -44,18 +49,23 @@ export const getContext = (studio: StudioController) => {
       ),
     }));
 
-  /** Moves the booking to Past with an undo. */
-  const finish = (record: Partial<PastRecord>, message: string) => {
+  const finish = (
+    record: Partial<PastRecord>,
+    message: string,
+    remote?: RemoteFinish,
+  ) => {
     const current = context.getState();
     const previousBookings = current.bookings;
     const previousPast = current.pastNew;
     const original = previousBookings.find(({ id }) => id === booking.id);
+    const remoteId = remote && original?.remoteId;
+    const undoRemote = remote?.undo;
 
-    setState({
+    const next = {
       bookings: previousBookings.filter(({ id }) => id !== booking.id),
       pastNew: [
         {
-          pastId: Date.now(),
+          pastId: remoteId || Date.now(),
           client: booking.client,
           service: booking.service,
           price: booking.price,
@@ -67,11 +77,22 @@ export const getContext = (studio: StudioController) => {
           ...record,
         } as PastRecord,
       ].concat(previousPast),
-    });
+    };
+
+    const restore = { bookings: previousBookings, pastNew: previousPast };
+
+    setState(next);
+
+    if (remoteId) context.sync?.save(() => remote.save(remoteId), restore);
+
+    if (remoteId && !undoRemote) return showToast(message);
 
     showToast(message, () => {
-      setState({ bookings: previousBookings, pastNew: previousPast });
+      setState(restore);
       closeSheet();
+
+      if (remoteId && undoRemote)
+        context.sync?.save(() => undoRemote(remoteId), next);
     });
   };
 
@@ -100,7 +121,10 @@ export const getContext = (studio: StudioController) => {
     booking,
     nowMinutes,
     hoursToStart,
-    isLate: hoursToStart < state.policy.window,
+    // a real booking keeps the deadline agreed when it was made
+    isLate: booking.freeCancelUntil
+      ? Date.now() >= Date.parse(booking.freeCancelUntil)
+      : hoursToStart < state.policy.window,
     lateFee: getPolicyFee(state, "late", booking),
     noShowFee: getPolicyFee(state, "noShow", booking),
     paymentMode: getPaymentMode(booking),

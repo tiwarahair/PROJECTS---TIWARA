@@ -1,9 +1,11 @@
+import { undoNoShow } from "../../../../../lib/studio-api";
 import { getWaiveConfirm } from "../../../core/model";
 import { roundToPence } from "../../../../../utils/money";
 import { getRefundTag } from "./context";
 import type { PastContext } from "./context";
 
 const getUndo = ({
+  studio,
   state,
   setState,
   actions,
@@ -18,10 +20,18 @@ const getUndo = ({
 
   return {
     action: () => {
+      const { remoteId } = original;
+
       setState({
         bookings: state.bookings.concat([original]),
         pastNew: state.pastNew.filter(({ pastId }) => pastId !== row.pastId),
       });
+
+      if (remoteId)
+        studio.context.sync?.save(() => undoNoShow(remoteId), {
+          bookings: state.bookings,
+          pastNew: state.pastNew,
+        });
 
       actions.closeSheet();
       actions.showToast("Booking restored");

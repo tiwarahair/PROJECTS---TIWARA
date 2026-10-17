@@ -7,13 +7,13 @@ import type { StudioController } from "../../core/use-studio";
 import type { AddonLine } from "./types";
 
 export const getSheetBooking = (
-  { state, isNew, actions: { openSheet } }: StudioController,
+  { state, actions: { openSheet } }: StudioController,
   raw: StudioBooking | undefined,
 ) => {
   if (state.bookingStep === "done" && state.doneBooking)
     return decorateBooking(state, state.doneBooking, 0, () => {});
 
-  const upcoming = getDecoratedBookings(state, isNew, ({ id }) =>
+  const upcoming = getDecoratedBookings(state, ({ id }) =>
     openSheet("booking", { sheetBookingId: id }),
   );
 

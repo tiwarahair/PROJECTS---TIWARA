@@ -34,7 +34,9 @@ export const StudioBookings = ({ studio, view }: StudioBookingsProps) => {
             view.isCalendar && styles.cardCal,
           )}
         >
-          {isNew && !state.calendarEmptyHidden && <EmptyCard studio={studio} />}
+          {isNew && !state.bookings.length && !state.calendarEmptyHidden && (
+            <EmptyCard studio={studio} />
+          )}
           {view.isCalendar &&
             (view.isWeek ? (
               <WeekView view={view} />

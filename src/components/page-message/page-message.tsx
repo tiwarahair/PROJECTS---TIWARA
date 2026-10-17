@@ -6,6 +6,7 @@ interface PageMessageProps {
   text: string;
   linkLabel: string;
   linkHref: string;
+  isReload?: boolean;
 }
 
 export const PageMessage = ({
@@ -13,11 +14,12 @@ export const PageMessage = ({
   text,
   linkLabel,
   linkHref,
+  isReload = false,
 }: PageMessageProps) => (
   <div className={styles.message}>
     <h1 className={styles.title}>{title}</h1>
     <p className={styles.text}>{text}</p>
-    <Link to={linkHref} className={styles.link}>
+    <Link to={linkHref} reloadDocument={isReload} className={styles.link}>
       {linkLabel}
     </Link>
   </div>

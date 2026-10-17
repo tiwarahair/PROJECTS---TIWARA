@@ -28,7 +28,7 @@ export const createStudioActions = (context: StudioContext) => {
     { scrollBody },
   );
 
-  const { setStatus, patchPast, rebookFrom, autoComplete } =
+  const { setStatus, patchPast, rebookFrom, autoComplete, followToday } =
     createBookingActions(context, { showToast, openSheet, closeSheet });
 
   const { editBlock, removeBlock, blockActions, blockPop } = createBlockActions(
@@ -69,6 +69,7 @@ export const createStudioActions = (context: StudioContext) => {
     patchPast,
     rebookFrom,
     autoComplete,
+    followToday,
     isTouch,
     tipShow,
     tipHide,

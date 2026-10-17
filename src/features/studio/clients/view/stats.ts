@@ -6,7 +6,6 @@ import type { PastRecord, StudioState } from "../../core/types";
 export const getClientStats = (
   state: StudioState,
   id: string | null,
-  isNew: boolean,
   seed: PastRecord[],
 ) => {
   const depositShare = (parseFloat(String(state.policy?.deposit)) || 20) / 100;
@@ -24,9 +23,7 @@ export const getClientStats = (
         timeToMinutes(first.time) - timeToMinutes(second.time),
     );
 
-  const past = getPastRows(state, isNew, seed).filter(
-    (row) => row.client === id,
-  );
+  const past = getPastRows(state, seed).filter((row) => row.client === id);
 
   const getFee = (row: PastRecord) =>
     parseFloat(String(row.feeLabel || "").replace(/[^0-9.]/g, "")) ||

@@ -1,3 +1,4 @@
+import { cancelStudioBooking } from "../../../../lib/studio-api";
 import type { SheetContext } from "./context";
 
 const getNotice = (hoursToStart: number) =>
@@ -49,15 +50,15 @@ const getCancelBody = ({ state, booking, isLate, lateFee }: SheetContext) => {
 
 // ---- cancel ----
 export const getCancelView = (context: SheetContext) => {
-  const { state, actions, memo, booking, hoursToStart, isLate, lateFee } =
-    context;
+  const { state, actions, booking, hoursToStart, isLate, lateFee } = context;
 
   const isFeeShown =
     state.cancelWho === "client" && isLate && lateFee.amount > 0;
 
   const cancel = () => {
     const isFeeKept = isFeeShown && state.cancelFee;
-    const who = state.cancelWho === "me" ? "you" : booking.firstName;
+    const isMine = state.cancelWho === "me";
+    const who = isMine ? "you" : booking.firstName;
     const { meta, noteTail, toast } = getCancelCopy(context, isFeeKept);
     const reason = state.cancelReason.trim();
     const reasonNote = reason ? ` ${reason}` : "";
@@ -72,12 +73,19 @@ export const getCancelView = (context: SheetContext) => {
         note: `Cancelled by ${who} ${getNotice(hoursToStart)}.${noteTail}${reasonNote}`,
       },
       toast,
+      {
+        save: (bookingId) =>
+          cancelStudioBooking({
+            bookingId,
+            who: isMine ? "stylist" : "client",
+            waiveFee: isFeeShown && !state.cancelFee,
+            reason,
+          }),
+      },
     );
 
     actions.closeSheet();
   };
-
-  memo.cancelBooking = cancel;
 
   return {
     cancelWhoOptions: [

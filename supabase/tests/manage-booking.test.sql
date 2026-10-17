@@ -1,5 +1,5 @@
 begin;
-select plan(37);
+select plan(38);
 
 insert into auth.users (id, instance_id, aud, role, email, raw_user_meta_data, raw_app_meta_data)
 values ('b1111111-1111-1111-1111-111111111111', '00000000-0000-0000-0000-000000000000', 'authenticated', 'authenticated',
@@ -133,6 +133,8 @@ select throws_ok(
   'slot_taken', 'a taken time is refused'
 );
 
+update public.bookings set overlap_ok = true where id = ((select nonrefundable from b) ->> 'id')::uuid;
+
 select is(
   public.reschedule_managed_booking((select nonrefundable from b) ->> 'token', pg_temp.at(6, '09:00')) ->> 'starts_at',
   to_jsonb(pg_temp.at(6, '09:00')) #>> '{}', 'it moves to the new time'
@@ -152,6 +154,9 @@ select throws_ok(
   format('select public.reschedule_managed_booking(%L, %L)', (select nonrefundable from b) ->> 'token', pg_temp.at(6, '11:00')),
   'reschedule_not_allowed', 'only once'
 );
+
+select is((select overlap_ok from public.bookings where id = ((select nonrefundable from b) ->> 'id')::uuid), false,
+  'a client moving to a free time is no longer a double-booking');
 
 select throws_ok(
   format('select public.reschedule_managed_booking(%L, %L)', (select deposit from b) ->> 'token', pg_temp.at(6, '11:00')),

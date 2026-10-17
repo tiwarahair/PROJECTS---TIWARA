@@ -149,6 +149,7 @@ export interface StudioState {
   noShowCharge: string;
   toastUndo: (() => void) | null;
   extraClients: StudioClient[];
+  bookingClients: StudioClient[];
   clientAddresses: Record<string, string>;
   sheetBookingId?: number | null;
   sheetClientId?: string | null;

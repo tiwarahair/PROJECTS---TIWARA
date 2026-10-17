@@ -79,7 +79,7 @@ const STATUS_ITEMS: Record<
     },
   ],
   upcoming: (context) => {
-    const { booking, state, setState, actions } = context;
+    const { booking, setState, actions } = context;
 
     return [
       {
@@ -102,7 +102,7 @@ const STATUS_ITEMS: Record<
         subtitle: getOnTheDaySubtitle(
           booking.canNoShow,
           booking.dayOffset,
-          `From ${hhmm(booking.graceEnd)} (${state.policy.grace} min grace)`,
+          `From ${hhmm(booking.graceEnd)} (${booking.graceMinutes} min grace)`,
         ),
         run: () => setState({ bookingStep: "noshow", noShowCharge: "deposit" }),
       },

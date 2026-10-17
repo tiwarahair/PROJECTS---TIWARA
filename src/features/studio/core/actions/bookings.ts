@@ -1,3 +1,6 @@
+import { setBookingStatus } from "../../../../lib/studio-api";
+import { toIsoDate } from "../../../../utils/dates";
+import { toDayOffset } from "../../bookings/records";
 import { durationToMinutes, timeToMinutes } from "../format";
 import { getBookingDuration, getNowMinutes } from "../model";
 import type {
@@ -22,10 +25,26 @@ interface RebookSource {
   address?: string;
 }
 
+const isSavedStatus = (status: string): status is "arrived" | "confirmed" =>
+  status === "arrived" || status === "confirmed";
+
 export const createBookingActions = (
-  { getState, setState }: StudioContext,
+  { getState, setState, sync, memo }: StudioContext,
   { showToast, openSheet, closeSheet }: BookingDeps,
 ) => {
+  const saveStatus = (
+    booking: StudioBooking | undefined,
+    status: string,
+    revert: StudioBooking[],
+  ) => {
+    const remoteId = booking?.remoteId;
+
+    if (remoteId && isSavedStatus(status))
+      sync?.save(() => setBookingStatus(remoteId, status), {
+        bookings: revert,
+      });
+  };
+
   const setStatus = (
     id: number,
     status: string,
@@ -33,14 +52,19 @@ export const createBookingActions = (
     extra: Partial<StudioBooking> = {},
   ) => {
     const previous = getState().bookings;
+    const booking = previous.find((item) => item.id === id);
 
-    setState({
-      bookings: previous.map((booking) =>
-        booking.id === id ? { ...booking, status, ...extra } : booking,
-      ),
+    const next = previous.map((item) =>
+      item.id === id ? { ...item, status, ...extra } : item,
+    );
+
+    setState({ bookings: next });
+    saveStatus(booking, status, previous);
+
+    showToast(message, () => {
+      setState({ bookings: previous });
+      saveStatus(booking, booking?.status ?? "", next);
     });
-
-    showToast(message, () => setState({ bookings: previous }));
   };
 
   const patchPast = (
@@ -133,5 +157,26 @@ export const createBookingActions = (
     });
   };
 
-  return { setStatus, patchPast, rebookFrom, autoComplete };
+  /** Past midnight, real bookings move to their new day offsets. */
+  const followToday = () => {
+    const today = toIsoDate(new Date());
+
+    if (memo.today === today) return;
+
+    const isFirstCheck = !memo.today;
+
+    memo.today = today;
+
+    if (isFirstCheck) return;
+
+    setState({
+      bookings: getState().bookings.map((booking) =>
+        booking.startsAt
+          ? { ...booking, dayOffset: toDayOffset(booking.startsAt) }
+          : booking,
+      ),
+    });
+  };
+
+  return { setStatus, patchPast, rebookFrom, autoComplete, followToday };
 };

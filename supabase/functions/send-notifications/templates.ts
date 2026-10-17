@@ -5,8 +5,10 @@ import { bookingConfirmed, newBooking } from "./booking-emails.ts";
 import type { BookingDetails, ConfirmedBooking } from "./booking-emails.ts";
 import {
   bookingCancelled,
+  bookingCancelledByStylist,
   bookingCode,
   bookingLinkReset,
+  bookingMovedByStylist,
   bookingRescheduled,
   clientCancelled,
   clientRescheduled,
@@ -81,6 +83,8 @@ const templates: Record<string, TemplateBuilder> = {
   new_booking: (payload) => newBooking(payload as unknown as BookingDetails & { studio_url: string }),
   booking_cancelled: (payload) => bookingCancelled(payload as unknown as ChangedBooking),
   booking_rescheduled: (payload) => bookingRescheduled(payload as unknown as ChangedBooking),
+  booking_cancelled_by_stylist: (payload) => bookingCancelledByStylist(payload as unknown as ChangedBooking),
+  booking_moved_by_stylist: (payload) => bookingMovedByStylist(payload as unknown as ChangedBooking),
   client_cancelled: (payload) => clientCancelled(payload as unknown as Parameters<typeof clientCancelled>[0]),
   booking_invite: bookingInvite,
   booking_code: (payload) => bookingCode(payload as unknown as Parameters<typeof bookingCode>[0]),

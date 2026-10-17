@@ -2,11 +2,8 @@ import type { PastRecord, StudioState } from "../types";
 
 export const getPastRows = (
   state: StudioState,
-  isNew: boolean,
   seed: PastRecord[],
 ): PastRecord[] => {
-  if (isNew) return [];
-
   const overrides = state.pastOverrides ?? {};
 
   return state.pastNew.concat(
