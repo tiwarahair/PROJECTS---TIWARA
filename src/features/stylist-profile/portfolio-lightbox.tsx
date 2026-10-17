@@ -1,5 +1,5 @@
 import { useEffect, useRef } from "react";
-import type { CSSProperties, MouseEvent } from "react";
+import type { MouseEvent } from "react";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import { joinClassNames } from "../../utils/class-names";
 import { resolveAssetUrl } from "../../utils/asset-url";
@@ -43,10 +43,6 @@ export const PortfolioLightbox = ({
     return () => window.removeEventListener("keydown", handleKey);
   });
 
-  const imageStyle = {
-    "--zoom-image": src ? `url("${resolveAssetUrl(src)}")` : "none",
-  } as CSSProperties;
-
   return (
     // the scrim closes on click; Escape is handled by the window key listener
     // eslint-disable-next-line jsx-a11y/click-events-have-key-events, jsx-a11y/no-static-element-interactions
@@ -77,13 +73,12 @@ export const PortfolioLightbox = ({
         <ChevronLeft size={22} strokeWidth={1.8} />
       </button>
       {/* eslint-disable-next-line jsx-a11y/click-events-have-key-events, jsx-a11y/no-noninteractive-element-interactions */}
-      <div
-        role="img"
-        aria-label="Portfolio"
+      <img
+        src={resolveAssetUrl(src)}
+        alt="Portfolio"
         onClick={(event) => event.stopPropagation()}
         className={joinClassNames(pageGlobal.scpPanel, styles.image)}
-        style={imageStyle}
-      ></div>
+      />
       <button
         onClick={stepFromButton(1)}
         aria-label="Next"

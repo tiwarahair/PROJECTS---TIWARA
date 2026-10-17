@@ -407,6 +407,7 @@ const SettingsFrame = ({
               >
                 <PaymentPolicy
                   embedded={true}
+                  stylistName={state.profile.salon}
                   value={state.policy}
                   bookingsCount={view.policyBookings}
                   onSave={view.onPolicySave}
