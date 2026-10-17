@@ -8,6 +8,8 @@ export const PAY_ERRORS = {
   human: "We couldn't check this browser. Try again.",
   busy: "Too many tries. Wait a few minutes, then try again.",
   address: "We can't book this address. Check it on Your details.",
+  stylist:
+    "This stylist can't take payments online yet, so you haven't been charged. Try another stylist.",
   pending:
     "Your payment went through and we're confirming your booking. We'll email you as soon as it's done.",
 };
@@ -29,6 +31,9 @@ export const getCheckoutError = (code: string, time: string | null) => {
 
   if (code === "turnstile_failed")
     return { payKind: "network", payError: PAY_ERRORS.human };
+
+  if (code === "stylist_not_ready")
+    return { payKind: "network", payError: PAY_ERRORS.stylist };
 
   if (code === "rate_limited")
     return { payKind: "network", payError: PAY_ERRORS.busy };

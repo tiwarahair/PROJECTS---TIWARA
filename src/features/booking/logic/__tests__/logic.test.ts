@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 import { getClosedLine, getWhenLine } from "../calendar";
 import { getPreviewIndex, hasPreview, PREVIEW_POOL } from "../content";
 import { getAddressCheck, getContactChanges, getEmailFix } from "../details";
+import { getCheckoutError, PAY_ERRORS } from "../payment";
 import { getDeltaLabel } from "../pricing";
 
 describe("details", () => {
@@ -102,5 +103,16 @@ describe("labels", () => {
     );
 
     expect(hasPreview(["Shoulder", "Waist"])).toBe(false);
+  });
+});
+
+describe("checkout errors", () => {
+  it("a stylist who can't take payments yet says so, and nothing was charged", () => {
+    expect(getCheckoutError("stylist_not_ready", null)).toEqual({
+      payKind: "network",
+      payError: PAY_ERRORS.stylist,
+    });
+
+    expect(PAY_ERRORS.stylist).toContain("you haven't been charged");
   });
 });

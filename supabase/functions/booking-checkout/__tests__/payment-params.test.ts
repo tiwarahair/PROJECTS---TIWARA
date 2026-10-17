@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { getPaymentParams } from "../payment-params";
+import { getPaymentParams, paysStylist } from "../payment-params";
 import type { CheckoutQuote } from "../payment-params";
 
 const quote = (mode: CheckoutQuote["mode"], due: number): CheckoutQuote => ({
@@ -67,5 +67,16 @@ describe("the booking's payment", () => {
     expect(getPaymentParams(quote("none", 163), null)).toMatchObject({
       allowed_payment_method_types: ["card"],
     });
+  });
+});
+
+describe("which bookings need the stylist's Stripe account", () => {
+  it("deposit and full pay the stylist; card on file and pay at the appointment don't", () => {
+    expect(["deposit", "full", "card", "none"].map((mode) => paysStylist(mode as CheckoutQuote["mode"]))).toEqual([
+      true,
+      true,
+      false,
+      false,
+    ]);
   });
 });
