@@ -173,7 +173,7 @@ export const AccountPage = (props: AccountPageProps) => {
                     />
                   )}
                   {current === "favourites" && (
-                    <FavouritesSection favourites={view.favourites} />
+                    <FavouritesSection favouriteIds={view.favouriteIds} />
                   )}
                   {current === "hair" && (
                     <HairSection quiz={state.quiz} quizDate={view.quizDate} />

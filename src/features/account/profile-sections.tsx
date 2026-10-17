@@ -1,56 +1,77 @@
 import { Heart, Sparkles } from "lucide-react";
+import { useEffect, useMemo } from "react";
 import { Link } from "react-router";
+import { StylistCardSkeleton } from "../../components/skeleton/stylist-card-skeleton";
+import { toPublicStylist } from "../../lib/public-stylist";
+import { useGetStylistProfileQuery } from "../../stores/api-slice";
+import { setFavourite } from "../../stores/favourites-slice";
+import { useAppDispatch } from "../../stores/hooks";
 import { StylistCard } from "../../components/stylist-card/stylist-card";
-import type { Stylist } from "../../types/stylist";
 import styles from "../../styles/features/account/profile-sections.module.css";
 import ui from "../../styles/features/account/ui.module.css";
 
+/** One saved stylist, from their live profile; nothing if it's gone. */
+const FavouriteCard = ({ slug }: { slug: string }) => {
+  const dispatch = useAppDispatch();
+  const { data, isLoading, isSuccess } = useGetStylistProfileQuery(slug);
+
+  // a stylist who has closed or gone back to draft drops out of favourites, so the count stays right
+  useEffect(() => {
+    if (isSuccess && !data) dispatch(setFavourite({ id: slug, on: false }));
+  }, [data, dispatch, isSuccess, slug]);
+
+  const stylist = useMemo(
+    () => (data ? toPublicStylist(data).stylist : null),
+    [data],
+  );
+
+  if (isLoading) return <StylistCardSkeleton />;
+
+  if (!stylist) return null;
+
+  const { id, name, cover, rating, reviews, area, verified, fromLabel } =
+    stylist;
+
+  return (
+    // plain block wrapper, which the card's height:100% depends on
+    <div data-dc-host="">
+      <StylistCard
+        href={`/${id}`}
+        bookHref={`/book?stylist=${id}`}
+        stylistId={id}
+        cover={cover}
+        stylistName={name}
+        rating={rating}
+        reviews={reviews}
+        area={area}
+        meta={fromLabel ? `From ${fromLabel}` : ""}
+        verified={!!verified}
+      />
+    </div>
+  );
+};
+
 export const FavouritesSection = ({
-  favourites,
+  favouriteIds,
 }: {
-  favourites: Stylist[];
+  favouriteIds: string[];
 }) => (
   <section data-screen-label="Account: Favourites">
-    {favourites.length > 0 && (
+    {favouriteIds.length > 0 && (
       <>
         <p className={styles.count}>
-          {favourites.length === 1
+          {favouriteIds.length === 1
             ? "1 saved stylist"
-            : `${favourites.length} saved stylists`}
+            : `${favouriteIds.length} saved stylists`}
         </p>
         <div className={styles.favGrid}>
-          {favourites.map(
-            ({
-              id,
-              name,
-              cover,
-              rating,
-              reviews,
-              area,
-              verified,
-              fromLabel,
-            }) => (
-              // plain block wrapper, which the card's height:100% depends on
-              <div key={id} data-dc-host="">
-                <StylistCard
-                  href={`/${id}`}
-                  bookHref={`/book?stylist=${id}`}
-                  stylistId={id}
-                  cover={cover}
-                  stylistName={name}
-                  rating={rating}
-                  reviews={reviews}
-                  area={area}
-                  meta={fromLabel ? `From ${fromLabel}` : ""}
-                  verified={!!verified}
-                />
-              </div>
-            ),
-          )}
+          {favouriteIds.map((slug) => (
+            <FavouriteCard key={slug} slug={slug} />
+          ))}
         </div>
       </>
     )}
-    {!favourites.length && (
+    {!favouriteIds.length && (
       <div className={ui.emptyState} data-screen-label="Favourites empty">
         <div className={ui.emptyIcon}>
           <Heart size={24} strokeWidth={2} />

@@ -1,7 +1,6 @@
 // Derived values for the Account page.
 import { Heart, RotateCcw, Sparkles } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
-import { stylists } from "../../data";
 import { QUIZ_DAYS_AGO, SECTIONS } from "./data";
 import type { AccountBooking, AccountSection } from "./data";
 import {
@@ -112,10 +111,6 @@ export const getAccountView = (
     ({ booking }) => booking.status === "completed",
   );
 
-  const favourites = favouriteIds
-    .map((id) => stylists.find((stylist) => stylist.id === id))
-    .filter((stylist) => !!stylist);
-
   const quizDate = new Date(now - QUIZ_DAYS_AGO).toLocaleDateString("en-GB", {
     day: "numeric",
     month: "long",
@@ -139,8 +134,8 @@ export const getAccountView = (
 
   quick.push({
     key: "favs",
-    label: `Your favourites (${favourites.length})`,
-    subtitle: favourites.length
+    label: `Your favourites (${favouriteIds.length})`,
+    subtitle: favouriteIds.length
       ? "Stylists you’ve saved"
       : "Save stylists you love",
     href: "/account?section=favourites",
@@ -199,7 +194,7 @@ export const getAccountView = (
     past,
     quick,
     quizDate,
-    favourites,
+    favouriteIds,
     showUpcoming: (bookingsTab || "up") !== "past" || !past.length,
     showPast: showPastTab,
     activeTab: showPastTab ? "past" : "up",
