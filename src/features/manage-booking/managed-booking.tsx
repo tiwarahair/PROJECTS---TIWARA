@@ -5,15 +5,14 @@ import type { ManagedBooking as Booking } from "../../lib/manage-booking-api";
 import {
   getErrorMessage,
   useCancelBookingMutation,
-  useUpdateBookingAllergiesMutation,
 } from "../../stores/api-slice";
 import { BookingCard } from "./booking-card";
+import { BookingNotes } from "./booking-notes";
 import { CodeDialog } from "./code-dialog";
 import { ConfirmDialog } from "./confirm-dialog";
 import { ManageActions } from "./manage-actions";
 import { getCancelLines, toPounds } from "./logic";
 import { RescheduleSheet } from "./reschedule-sheet";
-import { SharedDetails } from "./shared-details";
 import styles from "../../styles/features/manage-booking/index.module.css";
 import toastStyles from "../../styles/features/manage-booking/manage-toast.module.css";
 
@@ -40,26 +39,16 @@ export const ManagedBooking = ({
   token,
   onRefresh,
 }: ManagedBookingProps) => {
-  const [dialog, setDialog] = useState<"cancel" | "remove" | null>(null);
+  const [isCancelOpen, setCancelOpen] = useState(false);
   const [isRescheduling, setRescheduling] = useState(false);
   const [confirming, setConfirming] = useState<Action | null>(null);
 
-  const [editing, setEditing] = useState({
-    on: false,
-    draft: "",
-    consent: false,
-  });
-
-  const [allergyError, setAllergyError] = useState("");
   const [cancelError, setCancelError] = useState("");
   const [toast, setToast] = useState("");
   const toastTimer = useRef(0);
 
   const [cancelBooking, { isLoading: isCancelling }] =
     useCancelBookingMutation();
-
-  const [saveAllergies, { isLoading: isSaving }] =
-    useUpdateBookingAllergiesMutation();
 
   const stylist = booking.stylist_name;
   const isCancelled = booking.status === "cancelled";
@@ -77,7 +66,7 @@ export const ManagedBooking = ({
     if (action === "reschedule") return setRescheduling(true);
 
     setCancelError("");
-    setDialog("cancel");
+    setCancelOpen(true);
     onRefresh();
   };
 
@@ -86,37 +75,8 @@ export const ManagedBooking = ({
 
   const askForCode = (action: Action) => {
     setRescheduling(false);
-    setDialog(null);
+    setCancelOpen(false);
     setConfirming(action);
-  };
-
-  const updateAllergies = async (allergies: string, consent: boolean) => {
-    setAllergyError("");
-
-    try {
-      await saveAllergies({ token, allergies, consent }).unwrap();
-      setEditing({ on: false, draft: "", consent: false });
-      setDialog(null);
-      showToast(allergies ? "Saved" : "Removed");
-    } catch (error) {
-      setAllergyError(
-        getErrorMessage(error) === "consent_required"
-          ? `Tick the box to share this with ${stylist}.`
-          : "We couldn't save that. Try again.",
-      );
-    }
-  };
-
-  const saveDraft = () => {
-    const text = editing.draft.trim();
-
-    if (text && !editing.consent) {
-      setAllergyError(`Tick the box to share this with ${stylist}.`);
-
-      return;
-    }
-
-    void updateAllergies(text, editing.consent);
   };
 
   const cancel = async () => {
@@ -124,7 +84,7 @@ export const ManagedBooking = ({
 
     try {
       await cancelBooking(token).unwrap();
-      setDialog(null);
+      setCancelOpen(false);
       showToast("Booking cancelled");
     } catch (error) {
       if (getErrorMessage(error) === "confirm_needed")
@@ -173,39 +133,6 @@ export const ManagedBooking = ({
           }}
         />
       )}
-      {!isCancelled && (
-        <SharedDetails
-          stylistName={stylist}
-          allergies={booking.allergies ?? ""}
-          isEditing={editing.on}
-          draft={editing.draft}
-          consent={editing.consent}
-          error={dialog ? "" : allergyError}
-          isSaving={isSaving}
-          onEdit={() => {
-            setAllergyError("");
-
-            setEditing({
-              on: true,
-              draft: booking.allergies ?? "",
-              consent: false,
-            });
-          }}
-          onRemove={() => {
-            setAllergyError("");
-            setDialog("remove");
-          }}
-          onDraft={(draft) => setEditing((current) => ({ ...current, draft }))}
-          onConsent={() =>
-            setEditing((current) => ({ ...current, consent: !current.consent }))
-          }
-          onSave={saveDraft}
-          onCancel={() => {
-            setAllergyError("");
-            setEditing({ on: false, draft: "", consent: false });
-          }}
-        />
-      )}
       {!isCancelled && !!confirming && (
         <CodeDialog
           token={token}
@@ -217,7 +144,8 @@ export const ManagedBooking = ({
           }}
         />
       )}
-      {dialog === "cancel" && (
+      {!isCancelled && <BookingNotes booking={booking} />}
+      {isCancelOpen && (
         <ConfirmDialog
           title="Cancel this booking?"
           lines={getCancelLines(booking, booking.cancellation)}
@@ -225,20 +153,8 @@ export const ManagedBooking = ({
           confirmLabel={isCancelling ? "Cancelling…" : "Cancel booking"}
           isBusy={isCancelling}
           error={cancelError}
-          onCancel={() => setDialog(null)}
+          onCancel={() => setCancelOpen(false)}
           onConfirm={() => void cancel()}
-        />
-      )}
-      {dialog === "remove" && (
-        <ConfirmDialog
-          title="Remove this?"
-          lines={[`${stylist} won’t see it any more.`]}
-          cancelLabel="Cancel"
-          confirmLabel="Remove"
-          isBusy={isSaving}
-          error={allergyError}
-          onCancel={() => setDialog(null)}
-          onConfirm={() => void updateAllergies("", false)}
         />
       )}
       {!!toast && (

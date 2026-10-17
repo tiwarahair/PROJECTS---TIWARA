@@ -1739,10 +1739,6 @@ export type Database = {
       };
       service_from_pence: { Args: { target: string }; Returns: number };
       slugify: { Args: { value: string }; Returns: string };
-      update_booking_allergies: {
-        Args: { allergies: string; consent: boolean; token: string };
-        Returns: undefined;
-      };
       verify_booking_code: {
         Args: { code: string; token: string };
         Returns: string;

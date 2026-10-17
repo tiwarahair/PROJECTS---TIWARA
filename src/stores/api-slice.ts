@@ -21,7 +21,6 @@ import {
   verifyBookingCode,
   getRescheduleSlots,
   rescheduleBooking,
-  updateBookingAllergies,
 } from "../lib/manage-booking-api";
 import {
   claimBookingInvite,
@@ -221,13 +220,6 @@ export const api = createApi({
       invalidatesTags: () => ["ManagedBooking"],
       queryFn: (request) => toQueryResult(rescheduleBooking(request)),
     }),
-    updateBookingAllergies: build.mutation<
-      void,
-      { token: string; allergies: string; consent: boolean }
-    >({
-      invalidatesTags: () => ["ManagedBooking"],
-      queryFn: (request) => toQueryResult(updateBookingAllergies(request)),
-    }),
     sendBookingCode: build.mutation<{ email: string; sent: boolean }, string>({
       queryFn: (token) => toQueryResult(sendBookingCode(token)),
     }),
@@ -285,7 +277,6 @@ export const {
   useGetManagedBookingQuery,
   useGetRescheduleSlotsQuery,
   useRescheduleBookingMutation,
-  useUpdateBookingAllergiesMutation,
   useGetAvailableSlotsQuery,
   useGetBookingStatusQuery,
   useStartCheckoutMutation,

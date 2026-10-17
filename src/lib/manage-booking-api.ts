@@ -39,7 +39,8 @@ export interface ManagedBooking {
     free_cancel_until: string;
     free_window_hours: number;
   };
-  allergies: string | null;
+  notes: string | null;
+  address_notes: string | null;
   reschedule_count: number;
   calendar_key: string;
   is_verified: boolean;
@@ -89,24 +90,6 @@ export const rescheduleBooking = async ({
   const { error } = await supabase.rpc("reschedule_managed_booking", {
     token,
     slot_start: startsAt,
-  });
-
-  if (error) throw error;
-};
-
-export const updateBookingAllergies = async ({
-  token,
-  allergies,
-  consent,
-}: {
-  token: string;
-  allergies: string;
-  consent: boolean;
-}) => {
-  const { error } = await supabase.rpc("update_booking_allergies", {
-    token,
-    allergies,
-    consent,
   });
 
   if (error) throw error;
