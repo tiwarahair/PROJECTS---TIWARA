@@ -2,6 +2,7 @@ import { ResponsiveImage } from "../../components/responsive-image/responsive-im
 import { CtaArrowIcon } from "../../components/icons/custom-icons";
 import { Link } from "react-router";
 import { joinClassNames } from "../../utils/class-names";
+import { HERO_IMAGE, HERO_SIZES } from "./hero-image";
 import page from "../../styles/features/home/home-page.module.css";
 import styles from "../../styles/features/home/hero-section.module.css";
 
@@ -15,8 +16,8 @@ export const HeroSection = () => (
   >
     <div id="heroframe" className={styles.frame}>
       <ResponsiveImage
-        src="site/hero.jpg"
-        sizes="100vw"
+        src={HERO_IMAGE}
+        sizes={HERO_SIZES}
         loading="eager"
         fetchPriority="high"
         alt="Stylist cornrowing a client at Tiwára's House"

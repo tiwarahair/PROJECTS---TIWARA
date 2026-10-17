@@ -5,6 +5,7 @@ import { Provider } from "react-redux";
 import { RouterProvider } from "react-router";
 import "./styles/global.css";
 import { appRouter } from "./app-router";
+import { preloadHeroImage } from "./features/home/hero-image";
 import { startAuthListener } from "./stores/auth-listener";
 import { startCacheListener } from "./stores/cache-listener";
 import { createStore } from "./stores/store";
@@ -15,6 +16,9 @@ if (!rootElement) throw new Error("Missing #root element");
 
 // a deploy replaced the page chunks this tab expects: reload to get the new ones
 window.addEventListener("vite:preloadError", () => window.location.reload());
+
+// home's photo starts downloading now rather than after Home's own code has loaded
+if (window.location.pathname === "/") preloadHeroImage();
 
 const store = createStore();
 

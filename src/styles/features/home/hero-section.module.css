@@ -15,6 +15,17 @@
   background: #1a1714;
 }
 
+/* a 24px copy of the photo (yarn images), blurred, shows until the photo arrives */
+.frame::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: url("../../../../assets/generated/site/hero-placeholder.webp")
+    center 42% / cover no-repeat;
+  filter: blur(24px);
+  transform: scale(1.15);
+}
+
 .image {
   position: absolute;
   inset: 0;
