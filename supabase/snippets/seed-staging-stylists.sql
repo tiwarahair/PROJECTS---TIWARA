@@ -194,14 +194,18 @@ set is_open = case when seeded.n % 3 = 1 then weekday between 1 and 5 else weekd
 from seeded
 where working_hours.stylist_id = seeded.stylist_id and seeded.n % 3 <> 0;
 
--- a second later than the sign-up default, so it's the current policy
-insert into public.payment_policies (stylist_id, mode, deposit_percent, refundable, free_window_hours, grace_minutes, created_at)
+-- a second later than the sign-up default, so it's the current policy. Card on file or pay at the appointment only:
+-- deposits and full payments go to the stylist's Stripe account, which seeded stylists don't have
+insert into public.payment_policies (stylist_id, mode, deposit_percent, refundable, free_window_hours, grace_minutes,
+  late_on, late_kind, late_percent, no_show_on, no_show_kind, no_show_percent, created_at)
 select stylist_id,
-  (array['deposit', 'deposit', 'card', 'none'])[n % 4 + 1],
-  (array[20, 25, 0, 0])[n % 4 + 1],
+  (array['card', 'card', 'none'])[n % 3 + 1],
+  0,
   true,
-  (array[48, 24, 24, 24])[n % 4 + 1],
-  (array[0, 0, 15, 0])[n % 4 + 1],
+  (array[48, 24, 24])[n % 3 + 1],
+  (array[0, 15, 0])[n % 3 + 1],
+  n % 3 <> 2, 'pct', 50,
+  n % 3 <> 2, 'pct', (array[50, 100, 50])[n % 3 + 1],
   now() + interval '1 second'
 from seeded;
 
