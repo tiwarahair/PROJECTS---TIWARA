@@ -81,7 +81,7 @@ export const BusinessDetails = (props: BusinessDetailsProps) => {
               <CircleAlert
                 className={styles.barErrorIcon}
                 size={15}
-                strokeWidth={1.5}
+                strokeWidth={1.8}
               />
               {errorCount === 1
                 ? "Fix the highlighted field to save"

@@ -49,7 +49,7 @@ export const Reveal = ({
 export const FieldError = ({ id, error }: { id: string; error: string }) =>
   error ? (
     <div className={styles.error} id={id} role="alert">
-      <CircleAlert className={styles.errorIcon} size={15} strokeWidth={1.5} />
+      <CircleAlert className={styles.errorIcon} size={15} strokeWidth={1.8} />
       {error}
     </div>
   ) : null;

@@ -11,7 +11,7 @@ export const ErrorLine = ({
   children: ReactNode;
 }) => (
   <div className={className} role="alert">
-    <CircleAlert className={styles.errorIcon} size={15} strokeWidth={1.5} />
+    <CircleAlert className={styles.errorIcon} size={15} strokeWidth={1.8} />
     {children}
   </div>
 );

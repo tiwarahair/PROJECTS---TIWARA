@@ -206,7 +206,7 @@ const AddressFinderField = ({
                         <MapPin
                           className={styles.pinIcon}
                           size={16}
-                          strokeWidth={1.7}
+                          strokeWidth={2}
                         />
                         <span className={styles.optionText}>
                           <span className={styles.optionLine}>
@@ -268,7 +268,7 @@ const AddressFinderField = ({
                 <CircleAlert
                   className={styles.errorIcon}
                   size={15}
-                  strokeWidth={1.5}
+                  strokeWidth={1.8}
                 />
                 {queryError}
               </div>
@@ -289,7 +289,7 @@ const AddressFinderField = ({
       {state.mode === "summary" && (
         <div className={styles.summaryStack}>
           <div className={styles.summaryCard}>
-            <MapPin className={styles.summaryPin} size={18} strokeWidth={1.7} />
+            <MapPin className={styles.summaryPin} size={18} strokeWidth={2} />
             <address className={styles.address}>
               {summaryLines.map((line, index) => (
                 <div
@@ -355,7 +355,7 @@ const AddressFinderField = ({
                         <CircleAlert
                           className={styles.errorIcon}
                           size={15}
-                          strokeWidth={1.5}
+                          strokeWidth={1.8}
                         />
                         {error}
                       </div>
