@@ -14,6 +14,7 @@ import { OnboardingTurnstile } from "../onboarding/onboarding-turnstile";
 import { getPayIntro } from "./logic/content";
 import {
   getPaymentAppearance,
+  WALLET_BUTTON_HEIGHT,
   getPaymentFonts,
   toPence,
 } from "./logic/payment";
@@ -93,7 +94,10 @@ const PayForm = ({ booking }: StepPayProps) => {
         >
           <div className={styles.quickCheckout}>Quick checkout</div>
           <ExpressCheckoutElement
-            options={{ buttonHeight: 48, paymentMethods: { link: "never" } }}
+            options={{
+              buttonHeight: WALLET_BUTTON_HEIGHT,
+              paymentMethods: { link: "never" },
+            }}
             onReady={({ availablePaymentMethods }) =>
               setHasWallets(!!availablePaymentMethods)
             }

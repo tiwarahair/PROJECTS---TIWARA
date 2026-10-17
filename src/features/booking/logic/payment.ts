@@ -74,6 +74,8 @@ export const getCheckoutRequest = (
 
 export const toPence = (pounds: number) => Math.round(pounds * 100);
 
+export const WALLET_BUTTON_HEIGHT = 48;
+
 export const getPaymentAppearance = (): Appearance => ({
   theme: "stripe",
   variables: {
@@ -84,10 +86,14 @@ export const getPaymentAppearance = (): Appearance => ({
     colorTextSecondary: "#7d7465",
     colorDanger: "#8f1112",
     colorBackground: "#fffefb",
-    borderRadius: "12px",
+    borderRadius: `${WALLET_BUTTON_HEIGHT / 2}px`,
   },
   rules: {
-    ".Input": { border: "1px solid #d4cbb9", boxShadow: "none" },
+    ".Input": {
+      border: "1px solid #d4cbb9",
+      boxShadow: "none",
+      borderRadius: "12px",
+    },
   },
 });
 
