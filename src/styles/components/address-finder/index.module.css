@@ -328,6 +328,24 @@
   max-width: 200px;
 }
 
+/* wider screens: town and postcode share a row */
+@media (min-width: 640px) {
+  .manualStack {
+    display: grid;
+    grid-template-columns: minmax(0, 2fr) minmax(0, 1fr);
+  }
+
+  .manualStack > * {
+    grid-column: 1 / -1;
+  }
+
+  .manualStack > .fieldTown,
+  .manualStack > .fieldPostcode {
+    grid-column: auto;
+    max-width: none;
+  }
+}
+
 .toFindRow {
   margin-top: -4px;
 }

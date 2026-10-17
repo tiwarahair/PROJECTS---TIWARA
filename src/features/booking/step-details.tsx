@@ -35,6 +35,9 @@ export const StepDetails = ({ booking }: StepDetailsProps) => {
   const { setState } = actions;
   const { loggedIn, allergy, photos } = state;
 
+  // the address section brings its own space below; the contact fields don't
+  const isAfterAddress = isMobileStylist && (showContactFields || !needsMobile);
+
   const setAllergy = (patch: Partial<AllergyState>) =>
     setState((current) => ({ allergy: { ...current.allergy, ...patch } }));
 
@@ -54,7 +57,12 @@ export const StepDetails = ({ booking }: StepDetailsProps) => {
           <AppointmentAddress booking={booking} />
         </div>
       )}
-      <h2 className={joinClassNames(fields.heading, styles.extraHeading)}>
+      <h2
+        className={joinClassNames(
+          fields.heading,
+          !isAfterAddress && styles.extraHeading,
+        )}
+      >
         Extra details
       </h2>
       <div className={fields.grid}>

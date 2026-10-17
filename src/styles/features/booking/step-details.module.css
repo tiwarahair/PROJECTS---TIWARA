@@ -202,7 +202,3 @@
 .extraHeading {
   margin-top: 20px;
 }
-
-.addressBelow + .extraHeading {
-  margin-top: 0;
-}
