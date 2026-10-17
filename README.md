@@ -28,15 +28,10 @@ After cloning down the repo, run these commands:
 - `cp .env.example .env.local && cp supabase/.env.example supabase/.env && cp supabase/.env.example supabase/functions/.env` - create the 3 needed .env files
 - `yarn db:start` — start the local Supabase stack (first run downloads docker images, takes a few minutes)
 - run `yarn supabase status` -> copy what it returns, paste the the API URL into `VITE_SUPABASE_URL` & the publishable key to `VITE_SUPABASE_PUBLISHABLE_KEY` in `.env.local`
-- In both `supabase/.env` and `supabase/functions/.env`, generate your own:
-  - `CRON_SECRET` — run `openssl rand -hex 32` to get the key
-  - `TAX_ENCRYPTION_KEY` — run `openssl rand -base64 32` to get the key
+- In both `supabase/.env` and `supabase/functions/.env`, generate your own `TAX_ENCRYPTION_KEY` — run `openssl rand -base64 32` to get the key
 - message @faithod/a team member privately for the `.env` files
 - run `yarn supabase stop && yarn db:start` — restart so the stack picks up the secrets
-- run `yarn db:reset`
-- in Supabase Studio's SQL editor (http://127.0.0.1:54323), run
-  `select vault.create_secret('<your CRON_SECRET>', 'cron_secret');`
-  (repeat after every `yarn db:reset`, otherwise scheduled emails won't send)
+- run `yarn db:reset` — applies migrations and loads the demo stylists and scheduled-job secrets
 - run `yarn start`
 - optionally run a check: `yarn format && yarn lint && yarn typecheck && yarn test && yarn db:test`
 
