@@ -12,6 +12,12 @@
   max-width: 460px;
 }
 
+/* Stripe's form loads out of sight behind the skeleton */
+.cardLoading {
+  height: 0;
+  overflow: hidden;
+}
+
 .wallets {
   display: flex;
   flex-direction: column;
