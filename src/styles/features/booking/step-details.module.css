@@ -194,3 +194,15 @@
     transform: none;
   }
 }
+
+.addressBelow {
+  margin-top: 20px;
+}
+
+.extraHeading {
+  margin-top: 20px;
+}
+
+.addressBelow + .extraHeading {
+  margin-top: 0;
+}
