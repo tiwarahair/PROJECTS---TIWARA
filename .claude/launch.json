@@ -9,18 +9,6 @@
       ],
       "port": 5173,
       "autoPort": true
-    },
-    {
-      "name": "tiwara-prototype",
-      "runtimeExecutable": "python3",
-      "runtimeArgs": [
-        "-m",
-        "http.server",
-        "5180",
-        "--directory",
-        "design-import/handoff folder/project/design_handoff_tiwaras_house/prototype"
-      ],
-      "port": 5180
     }
   ]
 }
