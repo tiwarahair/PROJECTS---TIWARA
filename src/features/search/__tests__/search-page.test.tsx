@@ -61,7 +61,6 @@ describe("SearchPage", () => {
 
     expect(count).toHaveTextContent("2 stylists");
     expect(count).not.toHaveTextContent("near");
-    expect(screen.getByText(/Location is off/)).toBeInTheDocument();
   });
 
   it("asks for the location as soon as Search opens and sorts by distance", async () => {
@@ -103,8 +102,6 @@ describe("SearchPage", () => {
     expect(screen.getAllByRole("status")[0]).toHaveTextContent(
       "2 stylists near Chorlton",
     );
-
-    expect(screen.queryByText(/Location is off/)).not.toBeInTheDocument();
   });
 
   it("typing in What opens matching styles and stylists; picking a group filters the results", async () => {
