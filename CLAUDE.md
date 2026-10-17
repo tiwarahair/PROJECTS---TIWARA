@@ -2,11 +2,9 @@
 
 A hair booking platform for salon owners and paying clients. Uses React 19 & Typescript 5.9
 
-Read @CONTEXT.md for more context.
-
 ## Tech Stack
 
-React 19.x and TypeScript 5.9, Redux Tool Kit
+React 19.x and TypeScript 5.9, Redux Tool Kit etc.
 
 ## Core Operating Rules
 

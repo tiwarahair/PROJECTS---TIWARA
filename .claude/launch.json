@@ -11,16 +11,16 @@
       "autoPort": true
     },
     {
-      "name": "tiwara-prototype",
-      "runtimeExecutable": "python3",
+      "name": "tiwara-phase-4",
+      "runtimeExecutable": "/Users/Faith-Personal/.nvm/versions/node/v24.18.0/bin/node",
       "runtimeArgs": [
-        "-m",
-        "http.server",
-        "5180",
-        "--directory",
-        "design-import/handoff folder/project/design_handoff_tiwaras_house/prototype"
+        "/Users/Faith-Personal/Documents/new folder for code/PROJECTS---TIWARA/.claude/worktrees/phase-4-booking/node_modules/vite/bin/vite.js",
+        "/Users/Faith-Personal/Documents/new folder for code/PROJECTS---TIWARA/.claude/worktrees/phase-4-booking",
+        "--port",
+        "5190",
+        "--strictPort"
       ],
-      "port": 5180
+      "port": 5190
     }
   ]
 }

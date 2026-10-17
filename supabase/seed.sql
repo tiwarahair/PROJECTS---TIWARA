@@ -556,3 +556,7 @@ from (values
 join public.stylists on stylists.owner_id = photo.owner::uuid;
 
 update public.stylists set status = 'live' where owner_id in (select owner from demo);
+
+-- lets pg_cron call the local Edge Functions; matches CRON_SECRET in supabase/.env.example
+select vault.create_secret('http://kong:8000', 'project_url');
+select vault.create_secret('local-cron-secret', 'cron_secret');

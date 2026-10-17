@@ -86,25 +86,6 @@ const appRoutes: RouteObject[] = [
         ({ StylistProfilePage }) => ({ Component: StylistProfilePage }),
       ),
   },
-  // dev-only: design-system gallery (mirrors each .card.html) and per-component fixture harnesses
-  ...(import.meta.env.DEV
-    ? [
-        {
-          path: "/__ds/:card",
-          lazy: () =>
-            import("./features/ds-specimens/ds-specimens").then(
-              ({ DsSpecimens }) => ({ Component: DsSpecimens }),
-            ),
-        },
-        {
-          path: "/__harness/:component",
-          lazy: () =>
-            import("./features/dev-harness/dev-harness").then(
-              ({ DevHarness }) => ({ Component: DevHarness }),
-            ),
-        },
-      ]
-    : []),
 ];
 
 export const appRouter = createBrowserRouter([
