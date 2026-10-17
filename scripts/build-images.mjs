@@ -49,9 +49,13 @@ const FORMATS = [
 // drops metadata but keeps the colour profile: wide-colour (Display P3) photos shift colour without it
 const COMMON_OPTIONS = ["-auto-orient", "+profile", "!icc,*"];
 
+// tiny copies shown blurred while the full photo loads; Vite inlines them into the CSS
+const PLACEHOLDERS = ["site/hero.jpg"];
+
 // changing these options regenerates every copy
 const SETTINGS_FILE = join(OUTPUT, "settings.json");
 const settings = JSON.stringify({ COMMON_OPTIONS, FORMATS });
+
 const isSameSettings =
   existsSync(SETTINGS_FILE) && readFileSync(SETTINGS_FILE, "utf8") === settings;
 
@@ -92,9 +96,11 @@ for (const { folder, widths, skip } of SETS) {
 
     const assetPath = relative(ASSETS, source);
     const { width, height } = getSize(source);
+
     const fittingWidths = [
       ...new Set(widths.map((wanted) => Math.min(wanted, width))),
     ];
+
     const base = join(OUTPUT, assetPath.replace(/\.(jpe?g)$/i, ""));
 
     mkdirSync(dirname(base), { recursive: true });
@@ -113,8 +119,26 @@ for (const { folder, widths, skip } of SETS) {
           ...options,
           output,
         ]);
+
         written++;
       }
+    }
+
+    const placeholder = `${base}-placeholder.webp`;
+
+    if (PLACEHOLDERS.includes(assetPath) && !isFresh(placeholder, source)) {
+      execFileSync("magick", [
+        source,
+        "-auto-orient",
+        "-strip",
+        "-resize",
+        "24x",
+        "-quality",
+        "55",
+        placeholder,
+      ]);
+
+      written++;
     }
 
     manifest[assetPath] = { width, height, widths: fittingWidths };
@@ -125,5 +149,6 @@ writeFileSync(
   join(OUTPUT, "manifest.json"),
   `${JSON.stringify(manifest, null, 2)}\n`,
 );
+
 writeFileSync(SETTINGS_FILE, settings);
 console.log(`${Object.keys(manifest).length} photos, ${written} files written`);

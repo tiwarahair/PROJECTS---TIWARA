@@ -8,12 +8,15 @@ import {
 import type { StripeExpressCheckoutElementConfirmEvent } from "@stripe/stripe-js";
 import { ArrowLeft, ArrowRight, Check, CircleAlert } from "lucide-react";
 import { useState } from "react";
+import { PaymentFieldsSkeleton } from "../../components/skeleton/payment-fields-skeleton";
 import { stripePromise } from "../../lib/stripe";
 import { joinClassNames } from "../../utils/class-names";
 import { OnboardingTurnstile } from "../onboarding/onboarding-turnstile";
 import { getPayIntro } from "./logic/content";
 import {
   getPaymentAppearance,
+  PAY_ERRORS,
+  WALLET_BUTTON_HEIGHT,
   getPaymentFonts,
   toPence,
 } from "./logic/payment";
@@ -63,6 +66,7 @@ const PayForm = ({ booking }: StepPayProps) => {
   const stripe = useStripe();
   const elements = useElements();
   const [hasWallets, setHasWallets] = useState(false);
+  const [isCardReady, setCardReady] = useState(false);
   const isBlocked = !pay.hasTurnstileToken || !stripe;
   const payDisabled = pay.payDisabled || !stripe;
 
@@ -93,7 +97,10 @@ const PayForm = ({ booking }: StepPayProps) => {
         >
           <div className={styles.quickCheckout}>Quick checkout</div>
           <ExpressCheckoutElement
-            options={{ buttonHeight: 48, paymentMethods: { link: "never" } }}
+            options={{
+              buttonHeight: WALLET_BUTTON_HEIGHT,
+              paymentMethods: { link: "never" },
+            }}
             onReady={({ availablePaymentMethods }) =>
               setHasWallets(!!availablePaymentMethods)
             }
@@ -108,7 +115,14 @@ const PayForm = ({ booking }: StepPayProps) => {
             <span className={styles.dividerLine}></span>
           </div>
         </div>
+        {!isCardReady && <PaymentFieldsSkeleton />}
         <PaymentElement
+          className={isCardReady ? undefined : styles.cardLoading}
+          onReady={() => setCardReady(true)}
+          onLoadError={() => {
+            setCardReady(true);
+            setState({ payKind: "network", payError: PAY_ERRORS.network });
+          }}
           options={{
             layout: "tabs",
             wallets: { applePay: "never", googlePay: "never", link: "never" },

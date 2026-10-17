@@ -1,0 +1,14 @@
+.fields {
+  display: grid;
+  gap: 14px;
+}
+
+.row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}
+
+.input {
+  margin-top: 8px;
+}

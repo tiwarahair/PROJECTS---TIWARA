@@ -1,4 +1,3 @@
-import { preloadImage } from "../../components/responsive-image/responsive-image";
 import { useLayoutEffect, useRef } from "react";
 import type { CSSProperties } from "react";
 import { FavHost } from "../../components/fav-host/fav-host";
@@ -8,6 +7,7 @@ import { BookSlotTiles } from "./book-slot-tiles";
 import { FaqSection } from "./faq-section";
 import { ForStylistsSection } from "./for-stylists-section";
 import { HeroSection } from "./hero-section";
+import { preloadHeroImage } from "./hero-image";
 import layout from "../../styles/features/home/home-layout.module.css";
 import { HomeFooter } from "./home-footer";
 import { HomeNav } from "./home-nav";
@@ -44,7 +44,7 @@ export const HomePage = ({
 
   useHomeMotion(rootRef, showWhy);
 
-  preloadImage("site/hero.jpg", "100vw", "high");
+  preloadHeroImage();
 
   // page-wide rules (body background, colour tokens, smooth scroll) apply while Home is mounted
   useLayoutEffect(() => {

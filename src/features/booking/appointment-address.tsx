@@ -142,7 +142,7 @@ export const AppointmentAddress = ({ booking }: AppointmentAddressProps) => {
               <div role="alert" className={styles.areaOut}>
                 <CircleAlert
                   size={15}
-                  strokeWidth={1.5}
+                  strokeWidth={1.8}
                   className={fields.errorIcon}
                 />
                 <span>

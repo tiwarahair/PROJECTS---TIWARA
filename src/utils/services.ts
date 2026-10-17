@@ -73,26 +73,32 @@ export const getServiceOptions = (
   service: Service | null | undefined,
 ): ServiceOptions => {
   const customisations = service?.customisations;
+  const size = customisations ? getOnOptions(customisations.size) : [];
+  const length = customisations ? getOnOptions(customisations.length) : [];
+  const own = service?.ownCustomisations ?? [];
+  const addons = service?.addons ?? [];
+
+  // colour alone isn't worth a "Make it yours" step, so braids offer it only beside other choices
+  const hasChoices = !!(
+    size.length ||
+    length.length ||
+    own.length ||
+    addons.length
+  );
 
   return {
-    size: customisations ? getOnOptions(customisations.size) : [],
-    length: customisations ? getOnOptions(customisations.length) : [],
-    colour: getGroupId(service) === "braids",
-    own: service?.ownCustomisations ?? [],
-    addons: service?.addons ?? [],
+    size,
+    length,
+    colour: hasChoices && getGroupId(service) === "braids",
+    own,
+    addons,
   };
 };
 
 export const hasStep2 = (service: Service): boolean => {
-  const { size, length, colour, own, addons } = getServiceOptions(service);
+  const { size, length, own, addons } = getServiceOptions(service);
 
-  return !!(
-    size.length ||
-    length.length ||
-    colour ||
-    own.length ||
-    addons.length
-  );
+  return !!(size.length || length.length || own.length || addons.length);
 };
 
 const getLowestDelta = (options: CustomisationOption[]): number =>

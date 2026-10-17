@@ -14,6 +14,9 @@ export interface CheckoutQuote {
 export const savesCard = (mode: CheckoutQuote["mode"]) =>
   mode === "deposit" || mode === "card";
 
+/** Deposit and full payments go to the stylist's Stripe account; the other modes only take the booking fee. */
+export const paysStylist = (mode: CheckoutQuote["mode"]) => mode === "deposit" || mode === "full";
+
 export const getPaymentParams = (
   quote: CheckoutQuote,
   customerId: string | null,
@@ -27,7 +30,7 @@ export const getPaymentParams = (
   metadata: { booking_id: quote.id, booking_ref: quote.ref },
   ...(customerId ? { customer: customerId } : {}),
   ...(savesCard(quote.mode) || keepCard ? { setup_future_usage: "off_session" } : {}),
-  ...(quote.mode === "deposit" || quote.mode === "full"
+  ...(paysStylist(quote.mode)
     ? {
         application_fee_amount: quote.fee_pence,
         transfer_data: { destination: quote.stylist_account },

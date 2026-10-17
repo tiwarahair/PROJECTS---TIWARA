@@ -51,7 +51,6 @@ export const mockManageBookingApi = async (
   getManagedBooking: vi.fn(),
   getRescheduleSlots: vi.fn(() => Promise.resolve([])),
   rescheduleBooking: vi.fn(() => Promise.resolve()),
-  updateBookingAllergies: vi.fn(() => Promise.resolve()),
   sendBookingCode: vi.fn(() =>
     Promise.resolve({ email: "n•••@gmail.com", sent: true }),
   ),

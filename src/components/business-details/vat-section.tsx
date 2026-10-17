@@ -77,7 +77,7 @@ export const VatSection = ({
                 <CircleAlert
                   className={parts.errorIcon}
                   size={15}
-                  strokeWidth={1.5}
+                  strokeWidth={1.8}
                 />
                 {vatError}
               </div>

@@ -177,6 +177,14 @@ describe("BookingPage", () => {
     ).toBeInTheDocument();
   });
 
+  it("pay: a skeleton stands in for the card fields until Stripe has loaded them", async () => {
+    await renderBooking("fixture=pay");
+
+    expect(screen.getByTestId("payment-skeleton")).toBeInTheDocument();
+    await user.click(screen.getByTestId("payment-element"));
+    expect(screen.queryByTestId("payment-skeleton")).not.toBeInTheDocument();
+  });
+
   it("pay: Stripe's decline shows its message and keeps the hold", async () => {
     stripeStub.confirmPayment.mockResolvedValueOnce({
       error: { type: "card_error", message: "Your card was declined." },

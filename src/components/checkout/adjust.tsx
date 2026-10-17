@@ -137,7 +137,7 @@ export const AdjustPanel = ({ line, checkout }: AdjustPanelProps) => {
           <CircleAlert
             className={shared.iconTop2}
             size={15}
-            strokeWidth={1.5}
+            strokeWidth={1.8}
           />
           {error}
         </div>

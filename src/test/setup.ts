@@ -83,8 +83,12 @@ vi.mock("@stripe/react-stripe-js", async () => {
 
   return {
     Elements: ({ children }: { children: React.ReactNode }) => children,
-    PaymentElement: () =>
-      createElement("div", { "data-testid": "payment-element" }),
+    // clicking it stands in for Stripe finishing loading its fields
+    PaymentElement: ({ onReady }: { onReady?: () => void }) =>
+      createElement("button", {
+        "data-testid": "payment-element",
+        onClick: onReady,
+      }),
     ExpressCheckoutElement: () => null,
     useStripe: () => ({ confirmPayment: stripeStub.confirmPayment }),
     useElements: () => ({ submit: stripeStub.submit }),

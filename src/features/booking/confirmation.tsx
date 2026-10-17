@@ -72,7 +72,7 @@ export const BookingConfirmation = ({ booking }: BookingConfirmationProps) => {
         </div>
         <div className={styles.facts}>
           <span className={styles.fact}>
-            <Calendar size={15} strokeWidth={1.5} />
+            <Calendar size={15} strokeWidth={2} />
             {getWhenLine(
               state.calendarYear,
               state.calendarMonth,
@@ -84,7 +84,7 @@ export const BookingConfirmation = ({ booking }: BookingConfirmationProps) => {
             data-screen-label="Confirmation where"
             className={styles.whereFact}
           >
-            <MapPin size={15} strokeWidth={1.5} className={styles.whereIcon} />
+            <MapPin size={15} strokeWidth={2} className={styles.whereIcon} />
             <span className={styles.factLines}>
               <span>
                 {isMobile
@@ -104,7 +104,7 @@ export const BookingConfirmation = ({ booking }: BookingConfirmationProps) => {
             </span>
           </span>
           <span className={styles.fact}>
-            <Clock size={15} strokeWidth={1.5} />
+            <Clock size={15} strokeWidth={2} />
             <span className={styles.factLines}>
               <span>{`Paid today ${money.dueToday}`}</span>
               <span>
@@ -121,7 +121,7 @@ export const BookingConfirmation = ({ booking }: BookingConfirmationProps) => {
       </div>
       <div className={styles.inbox}>
         <div className={styles.inboxHead}>
-          <Mail size={18} strokeWidth={1.6} />
+          <Mail size={18} strokeWidth={2} />
           <span className={styles.eyebrow}>Manage it from your inbox</span>
         </div>
         <p className={styles.inboxText}>

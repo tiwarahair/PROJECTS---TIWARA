@@ -8,6 +8,7 @@ import { ContactSummary } from "./contact-summary";
 import fields from "../../styles/features/booking/fields.module.css";
 import step from "../../styles/features/booking/step.module.css";
 import { CheckBox } from "./step-customise";
+import { joinClassNames } from "../../utils/class-names";
 import styles from "../../styles/features/booking/step-details.module.css";
 import type { BookingController } from "./hooks/use-booking";
 
@@ -17,7 +18,7 @@ interface StepDetailsProps {
 
 const MAX_PHOTOS = 8;
 
-/** Step 4 (Your details): log-in line or booking-as card, mobile address, contact fields, allergies and photos. */
+/** Step 4 (Your details): log-in line or booking-as card, contact fields, mobile address (below the fields when they all show), then extra details: notes, allergies and photos. */
 export const StepDetails = ({ booking }: StepDetailsProps) => {
   const {
     state,
@@ -34,6 +35,9 @@ export const StepDetails = ({ booking }: StepDetailsProps) => {
   const { setState } = actions;
   const { loggedIn, allergy, photos } = state;
 
+  // the address section brings its own space below; the contact fields don't
+  const isAfterAddress = isMobileStylist && (showContactFields || !needsMobile);
+
   const setAllergy = (patch: Partial<AllergyState>) =>
     setState((current) => ({ allergy: { ...current.allergy, ...patch } }));
 
@@ -41,11 +45,26 @@ export const StepDetails = ({ booking }: StepDetailsProps) => {
     <>
       <h1 className={step.title}>Your details</h1>
       <ContactSummary booking={booking} />
-      {isMobileStylist && <AppointmentAddress booking={booking} />}
+      {isMobileStylist && !showContactFields && (
+        <AppointmentAddress booking={booking} />
+      )}
       {isMobileStylist && (showContactFields || needsMobile) && (
         <h2 className={fields.heading}>Your contact details</h2>
       )}
       <ContactFields booking={booking} />
+      {isMobileStylist && showContactFields && (
+        <div className={styles.addressBelow}>
+          <AppointmentAddress booking={booking} />
+        </div>
+      )}
+      <h2
+        className={joinClassNames(
+          fields.heading,
+          !isAfterAddress && styles.extraHeading,
+        )}
+      >
+        Extra details
+      </h2>
       <div className={fields.grid}>
         <label className={fields.fieldWide}>
           <span className={fields.label}>

@@ -1,7 +1,11 @@
 import { describe, expect, it } from "vitest";
 import { toPublicStylist } from "../../../../lib/public-stylist";
 import { getDemoProfile } from "../../../../test/demo-profile";
-import { findService, getServiceOptions } from "../../../../utils/services";
+import {
+  findService,
+  getServiceOptions,
+  hasStep2,
+} from "../../../../utils/services";
 import { toChoices } from "../choices";
 
 const { stylist } = toPublicStylist(getDemoProfile("tiwaras-house"));
@@ -43,5 +47,29 @@ describe("toChoices", () => {
       variations: [],
       addons: [],
     });
+  });
+});
+
+describe("the Make it yours step", () => {
+  if (!knotless) throw new Error("the demo profile has no Knotless braids");
+
+  const plainBraids = {
+    ...knotless,
+    customisations: null,
+    ownCustomisations: [],
+    addons: [],
+  };
+
+  it("is skipped for braids with nothing to choose but colour, and no colour is sent", () => {
+    expect(hasStep2(plainBraids)).toBe(false);
+    expect(getServiceOptions(plainBraids).colour).toBe(false);
+  });
+
+  it("offers colour on braids beside other choices", () => {
+    expect(hasStep2({ ...plainBraids, addons: knotless.addons })).toBe(true);
+
+    expect(
+      getServiceOptions({ ...plainBraids, addons: knotless.addons }).colour,
+    ).toBe(true);
   });
 });

@@ -1,5 +1,5 @@
 begin;
-select plan(38);
+select plan(37);
 
 insert into auth.users (id, instance_id, aud, role, email, raw_user_meta_data, raw_app_meta_data)
 values ('b1111111-1111-1111-1111-111111111111', '00000000-0000-0000-0000-000000000000', 'authenticated', 'authenticated',
@@ -164,23 +164,14 @@ select is(
   'booking_rescheduled,client_rescheduled', 'client and stylist are emailed the new time'
 );
 
-select throws_ok(
-  format('select public.update_booking_allergies(%L, %L, false)', (select deposit from b) ->> 'token', 'Latex'),
-  'consent_required', 'sharing allergies needs consent'
+select ok(
+  not (public.get_managed_booking((select deposit from b) ->> 'token') ? 'allergies'),
+  'the manage link never carries allergies'
 );
 
-select public.update_booking_allergies((select deposit from b) ->> 'token', '  Latex  ', true);
-
-select is(
-  (select allergies || ' ' || (allergies_consented_at is not null) from public.bookings where id = ((select deposit from b) ->> 'id')::uuid),
-  'Latex true', 'they''re saved with the time of consent'
-);
-
-select public.update_booking_allergies((select deposit from b) ->> 'token', '', false);
-
-select is(
-  (select coalesce(allergies, 'none') || ' ' || (allergies_consented_at is null) from public.bookings where id = ((select deposit from b) ->> 'id')::uuid),
-  'none true', 'removing them clears the consent too'
+select ok(
+  public.get_managed_booking((select deposit from b) ->> 'token') ?& array['notes', 'address_notes'],
+  'it carries the client''s notes instead'
 );
 
 select is(
@@ -226,7 +217,7 @@ select ok(
     and has_function_privilege('anon', 'public.reschedule_managed_booking(text, timestamptz)', 'execute')
     and not has_function_privilege('anon', 'public.cancel_managed_booking(text, jsonb)', 'execute')
     and not has_function_privilege('anon', 'public.get_booking_by_token(text)', 'execute'),
-  'browsers view, reschedule and edit allergies with the link; cancelling goes through the server'
+  'browsers view and reschedule with the link; cancelling goes through the server'
 );
 
 select * from finish();

@@ -8,7 +8,6 @@ import {
   rescheduleBooking,
   secureBookingLink,
   sendBookingCode,
-  updateBookingAllergies,
   verifyBookingCode,
 } from "../../../lib/manage-booking-api";
 import type { ManagedBooking } from "../../../lib/manage-booking-api";
@@ -50,7 +49,8 @@ const booking: ManagedBooking = {
     free_cancel_until: "2026-10-20T16:30:00Z",
     free_window_hours: 48,
   },
-  allergies: "Sensitive scalp",
+  notes: "Please use the side entrance",
+  address_notes: null,
   reschedule_count: 0,
   calendar_key: "cal-key",
   is_verified: true,
@@ -313,55 +313,28 @@ describe("the manage booking page", () => {
     );
   });
 
-  it("sharing allergies needs the consent tick", async () => {
+  it("shows the client's notes, never their allergies", async () => {
     renderPage();
-    await user.click(await screen.findByRole("button", { name: "Edit" }));
-    await user.type(screen.getByRole("textbox"), ", latex");
-    await user.click(screen.getByRole("button", { name: "Save" }));
 
-    expect(screen.getByRole("alert")).toHaveTextContent(
-      "Tick the box to share this with Tiwára's House.",
-    );
-
-    expect(updateBookingAllergies).not.toHaveBeenCalled();
-
-    await user.click(
-      screen.getByRole("checkbox", {
-        name: "Share this with Tiwára's House for this booking",
+    expect(
+      await screen.findByRole("heading", {
+        name: "Your notes for Tiwára's House",
       }),
-    );
+    ).toBeInTheDocument();
 
-    await user.click(screen.getByRole("button", { name: "Save" }));
+    expect(
+      screen.getByText("Please use the side entrance"),
+    ).toBeInTheDocument();
 
-    expect(updateBookingAllergies).toHaveBeenCalledWith({
-      token: "tok",
-      allergies: "Sensitive scalp, latex",
-      consent: true,
-    });
-
-    expect(await screen.findByText("Saved")).toBeInTheDocument();
+    expect(screen.queryByText(/allerg/i)).not.toBeInTheDocument();
   });
 
-  it("removing allergies asks first, without an old message from editing", async () => {
+  it("hides the notes section when there are no notes", async () => {
+    vi.mocked(getManagedBooking).mockResolvedValue({ ...booking, notes: null });
     renderPage();
-    await user.click(await screen.findByRole("button", { name: "Edit" }));
-    await user.click(screen.getByRole("button", { name: "Save" }));
-    await user.click(screen.getByRole("button", { name: "Cancel" }));
-    await user.click(await screen.findByRole("button", { name: "Remove" }));
 
-    const dialog = within(
-      screen.getByRole("alertdialog", { name: "Remove this?" }),
-    );
-
-    expect(dialog.queryByRole("alert")).not.toBeInTheDocument();
-
-    await user.click(dialog.getByRole("button", { name: "Remove" }));
-
-    expect(updateBookingAllergies).toHaveBeenCalledWith({
-      token: "tok",
-      allergies: "",
-      consent: false,
-    });
+    await screen.findByText("Booking ref TH-ABC123");
+    expect(screen.queryByText(/Your notes for/)).not.toBeInTheDocument();
   });
 
   it("a past appointment can't be changed", async () => {

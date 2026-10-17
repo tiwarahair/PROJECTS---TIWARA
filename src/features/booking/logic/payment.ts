@@ -8,6 +8,8 @@ export const PAY_ERRORS = {
   human: "We couldn't check this browser. Try again.",
   busy: "Too many tries. Wait a few minutes, then try again.",
   address: "We can't book this address. Check it on Your details.",
+  stylist:
+    "This stylist can't take payments online yet, so you haven't been charged. Try another stylist.",
   pending:
     "Your payment went through and we're confirming your booking. We'll email you as soon as it's done.",
 };
@@ -29,6 +31,9 @@ export const getCheckoutError = (code: string, time: string | null) => {
 
   if (code === "turnstile_failed")
     return { payKind: "network", payError: PAY_ERRORS.human };
+
+  if (code === "stylist_not_ready")
+    return { payKind: "network", payError: PAY_ERRORS.stylist };
 
   if (code === "rate_limited")
     return { payKind: "network", payError: PAY_ERRORS.busy };
@@ -74,6 +79,8 @@ export const getCheckoutRequest = (
 
 export const toPence = (pounds: number) => Math.round(pounds * 100);
 
+export const WALLET_BUTTON_HEIGHT = 48;
+
 export const getPaymentAppearance = (): Appearance => ({
   theme: "stripe",
   variables: {
@@ -84,10 +91,14 @@ export const getPaymentAppearance = (): Appearance => ({
     colorTextSecondary: "#7d7465",
     colorDanger: "#8f1112",
     colorBackground: "#fffefb",
-    borderRadius: "12px",
+    borderRadius: `${WALLET_BUTTON_HEIGHT / 2}px`,
   },
   rules: {
-    ".Input": { border: "1px solid #d4cbb9", boxShadow: "none" },
+    ".Input": {
+      border: "1px solid #d4cbb9",
+      boxShadow: "none",
+      borderRadius: "12px",
+    },
   },
 });
 

@@ -5,7 +5,7 @@ import fields from "../../styles/features/booking/fields.module.css";
 import styles from "../../styles/features/booking/details-field.module.css";
 
 export const ErrorIcon = () => (
-  <CircleAlert size={15} strokeWidth={1.5} className={fields.errorIcon} />
+  <CircleAlert size={15} strokeWidth={1.8} className={fields.errorIcon} />
 );
 
 interface FieldProps {

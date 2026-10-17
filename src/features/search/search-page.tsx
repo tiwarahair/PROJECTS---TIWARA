@@ -8,7 +8,6 @@ import { useSearchMemory } from "../../hooks/use-search-memory";
 import { DatePopover } from "./date-picker";
 import { FilterBar } from "./filter-bar";
 import { FiltersSheet } from "./filters-sheet";
-import { LocationPrompt } from "./location-prompt";
 import { MobileSearchSheet } from "./mobile-search-sheet";
 import pageGlobal from "../../styles/features/search/search-page-global.module.css";
 import { SearchNav } from "./search-nav";
@@ -68,7 +67,6 @@ export const SearchPage = () => {
       <FilterBar search={search} />
 
       <div className={styles.results}>
-        <LocationPrompt search={search} />
         <div className={styles.grid} aria-busy={search.isLoading}>
           {cards.map(({ key, name, ...card }, index) => (
             <div key={key} className={pageGlobal.rescard}>
