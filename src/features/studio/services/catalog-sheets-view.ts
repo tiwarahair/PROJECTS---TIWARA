@@ -1,6 +1,6 @@
 // The Manage categories and add-on sheets, and the category colour picker.
 import type { ChangeEvent } from "react";
-import type { SearchSelectOption } from "../../../components/search-select/search-select";
+import type { SearchSelectOption } from "../../../components/search-select";
 import { CATEGORY_COLOURS, NO_CATEGORY_TONE } from "../core/constants";
 import { parseNumber, parseWholeNumber } from "../core/format";
 import {

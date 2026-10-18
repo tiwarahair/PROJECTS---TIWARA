@@ -7,7 +7,7 @@ import { getAdjustNote } from "./view";
 import type { CheckoutViewModel } from "./view";
 import type { CheckoutController, CheckoutSheetProps } from "./use-checkout";
 import flow from "../../styles/components/checkout/flow.module.css";
-import shared from "../../styles/components/checkout/checkout-sheet.module.css";
+import shared from "../../styles/components/checkout/index.module.css";
 import { formatMoney } from "../../utils/money";
 
 export const CheckoutItems = ({

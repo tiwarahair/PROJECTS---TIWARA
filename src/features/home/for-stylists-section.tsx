@@ -1,8 +1,8 @@
-import { ResponsiveImage } from "../../components/responsive-image/responsive-image";
+import { ResponsiveImage } from "../../components/responsive-image";
 import { CtaArrowIcon } from "../../components/icons/custom-icons";
 import { Link } from "react-router";
 import { joinClassNames } from "../../utils/class-names";
-import page from "../../styles/features/home/home-page.module.css";
+import page from "../../styles/features/home/index.module.css";
 import styles from "../../styles/features/home/for-stylists-section.module.css";
 
 /** Remembers the list-your-business intent for Onboarding. */

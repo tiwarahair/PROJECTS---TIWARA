@@ -6,9 +6,9 @@ import {
   usePeekStylistsQuery,
   useSearchStylistsInfiniteQuery,
 } from "../../stores/api-slice";
-import { toResultCards } from "./search-cards";
-import { getPlace, getStyleSelection, toSearchArgs } from "./search-logic";
-import type { FilterDraft, SearchState } from "./search-state";
+import { toResultCards } from "./cards";
+import { getPlace, getStyleSelection, toSearchArgs } from "./logic";
+import type { FilterDraft, SearchState } from "./state";
 import { useCurrentPosition } from "./use-current-position";
 import type { PlaceSuggestions } from "./use-place-suggestions";
 

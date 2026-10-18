@@ -1,5 +1,5 @@
 import { X } from "lucide-react";
-import styles from "../../styles/features/search/search-nav.module.css";
+import styles from "../../styles/features/search/nav.module.css";
 
 interface ClearButtonProps {
   label: string;

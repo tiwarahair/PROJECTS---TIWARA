@@ -1,5 +1,5 @@
 import { Check, ChevronLeft, X } from "lucide-react";
-import { TaxDetailsForm } from "../../../../components/tax-details-form/tax-details-form";
+import { TaxDetailsForm } from "../../../../components/tax-details-form";
 import { joinClassNames } from "../../../../utils/class-names";
 import { getOverlayAnimation } from "../../shell/overlay";
 import type { StudioController } from "../../core/use-studio";

@@ -1,6 +1,6 @@
 import { useMemo, useState } from "react";
-import { PageMessage } from "../../components/page-message/page-message";
-import { SiteHeader } from "../../components/site-header/site-header";
+import { PageMessage } from "../../components/page-message";
+import { SiteHeader } from "../../components/site-header";
 import { MapsProvider } from "../../lib/google-maps";
 import { toPublicStylist } from "../../lib/public-stylist";
 import { useGetStylistProfileQuery } from "../../stores/api-slice";

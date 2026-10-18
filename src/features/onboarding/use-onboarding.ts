@@ -16,7 +16,7 @@ import type {
   OnboardingProps,
   OnboardingState,
   ResolvedProps,
-} from "./onboarding-state";
+} from "./state";
 
 /** What the submit and address hooks share with the main onboarding hook. */
 export interface OnboardingCore {

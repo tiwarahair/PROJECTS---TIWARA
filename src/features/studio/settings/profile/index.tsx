@@ -1,4 +1,4 @@
-import { ResponsiveImage } from "../../../../components/responsive-image/responsive-image";
+import { ResponsiveImage } from "../../../../components/responsive-image";
 import { useRef } from "react";
 import { Camera, Plus, X } from "lucide-react";
 import { Avatar } from "../../../../components/ds/avatar";

@@ -2,9 +2,9 @@ import type { KeyboardEvent } from "react";
 import { joinClassNames } from "../../utils/class-names";
 import { ArrowRight } from "lucide-react";
 import { AppleLogo, GoogleLogo } from "../../components/icons/brand-icons";
-import { CHOOSER_ICONS } from "./onboarding-data";
-import { OnboardingTurnstile } from "./onboarding-turnstile";
-import { PasswordInput, SubmitButton, TextField } from "./onboarding-fields";
+import { CHOOSER_ICONS } from "./data";
+import { OnboardingTurnstile } from "./turnstile";
+import { PasswordInput, SubmitButton, TextField } from "./fields";
 import type { ScreenProps } from "./screen-props";
 import styles from "../../styles/features/onboarding/auth-screens.module.css";
 

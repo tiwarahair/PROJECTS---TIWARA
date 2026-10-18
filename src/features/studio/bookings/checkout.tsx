@@ -3,7 +3,7 @@ import type {
   CheckoutView,
   MenuGroup,
 } from "../../../components/checkout/data";
-import { CheckoutSheet } from "../../../components/checkout/checkout-sheet";
+import { CheckoutSheet } from "../../../components/checkout";
 import type { CheckoutSheetProps } from "../../../components/checkout/use-checkout";
 import type { StudioController } from "../core/use-studio";
 import sheet from "../../../styles/features/studio/shell/sheet-frame.module.css";

@@ -3,7 +3,7 @@ import type { ChangeEvent } from "react";
 import type {
   TaxDetails,
   TaxFixture,
-} from "../../../../components/tax-details-form/tax-details-logic";
+} from "../../../../components/tax-details-form/logic";
 import { getQrCells } from "../../core/format";
 import type { StudioController } from "../../core/use-studio";
 

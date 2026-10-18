@@ -3,7 +3,7 @@ import { SOCIAL_ICONS, SocialIcon } from "../../components/icons/brand-icons";
 import { LinkIcon, Mail } from "lucide-react";
 import { joinClassNames } from "../../utils/class-names";
 import styles from "../../styles/features/stylist-profile/share-popover.module.css";
-import pageGlobal from "../../styles/features/stylist-profile/stylist-profile-page-global.module.css";
+import pageGlobal from "../../styles/features/stylist-profile/index-global.module.css";
 import type { SharePosition } from "./use-share-popover";
 
 interface SharePopoverProps {

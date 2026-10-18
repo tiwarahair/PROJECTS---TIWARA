@@ -1,4 +1,4 @@
-import type { OnboardingLayout } from "./onboarding-layout";
+import type { OnboardingLayout } from "./layout";
 import type { OnboardingController } from "./use-onboarding";
 
 /** Derived per-render values every screen reads (shown errors, canSubmit, turnstile). */

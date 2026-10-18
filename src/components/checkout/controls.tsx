@@ -1,6 +1,6 @@
 import type { ReactNode } from "react";
 import { joinClassNames } from "../../utils/class-names";
-import shared from "../../styles/components/checkout/checkout-sheet.module.css";
+import shared from "../../styles/components/checkout/index.module.css";
 
 export const Chip = ({
   isOn,

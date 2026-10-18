@@ -12,14 +12,10 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import type { TurnstileInstance } from "@marsidev/react-turnstile";
 import { useIdentity } from "../../hooks/use-identity";
 import { usePasswordChecker } from "../../hooks/use-password-checker";
-import { getStartState } from "./onboarding-start";
-import { getScreenSchema } from "./onboarding-screen-schemas";
-import { EMPTY_CODE, resolveProps } from "./onboarding-state";
-import type {
-  OnboardingForm,
-  OnboardingProps,
-  OnboardingState,
-} from "./onboarding-state";
+import { getStartState } from "./start";
+import { getScreenSchema } from "./screen-schemas";
+import { EMPTY_CODE, resolveProps } from "./state";
+import type { OnboardingForm, OnboardingProps, OnboardingState } from "./state";
 
 export type StatePatch =
   | Partial<OnboardingState>

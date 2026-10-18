@@ -1,0 +1,48 @@
+.tiles {
+  display: grid;
+  gap: 10px;
+}
+
+.tile {
+  background: #fff;
+  border-radius: var(--radius-md);
+  padding: 14px 16px;
+  box-shadow: var(--shadow-panel);
+  min-width: 0;
+}
+
+.tileLabel {
+  font-size: 13.5px;
+  color: var(--text-secondary);
+}
+
+.tileValue {
+  font-size: 22px;
+  letter-spacing: -0.01em;
+  font-variant-numeric: tabular-nums;
+  margin-top: 4px;
+  white-space: nowrap;
+}
+
+.tilesDesk {
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+}
+
+.tilesMobile {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.tileValueNormal {
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.tileValueNet {
+  font-weight: 700;
+  color: var(--text-primary);
+}
+
+.tileValueNegative {
+  font-weight: 600;
+  color: var(--accent-700);
+}

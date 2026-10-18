@@ -1,0 +1,72 @@
+.backBar {
+  position: sticky;
+  top: 0;
+  z-index: 5;
+  background: #fffefb;
+  box-shadow: var(--shadow-hairline, 0 1px 0 rgba(26, 23, 20, 0.08));
+  padding: 8px 10px;
+}
+
+.backRow {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.backButton {
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+  height: 38px;
+  padding: 0 14px 0 6px;
+  border: none;
+  background: none;
+  border-radius: var(--radius-full);
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.backButton:active {
+  transform: scale(0.96) !important;
+}
+
+.spacer {
+  flex: 1;
+}
+
+.save {
+  border: none;
+  background: var(--accent-700);
+  color: var(--neutral-100);
+  border-radius: var(--radius-full);
+  padding: 9px 22px;
+  font-size: 14.5px;
+  font-weight: 600;
+}
+
+.save:active {
+  transform: scale(0.96) !important;
+}
+
+.hostSave {
+  border: none;
+  border-radius: var(--radius-full);
+  padding: 9px 22px;
+  font-size: 14.5px;
+  font-weight: 600;
+  transition:
+    background-color 0.16s cubic-bezier(0.2, 0.8, 0.2, 1),
+    color 0.16s cubic-bezier(0.2, 0.8, 0.2, 1);
+  background: var(--neutral-200, #ece6db);
+  color: var(--neutral-600);
+}
+
+.hostSave:active {
+  transform: scale(0.96) !important;
+}
+
+.hostSaveOn {
+  background: var(--accent-700);
+  color: var(--neutral-100);
+}

@@ -1,6 +1,6 @@
 // Tax details from Studio: editing needs a recent app code; a save that needs one asks, then saves again.
 import { FunctionsHttpError } from "@supabase/supabase-js";
-import type { TaxDetails } from "../../../../components/tax-details-form/tax-details-logic";
+import type { TaxDetails } from "../../../../components/tax-details-form/logic";
 import { saveTaxDetails } from "../../../../lib/studio-api";
 import {
   hasRecentSecondFactor,

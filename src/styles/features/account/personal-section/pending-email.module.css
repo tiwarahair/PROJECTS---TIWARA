@@ -1,0 +1,47 @@
+.pending {
+  margin-top: 8px;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.pendingText {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  font-size: 13.5px;
+  line-height: 1.45;
+  color: #9a4518;
+  overflow-wrap: anywhere;
+}
+
+.pendingDot {
+  flex: none;
+  width: 7px;
+  height: 7px;
+  margin-top: 6px;
+  border-radius: var(--radius-full);
+  background: #b5541f;
+}
+
+.pendingActions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0 18px;
+  padding-left: 15px;
+}
+
+.linkButtonQuiet {
+  border: none;
+  background: none;
+  padding: 8px 0;
+  font: inherit;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  color: var(--text-primary);
+}
+
+.linkButtonQuiet:hover {
+  color: var(--accent-700) !important;
+}

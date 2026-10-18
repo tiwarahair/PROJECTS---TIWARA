@@ -1,5 +1,5 @@
 // Studio's reads and writes against Supabase (row shapes; studio-records converts them).
-import type { TaxDetails } from "../components/tax-details-form/tax-details-logic";
+import type { TaxDetails } from "../components/tax-details-form/logic";
 import type { Tables, TablesInsert, TablesUpdate } from "../types/database";
 import {
   UPLOAD_WIDTHS,

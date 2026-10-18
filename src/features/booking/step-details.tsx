@@ -1,6 +1,6 @@
 import { Plus, X } from "lucide-react";
 import type { CSSProperties } from "react";
-import { AllergyField } from "../../components/allergy-field/allergy-field";
+import { AllergyField } from "../../components/allergy-field";
 import { AppointmentAddress } from "./appointment-address";
 import type { AllergyState } from "./logic/types";
 import { ContactFields } from "./contact-fields";

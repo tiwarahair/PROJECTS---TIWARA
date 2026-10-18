@@ -1,0 +1,73 @@
+.question {
+  font-size: 14.5px;
+  font-weight: 600;
+  margin-bottom: 10px;
+  text-wrap: pretty;
+}
+
+.chips {
+  display: flex;
+  gap: 8px;
+}
+
+.chip {
+  height: 40px;
+  min-width: 76px;
+  padding: 0 18px;
+  border-radius: var(--radius-full);
+  font: inherit;
+  font-size: 14.5px;
+  font-weight: 600;
+  cursor: pointer;
+  transition:
+    background-color 0.16s cubic-bezier(0.2, 0.8, 0.2, 1),
+    color 0.16s;
+}
+
+.chip:active {
+  transform: scale(0.97) !important;
+}
+
+.nameFields {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  margin-top: 16px;
+  animation: txin 0.22s cubic-bezier(0.2, 0.8, 0.2, 1) both;
+}
+
+.hint {
+  font-size: 13.5px;
+  line-height: 1.45;
+  color: var(--neutral-600);
+}
+
+.chipOn {
+  border: 1px solid transparent;
+  background: #1a1714;
+  color: var(--neutral-100, #fdfbf5);
+}
+
+.chipOff {
+  border: 1px solid var(--border-strong, #d8d2c6);
+  background: transparent;
+  color: var(--text-primary);
+}
+
+/* keyframes are scoped per file in CSS modules, so shared ones are repeated */
+@keyframes txin {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .nameFields[data-tx-anim] {
+    animation: none !important;
+  }
+}

@@ -1,12 +1,12 @@
 import { useRef } from "react";
 import { StylistCardSkeleton } from "../../components/skeleton/stylist-card-skeleton";
-import { StylistCard } from "../../components/stylist-card/stylist-card";
+import { StylistCard } from "../../components/stylist-card";
 import { useIsSlow } from "../../hooks/use-is-slow";
 import { toPhotoUrl } from "../../lib/public-stylist";
 import { usePeekStylistsQuery } from "../../stores/api-slice";
 import { joinClassNames } from "../../utils/class-names";
 import { formatMoney } from "../../utils/money";
-import page from "../../styles/features/home/home-page.module.css";
+import page from "../../styles/features/home/index.module.css";
 import styles from "../../styles/features/home/stylists-section.module.css";
 import { useCentreSecondCard } from "./use-centre-second-card";
 

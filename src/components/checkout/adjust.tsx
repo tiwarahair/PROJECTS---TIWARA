@@ -9,7 +9,7 @@ import { getAdjustDelta, getAdjustSchema } from "./schemas";
 import type { AdjustValues } from "./schemas";
 import type { CheckoutController } from "./use-checkout";
 import flow from "../../styles/components/checkout/flow.module.css";
-import shared from "../../styles/components/checkout/checkout-sheet.module.css";
+import shared from "../../styles/components/checkout/index.module.css";
 
 interface AdjustPanelProps {
   line: CheckoutLine;

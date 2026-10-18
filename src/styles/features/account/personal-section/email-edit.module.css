@@ -1,0 +1,19 @@
+.emailEdit {
+  max-width: 420px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.currentLabel {
+  font-size: 13.5px;
+  font-weight: 600;
+  color: var(--neutral-600);
+}
+
+.currentValue {
+  margin-top: 2px;
+  font-size: 15px;
+  line-height: 1.5;
+  overflow-wrap: anywhere;
+}

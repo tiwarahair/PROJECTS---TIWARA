@@ -1,4 +1,4 @@
-import type { TaxDetails } from "../../../../components/tax-details-form/tax-details-logic";
+import type { TaxDetails } from "../../../../components/tax-details-form/logic";
 import type { OwnOption } from "../types";
 
 export const WRONG_CODE =

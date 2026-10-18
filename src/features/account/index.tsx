@@ -1,8 +1,8 @@
 import { ArrowLeft, Check } from "lucide-react";
 import { useLayoutEffect } from "react";
 import { Link } from "react-router";
-import { FavHost } from "../../components/fav-host/fav-host";
-import { SiteHeader } from "../../components/site-header/site-header";
+import { FavHost } from "../../components/fav-host";
+import { SiteHeader } from "../../components/site-header";
 import { useAppSelector } from "../../stores/hooks";
 import { joinClassNames } from "../../utils/class-names";
 import { AccountDialogs } from "./dialogs";

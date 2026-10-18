@@ -1,5 +1,5 @@
 import { useCallback } from "react";
-import { MODE_KEY, STORAGE_KEY } from "./onboarding-data";
+import { MODE_KEY, STORAGE_KEY } from "./data";
 import type { OnboardingBase } from "./use-base";
 
 export const useOnboardingStorage = ({

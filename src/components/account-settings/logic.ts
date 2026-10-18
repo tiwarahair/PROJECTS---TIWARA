@@ -11,7 +11,7 @@ import {
   TriangleAlert,
 } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
-import type { TaxDetails } from "../tax-details-form/tax-details-logic";
+import type { TaxDetails } from "../tax-details-form/logic";
 
 export type SettingsPage =
   "personal" | "security" | "notifications" | "payouts" | "calendar";

@@ -5,7 +5,7 @@ import {
   getScreenPath,
   isScreenOnRoute,
   ROUTE_START,
-} from "./onboarding-routes";
+} from "./routes";
 import type { useOnboarding } from "./use-onboarding";
 
 /**

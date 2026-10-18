@@ -2,7 +2,7 @@ import { Check, ChevronDown, Settings2 } from "lucide-react";
 import Skeleton from "react-loading-skeleton";
 import type { CSSProperties } from "react";
 import { joinClassNames } from "../../utils/class-names";
-import controls from "../../styles/features/search/search-controls.module.css";
+import controls from "../../styles/features/search/controls.module.css";
 import {
   formatMaxPrice,
   getPriceFill,
@@ -10,9 +10,9 @@ import {
   toggleVenue,
   toMaxPrice,
   VENUES,
-} from "./search-filters";
-import { RADII } from "./search-state";
-import pageGlobal from "../../styles/features/search/search-page-global.module.css";
+} from "./filters";
+import { RADII } from "./state";
+import pageGlobal from "../../styles/features/search/index-global.module.css";
 import styles from "../../styles/features/search/filter-bar.module.css";
 import type { SearchController } from "./use-search";
 

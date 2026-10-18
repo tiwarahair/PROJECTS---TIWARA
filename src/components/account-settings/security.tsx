@@ -1,5 +1,5 @@
 import { joinClassNames } from "../../utils/class-names";
-import { PasswordMeter } from "../password-meter/password-meter";
+import { PasswordMeter } from "../password-meter";
 import type { AccountSettingsProps } from "./use-account-settings";
 import type { AccountSettingsController } from "./use-account-settings";
 import { CheckRow, SettingsSection } from "./fields";

@@ -1,5 +1,5 @@
 import { Link } from "react-router";
-import { PageMessage } from "../../components/page-message/page-message";
+import { PageMessage } from "../../components/page-message";
 import {
   getErrorMessage,
   useSecureBookingLinkMutation,
