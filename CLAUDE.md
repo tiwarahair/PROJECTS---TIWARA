@@ -22,10 +22,10 @@ React 19.x and TypeScript 5.9, Redux Tool Kit etc.
 - Keep variable naming consistent
   - opt for 'getName' instead of 'nameOf'
 - Code should avoid the use of the reduce javascript method
-- Update or add tests when behavior changes
+- add tests for core behaviour expectations and edge cases/bugs found
 - Don't write comments unless they're needed for clarification (logic a reader couldn't follow without one); never restate what the code already says
 - Files should not be too long
-- Destructure objects where you can without errors & destructure map object arguments where you can
+- Destructure objects and function/callback arguments (including `map`/`filter` callbacks) wherever it reads cleanly; skip it when it would mean renaming many fields or nesting deeply
 - Prefer arrow functions
 
 - Do not commit to main
@@ -89,7 +89,6 @@ export function Button({ label, onClick, variant = "primary" }: ButtonProps) {
 
 - Use Vitest + React Testing Library + Playwright
 - Test behavior, not implementation — query by role, text, or test ID
-- Every component should have at least a smoke test (renders without crashing)
 - Place test utilities in `src/test`
 - Put tests in a `__tests__` folder inside the folder of the code they cover, e.g. `src/features/home/__tests__/home-page.test.tsx`
 
