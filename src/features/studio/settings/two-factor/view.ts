@@ -12,6 +12,7 @@ const DEMO_KEY = "JBSWY3DPEHPK3PXPK4ZX";
 const CODE_REASONS: Record<string, string> = {
   stripe: "continue to Stripe",
   policy: "save your payment policy",
+  refund: "make this refund",
 };
 
 export const getTwoFactorView = (studio: StudioController) => {

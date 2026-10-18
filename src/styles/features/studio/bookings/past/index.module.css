@@ -136,6 +136,16 @@
   transform: scale(0.97) !important;
 }
 
+.whiteButton:disabled {
+  color: var(--text-secondary);
+  opacity: 0.6;
+  cursor: default;
+}
+
+.whiteButton:disabled:active {
+  transform: none !important;
+}
+
 .waive {
   flex: 1 1 100%;
   height: 44px;

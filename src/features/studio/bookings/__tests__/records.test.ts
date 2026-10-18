@@ -32,6 +32,7 @@ const getRow = (patch: Partial<StudioBookingRow>): StudioBookingRow => ({
   overlap_ok: false,
   booking_fees: [],
   refunds: [],
+  payment_links: [],
   ...patch,
 });
 
@@ -50,7 +51,7 @@ describe("toStudioBookings", () => {
       price: 65,
       status: "confirmed",
       paid: "deposit",
-      grace: 15,
+      agreedPolicy: expect.objectContaining({ mode: "deposit", grace: 15 }),
       freeCancelUntil: "2026-10-18T10:00:00+00:00",
       overlapOk: false,
     });

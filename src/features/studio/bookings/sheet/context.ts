@@ -125,7 +125,7 @@ export const getContext = (studio: StudioController) => {
     // a real booking keeps the deadline agreed when it was made
     isLate: booking.freeCancelUntil
       ? Date.now() >= Date.parse(booking.freeCancelUntil)
-      : hoursToStart < state.policy.window,
+      : hoursToStart < (booking.agreedPolicy ?? state.policy).window,
     lateFee: getPolicyFee(state, "late", booking),
     noShowFee: getPolicyFee(state, "noShow", booking),
     paymentMode: getPaymentMode(booking),

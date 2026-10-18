@@ -205,10 +205,18 @@ export const decorateBooking = (
   const canArrive =
     isPre && booking.dayOffset === 0 && startMinutes - nowMinutes <= 60;
 
-  const graceMinutes = booking.grace ?? (state.policy.grace || 0);
+  const policy = booking.agreedPolicy ?? state.policy;
+  const graceMinutes = policy.grace || 0;
   const graceEnd = startMinutes + graceMinutes;
-  const canNoShow = isPre && booking.dayOffset === 0 && nowMinutes >= graceEnd;
-  const depositAmount = Math.round(booking.price * state.policy.deposit) / 100;
+
+  // from the end of the grace period until a day after the start, as the server allows
+  const minutesSinceStart =
+    nowMinutes - startMinutes - booking.dayOffset * 1440;
+
+  const canNoShow =
+    isPre && minutesSinceStart >= graceMinutes && minutesSinceStart < 1440;
+
+  const depositAmount = Math.round(booking.price * policy.deposit) / 100;
 
   const paidAmounts: Record<string, number> = {
     full: booking.price,

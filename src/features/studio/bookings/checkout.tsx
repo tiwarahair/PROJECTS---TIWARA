@@ -17,7 +17,7 @@ export interface StudioCheckoutProps {
   refunded?: number;
   onExit: () => void;
   onComplete: NonNullable<CheckoutSheetProps["onComplete"]>;
-  onRefund?: (amount: number, reason: string) => void;
+  onRefund?: CheckoutSheetProps["onRefund"];
 }
 
 /** CheckoutSheet over a Studio sheet. */

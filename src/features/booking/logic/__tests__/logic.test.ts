@@ -115,4 +115,10 @@ describe("checkout errors", () => {
 
     expect(PAY_ERRORS.stylist).toContain("you haven't been charged");
   });
+
+  it("a client with an unpaid fee is told to pay it first", () => {
+    expect(getCheckoutError("unpaid_fee", null).payError).toBe(
+      PAY_ERRORS.unpaidFee,
+    );
+  });
 });

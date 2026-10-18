@@ -4,6 +4,7 @@ import type {
   ConfirmDialog,
   PastRecord,
   StudioClient,
+  StudioPolicy,
   StudioState,
 } from "../types";
 
@@ -73,9 +74,9 @@ interface PolicyFee {
 export const getPolicyFee = (
   state: StudioState,
   kind: "late" | "noShow",
-  booking: { price: number },
+  booking: { price: number; agreedPolicy?: StudioPolicy },
 ): PolicyFee => {
-  const policy = state.policy;
+  const policy = booking.agreedPolicy ?? state.policy;
   const mode = policy.mode || "none";
   const price = +booking.price || 0;
   const fee = policy[kind];
@@ -154,24 +155,28 @@ export const getWaiveConfirm = (
 
   if (!isFresh)
     return {
-      title: `Refund ${formatMoney(fee)} to ${first}’s card ending 4242?`,
+      title: `Refund ${formatMoney(fee)} to ${first}’s ${row.feeCard ?? "card ending 4242"}?`,
       body: "It usually takes 5–10 business days to arrive. The card fee isn’t returned.",
       yesLabel: `Refund ${formatMoney(fee)}`,
       yes: run,
     };
 
   const mode = policy.mode;
+  const back = row.feeWaiveRefund;
 
   const getBody = () => {
+    if (back != null)
+      return back > 0
+        ? `${first} won’t be charged for it and gets ${formatMoney(back)} back.`
+        : `${first} won’t be charged for it.`;
+
     if (mode === "deposit")
-      return policy.refundable
-        ? `Her ${formatMoney(deposit)} deposit will be refunded and she won’t be charged anything else.`
-        : `She won’t be charged the extra ${formatMoney(Math.max(0, fee - deposit))}. Her ${formatMoney(deposit)} deposit is non-refundable and will be kept.`;
+      return `${first}’s ${formatMoney(deposit)} deposit will be refunded and they won’t be charged anything else.`;
 
     if (mode === "full")
-      return `The ${formatMoney(fee)} will be refunded to her card.`;
+      return `The ${formatMoney(fee)} will be refunded to ${first}’s card.`;
 
-    return "She won’t be charged.";
+    return `${first} won’t be charged.`;
   };
 
   const body = getBody();

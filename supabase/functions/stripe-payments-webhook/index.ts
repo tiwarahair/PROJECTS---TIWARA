@@ -1,7 +1,7 @@
 import Stripe from "npm:stripe@22.6.2";
 import { stripe } from "../_shared/stripe.ts";
 import { isHandled, markHandled } from "../_shared/stripe-events.ts";
-import { onPaymentFailed, onPaymentSucceeded } from "./handlers.ts";
+import { onDispute, onPaymentFailed, onPaymentSucceeded, onRefundCreated } from "./handlers.ts";
 
 const cryptoProvider = Stripe.createSubtleCryptoProvider();
 
@@ -26,6 +26,10 @@ Deno.serve(async (request) => {
     if (event.type === "payment_intent.succeeded") await onPaymentSucceeded(event.data.object);
 
     if (event.type === "payment_intent.payment_failed") await onPaymentFailed(event.data.object);
+
+    if (event.type === "refund.created") await onRefundCreated(event.data.object);
+
+    if (event.type.startsWith("charge.dispute.")) await onDispute(event.data.object as Stripe.Dispute);
   } catch (error) {
     console.error(event.type, "failed", error instanceof Error ? error.message : error);
 

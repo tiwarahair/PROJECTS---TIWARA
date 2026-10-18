@@ -30,17 +30,29 @@ export const getRefunded = ({ refunds }: StudioBookingRow) => {
   return total;
 };
 
-const getUnpaidFlags = (fee: FeeRow): Partial<PastRecord> => ({
+// the first email and two resends
+const MAX_LINK_SENDS = 3;
+
+type LinkRow = StudioBookingRow["payment_links"][number];
+
+const getUnpaidFlags = (
+  fee: FeeRow,
+  link: LinkRow | undefined,
+): Partial<PastRecord> => ({
   feeKept: true,
   feeUnpaid: true,
   feeTries: fee.hard_decline ? 0 : Math.max(0, MAX_TRIES - fee.tries),
   feeCharge: toPounds(fee.charge_pence),
   feeCard: fee.card_label ?? undefined,
-  meta: "Fee unpaid",
+  feeLinkResends: link ? Math.max(0, MAX_LINK_SENDS - link.sent_count) : 0,
+  meta: link ? "Fee link sent" : "Fee unpaid",
 });
 
-const getStatusFlags = (fee: FeeRow): Partial<PastRecord> => {
-  if (fee.status === "unpaid") return getUnpaidFlags(fee);
+const getStatusFlags = (
+  fee: FeeRow,
+  link: LinkRow | undefined,
+): Partial<PastRecord> => {
+  if (fee.status === "unpaid") return getUnpaidFlags(fee, link);
 
   if (fee.status === "pending" || fee.status === "charging")
     return { feeKept: true, feePending: true, meta: "Fee pending" };
@@ -54,17 +66,22 @@ const getStatusFlags = (fee: FeeRow): Partial<PastRecord> => {
 };
 
 /** Past's fee flags; nothing for a no-charge settlement, which only refunds. */
-export const getFeeFlags = (fee: FeeRow | undefined): Partial<PastRecord> => {
+export const getFeeFlags = (
+  fee: FeeRow | undefined,
+  link?: LinkRow,
+): Partial<PastRecord> => {
   if (!fee?.amount_pence) return {};
 
   const base = {
+    // waiving refunds what was kept from the payment too
+    feeWaiveRefund: toPounds(fee.kept_pence + fee.refund_pence),
     feeLabel: formatPence(fee.amount_pence),
     at: Date.parse(fee.created_at),
   };
 
   if (fee.waived_at) return { ...base, waived: true, meta: "Fee waived" };
 
-  return { ...base, ...getStatusFlags(fee) };
+  return { ...base, ...getStatusFlags(fee, link) };
 };
 
 /** "£30.00 refunded." now, or "£30.00 back to the client on settlement." while it waits. */

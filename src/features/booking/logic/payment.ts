@@ -10,6 +10,8 @@ export const PAY_ERRORS = {
   address: "We can't book this address. Check it on Your details.",
   stylist:
     "This stylist can't take payments online yet, so you haven't been charged. Try another stylist.",
+  unpaidFee:
+    "You have an unpaid fee with this stylist, so you haven't been charged. Pay it from the link we emailed you, then book again.",
   pending:
     "Your payment went through and we're confirming your booking. We'll email you as soon as it's done.",
 };
@@ -37,6 +39,9 @@ export const getCheckoutError = (code: string, time: string | null) => {
 
   if (code === "rate_limited")
     return { payKind: "network", payError: PAY_ERRORS.busy };
+
+  if (code === "unpaid_fee")
+    return { payKind: "network", payError: PAY_ERRORS.unpaidFee };
 
   return { payKind: "network", payError: PAY_ERRORS.network };
 };

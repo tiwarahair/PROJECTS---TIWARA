@@ -456,6 +456,15 @@ verify_jwt = false
 [functions.charge-fees]
 verify_jwt = false
 
+[functions.payment-link]
+verify_jwt = false
+
+[functions.send-transfers]
+verify_jwt = false
+
+[functions.studio-refund]
+verify_jwt = false
+
 # called by pg_cron with x-cron-secret, not a user's token
 [functions.purge-closed-businesses]
 verify_jwt = false

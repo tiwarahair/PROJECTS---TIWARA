@@ -347,7 +347,8 @@ const BOOKING_SELECT = `id, status, starts_at, minutes, price_pence, snapshot, c
   reschedule_count, cancelled_at, cancelled_by, cancellation, no_show_at, overlap_ok,
   booking_fees(id, kind, status, amount_pence, kept_pence, refund_pence, charge_pence, tries, hard_decline,
     decline_message, card_label, waived_at, created_at),
-  refunds(amount_pence)`;
+  refunds(amount_pence),
+  payment_links(status, sent_count)`;
 
 /** Studio's bookings from `fromDate` on (anything still being paid for is left out). */
 export const fetchStudioBookings = async (
@@ -415,6 +416,10 @@ export const recordFeePaid = (bookingId: string) =>
     }),
   );
 
+/** Emails the client a fresh link to pay the booking's unpaid fee (twice at most). */
+export const resendPaymentLink = (bookingId: string) =>
+  write(supabase.rpc("resend_payment_link", { target_booking: bookingId }));
+
 export interface FeeRetry {
   outcome: "paid" | "unpaid";
   declineMessage: string | null;
@@ -435,6 +440,31 @@ export const retryFee = async (bookingId: string) => {
   notifyStudioWrite();
 
   return data;
+};
+
+export class SecondFactorNeeded extends Error {}
+
+/** A discretionary refund from Studio (needs a 2FA code from the last 30 days); returns the pence refunded. */
+export const refundBookingPayment = async (
+  bookingId: string,
+  amountPence: number,
+  reason: string,
+) => {
+  const { data, error } = await supabase.functions.invoke<{
+    refunded_pence: number;
+  }>("studio-refund", { body: { bookingId, amountPence, reason } });
+
+  if (error instanceof FunctionsHttpError && error.context.status === 403)
+    throw new SecondFactorNeeded();
+
+  if (error instanceof FunctionsHttpError && error.context.status === 409)
+    throw new SaveError("That’s more than can be refunded.");
+
+  if (error || !data) throw error ?? new Error("refund failed");
+
+  notifyStudioWrite();
+
+  return data.refunded_pence;
 };
 
 export interface StudioCancel {

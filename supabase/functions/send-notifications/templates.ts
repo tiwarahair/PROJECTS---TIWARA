@@ -14,8 +14,8 @@ import {
   clientRescheduled,
 } from "./change-emails.ts";
 import type { ChangedBooking } from "./change-emails.ts";
-import { feeScheduled, feeWaived } from "./fee-emails.ts";
-import type { ScheduledFee, WaivedFee } from "./fee-emails.ts";
+import { disputeOpened, feeDeclined, feeScheduled, feeUnpaid, feeWaived } from "./fee-emails.ts";
+import type { DeclinedFee, DisputeNotice, ScheduledFee, UnpaidFeeNotice, WaivedFee } from "./fee-emails.ts";
 
 type TemplateBuilder = (payload: Record<string, unknown>) => RenderedEmail;
 
@@ -93,6 +93,9 @@ const templates: Record<string, TemplateBuilder> = {
   booking_link_reset: (payload) => bookingLinkReset(payload as unknown as Parameters<typeof bookingLinkReset>[0]),
   fee_scheduled: (payload) => feeScheduled(payload as unknown as ScheduledFee),
   fee_waived: (payload) => feeWaived(payload as unknown as WaivedFee),
+  fee_declined: (payload) => feeDeclined(payload as unknown as DeclinedFee),
+  fee_failed: (payload) => feeUnpaid(payload as unknown as UnpaidFeeNotice),
+  dispute_opened: (payload) => disputeOpened(payload as unknown as DisputeNotice),
   client_rescheduled: (payload) => clientRescheduled(payload as unknown as Parameters<typeof clientRescheduled>[0]),
 };
 

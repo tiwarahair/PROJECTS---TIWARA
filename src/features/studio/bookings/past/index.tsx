@@ -117,8 +117,12 @@ export const PastSheetBody = ({ view }: { view: PastSheetView }) => (
               {view.feeUnpaidRetryLabel}
             </button>
           )}
-          <button className={styles.whiteButton} onClick={view.feeUnpaidLink}>
-            Send payment link
+          <button
+            className={styles.whiteButton}
+            onClick={view.feeUnpaidLink}
+            disabled={view.isFeeUnpaidLinkOff}
+          >
+            {view.feeUnpaidLinkLabel}
           </button>
           <button className={styles.whiteButton} onClick={view.feeUnpaidRecord}>
             Record as paid

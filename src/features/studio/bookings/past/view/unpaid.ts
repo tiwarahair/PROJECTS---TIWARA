@@ -1,13 +1,25 @@
 import {
   recordFeePaid,
+  resendPaymentLink,
   retryFee,
   waiveFee,
 } from "../../../../../lib/studio-api";
 import { SaveError } from "../../../../../lib/studio-writes";
 import { getWaiveConfirm } from "../../../core/model";
-import { roundToPence } from "../../../../../utils/money";
+import { formatMoney, roundToPence } from "../../../../../utils/money";
 import { DAY_MS, RECORDED_ONLY } from "./context";
+import type { PastRecord } from "../../../core/types";
 import type { PastContext } from "./context";
+
+/** Demo rows send a link; a real fee was emailed one already, which can be resent twice. */
+const getLinkLabel = ({
+  remoteId,
+  feeLinkResends: resends = 0,
+}: PastRecord) => {
+  if (!remoteId) return "Send payment link";
+
+  return resends ? `Resend link (${resends} left)` : "No resends left";
+};
 
 export const getUnpaidView = ({
   studio,
@@ -36,6 +48,8 @@ export const getUnpaidView = ({
     ) ||
       feeNumber);
 
+  const amount = formatMoney(extra, { pence: "always" });
+
   const collected = (meta: string) => ({
     feeUnpaid: false,
     feePending: false,
@@ -47,7 +61,7 @@ export const getUnpaidView = ({
   const chargeDemo = () => {
     if ((studio.props.cardDeclines || "none") !== "none")
       settle({ feeTries: tries - 1 }, "Card declined again");
-    else settle(collected("Fee collected"), `£${extra} charged`);
+    else settle(collected("Fee collected"), `${amount} charged`);
   };
 
   const chargeAgain = async (bookingId: string) => {
@@ -57,7 +71,7 @@ export const getUnpaidView = ({
       const { outcome } = await retryFee(bookingId);
 
       if (outcome === "paid")
-        settle(collected("Fee paid"), `£${extra} charged`);
+        settle(collected("Fee paid"), `${amount} charged`);
       else settle({ feeTries: tries - 1 }, "Card declined again");
     } catch (error) {
       actions.showToast(
@@ -73,18 +87,18 @@ export const getUnpaidView = ({
     feeUnpaidTitle: row.remoteId
       ? "Card declined"
       : "Card declined: insufficient funds",
-    feeUnpaidBody: `£${extra} of ${unpaidFirst}’s ${row.feeLabel} fee couldn’t be charged to ${card}.`,
+    feeUnpaidBody: `${amount} of ${unpaidFirst}’s ${row.feeLabel} fee couldn’t be charged to ${card}.`,
     feeUnpaidRetryShown: tries > 0,
     feeUnpaidRetryLabel: `Retry card (${tries} of 2 left)`,
     feeUnpaidRetry: () =>
       setState({
         confirm: {
-          title: `Charge £${extra} to ${unpaidFirst}’s ${card}?`,
+          title: `Charge ${amount} to ${unpaidFirst}’s ${card}?`,
           body:
             tries === 1
               ? "This uses your last retry. If it’s declined again, send a payment link or record the payment instead."
               : `You have ${tries} retries left.`,
-          yesLabel: `Charge £${extra}`,
+          yesLabel: `Charge ${amount}`,
           yes: () => {
             const { remoteId } = row;
 
@@ -93,14 +107,23 @@ export const getUnpaidView = ({
           },
         },
       }),
+    feeUnpaidLinkLabel: getLinkLabel(row),
+    isFeeUnpaidLinkOff: !!row.remoteId && !row.feeLinkResends,
     feeUnpaidLink: () => {
-      patch({ meta: "Fee link sent" });
-      actions.showToast(`Payment link for £${extra} sent to ${unpaidFirst}`);
+      const resends = row.feeLinkResends ?? 1;
+
+      if (row.remoteId && !resends) return;
+
+      const previous = state.pastNew;
+
+      patch({ meta: "Fee link sent", feeLinkResends: resends - 1 });
+      actions.showToast(`Payment link for ${amount} sent to ${unpaidFirst}`);
+      saveFee(resendPaymentLink, previous);
     },
     feeUnpaidRecord: () =>
       setState({
         confirm: {
-          title: `Record £${extra} as paid?`,
+          title: `Record ${amount} as paid?`,
           body: RECORDED_ONLY,
           yesLabel: "Record as paid",
           yes: () => {

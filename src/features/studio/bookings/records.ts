@@ -13,7 +13,13 @@ import {
   toPounds,
 } from "./fee-records";
 import { dateLabel } from "../core/format";
-import type { PastRecord, StudioBooking, StudioClient } from "../core/types";
+import type {
+  PastRecord,
+  StudioBooking,
+  StudioClient,
+  StudioPolicy,
+} from "../core/types";
+import { toFeeKind, toPolicyMode } from "../settings/records";
 
 const UPCOMING_STATUSES: Record<string, string> = {
   awaiting_confirmation: "awaiting",
@@ -52,7 +58,7 @@ const getText = (value: unknown, key: string) => {
   return typeof entry === "string" ? entry : "";
 };
 
-const getPence = (value: unknown, key: string) => {
+const getNumber = (value: unknown, key: string) => {
   const entry = isRecord(value) ? value[key] : undefined;
 
   return typeof entry === "number" ? entry : 0;
@@ -83,17 +89,37 @@ export const toStartsAt = (dayOffset: number, time: string) =>
 export const toDayOffset = (startsAt: string) =>
   toOffset(toLondonTime(startsAt).date);
 
+const toAgreedFee = (terms: Record<string, unknown>, prefix: string) => ({
+  on: terms[`${prefix}_on`] === true,
+  kind: toFeeKind(getText(terms, `${prefix}_kind`)),
+  percent: getNumber(terms, `${prefix}_percent`),
+});
+
+/** The policy as agreed when the client booked, which fees and deadlines follow. */
+const toAgreedPolicy = (terms: unknown): StudioPolicy | undefined =>
+  isRecord(terms)
+    ? {
+        mode: toPolicyMode(getText(terms, "mode")),
+        deposit: getNumber(terms, "deposit_percent"),
+        refundable: terms.refundable === true,
+        window: getNumber(terms, "free_window_hours"),
+        grace: getNumber(terms, "grace_minutes"),
+        late: toAgreedFee(terms, "late"),
+        noShow: toAgreedFee(terms, "no_show"),
+        extras: [],
+      }
+    : undefined;
+
 export const toStudioBooking = (row: StudioBookingRow): StudioBooking => {
   const { time } = toLondonTime(row.starts_at);
   const mode = getText(row.terms, "mode");
-  const grace = isRecord(row.terms) ? row.terms.grace_minutes : undefined;
 
   return {
     id: getLocalId(row.id),
     remoteId: row.id,
     startsAt: row.starts_at,
     overlapOk: row.overlap_ok,
-    grace: typeof grace === "number" ? grace : undefined,
+    agreedPolicy: toAgreedPolicy(row.terms),
     freeCancelUntil: getText(row.terms, "free_cancel_until") || undefined,
     dayOffset: toDayOffset(row.starts_at),
     time,
@@ -130,7 +156,7 @@ export const toPastRecord = (row: StudioBookingRow): PastRecord => {
   const getMeta = () => {
     if (refunded) return "Refunded";
 
-    return getPence(row.cancellation, "kept_pence")
+    return getNumber(row.cancellation, "kept_pence")
       ? "Deposit kept"
       : "No charge";
   };
@@ -161,7 +187,10 @@ export const toPastRecord = (row: StudioBookingRow): PastRecord => {
           original: { ...booking, status: "confirmed" },
         }
       : {}),
-    ...getFeeFlags(fee),
+    ...getFeeFlags(
+      fee,
+      row.payment_links.find(({ status }) => status === "pending"),
+    ),
   };
 };
 

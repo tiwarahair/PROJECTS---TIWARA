@@ -1,3 +1,5 @@
+import type { StudioPolicy } from "./settings";
+
 export interface BookingAddon {
   addonId?: string;
   id?: string;
@@ -12,7 +14,8 @@ export interface StudioBooking {
   remoteId?: string;
   startsAt?: string;
   overlapOk?: boolean;
-  grace?: number;
+  /** The policy agreed at booking; demo bookings follow the current one. */
+  agreedPolicy?: StudioPolicy;
   freeCancelUntil?: string;
   dayOffset: number;
   time: string;
@@ -63,6 +66,9 @@ export interface PastRecord {
   remoteId?: string;
   feeCharge?: number;
   feeCard?: string;
+  feeLinkResends?: number;
+  /** What a real client gets back if the fee is waived. */
+  feeWaiveRefund?: number;
   client: string | null;
   service: string;
   price: number;

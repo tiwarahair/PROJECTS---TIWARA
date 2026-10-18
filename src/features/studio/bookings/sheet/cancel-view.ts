@@ -18,7 +18,9 @@ const getCancelCopy = (
       toast: `Cancelled. ${lateFee.label} fee pending`,
     };
 
-  if (state.policy.mode === "card" || state.policy.mode === "none")
+  const { mode } = booking.agreedPolicy ?? state.policy;
+
+  if (mode === "card" || mode === "none")
     return { meta: "No charge", noteTail: "", toast: "Booking cancelled" };
 
   return {
@@ -31,8 +33,8 @@ const getCancelCopy = (
 const getCancelBody = ({ state, booking, isLate, lateFee }: SheetContext) => {
   const { firstName } = booking;
 
-  const windowText =
-    state.policy.window < 1 ? "30-minute" : `${state.policy.window}-hour`;
+  const { window } = booking.agreedPolicy ?? state.policy;
+  const windowText = window < 1 ? "30-minute" : `${window}-hour`;
 
   if (state.cancelWho === "me")
     return `Cancelling refunds ${firstName} in full, including the booking fee, and frees the slot for online booking.`;

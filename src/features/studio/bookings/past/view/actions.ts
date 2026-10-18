@@ -18,7 +18,8 @@ const getUndo = ({
 }: PastContext) => {
   const { original } = row;
 
-  if (!isFresh || row.status !== "No show" || !original)
+  // a settled fee can't be undone, so neither can the no-show
+  if (!isFresh || row.status !== "No show" || !original || row.feeUnpaid)
     return { action: null, actionLabel: "", actionHint: "" };
 
   return {

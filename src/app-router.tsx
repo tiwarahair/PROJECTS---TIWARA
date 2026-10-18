@@ -41,6 +41,13 @@ const appRoutes: RouteObject[] = [
       })),
   },
   {
+    path: "/pay",
+    lazy: () =>
+      import("./features/pay-fee").then(({ PayFeePage }) => ({
+        Component: PayFeePage,
+      })),
+  },
+  {
     path: "/save-details",
     lazy: () =>
       import("./features/save-details").then(({ SaveDetailsPage }) => ({

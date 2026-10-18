@@ -87,3 +87,61 @@ export const feeWaived = ({
     ],
     footnote: "Questions? Reply to this email.",
   });
+
+export interface DeclinedFee extends BookingDetails {
+  kind: FeeKind;
+  fee_pence: number;
+  amount_pence: number;
+  card_label: string | null;
+  expires_at: string;
+  pay_url: string;
+}
+
+export const feeDeclined = (fee: DeclinedFee): RenderedEmail =>
+  renderNotice({
+    title: `Pay your ${pounds(fee.amount_pence)} ${FEE_NAMES[fee.kind]}`,
+    paragraphs: [
+      `We couldn’t charge ${fee.card_label ?? "your saved card"} for the ${FEE_NAMES[fee.kind]} from ${fee.service_name} with ${fee.stylist_name} on ${formatWhen(fee.starts_at)} (UK time).`,
+      `Please pay the ${pounds(fee.amount_pence)} left with the button below. You can use any card.`,
+      `You can’t book with ${fee.stylist_name} again until it’s paid.`,
+      `Booking reference: ${fee.ref}`,
+    ],
+    button: { label: `Pay ${pounds(fee.amount_pence)}`, url: fee.pay_url },
+    footnote: `The link works until ${formatWhen(fee.expires_at)}. Questions about this fee? Reply to this email.`,
+  });
+
+export interface UnpaidFeeNotice extends BookingDetails {
+  kind: FeeKind;
+  amount_pence: number;
+  card_label: string | null;
+  studio_url: string;
+}
+
+export const feeUnpaid = (fee: UnpaidFeeNotice): RenderedEmail =>
+  renderNotice({
+    title: `Fee unpaid: ${fee.client_name}`,
+    paragraphs: [
+      `${fee.client_name}’s ${fee.card_label ?? "card"} was declined for the ${pounds(fee.amount_pence)} ${FEE_NAMES[fee.kind]} from ${fee.service_name} on ${formatWhen(fee.starts_at)} (UK time).`,
+      "We’ve emailed them a link to pay it. They can’t book with you again until it’s paid. You can retry the card, resend the link, record it as paid or waive it in Studio.",
+      `Booking reference: ${fee.ref}`,
+    ],
+    button: { label: "Open Studio", url: fee.studio_url },
+    footnote: "You can choose which booking emails and texts you get in Studio → Settings → Notifications.",
+  });
+
+export interface DisputeNotice extends BookingDetails {
+  amount_pence: number;
+  reason: string | null;
+}
+
+export const disputeOpened = (dispute: DisputeNotice): RenderedEmail =>
+  renderNotice({
+    title: `A payment is disputed: ${pounds(dispute.amount_pence)}`,
+    paragraphs: [
+      `${dispute.client_name} has asked their bank to reverse a ${pounds(dispute.amount_pence)} payment for ${dispute.service_name} on ${formatWhen(dispute.starts_at)} (UK time).`,
+      ...(dispute.reason ? [`The bank’s reason: ${dispute.reason.replaceAll("_", " ")}.`] : []),
+      "The money is held while the bank decides. We’ll be in touch if we need anything from you, like messages or photos from the appointment.",
+      `Booking reference: ${dispute.ref}`,
+    ],
+    footnote: "Questions? Reply to this email.",
+  });

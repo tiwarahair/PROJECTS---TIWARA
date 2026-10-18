@@ -10,7 +10,7 @@ import {
   clientRescheduled,
 } from "../change-emails";
 import type { ChangedBooking } from "../change-emails";
-import { feeScheduled, feeWaived } from "../fee-emails";
+import { disputeOpened, feeDeclined, feeScheduled, feeUnpaid, feeWaived } from "../fee-emails";
 import { renderSms } from "../sms";
 
 const booking: ChangedBooking = {
@@ -174,5 +174,41 @@ describe("fee emails", () => {
 
     expect(subject).toBe("Your £50.00 fee has been waived");
     expect(text).toContain("£30.00 is refunded to your card.");
+  });
+});
+
+describe("declined fee and dispute emails", () => {
+  it("give the client a link to pay what the card didn't cover", () => {
+    const { subject, text } = feeDeclined({
+      ...booking,
+      kind: "no_show",
+      fee_pence: 5000,
+      amount_pence: 2000,
+      card_label: "Visa •••• 4242",
+      expires_at: "2026-10-30T16:30:00Z",
+      pay_url: "https://dev.tiwarashouse.com/pay?token=abc",
+    });
+
+    expect(subject).toBe("Pay your £20.00 no-show fee");
+    expect(text).toContain("We couldn’t charge Visa •••• 4242");
+    expect(text).toContain("Pay £20.00: https://dev.tiwarashouse.com/pay?token=abc");
+  });
+
+  it("tell the stylist the fee is unpaid and what they can do", () => {
+    const { text } = feeUnpaid({
+      ...booking,
+      kind: "late_cancel",
+      amount_pence: 2000,
+      card_label: null,
+      studio_url: "https://dev.tiwarashouse.com/studio",
+    });
+
+    expect(text).toContain("Nia Okafor’s card was declined for the £20.00 late cancellation fee");
+  });
+
+  it("tell the stylist about a dispute", () => {
+    expect(disputeOpened({ ...booking, amount_pence: 3163, reason: "product_not_received" }).text).toContain(
+      "The bank’s reason: product not received.",
+    );
   });
 });

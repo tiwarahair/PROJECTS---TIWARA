@@ -41,7 +41,18 @@ describe("getFeeFlags", () => {
       feeTries: 2,
       feeCharge: 20,
       feeCard: "Visa •••• 4242",
+      feeLinkResends: 0,
+      meta: "Fee unpaid",
     });
+  });
+
+  it("counts the link resends left", () => {
+    expect(
+      getFeeFlags(getFee({ status: "unpaid" }), {
+        status: "pending",
+        sent_count: 2,
+      }),
+    ).toMatchObject({ feeLinkResends: 1, meta: "Fee link sent" });
   });
 
   it("allows no retries after a hard decline", () => {

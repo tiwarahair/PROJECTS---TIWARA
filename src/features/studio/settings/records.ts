@@ -10,7 +10,8 @@ const POLICY_MODES = ["none", "deposit", "full", "card"] as const;
 export const toPolicyMode = (value: string) =>
   POLICY_MODES.find((mode) => mode === value) ?? "none";
 
-export const toFeeKind = (value: string) => (value === "pct" ? "pct" : "keep");
+export const toFeeKind = (value: string): "keep" | "pct" =>
+  value === "pct" ? "pct" : "keep";
 
 export const toExtras = (value: Json): PolicyValue["extras"] =>
   Array.isArray(value)
