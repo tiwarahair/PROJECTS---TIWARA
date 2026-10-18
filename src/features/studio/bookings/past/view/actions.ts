@@ -1,4 +1,7 @@
-import { undoNoShow } from "../../../../../lib/studio-api";
+import {
+  undoNoShow,
+  waiveFee as waiveFeeRemote,
+} from "../../../../../lib/studio-api";
 import { getWaiveConfirm } from "../../../core/model";
 import { roundToPence } from "../../../../../utils/money";
 import { getRefundTag } from "./context";
@@ -52,6 +55,7 @@ const getFeeAction = (
     hoursLeft,
     isKept,
     patch,
+    saveFee,
   }: PastContext,
   feeLeft: number,
 ) => {
@@ -60,6 +64,8 @@ const getFeeAction = (
   const pendingNote = row.feePending ? ` (applies in ${hoursLeft}h)` : "";
 
   const waiveFee = () => {
+    const previous = state.pastNew;
+
     setState({ confirm: null });
 
     patch((current) => ({
@@ -78,6 +84,7 @@ const getFeeAction = (
     const clientFirst = (client.name || "").split(" ")[0];
 
     actions.showToast(`${refundLead}${clientFirst} gets ${row.feeLabel} back`);
+    saveFee(waiveFeeRemote, previous);
   };
 
   const getAction = () => {

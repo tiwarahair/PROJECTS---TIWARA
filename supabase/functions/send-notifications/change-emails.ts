@@ -24,7 +24,7 @@ type StylistNotice = BookingDetails & { cancellation: Cancellation | null; studi
 const getMoneyLines = ({ refund_pence: refund, kept_pence: kept, charge_pence: charge }: Cancellation, stylist: string) => [
   ...(refund ? [`${pounds(refund)} is refunded to your card. It can take 5–10 working days to show.`] : []),
   ...(kept ? [`${pounds(kept)} is kept under ${stylist}’s cancellation policy.`] : []),
-  ...(charge ? [`A ${pounds(charge)} late cancellation fee is due under ${stylist}’s policy. We’ll email you about paying it.`] : []),
+  ...(charge ? [`A ${pounds(charge)} late cancellation fee is due under ${stylist}’s policy. We’ve emailed you when it will be charged.`] : []),
 ];
 
 export const bookingCancelled = (booking: ChangedBooking): RenderedEmail =>

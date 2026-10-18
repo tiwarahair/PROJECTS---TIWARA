@@ -3,6 +3,7 @@ import { z } from "npm:zod@4";
 import { admin } from "../_shared/admin.ts";
 import { corsHeaders, respond } from "../_shared/cors.ts";
 import { getSignedInUser } from "../_shared/recent-user.ts";
+import { getRefundNow } from "../_shared/cancel-refund.ts";
 import { refundBooking } from "../_shared/refund.ts";
 
 const ERRORS: Record<string, number> = { not_found: 404, cannot_cancel: 409 };
@@ -20,6 +21,7 @@ interface Cancellation {
   refund_pence: number;
   kept_pence: number;
   charge_pence: number;
+  fee_pence: number;
 }
 
 Deno.serve(async (request) => {
@@ -52,11 +54,12 @@ Deno.serve(async (request) => {
     if (error) throw error;
 
     const cancellation = data as Cancellation;
+    const refundNow = getRefundNow(cancellation);
 
     const refundId = await refundBooking({
       bookingId,
       paymentIntentId: cancellation.payment_intent_id,
-      amount: cancellation.refund_pence,
+      amount: refundNow,
       reason: who === "stylist" ? "stylist_cancelled" : "client_cancelled",
     });
 
@@ -70,6 +73,7 @@ Deno.serve(async (request) => {
         id: undefined,
         payment_intent_id: undefined,
         refund_id: refundId,
+        refunded_pence: refundId ? refundNow : 0,
       },
     });
 

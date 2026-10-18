@@ -60,6 +60,9 @@ export interface CheckoutRecord {
 
 export interface PastRecord {
   pastId?: string | number;
+  remoteId?: string;
+  feeCharge?: number;
+  feeCard?: string;
   client: string | null;
   service: string;
   price: number;

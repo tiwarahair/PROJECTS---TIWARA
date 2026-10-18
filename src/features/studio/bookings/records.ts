@@ -4,8 +4,14 @@ import type { AddressValue } from "../../../types/address";
 import { getAddressOneLine } from "../../../utils/address";
 import { formatDuration } from "../../../utils/dates";
 import { fromLondonTime, toLondonTime } from "../../../utils/london-time";
-import { formatMoney } from "../../../utils/money";
 import { toDate, toOffset } from "../core/blocked-time";
+import {
+  getFeeFlags,
+  getLatestFee,
+  getRefundNote,
+  getRefunded,
+  toPounds,
+} from "./fee-records";
 import { dateLabel } from "../core/format";
 import type { PastRecord, StudioBooking, StudioClient } from "../core/types";
 
@@ -51,8 +57,6 @@ const getPence = (value: unknown, key: string) => {
 
   return typeof entry === "number" ? entry : 0;
 };
-
-const toPounds = (pence: number) => pence / 100;
 
 const getClientKey = ({ id, contact }: StudioBookingRow) => {
   const contactKey =
@@ -106,36 +110,34 @@ export const toStudioBooking = (row: StudioBookingRow): StudioBooking => {
   };
 };
 
-const getCancelNote = (row: StudioBookingRow, refund: number) => {
+const getCancelNote = (row: StudioBookingRow, refundNote: string) => {
   const who =
     row.cancelled_by === "stylist"
       ? "you"
       : getText(row.contact, "first") || "the client";
 
-  const refundNote = refund
-    ? ` ${formatMoney(toPounds(refund), { pence: "always" })} refunded.`
-    : "";
-
   return `Cancelled by ${who}.${refundNote}`;
-};
-
-const getCancelMeta = (refund: number, kept: number) => {
-  if (refund) return "Refunded";
-
-  return kept ? "Deposit kept" : "No charge";
 };
 
 export const toPastRecord = (row: StudioBookingRow): PastRecord => {
   const booking = toStudioBooking(row);
   const status = PAST_STATUSES[row.status] ?? "Completed";
-  const refund = getPence(row.cancellation, "refund_pence");
-  const kept = getPence(row.cancellation, "kept_pence");
-  const isCancelled = status === "Cancelled";
-  const isNoShow = status === "No show";
+  const fee = getLatestFee(row);
+  const refunded = getRefunded(row);
+  const refundNote = getRefundNote(refunded, fee);
   const markedAt = row.no_show_at ?? row.cancelled_at ?? row.starts_at;
+
+  const getMeta = () => {
+    if (refunded) return "Refunded";
+
+    return getPence(row.cancellation, "kept_pence")
+      ? "Deposit kept"
+      : "No charge";
+  };
 
   return {
     pastId: row.id,
+    remoteId: row.id,
     client: booking.client,
     service: booking.service,
     price: booking.price,
@@ -144,20 +146,22 @@ export const toPastRecord = (row: StudioBookingRow): PastRecord => {
     time: booking.time,
     status,
     at: Date.parse(markedAt),
-    ...(isCancelled
+    ...(status === "Cancelled"
       ? {
-          meta: getCancelMeta(refund, kept),
-          note: getCancelNote(row, refund),
-          refunded: toPounds(refund),
+          meta: getMeta(),
+          note: getCancelNote(row, refundNote),
+          refunded: toPounds(refunded),
         }
       : {}),
-    ...(isNoShow
+    ...(status === "No show"
       ? {
-          meta: "No charge",
-          note: "Client did not attend.",
+          meta: getMeta(),
+          note: `Client did not attend.${refundNote}`,
+          refunded: toPounds(refunded),
           original: { ...booking, status: "confirmed" },
         }
       : {}),
+    ...getFeeFlags(fee),
   };
 };
 

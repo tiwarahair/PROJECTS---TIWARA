@@ -29,6 +29,17 @@ export const getContext = (studio: StudioController, row: PastRecord) => {
     actions.showToast(message);
   };
 
+  /** Saves a real booking's fee change (after any save before it); a failure puts the row back. */
+  const saveFee = (
+    task: (bookingId: string) => Promise<unknown>,
+    previous: PastRecord[],
+  ) => {
+    const { remoteId } = row;
+
+    if (remoteId)
+      studio.context.sync?.save(() => task(remoteId), { pastNew: previous });
+  };
+
   return {
     studio,
     state,
@@ -52,6 +63,7 @@ export const getContext = (studio: StudioController, row: PastRecord) => {
         : `Cancelled inside your ${state.policy.window}h window.`,
     patch,
     settle,
+    saveFee,
     firstName: (fallback: string) =>
       (client.name || fallback).split(" ")[0] ?? "",
   };

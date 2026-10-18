@@ -6,6 +6,7 @@ import {
   isUploadOriginal,
   toUploadVariant,
 } from "../utils/image-sources";
+import { FunctionsHttpError } from "@supabase/supabase-js";
 import { SaveError, notifyStudioWrite } from "./studio-writes";
 import { supabase } from "./supabase";
 
@@ -343,7 +344,10 @@ export const callStripe = async (
 };
 
 const BOOKING_SELECT = `id, status, starts_at, minutes, price_pence, snapshot, contact, notes, address, terms,
-  reschedule_count, cancelled_at, cancelled_by, cancellation, no_show_at, overlap_ok`;
+  reschedule_count, cancelled_at, cancelled_by, cancellation, no_show_at, overlap_ok,
+  booking_fees(id, kind, status, amount_pence, kept_pence, refund_pence, charge_pence, tries, hard_decline,
+    decline_message, card_label, waived_at, created_at),
+  refunds(amount_pence)`;
 
 /** Studio's bookings from `fromDate` on (anything still being paid for is left out). */
 export const fetchStudioBookings = async (
@@ -397,6 +401,40 @@ export const rescheduleStudioBooking = async (
   if (error) throw error;
 
   notifyStudioWrite();
+};
+
+/** The booking's current fee is waived. */
+export const waiveFee = (bookingId: string) =>
+  write(supabase.rpc("waive_fee", { target_booking: bookingId }));
+
+export const recordFeePaid = (bookingId: string) =>
+  write(
+    supabase.rpc("record_fee_paid", {
+      target_booking: bookingId,
+      method: "other",
+    }),
+  );
+
+export interface FeeRetry {
+  outcome: "paid" | "unpaid";
+  declineMessage: string | null;
+}
+
+/** Charges a declined fee again; throws SaveError when it can't be retried yet. */
+export const retryFee = async (bookingId: string) => {
+  const { data, error } = await supabase.functions.invoke<FeeRetry>(
+    "studio-fee",
+    { body: { bookingId } },
+  );
+
+  if (error instanceof FunctionsHttpError && error.context.status === 409)
+    throw new SaveError("You can retry 24 hours after the last try.");
+
+  if (error || !data) throw error ?? new Error("retry failed");
+
+  notifyStudioWrite();
+
+  return data;
 };
 
 export interface StudioCancel {

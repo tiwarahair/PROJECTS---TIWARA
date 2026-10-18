@@ -66,6 +66,7 @@ export const getContext = (studio: StudioController) => {
       pastNew: [
         {
           pastId: remoteId || Date.now(),
+          ...(remoteId ? { remoteId } : {}),
           client: booking.client,
           service: booking.service,
           price: booking.price,

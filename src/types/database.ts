@@ -167,6 +167,82 @@ export type Database = {
           },
         ];
       };
+      booking_fees: {
+        Row: {
+          amount_pence: number;
+          booking_id: string;
+          card_label: string | null;
+          charge_after: string;
+          charge_pence: number;
+          claimed_at: string | null;
+          created_at: string;
+          decline_message: string | null;
+          hard_decline: boolean;
+          id: string;
+          kept_pence: number;
+          kind: string;
+          last_tried_at: string | null;
+          paid_at: string | null;
+          refund_pence: number;
+          refunded_pence: number;
+          status: string;
+          tries: number;
+          waived_at: string | null;
+          get_fee_settlement: Json | null;
+        };
+        ComputedFields: "get_fee_settlement";
+        Insert: {
+          amount_pence: number;
+          booking_id: string;
+          card_label?: string | null;
+          charge_after: string;
+          charge_pence: number;
+          claimed_at?: string | null;
+          created_at?: string;
+          decline_message?: string | null;
+          hard_decline?: boolean;
+          id?: string;
+          kept_pence: number;
+          kind: string;
+          last_tried_at?: string | null;
+          paid_at?: string | null;
+          refund_pence: number;
+          refunded_pence?: number;
+          status?: string;
+          tries?: number;
+          waived_at?: string | null;
+        };
+        Update: {
+          amount_pence?: number;
+          booking_id?: string;
+          card_label?: string | null;
+          charge_after?: string;
+          charge_pence?: number;
+          claimed_at?: string | null;
+          created_at?: string;
+          decline_message?: string | null;
+          hard_decline?: boolean;
+          id?: string;
+          kept_pence?: number;
+          kind?: string;
+          last_tried_at?: string | null;
+          paid_at?: string | null;
+          refund_pence?: number;
+          refunded_pence?: number;
+          status?: string;
+          tries?: number;
+          waived_at?: string | null;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "booking_fees_booking_id_fkey";
+            columns: ["booking_id"];
+            isOneToOne: false;
+            referencedRelation: "bookings";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
       booking_rules: {
         Row: {
           default_extra_minutes: number;
@@ -285,6 +361,7 @@ export type Database = {
           status: string;
           stripe_customer_id: string | null;
           stripe_payment_intent_id: string | null;
+          stripe_payment_method_id: string | null;
           stylist_id: string;
           terms: Json | null;
           get_cancellation_terms: Json | null;
@@ -332,6 +409,7 @@ export type Database = {
           status?: string;
           stripe_customer_id?: string | null;
           stripe_payment_intent_id?: string | null;
+          stripe_payment_method_id?: string | null;
           stylist_id: string;
           terms?: Json | null;
         };
@@ -377,6 +455,7 @@ export type Database = {
           status?: string;
           stripe_customer_id?: string | null;
           stripe_payment_intent_id?: string | null;
+          stripe_payment_method_id?: string | null;
           stylist_id?: string;
           terms?: Json | null;
         };
@@ -669,6 +748,61 @@ export type Database = {
           },
         ];
       };
+      payments: {
+        Row: {
+          amount_pence: number;
+          booking_id: string;
+          created_at: string;
+          fee_id: string | null;
+          id: string;
+          kind: string;
+          method: string;
+          platform_fee_pence: number;
+          stripe_payment_intent_id: string | null;
+          transfer_pending: boolean;
+        };
+        ComputedFields: never;
+        Insert: {
+          amount_pence: number;
+          booking_id: string;
+          created_at?: string;
+          fee_id?: string | null;
+          id?: string;
+          kind: string;
+          method?: string;
+          platform_fee_pence?: number;
+          stripe_payment_intent_id?: string | null;
+          transfer_pending?: boolean;
+        };
+        Update: {
+          amount_pence?: number;
+          booking_id?: string;
+          created_at?: string;
+          fee_id?: string | null;
+          id?: string;
+          kind?: string;
+          method?: string;
+          platform_fee_pence?: number;
+          stripe_payment_intent_id?: string | null;
+          transfer_pending?: boolean;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "payments_booking_id_fkey";
+            columns: ["booking_id"];
+            isOneToOne: false;
+            referencedRelation: "bookings";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "payments_fee_id_fkey";
+            columns: ["fee_id"];
+            isOneToOne: false;
+            referencedRelation: "booking_fees";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
       portfolio_photos: {
         Row: {
           created_at: string;
@@ -757,6 +891,45 @@ export type Database = {
           window_start?: string;
         };
         Relationships: [];
+      };
+      refunds: {
+        Row: {
+          amount_pence: number;
+          booking_id: string;
+          created_at: string;
+          id: string;
+          note: string | null;
+          reason: string;
+          stripe_refund_id: string | null;
+        };
+        ComputedFields: never;
+        Insert: {
+          amount_pence: number;
+          booking_id: string;
+          created_at?: string;
+          id?: string;
+          note?: string | null;
+          reason: string;
+          stripe_refund_id?: string | null;
+        };
+        Update: {
+          amount_pence?: number;
+          booking_id?: string;
+          created_at?: string;
+          id?: string;
+          note?: string | null;
+          reason?: string;
+          stripe_refund_id?: string | null;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "refunds_booking_id_fkey";
+            columns: ["booking_id"];
+            isOneToOne: false;
+            referencedRelation: "bookings";
+            referencedColumns: ["id"];
+          },
+        ];
       };
       reserved_slugs: {
         Row: {
@@ -1450,6 +1623,11 @@ export type Database = {
         Args: { token: string; user_id: string };
         Returns: number;
       };
+      claim_due_fees: { Args: { batch_size: number }; Returns: Json[] };
+      claim_fee_retry: {
+        Args: { owner: string; target_booking: string };
+        Returns: Json;
+      };
       claim_notifications: {
         Args: { batch_size?: number };
         Returns: {
@@ -1485,6 +1663,10 @@ export type Database = {
       };
       expire_booking_holds: {
         Args: Record<PropertyKey, never>;
+        Returns: undefined;
+      };
+      finish_fee_settlement: {
+        Args: { result: Json; target: string };
         Returns: undefined;
       };
       get_account_kind: { Args: { lookup_email: string }; Returns: string };
@@ -1542,6 +1724,7 @@ export type Database = {
           status: string;
           stripe_customer_id: string | null;
           stripe_payment_intent_id: string | null;
+          stripe_payment_method_id: string | null;
           stylist_id: string;
           terms: Json | null;
         };
@@ -1588,6 +1771,35 @@ export type Database = {
         Returns: string[];
       };
       get_due_closures: { Args: Record<PropertyKey, never>; Returns: string[] };
+      get_fee_amount: {
+        Args: {
+          booking: Omit<
+            Database["public"]["Tables"]["bookings"]["Row"],
+            Database["public"]["Tables"]["bookings"]["ComputedFields"]
+          >;
+          kind: string;
+        };
+        Returns: number;
+      };
+      get_fee_settlement: {
+        Args: {
+          fee: Omit<
+            Database["public"]["Tables"]["booking_fees"]["Row"],
+            Database["public"]["Tables"]["booking_fees"]["ComputedFields"]
+          >;
+        };
+        Returns: Json;
+      };
+      get_fee_split: {
+        Args: {
+          booking: Omit<
+            Database["public"]["Tables"]["bookings"]["Row"],
+            Database["public"]["Tables"]["bookings"]["ComputedFields"]
+          >;
+          fee: number;
+        };
+        Returns: Json;
+      };
       get_invite_token: {
         Args: { token: string };
         Returns: {
@@ -1625,9 +1837,9 @@ export type Database = {
       };
       get_studio_cancellation: {
         Args: {
-          charge_fee: boolean;
           owner: string;
           target: string;
+          waive_fee: boolean;
           who: string;
         };
         Returns: Json;
@@ -1723,12 +1935,43 @@ export type Database = {
           status: string;
           stripe_customer_id: string | null;
           stripe_payment_intent_id: string | null;
+          stripe_payment_method_id: string | null;
           stylist_id: string;
           terms: Json | null;
         };
         SetofOptions: {
           from: "*";
           to: "bookings";
+          isOneToOne: true;
+          isSetofReturn: false;
+        };
+      };
+      lock_own_fee: {
+        Args: { target_booking: string };
+        Returns: {
+          amount_pence: number;
+          booking_id: string;
+          card_label: string | null;
+          charge_after: string;
+          charge_pence: number;
+          claimed_at: string | null;
+          created_at: string;
+          decline_message: string | null;
+          hard_decline: boolean;
+          id: string;
+          kept_pence: number;
+          kind: string;
+          last_tried_at: string | null;
+          paid_at: string | null;
+          refund_pence: number;
+          refunded_pence: number;
+          status: string;
+          tries: number;
+          waived_at: string | null;
+        };
+        SetofOptions: {
+          from: "*";
+          to: "booking_fees";
           isOneToOne: true;
           isSetofReturn: false;
         };
@@ -1794,6 +2037,10 @@ export type Database = {
         };
         Returns: string;
       };
+      record_fee_paid: {
+        Args: { method: string; target_booking: string };
+        Returns: undefined;
+      };
       refresh_go_live: { Args: { target: string }; Returns: undefined };
       renew_booking_invite: { Args: { token: string }; Returns: undefined };
       reopen_business: { Args: Record<PropertyKey, never>; Returns: undefined };
@@ -1804,6 +2051,17 @@ export type Database = {
       reschedule_studio_booking: {
         Args: { allow_overlap: boolean; slot_start: string; target: string };
         Returns: Json;
+      };
+      schedule_booking_fee: {
+        Args: {
+          booking: Omit<
+            Database["public"]["Tables"]["bookings"]["Row"],
+            Database["public"]["Tables"]["bookings"]["ComputedFields"]
+          >;
+          kind: string;
+          split: Json;
+        };
+        Returns: undefined;
       };
       search_stylists: {
         Args: {
@@ -1853,6 +2111,7 @@ export type Database = {
         Args: { code: string; token: string };
         Returns: string;
       };
+      waive_fee: { Args: { target_booking: string }; Returns: undefined };
     };
     Enums: {
       [_ in never]: never;

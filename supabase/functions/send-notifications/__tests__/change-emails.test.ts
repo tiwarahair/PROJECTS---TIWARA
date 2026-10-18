@@ -10,6 +10,7 @@ import {
   clientRescheduled,
 } from "../change-emails";
 import type { ChangedBooking } from "../change-emails";
+import { feeScheduled, feeWaived } from "../fee-emails";
 import { renderSms } from "../sms";
 
 const booking: ChangedBooking = {
@@ -138,5 +139,40 @@ describe("link safety emails", () => {
     const guest = bookingLinkReset({ ...booking, save_details_url: "https://dev.tiwarashouse.com/save-details?token=new" });
 
     expect(guest.text).toContain("https://dev.tiwarashouse.com/save-details?token=new");
+  });
+});
+
+describe("fee emails", () => {
+  const fee = {
+    ...booking,
+    kind: "no_show" as const,
+    fee_pence: 5000,
+    kept_pence: 3000,
+    refund_pence: 0,
+    charge_pence: 2000,
+    charge_after: "2026-10-23T16:30:00Z",
+  };
+
+  it("say what's kept, charged and refunded, and when", () => {
+    const { subject, text } = feeScheduled(fee);
+
+    expect(subject).toBe("No-show fee: £50.00");
+    expect(text).toContain("£30.00 of what you paid is kept towards it.");
+    expect(text).toContain("£20.00 will be charged to your saved card on Friday 23 October at 17:30.");
+    expect(text).toContain("If you did attend, reply to this email");
+  });
+
+  it("explain a late cancellation fee", () => {
+    const { subject, text } = feeScheduled({ ...fee, kind: "late_cancel" });
+
+    expect(subject).toBe("Late cancellation fee: £50.00");
+    expect(text).toContain("after the free cancellation deadline");
+  });
+
+  it("tell the client a fee was waived and what comes back", () => {
+    const { subject, text } = feeWaived({ ...booking, kind: "no_show", fee_pence: 5000, refund_pence: 3000 });
+
+    expect(subject).toBe("Your £50.00 fee has been waived");
+    expect(text).toContain("£30.00 is refunded to your card.");
   });
 });

@@ -30,6 +30,8 @@ const getRow = (patch: Partial<StudioBookingRow>): StudioBookingRow => ({
   cancellation: null,
   no_show_at: null,
   overlap_ok: false,
+  booking_fees: [],
+  refunds: [],
   ...patch,
 });
 
@@ -73,7 +75,7 @@ describe("toStudioBookings", () => {
         status: "cancelled",
         cancelled_by: "stylist",
         cancelled_at: new Date(Date.now() - 3600000).toISOString(),
-        cancellation: { refund_pence: 1463 },
+        refunds: [{ amount_pence: 1463 }],
       }),
       getRow({
         id: "b-5",
@@ -94,6 +96,8 @@ describe("toStudioBookings", () => {
       note: "Cancelled by you. £14.63 refunded.",
       refunded: 14.63,
     });
+
+    expect(pastNew[0]?.remoteId).toBe("b-5");
 
     expect(pastNew[0]?.original).toMatchObject({
       remoteId: "b-5",

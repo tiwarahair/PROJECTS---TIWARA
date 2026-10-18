@@ -450,6 +450,12 @@ verify_jwt = false
 [functions.studio-booking-cancel]
 verify_jwt = false
 
+[functions.studio-fee]
+verify_jwt = false
+
+[functions.charge-fees]
+verify_jwt = false
+
 # called by pg_cron with x-cron-secret, not a user's token
 [functions.purge-closed-businesses]
 verify_jwt = false

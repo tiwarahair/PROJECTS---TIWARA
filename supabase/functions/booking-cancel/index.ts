@@ -3,6 +3,7 @@ import { admin } from "../_shared/admin.ts";
 import { getClientIp } from "../_shared/client-ip.ts";
 import { corsHeaders, respond } from "../_shared/cors.ts";
 import { isWithinLimit } from "../_shared/rate-limit.ts";
+import { getRefundNow } from "../_shared/cancel-refund.ts";
 import { refundBooking } from "../_shared/refund.ts";
 
 const ERRORS: Record<string, number> = {
@@ -19,6 +20,7 @@ interface Cancellation {
   refund_pence: number;
   kept_pence: number;
   charge_pence: number;
+  fee_pence: number;
 }
 
 Deno.serve(async (request) => {
@@ -47,11 +49,12 @@ Deno.serve(async (request) => {
     if (error) throw error;
 
     const cancellation = data as Cancellation;
+    const refundNow = getRefundNow(cancellation);
 
     const refundId = await refundBooking({
       bookingId: cancellation.id,
       paymentIntentId: cancellation.payment_intent_id,
-      amount: cancellation.refund_pence,
+      amount: refundNow,
       reason: "client_cancelled",
     });
 
@@ -64,6 +67,7 @@ Deno.serve(async (request) => {
         id: undefined,
         payment_intent_id: undefined,
         refund_id: refundId,
+        refunded_pence: refundId ? refundNow : 0,
       },
     });
 
