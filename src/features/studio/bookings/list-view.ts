@@ -37,7 +37,8 @@ const getUpcomingGroups = (items: DecoratedBooking[]) => {
 
 const getPastGroups = ({ studio, pastItems }: BookingsContext) => {
   const items = pastItems.map((row, index) => ({
-    month: PAST_MONTHS[row.when.split(" ")[2] ?? ""] || "Earlier",
+    month:
+      row.month ?? (PAST_MONTHS[row.when.split(" ")[2] ?? ""] || "Earlier"),
     item: getPastItem(studio, row, index),
   }));
 
@@ -84,7 +85,7 @@ const getEmptyKind = (context: BookingsContext): EmptyKind => {
 };
 
 export const getListView = (context: BookingsContext) => {
-  const { isPast, pastItems, upcomingItems } = context;
+  const { isPast, pastItems, upcomingItems, state, actions } = context;
   const { title, body } = EMPTY_COPY[getEmptyKind(context)];
 
   const earned = getTotal(
@@ -102,5 +103,10 @@ export const getListView = (context: BookingsContext) => {
     listEmptyBody: body,
     // ---- past list ----
     pastGroups: getPastGroups(context),
+    hasOlderPast: isPast && !!state.pastCursor,
+    olderPastLabel: state.isPastLoading
+      ? "Loading…"
+      : "Show older appointments",
+    loadOlderPast: () => void actions.loadOlderPast(),
   };
 };

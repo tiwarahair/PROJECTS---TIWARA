@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import type { StudioBookingRow } from "../../../../lib/studio-api";
+import type { StudioBookingRow } from "../../../../lib/studio-api/bookings";
 import { getFeeFlags, getRefundNote } from "../fee-records";
 
 type FeeRow = StudioBookingRow["booking_fees"][number];

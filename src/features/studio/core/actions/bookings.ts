@@ -1,4 +1,8 @@
-import { setBookingStatus } from "../../../../lib/studio-api";
+import {
+  fetchPastBookings,
+  setBookingStatus,
+} from "../../../../lib/studio-api/bookings";
+import { mergeBookingRows } from "../../bookings/live-records";
 import { toIsoDate } from "../../../../utils/dates";
 import { toDayOffset } from "../../bookings/records";
 import { durationToMinutes, timeToMinutes } from "../format";
@@ -178,5 +182,35 @@ export const createBookingActions = (
     });
   };
 
-  return { setStatus, patchPast, rebookFrom, autoComplete, followToday };
+  /** The next page of a real account's Past, added under what's shown. */
+  const loadOlderPast = async () => {
+    const { pastCursor, isPastLoading } = getState();
+    const stylistId = sync?.stylistId;
+
+    if (!pastCursor || !stylistId || isPastLoading) return;
+
+    setState({ isPastLoading: true });
+
+    try {
+      const { rows, cursor } = await fetchPastBookings(stylistId, pastCursor);
+
+      setState((current) => ({
+        ...mergeBookingRows(current, rows),
+        pastCursor: cursor,
+        isPastLoading: false,
+      }));
+    } catch {
+      setState({ isPastLoading: false });
+      showToast("Older appointments didn’t load. Try again.");
+    }
+  };
+
+  return {
+    setStatus,
+    patchPast,
+    rebookFrom,
+    autoComplete,
+    followToday,
+    loadOlderPast,
+  };
 };

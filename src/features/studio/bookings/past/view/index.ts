@@ -4,7 +4,7 @@ import type { StudioController } from "../../../core/use-studio";
 import {
   refundBookingPayment,
   SecondFactorNeeded,
-} from "../../../../../lib/studio-api";
+} from "../../../../../lib/studio-api/money";
 import { SaveError } from "../../../../../lib/studio-writes";
 import { formatMoney, roundToPence } from "../../../../../utils/money";
 import { toPence } from "../../../../booking/logic/payment";

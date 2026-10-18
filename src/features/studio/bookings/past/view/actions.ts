@@ -1,7 +1,5 @@
-import {
-  undoNoShow,
-  waiveFee as waiveFeeRemote,
-} from "../../../../../lib/studio-api";
+import { undoNoShow } from "../../../../../lib/studio-api/bookings";
+import { waiveFee as waiveFeeRemote } from "../../../../../lib/studio-api/money";
 import { getWaiveConfirm } from "../../../core/model";
 import { roundToPence } from "../../../../../utils/money";
 import { getRefundTag } from "./context";

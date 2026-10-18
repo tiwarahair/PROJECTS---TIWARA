@@ -4,7 +4,7 @@ import type { PolicyValue } from "../../../components/payment-policy/types";
 import type { PaymentPolicyApi } from "../../../components/payment-policy";
 import type { AccountSettingsApi } from "../../../components/account-settings/use-account-settings";
 import type { TaxDetails } from "../../../components/tax-details-form/tax-details-logic";
-import { addPaymentPolicy } from "../../../lib/studio-api";
+import { addPaymentPolicy } from "../../../lib/studio-api/settings";
 import { hasRecentSecondFactor } from "../../../lib/two-factor";
 import { getAvailabilityView } from "./availability/view";
 import { getSettingsNav } from "./nav-view";

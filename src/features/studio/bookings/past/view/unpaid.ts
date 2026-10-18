@@ -3,7 +3,7 @@ import {
   resendPaymentLink,
   retryFee,
   waiveFee,
-} from "../../../../../lib/studio-api";
+} from "../../../../../lib/studio-api/money";
 import { SaveError } from "../../../../../lib/studio-writes";
 import { getWaiveConfirm } from "../../../core/model";
 import { formatMoney, roundToPence } from "../../../../../utils/money";

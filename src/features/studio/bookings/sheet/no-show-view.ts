@@ -1,4 +1,4 @@
-import { markNoShow, undoNoShow } from "../../../../lib/studio-api";
+import { markNoShow, undoNoShow } from "../../../../lib/studio-api/bookings";
 import type { SheetContext } from "./context";
 
 const getNoShowChoices = ({ noShowFee }: SheetContext) =>

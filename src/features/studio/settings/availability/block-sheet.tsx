@@ -18,7 +18,7 @@ import type { StudioController } from "../../core/use-studio";
 import overlay from "../../../../styles/features/studio/shell/overlay.module.css";
 import styles from "../../../../styles/features/studio/settings/availability/block-sheet.module.css";
 import fields from "../../../../styles/features/studio/settings/availability/sheet-fields.module.css";
-import { saveBlock } from "../../../../lib/studio-api";
+import { saveBlock } from "../../../../lib/studio-api/settings";
 import { buildBlockedTime, fromBlockedTime } from "../../core/blocked-time";
 import {
   getMonthNav,

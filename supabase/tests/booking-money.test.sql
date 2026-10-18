@@ -1,5 +1,5 @@
 begin;
-select plan(28);
+select plan(30);
 
 create function pg_temp.sign_up(user_id uuid, user_email text, business text)
 returns void
@@ -111,6 +111,16 @@ select pg_temp.act_as('d1111111-1111-1111-1111-111111111111');
 select public.undo_no_show((select card from b));
 reset role;
 select is(pg_temp.fee((select card from b)), 'no_show void fee 5000 kept 0 refund 0 charge 5000', 'undoing the no-show voids it');
+select is(
+  (select count(*)::int from public.notifications
+  where template = 'fee_cancelled' and payload ->> 'ref' = (select ref from public.bookings where id = (select card from b))),
+  1, 'and tells the client the fee is off'
+);
+select is(
+  (select past_at from public.bookings where id = (select deposit_over from b)),
+  (select no_show_at from public.bookings where id = (select deposit_over from b)),
+  'a no-show joins Past when it was marked'
+);
 
 select pg_temp.act_as('d2222222-2222-2222-2222-222222222222');
 select throws_ok(

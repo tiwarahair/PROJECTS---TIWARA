@@ -10,7 +10,7 @@ import {
   clientRescheduled,
 } from "../change-emails";
 import type { ChangedBooking } from "../change-emails";
-import { disputeOpened, feeDeclined, feeScheduled, feeUnpaid, feeWaived } from "../fee-emails";
+import { disputeOpened, feeCancelled, feeDeclined, feeScheduled, feeUnpaid, feeWaived } from "../fee-emails";
 import { renderSms } from "../sms";
 
 const booking: ChangedBooking = {
@@ -167,6 +167,14 @@ describe("fee emails", () => {
 
     expect(subject).toBe("Late cancellation fee: £50.00");
     expect(text).toContain("after the free cancellation deadline");
+  });
+
+  it("tell the client an undone no-show's fee is off", () => {
+    const { subject, text } = feeCancelled({ ...booking, kind: "no_show", fee_pence: 5000 });
+
+    expect(subject).toBe("Your no-show fee is cancelled");
+    expect(text).toContain("has undone the no-show for Silk press");
+    expect(text).toContain("there’s no £50.00 fee and nothing will be charged");
   });
 
   it("tell the client a fee was waived and what comes back", () => {

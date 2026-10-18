@@ -2,7 +2,7 @@ import { act, screen } from "@testing-library/react";
 import type { UserEvent } from "@testing-library/user-event";
 import { useEffect } from "react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import { changeSlug, isSlugFree } from "../../../../../lib/studio-api";
+import { changeSlug, isSlugFree } from "../../../../../lib/studio-api/settings";
 import { renderWithStore } from "../../../../../test/render-with-store";
 import { setupUser } from "../../../../../test/setup-user";
 import { BookingLinkField } from "../booking-link-field";
@@ -10,8 +10,10 @@ import type { StudioContext } from "../../../core/actions";
 import type { StudioState } from "../../../core/types";
 import { useStudio } from "../../../core/use-studio";
 
-vi.mock("../../../../../lib/studio-api", async (importOriginal) => ({
-  ...(await importOriginal<typeof import("../../../../../lib/studio-api")>()),
+vi.mock("../../../../../lib/studio-api/settings", async (importOriginal) => ({
+  ...(await importOriginal<
+    typeof import("../../../../../lib/studio-api/settings")
+  >()),
   isSlugFree: vi.fn(),
   changeSlug: vi.fn(),
 }));

@@ -1,13 +1,15 @@
 import { renderHook, waitFor } from "@testing-library/react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import * as studioApi from "../../../../lib/studio-api";
+import * as studioApi from "../../../../lib/studio-api/services";
 import { useCatalogueSync } from "../catalogue-sync";
 import { getInitialStudioState } from "../../core/initial-state";
 import { createStudioSync } from "../../core/sync";
 import type { StudioState } from "../../core/types";
 
-vi.mock("../../../../lib/studio-api", async (importOriginal) => ({
-  ...(await importOriginal<typeof import("../../../../lib/studio-api")>()),
+vi.mock("../../../../lib/studio-api/services", async (importOriginal) => ({
+  ...(await importOriginal<
+    typeof import("../../../../lib/studio-api/services")
+  >()),
   saveCategories: vi.fn().mockResolvedValue(undefined),
   saveAddon: vi.fn().mockResolvedValue(undefined),
   saveService: vi.fn().mockResolvedValue(undefined),

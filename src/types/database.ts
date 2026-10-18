@@ -350,6 +350,7 @@ export type Database = {
           notes: string | null;
           overlap_ok: boolean;
           paid_at: string | null;
+          past_at: string | null;
           policy_id: string | null;
           price_pence: number;
           ref: string;
@@ -398,6 +399,7 @@ export type Database = {
           notes?: string | null;
           overlap_ok?: boolean;
           paid_at?: string | null;
+          past_at?: never;
           policy_id?: string | null;
           price_pence: number;
           ref?: string;
@@ -444,6 +446,7 @@ export type Database = {
           notes?: string | null;
           overlap_ok?: boolean;
           paid_at?: string | null;
+          past_at?: never;
           policy_id?: string | null;
           price_pence?: number;
           ref?: string;
@@ -1836,6 +1839,7 @@ export type Database = {
           notes: string | null;
           overlap_ok: boolean;
           paid_at: string | null;
+          past_at: string | null;
           policy_id: string | null;
           price_pence: number;
           ref: string;
@@ -2059,6 +2063,7 @@ export type Database = {
           notes: string | null;
           overlap_ok: boolean;
           paid_at: string | null;
+          past_at: string | null;
           policy_id: string | null;
           price_pence: number;
           ref: string;
@@ -2186,6 +2191,10 @@ export type Database = {
         Returns: undefined;
       };
       refresh_go_live: { Args: { target: string }; Returns: undefined };
+      release_hold: {
+        Args: { secret: string; target: string };
+        Returns: undefined;
+      };
       renew_booking_invite: { Args: { token: string }; Returns: undefined };
       reopen_business: { Args: Record<PropertyKey, never>; Returns: undefined };
       reschedule_managed_booking: {

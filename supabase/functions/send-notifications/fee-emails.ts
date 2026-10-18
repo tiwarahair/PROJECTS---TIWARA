@@ -145,3 +145,18 @@ export const disputeOpened = (dispute: DisputeNotice): RenderedEmail =>
     ],
     footnote: "Questions? Reply to this email.",
   });
+
+export interface CancelledFee extends BookingDetails {
+  kind: FeeKind;
+  fee_pence: number;
+}
+
+export const feeCancelled = (fee: CancelledFee): RenderedEmail =>
+  renderNotice({
+    title: `Your ${FEE_NAMES[fee.kind]} is cancelled`,
+    paragraphs: [
+      `${fee.stylist_name} has undone the no-show for ${fee.service_name} on ${formatWhen(fee.starts_at)} (UK time), so there’s no ${pounds(fee.fee_pence)} fee and nothing will be charged.`,
+      `Booking reference: ${fee.ref}`,
+    ],
+    footnote: "Questions? Reply to this email.",
+  });

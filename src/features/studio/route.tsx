@@ -14,10 +14,6 @@ import { ClosedBusiness } from "./closed-business";
 import { getQueryParam } from "./core/model";
 import { StudioPage } from ".";
 
-const PAST_DAYS = 90;
-
-const fromDate = new Date(Date.now() - PAST_DAYS * 864e5).toISOString();
-
 /** Dev boards (?board=true, ?fixture=, ?account=new) open the demo Studio without signing in. */
 const isDemoStudio = () =>
   import.meta.env.DEV &&
@@ -38,10 +34,9 @@ export const StudioRoute = () => {
   );
 
   const { data: bookings, isError: isBookingsError } =
-    useGetStudioBookingsQuery(
-      studio ? { stylistId: studio.id, fromDate } : skipToken,
-      { refetchOnMountOrArgChange: 30 },
-    );
+    useGetStudioBookingsQuery(studio ? studio.id : skipToken, {
+      refetchOnMountOrArgChange: 30,
+    });
 
   const { data: devices, isError: isDevicesError } =
     useGetTwoFactorDevicesQuery(user?.isStylist ? user.id : skipToken, {

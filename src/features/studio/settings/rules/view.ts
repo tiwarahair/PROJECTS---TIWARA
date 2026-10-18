@@ -1,6 +1,6 @@
 // Studio → Settings → Booking rules.
 import type { ChangeEvent } from "react";
-import { saveBookingRules } from "../../../../lib/studio-api";
+import { saveBookingRules } from "../../../../lib/studio-api/settings";
 import { formatDuration } from "../../../../utils/dates";
 import { getSettingsSave } from "../save";
 import { formatMinutes } from "../../core/format";

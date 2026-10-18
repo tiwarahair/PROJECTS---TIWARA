@@ -1,10 +1,8 @@
 // The stylist's business from the database → the parts of Studio's state it fills.
 import type { PayoutStatus } from "../../../components/account-settings/logic";
-import type {
-  StripeAccountState,
-  StylistStudio,
-} from "../../../lib/studio-api";
-import { getPhotoUrl } from "../../../lib/studio-api";
+import type { StylistStudio } from "../../../lib/studio-api";
+import type { StripeAccountState } from "../../../lib/studio-api/settings";
+import { getPhotoUrl } from "../../../lib/studio-api/photos";
 import { toShownBusinessType } from "../../../utils/business-type";
 import { MONDAY_FIRST_WEEKDAYS } from "../../../utils/dates";
 import { bySort } from "../../../utils/sort";

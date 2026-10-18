@@ -1,3 +1,4 @@
+import { LONG_MONTHS, SHORT_MONTHS } from "../../../utils/dates";
 import {
   categoryColours,
   platformCustomisations,
@@ -60,11 +61,10 @@ export const BLOCK_COLORS: BlockColour[] = [
   { id: "grey", label: "Grey", hex: "#7d7465" },
 ];
 
-export const PAST_MONTHS: Record<string, string> = {
-  Sep: "September",
-  Aug: "August",
-  Jul: "July",
-};
+/** "Sep" → "September", for Past's month headings. */
+export const PAST_MONTHS: Record<string, string> = Object.fromEntries(
+  SHORT_MONTHS.map((short, index) => [short, LONG_MONTHS[index] ?? short]),
+);
 
 interface PastTone {
   background: string;

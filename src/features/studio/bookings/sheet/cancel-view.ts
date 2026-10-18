@@ -1,4 +1,4 @@
-import { cancelStudioBooking } from "../../../../lib/studio-api";
+import { cancelStudioBooking } from "../../../../lib/studio-api/bookings";
 import type { SheetContext } from "./context";
 
 const getNotice = (hoursToStart: number) =>

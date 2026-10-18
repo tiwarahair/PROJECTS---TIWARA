@@ -76,5 +76,10 @@ export const BookingsList = ({ view }: BookingsListProps) => (
           </div>
         </div>
       ))}
+    {view.hasOlderPast && (
+      <button className={styles.showOlder} onClick={view.loadOlderPast}>
+        {view.olderPastLabel}
+      </button>
+    )}
   </div>
 );

@@ -104,6 +104,8 @@ export const getInitialStudioState = (): StudioState => {
     toastUndo: null,
     extraClients: [],
     bookingClients: [],
+    pastCursor: null,
+    isPastLoading: false,
     clientAddresses: {},
     addStep: 1,
     addClient: null,

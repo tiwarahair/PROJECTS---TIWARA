@@ -9,7 +9,7 @@ import {
   useSetBusinessClosedMutation,
   useUpdateProfileMutation,
 } from "../../../stores/api-slice";
-import { saveNotificationPreference } from "../../../lib/studio-api";
+import { saveNotificationPreference } from "../../../lib/studio-api/settings";
 import { useAppSelector } from "../../../stores/hooks";
 import { toNotificationEvent } from "../core/records";
 import type { StudioController } from "../core/use-studio";

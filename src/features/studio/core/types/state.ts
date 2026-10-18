@@ -4,6 +4,7 @@ import type {
   PayoutStatus,
 } from "../../../../components/account-settings/logic";
 import type { TaxDetails } from "../../../../components/tax-details-form/tax-details-logic";
+import type { PastCursor } from "../../../../lib/studio-api/bookings";
 import type { NOTIFS } from "../seed-dashboard";
 import type {
   BlockDraft,
@@ -150,6 +151,9 @@ export interface StudioState {
   toastUndo: (() => void) | null;
   extraClients: StudioClient[];
   bookingClients: StudioClient[];
+  /** Where the next page of a real account's Past starts; null once it's all loaded. */
+  pastCursor: PastCursor | null;
+  isPastLoading: boolean;
   clientAddresses: Record<string, string>;
   sheetBookingId?: number | null;
   sheetClientId?: string | null;

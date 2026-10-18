@@ -1,46 +1,17 @@
 import { describe, expect, it } from "vitest";
-import type { StudioBookingRow } from "../../../../lib/studio-api";
-import { fromLondonTime } from "../../../../utils/london-time";
-import { toDate } from "../../core/blocked-time";
+import type { StudioBookingRow } from "../../../../lib/studio-api/bookings";
+import { getRow } from "../../../../test/studio-booking-row";
 import { toStartsAt, toStudioBookings } from "../records";
 
-const getRow = (patch: Partial<StudioBookingRow>): StudioBookingRow => ({
-  id: "b-1",
-  status: "confirmed",
-  starts_at: fromLondonTime(toDate(2), "14:30"),
-  minutes: 90,
-  price_pence: 6500,
-  snapshot: { service_name: "Silk press" },
-  contact: {
-    first: "Nia",
-    last: "Okafor",
-    email: "Nia@Example.com",
-    phone: "07700900123",
-  },
-  notes: null,
-  address: null,
-  terms: {
-    mode: "deposit",
-    grace_minutes: 15,
-    free_cancel_until: "2026-10-18T10:00:00+00:00",
-  },
-  reschedule_count: 0,
-  cancelled_at: null,
-  cancelled_by: null,
-  cancellation: null,
-  no_show_at: null,
-  overlap_ok: false,
-  booking_fees: [],
-  refunds: [],
-  payment_links: [],
-  ...patch,
-});
+// the opening load: each row is sorted into upcoming or Past by its status
+const load = (rows: StudioBookingRow[]) =>
+  toStudioBookings({ active: rows, past: rows, pastCursor: null });
 
 describe("toStudioBookings", () => {
   it("shows an upcoming booking on its UK day and time", () => {
     const {
       bookings: [booking],
-    } = toStudioBookings([getRow({})]);
+    } = load([getRow({})]);
 
     expect(booking).toMatchObject({
       remoteId: "b-1",
@@ -58,9 +29,9 @@ describe("toStudioBookings", () => {
   });
 
   it("keeps a booking's number across loads", () => {
-    const first = toStudioBookings([getRow({ id: "b-2" })]).bookings[0]?.id;
+    const first = load([getRow({ id: "b-2" })]).bookings[0]?.id;
 
-    const second = toStudioBookings([
+    const second = load([
       getRow({ id: "b-3" }),
       getRow({ id: "b-2" }),
     ]).bookings;
@@ -70,7 +41,7 @@ describe("toStudioBookings", () => {
   });
 
   it("puts finished bookings in Past, latest change first", () => {
-    const { bookings, pastNew } = toStudioBookings([
+    const { bookings, pastNew } = load([
       getRow({
         id: "b-4",
         status: "cancelled",
@@ -107,7 +78,7 @@ describe("toStudioBookings", () => {
   });
 
   it("lists each client once, from their booking details", () => {
-    const { bookings, bookingClients } = toStudioBookings([
+    const { bookings, bookingClients } = load([
       getRow({ id: "b-6" }),
       getRow({ id: "b-7" }),
     ]);
@@ -126,10 +97,31 @@ describe("toStudioBookings", () => {
   });
 
   it("saves a moved booking at the time Studio shows", () => {
-    const [booking] = toStudioBookings([
+    const [booking] = load([
       getRow({ id: "b-8", starts_at: toStartsAt(3, "09:00") }),
     ]).bookings;
 
     expect(booking).toMatchObject({ dayOffset: 3, time: "09:00" });
+  });
+
+  it("heads Past rows from another year with the year", () => {
+    const { pastNew } = load([
+      getRow({
+        id: "old-1",
+        status: "completed",
+        starts_at: "2024-10-12T10:00:00Z",
+        past_at: "2024-10-12T12:00:00Z",
+      }),
+      getRow({
+        id: "new-1",
+        status: "completed",
+        starts_at: new Date().toISOString(),
+        past_at: new Date().toISOString(),
+      }),
+    ]);
+
+    expect(pastNew.map(({ pastId }) => pastId)).toEqual(["new-1", "old-1"]);
+    expect(pastNew[1]?.month).toBe("October 2024");
+    expect(pastNew[0]?.month).not.toMatch(/\d/);
   });
 });

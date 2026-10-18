@@ -5,10 +5,10 @@ import {
   getPhotoUrl,
   removePhoto,
   removePortfolioPhoto,
-  updateStylist,
   uploadPhoto,
   uploadPhotoWithCopies,
-} from "../../../../lib/studio-api";
+} from "../../../../lib/studio-api/photos";
+import { updateStylist } from "../../../../lib/studio-api/settings";
 import type { StudioContext } from "../../core/actions";
 
 const AVATAR_SIDE = 600;

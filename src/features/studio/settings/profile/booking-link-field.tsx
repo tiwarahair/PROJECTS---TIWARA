@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { changeSlug, isSlugFree } from "../../../../lib/studio-api";
+import { changeSlug, isSlugFree } from "../../../../lib/studio-api/settings";
 import { joinClassNames } from "../../../../utils/class-names";
 import { SHORT_MONTHS } from "../../../../utils/dates";
 import type { StudioController } from "../../core/use-studio";

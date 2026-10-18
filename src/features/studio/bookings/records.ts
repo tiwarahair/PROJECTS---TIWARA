@@ -1,8 +1,11 @@
 // Bookings from the database → Studio's upcoming bookings, past appointments and their clients.
-import type { StudioBookingRow } from "../../../lib/studio-api";
+import type {
+  StudioBookingRow,
+  StudioBookings,
+} from "../../../lib/studio-api/bookings";
 import type { AddressValue } from "../../../types/address";
 import { getAddressOneLine } from "../../../utils/address";
-import { formatDuration } from "../../../utils/dates";
+import { formatDuration, LONG_MONTHS } from "../../../utils/dates";
 import { fromLondonTime, toLondonTime } from "../../../utils/london-time";
 import { toDate, toOffset } from "../core/blocked-time";
 import {
@@ -152,6 +155,7 @@ export const toPastRecord = (row: StudioBookingRow): PastRecord => {
   const refunded = getRefunded(row);
   const refundNote = getRefundNote(refunded, fee);
   const markedAt = row.no_show_at ?? row.cancelled_at ?? row.starts_at;
+  const pastAt = Date.parse(row.past_at ?? markedAt);
 
   const getMeta = () => {
     if (refunded) return "Refunded";
@@ -170,8 +174,10 @@ export const toPastRecord = (row: StudioBookingRow): PastRecord => {
     duration: booking.duration,
     when: dateLabel(booking.dayOffset),
     time: booking.time,
+    month: getMonthLabel(row.starts_at),
     status,
     at: Date.parse(markedAt),
+    pastAt,
     ...(status === "Cancelled"
       ? {
           meta: getMeta(),
@@ -207,18 +213,43 @@ export const toBookingClient = (row: StudioBookingRow): StudioClient => {
   };
 };
 
-/** Upcoming bookings, past appointments (latest change first) and everyone who booked. */
-export const toStudioBookings = (rows: StudioBookingRow[]) => {
-  const clients = new Map(rows.map((row) => [getClientKey(row), row]));
+export const isActiveRow = ({ status }: StudioBookingRow) =>
+  status in UPCOMING_STATUSES;
+
+export const isPastRow = ({ status }: StudioBookingRow) =>
+  status in PAST_STATUSES;
+
+/** Past newest first, in the database's own order, so pages join up. */
+export const sortPast = (rows: PastRecord[]) =>
+  rows.sort(
+    (first, second) =>
+      (second.pastAt ?? second.at ?? 0) - (first.pastAt ?? first.at ?? 0),
+  );
+
+/** "October", or "October 2025" for another year. */
+const getMonthLabel = (startsAt: string) => {
+  const [year = "", month = ""] = toLondonTime(startsAt).date.split("-");
+  const name = LONG_MONTHS[Number(month) - 1] ?? "";
+
+  return year === toLondonTime(new Date().toISOString()).date.slice(0, 4)
+    ? name
+    : `${name} ${year}`;
+};
+
+/** Studio's opening state: upcoming bookings, the first page of Past and everyone who booked. */
+export const toStudioBookings = ({
+  active,
+  past,
+  pastCursor,
+}: StudioBookings) => {
+  const clients = new Map(
+    [...active, ...past].map((row) => [getClientKey(row), row]),
+  );
 
   return {
-    bookings: rows
-      .filter(({ status }) => status in UPCOMING_STATUSES)
-      .map(toStudioBooking),
-    pastNew: rows
-      .filter(({ status }) => status in PAST_STATUSES)
-      .map(toPastRecord)
-      .sort((first, second) => (second.at ?? 0) - (first.at ?? 0)),
+    bookings: active.filter(isActiveRow).map(toStudioBooking),
+    pastNew: sortPast(past.filter(isPastRow).map(toPastRecord)),
     bookingClients: [...clients.values()].map(toBookingClient),
+    pastCursor,
   };
 };

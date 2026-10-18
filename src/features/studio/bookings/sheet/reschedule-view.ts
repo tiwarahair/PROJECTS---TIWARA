@@ -1,5 +1,5 @@
 import type { ChangeEvent } from "react";
-import { rescheduleStudioBooking } from "../../../../lib/studio-api";
+import { rescheduleStudioBooking } from "../../../../lib/studio-api/bookings";
 import { SLOT_TIMES } from "../../core/constants";
 import { dayInfo, timeToMinutes } from "../../core/format";
 import {

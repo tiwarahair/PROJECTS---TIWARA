@@ -5,7 +5,7 @@ import { joinClassNames } from "../../../../utils/class-names";
 import type { StudioController } from "../../core/use-studio";
 import styles from "../../../../styles/features/studio/settings/availability/closed-sheet.module.css";
 import fields from "../../../../styles/features/studio/settings/availability/sheet-fields.module.css";
-import { saveClosedPeriod } from "../../../../lib/studio-api";
+import { saveClosedPeriod } from "../../../../lib/studio-api/settings";
 import { formatClosedSpan } from "../../core/blocked-time";
 import { closedSchema } from "./closed-schema";
 import type { ClosedValues } from "./closed-schema";

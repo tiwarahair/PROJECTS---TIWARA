@@ -1,5 +1,5 @@
 // What the settings pages share for saving: a stylist-row save and the "Discard changes?" baseline.
-import { updateStylist } from "../../../lib/studio-api";
+import { updateStylist } from "../../../lib/studio-api/settings";
 import type { TablesUpdate } from "../../../types/database";
 import type { StudioPatch } from "../core/types";
 import type { StudioController } from "../core/use-studio";

@@ -1,6 +1,9 @@
 import type { BusinessValue } from "../../../components/business-details/types";
 import { geocodeAddress } from "../../../lib/google-maps";
-import { updateStylist, updateStylistAddress } from "../../../lib/studio-api";
+import {
+  updateStylist,
+  updateStylistAddress,
+} from "../../../lib/studio-api/settings";
 import { toStoredBusinessType } from "../../../utils/business-type";
 
 const getAddressQuery = ({ type, details }: BusinessValue) =>

@@ -1,7 +1,7 @@
 import { FunctionsHttpError } from "@supabase/supabase-js";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import type { TaxDetails } from "../../../../../components/tax-details-form/tax-details-logic";
-import { saveTaxDetails } from "../../../../../lib/studio-api";
+import { saveTaxDetails } from "../../../../../lib/studio-api/settings";
 import {
   listTwoFactorDevices,
   startTwoFactorEnrolment,
@@ -16,7 +16,9 @@ import { createTaxActions } from "../../payouts/tax-actions";
 import { createTwoFactorActions } from "../actions";
 import type { StudioPatch, StudioState } from "../../../core/types";
 
-vi.mock("../../../../../lib/studio-api", () => ({ saveTaxDetails: vi.fn() }));
+vi.mock("../../../../../lib/studio-api/settings", () => ({
+  saveTaxDetails: vi.fn(),
+}));
 
 vi.mock("../../../../../lib/two-factor", () => ({
   confirmTwoFactorEnrolment: vi.fn(() => Promise.resolve(true)),

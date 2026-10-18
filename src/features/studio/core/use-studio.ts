@@ -17,10 +17,12 @@ import { getSeedPast } from "./seed-bookings";
 import { applyFixture } from "./fixtures";
 import { getQueryParam, getSteps } from "./model";
 import { createServiceActions } from "../services/actions";
-import type { StudioBookingRow, StylistStudio } from "../../../lib/studio-api";
+import type { StudioBookings } from "../../../lib/studio-api/bookings";
+import type { StylistStudio } from "../../../lib/studio-api";
 import { toStudioBookings } from "../bookings/records";
 import { toStudioPatch } from "./records";
 import { useCatalogueSync } from "../services/catalogue-sync";
+import { watchStudio } from "./live";
 import { createStudioSync } from "./sync";
 import {
   getDiscardConfirm,
@@ -50,7 +52,7 @@ export interface StudioProps {
 export interface StudioSeed {
   owner: StudioState["owner"];
   studio: StylistStudio;
-  bookings: StudioBookingRow[];
+  bookings: StudioBookings;
   devices: TwoFactorDevice[];
 }
 
@@ -249,6 +251,16 @@ export const useStudio = (props: StudioProps) => {
   const latest = useRef({ actions, serviceActions, context });
 
   latest.current = { actions, serviceActions, context };
+
+  useEffect(() => {
+    if (!stylistId) return;
+
+    return watchStudio(stylistId, () => ({
+      context: latest.current.context,
+      showToast: latest.current.actions.showToast,
+      closeSheet: latest.current.actions.closeSheet,
+    }));
+  }, [stylistId]);
 
   useEffect(() => {
     if (!stylistId) return;

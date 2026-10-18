@@ -7,7 +7,7 @@ import { getFromWithFee } from "../utils/services";
 import { bySort } from "../utils/sort";
 import type { PublicProfile, WorkingHours } from "./public-profiles";
 import { toService } from "./public-services";
-import { getPhotoUrl } from "./studio-api";
+import { getPhotoUrl } from "./studio-api/photos";
 
 export interface PublicStylist {
   stylist: Stylist;

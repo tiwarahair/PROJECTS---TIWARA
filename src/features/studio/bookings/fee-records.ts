@@ -1,5 +1,5 @@
 // A booking's fee and refunds from the database → the flags Past shows and acts on.
-import type { StudioBookingRow } from "../../../lib/studio-api";
+import type { StudioBookingRow } from "../../../lib/studio-api/bookings";
 import { formatMoney } from "../../../utils/money";
 import type { PastRecord } from "../core/types";
 

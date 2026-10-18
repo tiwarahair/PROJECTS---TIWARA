@@ -40,13 +40,11 @@ import { SEARCH_PAGE_SIZE, searchStylists } from "../lib/search-api";
 import type { SearchArgs, SearchRow } from "../lib/search-api";
 import type { PublicProfile } from "../lib/public-profiles";
 import { supabase } from "../lib/supabase";
-import {
-  closeBusiness,
-  fetchStudioBookings,
-  fetchStylistStudio,
-  reopenBusiness,
-} from "../lib/studio-api";
-import type { StudioBookingRow, StylistStudio } from "../lib/studio-api";
+import { fetchStudioBookings } from "../lib/studio-api/bookings";
+import { fetchStylistStudio } from "../lib/studio-api";
+import { closeBusiness, reopenBusiness } from "../lib/studio-api/settings";
+import type { StudioBookings } from "../lib/studio-api/bookings";
+import type { StylistStudio } from "../lib/studio-api";
 import { fetchPaymentLink, startLinkPayment } from "../lib/payment-link-api";
 import type { PaymentLink } from "../lib/payment-link-api";
 import { listTwoFactorDevices } from "../lib/two-factor";
@@ -148,13 +146,9 @@ export const api = createApi({
       providesTags: ["Studio"],
       queryFn: (ownerId) => toQueryResult(fetchStylistStudio(ownerId)),
     }),
-    getStudioBookings: build.query<
-      StudioBookingRow[],
-      { stylistId: string; fromDate: string }
-    >({
+    getStudioBookings: build.query<StudioBookings, string>({
       providesTags: ["Bookings"],
-      queryFn: ({ stylistId, fromDate }) =>
-        toQueryResult(fetchStudioBookings(stylistId, fromDate)),
+      queryFn: (stylistId) => toQueryResult(fetchStudioBookings(stylistId)),
     }),
     getStylistProfile: build.query<PublicProfile | null, string>({
       providesTags: ["StylistProfile"],
