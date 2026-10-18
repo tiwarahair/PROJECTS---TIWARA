@@ -6,7 +6,7 @@ import { getAssetUrl } from "../../utils/asset-url";
 import { AccountAvatar, openAccountSection, SiteMenu } from "../site-menu";
 import styles from "../../styles/components/site-header/index.module.css";
 
-/** The nav links show from this width (site-header.module.css hides them up to 760px). */
+/** The nav links show from this width (index.module.css hides them up to 760px). */
 const NAV_LINKS_FROM = 761;
 
 const LINKS = [

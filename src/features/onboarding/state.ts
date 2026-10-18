@@ -1,4 +1,4 @@
-// Onboarding state and props (validation lives in onboarding-field-schemas.ts and onboarding-screen-schemas.ts).
+// Onboarding state and props (validation lives in field-schemas.ts and screen-schemas.ts).
 import type { AuthFailure } from "../../lib/auth-errors";
 
 export interface OnboardingProps {
