@@ -5,7 +5,7 @@ import { joinClassNames } from "../../utils/class-names";
 import type { ProfileFacts } from "./profile-facts";
 import type { OpenStatus } from "./profile-hours";
 import styles from "../../styles/features/stylist-profile/profile-lede.module.css";
-import pageGlobal from "../../styles/features/stylist-profile/stylist-profile-page-global.module.css";
+import pageGlobal from "../../styles/features/stylist-profile/index-global.module.css";
 
 interface ProfileLedeProps {
   stylist: Stylist;

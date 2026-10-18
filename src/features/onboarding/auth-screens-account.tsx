@@ -1,9 +1,9 @@
 import { Lock } from "lucide-react";
-import { PasswordMeter } from "../../components/password-meter/password-meter";
+import { PasswordMeter } from "../../components/password-meter";
 import { joinClassNames } from "../../utils/class-names";
 import { getPasswordView } from "../../utils/password";
 import { getSupportMailto } from "../../utils/support";
-import { OnboardingTurnstile } from "./onboarding-turnstile";
+import { OnboardingTurnstile } from "./turnstile";
 import {
   ClientConsent,
   MobileField,
@@ -11,8 +11,8 @@ import {
   PasswordInput,
   Spinner,
   SubmitButton,
-} from "./onboarding-fields";
-import { getPasswordCheck } from "./onboarding-field-schemas";
+} from "./fields";
+import { getPasswordCheck } from "./field-schemas";
 import type { OnboardingController } from "./use-onboarding";
 import type { ScreenProps } from "./screen-props";
 import styles from "../../styles/features/onboarding/auth-screens.module.css";

@@ -1,6 +1,6 @@
 // BusinessDetails values, validation and display values
 import type { UseFormRegisterReturn } from "react-hook-form";
-import type { TaxDetails } from "../tax-details-form/tax-details-logic";
+import type { TaxDetails } from "../tax-details-form/logic";
 
 export type BusinessType = "shop" | "chair" | "home" | "mobile";
 export type BusinessPreset =

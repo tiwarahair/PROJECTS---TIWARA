@@ -1,7 +1,7 @@
 import type { AddonForm } from "./use-addon-form";
 import type { CSSProperties } from "react";
 import { Check, ChevronDown, ChevronUp, Plus, Trash } from "lucide-react";
-import { SearchSelect } from "../../../components/search-select/search-select";
+import { SearchSelect } from "../../../components/search-select";
 import { joinClassNames } from "../../../utils/class-names";
 import {
   DURATION_HOUR_OPTIONS,

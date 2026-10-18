@@ -1,9 +1,9 @@
-import { ResponsiveImage } from "../../components/responsive-image/responsive-image";
+import { ResponsiveImage } from "../../components/responsive-image";
 import { useRef } from "react";
 import { Link } from "react-router";
 import { serviceGroups } from "../../data";
 import { joinClassNames } from "../../utils/class-names";
-import page from "../../styles/features/home/home-page.module.css";
+import page from "../../styles/features/home/index.module.css";
 import styles from "../../styles/features/home/looks-section.module.css";
 import { useGridReveal } from "./use-grid-reveal";
 

@@ -1,5 +1,5 @@
 import { formatPostcode, isPostcodeValid } from "../../utils/address";
-import type { TaxDetails } from "../tax-details-form/tax-details-logic";
+import type { TaxDetails } from "../tax-details-form/logic";
 
 const AREAS: Record<string, string> = {
   M13: "Longsight",

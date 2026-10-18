@@ -1,6 +1,6 @@
 // Settings pages ⇄ database rows: working hours and the payment policy.
 import type { PolicyValue } from "../../../components/payment-policy/types";
-import type { TaxDetails } from "../../../components/tax-details-form/tax-details-logic";
+import type { TaxDetails } from "../../../components/tax-details-form/logic";
 import type { StylistStudio } from "../../../lib/studio-api";
 import type { Json, TablesInsert } from "../../../types/database";
 import type { StudioState } from "../core/types";

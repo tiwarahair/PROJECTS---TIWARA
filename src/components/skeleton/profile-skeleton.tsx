@@ -1,5 +1,5 @@
 import Skeleton from "react-loading-skeleton";
-import { ResponsiveImage } from "../responsive-image/responsive-image";
+import { ResponsiveImage } from "../responsive-image";
 import { PROFILE_COVER_SIZES } from "../../utils/image-sources";
 import { joinClassNames } from "../../utils/class-names";
 import styles from "../../styles/components/skeleton/profile-skeleton.module.css";

@@ -5,7 +5,7 @@ import { joinClassNames } from "../../utils/class-names";
 import type { LastSearch } from "../../utils/last-search";
 import type { ProfileActions } from "./profile-cover";
 import styles from "../../styles/features/stylist-profile/profile-sticky-bar.module.css";
-import pageGlobal from "../../styles/features/stylist-profile/stylist-profile-page-global.module.css";
+import pageGlobal from "../../styles/features/stylist-profile/index-global.module.css";
 
 interface ProfileStickyBarProps {
   name: string;

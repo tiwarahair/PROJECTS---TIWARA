@@ -8,7 +8,7 @@ import { useUpdateProfileMutation } from "../../../stores/api-slice";
 import { useAppDispatch } from "../../../stores/hooks";
 import { logOut as logOutSession } from "../../../stores/session-slice";
 import { writeSession } from "../../../utils/page-flags";
-import { getScreenPath } from "../../onboarding/onboarding-routes";
+import { getScreenPath } from "../../onboarding/routes";
 import { getContactChanges } from "../logic/details";
 import { saveDraft } from "../logic/draft";
 import { focusLater } from "../logic/focus";

@@ -1,8 +1,8 @@
 import { getAssetUrl } from "../../utils/asset-url";
 import { joinClassNames } from "../../utils/class-names";
-import { WIZARD_TITLES } from "./onboarding-data";
+import { WIZARD_TITLES } from "./data";
 import { ChevronLeft } from "lucide-react";
-import { ModeIcon } from "./onboarding-fields";
+import { ModeIcon } from "./fields";
 import type { ScreenProps } from "./screen-props";
 import { MapsProvider } from "../../lib/google-maps";
 import { StepAccount } from "./step-account";

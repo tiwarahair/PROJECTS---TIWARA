@@ -1,6 +1,6 @@
 import { useNavigate } from "react-router";
 import { Button } from "../../components/ds/button";
-import { SiteHeader } from "../../components/site-header/site-header";
+import { SiteHeader } from "../../components/site-header";
 import { useSetBusinessClosedMutation } from "../../stores/api-slice";
 import { SHORT_MONTHS } from "../../utils/dates";
 import styles from "../../styles/features/studio/closed-business.module.css";

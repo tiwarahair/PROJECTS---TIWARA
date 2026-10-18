@@ -3,7 +3,7 @@ import type { FieldPath } from "react-hook-form";
 import type { EmittedAddress } from "../../components/address-finder/data";
 import { geocodeAddress } from "../../lib/google-maps";
 import { isAddressValid } from "../../utils/address";
-import type { OnboardingForm } from "./onboarding-state";
+import type { OnboardingForm } from "./state";
 import type { OnboardingCore } from "./use-onboarding";
 
 export const useOnboardingAddress = ({

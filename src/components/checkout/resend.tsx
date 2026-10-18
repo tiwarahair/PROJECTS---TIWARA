@@ -4,7 +4,7 @@ import { getViewAnimation } from "./detail";
 import { Chip } from "./controls";
 import type { CheckoutController } from "./use-checkout";
 import styles from "../../styles/components/checkout/resend.module.css";
-import shared from "../../styles/components/checkout/checkout-sheet.module.css";
+import shared from "../../styles/components/checkout/index.module.css";
 
 export const CheckoutResend = ({
   checkout: { state, booking, resendForm, startResend },

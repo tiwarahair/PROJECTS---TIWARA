@@ -1,6 +1,6 @@
 import { serviceGroups } from "../../data";
 import { joinClassNames } from "../../utils/class-names";
-import page from "../../styles/features/home/home-page.module.css";
+import page from "../../styles/features/home/index.module.css";
 import styles from "../../styles/features/home/styles-marquee.module.css";
 
 /** Ink band of service-group names scrolling forever; the second copy is for the seamless loop. */

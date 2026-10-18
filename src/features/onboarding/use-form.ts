@@ -1,7 +1,7 @@
 import { useEffect } from "react";
 import type { FieldPath, PathValue } from "react-hook-form";
-import type { FieldBinding } from "./onboarding-fields";
-import type { OnboardingForm } from "./onboarding-state";
+import type { FieldBinding } from "./fields";
+import type { OnboardingForm } from "./state";
 import type { OnboardingBase } from "./use-base";
 
 /** Form fields typed into text inputs. */

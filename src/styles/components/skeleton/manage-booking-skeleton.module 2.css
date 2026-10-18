@@ -1,0 +1,20 @@
+.title {
+  margin-top: 14px;
+}
+
+.card {
+  margin-top: 24px;
+  padding: 22px 24px;
+  border-radius: var(--radius-md);
+  background: var(--accent-wash);
+  display: grid;
+  gap: 8px;
+}
+
+.fact {
+  margin-top: 12px;
+}
+
+.button {
+  margin-top: 22px;
+}

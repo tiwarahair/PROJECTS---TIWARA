@@ -3,7 +3,7 @@ import type { BusinessValue } from "../../../components/business-details/types";
 import type { PolicyValue } from "../../../components/payment-policy/types";
 import type { PaymentPolicyApi } from "../../../components/payment-policy";
 import type { AccountSettingsApi } from "../../../components/account-settings/use-account-settings";
-import type { TaxDetails } from "../../../components/tax-details-form/tax-details-logic";
+import type { TaxDetails } from "../../../components/tax-details-form/logic";
 import { addPaymentPolicy } from "../../../lib/studio-api";
 import { hasRecentSecondFactor } from "../../../lib/two-factor";
 import { getAvailabilityView } from "./availability/view";

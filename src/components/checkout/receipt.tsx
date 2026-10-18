@@ -5,7 +5,7 @@ import { getReceiptView } from "./receipt-view";
 import type { CheckoutViewModel } from "./view";
 import type { CheckoutController } from "./use-checkout";
 import styles from "../../styles/components/checkout/receipt.module.css";
-import shared from "../../styles/components/checkout/checkout-sheet.module.css";
+import shared from "../../styles/components/checkout/index.module.css";
 
 export const CheckoutReceipt = ({
   checkout,

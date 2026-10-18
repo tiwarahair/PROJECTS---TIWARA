@@ -2,15 +2,15 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { useLocation, useNavigate } from "react-router";
 import { useViewportWidth } from "../../hooks/use-viewport-width";
-import { getEmptySuggestions } from "./search-empty-suggestions";
-import { createFieldActions } from "./search-field-actions";
-import { createFilterActions } from "./search-filter-actions";
-import { getFixturePatch } from "./search-fixtures";
-import { getInitialState, getStateSearch } from "./search-state";
-import type { SearchState } from "./search-state";
-import { getWhatModel, getWhereModel } from "./search-suggestions";
-import { CLOSE_ALL, DEFAULT_DRAFT } from "./search-update";
-import type { Update } from "./search-update";
+import { getEmptySuggestions } from "./empty-suggestions";
+import { createFieldActions } from "./field-actions";
+import { createFilterActions } from "./filter-actions";
+import { getFixturePatch } from "./fixtures";
+import { getInitialState, getStateSearch } from "./state";
+import type { SearchState } from "./state";
+import { getWhatModel, getWhereModel } from "./suggestions";
+import { CLOSE_ALL, DEFAULT_DRAFT } from "./update";
+import type { Update } from "./update";
 import { useSearchData } from "./use-search-data";
 import { NO_PLACES } from "./use-place-suggestions";
 

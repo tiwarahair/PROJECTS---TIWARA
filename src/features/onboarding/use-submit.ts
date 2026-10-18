@@ -20,9 +20,9 @@ import type { StylistDetails } from "../../types/auth";
 import { toStoredBusinessType } from "../../utils/business-type";
 import { rememberDevice } from "../../lib/supabase";
 import { getAuthFailure } from "../../lib/auth-errors";
-import { TURNSTILE_SCREENS } from "./onboarding-data";
-import { EMPTY_CODE, isCodeScreen } from "./onboarding-state";
-import type { OnboardingForm } from "./onboarding-state";
+import { TURNSTILE_SCREENS } from "./data";
+import { EMPTY_CODE, isCodeScreen } from "./state";
+import type { OnboardingForm } from "./state";
 import type { OnboardingCore } from "./use-onboarding";
 
 const LOCK_MS = 9e5;

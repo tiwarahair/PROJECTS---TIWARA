@@ -3,10 +3,7 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useLocation } from "react-router";
 import { usePasswordChecker } from "../../hooks/use-password-checker";
-import type {
-  TaxBusiness,
-  TaxDetails,
-} from "../tax-details-form/tax-details-logic";
+import type { TaxBusiness, TaxDetails } from "../tax-details-form/logic";
 import { DEMO_BACKEND } from "./backend";
 import { nameSchema } from "./name-schema";
 import { EMPTY_PASSWORD } from "./password-schema";

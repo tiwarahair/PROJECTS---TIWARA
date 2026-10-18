@@ -1,7 +1,7 @@
-import { ResponsiveImage } from "../../components/responsive-image/responsive-image";
+import { ResponsiveImage } from "../../components/responsive-image";
 import { joinClassNames } from "../../utils/class-names";
 import styles from "../../styles/features/stylist-profile/profile-portfolio.module.css";
-import pageGlobal from "../../styles/features/stylist-profile/stylist-profile-page-global.module.css";
+import pageGlobal from "../../styles/features/stylist-profile/index-global.module.css";
 
 interface ProfilePortfolioProps {
   portfolio: string[];

@@ -1,4 +1,4 @@
-import { getBackScreen } from "./onboarding-state";
+import { getBackScreen } from "./state";
 import type { OnboardingBase } from "./use-base";
 
 interface SubmitActions {

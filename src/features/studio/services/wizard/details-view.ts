@@ -1,5 +1,5 @@
 import type { ChangeEvent, FocusEvent, MouseEvent } from "react";
-import type { SearchSelectOption } from "../../../../components/search-select/search-select";
+import type { SearchSelectOption } from "../../../../components/search-select";
 import { serviceTypes } from "../../../../data";
 import type { ServiceType } from "../../../../types/service-type";
 import { getSwatches } from "../catalog-sheets-view";
