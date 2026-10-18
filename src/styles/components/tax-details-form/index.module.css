@@ -13,114 +13,10 @@
   min-width: 0;
 }
 
-.legend {
-  padding: 0;
-  font-size: 14.5px;
-  font-weight: 600;
-  margin-bottom: 10px;
-}
-
-.kinds {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(min(100%, 200px), 1fr));
-  gap: 10px;
-}
-
-.tile {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  width: 100%;
-  min-height: 56px;
-  padding: 12px 14px;
-  box-sizing: border-box;
-  border-radius: var(--radius-md);
-  text-align: left;
-  font: inherit;
-  color: inherit;
-  cursor: pointer;
-  transition:
-    background-color 0.16s cubic-bezier(0.2, 0.8, 0.2, 1),
-    border-color 0.16s;
-}
-
-.tile:active {
-  transform: scale(0.98) !important;
-}
-
-.tileLabel {
-  flex: 1;
-  min-width: 0;
-  font-size: 15px;
-}
-
-.ring {
-  width: 20px;
-  height: 20px;
-  box-sizing: border-box;
-  border-radius: var(--radius-full);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  flex: 0 0 auto;
-}
-
-.dot {
-  width: 10px;
-  height: 10px;
-  border-radius: var(--radius-full);
-  background: var(--accent-700);
-  transition: opacity 0.16s;
-}
-
 .group {
   display: flex;
   flex-direction: column;
   gap: 22px;
-}
-
-.question {
-  font-size: 14.5px;
-  font-weight: 600;
-  margin-bottom: 10px;
-  text-wrap: pretty;
-}
-
-.chips {
-  display: flex;
-  gap: 8px;
-}
-
-.chip {
-  height: 40px;
-  min-width: 76px;
-  padding: 0 18px;
-  border-radius: var(--radius-full);
-  font: inherit;
-  font-size: 14.5px;
-  font-weight: 600;
-  cursor: pointer;
-  transition:
-    background-color 0.16s cubic-bezier(0.2, 0.8, 0.2, 1),
-    color 0.16s;
-}
-
-.chip:active {
-  transform: scale(0.97) !important;
-}
-
-.nameFields {
-  display: flex;
-  flex-direction: column;
-  gap: 14px;
-  margin-top: 16px;
-  animation: txin 0.22s cubic-bezier(0.2, 0.8, 0.2, 1) both;
-}
-
-.hint {
-  font-size: 13.5px;
-  line-height: 1.45;
-  color: var(--neutral-600);
 }
 
 .label {
@@ -160,19 +56,6 @@
   color: var(--accent-700);
 }
 
-.dobLegend {
-  padding: 0;
-  font-size: 14.5px;
-  font-weight: 600;
-  margin-bottom: 8px;
-}
-
-.dobRow {
-  display: flex;
-  align-items: flex-end;
-  gap: 8px;
-}
-
 .dobInput {
   width: 100%;
   box-sizing: border-box;
@@ -207,54 +90,6 @@
   margin-bottom: 8px;
 }
 
-.sectionTitle {
-  font-size: 14.5px;
-  font-weight: 600;
-}
-
-.sectionHelp {
-  font-size: 13.5px;
-  line-height: 1.45;
-  color: var(--neutral-600);
-  margin-top: 4px;
-}
-
-.sameLabel {
-  display: flex;
-  align-items: flex-start;
-  gap: 12px;
-  margin-top: 12px;
-  font-size: 15px;
-  line-height: 1.45;
-  cursor: pointer;
-}
-
-.checkbox {
-  flex: 0 0 auto;
-  width: 20px;
-  height: 20px;
-  margin: 1px 0 0;
-  accent-color: var(--accent-700);
-}
-
-.sameText {
-  margin: 10px 0 0;
-  padding: 12px 14px;
-  border-radius: var(--radius-sm);
-  background: var(--fill-quiet, rgba(26, 23, 20, 0.05));
-  font-size: 14.5px;
-  line-height: 1.5;
-  color: var(--neutral-700, #3d3730);
-}
-
-.finder {
-  margin-top: 12px;
-}
-
-.niWrap {
-  position: relative;
-}
-
 .niInput {
   width: 100%;
   box-sizing: border-box;
@@ -274,31 +109,6 @@
 .niInput:focus {
   border-color: var(--accent-700) !important;
   box-shadow: 0 0 0 3px var(--accent-glow, rgba(143, 17, 18, 0.35)) !important;
-}
-
-.niToggle {
-  position: absolute;
-  right: 4px;
-  top: 3px;
-  width: 44px;
-  height: 44px;
-  border: none;
-  background: none;
-  border-radius: var(--radius-full);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  color: var(--neutral-600);
-  cursor: pointer;
-  padding: 0;
-}
-
-.niToggle:hover {
-  background: var(--fill-quiet, rgba(26, 23, 20, 0.05)) !important;
-}
-
-.niToggle:active {
-  transform: scale(0.92) !important;
 }
 
 .note {
@@ -369,54 +179,6 @@
 }
 
 /* runtime states (tiles, chips, field borders / transitions, date-of-birth part widths) */
-.tileOn {
-  border: 1px solid var(--accent-700);
-  background: var(--accent-wash, rgba(143, 17, 18, 0.06));
-}
-
-.tileOff {
-  border: 1px solid var(--border-subtle);
-  background: transparent;
-}
-
-.tileLabelOn {
-  font-weight: 600;
-  color: var(--accent-700);
-}
-
-.tileLabelOff {
-  font-weight: 500;
-  color: var(--text-primary);
-}
-
-.ringOn {
-  border: 1.5px solid var(--accent-700);
-}
-
-.ringOff {
-  border: 1.5px solid var(--border-strong);
-}
-
-.dotOn {
-  opacity: 1;
-}
-
-.dotOff {
-  opacity: 0;
-}
-
-.chipOn {
-  border: 1px solid transparent;
-  background: #1a1714;
-  color: var(--neutral-100, #fdfbf5);
-}
-
-.chipOff {
-  border: 1px solid var(--border-strong, #d8d2c6);
-  background: transparent;
-  color: var(--text-primary);
-}
-
 .fieldOk {
   border: 1px solid var(--border-strong, #d8d2c6);
 }
@@ -441,22 +203,4 @@
 
 .dobLong {
   width: 96px;
-}
-
-/* keyframes are scoped per file in CSS modules, so shared ones are repeated */
-@keyframes txin {
-  from {
-    opacity: 0;
-    transform: translateY(6px);
-  }
-  to {
-    opacity: 1;
-    transform: none;
-  }
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .nameFields[data-tx-anim] {
-    animation: none !important;
-  }
 }

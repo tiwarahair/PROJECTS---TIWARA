@@ -1,0 +1,87 @@
+.photoHead {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  gap: 6px 20px;
+  align-items: center;
+}
+
+.photoBody {
+  flex: 1 1 200px;
+  min-width: 0;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  flex-wrap: wrap;
+}
+
+.photoButton {
+  position: relative;
+  flex: none;
+  width: 56px;
+  height: 56px;
+  padding: 0;
+  border: none;
+  border-radius: var(--radius-full);
+  background: none;
+  cursor: pointer;
+  transition: transform 0.16s cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+
+.photoButton:hover {
+  filter: brightness(0.96) !important;
+}
+
+.photoButton:active {
+  transform: scale(0.96) !important;
+}
+
+.photoAvatar {
+  width: 56px;
+  height: 56px;
+  border-radius: var(--radius-full);
+  overflow: hidden;
+  background: var(--accent-wash);
+  color: var(--accent-700);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: "Schibsted Grotesk", sans-serif;
+  font-weight: 600;
+  font-size: 20px;
+  letter-spacing: -0.01em;
+}
+
+.avatarImage {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center 25%;
+  display: block;
+}
+
+.photoBadge {
+  position: absolute;
+  right: -4px;
+  bottom: -4px;
+  width: 26px;
+  height: 26px;
+  border-radius: var(--radius-full);
+  background: var(--neutral-50);
+  color: var(--neutral-900);
+  box-shadow: 0 1px 3px rgba(26, 23, 20, 0.18);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.fileInput {
+  display: none;
+}
+
+.photoHint {
+  margin-top: 10px;
+  font-size: 13.5px;
+  line-height: 1.5;
+  color: var(--neutral-600);
+}

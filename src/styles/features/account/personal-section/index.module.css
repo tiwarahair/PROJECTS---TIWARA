@@ -1,0 +1,44 @@
+.linkButton {
+  border: none;
+  background: none;
+  padding: 8px 0;
+  font: inherit;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  color: var(--accent-700);
+}
+
+.linkButton:hover {
+  color: var(--accent-900) !important;
+}
+
+.continue {
+  height: 46px;
+  padding: 0 26px;
+  border: none;
+  border-radius: var(--radius-full);
+  background: var(--accent-700);
+  color: var(--neutral-50);
+  font: inherit;
+  font-size: 15px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background-color 0.16s cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+
+.continue:hover {
+  background: var(--accent-900) !important;
+}
+
+.continue:active {
+  transform: scale(0.98) !important;
+}
+
+.footnote {
+  margin: 14px 0 0;
+  font-size: 14px;
+  line-height: 1.55;
+  color: var(--neutral-600);
+  text-wrap: pretty;
+}

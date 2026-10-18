@@ -1,0 +1,138 @@
+.chartCard {
+  background: #fff;
+  border-radius: var(--radius-lg);
+  padding: 16px 18px;
+  margin-top: 10px;
+  box-shadow: var(--shadow-panel);
+}
+
+.chartHead {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.strongText {
+  font-size: 15px;
+  font-weight: 600;
+}
+
+.chartSub {
+  font-size: 13.5px;
+  color: var(--text-secondary);
+  font-variant-numeric: tabular-nums;
+}
+
+.bars {
+  display: flex;
+  align-items: flex-end;
+  height: 124px;
+  margin-top: 14px;
+}
+
+.bar {
+  flex: 1;
+  min-width: 0;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 6px;
+  border: none;
+  background: none;
+  padding: 0;
+  cursor: pointer;
+}
+
+.barAmount {
+  font-size: 12px;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+  color: var(--accent-700);
+  white-space: nowrap;
+  transition: opacity 0.16s;
+}
+
+.barFill {
+  width: 100%;
+  max-width: 24px;
+  border-radius: var(--radius-full);
+  transform-origin: bottom;
+  transition: background-color 0.18s;
+}
+
+.barLabel {
+  font-size: 12px;
+  white-space: nowrap;
+}
+
+.barsWide {
+  gap: 10px;
+}
+
+.barsDense {
+  gap: 4px;
+}
+
+.barAmountShown {
+  opacity: 1;
+}
+
+.barAmountHidden {
+  opacity: 0;
+}
+
+/* the bar height is the takings scaled to the period's maximum; the delay staggers the bars */
+.barFill {
+  height: var(--bar-h);
+  animation: eBar 0.45s cubic-bezier(0.2, 0.8, 0.2, 1) var(--bar-delay) both;
+}
+
+.barFuture {
+  background: var(--fill-quiet);
+}
+
+.barSelected {
+  background: var(--accent-700);
+}
+
+.barDimmed {
+  background: rgba(143, 17, 18, 0.12);
+}
+
+.barIdle {
+  background: rgba(143, 17, 18, 0.22);
+}
+
+.barLabelSelected {
+  color: var(--accent-700);
+}
+
+.barLabelIdle {
+  color: var(--text-secondary);
+}
+
+/* keyframes are scoped per file in CSS modules, so shared ones are repeated */
+@keyframes eBar {
+  from {
+    transform: scaleY(0.2);
+    opacity: 0;
+  }
+  to {
+    transform: none;
+    opacity: 1;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  @keyframes eBar {
+    from {
+      opacity: 0;
+    }
+    to {
+      opacity: 1;
+    }
+  }
+}

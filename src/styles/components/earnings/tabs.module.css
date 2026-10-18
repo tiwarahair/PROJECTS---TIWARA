@@ -1,0 +1,78 @@
+.tabRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  margin: 26px 0 12px;
+  flex-wrap: wrap;
+}
+
+.tabs {
+  display: inline-flex;
+  padding: 3px;
+  border-radius: var(--radius-full);
+  background: var(--fill-quiet);
+}
+
+.tab {
+  height: 34px;
+  padding: 0 18px;
+  border-radius: var(--radius-full);
+  border: none;
+  font: inherit;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition:
+    background-color 0.16s cubic-bezier(0.2, 0.8, 0.2, 1),
+    color 0.16s;
+}
+
+.chips {
+  display: flex;
+  gap: 6px;
+  overflow-x: auto;
+  scrollbar-width: none;
+  max-width: 100%;
+}
+
+.chip {
+  flex: 0 0 auto;
+  height: 34px;
+  padding: 0 14px;
+  border-radius: var(--radius-full);
+  font: inherit;
+  font-size: 13.5px;
+  font-weight: 600;
+  white-space: nowrap;
+  cursor: pointer;
+  transition:
+    background-color 0.16s cubic-bezier(0.2, 0.8, 0.2, 1),
+    color 0.16s;
+}
+
+.chip:active {
+  transform: scale(0.97) !important;
+}
+
+.tabOn {
+  background: #fff;
+  color: var(--text-primary);
+}
+
+.tabOff {
+  background: transparent;
+  color: var(--neutral-600);
+}
+
+.chipOn {
+  border: 1px solid #1a1714;
+  background: #1a1714;
+  color: var(--neutral-100);
+}
+
+.chipOff {
+  border: 1px solid var(--border-strong);
+  background: transparent;
+  color: var(--text-primary);
+}

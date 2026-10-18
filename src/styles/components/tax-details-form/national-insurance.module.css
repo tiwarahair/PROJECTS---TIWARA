@@ -1,0 +1,28 @@
+.niWrap {
+  position: relative;
+}
+
+.niToggle {
+  position: absolute;
+  right: 4px;
+  top: 3px;
+  width: 44px;
+  height: 44px;
+  border: none;
+  background: none;
+  border-radius: var(--radius-full);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--neutral-600);
+  cursor: pointer;
+  padding: 0;
+}
+
+.niToggle:hover {
+  background: var(--fill-quiet, rgba(26, 23, 20, 0.05)) !important;
+}
+
+.niToggle:active {
+  transform: scale(0.92) !important;
+}
