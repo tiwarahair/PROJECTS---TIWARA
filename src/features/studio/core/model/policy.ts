@@ -84,7 +84,10 @@ export const getPolicyFee = (
   const deposit = roundToPence((price * (policy.deposit || 0)) / 100);
 
   const getRefund = () => {
-    if (mode === "deposit") return "Deposit refunded";
+    if (mode === "deposit")
+      return policy.refundable
+        ? "Deposit refunded"
+        : "Deposit kept (non-refundable)";
 
     return mode === "full" ? "Refunded in full" : "Nothing charged";
   };
