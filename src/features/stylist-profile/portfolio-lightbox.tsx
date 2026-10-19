@@ -4,7 +4,7 @@ import { ChevronLeft, ChevronRight } from "lucide-react";
 import { joinClassNames } from "../../utils/class-names";
 import { resolveAssetUrl } from "../../utils/asset-url";
 import styles from "../../styles/features/stylist-profile/portfolio-lightbox.module.css";
-import pageGlobal from "../../styles/features/stylist-profile/stylist-profile-page-global.module.css";
+import pageGlobal from "../../styles/features/stylist-profile/index-global.module.css";
 
 interface PortfolioLightboxProps {
   photos: string[];

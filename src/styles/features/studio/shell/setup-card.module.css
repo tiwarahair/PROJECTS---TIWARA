@@ -1,0 +1,218 @@
+.setupOut {
+  animation: setupout 0.2s cubic-bezier(0.4, 0, 0.7, 0.2) both;
+}
+
+.cardTitleRow {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.cardTitle {
+  font-family: "Schibsted Grotesk", sans-serif;
+  font-size: 18px;
+  font-weight: 600;
+  letter-spacing: -0.02em;
+}
+
+.cardCount {
+  font-size: 13.5px;
+  color: rgba(246, 240, 228, 0.7);
+  white-space: nowrap;
+}
+
+.cardSub {
+  font-size: 14.5px;
+  color: rgba(246, 240, 228, 0.7);
+  margin-top: 3px;
+}
+
+.progressTrack {
+  height: 5px;
+  border-radius: var(--radius-full);
+  background: rgba(246, 240, 228, 0.16);
+  margin: 14px 0 4px;
+  overflow: hidden;
+}
+
+.progressBar {
+  height: 100%;
+  border-radius: var(--radius-full);
+  background: var(--brand-yellow);
+  transform-origin: left;
+  transition: transform 0.52s cubic-bezier(0.2, 0.8, 0.2, 1);
+  /* runtime: the share of setup steps done */
+  transform: scaleX(var(--setup-frac));
+}
+
+.column {
+  display: flex;
+  flex-direction: column;
+}
+
+.setupRow {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+  border: none;
+  border-bottom: 1px solid rgba(246, 240, 228, 0.1);
+  background: none;
+  padding: 12px 0;
+  text-align: left;
+  color: var(--neutral-100);
+  transition: opacity 0.16s;
+}
+
+.setupRow:hover {
+  opacity: 0.8 !important;
+}
+
+.setupRow:active {
+  transform: scale(0.98) !important;
+}
+
+.tick {
+  width: 22px;
+  height: 22px;
+  box-sizing: border-box;
+  border-radius: var(--radius-full);
+  flex: 0 0 auto;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #1a1714;
+  transition:
+    background 0.22s cubic-bezier(0.2, 0.8, 0.2, 1),
+    border-color 0.22s;
+  border: 1.5px solid rgba(246, 240, 228, 0.4);
+  background: transparent;
+  animation: none;
+}
+
+.tickDone {
+  border: 1.5px solid var(--brand-yellow);
+  background: var(--brand-yellow);
+}
+
+.tickPop {
+  animation: tickpop 0.36s cubic-bezier(0.2, 0.8, 0.2, 1) both;
+}
+
+.tickMark {
+  opacity: 0;
+}
+
+.tickDone .tickMark {
+  opacity: 1;
+}
+
+.rowText {
+  flex: 1;
+  min-width: 0;
+  opacity: 1;
+}
+
+.rowTextDone {
+  opacity: 0.6;
+}
+
+.rowLabel {
+  display: block;
+  font-size: 15px;
+  font-weight: 500;
+  text-decoration: none;
+}
+
+.rowTextDone .rowLabel {
+  text-decoration: line-through;
+}
+
+.rowSub {
+  display: block;
+  font-size: 13.5px;
+  line-height: 1.4;
+  color: rgba(246, 240, 228, 0.7);
+  margin-top: 2px;
+  text-wrap: pretty;
+}
+
+.noShrink {
+  flex: 0 0 auto;
+}
+
+.setupPill {
+  position: absolute;
+  right: 20px;
+  bottom: 20px;
+  z-index: 20;
+  height: 46px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  border: none;
+  background: #1a1714;
+  border-radius: var(--radius-full);
+  padding: 0 18px 0 8px;
+  font-size: 14.5px;
+  font-weight: 600;
+  color: var(--neutral-100);
+  white-space: nowrap;
+  box-shadow: var(--shadow-float, 0 18px 44px -18px rgba(26, 23, 20, 0.45));
+  animation: setupin 0.22s cubic-bezier(0.2, 0.8, 0.2, 1) both;
+  transform-origin: bottom right;
+}
+
+.setupPill:active {
+  transform: scale(0.97) !important;
+}
+
+.pillCount {
+  width: 30px;
+  height: 30px;
+  border-radius: var(--radius-full);
+  background: var(--brand-yellow);
+  color: #1a1714;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 12.5px;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+  flex: 0 0 auto;
+}
+
+@keyframes setupin {
+  from {
+    opacity: 0;
+    transform: translateY(12px) scale(0.97);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@keyframes setupout {
+  from {
+    opacity: 1;
+    transform: none;
+  }
+  to {
+    opacity: 0;
+    transform: translateY(10px) scale(0.97);
+  }
+}
+
+@keyframes tickpop {
+  0% {
+    transform: scale(0.6);
+  }
+  60% {
+    transform: scale(1.12);
+  }
+  100% {
+    transform: scale(1);
+  }
+}

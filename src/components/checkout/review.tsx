@@ -6,7 +6,7 @@ import { RECORD_VIA_LABELS, getAdjustNote, getReviewTotal } from "./view";
 import type { CheckoutViewModel, DetailRow } from "./view";
 import type { CheckoutController } from "./use-checkout";
 import flow from "../../styles/components/checkout/flow.module.css";
-import shared from "../../styles/components/checkout/checkout-sheet.module.css";
+import shared from "../../styles/components/checkout/index.module.css";
 import { formatMoney } from "../../utils/money";
 
 export const CheckoutReview = ({

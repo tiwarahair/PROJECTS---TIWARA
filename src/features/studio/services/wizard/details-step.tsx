@@ -1,5 +1,5 @@
 import { ImageIcon, Sparkles } from "lucide-react";
-import { SearchSelect } from "../../../../components/search-select/search-select";
+import { SearchSelect } from "../../../../components/search-select";
 import { joinClassNames } from "../../../../utils/class-names";
 import { Swatches } from "../catalog-sheets";
 import type { WizardForm } from "./use-wizard-form";

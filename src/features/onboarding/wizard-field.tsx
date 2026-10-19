@@ -1,5 +1,5 @@
 import { joinClassNames } from "../../utils/class-names";
-import type { FieldBinding } from "./onboarding-fields";
+import type { FieldBinding } from "./fields";
 import styles from "../../styles/features/onboarding/wizard-field.module.css";
 
 interface WizardFieldProps extends FieldBinding {

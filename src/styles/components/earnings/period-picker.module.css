@@ -1,0 +1,156 @@
+.periodWrap {
+  position: relative;
+}
+
+.periodButton {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  height: 38px;
+  padding: 0 12px 0 16px;
+  border-radius: var(--radius-full);
+  border: 1px solid var(--border-strong);
+  background: #fff;
+  color: var(--text-primary);
+  font: inherit;
+  font-size: 14.5px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: transform 0.12s cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+
+.periodButton:active {
+  transform: scale(0.98) !important;
+}
+
+.periodChevron {
+  transition: transform 0.2s cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+
+.periodScrim {
+  position: fixed;
+  inset: 0;
+  z-index: 40;
+}
+
+.periodMenu {
+  position: absolute;
+  top: calc(100% + 6px);
+  left: 0;
+  z-index: 41;
+  width: 260px;
+  background: #fff;
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-popover);
+  padding: 6px;
+  transform-origin: top left;
+  animation: ePop 0.16s cubic-bezier(0.23, 1, 0.32, 1) both;
+}
+
+.periodOption {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  text-align: left;
+  border: none;
+  font: inherit;
+  font-size: 14.5px;
+  border-radius: var(--radius-sm);
+  padding: 10px 12px;
+  cursor: pointer;
+  transition: background-color 0.14s;
+}
+
+.periodOption:hover {
+  background: var(--fill-quiet) !important;
+}
+
+.periodHint {
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--text-secondary);
+}
+
+.customRange {
+  border-top: 1px solid var(--border-subtle);
+  margin-top: 6px;
+  padding: 10px 6px 4px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.dateLabel {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  font-size: 12.5px;
+  font-weight: 600;
+  color: var(--neutral-600);
+}
+
+.dateInput {
+  height: 38px;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--border-strong);
+  padding: 0 10px;
+  font: inherit;
+  font-size: 14.5px;
+  color: var(--text-primary);
+  background: #fff;
+}
+
+.customError {
+  font-size: 13px;
+  color: var(--accent-700);
+}
+
+.apply {
+  height: 38px;
+  border-radius: var(--radius-full);
+  border: none;
+  background: #1a1714;
+  color: var(--neutral-100);
+  font: inherit;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  margin-top: 2px;
+}
+
+.apply:active {
+  transform: scale(0.98) !important;
+}
+
+.chevronOpen {
+  transform: rotate(180deg);
+}
+
+.chevronClosed {
+  transform: none;
+}
+
+.optionOn {
+  background: var(--accent-wash);
+  color: var(--accent-700);
+  font-weight: 600;
+}
+
+.optionOff {
+  background: transparent;
+  color: var(--text-primary);
+  font-weight: 500;
+}
+
+/* keyframes are scoped per file in CSS modules, so shared ones are repeated */
+@keyframes ePop {
+  from {
+    opacity: 0;
+    transform: scale(0.97) translateY(-4px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}

@@ -1,12 +1,12 @@
 import type { MouseEvent, RefObject } from "react";
 import { ArrowLeft, Heart, Share } from "lucide-react";
 import { Link } from "react-router";
-import { ResponsiveImage } from "../../components/responsive-image/responsive-image";
+import { ResponsiveImage } from "../../components/responsive-image";
 import { PROFILE_COVER_SIZES } from "../../utils/image-sources";
 import { joinClassNames } from "../../utils/class-names";
 import type { LastSearch } from "../../utils/last-search";
 import styles from "../../styles/features/stylist-profile/profile-cover.module.css";
-import pageGlobal from "../../styles/features/stylist-profile/stylist-profile-page-global.module.css";
+import pageGlobal from "../../styles/features/stylist-profile/index-global.module.css";
 
 /** Share + save state and handlers shared by the cover buttons and the sticky bar. */
 export interface ProfileActions {

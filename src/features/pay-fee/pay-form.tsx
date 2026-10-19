@@ -21,7 +21,7 @@ import {
   getPaymentFonts,
   WALLET_BUTTON_HEIGHT,
 } from "../booking/logic/payment";
-import { OnboardingTurnstile } from "../onboarding/onboarding-turnstile";
+import { OnboardingTurnstile } from "../onboarding/turnstile";
 import { formatPence, LINK_PAY_ERRORS } from "./logic";
 import stepPay from "../../styles/features/booking/step-pay.module.css";
 import styles from "../../styles/features/pay-fee/pay-form.module.css";

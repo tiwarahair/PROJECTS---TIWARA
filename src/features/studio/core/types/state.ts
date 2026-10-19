@@ -3,7 +3,7 @@ import type {
   NotificationSettings,
   PayoutStatus,
 } from "../../../../components/account-settings/logic";
-import type { TaxDetails } from "../../../../components/tax-details-form/tax-details-logic";
+import type { TaxDetails } from "../../../../components/tax-details-form/logic";
 import type { PastCursor } from "../../../../lib/studio-api/bookings";
 import type { NOTIFS } from "../seed-dashboard";
 import type {

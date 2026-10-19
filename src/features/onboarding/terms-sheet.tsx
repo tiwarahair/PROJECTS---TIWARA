@@ -1,7 +1,7 @@
 import { X } from "lucide-react";
 import { joinClassNames } from "../../utils/class-names";
-import { TERMS_BODY } from "./onboarding-data";
-import type { TermsKind } from "./onboarding-state";
+import { TERMS_BODY } from "./data";
+import type { TermsKind } from "./state";
 import styles from "../../styles/features/onboarding/terms-sheet.module.css";
 
 interface TermsSheetProps {

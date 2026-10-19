@@ -9,7 +9,7 @@ import {
   useGetTwoFactorDevicesQuery,
 } from "../../stores/api-slice";
 import { useAppSelector } from "../../stores/hooks";
-import { PageMessage } from "../../components/page-message/page-message";
+import { PageMessage } from "../../components/page-message";
 import { ClosedBusiness } from "./closed-business";
 import { getQueryParam } from "./core/model";
 import { StudioPage } from ".";

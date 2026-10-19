@@ -1,0 +1,225 @@
+/* ---- Suggested services ---- */
+.sugg {
+  position: fixed;
+  left: 50%;
+  width: 100%;
+  box-sizing: border-box;
+  z-index: 71;
+  background: var(--neutral-50);
+  box-shadow: var(--shadow-modal, 0 24px 60px rgba(26, 23, 20, 0.3));
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  font-family: "Hanken Grotesk", sans-serif;
+  color: var(--text-primary);
+  bottom: 0;
+  top: auto;
+  transform: translateX(-50%);
+  max-width: 430px;
+  height: 88dvh;
+  border-radius: 24px 24px 0 0;
+}
+
+.suggWide {
+  bottom: auto;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  max-width: 560px;
+  height: min(660px, calc(100dvh - 48px));
+  border-radius: var(--radius-lg, 24px);
+}
+
+.suggHead {
+  flex: 0 0 auto;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 16px 12px 10px 20px;
+}
+
+.h2 {
+  margin: 0;
+  font-family: "Schibsted Grotesk", sans-serif;
+  font-size: 18px;
+  font-weight: 600;
+  letter-spacing: -0.02em;
+}
+
+.closeRound {
+  width: 40px;
+  height: 40px;
+  border-radius: var(--radius-full);
+  border: none;
+  background: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--text-secondary);
+  padding: 0;
+  flex: 0 0 auto;
+  cursor: pointer;
+}
+
+.closeRound:hover {
+  background: var(--fill-quiet, rgba(26, 23, 20, 0.05)) !important;
+}
+
+.closeRound:active {
+  transform: scale(0.92) !important;
+}
+
+.suggBody {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  padding: 0 18px calc(18px + env(safe-area-inset-bottom));
+}
+
+.searchWrap {
+  position: relative;
+  margin-bottom: 10px;
+}
+
+.searchIcon {
+  position: absolute;
+  left: 13px;
+  top: 50%;
+  transform: translateY(-50%);
+}
+
+.search {
+  width: 100%;
+  box-sizing: border-box;
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-full);
+  background: transparent;
+  font-size: 16px;
+  outline: none;
+  font-family: inherit;
+  padding: 11px 14px 11px 38px;
+}
+
+.searchActive {
+  padding: 11px 38px 11px 38px;
+}
+
+.clear {
+  position: absolute;
+  right: 7px;
+  top: 7px;
+  bottom: 7px;
+  width: 26px;
+  border: none;
+  background: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--text-secondary);
+  padding: 0;
+  line-height: 0;
+}
+
+.clear:active {
+  transform: scale(0.9) !important;
+}
+
+.chips {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex: 0 0 auto;
+  min-height: 38px;
+  overflow-x: auto;
+  overflow-y: hidden;
+  margin-bottom: 16px;
+  scrollbar-width: none;
+}
+
+.chip {
+  flex: 0 0 auto;
+  border-radius: var(--radius-full);
+  padding: 8px 14px;
+  font-size: 14.5px;
+  font-weight: 600;
+  white-space: nowrap;
+  transition:
+    background 0.22s cubic-bezier(0.2, 0.8, 0.2, 1),
+    color 0.22s,
+    border-color 0.22s;
+  border: 1px solid var(--border-subtle);
+  background: transparent;
+  color: var(--text-secondary);
+}
+
+.chip:active {
+  transform: scale(0.97) !important;
+}
+
+.chipOn {
+  border-color: #1a1714;
+  background: #1a1714;
+  color: var(--neutral-100);
+}
+
+.group {
+  margin-bottom: 22px;
+}
+
+.groupTitle {
+  font-family: "Schibsted Grotesk", sans-serif;
+  font-size: 18px;
+  font-weight: 600;
+  letter-spacing: -0.02em;
+  line-height: 1.2;
+  color: var(--text-primary);
+  margin-bottom: 4px;
+  padding: 0 2px;
+}
+
+.item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+  min-height: 52px;
+  box-sizing: border-box;
+  text-align: left;
+  border: none;
+  background: none;
+  padding: 8px 2px;
+  border-radius: var(--radius-sm);
+}
+
+.item:active {
+  background: var(--quiet) !important;
+}
+
+.itemName {
+  flex: 1;
+  min-width: 0;
+  font-size: 15px;
+  font-weight: 500;
+  color: var(--text-primary);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.itemChevron {
+  flex: 0 0 auto;
+  display: block;
+}
+
+.noResults {
+  padding: 22px 2px 14px;
+  text-align: center;
+}
+
+.noResultsText {
+  font-size: 14.5px;
+  color: var(--text-secondary);
+  line-height: 1.5;
+  text-wrap: pretty;
+}

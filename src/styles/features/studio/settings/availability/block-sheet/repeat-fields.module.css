@@ -1,0 +1,49 @@
+.select {
+  width: 100%;
+  box-sizing: border-box;
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-sm);
+  background: transparent;
+  padding: 11px 10px;
+  font-size: 16px;
+  font-weight: 600;
+  outline: none;
+}
+
+.endDate {
+  width: 100%;
+  box-sizing: border-box;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-sm);
+  background: transparent;
+  padding: 11px 13px;
+  font-size: 15px;
+  font-weight: 600;
+  margin-top: 8px;
+  text-align: left;
+  animation: rowin 0.22s cubic-bezier(0.2, 0.8, 0.2, 1) both;
+  color: var(--text-secondary);
+}
+
+.endDate:active {
+  transform: scale(0.985) !important;
+}
+
+.endDateSet {
+  color: var(--text-primary);
+}
+
+@keyframes rowin {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}

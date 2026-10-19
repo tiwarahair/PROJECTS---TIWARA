@@ -1,0 +1,7 @@
+.nameGrid {
+  margin-top: 14px;
+  max-width: 460px;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 200px), 1fr));
+  gap: 14px;
+}

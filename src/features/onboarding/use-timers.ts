@@ -1,8 +1,8 @@
 import { useEffect } from "react";
 import { getAssetImageSet, getAssetUrl } from "../../utils/asset-url";
-import { MODE_KEY, PHOTOS } from "./onboarding-data";
-import { readStorage } from "./onboarding-start";
-import { isCodeScreen } from "./onboarding-state";
+import { MODE_KEY, PHOTOS } from "./data";
+import { readStorage } from "./start";
+import { isCodeScreen } from "./state";
 import type { OnboardingBase } from "./use-base";
 
 export const useOnboardingTimers = (

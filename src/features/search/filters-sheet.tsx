@@ -1,16 +1,16 @@
 import { Check, X } from "lucide-react";
 import type { CSSProperties } from "react";
 import { joinClassNames } from "../../utils/class-names";
-import controls from "../../styles/features/search/search-controls.module.css";
+import controls from "../../styles/features/search/controls.module.css";
 import {
   formatMaxPrice,
   getPriceFill,
   toggleVenue,
   toMaxPrice,
   VENUES,
-} from "./search-filters";
-import { RADII } from "./search-state";
-import pageGlobal from "../../styles/features/search/search-page-global.module.css";
+} from "./filters";
+import { RADII } from "./state";
+import pageGlobal from "../../styles/features/search/index-global.module.css";
 import styles from "../../styles/features/search/filters-sheet.module.css";
 import type { SearchController } from "./use-search";
 

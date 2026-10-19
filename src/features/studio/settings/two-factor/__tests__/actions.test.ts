@@ -1,6 +1,6 @@
 import { FunctionsHttpError } from "@supabase/supabase-js";
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import type { TaxDetails } from "../../../../../components/tax-details-form/tax-details-logic";
+import type { TaxDetails } from "../../../../../components/tax-details-form/logic";
 import { saveTaxDetails } from "../../../../../lib/studio-api/settings";
 import {
   listTwoFactorDevices,

@@ -1,8 +1,8 @@
 import type { ChangeEvent, ReactNode } from "react";
-import { PasswordMeter } from "../../components/password-meter/password-meter";
+import { PasswordMeter } from "../../components/password-meter";
 import { joinClassNames } from "../../utils/class-names";
 import { getOnboardingMeter } from "./auth-screens-account";
-import { OnboardingTurnstile } from "./onboarding-turnstile";
+import { OnboardingTurnstile } from "./turnstile";
 import type { ScreenProps } from "./screen-props";
 import { WizardField } from "./wizard-field";
 import fieldStyles from "../../styles/features/onboarding/wizard-field.module.css";

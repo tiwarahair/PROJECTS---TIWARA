@@ -8,7 +8,7 @@ import {
   TriangleAlert,
 } from "lucide-react";
 import { joinClassNames } from "../../utils/class-names";
-import { TaxDetailsForm } from "../tax-details-form/tax-details-form";
+import { TaxDetailsForm } from "../tax-details-form";
 import { getPayoutStatus, getTaxRows } from "./logic";
 import type { AccountSettingsProps } from "./use-account-settings";
 import type { AccountSettingsController } from "./use-account-settings";

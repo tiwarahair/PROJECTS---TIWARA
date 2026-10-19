@@ -1,5 +1,5 @@
 import { useNavigate } from "react-router";
-import { queueSiteToast } from "../components/welcome-toast/welcome-toast";
+import { queueSiteToast } from "../components/welcome-toast";
 import { useAppDispatch } from "../stores/hooks";
 import { logOut } from "../stores/session-slice";
 

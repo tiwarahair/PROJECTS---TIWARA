@@ -1,5 +1,5 @@
 import { useCallback, useEffect } from "react";
-import { ACCOUNT_TAB_EVENT } from "../../components/site-menu/site-menu";
+import { ACCOUNT_TAB_EVENT } from "../../components/site-menu";
 import { useUnsavedChanges } from "../../hooks/use-unsaved-changes";
 import { getSearchParams } from "../../utils/page-flags";
 import { SECTION_IDS } from "./data";

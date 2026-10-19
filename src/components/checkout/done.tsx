@@ -6,7 +6,7 @@ import { RECORD_VIA_LABELS } from "./view";
 import type { CheckoutViewModel } from "./view";
 import type { CheckoutController } from "./use-checkout";
 import styles from "../../styles/components/checkout/done.module.css";
-import shared from "../../styles/components/checkout/checkout-sheet.module.css";
+import shared from "../../styles/components/checkout/index.module.css";
 import { formatMoney } from "../../utils/money";
 
 export const CheckoutDone = ({

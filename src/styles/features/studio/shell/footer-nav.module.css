@@ -1,0 +1,60 @@
+.footerNav {
+  position: fixed;
+  bottom: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 100%;
+  max-width: 430px;
+  z-index: 30;
+  background: rgba(255, 254, 251, 0.85);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  box-shadow: var(--shadow-hairline-up, 0 -1px 0 rgba(26, 23, 20, 0.08));
+  padding: 8px 10px calc(10px + env(safe-area-inset-bottom));
+  display: flex;
+}
+
+.footerButton {
+  flex: 1;
+  background: none;
+  border: none;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 3px;
+  padding: 6px 0;
+  transition:
+    color 0.2s cubic-bezier(0.2, 0.8, 0.2, 1),
+    transform 0.16s;
+  color: var(--text-secondary);
+}
+
+.footerButton:active {
+  transform: scale(0.92) !important;
+}
+
+.footerOn {
+  color: var(--accent-700);
+}
+
+.footerPill {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 26px;
+  border-radius: var(--radius-full);
+  line-height: 0;
+  transition: background 0.22s cubic-bezier(0.2, 0.8, 0.2, 1);
+  background: transparent;
+}
+
+.footerOn .footerPill {
+  background: var(--accent-wash);
+}
+
+.footerLabel {
+  font-size: 12.5px;
+  font-weight: 500;
+  white-space: nowrap;
+}

@@ -1,14 +1,14 @@
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import { joinClassNames } from "../../utils/class-names";
-import controls from "../../styles/features/search/search-controls.module.css";
+import controls from "../../styles/features/search/controls.module.css";
 import {
   getCalendarCells,
   getQuickDays,
   getVisibleMonth,
   HOURS,
   TIMES,
-} from "./search-dates";
-import pageGlobal from "../../styles/features/search/search-page-global.module.css";
+} from "./dates";
+import pageGlobal from "../../styles/features/search/index-global.module.css";
 import styles from "../../styles/features/search/date-picker.module.css";
 import type { SearchController } from "./use-search";
 import { MONDAY_FIRST_WEEKDAYS } from "../../utils/dates";

@@ -11,7 +11,7 @@ import { useState } from "react";
 import { PaymentFieldsSkeleton } from "../../components/skeleton/payment-fields-skeleton";
 import { stripePromise } from "../../lib/stripe";
 import { joinClassNames } from "../../utils/class-names";
-import { OnboardingTurnstile } from "../onboarding/onboarding-turnstile";
+import { OnboardingTurnstile } from "../onboarding/turnstile";
 import { getPayIntro } from "./logic/content";
 import {
   getPaymentAppearance,

@@ -1,6 +1,6 @@
 // The business and its settings: details, hours, time off, rules, payment policy, notifications, booking link,
 // tax details, Stripe, and closing or reopening.
-import type { TaxDetails } from "../../components/tax-details-form/tax-details-logic";
+import type { TaxDetails } from "../../components/tax-details-form/logic";
 import type { TablesInsert, TablesUpdate } from "../../types/database";
 import { supabase } from "../supabase";
 import { check, invokeStudio, write } from "./request";
