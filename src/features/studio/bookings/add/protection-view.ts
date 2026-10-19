@@ -5,6 +5,7 @@ import {
   getProtectionTotal,
 } from "../../core/model";
 import { formatMoney } from "../../../../utils/money";
+import { bookingFee } from "../../../../utils/pricing";
 import type { AddContext } from "./context";
 
 const getProtectedFirst = ({
@@ -22,11 +23,31 @@ const getProtectedFirst = ({
   return "the client";
 };
 
+const getLinkSubtitle = (
+  isTooLate: boolean,
+  mode: string,
+  first: string,
+  totalLabel: string,
+  feeLabel: string,
+) => {
+  if (isTooLate)
+    return "Not available: the start is less than 2 hours away, so there isn’t time to confirm.";
+
+  return mode === "card"
+    ? `${first} accepts your policy, saves a card and pays the ${feeLabel} booking fee to confirm.`
+    : `${first} accepts your policy and pays ${totalLabel} to confirm.`;
+};
+
 // ---- step 4: protection ----
 export const getProtectionView = (context: AddContext) => {
-  const { state, setState, price } = context;
+  const { state, setState, price, isLinkTooLate } = context;
   const { mode, window: policyWindow } = state.policy;
   const first = getProtectedFirst(context);
+  const salon = state.profile.salon || "your stylist";
+
+  const feeLabel = formatMoney(bookingFee(Math.max(0, price)), {
+    pence: "always",
+  });
 
   const totalLabel = formatMoney(
     getProtectionTotal(state, Math.max(0, price)),
@@ -45,8 +66,7 @@ export const getProtectionView = (context: AddContext) => {
       ? " (full price + booking fee)"
       : " (deposit + booking fee)";
 
-  const chargeNoun = mode === "full" ? " payment" : " deposit";
-  const isSend = state.addProtection === "link";
+  const isSend = state.addProtection === "link" && !isLinkTooLate;
 
   const expiry = formatDateTime(
     getProtectionExpiry(Date.now(), state.addDay, state.addTime),
@@ -60,16 +80,19 @@ export const getProtectionView = (context: AddContext) => {
       : "The booking is confirmed straight away, and no cancellation or no-show fee can be charged on it.",
     protectionPreview:
       mode === "card"
-        ? `Email and SMS: “Confirm your appointment with Tiwára's House on ${when}. Card details are required to hold the slot, with nothing charged now. Cancellation policy: free up to ${policyWindow} hrs before.” With a Confirm & save card link.`
-        : `Email and SMS: “Confirm your appointment with Tiwára's House on ${when}. A ${totalLabel}${chargeNoun} is required. Cancellation policy: free up to ${policyWindow} hrs before.” With a Confirm & pay link.`,
+        ? `Email: “Confirm your appointment with ${salon} on ${when}. Add a card and pay the ${feeLabel} booking fee to confirm. Cancellation policy: free up to ${policyWindow} hrs before.” With a Confirm my appointment link.`
+        : `Email: “Confirm your appointment with ${salon} on ${when}. Pay ${totalLabel}${paidFor} to confirm. Cancellation policy: free up to ${policyWindow} hrs before.” With a Confirm my appointment link.`,
     protectionOptions: [
       {
         id: "link",
         label: "Send payment link",
-        subtitle:
-          mode === "card"
-            ? `${first} accepts your policy and saves a card to confirm. Nothing is charged now.`
-            : `${first} accepts your policy and pays ${totalLabel}${paidFor} to confirm.`,
+        subtitle: getLinkSubtitle(
+          isLinkTooLate,
+          mode,
+          first,
+          totalLabel + paidFor,
+          feeLabel,
+        ),
       },
       {
         id: "none",
@@ -77,13 +100,20 @@ export const getProtectionView = (context: AddContext) => {
         subtitle:
           "Confirmed straight away. It won't be protected against cancellations or no-shows.",
       },
-    ].map(({ id, label, subtitle }) => ({
-      key: id,
-      label,
-      subtitle,
-      isOn: state.addProtection === id,
-      pick: () => setState({ addProtection: id }),
-    })),
+    ].map(({ id, label, subtitle }) => {
+      const isOff = id === "link" && isLinkTooLate;
+
+      return {
+        key: id,
+        label,
+        subtitle,
+        isOff,
+        isOn: isLinkTooLate ? id === "none" : state.addProtection === id,
+        pick: () => {
+          if (!isOff) setState({ addProtection: id });
+        },
+      };
+    }),
     firstName:
       state.addWalkIn || !context.client ? "the client" : context.clientFirst,
   };

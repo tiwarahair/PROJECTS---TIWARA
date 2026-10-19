@@ -50,7 +50,12 @@ export const getClient = (
 };
 
 export const getAllClients = (state: StudioState): StudioClient[] =>
-  CLIENTS.concat(state.extraClients)
+  (state.account ? state.bookingClients : CLIENTS)
+    .concat(state.extraClients)
+    .filter(
+      (client, index, all) =>
+        all.findIndex(({ id }) => id === client.id) === index,
+    )
     .map(({ id }) => getClient(state, id))
     .filter(({ deleted }) => !deleted);
 

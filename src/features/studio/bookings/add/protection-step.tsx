@@ -25,24 +25,28 @@ export const ProtectionStep = ({ view }: ProtectionStepProps) => (
       </div>
     </div>
     <div className={styles.protOptions}>
-      {view.protectionOptions.map(({ key, label, subtitle, isOn, pick }) => (
-        <button
-          key={key}
-          className={joinClassNames(
-            styles.protOption,
-            isOn && styles.protOptionOn,
-          )}
-          onClick={pick}
-        >
-          <span className={styles.radio}>
-            <span className={styles.dot}></span>
-          </span>
-          <span className={shared.grow}>
-            <span className={styles.protLabel}>{label}</span>
-            <span className={styles.protSub}>{subtitle}</span>
-          </span>
-        </button>
-      ))}
+      {view.protectionOptions.map(
+        ({ key, label, subtitle, isOn, isOff, pick }) => (
+          <button
+            key={key}
+            className={joinClassNames(
+              styles.protOption,
+              isOn && styles.protOptionOn,
+              isOff && styles.protOptionOff,
+            )}
+            onClick={pick}
+            disabled={isOff}
+          >
+            <span className={styles.radio}>
+              <span className={styles.dot}></span>
+            </span>
+            <span className={shared.grow}>
+              <span className={styles.protLabel}>{label}</span>
+              <span className={styles.protSub}>{subtitle}</span>
+            </span>
+          </button>
+        ),
+      )}
     </div>
     <div className={styles.protFoot}>{view.protectionFootnote}</div>
     {view.isProtectionSend && (

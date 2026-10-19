@@ -23,6 +23,8 @@ import type {
   StudioPolicy,
 } from "../core/types";
 import { toFeeKind, toPolicyMode } from "../settings/records";
+import { getProtectionFields, getServiceFields } from "./protection-records";
+import { getNumber, getText, isRecord } from "./row-values";
 
 const UPCOMING_STATUSES: Record<string, string> = {
   awaiting_confirmation: "awaiting",
@@ -52,21 +54,6 @@ const getLocalId = (remoteId: string) => {
   return next;
 };
 
-const isRecord = (value: unknown): value is Record<string, unknown> =>
-  !!value && typeof value === "object" && !Array.isArray(value);
-
-const getText = (value: unknown, key: string) => {
-  const entry = isRecord(value) ? value[key] : undefined;
-
-  return typeof entry === "string" ? entry : "";
-};
-
-const getNumber = (value: unknown, key: string) => {
-  const entry = isRecord(value) ? value[key] : undefined;
-
-  return typeof entry === "number" ? entry : 0;
-};
-
 // after this many failed tries a cancellation's refund is left for us to look at
 const MAX_REFUND_FAILURES = 5;
 
@@ -76,12 +63,12 @@ const isRefundStuck = ({ cancellation }: StudioBookingRow) =>
   !getText(cancellation, "refund_id") &&
   getNumber(cancellation, "refund_failures") >= MAX_REFUND_FAILURES;
 
-const getClientKey = ({ id, contact }: StudioBookingRow) => {
-  const contactKey =
-    getText(contact, "email").toLowerCase() || getText(contact, "phone");
+/** a real client's key in Studio: their email, else their phone (the same person across their bookings) */
+export const toContactKey = (email: string, phone: string, fallback = "") =>
+  `contact:${email.trim().toLowerCase() || phone.trim() || fallback}`;
 
-  return `contact:${contactKey || id}`;
-};
+const getClientKey = ({ id, contact }: StudioBookingRow) =>
+  toContactKey(getText(contact, "email"), getText(contact, "phone"), id);
 
 const toAddress = (value: unknown): AddressValue | null =>
   isRecord(value)
@@ -136,15 +123,20 @@ export const toStudioBooking = (row: StudioBookingRow): StudioBooking => {
     dayOffset: toDayOffset(row.starts_at),
     time,
     duration: formatDuration(row.minutes),
-    client: getClientKey(row),
+    client: row.contact ? getClientKey(row) : null,
+    walkIn: !row.contact,
     service: getText(row.snapshot, "service_name"),
     price: toPounds(row.price_pence),
     note: row.notes ?? undefined,
     address: getAddressOneLine(toAddress(row.address)) || undefined,
     pending: false,
     status: UPCOMING_STATUSES[row.status] ?? "confirmed",
-    paid: mode === "deposit" || mode === "full" ? mode : "none",
+    paid:
+      row.paid_at && (mode === "deposit" || mode === "full") ? mode : "none",
     movedByClient: row.reschedule_count > 0,
+    stylistNote: row.booking_notes?.note ?? undefined,
+    ...getServiceFields(row),
+    ...getProtectionFields(row),
   };
 };
 
@@ -194,11 +186,19 @@ export const toPastRecord = (row: StudioBookingRow): PastRecord => {
     status,
     at: Date.parse(markedAt),
     pastAt,
-    ...(status === "Cancelled"
+    ...(status === "Cancelled" && row.status !== "auto_cancelled"
       ? {
           meta: getMeta(),
           note: getCancelNote(row, refundNote),
           refunded: toPounds(refunded),
+        }
+      : {}),
+    ...(row.status === "auto_cancelled"
+      ? {
+          meta: "Auto-cancelled",
+          note: "Not confirmed in time, so it was cancelled automatically. Nothing was charged.",
+          autoCancelled: true,
+          startsAt: row.starts_at,
         }
       : {}),
     ...(status === "No show"

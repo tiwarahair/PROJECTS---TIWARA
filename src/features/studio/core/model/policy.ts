@@ -1,4 +1,5 @@
 import { formatMoney, roundToPence } from "../../../../utils/money";
+import { bookingFee } from "../../../../utils/pricing";
 import { parseAmountLabel } from "../format";
 import type {
   ConfirmDialog,
@@ -26,16 +27,14 @@ const getProtectionAmount = (
   return policy.mode === "full" ? price : 0;
 };
 
-const getBookingFee = (amount: number): number =>
-  amount > 0 ? Math.round((amount * 0.015 + 0.5) * 100) / 100 : 0;
-
+/** what a protection link asks the client to pay: the deposit or full price, plus the booking fee on the price. */
 export const getProtectionTotal = (
   state: StudioState,
   price: number,
 ): number => {
-  const amount = getProtectionAmount(state, price);
+  if (state.policy.mode === "none") return 0;
 
-  return Math.round((amount + getBookingFee(amount)) * 100) / 100;
+  return roundToPence(getProtectionAmount(state, price) + bookingFee(price));
 };
 
 /** Link expiry: 48 hours from sending, or 2 hours before the start, whichever is first. */

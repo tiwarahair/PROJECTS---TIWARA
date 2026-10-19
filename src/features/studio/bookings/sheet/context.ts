@@ -2,6 +2,7 @@ import { dateLabel } from "../../core/format";
 import { getPolicyFee } from "../../core/model";
 import type { PastRecord, StudioBooking } from "../../core/types";
 import type { StudioController } from "../../core/use-studio";
+import { resendConfirmLink } from "../../../../lib/studio-api/booking-writes";
 import {
   getAddonLines,
   getFreshLink,
@@ -48,6 +49,21 @@ export const getContext = (studio: StudioController) => {
         item.id === booking.id ? { ...item, ...patch } : item,
       ),
     }));
+
+  /** shows a change straight away; a real booking then saves it, and a failed save puts the screen back. */
+  const saveBooking = (
+    patch: Partial<StudioBooking>,
+    task?: (remoteId: string) => Promise<unknown>,
+  ) => {
+    const previous = context.getState().bookings;
+
+    patchBooking(patch);
+
+    if (raw?.remoteId && task)
+      context.sync?.save(() => task(raw.remoteId as string), {
+        bookings: previous,
+      });
+  };
 
   const finish = (
     record: Partial<PastRecord>,
@@ -100,14 +116,15 @@ export const getContext = (studio: StudioController) => {
   const resendLink = (patch: { statusMenuOpen?: boolean } = {}) => {
     const count = (booking.resends || 0) + 1;
 
-    setState({
-      ...patch,
-      bookings: state.bookings.map((item) =>
-        item.id === booking.id
-          ? { ...item, resends: count, ...getFreshLink(booking) }
-          : item,
-      ),
-    });
+    setState(patch);
+
+    // a real link keeps the deadline set when the booking was made
+    saveBooking(
+      raw?.remoteId
+        ? { resends: count, linkSentAt: Date.now() }
+        : { resends: count, ...getFreshLink(booking) },
+      resendConfirmLink,
+    );
 
     showToast(`Link resent to ${booking.firstName} · ${2 - count} of 2 left`);
   };
@@ -132,6 +149,7 @@ export const getContext = (studio: StudioController) => {
     addonLines,
     servicePrice: Math.max(0, booking.price - addonSum),
     patchBooking,
+    saveBooking,
     finish,
     resendLink,
   };

@@ -1,9 +1,44 @@
 import { undoNoShow } from "../../../../../lib/studio-api/bookings";
+import { reopenStudioBooking } from "../../../../../lib/studio-api/booking-writes";
+import { SaveError } from "../../../../../lib/studio-writes";
 import { waiveFee as waiveFeeRemote } from "../../../../../lib/studio-api/money";
 import { getWaiveConfirm } from "../../../core/model";
 import { roundToPence } from "../../../../../utils/money";
 import { getRefundTag } from "./context";
 import type { PastContext } from "./context";
+
+// >> "send a new link" on a booking nobody confirmed in time; the server checks the time is still free
+const getReopen = ({ actions, row, client }: PastContext) => {
+  const { remoteId, startsAt } = row;
+
+  if (
+    !row.autoCancelled ||
+    !remoteId ||
+    !startsAt ||
+    Date.parse(startsAt) - Date.now() <= 2 * 3600000
+  )
+    return null;
+
+  const first = (client.name || "the client").split(" ")[0];
+
+  return {
+    action: () =>
+      reopenStudioBooking(remoteId).then(
+        () => {
+          actions.closeSheet();
+          actions.showToast(`New link sent to ${first}`);
+        },
+        (error: unknown) =>
+          actions.showToast(
+            error instanceof SaveError
+              ? error.message
+              : "That didn’t work. Try again.",
+          ),
+      ),
+    actionLabel: "Send a new link",
+    actionHint: `Asks ${first} to confirm again, if the time is still free.`,
+  };
+};
 
 const getUndo = ({
   studio,
@@ -115,7 +150,10 @@ export const getActionsView = (context: PastContext) => {
     context;
 
   const feeLeft = roundToPence(feeNumber - (row.refunded || 0));
-  const { action, actionLabel, actionHint } = getUndo(context);
+
+  const { action, actionLabel, actionHint } =
+    getReopen(context) ?? getUndo(context);
+
   // the fee gets its own action so a no-show can offer both "Undo no-show" and "Waive fee"
   const { feeAction, feeActionLabel } = getFeeAction(context, feeLeft);
   // a pending/kept fee with an action collapses note + action into one panel
@@ -129,6 +167,8 @@ export const getActionsView = (context: PastContext) => {
 
       return `${row.feeLabel} ${feeKind}`;
     }
+
+    if (actionLabel === "Send a new link") return "Not confirmed in time";
 
     return actionLabel === "Undo no-show" ? "Marked as a no-show" : "";
   };

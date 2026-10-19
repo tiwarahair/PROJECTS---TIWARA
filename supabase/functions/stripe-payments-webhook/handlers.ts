@@ -27,7 +27,11 @@ export const onPaymentSucceeded = async (intent: Stripe.PaymentIntent) => {
 
   if (intent.metadata.kind === "link") return onLinkPaid(intent);
 
-  const { data: outcome, error } = await admin.rpc("confirm_booking_payment", { intent: intent.id });
+  const { data: outcome, error } = await admin.rpc("confirm_booking_payment", {
+    intent: intent.id,
+    amount: intent.amount_received,
+    target_booking: intent.metadata.booking_id ?? null,
+  });
 
   // a payment from another environment sharing this Stripe sandbox
   if (error?.message === "booking_not_found") return;
@@ -35,21 +39,22 @@ export const onPaymentSucceeded = async (intent: Stripe.PaymentIntent) => {
   if (error) throw error;
 
   // the card a deposit or card-on-file booking saved, for fees later
-  if (intent.setup_future_usage && typeof intent.payment_method === "string")
+  if ((outcome === "confirmed" || outcome === "duplicate") && intent.setup_future_usage && typeof intent.payment_method === "string")
     await admin
       .from("bookings")
       .update({ stripe_payment_method_id: intent.payment_method })
       .eq("stripe_payment_intent_id", intent.id);
 
-  if (outcome !== "slot_taken") return;
+  // the time was taken meanwhile, or (a stylist's booking) it was confirmed without protection, changed or cancelled
+  if (outcome !== "slot_taken" && outcome !== "refund") return;
 
   await stripe.refunds.create(
     {
       payment_intent: intent.id,
-      metadata: { reason: "slot_taken" },
+      metadata: { reason: outcome === "slot_taken" ? "slot_taken" : "not_needed" },
       ...(intent.transfer_data ? { reverse_transfer: true, refund_application_fee: true } : {}),
     },
-    { idempotencyKey: `payment:${intent.id}:slot-taken-refund` },
+    { idempotencyKey: `payment:${intent.id}:${outcome === "slot_taken" ? "slot-taken" : "not-needed"}-refund` },
   );
 };
 

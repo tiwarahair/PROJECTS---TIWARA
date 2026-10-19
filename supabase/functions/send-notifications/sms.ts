@@ -38,6 +38,8 @@ const templates: Record<string, (payload: Record<string, unknown>) => string> = 
   client_cancelled: getLine("Cancelled"),
   client_rescheduled: getLine("Moved", "now "),
   fee_failed: getLine("Fee unpaid"),
+  auto_cancel_soon: getLine("Not confirmed yet"),
+  auto_cancelled: getLine("Auto-cancelled"),
 };
 
 export const renderSms = (template: string, payload: Record<string, unknown>) => {

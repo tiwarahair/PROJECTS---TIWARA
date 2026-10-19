@@ -16,7 +16,7 @@ export interface BookingDetails {
   address_notes: string | null;
 }
 
-interface Terms {
+export interface Terms {
   mode: "none" | "deposit" | "full" | "card";
   refundable: boolean;
   deposit_pence: number;
@@ -61,7 +61,7 @@ const getPaidLine = ({ terms, price_pence: price, fee_pence: fee, paid_pence: pa
   return `You paid the ${pounds(fee)} booking fee today.${saved} ${pounds(price)} is paid to ${stylist} at your appointment.`;
 };
 
-const getCancelLine = ({ mode, refundable, deposit_pence: deposit, free_cancel_until: until }: Terms) => {
+export const getCancelLine = ({ mode, refundable, deposit_pence: deposit, free_cancel_until: until }: Terms) => {
   const deadline = formatWhen(until);
 
   if (mode === "deposit")

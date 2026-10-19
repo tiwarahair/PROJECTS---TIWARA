@@ -23,7 +23,7 @@ const ClientPicker = ({ view }: WhoStepProps) => (
         className={styles.searchInput}
         value={view.clientQuery}
         onChange={view.onClientQuery}
-        placeholder="Search by name or phone"
+        placeholder="Search by name, phone or email"
       />
     </div>
     <div className={styles.clientList}>

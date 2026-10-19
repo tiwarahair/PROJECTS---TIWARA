@@ -65,7 +65,7 @@ describe("Studio → New booking", { timeout: 15_000 }, () => {
     expect(getContinue()).toBeDisabled();
 
     await user.type(
-      screen.getByPlaceholderText("Search by name or phone"),
+      screen.getByPlaceholderText("Search by name, phone or email"),
       "Zed",
     );
 

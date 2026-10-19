@@ -8,6 +8,7 @@ import { getProtectionView } from "./protection-view";
 import { getServiceEditView } from "./service-edit-view";
 import { getServiceListView } from "./service-list-view";
 import { getStepsView } from "./steps-view";
+import { getUnpaidFeeView } from "./unpaid-fee";
 import { getWhenView } from "./when-view";
 
 /** New booking: who, service (+ edit / add-ons), when, protection, notes. */
@@ -16,6 +17,7 @@ export const getAddBookingView = (studio: StudioController) => {
 
   return {
     ...getStepsView(context),
+    ...getUnpaidFeeView(context),
     // step 1
     ...getClientView(context),
     // step 2

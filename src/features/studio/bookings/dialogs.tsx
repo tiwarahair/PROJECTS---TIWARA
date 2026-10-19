@@ -6,6 +6,7 @@ import type { DuplicateView } from "../clients/view";
 import { findDuplicate } from "../core/model";
 import { getDialogPlacement, getOverlayAnimation } from "../shell/overlay";
 import type { StudioController } from "../core/use-studio";
+import { toContactKey } from "./records";
 import styles from "../../../styles/features/studio/bookings/dialogs.module.css";
 
 type AddonDialogView = ReturnType<typeof getAddonDialog> & {
@@ -165,12 +166,22 @@ export const NewClientDialog = ({ studio }: { studio: StudioController }) => {
     setState({ newClient: { ...draft, ...patch } });
 
   const duplicate = findDuplicate(state, draft.phone, draft.email, null);
-  const isReady = (draft.first || "").trim().length > 1 && !duplicate;
+
+  // every client needs a phone or an email for their booking messages
+  const isReady =
+    (draft.first || "").trim().length > 1 &&
+    !!((draft.phone || "").trim() || (draft.email || "").trim()) &&
+    !duplicate;
 
   const save = () => {
     if (!isReady) return;
 
-    const id = `c${Date.now()}`;
+    const local = `c${Date.now()}`;
+
+    const id = state.account
+      ? toContactKey(draft.email || "", draft.phone || "", local)
+      : local;
+
     const first = (draft.first || "").trim();
     const last = (draft.last || "").trim();
     const name = [first, last].filter(Boolean).join(" ");
@@ -242,17 +253,13 @@ export const NewClientDialog = ({ studio }: { studio: StudioController }) => {
           </label>
         </div>
         <label className={styles.fieldSpaced}>
-          <span className={styles.fieldLabel}>
-            Email <span className={styles.optional}>optional</span>
-          </span>
+          <span className={styles.fieldLabel}>Email</span>
           {field(draft.email || "", "email", "mia@example.com", {
             inputMode: "email",
           })}
         </label>
         <label className={styles.fieldSpaced}>
-          <span className={styles.fieldLabel}>
-            Phone <span className={styles.optional}>optional</span>
-          </span>
+          <span className={styles.fieldLabel}>Phone</span>
           {field(draft.phone || "", "phone", "07…", { inputMode: "tel" })}
         </label>
         <DuplicateNotice

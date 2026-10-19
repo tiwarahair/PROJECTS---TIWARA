@@ -178,6 +178,7 @@ export interface StudioState {
   addAddress: string;
   addWalkIn: boolean;
   addProtection: string;
+  addUnpaidFee?: { bookingId: string; amount: number; kind: string } | null;
   addEditService?: boolean;
   addAddonPickerOpen?: boolean;
   addAddons?: string[];

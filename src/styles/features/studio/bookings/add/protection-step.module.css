@@ -50,6 +50,11 @@
   border-color: var(--accent-700);
 }
 
+.protOptionOff {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+
 .radio {
   flex: 0 0 auto;
   width: 20px;

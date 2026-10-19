@@ -1,4 +1,4 @@
-import { ArrowLeft } from "lucide-react";
+import { ArrowLeft, CircleAlert } from "lucide-react";
 import { joinClassNames } from "../../../../utils/class-names";
 import type { StudioController } from "../../core/use-studio";
 import { AddonPickerList } from "../steps";
@@ -27,6 +27,21 @@ export const AddBookingSheet = ({ studio, view }: AddBookingSheetProps) => (
         ></span>
       ))}
     </div>
+    {!!view.unpaidFeeNote && (
+      <div className={styles.feeNote}>
+        <CircleAlert
+          size={16}
+          strokeWidth={1.7}
+          className={styles.feeNoteIcon}
+        />
+        <span>{view.unpaidFeeNote}</span>
+        {view.openUnpaidFee && (
+          <button className={styles.feeNoteLink} onClick={view.openUnpaidFee}>
+            View fee
+          </button>
+        )}
+      </div>
+    )}
     {view.isStep1 && <WhoStep view={view} />}
     {view.isServiceList && <ServiceList view={view} />}
     {view.isServiceEdit && <ServiceEdit view={view} />}

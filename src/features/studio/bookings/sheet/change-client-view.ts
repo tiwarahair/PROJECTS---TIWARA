@@ -1,9 +1,21 @@
-import { CLIENTS } from "../../core/seed-clients";
+import { changeBookingClient } from "../../../../lib/studio-api/booking-writes";
 import { getAvatarSrc } from "../../core/format";
-import { getProtectionNoun } from "../../core/model";
+import { getAllClients, getClient, getProtectionNoun } from "../../core/model";
 import type { StudioBooking } from "../../core/types";
 import { getFreshLink } from "./booking";
 import type { SheetContext } from "./context";
+
+const toContact = (state: SheetContext["state"], clientId: string) => {
+  const { name, phone, email } = getClient(state, clientId);
+  const [first = "", ...rest] = name.trim().split(/\s+/);
+
+  return {
+    first,
+    last: rest.join(" "),
+    phone: phone || "",
+    email: email || "",
+  };
+};
 
 const NO_PROTECTION: Partial<StudioBooking> = {
   protect: "none",
@@ -18,10 +30,12 @@ const getVisitsMeta = ({ visits, area }: { visits?: number; area?: string }) =>
 
 // ---- change client ----
 export const getChangeClientView = (context: SheetContext) => {
-  const { state, setState, actions, memo, booking } = context;
+  const { state, setState, actions, memo, booking, hoursToStart, saveBooking } =
+    context;
+
   const changeQuery = (state.changeClientQuery || "").trim();
   const lowerQuery = changeQuery.toLowerCase();
-  const everyone = CLIENTS.concat(state.extraClients);
+  const everyone = getAllClients(state);
 
   const applyClient = (
     clientId: string | null,
@@ -29,27 +43,31 @@ export const getChangeClientView = (context: SheetContext) => {
   ) => {
     setState({ bookingStepOut: true });
 
-    window.setTimeout(
-      () =>
-        setState(({ bookings }) => ({
-          bookingStepOut: false,
-          bookingStep: "view",
-          bookingStepBack: true,
-          confirm: null,
-          bookings: bookings.map((item) =>
-            item.id === booking.id
-              ? { ...item, client: clientId, ...patch }
-              : item,
+    window.setTimeout(() => {
+      setState({
+        bookingStepOut: false,
+        bookingStep: "view",
+        bookingStepBack: true,
+        confirm: null,
+      });
+
+      saveBooking(
+        { client: clientId, walkIn: !clientId, ...patch },
+        (remoteId) =>
+          changeBookingClient(
+            remoteId,
+            clientId ? toContact(state, clientId) : null,
+            patch.protect === "link",
           ),
-        })),
-      200,
-    );
+      );
+    }, 200);
 
     window.setTimeout(() => setState({ bookingStepBack: false }), 900);
   };
 
   const setClient = (clientId: string | null) => {
-    if (!clientId || state.policy.mode === "none") {
+    // the client needs until 2 hours before the start to confirm
+    if (!clientId || state.policy.mode === "none" || hoursToStart <= 2) {
       applyClient(clientId, NO_PROTECTION);
 
       return;
@@ -94,7 +112,9 @@ export const getChangeClientView = (context: SheetContext) => {
         isCurrent: client.id === booking.client,
         pick: () => setClient(client.id),
       })),
+    // a real client needs a phone or email, so they're added through the form
     canAddTyped:
+      !state.account &&
       changeQuery.length > 1 &&
       !everyone.some(({ name }) => name.toLowerCase() === lowerQuery),
     openNewClient: () => {

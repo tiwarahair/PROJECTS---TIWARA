@@ -15,7 +15,7 @@ export const ClientRow = ({ studio, view }: ClientRowProps) => {
   const { state, setState } = studio;
   const { booking } = view;
   const isHovering = !!state.clientHover && view.isView;
-  const hasClientActions = isHovering && !view.isClientLocked;
+  const hasClientActions = isHovering;
 
   return (
     <div
@@ -62,7 +62,7 @@ export const ClientRow = ({ studio, view }: ClientRowProps) => {
           >
             <ArrowRightLeft size={16} strokeWidth={1.7} />
           </button>
-          {!!booking.client && (
+          {!!booking.client && !view.isClientLocked && (
             <button
               className={joinClassNames(styles.roundButton, styles.roundDanger)}
               onClick={view.clearClient}

@@ -459,6 +459,9 @@ verify_jwt = false
 [functions.payment-link]
 verify_jwt = false
 
+[functions.booking-confirm]
+verify_jwt = false
+
 [functions.send-transfers]
 verify_jwt = false
 

@@ -3,8 +3,10 @@ import { notifyStudioWrite, SaveError } from "../studio-writes";
 import { supabase } from "../supabase";
 import { check, invokeStudio, write } from "./request";
 
-const BOOKING_SELECT = `id, status, starts_at, minutes, price_pence, snapshot, contact, notes, address, terms,
-  reschedule_count, cancelled_at, cancelled_by, cancellation, no_show_at, overlap_ok, created_by, past_at,
+const BOOKING_SELECT = `id, status, starts_at, minutes, buffer_minutes, price_pence, fee_pence, due_today_pence,
+  service_id, snapshot, contact, notes, address, terms, reschedule_count, cancelled_at, cancelled_by, cancellation,
+  no_show_at, overlap_ok, created_by, past_at, paid_at, stripe_payment_method_id, protection_status, confirm_by,
+  confirm_sends, confirm_sent_at, created_at, booking_notes(note),
   booking_fees(id, kind, status, amount_pence, kept_pence, refund_pence, charge_pence, tries, hard_decline,
     decline_message, card_label, waived_at, created_at, failed_runs),
   refunds(amount_pence),
@@ -108,6 +110,11 @@ export const rescheduleStudioBooking = async (
 
   if (error?.message === "slot_taken")
     throw new SaveError("That time was just booked. Pick another time.");
+
+  if (error?.message === "too_late_to_protect")
+    throw new SaveError(
+      "The client needs at least 2 hours to confirm. Pick a later time, or confirm it without protection first.",
+    );
 
   if (error) throw error;
 

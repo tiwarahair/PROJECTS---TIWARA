@@ -6,13 +6,16 @@ import type { StudioClient } from "../../core/types";
 import type { AddContext } from "./context";
 import { BLANK_NEW_CLIENT } from "./types";
 import type { NewClient } from "./types";
+import { checkUnpaidFee } from "./unpaid-fee";
 
-const isClientMatch = ({ name, phone }: StudioClient, query: string) =>
+const isClientMatch = ({ name, phone, email }: StudioClient, query: string) =>
   !query ||
   name.toLowerCase().includes(query) ||
+  (email || "").toLowerCase().includes(query) ||
   (phone || "").replace(/\s/g, "").includes(query.replace(/\s/g, ""));
 
 export const getClientView = ({
+  studio,
   state,
   setState,
   addNew,
@@ -27,8 +30,11 @@ export const getClientView = ({
 
   const isNoMatch = !!query && filtered.length === 0;
 
-  const pickClient = (id: string | null) =>
+  const pickClient = (id: string | null) => {
     setState({ addClient: id, addNew: null, addWalkIn: false, addStep: 2 });
+
+    if (id) checkUnpaidFee(studio.context.getState, setState, id);
+  };
 
   return {
     isWalkIn: !!state.addWalkIn,
@@ -38,6 +44,7 @@ export const getClientView = ({
         addClient: null,
         addNew: null,
         addStep: 2,
+        addUnpaidFee: null,
       }),
     clientQuery: state.addClientQuery,
     onClientQuery: (event: ChangeEvent<HTMLInputElement>) =>

@@ -16,6 +16,17 @@ import {
 import type { ChangedBooking } from "./change-emails.ts";
 import { disputeOpened, feeCancelled, feeDeclined, feeScheduled, feeUnpaid, feeWaived } from "./fee-emails.ts";
 import type { CancelledFee, DeclinedFee, DisputeNotice, ScheduledFee, UnpaidFeeNotice, WaivedFee } from "./fee-emails.ts";
+import {
+  autoCancelled,
+  autoCancelSoon,
+  bookingAddedByStylist,
+  bookingAutoCancelled,
+  bookingManageLink,
+  bookingUpdatedByStylist,
+  confirmBooking,
+  confirmBookingChanged,
+} from "./studio-booking-emails.ts";
+import type { ConfirmLink, StudioBooking, StylistNotice } from "./studio-booking-emails.ts";
 
 type TemplateBuilder = (payload: Record<string, unknown>) => RenderedEmail;
 
@@ -98,6 +109,15 @@ const templates: Record<string, TemplateBuilder> = {
   fee_failed: (payload) => feeUnpaid(payload as unknown as UnpaidFeeNotice),
   dispute_opened: (payload) => disputeOpened(payload as unknown as DisputeNotice),
   client_rescheduled: (payload) => clientRescheduled(payload as unknown as Parameters<typeof clientRescheduled>[0]),
+  confirm_booking: (payload) => confirmBooking(payload as unknown as ConfirmLink),
+  confirm_booking_changed: (payload) => confirmBookingChanged(payload as unknown as ConfirmLink),
+  booking_added_by_stylist: (payload) => bookingAddedByStylist(payload as unknown as StudioBooking),
+  booking_updated_by_stylist: (payload) => bookingUpdatedByStylist(payload as unknown as StudioBooking),
+  booking_confirmed_by_client: (payload) => bookingConfirmed(payload as unknown as ConfirmedBooking),
+  booking_manage_link: (payload) => bookingManageLink(payload as unknown as StudioBooking),
+  booking_auto_cancelled: (payload) => bookingAutoCancelled(payload as unknown as BookingDetails),
+  auto_cancelled: (payload) => autoCancelled(payload as unknown as StylistNotice),
+  auto_cancel_soon: (payload) => autoCancelSoon(payload as unknown as StylistNotice),
 };
 
 export const renderEmail = (

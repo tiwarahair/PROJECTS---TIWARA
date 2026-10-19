@@ -1,12 +1,24 @@
-import { copyText } from "../../core/format";
+import { SaveError } from "../../../../lib/studio-writes";
+import {
+  getConfirmUrl,
+  setStylistNote,
+} from "../../../../lib/studio-api/booking-writes";
+import { copyLaterText, copyText } from "../../core/format";
 import type { SheetContext } from "./context";
+
+const getCopyError = (error: unknown) =>
+  error instanceof SaveError
+    ? error.message
+    : "Couldn’t copy the link. Try again.";
 
 export const getPanelsView = ({
   state,
   setState,
   actions: { showToast },
+  raw,
   booking,
   patchBooking,
+  saveBooking,
   resendLink,
 }: SheetContext) => ({
   // awaiting confirmation
@@ -14,8 +26,17 @@ export const getPanelsView = ({
     if (booking.canResend) resendLink();
   },
   copyPaymentLink: () => {
-    copyText(`tiwaras.house/pay/${booking.id}`);
-    showToast("Payment link copied");
+    if (!raw?.remoteId) {
+      copyText(`tiwaras.house/pay/${booking.id}`);
+      showToast("Payment link copied");
+
+      return;
+    }
+
+    copyLaterText(getConfirmUrl(raw.remoteId)).then(
+      () => showToast(`Link copied. Send it to ${booking.firstName} yourself.`),
+      (error: unknown) => showToast(getCopyError(error)),
+    );
   },
   // location (mobile stylists)
   toggleLocation: () => {
@@ -50,7 +71,10 @@ export const getPanelsView = ({
   saveNote: () => {
     const note = state.bookingNoteDraft.trim();
 
-    patchBooking({ stylistNote: note });
+    saveBooking({ stylistNote: note }, (remoteId) =>
+      setStylistNote(remoteId, note),
+    );
+
     setState({ bookingNoteOn: false });
     showToast(note ? "Note saved" : "Note removed");
   },

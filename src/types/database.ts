@@ -249,6 +249,30 @@ export type Database = {
           },
         ];
       };
+      booking_notes: {
+        Row: {
+          booking_id: string;
+          note: string;
+        };
+        ComputedFields: never;
+        Insert: {
+          booking_id: string;
+          note: string;
+        };
+        Update: {
+          booking_id?: string;
+          note?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "booking_notes_booking_id_fkey";
+            columns: ["booking_id"];
+            isOneToOne: true;
+            referencedRelation: "bookings";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
       booking_rules: {
         Row: {
           default_extra_minutes: number;
@@ -330,6 +354,7 @@ export type Database = {
           allergies: string | null;
           allergies_consented_at: string | null;
           arrived_at: string | null;
+          auto_cancel_warned_at: string | null;
           block_ends_at: string;
           block_range: unknown;
           buffer_minutes: number;
@@ -341,6 +366,9 @@ export type Database = {
           choices: NonNullable<Json>;
           client_id: string | null;
           completed_at: string | null;
+          confirm_by: string | null;
+          confirm_sends: number;
+          confirm_sent_at: string | null;
           contact: Json | null;
           created_at: string;
           created_by: string;
@@ -357,8 +385,11 @@ export type Database = {
           overlap_ok: boolean;
           paid_at: string | null;
           past_at: string | null;
+          policy_accepted_at: string | null;
           policy_id: string | null;
           price_pence: number;
+          protection_overridden_at: string | null;
+          protection_status: string;
           ref: string;
           reschedule_count: number;
           service_id: string | null;
@@ -379,6 +410,7 @@ export type Database = {
           allergies?: string | null;
           allergies_consented_at?: string | null;
           arrived_at?: string | null;
+          auto_cancel_warned_at?: string | null;
           block_ends_at: string;
           block_range?: never;
           buffer_minutes?: number;
@@ -390,6 +422,9 @@ export type Database = {
           choices: NonNullable<Json>;
           client_id?: string | null;
           completed_at?: string | null;
+          confirm_by?: string | null;
+          confirm_sends?: number;
+          confirm_sent_at?: string | null;
           contact?: Json | null;
           created_at?: string;
           created_by?: string;
@@ -406,8 +441,11 @@ export type Database = {
           overlap_ok?: boolean;
           paid_at?: string | null;
           past_at?: never;
+          policy_accepted_at?: string | null;
           policy_id?: string | null;
           price_pence: number;
+          protection_overridden_at?: string | null;
+          protection_status?: string;
           ref?: string;
           reschedule_count?: number;
           service_id?: string | null;
@@ -426,6 +464,7 @@ export type Database = {
           allergies?: string | null;
           allergies_consented_at?: string | null;
           arrived_at?: string | null;
+          auto_cancel_warned_at?: string | null;
           block_ends_at?: string;
           block_range?: never;
           buffer_minutes?: number;
@@ -437,6 +476,9 @@ export type Database = {
           choices?: NonNullable<Json>;
           client_id?: string | null;
           completed_at?: string | null;
+          confirm_by?: string | null;
+          confirm_sends?: number;
+          confirm_sent_at?: string | null;
           contact?: Json | null;
           created_at?: string;
           created_by?: string;
@@ -453,8 +495,11 @@ export type Database = {
           overlap_ok?: boolean;
           paid_at?: string | null;
           past_at?: never;
+          policy_accepted_at?: string | null;
           policy_id?: string | null;
           price_pence?: number;
+          protection_overridden_at?: string | null;
+          protection_status?: string;
           ref?: string;
           reschedule_count?: number;
           service_id?: string | null;
@@ -1710,6 +1755,10 @@ export type Database = {
       [_ in never]: never;
     };
     Functions: {
+      auto_cancel_unconfirmed: {
+        Args: Record<PropertyKey, never>;
+        Returns: undefined;
+      };
       become_stylist: { Args: { details: Json }; Returns: undefined };
       booking_fee_pence: { Args: { price_pence: number }; Returns: number };
       cancel_managed_booking: {
@@ -1725,6 +1774,10 @@ export type Database = {
           who: string;
         };
         Returns: undefined;
+      };
+      change_booking_client: {
+        Args: { contact: Json; protect: boolean; target: string };
+        Returns: Json;
       };
       change_slug: { Args: { new_slug: string }; Returns: string };
       checkout_booking: {
@@ -1782,8 +1835,12 @@ export type Database = {
           transfer_failures: number;
         }[];
       };
+      clean_contact: { Args: { contact: Json }; Returns: Json };
       close_business: { Args: Record<PropertyKey, never>; Returns: undefined };
-      confirm_booking_payment: { Args: { intent: string }; Returns: string };
+      confirm_booking_payment: {
+        Args: { amount?: number; intent: string; target_booking?: string };
+        Returns: string;
+      };
       confirm_link_payment: {
         Args: {
           intent: string;
@@ -1792,9 +1849,31 @@ export type Database = {
         };
         Returns: string;
       };
+      confirm_without_protection: {
+        Args: { target: string };
+        Returns: undefined;
+      };
       create_booking_token: {
         Args: { expires_at: string; purpose: string; target: string };
         Returns: string;
+      };
+      create_studio_booking: {
+        Args: {
+          addons: Json;
+          address: Json;
+          allow_overlap: boolean;
+          choices: Json;
+          contact: Json;
+          extra_minutes: number;
+          minutes: number;
+          origin: string;
+          price_pence: number;
+          protect: boolean;
+          slot_start: string;
+          stylist_note: string;
+          target_service: string;
+        };
+        Returns: Json;
       };
       create_stylist_business: {
         Args: { meta: Json; new_owner_id: string };
@@ -1830,6 +1909,7 @@ export type Database = {
           allergies: string | null;
           allergies_consented_at: string | null;
           arrived_at: string | null;
+          auto_cancel_warned_at: string | null;
           block_ends_at: string;
           block_range: unknown;
           buffer_minutes: number;
@@ -1841,6 +1921,9 @@ export type Database = {
           choices: NonNullable<Json>;
           client_id: string | null;
           completed_at: string | null;
+          confirm_by: string | null;
+          confirm_sends: number;
+          confirm_sent_at: string | null;
           contact: Json | null;
           created_at: string;
           created_by: string;
@@ -1857,8 +1940,11 @@ export type Database = {
           overlap_ok: boolean;
           paid_at: string | null;
           past_at: string | null;
+          policy_accepted_at: string | null;
           policy_id: string | null;
           price_pence: number;
+          protection_overridden_at: string | null;
+          protection_status: string;
           ref: string;
           reschedule_count: number;
           service_id: string | null;
@@ -1883,6 +1969,7 @@ export type Database = {
         Args: { calendar_key: string; secret: string; target: string };
         Returns: Json;
       };
+      get_booking_confirmation: { Args: { token: string }; Returns: Json };
       get_booking_details: { Args: { target: string }; Returns: Json };
       get_booking_invite: { Args: { token: string }; Returns: Json };
       get_booking_status: {
@@ -1900,6 +1987,22 @@ export type Database = {
         };
         Returns: Json;
       };
+      get_client_unpaid_fee: {
+        Args: { email: string; phone: string; target_stylist: string };
+        Returns: Json;
+      };
+      get_confirm_by: {
+        Args: {
+          starts_at: string;
+          stylist: Omit<
+            Database["public"]["Tables"]["stylists"]["Row"],
+            Database["public"]["Tables"]["stylists"]["ComputedFields"]
+          >;
+          terms: Json;
+        };
+        Returns: string;
+      };
+      get_confirm_url: { Args: { target: string }; Returns: string };
       get_day_slots: {
         Args: {
           buffer_minutes: number;
@@ -1915,6 +2018,10 @@ export type Database = {
         Returns: string[];
       };
       get_due_closures: { Args: Record<PropertyKey, never>; Returns: string[] };
+      get_due_pence: {
+        Args: { fee: number; price: number; terms: Json };
+        Returns: number;
+      };
       get_fee_amount: {
         Args: {
           booking: Omit<
@@ -1963,6 +2070,10 @@ export type Database = {
           isSetofReturn: false;
         };
       };
+      get_manage_url: {
+        Args: { send: boolean; target: string };
+        Returns: string;
+      };
       get_managed_booking: { Args: { token: string }; Returns: Json };
       get_next_start: {
         Args: {
@@ -1976,6 +2087,15 @@ export type Database = {
       };
       get_owner_manage_token: { Args: { ref: string }; Returns: string };
       get_payment_link: { Args: { token: string }; Returns: Json };
+      get_protection_status: {
+        Args: {
+          client: Json;
+          is_past: boolean;
+          protect: boolean;
+          stylist: string;
+        };
+        Returns: string;
+      };
       get_refund_sources: {
         Args: { owner: string; target_booking: string };
         Returns: {
@@ -1988,6 +2108,7 @@ export type Database = {
         Args: { from_date: string; to_date: string; token: string };
         Returns: string[];
       };
+      get_site: { Args: { origin: string }; Returns: string };
       get_studio_cancellation: {
         Args: {
           owner: string;
@@ -1997,7 +2118,21 @@ export type Database = {
         };
         Returns: Json;
       };
+      get_studio_snapshot: {
+        Args: { addons: Json; priced: Json };
+        Returns: Json;
+      };
+      get_studio_terms: {
+        Args: {
+          price: number;
+          protect: boolean;
+          starts_at: string;
+          stylist: string;
+        };
+        Returns: Json;
+      };
       get_stylist_profile: { Args: { lookup: string }; Returns: Json };
+      get_unconfirmed_where: { Args: { target: string }; Returns: string };
       get_unfinished_refunds: {
         Args: { batch_size: number };
         Returns: {
@@ -2074,6 +2209,7 @@ export type Database = {
           allergies: string | null;
           allergies_consented_at: string | null;
           arrived_at: string | null;
+          auto_cancel_warned_at: string | null;
           block_ends_at: string;
           block_range: unknown;
           buffer_minutes: number;
@@ -2085,6 +2221,9 @@ export type Database = {
           choices: NonNullable<Json>;
           client_id: string | null;
           completed_at: string | null;
+          confirm_by: string | null;
+          confirm_sends: number;
+          confirm_sent_at: string | null;
           contact: Json | null;
           created_at: string;
           created_by: string;
@@ -2101,8 +2240,11 @@ export type Database = {
           overlap_ok: boolean;
           paid_at: string | null;
           past_at: string | null;
+          policy_accepted_at: string | null;
           policy_id: string | null;
           price_pence: number;
+          protection_overridden_at: string | null;
+          protection_status: string;
           ref: string;
           reschedule_count: number;
           service_id: string | null;
@@ -2176,6 +2318,7 @@ export type Database = {
         Returns: undefined;
       };
       mask_email: { Args: { email: string }; Returns: string };
+      normalise_phone: { Args: { phone: string }; Returns: string };
       note_refund_failure: {
         Args: { message: string; target: string };
         Returns: undefined;
@@ -2191,6 +2334,10 @@ export type Database = {
       owns_photo_path: { Args: { object_name: string }; Returns: boolean };
       price_booking: {
         Args: { choices: Json; target_service: string };
+        Returns: Json;
+      };
+      price_service: {
+        Args: { choices: Json; require_live: boolean; target_service: string };
         Returns: Json;
       };
       purge_closed_businesses: {
@@ -2248,6 +2395,7 @@ export type Database = {
       };
       renew_booking_invite: { Args: { token: string }; Returns: undefined };
       reopen_business: { Args: Record<PropertyKey, never>; Returns: undefined };
+      reopen_studio_booking: { Args: { target: string }; Returns: Json };
       reschedule_managed_booking: {
         Args: { slot_start: string; token: string };
         Returns: Json;
@@ -2256,6 +2404,7 @@ export type Database = {
         Args: { allow_overlap: boolean; slot_start: string; target: string };
         Returns: Json;
       };
+      resend_confirm_link: { Args: { target: string }; Returns: number };
       resend_payment_link: {
         Args: { target_booking: string };
         Returns: undefined;
@@ -2263,6 +2412,7 @@ export type Database = {
       retry_stuck_fee: { Args: { target: string }; Returns: undefined };
       retry_stuck_refund: { Args: { target: string }; Returns: undefined };
       retry_stuck_transfer: { Args: { payment: string }; Returns: undefined };
+      revoke_confirm_links: { Args: { target: string }; Returns: undefined };
       schedule_booking_fee: {
         Args: {
           booking: Omit<
@@ -2307,6 +2457,10 @@ export type Database = {
       };
       secure_booking_link: { Args: { token: string }; Returns: Json };
       send_booking_code: { Args: { token: string }; Returns: Json };
+      send_confirm_link: {
+        Args: { counts: boolean; target: string; template: string };
+        Returns: undefined;
+      };
       send_fee_link: {
         Args: {
           fee: Omit<
@@ -2319,6 +2473,10 @@ export type Database = {
       };
       send_notifications_now: {
         Args: Record<PropertyKey, never>;
+        Returns: undefined;
+      };
+      send_studio_booking_notice: {
+        Args: { target: string; template: string };
         Returns: undefined;
       };
       service_from_pence: { Args: { target: string }; Returns: number };
@@ -2334,9 +2492,29 @@ export type Database = {
         Args: { intent: string; link: string };
         Returns: undefined;
       };
+      set_stylist_note: {
+        Args: { note: string; target: string };
+        Returns: undefined;
+      };
       slugify: { Args: { value: string }; Returns: string };
+      start_booking_confirmation: { Args: { token: string }; Returns: Json };
       start_link_payment: { Args: { token: string }; Returns: Json };
       undo_no_show: { Args: { target: string }; Returns: undefined };
+      update_studio_booking: {
+        Args: {
+          addons: Json;
+          allow_overlap: boolean;
+          choices: Json;
+          extra_minutes: number;
+          minutes: number;
+          price_pence: number;
+          price_reason: string;
+          slot_start: string;
+          target: string;
+          target_service: string;
+        };
+        Returns: Json;
+      };
       verify_booking_code: {
         Args: { code: string; token: string };
         Returns: string;

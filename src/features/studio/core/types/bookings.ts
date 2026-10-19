@@ -41,6 +41,11 @@ export interface StudioBooking {
   extra?: number;
   addons?: BookingAddon[];
   priceReason?: string;
+  serviceId?: string;
+  agreedDeposit?: number; // the deposit agreed for this booking (doesn't follow later price changes)
+  linkAmount?: number; // what the client pays on their confirm link
+  clientLocked?: boolean; // the client paid or saved a card, so they can't be swapped for someone else
+  loggedAfterStart?: boolean;
 }
 
 export interface CheckoutRecord {
@@ -95,6 +100,8 @@ export interface PastRecord {
   linkPaid?: boolean;
   linkVia?: string;
   original?: StudioBooking;
+  autoCancelled?: boolean; // happens when not confirmed in time -  a link can be sent again while its start is more than 2 hours away
+  startsAt?: string;
   checkout?: CheckoutRecord;
   total?: number;
   paid?: number;

@@ -36,6 +36,9 @@ const getCancelBody = ({ state, booking, isLate, lateFee }: SheetContext) => {
   const { window } = booking.agreedPolicy ?? state.policy;
   const windowText = window < 1 ? "30-minute" : `${window}-hour`;
 
+  if (booking.awaiting)
+    return `${firstName} hasn’t confirmed yet, so nothing was paid and there’s no fee. Their link stops working and the slot opens up.`;
+
   if (state.cancelWho === "me")
     return `Cancelling refunds ${firstName} in full, including the booking fee, and frees the slot for online booking.`;
 
@@ -55,7 +58,10 @@ export const getCancelView = (context: SheetContext) => {
   const { state, actions, booking, hoursToStart, isLate, lateFee } = context;
 
   const isFeeShown =
-    state.cancelWho === "client" && isLate && lateFee.amount > 0;
+    !booking.awaiting &&
+    state.cancelWho === "client" &&
+    isLate &&
+    lateFee.amount > 0;
 
   const cancel = () => {
     const isFeeKept = isFeeShown && state.cancelFee;

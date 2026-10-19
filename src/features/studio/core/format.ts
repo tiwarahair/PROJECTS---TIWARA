@@ -364,3 +364,24 @@ export const copyText = (text: string) => {
     // clipboard can be unavailable; the toast still confirms
   }
 };
+
+/** copies text the server is still making; Safari only allows it while the click is still being handled. */
+export const copyLaterText = async (text: Promise<string>) => {
+  if (typeof ClipboardItem === "undefined" || !navigator.clipboard?.write) {
+    await navigator.clipboard.writeText(await text);
+
+    return;
+  }
+
+  const blob = text.then((value) => new Blob([value], { type: "text/plain" }));
+
+  try {
+    await navigator.clipboard.write([
+      new ClipboardItem({ "text/plain": blob }),
+    ]);
+  } catch (error) {
+    await text;
+
+    throw error;
+  }
+};

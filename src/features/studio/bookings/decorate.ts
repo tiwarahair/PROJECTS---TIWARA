@@ -216,7 +216,9 @@ export const decorateBooking = (
   const canNoShow =
     isPre && minutesSinceStart >= graceMinutes && minutesSinceStart < 1440;
 
-  const depositAmount = Math.round(booking.price * policy.deposit) / 100;
+  // a real booking keeps the deposit agreed when it was made, whatever its price is now
+  const depositAmount =
+    booking.agreedDeposit ?? Math.round(booking.price * policy.deposit) / 100;
 
   const paidAmounts: Record<string, number> = {
     full: booking.price,
@@ -316,7 +318,7 @@ export const decorateBooking = (
     canResend: resends < 2,
     resendOpacity: resends < 2 ? "1" : ".45",
     protectionAmountLabel: formatMoney(
-      getProtectionTotal(state, booking.price),
+      booking.linkAmount ?? getProtectionTotal(state, booking.price),
       { pence: "always" },
     ),
     payLabel: getPayLabel(paid, booking.protectionMode),

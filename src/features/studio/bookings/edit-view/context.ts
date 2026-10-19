@@ -76,7 +76,7 @@ export const getContext = (
     addonsMinutes += minutes * quantity;
   }
 
-  const span = duration + extra;
+  const span = duration + addonsMinutes + extra;
 
   const clashes =
     draft.time != null

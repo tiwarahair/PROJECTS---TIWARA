@@ -48,6 +48,13 @@ const appRoutes: RouteObject[] = [
       })),
   },
   {
+    path: "/confirm",
+    lazy: () =>
+      import("./features/confirm-booking").then(({ ConfirmBookingPage }) => ({
+        Component: ConfirmBookingPage,
+      })),
+  },
+  {
     path: "/save-details",
     lazy: () =>
       import("./features/save-details").then(({ SaveDetailsPage }) => ({

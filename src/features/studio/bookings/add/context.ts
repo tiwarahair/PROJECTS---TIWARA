@@ -8,6 +8,7 @@ import {
 } from "../../core/model";
 import type { StudioAddon, StudioState } from "../../core/types";
 import type { StudioController } from "../../core/use-studio";
+import { toStartsAt } from "../records";
 
 const isNewClientReady = (
   addNew: StudioState["addNew"],
@@ -49,6 +50,13 @@ export const getContext = (studio: StudioController) => {
 
   const selected = state.addAddons || [];
 
+  const msToStart =
+    state.addDay != null && state.addTime
+      ? Date.parse(toStartsAt(state.addDay, state.addTime)) - Date.now()
+      : null;
+
+  const hasStarted = msToStart != null && msToStart <= 0;
+
   const readyByStep: Record<number, boolean> = {
     1:
       !!state.addClient ||
@@ -75,7 +83,11 @@ export const getContext = (studio: StudioController) => {
     conflicts,
     addNew,
     duplicate,
-    isProtectionSkipped: state.policy.mode === "none" || state.addWalkIn,
+    hasStarted,
+    isProtectionSkipped:
+      state.policy.mode === "none" || state.addWalkIn || hasStarted,
+    // the client needs until 2 hours before the start to confirm
+    isLinkTooLate: msToStart != null && msToStart <= 2 * 3600000,
     isDisabled: readyByStep[addStep] === false,
     price: parseNumber(state.addPrice ?? (service ? service.price : 0)),
     priceLabel: state.addPrice != null ? state.addPrice : service?.price,

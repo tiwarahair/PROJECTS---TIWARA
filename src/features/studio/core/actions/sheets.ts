@@ -32,6 +32,7 @@ const getAddDefaults = (): Partial<StudioState> => ({
   addServiceQuery: "",
   addWalkIn: false,
   addProtection: "link",
+  addUnpaidFee: null,
   addStep: 1,
   addClient: null,
   addService: null,

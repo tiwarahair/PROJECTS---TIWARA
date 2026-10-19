@@ -34,7 +34,10 @@ const toFee = (on: boolean, kind: string, percent: number): PolicyFee => ({
   percent,
 });
 
-const toPolicy = (row: Tables<"payment_policies">): Policy => ({
+/** a stylist's policy (or the terms a booking was made under)) */
+export const toPolicy = (
+  row: Omit<Tables<"payment_policies">, "id" | "stylist_id" | "created_at">,
+): Policy => ({
   mode:
     row.mode === "deposit" || row.mode === "full" || row.mode === "card"
       ? row.mode

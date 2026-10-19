@@ -64,11 +64,6 @@
   margin-bottom: 6px;
 }
 
-.optional {
-  font-weight: 400;
-  color: var(--text-secondary);
-}
-
 .moneyBox {
   display: flex;
   align-items: center;

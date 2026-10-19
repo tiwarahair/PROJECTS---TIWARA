@@ -1,16 +1,36 @@
 import { getInitialsImage, parseNumber } from "../../core/format";
-import { getProtectionExpiry } from "../../core/model";
+import { getClient, getProtectionExpiry } from "../../core/model";
 import type { StudioBooking } from "../../core/types";
 import { formatDuration } from "../../../../utils/dates";
+import { fetchStudioBooking } from "../../../../lib/studio-api/bookings";
+import { createStudioBooking } from "../../../../lib/studio-api/booking-writes";
+import type { StudioContact } from "../../../../lib/studio-api/booking-writes";
+import { mergeBookingRows } from "../live-records";
+import { toContactKey, toStartsAt } from "../records";
+import { getAddonValue } from "./addon-values";
 import type { AddContext } from "./context";
 import type { NewClient } from "./types";
+import { checkUnpaidFee } from "./unpaid-fee";
+
+const toPence = (pounds: number) => Math.round(pounds * 100);
+
+const splitName = (name: string) => {
+  const [first = "", ...rest] = name.trim().split(/\s+/);
+
+  return { first, last: rest.join(" ") };
+};
 
 export const saveNewClient = (
-  { state, setState }: AddContext,
+  { studio, state, setState }: AddContext,
   addNew: NewClient,
 ) => {
-  const id = `c${Date.now()}`;
   const address = addNew.address.trim();
+  const local = `c${Date.now()}`;
+
+  // a real client is known by their email or phone, as their bookings will be
+  const id = state.account
+    ? toContactKey(addNew.email || "", addNew.contact, local)
+    : local;
 
   setState({
     extraClients: state.extraClients.concat([
@@ -34,15 +54,34 @@ export const saveNewClient = (
       ? { clientAddresses: { ...state.clientAddresses, [id]: address } }
       : {}),
   });
+
+  // a shared phone can still owe a fee
+  checkUnpaidFee(studio.context.getState, setState, id);
+};
+
+const getStatus = (isLink: boolean, hasStarted: boolean) => {
+  if (isLink) return "awaiting";
+
+  return hasStarted ? "arrived" : "confirmed";
 };
 
 const getBookingRecord = (
-  { state, duration, price, isProtectionSkipped, selectedAddons }: AddContext,
+  {
+    state,
+    duration,
+    price,
+    hasStarted,
+    isProtectionSkipped,
+    isLinkTooLate,
+    selectedAddons,
+  }: AddContext,
   name: string,
   dayOffset: number,
   time: string,
 ): StudioBooking => {
-  const isLink = !isProtectionSkipped && state.addProtection !== "none";
+  const isLink =
+    !isProtectionSkipped && !isLinkTooLate && state.addProtection !== "none";
+
   const id = Date.now();
   const sentAt = Date.now();
 
@@ -55,7 +94,8 @@ const getBookingRecord = (
     service: name,
     price: Math.max(0, price),
     pending: false,
-    status: isLink ? "awaiting" : "confirmed",
+    status: getStatus(isLink, hasStarted),
+    loggedAfterStart: hasStarted,
     paid: isLink ? "link" : "none",
     protect: isLink ? "link" : "none",
     stylistNote: state.addNote.trim(),
@@ -96,6 +136,69 @@ const getAddedToast = (
   return `Booking added for ${who}${isLink ? ". Payment link sent" : ""}`;
 };
 
+const getContact = (context: AddContext): StudioContact | null => {
+  const { state } = context;
+
+  if (state.addWalkIn || !state.addClient) return null;
+
+  const { name, phone, email } = getClient(state, state.addClient);
+
+  return { ...splitName(name), phone: phone || "", email: email || "" };
+};
+
+/** Saves a real booking; the server's row then replaces the one shown straight away. */
+const saveRemote = (context: AddContext, record: StudioBooking) => {
+  const { state, setState, service, studio, overrides, selectedAddons } =
+    context;
+
+  const sync = studio.context.sync;
+
+  if (!sync || !service) return;
+
+  const previous = state.bookings;
+
+  sync.save(
+    async () => {
+      const { id } = await createStudioBooking({
+        serviceId: service.id,
+        addons: selectedAddons.map((addon) => {
+          const { price, minutes, quantity } = getAddonValue(addon, overrides);
+
+          return {
+            id: addon.id,
+            pricePence: toPence(price),
+            minutes,
+            quantity,
+          };
+        }),
+        startsAt: toStartsAt(record.dayOffset, record.time),
+        minutes: context.duration,
+        extraMinutes: state.addExtra || 0,
+        pricePence: toPence(record.price),
+        allowOverlap: !!state.addOverlapAllowed,
+        contact: getContact(context),
+        address: record.address || "",
+        note: record.stylistNote || "",
+        protect: record.protect === "link",
+      });
+
+      const row = await fetchStudioBooking(id);
+
+      setState((current) => {
+        const others = {
+          ...current,
+          bookings: current.bookings.filter(
+            ({ id: local }) => local !== record.id,
+          ),
+        };
+
+        return row ? mergeBookingRows(others, [row]) : others;
+      });
+    },
+    { bookings: previous },
+  );
+};
+
 export const confirmBooking = (context: AddContext) => {
   const { state, setState, actions, service } = context;
   const { addDay, addTime, addClient } = state;
@@ -103,6 +206,8 @@ export const confirmBooking = (context: AddContext) => {
   if (!service || addDay == null || !addTime) return;
 
   const record = getBookingRecord(context, service.name, addDay, addTime);
+
+  saveRemote(context, record);
   const date = new Date();
 
   date.setDate(date.getDate() + addDay);

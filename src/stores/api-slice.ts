@@ -46,6 +46,11 @@ import { closeBusiness, reopenBusiness } from "../lib/studio-api/settings";
 import type { StudioBookings } from "../lib/studio-api/bookings";
 import type { StylistStudio } from "../lib/studio-api";
 import { fetchPaymentLink, startLinkPayment } from "../lib/payment-link-api";
+import {
+  fetchBookingConfirmation,
+  startBookingConfirmation,
+} from "../lib/booking-confirm-api";
+import type { BookingConfirmation } from "../lib/booking-confirm-api";
 import type { PaymentLink } from "../lib/payment-link-api";
 import { listTwoFactorDevices } from "../lib/two-factor";
 import type { TwoFactorDevice } from "../lib/two-factor";
@@ -225,6 +230,16 @@ export const api = createApi({
       queryFn: ({ token, turnstileToken }) =>
         toQueryResult(startLinkPayment(token, turnstileToken)),
     }),
+    getBookingConfirmation: build.query<BookingConfirmation, string>({
+      queryFn: (token) => toQueryResult(fetchBookingConfirmation(token)),
+    }),
+    startBookingConfirmation: build.mutation<
+      { clientSecret: string },
+      { token: string; turnstileToken: string }
+    >({
+      queryFn: ({ token, turnstileToken }) =>
+        toQueryResult(startBookingConfirmation(token, turnstileToken)),
+    }),
     getRescheduleSlots: build.query<string[], RescheduleSlotsRequest>({
       providesTags: ["ManagedBooking"],
       queryFn: (request) => toQueryResult(getRescheduleSlots(request)),
@@ -293,6 +308,8 @@ export const {
   useGetManagedBookingQuery,
   useGetPaymentLinkQuery,
   useStartLinkPaymentMutation,
+  useGetBookingConfirmationQuery,
+  useStartBookingConfirmationMutation,
   useGetRescheduleSlotsQuery,
   useRescheduleBookingMutation,
   useGetAvailableSlotsQuery,
