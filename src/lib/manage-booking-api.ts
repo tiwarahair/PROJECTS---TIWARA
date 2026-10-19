@@ -3,6 +3,8 @@ import { supabase } from "./supabase";
 
 export interface CancellationTerms {
   is_late: boolean;
+  /** a late-cancellation fee: then nothing moves until it settles a day later. */
+  fee_pence?: number;
   refund_pence: number;
   kept_pence: number;
   charge_pence: number;

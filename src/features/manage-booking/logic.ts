@@ -78,10 +78,17 @@ const getKeptLine = (
     : `${toPounds(kept)} of your deposit is kept under ${stylist}'s policy.`;
 };
 
+/** with a late fee, the refund waits for the fee to settle a day later. */
+export const getRefundTiming = (fee = 0) =>
+  fee
+    ? "comes back to your card when the fee settles, 24 hours after you cancel."
+    : "is refunded to your card.";
+
 export const getCancelLines = (
   booking: ManagedBooking,
   {
     is_late: isLate,
+    fee_pence: fee = 0,
     refund_pence: refund,
     kept_pence: kept,
     charge_pence: charge,
@@ -96,9 +103,7 @@ export const getCancelLines = (
     ...(isLate ? ["It's past the free cancellation time."] : []),
     ...(refund
       ? [
-          isWholeDeposit
-            ? `Your ${toPounds(refund)} deposit is refunded to your card.`
-            : `${toPounds(refund)} is refunded to your card.`,
+          `${isWholeDeposit ? `Your ${toPounds(refund)} deposit` : toPounds(refund)} ${getRefundTiming(fee)}`,
         ]
       : []),
     ...(kept ? [getKeptLine(booking, kept)] : []),

@@ -1,3 +1,4 @@
+import { admin } from "./admin.ts";
 import { findEarlierRefund } from "./earlier-refund.ts";
 import { stripe } from "./stripe.ts";
 
@@ -9,10 +10,19 @@ interface BookingRefund {
 }
 
 /** Refunds a booking's payment once per reason, taking the stylist's share back when they were paid. */
-export const refundBooking = async ({ bookingId, paymentIntentId, amount, reason }: BookingRefund) => {
+export const refundBooking = async ({
+  bookingId,
+  paymentIntentId,
+  amount,
+  reason,
+}: BookingRefund) => {
   if (!amount || !paymentIntentId) return null;
 
-  const { data: earlier } = await stripe.refunds.list({ payment_intent: paymentIntentId, limit: 100 });
+  const { data: earlier } = await stripe.refunds.list({
+    payment_intent: paymentIntentId,
+    limit: 100,
+  });
+
   const madeBefore = findEarlierRefund(earlier, reason);
 
   if (madeBefore) return madeBefore.id;
@@ -30,4 +40,19 @@ export const refundBooking = async ({ bookingId, paymentIntentId, amount, reason
   );
 
   return id;
+};
+
+/** after a booking is cancelled: refunds what goes back now and records it on the cancellation. */
+export const refundCancellation = async (refund: BookingRefund) => {
+  const refundId = await refundBooking(refund);
+
+  if (!refundId) return;
+
+  const { error } = await admin.rpc("set_cancel_refund", {
+    target: refund.bookingId,
+    refund_id: refundId,
+    refunded: refund.amount,
+  });
+
+  if (error) throw error;
 };

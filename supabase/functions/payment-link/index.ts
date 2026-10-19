@@ -50,7 +50,8 @@ const getIntent = async (link: LinkPayment) => {
       },
       ...(canTransfer ? { transfer_data: { destination: link.stylist_account as string } } : {}),
     },
-    { idempotencyKey: `link:${link.link_id}:pi` },
+    // a new key after each replaced payment, so Stripe doesn't hand back the old one
+    { idempotencyKey: `link:${link.link_id}:after:${link.payment_intent_id ?? "none"}` },
   );
 };
 

@@ -5,6 +5,7 @@ import { formatWhen, pounds } from "./booking-emails.ts";
 import type { BookingDetails } from "./booking-emails.ts";
 
 interface Cancellation {
+  fee_pence?: number;
   refund_pence: number;
   kept_pence: number;
   charge_pence: number;
@@ -21,8 +22,15 @@ const NOT_ME = "This wasn’t me";
 
 type StylistNotice = BookingDetails & { cancellation: Cancellation | null; studio_url: string };
 
-const getMoneyLines = ({ refund_pence: refund, kept_pence: kept, charge_pence: charge }: Cancellation, stylist: string) => [
-  ...(refund ? [`${pounds(refund)} is refunded to your card. It can take 5–10 working days to show.`] : []),
+const getMoneyLines = (
+  { fee_pence: fee = 0, refund_pence: refund, kept_pence: kept, charge_pence: charge }: Cancellation,
+  stylist: string,
+) => [
+  // with a fee, nothing moves until the fee settles a day later
+  ...(refund && fee
+    ? [`${pounds(refund)} goes back to your card when the fee settles in 24 hours.`]
+    : []),
+  ...(refund && !fee ? [`${pounds(refund)} is refunded to your card. It can take 5–10 working days to show.`] : []),
   ...(kept ? [`${pounds(kept)} is kept under ${stylist}’s cancellation policy.`] : []),
   ...(charge ? [`A ${pounds(charge)} late cancellation fee is due under ${stylist}’s policy. We’ve emailed you when it will be charged.`] : []),
 ];

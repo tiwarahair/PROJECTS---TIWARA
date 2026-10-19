@@ -7,6 +7,8 @@ type FeeRow = StudioBookingRow["booking_fees"][number];
 
 // the automatic charge, then two retries
 const MAX_TRIES = 3;
+// after this many failed settlement runs the fee is left for us to look at
+const MAX_FAILED_RUNS = 5;
 
 export const toPounds = (pence: number) => pence / 100;
 
@@ -81,11 +83,17 @@ export const getFeeFlags = (
 
   if (fee.waived_at) return { ...base, waived: true, meta: "Fee waived" };
 
+  if (fee.status === "charging" && fee.failed_runs >= MAX_FAILED_RUNS)
+    return { ...base, feeStuck: true, meta: "Fee needs checking" };
+
   return { ...base, ...getStatusFlags(fee, link) };
 };
 
 /** "£30.00 refunded." now, or "£30.00 back to the client on settlement." while it waits. */
 export const getRefundNote = (refunded: number, fee: FeeRow | undefined) => {
+  if (fee?.status === "charging" && fee.failed_runs >= MAX_FAILED_RUNS)
+    return " We’re checking why this fee couldn’t be settled. There’s nothing for you to do.";
+
   if (refunded) return ` ${formatPence(refunded)} refunded.`;
 
   if (fee?.refund_pence && !fee.waived_at)

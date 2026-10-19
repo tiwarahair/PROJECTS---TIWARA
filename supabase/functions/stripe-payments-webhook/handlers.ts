@@ -6,6 +6,7 @@ const onLinkPaid = async (intent: Stripe.PaymentIntent) => {
   const { data: outcome, error } = await admin.rpc("confirm_link_payment", {
     intent: intent.id,
     transfer_pending: intent.metadata.transfer_pending === "true",
+    target_link: intent.metadata.link_id ?? null,
   });
 
   if (error?.message === "link_not_found") return;

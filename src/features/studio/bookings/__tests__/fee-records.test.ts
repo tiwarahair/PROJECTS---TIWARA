@@ -18,6 +18,7 @@ const getFee = (patch: Partial<FeeRow>): FeeRow => ({
   card_label: null,
   waived_at: null,
   created_at: "2026-10-17T12:00:00Z",
+  failed_runs: 0,
   ...patch,
 });
 
@@ -65,6 +66,14 @@ describe("getFeeFlags", () => {
     expect(
       getFeeFlags(getFee({ waived_at: "2026-10-17T13:00:00Z" })),
     ).toMatchObject({ waived: true, meta: "Fee waived" });
+  });
+
+  it("shows a fee whose settlement keeps failing as needing checking, with no actions", () => {
+    const flags = getFeeFlags(getFee({ status: "charging", failed_runs: 5 }));
+
+    expect(flags).toMatchObject({ feeStuck: true, meta: "Fee needs checking" });
+    expect(flags.feePending).toBeUndefined();
+    expect(flags.feeKept).toBeUndefined();
   });
 
   it("shows nothing for a no-charge settlement", () => {

@@ -1,5 +1,5 @@
 begin;
-select plan(30);
+select plan(34);
 
 create function pg_temp.sign_up(user_id uuid, user_email text, business text)
 returns void
@@ -221,6 +221,32 @@ select is((select count(*)::int from public.notifications where template = 'fee_
 select is(
   (select payload ->> 'refund_pence' from public.notifications where template = 'fee_waived' and to_address = 'nia@money.test'),
   '3000', 'a waived fee tells the client, with what comes back'
+);
+
+create temp table c as
+select pg_temp.book(interval '5 days', '{"mode": "deposit", "deposit_pence": 3000, "refundable": true}') as resumed;
+
+select public.cancel_studio_booking((select resumed from c), 'd1111111-1111-1111-1111-111111111111', 'stylist', '',
+  public.get_studio_cancellation((select resumed from c), 'd1111111-1111-1111-1111-111111111111', 'stylist', false)
+    || '{"refund_now_pence": 3163}');
+select is(
+  public.get_studio_cancellation((select resumed from c), 'd1111111-1111-1111-1111-111111111111', 'stylist', false) ->> 'resume',
+  'true', 'a cancellation whose refund failed is picked up again'
+);
+update public.bookings set cancelled_at = now() - interval '10 minutes' where id = (select resumed from c);
+select is(
+  (select amount_pence from public.get_unfinished_refunds(50) where booking_id = (select resumed from c)),
+  3163, 'the settlement job finds it, with what to refund'
+);
+select public.set_cancel_refund((select resumed from c), 're_resumed', 3163);
+select is(
+  (select concat_ws(' ', reason, amount_pence) from public.refunds where stripe_refund_id = 're_resumed'),
+  'stylist_cancel 3163', 'its refund is recorded once it goes through'
+);
+select throws_ok(
+  format('select public.get_studio_cancellation(%L, %L, %L, false)', (select resumed from c),
+    'd1111111-1111-1111-1111-111111111111', 'stylist'),
+  'cannot_cancel', 'and then there is nothing left to do'
 );
 
 select ok(

@@ -58,10 +58,17 @@ export const watchStudio = (stylistId: string, getStudio: () => LiveStudio) => {
     }
   };
 
+  // several changes to one booking arrive close together; only the newest fetch's answer is used
+  const latestFetch = new Map<string, number>();
+
   const refreshOne = async (bookingId: string) => {
+    const ticket = (latestFetch.get(bookingId) ?? 0) + 1;
+
+    latestFetch.set(bookingId, ticket);
+
     const row = await fetchStudioBooking(bookingId).catch(() => null);
 
-    if (row) apply([row]);
+    if (row && latestFetch.get(bookingId) === ticket) apply([row]);
   };
 
   const refreshAll = async () => {

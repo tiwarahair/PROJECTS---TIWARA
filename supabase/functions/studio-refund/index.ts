@@ -13,17 +13,24 @@ const requestSchema = z.object({
 
 interface RefundSource {
   payment_intent_id: string;
-  amount_pence: number;
+  stylist_share_pence: number;
+  stripe_transfer_id: string | null;
 }
 
-const getRefundable = async (intentId: string) => {
+interface RefundPart {
+  intentId: string;
+  amount: number;
+  isTransferred: boolean;
+  transferId: string | null;
+}
+
+// only the stylist's share goes back from Studio: never the platform's booking fee
+const getRefundable = async ({ payment_intent_id: intentId, stylist_share_pence: share }: RefundSource) => {
   const intent = await stripe.paymentIntents.retrieve(intentId, { expand: ["latest_charge"] });
   const charge = intent.latest_charge;
+  const refunded = typeof charge === "object" && charge ? charge.amount_refunded : share;
 
-  return {
-    available: typeof charge === "object" && charge ? charge.amount - charge.amount_refunded : 0,
-    isTransferred: !!intent.transfer_data,
-  };
+  return { available: Math.max(0, share - refunded), isTransferred: !!intent.transfer_data };
 };
 
 Deno.serve(async (request) => {
@@ -46,16 +53,16 @@ Deno.serve(async (request) => {
 
     const sources = (data ?? []) as RefundSource[];
     let left = amountPence;
-    const plan: { intentId: string; amount: number; isTransferred: boolean }[] = [];
+    const plan: RefundPart[] = [];
 
-    for (const { payment_intent_id: intentId } of sources) {
+    for (const source of sources) {
       if (!left) break;
 
-      const { available, isTransferred } = await getRefundable(intentId);
+      const { available, isTransferred } = await getRefundable(source);
       const amount = Math.min(left, available);
 
       if (amount > 0) {
-        plan.push({ intentId, amount, isTransferred });
+        plan.push({ intentId: source.payment_intent_id, amount, isTransferred, transferId: source.stripe_transfer_id });
         left -= amount;
       }
     }
@@ -69,7 +76,7 @@ Deno.serve(async (request) => {
 
     let refunded = 0;
 
-    for (const [index, { intentId, amount, isTransferred }] of plan.entries()) {
+    for (const [index, { intentId, amount, isTransferred, transferId }] of plan.entries()) {
       // a later part failing leaves the earlier ones made; say how much went back, so a retry asks for the rest
       const refund = await stripe.refunds
         .create(
@@ -90,6 +97,10 @@ Deno.serve(async (request) => {
       if (!refund) return respond(refunded ? 200 : 500, refunded ? { refunded_pence: refunded } : { error: "unknown" });
 
       refunded += amount;
+
+      // a fee sent on to the stylist later: take the refunded part of that transfer back too
+      if (transferId)
+        await stripe.transfers.createReversal(transferId, { amount }, { idempotencyKey: `refund-reversal:${refund.id}` });
 
       const { error: saveError } = await admin
         .from("refunds")

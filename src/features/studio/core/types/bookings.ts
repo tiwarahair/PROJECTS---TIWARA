@@ -70,6 +70,8 @@ export interface PastRecord {
   feeCharge?: number;
   feeCard?: string;
   feeLinkResends?: number;
+  /** Its settlement kept failing, so we're looking at it; nothing for the stylist to do. */
+  feeStuck?: boolean;
   /** What a real client gets back if the fee is waived. */
   feeWaiveRefund?: number;
   client: string | null;

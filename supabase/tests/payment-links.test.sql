@@ -1,5 +1,5 @@
 begin;
-select plan(27);
+select plan(33);
 
 create function pg_temp.sign_up(user_id uuid, user_email text, business text)
 returns void
@@ -182,7 +182,7 @@ select is(public.start_link_payment(pg_temp.token((select card from b))) ->> 'am
 select public.set_link_intent(
   (select id from public.payment_links where booking_id = (select card from b)), 'pi_link_card'
 );
-select is(public.confirm_link_payment('pi_link_card', true), 'paid', 'the payment goes through');
+select is(public.confirm_link_payment('pi_link_card', true, null), 'paid', 'the payment goes through');
 select is(
   (select concat_ws(' ', fees.status, payments.amount_pence, payments.transfer_pending)
   from public.booking_fees as fees join public.payments on payments.fee_id = fees.id
@@ -191,6 +191,10 @@ select is(
 );
 select throws_ok(format('select public.start_link_payment(%L)', pg_temp.token((select card from b))), 'link_paid',
   'a paid link cannot be paid again');
+select is(
+  public.confirm_link_payment('pi_link_card_again', true, (select id from public.payment_links where booking_id = (select card from b))),
+  'refund', 'a second payment of a paid link is refunded'
+);
 
 select pg_temp.act_as('e1111111-1111-1111-1111-111111111111');
 select public.waive_fee((select waived from b));
@@ -198,9 +202,18 @@ reset role;
 select is((select status from public.payment_links where booking_id = (select waived from b)), 'cancelled',
   'waiving cancels the link');
 
+select public.set_link_intent((select id from public.payment_links where booking_id = (select raced from b)), 'pi_link_old');
 select public.set_link_intent((select id from public.payment_links where booking_id = (select raced from b)), 'pi_link_raced');
+select is((select stripe_payment_intent_id from public.payment_links where booking_id = (select raced from b)), 'pi_link_raced',
+  'a replaced payment is saved on the link');
 update public.booking_fees set status = 'paid_offline' where booking_id = (select raced from b);
-select is(public.confirm_link_payment('pi_link_raced', false), 'refund', 'paid another way meanwhile: refund the link payment');
+select is(public.confirm_link_payment('pi_link_raced', false, null), 'refund', 'paid another way meanwhile: refund the link payment');
+
+update public.booking_fees set status = 'unpaid' where booking_id = (select raced from b);
+select pg_temp.act_as('e1111111-1111-1111-1111-111111111111');
+select lives_ok(format('select public.resend_payment_link(%L)', (select raced from b)),
+  'a link cancelled while the fee was busy can be resent once it''s unpaid again');
+reset role;
 
 update public.payment_links set expires_at = now() - interval '1 minute'
 where booking_id = (select raced from b);
@@ -252,6 +265,26 @@ select public.release_hold((select waived from b), 'wrong');
 select is((select status from public.bookings where id = (select waived from b)), 'held', 'a hold needs its secret to be released');
 select public.release_hold((select waived from b), 'secret');
 select is((select status from public.bookings where id = (select waived from b)), 'expired', 'a turned-away client''s hold is released');
+
+select is(
+  (select count(*)::int from public.get_refund_sources((select card from b), 'e1111111-1111-1111-1111-111111111111')
+  where stylist_share_pence > 0),
+  1, 'a Studio refund can only come from the stylist''s share (the fee charge), not the booking fee payment'
+);
+
+update public.booking_fees set status = 'pending', charge_after = now() - interval '1 minute', failed_runs = 5
+where booking_id = (select waived from b);
+select is(
+  (select count(*)::int from public.claim_due_fees(50) as claimed where (claimed ->> 'booking_id')::uuid = (select waived from b)),
+  0, 'a settlement that failed five times is left alone'
+);
+
+update public.booking_fees set status = 'charging' where booking_id = (select waived from b);
+select public.retry_stuck_fee((select id from public.booking_fees where booking_id = (select waived from b)));
+select is(
+  (select concat_ws(' ', status, failed_runs) from public.booking_fees where booking_id = (select waived from b)),
+  'pending 0', 'once fixed, we can send a stuck settlement round again'
+);
 
 select * from finish();
 rollback;

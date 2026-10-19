@@ -6,7 +6,7 @@ import { check, invokeStudio, write } from "./request";
 const BOOKING_SELECT = `id, status, starts_at, minutes, price_pence, snapshot, contact, notes, address, terms,
   reschedule_count, cancelled_at, cancelled_by, cancellation, no_show_at, overlap_ok, created_by, past_at,
   booking_fees(id, kind, status, amount_pence, kept_pence, refund_pence, charge_pence, tries, hard_decline,
-    decline_message, card_label, waived_at, created_at),
+    decline_message, card_label, waived_at, created_at, failed_runs),
   refunds(amount_pence),
   payment_links(status, sent_count)`;
 

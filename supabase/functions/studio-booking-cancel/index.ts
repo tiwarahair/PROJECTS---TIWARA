@@ -4,7 +4,7 @@ import { admin } from "../_shared/admin.ts";
 import { corsHeaders, respond } from "../_shared/cors.ts";
 import { getSignedInUser } from "../_shared/recent-user.ts";
 import { getRefundNow } from "../_shared/cancel-refund.ts";
-import { refundBooking } from "../_shared/refund.ts";
+import { refundCancellation } from "../_shared/refund.ts";
 
 const ERRORS: Record<string, number> = { not_found: 404, cannot_cancel: 409 };
 
@@ -22,6 +22,7 @@ interface Cancellation {
   kept_pence: number;
   charge_pence: number;
   fee_pence: number;
+  resume?: boolean;
 }
 
 Deno.serve(async (request) => {
@@ -56,33 +57,35 @@ Deno.serve(async (request) => {
     const cancellation = data as Cancellation;
     const refundNow = getRefundNow(cancellation);
 
-    const refundId = await refundBooking({
+    // cancelled first, so the client can't cancel it meanwhile; a refund that then fails is finished on a retry
+    if (!cancellation.resume) {
+      const { error: cancelError } = await admin.rpc("cancel_studio_booking", {
+        target: bookingId,
+        owner,
+        who,
+        reason,
+        cancellation: {
+          ...cancellation,
+          id: undefined,
+          payment_intent_id: undefined,
+          refund_now_pence: refundNow,
+        },
+      });
+
+      if (cancelError && ERRORS[cancelError.message])
+        return respond(ERRORS[cancelError.message], {
+          error: cancelError.message,
+        });
+
+      if (cancelError) throw cancelError;
+    }
+
+    await refundCancellation({
       bookingId,
       paymentIntentId: cancellation.payment_intent_id,
       amount: refundNow,
       reason: who === "stylist" ? "stylist_cancelled" : "client_cancelled",
     });
-
-    const { error: cancelError } = await admin.rpc("cancel_studio_booking", {
-      target: bookingId,
-      owner,
-      who,
-      reason,
-      cancellation: {
-        ...cancellation,
-        id: undefined,
-        payment_intent_id: undefined,
-        refund_id: refundId,
-        refunded_pence: refundId ? refundNow : 0,
-      },
-    });
-
-    if (cancelError && ERRORS[cancelError.message])
-      return respond(ERRORS[cancelError.message], {
-        error: cancelError.message,
-      });
-
-    if (cancelError) throw cancelError;
 
     const { refund_pence, kept_pence, charge_pence } = cancellation;
 

@@ -177,6 +177,7 @@ export type Database = {
           claimed_at: string | null;
           created_at: string;
           decline_message: string | null;
+          failed_runs: number;
           hard_decline: boolean;
           id: string;
           kept_pence: number;
@@ -200,6 +201,7 @@ export type Database = {
           claimed_at?: string | null;
           created_at?: string;
           decline_message?: string | null;
+          failed_runs?: number;
           hard_decline?: boolean;
           id?: string;
           kept_pence: number;
@@ -221,6 +223,7 @@ export type Database = {
           claimed_at?: string | null;
           created_at?: string;
           decline_message?: string | null;
+          failed_runs?: number;
           hard_decline?: boolean;
           id?: string;
           kept_pence?: number;
@@ -1772,7 +1775,11 @@ export type Database = {
       close_business: { Args: Record<PropertyKey, never>; Returns: undefined };
       confirm_booking_payment: { Args: { intent: string }; Returns: string };
       confirm_link_payment: {
-        Args: { intent: string; transfer_pending: boolean };
+        Args: {
+          intent: string;
+          target_link: string;
+          transfer_pending: boolean;
+        };
         Returns: string;
       };
       create_booking_token: {
@@ -1962,8 +1969,9 @@ export type Database = {
       get_refund_sources: {
         Args: { owner: string; target_booking: string };
         Returns: {
-          amount_pence: number;
           payment_intent_id: string;
+          stripe_transfer_id: string;
+          stylist_share_pence: number;
         }[];
       };
       get_reschedule_slots: {
@@ -1980,6 +1988,15 @@ export type Database = {
         Returns: Json;
       };
       get_stylist_profile: { Args: { lookup: string }; Returns: Json };
+      get_unfinished_refunds: {
+        Args: { batch_size: number };
+        Returns: {
+          amount_pence: number;
+          booking_id: string;
+          cancelled_by: string;
+          payment_intent_id: string;
+        }[];
+      };
       get_unique_slug: { Args: { business_name: string }; Returns: string };
       has_recent_second_factor: {
         Args: Record<PropertyKey, never>;
@@ -2017,6 +2034,16 @@ export type Database = {
         Returns: boolean;
       };
       is_manage_verified: { Args: { token: string }; Returns: boolean };
+      is_refund_unfinished: {
+        Args: {
+          booking: Omit<
+            Database["public"]["Tables"]["bookings"]["Row"],
+            Database["public"]["Tables"]["bookings"]["ComputedFields"]
+          >;
+          who: string;
+        };
+        Returns: boolean;
+      };
       is_service_owner: {
         Args: { target_service_id: string };
         Returns: boolean;
@@ -2097,6 +2124,7 @@ export type Database = {
           claimed_at: string | null;
           created_at: string;
           decline_message: string | null;
+          failed_runs: number;
           hard_decline: boolean;
           id: string;
           kept_pence: number;
@@ -2137,6 +2165,10 @@ export type Database = {
         Returns: undefined;
       };
       mask_email: { Args: { email: string }; Returns: string };
+      note_settlement_failure: {
+        Args: { message: string; target: string };
+        Returns: undefined;
+      };
       owns_photo_path: { Args: { object_name: string }; Returns: boolean };
       price_booking: {
         Args: { choices: Json; target_service: string };
@@ -2209,6 +2241,7 @@ export type Database = {
         Args: { target_booking: string };
         Returns: undefined;
       };
+      retry_stuck_fee: { Args: { target: string }; Returns: undefined };
       schedule_booking_fee: {
         Args: {
           booking: Omit<
@@ -2270,6 +2303,10 @@ export type Database = {
       service_from_pence: { Args: { target: string }; Returns: number };
       set_booking_status: {
         Args: { next_status: string; target: string };
+        Returns: undefined;
+      };
+      set_cancel_refund: {
+        Args: { refund_id: string; refunded: number; target: string };
         Returns: undefined;
       };
       set_link_intent: {
