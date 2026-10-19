@@ -73,6 +73,7 @@ export const getClosedMessage = (
 
 export const LINK_PAY_ERRORS: Record<string, string> = {
   link_paid: "This fee is already paid.",
+  link_processing: "Your payment is being confirmed. Check back in a minute.",
   link_expired: "This link has expired. Reply to our email for a new one.",
   link_not_valid:
     "This link no longer works. Use the link in our latest email.",

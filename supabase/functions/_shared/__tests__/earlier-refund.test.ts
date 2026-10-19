@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { findEarlierRefund } from "../earlier-refund";
 
-const refund = (id: string, status: string, reason = "client_cancelled") => ({ id, status, metadata: { reason } });
+const refund = (id: string, status: string, reason = "client_cancelled") => ({ id, amount: 1500, status, metadata: { reason } });
 
 describe("findEarlierRefund", () => {
   it("reuses a refund for the same reason that went through or is pending", () => {

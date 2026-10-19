@@ -1,5 +1,6 @@
 interface Refund {
   id: string;
+  amount: number;
   status: string | null;
   metadata: Record<string, string> | null;
 }

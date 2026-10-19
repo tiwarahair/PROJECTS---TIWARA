@@ -186,6 +186,7 @@ export type Database = {
           paid_at: string | null;
           refund_pence: number;
           refunded_pence: number;
+          reruns: number;
           status: string;
           tries: number;
           waived_at: string | null;
@@ -210,6 +211,7 @@ export type Database = {
           paid_at?: string | null;
           refund_pence: number;
           refunded_pence?: number;
+          reruns?: number;
           status?: string;
           tries?: number;
           waived_at?: string | null;
@@ -232,6 +234,7 @@ export type Database = {
           paid_at?: string | null;
           refund_pence?: number;
           refunded_pence?: number;
+          reruns?: number;
           status?: string;
           tries?: number;
           waived_at?: string | null;
@@ -869,6 +872,8 @@ export type Database = {
           platform_fee_pence: number;
           stripe_payment_intent_id: string | null;
           stripe_transfer_id: string | null;
+          transfer_failed_at: string | null;
+          transfer_failures: number;
           transfer_pending: boolean;
         };
         ComputedFields: never;
@@ -883,6 +888,8 @@ export type Database = {
           platform_fee_pence?: number;
           stripe_payment_intent_id?: string | null;
           stripe_transfer_id?: string | null;
+          transfer_failed_at?: string | null;
+          transfer_failures?: number;
           transfer_pending?: boolean;
         };
         Update: {
@@ -896,6 +903,8 @@ export type Database = {
           platform_fee_pence?: number;
           stripe_payment_intent_id?: string | null;
           stripe_transfer_id?: string | null;
+          transfer_failed_at?: string | null;
+          transfer_failures?: number;
           transfer_pending?: boolean;
         };
         Relationships: [
@@ -1770,6 +1779,7 @@ export type Database = {
           payment_id: string;
           payment_intent_id: string;
           stylist_account: string;
+          transfer_failures: number;
         }[];
       };
       close_business: { Args: Record<PropertyKey, never>; Returns: undefined };
@@ -2133,6 +2143,7 @@ export type Database = {
           paid_at: string | null;
           refund_pence: number;
           refunded_pence: number;
+          reruns: number;
           status: string;
           tries: number;
           waived_at: string | null;
@@ -2165,8 +2176,16 @@ export type Database = {
         Returns: undefined;
       };
       mask_email: { Args: { email: string }; Returns: string };
+      note_refund_failure: {
+        Args: { message: string; target: string };
+        Returns: undefined;
+      };
       note_settlement_failure: {
         Args: { message: string; target: string };
+        Returns: undefined;
+      };
+      note_transfer_failure: {
+        Args: { message: string; payment: string };
         Returns: undefined;
       };
       owns_photo_path: { Args: { object_name: string }; Returns: boolean };
@@ -2242,6 +2261,8 @@ export type Database = {
         Returns: undefined;
       };
       retry_stuck_fee: { Args: { target: string }; Returns: undefined };
+      retry_stuck_refund: { Args: { target: string }; Returns: undefined };
+      retry_stuck_transfer: { Args: { payment: string }; Returns: undefined };
       schedule_booking_fee: {
         Args: {
           booking: Omit<

@@ -1,5 +1,5 @@
 begin;
-select plan(33);
+select plan(36);
 
 create function pg_temp.sign_up(user_id uuid, user_email text, business text)
 returns void
@@ -242,6 +242,23 @@ select is(
   (select count(*)::int from public.claim_pending_transfers(50) where stylist_account = 'acct_links'),
   1, 'a fee waiting for the account is sent once it can receive'
 );
+select public.note_transfer_failure((select id from public.payments where stripe_payment_intent_id = 'pi_link_card'), 'boom');
+select is(
+  (select count(*)::int from public.claim_pending_transfers(50) where stylist_account = 'acct_links'),
+  0, 'a failed transfer waits before its next try'
+);
+select public.note_transfer_failure((select id from public.payments where stripe_payment_intent_id = 'pi_link_card'), 'boom')
+from generate_series(1, 4);
+update public.payments set transfer_failed_at = now() - interval '13 hours' where stripe_payment_intent_id = 'pi_link_card';
+select is(
+  (select count(*)::int from public.claim_pending_transfers(50) where stylist_account = 'acct_links'),
+  0, 'a transfer that failed five times stops holding up the rest'
+);
+select is(
+  (select count(*)::int from public.booking_events where kind = 'transfer_stuck' and data ->> 'error' = 'boom'),
+  1, 'and is flagged for us'
+);
+select public.retry_stuck_transfer((select id from public.payments where stripe_payment_intent_id = 'pi_link_card'));
 select public.mark_transfer_sent((select id from public.payments where stripe_payment_intent_id = 'pi_link_card'), 'tr_1');
 select is((select count(*)::int from public.claim_pending_transfers(50) where stylist_account = 'acct_links'), 0, 'and only once');
 
@@ -283,7 +300,7 @@ update public.booking_fees set status = 'charging' where booking_id = (select wa
 select public.retry_stuck_fee((select id from public.booking_fees where booking_id = (select waived from b)));
 select is(
   (select concat_ws(' ', status, failed_runs) from public.booking_fees where booking_id = (select waived from b)),
-  'pending 0', 'once fixed, we can send a stuck settlement round again'
+  'charging 0', 'once fixed, we can send a stuck settlement round again'
 );
 
 select * from finish();

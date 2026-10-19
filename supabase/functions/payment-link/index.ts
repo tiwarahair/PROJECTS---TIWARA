@@ -6,9 +6,9 @@ import { corsHeaders, respond } from "../_shared/cors.ts";
 import { isWithinLimit } from "../_shared/rate-limit.ts";
 import { stripe } from "../_shared/stripe.ts";
 import { isHuman } from "../_shared/turnstile.ts";
+import { isCurrentIntent } from "./intent.ts";
 
 const LINK_ERRORS = ["link_not_valid", "link_paid", "link_expired"];
-const OPEN_STATUSES = ["requires_payment_method", "requires_confirmation", "requires_action"];
 
 const requestSchema = z.discriminatedUnion("action", [
   z.object({ action: z.literal("view"), token: z.string().min(1).max(100) }),
@@ -28,9 +28,10 @@ interface LinkPayment {
 
 const getIntent = async (link: LinkPayment) => {
   if (link.payment_intent_id) {
-    const existing = await stripe.paymentIntents.retrieve(link.payment_intent_id);
+    const existing = await stripe.paymentIntents.retrieve(link.payment_intent_id, { expand: ["latest_charge"] });
 
-    if (OPEN_STATUSES.includes(existing.status)) return existing;
+    // a paid or confirming payment is kept too, so the client can't pay a second time before the webhook lands
+    if (isCurrentIntent(existing)) return existing;
   }
 
   const canTransfer = !!link.stylist_account && link.stylist_can_receive;
@@ -87,6 +88,8 @@ Deno.serve(async (request) => {
     const intent = await getIntent(link);
 
     if (intent.status === "succeeded") return respond(409, { error: "link_paid" });
+
+    if (intent.status === "processing") return respond(409, { error: "link_processing" });
 
     const { error: saveError } = await admin.rpc("set_link_intent", { link: link.link_id, intent: intent.id });
 

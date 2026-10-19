@@ -1,5 +1,5 @@
 begin;
-select plan(34);
+select plan(44);
 
 create function pg_temp.sign_up(user_id uuid, user_email text, business text)
 returns void
@@ -247,6 +247,72 @@ select throws_ok(
   format('select public.get_studio_cancellation(%L, %L, %L, false)', (select resumed from c),
     'd1111111-1111-1111-1111-111111111111', 'stylist'),
   'cannot_cancel', 'and then there is nothing left to do'
+);
+
+create temp table d as
+select pg_temp.book(interval '6 days', '{"mode": "deposit", "deposit_pence": 3000, "refundable": true}') as stuck,
+  pg_temp.book(interval '7 days', '{"mode": "deposit", "deposit_pence": 3000, "refundable": true}') as emptied;
+
+select public.cancel_studio_booking(booking, 'd1111111-1111-1111-1111-111111111111', 'stylist', '',
+  public.get_studio_cancellation(booking, 'd1111111-1111-1111-1111-111111111111', 'stylist', false)
+    || '{"refund_now_pence": 3163}')
+from (select stuck as booking from d union all select emptied from d) as cancelled;
+update public.bookings set cancelled_at = now() - interval '10 minutes'
+where id in ((select stuck from d), (select emptied from d));
+
+select public.note_refund_failure((select stuck from d), 'stripe_down');
+select is(
+  (select count(*)::int from public.get_unfinished_refunds(50) where booking_id = (select stuck from d)),
+  0, 'a failed refund waits before its next try'
+);
+update public.bookings set cancellation = cancellation || jsonb_build_object('refund_failed_at', now() - interval '61 minutes')
+where id = (select stuck from d);
+select is(
+  (select count(*)::int from public.get_unfinished_refunds(50) where booking_id = (select stuck from d)),
+  1, 'then is tried again an hour later'
+);
+select public.note_refund_failure((select stuck from d), 'stripe_down');
+update public.bookings set cancellation = cancellation || jsonb_build_object('refund_failed_at', now() - interval '61 minutes')
+where id = (select stuck from d);
+select is(
+  (select count(*)::int from public.get_unfinished_refunds(50) where booking_id = (select stuck from d)),
+  0, 'and waits an hour longer after each failure'
+);
+
+select public.note_refund_failure((select stuck from d), 'charge_already_refunded') from generate_series(1, 3);
+update public.bookings set cancellation = cancellation || jsonb_build_object('refund_failed_at', now() - interval '13 hours')
+where id = (select stuck from d);
+select is(
+  (select count(*)::int from public.get_unfinished_refunds(50) where booking_id = (select stuck from d)),
+  0, 'a refund that failed five times stops being retried'
+);
+select is(
+  (select data ->> 'error' from public.booking_events where booking_id = (select stuck from d) and kind = 'refund_stuck'),
+  'charge_already_refunded', 'and is flagged for us'
+);
+
+select public.set_cancel_refund((select emptied from d), null, 0);
+select is(
+  (select count(*)::int from public.get_unfinished_refunds(50) where booking_id = (select emptied from d)),
+  0, 'a cancellation with nothing left to refund is done'
+);
+select is((select count(*)::int from public.refunds where booking_id = (select emptied from d)), 0, 'without a refund record');
+
+update public.booking_fees set status = 'charging', claimed_at = now(), failed_runs = 5
+where booking_id = (select late from b);
+select public.retry_stuck_fee((select id from public.booking_fees where booking_id = (select late from b)));
+select is(
+  (select concat_ws(' ', status, failed_runs, tries, reruns) from public.booking_fees where booking_id = (select late from b)),
+  'charging 0 0 1', 'a stuck fee retried reruns mid-settlement, without using up a try'
+);
+select is(
+  (select count(*)::int from public.claim_due_fees(50) as fee where fee ->> 'booking_id' = (select late from b)::text),
+  1, 'which the next run picks up'
+);
+select public.retry_stuck_refund((select stuck from d));
+select is(
+  (select count(*)::int from public.get_unfinished_refunds(50) where booking_id = (select stuck from d)),
+  1, 'a stuck refund can be sent round again'
 );
 
 select ok(

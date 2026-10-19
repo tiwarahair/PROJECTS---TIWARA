@@ -55,6 +55,7 @@ const finishRefunds = async () => {
         reason: by === "stylist" ? "stylist_cancelled" : "client_cancelled",
       });
     } catch (refundError) {
+      // counted by refundCancellation; tried again later with a new key
       failed++;
       console.error("charge-fees refund failed", bookingId, getMessage(refundError));
     }

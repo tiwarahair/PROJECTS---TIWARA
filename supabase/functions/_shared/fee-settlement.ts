@@ -2,6 +2,8 @@
 import Stripe from "npm:stripe@22.6.2";
 import { admin } from "./admin.ts";
 import { getCardLabel, isHardDecline } from "./declines.ts";
+import { getRefundable } from "./refundable.ts";
+import { getFeeChargeKey, getFeeRefundKey } from "./stripe-keys.ts";
 import { stripe } from "./stripe.ts";
 
 export interface FeeSettlement {
@@ -12,6 +14,7 @@ export interface FeeSettlement {
   refunded_pence: number;
   charge_pence: number;
   tries: number;
+  reruns: number;
   status: string;
   waived_at: string | null;
   payment_intent_id: string | null;
@@ -38,15 +41,6 @@ type ChargeResult = Omit<SettlementResult, "refunded_pence" | "refund_id">;
 const KIND_LABELS = {
   late_cancel: "late cancellation fee",
   no_show: "no-show fee",
-};
-
-/** What's still refundable on the payment, so a refund Stripe would refuse isn't attempted. */
-const getRefundable = (intent: Stripe.PaymentIntent) => {
-  const charge = intent.latest_charge;
-
-  return typeof charge === "object" && charge
-    ? charge.amount - charge.amount_refunded
-    : 0;
 };
 
 // refunds made for this fee that aren't recorded yet: a run that refunded, then failed before saving
@@ -83,7 +77,8 @@ const refundRest = async (fee: FeeSettlement) => {
     expand: ["latest_charge"],
   });
 
-  const amount = Math.min(fee.refund_pence, getRefundable(intent));
+  // no more than is still on the payment, so a refund Stripe would refuse isn't attempted
+  const amount = Math.min(fee.refund_pence, getRefundable(intent.latest_charge));
 
   if (amount <= 0) return { refunded_pence: 0 };
 
@@ -98,7 +93,7 @@ const refundRest = async (fee: FeeSettlement) => {
       },
       ...(intent.transfer_data ? { reverse_transfer: true } : {}),
     },
-    { idempotencyKey: `fee:${fee.id}:refund:${fee.refunded_pence}:${amount}` },
+    { idempotencyKey: getFeeRefundKey(fee, amount) },
   );
 
   return { refund_id: id, refunded_pence: amount };
@@ -131,6 +126,19 @@ const chargeCard = async (fee: FeeSettlement): Promise<ChargeResult> => {
   // the stylist gets the whole fee; if their account can't receive yet, it's sent on later
   const canTransfer = !!fee.stylist_account && fee.stylist_can_receive;
 
+  // a run that charged, then failed before saving: keep that payment rather than charge again
+  const { data: charged } = await stripe.paymentIntents.search({
+    query: `metadata['fee_id']:'${fee.id}' AND status:'succeeded'`,
+  });
+
+  if (charged[0])
+    return {
+      outcome: "paid",
+      payment_intent_id: charged[0].id,
+      transfer_pending: !charged[0].transfer_data,
+      card_label: cardLabel,
+    };
+
   try {
     const intent = await stripe.paymentIntents.create(
       {
@@ -146,7 +154,7 @@ const chargeCard = async (fee: FeeSettlement): Promise<ChargeResult> => {
           ? { transfer_data: { destination: fee.stylist_account as string } }
           : {}),
       },
-      { idempotencyKey: `fee:${fee.id}:try:${fee.tries}` },
+      { idempotencyKey: getFeeChargeKey(fee) },
     );
 
     return {
