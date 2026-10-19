@@ -77,6 +77,40 @@ describe("toStudioBookings", () => {
     });
   });
 
+  it("shows a cancellation whose refund keeps failing as needing checking", () => {
+    const cancelled = {
+      status: "cancelled",
+      cancelled_by: "client",
+      cancelled_at: new Date().toISOString(),
+    };
+
+    const { pastNew } = load([
+      getRow({
+        id: "b-6",
+        ...cancelled,
+        cancellation: { refund_now_pence: 1400, refund_failures: 5 },
+      }),
+      getRow({
+        id: "b-7",
+        ...cancelled,
+        cancellation: {
+          refund_now_pence: 1400,
+          refund_failures: 5,
+          refund_done: true,
+        },
+      }),
+    ]);
+
+    expect(pastNew.find(({ remoteId }) => remoteId === "b-6")).toMatchObject({
+      meta: "Checking refund",
+      note: "Cancelled by Nia. We’re checking why the refund couldn’t go through. There’s nothing for you to do.",
+    });
+
+    expect(pastNew.find(({ remoteId }) => remoteId === "b-7")?.meta).toBe(
+      "No charge",
+    );
+  });
+
   it("lists each client once, from their booking details", () => {
     const { bookings, bookingClients } = load([
       getRow({ id: "b-6" }),

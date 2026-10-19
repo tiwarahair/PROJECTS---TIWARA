@@ -67,6 +67,15 @@ const getNumber = (value: unknown, key: string) => {
   return typeof entry === "number" ? entry : 0;
 };
 
+// after this many failed tries a cancellation's refund is left for us to look at
+const MAX_REFUND_FAILURES = 5;
+
+const isRefundStuck = ({ cancellation }: StudioBookingRow) =>
+  isRecord(cancellation) &&
+  !cancellation.refund_done &&
+  !getText(cancellation, "refund_id") &&
+  getNumber(cancellation, "refund_failures") >= MAX_REFUND_FAILURES;
+
 const getClientKey = ({ id, contact }: StudioBookingRow) => {
   const contactKey =
     getText(contact, "email").toLowerCase() || getText(contact, "phone");
@@ -153,11 +162,18 @@ export const toPastRecord = (row: StudioBookingRow): PastRecord => {
   const status = PAST_STATUSES[row.status] ?? "Completed";
   const fee = getLatestFee(row);
   const refunded = getRefunded(row);
-  const refundNote = getRefundNote(refunded, fee);
+  const isStuck = isRefundStuck(row);
+
+  const refundNote = isStuck
+    ? " We’re checking why the refund couldn’t go through. There’s nothing for you to do."
+    : getRefundNote(refunded, fee);
+
   const markedAt = row.no_show_at ?? row.cancelled_at ?? row.starts_at;
   const pastAt = Date.parse(row.past_at ?? markedAt);
 
   const getMeta = () => {
+    if (isStuck) return "Checking refund";
+
     if (refunded) return "Refunded";
 
     return getNumber(row.cancellation, "kept_pence")

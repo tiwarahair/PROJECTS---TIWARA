@@ -34,7 +34,6 @@ export const LONG_MONTHS = [
   "December",
 ];
 
-/** "Jan" … "Sep" … "Dec". */
 export const SHORT_MONTHS = LONG_MONTHS.map((name) => name.slice(0, 3));
 
 /** As SHORT_MONTHS but with "Sept". */
