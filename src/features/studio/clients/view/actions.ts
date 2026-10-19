@@ -1,3 +1,8 @@
+import {
+  deleteStylistClient,
+  setClientBlocked,
+} from "../../../../lib/studio-api/clients";
+import { removeClientPhoto } from "../../../../lib/studio-api/photos";
 import { dateLabel } from "../../core/format";
 import type { StudioBooking, StudioClient } from "../../core/types";
 import { getFirstName } from "./context";
@@ -12,6 +17,32 @@ export const createClientActions = ({
   getStats,
 }: ClientsContext) => {
   const { openSheet, showToast, closeSheet } = actions;
+  const { sync } = studio.context;
+
+  const saveBlocked = (client: StudioClient, isBlocked: boolean) => {
+    const previous = studio.context.getState().clientOverrides;
+
+    setOverride(client.id, { blocked: isBlocked });
+
+    sync?.save(() => setClientBlocked(client.id ?? "", isBlocked), {
+      clientOverrides: previous,
+    });
+  };
+
+  const saveDeleted = (client: StudioClient) => {
+    const previous = studio.context.getState().clientOverrides;
+
+    setOverride(client.id, { deleted: true, blocked: false });
+
+    sync?.save(
+      async () => {
+        await deleteStylistClient(client.id ?? "");
+
+        if (client.photoPath) await removeClientPhoto(client.photoPath);
+      },
+      { clientOverrides: previous },
+    );
+  };
 
   const openEdit = (client: StudioClient | null) => {
     const notes = client?.notes || {};
@@ -29,7 +60,6 @@ export const createClientActions = ({
         size: notes.size || "",
         length: notes.length || "",
         products: notes.products || "",
-        sensitivities: client ? client.sensitivities || "" : "",
       },
     });
   };
@@ -38,10 +68,10 @@ export const createClientActions = ({
     const first = getFirstName(client);
 
     if (client.blocked) {
-      setOverride(client.id, { blocked: false });
+      saveBlocked(client, false);
 
       showToast(`${first} can book online again`, () =>
-        setOverride(client.id, { blocked: true }),
+        saveBlocked(client, true),
       );
 
       return;
@@ -55,10 +85,10 @@ export const createClientActions = ({
         noLabel: "Cancel",
         yes: () => {
           setState({ confirm: null });
-          setOverride(client.id, { blocked: true });
+          saveBlocked(client, true);
 
           showToast(`${first} blocked from online booking`, () =>
-            setOverride(client.id, { blocked: false }),
+            saveBlocked(client, false),
           );
         },
       },
@@ -108,6 +138,20 @@ export const createClientActions = ({
       return;
     }
 
+    if (client.deletableFrom) {
+      setState({
+        confirm: {
+          title: `${first} can’t be deleted yet`,
+          body: `Payments can be disputed for 120 days, so their records stay until ${client.deletableFrom}. You can delete ${first} from then.`,
+          yesLabel: "View appointments",
+          noLabel: "Close",
+          yes: () => setState({ confirm: null, clientAppointmentsTab: "past" }),
+        },
+      });
+
+      return;
+    }
+
     const blockNote = client.blocked
       ? " Deleting also removes the block, so they could book online again. Keep them blocked instead if you don’t want that."
       : "";
@@ -122,7 +166,7 @@ export const createClientActions = ({
           if (studio.context.getState().sheet === "cliView") closeSheet();
 
           setState({ confirm: null, selectedClientId: null });
-          setOverride(client.id, { deleted: true, blocked: false });
+          saveDeleted(client);
           showToast("Client deleted");
         },
       },

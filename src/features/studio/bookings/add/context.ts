@@ -1,6 +1,7 @@
 import { durationToMinutes, parseNumber } from "../../core/format";
 import {
   findDuplicate,
+  isDuplicateBlocking,
   getBookingBuffer,
   getClient,
   getConflicts,
@@ -61,7 +62,7 @@ export const getContext = (studio: StudioController) => {
     1:
       !!state.addClient ||
       state.addWalkIn ||
-      isNewClientReady(addNew, !!duplicate),
+      isNewClientReady(addNew, isDuplicateBlocking(duplicate)),
     2: !!state.addService,
     3:
       state.addDay != null &&

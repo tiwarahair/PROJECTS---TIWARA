@@ -15,6 +15,7 @@ const CHECKOUT_ERRORS = [
   "address_required",
   "outside_area",
   "unpaid_fee",
+  "not_bookable_contact",
 ];
 
 const getClientId = async (request: Request) => {
@@ -61,7 +62,10 @@ Deno.serve(async (request) => {
     });
 
     // turned away for an unpaid fee: the slot they were holding goes back
-    if (error?.message === "unpaid_fee")
+    if (
+      error?.message === "unpaid_fee" ||
+      error?.message === "not_bookable_contact"
+    )
       await admin.rpc("release_hold", { target: hold.id, secret: hold.secret });
 
     if (CHECKOUT_ERRORS.includes(error?.message ?? ""))

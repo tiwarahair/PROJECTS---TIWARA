@@ -1,6 +1,7 @@
 // Studio's requests: a read's data or its error, a write that tells cached reads, and an Edge Function call.
 import { FunctionsHttpError } from "@supabase/supabase-js";
-import { notifyStudioWrite } from "../studio-writes";
+import type { PostgrestError } from "@supabase/supabase-js";
+import { notifyStudioWrite, SaveError } from "../studio-writes";
 import { supabase } from "../supabase";
 
 /** The request's data (empty for functions that return nothing), or its error thrown. */
@@ -19,6 +20,23 @@ export const write = async <T>(
   request: PromiseLike<{ data: T; error: Error | null }>,
 ) => {
   const data = await check(request);
+
+  notifyStudioWrite();
+
+  return data;
+};
+
+/** write() for an RPC whose refusals the stylist can act on: each becomes a SaveError with its message. */
+export const writeOrRefuse = async <T>(
+  request: PromiseLike<{ data: T; error: PostgrestError | null }>,
+  refusals: Record<string, string>,
+) => {
+  const { data, error } = await request;
+  const refusal = error ? refusals[error.message] : undefined;
+
+  if (refusal) throw new SaveError(refusal);
+
+  if (error) throw error;
 
   notifyStudioWrite();
 

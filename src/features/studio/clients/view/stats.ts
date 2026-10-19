@@ -1,5 +1,5 @@
 import { timeToMinutes } from "../../core/format";
-import { getPastRows } from "../../core/model";
+import { getClient, getPastRows } from "../../core/model";
 import type { PastRecord, StudioState } from "../../core/types";
 
 /** A client's bookings, past visits and money. */
@@ -52,16 +52,21 @@ export const getClientStats = (
     if (booking.paid === "deposit" || booking.paid === "full")
       deposits += Math.round(booking.price * depositShare);
 
+  const { money, noShows, lateCancels } = getClient(state, id);
+
   return {
     upcoming,
     past,
-    noShows: past.filter(({ status }) => status === "No show").length,
-    lateCancel: past.filter(
-      ({ status, feeKept }) => status === "Cancelled" && feeKept,
-    ).length,
+    noShows:
+      noShows ?? past.filter(({ status }) => status === "No show").length,
+    lateCancel:
+      lateCancels ??
+      past.filter(({ status, feeKept }) => status === "Cancelled" && feeKept)
+        .length,
     fees,
     refunds,
     deposits,
+    ...money,
     unpaidFee: past.some(({ feePending, waived }) => feePending && !waived),
   };
 };

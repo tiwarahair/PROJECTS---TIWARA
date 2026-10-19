@@ -51,6 +51,12 @@ export const BookingMain = ({ studio, view, edit }: BookingMainProps) => {
           </figure>
         )}
       </div>
+      {!!view.hairNotes && (
+        <figure className={styles.note}>
+          <figcaption className={styles.noteCaption}>Hair notes</figcaption>
+          <div className={styles.noteQuote}>{view.hairNotes}</div>
+        </figure>
+      )}
       {!!view.sensitivities && (
         <div className={styles.sens}>
           <TriangleAlert

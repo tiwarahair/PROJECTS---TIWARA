@@ -26,10 +26,5 @@ export const HairNotes = ({ view, profile }: HairNotesProps) => (
         {`Add anything to remember about ${profile.first}'s hair.`}
       </div>
     )}
-    {!profile.sensitivities && (
-      <button className={styles.addSens} onClick={view.editSelected}>
-        Add allergy or sensitivity
-      </button>
-    )}
   </>
 );

@@ -3,10 +3,10 @@ import { joinClassNames } from "../../../utils/class-names";
 import type { getAddonDialog } from "./edit-view";
 import { getDuplicateView } from "../clients/view";
 import type { DuplicateView } from "../clients/view";
-import { findDuplicate } from "../core/model";
+import { findDuplicate, isDuplicateBlocking } from "../core/model";
 import { getDialogPlacement, getOverlayAnimation } from "../shell/overlay";
 import type { StudioController } from "../core/use-studio";
-import { toContactKey } from "./records";
+import { addStudioClient } from "../clients/save";
 import styles from "../../../styles/features/studio/bookings/dialogs.module.css";
 
 type AddonDialogView = ReturnType<typeof getAddonDialog> & {
@@ -171,39 +171,30 @@ export const NewClientDialog = ({ studio }: { studio: StudioController }) => {
   const isReady =
     (draft.first || "").trim().length > 1 &&
     !!((draft.phone || "").trim() || (draft.email || "").trim()) &&
-    !duplicate;
+    !isDuplicateBlocking(duplicate);
 
   const save = () => {
     if (!isReady) return;
 
-    const local = `c${Date.now()}`;
-
-    const id = state.account
-      ? toContactKey(draft.email || "", draft.phone || "", local)
-      : local;
-
+    const id = `c${Date.now()}`;
     const first = (draft.first || "").trim();
     const last = (draft.last || "").trim();
     const name = [first, last].filter(Boolean).join(" ");
 
-    setState(({ extraClients }) => ({
-      newClient: null,
-      changeClientQuery: "",
-      extraClients: extraClients.concat([
-        {
-          id,
-          name,
-          first,
-          img: "",
-          area: "",
-          visits: 0,
-          since: "today",
-          spent: 0,
-          phone: draft.phone || "",
-          email: draft.email || "",
-        },
-      ]),
-    }));
+    setState({ newClient: null, changeClientQuery: "" });
+
+    addStudioClient(context, {
+      id,
+      name,
+      first,
+      img: "",
+      area: "",
+      visits: 0,
+      since: "today",
+      spent: 0,
+      phone: draft.phone || "",
+      email: draft.email || "",
+    });
 
     context.memo.setChangeClient?.(id);
     actions.showToast(`${name} added`);

@@ -113,11 +113,6 @@
   font-weight: 500;
 }
 
-.optional {
-  font-weight: 400;
-  color: var(--text-secondary);
-}
-
 .input {
   width: 100%;
   box-sizing: border-box;
@@ -201,12 +196,6 @@
   font-size: 18px;
   font-weight: 600;
   letter-spacing: -0.02em;
-}
-
-.sensHint {
-  font-size: 13.5px;
-  color: var(--text-secondary);
-  line-height: 1.45;
 }
 
 @keyframes rowin {

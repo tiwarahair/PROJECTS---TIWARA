@@ -27,8 +27,7 @@ const FieldError = ({ id, message }: FieldErrorProps) =>
     </span>
   ) : null;
 
-type DraftField =
-  "first" | "last" | "phone" | "email" | "products" | "sensitivities";
+type DraftField = "first" | "last" | "phone" | "email" | "products";
 
 interface ClientEditProps {
   view: ClientsView;
@@ -184,21 +183,6 @@ export const ClientEditSheet = ({ view, form }: ClientEditProps) => {
           placeholder="Products, how they like it, anything to avoid"
         ></textarea>
       </label>
-      <label className={styles.field}>
-        <span className={styles.label}>
-          Allergy or sensitivity{" "}
-          <span className={styles.optional}>(optional)</span>
-        </span>
-        <input
-          className={styles.input}
-          {...onField("sensitivities")}
-          maxLength={80}
-          placeholder="e.g. Sensitive scalp"
-        />
-        <span className={styles.sensHint}>
-          Shows on every booking for this client. They never see it.
-        </span>
-      </label>
     </div>
   );
 };
@@ -212,10 +196,10 @@ export const ClientEditFooter = ({ view, form }: ClientEditProps) => (
     <button
       className={joinClassNames(
         sheet.save48,
-        view.duplicate.isOn && sheet.faded,
+        view.duplicate.isBlocking && sheet.faded,
       )}
       onClick={() => void form.handleSubmit(view.saveDraft)()}
-      disabled={view.duplicate.isOn}
+      disabled={view.duplicate.isBlocking}
     >
       {view.saveLabel}
     </button>

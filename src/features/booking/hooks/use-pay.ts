@@ -23,10 +23,11 @@ const CONFIRM_WAIT_MS = 60_000;
 interface PayOptions {
   flow: FlowState;
   point: LatLng | null;
+  stylist: { name: string; email?: string };
   onConfirm: () => void;
 }
 
-export const usePay = ({ flow, point, onConfirm }: PayOptions) => {
+export const usePay = ({ flow, point, stylist, onConfirm }: PayOptions) => {
   const { state, stateRef, setState } = flow;
   const turnstileRef = useRef<TurnstileInstance | null>(null);
   const [turnstileToken, setTurnstileToken] = useState<string | null>(null);
@@ -96,7 +97,7 @@ export const usePay = ({ flow, point, onConfirm }: PayOptions) => {
       else
         setState({
           paying: false,
-          ...getCheckoutError(code, stateRef.current.time),
+          ...getCheckoutError(code, stateRef.current.time, stylist),
         });
 
       return null;

@@ -1,11 +1,11 @@
 import { describe, expect, it } from "vitest";
 import type { StudioBookingRow } from "../../../../lib/studio-api/bookings";
-import { getRow } from "../../../../test/studio-booking-row";
+import { getClientRow, getRow } from "../../../../test/studio-booking-row";
 import { toStartsAt, toStudioBookings } from "../records";
 
 // the opening load: each row is sorted into upcoming or Past by its status
 const load = (rows: StudioBookingRow[]) =>
-  toStudioBookings({ active: rows, past: rows, pastCursor: null });
+  toStudioBookings({ active: rows, past: rows, pastCursor: null, clients: [] });
 
 describe("toStudioBookings", () => {
   it("shows an upcoming booking on its UK day and time", () => {
@@ -111,7 +111,7 @@ describe("toStudioBookings", () => {
     );
   });
 
-  it("lists each client once, from their booking details", () => {
+  it("lists each client once, by their client record", () => {
     const { bookings, bookingClients } = load([
       getRow({ id: "b-6" }),
       getRow({ id: "b-7" }),
@@ -119,15 +119,34 @@ describe("toStudioBookings", () => {
 
     expect(bookingClients).toEqual([
       {
-        id: "contact:nia@example.com",
+        id: "client-nia",
         name: "Nia Okafor",
         first: "Nia",
         phone: "07700900123",
-        email: "Nia@Example.com",
+        email: "nia@example.com",
+        deleted: false,
       },
     ]);
 
-    expect(bookings[0]?.client).toBe("contact:nia@example.com");
+    expect(bookings[0]?.client).toBe("client-nia");
+  });
+
+  it("prefers the client list, which has their totals", () => {
+    const { bookingClients } = toStudioBookings({
+      active: [getRow({})],
+      past: [],
+      pastCursor: null,
+      clients: [getClientRow({})],
+    });
+
+    expect(bookingClients).toHaveLength(1);
+
+    expect(bookingClients[0]).toMatchObject({
+      id: "client-nia",
+      visits: 3,
+      spent: 120,
+      money: { deposits: 30, fees: 10, refunds: 5 },
+    });
   });
 
   it("saves a moved booking at the time Studio shows", () => {

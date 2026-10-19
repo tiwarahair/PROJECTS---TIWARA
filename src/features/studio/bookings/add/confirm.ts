@@ -6,7 +6,8 @@ import { fetchStudioBooking } from "../../../../lib/studio-api/bookings";
 import { createStudioBooking } from "../../../../lib/studio-api/booking-writes";
 import type { StudioContact } from "../../../../lib/studio-api/booking-writes";
 import { mergeBookingRows } from "../live-records";
-import { toContactKey, toStartsAt } from "../records";
+import { addStudioClient } from "../../clients/save";
+import { toStartsAt } from "../records";
 import { getAddonValue } from "./addon-values";
 import type { AddContext } from "./context";
 import type { NewClient } from "./types";
@@ -25,28 +26,22 @@ export const saveNewClient = (
   addNew: NewClient,
 ) => {
   const address = addNew.address.trim();
-  const local = `c${Date.now()}`;
+  const id = `c${Date.now()}`;
 
-  // a real client is known by their email or phone, as their bookings will be
-  const id = state.account
-    ? toContactKey(addNew.email || "", addNew.contact, local)
-    : local;
+  addStudioClient(studio.context, {
+    id,
+    name: addNew.name.trim(),
+    phone: addNew.contact.trim(),
+    email: (addNew.email || "").trim(),
+    area: "",
+    img: getInitialsImage(addNew.name),
+    visits: 0,
+    last: "—",
+    spent: 0,
+    fav: "",
+  });
 
   setState({
-    extraClients: state.extraClients.concat([
-      {
-        id,
-        name: addNew.name.trim(),
-        phone: addNew.contact.trim(),
-        email: (addNew.email || "").trim(),
-        area: "",
-        img: getInitialsImage(addNew.name),
-        visits: 0,
-        last: "—",
-        spent: 0,
-        fav: "",
-      },
-    ]),
     addClient: id,
     addNew: null,
     addStep: 2,

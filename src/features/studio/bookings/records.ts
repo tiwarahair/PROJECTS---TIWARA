@@ -22,6 +22,7 @@ import type {
   StudioClient,
   StudioPolicy,
 } from "../core/types";
+import { toStudioClient } from "../clients/records";
 import { toFeeKind, toPolicyMode } from "../settings/records";
 import { getProtectionFields, getServiceFields } from "./protection-records";
 import { getNumber, getText, isRecord } from "./row-values";
@@ -64,11 +65,8 @@ const isRefundStuck = ({ cancellation }: StudioBookingRow) =>
   getNumber(cancellation, "refund_failures") >= MAX_REFUND_FAILURES;
 
 /** a real client's key in Studio: their email, else their phone (the same person across their bookings) */
-export const toContactKey = (email: string, phone: string, fallback = "") =>
-  `contact:${email.trim().toLowerCase() || phone.trim() || fallback}`;
-
-const getClientKey = ({ id, contact }: StudioBookingRow) =>
-  toContactKey(getText(contact, "email"), getText(contact, "phone"), id);
+const getClientKey = ({ id, stylist_client_id: clientId }: StudioBookingRow) =>
+  clientId ?? `booking:${id}`;
 
 const toAddress = (value: unknown): AddressValue | null =>
   isRecord(value)
@@ -216,16 +214,19 @@ export const toPastRecord = (row: StudioBookingRow): PastRecord => {
   };
 };
 
+/** The booking's client loaded from the booking; the client list fills in the rest. */
 export const toBookingClient = (row: StudioBookingRow): StudioClient => {
-  const first = getText(row.contact, "first");
-  const name = `${first} ${getText(row.contact, "last")}`.trim();
+  const details = row.stylist_client ?? row.contact;
+  const first = getText(details, "first");
+  const name = `${first} ${getText(details, "last")}`.trim();
 
   return {
     id: getClientKey(row),
     name: name || "Client",
     first: first || "Client",
-    phone: getText(row.contact, "phone"),
-    email: getText(row.contact, "email"),
+    phone: getText(details, "phone"),
+    email: getText(details, "email"),
+    deleted: !!row.stylist_client?.deleted_at,
   };
 };
 
@@ -252,20 +253,26 @@ const getMonthLabel = (startsAt: string) => {
     : `${name} ${year}`;
 };
 
-/** Studio's opening state: upcoming bookings, the first page of Past and everyone who booked. */
+/** Studio's opening state: upcoming bookings, the first page of Past and the clients. */
 export const toStudioBookings = ({
   active,
   past,
   pastCursor,
+  clients,
 }: StudioBookings) => {
-  const clients = new Map(
-    [...active, ...past].map((row) => [getClientKey(row), row]),
+  const listed = clients.map(toStudioClient);
+  const ids = new Set(listed.map(({ id }) => id));
+
+  const others = new Map(
+    [...active, ...past]
+      .filter((row) => !ids.has(getClientKey(row)))
+      .map((row) => [getClientKey(row), toBookingClient(row)]),
   );
 
   return {
     bookings: active.filter(isActiveRow).map(toStudioBooking),
     pastNew: sortPast(past.filter(isPastRow).map(toPastRecord)),
-    bookingClients: [...clients.values()].map(toBookingClient),
+    bookingClients: [...listed, ...others.values()],
     pastCursor,
   };
 };

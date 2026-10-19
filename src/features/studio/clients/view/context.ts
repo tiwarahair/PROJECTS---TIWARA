@@ -27,11 +27,12 @@ export const getContext = (studio: StudioController) => {
   const { state, setState, isNew, seedPast } = studio;
 
   // new accounts have no seed clients, but anyone they add themselves still belongs in the list
-  const all = isNew
-    ? state.extraClients
-        .map(({ id }) => getClient(state, id))
-        .filter(({ deleted }) => !deleted)
-    : getAllClients(state);
+  const all =
+    isNew && !state.account
+      ? state.extraClients
+          .map(({ id }) => getClient(state, id))
+          .filter(({ deleted }) => !deleted)
+      : getAllClients(state);
 
   const setOverride = (id: string | null, patch: Partial<StudioClient>) =>
     setState(({ clientOverrides }) => ({

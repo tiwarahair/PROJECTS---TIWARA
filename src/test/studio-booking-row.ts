@@ -1,4 +1,5 @@
 import type { StudioBookingRow } from "../lib/studio-api/bookings";
+import type { StudioClientRow } from "../lib/studio-api/clients";
 import { fromLondonTime } from "../utils/london-time";
 import { toDate } from "../features/studio/core/blocked-time";
 
@@ -43,9 +44,47 @@ export const getRow = (patch: Partial<StudioBookingRow>): StudioBookingRow => ({
   confirm_sends: 0,
   confirm_sent_at: null,
   booking_notes: null,
+  stylist_client_id: "client-nia",
+  stylist_client: {
+    first: "Nia",
+    last: "Okafor",
+    phone: "07700900123",
+    email: "nia@example.com",
+    deleted_at: null,
+  },
   created_at: "2026-10-15T10:00:00+00:00",
   booking_fees: [],
   refunds: [],
   payment_links: [],
+  ...patch,
+});
+
+/** A client list row: Nia, three visits and some money. */
+export const getClientRow = (
+  patch: Partial<StudioClientRow>,
+): StudioClientRow => ({
+  id: "client-nia",
+  first: "Nia",
+  last: "Okafor",
+  phone: "07700900123",
+  email: "nia@example.com",
+  photo_path: "",
+  photo_url: "",
+  hair_notes: "Rosemary oil",
+  blocked: false,
+  created_at: "2026-03-01T10:00:00+00:00",
+  visits: 3,
+  last_visit: "2026-10-01T10:00:00+00:00",
+  upcoming: 1,
+  no_shows: 0,
+  late_cancels: 0,
+  paid_pence: 12000,
+  booking_paid_pence: 3000,
+  fee_paid_pence: 1000,
+  refund_pence: 500,
+  last_payment_at: "2026-01-01T10:00:00+00:00",
+  allergies: "",
+  allergies_at: "",
+  allergies_by: "",
   ...patch,
 });

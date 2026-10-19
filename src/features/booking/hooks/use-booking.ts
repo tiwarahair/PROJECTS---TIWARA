@@ -60,6 +60,7 @@ export const useBooking = ({ stylist, hours }: PublicStylist) => {
   const pay = usePay({
     flow,
     point: travel.point,
+    stylist: { name: stylist.name, email: stylist.email },
     onConfirm: account.saveContactToAccount,
   });
 

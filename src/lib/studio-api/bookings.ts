@@ -1,12 +1,14 @@
 // Studio's bookings: loading them (active ones, and Past a page at a time) and changing them.
 import { notifyStudioWrite, SaveError } from "../studio-writes";
 import { supabase } from "../supabase";
+import { fetchStudioClients } from "./clients";
 import { check, invokeStudio, write } from "./request";
 
 const BOOKING_SELECT = `id, status, starts_at, minutes, buffer_minutes, price_pence, fee_pence, due_today_pence,
   service_id, snapshot, contact, notes, address, terms, reschedule_count, cancelled_at, cancelled_by, cancellation,
   no_show_at, overlap_ok, created_by, past_at, paid_at, stripe_payment_method_id, protection_status, confirm_by,
-  confirm_sends, confirm_sent_at, created_at, booking_notes(note),
+  confirm_sends, confirm_sent_at, created_at, booking_notes(note), stylist_client_id,
+  stylist_client:stylist_clients(first, last, phone, email, deleted_at),
   booking_fees(id, kind, status, amount_pence, kept_pence, refund_pence, charge_pence, tries, hard_decline,
     decline_message, card_label, waived_at, created_at, failed_runs),
   refunds(amount_pence),
@@ -62,14 +64,15 @@ export const fetchPastBookings = async (
   };
 };
 
-/** Studio's opening load: every active booking and the first page of Past. */
+/** Studio's opening load: every active booking, the first page of Past and the clients. */
 export const fetchStudioBookings = async (stylistId: string) => {
-  const [active, past] = await Promise.all([
+  const [active, past, clients] = await Promise.all([
     fetchActiveBookings(stylistId),
     fetchPastBookings(stylistId),
+    fetchStudioClients(stylistId),
   ]);
 
-  return { active, past: past.rows, pastCursor: past.cursor };
+  return { active, past: past.rows, pastCursor: past.cursor, clients };
 };
 
 export type StudioBookings = Awaited<ReturnType<typeof fetchStudioBookings>>;

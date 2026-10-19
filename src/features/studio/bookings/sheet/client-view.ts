@@ -22,14 +22,12 @@ const getLockedBody = ({ booking }: SheetContext) => {
   return `${booking.firstName} ${what}. Cancel this booking to refund or keep it, then create a new one.`;
 };
 
-const getSensitivities = (state: StudioState) => {
+const getBookingClient = (state: StudioState) => {
   const bookingClient = state.bookings.find(
     ({ id }) => id === state.sheetBookingId,
   )?.client;
 
-  return bookingClient
-    ? getClient(state, bookingClient).sensitivities || ""
-    : "";
+  return bookingClient ? getClient(state, bookingClient) : null;
 };
 
 export const getClientView = (context: SheetContext) => {
@@ -57,7 +55,8 @@ export const getClientView = (context: SheetContext) => {
   };
 
   return {
-    sensitivities: getSensitivities(state),
+    sensitivities: getBookingClient(state)?.sensitivities || "",
+    hairNotes: getBookingClient(state)?.notes?.products || "",
     // client row: hover reveals change / walk-in; once the client paid, change explains why it can't
     isClientLocked,
     openClient: () => {

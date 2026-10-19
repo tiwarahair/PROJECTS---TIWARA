@@ -60,11 +60,11 @@ export const getAllClients = (state: StudioState): StudioClient[] =>
     .filter(({ deleted }) => !deleted);
 
 const normalisePhone = (phone: string | null | undefined): string => {
-  let digits = String(phone || "").replace(/\D/g, "");
+  const digits = String(phone || "").replace(/\D/g, "");
 
-  if (digits.startsWith("44")) digits = `0${digits.slice(2)}`;
+  if (/^(44)?0?7\d{9}$/.test(digits)) return `0${digits.slice(-10)}`;
 
-  return digits;
+  return digits.replace(/^44/, "0");
 };
 
 const normaliseEmail = (email: string | null | undefined): string =>
@@ -77,7 +77,7 @@ export interface DuplicateHit {
   field: "phone" | "email";
 }
 
-/** Another client already using this phone or email. */
+/** Another client already using this email or, failing that, this phone*/
 export const findDuplicate = (
   state: StudioState,
   phone: string | null | undefined,
@@ -86,20 +86,22 @@ export const findDuplicate = (
 ): DuplicateHit | null => {
   const normalised = normalisePhone(phone);
   const address = normaliseEmail(email);
-  const hasPhone = normalised.length >= 10;
-  const hasEmail = address.includes("@");
+  const others = getAllClients(state).filter(({ id }) => id !== exceptId);
 
-  if (!hasPhone && !hasEmail) return null;
+  const byEmail = address.includes("@")
+    ? others.find((client) => normaliseEmail(client.email) === address)
+    : undefined;
 
-  for (const client of getAllClients(state)) {
-    if (client.id === exceptId) continue;
+  const byPhone =
+    normalised.length >= 10
+      ? others.find((client) => normalisePhone(client.phone) === normalised)
+      : undefined;
 
-    if (hasPhone && normalisePhone(client.phone) === normalised)
-      return { client, field: "phone" };
+  if (byEmail) return { client: byEmail, field: "email" };
 
-    if (hasEmail && normaliseEmail(client.email) === address)
-      return { client, field: "email" };
-  }
-
-  return null;
+  return byPhone ? { client: byPhone, field: "phone" } : null;
 };
+
+/** Only a shared email stops a client being saved. */
+export const isDuplicateBlocking = (hit: DuplicateHit | null) =>
+  hit?.field === "email";

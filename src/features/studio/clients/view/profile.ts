@@ -5,6 +5,7 @@ import { CONTACT_ICONS, PAST_TONE } from "../../core/constants";
 import { dateLabel, getInitials } from "../../core/format";
 import { getPastKey } from "../../core/model";
 import type { StudioClient } from "../../core/types";
+import { saveStudioClient } from "../save";
 import type { ClientActions } from "./actions";
 import { getFirstName, readImage } from "./context";
 import type { ClientsContext } from "./context";
@@ -164,6 +165,8 @@ const getProfile = (
     isBlocked: !!client.blocked,
     contacts: getContacts(client, first),
     sensitivities: client.sensitivities || "",
+    sensitivitiesNote:
+      client.sensitivitiesNote || `Added by ${first} when they booked`,
     products: notes.products || "",
     hairActionLabel: notes.products ? "Edit" : "Add",
     appointmentTabs: (
@@ -202,7 +205,7 @@ export const getProfileView = (
   context: ClientsContext,
   { openEdit, block, remove }: ClientActions,
 ) => {
-  const { actions, selected, setOverride } = context;
+  const { studio, actions, selected, setOverride } = context;
 
   return {
     profile: selected ? getProfile(context, selected) : null,
@@ -210,11 +213,19 @@ export const getProfileView = (
       if (!selected) return;
 
       readImage(event, (url) => {
+        const previous = studio.context.getState().clientOverrides;
+
         setOverride(selected.id, { img: url });
+
+        saveStudioClient(studio.context, selected, url, {
+          clientOverrides: previous,
+        });
+
         actions.showToast("Photo updated");
       });
     },
     editSelected: () => selected && openEdit(selected),
+    unblockSelected: () => selected && block(selected),
     bookSelected: () =>
       selected &&
       actions.openSheet("add", {

@@ -1,7 +1,7 @@
 // Bookings the stylist makes or changes in Studio: new bookings, edits, the client, protection and the client's links.
 import type { PostgrestError } from "@supabase/supabase-js";
-import { notifyStudioWrite, SaveError } from "../studio-writes";
 import { supabase } from "../supabase";
+import { writeOrRefuse } from "./request";
 
 const REFUSALS: Record<string, string> = {
   slot_taken: "That time was just booked. Pick another time.",
@@ -27,21 +27,9 @@ const REFUSALS: Record<string, string> = {
     "Those add-ons aren’t available any more. Remove them and try again.",
 };
 
-/** A Studio RPC's data; a refusal the stylist can act on becomes a SaveError with its message. */
-const send = async <T>(
+const send = <T>(
   request: PromiseLike<{ data: T; error: PostgrestError | null }>,
-) => {
-  const { data, error } = await request;
-  const refusal = error ? REFUSALS[error.message] : undefined;
-
-  if (refusal) throw new SaveError(refusal);
-
-  if (error) throw error;
-
-  notifyStudioWrite();
-
-  return data;
-};
+) => writeOrRefuse(request, REFUSALS);
 
 export interface StudioAddonLine {
   id: string;

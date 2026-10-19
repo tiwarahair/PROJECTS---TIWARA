@@ -400,6 +400,7 @@ export type Database = {
           stripe_customer_id: string | null;
           stripe_payment_intent_id: string | null;
           stripe_payment_method_id: string | null;
+          stylist_client_id: string | null;
           stylist_id: string;
           terms: Json | null;
           get_cancellation_terms: Json | null;
@@ -456,6 +457,7 @@ export type Database = {
           stripe_customer_id?: string | null;
           stripe_payment_intent_id?: string | null;
           stripe_payment_method_id?: string | null;
+          stylist_client_id?: string | null;
           stylist_id: string;
           terms?: Json | null;
         };
@@ -510,6 +512,7 @@ export type Database = {
           stripe_customer_id?: string | null;
           stripe_payment_intent_id?: string | null;
           stripe_payment_method_id?: string | null;
+          stylist_client_id?: string | null;
           stylist_id?: string;
           terms?: Json | null;
         };
@@ -533,6 +536,13 @@ export type Database = {
             columns: ["service_id"];
             isOneToOne: false;
             referencedRelation: "services";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "bookings_stylist_client_id_fkey";
+            columns: ["stylist_client_id"];
+            isOneToOne: false;
+            referencedRelation: "stylist_clients";
             referencedColumns: ["id"];
           },
           {
@@ -1411,6 +1421,57 @@ export type Database = {
           },
         ];
       };
+      stylist_clients: {
+        Row: {
+          blocked_at: string | null;
+          created_at: string;
+          deleted_at: string | null;
+          email: string | null;
+          first: string;
+          hair_notes: string | null;
+          id: string;
+          last: string | null;
+          phone: string | null;
+          photo_path: string | null;
+          stylist_id: string;
+        };
+        ComputedFields: never;
+        Insert: {
+          blocked_at?: string | null;
+          created_at?: string;
+          deleted_at?: string | null;
+          email?: string | null;
+          first: string;
+          hair_notes?: string | null;
+          id?: string;
+          last?: string | null;
+          phone?: string | null;
+          photo_path?: string | null;
+          stylist_id: string;
+        };
+        Update: {
+          blocked_at?: string | null;
+          created_at?: string;
+          deleted_at?: string | null;
+          email?: string | null;
+          first?: string;
+          hair_notes?: string | null;
+          id?: string;
+          last?: string | null;
+          phone?: string | null;
+          photo_path?: string | null;
+          stylist_id?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "stylist_clients_stylist_id_fkey";
+            columns: ["stylist_id"];
+            isOneToOne: false;
+            referencedRelation: "stylists";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
       stylist_private: {
         Row: {
           city: string | null;
@@ -1879,6 +1940,7 @@ export type Database = {
         Args: { meta: Json; new_owner_id: string };
         Returns: string;
       };
+      delete_stylist_client: { Args: { target: string }; Returns: undefined };
       expire_booking_holds: {
         Args: Record<PropertyKey, never>;
         Returns: undefined;
@@ -1886,6 +1948,28 @@ export type Database = {
       expire_payment_links: {
         Args: Record<PropertyKey, never>;
         Returns: undefined;
+      };
+      find_stylist_client: {
+        Args: { contact: Json; target_stylist: string };
+        Returns: {
+          blocked_at: string | null;
+          created_at: string;
+          deleted_at: string | null;
+          email: string | null;
+          first: string;
+          hair_notes: string | null;
+          id: string;
+          last: string | null;
+          phone: string | null;
+          photo_path: string | null;
+          stylist_id: string;
+        };
+        SetofOptions: {
+          from: "*";
+          to: "stylist_clients";
+          isOneToOne: true;
+          isSetofReturn: false;
+        };
       };
       finish_fee_settlement: {
         Args: { result: Json; target: string };
@@ -1955,6 +2039,7 @@ export type Database = {
           stripe_customer_id: string | null;
           stripe_payment_intent_id: string | null;
           stripe_payment_method_id: string | null;
+          stylist_client_id: string | null;
           stylist_id: string;
           terms: Json | null;
         };
@@ -2118,6 +2203,33 @@ export type Database = {
         };
         Returns: Json;
       };
+      get_studio_clients: {
+        Args: { target_stylist: string };
+        Returns: {
+          allergies: string;
+          allergies_at: string;
+          allergies_by: string;
+          blocked: boolean;
+          booking_paid_pence: number;
+          created_at: string;
+          email: string;
+          fee_paid_pence: number;
+          first: string;
+          hair_notes: string;
+          id: string;
+          last: string;
+          last_payment_at: string;
+          last_visit: string;
+          late_cancels: number;
+          no_shows: number;
+          paid_pence: number;
+          phone: string;
+          photo_path: string;
+          refund_pence: number;
+          upcoming: number;
+          visits: number;
+        }[];
+      };
       get_studio_snapshot: {
         Args: { addons: Json; priced: Json };
         Returns: Json;
@@ -2255,6 +2367,7 @@ export type Database = {
           stripe_customer_id: string | null;
           stripe_payment_intent_id: string | null;
           stripe_payment_method_id: string | null;
+          stylist_client_id: string | null;
           stylist_id: string;
           terms: Json | null;
         };
@@ -2318,6 +2431,10 @@ export type Database = {
         Returns: undefined;
       };
       mask_email: { Args: { email: string }; Returns: string };
+      match_stylist_client: {
+        Args: { contact: Json; target_stylist: string };
+        Returns: string;
+      };
       normalise_phone: { Args: { phone: string }; Returns: string };
       note_refund_failure: {
         Args: { message: string; target: string };
@@ -2413,6 +2530,10 @@ export type Database = {
       retry_stuck_refund: { Args: { target: string }; Returns: undefined };
       retry_stuck_transfer: { Args: { payment: string }; Returns: undefined };
       revoke_confirm_links: { Args: { target: string }; Returns: undefined };
+      save_stylist_client: {
+        Args: { details: Json; target?: string; target_stylist: string };
+        Returns: string;
+      };
       schedule_booking_fee: {
         Args: {
           booking: Omit<
@@ -2486,6 +2607,10 @@ export type Database = {
       };
       set_cancel_refund: {
         Args: { refund_id: string; refunded: number; target: string };
+        Returns: undefined;
+      };
+      set_client_blocked: {
+        Args: { blocked: boolean; target: string };
         Returns: undefined;
       };
       set_link_intent: {

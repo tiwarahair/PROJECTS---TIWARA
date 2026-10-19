@@ -59,14 +59,17 @@ const compress = async (file: File, options: CompressOptions) => {
 };
 
 // names are unique per upload, so browsers and the CDN can keep a file for a year
-const putFile = async (path: string, file: Blob, contentType: string) => {
-  const { error } = await supabase.storage
-    .from(PHOTO_BUCKET)
-    .upload(path, file, {
-      upsert: true,
-      contentType,
-      cacheControl: "31536000",
-    });
+const putFile = async (
+  path: string,
+  file: Blob,
+  contentType: string,
+  bucket = PHOTO_BUCKET,
+) => {
+  const { error } = await supabase.storage.from(bucket).upload(path, file, {
+    upsert: true,
+    contentType,
+    cacheControl: "31536000",
+  });
 
   if (error) throw error;
 };
@@ -150,3 +153,35 @@ export const addPortfolioPhoto = (row: TablesInsert<"portfolio_photos">) =>
 
 export const removePortfolioPhoto = (id: string) =>
   write(supabase.from("portfolio_photos").delete().eq("id", id));
+
+const CLIENT_PHOTO_BUCKET = "client-photos";
+
+export const uploadClientPhoto = async (path: string, file: Blob) => {
+  const resized = await compress(new File([file], "photo"), {
+    maxWidthOrHeight: 600,
+    maxSizeMB: 0.5,
+    fileType: "image/jpeg",
+  });
+
+  await putFile(path, resized, "image/jpeg", CLIENT_PHOTO_BUCKET);
+
+  return path;
+};
+
+export const removeClientPhoto = (path: string) =>
+  check(supabase.storage.from(CLIENT_PHOTO_BUCKET).remove([path]));
+
+/** Signed URLs for private client photos, by path. */
+export const getClientPhotoUrls = async (paths: string[]) => {
+  if (!paths.length) return new Map<string, string>();
+
+  const signed = await check(
+    supabase.storage.from(CLIENT_PHOTO_BUCKET).createSignedUrls(paths, 86400),
+  );
+
+  return new Map(
+    (signed ?? []).flatMap(({ path, signedUrl }) =>
+      path && signedUrl ? [[path, signedUrl] as const] : [],
+    ),
+  );
+};

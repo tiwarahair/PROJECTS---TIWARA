@@ -120,5 +120,14 @@ describe("checkout errors", () => {
     expect(getCheckoutError("unpaid_fee", null).payError).toBe(
       PAY_ERRORS.unpaidFee,
     );
+
+    expect(
+      getCheckoutError("not_bookable_contact", null, {
+        name: "Tiwára’s House",
+        email: "hello@tiwaras.house",
+      }).payError,
+    ).toBe(
+      "Tiwára’s House isn’t taking online bookings for this contact. Please get in touch with them directly at hello@tiwaras.house. You haven't been charged.",
+    );
   });
 });
