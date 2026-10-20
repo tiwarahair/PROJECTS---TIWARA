@@ -1,5 +1,6 @@
 import type { CheckoutBooking } from "../../../../components/checkout/data";
 import type { CheckoutPayment } from "../../../../components/checkout/use-checkout";
+import { fetchStudioBooking } from "../../../../lib/studio-api/bookings";
 import {
   completeCheckout,
   undoCheckout,
@@ -8,6 +9,7 @@ import { SaveError } from "../../../../lib/studio-writes";
 import { getClient } from "../../core/model";
 import type { CheckoutRecord } from "../../core/types";
 import { getCheckoutLabel } from "../checkout-label";
+import { mergeBookingRows } from "../live-records";
 import type { SheetContext } from "./context";
 
 const toPence = (pounds: number) => Math.round(pounds * 100);
@@ -40,7 +42,14 @@ const getCheckoutBooking = (context: SheetContext): CheckoutBooking => {
     mode: paymentMode,
     paid: booking.paidAmount || 0,
     ...(paymentMode === "none" ? { card: null, brand: "" } : getCard(context)),
-    ...(raw?.remoteId ? { agreedPrice: raw.agreedPrice ?? booking.price } : {}),
+    ...(raw?.remoteId
+      ? {
+          agreedPrice: raw.agreedPrice ?? booking.price,
+          paidLater: raw.paidLater,
+          refundableOnline: raw.refundableOnline,
+          recordedVia: raw.recordedVia,
+        }
+      : {}),
     paidOn: "",
     phone: client?.phone || "",
     email: client?.email || "",
@@ -115,7 +124,13 @@ export const getCheckoutView = (context: SheetContext) => {
         },
         "Checkout complete",
         {
-          save: () => Promise.resolve(),
+          // already saved by the checkout: Past gets the server's record of it
+          save: async (bookingId: string) => {
+            const fresh = await fetchStudioBooking(bookingId);
+
+            if (fresh)
+              context.setState((current) => mergeBookingRows(current, [fresh]));
+          },
           ...(isUndoable(result, !!raw?.completed)
             ? { undo: undoCheckout }
             : {}),

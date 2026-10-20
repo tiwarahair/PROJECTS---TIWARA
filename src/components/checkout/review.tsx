@@ -177,7 +177,7 @@ export const CheckoutReview = ({
         <div className={flow.nothing}>
           <div className={flow.strong15}>Nothing to pay</div>
           <div className={flow.nothingText}>
-            {`${view.name} has already paid ${formatMoney(state.paid)}.`}
+            {`${view.name} has already paid ${formatMoney(state.paid + (booking.paidLater ?? 0))}.`}
           </div>
         </div>
       )}

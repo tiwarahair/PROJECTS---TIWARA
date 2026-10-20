@@ -42,14 +42,23 @@ export const watchStudio = (stylistId: string, getStudio: () => LiveStudio) => {
         ? state.bookings.find(({ id }) => id === state.sheetBookingId)?.remoteId
         : undefined;
 
-    context.applyState((current) => mergeBookingRows(current, rows));
+    // the open booking's own checkout finishing: it stays put until they leave the checkout, which reloads it
+    const isOwnCheckout = (row: StudioBookingRow) =>
+      row.id === openId && row.status === "completed" && !row.unpaid_at;
+
+    context.applyState((current) =>
+      mergeBookingRows(
+        current,
+        rows.filter((row) => !isOwnCheckout(row)),
+      ),
+    );
 
     for (const row of rows) {
       if (!known.has(row.id) && isActiveRow(row) && row.created_by === "client")
         showToast(getNewBookingToast(row));
 
-      // the booking open in front of them was cancelled by the client
-      if (row.id === openId && isPastRow(row)) {
+      // the booking open in front of them was cancelled (a completed one is their own checkout finishing)
+      if (row.id === openId && isPastRow(row) && row.status !== "completed") {
         closeSheet();
 
         if (row.cancelled_by === "client")

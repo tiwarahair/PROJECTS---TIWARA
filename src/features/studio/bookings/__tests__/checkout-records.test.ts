@@ -144,6 +144,21 @@ describe("a completed booking's checkout", () => {
     });
   });
 
+  it("a lower price refunds the card part and records the cash handed back", () => {
+    const row = completed({
+      checkout: { lines: [], method: "none", via: "" },
+      refunds: [
+        { amount_pence: 1300, reason: "price_lowered", method: "card" },
+        { amount_pence: 700, reason: "price_lowered", method: "cash" },
+      ],
+    });
+
+    expect(toPastRecord(row)).toMatchObject({
+      meta: "Refunded £20",
+      checkout: { refundAuto: 13, cashBack: 7, cashBackVia: "cash" },
+    });
+  });
+
   it("completed but unpaid is back with the active bookings", () => {
     const row = completed({
       unpaid_at: "2026-10-20T12:00:00+00:00",
@@ -188,7 +203,8 @@ describe("a completed booking's checkout", () => {
     expect(toStudioBooking(row)).toMatchObject({
       price: 60,
       agreedPrice: 65,
-      paidSoFar: 43,
+      paidOnline: 13,
+      paidLater: 30,
     });
   });
 });

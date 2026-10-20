@@ -50,9 +50,16 @@ export const getMoney = (
     (state.mode === "deposit" || state.mode === "card") &&
     !isOverAgreed;
 
-  const balance = roundToPence(items - state.paid);
+  const balance = roundToPence(items - state.paid - (booking.paidLater ?? 0));
   const due = Math.max(0, balance);
   const refundDue = Math.max(0, roundToPence(-balance));
+
+  const cashBack =
+    booking.refundableOnline === undefined
+      ? 0
+      : Math.max(0, roundToPence(refundDue - booking.refundableOnline));
+
+  const refundCard = roundToPence(refundDue - cashBack);
 
   const getSelectedTip = () => {
     if (state.tip === "custom") return parsePounds(state.tipCustom);
@@ -94,6 +101,8 @@ export const getMoney = (
     items,
     due,
     refundDue,
+    refundCard,
+    cashBack,
     selectedTip,
     tip,
     charge,
@@ -121,7 +130,8 @@ export const getFinalized = (
       via: state.method === "link" ? state.linkVia : state.recordVia,
       charged: money.charge,
       tip: money.tip,
-      refundAuto: money.refundDue,
+      refundAuto: money.refundCard,
+      cashBack: money.cashBack,
     },
     status: money.method === "link" ? "awaiting" : "paid",
   };
@@ -214,6 +224,7 @@ export const getInitialCheckout = ({
         charged: done.charged ?? 0,
         tip: done.tip ?? 0,
         refundAuto: done.refundAuto ?? 0,
+        cashBack: done.cashBack ?? 0,
       };
 
       state.status = done.method === "link" && !linkPaid ? "awaiting" : "paid";

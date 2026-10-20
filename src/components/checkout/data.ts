@@ -62,6 +62,11 @@ export interface CheckoutBooking {
   arrived: string;
   fee?: number;
   agreedPrice?: number;
+  /** Paid at an earlier checkout (cash, bank, reader), less what went back since. */
+  paidLater?: number;
+  /** Of what was paid, how much can go back to the card; the rest of a refund is handed back the way it was paid. */
+  refundableOnline?: number;
+  recordedVia?: string;
   /** A Studio booking can bring its own item lines. */
   lines?: Partial<CheckoutLine>[];
 }
@@ -82,6 +87,7 @@ export interface CheckoutResult {
   charged: number;
   tip: number;
   refundAuto: number;
+  cashBack?: number;
 }
 
 export interface RefundValues {
@@ -299,6 +305,8 @@ export interface CheckoutMoney {
   items: number;
   due: number;
   refundDue: number;
+  refundCard: number;
+  cashBack: number;
   selectedTip: number;
   tip: number;
   charge: number;

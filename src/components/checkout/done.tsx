@@ -2,7 +2,7 @@ import { Check } from "lucide-react";
 import { joinClassNames } from "../../utils/class-names";
 import { ICONS } from "./data";
 import { getReceiptView } from "./receipt-view";
-import { RECORD_VIA_LABELS } from "./view";
+import { RECORD_VIA_LABELS, getHandBackWay } from "./view";
 import type { CheckoutViewModel } from "./view";
 import type { CheckoutController } from "./use-checkout";
 import styles from "../../styles/components/checkout/done.module.css";
@@ -35,8 +35,15 @@ export const CheckoutDone = ({
     if (done.method === "record")
       return `${formatMoney(done.charged)} ${(RECORD_VIA_LABELS[done.via] || "").toLowerCase()} recorded.`;
 
+    const handBack = `${formatMoney(done.cashBack ?? 0)} back ${getHandBackWay(booking.recordedVia)}`;
+
+    if (done.refundAuto > 0 && done.cashBack)
+      return `${formatMoney(done.refundAuto)} refund on its way to ${cardText}. Give the other ${handBack}.`;
+
     if (done.refundAuto > 0)
       return `${formatMoney(done.refundAuto)} refund on its way to ${cardText}.`;
+
+    if (done.cashBack) return `Give ${name} ${handBack}.`;
 
     return `Nothing to pay. ${name} had already paid.`;
   };

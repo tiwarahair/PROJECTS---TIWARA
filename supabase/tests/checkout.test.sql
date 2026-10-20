@@ -1,5 +1,5 @@
 begin;
-select plan(56);
+select plan(69);
 
 create function pg_temp.sign_up(user_id uuid, user_email text, business text)
 returns void
@@ -170,14 +170,42 @@ select throws_ok(
     pg_temp.input('record', 10000, 0, 'cash')),
   'checkout_in_progress', 'nor can it be recorded meanwhile'
 );
-select public.note_checkout_declined((select card from b));
+select public.note_checkout_declined((select card from b), null);
 select is(
   (select concat_ws(' ', checkout_tries, checkout_started_at is null) from public.bookings where id = (select card from b)),
   '1 t', 'a decline makes the next try a new charge'
 );
-update public.bookings set checkout_intent_id = 'pi_checkout_tried' where id = (select card from b);
-select is((pg_temp.claim((select card from b), pg_temp.input('card')) ->> 'checkout_intent_id'), 'pi_checkout_tried',
-  'the next try is told the last card charge, to check it went through');
+
+-- card charges a checkout made but hasn't saved, from a try that crashed
+select public.add_checkout_intent((select card from b), 'pi_checkout_tried');
+select public.add_checkout_intent((select card from b), 'pi_checkout_tried');
+select is((select checkout_intent_ids from public.bookings where id = (select card from b)), '{pi_checkout_tried}'::text[],
+  'a card charge is noted once, before it''s confirmed');
+select is((pg_temp.claim((select card from b), pg_temp.input('card')) -> 'checkout_intent_ids'), '["pi_checkout_tried"]'::jsonb,
+  'the next try is told of it, to check whether it went through');
+select ok(not exists (select 1 from public.claim_unsaved_charges(1000) where booking_id = (select card from b)),
+  'the clean-up leaves it alone while a checkout is under way');
+update public.bookings set checkout_started_at = now() - interval '3 minutes' where id = (select card from b);
+select ok(exists (select 1 from public.claim_unsaved_charges(1000) where booking_id = (select card from b)),
+  'and picks it up once that checkout has stopped');
+select ok((select checkout_started_at > now() - interval '1 minute' from public.bookings where id = (select card from b)),
+  'holding the booking so a checkout waits meanwhile');
+select public.settle_unsaved_charge((select card from b), 'pi_checkout_tried', 'failed', 'balance too low');
+update public.bookings set checkout_started_at = null where id = (select card from b);
+select ok(not exists (select 1 from public.claim_unsaved_charges(1000) where booking_id = (select card from b)),
+  'a refund that failed waits before it''s tried again');
+select public.settle_unsaved_charge((select card from b), 'pi_checkout_tried', 'refunded', '');
+select is(
+  (select concat_ws(' ', cardinality(checkout_intent_ids), unsaved_refund_failures, checkout_tries)
+    from public.bookings where id = (select card from b)),
+  '0 1 2', 'once refunded it''s off the list, and the next card try is a new charge'
+);
+select is((select count(*)::int from public.booking_events where booking_id = (select card from b) and kind = 'unsaved_charge_refunded'),
+  1, 'and the refund is logged');
+select public.add_checkout_intent((select card from b), 'pi_checkout_declined');
+select public.note_checkout_declined((select card from b), 'pi_checkout_declined');
+select is((select cardinality(checkout_intent_ids) from public.bookings where id = (select card from b)), 0,
+  'a declined charge comes off the list');
 
 -- deposit + saved card with a tip
 select is(
@@ -186,11 +214,14 @@ select is(
     jsonb_to_record(q) as x(final_pence int, paid_pence int, due_pence int, charge_pence int, refund_pence int)),
   '10000 3000 7000 8500 0', 'the deposit counts towards the price'
 );
+select public.add_checkout_intent((select deposit from b), 'pi_checkout_deposit');
 select is(
   pg_temp.finish((select deposit from b), pg_temp.input('card', 10000, 1500),
     '{"payment_intent_id": "pi_checkout_deposit", "card_label": "Visa •••• 4242"}'),
   'completed', 'the charged checkout completes'
 );
+select is((select cardinality(checkout_intent_ids) from public.bookings where id = (select deposit from b)), 0,
+  'its card charge comes off the list once saved');
 select is(
   (select concat_ws(' ', status, final_price_pence, tip_pence, card_label, checkout ->> 'method') from public.bookings where id = (select deposit from b)),
   'completed 10000 1500 Visa •••• 4242 card', 'the booking is completed with its checkout'
@@ -213,6 +244,36 @@ select is(
   '2000 price_lowered', 'the refund is recorded'
 );
 select is(public.get_paid_pence((select full_price from b)), 8000, 'so what was paid matches the final price');
+
+-- paid in cash, then cheaper: the stylist hands the difference back
+create temp table hb as select pg_temp.book(interval '-7 hours', '{"mode": "none"}') as id;
+grant select on hb to authenticated;
+select pg_temp.finish((select id from hb), pg_temp.input('record', 10000, 0, 'cash'));
+create temp table hp as select id from public.payments where booking_id = (select id from hb);
+grant select on hp to authenticated;
+select pg_temp.act_as('c5111111-1111-1111-1111-111111111111');
+select public.correct_recorded_payment((select id from hp), 6000, 'cash', 0);
+reset role;
+select is(
+  (select concat_ws(' ', online_pence, recorded_pence, recorded_via, refund_pence)
+    from pg_temp.claim((select id from hb), pg_temp.input('none', 5000)) as quote(q),
+    jsonb_to_record(q) as x(online_pence int, recorded_pence int, recorded_via text, refund_pence int)),
+  '0 6000 cash 1000', 'what was paid outside the app is told apart from what can go back to a card'
+);
+select pg_temp.finish((select id from hb), pg_temp.input('none', 5000), '{"given_back_pence": 1000, "given_back_via": "cash"}');
+select is(
+  (select concat_ws(' ', amount_pence, reason, method, stripe_refund_id is null) from public.refunds where booking_id = (select id from hb)),
+  '1000 price_lowered cash t', 'the cash handed back is recorded, with nothing through Stripe'
+);
+select is(
+  (select concat_ws(' ', public.get_balance_due(bookings), unpaid_at is null) from public.bookings where id = (select id from hb)),
+  '0 t', 'and the booking is settled'
+);
+select is(
+  (select concat_ws(' ', details ->> 'refunded_pence', details ->> 'given_back_pence', details ->> 'given_back_via')
+    from public.get_receipt_details((select id from hb)) as details),
+  '0 1000 cash', 'the receipt says it was given back in cash, not refunded to a card'
+);
 
 -- a balance link
 select pg_temp.finish((select unprotected from b), pg_temp.input('link'));
@@ -359,7 +420,10 @@ select ok(
   not has_function_privilege('authenticated', 'public.claim_checkout(uuid, uuid, jsonb)', 'execute')
     and not has_function_privilege('authenticated', 'public.finish_checkout(uuid, jsonb)', 'execute')
     and has_function_privilege('authenticated', 'public.record_balance_paid(uuid, text, integer)', 'execute')
-    and not has_function_privilege('anon', 'public.record_balance_paid(uuid, text, integer)', 'execute'),
+    and not has_function_privilege('anon', 'public.record_balance_paid(uuid, text, integer)', 'execute')
+    and not has_function_privilege('authenticated', 'public.add_checkout_intent(uuid, text)', 'execute')
+    and not has_function_privilege('authenticated', 'public.claim_unsaved_charges(integer)', 'execute')
+    and not has_function_privilege('authenticated', 'public.settle_unsaved_charge(uuid, text, text, text)', 'execute'),
   'charging is server-only; recording is for signed-in stylists'
 );
 

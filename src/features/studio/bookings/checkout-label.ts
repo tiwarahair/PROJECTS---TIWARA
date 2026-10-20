@@ -1,3 +1,4 @@
+import { roundToPence } from "../../../utils/money";
 import type { CheckoutRecord } from "../core/types";
 
 const VIA_NAMES: Record<string, string> = {
@@ -8,7 +9,7 @@ const VIA_NAMES: Record<string, string> = {
 
 /** How a finished checkout reads in Past and on the booking. */
 export const getCheckoutLabel = (
-  { method, charged, via, refundAuto }: CheckoutRecord,
+  { method, charged, via, refundAuto, cashBack = 0 }: CheckoutRecord,
   link?: { isPaid?: boolean; isExpired?: boolean },
 ) => {
   if (method === "link" && link?.isPaid) return "Paid · Link";
@@ -21,5 +22,7 @@ export const getCheckoutLabel = (
 
   if (method === "card") return "Paid · Card";
 
-  return refundAuto > 0 ? `Refunded £${refundAuto}` : "Paid";
+  const refunded = roundToPence(refundAuto + cashBack);
+
+  return refunded > 0 ? `Refunded £${refunded}` : "Paid";
 };

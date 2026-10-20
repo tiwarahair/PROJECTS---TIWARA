@@ -38,8 +38,11 @@ export interface StudioBooking {
   movedByClient?: boolean;
   autoDone?: boolean;
   checkoutUnpaid?: boolean;
-  paidSoFar?: number;
+  paidOnline?: number; // paid when they booked, for a booking checked out before
+  paidLater?: number; // paid at that earlier checkout, less what went back since
   agreedPrice?: number; // what the saved card can be charged up to, when the price shown is the final one
+  refundableOnline?: number;
+  recordedVia?: string;
   extra?: number;
   addons?: BookingAddon[];
   priceReason?: string;
@@ -59,6 +62,8 @@ export interface CheckoutRecord {
   charged: number;
   tip: number;
   refundAuto: number;
+  cashBack?: number;
+  cashBackVia?: string;
   total: number;
   lines: {
     name: string;

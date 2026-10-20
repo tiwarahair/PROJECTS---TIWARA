@@ -23,6 +23,9 @@ alter table public.payments add column corrected_at timestamptz;
 alter table public.refunds drop constraint refunds_reason_check;
 alter table public.refunds add constraint refunds_reason_check
   check (reason in ('client_cancel', 'stylist_cancel', 'fee_settled', 'fee_waived', 'manual', 'price_lowered'));
+-- how it went back: to the card through us, or handed back by the stylist the way it was paid (recorded only)
+alter table public.refunds add column method text not null default 'card'
+  check (method in ('card', 'cash', 'bank', 'reader'));
 
 alter table public.bookings
   add column final_price_pence integer check (final_price_pence >= 0),
@@ -31,8 +34,11 @@ alter table public.bookings
   add column checkout_tries smallint not null default 0,
   -- a checkout under way; another waits until it's finished or two minutes have passed
   add column checkout_started_at timestamptz,
-  -- the card charge last made for the checkout, saved before it's confirmed, so a try that crashed isn't charged twice
-  add column checkout_intent_id text,
+  -- card charges made for the checkout but not yet saved as a payment or given back, noted before each is confirmed:
+  -- a try that crashed is finished with, or refunded, rather than charged twice
+  add column checkout_intent_ids text[] not null default '{}',
+  add column unsaved_refund_failures smallint not null default 0,
+  add column unsaved_refund_failed_at timestamptz,
   add column card_label text,
   -- completed with the balance still to collect and no link out: back in Studio's "Due for checkout"
   add column unpaid_at timestamptz;
@@ -91,8 +97,18 @@ as $$
       from public.payments where booking_id = bookings.id and kind in ('booking', 'balance')
     ), '[]'),
     'refunded_pence', coalesce((
-      select sum(amount_pence) from public.refunds where booking_id = bookings.id and reason = 'price_lowered'
-    ), 0)
+      select sum(amount_pence) from public.refunds
+      where booking_id = bookings.id and reason = 'price_lowered' and method = 'card'
+    ), 0),
+    'given_back_pence', coalesce((
+      select sum(amount_pence) from public.refunds
+      where booking_id = bookings.id and reason = 'price_lowered' and method <> 'card'
+    ), 0),
+    'given_back_via', (
+      select method from public.refunds
+      where booking_id = bookings.id and reason = 'price_lowered' and method <> 'card'
+      order by created_at desc limit 1
+    )
   )
   from public.bookings
   where bookings.id = target
@@ -255,13 +271,36 @@ begin
     'stylist_account', stylist.stripe_account_id,
     'stylist_can_receive', stylist.charges_enabled,
     'tries', booking.checkout_tries,
-    'checkout_intent_id', booking.checkout_intent_id,
+    'checkout_intent_ids', to_jsonb(booking.checkout_intent_ids),
+    'refund_failures', booking.unsaved_refund_failures,
     'card_intents', coalesce((
       select jsonb_agg(stripe_payment_intent_id) from public.payments
       where booking_id = booking.id and kind = 'balance' and stripe_payment_intent_id is not null
     ), '[]'::jsonb),
     'booking_fee_pence', booking.fee_pence,
-    'lowered_refunds', (select count(*) from public.refunds where booking_id = booking.id and reason = 'price_lowered')
+    'lowered_refunds', (
+      select count(*) from public.refunds where booking_id = booking.id and reason = 'price_lowered' and refunds.method = 'card'
+    ),
+    -- what can go back to the card (paid online, less what already has), and what was paid outside the app
+    'online_pence', greatest(
+      coalesce((select sum(amount_pence - platform_fee_pence) from public.payments
+        where booking_id = booking.id and kind = 'booking'), 0)
+      - coalesce((select sum(amount_pence) from public.refunds
+        where booking_id = booking.id and reason = 'price_lowered' and refunds.method = 'card'), 0),
+      0
+    ),
+    'recorded_pence', greatest(
+      coalesce((select sum(amount_pence - tip_pence) from public.payments
+        where booking_id = booking.id and kind = 'balance' and payments.method <> 'card'), 0)
+      - coalesce((select sum(amount_pence) from public.refunds
+        where booking_id = booking.id and reason = 'price_lowered' and refunds.method <> 'card'), 0),
+      0
+    ),
+    'recorded_via', (
+      select payments.method from public.payments
+      where booking_id = booking.id and kind = 'balance' and payments.method <> 'card'
+      order by created_at desc limit 1
+    )
   );
 end;
 $$;
@@ -289,6 +328,7 @@ begin
 
   update public.bookings
   set status = 'completed', completed_at = coalesce(completed_at, now()), unpaid_at = null, checkout_started_at = null,
+    checkout_intent_ids = array_remove(checkout_intent_ids, result ->> 'payment_intent_id'),
     final_price_pence = (result ->> 'final_pence')::integer, tip_pence = booking.tip_pence + tip,
     checkout = jsonb_build_object(
       'lines', result -> 'lines', 'method', method, 'via', result ->> 'via', 'from_status', booking.status
@@ -314,6 +354,12 @@ begin
     on conflict (stripe_refund_id) do nothing;
   end if;
 
+  -- paid outside the app, so the stylist hands it back the same way
+  if coalesce((result ->> 'given_back_pence')::integer, 0) > 0 then
+    insert into public.refunds (booking_id, amount_pence, reason, method)
+    values (target, (result ->> 'given_back_pence')::integer, 'price_lowered', result ->> 'given_back_via');
+  end if;
+
   if method = 'link' then
     insert into public.payment_links (booking_id, purpose, amount_pence, token_hash, expires_at)
     values (target, 'balance', public.get_balance_due(booking), extensions.gen_random_bytes(32),
@@ -335,13 +381,88 @@ end;
 $$;
 
 -- the card was declined: the next try is a new charge
-create function public.note_checkout_declined(target uuid)
+create function public.note_checkout_declined(target uuid, intent text)
 returns void
 language sql
 security definer
 set search_path = ''
 as $$
-  update public.bookings set checkout_tries = checkout_tries + 1, checkout_started_at = null where id = target
+  update public.bookings
+  set checkout_tries = checkout_tries + 1, checkout_started_at = null,
+    checkout_intent_ids = array_remove(checkout_intent_ids, intent)
+  where id = target
+$$;
+
+-- a card charge about to be confirmed
+create function public.add_checkout_intent(target uuid, intent text)
+returns void
+language sql
+security definer
+set search_path = ''
+as $$
+  update public.bookings set checkout_intent_ids = array_append(checkout_intent_ids, intent)
+  where id = target and not intent = any(checkout_intent_ids)
+$$;
+
+/** Bookings with a card charge from a checkout that crashed: none in a checkout now, each held for this run. */
+create function public.claim_unsaved_charges(batch_size integer)
+returns table (booking_id uuid, intent_ids text[], saved_intents text[], refund_failures smallint, held_at timestamptz)
+language sql
+security definer
+set search_path = ''
+as $$
+  update public.bookings
+  set checkout_started_at = now()
+  where id in (
+    select id from public.bookings
+    where cardinality(checkout_intent_ids) > 0
+      and coalesce(checkout_started_at, '-infinity') < now() - interval '2 minutes'
+      and unsaved_refund_failures < 5
+      and coalesce(unsaved_refund_failed_at, '-infinity') < now() - interval '1 hour' * unsaved_refund_failures
+    order by unsaved_refund_failures, checkout_started_at nulls first
+    limit batch_size
+    for update skip locked
+  )
+  returning id, checkout_intent_ids,
+    array(select stripe_payment_intent_id from public.payments
+      where payments.booking_id = bookings.id and stripe_payment_intent_id is not null),
+    unsaved_refund_failures, checkout_started_at
+$$;
+
+/** A crashed checkout's card charge dealt with: refunded, never charged, or a refund that failed (tried again later). */
+create function public.settle_unsaved_charge(target uuid, intent text, outcome text, message text)
+returns void
+language plpgsql
+security definer
+set search_path = ''
+as $$
+declare
+  failures integer;
+begin
+  if outcome = 'failed' then
+    update public.bookings
+    set unsaved_refund_failures = unsaved_refund_failures + 1, unsaved_refund_failed_at = now()
+    where id = target
+    returning unsaved_refund_failures into failures;
+
+    if failures = 5 then
+      insert into public.booking_events (booking_id, kind, data)
+      values (target, 'refund_stuck', jsonb_build_object('payment_intent_id', intent, 'error', message));
+    end if;
+  else
+    -- once refunded, the same checkout tried again needs a new charge, not Stripe's replay of the refunded one
+    update public.bookings
+    set checkout_intent_ids = array_remove(checkout_intent_ids, intent),
+      checkout_tries = checkout_tries + case when outcome = 'refunded' then 1 else 0 end
+    where id = target;
+  end if;
+
+  if outcome = 'refunded' then
+    insert into public.booking_events (booking_id, kind, data)
+    values (target, 'unsaved_charge_refunded', jsonb_build_object('payment_intent_id', intent));
+  end if;
+
+end;
 $$;
 
 /** Takes back a checkout where no money moved through us (recorded, or nothing due), within ten minutes. */
@@ -663,7 +784,10 @@ revoke execute on function
   public.send_balance_link(uuid, uuid),
   public.claim_checkout(uuid, uuid, jsonb),
   public.finish_checkout(uuid, jsonb),
-  public.note_checkout_declined(uuid),
+  public.note_checkout_declined(uuid, text),
+  public.add_checkout_intent(uuid, text),
+  public.claim_unsaved_charges(integer),
+  public.settle_unsaved_charge(uuid, text, text, text),
   public.undo_checkout(uuid),
   public.record_balance_paid(uuid, text, integer),
   public.correct_recorded_payment(uuid, integer, text, integer),
@@ -682,5 +806,43 @@ grant execute on function
 grant execute on function
   public.claim_checkout(uuid, uuid, jsonb),
   public.finish_checkout(uuid, jsonb),
-  public.note_checkout_declined(uuid)
+  public.note_checkout_declined(uuid, text),
+  public.add_checkout_intent(uuid, text),
+  public.claim_unsaved_charges(integer),
+  public.settle_unsaved_charge(uuid, text, text, text)
   to service_role;
+
+create index bookings_unsaved_charges_idx on public.bookings (id) where cardinality(checkout_intent_ids) > 0;
+
+-- the same every-minute job, now also while a crashed checkout's card charge is waiting to be sorted out
+select cron.schedule(
+  'charge-fees',
+  '* * * * *',
+  $$
+  select net.http_post(
+    url := (select decrypted_secret from vault.decrypted_secrets where name = 'project_url')
+      || '/functions/v1/charge-fees',
+    headers := jsonb_build_object(
+      'x-cron-secret', (select decrypted_secret from vault.decrypted_secrets where name = 'cron_secret')
+    )
+  )
+  where exists (select 1 from vault.decrypted_secrets where name = 'cron_secret')
+    and (
+      exists (
+        select 1 from public.booking_fees
+        where failed_runs < 5 and (
+          (status = 'pending' and charge_after <= now())
+          or (status = 'charging' and claimed_at < now() - interval '15 minutes')
+        )
+      )
+      or exists (select 1 from public.get_unfinished_refunds(1))
+      or exists (
+        select 1 from public.bookings
+        where cardinality(checkout_intent_ids) > 0
+          and coalesce(checkout_started_at, '-infinity') < now() - interval '2 minutes'
+          and unsaved_refund_failures < 5
+          and coalesce(unsaved_refund_failed_at, '-infinity') < now() - interval '1 hour' * unsaved_refund_failures
+      )
+    )
+  $$
+);

@@ -102,6 +102,7 @@ export const getPastCheckout = (
         charged: checkout.charged,
         tip: checkout.tip,
         refundAuto: checkout.refundAuto,
+        cashBack: checkout.cashBack ?? 0,
       }
     : {
         method: "card",
@@ -135,6 +136,7 @@ export const getPastCheckout = (
       lines,
       mode: (checkout ? checkout.mode : "deposit") as PaymentMode,
       paid,
+      ...(checkout?.cashBackVia ? { recordedVia: checkout.cashBackVia } : {}),
     },
     done: done as PastCheckout["done"],
     cap: getCap(),

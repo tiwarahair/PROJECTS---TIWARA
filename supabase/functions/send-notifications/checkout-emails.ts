@@ -23,6 +23,8 @@ export interface Receipt extends BookingDetails {
   tip_pence: number;
   payments: ReceiptPayment[];
   refunded_pence: number;
+  given_back_pence?: number;
+  given_back_via?: string | null;
   corrected?: boolean;
 }
 
@@ -58,6 +60,9 @@ const getSummary = (receipt: Receipt) => [
   ...getPayments(receipt),
   ...(receipt.refunded_pence
     ? [`Refunded to your card: ${pounds(receipt.refunded_pence)}. It can take 5–10 working days to show.`]
+    : []),
+  ...(receipt.given_back_pence
+    ? [`Given back by ${METHODS[receipt.given_back_via ?? ""] ?? "another way"}: ${pounds(receipt.given_back_pence)}`]
     : []),
 ];
 

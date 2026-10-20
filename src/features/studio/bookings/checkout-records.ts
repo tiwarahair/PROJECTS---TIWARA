@@ -52,6 +52,27 @@ export const getPaidAtBooking = ({ payments }: StudioBookingRow) =>
       .map(({ amount_pence: amount, platform_fee_pence: fee }) => amount - fee),
   );
 
+const getLowered = ({ refunds }: StudioBookingRow, isCard: boolean) =>
+  sumPence(
+    refunds
+      .filter(
+        ({ reason, method }) =>
+          reason === "price_lowered" && (method === "card") === isCard,
+      )
+      .map(({ amount_pence: amount }) => amount),
+  );
+
+/** How the latest payment outside the app was made (cash, bank, reader). */
+export const getRecordedVia = ({ payments }: StudioBookingRow) =>
+  payments
+    .filter(({ kind, method }) => kind === "balance" && method !== "card")
+    .sort(byTime)
+    .at(-1)?.method;
+
+/** What could still go back to the card if the price came down: paid online, less what already went back. */
+export const getRefundableOnline = (row: StudioBookingRow) =>
+  Math.max(getPaidAtBooking(row) - getLowered(row, true), 0);
+
 /** What the client has paid towards the price so far, as the server counts it (tips and refunds left out). */
 export const getPaidSoFar = (row: StudioBookingRow) =>
   getPaidAtBooking(row) +
@@ -94,10 +115,6 @@ export const getCheckoutFields = (
     ? "link"
     : balance[0]?.method;
 
-  const lowered = row.refunds.filter(
-    ({ reason }) => reason === "price_lowered",
-  );
-
   const lines =
     isRecord(row.checkout) && Array.isArray(row.checkout.lines)
       ? row.checkout.lines
@@ -116,9 +133,12 @@ export const getCheckoutFields = (
           ),
     ),
     tip: toPounds(row.tip_pence),
-    refundAuto: toPounds(
-      sumPence(lowered.map(({ amount_pence: amount }) => amount)),
-    ),
+    refundAuto: toPounds(getLowered(row, true)),
+    cashBack: toPounds(getLowered(row, false)),
+    cashBackVia:
+      row.refunds.find(
+        ({ reason, method }) => reason === "price_lowered" && method !== "card",
+      )?.method ?? "",
     total: toPounds(row.final_price_pence ?? row.price_pence),
     lines: lines.length
       ? lines.map(toLine)

@@ -15,7 +15,8 @@ export const getReceiptView = (
     method: money.method,
     charged: money.charge,
     tip: money.tip,
-    refundAuto: money.refundDue,
+    refundAuto: money.refundCard,
+    cashBack: money.cashBack,
     via: state.recordVia,
   };
 
@@ -47,6 +48,13 @@ export const getReceiptView = (
       subtitle: `Paid at booking${booking.paidOn ? `, ${booking.paidOn}` : ""}`,
       value: formatPence(-state.paid),
     },
+    !!booking.paidLater &&
+      booking.paidLater > 0 && {
+        key: "pl",
+        label: "Paid at an earlier checkout",
+        subtitle: `${RECORD_VIA_LABELS[booking.recordedVia ?? ""] ?? "Recorded"}, recorded by the stylist`,
+        value: formatPence(-booking.paidLater),
+      },
     done.charged > 0 && {
       key: "c",
       label: done.method === "link" ? "Awaiting payment" : "Paid at checkout",
@@ -60,6 +68,12 @@ export const getReceiptView = (
       subtitle: "Price lowered after booking",
       value: formatPence(done.refundAuto),
     },
+    !!done.cashBack && {
+      key: "cb",
+      label: "Given back",
+      subtitle: `${RECORD_VIA_LABELS[booking.recordedVia ?? ""] ?? "Recorded"}, price lowered after booking`,
+      value: formatPence(done.cashBack),
+    },
     state.refunded > 0 && {
       key: "rf",
       label: "Refunded",
@@ -70,9 +84,11 @@ export const getReceiptView = (
 
   const paid =
     state.paid +
+    (booking.paidLater ?? 0) +
     money.bookFee +
     (done.method === "link" ? 0 : done.charged) -
     done.refundAuto -
+    (done.cashBack ?? 0) -
     state.refunded;
 
   const getMethod = () => {

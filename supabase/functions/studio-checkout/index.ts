@@ -3,7 +3,8 @@ import { z } from "npm:zod@4";
 import { admin } from "../_shared/admin.ts";
 import { corsHeaders, respond } from "../_shared/cors.ts";
 import { getSignedInUser } from "../_shared/recent-user.ts";
-import { chargeSavedCard, findEarlierCharge, isSameCharge, refundCharge, refundOverpaid } from "./charge.ts";
+import { giveBackUnsavedCharge, settleUnsavedCharge } from "../_shared/unsaved-charge.ts";
+import { chargeSavedCard, getGivenBack, getUnsavedCharges, isSameCharge, refundOverpaid } from "./charge.ts";
 import type { CheckoutQuote } from "./charge.ts";
 
 const REFUSALS = [
@@ -61,24 +62,25 @@ Deno.serve(async (request) => {
     if (error) throw error;
 
     const quote = data as CheckoutQuote;
-    const earlier = await findEarlierCharge(quote);
-
-    const noteTry = async () => {
-      const { error: tryError } = await admin.rpc("note_checkout_declined", { target: bookingId });
-
-      if (tryError) throw tryError;
-    };
+    const unsaved = await getUnsavedCharges(quote);
 
     // the card went through on a try that wasn't saved: the same checkout finishes with it, anything else gives it back
-    const reused = earlier && method === "card" && isSameCharge(earlier, quote) ? earlier : null;
+    const reused =
+      method === "card"
+        ? (unsaved.find(({ intent, state }) => state === "charged" && isSameCharge(intent, quote))?.intent ?? null)
+        : null;
 
-    if (earlier && !reused) await refundCharge(bookingId, earlier.id, !!earlier.transfer_data);
+    for (const { intent, state } of unsaved) {
+      if (intent.id === reused?.id) continue;
+
+      if (state === "charged")
+        await giveBackUnsavedCharge(bookingId, intent.id, !!intent.transfer_data, quote.refund_failures);
+
+      if (state === "settled") await settleUnsavedCharge(bookingId, intent.id, "not_charged");
+    }
 
     const saveIntent = async (intentId: string) => {
-      const { error: saveError } = await admin
-        .from("bookings")
-        .update({ checkout_intent_id: intentId })
-        .eq("id", bookingId);
+      const { error: saveError } = await admin.rpc("add_checkout_intent", { target: bookingId, intent: intentId });
 
       if (saveError) throw saveError;
     };
@@ -86,12 +88,18 @@ Deno.serve(async (request) => {
     const charge = method === "card" ? await chargeSavedCard(quote, reused, saveIntent) : null;
 
     if (charge && !charge.paid) {
-      await noteTry();
+      const { error: declineError } = await admin.rpc("note_checkout_declined", {
+        target: bookingId,
+        intent: charge.payment_intent_id,
+      });
+
+      if (declineError) throw declineError;
 
       return respond(200, { outcome: "declined", hard: charge.hard, message: charge.message });
     }
 
     const refund = await refundOverpaid(quote);
+    const givenBack = getGivenBack(quote, refund.refund_pence);
 
     const { data: finished, error: finishError } = await admin.rpc("finish_checkout", {
       target: bookingId,
@@ -105,18 +113,19 @@ Deno.serve(async (request) => {
         // a charge found from an earlier try keeps its own amount
         ...charge,
         ...refund,
+        ...givenBack,
       },
     });
 
     if (finishError) throw finishError;
 
-    if (finished === "duplicate" && charge?.payment_intent_id) {
-      await refundCharge(bookingId, charge.payment_intent_id, !charge.transfer_pending);
+    if (finished === "duplicate" && charge?.paid) {
+      await giveBackUnsavedCharge(bookingId, charge.payment_intent_id, !charge.transfer_pending, quote.refund_failures);
 
       return respond(409, { error: "already_completed" });
     }
 
-    return respond(200, { outcome: "completed" });
+    return respond(200, { outcome: "completed", refunded_pence: refund.refund_pence, ...givenBack });
   } catch (error) {
     console.error("studio-checkout failed", error instanceof Error ? error.message : error);
 

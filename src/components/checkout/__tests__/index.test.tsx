@@ -2,7 +2,7 @@ import { act, render, screen, within } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { CheckoutSheet } from "..";
 import { BOOKINGS } from "../data";
-import { getInitialCheckout, getMoney } from "../logic";
+import { getFinalized, getInitialCheckout, getMoney } from "../logic";
 import { formatMoney } from "../../../utils/money";
 import type { UserEvent } from "@testing-library/user-event";
 import { setupUser } from "../../../test/setup-user";
@@ -37,6 +37,25 @@ describe("checkout money", () => {
 
     expect(money.refundDue).toBe(20);
     expect(money.method).toBe("none");
+  });
+
+  it("a refund beyond what was paid online is handed back the way it was paid", () => {
+    const state = getInitialCheckout({ scenario: "reduce-review" });
+
+    const booking = {
+      ...BOOKINGS.nia!,
+      refundableOnline: 15,
+      recordedVia: "cash",
+    };
+
+    const money = getMoney(state, booking);
+
+    expect([money.refundCard, money.cashBack]).toEqual([15, 5]);
+
+    expect(getFinalized(state, booking).done).toMatchObject({
+      refundAuto: 15,
+      cashBack: 5,
+    });
   });
 
   it("nothing to take is completed without a charge, even with the tip step open", () => {

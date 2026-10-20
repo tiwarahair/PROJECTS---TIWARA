@@ -365,7 +365,7 @@ export type Database = {
           cancelled_by: string | null;
           card_label: string | null;
           checkout: Json | null;
-          checkout_intent_id: string | null;
+          checkout_intent_ids: string[];
           checkout_started_at: string | null;
           checkout_tries: number;
           choices: NonNullable<Json>;
@@ -411,6 +411,8 @@ export type Database = {
           terms: Json | null;
           tip_pence: number;
           unpaid_at: string | null;
+          unsaved_refund_failed_at: string | null;
+          unsaved_refund_failures: number;
           get_balance_due: number | null;
           get_cancellation_terms: Json | null;
         };
@@ -431,7 +433,7 @@ export type Database = {
           cancelled_by?: string | null;
           card_label?: string | null;
           checkout?: Json | null;
-          checkout_intent_id?: string | null;
+          checkout_intent_ids?: string[];
           checkout_started_at?: string | null;
           checkout_tries?: number;
           choices: NonNullable<Json>;
@@ -477,6 +479,8 @@ export type Database = {
           terms?: Json | null;
           tip_pence?: number;
           unpaid_at?: string | null;
+          unsaved_refund_failed_at?: string | null;
+          unsaved_refund_failures?: number;
         };
         Update: {
           address?: Json | null;
@@ -494,7 +498,7 @@ export type Database = {
           cancelled_by?: string | null;
           card_label?: string | null;
           checkout?: Json | null;
-          checkout_intent_id?: string | null;
+          checkout_intent_ids?: string[];
           checkout_started_at?: string | null;
           checkout_tries?: number;
           choices?: NonNullable<Json>;
@@ -540,6 +544,8 @@ export type Database = {
           terms?: Json | null;
           tip_pence?: number;
           unpaid_at?: string | null;
+          unsaved_refund_failed_at?: string | null;
+          unsaved_refund_failures?: number;
         };
         Relationships: [
           {
@@ -1111,6 +1117,7 @@ export type Database = {
           booking_id: string;
           created_at: string;
           id: string;
+          method: string;
           note: string | null;
           reason: string;
           stripe_refund_id: string | null;
@@ -1121,6 +1128,7 @@ export type Database = {
           booking_id: string;
           created_at?: string;
           id?: string;
+          method?: string;
           note?: string | null;
           reason: string;
           stripe_refund_id?: string | null;
@@ -1130,6 +1138,7 @@ export type Database = {
           booking_id?: string;
           created_at?: string;
           id?: string;
+          method?: string;
           note?: string | null;
           reason?: string;
           stripe_refund_id?: string | null;
@@ -1853,6 +1862,10 @@ export type Database = {
       [_ in never]: never;
     };
     Functions: {
+      add_checkout_intent: {
+        Args: { intent: string; target: string };
+        Returns: undefined;
+      };
       auto_cancel_unconfirmed: {
         Args: Record<PropertyKey, never>;
         Returns: undefined;
@@ -1936,6 +1949,16 @@ export type Database = {
           payment_intent_id: string;
           stylist_account: string;
           transfer_failures: number;
+        }[];
+      };
+      claim_unsaved_charges: {
+        Args: { batch_size: number };
+        Returns: {
+          booking_id: string;
+          held_at: string;
+          intent_ids: string[];
+          refund_failures: number;
+          saved_intents: string[];
         }[];
       };
       clean_contact: { Args: { contact: Json }; Returns: Json };
@@ -2063,7 +2086,7 @@ export type Database = {
           cancelled_by: string | null;
           card_label: string | null;
           checkout: Json | null;
-          checkout_intent_id: string | null;
+          checkout_intent_ids: string[];
           checkout_started_at: string | null;
           checkout_tries: number;
           choices: NonNullable<Json>;
@@ -2109,6 +2132,8 @@ export type Database = {
           terms: Json | null;
           tip_pence: number;
           unpaid_at: string | null;
+          unsaved_refund_failed_at: string | null;
+          unsaved_refund_failures: number;
         };
         SetofOptions: {
           from: "*";
@@ -2406,7 +2431,7 @@ export type Database = {
           cancelled_by: string | null;
           card_label: string | null;
           checkout: Json | null;
-          checkout_intent_id: string | null;
+          checkout_intent_ids: string[];
           checkout_started_at: string | null;
           checkout_tries: number;
           choices: NonNullable<Json>;
@@ -2452,6 +2477,8 @@ export type Database = {
           terms: Json | null;
           tip_pence: number;
           unpaid_at: string | null;
+          unsaved_refund_failed_at: string | null;
+          unsaved_refund_failures: number;
         };
         SetofOptions: {
           from: "*";
@@ -2518,7 +2545,10 @@ export type Database = {
         Returns: string;
       };
       normalise_phone: { Args: { phone: string }; Returns: string };
-      note_checkout_declined: { Args: { target: string }; Returns: undefined };
+      note_checkout_declined: {
+        Args: { intent: string; target: string };
+        Returns: undefined;
+      };
       note_refund_failure: {
         Args: { message: string; target: string };
         Returns: undefined;
@@ -2715,6 +2745,15 @@ export type Database = {
       };
       set_stylist_note: {
         Args: { note: string; target: string };
+        Returns: undefined;
+      };
+      settle_unsaved_charge: {
+        Args: {
+          intent: string;
+          message: string;
+          outcome: string;
+          target: string;
+        };
         Returns: undefined;
       };
       slugify: { Args: { value: string }; Returns: string };

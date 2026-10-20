@@ -5,6 +5,7 @@ import { getRefundable } from "../_shared/refundable.ts";
 import { getStripeFee } from "../_shared/stripe-fee.ts";
 import { getCheckoutChargeKey } from "../_shared/stripe-keys.ts";
 import { stripe } from "../_shared/stripe.ts";
+import { getUnsavedCharge } from "../_shared/unsaved-charge.ts";
 
 export interface CheckoutQuote {
   id: string;
@@ -20,21 +21,24 @@ export interface CheckoutQuote {
   stylist_account: string | null;
   stylist_can_receive: boolean;
   tries: number;
-  checkout_intent_id: string | null;
+  checkout_intent_ids: string[];
+  refund_failures: number;
   card_intents: string[];
   booking_fee_pence: number;
   lowered_refunds: number;
+  online_pence: number;
+  recorded_pence: number;
+  recorded_via: string | null;
 }
 
-/** A card charge from an earlier try that went through but was never saved. */
-export const findEarlierCharge = async ({ checkout_intent_id: intentId, card_intents: saved }: CheckoutQuote) => {
-  if (!intentId || saved.includes(intentId)) return null;
+/** Card charges from earlier tries that were never saved as a payment, and what became of each. */
+export const getUnsavedCharges = async ({ checkout_intent_ids: intentIds, card_intents: saved }: CheckoutQuote) => {
+  const results = await Promise.allSettled(
+    intentIds.filter((intentId) => !saved.includes(intentId)).map(getUnsavedCharge),
+  );
 
-  const intent = await stripe.paymentIntents.retrieve(intentId, { expand: ["latest_charge"] });
-  const charge = intent.latest_charge;
-
-  // one given back because the booking was checked out another way doesn't count
-  return intent.status === "succeeded" && !(typeof charge === "object" && charge?.refunded) ? intent : null;
+  // one Stripe can't tell us about stays listed for the clean-up job, rather than stopping this checkout
+  return results.flatMap((result) => (result.status === "fulfilled" ? [result.value] : []));
 };
 
 /** Whether an earlier charge is the one this checkout would make. */
@@ -51,6 +55,7 @@ interface CardPaid {
 
 interface CardDeclined {
   paid: false;
+  payment_intent_id: string | null;
   hard: boolean;
   message: string;
   card_label: string | null;
@@ -81,6 +86,8 @@ export const chargeSavedCard = async (
       card_label: cardLabel,
     };
 
+  let createdId: string | null = null;
+
   try {
     const created = await stripe.paymentIntents.create(
       {
@@ -105,6 +112,7 @@ export const chargeSavedCard = async (
       { idempotencyKey: getCheckoutChargeKey(quote.id, quote.tries, quote.charge_pence, quote.tip_pence) },
     );
 
+    createdId = created.id;
     await saveIntent(created.id);
 
     const intent = await stripe.paymentIntents.confirm(created.id, { off_session: true });
@@ -124,6 +132,7 @@ export const chargeSavedCard = async (
     // the bank wants the client there to approve it, which a saved-card charge can't do
     return {
       paid: false,
+      payment_intent_id: createdId,
       hard: isHardDecline(code) || code === "authentication_required",
       message: error.message,
       card_label: cardLabel,
@@ -131,13 +140,14 @@ export const chargeSavedCard = async (
   }
 };
 
-/** Gives back what the client paid over the final price; the stylist's card fee stays paid. */
+/** Gives back to the card what the client paid online over the final price; the stylist's card fee stays paid. */
 export const refundOverpaid = async ({
   id,
   refund_pence: amount,
   payment_intent_id: intentId,
   booking_fee_pence: bookingFee,
   lowered_refunds: saved,
+  online_pence: online,
 }: CheckoutQuote) => {
   if (!amount || !intentId) return { refund_pence: 0 };
 
@@ -152,7 +162,7 @@ export const refundOverpaid = async ({
 
   // the booking fee is never part of it
   const intent = await stripe.paymentIntents.retrieve(intentId, { expand: ["latest_charge"] });
-  const refundAmount = Math.min(amount, getRefundable(intent.latest_charge) - bookingFee);
+  const refundAmount = Math.min(amount, online, getRefundable(intent.latest_charge) - bookingFee);
 
   if (refundAmount <= 0) return { refund_pence: 0 };
 
@@ -169,13 +179,12 @@ export const refundOverpaid = async ({
   return { refund_pence: refundAmount, refund_id: refund.id };
 };
 
-/** Gives back in full a card charge that was never saved, or one made while the booking was checked out another way. */
-export const refundCharge = (id: string, intentId: string, isTransferred: boolean) =>
-  stripe.refunds.create(
-    {
-      payment_intent: intentId,
-      metadata: { booking_id: id, reason: "unsaved_checkout" },
-      ...(isTransferred ? { reverse_transfer: true } : {}),
-    },
-    { idempotencyKey: `checkout:${id}:unsaved-refund:${intentId}` },
-  );
+/** The rest of an overpayment, paid outside the app: the stylist hands it back the same way. */
+export const getGivenBack = (
+  { refund_pence: amount, recorded_pence: recorded, recorded_via: via }: CheckoutQuote,
+  refundedToCard: number,
+) => {
+  const givenBack = Math.min(Math.max(amount - refundedToCard, 0), recorded);
+
+  return givenBack > 0 ? { given_back_pence: givenBack, given_back_via: via ?? "cash" } : {};
+};
