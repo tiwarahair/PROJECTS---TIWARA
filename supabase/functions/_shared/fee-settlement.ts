@@ -3,6 +3,8 @@ import Stripe from "npm:stripe@22.6.2";
 import { admin } from "./admin.ts";
 import { getCardLabel, isHardDecline } from "./declines.ts";
 import { getRefundable } from "./refundable.ts";
+import { getRecovery } from "./owed.ts";
+import { getRecoveryMetadata } from "./recovery-metadata.ts";
 import { getStripeFee } from "./stripe-fee.ts";
 import { getFeeChargeKey, getFeeRefundKey } from "./stripe-keys.ts";
 import { stripe } from "./stripe.ts";
@@ -140,6 +142,9 @@ const chargeCard = async (fee: FeeSettlement): Promise<ChargeResult> => {
       card_label: cardLabel,
     };
 
+  const stripeFee = getStripeFee(fee.charge_pence);
+  const recovered = canTransfer ? await getRecovery(fee.stylist_account, fee.charge_pence - stripeFee) : 0;
+
   try {
     const intent = await stripe.paymentIntents.create(
       {
@@ -150,15 +155,20 @@ const chargeCard = async (fee: FeeSettlement): Promise<ChargeResult> => {
         off_session: true,
         confirm: true,
         description: `${fee.booking_ref}: ${KIND_LABELS[fee.kind]}`,
-        metadata: { kind: "fee", fee_id: fee.id, booking_id: fee.booking_id },
+        metadata: {
+          kind: "fee",
+          fee_id: fee.id,
+          booking_id: fee.booking_id,
+          ...getRecoveryMetadata(fee.stylist_account, recovered),
+        },
         ...(canTransfer
           ? {
-              application_fee_amount: getStripeFee(fee.charge_pence),
+              application_fee_amount: stripeFee + recovered,
               transfer_data: { destination: fee.stylist_account as string },
             }
           : {}),
       },
-      { idempotencyKey: getFeeChargeKey(fee) },
+      { idempotencyKey: `${getFeeChargeKey(fee)}${recovered ? `:owed:${recovered}` : ""}` },
     );
 
     return {

@@ -37,6 +37,8 @@ import { StripeSheet } from "../settings/payouts/stripe-sheet";
 import { SheetFrame } from "./sheet-frame";
 import type { StudioController } from "../core/use-studio";
 import { WizardFooter, WizardSheet } from "../services/wizard";
+import { DisputeFooter, DisputeSheet } from "../disputes";
+import { getDisputeView } from "../disputes/view";
 import { getWizardView } from "../services/wizard/view";
 
 /** The open sheet's body and footer inside the shared frame. */
@@ -72,6 +74,7 @@ export const StudioSheets = ({ studio }: { studio: StudioController }) => {
   );
 
   const wizardView = sheet === "svcwiz" ? getWizardView(studio) : null;
+  const disputeView = getDisputeView(studio);
 
   const clientsView =
     sheet === "cliView" || sheet === "clientEdit"
@@ -95,6 +98,8 @@ export const StudioSheets = ({ studio }: { studio: StudioController }) => {
       return <ClientEditFooter view={clientsView} form={clientForm} />;
 
     if (wizardView) return <WizardFooter view={wizardView} form={wizardForm} />;
+
+    if (disputeView) return <DisputeFooter view={disputeView} />;
 
     return addonView ? (
       <AddonSheetFooter view={addonView} form={addonForm} />
@@ -125,6 +130,7 @@ export const StudioSheets = ({ studio }: { studio: StudioController }) => {
       {sheet === "block" && <BlockSheet studio={studio} />}
       {sheet === "closed" && <ClosedSheet studio={studio} />}
       {sheet === "client" && <ClientSummarySheet studio={studio} />}
+      {disputeView && <DisputeSheet view={disputeView} />}
     </SheetFrame>
   );
 };

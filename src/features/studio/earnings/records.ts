@@ -14,6 +14,7 @@ import type {
 } from "../../../lib/studio-api/earnings";
 import { getTotals } from "../../../components/earnings/logic";
 import { roundToPence } from "../../../utils/money";
+import { isAnswerable, toDisputeRecord } from "../bookings/dispute-records";
 
 const PAYOUT_STATES: Record<string, PayoutState> = {
   paid: "Paid",
@@ -86,18 +87,22 @@ export const toLedger = ({
     }),
   );
 
+  // below zero after a refund or dispute: Stripe takes it from new payments before paying out again
+  const owed = Math.max(0, -balance.available_pence);
+
   return {
     transactions,
     payouts: payouts
       .filter(({ status }) => status !== "canceled")
       .map((row) => toPayout(row, transactions)),
-    available: toPounds(balance.available_pence),
+    available: toPounds(Math.max(0, balance.available_pence)),
     pending: toPounds(balance.pending_pence),
     onHold: 0,
-    pausedAmount: 0,
-    nextDate: balance.next_payout ? new Date(balance.next_payout) : null,
+    pausedAmount: toPounds(owed),
+    nextDate:
+      balance.next_payout && !owed ? new Date(balance.next_payout) : null,
     today: new Date(),
-    scenario: "default",
+    scenario: owed ? "paused" : "default",
   };
 };
 
@@ -117,3 +122,12 @@ export const getFailedPayout = ({ payouts }: StudioEarnings) => {
 
   return latest?.status === "failed" ? toPounds(latest.amount_pence) : 0;
 };
+
+export const getOpenDisputes = (
+  { disputes }: StudioEarnings,
+  answered: Record<string, string> = {},
+) =>
+  disputes
+    .map((row) => ({ row, record: toDisputeRecord(row) }))
+    .filter(({ record }) => isAnswerable(record) && !answered[record.id])
+    .sort((first, second) => first.record.respondBy - second.record.respondBy);

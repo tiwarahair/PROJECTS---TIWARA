@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import type { StudioEarnings } from "../../../../lib/studio-api/earnings";
-import { getFailedPayout, toLedger } from "../records";
+import { getFailedPayout, getOpenDisputes, toLedger } from "../records";
 
 const line = {
   booking_id: "b-1",
@@ -52,7 +52,19 @@ const earnings: StudioEarnings = {
     },
   ],
   balance: { available_pence: 1200, pending_pence: 500, next_payout: null },
+  disputes: [],
 };
+
+const dispute = (id: string, respondBy: string, status = "needs_response") => ({
+  id,
+  amount_pence: 1555,
+  reason: "fraudulent",
+  status,
+  outcome: null,
+  respond_by: respondBy,
+  returned_pence: 0,
+  booking: null,
+});
 
 describe("the stylist's earnings", () => {
   it("shows their part, card fees, recorded money and what each payout paid out", () => {
@@ -81,5 +93,40 @@ describe("the stylist's earnings", () => {
 
     expect([ledger.available, ledger.pending]).toEqual([12, 5]);
     expect(getFailedPayout(earnings)).toBe(29.35);
+  });
+
+  it("pauses payouts while the balance is below zero, and shows how much is being recovered", () => {
+    const ledger = toLedger({
+      ...earnings,
+      balance: {
+        available_pence: -3555,
+        pending_pence: 0,
+        next_payout: "2026-10-22",
+      },
+    });
+
+    expect(ledger).toMatchObject({
+      available: 0,
+      pausedAmount: 35.55,
+      nextDate: null,
+      scenario: "paused",
+    });
+  });
+
+  it("asks about the dispute due soonest, leaving out decided and just-answered ones", () => {
+    const open = getOpenDisputes(
+      {
+        ...earnings,
+        disputes: [
+          dispute("later", "2026-10-25T10:00:00Z"),
+          dispute("sooner", "2026-10-23T10:00:00Z"),
+          dispute("deciding", "2026-10-21T10:00:00Z", "under_review"),
+          dispute("answered", "2026-10-20T10:00:00Z"),
+        ],
+      },
+      { answered: "submitted" },
+    );
+
+    expect(open.map(({ record }) => record.id)).toEqual(["sooner", "later"]);
   });
 });

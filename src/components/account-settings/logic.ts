@@ -12,6 +12,7 @@ import {
 } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
 import type { TaxDetails } from "../tax-details-form/logic";
+import { formatMoney } from "../../utils/money";
 
 export type SettingsPage =
   "personal" | "security" | "notifications" | "payouts" | "calendar";
@@ -171,12 +172,19 @@ export const getInitialSettingsState = (
 };
 
 /** Why the account can't be closed yet, else "". */
-export const getCloseReason = (upcoming: number, owed: boolean): string => {
+export const getCloseReason = (
+  upcoming: number,
+  owed: number,
+  hasOpenDispute: boolean,
+): string => {
   if (upcoming)
     return `You have ${upcoming} upcoming booking${upcoming === 1 ? "" : "s"}. Cancel or complete them first.`;
 
+  if (hasOpenDispute)
+    return "A client’s dispute is still open. You can close once their bank decides.";
+
   return owed
-    ? "You have money owed on your account. Settle it in Payouts first."
+    ? `You owe ${formatMoney(owed, { pence: "always" })} in dispute fees. Pay it to close your business.`
     : "";
 };
 

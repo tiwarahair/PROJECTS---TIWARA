@@ -25,7 +25,8 @@ export type SheetKind =
   | "closed"
   | "client"
   | "clientEdit"
-  | "cliView";
+  | "cliView"
+  | "dispute";
 export type BookingStep =
   | "view"
   | "resched"

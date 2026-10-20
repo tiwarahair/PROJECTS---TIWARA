@@ -132,6 +132,7 @@ export const feeUnpaid = (fee: UnpaidFeeNotice): RenderedEmail =>
 export interface DisputeNotice extends BookingDetails {
   amount_pence: number;
   reason: string | null;
+  respond_by?: string | null;
 }
 
 export const disputeOpened = (dispute: DisputeNotice): RenderedEmail =>
@@ -140,7 +141,8 @@ export const disputeOpened = (dispute: DisputeNotice): RenderedEmail =>
     paragraphs: [
       `${dispute.client_name} has asked their bank to reverse a ${pounds(dispute.amount_pence)} payment for ${dispute.service_name} on ${formatWhen(dispute.starts_at)} (UK time).`,
       ...(dispute.reason ? [`The bank’s reason: ${dispute.reason.replaceAll("_", " ")}.`] : []),
-      "The money is held while the bank decides. We’ll be in touch if we need anything from you, like messages or photos from the appointment.",
+      "Your share of the payment is held while the bank decides, and is returned to you if the decision goes your way.",
+      `Send your side in Studio → Earnings${dispute.respond_by ? ` by ${formatWhen(dispute.respond_by)} (UK time)` : ""}: what happened, plus any photos or messages. We add the booking details ourselves. If you'd rather not fight it, you can accept it there. If we don't hear from you, we send what we have.`,
       `Booking reference: ${dispute.ref}`,
     ],
     footnote: "Questions? Reply to this email.",

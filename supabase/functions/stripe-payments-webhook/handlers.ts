@@ -1,6 +1,7 @@
 import type Stripe from "npm:stripe@22.6.2";
 import { admin } from "../_shared/admin.ts";
 import { getCardLabel } from "../_shared/declines.ts";
+import { handleDispute } from "../_shared/disputes.ts";
 import { stripe } from "../_shared/stripe.ts";
 
 const onLinkPaid = async (intent: Stripe.PaymentIntent) => {
@@ -23,10 +24,14 @@ const onLinkPaid = async (intent: Stripe.PaymentIntent) => {
 };
 
 export const onPaymentSucceeded = async (intent: Stripe.PaymentIntent) => {
-  // fee and checkout charges are recorded by the code that made them
-  if (intent.metadata.kind === "fee" || intent.metadata.kind === "checkout") return;
+  // fee and checkout charges are recorded by the code that made them; a debt payment only settles debts
+  if (["fee", "checkout", "debt"].includes(intent.metadata.kind ?? "")) return false;
 
-  if (intent.metadata.kind === "link") return onLinkPaid(intent);
+  if (intent.metadata.kind === "link") {
+    await onLinkPaid(intent);
+
+    return false;
+  }
 
   const { data: outcome, error } = await admin.rpc("confirm_booking_payment", {
     intent: intent.id,
@@ -35,7 +40,7 @@ export const onPaymentSucceeded = async (intent: Stripe.PaymentIntent) => {
   });
 
   // a payment from another environment sharing this Stripe sandbox
-  if (error?.message === "booking_not_found") return;
+  if (error?.message === "booking_not_found") return false;
 
   if (error) throw error;
 
@@ -50,7 +55,7 @@ export const onPaymentSucceeded = async (intent: Stripe.PaymentIntent) => {
   }
 
   // the time was taken meanwhile, or (a stylist's booking) it was confirmed without protection, changed or cancelled
-  if (outcome !== "slot_taken" && outcome !== "refund") return;
+  if (outcome !== "slot_taken" && outcome !== "refund") return false;
 
   await stripe.refunds.create(
     {
@@ -60,6 +65,8 @@ export const onPaymentSucceeded = async (intent: Stripe.PaymentIntent) => {
     },
     { idempotencyKey: `payment:${intent.id}:${outcome === "slot_taken" ? "slot-taken" : "not-needed"}-refund` },
   );
+
+  return true;
 };
 
 export const onPaymentFailed = async ({ id, last_payment_error }: Stripe.PaymentIntent) => {
@@ -87,10 +94,4 @@ export const onRefundCreated = async ({ id, amount, payment_intent: intent, stat
   if (error) throw error;
 };
 
-export const onDispute = async ({ id, amount, reason, status, payment_intent: intent }: Stripe.Dispute) => {
-  const { error } = await admin.rpc("record_dispute", {
-    dispute: { id, amount, reason, status, payment_intent: typeof intent === "string" ? intent : intent?.id },
-  });
-
-  if (error) throw error;
-};
+export const onDispute = (dispute: Stripe.Dispute) => handleDispute(dispute);

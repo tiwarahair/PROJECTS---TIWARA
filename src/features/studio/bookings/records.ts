@@ -31,6 +31,7 @@ import {
   getRecordedVia,
   getRefundableOnline,
 } from "./checkout-records";
+import { getDisputeFields } from "./dispute-records";
 import { getProtectionFields, getServiceFields } from "./protection-records";
 import { getNumber, getText, isRecord } from "./row-values";
 
@@ -237,6 +238,7 @@ export const toPastRecord = (row: StudioBookingRow): PastRecord => {
       ),
     ),
     ...getCheckoutFields(row),
+    ...getDisputeFields(row),
   };
 };
 

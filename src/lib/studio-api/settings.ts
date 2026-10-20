@@ -3,7 +3,7 @@
 import type { TaxDetails } from "../../components/tax-details-form/logic";
 import type { TablesInsert, TablesUpdate } from "../../types/database";
 import { supabase } from "../supabase";
-import { check, invokeStudio, write } from "./request";
+import { check, invokeStudio, write, writeOrRefuse } from "./request";
 
 export const updateStylist = (id: string, patch: TablesUpdate<"stylists">) =>
   write(supabase.from("stylists").update(patch).eq("id", id));
@@ -76,6 +76,13 @@ export const callStripe = async (action: "onboard" | "dashboard" | "refresh") =>
   (await invokeStudio<StripeAccountState>("stripe-connect", { action })) ?? {};
 
 /** Takes the booking page offline; it can be reopened for 15 days. */
-export const closeBusiness = () => write(supabase.rpc("close_business"));
+export const closeBusiness = () =>
+  writeOrRefuse(supabase.rpc("close_business"), {
+    has_upcoming:
+      "You still have upcoming bookings. Cancel or finish them before closing.",
+    has_dispute:
+      "A client’s dispute is still open. You can close once their bank decides.",
+    has_debt: "Pay what you owe in dispute fees to close your business.",
+  });
 
 export const reopenBusiness = () => write(supabase.rpc("reopen_business"));

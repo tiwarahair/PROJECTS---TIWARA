@@ -14,7 +14,8 @@ const BOOKING_SELECT = `id, status, starts_at, minutes, buffer_minutes, price_pe
   booking_fees(id, kind, status, amount_pence, kept_pence, refund_pence, charge_pence, tries, hard_decline,
     decline_message, card_label, waived_at, created_at, failed_runs),
   refunds(amount_pence, reason, method),
-  payment_links(purpose, status, sent_count, amount_pence, created_at)`;
+  payment_links(purpose, status, sent_count, amount_pence, created_at),
+  disputes(id, amount_pence, reason, status, outcome, respond_by, returned_pence, created_at)`;
 
 // a completed booking still to be paid is back in "Due for checkout" with the active ones
 const ACTIVE_FILTER =

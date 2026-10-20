@@ -5,6 +5,8 @@ import { getClientIp } from "../_shared/client-ip.ts";
 import { corsHeaders, respond } from "../_shared/cors.ts";
 import { isWithinLimit } from "../_shared/rate-limit.ts";
 import { stripe } from "../_shared/stripe.ts";
+import { getRecovery } from "../_shared/owed.ts";
+import { getRecoveryMetadata } from "../_shared/recovery-metadata.ts";
 import { getStripeFee } from "../_shared/stripe-fee.ts";
 import { isHuman } from "../_shared/turnstile.ts";
 import { isCurrentIntent } from "./intent.ts";
@@ -37,6 +39,8 @@ const getIntent = async (link: LinkPayment) => {
   }
 
   const canTransfer = !!link.stylist_account && link.stylist_can_receive;
+  const stripeFee = getStripeFee(link.amount_pence);
+  const recovered = canTransfer ? await getRecovery(link.stylist_account, link.amount_pence - stripeFee) : 0;
 
   return stripe.paymentIntents.create(
     {
@@ -50,16 +54,17 @@ const getIntent = async (link: LinkPayment) => {
         link_id: link.link_id,
         booking_id: link.booking_id,
         transfer_pending: String(!canTransfer),
+        ...getRecoveryMetadata(link.stylist_account, recovered),
       },
       ...(canTransfer
         ? {
-            application_fee_amount: getStripeFee(link.amount_pence),
+            application_fee_amount: stripeFee + recovered,
             transfer_data: { destination: link.stylist_account as string },
           }
         : {}),
     },
     // a new key after each replaced payment, so Stripe doesn't hand back the old one
-    { idempotencyKey: `link:${link.link_id}:after:${link.payment_intent_id ?? "none"}:card-fee` },
+    { idempotencyKey: `link:${link.link_id}:after:${link.payment_intent_id ?? "none"}:card-fee:${recovered}` },
   );
 };
 

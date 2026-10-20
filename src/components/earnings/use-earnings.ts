@@ -47,6 +47,8 @@ export interface EarningsProps {
   ledger?: Ledger;
   /** The newest payout's amount when it failed. */
   failedPayout?: number;
+  /** a client's dispute waiting for the stylist's evidence. */
+  dispute?: { text: string; onRespond: () => void };
   onUpdateBank?: () => void;
   onOpenBooking?: (bookingRef: string, clientId: string) => void;
   onContinueSetup?: () => void;

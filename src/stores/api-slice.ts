@@ -46,6 +46,8 @@ import { closeBusiness, reopenBusiness } from "../lib/studio-api/settings";
 import type { StudioBookings } from "../lib/studio-api/bookings";
 import { fetchStudioEarnings } from "../lib/studio-api/earnings";
 import type { StudioEarnings } from "../lib/studio-api/earnings";
+import { fetchCloseChecks } from "../lib/studio-api/disputes";
+import type { CloseChecks } from "../lib/studio-api/disputes";
 import type { StylistStudio } from "../lib/studio-api";
 import { fetchPaymentLink, startLinkPayment } from "../lib/payment-link-api";
 import {
@@ -162,6 +164,10 @@ export const api = createApi({
       providesTags: ["Earnings"],
       keepUnusedDataFor: 60,
       queryFn: (stylistId) => toQueryResult(fetchStudioEarnings(stylistId)),
+    }),
+    getCloseChecks: build.query<CloseChecks, string>({
+      providesTags: ["Earnings"],
+      queryFn: (stylistId) => toQueryResult(fetchCloseChecks(stylistId)),
     }),
     getStylistProfile: build.query<PublicProfile | null, string>({
       providesTags: ["StylistProfile"],
@@ -332,6 +338,7 @@ export const {
   useGetStylistStudioQuery,
   useGetStudioBookingsQuery,
   useGetStudioEarningsQuery,
+  useGetCloseChecksQuery,
   useGetTwoFactorDevicesQuery,
   useUpdateProfileMutation,
   useSetBusinessClosedMutation,

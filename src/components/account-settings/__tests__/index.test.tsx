@@ -218,6 +218,22 @@ describe("AccountSettings", () => {
     ).toBeDisabled();
   });
 
+  it("asks for dispute fees owed to be paid before closing", async () => {
+    const onPayOwed = vi.fn();
+
+    render(<AccountSettings owed={13.59} onPayOwed={onPayOwed} />, {
+      wrapper: MemoryRouter,
+    });
+
+    expect(
+      screen.getByRole("button", { name: "Close business" }),
+    ).toBeDisabled();
+
+    await user.click(screen.getByRole("button", { name: "Pay £13.59" }));
+
+    expect(onPayOwed).toHaveBeenCalledOnce();
+  });
+
   it("confirms closing the business in a dialog on <body>", async () => {
     render(<AccountSettings />, { wrapper: MemoryRouter });
     await user.click(screen.getByRole("button", { name: "Close business" }));

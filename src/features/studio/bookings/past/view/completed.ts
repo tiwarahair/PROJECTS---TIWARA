@@ -8,6 +8,8 @@ import { getPastCheckout } from "./checkout";
 import { RECORDED_ONLY, getRefundTag } from "./context";
 import type { PastContext } from "./context";
 
+const REFUNDABLE_DISPUTES = ["won", "warning_closed"];
+
 export const getCompletedView = (context: PastContext) => {
   const {
     state,
@@ -95,7 +97,11 @@ export const getCompletedView = (context: PastContext) => {
     hasLinks: !isAwaiting,
     viewReceipt: () => setState({ pastCheckoutPanel: "receipt" }),
     resendReceipt: () => setState({ pastCheckoutPanel: "resend" }),
-    canRefund: !isAwaiting && left > 0,
+    // a disputed payment is the bank's to settle, unless the stylist won it or an inquiry closed
+    canRefund:
+      !isAwaiting &&
+      left > 0 &&
+      (!row.dispute || REFUNDABLE_DISPUTES.includes(row.dispute.status)),
     openRefund: () => setState({ pastCheckoutPanel: "refund" }),
   };
 };

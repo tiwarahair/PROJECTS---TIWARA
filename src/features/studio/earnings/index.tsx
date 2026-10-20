@@ -7,6 +7,7 @@ import { joinClassNames } from "../../../utils/class-names";
 import { CLIENTS } from "../core/seed-clients";
 import { getClient, hasTwoFactor, isLive } from "../core/model";
 import type { StudioController } from "../core/use-studio";
+import { getDisputeBanner } from "./dispute";
 import { getFailedPayout, getLedgerClients, toLedger } from "./records";
 import styles from "../../../styles/features/studio/earnings/index.module.css";
 
@@ -36,17 +37,21 @@ export const StudioEarnings = ({ studio }: { studio: StudioController }) => {
   const { business, tax, payoutBank } = state;
 
   // a real account's money, the legal details its statements need, and its own Stripe for bank details
-  const real: Partial<EarningsProps> = earnings
-    ? {
-        ledger: { ...toLedger(earnings), scenario: live ? "default" : "setup" },
-        clients: getLedgerClients(earnings),
-        failedPayout: getFailedPayout(earnings),
-        legalName: tax?.legalName ?? "",
-        vatNumber: business.vatOn ? business.details?.vat : undefined,
-        bankLabel: payoutBank ?? "your bank account",
-        onUpdateBank: () => void actions.openStripeDashboard(),
-      }
-    : {};
+  const ledger = earnings && toLedger(earnings);
+
+  const real: Partial<EarningsProps> =
+    earnings && ledger
+      ? {
+          ledger: { ...ledger, scenario: live ? ledger.scenario : "setup" },
+          dispute: getDisputeBanner(studio, earnings),
+          clients: getLedgerClients(earnings),
+          failedPayout: getFailedPayout(earnings),
+          legalName: tax?.legalName ?? "",
+          vatNumber: business.vatOn ? business.details?.vat : undefined,
+          bankLabel: payoutBank ?? "your bank account",
+          onUpdateBank: () => void actions.openStripeDashboard(),
+        }
+      : {};
 
   const className = joinClassNames(
     styles.earnings,

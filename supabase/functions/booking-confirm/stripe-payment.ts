@@ -1,5 +1,7 @@
+import { getRecovery } from "../_shared/owed.ts";
+import { CLEAR_RECOVERY } from "../_shared/recovery-metadata.ts";
 import { stripe } from "../_shared/stripe.ts";
-import { getPaymentParams } from "../booking-checkout/payment-params.ts";
+import { getPaymentParams, getRecoveryRoom } from "../booking-checkout/payment-params.ts";
 import type { CheckoutQuote } from "../booking-checkout/payment-params.ts";
 import { isCurrentIntent } from "../payment-link/intent.ts";
 
@@ -32,7 +34,8 @@ export const getConfirmCustomer = async (quote: ConfirmQuote) => {
 
 /** The payment for what's due now: the open one brought up to date, or a new one (after a change, a refund or a new client). */
 export const getConfirmIntent = async (quote: ConfirmQuote, customerId: string) => {
-  const params = getPaymentParams(quote, customerId);
+  const recovered = await getRecovery(quote.stylist_account, getRecoveryRoom(quote));
+  const params = getPaymentParams(quote, customerId, false, recovered);
 
   if (quote.payment_intent_id) {
     const existing = await stripe.paymentIntents.retrieve(quote.payment_intent_id, { expand: ["latest_charge"] });
@@ -40,10 +43,11 @@ export const getConfirmIntent = async (quote: ConfirmQuote, customerId: string) 
     if (isCurrentIntent(existing) && !OPEN_STATUSES.includes(existing.status)) return existing;
 
     if (OPEN_STATUSES.includes(existing.status) && existing.customer === customerId) {
-      const { amount, application_fee_amount, setup_future_usage } = params;
+      const { amount, application_fee_amount, setup_future_usage, metadata } = params;
 
       return stripe.paymentIntents.update(existing.id, {
         amount,
+        metadata: { ...CLEAR_RECOVERY, ...metadata },
         ...(application_fee_amount ? { application_fee_amount } : {}),
         setup_future_usage: setup_future_usage ?? "",
       });
@@ -51,6 +55,6 @@ export const getConfirmIntent = async (quote: ConfirmQuote, customerId: string) 
   }
 
   return stripe.paymentIntents.create(params, {
-    idempotencyKey: `confirm:${quote.id}:${quote.link_version}:after:${quote.payment_intent_id ?? "none"}:${quote.due_today_pence}`,
+    idempotencyKey: `confirm:${quote.id}:${quote.link_version}:after:${quote.payment_intent_id ?? "none"}:${quote.due_today_pence}:${recovered}`,
   });
 };

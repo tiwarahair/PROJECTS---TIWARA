@@ -76,6 +76,35 @@ export interface CheckoutRecord {
   paid: number;
 }
 
+export interface DisputeRecord {
+  id: string;
+  amount: number;
+  reason: string;
+  status: string; // needs_response | under_review | won | lost, or an inquiry's warning_*
+  outcome: string | null; // accepted | submitted | won | lost, once it's answered or decided
+  respondBy: number;
+  returned: number;
+}
+
+export type EvidenceSlot = "photos" | "messages" | "other";
+
+export interface EvidenceFile {
+  name: string;
+  fileId: string | null;
+}
+
+export interface DisputeForm {
+  dispute: DisputeRecord;
+  bookingId: string;
+  clientName: string;
+  service: string;
+  when: string;
+  text: string;
+  files: Partial<Record<EvidenceSlot, EvidenceFile>>;
+  isSending: boolean;
+  fromPastId?: string | number | null;
+}
+
 export interface PastRecord {
   pastId?: string | number;
   /** A real row's month heading ("October 2025") and when it joined Past, for sorting. */
@@ -124,6 +153,7 @@ export interface PastRecord {
   total?: number;
   paid?: number;
   method?: string;
+  dispute?: DisputeRecord;
 }
 
 export interface EditServiceDraft {

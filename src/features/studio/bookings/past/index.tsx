@@ -5,6 +5,7 @@ import {
   Pencil,
   Receipt,
   Send,
+  ShieldAlert,
   TriangleAlert,
   Undo,
   Undo2,
@@ -99,6 +100,28 @@ export const PastSheetBody = ({ view }: { view: PastSheetView }) => (
         {view.priceLabel}
       </div>
     </div>
+    {view.hasDispute && (
+      <div className={styles.unpaid} role="alert">
+        <div className={styles.alertRow}>
+          <ShieldAlert
+            className={styles.alertIcon}
+            size={18}
+            strokeWidth={1.7}
+            color="var(--accent-700)"
+          />
+          <div className={styles.minWidth}>
+            <div className={styles.unpaidTitle}>{view.disputeTitle}</div>
+            <div className={styles.panelBody}>{view.disputeBody}</div>
+          </div>
+        </div>
+        <div className={styles.buttons}>
+          <button className={styles.retry} onClick={view.respondToDispute}>
+            Respond
+          </button>
+        </div>
+      </div>
+    )}
+    {view.disputeTag && <span className={styles.tag}>{view.disputeTag}</span>}
     {view.feeUnpaid && (
       <div className={styles.unpaid} role="alert">
         <div className={styles.alertRow}>

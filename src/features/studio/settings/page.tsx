@@ -8,6 +8,7 @@ import { ProfilePage } from "./profile";
 import { RulesPage } from "./rules";
 import { SaveButtons } from "./save-buttons";
 import type { useAccountBackend } from "./use-account-backend";
+import { useOwed } from "./use-owed";
 import type { SettingsView } from "./view";
 import styles from "../../../styles/features/studio/settings/page.module.css";
 
@@ -19,6 +20,7 @@ export interface SettingsPageProps {
 
 export const SettingsPage = ({ studio, view, account }: SettingsPageProps) => {
   const { state, isWide, isNew, props, actions } = studio;
+  const owed = useOwed(studio);
 
   return (
     <div className={styles.page} data-screen-label="Settings page">
@@ -70,6 +72,7 @@ export const SettingsPage = ({ studio, view, account }: SettingsPageProps) => {
           backend={account.backend}
           isNew={isNew}
           upcoming={view.accountUpcoming}
+          {...owed}
           onNavigate={view.onAccountNav}
           onToast={(text) => actions.showToast(text)}
           onState={view.onAccountState}

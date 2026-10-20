@@ -1,4 +1,4 @@
-import { Lock, TriangleAlert } from "lucide-react";
+import { Lock, ShieldAlert, TriangleAlert } from "lucide-react";
 import { joinClassNames } from "../../utils/class-names";
 import type { EarningsController, EarningsProps } from "./use-earnings";
 import styles from "../../styles/components/earnings/balance.module.css";
@@ -15,6 +15,7 @@ export const Balance = ({
   props: {
     taxHold,
     failedPayout,
+    dispute,
     onLearnMore,
     onAddTax,
     onContinueSetup,
@@ -74,7 +75,24 @@ export const Balance = ({
           </span>
         </div>
       )}
-      {!!failedPayout && (
+      {dispute && (
+        <div
+          className={joinClassNames(styles.taxBanner, styles.failedBanner)}
+          role="alert"
+        >
+          <ShieldAlert
+            className={styles.taxIcon}
+            size={18}
+            color="var(--accent-200)"
+            strokeWidth={1.7}
+          />
+          <div className={styles.failedText}>{dispute.text}</div>
+          <button className={styles.addTax} onClick={dispute.onRespond}>
+            Respond
+          </button>
+        </div>
+      )}
+      {!!failedPayout && !dispute && (
         <div
           className={joinClassNames(styles.taxBanner, styles.failedBanner)}
           role="alert"
@@ -96,7 +114,7 @@ export const Balance = ({
           </button>
         </div>
       )}
-      {!!taxHold && !failedPayout && (
+      {!!taxHold && !failedPayout && !dispute && (
         <div className={styles.taxBanner} role="status">
           <TriangleAlert
             className={styles.taxIcon}

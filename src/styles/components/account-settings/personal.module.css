@@ -88,3 +88,26 @@
   color: var(--neutral-400, #a39a8c);
   cursor: not-allowed;
 }
+
+.payOwed {
+  margin: 14px 10px 0 0;
+  height: 44px;
+  padding: 0 20px;
+  border: none;
+  border-radius: var(--radius-full);
+  background: var(--accent-700);
+  color: var(--neutral-50);
+  font: inherit;
+  font-size: 14.5px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.payOwed:active {
+  transform: scale(0.98);
+}
+
+.payOwed:disabled {
+  opacity: 0.6;
+  cursor: default;
+}

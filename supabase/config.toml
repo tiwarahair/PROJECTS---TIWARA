@@ -495,6 +495,12 @@ verify_jwt = false
 [functions.studio-balance]
 verify_jwt = false
 
+[functions.studio-dispute]
+verify_jwt = false
+
+[functions.studio-debt]
+verify_jwt = false
+
 # called by pg_cron with x-cron-secret, not a user's token
 [functions.send-notifications]
 verify_jwt = false

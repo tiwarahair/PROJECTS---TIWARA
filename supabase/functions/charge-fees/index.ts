@@ -3,7 +3,10 @@
 import { admin } from "../_shared/admin.ts";
 import { settleFee } from "../_shared/fee-settlement.ts";
 import type { FeeSettlement } from "../_shared/fee-settlement.ts";
+import { getDisputeFacts, isAnswerable, submitDispute } from "../_shared/dispute-evidence.ts";
+import { handleDispute } from "../_shared/disputes.ts";
 import { refundCancellation } from "../_shared/refund.ts";
+import { stripe } from "../_shared/stripe.ts";
 import { getUnsavedCharge, giveBackUnsavedCharge, settleUnsavedCharge } from "../_shared/unsaved-charge.ts";
 
 const BATCH_SIZE = 10;
@@ -119,13 +122,48 @@ const refundUnsavedCharges = async () => {
   return { unsaved: bookings.length };
 };
 
+const followUpDisputes = async () => {
+  const [{ data: unrecovered, error: unrecoveredError }, { data: unanswered, error: unansweredError }] =
+    await Promise.all([
+      admin.rpc("get_unrecovered_disputes", { batch_size: BATCH_SIZE }),
+      admin.rpc("get_unanswered_disputes", { batch_size: BATCH_SIZE }),
+    ]);
+
+  if (unrecoveredError) throw unrecoveredError;
+
+  if (unansweredError) throw unansweredError;
+
+  // each failure is noted, so it waits a day before the next try
+  for (const { id, stripe_dispute_id: disputeId } of (unrecovered ?? []) as { id: string; stripe_dispute_id: string }[])
+    try {
+      await handleDispute(await stripe.disputes.retrieve(disputeId));
+    } catch (disputeError) {
+      console.error("charge-fees dispute retry failed", disputeId, getMessage(disputeError));
+      await admin.rpc("note_reversal_failure", { target: id, message: getMessage(disputeError) });
+    }
+
+  for (const { id, owner_id: owner } of (unanswered ?? []) as { id: string; owner_id: string }[])
+    try {
+      const facts = await getDisputeFacts(id, owner);
+
+      if (facts && isAnswerable(facts)) await submitDispute(id, facts, facts.evidence);
+    } catch (submitError) {
+      console.error("charge-fees dispute submit failed", id, getMessage(submitError));
+      await admin.rpc("note_submit_failure", { target: id });
+    }
+
+  return { disputes: (unrecovered?.length ?? 0) + (unanswered?.length ?? 0) };
+};
+
 Deno.serve(async (request) => {
   const secret = Deno.env.get("CRON_SECRET");
 
   if (!secret || request.headers.get("x-cron-secret") !== secret) return new Response("Forbidden", { status: 403 });
 
   try {
-    return Response.json({ ...(await settleFees()), ...(await finishRefunds()), ...(await refundUnsavedCharges()) });
+    return Response.json({ ...(await settleFees()), ...(await finishRefunds()), ...(await refundUnsavedCharges()),
+      ...(await followUpDisputes()),
+    });
   } catch (error) {
     return new Response(getMessage(error), { status: 500 });
   }

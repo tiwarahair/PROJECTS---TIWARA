@@ -62,6 +62,7 @@ export const getRow = (patch: Partial<StudioBookingRow>): StudioBookingRow => ({
   booking_fees: [],
   refunds: [],
   payment_links: [],
+  disputes: [],
   ...patch,
 });
 

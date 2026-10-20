@@ -45,8 +45,11 @@ export interface AccountSettingsProps {
   signIn?: SignIn;
   isNew?: boolean;
   upcoming?: number;
-  /** Money owed on the account blocks closing it. */
-  owed?: boolean;
+  /** Money owed (pounds) and open disputes block closing the business. */
+  owed?: number;
+  hasOpenDispute?: boolean;
+  onPayOwed?: () => void;
+  isPayingOwed?: boolean;
   pauseReason?: string;
   embedded?: boolean;
   hideSave?: boolean;

@@ -7,6 +7,7 @@ import {
   useLeaveGuard,
   usePageFollow,
   useLiveStudio,
+  useOwedReturn,
   useStripeReturn,
   useStudioMount,
 } from "./effects";
@@ -152,6 +153,7 @@ export const useStudio = (props: StudioProps) => {
   latest.current = { actions, serviceActions, context };
 
   useStripeReturn(latest, stylistId);
+  useOwedReturn(latest, stylistId);
   useLiveStudio(latest, stylistId);
   useLeaveGuard(latest, blocker);
   useStudioMount(latest, props.fixture, setTick);

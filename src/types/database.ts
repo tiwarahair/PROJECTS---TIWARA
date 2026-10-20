@@ -676,6 +676,39 @@ export type Database = {
           },
         ];
       };
+      debt_recoveries: {
+        Row: {
+          amount_pence: number;
+          created_at: string;
+          debt_id: string;
+          id: string;
+          payment_intent_id: string;
+        };
+        ComputedFields: never;
+        Insert: {
+          amount_pence: number;
+          created_at?: string;
+          debt_id: string;
+          id?: string;
+          payment_intent_id: string;
+        };
+        Update: {
+          amount_pence?: number;
+          created_at?: string;
+          debt_id?: string;
+          id?: string;
+          payment_intent_id?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "debt_recoveries_debt_id_fkey";
+            columns: ["debt_id"];
+            isOneToOne: false;
+            referencedRelation: "stylist_debts";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
       default_addons: {
         Row: {
           group_id: string;
@@ -716,35 +749,77 @@ export type Database = {
         Row: {
           amount_pence: number;
           booking_id: string | null;
+          charge_id: string | null;
           created_at: string;
+          evidence: NonNullable<Json>;
           id: string;
+          is_held: boolean;
+          outcome: string | null;
           reason: string | null;
+          respond_by: string | null;
+          responded_at: string | null;
+          returned_pence: number;
+          returned_transfer_id: string | null;
+          reversal_failed_at: string | null;
+          reversal_failures: number;
+          reversed_pence: number;
+          share_pence: number;
           status: string;
           stripe_dispute_id: string;
           stripe_payment_intent_id: string | null;
+          stylist_id: string | null;
+          transfer_reversal_id: string | null;
           updated_at: string;
         };
         ComputedFields: never;
         Insert: {
           amount_pence: number;
           booking_id?: string | null;
+          charge_id?: string | null;
           created_at?: string;
+          evidence?: NonNullable<Json>;
           id?: string;
+          is_held?: boolean;
+          outcome?: string | null;
           reason?: string | null;
+          respond_by?: string | null;
+          responded_at?: string | null;
+          returned_pence?: number;
+          returned_transfer_id?: string | null;
+          reversal_failed_at?: string | null;
+          reversal_failures?: number;
+          reversed_pence?: number;
+          share_pence?: number;
           status: string;
           stripe_dispute_id: string;
           stripe_payment_intent_id?: string | null;
+          stylist_id?: string | null;
+          transfer_reversal_id?: string | null;
           updated_at?: string;
         };
         Update: {
           amount_pence?: number;
           booking_id?: string | null;
+          charge_id?: string | null;
           created_at?: string;
+          evidence?: NonNullable<Json>;
           id?: string;
+          is_held?: boolean;
+          outcome?: string | null;
           reason?: string | null;
+          respond_by?: string | null;
+          responded_at?: string | null;
+          returned_pence?: number;
+          returned_transfer_id?: string | null;
+          reversal_failed_at?: string | null;
+          reversal_failures?: number;
+          reversed_pence?: number;
+          share_pence?: number;
           status?: string;
           stripe_dispute_id?: string;
           stripe_payment_intent_id?: string | null;
+          stylist_id?: string | null;
+          transfer_reversal_id?: string | null;
           updated_at?: string;
         };
         Relationships: [
@@ -753,6 +828,13 @@ export type Database = {
             columns: ["booking_id"];
             isOneToOne: false;
             referencedRelation: "bookings";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "disputes_stylist_id_fkey";
+            columns: ["stylist_id"];
+            isOneToOne: false;
+            referencedRelation: "stylists";
             referencedColumns: ["id"];
           },
         ];
@@ -1608,6 +1690,49 @@ export type Database = {
           },
         ];
       };
+      stylist_debts: {
+        Row: {
+          amount_pence: number;
+          created_at: string;
+          dispute_id: string;
+          id: string;
+          recovered_pence: number;
+          stylist_id: string;
+        };
+        ComputedFields: never;
+        Insert: {
+          amount_pence: number;
+          created_at?: string;
+          dispute_id: string;
+          id?: string;
+          recovered_pence?: number;
+          stylist_id: string;
+        };
+        Update: {
+          amount_pence?: number;
+          created_at?: string;
+          dispute_id?: string;
+          id?: string;
+          recovered_pence?: number;
+          stylist_id?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "stylist_debts_dispute_id_fkey";
+            columns: ["dispute_id"];
+            isOneToOne: true;
+            referencedRelation: "disputes";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "stylist_debts_stylist_id_fkey";
+            columns: ["stylist_id"];
+            isOneToOne: false;
+            referencedRelation: "stylists";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
       stylist_private: {
         Row: {
           city: string | null;
@@ -1956,6 +2081,10 @@ export type Database = {
         Args: { intent: string; target: string };
         Returns: undefined;
       };
+      apply_recovery: {
+        Args: { account: string; intent: string; recovered: number };
+        Returns: number;
+      };
       auto_cancel_unconfirmed: {
         Args: Record<PropertyKey, never>;
         Returns: undefined;
@@ -2285,6 +2414,10 @@ export type Database = {
         };
         Returns: string[];
       };
+      get_dispute_evidence: {
+        Args: { owner: string; target: string };
+        Returns: Json;
+      };
       get_due_closure_photos: {
         Args: Record<PropertyKey, never>;
         Returns: string[];
@@ -2357,6 +2490,7 @@ export type Database = {
         };
         Returns: string;
       };
+      get_owed_pence: { Args: { account: string }; Returns: number };
       get_owner_manage_token: { Args: { ref: string }; Returns: string };
       get_paid_pence: { Args: { target: string }; Returns: number };
       get_payment_link: { Args: { token: string }; Returns: Json };
@@ -2454,6 +2588,13 @@ export type Database = {
         }[];
       };
       get_stylist_profile: { Args: { lookup: string }; Returns: Json };
+      get_unanswered_disputes: {
+        Args: { batch_size: number };
+        Returns: {
+          id: string;
+          owner_id: string;
+        }[];
+      };
       get_unconfirmed_where: { Args: { target: string }; Returns: string };
       get_unfinished_refunds: {
         Args: { batch_size: number };
@@ -2465,6 +2606,12 @@ export type Database = {
         }[];
       };
       get_unique_slug: { Args: { business_name: string }; Returns: string };
+      get_unrecovered_disputes: {
+        Args: { batch_size: number };
+        Returns: {
+          stripe_dispute_id: string;
+        }[];
+      };
       has_recent_second_factor: {
         Args: Record<PropertyKey, never>;
         Returns: boolean;
@@ -2672,6 +2819,10 @@ export type Database = {
         Args: { message: string; target: string };
         Returns: undefined;
       };
+      note_reversal_failure: {
+        Args: { message: string; target: string };
+        Returns: undefined;
+      };
       note_settlement_failure: {
         Args: { message: string; target: string };
         Returns: undefined;
@@ -2736,7 +2887,7 @@ export type Database = {
         Args: { target: string; tip: number; via: string };
         Returns: undefined;
       };
-      record_dispute: { Args: { dispute: Json }; Returns: undefined };
+      record_dispute: { Args: { dispute: Json }; Returns: Json };
       record_fee_paid: {
         Args: { method: string; target_booking: string };
         Returns: undefined;
@@ -2777,6 +2928,24 @@ export type Database = {
       revoke_confirm_links: { Args: { target: string }; Returns: undefined };
       save_card_payment: {
         Args: { available: string; destination: string; intent: string };
+        Returns: undefined;
+      };
+      save_dispute_fees: {
+        Args: { fees: number; target: string };
+        Returns: undefined;
+      };
+      save_dispute_recovery: {
+        Args: {
+          held: boolean;
+          reversal: string;
+          reversed: number;
+          share: number;
+          target: string;
+        };
+        Returns: undefined;
+      };
+      save_dispute_response: {
+        Args: { given: Json; response: string; target: string };
         Returns: undefined;
       };
       save_payout: { Args: { account: string; payout: Json }; Returns: string };
@@ -2873,6 +3042,15 @@ export type Database = {
       };
       set_stylist_note: {
         Args: { note: string; target: string };
+        Returns: undefined;
+      };
+      settle_dispute: {
+        Args: {
+          returned: number;
+          target: string;
+          transfer: string;
+          won: boolean;
+        };
         Returns: undefined;
       };
       settle_unsaved_charge: {

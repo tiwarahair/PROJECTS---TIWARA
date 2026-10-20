@@ -15,6 +15,7 @@ import type {
 } from "./availability";
 import type {
   AddonEditDraft,
+  DisputeForm,
   EditServiceDraft,
   PastRecord,
   StudioBooking,
@@ -160,6 +161,9 @@ export interface StudioState {
   selectedPastId?: string | number | null;
   pastCheckoutPanel?: string | null;
   correctPayment?: { amount: string; tip: string; via: string } | null;
+  disputeForm?: DisputeForm | null;
+  answeredDisputes?: Record<string, string>;
+  isOwedSettling?: boolean;
   statusMenuOpen?: boolean;
   addRebook?: boolean;
   addStep: number;

@@ -63,6 +63,40 @@ export const useStripeReturn = (
   }, [latest]);
 };
 
+export const useOwedReturn = (
+  latest: LatestRef,
+  stylistId: string | undefined,
+) =>
+  useEffect(() => {
+    const result = getQueryParam("owed");
+
+    if (!stylistId || !result) return;
+
+    const url = new URL(window.location.href);
+
+    url.searchParams.delete("owed");
+    window.history.replaceState(window.history.state, "", url);
+
+    if (result !== "paid") return;
+
+    const { context, actions } = latest.current;
+
+    context.applyState({
+      tab: "settings",
+      page: "personal",
+      isOwedSettling: true,
+    });
+
+    actions.showToast("Payment received. Updating your account…");
+
+    const timer = window.setTimeout(
+      () => context.applyState({ isOwedSettling: false }),
+      60000,
+    );
+
+    return () => window.clearTimeout(timer);
+  }, [latest, stylistId]);
+
 // leaving Studio (sign out, links) with unsaved edits
 export const useLeaveGuard = (
   latest: LatestRef,

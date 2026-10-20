@@ -1,6 +1,8 @@
 import { admin } from "../_shared/admin.ts";
+import { getRecovery } from "../_shared/owed.ts";
+import { CLEAR_RECOVERY } from "../_shared/recovery-metadata.ts";
 import { stripe } from "../_shared/stripe.ts";
-import { getPaymentParams } from "./payment-params.ts";
+import { getPaymentParams, getRecoveryRoom } from "./payment-params.ts";
 import type { CheckoutQuote } from "./payment-params.ts";
 import type { Contact } from "./request.ts";
 
@@ -26,18 +28,22 @@ export const getCustomerId = async (quote: CheckoutQuote, contact: Contact, clie
 };
 
 export const getPaymentIntent = async (quote: CheckoutQuote, customerId: string | null, keepCard: boolean) => {
-  const params = getPaymentParams(quote, customerId, keepCard);
+  const recovered = await getRecovery(quote.stylist_account, getRecoveryRoom(quote));
+  const params = getPaymentParams(quote, customerId, keepCard, recovered);
 
-  if (!quote.payment_intent_id) return stripe.paymentIntents.create(params, { idempotencyKey: `booking:${quote.id}:pi` });
+  // what's owed is part of the key, as it changes the charge's fee
+  if (!quote.payment_intent_id)
+    return stripe.paymentIntents.create(params, { idempotencyKey: `booking:${quote.id}:pi:${recovered}` });
 
   const existing = await stripe.paymentIntents.retrieve(quote.payment_intent_id);
 
   if (!OPEN_STATUSES.includes(existing.status)) return existing;
 
-  const { amount, application_fee_amount, customer, setup_future_usage } = params;
+  const { amount, application_fee_amount, customer, setup_future_usage, metadata } = params;
 
   return stripe.paymentIntents.update(existing.id, {
     amount,
+    metadata: { ...CLEAR_RECOVERY, ...metadata },
     ...(application_fee_amount ? { application_fee_amount } : {}),
     ...(customer ? { customer } : {}),
     setup_future_usage: setup_future_usage ?? "",

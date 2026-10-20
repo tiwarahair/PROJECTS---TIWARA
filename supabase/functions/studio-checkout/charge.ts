@@ -2,6 +2,8 @@
 import Stripe from "npm:stripe@22.6.2";
 import { getCardLabel, isHardDecline } from "../_shared/declines.ts";
 import { getRefundable } from "../_shared/refundable.ts";
+import { getRecovery } from "../_shared/owed.ts";
+import { getRecoveryMetadata } from "../_shared/recovery-metadata.ts";
 import { getStripeFee } from "../_shared/stripe-fee.ts";
 import { getCheckoutChargeKey } from "../_shared/stripe-keys.ts";
 import { stripe } from "../_shared/stripe.ts";
@@ -87,6 +89,8 @@ export const chargeSavedCard = async (
     };
 
   let createdId: string | null = null;
+  const stripeFee = getStripeFee(quote.charge_pence);
+  const recovered = canTransfer ? await getRecovery(quote.stylist_account, quote.charge_pence - stripeFee) : 0;
 
   try {
     const created = await stripe.paymentIntents.create(
@@ -101,15 +105,18 @@ export const chargeSavedCard = async (
           booking_id: quote.id,
           checkout_booking: quote.id,
           tip_pence: String(quote.tip_pence),
+          ...getRecoveryMetadata(quote.stylist_account, recovered),
         },
         ...(canTransfer
           ? {
-              application_fee_amount: getStripeFee(quote.charge_pence),
+              application_fee_amount: stripeFee + recovered,
               transfer_data: { destination: quote.stylist_account as string },
             }
           : {}),
       },
-      { idempotencyKey: getCheckoutChargeKey(quote.id, quote.tries, quote.charge_pence, quote.tip_pence) },
+      {
+        idempotencyKey: `${getCheckoutChargeKey(quote.id, quote.tries, quote.charge_pence, quote.tip_pence)}:${recovered}`,
+      },
     );
 
     createdId = created.id;

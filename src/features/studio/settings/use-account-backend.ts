@@ -5,12 +5,12 @@ import {
   sendReauthenticationCode,
   verifyEmailChangeCode,
 } from "../../../lib/account-changes";
+import { api, useUpdateProfileMutation } from "../../../stores/api-slice";
 import {
-  useSetBusinessClosedMutation,
-  useUpdateProfileMutation,
-} from "../../../stores/api-slice";
-import { saveNotificationPreference } from "../../../lib/studio-api/settings";
-import { useAppSelector } from "../../../stores/hooks";
+  closeBusiness,
+  saveNotificationPreference,
+} from "../../../lib/studio-api/settings";
+import { useAppDispatch, useAppSelector } from "../../../stores/hooks";
 import { toNotificationEvent } from "../core/records";
 import type { StudioController } from "../core/use-studio";
 
@@ -18,7 +18,7 @@ import type { StudioController } from "../core/use-studio";
 export const useAccountBackend = ({ state, setState }: StudioController) => {
   const user = useAppSelector(({ session }) => session.user);
   const [updateProfile] = useUpdateProfileMutation();
-  const [setBusinessClosed] = useSetBusinessClosedMutation();
+  const dispatch = useAppDispatch();
 
   if (!user || !state.account) return {};
 
@@ -40,7 +40,8 @@ export const useAccountBackend = ({ state, setState }: StudioController) => {
     sendPasswordCode: sendReauthenticationCode,
     changePassword,
     closeBusiness: async () => {
-      await setBusinessClosed(true).unwrap();
+      await closeBusiness();
+      dispatch(api.util.invalidateTags(["Studio", "StylistProfile", "Search"]));
     },
     saveNotification: async (key, setting) => {
       await saveNotificationPreference({

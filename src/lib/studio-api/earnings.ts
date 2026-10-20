@@ -23,10 +23,25 @@ export interface StripeBalance {
   next_payout: string | null;
 }
 
+const DISPUTE_SELECT = `id, amount_pence, reason, status, outcome, respond_by, returned_pence,
+  booking:bookings(id, starts_at, snapshot, contact)`;
+
+const selectDisputes = (stylistId: string) =>
+  supabase
+    .from("disputes")
+    .select(DISPUTE_SELECT)
+    .eq("stylist_id", stylistId)
+    .is("outcome", null);
+
+export type EarningsDispute = NonNullable<
+  Awaited<ReturnType<typeof selectDisputes>>["data"]
+>[number];
+
 export interface StudioEarnings {
   lines: LedgerRow[];
   payouts: PayoutRow[];
   balance: StripeBalance;
+  disputes: EarningsDispute[];
 }
 
 const NO_BALANCE: StripeBalance = {
@@ -46,7 +61,7 @@ const fetchBalance = async () => {
 export const fetchStudioEarnings = async (
   stylistId: string,
 ): Promise<StudioEarnings> => {
-  const [lines, payouts, balance] = await Promise.all([
+  const [lines, payouts, balance, disputes] = await Promise.all([
     check(supabase.rpc("get_stylist_ledger", { target_stylist: stylistId })),
     check(
       supabase
@@ -56,9 +71,15 @@ export const fetchStudioEarnings = async (
         .order("created_at", { ascending: false }),
     ),
     fetchBalance(),
+    check(selectDisputes(stylistId)),
   ]);
 
-  return { lines: lines ?? [], payouts: payouts ?? [], balance };
+  return {
+    lines: lines ?? [],
+    payouts: payouts ?? [],
+    balance,
+    disputes: disputes ?? [],
+  };
 };
 
 /** Money the stylist gave back themselves (cash, bank transfer, card reader); never more than they recorded. */

@@ -21,6 +21,7 @@ const SHEET_DRAFTS: Partial<Record<SheetKind, keyof StudioState>> = {
   block: "blockDraft",
   closed: "closedDraft",
   clientEdit: "clientEdit",
+  dispute: "disputeForm",
 };
 
 const NO_PAUSE = { on: false, until: "" };
