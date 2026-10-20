@@ -1,4 +1,7 @@
 import { useEffect, useLayoutEffect } from "react";
+import { skipToken } from "@reduxjs/toolkit/query";
+import { useGetStudioActivityQuery } from "../../../stores/api-slice";
+import { toNotification } from "../home/activity-records";
 import type { Dispatch, RefObject, SetStateAction } from "react";
 import type { useUnsavedChanges } from "../../../hooks/use-unsaved-changes";
 import type { StudioActions, StudioContext } from "./actions";
@@ -31,6 +34,27 @@ export const useLiveStudio = (
       closeSheet: latest.current.actions.closeSheet,
     }));
   }, [latest, stylistId]);
+
+export const useActivityFeed = (
+  latest: LatestRef,
+  stylistId: string | undefined,
+) => {
+  const { data } = useGetStudioActivityQuery(stylistId ?? skipToken, {
+    pollingInterval: 60000,
+    refetchOnMountOrArgChange: true,
+  });
+
+  useEffect(() => {
+    if (!data) return;
+
+    const notifications = data.flatMap((row) => toNotification(row) ?? []);
+
+    latest.current.context.applyState({
+      notifications,
+      notifAllRead: !notifications.some(({ unread }) => unread),
+    });
+  }, [latest, data]);
+};
 
 export const useStripeReturn = (
   latest: LatestRef,

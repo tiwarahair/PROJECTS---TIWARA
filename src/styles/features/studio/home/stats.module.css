@@ -36,3 +36,8 @@
   color: var(--text-secondary);
   margin-top: 4px;
 }
+
+.deltaDown {
+  color: var(--accent-700);
+  background: var(--accent-wash);
+}

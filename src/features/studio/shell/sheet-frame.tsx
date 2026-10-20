@@ -1,5 +1,6 @@
 import type { ReactNode } from "react";
 import { ChevronLeft, X } from "lucide-react";
+import { markActivitySeen } from "../../../lib/studio-api/home";
 import { joinClassNames } from "../../../utils/class-names";
 import { getOverlayAnimation } from "./overlay";
 import type { BookingStep } from "../core/types";
@@ -221,12 +222,21 @@ export const SheetFrame = ({
           <div className={styles.titleRow}>
             {frame.title && <span className={styles.title}>{frame.title}</span>}
           </div>
-          {state.sheet === "notif" && (
+          {state.sheet === "notif" && state.notifications.length > 0 && (
             <button
               className={styles.markAllRead}
               onClick={() => {
+                const stylistId = state.account?.stylistId;
+                const seenUntil = state.notifications[0]?.at;
+
                 studio.setState({ notifAllRead: true });
                 actions.showToast("All caught up");
+
+                if (stylistId && seenUntil)
+                  studio.context.sync?.save(
+                    () => markActivitySeen(stylistId, seenUntil),
+                    { notifAllRead: false },
+                  );
               }}
             >
               Mark all read

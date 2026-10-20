@@ -1,5 +1,6 @@
 import { joinClassNames } from "../../../utils/class-names";
 import type { StudioController } from "../core/use-studio";
+import { getNotificationTime } from "./activity-records";
 import type { HomeView } from "./view";
 import styles from "../../../styles/features/studio/home/activity.module.css";
 import shared from "../../../styles/features/studio/home/index.module.css";
@@ -22,9 +23,12 @@ export const ActivityPanel = ({ studio, view }: ActivityPanelProps) => {
         </button>
       </div>
       <div className={styles.feed}>
-        {feed.map(({ title, body, time }, index) => (
+        {!feed.length && (
+          <div className={styles.feedEmpty}>Nothing new yet</div>
+        )}
+        {feed.map(({ id, at, title, body, time }, index) => (
           <button
-            key={title}
+            key={id ?? title}
             className={joinClassNames(
               styles.feedRow,
               index === feed.length - 1 && styles.feedRowLast,
@@ -36,7 +40,9 @@ export const ActivityPanel = ({ studio, view }: ActivityPanelProps) => {
               <span className={shared.grow}>
                 <span className={styles.feedTop}>
                   <span className={styles.feedTitle}>{title}</span>
-                  <span className={styles.feedTime}>{time}</span>
+                  <span className={styles.feedTime}>
+                    {getNotificationTime({ at, time })}
+                  </span>
                 </span>
                 <span className={styles.feedBody}>{body}</span>
               </span>

@@ -35,6 +35,7 @@ export const seedFromAccount = (
       slugChangedAt: studio.slug_changed_at,
     },
     notifications: [],
+    notifAllRead: true,
     twoFactorSettings: { devices },
     categories: (patch.categories ?? []).map((category) => ({
       ...category,

@@ -11,6 +11,7 @@ import { SetupBanner } from "./setup-banner";
 import { OverviewStats } from "./stats";
 import { TodayPanel } from "./today";
 import { UpcomingPanel } from "./upcoming";
+import { useHomeRange } from "./use-home-range";
 import { getHomeView } from "./view";
 import styles from "../../../styles/features/studio/home/index.module.css";
 
@@ -21,7 +22,8 @@ interface StudioHomeProps {
 export const StudioHome = ({ studio }: StudioHomeProps) => {
   const { state, isWide, isDesktop } = studio;
   const { isSetupOn, isComplete } = getSetupProgress(studio);
-  const view = getHomeView(studio);
+  const { real, isError } = useHomeRange(studio);
+  const view = getHomeView(studio, real, isError);
 
   return (
     <div

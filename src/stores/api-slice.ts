@@ -47,6 +47,8 @@ import type { StudioBookings } from "../lib/studio-api/bookings";
 import { fetchStudioEarnings } from "../lib/studio-api/earnings";
 import type { StudioEarnings } from "../lib/studio-api/earnings";
 import { fetchCloseChecks } from "../lib/studio-api/disputes";
+import { fetchHomeStats, fetchStudioActivity } from "../lib/studio-api/home";
+import type { ActivityRow, HomeStats } from "../lib/studio-api/home";
 import type { CloseChecks } from "../lib/studio-api/disputes";
 import type { StylistStudio } from "../lib/studio-api";
 import { fetchPaymentLink, startLinkPayment } from "../lib/payment-link-api";
@@ -164,6 +166,15 @@ export const api = createApi({
       providesTags: ["Earnings"],
       keepUnusedDataFor: 60,
       queryFn: (stylistId) => toQueryResult(fetchStudioEarnings(stylistId)),
+    }),
+    getHomeStats: build.query<HomeStats, { stylistId: string; days: number }>({
+      providesTags: ["Bookings", "Earnings"],
+      queryFn: ({ stylistId, days }) =>
+        toQueryResult(fetchHomeStats(stylistId, days)),
+    }),
+    getStudioActivity: build.query<ActivityRow[], string>({
+      providesTags: ["Bookings", "Earnings"],
+      queryFn: (stylistId) => toQueryResult(fetchStudioActivity(stylistId)),
     }),
     getCloseChecks: build.query<CloseChecks, string>({
       providesTags: ["Earnings"],
@@ -339,6 +350,8 @@ export const {
   useGetStudioBookingsQuery,
   useGetStudioEarningsQuery,
   useGetCloseChecksQuery,
+  useGetHomeStatsQuery,
+  useGetStudioActivityQuery,
   useGetTwoFactorDevicesQuery,
   useUpdateProfileMutation,
   useSetBusinessClosedMutation,

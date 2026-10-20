@@ -33,7 +33,7 @@ export const UpcomingPanel = ({ studio, view }: UpcomingPanelProps) => {
           View all
         </button>
       </div>
-      {view.upcoming.length === 0 && (
+      {view.homeUpcoming.length === 0 && (
         <div className={styles.emptyCard}>
           <div className={styles.emptyCardTitle}>{view.emptyTitle}</div>
           <div className={styles.emptyCardBody}>

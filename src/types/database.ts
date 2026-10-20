@@ -682,6 +682,7 @@ export type Database = {
           created_at: string;
           debt_id: string;
           id: string;
+          is_direct: boolean;
           payment_intent_id: string;
         };
         ComputedFields: never;
@@ -690,6 +691,7 @@ export type Database = {
           created_at?: string;
           debt_id: string;
           id?: string;
+          is_direct?: boolean;
           payment_intent_id: string;
         };
         Update: {
@@ -697,6 +699,7 @@ export type Database = {
           created_at?: string;
           debt_id?: string;
           id?: string;
+          is_direct?: boolean;
           payment_intent_id?: string;
         };
         Relationships: [
@@ -768,6 +771,7 @@ export type Database = {
           stripe_dispute_id: string;
           stripe_payment_intent_id: string | null;
           stylist_id: string | null;
+          submit_failures: number;
           transfer_reversal_id: string | null;
           updated_at: string;
         };
@@ -794,6 +798,7 @@ export type Database = {
           stripe_dispute_id: string;
           stripe_payment_intent_id?: string | null;
           stylist_id?: string | null;
+          submit_failures?: number;
           transfer_reversal_id?: string | null;
           updated_at?: string;
         };
@@ -819,6 +824,7 @@ export type Database = {
           stripe_dispute_id?: string;
           stripe_payment_intent_id?: string | null;
           stylist_id?: string | null;
+          submit_failures?: number;
           transfer_reversal_id?: string | null;
           updated_at?: string;
         };
@@ -1143,6 +1149,7 @@ export type Database = {
           failure_message: string | null;
           id: string;
           status: string;
+          status_at: string;
           stripe_payout_id: string;
           stylist_id: string;
           updated_at: string;
@@ -1157,6 +1164,7 @@ export type Database = {
           failure_message?: string | null;
           id?: string;
           status: string;
+          status_at?: string;
           stripe_payout_id: string;
           stylist_id: string;
           updated_at?: string;
@@ -1170,6 +1178,7 @@ export type Database = {
           failure_message?: string | null;
           id?: string;
           status?: string;
+          status_at?: string;
           stripe_payout_id?: string;
           stylist_id?: string;
           updated_at?: string;
@@ -1735,6 +1744,7 @@ export type Database = {
       };
       stylist_private: {
         Row: {
+          activity_seen_at: string | null;
           city: string | null;
           line1: string | null;
           line2: string | null;
@@ -1743,6 +1753,7 @@ export type Database = {
         };
         ComputedFields: never;
         Insert: {
+          activity_seen_at?: string | null;
           city?: string | null;
           line1?: string | null;
           line2?: string | null;
@@ -1750,6 +1761,7 @@ export type Database = {
           stylist_id: string;
         };
         Update: {
+          activity_seen_at?: string | null;
           city?: string | null;
           line1?: string | null;
           line2?: string | null;
@@ -2082,7 +2094,12 @@ export type Database = {
         Returns: undefined;
       };
       apply_recovery: {
-        Args: { account: string; intent: string; recovered: number };
+        Args: {
+          account: string;
+          direct?: boolean;
+          intent: string;
+          recovered: number;
+        };
         Returns: number;
       };
       auto_cancel_unconfirmed: {
@@ -2490,11 +2507,19 @@ export type Database = {
         };
         Returns: string;
       };
+      get_open_minutes: {
+        Args: { check_day: string; target: string };
+        Returns: number;
+      };
       get_owed_pence: { Args: { account: string }; Returns: number };
       get_owner_manage_token: { Args: { ref: string }; Returns: string };
       get_paid_pence: { Args: { target: string }; Returns: number };
       get_payment_link: { Args: { token: string }; Returns: Json };
       get_payout_rank: { Args: { status: string }; Returns: number };
+      get_period_kpis: {
+        Args: { first_day: string; last_day: string; target: string };
+        Returns: Json;
+      };
       get_protection_status: {
         Args: {
           client: Json;
@@ -2518,6 +2543,19 @@ export type Database = {
         Returns: string[];
       };
       get_site: { Args: { origin: string }; Returns: string };
+      get_studio_activity: {
+        Args: { max_rows: number; target: string };
+        Returns: {
+          amount_pence: number;
+          at: string;
+          booking_id: string;
+          client_first: string;
+          id: string;
+          is_unread: boolean;
+          kind: string;
+          service: string;
+        }[];
+      };
       get_studio_cancellation: {
         Args: {
           owner: string;
@@ -2553,6 +2591,10 @@ export type Database = {
           upcoming: number;
           visits: number;
         }[];
+      };
+      get_studio_kpis: {
+        Args: { days: number; target: string };
+        Returns: Json;
       };
       get_studio_snapshot: {
         Args: { addons: Json; priced: Json };
@@ -2609,6 +2651,7 @@ export type Database = {
       get_unrecovered_disputes: {
         Args: { batch_size: number };
         Returns: {
+          id: string;
           stripe_dispute_id: string;
         }[];
       };
@@ -2785,6 +2828,10 @@ export type Database = {
           isSetofReturn: false;
         };
       };
+      mark_activity_seen: {
+        Args: { seen_until: string; target: string };
+        Returns: undefined;
+      };
       mark_no_show: {
         Args: { charge_fee: boolean; target: string };
         Returns: undefined;
@@ -2827,6 +2874,7 @@ export type Database = {
         Args: { message: string; target: string };
         Returns: undefined;
       };
+      note_submit_failure: { Args: { target: string }; Returns: undefined };
       note_transfer_failure: {
         Args: { message: string; payment: string };
         Returns: undefined;

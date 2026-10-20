@@ -5,7 +5,6 @@ import type {
 } from "../../../../components/account-settings/logic";
 import type { TaxDetails } from "../../../../components/tax-details-form/logic";
 import type { PastCursor } from "../../../../lib/studio-api/bookings";
-import type { NOTIFS } from "../seed-dashboard";
 import type {
   BlockDraft,
   BlockedTime,
@@ -26,7 +25,13 @@ import type {
   NewClientDraft,
   StudioClient,
 } from "./clients";
-import type { ActionSheet, ConfirmDialog, Popover, Tooltip } from "./overlays";
+import type {
+  ActionSheet,
+  ConfirmDialog,
+  Popover,
+  StudioNotification,
+  Tooltip,
+} from "./overlays";
 import type {
   CategoriesUi,
   CategoryDraft,
@@ -62,7 +67,7 @@ export interface StudioState {
     phone: string;
   };
   /** Home feed and notifications sheet; a new account has none. */
-  notifications: typeof NOTIFS;
+  notifications: StudioNotification[];
   avatarUrl: string | null;
   coverUrl: string | null;
   tab: StudioTab;

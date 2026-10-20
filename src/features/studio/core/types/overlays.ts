@@ -53,3 +53,14 @@ export interface Tooltip {
   y: number;
   below?: boolean;
 }
+
+export interface StudioNotification {
+  id?: string;
+  at?: string;
+  title: string;
+  body: string;
+  time: string;
+  unread: boolean;
+  bookingId?: string;
+  opensEarnings?: boolean;
+}

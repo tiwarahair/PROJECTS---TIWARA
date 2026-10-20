@@ -7,6 +7,7 @@ import {
   useLeaveGuard,
   usePageFollow,
   useLiveStudio,
+  useActivityFeed,
   useOwedReturn,
   useStripeReturn,
   useStudioMount,
@@ -155,6 +156,7 @@ export const useStudio = (props: StudioProps) => {
   useStripeReturn(latest, stylistId);
   useOwedReturn(latest, stylistId);
   useLiveStudio(latest, stylistId);
+  useActivityFeed(latest, stylistId);
   useLeaveGuard(latest, blocker);
   useStudioMount(latest, props.fixture, setTick);
   usePageFollow(latest, state);

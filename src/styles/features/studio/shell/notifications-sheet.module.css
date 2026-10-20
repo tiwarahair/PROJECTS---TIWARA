@@ -83,3 +83,10 @@
     transform: translateY(0);
   }
 }
+
+.empty {
+  padding: 24px 0;
+  text-align: center;
+  font-size: 14.5px;
+  color: var(--text-secondary);
+}

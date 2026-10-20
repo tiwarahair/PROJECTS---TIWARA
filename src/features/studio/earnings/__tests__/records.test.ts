@@ -49,6 +49,7 @@ const earnings: StudioEarnings = {
       emailed_status: "failed",
       created_at: "2026-10-20T09:00:00+00:00",
       updated_at: "2026-10-20T09:00:00+00:00",
+      status_at: "2026-10-20T09:00:00+00:00",
     },
   ],
   balance: { available_pence: 1200, pending_pence: 500, next_payout: null },

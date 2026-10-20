@@ -6,11 +6,12 @@ import { copyText, makeChart } from "../core/format";
 import { getBookingLink } from "../core/model";
 import { isGated } from "../shell";
 import type { StudioController } from "../core/use-studio";
+import type { HomeRange } from "./records";
 
 // desktop cards are stretched to the hero's height, so a quiet line under the number fills the room
 const STAT_SUBTITLES: Record<string, string> = {
   Bookings: "vs last period",
-  Revenue: "completed bookings",
+  Revenue: "takings less refunds",
   Occupancy: "of working hours",
   "New clients": "first visits",
 };
@@ -20,14 +21,43 @@ const RANGE_DAYS: Record<string, number> = { today: 1, week: 7 };
 
 const getZeroStat = (label: string) => (label === "Revenue" ? "£0" : "0");
 
-export const getHomeView = (studio: StudioController) => {
+const toDemoRange = ({
+  stats,
+  ...demo
+}: (typeof RANGE_DATA)["today"]): HomeRange => ({
+  ...demo,
+  stats: {
+    bookings: [stats.bookings[0], toDemoDelta(stats.bookings[1])],
+    revenue: [stats.revenue[0], toDemoDelta(stats.revenue[1])],
+    occupancy: [stats.occupancy[0], toDemoDelta(stats.occupancy[1])],
+    clients: [stats.clients[0], toDemoDelta(stats.clients[1])],
+  },
+});
+
+const toDemoDelta = (text: string) =>
+  text ? { text, isDown: text.startsWith("-") } : null;
+
+export const getHomeView = (
+  studio: StudioController,
+  real?: HomeRange | null,
+  isError = false,
+) => {
   const { state, setState, isDesktop, isNew, hasBookings, actions } = studio;
+  const isLoading = real === null;
+  const isEmpty = real === undefined && isNew;
 
   const upcoming = getDecoratedBookings(state, (booking) =>
     actions.openSheet("booking", { sheetBookingId: booking.id }),
   );
 
-  const rangeData = RANGE_DATA[state.range];
+  const rangeData = real ?? toDemoRange(RANGE_DATA[state.range]);
+
+  const getStatValue = (label: string, value: string) => {
+    if (isLoading) return "—";
+
+    return isEmpty ? getZeroStat(label) : value;
+  };
+
   const chart = makeChart(rangeData.chart);
   const now = new Date();
   const nowMinutes = now.getHours() * 60 + now.getMinutes();
@@ -91,6 +121,18 @@ export const getHomeView = (studio: StudioController) => {
     rangeData,
     chart,
     tipPoint: state.chartIndex != null ? chart.points[state.chartIndex] : null,
+    hasChart:
+      !isEmpty && !isLoading && rangeData.chart.some((value) => value > 0),
+    isChartEmpty:
+      isEmpty ||
+      isError ||
+      (!isLoading && !rangeData.chart.some((value) => value > 0)),
+    chartEmptyTitle: isError
+      ? "Your numbers didn’t load"
+      : "Nothing to chart yet",
+    chartEmptyBody: isError
+      ? "We’ll try again in a minute."
+      : "Money you take will appear here.",
     due,
     today,
     homeUpcoming: upcoming
@@ -105,9 +147,10 @@ export const getHomeView = (studio: StudioController) => {
       ] as const
     ).map(([label, [value, delta]], index) => ({
       label,
-      value: isNew ? getZeroStat(label) : value,
-      subtitle: isDesktop && !isNew ? STAT_SUBTITLES[label] : "",
-      delta: isNew ? "" : delta,
+      value: getStatValue(label, value),
+      subtitle:
+        isDesktop && !isEmpty && !isLoading ? STAT_SUBTITLES[label] : "",
+      delta: isEmpty || isLoading ? null : delta,
       delay: `${(index * 0.05).toFixed(2)}s`,
     })),
     feed: state.notifications.slice(0, 4),
