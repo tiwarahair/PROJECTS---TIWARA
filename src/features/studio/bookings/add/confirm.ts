@@ -1,5 +1,9 @@
 import { getInitialsImage, parseNumber } from "../../core/format";
-import { getClient, getProtectionExpiry } from "../../core/model";
+import {
+  getClient,
+  getClientNames,
+  getProtectionExpiry,
+} from "../../core/model";
 import type { StudioBooking } from "../../core/types";
 import { formatDuration } from "../../../../utils/dates";
 import { fetchStudioBooking } from "../../../../lib/studio-api/bookings";
@@ -14,12 +18,6 @@ import type { NewClient } from "./types";
 import { checkUnpaidFee } from "./unpaid-fee";
 
 const toPence = (pounds: number) => Math.round(pounds * 100);
-
-const splitName = (name: string) => {
-  const [first = "", ...rest] = name.trim().split(/\s+/);
-
-  return { first, last: rest.join(" ") };
-};
 
 export const saveNewClient = (
   { studio, state, setState }: AddContext,
@@ -136,9 +134,13 @@ const getContact = (context: AddContext): StudioContact | null => {
 
   if (state.addWalkIn || !state.addClient) return null;
 
-  const { name, phone, email } = getClient(state, state.addClient);
+  const client = getClient(state, state.addClient);
 
-  return { ...splitName(name), phone: phone || "", email: email || "" };
+  return {
+    ...getClientNames(client),
+    phone: client.phone || "",
+    email: client.email || "",
+  };
 };
 
 /** Saves a real booking; the server's row then replaces the one shown straight away. */

@@ -18,6 +18,7 @@ export interface StudioCheckoutProps {
   onExit: () => void;
   onComplete: NonNullable<CheckoutSheetProps["onComplete"]>;
   onRefund?: CheckoutSheetProps["onRefund"];
+  onPay?: CheckoutSheetProps["onPay"];
 }
 
 /** CheckoutSheet over a Studio sheet. */
@@ -30,6 +31,7 @@ export const StudioCheckout = ({
   onExit,
   onComplete,
   onRefund = () => {},
+  onPay,
 }: StudioCheckoutProps) => {
   const { state, isWide, props, actions } = studio;
   const { business } = state;
@@ -82,6 +84,7 @@ export const StudioCheckout = ({
         onClose={actions.closeSheet}
         onComplete={onComplete}
         onRefund={onRefund}
+        onPay={onPay}
         onResent={() => {}}
         onCancelLink={() => {}}
       />

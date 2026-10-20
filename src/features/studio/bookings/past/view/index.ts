@@ -13,6 +13,7 @@ import { getActionsView } from "./actions";
 import { findPastRow, getPastCheckout } from "./checkout";
 import { getClientView } from "./client";
 import { getCompletedView } from "./completed";
+import { getCorrectView } from "./correct";
 import { getContext } from "./context";
 import { getUnpaidView } from "./unpaid";
 import { getVisitView } from "./visit";
@@ -30,6 +31,7 @@ export const getPastSheetView = (studio: StudioController) => {
     ...getActionsView(context),
     ...getUnpaidView(context),
     ...getCompletedView(context),
+    ...getCorrectView(context),
   };
 };
 

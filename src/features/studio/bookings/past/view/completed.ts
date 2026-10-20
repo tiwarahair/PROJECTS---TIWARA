@@ -1,17 +1,19 @@
+import {
+  cancelBalanceLink,
+  recordBalancePaid,
+  resendBalanceLink,
+} from "../../../../../lib/studio-api/checkout";
+import { fetchStudioBooking } from "../../../../../lib/studio-api/bookings";
 import { roundToPence } from "../../../../../utils/money";
+import { mergeBookingRows } from "../../live-records";
 import { getPastCheckout } from "./checkout";
 import { RECORDED_ONLY, getRefundTag } from "./context";
 import type { PastContext } from "./context";
 
-export const getCompletedView = ({
-  state,
-  setState,
-  actions,
-  row,
-  isCompleted,
-  patch,
-  firstName,
-}: PastContext) => {
+export const getCompletedView = (context: PastContext) => {
+  const { state, setState, actions, row, isCompleted, patch, firstName } =
+    context;
+
   if (!isCompleted)
     return {
       hasAwait: false,
@@ -22,17 +24,29 @@ export const getCompletedView = ({
       canCancelLink: false,
     };
 
-  const { original } = row;
+  const { original, remoteId } = row;
   const checkout = getPastCheckout(state, row);
   const first = firstName("your client");
-  const isAwaiting = checkout.done.method === "link";
+  const isAwaiting = checkout.done.method === "link" && !row.linkPaid;
   const refunded = row.refunded || 0;
   const left = roundToPence(checkout.cap - refunded);
 
+  const saveBalance = (task: (bookingId: string) => Promise<unknown>) =>
+    context.saveFee(async (bookingId) => {
+      await task(bookingId);
+
+      const fresh = await fetchStudioBooking(bookingId);
+
+      if (fresh) setState((current) => mergeBookingRows(current, [fresh]));
+    }, state.pastNew);
+
   return {
     hasAwait: isAwaiting,
-    awaitBody: `Payment link for £${checkout.done.charged} sent to ${first}. They can pay by card, Apple Pay or Google Pay, and add a tip.`,
-    resendLink: () => actions.showToast(`Payment link resent to ${first}`),
+    awaitBody: `Payment link for £${checkout.done.charged} sent to ${first}. They can pay by card, Apple Pay or Google Pay.`,
+    resendLink: () => {
+      saveBalance(resendBalanceLink);
+      actions.showToast(`Payment link resent to ${first}`);
+    },
     recordPaid: () =>
       setState({
         confirm: {
@@ -45,14 +59,15 @@ export const getCompletedView = ({
             patch({
               linkPaid: true,
               linkVia: "cash",
-              meta: "Paid · Recorded",
+              meta: "Paid · Cash",
             });
 
+            saveBalance((bookingId) => recordBalancePaid(bookingId, "cash", 0));
             actions.showToast("Payment recorded");
           },
         },
       }),
-    canCancelLink: isAwaiting && !!original,
+    canCancelLink: isAwaiting && (!!original || !!remoteId),
     cancelLink: () =>
       setState({
         confirm: {
@@ -60,10 +75,15 @@ export const getCompletedView = ({
           body: `${first} won’t be able to pay with it. The booking moves to Unpaid and back into Due for checkout.`,
           yesLabel: "Cancel link",
           yes: () => {
+            setState({ confirm: null });
+            actions.closeSheet();
+            actions.showToast("Payment link cancelled");
+
+            if (remoteId) return saveBalance(cancelBalanceLink);
+
             if (!original) return;
 
             setState({
-              confirm: null,
               bookings: state.bookings.concat([
                 { ...original, status: "arrived", checkoutUnpaid: true },
               ]),
@@ -71,9 +91,6 @@ export const getCompletedView = ({
                 ({ pastId }) => pastId !== row.pastId,
               ),
             });
-
-            actions.closeSheet();
-            actions.showToast("Payment link cancelled");
           },
         },
       }),

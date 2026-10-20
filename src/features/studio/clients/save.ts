@@ -4,6 +4,7 @@ import {
   uploadClientPhoto,
 } from "../../../lib/studio-api/photos";
 import type { StudioContext } from "../core/actions";
+import { getClientNames } from "../core/model";
 import type { StudioClient, StudioPatch, StudioState } from "../core/types";
 
 const renameClient = (
@@ -44,19 +45,13 @@ const getPhotoPath = async (
   return uploadClientPhoto(`${stylistId}/${crypto.randomUUID()}.jpg`, blob);
 };
 
-const toDetails = (client: StudioClient, photoPath: string) => {
-  const name = client.name.trim();
-  const first = client.first?.trim() || (name.split(/\s+/)[0] ?? "");
-
-  return {
-    first,
-    last: name.startsWith(first) ? name.slice(first.length).trim() : "",
-    phone: client.phone ?? "",
-    email: client.email ?? "",
-    photoPath,
-    hairNotes: client.notes?.products ?? "",
-  };
-};
+const toDetails = (client: StudioClient, photoPath: string) => ({
+  ...getClientNames(client),
+  phone: client.phone ?? "",
+  email: client.email ?? "",
+  photoPath,
+  hairNotes: client.notes?.products ?? "",
+});
 
 /** Shows a new client straight away; a real account saves them and swaps in the id they're given. */
 export const addStudioClient = (

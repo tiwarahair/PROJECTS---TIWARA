@@ -46,6 +46,9 @@ export interface StudioBooking {
   linkAmount?: number; // what the client pays on their confirm link
   clientLocked?: boolean; // the client paid or saved a card, so they can't be swapped for someone else
   loggedAfterStart?: boolean;
+  cardLabel?: string;
+  hasSavedCard?: boolean;
+  completed?: boolean;
 }
 
 export interface CheckoutRecord {
@@ -103,6 +106,14 @@ export interface PastRecord {
   autoCancelled?: boolean; // happens when not confirmed in time -  a link can be sent again while its start is more than 2 hours away
   startsAt?: string;
   checkout?: CheckoutRecord;
+  cardLabel?: string;
+  recordedPayment?: {
+    id: string;
+    amount: number;
+    tip: number;
+    via: string;
+    takenAt: number;
+  };
   total?: number;
   paid?: number;
   method?: string;

@@ -115,8 +115,8 @@ export const CheckoutDone = ({
       </div>
       <div className={styles.doneNote}>
         {done.method === "link"
-          ? `${name} gets a receipt once they pay. A review request goes to them automatically.`
-          : `A review request goes to ${name} automatically.`}
+          ? `${name} gets a receipt once they pay.`
+          : `A receipt is on its way to ${name}.`}
       </div>
     </div>
   );

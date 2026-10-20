@@ -63,6 +63,7 @@ const FOOTERS: Partial<Record<CheckoutView, FooterBuilder>> = {
     totalValue: formatMoney(money.charge),
     primaryLabel: "Continue",
     primaryRun: view.goNext,
+    isPrimaryDisabled: money.isTipTooHigh,
   }),
   pay: (_checkout, view) => ({
     hasTotal: true,

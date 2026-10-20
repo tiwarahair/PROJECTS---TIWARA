@@ -13,6 +13,7 @@ export const BookingCheckout = ({ studio, view }: BookingCheckoutProps) => (
     studio={studio}
     booking={view.checkoutBooking}
     onExit={() => studio.setState({ bookingStep: "view" })}
+    onPay={view.onPay}
     onComplete={(result, action) =>
       view.onCheckoutComplete({ ...result, tip: result.tip ?? 0 }, action)
     }

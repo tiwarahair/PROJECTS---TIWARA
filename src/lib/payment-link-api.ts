@@ -3,7 +3,7 @@ import { invokeBookingFunction } from "./booking-api";
 
 export interface PaymentLink {
   status: "pending" | "paid" | "expired" | "cancelled";
-  kind: "late_cancel" | "no_show";
+  kind: "late_cancel" | "no_show" | "balance";
   amount_pence: number;
   fee_pence: number;
   expires_at: string;

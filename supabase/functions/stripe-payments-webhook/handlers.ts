@@ -1,5 +1,6 @@
 import type Stripe from "npm:stripe@22.6.2";
 import { admin } from "../_shared/admin.ts";
+import { getCardLabel } from "../_shared/declines.ts";
 import { stripe } from "../_shared/stripe.ts";
 
 const onLinkPaid = async (intent: Stripe.PaymentIntent) => {
@@ -22,8 +23,8 @@ const onLinkPaid = async (intent: Stripe.PaymentIntent) => {
 };
 
 export const onPaymentSucceeded = async (intent: Stripe.PaymentIntent) => {
-  // fee charges are recorded by the settlement that made them
-  if (intent.metadata.kind === "fee") return;
+  // fee and checkout charges are recorded by the code that made them
+  if (intent.metadata.kind === "fee" || intent.metadata.kind === "checkout") return;
 
   if (intent.metadata.kind === "link") return onLinkPaid(intent);
 
@@ -39,11 +40,14 @@ export const onPaymentSucceeded = async (intent: Stripe.PaymentIntent) => {
   if (error) throw error;
 
   // the card a deposit or card-on-file booking saved, for fees later
-  if ((outcome === "confirmed" || outcome === "duplicate") && intent.setup_future_usage && typeof intent.payment_method === "string")
+  if ((outcome === "confirmed" || outcome === "duplicate") && intent.setup_future_usage && typeof intent.payment_method === "string") {
+    const { card } = await stripe.paymentMethods.retrieve(intent.payment_method);
+
     await admin
       .from("bookings")
-      .update({ stripe_payment_method_id: intent.payment_method })
+      .update({ stripe_payment_method_id: intent.payment_method, card_label: getCardLabel(card?.brand, card?.last4) })
       .eq("stripe_payment_intent_id", intent.id);
+  }
 
   // the time was taken meanwhile, or (a stylist's booking) it was confirmed without protection, changed or cancelled
   if (outcome !== "slot_taken" && outcome !== "refund") return;

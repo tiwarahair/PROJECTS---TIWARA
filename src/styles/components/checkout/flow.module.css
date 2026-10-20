@@ -653,6 +653,12 @@
   animation: ckup 0.2s cubic-bezier(0.23, 1, 0.32, 1) both;
 }
 
+.tipError {
+  font-size: 14.5px;
+  color: var(--status-danger);
+  line-height: 1.5;
+}
+
 .tipHelp {
   font-size: 14.5px;
   color: var(--neutral-700);
@@ -729,19 +735,6 @@
   flex-direction: column;
   gap: 10px;
   animation: ckup 0.2s cubic-bezier(0.23, 1, 0.32, 1) both;
-}
-
-.linkChip {
-  height: 44px;
-  padding: 0 18px;
-  border-radius: var(--radius-full);
-  font: inherit;
-  font-size: 14.5px;
-  font-weight: 600;
-  cursor: pointer;
-  transition:
-    background-color 0.16s ease,
-    color 0.16s ease;
 }
 
 .linkTo {

@@ -363,6 +363,9 @@ export type Database = {
           cancellation: Json | null;
           cancelled_at: string | null;
           cancelled_by: string | null;
+          card_label: string | null;
+          checkout: Json | null;
+          checkout_tries: number;
           choices: NonNullable<Json>;
           client_id: string | null;
           completed_at: string | null;
@@ -375,6 +378,7 @@ export type Database = {
           due_today_pence: number | null;
           ends_at: string;
           fee_pence: number;
+          final_price_pence: number | null;
           hold_expires_at: string | null;
           hold_secret_hash: string | null;
           id: string;
@@ -403,9 +407,12 @@ export type Database = {
           stylist_client_id: string | null;
           stylist_id: string;
           terms: Json | null;
+          tip_pence: number;
+          unpaid_at: string | null;
+          get_balance_due: number | null;
           get_cancellation_terms: Json | null;
         };
-        ComputedFields: "get_cancellation_terms";
+        ComputedFields: "get_balance_due" | "get_cancellation_terms";
         Insert: {
           address?: Json | null;
           allergies?: string | null;
@@ -420,6 +427,9 @@ export type Database = {
           cancellation?: Json | null;
           cancelled_at?: string | null;
           cancelled_by?: string | null;
+          card_label?: string | null;
+          checkout?: Json | null;
+          checkout_tries?: number;
           choices: NonNullable<Json>;
           client_id?: string | null;
           completed_at?: string | null;
@@ -432,6 +442,7 @@ export type Database = {
           due_today_pence?: number | null;
           ends_at: string;
           fee_pence: number;
+          final_price_pence?: number | null;
           hold_expires_at?: string | null;
           hold_secret_hash?: string | null;
           id?: string;
@@ -460,6 +471,8 @@ export type Database = {
           stylist_client_id?: string | null;
           stylist_id: string;
           terms?: Json | null;
+          tip_pence?: number;
+          unpaid_at?: string | null;
         };
         Update: {
           address?: Json | null;
@@ -475,6 +488,9 @@ export type Database = {
           cancellation?: Json | null;
           cancelled_at?: string | null;
           cancelled_by?: string | null;
+          card_label?: string | null;
+          checkout?: Json | null;
+          checkout_tries?: number;
           choices?: NonNullable<Json>;
           client_id?: string | null;
           completed_at?: string | null;
@@ -487,6 +503,7 @@ export type Database = {
           due_today_pence?: number | null;
           ends_at?: string;
           fee_pence?: number;
+          final_price_pence?: number | null;
           hold_expires_at?: string | null;
           hold_secret_hash?: string | null;
           id?: string;
@@ -515,6 +532,8 @@ export type Database = {
           stylist_client_id?: string | null;
           stylist_id?: string;
           terms?: Json | null;
+          tip_pence?: number;
+          unpaid_at?: string | null;
         };
         Relationships: [
           {
@@ -800,9 +819,10 @@ export type Database = {
           booking_id: string;
           created_at: string;
           expires_at: string;
-          fee_id: string;
+          fee_id: string | null;
           id: string;
           paid_at: string | null;
+          purpose: string;
           sent_count: number;
           status: string;
           stripe_payment_intent_id: string | null;
@@ -814,9 +834,10 @@ export type Database = {
           booking_id: string;
           created_at?: string;
           expires_at: string;
-          fee_id: string;
+          fee_id?: string | null;
           id?: string;
           paid_at?: string | null;
+          purpose?: string;
           sent_count?: number;
           status?: string;
           stripe_payment_intent_id?: string | null;
@@ -827,9 +848,10 @@ export type Database = {
           booking_id?: string;
           created_at?: string;
           expires_at?: string;
-          fee_id?: string;
+          fee_id?: string | null;
           id?: string;
           paid_at?: string | null;
+          purpose?: string;
           sent_count?: number;
           status?: string;
           stripe_payment_intent_id?: string | null;
@@ -919,6 +941,8 @@ export type Database = {
         Row: {
           amount_pence: number;
           booking_id: string;
+          card_fee_pence: number | null;
+          corrected_at: string | null;
           created_at: string;
           fee_id: string | null;
           id: string;
@@ -927,6 +951,7 @@ export type Database = {
           platform_fee_pence: number;
           stripe_payment_intent_id: string | null;
           stripe_transfer_id: string | null;
+          tip_pence: number;
           transfer_failed_at: string | null;
           transfer_failures: number;
           transfer_pending: boolean;
@@ -935,6 +960,8 @@ export type Database = {
         Insert: {
           amount_pence: number;
           booking_id: string;
+          card_fee_pence?: never;
+          corrected_at?: string | null;
           created_at?: string;
           fee_id?: string | null;
           id?: string;
@@ -943,6 +970,7 @@ export type Database = {
           platform_fee_pence?: number;
           stripe_payment_intent_id?: string | null;
           stripe_transfer_id?: string | null;
+          tip_pence?: number;
           transfer_failed_at?: string | null;
           transfer_failures?: number;
           transfer_pending?: boolean;
@@ -950,6 +978,8 @@ export type Database = {
         Update: {
           amount_pence?: number;
           booking_id?: string;
+          card_fee_pence?: never;
+          corrected_at?: string | null;
           created_at?: string;
           fee_id?: string | null;
           id?: string;
@@ -958,6 +988,7 @@ export type Database = {
           platform_fee_pence?: number;
           stripe_payment_intent_id?: string | null;
           stripe_transfer_id?: string | null;
+          tip_pence?: number;
           transfer_failed_at?: string | null;
           transfer_failures?: number;
           transfer_pending?: boolean;
@@ -1822,6 +1853,7 @@ export type Database = {
       };
       become_stylist: { Args: { details: Json }; Returns: undefined };
       booking_fee_pence: { Args: { price_pence: number }; Returns: number };
+      cancel_balance_link: { Args: { target: string }; Returns: undefined };
       cancel_managed_booking: {
         Args: { cancellation: Json; token: string };
         Returns: undefined;
@@ -1857,6 +1889,10 @@ export type Database = {
       claim_booking_invite: {
         Args: { token: string; user_id: string };
         Returns: number;
+      };
+      claim_checkout: {
+        Args: { input: Json; owner: string; target: string };
+        Returns: Json;
       };
       claim_due_fees: { Args: { batch_size: number }; Returns: Json[] };
       claim_fee_retry: {
@@ -1912,6 +1948,10 @@ export type Database = {
       };
       confirm_without_protection: {
         Args: { target: string };
+        Returns: undefined;
+      };
+      correct_recorded_payment: {
+        Args: { amount: number; target: string; tip: number; via: string };
         Returns: undefined;
       };
       create_booking_token: {
@@ -1971,6 +2011,10 @@ export type Database = {
           isSetofReturn: false;
         };
       };
+      finish_checkout: {
+        Args: { result: Json; target: string };
+        Returns: string;
+      };
       finish_fee_settlement: {
         Args: { result: Json; target: string };
         Returns: undefined;
@@ -1985,6 +2029,15 @@ export type Database = {
           to_date: string;
         };
         Returns: string[];
+      };
+      get_balance_due: {
+        Args: {
+          booking: Omit<
+            Database["public"]["Tables"]["bookings"]["Row"],
+            Database["public"]["Tables"]["bookings"]["ComputedFields"]
+          >;
+        };
+        Returns: number;
       };
       get_booking_by_token: {
         Args: { token: string };
@@ -2002,6 +2055,9 @@ export type Database = {
           cancellation: Json | null;
           cancelled_at: string | null;
           cancelled_by: string | null;
+          card_label: string | null;
+          checkout: Json | null;
+          checkout_tries: number;
           choices: NonNullable<Json>;
           client_id: string | null;
           completed_at: string | null;
@@ -2014,6 +2070,7 @@ export type Database = {
           due_today_pence: number | null;
           ends_at: string;
           fee_pence: number;
+          final_price_pence: number | null;
           hold_expires_at: string | null;
           hold_secret_hash: string | null;
           id: string;
@@ -2042,6 +2099,8 @@ export type Database = {
           stylist_client_id: string | null;
           stylist_id: string;
           terms: Json | null;
+          tip_pence: number;
+          unpaid_at: string | null;
         };
         SetofOptions: {
           from: "*";
@@ -2072,6 +2131,7 @@ export type Database = {
         };
         Returns: Json;
       };
+      get_card_fee_pence: { Args: { amount: number }; Returns: number };
       get_client_unpaid_fee: {
         Args: { email: string; phone: string; target_stylist: string };
         Returns: Json;
@@ -2088,6 +2148,10 @@ export type Database = {
         Returns: string;
       };
       get_confirm_url: { Args: { target: string }; Returns: string };
+      get_contact_clients: {
+        Args: { contact: Json; target_stylist: string };
+        Returns: string[];
+      };
       get_day_slots: {
         Args: {
           buffer_minutes: number;
@@ -2171,6 +2235,7 @@ export type Database = {
         Returns: string;
       };
       get_owner_manage_token: { Args: { ref: string }; Returns: string };
+      get_paid_pence: { Args: { target: string }; Returns: number };
       get_payment_link: { Args: { token: string }; Returns: Json };
       get_protection_status: {
         Args: {
@@ -2181,6 +2246,7 @@ export type Database = {
         };
         Returns: string;
       };
+      get_receipt_details: { Args: { target: string }; Returns: Json };
       get_refund_sources: {
         Args: { owner: string; target_booking: string };
         Returns: {
@@ -2330,6 +2396,9 @@ export type Database = {
           cancellation: Json | null;
           cancelled_at: string | null;
           cancelled_by: string | null;
+          card_label: string | null;
+          checkout: Json | null;
+          checkout_tries: number;
           choices: NonNullable<Json>;
           client_id: string | null;
           completed_at: string | null;
@@ -2342,6 +2411,7 @@ export type Database = {
           due_today_pence: number | null;
           ends_at: string;
           fee_pence: number;
+          final_price_pence: number | null;
           hold_expires_at: string | null;
           hold_secret_hash: string | null;
           id: string;
@@ -2370,6 +2440,8 @@ export type Database = {
           stylist_client_id: string | null;
           stylist_id: string;
           terms: Json | null;
+          tip_pence: number;
+          unpaid_at: string | null;
         };
         SetofOptions: {
           from: "*";
@@ -2487,6 +2559,10 @@ export type Database = {
         };
         Returns: string;
       };
+      queue_receipt: {
+        Args: { corrected: boolean; target: string };
+        Returns: undefined;
+      };
       queue_sms: {
         Args: {
           payload: Json;
@@ -2495,6 +2571,10 @@ export type Database = {
           user_id?: string;
         };
         Returns: string;
+      };
+      record_balance_paid: {
+        Args: { target: string; tip: number; via: string };
+        Returns: undefined;
       };
       record_dispute: { Args: { dispute: Json }; Returns: undefined };
       record_fee_paid: {
@@ -2521,6 +2601,7 @@ export type Database = {
         Args: { allow_overlap: boolean; slot_start: string; target: string };
         Returns: Json;
       };
+      resend_balance_link: { Args: { target: string }; Returns: undefined };
       resend_confirm_link: { Args: { target: string }; Returns: number };
       resend_payment_link: {
         Args: { target_booking: string };
@@ -2577,6 +2658,10 @@ export type Database = {
         }[];
       };
       secure_booking_link: { Args: { token: string }; Returns: Json };
+      send_balance_link: {
+        Args: { link_id: string; target: string };
+        Returns: undefined;
+      };
       send_booking_code: { Args: { token: string }; Returns: Json };
       send_confirm_link: {
         Args: { counts: boolean; target: string; template: string };
@@ -2624,6 +2709,7 @@ export type Database = {
       slugify: { Args: { value: string }; Returns: string };
       start_booking_confirmation: { Args: { token: string }; Returns: Json };
       start_link_payment: { Args: { token: string }; Returns: Json };
+      undo_checkout: { Args: { target: string }; Returns: undefined };
       undo_no_show: { Args: { target: string }; Returns: undefined };
       update_studio_booking: {
         Args: {

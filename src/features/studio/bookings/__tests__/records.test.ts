@@ -47,7 +47,7 @@ describe("toStudioBookings", () => {
         status: "cancelled",
         cancelled_by: "stylist",
         cancelled_at: new Date(Date.now() - 3600000).toISOString(),
-        refunds: [{ amount_pence: 1463 }],
+        refunds: [{ amount_pence: 1463, reason: "stylist_cancel" }],
       }),
       getRow({
         id: "b-5",

@@ -66,8 +66,9 @@ export const getPastCheckout = (
     service: row.service,
     meta: "",
     addons: [] as [string, number][],
-    card: "4242",
-    brand: "Visa",
+    ...(row.remoteId
+      ? { card: "saved", brand: "", cardLabel: row.cardLabel ?? "Saved card" }
+      : { card: "4242", brand: "Visa" }),
     paidOn: "",
     phone: client?.phone || "",
     email: client?.email || "",

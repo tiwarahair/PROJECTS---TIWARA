@@ -9,6 +9,14 @@ import flow from "../../styles/components/checkout/flow.module.css";
 import shared from "../../styles/components/checkout/index.module.css";
 import { formatMoney } from "../../utils/money";
 
+const getDeclineTitle = (message: string | undefined, isHard: boolean) => {
+  if (message) return `Card declined: ${message}`;
+
+  return isHard
+    ? "Card declined: reported lost or stolen"
+    : "Card declined: insufficient funds";
+};
+
 export const CheckoutReview = ({
   checkout,
   view,
@@ -85,9 +93,7 @@ export const CheckoutReview = ({
             />
             <div>
               <div className={flow.declinedTitle}>
-                {isHard
-                  ? "Card declined: reported lost or stolen"
-                  : "Card declined: insufficient funds"}
+                {getDeclineTitle(state.declineMessage, isHard)}
               </div>
               <div className={flow.declinedBody}>
                 {isHard
@@ -199,15 +205,12 @@ export const CheckoutReview = ({
       )}
       <div className={flow.reviewNotes}>
         {money.cardFee > 0 && (
-          <span>{`Card fee of about ${formatMoney(money.cardFee, { pence: "always" })} is deducted from your payout.`}</span>
-        )}
-        {money.method === "link" && (
-          <span>{`${view.name} can choose their own tip on the payment page. The booking shows Awaiting payment until they pay.`}</span>
+          <span>{`Card fee of about ${formatMoney(money.cardFee, { pence: "always" })} (1.5% + 20p) is deducted from your payout.`}</span>
         )}
         <span>
           {money.method === "link"
-            ? `A review request goes to ${view.name} automatically.`
-            : `A receipt and review request go to ${view.name} automatically.`}
+            ? `${view.name} gets a receipt once they pay. The booking shows Awaiting payment until then.`
+            : `A receipt goes to ${view.name} automatically.`}
         </span>
       </div>
     </div>

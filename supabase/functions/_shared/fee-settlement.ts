@@ -3,6 +3,7 @@ import Stripe from "npm:stripe@22.6.2";
 import { admin } from "./admin.ts";
 import { getCardLabel, isHardDecline } from "./declines.ts";
 import { getRefundable } from "./refundable.ts";
+import { getStripeFee } from "./stripe-fee.ts";
 import { getFeeChargeKey, getFeeRefundKey } from "./stripe-keys.ts";
 import { stripe } from "./stripe.ts";
 
@@ -123,7 +124,7 @@ const chargeCard = async (fee: FeeSettlement): Promise<ChargeResult> => {
 
   const card = await stripe.paymentMethods.retrieve(paymentMethod);
   const cardLabel = getCardLabel(card.card?.brand, card.card?.last4);
-  // the stylist gets the whole fee; if their account can't receive yet, it's sent on later
+  // the stylist gets the fee less Stripe's fee; if their account can't receive yet, it's sent on later
   const canTransfer = !!fee.stylist_account && fee.stylist_can_receive;
 
   // a run that charged, then failed before saving: keep that payment rather than charge again
@@ -151,7 +152,10 @@ const chargeCard = async (fee: FeeSettlement): Promise<ChargeResult> => {
         description: `${fee.booking_ref}: ${KIND_LABELS[fee.kind]}`,
         metadata: { kind: "fee", fee_id: fee.id, booking_id: fee.booking_id },
         ...(canTransfer
-          ? { transfer_data: { destination: fee.stylist_account as string } }
+          ? {
+              application_fee_amount: getStripeFee(fee.charge_pence),
+              transfer_data: { destination: fee.stylist_account as string },
+            }
           : {}),
       },
       { idempotencyKey: getFeeChargeKey(fee) },

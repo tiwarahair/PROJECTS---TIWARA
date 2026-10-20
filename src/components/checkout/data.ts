@@ -53,6 +53,7 @@ export interface CheckoutBooking {
   paid: number;
   card: string | null;
   brand: string;
+  cardLabel?: string;
   paidOn: string;
   phone: string;
   email: string;
@@ -60,6 +61,7 @@ export interface CheckoutBooking {
   time: string;
   arrived: string;
   fee?: number;
+  agreedPrice?: number;
   /** A Studio booking can bring its own item lines. */
   lines?: Partial<CheckoutLine>[];
 }
@@ -113,6 +115,7 @@ export interface CheckoutState {
   tipReceived: string;
   status: CheckoutStatus;
   decline: "soft" | "hard" | null;
+  declineMessage?: string;
   tries: number;
   busy: boolean;
   fromDone: boolean;
@@ -304,4 +307,7 @@ export interface CheckoutMoney {
   steps: CheckoutView[];
   bookFee: number;
   cardOk: boolean;
+  isOverAgreed: boolean;
+  tipCap: number;
+  isTipTooHigh: boolean;
 }

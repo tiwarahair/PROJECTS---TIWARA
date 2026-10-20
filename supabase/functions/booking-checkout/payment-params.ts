@@ -1,3 +1,5 @@
+import { getStripeFee } from "../_shared/stripe-fee.ts";
+
 export interface CheckoutQuote {
   id: string;
   ref: string;
@@ -32,7 +34,8 @@ export const getPaymentParams = (
   ...(savesCard(quote.mode) || keepCard ? { setup_future_usage: "off_session" } : {}),
   ...(paysStylist(quote.mode)
     ? {
-        application_fee_amount: quote.fee_pence,
+        // the booking fee, plus Stripe's fee on the stylist's part
+        application_fee_amount: quote.fee_pence + getStripeFee(quote.due_today_pence - quote.fee_pence),
         transfer_data: { destination: quote.stylist_account },
       }
     : {}),

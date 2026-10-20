@@ -2,6 +2,7 @@ import type { CSSProperties } from "react";
 import {
   ChevronRight,
   Link,
+  Pencil,
   Receipt,
   Send,
   TriangleAlert,
@@ -13,6 +14,7 @@ import { ContactLinks } from "../sheet/contact-links";
 import { getPastCheckoutView } from "./view";
 import type { PastSheetView } from "./view";
 import { StudioCheckout } from "../checkout";
+import { CorrectPayment } from "./correct-payment";
 import type { StudioController } from "../../core/use-studio";
 import bookingStyles from "../../../../styles/features/studio/bookings/sheet/index.module.css";
 import styles from "../../../../styles/features/studio/bookings/past/index.module.css";
@@ -212,8 +214,20 @@ export const PastSheetBody = ({ view }: { view: PastSheetView }) => (
             color="var(--neutral-500)"
           />
         </button>
+        {view.canCorrect && !view.correctDraft && (
+          <button className={styles.linkRow} onClick={view.openCorrect}>
+            <Pencil size={18} strokeWidth={1.7} color="var(--neutral-600)" />
+            <span className={styles.linkLabel}>Correct payment</span>
+            <ChevronRight
+              size={16}
+              strokeWidth={1.7}
+              color="var(--neutral-500)"
+            />
+          </button>
+        )}
       </div>
     )}
+    <CorrectPayment view={view} />
     {view.canRefund && (
       <button className={styles.refund} onClick={view.openRefund}>
         Refund

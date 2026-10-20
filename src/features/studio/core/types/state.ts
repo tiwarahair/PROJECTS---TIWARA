@@ -159,6 +159,7 @@ export interface StudioState {
   sheetClientId?: string | null;
   selectedPastId?: string | number | null;
   pastCheckoutPanel?: string | null;
+  correctPayment?: { amount: string; tip: string; via: string } | null;
   statusMenuOpen?: boolean;
   addRebook?: boolean;
   addStep: number;

@@ -23,6 +23,24 @@ import type {
 const TOAST_MS = 2400;
 const CHARGE_MS = 1100;
 
+export interface CheckoutPayment {
+  method: CheckoutResult["method"];
+  via: string;
+  tip: number;
+  lines: CheckoutResultLine[];
+}
+
+interface CheckoutResultLine {
+  name: string;
+  subtitle: string;
+  base: number;
+  adjustment: number;
+  reason: string;
+}
+
+export type CheckoutPayOutcome =
+  { outcome: "paid" } | { outcome: "soft" | "hard"; message: string };
+
 export interface CheckoutSheetProps {
   scenario?: string;
   layout?: "mobile" | "desktop";
@@ -37,19 +55,15 @@ export interface CheckoutSheetProps {
   stylist?: Partial<CheckoutStylist>;
   /** Demo: "soft" declines the first card attempt, "hard" every attempt. */
   declineMode?: "none" | "soft" | "hard";
+  /** Takes the payment for real: "paid", or how the card was declined. Without it the sheet runs the demo. */
+  onPay?: (payment: CheckoutPayment) => Promise<CheckoutPayOutcome>;
   menu?: MenuGroup[];
   onExit?: () => void;
   onClose?: () => void;
   onComplete?: (
     result: CheckoutResult & {
       total: number;
-      lines: {
-        name: string;
-        subtitle: string;
-        base: number;
-        adjustment: number;
-        reason: string;
-      }[];
+      lines: CheckoutResultLine[];
       mode: string;
       paid: number;
     },
@@ -166,6 +180,54 @@ export const useCheckout = (props: CheckoutSheetProps) => {
     goTo("items", 1);
   };
 
+  const getLines = () =>
+    state.lines.map(({ name, subtitle, base, adjustment, reason }) => ({
+      name,
+      subtitle,
+      base,
+      adjustment,
+      reason,
+    }));
+
+  const pay = (
+    onPay: NonNullable<CheckoutSheetProps["onPay"]>,
+    finish: () => void,
+  ) => {
+    setState({ busy: true });
+
+    onPay({
+      method: money.method,
+      via: state.method === "link" ? state.linkVia : state.recordVia,
+      tip: money.tip,
+      lines: getLines(),
+    }).then(
+      (result) => {
+        if (result.outcome === "paid") return finish();
+
+        setState((current) => {
+          const tries =
+            result.outcome === "soft" ? Math.max(0, current.tries - 1) : 0;
+
+          return {
+            busy: false,
+            decline: tries ? "soft" : "hard",
+            declineMessage: result.message,
+            tries,
+          };
+        });
+      },
+      (error: unknown) => {
+        setState({ busy: false });
+
+        showToast(
+          error instanceof Error
+            ? error.message
+            : "That didn’t work. Try again.",
+        );
+      },
+    );
+  };
+
   const complete = () => {
     const finish = () => {
       setRawState((current) => {
@@ -183,6 +245,8 @@ export const useCheckout = (props: CheckoutSheetProps) => {
 
       scrollTop();
     };
+
+    if (props.onPay) return pay(props.onPay, finish);
 
     if (money.method !== "card") return finish();
 
@@ -217,13 +281,7 @@ export const useCheckout = (props: CheckoutSheetProps) => {
     refundAuto: 0,
     ...(state.done ?? {}),
     total: money.items,
-    lines: state.lines.map(({ name, subtitle, base, adjustment, reason }) => ({
-      name,
-      subtitle,
-      base,
-      adjustment,
-      reason,
-    })),
+    lines: getLines(),
     mode: state.mode,
     paid: state.paid,
   });

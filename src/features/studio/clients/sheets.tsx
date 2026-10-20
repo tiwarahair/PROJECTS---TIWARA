@@ -179,6 +179,7 @@ export const ClientEditSheet = ({ view, form }: ClientEditProps) => {
           className={joinClassNames(styles.input, styles.textarea)}
           {...onField("products")}
           rows={5}
+          maxLength={1000}
           aria-label="Hair notes"
           placeholder="Products, how they like it, anything to avoid"
         ></textarea>

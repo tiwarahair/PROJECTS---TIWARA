@@ -4,6 +4,7 @@ import { formatMoney } from "../../utils/money";
 const FEE_NAMES = {
   late_cancel: "Late cancellation fee",
   no_show: "No-show fee",
+  balance: "Balance",
 };
 
 const londonWhen = new Intl.DateTimeFormat("en-GB", {
@@ -20,6 +21,9 @@ export const formatPence = (pence: number) =>
   formatMoney(pence / 100, { pence: "always" });
 
 export const getFeeName = ({ kind }: PaymentLink) => FEE_NAMES[kind];
+
+export const isBalance = (link: PaymentLink | undefined) =>
+  link?.kind === "balance";
 
 export const formatWhen = (iso: string) => londonWhen.format(new Date(iso));
 
@@ -39,6 +43,14 @@ interface LinkMessage {
 export const getClosedMessage = (
   link: PaymentLink | undefined,
 ): LinkMessage => {
+  if (link?.status === "paid" && isBalance(link))
+    return {
+      title: "This is paid",
+      text: `Thanks for visiting ${link.stylist_name}. We’ve emailed you a receipt.`,
+      linkLabel: `Book with ${link.stylist_name}`,
+      linkHref: `/${link.stylist_slug}`,
+    };
+
   if (link?.status === "paid")
     return {
       title: "This fee is paid",
@@ -58,7 +70,9 @@ export const getClosedMessage = (
   if (link?.status === "cancelled")
     return {
       title: "Nothing to pay",
-      text: "This fee was waived or paid another way.",
+      text: isBalance(link)
+        ? "This was paid another way."
+        : "This fee was waived or paid another way.",
       linkLabel: "Go to Tiwára’s House",
       linkHref: "/",
     };
@@ -72,7 +86,7 @@ export const getClosedMessage = (
 };
 
 export const LINK_PAY_ERRORS: Record<string, string> = {
-  link_paid: "This fee is already paid.",
+  link_paid: "This is already paid.",
   link_processing: "Your payment is being confirmed. Check back in a minute.",
   link_expired: "This link has expired. Reply to our email for a new one.",
   link_not_valid:

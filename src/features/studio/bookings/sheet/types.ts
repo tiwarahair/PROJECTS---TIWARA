@@ -28,12 +28,6 @@ export const CLOSED_STATUSES = [
   "expired",
 ];
 
-export const VIA_LABELS: Record<string, string> = {
-  cash: "Cash",
-  bank: "Bank transfer",
-  reader: "Card reader",
-};
-
 export const CANCEL_STEP: Partial<StudioState> = {
   bookingStep: "cancel",
   cancelWho: "client",

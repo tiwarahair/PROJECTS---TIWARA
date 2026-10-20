@@ -1,10 +1,11 @@
-// The public pay page for a fee: "view" shows what's owed, "pay" starts the card payment (Turnstile-checked).
+// The public pay page for a fee or a balance: "view" shows what's owed, "pay" starts the card payment (Turnstile-checked).
 import { z } from "npm:zod@4";
 import { admin } from "../_shared/admin.ts";
 import { getClientIp } from "../_shared/client-ip.ts";
 import { corsHeaders, respond } from "../_shared/cors.ts";
 import { isWithinLimit } from "../_shared/rate-limit.ts";
 import { stripe } from "../_shared/stripe.ts";
+import { getStripeFee } from "../_shared/stripe-fee.ts";
 import { isHuman } from "../_shared/turnstile.ts";
 import { isCurrentIntent } from "./intent.ts";
 
@@ -17,6 +18,7 @@ const requestSchema = z.discriminatedUnion("action", [
 
 interface LinkPayment {
   link_id: string;
+  purpose: "fee" | "balance";
   booking_id: string;
   booking_ref: string;
   amount_pence: number;
@@ -41,7 +43,7 @@ const getIntent = async (link: LinkPayment) => {
       amount: link.amount_pence,
       currency: "gbp",
       allowed_payment_method_types: ["card"],
-      description: `${link.booking_ref}: fee`,
+      description: `${link.booking_ref}: ${link.purpose}`,
       ...(link.customer_id ? { customer: link.customer_id } : {}),
       metadata: {
         kind: "link",
@@ -49,10 +51,15 @@ const getIntent = async (link: LinkPayment) => {
         booking_id: link.booking_id,
         transfer_pending: String(!canTransfer),
       },
-      ...(canTransfer ? { transfer_data: { destination: link.stylist_account as string } } : {}),
+      ...(canTransfer
+        ? {
+            application_fee_amount: getStripeFee(link.amount_pence),
+            transfer_data: { destination: link.stylist_account as string },
+          }
+        : {}),
     },
     // a new key after each replaced payment, so Stripe doesn't hand back the old one
-    { idempotencyKey: `link:${link.link_id}:after:${link.payment_intent_id ?? "none"}` },
+    { idempotencyKey: `link:${link.link_id}:after:${link.payment_intent_id ?? "none"}:card-fee` },
   );
 };
 

@@ -375,6 +375,8 @@ export const copyLaterText = async (text: Promise<string>) => {
 
   const blob = text.then((value) => new Blob([value], { type: "text/plain" }));
 
+  void blob.catch(() => undefined);
+
   try {
     await navigator.clipboard.write([
       new ClipboardItem({ "text/plain": blob }),

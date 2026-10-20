@@ -105,6 +105,11 @@ export const CheckoutTip = ({
           </span>
         </label>
       )}
+      {money.isTipTooHigh && (
+        <div className={flow.tipError} role="alert">
+          {`A tip on the saved card can be up to ${formatMoney(money.tipCap)} (25%). Record a bigger tip as cash instead.`}
+        </div>
+      )}
       <div className={flow.tipHelp}>
         {isRecord
           ? "Tips go 100% to you. Recorded only, no money moves through Tiwára’s House."

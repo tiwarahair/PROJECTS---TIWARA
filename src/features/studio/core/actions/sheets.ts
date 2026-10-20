@@ -7,6 +7,7 @@ const SHEET_RESET: Partial<StudioState> = {
   out: false,
   statusMenuOpen: false,
   pastCheckoutPanel: null,
+  correctPayment: null,
   clientFromPastId: null,
   bookingStep: "view",
   rescheduleDay: null,

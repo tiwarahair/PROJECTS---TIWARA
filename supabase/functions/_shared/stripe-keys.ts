@@ -21,3 +21,5 @@ export const getCancelRefundKey = (bookingId: string, reason: string, amount: nu
 
 export const getTransferKey = (paymentId: string, failures: number) =>
   `fee-transfer:${paymentId}${getAttempt("retry", failures)}`;
+
+export const getCheckoutChargeKey = (bookingId: string, tries: number) => `checkout:${bookingId}:try:${tries}`;

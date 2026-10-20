@@ -50,8 +50,11 @@ describe("getFeeFlags", () => {
   it("counts the link resends left", () => {
     expect(
       getFeeFlags(getFee({ status: "unpaid" }), {
+        purpose: "fee",
         status: "pending",
         sent_count: 2,
+        amount_pence: 2000,
+        created_at: "2026-10-20T10:00:00+00:00",
       }),
     ).toMatchObject({ feeLinkResends: 1, meta: "Fee link sent" });
   });

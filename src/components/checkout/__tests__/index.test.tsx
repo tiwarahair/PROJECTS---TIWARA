@@ -39,6 +39,37 @@ describe("checkout money", () => {
     expect(money.method).toBe("none");
   });
 
+  it("nothing to take is completed without a charge, even with the tip step open", () => {
+    const state = {
+      ...getInitialCheckout({ scenario: "reduce-review" }),
+      tipOpen: true,
+    };
+
+    expect(getMoney(state, BOOKINGS.nia!).method).toBe("none");
+  });
+
+  it("the saved card can't take more than was agreed", () => {
+    const state = getInitialCheckout({ scenario: "review" });
+    const money = getMoney(state, { ...BOOKINGS.zainab!, agreedPrice: 90 });
+
+    expect(money.isOverAgreed).toBe(true);
+    expect(money.cardOk).toBe(false);
+    expect(money.method).toBe("link");
+  });
+
+  it("caps a saved-card tip at a quarter of the price", () => {
+    const state = {
+      ...getInitialCheckout({ scenario: "review" }),
+      tip: "custom" as const,
+      tipCustom: "30",
+    };
+
+    const money = getMoney(state, BOOKINGS.zainab!);
+
+    expect(money.tipCap).toBe(25);
+    expect(money.isTipTooHigh).toBe(true);
+  });
+
   it("formats whole pounds without pence and negatives with a minus sign", () => {
     expect(formatMoney(85)).toBe("£85");
     expect(formatMoney(-20.5)).toBe("−£20.50");
@@ -193,6 +224,35 @@ describe("CheckoutSheet", () => {
     await user.click(within(dialog).getByRole("button", { name: "Waive fee" }));
     expect(screen.getByText("No-show · Fee waived")).toBeInTheDocument();
     expect(screen.getByRole("status")).toHaveTextContent("Fee waived");
+  });
+
+  it("embedded: a real charge waits for the host, and a decline offers a retry", async () => {
+    const onPay = vi
+      .fn()
+      .mockResolvedValueOnce({
+        outcome: "soft",
+        message: "your card was declined",
+      })
+      .mockResolvedValueOnce({ outcome: "paid" });
+
+    render(
+      <CheckoutSheet booking={BOOKINGS.zainab} start="review" onPay={onPay} />,
+    );
+
+    await click("Charge £80");
+
+    expect(onPay).toHaveBeenCalledWith(
+      expect.objectContaining({ method: "card", tip: 0 }),
+    );
+
+    await screen.findByRole("button", { name: "Retry card (1 of 2 left)" });
+    await click("Retry card (1 of 2 left)");
+
+    expect(
+      await screen.findByRole("button", { name: "Done" }),
+    ).toBeInTheDocument();
+
+    expect(onPay).toHaveBeenCalledTimes(2);
   });
 
   it("embedded: finishing hands the result to the host", async () => {

@@ -49,6 +49,17 @@ export const getClient = (
   return address ? { ...client, address } : client;
 };
 
+/** First and last name, keeping a first name with a space ("Mary Jane") whole when it's known. */
+export const getClientNames = ({ name, first }: StudioClient) => {
+  const full = name.trim();
+  const firstName = first?.trim() || (full.split(/\s+/)[0] ?? "");
+
+  return {
+    first: firstName,
+    last: full.startsWith(firstName) ? full.slice(firstName.length).trim() : "",
+  };
+};
+
 export const getAllClients = (state: StudioState): StudioClient[] =>
   (state.account ? state.bookingClients : CLIENTS)
     .concat(state.extraClients)

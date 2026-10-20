@@ -24,6 +24,7 @@ import type {
 } from "../core/types";
 import { toStudioClient } from "../clients/records";
 import { toFeeKind, toPolicyMode } from "../settings/records";
+import { getCheckoutFields } from "./checkout-records";
 import { getProtectionFields, getServiceFields } from "./protection-records";
 import { getNumber, getText, isRecord } from "./row-values";
 
@@ -135,6 +136,16 @@ export const toStudioBooking = (row: StudioBookingRow): StudioBooking => {
     stylistNote: row.booking_notes?.note ?? undefined,
     ...getServiceFields(row),
     ...getProtectionFields(row),
+    ...(row.card_label ? { cardLabel: row.card_label } : {}),
+    ...(row.stripe_payment_method_id ? { hasSavedCard: true } : {}),
+    ...(row.unpaid_at
+      ? {
+          status: "arrived",
+          autoDone: true,
+          checkoutUnpaid: true,
+          completed: true,
+        }
+      : {}),
   };
 };
 
@@ -209,8 +220,11 @@ export const toPastRecord = (row: StudioBookingRow): PastRecord => {
       : {}),
     ...getFeeFlags(
       fee,
-      row.payment_links.find(({ status }) => status === "pending"),
+      row.payment_links.find(
+        ({ purpose, status }) => purpose === "fee" && status === "pending",
+      ),
     ),
+    ...getCheckoutFields(row),
   };
 };
 
@@ -230,11 +244,14 @@ export const toBookingClient = (row: StudioBookingRow): StudioClient => {
   };
 };
 
-export const isActiveRow = ({ status }: StudioBookingRow) =>
-  status in UPCOMING_STATUSES;
+export const isActiveRow = ({
+  status,
+  unpaid_at: unpaidAt,
+}: StudioBookingRow) =>
+  status in UPCOMING_STATUSES || (status === "completed" && !!unpaidAt);
 
-export const isPastRow = ({ status }: StudioBookingRow) =>
-  status in PAST_STATUSES;
+export const isPastRow = (row: StudioBookingRow) =>
+  row.status in PAST_STATUSES && !isActiveRow(row);
 
 /** Past newest first, in the database's own order, so pages join up. */
 export const sortPast = (rows: PastRecord[]) =>

@@ -63,7 +63,11 @@ export const getCheckoutView = (checkout: CheckoutController) => {
     checkout;
 
   const { first: name } = booking;
-  const cardText = booking.card ? `${booking.brand} •••• ${booking.card}` : "";
+
+  const cardText = booking.card
+    ? (booking.cardLabel ?? `${booking.brand} •••• ${booking.card}`)
+    : "";
+
   let bookedTotal = booking.price;
 
   for (const [, price] of booking.addons) bookedTotal += price;

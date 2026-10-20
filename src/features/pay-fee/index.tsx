@@ -15,6 +15,7 @@ import {
   getClosedMessage,
   getCovered,
   getFeeName,
+  isBalance,
 } from "./logic";
 import { PayForm } from "./pay-form";
 import card from "../../styles/features/manage-booking/booking-card.module.css";
@@ -89,7 +90,9 @@ export const PayFeePage = () => {
         </div>
         <PayForm link={link} token={token} onPaid={() => setPaid(true)} />
         <p className={styles.note}>
-          {`You can’t book with ${link.stylist_name} again until it’s paid. Questions? Reply to the email we sent you.`}
+          {isBalance(link)
+            ? "Questions? Reply to the email we sent you."
+            : `You can’t book with ${link.stylist_name} again until it’s paid. Questions? Reply to the email we sent you.`}
         </p>
       </>
     );

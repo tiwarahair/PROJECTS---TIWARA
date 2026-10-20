@@ -145,13 +145,17 @@ const STATUS_ITEMS: Record<
         booking.due > 0 ? `Collect £${booking.due}` : "Nothing left to collect",
       run: () => setState({ bookingStep: "checkout", checkoutMethod: null }),
     },
-    {
-      label: "Confirmed",
-      icon: Undo,
-      subtitle: "Undo arrived",
-      run: () =>
-        actions.setStatus(booking.id, "confirmed", "Back to confirmed"),
-    },
+    ...(booking.completed
+      ? []
+      : [
+          {
+            label: "Confirmed",
+            icon: Undo,
+            subtitle: "Undo arrived",
+            run: () =>
+              actions.setStatus(booking.id, "confirmed", "Back to confirmed"),
+          },
+        ]),
   ],
 };
 

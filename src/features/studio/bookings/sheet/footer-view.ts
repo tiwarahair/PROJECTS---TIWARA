@@ -134,7 +134,7 @@ export const getFooterView = (context: SheetContext) => {
       (booking.status === "arrived" ||
         booking.dayOffset < 0 ||
         (booking.dayOffset === 0 && nowMinutes >= booking.startMinutes)),
-    hasMore: !isClosed,
+    hasMore: !isClosed && !booking.completed,
     more: (event: MouseEvent) => {
       const rect = (event.currentTarget as Element).getBoundingClientRect?.();
 

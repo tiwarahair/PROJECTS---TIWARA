@@ -1,6 +1,7 @@
 // Run by cron while fees wait for a stylist's account: sends each one on once the account can receive money.
 import { admin } from "../_shared/admin.ts";
 import { getRefundable } from "../_shared/refundable.ts";
+import { getStripeFee } from "../_shared/stripe-fee.ts";
 import { getTransferKey } from "../_shared/stripe-keys.ts";
 import { stripe } from "../_shared/stripe.ts";
 
@@ -30,8 +31,8 @@ const makeTransfer = async ({ payment_id: paymentId, payment_intent_id: intentId
 
   if (!charge || typeof charge === "string") throw new Error(`${intentId} has no charge`);
 
-  // whatever was refunded from the fee meanwhile stays with the client, not the stylist
-  const amount = getRefundable(charge);
+  // whatever was refunded meanwhile stays with the client, and Stripe's fee is the stylist's
+  const amount = getRefundable(charge) - getStripeFee(charge.amount);
 
   if (amount <= 0) return null;
 

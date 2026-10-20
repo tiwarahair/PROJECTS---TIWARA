@@ -9,13 +9,20 @@ const BOOKING_SELECT = `id, status, starts_at, minutes, buffer_minutes, price_pe
   no_show_at, overlap_ok, created_by, past_at, paid_at, stripe_payment_method_id, protection_status, confirm_by,
   confirm_sends, confirm_sent_at, created_at, booking_notes(note), stylist_client_id,
   stylist_client:stylist_clients(first, last, phone, email, deleted_at),
+  final_price_pence, tip_pence, checkout, card_label, unpaid_at,
+  payments(id, kind, method, amount_pence, platform_fee_pence, tip_pence, created_at),
   booking_fees(id, kind, status, amount_pence, kept_pence, refund_pence, charge_pence, tries, hard_decline,
     decline_message, card_label, waived_at, created_at, failed_runs),
-  refunds(amount_pence),
-  payment_links(status, sent_count)`;
+  refunds(amount_pence, reason),
+  payment_links(purpose, status, sent_count, amount_pence, created_at)`;
 
-const ACTIVE_STATUSES = ["awaiting_confirmation", "confirmed", "arrived"];
-const PAST_STATUSES = ["completed", "cancelled", "auto_cancelled", "no_show"];
+// a completed booking still to be paid is back in "Due for checkout" with the active ones
+const ACTIVE_FILTER =
+  "status.in.(awaiting_confirmation,confirmed,arrived),and(status.eq.completed,unpaid_at.not.is.null)";
+
+const PAST_FILTER =
+  "status.in.(cancelled,auto_cancelled,no_show),and(status.eq.completed,unpaid_at.is.null)";
+
 const PAST_PAGE_SIZE = 50;
 
 export interface PastCursor {
@@ -29,7 +36,7 @@ const selectBookings = (stylistId: string) =>
 /** Every booking still to happen or happening (anything still being paid for is left out). */
 const fetchActiveBookings = async (stylistId: string) =>
   (await check(
-    selectBookings(stylistId).in("status", ACTIVE_STATUSES).order("starts_at"),
+    selectBookings(stylistId).or(ACTIVE_FILTER).order("starts_at"),
   )) ?? [];
 
 /** A page of Past, newest first, after `cursor` when given. */
@@ -38,7 +45,7 @@ export const fetchPastBookings = async (
   cursor?: PastCursor,
 ) => {
   const query = selectBookings(stylistId)
-    .in("status", PAST_STATUSES)
+    .or(PAST_FILTER)
     .order("past_at", { ascending: false })
     .order("id", { ascending: false })
     .limit(PAST_PAGE_SIZE + 1);

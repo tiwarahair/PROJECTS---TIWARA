@@ -1,19 +1,22 @@
 import { changeBookingClient } from "../../../../lib/studio-api/booking-writes";
 import { getAvatarSrc } from "../../core/format";
-import { getAllClients, getClient, getProtectionNoun } from "../../core/model";
+import {
+  getAllClients,
+  getClient,
+  getClientNames,
+  getProtectionNoun,
+} from "../../core/model";
 import type { StudioBooking } from "../../core/types";
 import { getFreshLink } from "./booking";
 import type { SheetContext } from "./context";
 
 const toContact = (state: SheetContext["state"], clientId: string) => {
-  const { name, phone, email } = getClient(state, clientId);
-  const [first = "", ...rest] = name.trim().split(/\s+/);
+  const client = getClient(state, clientId);
 
   return {
-    first,
-    last: rest.join(" "),
-    phone: phone || "",
-    email: email || "",
+    ...getClientNames(client),
+    phone: client.phone || "",
+    email: client.email || "",
   };
 };
 

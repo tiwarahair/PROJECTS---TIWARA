@@ -240,9 +240,19 @@ export const decorateBooking = (
       : `${Math.max(1, Math.round(msLeft / 60000))} min`;
 
   const flags: StatusFlags = { awaiting, autoX, ongoing, status };
-  const badge = getBadge(flags, paid, msLeft, leftShort);
-  const tone = getStatusTone(flags, getPaidTone(paid));
-  const statusTone = getStatusTone(flags, CONFIRMED_TONE);
+
+  const badge = booking.autoDone
+    ? "Completed · Unpaid"
+    : getBadge(flags, paid, msLeft, leftShort);
+
+  const tone = booking.autoDone
+    ? UNPAID_TONE
+    : getStatusTone(flags, getPaidTone(paid));
+
+  const statusTone = booking.autoDone
+    ? UNPAID_TONE
+    : getStatusTone(flags, CONFIRMED_TONE);
+
   const payTone = getPayTone(paid === "full" || paid === "deposit", paid);
   const tileTone = getTileTone(state, booking.service);
   const address = booking.address || client.address || "";
@@ -295,7 +305,7 @@ export const decorateBooking = (
     badgeBackground: tone.background,
     badgeBorder: tone.border,
     badgeColor: tone.color,
-    badgeDot: ongoing,
+    badgeDot: ongoing && !booking.autoDone,
     subtitle: "",
     subtitleColor: "var(--accent-500)",
     statusLabel: getStatusLabel(flags, booking.autoDone),

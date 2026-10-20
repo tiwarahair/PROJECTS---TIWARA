@@ -35,15 +35,21 @@ export const getMoney = (
   state: CheckoutState,
   booking: CheckoutBooking,
 ): CheckoutMoney => {
-  const isCardOk =
-    !!booking.card && (state.mode === "deposit" || state.mode === "card");
-
   let lineTotal = 0;
 
   for (const { base, adjustment } of state.lines)
     lineTotal += base + adjustment;
 
   const items = roundToPence(lineTotal);
+
+  const isOverAgreed =
+    booking.agreedPrice !== undefined && items > booking.agreedPrice;
+
+  const isCardOk =
+    !!booking.card &&
+    (state.mode === "deposit" || state.mode === "card") &&
+    !isOverAgreed;
+
   const balance = roundToPence(items - state.paid);
   const due = Math.max(0, balance);
   const refundDue = Math.max(0, roundToPence(-balance));
@@ -65,6 +71,10 @@ export const getMoney = (
 
   const tip = method === "link" || method === "none" ? 0 : selectedTip;
   const charge = roundToPence(due + tip);
+
+  if (charge === 0) method = "none";
+
+  const tipCap = roundToPence(items * 0.25);
 
   const cardFee =
     (method === "card" || method === "link") && charge > 0
@@ -92,6 +102,9 @@ export const getMoney = (
     steps,
     bookFee,
     cardOk: isCardOk,
+    isOverAgreed,
+    tipCap,
+    isTipTooHigh: method === "card" && tip > tipCap,
   };
 };
 
@@ -160,7 +173,7 @@ export const getInitialCheckout = ({
       booking.card && (booking.mode === "deposit" || booking.mode === "card")
         ? "card"
         : "link",
-    linkVia: "sms",
+    linkVia: "email",
     recordVia: "cash",
     tipReceived: "",
     status: "arrived",
@@ -216,7 +229,7 @@ export const getInitialCheckout = ({
       }
 
       if (done.method === "link")
-        state.linkVia = (done.via as "sms" | "email") || "sms";
+        state.linkVia = (done.via as "sms" | "email") || "email";
     }
 
     state.refunded = refunded || 0;
