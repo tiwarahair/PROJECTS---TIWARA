@@ -111,7 +111,7 @@ export const getPastCheckout = (
         refundAuto: 0,
       };
 
-  if (row.linkPaid && done.method === "link") {
+  if (row.linkPaid && done.method === "link" && row.linkVia !== "link") {
     done.method = "record";
     done.via = row.linkVia || "cash";
   }

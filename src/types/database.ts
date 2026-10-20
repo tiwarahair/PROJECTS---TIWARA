@@ -365,6 +365,8 @@ export type Database = {
           cancelled_by: string | null;
           card_label: string | null;
           checkout: Json | null;
+          checkout_intent_id: string | null;
+          checkout_started_at: string | null;
           checkout_tries: number;
           choices: NonNullable<Json>;
           client_id: string | null;
@@ -429,6 +431,8 @@ export type Database = {
           cancelled_by?: string | null;
           card_label?: string | null;
           checkout?: Json | null;
+          checkout_intent_id?: string | null;
+          checkout_started_at?: string | null;
           checkout_tries?: number;
           choices: NonNullable<Json>;
           client_id?: string | null;
@@ -490,6 +494,8 @@ export type Database = {
           cancelled_by?: string | null;
           card_label?: string | null;
           checkout?: Json | null;
+          checkout_intent_id?: string | null;
+          checkout_started_at?: string | null;
           checkout_tries?: number;
           choices?: NonNullable<Json>;
           client_id?: string | null;
@@ -2057,6 +2063,8 @@ export type Database = {
           cancelled_by: string | null;
           card_label: string | null;
           checkout: Json | null;
+          checkout_intent_id: string | null;
+          checkout_started_at: string | null;
           checkout_tries: number;
           choices: NonNullable<Json>;
           client_id: string | null;
@@ -2398,6 +2406,8 @@ export type Database = {
           cancelled_by: string | null;
           card_label: string | null;
           checkout: Json | null;
+          checkout_intent_id: string | null;
+          checkout_started_at: string | null;
           checkout_tries: number;
           choices: NonNullable<Json>;
           client_id: string | null;
@@ -2508,6 +2518,7 @@ export type Database = {
         Returns: string;
       };
       normalise_phone: { Args: { phone: string }; Returns: string };
+      note_checkout_declined: { Args: { target: string }; Returns: undefined };
       note_refund_failure: {
         Args: { message: string; target: string };
         Returns: undefined;

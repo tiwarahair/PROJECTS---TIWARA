@@ -3,16 +3,22 @@ import {
   recordBalancePaid,
   resendBalanceLink,
 } from "../../../../../lib/studio-api/checkout";
-import { fetchStudioBooking } from "../../../../../lib/studio-api/bookings";
 import { roundToPence } from "../../../../../utils/money";
-import { mergeBookingRows } from "../../live-records";
 import { getPastCheckout } from "./checkout";
 import { RECORDED_ONLY, getRefundTag } from "./context";
 import type { PastContext } from "./context";
 
 export const getCompletedView = (context: PastContext) => {
-  const { state, setState, actions, row, isCompleted, patch, firstName } =
-    context;
+  const {
+    state,
+    setState,
+    actions,
+    row,
+    isCompleted,
+    patch,
+    firstName,
+    saveAndRefresh: saveBalance,
+  } = context;
 
   if (!isCompleted)
     return {
@@ -30,15 +36,6 @@ export const getCompletedView = (context: PastContext) => {
   const isAwaiting = checkout.done.method === "link" && !row.linkPaid;
   const refunded = row.refunded || 0;
   const left = roundToPence(checkout.cap - refunded);
-
-  const saveBalance = (task: (bookingId: string) => Promise<unknown>) =>
-    context.saveFee(async (bookingId) => {
-      await task(bookingId);
-
-      const fresh = await fetchStudioBooking(bookingId);
-
-      if (fresh) setState((current) => mergeBookingRows(current, [fresh]));
-    }, state.pastNew);
 
   return {
     hasAwait: isAwaiting,

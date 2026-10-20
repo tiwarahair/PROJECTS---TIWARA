@@ -1,7 +1,9 @@
+import { fetchStudioBooking } from "../../../../../lib/studio-api/bookings";
 import { parseAmountLabel } from "../../../core/format";
 import { getClient } from "../../../core/model";
 import type { PastRecord } from "../../../core/types";
 import type { StudioController } from "../../../core/use-studio";
+import { mergeBookingRows } from "../../live-records";
 
 export const DAY_MS = 86400000;
 
@@ -40,6 +42,16 @@ export const getContext = (studio: StudioController, row: PastRecord) => {
       studio.context.sync?.save(() => task(remoteId), { pastNew: previous });
   };
 
+  // then reloads the booking, as the server may move it (back to Due for checkout, say)
+  const saveAndRefresh = (task: (bookingId: string) => Promise<unknown>) =>
+    saveFee(async (bookingId) => {
+      await task(bookingId);
+
+      const fresh = await fetchStudioBooking(bookingId);
+
+      if (fresh) setState((current) => mergeBookingRows(current, [fresh]));
+    }, state.pastNew);
+
   return {
     studio,
     state,
@@ -64,6 +76,7 @@ export const getContext = (studio: StudioController, row: PastRecord) => {
     patch,
     settle,
     saveFee,
+    saveAndRefresh,
     firstName: (fallback: string) =>
       (client.name || fallback).split(" ")[0] ?? "",
   };

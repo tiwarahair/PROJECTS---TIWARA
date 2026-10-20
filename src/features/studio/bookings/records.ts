@@ -24,7 +24,7 @@ import type {
 } from "../core/types";
 import { toStudioClient } from "../clients/records";
 import { toFeeKind, toPolicyMode } from "../settings/records";
-import { getCheckoutFields } from "./checkout-records";
+import { getCheckoutFields, getPaidSoFar } from "./checkout-records";
 import { getProtectionFields, getServiceFields } from "./protection-records";
 import { getNumber, getText, isRecord } from "./row-values";
 
@@ -144,6 +144,9 @@ export const toStudioBooking = (row: StudioBookingRow): StudioBooking => {
           autoDone: true,
           checkoutUnpaid: true,
           completed: true,
+          price: toPounds(row.final_price_pence ?? row.price_pence),
+          agreedPrice: toPounds(row.price_pence),
+          paidSoFar: toPounds(Math.max(getPaidSoFar(row), 0)),
         }
       : {}),
   };

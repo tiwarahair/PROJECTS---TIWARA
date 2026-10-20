@@ -52,6 +52,20 @@ export const getPaidAtBooking = ({ payments }: StudioBookingRow) =>
       .map(({ amount_pence: amount, platform_fee_pence: fee }) => amount - fee),
   );
 
+/** What the client has paid towards the price so far, as the server counts it (tips and refunds left out). */
+export const getPaidSoFar = (row: StudioBookingRow) =>
+  getPaidAtBooking(row) +
+  sumPence(
+    getBalancePayments(row).map(
+      ({ amount_pence: amount, tip_pence: tip }) => amount - tip,
+    ),
+  ) -
+  sumPence(
+    row.refunds
+      .filter(({ reason }) => reason === "price_lowered")
+      .map(({ amount_pence: amount }) => amount),
+  );
+
 const getRecordedPayment = (payment: PaymentRow | undefined) =>
   payment && payment.method !== "card"
     ? {
@@ -73,7 +87,12 @@ export const getCheckoutFields = (
   const method = getText(row.checkout, "method") || "none";
   const balance = getBalancePayments(row);
   const link = getBalanceLink(row);
-  const isLinkPaid = method === "link" && balance.length > 0;
+  const isLinkOut = link?.status === "pending" || link?.status === "expired";
+  const isLinkPaid = method === "link" && !isLinkOut && balance.length > 0;
+
+  const linkVia = balance.some(({ method: via }) => via === "card")
+    ? "link"
+    : balance[0]?.method;
 
   const lowered = row.refunds.filter(
     ({ reason }) => reason === "price_lowered",
@@ -90,7 +109,11 @@ export const getCheckoutFields = (
     charged: toPounds(
       method === "link"
         ? (link?.amount_pence ?? 0)
-        : sumPence(balance.map(({ amount_pence: amount }) => amount)),
+        : sumPence(
+            balance
+              .filter(({ method: via }) => method !== "card" || via === "card")
+              .map(({ amount_pence: amount }) => amount),
+          ),
     ),
     tip: toPounds(row.tip_pence),
     refundAuto: toPounds(
@@ -116,16 +139,14 @@ export const getCheckoutFields = (
     checkout,
     ...(row.card_label ? { cardLabel: row.card_label } : {}),
     price: checkout.total,
-    meta: getCheckoutLabel(checkout, {
-      isPaid: isLinkPaid,
-      isExpired: link?.status === "expired",
-    }),
-    ...(isLinkPaid
-      ? {
-          linkPaid: true,
-          linkVia: balance[0]?.method === "card" ? "link" : balance[0]?.method,
-        }
-      : {}),
+    // a link settled another way reads as the payment recorded
+    meta: getCheckoutLabel(
+      isLinkPaid && linkVia !== "link"
+        ? { ...checkout, method: "record", via: linkVia ?? "" }
+        : checkout,
+      { isPaid: isLinkPaid, isExpired: link?.status === "expired" },
+    ),
+    ...(isLinkPaid ? { linkPaid: true, linkVia } : {}),
     refunded: toPounds(
       sumPence(
         row.refunds

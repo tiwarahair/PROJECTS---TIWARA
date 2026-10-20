@@ -1,5 +1,8 @@
 import { correctRecordedPayment } from "../../../../../lib/studio-api/checkout";
+import { toLondonTime } from "../../../../../utils/london-time";
+import { roundToPence } from "../../../../../utils/money";
 import { parseNumber } from "../../../core/format";
+import { getCheckoutLabel } from "../../checkout-label";
 import type { PastContext } from "./context";
 
 export const CORRECT_VIAS = [
@@ -8,12 +11,17 @@ export const CORRECT_VIAS = [
   ["reader", "Card reader"],
 ] as const;
 
-// recorded payments can be fixed until the end of the month after they were taken
-const isCorrectable = (takenAt: number) => {
-  const taken = new Date(takenAt);
+const toMonthNumber = (instant: Date) => {
+  const [year = 0, month = 0] = toLondonTime(instant.toISOString())
+    .date.split("-")
+    .map(Number);
 
-  return new Date(taken.getFullYear(), taken.getMonth() + 2, 1) > new Date();
+  return year * 12 + month;
 };
+
+// recorded payments can be fixed until the end of the month after they were taken, in UK time as the server counts
+const isCorrectable = (takenAt: number) =>
+  toMonthNumber(new Date()) - toMonthNumber(new Date(takenAt)) < 2;
 
 const toPence = (pounds: number) => Math.round(pounds * 100);
 
@@ -23,7 +31,7 @@ export const getCorrectView = ({
   actions,
   row,
   patch,
-  saveFee,
+  saveAndRefresh,
 }: PastContext) => {
   const payment = row.recordedPayment;
   const draft = state.correctPayment ?? null;
@@ -33,33 +41,37 @@ export const getCorrectView = ({
   const save = () => {
     if (!payment || !draft || amount <= 0 || tip > amount) return;
 
-    const previous = state.pastNew;
-
     setState({ correctPayment: null });
 
-    patch((current) => ({
-      recordedPayment: { ...payment, amount, tip, via: draft.via },
-      ...(current.checkout
-        ? {
-            checkout: {
-              ...current.checkout,
-              charged: amount,
-              tip,
-              via: draft.via,
-            },
-          }
-        : {}),
-    }));
+    patch((current) => {
+      if (!current.checkout)
+        return { recordedPayment: { ...payment, amount, tip, via: draft.via } };
 
-    saveFee(
-      () =>
-        correctRecordedPayment(
-          payment.id,
-          toPence(amount),
-          draft.via,
-          toPence(tip),
+      const checkout = {
+        ...current.checkout,
+        charged: roundToPence(
+          current.checkout.charged - payment.amount + amount,
         ),
-      previous,
+        tip: roundToPence(current.checkout.tip - payment.tip + tip),
+        via: draft.via,
+      };
+
+      return {
+        recordedPayment: { ...payment, amount, tip, via: draft.via },
+        checkout,
+        ...(checkout.method === "record"
+          ? { meta: getCheckoutLabel(checkout) }
+          : {}),
+      };
+    });
+
+    saveAndRefresh(() =>
+      correctRecordedPayment(
+        payment.id,
+        toPence(amount),
+        draft.via,
+        toPence(tip),
+      ),
     );
 
     actions.showToast("Payment corrected");

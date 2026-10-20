@@ -225,7 +225,7 @@ export const decorateBooking = (
     deposit: depositAmount,
   };
 
-  const paidAmount = paidAmounts[paid] ?? 0;
+  const paidAmount = booking.paidSoFar ?? paidAmounts[paid] ?? 0;
   const due = Math.max(0, booking.price - paidAmount);
   const awaiting = status === "awaiting";
   const autoX = status === "autocancelled";

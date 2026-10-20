@@ -38,6 +38,8 @@ export interface StudioBooking {
   movedByClient?: boolean;
   autoDone?: boolean;
   checkoutUnpaid?: boolean;
+  paidSoFar?: number;
+  agreedPrice?: number; // what the saved card can be charged up to, when the price shown is the final one
   extra?: number;
   addons?: BookingAddon[];
   priceReason?: string;

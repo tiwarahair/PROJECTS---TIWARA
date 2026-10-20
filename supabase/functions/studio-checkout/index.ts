@@ -3,7 +3,7 @@ import { z } from "npm:zod@4";
 import { admin } from "../_shared/admin.ts";
 import { corsHeaders, respond } from "../_shared/cors.ts";
 import { getSignedInUser } from "../_shared/recent-user.ts";
-import { chargeSavedCard, refundOverpaid } from "./charge.ts";
+import { chargeSavedCard, findEarlierCharge, isSameCharge, refundCharge, refundOverpaid } from "./charge.ts";
 import type { CheckoutQuote } from "./charge.ts";
 
 const REFUSALS = [
@@ -61,19 +61,39 @@ Deno.serve(async (request) => {
     if (error) throw error;
 
     const quote = data as CheckoutQuote;
-    const charge = method === "card" ? await chargeSavedCard(quote) : null;
+    const earlier = await findEarlierCharge(quote);
+
+    const noteTry = async () => {
+      const { error: tryError } = await admin.rpc("note_checkout_declined", { target: bookingId });
+
+      if (tryError) throw tryError;
+    };
+
+    // the card went through on a try that wasn't saved: the same checkout finishes with it, anything else gives it back
+    const reused = earlier && method === "card" && isSameCharge(earlier, quote) ? earlier : null;
+
+    if (earlier && !reused) await refundCharge(bookingId, earlier.id, !!earlier.transfer_data);
+
+    const saveIntent = async (intentId: string) => {
+      const { error: saveError } = await admin
+        .from("bookings")
+        .update({ checkout_intent_id: intentId })
+        .eq("id", bookingId);
+
+      if (saveError) throw saveError;
+    };
+
+    const charge = method === "card" ? await chargeSavedCard(quote, reused, saveIntent) : null;
 
     if (charge && !charge.paid) {
-      const { error: declineError } = await admin.rpc("note_checkout_declined", { target: bookingId });
-
-      if (declineError) throw declineError;
+      await noteTry();
 
       return respond(200, { outcome: "declined", hard: charge.hard, message: charge.message });
     }
 
     const refund = await refundOverpaid(quote);
 
-    const { error: finishError } = await admin.rpc("finish_checkout", {
+    const { data: finished, error: finishError } = await admin.rpc("finish_checkout", {
       target: bookingId,
       result: {
         method,
@@ -89,6 +109,12 @@ Deno.serve(async (request) => {
     });
 
     if (finishError) throw finishError;
+
+    if (finished === "duplicate" && charge?.payment_intent_id) {
+      await refundCharge(bookingId, charge.payment_intent_id, !charge.transfer_pending);
+
+      return respond(409, { error: "already_completed" });
+    }
 
     return respond(200, { outcome: "completed" });
   } catch (error) {

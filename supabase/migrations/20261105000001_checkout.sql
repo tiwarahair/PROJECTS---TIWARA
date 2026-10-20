@@ -29,8 +29,10 @@ alter table public.bookings
   add column tip_pence integer not null default 0 check (tip_pence >= 0),
   add column checkout jsonb,
   add column checkout_tries smallint not null default 0,
-  -- a card charge under way; another checkout waits until it's finished or two minutes have passed
+  -- a checkout under way; another waits until it's finished or two minutes have passed
   add column checkout_started_at timestamptz,
+  -- the card charge last made for the checkout, saved before it's confirmed, so a try that crashed isn't charged twice
+  add column checkout_intent_id text,
   add column card_label text,
   -- completed with the balance still to collect and no link out: back in Studio's "Due for checkout"
   add column unpaid_at timestamptz;
@@ -229,13 +231,11 @@ begin
     raise exception 'no_contact_email';
   end if;
 
-  if method = 'card' and booking.checkout_started_at > now() - interval '2 minutes' then
+  if booking.checkout_started_at > now() - interval '2 minutes' then
     raise exception 'checkout_in_progress';
   end if;
 
-  if method = 'card' then
-    update public.bookings set checkout_started_at = now() where id = booking.id;
-  end if;
+  update public.bookings set checkout_started_at = now() where id = booking.id;
 
   select * into stylist from public.stylists where id = booking.stylist_id;
 
@@ -254,7 +254,14 @@ begin
     'payment_intent_id', booking.stripe_payment_intent_id,
     'stylist_account', stylist.stripe_account_id,
     'stylist_can_receive', stylist.charges_enabled,
-    'tries', booking.checkout_tries
+    'tries', booking.checkout_tries,
+    'checkout_intent_id', booking.checkout_intent_id,
+    'card_intents', coalesce((
+      select jsonb_agg(stripe_payment_intent_id) from public.payments
+      where booking_id = booking.id and kind = 'balance' and stripe_payment_intent_id is not null
+    ), '[]'::jsonb),
+    'booking_fee_pence', booking.fee_pence,
+    'lowered_refunds', (select count(*) from public.refunds where booking_id = booking.id and reason = 'price_lowered')
   );
 end;
 $$;
@@ -282,7 +289,7 @@ begin
 
   update public.bookings
   set status = 'completed', completed_at = coalesce(completed_at, now()), unpaid_at = null, checkout_started_at = null,
-    final_price_pence = (result ->> 'final_pence')::integer, tip_pence = tip,
+    final_price_pence = (result ->> 'final_pence')::integer, tip_pence = booking.tip_pence + tip,
     checkout = jsonb_build_object(
       'lines', result -> 'lines', 'method', method, 'via', result ->> 'via', 'from_status', booking.status
     ),
@@ -314,6 +321,9 @@ begin
     returning id into link_id;
 
     perform public.send_balance_link(target, link_id);
+  -- less came in than the final price (a refund from an earlier try, say): the rest is still to collect
+  elsif public.get_balance_due(booking) > 0 then
+    update public.bookings set unpaid_at = now() where id = target;
   else
     perform public.queue_receipt(target, false);
   end if;
@@ -381,6 +391,10 @@ begin
     raise exception 'nothing_due';
   end if;
 
+  if booking.checkout_started_at > now() - interval '2 minutes' then
+    raise exception 'checkout_in_progress';
+  end if;
+
   if via not in ('cash', 'bank', 'reader') or coalesce(tip, 0) < 0 then
     raise exception 'method_not_allowed';
   end if;
@@ -433,13 +447,17 @@ begin
   set amount_pence = amount, method = via, tip_pence = coalesce(tip, 0), corrected_at = now()
   where id = target;
 
+  -- a link out for the old balance would ask for the wrong amount
+  update public.payment_links set status = 'cancelled'
+  where booking_id = booking.id and purpose = 'balance' and status in ('pending', 'expired');
+
   update public.bookings set tip_pence = tip_pence - payment.tip_pence + coalesce(tip, 0) where id = booking.id
   returning * into booking;
 
   -- less was taken than was due: it's back in "Due for checkout" to collect the rest
-  if public.get_balance_due(booking) > 0 then
-    update public.bookings set unpaid_at = now() where id = booking.id;
-  end if;
+  update public.bookings
+  set unpaid_at = case when public.get_balance_due(booking) > 0 then coalesce(unpaid_at, now()) end
+  where id = booking.id;
 
   insert into public.booking_events (booking_id, kind, data)
   values (booking.id, 'payment_corrected', jsonb_build_object(

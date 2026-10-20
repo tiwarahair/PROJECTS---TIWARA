@@ -1,5 +1,5 @@
 begin;
-select plan(48);
+select plan(56);
 
 create function pg_temp.sign_up(user_id uuid, user_email text, business text)
 returns void
@@ -165,11 +165,19 @@ select throws_ok(
   format('select public.claim_checkout(%L, %L, %L)', (select card from b), 'c5111111-1111-1111-1111-111111111111', pg_temp.input('card')),
   'checkout_in_progress', 'a second one waits while it''s going through'
 );
+select throws_ok(
+  format('select public.claim_checkout(%L, %L, %L)', (select card from b), 'c5111111-1111-1111-1111-111111111111',
+    pg_temp.input('record', 10000, 0, 'cash')),
+  'checkout_in_progress', 'nor can it be recorded meanwhile'
+);
 select public.note_checkout_declined((select card from b));
 select is(
   (select concat_ws(' ', checkout_tries, checkout_started_at is null) from public.bookings where id = (select card from b)),
   '1 t', 'a decline makes the next try a new charge'
 );
+update public.bookings set checkout_intent_id = 'pi_checkout_tried' where id = (select card from b);
+select is((pg_temp.claim((select card from b), pg_temp.input('card')) ->> 'checkout_intent_id'), 'pi_checkout_tried',
+  'the next try is told the last card charge, to check it went through');
 
 -- deposit + saved card with a tip
 select is(
@@ -250,6 +258,7 @@ select ok((select unpaid_at is not null from public.bookings where id = (select 
   'cancelling the link puts it back in Due for checkout');
 select is((pg_temp.claim((select recorded from b), pg_temp.input('record', 10000, 0, 'cash')) ->> 'charge_pence'), '10000',
   'where it can be checked out again');
+update public.bookings set checkout_started_at = null where id = (select recorded from b);
 select pg_temp.act_as('c5111111-1111-1111-1111-111111111111');
 select public.record_balance_paid((select recorded from b), 'bank', 500);
 select throws_ok(format('select public.undo_checkout(%L)', (select deposit from b)), 'undo_not_allowed',
@@ -282,6 +291,48 @@ select is(
   (select count(*)::int from public.notifications where template = 'checkout_receipt' and (payload ->> 'corrected')::boolean
     and payload ->> 'ref' = (select ref from public.bookings where id = (select recorded from b))),
   2, 'with a corrected receipt each time the amount changed'
+);
+update public.bookings set checkout_started_at = now() where id = (select recorded from b);
+select pg_temp.act_as('c5111111-1111-1111-1111-111111111111');
+select throws_ok(format('select public.record_balance_paid(%L, %L, 0)', (select recorded from b), 'cash'),
+  'checkout_in_progress', 'the rest can''t be recorded while a card charge is going through');
+reset role;
+update public.bookings set checkout_started_at = null where id = (select recorded from b);
+select pg_temp.act_as('c5111111-1111-1111-1111-111111111111');
+select public.correct_recorded_payment((select id from p), 10000, 'cash', 0);
+reset role;
+select ok((select unpaid_at is null from public.bookings where id = (select recorded from b)),
+  'correcting it back to the full amount takes it out of Due for checkout');
+select pg_temp.act_as('c5111111-1111-1111-1111-111111111111');
+select public.correct_recorded_payment((select id from p), 9000, 'cash', 100);
+reset role;
+select pg_temp.finish((select recorded from b), pg_temp.input('link'));
+select pg_temp.act_as('c5111111-1111-1111-1111-111111111111');
+select public.correct_recorded_payment((select id from p), 10000, 'cash', 100);
+reset role;
+select is(
+  (select count(*)::int from public.payment_links
+    where booking_id = (select recorded from b) and status in ('pending', 'expired')),
+  0, 'a correction stops a link out for the old balance'
+);
+select pg_temp.act_as('c5111111-1111-1111-1111-111111111111');
+select public.correct_recorded_payment((select id from p), 9000, 'cash', 100);
+reset role;
+select pg_temp.finish((select recorded from b), pg_temp.input('record', 10000, 300, 'cash'));
+select is((select tip_pence from public.bookings where id = (select recorded from b)), 400,
+  'checking it out again keeps the earlier tip');
+select pg_temp.act_as('c5111111-1111-1111-1111-111111111111');
+select public.correct_recorded_payment((select id from p), 8000, 'cash', 100);
+reset role;
+create temp table receipts as select count(*)::int as sent from public.notifications
+where template = 'checkout_receipt' and payload ->> 'ref' = (select ref from public.bookings where id = (select recorded from b));
+select pg_temp.finish((select recorded from b), pg_temp.input('record', 10000, 0, 'cash'), '{"charge_pence": 500}');
+select ok((select unpaid_at is not null from public.bookings where id = (select recorded from b)),
+  'a checkout that leaves some unpaid puts it back in Due for checkout');
+select is(
+  (select count(*)::int from public.notifications where template = 'checkout_receipt'
+    and payload ->> 'ref' = (select ref from public.bookings where id = (select recorded from b))),
+  (select sent from receipts), 'with no receipt until it''s paid'
 );
 update public.payments set created_at = now() - interval '3 months' where id = (select id from p);
 select pg_temp.act_as('c5111111-1111-1111-1111-111111111111');

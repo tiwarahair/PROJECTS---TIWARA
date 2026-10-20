@@ -84,7 +84,42 @@ describe("a completed booking's checkout", () => {
           },
         ],
       }),
-    ).toMatchObject({ meta: "Paid · Link", linkPaid: true });
+    ).toMatchObject({ meta: "Paid · Link", linkPaid: true, linkVia: "link" });
+
+    expect(
+      toPastRecord({
+        ...sent,
+        payment_links: [{ ...link, status: "cancelled" }],
+        payments: [
+          {
+            id: "p-5",
+            kind: "balance",
+            method: "cash",
+            amount_pence: 5200,
+            platform_fee_pence: 0,
+            tip_pence: 0,
+            created_at: "2026-10-21T10:00:00+00:00",
+          },
+        ],
+      }),
+    ).toMatchObject({ meta: "Paid · Cash", linkPaid: true, linkVia: "cash" });
+
+    expect(
+      toPastRecord({
+        ...sent,
+        payments: [
+          {
+            id: "p-7",
+            kind: "balance",
+            method: "cash",
+            amount_pence: 1300,
+            platform_fee_pence: 0,
+            tip_pence: 0,
+            created_at: "2026-10-19T10:00:00+00:00",
+          },
+        ],
+      }),
+    ).toMatchObject({ meta: "Link sent · £52 due" });
   });
 
   it("a recorded payment can be corrected", () => {
@@ -121,6 +156,39 @@ describe("a completed booking's checkout", () => {
       checkoutUnpaid: true,
       completed: true,
       status: "arrived",
+    });
+  });
+
+  it("completed but unpaid counts what was taken at checkout and its final price", () => {
+    const row = completed({
+      unpaid_at: "2026-10-20T12:00:00+00:00",
+      final_price_pence: 6000,
+      payments: [
+        {
+          id: "p-1",
+          kind: "booking",
+          method: "card",
+          amount_pence: 1448,
+          platform_fee_pence: 148,
+          tip_pence: 0,
+          created_at: "2026-10-15T10:00:00+00:00",
+        },
+        {
+          id: "p-6",
+          kind: "balance",
+          method: "cash",
+          amount_pence: 3500,
+          platform_fee_pence: 0,
+          tip_pence: 500,
+          created_at: "2026-10-20T10:00:00+00:00",
+        },
+      ],
+    });
+
+    expect(toStudioBooking(row)).toMatchObject({
+      price: 60,
+      agreedPrice: 65,
+      paidSoFar: 43,
     });
   });
 });

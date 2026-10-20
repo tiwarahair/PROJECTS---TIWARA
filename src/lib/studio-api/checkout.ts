@@ -16,7 +16,7 @@ const REFUSALS: Record<string, string> = {
   tip_not_allowed: "Payment links can’t include a tip.",
   no_contact_email: "There’s no email address to send the link to.",
   checkout_in_progress:
-    "A card payment for this booking is already going through. Wait a moment, then check Past.",
+    "This booking is already being checked out. Wait a moment, then check Past.",
   nothing_due: "Nothing is left to pay.",
   undo_not_allowed: "This checkout can’t be undone any more.",
   correction_not_allowed:
