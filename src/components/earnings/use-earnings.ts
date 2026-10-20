@@ -44,6 +44,10 @@ export interface EarningsProps {
   bankLabel?: string;
   bookingLink?: string;
   taxHold?: boolean;
+  ledger?: Ledger;
+  /** The newest payout's amount when it failed. */
+  failedPayout?: number;
+  onUpdateBank?: () => void;
   onOpenBooking?: (bookingRef: string, clientId: string) => void;
   onContinueSetup?: () => void;
   onAddTax?: () => void;
@@ -128,6 +132,8 @@ export const useEarnings = (props: EarningsProps) => {
 
   // rebuilt only when the scenario or the day changes
   const getLedger = (): Ledger => {
+    if (props.ledger) return props.ledger;
+
     const key = getLedgerKey(scenario);
 
     if (ledgerRef.current?.key !== key)

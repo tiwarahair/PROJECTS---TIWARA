@@ -16,6 +16,8 @@ import {
 import type { ChangedBooking } from "./change-emails.ts";
 import { balanceDue, checkoutReceipt } from "./checkout-emails.ts";
 import type { BalanceDue, Receipt } from "./checkout-emails.ts";
+import { payoutFailed, payoutPaid } from "./payout-emails.ts";
+import type { PayoutNotice } from "./payout-emails.ts";
 import { disputeOpened, feeCancelled, feeDeclined, feeScheduled, feeUnpaid, feeWaived } from "./fee-emails.ts";
 import type { CancelledFee, DeclinedFee, DisputeNotice, ScheduledFee, UnpaidFeeNotice, WaivedFee } from "./fee-emails.ts";
 import {
@@ -122,6 +124,8 @@ const templates: Record<string, TemplateBuilder> = {
   auto_cancel_soon: (payload) => autoCancelSoon(payload as unknown as StylistNotice),
   checkout_receipt: (payload) => checkoutReceipt(payload as unknown as Receipt),
   balance_due: (payload) => balanceDue(payload as unknown as BalanceDue),
+  payout_paid: (payload) => payoutPaid(payload as unknown as PayoutNotice),
+  payout_failed: (payload) => payoutFailed(payload as unknown as PayoutNotice),
 };
 
 export const renderEmail = (

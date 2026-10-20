@@ -1,5 +1,6 @@
 // Run by cron while fees wait for a stylist's account: sends each one on once the account can receive money.
 import { admin } from "../_shared/admin.ts";
+import { saveDestinationPayment } from "../_shared/card-payment.ts";
 import { getRefundable } from "../_shared/refundable.ts";
 import { getStripeFee } from "../_shared/stripe-fee.ts";
 import { getTransferKey } from "../_shared/stripe-keys.ts";
@@ -50,6 +51,9 @@ const sendTransfer = async (pending: PendingTransfer) => {
   const { error } = await admin.rpc("mark_transfer_sent", { payment: paymentId, transfer: transfer?.id ?? null });
 
   if (error) throw error;
+
+  if (transfer && typeof transfer.destination_payment === "string")
+    await saveDestinationPayment(pending.payment_intent_id, transfer.destination_payment, pending.stylist_account);
 };
 
 Deno.serve(async (request) => {

@@ -99,6 +99,18 @@
   padding: 11px 14px;
 }
 
+.failedText {
+  flex: 1 1 200px;
+  min-width: 0;
+  font-size: 14.5px;
+  line-height: 1.45;
+  color: var(--neutral-100);
+}
+
+.failedBanner {
+  background: rgba(184, 51, 42, 0.28);
+}
+
 .taxIcon {
   flex: 0 0 auto;
 }

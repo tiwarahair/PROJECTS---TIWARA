@@ -585,6 +585,25 @@ export type Database = {
           },
         ];
       };
+      card_payment_details: {
+        Row: {
+          available_on: string;
+          destination_payment: string;
+          payment_intent_id: string;
+        };
+        ComputedFields: never;
+        Insert: {
+          available_on: string;
+          destination_payment: string;
+          payment_intent_id: string;
+        };
+        Update: {
+          available_on?: string;
+          destination_payment?: string;
+          payment_intent_id?: string;
+        };
+        Relationships: [];
+      };
       closed_periods: {
         Row: {
           ends_on: string;
@@ -960,6 +979,7 @@ export type Database = {
           id: string;
           kind: string;
           method: string;
+          payout_id: string | null;
           platform_fee_pence: number;
           stripe_payment_intent_id: string | null;
           stripe_transfer_id: string | null;
@@ -979,6 +999,7 @@ export type Database = {
           id?: string;
           kind: string;
           method?: string;
+          payout_id?: string | null;
           platform_fee_pence?: number;
           stripe_payment_intent_id?: string | null;
           stripe_transfer_id?: string | null;
@@ -997,6 +1018,7 @@ export type Database = {
           id?: string;
           kind?: string;
           method?: string;
+          payout_id?: string | null;
           platform_fee_pence?: number;
           stripe_payment_intent_id?: string | null;
           stripe_transfer_id?: string | null;
@@ -1018,6 +1040,64 @@ export type Database = {
             columns: ["fee_id"];
             isOneToOne: false;
             referencedRelation: "booking_fees";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "payments_payout_id_fkey";
+            columns: ["payout_id"];
+            isOneToOne: false;
+            referencedRelation: "payouts";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
+      payouts: {
+        Row: {
+          amount_pence: number;
+          arrival_date: string | null;
+          bank_label: string | null;
+          created_at: string;
+          emailed_status: string | null;
+          failure_message: string | null;
+          id: string;
+          status: string;
+          stripe_payout_id: string;
+          stylist_id: string;
+          updated_at: string;
+        };
+        ComputedFields: never;
+        Insert: {
+          amount_pence: number;
+          arrival_date?: string | null;
+          bank_label?: string | null;
+          created_at?: string;
+          emailed_status?: string | null;
+          failure_message?: string | null;
+          id?: string;
+          status: string;
+          stripe_payout_id: string;
+          stylist_id: string;
+          updated_at?: string;
+        };
+        Update: {
+          amount_pence?: number;
+          arrival_date?: string | null;
+          bank_label?: string | null;
+          created_at?: string;
+          emailed_status?: string | null;
+          failure_message?: string | null;
+          id?: string;
+          status?: string;
+          stripe_payout_id?: string;
+          stylist_id?: string;
+          updated_at?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "payouts_stylist_id_fkey";
+            columns: ["stylist_id"];
+            isOneToOne: false;
+            referencedRelation: "stylists";
             referencedColumns: ["id"];
           },
         ];
@@ -1119,6 +1199,7 @@ export type Database = {
           id: string;
           method: string;
           note: string | null;
+          payout_id: string | null;
           reason: string;
           stripe_refund_id: string | null;
         };
@@ -1130,6 +1211,7 @@ export type Database = {
           id?: string;
           method?: string;
           note?: string | null;
+          payout_id?: string | null;
           reason: string;
           stripe_refund_id?: string | null;
         };
@@ -1140,6 +1222,7 @@ export type Database = {
           id?: string;
           method?: string;
           note?: string | null;
+          payout_id?: string | null;
           reason?: string;
           stripe_refund_id?: string | null;
         };
@@ -1149,6 +1232,13 @@ export type Database = {
             columns: ["booking_id"];
             isOneToOne: false;
             referencedRelation: "bookings";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "refunds_payout_id_fkey";
+            columns: ["payout_id"];
+            isOneToOne: false;
+            referencedRelation: "payouts";
             referencedColumns: ["id"];
           },
         ];
@@ -2270,6 +2360,7 @@ export type Database = {
       get_owner_manage_token: { Args: { ref: string }; Returns: string };
       get_paid_pence: { Args: { target: string }; Returns: number };
       get_payment_link: { Args: { token: string }; Returns: Json };
+      get_payout_rank: { Args: { status: string }; Returns: number };
       get_protection_status: {
         Args: {
           client: Json;
@@ -2342,6 +2433,26 @@ export type Database = {
         };
         Returns: Json;
       };
+      get_stylist_ledger: {
+        Args: { target_stylist: string };
+        Returns: {
+          amount_pence: number;
+          appointment: string;
+          at: string;
+          booking_id: string;
+          booking_ref: string;
+          card_fee_pence: number;
+          client_id: string;
+          client_name: string;
+          description: string;
+          id: string;
+          method: string;
+          note: string;
+          payout_id: string;
+          service: string;
+          status: string;
+        }[];
+      };
       get_stylist_profile: { Args: { lookup: string }; Returns: Json };
       get_unconfirmed_where: { Args: { target: string }; Returns: string };
       get_unfinished_refunds: {
@@ -2413,6 +2524,14 @@ export type Database = {
         Returns: boolean;
       };
       is_valid_slug: { Args: { candidate: string }; Returns: boolean };
+      link_payout: {
+        Args: {
+          intents: string[];
+          stripe_payout: string;
+          stripe_refunds: string[];
+        };
+        Returns: undefined;
+      };
       lock_own_booking: {
         Args: { target: string };
         Returns: {
@@ -2622,6 +2741,10 @@ export type Database = {
         Args: { method: string; target_booking: string };
         Returns: undefined;
       };
+      record_refund: {
+        Args: { amount: number; reason: string; target: string };
+        Returns: undefined;
+      };
       record_stripe_refund: {
         Args: { amount: number; intent: string; refund_id: string };
         Returns: undefined;
@@ -2652,6 +2775,11 @@ export type Database = {
       retry_stuck_refund: { Args: { target: string }; Returns: undefined };
       retry_stuck_transfer: { Args: { payment: string }; Returns: undefined };
       revoke_confirm_links: { Args: { target: string }; Returns: undefined };
+      save_card_payment: {
+        Args: { available: string; destination: string; intent: string };
+        Returns: undefined;
+      };
+      save_payout: { Args: { account: string; payout: Json }; Returns: string };
       save_stylist_client: {
         Args: { details: Json; target?: string; target_stylist: string };
         Returns: string;

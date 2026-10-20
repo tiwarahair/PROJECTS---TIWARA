@@ -44,6 +44,8 @@ import { fetchStudioBookings } from "../lib/studio-api/bookings";
 import { fetchStylistStudio } from "../lib/studio-api";
 import { closeBusiness, reopenBusiness } from "../lib/studio-api/settings";
 import type { StudioBookings } from "../lib/studio-api/bookings";
+import { fetchStudioEarnings } from "../lib/studio-api/earnings";
+import type { StudioEarnings } from "../lib/studio-api/earnings";
 import type { StylistStudio } from "../lib/studio-api";
 import { fetchPaymentLink, startLinkPayment } from "../lib/payment-link-api";
 import {
@@ -85,6 +87,7 @@ export const api = createApi({
     "Slots",
     "ManagedBooking",
     "Bookings",
+    "Earnings",
   ],
   refetchOnReconnect: true,
   endpoints: (build) => ({
@@ -154,6 +157,11 @@ export const api = createApi({
     getStudioBookings: build.query<StudioBookings, string>({
       providesTags: ["Bookings"],
       queryFn: (stylistId) => toQueryResult(fetchStudioBookings(stylistId)),
+    }),
+    getStudioEarnings: build.query<StudioEarnings, string>({
+      providesTags: ["Earnings"],
+      keepUnusedDataFor: 60,
+      queryFn: (stylistId) => toQueryResult(fetchStudioEarnings(stylistId)),
     }),
     getStylistProfile: build.query<PublicProfile | null, string>({
       providesTags: ["StylistProfile"],
@@ -323,6 +331,7 @@ export const {
   useSearchStylistsInfiniteQuery,
   useGetStylistStudioQuery,
   useGetStudioBookingsQuery,
+  useGetStudioEarningsQuery,
   useGetTwoFactorDevicesQuery,
   useUpdateProfileMutation,
   useSetBusinessClosedMutation,

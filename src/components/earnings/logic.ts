@@ -72,3 +72,14 @@ export const getTakings = (
 
 export const getMethodLabel = ({ isRecorded, method }: Transaction): string =>
   isRecorded ? `Recorded · ${method}` : method;
+
+/** A failed payout's link opens the stylist's own Stripe when Studio gives a way to */
+export const openUpdateBank = (
+  event: { preventDefault: () => void },
+  onUpdateBank?: () => void,
+) => {
+  if (!onUpdateBank) return;
+
+  event.preventDefault();
+  onUpdateBank();
+};

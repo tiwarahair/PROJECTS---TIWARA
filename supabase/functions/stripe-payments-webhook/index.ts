@@ -1,4 +1,5 @@
 import Stripe from "npm:stripe@22.6.2";
+import { saveCardPayment } from "../_shared/card-payment.ts";
 import { stripe } from "../_shared/stripe.ts";
 import { isHandled, markHandled } from "../_shared/stripe-events.ts";
 import { onDispute, onPaymentFailed, onPaymentSucceeded, onRefundCreated } from "./handlers.ts";
@@ -24,6 +25,10 @@ Deno.serve(async (request) => {
 
   try {
     if (event.type === "payment_intent.succeeded") await onPaymentSucceeded(event.data.object);
+
+    // any card payment that went to a stylist: when its money becomes available to them
+    if (event.type === "payment_intent.succeeded" && event.data.object.transfer_data && event.data.object.latest_charge)
+      await saveCardPayment(event.data.object.id, String(event.data.object.latest_charge));
 
     if (event.type === "payment_intent.payment_failed") await onPaymentFailed(event.data.object);
 

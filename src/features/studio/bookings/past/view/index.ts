@@ -5,6 +5,7 @@ import {
   refundBookingPayment,
   SecondFactorNeeded,
 } from "../../../../../lib/studio-api/money";
+import { recordRefund } from "../../../../../lib/studio-api/earnings";
 import { SaveError } from "../../../../../lib/studio-writes";
 import { formatMoney, roundToPence } from "../../../../../utils/money";
 import { toPence } from "../../../../booking/logic/payment";
@@ -74,8 +75,17 @@ export const getPastCheckoutView = (studio: StudioController) => {
 
       const { remoteId } = row;
 
-      // a refund made outside the app (cash, bank) is only noted on the row
-      if (!remoteId || isOffPlatform) return;
+      if (!remoteId) return;
+
+      // given back outside the app (cash, bank, card reader): saved as recorded, no money moves through us
+      if (isOffPlatform) {
+        context.sync?.save(
+          () => recordRefund(remoteId, toPence(amount), reason),
+          { pastNew: previous },
+        );
+
+        return;
+      }
 
       const refund = async () => {
         try {

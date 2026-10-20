@@ -489,6 +489,12 @@ verify_jwt = false
 [functions.stripe-payments-webhook]
 verify_jwt = false
 
+[functions.stripe-payouts-webhook]
+verify_jwt = false
+
+[functions.studio-balance]
+verify_jwt = false
+
 # called by pg_cron with x-cron-secret, not a user's token
 [functions.send-notifications]
 verify_jwt = false

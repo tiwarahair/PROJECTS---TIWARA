@@ -2,7 +2,7 @@ import type { CSSProperties, MouseEvent } from "react";
 import { Copy, Landmark } from "lucide-react";
 import { joinClassNames } from "../../utils/class-names";
 import { DAY_MS, DEFAULT_BANK, STATUS_COLOURS, STRIPE_PAYOUTS } from "./data";
-import { getClient } from "./logic";
+import { getClient, openUpdateBank } from "./logic";
 import type { Payout, Transaction, TransactionStatus } from "./data";
 import type { EarningsController, EarningsProps } from "./use-earnings";
 import styles from "../../styles/components/earnings/lists.module.css";
@@ -181,7 +181,10 @@ export const EarningsLists = ({
                         href={STRIPE_PAYOUTS}
                         target="_blank"
                         rel="noopener"
-                        onClick={(event: MouseEvent) => event.stopPropagation()}
+                        onClick={(event: MouseEvent) => {
+                          event.stopPropagation();
+                          openUpdateBank(event, props.onUpdateBank);
+                        }}
                       >
                         Update bank details in Stripe ↗
                       </a>

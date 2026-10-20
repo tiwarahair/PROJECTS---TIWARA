@@ -478,7 +478,7 @@ begin
   if booking.status <> 'completed' or booking.checkout ->> 'method' not in ('record', 'none')
     or booking.checkout ->> 'from_status' not in ('confirmed', 'arrived')
     or booking.completed_at < now() - interval '10 minutes'
-    or exists (select 1 from public.refunds where booking_id = target and reason = 'price_lowered') then
+    or exists (select 1 from public.refunds where booking_id = target) then
     raise exception 'undo_not_allowed';
   end if;
 

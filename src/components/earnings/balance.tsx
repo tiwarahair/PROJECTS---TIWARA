@@ -1,4 +1,5 @@
 import { Lock, TriangleAlert } from "lucide-react";
+import { joinClassNames } from "../../utils/class-names";
 import type { EarningsController, EarningsProps } from "./use-earnings";
 import styles from "../../styles/components/earnings/balance.module.css";
 import { formatMoney } from "../../utils/money";
@@ -11,7 +12,14 @@ interface BalanceProps {
 
 export const Balance = ({
   earnings: { ledger, showToast },
-  props: { taxHold, onLearnMore, onAddTax, onContinueSetup },
+  props: {
+    taxHold,
+    failedPayout,
+    onLearnMore,
+    onAddTax,
+    onContinueSetup,
+    onUpdateBank,
+  },
 }: BalanceProps) => {
   const { scenario } = ledger;
   const pausedText = formatMoney(ledger.pausedAmount, { pence: "always" });
@@ -66,7 +74,29 @@ export const Balance = ({
           </span>
         </div>
       )}
-      {!!taxHold && (
+      {!!failedPayout && (
+        <div
+          className={joinClassNames(styles.taxBanner, styles.failedBanner)}
+          role="alert"
+        >
+          <TriangleAlert
+            className={styles.taxIcon}
+            size={18}
+            color="var(--accent-200)"
+            strokeWidth={1.7}
+          />
+          <div className={styles.failedText}>
+            {`Your ${formatMoney(failedPayout, { pence: "always" })} payout couldn’t be sent. Your bank rejected it.`}
+          </div>
+          <button
+            className={styles.addTax}
+            onClick={getHandler(onUpdateBank, "Opening Stripe")}
+          >
+            Update bank details
+          </button>
+        </div>
+      )}
+      {!!taxHold && !failedPayout && (
         <div className={styles.taxBanner} role="status">
           <TriangleAlert
             className={styles.taxIcon}
