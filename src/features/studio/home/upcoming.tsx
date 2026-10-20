@@ -11,7 +11,7 @@ interface UpcomingPanelProps {
 }
 
 export const UpcomingPanel = ({ studio, view }: UpcomingPanelProps) => {
-  const { state, isNew, actions } = studio;
+  const { state, hasBookings, actions } = studio;
 
   return (
     <section
@@ -37,7 +37,7 @@ export const UpcomingPanel = ({ studio, view }: UpcomingPanelProps) => {
         <div className={styles.emptyCard}>
           <div className={styles.emptyCardTitle}>{view.emptyTitle}</div>
           <div className={styles.emptyCardBody}>
-            {isNew
+            {!hasBookings
               ? "Share your booking link to get your first one."
               : "Open a slot or share your link to fill it."}
           </div>

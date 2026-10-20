@@ -20,7 +20,7 @@ export const getSettingsView = (
   navigate: (to: string) => void,
   signOut: () => void,
 ) => {
-  const { state, setState, props, isDesktop, isNew, actions, context } = studio;
+  const { state, setState, props, isDesktop, actions, context } = studio;
 
   const { showToast, openSubpage, openSheet, openTwoFactor, scrollBody } =
     actions;
@@ -148,12 +148,13 @@ export const getSettingsView = (
         "none" | "verifying" | "action" | "paused" | "active"),
     payoutBank: state.payoutBank,
     openStripeDashboard: () => void actions.openStripeDashboard(),
-    accountUpcoming: isNew
-      ? 0
-      : state.bookings.filter(
-          ({ dayOffset, status }) =>
-            (dayOffset || 0) >= 0 && status !== "cancelled",
-        ).length,
+    accountUpcoming: state.bookings.filter(
+      ({ dayOffset, status, completed }) =>
+        (dayOffset || 0) >= 0 &&
+        status !== "cancelled" &&
+        status !== "autocancelled" &&
+        !completed,
+    ).length,
     onAccountNav: (to: "business" | "earnings") => {
       if (to === "earnings") {
         setState({ tab: "earnings", page: null });

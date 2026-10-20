@@ -157,11 +157,18 @@ export const useStudio = (props: StudioProps) => {
   useStudioMount(latest, props.fixture, setTick);
   usePageFollow(latest, state);
 
+  // a stylist who has never had a booking sees the welcome messages; anyone else sees the usual empty states
+  const hasBookings =
+    state.bookings.length > 0 ||
+    state.pastNew.length > 0 ||
+    seedPast.length > 0;
+
   return {
     state,
     setState,
     props,
     isNew,
+    hasBookings,
     isWide,
     isDesktop,
     actions,

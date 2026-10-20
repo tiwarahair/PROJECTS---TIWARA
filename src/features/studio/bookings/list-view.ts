@@ -75,7 +75,7 @@ const getListSummary = ({
 };
 
 const getEmptyKind = (context: BookingsContext): EmptyKind => {
-  if (context.studio.isNew) return "new";
+  if (!context.studio.hasBookings) return "new";
 
   if (getFilterCount(context) > 0 || context.query) return "filtered";
 

@@ -21,7 +21,7 @@ const RANGE_DAYS: Record<string, number> = { today: 1, week: 7 };
 const getZeroStat = (label: string) => (label === "Revenue" ? "£0" : "0");
 
 export const getHomeView = (studio: StudioController) => {
-  const { state, setState, isDesktop, isNew, actions } = studio;
+  const { state, setState, isDesktop, isNew, hasBookings, actions } = studio;
 
   const upcoming = getDecoratedBookings(state, (booking) =>
     actions.openSheet("booking", { sheetBookingId: booking.id }),
@@ -66,7 +66,7 @@ export const getHomeView = (studio: StudioController) => {
   };
 
   const getEmptyTitle = () => {
-    if (isNew) return "No appointments yet";
+    if (!hasBookings) return "No appointments yet";
 
     return state.range === "today"
       ? "Nothing booked today"

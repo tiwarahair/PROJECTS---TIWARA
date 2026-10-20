@@ -96,9 +96,10 @@ export const getSettingsNav = (
     none: "No protection",
   };
 
-  const clientCount = isNew
-    ? state.extraClients.length
-    : getAllClients(state).length;
+  const clientCount =
+    isNew && !state.account
+      ? state.extraClients.length
+      : getAllClients(state).length;
 
   const businessTypes: Record<string, string> = {
     shop: "Shop / salon",
