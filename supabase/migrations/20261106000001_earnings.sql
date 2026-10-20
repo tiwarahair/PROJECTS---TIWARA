@@ -174,7 +174,7 @@ set search_path = ''
 as $$
   with owned as (
     select bookings.*, bookings.snapshot ->> 'service_name' as service,
-      coalesce(bookings.stylist_client_id::text, 'walk-in') as client_key,
+      coalesce(bookings.stylist_client_id::text, 'walk-in:' || bookings.id) as client_key,
       coalesce(nullif(trim(concat_ws(' ', clients.first, clients.last)), ''),
         nullif(trim(concat_ws(' ', bookings.contact ->> 'first', bookings.contact ->> 'last')), ''), 'Walk-in') as name
     from public.bookings
@@ -259,7 +259,7 @@ as $$
     union all
 
     select returned.id::text || ':fee', returned.booking_id, returned.ref, returned.client_key, returned.name,
-      returned.service, returned.starts_at, 'Adjustment', 'Card', returned.created_at, -returned.fee_share, 0,
+      returned.service, returned.starts_at, 'Adjustment (recovery)', 'Card', returned.created_at, -returned.fee_share, 0,
       returned.line_status, returned.payout_id, 'Booking fee for your cancellation'
     from returned
   )

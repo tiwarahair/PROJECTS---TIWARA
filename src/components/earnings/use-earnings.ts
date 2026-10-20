@@ -255,7 +255,7 @@ export const useEarnings = (props: EarningsProps) => {
             ),
           clients: props.clients,
           businessName: props.businessName || "Tiwára’s House",
-          legalName: props.legalName || "Amara Okonkwo",
+          legalName: props.legalName ?? "Amara Okonkwo",
           vatNumber: props.vatNumber || "",
           bankLabel: props.bankLabel,
         }),

@@ -107,7 +107,7 @@ select is(
   (select string_agg(concat_ws(' ', description, amount_pence), ', ' order by description)
     from public.get_stylist_ledger((select id from public.stylists where slug = 'earnings-test'))
     where id like (select id::text || '%' from public.refunds where stripe_refund_id = 're_earnings')),
-  'Adjustment -163, Refund -3000', 'a stylist''s cancellation shows the refund and the booking fee it cost them'
+  'Adjustment (recovery) -163, Refund -3000', 'a stylist''s cancellation shows the refund and the booking fee it cost them'
 );
 
 -- money given back by hand: never more than was paid outside the app

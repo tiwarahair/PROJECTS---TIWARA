@@ -45,13 +45,17 @@ const toTransaction = (row: LedgerRow): Transaction => {
   };
 };
 
+// shown by Stripe's own reference, so the stylist can find it in their Stripe dashboard
 const toPayout = (row: PayoutRow, transactions: Transaction[]): Payout => {
-  const items = transactions.filter(({ payoutId }) => payoutId === row.id);
+  const items = transactions.filter(
+    ({ payoutId }) => payoutId === row.stripe_payout_id,
+  );
+
   const sent = new Date(row.created_at);
   const { gross, fees, refunds } = getTotals(items);
 
   return {
-    id: row.id,
+    id: row.stripe_payout_id,
     amount: toPounds(row.amount_pence),
     gross,
     fees,
@@ -71,7 +75,16 @@ export const toLedger = ({
   payouts,
   balance,
 }: StudioEarnings): Ledger => {
-  const transactions = lines.map(toTransaction);
+  const stripeIds = new Map(
+    payouts.map(({ id, stripe_payout_id: stripeId }) => [id, stripeId]),
+  );
+
+  const transactions = lines.map((row) =>
+    toTransaction({
+      ...row,
+      payout_id: row.payout_id ? (stripeIds.get(row.payout_id) ?? null) : null,
+    }),
+  );
 
   return {
     transactions,

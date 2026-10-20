@@ -62,7 +62,7 @@ describe("the stylist's earnings", () => {
       amount: 30,
       fee: 0.65,
       net: 29.35,
-      payoutId: "po-1",
+      payoutId: "po_1",
     });
 
     expect(ledger.transactions[1]).toMatchObject({
@@ -72,6 +72,7 @@ describe("the stylist's earnings", () => {
     });
 
     expect(ledger.payouts[0]).toMatchObject({
+      id: "po_1",
       amount: 29.35,
       gross: 30,
       fees: 0.65,

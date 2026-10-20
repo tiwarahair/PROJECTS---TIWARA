@@ -41,7 +41,7 @@ export const StudioEarnings = ({ studio }: { studio: StudioController }) => {
         ledger: { ...toLedger(earnings), scenario: live ? "default" : "setup" },
         clients: getLedgerClients(earnings),
         failedPayout: getFailedPayout(earnings),
-        legalName: tax?.legalName || undefined,
+        legalName: tax?.legalName ?? "",
         vatNumber: business.vatOn ? business.details?.vat : undefined,
         bankLabel: payoutBank ?? "your bank account",
         onUpdateBank: () => void actions.openStripeDashboard(),
