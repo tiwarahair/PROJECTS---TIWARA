@@ -23,11 +23,13 @@ import type { LoginAlert } from "./security-emails.ts";
 import { disputeOpened, feeCancelled, feeDeclined, feeScheduled, feeUnpaid, feeWaived } from "./fee-emails.ts";
 import type { CancelledFee, DeclinedFee, DisputeNotice, ScheduledFee, UnpaidFeeNotice, WaivedFee } from "./fee-emails.ts";
 import {
-  autoCancelled,
   autoCancelSoon,
+  autoCancelled,
   bookingAddedByStylist,
   bookingAutoCancelled,
   bookingManageLink,
+  bookingReminder24h,
+  bookingReminder48h,
   bookingUpdatedByStylist,
   confirmBooking,
   confirmBookingChanged,
@@ -119,6 +121,8 @@ const templates: Record<string, TemplateBuilder> = {
   confirm_booking_changed: (payload) => confirmBookingChanged(payload as unknown as ConfirmLink),
   booking_added_by_stylist: (payload) => bookingAddedByStylist(payload as unknown as StudioBooking),
   booking_updated_by_stylist: (payload) => bookingUpdatedByStylist(payload as unknown as StudioBooking),
+  booking_reminder_48h: (payload) => bookingReminder48h(payload as unknown as StudioBooking),
+  booking_reminder_24h: (payload) => bookingReminder24h(payload as unknown as StudioBooking),
   booking_confirmed_by_client: (payload) => bookingConfirmed(payload as unknown as ConfirmedBooking),
   booking_manage_link: (payload) => bookingManageLink(payload as unknown as StudioBooking),
   booking_auto_cancelled: (payload) => bookingAutoCancelled(payload as unknown as BookingDetails),

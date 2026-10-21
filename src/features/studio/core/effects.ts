@@ -174,12 +174,10 @@ export const useStudioMount = (
 
     const tick = window.setInterval(() => {
       latest.current.actions.followToday();
-      latest.current.actions.autoComplete();
       setTick((count) => count + 1);
     }, 30000);
 
     current.followToday();
-    current.autoComplete();
 
     if (currentContext.getState().tab === "bookings")
       current.scrollCalendarToNow();
