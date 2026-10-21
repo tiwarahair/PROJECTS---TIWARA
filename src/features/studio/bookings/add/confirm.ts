@@ -11,7 +11,7 @@ import { createStudioBooking } from "../../../../lib/studio-api/booking-writes";
 import type { StudioContact } from "../../../../lib/studio-api/booking-writes";
 import { addStudioClient } from "../../clients/save";
 import { keepLocalId, toStartsAt } from "../records";
-import { isWaiting, removeLocal, replaceWithRow } from "../save";
+import { isWaiting, keepRemoteId, removeLocal, replaceWithRow } from "../save";
 import { getAddonValue } from "./addon-values";
 import type { AddContext } from "./context";
 import type { NewClient } from "./types";
@@ -75,6 +75,7 @@ const getBookingRecord = (
   const isLink =
     !isProtectionSkipped && !isLinkTooLate && state.addProtection !== "none";
 
+  const mode = isLink ? state.policy.mode : "none";
   const id = Date.now();
   const sentAt = Date.now();
 
@@ -94,8 +95,8 @@ const getBookingRecord = (
     stylistNote: state.addNote.trim(),
     address: state.addAddress.trim(),
     walkIn: !!state.addWalkIn,
-    protectionMode: isLink ? state.policy.mode : "none",
-    agreedPolicy: isLink ? state.policy : { ...state.policy, mode: "none" },
+    protectionMode: mode,
+    agreedPolicy: { ...state.policy, mode },
   };
 
   if (state.addExtra) record.extra = state.addExtra;
@@ -185,21 +186,8 @@ const saveRemote = (context: AddContext, record: StudioBooking) => {
       const row = await fetchStudioBooking(id);
 
       setState((current) => {
-        // changes queued behind this save bring the server's copy once they're saved
-        if (isWaiting(record.id))
-          return {
-            bookings: current.bookings
-              .filter(({ remoteId }) => remoteId !== id)
-              .map((item) =>
-                item.id === record.id ? { ...item, remoteId: id } : item,
-              ),
-            // cancelled or marked a no-show before this save came back
-            pastNew: current.pastNew.map((item) =>
-              item.original?.id === record.id
-                ? { ...item, remoteId: id }
-                : item,
-            ),
-          };
+        // the last queued change brings the server's copy
+        if (isWaiting(record.id)) return keepRemoteId(current, record.id, id);
 
         return row
           ? replaceWithRow(current, record.id, row)

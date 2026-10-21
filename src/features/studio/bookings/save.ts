@@ -22,6 +22,20 @@ export const removeLocal = (
   pastNew: pastNew.filter(({ original }) => original?.id !== localId),
 });
 
+/** marks a booking saved while changes queued behind it still run; a live copy that got in first is dropped. */
+export const keepRemoteId = (
+  { bookings, pastNew }: BookingLists,
+  localId: number,
+  remoteId: string,
+) => ({
+  bookings: bookings
+    .filter((item) => item.remoteId !== remoteId)
+    .map((item) => (item.id === localId ? { ...item, remoteId } : item)),
+  pastNew: pastNew.map((item) =>
+    item.original?.id === localId ? { ...item, remoteId } : item,
+  ),
+});
+
 /** The server's copy of a booking in place of the one shown, under the same local id. */
 export const replaceWithRow = (
   current: StudioState,
