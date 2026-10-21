@@ -57,6 +57,7 @@ export const createStudioActions = (context: StudioContext) => {
     closeSheet,
     guardSheet: sheets.guardSheet,
     requestCloseSheet: sheets.requestCloseSheet,
+    backToAdd: sheets.backToAdd,
     openPage,
     closePage,
     leavePage,

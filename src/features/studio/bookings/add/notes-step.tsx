@@ -39,5 +39,8 @@ export const NotesStep = ({ view }: NotesStepProps) => (
       </label>
     </div>
     <div className={shared.summary}>{view.summary}</div>
+    {!!view.noEmailNote && (
+      <div className={styles.hint}>{view.noEmailNote}</div>
+    )}
   </>
 );

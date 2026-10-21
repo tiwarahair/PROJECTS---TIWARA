@@ -7,6 +7,12 @@ import type { StudioContext } from "../core/actions";
 import { getClientNames } from "../core/model";
 import type { StudioClient, StudioPatch, StudioState } from "../core/types";
 
+// a client added in Studio keeps the id they were shown with until their save returns the real one
+const savedIds = new Map<string, string>();
+
+const getSavedId = (id: string | null | undefined) =>
+  savedIds.get(id ?? "") ?? id ?? "";
+
 const renameClient = (
   state: StudioState,
   from: string,
@@ -20,6 +26,13 @@ const renameClient = (
     booking.client === from ? { ...booking, client: to } : booking,
   ),
   addClient: state.addClient === from ? to : state.addClient,
+  // a change made while they were still saving moves with them
+  clientOverrides: Object.fromEntries(
+    Object.entries(state.clientOverrides).map(([id, override]) => [
+      id === from ? to : id,
+      override,
+    ]),
+  ),
   clientAddresses: Object.fromEntries(
     Object.entries(state.clientAddresses).map(([id, address]) => [
       id === from ? to : id,
@@ -75,6 +88,7 @@ export const addStudioClient = (
         toDetails(client, photoPath),
       );
 
+      savedIds.set(localId, id);
       setState((state) => renameClient(state, localId, id, photoPath));
     },
     (state) => ({
@@ -83,7 +97,7 @@ export const addStudioClient = (
   );
 };
 
-/** Saves a real client's details, which the screen already shows. */
+/** Saves a real client's details, which the screen already shows; one still being added saves after it. */
 export const saveStudioClient = (
   { setState, sync }: StudioContext,
   client: StudioClient,
@@ -91,13 +105,15 @@ export const saveStudioClient = (
   revert: StudioPatch,
 ) =>
   sync.save(async (stylistId) => {
+    const id = getSavedId(client.id);
+
     const photoPath = await getPhotoPath(
       stylistId,
       image,
       client.photoPath ?? "",
     );
 
-    await saveStylistClient(stylistId, client.id, toDetails(client, photoPath));
+    await saveStylistClient(stylistId, id, toDetails(client, photoPath));
 
     if (client.photoPath && client.photoPath !== photoPath)
       await removeClientPhoto(client.photoPath).catch(() => undefined);
@@ -105,7 +121,7 @@ export const saveStudioClient = (
     setState(({ clientOverrides }) => ({
       clientOverrides: {
         ...clientOverrides,
-        [client.id ?? ""]: { ...clientOverrides[client.id ?? ""], photoPath },
+        [id]: { ...clientOverrides[id], photoPath },
       },
     }));
   }, revert);

@@ -1,6 +1,6 @@
 import { renderNotice } from "../_shared/email-layout.ts";
 import type { RenderedEmail } from "../_shared/email-layout.ts";
-import { formatWhen, pounds } from "./booking-emails.ts";
+import { formatWhen, getLinkWording, pounds } from "./booking-emails.ts";
 import type { BookingDetails } from "./booking-emails.ts";
 
 interface ReceiptLine {
@@ -32,6 +32,7 @@ export interface BalanceDue extends Receipt {
   amount_pence: number;
   expires_at: string;
   pay_url: string;
+  is_reminder?: boolean;
 }
 
 const METHODS: Record<string, string> = {
@@ -77,9 +78,15 @@ export const checkoutReceipt = (receipt: Receipt): RenderedEmail =>
     footnote: "Questions about this receipt? Reply to this email.",
   });
 
-export const balanceDue = (balance: BalanceDue): RenderedEmail =>
-  renderNotice({
-    title: `Pay ${pounds(balance.amount_pence)} to ${balance.stylist_name}`,
+export const balanceDue = (balance: BalanceDue): RenderedEmail => {
+  const { title, expiry } = getLinkWording(
+    `Pay ${pounds(balance.amount_pence)} to ${balance.stylist_name}`,
+    balance.expires_at,
+    balance.is_reminder,
+  );
+
+  return renderNotice({
+    title,
     paragraphs: [
       `Thanks for visiting ${balance.stylist_name} for ${balance.service_name} on ${formatWhen(balance.starts_at)} (UK time).`,
       ...getSummary(balance),
@@ -87,5 +94,6 @@ export const balanceDue = (balance: BalanceDue): RenderedEmail =>
       `Booking reference: ${balance.ref}`,
     ],
     button: { label: `Pay ${pounds(balance.amount_pence)}`, url: balance.pay_url },
-    footnote: `The link works until ${formatWhen(balance.expires_at)}. Questions? Reply to this email.`,
+    footnote: `${expiry} Questions? Reply to this email.`,
   });
+};

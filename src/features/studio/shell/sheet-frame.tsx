@@ -71,7 +71,8 @@ const getSheetFrame = (studio: StudioController) => {
     (isBooking && (SUB_STEPS.includes(bookingStep) || isNarrowCheckout)) ||
     (isClientSheet &&
       (!!state.clientFromBookingId || !!state.clientFromPastId)) ||
-    (sheet === "clientEdit" && !!state.clientEditFromView) ||
+    (sheet === "clientEdit" &&
+      (!!state.clientEditFromView || !!state.clientEditFromAdd)) ||
     (sheet === "dispute" && !!state.disputeForm?.fromPastId) ||
     (!!state.fromClientId &&
       (sheet === "past" || (isBooking && bookingStep === "view")));
@@ -101,6 +102,12 @@ const getSheetFrame = (studio: StudioController) => {
 
     if (isClientSheet && state.clientFromPastId) {
       actions.openSheet("past", { selectedPastId: state.clientFromPastId });
+
+      return;
+    }
+
+    if (sheet === "clientEdit" && state.clientEditFromAdd) {
+      actions.guardSheet(actions.backToAdd);
 
       return;
     }

@@ -26,6 +26,8 @@ const REFUSALS: Record<string, string> = {
   invalid_choices:
     "Those add-ons aren’t available any more. Remove them and try again.",
   invalid_address: "That address is too long. Keep it to 300 characters.",
+  email_required:
+    "Add an email for the client first: the confirm link is sent by email.",
 };
 
 const send = <T>(

@@ -36,7 +36,7 @@ export const getDraftView = ({
   actions,
   setOverride,
 }: ClientsContext) => {
-  const { openSheet, showToast, closeSheet, scrollBody } = actions;
+  const { openSheet, showToast, closeSheet, scrollBody, backToAdd } = actions;
   // ---- the add / edit client sheet ----
   const draft = state.clientEdit;
 
@@ -82,11 +82,14 @@ export const getDraftView = ({
         { clientOverrides: previous },
       );
 
-      if (state.clientEditFromView)
+      if (state.clientEditFromAdd) backToAdd();
+      else if (state.clientEditFromView)
         openSheet("cliView", { selectedClientId: draft.id });
       else closeSheet();
 
-      showToast("Changes saved");
+      showToast(
+        state.clientEditFromAdd && data.email ? "Email added" : "Changes saved",
+      );
 
       return;
     }
@@ -127,9 +130,11 @@ export const getDraftView = ({
       openSheet("cliView", { selectedClientId: client.id }),
     ),
     saveLabel: draft?.id ? "Save changes" : "Add client",
+    isEmailFocused: state.clientEditFocus === "email",
     saveDraft,
     cancelDraft: () => {
-      if (state.clientEditFromView)
+      if (state.clientEditFromAdd) backToAdd();
+      else if (state.clientEditFromView)
         openSheet("cliView", { selectedClientId: draft?.id ?? null });
       else closeSheet();
     },

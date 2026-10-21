@@ -1,6 +1,6 @@
 import { renderNotice } from "../_shared/email-layout.ts";
 import type { RenderedEmail } from "../_shared/email-layout.ts";
-import { formatWhen, pounds } from "./booking-emails.ts";
+import { formatWhen, getLinkWording, pounds } from "./booking-emails.ts";
 import type { BookingDetails } from "./booking-emails.ts";
 
 type FeeKind = "late_cancel" | "no_show";
@@ -95,11 +95,18 @@ export interface DeclinedFee extends BookingDetails {
   card_label: string | null;
   expires_at: string;
   pay_url: string;
+  is_reminder?: boolean;
 }
 
-export const feeDeclined = (fee: DeclinedFee): RenderedEmail =>
-  renderNotice({
-    title: `Pay your ${pounds(fee.amount_pence)} ${FEE_NAMES[fee.kind]}`,
+export const feeDeclined = (fee: DeclinedFee): RenderedEmail => {
+  const { title, expiry } = getLinkWording(
+    `Pay your ${pounds(fee.amount_pence)} ${FEE_NAMES[fee.kind]}`,
+    fee.expires_at,
+    fee.is_reminder,
+  );
+
+  return renderNotice({
+    title,
     paragraphs: [
       `We couldn’t charge ${fee.card_label ?? "your saved card"} for the ${FEE_NAMES[fee.kind]} from ${fee.service_name} with ${fee.stylist_name} on ${formatWhen(fee.starts_at)} (UK time).`,
       `Please pay the ${pounds(fee.amount_pence)} left with the button below. You can use any card.`,
@@ -107,8 +114,9 @@ export const feeDeclined = (fee: DeclinedFee): RenderedEmail =>
       `Booking reference: ${fee.ref}`,
     ],
     button: { label: `Pay ${pounds(fee.amount_pence)}`, url: fee.pay_url },
-    footnote: `The link works until ${formatWhen(fee.expires_at)}. Questions about this fee? Reply to this email.`,
+    footnote: `${expiry} Questions about this fee? Reply to this email.`,
   });
+};
 
 export interface UnpaidFeeNotice extends BookingDetails {
   kind: FeeKind;

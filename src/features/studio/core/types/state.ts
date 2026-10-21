@@ -79,6 +79,9 @@ export interface StudioState {
   clientOverrides: Record<string, Partial<StudioClient>>;
   clientEdit: ClientEditDraft | null;
   clientEditFromView?: boolean;
+  /** opened from the add-booking flow, which it goes back to */
+  clientEditFromAdd?: boolean;
+  clientEditFocus?: "email";
   range: "today" | "week" | "month";
   sheet: SheetKind | null;
   out: boolean;

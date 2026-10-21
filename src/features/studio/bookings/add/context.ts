@@ -57,6 +57,19 @@ export const getContext = (studio: StudioController) => {
       : null;
 
   const hasStarted = msToStart != null && msToStart <= 0;
+  const isLinkTooLate = msToStart != null && msToStart <= 2 * 3600000;
+
+  const isProtectionSkipped =
+    state.policy.mode === "none" || state.addWalkIn || hasStarted;
+
+  // the confirm link goes by email: choosing it for a client without one needs an email first
+  const hasNoEmail = !state.addWalkIn && !!client && !client.email?.trim();
+
+  const isEmailNeeded =
+    state.addProtection === "link" &&
+    hasNoEmail &&
+    !isLinkTooLate &&
+    !isProtectionSkipped;
 
   const readyByStep: Record<number, boolean> = {
     1:
@@ -68,6 +81,7 @@ export const getContext = (studio: StudioController) => {
       state.addDay != null &&
       !!state.addTime &&
       (conflicts.length === 0 || state.addOverlapAllowed),
+    4: !isEmailNeeded,
   };
 
   return {
@@ -85,10 +99,11 @@ export const getContext = (studio: StudioController) => {
     addNew,
     duplicate,
     hasStarted,
-    isProtectionSkipped:
-      state.policy.mode === "none" || state.addWalkIn || hasStarted,
+    isProtectionSkipped,
     // the client needs until 2 hours before the start to confirm
-    isLinkTooLate: msToStart != null && msToStart <= 2 * 3600000,
+    isLinkTooLate,
+    hasNoEmail,
+    isEmailNeeded,
     isDisabled: readyByStep[addStep] === false,
     price: parseNumber(state.addPrice ?? (service ? service.price : 0)),
     priceLabel: state.addPrice != null ? state.addPrice : service?.price,

@@ -202,6 +202,22 @@ describe("declined fee and dispute emails", () => {
     expect(text).toContain("Pay £20.00: https://dev.tiwarashouse.com/pay?token=abc");
   });
 
+  it("remind the client two days before the link runs out, with a fresh link", () => {
+    const { subject, text } = feeDeclined({
+      ...booking,
+      kind: "no_show",
+      fee_pence: 5000,
+      amount_pence: 2000,
+      card_label: null,
+      expires_at: "2026-10-30T16:30:00Z",
+      pay_url: "https://dev.tiwarashouse.com/pay?token=new",
+      is_reminder: true,
+    });
+
+    expect(subject).toBe("Reminder: pay your £20.00 no-show fee");
+    expect(text).toContain("This link replaces the one we sent before.");
+  });
+
   it("tell the stylist the fee is unpaid and what they can do", () => {
     const { text } = feeUnpaid({
       ...booking,

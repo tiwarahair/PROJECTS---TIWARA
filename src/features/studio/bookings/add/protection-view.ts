@@ -6,6 +6,7 @@ import {
 } from "../../core/model";
 import { formatMoney } from "../../../../utils/money";
 import { bookingFee } from "../../../../utils/pricing";
+import { toEditDraft } from "../../clients/edit-draft";
 import type { AddContext } from "./context";
 
 const getProtectedFirst = ({
@@ -40,7 +41,7 @@ const getLinkSubtitle = (
 
 // ---- step 4: protection ----
 export const getProtectionView = (context: AddContext) => {
-  const { state, setState, price, isLinkTooLate } = context;
+  const { state, setState, actions, client, price, isLinkTooLate } = context;
   const { mode, window: policyWindow } = state.policy;
   const first = getProtectedFirst(context);
   const salon = state.profile.salon || "your stylist";
@@ -116,5 +117,15 @@ export const getProtectionView = (context: AddContext) => {
     }),
     firstName:
       state.addWalkIn || !context.client ? "the client" : context.clientFirst,
+    emailNotice: context.isEmailNeeded
+      ? `${first} has no email yet. The link is sent by email.`
+      : "",
+    // the client's own edit sheet, which comes back here once saved
+    addEmail: () =>
+      actions.openSheet("clientEdit", {
+        clientEdit: toEditDraft(client),
+        clientEditFromAdd: true,
+        clientEditFocus: "email",
+      }),
   };
 };

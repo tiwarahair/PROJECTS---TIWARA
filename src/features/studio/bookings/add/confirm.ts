@@ -66,6 +66,7 @@ const getBookingRecord = (
     hasStarted,
     isProtectionSkipped,
     isLinkTooLate,
+    hasNoEmail,
     selectedAddons,
   }: AddContext,
   name: string,
@@ -73,7 +74,10 @@ const getBookingRecord = (
   time: string,
 ): StudioBooking => {
   const isLink =
-    !isProtectionSkipped && !isLinkTooLate && state.addProtection !== "none";
+    !isProtectionSkipped &&
+    !isLinkTooLate &&
+    !hasNoEmail &&
+    state.addProtection !== "none";
 
   const mode = isLink ? state.policy.mode : "none";
   const id = Date.now();

@@ -33,7 +33,8 @@ const getVisitsMeta = ({ visits, area }: { visits?: number; area?: string }) =>
 
 // ---- change client ----
 export const getChangeClientView = (context: SheetContext) => {
-  const { state, setState, memo, booking, hoursToStart, saveBooking } = context;
+  const { state, setState, actions, memo, booking, hoursToStart, saveBooking } =
+    context;
 
   const changeQuery = (state.changeClientQuery || "").trim();
   const lowerQuery = changeQuery.toLowerCase();
@@ -77,6 +78,18 @@ export const getChangeClientView = (context: SheetContext) => {
 
     const other = everyone.find(({ id }) => id === clientId);
     const name = other ? (other.name.split(" ")[0] ?? "") : "the client";
+
+    // the confirm link goes by email
+    if (!other?.email?.trim()) {
+      applyClient(clientId, NO_PROTECTION);
+
+      actions.showToast(
+        `${name} has no email, so this booking isn’t protected`,
+      );
+
+      return;
+    }
+
     const sentAt = Date.now();
 
     setState({

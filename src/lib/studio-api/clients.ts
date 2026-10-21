@@ -11,6 +11,8 @@ const REFUSALS: Record<string, string> = {
   has_upcoming: "Cancel their upcoming bookings first.",
   unpaid_fee: "Settle their fee first.",
   recent_payment: "Clients who paid in the last 120 days can’t be deleted yet.",
+  email_required:
+    "They have a booking waiting for them to confirm by email. Keep an email until it’s confirmed, or cancel it.",
 };
 
 export const fetchStudioClients = async (stylistId: string) => {

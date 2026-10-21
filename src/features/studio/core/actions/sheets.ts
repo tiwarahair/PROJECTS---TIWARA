@@ -10,6 +10,8 @@ const SHEET_RESET: Partial<StudioState> = {
   correctPayment: null,
   disputeForm: null,
   clientFromPastId: null,
+  clientEditFromAdd: false,
+  clientEditFocus: undefined,
   bookingStep: "view",
   rescheduleDay: null,
   rescheduleTime: null,
@@ -129,7 +131,17 @@ export const createSheetActions = ({
     });
   };
 
-  const requestCloseSheet = () => guardSheet(closeSheet);
+  // the client's edit sheet opened from a booking being added goes back to it, never starting it over
+  const backToAdd = () =>
+    setState({
+      sheet: "add",
+      clientEdit: null,
+      clientEditFromAdd: false,
+      clientEditFocus: undefined,
+    });
+
+  const requestCloseSheet = () =>
+    guardSheet(getState().clientEditFromAdd ? backToAdd : closeSheet);
 
   return {
     openActionSheet,
@@ -138,5 +150,6 @@ export const createSheetActions = ({
     closeSheet,
     guardSheet,
     requestCloseSheet,
+    backToAdd,
   };
 };
