@@ -504,3 +504,11 @@ verify_jwt = false
 # called by pg_cron with x-cron-secret, not a user's token
 [functions.send-notifications]
 verify_jwt = false
+
+# the update-card page, by a link in the client's email
+[functions.booking-card]
+verify_jwt = false
+
+# called by pg_cron with x-cron-secret
+[functions.check-cards]
+verify_jwt = false

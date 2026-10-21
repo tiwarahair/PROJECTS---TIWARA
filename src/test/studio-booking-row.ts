@@ -59,6 +59,7 @@ export const getRow = (patch: Partial<StudioBookingRow>): StudioBookingRow => ({
   checkout: null,
   card_label: null,
   unpaid_at: null,
+  card_failed_at: null,
   payments: [],
   booking_fees: [],
   refunds: [],

@@ -57,6 +57,12 @@ import {
   startBookingConfirmation,
 } from "../lib/booking-confirm-api";
 import type { BookingConfirmation } from "../lib/booking-confirm-api";
+import {
+  fetchCardUpdate,
+  saveCardUpdate,
+  startCardUpdate,
+} from "../lib/card-update-api";
+import type { CardUpdate } from "../lib/card-update-api";
 import type { PaymentLink } from "../lib/payment-link-api";
 import { listTwoFactorDevices } from "../lib/two-factor";
 import type { TwoFactorDevice } from "../lib/two-factor";
@@ -265,6 +271,19 @@ export const api = createApi({
       queryFn: ({ token, turnstileToken }) =>
         toQueryResult(startBookingConfirmation(token, turnstileToken)),
     }),
+    getCardUpdate: build.query<CardUpdate, string>({
+      queryFn: (token) => toQueryResult(fetchCardUpdate(token)),
+    }),
+    startCardUpdate: build.mutation<
+      { clientSecret: string },
+      { token: string; turnstileToken: string }
+    >({
+      queryFn: ({ token, turnstileToken }) =>
+        toQueryResult(startCardUpdate(token, turnstileToken)),
+    }),
+    saveCardUpdate: build.mutation<CardUpdate, string>({
+      queryFn: (token) => toQueryResult(saveCardUpdate(token)),
+    }),
     getRescheduleSlots: build.query<string[], RescheduleSlotsRequest>({
       providesTags: ["ManagedBooking"],
       queryFn: (request) => toQueryResult(getRescheduleSlots(request)),
@@ -335,6 +354,9 @@ export const {
   useStartLinkPaymentMutation,
   useGetBookingConfirmationQuery,
   useStartBookingConfirmationMutation,
+  useGetCardUpdateQuery,
+  useStartCardUpdateMutation,
+  useSaveCardUpdateMutation,
   useGetRescheduleSlotsQuery,
   useRescheduleBookingMutation,
   useGetAvailableSlotsQuery,

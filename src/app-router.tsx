@@ -55,6 +55,13 @@ const appRoutes: RouteObject[] = [
       })),
   },
   {
+    path: "/card",
+    lazy: () =>
+      import("./features/update-card").then(({ UpdateCardPage }) => ({
+        Component: UpdateCardPage,
+      })),
+  },
+  {
     path: "/save-details",
     lazy: () =>
       import("./features/save-details").then(({ SaveDetailsPage }) => ({

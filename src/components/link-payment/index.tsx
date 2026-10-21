@@ -27,6 +27,8 @@ interface FormProps {
   getClientSecret: (turnstileToken: string) => Promise<string>;
   refusals: Record<string, string>;
   onPaid: () => void;
+  /** saves a card for later (a SetupIntent) instead of paying */
+  isSetup?: boolean;
 }
 
 export interface LinkPaymentProps extends FormProps {
@@ -34,6 +36,8 @@ export interface LinkPaymentProps extends FormProps {
   /** deposit & card protection keep the card for later fees. */
   isSavingCard: boolean;
 }
+
+const getBusyLabel = (isSetup: boolean) => (isSetup ? "Saving…" : "Paying…");
 
 const NETWORK_ERROR =
   "Something went wrong and you haven't been charged. Try again.";
@@ -43,6 +47,7 @@ const Form = ({
   getClientSecret: startPayment,
   refusals,
   onPaid,
+  isSetup = false,
 }: FormProps) => {
   const stripe = useStripe();
   const elements = useElements();
@@ -90,12 +95,16 @@ const Form = ({
       return false;
     }
 
-    const { error: payError } = await stripe.confirmPayment({
+    const confirmation = {
       elements,
       clientSecret,
       confirmParams: { return_url: window.location.href },
-      redirect: "if_required",
-    });
+      redirect: "if_required" as const,
+    };
+
+    const { error: payError } = isSetup
+      ? await stripe.confirmSetup(confirmation)
+      : await stripe.confirmPayment(confirmation);
 
     setPaying(false);
 
@@ -135,7 +144,7 @@ const Form = ({
         />
         <div className={stepPay.divider}>
           <span className={stepPay.dividerLine}></span>
-          or pay by card
+          {isSetup ? "or add a card" : "or pay by card"}
           <span className={stepPay.dividerLine}></span>
         </div>
       </div>
@@ -180,12 +189,29 @@ const Form = ({
           isDisabled && stepPay.payButtonDisabled,
         )}
       >
-        {isPaying ? "Paying…" : payLabel}{" "}
+        {isPaying ? getBusyLabel(isSetup) : payLabel}{" "}
         <ArrowRight size={17} strokeWidth={2} />
       </button>
     </div>
   );
 };
+
+/** a new card (or Apple / Google Pay) saved for later fees, with nothing charged now. */
+export const CardSetup = (form: FormProps) => (
+  <Elements
+    stripe={stripePromise}
+    options={{
+      mode: "setup",
+      currency: "gbp",
+      allowedPaymentMethodTypes: ["card"],
+      setupFutureUsage: "off_session",
+      appearance: getPaymentAppearance(),
+      fonts: getPaymentFonts(),
+    }}
+  >
+    <Form {...form} isSetup />
+  </Elements>
+);
 
 /** Card (and Apple / Google Pay) payment for a link a client was sent: a fee, or confirming a booking. */
 export const LinkPayment = ({

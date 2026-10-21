@@ -18,6 +18,8 @@ import { balanceDue, checkoutReceipt } from "./checkout-emails.ts";
 import type { BalanceDue, Receipt } from "./checkout-emails.ts";
 import { payoutFailed, payoutPaid } from "./payout-emails.ts";
 import type { PayoutNotice } from "./payout-emails.ts";
+import { cardNotReplaced, cardUpdateNeeded } from "./card-emails.ts";
+import type { CardUpdateNeeded } from "./card-emails.ts";
 import { loginAlert } from "./security-emails.ts";
 import type { LoginAlert } from "./security-emails.ts";
 import { disputeOpened, feeCancelled, feeDeclined, feeScheduled, feeUnpaid, feeWaived } from "./fee-emails.ts";
@@ -133,6 +135,8 @@ const templates: Record<string, TemplateBuilder> = {
   payout_paid: (payload) => payoutPaid(payload as unknown as PayoutNotice),
   payout_failed: (payload) => payoutFailed(payload as unknown as PayoutNotice),
   login_alert: (payload) => loginAlert(payload as unknown as LoginAlert),
+  card_update_needed: (payload) => cardUpdateNeeded(payload as unknown as CardUpdateNeeded),
+  card_not_replaced: (payload) => cardNotReplaced(payload as unknown as StylistNotice),
 };
 
 export const renderEmail = (

@@ -40,6 +40,7 @@ const templates: Record<string, (payload: Record<string, unknown>) => string> = 
   fee_failed: getLine("Fee unpaid"),
   auto_cancel_soon: getLine("Not confirmed yet"),
   auto_cancelled: getLine("Auto-cancelled"),
+  card_not_replaced: getLine("Card expired, not replaced"),
 };
 
 export const renderSms = (template: string, payload: Record<string, unknown>) => {
