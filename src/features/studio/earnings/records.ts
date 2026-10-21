@@ -97,7 +97,8 @@ export const toLedger = ({
       .map((row) => toPayout(row, transactions)),
     available: toPounds(Math.max(0, balance.available_pence)),
     pending: toPounds(balance.pending_pence),
-    onHold: 0,
+    onHold: getTotals(transactions.filter(({ status }) => status === "On hold"))
+      .net,
     pausedAmount: toPounds(owed),
     nextDate:
       balance.next_payout && !owed ? new Date(balance.next_payout) : null,

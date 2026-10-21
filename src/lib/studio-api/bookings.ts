@@ -9,7 +9,7 @@ const BOOKING_SELECT = `id, ref, status, starts_at, minutes, buffer_minutes, pri
   no_show_at, overlap_ok, created_by, past_at, paid_at, stripe_payment_method_id, protection_status, confirm_by,
   confirm_sends, confirm_sent_at, created_at, booking_notes(note), stylist_client_id,
   stylist_client:stylist_clients(first, last, phone, email, deleted_at),
-  final_price_pence, tip_pence, checkout, card_label, unpaid_at,
+  final_price_pence, tip_pence, checkout, card_label, unpaid_at, card_failed_at,
   payments(id, kind, method, amount_pence, platform_fee_pence, tip_pence, created_at),
   booking_fees(id, kind, status, amount_pence, kept_pence, refund_pence, charge_pence, tries, hard_decline,
     decline_message, card_label, waived_at, created_at, failed_runs),

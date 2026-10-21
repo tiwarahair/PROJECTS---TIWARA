@@ -3,6 +3,7 @@ import Stripe from "npm:stripe@22.6.2";
 import { getCardLabel, isHardDecline } from "../_shared/declines.ts";
 import { getRefundable } from "../_shared/refundable.ts";
 import { getRecovery } from "../_shared/owed.ts";
+import { isPayoutHeld } from "../_shared/payout-hold.ts";
 import { getRecoveryMetadata } from "../_shared/recovery-metadata.ts";
 import { getStripeFee } from "../_shared/stripe-fee.ts";
 import { getCheckoutChargeKey } from "../_shared/stripe-keys.ts";
@@ -76,7 +77,8 @@ export const chargeSavedCard = async (
 ): Promise<CardPaid | CardDeclined> => {
   const paymentMethod = quote.payment_method_id as string;
   const cardLabel = await getCard(paymentMethod);
-  const canTransfer = !!quote.stylist_account && quote.stylist_can_receive;
+  const canTransfer =
+    !!quote.stylist_account && quote.stylist_can_receive && !(await isPayoutHeld(quote.stylist_account));
 
   // a try that charged, then failed before saving: keep that payment rather than charge again
   if (earlier)
@@ -106,6 +108,7 @@ export const chargeSavedCard = async (
           checkout_booking: quote.id,
           tip_pence: String(quote.tip_pence),
           ...getRecoveryMetadata(quote.stylist_account, recovered),
+          ...(canTransfer ? {} : { kept_pence: String(stripeFee) }),
         },
         ...(canTransfer
           ? {
@@ -115,7 +118,7 @@ export const chargeSavedCard = async (
           : {}),
       },
       {
-        idempotencyKey: `${getCheckoutChargeKey(quote.id, quote.tries, quote.charge_pence, quote.tip_pence)}:${recovered}`,
+        idempotencyKey: `${getCheckoutChargeKey(quote.id, quote.tries, quote.charge_pence, quote.tip_pence)}:${recovered}${canTransfer ? "" : ":kept"}`,
       },
     );
 

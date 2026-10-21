@@ -232,13 +232,15 @@ export const decorateBooking = (
 
   const flags: StatusFlags = { awaiting, ongoing, status };
 
+  const badgePaid = booking.cardFailed ? "failed" : paid;
+
   const badge = booking.autoDone
     ? "Completed · Unpaid"
-    : getBadge(flags, paid, msLeft, leftShort);
+    : getBadge(flags, badgePaid, msLeft, leftShort);
 
   const tone = booking.autoDone
     ? UNPAID_TONE
-    : getStatusTone(flags, getPaidTone(paid));
+    : getStatusTone(flags, getPaidTone(badgePaid));
 
   const statusTone = booking.autoDone
     ? UNPAID_TONE

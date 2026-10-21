@@ -192,7 +192,7 @@ where id = (select next_week_after from b);
 select is(
   (public.get_studio_cancellation((select next_week_after from b), 'c1111111-1111-1111-1111-111111111111', 'client', false)
     ->> 'refund_pence')::int,
-  0, 'a client cancelling in time still loses a non-refundable deposit'
+  163, 'a client cancelling in time loses a non-refundable deposit but gets the booking fee back'
 );
 
 select throws_ok(

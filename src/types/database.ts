@@ -364,6 +364,10 @@ export type Database = {
           cancelled_at: string | null;
           cancelled_by: string | null;
           card_label: string | null;
+          card_checked_at: string | null;
+          card_failed_at: string | null;
+          card_setup_intent_id: string | null;
+          card_update_requested_at: string | null;
           checkout: Json | null;
           checkout_intent_ids: string[];
           checkout_started_at: string | null;
@@ -434,6 +438,10 @@ export type Database = {
           cancelled_at?: string | null;
           cancelled_by?: string | null;
           card_label?: string | null;
+          card_checked_at?: string | null;
+          card_failed_at?: string | null;
+          card_setup_intent_id?: string | null;
+          card_update_requested_at?: string | null;
           checkout?: Json | null;
           checkout_intent_ids?: string[];
           checkout_started_at?: string | null;
@@ -501,6 +509,10 @@ export type Database = {
           cancelled_at?: string | null;
           cancelled_by?: string | null;
           card_label?: string | null;
+          card_checked_at?: string | null;
+          card_failed_at?: string | null;
+          card_setup_intent_id?: string | null;
+          card_update_requested_at?: string | null;
           checkout?: Json | null;
           checkout_intent_ids?: string[];
           checkout_started_at?: string | null;

@@ -157,6 +157,7 @@ export const toStudioBooking = (row: StudioBookingRow): StudioBooking => {
     ...getProtectionFields(row),
     ...(row.card_label ? { cardLabel: row.card_label } : {}),
     ...(row.stripe_payment_method_id ? { hasSavedCard: true } : {}),
+    ...(row.card_failed_at ? { cardFailed: true } : {}),
     ...(row.unpaid_at
       ? {
           status: "arrived",

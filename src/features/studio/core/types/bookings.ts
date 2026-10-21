@@ -54,6 +54,7 @@ export interface StudioBooking {
   loggedAfterStart?: boolean;
   cardLabel?: string;
   hasSavedCard?: boolean;
+  cardFailed?: boolean;
   completed?: boolean;
 }
 

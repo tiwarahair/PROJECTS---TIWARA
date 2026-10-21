@@ -6,8 +6,6 @@ import { mergeBookingRows } from "../../bookings/live-records";
 import { saveToBooking } from "../../bookings/save";
 import { toIsoDate } from "../../../../utils/dates";
 import { toDayOffset } from "../../bookings/records";
-import { durationToMinutes, timeToMinutes } from "../format";
-import { getBookingDuration, getNowMinutes } from "../model";
 import type {
   PastRecord,
   SheetKind,
@@ -113,38 +111,6 @@ export const createBookingActions = (
     );
   };
 
-  /** Bookings that ended an hour ago are marked done-but-unpaid. */
-  const autoComplete = () => {
-    const state = getState();
-    const nowMinutes = getNowMinutes();
-
-    const isOverAnHour = (booking: StudioBooking) =>
-      booking.dayOffset < 0 ||
-      (booking.dayOffset === 0 &&
-        timeToMinutes(booking.time) +
-          durationToMinutes(getBookingDuration(state, booking)) +
-          60 <=
-          nowMinutes);
-
-    const done = state.bookings.filter(
-      (booking) =>
-        !booking.autoDone &&
-        !booking.pending &&
-        (booking.status === "arrived" || booking.status === "confirmed") &&
-        isOverAnHour(booking),
-    );
-
-    if (!done.length) return;
-
-    setState({
-      bookings: state.bookings.map((booking) =>
-        done.includes(booking)
-          ? { ...booking, autoDone: true, checkoutUnpaid: true }
-          : booking,
-      ),
-    });
-  };
-
   /** Past midnight, real bookings move to their new day offsets. */
   const followToday = () => {
     const today = toIsoDate(new Date());
@@ -193,7 +159,6 @@ export const createBookingActions = (
     setStatus,
     patchPast,
     rebookFrom,
-    autoComplete,
     followToday,
     loadOlderPast,
   };

@@ -58,7 +58,7 @@ const refundBooking = async (
   return { id, amount: refundAmount };
 };
 
-const getRefundFailures = async (bookingId: string) => {
+const getCancellation = async (bookingId: string) => {
   const { data, error } = await admin
     .from("bookings")
     .select("cancellation")
@@ -67,7 +67,45 @@ const getRefundFailures = async (bookingId: string) => {
 
   if (error) throw error;
 
-  return Number(data.cancellation?.refund_failures ?? 0);
+  return {
+    failures: Number(data.cancellation?.refund_failures ?? 0),
+    feeRefund: Number(data.cancellation?.fee_refund_pence ?? 0),
+  };
+};
+
+/**
+ * A free cancellation's booking fee is ours to give back, but Stripe took the whole refund from the stylist's
+ * transfer: that part of our fee goes back to them. Once only, even when tried again.
+ */
+const giveBookingFeeBack = async (
+  bookingId: string,
+  paymentIntentId: string,
+  amount: number,
+) => {
+  const { latest_charge: charge } = await stripe.paymentIntents.retrieve(
+    paymentIntentId,
+    { expand: ["latest_charge"] },
+  );
+
+  if (!charge || typeof charge === "string" || !charge.application_fee) return;
+
+  const feeId =
+    typeof charge.application_fee === "string"
+      ? charge.application_fee
+      : charge.application_fee.id;
+
+  const { data: earlier } = await stripe.applicationFees.listRefunds(feeId, {
+    limit: 100,
+  });
+
+  if (earlier.some(({ metadata }) => metadata?.booking_fee_back === bookingId))
+    return;
+
+  await stripe.applicationFees.createRefund(
+    feeId,
+    { amount, metadata: { booking_fee_back: bookingId } },
+    { idempotencyKey: `booking:${bookingId}:booking-fee-back` },
+  );
 };
 
 /**
@@ -78,10 +116,15 @@ export const refundCancellation = async (refund: BookingRefund) => {
   if (!refund.amount) return;
 
   try {
-    const made = await refundBooking(
-      refund,
-      await getRefundFailures(refund.bookingId),
-    );
+    const { failures, feeRefund } = await getCancellation(refund.bookingId);
+    const made = await refundBooking(refund, failures);
+
+    if (made.id && refund.paymentIntentId && feeRefund > 0)
+      await giveBookingFeeBack(
+        refund.bookingId,
+        refund.paymentIntentId,
+        Math.min(feeRefund, made.amount),
+      );
 
     const { error } = await admin.rpc("set_cancel_refund", {
       target: refund.bookingId,

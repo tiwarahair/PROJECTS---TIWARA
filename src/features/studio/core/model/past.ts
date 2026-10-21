@@ -9,7 +9,7 @@ export const isPastIn = (row: PastRecord, filter: string): boolean => {
 
   if (filter === "noshow") return row.status === "No show";
 
-  if (filter === "failed") return row.status === "Payment failed";
+  if (filter === "failed") return !!row.feeUnpaid;
 
   return true;
 };

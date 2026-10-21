@@ -1,4 +1,5 @@
-// Run by cron while fees wait for a stylist's account: sends each one on once the account can receive money.
+// Run by cron for card money we kept: sent on once the stylist's account can receive it, and a new stylist's once
+// their appointment is over.
 import { admin } from "../_shared/admin.ts";
 import { saveDestinationPayment } from "../_shared/card-payment.ts";
 import { getRefundable } from "../_shared/refundable.ts";
@@ -11,6 +12,8 @@ const BATCH_SIZE = 20;
 interface PendingTransfer {
   payment_id: string;
   payment_intent_id: string;
+  platform_fee_pence: number;
+  fee_refunded_pence: number;
   stylist_account: string;
   transfer_failures: number;
 }
@@ -22,7 +25,14 @@ const findEarlierTransfer = async (group: string) => {
   return data[0] ?? null;
 };
 
-const makeTransfer = async ({ payment_id: paymentId, payment_intent_id: intentId, stylist_account: account, transfer_failures: failures }: PendingTransfer) => {
+const makeTransfer = async ({
+  payment_id: paymentId,
+  payment_intent_id: intentId,
+  platform_fee_pence: bookingFee,
+  fee_refunded_pence: feeRefunded,
+  stylist_account: account,
+  transfer_failures: failures,
+}: PendingTransfer) => {
   const group = `payment:${paymentId}`;
   const earlier = await findEarlierTransfer(group);
 
@@ -32,8 +42,9 @@ const makeTransfer = async ({ payment_id: paymentId, payment_intent_id: intentId
 
   if (!charge || typeof charge === "string") throw new Error(`${intentId} has no charge`);
 
-  // whatever was refunded meanwhile stays with the client, and Stripe's fee is the stylist's
-  const amount = getRefundable(charge) - getStripeFee(charge.amount);
+  // whatever was refunded meanwhile stays with the client; our booking fee (unless it went back to the client) stays
+  // with us, and Stripe's fee on the stylist's part is theirs
+  const amount = getRefundable(charge) - (bookingFee - feeRefunded) - getStripeFee(charge.amount - bookingFee);
 
   if (amount <= 0) return null;
 

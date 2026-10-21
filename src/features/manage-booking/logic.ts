@@ -84,28 +84,37 @@ export const getRefundTiming = (fee = 0) =>
     ? "comes back to your card when the fee settles, 24 hours after you cancel."
     : "is refunded to your card.";
 
+const getRefundLine = (
+  { terms }: ManagedBooking,
+  refund: number,
+  feeRefund: number,
+  fee: number,
+) => {
+  if (feeRefund)
+    return `${toPounds(refund)} is refunded to your card, including the ${toPounds(feeRefund)} booking fee.`;
+
+  const isWholeDeposit =
+    terms.mode === "deposit" && refund === terms.deposit_pence;
+
+  return `${isWholeDeposit ? `Your ${toPounds(refund)} deposit` : toPounds(refund)} ${getRefundTiming(fee)}`;
+};
+
 export const getCancelLines = (
   booking: ManagedBooking,
   {
     is_late: isLate,
     fee_pence: fee = 0,
     refund_pence: refund,
+    fee_refund_pence: feeRefund = 0,
     kept_pence: kept,
     charge_pence: charge,
   }: CancellationTerms,
 ) => {
-  const { terms, stylist_name: stylist } = booking;
-
-  const isWholeDeposit =
-    terms.mode === "deposit" && refund === terms.deposit_pence;
+  const { stylist_name: stylist } = booking;
 
   return [
     ...(isLate ? ["It's past the free cancellation time."] : []),
-    ...(refund
-      ? [
-          `${isWholeDeposit ? `Your ${toPounds(refund)} deposit` : toPounds(refund)} ${getRefundTiming(fee)}`,
-        ]
-      : []),
+    ...(refund ? [getRefundLine(booking, refund, feeRefund, fee)] : []),
     ...(kept ? [getKeptLine(booking, kept)] : []),
     ...(charge
       ? [
