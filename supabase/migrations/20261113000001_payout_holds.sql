@@ -145,7 +145,10 @@ as $$
       case
         when payments.method <> 'card' then 'Recorded'
         when payments.payout_id in (select id from paid_out) then 'Paid out'
-        when payments.held and payments.transfer_pending then 'On hold'
+        -- until it's sent, unless it all went back to the client
+        when payments.held and payments.transfer_pending and payments.amount_pence > coalesce(
+          (select sum(refunds.amount_pence) from public.refunds where refunds.booking_id = payments.booking_id), 0
+        ) then 'On hold'
         when details.available_on <= now() then 'Available'
         else 'Pending'
       end as line_status

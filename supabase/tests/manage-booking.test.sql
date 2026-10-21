@@ -99,11 +99,16 @@ where booking_id = ((select fee_only from b) ->> 'id')::uuid and purpose = 'mana
 select is(public.get_managed_booking((select deposit from b) ->> 'token') ->> 'where', 'Manage Test, 1 High St, Manchester, M1 1AA',
   'the booking shows the full address');
 
-select is(pg_temp.terms((select deposit from b)), 'refund 3000 kept 0 charge 0', 'deposit, in time: the deposit is refunded');
-select is(pg_temp.terms((select nonrefundable from b)), 'refund 0 kept 2500 charge 0', 'non-refundable deposit: kept');
-select is(pg_temp.terms((select full_price from b)), 'refund 10000 kept 0 charge 0', 'full, in time: refunded in full');
-select is(pg_temp.terms((select card from b)), 'refund 0 kept 0 charge 0', 'card on file, in time: nothing charged');
-select is(pg_temp.terms((select fee_only from b)), 'refund 0 kept 0 charge 0', 'pay at the appointment: nothing either way');
+select is(pg_temp.terms((select deposit from b)), 'refund 3200 kept 0 charge 0',
+  'deposit, in time: the deposit and booking fee are refunded');
+select is(pg_temp.terms((select nonrefundable from b)), 'refund 200 kept 2500 charge 0',
+  'non-refundable deposit: kept, but the booking fee comes back');
+select is(pg_temp.terms((select full_price from b)), 'refund 10200 kept 0 charge 0',
+  'full, in time: refunded in full with the booking fee');
+select is(pg_temp.terms((select card from b)), 'refund 200 kept 0 charge 0',
+  'card on file, in time: the booking fee comes back');
+select is(pg_temp.terms((select fee_only from b)), 'refund 200 kept 0 charge 0',
+  'pay at the appointment: the booking fee comes back');
 
 select pg_temp.make_late(late) from (values ((select deposit from b)), ((select late_keep from b)), ((select late_over from b)),
   ((select late_under from b)), ((select full_price from b)), ((select card from b)), ((select fee_only from b))) as late (late);

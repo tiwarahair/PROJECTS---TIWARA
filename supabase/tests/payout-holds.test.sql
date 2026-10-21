@@ -1,5 +1,5 @@
 begin;
-select plan(10);
+select plan(11);
 
 insert into auth.users (id, instance_id, aud, role, email, raw_user_meta_data, raw_app_meta_data)
 values ('f1111111-1111-1111-1111-111111111111', '00000000-0000-0000-0000-000000000000', 'authenticated',
@@ -110,6 +110,17 @@ select is(
   (select status from public.get_stylist_ledger((select stylist from hold))
     where booking_id = (select just_finished from ids) and description = 'Deposit'),
   'On hold', 'Earnings shows held money as on hold');
+
+reset role;
+
+insert into public.refunds (booking_id, amount_pence, reason) select just_finished, 1163, 'client_cancel' from ids;
+
+set local role authenticated;
+
+select isnt(
+  (select status from public.get_stylist_ledger((select stylist from hold))
+    where booking_id = (select just_finished from ids) and description = 'Deposit'),
+  'On hold', 'but not once it all went back to the client');
 
 reset role;
 
