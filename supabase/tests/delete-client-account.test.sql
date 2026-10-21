@@ -1,5 +1,5 @@
 begin;
-select plan(16);
+select plan(22);
 
 insert into auth.users (id, instance_id, aud, role, email, raw_user_meta_data, raw_app_meta_data)
 values ('a1111111-1111-1111-1111-111111111111', '00000000-0000-0000-0000-000000000000', 'authenticated',
@@ -30,11 +30,29 @@ as $$
   returning id
 $$;
 
+create function pg_temp.book_as_guest(booking_status text, days integer)
+returns uuid
+language sql
+as $$
+  insert into public.bookings (stylist_id, service_id, choices, snapshot, price_pence, fee_pence, minutes, starts_at,
+    ends_at, block_ends_at, status, contact, allergies, terms, created_by)
+  select stylists.id, (select id from public.services where stylist_id = stylists.id order by sort limit 1), '{}',
+    '{"service_name": "Silk press"}', 6000, 140, 60, now() + make_interval(days => days),
+    now() + make_interval(days => days, hours => 1), now() + make_interval(days => days, hours => 1), booking_status,
+    '{"first": "Nia", "email": "NIA@deleting.test", "phone": "07700900123"}', 'Sensitive scalp', '{"mode": "deposit"}',
+    'client'
+  from public.stylists where owner_id = 'a1111111-1111-1111-1111-111111111111'
+  returning id
+$$;
+
+update auth.users set email_confirmed_at = now() where id = 'a2222222-2222-2222-2222-222222222222';
+
 create temp table ids as
 select
   pg_temp.book('confirmed', 3) as upcoming,
   pg_temp.book('completed', -10) as recent,
-  pg_temp.book('completed', -200) as old;
+  pg_temp.book('completed', -200) as old,
+  pg_temp.book_as_guest('completed', -300) as guest;
 
 insert into public.payments (booking_id, kind, amount_pence, platform_fee_pence, created_at)
 values ((select recent from ids), 'booking', 6140, 140, now() - interval '10 days'),
@@ -53,6 +71,13 @@ select stylist_client_id from public.bookings where id = (select recent from ids
 
 select isnt((select stylist_client_id from linked), null, 'the booking starts on the stylist''s client card');
 
+create function pg_temp.sign_in(user_id uuid)
+returns void
+language sql
+as $$
+  select set_config('request.jwt.claims', json_build_object('sub', user_id, 'role', 'authenticated')::text, true)
+$$;
+
 create function pg_temp.blockers()
 returns jsonb
 language sql
@@ -70,6 +95,13 @@ values ((select upcoming from ids), 'late_cancel', 1000, 0, 0, 1000, 'unpaid', n
 select is((pg_temp.blockers() ->> 'owes_money')::boolean, true, 'so does an unpaid fee');
 
 update public.booking_fees set status = 'paid' where booking_id = (select upcoming from ids);
+
+create temp table guest_upcoming as select pg_temp.book_as_guest('confirmed', 5) as id;
+
+select is(jsonb_array_length(pg_temp.blockers() -> 'bookings'), 1,
+  'a guest booking under the same email stops it too');
+
+update public.bookings set status = 'cancelled' where id = (select id from guest_upcoming);
 
 select is(pg_temp.blockers(), '{"bookings": [], "owes_money": false, "has_business": false}'::jsonb,
   'with neither, the client can delete their account');
@@ -90,6 +122,12 @@ select is((select count(*) from public.bookings where client_id = 'a2222222-2222
   and (notes is not null or allergies is not null or address is not null)), 0::bigint,
   'notes, allergies and the address go from every booking');
 
+select is((select contact from public.bookings where id = (select guest from ids)), '{"account_deleted": true}'::jsonb,
+  'guest bookings made with the same email are anonymised too');
+
+select is((select allergies from public.bookings where id = (select guest from ids)), null,
+  'including their allergies');
+
 select is((select price_pence from public.bookings where id = (select recent from ids)), 6000,
   'the booking''s money stays');
 
@@ -104,6 +142,22 @@ select is((select data from public.booking_events where booking_id = (select rec
 
 select is((select count(*) from public.notifications where to_address = 'nia@deleting.test'), 0::bigint,
   'emails to the client are deleted');
+
+select pg_temp.sign_in('a2222222-2222-2222-2222-222222222222');
+set local role authenticated;
+
+select is(public.send_account_code(), 'n•••@deleting.test', 'the code goes to the login email, shown masked');
+
+reset role;
+
+select is(public.use_account_code('a2222222-2222-2222-2222-222222222222', '000000x'), 'wrong_code',
+  'a wrong code is refused');
+
+update public.account_codes set code_hash = public.hash_booking_code(user_id, '123456')
+where user_id = 'a2222222-2222-2222-2222-222222222222';
+
+select is(public.use_account_code('a2222222-2222-2222-2222-222222222222', '123456'), 'verified',
+  'the emailed code confirms it''s them');
 
 delete from auth.users where id = 'a2222222-2222-2222-2222-222222222222';
 

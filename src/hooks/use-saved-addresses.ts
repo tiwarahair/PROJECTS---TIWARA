@@ -33,9 +33,13 @@ export const useSavedAddresses = () => {
         try {
           await saveAddress({ id: null, address }).unwrap();
         } catch (error) {
-          if (getErrorMessage(error) === "too_many_addresses") break;
+          const reason = getErrorMessage(error);
 
-          return writeDeviceAddresses(deviceAddresses.slice(index));
+          if (reason === "too_many_addresses") break;
+
+          // an address the account can't hold is dropped; anything else (offline) waits for next time
+          if (reason !== "invalid_address")
+            return writeDeviceAddresses(deviceAddresses.slice(index));
         }
       }
 

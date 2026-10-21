@@ -79,15 +79,12 @@ export const getAccountView = (
     money: getBookingMoney(booking),
   }));
 
-  const isUpcoming = (booking: AccountBooking) =>
-    booking.at >= now && isUpcomingBooking(booking);
-
   const upcomingRaw = withMoney
-    .filter(({ booking }) => isUpcoming(booking))
+    .filter(({ booking }) => isUpcomingBooking(booking))
     .sort((first, second) => first.booking.at - second.booking.at);
 
   const pastRaw = withMoney
-    .filter(({ booking }) => !isUpcoming(booking))
+    .filter(({ booking }) => !isUpcomingBooking(booking))
     .sort((first, second) => second.booking.at - first.booking.at);
 
   const upcoming = upcomingRaw.map(({ booking, money: bookingMoney }) =>
@@ -205,7 +202,7 @@ export const getAccountView = (
         .filter(
           (booking) =>
             booking.paymentMethodId === cardId &&
-            isUpcoming(booking) &&
+            isUpcomingBooking(booking) &&
             (booking.mode === "deposit" || booking.mode === "card"),
         )
         .sort((first, second) => first.at - second.at);

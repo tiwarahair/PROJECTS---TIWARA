@@ -1,18 +1,11 @@
 import { skipToken } from "@reduxjs/toolkit/query";
-import { useState } from "react";
 import { Link } from "react-router";
-import {
-  deleteClientAccount,
-  isDeletionBlocked,
-} from "../../../lib/client-account";
+import { isDeletionBlocked } from "../../../lib/client-account";
 import type { DeletionBlockers } from "../../../lib/client-account";
-import { getErrorMessage } from "../../../stores/api-slice";
 import { useGetDeletionBlockersQuery } from "../../../stores/account-api";
-import { clearStoredFavourites } from "../../../stores/favourites-slice";
 import { useAppSelector } from "../../../stores/hooks";
-import { joinClassNames } from "../../../utils/class-names";
-import { writeDeviceAddresses } from "../../../utils/saved-addresses";
 import { formatAccountDate } from "../logic";
+import { DeleteAccount } from "./delete-account";
 import type { AccountController } from "../use-account";
 import shared from "../../../styles/features/account/dialogs/index.module.css";
 import styles from "../../../styles/features/account/dialogs/delete.module.css";
@@ -119,91 +112,3 @@ const DeleteBlocked = ({
     </div>
   </div>
 );
-
-interface DeleteAccountProps {
-  account: AccountController;
-  userId: string;
-  onBlocked: () => void;
-}
-
-const DeleteAccount = ({
-  account: { state, refs, actions },
-  userId,
-  onBlocked,
-}: DeleteAccountProps) => {
-  const { deleteText } = state;
-  const [isDeleting, setDeleting] = useState(false);
-  const canDelete = deleteText.trim() === "DELETE" && !isDeleting;
-
-  const deleteAccount = async () => {
-    setDeleting(true);
-
-    try {
-      await deleteClientAccount();
-    } catch (error) {
-      setDeleting(false);
-
-      if (getErrorMessage(error) === "blocked") return onBlocked();
-
-      return actions.showToast("Your account couldn’t be deleted. Try again");
-    }
-
-    clearStoredFavourites(userId);
-    writeDeviceAddresses([]);
-    actions.setState({ dialog: null, deleted: true });
-    actions.endSession();
-    actions.showToast("Your account has been deleted");
-  };
-
-  return (
-    <div data-screen-label="Delete account allowed">
-      <h2 className={shared.title} id="ac-dlg-t">
-        Delete your account?
-      </h2>
-      <p className={styles.deleteLead}>This can’t be undone.</p>
-      <div className={styles.deleteHeading}>We’ll delete</div>
-      <ul className={styles.deleteList}>
-        <li>Your name and contact details</li>
-        <li>Your favourites and saved addresses</li>
-        <li>Allergies and notes you’ve shared with stylists</li>
-        <li>Your saved cards</li>
-      </ul>
-      <div className={styles.keepHeading}>We’ll keep, without your details</div>
-      <p className={styles.keepText}>
-        Payment records, for tax. Recent payments keep your name and email for
-        up to 120 days in case one is disputed.
-      </p>
-      <label className={styles.deleteLabel}>
-        Type DELETE to confirm{" "}
-        <input
-          className={styles.deleteInput}
-          ref={refs.deleteConfirm}
-          value={deleteText}
-          onChange={(event) =>
-            actions.setState({ deleteText: event.target.value.toUpperCase() })
-          }
-          autoComplete="off"
-          autoCapitalize="characters"
-          spellCheck="false"
-        />
-      </label>
-      <div className={shared.actions}>
-        <button className={shared.secondary} onClick={actions.closeDialog}>
-          Cancel
-        </button>
-        <button
-          className={joinClassNames(
-            styles.deleteButton,
-            canDelete ? styles.deleteReady : styles.deleteBlocked,
-          )}
-          onClick={() => {
-            if (canDelete) void deleteAccount();
-          }}
-          disabled={!canDelete}
-        >
-          {isDeleting ? "Deleting…" : "Delete account"}
-        </button>
-      </div>
-    </div>
-  );
-};

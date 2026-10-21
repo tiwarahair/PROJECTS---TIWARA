@@ -39,6 +39,12 @@ begin
     raise exception 'not_signed_in';
   end if;
 
+  if nullif(trim(address ->> 'line1'), '') is null or nullif(trim(address ->> 'town'), '') is null
+    or char_length(trim(coalesce(address ->> 'postcode', ''))) not between 5 and 8
+    or char_length(coalesce(address ->> 'line1', '') || coalesce(address ->> 'line2', '')) > 200 then
+    raise exception 'invalid_address';
+  end if;
+
   -- one save at a time per client, so the count and the single default hold
   perform 1 from public.profiles where id = client for update;
 

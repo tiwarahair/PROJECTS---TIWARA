@@ -20,7 +20,7 @@ import { payoutFailed, payoutPaid } from "./payout-emails.ts";
 import type { PayoutNotice } from "./payout-emails.ts";
 import { cardNotReplaced, cardUpdateNeeded } from "./card-emails.ts";
 import type { CardUpdateNeeded } from "./card-emails.ts";
-import { loginAlert } from "./security-emails.ts";
+import { accountCode, loginAlert } from "./security-emails.ts";
 import type { LoginAlert } from "./security-emails.ts";
 import { disputeOpened, feeCancelled, feeDeclined, feeScheduled, feeUnpaid, feeWaived } from "./fee-emails.ts";
 import type { CancelledFee, DeclinedFee, DisputeNotice, ScheduledFee, UnpaidFeeNotice, WaivedFee } from "./fee-emails.ts";
@@ -137,6 +137,7 @@ const templates: Record<string, TemplateBuilder> = {
   login_alert: (payload) => loginAlert(payload as unknown as LoginAlert),
   card_update_needed: (payload) => cardUpdateNeeded(payload as unknown as CardUpdateNeeded),
   card_not_replaced: (payload) => cardNotReplaced(payload as unknown as StylistNotice),
+  account_code: (payload) => accountCode(payload as unknown as { code: string }),
 };
 
 export const renderEmail = (

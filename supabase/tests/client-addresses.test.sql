@@ -1,5 +1,5 @@
 begin;
-select plan(10);
+select plan(11);
 
 insert into auth.users (id, instance_id, aud, role, email, raw_user_meta_data, raw_app_meta_data)
 values ('e1111111-1111-1111-1111-111111111111', '00000000-0000-0000-0000-000000000000', 'authenticated',
@@ -46,6 +46,16 @@ select public.save_client_address(pg_temp.address('Spare ' || n)) from generate_
 
 select throws_ok($$ select public.save_client_address(pg_temp.address('Eleventh')) $$,
   'too_many_addresses', 'a client keeps at most 10 addresses');
+
+select throws_ok($$ select public.save_client_address(pg_temp.address('Short') || '{"postcode": "M1"}') $$,
+  'invalid_address', 'an address the table can''t hold is refused by name');
+
+-- one transaction gives every row the same now(): spread them out so "newest" means something
+reset role;
+update public.client_addresses set created_at = created_at + (coalesce(nullif(split_part(label, ' ', 2), '')::int, 0) * interval '1 minute')
+where label like 'Spare %';
+select pg_temp.sign_in('e1111111-1111-1111-1111-111111111111');
+set local role authenticated;
 
 select public.delete_client_address((select id from saved where name = 'mum'));
 

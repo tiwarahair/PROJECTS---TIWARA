@@ -4,6 +4,7 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 import {
   deleteClientAccount,
   fetchDeletionBlockers,
+  sendAccountCode,
 } from "../../../lib/client-account";
 import { renderWithStore } from "../../../test/render-with-store";
 import { setupUser } from "../../../test/setup-user";
@@ -13,6 +14,7 @@ vi.mock("../../../lib/client-account", async (importOriginal) => ({
   ...(await importOriginal<typeof import("../../../lib/client-account")>()),
   fetchDeletionBlockers: vi.fn(),
   deleteClientAccount: vi.fn(),
+  sendAccountCode: vi.fn(),
 }));
 
 const NOTHING_IN_THE_WAY = {
@@ -45,6 +47,8 @@ describe("Account delete", () => {
     vi.mocked(deleteClientAccount)
       .mockReset()
       .mockResolvedValue({ deleted: true });
+
+    vi.mocked(sendAccountCode).mockReset().mockResolvedValue("n•••@gmail.com");
   });
 
   it("deletes the account once DELETE is typed, and clears what was on this device", async () => {
@@ -116,5 +120,48 @@ describe("Account delete", () => {
     await waitFor(() =>
       expect(screen.getByText(/fee or balance to pay/)).toBeInTheDocument(),
     );
+  });
+
+  it("a session over a day old asks for an emailed code first", async () => {
+    vi.mocked(deleteClientAccount)
+      .mockRejectedValueOnce(new Error("code_needed"))
+      .mockRejectedValueOnce(new Error("wrong_code"))
+      .mockResolvedValueOnce({ deleted: true });
+
+    const dialog = await openDelete();
+
+    await user.type(
+      await dialog.findByLabelText("Type DELETE to confirm"),
+      "delete",
+    );
+
+    await user.click(dialog.getByRole("button", { name: "Delete account" }));
+
+    expect(
+      await dialog.findByText(/we emailed a code to n•••@gmail.com/),
+    ).toBeInTheDocument();
+
+    expect(
+      dialog.getByRole("button", { name: "Delete account" }),
+    ).toBeDisabled();
+
+    await user.type(dialog.getByLabelText("Code from your email"), "111111");
+    await user.click(dialog.getByRole("button", { name: "Delete account" }));
+
+    expect(await dialog.findByRole("alert")).toHaveTextContent(
+      "That code isn’t right.",
+    );
+
+    await user.clear(dialog.getByLabelText("Code from your email"));
+    await user.type(dialog.getByLabelText("Code from your email"), "482913");
+    await user.click(dialog.getByRole("button", { name: "Delete account" }));
+
+    expect(
+      await screen.findByRole("heading", {
+        name: "Your account has been deleted",
+      }),
+    ).toBeInTheDocument();
+
+    expect(deleteClientAccount).toHaveBeenLastCalledWith("482913");
   });
 });

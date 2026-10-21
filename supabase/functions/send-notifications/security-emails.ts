@@ -17,3 +17,14 @@ export const loginAlert = ({ device, signed_in_at: signedInAt }: LoginAlert): Re
     ],
     footnote: "You can turn these emails off in Studio → Settings → Security.",
   });
+
+export const accountCode = ({ code }: { code: string }): RenderedEmail =>
+  renderNotice({
+    title: `Your code is ${code}`,
+    paragraphs: [
+      "Enter this code to delete your Tiwára’s House account.",
+      "It works for 10 minutes.",
+    ],
+    footnote:
+      "If you didn’t ask to delete your account, someone may be signed in as you. Change your password in Account → Login & security.",
+  });

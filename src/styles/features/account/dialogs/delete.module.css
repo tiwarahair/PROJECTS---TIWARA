@@ -113,3 +113,13 @@
   cursor: default;
   opacity: 0.4;
 }
+
+.codeBlock {
+  display: flex;
+  flex-direction: column;
+}
+
+.resendCode {
+  align-self: flex-start;
+  margin-top: 12px;
+}

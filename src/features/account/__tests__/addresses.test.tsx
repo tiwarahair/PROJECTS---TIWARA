@@ -167,6 +167,24 @@ describe("Account saved addresses", () => {
     );
   });
 
+  it("a device address the account can't hold is dropped and the rest still move", async () => {
+    vi.mocked(saveClientAddress)
+      .mockRejectedValueOnce(new Error("invalid_address"))
+      .mockResolvedValueOnce("a3");
+
+    localStorage.setItem(
+      "tw_addrs",
+      JSON.stringify([
+        { ...WORK, id: "old-1", postcode: "M1" },
+        { ...HOME, id: "old-2" },
+      ]),
+    );
+
+    await renderAddresses();
+    await waitFor(() => expect(localStorage.getItem("tw_addrs")).toBeNull());
+    expect(saveClientAddress).toHaveBeenCalledTimes(2);
+  });
+
   it("moves addresses saved on this device into the account once", async () => {
     localStorage.setItem("tw_addrs", JSON.stringify([{ ...WORK, id: "old" }]));
     await renderAddresses();

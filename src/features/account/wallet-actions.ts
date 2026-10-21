@@ -7,10 +7,14 @@ import type { AddressFormValues } from "./schemas";
 import type { AccountCore } from "./use-core";
 import type { AccountFeedback } from "./use-feedback";
 
+const ADDRESS_FAILURES: Record<string, string> = {
+  too_many_addresses: "You can save up to 10 addresses",
+  invalid_address: "Check the address and try again",
+};
+
 const getAddressFailure = (error: unknown) =>
-  getErrorMessage(error) === "too_many_addresses"
-    ? "You can save up to 10 addresses"
-    : "Your address couldn’t be saved. Try again";
+  ADDRESS_FAILURES[getErrorMessage(error)] ??
+  "Your address couldn’t be saved. Try again";
 
 export const getWalletActions = (
   {

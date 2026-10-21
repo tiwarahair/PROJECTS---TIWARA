@@ -43,5 +43,16 @@ export const isDeletionBlocked = ({
   hasBusiness,
 }: DeletionBlockers) => bookings.length > 0 || owesMoney || hasBusiness;
 
-export const deleteClientAccount = () =>
-  invokeFunction<{ deleted: boolean }>("client-delete-account", {});
+export const sendAccountCode = async () => {
+  const { data, error } = await supabase.rpc("send_account_code");
+
+  if (error) throw error;
+
+  return data;
+};
+
+export const deleteClientAccount = (code?: string) =>
+  invokeFunction<{ deleted: boolean }>(
+    "client-delete-account",
+    code ? { code } : {},
+  );

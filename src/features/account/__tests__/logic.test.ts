@@ -41,6 +41,12 @@ describe("account logic", () => {
     expect(money.total).toBe("£61.40");
   });
 
+  it("an appointment that's passed but isn't closed yet has nothing left to pay at it", () => {
+    const money = getBookingMoney(getBooking({ at: Date.now() - 864e5 }));
+
+    expect(money.due).toBe("");
+  });
+
   it("a cancelled booking shows the refund on the receipt", () => {
     const money = getBookingMoney(
       getBooking({

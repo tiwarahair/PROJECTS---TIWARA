@@ -78,8 +78,8 @@ const CALLED_OFF_STATUSES: AccountBooking["status"][] = [
   "no_show",
 ];
 
-export const isUpcomingBooking = ({ status }: AccountBooking) =>
-  UPCOMING_STATUSES.includes(status);
+export const isUpcomingBooking = ({ status, at }: AccountBooking) =>
+  at >= Date.now() && UPCOMING_STATUSES.includes(status);
 
 const METHOD_LABELS: Record<string, string> = {
   cash: "Cash",
