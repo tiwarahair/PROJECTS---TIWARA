@@ -42,7 +42,7 @@ export type PastSheetView = NonNullable<ReturnType<typeof getPastSheetView>>;
 
 /** CheckoutSheet's receipt / resend / refund over the past sheet. */
 export const getPastCheckoutView = (studio: StudioController) => {
-  const { state, setState, actions, seedPast, context } = studio;
+  const { state, setState, actions, context } = studio;
 
   if (state.sheet !== "past" || !state.pastCheckoutPanel) return null;
 
@@ -66,24 +66,18 @@ export const getPastCheckoutView = (studio: StudioController) => {
       const previous = state.pastNew;
 
       const markRefunded = (refunded = amount) =>
-        actions.patchPast(
-          row.pastId,
-          (current) => ({
-            refunded: roundToPence((current.refunded || 0) + refunded),
-            refundReason: reason,
-          }),
-          seedPast,
-        );
+        actions.patchPast(row.pastId, (current) => ({
+          refunded: roundToPence((current.refunded || 0) + refunded),
+          refundReason: reason,
+        }));
 
       markRefunded();
 
       const { remoteId } = row;
 
-      if (!remoteId) return;
-
       // given back outside the app (cash, bank, card reader): saved as recorded, no money moves through us
       if (isOffPlatform) {
-        context.sync?.save(
+        context.sync.save(
           () => recordRefund(remoteId, toPence(amount), reason),
           { pastNew: previous },
         );

@@ -15,13 +15,6 @@ export const EMPTY_PASSWORD: PasswordValues = {
   confirm: "",
 };
 
-/** ?pwnew= prefills the new password (and the current one) for the meter boards. */
-export const getInitialPassword = (search: string): PasswordValues => {
-  const prefilled = new URLSearchParams(search).get("pwnew") || "";
-
-  return { code: prefilled ? "123456" : "", next: prefilled, confirm: "" };
-};
-
 export const getPasswordSchema = (
   isCodeSent: boolean,
   checkOptions: PasswordCheckOptions,

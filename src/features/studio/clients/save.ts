@@ -65,7 +65,7 @@ export const addStudioClient = (
     extraClients: extraClients.concat([client]),
   }));
 
-  sync?.save(
+  sync.save(
     async (stylistId) => {
       const photoPath = await getPhotoPath(stylistId, image, "");
 
@@ -90,7 +90,7 @@ export const saveStudioClient = (
   image: string | undefined,
   revert: StudioPatch,
 ) =>
-  sync?.save(async (stylistId) => {
+  sync.save(async (stylistId) => {
     const photoPath = await getPhotoPath(
       stylistId,
       image,

@@ -115,6 +115,19 @@ const getChart = (
   };
 };
 
+export const getLoadingRange = (range: StudioState["range"]): HomeRange => ({
+  caption: CAPTIONS[range],
+  stats: {
+    bookings: ["", null],
+    revenue: ["", null],
+    occupancy: ["", null],
+    clients: ["", null],
+  },
+  chart: [],
+  labels: [],
+  tips: [],
+});
+
 export const toHomeRange = (
   { today, current, previous, buckets }: HomeStats,
   range: StudioState["range"],

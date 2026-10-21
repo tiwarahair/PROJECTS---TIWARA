@@ -1,7 +1,6 @@
 import { render, screen } from "@testing-library/react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { TaxDetailsForm } from "..";
-import type { TaxFixture } from "../logic";
 import {
   formatNationalInsuranceNumber,
   getInitialTax,
@@ -13,13 +12,15 @@ import { setupUser } from "../../../test/setup-user";
 
 let user: UserEvent;
 
+const names = { legalName: "Amara Okonkwo", businessName: "Crown & Coil Ltd" };
+
 beforeEach(() => {
   user = setupUser();
 });
 
 describe("TaxDetailsForm", () => {
   it("renders the sole-trader form by default", () => {
-    render(<TaxDetailsForm />);
+    render(<TaxDetailsForm {...names} />);
 
     expect(
       screen.getByRole("radio", { name: "Sole trader / self-employed" }),
@@ -35,7 +36,7 @@ describe("TaxDetailsForm", () => {
   });
 
   it("date of birth boxes are labelled for screen readers, with no visible DD / MM / YYYY headings", () => {
-    render(<TaxDetailsForm />);
+    render(<TaxDetailsForm {...names} />);
 
     expect(screen.getByLabelText("Day")).toHaveAttribute("placeholder", "DD");
     expect(screen.getByLabelText("Month")).toHaveAttribute("placeholder", "MM");
@@ -49,34 +50,19 @@ describe("TaxDetailsForm", () => {
     expect(screen.queryByText("YYYY")).not.toBeInTheDocument();
   });
 
-  it.each<[TaxFixture, string]>([
-    ["err-empty", "Enter your date of birth"],
-    ["err-initials", "Enter your full name, not initials."],
-    ["err-dob", "Enter a real date of birth."],
-    ["err-under18", "You must be 18 or over to receive payouts."],
-    ["err-ni", "Enter a National Insurance number like QQ 12 34 56 C."],
-    ["err-conum", "Enter your 8-character company registration number."],
-  ])("fixture %s shows its error", async (fixture, message) => {
-    render(<TaxDetailsForm fixture={fixture} />);
-    expect((await screen.findAllByText(message))[0]).toBeInTheDocument();
-  });
-
-  it("fixtures name-no and ltd open their fields", () => {
-    const { unmount } = render(<TaxDetailsForm fixture="name-no" />);
-
-    expect(screen.getByLabelText("Legal first name")).toBeInTheDocument();
-    unmount();
-    render(<TaxDetailsForm fixture="ltd" />);
-
-    expect(screen.getByLabelText("Company name")).toHaveValue(
-      "Tiwára's House Ltd",
-    );
-  });
-
   it("accepts postcodes typed with punctuation, like every other form", () => {
-    const { values } = getInitialTax({ fixture: "err-pc" });
+    const { values } = getInitialTax({ businessName: "" });
 
-    values.home.fields.postcode = "m14-5tq";
+    values.home = {
+      same: false,
+      src: "manual",
+      fields: {
+        line1: "12 Dickenson Road",
+        line2: "",
+        city: "Manchester",
+        postcode: "m14-5tq",
+      },
+    };
 
     expect(
       getTaxSchema("")
@@ -87,7 +73,7 @@ describe("TaxDetailsForm", () => {
 
   it("drops names typed before choosing the account name", () => {
     const state = {
-      ...getInitialTax({ fixture: "name-no" }).values,
+      ...getInitialTax({ businessName: "" }).values,
       first: "Old",
       last: "Name",
       nameYes: true,
@@ -101,18 +87,10 @@ describe("TaxDetailsForm", () => {
     });
   });
 
-  it("fixture err-pc flags the address", () => {
-    const issue = getTaxSchema("")
-      .safeParse(getInitialTax({ fixture: "err-pc" }).values)
-      .error?.issues.find(({ path }) => path.join(".") === "home.fields");
-
-    expect(issue?.message).toBe("Enter your home address");
-  });
-
   it("checks every field on submit and doesn't send an invalid form", async () => {
     const onSubmit = vi.fn();
 
-    render(<TaxDetailsForm onSubmit={onSubmit} />);
+    render(<TaxDetailsForm {...names} onSubmit={onSubmit} />);
 
     await user.click(
       screen.getByRole("button", { name: "Continue to Stripe" }),
@@ -131,6 +109,7 @@ describe("TaxDetailsForm", () => {
 
   it("a saved NI number can be left blank", () => {
     const { values } = getInitialTax({
+      businessName: "",
       value: { kind: "sole", nationalInsuranceHint: "QQ •• •• 56 C" },
     });
 
@@ -148,8 +127,8 @@ describe("TaxDetailsForm", () => {
 
     render(
       <TaxDetailsForm
+        {...names}
         mode="settings"
-        fixture="ltd"
         business={{
           type: "chair",
           details: {
@@ -161,6 +140,8 @@ describe("TaxDetailsForm", () => {
         onSubmit={onSubmit}
       />,
     );
+
+    await user.click(screen.getByRole("radio", { name: "Limited company" }));
 
     await user.type(
       screen.getByLabelText("Company registration number"),
@@ -187,7 +168,13 @@ describe("TaxDetailsForm", () => {
   it("reports unsaved changes, and none once they're undone", async () => {
     const onDirtyChange = vi.fn();
 
-    render(<TaxDetailsForm mode="settings" onDirtyChange={onDirtyChange} />);
+    render(
+      <TaxDetailsForm
+        {...names}
+        mode="settings"
+        onDirtyChange={onDirtyChange}
+      />,
+    );
 
     const year = screen.getByLabelText("Year");
 

@@ -13,7 +13,6 @@ const getReopen = ({ actions, row, client }: PastContext) => {
 
   if (
     !row.autoCancelled ||
-    !remoteId ||
     !startsAt ||
     Date.parse(startsAt) - Date.now() <= 2 * 3600000
   )
@@ -63,18 +62,15 @@ const getUndo = ({
 
   return {
     action: () => {
-      const { remoteId } = original;
-
       setState({
         bookings: state.bookings.concat([original]),
         pastNew: state.pastNew.filter(({ pastId }) => pastId !== row.pastId),
       });
 
-      if (remoteId)
-        studio.context.sync?.save(() => undoNoShow(remoteId), {
-          bookings: state.bookings,
-          pastNew: state.pastNew,
-        });
+      studio.context.sync.save(() => undoNoShow(row.remoteId), {
+        bookings: state.bookings,
+        pastNew: state.pastNew,
+      });
 
       actions.closeSheet();
       actions.showToast("Booking restored");

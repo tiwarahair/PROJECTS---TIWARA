@@ -18,7 +18,7 @@ export const checkUnpaidFee = (
   clientId: string,
 ) => {
   const state = getState();
-  const stylistId = state.account?.stylistId;
+  const { stylistId } = state.account;
 
   setState({ addUnpaidFee: null });
 

@@ -10,7 +10,12 @@ import {
 } from "../unsaved";
 
 const getStudio = () => {
-  const state = getInitialStudioState();
+  const initial = getInitialStudioState();
+
+  const state = {
+    ...initial,
+    profile: { ...initial.profile, about: "Silk press in Ancoats" },
+  };
 
   return { state, memo: { saved: getSavedSettings(state) } };
 };

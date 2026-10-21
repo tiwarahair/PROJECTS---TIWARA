@@ -1,9 +1,21 @@
 import { act, screen } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { renderWithStore } from "../../../../../test/render-with-store";
+import { getStudioSeed } from "../../../../../test/studio-seed";
 import { StudioPage } from "../../..";
 import type { UserEvent } from "@testing-library/user-event";
 import { setupUser } from "../../../../../test/setup-user";
+
+// the save stays in flight, so the screen keeps what was done
+vi.mock(
+  "../../../../../lib/studio-api/booking-writes",
+  async (importOriginal) => ({
+    ...(await importOriginal<
+      typeof import("../../../../../lib/studio-api/booking-writes")
+    >()),
+    createStudioBooking: vi.fn(() => new Promise(() => {})),
+  }),
+);
 
 let user: UserEvent;
 
@@ -27,7 +39,7 @@ const setViewport = (width: number) => {
 };
 
 const openNewBooking = async () => {
-  renderWithStore(<StudioPage />, "/studio");
+  renderWithStore(<StudioPage seed={getStudioSeed()} />, "/studio");
   runNextTimer();
 
   await user.click(
@@ -85,7 +97,7 @@ describe("Studio → New booking", { timeout: 15_000 }, () => {
     );
 
     // picking a client moves straight to the service list
-    await user.click(screen.getByRole("button", { name: /^Knotless braids/ }));
+    await user.click(screen.getByRole("button", { name: /^Silk press/ }));
     expect(screen.getByText("Selected service")).toBeInTheDocument();
     await user.click(getContinue());
     expect(screen.getByText("When?")).toBeInTheDocument();
@@ -118,7 +130,7 @@ describe("Studio → New booking", { timeout: 15_000 }, () => {
       screen.getByRole("button", { name: "No client, this is a walk-in" }),
     );
 
-    await user.click(screen.getByRole("button", { name: /^Knotless braids/ }));
+    await user.click(screen.getByRole("button", { name: /^Silk press/ }));
     await user.click(getContinue());
 
     await user.click(

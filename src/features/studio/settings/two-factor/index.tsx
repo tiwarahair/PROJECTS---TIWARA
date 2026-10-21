@@ -30,7 +30,6 @@ const TwoFactorBody = ({ studio, view }: TwoFactorBodyProps) => {
         <div className={styles.tax}>
           <TaxDetailsForm
             mode="setup"
-            fixture={view.taxFixture}
             value={state.tax ?? undefined}
             business={state.business}
             legalName={state.owner.name}

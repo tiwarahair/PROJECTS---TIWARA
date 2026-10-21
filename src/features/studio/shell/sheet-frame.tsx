@@ -226,14 +226,14 @@ export const SheetFrame = ({
             <button
               className={styles.markAllRead}
               onClick={() => {
-                const stylistId = state.account?.stylistId;
+                const { stylistId } = state.account;
                 const seenUntil = state.notifications[0]?.at;
 
                 studio.setState({ notifAllRead: true });
                 actions.showToast("All caught up");
 
                 if (stylistId && seenUntil)
-                  studio.context.sync?.save(
+                  studio.context.sync.save(
                     () => markActivitySeen(stylistId, seenUntil),
                     { notifAllRead: false },
                   );

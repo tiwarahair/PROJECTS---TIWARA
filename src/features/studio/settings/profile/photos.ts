@@ -1,4 +1,4 @@
-// Studio photo uploads for a real stylist (demo boards keep photos on the device).
+// Studio photo uploads: cover, avatar and portfolio.
 import {
   addPortfolioPhoto,
   getPhotoPath,
@@ -29,7 +29,7 @@ export const replacePhoto = (
 
   setState(toPatch(previewUrl));
 
-  sync?.save(async (stylistId) => {
+  sync.save(async (stylistId) => {
     const path = isCover
       ? await uploadPhotoWithCopies(
           `${stylistId}/cover-${Date.now()}-full.jpg`,
@@ -71,7 +71,7 @@ export const addPortfolioPhotos = (
     portfolio: before.concat(uploads.map(({ id, src }) => ({ id, src }))),
   });
 
-  sync?.save(
+  sync.save(
     async (stylistId) => {
       for (const [index, { id, file }] of uploads.entries()) {
         const path = await uploadPhotoWithCopies(
@@ -106,7 +106,7 @@ export const removePortfolioItem = (
 
   setState({ portfolio: before.filter((item) => item.id !== id) });
 
-  sync?.save(
+  sync.save(
     async () => {
       await removePortfolioPhoto(id);
 

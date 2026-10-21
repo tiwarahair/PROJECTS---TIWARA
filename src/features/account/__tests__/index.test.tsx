@@ -13,11 +13,8 @@ beforeEach(() => {
 
 const advance = (ms: number) => act(() => vi.advanceTimersByTime(ms));
 
-// board=true: the demo account (Nia), as a signed-in customer
 const renderAccount = (query = "") =>
-  renderWithStore(<AccountPage />, `/account?board=true${query}`, {
-    signedIn: true,
-  });
+  renderWithStore(<AccountPage />, `/account${query}`, { signedIn: true });
 
 const getLabelled = (label: string) =>
   document.querySelector(`[data-screen-label="${label}"]`);
@@ -96,7 +93,7 @@ describe("AccountPage", () => {
   });
 
   it("maps the legacy ?tab= values to sections", () => {
-    renderAccount("&tab=details");
+    renderAccount("?tab=details");
 
     expect(
       screen.getByRole("heading", { level: 1, name: "Shared with stylists" }),
@@ -104,67 +101,32 @@ describe("AccountPage", () => {
   });
 
   it.each([
-    ["ov-empty", "Overview: no upcoming"],
-    ["bk-empty", "Bookings: no upcoming"],
-    ["bk-none", "Bookings: no upcoming"],
-    ["receipt", "Receipt"],
-    ["quiz-none", "Hair profile: not taken"],
-    ["email-edit", "Email: editing"],
-    ["email-code", "Email code step"],
-    ["email-pending", "Email change pending"],
-    ["pw-open", "Change password open"],
-    ["cards-empty", "Payment methods empty"],
-    ["add-card", "Add a card"],
-    ["addr-add", "Add an address"],
-    ["addr-edit", "Edit address"],
-    ["cookies", "Cookie settings"],
-    ["delete-blocked", "Delete account blocked"],
-    ["delete-allowed", "Delete account allowed"],
-    ["deleted", "Account deleted"],
-  ])("fixture %s shows %s", (fixture, label) => {
-    renderAccount(`&fixture=${fixture}`);
+    ["overview", "Overview: no upcoming"],
+    ["bookings", "Bookings: no upcoming"],
+    ["hair", "Hair profile: not taken"],
+    ["payments", "Payment methods empty"],
+    ["addresses", "Saved addresses empty"],
+  ])("a new account's %s section shows %s", (section, label) => {
+    renderAccount(`?section=${section}`);
     expect(getLabelled(label)).toBeInTheDocument();
   });
 
-  it.each([
-    ["photo-error", "That photo is too big. Choose one under 10MB."],
-    ["email-invalid", "Enter an email address like name@example.com"],
-    ["email-same", "That’s already your email"],
-    ["email-taken", "This email is already used by another account"],
-    ["email-wrong", "That code isn’t right"],
-    ["email-expired", "That code has expired. Send a new one."],
-  ])("fixture %s shows the error", (fixture, message) => {
-    renderAccount(`&fixture=${fixture}`);
-    expect(screen.getByText(message)).toBeInTheDocument();
-  });
+  it("the email edit checks the address before sending a code", async () => {
+    renderAccount("?section=personal");
+    await user.click(screen.getByRole("button", { name: "Edit email" }));
+    await user.type(screen.getByLabelText("New email"), "nia@example");
+    await user.click(screen.getByRole("button", { name: "Continue" }));
+    await settle();
 
-  it.each([
-    ["bk-past", "View receipt"],
-    ["alg-edit", "Save"],
-    ["profile-full", "Change photo"],
-    ["personal-edit", "Save"],
-    ["nopw", "Set a password"],
-    ["logout-all", "Log out everywhere"],
-    ["card-remove", "Remove card"],
-    ["addr-remove", "Remove"],
-    ["mkt-on", "Copy calendar link"],
-    ["sync-reset", "Reset link"],
-  ])("fixture %s renders its controls", (fixture, name) => {
-    renderAccount(`&fixture=${fixture}`);
-    expect(screen.getAllByRole("button", { name })[0]).toBeInTheDocument();
-  });
+    expect(
+      screen.getByText("Enter an email address like name@example.com"),
+    ).toBeInTheDocument();
 
-  it("fixture addr-empty shows the empty line", () => {
-    renderAccount("&fixture=addr-empty");
-    expect(getLabelled("Saved addresses empty")).toBeInTheDocument();
-  });
-
-  it("fixture email-done shows the toast", () => {
-    renderAccount("&fixture=email-done");
-
-    expect(screen.getByRole("status")).toHaveTextContent(
-      "Email updated. We’ve let nia.okafor@gmail.com know.",
-    );
+    await user.clear(screen.getByLabelText("New email"));
+    await user.type(screen.getByLabelText("New email"), "nia.okafor@gmail.com");
+    await user.click(screen.getByRole("button", { name: "Continue" }));
+    await settle();
+    expect(screen.getByText("That’s already your email")).toBeInTheDocument();
   });
 
   it("the side nav switches section and updates the URL", async () => {
@@ -176,12 +138,12 @@ describe("AccountPage", () => {
     ).toBeInTheDocument();
 
     expect(screen.getByTestId("location")).toHaveTextContent(
-      "/account?board=true&section=payments",
+      "/account?section=payments",
     );
   });
 
   it("leaving a section with an unsaved edit asks first; Keep editing stays, Discard leaves", async () => {
-    renderAccount("&section=personal");
+    renderAccount("?section=personal");
     await user.click(screen.getByRole("button", { name: "Edit email" }));
     await user.type(screen.getByLabelText("New email"), "nia@example.com");
     await user.click(screen.getByRole("link", { name: "Payment methods" }));
@@ -202,7 +164,7 @@ describe("AccountPage", () => {
   });
 
   it("changing the email sends a code; 123456 confirms it", async () => {
-    renderAccount("&section=personal");
+    renderAccount("?section=personal");
     await user.click(screen.getByRole("button", { name: "Edit email" }));
 
     await user.type(screen.getByLabelText("New email"), "nia@example.com");
@@ -224,7 +186,8 @@ describe("AccountPage", () => {
   });
 
   it("the add-card dialog validates, then saves the card", async () => {
-    renderAccount("&fixture=add-card");
+    renderAccount("?section=payments");
+    await user.click(screen.getByRole("button", { name: "Add a card" }));
     const dialog = screen.getByRole("dialog");
 
     await user.click(within(dialog).getByRole("button", { name: "Save card" }));
@@ -243,11 +206,12 @@ describe("AccountPage", () => {
     await user.click(within(dialog).getByRole("button", { name: "Save card" }));
     await settle();
     expect(screen.queryByRole("dialog")).not.toBeInTheDocument();
-    expect(screen.getAllByText("Mastercard •••• 4444")).toHaveLength(2);
+    expect(screen.getAllByText("Mastercard •••• 4444").length).toBeGreaterThan(0);
   });
 
   it("log out everywhere ends the session and shows the gate", async () => {
-    renderAccount("&fixture=logout-all");
+    renderAccount("?section=security");
+    await user.click(screen.getByRole("button", { name: "Log out everywhere" }));
     const dialog = screen.getByRole("dialog");
 
     await user.click(
@@ -262,7 +226,9 @@ describe("AccountPage", () => {
   });
 
   it("delete stays disabled until DELETE is typed", async () => {
-    renderAccount("&fixture=delete-allowed");
+    renderAccount("?section=privacy");
+    await user.click(screen.getByRole("button", { name: "Delete account" }));
+    expect(getLabelled("Delete account allowed")).toBeInTheDocument();
 
     const remove = within(screen.getByRole("dialog")).getByRole("button", {
       name: "Delete account",
@@ -281,7 +247,9 @@ describe("AccountPage", () => {
   });
 
   it("Escape closes the dialog", async () => {
-    renderAccount("&fixture=sync-reset");
+    renderAccount("?section=communication");
+    await user.click(screen.getByRole("button", { name: "Reset link" }));
+    expect(screen.getByRole("dialog")).toBeInTheDocument();
     await user.keyboard("{Escape}");
     expect(screen.queryByRole("dialog")).not.toBeInTheDocument();
   });

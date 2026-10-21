@@ -114,7 +114,13 @@ describe("Earnings", () => {
   });
 
   it("empty: offers to copy the booking link", async () => {
-    render(<Earnings ledger={getLedger({ transactions: [], payouts: [] })} />);
+    render(
+      <Earnings
+        ledger={getLedger({ transactions: [], payouts: [] })}
+        bookingLink="tiwarashouse.com/nia-hair"
+      />,
+    );
+
     expect(screen.getByText("No earnings yet.")).toBeInTheDocument();
     await user.click(screen.getByRole("button", { name: "Copy booking link" }));
     expect(screen.getByRole("status")).toHaveTextContent("Booking link copied");

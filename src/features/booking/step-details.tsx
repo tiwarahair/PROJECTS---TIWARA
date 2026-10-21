@@ -28,7 +28,6 @@ export const StepDetails = ({ booking }: StepDetailsProps) => {
     showContactFields,
     needsMobile,
     actions,
-    openPrivacy,
   } = booking;
 
   const { register } = detailsForm;
@@ -131,7 +130,6 @@ export const StepDetails = ({ booking }: StepDetailsProps) => {
               stylistName={stylist.name}
               value={allergy.text}
               onChange={(text) => setAllergy({ text })}
-              openPrivacy={openPrivacy}
               autoFocus={!!allergy.focus}
             />
           </div>

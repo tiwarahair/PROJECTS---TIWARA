@@ -20,7 +20,7 @@ export const getSettingsView = (
   navigate: (to: string) => void,
   signOut: () => void,
 ) => {
-  const { state, setState, props, isDesktop, actions, context } = studio;
+  const { state, setState, isDesktop, actions, context } = studio;
 
   const { showToast, openSubpage, openSheet, openTwoFactor, scrollBody } =
     actions;
@@ -34,7 +34,7 @@ export const getSettingsView = (
 
     setState({ policy: { ...policy, ...value } });
 
-    sync?.save((stylistId) => addPaymentPolicy(fromPolicy(value, stylistId)), {
+    sync.save((stylistId) => addPaymentPolicy(fromPolicy(value, stylistId)), {
       policy,
     });
 
@@ -43,7 +43,6 @@ export const getSettingsView = (
 
   const checkPolicy = async (value: PolicyValue) => {
     if (
-      !sync ||
       !hasTwoFactor(state) ||
       (await hasRecentSecondFactor().catch(() => false))
     ) {
@@ -112,7 +111,7 @@ export const getSettingsView = (
         },
       });
 
-      sync?.save(
+      sync.save(
         (stylistId) => saveBusiness(stylistId, value, state.business),
         before,
       );
@@ -142,18 +141,12 @@ export const getSettingsView = (
       setState({ page: "payouts" });
       scrollBody(0, false);
     },
-    payoutStatus:
-      state.payoutStatus ??
-      ((!state.check?.stripe ? "none" : props.payouts || "active") as
-        "none" | "verifying" | "action" | "paused" | "active"),
+    payoutStatus: state.payoutStatus ?? "none",
     payoutBank: state.payoutBank,
     openStripeDashboard: () => void actions.openStripeDashboard(),
     accountUpcoming: state.bookings.filter(
       ({ dayOffset, status, completed }) =>
-        (dayOffset || 0) >= 0 &&
-        status !== "cancelled" &&
-        status !== "autocancelled" &&
-        !completed,
+        (dayOffset || 0) >= 0 && status !== "cancelled" && !completed,
     ).length,
     onAccountNav: (to: "business" | "earnings") => {
       if (to === "earnings") {

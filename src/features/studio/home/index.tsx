@@ -21,7 +21,7 @@ interface StudioHomeProps {
 
 export const StudioHome = ({ studio }: StudioHomeProps) => {
   const { state, isWide, isDesktop } = studio;
-  const { isSetupOn, isComplete } = getSetupProgress(studio);
+  const { isComplete } = getSetupProgress(studio);
   const { real, isError } = useHomeRange(studio);
   const view = getHomeView(studio, real, isError);
 
@@ -34,7 +34,7 @@ export const StudioHome = ({ studio }: StudioHomeProps) => {
       data-screen-label="Home"
     >
       {view.isGate && <GoLiveBanner studio={studio} />}
-      {!isWide && isSetupOn && !isComplete && <SetupBanner studio={studio} />}
+      {!isWide && !isComplete && <SetupBanner studio={studio} />}
       {!isWide && state.linkCard && (
         <section
           className={styles.linkReady}
@@ -44,11 +44,9 @@ export const StudioHome = ({ studio }: StudioHomeProps) => {
           <LinkCardBody studio={studio} />
         </section>
       )}
-      {isSetupOn &&
-        isComplete &&
-        !state.linkCard &&
-        !state.setupExit &&
-        state.nudge && <PolicyNudge studio={studio} />}
+      {isComplete && !state.linkCard && !state.setupExit && state.nudge && (
+        <PolicyNudge studio={studio} />
+      )}
 
       <TodayHero view={view} />
       <OverviewStats studio={studio} view={view} />

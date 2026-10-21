@@ -1,10 +1,8 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useLocation } from "react-router";
 import { usePasswordChecker } from "../../hooks/use-password-checker";
 import type { TaxBusiness, TaxDetails } from "../tax-details-form/logic";
-import { DEMO_BACKEND } from "./backend";
 import { nameSchema } from "./name-schema";
 import { EMPTY_PASSWORD } from "./password-schema";
 import { usePasswordForm } from "./use-password-form";
@@ -43,7 +41,6 @@ export interface AccountSettingsProps {
   page?: SettingsPage;
   payoutStatus?: PayoutStatus;
   signIn?: SignIn;
-  isNew?: boolean;
   upcoming?: number;
   /** Money owed (pounds) and open disputes block closing the business. */
   owed?: number;
@@ -53,8 +50,8 @@ export interface AccountSettingsProps {
   pauseReason?: string;
   embedded?: boolean;
   hideSave?: boolean;
-  /** Whose account this is (the demo stylist when not given). */
-  person?: SettingsPerson;
+  /** Whose account this is. */
+  person: SettingsPerson;
   /** Saved email / SMS choices (Studio); missing events use the defaults. */
   notifications?: Partial<NotificationSettings>;
   /** Account name, used by the password checker when the name fields are empty. */
@@ -83,20 +80,18 @@ export interface AccountSettingsProps {
   onOpenStripe?: () => void;
   /** The payout bank Stripe reports, e.g. "Monzo •••• 4821". */
   payoutBank?: string | null;
-  /** Where the changes save; demo boards leave it out. */
-  backend?: AccountSettingsBackend;
+  /** Where the changes save. */
+  backend: AccountSettingsBackend;
   onTaxLearnMore?: () => void;
 }
 
 type DialogPhase = "idle" | "open" | "closing";
 
 export const useAccountSettings = (props: AccountSettingsProps) => {
-  const { page = "personal", signIn, isNew = false } = props;
-  const { search } = useLocation();
+  const { page = "personal", signIn } = props;
 
-  // read once: ?pwnew= only prefills the initial state
   const [state, setRawState] = useState(() =>
-    getInitialSettingsState(isNew, search, props.person, props.notifications),
+    getInitialSettingsState(props.person, props.notifications),
   );
 
   const [dialog, setDialog] = useState<ConfirmDialog>({
@@ -209,7 +204,6 @@ export const useAccountSettings = (props: AccountSettingsProps) => {
 
   const { passwordForm, passwordView, passwordErrors, isPasswordFilled } =
     usePasswordForm({
-      search,
       isCodeSent: state.isPasswordCodeSent,
       checkOptions: {
         min: PASSWORD_MIN,
@@ -243,7 +237,7 @@ export const useAccountSettings = (props: AccountSettingsProps) => {
           passwordErrors.server
         );
 
-  const backend = props.backend ?? DEMO_BACKEND;
+  const { backend } = props;
 
   const save = async () => {
     if (page === "personal")
@@ -317,6 +311,7 @@ export const useAccountSettings = (props: AccountSettingsProps) => {
     props.onState?.({ canSave: isDirty && hasSave, save, discard });
   });
 
+  // TO DO: google first needs to verify our app for this to work which can take weeks
   const connectGoogle = () => {
     setState(({ google }) => ({ google: { ...google, state: "connecting" } }));
     window.clearTimeout(googleTimer.current);

@@ -148,9 +148,9 @@ const saveRemote = (context: AddContext, record: StudioBooking) => {
   const { state, setState, service, studio, overrides, selectedAddons } =
     context;
 
-  const sync = studio.context.sync;
+  const { sync } = studio.context;
 
-  if (!sync || !service) return;
+  if (!service) return;
 
   const previous = state.bookings;
 

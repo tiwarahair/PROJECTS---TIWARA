@@ -10,8 +10,6 @@ export interface AllergyFieldProps {
   stylistName?: string;
   value?: string;
   onChange?: (value: string) => void;
-  /** Opens the "How we use it" privacy sheet on mount (boards). */
-  openPrivacy?: boolean;
   autoFocus?: boolean;
 }
 
@@ -20,11 +18,10 @@ export const AllergyField = ({
   stylistName,
   value = "",
   onChange,
-  openPrivacy = false,
   autoFocus = false,
 }: AllergyFieldProps) => {
   const [uid] = useState(() => `al${Math.random().toString(36).slice(2, 7)}`);
-  const [isSheetOpen, setSheetOpen] = useState(openPrivacy);
+  const [isSheetOpen, setSheetOpen] = useState(false);
 
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const name = stylistName || "your stylist";

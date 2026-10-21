@@ -51,7 +51,7 @@ export const toIsoDate = (date: Date): string =>
 export const formatClockTime = (date: Date): string =>
   `${pad2(date.getHours())}:${pad2(date.getMinutes())}`;
 
-/** "Wed 14 Oct" */
+/** "Wed 14 Oct 2026" */
 export const formatFullDate = (date: Date): string =>
   date.toLocaleDateString("en-GB", {
     weekday: "short",
@@ -60,6 +60,7 @@ export const formatFullDate = (date: Date): string =>
     year: "numeric",
   });
 
+/** "Wed 14 Oct" */
 export const formatWeekdayDate = (date: Date): string =>
   date.toLocaleDateString("en-GB", {
     weekday: "short",

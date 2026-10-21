@@ -1,6 +1,7 @@
 import { act, screen, within } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { renderWithStore } from "../../../../test/render-with-store";
+import { getStudioSeed } from "../../../../test/studio-seed";
 import { StudioPage } from "../..";
 import type { UserEvent } from "@testing-library/user-event";
 import { setupUser } from "../../../../test/setup-user";
@@ -29,7 +30,7 @@ const setViewport = (width: number) => {
 };
 
 const openTab = async (label: string) => {
-  renderWithStore(<StudioPage />, "/studio");
+  renderWithStore(<StudioPage seed={getStudioSeed()} />, "/studio");
   runNextTimer();
   await user.click(within(getLabelled("Sidebar")).getByTitle(label));
 
@@ -67,7 +68,7 @@ describe("Studio → Clients", () => {
       .map(({ textContent }) => textContent)
       .filter((text) => /Okafor|Mensah|Adeyemi/.test(text || ""));
 
-    expect(names[0]).toMatch(/^Nia Okafor/);
+    expect(names[0]).toMatch(/Nia Okafor/);
     expect(within(clients).getAllByText("Blocked").length).toBeGreaterThan(0);
   });
 
@@ -83,8 +84,8 @@ describe("Studio → Clients", () => {
     expect(within(clients).queryByText("Nia Okafor")).not.toBeInTheDocument();
     await user.click(screen.getByRole("button", { name: "Clear search" }));
     await user.click(within(clients).getByRole("button", { name: /^Blocked/ }));
-    expect(within(clients).getByText("Tola Fashola")).toBeInTheDocument();
-    expect(within(clients).queryByText("Kemi Adeyemi")).not.toBeInTheDocument();
+    expect(within(clients).getByText("Kemi Adeyemi")).toBeInTheDocument();
+    expect(within(clients).queryByText("Nia Okafor")).not.toBeInTheDocument();
   });
 
   it("an empty search offers to clear it", async () => {

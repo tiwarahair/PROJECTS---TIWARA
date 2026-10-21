@@ -2,11 +2,27 @@ import { act, render, screen } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { BusinessDetails } from "..";
 import type { BusinessDetailsApi } from "..";
-import type { BusinessPreset } from "../types";
+import type { BusinessValue } from "../types";
 import type { UserEvent } from "@testing-library/user-event";
 import { setupUser } from "../../../test/setup-user";
 
 let user: UserEvent;
+
+const business: BusinessValue = {
+  type: "shop",
+  vatOn: false,
+  details: {
+    line1: "118 Wilmslow Road",
+    line2: "Unit 4",
+    city: "Manchester",
+    postcode: "M14 5AJ",
+    basePostcode: "",
+    radius: "10",
+    phone: "07700 900418",
+    email: "info@tiwarashouse.com",
+    vat: "",
+  },
+};
 
 const settle = () => act(() => vi.advanceTimersByTimeAsync(0));
 
@@ -18,8 +34,8 @@ describe("BusinessDetails", () => {
   beforeEach(() => vi.useFakeTimers());
   afterEach(() => vi.useRealTimers());
 
-  it("renders the shop preset with saving disabled", () => {
-    render(<BusinessDetails />);
+  it("renders the saved details with saving disabled", () => {
+    render(<BusinessDetails value={business} tax={null} />);
 
     expect(
       screen.getByRole("radio", { name: /Shop \/ salon/ }),
@@ -32,47 +48,23 @@ describe("BusinessDetails", () => {
     expect(screen.getByRole("button", { name: "Save changes" })).toBeDisabled();
   });
 
-  it.each<[BusinessPreset, string]>([
-    ["chair", "Salon address"],
-    ["home", "Your address"],
-    ["mobile", "Where you work"],
-  ])("preset %s titles the location %s", (preset, heading) => {
-    render(<BusinessDetails preset={preset} />);
-    expect(screen.getByRole("heading", { name: heading })).toBeInTheDocument();
-  });
-
-  it("presets vatValid / vatInvalid show the VAT result", async () => {
-    const { unmount } = render(<BusinessDetails preset="vatValid" />);
-
-    expect(screen.getByText("GB 312 4567 89")).toBeInTheDocument();
-    unmount();
-    render(<BusinessDetails preset="vatInvalid" />);
-    await settle();
-
-    expect(
-      screen.getByText(
-        "UK VAT numbers are 9 digits, or 12 for some businesses.",
-      ),
-    ).toBeInTheDocument();
-  });
-
-  it("preset pcError flags the address in the save bar", async () => {
-    render(<BusinessDetails preset="pcError" />);
-    await settle();
-
-    expect(
-      screen.getByText("Fix the highlighted field to save"),
-    ).toBeInTheDocument();
-  });
-
-  it("preset unsaved saves, reports and shows the toast for 2.4s", async () => {
+  it("saves an edit, reports and shows the toast for 2.4s", async () => {
     const onSave = vi.fn();
     const onState = vi.fn<(api: BusinessDetailsApi) => void>();
 
     render(
-      <BusinessDetails preset="unsaved" onSave={onSave} onState={onState} />,
+      <BusinessDetails
+        value={business}
+        tax={null}
+        onSave={onSave}
+        onState={onState}
+      />,
     );
 
+    const phone = screen.getByLabelText("Business phone");
+
+    await user.clear(phone);
+    await user.type(phone, "07700 900512");
     expect(onState.mock.lastCall?.[0].canSave).toBe(true);
     await user.click(screen.getByRole("button", { name: "Save changes" }));
     await settle();
@@ -96,7 +88,7 @@ describe("BusinessDetails", () => {
   it("saving without a phone or email flags both until one is filled", async () => {
     const onSave = vi.fn();
 
-    render(<BusinessDetails preset="unsaved" onSave={onSave} />);
+    render(<BusinessDetails value={business} tax={null} onSave={onSave} />);
     await settle();
     await user.clear(screen.getByLabelText("Business phone"));
     await user.clear(screen.getByLabelText("Business email"));
@@ -115,19 +107,8 @@ describe("BusinessDetails", () => {
     expect(screen.queryByRole("alert")).not.toBeInTheDocument();
   });
 
-  it("switching to mobile drops the address error", async () => {
-    render(<BusinessDetails preset="pcError" />);
-    await settle();
-    await user.click(screen.getByRole("radio", { name: /Mobile/ }));
-    await settle();
-
-    expect(
-      screen.queryByText("Fix the highlighted field to save"),
-    ).not.toBeInTheDocument();
-  });
-
   it("the VAT number drops the GB prefix and letters while typing", async () => {
-    render(<BusinessDetails preset="vatValid" />);
+    render(<BusinessDetails value={{ ...business, vatOn: true }} tax={null} />);
     const vat = screen.getByLabelText("VAT number");
 
     await user.clear(vat);
@@ -142,7 +123,10 @@ describe("BusinessDetails", () => {
   it("without tax details offers to add them", async () => {
     const onEditTax = vi.fn();
 
-    render(<BusinessDetails tax={null} onEditTax={onEditTax} />);
+    render(
+      <BusinessDetails value={business} tax={null} onEditTax={onEditTax} />,
+    );
+
     await user.click(screen.getByRole("button", { name: "Add tax details" }));
     expect(onEditTax).toHaveBeenCalled();
   });

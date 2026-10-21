@@ -1,7 +1,6 @@
 import type { BookingAddress, Details } from "./types";
 
 export const DRAFT_TTL_MS = 864e5;
-export const DEFAULT_HOLD_SECONDS = 600;
 
 export const EMPTY_DETAILS: Details = {
   first: "",

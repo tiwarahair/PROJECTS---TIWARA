@@ -1,11 +1,11 @@
 import type { PointerEvent } from "react";
 import { GATE_REASON } from "../core/constants";
-import { RANGE_DATA } from "../core/seed-dashboard";
 import { getDecoratedBookings } from "../bookings/decorate";
 import { copyText, makeChart } from "../core/format";
 import { getBookingLink } from "../core/model";
 import { isGated } from "../shell";
 import type { StudioController } from "../core/use-studio";
+import { getLoadingRange } from "./records";
 import type { HomeRange } from "./records";
 
 // desktop cards are stretched to the hero's height, so a quiet line under the number fills the room
@@ -19,44 +19,19 @@ const STAT_SUBTITLES: Record<string, string> = {
 // how many days ahead each range looks; anything else falls back to 30
 const RANGE_DAYS: Record<string, number> = { today: 1, week: 7 };
 
-const getZeroStat = (label: string) => (label === "Revenue" ? "£0" : "0");
-
-const toDemoRange = ({
-  stats,
-  ...demo
-}: (typeof RANGE_DATA)["today"]): HomeRange => ({
-  ...demo,
-  stats: {
-    bookings: [stats.bookings[0], toDemoDelta(stats.bookings[1])],
-    revenue: [stats.revenue[0], toDemoDelta(stats.revenue[1])],
-    occupancy: [stats.occupancy[0], toDemoDelta(stats.occupancy[1])],
-    clients: [stats.clients[0], toDemoDelta(stats.clients[1])],
-  },
-});
-
-const toDemoDelta = (text: string) =>
-  text ? { text, isDown: text.startsWith("-") } : null;
-
 export const getHomeView = (
   studio: StudioController,
-  real?: HomeRange | null,
+  real: HomeRange | null,
   isError = false,
 ) => {
-  const { state, setState, isDesktop, isNew, hasBookings, actions } = studio;
+  const { state, setState, isDesktop, hasBookings, actions } = studio;
   const isLoading = real === null;
-  const isEmpty = real === undefined && isNew;
 
   const upcoming = getDecoratedBookings(state, (booking) =>
     actions.openSheet("booking", { sheetBookingId: booking.id }),
   );
 
-  const rangeData = real ?? toDemoRange(RANGE_DATA[state.range]);
-
-  const getStatValue = (label: string, value: string) => {
-    if (isLoading) return "—";
-
-    return isEmpty ? getZeroStat(label) : value;
-  };
+  const rangeData = real ?? getLoadingRange(state.range);
 
   const chart = makeChart(rangeData.chart);
   const now = new Date();
@@ -121,12 +96,9 @@ export const getHomeView = (
     rangeData,
     chart,
     tipPoint: state.chartIndex != null ? chart.points[state.chartIndex] : null,
-    hasChart:
-      !isEmpty && !isLoading && rangeData.chart.some((value) => value > 0),
+    hasChart: !isLoading && rangeData.chart.some((value) => value > 0),
     isChartEmpty:
-      isEmpty ||
-      isError ||
-      (!isLoading && !rangeData.chart.some((value) => value > 0)),
+      isError || (!isLoading && !rangeData.chart.some((value) => value > 0)),
     chartEmptyTitle: isError
       ? "Your numbers didn’t load"
       : "Nothing to chart yet",
@@ -147,10 +119,9 @@ export const getHomeView = (
       ] as const
     ).map(([label, [value, delta]], index) => ({
       label,
-      value: getStatValue(label, value),
-      subtitle:
-        isDesktop && !isEmpty && !isLoading ? STAT_SUBTITLES[label] : "",
-      delta: isEmpty || isLoading ? null : delta,
+      value: isLoading ? "—" : value,
+      subtitle: isDesktop && !isLoading ? STAT_SUBTITLES[label] : "",
+      delta: isLoading ? null : delta,
       delay: `${(index * 0.05).toFixed(2)}s`,
     })),
     feed: state.notifications.slice(0, 4),

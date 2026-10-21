@@ -1,11 +1,8 @@
 import { Check, Copy, Smartphone } from "lucide-react";
-import type { CSSProperties } from "react";
 import { joinClassNames } from "../../../../utils/class-names";
 import { BusyButton, CodeField } from "./fields";
 import type { TwoFactorView } from "./view";
 import styles from "../../../../styles/features/studio/settings/two-factor/index.module.css";
-
-const asStyle = (values: Record<string, string>) => values as CSSProperties;
 
 interface StepAppProps {
   view: TwoFactorView;
@@ -74,23 +71,6 @@ const QrCode = ({ view }: StepAppProps) => (
         </button>
       </div>
     )}
-    <div
-      className={joinClassNames(
-        styles.qr,
-        !view.qrCells.length && styles.hidden,
-      )}
-      role="img"
-      aria-label="QR code for your authenticator app"
-    >
-      {view.qrCells.map(({ key, background }) => (
-        <span
-          key={key}
-          className={styles.qrCell}
-          // runtime: each QR module is dark or light
-          style={asStyle({ "--cell": background })}
-        ></span>
-      ))}
-    </div>
     <button
       className={styles.keyToggle}
       onClick={view.toggleKey}

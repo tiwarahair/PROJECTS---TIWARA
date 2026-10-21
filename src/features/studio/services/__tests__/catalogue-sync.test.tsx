@@ -3,6 +3,8 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 import * as studioApi from "../../../../lib/studio-api/services";
 import { useCatalogueSync } from "../catalogue-sync";
 import { getInitialStudioState } from "../../core/initial-state";
+import { seedFromAccount } from "../../core/seed-account";
+import { getStudioSeed } from "../../../../test/studio-seed";
 import { createStudioSync } from "../../core/sync";
 import type { StudioState } from "../../core/types";
 
@@ -20,6 +22,9 @@ vi.mock("../../../../lib/studio-api/services", async (importOriginal) => ({
 
 const sync = createStudioSync("stylist-1", vi.fn(), vi.fn());
 
+const getState = () =>
+  seedFromAccount(getInitialStudioState(), getStudioSeed());
+
 const renderSync = (state: StudioState) =>
   renderHook(({ current }) => useCatalogueSync(current, sync), {
     initialProps: { current: state },
@@ -29,11 +34,11 @@ describe("useCatalogueSync", () => {
   beforeEach(() => vi.clearAllMocks());
 
   it("saves only the service whose reference changed", async () => {
-    const state = getInitialStudioState();
+    const state = getState();
     const { rerender } = renderSync(state);
     const [first, ...rest] = state.services;
 
-    if (!first) throw new Error("the demo state has services");
+    if (!first) throw new Error("the seed has a service");
 
     rerender({
       current: { ...state, services: [{ ...first, name: "Renamed" }, ...rest] },
@@ -51,29 +56,17 @@ describe("useCatalogueSync", () => {
   });
 
   it("removes a deleted add-on", async () => {
-    const state = getInitialStudioState();
+    const state = getState();
     const { rerender } = renderSync(state);
     const [first, ...rest] = state.addons;
 
-    if (!first) throw new Error("the demo state has add-ons");
+    if (!first) throw new Error("the seed has an add-on");
 
     rerender({ current: { ...state, addons: rest } });
 
     await waitFor(() =>
       expect(studioApi.removeAddon).toHaveBeenCalledWith(first.id),
     );
-  });
-
-  it("does nothing on a demo board with no sync", () => {
-    const state = getInitialStudioState();
-
-    const { rerender } = renderHook(
-      ({ current }) => useCatalogueSync(current, null),
-      { initialProps: { current: state } },
-    );
-
-    rerender({ current: { ...state, addons: [] } });
-    expect(studioApi.removeAddon).not.toHaveBeenCalled();
   });
 });
 

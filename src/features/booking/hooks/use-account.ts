@@ -33,8 +33,8 @@ export const useAccount = ({
   const navigate = useNavigate();
   const dispatch = useAppDispatch();
   const identity = useIdentity();
-  const hasSession = !!identity && !state.board;
-  const signedIn = identity?.isLoaded && hasSession ? identity : null;
+  const hasSession = !!identity;
+  const signedIn = identity?.isLoaded ? identity : null;
   const [updateProfile] = useUpdateProfileMutation();
 
   // signed in: book as them, with their details filled in
@@ -60,7 +60,7 @@ export const useAccount = ({
         editContact: false,
         loginStart: null,
         step: isLeavingTime ? 4 : step,
-        ...(current.board || current.appointmentAddress.line1
+        ...(current.appointmentAddress.line1
           ? {}
           : getSavedAddressPatch(current.appointmentAddress)),
       }),

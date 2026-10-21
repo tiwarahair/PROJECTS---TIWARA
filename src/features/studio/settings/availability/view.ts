@@ -91,7 +91,7 @@ export const getAvailabilityView = (studio: StudioController) => {
                 confirm: null,
               }));
 
-              sync?.save(() => removeClosedPeriod(period.id), {
+              sync.save(() => removeClosedPeriod(period.id), {
                 closed: before,
               });
 
@@ -114,7 +114,7 @@ export const getAvailabilityView = (studio: StudioController) => {
 
       setState({ check: { ...state.check, availability: true } });
 
-      sync?.save(
+      sync.save(
         (stylistId) => saveHours(fromHours(state.hours, stylistId)),
         { hours: saved?.hours ?? state.hours },
         restoreSaved,

@@ -28,8 +28,7 @@ export const getDisputeView = ({
   client: { name: clientName },
   firstName,
 }: PastContext) => {
-  if (!dispute || !remoteId)
-    return { hasDispute: false, disputeTag: "" } as const;
+  if (!dispute) return { hasDispute: false, disputeTag: "" } as const;
 
   const isOpen = isAnswerable(dispute);
 

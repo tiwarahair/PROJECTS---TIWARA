@@ -8,8 +8,8 @@ export interface StudioContext {
   setState: (patch: StudioPatch) => void;
   /** setState without the "Discard changes?" check, for leaving a page after saving it. */
   applyState: (patch: StudioPatch) => void;
-  /** Saves a real stylist's changes; null on demo boards. */
-  sync: StudioSync | null;
+  /** Saves the stylist's changes. */
+  sync: StudioSync;
   timers: Record<string, number>;
   /** Values kept between renders (seen setup steps, the clash override, the last pointer type). */
   memo: {

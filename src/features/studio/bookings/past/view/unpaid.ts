@@ -11,18 +11,11 @@ import { DAY_MS, RECORDED_ONLY } from "./context";
 import type { PastRecord } from "../../../core/types";
 import type { PastContext } from "./context";
 
-/** Demo rows send a link; a real fee was emailed one already, which can be resent twice. */
-const getLinkLabel = ({
-  remoteId,
-  feeLinkResends: resends = 0,
-}: PastRecord) => {
-  if (!remoteId) return "Send payment link";
-
-  return resends ? `Resend link (${resends} left)` : "No resends left";
-};
+/** A real fee was emailed a link already, which can be resent twice. */
+const getLinkLabel = ({ feeLinkResends: resends = 0 }: PastRecord) =>
+  resends ? `Resend link (${resends} left)` : "No resends left";
 
 export const getUnpaidView = ({
-  studio,
   state,
   setState,
   actions,
@@ -36,15 +29,13 @@ export const getUnpaidView = ({
 }: PastContext) => {
   const unpaidFirst = firstName("the client");
   const tries = row.feeTries == null ? 1 : row.feeTries;
-  const card = row.feeCard ?? "Visa •••• 4242";
+  const card = row.feeCard ?? "saved card";
 
   const extra =
     row.feeCharge ??
     (Math.max(
       0,
-      roundToPence(
-        feeNumber - (row.price * (state.policy.deposit || 20)) / 100,
-      ),
+      roundToPence(feeNumber - (row.price * state.policy.deposit) / 100),
     ) ||
       feeNumber);
 
@@ -56,13 +47,6 @@ export const getUnpaidView = ({
     meta,
     at: Date.now() - 2 * DAY_MS,
   });
-
-  // demo boards say how the card behaves; a real fee is charged now
-  const chargeDemo = () => {
-    if ((studio.props.cardDeclines || "none") !== "none")
-      settle({ feeTries: tries - 1 }, "Card declined again");
-    else settle(collected("Fee collected"), `${amount} charged`);
-  };
 
   const chargeAgain = async (bookingId: string) => {
     setState({ confirm: null });
@@ -84,9 +68,7 @@ export const getUnpaidView = ({
 
   return {
     feeUnpaid: !!row.feeUnpaid && !row.waived,
-    feeUnpaidTitle: row.remoteId
-      ? "Card declined"
-      : "Card declined: insufficient funds",
+    feeUnpaidTitle: "Card declined",
     feeUnpaidBody: `${amount} of ${unpaidFirst}’s ${row.feeLabel} fee couldn’t be charged to ${card}.`,
     feeUnpaidRetryShown: tries > 0,
     feeUnpaidRetryLabel: `Retry card (${tries} of 2 left)`,
@@ -99,20 +81,15 @@ export const getUnpaidView = ({
               ? "This uses your last retry. If it’s declined again, send a payment link or record the payment instead."
               : `You have ${tries} retries left.`,
           yesLabel: `Charge ${amount}`,
-          yes: () => {
-            const { remoteId } = row;
-
-            if (remoteId) void chargeAgain(remoteId);
-            else chargeDemo();
-          },
+          yes: () => void chargeAgain(row.remoteId),
         },
       }),
     feeUnpaidLinkLabel: getLinkLabel(row),
-    isFeeUnpaidLinkOff: !!row.remoteId && !row.feeLinkResends,
+    isFeeUnpaidLinkOff: !row.feeLinkResends,
     feeUnpaidLink: () => {
-      const resends = row.feeLinkResends ?? 1;
+      const resends = row.feeLinkResends ?? 0;
 
-      if (row.remoteId && !resends) return;
+      if (!resends) return;
 
       const previous = state.pastNew;
 

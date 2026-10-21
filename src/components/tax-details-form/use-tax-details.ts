@@ -21,9 +21,8 @@ type TaxErrorName =
 
 export const useTaxDetails = ({
   mode = "setup",
-  fixture = "",
-  legalName = "Amara Okonkwo",
-  businessName = "Tiwára's House Ltd",
+  legalName,
+  businessName,
   business,
   value,
   onSubmit,
@@ -32,12 +31,10 @@ export const useTaxDetails = ({
   const uid = `tx${useId().replace(/[^a-zA-Z0-9]/g, "")}`;
 
   const [initial] = useState(() =>
-    getInitialTax({ fixture, businessName, business, value }),
+    getInitialTax({ businessName, business, value }),
   );
 
-  const [showNationalInsurance, setShowNationalInsurance] = useState(
-    initial.showNationalInsurance,
-  );
+  const [showNationalInsurance, setShowNationalInsurance] = useState(false);
 
   const dobRefs = useRef<(HTMLInputElement | null)[]>([]);
 
@@ -50,15 +47,10 @@ export const useTaxDetails = ({
   const {
     control,
     handleSubmit,
-    trigger,
     formState: { errors, isDirty },
   } = form;
 
   useEffect(() => onDirtyChange?.(isDirty), [isDirty, onDirtyChange]);
-
-  useEffect(() => {
-    if (initial.shownErrors.length) void trigger(initial.shownErrors);
-  }, [initial, trigger]);
 
   const [kind, nameYes] = useWatch({ control, name: ["kind", "nameYes"] });
   const isSole = kind === "sole";

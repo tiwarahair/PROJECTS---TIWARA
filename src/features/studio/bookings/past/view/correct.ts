@@ -78,7 +78,7 @@ export const getCorrectView = ({
   };
 
   return {
-    canCorrect: !!payment && !!row.remoteId && isCorrectable(payment.takenAt),
+    canCorrect: !!payment && isCorrectable(payment.takenAt),
     correctDraft: draft,
     isCorrectValid: amount > 0 && tip <= amount,
     openCorrect: () =>

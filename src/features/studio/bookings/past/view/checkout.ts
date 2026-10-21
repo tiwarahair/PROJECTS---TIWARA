@@ -4,12 +4,7 @@ import type {
 } from "../../../../../components/checkout/data";
 import type { CheckoutSheetProps } from "../../../../../components/checkout/use-checkout";
 import { parseAmountLabel, timeRange } from "../../../core/format";
-import {
-  getClient,
-  getPastKey,
-  getPastRows,
-  getServiceDuration,
-} from "../../../core/model";
+import { getClient, getPastKey, getServiceDuration } from "../../../core/model";
 import type { PastRecord, StudioState } from "../../../core/types";
 import type { StudioController } from "../../../core/use-studio";
 import { roundToPence } from "../../../../../utils/money";
@@ -66,9 +61,9 @@ export const getPastCheckout = (
     service: row.service,
     meta: "",
     addons: [] as [string, number][],
-    ...(row.remoteId
-      ? { card: "saved", brand: "", cardLabel: row.cardLabel ?? "Saved card" }
-      : { card: "4242", brand: "Visa" }),
+    card: "saved",
+    brand: "",
+    cardLabel: row.cardLabel ?? "Saved card",
     paidOn: "",
     phone: client?.phone || "",
     email: client?.email || "",
@@ -83,7 +78,7 @@ export const getPastCheckout = (
 
   const paid = checkout
     ? checkout.paid
-    : roundToPence((row.price * (state.policy.deposit || 20)) / 100);
+    : roundToPence((row.price * state.policy.deposit) / 100);
 
   const lines = checkout?.lines
     ? checkout.lines
@@ -146,9 +141,7 @@ export const getPastCheckout = (
 };
 
 export const findPastRow = (studio: StudioController) => {
-  const { state, seedPast } = studio;
+  const { state } = studio;
 
-  return getPastRows(state, seedPast).find(
-    (row) => getPastKey(row) === state.selectedPastId,
-  );
+  return state.pastNew.find((row) => getPastKey(row) === state.selectedPastId);
 };

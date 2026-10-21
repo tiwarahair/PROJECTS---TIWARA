@@ -11,7 +11,7 @@ import { useIdentity } from "../../hooks/use-identity";
 import { usePasswordChecker } from "../../hooks/use-password-checker";
 import { useAppDispatch, useAppSelector } from "../../stores/hooks";
 import { useAccountForms } from "./forms";
-import { getInitialState, isDemoAccount } from "./initial-state";
+import { getInitialState } from "./initial-state";
 import { EMPTY_CODE } from "./state";
 import type { AccountProps, StatePatch } from "./state";
 
@@ -20,13 +20,13 @@ export const useAccountCore = (props: AccountProps) => {
 
   // read once: later URL changes move between sections via goToSection / popstate, not a re-initialise
   const [initial] = useState(() => getInitialState(props, searchParams));
-  const [state, setRawState] = useState(initial.state);
+  const [state, setRawState] = useState(initial);
   const stateRef = useRef(state);
 
   stateRef.current = state;
 
   const forms = useAccountForms(
-    initial.fixtureForms.draft ?? { ...initial.state.profile },
+    { ...initial.profile },
     () => ({
       edit: stateRef.current.edit,
       profile: stateRef.current.profile,
@@ -70,23 +70,9 @@ export const useAccountCore = (props: AccountProps) => {
     for (const callback of callbacks) callback();
   });
 
-  useEffect(() => {
-    const { draftError, password, address } = initial.fixtureForms;
-
-    if (draftError)
-      forms.edit.setError(draftError.field, { message: draftError.message });
-
-    if (password) forms.password.reset(password);
-
-    if (address) forms.address.reset(address);
-  }, [initial, forms]);
-
   const identity = useIdentity();
 
-  const signedIn =
-    identity?.isLoaded && !isDemoAccount(searchParams, state.fixture)
-      ? identity
-      : null;
+  const signedIn = identity?.isLoaded ? identity : null;
 
   // a real account shows the signed-in person's details and sign-in methods
   useEffect(() => {

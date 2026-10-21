@@ -3,7 +3,6 @@ import type { AddressValue } from "../../types/address";
 import { isAddressValid } from "../../utils/address";
 import { checkPassword, getPasswordMin } from "../../utils/password";
 import { isValidEmail, isValidMobile } from "../../utils/validation";
-import { CURRENT_PASSWORD, TAKEN_EMAILS } from "./data";
 import type { Profile } from "./data";
 import type { EditKey } from "./logic";
 
@@ -27,11 +26,7 @@ export const getEditSchema = (key: EditKey, currentEmail: string) => {
         .string()
         .transform((value) => value.trim().toLowerCase())
         .refine(isValidEmail, "Enter an email address like name@example.com")
-        .refine((value) => value !== currentEmail, "That’s already your email")
-        .refine(
-          (value) => !TAKEN_EMAILS.includes(value),
-          "This email is already used by another account",
-        ),
+        .refine((value) => value !== currentEmail, "That’s already your email"),
     });
 
   return profileSchema.extend({
@@ -50,11 +45,7 @@ export const getPasswordSchema = (hasPassword: boolean, profile: Profile) =>
   z.object({
     current: z
       .string()
-      .refine((value) => !hasPassword || !!value, "Enter your current password")
-      .refine(
-        (value) => !hasPassword || !value || value === CURRENT_PASSWORD,
-        "That password isn’t right",
-      ),
+      .refine((value) => !hasPassword || !!value, "Enter your current password"),
     next: z.string().refine(
       (value) =>
         checkPassword(value, {

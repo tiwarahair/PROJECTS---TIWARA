@@ -33,8 +33,7 @@ const getVisitsMeta = ({ visits, area }: { visits?: number; area?: string }) =>
 
 // ---- change client ----
 export const getChangeClientView = (context: SheetContext) => {
-  const { state, setState, actions, memo, booking, hoursToStart, saveBooking } =
-    context;
+  const { state, setState, memo, booking, hoursToStart, saveBooking } = context;
 
   const changeQuery = (state.changeClientQuery || "").trim();
   const lowerQuery = changeQuery.toLowerCase();
@@ -115,11 +114,6 @@ export const getChangeClientView = (context: SheetContext) => {
         isCurrent: client.id === booking.client,
         pick: () => setClient(client.id),
       })),
-    // a real client needs a phone or email, so they're added through the form
-    canAddTyped:
-      !state.account &&
-      changeQuery.length > 1 &&
-      !everyone.some(({ name }) => name.toLowerCase() === lowerQuery),
     openNewClient: () => {
       const parts = changeQuery.split(" ");
 
@@ -131,29 +125,6 @@ export const getChangeClientView = (context: SheetContext) => {
           phone: "",
         },
       });
-    },
-    addTypedClient: () => {
-      const id = `c${Date.now()}`;
-
-      setState(({ extraClients }) => ({
-        extraClients: extraClients.concat([
-          {
-            id,
-            name: changeQuery,
-            first: changeQuery.split(" ")[0],
-            img: "",
-            area: "",
-            visits: 0,
-            since: "today",
-            spent: 0,
-            phone: "",
-            email: "",
-          },
-        ]),
-      }));
-
-      setClient(id);
-      actions.showToast(`${changeQuery} added`);
     },
     makeWalkIn: () => setClient(null),
   };

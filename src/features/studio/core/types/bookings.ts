@@ -15,7 +15,7 @@ export interface StudioBooking {
   ref?: string;
   startsAt?: string;
   overlapOk?: boolean;
-  /** The policy agreed at booking; demo bookings follow the current one. */
+  /** The policy agreed at booking. */
   agreedPolicy?: StudioPolicy;
   freeCancelUntil?: string;
   dayOffset: number;
@@ -111,7 +111,7 @@ export interface PastRecord {
   /** A real row's month heading ("October 2025") and when it joined Past, for sorting. */
   month?: string;
   pastAt?: number;
-  remoteId?: string;
+  remoteId: string;
   ref?: string;
   receiptDate?: string;
   feeCharge?: number;

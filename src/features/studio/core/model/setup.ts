@@ -1,4 +1,3 @@
-import { BOOKING_LINK, STUDIO_STYLIST_ID } from "../constants";
 import type { StudioState } from "../types";
 
 export const hasTwoFactor = (state: StudioState): boolean =>
@@ -8,10 +7,9 @@ export const isLive = (state: StudioState): boolean =>
   hasTwoFactor(state) && !!state.tax && !!state.check.stripe;
 
 export const getBookingLink = ({ account }: StudioState) =>
-  account ? `tiwarashouse.com/${account.slug}` : BOOKING_LINK;
+  `tiwarashouse.com/${account.slug}`;
 
-export const getProfilePath = ({ account }: StudioState) =>
-  `/${account?.slug ?? STUDIO_STYLIST_ID}`;
+export const getProfilePath = ({ account }: StudioState) => `/${account.slug}`;
 
 export const getSteps = (state: StudioState) => ({
   availability: !!state.check.availability,

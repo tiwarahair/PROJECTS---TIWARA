@@ -12,7 +12,13 @@ import {
   toVariationRow,
 } from "../../services/records";
 import { fromHours } from "../../settings/records";
-import { toNotificationEvent, toNotificationKey } from "../records";
+import { getStudioRow } from "../../../../test/studio-seed";
+import { getInitialStudioState } from "../initial-state";
+import {
+  toNotificationEvent,
+  toNotificationKey,
+  toStudioPatch,
+} from "../records";
 
 const SERVICE_ROW: ServiceRow = {
   id: "service-1",
@@ -251,5 +257,31 @@ describe("notification event names", () => {
   it("convert between the database and Settings", () => {
     expect(toNotificationKey("auto_cancel_soon")).toBe("autoCancelSoon");
     expect(toNotificationEvent("autoCancelSoon")).toBe("auto_cancel_soon");
+  });
+});
+
+describe("toStudioPatch", () => {
+  it("suggests a 20% deposit to a stylist without one and falls back to the database defaults for missing rules", () => {
+    const studio = getStudioRow();
+    const [policy] = studio.payment_policies;
+
+    if (!policy) throw new Error("the studio row has a policy");
+
+    const { policy: shown, rules } = toStudioPatch(
+      {
+        ...studio,
+        payment_policies: [{ ...policy, mode: "none", deposit_percent: 0 }],
+      },
+      getInitialStudioState(),
+    );
+
+    expect(shown).toMatchObject({ mode: "none", deposit: 20 });
+
+    expect(rules).toEqual({
+      minNotice: 24,
+      maxNotice: 3,
+      extra: 0,
+      travel: 0,
+    });
   });
 });

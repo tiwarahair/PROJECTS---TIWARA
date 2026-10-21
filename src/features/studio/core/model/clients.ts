@@ -1,4 +1,3 @@
-import { CLIENTS } from "../seed-clients";
 import type { StudioClient, StudioState } from "../types";
 
 const WALK_IN: StudioClient = {
@@ -22,9 +21,13 @@ export const getClient = (
 ): StudioClient => {
   if (id === null) return WALK_IN;
 
-  const base = CLIENTS.concat(state.extraClients, state.bookingClients).find(
-    (client) => client.id === id,
-  ) ?? { id: id ?? "", name: "Client", first: "Client" };
+  const base = state.extraClients
+    .concat(state.bookingClients)
+    .find((client) => client.id === id) ?? {
+    id: id ?? "",
+    name: "Client",
+    first: "Client",
+  };
 
   const override = state.clientOverrides[base.id ?? ""];
   const client = override ? { ...base, ...override } : base;
@@ -61,7 +64,7 @@ export const getClientNames = ({ name, first }: StudioClient) => {
 };
 
 export const getAllClients = (state: StudioState): StudioClient[] =>
-  (state.account ? state.bookingClients : CLIENTS)
+  state.bookingClients
     .concat(state.extraClients)
     .filter(
       (client, index, all) =>

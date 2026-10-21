@@ -1,13 +1,7 @@
 // "Get paid: 2FA, tax details and Stripe" and the two-step verification flow.
 import type { ChangeEvent } from "react";
-import type {
-  TaxDetails,
-  TaxFixture,
-} from "../../../../components/tax-details-form/logic";
-import { getQrCells } from "../../core/format";
+import type { TaxDetails } from "../../../../components/tax-details-form/logic";
 import type { StudioController } from "../../core/use-studio";
-
-const DEMO_KEY = "JBSWY3DPEHPK3PXPK4ZX";
 
 const CODE_REASONS: Record<string, string> = {
   stripe: "continue to Stripe",
@@ -122,7 +116,6 @@ export const getTwoFactorView = (studio: StudioController) => {
     isTax: step === "tax",
     isLearn: step === "learn",
     isTaxCode: step === "taxcode",
-    taxFixture: (flow.fixture || "") as TaxFixture,
     parts: [
       {
         key: "p1",
@@ -216,17 +209,16 @@ export const getTwoFactorView = (studio: StudioController) => {
     },
     isKeyOn: !!flow.keyShown,
     toggleKey: () => setTwoFactor({ keyShown: !flow.keyShown }),
-    keyText: (enrolment?.secret ?? DEMO_KEY).replace(/(.{4})(?=.)/g, "$1 "),
+    keyText: (enrolment?.secret ?? "").replace(/(.{4})(?=.)/g, "$1 "),
     isKeyCopied: !!flow.keyCopied,
-    copyKey: () => actions.copyTwoFactorKey(enrolment?.secret ?? DEMO_KEY),
+    copyKey: () => enrolment && actions.copyTwoFactorKey(enrolment.secret),
     isOpenAppShown: !isWide,
     appLink: enrolment?.uri ?? "",
     openApp: () => actions.showToast("Opening your authenticator app"),
     qrImage: enrolment?.qrCode ?? "",
-    isQrLoading: !!state.account && !enrolment && !flow.isEnrolmentFailed,
+    isQrLoading: !enrolment && !flow.isEnrolmentFailed,
     isQrFailed: !!flow.isEnrolmentFailed,
     retryQr: actions.retryEnrolment,
-    qrCells: state.account ? [] : getQrCells(),
     isBusy: !!flow.isBusy,
     verify: actions.verifyTwoFactor,
     verifyLabel: isBackup ? "Add backup" : "Turn on",

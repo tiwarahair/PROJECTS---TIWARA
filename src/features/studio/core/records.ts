@@ -31,6 +31,9 @@ export const getPayoutStatus = ({
   return charges_enabled && payouts_enabled ? "active" : "verifying";
 };
 
+// what the form suggests when a stylist without a deposit switches to one (a deposit is always 1-50%)
+const SUGGESTED_DEPOSIT = 20;
+
 const getClockTime = (time: string | null) => (time ?? "").slice(0, 5);
 
 /** The parts of Studio's state that come from the stylist's own data. */
@@ -132,7 +135,7 @@ export const toStudioPatch = (
     policy: policy
       ? {
           mode: toPolicyMode(policy.mode),
-          deposit: policy.deposit_percent || state.policy.deposit,
+          deposit: policy.deposit_percent || SUGGESTED_DEPOSIT,
           refundable: policy.refundable,
           window: Number(policy.free_window_hours),
           grace: policy.grace_minutes,

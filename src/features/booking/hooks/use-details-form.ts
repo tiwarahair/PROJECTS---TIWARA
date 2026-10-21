@@ -7,7 +7,7 @@ import type { FlowState } from "./use-flow-state";
 
 export const useDetailsForm = ({ initial, setState }: FlowState) => {
   const detailsForm = useForm<Details>({
-    defaultValues: initial.state.details,
+    defaultValues: initial.details,
     mode: "onTouched",
     resolver: zodResolver(detailsSchema),
     shouldFocusError: false,
@@ -18,10 +18,8 @@ export const useDetailsForm = ({ initial, setState }: FlowState) => {
       setState({ details: detailsForm.getValues() }),
     );
 
-    if (initial.showErrors) void detailsForm.handleSubmit(() => undefined)();
-
     return unsubscribe;
-  }, [detailsForm, initial, setState]);
+  }, [detailsForm, setState]);
 
   return detailsForm;
 };

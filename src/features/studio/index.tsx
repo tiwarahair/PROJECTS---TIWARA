@@ -49,7 +49,7 @@ export const StudioPage = (props: StudioPageProps) => {
   const studio = useStudio(props);
   const dispatch = useAppDispatch();
   const { state, isWide } = studio;
-  const { isSetupOn, isComplete } = getSetupProgress(studio);
+  const { isComplete } = getSetupProgress(studio);
 
   const bookingsView =
     state.tab === "bookings" ? getBookingsView(studio) : null;
@@ -101,12 +101,10 @@ export const StudioPage = (props: StudioPageProps) => {
               )}
             </div>
             {isWide &&
-              isSetupOn &&
               ((!isComplete && !state.setupMinimised) || !!state.setupExit) && (
                 <SetupCard studio={studio} />
               )}
             {isWide &&
-              isSetupOn &&
               !isComplete &&
               state.setupMinimised &&
               !state.setupExit && <SetupPill studio={studio} />}

@@ -19,7 +19,7 @@ export interface SettingsPageProps {
 }
 
 export const SettingsPage = ({ studio, view, account }: SettingsPageProps) => {
-  const { state, isWide, isNew, props, actions } = studio;
+  const { state, isWide, actions } = studio;
   const owed = useOwed(studio);
 
   return (
@@ -51,40 +51,41 @@ export const SettingsPage = ({ studio, view, account }: SettingsPageProps) => {
         )}
         data-screen-label="Account settings"
       >
-        <AccountSettings
-          embedded={true}
-          page={view.accountPage}
-          payoutStatus={view.payoutStatus}
-          tax={state.tax}
-          taxEditing={!!state.taxEdit}
-          taxBusiness={state.business}
-          taxLegalName={state.owner.name}
-          person={state.owner}
-          notifications={state.notificationPrefs}
-          taxBusinessName={state.profile.salon}
-          onTaxEdit={view.onTaxEdit}
-          onTaxAdd={view.onTaxAdd}
-          onTaxSave={view.onTaxSave}
-          onTaxCancel={view.onTaxCancel}
-          onTaxDirty={view.onTaxDirty}
-          onTaxLearnMore={view.onTaxLearn}
-          signIn={account.signIn ?? props.signIn ?? "email"}
-          backend={account.backend}
-          isNew={isNew}
-          upcoming={view.accountUpcoming}
-          {...owed}
-          onNavigate={view.onAccountNav}
-          onToast={(text) => actions.showToast(text)}
-          onState={view.onAccountState}
-          onConnectStripe={view.connectStripe}
-          onOpenStripe={view.openStripeDashboard}
-          payoutBank={view.payoutBank}
-          twoFactorDevices={state.twoFactorSettings.devices}
-          onTwoFactorTurnOn={view.onTwoFactorTurnOn}
-          onTwoFactorAddBackup={view.onTwoFactorAddBackup}
-          onTwoFactorRemove={view.onTwoFactorRemove}
-          hideSave={!isWide}
-        />
+        {account && (
+          <AccountSettings
+            embedded={true}
+            page={view.accountPage}
+            payoutStatus={view.payoutStatus}
+            tax={state.tax}
+            taxEditing={!!state.taxEdit}
+            taxBusiness={state.business}
+            taxLegalName={state.owner.name}
+            person={state.owner}
+            notifications={state.notificationPrefs}
+            taxBusinessName={state.profile.salon}
+            onTaxEdit={view.onTaxEdit}
+            onTaxAdd={view.onTaxAdd}
+            onTaxSave={view.onTaxSave}
+            onTaxCancel={view.onTaxCancel}
+            onTaxDirty={view.onTaxDirty}
+            onTaxLearnMore={view.onTaxLearn}
+            signIn={account.signIn}
+            backend={account.backend}
+            upcoming={view.accountUpcoming}
+            {...owed}
+            onNavigate={view.onAccountNav}
+            onToast={(text) => actions.showToast(text)}
+            onState={view.onAccountState}
+            onConnectStripe={view.connectStripe}
+            onOpenStripe={view.openStripeDashboard}
+            payoutBank={view.payoutBank}
+            twoFactorDevices={state.twoFactorSettings.devices}
+            onTwoFactorTurnOn={view.onTwoFactorTurnOn}
+            onTwoFactorAddBackup={view.onTwoFactorAddBackup}
+            onTwoFactorRemove={view.onTwoFactorRemove}
+            hideSave={!isWide}
+          />
+        )}
       </div>
       {view.isPolicy && (
         <div className={styles.embedded} data-screen-label="Payment policy">

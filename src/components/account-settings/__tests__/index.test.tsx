@@ -1,17 +1,47 @@
 import { act, render, screen, waitFor, within } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { MemoryRouter } from "react-router";
-import { DEMO_BACKEND } from "../backend";
+import type { AccountSettingsBackend } from "../backend";
 import { AccountSettings } from "..";
 import type { AccountSettingsApi } from "..";
-import type { PayoutStatus } from "../logic";
+import type { PayoutStatus, SettingsPerson } from "../logic";
 import type { UserEvent } from "@testing-library/user-event";
 import { setupUser } from "../../../test/setup-user";
 
 let user: UserEvent;
+let backend: AccountSettingsBackend;
+
+const CODE = "123456";
+
+const getTestBackend = (): AccountSettingsBackend => ({
+  saveName: vi.fn(() => Promise.resolve()),
+  savePhone: vi.fn(() => Promise.resolve()),
+  sendEmailCodes: vi.fn(() => Promise.resolve(null)),
+  verifyEmailCode: vi.fn((email: string, code: string) =>
+    Promise.resolve(!!email && code === CODE),
+  ),
+  sendPasswordCode: vi.fn(() => Promise.resolve()),
+  closeBusiness: vi.fn(() => Promise.resolve()),
+  saveNotification: vi.fn(() => Promise.resolve()),
+  changePassword: vi.fn((password: string, code: string) => {
+    if (!code) return Promise.resolve("reauthentication_needed");
+
+    return Promise.resolve(
+      password && code === CODE ? null : "reauthentication_not_valid",
+    );
+  }),
+});
+
+const person: SettingsPerson = {
+  first: "Amara",
+  last: "Okonkwo",
+  email: "amara.okonkwo@gmail.com",
+  phone: "07700 900418",
+};
 
 beforeEach(() => {
   user = setupUser();
+  backend = getTestBackend();
 });
 
 const advance = (ms: number) => act(() => vi.advanceTimersByTime(ms));
@@ -21,7 +51,10 @@ describe("AccountSettings", () => {
   afterEach(() => vi.useRealTimers());
 
   it("renders the personal page with saving disabled", () => {
-    render(<AccountSettings />, { wrapper: MemoryRouter });
+    render(<AccountSettings person={person} backend={backend} />, {
+      wrapper: MemoryRouter,
+    });
+
     expect(screen.getByLabelText("First name")).toHaveValue("Amara");
     expect(screen.getByText("amara.okonkwo@gmail.com")).toBeInTheDocument();
     expect(screen.getByRole("button", { name: "Save changes" })).toBeDisabled();
@@ -30,7 +63,12 @@ describe("AccountSettings", () => {
   it("saves a name change and reports it to the host", async () => {
     const onState = vi.fn<(api: AccountSettingsApi) => void>();
 
-    render(<AccountSettings onState={onState} />, { wrapper: MemoryRouter });
+    render(
+      <AccountSettings person={person} backend={backend} onState={onState} />,
+      {
+        wrapper: MemoryRouter,
+      },
+    );
 
     await user.clear(screen.getByLabelText("First name"));
     await user.type(screen.getByLabelText("First name"), "Ama");
@@ -46,7 +84,9 @@ describe("AccountSettings", () => {
   });
 
   it("a blank name shows its error on save until it's filled in", async () => {
-    render(<AccountSettings />, { wrapper: MemoryRouter });
+    render(<AccountSettings person={person} backend={backend} />, {
+      wrapper: MemoryRouter,
+    });
 
     await user.clear(screen.getByLabelText("Last name"));
     await user.click(screen.getByRole("button", { name: "Save changes" }));
@@ -67,7 +107,13 @@ describe("AccountSettings", () => {
   it("discarding puts the saved name back", async () => {
     const onState = vi.fn<(api: AccountSettingsApi) => void>();
 
-    render(<AccountSettings onState={onState} />, { wrapper: MemoryRouter });
+    render(
+      <AccountSettings person={person} backend={backend} onState={onState} />,
+      {
+        wrapper: MemoryRouter,
+      },
+    );
+
     await user.type(screen.getByLabelText("First name"), "x");
     act(() => onState.mock.lastCall?.[0].discard());
 
@@ -76,7 +122,10 @@ describe("AccountSettings", () => {
   });
 
   it("saves a new mobile straight away, no code", async () => {
-    render(<AccountSettings />, { wrapper: MemoryRouter });
+    render(<AccountSettings person={person} backend={backend} />, {
+      wrapper: MemoryRouter,
+    });
+
     await user.click(screen.getAllByRole("button", { name: "Change" })[1]!);
     await user.type(screen.getByLabelText("New phone number"), "07700 900999");
     await user.click(screen.getByRole("button", { name: "Save" }));
@@ -86,7 +135,10 @@ describe("AccountSettings", () => {
   });
 
   it("checks the new login email and mobile before sending anything", async () => {
-    render(<AccountSettings />, { wrapper: MemoryRouter });
+    render(<AccountSettings person={person} backend={backend} />, {
+      wrapper: MemoryRouter,
+    });
+
     await user.click(screen.getAllByRole("button", { name: "Change" })[0]!);
     await user.type(screen.getByLabelText("New email"), "amara@");
     await user.click(screen.getByRole("button", { name: "Send codes" }));
@@ -118,7 +170,10 @@ describe("AccountSettings", () => {
   });
 
   it("a mobile error clears while typing", async () => {
-    render(<AccountSettings />, { wrapper: MemoryRouter });
+    render(<AccountSettings person={person} backend={backend} />, {
+      wrapper: MemoryRouter,
+    });
+
     await user.click(screen.getAllByRole("button", { name: "Change" })[1]!);
     await user.type(screen.getByLabelText("New phone number"), "0");
     await user.click(screen.getByRole("button", { name: "Save" }));
@@ -135,7 +190,10 @@ describe("AccountSettings", () => {
   });
 
   it("resending the email codes clears the old codes and error", async () => {
-    render(<AccountSettings />, { wrapper: MemoryRouter });
+    render(<AccountSettings person={person} backend={backend} />, {
+      wrapper: MemoryRouter,
+    });
+
     await user.click(screen.getAllByRole("button", { name: "Change" })[0]!);
     await user.type(screen.getByLabelText("New email"), "amara@example.com");
     await user.click(screen.getByRole("button", { name: "Send codes" }));
@@ -169,7 +227,10 @@ describe("AccountSettings", () => {
   });
 
   it("changes the login email with a code from each address", async () => {
-    render(<AccountSettings />, { wrapper: MemoryRouter });
+    render(<AccountSettings person={person} backend={backend} />, {
+      wrapper: MemoryRouter,
+    });
+
     await user.click(screen.getAllByRole("button", { name: "Change" })[0]!);
     await user.type(screen.getByLabelText("New email"), "amara@example.com");
     await user.click(screen.getByRole("button", { name: "Send codes" }));
@@ -205,7 +266,9 @@ describe("AccountSettings", () => {
   });
 
   it("blocks closing the business while bookings are upcoming", () => {
-    render(<AccountSettings upcoming={2} />, { wrapper: MemoryRouter });
+    render(<AccountSettings person={person} backend={backend} upcoming={2} />, {
+      wrapper: MemoryRouter,
+    });
 
     expect(
       screen.getByText(
@@ -221,9 +284,17 @@ describe("AccountSettings", () => {
   it("asks for dispute fees owed to be paid before closing", async () => {
     const onPayOwed = vi.fn();
 
-    render(<AccountSettings owed={13.59} onPayOwed={onPayOwed} />, {
-      wrapper: MemoryRouter,
-    });
+    render(
+      <AccountSettings
+        person={person}
+        backend={backend}
+        owed={13.59}
+        onPayOwed={onPayOwed}
+      />,
+      {
+        wrapper: MemoryRouter,
+      },
+    );
 
     expect(
       screen.getByRole("button", { name: "Close business" }),
@@ -235,7 +306,10 @@ describe("AccountSettings", () => {
   });
 
   it("confirms closing the business in a dialog on <body>", async () => {
-    render(<AccountSettings />, { wrapper: MemoryRouter });
+    render(<AccountSettings person={person} backend={backend} />, {
+      wrapper: MemoryRouter,
+    });
+
     await user.click(screen.getByRole("button", { name: "Close business" }));
 
     const dialog = screen.getByRole("alertdialog", {
@@ -254,7 +328,13 @@ describe("AccountSettings", () => {
   });
 
   it("security: loads the sessions, then signs out of one", async () => {
-    render(<AccountSettings page="security" />, { wrapper: MemoryRouter });
+    render(
+      <AccountSettings person={person} backend={backend} page="security" />,
+      {
+        wrapper: MemoryRouter,
+      },
+    );
+
     expect(screen.getByLabelText("Loading sessions")).toBeInTheDocument();
     advance(700);
 
@@ -266,7 +346,12 @@ describe("AccountSettings", () => {
   });
 
   it("security: when Supabase asks, the password change needs the emailed code", async () => {
-    render(<AccountSettings page="security" />, { wrapper: MemoryRouter });
+    render(
+      <AccountSettings person={person} backend={backend} page="security" />,
+      {
+        wrapper: MemoryRouter,
+      },
+    );
 
     expect(
       screen.queryByLabelText("Code from your email"),
@@ -301,9 +386,10 @@ describe("AccountSettings", () => {
   it("security: a rejected password says why, even without a code", async () => {
     render(
       <AccountSettings
+        person={person}
         page="security"
         backend={{
-          ...DEMO_BACKEND,
+          ...backend,
           changePassword: () => Promise.resolve("same_password"),
         }}
       />,
@@ -325,7 +411,13 @@ describe("AccountSettings", () => {
   });
 
   it("security: the passwords must match", async () => {
-    render(<AccountSettings page="security" />, { wrapper: MemoryRouter });
+    render(
+      <AccountSettings person={person} backend={backend} page="security" />,
+      {
+        wrapper: MemoryRouter,
+      },
+    );
+
     await user.type(screen.getByLabelText("New password"), "tide2lamp-violet");
     await user.type(screen.getByLabelText("Confirm new password"), "tide2lamp");
     await user.click(screen.getByRole("button", { name: "Save changes" }));
@@ -338,9 +430,10 @@ describe("AccountSettings", () => {
   it("security: errors clear once the password is edited", async () => {
     render(
       <AccountSettings
+        person={person}
         page="security"
         backend={{
-          ...DEMO_BACKEND,
+          ...backend,
           changePassword: () => Promise.resolve("same_password"),
         }}
       />,
@@ -382,9 +475,17 @@ describe("AccountSettings", () => {
   });
 
   it("security: a social sign-in offers to set a password", () => {
-    render(<AccountSettings page="security" signIn="apple" />, {
-      wrapper: MemoryRouter,
-    });
+    render(
+      <AccountSettings
+        person={person}
+        backend={backend}
+        page="security"
+        signIn="apple"
+      />,
+      {
+        wrapper: MemoryRouter,
+      },
+    );
 
     expect(
       screen.getByText(
@@ -400,9 +501,17 @@ describe("AccountSettings", () => {
     ["paused", "Payouts paused"],
     ["active", "Payouts active"],
   ])("payouts status %s", (payoutStatus, title) => {
-    render(<AccountSettings page="payouts" payoutStatus={payoutStatus} />, {
-      wrapper: MemoryRouter,
-    });
+    render(
+      <AccountSettings
+        person={person}
+        backend={backend}
+        page="payouts"
+        payoutStatus={payoutStatus}
+      />,
+      {
+        wrapper: MemoryRouter,
+      },
+    );
 
     expect(screen.getByText(title)).toBeInTheDocument();
   });
@@ -410,16 +519,34 @@ describe("AccountSettings", () => {
   it("payouts without tax details are on hold", async () => {
     const onTaxAdd = vi.fn();
 
-    render(<AccountSettings page="payouts" onTaxAdd={onTaxAdd} />, {
-      wrapper: MemoryRouter,
-    });
+    render(
+      <AccountSettings
+        person={person}
+        backend={backend}
+        page="payouts"
+        onTaxAdd={onTaxAdd}
+      />,
+      {
+        wrapper: MemoryRouter,
+      },
+    );
 
     await user.click(screen.getByRole("button", { name: "Add tax details" }));
     expect(onTaxAdd).toHaveBeenCalled();
   });
 
   it("notifications toggle per channel", async () => {
-    render(<AccountSettings page="notifications" />, { wrapper: MemoryRouter });
+    render(
+      <AccountSettings
+        person={person}
+        backend={backend}
+        page="notifications"
+      />,
+      {
+        wrapper: MemoryRouter,
+      },
+    );
+
     const sms = screen.getByRole("switch", { name: "New booking by SMS" });
 
     await user.click(sms);
@@ -431,9 +558,10 @@ describe("AccountSettings", () => {
 
     render(
       <AccountSettings
+        person={person}
         page="notifications"
         notifications={{ newBooking: { email: false, sms: true } }}
-        backend={{ ...DEMO_BACKEND, saveNotification }}
+        backend={{ ...backend, saveNotification }}
       />,
       { wrapper: MemoryRouter },
     );
@@ -452,9 +580,10 @@ describe("AccountSettings", () => {
   it("a notification toggle that doesn't save goes back", async () => {
     render(
       <AccountSettings
+        person={person}
         page="notifications"
         backend={{
-          ...DEMO_BACKEND,
+          ...backend,
           saveNotification: () => Promise.reject(new Error("offline")),
         }}
       />,
@@ -478,8 +607,9 @@ describe("AccountSettings", () => {
 
     render(
       <AccountSettings
+        person={person}
         page="notifications"
-        backend={{ ...DEMO_BACKEND, saveNotification }}
+        backend={{ ...backend, saveNotification }}
       />,
       { wrapper: MemoryRouter },
     );
@@ -504,9 +634,12 @@ describe("AccountSettings", () => {
   });
 
   it("calendar connects Google after a short wait", async () => {
-    render(<AccountSettings page="calendar" isNew={true} />, {
-      wrapper: MemoryRouter,
-    });
+    render(
+      <AccountSettings person={person} backend={backend} page="calendar" />,
+      {
+        wrapper: MemoryRouter,
+      },
+    );
 
     await user.click(
       screen.getByRole("button", { name: "Connect Google Calendar" }),

@@ -13,10 +13,8 @@ import {
   useStudioMount,
 } from "./effects";
 import { getInitialStudioState } from "./initial-state";
-import { seedFromAccount, seedNewAccount } from "./seed-account";
+import { seedFromAccount } from "./seed-account";
 import type { StudioSeed } from "./seed-account";
-import { getSeedPast } from "./seed-bookings";
-import { getQueryParam } from "./model";
 import { createServiceActions } from "../services/actions";
 import { useCatalogueSync } from "../services/catalogue-sync";
 import { createStudioSync } from "./sync";
@@ -33,35 +31,16 @@ import type { StudioPatch } from "./types";
 export type { StudioSeed } from "./seed-account";
 
 export interface StudioProps {
-  /** A signed-in stylist's own data; without it Studio shows the demo. */
-  seed?: StudioSeed;
-  account?: "populated" | "new";
-  setup?: boolean;
-  payouts?: "verifying" | "action" | "paused" | "active";
-  signIn?: "email" | "google" | "apple";
-  /** Demo: how card charges behave in checkout. */
-  cardDeclines?: "none" | "soft" | "hard";
-  /** Demo: the Earnings tab's scenario. */
-  earnings?: "default" | "onhold" | "paused";
-  fixture?: string;
+  seed: StudioSeed;
 }
 
-export const useStudio = (props: StudioProps) => {
-  const isNew =
-    !!props.seed ||
-    (getQueryParam("account") || props.account || "populated") === "new";
-
+export const useStudio = ({ seed }: StudioProps) => {
   const memoRef = useRef<StudioContext["memo"]>({});
 
-  const [state, setRawState] = useState(() => {
-    const initial = getInitialStudioState();
+  const [state, setRawState] = useState(() =>
+    seedFromAccount(getInitialStudioState(), seed),
+  );
 
-    if (props.seed) return seedFromAccount(initial, props.seed);
-
-    return isNew ? seedNewAccount(initial) : initial;
-  });
-
-  const [seedPast] = useState(() => (isNew ? [] : getSeedPast()));
   const [, setTick] = useState(0);
   const stateRef = useRef(state);
 
@@ -120,18 +99,16 @@ export const useStudio = (props: StudioProps) => {
 
   const blocker = useUnsavedChanges(hasUnsaved);
 
-  const stylistId = state.account?.stylistId;
+  const { stylistId } = state.account;
 
   // one sync per stylist for Studio's lifetime, so its save queue survives re-renders
   const sync = useMemo(
     () =>
-      stylistId
-        ? createStudioSync(
-            stylistId,
-            (patch) => latest.current.context.applyState(patch),
-            (message) => latest.current.actions.showToast(message),
-          )
-        : null,
+      createStudioSync(
+        stylistId,
+        (patch) => latest.current.context.applyState(patch),
+        (message) => latest.current.actions.showToast(message),
+      ),
     [stylistId],
   );
 
@@ -158,27 +135,21 @@ export const useStudio = (props: StudioProps) => {
   useLiveStudio(latest, stylistId);
   useActivityFeed(latest, stylistId);
   useLeaveGuard(latest, blocker);
-  useStudioMount(latest, props.fixture, setTick);
+  useStudioMount(latest, setTick);
   usePageFollow(latest, state);
 
   // a stylist who has never had a booking sees the welcome messages; anyone else sees the usual empty states
-  const hasBookings =
-    state.bookings.length > 0 ||
-    state.pastNew.length > 0 ||
-    seedPast.length > 0;
+  const hasBookings = state.bookings.length > 0 || state.pastNew.length > 0;
 
   return {
     state,
     setState,
-    props,
-    isNew,
     hasBookings,
     isWide,
     isDesktop,
     actions,
     serviceActions,
     context,
-    seedPast,
   };
 };
 

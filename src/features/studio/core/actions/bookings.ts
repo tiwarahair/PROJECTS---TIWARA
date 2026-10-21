@@ -3,6 +3,7 @@ import {
   setBookingStatus,
 } from "../../../../lib/studio-api/bookings";
 import { mergeBookingRows } from "../../bookings/live-records";
+import { STILL_SAVING } from "../../bookings/sheet/checkout-view";
 import { toIsoDate } from "../../../../utils/dates";
 import { toDayOffset } from "../../bookings/records";
 import { durationToMinutes, timeToMinutes } from "../format";
@@ -44,7 +45,7 @@ export const createBookingActions = (
     const remoteId = booking?.remoteId;
 
     if (remoteId && isSavedStatus(status))
-      sync?.save(() => setBookingStatus(remoteId, status), {
+      sync.save(() => setBookingStatus(remoteId, status), {
         bookings: revert,
       });
   };
@@ -57,6 +58,8 @@ export const createBookingActions = (
   ) => {
     const previous = getState().bookings;
     const booking = previous.find((item) => item.id === id);
+
+    if (!booking?.remoteId) return showToast(STILL_SAVING);
 
     const next = previous.map((item) =>
       item.id === id ? { ...item, status, ...extra } : item,
@@ -74,35 +77,15 @@ export const createBookingActions = (
   const patchPast = (
     pastId: string | number | undefined,
     patch: Partial<PastRecord> | ((row: PastRecord) => Partial<PastRecord>),
-    seed: PastRecord[],
   ) => {
-    const state = getState();
-
-    const resolve = (row: PastRecord) =>
-      typeof patch === "function" ? patch(row) : patch;
-
-    if (state.pastNew.some((row) => row.pastId === pastId)) {
-      setState({
-        pastNew: state.pastNew.map((row) =>
-          row.pastId === pastId ? { ...row, ...resolve(row) } : row,
-        ),
-      });
-
-      return;
-    }
-
-    const current =
-      seed.find((row) => row.pastId === pastId) ?? ({} as PastRecord);
-
-    const overrides = state.pastOverrides ?? {};
-    const key = String(pastId);
-    const merged = { ...current, ...(overrides[key] ?? {}) };
+    const { pastNew } = getState();
 
     setState({
-      pastOverrides: {
-        ...overrides,
-        [key]: { ...(overrides[key] ?? {}), ...resolve(merged) },
-      },
+      pastNew: pastNew.map((row) =>
+        row.pastId === pastId
+          ? { ...row, ...(typeof patch === "function" ? patch(row) : patch) }
+          : row,
+      ),
     });
   };
 
@@ -185,9 +168,9 @@ export const createBookingActions = (
   /** The next page of a real account's Past, added under what's shown. */
   const loadOlderPast = async () => {
     const { pastCursor, isPastLoading } = getState();
-    const stylistId = sync?.stylistId;
+    const { stylistId } = sync;
 
-    if (!pastCursor || !stylistId || isPastLoading) return;
+    if (!pastCursor || isPastLoading) return;
 
     setState({ isPastLoading: true });
 

@@ -3,7 +3,8 @@ import {
   getConfirmUrl,
   setStylistNote,
 } from "../../../../lib/studio-api/booking-writes";
-import { copyLaterText, copyText } from "../../core/format";
+import { copyLaterText } from "../../core/format";
+import { STILL_SAVING } from "./checkout-view";
 import type { SheetContext } from "./context";
 
 const getCopyError = (error: unknown) =>
@@ -26,12 +27,7 @@ export const getPanelsView = ({
     if (booking.canResend) resendLink();
   },
   copyPaymentLink: () => {
-    if (!raw?.remoteId) {
-      copyText(`tiwaras.house/pay/${booking.id}`);
-      showToast("Payment link copied");
-
-      return;
-    }
+    if (!raw?.remoteId) return showToast(STILL_SAVING);
 
     copyLaterText(getConfirmUrl(raw.remoteId)).then(
       () => showToast(`Link copied. Send it to ${booking.firstName} yourself.`),
@@ -71,9 +67,11 @@ export const getPanelsView = ({
   saveNote: () => {
     const note = state.bookingNoteDraft.trim();
 
-    saveBooking({ stylistNote: note }, (remoteId) =>
+    const isSaving = saveBooking({ stylistNote: note }, (remoteId) =>
       setStylistNote(remoteId, note),
     );
+
+    if (!isSaving) return;
 
     setState({ bookingNoteOn: false });
     showToast(note ? "Note saved" : "Note removed");

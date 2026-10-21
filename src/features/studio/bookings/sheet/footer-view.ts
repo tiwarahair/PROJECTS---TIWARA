@@ -10,9 +10,9 @@ import {
 } from "lucide-react";
 import { getManageUrl } from "../../../../lib/studio-api/booking-writes";
 import { SaveError } from "../../../../lib/studio-writes";
-import { copyLaterText, copyText } from "../../core/format";
+import { copyLaterText } from "../../core/format";
 import type { ActionItem } from "../../core/types";
-import { openCheckout } from "./checkout-view";
+import { openCheckout, STILL_SAVING } from "./checkout-view";
 import { getClientView } from "./client-view";
 import type { SheetContext } from "./context";
 import { CANCEL_STEP, CLOSED_STATUSES, RESCHEDULE_STEP } from "./types";
@@ -49,21 +49,17 @@ const getGuestItems = ({
 
   const showError = (error: unknown) => actions.showToast(getLinkError(error));
 
-  const copyManageLink = () =>
-    remoteId
-      ? copyLaterText(getManageUrl(remoteId, false))
-      : Promise.resolve(copyText(`tiwaras.house/manage/${booking.id}`));
+  const copyManageLink = () => {
+    if (!remoteId) return actions.showToast(STILL_SAVING);
+
+    copyLaterText(getManageUrl(remoteId, false)).then(
+      () => actions.showToast(`Guest link copied for ${booking.firstName}`),
+      showError,
+    );
+  };
 
   return [
-    {
-      label: "Copy guest management link",
-      icon: Link,
-      run: () =>
-        copyManageLink().then(
-          () => actions.showToast(`Guest link copied for ${booking.firstName}`),
-          showError,
-        ),
-    },
+    { label: "Copy guest management link", icon: Link, run: copyManageLink },
     ...(remoteId && booking.hasEmail
       ? [
           {
@@ -131,7 +127,6 @@ export const getFooterView = (context: SheetContext) => {
     canCheckout:
       !isClosed &&
       !booking.awaiting &&
-      !booking.autoX &&
       (booking.status === "arrived" ||
         booking.dayOffset < 0 ||
         (booking.dayOffset === 0 && nowMinutes >= booking.startMinutes)),

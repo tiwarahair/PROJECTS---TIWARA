@@ -10,10 +10,10 @@ export const useOwed = ({
   setState,
   actions: { showToast },
 }: StudioController) => {
-  const stylistId = account?.stylistId;
+  const { stylistId } = account;
   const [isPaying, setIsPaying] = useState(false);
 
-  const { data } = useGetCloseChecksQuery(stylistId ?? skipToken, {
+  const { data } = useGetCloseChecksQuery(stylistId || skipToken, {
     pollingInterval: isOwedSettling ? 3000 : 0,
     refetchOnMountOrArgChange: true,
   });

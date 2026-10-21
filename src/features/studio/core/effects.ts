@@ -5,7 +5,6 @@ import { toNotification } from "../home/activity-records";
 import type { Dispatch, RefObject, SetStateAction } from "react";
 import type { useUnsavedChanges } from "../../../hooks/use-unsaved-changes";
 import type { StudioActions, StudioContext } from "./actions";
-import { applyFixture } from "./fixtures";
 import { watchStudio } from "./live";
 import { getQueryParam, getSteps } from "./model";
 import type { ServiceActions } from "../services/actions";
@@ -147,15 +146,10 @@ export const useLeaveGuard = (
 
 export const useStudioMount = (
   latest: LatestRef,
-  fixtureProp: string | undefined,
   setTick: Dispatch<SetStateAction<number>>,
 ) =>
   useEffect(() => {
-    const {
-      actions: current,
-      serviceActions: services,
-      context: currentContext,
-    } = latest.current;
+    const { actions: current, context: currentContext } = latest.current;
 
     const { memo, timers } = currentContext;
     const mountTimers: number[] = [];
@@ -172,15 +166,9 @@ export const useStudioMount = (
         }, 600),
       );
 
-    const fixture = fixtureProp || getQueryParam("fixture");
-
     mountTimers.push(
       window.setTimeout(() => {
         memo.seenDone = getSteps(currentContext.getState());
-
-        // demo states are dev-only; production builds drop this branch and the fixtures module
-        if (import.meta.env.DEV && fixture)
-          applyFixture(fixture, currentContext, current, services);
       }, 0),
     );
 

@@ -80,7 +80,7 @@ export const getClientView = (context: SheetContext) => {
             setState({ confirm: null });
 
             // a walk-in has nothing to confirm: any link stops working
-            saveBooking(
+            const isSaving = saveBooking(
               {
                 client: null,
                 walkIn: true,
@@ -93,7 +93,7 @@ export const getClientView = (context: SheetContext) => {
               (remoteId) => changeBookingClient(remoteId, null, false),
             );
 
-            actions.showToast("Now a walk-in");
+            if (isSaving) actions.showToast("Now a walk-in");
           },
         },
       }),

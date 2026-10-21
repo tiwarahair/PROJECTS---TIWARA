@@ -3,8 +3,6 @@ import type { UseFormRegisterReturn } from "react-hook-form";
 import type { TaxDetails } from "../tax-details-form/logic";
 
 export type BusinessType = "shop" | "chair" | "home" | "mobile";
-export type BusinessPreset =
-  BusinessType | "vatValid" | "vatInvalid" | "unsaved" | "pcError";
 export type BusinessFieldName =
   "address" | "basePostcode" | "phone" | "email" | "vat";
 
@@ -45,13 +43,6 @@ export interface BusinessFormValues {
   vat: string;
 }
 
-export interface InitialBusiness {
-  saved: BusinessFormValues;
-  values: BusinessFormValues;
-  shownErrors: BusinessFieldName[];
-  addressSource: string;
-}
-
 /** What the host (Studio) gets after every render to drive its own save bar. */
 export interface BusinessDetailsApi {
   canSave: boolean;
@@ -59,17 +50,14 @@ export interface BusinessDetailsApi {
 }
 
 export interface BusinessDetailsProps {
-  preset?: BusinessPreset;
   /** Accepted for the host; not rendered. */
   stripe?: "connected" | "company" | "none" | "action";
   scrollTo?: "" | "type" | "location" | "vat" | "legal";
   embedded?: boolean;
   hideSave?: boolean;
-  value?: Partial<Omit<BusinessValue, "details">> & {
-    details?: Partial<BusinessFields>;
-  };
+  value: BusinessValue;
   /** Legal details from TaxDetailsForm; null shows the "add tax details" state. */
-  tax?: Partial<TaxDetails> | null;
+  tax: Partial<TaxDetails> | null;
   onSave?: (value: BusinessValue) => void;
   onState?: (api: BusinessDetailsApi) => void;
   onEditTax?: () => void;

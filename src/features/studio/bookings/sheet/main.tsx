@@ -30,14 +30,6 @@ export const BookingMain = ({ studio, view, edit }: BookingMainProps) => {
           state.bookingStepBack && styles.mainBack,
         )}
       >
-        {booking.autoX && (
-          <div className={styles.autoCancelled}>
-            <div className={styles.autoLabel}>Auto-cancelled</div>
-            <div className={styles.autoBody}>
-              {`The payment link expired on ${booking.expiryLabel} without being confirmed, so the slot was released.`}
-            </div>
-          </div>
-        )}
         <ClientRow studio={studio} view={view} />
         <StatusRow studio={studio} view={view} />
         {!!booking.note && (
@@ -87,7 +79,7 @@ export const BookingMain = ({ studio, view, edit }: BookingMainProps) => {
       )}
       {state.profile.mobile && <LocationPanel studio={studio} view={view} />}
       {booking.awaiting && <LinkPanel view={view} />}
-      {booking.noProtect && !booking.autoX && (
+      {booking.noProtect && (
         <div className={styles.noProtect}>
           <ShieldOff
             className={shared.menuIcon}

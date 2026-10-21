@@ -1,9 +1,21 @@
 import { act, screen, within } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { renderWithStore } from "../../../../../test/render-with-store";
+import { getRow } from "../../../../../test/studio-booking-row";
+import { getStudioSeed } from "../../../../../test/studio-seed";
+import { fromLondonTime } from "../../../../../utils/london-time";
+import { toDate } from "../../../core/blocked-time";
 import { StudioPage } from "../../..";
 import type { UserEvent } from "@testing-library/user-event";
 import { setupUser } from "../../../../../test/setup-user";
+
+// the save stays in flight, so the screen keeps what was done
+vi.mock("../../../../../lib/studio-api/bookings", async (importOriginal) => ({
+  ...(await importOriginal<
+    typeof import("../../../../../lib/studio-api/bookings")
+  >()),
+  rescheduleStudioBooking: vi.fn(() => new Promise(() => {})),
+}));
 
 let user: UserEvent;
 
@@ -29,9 +41,39 @@ const setViewport = (width: number) => {
   });
 };
 
+const BOOKED_AT = "2026-09-01T10:00:00+00:00";
+
+// Nia at 10:00 today, Ruth at 15:00
+const getTodaySeed = () => {
+  const seed = getStudioSeed();
+
+  seed.bookings.active = [
+    getRow({
+      starts_at: fromLondonTime(toDate(0), "10:00"),
+      created_at: BOOKED_AT,
+    }),
+    getRow({
+      id: "b-2",
+      starts_at: fromLondonTime(toDate(0), "15:00"),
+      created_at: BOOKED_AT,
+      stylist_client_id: "client-ruth",
+      stylist_client: {
+        first: "Ruth",
+        last: "Mensah",
+        phone: "07700900456",
+        email: "ruth@example.com",
+        deleted_at: null,
+      },
+    }),
+  ];
+
+  return seed;
+};
+
 const openNia = async () => {
-  renderWithStore(<StudioPage />, "/studio?fixture=cal-day");
+  renderWithStore(<StudioPage seed={getTodaySeed()} />, "/studio");
   runNextTimer();
+  await user.click(screen.getByTitle("Bookings"));
   await user.click(within(getLabelled("Bookings")).getByText("Nia Okafor"));
   advance(400);
 };

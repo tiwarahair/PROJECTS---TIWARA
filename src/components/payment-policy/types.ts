@@ -1,8 +1,6 @@
 // PaymentPolicy state, validation and save-bar summary.
 import type { PolicyMode } from "../../types/policy";
 
-export type PolicyPreset =
-  "default" | "full" | "card" | "none" | "error" | "unsaved";
 export type ExtraType = "prep" | "custom";
 export type FeeName = "late" | "noShow";
 
@@ -48,12 +46,11 @@ export interface PaymentPolicyApi {
 }
 
 export interface PaymentPolicyProps {
-  preset?: PolicyPreset;
   embedded?: boolean;
   hideSave?: boolean;
-  value?: Partial<PolicyValue>;
+  value: PolicyValue;
   bookingsCount?: number;
-  stylistName?: string;
+  stylistName: string;
   onSave?: (value: PolicyValue) => void | Promise<boolean>;
   onState?: (api: PaymentPolicyApi) => void;
 }

@@ -1,4 +1,4 @@
-// AccountSettings demo data, validators and display tables.
+// AccountSettings stand-in sessions and calendar values, validators and display tables.
 import type { NameValues } from "./name-schema";
 import {
   Check,
@@ -88,27 +88,17 @@ export interface SettingsPerson {
   phone: string;
 }
 
-const DEMO_PERSON: SettingsPerson = {
-  first: "Amara",
-  last: "Okonkwo",
-  email: "amara.okonkwo@gmail.com",
-  phone: "07700 900418",
-};
-
 export const getInitialName = ({
   first,
   last,
-}: SettingsPerson = DEMO_PERSON): NameValues => ({ first, last });
+}: SettingsPerson): NameValues => ({ first, last });
 
 export type NotificationSettings = Record<NotificationKey, ChannelSetting>;
 
 export const getInitialSettingsState = (
-  isNew: boolean,
-  search: string,
-  { email, phone }: SettingsPerson = DEMO_PERSON,
+  { email, phone }: SettingsPerson,
   savedNotifications: Partial<NotificationSettings> = {},
 ): SettingsState => {
-  const prefilled = new URLSearchParams(search).get("pwnew") || "";
   const channel = (): ChannelSetting => ({ email: true, sms: false });
 
   return {
@@ -119,7 +109,7 @@ export const getInitialSettingsState = (
     phone,
     phoneFlow: null,
     isSettingPassword: false,
-    isPasswordCodeSent: !!prefilled,
+    isPasswordCodeSent: false,
     signOthers: true,
     sessions: [
       {
@@ -161,7 +151,7 @@ export const getInitialSettingsState = (
       ...savedNotifications,
     },
     google: {
-      state: isNew ? "off" : "on",
+      state: "off",
       calendars: { main: true, family: true, holidays: false },
       target: "new",
     },

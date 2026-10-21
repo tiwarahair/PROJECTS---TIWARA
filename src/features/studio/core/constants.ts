@@ -40,8 +40,6 @@ export const TIMES = [
   "20:00",
 ];
 export const SLOT_TIMES = ["09:00", "10:30", "13:00", "15:30", "17:00"];
-export const BOOKING_LINK = "tiwaras.house/book/tiwara";
-export const STUDIO_STYLIST_ID = "tiwaras-house";
 export const GATE_REASON =
   "Finish setting up your studio to turn on your booking link.";
 

@@ -32,16 +32,9 @@ interface Tone {
 
 interface StatusFlags {
   awaiting: boolean;
-  autoX: boolean;
   ongoing: boolean;
   status: string;
 }
-
-const QUIET_TONE: Tone = {
-  background: "var(--quiet)",
-  border: "var(--border-subtle)",
-  color: "var(--text-secondary)",
-};
 
 const WAITING_TONE: Tone = {
   background: YELLOW_BACKGROUND,
@@ -92,14 +85,12 @@ const PROTECTION_WORDS: Record<string, string> = {
   full: "Payment request",
 };
 
-// Status wins over payment: awaiting, auto-cancelled, ongoing and arrived each have a fixed tone.
+// Status wins over payment: awaiting, ongoing and arrived each have a fixed tone.
 const getStatusTone = (
-  { awaiting, autoX, ongoing, status }: StatusFlags,
+  { awaiting, ongoing, status }: StatusFlags,
   fallback: Tone,
 ): Tone => {
   if (awaiting) return WAITING_TONE;
-
-  if (autoX) return QUIET_TONE;
 
   if (ongoing) return ONGOING_TONE;
 
@@ -125,7 +116,7 @@ const getPayTone = (isPaid: boolean, paid: string): Tone => {
 };
 
 const getBadge = (
-  { awaiting, autoX, ongoing, status }: StatusFlags,
+  { awaiting, ongoing, status }: StatusFlags,
   paid: string,
   msLeft: number,
   leftShort: string,
@@ -135,20 +126,16 @@ const getBadge = (
   if (awaiting)
     return msLeft > 0 ? `Auto-cancels in ${leftShort}` : "Auto-cancels now";
 
-  if (autoX) return "Auto-cancelled";
-
   if (status === "arrived") return "Arrived";
 
   return PAID_BADGES[paid] ?? "";
 };
 
 const getStatusLabel = (
-  { awaiting, autoX, ongoing, status }: StatusFlags,
+  { awaiting, ongoing, status }: StatusFlags,
   autoDone: boolean | undefined,
 ) => {
   if (awaiting) return "Awaiting confirmation";
-
-  if (autoX) return "Auto-cancelled";
 
   if (autoDone) return "Completed · Unpaid";
 
@@ -233,7 +220,6 @@ export const decorateBooking = (
   );
 
   const awaiting = status === "awaiting";
-  const autoX = status === "autocancelled";
 
   const msLeft = booking.expiresAt
     ? Math.max(0, booking.expiresAt - Date.now())
@@ -244,7 +230,7 @@ export const decorateBooking = (
       ? `${Math.round(msLeft / 3600000)} h`
       : `${Math.max(1, Math.round(msLeft / 60000))} min`;
 
-  const flags: StatusFlags = { awaiting, autoX, ongoing, status };
+  const flags: StatusFlags = { awaiting, ongoing, status };
 
   const badge = booking.autoDone
     ? "Completed · Unpaid"
@@ -319,7 +305,6 @@ export const decorateBooking = (
     statusColor: statusTone.color,
     statusDot: ongoing,
     awaiting,
-    autoX,
     noProtect: booking.protect === "none",
     protectionIsCard: booking.protectionMode === "card",
     protectionIsFull: booking.protectionMode === "full",

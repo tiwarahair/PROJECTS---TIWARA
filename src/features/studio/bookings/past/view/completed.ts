@@ -32,7 +32,6 @@ export const getCompletedView = (context: PastContext) => {
       canCancelLink: false,
     };
 
-  const { original, remoteId } = row;
   const checkout = getPastCheckout(state, row);
   const first = firstName("your client");
   const isAwaiting = checkout.done.method === "link" && !row.linkPaid;
@@ -66,7 +65,7 @@ export const getCompletedView = (context: PastContext) => {
           },
         },
       }),
-    canCancelLink: isAwaiting && (!!original || !!remoteId),
+    canCancelLink: isAwaiting,
     cancelLink: () =>
       setState({
         confirm: {
@@ -77,19 +76,7 @@ export const getCompletedView = (context: PastContext) => {
             setState({ confirm: null });
             actions.closeSheet();
             actions.showToast("Payment link cancelled");
-
-            if (remoteId) return saveBalance(cancelBalanceLink);
-
-            if (!original) return;
-
-            setState({
-              bookings: state.bookings.concat([
-                { ...original, status: "arrived", checkoutUnpaid: true },
-              ]),
-              pastNew: state.pastNew.filter(
-                ({ pastId }) => pastId !== row.pastId,
-              ),
-            });
+            saveBalance(cancelBalanceLink);
           },
         },
       }),

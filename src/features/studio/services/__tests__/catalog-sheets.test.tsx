@@ -1,9 +1,19 @@
 import { act, screen, within } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { renderWithStore } from "../../../../test/render-with-store";
+import { getStudioSeed } from "../../../../test/studio-seed";
 import { StudioPage } from "../..";
 import type { UserEvent } from "@testing-library/user-event";
 import { setupUser } from "../../../../test/setup-user";
+
+// saves stay in flight, so the screen keeps what was done
+vi.mock("../../../../lib/studio-api/services", async (importOriginal) => ({
+  ...(await importOriginal<
+    typeof import("../../../../lib/studio-api/services")
+  >()),
+  saveCategories: vi.fn(() => new Promise(() => {})),
+  saveAddon: vi.fn(() => new Promise(() => {})),
+}));
 
 let user: UserEvent;
 
@@ -29,7 +39,7 @@ const setViewport = (width: number) => {
 };
 
 const openServices = async () => {
-  renderWithStore(<StudioPage />, "/studio");
+  renderWithStore(<StudioPage seed={getStudioSeed()} />, "/studio");
   runNextTimer();
   await user.click(within(getLabelled("Sidebar")).getByTitle("Services"));
 };
@@ -98,14 +108,14 @@ describe("Studio → categories and add-on sheets", () => {
       within(sheet).getAllByRole("button", { name: "Edit" })[0] as HTMLElement,
     );
 
-    const name = within(sheet).getByDisplayValue("Signature braids");
+    const name = within(sheet).getByDisplayValue("Natural hair");
 
     await user.clear(name);
-    await user.type(name, "Braids");
+    await user.type(name, "Silk and blow-dry");
 
     await user.click(within(sheet).getByRole("button", { name: "Save" }));
     expect(screen.getByText("Category saved")).toBeInTheDocument();
-    expect(within(sheet).getByText("Braids")).toBeInTheDocument();
+    expect(within(sheet).getByText("Silk and blow-dry")).toBeInTheDocument();
   });
 
   it("an add-on needs a name before it can be created", async () => {

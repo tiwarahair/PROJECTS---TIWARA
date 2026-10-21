@@ -32,21 +32,6 @@ export const ChangeClientStep = ({ studio, view }: ChangeClientStepProps) => {
           <span className={shared.optionName}>Add a new client</span>
         </span>
       </button>
-      {view.canAddTyped && (
-        <button className={styles.addTyped} onClick={view.addTypedClient}>
-          <span className={styles.plusDiscLight}>
-            <Plus size={17} strokeWidth={1.9} />
-          </span>
-          <span className={shared.grow}>
-            <span className={styles.addTypedLabel}>
-              {`Add “${(state.changeClientQuery || "").trim()}” as a new client`}
-            </span>
-            <span className={shared.optionSub}>
-              You can add their details later
-            </span>
-          </span>
-        </button>
-      )}
       <div className={styles.clientList}>
         {view.changeRows.map(({ key, name, imgSrc, meta, isCurrent, pick }) => (
           <button

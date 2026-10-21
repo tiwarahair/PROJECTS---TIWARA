@@ -1,10 +1,10 @@
 import { getDecoratedBookings } from "./decorate";
-import { getClient, getPastRows, isPastIn } from "../core/model";
+import { getClient, isPastIn } from "../core/model";
 import type { StudioController } from "../core/use-studio";
 import { isUpcomingMatch } from "./filters";
 
 export const getContext = (studio: StudioController) => {
-  const { state, actions, seedPast } = studio;
+  const { state, actions } = studio;
   const now = new Date();
   const isList = state.bookingsLayout === "list";
   const isPast = isList && (state.listScope || "upcoming") === "past";
@@ -24,7 +24,7 @@ export const getContext = (studio: StudioController) => {
     matchesQuery(booking.clientName, booking.service),
   );
 
-  const pastBase = getPastRows(state, seedPast).filter((row) =>
+  const pastBase = state.pastNew.filter((row) =>
     matchesQuery(getClient(state, row.client).name, row.service),
   );
 

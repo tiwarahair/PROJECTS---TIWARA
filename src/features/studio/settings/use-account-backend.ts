@@ -14,13 +14,13 @@ import { useAppDispatch, useAppSelector } from "../../../stores/hooks";
 import { toNotificationEvent } from "../core/records";
 import type { StudioController } from "../core/use-studio";
 
-/** Settings → Account for a real stylist: Supabase Auth and their profile; demo boards get none. */
+/** Settings → Account: Supabase Auth and the stylist's profile; null while nobody is signed in. */
 export const useAccountBackend = ({ state, setState }: StudioController) => {
   const user = useAppSelector(({ session }) => session.user);
   const [updateProfile] = useUpdateProfileMutation();
   const dispatch = useAppDispatch();
 
-  if (!user || !state.account) return {};
+  if (!user) return null;
 
   const { stylistId } = state.account;
 

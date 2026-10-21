@@ -3,7 +3,6 @@ import type { DecoratedBooking } from "../decorate";
 import { hhmm } from "../../core/format";
 import type { ActionItem } from "../../core/types";
 import { confirmWithoutProtection } from "../../../../lib/studio-api/booking-writes";
-import { getFreshLink } from "./booking";
 import { openCheckout } from "./checkout-view";
 import type { SheetContext } from "./context";
 import { CANCEL_STEP } from "./types";
@@ -22,12 +21,9 @@ const getOnTheDaySubtitle = (
 
 const getStatusMenuKind = ({
   awaiting,
-  autoX,
   status,
 }: DecoratedBooking): StatusMenuKind => {
   if (awaiting) return "awaiting";
-
-  if (autoX) return "autoCancelled";
 
   return status === "arrived" ? "arrived" : "upcoming";
 };
@@ -54,7 +50,7 @@ const askToConfirmUnprotected = ({
       yes: () => {
         setState({ confirm: null });
 
-        saveBooking(
+        const isSaving = saveBooking(
           {
             status: "confirmed",
             paid: "none",
@@ -65,7 +61,7 @@ const askToConfirmUnprotected = ({
           confirmWithoutProtection,
         );
 
-        actions.showToast("Confirmed without protection");
+        if (isSaving) actions.showToast("Confirmed without protection");
       },
     },
   });
@@ -93,20 +89,6 @@ const STATUS_ITEMS: Record<
       getCancelItem(context),
     ];
   },
-  autoCancelled: ({ booking, actions }) => [
-    {
-      label: "Send a new link",
-      icon: Send,
-      subtitle: "Starts a fresh 48 hrs",
-      run: () =>
-        actions.setStatus(
-          booking.id,
-          "awaiting",
-          `New link sent to ${booking.firstName}`,
-          { paid: "link", resends: 0, ...getFreshLink(booking) },
-        ),
-    },
-  ],
   upcoming: (context) => {
     const { booking, setState, actions } = context;
 

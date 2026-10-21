@@ -24,7 +24,7 @@ export const createClientActions = ({
 
     setOverride(client.id, { blocked: isBlocked });
 
-    sync?.save(() => setClientBlocked(client.id ?? "", isBlocked), {
+    sync.save(() => setClientBlocked(client.id ?? "", isBlocked), {
       clientOverrides: previous,
     });
   };
@@ -34,7 +34,7 @@ export const createClientActions = ({
 
     setOverride(client.id, { deleted: true, blocked: false });
 
-    sync?.save(
+    sync.save(
       async () => {
         await deleteStylistClient(client.id ?? "");
 

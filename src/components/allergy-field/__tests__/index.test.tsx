@@ -60,8 +60,9 @@ describe("AllergyField", () => {
     expect(screen.queryByRole("dialog")).not.toBeInTheDocument();
   });
 
-  it("openPrivacy shows the sheet on load; the scrim closes it", async () => {
-    render(<AllergyField openPrivacy />);
+  it("clicking inside the sheet keeps it open; the scrim closes it", async () => {
+    render(<AllergyField />);
+    await user.click(screen.getByRole("button", { name: "How we use it" }));
     const dialog = screen.getByRole("dialog");
 
     await user.click(dialog);

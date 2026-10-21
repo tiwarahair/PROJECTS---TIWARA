@@ -52,14 +52,10 @@ const getCheckoutBooking = (context: SheetContext): CheckoutBooking => {
     mode: paymentMode,
     paid: booking.paidAmount || 0,
     ...(paymentMode === "none" ? { card: null, brand: "" } : getCard(context)),
-    ...(raw?.remoteId
-      ? {
-          agreedPrice: raw.agreedPrice ?? booking.price,
-          paidLater: raw.paidLater,
-          refundableOnline: raw.refundableOnline,
-          recordedVia: raw.recordedVia,
-        }
-      : {}),
+    agreedPrice: raw?.agreedPrice ?? booking.price,
+    paidLater: raw?.paidLater,
+    refundableOnline: raw?.refundableOnline,
+    recordedVia: raw?.recordedVia,
     paidOn: "",
     phone: client?.phone || "",
     email: client?.email || "",

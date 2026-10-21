@@ -91,7 +91,7 @@ export const saveBlockDraft = (studio: StudioController) => {
       : current.blocked.concat([item]),
   });
 
-  context.sync?.save(
+  context.sync.save(
     (stylistId) => saveBlock(fromBlockedTime(item, stylistId)),
     { blocked: before },
   );

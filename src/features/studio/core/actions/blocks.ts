@@ -62,7 +62,7 @@ export const createBlockActions = (
             confirm: null,
           }));
 
-          context.sync?.save(() => removeBlockRow(block.id), {
+          context.sync.save(() => removeBlockRow(block.id), {
             blocked: before,
           });
 

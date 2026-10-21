@@ -2,7 +2,7 @@ import { screen, within } from "@testing-library/react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import type { UserEvent } from "@testing-library/user-event";
 import * as auth from "../../../lib/auth";
-import { renderBooking } from "../../../test/render-booking";
+import { renderSavedBooking } from "../../../test/render-booking";
 import { setupUser } from "../../../test/setup-user";
 
 vi.mock("../../../lib/auth", async (importOriginal) => ({
@@ -24,7 +24,7 @@ let user: UserEvent;
 const getDialog = () => within(screen.getByRole("dialog"));
 
 const openLogin = async () => {
-  await renderBooking("fixture=time-picked");
+  await renderSavedBooking();
   await user.click(screen.getAllByRole("button", { name: /^Continue$/ })[0]!);
   await screen.findByRole("dialog");
   await user.click(getDialog().getByRole("button", { name: "Log in" }));

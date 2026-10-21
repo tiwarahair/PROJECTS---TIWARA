@@ -10,20 +10,19 @@ import type {
   PaymentPolicyProps,
   PolicyFormValues,
 } from "./types";
-import { getInitialPolicy, getPolicyOutput } from "./values";
+import { getPolicyOutput, toPolicyFormValues } from "./values";
 
 const FLASH_MS = 1800;
 
 const getDigits = (value: string) => value.replace(/\D/g, "").slice(0, 3);
 
 export const usePaymentPolicy = ({
-  preset = "default",
   value,
   onSave,
   onState,
 }: PaymentPolicyProps) => {
   const uid = `pp${useId().replace(/[^a-zA-Z0-9]/g, "")}`;
-  const [initial] = useState(() => getInitialPolicy(preset, value));
+  const [initial] = useState(() => toPolicyFormValues(value));
   const [isFlashing, setIsFlashing] = useState(false);
   const flashTimer = useRef(0);
 
@@ -38,7 +37,7 @@ export const usePaymentPolicy = ({
     reset,
     formState: { errors, isDirty },
   } = useForm<PolicyFormValues>({
-    defaultValues: initial.saved,
+    defaultValues: initial,
     resolver: zodResolver(policySchema),
   });
 
@@ -88,7 +87,6 @@ export const usePaymentPolicy = ({
   });
 
   useEffect(() => {
-    reset(initial.values, { keepDefaultValues: true });
     void trigger();
 
     const subscription = watch(() => void trigger());

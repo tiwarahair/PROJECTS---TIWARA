@@ -1,10 +1,9 @@
-import type { TaxBusiness, TaxDetails, TaxFixture } from "./logic";
+import type { TaxBusiness, TaxDetails } from "./logic";
 
 export interface TaxDetailsFormProps {
   mode?: "setup" | "settings";
-  fixture?: TaxFixture;
-  legalName?: string;
-  businessName?: string;
+  legalName: string;
+  businessName: string;
   business?: TaxBusiness;
   value?: Partial<TaxDetails>;
   onSubmit?: (details: TaxDetails) => void;

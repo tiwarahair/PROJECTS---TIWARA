@@ -18,12 +18,12 @@ export const getRefundTag = (refunded: number, left: number) => {
 };
 
 export const getContext = (studio: StudioController, row: PastRecord) => {
-  const { state, setState, actions, seedPast } = studio;
+  const { state, setState, actions } = studio;
   const client = getClient(state, row.client);
   const isFresh = !!row.at && Date.now() - row.at < DAY_MS;
 
   const patch = (value: Parameters<typeof actions.patchPast>[1]) =>
-    actions.patchPast(row.pastId, value, seedPast);
+    actions.patchPast(row.pastId, value);
 
   const settle = (value: Partial<PastRecord>, message: string) => {
     setState({ confirm: null });
@@ -35,12 +35,8 @@ export const getContext = (studio: StudioController, row: PastRecord) => {
   const saveFee = (
     task: (bookingId: string) => Promise<unknown>,
     previous: PastRecord[],
-  ) => {
-    const { remoteId } = row;
-
-    if (remoteId)
-      studio.context.sync?.save(() => task(remoteId), { pastNew: previous });
-  };
+  ) =>
+    studio.context.sync.save(() => task(row.remoteId), { pastNew: previous });
 
   // then reloads the booking, as the server may move it (back to Due for checkout, say)
   const saveAndRefresh = (task: (bookingId: string) => Promise<unknown>) =>

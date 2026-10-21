@@ -1,23 +1,4 @@
-import type { PastRecord, StudioState } from "../types";
-
-export const getPastRows = (
-  state: StudioState,
-  seed: PastRecord[],
-): PastRecord[] => {
-  const overrides = state.pastOverrides ?? {};
-
-  return state.pastNew.concat(
-    seed.map((original, index) => {
-      const row = original.pastId
-        ? original
-        : { pastId: `seed-${index}`, ...original };
-
-      const override = overrides[String(row.pastId)];
-
-      return override ? { ...row, ...override } : row;
-    }),
-  );
-};
+import type { PastRecord } from "../types";
 
 export const isPastIn = (row: PastRecord, filter: string): boolean => {
   if (filter === "completed") return row.status === "Completed";

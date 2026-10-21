@@ -1,4 +1,3 @@
-// Studio state shapes: component state, clients, past bookings, seed services/add-ons.
 export type * from "./availability";
 export type * from "./bookings";
 export type * from "./clients";

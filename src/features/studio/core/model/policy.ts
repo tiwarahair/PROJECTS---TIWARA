@@ -157,7 +157,7 @@ export const getWaiveConfirm = (
 
   if (!isFresh)
     return {
-      title: `Refund ${formatMoney(fee)} to ${first}’s ${row.feeCard ?? "card ending 4242"}?`,
+      title: `Refund ${formatMoney(fee)} to ${first}’s ${row.feeCard ?? "card"}?`,
       body: "It usually takes 5–10 business days to arrive. The card fee isn’t returned.",
       yesLabel: `Refund ${formatMoney(fee)}`,
       yes: run,

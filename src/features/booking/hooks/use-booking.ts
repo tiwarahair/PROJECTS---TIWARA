@@ -24,7 +24,7 @@ import { useTravelCheck } from "./use-travel-check";
 
 export const useBooking = ({ stylist, hours }: PublicStylist) => {
   const flow = useFlowState(stylist);
-  const { initial, state, stateRef, setState, crumbsRef, scrollToTitle } = flow;
+  const { state, stateRef, setState, crumbsRef, scrollToTitle } = flow;
 
   const detailsForm = useDetailsForm(flow);
   const leave = useLeaveGuard(flow);
@@ -76,7 +76,7 @@ export const useBooking = ({ stylist, hours }: PublicStylist) => {
     state.holding ||
     (state.step === 2 && (needSize || needLength)) ||
     (state.step === 3 &&
-      (!(state.date && state.time) || (!state.board && hold.isLoadingSlots)));
+      (!(state.date && state.time) || hold.isLoadingSlots));
 
   const goToStep = (step: number) => setState({ step }, scrollToTitle);
 
@@ -181,7 +181,6 @@ export const useBooking = ({ stylist, hours }: PublicStylist) => {
 
   return {
     state,
-    openPrivacy: initial.openPrivacy,
     crumbsRef,
     stylist,
     service,

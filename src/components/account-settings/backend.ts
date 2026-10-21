@@ -1,4 +1,4 @@
-// What Account settings saves through: a real account passes its own; demo boards use the stand-in.
+// What Account settings saves through.
 import type { ChannelSetting, NotificationKey } from "./logic";
 
 export interface AccountSettingsBackend {
@@ -21,23 +21,3 @@ export interface AccountSettingsBackend {
     signOutOthers: boolean,
   ) => Promise<string | null>;
 }
-
-const DEMO_CODE = "123456";
-
-export const DEMO_BACKEND: AccountSettingsBackend = {
-  saveName: () => Promise.resolve(),
-  savePhone: () => Promise.resolve(),
-  sendEmailCodes: () => Promise.resolve(null),
-  verifyEmailCode: (email, code) =>
-    Promise.resolve(!!email && code === DEMO_CODE),
-  sendPasswordCode: () => Promise.resolve(),
-  closeBusiness: () => Promise.resolve(),
-  saveNotification: () => Promise.resolve(),
-  changePassword: (password, code) => {
-    if (!code) return Promise.resolve("reauthentication_needed");
-
-    return Promise.resolve(
-      password && code === DEMO_CODE ? null : "reauthentication_not_valid",
-    );
-  },
-};

@@ -55,7 +55,7 @@ export const getRulesView = (studio: StudioController) => {
   const saveRules = () => {
     const { saved, restoreSaved } = markSaved({ rules });
 
-    sync?.save(
+    sync.save(
       (stylistId) =>
         saveBookingRules({
           stylist_id: stylistId,

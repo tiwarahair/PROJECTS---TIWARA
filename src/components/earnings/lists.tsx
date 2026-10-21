@@ -209,7 +209,9 @@ export const EarningsLists = ({
           <button
             className={styles.copyLink}
             onClick={() => {
-              const link = props.bookingLink || "tiwaras.house/book/tiwara";
+              const link = props.bookingLink;
+
+              if (!link) return;
 
               try {
                 void navigator.clipboard?.writeText(`https://${link}`);

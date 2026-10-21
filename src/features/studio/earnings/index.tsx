@@ -3,7 +3,7 @@ import { Earnings } from "../../../components/earnings";
 import { PageMessage } from "../../../components/page-message";
 import { useGetStudioEarningsQuery } from "../../../stores/api-slice";
 import { joinClassNames } from "../../../utils/class-names";
-import { getClient, hasTwoFactor, isLive } from "../core/model";
+import { getBookingLink, getClient, hasTwoFactor, isLive } from "../core/model";
 import type { StudioController } from "../core/use-studio";
 import { getDisputeBanner } from "./dispute";
 import { getFailedPayout, getLedgerClients, toLedger } from "./records";
@@ -13,10 +13,10 @@ import styles from "../../../styles/features/studio/earnings/index.module.css";
 export const StudioEarnings = ({ studio }: { studio: StudioController }) => {
   const { state, setState, isWide, isDesktop, actions } = studio;
   const live = isLive(state);
-  const stylistId = state.account?.stylistId;
+  const { stylistId } = state.account;
 
   const { data: earnings, isError } = useGetStudioEarningsQuery(
-    stylistId ?? skipToken,
+    stylistId || skipToken,
     { refetchOnMountOrArgChange: true },
   );
 
@@ -50,6 +50,7 @@ export const StudioEarnings = ({ studio }: { studio: StudioController }) => {
   return (
     <div className={className} data-screen-label="Earnings">
       <Earnings
+        bookingLink={getBookingLink(state)}
         layout="auto"
         contained={false}
         showTitle={true}

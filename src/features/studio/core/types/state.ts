@@ -51,13 +51,13 @@ import type {
 import type { BookingStep, SheetKind, StudioPage, StudioTab } from "./views";
 
 export interface StudioState {
-  /** A real stylist's ids (null on demo boards, which never save). */
+  /** The stylist's ids (empty until Studio is seeded from their account). */
   account: {
     stylistId: string;
     slug: string;
     slugChangedAt: string | null;
-  } | null;
-  /** The signed-in stylist (demo: Amara). */
+  };
+  /** The signed-in stylist. */
   owner: {
     first: string;
     last: string;
@@ -92,7 +92,7 @@ export interface StudioState {
   twoFactorOut: boolean;
   shareTip: boolean;
   stripeBusy: boolean;
-  /** A real account's Stripe status and payout bank (demo boards derive the status from check.stripe). */
+  /** The account's Stripe status and payout bank. */
   payoutStatus: PayoutStatus | null;
   payoutBank: string | null;
   /** A real account's saved notification choices (Settings → Notifications). */
@@ -128,7 +128,6 @@ export interface StudioState {
   rescheduleTime: string | null;
   rescheduleCustom?: boolean;
   pastNew: PastRecord[];
-  pastOverrides?: Record<string, Partial<PastRecord>>;
   doneBooking: StudioBooking | null;
   bookingEdit: boolean;
   serviceHover: boolean;

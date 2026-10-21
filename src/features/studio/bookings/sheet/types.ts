@@ -1,7 +1,6 @@
 import type { BookingStep, StudioState } from "../../core/types";
 
-export type StatusMenuKind =
-  "awaiting" | "autoCancelled" | "upcoming" | "arrived";
+export type StatusMenuKind = "awaiting" | "upcoming" | "arrived";
 
 export type ReceivedTone = "paid" | "quiet" | "failed";
 

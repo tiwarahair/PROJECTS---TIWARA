@@ -68,12 +68,11 @@ export const getSettingsNav = (
   studio: StudioController,
   navigate: (to: string) => void,
 ) => {
-  const { state, setState, props, isWide, isNew, actions } = studio;
+  const { state, setState, isWide, actions } = studio;
   const { showToast, openSubpage, scrollBody } = actions;
 
-  const isSetupOn = props.setup ?? true;
   const live = isLive(state);
-  const isGate = isSetupOn && !live;
+  const isGate = !live;
 
   const copyLink = () => {
     if (isGate) {
@@ -96,10 +95,7 @@ export const getSettingsNav = (
     none: "No protection",
   };
 
-  const clientCount =
-    isNew && !state.account
-      ? state.extraClients.length
-      : getAllClients(state).length;
+  const clientCount = getAllClients(state).length;
 
   const businessTypes: Record<string, string> = {
     shop: "Shop / salon",
@@ -297,6 +293,6 @@ export const getSettingsNav = (
     isAccountPage,
     pageTitle: page ? TITLES[page] : "",
     copyLink,
-    isShareLive: !isSetupOn || live,
+    isShareLive: live,
   };
 };

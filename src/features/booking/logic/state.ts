@@ -3,12 +3,7 @@ import type { Stylist } from "../../../types/stylist";
 import { getSearchParams } from "../../../utils/page-flags";
 import { getSavedAddresses } from "../../../utils/saved-addresses";
 import { findService, hasStep2 } from "../../../utils/services";
-import { applyFixture } from "./fixtures";
-import {
-  DEFAULT_HOLD_SECONDS,
-  EMPTY_ADDRESS,
-  EMPTY_DETAILS,
-} from "./constants";
+import { EMPTY_ADDRESS, EMPTY_DETAILS } from "./constants";
 import { getDraftPatch, readDraft } from "./draft";
 import type { BookingAddress, BookingState, Selection } from "./types";
 
@@ -23,13 +18,6 @@ export const getFreshSelection = (
 
   return { size: null, length: null, colour: "30 Auburn", own, addons: [] };
 };
-
-interface InitialBooking {
-  state: BookingState;
-  /** ?fixture=privacy opens the allergy field's privacy sheet. */
-  openPrivacy: boolean;
-  showErrors: boolean;
-}
 
 /** Skip straight past steps the preselected service doesn't need. */
 export const getStartStep = (service: Service | null): number => {
@@ -62,12 +50,10 @@ export const getSavedAddressPatch = (
   };
 };
 
-export const getInitialBooking = (stylist: Stylist): InitialBooking => {
+export const getInitialBooking = (stylist: Stylist): BookingState => {
   const params = getSearchParams();
   const serviceParam = params.get("service") || "";
   const service = serviceParam ? findService(stylist, serviceParam) : null;
-  const fixture = params.get("fixture") || "";
-  const board = !!fixture || params.get("board") === "true";
   const today = new Date();
 
   const state: BookingState = {
@@ -87,8 +73,6 @@ export const getInitialBooking = (stylist: Stylist): InitialBooking => {
     guest: false,
     editContact: false,
     loginStart: null,
-    board,
-    holdSeconds: parseInt(params.get("hold") ?? "", 10) || DEFAULT_HOLD_SECONDS,
     hold: null,
     holding: false,
     holdError: null,
@@ -121,25 +105,13 @@ export const getInitialBooking = (stylist: Stylist): InitialBooking => {
     sizeGuide: false,
   };
 
-  if (fixture === "saved-addr")
-    Object.assign(state, getSavedAddressPatch(state.appointmentAddress));
+  const draft = readDraft(state.id);
 
-  let openPrivacy = false;
-  let showErrors = false;
-
-  // demo states are dev-only; production builds drop this branch and the fixtures module
-  if (import.meta.env.DEV && fixture)
-    ({ openPrivacy, showErrors } = applyFixture(state, fixture, stylist));
-
-  if (!state.board) {
-    const draft = readDraft(state.id);
-
-    if (draft) {
-      if (params.get("resume") === "1")
-        Object.assign(state, getDraftPatch(draft, state));
-      else state.resumeDraft = draft;
-    }
+  if (draft) {
+    if (params.get("resume") === "1")
+      Object.assign(state, getDraftPatch(draft, state));
+    else state.resumeDraft = draft;
   }
 
-  return { state, openPrivacy, showErrors };
+  return state;
 };

@@ -11,13 +11,7 @@ import {
 import { useAppSelector } from "../../stores/hooks";
 import { PageMessage } from "../../components/page-message";
 import { ClosedBusiness } from "./closed-business";
-import { getQueryParam } from "./core/model";
 import { StudioPage } from ".";
-
-/** Dev boards (?board=true, ?fixture=, ?account=new) open the demo Studio without signing in. */
-const isDemoStudio = () =>
-  import.meta.env.DEV &&
-  ["board", "fixture", "account"].some((key) => !!getQueryParam(key));
 
 /** "/studio" is for stylists: it loads their business, then opens Studio with it. */
 export const StudioRoute = () => {
@@ -52,8 +46,6 @@ export const StudioRoute = () => {
         (!devices && !isDevicesError)));
 
   const isSlow = useIsSlow(isLoading);
-
-  if (isDemoStudio()) return <StudioPage />;
 
   if (!ready) return isSlow ? <StudioSkeleton /> : null;
 

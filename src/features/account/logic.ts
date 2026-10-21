@@ -105,12 +105,9 @@ export const getBookingMoney = (
     : `${stylist.name}, ${stylist.addressFull || stylist.area}`;
 
   const cardText = (id: string) => {
-    const card = cards.find((item) => item.id === id) ?? {
-      brand: "Visa",
-      last4: "4242",
-    };
+    const card = cards.find((item) => item.id === id);
 
-    return `${card.brand} •••• ${card.last4}`;
+    return card ? `${card.brand} •••• ${card.last4}` : "Card";
   };
 
   let paid = "";

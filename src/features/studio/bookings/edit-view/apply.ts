@@ -3,6 +3,7 @@ import type { BookingAddon } from "../../core/types";
 import { formatDuration } from "../../../../utils/dates";
 import { updateStudioBooking } from "../../../../lib/studio-api/booking-writes";
 import { toStartsAt } from "../records";
+import { STILL_SAVING } from "../sheet/checkout-view";
 import type { EditContext } from "./context";
 
 const toPence = (pounds: number) => Math.round(pounds * 100);
@@ -69,6 +70,10 @@ export const getApplyView = (context: EditContext) => {
     );
 
   const apply = () => {
+    const { remoteId } = booking;
+
+    if (!remoteId) return actions.showToast(STILL_SAVING);
+
     if (clashes.length && !memo.clashOk && firstClash) {
       const who =
         firstClash.kind === "booking" && firstClash.booking
@@ -112,19 +117,13 @@ export const getApplyView = (context: EditContext) => {
       time,
       extra,
       priceReason: (draft.priceReason || "").trim(),
-      ...(booking.remoteId
-        ? {
-            startsAt: toStartsAt(booking.dayOffset, time),
-            overlapOk: allowOverlap,
-          }
-        : {}),
+      startsAt: toStartsAt(booking.dayOffset, time),
+      overlapOk: allowOverlap,
     });
 
-    if (booking.remoteId)
-      studio.context.sync?.save(
-        () => save(booking.remoteId as string, allowOverlap),
-        { bookings: previous },
-      );
+    studio.context.sync.save(() => save(remoteId, allowOverlap), {
+      bookings: previous,
+    });
 
     const list = state.bookings.map((item) =>
       item.id === booking.id

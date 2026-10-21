@@ -52,7 +52,7 @@ export const ClosedSheet = ({ studio }: { studio: StudioController }) => {
         : state.closed.concat([item]),
     });
 
-    context.sync?.save(
+    context.sync.save(
       (stylistId) =>
         saveClosedPeriod({
           id: item.id,

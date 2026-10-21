@@ -1,18 +1,7 @@
-// TaxDetailsForm values, fixtures and output.
+// TaxDetailsForm values and output.
 import { formatPostcode } from "../../utils/address";
 
 export type TaxKind = "sole" | "ltd";
-export type TaxFixture =
-  | ""
-  | "name-no"
-  | "ltd"
-  | "err-empty"
-  | "err-initials"
-  | "err-dob"
-  | "err-under18"
-  | "err-ni"
-  | "err-conum"
-  | "err-pc";
 
 interface TaxAddress {
   line1: string;
@@ -69,33 +58,10 @@ export interface TaxFormValues {
   registered: TaxAddressValues;
 }
 
-export type TaxFieldName =
-  | "first"
-  | "last"
-  | "day"
-  | "nationalInsuranceNumber"
-  | "companyName"
-  | "companyNumber"
-  | "home.fields"
-  | "registered.fields";
-
 interface InitialTax {
   values: TaxFormValues;
   nationalInsuranceHint: string;
-  showNationalInsurance: boolean;
-  shownErrors: TaxFieldName[];
 }
-
-const ALL_FIELDS: TaxFieldName[] = [
-  "first",
-  "last",
-  "day",
-  "nationalInsuranceNumber",
-  "companyName",
-  "companyNumber",
-  "home.fields",
-  "registered.fields",
-];
 
 /** A chair rental counts as a shop. */
 export const getTaxBusiness = (business?: TaxBusiness) => {
@@ -118,13 +84,11 @@ export const getAddressKey = (kind: TaxKind): "home" | "registered" =>
   kind === "ltd" ? "registered" : "home";
 
 export const getInitialTax = ({
-  fixture = "",
-  businessName = "",
+  businessName,
   business,
   value,
 }: {
-  fixture?: string;
-  businessName?: string;
+  businessName: string;
   business?: TaxBusiness;
   value?: Partial<TaxDetails>;
 }): InitialTax => {
@@ -145,13 +109,6 @@ export const getInitialTax = ({
     companyNumber: "",
     home: { same: type === "home", fields: getBlankAddress(), src: "" },
     registered: { same: sameOk, fields: getBlankAddress(), src: "" },
-  };
-
-  const initial: InitialTax = {
-    values,
-    nationalInsuranceHint: value?.nationalInsuranceHint || "",
-    showNationalInsurance: false,
-    shownErrors: [],
   };
 
   if (value?.kind) {
@@ -181,59 +138,7 @@ export const getInitialTax = ({
     };
   }
 
-  if (fixture === "name-no") values.nameYes = false;
-
-  if (fixture === "ltd") values.kind = "ltd";
-
-  if (fixture === "err-empty") initial.shownErrors = ALL_FIELDS;
-
-  if (fixture === "err-initials") {
-    Object.assign(values, { nameYes: false, first: "A", last: "Okonkwo" });
-    initial.shownErrors = ["first", "last"];
-  }
-
-  if (fixture === "err-dob") {
-    Object.assign(values, { day: "31", month: "02", year: "1994" });
-    initial.shownErrors = ["day"];
-  }
-
-  if (fixture === "err-under18") {
-    Object.assign(values, {
-      day: "14",
-      month: "03",
-      year: String(new Date().getFullYear() - 16),
-    });
-
-    initial.shownErrors = ["day"];
-  }
-
-  if (fixture === "err-ni") {
-    values.nationalInsuranceNumber = "QQ 12 34 5";
-    initial.showNationalInsurance = true;
-    initial.shownErrors = ["nationalInsuranceNumber"];
-  }
-
-  if (fixture === "err-conum") {
-    Object.assign(values, { kind: "ltd", companyNumber: "1482930" });
-    initial.shownErrors = ["companyNumber"];
-  }
-
-  if (fixture === "err-pc") {
-    values.home = {
-      same: false,
-      src: "manual",
-      fields: {
-        line1: "12 Dickenson Road",
-        line2: "",
-        city: "Manchester",
-        postcode: "ZZ1",
-      },
-    };
-
-    initial.shownErrors = ["home.fields"];
-  }
-
-  return initial;
+  return { values, nationalInsuranceHint: value?.nationalInsuranceHint || "" };
 };
 
 /** "QQ 12 34 56 C" as you type. */

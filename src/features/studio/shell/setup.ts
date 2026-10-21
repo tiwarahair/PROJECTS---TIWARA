@@ -7,8 +7,6 @@ export const SETUP_COUNT = SETUP_KEYS.length;
 
 type SetupRow = [(typeof SETUP_KEYS)[number], string, string, () => void];
 
-const isSetupOn = (studio: StudioController) => studio.props.setup ?? true;
-
 /** The four setup steps with their actions. */
 export const getSetupRows = (studio: StudioController): SetupRow[] => {
   const { setState, actions } = studio;
@@ -58,10 +56,8 @@ export const getSetupProgress = (studio: StudioController) => {
     steps,
     doneCount,
     isComplete: doneCount === SETUP_COUNT,
-    isSetupOn: isSetupOn(studio),
   };
 };
 
-/** Whether the go-live gate applies: setup is on and the account can't take bookings yet. */
-export const isGated = (studio: StudioController) =>
-  isSetupOn(studio) && !isLive(studio.state);
+/** Whether the go-live gate applies: the account can't take bookings yet. */
+export const isGated = (studio: StudioController) => !isLive(studio.state);
