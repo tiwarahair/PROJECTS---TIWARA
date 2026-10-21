@@ -18,7 +18,8 @@ export const savesCard = (mode: CheckoutQuote["mode"]) =>
   mode === "deposit" || mode === "card";
 
 /** Deposit and full payments go to the stylist's Stripe account; the other modes only take the booking fee. */
-export const paysStylist = (mode: CheckoutQuote["mode"]) => mode === "deposit" || mode === "full";
+export const paysStylist = (mode: CheckoutQuote["mode"]) =>
+  mode === "deposit" || mode === "full";
 
 const getStylistFee = (quote: CheckoutQuote) =>
   quote.fee_pence + getStripeFee(quote.due_today_pence - quote.fee_pence);
@@ -31,6 +32,7 @@ export const getPaymentParams = (
   customerId: string | null,
   keepCard = false,
   recovered = 0,
+  isHeld = false,
 ) => ({
   amount: quote.due_today_pence,
   currency: "gbp",
@@ -41,10 +43,15 @@ export const getPaymentParams = (
     booking_id: quote.id,
     booking_ref: quote.ref,
     ...getRecoveryMetadata(quote.stylist_account, recovered),
+    ...(isHeld
+      ? { hold: "true", kept_pence: String(getStylistFee(quote)) }
+      : {}),
   },
   ...(customerId ? { customer: customerId } : {}),
-  ...(savesCard(quote.mode) || keepCard ? { setup_future_usage: "off_session" } : {}),
-  ...(paysStylist(quote.mode)
+  ...(savesCard(quote.mode) || keepCard
+    ? { setup_future_usage: "off_session" }
+    : {}),
+  ...(paysStylist(quote.mode) && !isHeld
     ? {
         // the booking fee, plus Stripe's fee on the stylist's part (and anything they owe)
         application_fee_amount: getStylistFee(quote) + recovered,

@@ -96,6 +96,27 @@ describe("the stylist's earnings", () => {
     expect(getFailedPayout(earnings)).toBe(29.35);
   });
 
+  it("shows a new stylist's held money after Stripe's fee", () => {
+    const ledger = toLedger({
+      ...earnings,
+      lines: [
+        ...earnings.lines,
+        {
+          ...line,
+          id: "p-3",
+          description: "Full payment",
+          method: "Card online",
+          amount_pence: 12000,
+          card_fee_pence: 200,
+          status: "On hold",
+          payout_id: null,
+        },
+      ],
+    });
+
+    expect(ledger.onHold).toBe(118);
+  });
+
   it("pauses payouts while the balance is below zero, and shows how much is being recovered", () => {
     const ledger = toLedger({
       ...earnings,

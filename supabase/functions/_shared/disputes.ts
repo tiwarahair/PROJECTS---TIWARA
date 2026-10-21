@@ -60,8 +60,10 @@ const recover = async ({ id, amount, charge: chargeId }: Stripe.Dispute, saved: 
   const transfer = await getTransfer(charge, saved);
   const { amount: paid, amount_refunded: refunded, application_fee_amount: ourFee, metadata } = charge;
 
-  // our fee is ours to lose; a debt it paid off for the stylist goes back to the bank too
-  const received = paid - (ourFee ?? 0) + Number(metadata.recovered_pence || 0) - refunded;
+  // our fee is ours to lose (on a charge we kept, what it would have been); a debt it paid off for the stylist goes
+  // back to the bank too
+  const received =
+    paid - (ourFee ?? Number(metadata.kept_pence || 0)) + Number(metadata.recovered_pence || 0) - refunded;
   const left = transfer ? transfer.amount - transfer.amount_reversed : received;
   const share = Math.max(0, Math.min(amount, received, left));
 

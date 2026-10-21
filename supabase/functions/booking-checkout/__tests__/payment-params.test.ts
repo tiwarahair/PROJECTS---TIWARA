@@ -64,6 +64,14 @@ describe("the booking's payment", () => {
     });
   });
 
+  it("a new stylist's deposit stays with us, marked as held", () => {
+    const params = getPaymentParams(quote("deposit", 2663), "cus_1", false, 0, true);
+
+    expect(params).toMatchObject({ amount: 2663, metadata: { hold: "true" } });
+    expect(params).not.toHaveProperty("transfer_data");
+    expect(params).not.toHaveProperty("application_fee_amount");
+  });
+
   it("only takes cards, so paying never leaves the page", () => {
     expect(getPaymentParams(quote("none", 163), null)).toMatchObject({
       allowed_payment_method_types: ["card"],
