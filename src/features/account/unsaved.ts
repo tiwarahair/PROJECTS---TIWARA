@@ -1,6 +1,7 @@
 // Unsaved edits on the Account page: an open edit form whose values differ from what's saved.
 import type { Profile } from "./data";
 import type { AddressFormValues, PasswordFormValues } from "./schemas";
+import type { SavedAddress } from "../../types/address";
 import type { AccountState } from "./state";
 
 interface FormValues {
@@ -20,8 +21,9 @@ const getAddressFields = ({ label, isDefault, address }: AddressFormValues) =>
   ]);
 
 const hasUnsavedAddress = (
-  { addressForm, addresses }: AccountState,
+  { addressForm }: AccountState,
   values: AddressFormValues,
+  addresses: SavedAddress[],
 ) => {
   if (!addressForm) return false;
 
@@ -34,14 +36,18 @@ const hasUnsavedAddress = (
   return getAddressFields(values) !== getAddressFields(opened);
 };
 
-export const hasUnsavedEdits = (state: AccountState, values: FormValues) => {
+export const hasUnsavedEdits = (
+  state: AccountState,
+  values: FormValues,
+  addresses: SavedAddress[],
+) => {
   const { edit, profile, password, allergyEdit, allergyDraft, entries } = state;
 
   return (
     (!!edit && JSON.stringify(values.draft) !== JSON.stringify(profile)) ||
-    (password.open && !!(values.password.current || values.password.next)) ||
+    (password.open && !!(values.password.code || values.password.next)) ||
     (allergyEdit >= 0 && allergyDraft !== (entries[allergyEdit]?.text ?? "")) ||
-    hasUnsavedAddress(state, values.address)
+    hasUnsavedAddress(state, values.address, addresses)
   );
 };
 
@@ -53,5 +59,5 @@ export const getDiscardPatch = ({
   emailStep: "",
   allergyEdit: -1,
   addressForm: null,
-  password: { ...password, open: false },
+  password: { ...password, open: false, isCodeSent: false },
 });

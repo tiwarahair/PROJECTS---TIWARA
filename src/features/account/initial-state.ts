@@ -1,6 +1,5 @@
-import { getSavedAddresses } from "../../utils/saved-addresses";
 import { LEGACY_TABS, SECTION_IDS } from "./data";
-import { EMPTY_CODE, EMPTY_PROFILE, WIDE_PX } from "./state";
+import { EMPTY_CODES, EMPTY_PROFILE, WIDE_PX } from "./state";
 import type { AccountProps, AccountState } from "./state";
 
 /** ?section= (or legacy ?tab=), else the prop; only real sections. */
@@ -24,7 +23,6 @@ export const getInitialState = (
   wide: window.innerWidth >= WIDE_PX,
   dialog: null,
   toast: "",
-  bookings: [],
   entries: [],
   allergyEdit: -1,
   allergyDraft: "",
@@ -34,15 +32,17 @@ export const getInitialState = (
   quiz: false,
   edit: null,
   emailStep: "",
-  code: EMPTY_CODE,
-  codeError: "",
-  shake: 0,
+  codes: EMPTY_CODES,
   resendIn: 0,
-  password: { has: true, open: false, show: false },
+  password: {
+    has: true,
+    open: false,
+    show: false,
+    isCodeSent: false,
+    signOthers: false,
+  },
   googleConnected: false,
   appleConnected: false,
-  cards: [],
-  addresses: getSavedAddresses(),
   addressForm: null,
   marketing: false,
   sync: "k7f2m9qx",

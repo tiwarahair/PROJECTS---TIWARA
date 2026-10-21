@@ -5,49 +5,10 @@
   gap: 14px;
 }
 
-.cardInput {
-  height: 48px;
-  box-sizing: border-box;
-  padding: 0 14px;
-  border-radius: var(--radius-sm);
-  background: #fff;
-  font: inherit;
-  font-size: 15px;
-  font-weight: 400;
-  font-variant-numeric: tabular-nums;
-  color: var(--text-primary);
-  outline: none;
-}
-
-.cardInput:focus {
-  border-color: var(--neutral-900) !important;
-  box-shadow: var(--focus-ring) !important;
-}
-
-.cardGrid {
-  display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 14px;
-}
-
-.cardInputSmall {
-  height: 48px;
-  box-sizing: border-box;
-  padding: 0 14px;
-  border-radius: var(--radius-sm);
-  background: #fff;
-  font: inherit;
-  font-size: 15px;
-  font-weight: 400;
-  color: var(--text-primary);
-  outline: none;
-  width: 100%;
-  min-width: 0;
-}
-
-.cardInputSmall:focus {
-  border-color: var(--neutral-900) !important;
-  box-shadow: var(--focus-ring) !important;
+/* Stripe's fields stay hidden behind the skeleton until they've loaded */
+.cardLoading {
+  height: 0;
+  overflow: hidden;
 }
 
 .stripeNote {

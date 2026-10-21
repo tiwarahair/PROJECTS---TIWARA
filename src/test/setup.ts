@@ -71,6 +71,9 @@ vi.mock("@vis.gl/react-google-maps", () => ({
 
 export const stripeStub = {
   confirmPayment: vi.fn(() => Promise.resolve({})),
+  confirmSetup: vi.fn(() =>
+    Promise.resolve({ setupIntent: { payment_method: "pm_new" } }),
+  ),
   submit: vi.fn(() => Promise.resolve({})),
 };
 
@@ -90,7 +93,10 @@ vi.mock("@stripe/react-stripe-js", async () => {
         onClick: onReady,
       }),
     ExpressCheckoutElement: () => null,
-    useStripe: () => ({ confirmPayment: stripeStub.confirmPayment }),
+    useStripe: () => ({
+      confirmPayment: stripeStub.confirmPayment,
+      confirmSetup: stripeStub.confirmSetup,
+    }),
     useElements: () => ({ submit: stripeStub.submit }),
   };
 });

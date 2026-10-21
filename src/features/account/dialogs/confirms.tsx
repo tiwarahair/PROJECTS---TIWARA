@@ -36,7 +36,7 @@ interface CardRemoveProps {
 }
 
 export const CardRemove = ({ account, id }: CardRemoveProps) => {
-  const { cards } = account.state;
+  const { cards } = account.data;
   const card = cards.find((item) => item.id === id);
 
   const defaultNote =
@@ -51,19 +51,8 @@ export const CardRemove = ({ account, id }: CardRemoveProps) => {
       action="Remove card"
       onCancel={account.actions.closeDialog}
       onConfirm={() => {
-        closeThen(account, ({ cards: current }) => {
-          let list = current.filter((item) => item.id !== id);
-
-          if (card?.isDefault && list.length)
-            list = list.map((item, index) => ({
-              ...item,
-              isDefault: index === 0,
-            }));
-
-          return { cards: list, dialog: null };
-        });
-
-        account.actions.showToast("Card removed");
+        closeThen(account, { dialog: null });
+        void account.actions.removeSavedCard(id);
       }}
     />
   );
@@ -109,7 +98,7 @@ interface AddressRemoveProps {
 }
 
 export const AddressRemove = ({ account, id }: AddressRemoveProps) => {
-  const { addresses } = account.state;
+  const { addresses } = account.data;
   const address = addresses.find((item) => item.id === id);
 
   return (
@@ -123,17 +112,8 @@ export const AddressRemove = ({ account, id }: AddressRemoveProps) => {
       action="Remove"
       onCancel={account.actions.closeDialog}
       onConfirm={() => {
-        let list = addresses.filter((item) => item.id !== id);
-
-        if (address?.isDefault && list.length)
-          list = list.map((item, index) => ({
-            ...item,
-            isDefault: index === 0,
-          }));
-
-        account.actions.setAddresses(list);
         closeThen(account, { dialog: null });
-        account.actions.showToast("Address removed");
+        void account.actions.removeAddress(id);
       }}
     />
   );

@@ -6,7 +6,21 @@ import {
   getErrorCode,
   TERMS_VERSION,
 } from "./auth-helpers";
+import { AUTH_FAILURE_MESSAGES } from "./auth-errors";
 import { supabase } from "./supabase";
+
+export const EMAIL_CODE_FAILURES: Record<string, string> = {
+  email_exists: "That email is already used by another account.",
+  over_email_send_rate_limit: AUTH_FAILURE_MESSAGES.emailLimit,
+  failed: "The codes couldn’t be sent. Try again.",
+};
+
+export const PASSWORD_FAILURES: Record<string, string> = {
+  reauthentication_not_valid: "That code isn’t right or has expired.",
+  same_password: "That’s your current password. Choose a new one.",
+  weak_password: "Choose a stronger password.",
+  failed: "Your password couldn’t be changed. Try again.",
+};
 
 /** Adds a business to the account; the refreshed session then carries is_stylist. */
 export const becomeStylist = async (details: StylistDetails) => {

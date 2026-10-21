@@ -8,6 +8,7 @@ import {
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { usePasswordChecker } from "../../hooks/use-password-checker";
+import { PASSWORD_FAILURES } from "../../lib/account-changes";
 import type { TaxBusiness, TaxDetails } from "../tax-details-form/logic";
 import { nameSchema } from "./name-schema";
 import { EMPTY_PASSWORD } from "./password-schema";
@@ -28,13 +29,6 @@ import type {
 
 const TOAST_MS = 2400;
 const PASSWORD_MIN = 8;
-
-const PASSWORD_FAILURES: Record<string, string> = {
-  reauthentication_not_valid: "That code isn’t right or has expired.",
-  same_password: "That’s your current password. Choose a new one.",
-  weak_password: "Choose a stronger password.",
-  failed: "Your password couldn’t be changed. Try again.",
-};
 
 /** What the host (Studio) gets after every render to drive its own save button. */
 export interface AccountSettingsApi {

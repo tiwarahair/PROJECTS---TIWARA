@@ -72,7 +72,7 @@ export const getErrorMessage = (error: unknown) =>
     : "";
 
 /** RTK Query's result shape for a promise that may throw. Supabase rpc errors are plain objects, not Errors. */
-const toQueryResult = <T>(task: Promise<T>) =>
+export const toQueryResult = <T>(task: Promise<T>) =>
   task.then(
     (data) => ({ data }),
     (error: unknown) => ({
@@ -92,6 +92,9 @@ export const api = createApi({
     "ManagedBooking",
     "Bookings",
     "Earnings",
+    "Addresses",
+    "ClientBookings",
+    "ClientCards",
   ],
   refetchOnReconnect: true,
   endpoints: (build) => ({
@@ -120,13 +123,21 @@ export const api = createApi({
       null,
       {
         userId: string;
-        patch: Partial<Pick<Profile, "first" | "last" | "mobile">>;
+        patch: Partial<Profile>;
       }
     >({
-      queryFn: async ({ userId, patch: { first, last, mobile } }) => {
+      queryFn: async ({
+        userId,
+        patch: { first, last, mobile, marketing },
+      }) => {
         const { error } = await supabase
           .from("profiles")
-          .update({ first_name: first, last_name: last, phone: mobile })
+          .update({
+            first_name: first,
+            last_name: last,
+            phone: mobile,
+            marketing_opt_in: marketing,
+          })
           .eq("id", userId);
 
         return error ? { error } : { data: null };
@@ -136,7 +147,12 @@ export const api = createApi({
         { userId, patch },
         { dispatch, queryFulfilled },
       ) => {
-        await queryFulfilled;
+        try {
+          await queryFulfilled;
+        } catch {
+          // the caller shows the failure
+          return;
+        }
 
         dispatch(
           api.util.updateQueryData("getProfile", userId, (profile) => ({
@@ -273,7 +289,7 @@ export const api = createApi({
       void,
       { token: string; startsAt: string }
     >({
-      invalidatesTags: () => ["ManagedBooking"],
+      invalidatesTags: () => ["ManagedBooking", "ClientBookings"],
       queryFn: (request) => toQueryResult(rescheduleBooking(request)),
     }),
     sendBookingCode: build.mutation<{ email: string; sent: boolean }, string>({
@@ -294,7 +310,7 @@ export const api = createApi({
       queryFn: (token) => toQueryResult(secureBookingLink(token)),
     }),
     cancelBooking: build.mutation<CancellationTerms, string>({
-      invalidatesTags: () => ["ManagedBooking"],
+      invalidatesTags: () => ["ManagedBooking", "ClientBookings"],
       queryFn: (token) => toQueryResult(cancelBooking(token)),
     }),
     getOwnerManageToken: build.query<string, string>({

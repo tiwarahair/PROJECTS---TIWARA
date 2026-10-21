@@ -197,17 +197,7 @@ export const CommunicationSection = ({
             id="ac-mkt"
             labelId="ac-mkt-l"
             on={state.marketing}
-            onToggle={() => {
-              const isOn = !state.marketing;
-
-              actions.setState({ marketing: isOn });
-
-              actions.showToast(
-                isOn
-                  ? "You’ll get offers and news by email"
-                  : "You won’t get offers and news by email",
-              );
-            }}
+            onToggle={() => void actions.saveMarketing(!state.marketing)}
           />
         </div>
       </div>

@@ -40,7 +40,7 @@ const CardHead = ({ card }: { card: BookingCardView }) => (
   <>
     <div className={styles.cardHead}>
       <Link className={styles.stylistLink} to={card.profile}>
-        {card.money.stylist.name}
+        {card.booking.stylistName}
       </Link>
       <StatusTag card={card} />
     </div>
@@ -75,7 +75,7 @@ export const OverviewSection = ({
         <div className={styles.cardTop}>
           <ResponsiveImage
             className={styles.cover}
-            src={card.money.stylist.cover}
+            src={card.booking.cover}
             sizes="88px"
             alt=""
           />
@@ -88,7 +88,7 @@ export const OverviewSection = ({
               </span>
               <span className={styles.fact}>
                 <PinIcon />
-                <span>{card.money.where}</span>
+                <span>{card.booking.where}</span>
               </span>
             </div>
           </div>
@@ -230,7 +230,7 @@ export const BookingsSection = ({
               <div className={styles.cardTop}>
                 <ResponsiveImage
                   className={styles.cover}
-                  src={card.money.stylist.cover}
+                  src={card.booking.cover}
                   sizes="88px"
                   alt=""
                 />
@@ -245,7 +245,7 @@ export const BookingsSection = ({
                     </span>
                     <span className={styles.fact}>
                       <PinIcon />
-                      <span>{card.money.where}</span>
+                      <span>{card.booking.where}</span>
                     </span>
                     <span className={styles.fact}>
                       <CardIcon />
@@ -298,14 +298,14 @@ export const BookingsSection = ({
             >
               <ResponsiveImage
                 className={styles.pastCover}
-                src={card.money.stylist.cover}
+                src={card.booking.cover}
                 sizes="56px"
                 alt=""
               />
               <div className={styles.pastBody}>
                 <div className={styles.cardHead}>
                   <Link className={styles.stylistLink} to={card.profile}>
-                    {card.money.stylist.name}
+                    {card.booking.stylistName}
                   </Link>
                   <StatusTag card={card} />
                 </div>

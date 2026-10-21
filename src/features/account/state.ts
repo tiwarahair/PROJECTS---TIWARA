@@ -1,5 +1,4 @@
-import type { SavedAddress } from "../../types/address";
-import type { AccountBooking, Profile, SavedCard } from "./data";
+import type { Profile } from "./data";
 import type { EditKey } from "./logic";
 
 export type DialogState =
@@ -15,11 +14,23 @@ export interface AddressForm {
   id?: string;
 }
 
+/** the email change sends one code to the current address and one to the new one. */
+export type CodeTarget = "current" | "next";
+
+export interface CodeRow {
+  digits: string[];
+  error: string;
+  shake: number;
+  confirmed: boolean;
+}
+
 export interface PasswordState {
   has: boolean;
   open: boolean;
   show: boolean;
   changed?: boolean;
+  isCodeSent: boolean;
+  signOthers: boolean;
 }
 
 export interface AccountState {
@@ -27,7 +38,6 @@ export interface AccountState {
   wide: boolean;
   dialog: DialogState | null;
   toast: string;
-  bookings: AccountBooking[];
   bookingsTab?: "up" | "past";
   entries: { id: string; text: string }[];
   allergyEdit: number;
@@ -39,15 +49,11 @@ export interface AccountState {
   edit: EditKey | null;
   emailStep: "" | "code";
   pendingEmail?: string;
-  code: string[];
-  codeError: string;
-  shake: number;
+  codes: Record<CodeTarget, CodeRow>;
   resendIn: number;
   password: PasswordState;
   googleConnected: boolean;
   appleConnected: boolean;
-  cards: SavedCard[];
-  addresses: SavedAddress[];
   addressForm: AddressForm | null;
   addressMenu?: string | null;
   marketing: boolean;
@@ -67,16 +73,19 @@ export interface AccountProps {
 }
 
 export const EMPTY_CODE = ["", "", "", "", "", ""];
-export const CORRECT_CODE = "123456";
-export const EXPIRED_CODE = "000000";
+
+const EMPTY_ROW: CodeRow = {
+  digits: EMPTY_CODE,
+  error: "",
+  shake: 0,
+  confirmed: false,
+};
+
+export const EMPTY_CODES: Record<CodeTarget, CodeRow> = {
+  current: EMPTY_ROW,
+  next: EMPTY_ROW,
+};
 export const TOAST_MS = 3200;
 export const WIDE_PX = 960;
-
-// Card brand by the number's first digit
-export const CARD_BRANDS: Record<string, string> = {
-  "4": "Visa",
-  "5": "Mastercard",
-  "3": "Amex",
-};
 
 export const EMPTY_PROFILE = { first: "", last: "", email: "", mobile: "" };

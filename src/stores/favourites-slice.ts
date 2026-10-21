@@ -5,6 +5,14 @@ import { sessionChanged } from "./session-slice";
 // kept on the device per account until favourites move to the database (Phase 6)
 const getStorageKey = (ownerId: string) => `tw_favs_${ownerId}`;
 
+export const clearStoredFavourites = (ownerId: string) => {
+  try {
+    window.localStorage.removeItem(getStorageKey(ownerId));
+  } catch {
+    // storage unavailable: nothing to clear
+  }
+};
+
 interface FavouritesState {
   ids: string[];
   /** The signed-in account the saved list belongs to. */

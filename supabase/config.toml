@@ -501,6 +501,13 @@ verify_jwt = false
 [functions.studio-debt]
 verify_jwt = false
 
+# checks the caller's token itself (getClaims)
+[functions.client-cards]
+verify_jwt = false
+
+[functions.client-delete-account]
+verify_jwt = false
+
 # called by pg_cron with x-cron-secret, not a user's token
 [functions.send-notifications]
 verify_jwt = false

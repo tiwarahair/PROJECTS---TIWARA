@@ -6,14 +6,39 @@ import {
   useRef,
   useState,
 } from "react";
+import { skipToken } from "@reduxjs/toolkit/query";
 import { useNavigate, useSearchParams } from "react-router";
 import { useIdentity } from "../../hooks/use-identity";
+import { useSavedAddresses } from "../../hooks/use-saved-addresses";
+import {
+  useDeleteClientAddressMutation,
+  useGetClientBookingsQuery,
+  useGetClientCardsQuery,
+  useRemoveClientCardMutation,
+  useSaveClientAddressMutation,
+  useSetDefaultCardMutation,
+} from "../../stores/account-api";
 import { usePasswordChecker } from "../../hooks/use-password-checker";
+import { useUpdateProfileMutation } from "../../stores/api-slice";
 import { useAppDispatch, useAppSelector } from "../../stores/hooks";
+import type { SavedAddress } from "../../types/address";
+import type { Profile as SavedProfile } from "../../types/profile";
+import type { AccountBooking, SavedCard } from "./data";
 import { useAccountForms } from "./forms";
 import { getInitialState } from "./initial-state";
 import { EMPTY_CODE } from "./state";
+import type { CodeTarget } from "./state";
 import type { AccountProps, StatePatch } from "./state";
+
+const NO_BOOKINGS: AccountBooking[] = [];
+const NO_CARDS: SavedCard[] = [];
+
+/** What the account has on the server; read from the queries, never copied into page state. */
+export interface AccountData {
+  addresses: SavedAddress[];
+  bookings: AccountBooking[];
+  cards: SavedCard[];
+}
 
 export const useAccountCore = (props: AccountProps) => {
   const [searchParams] = useSearchParams();
@@ -28,7 +53,7 @@ export const useAccountCore = (props: AccountProps) => {
   const forms = useAccountForms({ ...initial.profile }, () => ({
     edit: stateRef.current.edit,
     profile: stateRef.current.profile,
-    hasPassword: stateRef.current.password.has,
+    isCodeSent: stateRef.current.password.isCodeSent,
   }));
 
   const afterCommit = useRef<(() => void)[]>([]);
@@ -41,12 +66,21 @@ export const useAccountCore = (props: AccountProps) => {
       dialog: createRef<HTMLDivElement>(),
       deleteConfirm: createRef<HTMLInputElement>(),
       file: createRef<HTMLInputElement>(),
-      code: EMPTY_CODE.map(() => createRef<HTMLInputElement>()),
+      codes: {
+        current: EMPTY_CODE.map(() => createRef<HTMLInputElement>()),
+        next: EMPTY_CODE.map(() => createRef<HTMLInputElement>()),
+      },
     }),
     [],
   );
 
   const returnFocus = useRef<Element | null>(null);
+
+  const emailCheck = useRef({
+    queue: Promise.resolve(),
+    confirmed: new Set<CodeTarget>(),
+  });
+
   const toastTimer = useRef(0);
   const resendTimer = useRef(0);
 
@@ -70,6 +104,45 @@ export const useAccountCore = (props: AccountProps) => {
   const identity = useIdentity();
 
   const signedIn = identity?.isLoaded ? identity : null;
+  const [updateProfile] = useUpdateProfileMutation();
+  const savedAddresses = useSavedAddresses();
+  const [saveAddress] = useSaveClientAddressMutation();
+  const [deleteAddress] = useDeleteClientAddressMutation();
+
+  // a booking made or changed since the last visit shows straight away
+  const { data: bookings } = useGetClientBookingsQuery(
+    identity?.user.id ?? skipToken,
+    { refetchOnMountOrArgChange: true },
+  );
+
+  const { data: cards, refetch: refetchCards } = useGetClientCardsQuery(
+    identity?.user.id ?? skipToken,
+  );
+
+  const [setDefaultCard] = useSetDefaultCardMutation();
+  const [removeCard] = useRemoveClientCardMutation();
+
+  const data: AccountData = useMemo(
+    () => ({
+      addresses: savedAddresses,
+      bookings: bookings ?? NO_BOOKINGS,
+      cards: cards ?? NO_CARDS,
+    }),
+    [savedAddresses, bookings, cards],
+  );
+
+  const dataRef = useRef(data);
+
+  dataRef.current = data;
+
+  const saveProfile = useCallback(
+    async (patch: Partial<SavedProfile>) => {
+      if (!identity) throw new Error("Not signed in");
+
+      await updateProfile({ userId: identity.user.id, patch }).unwrap();
+    },
+    [identity, updateProfile],
+  );
 
   // a real account shows the signed-in person's details and sign-in methods
   useEffect(() => {
@@ -94,6 +167,9 @@ export const useAccountCore = (props: AccountProps) => {
     searchParams,
     state,
     stateRef,
+    data,
+    dataRef,
+    emailCheck,
     setState,
     forms,
     navigate,
@@ -103,6 +179,12 @@ export const useAccountCore = (props: AccountProps) => {
     returnFocus,
     toastTimer,
     resendTimer,
+    saveProfile,
+    saveAddress,
+    deleteAddress,
+    setDefaultCard,
+    removeCard,
+    refetchCards,
   };
 };
 

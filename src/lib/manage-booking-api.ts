@@ -1,4 +1,4 @@
-import { invokeBookingFunction } from "./booking-api";
+import { invokeFunction } from "./invoke-function";
 import { supabase } from "./supabase";
 
 export interface CancellationTerms {
@@ -134,7 +134,7 @@ export const secureBookingLink = async (token: string) => {
 };
 
 export const cancelBooking = (token: string) =>
-  invokeBookingFunction<CancellationTerms>("booking-cancel", { token });
+  invokeFunction<CancellationTerms>("booking-cancel", { token });
 
 export const getCalendarFileUrl = (params: Record<string, string>) =>
   `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/booking-calendar?${new URLSearchParams(params)}`;

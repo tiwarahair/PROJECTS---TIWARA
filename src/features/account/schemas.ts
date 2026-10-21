@@ -37,17 +37,17 @@ export const getEditSchema = (key: EditKey, currentEmail: string) => {
 };
 
 export interface PasswordFormValues {
-  current: string;
+  code: string;
   next: string;
 }
 
-export const getPasswordSchema = (hasPassword: boolean, profile: Profile) =>
+export const getPasswordSchema = (isCodeSent: boolean, profile: Profile) =>
   z.object({
-    current: z
+    code: z
       .string()
       .refine(
-        (value) => !hasPassword || !!value,
-        "Enter your current password",
+        (value) => !isCodeSent || !!value,
+        "Enter the code we emailed you",
       ),
     next: z.string().refine(
       (value) =>
@@ -60,52 +60,13 @@ export const getPasswordSchema = (hasPassword: boolean, profile: Profile) =>
     ),
   });
 
-export interface CardFormValues {
-  number: string;
-  expiry: string;
-  cvc: string;
-  isDefault: boolean;
-}
-
-const isExpiryReal = (expiry: string) => {
-  const month = Number(expiry.slice(0, 2));
-
-  return expiry.length === 4 && month >= 1 && month <= 12;
-};
-
-const isExpiryCurrent = (expiry: string) => {
-  const month = Number(expiry.slice(0, 2));
-  const year = Number(expiry.slice(2, 4));
-  const now = new Date();
-  const currentYear = now.getFullYear() % 100;
-
-  return (
-    year > currentYear || (year === currentYear && month >= now.getMonth() + 1)
-  );
-};
-
-const digitsOnly = (value: string) => value.replace(/\D/g, "");
-
-export const cardSchema = z.object({
-  number: z
-    .string()
-    .refine(
-      (value) => digitsOnly(value).length >= 15,
-      "Enter your card number",
-    ),
-  expiry: z
-    .string()
-    .refine((value) => isExpiryReal(digitsOnly(value)), "Enter the expiry date")
-    .refine(
-      (value) =>
-        !isExpiryReal(digitsOnly(value)) || isExpiryCurrent(digitsOnly(value)),
-      "This card has expired",
-    ),
-  cvc: z.string().regex(/^\d{3,4}$/, "Enter the 3 or 4-digit code"),
-  isDefault: z.boolean(),
-});
-
-export type FormAddress = (AddressValue & { source?: string }) | null;
+export type FormAddress =
+  | (AddressValue & {
+      source?: string;
+      lat?: number | null;
+      lng?: number | null;
+    })
+  | null;
 
 export interface AddressFormValues {
   label: string;

@@ -36,7 +36,7 @@ export const AccountPage = (props: AccountPageProps) => {
   const account = useAccount(props);
   const { state, actions, loggedIn } = account;
   const favouriteIds = useAppSelector(({ favourites }) => favourites.ids);
-  const view = getAccountView(state, favouriteIds, loggedIn);
+  const view = getAccountView(state, account.data, favouriteIds, loggedIn);
   const { current, mobileHome, initials, accountName } = view;
   const { setState, goToSection, showToast } = actions;
 
@@ -46,10 +46,10 @@ export const AccountPage = (props: AccountPageProps) => {
     return () => document.documentElement.classList.remove("account-page");
   }, []);
 
-  const onCalendar = ({ booking, money }: BookingCardView) => {
+  const onCalendar = ({ booking }: BookingCardView) => {
     downloadFile(
-      `tiwaras-house-${booking.id}.ics`,
-      getBookingCalendarFile(booking, money),
+      `tiwaras-house-${booking.ref}.ics`,
+      getBookingCalendarFile(booking),
       "text/calendar",
     );
 

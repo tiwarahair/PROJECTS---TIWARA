@@ -5,13 +5,13 @@ import { QUIZ_DAYS_AGO, SECTIONS } from "./data";
 import type { AccountBooking, AccountSection } from "./data";
 import {
   formatAccountDate,
-  getAccountStylist,
   getAddressLine,
   getBookingMoney,
+  isUpcomingBooking,
 } from "./logic";
 import type { BookingMoney } from "./logic";
 import type { AccountState } from "./state";
-import { formatMoney } from "../../utils/money";
+import type { AccountData } from "./use-core";
 
 export interface BookingCardView {
   booking: AccountBooking;
@@ -38,40 +38,31 @@ const getBookingCard = (
   booking: AccountBooking,
   bookingMoney: BookingMoney,
 ): BookingCardView => {
-  const { id, stylistId, service, at } = booking;
+  const { ref, stylistSlug, stylistName, service, at } = booking;
   const when = formatAccountDate(at, true);
 
   return {
     booking,
     money: bookingMoney,
-    aria: `${service} with ${bookingMoney.stylist.name}, ${when}, ${bookingMoney.tag[0]}`,
+    aria: `${service} with ${stylistName}, ${when}, ${bookingMoney.tag[0]}`,
     when,
-    profile: `/${stylistId}`,
-    manage: `/manage?ref=${id}`,
-    help: `/help?booking=${id}`,
-    again: `/book?stylist=${stylistId}&service=${encodeURIComponent(service)}`,
+    profile: `/${stylistSlug}`,
+    manage: `/manage?ref=${ref}`,
+    help: `/help?booking=${ref}`,
+    again: `/book?stylist=${stylistSlug}&service=${encodeURIComponent(service)}`,
   };
 };
 
 /** The page's derived values; `favouriteIds` comes from the favourites store. */
 export const getAccountView = (
   state: AccountState,
+  { bookings }: AccountData,
   favouriteIds: string[],
   loggedIn: boolean,
 ) => {
   const now = Date.now();
 
-  const {
-    sectionId,
-    wide,
-    profile,
-    quiz,
-    addresses,
-    cards,
-    bookings,
-    dialog,
-    bookingsTab,
-  } = state;
+  const { sectionId, wide, profile, quiz, dialog, bookingsTab } = state;
 
   const current = sectionId || (wide ? "overview" : null);
   const mobileHome = !wide && !sectionId;
@@ -85,11 +76,11 @@ export const getAccountView = (
 
   const withMoney = bookings.map((booking) => ({
     booking,
-    money: getBookingMoney(booking, addresses, cards),
+    money: getBookingMoney(booking),
   }));
 
-  const isUpcoming = ({ at, status }: AccountBooking) =>
-    at >= now && status !== "cancelled";
+  const isUpcoming = (booking: AccountBooking) =>
+    booking.at >= now && isUpcomingBooking(booking);
 
   const upcomingRaw = withMoney
     .filter(({ booking }) => isUpcoming(booking))
@@ -120,14 +111,14 @@ export const getAccountView = (
   const quick: QuickAction[] = [];
 
   if (lastDone) {
-    const { stylistId, service } = lastDone.booking;
+    const { stylistSlug, stylistName, service } = lastDone.booking;
     const serviceParam = encodeURIComponent(service);
 
     quick.push({
       key: "again",
-      label: `Book again with ${lastDone.money.stylist.name}`,
+      label: `Book again with ${stylistName}`,
       subtitle: service,
-      href: `/book?stylist=${stylistId}&service=${serviceParam}`,
+      href: `/book?stylist=${stylistSlug}&service=${serviceParam}`,
       icon: RotateCcw,
     });
   }
@@ -168,7 +159,6 @@ export const getAccountView = (
     : "Nothing booked yet.";
 
   const showPastTab = bookingsTab === "past" && past.length > 0;
-  const blocked = upcoming.length > 0;
 
   const receiptBooking =
     dialog?.kind === "receipt"
@@ -198,14 +188,13 @@ export const getAccountView = (
     showUpcoming: (bookingsTab || "up") !== "past" || !past.length,
     showPast: showPastTab,
     activeTab: showPastTab ? "past" : "up",
-    blocked,
     receipt: receiptBooking
       ? {
-          ref: receiptBooking.booking.id,
+          ref: receiptBooking.booking.ref,
           date: formatAccountDate(receiptBooking.booking.at, true),
-          stylist: receiptBooking.money.stylist.name,
-          where: receiptBooking.money.where,
-          total: formatMoney(receiptBooking.money.total),
+          stylist: receiptBooking.booking.stylistName,
+          where: receiptBooking.booking.where,
+          total: receiptBooking.money.total,
           lines: receiptBooking.money.lines,
           payments: receiptBooking.money.payments,
         }
@@ -214,17 +203,18 @@ export const getAccountView = (
     getCardInUse: (cardId: string): string => {
       const [next] = bookings
         .filter(
-          ({ card, at, mode, status }) =>
-            card === cardId &&
-            at >= now &&
-            (mode === "deposit" || mode === "card") &&
-            status !== "cancelled",
+          (booking) =>
+            booking.paymentMethodId === cardId &&
+            isUpcoming(booking) &&
+            (booking.mode === "deposit" || booking.mode === "card"),
         )
         .sort((first, second) => first.at - second.at);
 
       return next ? formatAccountDate(next.at) : "";
     },
-    getStylistName: (id: string) => getAccountStylist(id).name,
+    getStylistName: (id: string) =>
+      bookings.find(({ stylistSlug }) => stylistSlug === id)?.stylistName ??
+      "Your stylist",
     getAddressLine,
   };
 };

@@ -1,4 +1,4 @@
-import { FunctionsHttpError } from "@supabase/supabase-js";
+import { invokeFunction } from "./invoke-function";
 import { supabase } from "./supabase";
 
 export interface BookingChoices {
@@ -56,24 +56,6 @@ export interface BookingStatus {
   ends_at: string;
 }
 
-export class BookingError extends Error {}
-
-export const invokeBookingFunction = async <T>(name: string, body: object) => {
-  const { data, error } = await supabase.functions.invoke<T>(name, { body });
-
-  if (error instanceof FunctionsHttpError) {
-    const response = (await error.context.json().catch(() => ({}))) as {
-      error?: string;
-    };
-
-    throw new BookingError(response.error ?? "unknown");
-  }
-
-  if (error || !data) throw new BookingError("unknown");
-
-  return data;
-};
-
 export const getAvailableSlots = async ({
   serviceId,
   choices,
@@ -95,10 +77,10 @@ export const getAvailableSlots = async ({
 };
 
 export const holdBooking = (request: HoldRequest) =>
-  invokeBookingFunction<HeldBooking>("booking-hold", request);
+  invokeFunction<HeldBooking>("booking-hold", request);
 
 export const startCheckout = (request: CheckoutRequest) =>
-  invokeBookingFunction<{ clientSecret: string }>("booking-checkout", request);
+  invokeFunction<{ clientSecret: string }>("booking-checkout", request);
 
 export const getBookingStatus = async ({
   id,

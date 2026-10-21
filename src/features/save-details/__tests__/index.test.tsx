@@ -1,7 +1,7 @@
 import { screen, waitFor } from "@testing-library/react";
 import type { UserEvent } from "@testing-library/user-event";
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import { BookingError } from "../../../lib/booking-api";
+import { FunctionError } from "../../../lib/invoke-function";
 import {
   claimBookingInvite,
   getBookingInvite,
@@ -84,7 +84,7 @@ describe("SaveDetailsPage", () => {
 
   it("an email that already has an account is told to log in", async () => {
     vi.mocked(claimBookingInvite).mockRejectedValueOnce(
-      new BookingError("account_exists"),
+      new FunctionError("account_exists"),
     );
 
     renderWithStore(<SaveDetailsPage />, PAGE);
@@ -117,7 +117,7 @@ describe("SaveDetailsPage", () => {
 
   it("a link that expires while the form is open offers a new one", async () => {
     vi.mocked(claimBookingInvite).mockRejectedValueOnce(
-      new BookingError("expired"),
+      new FunctionError("expired"),
     );
 
     renderWithStore(<SaveDetailsPage />, PAGE);
@@ -132,7 +132,7 @@ describe("SaveDetailsPage", () => {
 
   it("an unexpected failure keeps the form with an error", async () => {
     vi.mocked(claimBookingInvite).mockRejectedValueOnce(
-      new BookingError("unknown"),
+      new FunctionError("unknown"),
     );
 
     renderWithStore(<SaveDetailsPage />, PAGE);
@@ -183,7 +183,7 @@ describe("SaveDetailsPage", () => {
 
   it("an unknown link says it isn't valid", async () => {
     vi.mocked(getBookingInvite).mockRejectedValueOnce(
-      new BookingError("link_not_valid"),
+      new FunctionError("link_not_valid"),
     );
 
     renderWithStore(<SaveDetailsPage />, PAGE);

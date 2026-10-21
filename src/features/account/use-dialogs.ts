@@ -5,7 +5,7 @@ import { getFocusables } from "./use-feedback";
 import type { AccountFeedback } from "./use-feedback";
 
 export const useAccountDialogs = (
-  { stateRef, setState, forms, refs, returnFocus }: AccountCore,
+  { stateRef, setState, refs, returnFocus }: AccountCore,
   { focusLater, clearTimers }: AccountFeedback,
 ) => {
   const closeDialog = useCallback(() => {
@@ -13,10 +13,8 @@ export const useAccountDialogs = (
 
     if (dialog?.kind === "discard") dialog.keep?.();
 
-    forms.card.clearErrors();
-
     setState({ dialog: null, deleteText: "" }, () => focusLater("returnFocus"));
-  }, [focusLater, setState, forms, stateRef]);
+  }, [focusLater, setState, stateRef]);
 
   // Escape closes the dialog (Tab stays inside it), then the address menu, then the mobile menu
   useEffect(() => {

@@ -1,4 +1,5 @@
 import { getEditActions } from "./edit-actions";
+import { getEmailActions } from "./email-actions";
 import { getSaveActions } from "./save-actions";
 import type { AccountProps } from "./state";
 import { useAccountCore } from "./use-core";
@@ -11,12 +12,14 @@ export const useAccount = (props: AccountProps) => {
   const feedback = useAccountFeedback(core);
   const { goToSection } = useAccountNavigation(core, feedback);
   const { openDialog, closeDialog } = useAccountDialogs(core, feedback);
-  const edits = getEditActions(core, feedback);
+  const email = getEmailActions(core, feedback);
+  const edits = getEditActions(core, feedback, email);
   const saves = getSaveActions(core, feedback);
-  const { state, refs, forms, setState, sessionLoggedIn } = core;
+  const { state, data, refs, forms, setState, sessionLoggedIn } = core;
 
   return {
     state,
+    data,
     refs,
     forms,
     loggedIn: sessionLoggedIn && !state.loggedOut && !state.deleted,
@@ -30,15 +33,19 @@ export const useAccount = (props: AccountProps) => {
       startResendCountdown: feedback.startResendCountdown,
       stopResendCountdown: feedback.stopResendCountdown,
       saveEdit: edits.saveEdit,
-      checkCode: edits.checkCode,
-      setCode: edits.setCode,
-      fillCode: edits.fillCode,
-      pasteCode: edits.pasteCode,
-      codeKey: edits.codeKey,
+      setCode: email.setCode,
+      pasteCode: email.pasteCode,
+      codeKey: email.codeKey,
+      resendCodes: email.resendCodes,
       savePassword: saves.savePassword,
-      saveCard: saves.saveCard,
+      sendPasswordCode: saves.sendPasswordCode,
+      saveMarketing: saves.saveMarketing,
+      finishCardSetup: saves.finishCardSetup,
+      makeDefaultCard: saves.makeDefaultCard,
+      removeSavedCard: saves.removeSavedCard,
       saveAddress: saves.saveAddress,
-      setAddresses: saves.setAddresses,
+      makeDefaultAddress: saves.makeDefaultAddress,
+      removeAddress: saves.removeAddress,
       onPhoto: saves.onPhoto,
       copy: saves.copy,
       endSession: saves.endSession,

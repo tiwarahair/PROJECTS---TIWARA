@@ -1,6 +1,6 @@
 // The public confirm page for a booking a stylist made: what's booked and due, and starting its payment.
 import type { Tables } from "../types/database";
-import { invokeBookingFunction } from "./booking-api";
+import { invokeFunction } from "./invoke-function";
 
 export type BookingTerms = Omit<
   Tables<"payment_policies">,
@@ -26,7 +26,7 @@ export interface BookingConfirmation {
 }
 
 export const fetchBookingConfirmation = (token: string) =>
-  invokeBookingFunction<BookingConfirmation>("booking-confirm", {
+  invokeFunction<BookingConfirmation>("booking-confirm", {
     action: "view",
     token,
   });
@@ -35,7 +35,7 @@ export const startBookingConfirmation = (
   token: string,
   turnstileToken: string,
 ) =>
-  invokeBookingFunction<{ clientSecret: string }>("booking-confirm", {
+  invokeFunction<{ clientSecret: string }>("booking-confirm", {
     action: "pay",
     token,
     turnstileToken,

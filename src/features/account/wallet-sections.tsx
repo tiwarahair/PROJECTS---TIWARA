@@ -22,13 +22,14 @@ const getCardMark = (brand: string) => {
 };
 
 export const PaymentsSection = ({
-  account: { state, actions },
+  account: { data, actions },
   getCardInUse,
 }: PaymentsSectionProps) => (
   <section data-screen-label="Account: Payment methods">
-    {state.cards.length > 0 && (
+    {data.cards.length > 0 && (
       <div className={ui.list}>
-        {state.cards.map(({ id, brand, last4, expiry, isDefault }) => {
+        {data.cards.map((card) => {
+          const { id, brand, last4, expiry, isDefault } = card;
           const inUse = getCardInUse(id);
 
           return (
@@ -60,18 +61,7 @@ export const PaymentsSection = ({
                 {!isDefault && (
                   <button
                     className={styles.cardButton}
-                    onClick={() => {
-                      actions.setState(({ cards }) => ({
-                        cards: cards.map((card) => ({
-                          ...card,
-                          isDefault: card.id === id,
-                        })),
-                      }));
-
-                      actions.showToast(
-                        `${brand} •••• ${last4} is now your default card`,
-                      );
-                    }}
+                    onClick={() => void actions.makeDefaultCard(card)}
                   >
                     Make default
                   </button>
@@ -103,7 +93,7 @@ export const PaymentsSection = ({
         })}
       </div>
     )}
-    {!state.cards.length && (
+    {!data.cards.length && (
       <p className={ui.emptyLine} data-screen-label="Payment methods empty">
         No saved cards. You can save a card when you book.
       </p>
@@ -191,8 +181,9 @@ export const AddressesSection = ({
   account: AccountController;
 }) => {
   const { state, actions, forms } = account;
-  const { addresses, addressForm: form, addressMenu } = state;
-  const { setState, showToast, focusLater } = actions;
+  const { addressForm: form, addressMenu } = state;
+  const { addresses } = account.data;
+  const { setState, focusLater } = actions;
   const isEditing = form?.mode === "edit";
 
   const showDefault =
@@ -296,17 +287,7 @@ export const AddressesSection = ({
                                 role="menuitem"
                                 onClick={() => {
                                   setState({ addressMenu: null });
-
-                                  actions.setAddresses(
-                                    addresses.map((item) => ({
-                                      ...item,
-                                      isDefault: item.id === id,
-                                    })),
-                                  );
-
-                                  showToast(
-                                    `${label} is now your default address`,
-                                  );
+                                  void actions.makeDefaultAddress(address);
                                 }}
                               >
                                 Make default

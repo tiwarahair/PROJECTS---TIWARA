@@ -59,10 +59,16 @@ export const useAccountFeedback = ({
             ],
           );
 
-        if (target === "code") refs.code[0]?.current?.focus();
+        if (target === "code") {
+          const row = current.codes.current.confirmed ? "next" : "current";
+
+          refs.codes[row][0]?.current?.focus();
+        }
 
         if (target === "password")
-          forms.password.setFocus(current.password.has ? "current" : "next");
+          forms.password.setFocus(
+            current.password.isCodeSent ? "code" : "next",
+          );
 
         if (target === "address") forms.address.setFocus("label");
       }, 40);

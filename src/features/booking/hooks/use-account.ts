@@ -2,6 +2,7 @@ import type { MutableRefObject } from "react";
 import { useEffect } from "react";
 import type { UseFormReturn } from "react-hook-form";
 import { useNavigate } from "react-router";
+import { useSavedAddresses } from "../../../hooks/use-saved-addresses";
 import { useIdentity } from "../../../hooks/use-identity";
 import { startGoogleSignIn } from "../../../lib/auth";
 import { useUpdateProfileMutation } from "../../../stores/api-slice";
@@ -36,6 +37,7 @@ export const useAccount = ({
   const hasSession = !!identity;
   const signedIn = identity?.isLoaded ? identity : null;
   const [updateProfile] = useUpdateProfileMutation();
+  const savedAddresses = useSavedAddresses();
 
   // signed in: book as them, with their details filled in
   useEffect(() => {
@@ -55,20 +57,29 @@ export const useAccount = ({
     const isLeavingTime = !!loginStart && step === 3;
 
     setState(
-      (current) => ({
+      {
         loggedIn: true,
         editContact: false,
         loginStart: null,
         step: isLeavingTime ? 4 : step,
-        ...(current.appointmentAddress.line1
-          ? {}
-          : getSavedAddressPatch(current.appointmentAddress)),
-      }),
+      },
       isLeavingTime ? scrollToTitle : undefined,
     );
     // once per signed-in account
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [signedIn?.user.id, setState]);
+
+  // the default fills an empty appointment address once, when the addresses first arrive; a refetch keeps the client's choice
+  useEffect(() => {
+    if (!signedIn) return;
+
+    setState(({ appointmentAddress, saved }) =>
+      appointmentAddress.line1 || saved.length
+        ? { saved: savedAddresses }
+        : getSavedAddressPatch(appointmentAddress, savedAddresses),
+    );
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [signedIn?.user.id, savedAddresses, setState]);
 
   const saveContactToAccount = () => {
     if (!signedIn) return;

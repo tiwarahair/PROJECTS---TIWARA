@@ -397,6 +397,8 @@ export type Database = {
           protection_overridden_at: string | null;
           protection_status: string;
           ref: string;
+          reminder_24_at: string | null;
+          reminder_48_at: string | null;
           reschedule_count: number;
           service_id: string | null;
           site: string;
@@ -465,6 +467,8 @@ export type Database = {
           protection_overridden_at?: string | null;
           protection_status?: string;
           ref?: string;
+          reminder_24_at?: string | null;
+          reminder_48_at?: string | null;
           reschedule_count?: number;
           service_id?: string | null;
           site?: string;
@@ -530,6 +534,8 @@ export type Database = {
           protection_overridden_at?: string | null;
           protection_status?: string;
           ref?: string;
+          reminder_24_at?: string | null;
+          reminder_48_at?: string | null;
           reschedule_count?: number;
           service_id?: string | null;
           site?: string;
@@ -604,6 +610,57 @@ export type Database = {
         };
         Relationships: [];
       };
+      client_addresses: {
+        Row: {
+          client_id: string;
+          created_at: string;
+          id: string;
+          is_default: boolean;
+          label: string;
+          lat: number | null;
+          line1: string;
+          line2: string;
+          lng: number | null;
+          postcode: string;
+          town: string;
+        };
+        ComputedFields: never;
+        Insert: {
+          client_id: string;
+          created_at?: string;
+          id?: string;
+          is_default?: boolean;
+          label: string;
+          lat?: number | null;
+          line1: string;
+          line2?: string;
+          lng?: number | null;
+          postcode: string;
+          town: string;
+        };
+        Update: {
+          client_id?: string;
+          created_at?: string;
+          id?: string;
+          is_default?: boolean;
+          label?: string;
+          lat?: number | null;
+          line1?: string;
+          line2?: string;
+          lng?: number | null;
+          postcode?: string;
+          town?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "client_addresses_client_id_fkey";
+            columns: ["client_id"];
+            isOneToOne: false;
+            referencedRelation: "profiles";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
       closed_periods: {
         Row: {
           ends_on: string;
@@ -672,6 +729,33 @@ export type Database = {
             columns: ["group_id"];
             isOneToOne: false;
             referencedRelation: "service_groups";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
+      daily_open_minutes: {
+        Row: {
+          day: string;
+          minutes: number;
+          stylist_id: string;
+        };
+        ComputedFields: never;
+        Insert: {
+          day: string;
+          minutes: number;
+          stylist_id: string;
+        };
+        Update: {
+          day?: string;
+          minutes?: number;
+          stylist_id?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "daily_open_minutes_stylist_id_fkey";
+            columns: ["stylist_id"];
+            isOneToOne: false;
+            referencedRelation: "stylists";
             referencedColumns: ["id"];
           },
         ];
@@ -2115,6 +2199,10 @@ export type Database = {
         Args: { intent: string; target: string };
         Returns: undefined;
       };
+      anonymise_client_bookings: {
+        Args: { client: string };
+        Returns: undefined;
+      };
       apply_recovery: {
         Args: {
           account: string;
@@ -2221,6 +2309,10 @@ export type Database = {
       };
       clean_contact: { Args: { contact: Json }; Returns: Json };
       close_business: { Args: Record<PropertyKey, never>; Returns: undefined };
+      complete_past_bookings: {
+        Args: Record<PropertyKey, never>;
+        Returns: number;
+      };
       confirm_booking_payment: {
         Args: { amount?: number; intent: string; target_booking?: string };
         Returns: string;
@@ -2267,6 +2359,7 @@ export type Database = {
         Args: { meta: Json; new_owner_id: string };
         Returns: string;
       };
+      delete_client_address: { Args: { target: string }; Returns: undefined };
       delete_stylist_client: { Args: { target: string }; Returns: undefined };
       expire_booking_holds: {
         Args: Record<PropertyKey, never>;
@@ -2377,6 +2470,8 @@ export type Database = {
           protection_overridden_at: string | null;
           protection_status: string;
           ref: string;
+          reminder_24_at: string | null;
+          reminder_48_at: string | null;
           reschedule_count: number;
           service_id: string | null;
           site: string;
@@ -2424,6 +2519,7 @@ export type Database = {
         Returns: Json;
       };
       get_card_fee_pence: { Args: { amount: number }; Returns: number };
+      get_client_bookings: { Args: Record<PropertyKey, never>; Returns: Json };
       get_client_unpaid_fee: {
         Args: { email: string; phone: string; target_stylist: string };
         Returns: Json;
@@ -2454,6 +2550,7 @@ export type Database = {
         };
         Returns: string[];
       };
+      get_deletion_blockers: { Args: { client: string }; Returns: Json };
       get_device_kind: { Args: { user_agent: string }; Returns: string };
       get_device_label: { Args: { user_agent: string }; Returns: string };
       get_dispute_evidence: {
@@ -2522,6 +2619,10 @@ export type Database = {
         Returns: string;
       };
       get_managed_booking: { Args: { token: string }; Returns: Json };
+      get_my_deletion_blockers: {
+        Args: Record<PropertyKey, never>;
+        Returns: Json;
+      };
       get_next_start: {
         Args: {
           minutes: number;
@@ -2680,6 +2781,7 @@ export type Database = {
           stripe_dispute_id: string;
         }[];
       };
+      has_recent_payment: { Args: { target: string }; Returns: boolean };
       has_recent_second_factor: {
         Args: Record<PropertyKey, never>;
         Returns: boolean;
@@ -2797,6 +2899,8 @@ export type Database = {
           protection_overridden_at: string | null;
           protection_status: string;
           ref: string;
+          reminder_24_at: string | null;
+          reminder_48_at: string | null;
           reschedule_count: number;
           service_id: string | null;
           site: string;
@@ -2917,6 +3021,10 @@ export type Database = {
         Args: Record<PropertyKey, never>;
         Returns: undefined;
       };
+      purge_deleted_client_contacts: {
+        Args: Record<PropertyKey, never>;
+        Returns: number;
+      };
       purge_expired_booking_tokens: {
         Args: Record<PropertyKey, never>;
         Returns: number;
@@ -2934,6 +3042,10 @@ export type Database = {
         Returns: undefined;
       };
       queue_booking_messages: { Args: { target: string }; Returns: undefined };
+      queue_due_reminders: {
+        Args: Record<PropertyKey, never>;
+        Returns: number;
+      };
       queue_email: {
         Args: {
           payload: Json;
@@ -3003,6 +3115,10 @@ export type Database = {
         Args: { available: string; destination: string; intent: string };
         Returns: undefined;
       };
+      save_client_address: {
+        Args: { address: Json; target?: string };
+        Returns: string;
+      };
       save_dispute_fees: {
         Args: { fees: number; target: string };
         Returns: undefined;
@@ -3021,6 +3137,7 @@ export type Database = {
         Args: { given: Json; response: string; target: string };
         Returns: undefined;
       };
+      save_open_minutes: { Args: Record<PropertyKey, never>; Returns: number };
       save_payout: { Args: { account: string; payout: Json }; Returns: string };
       save_stylist_client: {
         Args: { details: Json; target?: string; target_stylist: string };

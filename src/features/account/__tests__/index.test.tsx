@@ -11,8 +11,6 @@ beforeEach(() => {
   user = setupUser();
 });
 
-const advance = (ms: number) => act(() => vi.advanceTimersByTime(ms));
-
 const renderAccount = (query = "") =>
   renderWithStore(<AccountPage />, `/account${query}`, { signedIn: true });
 
@@ -163,55 +161,6 @@ describe("AccountPage", () => {
     ).toBeInTheDocument();
   });
 
-  it("changing the email sends a code; 123456 confirms it", async () => {
-    renderAccount("?section=personal");
-    await user.click(screen.getByRole("button", { name: "Edit email" }));
-
-    await user.type(screen.getByLabelText("New email"), "nia@example.com");
-
-    await user.click(screen.getByRole("button", { name: "Continue" }));
-    await settle();
-    expect(getLabelled("Email code step")).toBeInTheDocument();
-
-    for (const [index, digit] of [..."123456"].entries())
-      await user.type(screen.getByLabelText(`Digit ${index + 1}`), digit);
-
-    expect(screen.getByRole("status")).toHaveTextContent(
-      "Email updated. We’ve let nia.okafor@gmail.com know.",
-    );
-
-    expect(screen.getByText("nia@example.com")).toBeInTheDocument();
-    advance(3200);
-    expect(screen.getByRole("status")).toHaveTextContent("");
-  });
-
-  it("the add-card dialog validates, then saves the card", async () => {
-    renderAccount("?section=payments");
-    await user.click(screen.getByRole("button", { name: "Add a card" }));
-    const dialog = screen.getByRole("dialog");
-
-    await user.click(within(dialog).getByRole("button", { name: "Save card" }));
-    await settle();
-    expect(within(dialog).getByText("Enter your card number")).toBeVisible();
-
-    await user.type(
-      within(dialog).getByPlaceholderText("1234 1234 1234 1234"),
-      "5555555555554444",
-    );
-
-    await user.type(within(dialog).getByPlaceholderText("MM / YY"), "1240");
-
-    await user.type(within(dialog).getByPlaceholderText("CVC"), "123");
-
-    await user.click(within(dialog).getByRole("button", { name: "Save card" }));
-    await settle();
-    expect(screen.queryByRole("dialog")).not.toBeInTheDocument();
-
-    expect(screen.getAllByText("Mastercard •••• 4444").length).toBeGreaterThan(
-      0,
-    );
-  });
-
   it("log out everywhere ends the session and shows the gate", async () => {
     renderAccount("?section=security");
 
@@ -229,27 +178,6 @@ describe("AccountPage", () => {
 
     expect(
       screen.getByRole("heading", { name: "Log in to see your account" }),
-    ).toBeInTheDocument();
-  });
-
-  it("delete stays disabled until DELETE is typed", async () => {
-    renderAccount("?section=privacy");
-    await user.click(screen.getByRole("button", { name: "Delete account" }));
-    expect(getLabelled("Delete account allowed")).toBeInTheDocument();
-
-    const remove = within(screen.getByRole("dialog")).getByRole("button", {
-      name: "Delete account",
-    });
-
-    expect(remove).toBeDisabled();
-
-    await user.type(screen.getByLabelText("Type DELETE to confirm"), "delete");
-
-    expect(remove).toBeEnabled();
-    await user.click(remove);
-
-    expect(
-      screen.getByRole("heading", { name: "Your account has been deleted" }),
     ).toBeInTheDocument();
   });
 

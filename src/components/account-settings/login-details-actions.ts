@@ -1,12 +1,6 @@
 // Settings → Personal: the login email (a code to each address) and the mobile (saved straight away).
-import { AUTH_FAILURE_MESSAGES } from "../../lib/auth-errors";
+import { EMAIL_CODE_FAILURES } from "../../lib/account-changes";
 import type { AccountSettingsController } from "./use-account-settings";
-
-const EMAIL_FAILURES: Record<string, string> = {
-  email_exists: "That email is already used by another account.",
-  over_email_send_rate_limit: AUTH_FAILURE_MESSAGES.emailLimit,
-  failed: "The codes couldn’t be sent. Try again.",
-};
 
 export const getLoginDetailsActions = ({
   state,
@@ -17,7 +11,8 @@ export const getLoginDetailsActions = ({
   const sendEmailCodes = async (email: string) => {
     const failure = await backend.sendEmailCodes(email).catch(() => "failed");
 
-    if (failure) return EMAIL_FAILURES[failure] ?? EMAIL_FAILURES.failed ?? "";
+    if (failure)
+      return EMAIL_CODE_FAILURES[failure] ?? EMAIL_CODE_FAILURES.failed ?? "";
 
     setState({
       emailFlow: null,
