@@ -1,6 +1,7 @@
 import { useMemo } from "react";
 import { Navigate, useLocation } from "react-router";
 import { PageMessage } from "../../components/page-message";
+import { NotFoundPage } from "../page-states/not-found";
 import { SiteHeader } from "../../components/site-header";
 import { ProfileSkeleton } from "../../components/skeleton/profile-skeleton";
 import type { ProfilePreview } from "../../components/skeleton/profile-skeleton";
@@ -37,6 +38,9 @@ export const StylistProfilePage = () => {
   if (publicStylist)
     return <StylistProfileView key={slug} publicStylist={publicStylist} />;
 
+  if (!isFetching && !isError)
+    return <NotFoundPage isStylistLink loginHref={getLoginHref(slug)} />;
+
   return (
     <div className={styles.page} aria-busy={isFetching}>
       <SiteHeader loginHref={getLoginHref(slug)} />
@@ -45,16 +49,8 @@ export const StylistProfilePage = () => {
       )}
       {!isFetching && (
         <PageMessage
-          title={
-            isError
-              ? "We couldn’t load this page"
-              : "We couldn’t find this stylist"
-          }
-          text={
-            isError
-              ? "Check your connection and try again."
-              : "The link may be wrong, or they’re no longer taking bookings here."
-          }
+          title="We couldn’t load this page"
+          text="Check your connection and try again."
           linkLabel="Find a stylist"
           linkHref="/search"
         />

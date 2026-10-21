@@ -1,6 +1,8 @@
 import { Navigate, createBrowserRouter } from "react-router";
 import type { RouteObject } from "react-router";
 import { AppLayout } from "./app-layout";
+import { NotFoundPage } from "./features/page-states/not-found";
+import { RouteError } from "./features/page-states/route-error";
 
 // preserve links shared before profiles moved to /{slug}
 const OldProfileLink = () => (
@@ -9,6 +11,18 @@ const OldProfileLink = () => (
     replace
   />
 );
+
+// reserved for pages not built yet, so they don't open as a stylist profile
+const UNBUILT_PAGES = [
+  "about",
+  "for-stylists",
+  "policies",
+  "terms-of-service",
+  "privacy-policy",
+  "reviews",
+  "cookies",
+  "admin",
+];
 
 const appRoutes: RouteObject[] = [
   {
@@ -107,8 +121,13 @@ const appRoutes: RouteObject[] = [
         ({ StylistProfilePage }) => ({ Component: StylistProfilePage }),
       ),
   },
+  ...UNBUILT_PAGES.map((page) => ({
+    path: `/${page}`,
+    element: <NotFoundPage />,
+  })),
+  { path: "*", element: <NotFoundPage /> },
 ];
 
 export const appRouter = createBrowserRouter([
-  { element: <AppLayout />, children: appRoutes },
+  { element: <AppLayout />, errorElement: <RouteError />, children: appRoutes },
 ]);
