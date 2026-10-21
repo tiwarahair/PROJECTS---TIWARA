@@ -25,6 +25,7 @@ const REFUSALS: Record<string, string> = {
   not_bookable: "That service isn’t active any more. Pick another service.",
   invalid_choices:
     "Those add-ons aren’t available any more. Remove them and try again.",
+  invalid_address: "That address is too long. Keep it to 300 characters.",
 };
 
 const send = <T>(
@@ -167,3 +168,6 @@ export const getClientUnpaidFee = async (
 
 export const setStylistNote = (id: string, note: string) =>
   send(supabase.rpc("set_stylist_note", { target: id, note }));
+
+export const setBookingAddress = (id: string, address: string) =>
+  send(supabase.rpc("set_booking_address", { target: id, address }));

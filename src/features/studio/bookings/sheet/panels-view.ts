@@ -1,6 +1,7 @@
 import { SaveError } from "../../../../lib/studio-writes";
 import {
   getConfirmUrl,
+  setBookingAddress,
   setStylistNote,
 } from "../../../../lib/studio-api/booking-writes";
 import { copyLaterText } from "../../core/format";
@@ -18,7 +19,6 @@ export const getPanelsView = ({
   actions: { showToast },
   raw,
   booking,
-  patchBooking,
   saveBooking,
   resendLink,
 }: SheetContext) => ({
@@ -47,21 +47,15 @@ export const getPanelsView = ({
 
     const address = state.bookingAddressDraft.trim();
 
-    setState({
-      bookingAddressOn: false,
-      clientAddresses: {
-        ...state.clientAddresses,
-        [booking.client ?? ""]: address,
-      },
-    });
+    setState({ bookingAddressOn: false });
 
-    patchBooking({ address });
+    if (address === (raw?.address ?? "")) return;
 
-    showToast(
-      address
-        ? `Address saved to ${booking.firstName}’s profile`
-        : "Address removed",
+    saveBooking({ address }, (remoteId) =>
+      setBookingAddress(remoteId, address),
     );
+
+    showToast(address ? "Address updated" : "Address removed");
   },
   // the stylist's own note
   saveNote: () => {

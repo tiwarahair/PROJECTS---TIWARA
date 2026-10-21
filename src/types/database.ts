@@ -3072,6 +3072,10 @@ export type Database = {
         Returns: undefined;
       };
       service_from_pence: { Args: { target: string }; Returns: number };
+      set_booking_address: {
+        Args: { address: string; target: string };
+        Returns: undefined;
+      };
       set_booking_status: {
         Args: { next_status: string; target: string };
         Returns: undefined;
