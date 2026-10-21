@@ -159,7 +159,7 @@ export const ConfirmSheet = ({ studio }: { studio: StudioController }) => {
           styles.confirmScrim,
           state.confirmOut ? overlay.scrimOut21 : overlay.scrimIn20,
         )}
-        onClick={onNo}
+        onClick={confirm.isBlocking ? undefined : onNo}
       ></div>
       <div
         className={joinClassNames(

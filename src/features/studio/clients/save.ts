@@ -10,7 +10,7 @@ import type { StudioClient, StudioPatch, StudioState } from "../core/types";
 // a client added in Studio keeps the id they were shown with until their save returns the real one
 const savedIds = new Map<string, string>();
 
-const getSavedId = (id: string | null | undefined) =>
+export const getSavedId = (id: string | null | undefined) =>
   savedIds.get(id ?? "") ?? id ?? "";
 
 const renameClient = (

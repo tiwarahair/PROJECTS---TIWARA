@@ -7,6 +7,7 @@ import {
   getProtectionNoun,
 } from "../../core/model";
 import type { StudioBooking } from "../../core/types";
+import { toEditDraft } from "../../clients/edit-draft";
 import { getFreshLink } from "./booking";
 import type { SheetContext } from "./context";
 
@@ -70,22 +71,44 @@ export const getChangeClientView = (context: SheetContext) => {
 
   const setClient = (clientId: string | null) => {
     // the client needs until 2 hours before the start to confirm
-    if (!clientId || state.policy.mode === "none" || hoursToStart <= 2) {
+    const other = everyone.find(({ id }) => id === clientId);
+
+    if (
+      !clientId ||
+      !other ||
+      state.policy.mode === "none" ||
+      hoursToStart <= 2
+    ) {
       applyClient(clientId, NO_PROTECTION);
 
       return;
     }
 
-    const other = everyone.find(({ id }) => id === clientId);
-    const name = other ? (other.name.split(" ")[0] ?? "") : "the client";
+    const name = other.name.split(" ")[0] ?? "";
 
     // the confirm link goes by email
-    if (!other?.email?.trim()) {
-      applyClient(clientId, NO_PROTECTION);
-
-      actions.showToast(
-        `${name} has no email, so this booking isn’t protected`,
-      );
+    if (!other.email?.trim()) {
+      setState({
+        confirm: {
+          title: `${name} has no email yet`,
+          yesLabel: "Add email",
+          noLabel: "No protection",
+          body: `The payment link is sent by email. Add ${name}’s email to ask for booking protection, or change the client without it.`,
+          yes: () =>
+            actions.openSheet("clientEdit", {
+              confirm: null,
+              clientEdit: toEditDraft(other),
+              clientEditFromBooking: {
+                bookingId: booking.id,
+                clientId,
+                fromClientId: state.fromClientId ?? null,
+              },
+              clientEditFocus: "email",
+            }),
+          onNo: () => applyClient(clientId, NO_PROTECTION),
+          isBlocking: true,
+        },
+      });
 
       return;
     }
@@ -108,6 +131,7 @@ export const getChangeClientView = (context: SheetContext) => {
             ...getFreshLink(booking, sentAt),
           }),
         onNo: () => applyClient(clientId, NO_PROTECTION),
+        isBlocking: true,
       },
     });
   };
