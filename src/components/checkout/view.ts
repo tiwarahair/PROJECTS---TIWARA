@@ -91,8 +91,7 @@ export const getAdjustNote = ({ adjustment, reason }: CheckoutLine): string => {
 };
 
 export const getCheckoutView = (checkout: CheckoutController) => {
-  const { props, state, booking, money, goTo, showToast, isEmbedded } =
-    checkout;
+  const { props, state, booking, money, goTo } = checkout;
 
   const { first: name } = booking;
 
@@ -150,12 +149,8 @@ export const getCheckoutView = (checkout: CheckoutController) => {
     else goTo("detail", -1);
   };
 
-  const leaveDone = (action: "done" | "rebook") => {
-    if (isEmbedded && props.onComplete)
-      props.onComplete(checkout.getResult(), action);
-    else if (action === "rebook") showToast(`New booking for ${name} started`);
-    else goTo("detail", -1);
-  };
+  const leaveDone = (action: "done" | "rebook") =>
+    props.onComplete(checkout.getResult(), action);
 
   const { isOffPlatform, refundCapAll, refundCap } = getRefundCap(
     state,

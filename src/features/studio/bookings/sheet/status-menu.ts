@@ -4,6 +4,7 @@ import { hhmm } from "../../core/format";
 import type { ActionItem } from "../../core/types";
 import { confirmWithoutProtection } from "../../../../lib/studio-api/booking-writes";
 import { getFreshLink } from "./booking";
+import { openCheckout } from "./checkout-view";
 import type { SheetContext } from "./context";
 import { CANCEL_STEP } from "./types";
 import type { StatusMenuKind } from "./types";
@@ -137,26 +138,32 @@ const STATUS_ITEMS: Record<
       getCancelItem(context),
     ];
   },
-  arrived: ({ booking, setState, actions }) => [
-    {
-      label: "Completed",
-      icon: CreditCard,
-      subtitle:
-        booking.due > 0 ? `Collect £${booking.due}` : "Nothing left to collect",
-      run: () => setState({ bookingStep: "checkout", checkoutMethod: null }),
-    },
-    ...(booking.completed
-      ? []
-      : [
-          {
-            label: "Confirmed",
-            icon: Undo,
-            subtitle: "Undo arrived",
-            run: () =>
-              actions.setStatus(booking.id, "confirmed", "Back to confirmed"),
-          },
-        ]),
-  ],
+  arrived: (context) => {
+    const { booking, actions } = context;
+
+    return [
+      {
+        label: "Completed",
+        icon: CreditCard,
+        subtitle:
+          booking.due > 0
+            ? `Collect £${booking.due}`
+            : "Nothing left to collect",
+        run: () => openCheckout(context),
+      },
+      ...(booking.completed
+        ? []
+        : [
+            {
+              label: "Confirmed",
+              icon: Undo,
+              subtitle: "Undo arrived",
+              run: () =>
+                actions.setStatus(booking.id, "confirmed", "Back to confirmed"),
+            },
+          ]),
+    ];
+  },
 };
 
 // ---- the status menu ----

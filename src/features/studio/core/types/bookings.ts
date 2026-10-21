@@ -12,6 +12,7 @@ export interface BookingAddon {
 export interface StudioBooking {
   id: number;
   remoteId?: string;
+  ref?: string;
   startsAt?: string;
   overlapOk?: boolean;
   /** The policy agreed at booking; demo bookings follow the current one. */
@@ -111,6 +112,8 @@ export interface PastRecord {
   month?: string;
   pastAt?: number;
   remoteId?: string;
+  ref?: string;
+  receiptDate?: string;
   feeCharge?: number;
   feeCard?: string;
   feeLinkResends?: number;

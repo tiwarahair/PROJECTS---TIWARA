@@ -1,4 +1,3 @@
-import { DEFAULT_STYLIST } from "./data";
 import { RECORD_VIA_LABELS } from "./view";
 import type { CheckoutViewModel } from "./view";
 import type { CheckoutController } from "./use-checkout";
@@ -8,7 +7,7 @@ const formatPence = (amount: number) =>
   formatMoney(amount, { pence: "always" });
 
 export const getReceiptView = (
-  { props, state, booking, money }: CheckoutController,
+  { props: { stylist }, state, booking, money }: CheckoutController,
   { cardText }: CheckoutViewModel,
 ) => {
   const done = state.done ?? {
@@ -99,14 +98,12 @@ export const getReceiptView = (
     return cardText || "card";
   };
 
-  const stylist = { ...DEFAULT_STYLIST, ...props.stylist };
-
   return {
     stylist: stylist.name,
     address: stylist.address,
     vat: stylist.vat,
-    number: "Receipt TH-20418",
-    date: `${booking.day} 2026`,
+    number: booking.ref ? `Receipt ${booking.ref}` : "Receipt",
+    date: booking.receiptDate ?? booking.day,
     client: `For ${booking.client}`,
     lines,
     subtotal: formatPence(money.items),

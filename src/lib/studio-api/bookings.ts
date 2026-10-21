@@ -4,7 +4,7 @@ import { supabase } from "../supabase";
 import { fetchStudioClients } from "./clients";
 import { check, invokeStudio, write } from "./request";
 
-const BOOKING_SELECT = `id, status, starts_at, minutes, buffer_minutes, price_pence, fee_pence, due_today_pence,
+const BOOKING_SELECT = `id, ref, status, starts_at, minutes, buffer_minutes, price_pence, fee_pence, due_today_pence,
   service_id, snapshot, contact, notes, address, terms, reschedule_count, cancelled_at, cancelled_by, cancellation,
   no_show_at, overlap_ok, created_by, past_at, paid_at, stripe_payment_method_id, protection_status, confirm_by,
   confirm_sends, confirm_sent_at, created_at, booking_notes(note), stylist_client_id,

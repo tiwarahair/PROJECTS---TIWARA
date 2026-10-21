@@ -36,7 +36,7 @@ const openTab = async (label: string) => {
   return getLabelled(label);
 };
 
-describe("Studio → Clients and Earnings", () => {
+describe("Studio → Clients", () => {
   beforeEach(() => {
     vi.useFakeTimers({
       toFake: [
@@ -104,11 +104,5 @@ describe("Studio → Clients and Earnings", () => {
     );
 
     expect(within(clients).getByText("Nia Okafor")).toBeInTheDocument();
-  });
-
-  it("the Earnings tab embeds the earnings dashboard", async () => {
-    const earnings = await openTab("Earnings");
-
-    expect(within(earnings).getByText("Available")).toBeInTheDocument();
   });
 });

@@ -1,6 +1,6 @@
 // CheckoutSheet money maths and initial state.
 import { roundToPence } from "../../utils/money";
-import { BOOKINGS, EMPTY_REFUND } from "./data";
+import { EMPTY_REFUND } from "./data";
 import type {
   CheckoutBooking,
   CheckoutMoney,
@@ -16,19 +16,6 @@ export const parsePounds = (value: string): number => {
 
   return isNaN(parsed) ? 0 : roundToPence(parsed);
 };
-
-/** Which demo booking a scenario uses; a host booking is "live". */
-const getBookingKey = (scenario: string, hasBooking: boolean): string =>
-  hasBooking
-    ? "live"
-    : ({
-        reduce: "nia",
-        "reduce-review": "nia",
-        link: "chi",
-        awaiting: "chi",
-        cash: "tola",
-        unpaid: "tola",
-      }[scenario] ?? (/^(fee|waive)/.test(scenario) ? "kemi" : "zainab"));
 
 /** Totals, method and steps for the current state. */
 export const getMoney = (
@@ -137,20 +124,15 @@ export const getFinalized = (
   };
 };
 
-/** The initial state for a scenario or a host booking. */
+/** The initial state for a host booking. */
 export const getInitialCheckout = ({
-  scenario = "arrived",
-  booking: hostBooking,
+  booking,
   start,
   done,
   refunded,
   linkPaid,
 }: CheckoutSeedProps): CheckoutState => {
-  const bookingKey = getBookingKey(scenario, !!hostBooking);
-  const booking = hostBooking ?? BOOKINGS[bookingKey]!;
-
   const state: CheckoutState = {
-    bookingKey,
     mode: booking.mode,
     paid: booking.paid,
     isNonRefundable: false,
@@ -201,182 +183,46 @@ export const getInitialCheckout = ({
     done: null,
   };
 
-  const finalize = () => Object.assign(state, getFinalized(state, booking));
+  if (Array.isArray(booking.lines))
+    state.lines = booking.lines.map((line, index) => ({
+      id: index + 1,
+      adjustment: 0,
+      reason: "",
+      name: "",
+      subtitle: "",
+      base: 0,
+      ...line,
+    }));
 
-  if (hostBooking) {
-    if (Array.isArray(hostBooking.lines))
-      state.lines = hostBooking.lines.map((line, index) => ({
-        id: index + 1,
-        adjustment: 0,
-        reason: "",
-        name: "",
-        subtitle: "",
-        base: 0,
-        ...line,
-      }));
+  state.view = start || "items";
 
-    state.view = start || "items";
+  if (done) {
+    state.done = {
+      method: done.method ?? "none",
+      via: done.via ?? "",
+      charged: done.charged ?? 0,
+      tip: done.tip ?? 0,
+      refundAuto: done.refundAuto ?? 0,
+      cashBack: done.cashBack ?? 0,
+    };
 
-    if (done) {
-      state.done = {
-        method: done.method ?? "none",
-        via: done.via ?? "",
-        charged: done.charged ?? 0,
-        tip: done.tip ?? 0,
-        refundAuto: done.refundAuto ?? 0,
-        cashBack: done.cashBack ?? 0,
-      };
+    state.status = done.method === "link" && !linkPaid ? "awaiting" : "paid";
 
-      state.status = done.method === "link" && !linkPaid ? "awaiting" : "paid";
-
-      if (done.tip && typeof done.tip === "number") {
-        state.tip = "custom";
-        state.tipCustom = String(done.tip);
-      }
-
-      if (done.method === "record") {
-        state.method = "record";
-        state.recordVia = (done.via as RecordVia) || "cash";
-      }
-
-      if (done.method === "link")
-        state.linkVia = (done.via as "sms" | "email") || "email";
+    if (done.tip && typeof done.tip === "number") {
+      state.tip = "custom";
+      state.tipCustom = String(done.tip);
     }
 
-    state.refunded = refunded || 0;
+    if (done.method === "record") {
+      state.method = "record";
+      state.recordVia = (done.via as RecordVia) || "cash";
+    }
 
-    return state;
+    if (done.method === "link")
+      state.linkVia = (done.via as "sms" | "email") || "email";
   }
 
-  switch (scenario) {
-    case "items":
-      state.view = "items";
-      break;
-    case "tip":
-      state.view = "tip";
-      state.tip = 15;
-      break;
-    case "review":
-      state.view = "review";
-      state.tip = 15;
-      break;
-    case "done":
-      state.tip = 15;
-      finalize();
-      state.view = "done";
-      break;
-    case "paid":
-      state.tip = 15;
-      finalize();
-      break;
-    case "refund":
-      state.tip = 15;
-      finalize();
-
-      Object.assign(state, {
-        view: "refund",
-        refund: { kind: "partial", amount: "20", reason: "Service issue" },
-      });
-
-      break;
-    case "receipt":
-      state.tip = 15;
-      finalize();
-      state.view = "receipt";
-      break;
-    case "resend":
-      state.tip = 15;
-      finalize();
-
-      Object.assign(state, { view: "resend", resendVia: "sms" });
-
-      break;
-    case "reduce":
-    case "reduce-review":
-      state.lines[0]!.adjustment = -20;
-      state.lines[0]!.reason = "Service shortened";
-      state.view = scenario === "reduce" ? "items" : "review";
-      break;
-    case "link":
-      state.method = "link";
-      state.view = "pay";
-      break;
-    case "awaiting":
-      state.method = "link";
-      finalize();
-      break;
-    case "cash":
-      Object.assign(state, {
-        method: "record",
-        view: "tip",
-        tip: "custom",
-        tipCustom: "5",
-      });
-
-      break;
-    case "unpaid":
-      state.status = "unpaid";
-      break;
-    case "declined":
-      Object.assign(state, {
-        tip: 15,
-        view: "review",
-        decline: "soft",
-        tries: 1,
-      });
-
-      break;
-    case "declined-hard":
-      Object.assign(state, {
-        tip: 15,
-        view: "review",
-        decline: "hard",
-        tries: 0,
-      });
-
-      break;
-    case "fee-pending":
-      state.status = "feePending";
-      break;
-    case "fee-waived":
-      state.status = "feeWaived";
-      break;
-    case "fee-unpaid":
-      state.status = "feeUnpaid";
-      break;
-    case "fee-collected":
-      state.status = "feeCollected";
-      break;
-    case "waive-dep":
-      Object.assign(state, { status: "feePending", dialog: "waive" });
-      break;
-    case "waive-nonref":
-      Object.assign(state, {
-        status: "feePending",
-        isNonRefundable: true,
-        dialog: "waive",
-      });
-
-      break;
-    case "waive-full":
-      Object.assign(state, {
-        status: "feePending",
-        mode: "full",
-        paid: 100,
-        dialog: "waive",
-      });
-
-      break;
-    case "waive-card":
-      Object.assign(state, {
-        status: "feePending",
-        mode: "card",
-        paid: 0,
-        dialog: "waive",
-      });
-
-      break;
-  }
+  state.refunded = refunded || 0;
 
   return state;
 };

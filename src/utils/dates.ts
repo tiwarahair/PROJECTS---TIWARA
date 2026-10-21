@@ -52,6 +52,14 @@ export const formatClockTime = (date: Date): string =>
   `${pad2(date.getHours())}:${pad2(date.getMinutes())}`;
 
 /** "Wed 14 Oct" */
+export const formatFullDate = (date: Date): string =>
+  date.toLocaleDateString("en-GB", {
+    weekday: "short",
+    day: "numeric",
+    month: "short",
+    year: "numeric",
+  });
+
 export const formatWeekdayDate = (date: Date): string =>
   date.toLocaleDateString("en-GB", {
     weekday: "short",

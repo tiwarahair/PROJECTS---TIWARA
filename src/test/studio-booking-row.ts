@@ -6,6 +6,7 @@ import { toDate } from "../features/studio/core/blocked-time";
 /** A Studio booking row as the database returns it: Nia, two days from now at 14:30, deposit paid. */
 export const getRow = (patch: Partial<StudioBookingRow>): StudioBookingRow => ({
   id: "b-1",
+  ref: "TH-ABC123",
   status: "confirmed",
   starts_at: fromLondonTime(toDate(2), "14:30"),
   minutes: 90,

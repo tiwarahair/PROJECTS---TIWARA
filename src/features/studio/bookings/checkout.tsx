@@ -18,7 +18,7 @@ export interface StudioCheckoutProps {
   onExit: () => void;
   onComplete: NonNullable<CheckoutSheetProps["onComplete"]>;
   onRefund?: CheckoutSheetProps["onRefund"];
-  onPay?: CheckoutSheetProps["onPay"];
+  onPay: CheckoutSheetProps["onPay"];
 }
 
 /** CheckoutSheet over a Studio sheet. */
@@ -33,7 +33,7 @@ export const StudioCheckout = ({
   onRefund = () => {},
   onPay,
 }: StudioCheckoutProps) => {
-  const { state, isWide, props, actions } = studio;
+  const { state, isWide, actions } = studio;
   const { business } = state;
   const fields = business.details || {};
 
@@ -78,7 +78,6 @@ export const StudioCheckout = ({
             .join(", "),
           vat: business.vatOn && fields.vat ? `GB ${fields.vat}` : "",
         }}
-        declineMode={props.cardDeclines || "none"}
         menu={menu}
         onExit={onExit}
         onClose={actions.closeSheet}

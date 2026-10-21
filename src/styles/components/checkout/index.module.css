@@ -21,20 +21,6 @@
   position: relative;
 }
 
-.handleRow {
-  flex: 0 0 auto;
-  display: flex;
-  justify-content: center;
-  padding-top: 8px;
-}
-
-.handle {
-  width: 36px;
-  height: 4px;
-  border-radius: var(--radius-full);
-  background: var(--neutral-300);
-}
-
 .header {
   flex: 0 0 auto;
   display: flex;
@@ -368,16 +354,6 @@
 }
 
 /* runtime states */
-.outerPhone {
-  background: #969491;
-  padding-top: 40px;
-}
-
-.outerPlain {
-  background: transparent;
-  padding-top: 0px;
-}
-
 /* the sheet's corners: the host passes its own radius when embedded */
 .sheet {
   border-radius: var(--sheet-radius);

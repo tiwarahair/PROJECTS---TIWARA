@@ -25,18 +25,16 @@ export type { CheckoutSheetProps } from "./use-checkout";
  */
 export const CheckoutSheet = (props: CheckoutSheetProps) => {
   const checkout = useCheckout(props);
-  const { state, setState, money, isEmbedded, scrollRef, goTo } = checkout;
+  const { state, setState, money, scrollRef } = checkout;
   const view = getCheckoutView(checkout);
   const isMobile = (props.layout || "mobile") !== "desktop";
-  const isPhoneFrame = isMobile && !isEmbedded;
   const hasBack = state.view !== "detail" && state.view !== "done";
   const footer = getFooter(checkout, view);
   const dialog = getDialog(checkout, view);
-  const ownRadius = isMobile ? "24px 24px 0 0" : "24px";
 
   // embedded, the host decides the sheet's corners
   const sheetStyle = {
-    "--sheet-radius": isEmbedded ? props.radius || "0" : ownRadius,
+    "--sheet-radius": props.radius || "0",
   } as CSSProperties;
 
   const getStepClass = (index: number) => {
@@ -46,8 +44,6 @@ export const CheckoutSheet = (props: CheckoutSheetProps) => {
   };
 
   const close = () => {
-    if (!isEmbedded) return goTo("detail", -1);
-
     if (state.view === "done") return view.leaveDone("done");
 
     if (props.onClose) props.onClose();
@@ -55,19 +51,8 @@ export const CheckoutSheet = (props: CheckoutSheetProps) => {
   };
 
   return (
-    <div
-      className={joinClassNames(
-        shared.outer,
-        isPhoneFrame ? shared.outerPhone : shared.outerPlain,
-      )}
-      data-screen-label="Checkout sheet"
-    >
+    <div className={shared.outer} data-screen-label="Checkout sheet">
       <div className={shared.sheet} style={sheetStyle}>
-        {isPhoneFrame && (
-          <div className={shared.handleRow}>
-            <span className={shared.handle}></span>
-          </div>
-        )}
         <div className={shared.header}>
           {hasBack && (
             <button

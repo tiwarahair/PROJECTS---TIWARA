@@ -12,6 +12,7 @@ import { getManageUrl } from "../../../../lib/studio-api/booking-writes";
 import { SaveError } from "../../../../lib/studio-writes";
 import { copyLaterText, copyText } from "../../core/format";
 import type { ActionItem } from "../../core/types";
+import { openCheckout } from "./checkout-view";
 import { getClientView } from "./client-view";
 import type { SheetContext } from "./context";
 import { CANCEL_STEP, CLOSED_STATUSES, RESCHEDULE_STEP } from "./types";
@@ -148,12 +149,7 @@ export const getFooterView = (context: SheetContext) => {
       });
     },
     bookAgain: () => actions.rebookFrom(booking),
-    goCheckout: () =>
-      setState({
-        bookingStep: "checkout",
-        checkoutMethod: null,
-        statusMenuOpen: false,
-      }),
+    goCheckout: () => openCheckout(context),
     openPayment: () =>
       setState({ bookingStep: "payment", statusMenuOpen: false }),
   };

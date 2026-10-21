@@ -60,6 +60,8 @@ export const getPastCheckoutView = (studio: StudioController) => {
     refunded: row.refunded || 0,
     onExit: back,
     onComplete: back,
+    onPay: () =>
+      Promise.reject(new Error("This booking is already checked out.")),
     onRefund: (amount: number, reason: string, isOffPlatform: boolean) => {
       const previous = state.pastNew;
 

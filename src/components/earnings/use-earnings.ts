@@ -1,15 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import { DAY_MS } from "./data";
 import { getRange } from "./dates";
-import { buildLedger } from "./ledger";
-import { getLedgerKey } from "./logic";
-import type {
-  EarningsClient,
-  EarningsScenario,
-  EarningsService,
-  Ledger,
-  PeriodId,
-} from "./data";
+import type { EarningsClient, Ledger, PeriodId } from "./data";
 import {
   downloadText,
   getEarningsCsv,
@@ -26,10 +18,7 @@ const EXPORT_OUT_MS = 180;
 const DESKTOP_MIN = 720;
 
 export interface EarningsProps {
-  scenario?: EarningsScenario;
   tab?: "tx" | "po";
-  /** Opens a drawer or the export dialog on mount (boards). */
-  open?: "none" | "tx" | "po" | "export";
   layout?: "auto" | "desktop" | "mobile";
   /** Full-height panel with its own scroll (standalone); otherwise it flows in the page. */
   contained?: boolean;
@@ -37,14 +26,13 @@ export interface EarningsProps {
   period?: PeriodId;
   filter?: string;
   clients?: EarningsClient[];
-  services?: EarningsService[];
   businessName?: string;
   legalName?: string;
   vatNumber?: string;
   bankLabel?: string;
   bookingLink?: string;
   taxHold?: boolean;
-  ledger?: Ledger;
+  ledger: Ledger;
   /** The newest payout's amount when it failed. */
   failedPayout?: number;
   /** a client's dispute waiting for the stylist's evidence. */
@@ -116,10 +104,9 @@ const INITIAL_STATE: EarningsState = {
 };
 
 export const useEarnings = (props: EarningsProps) => {
-  const { scenario = "default", layout = "auto" } = props;
+  const { ledger, layout = "auto" } = props;
   const [state, setRawState] = useState(INITIAL_STATE);
   const rootRef = useRef<HTMLDivElement>(null);
-  const ledgerRef = useRef<{ key: string; ledger: Ledger } | null>(null);
   const timers = useRef({ toast: 0, toastOut: 0, drawer: 0, exportOut: 0 });
 
   const setState = (
@@ -131,23 +118,6 @@ export const useEarnings = (props: EarningsProps) => {
       ...current,
       ...(typeof patch === "function" ? patch(current) : patch),
     }));
-
-  // rebuilt only when the scenario or the day changes
-  const getLedger = (): Ledger => {
-    if (props.ledger) return props.ledger;
-
-    const key = getLedgerKey(scenario);
-
-    if (ledgerRef.current?.key !== key)
-      ledgerRef.current = {
-        key,
-        ledger: buildLedger(scenario, props.clients, props.services),
-      };
-
-    return ledgerRef.current.ledger;
-  };
-
-  const ledger = getLedger();
 
   const getIsDesktop = () => {
     if (layout === "desktop") return true;
@@ -257,7 +227,7 @@ export const useEarnings = (props: EarningsProps) => {
             ),
           clients: props.clients,
           businessName: props.businessName || "Tiwára’s House",
-          legalName: props.legalName ?? "Amara Okonkwo",
+          legalName: props.legalName ?? "",
           vatNumber: props.vatNumber || "",
           bankLabel: props.bankLabel,
         }),
@@ -267,7 +237,7 @@ export const useEarnings = (props: EarningsProps) => {
     showToast("Your export is downloading.");
   };
 
-  // width-driven layout, and the boards' open= drawer or export dialog
+  // width-driven layout
   useEffect(() => {
     const element = rootRef.current;
     let observer: ResizeObserver | undefined;
@@ -284,47 +254,16 @@ export const useEarnings = (props: EarningsProps) => {
       observer.observe(element);
     }
 
-    const { open } = props;
-    let openTimer = 0;
-
-    if (open === "export") setState({ exportOn: true });
-    else if (open === "tx" || open === "po")
-      openTimer = window.setTimeout(() => {
-        const { transactions, payouts } = getLedger();
-
-        const id =
-          open === "tx"
-            ? (
-                transactions.find(
-                  ({ payoutId, description, method }) =>
-                    payoutId &&
-                    description === "Balance" &&
-                    method === "Saved card",
-                ) ??
-                transactions.find(({ payoutId }) => payoutId) ??
-                transactions[0]
-              )?.id
-            : (
-                payouts.find(
-                  ({ status, items }) => status === "Paid" && items.length >= 3,
-                ) ?? payouts[0]
-              )?.id;
-
-        if (id) setState({ drawer: { kind: open, id } });
-      }, 0);
-
     const pending = timers.current;
 
     return () => {
       observer?.disconnect();
-      window.clearTimeout(openTimer);
       window.clearTimeout(pending.toast);
       window.clearTimeout(pending.toastOut);
       window.clearTimeout(pending.drawer);
       window.clearTimeout(pending.exportOut);
     };
     // mount only
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const lastDay = (end: Date) => toIsoDate(new Date(end.getTime() - DAY_MS));

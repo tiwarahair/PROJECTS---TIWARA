@@ -1,5 +1,5 @@
 // Earnings export: a CSV of the transactions, or a printable monthly statement.
-import { DAY_MS, DEFAULT_BANK } from "./data";
+import { DAY_MS, FALLBACK_BANK } from "./data";
 import { getRangeLabel } from "./dates";
 import { getClient, getMethodLabel, getStats } from "./logic";
 import type { DateRange, EarningsClient, Payout, Transaction } from "./data";
@@ -200,7 +200,7 @@ export const getStatementHtml = ({
         .map((payout) =>
           line(
             payout.sent.toLocaleDateString("en-GB"),
-            `To ${bankLabel || DEFAULT_BANK}`,
+            `To ${bankLabel || FALLBACK_BANK}`,
             payout.status,
             formatMoney(payout.amount, { pence: "always" }),
           ),

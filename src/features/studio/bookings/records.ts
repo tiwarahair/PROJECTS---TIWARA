@@ -5,7 +5,11 @@ import type {
 } from "../../../lib/studio-api/bookings";
 import type { AddressValue } from "../../../types/address";
 import { getAddressOneLine } from "../../../utils/address";
-import { formatDuration, LONG_MONTHS } from "../../../utils/dates";
+import {
+  formatDuration,
+  formatFullDate,
+  LONG_MONTHS,
+} from "../../../utils/dates";
 import { fromLondonTime, toLondonTime } from "../../../utils/london-time";
 import { toDate, toOffset } from "../core/blocked-time";
 import {
@@ -122,6 +126,7 @@ export const toStudioBooking = (row: StudioBookingRow): StudioBooking => {
   return {
     id: getLocalId(row.id),
     remoteId: row.id,
+    ref: row.ref,
     startsAt: row.starts_at,
     overlapOk: row.overlap_ok,
     agreedPolicy: toAgreedPolicy(row.terms),
@@ -198,6 +203,8 @@ export const toPastRecord = (row: StudioBookingRow): PastRecord => {
   return {
     pastId: row.id,
     remoteId: row.id,
+    ref: row.ref,
+    receiptDate: formatFullDate(new Date(row.starts_at)),
     client: booking.client,
     service: booking.service,
     price: booking.price,

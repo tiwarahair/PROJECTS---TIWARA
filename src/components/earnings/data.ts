@@ -1,5 +1,4 @@
-export type EarningsScenario =
-  "default" | "onhold" | "paused" | "setup" | "empty";
+export type EarningsScenario = "default" | "paused" | "setup";
 export type TransactionStatus =
   "Pending" | "Available" | "On hold" | "Paid out" | "Refunded" | "Recorded";
 export type PeriodId = "week" | "month" | "lastmonth" | "custom";
@@ -10,15 +9,6 @@ export interface EarningsClient {
   id: string;
   name: string;
   email?: string;
-}
-
-/** A Studio service (only the fields the ledger reads). */
-export interface EarningsService {
-  name: string;
-  price: number | string;
-  status?: string;
-  durationHours?: number | string;
-  durationMinutes?: number | string;
 }
 
 export interface Transaction {
@@ -41,8 +31,6 @@ export interface Transaction {
   note?: string;
   payoutId?: string;
 }
-
-export type NewTransaction = Omit<Transaction, "id" | "fee" | "net" | "status">;
 
 export interface Payout {
   id: string;
@@ -74,45 +62,6 @@ export interface DateRange {
   end: Date;
 }
 
-export interface LedgerService {
-  name: string;
-  price: number;
-  hours: number;
-}
-
-export interface AppointmentOptions {
-  service?: LedgerService;
-  clientIndex?: number;
-  hold?: boolean;
-  flow?: number;
-  method?: string;
-}
-
-export interface TransactionLog {
-  transactions: Transaction[];
-  count: number;
-  add: (entry: NewTransaction) => Transaction;
-}
-
-export interface LedgerContext {
-  now: Date;
-  today: Date;
-  random: () => number;
-  log: TransactionLog;
-  clientList: EarningsClient[];
-  serviceList: LedgerService[];
-}
-
-export interface Visit {
-  service: LedgerService;
-  at: Date;
-  end: Date;
-  booked: Date;
-  rolls: [number, number, number, number, number];
-  deposit: number;
-  base: Omit<NewTransaction, "description" | "method" | "at" | "amount">;
-}
-
 export interface Bucket {
   start: Date;
   end: Date;
@@ -129,7 +78,7 @@ export interface PeriodStats {
 
 export const DAY_MS = 86400000;
 
-export const DEFAULT_BANK = "Barclays •••• 4471";
+export const FALLBACK_BANK = "your bank account";
 export const STRIPE_PAYOUTS = "https://dashboard.stripe.com/settings/payouts";
 
 export const PERIODS: [PeriodId, string][] = [
@@ -138,35 +87,6 @@ export const PERIODS: [PeriodId, string][] = [
   ["lastmonth", "Last month"],
   ["custom", "Custom"],
 ];
-
-export const DEFAULT_CLIENTS: EarningsClient[] = [
-  { id: "nia", name: "Nia Okafor", email: "nia.okafor@gmail.com" },
-  { id: "ruth", name: "Ruth Mensah", email: "ruth.mensah@outlook.com" },
-  { id: "kemi", name: "Kemi Adeyemi", email: "kemi.a@icloud.com" },
-  { id: "zainab", name: "Zainab Bello" },
-  { id: "amara", name: "Amara Osei" },
-  { id: "tola", name: "Tola Fashola" },
-  { id: "chi", name: "Chidinma Eze" },
-  { id: "yasmin", name: "Yasmin Diallo" },
-];
-
-export const DEFAULT_SERVICES: LedgerService[] = [
-  { name: "Knotless braids", price: 85, hours: 4.5 },
-  { name: "Box braids", price: 70, hours: 4 },
-  { name: "Silk press", price: 65, hours: 2 },
-  { name: "Loc retwist", price: 55, hours: 2 },
-  { name: "Cornrows", price: 45, hours: 1.5 },
-  { name: "Twist out", price: 50, hours: 1.5 },
-  { name: "Fulani braids", price: 80, hours: 4 },
-];
-
-export const SLOTS = [
-  [9, 30],
-  [11, 0],
-  [13, 30],
-  [15, 0],
-  [16, 30],
-] as const;
 
 /** Status tag colours: [background, text]. */
 export const STATUS_COLOURS: Record<

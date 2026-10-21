@@ -74,6 +74,8 @@ export const getPastCheckout = (
     email: client?.email || "",
     day: row.when,
     time: getPastTime(state, row),
+    ref: row.ref,
+    receiptDate: row.receiptDate,
     arrived: "",
   };
 

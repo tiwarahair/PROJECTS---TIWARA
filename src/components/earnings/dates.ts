@@ -10,26 +10,12 @@ const formatDayYear = (date: Date): string =>
     year: "numeric",
   });
 
-export const getDayStart = (date: Date): Date => {
+const getDayStart = (date: Date): Date => {
   const start = new Date(date);
 
   start.setHours(0, 0, 0, 0);
 
   return start;
-};
-
-export const addWorkingDays = (date: Date, count: number): Date => {
-  const next = new Date(date);
-  let remaining = count;
-
-  while (remaining > 0) {
-    next.setDate(next.getDate() + 1);
-    const weekday = next.getDay();
-
-    if (weekday !== 0 && weekday !== 6) remaining--;
-  }
-
-  return next;
 };
 
 /** The period's [start, end); week starts on Monday. */

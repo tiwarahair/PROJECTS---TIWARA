@@ -1,4 +1,5 @@
 import type { CheckoutBooking } from "../../../../components/checkout/data";
+import { formatFullDate } from "../../../../utils/dates";
 import type { CheckoutPayment } from "../../../../components/checkout/use-checkout";
 import { fetchStudioBooking } from "../../../../lib/studio-api/bookings";
 import {
@@ -14,13 +15,22 @@ import type { SheetContext } from "./context";
 
 const toPence = (pounds: number) => Math.round(pounds * 100);
 
-const getCard = ({ raw }: SheetContext) => {
-  if (!raw?.remoteId) return { card: "4242", brand: "Visa" };
+export const STILL_SAVING = "Still saving this booking. Try again in a moment.";
 
-  return raw.hasSavedCard
+export const openCheckout = ({ raw, setState, actions }: SheetContext) => {
+  if (!raw?.remoteId) return actions.showToast(STILL_SAVING);
+
+  setState({
+    bookingStep: "checkout",
+    checkoutMethod: null,
+    statusMenuOpen: false,
+  });
+};
+
+const getCard = ({ raw }: SheetContext) =>
+  raw?.hasSavedCard
     ? { card: "saved", brand: "", cardLabel: raw.cardLabel ?? "Saved card" }
     : { card: null, brand: "" };
-};
 
 /** The booking in the shape CheckoutSheet takes. */
 const getCheckoutBooking = (context: SheetContext): CheckoutBooking => {
@@ -55,6 +65,10 @@ const getCheckoutBooking = (context: SheetContext): CheckoutBooking => {
     email: client?.email || "",
     day: booking.dayLabel,
     time: booking.timeRange,
+    ref: raw?.ref,
+    receiptDate: raw?.startsAt
+      ? formatFullDate(new Date(raw.startsAt))
+      : undefined,
     arrived: "",
   };
 };
@@ -110,9 +124,10 @@ export const getCheckoutView = (context: SheetContext) => {
         ? `A payment link for £${booking.due} is on its way to ${booking.firstName}. The booking is in Past.`
         : "Marked completed and moved to Past.",
     rebook,
-    onPay: remoteId
-      ? (payment: CheckoutPayment) => pay(remoteId, payment)
-      : undefined,
+    onPay: (payment: CheckoutPayment) =>
+      remoteId
+        ? pay(remoteId, payment)
+        : Promise.reject(new Error(STILL_SAVING)),
     // the embedded checkout's result
     onCheckoutComplete: (result: CheckoutRecord, action: string) => {
       context.finish(
