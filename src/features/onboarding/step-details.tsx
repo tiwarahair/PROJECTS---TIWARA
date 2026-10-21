@@ -1,6 +1,5 @@
 import { Shield } from "lucide-react";
 import { AddressFinder } from "../../components/address-finder";
-import type { AddressFixture } from "../../components/address-finder/data";
 import { joinClassNames } from "../../utils/class-names";
 import { RADII } from "./data";
 import { OnboardingMap } from "./map";
@@ -121,7 +120,6 @@ export const StepDetails = ({ onboarding, layout, view }: ScreenProps) => {
               }
               onChange={actions.setAddress}
               showErrors={!!shown.address}
-              fixture={(state.addressFinderFixture || "") as AddressFixture}
               fieldHeight={54}
               labelSize={14}
             />

@@ -5,11 +5,9 @@ import {
   isPostcodeValid,
   toSegments,
 } from "../../utils/address";
-import { DEMO_ADDRESS } from "./data";
 import type {
   AddressDraft,
   AddressFinderValue,
-  AddressFixture,
   AddressSource,
   AddressSuggestion,
   EmittedAddress,
@@ -57,7 +55,6 @@ export const toDraft = (value: AddressFinderValue): AddressDraft => ({
 
 export const getInitialState = (
   value: AddressFinderValue | null | undefined,
-  fixture: AddressFixture,
 ): FinderState => {
   const state: FinderState = {
     mode: "find",
@@ -82,40 +79,6 @@ export const getInitialState = (
       showLine2: !!draft.line2,
     });
   }
-
-  if (fixture === "typing")
-    Object.assign(state, { query: "14 Blos", open: true });
-
-  if (fixture === "postcode")
-    Object.assign(state, { query: "M14 5", open: true });
-
-  if (fixture === "typo") Object.assign(state, { query: "Blosom", open: true });
-
-  if (fixture === "nomatch")
-    Object.assign(state, { query: "99 Nowhere Lane", open: true });
-
-  if (fixture === "summary")
-    Object.assign(state, {
-      mode: "summary",
-      sum: DEMO_ADDRESS,
-      draft: DEMO_ADDRESS,
-    });
-
-  if (fixture === "manual")
-    Object.assign(state, {
-      mode: "manual",
-      draft: { ...DEMO_ADDRESS, line2: "Flat 3" },
-      showLine2: true,
-    });
-
-  if (fixture === "manual-errors")
-    Object.assign(state, {
-      mode: "manual",
-      draft: { line1: "", line2: "", town: "", postcode: "M4 6" },
-      touched: { line1: 1, town: 1, postcode: 1 },
-    });
-
-  if (fixture === "errors") Object.assign(state, { touched: { query: 1 } });
 
   return state;
 };

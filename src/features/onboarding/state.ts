@@ -3,30 +3,20 @@ import type { AuthFailure } from "../../lib/auth-errors";
 
 export interface OnboardingProps {
   screen?: string;
-  fixture?: string;
   /** Mobile photo: full-bleed fade or a clipped card. */
   photo?: "full" | "clipped";
   layout?: "auto" | "desktop" | "mobile";
-  addressLookup?: "ok" | "fail";
   theme?: "auto" | "light" | "dark";
-  /** Board view: no saving/restoring and demo names. */
-  board?: boolean;
-  /** Stay on the last screen instead of redirecting (boards). */
-  stayOnDone?: boolean;
 }
 
-const DEFAULT_PROPS: Required<
-  Omit<OnboardingProps, "theme" | "board" | "stayOnDone">
-> = {
+const DEFAULT_PROPS: Required<Omit<OnboardingProps, "theme">> = {
   screen: "auto",
-  fixture: "none",
   photo: "clipped",
   layout: "auto",
-  addressLookup: "ok",
 };
 
 export type ResolvedProps = typeof DEFAULT_PROPS &
-  Pick<OnboardingProps, "theme" | "board" | "stayOnDone">;
+  Pick<OnboardingProps, "theme">;
 
 // a Map so query values like "constructor" can't match inherited object keys
 const URL_BOOLEANS = new Map([
@@ -98,7 +88,6 @@ export interface OnboardingState {
   lockedUntil: number;
   addressOpen: boolean;
   addressSource: string;
-  addressFinderFixture: string;
   geocodedLatLng: [number, number] | null;
   pinLatLng: [number, number] | null;
   area: string | null;
@@ -125,10 +114,9 @@ export interface OnboardingState {
   benefitIndex: number;
 }
 
-/** The start state plus the form's initial values and touched fields (fixtures, saved progress). */
+/** The start state plus the form's initial values (saved progress). */
 export interface StartState extends OnboardingState {
   form: OnboardingForm;
-  touched: Partial<Record<keyof OnboardingForm, boolean>>;
   /** ?flow= the page opened with (list, pro, reset, social, social-pro). */
   flow: string | null;
 }
@@ -175,7 +163,6 @@ export const INITIAL_STATE: OnboardingState = {
   lockedUntil: 0,
   addressOpen: false,
   addressSource: "",
-  addressFinderFixture: "",
   geocodedLatLng: null,
   pinLatLng: null,
   area: null,

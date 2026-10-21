@@ -3,7 +3,7 @@ import type { BookingAddon } from "../../core/types";
 import { formatDuration } from "../../../../utils/dates";
 import { updateStudioBooking } from "../../../../lib/studio-api/booking-writes";
 import { toStartsAt } from "../records";
-import { STILL_SAVING } from "../sheet/checkout-view";
+import { saveToBooking } from "../save";
 import type { EditContext } from "./context";
 
 const toPence = (pounds: number) => Math.round(pounds * 100);
@@ -70,10 +70,6 @@ export const getApplyView = (context: EditContext) => {
     );
 
   const apply = () => {
-    const { remoteId } = booking;
-
-    if (!remoteId) return actions.showToast(STILL_SAVING);
-
     if (clashes.length && !memo.clashOk && firstClash) {
       const who =
         firstClash.kind === "booking" && firstClash.booking
@@ -121,9 +117,12 @@ export const getApplyView = (context: EditContext) => {
       overlapOk: allowOverlap,
     });
 
-    studio.context.sync.save(() => save(remoteId, allowOverlap), {
-      bookings: previous,
-    });
+    saveToBooking(
+      studio.context,
+      booking,
+      (remoteId) => save(remoteId, allowOverlap),
+      { bookings: previous },
+    );
 
     const list = state.bookings.map((item) =>
       item.id === booking.id

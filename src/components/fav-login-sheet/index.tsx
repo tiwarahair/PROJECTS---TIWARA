@@ -55,10 +55,7 @@ const LoginSheetCard = ({ stylistId }: LoginSheetCardProps) => {
 
   // after log in the stylist is saved and the guest lands back on this page
   const goToOnboarding = (screen: string) => {
-    const returnTo = (pathname + search)
-      .replace(/([?&])(guest|login|favsheet|favtoast)=[^&]*/g, "$1")
-      .replace(/[?&]+$/, "")
-      .replace("?&", "?");
+    const returnTo = pathname + search;
 
     writeSession("tw_fav_pending", stylistId);
     dispatch(closeLoginSheet());

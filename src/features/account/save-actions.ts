@@ -9,7 +9,7 @@ import type { AccountCore } from "./use-core";
 import type { AccountFeedback } from "./use-feedback";
 
 export const getSaveActions = (
-  { searchParams, stateRef, setState, forms, navigate, dispatch }: AccountCore,
+  { stateRef, setState, forms, navigate, dispatch }: AccountCore,
   { focusLater, showToast }: AccountFeedback,
 ) => {
   const savePassword = forms.password.handleSubmit(() => {
@@ -50,7 +50,7 @@ export const getSaveActions = (
   });
 
   const setAddresses = (list: SavedAddress[]) => {
-    saveAddresses(list, searchParams.toString());
+    saveAddresses(list);
     setState({ addresses: list });
   };
 

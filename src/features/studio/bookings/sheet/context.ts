@@ -5,6 +5,7 @@ import type { StudioController } from "../../core/use-studio";
 import { resendConfirmLink } from "../../../../lib/studio-api/booking-writes";
 import { getAddonLines, getPaymentMode, getSheetBooking } from "./booking";
 import { STILL_SAVING } from "./checkout-view";
+import { saveToBooking } from "../save";
 
 interface RemoteFinish {
   save: (remoteId: string) => Promise<unknown>;
@@ -46,25 +47,15 @@ export const getContext = (studio: StudioController) => {
       ),
     }));
 
-  /** shows a change straight away and saves it; a failed save puts the screen back. False while the booking is still saving. */
+  /** shows a change straight away and saves it; a failed save puts the screen back */
   const saveBooking = (
     patch: Partial<StudioBooking>,
     task: (remoteId: string) => Promise<unknown>,
   ) => {
-    const remoteId = raw?.remoteId;
-
-    if (!remoteId) {
-      showToast(STILL_SAVING);
-
-      return false;
-    }
-
     const previous = context.getState().bookings;
 
     patchBooking(patch);
-    context.sync.save(() => task(remoteId), { bookings: previous });
-
-    return true;
+    saveToBooking(context, booking, task, { bookings: previous });
   };
 
   const finish = (
@@ -76,22 +67,15 @@ export const getContext = (studio: StudioController) => {
     const previousBookings = current.bookings;
     const previousPast = current.pastNew;
     const original = previousBookings.find(({ id }) => id === booking.id);
-    const remoteId = original?.remoteId;
-
-    if (!remoteId) {
-      showToast(STILL_SAVING);
-
-      return false;
-    }
-
+    const target = { id: booking.id, remoteId: original?.remoteId };
     const { save, undo } = remote;
 
     const next = {
       bookings: previousBookings.filter(({ id }) => id !== booking.id),
       pastNew: [
         {
-          pastId: remoteId,
-          remoteId,
+          pastId: target.remoteId ?? booking.id,
+          remoteId: target.remoteId ?? "",
           client: booking.client,
           service: booking.service,
           price: booking.price,
@@ -108,21 +92,15 @@ export const getContext = (studio: StudioController) => {
     const restore = { bookings: previousBookings, pastNew: previousPast };
 
     setState(next);
-    context.sync.save(() => save(remoteId), restore);
+    saveToBooking(context, target, save, restore);
 
-    if (!undo) {
-      showToast(message);
-
-      return true;
-    }
+    if (!undo) return showToast(message);
 
     showToast(message, () => {
       setState(restore);
       closeSheet();
-      context.sync.save(() => undo(remoteId), next);
+      saveToBooking(context, target, undo, next);
     });
-
-    return true;
   };
 
   const resendLink = (patch: { statusMenuOpen?: boolean } = {}) => {
@@ -130,15 +108,10 @@ export const getContext = (studio: StudioController) => {
 
     setState(patch);
 
-    // the link keeps the deadline set when the booking was made
-    if (
-      !saveBooking(
-        { resends: count, linkSentAt: Date.now() },
-        resendConfirmLink,
-      )
-    )
-      return;
+    if (!raw?.remoteId) return showToast(STILL_SAVING);
 
+    // the link keeps the deadline set when the booking was made
+    saveBooking({ resends: count, linkSentAt: Date.now() }, resendConfirmLink);
     showToast(`Link resent to ${booking.firstName} · ${2 - count} of 2 left`);
   };
 

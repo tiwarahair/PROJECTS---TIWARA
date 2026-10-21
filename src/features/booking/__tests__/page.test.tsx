@@ -231,6 +231,24 @@ describe("BookingPage", () => {
     expect(startCheckout).not.toHaveBeenCalled();
   });
 
+  it("confirm: paying shows You're booked in. and the guest save row", async () => {
+    await renderSavedBooking({ step: 6, guest: true, details: GUEST_DETAILS });
+
+    await user.click(
+      screen.getByRole("button", { name: /^Pay £.* & confirm/ }),
+    );
+
+    expect(
+      await screen.findByRole("heading", {
+        level: 1,
+        name: "You're booked in.",
+      }),
+    ).toBeInTheDocument();
+
+    await user.click(screen.getByRole("button", { name: "Save my details" }));
+    expect(screen.getByText("Check your email.")).toBeInTheDocument();
+  });
+
   it("leaving after picking a service asks first; Keep booking stays, Leave goes", async () => {
     await renderBooking("stylist=tiwaras-house");
     await user.click(screen.getByRole("button", { name: /^Knotless braids/ }));

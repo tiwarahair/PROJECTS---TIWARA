@@ -59,7 +59,6 @@ export const useOnboardingAddress = ({
       () => ({
         addressOpen: isOk,
         addressSource: address ? address.source : "",
-        addressFinderFixture: "",
         ...(addressLatLng && isNewPlace
           ? {
               geocodedLatLng: addressLatLng,

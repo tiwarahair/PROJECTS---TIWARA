@@ -1,7 +1,7 @@
 import { createSlice } from "@reduxjs/toolkit";
 import type { PayloadAction } from "@reduxjs/toolkit";
 
-/** Toast action: a link (View), an undo that re-saves a favourite, or a label with no handler (board demo). */
+/** Toast action: a link (View) or an undo that re-saves a favourite. */
 interface ToastAction {
   label: string;
   href?: string;
@@ -14,8 +14,6 @@ export interface ToastMessage {
   action: ToastAction | null;
   /** Distance from the viewport bottom in px (default 24). */
   bottom: number;
-  /** Pinned toasts never auto-dismiss (boards). */
-  pinned: boolean;
 }
 
 interface ToastState {
@@ -36,14 +34,13 @@ export const toastSlice = createSlice({
       prepare: (
         message: string,
         action: ToastAction | null = null,
-        options: { bottom?: number; pinned?: boolean } = {},
+        options: { bottom?: number } = {},
       ) => ({
         payload: {
           id: nextToastId++,
           message,
           action,
           bottom: options.bottom ?? 24,
-          pinned: !!options.pinned,
         },
       }),
     },

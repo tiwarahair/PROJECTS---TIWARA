@@ -1,5 +1,4 @@
 import { describe, expect, it } from "vitest";
-import { getFixturePatch } from "../fixtures";
 import { isPostcodeValid } from "../../../utils/address";
 import { isValidMobile } from "../../../utils/validation";
 import { getErrors } from "../screen-schemas";
@@ -8,7 +7,6 @@ import type { StartState } from "../state";
 
 const buildState = (patch: Partial<StartState>): StartState => ({
   ...INITIAL_STATE,
-  touched: {},
   flow: null,
   ...patch,
   form: { ...INITIAL_FORM, ...patch.form },
@@ -69,18 +67,5 @@ describe("onboarding validation", () => {
     expect(
       getBackScreen(buildState({ screen: "verify", audience: "pro" })),
     ).toBe("w5");
-  });
-
-  it("fixtures seed board states", () => {
-    expect(getFixturePatch("w2", INITIAL_FORM)).toMatchObject({
-      screen: "w2",
-      form: { categories: ["braids", "natural", "locs"] },
-    });
-
-    expect(getFixturePatch("pw-good", INITIAL_FORM)).toMatchObject({
-      screen: "cust-create",
-      form: { password: "sunflower house" },
-      passwordShown: true,
-    });
   });
 });

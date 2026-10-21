@@ -110,18 +110,4 @@ describe("FavHost", () => {
     await flush(700);
     expect(screen.getByRole("status")).toHaveTextContent("Saved to favourites");
   });
-
-  it("keeps ?favs= in memory and shows pinned board toasts", async () => {
-    renderWithStore(<HeartPage />, "/search?favs=amara-beauty&favtoast=copied");
-
-    expect(
-      screen.getByRole("button", { name: "Save Amara" }),
-    ).toHaveTextContent("saved");
-
-    await flush(500);
-    expect(screen.getByRole("status")).toHaveTextContent("Link copied");
-    await flush(10000);
-    expect(screen.getByRole("status")).toHaveTextContent("Link copied");
-    expect(localStorage.getItem(FAVS_KEY)).toBeNull();
-  });
 });

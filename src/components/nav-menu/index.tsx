@@ -30,8 +30,6 @@ export interface NavMenuProps {
   /** Optional block above the rows (the account menu's name and email). */
   head?: ReactNode;
   items: NavMenuItem[];
-  /** Pinned (?acctmenu=1 boards): stays open on outside clicks and does not take focus. */
-  pinned?: boolean;
   onClose: (refocus: boolean) => void;
 }
 
@@ -44,7 +42,6 @@ export const NavMenu = ({
   label,
   head,
   items,
-  pinned = false,
   onClose,
 }: NavMenuProps) => {
   const menuRef = useRef<HTMLDivElement>(null);
@@ -85,11 +82,11 @@ export const NavMenu = ({
     const frame = requestAnimationFrame(() => {
       setEntered(true);
 
-      if (!pinned) itemRefs.current[0]?.focus();
+      itemRefs.current[0]?.focus();
     });
 
     return () => cancelAnimationFrame(frame);
-  }, [anchorRect, pinned]);
+  }, [anchorRect]);
 
   useEffect(() => {
     anchor.setAttribute("aria-expanded", "true");
@@ -97,11 +94,7 @@ export const NavMenu = ({
     const handleOutside = (event: globalThis.MouseEvent) => {
       const target = event.target as Node;
 
-      if (
-        !pinned &&
-        !menuRef.current?.contains(target) &&
-        !anchor.contains(target)
-      )
+      if (!menuRef.current?.contains(target) && !anchor.contains(target))
         onClose(false);
     };
 
@@ -115,9 +108,8 @@ export const NavMenu = ({
       document.removeEventListener("mousedown", handleOutside, true);
       window.removeEventListener("resize", handleResize);
     };
-  }, [anchor, pinned, onClose]);
+  }, [anchor, onClose]);
 
-  // keyboard handled on the document (capture), so a pinned menu without focus still responds
   useEffect(() => {
     const focusItem = (index: number) => itemRefs.current[index]?.focus();
 

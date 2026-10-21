@@ -50,7 +50,7 @@ const askToConfirmUnprotected = ({
       yes: () => {
         setState({ confirm: null });
 
-        const isSaving = saveBooking(
+        saveBooking(
           {
             status: "confirmed",
             paid: "none",
@@ -61,7 +61,7 @@ const askToConfirmUnprotected = ({
           confirmWithoutProtection,
         );
 
-        if (isSaving) actions.showToast("Confirmed without protection");
+        actions.showToast("Confirmed without protection");
       },
     },
   });

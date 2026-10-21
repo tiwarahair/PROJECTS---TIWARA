@@ -1,4 +1,4 @@
-import { act, screen, waitFor, within } from "@testing-library/react";
+import { screen, waitFor, within } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { fetchPublicProfile } from "../../../lib/public-profiles";
 import { toPublicStylist } from "../../../lib/public-stylist";
@@ -164,11 +164,11 @@ describe("StylistProfilePage", () => {
     expect(screen.queryByText(getCounter(first))).not.toBeInTheDocument();
   });
 
-  it("?share=open opens the share popover; Escape closes it", async () => {
-    renderWithStore(<StylistProfilePage />, "/tiwaras-house?share=open");
+  it("Share opens the share popover; Escape closes it", async () => {
+    renderWithStore(<StylistProfilePage />, "/tiwaras-house");
 
     await screen.findByRole("heading", { level: 1 });
-    act(() => vi.advanceTimersByTime(700));
+    await user.click(screen.getAllByRole("button", { name: /^Share / })[0]!);
     const popover = screen.getByRole("dialog", { name: "Share this stylist" });
 
     expect(

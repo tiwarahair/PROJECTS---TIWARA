@@ -67,11 +67,9 @@ export const getPanelsView = ({
   saveNote: () => {
     const note = state.bookingNoteDraft.trim();
 
-    const isSaving = saveBooking({ stylistNote: note }, (remoteId) =>
+    saveBooking({ stylistNote: note }, (remoteId) =>
       setStylistNote(remoteId, note),
     );
-
-    if (!isSaving) return;
 
     setState({ bookingNoteOn: false });
     showToast(note ? "Note saved" : "Note removed");

@@ -45,7 +45,10 @@ export const getPasswordSchema = (hasPassword: boolean, profile: Profile) =>
   z.object({
     current: z
       .string()
-      .refine((value) => !hasPassword || !!value, "Enter your current password"),
+      .refine(
+        (value) => !hasPassword || !!value,
+        "Enter your current password",
+      ),
     next: z.string().refine(
       (value) =>
         checkPassword(value, {

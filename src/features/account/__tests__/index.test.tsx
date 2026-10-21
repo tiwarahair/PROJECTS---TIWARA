@@ -206,12 +206,19 @@ describe("AccountPage", () => {
     await user.click(within(dialog).getByRole("button", { name: "Save card" }));
     await settle();
     expect(screen.queryByRole("dialog")).not.toBeInTheDocument();
-    expect(screen.getAllByText("Mastercard •••• 4444").length).toBeGreaterThan(0);
+
+    expect(screen.getAllByText("Mastercard •••• 4444").length).toBeGreaterThan(
+      0,
+    );
   });
 
   it("log out everywhere ends the session and shows the gate", async () => {
     renderAccount("?section=security");
-    await user.click(screen.getByRole("button", { name: "Log out everywhere" }));
+
+    await user.click(
+      screen.getByRole("button", { name: "Log out everywhere" }),
+    );
+
     const dialog = screen.getByRole("dialog");
 
     await user.click(

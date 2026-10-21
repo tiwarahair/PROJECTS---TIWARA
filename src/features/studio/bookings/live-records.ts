@@ -2,6 +2,7 @@
 import type { StudioBookingRow } from "../../../lib/studio-api/bookings";
 import type { StudioState } from "../core/types";
 import {
+  getLocalId,
   isActiveRow,
   isPastRow,
   sortPast,
@@ -39,8 +40,10 @@ export const mergeBookingRows = (
     // anything still being paid for isn't Studio's yet
     if (!isActive && !isPastRow(row)) continue;
 
+    const localId = getLocalId(row.id);
+
     const others = merged.bookings.filter(
-      ({ remoteId }) => remoteId !== row.id,
+      ({ id, remoteId }) => remoteId !== row.id && id !== localId,
     );
 
     const otherPast = merged.pastNew.filter(({ pastId }) => pastId !== row.id);

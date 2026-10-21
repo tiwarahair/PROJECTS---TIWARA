@@ -29,7 +29,7 @@ export const useOnboardingBase = (props: OnboardingProps) => {
 
   const [start] = useState(() => getStartState(resolved, location));
   // the start flow stays in state unused; only the mount effect below reads it
-  const { form: startForm, touched: startTouched, ...startState } = start;
+  const { form: startForm, ...startState } = start;
   const [state, setRawState] = useState<OnboardingState>(startState);
 
   const navigate = useNavigate();
@@ -126,7 +126,6 @@ export const useOnboardingBase = (props: OnboardingProps) => {
   return {
     resolved,
     start,
-    startTouched,
     state,
     navigate,
     stateRef,

@@ -6,7 +6,9 @@ import {
 import type { StudioBookingRow } from "../../../lib/studio-api/bookings";
 import { supabase } from "../../../lib/supabase";
 import { mergeBookingRows } from "../bookings/live-records";
+import { isWaiting } from "../bookings/save";
 import {
+  getLocalId,
   isActiveRow,
   isPastRow,
   toBookingClient,
@@ -46,10 +48,13 @@ export const watchStudio = (stylistId: string, getStudio: () => LiveStudio) => {
     const isOwnCheckout = (row: StudioBookingRow) =>
       row.id === openId && row.status === "completed" && !row.unpaid_at;
 
+    // a booking with changes still saving gets the server's copy once they're done
     context.applyState((current) =>
       mergeBookingRows(
         current,
-        rows.filter((row) => !isOwnCheckout(row)),
+        rows.filter(
+          (row) => !isOwnCheckout(row) && !isWaiting(getLocalId(row.id)),
+        ),
       ),
     );
 

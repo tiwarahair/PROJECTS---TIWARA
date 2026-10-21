@@ -5,7 +5,6 @@ import { useViewportWidth } from "../../hooks/use-viewport-width";
 import { getEmptySuggestions } from "./empty-suggestions";
 import { createFieldActions } from "./field-actions";
 import { createFilterActions } from "./filter-actions";
-import { getFixturePatch } from "./fixtures";
 import { getInitialState, getStateSearch } from "./state";
 import type { SearchState } from "./state";
 import { getWhatModel, getWhereModel } from "./suggestions";
@@ -24,11 +23,6 @@ export const useSearch = () => {
   // read once: the state drives the URL from here on (the sync below), not the other way round
   const [state, setState] = useState<SearchState>(() =>
     getInitialState(locationSearch, window.innerWidth),
-  );
-
-  // read once from the URL the page opened with (the URL sync below drops ?fixture=)
-  const [initialFixture] = useState(() =>
-    new URLSearchParams(locationSearch).get("fixture"),
   );
 
   // the sync below compares against the current URL without re-running when only the URL changes
@@ -78,25 +72,10 @@ export const useSearch = () => {
 
     window.addEventListener("resize", setNavHeight);
 
-    // demo states are dev-only; production builds drop this branch and the fixtures module
-    const fixturePatch =
-      import.meta.env.DEV && initialFixture
-        ? getFixturePatch(
-            initialFixture,
-            stateRef.current,
-            window.innerWidth <= 720,
-          )
-        : null;
-
-    const fixtureTimer = fixturePatch
-      ? window.setTimeout(() => update(fixturePatch), 350)
-      : 0;
-
     const timers = timersRef.current;
 
     return () => {
       window.clearTimeout(timer);
-      window.clearTimeout(fixtureTimer);
       window.removeEventListener("resize", setNavHeight);
       timers.forEach((pending) => window.clearTimeout(pending));
     };

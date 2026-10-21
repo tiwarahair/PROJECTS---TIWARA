@@ -55,7 +55,7 @@ const PAST_STATUSES: Record<string, string> = {
 // Studio keys bookings by number; the same booking keeps its number for the whole visit
 const localIds = new Map<string, number>();
 
-const getLocalId = (remoteId: string) => {
+export const getLocalId = (remoteId: string) => {
   const known = localIds.get(remoteId);
 
   if (known) return known;
@@ -66,6 +66,13 @@ const getLocalId = (remoteId: string) => {
 
   return next;
 };
+
+/** A booking added in Studio keeps the number it was shown with once it's saved. */
+export const keepLocalId = (remoteId: string, localId: number) =>
+  localIds.set(remoteId, localId);
+
+export const getRemoteId = (localId: number) =>
+  [...localIds].find(([, local]) => local === localId)?.[0];
 
 // after this many failed tries a cancellation's refund is left for us to look at
 const MAX_REFUND_FAILURES = 5;

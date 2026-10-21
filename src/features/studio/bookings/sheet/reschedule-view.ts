@@ -10,9 +10,9 @@ import {
   getWorkingHours,
 } from "../../core/model";
 import { toStartsAt } from "../records";
+import { saveToBooking } from "../save";
 import { getTimeHints } from "../time-hints";
 import type { StudioBooking } from "../../core/types";
-import { STILL_SAVING } from "./checkout-view";
 import type { SheetContext } from "./context";
 
 /** The free-cancellation deadline moves with the booking, as it does when saved. */
@@ -71,15 +71,13 @@ export const getRescheduleView = ({
     .join(", ");
 
   const move = () => {
-    const { remoteId, startsAt: oldStartsAt } = booking;
-
-    if (!remoteId) return actions.showToast(STILL_SAVING);
+    const oldStartsAt =
+      booking.startsAt ?? toStartsAt(booking.dayOffset, booking.time);
 
     const previous = state.bookings;
     const day = rescheduleDay ?? 0;
     const time = rescheduleTime ?? booking.time;
     const startsAt = toStartsAt(day, time);
-    const { sync } = studio.context;
 
     const next = state.bookings.map((item) =>
       item.id === state.sheetBookingId
@@ -96,9 +94,12 @@ export const getRescheduleView = ({
     );
 
     const save = (at: string, revert: typeof next, allowOverlap: boolean) =>
-      sync.save(() => rescheduleStudioBooking(remoteId, at, allowOverlap), {
-        bookings: revert,
-      });
+      saveToBooking(
+        studio.context,
+        booking,
+        (remoteId) => rescheduleStudioBooking(remoteId, at, allowOverlap),
+        { bookings: revert },
+      );
 
     setState({
       confirm: null,
@@ -116,7 +117,7 @@ export const getRescheduleView = ({
       () => {
         setState({ bookings: previous });
 
-        if (oldStartsAt) save(oldStartsAt, next, !!booking.overlapOk);
+        save(oldStartsAt, next, !!booking.overlapOk);
       },
     );
 

@@ -75,8 +75,7 @@ export const useBooking = ({ stylist, hours }: PublicStylist) => {
   const nextDisabled =
     state.holding ||
     (state.step === 2 && (needSize || needLength)) ||
-    (state.step === 3 &&
-      (!(state.date && state.time) || hold.isLoadingSlots));
+    (state.step === 3 && (!(state.date && state.time) || hold.isLoadingSlots));
 
   const goToStep = (step: number) => setState({ step }, scrollToTitle);
 

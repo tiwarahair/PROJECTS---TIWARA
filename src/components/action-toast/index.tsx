@@ -15,7 +15,7 @@ interface ToastPillProps {
 }
 
 const ToastPill = ({ toast }: ToastPillProps) => {
-  const { id, message, action, bottom, pinned } = toast;
+  const { id, message, action, bottom } = toast;
   const dispatch = useAppDispatch();
   const entered = useEntered();
   const [closing, setClosing] = useState(false);
@@ -29,15 +29,13 @@ const ToastPill = ({ toast }: ToastPillProps) => {
   }, [closing, dispatch, id]);
 
   useEffect(() => {
-    if (pinned) return;
-
     const timer = window.setTimeout(
       () => setClosing(true),
       action ? 5000 : 3200,
     );
 
     return () => window.clearTimeout(timer);
-  }, [pinned, action]);
+  }, [action]);
 
   const className = [
     styles.toast,

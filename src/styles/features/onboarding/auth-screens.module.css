@@ -246,11 +246,6 @@
   flex: 0 0 auto;
 }
 
-.appleIcon {
-  flex: 0 0 auto;
-  margin-top: -2px;
-}
-
 .emailFooter {
   display: flex;
   flex-direction: column;

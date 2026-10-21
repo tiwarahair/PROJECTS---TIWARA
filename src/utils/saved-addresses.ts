@@ -1,53 +1,19 @@
 // Client account saved addresses (Account → Saved addresses, Booking for mobile stylists).
-// Board/fixture pages never persist; ?addrs=none = empty.
-import { seedAddresses } from "../data";
 import type { SavedAddress } from "../types/address";
 
 const STORAGE_KEY = "tw_addrs";
 
-const isBoard = (search: string): boolean => {
+export const getSavedAddresses = (): SavedAddress[] => {
   try {
-    const params = new URLSearchParams(search);
+    const stored = localStorage.getItem(STORAGE_KEY);
 
-    return (
-      params.has("fixture") ||
-      params.get("board") === "true" ||
-      params.has("addrs")
-    );
+    return stored ? (JSON.parse(stored) as SavedAddress[]) : [];
   } catch {
-    return true;
+    return [];
   }
 };
 
-export const getSavedAddresses = (
-  search: string = window.location.search,
-): SavedAddress[] => {
-  try {
-    const params = new URLSearchParams(search);
-
-    if (params.get("addrs") === "none") return [];
-
-    if (!isBoard(search)) {
-      const stored = localStorage.getItem(STORAGE_KEY);
-
-      if (stored) return JSON.parse(stored) as SavedAddress[];
-    }
-  } catch {
-    // storage unavailable: start empty
-  }
-
-  // demo addresses are for dev boards only
-  return import.meta.env.DEV && isBoard(search)
-    ? seedAddresses.map((address) => ({ ...address }))
-    : [];
-};
-
-export const saveAddresses = (
-  addresses: SavedAddress[],
-  search: string = window.location.search,
-): void => {
-  if (isBoard(search)) return;
-
+export const saveAddresses = (addresses: SavedAddress[]): void => {
   try {
     localStorage.setItem(STORAGE_KEY, JSON.stringify(addresses));
   } catch {

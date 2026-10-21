@@ -71,7 +71,7 @@ export const getCancelView = (context: SheetContext) => {
     const reason = state.cancelReason.trim();
     const reasonNote = reason ? ` ${reason}` : "";
 
-    const isDone = context.finish(
+    context.finish(
       {
         status: "Cancelled",
         feeKept: isFeeKept,
@@ -92,7 +92,7 @@ export const getCancelView = (context: SheetContext) => {
       },
     );
 
-    if (isDone) actions.closeSheet();
+    actions.closeSheet();
   };
 
   return {

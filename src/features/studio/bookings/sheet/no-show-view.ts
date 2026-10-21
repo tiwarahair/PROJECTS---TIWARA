@@ -34,7 +34,7 @@ export const getNoShowView = (context: SheetContext) => {
     confirmNoShow: () => {
       const isCharging = choice === "fee";
 
-      const isDone = context.finish(
+      context.finish(
         {
           status: "No show",
           meta: isCharging ? "Fee pending" : "No charge",
@@ -50,7 +50,7 @@ export const getNoShowView = (context: SheetContext) => {
         },
       );
 
-      if (isDone) actions.closeSheet();
+      actions.closeSheet();
     },
   };
 };

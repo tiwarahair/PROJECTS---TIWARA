@@ -1,5 +1,4 @@
 import { describe, expect, it, vi } from "vitest";
-import { STILL_SAVING } from "../../../bookings/sheet/checkout-view";
 import { getInitialStudioState } from "../../initial-state";
 import type { StudioBooking } from "../../types";
 import { createBookingActions } from "../bookings";
@@ -19,7 +18,7 @@ const unsaved: StudioBooking = {
 };
 
 describe("booking actions", () => {
-  it("an unsaved booking asks to try again instead of changing", () => {
+  it("a booking that is still saving changes at once and saves after it", () => {
     const state = { ...getInitialStudioState(), bookings: [unsaved] };
     const setState = vi.fn();
     const save = vi.fn();
@@ -40,8 +39,15 @@ describe("booking actions", () => {
 
     setStatus(unsaved.id, "arrived", "Marked as arrived");
 
-    expect(showToast).toHaveBeenCalledWith(STILL_SAVING);
-    expect(setState).not.toHaveBeenCalled();
-    expect(save).not.toHaveBeenCalled();
+    expect(showToast).toHaveBeenCalledWith(
+      "Marked as arrived",
+      expect.any(Function),
+    );
+
+    expect(setState).toHaveBeenCalledWith({
+      bookings: [{ ...unsaved, status: "arrived" }],
+    });
+
+    expect(save).toHaveBeenCalledTimes(1);
   });
 });

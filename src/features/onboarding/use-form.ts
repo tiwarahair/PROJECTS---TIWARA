@@ -11,7 +11,6 @@ type TextFieldName = {
 
 export const useOnboardingForm = (
   {
-    startTouched,
     stateRef,
     identity,
     isUpgrade,
@@ -82,15 +81,6 @@ export const useOnboardingForm = (
 
     return unsubscribe;
   }, [watch, trigger, setState, save, formStateRef, stateRef]);
-
-  // fixture boards open with some fields already showing their errors
-  useEffect(() => {
-    const keys = Object.keys(startTouched) as FieldPath<OnboardingForm>[];
-
-    if (keys.length) void trigger(keys);
-    // mount only
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
 
   // a signed-in account's own details fill (and lock) the account step
   const { first, last, email, mobile } = identity ?? {};

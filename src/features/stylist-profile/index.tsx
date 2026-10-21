@@ -44,7 +44,7 @@ interface StylistProfileViewProps {
 export const StylistProfileView = ({
   publicStylist: { stylist, hours, nextStart, isTakingBookings, socials },
 }: StylistProfileViewProps) => {
-  const { shareAt, shareButtonRef, openShare, closeShare } = useSharePopover();
+  const { shareAt, openShare, closeShare } = useSharePopover();
   const { heroRef, isShown: isStickyShown } = useStickyBar();
 
   const [serviceModal, setServiceModal] = useState<ServiceModalData | null>(
@@ -122,7 +122,6 @@ export const StylistProfileView = ({
         back={back}
         onBack={goBack}
         heroRef={heroRef}
-        shareButtonRef={shareButtonRef}
         coverActionsOn={isCoverActionsOn || !!shareAt}
         onToggleCoverActions={() => setIsCoverActionsOn((isOn) => !isOn)}
         actions={actions}

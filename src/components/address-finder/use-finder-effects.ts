@@ -7,7 +7,7 @@ import type { FinderCore } from "./use-finder-core";
 
 export const useFinderEffects = (
   core: FinderCore,
-  { value, fixture = "", autoFocus = false }: UseAddressFinderOptions,
+  { value, autoFocus = false }: UseAddressFinderOptions,
 ) => {
   const {
     state,
@@ -18,14 +18,9 @@ export const useFinderEffects = (
     previousValueRef,
     places,
     sessionRef,
-    emit,
   } = core;
 
-  // fixtures that seed an address report it once, on mount
   useEffect(() => {
-    if (fixture === "summary" || fixture === "manual")
-      emit(state.draft, fixture === "manual" ? "manual" : "pick");
-
     let focusTimer = 0;
 
     if (autoFocus && state.mode === "find")

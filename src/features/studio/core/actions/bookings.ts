@@ -3,7 +3,7 @@ import {
   setBookingStatus,
 } from "../../../../lib/studio-api/bookings";
 import { mergeBookingRows } from "../../bookings/live-records";
-import { STILL_SAVING } from "../../bookings/sheet/checkout-view";
+import { saveToBooking } from "../../bookings/save";
 import { toIsoDate } from "../../../../utils/dates";
 import { toDayOffset } from "../../bookings/records";
 import { durationToMinutes, timeToMinutes } from "../format";
@@ -38,16 +38,17 @@ export const createBookingActions = (
   { showToast, openSheet, closeSheet }: BookingDeps,
 ) => {
   const saveStatus = (
-    booking: StudioBooking | undefined,
+    booking: StudioBooking,
     status: string,
     revert: StudioBooking[],
   ) => {
-    const remoteId = booking?.remoteId;
-
-    if (remoteId && isSavedStatus(status))
-      sync.save(() => setBookingStatus(remoteId, status), {
-        bookings: revert,
-      });
+    if (isSavedStatus(status))
+      saveToBooking(
+        { setState, sync },
+        booking,
+        (remoteId) => setBookingStatus(remoteId, status),
+        { bookings: revert },
+      );
   };
 
   const setStatus = (
@@ -59,7 +60,7 @@ export const createBookingActions = (
     const previous = getState().bookings;
     const booking = previous.find((item) => item.id === id);
 
-    if (!booking?.remoteId) return showToast(STILL_SAVING);
+    if (!booking) return;
 
     const next = previous.map((item) =>
       item.id === id ? { ...item, status, ...extra } : item,
@@ -70,7 +71,7 @@ export const createBookingActions = (
 
     showToast(message, () => {
       setState({ bookings: previous });
-      saveStatus(booking, booking?.status ?? "", next);
+      saveStatus(booking, booking.status, next);
     });
   };
 

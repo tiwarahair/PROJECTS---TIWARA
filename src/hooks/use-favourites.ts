@@ -24,7 +24,7 @@ const popHeart = (element: Element) => {
   );
 };
 
-/** Favourites for the demo account: the one heart handler every heart calls. */
+/** Favourites: the one heart handler every heart calls. */
 export const useFavourites = () => {
   const dispatch = useAppDispatch();
   const loggedIn = useAppSelector((state) => state.session.loggedIn);

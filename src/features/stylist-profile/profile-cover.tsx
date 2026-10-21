@@ -25,7 +25,6 @@ interface ProfileCoverProps {
   back: LastSearch;
   onBack: (event: MouseEvent<HTMLAnchorElement>) => void;
   heroRef: RefObject<HTMLDivElement | null>;
-  shareButtonRef: RefObject<HTMLButtonElement | null>;
   coverActionsOn: boolean;
   onToggleCoverActions: () => void;
   actions: ProfileActions;
@@ -38,7 +37,6 @@ export const ProfileCover = ({
   back,
   onBack,
   heroRef,
-  shareButtonRef,
   coverActionsOn,
   onToggleCoverActions,
   actions,
@@ -110,7 +108,6 @@ export const ProfileCover = ({
           )}
           <div className={styles.coverButtons}>
             <button
-              ref={shareButtonRef}
               data-tip="Share"
               onClick={onShare}
               aria-label={shareLabel}

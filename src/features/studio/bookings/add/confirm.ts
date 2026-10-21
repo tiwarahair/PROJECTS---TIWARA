@@ -9,9 +9,9 @@ import { formatDuration } from "../../../../utils/dates";
 import { fetchStudioBooking } from "../../../../lib/studio-api/bookings";
 import { createStudioBooking } from "../../../../lib/studio-api/booking-writes";
 import type { StudioContact } from "../../../../lib/studio-api/booking-writes";
-import { mergeBookingRows } from "../live-records";
 import { addStudioClient } from "../../clients/save";
-import { toStartsAt } from "../records";
+import { keepLocalId, toStartsAt } from "../records";
+import { isWaiting, removeLocal, replaceWithRow } from "../save";
 import { getAddonValue } from "./addon-values";
 import type { AddContext } from "./context";
 import type { NewClient } from "./types";
@@ -95,6 +95,7 @@ const getBookingRecord = (
     address: state.addAddress.trim(),
     walkIn: !!state.addWalkIn,
     protectionMode: isLink ? state.policy.mode : "none",
+    agreedPolicy: isLink ? state.policy : { ...state.policy, mode: "none" },
   };
 
   if (state.addExtra) record.extra = state.addExtra;
@@ -179,17 +180,30 @@ const saveRemote = (context: AddContext, record: StudioBooking) => {
         protect: record.protect === "link",
       });
 
+      keepLocalId(id, record.id);
+
       const row = await fetchStudioBooking(id);
 
       setState((current) => {
-        const others = {
-          ...current,
-          bookings: current.bookings.filter(
-            ({ id: local }) => local !== record.id,
-          ),
-        };
+        // changes queued behind this save bring the server's copy once they're saved
+        if (isWaiting(record.id))
+          return {
+            bookings: current.bookings
+              .filter(({ remoteId }) => remoteId !== id)
+              .map((item) =>
+                item.id === record.id ? { ...item, remoteId: id } : item,
+              ),
+            // cancelled or marked a no-show before this save came back
+            pastNew: current.pastNew.map((item) =>
+              item.original?.id === record.id
+                ? { ...item, remoteId: id }
+                : item,
+            ),
+          };
 
-        return row ? mergeBookingRows(others, [row]) : others;
+        return row
+          ? replaceWithRow(current, record.id, row)
+          : removeLocal(current, record.id);
       });
     },
     { bookings: previous },

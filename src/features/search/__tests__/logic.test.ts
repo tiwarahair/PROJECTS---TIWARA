@@ -5,7 +5,6 @@ import {
   toDayMinutes,
   toSearchArgs,
 } from "../logic";
-import { getFixturePatch } from "../fixtures";
 import { getInitialState, getStateSearch } from "../state";
 
 const stateFor = (search: string) => getInitialState(search, 1440);
@@ -59,27 +58,6 @@ describe("search state", () => {
     expect(getStateSearch(stateFor("?loc=Chorlton"))).toBe("");
 
     expect(getStateSearch(stateFor(""))).toBe("");
-  });
-
-  it("maps board fixtures, mobile ones to the sheet", () => {
-    const state = stateFor("");
-
-    expect(getFixturePatch("what-knot", state, false)).toMatchObject({
-      whatOpen: true,
-      whatText: "knot",
-      whatTyped: true,
-    });
-
-    expect(getFixturePatch("what-knot", state, true)).toMatchObject({
-      mobileView: "service",
-    });
-
-    expect(getFixturePatch("price-open", state, true)).toMatchObject({
-      filtersOpen: true,
-      filtersDraft: { maxPrice: 80 },
-    });
-
-    expect(getFixturePatch("nope", state, false)).toBeNull();
   });
 });
 

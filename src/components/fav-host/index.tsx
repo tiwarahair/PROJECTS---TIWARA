@@ -1,17 +1,9 @@
 import { useEffect } from "react";
 import { FAVOURITES_HREF } from "../../hooks/use-favourites";
-import {
-  openLoginSheet,
-  setFavourite,
-  syncFavourites,
-} from "../../stores/favourites-slice";
+import { setFavourite, syncFavourites } from "../../stores/favourites-slice";
 import { useAppDispatch, useAppStore } from "../../stores/hooks";
 import { dismissToasts, showToast } from "../../stores/toast-slice";
-import {
-  getSearchParams,
-  readSession,
-  writeSession,
-} from "../../utils/page-flags";
+import { readSession, writeSession } from "../../utils/page-flags";
 import { ActionToast } from "../action-toast";
 import { FavLoginSheet } from "../fav-login-sheet";
 
@@ -26,7 +18,6 @@ export const FavHost = () => {
   // page "load": sync session + favourites, then the boot behaviours
   useEffect(() => {
     dispatch(syncFavourites());
-    const params = getSearchParams();
     const timers: number[] = [];
 
     const later = (callback: () => void, delay: number) =>
@@ -52,33 +43,6 @@ export const FavHost = () => {
         700,
       );
     }
-
-    const favouriteToast = params.get("favtoast");
-
-    if (favouriteToast)
-      later(() => {
-        if (favouriteToast === "saved")
-          dispatch(
-            showToast(
-              "Saved to favourites",
-              { label: "View", href: FAVOURITES_HREF },
-              { pinned: true },
-            ),
-          );
-        else if (favouriteToast === "removed")
-          dispatch(
-            showToast(
-              "Removed from favourites",
-              { label: "Undo" },
-              { pinned: true },
-            ),
-          );
-        else if (favouriteToast === "copied")
-          dispatch(showToast("Link copied", null, { pinned: true }));
-      }, 500);
-
-    if (params.get("favsheet") === "1")
-      later(() => dispatch(openLoginSheet("demo")), 500);
 
     return () => {
       timers.forEach((timer) => window.clearTimeout(timer));

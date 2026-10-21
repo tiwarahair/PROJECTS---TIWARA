@@ -1,11 +1,6 @@
 import { useEffect, useRef } from "react";
 import { useLocation } from "react-router";
-import {
-  getSearchParams,
-  isBoardView,
-  readSession,
-  writeSession,
-} from "../utils/page-flags";
+import { readSession, writeSession } from "../utils/page-flags";
 import {
   LAST_SEARCH_KEY,
   SEARCH_BACK_KEY,
@@ -33,8 +28,6 @@ export const useSearchMemory = (): void => {
   locationRef.current = location;
 
   useEffect(() => {
-    if (isBoardView(getSearchParams(locationRef.current.search))) return;
-
     const record = () => {
       const { pathname, search } = locationRef.current;
 

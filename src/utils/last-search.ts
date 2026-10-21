@@ -1,11 +1,6 @@
 // "Back to results" memory shared by Search and Stylist Profile.
 import { serviceGroups, serviceTypes } from "../data";
-import {
-  getSearchParams,
-  isBoardView,
-  readSession,
-  writeSession,
-} from "./page-flags";
+import { readSession, writeSession } from "./page-flags";
 import { formatWeekdayDate } from "./dates";
 
 export const LAST_SEARCH_KEY = "tw_last_search";
@@ -64,9 +59,7 @@ export const getSearchSummary = (href: string): string => {
 };
 
 export const getLastSearch = (): LastSearch => {
-  const href =
-    getSearchParams().get("lastsearch") ||
-    (isBoardView() ? null : readSession(LAST_SEARCH_KEY));
+  const href = readSession(LAST_SEARCH_KEY);
 
   if (!href)
     return {

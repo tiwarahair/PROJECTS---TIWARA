@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useRef, useState } from "react";
 import type { MouseEvent, ReactNode } from "react";
 import { ChevronDown } from "lucide-react";
 import { useLocation } from "react-router";
@@ -6,7 +6,6 @@ import { useIdentity } from "../../hooks/use-identity";
 import { useMediaQuery } from "../../hooks/use-media-query";
 import { useSignOut } from "../../hooks/use-sign-out";
 import { resolveAssetUrl } from "../../utils/asset-url";
-import { getSearchParams } from "../../utils/page-flags";
 import { NavMenu, NavMenuAccountHead } from "../nav-menu";
 import type { NavMenuItem } from "../nav-menu";
 import styles from "../../styles/components/site-menu/index.module.css";
@@ -104,27 +103,16 @@ export const SiteMenu = ({
   const signOut = useSignOut();
   const { pathname, search } = useLocation();
   const buttonRef = useRef<HTMLButtonElement>(null);
-  const [menu, setMenu] = useState<{ pinned: boolean } | null>(null);
+  const [isOpen, setOpen] = useState(false);
 
   const isWide = useMediaQuery(
     `(min-width: ${linksShownFrom ?? MOBILE_UP_TO + 1}px)`,
   );
 
   const close = useCallback((refocus: boolean) => {
-    setMenu(null);
+    setOpen(false);
 
     if (refocus) buttonRef.current?.focus();
-  }, []);
-
-  // ?acctmenu=1 boards open the menu pinned, from whichever trigger is on screen
-  useEffect(() => {
-    if (getSearchParams().get("acctmenu") !== "1") return;
-
-    const timer = window.setTimeout(() => {
-      if (buttonRef.current?.offsetParent) setMenu({ pinned: true });
-    }, 900);
-
-    return () => window.clearTimeout(timer);
   }, []);
 
   const closeOnClick = () => close(false);
@@ -243,7 +231,7 @@ export const SiteMenu = ({
       <button
         ref={buttonRef}
         type="button"
-        onClick={() => setMenu((open) => (open ? null : { pinned: false }))}
+        onClick={() => setOpen((open) => !open)}
         aria-label={isSignedIn ? "Account" : "Menu"}
         aria-haspopup="menu"
         aria-expanded="false"
@@ -251,7 +239,7 @@ export const SiteMenu = ({
       >
         {children}
       </button>
-      {menu && buttonRef.current && (
+      {isOpen && buttonRef.current && (
         <NavMenu
           anchor={buttonRef.current}
           label={isSignedIn ? (identity?.name ?? "") : "Menu"}
@@ -270,7 +258,6 @@ export const SiteMenu = ({
               : []),
             ...(isSignedIn ? accountItems : guestItems),
           ]}
-          pinned={menu.pinned}
           onClose={close}
         />
       )}

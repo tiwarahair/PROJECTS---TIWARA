@@ -14,6 +14,7 @@ vi.mock("../../../lib/auth", async (importOriginal) => ({
   getSignedInAccount: vi.fn(),
   resendEmailCode: vi.fn(),
   signIn: vi.fn(),
+  signUpClient: vi.fn(),
   verifyEmailCode: vi.fn(),
 }));
 
@@ -29,6 +30,10 @@ beforeEach(() => {
 });
 
 const advance = (ms: number) => act(() => vi.advanceTimersByTime(ms));
+
+/** Progress saved on this device from an earlier visit (the form's email and name). */
+const saveProgress = (form: Record<string, string>) =>
+  localStorage.setItem("tw_onboarding_v1", JSON.stringify({ form }));
 
 describe("OnboardingPage", () => {
   beforeEach(() => {
@@ -47,7 +52,7 @@ describe("OnboardingPage", () => {
   });
 
   it("a signed-in customer's account step shows their own details, locked, with no password", () => {
-    renderWithStore(<OnboardingPage />, "/join?fixture=w4-bizcontact", {
+    renderWithStore(<OnboardingPage />, "/join?screen=w4", {
       signedIn: true,
     });
 
@@ -102,7 +107,7 @@ describe("OnboardingPage", () => {
     await user.click(screen.getByRole("button", { name: "Log in" }));
 
     await vi.waitFor(() =>
-      expect(screen.getByTestId("location")).toHaveTextContent("/search"),
+      expect(screen.getByTestId("location").textContent).toBe("/search"),
     );
 
     expect(sessionStorage.getItem("tw_toast")).toBe("Welcome back");
@@ -125,10 +130,7 @@ describe("OnboardingPage", () => {
     vi.mocked(auth.signIn).mockResolvedValue(null);
     turnstileStub.isHeld = true;
 
-    renderWithStore(
-      <OnboardingPage />,
-      "/login?screen=cust-password&board=true",
-    );
+    renderWithStore(<OnboardingPage />, "/login?screen=cust-password");
 
     await user.type(screen.getByLabelText("Password"), "a long password");
     await user.click(screen.getByRole("button", { name: "Log in" }));
@@ -141,7 +143,7 @@ describe("OnboardingPage", () => {
   });
 
   it("the login code step takes a code from any app and offers support", () => {
-    renderWithStore(<OnboardingPage />, "/login?fixture=pro-2fa");
+    renderWithStore(<OnboardingPage />, "/login?screen=pro-2fa");
 
     expect(
       screen.getByText("Enter a code from your authenticator app."),
@@ -157,7 +159,7 @@ describe("OnboardingPage", () => {
   });
 
   it("an empty field only shows its error after Continue, not when focus leaves it", async () => {
-    renderWithStore(<OnboardingPage />, "/login?screen=pro-email&board=true");
+    renderWithStore(<OnboardingPage />, "/login?screen=pro-email");
 
     await user.click(screen.getByLabelText("Email address"));
     await user.tab();
@@ -247,10 +249,7 @@ describe("OnboardingPage", () => {
   it("a wrong password from the server shows the error", async () => {
     vi.mocked(auth.signIn).mockResolvedValue("invalid_credentials");
 
-    renderWithStore(
-      <OnboardingPage />,
-      "/login?screen=cust-password&board=true",
-    );
+    renderWithStore(<OnboardingPage />, "/login?screen=cust-password");
 
     await user.type(screen.getByLabelText("Password"), "not my password");
     await user.click(screen.getByRole("button", { name: "Log in" }));
@@ -260,17 +259,6 @@ describe("OnboardingPage", () => {
         "That password isn’t right. Try again or reset it.",
       ),
     ).toBeInTheDocument();
-  });
-
-  it("a wrong password shows the error", () => {
-    renderWithStore(
-      <OnboardingPage />,
-      "/login?fixture=wrong-password&password=strict&board=true",
-    );
-
-    expect(screen.getAllByRole("alert")[0]).toHaveTextContent(
-      "That password isn’t right. Try again or reset it.",
-    );
   });
 
   it("backing out of Google sign-in returns to the chooser without an error", async () => {
@@ -287,7 +275,13 @@ describe("OnboardingPage", () => {
   });
 
   it("the stylist account step moves on without a server check", async () => {
-    renderWithStore(<OnboardingPage />, "/join?screen=w4&board=true");
+    saveProgress({
+      email: "amara@tiwarashouse.com",
+      first: "Amara",
+      last: "Okonkwo",
+    });
+
+    renderWithStore(<OnboardingPage />, "/join?screen=w4");
 
     await user.type(screen.getByLabelText("Mobile"), "7700900456");
     await user.type(screen.getByLabelText("Password"), "copper meadow 47");
@@ -305,7 +299,8 @@ describe("OnboardingPage", () => {
 
   it("the code screen loads the human check only when Resend is tapped", async () => {
     vi.mocked(auth.resendEmailCode).mockResolvedValue();
-    renderWithStore(<OnboardingPage />, "/signup?screen=verify&board=true");
+    saveProgress({ email: "ama@example.com", first: "Ama", last: "Mensah" });
+    renderWithStore(<OnboardingPage />, "/signup?screen=verify");
 
     advance(30_000);
     expect(auth.resendEmailCode).not.toHaveBeenCalled();
@@ -323,7 +318,8 @@ describe("OnboardingPage", () => {
   it("a failed bot check on Resend says so, and Resend can be tapped again", async () => {
     vi.mocked(auth.resendEmailCode).mockResolvedValue();
     turnstileStub.isHeld = true;
-    renderWithStore(<OnboardingPage />, "/signup?screen=verify&board=true");
+    saveProgress({ email: "ama@example.com", first: "Ama", last: "Mensah" });
+    renderWithStore(<OnboardingPage />, "/signup?screen=verify");
 
     advance(30_000);
     await user.click(screen.getByRole("button", { name: "Resend code" }));
@@ -340,7 +336,7 @@ describe("OnboardingPage", () => {
   });
 
   it("the wizard picks a business type and moves on after 300ms", async () => {
-    renderWithStore(<OnboardingPage />, "/join?screen=w1&board=true");
+    renderWithStore(<OnboardingPage />, "/join?screen=w1");
     await user.click(screen.getByRole("radio", { name: /Mobile/ }));
     advance(300);
 
@@ -350,18 +346,27 @@ describe("OnboardingPage", () => {
   });
 
   it("a code the server accepts signs the new customer in", async () => {
+    vi.mocked(auth.signUpClient).mockResolvedValue(true);
     vi.mocked(auth.verifyEmailCode).mockResolvedValue(true);
+
+    saveProgress({ email: "ama@example.com", first: "Ama", last: "Mensah" });
 
     renderWithStore(
       <OnboardingPage />,
-      "/signup?screen=verify&board=true&stayOnDone=true",
+      "/signup?screen=cust-create&return=%2Fsearch",
     );
+
+    await user.type(screen.getByLabelText("Mobile"), "7700900123");
+    await user.type(screen.getByLabelText("Password"), "copper meadow 47");
+    await user.click(screen.getByRole("checkbox", { name: /Client Terms/ }));
+    await user.click(screen.getByRole("button", { name: "Create account" }));
+    await screen.findByLabelText("Digit 1");
 
     for (const [index, digit] of [..."482913"].entries())
       await user.type(screen.getByLabelText(`Digit ${index + 1}`), digit);
 
     await vi.waitFor(() =>
-      expect(screen.getByRole("status")).toBeInTheDocument(),
+      expect(screen.getByTestId("location")).toHaveTextContent("/search"),
     );
 
     expect(auth.verifyEmailCode).toHaveBeenCalledWith(
@@ -369,17 +374,13 @@ describe("OnboardingPage", () => {
       "482913",
     );
 
-    // a board's verify screen is a customer sign-up: it ends with the welcome toast
-    expect(screen.getByRole("status")).toHaveTextContent(
+    expect(sessionStorage.getItem("tw_toast")).toBe(
       "Welcome to Tiwára’s House, Ama",
     );
   });
 
   it("Client Terms opens the terms sheet", async () => {
-    renderWithStore(
-      <OnboardingPage />,
-      "/signup?screen=cust-create&board=true",
-    );
+    renderWithStore(<OnboardingPage />, "/signup?screen=cust-create");
 
     await user.click(screen.getByRole("button", { name: "Client Terms" }));
 
@@ -439,7 +440,7 @@ describe("OnboardingPage", () => {
     });
 
     it("a ?screen= for another route opens on that route", () => {
-      renderWithStore(<OnboardingPage />, "/login?screen=w1&board=true");
+      renderWithStore(<OnboardingPage />, "/login?screen=w1");
 
       expect(
         screen.getByRole("heading", { name: "How do you work?" }),

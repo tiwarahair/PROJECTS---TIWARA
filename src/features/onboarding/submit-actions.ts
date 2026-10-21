@@ -22,7 +22,6 @@ export const getSubmitActions = ({
   later,
   clearSaved,
   navigate,
-  resolved,
   turnstileRef,
   formApi: { getValues },
 }: SubmitCore) => {
@@ -54,13 +53,11 @@ export const getSubmitActions = ({
   const toStudio = (isNew: boolean) => {
     goTo("studio");
 
-    if (!resolved.stayOnDone)
-      later(
-        "studio",
-        () =>
-          navigate(`/studio${isNew ? "?welcome=1" : ""}`, { replace: true }),
-        500,
-      );
+    later(
+      "studio",
+      () => navigate(`/studio${isNew ? "?welcome=1" : ""}`, { replace: true }),
+      500,
+    );
   };
 
   const finish = (kind: FinishKind) => {
@@ -75,8 +72,6 @@ export const getSubmitActions = ({
     if (kind === "pro") return toStudio(false);
 
     const message = getWelcomeMessage(kind, getValues("first").trim());
-
-    if (resolved.stayOnDone) return setState({ busy: false, toast: message });
 
     try {
       sessionStorage.setItem("tw_toast", message);

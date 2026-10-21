@@ -27,9 +27,7 @@ describe("account schemas", () => {
 
     expect(check("email")).toEqual({ email: "That’s already your email" });
 
-    expect(
-      check("mobile", { ...PROFILE, mobile: "07700 900123" }),
-    ).toEqual({});
+    expect(check("mobile", { ...PROFILE, mobile: "07700 900123" })).toEqual({});
 
     expect(check("mobile", { ...PROFILE, mobile: "0123" })).toEqual({
       mobile: "Enter a UK mobile number, like 07700 900123",

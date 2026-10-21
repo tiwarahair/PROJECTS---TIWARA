@@ -1,7 +1,6 @@
-// Where the onboarding page starts: screen, saved wizard progress, fixtures, return URL and theme.
+// Where the onboarding page starts: screen, saved wizard progress, return URL and theme.
 import type { Location } from "react-router";
 import { MODE_KEY, STORAGE_KEY } from "./data";
-import { getFixturePatch } from "./fixtures";
 import { getRouteForPath, ROUTE_START } from "./routes";
 import type { OnboardingRoute } from "./routes";
 import { INITIAL_FORM, INITIAL_STATE } from "./state";
@@ -82,7 +81,7 @@ const getStartMode = (
   return prefersDark ? "dark" : "light";
 };
 
-/** The initial state, computed up front (start screen, saved progress, board, fixture, mode). */
+/** The initial state, computed up front (start screen, saved progress, mode). */
 export const getStartState = (
   props: ResolvedProps,
   { pathname, search }: Pick<Location, "pathname" | "search">,
@@ -90,7 +89,6 @@ export const getStartState = (
   const state: StartState = {
     ...INITIAL_STATE,
     form: INITIAL_FORM,
-    touched: {},
     flow: null,
     width: document.documentElement.clientWidth,
   };
@@ -125,7 +123,7 @@ export const getStartState = (
 
   if (start === "welcome" || start[0] === "w") state.audience = "pro";
 
-  if (saved && saved.form && !props.board) {
+  if (saved && saved.form) {
     state.form = {
       ...state.form,
       ...saved.form,
@@ -142,26 +140,6 @@ export const getStartState = (
 
     if (saved.area) state.area = saved.area;
   }
-
-  if (props.board) {
-    const isPro = /^(pro-|w)/.test(start);
-
-    state.form = {
-      ...state.form,
-      ...(isPro
-        ? { email: "amara@tiwarashouse.com", first: "Amara", last: "Okonkwo" }
-        : { email: "ama@example.com", first: "Ama", last: "Mensah" }),
-    };
-
-    if (isPro) state.audience = "pro";
-    else if (start !== "welcome" && start !== "chooser")
-      state.audience = "customer";
-  }
-
-  // fixtures start from the blank form, not the saved / board one
-  // demo states are dev-only; production builds drop this branch and the fixtures module
-  if (import.meta.env.DEV && props.fixture && props.fixture !== "none")
-    Object.assign(state, getFixturePatch(props.fixture, INITIAL_FORM));
 
   const storedMode = readStorage(localStorage, MODE_KEY);
 

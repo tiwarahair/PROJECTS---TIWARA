@@ -4,9 +4,9 @@ import { StrictMode } from "react";
 import { MemoryRouter } from "react-router";
 import { queueSiteToast, WelcomeToast } from "..";
 
-const renderAt = (url = "/") =>
+const renderAt = () =>
   render(
-    <MemoryRouter initialEntries={[url]}>
+    <MemoryRouter>
       <WelcomeToast />
     </MemoryRouter>,
   );
@@ -41,15 +41,6 @@ describe("WelcomeToast", () => {
     );
 
     expect(sessionStorage.getItem("tw_toast")).toBeNull();
-  });
-
-  it("pins the ?twtoast= message for boards", async () => {
-    renderAt("/?twtoast=Welcome%20to%20Tiw%C3%A1ra%27s%20House%2C%20Nia");
-    await act(async () => vi.advanceTimersByTime(10000));
-
-    expect(screen.getByRole("status")).toHaveTextContent(
-      "Welcome to Tiwára's House, Nia",
-    );
   });
 
   it("shows the stored welcome under StrictMode too", async () => {

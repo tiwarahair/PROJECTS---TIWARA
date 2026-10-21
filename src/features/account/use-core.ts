@@ -25,14 +25,11 @@ export const useAccountCore = (props: AccountProps) => {
 
   stateRef.current = state;
 
-  const forms = useAccountForms(
-    { ...initial.profile },
-    () => ({
-      edit: stateRef.current.edit,
-      profile: stateRef.current.profile,
-      hasPassword: stateRef.current.password.has,
-    }),
-  );
+  const forms = useAccountForms({ ...initial.profile }, () => ({
+    edit: stateRef.current.edit,
+    profile: stateRef.current.profile,
+    hasPassword: stateRef.current.password.has,
+  }));
 
   const afterCommit = useRef<(() => void)[]>([]);
   const navigate = useNavigate();
