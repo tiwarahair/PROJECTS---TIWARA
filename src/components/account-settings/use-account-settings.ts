@@ -111,6 +111,7 @@ export const useAccountSettings = (props: AccountSettingsProps) => {
   const dialogReturn = useRef<HTMLElement | null>(null);
   const toastTimer = useRef(0);
   const googleTimer = useRef(0);
+  const latestSessionsLoad = useRef(0);
 
   usePasswordChecker();
 
@@ -170,6 +171,7 @@ export const useAccountSettings = (props: AccountSettingsProps) => {
     backend: props.backend,
     setState,
     toast,
+    latestLoad: latestSessionsLoad,
   });
 
   const loadSessions = useEffectEvent(() => sessions.load());
@@ -265,13 +267,9 @@ export const useAccountSettings = (props: AccountSettingsProps) => {
 
         passwordForm.reset(EMPTY_PASSWORD);
 
-        setState({
-          isPasswordCodeSent: false,
-          isSettingPassword: false,
-          sessions: state.signOthers
-            ? state.sessions.filter(({ isCurrent }) => isCurrent)
-            : state.sessions,
-        });
+        setState({ isPasswordCodeSent: false, isSettingPassword: false });
+
+        if (state.signOthers) sessions.load();
 
         const deviceSuffix = others === 1 ? "" : "s";
 

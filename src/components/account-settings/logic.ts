@@ -70,7 +70,7 @@ export interface SettingsState {
   sessions: SettingsSession[];
   sessionsLoading: boolean;
   sessionsFailed: boolean;
-  alerts: boolean;
+  alerts: boolean | null;
   notifications: Record<NotificationKey, ChannelSetting>;
   google: {
     state: "off" | "connecting" | "on";
@@ -115,7 +115,7 @@ export const getInitialSettingsState = (
     sessions: [],
     sessionsLoading: false,
     sessionsFailed: false,
-    alerts: true,
+    alerts: null,
     notifications: {
       newBooking: channel(),
       clientCancelled: channel(),

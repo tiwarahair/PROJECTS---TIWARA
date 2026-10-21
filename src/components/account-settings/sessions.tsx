@@ -120,12 +120,22 @@ export const SettingsSessions = ({
           <span className={styles.alertsText}>
             Email me when someone signs in from a new device
           </span>
-          <Switch
-            isOn={state.alerts}
-            label="Login alerts"
-            className={styles.switchButton}
-            onToggle={() => sessions.toggleAlerts(!state.alerts)}
-          />
+          {state.alerts !== null && (
+            <Switch
+              isOn={state.alerts}
+              label="Login alerts"
+              className={styles.switchButton}
+              onToggle={() => sessions.toggleAlerts(!state.alerts)}
+            />
+          )}
+          {state.alerts === null && !state.sessionsFailed && (
+            <span
+              className={styles.skeletonSwitch}
+              aria-busy="true"
+              aria-label="Loading login alerts"
+              data-ac-sk="1"
+            ></span>
+          )}
         </div>
       </SettingsSection>
     </>

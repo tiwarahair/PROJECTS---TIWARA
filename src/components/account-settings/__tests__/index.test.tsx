@@ -379,6 +379,24 @@ describe("AccountSettings", () => {
     ).toBeInTheDocument();
   });
 
+  it("security: login alerts show the saved setting once it's loaded", async () => {
+    vi.mocked(backend.getSecurity).mockResolvedValueOnce({
+      login_alerts: false,
+      sessions: [],
+    });
+
+    render(
+      <AccountSettings person={person} backend={backend} page="security" />,
+      { wrapper: MemoryRouter },
+    );
+
+    expect(screen.getByLabelText("Loading login alerts")).toBeInTheDocument();
+
+    expect(
+      await screen.findByRole("switch", { name: "Login alerts" }),
+    ).toHaveAttribute("aria-checked", "false");
+  });
+
   it("security: when Supabase asks, the password change needs the emailed code", async () => {
     render(
       <AccountSettings person={person} backend={backend} page="security" />,

@@ -32,6 +32,7 @@ interface SessionsContext {
   backend: AccountSettingsBackend;
   setState: (patch: (current: SettingsState) => Partial<SettingsState>) => void;
   toast: (text: string) => void;
+  latestLoad: { current: number };
 }
 
 /** Settings → Security: reads and ends the account's sign-ins, and saves the new-device alerts switch. */
@@ -39,9 +40,18 @@ export const getSessionsActions = ({
   backend,
   setState,
   toast,
+  latestLoad,
 }: SessionsContext) => {
+  // a sign-out makes any list still loading out of date
+  const forgetLoads = () => {
+    latestLoad.current += 1;
+  };
+
   // the skeleton only shows until the first list arrives; later visits refresh in place
   const load = () => {
+    latestLoad.current += 1;
+    const loadId = latestLoad.current;
+
     setState(({ sessions }) => ({
       sessionsLoading: !sessions.length,
       sessionsFailed: false,
@@ -49,9 +59,12 @@ export const getSessionsActions = ({
 
     return backend.getSecurity().then(
       ({ sessions, login_alerts: alerts }) =>
-        setState(() => ({
-          sessions: sessions.map((row) => toSettingsSession(row)),
-          alerts,
+        setState((current) => ({
+          sessions:
+            loadId === latestLoad.current
+              ? sessions.map((row) => toSettingsSession(row))
+              : current.sessions,
+          alerts: current.alerts ?? alerts,
           sessionsLoading: false,
         })),
       () => setState(() => ({ sessionsLoading: false, sessionsFailed: true })),
@@ -61,6 +74,8 @@ export const getSessionsActions = ({
   const signOut = ({ id, device }: SettingsSession) =>
     backend.signOutSession(id).then(
       () => {
+        forgetLoads();
+
         setState(({ sessions }) => ({
           sessions: sessions.filter((item) => item.id !== id),
         }));
@@ -73,6 +88,8 @@ export const getSessionsActions = ({
   const signOutOthers = () =>
     backend.signOutOthers().then(
       () => {
+        forgetLoads();
+
         setState(({ sessions }) => ({
           sessions: sessions.filter(({ isCurrent }) => isCurrent),
         }));

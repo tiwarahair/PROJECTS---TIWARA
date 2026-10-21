@@ -47,6 +47,16 @@
   animation: acpulse 1.2s ease-in-out infinite;
 }
 
+.skeletonSwitch {
+  flex: 0 0 auto;
+  width: 44px;
+  height: 26px;
+  margin: 9px 4px;
+  border-radius: var(--radius-full);
+  background: var(--fill-quiet-strong, rgba(26, 23, 20, 0.08));
+  animation: acpulse 1.2s ease-in-out infinite;
+}
+
 .sessionRow {
   display: flex;
   align-items: center;
@@ -203,7 +213,8 @@
 @media (prefers-reduced-motion: reduce) {
   .skeletonLong,
   .skeletonShort,
-  .skeletonIcon {
+  .skeletonIcon,
+  .skeletonSwitch {
     animation: none !important;
   }
 }
