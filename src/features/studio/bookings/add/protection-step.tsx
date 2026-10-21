@@ -1,4 +1,4 @@
-import { Shield } from "lucide-react";
+import { Mail, Shield } from "lucide-react";
 import { joinClassNames } from "../../../../utils/class-names";
 import type { AddBookingView } from "./view";
 import styles from "../../../../styles/features/studio/bookings/add/protection-step.module.css";
@@ -48,6 +48,15 @@ export const ProtectionStep = ({ view }: ProtectionStepProps) => (
         ),
       )}
     </div>
+    {!!view.emailNotice && (
+      <div className={joinClassNames(shared.feeNote, styles.emailNote)}>
+        <Mail size={16} strokeWidth={1.7} className={shared.feeNoteIcon} />
+        <span>{view.emailNotice}</span>
+        <button className={shared.feeNoteLink} onClick={view.addEmail}>
+          Add email
+        </button>
+      </div>
+    )}
     <div className={styles.protFoot}>{view.protectionFootnote}</div>
     {view.isProtectionSend && (
       <>

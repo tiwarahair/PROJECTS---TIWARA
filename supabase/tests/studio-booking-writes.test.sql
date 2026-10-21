@@ -330,8 +330,9 @@ select pg_temp.create('chase', pg_temp.at(12), '{"first": "Zara", "email": "zara
 select is(public.resend_confirm_link(pg_temp.id('chase'))::int, 2, 'a first resend');
 select is(public.resend_confirm_link(pg_temp.id('chase'))::int, 3, 'a second');
 select throws_ok(format('select public.resend_confirm_link(%L)', pg_temp.id('chase')), 'resend_not_allowed', 'no third');
-select pg_temp.create('phone_only', pg_temp.at(12, '14:00'), '{"first": "Bisi", "phone": "07700900111"}', true);
-select throws_ok(format('select public.resend_confirm_link(%L)', pg_temp.id('phone_only')), 'no_email', 'a client with no email can''t be emailed a link');
+select throws_ok(
+  format('select pg_temp.create(%L, %L, %L, true)', 'phone_only', pg_temp.at(12, '14:00'), '{"first": "Bisi", "phone": "07700900111"}'),
+  'email_required', 'a client with no email can''t be sent a confirm link, so the booking can''t ask for protection');
 select ok(public.get_confirm_url(pg_temp.id('chase')) like 'http://localhost:5173/confirm?token=%', 'copying the link has no limit');
 
 -- auto-cancel

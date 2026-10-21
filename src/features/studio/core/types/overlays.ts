@@ -10,6 +10,8 @@ export interface ConfirmDialog {
   noLabel?: string;
   yes: () => void;
   onNo?: () => void;
+  /** tapping outside does nothing */
+  isBlocking?: boolean;
 }
 
 export interface ActionItem {

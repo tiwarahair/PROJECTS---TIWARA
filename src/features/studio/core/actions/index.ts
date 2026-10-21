@@ -57,6 +57,8 @@ export const createStudioActions = (context: StudioContext) => {
     closeSheet,
     guardSheet: sheets.guardSheet,
     requestCloseSheet: sheets.requestCloseSheet,
+    leaveClientEdit: sheets.leaveClientEdit,
+    isEditFromBooking: sheets.isEditFromBooking,
     openPage,
     closePage,
     leavePage,

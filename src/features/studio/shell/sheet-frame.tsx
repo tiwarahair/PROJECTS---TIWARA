@@ -72,6 +72,7 @@ const getSheetFrame = (studio: StudioController) => {
     (isClientSheet &&
       (!!state.clientFromBookingId || !!state.clientFromPastId)) ||
     (sheet === "clientEdit" && !!state.clientEditFromView) ||
+    actions.isEditFromBooking() ||
     (sheet === "dispute" && !!state.disputeForm?.fromPastId) ||
     (!!state.fromClientId &&
       (sheet === "past" || (isBooking && bookingStep === "view")));
@@ -101,6 +102,12 @@ const getSheetFrame = (studio: StudioController) => {
 
     if (isClientSheet && state.clientFromPastId) {
       actions.openSheet("past", { selectedPastId: state.clientFromPastId });
+
+      return;
+    }
+
+    if (actions.isEditFromBooking()) {
+      actions.guardSheet(() => actions.leaveClientEdit());
 
       return;
     }

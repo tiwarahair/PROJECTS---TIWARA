@@ -1,4 +1,4 @@
-import { useId, useRef } from "react";
+import { useEffect, useId, useRef } from "react";
 import { Camera, User } from "lucide-react";
 import { joinClassNames } from "../../../utils/class-names";
 import type { ClientForm } from "./use-client-form";
@@ -37,9 +37,15 @@ interface ClientEditProps {
 /** Add or edit a client. */
 export const ClientEditSheet = ({ view, form }: ClientEditProps) => {
   const fileRef = useRef<HTMLInputElement>(null);
+  const emailRef = useRef<HTMLInputElement>(null);
   const uid = useId();
-  const { draft, draftImage, duplicate } = view;
+  const { draft, draftImage, duplicate, isEmailFocused } = view;
   const { errors } = form.formState;
+
+  // opened to add a missing email, so it's ready to type
+  useEffect(() => {
+    if (isEmailFocused) emailRef.current?.focus();
+  }, [isEmailFocused]);
 
   if (!draft) return null;
 
@@ -150,6 +156,7 @@ export const ClientEditSheet = ({ view, form }: ClientEditProps) => {
           type="email"
           {...onField("email")}
           placeholder="name@email.com"
+          ref={emailRef}
           id={`${uid}-email`}
           aria-invalid={errors.email ? "true" : "false"}
           aria-describedby={errors.email ? `${uid}-email-error` : undefined}

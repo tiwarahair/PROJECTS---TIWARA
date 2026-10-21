@@ -5,6 +5,7 @@ import {
 import { removeClientPhoto } from "../../../../lib/studio-api/photos";
 import { dateLabel } from "../../core/format";
 import type { StudioBooking, StudioClient } from "../../core/types";
+import { toEditDraft } from "../edit-draft";
 import { getFirstName } from "./context";
 import type { ClientsContext } from "./context";
 
@@ -44,25 +45,11 @@ export const createClientActions = ({
     );
   };
 
-  const openEdit = (client: StudioClient | null) => {
-    const notes = client?.notes || {};
-    const parts = client ? client.name.split(" ") : [""];
-
+  const openEdit = (client: StudioClient | null) =>
     openSheet("clientEdit", {
       clientEditFromView: state.sheet === "cliView" && !!client,
-      clientEdit: {
-        id: client ? client.id : null,
-        first: client ? (parts[0] ?? "") : "",
-        last: client ? parts.slice(1).join(" ") : "",
-        phone: client ? client.phone || "" : "",
-        email: client ? client.email || "" : "",
-        type: notes.type || "",
-        size: notes.size || "",
-        length: notes.length || "",
-        products: notes.products || "",
-      },
+      clientEdit: toEditDraft(client),
     });
-  };
 
   const block = (client: StudioClient) => {
     const first = getFirstName(client);
