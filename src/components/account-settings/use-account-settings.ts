@@ -1,4 +1,10 @@
-import { useCallback, useEffect, useRef, useState } from "react";
+import {
+  useCallback,
+  useEffect,
+  useEffectEvent,
+  useRef,
+  useState,
+} from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { usePasswordChecker } from "../../hooks/use-password-checker";
@@ -9,6 +15,7 @@ import { usePasswordForm } from "./use-password-form";
 import type { NameValues } from "./name-schema";
 import type { AccountSettingsBackend } from "./backend";
 import { getInitialName, getInitialSettingsState } from "./logic";
+import { getSessionsActions } from "./sessions-actions";
 import type { SettingsPerson, NotificationSettings } from "./logic";
 import type {
   ConfirmDialog,
@@ -20,7 +27,6 @@ import type {
 } from "./logic";
 
 const TOAST_MS = 2400;
-const SESSIONS_LOAD_MS = 700;
 const PASSWORD_MIN = 8;
 
 const PASSWORD_FAILURES: Record<string, string> = {
@@ -105,7 +111,6 @@ export const useAccountSettings = (props: AccountSettingsProps) => {
   const dialogReturn = useRef<HTMLElement | null>(null);
   const toastTimer = useRef(0);
   const googleTimer = useRef(0);
-  const hasLoaded = useRef(false);
 
   usePasswordChecker();
 
@@ -161,29 +166,16 @@ export const useAccountSettings = (props: AccountSettingsProps) => {
     run?.();
   };
 
-  // the sessions list "loads" once, the first time the security page shows
+  const sessions = getSessionsActions({
+    backend: props.backend,
+    setState,
+    toast,
+  });
+
+  const loadSessions = useEffectEvent(() => sessions.load());
+
   useEffect(() => {
-    if (page !== "security" || hasLoaded.current) return;
-
-    hasLoaded.current = true;
-    let isDone = false;
-
-    setState({ sessionsLoading: true });
-
-    const timer = window.setTimeout(() => {
-      isDone = true;
-      setState({ sessionsLoading: false });
-    }, SESSIONS_LOAD_MS);
-
-    return () => {
-      window.clearTimeout(timer);
-
-      // interrupted (a remount, or leaving the page early): load again next time
-      if (isDone) return;
-
-      hasLoaded.current = false;
-      setState({ sessionsLoading: false });
-    };
+    if (page === "security") loadSessions();
   }, [page]);
 
   useEffect(
@@ -345,6 +337,7 @@ export const useAccountSettings = (props: AccountSettingsProps) => {
     save,
     sendPasswordCode,
     backend,
+    sessions,
     connectGoogle,
   };
 };

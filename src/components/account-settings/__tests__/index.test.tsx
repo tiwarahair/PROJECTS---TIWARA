@@ -23,6 +23,32 @@ const getTestBackend = (): AccountSettingsBackend => ({
   sendPasswordCode: vi.fn(() => Promise.resolve()),
   closeBusiness: vi.fn(() => Promise.resolve()),
   saveNotification: vi.fn(() => Promise.resolve()),
+  getSecurity: vi.fn(() =>
+    Promise.resolve({
+      login_alerts: true,
+      sessions: [
+        {
+          id: "s1",
+          device: "iPhone · Safari",
+          kind: "phone" as const,
+          signed_in_at: "2026-10-01T09:00:00Z",
+          active_at: "2026-10-21T09:00:00Z",
+          is_current: true,
+        },
+        {
+          id: "s2",
+          device: "iPad · Safari",
+          kind: "tablet" as const,
+          signed_in_at: "2026-10-12T09:00:00Z",
+          active_at: "2026-10-18T09:00:00Z",
+          is_current: false,
+        },
+      ],
+    }),
+  ),
+  signOutSession: vi.fn(() => Promise.resolve()),
+  signOutOthers: vi.fn(() => Promise.resolve()),
+  saveLoginAlerts: vi.fn(() => Promise.resolve()),
   changePassword: vi.fn((password: string, code: string) => {
     if (!code) return Promise.resolve("reauthentication_needed");
 
@@ -336,13 +362,21 @@ describe("AccountSettings", () => {
     );
 
     expect(screen.getByLabelText("Loading sessions")).toBeInTheDocument();
-    advance(700);
+    expect(await screen.findByText("Signed in 12 Oct")).toBeInTheDocument();
 
     await user.click(
-      screen.getByRole("button", { name: "Sign out of iPad, Safari" }),
+      screen.getByRole("button", { name: "Sign out of iPad · Safari" }),
     );
 
-    expect(screen.getByText("Signed out of iPad")).toBeInTheDocument();
+    expect(backend.signOutSession).toHaveBeenCalledWith("s2");
+
+    expect(
+      await screen.findByText("Signed out of iPad · Safari"),
+    ).toBeInTheDocument();
+
+    expect(
+      screen.getByText("No other devices are signed in."),
+    ).toBeInTheDocument();
   });
 
   it("security: when Supabase asks, the password change needs the emailed code", async () => {

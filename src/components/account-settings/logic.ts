@@ -1,4 +1,4 @@
-// AccountSettings stand-in sessions and calendar values, validators and display tables.
+// AccountSettings state, stand-in calendar values, validators and display tables.
 import type { NameValues } from "./name-schema";
 import {
   Check,
@@ -25,12 +25,12 @@ export interface TwoFactorDevice {
   backup: boolean;
 }
 
-interface SettingsSession {
+export interface SettingsSession {
   id: string;
   device: string;
-  location: string;
+  signedIn: string;
   last: string;
-  isCurrent?: boolean;
+  isCurrent: boolean;
   kind: "phone" | "laptop" | "tablet";
 }
 
@@ -69,6 +69,7 @@ export interface SettingsState {
   signOthers: boolean;
   sessions: SettingsSession[];
   sessionsLoading: boolean;
+  sessionsFailed: boolean;
   alerts: boolean;
   notifications: Record<NotificationKey, ChannelSetting>;
   google: {
@@ -111,31 +112,9 @@ export const getInitialSettingsState = (
     isSettingPassword: false,
     isPasswordCodeSent: false,
     signOthers: true,
-    sessions: [
-      {
-        id: "s1",
-        device: "iPhone 15, Safari",
-        location: "Manchester, UK",
-        last: "Active now",
-        isCurrent: true,
-        kind: "phone",
-      },
-      {
-        id: "s2",
-        device: "MacBook Air, Chrome",
-        location: "Manchester, UK",
-        last: "2 hours ago",
-        kind: "laptop",
-      },
-      {
-        id: "s3",
-        device: "iPad, Safari",
-        location: "Salford, UK",
-        last: "3 days ago",
-        kind: "tablet",
-      },
-    ],
+    sessions: [],
     sessionsLoading: false,
+    sessionsFailed: false,
     alerts: true,
     notifications: {
       newBooking: channel(),

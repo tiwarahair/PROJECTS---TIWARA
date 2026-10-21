@@ -1,28 +1,7 @@
 import type { ActivityRow } from "../../../lib/studio-api/home";
-import { SHORT_MONTHS, SHORT_WEEKDAYS } from "../../../utils/dates";
+import { getTimeAgo } from "../../../utils/dates";
 import { formatMoney } from "../../../utils/money";
 import type { StudioNotification } from "../core/types";
-
-const HOUR_MS = 3600000;
-const DAY_MS = 24 * HOUR_MS;
-
-export const getTimeAgo = (at: Date, now = new Date()) => {
-  const elapsed = now.getTime() - at.getTime();
-  const isToday = at.toDateString() === now.toDateString();
-
-  if (elapsed < 60000) return "Just now";
-
-  if (elapsed < HOUR_MS) return `${Math.floor(elapsed / 60000)}m ago`;
-
-  if (isToday) return `${Math.floor(elapsed / HOUR_MS)}h ago`;
-
-  if (at.toDateString() === new Date(now.getTime() - DAY_MS).toDateString())
-    return "Yesterday";
-
-  if (elapsed < 6 * DAY_MS) return SHORT_WEEKDAYS[at.getDay()] ?? "";
-
-  return `${at.getDate()} ${SHORT_MONTHS[at.getMonth()]}`;
-};
 
 const getWording = ({
   kind,

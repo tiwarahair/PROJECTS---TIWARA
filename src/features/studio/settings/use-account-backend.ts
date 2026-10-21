@@ -5,6 +5,12 @@ import {
   sendReauthenticationCode,
   verifyEmailChangeCode,
 } from "../../../lib/account-changes";
+import {
+  fetchAccountSecurity,
+  saveLoginAlerts,
+  signOutOtherSessions,
+  signOutSession,
+} from "../../../lib/account-security";
 import { api, useUpdateProfileMutation } from "../../../stores/api-slice";
 import {
   closeBusiness,
@@ -39,6 +45,10 @@ export const useAccountBackend = ({ state, setState }: StudioController) => {
     verifyEmailCode: verifyEmailChangeCode,
     sendPasswordCode: sendReauthenticationCode,
     changePassword,
+    getSecurity: fetchAccountSecurity,
+    signOutSession,
+    signOutOthers: signOutOtherSessions,
+    saveLoginAlerts: (isOn) => saveLoginAlerts(user.id, isOn),
     closeBusiness: async () => {
       await closeBusiness();
       dispatch(api.util.invalidateTags(["Studio", "StylistProfile", "Search"]));

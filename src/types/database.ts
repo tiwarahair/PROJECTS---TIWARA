@@ -845,6 +845,25 @@ export type Database = {
           },
         ];
       };
+      login_devices: {
+        Row: {
+          device: string;
+          last_seen_at: string;
+          user_id: string;
+        };
+        ComputedFields: never;
+        Insert: {
+          device: string;
+          last_seen_at?: string;
+          user_id: string;
+        };
+        Update: {
+          device?: string;
+          last_seen_at?: string;
+          user_id?: string;
+        };
+        Relationships: [];
+      };
       notification_preferences: {
         Row: {
           email: boolean;
@@ -1234,6 +1253,7 @@ export type Database = {
           first_name: string | null;
           id: string;
           last_name: string | null;
+          login_alerts: boolean;
           marketing_opt_in: boolean;
           phone: string | null;
           stripe_customer_id: string | null;
@@ -1246,6 +1266,7 @@ export type Database = {
           first_name?: string | null;
           id: string;
           last_name?: string | null;
+          login_alerts?: boolean;
           marketing_opt_in?: boolean;
           phone?: string | null;
           stripe_customer_id?: string | null;
@@ -1257,6 +1278,7 @@ export type Database = {
           first_name?: string | null;
           id?: string;
           last_name?: string | null;
+          login_alerts?: boolean;
           marketing_opt_in?: boolean;
           phone?: string | null;
           stripe_customer_id?: string | null;
@@ -2285,6 +2307,7 @@ export type Database = {
         Returns: undefined;
       };
       get_account_kind: { Args: { lookup_email: string }; Returns: string };
+      get_account_security: { Args: Record<PropertyKey, never>; Returns: Json };
       get_available_slots: {
         Args: {
           choices: Json;
@@ -2431,6 +2454,8 @@ export type Database = {
         };
         Returns: string[];
       };
+      get_device_kind: { Args: { user_agent: string }; Returns: string };
+      get_device_label: { Args: { user_agent: string }; Returns: string };
       get_dispute_evidence: {
         Args: { owner: string; target: string };
         Returns: Json;
@@ -3114,6 +3139,7 @@ export type Database = {
         };
         Returns: undefined;
       };
+      sign_out_session: { Args: { target: string }; Returns: undefined };
       slugify: { Args: { value: string }; Returns: string };
       start_booking_confirmation: { Args: { token: string }; Returns: Json };
       start_link_payment: { Args: { token: string }; Returns: Json };
