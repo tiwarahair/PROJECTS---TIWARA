@@ -1,5 +1,6 @@
 import { act, screen, within } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+import { supabase } from "../../../lib/supabase";
 import { renderWithStore } from "../../../test/render-with-store";
 import { AccountPage } from "..";
 import type { UserEvent } from "@testing-library/user-event";
@@ -161,7 +162,11 @@ describe("AccountPage", () => {
     ).toBeInTheDocument();
   });
 
-  it("log out everywhere ends the session and shows the gate", async () => {
+  it("log out everywhere ends every session and shows the gate", async () => {
+    const signOut = vi
+      .spyOn(supabase.auth, "signOut")
+      .mockResolvedValue({ error: null });
+
     renderAccount("?section=security");
 
     await user.click(
@@ -174,6 +179,7 @@ describe("AccountPage", () => {
       within(dialog).getByRole("button", { name: "Log out everywhere" }),
     );
 
+    expect(signOut).toHaveBeenCalledWith({ scope: "global" });
     expect(sessionStorage.getItem("tw_cust")).toBeNull();
 
     expect(

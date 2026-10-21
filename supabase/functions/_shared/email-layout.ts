@@ -1,4 +1,5 @@
 // The notice layout shared by every email, matching supabase/templates/*.html: logo, title, paragraphs, an
+import { escapeHtml } from "./escape-html.ts";
 export interface Attachment {
   filename: string;
   content: string;
@@ -29,9 +30,6 @@ export interface Notice {
 export const SUPPORT_EMAIL = "info@tiwarashouse.com";
 
 const FONT = "'Schibsted Grotesk', Helvetica, Arial, sans-serif";
-
-const escapeHtml = (text: string) =>
-  text.replace(/[&<>"']/g, (character) => `&#${character.charCodeAt(0)};`);
 
 const renderHtml = ({ title, paragraphs, button, link, footnote }: Notice) => {
   const body = paragraphs

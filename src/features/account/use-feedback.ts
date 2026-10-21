@@ -106,6 +106,24 @@ export const useAccountFeedback = ({
 
   const stopResendCountdown = () => window.clearInterval(resendTimer.current);
 
+  const saveWith = async (
+    task: () => Promise<unknown>,
+    done: string,
+    failed: string | ((error: unknown) => string),
+  ) => {
+    try {
+      await task();
+    } catch (error) {
+      showToast(typeof failed === "string" ? failed : failed(error));
+
+      return false;
+    }
+
+    showToast(done);
+
+    return true;
+  };
+
   const clearTimers = useCallback(() => {
     window.clearTimeout(toastTimer.current);
     window.clearInterval(resendTimer.current);
@@ -117,6 +135,7 @@ export const useAccountFeedback = ({
     startResendCountdown,
     stopResendCountdown,
     clearTimers,
+    saveWith,
   };
 };
 

@@ -7,7 +7,7 @@ import type { AccountFeedback } from "./use-feedback";
 
 export const getEditActions = (
   { stateRef, setState, forms, saveProfile }: AccountCore,
-  { showToast }: AccountFeedback,
+  { saveWith }: AccountFeedback,
   { sendCodes, confirmCodes }: EmailActions,
 ) => {
   const applyEdit = async (key: EditKey, draft: Profile) => {
@@ -30,14 +30,13 @@ export const getEditActions = (
 
     const { first, last, mobile } = profile;
 
-    try {
-      await saveProfile(key === "name" ? { first, last } : { mobile });
-    } catch {
-      return showToast("Your details couldn’t be saved. Try again");
-    }
+    const isSaved = await saveWith(
+      () => saveProfile(key === "name" ? { first, last } : { mobile }),
+      "Your details are updated",
+      "Your details couldn’t be saved. Try again",
+    );
 
-    setState({ profile, edit: null });
-    showToast("Your details are updated");
+    if (isSaved) setState({ profile, edit: null });
   };
 
   const saveEdit = () => {

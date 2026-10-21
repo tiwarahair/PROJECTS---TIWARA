@@ -5,6 +5,7 @@ import type { AccountBooking, Profile } from "./data";
 import { formatMoney } from "../../utils/money";
 import { formatWeekdayDate, formatClockTime } from "../../utils/dates";
 import { getCalendarFile } from "../../../supabase/functions/_shared/calendar-file";
+import { escapeHtml } from "../../../supabase/functions/_shared/escape-html";
 
 /** "Wed 14 Oct" or "Wed 14 Oct, 10:30". */
 export const formatAccountDate = (time: number, withTime = false): string => {
@@ -34,9 +35,11 @@ interface ReceiptLine {
   amount: string;
 }
 
+type StatusTag = [label: string, background: string, colour: string];
+
 export interface BookingMoney {
   whereShort: string;
-  tag: [string, string, string];
+  tag: StatusTag;
   paid: string;
   due: string;
   lines: ReceiptLine[];
@@ -44,41 +47,35 @@ export interface BookingMoney {
   total: string;
 }
 
-const CONFIRMED_TAG: [string, string, string] = [
-  "Confirmed",
-  "rgba(47,122,77,.12)",
-  "#245c3b",
-];
-
-const CANCELLED_TAG: [string, string, string] = [
-  "Cancelled",
-  "var(--fill-quiet)",
-  "var(--neutral-600)",
-];
-
-const STATUS_TAGS: Record<AccountBooking["status"], [string, string, string]> =
-  {
-    awaiting_confirmation: [
-      "Awaiting confirmation",
-      "rgba(181,84,31,.13)",
-      "#7d3712",
-    ],
-    confirmed: CONFIRMED_TAG,
-    arrived: CONFIRMED_TAG,
-    completed: ["Completed", "var(--fill-quiet)", "var(--neutral-700,#3d3730)"],
-    cancelled: CANCELLED_TAG,
-    auto_cancelled: CANCELLED_TAG,
-    no_show: [
-      "No-show",
-      "var(--accent-wash-strong,rgba(143,17,18,.10))",
-      "var(--accent-700)",
-    ],
-  };
+const STATUS_TAGS: Record<AccountBooking["status"], StatusTag> = {
+  awaiting_confirmation: [
+    "Awaiting confirmation",
+    "rgba(181,84,31,.13)",
+    "#7d3712",
+  ],
+  confirmed: ["Confirmed", "rgba(47,122,77,.12)", "#245c3b"],
+  arrived: ["Confirmed", "rgba(47,122,77,.12)", "#245c3b"],
+  completed: ["Completed", "var(--fill-quiet)", "var(--neutral-700,#3d3730)"],
+  cancelled: ["Cancelled", "var(--fill-quiet)", "var(--neutral-600)"],
+  auto_cancelled: ["Cancelled", "var(--fill-quiet)", "var(--neutral-600)"],
+  no_show: [
+    "No-show",
+    "var(--accent-wash-strong,rgba(143,17,18,.10))",
+    "var(--accent-700)",
+  ],
+};
 
 const UPCOMING_STATUSES: AccountBooking["status"][] = [
   "awaiting_confirmation",
   "confirmed",
   "arrived",
+];
+
+// the appointment never happened, so the client paid only what was kept
+const CALLED_OFF_STATUSES: AccountBooking["status"][] = [
+  "cancelled",
+  "auto_cancelled",
+  "no_show",
 ];
 
 export const isUpcomingBooking = ({ status }: AccountBooking) =>
@@ -91,53 +88,55 @@ const METHOD_LABELS: Record<string, string> = {
 };
 
 export const getBookingMoney = (booking: AccountBooking): BookingMoney => {
-  const { pricePence, feePence, tipPence, payments, refunds, cardLabel } =
+  const { status, service, customisation, pricePence, feePence, tipPence } =
     booking;
 
-  const paidPence = sumPence(payments);
+  const { payments, refunds, cardLabel } = booking;
+  const tag = STATUS_TAGS[status];
   const refundedPence = sumPence(refunds);
-  const totalPence = pricePence + feePence + tipPence;
-  const duePence = totalPence - paidPence;
+  const netPence = sumPence(payments) - refundedPence;
+  const isCalledOff = CALLED_OFF_STATUSES.includes(status);
+
+  const lines = isCalledOff
+    ? [{ label: service, subtitle: tag[0], pence: netPence }]
+    : [
+        { label: service, subtitle: customisation, pence: pricePence },
+        { label: "Booking fee", subtitle: "", pence: feePence },
+        { label: "Tip", subtitle: "", pence: tipPence },
+      ].filter(({ pence }, index) => index === 0 || pence > 0);
+
+  const totalPence = isCalledOff ? netPence : pricePence + feePence + tipPence;
+  const duePence = totalPence - netPence;
 
   const getMethod = (method: string) =>
-    method === "card" ? (cardLabel ?? "Card") : (METHOD_LABELS[method] ?? "");
-
-  const paidParts = [
-    paidPence - refundedPence > 0 &&
-      `${formatPence(paidPence - refundedPence)} paid`,
-    refundedPence > 0 && `${formatPence(refundedPence)} refunded`,
-  ].filter(Boolean);
-
-  const lines: ReceiptLine[] = [
-    {
-      label: booking.service,
-      subtitle: booking.customisation,
-      amount: formatPence(pricePence),
-    },
-  ];
-
-  if (feePence)
-    lines.push({
-      label: "Booking fee",
-      subtitle: "",
-      amount: formatPence(feePence),
-    });
-
-  if (tipPence)
-    lines.push({ label: "Tip", subtitle: "", amount: formatPence(tipPence) });
+    method === "card" ? (cardLabel ?? "Card") : METHOD_LABELS[method];
 
   return {
     whereShort: booking.isMobile ? "At your address" : booking.stylistArea,
-    tag: STATUS_TAGS[booking.status],
-    paid: paidParts.join(" · "),
+    tag,
+    paid: [
+      netPence > 0 && `${formatPence(netPence)} paid`,
+      refundedPence > 0 && `${formatPence(refundedPence)} refunded`,
+    ]
+      .filter(Boolean)
+      .join(" · "),
     due:
       isUpcomingBooking(booking) && duePence > 0
         ? ` · ${formatPence(duePence)} to pay at your appointment`
         : "",
-    lines,
+    lines: lines.map(({ label, subtitle, pence }) => ({
+      label,
+      subtitle,
+      amount: formatPence(pence),
+    })),
     payments: [
       ...payments.map(({ kind, method, amountPence, paidAt }) => ({
-        label: `${kind === "fee" ? "Fee charged" : "Paid"} ${formatAccountDate(paidAt)} · ${getMethod(method)}`,
+        label: [
+          `${kind === "fee" ? "Fee charged" : "Paid"} ${formatAccountDate(paidAt)}`,
+          getMethod(method),
+        ]
+          .filter(Boolean)
+          .join(" · "),
         amount: formatPence(amountPence),
       })),
       ...refunds.map(({ amountPence, refundedAt }) => ({
@@ -180,26 +179,31 @@ interface ReceiptView {
 }
 
 export const getReceiptHtml = (
-  receipt: ReceiptView,
-  profile: Profile,
+  { ref, date, stylist, where, total, lines, payments }: ReceiptView,
+  { first, last }: Profile,
 ): string => {
-  const rows =
-    receipt.lines
-      .map(({ label, subtitle, amount }) => {
-        const subtitleLine = subtitle ? `<br><small>${subtitle}</small>` : "";
+  const rows = [
+    ...lines.map(({ label, subtitle, amount }) => {
+      const subtitleLine = subtitle
+        ? `<br><small>${escapeHtml(subtitle)}</small>`
+        : "";
 
-        return `<tr><td>${label}${subtitleLine}</td><td align="right">${amount}</td></tr>`;
-      })
-      .join("") +
-    receipt.payments
-      .map(
-        ({ label, amount }) =>
-          `<tr><td><small>${label}</small></td><td align="right"><small>${amount}</small></td></tr>`,
-      )
-      .join("");
+      return `<tr><td>${escapeHtml(label)}${subtitleLine}</td><td align="right">${amount}</td></tr>`;
+    }),
+    ...payments.map(
+      ({ label, amount }) =>
+        `<tr><td><small>${escapeHtml(label)}</small></td><td align="right"><small>${amount}</small></td></tr>`,
+    ),
+  ].join("");
 
-  const { ref, date, stylist, where, total } = receipt;
-  const { first, last } = profile;
+  const details = [
+    `${ref} · ${date}`,
+    stylist,
+    where,
+    `Billed to ${first} ${last}`,
+  ]
+    .map(escapeHtml)
+    .join("<br>");
 
-  return `<!doctype html><meta charset="utf-8"><title>Receipt ${ref}</title><body style="font-family:sans-serif;max-width:480px;margin:40px auto;color:#1a1714"><h1>Tiwára’s House receipt</h1><p>${ref} · ${date}<br>${stylist}<br>${where}<br>Billed to ${first} ${last}</p><table width="100%" cellpadding="8">${rows}<tr><th align="left">Total</th><th align="right">${total}</th></tr></table></body>`;
+  return `<!doctype html><meta charset="utf-8"><title>Receipt ${escapeHtml(ref)}</title><body style="font-family:sans-serif;max-width:480px;margin:40px auto;color:#1a1714"><h1>Tiwára’s House receipt</h1><p>${details}</p><table width="100%" cellpadding="8">${rows}<tr><th align="left">Total</th><th align="right">${total}</th></tr></table></body>`;
 };

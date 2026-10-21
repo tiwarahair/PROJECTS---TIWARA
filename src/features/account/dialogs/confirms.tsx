@@ -86,7 +86,7 @@ export const LogoutAll = ({ account: { actions } }: LogoutAllProps) => (
     onCancel={actions.closeDialog}
     onConfirm={() => {
       actions.setState({ dialog: null, loggedOut: true });
-      actions.endSession();
+      actions.endSession("global");
       actions.showToast("You’re logged out of all devices");
     }}
   />

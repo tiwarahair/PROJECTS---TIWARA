@@ -9,9 +9,7 @@ import type { SessionUser } from "../types/session";
 interface SessionState {
   loggedIn: boolean;
   user: SessionUser | null;
-  /** True once Supabase has reported the initial session. */
   ready: boolean;
-  /** They signed out themselves, so signed-in pages send them home rather than to log in. */
   hasSignedOut: boolean;
 }
 
@@ -43,7 +41,10 @@ export const sessionSlice = createSlice({
 
 export const { sessionChanged, signedOut } = sessionSlice.actions;
 
-export const logOut = () => (dispatch: Dispatch) => {
-  dispatch(signedOut());
-  void supabase.auth.signOut();
-};
+/** logs out this device only; "global" logs out every device */
+export const logOut =
+  (scope: "local" | "global" = "local") =>
+  (dispatch: Dispatch) => {
+    dispatch(signedOut());
+    void supabase.auth.signOut({ scope });
+  };

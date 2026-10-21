@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import type { AccountBooking } from "../data";
-import { getBookingMoney } from "../logic";
+import { getBookingMoney, getReceiptHtml } from "../logic";
 
 const PAID_AT = new Date("2026-10-01T09:00:00Z").getTime();
 
@@ -57,6 +57,50 @@ describe("account logic", () => {
       { label: "Paid Thu 1 Oct · Visa •••• 4242", amount: "£13.40" },
       { label: "Refunded Fri 2 Oct", amount: "−£12" },
     ]);
+
+    expect(money.lines).toEqual([
+      { label: "Silk press", subtitle: "Cancelled", amount: "£1.40" },
+    ]);
+
+    expect(money.total).toBe("£1.40");
+  });
+
+  it("what's left to pay counts refunds, and an unknown payment method adds no separator", () => {
+    const money = getBookingMoney(
+      getBooking({
+        payments: [
+          {
+            kind: "booking",
+            method: "voucher",
+            amountPence: 1340,
+            paidAt: PAID_AT,
+          },
+        ],
+        refunds: [{ amountPence: 1340, refundedAt: PAID_AT }],
+      }),
+    );
+
+    expect(money.due).toBe(" · £61.40 to pay at your appointment");
+    expect(money.payments[0]?.label).toBe("Paid Thu 1 Oct");
+  });
+
+  it("the downloaded receipt escapes what stylists and clients typed", () => {
+    const html = getReceiptHtml(
+      {
+        ref: "TH-1",
+        date: "Thu 1 Oct",
+        stylist: "<img src=x onerror=alert(1)>",
+        where: "1 High St",
+        total: "£1",
+        lines: [{ label: "Silk & press", subtitle: "", amount: "£1" }],
+        payments: [],
+      },
+      { first: "Nia", last: "Okafor", email: "", mobile: "" },
+    );
+
+    expect(html).not.toContain("<img");
+    expect(html).toContain("&#60;img src=x onerror=alert(1)&#62;");
+    expect(html).toContain("Silk &#38; press");
   });
 
   it("a checked-out booking lists the tip and every payment", () => {

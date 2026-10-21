@@ -5,31 +5,13 @@ import {
   sendReauthenticationCode,
 } from "../../lib/account-changes";
 import { logOut } from "../../stores/session-slice";
-import type { SavedAddress } from "../../types/address";
-import { getErrorMessage } from "../../stores/api-slice";
-import { formatPostcode } from "../../utils/address";
-import type { SavedCard } from "./data";
 import { EMPTY_PASSWORD } from "./forms";
-import type { AddressFormValues } from "./schemas";
 import type { AccountCore } from "./use-core";
 import type { AccountFeedback } from "./use-feedback";
 
 export const getSaveActions = (
-  {
-    stateRef,
-    dataRef,
-    setState,
-    forms,
-    navigate,
-    dispatch,
-    saveProfile,
-    saveAddress: saveAddressRow,
-    deleteAddress,
-    setDefaultCard,
-    removeCard,
-    refetchCards,
-  }: AccountCore,
-  { focusLater, showToast }: AccountFeedback,
+  { stateRef, setState, forms, navigate, dispatch, saveProfile }: AccountCore,
+  { focusLater, showToast, saveWith }: AccountFeedback,
 ) => {
   const sendPasswordCode = () =>
     sendReauthenticationCode()
@@ -82,115 +64,15 @@ export const getSaveActions = (
   });
 
   const saveMarketing = async (isOn: boolean) => {
-    try {
-      await saveProfile({ marketing: isOn });
-    } catch {
-      return showToast("Your email choice couldn’t be saved. Try again");
-    }
-
-    setState({ marketing: isOn });
-
-    showToast(
+    const isSaved = await saveWith(
+      () => saveProfile({ marketing: isOn }),
       isOn
         ? "You’ll get offers and news by email"
         : "You won’t get offers and news by email",
-    );
-  };
-
-  const finishCardSetup = async (card: string, isDefault: boolean) => {
-    try {
-      if (isDefault || !dataRef.current.cards.length)
-        await setDefaultCard(card).unwrap();
-      else await refetchCards();
-    } catch {
-      // the card is saved; only the default didn't change
-    }
-
-    setState({ dialog: null }, () => focusLater("returnFocus"));
-    showToast("Card saved");
-  };
-
-  const makeDefaultCard = async ({ id, brand, last4 }: SavedCard) => {
-    try {
-      await setDefaultCard(id).unwrap();
-    } catch {
-      return showToast("Your default card couldn’t be changed. Try again");
-    }
-
-    showToast(`${brand} •••• ${last4} is now your default card`);
-  };
-
-  const removeSavedCard = async (id: string) => {
-    try {
-      await removeCard(id).unwrap();
-    } catch (error) {
-      return showToast(
-        getErrorMessage(error) === "card_in_use"
-          ? "This card is needed for an upcoming booking"
-          : "Your card couldn’t be removed. Try again",
-      );
-    }
-
-    showToast("Card removed");
-  };
-
-  const addressFailure = (error: unknown) =>
-    showToast(
-      getErrorMessage(error) === "too_many_addresses"
-        ? "You can save up to 10 addresses"
-        : "Your address couldn’t be saved. Try again",
+      "Your email choice couldn’t be saved. Try again",
     );
 
-  const saveAddress = forms.address.handleSubmit(
-    async ({ label, address, isDefault }: AddressFormValues) => {
-      const { addressForm } = stateRef.current;
-
-      if (!addressForm || !address) return;
-
-      try {
-        await saveAddressRow({
-          id: addressForm.mode === "edit" ? (addressForm.id ?? null) : null,
-          address: {
-            label: label.trim() || "Address",
-            line1: address.line1 ?? "",
-            line2: address.line2 ?? "",
-            town: address.town ?? "",
-            postcode: formatPostcode(address.postcode),
-            lat: address.lat ?? null,
-            lng: address.lng ?? null,
-            isDefault,
-          },
-        }).unwrap();
-      } catch (error) {
-        return addressFailure(error);
-      }
-
-      setState({ addressForm: null });
-      showToast("Address saved");
-    },
-  );
-
-  const makeDefaultAddress = async ({ id, ...address }: SavedAddress) => {
-    try {
-      await saveAddressRow({
-        id,
-        address: { ...address, isDefault: true },
-      }).unwrap();
-    } catch (error) {
-      return addressFailure(error);
-    }
-
-    showToast(`${address.label} is now your default address`);
-  };
-
-  const removeAddress = async (id: string) => {
-    try {
-      await deleteAddress(id).unwrap();
-    } catch {
-      return showToast("Your address couldn’t be removed. Try again");
-    }
-
-    showToast("Address removed");
+    if (isSaved) setState({ marketing: isOn });
   };
 
   const onPhoto = (event: ChangeEvent<HTMLInputElement>) => {
@@ -229,7 +111,7 @@ export const getSaveActions = (
   };
 
   /** Ends the session without leaving the page (log out everywhere, delete account). */
-  const endSession = () => dispatch(logOut());
+  const endSession = (scope?: "global") => dispatch(logOut(scope));
 
   const logout = () => {
     endSession();
@@ -240,12 +122,6 @@ export const getSaveActions = (
     savePassword,
     sendPasswordCode,
     saveMarketing,
-    finishCardSetup,
-    makeDefaultCard,
-    removeSavedCard,
-    saveAddress,
-    makeDefaultAddress,
-    removeAddress,
     onPhoto,
     copy,
     endSession,

@@ -170,4 +170,4 @@ export const completeClientProfile = async (details: PersonDetails) => {
   if (error) throw new Error(error.message);
 };
 
-export const signOut = () => supabase.auth.signOut();
+export const signOut = () => supabase.auth.signOut({ scope: "local" });
