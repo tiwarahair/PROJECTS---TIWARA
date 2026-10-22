@@ -7,6 +7,7 @@ import { showToast } from "./toast-slice";
 interface FavouritesState {
   ids: string[];
   isLoaded: boolean;
+  isFailed: boolean;
   ownerId: string | null;
   loginSheetFor: string | null;
 }
@@ -14,6 +15,7 @@ interface FavouritesState {
 const initialState: FavouritesState = {
   ids: [],
   isLoaded: false,
+  isFailed: false,
   ownerId: null,
   loginSheetFor: null,
 };
@@ -22,6 +24,12 @@ export const favouritesSlice = createSlice({
   name: "favourites",
   initialState,
   reducers: {
+    favouritesRequested: (state) => {
+      state.isFailed = false;
+    },
+    favouritesFailed: (state, { payload: ownerId }: PayloadAction<string>) => {
+      if (state.ownerId === ownerId && !state.isLoaded) state.isFailed = true;
+    },
     favouritesLoaded: (
       state,
       {
@@ -59,13 +67,15 @@ export const favouritesSlice = createSlice({
       state.ownerId = ownerId;
       state.ids = [];
       state.isLoaded = false;
+      state.isFailed = false;
     }),
 });
 
 export const { setFavourite, openLoginSheet, closeLoginSheet } =
   favouritesSlice.actions;
 
-const { favouritesLoaded } = favouritesSlice.actions;
+const { favouritesRequested, favouritesFailed, favouritesLoaded } =
+  favouritesSlice.actions;
 
 // load the account's favourites
 export const loadFavourites =
@@ -75,6 +85,8 @@ export const loadFavourites =
     getState: () => { favourites: FavouritesState },
   ) => {
     const startIds = getState().favourites.ids;
+
+    dispatch(favouritesRequested());
 
     try {
       const savedIds = await fetchFavourites();
@@ -92,8 +104,8 @@ export const loadFavourites =
 
       dispatch(favouritesLoaded({ ownerId, ids }));
     } catch {
-      // offline: show the hearts as they are; the next page load tries again
-      dispatch(favouritesLoaded({ ownerId, ids: getState().favourites.ids }));
+      // a list already shown stays as it is; with none yet, the page offers to try again
+      dispatch(favouritesFailed(ownerId));
     }
   };
 

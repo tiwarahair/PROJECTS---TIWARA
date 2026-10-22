@@ -37,6 +37,7 @@ export const AccountPage = (props: AccountPageProps) => {
   const { state, actions, loggedIn } = account;
   const ids = useAppSelector(({ favourites }) => favourites.ids);
   const isLoaded = useAppSelector(({ favourites }) => favourites.isLoaded);
+  const isFailed = useAppSelector(({ favourites }) => favourites.isFailed);
 
   const view = getAccountView(state, account.data, { ids, isLoaded }, loggedIn);
   const { current, mobileHome, initials, accountName } = view;
@@ -175,6 +176,7 @@ export const AccountPage = (props: AccountPageProps) => {
                     <FavouritesSection
                       favouriteIds={view.favouriteIds}
                       isLoaded={view.isFavouritesLoaded}
+                      isFailed={isFailed}
                     />
                   )}
                   {current === "hair" && (
