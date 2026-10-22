@@ -53,11 +53,19 @@ const FavouriteCard = ({ slug }: { slug: string }) => {
 
 export const FavouritesSection = ({
   favouriteIds,
+  isLoaded,
 }: {
   favouriteIds: string[];
+  isLoaded: boolean;
 }) => (
   <section data-screen-label="Account: Favourites">
-    {favouriteIds.length > 0 && (
+    {!isLoaded && (
+      <div className={styles.favGrid} aria-busy="true">
+        <StylistCardSkeleton />
+        <StylistCardSkeleton />
+      </div>
+    )}
+    {isLoaded && favouriteIds.length > 0 && (
       <>
         <p className={styles.count}>
           {favouriteIds.length === 1
@@ -71,7 +79,7 @@ export const FavouritesSection = ({
         </div>
       </>
     )}
-    {!favouriteIds.length && (
+    {isLoaded && !favouriteIds.length && (
       <div className={ui.emptyState} data-screen-label="Favourites empty">
         <div className={ui.emptyIcon}>
           <Heart size={24} strokeWidth={2} />

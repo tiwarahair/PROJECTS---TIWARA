@@ -53,11 +53,16 @@ const getBookingCard = (
   };
 };
 
-/** The page's derived values; `favouriteIds` comes from the favourites store. */
+interface FavouritesView {
+  ids: string[];
+  isLoaded: boolean;
+}
+
+/** The page's derived values; `favourites` comes from the favourites store. */
 export const getAccountView = (
   state: AccountState,
   { bookings }: AccountData,
-  favouriteIds: string[],
+  { ids: favouriteIds, isLoaded: isFavouritesLoaded }: FavouritesView,
   loggedIn: boolean,
 ) => {
   const now = Date.now();
@@ -122,10 +127,13 @@ export const getAccountView = (
 
   quick.push({
     key: "favs",
-    label: `Your favourites (${favouriteIds.length})`,
-    subtitle: favouriteIds.length
-      ? "Stylists you’ve saved"
-      : "Save stylists you love",
+    label: isFavouritesLoaded
+      ? `Your favourites (${favouriteIds.length})`
+      : "Your favourites",
+    subtitle:
+      favouriteIds.length || !isFavouritesLoaded
+        ? "Stylists you’ve saved"
+        : "Save stylists you love",
     href: "/account?section=favourites",
     icon: Heart,
     section: "favourites",
@@ -182,6 +190,7 @@ export const getAccountView = (
     quick,
     quizDate,
     favouriteIds,
+    isFavouritesLoaded,
     showUpcoming: (bookingsTab || "up") !== "past" || !past.length,
     showPast: showPastTab,
     activeTab: showPastTab ? "past" : "up",

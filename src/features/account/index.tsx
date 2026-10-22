@@ -35,8 +35,10 @@ export type AccountPageProps = AccountProps;
 export const AccountPage = (props: AccountPageProps) => {
   const account = useAccount(props);
   const { state, actions, loggedIn } = account;
-  const favouriteIds = useAppSelector(({ favourites }) => favourites.ids);
-  const view = getAccountView(state, account.data, favouriteIds, loggedIn);
+  const ids = useAppSelector(({ favourites }) => favourites.ids);
+  const isLoaded = useAppSelector(({ favourites }) => favourites.isLoaded);
+
+  const view = getAccountView(state, account.data, { ids, isLoaded }, loggedIn);
   const { current, mobileHome, initials, accountName } = view;
   const { setState, goToSection, showToast } = actions;
 
@@ -102,7 +104,6 @@ export const AccountPage = (props: AccountPageProps) => {
               current={current}
               accountName={accountName}
               initials={initials}
-              photo={account.data.photo}
               onGo={goToSection}
               onLogOut={actions.logout}
             />
@@ -112,7 +113,6 @@ export const AccountPage = (props: AccountPageProps) => {
               <AccountMobileList
                 accountName={accountName}
                 initials={initials}
-                photo={account.data.photo}
                 onGo={goToSection}
                 onLogOut={actions.logout}
               />
@@ -172,7 +172,10 @@ export const AccountPage = (props: AccountPageProps) => {
                     />
                   )}
                   {current === "favourites" && (
-                    <FavouritesSection favouriteIds={view.favouriteIds} />
+                    <FavouritesSection
+                      favouriteIds={view.favouriteIds}
+                      isLoaded={view.isFavouritesLoaded}
+                    />
                   )}
                   {current === "hair" && (
                     <HairSection quiz={state.quiz} quizDate={view.quizDate} />

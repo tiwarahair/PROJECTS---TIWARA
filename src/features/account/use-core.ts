@@ -40,9 +40,7 @@ export interface AccountData {
   addresses: SavedAddress[];
   bookings: AccountBooking[];
   cards: SavedCard[];
-  photo: string | null;
   hasPhoto: boolean;
-  isPhotoLoading: boolean;
 }
 
 export const useAccountCore = (props: AccountProps) => {
@@ -127,11 +125,7 @@ export const useAccountCore = (props: AccountProps) => {
   const [setDefaultCard] = useSetDefaultCardMutation();
   const [removeCard] = useRemoveClientCardMutation();
 
-  const {
-    photo: photoUrl,
-    hasPhoto,
-    isLoading: isPhotoLoading,
-  } = useAccountPhoto();
+  const { hasPhoto } = useAccountPhoto();
 
   const [setAccountPhoto] = useSetAccountPhotoMutation();
 
@@ -149,11 +143,9 @@ export const useAccountCore = (props: AccountProps) => {
       addresses: savedAddresses,
       bookings: bookings ?? NO_BOOKINGS,
       cards: cards ?? NO_CARDS,
-      photo: photoUrl,
       hasPhoto,
-      isPhotoLoading,
     }),
-    [savedAddresses, bookings, cards, photoUrl, hasPhoto, isPhotoLoading],
+    [savedAddresses, bookings, cards, hasPhoto],
   );
 
   const dataRef = useRef(data);

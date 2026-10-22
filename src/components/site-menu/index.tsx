@@ -2,11 +2,10 @@ import { useCallback, useRef, useState } from "react";
 import type { MouseEvent, ReactNode } from "react";
 import { ChevronDown } from "lucide-react";
 import { useLocation } from "react-router";
-import { useAccountPhoto } from "../../hooks/use-account-photo";
 import { useIdentity } from "../../hooks/use-identity";
 import { useMediaQuery } from "../../hooks/use-media-query";
 import { useSignOut } from "../../hooks/use-sign-out";
-import { resolveAssetUrl } from "../../utils/asset-url";
+import { AccountPhoto } from "../account-photo";
 import { NavMenu, NavMenuAccountHead } from "../nav-menu";
 import type { NavMenuItem } from "../nav-menu";
 import styles from "../../styles/components/site-menu/index.module.css";
@@ -54,26 +53,16 @@ interface AccountAvatarProps {
   className?: string;
 }
 
-/** The account trigger's contents: the photo or initials, and a chevron. */
+/** The account trigger's contents: the photo (or initials), and a chevron. */
 export const AccountAvatar = ({
   initials,
   hasChevron = true,
   className = styles.avatar,
 }: AccountAvatarProps) => {
-  const { photo } = useAccountPhoto();
-
   return (
     <>
       <span aria-hidden="true" className={className}>
-        {photo ? (
-          <img
-            className={styles.avatarImage}
-            src={resolveAssetUrl(photo)}
-            alt=""
-          />
-        ) : (
-          initials
-        )}
+        <AccountPhoto initials={initials} />
       </span>
       {hasChevron && <ChevronDown size={14} strokeWidth={1.7} />}
     </>

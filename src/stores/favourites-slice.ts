@@ -6,14 +6,14 @@ import { showToast } from "./toast-slice";
 
 interface FavouritesState {
   ids: string[];
-  /** The signed-in account the saved list belongs to. */
+  isLoaded: boolean;
   ownerId: string | null;
-  /** Guest tapped a heart: the "Log in to save stylists" sheet is open for this stylist. */
   loginSheetFor: string | null;
 }
 
 const initialState: FavouritesState = {
   ids: [],
+  isLoaded: false,
   ownerId: null,
   loginSheetFor: null,
 };
@@ -28,7 +28,10 @@ export const favouritesSlice = createSlice({
         payload: { ownerId, ids },
       }: PayloadAction<{ ownerId: string; ids: string[] }>,
     ) => {
-      if (state.ownerId === ownerId) state.ids = ids;
+      if (state.ownerId !== ownerId) return;
+
+      state.ids = ids;
+      state.isLoaded = true;
     },
     setFavourite: (
       state,
@@ -55,6 +58,7 @@ export const favouritesSlice = createSlice({
 
       state.ownerId = ownerId;
       state.ids = [];
+      state.isLoaded = false;
     }),
 });
 
@@ -88,7 +92,8 @@ export const loadFavourites =
 
       dispatch(favouritesLoaded({ ownerId, ids }));
     } catch {
-      // offline: the hearts stay as they are and the next page load tries again
+      // offline: show the hearts as they are; the next page load tries again
+      dispatch(favouritesLoaded({ ownerId, ids: getState().favourites.ids }));
     }
   };
 

@@ -1,5 +1,5 @@
 import { Pencil } from "lucide-react";
-import Skeleton from "react-loading-skeleton";
+import { AccountPhoto } from "../../../components/account-photo";
 import type { AccountController } from "../use-account";
 import styles from "../../../styles/features/account/personal-section/photo-row.module.css";
 import ui from "../../../styles/features/account/ui.module.css";
@@ -26,11 +26,7 @@ export const PhotoRow = ({
           aria-label={data.hasPhoto ? "Change photo" : "Upload photo"}
         >
           <span className={styles.photoAvatar} aria-hidden="true">
-            {data.isPhotoLoading && <Skeleton circle width={56} height={56} />}
-            {data.photo && (
-              <img className={styles.avatarImage} src={data.photo} alt="" />
-            )}
-            {!data.photo && !data.isPhotoLoading && initials}
+            <AccountPhoto initials={initials} />
           </span>
           <span className={styles.photoBadge} aria-hidden="true">
             <Pencil size={13} strokeWidth={2} />

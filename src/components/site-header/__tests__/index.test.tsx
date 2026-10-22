@@ -1,4 +1,4 @@
-import { screen, waitFor } from "@testing-library/react";
+import { act, screen, waitFor } from "@testing-library/react";
 import type { UserEvent } from "@testing-library/user-event";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { getAccountPhotoUrl } from "../../../lib/account-photo";
@@ -85,5 +85,33 @@ describe("SiteHeader", () => {
     );
 
     expect(getAccountPhotoUrl).toHaveBeenCalledWith("test-user/photo.jpg");
+  });
+
+  it("shows a skeleton, not initials, while the photo is on its way", async () => {
+    vi.mocked(getAccountPhotoUrl).mockReturnValueOnce(new Promise(() => {}));
+
+    const { container, store } = renderWithStore(<SiteHeader />, "/", {
+      signedIn: true,
+    });
+
+    act(() => {
+      store.dispatch(
+        api.util.upsertQueryEntries([
+          {
+            endpointName: "getProfile",
+            arg: TEST_USER.id,
+            value: { ...TEST_PROFILE, photoPath: "test-user/photo.jpg" },
+          },
+        ]),
+      );
+    });
+
+    await waitFor(() =>
+      expect(container.querySelector(".react-loading-skeleton")).not.toBeNull(),
+    );
+
+    expect(
+      screen.getByRole("button", { name: "Account" }),
+    ).not.toHaveTextContent("NO");
   });
 });
