@@ -1,0 +1,118 @@
+import { useState } from "react";
+import { Button } from "../ds/button";
+import type { ReportReason } from "../../lib/review-api";
+import { Sheet } from "../sheet";
+import { useReportReviewMutation } from "../../stores/api-slice";
+import styles from "../../styles/components/report-review/index.module.css";
+
+const REASONS: { reason: ReportReason; label: string }[] = [
+  { reason: "abusive", label: "Abusive, hateful or harassing" },
+  {
+    reason: "personal_info",
+    label: "Shares private details, like a phone number",
+  },
+  { reason: "not_real", label: "Not a real visit, or the wrong stylist" },
+  {
+    reason: "conflict",
+    label: "Written by someone with a conflict of interest",
+  },
+  { reason: "spam", label: "Spam or advertising" },
+  { reason: "threat", label: "A threat, or asks for something in return" },
+];
+
+interface ReportReviewProps {
+  reviewId: string;
+  onClose: () => void;
+}
+
+/** Report a review with a reason; it stays up but stops counting toward the rating while we check it. */
+export const ReportReview = ({ reviewId, onClose }: ReportReviewProps) => {
+  const [reason, setReason] = useState<ReportReason | "">("");
+  const [details, setDetails] = useState("");
+  const [error, setError] = useState("");
+  const [report, { data: outcome, isLoading }] = useReportReviewMutation();
+
+  const send = async () => {
+    if (!reason) {
+      setError("Choose a reason.");
+
+      return;
+    }
+
+    await report({ reviewId, reason, details })
+      .unwrap()
+      .catch(() => setError("We couldn’t send your report. Try again."));
+  };
+
+  if (outcome)
+    return (
+      <Sheet
+        open
+        size="sm"
+        title="Thanks for telling us"
+        onClose={onClose}
+        footer={<Button onClick={onClose}>Done</Button>}
+      >
+        <p className={styles.text}>
+          {outcome === "already_reported"
+            ? "You’ve already reported this review. We’ll email you when we’ve decided."
+            : "We’ll check it against our review rules, usually within 2 working days, and email you what we decided. A bad rating on its own isn’t a reason to remove a review."}
+        </p>
+      </Sheet>
+    );
+
+  return (
+    <Sheet
+      open
+      size="sm"
+      title="Report this review"
+      onClose={onClose}
+      footer={
+        <>
+          <Button variant="ghost" onClick={onClose}>
+            Cancel
+          </Button>
+          <Button disabled={isLoading} onClick={() => void send()}>
+            {isLoading ? "Sending…" : "Send report"}
+          </Button>
+        </>
+      }
+    >
+      <fieldset className={styles.reasons}>
+        <legend className={styles.legend}>What’s wrong with it?</legend>
+        {REASONS.map(({ reason: value, label }) => (
+          <label key={value} className={styles.reason}>
+            <input
+              type="radio"
+              name="report-reason"
+              value={value}
+              checked={reason === value}
+              onChange={() => {
+                setReason(value);
+                setError("");
+              }}
+            />
+            {label}
+          </label>
+        ))}
+      </fieldset>
+      <label className={styles.field}>
+        <span className={styles.legend}>
+          Anything else? <span className={styles.optional}>(optional)</span>
+        </span>
+        <textarea
+          className={styles.textarea}
+          value={details}
+          maxLength={1000}
+          rows={3}
+          onChange={(event) => setDetails(event.target.value)}
+        />
+      </label>
+      {!!error && (
+        <p className={styles.error} role="alert">
+          {error}
+        </p>
+      )}
+    </Sheet>
+  );
+};

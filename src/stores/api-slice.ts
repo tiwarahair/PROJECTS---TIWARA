@@ -63,6 +63,21 @@ import {
   startCardUpdate,
 } from "../lib/card-update-api";
 import type { CardUpdate } from "../lib/card-update-api";
+import {
+  fetchReviewPage,
+  fetchStylistReviews,
+  REVIEWS_PAGE_SIZE,
+  reportReview,
+  submitReview,
+} from "../lib/review-api";
+import type {
+  PublicReviewsPage,
+  ReviewDraft,
+  ReviewPage,
+  ReviewReport,
+} from "../lib/review-api";
+import { fetchStudioReviews, replyToReview } from "../lib/studio-api/reviews";
+import type { StudioReviews } from "../lib/studio-api/reviews";
 import type { PaymentLink } from "../lib/payment-link-api";
 import { listTwoFactorDevices } from "../lib/two-factor";
 import type { TwoFactorDevice } from "../lib/two-factor";
@@ -98,6 +113,7 @@ export const api = createApi({
     "ManagedBooking",
     "Bookings",
     "Earnings",
+    "Reviews",
   ],
   refetchOnReconnect: true,
   endpoints: (build) => ({
@@ -284,6 +300,50 @@ export const api = createApi({
     saveCardUpdate: build.mutation<CardUpdate, string>({
       queryFn: (token) => toQueryResult(saveCardUpdate(token)),
     }),
+    getReviewPage: build.query<ReviewPage, string>({
+      queryFn: (token) => toQueryResult(fetchReviewPage(token)),
+    }),
+    submitReview: build.mutation<ReviewPage, ReviewDraft>({
+      queryFn: (draft) => toQueryResult(submitReview(draft)),
+      onQueryStarted: ({ token }, { dispatch, queryFulfilled }) => {
+        queryFulfilled
+          .then(({ data }) => {
+            void dispatch(
+              api.util.upsertQueryData("getReviewPage", token, data),
+            );
+          })
+          .catch(() => undefined);
+      },
+    }),
+    getStylistReviews: build.infiniteQuery<PublicReviewsPage, string, number>({
+      providesTags: ["Reviews"],
+      keepUnusedDataFor: 300,
+      infiniteQueryOptions: {
+        initialPageParam: 0,
+        getNextPageParam: ({ total }, _allPages, lastPageParam) =>
+          (lastPageParam + 1) * REVIEWS_PAGE_SIZE < total
+            ? lastPageParam + 1
+            : undefined,
+      },
+      queryFn: ({ queryArg, pageParam }) =>
+        toQueryResult(fetchStylistReviews(queryArg, pageParam)),
+    }),
+    reportReview: build.mutation<"reported" | "already_reported", ReviewReport>(
+      {
+        queryFn: (report) => toQueryResult(reportReview(report)),
+        invalidatesTags: ["Reviews", "StylistProfile"],
+      },
+    ),
+    getStudioReviews: build.query<StudioReviews, string>({
+      providesTags: ["Reviews"],
+      queryFn: (stylistId) => toQueryResult(fetchStudioReviews(stylistId)),
+    }),
+    replyToReview: build.mutation<unknown, { reviewId: string; reply: string }>(
+      {
+        queryFn: (reply) => toQueryResult(replyToReview(reply)),
+        invalidatesTags: ["Reviews"],
+      },
+    ),
     getRescheduleSlots: build.query<string[], RescheduleSlotsRequest>({
       providesTags: ["ManagedBooking"],
       queryFn: (request) => toQueryResult(getRescheduleSlots(request)),
@@ -355,6 +415,12 @@ export const {
   useGetBookingConfirmationQuery,
   useStartBookingConfirmationMutation,
   useGetCardUpdateQuery,
+  useGetReviewPageQuery,
+  useSubmitReviewMutation,
+  useGetStylistReviewsInfiniteQuery,
+  useReportReviewMutation,
+  useGetStudioReviewsQuery,
+  useReplyToReviewMutation,
   useStartCardUpdateMutation,
   useSaveCardUpdateMutation,
   useGetRescheduleSlotsQuery,

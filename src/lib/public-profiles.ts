@@ -34,6 +34,9 @@ export interface PublicProfile extends Pick<
   working_hours: WorkingHours[];
   payment_policy: Tables<"payment_policies">;
   portfolio_photos: Tables<"portfolio_photos">[];
+  /** null until 3 reviews count */
+  rating: number | null;
+  review_count: number;
 }
 
 export const fetchPublicProfile = async (slug: string) => {

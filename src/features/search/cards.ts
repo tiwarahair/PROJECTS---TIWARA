@@ -51,6 +51,8 @@ export const toResultCards = (rows: SearchRow[], selection: StyleSelection) =>
       cover_path,
       from_pence,
       next_start,
+      rating,
+      review_count,
     } = row;
 
     const from = from_pence / 100;
@@ -67,6 +69,9 @@ export const toResultCards = (rows: SearchRow[], selection: StyleSelection) =>
       area: area_label ?? "",
       from,
       verified: true,
+      ...(rating == null
+        ? {}
+        : { rating: rating.toFixed(1), reviews: review_count }),
       meta: `From ${formatMoney(from)}`,
       rows: selection.has
         ? matches.map((match) => ({

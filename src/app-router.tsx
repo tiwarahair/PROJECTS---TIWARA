@@ -76,6 +76,13 @@ const appRoutes: RouteObject[] = [
       })),
   },
   {
+    path: "/review",
+    lazy: () =>
+      import("./features/review").then(({ ReviewPage }) => ({
+        Component: ReviewPage,
+      })),
+  },
+  {
     path: "/save-details",
     lazy: () =>
       import("./features/save-details").then(({ SaveDetailsPage }) => ({

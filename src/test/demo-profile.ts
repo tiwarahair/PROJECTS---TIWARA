@@ -91,6 +91,8 @@ export const getDemoProfile = (slug: string): PublicProfile => {
     slug,
     business_name: stylist.name,
     business_type: BUSINESS_TYPES[stylist.businessType],
+    rating: stylist.reviews >= 3 ? stylist.rating : null,
+    review_count: stylist.reviews,
     bio: stylist.bio,
     area_label: stylist.area,
     travel_radius_miles: stylist.travelMiles ?? null,

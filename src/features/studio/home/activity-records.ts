@@ -51,6 +51,8 @@ const getWording = ({
       ];
     case "payout_paid":
       return ["Payout sent", `${amount} has been paid to your bank.`];
+    case "review_received":
+      return ["New review", `${client} reviewed ${what}.`];
     case "payout_failed":
       return [
         "Payout failed",
@@ -65,6 +67,8 @@ const OPENS_EARNINGS = ["dispute_opened", "payout_paid", "payout_failed"];
 
 const getTarget = (kind: string, bookingId: string | null) => {
   if (OPENS_EARNINGS.includes(kind)) return { opensEarnings: true };
+
+  if (kind === "review_received") return { opensReviews: true };
 
   return bookingId ? { bookingId } : {};
 };

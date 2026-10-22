@@ -22,6 +22,8 @@ import { cardNotReplaced, cardUpdateNeeded } from "./card-emails.ts";
 import type { CardUpdateNeeded } from "./card-emails.ts";
 import { loginAlert } from "./security-emails.ts";
 import type { LoginAlert } from "./security-emails.ts";
+import { reviewInvited, reviewReceived, reviewReminder, reviewReplied } from "./review-emails.ts";
+import type { ReviewInvite, ReviewReceived, ReviewReply } from "./review-emails.ts";
 import { disputeOpened, feeCancelled, feeDeclined, feeScheduled, feeUnpaid, feeWaived } from "./fee-emails.ts";
 import type { CancelledFee, DeclinedFee, DisputeNotice, ScheduledFee, UnpaidFeeNotice, WaivedFee } from "./fee-emails.ts";
 import {
@@ -137,6 +139,10 @@ const templates: Record<string, TemplateBuilder> = {
   login_alert: (payload) => loginAlert(payload as unknown as LoginAlert),
   card_update_needed: (payload) => cardUpdateNeeded(payload as unknown as CardUpdateNeeded),
   card_not_replaced: (payload) => cardNotReplaced(payload as unknown as StylistNotice),
+  review_invite: (payload) => reviewInvited(payload as unknown as ReviewInvite),
+  review_reminder: (payload) => reviewReminder(payload as unknown as ReviewInvite),
+  review_received: (payload) => reviewReceived(payload as unknown as ReviewReceived),
+  review_reply: (payload) => reviewReplied(payload as unknown as ReviewReply),
 };
 
 export const renderEmail = (

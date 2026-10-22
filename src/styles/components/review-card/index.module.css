@@ -1,0 +1,101 @@
+.card {
+  padding: 20px 0;
+  border-top: 1px solid var(--border-subtle);
+  display: grid;
+  gap: 10px;
+}
+
+.head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.who {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 4px 10px;
+}
+
+.author {
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.verified {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--text-secondary);
+}
+
+.verified svg {
+  color: var(--accent-700);
+}
+
+.meta {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 4px 8px;
+  font-size: 13px;
+  color: var(--text-secondary);
+}
+
+.body {
+  margin: 0;
+  font-size: 15px;
+  line-height: 1.6;
+  color: var(--text-primary);
+  white-space: pre-line;
+  overflow-wrap: anywhere;
+}
+
+.removed {
+  margin: 0;
+  font-size: 14px;
+  font-style: italic;
+  color: var(--text-secondary);
+}
+
+.reply {
+  margin-top: 4px;
+  padding: 14px 16px;
+  border-radius: var(--radius-md);
+  background: var(--fill-quiet);
+  display: grid;
+  gap: 6px;
+}
+
+.replyHead {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.edited {
+  padding: 2px 8px;
+  border-radius: var(--radius-full);
+  background: var(--neutral-0);
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  color: var(--text-secondary);
+}
+
+.replyText {
+  margin: 0;
+  font-size: 14px;
+  line-height: 1.55;
+  color: var(--text-primary);
+  white-space: pre-line;
+  overflow-wrap: anywhere;
+}

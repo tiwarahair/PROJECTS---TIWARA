@@ -19,6 +19,8 @@ const row = (slug: string, name: string, fromPence: number): SearchRow => ({
     },
   ],
   total_count: 0,
+  rating: null,
+  review_count: 0,
 });
 
 const ALL = [

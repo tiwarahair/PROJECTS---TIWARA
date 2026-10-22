@@ -1,0 +1,60 @@
+.picker {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px 16px;
+}
+
+.stars {
+  display: flex;
+  gap: 4px;
+}
+
+.star {
+  display: grid;
+  place-items: center;
+  padding: 4px;
+  border: none;
+  border-radius: var(--radius-sm);
+  background: none;
+  color: var(--neutral-300);
+  cursor: pointer;
+  transition:
+    color var(--duration-fast) var(--ease-out),
+    transform 160ms var(--ease-out);
+}
+
+.star svg {
+  fill: transparent;
+  transition: fill var(--duration-fast) var(--ease-out);
+}
+
+.starOn {
+  color: var(--brand-yellow);
+}
+
+.starOn svg {
+  fill: var(--brand-yellow);
+}
+
+.star:active {
+  transform: scale(0.9);
+}
+
+.star:focus-visible {
+  outline: 2px solid var(--focus-ring);
+  outline-offset: 2px;
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .star:hover {
+    transform: scale(1.08);
+  }
+}
+
+.label {
+  min-width: 90px;
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--text-secondary);
+}

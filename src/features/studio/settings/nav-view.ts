@@ -9,6 +9,7 @@ import {
   Link2,
   ListChecks,
   Shield,
+  Star,
   Store,
   User,
   UserRound,
@@ -166,6 +167,17 @@ export const getSettingsNav = (
               scrollBody(0, false);
             },
           },
+          {
+            key: "reviews",
+            label: "Reviews",
+            subtitle: "What clients say, and your replies",
+            icon: Star,
+            isLocked: false,
+            onSelect: () => {
+              setState({ tab: "reviews" });
+              scrollBody(0, false);
+            },
+          },
         ]),
     {
       key: "link",
@@ -224,7 +236,7 @@ export const getSettingsNav = (
     {
       key: "bookings",
       label: "Bookings",
-      rows: pick(["Booking rules", "Payment policy", "Clients"]),
+      rows: pick(["Booking rules", "Payment policy", "Clients", "Reviews"]),
     },
     { key: "account", label: "Account", rows: accountRows },
     {

@@ -18,7 +18,10 @@ export const StudioTopBar = ({ studio }: { studio: StudioController }) => {
   const greeting = `${getDayPart(now.getHours())}, ${state.owner.first}`;
 
   const isHidden =
-    !isWide && (state.tab === "settings" || state.tab === "clients");
+    !isWide &&
+    (state.tab === "settings" ||
+      state.tab === "clients" ||
+      state.tab === "reviews");
 
   return (
     <div

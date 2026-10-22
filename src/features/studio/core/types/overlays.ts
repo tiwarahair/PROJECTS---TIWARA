@@ -65,4 +65,5 @@ export interface StudioNotification {
   unread: boolean;
   bookingId?: string;
   opensEarnings?: boolean;
+  opensReviews?: boolean;
 }

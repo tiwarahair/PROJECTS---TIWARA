@@ -1,0 +1,129 @@
+.main {
+  max-width: 560px;
+}
+
+.visit {
+  margin-top: 24px;
+  padding: 18px 20px;
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-lg);
+}
+
+.visitText {
+  min-width: 0;
+  display: grid;
+  gap: 2px;
+}
+
+.visitService {
+  font-family: var(--font-display);
+  font-size: 18px;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  color: var(--text-primary);
+}
+
+.visitStylist {
+  font-size: 14.5px;
+  color: var(--text-secondary);
+}
+
+.visitWhen {
+  margin-top: 8px;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--text-primary);
+}
+
+.visitWhen svg {
+  color: var(--text-secondary);
+}
+
+.form {
+  margin-top: 28px;
+  display: grid;
+  gap: 24px;
+}
+
+.fieldset {
+  margin: 0;
+  padding: 0;
+  border: none;
+  display: grid;
+  gap: 10px;
+}
+
+.legend {
+  padding: 0;
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.optional {
+  font-weight: 400;
+  color: var(--text-secondary);
+}
+
+.field {
+  display: grid;
+  gap: 10px;
+}
+
+.textarea {
+  box-sizing: border-box;
+  width: 100%;
+  min-height: 132px;
+  padding: 14px 16px;
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius-md);
+  background: var(--neutral-0);
+  font: inherit;
+  font-size: 16px;
+  line-height: 1.5;
+  color: var(--text-primary);
+  resize: vertical;
+  transition:
+    border-color var(--duration-fast) var(--ease-out),
+    box-shadow var(--duration-fast) var(--ease-out);
+}
+
+.textarea:focus {
+  outline: none;
+  border-color: var(--accent-700);
+  box-shadow: 0 0 0 3px var(--focus-ring);
+}
+
+.count {
+  justify-self: end;
+  font-size: 13px;
+  font-variant-numeric: tabular-nums;
+  color: var(--text-secondary);
+}
+
+.error {
+  margin: 0;
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--accent-700);
+}
+
+.submit {
+  justify-self: start;
+}
+
+.note {
+  margin: 18px 0 0;
+  font-size: 14px;
+  line-height: 1.55;
+  color: var(--text-secondary);
+}
+
+@media (max-width: 560px) {
+  .submit {
+    justify-self: stretch;
+  }
+}

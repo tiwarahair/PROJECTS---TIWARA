@@ -7,9 +7,9 @@ type SearchFunction = Database["public"]["Functions"]["search_stylists"];
 export type SearchArgs = Omit<SearchFunction["Args"], "page" | "page_size">;
 
 type NullableColumns =
-  "area_label" | "cover_path" | "distance_miles" | "next_start";
+  "area_label" | "cover_path" | "distance_miles" | "next_start" | "rating";
 
-/** The generated type marks every returned column non-null; these can be null (no point: no distance). */
+/** The generated type marks every returned column non-null; these can be null (no point: no distance; under 3 reviews: no rating). */
 export type SearchRow = Omit<
   SearchFunction["Returns"][number],
   NullableColumns

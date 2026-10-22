@@ -46,6 +46,7 @@
     "react-loading-skeleton": "^3.5.0",
     "react-redux": "^9.3.0",
     "react-router": "^8.3.0",
+    "vaul": "^1.1.2",
     "zod": "^4.4.3"
   },
   "devDependencies": {
