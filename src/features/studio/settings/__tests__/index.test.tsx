@@ -365,10 +365,11 @@ describe("Studio → Settings", () => {
     );
 
     runNextTimer();
-    await act(() => Promise.resolve());
 
-    expect(
-      screen.getByRole("region", { name: "Set up your studio" }),
-    ).toHaveTextContent("2 of 4 done");
+    await waitFor(() =>
+      expect(
+        screen.getByRole("region", { name: "Set up your studio" }),
+      ).toHaveTextContent("2 of 4 done"),
+    );
   });
 });
