@@ -2,6 +2,7 @@ import { useCallback, useRef, useState } from "react";
 import type { MouseEvent, ReactNode } from "react";
 import { ChevronDown } from "lucide-react";
 import { useLocation } from "react-router";
+import { useAccountPhoto } from "../../hooks/use-account-photo";
 import { useIdentity } from "../../hooks/use-identity";
 import { useMediaQuery } from "../../hooks/use-media-query";
 import { useSignOut } from "../../hooks/use-sign-out";
@@ -48,7 +49,6 @@ const getCurrentSection = (search: string) => {
 
 interface AccountAvatarProps {
   initials: string;
-  photo?: string | null;
   hasChevron?: boolean;
   /** Replaces the default avatar circle style. */
   className?: string;
@@ -57,25 +57,28 @@ interface AccountAvatarProps {
 /** The account trigger's contents: the photo or initials, and a chevron. */
 export const AccountAvatar = ({
   initials,
-  photo,
   hasChevron = true,
   className = styles.avatar,
-}: AccountAvatarProps) => (
-  <>
-    <span aria-hidden="true" className={className}>
-      {photo ? (
-        <img
-          className={styles.avatarImage}
-          src={resolveAssetUrl(photo)}
-          alt=""
-        />
-      ) : (
-        initials
-      )}
-    </span>
-    {hasChevron && <ChevronDown size={14} strokeWidth={1.7} />}
-  </>
-);
+}: AccountAvatarProps) => {
+  const { photo } = useAccountPhoto();
+
+  return (
+    <>
+      <span aria-hidden="true" className={className}>
+        {photo ? (
+          <img
+            className={styles.avatarImage}
+            src={resolveAssetUrl(photo)}
+            alt=""
+          />
+        ) : (
+          initials
+        )}
+      </span>
+      {hasChevron && <ChevronDown size={14} strokeWidth={1.7} />}
+    </>
+  );
+};
 
 interface SiteMenuProps {
   isSignedIn: boolean;

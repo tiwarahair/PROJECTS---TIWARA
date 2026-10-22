@@ -58,6 +58,7 @@ export const getStudioRow = (
     stylist_id: STYLIST_ID,
     line1: "14 Blossom Street",
     line2: null,
+    calendar_feed_key: "feed-key",
     city: "Manchester",
     postcode: "M4 6AJ",
     activity_seen_at: null,

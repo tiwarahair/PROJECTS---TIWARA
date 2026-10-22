@@ -1,0 +1,62 @@
+.apps {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.centered {
+  align-items: center;
+}
+
+.centered .links {
+  justify-content: center;
+}
+
+.label {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text-secondary);
+}
+
+.links {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.app {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  height: 40px;
+  padding: 0 16px 0 14px;
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius-full);
+  background: transparent;
+  color: var(--text-primary);
+  font-size: 14px;
+  font-weight: 600;
+  text-decoration: none;
+  transition:
+    background-color 0.16s cubic-bezier(0.2, 0.8, 0.2, 1),
+    border-color 0.16s cubic-bezier(0.2, 0.8, 0.2, 1),
+    transform 0.16s cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+
+.app:hover {
+  background: var(--fill-quiet);
+  border-color: var(--neutral-900);
+}
+
+.app:active {
+  transform: scale(0.97);
+}
+
+.app:focus-visible {
+  outline: 2px solid var(--accent-700);
+  outline-offset: 2px;
+}
+
+.appleLogo {
+  margin-top: -2px;
+}

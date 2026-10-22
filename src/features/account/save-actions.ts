@@ -4,13 +4,23 @@ import {
   PASSWORD_FAILURES,
   sendReauthenticationCode,
 } from "../../lib/account-changes";
+import { fetchMyData } from "../../lib/my-data";
 import { logOut } from "../../stores/session-slice";
+import { downloadFile } from "../../utils/download-file";
 import { EMPTY_PASSWORD } from "./forms";
 import type { AccountCore } from "./use-core";
 import type { AccountFeedback } from "./use-feedback";
 
 export const getSaveActions = (
-  { stateRef, setState, forms, navigate, dispatch, saveProfile }: AccountCore,
+  {
+    stateRef,
+    setState,
+    forms,
+    navigate,
+    dispatch,
+    saveProfile,
+    setPhoto,
+  }: AccountCore,
   { focusLater, showToast, saveWith }: AccountFeedback,
 ) => {
   const sendPasswordCode = () =>
@@ -75,6 +85,27 @@ export const getSaveActions = (
     if (isSaved) setState({ marketing: isOn });
   };
 
+  const savePhoto = (file: File | null) =>
+    saveWith(
+      () => setPhoto(file),
+      file ? "Your photo is updated" : "Photo removed",
+      file
+        ? "Your photo couldn’t be saved. Try again"
+        : "Your photo couldn’t be removed. Try again",
+    );
+
+  const downloadMyData = (userId: string) =>
+    saveWith(
+      async () =>
+        downloadFile(
+          `tiwaras-house-data-${new Date().toISOString().slice(0, 10)}.json`,
+          JSON.stringify(await fetchMyData(userId), null, 2),
+          "application/json",
+        ),
+      "Your data is downloaded",
+      "Your data couldn’t be downloaded. Try again",
+    );
+
   const onPhoto = (event: ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
 
@@ -90,14 +121,8 @@ export const getSaveActions = (
         photoError: "That photo is too big. Choose one under 10MB.",
       });
 
-    const reader = new FileReader();
-
-    reader.onload = () => {
-      setState({ photo: String(reader.result), photoError: "" });
-      showToast("Your photo is updated");
-    };
-
-    reader.readAsDataURL(file);
+    setState({ photoError: "" });
+    void savePhoto(file);
   };
 
   const copy = (text: string, message: string) => {
@@ -122,7 +147,9 @@ export const getSaveActions = (
     savePassword,
     sendPasswordCode,
     saveMarketing,
+    savePhoto,
     onPhoto,
+    downloadMyData,
     copy,
     endSession,
     logout,

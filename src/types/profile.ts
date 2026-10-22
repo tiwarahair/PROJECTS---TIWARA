@@ -3,4 +3,5 @@ export interface Profile {
   last: string;
   mobile: string;
   marketing: boolean;
+  photoPath: string | null;
 }

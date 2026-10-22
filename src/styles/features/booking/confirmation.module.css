@@ -145,23 +145,7 @@
 }
 
 .calendarRow {
-  display: flex;
-  gap: 12px;
-  justify-content: center;
   margin-top: 24px;
-  flex-wrap: wrap;
-}
-
-.calendarButton {
-  border: 1px solid var(--neutral-900);
-  text-decoration: none;
-  background: transparent;
-  color: var(--neutral-900);
-  font-weight: 600;
-  font-size: 14.5px;
-  padding: 12px 20px;
-  border-radius: var(--radius-full);
-  cursor: pointer;
 }
 
 .saveRow {

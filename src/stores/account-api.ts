@@ -1,4 +1,10 @@
+import {
+  getAccountPhotoUrl,
+  removeAccountPhoto,
+  uploadAccountPhoto,
+} from "../lib/account-photo";
 import { fetchDeletionBlockers } from "../lib/client-account";
+import { fetchCalendarSecret } from "../lib/client-calendar";
 import type { DeletionBlockers } from "../lib/client-account";
 import { fetchClientBookings } from "../lib/client-bookings";
 import {
@@ -35,6 +41,58 @@ export const accountApi = api.injectEndpoints({
       queryFn: (request) => toQueryResult(saveClientAddress(request)),
       invalidatesTags: ["Addresses"],
     }),
+    getAccountPhotoUrl: build.query<string, string>({
+      queryFn: (path) => toQueryResult(getAccountPhotoUrl(path)),
+      providesTags: ["AccountPhoto"],
+      keepUnusedDataFor: 1800,
+    }),
+    setAccountPhoto: build.mutation<
+      string | null,
+      { userId: string; file: File | null }
+    >({
+      queryFn: ({ userId, file }) =>
+        toQueryResult(
+          file
+            ? uploadAccountPhoto({ userId, file })
+            : removeAccountPhoto(userId),
+        ),
+      invalidatesTags: ["AccountPhoto"],
+      onQueryStarted: async ({ userId }, { dispatch, queryFulfilled }) => {
+        try {
+          const { data: photoPath } = await queryFulfilled;
+
+          dispatch(
+            api.util.updateQueryData("getProfile", userId, (profile) => ({
+              ...profile,
+              photoPath,
+            })),
+          );
+        } catch {
+          // the caller shows the failure
+        }
+      },
+    }),
+    getCalendarSecret: build.query<string, string>({
+      queryFn: () => toQueryResult(fetchCalendarSecret()),
+    }),
+    resetCalendarSecret: build.mutation<string, string>({
+      queryFn: () => toQueryResult(fetchCalendarSecret(true)),
+      onQueryStarted: async (userId, { dispatch, queryFulfilled }) => {
+        try {
+          const { data: secret } = await queryFulfilled;
+
+          dispatch(
+            accountApi.util.upsertQueryData(
+              "getCalendarSecret",
+              userId,
+              secret,
+            ),
+          );
+        } catch {
+          // the caller shows the failure
+        }
+      },
+    }),
     getDeletionBlockers: build.query<DeletionBlockers, string>({
       queryFn: () => toQueryResult(fetchDeletionBlockers()),
     }),
@@ -62,6 +120,10 @@ export const {
   useGetClientAddressesQuery,
   useGetClientCardsQuery,
   useGetDeletionBlockersQuery,
+  useGetAccountPhotoUrlQuery,
+  useGetCalendarSecretQuery,
+  useResetCalendarSecretMutation,
+  useSetAccountPhotoMutation,
   useSetDefaultCardMutation,
   useRemoveClientCardMutation,
   useSaveClientAddressMutation,

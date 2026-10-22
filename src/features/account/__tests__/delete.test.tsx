@@ -51,8 +51,7 @@ describe("Account delete", () => {
     vi.mocked(sendAccountCode).mockReset().mockResolvedValue("n•••@gmail.com");
   });
 
-  it("deletes the account once DELETE is typed, and clears what was on this device", async () => {
-    localStorage.setItem("tw_favs_test-user", '["crown-studio"]');
+  it("deletes the account once DELETE is typed", async () => {
     const dialog = await openDelete();
 
     const remove = await dialog.findByRole("button", {
@@ -70,7 +69,6 @@ describe("Account delete", () => {
     ).toBeInTheDocument();
 
     expect(deleteClientAccount).toHaveBeenCalled();
-    expect(localStorage.getItem("tw_favs_test-user")).toBeNull();
   });
 
   it("lists the upcoming bookings in the way, with a link to manage each", async () => {

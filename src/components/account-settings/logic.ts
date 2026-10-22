@@ -1,4 +1,4 @@
-// AccountSettings state, stand-in calendar values, validators and display tables.
+// AccountSettings state, validators and display tables.
 import type { NameValues } from "./name-schema";
 import {
   Check,
@@ -72,12 +72,8 @@ export interface SettingsState {
   sessionsFailed: boolean;
   alerts: boolean | null;
   notifications: Record<NotificationKey, ChannelSetting>;
-  google: {
-    state: "off" | "connecting" | "on";
-    calendars: Record<"main" | "family" | "holidays", boolean>;
-    target: string;
-  };
-  icsToken: string;
+  feedUrl: string;
+  feedFailed: boolean;
   toast: boolean;
   toastText: string;
 }
@@ -129,12 +125,8 @@ export const getInitialSettingsState = (
       reviewReceived: channel(),
       ...savedNotifications,
     },
-    google: {
-      state: "off",
-      calendars: { main: true, family: true, holidays: false },
-      target: "new",
-    },
-    icsToken: "7f3k29xq",
+    feedUrl: "",
+    feedFailed: false,
     toast: false,
     toastText: "",
   };

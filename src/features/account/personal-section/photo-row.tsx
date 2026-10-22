@@ -1,5 +1,5 @@
 import { Pencil } from "lucide-react";
-import { resolveAssetUrl } from "../../../utils/asset-url";
+import Skeleton from "react-loading-skeleton";
 import type { AccountController } from "../use-account";
 import styles from "../../../styles/features/account/personal-section/photo-row.module.css";
 import ui from "../../../styles/features/account/ui.module.css";
@@ -10,7 +10,7 @@ interface PhotoRowProps {
 }
 
 export const PhotoRow = ({
-  account: { state, refs, actions },
+  account: { state, data, refs, actions },
   initials,
 }: PhotoRowProps) => (
   <div className={ui.row} data-screen-label="Profile photo">
@@ -23,31 +23,24 @@ export const PhotoRow = ({
         <button
           className={styles.photoButton}
           onClick={() => refs.file.current?.click()}
-          aria-label={state.photo ? "Change photo" : "Upload photo"}
+          aria-label={data.hasPhoto ? "Change photo" : "Upload photo"}
         >
           <span className={styles.photoAvatar} aria-hidden="true">
-            {state.photo ? (
-              <img
-                className={styles.avatarImage}
-                src={resolveAssetUrl(state.photo)}
-                alt=""
-              />
-            ) : (
-              initials
+            {data.isPhotoLoading && <Skeleton circle width={56} height={56} />}
+            {data.photo && (
+              <img className={styles.avatarImage} src={data.photo} alt="" />
             )}
+            {!data.photo && !data.isPhotoLoading && initials}
           </span>
           <span className={styles.photoBadge} aria-hidden="true">
             <Pencil size={13} strokeWidth={2} />
           </span>
         </button>
         <div className={ui.buttonRow}>
-          {state.photo && (
+          {data.hasPhoto && (
             <button
               className={ui.quietButton}
-              onClick={() => {
-                actions.setState({ photo: null, photoError: "" });
-                actions.showToast("Photo removed");
-              }}
+              onClick={() => void actions.savePhoto(null)}
             >
               Remove
             </button>

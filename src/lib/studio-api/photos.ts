@@ -44,7 +44,7 @@ let compressorImport: Promise<
   typeof import("browser-image-compression")
 > | null = null;
 
-const compress = async (file: File, options: CompressOptions) => {
+export const compressPhoto = async (file: File, options: CompressOptions) => {
   compressorImport ??= import("browser-image-compression").catch(
     (error: unknown) => {
       // a failed download is retried on the next upload
@@ -76,7 +76,7 @@ const putFile = async (
 
 /** Resizes in the browser (long side 2000px for covers and portfolio, 600px for avatars), then uploads. */
 export const uploadPhoto = async (path: string, file: File, maxSide = 2000) => {
-  const resized = await compress(file, {
+  const resized = await compressPhoto(file, {
     maxWidthOrHeight: maxSide,
     maxSizeMB: 1.5,
     fileType: "image/jpeg",
@@ -104,7 +104,7 @@ export const uploadPhotoWithCopies = async (path: string, file: File) => {
       Math.min(copyWidth, width) * longSidePerWidth,
     );
 
-    const jpeg = await compress(file, {
+    const jpeg = await compressPhoto(file, {
       maxWidthOrHeight,
       maxSizeMB: 1,
       fileType: "image/jpeg",
@@ -112,7 +112,7 @@ export const uploadPhotoWithCopies = async (path: string, file: File) => {
 
     // a browser that can't encode WebP (Safari) stores the JPEG under the .webp name, so that source still loads
     const webp = canEncodeWebp()
-      ? await compress(file, {
+      ? await compressPhoto(file, {
           maxWidthOrHeight,
           maxSizeMB: 1,
           fileType: "image/webp",
@@ -157,7 +157,7 @@ export const removePortfolioPhoto = (id: string) =>
 const CLIENT_PHOTO_BUCKET = "client-photos";
 
 export const uploadClientPhoto = async (path: string, file: Blob) => {
-  const resized = await compress(new File([file], "photo"), {
+  const resized = await compressPhoto(new File([file], "photo"), {
     maxWidthOrHeight: 600,
     maxSizeMB: 0.5,
     fileType: "image/jpeg",

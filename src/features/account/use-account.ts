@@ -44,6 +44,8 @@ export const useAccount = (props: AccountProps) => {
       saveMarketing: saves.saveMarketing,
       ...wallet,
       onPhoto: saves.onPhoto,
+      savePhoto: saves.savePhoto,
+      downloadMyData: saves.downloadMyData,
       copy: saves.copy,
       endSession: saves.endSession,
       logout: saves.logout,

@@ -1,5 +1,6 @@
 // Refused while the client has a booking to come, owes money or owns a business; otherwise their bookings are
-// anonymised (the money stays as records) and the login goes, taking the profile and saved addresses with it.
+// anonymised (the money stays as records), the photo is deleted and the login goes, taking the profile and saved
+// addresses with it.
 import { admin } from "../_shared/admin.ts";
 import { corsHeaders, respond } from "../_shared/cors.ts";
 import { z } from "npm:zod@4";
@@ -66,6 +67,12 @@ Deno.serve(async (request) => {
       // if a later step fails, checkout mustn't use the deleted customer
       await admin.from("profiles").update({ stripe_customer_id: null }).eq("id", client);
     }
+
+    const { error: photoError } = await admin.storage.from("account-photos").remove([`${client}/photo.jpg`]);
+
+    if (photoError) throw photoError;
+
+    await admin.from("profiles").update({ photo_path: null }).eq("id", client);
 
     const { error: anonymiseError } = await admin.rpc("anonymise_client_bookings", { client });
 

@@ -447,6 +447,12 @@ verify_jwt = false
 [functions.booking-invite]
 verify_jwt = false
 
+[functions.client-calendar]
+verify_jwt = false
+
+[functions.stylist-calendar]
+verify_jwt = false
+
 [functions.studio-booking-cancel]
 verify_jwt = false
 

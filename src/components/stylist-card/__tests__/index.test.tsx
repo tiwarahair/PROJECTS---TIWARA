@@ -1,9 +1,14 @@
 import { screen } from "@testing-library/react";
-import { beforeEach, describe, expect, it } from "vitest";
+import { beforeEach, describe, expect, it, vi } from "vitest";
 import { renderWithStore } from "../../../test/render-with-store";
 import { StylistCard } from "..";
 import type { UserEvent } from "@testing-library/user-event";
 import { setupUser } from "../../../test/setup-user";
+
+vi.mock("../../../lib/favourites", () => ({
+  fetchFavourites: vi.fn(),
+  writeFavourite: vi.fn(() => Promise.resolve()),
+}));
 
 let user: UserEvent;
 

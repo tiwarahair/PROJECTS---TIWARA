@@ -26,4 +26,6 @@ export interface AccountSettingsBackend {
   signOutSession: (id: string) => Promise<void>;
   signOutOthers: () => Promise<void>;
   saveLoginAlerts: (isOn: boolean) => Promise<void>;
+  getCalendarFeed: () => Promise<string>;
+  resetCalendarFeed: () => Promise<string>;
 }

@@ -43,6 +43,23 @@
   box-sizing: border-box;
 }
 
+.back {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  min-height: 44px;
+  margin: -12px 0 12px;
+  color: var(--text-secondary);
+  font-size: 14px;
+  font-weight: 600;
+  text-decoration: none;
+  transition: color 0.16s cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+
+.back:hover {
+  color: var(--text-primary);
+}
+
 .eyebrow {
   font-size: 12px;
   font-weight: 600;

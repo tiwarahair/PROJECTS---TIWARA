@@ -14,6 +14,8 @@ import {
 import { api, useUpdateProfileMutation } from "../../../stores/api-slice";
 import {
   closeBusiness,
+  fetchCalendarFeedUrl,
+  resetCalendarFeed,
   saveNotificationPreference,
 } from "../../../lib/studio-api/settings";
 import { useAppDispatch, useAppSelector } from "../../../stores/hooks";
@@ -49,6 +51,8 @@ export const useAccountBackend = ({ state, setState }: StudioController) => {
     signOutSession,
     signOutOthers: signOutOtherSessions,
     saveLoginAlerts: (isOn) => saveLoginAlerts(user.id, isOn),
+    getCalendarFeed: () => fetchCalendarFeedUrl(stylistId),
+    resetCalendarFeed: () => resetCalendarFeed(stylistId),
     closeBusiness: async () => {
       await closeBusiness();
       dispatch(api.util.invalidateTags(["Studio", "StylistProfile", "Search"]));

@@ -190,6 +190,12 @@
   transform: scale(0.97) !important;
 }
 
+.quietButton:disabled {
+  opacity: 0.55;
+  cursor: default;
+  pointer-events: none;
+}
+
 .buttonRow {
   display: flex;
   gap: 8px;

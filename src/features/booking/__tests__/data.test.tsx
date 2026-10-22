@@ -280,7 +280,7 @@ describe("booking on real data", () => {
     expect(screen.getByText("TH-TEST01")).toBeInTheDocument();
 
     expect(
-      screen.getByRole("link", { name: "+ Google Calendar" }),
+      screen.getByRole("link", { name: "Google Calendar" }),
     ).toHaveAttribute(
       "href",
       expect.stringContaining("dates=20261020T093000Z%2F20261020T113000Z"),

@@ -976,6 +976,33 @@ export type Database = {
           },
         ];
       };
+      favourites: {
+        Row: {
+          client_id: string;
+          created_at: string;
+          stylist_id: string;
+        };
+        ComputedFields: never;
+        Insert: {
+          client_id: string;
+          created_at?: string;
+          stylist_id: string;
+        };
+        Update: {
+          client_id?: string;
+          created_at?: string;
+          stylist_id?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "favourites_stylist_id_fkey";
+            columns: ["stylist_id"];
+            isOneToOne: false;
+            referencedRelation: "stylists";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
       login_devices: {
         Row: {
           device: string;
@@ -1384,6 +1411,7 @@ export type Database = {
       };
       profiles: {
         Row: {
+          calendar_secret: string | null;
           client_terms_accepted_at: string | null;
           client_terms_version: string | null;
           created_at: string;
@@ -1393,10 +1421,12 @@ export type Database = {
           login_alerts: boolean;
           marketing_opt_in: boolean;
           phone: string | null;
+          photo_path: string | null;
           stripe_customer_id: string | null;
         };
         ComputedFields: never;
         Insert: {
+          calendar_secret?: string | null;
           client_terms_accepted_at?: string | null;
           client_terms_version?: string | null;
           created_at?: string;
@@ -1406,9 +1436,11 @@ export type Database = {
           login_alerts?: boolean;
           marketing_opt_in?: boolean;
           phone?: string | null;
+          photo_path?: string | null;
           stripe_customer_id?: string | null;
         };
         Update: {
+          calendar_secret?: string | null;
           client_terms_accepted_at?: string | null;
           client_terms_version?: string | null;
           created_at?: string;
@@ -1418,6 +1450,7 @@ export type Database = {
           login_alerts?: boolean;
           marketing_opt_in?: boolean;
           phone?: string | null;
+          photo_path?: string | null;
           stripe_customer_id?: string | null;
         };
         Relationships: [];
@@ -1904,6 +1937,7 @@ export type Database = {
       stylist_private: {
         Row: {
           activity_seen_at: string | null;
+          calendar_feed_key: string;
           city: string | null;
           line1: string | null;
           line2: string | null;
@@ -1913,6 +1947,7 @@ export type Database = {
         ComputedFields: never;
         Insert: {
           activity_seen_at?: string | null;
+          calendar_feed_key?: string;
           city?: string | null;
           line1?: string | null;
           line2?: string | null;
@@ -1921,6 +1956,7 @@ export type Database = {
         };
         Update: {
           activity_seen_at?: string | null;
+          calendar_feed_key?: string;
           city?: string | null;
           line1?: string | null;
           line2?: string | null;
@@ -2581,6 +2617,8 @@ export type Database = {
         Returns: Json;
       };
       get_booking_where: { Args: { target: string }; Returns: string };
+      get_calendar_feed: { Args: { feed_key: string }; Returns: Json };
+      get_calendar_secret: { Args: { renew?: boolean }; Returns: string };
       get_cancellation: { Args: { token: string }; Returns: Json };
       get_cancellation_terms: {
         Args: {
@@ -2594,6 +2632,7 @@ export type Database = {
       get_card_fee_pence: { Args: { amount: number }; Returns: number };
       get_card_update: { Args: { token: string }; Returns: Json };
       get_client_bookings: { Args: Record<PropertyKey, never>; Returns: Json };
+      get_client_calendar: { Args: { secret: string }; Returns: Json };
       get_client_unpaid_fee: {
         Args: { email: string; phone: string; target_stylist: string };
         Returns: Json;
@@ -2693,9 +2732,14 @@ export type Database = {
         Returns: string;
       };
       get_managed_booking: { Args: { token: string }; Returns: Json };
+      get_my_data: { Args: Record<PropertyKey, never>; Returns: Json };
       get_my_deletion_blockers: {
         Args: Record<PropertyKey, never>;
         Returns: Json;
+      };
+      get_my_favourites: {
+        Args: Record<PropertyKey, never>;
+        Returns: string[];
       };
       get_next_start: {
         Args: {
@@ -3211,6 +3255,10 @@ export type Database = {
         Args: { target_booking: string };
         Returns: undefined;
       };
+      reset_calendar_feed: {
+        Args: { target_stylist: string };
+        Returns: string;
+      };
       retry_stuck_fee: { Args: { target: string }; Returns: undefined };
       retry_stuck_refund: { Args: { target: string }; Returns: undefined };
       retry_stuck_transfer: { Args: { payment: string }; Returns: undefined };
@@ -3350,6 +3398,10 @@ export type Database = {
       };
       set_client_blocked: {
         Args: { blocked: boolean; target: string };
+        Returns: undefined;
+      };
+      set_favourite: {
+        Args: { saved: boolean; stylist_slug: string };
         Returns: undefined;
       };
       set_link_intent: {

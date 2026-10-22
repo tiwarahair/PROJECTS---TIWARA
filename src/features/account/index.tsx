@@ -67,7 +67,6 @@ export const AccountPage = (props: AccountPageProps) => {
         loginHref={view.loginHref}
         signedIn={loggedIn}
         initials={initials}
-        photo={state.photo}
       />
       {!loggedIn && (
         <main
@@ -103,7 +102,7 @@ export const AccountPage = (props: AccountPageProps) => {
               current={current}
               accountName={accountName}
               initials={initials}
-              photo={state.photo}
+              photo={account.data.photo}
               onGo={goToSection}
               onLogOut={actions.logout}
             />
@@ -113,7 +112,7 @@ export const AccountPage = (props: AccountPageProps) => {
               <AccountMobileList
                 accountName={accountName}
                 initials={initials}
-                photo={state.photo}
+                photo={account.data.photo}
                 onGo={goToSection}
                 onLogOut={actions.logout}
               />

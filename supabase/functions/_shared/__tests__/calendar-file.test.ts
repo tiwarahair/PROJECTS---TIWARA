@@ -1,5 +1,9 @@
 import { describe, expect, it } from "vitest";
-import { getCalendarFile, getGoogleCalendarUrl } from "../calendar-file";
+import {
+  getCalendarFeed,
+  getCalendarFile,
+  getGoogleCalendarUrl,
+} from "../calendar-file";
 
 const event = {
   ref: "TH-ABC123",
@@ -42,6 +46,38 @@ describe("the calendar file", () => {
     expect(file.replace(/\r\n /g, "")).toContain(
       "SUMMARY:Silk press with Tiwára's House",
     );
+  });
+});
+
+describe("the calendar feed", () => {
+  it("holds every booking, a cancelled one marked so calendars drop it", () => {
+    const lines = getCalendarFeed([
+      event,
+      { ...event, ref: "TH-XYZ789", status: "CANCELLED" },
+      { ...event, ref: "TH-PEN456", status: "TENTATIVE" },
+    ]).split("\r\n");
+
+    expect(lines.filter((line) => line === "BEGIN:VEVENT")).toHaveLength(3);
+    expect(lines).toContain("STATUS:TENTATIVE");
+    expect(lines).toContain("UID:TH-XYZ789@tiwarashouse.com");
+    expect(lines.filter((line) => line === "STATUS:CANCELLED")).toHaveLength(1);
+    expect(lines).toContain("REFRESH-INTERVAL;VALUE=DURATION:PT1H");
+  });
+
+  it("is named for its owner: bookings for a client, Studio for a stylist", () => {
+    expect(getCalendarFeed([event]).split("\r\n")).toContain(
+      "X-WR-CALNAME:Tiwára's House bookings",
+    );
+
+    expect(
+      getCalendarFeed([event], "Tiwára's House Studio").split("\r\n"),
+    ).toContain("X-WR-CALNAME:Tiwára's House Studio");
+  });
+
+  it("leaves out an empty location", () => {
+    const lines = getCalendarFeed([{ ...event, location: "" }]).split("\r\n");
+
+    expect(lines.some((line) => line.startsWith("LOCATION:"))).toBe(false);
   });
 });
 

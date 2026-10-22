@@ -4,9 +4,7 @@ import {
   sendAccountCode,
 } from "../../../lib/client-account";
 import { getErrorMessage } from "../../../stores/api-slice";
-import { clearStoredFavourites } from "../../../stores/favourites-slice";
 import { joinClassNames } from "../../../utils/class-names";
-import { writeDeviceAddresses } from "../../../utils/saved-addresses";
 import type { AccountController } from "../use-account";
 import shared from "../../../styles/features/account/dialogs/index.module.css";
 import styles from "../../../styles/features/account/dialogs/delete.module.css";
@@ -21,13 +19,11 @@ const CODE_FAILURES: Record<string, string> = {
 
 interface DeleteAccountProps {
   account: AccountController;
-  userId: string;
   onBlocked: () => void;
 }
 
 export const DeleteAccount = ({
   account: { state, refs, actions },
-  userId,
   onBlocked,
 }: DeleteAccountProps) => {
   const { deleteText } = state;
@@ -72,8 +68,6 @@ export const DeleteAccount = ({
       return actions.showToast("Your account couldn’t be deleted. Try again");
     }
 
-    clearStoredFavourites(userId);
-    writeDeviceAddresses([]);
     actions.setState({ dialog: null, deleted: true });
     actions.endSession();
     actions.showToast("Your account has been deleted");

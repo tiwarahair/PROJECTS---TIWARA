@@ -1,8 +1,12 @@
-import { Copy, Shield } from "lucide-react";
+import { skipToken } from "@reduxjs/toolkit/query";
+import { Shield } from "lucide-react";
 import { useState } from "react";
 import { Link } from "react-router";
 import { AllergyField } from "../../components/allergy-field";
 import { AllergyPrivacySheet } from "../../components/allergy-privacy-sheet";
+import { CalendarSubscribe } from "../../components/calendar-subscribe";
+import { useGetCalendarSecretQuery } from "../../stores/account-api";
+import { useAppSelector } from "../../stores/hooks";
 import { joinClassNames } from "../../utils/class-names";
 import type { AccountController } from "./use-account";
 import styles from "../../styles/features/account/settings-sections.module.css";
@@ -183,7 +187,15 @@ export const CommunicationSection = ({
 }: {
   account: AccountController;
 }) => {
-  const syncUrl = `webcal://tiwarashouse.com/cal/${state.sync}.ics`;
+  const userId = useAppSelector(({ session }) => session.user?.id);
+
+  const {
+    data: secret,
+    isError,
+    refetch,
+  } = useGetCalendarSecretQuery(userId ?? skipToken);
+
+  const feedUrl = secret ? `${window.location.origin}/cal/${secret}.ics` : "";
 
   return (
     <section data-screen-label="Account: Communication">
@@ -209,33 +221,14 @@ export const CommunicationSection = ({
               "Add all your Tiwára's House bookings to your calendar automatically."
             }
           </p>
-          <label className={styles.syncLabel}>
-            Your calendar link{" "}
-            <input
-              className={styles.syncInput}
-              readOnly={true}
-              value={syncUrl}
-            />
-          </label>
-          <div className={ui.buttonRow}>
-            <button
-              className={styles.copy}
-              onClick={() => actions.copy(syncUrl, "Calendar link copied")}
-            >
-              <Copy className={ui.icon} size={16} strokeWidth={1.7} />
-              Copy calendar link
-            </button>
-            <button
-              className={ui.quietButton}
-              onClick={() => actions.openDialog({ kind: "sync" })}
-            >
-              Reset link
-            </button>
-          </div>
-          <p className={styles.syncHint}>
-            Paste the link into Google Calendar, Apple Calendar or Outlook as a
-            calendar subscription.
-          </p>
+          <CalendarSubscribe
+            feedUrl={feedUrl}
+            isError={isError}
+            hint="For another calendar app, copy the link and add it as a calendar subscription."
+            onRetry={() => void refetch()}
+            onCopy={(link) => actions.copy(link, "Calendar link copied")}
+            onReset={() => actions.openDialog({ kind: "sync" })}
+          />
         </div>
       </div>
     </section>
@@ -248,51 +241,59 @@ export const PrivacySection = ({
 }: {
   account: AccountController;
   onCookies: () => void;
-}) => (
-  <section data-screen-label="Account: Privacy and data">
-    <div className={ui.list}>
-      <div className={styles.privacyRow}>
-        <div className={ui.itemText}>
-          <div className={ui.itemTitle}>Download your data</div>
-          <div className={ui.itemSub}>
-            A copy of your details, bookings and payments.
+}) => {
+  const userId = useAppSelector(({ session }) => session.user?.id ?? "");
+  const [isDownloading, setDownloading] = useState(false);
+
+  const download = async () => {
+    setDownloading(true);
+    await actions.downloadMyData(userId);
+    setDownloading(false);
+  };
+
+  return (
+    <section data-screen-label="Account: Privacy and data">
+      <div className={ui.list}>
+        <div className={styles.privacyRow}>
+          <div className={ui.itemText}>
+            <div className={ui.itemTitle}>Download your data</div>
+            <div className={ui.itemSub}>
+              A copy of your details, bookings and payments.
+            </div>
           </div>
+          <button
+            className={ui.quietButton}
+            disabled={isDownloading}
+            onClick={() => void download()}
+          >
+            {isDownloading ? "Preparing…" : "Download"}
+          </button>
         </div>
-        <button
-          className={ui.quietButton}
-          onClick={() =>
-            actions.showToast(
-              "We’ll email you a copy of your data within one month.",
-            )
-          }
-        >
-          Request a copy
-        </button>
-      </div>
-      <div className={styles.privacyRow}>
-        <div className={ui.itemText}>
-          <div className={ui.itemTitle}>Cookie settings</div>
-          <div className={ui.itemSub}>Choose which cookies we use.</div>
+        <div className={styles.privacyRow}>
+          <div className={ui.itemText}>
+            <div className={ui.itemTitle}>Cookie settings</div>
+            <div className={ui.itemSub}>Choose which cookies we use.</div>
+          </div>
+          <button className={styles.cookieLink} onClick={onCookies}>
+            Cookie settings
+          </button>
         </div>
-        <button className={styles.cookieLink} onClick={onCookies}>
-          Cookie settings
-        </button>
       </div>
-    </div>
-    <div className={styles.danger} data-screen-label="Danger zone">
-      <h2 className={styles.dangerTitle}>Delete Account</h2>
-      <div className={styles.dangerRow}>
-        <div className={styles.dangerText}>
-          Delete your account and the details stored with it. This can’t be
-          undone.
+      <div className={styles.danger} data-screen-label="Danger zone">
+        <h2 className={styles.dangerTitle}>Delete Account</h2>
+        <div className={styles.dangerRow}>
+          <div className={styles.dangerText}>
+            Delete your account and the details stored with it. This can’t be
+            undone.
+          </div>
+          <button
+            className={styles.dangerButton}
+            onClick={() => actions.openDialog({ kind: "delete" })}
+          >
+            Delete account
+          </button>
         </div>
-        <button
-          className={styles.dangerButton}
-          onClick={() => actions.openDialog({ kind: "delete" })}
-        >
-          Delete account
-        </button>
       </div>
-    </div>
-  </section>
-);
+    </section>
+  );
+};

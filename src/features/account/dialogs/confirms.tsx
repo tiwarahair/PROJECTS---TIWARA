@@ -1,4 +1,6 @@
 import { DISCARD_PROMPT } from "../../../hooks/use-unsaved-changes";
+import { useResetCalendarSecretMutation } from "../../../stores/account-api";
+import { useAppSelector } from "../../../stores/hooks";
 import { getAddressLine } from "../logic";
 import type { AccountController } from "../use-account";
 import type { AccountView } from "../view";
@@ -123,19 +125,27 @@ interface SyncResetProps {
   account: AccountController;
 }
 
-export const SyncReset = ({ account }: SyncResetProps) => (
-  <Confirm
-    title="Reset your calendar link?"
-    text="The old link will stop working."
-    action="Reset link"
-    onCancel={account.actions.closeDialog}
-    onConfirm={() => {
-      closeThen(account, {
-        sync: Math.random().toString(36).slice(2, 10),
-        dialog: null,
-      });
+export const SyncReset = ({ account }: SyncResetProps) => {
+  const userId = useAppSelector(({ session }) => session.user?.id ?? "");
+  const [resetLink] = useResetCalendarSecretMutation();
+  const { closeDialog, showToast } = account.actions;
 
-      account.actions.showToast("New calendar link created");
-    }}
-  />
-);
+  return (
+    <Confirm
+      title="Reset your calendar link?"
+      text="The old link will stop working."
+      action="Reset link"
+      onCancel={closeDialog}
+      onConfirm={() => {
+        closeThen(account, { dialog: null });
+
+        resetLink(userId)
+          .unwrap()
+          .then(
+            () => showToast("New calendar link created"),
+            () => showToast("Your calendar link couldn’t be reset. Try again"),
+          );
+      }}
+    />
+  );
+};

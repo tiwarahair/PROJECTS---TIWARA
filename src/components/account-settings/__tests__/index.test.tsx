@@ -12,6 +12,7 @@ let user: UserEvent;
 let backend: AccountSettingsBackend;
 
 const CODE = "123456";
+const FEED = "https://tiwarashouse.com/cal/studio";
 
 const getTestBackend = (): AccountSettingsBackend => ({
   saveName: vi.fn(() => Promise.resolve()),
@@ -49,6 +50,8 @@ const getTestBackend = (): AccountSettingsBackend => ({
   signOutSession: vi.fn(() => Promise.resolve()),
   signOutOthers: vi.fn(() => Promise.resolve()),
   saveLoginAlerts: vi.fn(() => Promise.resolve()),
+  getCalendarFeed: vi.fn(() => Promise.resolve(`${FEED}/first.ics`)),
+  resetCalendarFeed: vi.fn(() => Promise.resolve(`${FEED}/second.ics`)),
   changePassword: vi.fn((password: string, code: string) => {
     if (!code) return Promise.resolve("reauthentication_needed");
 
@@ -69,8 +72,6 @@ beforeEach(() => {
   user = setupUser();
   backend = getTestBackend();
 });
-
-const advance = (ms: number) => act(() => vi.advanceTimersByTime(ms));
 
 describe("AccountSettings", () => {
   beforeEach(() => vi.useFakeTimers());
@@ -685,7 +686,7 @@ describe("AccountSettings", () => {
     ).toHaveAttribute("aria-checked", "true");
   });
 
-  it("calendar connects Google after a short wait", async () => {
+  it("calendar: Google is coming soon, and the subscribe link loads and resets", async () => {
     render(
       <AccountSettings person={person} backend={backend} page="calendar" />,
       {
@@ -693,12 +694,55 @@ describe("AccountSettings", () => {
       },
     );
 
-    await user.click(
-      screen.getByRole("button", { name: "Connect Google Calendar" }),
+    expect(screen.getByText("Coming soon")).toBeInTheDocument();
+
+    const link = await screen.findByDisplayValue(
+      "webcal://tiwarashouse.com/cal/studio/first.ics",
     );
 
-    expect(screen.getByText("Connecting to Google")).toBeInTheDocument();
-    advance(1200);
-    expect(screen.getByText("Google Calendar connected")).toBeInTheDocument();
+    expect(link).toHaveAccessibleName("Your calendar link");
+
+    expect(
+      screen.getByRole("link", { name: "Apple Calendar" }),
+    ).toHaveAttribute("href", "webcal://tiwarashouse.com/cal/studio/first.ics");
+
+    await user.click(screen.getByRole("button", { name: "Reset link" }));
+
+    await user.click(
+      within(
+        screen.getByRole("alertdialog", { name: "Reset your subscribe link?" }),
+      ).getByRole("button", { name: "Reset link" }),
+    );
+
+    expect(
+      await screen.findByText("New link ready. Add it to your calendar app"),
+    ).toBeInTheDocument();
+
+    expect(link).toHaveValue("webcal://tiwarashouse.com/cal/studio/second.ics");
+  });
+
+  it("calendar: says when the link couldn't load and can try again", async () => {
+    vi.mocked(backend.getCalendarFeed)
+      .mockRejectedValueOnce(new Error("offline"))
+      .mockResolvedValueOnce(`${FEED}/first.ics`);
+
+    render(
+      <AccountSettings person={person} backend={backend} page="calendar" />,
+      {
+        wrapper: MemoryRouter,
+      },
+    );
+
+    expect(await screen.findByRole("alert")).toHaveTextContent(
+      "Your calendar link couldn’t load.",
+    );
+
+    await user.click(screen.getByRole("button", { name: "Try again" }));
+
+    expect(
+      await screen.findByDisplayValue(
+        "webcal://tiwarashouse.com/cal/studio/first.ics",
+      ),
+    ).toBeInTheDocument();
   });
 });

@@ -8,6 +8,7 @@ import {
 } from "react";
 import { skipToken } from "@reduxjs/toolkit/query";
 import { useNavigate, useSearchParams } from "react-router";
+import { useAccountPhoto } from "../../hooks/use-account-photo";
 import { useIdentity } from "../../hooks/use-identity";
 import { useSavedAddresses } from "../../hooks/use-saved-addresses";
 import {
@@ -16,6 +17,7 @@ import {
   useGetClientCardsQuery,
   useRemoveClientCardMutation,
   useSaveClientAddressMutation,
+  useSetAccountPhotoMutation,
   useSetDefaultCardMutation,
 } from "../../stores/account-api";
 import { usePasswordChecker } from "../../hooks/use-password-checker";
@@ -38,6 +40,9 @@ export interface AccountData {
   addresses: SavedAddress[];
   bookings: AccountBooking[];
   cards: SavedCard[];
+  photo: string | null;
+  hasPhoto: boolean;
+  isPhotoLoading: boolean;
 }
 
 export const useAccountCore = (props: AccountProps) => {
@@ -122,13 +127,33 @@ export const useAccountCore = (props: AccountProps) => {
   const [setDefaultCard] = useSetDefaultCardMutation();
   const [removeCard] = useRemoveClientCardMutation();
 
+  const {
+    photo: photoUrl,
+    hasPhoto,
+    isLoading: isPhotoLoading,
+  } = useAccountPhoto();
+
+  const [setAccountPhoto] = useSetAccountPhotoMutation();
+
+  const setPhoto = useCallback(
+    async (file: File | null) => {
+      if (!identity) throw new Error("Not signed in");
+
+      await setAccountPhoto({ userId: identity.user.id, file }).unwrap();
+    },
+    [identity, setAccountPhoto],
+  );
+
   const data: AccountData = useMemo(
     () => ({
       addresses: savedAddresses,
       bookings: bookings ?? NO_BOOKINGS,
       cards: cards ?? NO_CARDS,
+      photo: photoUrl,
+      hasPhoto,
+      isPhotoLoading,
     }),
-    [savedAddresses, bookings, cards],
+    [savedAddresses, bookings, cards, photoUrl, hasPhoto, isPhotoLoading],
   );
 
   const dataRef = useRef(data);
@@ -180,6 +205,7 @@ export const useAccountCore = (props: AccountProps) => {
     toastTimer,
     resendTimer,
     saveProfile,
+    setPhoto,
     saveAddress,
     deleteAddress,
     setDefaultCard,

@@ -188,8 +188,8 @@ describe("AccountPage", () => {
   });
 
   it("Escape closes the dialog", async () => {
-    renderAccount("?section=communication");
-    await user.click(screen.getByRole("button", { name: "Reset link" }));
+    renderAccount("?section=privacy");
+    await user.click(screen.getByRole("button", { name: "Cookie settings" }));
     expect(screen.getByRole("dialog")).toBeInTheDocument();
     await user.keyboard("{Escape}");
     expect(screen.queryByRole("dialog")).not.toBeInTheDocument();

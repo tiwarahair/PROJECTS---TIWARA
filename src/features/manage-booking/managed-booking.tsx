@@ -11,7 +11,12 @@ import { BookingNotes } from "./booking-notes";
 import { CodeDialog } from "./code-dialog";
 import { ConfirmDialog } from "./confirm-dialog";
 import { ManageActions } from "./manage-actions";
-import { getCancelLines, getRefundTiming, toPounds } from "./logic";
+import {
+  getCancelLines,
+  getRefundTiming,
+  isCancelledStatus,
+  toPounds,
+} from "./logic";
 import { RescheduleSheet } from "./reschedule-sheet";
 import styles from "../../styles/features/manage-booking/index.module.css";
 import toastStyles from "../../styles/features/manage-booking/manage-toast.module.css";
@@ -51,7 +56,7 @@ export const ManagedBooking = ({
     useCancelBookingMutation();
 
   const stylist = booking.stylist_name;
-  const isCancelled = booking.status === "cancelled";
+  const isCancelled = isCancelledStatus(booking.status);
   const isPast = !isCancelled && !booking.can_cancel;
 
   useEffect(() => () => window.clearTimeout(toastTimer.current), []);

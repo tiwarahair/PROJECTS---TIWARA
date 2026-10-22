@@ -36,13 +36,7 @@ export const DeleteDialog = ({ account }: DeleteDialogProps) => {
   if (isDeletionBlocked(blockers))
     return <DeleteBlocked account={account} blockers={blockers} />;
 
-  return (
-    <DeleteAccount
-      account={account}
-      userId={userId ?? ""}
-      onBlocked={() => void refetch()}
-    />
-  );
+  return <DeleteAccount account={account} onBlocked={() => void refetch()} />;
 };
 
 interface DeleteBlockedProps {

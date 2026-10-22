@@ -43,7 +43,6 @@ export interface AccountState {
   allergyEdit: number;
   allergyDraft: string;
   profile: Profile;
-  photo: string | null;
   photoError: string;
   quiz: boolean;
   edit: EditKey | null;
@@ -57,7 +56,6 @@ export interface AccountState {
   addressForm: AddressForm | null;
   addressMenu?: string | null;
   marketing: boolean;
-  sync: string;
   cookies: { analytics: boolean; marketing: boolean };
   cookiesDraft: { analytics: boolean; marketing: boolean };
   deleteText: string;

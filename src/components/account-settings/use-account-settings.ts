@@ -104,7 +104,6 @@ export const useAccountSettings = (props: AccountSettingsProps) => {
   const dialogRun = useRef<(() => void) | null>(null);
   const dialogReturn = useRef<HTMLElement | null>(null);
   const toastTimer = useRef(0);
-  const googleTimer = useRef(0);
   const latestSessionsLoad = useRef(0);
 
   usePasswordChecker();
@@ -174,10 +173,26 @@ export const useAccountSettings = (props: AccountSettingsProps) => {
     if (page === "security") loadSessions();
   }, [page]);
 
+  const loadFeed = () => {
+    if (state.feedUrl) return;
+
+    setState({ feedFailed: false });
+
+    props.backend.getCalendarFeed().then(
+      (feedUrl) => setState({ feedUrl }),
+      () => setState({ feedFailed: true }),
+    );
+  };
+
+  const loadFeedOnOpen = useEffectEvent(loadFeed);
+
+  useEffect(() => {
+    if (page === "calendar") loadFeedOnOpen();
+  }, [page]);
+
   useEffect(
     () => () => {
       window.clearTimeout(toastTimer.current);
-      window.clearTimeout(googleTimer.current);
     },
     [],
   );
@@ -295,17 +310,6 @@ export const useAccountSettings = (props: AccountSettingsProps) => {
     props.onState?.({ canSave: isDirty && hasSave, save, discard });
   });
 
-  // TO DO: google first needs to verify our app for this to work which can take weeks
-  const connectGoogle = () => {
-    setState(({ google }) => ({ google: { ...google, state: "connecting" } }));
-    window.clearTimeout(googleTimer.current);
-
-    googleTimer.current = window.setTimeout(() => {
-      setState(({ google }) => ({ google: { ...google, state: "on" } }));
-      toast("Google Calendar connected");
-    }, 1200);
-  };
-
   return {
     page,
     state,
@@ -330,7 +334,7 @@ export const useAccountSettings = (props: AccountSettingsProps) => {
     sendPasswordCode,
     backend,
     sessions,
-    connectGoogle,
+    retryFeed: loadFeed,
   };
 };
 

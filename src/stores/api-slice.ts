@@ -101,6 +101,7 @@ export const api = createApi({
     "Addresses",
     "ClientBookings",
     "ClientCards",
+    "AccountPhoto",
   ],
   refetchOnReconnect: true,
   endpoints: (build) => ({
@@ -109,7 +110,7 @@ export const api = createApi({
       queryFn: async (userId) => {
         const { data, error } = await supabase
           .from("profiles")
-          .select("first_name, last_name, phone, marketing_opt_in")
+          .select("first_name, last_name, phone, marketing_opt_in, photo_path")
           .eq("id", userId)
           .single();
 
@@ -121,6 +122,7 @@ export const api = createApi({
             last: data.last_name ?? "",
             mobile: data.phone ?? "",
             marketing: data.marketing_opt_in,
+            photoPath: data.photo_path,
           },
         };
       },
