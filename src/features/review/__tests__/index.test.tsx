@@ -74,6 +74,18 @@ describe("ReviewPage", () => {
     ).toBeInTheDocument();
   });
 
+  it("a server problem offers to try again, not an expired link", async () => {
+    vi.mocked(fetchReviewPage).mockRejectedValue(new Error("unknown"));
+
+    renderWithStore(<ReviewPage />, "/review?token=abc");
+
+    expect(
+      await screen.findByRole("heading", { name: "Something went wrong" }),
+    ).toBeInTheDocument();
+
+    expect(screen.getByRole("link", { name: "Try again" })).toBeInTheDocument();
+  });
+
   it("an expired link says so", async () => {
     vi.mocked(fetchReviewPage).mockRejectedValue(new Error("link_not_valid"));
 

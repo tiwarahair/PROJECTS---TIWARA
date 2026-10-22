@@ -69,9 +69,7 @@ export const toResultCards = (rows: SearchRow[], selection: StyleSelection) =>
       area: area_label ?? "",
       from,
       verified: true,
-      ...(rating == null
-        ? {}
-        : { rating: rating.toFixed(1), reviews: review_count }),
+      ...(rating == null ? {} : { rating, reviews: review_count }),
       meta: `From ${formatMoney(from)}`,
       rows: selection.has
         ? matches.map((match) => ({

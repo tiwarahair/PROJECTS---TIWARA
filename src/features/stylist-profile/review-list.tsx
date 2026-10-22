@@ -1,7 +1,6 @@
-import { Flag } from "lucide-react";
 import { ReviewCard } from "../../components/review-card";
 import type { PublicReview } from "../../lib/review-api";
-import styles from "../../styles/features/stylist-profile/profile-reviews.module.css";
+import { ReviewMenu } from "./review-menu";
 
 interface ReviewListProps {
   reviews: PublicReview[];
@@ -19,6 +18,7 @@ export const ReviewList = ({
     ({
       id,
       author,
+      is_former: isFormer,
       rating,
       created_at: createdAt,
       service_name: serviceName,
@@ -31,6 +31,7 @@ export const ReviewList = ({
       <ReviewCard
         key={id}
         author={author}
+        isFormer={isFormer}
         rating={rating}
         createdAt={createdAt}
         serviceName={serviceName}
@@ -39,18 +40,7 @@ export const ReviewList = ({
         reply={reply}
         isReplyEdited={isReplyEdited}
         stylistName={stylistName}
-        actions={
-          !isMine && (
-            <button
-              type="button"
-              className={styles.report}
-              onClick={() => onReport(id)}
-            >
-              <Flag size={13} strokeWidth={1.8} />
-              Report
-            </button>
-          )
-        }
+        tag={!isMine && <ReviewMenu onReport={() => onReport(id)} />}
       />
     ),
   );

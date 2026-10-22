@@ -5,15 +5,27 @@ interface ReviewMessage {
   text: string;
   linkLabel: string;
   linkHref: string;
+  isReload?: boolean;
 }
 
 export const MAX_REVIEW_LENGTH = 1000;
 
 const HOME = { linkLabel: "Go to Tiwára’s House", linkHref: "/" };
 
+/** the page's state, or why it didn't load: an expired link, or anything else going wrong */
 export const getClosedMessage = (
   page: ReviewPage | undefined,
+  loadError = "",
 ): ReviewMessage => {
+  if (!page && loadError && loadError !== "link_not_valid")
+    return {
+      title: "Something went wrong",
+      text: "We couldn’t open your review. Please try again.",
+      linkLabel: "Try again",
+      linkHref: "/review",
+      isReload: true,
+    };
+
   if (page?.state === "reviewed")
     return {
       title: "Thanks for your review",

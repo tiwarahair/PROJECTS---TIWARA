@@ -25,6 +25,7 @@ describe("ReviewCard", () => {
     ).toBeInTheDocument();
 
     expect(screen.getByText("Verified booking")).toBeInTheDocument();
+    expect(screen.getByText("AL")).toBeInTheDocument();
     expect(screen.getByText("Reply from NaturallyNia")).toBeInTheDocument();
     expect(screen.getByText("Edited")).toBeInTheDocument();
   });

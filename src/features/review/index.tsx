@@ -28,9 +28,11 @@ export const ReviewPage = () => {
   const [error, setError] = useState("");
   const [submit, { isLoading: isSubmitting }] = useSubmitReviewMutation();
 
-  const { currentData: page, isFetching } = useGetReviewPageQuery(token, {
-    skip: !token,
-  });
+  const {
+    currentData: page,
+    isFetching,
+    error: loadError,
+  } = useGetReviewPageQuery(token, { skip: !token });
 
   const isSlow = useIsSlow(isFetching && !page);
 
@@ -65,7 +67,9 @@ export const ReviewPage = () => {
     if (isFetching && !page) return null;
 
     if (!page || page.state !== "open")
-      return <PageMessage {...getClosedMessage(page)} />;
+      return (
+        <PageMessage {...getClosedMessage(page, getErrorMessage(loadError))} />
+      );
 
     return (
       <>
@@ -103,9 +107,14 @@ export const ReviewPage = () => {
             />
           </fieldset>
           <label className={styles.field}>
-            <span className={styles.legend}>
-              Tell others about your visit{" "}
-              <span className={styles.optional}>(optional)</span>
+            <span className={styles.fieldHead}>
+              <span className={styles.legend}>
+                Tell others about your visit{" "}
+                <span className={styles.optional}>(optional)</span>
+              </span>
+              <span className={styles.count}>
+                {`${body.length}/${MAX_REVIEW_LENGTH}`}
+              </span>
             </span>
             <textarea
               className={styles.textarea}
@@ -115,9 +124,6 @@ export const ReviewPage = () => {
               placeholder="What did you have done, and how did it go?"
               onChange={(event) => setBody(event.target.value)}
             />
-            <span className={styles.count}>
-              {`${body.length}/${MAX_REVIEW_LENGTH}`}
-            </span>
           </label>
           {!!error && (
             <p className={styles.error} role="alert">

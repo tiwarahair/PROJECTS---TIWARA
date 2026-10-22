@@ -1,4 +1,5 @@
-import { dateLabel, getInitials, timeToMinutes } from "../../core/format";
+import { getInitials } from "../../../../utils/initials";
+import { dateLabel, timeToMinutes } from "../../core/format";
 import type { StudioBooking, StudioClient } from "../../core/types";
 import type { ClientActions } from "./actions";
 import type { ClientsContext } from "./context";

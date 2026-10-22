@@ -5,21 +5,15 @@ import {
   MessageSquare,
   UserRound,
 } from "lucide-react";
-import { useState } from "react";
+import { useLayoutEffect, useRef, useState } from "react";
 import { StarRating } from "../../../components/star-rating";
 import type { StudioReview } from "../../../lib/studio-api/reviews";
 import { joinClassNames } from "../../../utils/class-names";
-import { getInitials } from "../core/format";
+import { formatReviewDate } from "../../../utils/review-date";
+import { getInitials } from "../../../utils/initials";
 import type { StudioClient } from "../core/types";
 import { ReplyForm } from "./reply-form";
-import { LONG_REVIEW } from "./view";
 import styles from "../../../styles/features/studio/reviews/row.module.css";
-
-const reviewDate = new Intl.DateTimeFormat("en-GB", {
-  day: "numeric",
-  month: "short",
-  year: "numeric",
-});
 
 interface ReviewRowProps {
   review: StudioReview;
@@ -79,8 +73,30 @@ export const ReviewRow = ({
   onOpenClient,
 }: ReviewRowProps) => {
   const [isExpanded, setExpanded] = useState(false);
-  const clientId = client?.id;
-  const isClamped = !!body && body.length > LONG_REVIEW && !isExpanded;
+  const [isCut, setCut] = useState(false);
+  const bodyRef = useRef<HTMLParagraphElement>(null);
+  // a deleted account keeps no link to the stylist's card
+  const clientId = isFormer ? null : client?.id;
+
+  // "Read more" only when the 4-line clamp actually hides text, re-checked as the width changes
+  useLayoutEffect(() => {
+    const element = bodyRef.current;
+
+    if (!element || isExpanded) return;
+
+    const measure = () =>
+      setCut(element.scrollHeight > element.clientHeight + 1);
+
+    measure();
+
+    if (typeof ResizeObserver === "undefined") return;
+
+    const observer = new ResizeObserver(measure);
+
+    observer.observe(element);
+
+    return () => observer.disconnect();
+  }, [body, isExpanded]);
 
   const who = (
     <>
@@ -126,19 +142,23 @@ export const ReviewRow = ({
       <div className={styles.content}>
         <div className={styles.meta}>
           <StarRating rating={rating} />
-          <span>{reviewDate.format(new Date(createdAt))}</span>
+          <span>{formatReviewDate(createdAt)}</span>
           <span aria-hidden="true">·</span>
           <span>{service}</span>
         </div>
         {!!body && (
           <p
+            ref={bodyRef}
             id={`review-${id}`}
-            className={joinClassNames(styles.body, isClamped && styles.clamped)}
+            className={joinClassNames(
+              styles.body,
+              !isExpanded && styles.clamped,
+            )}
           >
             {body}
           </p>
         )}
-        {isClamped && (
+        {isCut && !isExpanded && (
           <button
             type="button"
             className={styles.more}

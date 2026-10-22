@@ -11,13 +11,13 @@ const REASONS: { reason: ReportReason; label: string }[] = [
     reason: "personal_info",
     label: "Shares private details, like a phone number",
   },
-  { reason: "not_real", label: "Not a real visit, or the wrong stylist" },
   {
     reason: "conflict",
     label: "Written by someone with a conflict of interest",
   },
   { reason: "spam", label: "Spam or advertising" },
   { reason: "threat", label: "A threat, or asks for something in return" },
+  { reason: "other", label: "Other" },
 ];
 
 interface ReportReviewProps {
@@ -35,6 +35,12 @@ export const ReportReview = ({ reviewId, onClose }: ReportReviewProps) => {
   const send = async () => {
     if (!reason) {
       setError("Choose a reason.");
+
+      return;
+    }
+
+    if (reason === "other" && !details.trim()) {
+      setError("Tell us what’s wrong with it.");
 
       return;
     }
@@ -98,7 +104,10 @@ export const ReportReview = ({ reviewId, onClose }: ReportReviewProps) => {
       </fieldset>
       <label className={styles.field}>
         <span className={styles.legend}>
-          Anything else? <span className={styles.optional}>(optional)</span>
+          {reason === "other" ? "What’s wrong with it?" : "Anything else?"}{" "}
+          <span className={styles.optional}>
+            {reason === "other" ? "(required)" : "(optional)"}
+          </span>
         </span>
         <textarea
           className={styles.textarea}

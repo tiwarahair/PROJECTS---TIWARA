@@ -14,9 +14,6 @@ export const SORT_OPTIONS: { value: ReviewSort; label: string }[] = [
 
 export const PAGE_SIZE = 20;
 
-/** longer reviews show 4 lines and "Read more" */
-export const LONG_REVIEW = 260;
-
 const byNewest = (first: StudioReview, second: StudioReview) =>
   second.created_at.localeCompare(first.created_at);
 

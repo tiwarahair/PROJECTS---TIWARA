@@ -1,16 +1,14 @@
-import { BadgeCheck } from "lucide-react";
+import { BadgeCheck, UserRound } from "lucide-react";
 import type { ReactNode } from "react";
+import { getInitials } from "../../utils/initials";
+import { formatReviewDate } from "../../utils/review-date";
 import { StarRating } from "../star-rating";
 import styles from "../../styles/components/review-card/index.module.css";
 
-const reviewDate = new Intl.DateTimeFormat("en-GB", {
-  day: "numeric",
-  month: "short",
-  year: "numeric",
-});
-
 interface ReviewCardProps {
   author: string;
+  /** the reviewer deleted their account */
+  isFormer?: boolean;
   rating: number;
   createdAt: string;
   serviceName: string;
@@ -21,13 +19,14 @@ interface ReviewCardProps {
   stylistName: string;
   /** Under the review, e.g. Report or Reply. */
   actions?: ReactNode;
-  /** Above the stars, e.g. a "Being checked" tag. */
+  /** Top right of the card, e.g. a "⋯" button. */
   tag?: ReactNode;
 }
 
 /** One review: who, the stars and date, the words, and the stylist's reply. */
 export const ReviewCard = ({
   author,
+  isFormer = false,
   rating,
   createdAt,
   serviceName,
@@ -41,21 +40,31 @@ export const ReviewCard = ({
 }: ReviewCardProps) => (
   <article className={styles.card}>
     <header className={styles.head}>
+      <span className={styles.avatar} aria-hidden="true">
+        {isFormer ? (
+          <UserRound size={18} strokeWidth={1.7} />
+        ) : (
+          getInitials(author)
+        )}
+      </span>
       <div className={styles.who}>
         <span className={styles.author}>{author}</span>
-        <span className={styles.verified}>
-          <BadgeCheck size={14} strokeWidth={2} />
-          Verified booking
-        </span>
+        <div className={styles.meta}>
+          <span>{`${formatReviewDate(createdAt)} · ${serviceName}`}</span>
+          <span className={styles.verified} title="Verified booking">
+            <span className={styles.dot} aria-hidden="true">
+              ·
+            </span>
+            <BadgeCheck size={13} strokeWidth={2} />
+            <span className={styles.verifiedText}>Verified booking</span>
+          </span>
+        </div>
       </div>
+      <span className={styles.stars}>
+        <StarRating rating={rating} />
+      </span>
       {tag}
     </header>
-    <div className={styles.meta}>
-      <StarRating rating={rating} />
-      <span>{reviewDate.format(new Date(createdAt))}</span>
-      <span aria-hidden="true">·</span>
-      <span>{serviceName}</span>
-    </div>
     {!!body && <p className={styles.body}>{body}</p>}
     {isTextRemoved && (
       <p className={styles.removed}>

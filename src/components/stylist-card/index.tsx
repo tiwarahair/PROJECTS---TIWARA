@@ -212,7 +212,7 @@ export const StylistCard = ({
               <Star size={14} strokeWidth={0} fill="var(--brand-yellow)" />
               {reviews ? (
                 <>
-                  {rating}{" "}
+                  {typeof rating === "number" ? rating.toFixed(1) : rating}{" "}
                   <span className={styles.reviewCount}>({reviews})</span>
                 </>
               ) : (

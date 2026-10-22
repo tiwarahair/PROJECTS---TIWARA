@@ -19,6 +19,7 @@ const REVIEW: PublicReview = {
   body: "Beautiful knotless braids",
   is_text_removed: false,
   author: "Ada L.",
+  is_former: false,
   service_name: "Knotless braids",
   created_at: "2026-10-20T09:00:00Z",
   reply: null,
@@ -77,18 +78,51 @@ describe("ProfileReviews", () => {
   it("guests log in before reporting", async () => {
     renderReviews(false);
 
-    await user.click(await screen.findByRole("button", { name: "Report" }));
+    await user.click(
+      await screen.findByRole("button", {
+        name: "More options for this review",
+      }),
+    );
+
+    await user.click(screen.getByRole("menuitem", { name: "Report review" }));
 
     expect(screen.getByTestId("location")).toHaveTextContent(
       "/login?screen=cust-email&return=%2Fnaturallynia",
     );
   });
 
+  it("Other needs a few words before it sends", async () => {
+    renderReviews(true);
+
+    await user.click(
+      await screen.findByRole("button", {
+        name: "More options for this review",
+      }),
+    );
+
+    await user.click(screen.getByRole("menuitem", { name: "Report review" }));
+
+    await user.click(screen.getByRole("radio", { name: "Other" }));
+    await user.click(screen.getByRole("button", { name: "Send report" }));
+
+    expect(screen.getByRole("alert")).toHaveTextContent(
+      "Tell us what’s wrong with it.",
+    );
+
+    expect(reportReview).not.toHaveBeenCalled();
+  });
+
   it("signed-in visitors report with a reason", async () => {
     vi.mocked(reportReview).mockResolvedValue("reported");
     renderReviews(true);
 
-    await user.click(await screen.findByRole("button", { name: "Report" }));
+    await user.click(
+      await screen.findByRole("button", {
+        name: "More options for this review",
+      }),
+    );
+
+    await user.click(screen.getByRole("menuitem", { name: "Report review" }));
 
     await user.click(
       screen.getByRole("radio", { name: "Spam or advertising" }),

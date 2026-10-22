@@ -1,15 +1,7 @@
 import { skipToken } from "@reduxjs/toolkit/query";
 import { useGetProfileQuery } from "../stores/api-slice";
 import { useAppSelector } from "../stores/hooks";
-
-export const getInitials = (name: string) =>
-  name
-    .split(" ")
-    .filter(Boolean)
-    .map((word) => word[0])
-    .slice(0, 2)
-    .join("")
-    .toUpperCase();
+import { getInitials } from "../utils/initials";
 
 /** The signed-in person: Supabase user plus their profile (names fill in once loaded). */
 export const useIdentity = () => {

@@ -25,6 +25,7 @@ export interface PublicReview {
   body: string | null;
   is_text_removed: boolean;
   author: string;
+  is_former: boolean; //  the reviewer deleted their account
   service_name: string;
   created_at: string;
   reply: string | null;
@@ -40,7 +41,7 @@ export interface PublicReviewsPage {
 }
 
 export type ReportReason =
-  "abusive" | "personal_info" | "not_real" | "conflict" | "spam" | "threat";
+  "abusive" | "personal_info" | "conflict" | "spam" | "threat" | "other";
 
 export interface ReviewReport {
   reviewId: string;

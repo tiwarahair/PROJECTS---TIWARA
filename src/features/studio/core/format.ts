@@ -6,6 +6,7 @@ import {
   SHORT_WEEKDAYS,
   formatDuration,
 } from "../../../utils/dates";
+import { getInitials } from "../../../utils/initials";
 
 const pad2 = (value: number) => (value < 10 ? "0" : "") + value;
 
@@ -144,14 +145,6 @@ export const parseWholeNumber = (value: string | number): number =>
 export const parseAmountLabel = (label: string | undefined): number =>
   parseFloat((label || "").replace(/[^0-9.]/g, "")) || 0;
 
-export const getInitials = (name: string | null | undefined): string =>
-  (name || "?")
-    .split(" ")
-    .filter(Boolean)
-    .slice(0, 2)
-    .map((word) => (word[0] ?? "").toUpperCase())
-    .join("");
-
 /** A client's photo, or an initials tile. */
 export const getAvatarSrc = (
   client: { img?: string; walkIn?: boolean; name?: string } | null | undefined,
@@ -169,13 +162,7 @@ export const getAvatarSrc = (
 
 /** The initials image stored on a client added from the New booking sheet */
 export const getInitialsImage = (name: string): string => {
-  const initials = name
-    .trim()
-    .split(/\s+/)
-    .map((word) => word[0])
-    .slice(0, 2)
-    .join("")
-    .toUpperCase();
+  const initials = getInitials(name);
 
   const svg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64"><rect width="64" height="64" fill="#efe8db"/><text x="32" y="40" text-anchor="middle" font-family="Hanken Grotesk,Helvetica,sans-serif" font-size="24" font-weight="600" fill="#8f1112">${initials}</text></svg>`;
 
