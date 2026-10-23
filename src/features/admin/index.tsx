@@ -1,18 +1,20 @@
-import { useLayoutEffect, useState } from "react";
+import { ArrowLeft } from "lucide-react";
+import { useState } from "react";
 import { useSearchParams } from "react-router";
 import { ActionToast } from "../../components/action-toast";
 import { useIdentity } from "../../hooks/use-identity";
 import { useMediaQuery } from "../../hooks/use-media-query";
-import { joinClassNames } from "../../utils/class-names";
+import {
+  AppShell,
+  AppShellFooterNav,
+  AppShellSidebar,
+  AppShellTopBar,
+} from "../../components/app-shell";
 import { useGetReportStatsQuery } from "./api";
 import { AdminReports } from "./reports";
-import { AdminFooterNav } from "./shell/footer-nav";
-import { AdminPhoneHeader, AdminTopBar } from "./shell/headers";
-import { getAdminTab } from "./shell/nav-items";
+import { AdminPhoneHeader } from "./shell/headers";
+import { ADMIN_TABS, getAdminTab } from "./shell/nav-items";
 import type { AdminTab } from "./shell/nav-items";
-import { AdminSidebar } from "./shell/sidebar";
-import "../../styles/features/studio/global.module.css";
-import styles from "../../styles/features/studio/shell/index.module.css";
 
 interface AdminPageProps {
   isStylist: boolean;
@@ -29,62 +31,59 @@ export const AdminPage = ({ isStylist }: AdminPageProps) => {
   // everything waiting for an admin: open reports and appeals
   const openCount = (stats?.open ?? 0) + (stats?.appealed ?? 0);
 
-  useLayoutEffect(() => {
-    document.documentElement.classList.add("studio-page");
-
-    return () => document.documentElement.classList.remove("studio-page");
-  }, []);
-
   const goTo = (next: AdminTab) => setParams({ tab: next });
+  const isSidebarShown = isSidebarOpen ?? isDesktop;
+
+  const navItems = ADMIN_TABS.map(({ id, label, icon }) => ({
+    id,
+    label,
+    icon,
+    isOn: tab.id === id,
+    onSelect: () => goTo(id),
+    badge: id === "reports" ? openCount : 0,
+  }));
 
   return (
-    <div className={styles.studio} data-screen-label="Admin">
-      <div className={joinClassNames(styles.frame, isWide && styles.frameWide)}>
-        {isWide && (
-          <AdminSidebar
-            tab={tab.id}
-            onTab={goTo}
-            isOpen={isSidebarOpen ?? isDesktop}
-            onToggle={() => setSidebarOpen(!(isSidebarOpen ?? isDesktop))}
-            isStylist={isStylist}
-            name={identity?.name ?? ""}
-            openCount={openCount}
+    <AppShell
+      label="Admin"
+      isWide={isWide}
+      sidebar={
+        <AppShellSidebar
+          label="Admin"
+          isOpen={isSidebarShown}
+          onToggle={() => setSidebarOpen(!isSidebarShown)}
+          items={navItems}
+          hasLinksDivider
+          links={
+            isStylist
+              ? [{ to: "/studio", label: "Back to Studio", icon: ArrowLeft }]
+              : []
+          }
+          profile={{ name: identity?.name ?? "", area: "Admin" }}
+        />
+      }
+      topBar={
+        isWide ? (
+          <AppShellTopBar
+            title={tab.label}
+            note={tab.note}
+            isWide={isWide}
+            isDesktop={isDesktop}
           />
-        )}
-        <div
-          className={joinClassNames(
-            styles.mainCard,
-            isWide && styles.mainCardWide,
-          )}
-          data-screen-label="Main card"
-        >
-          {isWide ? (
-            <AdminTopBar
-              title={tab.label}
-              note={tab.note}
-              isDesktop={isDesktop}
-            />
-          ) : (
-            <AdminPhoneHeader
-              isStylist={isStylist}
-              initials={identity?.initials ?? ""}
-            />
-          )}
-          <div className={styles.body} id="adbody">
-            {tab.id === "reports" && (
-              <AdminReports
-                isWide={isWide}
-                isDesktop={isDesktop}
-                stats={stats}
-              />
-            )}
-          </div>
-          {!isWide && (
-            <AdminFooterNav tab={tab.id} onTab={goTo} openCount={openCount} />
-          )}
-          <ActionToast />
-        </div>
-      </div>
-    </div>
+        ) : (
+          <AdminPhoneHeader
+            isStylist={isStylist}
+            initials={identity?.initials ?? ""}
+          />
+        )
+      }
+      footerNav={<AppShellFooterNav label="Admin" items={navItems} />}
+      bodyId="adbody"
+      overlays={<ActionToast />}
+    >
+      {tab.id === "reports" && (
+        <AdminReports isWide={isWide} isDesktop={isDesktop} stats={stats} />
+      )}
+    </AppShell>
   );
 };

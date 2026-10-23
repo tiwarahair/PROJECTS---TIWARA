@@ -2,32 +2,8 @@ import { ChevronLeft } from "lucide-react";
 import { Link } from "react-router";
 import { AccountAvatar, SiteMenu } from "../../../components/site-menu";
 import { getAssetUrl } from "../../../utils/asset-url";
-import { joinClassNames } from "../../../utils/class-names";
-import topBar from "../../../styles/features/studio/shell/top-bar.module.css";
 import backBar from "../../../styles/features/studio/settings/back-bar.module.css";
 import admin from "../../../styles/features/admin/shell.module.css";
-
-interface AdminTopBarProps {
-  title: string;
-  note: string;
-  isDesktop: boolean;
-}
-
-/** Studio's top bar on wider screens: the page and what it's for. */
-export const AdminTopBar = ({ title, note, isDesktop }: AdminTopBarProps) => (
-  <div
-    className={joinClassNames(
-      topBar.topBar,
-      isDesktop ? topBar.topBarDesk : topBar.topBarWide,
-    )}
-    data-screen-label="Admin top bar"
-  >
-    <div className={admin.grow}>
-      <h1 className={topBar.title}>{title}</h1>
-      <div className={topBar.dateLine}>{note}</div>
-    </div>
-  </div>
-);
 
 interface AdminPhoneHeaderProps {
   isStylist: boolean;

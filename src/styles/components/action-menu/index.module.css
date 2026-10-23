@@ -99,6 +99,11 @@
   margin-top: 12px;
 }
 
+/* the popover has no title, so no gap above its first item */
+.hidden + .list {
+  margin-top: 0;
+}
+
 .item {
   display: flex;
   align-items: center;

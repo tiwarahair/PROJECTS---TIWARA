@@ -1,3 +1,4 @@
+/* The shell's bottom bar on phones, with count badges. */
 .footerNav {
   position: fixed;
   bottom: 0;
@@ -57,4 +58,25 @@
   font-size: 12.5px;
   font-weight: 500;
   white-space: nowrap;
+}
+
+.pillAnchor {
+  position: relative;
+}
+
+.footerBadge {
+  position: absolute;
+  top: -4px;
+  left: calc(50% + 6px);
+  min-width: 18px;
+  height: 18px;
+  padding: 0 5px;
+  box-sizing: border-box;
+  border-radius: var(--radius-full);
+  background: var(--accent-700);
+  color: var(--neutral-50);
+  font-size: 11px;
+  font-weight: 700;
+  line-height: 18px;
+  text-align: center;
 }

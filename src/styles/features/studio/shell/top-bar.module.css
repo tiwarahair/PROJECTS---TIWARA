@@ -1,0 +1,78 @@
+/* Studio's top-bar extras: the phone avatar, the notifications bell and New booking. */
+.avatarButton {
+  border: none;
+  padding: 0;
+  background: none;
+  border-radius: var(--radius-full);
+  flex: 0 0 auto;
+}
+
+.avatarButton:active {
+  transform: scale(0.95) !important;
+}
+
+.avatar42 {
+  display: flex;
+  border: 2px solid #fff;
+  box-shadow: var(--shadow-card);
+}
+
+.bell {
+  position: relative;
+  width: 42px;
+  height: 42px;
+  border-radius: var(--radius-full);
+  border: 1px solid var(--border-subtle);
+  background: transparent;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--text-primary);
+  transition: transform 0.16s cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+
+.bell:active {
+  transform: scale(0.94) !important;
+}
+
+.unreadDot {
+  position: absolute;
+  top: 9px;
+  right: 10px;
+  width: 8px;
+  height: 8px;
+  border-radius: var(--radius-full);
+  background: var(--brand-yellow);
+  border: 1.5px solid #fff;
+}
+
+.newBooking {
+  height: 42px;
+  border-radius: var(--radius-full);
+  border: none;
+  background: var(--accent-700);
+  color: var(--neutral-100);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 0 18px;
+  font-size: 14.5px;
+  font-weight: 600;
+  box-shadow:
+    0 10px 24px -10px rgba(143, 17, 18, 0.6),
+    0 2px 6px -2px rgba(143, 17, 18, 0.35);
+  transition:
+    box-shadow 0.22s cubic-bezier(0.2, 0.8, 0.2, 1),
+    transform 0.16s cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+
+.newBooking:hover {
+  box-shadow:
+    0 14px 30px -10px rgba(143, 17, 18, 0.7),
+    0 2px 6px -2px rgba(143, 17, 18, 0.35) !important;
+}
+
+.newBooking:active {
+  transform: scale(0.96) !important;
+}

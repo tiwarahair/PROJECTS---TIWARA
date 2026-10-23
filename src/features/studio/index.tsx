@@ -1,7 +1,7 @@
-import { useEffect, useLayoutEffect } from "react";
+import { useEffect } from "react";
+import { AppShell } from "../../components/app-shell";
 import { trackOpenStudio } from "../../stores/cache-listener";
 import { useAppDispatch } from "../../stores/hooks";
-import { joinClassNames } from "../../utils/class-names";
 import { FilterSheet, QuickActions, SlotPopover } from "./bookings/overlays";
 import { StudioBookings, getBookingsView } from "./bookings";
 import { StudioClients } from "./clients";
@@ -37,29 +37,33 @@ import {
 } from "./shell";
 import { useStudio } from "./core/use-studio";
 import type { StudioProps } from "./core/use-studio";
-import "../../styles/features/studio/global.module.css";
-import styles from "../../styles/features/studio/shell/index.module.css";
 
 export type StudioPageProps = StudioProps;
 
 /**
- * The stylist's Studio, route "/studio": sidebar (wide) or footer nav (narrow), top bar,
+ * The stylist's Studio, route "/studio":
  * the Home / Bookings / Services / Earnings / Clients / Settings tabs, setup checklist, sheets and dialogs.
  */
 export const StudioPage = (props: StudioPageProps) => {
   const studio = useStudio(props);
   const dispatch = useAppDispatch();
-  const { state, isWide } = studio;
+
+  const {
+    state: {
+      tab,
+      setupMinimised,
+      setupExit,
+      filterOpen,
+      linkCard,
+      sheet,
+      wizard,
+    },
+    isWide,
+  } = studio;
+
   const { isComplete } = getSetupProgress(studio);
 
-  const bookingsView =
-    state.tab === "bookings" ? getBookingsView(studio) : null;
-
-  useLayoutEffect(() => {
-    document.documentElement.classList.add("studio-page");
-
-    return () => document.documentElement.classList.remove("studio-page");
-  }, []);
+  const bookingsView = tab === "bookings" ? getBookingsView(studio) : null;
 
   // saves made here (or still landing after leaving) drop the cached Studio data once it closes
   useEffect(() => trackOpenStudio(dispatch), [dispatch]);
@@ -67,58 +71,30 @@ export const StudioPage = (props: StudioPageProps) => {
   return (
     <>
       <StudioTooltip studio={studio} />
-      <div className={styles.studio} data-screen-label="Studio">
-        <div
-          className={joinClassNames(styles.frame, isWide && styles.frameWide)}
-        >
-          {isWide && <StudioSidebar studio={studio} />}
-          <div
-            className={joinClassNames(
-              styles.mainCard,
-              isWide && styles.mainCardWide,
+      <AppShell
+        label="Studio"
+        isWide={isWide}
+        sidebar={<StudioSidebar studio={studio} />}
+        topBar={<StudioTopBar studio={studio} />}
+        footerNav={<FooterNav studio={studio} />}
+        bodyId="stbody"
+        isBodyLocked={isWide && tab === "bookings"}
+        overlays={
+          <>
+            {isWide && ((!isComplete && !setupMinimised) || !!setupExit) && (
+              <SetupCard studio={studio} />
             )}
-            data-screen-label="Main card"
-          >
-            <StudioTopBar studio={studio} />
-            <div
-              className={joinClassNames(
-                styles.body,
-                isWide && state.tab === "bookings" && styles.bodyLocked,
-              )}
-              id="stbody"
-            >
-              {state.tab === "home" && <StudioHome studio={studio} />}
-              {state.tab === "services" && <StudioServices studio={studio} />}
-              {state.tab === "earnings" && <StudioEarnings studio={studio} />}
-              {state.tab === "clients" && <StudioClients studio={studio} />}
-              {state.tab === "reviews" && <StudioReviews studio={studio} />}
-              {state.tab === "settings" && <StudioSettings studio={studio} />}
-              {bookingsView && (
-                <>
-                  <StudioBookings studio={studio} view={bookingsView} />
-                  {state.filterOpen && (
-                    <FilterSheet studio={studio} view={bookingsView} />
-                  )}
-                </>
-              )}
-            </div>
-            {isWide &&
-              ((!isComplete && !state.setupMinimised) || !!state.setupExit) && (
-                <SetupCard studio={studio} />
-              )}
-            {isWide &&
-              !isComplete &&
-              state.setupMinimised &&
-              !state.setupExit && <SetupPill studio={studio} />}
-            {isWide && state.linkCard && <LinkCard studio={studio} />}
+            {isWide && !isComplete && setupMinimised && !setupExit && (
+              <SetupPill studio={studio} />
+            )}
+            {isWide && linkCard && <LinkCard studio={studio} />}
             {!isWide &&
-              !state.sheet &&
-              !state.wizard &&
-              (state.tab === "home" ||
-                state.tab === "bookings" ||
-                state.tab === "services") && <Fab studio={studio} />}
-            {!isWide && <FooterNav studio={studio} />}
-            {state.sheet && <StudioSheets studio={studio} />}
+              !sheet &&
+              !wizard &&
+              (tab === "home" || tab === "bookings" || tab === "services") && (
+                <Fab studio={studio} />
+              )}
+            {sheet && <StudioSheets studio={studio} />}
             <SlotPopover studio={studio} />
             {bookingsView && (
               <QuickActions studio={studio} view={bookingsView} />
@@ -132,9 +108,22 @@ export const StudioPage = (props: StudioPageProps) => {
             <BookingAddonDialog studio={studio} />
             <NewClientDialog studio={studio} />
             <StudioToast studio={studio} />
-          </div>
-        </div>
-      </div>
+          </>
+        }
+      >
+        {tab === "home" && <StudioHome studio={studio} />}
+        {tab === "services" && <StudioServices studio={studio} />}
+        {tab === "earnings" && <StudioEarnings studio={studio} />}
+        {tab === "clients" && <StudioClients studio={studio} />}
+        {tab === "reviews" && <StudioReviews studio={studio} />}
+        {tab === "settings" && <StudioSettings studio={studio} />}
+        {bookingsView && (
+          <>
+            <StudioBookings studio={studio} view={bookingsView} />
+            {filterOpen && <FilterSheet studio={studio} view={bookingsView} />}
+          </>
+        )}
+      </AppShell>
     </>
   );
 };
