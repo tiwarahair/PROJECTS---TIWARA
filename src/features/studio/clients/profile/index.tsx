@@ -37,12 +37,10 @@ export const ClientProfile = ({ view, variant }: ClientProfileProps) => {
       <section className={card}>
         <ProfileHead view={view} profile={profile} />
         {profile.contacts.length > 0 && <ProfileContacts profile={profile} />}
-        {profile.isBlocked && <BlockedNote profile={profile} />}
+        {profile.isBlocked && <BlockedNote view={view} profile={profile} />}
         <ProfileActions view={view} profile={profile} />
       </section>
-      {!!profile.sensitivities && (
-        <SensitivityNote view={view} profile={profile} />
-      )}
+      {!!profile.sensitivities && <SensitivityNote profile={profile} />}
       <section className={nextCard}>
         <HairNotes view={view} profile={profile} />
       </section>

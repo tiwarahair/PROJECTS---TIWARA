@@ -2,41 +2,76 @@ import { act, render, screen, within } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { Earnings } from "..";
 import { getRange, getRangeLabel } from "../dates";
-import { buildLedger } from "../ledger";
 import { getEarningsCsv } from "../export";
+import type { Ledger, Transaction } from "../data";
 import { formatMoney } from "../../../utils/money";
 import type { UserEvent } from "@testing-library/user-event";
 import { setupUser } from "../../../test/setup-user";
 
 let user: UserEvent;
 
+const clients = [{ id: "nia", name: "Nia Okafor" }];
+
+const getTransaction = (
+  id: string,
+  amount: number,
+  status: Transaction["status"],
+): Transaction => {
+  const now = new Date();
+
+  return {
+    id,
+    client: "nia",
+    service: "Silk press",
+    bookingRef: "BK-1",
+    appointment: now,
+    description: "Balance",
+    method: "Saved card",
+    at: now,
+    amount,
+    fee: 1.18,
+    net: amount - 1.18,
+    status,
+    payoutId: status === "Paid out" ? "PO-1" : undefined,
+  };
+};
+
+const getLedger = (overrides: Partial<Ledger> = {}): Ledger => {
+  const now = new Date();
+  const paid = getTransaction("TX-1", 65, "Paid out");
+
+  return {
+    transactions: [paid, getTransaction("TX-2", 40, "Available")],
+    payouts: [
+      {
+        id: "PO-1",
+        amount: 63.82,
+        gross: 65,
+        fees: 1.18,
+        refunds: 0,
+        sent: now,
+        arrive: now,
+        status: "Paid",
+        items: [paid],
+        from: now,
+      },
+    ],
+    available: 38.82,
+    pending: 0,
+    onHold: 0,
+    pausedAmount: 0,
+    nextDate: null,
+    today: now,
+    scenario: "default",
+    ...overrides,
+  };
+};
+
 beforeEach(() => {
   user = setupUser();
 });
 
-describe("Earnings ledger", () => {
-  it("is deterministic for a scenario", () => {
-    const first = buildLedger("default");
-    const second = buildLedger("default");
-
-    expect(first.transactions.map(({ id, amount }) => [id, amount])).toEqual(
-      second.transactions.map(({ id, amount }) => [id, amount]),
-    );
-
-    expect(first.transactions.length).toBeGreaterThan(50);
-  });
-
-  it("marks one payout as failed in the default scenario", () => {
-    const { payouts } = buildLedger("default");
-
-    expect(payouts.filter(({ status }) => status === "Failed")).toHaveLength(1);
-  });
-
-  it("has no transactions in the empty and setup scenarios", () => {
-    expect(buildLedger("empty").transactions).toEqual([]);
-    expect(buildLedger("setup").payouts).toEqual([]);
-  });
-
+describe("Earnings helpers", () => {
   it("formats money and ranges", () => {
     expect(formatMoney(-1234.5, { pence: "always" })).toBe("−£1,234.50");
     const range = getRange("custom", "2026-09-28", "2026-10-04");
@@ -45,7 +80,7 @@ describe("Earnings ledger", () => {
   });
 
   it("exports a CSV with a header row", () => {
-    const csv = getEarningsCsv(buildLedger("onhold").transactions.slice(0, 2));
+    const csv = getEarningsCsv(getLedger().transactions, clients);
 
     expect(csv.split("\n")[0]).toBe(
       "﻿Date,Time,Reference,Booking,Client,Service,Description,Method,Amount (GBP),Card fee (GBP),Net (GBP),Status,Payout",
@@ -58,9 +93,11 @@ describe("Earnings", () => {
   afterEach(() => vi.useRealTimers());
 
   it("renders the balance, totals and transactions", () => {
-    render(<Earnings />);
+    render(<Earnings ledger={getLedger()} clients={clients} />);
     expect(screen.getAllByText("Available")[0]).toBeInTheDocument();
+    expect(screen.getAllByText("£38.82")[0]).toBeInTheDocument();
     expect(screen.getByText("Takings")).toBeInTheDocument();
+    expect(screen.getAllByText(/Nia Okafor/)[0]).toBeInTheDocument();
 
     expect(screen.getByRole("tab", { name: "Transactions" })).toHaveAttribute(
       "aria-selected",
@@ -68,8 +105,22 @@ describe("Earnings", () => {
     );
   });
 
+  it("shows the amount on hold", () => {
+    render(<Earnings ledger={getLedger({ onHold: 85 })} clients={clients} />);
+
+    expect(
+      screen.getByText(/£85\.00 on hold · released 24 hours/),
+    ).toBeInTheDocument();
+  });
+
   it("empty: offers to copy the booking link", async () => {
-    render(<Earnings scenario="empty" />);
+    render(
+      <Earnings
+        ledger={getLedger({ transactions: [], payouts: [] })}
+        bookingLink="tiwarashouse.com/nia-hair"
+      />,
+    );
+
     expect(screen.getByText("No earnings yet.")).toBeInTheDocument();
     await user.click(screen.getByRole("button", { name: "Copy booking link" }));
     expect(screen.getByRole("status")).toHaveTextContent("Booking link copied");
@@ -77,20 +128,25 @@ describe("Earnings", () => {
 
   it("setup: asks to continue setup, or for tax details when on hold", async () => {
     const onAddTax = vi.fn();
-    const { unmount } = render(<Earnings scenario="setup" />);
+    const ledger = getLedger({ scenario: "setup" });
+    const { unmount } = render(<Earnings ledger={ledger} />);
 
     expect(
       screen.getByText("Payouts start once setup is complete"),
     ).toBeInTheDocument();
 
     unmount();
-    render(<Earnings scenario="setup" taxHold={true} onAddTax={onAddTax} />);
+    render(<Earnings ledger={ledger} taxHold={true} onAddTax={onAddTax} />);
     await user.click(screen.getByRole("button", { name: "Add tax details" }));
     expect(onAddTax).toHaveBeenCalled();
   });
 
   it("paused: explains the recovery", () => {
-    render(<Earnings scenario="paused" />);
+    render(
+      <Earnings
+        ledger={getLedger({ scenario: "paused", pausedAmount: 62.4 })}
+      />,
+    );
 
     expect(
       screen.getByText(/Payouts paused — £62\.40 being recovered/),
@@ -98,7 +154,7 @@ describe("Earnings", () => {
   });
 
   it("opens the payout drawer on the payouts tab", async () => {
-    render(<Earnings tab="po" period="lastmonth" />);
+    render(<Earnings ledger={getLedger()} clients={clients} tab="po" />);
 
     const [firstPayout] = screen
       .getAllByRole("button")
@@ -117,7 +173,8 @@ describe("Earnings", () => {
   });
 
   it("export: the dialog closes after download with a toast", async () => {
-    render(<Earnings open="export" />);
+    render(<Earnings ledger={getLedger()} clients={clients} />);
+    await user.click(screen.getByRole("button", { name: "Export" }));
     const dialog = screen.getByRole("dialog", { name: "Export earnings" });
 
     URL.createObjectURL = vi.fn(() => "blob:test");

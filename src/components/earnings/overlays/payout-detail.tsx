@@ -1,10 +1,10 @@
 import { joinClassNames } from "../../../utils/class-names";
 import { formatWeekdayDate } from "../../../utils/dates";
 import { formatMoney } from "../../../utils/money";
-import { DEFAULT_BANK, STRIPE_PAYOUTS } from "../data";
+import { FALLBACK_BANK, STRIPE_PAYOUTS } from "../data";
 import type { Payout, Transaction } from "../data";
 import { getDayWord, getStatusStyle } from "../lists";
-import { getClient } from "../logic";
+import { getClient, openUpdateBank } from "../logic";
 import type { EarningsController, EarningsProps } from "../use-earnings";
 import { getAmountClass } from "./amount";
 import shared from "../../../styles/components/earnings/overlays/index.module.css";
@@ -82,7 +82,7 @@ export const PayoutDetail = ({
   return (
     <>
       <div className={shared.mutedText}>
-        {`To ${props.bankLabel || DEFAULT_BANK}`}
+        {`To ${props.bankLabel || FALLBACK_BANK}`}
       </div>
       <div className={shared.bigAmount}>
         {formatMoney(payout.amount, { pence: "always" })}
@@ -107,6 +107,7 @@ export const PayoutDetail = ({
             href={STRIPE_PAYOUTS}
             target="_blank"
             rel="noopener"
+            onClick={(event) => openUpdateBank(event, props.onUpdateBank)}
           >
             Update bank details in Stripe ↗
           </a>

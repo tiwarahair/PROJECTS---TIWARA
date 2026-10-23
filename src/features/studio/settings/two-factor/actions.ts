@@ -8,8 +8,6 @@ import {
 import type { StudioContext } from "../../core/actions";
 import type { TwoFactorFlow } from "../../core/types";
 
-const DEMO_CODE = "123456";
-
 const WRONG_CODE =
   "That code isn’t right. Enter the latest code from your app.";
 
@@ -119,9 +117,7 @@ export const createTwoFactorActions = (
       () => undefined,
     );
 
-  const isReal = () => !!getState().account;
-
-  /** Checks the dialog's code (Supabase for a real account, 123456 on demo boards), then carries on. */
+  /** Checks the dialog's code with Supabase, then carries on. */
   const withCode = async (
     check: (code: string) => Promise<boolean>,
     onPass: () => void | Promise<void>,
@@ -135,7 +131,7 @@ export const createTwoFactorActions = (
     setTwoFactor({ isBusy: true });
 
     try {
-      const isRight = isReal() ? await check(code) : code === DEMO_CODE;
+      const isRight = await check(code);
 
       if (!isRight)
         return setTwoFactor({
@@ -151,10 +147,8 @@ export const createTwoFactorActions = (
     }
   };
 
-  /** The app step: a real account gets its QR code and key from Supabase. */
+  /** The app step: the QR code and key come from Supabase. */
   const startEnrolment = () => {
-    if (!isReal()) return;
-
     const request = (memo.enrolmentRequest ?? 0) + 1;
 
     memo.enrolmentRequest = request;
@@ -194,7 +188,7 @@ export const createTwoFactorActions = (
     const name = (twoFactor.name || "").trim();
     const { enrolment } = twoFactor;
 
-    if (isReal() && !enrolment)
+    if (!enrolment)
       return setTwoFactor({
         error: "code",
         errorMessage: "The QR code is still loading. Try again in a moment.",
@@ -205,14 +199,11 @@ export const createTwoFactorActions = (
     ]);
 
     void withCode(
-      (code) =>
-        confirmTwoFactorEnrolment(enrolment?.factorId ?? "", code, name),
+      (code) => confirmTwoFactorEnrolment(enrolment.factorId, code, name),
       async () => {
         setState({
           twoFactorSettings: {
-            devices: isReal()
-              ? await listTwoFactorDevices().catch(() => added)
-              : added,
+            devices: await listTwoFactorDevices().catch(() => added),
           },
         });
 
@@ -250,9 +241,7 @@ export const createTwoFactorActions = (
           .filter((item) => item !== device)
           .map((item, index) => ({ ...item, backup: index > 0 }));
 
-        const next = isReal()
-          ? await listTwoFactorDevices().catch(() => kept)
-          : kept;
+        const next = await listTwoFactorDevices().catch(() => kept);
 
         setState({ twoFactorSettings: { devices: next } });
         closeTwoFactor();

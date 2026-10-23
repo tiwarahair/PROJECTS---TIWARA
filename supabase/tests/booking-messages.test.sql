@@ -1,5 +1,5 @@
 begin;
-select plan(20);
+select plan(22);
 
 insert into auth.users (id, instance_id, aud, role, email, raw_user_meta_data, raw_app_meta_data)
 values ('a1111111-1111-1111-1111-111111111111', '00000000-0000-0000-0000-000000000000', 'authenticated', 'authenticated',
@@ -144,6 +144,23 @@ create temp table broken as select pg_temp.book('15:00', 'pi_broken_hold') as id
 
 update public.bookings set status = 'held', paid_at = null, stripe_payment_intent_id = 'pi_broken', contact = contact - 'email'
 where id = (select id from broken);
+
+create temp table sent_before as
+select count(*)::int as sent from public.notifications where template = 'booking_confirmed'
+  and payload ->> 'ref' = (select ref from public.bookings where id = (select id from broken));
+
+select is(public.confirm_booking_payment('pi_broken'), 'confirmed', 'a client with no email is still confirmed');
+select is(
+  (select count(*)::int from public.notifications where template = 'booking_confirmed'
+    and payload ->> 'ref' = (select ref from public.bookings where id = (select id from broken))),
+  (select sent from sent_before), 'and nothing is sent to them'
+);
+
+-- messages that fail to queue (here: the queue itself is broken) never undo the payment
+create or replace function public.queue_email(to_address text, template text, payload jsonb, user_id uuid default null)
+returns uuid language plpgsql set search_path = '' as $$ begin raise exception 'queue down'; end; $$;
+
+update public.bookings set status = 'held', paid_at = null where id = (select id from broken);
 
 select is(public.confirm_booking_payment('pi_broken'), 'confirmed', 'a booking whose messages fail is still confirmed');
 

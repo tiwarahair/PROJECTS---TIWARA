@@ -1,5 +1,7 @@
 import { Plus } from "lucide-react";
+import { useEffect } from "react";
 import { joinClassNames } from "../../../../utils/class-names";
+import { getSavedId } from "../../clients/save";
 import type { StudioController } from "../../core/use-studio";
 import type { BookingSheetView } from "../sheet/view";
 import { getPaneClass } from "./pane";
@@ -13,7 +15,16 @@ interface ChangeClientStepProps {
 }
 
 export const ChangeClientStep = ({ studio, view }: ChangeClientStepProps) => {
-  const { state, setState } = studio;
+  const { state, setState, context } = studio;
+  const { resumeChangeClient } = state;
+
+  // back from adding the client's email: the change carries on
+  useEffect(() => {
+    if (!resumeChangeClient) return;
+
+    setState({ resumeChangeClient: null });
+    context.memo.setChangeClient?.(getSavedId(resumeChangeClient));
+  }, [resumeChangeClient, setState, context]);
 
   return (
     <div className={getPaneClass(studio)}>
@@ -32,21 +43,6 @@ export const ChangeClientStep = ({ studio, view }: ChangeClientStepProps) => {
           <span className={shared.optionName}>Add a new client</span>
         </span>
       </button>
-      {view.canAddTyped && (
-        <button className={styles.addTyped} onClick={view.addTypedClient}>
-          <span className={styles.plusDiscLight}>
-            <Plus size={17} strokeWidth={1.9} />
-          </span>
-          <span className={shared.grow}>
-            <span className={styles.addTypedLabel}>
-              {`Add “${(state.changeClientQuery || "").trim()}” as a new client`}
-            </span>
-            <span className={shared.optionSub}>
-              You can add their details later
-            </span>
-          </span>
-        </button>
-      )}
       <div className={styles.clientList}>
         {view.changeRows.map(({ key, name, imgSrc, meta, isCurrent, pick }) => (
           <button

@@ -7,7 +7,13 @@ const SHEET_RESET: Partial<StudioState> = {
   out: false,
   statusMenuOpen: false,
   pastCheckoutPanel: null,
+  correctPayment: null,
+  disputeForm: null,
   clientFromPastId: null,
+  clientEditFromAdd: false,
+  clientEditFromBooking: null,
+  clientEditFocus: undefined,
+  resumeChangeClient: null,
   bookingStep: "view",
   rescheduleDay: null,
   rescheduleTime: null,
@@ -32,6 +38,7 @@ const getAddDefaults = (): Partial<StudioState> => ({
   addServiceQuery: "",
   addWalkIn: false,
   addProtection: "link",
+  addUnpaidFee: null,
   addStep: 1,
   addClient: null,
   addService: null,
@@ -126,7 +133,47 @@ export const createSheetActions = ({
     });
   };
 
-  const requestCloseSheet = () => guardSheet(closeSheet);
+  const leaveClientEdit = (isSaved = false) => {
+    const { clientEditFromBooking: from } = getState();
+
+    if (from) {
+      const { bookingId, clientId, fromClientId } = from;
+
+      // cancelled or finished while the client was being edited
+      if (!getState().bookings.some(({ id }) => id === bookingId)) {
+        closeSheet();
+
+        return;
+      }
+
+      openSheet("booking", {
+        sheetBookingId: bookingId,
+        fromClientId,
+        bookingStep: "changeclient",
+        resumeChangeClient: isSaved ? clientId : null,
+      });
+
+      return;
+    }
+
+    setState({
+      sheet: "add",
+      clientEdit: null,
+      clientEditFromAdd: false,
+      clientEditFocus: undefined,
+    });
+  };
+
+  const isEditFromBooking = () => {
+    const { sheet, clientEditFromAdd, clientEditFromBooking } = getState();
+
+    return (
+      sheet === "clientEdit" && (!!clientEditFromAdd || !!clientEditFromBooking)
+    );
+  };
+
+  const requestCloseSheet = () =>
+    guardSheet(isEditFromBooking() ? () => leaveClientEdit() : closeSheet);
 
   return {
     openActionSheet,
@@ -135,5 +182,7 @@ export const createSheetActions = ({
     closeSheet,
     guardSheet,
     requestCloseSheet,
+    leaveClientEdit,
+    isEditFromBooking,
   };
 };

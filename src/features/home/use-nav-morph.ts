@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
-import { isDarkBackground } from "./home-colours";
+import { isDarkBackground } from "./colours";
 
 export interface NavMorphState {
   navSolid: boolean;

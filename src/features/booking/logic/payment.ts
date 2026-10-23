@@ -10,6 +10,8 @@ export const PAY_ERRORS = {
   address: "We can't book this address. Check it on Your details.",
   stylist:
     "This stylist can't take payments online yet, so you haven't been charged. Try another stylist.",
+  unpaidFee:
+    "You have an unpaid fee with this stylist, so you haven't been charged. Pay it from the link we emailed you, then book again.",
   pending:
     "Your payment went through and we're confirming your booking. We'll email you as soon as it's done.",
 };
@@ -19,7 +21,19 @@ export const getRefundedError = (time: string | null) => ({
   payError: `Sorry, ${time ?? "that time"} was booked by someone else while you paid. We've refunded you in full.`,
 });
 
-export const getCheckoutError = (code: string, time: string | null) => {
+interface StylistContact {
+  name: string;
+  email?: string;
+}
+
+const getBlockedError = ({ name, email }: StylistContact) =>
+  `${name} isn’t taking online bookings for this contact. Please get in touch with them directly${email ? ` at ${email}` : ""}. You haven't been charged.`;
+
+export const getCheckoutError = (
+  code: string,
+  time: string | null,
+  stylist?: StylistContact,
+) => {
   if (code === "hold_not_found")
     return {
       payKind: "taken",
@@ -37,6 +51,12 @@ export const getCheckoutError = (code: string, time: string | null) => {
 
   if (code === "rate_limited")
     return { payKind: "network", payError: PAY_ERRORS.busy };
+
+  if (code === "unpaid_fee")
+    return { payKind: "network", payError: PAY_ERRORS.unpaidFee };
+
+  if (code === "not_bookable_contact" && stylist)
+    return { payKind: "network", payError: getBlockedError(stylist) };
 
   return { payKind: "network", payError: PAY_ERRORS.network };
 };

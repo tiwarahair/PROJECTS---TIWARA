@@ -21,14 +21,6 @@ describe("StudioRoute", () => {
     expect(screen.getByTestId("location")).toHaveTextContent("/join");
   });
 
-  it("dev boards open the demo Studio without signing in", () => {
-    renderWithStore(<StudioRoute />, "/studio?board=true");
-
-    expect(screen.getByTestId("location")).toHaveTextContent(
-      "/studio?board=true",
-    );
-  });
-
   it("shows a loading skeleton, not a blank page, while the session loads", async () => {
     vi.useFakeTimers();
     renderWithStore(<StudioRoute />, "/studio");

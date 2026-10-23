@@ -1,5 +1,5 @@
 import { useLayoutEffect } from "react";
-import { WelcomeToast } from "../../components/welcome-toast/welcome-toast";
+import { WelcomeToast } from "../../components/welcome-toast";
 import type { PublicStylist } from "../../lib/public-stylist";
 import { joinClassNames } from "../../utils/class-names";
 import { BookingConfirmation } from "./confirmation";

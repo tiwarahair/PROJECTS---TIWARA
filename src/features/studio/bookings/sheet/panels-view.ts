@@ -1,12 +1,25 @@
-import { copyText } from "../../core/format";
+import { SaveError } from "../../../../lib/studio-writes";
+import {
+  getConfirmUrl,
+  setBookingAddress,
+  setStylistNote,
+} from "../../../../lib/studio-api/booking-writes";
+import { copyLaterText } from "../../core/format";
+import { STILL_SAVING } from "./checkout-view";
 import type { SheetContext } from "./context";
+
+const getCopyError = (error: unknown) =>
+  error instanceof SaveError
+    ? error.message
+    : "Couldn’t copy the link. Try again.";
 
 export const getPanelsView = ({
   state,
   setState,
   actions: { showToast },
+  raw,
   booking,
-  patchBooking,
+  saveBooking,
   resendLink,
 }: SheetContext) => ({
   // awaiting confirmation
@@ -14,8 +27,12 @@ export const getPanelsView = ({
     if (booking.canResend) resendLink();
   },
   copyPaymentLink: () => {
-    copyText(`tiwaras.house/pay/${booking.id}`);
-    showToast("Payment link copied");
+    if (!raw?.remoteId) return showToast(STILL_SAVING);
+
+    copyLaterText(getConfirmUrl(raw.remoteId)).then(
+      () => showToast(`Link copied. Send it to ${booking.firstName} yourself.`),
+      (error: unknown) => showToast(getCopyError(error)),
+    );
   },
   // location (mobile stylists)
   toggleLocation: () => {
@@ -30,27 +47,24 @@ export const getPanelsView = ({
 
     const address = state.bookingAddressDraft.trim();
 
-    setState({
-      bookingAddressOn: false,
-      clientAddresses: {
-        ...state.clientAddresses,
-        [booking.client ?? ""]: address,
-      },
-    });
+    setState({ bookingAddressOn: false });
 
-    patchBooking({ address });
+    if (address === (raw?.address ?? "")) return;
 
-    showToast(
-      address
-        ? `Address saved to ${booking.firstName}’s profile`
-        : "Address removed",
+    saveBooking({ address }, (remoteId) =>
+      setBookingAddress(remoteId, address),
     );
+
+    showToast(address ? "Address updated" : "Address removed");
   },
   // the stylist's own note
   saveNote: () => {
     const note = state.bookingNoteDraft.trim();
 
-    patchBooking({ stylistNote: note });
+    saveBooking({ stylistNote: note }, (remoteId) =>
+      setStylistNote(remoteId, note),
+    );
+
     setState({ bookingNoteOn: false });
     showToast(note ? "Note saved" : "Note removed");
   },

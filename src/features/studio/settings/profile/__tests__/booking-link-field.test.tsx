@@ -1,17 +1,19 @@
 import { act, screen } from "@testing-library/react";
 import type { UserEvent } from "@testing-library/user-event";
-import { useEffect } from "react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import { changeSlug, isSlugFree } from "../../../../../lib/studio-api";
+import { changeSlug, isSlugFree } from "../../../../../lib/studio-api/settings";
 import { renderWithStore } from "../../../../../test/render-with-store";
 import { setupUser } from "../../../../../test/setup-user";
+import { getStudioRow, getStudioSeed } from "../../../../../test/studio-seed";
 import { BookingLinkField } from "../booking-link-field";
 import type { StudioContext } from "../../../core/actions";
 import type { StudioState } from "../../../core/types";
 import { useStudio } from "../../../core/use-studio";
 
-vi.mock("../../../../../lib/studio-api", async (importOriginal) => ({
-  ...(await importOriginal<typeof import("../../../../../lib/studio-api")>()),
+vi.mock("../../../../../lib/studio-api/settings", async (importOriginal) => ({
+  ...(await importOriginal<
+    typeof import("../../../../../lib/studio-api/settings")
+  >()),
   isSlugFree: vi.fn(),
   changeSlug: vi.fn(),
 }));
@@ -32,22 +34,21 @@ let user: UserEvent;
 let memo: StudioContext["memo"];
 let getAccount: () => StudioState["account"];
 
-const Harness = ({ account }: HarnessProps) => {
-  const studio = useStudio({});
-  const { state, setState, context } = studio;
+const Harness = ({ account: { slug, slugChangedAt } }: HarnessProps) => {
+  const studio = useStudio({
+    seed: getStudioSeed({
+      studio: getStudioRow({ slug, slug_changed_at: slugChangedAt }),
+    }),
+  });
+
+  const { state, context } = studio;
 
   memo = context.memo;
   getAccount = () => context.getState().account;
 
-  // setState changes identity every render, so seed only while the account is missing
-  useEffect(() => {
-    if (!state.account) setState({ account });
-  }, [state.account, account, setState]);
-
-  // the field reads the slug once on mount, so it waits for the seeded account
   return (
     <>
-      {state.account && <BookingLinkField studio={studio} />}
+      <BookingLinkField studio={studio} />
       <p data-testid="toast">{state.toast}</p>
     </>
   );

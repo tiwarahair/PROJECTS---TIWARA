@@ -1,9 +1,17 @@
 import { act, screen, waitFor, within } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { renderWithStore } from "../../../../test/render-with-store";
+import { getStudioSeed } from "../../../../test/studio-seed";
 import { StudioPage } from "../..";
 import type { UserEvent } from "@testing-library/user-event";
 import { setupUser } from "../../../../test/setup-user";
+
+vi.mock("../../../../lib/studio-api/clients", async (importOriginal) => ({
+  ...(await importOriginal<
+    typeof import("../../../../lib/studio-api/clients")
+  >()),
+  saveStylistClient: vi.fn(() => Promise.resolve("client-ada")),
+}));
 
 let user: UserEvent;
 
@@ -29,7 +37,7 @@ const setViewport = (width: number) => {
 };
 
 const openClients = async () => {
-  renderWithStore(<StudioPage />, "/studio");
+  renderWithStore(<StudioPage seed={getStudioSeed()} />, "/studio");
   runNextTimer();
   await user.click(within(getLabelled("Sidebar")).getByTitle("Clients"));
 
@@ -92,7 +100,7 @@ describe("Studio → client sheets", () => {
 
     await user.type(
       screen.getByPlaceholderText("07700 900000"),
-      "07700 900123",
+      "07700 900999",
     );
 
     await user.type(screen.getByLabelText("First name"), "Ada");
@@ -138,7 +146,7 @@ describe("Studio → client sheets", () => {
 
     await user.type(
       screen.getByPlaceholderText("name@email.com"),
-      "nia.okafor@gmail.com",
+      "nia@example.com",
     );
 
     expect(

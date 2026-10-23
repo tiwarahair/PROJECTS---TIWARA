@@ -2,15 +2,14 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { useLocation, useNavigate } from "react-router";
 import { useViewportWidth } from "../../hooks/use-viewport-width";
-import { getEmptySuggestions } from "./search-empty-suggestions";
-import { createFieldActions } from "./search-field-actions";
-import { createFilterActions } from "./search-filter-actions";
-import { getFixturePatch } from "./search-fixtures";
-import { getInitialState, getStateSearch } from "./search-state";
-import type { SearchState } from "./search-state";
-import { getWhatModel, getWhereModel } from "./search-suggestions";
-import { CLOSE_ALL, DEFAULT_DRAFT } from "./search-update";
-import type { Update } from "./search-update";
+import { getEmptySuggestions } from "./empty-suggestions";
+import { createFieldActions } from "./field-actions";
+import { createFilterActions } from "./filter-actions";
+import { getInitialState, getStateSearch } from "./state";
+import type { SearchState } from "./state";
+import { getWhatModel, getWhereModel } from "./suggestions";
+import { CLOSE_ALL, DEFAULT_DRAFT } from "./update";
+import type { Update } from "./update";
 import { useSearchData } from "./use-search-data";
 import { NO_PLACES } from "./use-place-suggestions";
 
@@ -24,11 +23,6 @@ export const useSearch = () => {
   // read once: the state drives the URL from here on (the sync below), not the other way round
   const [state, setState] = useState<SearchState>(() =>
     getInitialState(locationSearch, window.innerWidth),
-  );
-
-  // read once from the URL the page opened with (the URL sync below drops ?fixture=)
-  const [initialFixture] = useState(() =>
-    new URLSearchParams(locationSearch).get("fixture"),
   );
 
   // the sync below compares against the current URL without re-running when only the URL changes
@@ -78,25 +72,10 @@ export const useSearch = () => {
 
     window.addEventListener("resize", setNavHeight);
 
-    // demo states are dev-only; production builds drop this branch and the fixtures module
-    const fixturePatch =
-      import.meta.env.DEV && initialFixture
-        ? getFixturePatch(
-            initialFixture,
-            stateRef.current,
-            window.innerWidth <= 720,
-          )
-        : null;
-
-    const fixtureTimer = fixturePatch
-      ? window.setTimeout(() => update(fixturePatch), 350)
-      : 0;
-
     const timers = timersRef.current;
 
     return () => {
       window.clearTimeout(timer);
-      window.clearTimeout(fixtureTimer);
       window.removeEventListener("resize", setNavHeight);
       timers.forEach((pending) => window.clearTimeout(pending));
     };

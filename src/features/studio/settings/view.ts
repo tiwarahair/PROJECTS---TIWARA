@@ -3,8 +3,8 @@ import type { BusinessValue } from "../../../components/business-details/types";
 import type { PolicyValue } from "../../../components/payment-policy/types";
 import type { PaymentPolicyApi } from "../../../components/payment-policy";
 import type { AccountSettingsApi } from "../../../components/account-settings/use-account-settings";
-import type { TaxDetails } from "../../../components/tax-details-form/tax-details-logic";
-import { addPaymentPolicy } from "../../../lib/studio-api";
+import type { TaxDetails } from "../../../components/tax-details-form/logic";
+import { addPaymentPolicy } from "../../../lib/studio-api/settings";
 import { hasRecentSecondFactor } from "../../../lib/two-factor";
 import { getAvailabilityView } from "./availability/view";
 import { getSettingsNav } from "./nav-view";
@@ -20,7 +20,7 @@ export const getSettingsView = (
   navigate: (to: string) => void,
   signOut: () => void,
 ) => {
-  const { state, setState, props, isDesktop, isNew, actions, context } = studio;
+  const { state, setState, isDesktop, actions, context } = studio;
 
   const { showToast, openSubpage, openSheet, openTwoFactor, scrollBody } =
     actions;
@@ -34,7 +34,7 @@ export const getSettingsView = (
 
     setState({ policy: { ...policy, ...value } });
 
-    sync?.save((stylistId) => addPaymentPolicy(fromPolicy(value, stylistId)), {
+    sync.save((stylistId) => addPaymentPolicy(fromPolicy(value, stylistId)), {
       policy,
     });
 
@@ -43,7 +43,6 @@ export const getSettingsView = (
 
   const checkPolicy = async (value: PolicyValue) => {
     if (
-      !sync ||
       !hasTwoFactor(state) ||
       (await hasRecentSecondFactor().catch(() => false))
     ) {
@@ -112,7 +111,7 @@ export const getSettingsView = (
         },
       });
 
-      sync?.save(
+      sync.save(
         (stylistId) => saveBusiness(stylistId, value, state.business),
         before,
       );
@@ -142,18 +141,13 @@ export const getSettingsView = (
       setState({ page: "payouts" });
       scrollBody(0, false);
     },
-    payoutStatus:
-      state.payoutStatus ??
-      ((!state.check?.stripe ? "none" : props.payouts || "active") as
-        "none" | "verifying" | "action" | "paused" | "active"),
+    payoutStatus: state.payoutStatus ?? "none",
     payoutBank: state.payoutBank,
     openStripeDashboard: () => void actions.openStripeDashboard(),
-    accountUpcoming: isNew
-      ? 0
-      : state.bookings.filter(
-          ({ dayOffset, status }) =>
-            (dayOffset || 0) >= 0 && status !== "cancelled",
-        ).length,
+    accountUpcoming: state.bookings.filter(
+      ({ dayOffset, status, completed }) =>
+        (dayOffset || 0) >= 0 && status !== "cancelled" && !completed,
+    ).length,
     onAccountNav: (to: "business" | "earnings") => {
       if (to === "earnings") {
         setState({ tab: "earnings", page: null });

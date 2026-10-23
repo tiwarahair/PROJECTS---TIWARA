@@ -1,9 +1,29 @@
 import { act, screen, waitFor, within } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { renderWithStore } from "../../../../../test/render-with-store";
+import { getStudioSeed } from "../../../../../test/studio-seed";
+import { startTwoFactorEnrolment } from "../../../../../lib/two-factor";
+import type { TwoFactorDevice } from "../../../../../lib/two-factor";
 import { StudioPage } from "../../..";
 import type { UserEvent } from "@testing-library/user-event";
 import { setupUser } from "../../../../../test/setup-user";
+
+vi.mock("../../../../../lib/two-factor", async (importOriginal) => ({
+  ...(await importOriginal<typeof import("../../../../../lib/two-factor")>()),
+  startTwoFactorEnrolment: vi.fn(() =>
+    Promise.resolve({
+      factorId: "factor-1",
+      qrCode: "data:image/svg+xml,",
+      secret: "JBSWY3DPEHPK3PXP",
+    }),
+  ),
+  confirmTwoFactorEnrolment: vi.fn((_factorId: string, code: string) =>
+    Promise.resolve(code === "123456"),
+  ),
+  listTwoFactorDevices: vi.fn(() =>
+    Promise.resolve([{ id: "factor-1", name: "Main phone", backup: false }]),
+  ),
+}));
 
 let user: UserEvent;
 
@@ -30,9 +50,59 @@ const setViewport = (width: number) => {
   });
 };
 
-const renderFixture = (fixture: string) => {
-  renderWithStore(<StudioPage />, `/studio?fixture=${fixture}`);
+const BOTH_DEVICES: TwoFactorDevice[] = [
+  { id: "factor-1", name: "Main phone", backup: false },
+  { id: "factor-2", name: "Password manager", backup: true },
+];
+
+/** Opens the setup checklist's "Get paid" step. */
+const openSecure = async (devices: TwoFactorDevice[] = []) => {
+  renderWithStore(<StudioPage seed={getStudioSeed({ devices })} />, "/studio");
+
   runNextTimer();
+
+  await user.click(
+    screen.getByRole("button", {
+      name: /^Get paid: 2FA, tax details and Stripe/,
+    }),
+  );
+};
+
+/** On to the authenticator app step, with its QR code loaded. */
+const openApp = async () => {
+  await openSecure();
+
+  await user.click(
+    within(getDialog()).getByRole("button", { name: "Turn on" }),
+  );
+
+  await user.click(
+    within(getDialog()).getByRole("button", { name: "Continue" }),
+  );
+
+  await act(() => Promise.resolve());
+};
+
+const turnOnMainPhone = async () => {
+  const dialog = getDialog();
+
+  await user.type(
+    within(dialog).getByLabelText("Enter the 6-digit code from the app"),
+    "123456",
+  );
+
+  await user.click(within(dialog).getByRole("button", { name: "Turn on" }));
+};
+
+const openBackup = async () => {
+  await openApp();
+  await turnOnMainPhone();
+
+  await within(getDialog()).findByRole("status", {
+    name: "Main phone added",
+  });
+
+  act(() => void vi.advanceTimersByTime(900));
 };
 
 describe("Studio → two-step verification", () => {
@@ -54,8 +124,8 @@ describe("Studio → two-step verification", () => {
 
   afterEach(() => vi.useRealTimers());
 
-  it("tax details and Stripe stay locked until 2FA is on", () => {
-    renderFixture("secure-locked");
+  it("tax details and Stripe stay locked until 2FA is on", async () => {
+    await openSecure();
     const dialog = getDialog();
 
     expect(
@@ -72,7 +142,7 @@ describe("Studio → two-step verification", () => {
   });
 
   it("the tax details step closes with the X, not Finish later", async () => {
-    renderFixture("secure-unlocked");
+    await openSecure(BOTH_DEVICES);
     await user.click(within(getDialog()).getByRole("button", { name: "Add" }));
 
     const dialog = getDialog();
@@ -87,7 +157,7 @@ describe("Studio → two-step verification", () => {
   });
 
   it("a wrong code is rejected and the right one moves on to a backup", async () => {
-    renderFixture("tf-app");
+    await openApp();
     const dialog = getDialog();
     const codeLabel = "Enter the 6-digit code from the app";
 
@@ -99,8 +169,7 @@ describe("Studio → two-step verification", () => {
     );
 
     await user.clear(within(dialog).getByLabelText(codeLabel));
-    await user.type(within(dialog).getByLabelText(codeLabel), "123456");
-    await user.click(within(dialog).getByRole("button", { name: "Turn on" }));
+    await turnOnMainPhone();
 
     expect(
       await within(getDialog()).findByRole("status", {
@@ -130,7 +199,7 @@ describe("Studio → two-step verification", () => {
   });
 
   it("asks for a device name and a full code before checking", async () => {
-    renderFixture("tf-app");
+    await openApp();
     const dialog = getDialog();
     const name = within(dialog).getByLabelText("Name this device");
 
@@ -163,8 +232,16 @@ describe("Studio → two-step verification", () => {
   });
 
   it("a name error replaces an earlier wrong-code error", async () => {
-    renderFixture("tf-app-error");
+    await openApp();
     const dialog = getDialog();
+
+    await user.type(
+      within(dialog).getByLabelText("Enter the 6-digit code from the app"),
+      "482910",
+    );
+
+    await user.click(within(dialog).getByRole("button", { name: "Turn on" }));
+    expect(await within(dialog).findByRole("alert")).toBeInTheDocument();
 
     await user.clear(within(dialog).getByLabelText("Name this device"));
     await user.click(within(dialog).getByRole("button", { name: "Turn on" }));
@@ -183,7 +260,7 @@ describe("Studio → two-step verification", () => {
   });
 
   it("back returns to the screen before, one step at a time", async () => {
-    renderFixture("secure-locked");
+    await openSecure();
 
     await user.click(
       within(getDialog()).getByRole("button", { name: "Turn on" }),
@@ -215,7 +292,7 @@ describe("Studio → two-step verification", () => {
   });
 
   it("copying the key swaps the icon to a tick, then back", async () => {
-    renderFixture("tf-app");
+    await openApp();
 
     await user.click(
       within(getDialog()).getByRole("button", {
@@ -238,8 +315,28 @@ describe("Studio → two-step verification", () => {
     ).toBeInTheDocument();
   });
 
+  it("shows no key until the QR code has loaded", async () => {
+    vi.mocked(startTwoFactorEnrolment).mockReturnValueOnce(
+      new Promise<never>(() => undefined),
+    );
+
+    await openApp();
+
+    expect(
+      within(getDialog()).getByText("Getting your QR code…"),
+    ).toBeInTheDocument();
+
+    await user.click(
+      within(getDialog()).getByRole("button", {
+        name: "Can’t scan? Enter this key instead",
+      }),
+    );
+
+    expect(getDialog()).not.toHaveTextContent(/[A-Z2-7]{4} [A-Z2-7]{4}/);
+  });
+
   it("the backup's QR step says where to scan it", async () => {
-    renderFixture("tf-backup");
+    await openBackup();
 
     await user.click(
       within(getDialog()).getByRole("button", { name: "Add backup" }),
@@ -253,7 +350,7 @@ describe("Studio → two-step verification", () => {
   });
 
   it("skipping the backup warns once, then finishes", async () => {
-    renderFixture("tf-backup");
+    await openBackup();
     const dialog = getDialog();
 
     await user.click(

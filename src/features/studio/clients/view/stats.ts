@@ -1,15 +1,10 @@
 import { timeToMinutes } from "../../core/format";
-import { getPastRows } from "../../core/model";
+import { getClient } from "../../core/model";
 import type { PastRecord, StudioState } from "../../core/types";
 
 /** A client's bookings, past visits and money. */
-export const getClientStats = (
-  state: StudioState,
-  id: string | null,
-  isNew: boolean,
-  seed: PastRecord[],
-) => {
-  const depositShare = (parseFloat(String(state.policy?.deposit)) || 20) / 100;
+export const getClientStats = (state: StudioState, id: string | null) => {
+  const depositShare = state.policy.deposit / 100;
 
   const upcoming = state.bookings
     .filter(
@@ -24,9 +19,7 @@ export const getClientStats = (
         timeToMinutes(first.time) - timeToMinutes(second.time),
     );
 
-  const past = getPastRows(state, isNew, seed).filter(
-    (row) => row.client === id,
-  );
+  const past = state.pastNew.filter((row) => row.client === id);
 
   const getFee = (row: PastRecord) =>
     parseFloat(String(row.feeLabel || "").replace(/[^0-9.]/g, "")) ||
@@ -55,16 +48,21 @@ export const getClientStats = (
     if (booking.paid === "deposit" || booking.paid === "full")
       deposits += Math.round(booking.price * depositShare);
 
+  const { money, noShows, lateCancels } = getClient(state, id);
+
   return {
     upcoming,
     past,
-    noShows: past.filter(({ status }) => status === "No show").length,
-    lateCancel: past.filter(
-      ({ status, feeKept }) => status === "Cancelled" && feeKept,
-    ).length,
+    noShows:
+      noShows ?? past.filter(({ status }) => status === "No show").length,
+    lateCancel:
+      lateCancels ??
+      past.filter(({ status, feeKept }) => status === "Cancelled" && feeKept)
+        .length,
     fees,
     refunds,
     deposits,
+    ...money,
     unpaidFee: past.some(({ feePending, waived }) => feePending && !waived),
   };
 };

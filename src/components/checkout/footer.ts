@@ -63,6 +63,7 @@ const FOOTERS: Partial<Record<CheckoutView, FooterBuilder>> = {
     totalValue: formatMoney(money.charge),
     primaryLabel: "Continue",
     primaryRun: view.goNext,
+    isPrimaryDisabled: money.isTipTooHigh,
   }),
   pay: (_checkout, view) => ({
     hasTotal: true,
@@ -79,7 +80,7 @@ const FOOTERS: Partial<Record<CheckoutView, FooterBuilder>> = {
       totalLabel: total.label,
       totalValue: total.value,
       hasPrimary: checkout.state.decline !== "hard",
-      isPrimaryDisabled: checkout.state.busy,
+      isPrimaryDisabled: checkout.state.busy || checkout.money.isTipTooHigh,
       primaryLabel: getReviewPrimaryLabel(checkout),
       primaryRun: () => {
         if (!checkout.state.busy) checkout.complete();

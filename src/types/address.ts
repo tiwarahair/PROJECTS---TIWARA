@@ -1,15 +1,11 @@
-export interface DemoAddress {
+/** A client's saved address (Account → Saved addresses). */
+export interface SavedAddress {
   id: string;
+  label: string;
   line1: string;
   line2: string;
   town: string;
   postcode: string;
-}
-
-/** A client's saved address (Account → Saved addresses). */
-export interface SavedAddress extends Omit<DemoAddress, "id"> {
-  id: string;
-  label: string;
   isDefault: boolean;
 }
 

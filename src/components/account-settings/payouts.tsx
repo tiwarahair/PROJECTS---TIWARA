@@ -8,7 +8,7 @@ import {
   TriangleAlert,
 } from "lucide-react";
 import { joinClassNames } from "../../utils/class-names";
-import { TaxDetailsForm } from "../tax-details-form/tax-details-form";
+import { TaxDetailsForm } from "../tax-details-form";
 import { getPayoutStatus, getTaxRows } from "./logic";
 import type { AccountSettingsProps } from "./use-account-settings";
 import type { AccountSettingsController } from "./use-account-settings";
@@ -103,13 +103,11 @@ export const SettingsPayouts = ({ props }: SettingsPayoutsProps) => {
             Paid out daily. Payments reach your bank about 3 working days after
             they’re taken.
           </p>
-          {!!props.isNew && (
-            <div className={payouts.firstPayout}>
-              <Info className={shared.infoIcon} size={16} strokeWidth={1.7} />
-              Your first payout can take 7 to 14 days. Payments for your first 5
-              bookings are released 24 hours after each appointment.
-            </div>
-          )}
+          <div className={payouts.firstPayout}>
+            <Info className={shared.infoIcon} size={16} strokeWidth={1.7} />
+            Your first payout can take 7 to 14 days. Payments for your first 5
+            bookings are released 24 hours after each appointment.
+          </div>
           <p className={payouts.cardFees}>
             Card fees on balance payments taken through Tiwára’s House are
             deducted from your payout.

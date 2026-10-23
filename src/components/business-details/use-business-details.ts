@@ -5,7 +5,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { formatPostcode } from "../../utils/address";
 import type { EmittedAddress } from "../address-finder/data";
 import { cleanVatInput } from "./display";
-import { getInitialBusiness, toBusinessValue } from "./initial";
+import { toBusinessValue, toFormValues } from "./initial";
 import { businessSchema } from "./schema";
 import type {
   BusinessDetailsProps,
@@ -23,7 +23,6 @@ type FieldOptions = Pick<
 >;
 
 export const useBusinessDetails = ({
-  preset = "shop",
   scrollTo = "",
   embedded = false,
   value,
@@ -31,8 +30,8 @@ export const useBusinessDetails = ({
   onState,
 }: BusinessDetailsProps) => {
   const uid = `bd${useId().replace(/[^a-zA-Z0-9]/g, "")}`;
-  const [initial] = useState(() => getInitialBusiness(preset, value));
-  const [addressSource, setAddressSource] = useState(initial.addressSource);
+  const [initial] = useState(() => toFormValues(value));
+  const [addressSource, setAddressSource] = useState("");
   const [isToastShown, setIsToastShown] = useState(false);
   const scrollRef = useRef<HTMLDivElement>(null);
   const toastTimer = useRef(0);
@@ -47,7 +46,7 @@ export const useBusinessDetails = ({
     reset,
     formState: { errors, isDirty, isSubmitted },
   } = useForm<BusinessFormValues>({
-    defaultValues: initial.saved,
+    defaultValues: initial,
     resolver: zodResolver(businessSchema),
     mode: "onTouched",
   });
@@ -55,7 +54,7 @@ export const useBusinessDetails = ({
   const [type, vatOn, address, vat] = useWatch({
     control,
     name: ["type", "vatOn", "address", "vat"],
-    defaultValue: initial.values,
+    defaultValue: initial,
   });
 
   const getError = (name: BusinessFieldName) => errors[name]?.message ?? "";
@@ -92,10 +91,6 @@ export const useBusinessDetails = ({
   });
 
   useEffect(() => {
-    reset(initial.values, { keepDefaultValues: true });
-
-    if (initial.shownErrors.length) void trigger(initial.shownErrors);
-
     const element = scrollRef.current;
 
     const target = scrollTo

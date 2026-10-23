@@ -1,0 +1,228 @@
+.body {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+  padding-bottom: 8px;
+}
+
+.alert {
+  display: flex;
+  gap: 10px;
+  align-items: flex-start;
+  padding: 14px 16px;
+  border-radius: var(--radius-md);
+  background: var(--accent-wash);
+}
+
+.alertIcon {
+  flex: 0 0 auto;
+  margin-top: 1px;
+}
+
+.alertText {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  min-width: 0;
+}
+
+.alertTitle {
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--accent-700);
+  text-wrap: balance;
+}
+
+.summary {
+  font-size: 13.5px;
+  font-weight: 500;
+  color: var(--neutral-700);
+}
+
+.copy {
+  font-size: 14px;
+  line-height: 1.5;
+  color: var(--neutral-700);
+}
+
+.due {
+  font-size: 14px;
+  line-height: 1.5;
+  font-weight: 500;
+  color: var(--text-primary);
+}
+
+.field,
+.group,
+.added {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.label {
+  font-size: 13.5px;
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.hint {
+  margin-top: -4px;
+  font-size: 13px;
+  color: var(--text-secondary);
+}
+
+.textarea {
+  width: 100%;
+  box-sizing: border-box;
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-sm);
+  background: transparent;
+  padding: 11px 13px;
+  font-family: "Hanken Grotesk", sans-serif;
+  font-size: 16px;
+  line-height: 1.45;
+  color: var(--text-primary);
+  outline: none;
+  resize: vertical;
+  transition: border-color 0.16s ease;
+}
+
+.textarea:focus {
+  border-color: var(--accent-700);
+}
+
+.slots {
+  display: flex;
+  flex-direction: column;
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-md);
+}
+
+.slot {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-height: 56px;
+  padding: 8px 14px;
+}
+
+.slot + .slot {
+  border-top: 1px solid var(--border-subtle);
+}
+
+.slotIcon {
+  flex: 0 0 auto;
+}
+
+.slotText {
+  flex: 1 1 auto;
+  min-width: 0;
+}
+
+.slotLabel {
+  font-size: 14.5px;
+  font-weight: 500;
+}
+
+.fileName {
+  font-size: 13px;
+  color: var(--text-secondary);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.add {
+  flex: 0 0 auto;
+  display: inline-flex;
+  align-items: center;
+  height: 34px;
+  padding: 0 14px;
+  border: 1px solid var(--border-strong, #d8d2c6);
+  border-radius: var(--radius-full);
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.add:active {
+  transform: scale(0.97);
+}
+
+.add:focus-within {
+  outline: 2px solid var(--accent-700);
+  outline-offset: 2px;
+}
+
+.fileInput {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  opacity: 0;
+  pointer-events: none;
+}
+
+.spinner {
+  flex: 0 0 auto;
+  color: var(--neutral-600);
+  animation: spin 0.8s linear infinite;
+}
+
+.remove {
+  flex: 0 0 auto;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  border: none;
+  border-radius: var(--radius-full);
+  background: transparent;
+  color: var(--neutral-600);
+  cursor: pointer;
+}
+
+.addedList {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.addedItem {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 14px;
+  color: var(--neutral-700);
+}
+
+.send {
+  flex: 1 1 auto;
+  width: auto;
+}
+
+.send:disabled {
+  opacity: 0.5;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .spinner {
+    animation-duration: 2s;
+  }
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .remove:hover {
+    background: var(--fill-quiet);
+  }
+}

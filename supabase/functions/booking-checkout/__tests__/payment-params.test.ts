@@ -16,13 +16,14 @@ const quote = (mode: CheckoutQuote["mode"], due: number): CheckoutQuote => ({
 });
 
 describe("the booking's payment", () => {
-  it("deposit: a destination charge of deposit + fee, the fee kept, the card saved", () => {
+  it("deposit: a destination charge of deposit + fee, keeping the fee and the stylist's card fee, the card saved", () => {
     expect(getPaymentParams(quote("deposit", 2413), "cus_1")).toMatchObject({
       amount: 2413,
       currency: "gbp",
       customer: "cus_1",
       setup_future_usage: "off_session",
-      application_fee_amount: 163,
+      // £1.63 booking fee + 1.5% of the £22.50 deposit + 20p
+      application_fee_amount: 217,
       transfer_data: { destination: "acct_stylist" },
       metadata: { booking_id: "booking-1", booking_ref: "TH-ABC123" },
     });
@@ -33,7 +34,7 @@ describe("the booking's payment", () => {
 
     expect(params).toMatchObject({
       amount: 7663,
-      application_fee_amount: 163,
+      application_fee_amount: 296,
       transfer_data: { destination: "acct_stylist" },
     });
 
@@ -61,6 +62,14 @@ describe("the booking's payment", () => {
     expect(getPaymentParams(quote("full", 7663), "cus_1", true)).toMatchObject({
       setup_future_usage: "off_session",
     });
+  });
+
+  it("a new stylist's deposit stays with us, marked as held", () => {
+    const params = getPaymentParams(quote("deposit", 2663), "cus_1", false, 0, true);
+
+    expect(params).toMatchObject({ amount: 2663, metadata: { hold: "true" } });
+    expect(params).not.toHaveProperty("transfer_data");
+    expect(params).not.toHaveProperty("application_fee_amount");
   });
 
   it("only takes cards, so paying never leaves the page", () => {

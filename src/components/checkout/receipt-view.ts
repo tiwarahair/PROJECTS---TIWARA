@@ -1,4 +1,3 @@
-import { DEFAULT_STYLIST } from "./data";
 import { RECORD_VIA_LABELS } from "./view";
 import type { CheckoutViewModel } from "./view";
 import type { CheckoutController } from "./use-checkout";
@@ -8,14 +7,15 @@ const formatPence = (amount: number) =>
   formatMoney(amount, { pence: "always" });
 
 export const getReceiptView = (
-  { props, state, booking, money }: CheckoutController,
+  { props: { stylist }, state, booking, money }: CheckoutController,
   { cardText }: CheckoutViewModel,
 ) => {
   const done = state.done ?? {
     method: money.method,
     charged: money.charge,
     tip: money.tip,
-    refundAuto: money.refundDue,
+    refundAuto: money.refundCard,
+    cashBack: money.cashBack,
     via: state.recordVia,
   };
 
@@ -47,6 +47,13 @@ export const getReceiptView = (
       subtitle: `Paid at booking${booking.paidOn ? `, ${booking.paidOn}` : ""}`,
       value: formatPence(-state.paid),
     },
+    !!booking.paidLater &&
+      booking.paidLater > 0 && {
+        key: "pl",
+        label: "Paid at an earlier checkout",
+        subtitle: `${RECORD_VIA_LABELS[booking.recordedVia ?? ""] ?? "Recorded"}, recorded by the stylist`,
+        value: formatPence(-booking.paidLater),
+      },
     done.charged > 0 && {
       key: "c",
       label: done.method === "link" ? "Awaiting payment" : "Paid at checkout",
@@ -60,6 +67,12 @@ export const getReceiptView = (
       subtitle: "Price lowered after booking",
       value: formatPence(done.refundAuto),
     },
+    !!done.cashBack && {
+      key: "cb",
+      label: "Given back",
+      subtitle: `${RECORD_VIA_LABELS[booking.recordedVia ?? ""] ?? "Recorded"}, price lowered after booking`,
+      value: formatPence(done.cashBack),
+    },
     state.refunded > 0 && {
       key: "rf",
       label: "Refunded",
@@ -70,9 +83,11 @@ export const getReceiptView = (
 
   const paid =
     state.paid +
+    (booking.paidLater ?? 0) +
     money.bookFee +
     (done.method === "link" ? 0 : done.charged) -
     done.refundAuto -
+    (done.cashBack ?? 0) -
     state.refunded;
 
   const getMethod = () => {
@@ -83,14 +98,12 @@ export const getReceiptView = (
     return cardText || "card";
   };
 
-  const stylist = { ...DEFAULT_STYLIST, ...props.stylist };
-
   return {
     stylist: stylist.name,
     address: stylist.address,
     vat: stylist.vat,
-    number: "Receipt TH-20418",
-    date: `${booking.day} 2026`,
+    number: booking.ref ? `Receipt ${booking.ref}` : "Receipt",
+    date: booking.receiptDate ?? booking.day,
     client: `For ${booking.client}`,
     lines,
     subtotal: formatPence(money.items),

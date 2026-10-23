@@ -3,9 +3,10 @@ import { joinClassNames } from "../../../utils/class-names";
 import type { getAddonDialog } from "./edit-view";
 import { getDuplicateView } from "../clients/view";
 import type { DuplicateView } from "../clients/view";
-import { findDuplicate } from "../core/model";
+import { findDuplicate, isDuplicateBlocking } from "../core/model";
 import { getDialogPlacement, getOverlayAnimation } from "../shell/overlay";
 import type { StudioController } from "../core/use-studio";
+import { addStudioClient } from "../clients/save";
 import styles from "../../../styles/features/studio/bookings/dialogs.module.css";
 
 type AddonDialogView = ReturnType<typeof getAddonDialog> & {
@@ -165,7 +166,12 @@ export const NewClientDialog = ({ studio }: { studio: StudioController }) => {
     setState({ newClient: { ...draft, ...patch } });
 
   const duplicate = findDuplicate(state, draft.phone, draft.email, null);
-  const isReady = (draft.first || "").trim().length > 1 && !duplicate;
+
+  // every client needs a phone or an email for their booking messages
+  const isReady =
+    (draft.first || "").trim().length > 1 &&
+    !!((draft.phone || "").trim() || (draft.email || "").trim()) &&
+    !isDuplicateBlocking(duplicate);
 
   const save = () => {
     if (!isReady) return;
@@ -175,24 +181,20 @@ export const NewClientDialog = ({ studio }: { studio: StudioController }) => {
     const last = (draft.last || "").trim();
     const name = [first, last].filter(Boolean).join(" ");
 
-    setState(({ extraClients }) => ({
-      newClient: null,
-      changeClientQuery: "",
-      extraClients: extraClients.concat([
-        {
-          id,
-          name,
-          first,
-          img: "",
-          area: "",
-          visits: 0,
-          since: "today",
-          spent: 0,
-          phone: draft.phone || "",
-          email: draft.email || "",
-        },
-      ]),
-    }));
+    setState({ newClient: null, changeClientQuery: "" });
+
+    addStudioClient(context, {
+      id,
+      name,
+      first,
+      img: "",
+      area: "",
+      visits: 0,
+      since: "today",
+      spent: 0,
+      phone: draft.phone || "",
+      email: draft.email || "",
+    });
 
     context.memo.setChangeClient?.(id);
     actions.showToast(`${name} added`);
@@ -242,17 +244,13 @@ export const NewClientDialog = ({ studio }: { studio: StudioController }) => {
           </label>
         </div>
         <label className={styles.fieldSpaced}>
-          <span className={styles.fieldLabel}>
-            Email <span className={styles.optional}>optional</span>
-          </span>
+          <span className={styles.fieldLabel}>Email</span>
           {field(draft.email || "", "email", "mia@example.com", {
             inputMode: "email",
           })}
         </label>
         <label className={styles.fieldSpaced}>
-          <span className={styles.fieldLabel}>
-            Phone <span className={styles.optional}>optional</span>
-          </span>
+          <span className={styles.fieldLabel}>Phone</span>
           {field(draft.phone || "", "phone", "07…", { inputMode: "tel" })}
         </label>
         <DuplicateNotice

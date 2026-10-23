@@ -1,5 +1,5 @@
 // What the settings pages share for saving: a stylist-row save and the "Discard changes?" baseline.
-import { updateStylist } from "../../../lib/studio-api";
+import { updateStylist } from "../../../lib/studio-api/settings";
 import type { TablesUpdate } from "../../../types/database";
 import type { StudioPatch } from "../core/types";
 import type { StudioController } from "../core/use-studio";
@@ -12,11 +12,7 @@ export const getSettingsSave = ({ context }: StudioController) => {
     revert: StudioPatch,
     onRevert?: () => void,
   ) =>
-    sync?.save(
-      (stylistId) => updateStylist(stylistId, patch),
-      revert,
-      onRevert,
-    );
+    sync.save((stylistId) => updateStylist(stylistId, patch), revert, onRevert);
 
   // what Save stores becomes the baseline for "Discard changes?"; a failed save puts the old one back
   const markSaved = (

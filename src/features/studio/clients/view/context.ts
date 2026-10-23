@@ -1,5 +1,5 @@
 import type { ChangeEvent } from "react";
-import { getAllClients, getClient } from "../../core/model";
+import { getAllClients } from "../../core/model";
 import type { StudioClient } from "../../core/types";
 import type { StudioController } from "../../core/use-studio";
 import { getClientStats } from "./stats";
@@ -24,14 +24,8 @@ export const readImage = (
 };
 
 export const getContext = (studio: StudioController) => {
-  const { state, setState, isNew, seedPast } = studio;
-
-  // new accounts have no seed clients, but anyone they add themselves still belongs in the list
-  const all = isNew
-    ? state.extraClients
-        .map(({ id }) => getClient(state, id))
-        .filter(({ deleted }) => !deleted)
-    : getAllClients(state);
+  const { state, setState } = studio;
+  const all = getAllClients(state);
 
   const setOverride = (id: string | null, patch: Partial<StudioClient>) =>
     setState(({ clientOverrides }) => ({
@@ -54,7 +48,7 @@ export const getContext = (studio: StudioController) => {
       ? (all.find(({ id }) => id === state.selectedClientId) ?? null)
       : null,
     setOverride,
-    getStats: (id: string | null) => getClientStats(state, id, isNew, seedPast),
+    getStats: (id: string | null) => getClientStats(state, id),
   };
 };
 

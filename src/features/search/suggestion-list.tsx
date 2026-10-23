@@ -1,15 +1,11 @@
-import { ResponsiveImage } from "../../components/responsive-image/responsive-image";
+import { ResponsiveImage } from "../../components/responsive-image";
 import { SuggestionRowSkeleton } from "../../components/skeleton/suggestion-row-skeleton";
 import { joinClassNames } from "../../utils/class-names";
-import controls from "../../styles/features/search/search-controls.module.css";
-import type { WhatChip } from "./search-state";
-import type {
-  RowView,
-  SuggestionRow,
-  WhatChipView,
-} from "./search-suggestions";
+import controls from "../../styles/features/search/controls.module.css";
+import type { WhatChip } from "./state";
+import type { RowView, SuggestionRow, WhatChipView } from "./suggestions";
 import styles from "../../styles/features/search/suggestion-list.module.css";
-import { getRowStrokeWidth } from "./search-icons";
+import { getRowStrokeWidth } from "./icons";
 
 interface SuggestionButtonProps {
   view: RowView;

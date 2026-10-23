@@ -5,6 +5,7 @@ import { getPastCheckout } from "../checkout";
 
 const row: PastRecord = {
   pastId: 1,
+  remoteId: "booking-1",
   client: null,
   service: "Silk press",
   price: 60,
@@ -37,8 +38,9 @@ describe("past sheet → checkout", () => {
   });
 
   it("charges the balance after the deposit for a completed visit", () => {
-    const state = getInitialStudioState();
-    const deposit = (60 * (state.policy.deposit || 20)) / 100;
+    const initial = getInitialStudioState();
+    const state = { ...initial, policy: { ...initial.policy, deposit: 20 } };
+    const deposit = 12;
 
     const { booking, done, cap } = getPastCheckout(state, {
       ...row,

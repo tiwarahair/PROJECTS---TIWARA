@@ -1,0 +1,51 @@
+.h3 {
+  font-family: "Schibsted Grotesk", sans-serif;
+  font-size: 18px;
+  font-weight: 600;
+  letter-spacing: -0.02em;
+}
+
+/* ---- repeat-until calendar dialog ---- */
+.endScrim {
+  position: fixed;
+  inset: 0;
+  z-index: 70;
+  background: var(--scrim-modal, rgba(26, 23, 20, 0.45));
+}
+
+.endDialog {
+  position: fixed;
+  left: 50%;
+  width: 100%;
+  box-sizing: border-box;
+  z-index: 71;
+  background: var(--neutral-50);
+  box-shadow: var(--shadow-modal, 0 24px 60px rgba(26, 23, 20, 0.3));
+  padding: 16px 18px calc(22px + env(safe-area-inset-bottom));
+}
+
+.endHead {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 10px;
+}
+
+.close {
+  flex: 0 0 auto;
+  width: 32px;
+  height: 32px;
+  margin: -4px -4px 0 0;
+  border: none;
+  background: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--text-secondary);
+  padding: 0;
+  line-height: 0;
+}
+
+.close:active {
+  transform: scale(0.9) !important;
+}

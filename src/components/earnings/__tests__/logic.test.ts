@@ -1,5 +1,4 @@
 import { describe, expect, it } from "vitest";
-import { createRandom } from "../appointments";
 import type { Transaction } from "../data";
 import { getBuckets } from "../dates";
 import { getClient, getStats, getTotals } from "../logic";
@@ -42,16 +41,9 @@ describe("earnings logic", () => {
     });
   });
 
-  it("unknown clients are walk-ins, and an empty client list uses the demo one", () => {
+  it("unknown clients are walk-ins", () => {
     expect(getClient("nobody")).toEqual({ name: "Walk-in" });
-    expect(getClient("nia", []).name).toBe("Nia Okafor");
-  });
-
-  it("the seeded sequence repeats for the same seed", () => {
-    const first = createRandom(7);
-    const second = createRandom(7);
-
-    expect([first(), first()]).toEqual([second(), second()]);
+    expect(getClient("nia", []).name).toBe("Walk-in");
   });
 
   it("chart buckets are days, weeks or months by the range's length", () => {

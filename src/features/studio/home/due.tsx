@@ -1,6 +1,7 @@
 import { TriangleAlert } from "lucide-react";
 import { joinClassNames } from "../../../utils/class-names";
 import type { DecoratedBooking } from "../bookings/decorate";
+import { STILL_SAVING } from "../bookings/sheet/checkout-view";
 import type { StudioController } from "../core/use-studio";
 import type { HomeView } from "./view";
 import styles from "../../../styles/features/studio/home/due.module.css";
@@ -21,7 +22,13 @@ interface DuePanelProps {
 
 export const DuePanel = ({ studio, view }: DuePanelProps) => {
   const { due } = view;
-  const { openSheet } = studio.actions;
+  const { openSheet, showToast } = studio.actions;
+
+  const openCheckout = ({ id, remoteId }: DecoratedBooking) => {
+    if (!remoteId) return showToast(STILL_SAVING);
+
+    openSheet("booking", { sheetBookingId: id, bookingStep: "checkout" });
+  };
 
   return (
     <section className={shared.sidePanel} data-screen-label="Due for checkout">
@@ -62,12 +69,7 @@ export const DuePanel = ({ studio, view }: DuePanelProps) => {
             </button>
             <button
               className={styles.checkout}
-              onClick={() =>
-                openSheet("booking", {
-                  sheetBookingId: booking.id,
-                  bookingStep: "checkout",
-                })
-              }
+              onClick={() => openCheckout(booking)}
             >
               Checkout
             </button>

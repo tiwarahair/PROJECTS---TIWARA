@@ -32,16 +32,9 @@ interface Tone {
 
 interface StatusFlags {
   awaiting: boolean;
-  autoX: boolean;
   ongoing: boolean;
   status: string;
 }
-
-const QUIET_TONE: Tone = {
-  background: "var(--quiet)",
-  border: "var(--border-subtle)",
-  color: "var(--text-secondary)",
-};
 
 const WAITING_TONE: Tone = {
   background: YELLOW_BACKGROUND,
@@ -92,14 +85,12 @@ const PROTECTION_WORDS: Record<string, string> = {
   full: "Payment request",
 };
 
-// Status wins over payment: awaiting, auto-cancelled, ongoing and arrived each have a fixed tone.
+// Status wins over payment: awaiting, ongoing and arrived each have a fixed tone.
 const getStatusTone = (
-  { awaiting, autoX, ongoing, status }: StatusFlags,
+  { awaiting, ongoing, status }: StatusFlags,
   fallback: Tone,
 ): Tone => {
   if (awaiting) return WAITING_TONE;
-
-  if (autoX) return QUIET_TONE;
 
   if (ongoing) return ONGOING_TONE;
 
@@ -125,7 +116,7 @@ const getPayTone = (isPaid: boolean, paid: string): Tone => {
 };
 
 const getBadge = (
-  { awaiting, autoX, ongoing, status }: StatusFlags,
+  { awaiting, ongoing, status }: StatusFlags,
   paid: string,
   msLeft: number,
   leftShort: string,
@@ -135,20 +126,16 @@ const getBadge = (
   if (awaiting)
     return msLeft > 0 ? `Auto-cancels in ${leftShort}` : "Auto-cancels now";
 
-  if (autoX) return "Auto-cancelled";
-
   if (status === "arrived") return "Arrived";
 
   return PAID_BADGES[paid] ?? "";
 };
 
 const getStatusLabel = (
-  { awaiting, autoX, ongoing, status }: StatusFlags,
+  { awaiting, ongoing, status }: StatusFlags,
   autoDone: boolean | undefined,
 ) => {
   if (awaiting) return "Awaiting confirmation";
-
-  if (autoX) return "Auto-cancelled";
 
   if (autoDone) return "Completed · Unpaid";
 
@@ -205,19 +192,34 @@ export const decorateBooking = (
   const canArrive =
     isPre && booking.dayOffset === 0 && startMinutes - nowMinutes <= 60;
 
-  const graceEnd = startMinutes + (state.policy.grace || 0);
-  const canNoShow = isPre && booking.dayOffset === 0 && nowMinutes >= graceEnd;
-  const depositAmount = Math.round(booking.price * state.policy.deposit) / 100;
+  const policy = booking.agreedPolicy ?? state.policy;
+  const graceMinutes = policy.grace || 0;
+  const graceEnd = startMinutes + graceMinutes;
+
+  // from the end of the grace period until a day after the start, as the server allows
+  const minutesSinceStart =
+    nowMinutes - startMinutes - booking.dayOffset * 1440;
+
+  const canNoShow =
+    isPre && minutesSinceStart >= graceMinutes && minutesSinceStart < 1440;
+
+  // a real booking keeps the deposit agreed when it was made, whatever its price is now
+  const depositAmount =
+    booking.agreedDeposit ?? Math.round(booking.price * policy.deposit) / 100;
 
   const paidAmounts: Record<string, number> = {
     full: booking.price,
     deposit: depositAmount,
   };
 
-  const paidAmount = paidAmounts[paid] ?? 0;
-  const due = Math.max(0, booking.price - paidAmount);
+  const paidAmount = booking.paidOnline ?? paidAmounts[paid] ?? 0;
+
+  const due = Math.max(
+    0,
+    booking.price - paidAmount - (booking.paidLater ?? 0),
+  );
+
   const awaiting = status === "awaiting";
-  const autoX = status === "autocancelled";
 
   const msLeft = booking.expiresAt
     ? Math.max(0, booking.expiresAt - Date.now())
@@ -228,10 +230,22 @@ export const decorateBooking = (
       ? `${Math.round(msLeft / 3600000)} h`
       : `${Math.max(1, Math.round(msLeft / 60000))} min`;
 
-  const flags: StatusFlags = { awaiting, autoX, ongoing, status };
-  const badge = getBadge(flags, paid, msLeft, leftShort);
-  const tone = getStatusTone(flags, getPaidTone(paid));
-  const statusTone = getStatusTone(flags, CONFIRMED_TONE);
+  const flags: StatusFlags = { awaiting, ongoing, status };
+
+  const badgePaid = booking.cardFailed ? "failed" : paid;
+
+  const badge = booking.autoDone
+    ? "Completed · Unpaid"
+    : getBadge(flags, badgePaid, msLeft, leftShort);
+
+  const tone = booking.autoDone
+    ? UNPAID_TONE
+    : getStatusTone(flags, getPaidTone(badgePaid));
+
+  const statusTone = booking.autoDone
+    ? UNPAID_TONE
+    : getStatusTone(flags, CONFIRMED_TONE);
+
   const payTone = getPayTone(paid === "full" || paid === "deposit", paid);
   const tileTone = getTileTone(state, booking.service);
   const address = booking.address || client.address || "";
@@ -248,6 +262,7 @@ export const decorateBooking = (
     canArrive,
     canNoShow,
     startMinutes,
+    graceMinutes,
     graceEnd,
     durationMinutes: durationToMinutes(duration),
     depositAmount,
@@ -283,7 +298,7 @@ export const decorateBooking = (
     badgeBackground: tone.background,
     badgeBorder: tone.border,
     badgeColor: tone.color,
-    badgeDot: ongoing,
+    badgeDot: ongoing && !booking.autoDone,
     subtitle: "",
     subtitleColor: "var(--accent-500)",
     statusLabel: getStatusLabel(flags, booking.autoDone),
@@ -292,7 +307,6 @@ export const decorateBooking = (
     statusColor: statusTone.color,
     statusDot: ongoing,
     awaiting,
-    autoX,
     noProtect: booking.protect === "none",
     protectionIsCard: booking.protectionMode === "card",
     protectionIsFull: booking.protectionMode === "full",
@@ -306,7 +320,7 @@ export const decorateBooking = (
     canResend: resends < 2,
     resendOpacity: resends < 2 ? "1" : ".45",
     protectionAmountLabel: formatMoney(
-      getProtectionTotal(state, booking.price),
+      booking.linkAmount ?? getProtectionTotal(state, booking.price),
       { pence: "always" },
     ),
     payLabel: getPayLabel(paid, booking.protectionMode),
@@ -348,21 +362,18 @@ export const decorateBooking = (
 
 export type DecoratedBooking = ReturnType<typeof decorateBooking>;
 
-/** Every booking, sorted by day then time and decorated; empty for a new account. */
+/** Every booking, sorted by day then time and decorated. */
 export const getDecoratedBookings = (
   state: StudioState,
-  isNew: boolean,
   onOpen: (booking: StudioBooking) => void,
 ): DecoratedBooking[] =>
-  isNew
-    ? []
-    : state.bookings
-        .slice()
-        .sort(
-          (first, second) =>
-            first.dayOffset - second.dayOffset ||
-            first.time.localeCompare(second.time),
-        )
-        .map((booking, index) =>
-          decorateBooking(state, booking, index, () => onOpen(booking)),
-        );
+  state.bookings
+    .slice()
+    .sort(
+      (first, second) =>
+        first.dayOffset - second.dayOffset ||
+        first.time.localeCompare(second.time),
+    )
+    .map((booking, index) =>
+      decorateBooking(state, booking, index, () => onOpen(booking)),
+    );

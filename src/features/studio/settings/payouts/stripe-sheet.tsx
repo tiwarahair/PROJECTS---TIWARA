@@ -3,26 +3,7 @@ import type { StudioController } from "../../core/use-studio";
 import styles from "../../../../styles/features/studio/settings/payouts/stripe-sheet.module.css";
 
 export const StripeSheet = ({ studio }: { studio: StudioController }) => {
-  const { state, setState, actions } = studio;
-
-  const connect = () => {
-    if (state.account) return void actions.startStripe();
-
-    if (state.stripeBusy) return;
-
-    setState({ stripeBusy: true });
-
-    window.setTimeout(() => {
-      setState(({ check }) => ({
-        stripeBusy: false,
-        check: { ...check, stripe: true },
-      }));
-
-      actions.showToast("Stripe connected. You can take payments");
-      actions.closeSheet();
-      actions.checkDone();
-    }, 1400);
-  };
+  const { state, actions } = studio;
 
   return (
     <>
@@ -49,7 +30,7 @@ export const StripeSheet = ({ studio }: { studio: StudioController }) => {
       </div>
       <button
         className={styles.stripeButton}
-        onClick={connect}
+        onClick={() => void actions.startStripe()}
         disabled={state.stripeBusy}
       >
         {state.stripeBusy && <span className={styles.spinner}></span>}

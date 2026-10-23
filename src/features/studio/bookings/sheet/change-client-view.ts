@@ -1,9 +1,25 @@
-import { CLIENTS } from "../../core/seed-clients";
+import { changeBookingClient } from "../../../../lib/studio-api/booking-writes";
 import { getAvatarSrc } from "../../core/format";
-import { getProtectionNoun } from "../../core/model";
+import {
+  getAllClients,
+  getClient,
+  getClientNames,
+  getProtectionNoun,
+} from "../../core/model";
 import type { StudioBooking } from "../../core/types";
+import { toEditDraft } from "../../clients/edit-draft";
 import { getFreshLink } from "./booking";
 import type { SheetContext } from "./context";
+
+const toContact = (state: SheetContext["state"], clientId: string) => {
+  const client = getClient(state, clientId);
+
+  return {
+    ...getClientNames(client),
+    phone: client.phone || "",
+    email: client.email || "",
+  };
+};
 
 const NO_PROTECTION: Partial<StudioBooking> = {
   protect: "none",
@@ -18,10 +34,12 @@ const getVisitsMeta = ({ visits, area }: { visits?: number; area?: string }) =>
 
 // ---- change client ----
 export const getChangeClientView = (context: SheetContext) => {
-  const { state, setState, actions, memo, booking } = context;
+  const { state, setState, actions, memo, booking, hoursToStart, saveBooking } =
+    context;
+
   const changeQuery = (state.changeClientQuery || "").trim();
   const lowerQuery = changeQuery.toLowerCase();
-  const everyone = CLIENTS.concat(state.extraClients);
+  const everyone = getAllClients(state);
 
   const applyClient = (
     clientId: string | null,
@@ -29,34 +47,72 @@ export const getChangeClientView = (context: SheetContext) => {
   ) => {
     setState({ bookingStepOut: true });
 
-    window.setTimeout(
-      () =>
-        setState(({ bookings }) => ({
-          bookingStepOut: false,
-          bookingStep: "view",
-          bookingStepBack: true,
-          confirm: null,
-          bookings: bookings.map((item) =>
-            item.id === booking.id
-              ? { ...item, client: clientId, ...patch }
-              : item,
+    window.setTimeout(() => {
+      setState({
+        bookingStepOut: false,
+        bookingStep: "view",
+        bookingStepBack: true,
+        confirm: null,
+      });
+
+      saveBooking(
+        { client: clientId, walkIn: !clientId, ...patch },
+        (remoteId) =>
+          changeBookingClient(
+            remoteId,
+            clientId ? toContact(state, clientId) : null,
+            patch.protect === "link",
           ),
-        })),
-      200,
-    );
+      );
+    }, 200);
 
     window.setTimeout(() => setState({ bookingStepBack: false }), 900);
   };
 
   const setClient = (clientId: string | null) => {
-    if (!clientId || state.policy.mode === "none") {
+    // the client needs until 2 hours before the start to confirm
+    const other = everyone.find(({ id }) => id === clientId);
+
+    if (
+      !clientId ||
+      !other ||
+      state.policy.mode === "none" ||
+      hoursToStart <= 2
+    ) {
       applyClient(clientId, NO_PROTECTION);
 
       return;
     }
 
-    const other = everyone.find(({ id }) => id === clientId);
-    const name = other ? (other.name.split(" ")[0] ?? "") : "the client";
+    const name = other.name.split(" ")[0] ?? "";
+
+    // the confirm link goes by email
+    if (!other.email?.trim()) {
+      setState({
+        confirm: {
+          title: `${name} has no email yet`,
+          yesLabel: "Add email",
+          noLabel: "No protection",
+          body: `The payment link is sent by email. Add ${name}’s email to ask for booking protection, or change the client without it.`,
+          yes: () =>
+            actions.openSheet("clientEdit", {
+              confirm: null,
+              clientEdit: toEditDraft(other),
+              clientEditFromBooking: {
+                bookingId: booking.id,
+                clientId,
+                fromClientId: state.fromClientId ?? null,
+              },
+              clientEditFocus: "email",
+            }),
+          onNo: () => applyClient(clientId, NO_PROTECTION),
+          isBlocking: true,
+        },
+      });
+
+      return;
+    }
+
     const sentAt = Date.now();
 
     setState({
@@ -75,6 +131,7 @@ export const getChangeClientView = (context: SheetContext) => {
             ...getFreshLink(booking, sentAt),
           }),
         onNo: () => applyClient(clientId, NO_PROTECTION),
+        isBlocking: true,
       },
     });
   };
@@ -94,9 +151,6 @@ export const getChangeClientView = (context: SheetContext) => {
         isCurrent: client.id === booking.client,
         pick: () => setClient(client.id),
       })),
-    canAddTyped:
-      changeQuery.length > 1 &&
-      !everyone.some(({ name }) => name.toLowerCase() === lowerQuery),
     openNewClient: () => {
       const parts = changeQuery.split(" ");
 
@@ -108,29 +162,6 @@ export const getChangeClientView = (context: SheetContext) => {
           phone: "",
         },
       });
-    },
-    addTypedClient: () => {
-      const id = `c${Date.now()}`;
-
-      setState(({ extraClients }) => ({
-        extraClients: extraClients.concat([
-          {
-            id,
-            name: changeQuery,
-            first: changeQuery.split(" ")[0],
-            img: "",
-            area: "",
-            visits: 0,
-            since: "today",
-            spent: 0,
-            phone: "",
-            email: "",
-          },
-        ]),
-      }));
-
-      setClient(id);
-      actions.showToast(`${changeQuery} added`);
     },
     makeWalkIn: () => setClient(null),
   };

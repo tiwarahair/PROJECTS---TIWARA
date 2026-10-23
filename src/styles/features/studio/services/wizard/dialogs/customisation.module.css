@@ -1,0 +1,209 @@
+/* ---- Customisation ---- */
+.own {
+  position: fixed;
+  left: 50%;
+  width: 100%;
+  max-height: calc(100dvh - 48px);
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  box-sizing: border-box;
+  z-index: 71;
+  background: var(--neutral-50);
+  box-shadow: var(--shadow-modal, 0 24px 60px rgba(26, 23, 20, 0.3));
+  padding: 20px 18px calc(22px + env(safe-area-inset-bottom));
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  font-family: "Hanken Grotesk", sans-serif;
+  color: var(--text-primary);
+}
+
+.ownTitle {
+  font-family: "Schibsted Grotesk", sans-serif;
+  font-size: 18px;
+  font-weight: 600;
+  letter-spacing: -0.02em;
+  margin-bottom: 4px;
+}
+
+.field6 {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.label135 {
+  font-size: 13.5px;
+  font-weight: 500;
+}
+
+.nameInput {
+  width: 100%;
+  padding: 11px 13px;
+  box-sizing: border-box;
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-sm);
+  background: #fff;
+  font-size: 16px;
+  outline: none;
+}
+
+.optionsHead {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 44px 84px 92px 32px;
+  gap: 6px;
+  width: 100%;
+  box-sizing: border-box;
+  font-size: 12.5px;
+  color: var(--text-secondary);
+}
+
+.optionRow {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 44px 84px 92px 32px;
+  gap: 6px;
+  width: 100%;
+  box-sizing: border-box;
+  align-items: center;
+}
+
+.optionInput {
+  min-width: 0;
+  width: 100%;
+  padding: 10px 12px;
+  box-sizing: border-box;
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-sm);
+  background: #fff;
+  font-size: 16px;
+  outline: none;
+}
+
+.sign {
+  align-self: stretch;
+  justify-self: end;
+  width: 32px;
+  box-sizing: border-box;
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-sm);
+  background: #fff;
+  font: inherit;
+  font-size: 18px;
+  font-weight: 600;
+  line-height: 1;
+  padding: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: color 0.16s cubic-bezier(0.2, 0.8, 0.2, 1);
+  color: var(--text-primary);
+}
+
+.signNeg {
+  color: var(--accent-700);
+}
+
+.optionPrice {
+  min-width: 0;
+  width: 100%;
+  padding: 10px 10px;
+  box-sizing: border-box;
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-sm);
+  background: #fff;
+  font-size: 16px;
+  outline: none;
+  font-variant-numeric: tabular-nums;
+}
+
+.optionTime {
+  min-width: 0;
+  width: 100%;
+  padding: 10px 6px;
+  box-sizing: border-box;
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-sm);
+  background: #fff;
+  font-size: 16px;
+  outline: none;
+}
+
+.removeOption {
+  width: 32px;
+  height: 32px;
+  border: none;
+  background: none;
+  border-radius: var(--radius-full);
+  color: var(--text-secondary);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  padding: 0;
+}
+
+.optionError {
+  font-size: 13.5px;
+  font-weight: 600;
+  color: var(--accent-700);
+  padding-top: 6px;
+  line-height: 1.4;
+}
+
+.addOption {
+  align-self: flex-start;
+  border: none;
+  background: none;
+  padding: 4px 0;
+  font: inherit;
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--accent-700);
+  cursor: pointer;
+}
+
+.error {
+  font-size: 13.5px;
+  font-weight: 600;
+  color: var(--accent-700);
+}
+
+.ownActions {
+  display: flex;
+  gap: 10px;
+  margin-top: 8px;
+}
+
+.ownCancel {
+  flex: 1;
+  border: 1px solid var(--border-strong, #d8d2c6);
+  background: transparent;
+  border-radius: var(--radius-full);
+  padding: 12px 0;
+  font: inherit;
+  font-size: 15px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.ownCancel:active {
+  transform: scale(0.97) !important;
+}
+
+.ownSave {
+  flex: 1;
+  border: none;
+  background: var(--accent-700);
+  color: var(--neutral-100);
+  border-radius: var(--radius-full);
+  padding: 12px 0;
+  font: inherit;
+  font-size: 15px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.ownSave:active {
+  transform: scale(0.97) !important;
+}

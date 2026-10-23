@@ -6,7 +6,7 @@ import type { StatePatch } from "../logic/types";
 
 export const useFlowState = (stylist: Stylist) => {
   const [initial] = useState(() => getInitialBooking(stylist));
-  const [state, setRawState] = useState(initial.state);
+  const [state, setRawState] = useState(initial);
   const [, setTick] = useState(0);
   const stateRef = useRef(state);
 
@@ -69,10 +69,10 @@ export const useFlowState = (stylist: Stylist) => {
 
   // after every update: keep the draft (or drop it once confirmed)
   useEffect(() => {
-    if (state === initial.state) return;
+    if (state === initial) return;
 
     if (state.confirmed) {
-      if (!state.board) clearDraft(state.id);
+      clearDraft(state.id);
     } else saveDraft(state);
   }, [state, initial]);
 

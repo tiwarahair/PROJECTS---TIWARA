@@ -3,8 +3,8 @@ import type {
   NotificationSettings,
   PayoutStatus,
 } from "../../../../components/account-settings/logic";
-import type { TaxDetails } from "../../../../components/tax-details-form/tax-details-logic";
-import type { NOTIFS } from "../seed-dashboard";
+import type { TaxDetails } from "../../../../components/tax-details-form/logic";
+import type { PastCursor } from "../../../../lib/studio-api/bookings";
 import type {
   BlockDraft,
   BlockedTime,
@@ -14,6 +14,7 @@ import type {
 } from "./availability";
 import type {
   AddonEditDraft,
+  DisputeForm,
   EditServiceDraft,
   PastRecord,
   StudioBooking,
@@ -24,7 +25,13 @@ import type {
   NewClientDraft,
   StudioClient,
 } from "./clients";
-import type { ActionSheet, ConfirmDialog, Popover, Tooltip } from "./overlays";
+import type {
+  ActionSheet,
+  ConfirmDialog,
+  Popover,
+  StudioNotification,
+  Tooltip,
+} from "./overlays";
 import type {
   CategoriesUi,
   CategoryDraft,
@@ -44,13 +51,13 @@ import type {
 import type { BookingStep, SheetKind, StudioPage, StudioTab } from "./views";
 
 export interface StudioState {
-  /** A real stylist's ids (null on demo boards, which never save). */
+  /** The stylist's ids (empty until Studio is seeded from their account). */
   account: {
     stylistId: string;
     slug: string;
     slugChangedAt: string | null;
-  } | null;
-  /** The signed-in stylist (demo: Amara). */
+  };
+  /** The signed-in stylist. */
   owner: {
     first: string;
     last: string;
@@ -60,7 +67,7 @@ export interface StudioState {
     phone: string;
   };
   /** Home feed and notifications sheet; a new account has none. */
-  notifications: typeof NOTIFS;
+  notifications: StudioNotification[];
   avatarUrl: string | null;
   coverUrl: string | null;
   tab: StudioTab;
@@ -72,6 +79,15 @@ export interface StudioState {
   clientOverrides: Record<string, Partial<StudioClient>>;
   clientEdit: ClientEditDraft | null;
   clientEditFromView?: boolean;
+  /** opened from the add-booking flow, which it goes back to */
+  clientEditFromAdd?: boolean;
+  clientEditFromBooking?: {
+    bookingId: number;
+    clientId: string;
+    fromClientId: string | null;
+  } | null;
+  clientEditFocus?: "email";
+  resumeChangeClient?: string | null;
   range: "today" | "week" | "month";
   sheet: SheetKind | null;
   out: boolean;
@@ -85,7 +101,7 @@ export interface StudioState {
   twoFactorOut: boolean;
   shareTip: boolean;
   stripeBusy: boolean;
-  /** A real account's Stripe status and payout bank (demo boards derive the status from check.stripe). */
+  /** The account's Stripe status and payout bank. */
   payoutStatus: PayoutStatus | null;
   payoutBank: string | null;
   /** A real account's saved notification choices (Settings → Notifications). */
@@ -121,7 +137,6 @@ export interface StudioState {
   rescheduleTime: string | null;
   rescheduleCustom?: boolean;
   pastNew: PastRecord[];
-  pastOverrides?: Record<string, Partial<PastRecord>>;
   doneBooking: StudioBooking | null;
   bookingEdit: boolean;
   serviceHover: boolean;
@@ -149,11 +164,19 @@ export interface StudioState {
   noShowCharge: string;
   toastUndo: (() => void) | null;
   extraClients: StudioClient[];
+  bookingClients: StudioClient[];
+  /** Where the next page of a real account's Past starts; null once it's all loaded. */
+  pastCursor: PastCursor | null;
+  isPastLoading: boolean;
   clientAddresses: Record<string, string>;
   sheetBookingId?: number | null;
   sheetClientId?: string | null;
   selectedPastId?: string | number | null;
   pastCheckoutPanel?: string | null;
+  correctPayment?: { amount: string; tip: string; via: string } | null;
+  disputeForm?: DisputeForm | null;
+  answeredDisputes?: Record<string, string>;
+  isOwedSettling?: boolean;
   statusMenuOpen?: boolean;
   addRebook?: boolean;
   addStep: number;
@@ -173,6 +196,7 @@ export interface StudioState {
   addAddress: string;
   addWalkIn: boolean;
   addProtection: string;
+  addUnpaidFee?: { bookingId: string; amount: number; kind: string } | null;
   addEditService?: boolean;
   addAddonPickerOpen?: boolean;
   addAddons?: string[];

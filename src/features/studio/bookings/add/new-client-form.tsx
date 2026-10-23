@@ -67,7 +67,8 @@ export const NewClientForm = ({ view, newClient }: NewClientFormProps) => (
     </div>
     <DuplicateNotice duplicate={view.duplicate} />
     <div className={styles.hint}>
-      Add a phone number or an email so they get their booking confirmation.
+      Add an email so they get their confirmation, reminders and receipts. A
+      phone number alone is fine, but they won’t get these.
     </div>
   </div>
 );

@@ -28,7 +28,7 @@ export const createStudioActions = (context: StudioContext) => {
     { scrollBody },
   );
 
-  const { setStatus, patchPast, rebookFrom, autoComplete } =
+  const { setStatus, patchPast, rebookFrom, followToday, loadOlderPast } =
     createBookingActions(context, { showToast, openSheet, closeSheet });
 
   const { editBlock, removeBlock, blockActions, blockPop } = createBlockActions(
@@ -57,6 +57,8 @@ export const createStudioActions = (context: StudioContext) => {
     closeSheet,
     guardSheet: sheets.guardSheet,
     requestCloseSheet: sheets.requestCloseSheet,
+    leaveClientEdit: sheets.leaveClientEdit,
+    isEditFromBooking: sheets.isEditFromBooking,
     openPage,
     closePage,
     leavePage,
@@ -68,7 +70,8 @@ export const createStudioActions = (context: StudioContext) => {
     blockPop,
     patchPast,
     rebookFrom,
-    autoComplete,
+    followToday,
+    loadOlderPast,
     isTouch,
     tipShow,
     tipHide,

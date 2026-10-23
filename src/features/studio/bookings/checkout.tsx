@@ -3,7 +3,7 @@ import type {
   CheckoutView,
   MenuGroup,
 } from "../../../components/checkout/data";
-import { CheckoutSheet } from "../../../components/checkout/checkout-sheet";
+import { CheckoutSheet } from "../../../components/checkout";
 import type { CheckoutSheetProps } from "../../../components/checkout/use-checkout";
 import type { StudioController } from "../core/use-studio";
 import sheet from "../../../styles/features/studio/shell/sheet-frame.module.css";
@@ -17,7 +17,8 @@ export interface StudioCheckoutProps {
   refunded?: number;
   onExit: () => void;
   onComplete: NonNullable<CheckoutSheetProps["onComplete"]>;
-  onRefund?: (amount: number, reason: string) => void;
+  onRefund?: CheckoutSheetProps["onRefund"];
+  onPay: CheckoutSheetProps["onPay"];
 }
 
 /** CheckoutSheet over a Studio sheet. */
@@ -30,8 +31,9 @@ export const StudioCheckout = ({
   onExit,
   onComplete,
   onRefund = () => {},
+  onPay,
 }: StudioCheckoutProps) => {
-  const { state, isWide, props, actions } = studio;
+  const { state, isWide, actions } = studio;
   const { business } = state;
   const fields = business.details || {};
 
@@ -76,12 +78,12 @@ export const StudioCheckout = ({
             .join(", "),
           vat: business.vatOn && fields.vat ? `GB ${fields.vat}` : "",
         }}
-        declineMode={props.cardDeclines || "none"}
         menu={menu}
         onExit={onExit}
         onClose={actions.closeSheet}
         onComplete={onComplete}
         onRefund={onRefund}
+        onPay={onPay}
         onResent={() => {}}
         onCancelLink={() => {}}
       />

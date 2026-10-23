@@ -1,4 +1,5 @@
 import { asStyle } from "../../../utils/as-style";
+import { joinClassNames } from "../../../utils/class-names";
 import type { StudioController } from "../core/use-studio";
 import { RangeSwitch } from "./range-switch";
 import type { HomeView } from "./view";
@@ -28,7 +29,16 @@ export const OverviewStats = ({ studio, view }: OverviewStatsProps) => (
         >
           <div className={styles.statHead}>
             <div className={shared.muted}>{label}</div>
-            {delta && <div className={styles.delta}>{delta}</div>}
+            {delta && (
+              <div
+                className={joinClassNames(
+                  styles.delta,
+                  delta.isDown && styles.deltaDown,
+                )}
+              >
+                {delta.text}
+              </div>
+            )}
           </div>
           <div>
             <div className={styles.statValue}>{value}</div>

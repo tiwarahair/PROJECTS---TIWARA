@@ -4,12 +4,7 @@ import type {
 } from "../../../../../components/checkout/data";
 import type { CheckoutSheetProps } from "../../../../../components/checkout/use-checkout";
 import { parseAmountLabel, timeRange } from "../../../core/format";
-import {
-  getClient,
-  getPastKey,
-  getPastRows,
-  getServiceDuration,
-} from "../../../core/model";
+import { getClient, getPastKey, getServiceDuration } from "../../../core/model";
 import type { PastRecord, StudioState } from "../../../core/types";
 import type { StudioController } from "../../../core/use-studio";
 import { roundToPence } from "../../../../../utils/money";
@@ -66,13 +61,16 @@ export const getPastCheckout = (
     service: row.service,
     meta: "",
     addons: [] as [string, number][],
-    card: "4242",
-    brand: "Visa",
+    card: "saved",
+    brand: "",
+    cardLabel: row.cardLabel ?? "Saved card",
     paidOn: "",
     phone: client?.phone || "",
     email: client?.email || "",
     day: row.when,
     time: getPastTime(state, row),
+    ref: row.ref,
+    receiptDate: row.receiptDate,
     arrived: "",
   };
 
@@ -80,7 +78,7 @@ export const getPastCheckout = (
 
   const paid = checkout
     ? checkout.paid
-    : roundToPence((row.price * (state.policy.deposit || 20)) / 100);
+    : roundToPence((row.price * state.policy.deposit) / 100);
 
   const lines = checkout?.lines
     ? checkout.lines
@@ -101,6 +99,7 @@ export const getPastCheckout = (
         charged: checkout.charged,
         tip: checkout.tip,
         refundAuto: checkout.refundAuto,
+        cashBack: checkout.cashBack ?? 0,
       }
     : {
         method: "card",
@@ -110,7 +109,7 @@ export const getPastCheckout = (
         refundAuto: 0,
       };
 
-  if (row.linkPaid && done.method === "link") {
+  if (row.linkPaid && done.method === "link" && row.linkVia !== "link") {
     done.method = "record";
     done.via = row.linkVia || "cash";
   }
@@ -134,6 +133,7 @@ export const getPastCheckout = (
       lines,
       mode: (checkout ? checkout.mode : "deposit") as PaymentMode,
       paid,
+      ...(checkout?.cashBackVia ? { recordedVia: checkout.cashBackVia } : {}),
     },
     done: done as PastCheckout["done"],
     cap: getCap(),
@@ -141,9 +141,7 @@ export const getPastCheckout = (
 };
 
 export const findPastRow = (studio: StudioController) => {
-  const { state, isNew, seedPast } = studio;
+  const { state } = studio;
 
-  return getPastRows(state, isNew, seedPast).find(
-    (row) => getPastKey(row) === state.selectedPastId,
-  );
+  return state.pastNew.find((row) => getPastKey(row) === state.selectedPastId);
 };

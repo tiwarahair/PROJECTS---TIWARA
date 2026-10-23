@@ -1,10 +1,10 @@
 import type { KeyboardEvent } from "react";
 import { joinClassNames } from "../../utils/class-names";
 import { ArrowRight } from "lucide-react";
-import { AppleLogo, GoogleLogo } from "../../components/icons/brand-icons";
-import { CHOOSER_ICONS } from "./onboarding-data";
-import { OnboardingTurnstile } from "./onboarding-turnstile";
-import { PasswordInput, SubmitButton, TextField } from "./onboarding-fields";
+import { GoogleLogo } from "../../components/icons/brand-icons";
+import { CHOOSER_ICONS } from "./data";
+import { OnboardingTurnstile } from "./turnstile";
+import { PasswordInput, SubmitButton, TextField } from "./fields";
 import type { ScreenProps } from "./screen-props";
 import styles from "../../styles/features/onboarding/auth-screens.module.css";
 
@@ -129,13 +129,6 @@ const SocialButtons = ({ onboarding, layout }: ScreenProps) => {
           <GoogleLogo size={18} className={styles.googleIcon} />
           Continue with Google
         </button>
-        {/* Apple sign-in isn't set up yet: design boards only */}
-        {import.meta.env.DEV && (
-          <button disabled className={styles.socialButton}>
-            <AppleLogo size={18} className={styles.appleIcon} />
-            Continue with Apple
-          </button>
-        )}
       </div>
     </>
   );

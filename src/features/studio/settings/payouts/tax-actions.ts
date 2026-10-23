@@ -1,7 +1,7 @@
 // Tax details from Studio: editing needs a recent app code; a save that needs one asks, then saves again.
 import { FunctionsHttpError } from "@supabase/supabase-js";
-import type { TaxDetails } from "../../../../components/tax-details-form/tax-details-logic";
-import { saveTaxDetails } from "../../../../lib/studio-api";
+import type { TaxDetails } from "../../../../components/tax-details-form/logic";
+import { saveTaxDetails } from "../../../../lib/studio-api/settings";
 import {
   hasRecentSecondFactor,
   verifySecondFactor,
@@ -16,32 +16,29 @@ interface TaxActionTools {
 }
 
 export const createTaxActions = (
-  { getState, setState, memo }: StudioContext,
+  { setState, memo }: StudioContext,
   { showToast, checkDone, twoFactor }: TaxActionTools,
 ) => {
   const { openTwoFactor, closeTwoFactor, withCode } = twoFactor;
-  const isReal = () => !!getState().account;
 
   /** Tax details need an app code from the last 30 days; within that, no code is asked for. */
   const openTaxEdit = async () => {
     memo.afterSecondFactor = undefined;
 
-    if (isReal() && (await hasRecentSecondFactor().catch(() => false)))
+    if (await hasRecentSecondFactor().catch(() => false))
       return setState({ taxEdit: true });
 
     openTwoFactor("taxcode", { flow: "info" });
   };
 
-  /** Saves tax details (encrypted on the server for a real account). */
+  /** Saves tax details (encrypted on the server). */
   const saveTax = async (value: TaxDetails, onSaved?: () => void) => {
     try {
-      const tax = isReal()
-        ? {
-            ...value,
-            nationalInsuranceNumber: "",
-            nationalInsuranceHint: await saveTaxDetails(value),
-          }
-        : value;
+      const tax = {
+        ...value,
+        nationalInsuranceNumber: "",
+        nationalInsuranceHint: await saveTaxDetails(value),
+      };
 
       setState({ tax });
       showToast("Tax details saved");

@@ -1,4 +1,4 @@
-import { removeBlock as removeBlockRow } from "../../../../lib/studio-api";
+import { removeBlock as removeBlockRow } from "../../../../lib/studio-api/settings";
 import { ICONS } from "../constants";
 import { getBlockTitle } from "../model";
 import type {
@@ -62,7 +62,7 @@ export const createBlockActions = (
             confirm: null,
           }));
 
-          context.sync?.save(() => removeBlockRow(block.id), {
+          context.sync.save(() => removeBlockRow(block.id), {
             blocked: before,
           });
 

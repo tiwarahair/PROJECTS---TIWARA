@@ -5,7 +5,7 @@ import type { TipChoice } from "./data";
 import type { CheckoutViewModel } from "./view";
 import type { CheckoutController } from "./use-checkout";
 import flow from "../../styles/components/checkout/flow.module.css";
-import shared from "../../styles/components/checkout/checkout-sheet.module.css";
+import shared from "../../styles/components/checkout/index.module.css";
 import { formatMoney, roundToPence } from "../../utils/money";
 
 const TIP_CHOICES: [TipChoice, string][] = [
@@ -104,6 +104,11 @@ export const CheckoutTip = ({
             />
           </span>
         </label>
+      )}
+      {money.isTipTooHigh && (
+        <div className={flow.tipError} role="alert">
+          {`A tip on the saved card can be up to ${formatMoney(money.tipCap)} (25%). Record a bigger tip as cash instead.`}
+        </div>
       )}
       <div className={flow.tipHelp}>
         {isRecord

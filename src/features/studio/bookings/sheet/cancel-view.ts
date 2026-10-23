@@ -1,3 +1,4 @@
+import { cancelStudioBooking } from "../../../../lib/studio-api/bookings";
 import type { SheetContext } from "./context";
 
 const getNotice = (hoursToStart: number) =>
@@ -17,7 +18,9 @@ const getCancelCopy = (
       toast: `Cancelled. ${lateFee.label} fee pending`,
     };
 
-  if (state.policy.mode === "card" || state.policy.mode === "none")
+  const { mode } = booking.agreedPolicy ?? state.policy;
+
+  if (mode === "card" || mode === "none")
     return { meta: "No charge", noteTail: "", toast: "Booking cancelled" };
 
   return {
@@ -30,8 +33,11 @@ const getCancelCopy = (
 const getCancelBody = ({ state, booking, isLate, lateFee }: SheetContext) => {
   const { firstName } = booking;
 
-  const windowText =
-    state.policy.window < 1 ? "30-minute" : `${state.policy.window}-hour`;
+  const { window } = booking.agreedPolicy ?? state.policy;
+  const windowText = window < 1 ? "30-minute" : `${window}-hour`;
+
+  if (booking.awaiting)
+    return `${firstName} hasn’t confirmed yet, so nothing was paid and there’s no fee. Their link stops working and the slot opens up.`;
 
   if (state.cancelWho === "me")
     return `Cancelling refunds ${firstName} in full, including the booking fee, and frees the slot for online booking.`;
@@ -49,15 +55,18 @@ const getCancelBody = ({ state, booking, isLate, lateFee }: SheetContext) => {
 
 // ---- cancel ----
 export const getCancelView = (context: SheetContext) => {
-  const { state, actions, memo, booking, hoursToStart, isLate, lateFee } =
-    context;
+  const { state, actions, booking, hoursToStart, isLate, lateFee } = context;
 
   const isFeeShown =
-    state.cancelWho === "client" && isLate && lateFee.amount > 0;
+    !booking.awaiting &&
+    state.cancelWho === "client" &&
+    isLate &&
+    lateFee.amount > 0;
 
   const cancel = () => {
     const isFeeKept = isFeeShown && state.cancelFee;
-    const who = state.cancelWho === "me" ? "you" : booking.firstName;
+    const isMine = state.cancelWho === "me";
+    const who = isMine ? "you" : booking.firstName;
     const { meta, noteTail, toast } = getCancelCopy(context, isFeeKept);
     const reason = state.cancelReason.trim();
     const reasonNote = reason ? ` ${reason}` : "";
@@ -72,12 +81,19 @@ export const getCancelView = (context: SheetContext) => {
         note: `Cancelled by ${who} ${getNotice(hoursToStart)}.${noteTail}${reasonNote}`,
       },
       toast,
+      {
+        save: (bookingId) =>
+          cancelStudioBooking({
+            bookingId,
+            who: isMine ? "stylist" : "client",
+            waiveFee: isFeeShown && !state.cancelFee,
+            reason,
+          }),
+      },
     );
 
     actions.closeSheet();
   };
-
-  memo.cancelBooking = cancel;
 
   return {
     cancelWhoOptions: [

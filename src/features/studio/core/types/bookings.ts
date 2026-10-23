@@ -1,3 +1,5 @@
+import type { StudioPolicy } from "./settings";
+
 export interface BookingAddon {
   addonId?: string;
   id?: string;
@@ -9,6 +11,13 @@ export interface BookingAddon {
 
 export interface StudioBooking {
   id: number;
+  remoteId?: string;
+  ref?: string;
+  startsAt?: string;
+  overlapOk?: boolean;
+  /** The policy agreed at booking. */
+  agreedPolicy?: StudioPolicy;
+  freeCancelUntil?: string;
   dayOffset: number;
   time: string;
   duration: string;
@@ -30,9 +39,23 @@ export interface StudioBooking {
   movedByClient?: boolean;
   autoDone?: boolean;
   checkoutUnpaid?: boolean;
+  paidOnline?: number; // paid when they booked, for a booking checked out before
+  paidLater?: number; // paid at that earlier checkout, less what went back since
+  agreedPrice?: number; // what the saved card can be charged up to, when the price shown is the final one
+  refundableOnline?: number;
+  recordedVia?: string;
   extra?: number;
   addons?: BookingAddon[];
   priceReason?: string;
+  serviceId?: string;
+  agreedDeposit?: number; // the deposit agreed for this booking (doesn't follow later price changes)
+  linkAmount?: number; // what the client pays on their confirm link
+  clientLocked?: boolean; // the client paid or saved a card, so they can't be swapped for someone else
+  loggedAfterStart?: boolean;
+  cardLabel?: string;
+  hasSavedCard?: boolean;
+  cardFailed?: boolean;
+  completed?: boolean;
 }
 
 export interface CheckoutRecord {
@@ -41,6 +64,8 @@ export interface CheckoutRecord {
   charged: number;
   tip: number;
   refundAuto: number;
+  cashBack?: number;
+  cashBackVia?: string;
   total: number;
   lines: {
     name: string;
@@ -53,8 +78,50 @@ export interface CheckoutRecord {
   paid: number;
 }
 
+export interface DisputeRecord {
+  id: string;
+  amount: number;
+  reason: string;
+  status: string; // needs_response | under_review | won | lost, or an inquiry's warning_*
+  outcome: string | null; // accepted | submitted | won | lost, once it's answered or decided
+  respondBy: number;
+  returned: number;
+}
+
+export type EvidenceSlot = "photos" | "messages" | "other";
+
+export interface EvidenceFile {
+  name: string;
+  fileId: string | null;
+}
+
+export interface DisputeForm {
+  dispute: DisputeRecord;
+  bookingId: string;
+  clientName: string;
+  service: string;
+  when: string;
+  text: string;
+  files: Partial<Record<EvidenceSlot, EvidenceFile>>;
+  isSending: boolean;
+  fromPastId?: string | number | null;
+}
+
 export interface PastRecord {
   pastId?: string | number;
+  /** A real row's month heading ("October 2025") and when it joined Past, for sorting. */
+  month?: string;
+  pastAt?: number;
+  remoteId: string;
+  ref?: string;
+  receiptDate?: string;
+  feeCharge?: number;
+  feeCard?: string;
+  feeLinkResends?: number;
+  /** Its settlement kept failing, so we're looking at it; nothing for the stylist to do. */
+  feeStuck?: boolean;
+  /** What a real client gets back if the fee is waived. */
+  feeWaiveRefund?: number;
   client: string | null;
   service: string;
   price: number;
@@ -76,10 +143,21 @@ export interface PastRecord {
   linkPaid?: boolean;
   linkVia?: string;
   original?: StudioBooking;
+  autoCancelled?: boolean; // happens when not confirmed in time -  a link can be sent again while its start is more than 2 hours away
+  startsAt?: string;
   checkout?: CheckoutRecord;
+  cardLabel?: string;
+  recordedPayment?: {
+    id: string;
+    amount: number;
+    tip: number;
+    via: string;
+    takenAt: number;
+  };
   total?: number;
   paid?: number;
   method?: string;
+  dispute?: DisputeRecord;
 }
 
 export interface EditServiceDraft {

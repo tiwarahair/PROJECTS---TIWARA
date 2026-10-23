@@ -174,7 +174,7 @@ select is(
 select ok(
   has_function_privilege('anon', 'public.get_booking_status(uuid, text)', 'execute')
     and not has_function_privilege('anon', 'public.checkout_booking(uuid, text, jsonb, text, jsonb, double precision, double precision, uuid)', 'execute')
-    and not has_function_privilege('authenticated', 'public.confirm_booking_payment(text)', 'execute'),
+    and not has_function_privilege('authenticated', 'public.confirm_booking_payment(text, integer, uuid)', 'execute'),
   'browsers can only read the status; checkout and confirming are server-only'
 );
 

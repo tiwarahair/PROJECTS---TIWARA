@@ -1,0 +1,84 @@
+.linkIcon {
+  width: 38px;
+  height: 38px;
+  border-radius: var(--radius-full);
+  background: var(--brand-yellow);
+  color: #1a1714;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex: 0 0 auto;
+}
+
+.linkTitle {
+  font-family: "Schibsted Grotesk", sans-serif;
+  font-size: 18px;
+  font-weight: 600;
+  letter-spacing: -0.02em;
+  line-height: 1.25;
+}
+
+.linkSub {
+  font-size: 14.5px;
+  color: rgba(246, 240, 228, 0.7);
+  margin-top: 3px;
+  line-height: 1.45;
+}
+
+.linkUrl {
+  margin-top: 14px;
+  height: 44px;
+  box-sizing: border-box;
+  padding: 0 14px;
+  border-radius: var(--radius-sm);
+  background: rgba(246, 240, 228, 0.08);
+  display: flex;
+  align-items: center;
+  font-size: 14.5px;
+  font-weight: 500;
+  color: var(--neutral-100);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.linkActions {
+  display: flex;
+  gap: 8px;
+  margin-top: 10px;
+}
+
+.previewProfile {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 42px;
+  box-sizing: border-box;
+  border-radius: var(--radius-full);
+  border: 1px solid rgba(246, 240, 228, 0.45);
+  color: var(--neutral-100);
+  font-size: 14.5px;
+  font-weight: 600;
+  text-decoration: none;
+  transition: background 0.16s ease;
+}
+
+.previewProfile:hover {
+  background: rgba(246, 240, 228, 0.1) !important;
+}
+
+.copyLink {
+  flex: 1;
+  height: 42px;
+  border: none;
+  border-radius: var(--radius-full);
+  background: #f6f0e4;
+  color: #1a1714;
+  font-size: 14.5px;
+  font-weight: 600;
+}
+
+.copyLink:active {
+  transform: scale(0.97) !important;
+}

@@ -12,7 +12,7 @@ export const SettingsSessions = ({
 }: {
   settings: AccountSettingsController;
 }) => {
-  const { state, setState, toast, ask } = settings;
+  const { state, ask, sessions } = settings;
   const hasOthers = state.sessions.some(({ isCurrent }) => !isCurrent);
 
   return (
@@ -35,58 +35,55 @@ export const SettingsSessions = ({
               ))}
             </div>
           )}
-          {!state.sessionsLoading && (
+          {state.sessionsFailed && (
+            <p className={styles.noOthers}>
+              Your sessions couldn’t load. Open Security again to retry.
+            </p>
+          )}
+          {!state.sessionsLoading && !state.sessionsFailed && (
             <>
-              {state.sessions.map(
-                ({ id, device, location, last, isCurrent, kind }) => {
-                  const SessionIcon = SESSION_ICONS[kind];
+              {state.sessions.map((session) => {
+                const { id, device, signedIn, last, isCurrent, kind } = session;
 
-                  return (
-                    <div key={id} className={styles.sessionRow}>
-                      <span className={styles.sessionIcon}>
-                        <SessionIcon size={18} strokeWidth={1.7} />
-                      </span>
-                      <div className={styles.sessionBody}>
-                        <div className={styles.sessionMain}>
-                          <div className={shared.badgeRow}>
-                            <span className={shared.strongText}>{device}</span>
-                            {isCurrent && (
-                              <span className={styles.currentTag}>Current</span>
-                            )}
-                          </div>
-                          <div className={shared.rowLabel}>{location}</div>
-                        </div>
-                        <div className={styles.sessionLast}>{last}</div>
-                      </div>
-                      {!isCurrent && (
-                        <button
-                          className={joinClassNames(
-                            styles.signOut,
-                            shared.focusRing,
+                const SessionIcon = SESSION_ICONS[kind];
+
+                return (
+                  <div key={id} className={styles.sessionRow}>
+                    <span className={styles.sessionIcon}>
+                      <SessionIcon size={18} strokeWidth={1.7} />
+                    </span>
+                    <div className={styles.sessionBody}>
+                      <div className={styles.sessionMain}>
+                        <div className={shared.badgeRow}>
+                          <span className={shared.strongText}>{device}</span>
+                          {isCurrent && (
+                            <span className={styles.currentTag}>Current</span>
                           )}
-                          data-ac-in="1"
-                          onClick={() => {
-                            setState(({ sessions }) => ({
-                              sessions: sessions.filter(
-                                (item) => item.id !== id,
-                              ),
-                            }));
-
-                            toast(`Signed out of ${device.split(",")[0]}`);
-                          }}
-                          aria-label={`Sign out of ${device}`}
-                          title="Sign out"
-                        >
-                          <LogOut size={17} strokeWidth={1.7} />
-                        </button>
-                      )}
-                      {isCurrent && (
-                        <span className={styles.signOutSpacer}></span>
-                      )}
+                        </div>
+                        <div className={shared.rowLabel}>{signedIn}</div>
+                      </div>
+                      <div className={styles.sessionLast}>{last}</div>
                     </div>
-                  );
-                },
-              )}
+                    {!isCurrent && (
+                      <button
+                        className={joinClassNames(
+                          styles.signOut,
+                          shared.focusRing,
+                        )}
+                        data-ac-in="1"
+                        onClick={() => sessions.signOut(session)}
+                        aria-label={`Sign out of ${device}`}
+                        title="Sign out"
+                      >
+                        <LogOut size={17} strokeWidth={1.7} />
+                      </button>
+                    )}
+                    {isCurrent && (
+                      <span className={styles.signOutSpacer}></span>
+                    )}
+                  </div>
+                );
+              })}
               {!hasOthers && (
                 <p className={styles.noOthers}>
                   No other devices are signed in.
@@ -107,13 +104,7 @@ export const SettingsSessions = ({
                       body: "Every device except this one will need to sign in again.",
                       cta: "Sign out",
                     },
-                    () => {
-                      setState(({ sessions }) => ({
-                        sessions: sessions.filter(({ isCurrent }) => isCurrent),
-                      }));
-
-                      toast("Signed out of other sessions");
-                    },
+                    sessions.signOutOthers,
                   )
                 }
               >
@@ -129,15 +120,22 @@ export const SettingsSessions = ({
           <span className={styles.alertsText}>
             Email me when someone signs in from a new device
           </span>
-          <Switch
-            isOn={state.alerts}
-            label="Login alerts"
-            className={styles.switchButton}
-            onToggle={() => {
-              setState({ alerts: !state.alerts });
-              toast(state.alerts ? "Login alerts off" : "Login alerts on");
-            }}
-          />
+          {state.alerts !== null && (
+            <Switch
+              isOn={state.alerts}
+              label="Login alerts"
+              className={styles.switchButton}
+              onToggle={() => sessions.toggleAlerts(!state.alerts)}
+            />
+          )}
+          {state.alerts === null && !state.sessionsFailed && (
+            <span
+              className={styles.skeletonSwitch}
+              aria-busy="true"
+              aria-label="Loading login alerts"
+              data-ac-sk="1"
+            ></span>
+          )}
         </div>
       </SettingsSection>
     </>

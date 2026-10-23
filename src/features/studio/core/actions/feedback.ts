@@ -1,7 +1,7 @@
 import { clear } from "./context";
 import type { StudioContext } from "./context";
 
-export const getTipX = ({ left, width }: DOMRect) =>
+const getTipX = ({ left, width }: DOMRect) =>
   Math.min(Math.max(left + width / 2, 128), window.innerWidth - 128);
 
 export const createFeedbackActions = ({

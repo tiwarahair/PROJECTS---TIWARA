@@ -1,6 +1,6 @@
 // Stripe Connect from Studio: onboarding, the Express dashboard, and catching up after Stripe sends them back.
 import { FunctionsHttpError } from "@supabase/supabase-js";
-import { callStripe } from "../../../../lib/studio-api";
+import { callStripe } from "../../../../lib/studio-api/settings";
 import type { StudioContext } from "../../core/actions";
 import { hasTwoFactor } from "../../core/model";
 import { getPayoutStatus } from "../../core/records";

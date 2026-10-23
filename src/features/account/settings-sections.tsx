@@ -1,8 +1,8 @@
 import { Copy, Shield } from "lucide-react";
 import { useState } from "react";
 import { Link } from "react-router";
-import { AllergyField } from "../../components/allergy-field/allergy-field";
-import { AllergyPrivacySheet } from "../../components/allergy-privacy-sheet/allergy-privacy-sheet";
+import { AllergyField } from "../../components/allergy-field";
+import { AllergyPrivacySheet } from "../../components/allergy-privacy-sheet";
 import { joinClassNames } from "../../utils/class-names";
 import type { AccountController } from "./use-account";
 import styles from "../../styles/features/account/settings-sections.module.css";

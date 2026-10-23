@@ -1,4 +1,3 @@
-import { stylists } from "../../data";
 import { formatMoney } from "../../utils/money";
 import { policyLines } from "../../utils/pricing";
 import { PREVIEW_PRICE, getPreviewPolicy } from "./summary";
@@ -6,18 +5,16 @@ import type { PolicyFormValues } from "./types";
 import styles from "../../styles/components/payment-policy/preview.module.css";
 import parts from "../../styles/components/payment-policy/parts.module.css";
 
-const DEFAULT_STYLIST = stylists.find(({ id }) => id === "amara-beauty");
-
 interface PreviewProps {
   policy: PolicyFormValues;
-  stylistName: string | undefined;
+  stylistName: string;
 }
 
 export const Preview = ({ policy, stylistName }: PreviewProps) => {
   const preview = policyLines(
     getPreviewPolicy(policy),
     PREVIEW_PRICE,
-    stylistName ?? DEFAULT_STYLIST?.name ?? "",
+    stylistName,
   );
 
   const notes = policy.extras

@@ -9,13 +9,13 @@ export const ClientSummarySheet = ({
 }: {
   studio: StudioController;
 }) => {
-  const { state, actions, seedPast } = studio;
+  const { state, actions } = studio;
 
   if (!state.sheetClientId) return null;
 
   const client = getClient(state, state.sheetClientId);
 
-  const history = seedPast
+  const history = state.pastNew
     .filter((row) => row.client === client.id)
     .map((row) => ({
       key: row.when + row.time,

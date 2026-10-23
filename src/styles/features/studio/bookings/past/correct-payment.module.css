@@ -1,0 +1,143 @@
+.panel {
+  background: var(--fill-quiet);
+  border-radius: var(--radius-md);
+  padding: 14px 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  animation: correct-in 0.2s cubic-bezier(0.23, 1, 0.32, 1) both;
+}
+
+.title {
+  font-size: 15px;
+  font-weight: 600;
+}
+
+.fields {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+}
+
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  min-width: 0;
+}
+
+.label {
+  font-size: 13.5px;
+  font-weight: 500;
+}
+
+.money {
+  position: relative;
+  display: block;
+}
+
+.pound {
+  position: absolute;
+  left: 14px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: var(--neutral-600);
+}
+
+.input {
+  width: 100%;
+  box-sizing: border-box;
+  height: 46px;
+  padding: 0 14px 0 28px;
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-sm);
+  background: #fff;
+  font: inherit;
+  font-size: 16px;
+  color: var(--text-primary);
+  outline: none;
+}
+
+.input:focus-visible {
+  border-color: var(--text-primary);
+}
+
+.chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.chip {
+  height: 40px;
+  padding: 0 16px;
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-full);
+  background: #fff;
+  font: inherit;
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--text-primary);
+  cursor: pointer;
+  transition:
+    background-color 0.16s ease,
+    color 0.16s ease;
+}
+
+.chipOn {
+  background: var(--text-primary);
+  border-color: var(--text-primary);
+  color: #fff;
+}
+
+.error {
+  font-size: 13.5px;
+  line-height: 1.45;
+  color: var(--status-danger);
+}
+
+.buttons {
+  display: flex;
+  gap: 8px;
+}
+
+.cancel,
+.save {
+  flex: 1;
+  height: 44px;
+  border-radius: var(--radius-full);
+  font: inherit;
+  font-size: 14.5px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.cancel {
+  border: 1px solid var(--border-strong, #d8d2c6);
+  background: #fff;
+  color: var(--text-primary);
+}
+
+.save {
+  border: none;
+  background: var(--accent-700);
+  color: #fff;
+}
+
+.save:disabled {
+  opacity: 0.5;
+  cursor: default;
+}
+
+@keyframes correct-in {
+  from {
+    opacity: 0;
+    transform: translateY(4px);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .panel {
+    animation: none;
+  }
+}

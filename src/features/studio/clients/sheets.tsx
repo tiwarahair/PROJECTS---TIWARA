@@ -1,4 +1,4 @@
-import { useId, useRef } from "react";
+import { useEffect, useId, useRef } from "react";
 import { Camera, User } from "lucide-react";
 import { joinClassNames } from "../../../utils/class-names";
 import type { ClientForm } from "./use-client-form";
@@ -27,8 +27,7 @@ const FieldError = ({ id, message }: FieldErrorProps) =>
     </span>
   ) : null;
 
-type DraftField =
-  "first" | "last" | "phone" | "email" | "products" | "sensitivities";
+type DraftField = "first" | "last" | "phone" | "email" | "products";
 
 interface ClientEditProps {
   view: ClientsView;
@@ -38,9 +37,15 @@ interface ClientEditProps {
 /** Add or edit a client. */
 export const ClientEditSheet = ({ view, form }: ClientEditProps) => {
   const fileRef = useRef<HTMLInputElement>(null);
+  const emailRef = useRef<HTMLInputElement>(null);
   const uid = useId();
-  const { draft, draftImage, duplicate } = view;
+  const { draft, draftImage, duplicate, isEmailFocused } = view;
   const { errors } = form.formState;
+
+  // opened to add a missing email, so it's ready to type
+  useEffect(() => {
+    if (isEmailFocused) emailRef.current?.focus();
+  }, [isEmailFocused]);
 
   if (!draft) return null;
 
@@ -151,6 +156,7 @@ export const ClientEditSheet = ({ view, form }: ClientEditProps) => {
           type="email"
           {...onField("email")}
           placeholder="name@email.com"
+          ref={emailRef}
           id={`${uid}-email`}
           aria-invalid={errors.email ? "true" : "false"}
           aria-describedby={errors.email ? `${uid}-email-error` : undefined}
@@ -180,24 +186,10 @@ export const ClientEditSheet = ({ view, form }: ClientEditProps) => {
           className={joinClassNames(styles.input, styles.textarea)}
           {...onField("products")}
           rows={5}
+          maxLength={1000}
           aria-label="Hair notes"
           placeholder="Products, how they like it, anything to avoid"
         ></textarea>
-      </label>
-      <label className={styles.field}>
-        <span className={styles.label}>
-          Allergy or sensitivity{" "}
-          <span className={styles.optional}>(optional)</span>
-        </span>
-        <input
-          className={styles.input}
-          {...onField("sensitivities")}
-          maxLength={80}
-          placeholder="e.g. Sensitive scalp"
-        />
-        <span className={styles.sensHint}>
-          Shows on every booking for this client. They never see it.
-        </span>
       </label>
     </div>
   );
@@ -212,10 +204,10 @@ export const ClientEditFooter = ({ view, form }: ClientEditProps) => (
     <button
       className={joinClassNames(
         sheet.save48,
-        view.duplicate.isOn && sheet.faded,
+        view.duplicate.isBlocking && sheet.faded,
       )}
       onClick={() => void form.handleSubmit(view.saveDraft)()}
-      disabled={view.duplicate.isOn}
+      disabled={view.duplicate.isBlocking}
     >
       {view.saveLabel}
     </button>

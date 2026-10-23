@@ -1,3 +1,4 @@
+import { markNoShow, undoNoShow } from "../../../../lib/studio-api/bookings";
 import type { SheetContext } from "./context";
 
 const getNoShowChoices = ({ noShowFee }: SheetContext) =>
@@ -43,6 +44,10 @@ export const getNoShowView = (context: SheetContext) => {
           note: `Client did not attend. ${isCharging ? noShowFee.subtitle : noShowFee.refund}.`,
         },
         "Marked as no-show",
+        {
+          save: (remoteId) => markNoShow(remoteId, isCharging),
+          undo: undoNoShow,
+        },
       );
 
       actions.closeSheet();

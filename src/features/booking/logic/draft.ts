@@ -31,11 +31,11 @@ export const readDraft = (stylistId: string): BookingDraft | null => {
   }
 };
 
-/** Saves the booking so far (no card, photos or allergy text); boards, no service or confirmed never save. */
+/** Saves the booking so far (no card, photos or allergy text); no service or confirmed never save. */
 export const saveDraft = (state: BookingState): void => {
-  const { board, serviceId, confirmed, hold } = state;
+  const { serviceId, confirmed, hold } = state;
 
-  if (board || !serviceId || confirmed) return;
+  if (!serviceId || confirmed) return;
 
   const draft: BookingDraft = {
     at: Date.now(),

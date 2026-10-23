@@ -7,8 +7,19 @@ import { ICONS } from "./data";
 import type { CheckoutViewModel } from "./view";
 import type { CheckoutController } from "./use-checkout";
 import flow from "../../styles/components/checkout/flow.module.css";
-import shared from "../../styles/components/checkout/checkout-sheet.module.css";
+import shared from "../../styles/components/checkout/index.module.css";
 import { formatMoney } from "../../utils/money";
+
+const getCardSubtitle = (
+  money: CheckoutController["money"],
+  view: CheckoutViewModel,
+) => {
+  if (money.cardOk) return view.cardText;
+
+  return money.isOverAgreed
+    ? `The total is more than ${view.name} agreed. Send a link or record the payment.`
+    : "No saved card for this booking";
+};
 
 export const CheckoutPay = ({
   checkout: { state, setState, money },
@@ -91,7 +102,7 @@ export const CheckoutPay = ({
         {option(
           isCardOn,
           "Charge saved card",
-          money.cardOk ? view.cardText : "No saved card for this booking",
+          getCardSubtitle(money, view),
           ICONS.card,
           () => {
             if (money.cardOk) setState({ method: "card" });
@@ -102,7 +113,7 @@ export const CheckoutPay = ({
         {option(
           isLinkOn,
           "Send payment link",
-          "By SMS or email. Opens a secure payment page with Apple Pay and Google Pay, where your client can add a tip.",
+          "By email. Opens a secure payment page with Apple Pay and Google Pay.",
           ICONS.link,
           () => setState({ method: "link" }),
           isLinkOn && (
@@ -110,27 +121,10 @@ export const CheckoutPay = ({
               className={joinClassNames(flow.linkOptions, shared.motion)}
               data-ck-m="1"
             >
-              <div className={shared.chipRow}>
-                {(
-                  [
-                    ["sms", "SMS"],
-                    ["email", "Email"],
-                  ] as const
-                ).map(([via, label]) => (
-                  <Chip
-                    key={via}
-                    isOn={state.linkVia === via}
-                    className={flow.linkChip}
-                    onPick={() => setState({ linkVia: via })}
-                  >
-                    {label}
-                  </Chip>
-                ))}
-              </div>
               <div className={flow.linkTo}>{`Sends to ${view.linkTarget}`}</div>
               {money.selectedTip > 0 && (
                 <div className={flow.linkTipDrop}>
-                  {`The ${formatMoney(money.selectedTip)} tip isn’t added. Your client can choose their own tip on the payment page.`}
+                  {`The ${formatMoney(money.selectedTip)} tip isn’t added to a payment link.`}
                 </div>
               )}
             </div>

@@ -1,5 +1,5 @@
 import { ChevronRight } from "lucide-react";
-import { ResponsiveImage } from "../../../components/responsive-image/responsive-image";
+import { ResponsiveImage } from "../../../components/responsive-image";
 import { joinClassNames } from "../../../utils/class-names";
 import type { HomeView } from "./view";
 import styles from "../../../styles/features/studio/home/hero.module.css";

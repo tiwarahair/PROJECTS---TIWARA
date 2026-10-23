@@ -34,7 +34,6 @@ export const LONG_MONTHS = [
   "December",
 ];
 
-/** "Jan" … "Sep" … "Dec". */
 export const SHORT_MONTHS = LONG_MONTHS.map((name) => name.slice(0, 3));
 
 /** As SHORT_MONTHS but with "Sept". */
@@ -51,6 +50,15 @@ export const toIsoDate = (date: Date): string =>
 /** "09:05" */
 export const formatClockTime = (date: Date): string =>
   `${pad2(date.getHours())}:${pad2(date.getMinutes())}`;
+
+/** "Wed 14 Oct 2026" */
+export const formatFullDate = (date: Date): string =>
+  date.toLocaleDateString("en-GB", {
+    weekday: "short",
+    day: "numeric",
+    month: "short",
+    year: "numeric",
+  });
 
 /** "Wed 14 Oct" */
 export const formatWeekdayDate = (date: Date): string =>
@@ -69,4 +77,25 @@ export const formatDuration = (totalMinutes: number): string => {
   if (hours && minutes) return `${hours}h ${minutes}m`;
 
   return hours ? `${hours}h` : `${minutes}m`;
+};
+
+const HOUR_MS = 3600000;
+const DAY_MS = 24 * HOUR_MS;
+
+export const getTimeAgo = (at: Date, now = new Date()) => {
+  const elapsed = now.getTime() - at.getTime();
+  const isToday = at.toDateString() === now.toDateString();
+
+  if (elapsed < 60000) return "Just now";
+
+  if (elapsed < HOUR_MS) return `${Math.floor(elapsed / 60000)}m ago`;
+
+  if (isToday) return `${Math.floor(elapsed / HOUR_MS)}h ago`;
+
+  if (at.toDateString() === new Date(now.getTime() - DAY_MS).toDateString())
+    return "Yesterday";
+
+  if (elapsed < 6 * DAY_MS) return SHORT_WEEKDAYS[at.getDay()] ?? "";
+
+  return `${at.getDate()} ${SHORT_MONTHS[at.getMonth()]}`;
 };

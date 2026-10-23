@@ -44,15 +44,6 @@ export const useHold = ({ flow, choices, canListTimes }: HoldOptions) => {
   const [holdTime] = useHoldBookingMutation();
 
   const holdChosenTime = async (): Promise<Partial<BookingState> | null> => {
-    if (state.board)
-      return {
-        hold: state.hold ?? {
-          id: "",
-          secret: "",
-          until: Date.now() + state.holdSeconds * 1000,
-        },
-      };
-
     const startsAt = slotsByDay
       .get(state.date ?? 0)
       ?.find(({ time }) => time === state.time)?.startsAt;

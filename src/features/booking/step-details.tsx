@@ -1,6 +1,6 @@
 import { Plus, X } from "lucide-react";
 import type { CSSProperties } from "react";
-import { AllergyField } from "../../components/allergy-field/allergy-field";
+import { AllergyField } from "../../components/allergy-field";
 import { AppointmentAddress } from "./appointment-address";
 import type { AllergyState } from "./logic/types";
 import { ContactFields } from "./contact-fields";
@@ -28,7 +28,6 @@ export const StepDetails = ({ booking }: StepDetailsProps) => {
     showContactFields,
     needsMobile,
     actions,
-    openPrivacy,
   } = booking;
 
   const { register } = detailsForm;
@@ -131,7 +130,6 @@ export const StepDetails = ({ booking }: StepDetailsProps) => {
               stylistName={stylist.name}
               value={allergy.text}
               onChange={(text) => setAllergy({ text })}
-              openPrivacy={openPrivacy}
               autoFocus={!!allergy.focus}
             />
           </div>

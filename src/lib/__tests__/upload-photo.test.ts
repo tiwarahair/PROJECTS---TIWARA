@@ -1,6 +1,6 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { supabase } from "../supabase";
-import { removePhoto, uploadPhotoWithCopies } from "../studio-api";
+import { removePhoto, uploadPhotoWithCopies } from "../studio-api/photos";
 
 vi.mock("browser-image-compression", () => ({
   default: vi.fn(

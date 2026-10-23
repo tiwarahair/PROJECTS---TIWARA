@@ -35,14 +35,3 @@
   margin-top: 12px;
   line-height: 1.5;
 }
-
-.addSens {
-  margin-top: 10px;
-  border: none;
-  background: none;
-  padding: 4px 0;
-  color: var(--accent-700);
-  font-size: 14.5px;
-  font-weight: 600;
-  cursor: pointer;
-}

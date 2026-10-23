@@ -1,4 +1,5 @@
 import { asStyle } from "../../../utils/as-style";
+import { formatMoney } from "../../../utils/money";
 import type { StudioController } from "../core/use-studio";
 import { RangeSwitch } from "./range-switch";
 import type { HomeView } from "./view";
@@ -75,7 +76,7 @@ const ChartPlot = ({ studio, view }: RevenueChartProps) => {
               "--tip-left": `${((tipPoint.x / 340) * 100).toFixed(1)}%`,
             })}
           >
-            {`${rangeData.tips[chartIndex]} · £${tipPoint.value}`}
+            {`${rangeData.tips[chartIndex]} · ${formatMoney(tipPoint.value)}`}
           </div>
         )}
       </div>
@@ -100,16 +101,13 @@ export const RevenueChart = ({ studio, view }: RevenueChartProps) => (
         </div>
         {studio.isDesktop && <RangeSwitch studio={studio} />}
       </div>
-      {studio.isNew && (
+      {view.isChartEmpty && (
         <div className={styles.chartEmpty}>
-          <div className={shared.emptyTitle}>Nothing to chart yet</div>
-          <div className={styles.emptyBody}>
-            Your revenue will appear here after your first completed
-            appointment.
-          </div>
+          <div className={shared.emptyTitle}>{view.chartEmptyTitle}</div>
+          <div className={styles.emptyBody}>{view.chartEmptyBody}</div>
         </div>
       )}
-      {!studio.isNew && <ChartPlot studio={studio} view={view} />}
+      {view.hasChart && <ChartPlot studio={studio} view={view} />}
     </div>
   </section>
 );

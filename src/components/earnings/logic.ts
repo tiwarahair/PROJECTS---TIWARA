@@ -1,13 +1,7 @@
 import { roundToPence } from "../../utils/money";
-import { DEFAULT_CLIENTS } from "./data";
-import type {
-  EarningsClient,
-  EarningsScenario,
-  PeriodStats,
-  Transaction,
-} from "./data";
+import type { EarningsClient, PeriodStats, Transaction } from "./data";
 
-export const sumOf = <T>(items: T[], getValue: (item: T) => number): number => {
+const sumOf = <T>(items: T[], getValue: (item: T) => number): number => {
   let total = 0;
 
   for (const item of items) total += getValue(item);
@@ -35,20 +29,13 @@ export const getTotals = (items: Transaction[]) => {
   return { gross, fees, refunds, net: roundToPence(gross - fees + refunds) };
 };
 
-export const getClientList = (clients?: EarningsClient[]) =>
-  clients && clients.length ? clients : DEFAULT_CLIENTS;
-
 export const getClient = (
   id: string,
   clients?: EarningsClient[],
 ): { name: string } =>
-  getClientList(clients).find((client) => client.id === id) ?? {
+  (clients ?? []).find((client) => client.id === id) ?? {
     name: "Walk-in",
   };
-
-/** Which ledger is current: it is rebuilt only when the scenario or the day changes. */
-export const getLedgerKey = (scenario: EarningsScenario): string =>
-  `${scenario}|${new Date().toDateString()}`;
 
 export const getStats = (transactions: Transaction[]): PeriodStats => {
   const { gross, fees, refunds, net } = getTotals(transactions);
@@ -72,3 +59,14 @@ export const getTakings = (
 
 export const getMethodLabel = ({ isRecorded, method }: Transaction): string =>
   isRecorded ? `Recorded · ${method}` : method;
+
+/** A failed payout's link opens the stylist's own Stripe when Studio gives a way to */
+export const openUpdateBank = (
+  event: { preventDefault: () => void },
+  onUpdateBank?: () => void,
+) => {
+  if (!onUpdateBank) return;
+
+  event.preventDefault();
+  onUpdateBank();
+};

@@ -6,17 +6,12 @@ import { AddressRowSkeleton } from "../skeleton/address-row-skeleton";
 import styles from "../../styles/components/address-finder/index.module.css";
 import { MapsProvider } from "../../lib/google-maps";
 import { useAddressFinder } from "./use-address-finder";
-import type {
-  AddressFinderValue,
-  AddressFixture,
-  EmittedAddress,
-} from "./data";
+import type { AddressFinderValue, EmittedAddress } from "./data";
 
 export interface AddressFinderProps {
   label?: string;
   value?: AddressFinderValue | null;
   onChange?: (address: EmittedAddress | null) => void;
-  fixture?: AddressFixture;
   showErrors?: boolean;
   fieldHeight?: number;
   labelSize?: number;
@@ -67,7 +62,6 @@ const AddressFinderField = ({
   label = "Address or postcode",
   value,
   onChange,
-  fixture = "",
   showErrors = false,
   fieldHeight = 50,
   labelSize = 14.5,
@@ -90,7 +84,6 @@ const AddressFinderField = ({
   const finder = useAddressFinder({
     value,
     onChange,
-    fixture,
     showErrors,
     autoFocus,
   });

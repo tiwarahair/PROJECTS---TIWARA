@@ -1,6 +1,5 @@
 import { createSlice } from "@reduxjs/toolkit";
 import type { PayloadAction } from "@reduxjs/toolkit";
-import { getSearchParams } from "../utils/page-flags";
 import { sessionChanged } from "./session-slice";
 
 // kept on the device per account until favourites move to the database (Phase 6)
@@ -8,8 +7,6 @@ const getStorageKey = (ownerId: string) => `tw_favs_${ownerId}`;
 
 interface FavouritesState {
   ids: string[];
-  /** ?favs=a,b keeps favourites in memory only (boards). */
-  inMemory: boolean;
   /** The signed-in account the saved list belongs to. */
   ownerId: string | null;
   /** Guest tapped a heart: the "Log in to save stylists" sheet is open for this stylist. */
@@ -26,25 +23,12 @@ const readStored = (ownerId: string): string[] => {
   }
 };
 
-/** Favourites for the current page: ?favs= list, else the logged-in account's saved list, else none. */
-export const readFavourites = (
-  ownerId: string | null,
-): Pick<FavouritesState, "ids" | "inMemory"> => {
-  const params = getSearchParams();
-  const favouritesParam = params.get("favs");
-
-  if (params.has("favs"))
-    return {
-      ids: (favouritesParam ?? "").split(",").filter(Boolean),
-      inMemory: true,
-    };
-
-  return { ids: ownerId ? readStored(ownerId) : [], inMemory: false };
-};
+/** The logged-in account's saved favourites, else none. */
+const readFavourites = (ownerId: string | null): string[] =>
+  ownerId ? readStored(ownerId) : [];
 
 const initialState: FavouritesState = {
   ids: [],
-  inMemory: false,
   ownerId: null,
   loginSheetFor: null,
 };
@@ -54,7 +38,7 @@ export const favouritesSlice = createSlice({
   initialState,
   reducers: {
     syncFavourites: (state) => {
-      Object.assign(state, readFavourites(state.ownerId));
+      state.ids = readFavourites(state.ownerId);
     },
     setFavourite: (
       state,
@@ -66,7 +50,7 @@ export const favouritesSlice = createSlice({
 
       state.ids = ids;
 
-      if (!state.inMemory && state.ownerId)
+      if (state.ownerId)
         try {
           window.localStorage.setItem(
             getStorageKey(state.ownerId),
@@ -86,7 +70,7 @@ export const favouritesSlice = createSlice({
   extraReducers: (builder) =>
     builder.addCase(sessionChanged, (state, { payload }) => {
       state.ownerId = payload?.id ?? null;
-      Object.assign(state, readFavourites(state.ownerId));
+      state.ids = readFavourites(state.ownerId);
     }),
 });
 

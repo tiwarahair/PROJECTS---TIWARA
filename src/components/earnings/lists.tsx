@@ -1,8 +1,8 @@
 import type { CSSProperties, MouseEvent } from "react";
 import { Copy, Landmark } from "lucide-react";
 import { joinClassNames } from "../../utils/class-names";
-import { DAY_MS, DEFAULT_BANK, STATUS_COLOURS, STRIPE_PAYOUTS } from "./data";
-import { getClient } from "./logic";
+import { DAY_MS, FALLBACK_BANK, STATUS_COLOURS, STRIPE_PAYOUTS } from "./data";
+import { getClient, openUpdateBank } from "./logic";
 import type { Payout, Transaction, TransactionStatus } from "./data";
 import type { EarningsController, EarningsProps } from "./use-earnings";
 import styles from "../../styles/components/earnings/lists.module.css";
@@ -130,7 +130,7 @@ export const EarningsLists = ({
               </div>
             )}
             {payouts.map((payout: Payout) => {
-              const to = props.bankLabel || DEFAULT_BANK;
+              const to = props.bankLabel || FALLBACK_BANK;
 
               return (
                 <button
@@ -181,7 +181,10 @@ export const EarningsLists = ({
                         href={STRIPE_PAYOUTS}
                         target="_blank"
                         rel="noopener"
-                        onClick={(event: MouseEvent) => event.stopPropagation()}
+                        onClick={(event: MouseEvent) => {
+                          event.stopPropagation();
+                          openUpdateBank(event, props.onUpdateBank);
+                        }}
                       >
                         Update bank details in Stripe ↗
                       </a>
@@ -206,7 +209,9 @@ export const EarningsLists = ({
           <button
             className={styles.copyLink}
             onClick={() => {
-              const link = props.bookingLink || "tiwaras.house/book/tiwara";
+              const link = props.bookingLink;
+
+              if (!link) return;
 
               try {
                 void navigator.clipboard?.writeText(`https://${link}`);

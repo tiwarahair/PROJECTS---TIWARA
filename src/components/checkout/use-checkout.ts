@@ -3,7 +3,7 @@ import { useEffect, useRef, useState } from "react";
 import { useForm } from "react-hook-form";
 import { getRefundSchema, resendSchema } from "./schemas";
 import type { ResendValues } from "./schemas";
-import { BOOKINGS, EMPTY_REFUND } from "./data";
+import { EMPTY_REFUND } from "./data";
 import type { RefundValues } from "./data";
 import {
   getFinalized,
@@ -21,35 +21,44 @@ import type {
 } from "./data";
 
 const TOAST_MS = 2400;
-const CHARGE_MS = 1100;
+
+export interface CheckoutPayment {
+  method: CheckoutResult["method"];
+  via: string;
+  tip: number;
+  lines: CheckoutResultLine[];
+}
+
+interface CheckoutResultLine {
+  name: string;
+  subtitle: string;
+  base: number;
+  adjustment: number;
+  reason: string;
+}
+
+export type CheckoutPayOutcome =
+  { outcome: "paid" } | { outcome: "soft" | "hard"; message: string };
 
 export interface CheckoutSheetProps {
-  scenario?: string;
   layout?: "mobile" | "desktop";
-  /** Studio passes the real booking; without it the sheet runs a demo scenario. */
-  booking?: CheckoutBooking;
+  booking: CheckoutBooking;
   start?: CheckoutView;
   done?: Partial<CheckoutResult> & { tip?: number };
   refunded?: number;
   linkPaid?: boolean;
-  /** The host's sheet corner radius when embedded. */
+  /** The host's sheet corner radius. */
   radius?: string;
-  stylist?: Partial<CheckoutStylist>;
-  /** Demo: "soft" declines the first card attempt, "hard" every attempt. */
-  declineMode?: "none" | "soft" | "hard";
-  menu?: MenuGroup[];
+  stylist: CheckoutStylist;
+  /** Takes the payment: "paid", or how the card was declined. */
+  onPay: (payment: CheckoutPayment) => Promise<CheckoutPayOutcome>;
+  menu: MenuGroup[];
   onExit?: () => void;
   onClose?: () => void;
-  onComplete?: (
+  onComplete: (
     result: CheckoutResult & {
       total: number;
-      lines: {
-        name: string;
-        subtitle: string;
-        base: number;
-        adjustment: number;
-        reason: string;
-      }[];
+      lines: CheckoutResultLine[];
       mode: string;
       paid: number;
     },
@@ -63,7 +72,6 @@ export interface CheckoutSheetProps {
 export const useCheckout = (props: CheckoutSheetProps) => {
   const [state, setRawState] = useState(() =>
     getInitialCheckout({
-      scenario: props.scenario,
       booking: props.booking,
       start: props.start,
       done: props.done,
@@ -72,18 +80,9 @@ export const useCheckout = (props: CheckoutSheetProps) => {
     }),
   );
 
-  const stateRef = useRef(state);
-
-  stateRef.current = state;
   const scrollRef = useRef<HTMLDivElement>(null);
   const toastTimer = useRef(0);
-  const chargeTimer = useRef(0);
-  const isEmbedded = !!props.booking;
-
-  const booking: CheckoutBooking =
-    state.bookingKey === "live" && props.booking
-      ? props.booking
-      : BOOKINGS[state.bookingKey]!;
+  const { booking } = props;
 
   const money = getMoney(state, booking);
 
@@ -128,13 +127,7 @@ export const useCheckout = (props: CheckoutSheetProps) => {
       ...(typeof patch === "function" ? patch(current) : patch),
     }));
 
-  useEffect(
-    () => () => {
-      window.clearTimeout(toastTimer.current);
-      window.clearTimeout(chargeTimer.current);
-    },
-    [],
-  );
+  useEffect(() => () => window.clearTimeout(toastTimer.current), []);
 
   const scrollTop = () => {
     if (scrollRef.current) scrollRef.current.scrollTop = 0;
@@ -142,9 +135,9 @@ export const useCheckout = (props: CheckoutSheetProps) => {
 
   const exit = () => props.onExit?.();
 
-  /** Show a view; leaving to "detail" inside Studio exits the sheet instead. */
+  /** Show a view; leaving to "detail" exits the sheet instead. */
   const goTo = (view: CheckoutView, direction = 1) => {
-    if (view === "detail" && isEmbedded) return exit();
+    if (view === "detail") return exit();
 
     setState({ view, direction, adjustingLineId: null });
     resendForm.clearErrors();
@@ -166,6 +159,53 @@ export const useCheckout = (props: CheckoutSheetProps) => {
     goTo("items", 1);
   };
 
+  const getLines = () =>
+    state.lines.map(({ name, subtitle, base, adjustment, reason }) => ({
+      name,
+      subtitle,
+      base,
+      adjustment,
+      reason,
+    }));
+
+  const pay = (finish: () => void) => {
+    setState({ busy: true });
+
+    props
+      .onPay({
+        method: money.method,
+        via: state.method === "link" ? state.linkVia : state.recordVia,
+        tip: money.tip,
+        lines: getLines(),
+      })
+      .then(
+        (result) => {
+          if (result.outcome === "paid") return finish();
+
+          setState((current) => {
+            const tries =
+              result.outcome === "soft" ? Math.max(0, current.tries - 1) : 0;
+
+            return {
+              busy: false,
+              decline: tries ? "soft" : "hard",
+              declineMessage: result.message,
+              tries,
+            };
+          });
+        },
+        (error: unknown) => {
+          setState({ busy: false });
+
+          showToast(
+            error instanceof Error
+              ? error.message
+              : "That didn’t work. Try again.",
+          );
+        },
+      );
+  };
+
   const complete = () => {
     const finish = () => {
       setRawState((current) => {
@@ -184,28 +224,7 @@ export const useCheckout = (props: CheckoutSheetProps) => {
       scrollTop();
     };
 
-    if (money.method !== "card") return finish();
-
-    setState({ busy: true });
-    window.clearTimeout(chargeTimer.current);
-    const declineMode = props.declineMode || "none";
-    const isFirst = !stateRef.current.decline;
-
-    // demo: 'soft' declines the first attempt then succeeds on retry; 'hard' always declines with no retry
-    const isFailing =
-      declineMode === "hard" || (declineMode === "soft" && isFirst);
-
-    chargeTimer.current = window.setTimeout(
-      isFailing
-        ? () =>
-            setState({
-              busy: false,
-              decline: declineMode === "hard" ? "hard" : "soft",
-              tries: declineMode === "hard" ? 0 : 1,
-            })
-        : finish,
-      CHARGE_MS,
-    );
+    pay(finish);
   };
 
   /** What the host gets when the stylist leaves the done screen. */
@@ -217,13 +236,7 @@ export const useCheckout = (props: CheckoutSheetProps) => {
     refundAuto: 0,
     ...(state.done ?? {}),
     total: money.items,
-    lines: state.lines.map(({ name, subtitle, base, adjustment, reason }) => ({
-      name,
-      subtitle,
-      base,
-      adjustment,
-      reason,
-    })),
+    lines: getLines(),
     mode: state.mode,
     paid: state.paid,
   });
@@ -234,7 +247,6 @@ export const useCheckout = (props: CheckoutSheetProps) => {
     setState,
     booking,
     money,
-    isEmbedded,
     scrollRef,
     goTo,
     exit,

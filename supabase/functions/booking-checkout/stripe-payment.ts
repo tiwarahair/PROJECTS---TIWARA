@@ -1,6 +1,9 @@
 import { admin } from "../_shared/admin.ts";
+import { getRecovery } from "../_shared/owed.ts";
+import { isPayoutHeld } from "../_shared/payout-hold.ts";
+import { CLEAR_RECOVERY } from "../_shared/recovery-metadata.ts";
 import { stripe } from "../_shared/stripe.ts";
-import { getPaymentParams } from "./payment-params.ts";
+import { getPaymentParams, getRecoveryRoom, paysStylist } from "./payment-params.ts";
 import type { CheckoutQuote } from "./payment-params.ts";
 import type { Contact } from "./request.ts";
 
@@ -26,18 +29,28 @@ export const getCustomerId = async (quote: CheckoutQuote, contact: Contact, clie
 };
 
 export const getPaymentIntent = async (quote: CheckoutQuote, customerId: string | null, keepCard: boolean) => {
-  const params = getPaymentParams(quote, customerId, keepCard);
+  const existing = quote.payment_intent_id ? await stripe.paymentIntents.retrieve(quote.payment_intent_id) : null;
 
-  if (!quote.payment_intent_id) return stripe.paymentIntents.create(params, { idempotencyKey: `booking:${quote.id}:pi` });
+  if (existing && !OPEN_STATUSES.includes(existing.status)) return existing;
 
-  const existing = await stripe.paymentIntents.retrieve(quote.payment_intent_id);
+  // an earlier try keeps its transfer choice, so its fee and any debt it recovers stay consistent
+  const isHeld =
+    paysStylist(quote.mode) && (existing ? !existing.transfer_data : await isPayoutHeld(quote.stylist_account));
 
-  if (!OPEN_STATUSES.includes(existing.status)) return existing;
+  const recovered = isHeld ? 0 : await getRecovery(quote.stylist_account, getRecoveryRoom(quote));
+  const params = getPaymentParams(quote, customerId, keepCard, recovered, isHeld);
 
-  const { amount, application_fee_amount, customer, setup_future_usage } = params;
+  // what's owed and the hold are part of the key, as they change the charge
+  if (!existing)
+    return stripe.paymentIntents.create(params, {
+      idempotencyKey: `booking:${quote.id}:pi:${recovered}${isHeld ? ":held" : ""}`,
+    });
+
+  const { amount, application_fee_amount, customer, setup_future_usage, metadata } = params;
 
   return stripe.paymentIntents.update(existing.id, {
     amount,
+    metadata: { ...CLEAR_RECOVERY, ...metadata },
     ...(application_fee_amount ? { application_fee_amount } : {}),
     ...(customer ? { customer } : {}),
     setup_future_usage: setup_future_usage ?? "",

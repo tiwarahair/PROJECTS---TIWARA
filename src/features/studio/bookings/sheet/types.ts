@@ -1,7 +1,6 @@
 import type { BookingStep, StudioState } from "../../core/types";
 
-export type StatusMenuKind =
-  "awaiting" | "autoCancelled" | "upcoming" | "arrived";
+export type StatusMenuKind = "awaiting" | "upcoming" | "arrived";
 
 export type ReceivedTone = "paid" | "quiet" | "failed";
 
@@ -27,12 +26,6 @@ export const CLOSED_STATUSES = [
   "auto_cancelled",
   "expired",
 ];
-
-export const VIA_LABELS: Record<string, string> = {
-  cash: "Cash",
-  bank: "Bank transfer",
-  reader: "Card reader",
-};
 
 export const CANCEL_STEP: Partial<StudioState> = {
   bookingStep: "cancel",

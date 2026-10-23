@@ -1,10 +1,10 @@
 import type { CSSProperties, FocusEvent, ReactNode } from "react";
 import { getAssetImageSet, getAssetUrl } from "../../utils/asset-url";
 import { joinClassNames } from "../../utils/class-names";
-import { BENEFITS, FOOTER_SCREENS, PHOTOS } from "./onboarding-data";
-import type { OnboardingLayout } from "./onboarding-layout";
+import { BENEFITS, FOOTER_SCREENS, PHOTOS } from "./data";
+import type { OnboardingLayout } from "./layout";
 import { ChevronLeft } from "lucide-react";
-import { ModeIcon } from "./onboarding-fields";
+import { ModeIcon } from "./fields";
 import styles from "../../styles/features/onboarding/auth-shell.module.css";
 import type { OnboardingController } from "./use-onboarding";
 

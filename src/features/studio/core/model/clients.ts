@@ -1,4 +1,3 @@
-import { CLIENTS } from "../seed-clients";
 import type { StudioClient, StudioState } from "../types";
 
 const WALK_IN: StudioClient = {
@@ -22,10 +21,13 @@ export const getClient = (
 ): StudioClient => {
   if (id === null) return WALK_IN;
 
-  const base =
-    CLIENTS.find((client) => client.id === id) ??
-    state.extraClients.find((client) => client.id === id) ??
-    (CLIENTS[0] as StudioClient);
+  const base = state.extraClients
+    .concat(state.bookingClients)
+    .find((client) => client.id === id) ?? {
+    id: id ?? "",
+    name: "Client",
+    first: "Client",
+  };
 
   const override = state.clientOverrides[base.id ?? ""];
   const client = override ? { ...base, ...override } : base;
@@ -50,17 +52,33 @@ export const getClient = (
   return address ? { ...client, address } : client;
 };
 
+/** First and last name, keeping a first name with a space ("Mary Jane") whole when it's known. */
+export const getClientNames = ({ name, first }: StudioClient) => {
+  const full = name.trim();
+  const firstName = first?.trim() || (full.split(/\s+/)[0] ?? "");
+
+  return {
+    first: firstName,
+    last: full.startsWith(firstName) ? full.slice(firstName.length).trim() : "",
+  };
+};
+
 export const getAllClients = (state: StudioState): StudioClient[] =>
-  CLIENTS.concat(state.extraClients)
+  state.bookingClients
+    .concat(state.extraClients)
+    .filter(
+      (client, index, all) =>
+        all.findIndex(({ id }) => id === client.id) === index,
+    )
     .map(({ id }) => getClient(state, id))
     .filter(({ deleted }) => !deleted);
 
 const normalisePhone = (phone: string | null | undefined): string => {
-  let digits = String(phone || "").replace(/\D/g, "");
+  const digits = String(phone || "").replace(/\D/g, "");
 
-  if (digits.startsWith("44")) digits = `0${digits.slice(2)}`;
+  if (/^(44)?0?7\d{9}$/.test(digits)) return `0${digits.slice(-10)}`;
 
-  return digits;
+  return digits.replace(/^44/, "0");
 };
 
 const normaliseEmail = (email: string | null | undefined): string =>
@@ -73,7 +91,7 @@ export interface DuplicateHit {
   field: "phone" | "email";
 }
 
-/** Another client already using this phone or email. */
+/** Another client already using this email or, failing that, this phone*/
 export const findDuplicate = (
   state: StudioState,
   phone: string | null | undefined,
@@ -82,20 +100,22 @@ export const findDuplicate = (
 ): DuplicateHit | null => {
   const normalised = normalisePhone(phone);
   const address = normaliseEmail(email);
-  const hasPhone = normalised.length >= 10;
-  const hasEmail = address.includes("@");
+  const others = getAllClients(state).filter(({ id }) => id !== exceptId);
 
-  if (!hasPhone && !hasEmail) return null;
+  const byEmail = address.includes("@")
+    ? others.find((client) => normaliseEmail(client.email) === address)
+    : undefined;
 
-  for (const client of getAllClients(state)) {
-    if (client.id === exceptId) continue;
+  const byPhone =
+    normalised.length >= 10
+      ? others.find((client) => normalisePhone(client.phone) === normalised)
+      : undefined;
 
-    if (hasPhone && normalisePhone(client.phone) === normalised)
-      return { client, field: "phone" };
+  if (byEmail) return { client: byEmail, field: "email" };
 
-    if (hasEmail && normaliseEmail(client.email) === address)
-      return { client, field: "email" };
-  }
-
-  return null;
+  return byPhone ? { client: byPhone, field: "phone" } : null;
 };
+
+/** Only a shared email stops a client being saved. */
+export const isDuplicateBlocking = (hit: DuplicateHit | null) =>
+  hit?.field === "email";

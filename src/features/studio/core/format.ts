@@ -291,76 +291,33 @@ export const makeChart = (data: number[]) => {
   return { line, area, points };
 };
 
-let qrCache: { key: string; background: string }[] | null = null;
-
-/** A seeded fake QR grid for the authenticator step. */
-export const getQrCells = () => {
-  if (qrCache) return qrCache;
-
-  const size = 21;
-  const cells: { key: string; background: string }[] = [];
-  let seed = 7;
-
-  const random = () => {
-    seed = (seed * 16807) % 2147483647;
-
-    return seed / 2147483647;
-  };
-
-  const finder = (row: number, column: number): number | null => {
-    for (const [originRow, originColumn] of [
-      [0, 0],
-      [0, size - 7],
-      [size - 7, 0],
-    ] as const) {
-      const y = row - originRow;
-      const x = column - originColumn;
-
-      if (y >= 0 && y < 7 && x >= 0 && x < 7)
-        return y === 0 ||
-          y === 6 ||
-          x === 0 ||
-          x === 6 ||
-          (y >= 2 && y <= 4 && x >= 2 && x <= 4)
-          ? 1
-          : 0;
-
-      if (y >= -1 && y <= 7 && x >= -1 && x <= 7) return 0;
-    }
-
-    return null;
-  };
-
-  for (let row = 0; row < size; row++)
-    for (let column = 0; column < size; column++) {
-      const found = finder(row, column);
-
-      const getIsOn = () => {
-        if (found !== null) return !!found;
-
-        // row/column 6 are the alternating timing patterns
-        if (row === 6 || column === 6) return (row + column) % 2 === 0;
-
-        return random() < 0.48;
-      };
-
-      const isOn = getIsOn();
-
-      cells.push({
-        key: `q${row * size + column}`,
-        background: isOn ? "#1a1714" : "transparent",
-      });
-    }
-
-  qrCache = cells;
-
-  return cells;
-};
-
 export const copyText = (text: string) => {
   try {
     void navigator.clipboard.writeText(text);
   } catch {
     // clipboard can be unavailable; the toast still confirms
+  }
+};
+
+/** copies text the server is still making; Safari only allows it while the click is still being handled. */
+export const copyLaterText = async (text: Promise<string>) => {
+  if (typeof ClipboardItem === "undefined" || !navigator.clipboard?.write) {
+    await navigator.clipboard.writeText(await text);
+
+    return;
+  }
+
+  const blob = text.then((value) => new Blob([value], { type: "text/plain" }));
+
+  void blob.catch(() => undefined);
+
+  try {
+    await navigator.clipboard.write([
+      new ClipboardItem({ "text/plain": blob }),
+    ]);
+  } catch (error) {
+    await text;
+
+    throw error;
   }
 };

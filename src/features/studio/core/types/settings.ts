@@ -25,7 +25,7 @@ export type StudioPolicy = Omit<PolicyValue, "extras"> & {
 };
 
 export interface TwoFactorDevice {
-  /** The Supabase factor; demo boards have none. */
+  /** The Supabase factor. */
   id?: string;
   name: string;
   backup: boolean;
@@ -43,7 +43,6 @@ export interface TwoFactorFlow {
   skipWarn: boolean;
   flow: string;
   from?: string;
-  fixture?: string;
   /** A real account's app being added: its QR code and key. */
   enrolment?: TwoFactorEnrolment | null;
   isEnrolmentFailed?: boolean;

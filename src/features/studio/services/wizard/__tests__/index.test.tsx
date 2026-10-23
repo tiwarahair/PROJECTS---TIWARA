@@ -1,9 +1,18 @@
 import { act, screen, waitFor, within } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { renderWithStore } from "../../../../../test/render-with-store";
+import { getStudioSeed } from "../../../../../test/studio-seed";
 import { StudioPage } from "../../..";
 import type { UserEvent } from "@testing-library/user-event";
 import { setupUser } from "../../../../../test/setup-user";
+
+// saves stay in flight, so the screen keeps what was done
+vi.mock("../../../../../lib/studio-api/services", async (importOriginal) => ({
+  ...(await importOriginal<
+    typeof import("../../../../../lib/studio-api/services")
+  >()),
+  saveService: vi.fn(() => new Promise(() => {})),
+}));
 
 let user: UserEvent;
 
@@ -30,7 +39,7 @@ const setViewport = (width: number) => {
 };
 
 const openWizard = async () => {
-  renderWithStore(<StudioPage />, "/studio");
+  renderWithStore(<StudioPage seed={getStudioSeed()} />, "/studio");
   runNextTimer();
   await user.click(within(getLabelled("Sidebar")).getByTitle("Services"));
   await user.click(screen.getByRole("button", { name: "Add service" }));
@@ -121,10 +130,10 @@ describe("Studio → service wizard", () => {
   });
 
   it("editing jumps to the tab with a missing price on save", async () => {
-    renderWithStore(<StudioPage />, "/studio");
+    renderWithStore(<StudioPage seed={getStudioSeed()} />, "/studio");
     runNextTimer();
     await user.click(within(getLabelled("Sidebar")).getByTitle("Services"));
-    await user.click(screen.getAllByText("Knotless braids")[0] as HTMLElement);
+    await user.click(screen.getAllByText("Silk press")[0] as HTMLElement);
     advance(300);
     await user.click(screen.getByRole("button", { name: "Pricing" }));
     await user.clear(screen.getAllByLabelText("Base price")[0] as HTMLElement);

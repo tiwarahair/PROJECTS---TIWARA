@@ -1,32 +1,45 @@
 import { getInitialsImage, parseNumber } from "../../core/format";
-import { getProtectionExpiry } from "../../core/model";
+import {
+  getClient,
+  getClientNames,
+  getProtectionExpiry,
+} from "../../core/model";
 import type { StudioBooking } from "../../core/types";
 import { formatDuration } from "../../../../utils/dates";
+import { fetchStudioBooking } from "../../../../lib/studio-api/bookings";
+import { createStudioBooking } from "../../../../lib/studio-api/booking-writes";
+import type { StudioContact } from "../../../../lib/studio-api/booking-writes";
+import { addStudioClient } from "../../clients/save";
+import { keepLocalId, toStartsAt } from "../records";
+import { isWaiting, keepRemoteId, removeLocal, replaceWithRow } from "../save";
+import { getAddonValue } from "./addon-values";
 import type { AddContext } from "./context";
 import type { NewClient } from "./types";
+import { checkUnpaidFee } from "./unpaid-fee";
+
+const toPence = (pounds: number) => Math.round(pounds * 100);
 
 export const saveNewClient = (
-  { state, setState }: AddContext,
+  { studio, state, setState }: AddContext,
   addNew: NewClient,
 ) => {
-  const id = `c${Date.now()}`;
   const address = addNew.address.trim();
+  const id = `c${Date.now()}`;
+
+  addStudioClient(studio.context, {
+    id,
+    name: addNew.name.trim(),
+    phone: addNew.contact.trim(),
+    email: (addNew.email || "").trim(),
+    area: "",
+    img: getInitialsImage(addNew.name),
+    visits: 0,
+    last: "—",
+    spent: 0,
+    fav: "",
+  });
 
   setState({
-    extraClients: state.extraClients.concat([
-      {
-        id,
-        name: addNew.name.trim(),
-        phone: addNew.contact.trim(),
-        email: (addNew.email || "").trim(),
-        area: "",
-        img: getInitialsImage(addNew.name),
-        visits: 0,
-        last: "—",
-        spent: 0,
-        fav: "",
-      },
-    ]),
     addClient: id,
     addNew: null,
     addStep: 2,
@@ -34,15 +47,39 @@ export const saveNewClient = (
       ? { clientAddresses: { ...state.clientAddresses, [id]: address } }
       : {}),
   });
+
+  // a shared phone can still owe a fee
+  checkUnpaidFee(studio.context.getState, setState, id);
+};
+
+const getStatus = (isLink: boolean, hasStarted: boolean) => {
+  if (isLink) return "awaiting";
+
+  return hasStarted ? "arrived" : "confirmed";
 };
 
 const getBookingRecord = (
-  { state, duration, price, isProtectionSkipped, selectedAddons }: AddContext,
+  {
+    state,
+    duration,
+    price,
+    hasStarted,
+    isProtectionSkipped,
+    isLinkTooLate,
+    hasNoEmail,
+    selectedAddons,
+  }: AddContext,
   name: string,
   dayOffset: number,
   time: string,
 ): StudioBooking => {
-  const isLink = !isProtectionSkipped && state.addProtection !== "none";
+  const isLink =
+    !isProtectionSkipped &&
+    !isLinkTooLate &&
+    !hasNoEmail &&
+    state.addProtection !== "none";
+
+  const mode = isLink ? state.policy.mode : "none";
   const id = Date.now();
   const sentAt = Date.now();
 
@@ -55,13 +92,15 @@ const getBookingRecord = (
     service: name,
     price: Math.max(0, price),
     pending: false,
-    status: isLink ? "awaiting" : "confirmed",
+    status: getStatus(isLink, hasStarted),
+    loggedAfterStart: hasStarted,
     paid: isLink ? "link" : "none",
     protect: isLink ? "link" : "none",
     stylistNote: state.addNote.trim(),
     address: state.addAddress.trim(),
     walkIn: !!state.addWalkIn,
-    protectionMode: isLink ? state.policy.mode : "none",
+    protectionMode: mode,
+    agreedPolicy: { ...state.policy, mode },
   };
 
   if (state.addExtra) record.extra = state.addExtra;
@@ -96,6 +135,73 @@ const getAddedToast = (
   return `Booking added for ${who}${isLink ? ". Payment link sent" : ""}`;
 };
 
+const getContact = (context: AddContext): StudioContact | null => {
+  const { state } = context;
+
+  if (state.addWalkIn || !state.addClient) return null;
+
+  const client = getClient(state, state.addClient);
+
+  return {
+    ...getClientNames(client),
+    phone: client.phone || "",
+    email: client.email || "",
+  };
+};
+
+/** Saves a real booking; the server's row then replaces the one shown straight away. */
+const saveRemote = (context: AddContext, record: StudioBooking) => {
+  const { state, setState, service, studio, overrides, selectedAddons } =
+    context;
+
+  const { sync } = studio.context;
+
+  if (!service) return;
+
+  const previous = state.bookings;
+
+  sync.save(
+    async () => {
+      const { id } = await createStudioBooking({
+        serviceId: service.id,
+        addons: selectedAddons.map((addon) => {
+          const { price, minutes, quantity } = getAddonValue(addon, overrides);
+
+          return {
+            id: addon.id,
+            pricePence: toPence(price),
+            minutes,
+            quantity,
+          };
+        }),
+        startsAt: toStartsAt(record.dayOffset, record.time),
+        minutes: context.duration,
+        extraMinutes: state.addExtra || 0,
+        pricePence: toPence(record.price),
+        allowOverlap: !!state.addOverlapAllowed,
+        contact: getContact(context),
+        address: record.address || "",
+        note: record.stylistNote || "",
+        protect: record.protect === "link",
+      });
+
+      keepLocalId(id, record.id);
+
+      const row = await fetchStudioBooking(id);
+
+      setState((current) => {
+        // the last queued change brings the server's copy
+        if (isWaiting(record.id)) return keepRemoteId(current, record.id, id);
+
+        return row
+          ? replaceWithRow(current, record.id, row)
+          : removeLocal(current, record.id);
+      });
+    },
+    { bookings: previous },
+  );
+};
+
 export const confirmBooking = (context: AddContext) => {
   const { state, setState, actions, service } = context;
   const { addDay, addTime, addClient } = state;
@@ -103,6 +209,8 @@ export const confirmBooking = (context: AddContext) => {
   if (!service || addDay == null || !addTime) return;
 
   const record = getBookingRecord(context, service.name, addDay, addTime);
+
+  saveRemote(context, record);
   const date = new Date();
 
   date.setDate(date.getDate() + addDay);

@@ -1,5 +1,5 @@
 begin;
-select plan(36);
+select plan(37);
 
 create function pg_temp.sign_up(user_id uuid, user_email text, meta jsonb)
 returns void
@@ -139,6 +139,19 @@ select throws_ok(
 );
 
 -- closing a business
+insert into public.bookings (stylist_id, service_id, choices, snapshot, price_pence, fee_pence, minutes, starts_at,
+  ends_at, block_ends_at, status)
+select (select one from ids), id, '{}', '{}', 5000, 0, 60, now() + interval '1 day', now() + interval '1 day 1 hour',
+  now() + interval '1 day 1 hour', 'confirmed'
+from public.services where stylist_id = (select one from ids) limit 1;
+
+select pg_temp.act_as('a1111111-1111-1111-1111-111111111111');
+select throws_ok($$select public.close_business()$$, 'P0001', 'has_upcoming',
+  'a business with bookings still to come can''t close');
+reset role;
+
+delete from public.bookings where stylist_id = (select one from ids) and status = 'confirmed';
+
 select pg_temp.act_as('a1111111-1111-1111-1111-111111111111');
 
 select lives_ok($$select public.close_business()$$, 'an owner closes their business');

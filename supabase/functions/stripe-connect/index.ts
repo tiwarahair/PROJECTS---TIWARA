@@ -4,7 +4,7 @@
 import { createClient } from "npm:@supabase/supabase-js@2";
 import { z } from "npm:zod@4";
 import { corsHeaders, respond } from "../_shared/cors.ts";
-import { getRecentUser } from "../_shared/recent-user.ts";
+import { getRecentUser, getSignedInUser } from "../_shared/recent-user.ts";
 import { getSite } from "../_shared/site.ts";
 import { getAccountState, stripe, syncAccount } from "../_shared/stripe.ts";
 
@@ -14,13 +14,6 @@ const getReturnSite = (origin: string) => getSite(origin).replace(/^http:/, "htt
 const requestSchema = z.object({ action: z.enum(["onboard", "dashboard", "refresh"]) });
 
 const admin = createClient(Deno.env.get("SUPABASE_URL")!, Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!);
-
-const getOwnerId = async (request: Request) => {
-  const token = request.headers.get("Authorization")?.replace(/^Bearer /, "") ?? "";
-  const { data } = await admin.auth.getClaims(token);
-
-  return data?.claims.sub ?? null;
-};
 
 type TaxRow = {
   kind: string;
@@ -86,7 +79,7 @@ Deno.serve(async (request) => {
   if (!parsed.success) return respond(400, { error: "invalid_request" });
 
   const { action } = parsed.data;
-  const ownerId = action === "refresh" ? await getOwnerId(request) : await getRecentUser(admin, request);
+  const ownerId = action === "refresh" ? await getSignedInUser(admin, request) : await getRecentUser(admin, request);
 
   if (!ownerId) return respond(403, { error: action === "refresh" ? "sign_in_required" : "second_factor_required" });
 

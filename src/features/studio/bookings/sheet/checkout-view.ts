@@ -1,32 +1,42 @@
 import type { CheckoutBooking } from "../../../../components/checkout/data";
+import { formatFullDate } from "../../../../utils/dates";
+import type { CheckoutPayment } from "../../../../components/checkout/use-checkout";
+import { fetchStudioBooking } from "../../../../lib/studio-api/bookings";
+import {
+  completeCheckout,
+  undoCheckout,
+} from "../../../../lib/studio-api/checkout";
+import { SaveError } from "../../../../lib/studio-writes";
 import { getClient } from "../../core/model";
 import type { CheckoutRecord } from "../../core/types";
+import { getCheckoutLabel } from "../checkout-label";
+import { mergeBookingRows } from "../live-records";
 import type { SheetContext } from "./context";
-import { VIA_LABELS } from "./types";
 
-const getCheckoutLabel = ({
-  method,
-  charged,
-  via,
-  refundAuto,
-}: CheckoutRecord) => {
-  if (method === "link") return `Link sent · £${charged} due`;
+const toPence = (pounds: number) => Math.round(pounds * 100);
 
-  if (method === "record") return `Paid · ${VIA_LABELS[via] || "Recorded"}`;
+export const STILL_SAVING = "Still saving this booking. Try again in a moment.";
 
-  if (method === "card") return "Paid · Card";
+export const openCheckout = ({ raw, setState, actions }: SheetContext) => {
+  if (!raw?.remoteId) return actions.showToast(STILL_SAVING);
 
-  return refundAuto > 0 ? `Refunded £${refundAuto}` : "Paid";
+  setState({
+    bookingStep: "checkout",
+    checkoutMethod: null,
+    statusMenuOpen: false,
+  });
 };
 
+const getCard = ({ raw }: SheetContext) =>
+  raw?.hasSavedCard
+    ? { card: "saved", brand: "", cardLabel: raw.cardLabel ?? "Saved card" }
+    : { card: null, brand: "" };
+
 /** The booking in the shape CheckoutSheet takes. */
-const getCheckoutBooking = ({
-  state,
-  booking,
-  paymentMode,
-  addonLines,
-  servicePrice,
-}: SheetContext): CheckoutBooking => {
+const getCheckoutBooking = (context: SheetContext): CheckoutBooking => {
+  const { state, booking, raw, paymentMode, addonLines, servicePrice } =
+    context;
+
   const client = booking.client ? getClient(state, booking.client) : null;
 
   return {
@@ -41,20 +51,66 @@ const getCheckoutBooking = ({
     ]),
     mode: paymentMode,
     paid: booking.paidAmount || 0,
-    card: paymentMode === "none" ? null : "4242",
-    brand: "Visa",
+    ...(paymentMode === "none" ? { card: null, brand: "" } : getCard(context)),
+    agreedPrice: raw?.agreedPrice ?? booking.price,
+    paidLater: raw?.paidLater,
+    refundableOnline: raw?.refundableOnline,
+    recordedVia: raw?.recordedVia,
     paidOn: "",
     phone: client?.phone || "",
     email: client?.email || "",
     day: booking.dayLabel,
     time: booking.timeRange,
+    ref: raw?.ref,
+    receiptDate: raw?.startsAt
+      ? formatFullDate(new Date(raw.startsAt))
+      : undefined,
     arrived: "",
   };
 };
 
+const pay = async (
+  remoteId: string,
+  { method, via, tip, lines }: CheckoutPayment,
+) => {
+  try {
+    const result = await completeCheckout(remoteId, {
+      method,
+      via,
+      tipPence: toPence(tip),
+      lines: lines.map(({ name, subtitle, base, adjustment, reason }) => ({
+        name,
+        subtitle,
+        base_pence: toPence(base),
+        adjustment_pence: toPence(adjustment),
+        reason,
+      })),
+    });
+
+    if (result.outcome === "completed") return { outcome: "paid" as const };
+
+    return {
+      outcome: result.hard ? ("hard" as const) : ("soft" as const),
+      message: result.message.replace(/\.$/, "").toLowerCase(),
+    };
+  } catch (error) {
+    throw error instanceof SaveError
+      ? error
+      : new Error(
+          "That didn’t go through. Check your connection and try again.",
+        );
+  }
+};
+
+const isUndoable = (
+  { method, refundAuto }: CheckoutRecord,
+  wasCompleted: boolean,
+) => (method === "record" || method === "none") && !refundAuto && !wasCompleted;
+
 export const getCheckoutView = (context: SheetContext) => {
-  const { state, actions, booking } = context;
+  const { state, actions, booking, raw } = context;
   const rebook = () => actions.rebookFrom(booking);
+  const remoteId = raw?.remoteId;
 
   return {
     // done
@@ -64,6 +120,10 @@ export const getCheckoutView = (context: SheetContext) => {
         ? `A payment link for £${booking.due} is on its way to ${booking.firstName}. The booking is in Past.`
         : "Marked completed and moved to Past.",
     rebook,
+    onPay: (payment: CheckoutPayment) =>
+      remoteId
+        ? pay(remoteId, payment)
+        : Promise.reject(new Error(STILL_SAVING)),
     // the embedded checkout's result
     onCheckoutComplete: (result: CheckoutRecord, action: string) => {
       context.finish(
@@ -74,6 +134,18 @@ export const getCheckoutView = (context: SheetContext) => {
           checkout: result,
         },
         "Checkout complete",
+        {
+          // already saved by the checkout: Past gets the server's record of it
+          save: async (bookingId: string) => {
+            const fresh = await fetchStudioBooking(bookingId);
+
+            if (fresh)
+              context.setState((current) => mergeBookingRows(current, [fresh]));
+          },
+          ...(isUndoable(result, !!raw?.completed)
+            ? { undo: undoCheckout }
+            : {}),
+        },
       );
 
       if (action === "rebook") rebook();

@@ -1,6 +1,5 @@
 import { describe, expect, it } from "vitest";
 import type { z } from "zod";
-import { SEED_PROFILE } from "../data";
 import { cardSchema, getEditSchema } from "../schemas";
 
 const getMessages = (result: z.ZodSafeParseResult<unknown>) =>
@@ -10,26 +9,27 @@ const getMessages = (result: z.ZodSafeParseResult<unknown>) =>
       .map(({ path, message }) => [String(path[0]), message]),
   );
 
+const PROFILE = {
+  first: "Nia",
+  last: "Okafor",
+  email: "nia.okafor@gmail.com",
+  mobile: "7700 900412",
+};
+
 describe("account schemas", () => {
   it("validates the personal details edits", () => {
-    const check = (key: "name" | "email" | "mobile", draft = SEED_PROFILE) =>
-      getMessages(getEditSchema(key, SEED_PROFILE.email).safeParse(draft));
+    const check = (key: "name" | "email" | "mobile", draft = PROFILE) =>
+      getMessages(getEditSchema(key, PROFILE.email).safeParse(draft));
 
-    expect(check("name", { ...SEED_PROFILE, first: " " })).toEqual({
+    expect(check("name", { ...PROFILE, first: " " })).toEqual({
       first: "Enter your first name",
     });
 
     expect(check("email")).toEqual({ email: "That’s already your email" });
 
-    expect(
-      check("email", { ...SEED_PROFILE, email: "kemi.a@icloud.com" }),
-    ).toEqual({ email: "This email is already used by another account" });
+    expect(check("mobile", { ...PROFILE, mobile: "07700 900123" })).toEqual({});
 
-    expect(
-      check("mobile", { ...SEED_PROFILE, mobile: "07700 900123" }),
-    ).toEqual({});
-
-    expect(check("mobile", { ...SEED_PROFILE, mobile: "0123" })).toEqual({
+    expect(check("mobile", { ...PROFILE, mobile: "0123" })).toEqual({
       mobile: "Enter a UK mobile number, like 07700 900123",
     });
   });

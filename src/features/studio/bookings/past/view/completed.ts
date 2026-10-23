@@ -1,17 +1,27 @@
+import {
+  cancelBalanceLink,
+  recordBalancePaid,
+  resendBalanceLink,
+} from "../../../../../lib/studio-api/checkout";
 import { roundToPence } from "../../../../../utils/money";
 import { getPastCheckout } from "./checkout";
 import { RECORDED_ONLY, getRefundTag } from "./context";
 import type { PastContext } from "./context";
 
-export const getCompletedView = ({
-  state,
-  setState,
-  actions,
-  row,
-  isCompleted,
-  patch,
-  firstName,
-}: PastContext) => {
+const REFUNDABLE_DISPUTES = ["won", "warning_closed"];
+
+export const getCompletedView = (context: PastContext) => {
+  const {
+    state,
+    setState,
+    actions,
+    row,
+    isCompleted,
+    patch,
+    firstName,
+    saveAndRefresh: saveBalance,
+  } = context;
+
   if (!isCompleted)
     return {
       hasAwait: false,
@@ -22,17 +32,19 @@ export const getCompletedView = ({
       canCancelLink: false,
     };
 
-  const { original } = row;
   const checkout = getPastCheckout(state, row);
   const first = firstName("your client");
-  const isAwaiting = checkout.done.method === "link";
+  const isAwaiting = checkout.done.method === "link" && !row.linkPaid;
   const refunded = row.refunded || 0;
   const left = roundToPence(checkout.cap - refunded);
 
   return {
     hasAwait: isAwaiting,
-    awaitBody: `Payment link for £${checkout.done.charged} sent to ${first}. They can pay by card, Apple Pay or Google Pay, and add a tip.`,
-    resendLink: () => actions.showToast(`Payment link resent to ${first}`),
+    awaitBody: `Payment link for £${checkout.done.charged} sent to ${first}. They can pay by card, Apple Pay or Google Pay.`,
+    resendLink: () => {
+      saveBalance(resendBalanceLink);
+      actions.showToast(`Payment link resent to ${first}`);
+    },
     recordPaid: () =>
       setState({
         confirm: {
@@ -45,14 +57,15 @@ export const getCompletedView = ({
             patch({
               linkPaid: true,
               linkVia: "cash",
-              meta: "Paid · Recorded",
+              meta: "Paid · Cash",
             });
 
+            saveBalance((bookingId) => recordBalancePaid(bookingId, "cash", 0));
             actions.showToast("Payment recorded");
           },
         },
       }),
-    canCancelLink: isAwaiting && !!original,
+    canCancelLink: isAwaiting,
     cancelLink: () =>
       setState({
         confirm: {
@@ -60,20 +73,10 @@ export const getCompletedView = ({
           body: `${first} won’t be able to pay with it. The booking moves to Unpaid and back into Due for checkout.`,
           yesLabel: "Cancel link",
           yes: () => {
-            if (!original) return;
-
-            setState({
-              confirm: null,
-              bookings: state.bookings.concat([
-                { ...original, status: "arrived", checkoutUnpaid: true },
-              ]),
-              pastNew: state.pastNew.filter(
-                ({ pastId }) => pastId !== row.pastId,
-              ),
-            });
-
+            setState({ confirm: null });
             actions.closeSheet();
             actions.showToast("Payment link cancelled");
+            saveBalance(cancelBalanceLink);
           },
         },
       }),
@@ -81,7 +84,11 @@ export const getCompletedView = ({
     hasLinks: !isAwaiting,
     viewReceipt: () => setState({ pastCheckoutPanel: "receipt" }),
     resendReceipt: () => setState({ pastCheckoutPanel: "resend" }),
-    canRefund: !isAwaiting && left > 0,
+    // a disputed payment is the bank's to settle, unless the stylist won it or an inquiry closed
+    canRefund:
+      !isAwaiting &&
+      left > 0 &&
+      (!row.dispute || REFUNDABLE_DISPUTES.includes(row.dispute.status)),
     openRefund: () => setState({ pastCheckoutPanel: "refund" }),
   };
 };

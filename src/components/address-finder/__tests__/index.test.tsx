@@ -2,7 +2,7 @@ import { act, render, screen } from "@testing-library/react";
 import { useMapsLibrary } from "@vis.gl/react-google-maps";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { AddressFinder } from "..";
-import type { AddressFixture } from "../data";
+import type { AddressFinderValue } from "../data";
 import type { UserEvent } from "@testing-library/user-event";
 import { setupUser } from "../../../test/setup-user";
 
@@ -41,8 +41,16 @@ const fakePlaces = {
   },
 };
 
-const renderFinder = (fixture: AddressFixture = "", onChange = vi.fn()) => {
-  render(<AddressFinder fixture={fixture} idPrefix="t" onChange={onChange} />);
+const BLOSSOM_STREET: AddressFinderValue = {
+  line1: "14 Blossom Street",
+  line2: "",
+  town: "Manchester",
+  postcode: "M4 6AJ",
+  source: "pick",
+};
+
+const renderFinder = (onChange = vi.fn()) => {
+  render(<AddressFinder idPrefix="t" onChange={onChange} />);
 
   return onChange;
 };
@@ -122,7 +130,7 @@ describe("AddressFinder", () => {
     );
 
     const { container } = render(
-      <AddressFinder fixture="" idPrefix="t" onChange={vi.fn()} />,
+      <AddressFinder idPrefix="t" onChange={vi.fn()} />,
     );
 
     await user.type(screen.getByRole("combobox"), "dickenson");
@@ -146,7 +154,7 @@ describe("AddressFinder", () => {
     ).mockImplementationOnce(() => new Promise(() => {}));
 
     const { container } = render(
-      <AddressFinder fixture="" idPrefix="t" onChange={vi.fn()} />,
+      <AddressFinder idPrefix="t" onChange={vi.fn()} />,
     );
 
     await user.type(screen.getByRole("combobox"), "dickenson");
@@ -216,8 +224,8 @@ describe("AddressFinder", () => {
     );
   });
 
-  it("summary: shows the picked address and reports it once", () => {
-    const onChange = renderFinder("summary");
+  it("summary: shows a saved address with Edit", () => {
+    render(<AddressFinder idPrefix="t" value={BLOSSOM_STREET} />);
 
     expect(
       screen.getByRole("button", { name: "Edit address" }),
@@ -225,22 +233,15 @@ describe("AddressFinder", () => {
 
     expect(screen.getByText("14 Blossom Street")).toBeInTheDocument();
     expect(screen.getByText("M4 6AJ")).toBeInTheDocument();
-
-    expect(onChange).toHaveBeenCalledWith({
-      line1: "14 Blossom Street",
-      line2: "",
-      town: "Manchester",
-      postcode: "M4 6AJ",
-      source: "pick",
-      district: "M4",
-      lat: null,
-      lng: null,
-      area: null,
-    });
   });
 
   it("manual: shows the four fields with line 2 optional", () => {
-    renderFinder("manual");
+    render(
+      <AddressFinder
+        idPrefix="t"
+        value={{ ...BLOSSOM_STREET, line2: "Flat 3", source: "manual" }}
+      />,
+    );
 
     expect(screen.getByLabelText("Address line 2 Optional")).toHaveValue(
       "Flat 3",
@@ -251,15 +252,21 @@ describe("AddressFinder", () => {
   });
 
   it("errors: asks for an address", () => {
-    renderFinder("errors");
+    render(<AddressFinder idPrefix="t" showErrors />);
 
     expect(screen.getByRole("alert")).toHaveTextContent(
       "Enter your address or postcode, or enter it manually",
     );
   });
 
-  it("manual-errors: shows each field error", () => {
-    renderFinder("manual-errors");
+  it("manual errors: shows each field error", async () => {
+    render(<AddressFinder idPrefix="t" showErrors />);
+
+    await user.click(
+      screen.getByRole("button", { name: "Enter address manually" }),
+    );
+
+    await user.type(screen.getByLabelText("Postcode"), "M4 6");
 
     expect(
       screen.getAllByRole("alert").map((alert) => alert.textContent),

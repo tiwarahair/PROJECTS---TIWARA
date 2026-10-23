@@ -1,0 +1,199 @@
+/* ---- sidebar ---- */
+.sidebar {
+  min-height: 0;
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  padding: 10px 6px 6px;
+  overflow: hidden;
+  transition:
+    width 0.22s cubic-bezier(0.2, 0.8, 0.2, 1),
+    flex-basis 0.22s cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+
+.sidebarOpen {
+  flex: 0 0 240px;
+  width: 240px;
+}
+
+.sidebarClosed {
+  flex: 0 0 72px;
+  width: 72px;
+}
+
+.logoRow {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  height: 44px;
+  padding: 0 6px;
+  margin-bottom: 18px;
+}
+
+.logo {
+  height: 28px;
+  width: 91px;
+  display: block;
+  margin: 0 auto;
+}
+
+.toggle {
+  right: 0;
+  top: 50%;
+  width: 32px;
+  height: 32px;
+  border-radius: var(--radius-full);
+  border: none;
+  background: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--text-secondary);
+  padding: 0;
+  flex: 0 0 auto;
+}
+
+.toggle:hover {
+  background: rgba(26, 23, 20, 0.05) !important;
+}
+
+.toggleOpen {
+  position: absolute;
+  transform: translateY(-50%);
+}
+
+.toggleOpen:active {
+  transform: translateY(-50%) scale(0.92) !important;
+}
+
+.toggleClosed {
+  position: static;
+  transform: none;
+}
+
+.toggleClosed:active {
+  transform: scale(0.92) !important;
+}
+
+.nav {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.navButton {
+  display: flex;
+  align-items: center;
+  height: 44px;
+  border: none;
+  border-radius: var(--radius-sm);
+  font-size: 15px;
+  text-align: left;
+  white-space: nowrap;
+  transition:
+    background 0.2s cubic-bezier(0.2, 0.8, 0.2, 1),
+    color 0.2s;
+  box-shadow: none;
+}
+
+.navButton:hover {
+  background: rgba(26, 23, 20, 0.05) !important;
+}
+
+.navButton:active {
+  transform: scale(0.98) !important;
+}
+
+.navOpen {
+  justify-content: flex-start;
+  gap: 12px;
+  padding: 0 12px;
+}
+
+.navClosed {
+  justify-content: center;
+  gap: 0;
+  padding: 0;
+}
+
+.navOn {
+  background: var(--accent-wash);
+  color: var(--accent-700);
+  font-weight: 600;
+}
+
+.navOff {
+  background: transparent;
+  color: var(--text-primary);
+  font-weight: 500;
+}
+
+.navIcon {
+  width: 20px;
+  height: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex: 0 0 auto;
+  line-height: 0;
+}
+
+.navLabel {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.spacer {
+  flex: 1;
+}
+
+.profileButton {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  border: none;
+  background: var(--neutral-50);
+  border-radius: var(--radius-md);
+  padding: 8px;
+  text-align: left;
+  overflow: hidden;
+  box-shadow:
+    0 1px 2px rgba(26, 23, 20, 0.03),
+    0 8px 18px -10px rgba(26, 23, 20, 0.16);
+}
+
+.profileButton:active {
+  transform: scale(0.98) !important;
+}
+
+.profileOpen {
+  justify-content: flex-start;
+}
+
+.profileClosed {
+  justify-content: center;
+}
+
+.profileAvatar {
+  flex: 0 0 auto;
+}
+
+.profileName {
+  display: block;
+  font-size: 14.5px;
+  font-weight: 500;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.profileArea {
+  display: block;
+  font-size: 12.5px;
+  color: var(--text-secondary);
+  white-space: nowrap;
+}

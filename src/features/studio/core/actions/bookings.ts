@@ -1,5 +1,11 @@
-import { durationToMinutes, timeToMinutes } from "../format";
-import { getBookingDuration, getNowMinutes } from "../model";
+import {
+  fetchPastBookings,
+  setBookingStatus,
+} from "../../../../lib/studio-api/bookings";
+import { mergeBookingRows } from "../../bookings/live-records";
+import { saveToBooking } from "../../bookings/save";
+import { toIsoDate } from "../../../../utils/dates";
+import { toDayOffset } from "../../bookings/records";
 import type {
   PastRecord,
   SheetKind,
@@ -22,10 +28,27 @@ interface RebookSource {
   address?: string;
 }
 
+const isSavedStatus = (status: string): status is "arrived" | "confirmed" =>
+  status === "arrived" || status === "confirmed";
+
 export const createBookingActions = (
-  { getState, setState }: StudioContext,
+  { getState, setState, sync, memo }: StudioContext,
   { showToast, openSheet, closeSheet }: BookingDeps,
 ) => {
+  const saveStatus = (
+    booking: StudioBooking,
+    status: string,
+    revert: StudioBooking[],
+  ) => {
+    if (isSavedStatus(status))
+      saveToBooking(
+        { setState, sync },
+        booking,
+        (remoteId) => setBookingStatus(remoteId, status),
+        { bookings: revert },
+      );
+  };
+
   const setStatus = (
     id: number,
     status: string,
@@ -33,48 +56,35 @@ export const createBookingActions = (
     extra: Partial<StudioBooking> = {},
   ) => {
     const previous = getState().bookings;
+    const booking = previous.find((item) => item.id === id);
 
-    setState({
-      bookings: previous.map((booking) =>
-        booking.id === id ? { ...booking, status, ...extra } : booking,
-      ),
+    if (!booking) return;
+
+    const next = previous.map((item) =>
+      item.id === id ? { ...item, status, ...extra } : item,
+    );
+
+    setState({ bookings: next });
+    saveStatus(booking, status, previous);
+
+    showToast(message, () => {
+      setState({ bookings: previous });
+      saveStatus(booking, booking.status, next);
     });
-
-    showToast(message, () => setState({ bookings: previous }));
   };
 
   const patchPast = (
     pastId: string | number | undefined,
     patch: Partial<PastRecord> | ((row: PastRecord) => Partial<PastRecord>),
-    seed: PastRecord[],
   ) => {
-    const state = getState();
-
-    const resolve = (row: PastRecord) =>
-      typeof patch === "function" ? patch(row) : patch;
-
-    if (state.pastNew.some((row) => row.pastId === pastId)) {
-      setState({
-        pastNew: state.pastNew.map((row) =>
-          row.pastId === pastId ? { ...row, ...resolve(row) } : row,
-        ),
-      });
-
-      return;
-    }
-
-    const current =
-      seed.find((row) => row.pastId === pastId) ?? ({} as PastRecord);
-
-    const overrides = state.pastOverrides ?? {};
-    const key = String(pastId);
-    const merged = { ...current, ...(overrides[key] ?? {}) };
+    const { pastNew } = getState();
 
     setState({
-      pastOverrides: {
-        ...overrides,
-        [key]: { ...(overrides[key] ?? {}), ...resolve(merged) },
-      },
+      pastNew: pastNew.map((row) =>
+        row.pastId === pastId
+          ? { ...row, ...(typeof patch === "function" ? patch(row) : patch) }
+          : row,
+      ),
     });
   };
 
@@ -101,37 +111,55 @@ export const createBookingActions = (
     );
   };
 
-  /** Bookings that ended an hour ago are marked done-but-unpaid. */
-  const autoComplete = () => {
-    const state = getState();
-    const nowMinutes = getNowMinutes();
+  /** Past midnight, real bookings move to their new day offsets. */
+  const followToday = () => {
+    const today = toIsoDate(new Date());
 
-    const isOverAnHour = (booking: StudioBooking) =>
-      booking.dayOffset < 0 ||
-      (booking.dayOffset === 0 &&
-        timeToMinutes(booking.time) +
-          durationToMinutes(getBookingDuration(state, booking)) +
-          60 <=
-          nowMinutes);
+    if (memo.today === today) return;
 
-    const done = state.bookings.filter(
-      (booking) =>
-        !booking.autoDone &&
-        !booking.pending &&
-        (booking.status === "arrived" || booking.status === "confirmed") &&
-        isOverAnHour(booking),
-    );
+    const isFirstCheck = !memo.today;
 
-    if (!done.length) return;
+    memo.today = today;
+
+    if (isFirstCheck) return;
 
     setState({
-      bookings: state.bookings.map((booking) =>
-        done.includes(booking)
-          ? { ...booking, autoDone: true, checkoutUnpaid: true }
+      bookings: getState().bookings.map((booking) =>
+        booking.startsAt
+          ? { ...booking, dayOffset: toDayOffset(booking.startsAt) }
           : booking,
       ),
     });
   };
 
-  return { setStatus, patchPast, rebookFrom, autoComplete };
+  /** The next page of a real account's Past, added under what's shown. */
+  const loadOlderPast = async () => {
+    const { pastCursor, isPastLoading } = getState();
+    const { stylistId } = sync;
+
+    if (!pastCursor || isPastLoading) return;
+
+    setState({ isPastLoading: true });
+
+    try {
+      const { rows, cursor } = await fetchPastBookings(stylistId, pastCursor);
+
+      setState((current) => ({
+        ...mergeBookingRows(current, rows),
+        pastCursor: cursor,
+        isPastLoading: false,
+      }));
+    } catch {
+      setState({ isPastLoading: false });
+      showToast("Older appointments didn’t load. Try again.");
+    }
+  };
+
+  return {
+    setStatus,
+    patchPast,
+    rebookFrom,
+    followToday,
+    loadOlderPast,
+  };
 };

@@ -2,8 +2,10 @@ import type { CSSProperties } from "react";
 import {
   ChevronRight,
   Link,
+  Pencil,
   Receipt,
   Send,
+  ShieldAlert,
   TriangleAlert,
   Undo,
   Undo2,
@@ -13,6 +15,7 @@ import { ContactLinks } from "../sheet/contact-links";
 import { getPastCheckoutView } from "./view";
 import type { PastSheetView } from "./view";
 import { StudioCheckout } from "../checkout";
+import { CorrectPayment } from "./correct-payment";
 import type { StudioController } from "../../core/use-studio";
 import bookingStyles from "../../../../styles/features/studio/bookings/sheet/index.module.css";
 import styles from "../../../../styles/features/studio/bookings/past/index.module.css";
@@ -97,6 +100,28 @@ export const PastSheetBody = ({ view }: { view: PastSheetView }) => (
         {view.priceLabel}
       </div>
     </div>
+    {view.hasDispute && (
+      <div className={styles.unpaid} role="alert">
+        <div className={styles.alertRow}>
+          <ShieldAlert
+            className={styles.alertIcon}
+            size={18}
+            strokeWidth={1.7}
+            color="var(--accent-700)"
+          />
+          <div className={styles.minWidth}>
+            <div className={styles.unpaidTitle}>{view.disputeTitle}</div>
+            <div className={styles.panelBody}>{view.disputeBody}</div>
+          </div>
+        </div>
+        <div className={styles.buttons}>
+          <button className={styles.retry} onClick={view.respondToDispute}>
+            Respond
+          </button>
+        </div>
+      </div>
+    )}
+    {view.disputeTag && <span className={styles.tag}>{view.disputeTag}</span>}
     {view.feeUnpaid && (
       <div className={styles.unpaid} role="alert">
         <div className={styles.alertRow}>
@@ -117,8 +142,12 @@ export const PastSheetBody = ({ view }: { view: PastSheetView }) => (
               {view.feeUnpaidRetryLabel}
             </button>
           )}
-          <button className={styles.whiteButton} onClick={view.feeUnpaidLink}>
-            Send payment link
+          <button
+            className={styles.whiteButton}
+            onClick={view.feeUnpaidLink}
+            disabled={view.isFeeUnpaidLinkOff}
+          >
+            {view.feeUnpaidLinkLabel}
           </button>
           <button className={styles.whiteButton} onClick={view.feeUnpaidRecord}>
             Record as paid
@@ -208,8 +237,20 @@ export const PastSheetBody = ({ view }: { view: PastSheetView }) => (
             color="var(--neutral-500)"
           />
         </button>
+        {view.canCorrect && !view.correctDraft && (
+          <button className={styles.linkRow} onClick={view.openCorrect}>
+            <Pencil size={18} strokeWidth={1.7} color="var(--neutral-600)" />
+            <span className={styles.linkLabel}>Correct payment</span>
+            <ChevronRight
+              size={16}
+              strokeWidth={1.7}
+              color="var(--neutral-500)"
+            />
+          </button>
+        )}
       </div>
     )}
+    <CorrectPayment view={view} />
     {view.canRefund && (
       <button className={styles.refund} onClick={view.openRefund}>
         Refund

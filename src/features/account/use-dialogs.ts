@@ -6,7 +6,7 @@ import type { AccountFeedback } from "./use-feedback";
 
 export const useAccountDialogs = (
   { stateRef, setState, forms, refs, returnFocus }: AccountCore,
-  { focusLater, startResendCountdown, clearTimers }: AccountFeedback,
+  { focusLater, clearTimers }: AccountFeedback,
 ) => {
   const closeDialog = useCallback(() => {
     const { dialog } = stateRef.current;
@@ -66,16 +66,7 @@ export const useAccountDialogs = (
     return () => document.removeEventListener("keydown", handleKey);
   }, [closeDialog, refs, setState, stateRef]);
 
-  // fixtures that start mid-flow: run the resend countdown, focus an open dialog
-  useEffect(() => {
-    const { resendIn, dialog } = stateRef.current;
-
-    if (resendIn > 0) startResendCountdown();
-
-    if (dialog) focusLater("dialog");
-
-    return clearTimers;
-  }, [focusLater, startResendCountdown, stateRef, clearTimers]);
+  useEffect(() => clearTimers, [clearTimers]);
 
   const openDialog = (dialog: DialogState) => {
     returnFocus.current = document.activeElement;

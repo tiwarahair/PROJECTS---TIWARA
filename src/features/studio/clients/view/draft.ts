@@ -1,9 +1,14 @@
 import type { ChangeEvent } from "react";
-import { findDuplicate, getClient } from "../../core/model";
+import {
+  findDuplicate,
+  getClient,
+  isDuplicateBlocking,
+} from "../../core/model";
 import type { StudioClient, StudioState } from "../../core/types";
 import { readImage } from "./context";
 import type { ClientsContext } from "./context";
 import { getDuplicateView } from "./duplicate";
+import { addStudioClient, saveStudioClient } from "../save";
 
 type ClientDraft = NonNullable<StudioState["clientEdit"]>;
 
@@ -12,9 +17,9 @@ const getDraftData = (draft: ClientDraft) => {
     name: [(draft.first || "").trim(), (draft.last || "").trim()]
       .filter(Boolean)
       .join(" "),
+    first: (draft.first || "").trim(),
     phone: (draft.phone || "").trim(),
     email: (draft.email || "").trim(),
-    sensitivities: (draft.sensitivities || "").trim(),
     notes: { products: (draft.products || "").trim() },
   };
 
@@ -24,13 +29,22 @@ const getDraftData = (draft: ClientDraft) => {
 };
 
 export const getDraftView = ({
+  studio,
   state,
   setState,
   isWide,
   actions,
   setOverride,
 }: ClientsContext) => {
-  const { openSheet, showToast, closeSheet, scrollBody } = actions;
+  const {
+    openSheet,
+    showToast,
+    closeSheet,
+    scrollBody,
+    leaveClientEdit,
+    isEditFromBooking,
+  } = actions;
+
   // ---- the add / edit client sheet ----
   const draft = state.clientEdit;
 
@@ -47,63 +61,70 @@ export const getDraftView = ({
   // clientEdit.img: undefined = untouched (use the client's saved photo), '' = removed, data URL = new pick
   const savedImage = draft?.id ? getClient(state, draft.id).img || "" : "";
 
-  const showAdded = (id: string) => {
+  const showAdded = () => {
     if (isWide) {
       setState({ tab: "clients" });
-
-      openSheet("cliView", {
-        selectedClientId: id,
-        clientAppointmentsTab: "up",
-      });
+      openSheet("cliView", { clientAppointmentsTab: "up" });
 
       return;
     }
 
-    setState({
-      tab: "clients",
-      selectedClientId: id,
-      clientAppointmentsTab: "up",
-    });
-
+    setState({ tab: "clients", clientAppointmentsTab: "up" });
     scrollBody(0, false);
   };
 
   const saveDraft = () => {
-    if (!draft || duplicate) return;
+    if (!draft || isDuplicateBlocking(duplicate)) return;
 
     const data = getDraftData(draft);
 
     if (draft.id) {
+      const previous = studio.context.getState().clientOverrides;
+
       setOverride(draft.id, data);
 
-      if (state.clientEditFromView)
+      saveStudioClient(
+        studio.context,
+        { ...getClient(state, draft.id), ...data },
+        draft.img,
+        { clientOverrides: previous },
+      );
+
+      const isFromBooking = isEditFromBooking();
+
+      if (isFromBooking) leaveClientEdit(true);
+      else if (state.clientEditFromView)
         openSheet("cliView", { selectedClientId: draft.id });
       else closeSheet();
 
-      showToast("Changes saved");
+      showToast(isFromBooking && data.email ? "Email added" : "Changes saved");
 
       return;
     }
 
     const id = `c${Date.now()}`;
 
-    setState({
-      extraClients: state.extraClients.concat([
-        {
-          id,
-          area: "",
-          img: "",
-          visits: 0,
-          last: "",
-          spent: 0,
-          since: "Sep 2026",
-          ...data,
-        },
-      ]),
-    });
+    addStudioClient(
+      studio.context,
+      {
+        id,
+        area: "",
+        img: "",
+        visits: 0,
+        last: "",
+        spent: 0,
+        since: new Date().toLocaleDateString("en-GB", {
+          month: "short",
+          year: "numeric",
+        }),
+        ...data,
+      },
+      draft.img,
+    );
 
+    setState({ selectedClientId: id });
     closeSheet();
-    window.setTimeout(() => showAdded(id), 220);
+    window.setTimeout(showAdded, 220);
     showToast(`${(draft.first || "").trim()} added`);
   };
 
@@ -117,9 +138,11 @@ export const getDraftView = ({
       openSheet("cliView", { selectedClientId: client.id }),
     ),
     saveLabel: draft?.id ? "Save changes" : "Add client",
+    isEmailFocused: state.clientEditFocus === "email",
     saveDraft,
     cancelDraft: () => {
-      if (state.clientEditFromView)
+      if (isEditFromBooking()) leaveClientEdit();
+      else if (state.clientEditFromView)
         openSheet("cliView", { selectedClientId: draft?.id ?? null });
       else closeSheet();
     },

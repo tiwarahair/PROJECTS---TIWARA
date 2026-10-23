@@ -3,7 +3,7 @@ import { Link } from "react-router";
 import { joinClassNames } from "../../utils/class-names";
 import type { MenuGroup, ServiceModal } from "./profile-menu";
 import styles from "../../styles/features/stylist-profile/profile-services.module.css";
-import pageGlobal from "../../styles/features/stylist-profile/stylist-profile-page-global.module.css";
+import pageGlobal from "../../styles/features/stylist-profile/index-global.module.css";
 
 interface ProfileServicesProps {
   groups: MenuGroup[];

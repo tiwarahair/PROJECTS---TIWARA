@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useForm } from "react-hook-form";
-import { PasswordMeter } from "../../components/password-meter/password-meter";
+import { PasswordMeter } from "../../components/password-meter";
 import { useMediaQuery } from "../../hooks/use-media-query";
 import { usePasswordChecker } from "../../hooks/use-password-checker";
 import { signInWithInvite } from "../../lib/booking-invite-api";
@@ -12,7 +12,7 @@ import {
 import { joinClassNames } from "../../utils/class-names";
 import { checkPassword, getPasswordView } from "../../utils/password";
 import { TermsSheet } from "../onboarding/terms-sheet";
-import type { TermsKind } from "../onboarding/onboarding-state";
+import type { TermsKind } from "../onboarding/state";
 import styles from "../../styles/features/save-details/index.module.css";
 
 const CLIENT_MIN = 15;

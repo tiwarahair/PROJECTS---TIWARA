@@ -37,6 +37,10 @@ const templates: Record<string, (payload: Record<string, unknown>) => string> = 
   new_booking: getLine("New booking"),
   client_cancelled: getLine("Cancelled"),
   client_rescheduled: getLine("Moved", "now "),
+  fee_failed: getLine("Fee unpaid"),
+  auto_cancel_soon: getLine("Not confirmed yet"),
+  auto_cancelled: getLine("Auto-cancelled"),
+  card_not_replaced: getLine("Card expired, not replaced"),
 };
 
 export const renderSms = (template: string, payload: Record<string, unknown>) => {

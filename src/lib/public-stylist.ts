@@ -7,7 +7,7 @@ import { getFromWithFee } from "../utils/services";
 import { bySort } from "../utils/sort";
 import type { PublicProfile, WorkingHours } from "./public-profiles";
 import { toService } from "./public-services";
-import { getPhotoUrl } from "./studio-api";
+import { getPhotoUrl } from "./studio-api/photos";
 
 export interface PublicStylist {
   stylist: Stylist;
@@ -34,7 +34,10 @@ const toFee = (on: boolean, kind: string, percent: number): PolicyFee => ({
   percent,
 });
 
-const toPolicy = (row: Tables<"payment_policies">): Policy => ({
+/** a stylist's policy (or the terms a booking was made under)) */
+export const toPolicy = (
+  row: Omit<Tables<"payment_policies">, "id" | "stylist_id" | "created_at">,
+): Policy => ({
   mode:
     row.mode === "deposit" || row.mode === "full" || row.mode === "card"
       ? row.mode

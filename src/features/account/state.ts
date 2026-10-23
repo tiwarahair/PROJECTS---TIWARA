@@ -23,7 +23,6 @@ export interface PasswordState {
 }
 
 export interface AccountState {
-  fixture: string;
   sectionId: string | null;
   wide: boolean;
   dialog: DialogState | null;
@@ -65,13 +64,6 @@ export type StatePatch =
 
 export interface AccountProps {
   section?: string;
-  fixture?: string;
-  /** Hair quiz taken (?quiz=0|1). */
-  hairQuiz?: boolean;
-  /** Has a profile photo (?photo=0|1). */
-  photo?: boolean;
-  /** Marketing emails on (?mkt=0|1). */
-  marketing?: boolean;
 }
 
 export const EMPTY_CODE = ["", "", "", "", "", ""];

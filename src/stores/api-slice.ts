@@ -40,12 +40,30 @@ import { SEARCH_PAGE_SIZE, searchStylists } from "../lib/search-api";
 import type { SearchArgs, SearchRow } from "../lib/search-api";
 import type { PublicProfile } from "../lib/public-profiles";
 import { supabase } from "../lib/supabase";
-import {
-  closeBusiness,
-  fetchStylistStudio,
-  reopenBusiness,
-} from "../lib/studio-api";
+import { fetchStudioBookings } from "../lib/studio-api/bookings";
+import { fetchStylistStudio } from "../lib/studio-api";
+import { closeBusiness, reopenBusiness } from "../lib/studio-api/settings";
+import type { StudioBookings } from "../lib/studio-api/bookings";
+import { fetchStudioEarnings } from "../lib/studio-api/earnings";
+import type { StudioEarnings } from "../lib/studio-api/earnings";
+import { fetchCloseChecks } from "../lib/studio-api/disputes";
+import { fetchHomeStats, fetchStudioActivity } from "../lib/studio-api/home";
+import type { ActivityRow, HomeStats } from "../lib/studio-api/home";
+import type { CloseChecks } from "../lib/studio-api/disputes";
 import type { StylistStudio } from "../lib/studio-api";
+import { fetchPaymentLink, startLinkPayment } from "../lib/payment-link-api";
+import {
+  fetchBookingConfirmation,
+  startBookingConfirmation,
+} from "../lib/booking-confirm-api";
+import type { BookingConfirmation } from "../lib/booking-confirm-api";
+import {
+  fetchCardUpdate,
+  saveCardUpdate,
+  startCardUpdate,
+} from "../lib/card-update-api";
+import type { CardUpdate } from "../lib/card-update-api";
+import type { PaymentLink } from "../lib/payment-link-api";
 import { listTwoFactorDevices } from "../lib/two-factor";
 import type { TwoFactorDevice } from "../lib/two-factor";
 import type { Profile } from "../types/profile";
@@ -78,6 +96,8 @@ export const api = createApi({
     "TwoFactor",
     "Slots",
     "ManagedBooking",
+    "Bookings",
+    "Earnings",
   ],
   refetchOnReconnect: true,
   endpoints: (build) => ({
@@ -144,6 +164,28 @@ export const api = createApi({
       providesTags: ["Studio"],
       queryFn: (ownerId) => toQueryResult(fetchStylistStudio(ownerId)),
     }),
+    getStudioBookings: build.query<StudioBookings, string>({
+      providesTags: ["Bookings"],
+      queryFn: (stylistId) => toQueryResult(fetchStudioBookings(stylistId)),
+    }),
+    getStudioEarnings: build.query<StudioEarnings, string>({
+      providesTags: ["Earnings"],
+      keepUnusedDataFor: 60,
+      queryFn: (stylistId) => toQueryResult(fetchStudioEarnings(stylistId)),
+    }),
+    getHomeStats: build.query<HomeStats, { stylistId: string; days: number }>({
+      providesTags: ["Bookings", "Earnings"],
+      queryFn: ({ stylistId, days }) =>
+        toQueryResult(fetchHomeStats(stylistId, days)),
+    }),
+    getStudioActivity: build.query<ActivityRow[], string>({
+      providesTags: ["Bookings", "Earnings"],
+      queryFn: (stylistId) => toQueryResult(fetchStudioActivity(stylistId)),
+    }),
+    getCloseChecks: build.query<CloseChecks, string>({
+      providesTags: ["Earnings"],
+      queryFn: (stylistId) => toQueryResult(fetchCloseChecks(stylistId)),
+    }),
     getStylistProfile: build.query<PublicProfile | null, string>({
       providesTags: ["StylistProfile"],
       keepUnusedDataFor: 300,
@@ -208,6 +250,39 @@ export const api = createApi({
     getManagedBooking: build.query<ManagedBooking | null, string>({
       providesTags: ["ManagedBooking"],
       queryFn: (token) => toQueryResult(getManagedBooking(token)),
+    }),
+    getPaymentLink: build.query<PaymentLink, string>({
+      queryFn: (token) => toQueryResult(fetchPaymentLink(token)),
+    }),
+    startLinkPayment: build.mutation<
+      { clientSecret: string },
+      { token: string; turnstileToken: string }
+    >({
+      queryFn: ({ token, turnstileToken }) =>
+        toQueryResult(startLinkPayment(token, turnstileToken)),
+    }),
+    getBookingConfirmation: build.query<BookingConfirmation, string>({
+      queryFn: (token) => toQueryResult(fetchBookingConfirmation(token)),
+    }),
+    startBookingConfirmation: build.mutation<
+      { clientSecret: string },
+      { token: string; turnstileToken: string }
+    >({
+      queryFn: ({ token, turnstileToken }) =>
+        toQueryResult(startBookingConfirmation(token, turnstileToken)),
+    }),
+    getCardUpdate: build.query<CardUpdate, string>({
+      queryFn: (token) => toQueryResult(fetchCardUpdate(token)),
+    }),
+    startCardUpdate: build.mutation<
+      { clientSecret: string },
+      { token: string; turnstileToken: string }
+    >({
+      queryFn: ({ token, turnstileToken }) =>
+        toQueryResult(startCardUpdate(token, turnstileToken)),
+    }),
+    saveCardUpdate: build.mutation<CardUpdate, string>({
+      queryFn: (token) => toQueryResult(saveCardUpdate(token)),
     }),
     getRescheduleSlots: build.query<string[], RescheduleSlotsRequest>({
       providesTags: ["ManagedBooking"],
@@ -275,6 +350,13 @@ export const {
   useGetOwnerManageTokenQuery,
   useRenewBookingInviteMutation,
   useGetManagedBookingQuery,
+  useGetPaymentLinkQuery,
+  useStartLinkPaymentMutation,
+  useGetBookingConfirmationQuery,
+  useStartBookingConfirmationMutation,
+  useGetCardUpdateQuery,
+  useStartCardUpdateMutation,
+  useSaveCardUpdateMutation,
   useGetRescheduleSlotsQuery,
   useRescheduleBookingMutation,
   useGetAvailableSlotsQuery,
@@ -287,6 +369,11 @@ export const {
   usePeekStylistsQuery,
   useSearchStylistsInfiniteQuery,
   useGetStylistStudioQuery,
+  useGetStudioBookingsQuery,
+  useGetStudioEarningsQuery,
+  useGetCloseChecksQuery,
+  useGetHomeStatsQuery,
+  useGetStudioActivityQuery,
   useGetTwoFactorDevicesQuery,
   useUpdateProfileMutation,
   useSetBusinessClosedMutation,

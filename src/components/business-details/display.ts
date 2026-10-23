@@ -1,5 +1,5 @@
 import { formatPostcode, isPostcodeValid } from "../../utils/address";
-import type { TaxDetails } from "../tax-details-form/tax-details-logic";
+import type { TaxDetails } from "../tax-details-form/logic";
 
 const AREAS: Record<string, string> = {
   M13: "Longsight",
@@ -35,11 +35,8 @@ export const formatVatNumber = (digits: string): string => {
 };
 
 export const getLegalRows = (
-  tax: Partial<TaxDetails> | null | undefined,
+  details: Partial<TaxDetails> | null,
 ): { label: string; value: string }[] => {
-  const details: Partial<TaxDetails> | null =
-    tax === undefined ? { kind: "sole", legalName: "Amara Okonkwo" } : tax;
-
   if (!details) return [];
 
   return details.kind === "ltd"

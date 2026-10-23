@@ -1,9 +1,46 @@
+import { undoNoShow } from "../../../../../lib/studio-api/bookings";
+import { reopenStudioBooking } from "../../../../../lib/studio-api/booking-writes";
+import { SaveError } from "../../../../../lib/studio-writes";
+import { waiveFee as waiveFeeRemote } from "../../../../../lib/studio-api/money";
 import { getWaiveConfirm } from "../../../core/model";
 import { roundToPence } from "../../../../../utils/money";
 import { getRefundTag } from "./context";
 import type { PastContext } from "./context";
 
+// >> "send a new link" on a booking nobody confirmed in time; the server checks the time is still free
+const getReopen = ({ actions, row, client }: PastContext) => {
+  const { remoteId, startsAt } = row;
+
+  if (
+    !row.autoCancelled ||
+    !startsAt ||
+    Date.parse(startsAt) - Date.now() <= 2 * 3600000
+  )
+    return null;
+
+  const first = (client.name || "the client").split(" ")[0];
+
+  return {
+    action: () =>
+      reopenStudioBooking(remoteId).then(
+        () => {
+          actions.closeSheet();
+          actions.showToast(`New link sent to ${first}`);
+        },
+        (error: unknown) =>
+          actions.showToast(
+            error instanceof SaveError
+              ? error.message
+              : "That didn’t work. Try again.",
+          ),
+      ),
+    actionLabel: "Send a new link",
+    actionHint: `Asks ${first} to confirm again, if the time is still free.`,
+  };
+};
+
 const getUndo = ({
+  studio,
   state,
   setState,
   actions,
@@ -13,7 +50,14 @@ const getUndo = ({
 }: PastContext) => {
   const { original } = row;
 
-  if (!isFresh || row.status !== "No show" || !original)
+  // a settled or waived fee can't be undone, so neither can the no-show
+  if (
+    !isFresh ||
+    row.status !== "No show" ||
+    !original ||
+    row.feeUnpaid ||
+    row.waived
+  )
     return { action: null, actionLabel: "", actionHint: "" };
 
   return {
@@ -21,6 +65,11 @@ const getUndo = ({
       setState({
         bookings: state.bookings.concat([original]),
         pastNew: state.pastNew.filter(({ pastId }) => pastId !== row.pastId),
+      });
+
+      studio.context.sync.save(() => undoNoShow(row.remoteId), {
+        bookings: state.bookings,
+        pastNew: state.pastNew,
       });
 
       actions.closeSheet();
@@ -42,6 +91,7 @@ const getFeeAction = (
     hoursLeft,
     isKept,
     patch,
+    saveFee,
   }: PastContext,
   feeLeft: number,
 ) => {
@@ -50,6 +100,8 @@ const getFeeAction = (
   const pendingNote = row.feePending ? ` (applies in ${hoursLeft}h)` : "";
 
   const waiveFee = () => {
+    const previous = state.pastNew;
+
     setState({ confirm: null });
 
     patch((current) => ({
@@ -68,6 +120,7 @@ const getFeeAction = (
     const clientFirst = (client.name || "").split(" ")[0];
 
     actions.showToast(`${refundLead}${clientFirst} gets ${row.feeLabel} back`);
+    saveFee(waiveFeeRemote, previous);
   };
 
   const getAction = () => {
@@ -93,7 +146,10 @@ export const getActionsView = (context: PastContext) => {
     context;
 
   const feeLeft = roundToPence(feeNumber - (row.refunded || 0));
-  const { action, actionLabel, actionHint } = getUndo(context);
+
+  const { action, actionLabel, actionHint } =
+    getReopen(context) ?? getUndo(context);
+
   // the fee gets its own action so a no-show can offer both "Undo no-show" and "Waive fee"
   const { feeAction, feeActionLabel } = getFeeAction(context, feeLeft);
   // a pending/kept fee with an action collapses note + action into one panel
@@ -107,6 +163,8 @@ export const getActionsView = (context: PastContext) => {
 
       return `${row.feeLabel} ${feeKind}`;
     }
+
+    if (actionLabel === "Send a new link") return "Not confirmed in time";
 
     return actionLabel === "Undo no-show" ? "Marked as a no-show" : "";
   };

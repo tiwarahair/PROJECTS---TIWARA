@@ -14,14 +14,14 @@ const appRoutes: RouteObject[] = [
   {
     path: "/",
     lazy: () =>
-      import("./features/home/home-page").then(({ HomePage }) => ({
+      import("./features/home").then(({ HomePage }) => ({
         Component: HomePage,
       })),
   },
   {
     path: "/search",
     lazy: () =>
-      import("./features/search/search-page").then(({ SearchPage }) => ({
+      import("./features/search").then(({ SearchPage }) => ({
         Component: SearchPage,
       })),
   },
@@ -41,6 +41,27 @@ const appRoutes: RouteObject[] = [
       })),
   },
   {
+    path: "/pay",
+    lazy: () =>
+      import("./features/pay-fee").then(({ PayFeePage }) => ({
+        Component: PayFeePage,
+      })),
+  },
+  {
+    path: "/confirm",
+    lazy: () =>
+      import("./features/confirm-booking").then(({ ConfirmBookingPage }) => ({
+        Component: ConfirmBookingPage,
+      })),
+  },
+  {
+    path: "/card",
+    lazy: () =>
+      import("./features/update-card").then(({ UpdateCardPage }) => ({
+        Component: UpdateCardPage,
+      })),
+  },
+  {
     path: "/save-details",
     lazy: () =>
       import("./features/save-details").then(({ SaveDetailsPage }) => ({
@@ -57,7 +78,7 @@ const appRoutes: RouteObject[] = [
   {
     path: "/help",
     lazy: () =>
-      import("./features/help/help-page").then(({ HelpPage }) => ({
+      import("./features/help").then(({ HelpPage }) => ({
         Component: HelpPage,
       })),
   },
@@ -67,9 +88,9 @@ const appRoutes: RouteObject[] = [
   // } /* ^ TO DO - MAKE THIS AN ACTUAL EMAIL */,
   {
     lazy: () =>
-      import("./features/onboarding/onboarding-page").then(
-        ({ OnboardingPage }) => ({ Component: OnboardingPage }),
-      ),
+      import("./features/onboarding").then(({ OnboardingPage }) => ({
+        Component: OnboardingPage,
+      })),
     children: [{ path: "/login" }, { path: "/signup" }, { path: "/join" }],
   },
   {
@@ -82,7 +103,7 @@ const appRoutes: RouteObject[] = [
   {
     path: "/:slug",
     lazy: () =>
-      import("./features/stylist-profile/stylist-profile-route").then(
+      import("./features/stylist-profile/route").then(
         ({ StylistProfilePage }) => ({ Component: StylistProfilePage }),
       ),
   },

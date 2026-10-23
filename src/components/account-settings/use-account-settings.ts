@@ -1,19 +1,21 @@
-import { useCallback, useEffect, useRef, useState } from "react";
+import {
+  useCallback,
+  useEffect,
+  useEffectEvent,
+  useRef,
+  useState,
+} from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useLocation } from "react-router";
 import { usePasswordChecker } from "../../hooks/use-password-checker";
-import type {
-  TaxBusiness,
-  TaxDetails,
-} from "../tax-details-form/tax-details-logic";
-import { DEMO_BACKEND } from "./backend";
+import type { TaxBusiness, TaxDetails } from "../tax-details-form/logic";
 import { nameSchema } from "./name-schema";
 import { EMPTY_PASSWORD } from "./password-schema";
 import { usePasswordForm } from "./use-password-form";
 import type { NameValues } from "./name-schema";
 import type { AccountSettingsBackend } from "./backend";
 import { getInitialName, getInitialSettingsState } from "./logic";
+import { getSessionsActions } from "./sessions-actions";
 import type { SettingsPerson, NotificationSettings } from "./logic";
 import type {
   ConfirmDialog,
@@ -25,7 +27,6 @@ import type {
 } from "./logic";
 
 const TOAST_MS = 2400;
-const SESSIONS_LOAD_MS = 700;
 const PASSWORD_MIN = 8;
 
 const PASSWORD_FAILURES: Record<string, string> = {
@@ -46,15 +47,17 @@ export interface AccountSettingsProps {
   page?: SettingsPage;
   payoutStatus?: PayoutStatus;
   signIn?: SignIn;
-  isNew?: boolean;
   upcoming?: number;
-  /** Money owed on the account blocks closing it. */
-  owed?: boolean;
+  /** Money owed (pounds) and open disputes block closing the business. */
+  owed?: number;
+  hasOpenDispute?: boolean;
+  onPayOwed?: () => void;
+  isPayingOwed?: boolean;
   pauseReason?: string;
   embedded?: boolean;
   hideSave?: boolean;
-  /** Whose account this is (the demo stylist when not given). */
-  person?: SettingsPerson;
+  /** Whose account this is. */
+  person: SettingsPerson;
   /** Saved email / SMS choices (Studio); missing events use the defaults. */
   notifications?: Partial<NotificationSettings>;
   /** Account name, used by the password checker when the name fields are empty. */
@@ -83,20 +86,18 @@ export interface AccountSettingsProps {
   onOpenStripe?: () => void;
   /** The payout bank Stripe reports, e.g. "Monzo •••• 4821". */
   payoutBank?: string | null;
-  /** Where the changes save; demo boards leave it out. */
-  backend?: AccountSettingsBackend;
+  /** Where the changes save. */
+  backend: AccountSettingsBackend;
   onTaxLearnMore?: () => void;
 }
 
 type DialogPhase = "idle" | "open" | "closing";
 
 export const useAccountSettings = (props: AccountSettingsProps) => {
-  const { page = "personal", signIn, isNew = false } = props;
-  const { search } = useLocation();
+  const { page = "personal", signIn } = props;
 
-  // read once: ?pwnew= only prefills the initial state
   const [state, setRawState] = useState(() =>
-    getInitialSettingsState(isNew, search, props.person, props.notifications),
+    getInitialSettingsState(props.person, props.notifications),
   );
 
   const [dialog, setDialog] = useState<ConfirmDialog>({
@@ -110,7 +111,7 @@ export const useAccountSettings = (props: AccountSettingsProps) => {
   const dialogReturn = useRef<HTMLElement | null>(null);
   const toastTimer = useRef(0);
   const googleTimer = useRef(0);
-  const hasLoaded = useRef(false);
+  const latestSessionsLoad = useRef(0);
 
   usePasswordChecker();
 
@@ -166,29 +167,17 @@ export const useAccountSettings = (props: AccountSettingsProps) => {
     run?.();
   };
 
-  // the sessions list "loads" once, the first time the security page shows
+  const sessions = getSessionsActions({
+    backend: props.backend,
+    setState,
+    toast,
+    latestLoad: latestSessionsLoad,
+  });
+
+  const loadSessions = useEffectEvent(() => sessions.load());
+
   useEffect(() => {
-    if (page !== "security" || hasLoaded.current) return;
-
-    hasLoaded.current = true;
-    let isDone = false;
-
-    setState({ sessionsLoading: true });
-
-    const timer = window.setTimeout(() => {
-      isDone = true;
-      setState({ sessionsLoading: false });
-    }, SESSIONS_LOAD_MS);
-
-    return () => {
-      window.clearTimeout(timer);
-
-      // interrupted (a remount, or leaving the page early): load again next time
-      if (isDone) return;
-
-      hasLoaded.current = false;
-      setState({ sessionsLoading: false });
-    };
+    if (page === "security") loadSessions();
   }, [page]);
 
   useEffect(
@@ -209,7 +198,6 @@ export const useAccountSettings = (props: AccountSettingsProps) => {
 
   const { passwordForm, passwordView, passwordErrors, isPasswordFilled } =
     usePasswordForm({
-      search,
       isCodeSent: state.isPasswordCodeSent,
       checkOptions: {
         min: PASSWORD_MIN,
@@ -243,7 +231,7 @@ export const useAccountSettings = (props: AccountSettingsProps) => {
           passwordErrors.server
         );
 
-  const backend = props.backend ?? DEMO_BACKEND;
+  const { backend } = props;
 
   const save = async () => {
     if (page === "personal")
@@ -279,13 +267,9 @@ export const useAccountSettings = (props: AccountSettingsProps) => {
 
         passwordForm.reset(EMPTY_PASSWORD);
 
-        setState({
-          isPasswordCodeSent: false,
-          isSettingPassword: false,
-          sessions: state.signOthers
-            ? state.sessions.filter(({ isCurrent }) => isCurrent)
-            : state.sessions,
-        });
+        setState({ isPasswordCodeSent: false, isSettingPassword: false });
+
+        if (state.signOthers) sessions.load();
 
         const deviceSuffix = others === 1 ? "" : "s";
 
@@ -317,6 +301,7 @@ export const useAccountSettings = (props: AccountSettingsProps) => {
     props.onState?.({ canSave: isDirty && hasSave, save, discard });
   });
 
+  // TO DO: google first needs to verify our app for this to work which can take weeks
   const connectGoogle = () => {
     setState(({ google }) => ({ google: { ...google, state: "connecting" } }));
     window.clearTimeout(googleTimer.current);
@@ -350,6 +335,7 @@ export const useAccountSettings = (props: AccountSettingsProps) => {
     save,
     sendPasswordCode,
     backend,
+    sessions,
     connectGoogle,
   };
 };

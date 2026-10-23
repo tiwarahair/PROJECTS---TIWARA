@@ -1,6 +1,10 @@
 import { act, screen, within } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import { renderBooking } from "../../../test/render-booking";
+import {
+  GUEST_DETAILS,
+  renderBooking,
+  renderSavedBooking,
+} from "../../../test/render-booking";
 import type { UserEvent } from "@testing-library/user-event";
 import { setupUser } from "../../../test/setup-user";
 import { stripeStub } from "../../../test/setup";
@@ -51,15 +55,17 @@ describe("BookingPage", () => {
     );
   });
 
-  it("details-errors: Continue shows every field error", async () => {
-    await renderBooking("fixture=details-errors");
+  it("details: Continue shows every field error", async () => {
+    await renderSavedBooking({ step: 4, guest: true });
+    await user.click(screen.getAllByRole("button", { name: /^Continue/ })[0]!);
     await act(() => Promise.resolve());
     expect(screen.getByText("Enter your first name")).toBeInTheDocument();
     expect(screen.getByText("Enter a UK mobile number")).toBeInTheDocument();
   });
 
   it("details: errors clear as fields are fixed, then Continue goes to Review", async () => {
-    await renderBooking("fixture=details-errors");
+    await renderSavedBooking({ step: 4, guest: true });
+    await user.click(screen.getAllByRole("button", { name: /^Continue/ })[0]!);
     await act(() => Promise.resolve());
 
     await user.type(screen.getByLabelText("First name"), "Nia");
@@ -82,8 +88,8 @@ describe("BookingPage", () => {
     ).toBeInTheDocument();
   });
 
-  it("time-picked: Continue asks to log in or continue as guest before Your details", async () => {
-    await renderBooking("fixture=time-picked");
+  it("time picked: Continue asks to log in or continue as guest before Your details", async () => {
+    await renderSavedBooking();
 
     await user.click(screen.getAllByRole("button", { name: /^Continue$/ })[0]!);
 
@@ -103,8 +109,8 @@ describe("BookingPage", () => {
     expect(screen.queryByRole("dialog")).not.toBeInTheDocument();
   });
 
-  it("time-picked: closing the account sheet stays on Time", async () => {
-    await renderBooking("fixture=time-picked");
+  it("time picked: closing the account sheet stays on Time", async () => {
+    await renderSavedBooking();
 
     await user.click(screen.getAllByRole("button", { name: /^Continue$/ })[0]!);
     await user.click(await screen.findByRole("button", { name: "Close" }));
@@ -113,8 +119,8 @@ describe("BookingPage", () => {
     expect(screen.queryByLabelText("First name")).not.toBeInTheDocument();
   });
 
-  it("time-picked: the account sheet closes when the hold runs out", async () => {
-    await renderBooking("fixture=time-picked&hold=2");
+  it("time picked: the account sheet closes when the hold runs out", async () => {
+    await renderSavedBooking();
 
     await user.click(screen.getAllByRole("button", { name: /^Continue$/ })[0]!);
 
@@ -122,7 +128,7 @@ describe("BookingPage", () => {
       await screen.findByRole("dialog", { name: "Have an account?" }),
     ).toBeInTheDocument();
 
-    const later = Date.now() + 3000;
+    const later = Date.now() + 601_000;
 
     vi.spyOn(Date, "now").mockReturnValue(later);
     act(() => vi.advanceTimersByTime(1000));
@@ -135,8 +141,8 @@ describe("BookingPage", () => {
     ).toBeInTheDocument();
   });
 
-  it("details-card: shows the logged-in contact card, edits name and mobile, and logs out", async () => {
-    await renderBooking("fixture=details-card");
+  it("details: shows the logged-in contact card, edits name and mobile, and logs out", async () => {
+    await renderSavedBooking({ step: 4 }, { signedIn: true });
 
     expect(screen.getByText("Nia Okafor")).toBeInTheDocument();
     expect(screen.queryByLabelText("First name")).not.toBeInTheDocument();
@@ -155,7 +161,7 @@ describe("BookingPage", () => {
 
     await user.click(screen.getByRole("button", { name: "Cancel" }));
 
-    expect(screen.getByText("07700 900123")).toBeInTheDocument();
+    expect(screen.getByText("07700 900412")).toBeInTheDocument();
 
     await user.click(screen.getByRole("button", { name: "Log out" }));
 
@@ -164,7 +170,7 @@ describe("BookingPage", () => {
   });
 
   it("review: shows the policy card and Continue to payment", async () => {
-    await renderBooking("fixture=review");
+    await renderSavedBooking({ step: 5, guest: true, details: GUEST_DETAILS });
 
     expect(
       screen.getByRole("heading", { level: 1, name: "Review your booking" }),
@@ -178,7 +184,7 @@ describe("BookingPage", () => {
   });
 
   it("pay: a skeleton stands in for the card fields until Stripe has loaded them", async () => {
-    await renderBooking("fixture=pay");
+    await renderSavedBooking({ step: 6, guest: true, details: GUEST_DETAILS });
 
     expect(screen.getByTestId("payment-skeleton")).toBeInTheDocument();
     await user.click(screen.getByTestId("payment-element"));
@@ -190,7 +196,7 @@ describe("BookingPage", () => {
       error: { type: "card_error", message: "Your card was declined." },
     });
 
-    await renderBooking("fixture=pay");
+    await renderSavedBooking({ step: 6, guest: true, details: GUEST_DETAILS });
 
     expect(screen.getByTestId("payment-element")).toBeInTheDocument();
 
@@ -212,7 +218,7 @@ describe("BookingPage", () => {
       error: { message: "Your card number is incomplete." },
     });
 
-    await renderBooking("fixture=pay");
+    await renderSavedBooking({ step: 6, guest: true, details: GUEST_DETAILS });
 
     await user.click(
       screen.getByRole("button", { name: /^Pay £.* & confirm/ }),
@@ -225,30 +231,22 @@ describe("BookingPage", () => {
     expect(startCheckout).not.toHaveBeenCalled();
   });
 
-  it("confirm: shows You're booked in. and the guest save row", async () => {
-    await renderBooking("fixture=confirm");
+  it("confirm: paying shows You're booked in. and the guest save row", async () => {
+    await renderSavedBooking({ step: 6, guest: true, details: GUEST_DETAILS });
+
+    await user.click(
+      screen.getByRole("button", { name: /^Pay £.* & confirm/ }),
+    );
 
     expect(
-      screen.getByRole("heading", { level: 1, name: "You're booked in." }),
+      await screen.findByRole("heading", {
+        level: 1,
+        name: "You're booked in.",
+      }),
     ).toBeInTheDocument();
 
     await user.click(screen.getByRole("button", { name: "Save my details" }));
     expect(screen.getByText("Check your email.")).toBeInTheDocument();
-  });
-
-  it("hold-expired and leave fixtures open their dialogs", async () => {
-    const { unmount } = await renderBooking("fixture=hold-expired");
-
-    expect(
-      screen.getByRole("alertdialog", { name: "Your slot is no longer held" }),
-    ).toBeInTheDocument();
-
-    unmount();
-    await renderBooking("fixture=leave");
-
-    expect(
-      screen.getByRole("dialog", { name: "Leave this booking?" }),
-    ).toBeInTheDocument();
   });
 
   it("leaving after picking a service asks first; Keep booking stays, Leave goes", async () => {

@@ -5,12 +5,19 @@ interface ClientNotes {
   products?: string;
 }
 
+export interface ClientMoney {
+  deposits: number;
+  fees: number;
+  refunds: number;
+}
+
 export interface StudioClient {
   id: string | null;
   name: string;
   first?: string;
   area?: string;
   img?: string;
+  photoPath?: string;
   visits?: number;
   last?: string;
   spent?: number;
@@ -20,7 +27,12 @@ export interface StudioClient {
   address?: string;
   since?: string;
   sensitivities?: string;
+  sensitivitiesNote?: string;
   notes?: ClientNotes | null;
+  money?: ClientMoney;
+  noShows?: number;
+  lateCancels?: number;
+  deletableFrom?: string;
   blocked?: boolean;
   deleted?: boolean;
   walkIn?: boolean;
@@ -36,7 +48,6 @@ export interface ClientEditDraft {
   size: string;
   length: string;
   products: string;
-  sensitivities: string;
   img?: string;
 }
 

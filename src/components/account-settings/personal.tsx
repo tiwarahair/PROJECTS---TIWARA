@@ -1,6 +1,8 @@
 import { Controller } from "react-hook-form";
 import { Info } from "lucide-react";
+import { SaveError } from "../../lib/studio-writes";
 import { joinClassNames } from "../../utils/class-names";
+import { formatMoney } from "../../utils/money";
 import { getCloseReason } from "./logic";
 import { SettingsSection, TextField } from "./fields";
 import { SettingsLoginDetails } from "./login-details";
@@ -22,7 +24,16 @@ export const SettingsPersonal = ({
 }: SettingsPersonalProps) => {
   const { nameForm, toast, ask, getNameError } = settings;
 
-  const closeReason = getCloseReason(props.upcoming || 0, !!props.owed);
+  const {
+    upcoming = 0,
+    owed = 0,
+    hasOpenDispute = false,
+    onPayOwed,
+    isPayingOwed,
+  } = props;
+
+  const closeReason = getCloseReason(upcoming, owed, hasOpenDispute);
+  const canPayOwed = !!onPayOwed && owed > 0 && !upcoming && !hasOpenDispute;
 
   return (
     <>
@@ -74,6 +85,17 @@ export const SettingsPersonal = ({
               {closeReason}
             </div>
           )}
+          {canPayOwed && (
+            <button
+              className={joinClassNames(styles.payOwed, shared.focusRing)}
+              onClick={onPayOwed}
+              disabled={isPayingOwed}
+            >
+              {isPayingOwed
+                ? "Paying…"
+                : `Pay ${formatMoney(owed, { pence: "always" })}`}
+            </button>
+          )}
           <button
             className={joinClassNames(
               styles.closeButton,
@@ -93,8 +115,12 @@ export const SettingsPersonal = ({
                   settings.backend
                     .closeBusiness()
                     .then(() => toast("Business closed"))
-                    .catch(() =>
-                      toast("Your business couldn’t be closed. Try again."),
+                    .catch((error: unknown) =>
+                      toast(
+                        error instanceof SaveError
+                          ? error.message
+                          : "Your business couldn’t be closed. Try again.",
+                      ),
                     ),
               )
             }

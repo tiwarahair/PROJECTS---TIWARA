@@ -1,5 +1,4 @@
-// Account sections, icons and demo data (sections, icons, taken emails, legacy tab names, seed bookings,
-// quiz rows).
+// Account sections, icons, legacy tab names and the booking and card shapes.
 import {
   Calendar,
   CreditCard,
@@ -101,22 +100,12 @@ export const LEGACY_TABS: Record<string, string> = {
   marketing: "communication",
 };
 
-// demo: emails another account already uses
-export const TAKEN_EMAILS = ["kemi.a@icloud.com", "amara@tiwarashouse.com"];
-
-export const SEED_PROFILE = {
-  first: "Nia",
-  last: "Okafor",
-  email: "nia.okafor@gmail.com",
-  mobile: "7700 900412",
-};
-
-export type Profile = typeof SEED_PROFILE;
-
-export const DEMO_PHOTO = "site/onboarding-client.jpg";
-
-// demo: the signed-in client's current password
-export const CURRENT_PASSWORD = "sunflower9";
+export interface Profile {
+  first: string;
+  last: string;
+  email: string;
+  mobile: string;
+}
 
 type BookingStatus =
   "confirmed" | "awaiting" | "completed" | "cancelled" | "noshow";
@@ -138,94 +127,6 @@ export interface AccountBooking {
 
 const DAY_MS = 864e5;
 
-/** n days from today at h:m. */
-const at = (days: number, hours: number, minutes: number): number => {
-  const date = new Date();
-
-  date.setHours(hours, minutes, 0, 0);
-  date.setDate(date.getDate() + days);
-
-  return date.getTime();
-};
-
-/** Demo bookings; some fixtures keep only past ones, bk-none has none. */
-export const getSeedBookings = (fixture: string): AccountBooking[] => {
-  const all: AccountBooking[] = [
-    {
-      id: "TH-48213",
-      stylistId: "amara-beauty",
-      service: "Knotless braids",
-      customisation: "Medium · Shoulder · 1B Natural Black",
-      extra: 20,
-      fallbackPrice: 140,
-      at: at(9, 10, 30),
-      minutes: 330,
-      status: "confirmed",
-      mode: "deposit",
-      card: "c1",
-    },
-    {
-      id: "TH-48377",
-      stylistId: "crowned-by-kemi",
-      service: "Faux locs",
-      customisation: "Medium · Mid-back",
-      extra: 0,
-      fallbackPrice: 160,
-      at: at(16, 11, 0),
-      minutes: 360,
-      status: "awaiting",
-      mode: "card",
-      card: "c1",
-    },
-    {
-      id: "TH-47702",
-      stylistId: "silk-and-roots",
-      service: "Silk press",
-      customisation: "",
-      extra: 0,
-      fallbackPrice: 65,
-      at: at(-12, 9, 30),
-      minutes: 120,
-      status: "completed",
-      mode: "full",
-      card: "c1",
-    },
-    {
-      id: "TH-47118",
-      stylistId: "studio-zuri",
-      service: "Knotless braids",
-      customisation: "Medium · Mid-back",
-      extra: 15,
-      fallbackPrice: 150,
-      at: at(-34, 13, 0),
-      minutes: 300,
-      status: "cancelled",
-      mode: "deposit",
-      card: "c2",
-    },
-    {
-      id: "TH-46590",
-      stylistId: "locd-and-lovely",
-      service: "Loc re-twist",
-      customisation: "",
-      extra: 0,
-      fallbackPrice: 70,
-      at: at(-61, 10, 0),
-      minutes: 150,
-      status: "noshow",
-      mode: "deposit",
-      card: "c1",
-    },
-  ];
-
-  if (["bk-empty", "ov-empty", "delete-allowed", "deleted"].includes(fixture))
-    return all.filter(({ at: time }) => time < Date.now());
-
-  if (fixture === "bk-none") return [];
-
-  return all;
-};
-
 export const QUIZ_DAYS_AGO = 36 * DAY_MS;
 
 export interface SavedCard {
@@ -235,20 +136,3 @@ export interface SavedCard {
   expiry: string;
   isDefault: boolean;
 }
-
-export const SEED_CARDS: SavedCard[] = [
-  { id: "c1", brand: "Visa", last4: "4242", expiry: "08/28", isDefault: true },
-  {
-    id: "c2",
-    brand: "Mastercard",
-    last4: "4444",
-    expiry: "03/27",
-    isDefault: false,
-  },
-];
-
-export const SHARED_ENTRIES = [
-  { id: "amara-beauty", text: "Sensitive scalp" },
-  { id: "crowned-by-kemi", text: "" },
-  { id: "silk-and-roots", text: "" },
-];

@@ -167,6 +167,112 @@ export type Database = {
           },
         ];
       };
+      booking_fees: {
+        Row: {
+          amount_pence: number;
+          booking_id: string;
+          card_label: string | null;
+          charge_after: string;
+          charge_pence: number;
+          claimed_at: string | null;
+          created_at: string;
+          decline_message: string | null;
+          failed_runs: number;
+          hard_decline: boolean;
+          id: string;
+          kept_pence: number;
+          kind: string;
+          last_tried_at: string | null;
+          paid_at: string | null;
+          refund_pence: number;
+          refunded_pence: number;
+          reruns: number;
+          status: string;
+          tries: number;
+          waived_at: string | null;
+          get_fee_settlement: Json | null;
+        };
+        ComputedFields: "get_fee_settlement";
+        Insert: {
+          amount_pence: number;
+          booking_id: string;
+          card_label?: string | null;
+          charge_after: string;
+          charge_pence: number;
+          claimed_at?: string | null;
+          created_at?: string;
+          decline_message?: string | null;
+          failed_runs?: number;
+          hard_decline?: boolean;
+          id?: string;
+          kept_pence: number;
+          kind: string;
+          last_tried_at?: string | null;
+          paid_at?: string | null;
+          refund_pence: number;
+          refunded_pence?: number;
+          reruns?: number;
+          status?: string;
+          tries?: number;
+          waived_at?: string | null;
+        };
+        Update: {
+          amount_pence?: number;
+          booking_id?: string;
+          card_label?: string | null;
+          charge_after?: string;
+          charge_pence?: number;
+          claimed_at?: string | null;
+          created_at?: string;
+          decline_message?: string | null;
+          failed_runs?: number;
+          hard_decline?: boolean;
+          id?: string;
+          kept_pence?: number;
+          kind?: string;
+          last_tried_at?: string | null;
+          paid_at?: string | null;
+          refund_pence?: number;
+          refunded_pence?: number;
+          reruns?: number;
+          status?: string;
+          tries?: number;
+          waived_at?: string | null;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "booking_fees_booking_id_fkey";
+            columns: ["booking_id"];
+            isOneToOne: false;
+            referencedRelation: "bookings";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
+      booking_notes: {
+        Row: {
+          booking_id: string;
+          note: string;
+        };
+        ComputedFields: never;
+        Insert: {
+          booking_id: string;
+          note: string;
+        };
+        Update: {
+          booking_id?: string;
+          note?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "booking_notes_booking_id_fkey";
+            columns: ["booking_id"];
+            isOneToOne: true;
+            referencedRelation: "bookings";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
       booking_rules: {
         Row: {
           default_extra_minutes: number;
@@ -247,29 +353,53 @@ export type Database = {
           address: Json | null;
           allergies: string | null;
           allergies_consented_at: string | null;
+          arrived_at: string | null;
+          auto_cancel_warned_at: string | null;
           block_ends_at: string;
           block_range: unknown;
           buffer_minutes: number;
           calendar_key: string;
+          cancel_reason: string | null;
           cancellation: Json | null;
           cancelled_at: string | null;
           cancelled_by: string | null;
+          card_label: string | null;
+          card_checked_at: string | null;
+          card_failed_at: string | null;
+          card_setup_intent_id: string | null;
+          card_update_requested_at: string | null;
+          checkout: Json | null;
+          checkout_intent_ids: string[];
+          checkout_started_at: string | null;
+          checkout_tries: number;
           choices: NonNullable<Json>;
           client_id: string | null;
+          completed_at: string | null;
+          confirm_by: string | null;
+          confirm_sends: number;
+          confirm_sent_at: string | null;
           contact: Json | null;
           created_at: string;
+          created_by: string;
           due_today_pence: number | null;
           ends_at: string;
           fee_pence: number;
+          final_price_pence: number | null;
           hold_expires_at: string | null;
           hold_secret_hash: string | null;
           id: string;
           location: unknown;
           minutes: number;
+          no_show_at: string | null;
           notes: string | null;
+          overlap_ok: boolean;
           paid_at: string | null;
+          past_at: string | null;
+          policy_accepted_at: string | null;
           policy_id: string | null;
           price_pence: number;
+          protection_overridden_at: string | null;
+          protection_status: string;
           ref: string;
           reschedule_count: number;
           service_id: string | null;
@@ -279,38 +409,69 @@ export type Database = {
           status: string;
           stripe_customer_id: string | null;
           stripe_payment_intent_id: string | null;
+          stripe_payment_method_id: string | null;
+          stylist_client_id: string | null;
           stylist_id: string;
           terms: Json | null;
+          tip_pence: number;
+          unpaid_at: string | null;
+          unsaved_refund_failed_at: string | null;
+          unsaved_refund_failures: number;
+          get_balance_due: number | null;
           get_cancellation_terms: Json | null;
         };
-        ComputedFields: "get_cancellation_terms";
+        ComputedFields: "get_balance_due" | "get_cancellation_terms";
         Insert: {
           address?: Json | null;
           allergies?: string | null;
           allergies_consented_at?: string | null;
+          arrived_at?: string | null;
+          auto_cancel_warned_at?: string | null;
           block_ends_at: string;
           block_range?: never;
           buffer_minutes?: number;
           calendar_key?: string;
+          cancel_reason?: string | null;
           cancellation?: Json | null;
           cancelled_at?: string | null;
           cancelled_by?: string | null;
+          card_label?: string | null;
+          card_checked_at?: string | null;
+          card_failed_at?: string | null;
+          card_setup_intent_id?: string | null;
+          card_update_requested_at?: string | null;
+          checkout?: Json | null;
+          checkout_intent_ids?: string[];
+          checkout_started_at?: string | null;
+          checkout_tries?: number;
           choices: NonNullable<Json>;
           client_id?: string | null;
+          completed_at?: string | null;
+          confirm_by?: string | null;
+          confirm_sends?: number;
+          confirm_sent_at?: string | null;
           contact?: Json | null;
           created_at?: string;
+          created_by?: string;
           due_today_pence?: number | null;
           ends_at: string;
           fee_pence: number;
+          final_price_pence?: number | null;
           hold_expires_at?: string | null;
           hold_secret_hash?: string | null;
           id?: string;
           location?: unknown;
           minutes: number;
+          no_show_at?: string | null;
           notes?: string | null;
+          overlap_ok?: boolean;
           paid_at?: string | null;
+          past_at?: never;
+          policy_accepted_at?: string | null;
           policy_id?: string | null;
           price_pence: number;
+          protection_overridden_at?: string | null;
+          protection_status?: string;
           ref?: string;
           reschedule_count?: number;
           service_id?: string | null;
@@ -320,36 +481,66 @@ export type Database = {
           status?: string;
           stripe_customer_id?: string | null;
           stripe_payment_intent_id?: string | null;
+          stripe_payment_method_id?: string | null;
+          stylist_client_id?: string | null;
           stylist_id: string;
           terms?: Json | null;
+          tip_pence?: number;
+          unpaid_at?: string | null;
+          unsaved_refund_failed_at?: string | null;
+          unsaved_refund_failures?: number;
         };
         Update: {
           address?: Json | null;
           allergies?: string | null;
           allergies_consented_at?: string | null;
+          arrived_at?: string | null;
+          auto_cancel_warned_at?: string | null;
           block_ends_at?: string;
           block_range?: never;
           buffer_minutes?: number;
           calendar_key?: string;
+          cancel_reason?: string | null;
           cancellation?: Json | null;
           cancelled_at?: string | null;
           cancelled_by?: string | null;
+          card_label?: string | null;
+          card_checked_at?: string | null;
+          card_failed_at?: string | null;
+          card_setup_intent_id?: string | null;
+          card_update_requested_at?: string | null;
+          checkout?: Json | null;
+          checkout_intent_ids?: string[];
+          checkout_started_at?: string | null;
+          checkout_tries?: number;
           choices?: NonNullable<Json>;
           client_id?: string | null;
+          completed_at?: string | null;
+          confirm_by?: string | null;
+          confirm_sends?: number;
+          confirm_sent_at?: string | null;
           contact?: Json | null;
           created_at?: string;
+          created_by?: string;
           due_today_pence?: number | null;
           ends_at?: string;
           fee_pence?: number;
+          final_price_pence?: number | null;
           hold_expires_at?: string | null;
           hold_secret_hash?: string | null;
           id?: string;
           location?: unknown;
           minutes?: number;
+          no_show_at?: string | null;
           notes?: string | null;
+          overlap_ok?: boolean;
           paid_at?: string | null;
+          past_at?: never;
+          policy_accepted_at?: string | null;
           policy_id?: string | null;
           price_pence?: number;
+          protection_overridden_at?: string | null;
+          protection_status?: string;
           ref?: string;
           reschedule_count?: number;
           service_id?: string | null;
@@ -359,8 +550,14 @@ export type Database = {
           status?: string;
           stripe_customer_id?: string | null;
           stripe_payment_intent_id?: string | null;
+          stripe_payment_method_id?: string | null;
+          stylist_client_id?: string | null;
           stylist_id?: string;
           terms?: Json | null;
+          tip_pence?: number;
+          unpaid_at?: string | null;
+          unsaved_refund_failed_at?: string | null;
+          unsaved_refund_failures?: number;
         };
         Relationships: [
           {
@@ -385,6 +582,13 @@ export type Database = {
             referencedColumns: ["id"];
           },
           {
+            foreignKeyName: "bookings_stylist_client_id_fkey";
+            columns: ["stylist_client_id"];
+            isOneToOne: false;
+            referencedRelation: "stylist_clients";
+            referencedColumns: ["id"];
+          },
+          {
             foreignKeyName: "bookings_stylist_id_fkey";
             columns: ["stylist_id"];
             isOneToOne: false;
@@ -392,6 +596,25 @@ export type Database = {
             referencedColumns: ["id"];
           },
         ];
+      };
+      card_payment_details: {
+        Row: {
+          available_on: string;
+          destination_payment: string;
+          payment_intent_id: string;
+        };
+        ComputedFields: never;
+        Insert: {
+          available_on: string;
+          destination_payment: string;
+          payment_intent_id: string;
+        };
+        Update: {
+          available_on?: string;
+          destination_payment?: string;
+          payment_intent_id?: string;
+        };
+        Relationships: [];
       };
       closed_periods: {
         Row: {
@@ -465,6 +688,42 @@ export type Database = {
           },
         ];
       };
+      debt_recoveries: {
+        Row: {
+          amount_pence: number;
+          created_at: string;
+          debt_id: string;
+          id: string;
+          is_direct: boolean;
+          payment_intent_id: string;
+        };
+        ComputedFields: never;
+        Insert: {
+          amount_pence: number;
+          created_at?: string;
+          debt_id: string;
+          id?: string;
+          is_direct?: boolean;
+          payment_intent_id: string;
+        };
+        Update: {
+          amount_pence?: number;
+          created_at?: string;
+          debt_id?: string;
+          id?: string;
+          is_direct?: boolean;
+          payment_intent_id?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "debt_recoveries_debt_id_fkey";
+            columns: ["debt_id"];
+            isOneToOne: false;
+            referencedRelation: "stylist_debts";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
       default_addons: {
         Row: {
           group_id: string;
@@ -500,6 +759,122 @@ export type Database = {
             referencedColumns: ["id"];
           },
         ];
+      };
+      disputes: {
+        Row: {
+          amount_pence: number;
+          booking_id: string | null;
+          charge_id: string | null;
+          created_at: string;
+          evidence: NonNullable<Json>;
+          id: string;
+          is_held: boolean;
+          outcome: string | null;
+          reason: string | null;
+          respond_by: string | null;
+          responded_at: string | null;
+          returned_pence: number;
+          returned_transfer_id: string | null;
+          reversal_failed_at: string | null;
+          reversal_failures: number;
+          reversed_pence: number;
+          share_pence: number;
+          status: string;
+          stripe_dispute_id: string;
+          stripe_payment_intent_id: string | null;
+          stylist_id: string | null;
+          submit_failures: number;
+          transfer_reversal_id: string | null;
+          updated_at: string;
+        };
+        ComputedFields: never;
+        Insert: {
+          amount_pence: number;
+          booking_id?: string | null;
+          charge_id?: string | null;
+          created_at?: string;
+          evidence?: NonNullable<Json>;
+          id?: string;
+          is_held?: boolean;
+          outcome?: string | null;
+          reason?: string | null;
+          respond_by?: string | null;
+          responded_at?: string | null;
+          returned_pence?: number;
+          returned_transfer_id?: string | null;
+          reversal_failed_at?: string | null;
+          reversal_failures?: number;
+          reversed_pence?: number;
+          share_pence?: number;
+          status: string;
+          stripe_dispute_id: string;
+          stripe_payment_intent_id?: string | null;
+          stylist_id?: string | null;
+          submit_failures?: number;
+          transfer_reversal_id?: string | null;
+          updated_at?: string;
+        };
+        Update: {
+          amount_pence?: number;
+          booking_id?: string | null;
+          charge_id?: string | null;
+          created_at?: string;
+          evidence?: NonNullable<Json>;
+          id?: string;
+          is_held?: boolean;
+          outcome?: string | null;
+          reason?: string | null;
+          respond_by?: string | null;
+          responded_at?: string | null;
+          returned_pence?: number;
+          returned_transfer_id?: string | null;
+          reversal_failed_at?: string | null;
+          reversal_failures?: number;
+          reversed_pence?: number;
+          share_pence?: number;
+          status?: string;
+          stripe_dispute_id?: string;
+          stripe_payment_intent_id?: string | null;
+          stylist_id?: string | null;
+          submit_failures?: number;
+          transfer_reversal_id?: string | null;
+          updated_at?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "disputes_booking_id_fkey";
+            columns: ["booking_id"];
+            isOneToOne: false;
+            referencedRelation: "bookings";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "disputes_stylist_id_fkey";
+            columns: ["stylist_id"];
+            isOneToOne: false;
+            referencedRelation: "stylists";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
+      login_devices: {
+        Row: {
+          device: string;
+          last_seen_at: string;
+          user_id: string;
+        };
+        ComputedFields: never;
+        Insert: {
+          device: string;
+          last_seen_at?: string;
+          user_id: string;
+        };
+        Update: {
+          device?: string;
+          last_seen_at?: string;
+          user_id?: string;
+        };
+        Relationships: [];
       };
       notification_preferences: {
         Row: {
@@ -588,6 +963,67 @@ export type Database = {
           },
         ];
       };
+      payment_links: {
+        Row: {
+          amount_pence: number;
+          booking_id: string;
+          created_at: string;
+          expires_at: string;
+          fee_id: string | null;
+          id: string;
+          paid_at: string | null;
+          purpose: string;
+          sent_count: number;
+          status: string;
+          stripe_payment_intent_id: string | null;
+          token_hash: string;
+        };
+        ComputedFields: never;
+        Insert: {
+          amount_pence: number;
+          booking_id: string;
+          created_at?: string;
+          expires_at: string;
+          fee_id?: string | null;
+          id?: string;
+          paid_at?: string | null;
+          purpose?: string;
+          sent_count?: number;
+          status?: string;
+          stripe_payment_intent_id?: string | null;
+          token_hash: string;
+        };
+        Update: {
+          amount_pence?: number;
+          booking_id?: string;
+          created_at?: string;
+          expires_at?: string;
+          fee_id?: string | null;
+          id?: string;
+          paid_at?: string | null;
+          purpose?: string;
+          sent_count?: number;
+          status?: string;
+          stripe_payment_intent_id?: string | null;
+          token_hash?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "payment_links_booking_id_fkey";
+            columns: ["booking_id"];
+            isOneToOne: false;
+            referencedRelation: "bookings";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "payment_links_fee_id_fkey";
+            columns: ["fee_id"];
+            isOneToOne: false;
+            referencedRelation: "booking_fees";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
       payment_policies: {
         Row: {
           created_at: string;
@@ -651,6 +1087,143 @@ export type Database = {
           },
         ];
       };
+      payments: {
+        Row: {
+          amount_pence: number;
+          booking_id: string;
+          card_fee_pence: number | null;
+          corrected_at: string | null;
+          created_at: string;
+          fee_id: string | null;
+          id: string;
+          kind: string;
+          method: string;
+          payout_id: string | null;
+          platform_fee_pence: number;
+          stripe_payment_intent_id: string | null;
+          stripe_transfer_id: string | null;
+          tip_pence: number;
+          transfer_failed_at: string | null;
+          transfer_failures: number;
+          transfer_pending: boolean;
+        };
+        ComputedFields: never;
+        Insert: {
+          amount_pence: number;
+          booking_id: string;
+          card_fee_pence?: never;
+          corrected_at?: string | null;
+          created_at?: string;
+          fee_id?: string | null;
+          id?: string;
+          kind: string;
+          method?: string;
+          payout_id?: string | null;
+          platform_fee_pence?: number;
+          stripe_payment_intent_id?: string | null;
+          stripe_transfer_id?: string | null;
+          tip_pence?: number;
+          transfer_failed_at?: string | null;
+          transfer_failures?: number;
+          transfer_pending?: boolean;
+        };
+        Update: {
+          amount_pence?: number;
+          booking_id?: string;
+          card_fee_pence?: never;
+          corrected_at?: string | null;
+          created_at?: string;
+          fee_id?: string | null;
+          id?: string;
+          kind?: string;
+          method?: string;
+          payout_id?: string | null;
+          platform_fee_pence?: number;
+          stripe_payment_intent_id?: string | null;
+          stripe_transfer_id?: string | null;
+          tip_pence?: number;
+          transfer_failed_at?: string | null;
+          transfer_failures?: number;
+          transfer_pending?: boolean;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "payments_booking_id_fkey";
+            columns: ["booking_id"];
+            isOneToOne: false;
+            referencedRelation: "bookings";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "payments_fee_id_fkey";
+            columns: ["fee_id"];
+            isOneToOne: false;
+            referencedRelation: "booking_fees";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "payments_payout_id_fkey";
+            columns: ["payout_id"];
+            isOneToOne: false;
+            referencedRelation: "payouts";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
+      payouts: {
+        Row: {
+          amount_pence: number;
+          arrival_date: string | null;
+          bank_label: string | null;
+          created_at: string;
+          emailed_status: string | null;
+          failure_message: string | null;
+          id: string;
+          status: string;
+          status_at: string;
+          stripe_payout_id: string;
+          stylist_id: string;
+          updated_at: string;
+        };
+        ComputedFields: never;
+        Insert: {
+          amount_pence: number;
+          arrival_date?: string | null;
+          bank_label?: string | null;
+          created_at?: string;
+          emailed_status?: string | null;
+          failure_message?: string | null;
+          id?: string;
+          status: string;
+          status_at?: string;
+          stripe_payout_id: string;
+          stylist_id: string;
+          updated_at?: string;
+        };
+        Update: {
+          amount_pence?: number;
+          arrival_date?: string | null;
+          bank_label?: string | null;
+          created_at?: string;
+          emailed_status?: string | null;
+          failure_message?: string | null;
+          id?: string;
+          status?: string;
+          status_at?: string;
+          stripe_payout_id?: string;
+          stylist_id?: string;
+          updated_at?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "payouts_stylist_id_fkey";
+            columns: ["stylist_id"];
+            isOneToOne: false;
+            referencedRelation: "stylists";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
       portfolio_photos: {
         Row: {
           created_at: string;
@@ -692,6 +1265,7 @@ export type Database = {
           first_name: string | null;
           id: string;
           last_name: string | null;
+          login_alerts: boolean;
           marketing_opt_in: boolean;
           phone: string | null;
           stripe_customer_id: string | null;
@@ -704,6 +1278,7 @@ export type Database = {
           first_name?: string | null;
           id: string;
           last_name?: string | null;
+          login_alerts?: boolean;
           marketing_opt_in?: boolean;
           phone?: string | null;
           stripe_customer_id?: string | null;
@@ -715,6 +1290,7 @@ export type Database = {
           first_name?: string | null;
           id?: string;
           last_name?: string | null;
+          login_alerts?: boolean;
           marketing_opt_in?: boolean;
           phone?: string | null;
           stripe_customer_id?: string | null;
@@ -739,6 +1315,58 @@ export type Database = {
           window_start?: string;
         };
         Relationships: [];
+      };
+      refunds: {
+        Row: {
+          amount_pence: number;
+          booking_id: string;
+          created_at: string;
+          id: string;
+          method: string;
+          note: string | null;
+          payout_id: string | null;
+          reason: string;
+          stripe_refund_id: string | null;
+        };
+        ComputedFields: never;
+        Insert: {
+          amount_pence: number;
+          booking_id: string;
+          created_at?: string;
+          id?: string;
+          method?: string;
+          note?: string | null;
+          payout_id?: string | null;
+          reason: string;
+          stripe_refund_id?: string | null;
+        };
+        Update: {
+          amount_pence?: number;
+          booking_id?: string;
+          created_at?: string;
+          id?: string;
+          method?: string;
+          note?: string | null;
+          payout_id?: string | null;
+          reason?: string;
+          stripe_refund_id?: string | null;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "refunds_booking_id_fkey";
+            columns: ["booking_id"];
+            isOneToOne: false;
+            referencedRelation: "bookings";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "refunds_payout_id_fkey";
+            columns: ["payout_id"];
+            isOneToOne: false;
+            referencedRelation: "payouts";
+            referencedColumns: ["id"];
+          },
+        ];
       };
       reserved_slugs: {
         Row: {
@@ -1054,8 +1682,103 @@ export type Database = {
           },
         ];
       };
+      stylist_clients: {
+        Row: {
+          blocked_at: string | null;
+          created_at: string;
+          deleted_at: string | null;
+          email: string | null;
+          first: string;
+          hair_notes: string | null;
+          id: string;
+          last: string | null;
+          phone: string | null;
+          photo_path: string | null;
+          stylist_id: string;
+        };
+        ComputedFields: never;
+        Insert: {
+          blocked_at?: string | null;
+          created_at?: string;
+          deleted_at?: string | null;
+          email?: string | null;
+          first: string;
+          hair_notes?: string | null;
+          id?: string;
+          last?: string | null;
+          phone?: string | null;
+          photo_path?: string | null;
+          stylist_id: string;
+        };
+        Update: {
+          blocked_at?: string | null;
+          created_at?: string;
+          deleted_at?: string | null;
+          email?: string | null;
+          first?: string;
+          hair_notes?: string | null;
+          id?: string;
+          last?: string | null;
+          phone?: string | null;
+          photo_path?: string | null;
+          stylist_id?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "stylist_clients_stylist_id_fkey";
+            columns: ["stylist_id"];
+            isOneToOne: false;
+            referencedRelation: "stylists";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
+      stylist_debts: {
+        Row: {
+          amount_pence: number;
+          created_at: string;
+          dispute_id: string;
+          id: string;
+          recovered_pence: number;
+          stylist_id: string;
+        };
+        ComputedFields: never;
+        Insert: {
+          amount_pence: number;
+          created_at?: string;
+          dispute_id: string;
+          id?: string;
+          recovered_pence?: number;
+          stylist_id: string;
+        };
+        Update: {
+          amount_pence?: number;
+          created_at?: string;
+          dispute_id?: string;
+          id?: string;
+          recovered_pence?: number;
+          stylist_id?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "stylist_debts_dispute_id_fkey";
+            columns: ["dispute_id"];
+            isOneToOne: true;
+            referencedRelation: "disputes";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "stylist_debts_stylist_id_fkey";
+            columns: ["stylist_id"];
+            isOneToOne: false;
+            referencedRelation: "stylists";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
       stylist_private: {
         Row: {
+          activity_seen_at: string | null;
           city: string | null;
           line1: string | null;
           line2: string | null;
@@ -1064,6 +1787,7 @@ export type Database = {
         };
         ComputedFields: never;
         Insert: {
+          activity_seen_at?: string | null;
           city?: string | null;
           line1?: string | null;
           line2?: string | null;
@@ -1071,6 +1795,7 @@ export type Database = {
           stylist_id: string;
         };
         Update: {
+          activity_seen_at?: string | null;
           city?: string | null;
           line1?: string | null;
           line2?: string | null;
@@ -1398,11 +2123,43 @@ export type Database = {
       [_ in never]: never;
     };
     Functions: {
+      add_checkout_intent: {
+        Args: { intent: string; target: string };
+        Returns: undefined;
+      };
+      apply_recovery: {
+        Args: {
+          account: string;
+          direct?: boolean;
+          intent: string;
+          recovered: number;
+        };
+        Returns: number;
+      };
+      auto_cancel_unconfirmed: {
+        Args: Record<PropertyKey, never>;
+        Returns: undefined;
+      };
       become_stylist: { Args: { details: Json }; Returns: undefined };
       booking_fee_pence: { Args: { price_pence: number }; Returns: number };
+      cancel_balance_link: { Args: { target: string }; Returns: undefined };
       cancel_managed_booking: {
         Args: { cancellation: Json; token: string };
         Returns: undefined;
+      };
+      cancel_studio_booking: {
+        Args: {
+          cancellation: Json;
+          owner: string;
+          reason: string;
+          target: string;
+          who: string;
+        };
+        Returns: undefined;
+      };
+      change_booking_client: {
+        Args: { contact: Json; protect: boolean; target: string };
+        Returns: Json;
       };
       change_slug: { Args: { new_slug: string }; Returns: string };
       checkout_booking: {
@@ -1421,6 +2178,15 @@ export type Database = {
       claim_booking_invite: {
         Args: { token: string; user_id: string };
         Returns: number;
+      };
+      claim_checkout: {
+        Args: { input: Json; owner: string; target: string };
+        Returns: Json;
+      };
+      claim_due_fees: { Args: { batch_size: number }; Returns: Json[] };
+      claim_fee_retry: {
+        Args: { owner: string; target_booking: string };
+        Returns: Json;
       };
       claim_notifications: {
         Args: { batch_size?: number };
@@ -1445,21 +2211,115 @@ export type Database = {
           isSetofReturn: true;
         };
       };
+      claim_pending_transfers: {
+        Args: { batch_size: number };
+        Returns: {
+          amount_pence: number;
+          payment_id: string;
+          payment_intent_id: string;
+          stylist_account: string;
+          transfer_failures: number;
+        }[];
+      };
+      claim_unsaved_charges: {
+        Args: { batch_size: number };
+        Returns: {
+          booking_id: string;
+          held_at: string;
+          intent_ids: string[];
+          refund_failures: number;
+          saved_intents: string[];
+        }[];
+      };
+      clean_contact: { Args: { contact: Json }; Returns: Json };
       close_business: { Args: Record<PropertyKey, never>; Returns: undefined };
-      confirm_booking_payment: { Args: { intent: string }; Returns: string };
+      confirm_booking_payment: {
+        Args: { amount?: number; intent: string; target_booking?: string };
+        Returns: string;
+      };
+      confirm_link_payment: {
+        Args: {
+          intent: string;
+          target_link: string;
+          transfer_pending: boolean;
+        };
+        Returns: string;
+      };
+      confirm_without_protection: {
+        Args: { target: string };
+        Returns: undefined;
+      };
+      correct_recorded_payment: {
+        Args: { amount: number; target: string; tip: number; via: string };
+        Returns: undefined;
+      };
       create_booking_token: {
         Args: { expires_at: string; purpose: string; target: string };
         Returns: string;
+      };
+      create_studio_booking: {
+        Args: {
+          addons: Json;
+          address: Json;
+          allow_overlap: boolean;
+          choices: Json;
+          contact: Json;
+          extra_minutes: number;
+          minutes: number;
+          origin: string;
+          price_pence: number;
+          protect: boolean;
+          slot_start: string;
+          stylist_note: string;
+          target_service: string;
+        };
+        Returns: Json;
       };
       create_stylist_business: {
         Args: { meta: Json; new_owner_id: string };
         Returns: string;
       };
+      delete_stylist_client: { Args: { target: string }; Returns: undefined };
       expire_booking_holds: {
         Args: Record<PropertyKey, never>;
         Returns: undefined;
       };
+      expire_payment_links: {
+        Args: Record<PropertyKey, never>;
+        Returns: undefined;
+      };
+      find_stylist_client: {
+        Args: { contact: Json; target_stylist: string };
+        Returns: {
+          blocked_at: string | null;
+          created_at: string;
+          deleted_at: string | null;
+          email: string | null;
+          first: string;
+          hair_notes: string | null;
+          id: string;
+          last: string | null;
+          phone: string | null;
+          photo_path: string | null;
+          stylist_id: string;
+        };
+        SetofOptions: {
+          from: "*";
+          to: "stylist_clients";
+          isOneToOne: true;
+          isSetofReturn: false;
+        };
+      };
+      finish_checkout: {
+        Args: { result: Json; target: string };
+        Returns: string;
+      };
+      finish_fee_settlement: {
+        Args: { result: Json; target: string };
+        Returns: undefined;
+      };
       get_account_kind: { Args: { lookup_email: string }; Returns: string };
+      get_account_security: { Args: Record<PropertyKey, never>; Returns: Json };
       get_available_slots: {
         Args: {
           choices: Json;
@@ -1470,35 +2330,64 @@ export type Database = {
         };
         Returns: string[];
       };
+      get_balance_due: {
+        Args: {
+          booking: Omit<
+            Database["public"]["Tables"]["bookings"]["Row"],
+            Database["public"]["Tables"]["bookings"]["ComputedFields"]
+          >;
+        };
+        Returns: number;
+      };
       get_booking_by_token: {
         Args: { token: string };
         Returns: {
           address: Json | null;
           allergies: string | null;
           allergies_consented_at: string | null;
+          arrived_at: string | null;
+          auto_cancel_warned_at: string | null;
           block_ends_at: string;
           block_range: unknown;
           buffer_minutes: number;
           calendar_key: string;
+          cancel_reason: string | null;
           cancellation: Json | null;
           cancelled_at: string | null;
           cancelled_by: string | null;
+          card_label: string | null;
+          checkout: Json | null;
+          checkout_intent_ids: string[];
+          checkout_started_at: string | null;
+          checkout_tries: number;
           choices: NonNullable<Json>;
           client_id: string | null;
+          completed_at: string | null;
+          confirm_by: string | null;
+          confirm_sends: number;
+          confirm_sent_at: string | null;
           contact: Json | null;
           created_at: string;
+          created_by: string;
           due_today_pence: number | null;
           ends_at: string;
           fee_pence: number;
+          final_price_pence: number | null;
           hold_expires_at: string | null;
           hold_secret_hash: string | null;
           id: string;
           location: unknown;
           minutes: number;
+          no_show_at: string | null;
           notes: string | null;
+          overlap_ok: boolean;
           paid_at: string | null;
+          past_at: string | null;
+          policy_accepted_at: string | null;
           policy_id: string | null;
           price_pence: number;
+          protection_overridden_at: string | null;
+          protection_status: string;
           ref: string;
           reschedule_count: number;
           service_id: string | null;
@@ -1508,8 +2397,14 @@ export type Database = {
           status: string;
           stripe_customer_id: string | null;
           stripe_payment_intent_id: string | null;
+          stripe_payment_method_id: string | null;
+          stylist_client_id: string | null;
           stylist_id: string;
           terms: Json | null;
+          tip_pence: number;
+          unpaid_at: string | null;
+          unsaved_refund_failed_at: string | null;
+          unsaved_refund_failures: number;
         };
         SetofOptions: {
           from: "*";
@@ -1522,6 +2417,7 @@ export type Database = {
         Args: { calendar_key: string; secret: string; target: string };
         Returns: Json;
       };
+      get_booking_confirmation: { Args: { token: string }; Returns: Json };
       get_booking_details: { Args: { target: string }; Returns: Json };
       get_booking_invite: { Args: { token: string }; Returns: Json };
       get_booking_status: {
@@ -1539,6 +2435,27 @@ export type Database = {
         };
         Returns: Json;
       };
+      get_card_fee_pence: { Args: { amount: number }; Returns: number };
+      get_client_unpaid_fee: {
+        Args: { email: string; phone: string; target_stylist: string };
+        Returns: Json;
+      };
+      get_confirm_by: {
+        Args: {
+          starts_at: string;
+          stylist: Omit<
+            Database["public"]["Tables"]["stylists"]["Row"],
+            Database["public"]["Tables"]["stylists"]["ComputedFields"]
+          >;
+          terms: Json;
+        };
+        Returns: string;
+      };
+      get_confirm_url: { Args: { target: string }; Returns: string };
+      get_contact_clients: {
+        Args: { contact: Json; target_stylist: string };
+        Returns: string[];
+      };
       get_day_slots: {
         Args: {
           buffer_minutes: number;
@@ -1549,11 +2466,50 @@ export type Database = {
         };
         Returns: string[];
       };
+      get_device_kind: { Args: { user_agent: string }; Returns: string };
+      get_device_label: { Args: { user_agent: string }; Returns: string };
+      get_dispute_evidence: {
+        Args: { owner: string; target: string };
+        Returns: Json;
+      };
       get_due_closure_photos: {
         Args: Record<PropertyKey, never>;
         Returns: string[];
       };
       get_due_closures: { Args: Record<PropertyKey, never>; Returns: string[] };
+      get_due_pence: {
+        Args: { fee: number; price: number; terms: Json };
+        Returns: number;
+      };
+      get_fee_amount: {
+        Args: {
+          booking: Omit<
+            Database["public"]["Tables"]["bookings"]["Row"],
+            Database["public"]["Tables"]["bookings"]["ComputedFields"]
+          >;
+          kind: string;
+        };
+        Returns: number;
+      };
+      get_fee_settlement: {
+        Args: {
+          fee: Omit<
+            Database["public"]["Tables"]["booking_fees"]["Row"],
+            Database["public"]["Tables"]["booking_fees"]["ComputedFields"]
+          >;
+        };
+        Returns: Json;
+      };
+      get_fee_split: {
+        Args: {
+          booking: Omit<
+            Database["public"]["Tables"]["bookings"]["Row"],
+            Database["public"]["Tables"]["bookings"]["ComputedFields"]
+          >;
+          fee: number;
+        };
+        Returns: Json;
+      };
       get_invite_token: {
         Args: { token: string };
         Returns: {
@@ -1573,6 +2529,10 @@ export type Database = {
           isSetofReturn: false;
         };
       };
+      get_manage_url: {
+        Args: { send: boolean; target: string };
+        Returns: string;
+      };
       get_managed_booking: { Args: { token: string }; Returns: Json };
       get_next_start: {
         Args: {
@@ -1584,18 +2544,163 @@ export type Database = {
         };
         Returns: string;
       };
+      get_open_minutes: {
+        Args: { check_day: string; target: string };
+        Returns: number;
+      };
+      get_owed_pence: { Args: { account: string }; Returns: number };
       get_owner_manage_token: { Args: { ref: string }; Returns: string };
+      get_paid_pence: { Args: { target: string }; Returns: number };
+      get_payment_link: { Args: { token: string }; Returns: Json };
+      get_payout_rank: { Args: { status: string }; Returns: number };
+      get_period_kpis: {
+        Args: { first_day: string; last_day: string; target: string };
+        Returns: Json;
+      };
+      get_protection_status: {
+        Args: {
+          client: Json;
+          is_past: boolean;
+          protect: boolean;
+          stylist: string;
+        };
+        Returns: string;
+      };
+      get_receipt_details: { Args: { target: string }; Returns: Json };
+      get_refund_sources: {
+        Args: { owner: string; target_booking: string };
+        Returns: {
+          payment_intent_id: string;
+          stripe_transfer_id: string;
+          stylist_share_pence: number;
+        }[];
+      };
       get_reschedule_slots: {
         Args: { from_date: string; to_date: string; token: string };
         Returns: string[];
       };
+      get_site: { Args: { origin: string }; Returns: string };
+      get_studio_activity: {
+        Args: { max_rows: number; target: string };
+        Returns: {
+          amount_pence: number;
+          at: string;
+          booking_id: string;
+          client_first: string;
+          id: string;
+          is_unread: boolean;
+          kind: string;
+          service: string;
+        }[];
+      };
+      get_studio_cancellation: {
+        Args: {
+          owner: string;
+          target: string;
+          waive_fee: boolean;
+          who: string;
+        };
+        Returns: Json;
+      };
+      get_studio_clients: {
+        Args: { target_stylist: string };
+        Returns: {
+          allergies: string;
+          allergies_at: string;
+          allergies_by: string;
+          blocked: boolean;
+          booking_paid_pence: number;
+          created_at: string;
+          email: string;
+          fee_paid_pence: number;
+          first: string;
+          hair_notes: string;
+          id: string;
+          last: string;
+          last_payment_at: string;
+          last_visit: string;
+          late_cancels: number;
+          no_shows: number;
+          paid_pence: number;
+          phone: string;
+          photo_path: string;
+          refund_pence: number;
+          upcoming: number;
+          visits: number;
+        }[];
+      };
+      get_studio_kpis: {
+        Args: { days: number; target: string };
+        Returns: Json;
+      };
+      get_studio_snapshot: {
+        Args: { addons: Json; priced: Json };
+        Returns: Json;
+      };
+      get_studio_terms: {
+        Args: {
+          price: number;
+          protect: boolean;
+          starts_at: string;
+          stylist: string;
+        };
+        Returns: Json;
+      };
+      get_stylist_ledger: {
+        Args: { target_stylist: string };
+        Returns: {
+          amount_pence: number;
+          appointment: string;
+          at: string;
+          booking_id: string;
+          booking_ref: string;
+          card_fee_pence: number;
+          client_id: string;
+          client_name: string;
+          description: string;
+          id: string;
+          method: string;
+          note: string;
+          payout_id: string;
+          service: string;
+          status: string;
+        }[];
+      };
       get_stylist_profile: { Args: { lookup: string }; Returns: Json };
+      get_unanswered_disputes: {
+        Args: { batch_size: number };
+        Returns: {
+          id: string;
+          owner_id: string;
+        }[];
+      };
+      get_unconfirmed_where: { Args: { target: string }; Returns: string };
+      get_unfinished_refunds: {
+        Args: { batch_size: number };
+        Returns: {
+          amount_pence: number;
+          booking_id: string;
+          cancelled_by: string;
+          payment_intent_id: string;
+        }[];
+      };
       get_unique_slug: { Args: { business_name: string }; Returns: string };
+      get_unrecovered_disputes: {
+        Args: { batch_size: number };
+        Returns: {
+          id: string;
+          stripe_dispute_id: string;
+        }[];
+      };
       has_recent_second_factor: {
         Args: Record<PropertyKey, never>;
         Returns: boolean;
       };
       has_second_factor: { Args: Record<PropertyKey, never>; Returns: boolean };
+      has_unpaid_fee: {
+        Args: { client: string; contact: Json; target_stylist: string };
+        Returns: boolean;
+      };
       hash_booking_code: {
         Args: { code: string; target: string };
         Returns: string;
@@ -1623,6 +2728,16 @@ export type Database = {
         Returns: boolean;
       };
       is_manage_verified: { Args: { token: string }; Returns: boolean };
+      is_refund_unfinished: {
+        Args: {
+          booking: Omit<
+            Database["public"]["Tables"]["bookings"]["Row"],
+            Database["public"]["Tables"]["bookings"]["ComputedFields"]
+          >;
+          who: string;
+        };
+        Returns: boolean;
+      };
       is_service_owner: {
         Args: { target_service_id: string };
         Returns: boolean;
@@ -1636,6 +2751,128 @@ export type Database = {
         Returns: boolean;
       };
       is_valid_slug: { Args: { candidate: string }; Returns: boolean };
+      link_payout: {
+        Args: {
+          intents: string[];
+          stripe_payout: string;
+          stripe_refunds: string[];
+        };
+        Returns: undefined;
+      };
+      lock_own_booking: {
+        Args: { target: string };
+        Returns: {
+          address: Json | null;
+          allergies: string | null;
+          allergies_consented_at: string | null;
+          arrived_at: string | null;
+          auto_cancel_warned_at: string | null;
+          block_ends_at: string;
+          block_range: unknown;
+          buffer_minutes: number;
+          calendar_key: string;
+          cancel_reason: string | null;
+          cancellation: Json | null;
+          cancelled_at: string | null;
+          cancelled_by: string | null;
+          card_label: string | null;
+          checkout: Json | null;
+          checkout_intent_ids: string[];
+          checkout_started_at: string | null;
+          checkout_tries: number;
+          choices: NonNullable<Json>;
+          client_id: string | null;
+          completed_at: string | null;
+          confirm_by: string | null;
+          confirm_sends: number;
+          confirm_sent_at: string | null;
+          contact: Json | null;
+          created_at: string;
+          created_by: string;
+          due_today_pence: number | null;
+          ends_at: string;
+          fee_pence: number;
+          final_price_pence: number | null;
+          hold_expires_at: string | null;
+          hold_secret_hash: string | null;
+          id: string;
+          location: unknown;
+          minutes: number;
+          no_show_at: string | null;
+          notes: string | null;
+          overlap_ok: boolean;
+          paid_at: string | null;
+          past_at: string | null;
+          policy_accepted_at: string | null;
+          policy_id: string | null;
+          price_pence: number;
+          protection_overridden_at: string | null;
+          protection_status: string;
+          ref: string;
+          reschedule_count: number;
+          service_id: string | null;
+          site: string;
+          snapshot: NonNullable<Json>;
+          starts_at: string;
+          status: string;
+          stripe_customer_id: string | null;
+          stripe_payment_intent_id: string | null;
+          stripe_payment_method_id: string | null;
+          stylist_client_id: string | null;
+          stylist_id: string;
+          terms: Json | null;
+          tip_pence: number;
+          unpaid_at: string | null;
+          unsaved_refund_failed_at: string | null;
+          unsaved_refund_failures: number;
+        };
+        SetofOptions: {
+          from: "*";
+          to: "bookings";
+          isOneToOne: true;
+          isSetofReturn: false;
+        };
+      };
+      lock_own_fee: {
+        Args: { target_booking: string };
+        Returns: {
+          amount_pence: number;
+          booking_id: string;
+          card_label: string | null;
+          charge_after: string;
+          charge_pence: number;
+          claimed_at: string | null;
+          created_at: string;
+          decline_message: string | null;
+          failed_runs: number;
+          hard_decline: boolean;
+          id: string;
+          kept_pence: number;
+          kind: string;
+          last_tried_at: string | null;
+          paid_at: string | null;
+          refund_pence: number;
+          refunded_pence: number;
+          reruns: number;
+          status: string;
+          tries: number;
+          waived_at: string | null;
+        };
+        SetofOptions: {
+          from: "*";
+          to: "booking_fees";
+          isOneToOne: true;
+          isSetofReturn: false;
+        };
+      };
+      mark_activity_seen: {
+        Args: { seen_until: string; target: string };
+        Returns: undefined;
+      };
+      mark_no_show: {
+        Args: { charge_fee: boolean; target: string };
+        Returns: undefined;
+      };
       mark_notification_failed: {
         Args: { error: string; notification_id: string };
         Returns: undefined;
@@ -1648,10 +2885,44 @@ export type Database = {
         Args: { notification_id: string };
         Returns: undefined;
       };
+      mark_transfer_sent: {
+        Args: { payment: string; transfer: string };
+        Returns: undefined;
+      };
       mask_email: { Args: { email: string }; Returns: string };
+      match_stylist_client: {
+        Args: { contact: Json; target_stylist: string };
+        Returns: string;
+      };
+      normalise_phone: { Args: { phone: string }; Returns: string };
+      note_checkout_declined: {
+        Args: { intent: string; target: string };
+        Returns: undefined;
+      };
+      note_refund_failure: {
+        Args: { message: string; target: string };
+        Returns: undefined;
+      };
+      note_reversal_failure: {
+        Args: { message: string; target: string };
+        Returns: undefined;
+      };
+      note_settlement_failure: {
+        Args: { message: string; target: string };
+        Returns: undefined;
+      };
+      note_submit_failure: { Args: { target: string }; Returns: undefined };
+      note_transfer_failure: {
+        Args: { message: string; payment: string };
+        Returns: undefined;
+      };
       owns_photo_path: { Args: { object_name: string }; Returns: boolean };
       price_booking: {
         Args: { choices: Json; target_service: string };
+        Returns: Json;
+      };
+      price_service: {
+        Args: { choices: Json; require_live: boolean; target_service: string };
         Returns: Json;
       };
       purge_closed_businesses: {
@@ -1684,6 +2955,10 @@ export type Database = {
         };
         Returns: string;
       };
+      queue_receipt: {
+        Args: { corrected: boolean; target: string };
+        Returns: undefined;
+      };
       queue_sms: {
         Args: {
           payload: Json;
@@ -1693,12 +2968,86 @@ export type Database = {
         };
         Returns: string;
       };
+      record_balance_paid: {
+        Args: { target: string; tip: number; via: string };
+        Returns: undefined;
+      };
+      record_dispute: { Args: { dispute: Json }; Returns: Json };
+      record_fee_paid: {
+        Args: { method: string; target_booking: string };
+        Returns: undefined;
+      };
+      record_refund: {
+        Args: { amount: number; reason: string; target: string };
+        Returns: undefined;
+      };
+      record_stripe_refund: {
+        Args: { amount: number; intent: string; refund_id: string };
+        Returns: undefined;
+      };
       refresh_go_live: { Args: { target: string }; Returns: undefined };
+      release_hold: {
+        Args: { secret: string; target: string };
+        Returns: undefined;
+      };
       renew_booking_invite: { Args: { token: string }; Returns: undefined };
       reopen_business: { Args: Record<PropertyKey, never>; Returns: undefined };
+      reopen_studio_booking: { Args: { target: string }; Returns: Json };
       reschedule_managed_booking: {
         Args: { slot_start: string; token: string };
         Returns: Json;
+      };
+      reschedule_studio_booking: {
+        Args: { allow_overlap: boolean; slot_start: string; target: string };
+        Returns: Json;
+      };
+      resend_balance_link: { Args: { target: string }; Returns: undefined };
+      resend_confirm_link: { Args: { target: string }; Returns: number };
+      resend_payment_link: {
+        Args: { target_booking: string };
+        Returns: undefined;
+      };
+      retry_stuck_fee: { Args: { target: string }; Returns: undefined };
+      retry_stuck_refund: { Args: { target: string }; Returns: undefined };
+      retry_stuck_transfer: { Args: { payment: string }; Returns: undefined };
+      revoke_confirm_links: { Args: { target: string }; Returns: undefined };
+      save_card_payment: {
+        Args: { available: string; destination: string; intent: string };
+        Returns: undefined;
+      };
+      save_dispute_fees: {
+        Args: { fees: number; target: string };
+        Returns: undefined;
+      };
+      save_dispute_recovery: {
+        Args: {
+          held: boolean;
+          reversal: string;
+          reversed: number;
+          share: number;
+          target: string;
+        };
+        Returns: undefined;
+      };
+      save_dispute_response: {
+        Args: { given: Json; response: string; target: string };
+        Returns: undefined;
+      };
+      save_payout: { Args: { account: string; payout: Json }; Returns: string };
+      save_stylist_client: {
+        Args: { details: Json; target?: string; target_stylist: string };
+        Returns: string;
+      };
+      schedule_booking_fee: {
+        Args: {
+          booking: Omit<
+            Database["public"]["Tables"]["bookings"]["Row"],
+            Database["public"]["Tables"]["bookings"]["ComputedFields"]
+          >;
+          kind: string;
+          split: Json;
+        };
+        Returns: undefined;
       };
       search_stylists: {
         Args: {
@@ -1732,17 +3081,102 @@ export type Database = {
         }[];
       };
       secure_booking_link: { Args: { token: string }; Returns: Json };
+      send_balance_link: {
+        Args: { link_id: string; target: string };
+        Returns: undefined;
+      };
       send_booking_code: { Args: { token: string }; Returns: Json };
+      send_confirm_link: {
+        Args: { counts: boolean; target: string; template: string };
+        Returns: undefined;
+      };
+      send_fee_link: {
+        Args: {
+          fee: Omit<
+            Database["public"]["Tables"]["booking_fees"]["Row"],
+            Database["public"]["Tables"]["booking_fees"]["ComputedFields"]
+          >;
+          link_id: string;
+        };
+        Returns: undefined;
+      };
       send_notifications_now: {
         Args: Record<PropertyKey, never>;
         Returns: undefined;
       };
+      send_studio_booking_notice: {
+        Args: { target: string; template: string };
+        Returns: undefined;
+      };
       service_from_pence: { Args: { target: string }; Returns: number };
+      set_booking_address: {
+        Args: { address: string; target: string };
+        Returns: undefined;
+      };
+      set_booking_status: {
+        Args: { next_status: string; target: string };
+        Returns: undefined;
+      };
+      set_cancel_refund: {
+        Args: { refund_id: string; refunded: number; target: string };
+        Returns: undefined;
+      };
+      set_client_blocked: {
+        Args: { blocked: boolean; target: string };
+        Returns: undefined;
+      };
+      set_link_intent: {
+        Args: { intent: string; link: string };
+        Returns: undefined;
+      };
+      set_stylist_note: {
+        Args: { note: string; target: string };
+        Returns: undefined;
+      };
+      settle_dispute: {
+        Args: {
+          returned: number;
+          target: string;
+          transfer: string;
+          won: boolean;
+        };
+        Returns: undefined;
+      };
+      settle_unsaved_charge: {
+        Args: {
+          intent: string;
+          message: string;
+          outcome: string;
+          target: string;
+        };
+        Returns: undefined;
+      };
+      sign_out_session: { Args: { target: string }; Returns: undefined };
       slugify: { Args: { value: string }; Returns: string };
+      start_booking_confirmation: { Args: { token: string }; Returns: Json };
+      start_link_payment: { Args: { token: string }; Returns: Json };
+      undo_checkout: { Args: { target: string }; Returns: undefined };
+      undo_no_show: { Args: { target: string }; Returns: undefined };
+      update_studio_booking: {
+        Args: {
+          addons: Json;
+          allow_overlap: boolean;
+          choices: Json;
+          extra_minutes: number;
+          minutes: number;
+          price_pence: number;
+          price_reason: string;
+          slot_start: string;
+          target: string;
+          target_service: string;
+        };
+        Returns: Json;
+      };
       verify_booking_code: {
         Args: { code: string; token: string };
         Returns: string;
       };
+      waive_fee: { Args: { target_booking: string }; Returns: undefined };
     };
     Enums: {
       [_ in never]: never;

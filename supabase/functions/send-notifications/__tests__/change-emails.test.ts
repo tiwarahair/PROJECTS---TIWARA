@@ -1,13 +1,16 @@
 import { describe, expect, it } from "vitest";
 import {
   bookingCancelled,
+  bookingCancelledByStylist,
   bookingCode,
   bookingLinkReset,
+  bookingMovedByStylist,
   bookingRescheduled,
   clientCancelled,
   clientRescheduled,
 } from "../change-emails";
 import type { ChangedBooking } from "../change-emails";
+import { disputeOpened, feeCancelled, feeDeclined, feeScheduled, feeUnpaid, feeWaived } from "../fee-emails";
 import { renderSms } from "../sms";
 
 const booking: ChangedBooking = {
@@ -52,6 +55,17 @@ describe("cancellation emails", () => {
     expect(text).not.toContain("refunded to your card");
   });
 
+  it("tell the client the stylist cancelled and everything is refunded", () => {
+    const { subject, text } = bookingCancelledByStylist({
+      ...booking,
+      cancellation: { refund_pence: 3163, kept_pence: 0, charge_pence: 0 },
+    });
+
+    expect(subject).toBe("Tiwára's House cancelled your booking");
+    expect(text).toContain("£31.63 is refunded to your card, including the booking fee.");
+    expect(text).not.toContain("This wasn’t me");
+  });
+
   it("tell the stylist the time is free and what they keep", () => {
     const { subject, text } = clientCancelled({ ...booking, ...studio });
 
@@ -68,6 +82,15 @@ describe("reschedule emails", () => {
 
     expect(email.text).toContain("Silk press with Tiwára's House is now on Thursday 22 October at 17:30 (UK time).");
     expect(email.text).toContain(`Manage your booking: ${booking.manage_url}`);
+    expect(email.attachments?.[0]?.content).toContain("DTSTART:20261022T163000Z");
+  });
+
+  it("tell the client the stylist moved it, without asking if it was them", () => {
+    const email = bookingMovedByStylist(booking);
+
+    expect(email.subject).toBe("Tiwára's House moved your booking");
+    expect(email.text).toContain(`Manage your booking: ${booking.manage_url}`);
+    expect(email.text).not.toContain("This wasn’t me");
     expect(email.attachments?.[0]?.content).toContain("DTSTART:20261022T163000Z");
   });
 
@@ -116,5 +139,100 @@ describe("link safety emails", () => {
     const guest = bookingLinkReset({ ...booking, save_details_url: "https://dev.tiwarashouse.com/save-details?token=new" });
 
     expect(guest.text).toContain("https://dev.tiwarashouse.com/save-details?token=new");
+  });
+});
+
+describe("fee emails", () => {
+  const fee = {
+    ...booking,
+    kind: "no_show" as const,
+    fee_pence: 5000,
+    kept_pence: 3000,
+    refund_pence: 0,
+    charge_pence: 2000,
+    charge_after: "2026-10-23T16:30:00Z",
+  };
+
+  it("say what's kept, charged and refunded, and when", () => {
+    const { subject, text } = feeScheduled(fee);
+
+    expect(subject).toBe("No-show fee: £50.00");
+    expect(text).toContain("£30.00 of what you paid is kept towards it.");
+    expect(text).toContain("£20.00 will be charged to your saved card on Friday 23 October at 17:30.");
+    expect(text).toContain("If you did attend, reply to this email");
+  });
+
+  it("explain a late cancellation fee", () => {
+    const { subject, text } = feeScheduled({ ...fee, kind: "late_cancel" });
+
+    expect(subject).toBe("Late cancellation fee: £50.00");
+    expect(text).toContain("after the free cancellation deadline");
+  });
+
+  it("tell the client an undone no-show's fee is off", () => {
+    const { subject, text } = feeCancelled({ ...booking, kind: "no_show", fee_pence: 5000 });
+
+    expect(subject).toBe("Your no-show fee is cancelled");
+    expect(text).toContain("has undone the no-show for Silk press");
+    expect(text).toContain("there’s no £50.00 fee and nothing will be charged");
+  });
+
+  it("tell the client a fee was waived and what comes back", () => {
+    const { subject, text } = feeWaived({ ...booking, kind: "no_show", fee_pence: 5000, refund_pence: 3000 });
+
+    expect(subject).toBe("Your £50.00 fee has been waived");
+    expect(text).toContain("£30.00 is refunded to your card.");
+  });
+});
+
+describe("declined fee and dispute emails", () => {
+  it("give the client a link to pay what the card didn't cover", () => {
+    const { subject, text } = feeDeclined({
+      ...booking,
+      kind: "no_show",
+      fee_pence: 5000,
+      amount_pence: 2000,
+      card_label: "Visa •••• 4242",
+      expires_at: "2026-10-30T16:30:00Z",
+      pay_url: "https://dev.tiwarashouse.com/pay?token=abc",
+    });
+
+    expect(subject).toBe("Pay your £20.00 no-show fee");
+    expect(text).toContain("We couldn’t charge Visa •••• 4242");
+    expect(text).toContain("Pay £20.00: https://dev.tiwarashouse.com/pay?token=abc");
+  });
+
+  it("remind the client two days before the link runs out, with a fresh link", () => {
+    const { subject, text } = feeDeclined({
+      ...booking,
+      kind: "no_show",
+      fee_pence: 5000,
+      amount_pence: 2000,
+      card_label: null,
+      expires_at: "2026-10-30T16:30:00Z",
+      pay_url: "https://dev.tiwarashouse.com/pay?token=new",
+      is_reminder: true,
+    });
+
+    expect(subject).toBe("Reminder: pay your £20.00 no-show fee");
+    expect(text).toContain("This link replaces the one we sent before.");
+  });
+
+  it("tell the stylist the fee is unpaid and what they can do", () => {
+    const { text } = feeUnpaid({
+      ...booking,
+      kind: "late_cancel",
+      amount_pence: 2000,
+      card_label: null,
+      studio_url: "https://dev.tiwarashouse.com/studio",
+    });
+
+    expect(text).toContain("Nia Okafor’s card was declined for the £20.00 late cancellation fee");
+  });
+
+  it("tell the stylist about a dispute", () => {
+    expect(disputeOpened({ ...booking, amount_pence: 3163, reason: "product_not_received" }).text).toContain(
+      "The bank’s reason: product not received.",
+    );
   });
 });

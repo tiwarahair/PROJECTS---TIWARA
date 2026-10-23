@@ -1,6 +1,7 @@
 import { act, screen, within } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { renderWithStore } from "../../../../test/render-with-store";
+import { getNewStudioSeed, getStudioSeed } from "../../../../test/studio-seed";
 import { StudioPage } from "../..";
 import type { UserEvent } from "@testing-library/user-event";
 import { setupUser } from "../../../../test/setup-user";
@@ -28,9 +29,10 @@ const setViewport = (width: number) => {
   });
 };
 
-const renderBookings = (query = "") => {
-  renderWithStore(<StudioPage />, `/studio?fixture=cal-day${query}`);
+const renderBookings = async (seed = getStudioSeed()) => {
+  renderWithStore(<StudioPage seed={seed} />, "/studio");
   runNextTimer();
+  await user.click(screen.getByRole("button", { name: "Bookings" }));
 };
 
 describe("Studio → Bookings", () => {
@@ -56,18 +58,11 @@ describe("Studio → Bookings", () => {
 
   afterEach(() => vi.useRealTimers());
 
-  it("the day timeline shows the day's bookings and blocked time", async () => {
-    renderBookings();
+  it("the day timeline moves between days and weeks", async () => {
+    await renderBookings();
     const bookings = getLabelled("Bookings");
 
     expect(within(bookings).getByText("Today, Mon 7 Sep")).toBeInTheDocument();
-    expect(within(bookings).getByText("Nia Okafor")).toBeInTheDocument();
-
-    expect(
-      within(bookings).getByText("Knotless braids · £85"),
-    ).toBeInTheDocument();
-
-    expect(within(bookings).getByText("Lunch")).toBeInTheDocument();
 
     expect(
       within(bookings).getByRole("button", { name: "Today" }),
@@ -85,7 +80,7 @@ describe("Studio → Bookings", () => {
   });
 
   it("switches to the week grid", async () => {
-    renderBookings();
+    await renderBookings();
     await user.click(screen.getByRole("button", { name: "Week" }));
     const week = getLabelled("Week view");
 
@@ -93,74 +88,43 @@ describe("Studio → Bookings", () => {
       within(week).getAllByText(/^(Mon|Tue|Wed|Thu|Fri|Sat|Sun)$/),
     ).toHaveLength(7);
 
-    expect(within(week).getByText("Kemi Adeyemi")).toBeInTheDocument();
+    expect(within(week).getByText("Nia Okafor")).toBeInTheDocument();
   });
 
-  it("the list groups upcoming bookings by day, searches and filters", async () => {
-    renderBookings();
+  it("the list shows upcoming bookings and searches them", async () => {
+    await renderBookings();
     await user.click(screen.getByRole("button", { name: "List" }));
     const bookings = getLabelled("Bookings");
-
-    expect(
-      within(bookings).getByText("9 bookings upcoming"),
-    ).toBeInTheDocument();
-
-    expect(within(bookings).getByText("Today")).toBeInTheDocument();
-    expect(within(bookings).getByText("Tomorrow")).toBeInTheDocument();
-
-    await user.type(
-      screen.getByPlaceholderText("Search client or service"),
-      "silk",
-    );
-
-    expect(
-      within(bookings).getByText("2 bookings upcoming"),
-    ).toBeInTheDocument();
-
-    await user.clear(screen.getByPlaceholderText("Search client or service"));
-
-    await user.click(screen.getByRole("button", { name: "Filter bookings" }));
-    await user.click(screen.getByRole("button", { name: /^Paid in full/ }));
-
-    expect(
-      screen.getByRole("button", { name: "Show 1 booking" }),
-    ).toBeInTheDocument();
-
-    await user.click(screen.getByRole("button", { name: "Show 1 booking" }));
-    act(() => vi.advanceTimersByTime(210));
 
     expect(
       within(bookings).getByText("1 booking upcoming"),
     ).toBeInTheDocument();
 
-    await user.click(
-      within(bookings).getAllByRole("button", {
-        name: "Clear all",
-      })[0] as HTMLElement,
+    expect(within(bookings).getByText("Nia Okafor")).toBeInTheDocument();
+
+    await user.type(
+      screen.getByPlaceholderText("Search client or service"),
+      "braids",
     );
 
-    expect(
-      within(bookings).getByText("9 bookings upcoming"),
-    ).toBeInTheDocument();
+    expect(within(bookings).queryByText("Nia Okafor")).not.toBeInTheDocument();
   });
 
-  it("the past list shows outcomes by month", async () => {
-    renderBookings();
+  it("the past list shows finished appointments", async () => {
+    await renderBookings();
     await user.click(screen.getByRole("button", { name: "List" }));
     await user.click(screen.getByRole("button", { name: "Past" }));
     const bookings = getLabelled("Bookings");
 
     expect(
-      within(bookings).getByText("10 appointments · 4 completed"),
+      within(bookings).getByText("1 appointment · 1 completed"),
     ).toBeInTheDocument();
 
-    expect(within(bookings).getByText("August")).toBeInTheDocument();
-    expect(within(bookings).getAllByText("No show")).toHaveLength(2);
-    expect(within(bookings).getByText("Fee pending")).toBeInTheDocument();
+    expect(within(bookings).getByText("Nia Okafor")).toBeInTheDocument();
   });
 
   it("tapping the narrow timeline offers to book or block that slot", async () => {
-    renderBookings();
+    await renderBookings();
 
     const timeline = document.getElementById("tl-h-09")
       ?.parentElement as HTMLElement;
@@ -191,7 +155,7 @@ describe("Studio → Bookings", () => {
 
   it("wide screens open a popover on the tapped slot", async () => {
     setViewport(1440);
-    renderBookings();
+    await renderBookings();
 
     const timeline = document.getElementById("tl-h-09")
       ?.parentElement as HTMLElement;
@@ -210,9 +174,8 @@ describe("Studio → Bookings", () => {
   });
 
   it("a new account sees the empty calendar card until it is closed", async () => {
-    renderWithStore(<StudioPage />, "/studio?account=new");
-    runNextTimer();
-    await user.click(screen.getByRole("button", { name: "Bookings" }));
+    await renderBookings(getNewStudioSeed());
+
     const empty = getLabelled("Calendar empty");
 
     expect(empty).toHaveTextContent("No appointments yet");

@@ -1,9 +1,20 @@
 import { act, screen, waitFor, within } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { renderWithStore } from "../../../../test/render-with-store";
+import { getStudioSeed } from "../../../../test/studio-seed";
 import { StudioPage } from "../..";
 import type { UserEvent } from "@testing-library/user-event";
 import { setupUser } from "../../../../test/setup-user";
+
+// saves stay in flight, so the screen keeps what was done
+vi.mock("../../../../lib/studio-api/settings", async (importOriginal) => ({
+  ...(await importOriginal<
+    typeof import("../../../../lib/studio-api/settings")
+  >()),
+  updateStylist: vi.fn(() => new Promise(() => {})),
+  saveHours: vi.fn(() => new Promise(() => {})),
+  saveBookingRules: vi.fn(() => new Promise(() => {})),
+}));
 
 let user: UserEvent;
 
@@ -28,8 +39,11 @@ const setViewport = (width: number) => {
   });
 };
 
-const renderStudio = (query = "") => {
-  renderWithStore(<StudioPage />, `/studio${query}`);
+const renderStudio = () => {
+  renderWithStore(<StudioPage seed={getStudioSeed()} />, "/studio", {
+    signedIn: true,
+  });
+
   runNextTimer();
 };
 
@@ -177,14 +191,14 @@ describe("Studio → Settings", () => {
       screen.getByRole("heading", { level: 1, name: "Your profile" }),
     ).toBeInTheDocument();
 
-    expect(screen.getByDisplayValue("Tiwára's House")).toBeInTheDocument();
+    expect(screen.getByDisplayValue("Amara Hair")).toBeInTheDocument();
     await user.click(within(nav).getByRole("button", { name: "Availability" }));
 
     expect(
       screen.getByRole("heading", { level: 1, name: "Availability" }),
     ).toBeInTheDocument();
 
-    expect(screen.getByText("Lunch")).toBeInTheDocument();
+    expect(screen.getByText("Working hours")).toBeInTheDocument();
   });
 
   it("social fields take just the username", async () => {
@@ -351,6 +365,7 @@ describe("Studio → Settings", () => {
     );
 
     runNextTimer();
+    await act(() => Promise.resolve());
 
     expect(
       screen.getByRole("region", { name: "Set up your studio" }),

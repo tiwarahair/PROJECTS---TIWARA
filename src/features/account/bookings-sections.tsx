@@ -1,5 +1,5 @@
 import { Calendar, CreditCard, MapPin } from "lucide-react";
-import { ResponsiveImage } from "../../components/responsive-image/responsive-image";
+import { ResponsiveImage } from "../../components/responsive-image";
 import type { CSSProperties, KeyboardEvent, MouseEvent } from "react";
 import { Link } from "react-router";
 import { joinClassNames } from "../../utils/class-names";

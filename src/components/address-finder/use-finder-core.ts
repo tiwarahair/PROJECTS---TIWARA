@@ -11,14 +11,8 @@ import type {
 } from "./data";
 import { getInitialState, toEmittedAddress } from "./state";
 
-export const useFinderCore = ({
-  value,
-  onChange,
-  fixture = "",
-}: UseAddressFinderOptions) => {
-  const [state, setState] = useState<FinderState>(() =>
-    getInitialState(value, fixture),
-  );
+export const useFinderCore = ({ value, onChange }: UseAddressFinderOptions) => {
+  const [state, setState] = useState<FinderState>(() => getInitialState(value));
 
   const update = useCallback(
     (patch: Partial<FinderState>) =>

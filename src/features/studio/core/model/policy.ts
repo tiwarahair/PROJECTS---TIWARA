@@ -1,9 +1,11 @@
 import { formatMoney, roundToPence } from "../../../../utils/money";
+import { bookingFee } from "../../../../utils/pricing";
 import { parseAmountLabel } from "../format";
 import type {
   ConfirmDialog,
   PastRecord,
   StudioClient,
+  StudioPolicy,
   StudioState,
 } from "../types";
 
@@ -25,16 +27,14 @@ const getProtectionAmount = (
   return policy.mode === "full" ? price : 0;
 };
 
-const getBookingFee = (amount: number): number =>
-  amount > 0 ? Math.round((amount * 0.015 + 0.5) * 100) / 100 : 0;
-
+/** what a protection link asks the client to pay: the deposit or full price, plus the booking fee on the price. */
 export const getProtectionTotal = (
   state: StudioState,
   price: number,
 ): number => {
-  const amount = getProtectionAmount(state, price);
+  if (state.policy.mode === "none") return 0;
 
-  return Math.round((amount + getBookingFee(amount)) * 100) / 100;
+  return roundToPence(getProtectionAmount(state, price) + bookingFee(price));
 };
 
 /** Link expiry: 48 hours from sending, or 2 hours before the start, whichever is first. */
@@ -73,9 +73,9 @@ interface PolicyFee {
 export const getPolicyFee = (
   state: StudioState,
   kind: "late" | "noShow",
-  booking: { price: number },
+  booking: { price: number; agreedPolicy?: StudioPolicy },
 ): PolicyFee => {
-  const policy = state.policy;
+  const policy = booking.agreedPolicy ?? state.policy;
   const mode = policy.mode || "none";
   const price = +booking.price || 0;
   const fee = policy[kind];
@@ -83,7 +83,10 @@ export const getPolicyFee = (
   const deposit = roundToPence((price * (policy.deposit || 0)) / 100);
 
   const getRefund = () => {
-    if (mode === "deposit") return "Deposit refunded";
+    if (mode === "deposit")
+      return policy.refundable
+        ? "Deposit refunded"
+        : "Deposit kept (non-refundable)";
 
     return mode === "full" ? "Refunded in full" : "Nothing charged";
   };
@@ -154,24 +157,28 @@ export const getWaiveConfirm = (
 
   if (!isFresh)
     return {
-      title: `Refund ${formatMoney(fee)} to ${first}’s card ending 4242?`,
+      title: `Refund ${formatMoney(fee)} to ${first}’s ${row.feeCard ?? "card"}?`,
       body: "It usually takes 5–10 business days to arrive. The card fee isn’t returned.",
       yesLabel: `Refund ${formatMoney(fee)}`,
       yes: run,
     };
 
   const mode = policy.mode;
+  const back = row.feeWaiveRefund;
 
   const getBody = () => {
+    if (back != null)
+      return back > 0
+        ? `${first} won’t be charged for it and gets ${formatMoney(back)} back.`
+        : `${first} won’t be charged for it.`;
+
     if (mode === "deposit")
-      return policy.refundable
-        ? `Her ${formatMoney(deposit)} deposit will be refunded and she won’t be charged anything else.`
-        : `She won’t be charged the extra ${formatMoney(Math.max(0, fee - deposit))}. Her ${formatMoney(deposit)} deposit is non-refundable and will be kept.`;
+      return `${first}’s ${formatMoney(deposit)} deposit will be refunded and they won’t be charged anything else.`;
 
     if (mode === "full")
-      return `The ${formatMoney(fee)} will be refunded to her card.`;
+      return `The ${formatMoney(fee)} will be refunded to ${first}’s card.`;
 
-    return "She won’t be charged.";
+    return `${first} won’t be charged.`;
   };
 
   const body = getBody();

@@ -8,7 +8,7 @@ import {
   saveAddon,
   saveCategories,
   saveService,
-} from "../../../lib/studio-api";
+} from "../../../lib/studio-api/services";
 import { fromCategories, fromStudioAddon, fromStudioService } from "./records";
 import type { StudioSync } from "../core/sync";
 import type { StudioState } from "../core/types";
@@ -25,7 +25,7 @@ const getRemovedIds = <T extends { id: string }>(list: T[], previous: T[]) =>
 
 export const useCatalogueSync = (
   { categories, addons, services }: StudioState,
-  sync: StudioSync | null,
+  sync: StudioSync,
 ) => {
   const saved = useRef<Catalogue>({ categories, addons, services });
 
@@ -33,10 +33,9 @@ export const useCatalogueSync = (
     const before = saved.current;
 
     if (
-      !sync ||
-      (before.categories === categories &&
-        before.addons === addons &&
-        before.services === services)
+      before.categories === categories &&
+      before.addons === addons &&
+      before.services === services
     )
       return;
 

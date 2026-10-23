@@ -27,9 +27,14 @@ const terms = (
 });
 
 describe("the cancel preview", () => {
-  it("in time with a deposit: refunded", () => {
-    expect(getCancelLines(booking, terms(1500, 0, 0, false))).toEqual([
-      "Your £15.00 deposit is refunded to your card.",
+  it("in time with a deposit: refunded with the booking fee", () => {
+    expect(
+      getCancelLines(booking, {
+        ...terms(1663, 0, 0, false),
+        fee_refund_pence: 163,
+      }),
+    ).toEqual([
+      "£16.63 is refunded to your card, including the £1.63 booking fee.",
     ]);
   });
 

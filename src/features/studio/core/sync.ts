@@ -1,3 +1,4 @@
+import { SaveError } from "../../../lib/studio-writes";
 import type { StudioPatch } from "./types";
 
 /** Saves a real stylist's changes; Studio has already updated the screen, so a failure puts it back. */
@@ -26,12 +27,14 @@ export const createStudioSync = (
         .then(() => task(stylistId))
         .then(
           () => undefined,
-          () => {
+          (error: unknown) => {
             onRevert?.();
             setState(revert);
 
             notify(
-              "That change didn’t save. Check your connection and try again.",
+              error instanceof SaveError
+                ? error.message
+                : "That change didn’t save. Check your connection and try again.",
             );
           },
         );

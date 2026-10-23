@@ -33,17 +33,6 @@ export interface AddressSuggestion {
   secondaryLine: HighlightSegment[];
 }
 
-export type AddressFixture =
-  | ""
-  | "typing"
-  | "postcode"
-  | "typo"
-  | "nomatch"
-  | "summary"
-  | "manual"
-  | "errors"
-  | "manual-errors";
-
 export interface FinderState {
   mode: Mode;
   query: string;
@@ -61,17 +50,9 @@ export interface FinderState {
 export interface UseAddressFinderOptions {
   value?: AddressFinderValue | null;
   onChange?: (address: EmittedAddress | null) => void;
-  fixture?: AddressFixture;
   showErrors?: boolean;
   autoFocus?: boolean;
 }
 
 export const MAX_RESULTS = 5;
 export const SEARCH_DELAY_MS = 200;
-
-export const DEMO_ADDRESS: AddressDraft = {
-  line1: "14 Blossom Street",
-  line2: "",
-  town: "Manchester",
-  postcode: "M4 6AJ",
-};

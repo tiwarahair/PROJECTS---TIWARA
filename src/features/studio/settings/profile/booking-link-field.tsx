@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { changeSlug, isSlugFree } from "../../../../lib/studio-api";
+import { changeSlug, isSlugFree } from "../../../../lib/studio-api/settings";
 import { joinClassNames } from "../../../../utils/class-names";
 import { SHORT_MONTHS } from "../../../../utils/dates";
 import type { StudioController } from "../../core/use-studio";
@@ -33,14 +33,14 @@ const getNextChange = (changedAt: string | null) => {
 export const BookingLinkField = ({ studio }: { studio: StudioController }) => {
   const { state, setState, actions, context } = studio;
   const { account } = state;
-  const [value, setValue] = useState(account?.slug ?? "");
+  const [value, setValue] = useState(account.slug);
   const [status, setStatus] = useState<Status>("same");
-  const nextChange = getNextChange(account?.slugChangedAt ?? null);
+  const nextChange = getNextChange(account.slugChangedAt);
 
   useEffect(() => {
-    context.memo.isSlugEdited = !!account && value !== account.slug;
+    context.memo.isSlugEdited = value !== account.slug;
 
-    if (!account || value === account.slug) return setStatus("same");
+    if (value === account.slug) return setStatus("same");
 
     if (!SLUG_PATTERN.test(value) || value.length < 3 || value.length > 40)
       return setStatus("invalid");
@@ -67,7 +67,7 @@ export const BookingLinkField = ({ studio }: { studio: StudioController }) => {
   // the page's Save calls this first and stops when it returns false
   useEffect(() => {
     context.memo.saveSlug = async () => {
-      if (!account || status === "same") return true;
+      if (status === "same") return true;
 
       if (status !== "available") {
         actions.showToast("Choose an available booking link first.");
@@ -100,8 +100,6 @@ export const BookingLinkField = ({ studio }: { studio: StudioController }) => {
       context.memo.saveSlug = undefined;
     };
   }, [context, account, status, value, actions, setState]);
-
-  if (!account) return null;
 
   return (
     <div className={pages.field}>

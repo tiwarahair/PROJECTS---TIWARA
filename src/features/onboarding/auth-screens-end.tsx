@@ -1,9 +1,9 @@
 import { Check, Mail } from "lucide-react";
-import { PasswordMeter } from "../../components/password-meter/password-meter";
+import { PasswordMeter } from "../../components/password-meter";
 import { joinClassNames } from "../../utils/class-names";
 import { getOnboardingMeter } from "./auth-screens-account";
-import { PasswordInput, SubmitButton, TextField } from "./onboarding-fields";
-import { OnboardingTurnstile } from "./onboarding-turnstile";
+import { PasswordInput, SubmitButton, TextField } from "./fields";
+import { OnboardingTurnstile } from "./turnstile";
 import type { ScreenProps } from "./screen-props";
 import styles from "../../styles/features/onboarding/auth-screens.module.css";
 import { AuthAlert } from "./auth-alert";

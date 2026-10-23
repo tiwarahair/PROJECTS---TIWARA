@@ -2,22 +2,20 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { checkPassword, getPasswordView } from "../../utils/password";
 import type { PasswordCheckOptions } from "../../utils/password";
-import { getInitialPassword, getPasswordSchema } from "./password-schema";
+import { EMPTY_PASSWORD, getPasswordSchema } from "./password-schema";
 import type { PasswordValues } from "./password-schema";
 
 interface PasswordFormOptions {
-  search: string;
   isCodeSent: boolean;
   checkOptions: PasswordCheckOptions;
 }
 
 export const usePasswordForm = ({
-  search,
   isCodeSent,
   checkOptions,
 }: PasswordFormOptions) => {
   const passwordForm = useForm<PasswordValues>({
-    defaultValues: getInitialPassword(search),
+    defaultValues: EMPTY_PASSWORD,
     resolver: zodResolver(getPasswordSchema(isCodeSent, checkOptions)),
   });
 

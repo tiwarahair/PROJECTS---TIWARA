@@ -15,7 +15,7 @@ interface StudioBookingsProps {
 }
 
 export const StudioBookings = ({ studio, view }: StudioBookingsProps) => {
-  const { state, isWide, isDesktop, isNew } = studio;
+  const { state, isWide, isDesktop, hasBookings } = studio;
 
   return (
     <div
@@ -34,7 +34,9 @@ export const StudioBookings = ({ studio, view }: StudioBookingsProps) => {
             view.isCalendar && styles.cardCal,
           )}
         >
-          {isNew && !state.calendarEmptyHidden && <EmptyCard studio={studio} />}
+          {!hasBookings && !state.calendarEmptyHidden && (
+            <EmptyCard studio={studio} />
+          )}
           {view.isCalendar &&
             (view.isWeek ? (
               <WeekView view={view} />

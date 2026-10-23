@@ -97,8 +97,6 @@ export interface BookingState {
   guest: boolean;
   editContact: boolean;
   loginStart: "choice" | "email" | null;
-  board: boolean;
-  holdSeconds: number;
   hold: Hold | null;
   holding: boolean;
   holdError: "taken" | "failed" | null;

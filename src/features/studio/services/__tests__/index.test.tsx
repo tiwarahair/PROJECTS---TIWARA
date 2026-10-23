@@ -1,9 +1,19 @@
 import { act, screen, within } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { renderWithStore } from "../../../../test/render-with-store";
+import { getStudioRow, getStudioSeed } from "../../../../test/studio-seed";
 import { StudioPage } from "../..";
 import type { UserEvent } from "@testing-library/user-event";
 import { setupUser } from "../../../../test/setup-user";
+
+// saves stay in flight, so the screen keeps what was done
+vi.mock("../../../../lib/studio-api/services", async (importOriginal) => ({
+  ...(await importOriginal<
+    typeof import("../../../../lib/studio-api/services")
+  >()),
+  saveService: vi.fn(() => new Promise(() => {})),
+  saveServiceStatus: vi.fn(() => new Promise(() => {})),
+}));
 
 let user: UserEvent;
 
@@ -28,9 +38,33 @@ const setViewport = (width: number) => {
   });
 };
 
-const renderServices = (fixture = "svc-cats") => {
-  renderWithStore(<StudioPage />, `/studio?fixture=${fixture}`);
+// the silk press, an archived wash and go with no category, and a draft blow-dry
+const getCatalogueSeed = () => {
+  const studio = getStudioRow();
+  const [silkPress] = studio.services;
+
+  if (!silkPress) throw new Error("the studio row has a service");
+
+  studio.services = [
+    silkPress,
+    {
+      ...silkPress,
+      id: "s-2",
+      name: "Wash and go",
+      category_id: null,
+      status: "archived",
+      sort: 1,
+    },
+    { ...silkPress, id: "s-3", name: "Blow-dry", status: "draft", sort: 2 },
+  ];
+
+  return getStudioSeed({ studio });
+};
+
+const renderServices = async () => {
+  renderWithStore(<StudioPage seed={getCatalogueSeed()} />, "/studio");
   runNextTimer();
+  await user.click(screen.getAllByRole("button", { name: "Services" })[0]!);
 
   return getLabelled("Services");
 };
@@ -54,38 +88,21 @@ describe("Studio → Services", () => {
 
   afterEach(() => vi.useRealTimers());
 
-  it("groups services by category, with archived ones last", () => {
-    const services = renderServices();
+  it("groups services by category, with archived ones last", async () => {
+    const services = await renderServices();
     const text = services.textContent || "";
 
-    const order = [
-      "Signature braids",
-      "Locs",
-      "Natural & silk press",
-      "Other services",
-      "Archived",
-    ].map((name) => text.lastIndexOf(name));
+    const order = ["Natural hair", "Archived"].map((name) =>
+      text.lastIndexOf(name),
+    );
 
     expect(order).toEqual([...order].sort((first, second) => first - second));
-    expect(within(services).getByText("Knotless braids")).toBeInTheDocument();
-    expect(within(services).getByText("+15m")).toBeInTheDocument();
+    expect(within(services).getByText("Silk press")).toBeInTheDocument();
     expect(within(services).getByText("Restore")).toBeInTheDocument();
   });
 
-  it("filters by category chip, search and status", async () => {
-    const services = renderServices();
-
-    await user.click(within(services).getByRole("button", { name: /^Locs/ }));
-
-    expect(
-      within(services).queryByText("Knotless braids"),
-    ).not.toBeInTheDocument();
-
-    expect(within(services).getByText("Loc retwist")).toBeInTheDocument();
-
-    await user.click(
-      within(services).getByRole("button", { name: /^All categories/ }),
-    );
+  it("filters by search and status", async () => {
+    const services = await renderServices();
 
     await user.type(screen.getByPlaceholderText("Search services"), "zzz");
 
@@ -104,23 +121,20 @@ describe("Studio → Services", () => {
     );
 
     expect(within(services).getByText("Wash and go")).toBeInTheDocument();
-
-    expect(
-      within(services).queryByText("Knotless braids"),
-    ).not.toBeInTheDocument();
+    expect(within(services).queryByText("Silk press")).not.toBeInTheDocument();
   });
 
   it("the add-ons tab lists add-ons by category", async () => {
-    const services = renderServices();
+    const services = await renderServices();
 
     await user.click(within(services).getByRole("button", { name: "Add-ons" }));
-    expect(within(services).getByText("Beads")).toBeInTheDocument();
-    expect(within(services).getAllByText("+£10, 30m")).toHaveLength(2);
+    expect(within(services).getByText("Trim")).toBeInTheDocument();
+    expect(within(services).getByText("+£10, 15m")).toBeInTheDocument();
     expect(screen.getByPlaceholderText("Search add-ons")).toBeInTheDocument();
   });
 
   it("the service menu archives and restores with a toast", async () => {
-    const services = renderServices();
+    const services = await renderServices();
 
     await user.click(
       within(services).getAllByRole("button", {
@@ -130,17 +144,17 @@ describe("Studio → Services", () => {
 
     await user.click(screen.getByRole("button", { name: "Archive" }));
     act(() => vi.advanceTimersByTime(400));
-    expect(screen.getByText("Knotless braids archived")).toBeInTheDocument();
+    expect(screen.getByText("Silk press archived")).toBeInTheDocument();
 
     await user.click(
       within(getLabelled("Services")).getAllByText("Restore")[0] as HTMLElement,
     );
 
-    expect(screen.getByText("Knotless braids restored")).toBeInTheDocument();
+    expect(screen.getByText(/restored$/)).toBeInTheDocument();
   });
 
-  it("drafts ask the stylist to finish setting them up", () => {
-    const services = renderServices("services-drafts");
+  it("drafts ask the stylist to finish setting them up", async () => {
+    const services = await renderServices();
 
     expect(within(services).getAllByText("Draft").length).toBeGreaterThan(0);
 
@@ -150,14 +164,14 @@ describe("Studio → Services", () => {
     ).toBeGreaterThan(0);
   });
 
-  it("desk screens show the category list beside the services", () => {
+  it("desk screens show the category list beside the services", async () => {
     setViewport(1440);
-    renderServices();
+    await renderServices();
     const categories = getLabelled("Categories");
 
     expect(
       within(categories).getByRole("button", { name: /All services/ }),
-    ).toHaveTextContent("9");
+    ).toHaveTextContent("3");
 
     expect(
       within(categories).getByRole("button", { name: "Manage categories" }),

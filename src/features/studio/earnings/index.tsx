@@ -1,45 +1,67 @@
+import { skipToken } from "@reduxjs/toolkit/query";
 import { Earnings } from "../../../components/earnings";
+import { PageMessage } from "../../../components/page-message";
+import { useGetStudioEarningsQuery } from "../../../stores/api-slice";
 import { joinClassNames } from "../../../utils/class-names";
-import { CLIENTS } from "../core/seed-clients";
-import { getClient, hasTwoFactor, isLive } from "../core/model";
+import { getBookingLink, getClient, hasTwoFactor, isLive } from "../core/model";
 import type { StudioController } from "../core/use-studio";
+import { getDisputeBanner } from "./dispute";
+import { getFailedPayout, getLedgerClients, toLedger } from "./records";
 import styles from "../../../styles/features/studio/earnings/index.module.css";
 
 /** Studio → Earnings: the embedded Earnings dashboard. */
 export const StudioEarnings = ({ studio }: { studio: StudioController }) => {
-  const { state, setState, props, isWide, isDesktop, isNew, actions } = studio;
+  const { state, setState, isWide, isDesktop, actions } = studio;
   const live = isLive(state);
+  const { stylistId } = state.account;
 
-  const getScenario = () => {
-    if (isNew) return live ? "empty" : "setup";
+  const { data: earnings, isError } = useGetStudioEarningsQuery(
+    stylistId || skipToken,
+    { refetchOnMountOrArgChange: true },
+  );
 
-    if (props.earnings && props.earnings !== "default") return props.earnings;
+  const { business, tax, payoutBank } = state;
 
-    return props.payouts === "paused" ? "paused" : "default";
-  };
+  const className = joinClassNames(
+    styles.earnings,
+    isWide && styles.wide,
+    isDesktop && styles.desk,
+  );
 
-  const scenario = getScenario();
+  if (!stylistId || !earnings)
+    return (
+      <div className={className} data-screen-label="Earnings">
+        {isError && (
+          <PageMessage
+            title="Earnings didn’t load"
+            text="Check your connection, then try again."
+            linkLabel="Try again"
+            linkHref="/studio"
+            isReload
+          />
+        )}
+      </div>
+    );
+
+  // a real account's money, the legal details its statements need, and its own Stripe for bank details
+  const ledger = toLedger(earnings);
+  const clients = getLedgerClients(earnings);
 
   return (
-    <div
-      className={joinClassNames(
-        styles.earnings,
-        isWide && styles.wide,
-        isDesktop && styles.desk,
-      )}
-      data-screen-label="Earnings"
-    >
+    <div className={className} data-screen-label="Earnings">
       <Earnings
-        scenario={scenario}
+        bookingLink={getBookingLink(state)}
         layout="auto"
         contained={false}
         showTitle={true}
-        clients={CLIENTS.map(({ id, name, email }) => ({
-          id: id ?? "",
-          name,
-          email,
-        }))}
-        services={state.services}
+        ledger={{ ...ledger, scenario: live ? ledger.scenario : "setup" }}
+        clients={clients}
+        dispute={getDisputeBanner(studio, earnings)}
+        failedPayout={getFailedPayout(earnings)}
+        legalName={tax?.legalName ?? ""}
+        vatNumber={business.vatOn ? business.details?.vat : undefined}
+        bankLabel={payoutBank || "your bank account"}
+        onUpdateBank={() => void actions.openStripeDashboard()}
         businessName={state.profile.salon}
         onOpenBooking={(_bookingRef, clientId) => {
           setState({
@@ -48,9 +70,11 @@ export const StudioEarnings = ({ studio }: { studio: StudioController }) => {
             listScope: "past",
           });
 
-          actions.showToast(
-            `Showing past bookings for ${getClient(state, clientId).name}`,
-          );
+          const name =
+            clients.find(({ id }) => id === clientId)?.name ??
+            getClient(state, clientId).name;
+
+          actions.showToast(`Showing past bookings for ${name}`);
         }}
         onContinueSetup={() => {
           setState({ tab: "home", setupMinimised: false });

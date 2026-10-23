@@ -1,6 +1,6 @@
 import { joinClassNames } from "../../utils/class-names";
-import { BUSINESS_TYPES, CATEGORIES, SOURCES } from "./onboarding-data";
-import { OnboardingTurnstile } from "./onboarding-turnstile";
+import { BUSINESS_TYPES, CATEGORIES, SOURCES } from "./data";
+import { OnboardingTurnstile } from "./turnstile";
 import type { ScreenProps } from "./screen-props";
 import fieldStyles from "../../styles/features/onboarding/wizard-field.module.css";
 import styles from "../../styles/features/onboarding/wizard-steps.module.css";

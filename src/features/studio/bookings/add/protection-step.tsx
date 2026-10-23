@@ -1,4 +1,4 @@
-import { Shield } from "lucide-react";
+import { Mail, Shield } from "lucide-react";
 import { joinClassNames } from "../../../../utils/class-names";
 import type { AddBookingView } from "./view";
 import styles from "../../../../styles/features/studio/bookings/add/protection-step.module.css";
@@ -25,25 +25,38 @@ export const ProtectionStep = ({ view }: ProtectionStepProps) => (
       </div>
     </div>
     <div className={styles.protOptions}>
-      {view.protectionOptions.map(({ key, label, subtitle, isOn, pick }) => (
-        <button
-          key={key}
-          className={joinClassNames(
-            styles.protOption,
-            isOn && styles.protOptionOn,
-          )}
-          onClick={pick}
-        >
-          <span className={styles.radio}>
-            <span className={styles.dot}></span>
-          </span>
-          <span className={shared.grow}>
-            <span className={styles.protLabel}>{label}</span>
-            <span className={styles.protSub}>{subtitle}</span>
-          </span>
-        </button>
-      ))}
+      {view.protectionOptions.map(
+        ({ key, label, subtitle, isOn, isOff, pick }) => (
+          <button
+            key={key}
+            className={joinClassNames(
+              styles.protOption,
+              isOn && styles.protOptionOn,
+              isOff && styles.protOptionOff,
+            )}
+            onClick={pick}
+            disabled={isOff}
+          >
+            <span className={styles.radio}>
+              <span className={styles.dot}></span>
+            </span>
+            <span className={shared.grow}>
+              <span className={styles.protLabel}>{label}</span>
+              <span className={styles.protSub}>{subtitle}</span>
+            </span>
+          </button>
+        ),
+      )}
     </div>
+    {!!view.emailNotice && (
+      <div className={joinClassNames(shared.feeNote, styles.emailNote)}>
+        <Mail size={16} strokeWidth={1.7} className={shared.feeNoteIcon} />
+        <span>{view.emailNotice}</span>
+        <button className={shared.feeNoteLink} onClick={view.addEmail}>
+          Add email
+        </button>
+      </div>
+    )}
     <div className={styles.protFoot}>{view.protectionFootnote}</div>
     {view.isProtectionSend && (
       <>

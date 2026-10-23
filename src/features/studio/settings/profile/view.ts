@@ -12,7 +12,7 @@ import type { StudioController } from "../../core/use-studio";
 export const getProfileView = (studio: StudioController) => {
   const { state, setState, actions, context } = studio;
   const { showToast, leavePage, checkDone } = actions;
-  const { sync, saveStylist, markSaved } = getSettingsSave(studio);
+  const { saveStylist, markSaved } = getSettingsSave(studio);
 
   const readFile = (
     event: ChangeEvent<HTMLInputElement>,
@@ -29,43 +29,21 @@ export const getProfileView = (studio: StudioController) => {
     event.target.value = "";
   };
 
-  const store = (key: string, value: string) => {
-    try {
-      localStorage.setItem(key, value);
-    } catch {
-      // storage can be blocked
-    }
-  };
-
   const setProfile = (patch: Partial<typeof state.profile>) =>
     setState(({ profile }) => ({ profile: { ...profile, ...patch } }));
 
   return {
     onCoverFile: (event: ChangeEvent<HTMLInputElement>) =>
-      readFile(event, (url, file) => {
-        if (sync) return replacePhoto(context, "cover", file, url);
-
-        setState({ coverUrl: url });
-        store("studio.cover", url);
-      }),
+      readFile(event, (url, file) => replacePhoto(context, "cover", file, url)),
     onAvatarFile: (event: ChangeEvent<HTMLInputElement>) =>
-      readFile(event, (url, file) => {
-        if (sync) return replacePhoto(context, "avatar", file, url);
-
-        setState({ avatarUrl: url });
-        store("studio.avatar", url);
-      }),
+      readFile(event, (url, file) =>
+        replacePhoto(context, "avatar", file, url),
+      ),
     setProfile,
     portfolio: state.portfolio.map(({ id, src }) => ({
       key: id,
       src,
-      remove: () => {
-        if (sync) return removePortfolioItem(context, id);
-
-        setState(({ portfolio }) => ({
-          portfolio: portfolio.filter((item) => item.id !== id),
-        }));
-      },
+      remove: () => removePortfolioItem(context, id),
     })),
     portCount: `${state.portfolio.length} of 20`,
     canAddPhotos: state.portfolio.length < 20,
@@ -85,26 +63,15 @@ export const getProfileView = (studio: StudioController) => {
               reader.readAsDataURL(file);
             }),
         ),
-      ).then((urls) => {
-        if (sync)
-          return addPortfolioPhotos(
-            context,
-            files.map((file, index) => ({
-              file,
-              previewUrl: urls[index] ?? "",
-            })),
-          );
-
-        if (urls.length)
-          setState(({ portfolio }) => ({
-            portfolio: portfolio.concat(
-              urls.map((src, index) => ({
-                id: `pf${Date.now()}${index}`,
-                src,
-              })),
-            ),
-          }));
-      });
+      ).then((urls) =>
+        addPortfolioPhotos(
+          context,
+          files.map((file, index) => ({
+            file,
+            previewUrl: urls[index] ?? "",
+          })),
+        ),
+      );
     },
     saveProfile: async () => {
       if (context.memo.saveSlug && !(await context.memo.saveSlug())) return;

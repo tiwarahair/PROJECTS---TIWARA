@@ -1,23 +1,73 @@
 import { hhmm, parseNumber } from "../../core/format";
+import type { BookingAddon } from "../../core/types";
 import { formatDuration } from "../../../../utils/dates";
+import { updateStudioBooking } from "../../../../lib/studio-api/booking-writes";
+import { toStartsAt } from "../records";
+import { saveToBooking } from "../save";
 import type { EditContext } from "./context";
 
-export const getApplyView = ({
-  state,
-  setState,
-  actions,
-  memo,
-  booking,
-  patchBooking,
-  draft,
-  duration,
-  extra,
-  clashes,
-  addonsPrice,
-  addonsMinutes,
-}: EditContext) => {
+const toPence = (pounds: number) => Math.round(pounds * 100);
+
+const getAppliedToast = ({ booking }: EditContext, isClientFacing: boolean) => {
+  if (!booking.client || !isClientFacing) return "Service updated";
+
+  return booking.awaiting
+    ? `Service updated. ${booking.firstName} gets a new link`
+    : `Service updated. ${booking.firstName} is notified`;
+};
+
+export const getApplyView = (context: EditContext) => {
+  const {
+    state,
+    setState,
+    actions,
+    memo,
+    studio,
+    booking,
+    patchBooking,
+    draft,
+    duration,
+    extra,
+    clashes,
+    addonsPrice,
+    addonsMinutes,
+    getLinkValues,
+  } = context;
+
   const totalPrice = parseNumber(draft.price) + addonsPrice;
   const firstClash = clashes[0];
+
+  // every line keeps its name, price, length and quantity, however it was added
+  const addons: BookingAddon[] = draft.addons.map((link) => {
+    const { addon, price, minutes, quantity } = getLinkValues(
+      link,
+      link.name || "Add-on",
+    );
+
+    const id = link.addonId || link.id;
+
+    return { id, addonId: id, name: addon.name, price, minutes, quantity };
+  });
+
+  const save = (remoteId: string, allowOverlap: boolean) =>
+    updateStudioBooking(
+      remoteId,
+      {
+        serviceId: draft.serviceId || booking.serviceId || "",
+        addons: addons.map(({ id, price, minutes, quantity }) => ({
+          id: id || "",
+          pricePence: toPence(price || 0),
+          minutes: minutes || 0,
+          quantity: quantity || 1,
+        })),
+        startsAt: toStartsAt(booking.dayOffset, hhmm(draft.time)),
+        minutes: duration + addonsMinutes,
+        extraMinutes: extra,
+        pricePence: toPence(totalPrice),
+        allowOverlap,
+      },
+      (draft.priceReason || "").trim(),
+    );
 
   const apply = () => {
     if (clashes.length && !memo.clashOk && firstClash) {
@@ -46,16 +96,37 @@ export const getApplyView = ({
       return;
     }
 
+    const previous = state.bookings;
+    const time = hhmm(draft.time);
+
+    const allowOverlap =
+      !!memo.clashOk || (!!booking.overlapOk && time === booking.time);
+
+    const isClientFacing =
+      draft.serviceName !== booking.service ||
+      time !== booking.time ||
+      totalPrice !== booking.price;
+
     patchBooking({
       price: totalPrice,
-      duration: formatDuration(duration),
-      time: hhmm(draft.time),
+      duration: formatDuration(duration + addonsMinutes),
+      time,
+      extra,
       priceReason: (draft.priceReason || "").trim(),
+      startsAt: toStartsAt(booking.dayOffset, time),
+      overlapOk: allowOverlap,
     });
+
+    saveToBooking(
+      studio.context,
+      booking,
+      (remoteId) => save(remoteId, allowOverlap),
+      { bookings: previous },
+    );
 
     const list = state.bookings.map((item) =>
       item.id === booking.id
-        ? { ...item, service: draft.serviceName, addons: draft.addons.slice() }
+        ? { ...item, service: draft.serviceName, addons }
         : item,
     );
 
@@ -76,7 +147,7 @@ export const getApplyView = ({
         bookingStepBack: true,
       }));
 
-      actions.showToast(`Service updated. ${booking.firstName} is notified`);
+      actions.showToast(getAppliedToast(context, isClientFacing));
       window.setTimeout(() => setState({ bookingStepBack: false }), 700);
     }, 200);
   };

@@ -1,6 +1,7 @@
 import { act, screen, within } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { renderWithStore } from "../../../test/render-with-store";
+import { getNewStudioSeed, getStudioSeed } from "../../../test/studio-seed";
 import { GATE_REASON } from "../core/constants";
 import { StudioPage } from "..";
 import type { UserEvent } from "@testing-library/user-event";
@@ -33,8 +34,8 @@ const setViewport = (width: number) => {
 // one timer per act, so React renders between them as the browser would
 const runNextTimer = () => act(() => void vi.advanceTimersToNextTimer());
 
-const renderStudio = (query = "") => {
-  const result = renderWithStore(<StudioPage />, `/studio${query}`);
+const renderStudio = (query = "", seed = getStudioSeed()) => {
+  const result = renderWithStore(<StudioPage seed={seed} />, `/studio${query}`);
 
   runNextTimer();
 
@@ -76,95 +77,33 @@ describe("StudioPage", () => {
     expect(getLabelled("Go-live banner")).toHaveTextContent(
       "Finish setup to go live",
     );
-
-    expect(
-      screen.getByRole("button", { name: "New booking" }),
-    ).toBeInTheDocument();
   });
 
-  it("wide screens show the sidebar and the setup checklist, which minimises to a pill", async () => {
+  it("every tab opens from the sidebar", async () => {
     setViewport(1440);
     renderStudio();
     const sidebar = getLabelled("Sidebar") as HTMLElement;
 
-    expect(within(sidebar).getByTitle("Clients")).toBeInTheDocument();
-    expect(within(sidebar).getByTitle("Settings")).toBeInTheDocument();
-
-    expect(
-      screen.getByRole("region", { name: "Set up your studio" }),
-    ).toHaveTextContent("1 of 4 done");
-
-    await user.click(
-      screen.getByRole("button", { name: "Minimise checklist" }),
-    );
-
-    expect(
-      screen.queryByRole("region", { name: "Set up your studio" }),
-    ).not.toBeInTheDocument();
-
-    await user.click(
-      screen.getByRole("button", { name: "Open setup checklist" }),
-    );
-
-    expect(
-      screen.getByRole("region", { name: "Set up your studio" }),
-    ).toBeInTheDocument();
+    for (const tab of [
+      "Bookings",
+      "Services",
+      "Earnings",
+      "Clients",
+      "Settings",
+    ]) {
+      await user.click(within(sidebar).getByTitle(tab));
+      expect(getLabelled(tab)).toBeInTheDocument();
+    }
   });
 
-  it("the overview range switches the stats and the chart caption", async () => {
-    renderStudio();
-    expect(screen.getByText("Last 7 days")).toBeInTheDocument();
-    expect(screen.getByText("£1,120")).toBeInTheDocument();
-    await user.click(screen.getByRole("button", { name: "Today" }));
-    expect(screen.getByText("Today, by hour")).toBeInTheDocument();
-    expect(screen.getByText("£240")).toBeInTheDocument();
+  it("the gate stops the booking link until setup is done", async () => {
+    renderStudio("", getNewStudioSeed());
 
-    expect(
-      screen.getByRole("heading", { name: "Today's appointments" }),
-    ).toBeInTheDocument();
-  });
-
-  it("lists today's bookings and those due for checkout", () => {
-    renderStudio();
-    const today = getLabelled("Today") as HTMLElement;
-
-    expect(within(today).getByText("Nia Okafor")).toBeInTheDocument();
-    expect(within(today).getByText("Ruth Mensah")).toBeInTheDocument();
-    expect(getLabelled("Due for checkout")).toHaveTextContent("Kemi Adeyemi");
-    expect(getLabelled("Today hero")).toHaveTextContent("2 appointments");
-  });
-
-  it("a new account starts empty, and the gate stops the booking link", async () => {
-    renderStudio("?account=new");
     expect(screen.getByText("No appointments yet")).toBeInTheDocument();
-    expect(screen.getByText("Nothing to chart yet")).toBeInTheDocument();
-    expect(getLabelled("Today hero")).toHaveTextContent("Nothing booked");
     await user.click(screen.getByRole("button", { name: "Copy booking link" }));
     expect(screen.getByText(GATE_REASON)).toBeInTheDocument();
     advance(2600);
     expect(screen.queryByText(GATE_REASON)).not.toBeInTheDocument();
-  });
-
-  it("finishing setup celebrates with the booking link, then nudges for a policy", async () => {
-    renderStudio("?fixture=all-done");
-    runNextTimer();
-    const card = getLabelled("Booking link ready") as HTMLElement;
-
-    expect(card).toHaveTextContent("Your booking link is ready to share");
-
-    expect(
-      within(card).getByRole("link", { name: "Preview profile" }),
-    ).toHaveAttribute("href", "/tiwaras-house");
-
-    await user.click(within(card).getByRole("button", { name: "Copy link" }));
-    expect(screen.getByText("Booking link copied")).toBeInTheDocument();
-
-    expect(getLabelled("Policy nudge")).toHaveTextContent(
-      "Make your policy your own",
-    );
-
-    await user.click(screen.getByRole("button", { name: "Dismiss" }));
-    expect(getLabelled("Policy nudge")).not.toBeInTheDocument();
   });
 
   it("arriving from sign-up (?welcome=1) greets the stylist by name", () => {

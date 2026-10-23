@@ -1,35 +1,150 @@
 import type Stripe from "npm:stripe@22.6.2";
 import { admin } from "../_shared/admin.ts";
+import { getCardLabel } from "../_shared/declines.ts";
+import { handleDispute } from "../_shared/disputes.ts";
 import { stripe } from "../_shared/stripe.ts";
 
-export const onPaymentSucceeded = async (intent: Stripe.PaymentIntent) => {
-  const { data: outcome, error } = await admin.rpc("confirm_booking_payment", { intent: intent.id });
+const onLinkPaid = async (intent: Stripe.PaymentIntent) => {
+  const { data: outcome, error } = await admin.rpc("confirm_link_payment", {
+    intent: intent.id,
+    transfer_pending: intent.metadata.transfer_pending === "true",
+    target_link: intent.metadata.link_id ?? null,
+  });
 
-  // a payment from another environment sharing this Stripe sandbox
-  if (error?.message === "booking_not_found") return;
+  if (error?.message === "link_not_found") return;
 
   if (error) throw error;
 
-  if (outcome !== "slot_taken") return;
+  // the fee was waived or paid another way while the client paid
+  if (outcome === "refund")
+    await stripe.refunds.create(
+      {
+        payment_intent: intent.id,
+        ...(intent.transfer_data ? { reverse_transfer: true } : {}),
+      },
+      { idempotencyKey: `link:${intent.id}:settled-refund` },
+    );
+};
+
+export const onPaymentSucceeded = async (intent: Stripe.PaymentIntent) => {
+  // fee and checkout charges are recorded by the code that made them; a debt payment only settles debts
+  if (["fee", "checkout", "debt"].includes(intent.metadata.kind ?? ""))
+    return false;
+
+  if (intent.metadata.kind === "link") {
+    await onLinkPaid(intent);
+
+    return false;
+  }
+
+  const { data: outcome, error } = await admin.rpc("confirm_booking_payment", {
+    intent: intent.id,
+    amount: intent.amount_received,
+    target_booking: intent.metadata.booking_id ?? null,
+  });
+
+  // a payment from another environment sharing this Stripe sandbox
+  if (error?.message === "booking_not_found") return false;
+
+  if (error) throw error;
+
+  // the card a deposit or card-on-file booking saved, for fees later
+  if (
+    (outcome === "confirmed" || outcome === "duplicate") &&
+    intent.setup_future_usage &&
+    typeof intent.payment_method === "string"
+  ) {
+    const { card } = await stripe.paymentMethods.retrieve(
+      intent.payment_method,
+    );
+
+    await admin
+      .from("bookings")
+      .update({
+        stripe_payment_method_id: intent.payment_method,
+        card_label: getCardLabel(card?.brand, card?.last4),
+      })
+      .eq("stripe_payment_intent_id", intent.id);
+  }
+
+  if (
+    (outcome === "confirmed" || outcome === "duplicate") &&
+    intent.metadata.hold === "true" &&
+    !intent.transfer_data
+  ) {
+    const { error: holdError } = await admin.rpc("mark_payment_untransferred", {
+      intent: intent.id,
+    });
+
+    if (holdError) throw holdError;
+  }
+
+  // the time was taken meanwhile, or (a stylist's booking) it was confirmed without protection, changed or cancelled
+  if (outcome !== "slot_taken" && outcome !== "refund") return false;
 
   await stripe.refunds.create(
     {
       payment_intent: intent.id,
-      metadata: { reason: "slot_taken" },
-      ...(intent.transfer_data ? { reverse_transfer: true, refund_application_fee: true } : {}),
+      metadata: {
+        reason: outcome === "slot_taken" ? "slot_taken" : "not_needed",
+      },
+      ...(intent.transfer_data
+        ? { reverse_transfer: true, refund_application_fee: true }
+        : {}),
     },
-    { idempotencyKey: `payment:${intent.id}:slot-taken-refund` },
+    {
+      idempotencyKey: `payment:${intent.id}:${outcome === "slot_taken" ? "slot-taken" : "not-needed"}-refund`,
+    },
   );
+
+  return true;
 };
 
-export const onPaymentFailed = async ({ id, last_payment_error }: Stripe.PaymentIntent) => {
-  const { data: booking } = await admin.from("bookings").select("id").eq("stripe_payment_intent_id", id).maybeSingle();
+export const onPaymentFailed = async ({
+  id,
+  last_payment_error,
+}: Stripe.PaymentIntent) => {
+  const { data: booking } = await admin
+    .from("bookings")
+    .select("id")
+    .eq("stripe_payment_intent_id", id)
+    .maybeSingle();
 
   if (!booking) return;
 
   await admin.from("booking_events").insert({
     booking_id: booking.id,
     kind: "payment_failed",
-    data: { code: last_payment_error?.decline_code ?? last_payment_error?.code ?? null },
+    data: {
+      code:
+        last_payment_error?.decline_code ?? last_payment_error?.code ?? null,
+    },
   });
 };
+
+export const onRefundCreated = async ({
+  id,
+  amount,
+  payment_intent: intent,
+  status,
+  metadata,
+}: Stripe.Refund) => {
+  // ours carry the booking and are recorded, with their reason, by the code that made them
+  if (
+    !intent ||
+    metadata?.booking_id ||
+    status === "failed" ||
+    status === "canceled"
+  )
+    return;
+
+  const { error } = await admin.rpc("record_stripe_refund", {
+    intent: typeof intent === "string" ? intent : intent.id,
+    refund_id: id,
+    amount,
+  });
+
+  if (error) throw error;
+};
+
+export const onDispute = (dispute: Stripe.Dispute) => handleDispute(dispute);

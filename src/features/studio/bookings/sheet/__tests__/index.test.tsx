@@ -1,9 +1,39 @@
 import { act, screen, within } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { renderWithStore } from "../../../../../test/render-with-store";
+import { getClientRow, getRow } from "../../../../../test/studio-booking-row";
+import { getStudioSeed } from "../../../../../test/studio-seed";
+import { fromLondonTime } from "../../../../../utils/london-time";
+import { toDate } from "../../../core/blocked-time";
+import { changeBookingClient } from "../../../../../lib/studio-api/booking-writes";
 import { StudioPage } from "../../..";
 import type { UserEvent } from "@testing-library/user-event";
 import { setupUser } from "../../../../../test/setup-user";
+
+// the save stays in flight, so the screen keeps what was done
+vi.mock("../../../../../lib/studio-api/bookings", async (importOriginal) => ({
+  ...(await importOriginal<
+    typeof import("../../../../../lib/studio-api/bookings")
+  >()),
+  rescheduleStudioBooking: vi.fn(() => new Promise(() => {})),
+}));
+
+vi.mock(
+  "../../../../../lib/studio-api/booking-writes",
+  async (importOriginal) => ({
+    ...(await importOriginal<
+      typeof import("../../../../../lib/studio-api/booking-writes")
+    >()),
+    changeBookingClient: vi.fn(() => new Promise(() => {})),
+  }),
+);
+
+vi.mock("../../../../../lib/studio-api/clients", async (importOriginal) => ({
+  ...(await importOriginal<
+    typeof import("../../../../../lib/studio-api/clients")
+  >()),
+  saveStylistClient: vi.fn(() => new Promise(() => {})),
+}));
 
 let user: UserEvent;
 
@@ -29,12 +59,44 @@ const setViewport = (width: number) => {
   });
 };
 
-const openNia = async () => {
-  renderWithStore(<StudioPage />, "/studio?fixture=cal-day");
+const BOOKED_AT = "2026-09-01T10:00:00+00:00";
+
+// Nia at 10:00 today, Ruth at 15:00
+const getTodaySeed = () => {
+  const seed = getStudioSeed();
+
+  seed.bookings.active = [
+    getRow({
+      starts_at: fromLondonTime(toDate(0), "10:00"),
+      created_at: BOOKED_AT,
+    }),
+    getRow({
+      id: "b-2",
+      starts_at: fromLondonTime(toDate(0), "15:00"),
+      created_at: BOOKED_AT,
+      stylist_client_id: "client-ruth",
+      stylist_client: {
+        first: "Ruth",
+        last: "Mensah",
+        phone: "07700900456",
+        email: "ruth@example.com",
+        deleted_at: null,
+      },
+    }),
+  ];
+
+  return seed;
+};
+
+const openBooking = async (name: string, seed = getTodaySeed()) => {
+  renderWithStore(<StudioPage seed={seed} />, "/studio");
   runNextTimer();
-  await user.click(within(getLabelled("Bookings")).getByText("Nia Okafor"));
+  await user.click(screen.getByTitle("Bookings"));
+  await user.click(within(getLabelled("Bookings")).getByText(name));
   advance(400);
 };
+
+const openNia = () => openBooking("Nia Okafor");
 
 const openMoreItem = async (label: string) => {
   await user.click(
@@ -128,5 +190,102 @@ describe("Studio → booking sheet", () => {
     advance(400);
     await openMoreItem("Cancel");
     expect(screen.getByText("I am cancelling")).toBeInTheDocument();
+  });
+
+  it("asks before moving onto another booking, and Go back keeps it", async () => {
+    await openNia();
+    await openMoreItem("Reschedule");
+
+    await user.click(
+      screen
+        .getAllByRole("button", { name: /^mon\s*7$/i })
+        .at(-1) as HTMLElement,
+    );
+
+    await user.click(screen.getByRole("button", { name: "Custom time" }));
+    await user.type(screen.getByLabelText("Custom start time"), "15:00");
+    await user.click(screen.getByRole("button", { name: "Move booking" }));
+
+    expect(
+      screen.getByText("This time clashes with another booking"),
+    ).toBeInTheDocument();
+
+    expect(
+      screen.getByText(/^Overlaps Ruth/, { selector: "strong" }),
+    ).toBeInTheDocument();
+
+    await user.click(screen.getByRole("button", { name: "Go back" }));
+    advance(400);
+
+    expect(screen.queryByText(/^Moved to/)).toBeNull();
+
+    await user.click(screen.getByRole("button", { name: "Move booking" }));
+    await user.click(screen.getByRole("button", { name: "Move anyway" }));
+    advance(400);
+
+    expect(screen.getByText(/^Moved to Today, 15:00/)).toBeInTheDocument();
+  });
+
+  it("a client with no email gets one added when changing the client, then is asked for protection", async () => {
+    const seed = getTodaySeed();
+
+    // nothing paid yet, so the client can change
+    seed.bookings.active = seed.bookings.active.map((row) =>
+      row.id === "b-2"
+        ? {
+            ...row,
+            paid_at: null,
+            stripe_payment_method_id: null,
+            protection_status: "not_required",
+          }
+        : row,
+    );
+
+    seed.bookings.clients.push(
+      getClientRow({
+        id: "client-bisi",
+        first: "Bisi",
+        last: "Phone",
+        phone: "07700900777",
+        email: undefined,
+      }),
+    );
+
+    await openBooking("Ruth Mensah", seed);
+    await openMoreItem("Change client");
+    await user.click(screen.getByRole("button", { name: /^Bisi Phone/ }));
+
+    const title = screen.getByText("Bisi has no email yet");
+
+    await user.click(title.parentElement?.previousElementSibling as Element);
+    advance(300);
+    expect(title).toBeInTheDocument();
+    expect(changeBookingClient).not.toHaveBeenCalled();
+
+    await user.click(screen.getByRole("button", { name: "Add email" }));
+    advance(300);
+
+    // closing the edit sheet goes back to the booking, unchanged
+    await user.click(screen.getByRole("button", { name: "Close" }));
+    advance(300);
+    expect(screen.getByRole("button", { name: /^Bisi Phone/ })).toBeVisible();
+
+    await user.click(screen.getByRole("button", { name: /^Bisi Phone/ }));
+    await user.click(screen.getByRole("button", { name: "Add email" }));
+    advance(300);
+
+    const email = screen.getByLabelText("Email");
+
+    expect(email).toHaveFocus();
+    await user.type(email, "bisi@example.com");
+    await user.click(screen.getByRole("button", { name: "Save changes" }));
+    await act(() => Promise.resolve());
+    advance(300);
+
+    expect(screen.getByText("Email added")).toBeInTheDocument();
+
+    expect(
+      screen.getByText("Ask Bisi for booking protection?"),
+    ).toBeInTheDocument();
   });
 });

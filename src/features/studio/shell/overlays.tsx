@@ -159,7 +159,7 @@ export const ConfirmSheet = ({ studio }: { studio: StudioController }) => {
           styles.confirmScrim,
           state.confirmOut ? overlay.scrimOut21 : overlay.scrimIn20,
         )}
-        onClick={onNo}
+        onClick={confirm.isBlocking ? undefined : onNo}
       ></div>
       <div
         className={joinClassNames(
@@ -171,7 +171,14 @@ export const ConfirmSheet = ({ studio }: { studio: StudioController }) => {
         <div className={styles.confirmTitle}>
           {confirm.title || "Are you sure you want to remove?"}
         </div>
-        <div className={styles.confirmBody}>{confirm.body}</div>
+        <div className={styles.confirmBody}>
+          {confirm.emphasis && (
+            <strong className={styles.confirmEmphasis}>
+              {confirm.emphasis}
+            </strong>
+          )}
+          {confirm.body}
+        </div>
         <div className={styles.confirmActions}>
           <button className={styles.confirmNo} onClick={onNo}>
             {confirm.noLabel || "Keep it"}

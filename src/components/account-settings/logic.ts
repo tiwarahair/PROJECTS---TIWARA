@@ -1,4 +1,4 @@
-// AccountSettings demo data, validators and display tables.
+// AccountSettings state, stand-in calendar values, validators and display tables.
 import type { NameValues } from "./name-schema";
 import {
   Check,
@@ -11,7 +11,8 @@ import {
   TriangleAlert,
 } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
-import type { TaxDetails } from "../tax-details-form/tax-details-logic";
+import type { TaxDetails } from "../tax-details-form/logic";
+import { formatMoney } from "../../utils/money";
 
 export type SettingsPage =
   "personal" | "security" | "notifications" | "payouts" | "calendar";
@@ -24,12 +25,12 @@ export interface TwoFactorDevice {
   backup: boolean;
 }
 
-interface SettingsSession {
+export interface SettingsSession {
   id: string;
   device: string;
-  location: string;
+  signedIn: string;
   last: string;
-  isCurrent?: boolean;
+  isCurrent: boolean;
   kind: "phone" | "laptop" | "tablet";
 }
 
@@ -68,7 +69,8 @@ export interface SettingsState {
   signOthers: boolean;
   sessions: SettingsSession[];
   sessionsLoading: boolean;
-  alerts: boolean;
+  sessionsFailed: boolean;
+  alerts: boolean | null;
   notifications: Record<NotificationKey, ChannelSetting>;
   google: {
     state: "off" | "connecting" | "on";
@@ -87,27 +89,17 @@ export interface SettingsPerson {
   phone: string;
 }
 
-const DEMO_PERSON: SettingsPerson = {
-  first: "Amara",
-  last: "Okonkwo",
-  email: "amara.okonkwo@gmail.com",
-  phone: "07700 900418",
-};
-
 export const getInitialName = ({
   first,
   last,
-}: SettingsPerson = DEMO_PERSON): NameValues => ({ first, last });
+}: SettingsPerson): NameValues => ({ first, last });
 
 export type NotificationSettings = Record<NotificationKey, ChannelSetting>;
 
 export const getInitialSettingsState = (
-  isNew: boolean,
-  search: string,
-  { email, phone }: SettingsPerson = DEMO_PERSON,
+  { email, phone }: SettingsPerson,
   savedNotifications: Partial<NotificationSettings> = {},
 ): SettingsState => {
-  const prefilled = new URLSearchParams(search).get("pwnew") || "";
   const channel = (): ChannelSetting => ({ email: true, sms: false });
 
   return {
@@ -118,34 +110,12 @@ export const getInitialSettingsState = (
     phone,
     phoneFlow: null,
     isSettingPassword: false,
-    isPasswordCodeSent: !!prefilled,
+    isPasswordCodeSent: false,
     signOthers: true,
-    sessions: [
-      {
-        id: "s1",
-        device: "iPhone 15, Safari",
-        location: "Manchester, UK",
-        last: "Active now",
-        isCurrent: true,
-        kind: "phone",
-      },
-      {
-        id: "s2",
-        device: "MacBook Air, Chrome",
-        location: "Manchester, UK",
-        last: "2 hours ago",
-        kind: "laptop",
-      },
-      {
-        id: "s3",
-        device: "iPad, Safari",
-        location: "Salford, UK",
-        last: "3 days ago",
-        kind: "tablet",
-      },
-    ],
+    sessions: [],
     sessionsLoading: false,
-    alerts: true,
+    sessionsFailed: false,
+    alerts: null,
     notifications: {
       newBooking: channel(),
       clientCancelled: channel(),
@@ -160,7 +130,7 @@ export const getInitialSettingsState = (
       ...savedNotifications,
     },
     google: {
-      state: isNew ? "off" : "on",
+      state: "off",
       calendars: { main: true, family: true, holidays: false },
       target: "new",
     },
@@ -171,12 +141,19 @@ export const getInitialSettingsState = (
 };
 
 /** Why the account can't be closed yet, else "". */
-export const getCloseReason = (upcoming: number, owed: boolean): string => {
+export const getCloseReason = (
+  upcoming: number,
+  owed: number,
+  hasOpenDispute: boolean,
+): string => {
   if (upcoming)
     return `You have ${upcoming} upcoming booking${upcoming === 1 ? "" : "s"}. Cancel or complete them first.`;
 
+  if (hasOpenDispute)
+    return "A client’s dispute is still open. You can close once their bank decides.";
+
   return owed
-    ? "You have money owed on your account. Settle it in Payouts first."
+    ? `You owe ${formatMoney(owed, { pence: "always" })} in dispute fees. Pay it to close your business.`
     : "";
 };
 

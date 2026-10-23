@@ -1,6 +1,6 @@
 import { configureStore } from "@reduxjs/toolkit";
 import { api } from "./api-slice";
-import { favouritesSlice, readFavourites } from "./favourites-slice";
+import { favouritesSlice } from "./favourites-slice";
 import { sessionSlice } from "./session-slice";
 import { toastSlice } from "./toast-slice";
 
@@ -13,13 +13,6 @@ export const createStore = () =>
       [api.reducerPath]: api.reducer,
     },
     middleware: (getDefault) => getDefault().concat(api.middleware),
-    preloadedState: {
-      favourites: {
-        ...readFavourites(null),
-        ownerId: null,
-        loginSheetFor: null,
-      },
-    },
   });
 
 export type AppStore = ReturnType<typeof createStore>;

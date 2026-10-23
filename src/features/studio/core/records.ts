@@ -1,10 +1,8 @@
 // The stylist's business from the database → the parts of Studio's state it fills.
 import type { PayoutStatus } from "../../../components/account-settings/logic";
-import type {
-  StripeAccountState,
-  StylistStudio,
-} from "../../../lib/studio-api";
-import { getPhotoUrl } from "../../../lib/studio-api";
+import type { StylistStudio } from "../../../lib/studio-api";
+import type { StripeAccountState } from "../../../lib/studio-api/settings";
+import { getPhotoUrl } from "../../../lib/studio-api/photos";
 import { toShownBusinessType } from "../../../utils/business-type";
 import { MONDAY_FIRST_WEEKDAYS } from "../../../utils/dates";
 import { bySort } from "../../../utils/sort";
@@ -32,6 +30,9 @@ export const getPayoutStatus = ({
 
   return charges_enabled && payouts_enabled ? "active" : "verifying";
 };
+
+// what the form suggests when a stylist without a deposit switches to one (a deposit is always 1-50%)
+const SUGGESTED_DEPOSIT = 20;
 
 const getClockTime = (time: string | null) => (time ?? "").slice(0, 5);
 
@@ -134,7 +135,7 @@ export const toStudioPatch = (
     policy: policy
       ? {
           mode: toPolicyMode(policy.mode),
-          deposit: policy.deposit_percent || state.policy.deposit,
+          deposit: policy.deposit_percent || SUGGESTED_DEPOSIT,
           refundable: policy.refundable,
           window: Number(policy.free_window_hours),
           grace: policy.grace_minutes,

@@ -1,3 +1,4 @@
+import { LONG_MONTHS, SHORT_MONTHS } from "../../../utils/dates";
 import {
   categoryColours,
   platformCustomisations,
@@ -39,8 +40,6 @@ export const TIMES = [
   "20:00",
 ];
 export const SLOT_TIMES = ["09:00", "10:30", "13:00", "15:30", "17:00"];
-export const BOOKING_LINK = "tiwaras.house/book/tiwara";
-export const STUDIO_STYLIST_ID = "tiwaras-house";
 export const GATE_REASON =
   "Finish setting up your studio to turn on your booking link.";
 
@@ -60,11 +59,10 @@ export const BLOCK_COLORS: BlockColour[] = [
   { id: "grey", label: "Grey", hex: "#7d7465" },
 ];
 
-export const PAST_MONTHS: Record<string, string> = {
-  Sep: "September",
-  Aug: "August",
-  Jul: "July",
-};
+/** "Sep" → "September", for Past's month headings. */
+export const PAST_MONTHS: Record<string, string> = Object.fromEntries(
+  SHORT_MONTHS.map((short, index) => [short, LONG_MONTHS[index] ?? short]),
+);
 
 interface PastTone {
   background: string;

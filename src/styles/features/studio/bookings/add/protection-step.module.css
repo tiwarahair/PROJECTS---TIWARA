@@ -50,6 +50,11 @@
   border-color: var(--accent-700);
 }
 
+.protOptionOff {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+
 .radio {
   flex: 0 0 auto;
   width: 20px;
@@ -117,4 +122,8 @@
   font-size: 13.5px;
   color: var(--text-primary);
   line-height: 1.5;
+}
+
+.emailNote {
+  margin: 14px 0 0;
 }

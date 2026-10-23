@@ -1,6 +1,7 @@
 import { durationToMinutes, parseNumber } from "../../core/format";
 import {
   findDuplicate,
+  isDuplicateBlocking,
   getBookingBuffer,
   getClient,
   getConflicts,
@@ -8,6 +9,7 @@ import {
 } from "../../core/model";
 import type { StudioAddon, StudioState } from "../../core/types";
 import type { StudioController } from "../../core/use-studio";
+import { toStartsAt } from "../records";
 
 const isNewClientReady = (
   addNew: StudioState["addNew"],
@@ -49,16 +51,37 @@ export const getContext = (studio: StudioController) => {
 
   const selected = state.addAddons || [];
 
+  const msToStart =
+    state.addDay != null && state.addTime
+      ? Date.parse(toStartsAt(state.addDay, state.addTime)) - Date.now()
+      : null;
+
+  const hasStarted = msToStart != null && msToStart <= 0;
+  const isLinkTooLate = msToStart != null && msToStart <= 2 * 3600000;
+
+  const isProtectionSkipped =
+    state.policy.mode === "none" || state.addWalkIn || hasStarted;
+
+  // the confirm link goes by email: choosing it for a client without one needs an email first
+  const hasNoEmail = !state.addWalkIn && !!client && !client.email?.trim();
+
+  const isEmailNeeded =
+    state.addProtection === "link" &&
+    hasNoEmail &&
+    !isLinkTooLate &&
+    !isProtectionSkipped;
+
   const readyByStep: Record<number, boolean> = {
     1:
       !!state.addClient ||
       state.addWalkIn ||
-      isNewClientReady(addNew, !!duplicate),
+      isNewClientReady(addNew, isDuplicateBlocking(duplicate)),
     2: !!state.addService,
     3:
       state.addDay != null &&
       !!state.addTime &&
       (conflicts.length === 0 || state.addOverlapAllowed),
+    4: !isEmailNeeded,
   };
 
   return {
@@ -75,7 +98,12 @@ export const getContext = (studio: StudioController) => {
     conflicts,
     addNew,
     duplicate,
-    isProtectionSkipped: state.policy.mode === "none" || state.addWalkIn,
+    hasStarted,
+    isProtectionSkipped,
+    // the client needs until 2 hours before the start to confirm
+    isLinkTooLate,
+    hasNoEmail,
+    isEmailNeeded,
     isDisabled: readyByStep[addStep] === false,
     price: parseNumber(state.addPrice ?? (service ? service.price : 0)),
     priceLabel: state.addPrice != null ? state.addPrice : service?.price,

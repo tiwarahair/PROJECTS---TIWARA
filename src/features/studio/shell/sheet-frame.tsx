@@ -1,5 +1,6 @@
 import type { ReactNode } from "react";
 import { ChevronLeft, X } from "lucide-react";
+import { markActivitySeen } from "../../../lib/studio-api/home";
 import { joinClassNames } from "../../../utils/class-names";
 import { getOverlayAnimation } from "./overlay";
 import type { BookingStep } from "../core/types";
@@ -61,6 +62,7 @@ const getSheetFrame = (studio: StudioController) => {
     client: "Client",
     clientEdit: state.clientEdit?.id ? "Edit client" : "Add client",
     cliView: "Client",
+    dispute: "Respond to dispute",
   };
 
   const isClientSheet = sheet === "client" || sheet === "cliView";
@@ -70,6 +72,8 @@ const getSheetFrame = (studio: StudioController) => {
     (isClientSheet &&
       (!!state.clientFromBookingId || !!state.clientFromPastId)) ||
     (sheet === "clientEdit" && !!state.clientEditFromView) ||
+    actions.isEditFromBooking() ||
+    (sheet === "dispute" && !!state.disputeForm?.fromPastId) ||
     (!!state.fromClientId &&
       (sheet === "past" || (isBooking && bookingStep === "view")));
 
@@ -86,8 +90,24 @@ const getSheetFrame = (studio: StudioController) => {
       return;
     }
 
+    if (sheet === "dispute" && state.disputeForm?.fromPastId) {
+      const { fromPastId } = state.disputeForm;
+
+      actions.guardSheet(() =>
+        actions.openSheet("past", { selectedPastId: fromPastId }),
+      );
+
+      return;
+    }
+
     if (isClientSheet && state.clientFromPastId) {
       actions.openSheet("past", { selectedPastId: state.clientFromPastId });
+
+      return;
+    }
+
+    if (actions.isEditFromBooking()) {
+      actions.guardSheet(() => actions.leaveClientEdit());
 
       return;
     }
@@ -209,12 +229,21 @@ export const SheetFrame = ({
           <div className={styles.titleRow}>
             {frame.title && <span className={styles.title}>{frame.title}</span>}
           </div>
-          {state.sheet === "notif" && (
+          {state.sheet === "notif" && state.notifications.length > 0 && (
             <button
               className={styles.markAllRead}
               onClick={() => {
+                const { stylistId } = state.account;
+                const seenUntil = state.notifications[0]?.at;
+
                 studio.setState({ notifAllRead: true });
                 actions.showToast("All caught up");
+
+                if (stylistId && seenUntil)
+                  studio.context.sync.save(
+                    () => markActivitySeen(stylistId, seenUntil),
+                    { notifAllRead: false },
+                  );
               }}
             >
               Mark all read

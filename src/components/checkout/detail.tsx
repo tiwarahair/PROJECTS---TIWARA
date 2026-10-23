@@ -6,7 +6,7 @@ import { TONES } from "./detail-view/types";
 import type { CheckoutViewModel, DetailRow } from "./view";
 import type { CheckoutController } from "./use-checkout";
 import flow from "../../styles/components/checkout/flow.module.css";
-import shared from "../../styles/components/checkout/checkout-sheet.module.css";
+import shared from "../../styles/components/checkout/index.module.css";
 
 /** Label (+ sub line) and amount. */
 export const AmountRow = ({

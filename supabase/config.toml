@@ -69,7 +69,7 @@ schema_paths = []
 enabled = true
 # Specifies an ordered list of seed files to load during db reset.
 # Supports glob patterns relative to supabase directory: "./seeds/*.sql"
-sql_paths = ["./seed.sql"]
+sql_paths = ["./seed.sql", "./snippets/seed-staging-bookings.sql"]
 
 [db.network_restrictions]
 # Enable management of network restrictions.
@@ -447,6 +447,30 @@ verify_jwt = false
 [functions.booking-invite]
 verify_jwt = false
 
+[functions.studio-booking-cancel]
+verify_jwt = false
+
+[functions.studio-fee]
+verify_jwt = false
+
+[functions.charge-fees]
+verify_jwt = false
+
+[functions.payment-link]
+verify_jwt = false
+
+[functions.booking-confirm]
+verify_jwt = false
+
+[functions.send-transfers]
+verify_jwt = false
+
+[functions.studio-refund]
+verify_jwt = false
+
+[functions.studio-checkout]
+verify_jwt = false
+
 # called by pg_cron with x-cron-secret, not a user's token
 [functions.purge-closed-businesses]
 verify_jwt = false
@@ -465,6 +489,26 @@ verify_jwt = false
 [functions.stripe-payments-webhook]
 verify_jwt = false
 
+[functions.stripe-payouts-webhook]
+verify_jwt = false
+
+[functions.studio-balance]
+verify_jwt = false
+
+[functions.studio-dispute]
+verify_jwt = false
+
+[functions.studio-debt]
+verify_jwt = false
+
 # called by pg_cron with x-cron-secret, not a user's token
 [functions.send-notifications]
+verify_jwt = false
+
+# the update-card page, by a link in the client's email
+[functions.booking-card]
+verify_jwt = false
+
+# called by pg_cron with x-cron-secret
+[functions.check-cards]
 verify_jwt = false

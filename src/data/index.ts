@@ -1,4 +1,3 @@
-import type { SavedAddress } from "../types/address";
 import type { CategoryColour } from "../types/category-colour";
 import type { ChatMessage } from "../types/chat";
 import type { HairColour } from "../types/colour";
@@ -16,7 +15,6 @@ import defaultAddonsJson from "./default-addons.json";
 import faqsJson from "./faqs.json";
 import passwordBlocklistJson from "./password-blocklist.json";
 import platformCustomisationsJson from "./platform-customisations.json";
-import seedAddressesJson from "./seed-addresses.json";
 import serviceGroupsJson from "./service-groups.json";
 import serviceSpecsJson from "./service-specs.json";
 import serviceTypesJson from "./service-types.json";
@@ -33,5 +31,4 @@ export const platformCustomisations =
 export const hairColours: HairColour[] = coloursJson;
 export const defaultAddons = defaultAddonsJson as unknown as DefaultAddons;
 export const categoryColours: CategoryColour[] = categoryColoursJson;
-export const seedAddresses: SavedAddress[] = seedAddressesJson;
 export const passwordBlocklist: string[] = passwordBlocklistJson;

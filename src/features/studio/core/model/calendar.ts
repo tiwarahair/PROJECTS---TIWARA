@@ -189,10 +189,12 @@ export const getConflicts = (
     .map(({ kind, booking, block }) =>
       kind === "booking" && booking
         ? {
+            kind,
             name: getClient(state, booking.client).name,
             range: timeRange(booking.time, getBookingDuration(state, booking)),
           }
         : {
+            kind,
             name: getBlockTitle(block),
             range:
               block?.span === "All day"

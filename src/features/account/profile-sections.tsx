@@ -6,7 +6,7 @@ import { toPublicStylist } from "../../lib/public-stylist";
 import { useGetStylistProfileQuery } from "../../stores/api-slice";
 import { setFavourite } from "../../stores/favourites-slice";
 import { useAppDispatch } from "../../stores/hooks";
-import { StylistCard } from "../../components/stylist-card/stylist-card";
+import { StylistCard } from "../../components/stylist-card";
 import styles from "../../styles/features/account/profile-sections.module.css";
 import ui from "../../styles/features/account/ui.module.css";
 

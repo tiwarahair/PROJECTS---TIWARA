@@ -90,6 +90,23 @@
   transform: scale(0.97) !important;
 }
 
+.showOlder {
+  display: block;
+  margin: 18px auto 4px;
+  border: 1px solid var(--border-strong, #d8d2c6);
+  background: transparent;
+  border-radius: var(--radius-full);
+  padding: 10px 20px;
+  font-size: 14.5px;
+  font-weight: 600;
+  color: var(--text-primary);
+  cursor: pointer;
+}
+
+.showOlder:active {
+  transform: scale(0.97);
+}
+
 .group {
   margin-bottom: 18px;
 }

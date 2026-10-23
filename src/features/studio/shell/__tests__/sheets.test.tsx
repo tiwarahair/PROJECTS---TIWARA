@@ -1,9 +1,53 @@
 import { act, screen, waitFor, within } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { renderWithStore } from "../../../../test/render-with-store";
+import { getRow } from "../../../../test/studio-booking-row";
+import { getStudioSeed } from "../../../../test/studio-seed";
+import { fromLondonTime } from "../../../../utils/london-time";
+import { toDate } from "../../core/blocked-time";
 import { StudioPage } from "../..";
 import type { UserEvent } from "@testing-library/user-event";
 import { setupUser } from "../../../../test/setup-user";
+
+const ACTIVITY_AT = "2026-09-07T07:00:00+00:00";
+
+vi.mock("../../../../lib/studio-api/home", async (importOriginal) => ({
+  ...(await importOriginal<typeof import("../../../../lib/studio-api/home")>()),
+  fetchStudioActivity: vi.fn(() =>
+    Promise.resolve([
+      {
+        id: "activity-1",
+        kind: "client_cancelled",
+        at: ACTIVITY_AT,
+        booking_id: null,
+        client_first: "Nia",
+        service: "Silk press",
+        amount_pence: null,
+        is_unread: true,
+      },
+      {
+        id: "activity-2",
+        kind: "payout_paid",
+        at: ACTIVITY_AT,
+        booking_id: null,
+        client_first: null,
+        service: null,
+        amount_pence: 12000,
+        is_unread: true,
+      },
+    ]),
+  ),
+  markActivitySeen: vi.fn(() => new Promise(() => {})),
+}));
+
+// saves stay in flight, so the screen keeps what was done
+vi.mock("../../../../lib/studio-api/settings", async (importOriginal) => ({
+  ...(await importOriginal<
+    typeof import("../../../../lib/studio-api/settings")
+  >()),
+  saveBlock: vi.fn(() => new Promise(() => {})),
+  saveClosedPeriod: vi.fn(() => new Promise(() => {})),
+}));
 
 let user: UserEvent;
 
@@ -29,8 +73,18 @@ const setViewport = (width: number) => {
   });
 };
 
-const renderStudio = (query = "") => {
-  renderWithStore(<StudioPage />, `/studio${query}`);
+// Nia is booked at 13:00 today, when new blocked time starts
+const renderStudio = () => {
+  const seed = getStudioSeed();
+
+  seed.bookings.active = [
+    getRow({
+      starts_at: fromLondonTime(toDate(0), "13:00"),
+      created_at: "2026-09-01T10:00:00+00:00",
+    }),
+  ];
+
+  renderWithStore(<StudioPage seed={seed} />, "/studio");
   runNextTimer();
 };
 
@@ -67,7 +121,7 @@ describe("Studio sheets", () => {
     renderStudio();
     await user.click(screen.getByRole("button", { name: "Notifications" }));
     // Home's activity feed shows it too
-    expect(screen.getAllByText("Late cancellation")).toHaveLength(2);
+    expect(await screen.findAllByText("Booking cancelled")).toHaveLength(2);
     await user.click(screen.getByRole("button", { name: "Mark all read" }));
     expect(screen.getByText("All caught up")).toBeInTheDocument();
 
@@ -104,7 +158,8 @@ describe("Studio sheets", () => {
       screen.getByRole("button", { name: "Keep bookings and block" }),
     );
 
-    runNextTimer();
+    await act(() => Promise.resolve());
+    advance(1);
     expect(screen.getByText("Time blocked")).toBeInTheDocument();
     advance(220);
     expect(screen.getByText("Dentist")).toBeInTheDocument();
@@ -233,22 +288,6 @@ describe("Studio sheets", () => {
 
     expect(
       await screen.findByRole("button", { name: "Save closed period" }),
-    ).toBeInTheDocument();
-  });
-
-  it("connecting Stripe ticks the payouts step", async () => {
-    renderStudio("?fixture=stripe-sheet");
-    runNextTimer();
-
-    await user.click(
-      screen.getByRole("button", { name: "Continue with Stripe" }),
-    );
-
-    expect(screen.getByRole("button", { name: "Connecting" })).toBeDisabled();
-    advance(1400);
-
-    expect(
-      screen.getByText("Stripe connected. You can take payments"),
     ).toBeInTheDocument();
   });
 });

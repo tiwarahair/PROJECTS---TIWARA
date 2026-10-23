@@ -1,6 +1,11 @@
 // CheckoutSheet derived values shared by every view.
 import { getRefundCap } from "./logic";
-import type { CheckoutLine, CheckoutView, PayMethod } from "./data";
+import type {
+  CheckoutLine,
+  CheckoutMoney,
+  CheckoutView,
+  PayMethod,
+} from "./data";
 import type { CheckoutController } from "./use-checkout";
 import { formatMoney } from "../../utils/money";
 
@@ -16,6 +21,33 @@ export const RECORD_VIA_LABELS: Record<string, string> = {
   cash: "Cash",
   bank: "Bank transfer",
   reader: "Own card reader",
+};
+
+const HAND_BACK_WAYS: Record<string, string> = {
+  cash: "in cash",
+  bank: "by bank transfer",
+  reader: "on your card reader",
+};
+
+/** "in cash": how money paid outside the app goes back. */
+export const getHandBackWay = (via = "") =>
+  HAND_BACK_WAYS[via] ?? "the way they paid";
+
+const getRefundNote = (
+  { refundCard, cashBack }: CheckoutMoney,
+  name: string,
+  cardText: string,
+  via: string | undefined,
+) => {
+  const handBack = getHandBackWay(via);
+
+  if (!cashBack)
+    return `${formatMoney(refundCard)} goes back to ${name}’s ${cardText} automatically when you complete checkout.`;
+
+  if (!refundCard)
+    return `Give ${formatMoney(cashBack)} back to ${name} ${handBack} when you complete checkout.`;
+
+  return `${formatMoney(refundCard)} goes back to ${name}’s ${cardText} automatically when you complete checkout. Give the other ${formatMoney(cashBack)} back ${handBack}.`;
 };
 
 const REVIEW_TOTAL_LABELS: Record<PayMethod, string> = {
@@ -59,11 +91,14 @@ export const getAdjustNote = ({ adjustment, reason }: CheckoutLine): string => {
 };
 
 export const getCheckoutView = (checkout: CheckoutController) => {
-  const { props, state, booking, money, goTo, showToast, isEmbedded } =
-    checkout;
+  const { props, state, booking, money, goTo } = checkout;
 
   const { first: name } = booking;
-  const cardText = booking.card ? `${booking.brand} •••• ${booking.card}` : "";
+
+  const cardText = booking.card
+    ? (booking.cardLabel ?? `${booking.brand} •••• ${booking.card}`)
+    : "";
+
   let bookedTotal = booking.price;
 
   for (const [, price] of booking.addons) bookedTotal += price;
@@ -75,8 +110,10 @@ export const getCheckoutView = (checkout: CheckoutController) => {
     none: "No protection",
   }[state.mode];
 
-  const creditRows =
-    state.paid > 0
+  const paidLater = booking.paidLater ?? 0;
+
+  const creditRows = [
+    ...(state.paid > 0
       ? [
           row(
             state.mode === "full" ? "Paid in full" : "Deposit paid",
@@ -84,7 +121,17 @@ export const getCheckoutView = (checkout: CheckoutController) => {
             formatMoney(-state.paid),
           ),
         ]
-      : [];
+      : []),
+    ...(paidLater > 0
+      ? [
+          row(
+            "Paid at checkout",
+            RECORD_VIA_LABELS[booking.recordedVia ?? ""] ?? "Recorded",
+            formatMoney(-paidLater),
+          ),
+        ]
+      : []),
+  ];
 
   const isRefund = money.refundDue > 0;
   const isInCheckout = ["items", "tip", "pay", "review"].includes(state.view);
@@ -102,12 +149,8 @@ export const getCheckoutView = (checkout: CheckoutController) => {
     else goTo("detail", -1);
   };
 
-  const leaveDone = (action: "done" | "rebook") => {
-    if (isEmbedded && props.onComplete)
-      props.onComplete(checkout.getResult(), action);
-    else if (action === "rebook") showToast(`New booking for ${name} started`);
-    else goTo("detail", -1);
-  };
+  const leaveDone = (action: "done" | "rebook") =>
+    props.onComplete(checkout.getResult(), action);
 
   const { isOffPlatform, refundCapAll, refundCap } = getRefundCap(
     state,
@@ -135,6 +178,7 @@ export const getCheckoutView = (checkout: CheckoutController) => {
       charged: 0,
       tip: 0,
       refundAuto: 0,
+      cashBack: 0,
     },
     isOffPlatform,
     refundCapAll,
@@ -143,7 +187,7 @@ export const getCheckoutView = (checkout: CheckoutController) => {
     feeExtra: Math.max(0, fee - state.paid),
     linkTarget: state.linkVia === "sms" ? booking.phone : booking.email,
     refundNote: isRefund
-      ? `${formatMoney(money.refundDue)} goes back to ${name}’s ${cardText} automatically when you complete checkout.`
+      ? getRefundNote(money, name, cardText, booking.recordedVia)
       : "",
   };
 };

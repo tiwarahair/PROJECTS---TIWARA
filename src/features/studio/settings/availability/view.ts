@@ -1,6 +1,9 @@
 // Studio → Settings → Availability: pause, working hours, blocked time and closed periods.
 import type { ChangeEvent } from "react";
-import { removeClosedPeriod, saveHours } from "../../../../lib/studio-api";
+import {
+  removeClosedPeriod,
+  saveHours,
+} from "../../../../lib/studio-api/settings";
 import { SHORT_MONTHS_SEPT } from "../../../../utils/dates";
 import { getSettingsSave } from "../save";
 import { getBlockColour } from "../../core/model";
@@ -88,7 +91,7 @@ export const getAvailabilityView = (studio: StudioController) => {
                 confirm: null,
               }));
 
-              sync?.save(() => removeClosedPeriod(period.id), {
+              sync.save(() => removeClosedPeriod(period.id), {
                 closed: before,
               });
 
@@ -111,7 +114,7 @@ export const getAvailabilityView = (studio: StudioController) => {
 
       setState({ check: { ...state.check, availability: true } });
 
-      sync?.save(
+      sync.save(
         (stylistId) => saveHours(fromHours(state.hours, stylistId)),
         { hours: saved?.hours ?? state.hours },
         restoreSaved,

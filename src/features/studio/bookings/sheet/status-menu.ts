@@ -2,7 +2,8 @@ import { Check, CreditCard, Send, TriangleAlert, Undo, X } from "lucide-react";
 import type { DecoratedBooking } from "../decorate";
 import { hhmm } from "../../core/format";
 import type { ActionItem } from "../../core/types";
-import { getFreshLink } from "./booking";
+import { confirmWithoutProtection } from "../../../../lib/studio-api/booking-writes";
+import { openCheckout } from "./checkout-view";
 import type { SheetContext } from "./context";
 import { CANCEL_STEP } from "./types";
 import type { StatusMenuKind } from "./types";
@@ -20,12 +21,9 @@ const getOnTheDaySubtitle = (
 
 const getStatusMenuKind = ({
   awaiting,
-  autoX,
   status,
 }: DecoratedBooking): StatusMenuKind => {
   if (awaiting) return "awaiting";
-
-  if (autoX) return "autoCancelled";
 
   return status === "arrived" ? "arrived" : "upcoming";
 };
@@ -37,23 +35,50 @@ const getCancelItem = ({ setState }: SheetContext): ActionItem => ({
   run: () => setState(CANCEL_STEP),
 });
 
+const askToConfirmUnprotected = ({
+  booking,
+  actions,
+  setState,
+  saveBooking,
+}: SheetContext) =>
+  setState({
+    confirm: {
+      title: "Confirm without protection?",
+      yesLabel: "Confirm booking",
+      noLabel: "Keep waiting",
+      body: `${booking.firstName}’s link stops working, and no cancellation or no-show fee can be charged on this booking.`,
+      yes: () => {
+        setState({ confirm: null });
+
+        saveBooking(
+          {
+            status: "confirmed",
+            paid: "none",
+            protect: "none",
+            expiresAt: undefined,
+            linkAmount: undefined,
+          },
+          confirmWithoutProtection,
+        );
+
+        actions.showToast("Confirmed without protection");
+      },
+    },
+  });
+
 const STATUS_ITEMS: Record<
   StatusMenuKind,
   (context: SheetContext) => ActionItem[]
 > = {
   awaiting: (context) => {
-    const { booking, actions, resendLink } = context;
+    const { booking, resendLink } = context;
 
     return [
       {
         label: "Confirmed",
         icon: Check,
         subtitle: "Confirm without protection",
-        run: () =>
-          actions.setStatus(booking.id, "confirmed", "Marked as confirmed", {
-            paid: booking.protectionMode === "full" ? "full" : "deposit",
-            protect: "link",
-          }),
+        run: () => askToConfirmUnprotected(context),
       },
       {
         label: booking.canResend ? "Resend payment link" : "No resends left",
@@ -64,22 +89,8 @@ const STATUS_ITEMS: Record<
       getCancelItem(context),
     ];
   },
-  autoCancelled: ({ booking, actions }) => [
-    {
-      label: "Send a new link",
-      icon: Send,
-      subtitle: "Starts a fresh 48 hrs",
-      run: () =>
-        actions.setStatus(
-          booking.id,
-          "awaiting",
-          `New link sent to ${booking.firstName}`,
-          { paid: "link", resends: 0, ...getFreshLink(booking) },
-        ),
-    },
-  ],
   upcoming: (context) => {
-    const { booking, state, setState, actions } = context;
+    const { booking, setState, actions } = context;
 
     return [
       {
@@ -102,29 +113,39 @@ const STATUS_ITEMS: Record<
         subtitle: getOnTheDaySubtitle(
           booking.canNoShow,
           booking.dayOffset,
-          `From ${hhmm(booking.graceEnd)} (${state.policy.grace} min grace)`,
+          `From ${hhmm(booking.graceEnd)} (${booking.graceMinutes} min grace)`,
         ),
         run: () => setState({ bookingStep: "noshow", noShowCharge: "deposit" }),
       },
       getCancelItem(context),
     ];
   },
-  arrived: ({ booking, setState, actions }) => [
-    {
-      label: "Completed",
-      icon: CreditCard,
-      subtitle:
-        booking.due > 0 ? `Collect £${booking.due}` : "Nothing left to collect",
-      run: () => setState({ bookingStep: "checkout", checkoutMethod: null }),
-    },
-    {
-      label: "Confirmed",
-      icon: Undo,
-      subtitle: "Undo arrived",
-      run: () =>
-        actions.setStatus(booking.id, "confirmed", "Back to confirmed"),
-    },
-  ],
+  arrived: (context) => {
+    const { booking, actions } = context;
+
+    return [
+      {
+        label: "Completed",
+        icon: CreditCard,
+        subtitle:
+          booking.due > 0
+            ? `Collect £${booking.due}`
+            : "Nothing left to collect",
+        run: () => openCheckout(context),
+      },
+      ...(booking.completed
+        ? []
+        : [
+            {
+              label: "Confirmed",
+              icon: Undo,
+              subtitle: "Undo arrived",
+              run: () =>
+                actions.setStatus(booking.id, "confirmed", "Back to confirmed"),
+            },
+          ]),
+    ];
+  },
 };
 
 // ---- the status menu ----
