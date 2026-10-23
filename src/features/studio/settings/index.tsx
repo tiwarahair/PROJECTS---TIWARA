@@ -1,6 +1,6 @@
 import { useNavigate } from "react-router";
 import { joinClassNames } from "../../../utils/class-names";
-import { BackBar } from "./back-bar";
+import { SettingsBackBar } from "./back-bar";
 import { SettingsNav } from "./nav";
 import { SettingsPage } from "./page";
 import { SettingsRoot } from "./root";
@@ -32,7 +32,7 @@ const SettingsFrame = ({ studio, view }: SettingsFrameProps) => {
     >
       {isWide && <SettingsNav studio={studio} view={view} />}
       <div className={styles.content}>
-        {!isWide && <BackBar studio={studio} view={view} />}
+        {!isWide && <SettingsBackBar studio={studio} view={view} />}
         <div
           className={joinClassNames(
             styles.pagePad,

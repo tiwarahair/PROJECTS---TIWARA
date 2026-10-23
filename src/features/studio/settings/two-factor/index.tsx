@@ -3,17 +3,20 @@ import { TaxDetailsForm } from "../../../../components/tax-details-form";
 import { joinClassNames } from "../../../../utils/class-names";
 import { getOverlayAnimation } from "../../../../components/overlay";
 import type { StudioController } from "../../core/use-studio";
-import { StepApp } from "./step-app";
+import { StepApp } from "../../../../components/two-factor/step-app";
 import { StepBackup } from "./step-backup";
 import { StepLearn } from "./step-learn";
 import { StepMethod } from "./step-method";
 import { StepSecure } from "./step-secure";
-import { BusyButton, CodeField } from "./fields";
+import {
+  BusyButton,
+  CodeField,
+} from "../../../../components/two-factor/fields";
 import { useTwoFactorForm } from "./use-two-factor-form";
 import { getTwoFactorView } from "./view";
 import type { TwoFactorView } from "./view";
 import overlay from "../../../../styles/components/overlay/index.module.css";
-import styles from "../../../../styles/features/studio/settings/two-factor/index.module.css";
+import styles from "../../../../styles/components/two-factor/index.module.css";
 
 interface TwoFactorBodyProps {
   studio: StudioController;

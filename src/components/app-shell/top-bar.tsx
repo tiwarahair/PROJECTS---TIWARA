@@ -8,9 +8,7 @@ interface AppShellTopBarProps {
   isWide: boolean;
   isDesktop: boolean;
   isHidden?: boolean;
-  /** before the title, e.g. Studio's avatar on phones */
   leading?: ReactNode;
-  /** after the title, e.g. Studio's bell and New booking */
   children?: ReactNode;
 }
 

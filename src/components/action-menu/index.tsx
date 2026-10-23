@@ -43,7 +43,6 @@ interface ActionMenuProps {
   onClose: () => void;
 }
 
-/** The "⋯" action menu */
 export const ActionMenu = ({
   menu,
   isWide,
@@ -177,7 +176,6 @@ const getAnchor = (button: HTMLElement, host: Element | null) => {
 };
 
 interface ActionMenuButtonProps {
-  /** names the button, e.g. "More options for this review" */
   label: string;
   title: string;
   subtitle: string;
@@ -185,7 +183,6 @@ interface ActionMenuButtonProps {
   isVertical?: boolean;
 }
 
-/** A "⋯" button that opens the action menu */
 export const ActionMenuButton = ({
   label,
   title,
@@ -198,12 +195,15 @@ export const ActionMenuButton = ({
   const [menu, setMenu] = useState<ActionMenuConfig | null>(null);
   const [host, setHost] = useState<Element | null>(null);
   const [isClosing, setClosing] = useState(false);
+  const closeTimer = useRef(0);
   const TriggerIcon = isVertical ? EllipsisVertical : Ellipsis;
 
   const open = () => {
     const button = buttonRef.current;
 
     if (!button) return;
+
+    window.clearTimeout(closeTimer.current);
 
     const dialog = button.closest('[role="dialog"]');
 
@@ -212,11 +212,13 @@ export const ActionMenuButton = ({
     setMenu({ title, subtitle, items, anchor: getAnchor(button, dialog) });
   };
 
+  useEffect(() => () => window.clearTimeout(closeTimer.current), []);
+
   const close = () => {
     setClosing(true);
     buttonRef.current?.focus();
 
-    window.setTimeout(() => {
+    closeTimer.current = window.setTimeout(() => {
       setMenu(null);
       setClosing(false);
     }, EXIT_MS);

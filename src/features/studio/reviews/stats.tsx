@@ -1,6 +1,6 @@
 import { Star } from "lucide-react";
+import { StatCards } from "../../../components/stat-cards";
 import type { getReviewStats } from "./view";
-import styles from "../../../styles/features/studio/reviews/index.module.css";
 
 interface ReviewStatsProps {
   stats: ReturnType<typeof getReviewStats>;
@@ -29,31 +29,27 @@ export const ReviewStats = ({
   };
 
   return (
-    <div className={styles.stats}>
-      <div className={styles.stat}>
-        <span className={styles.statLabel}>Average rating</span>
-        {rating == null ? (
-          <span className={styles.statEmpty}>—</span>
-        ) : (
-          <span className={styles.statValue}>
-            <Star size={22} strokeWidth={0} fill="var(--brand-yellow)" />
-            {rating.toFixed(1)}
-          </span>
-        )}
-        <span className={styles.statSub}>{getAverageNote()}</span>
-      </div>
-      <div className={styles.stat}>
-        <span className={styles.statLabel}>Reviews</span>
-        <span className={styles.statValue}>{total}</span>
-        <span className={styles.statSub}>{getCheckingNote()}</span>
-      </div>
-      <div className={styles.stat}>
-        <span className={styles.statLabel}>Replied to</span>
-        <span className={styles.statValue}>{replied}</span>
-        <span className={styles.statSub}>
-          {isShort ? "Shown publicly" : "Replies show on your profile"}
-        </span>
-      </div>
-    </div>
+    <StatCards
+      isWide={!isShort}
+      cards={[
+        {
+          label: "Average rating",
+          value: (
+            <>
+              <Star size={22} strokeWidth={0} fill="var(--brand-yellow)" />
+              {rating?.toFixed(1)}
+            </>
+          ),
+          isEmpty: rating == null,
+          sub: getAverageNote(),
+        },
+        { label: "Reviews", value: total, sub: getCheckingNote() },
+        {
+          label: "Replied to",
+          value: replied,
+          sub: isShort ? "Shown publicly" : "Replies show on your profile",
+        },
+      ]}
+    />
   );
 };

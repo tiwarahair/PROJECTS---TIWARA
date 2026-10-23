@@ -138,4 +138,26 @@ describe("shared menus", () => {
     expect(onKey).not.toHaveBeenCalled();
     window.removeEventListener("keydown", onKey);
   });
+
+  it("keeps an action menu open when it's reopened while closing", async () => {
+    const user = setupUser();
+
+    render(
+      <ActionMenuButton
+        label="More actions"
+        title="Tola’s review"
+        subtitle="About Crowned by Kemi"
+        items={[{ label: "Decide", icon: ClipboardCheck, run: vi.fn() }]}
+      />,
+    );
+
+    const button = screen.getByRole("button", { name: "More actions" });
+
+    await user.click(button);
+    await user.keyboard("{Escape}");
+    await user.click(button);
+    await new Promise((resolve) => window.setTimeout(resolve, 300));
+
+    expect(screen.getByRole("menu")).toBeInTheDocument();
+  });
 });

@@ -6,7 +6,6 @@ export interface AppShellNavItem {
   icon: LucideIcon;
   isOn: boolean;
   onSelect: () => void;
-  /** a count beside the item, e.g. open reports */
   badge?: number;
 }
 

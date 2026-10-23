@@ -1,4 +1,3 @@
-/* The app shell's frame (Studio and Admin): sidebar beside the main card on wider screens, the card alone on phones. */
 .studio {
   height: 100dvh;
   overflow: hidden;

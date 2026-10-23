@@ -22,10 +22,10 @@ interface AppShellSidebarProps {
   onToggle: () => void;
   items: AppShellNavItem[];
   links?: AppShellLink[];
+  hasLinksDivider?: boolean;
   profile: AppShellProfile;
 }
 
-/** The sidebar on wider screens: logo, the page's nav, links elsewhere and the profile chip. */
 export const AppShellSidebar = ({
   label,
   isOpen,

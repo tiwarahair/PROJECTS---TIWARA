@@ -1,4 +1,3 @@
-/* The shell's top bar on wider screens: the page title and a note line, with room for actions. */
 .topBar {
   flex: 0 0 auto;
   display: flex;

@@ -1,6 +1,8 @@
 import { skipToken } from "@reduxjs/toolkit/query";
-import { ChevronLeft } from "lucide-react";
+import { ChevronLeft, Star } from "lucide-react";
 import { useState } from "react";
+import { EmptyBox } from "../../../components/empty-box";
+import { ListSkeleton } from "../../../components/list-skeleton";
 import { PageMessage } from "../../../components/page-message";
 import { ReportReview } from "../../../components/report-review";
 import { useGetStudioReviewsQuery } from "../../../stores/api-slice";
@@ -10,10 +12,10 @@ import { getAllClients, getBookingLink } from "../core/model";
 import type { StudioController } from "../core/use-studio";
 import { ReviewControls } from "./controls";
 import { ReviewRow } from "./review-row";
-import { EmptyBox, ReviewsSkeleton } from "./states";
 import { ReviewStats } from "./stats";
 import { getReviewStats, getVisibleReviews, PAGE_SIZE } from "./view";
 import type { ReviewSort } from "./view";
+import list from "../../../styles/components/list-panel/index.module.css";
 import styles from "../../../styles/features/studio/reviews/index.module.css";
 
 /** Studio → Reviews: stats, search/sort/"Replied to", and every review with reply and report. */
@@ -77,7 +79,7 @@ export const StudioReviews = ({ studio }: { studio: StudioController }) => {
         />
       );
 
-    if (!data) return <ReviewsSkeleton />;
+    if (!data) return <ListSkeleton isWide={isWide} />;
 
     const stats = getReviewStats(data);
 
@@ -86,7 +88,7 @@ export const StudioReviews = ({ studio }: { studio: StudioController }) => {
         <>
           <ReviewStats stats={stats} isShort={!isWide} />
           <EmptyBox
-            hasIcon
+            icon={Star}
             title="No reviews yet"
             body="Clients are emailed a review link 2 hours after each completed booking. Your rating shows on your profile from 3 reviews."
             action="Copy your booking link"
@@ -137,7 +139,7 @@ export const StudioReviews = ({ studio }: { studio: StudioController }) => {
             />
           ))}
         {!!visible.length && (
-          <div className={isWide ? styles.panel : styles.cards}>
+          <div className={isWide ? list.panel : list.cards}>
             {visible.slice(0, shownCount).map((review) => (
               <ReviewRow
                 key={review.id}
@@ -161,7 +163,7 @@ export const StudioReviews = ({ studio }: { studio: StudioController }) => {
         {visible.length > shownCount && (
           <button
             type="button"
-            className={styles.showMore}
+            className={list.showMore}
             onClick={() => setShownCount((count) => count + PAGE_SIZE)}
           >
             Show more reviews

@@ -1,0 +1,60 @@
+.panel {
+  padding: 2px 22px;
+  border-radius: var(--radius-lg);
+  background: var(--neutral-0);
+  box-shadow: var(--shadow-panel);
+}
+
+.cards {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.showMore {
+  align-self: center;
+  height: 42px;
+  padding: 0 20px;
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius-full);
+  background: transparent;
+  font: inherit;
+  font-size: 14.5px;
+  font-weight: 600;
+  color: var(--text-primary);
+  cursor: pointer;
+  transition: transform var(--duration-fast) var(--ease-out);
+}
+
+.showMore:active {
+  transform: scale(0.97);
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .showMore:hover {
+    background: var(--quiet);
+  }
+}
+
+.skeleton {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.skeletonRow {
+  display: flex;
+  gap: 14px;
+  padding: 20px 0;
+}
+
+.skeletonRow + .skeletonRow {
+  border-top: 1px solid var(--border-subtle);
+}
+
+.skeletonText {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}

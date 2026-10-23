@@ -1,8 +1,10 @@
 import { useState } from "react";
-import Skeleton from "react-loading-skeleton";
 import { CountTabs } from "../../../components/count-tabs";
+import { EmptyBox } from "../../../components/empty-box";
+import { ListSkeleton } from "../../../components/list-skeleton";
 import { PageMessage } from "../../../components/page-message";
 import { SortMenu } from "../../../components/sort-menu";
+import { StatCards } from "../../../components/stat-cards";
 import type {
   AdminReport,
   AdminReportStats,
@@ -10,11 +12,11 @@ import type {
   ReportsTab,
 } from "../../../lib/admin-api";
 import { joinClassNames } from "../../../utils/class-names";
-import { EmptyBox, ReviewsSkeleton } from "../../studio/reviews/states";
 import { useGetReportsInfiniteQuery } from "../api";
 import { DecisionSheet } from "./decision-sheet";
 import { ReportRow } from "./row";
 import { getDefaultSort, getTabs, SORTS } from "./view";
+import list from "../../../styles/components/list-panel/index.module.css";
 import page from "../../../styles/features/studio/reviews/index.module.css";
 import shell from "../../../styles/features/admin/shell.module.css";
 import styles from "../../../styles/features/admin/page.module.css";
@@ -103,7 +105,7 @@ export const AdminReports = ({
         />
       );
 
-    if (!data) return <ReviewsSkeleton />;
+    if (!data) return <ListSkeleton isWide={isWide} />;
 
     if (!reports.length)
       return (
@@ -117,7 +119,7 @@ export const AdminReports = ({
     return (
       <>
         <div
-          className={isWide ? page.panel : page.cards}
+          className={isWide ? list.panel : list.cards}
           aria-busy={isFetching}
         >
           {reports.map((report) => (
@@ -133,7 +135,7 @@ export const AdminReports = ({
         {hasNextPage && (
           <button
             type="button"
-            className={page.showMore}
+            className={list.showMore}
             disabled={isFetchingNextPage}
             onClick={() => void fetchNextPage()}
           >
@@ -155,26 +157,15 @@ export const AdminReports = ({
       data-screen-label="Admin: Reports"
     >
       {!isWide && <h1 className={shell.pageTitle}>Reports</h1>}
-      <div className={page.stats}>
-        {statCards.map(({ label, value, sub, isAlert }) => (
-          <div key={label} className={page.stat}>
-            <span className={page.statLabel}>{label}</span>
-            {value == null ? (
-              <Skeleton width={36} height={26} />
-            ) : (
-              <span
-                className={joinClassNames(
-                  page.statValue,
-                  isAlert && styles.alert,
-                )}
-              >
-                {value}
-              </span>
-            )}
-            {isWide && <span className={page.statSub}>{sub}</span>}
-          </div>
-        ))}
-      </div>
+      <StatCards
+        isWide={isWide}
+        cards={statCards.map(({ sub, value, ...card }) => ({
+          ...card,
+          value,
+          isLoading: value == null,
+          sub: isWide ? sub : undefined,
+        }))}
+      />
       <div className={styles.tabsRow}>
         <div className={styles.tabs}>
           <CountTabs

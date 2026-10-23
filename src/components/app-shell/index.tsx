@@ -18,7 +18,6 @@ interface AppShellProps {
   bodyId: string;
   isBodyLocked?: boolean;
   children: ReactNode;
-  /** sheets, dialogs and floating cards over the main card */
   overlays?: ReactNode;
 }
 

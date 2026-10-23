@@ -1,7 +1,7 @@
 import { KeyRound, Smartphone, TriangleAlert } from "lucide-react";
 import { BackupOption, SmsRow } from "./fields";
 import type { TwoFactorView } from "./view";
-import styles from "../../../../styles/features/studio/settings/two-factor/index.module.css";
+import styles from "../../../../styles/components/two-factor/index.module.css";
 
 interface StepBackupProps {
   view: TwoFactorView;

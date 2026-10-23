@@ -5,10 +5,10 @@ import { PageMessage } from "../../../components/page-message";
 import { PHONE_QUERY } from "../../../components/sheet";
 import { useMediaQuery } from "../../../hooks/use-media-query";
 import { getAssetUrl } from "../../../utils/asset-url";
-import { BusyButton, CodeField } from "../../studio/settings/two-factor/fields";
-import { StepApp } from "../../studio/settings/two-factor/step-app";
+import { BusyButton, CodeField } from "../../../components/two-factor/fields";
+import { StepApp } from "../../../components/two-factor/step-app";
 import { useGate } from "./use-gate";
-import twoFactor from "../../../styles/features/studio/settings/two-factor/index.module.css";
+import twoFactor from "../../../styles/components/two-factor/index.module.css";
 import styles from "../../../styles/features/admin/gate.module.css";
 
 interface TwoStepGateProps {

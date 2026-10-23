@@ -7,7 +7,7 @@ import {
   verifySecondFactor,
 } from "../../../lib/two-factor";
 import type { TwoFactorEnrolment } from "../../../lib/two-factor";
-import type { AppStepView } from "../../studio/settings/two-factor/step-app";
+import type { AppStepView } from "../../../components/two-factor/step-app";
 
 type GateStep = "checking" | "setup" | "code" | "passed" | "failed";
 

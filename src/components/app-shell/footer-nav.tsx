@@ -7,7 +7,6 @@ interface AppShellFooterNavProps {
   items: AppShellNavItem[];
 }
 
-/** The bottom bar on phones. */
 export const AppShellFooterNav = ({ label, items }: AppShellFooterNavProps) => (
   <nav className={styles.footerNav} aria-label={label}>
     {items.map(

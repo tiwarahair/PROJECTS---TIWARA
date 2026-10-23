@@ -1,39 +1,37 @@
 import { Check, Copy, Smartphone } from "lucide-react";
 import { useState } from "react";
-import { joinClassNames } from "../../../../utils/class-names";
+import type { ChangeEvent } from "react";
+import { joinClassNames } from "../../utils/class-names";
 import { BusyButton, CodeField } from "./fields";
-import type { TwoFactorView } from "./view";
-import styles from "../../../../styles/features/studio/settings/two-factor/index.module.css";
+import styles from "../../styles/components/two-factor/index.module.css";
 
-/** what the app step needs, so Admin's two-step gate can show it too */
-export type AppStepView = Pick<
-  TwoFactorView,
-  | "appLink"
-  | "code"
-  | "copyKey"
-  | "errorMessage"
-  | "isBusy"
-  | "isCodeError"
-  | "isKeyCopied"
-  | "isKeyOn"
-  | "isNameError"
-  | "isOpenAppShown"
-  | "isQrFailed"
-  | "isQrLoading"
-  | "isSetUp"
-  | "isVerified"
-  | "keyText"
-  | "name"
-  | "onCode"
-  | "onName"
-  | "openApp"
-  | "qrImage"
-  | "retryQr"
-  | "toBackup"
-  | "toggleKey"
-  | "verify"
-  | "verifyLabel"
->;
+export interface AppStepView {
+  appLink?: string | null;
+  code: string;
+  copyKey: () => void;
+  errorMessage: string;
+  isBusy: boolean;
+  isCodeError: boolean;
+  isKeyCopied: boolean;
+  isKeyOn: boolean;
+  isNameError: boolean;
+  isOpenAppShown: boolean;
+  isQrFailed: boolean;
+  isQrLoading: boolean;
+  isSetUp: boolean;
+  isVerified: boolean;
+  keyText: string;
+  name: string;
+  onCode: (event: ChangeEvent<HTMLInputElement>) => void;
+  onName: (event: ChangeEvent<HTMLInputElement>) => void;
+  openApp: () => void;
+  qrImage?: string | null;
+  retryQr: () => void;
+  toBackup: () => void;
+  toggleKey: () => void;
+  verify: () => void;
+  verifyLabel: string;
+}
 
 interface StepAppProps {
   view: AppStepView;
