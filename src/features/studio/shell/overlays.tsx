@@ -1,9 +1,12 @@
 import type { CSSProperties } from "react";
-import { X } from "lucide-react";
+import { ActionMenu } from "../../../components/action-menu";
 import { joinClassNames } from "../../../utils/class-names";
-import { getDialogPlacement, getOverlayAnimation } from "./overlay";
+import {
+  getDialogPlacement,
+  getOverlayAnimation,
+} from "../../../components/overlay";
 import type { StudioController } from "../core/use-studio";
-import overlay from "../../../styles/features/studio/shell/overlay.module.css";
+import overlay from "../../../styles/components/overlay/index.module.css";
 import shell from "../../../styles/features/studio/shell/index.module.css";
 import styles from "../../../styles/features/studio/shell/overlays.module.css";
 
@@ -36,96 +39,16 @@ export const StudioTooltip = ({ studio }: { studio: StudioController }) => {
 /** The "…" action menu: anchored under its opener on wide screens, a sheet otherwise. */
 export const ActionsMenu = ({ studio }: { studio: StudioController }) => {
   const { state, isWide, actions } = studio;
-  const { actionSheet } = state;
 
-  if (!actionSheet) return null;
-
-  const anchor = actionSheet.anchor && isWide ? actionSheet.anchor : null;
-
-  // runtime: the opener's position on screen
-  const anchorStyle = anchor
-    ? ({
-        "--acts-top": `${anchor.top}px`,
-        "--acts-right": `${anchor.right}px`,
-        "--acts-bottom": `${anchor.bottom}px`,
-        "--acts-left": `${anchor.left}px`,
-      } as CSSProperties)
-    : undefined;
+  if (!state.actionSheet) return null;
 
   return (
-    <>
-      <div
-        className={joinClassNames(
-          styles.actsScrim,
-          anchor && styles.actsScrimClear,
-          state.actionSheetOut ? overlay.scrimOut21 : overlay.scrimIn20,
-        )}
-        onClick={actions.closeActionSheet}
-      ></div>
-      <div
-        className={joinClassNames(
-          styles.actsBox,
-          anchor
-            ? joinClassNames(
-                anchor.bottom != null ? styles.actsAbove : styles.actsBelow,
-                overlay.popIn,
-              )
-            : joinClassNames(
-                styles.actsSheet,
-                getDialogPlacement(isWide),
-                getOverlayAnimation(state.actionSheetOut, "dialog", isWide),
-              ),
-        )}
-        style={anchorStyle}
-      >
-        <div
-          className={joinClassNames(
-            styles.actsHead,
-            anchor && styles.actsHeadHidden,
-          )}
-        >
-          <div className={styles.grow}>
-            <div className={styles.actsTitle}>{actionSheet.title}</div>
-            <div className={styles.actsSub}>{actionSheet.subtitle}</div>
-          </div>
-          <button
-            className={styles.closeButton}
-            onClick={actions.closeActionSheet}
-            aria-label="Close"
-          >
-            <X size={19} strokeWidth={2} />
-          </button>
-        </div>
-        <div className={styles.actsList}>
-          {actionSheet.items.map(
-            ({ label, icon: ItemIcon, disabled, danger, run }) => (
-              <button
-                key={label}
-                className={joinClassNames(
-                  styles.actsItem,
-                  danger && styles.actsDanger,
-                  disabled && styles.actsOff,
-                )}
-                onClick={() => {
-                  if (disabled) return;
-
-                  actions.closeActionSheet();
-                  window.setTimeout(run, 180);
-                }}
-                disabled={!!disabled}
-              >
-                <ItemIcon
-                  className={styles.noShrink}
-                  size={17}
-                  strokeWidth={1.7}
-                />
-                <span className={styles.grow}>{label}</span>
-              </button>
-            ),
-          )}
-        </div>
-      </div>
-    </>
+    <ActionMenu
+      menu={state.actionSheet}
+      isWide={isWide}
+      isClosing={!!state.actionSheetOut}
+      onClose={actions.closeActionSheet}
+    />
   );
 };
 

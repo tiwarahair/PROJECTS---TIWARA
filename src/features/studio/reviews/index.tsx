@@ -25,6 +25,7 @@ export const StudioReviews = ({ studio }: { studio: StudioController }) => {
   const [search, setSearch] = useState("");
   const [shownCount, setShownCount] = useState(PAGE_SIZE);
   const [replyingId, setReplyingId] = useState("");
+  const [appealingId, setAppealingId] = useState("");
   const [reportingId, setReportingId] = useState("");
 
   const { data, isError } = useGetStudioReviewsQuery(stylistId || skipToken, {
@@ -148,6 +149,9 @@ export const StudioReviews = ({ studio }: { studio: StudioController }) => {
                 isReplying={replyingId === review.id}
                 onReply={() => setReplyingId(review.id)}
                 onCloseReply={() => setReplyingId("")}
+                isAppealing={appealingId === review.id}
+                onAppeal={() => setAppealingId(review.id)}
+                onCloseAppeal={() => setAppealingId("")}
                 onReport={() => setReportingId(review.id)}
                 onOpenClient={openClient}
               />

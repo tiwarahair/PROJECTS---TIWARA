@@ -1,6 +1,6 @@
 import { ChevronRight, Search, X } from "lucide-react";
 import { joinClassNames } from "../../../../../utils/class-names";
-import { getOverlayAnimation } from "../../../shell/overlay";
+import { getOverlayAnimation } from "../../../../../components/overlay";
 import type { WizardView } from "../view";
 import shared from "../../../../../styles/features/studio/services/wizard/dialogs/index.module.css";
 import styles from "../../../../../styles/features/studio/services/wizard/dialogs/suggestions.module.css";

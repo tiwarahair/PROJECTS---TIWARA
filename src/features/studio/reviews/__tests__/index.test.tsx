@@ -2,6 +2,7 @@ import { act, screen, within } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import type { UserEvent } from "@testing-library/user-event";
 import {
+  appealReview,
   fetchStudioReviews,
   replyToReview,
 } from "../../../../lib/studio-api/reviews";
@@ -17,6 +18,7 @@ vi.mock("../../../../lib/studio-api/reviews", async (importOriginal) => ({
   >()),
   fetchStudioReviews: vi.fn(),
   replyToReview: vi.fn(),
+  appealReview: vi.fn(),
 }));
 
 const REVIEW: StudioReview = {
@@ -35,8 +37,13 @@ const REVIEW: StudioReview = {
   reply: null,
   replied_at: null,
   is_reply_edited: false,
-  is_counted: false,
+  is_counted: true,
+  is_checking: true,
   is_reported: true,
+  status: "published",
+  decision: null,
+  appeal_state: null,
+  appeal_until: null,
 };
 
 let user: UserEvent;
@@ -99,6 +106,44 @@ describe("Studio → Reviews", () => {
     expect(replyToReview).toHaveBeenCalledWith({
       reviewId: "review-1",
       reply: "Sorry about the wait",
+    });
+  });
+
+  it("shows our decision and sends one appeal", async () => {
+    vi.mocked(appealReview).mockResolvedValue("appealed");
+
+    vi.mocked(fetchStudioReviews).mockResolvedValue({
+      rating: null,
+      review_count: 1,
+      reviews: [
+        {
+          ...REVIEW,
+          is_checking: false,
+          decision: "kept",
+          appeal_state: "open",
+          appeal_until: "2026-11-05T12:00:00Z",
+        },
+      ],
+    });
+
+    renderWithStore(<StudioPage seed={getStudioSeed()} />, "/studio");
+    act(() => void vi.advanceTimersToNextTimer());
+    await user.click(within(getLabelled("Sidebar")).getByTitle("Reviews"));
+
+    expect(await screen.findByText("Kept after checking")).toBeInTheDocument();
+
+    await user.click(screen.getByRole("button", { name: "Appeal" }));
+
+    await user.type(
+      screen.getByRole("textbox", { name: "Why should we look again?" }),
+      "It names my home address",
+    );
+
+    await user.click(screen.getByRole("button", { name: "Send appeal" }));
+
+    expect(appealReview).toHaveBeenCalledWith({
+      reviewId: "review-1",
+      body: "It names my home address",
     });
   });
 });

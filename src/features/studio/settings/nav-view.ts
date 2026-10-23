@@ -9,6 +9,7 @@ import {
   Link2,
   ListChecks,
   Shield,
+  ShieldCheck,
   Star,
   Store,
   User,
@@ -68,6 +69,7 @@ interface SettingsRow {
 export const getSettingsNav = (
   studio: StudioController,
   navigate: (to: string) => void,
+  isAdmin = false,
 ) => {
   const { state, setState, isWide, actions } = studio;
   const { showToast, openSubpage, scrollBody } = actions;
@@ -244,6 +246,24 @@ export const getSettingsNav = (
       label: "Share",
       rows: pick(["Booking link", "View public profile"]),
     },
+    ...(isAdmin
+      ? [
+          {
+            key: "admin",
+            label: "Tiwára’s House",
+            rows: [
+              {
+                key: "admin",
+                label: "Admin",
+                subtitle: "Reported reviews and appeals",
+                icon: ShieldCheck,
+                isLocked: false,
+                onSelect: () => navigate("/admin"),
+              },
+            ],
+          },
+        ]
+      : []),
   ];
 
   // ---- the wide settings nav ----

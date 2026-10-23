@@ -1,4 +1,4 @@
-import { screen, within } from "@testing-library/react";
+import { screen, waitFor, within } from "@testing-library/react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import type { UserEvent } from "@testing-library/user-event";
 import { fetchStylistReviews, reportReview } from "../../../lib/review-api";
@@ -18,6 +18,7 @@ const REVIEW: PublicReview = {
   rating: 5,
   body: "Beautiful knotless braids",
   is_text_removed: false,
+  is_checking: false,
   author: "Ada L.",
   is_former: false,
   service_name: "Knotless braids",
@@ -86,8 +87,10 @@ describe("ProfileReviews", () => {
 
     await user.click(screen.getByRole("menuitem", { name: "Report review" }));
 
-    expect(screen.getByTestId("location")).toHaveTextContent(
-      "/login?screen=cust-email&return=%2Fnaturallynia",
+    await waitFor(() =>
+      expect(screen.getByTestId("location")).toHaveTextContent(
+        "/login?screen=cust-email&return=%2Fnaturallynia",
+      ),
     );
   });
 
@@ -102,7 +105,7 @@ describe("ProfileReviews", () => {
 
     await user.click(screen.getByRole("menuitem", { name: "Report review" }));
 
-    await user.click(screen.getByRole("radio", { name: "Other" }));
+    await user.click(await screen.findByRole("radio", { name: "Other" }));
     await user.click(screen.getByRole("button", { name: "Send report" }));
 
     expect(screen.getByRole("alert")).toHaveTextContent(
@@ -125,7 +128,7 @@ describe("ProfileReviews", () => {
     await user.click(screen.getByRole("menuitem", { name: "Report review" }));
 
     await user.click(
-      screen.getByRole("radio", { name: "Spam or advertising" }),
+      await screen.findByRole("radio", { name: "Spam or advertising" }),
     );
 
     await user.click(screen.getByRole("button", { name: "Send report" }));

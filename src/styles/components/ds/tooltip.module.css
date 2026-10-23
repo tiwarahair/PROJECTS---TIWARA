@@ -18,3 +18,8 @@
   white-space: nowrap;
   z-index: 50;
 }
+
+.below {
+  bottom: auto;
+  top: calc(100% + 8px);
+}

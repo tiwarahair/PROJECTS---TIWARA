@@ -114,4 +114,14 @@ describe("the activity feed", () => {
 
     expect(toNotification({ ...row, kind: "something_else" }, now)).toBeNull();
   });
+
+  it("opens Reviews when we've decided on a reported review", () => {
+    expect(
+      toNotification({ ...row, kind: "review_text_removed" }, now),
+    ).toMatchObject({
+      title: "Review words removed",
+      body: "We removed the words of Ada’s review. The stars still count.",
+      opensReviews: true,
+    });
+  });
 });

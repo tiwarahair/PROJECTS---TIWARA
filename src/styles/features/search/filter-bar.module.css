@@ -148,24 +148,6 @@
   transition: background-color 0.16s cubic-bezier(0.2, 0.8, 0.2, 1);
 }
 
-.sortAnchor {
-  position: relative;
-}
-
-.sortPopover {
-  position: absolute;
-  top: calc(100% + 8px);
-  right: 0;
-  z-index: 61;
-  width: 240px;
-  background: var(--neutral-0);
-  border-radius: var(--radius-lg);
-  box-shadow: var(--shadow-popover);
-  padding: 8px;
-  animation: ddIn 0.18s cubic-bezier(0.2, 0.8, 0.2, 1) both;
-  transform-origin: top right;
-}
-
 /* keyframes are scoped per file in CSS modules, so shared ones are repeated */
 @keyframes ddIn {
   from {

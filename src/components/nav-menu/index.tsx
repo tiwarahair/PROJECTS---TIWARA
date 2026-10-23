@@ -34,8 +34,7 @@ export interface NavMenuProps {
 }
 
 /**
- * A pop-up menu anchored under its trigger: centred on the trigger and kept on
- * screen, closes on outside click, resize, Tab and Escape, and moves focus with the arrow / Home / End keys.
+ * A pop-up menu anchored under its trigger (above it when there's no room below)
  */
 export const NavMenu = ({
   anchor,
@@ -58,6 +57,8 @@ export const NavMenu = ({
     ),
   );
 
+  const [top, setTop] = useState(anchorRect.bottom + 8);
+  const [isAbove, setAbove] = useState(false);
   const [measured, setMeasured] = useState(false);
   const [entered, setEntered] = useState(false);
   const [activeIndex, setActiveIndex] = useState<number | null>(null);
@@ -68,7 +69,16 @@ export const NavMenu = ({
 
   useLayoutEffect(() => {
     const menuWidth = menuRef.current?.offsetWidth ?? 240;
+    const menuHeight = menuRef.current?.offsetHeight ?? 0;
     const centre = (anchorRect.left + anchorRect.right) / 2;
+
+    const hasRoomBelow =
+      anchorRect.bottom + 8 + menuHeight <= window.innerHeight - 12;
+
+    if (!hasRoomBelow && anchorRect.top - 8 - menuHeight >= 12) {
+      setTop(anchorRect.top - 8 - menuHeight);
+      setAbove(true);
+    }
 
     setLeft(
       Math.max(
@@ -144,6 +154,7 @@ export const NavMenu = ({
   const className = [
     styles.menu,
     measured && styles.measured,
+    isAbove && styles.above,
     measured && prefersReducedMotion() && styles.reduced,
     entered && styles.entered,
   ]
@@ -161,7 +172,7 @@ export const NavMenu = ({
       // --menu-top/--menu-left: measured from the trigger at open time
       style={
         {
-          "--menu-top": `${anchorRect.bottom + 8}px`,
+          "--menu-top": `${top}px`,
           "--menu-left": `${left}px`,
         } as CSSProperties
       }

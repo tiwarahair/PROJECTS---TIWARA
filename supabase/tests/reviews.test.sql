@@ -150,8 +150,8 @@ select is(
 
 reset role;
 
-select is(public.get_stylist_rating((select stylist from shop)),
-  '{"rating": null, "review_count": 2}', 'a reported review doesn''t count while it''s checked');
+select is(public.get_stylist_rating((select stylist from shop)) ->> 'rating', '4.0',
+  'a spam report leaves the review counting while it''s checked');
 
 select pg_temp.sign_in('f2222222-2222-2222-2222-222222222222');
 set local role authenticated;

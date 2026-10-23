@@ -24,6 +24,8 @@ import { loginAlert } from "./security-emails.ts";
 import type { LoginAlert } from "./security-emails.ts";
 import { reviewInvited, reviewReceived, reviewReminder, reviewReplied } from "./review-emails.ts";
 import type { ReviewInvite, ReviewReceived, ReviewReply } from "./review-emails.ts";
+import { appealAnswered, decisionForReviewer, decisionForStylist, reportAlert, reportOutcome, reportSummary } from "./admin-emails.ts";
+import type { AppealAnswer, ReportAlert, ReportSummary, ReviewDecision } from "./admin-emails.ts";
 import { disputeOpened, feeCancelled, feeDeclined, feeScheduled, feeUnpaid, feeWaived } from "./fee-emails.ts";
 import type { CancelledFee, DeclinedFee, DisputeNotice, ScheduledFee, UnpaidFeeNotice, WaivedFee } from "./fee-emails.ts";
 import {
@@ -143,6 +145,12 @@ const templates: Record<string, TemplateBuilder> = {
   review_reminder: (payload) => reviewReminder(payload as unknown as ReviewInvite),
   review_received: (payload) => reviewReceived(payload as unknown as ReviewReceived),
   review_reply: (payload) => reviewReplied(payload as unknown as ReviewReply),
+  admin_report_alert: (payload) => reportAlert(payload as unknown as ReportAlert),
+  admin_report_summary: (payload) => reportSummary(payload as unknown as ReportSummary),
+  review_decision_reviewer: (payload) => decisionForReviewer(payload as unknown as ReviewDecision),
+  review_decision_stylist: (payload) => decisionForStylist(payload as unknown as ReviewDecision),
+  review_report_outcome: (payload) => reportOutcome(payload as unknown as ReviewDecision),
+  review_appeal_answered: (payload) => appealAnswered(payload as unknown as AppealAnswer),
 };
 
 export const renderEmail = (

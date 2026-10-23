@@ -4,7 +4,10 @@ import type { getAddonDialog } from "./edit-view";
 import { getDuplicateView } from "../clients/view";
 import type { DuplicateView } from "../clients/view";
 import { findDuplicate, isDuplicateBlocking } from "../core/model";
-import { getDialogPlacement, getOverlayAnimation } from "../shell/overlay";
+import {
+  getDialogPlacement,
+  getOverlayAnimation,
+} from "../../../components/overlay";
 import type { StudioController } from "../core/use-studio";
 import { addStudioClient } from "../clients/save";
 import styles from "../../../styles/features/studio/bookings/dialogs.module.css";

@@ -1,16 +1,8 @@
-import { Navigate, createBrowserRouter } from "react-router";
+import { createBrowserRouter } from "react-router";
 import type { RouteObject } from "react-router";
 import { AppLayout } from "./app-layout";
 import { NotFoundPage } from "./features/page-states/not-found";
 import { RouteError } from "./features/page-states/route-error";
-
-// preserve links shared before profiles moved to /{slug}
-const OldProfileLink = () => (
-  <Navigate
-    to={`/${new URLSearchParams(window.location.search).get("stylist") ?? ""}`}
-    replace
-  />
-);
 
 // reserved for pages not built yet, so they don't open as a stylist profile
 const UNBUILT_PAGES = [
@@ -21,7 +13,6 @@ const UNBUILT_PAGES = [
   "privacy-policy",
   "reviews",
   "cookies",
-  "admin",
 ];
 
 const appRoutes: RouteObject[] = [
@@ -39,7 +30,6 @@ const appRoutes: RouteObject[] = [
         Component: SearchPage,
       })),
   },
-  { path: "/stylist", element: <OldProfileLink /> },
   {
     path: "/book",
     lazy: () =>
@@ -83,6 +73,13 @@ const appRoutes: RouteObject[] = [
       })),
   },
   {
+    path: "/appeal",
+    lazy: () =>
+      import("./features/appeal").then(({ AppealPage }) => ({
+        Component: AppealPage,
+      })),
+  },
+  {
     path: "/save-details",
     lazy: () =>
       import("./features/save-details").then(({ SaveDetailsPage }) => ({
@@ -119,6 +116,13 @@ const appRoutes: RouteObject[] = [
     lazy: () =>
       import("./features/studio/route").then(({ StudioRoute }) => ({
         Component: StudioRoute,
+      })),
+  },
+  {
+    path: "/admin",
+    lazy: () =>
+      import("./features/admin/route").then(({ AdminRoute }) => ({
+        Component: AdminRoute,
       })),
   },
   {

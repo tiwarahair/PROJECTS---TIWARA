@@ -4,9 +4,9 @@ import { getMiniCalendarDays } from "../../../core/format";
 import {
   getDialogPlacement,
   getOverlayAnimation,
-} from "../../../shell/overlay";
+} from "../../../../../components/overlay";
 import type { StudioController } from "../../../core/use-studio";
-import overlay from "../../../../../styles/features/studio/shell/overlay.module.css";
+import overlay from "../../../../../styles/components/overlay/index.module.css";
 import styles from "../../../../../styles/features/studio/settings/availability/block-sheet/end-date-dialog.module.css";
 import { getMonthNav, MonthCalendar } from "../../../shell/month-calendar";
 

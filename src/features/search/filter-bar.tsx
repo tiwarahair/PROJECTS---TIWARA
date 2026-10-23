@@ -1,6 +1,7 @@
 import { Check, ChevronDown, Settings2 } from "lucide-react";
 import Skeleton from "react-loading-skeleton";
 import type { CSSProperties } from "react";
+import { SortMenu } from "../../components/sort-menu";
 import { joinClassNames } from "../../utils/class-names";
 import controls from "../../styles/features/search/controls.module.css";
 import {
@@ -47,9 +48,6 @@ export const FilterBar = ({ search }: FilterBarProps) => {
     state.venues.length +
     (state.maxPrice != null ? 1 : 0) +
     (state.radius !== 10 ? 1 : 0);
-
-  const sortLabel = (SORTS.find(([key]) => key === state.sort) ||
-    SORTS[0])?.[1];
 
   return (
     <div className={joinClassNames(pageGlobal.flWrap, styles.wrap)}>
@@ -261,63 +259,16 @@ export const FilterBar = ({ search }: FilterBarProps) => {
               />
               {`Filters${filterCount ? ` · ${filterCount}` : ""}`}
             </button>
-            <div className={styles.sortAnchor}>
-              <button
-                type="button"
-                onClick={actions.toggleSort}
-                aria-haspopup="listbox"
-                aria-expanded={state.sortOpen ? "true" : "false"}
-                className={styles.pillButton}
-              >
-                {`Sort: ${sortLabel}`}
-                <ChevronDown
-                  className={styles.iconBlock}
-                  size={14}
-                  strokeWidth={2}
-                />
-              </button>
-              {state.sortOpen && (
-                <>
-                  <div
-                    onClick={actions.closeSort}
-                    className={styles.popoverScrim}
-                  ></div>
-                  <div
-                    data-dd=""
-                    role="listbox"
-                    aria-label="Sort"
-                    className={styles.sortPopover}
-                  >
-                    {SORTS.map(([key, label]) => {
-                      const isSelected = state.sort === key;
-
-                      return (
-                        <button
-                          key={key}
-                          type="button"
-                          role="option"
-                          aria-selected={isSelected ? "true" : "false"}
-                          onClick={() => actions.pickSort(key)}
-                          className={joinClassNames(
-                            controls.option,
-                            isSelected && controls.optionOn,
-                          )}
-                        >
-                          <span className={styles.optionLabel}>{label}</span>
-                          {isSelected && (
-                            <Check
-                              className={styles.iconBlock}
-                              size={14}
-                              strokeWidth={2.4}
-                            />
-                          )}
-                        </button>
-                      );
-                    })}
-                  </div>
-                </>
-              )}
-            </div>
+            <SortMenu
+              label="Sort"
+              ariaLabel="Sort"
+              options={SORTS}
+              value={state.sort}
+              isOpen={state.sortOpen}
+              onToggle={actions.toggleSort}
+              onClose={actions.closeSort}
+              onPick={actions.pickSort}
+            />
           </div>
         </div>
       </div>

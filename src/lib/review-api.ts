@@ -1,4 +1,4 @@
-// Reviews: the client's review page (by the emailed link), a profile's public reviews and reporting one.
+// Reviews: the client's review and appeal pages (by the emailed links), a profile's public reviews and reporting one.
 import { invokeBookingFunction } from "./booking-api";
 import { supabase } from "./supabase";
 
@@ -13,6 +13,20 @@ export interface ReviewPage {
   rating: number | null;
 }
 
+export type ReviewOutcome = "kept" | "text_removed" | "removed";
+
+export interface AppealPage {
+  state: "open" | "appealed" | "closed";
+  stylist_name: string;
+  service_name: string;
+  starts_at: string;
+  client_first: string | null;
+  rating: number;
+  outcome: ReviewOutcome | null;
+  decided_at: string | null;
+  appeal_until: string | null;
+}
+
 export interface ReviewDraft {
   token: string;
   rating: number;
@@ -21,9 +35,11 @@ export interface ReviewDraft {
 
 export interface PublicReview {
   id: string;
-  rating: number;
+  /** null while it's hidden for checking */
+  rating: number | null;
   body: string | null;
   is_text_removed: boolean;
+  is_checking: boolean;
   author: string;
   is_former: boolean; //  the reviewer deleted their account
   service_name: string;
@@ -63,6 +79,25 @@ export const submitReview = ({ token, rating, body }: ReviewDraft) =>
     token,
     rating,
     body: body.trim() || null,
+  });
+
+export const fetchAppealPage = (token: string) =>
+  invokeBookingFunction<AppealPage>("booking-review", {
+    action: "view-appeal",
+    token,
+  });
+
+export const submitAppeal = ({
+  token,
+  body,
+}: {
+  token: string;
+  body: string;
+}) =>
+  invokeBookingFunction<AppealPage>("booking-review", {
+    action: "appeal",
+    token,
+    body: body.trim(),
   });
 
 export const fetchStylistReviews = async (slug: string, page: number) => {

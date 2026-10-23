@@ -54,6 +54,18 @@ export const needsSecondFactor = async () => {
   return data?.nextLevel === "aal2" && data.currentLevel !== "aal2";
 };
 
+/** Where this session stands: a code entered ("passed"), an app set up but no code yet ("code"), or no app ("setup"). */
+export const getSecondFactorStep = async () => {
+  const { data, error } =
+    await supabase.auth.mfa.getAuthenticatorAssuranceLevel();
+
+  getErrorCode(error, []);
+
+  if (data?.currentLevel === "aal2") return "passed" as const;
+
+  return data?.nextLevel === "aal2" ? ("code" as const) : ("setup" as const);
+};
+
 /** True when this session entered an app code in the last 30 days. */
 export const hasRecentSecondFactor = async () => {
   const { data, error } =

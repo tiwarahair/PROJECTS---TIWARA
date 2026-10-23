@@ -18,7 +18,10 @@ export const SmsRow = () => (
 );
 
 interface CodeFieldProps {
-  view: TwoFactorView;
+  view: Pick<
+    TwoFactorView,
+    "code" | "onCode" | "isCodeError" | "errorMessage" | "isVerified"
+  >;
   label: string;
 }
 
@@ -39,7 +42,6 @@ export const CodeField = ({ view, label }: CodeFieldProps) => (
       inputMode="numeric"
       autoComplete="one-time-code"
       maxLength={6}
-      placeholder="000000"
       readOnly={view.isVerified}
       aria-invalid={view.isCodeError ? "true" : "false"}
     />

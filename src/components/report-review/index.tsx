@@ -25,7 +25,7 @@ interface ReportReviewProps {
   onClose: () => void;
 }
 
-/** Report a review with a reason; it stays up but stops counting toward the rating while we check it. */
+/** Report a review with a reason; abuse, private details and threats are hidden while we check, the rest stay up. */
 export const ReportReview = ({ reviewId, onClose }: ReportReviewProps) => {
   const [reason, setReason] = useState<ReportReason | "">("");
   const [details, setDetails] = useState("");
@@ -62,7 +62,7 @@ export const ReportReview = ({ reviewId, onClose }: ReportReviewProps) => {
         <p className={styles.text}>
           {outcome === "already_reported"
             ? "You’ve already reported this review. We’ll email you when we’ve decided."
-            : "We’ll check it against our review rules, usually within 2 working days, and email you what we decided. A bad rating on its own isn’t a reason to remove a review."}
+            : "We’ll check it against our review rules and email you what we decided, usually within 5 working days (24 hours for abuse, private details or threats). A bad rating on its own isn’t a reason to remove a review."}
         </p>
       </Sheet>
     );

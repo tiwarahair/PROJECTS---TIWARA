@@ -1,6 +1,7 @@
+import { Flag } from "lucide-react";
+import { ActionMenuButton } from "../../components/action-menu";
 import { ReviewCard } from "../../components/review-card";
 import type { PublicReview } from "../../lib/review-api";
-import { ReviewMenu } from "./review-menu";
 
 interface ReviewListProps {
   reviews: PublicReview[];
@@ -24,6 +25,7 @@ export const ReviewList = ({
       service_name: serviceName,
       body,
       is_text_removed: isTextRemoved,
+      is_checking: isChecking,
       reply,
       is_reply_edited: isReplyEdited,
       is_mine: isMine,
@@ -37,10 +39,26 @@ export const ReviewList = ({
         serviceName={serviceName}
         body={body}
         isTextRemoved={isTextRemoved}
+        isChecking={isChecking}
         reply={reply}
         isReplyEdited={isReplyEdited}
         stylistName={stylistName}
-        tag={!isMine && <ReviewMenu onReport={() => onReport(id)} />}
+        tag={
+          !isMine && (
+            <ActionMenuButton
+              label="More options for this review"
+              title={`${author}’s review`}
+              subtitle={serviceName}
+              items={[
+                {
+                  label: "Report review",
+                  icon: Flag,
+                  run: () => onReport(id),
+                },
+              ]}
+            />
+          )
+        }
       />
     ),
   );

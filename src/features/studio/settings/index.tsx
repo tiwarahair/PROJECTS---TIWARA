@@ -10,6 +10,7 @@ import type { StudioController } from "../core/use-studio";
 import styles from "../../../styles/features/studio/settings/index.module.css";
 import { useAccountBackend } from "./use-account-backend";
 import { useSignOut } from "../../../hooks/use-sign-out";
+import { useAppSelector } from "../../../stores/hooks";
 
 interface SettingsFrameProps {
   studio: StudioController;
@@ -49,7 +50,8 @@ const SettingsFrame = ({ studio, view }: SettingsFrameProps) => {
 export const StudioSettings = ({ studio }: { studio: StudioController }) => {
   const navigate = useNavigate();
   const signOut = useSignOut();
-  const view = getSettingsView(studio, navigate, signOut);
+  const isAdmin = useAppSelector(({ session }) => !!session.user?.isAdmin);
+  const view = getSettingsView(studio, navigate, signOut, isAdmin);
 
   return (
     <>

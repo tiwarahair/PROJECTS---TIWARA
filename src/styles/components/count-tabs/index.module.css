@@ -1,0 +1,60 @@
+.tabs {
+  display: flex;
+  gap: 26px;
+  overflow-x: auto;
+  box-shadow: inset 0 -1px 0 var(--border-subtle);
+}
+
+.tab {
+  position: relative;
+  flex: 0 0 auto;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  height: 48px;
+  padding: 0;
+  border: none;
+  background: none;
+  font: inherit;
+  font-size: 14.5px;
+  white-space: nowrap;
+  cursor: pointer;
+  transition: color 0.16s cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+
+.tab:hover {
+  color: var(--text-primary) !important;
+}
+
+.tabCount {
+  font-weight: 500;
+  color: var(--neutral-600);
+  font-variant-numeric: tabular-nums;
+}
+
+.tabBar {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: 2px;
+  border-radius: 2px;
+}
+
+.tabOn {
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.tabOff {
+  font-weight: 500;
+  color: var(--neutral-600);
+}
+
+.tabBarOn {
+  background: var(--neutral-900);
+}
+
+.tabBarOff {
+  background: transparent;
+}

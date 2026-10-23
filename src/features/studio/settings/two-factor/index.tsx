@@ -1,7 +1,7 @@
 import { Check, ChevronLeft, X } from "lucide-react";
 import { TaxDetailsForm } from "../../../../components/tax-details-form";
 import { joinClassNames } from "../../../../utils/class-names";
-import { getOverlayAnimation } from "../../shell/overlay";
+import { getOverlayAnimation } from "../../../../components/overlay";
 import type { StudioController } from "../../core/use-studio";
 import { StepApp } from "./step-app";
 import { StepBackup } from "./step-backup";
@@ -12,7 +12,7 @@ import { BusyButton, CodeField } from "./fields";
 import { useTwoFactorForm } from "./use-two-factor-form";
 import { getTwoFactorView } from "./view";
 import type { TwoFactorView } from "./view";
-import overlay from "../../../../styles/features/studio/shell/overlay.module.css";
+import overlay from "../../../../styles/components/overlay/index.module.css";
 import styles from "../../../../styles/features/studio/settings/two-factor/index.module.css";
 
 interface TwoFactorBodyProps {

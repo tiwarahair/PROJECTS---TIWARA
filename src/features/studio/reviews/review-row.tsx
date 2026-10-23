@@ -3,6 +3,7 @@ import {
   ChevronRight,
   Flag,
   MessageSquare,
+  Scale,
   UserRound,
 } from "lucide-react";
 import { useLayoutEffect, useRef, useState } from "react";
@@ -12,7 +13,8 @@ import { joinClassNames } from "../../../utils/class-names";
 import { formatReviewDate } from "../../../utils/review-date";
 import { getInitials } from "../../../utils/initials";
 import type { StudioClient } from "../core/types";
-import { ReplyForm } from "./reply-form";
+import { AppealForm, ReplyForm } from "./reply-form";
+import { getStatusTag } from "./view";
 import styles from "../../../styles/features/studio/reviews/row.module.css";
 
 interface ReviewRowProps {
@@ -22,6 +24,9 @@ interface ReviewRowProps {
   isReplying: boolean;
   onReply: () => void;
   onCloseReply: () => void;
+  isAppealing: boolean;
+  onAppeal: () => void;
+  onCloseAppeal: () => void;
   onReport: () => void;
   onOpenClient: (clientId: string) => void;
 }
@@ -48,9 +53,20 @@ const Avatar = ({
   return <span className={styles.avatar}>{getInitials(name)}</span>;
 };
 
-/** One review: the client (opening their card when linked), the stars, the words, the reply and the actions. */
 export const ReviewRow = ({
-  review: {
+  review,
+  client,
+  isCard,
+  isReplying,
+  onReply,
+  onCloseReply,
+  isAppealing,
+  onAppeal,
+  onCloseAppeal,
+  onReport,
+  onOpenClient,
+}: ReviewRowProps) => {
+  const {
     client_name: name,
     is_former: isFormer,
     rating,
@@ -60,18 +76,14 @@ export const ReviewRow = ({
     is_text_removed: isTextRemoved,
     reply,
     is_reply_edited: isReplyEdited,
-    is_counted: isCounted,
     is_reported: isReported,
+    status,
+    appeal_state: appealState,
     id,
-  },
-  client,
-  isCard,
-  isReplying,
-  onReply,
-  onCloseReply,
-  onReport,
-  onOpenClient,
-}: ReviewRowProps) => {
+  } = review;
+
+  const statusTag = getStatusTag(review);
+  const isUp = status === "published" || status === "text_removed";
   const [isExpanded, setExpanded] = useState(false);
   const [isCut, setCut] = useState(false);
   const bodyRef = useRef<HTMLParagraphElement>(null);
@@ -133,11 +145,7 @@ export const ReviewRow = ({
           <BadgeCheck size={14} strokeWidth={2} />
           Verified booking
         </span>
-        {!isCounted && (
-          <span className={styles.checking}>
-            Being checked · not in your rating
-          </span>
-        )}
+        {!!statusTag && <span className={styles.checking}>{statusTag}</span>}
       </div>
       <div className={styles.content}>
         <div className={styles.meta}>
@@ -183,17 +191,33 @@ export const ReviewRow = ({
             <p className={styles.replyText}>{reply}</p>
           </div>
         )}
-        {isReplying ? (
+        {isReplying && (
           <ReplyForm reviewId={id} reply={reply ?? ""} onDone={onCloseReply} />
-        ) : (
+        )}
+        {isAppealing && <AppealForm reviewId={id} onDone={onCloseAppeal} />}
+        {!isReplying && !isAppealing && (
           <div className={styles.actions}>
-            <button type="button" className={styles.action} onClick={onReply}>
-              <MessageSquare size={15} strokeWidth={1.8} />
-              {reply ? "Edit reply" : "Reply"}
-            </button>
-            {isReported ? (
-              <span className={styles.reported}>Reported</span>
-            ) : (
+            {isUp && (
+              <button type="button" className={styles.action} onClick={onReply}>
+                <MessageSquare size={15} strokeWidth={1.8} />
+                {reply ? "Edit reply" : "Reply"}
+              </button>
+            )}
+            {appealState === "open" && (
+              <button
+                type="button"
+                className={styles.action}
+                onClick={onAppeal}
+              >
+                <Scale size={15} strokeWidth={1.8} />
+                Appeal
+              </button>
+            )}
+            {appealState === "appealed" && (
+              <span className={styles.reported}>Appeal sent</span>
+            )}
+            {isReported && <span className={styles.reported}>Reported</span>}
+            {!isReported && status !== "removed" && (
               <button
                 type="button"
                 className={joinClassNames(styles.action, styles.actionQuiet)}

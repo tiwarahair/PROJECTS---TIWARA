@@ -33,13 +33,35 @@ export const getReviewStats = ({
   rating,
   review_count: counted,
   reviews,
-}: StudioReviews) => ({
-  rating,
-  counted,
-  total: reviews.length,
-  checking: reviews.filter(({ is_counted: isCounted }) => !isCounted).length,
-  replied: reviews.filter(({ reply }) => !!reply).length,
-});
+}: StudioReviews) => {
+  const shown = reviews.filter(({ status }) => status !== "removed");
+
+  return {
+    rating,
+    counted,
+    total: shown.length,
+    checking: shown.filter(
+      ({ is_checking: isChecking, status }) =>
+        isChecking || status === "hidden",
+    ).length,
+    replied: shown.filter(({ reply }) => !!reply).length,
+  };
+};
+
+/** where a review stands after reports: beside the client's name */
+export const getStatusTag = ({
+  status,
+  is_checking: isChecking,
+  decision,
+}: StudioReview) => {
+  if (status === "removed") return "Removed · not shown or counted";
+
+  if (status === "hidden") return "Hidden while we check · not in your rating";
+
+  if (isChecking) return "Being checked · still counts";
+
+  return decision === "kept" ? "Kept after checking" : "";
+};
 
 interface ReviewQuery {
   sort: ReviewSort;

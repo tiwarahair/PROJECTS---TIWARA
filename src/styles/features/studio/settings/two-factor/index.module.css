@@ -566,6 +566,15 @@
   cursor: pointer;
 }
 
+/* phones with the QR tucked away: the two links sit close under Open in authenticator app */
+.qrTucked {
+  margin-top: 8px;
+}
+
+.qrTucked .keyToggle {
+  margin-top: 0;
+}
+
 .key {
   display: flex;
   align-items: center;

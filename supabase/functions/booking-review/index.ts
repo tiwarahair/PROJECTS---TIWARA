@@ -1,4 +1,5 @@
-// The client's review page: "view" shows the booking to review, "submit" posts the stars and optional words
+// The client's review page: "view" shows the booking to review, "submit" posts the stars and optional words;
+// "view-appeal" and "appeal" are the same for appealing a decision on their review
 import { z } from "npm:zod@4";
 import { admin } from "../_shared/admin.ts";
 import { getClientIp } from "../_shared/client-ip.ts";
@@ -15,23 +16,32 @@ const requestSchema = z.discriminatedUnion("action", [
     rating: z.number().int().min(1).max(5),
     body: z.string().max(1000).nullable(),
   }),
+  z.object({ action: z.literal("view-appeal"), token: tokenSchema }),
+  z.object({
+    action: z.literal("appeal"),
+    token: tokenSchema,
+    body: z.string().trim().min(1).max(1000),
+  }),
 ]);
 
-interface ReviewPage {
-  booking_id: string;
+interface Page {
+  booking_id?: string;
+  review_id?: string;
   [shown: string]: unknown;
 }
 
-const getPage = async (token: string) => {
-  const { data, error } = await admin.rpc("get_review_page", { token });
+const isAppeal = (action: string) => action === "view-appeal" || action === "appeal";
+
+const getPage = async (token: string, action: string) => {
+  const { data, error } = await admin.rpc(isAppeal(action) ? "get_appeal_page" : "get_review_page", { token });
 
   if (error) throw error;
 
-  return data as ReviewPage | null;
+  return data as Page | null;
 };
 
 // what the page shows: none of our ids
-const toPage = ({ booking_id: _bookingId, ...shown }: ReviewPage) => shown;
+const toPage = ({ booking_id: _bookingId, review_id: _reviewId, ...shown }: Page) => shown;
 
 Deno.serve(async (request) => {
   if (request.method === "OPTIONS")
@@ -65,7 +75,19 @@ Deno.serve(async (request) => {
         return respond(404, { error: "link_not_valid" });
     }
 
-    const page = await getPage(token);
+    if (action === "appeal") {
+      const { data: outcome, error } = await admin.rpc("submit_appeal", {
+        token,
+        body: parsed.data.body,
+      });
+
+      if (error) throw error;
+
+      if (outcome === "link_not_valid")
+        return respond(404, { error: "link_not_valid" });
+    }
+
+    const page = await getPage(token, action);
 
     if (!page) return respond(404, { error: "link_not_valid" });
 

@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import type { StudioReview } from "../../../../lib/studio-api/reviews";
-import { getReviewStats, getVisibleReviews } from "../view";
+import { getReviewStats, getStatusTag, getVisibleReviews } from "../view";
 
 const review = (
   id: string,
@@ -24,7 +24,12 @@ const review = (
   replied_at: null,
   is_reply_edited: false,
   is_counted: true,
+  is_checking: false,
   is_reported: false,
+  status: "published",
+  decision: null,
+  appeal_state: null,
+  appeal_until: null,
   ...patch,
 });
 
@@ -33,6 +38,7 @@ const REVIEWS = [
   review("b", 5, "2026-10-03T10:00:00Z"),
   review("c", 1, "2026-10-02T10:00:00Z", {
     is_counted: false,
+    is_checking: true,
     service_name: "Knotless braids",
   }),
 ];
@@ -86,5 +92,33 @@ describe("Studio reviews view", () => {
     expect(
       getReviewStats({ rating: 4, review_count: 2, reviews: REVIEWS }),
     ).toEqual({ rating: 4, counted: 2, total: 3, checking: 1, replied: 1 });
+  });
+
+  it("says where a review stands after it was reported", () => {
+    const tag = (patch: Partial<StudioReview>) =>
+      getStatusTag(review("x", 2, "2026-10-01T10:00:00Z", patch));
+
+    expect(tag({ status: "removed" })).toBe("Removed · not shown or counted");
+
+    expect(tag({ status: "hidden" })).toBe(
+      "Hidden while we check · not in your rating",
+    );
+
+    expect(tag({ is_checking: true })).toBe("Being checked · still counts");
+    expect(tag({ decision: "kept" })).toBe("Kept after checking");
+    expect(tag({})).toBe("");
+  });
+
+  it("leaves removed reviews out of the counts", () => {
+    expect(
+      getReviewStats({
+        rating: null,
+        review_count: 1,
+        reviews: [
+          review("a", 4, "2026-10-01T10:00:00Z"),
+          review("b", 1, "2026-10-02T10:00:00Z", { status: "removed" }),
+        ],
+      }).total,
+    ).toBe(1);
   });
 });

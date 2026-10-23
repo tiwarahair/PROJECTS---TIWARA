@@ -9,11 +9,14 @@ interface ReviewCardProps {
   author: string;
   /** the reviewer deleted their account */
   isFormer?: boolean;
-  rating: number;
+  /** null while it's hidden for checking */
+  rating: number | null;
   createdAt: string;
   serviceName: string;
   body: string | null;
   isTextRemoved: boolean;
+  /** hidden while it's checked: no stars, words or reply */
+  isChecking?: boolean;
   reply: string | null;
   isReplyEdited: boolean;
   stylistName: string;
@@ -32,6 +35,7 @@ export const ReviewCard = ({
   serviceName,
   body,
   isTextRemoved,
+  isChecking = false,
   reply,
   isReplyEdited,
   stylistName,
@@ -60,12 +64,20 @@ export const ReviewCard = ({
           </span>
         </div>
       </div>
-      <span className={styles.stars}>
-        <StarRating rating={rating} />
-      </span>
+      {rating != null && (
+        <span className={styles.stars}>
+          <StarRating rating={rating} />
+        </span>
+      )}
       {tag}
     </header>
     {!!body && <p className={styles.body}>{body}</p>}
+    {isChecking && (
+      <p className={styles.removed}>
+        We’re checking this review because it was reported. It doesn’t count
+        toward the rating while we check.
+      </p>
+    )}
     {isTextRemoved && (
       <p className={styles.removed}>
         The words were removed because they broke our review rules. The rating

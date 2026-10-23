@@ -142,7 +142,7 @@ describe("Studio → Services", () => {
       })[0] as HTMLElement,
     );
 
-    await user.click(screen.getByRole("button", { name: "Archive" }));
+    await user.click(screen.getByRole("menuitem", { name: "Archive" }));
     act(() => vi.advanceTimersByTime(400));
     expect(screen.getByText("Silk press archived")).toBeInTheDocument();
 

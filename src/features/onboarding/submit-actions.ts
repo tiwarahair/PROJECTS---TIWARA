@@ -1,5 +1,5 @@
 import { becomeStylist } from "../../lib/account-changes";
-import { signUpStylist } from "../../lib/auth";
+import { isAdminSession, signUpStylist } from "../../lib/auth";
 import { getAuthFailure } from "../../lib/auth-errors";
 import { needsSecondFactor } from "../../lib/two-factor";
 import { getStylistDetails, getWelcomeMessage } from "./submit-logic";
@@ -81,7 +81,15 @@ export const getSubmitActions = ({
     }
 
     setState({ busy: true });
-    navigate(stateRef.current.returnTo || "/", { replace: true });
+
+    const returnTo = stateRef.current.returnTo || "/";
+
+    // admins who aren't stylists work in Admin, so a plain log in lands there
+    if (kind === "customer-login" && returnTo === "/")
+      void isAdminSession().then((isAdmin) =>
+        navigate(isAdmin ? "/admin" : "/", { replace: true }),
+      );
+    else navigate(returnTo, { replace: true });
   };
 
   const afterProAuth = async () => {

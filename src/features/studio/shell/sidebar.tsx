@@ -1,5 +1,7 @@
-import { PanelLeft } from "lucide-react";
+import { PanelLeft, ShieldCheck } from "lucide-react";
+import { Link } from "react-router";
 import { Avatar } from "../../../components/ds/avatar";
+import { useAppSelector } from "../../../stores/hooks";
 import { getAssetUrl } from "../../../utils/asset-url";
 import { joinClassNames } from "../../../utils/class-names";
 import type { StudioController } from "../core/use-studio";
@@ -10,6 +12,7 @@ import { getNavItems } from "./nav-items";
 export const StudioSidebar = ({ studio }: { studio: StudioController }) => {
   const { state, isDesktop, setState } = studio;
   const isOpen = state.sidebarOpen ?? isDesktop;
+  const isAdmin = useAppSelector(({ session }) => !!session.user?.isAdmin);
 
   return (
     <aside
@@ -57,6 +60,22 @@ export const StudioSidebar = ({ studio }: { studio: StudioController }) => {
               {isOpen && <span className={styles.navLabel}>{label}</span>}
             </button>
           ),
+        )}
+        {isAdmin && (
+          <Link
+            className={joinClassNames(
+              styles.navButton,
+              isOpen ? styles.navOpen : styles.navClosed,
+              styles.navOff,
+            )}
+            to="/admin"
+            title="Admin"
+          >
+            <span className={styles.navIcon}>
+              <ShieldCheck size={19} strokeWidth={1.8} />
+            </span>
+            {isOpen && <span className={styles.navLabel}>Admin</span>}
+          </Link>
         )}
       </nav>
       <div className={styles.spacer}></div>

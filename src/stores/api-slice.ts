@@ -64,19 +64,26 @@ import {
 } from "../lib/card-update-api";
 import type { CardUpdate } from "../lib/card-update-api";
 import {
+  fetchAppealPage,
   fetchReviewPage,
   fetchStylistReviews,
   REVIEWS_PAGE_SIZE,
   reportReview,
+  submitAppeal,
   submitReview,
 } from "../lib/review-api";
 import type {
+  AppealPage,
   PublicReviewsPage,
   ReviewDraft,
   ReviewPage,
   ReviewReport,
 } from "../lib/review-api";
-import { fetchStudioReviews, replyToReview } from "../lib/studio-api/reviews";
+import {
+  appealReview,
+  fetchStudioReviews,
+  replyToReview,
+} from "../lib/studio-api/reviews";
 import type { StudioReviews } from "../lib/studio-api/reviews";
 import type { PaymentLink } from "../lib/payment-link-api";
 import { listTwoFactorDevices } from "../lib/two-factor";
@@ -93,7 +100,7 @@ export const getErrorMessage = (error: unknown) =>
     : "";
 
 /** RTK Query's result shape for a promise that may throw. Supabase rpc errors are plain objects, not Errors. */
-const toQueryResult = <T>(task: Promise<T>) =>
+export const toQueryResult = <T>(task: Promise<T>) =>
   task.then(
     (data) => ({ data }),
     (error: unknown) => ({
@@ -315,6 +322,21 @@ export const api = createApi({
           .catch(() => undefined);
       },
     }),
+    getAppealPage: build.query<AppealPage, string>({
+      queryFn: (token) => toQueryResult(fetchAppealPage(token)),
+    }),
+    submitAppeal: build.mutation<AppealPage, { token: string; body: string }>({
+      queryFn: (draft) => toQueryResult(submitAppeal(draft)),
+      onQueryStarted: ({ token }, { dispatch, queryFulfilled }) => {
+        queryFulfilled
+          .then(({ data }) => {
+            void dispatch(
+              api.util.upsertQueryData("getAppealPage", token, data),
+            );
+          })
+          .catch(() => undefined);
+      },
+    }),
     getStylistReviews: build.infiniteQuery<PublicReviewsPage, string, number>({
       providesTags: ["Reviews"],
       keepUnusedDataFor: 300,
@@ -344,6 +366,13 @@ export const api = createApi({
         invalidatesTags: ["Reviews"],
       },
     ),
+    appealReview: build.mutation<
+      "appealed" | "closed",
+      { reviewId: string; body: string }
+    >({
+      queryFn: (appeal) => toQueryResult(appealReview(appeal)),
+      invalidatesTags: ["Reviews"],
+    }),
     getRescheduleSlots: build.query<string[], RescheduleSlotsRequest>({
       providesTags: ["ManagedBooking"],
       queryFn: (request) => toQueryResult(getRescheduleSlots(request)),
@@ -421,6 +450,9 @@ export const {
   useReportReviewMutation,
   useGetStudioReviewsQuery,
   useReplyToReviewMutation,
+  useAppealReviewMutation,
+  useGetAppealPageQuery,
+  useSubmitAppealMutation,
   useStartCardUpdateMutation,
   useSaveCardUpdateMutation,
   useGetRescheduleSlotsQuery,

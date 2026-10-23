@@ -1,4 +1,5 @@
 import { supabase } from "../supabase";
+import type { ReviewOutcome } from "../review-api";
 import { check, write } from "./request";
 
 export interface StudioReview {
@@ -7,6 +8,7 @@ export interface StudioReview {
   ref: string;
   rating: number;
   body: string | null;
+  status: "published" | "text_removed" | "removed" | "hidden";
   is_text_removed: boolean;
   client_name: string;
   /** the client deleted their account */
@@ -20,7 +22,12 @@ export interface StudioReview {
   replied_at: string | null;
   is_reply_edited: boolean;
   is_counted: boolean;
+  is_checking: boolean;
   is_reported: boolean;
+  /** the latest admin decision, if any */
+  decision: ReviewOutcome | null;
+  appeal_state: "open" | "appealed" | "closed" | null;
+  appeal_until: string | null;
 }
 
 export interface StudioReviews {
@@ -43,3 +50,17 @@ export const replyToReview = ({
   reviewId: string;
   reply: string;
 }) => write(supabase.rpc("reply_to_review", { target: reviewId, reply }));
+
+export const appealReview = async ({
+  reviewId,
+  body,
+}: {
+  reviewId: string;
+  body: string;
+}) =>
+  (await write(
+    supabase.rpc("appeal_review_decision", {
+      target: reviewId,
+      body: body.trim(),
+    }),
+  )) as "appealed" | "closed";

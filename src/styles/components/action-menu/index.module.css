@@ -1,0 +1,166 @@
+/* The action menu: a popover by its opener on wide screens, a sheet on phones. Motion comes from components/overlay. */
+
+.scrim {
+  position: fixed;
+  inset: 0;
+  z-index: 130;
+  background: var(--scrim-modal, rgba(26, 23, 20, 0.45));
+}
+
+.scrimClear {
+  background: transparent;
+}
+
+.box {
+  position: fixed;
+  z-index: 131;
+  background: var(--neutral-50);
+  box-sizing: border-box;
+}
+
+/* anchored under the opener (wide): runtime position from the opener's rect */
+.below {
+  top: var(--acts-top);
+  right: var(--acts-right);
+  width: 232px;
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-popover, 0 16px 40px -12px rgba(26, 23, 20, 0.28));
+  padding: 8px;
+}
+
+.above {
+  bottom: var(--acts-bottom);
+  left: var(--acts-left);
+  width: 264px;
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-popover, 0 16px 40px -12px rgba(26, 23, 20, 0.28));
+  padding: 8px;
+  transform-origin: bottom left;
+}
+
+.sheet {
+  left: 50%;
+  width: 100%;
+  box-shadow: var(--shadow-modal, 0 24px 60px rgba(26, 23, 20, 0.3));
+  padding: 20px 18px calc(16px + env(safe-area-inset-bottom));
+}
+
+.head {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+}
+
+.hidden {
+  display: none;
+}
+
+.grow {
+  flex: 1;
+  min-width: 0;
+}
+
+.title {
+  font-family: "Schibsted Grotesk", sans-serif;
+  font-size: 18px;
+  font-weight: 600;
+  letter-spacing: -0.02em;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.sub {
+  font-size: 14.5px;
+  color: var(--text-secondary);
+  margin-top: 3px;
+}
+
+.close {
+  flex: 0 0 auto;
+  width: 32px;
+  height: 32px;
+  margin: -4px -4px 0 0;
+  border: none;
+  background: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--text-secondary);
+  padding: 0;
+  line-height: 0;
+}
+
+.close:active {
+  transform: scale(0.9) !important;
+}
+
+.list {
+  margin-top: 12px;
+}
+
+.item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+  min-height: 52px;
+  box-sizing: border-box;
+  background: none;
+  border: none;
+  padding: 0 4px;
+  text-align: left;
+  font-size: 15px;
+  font-weight: 600;
+  border-radius: var(--radius-sm);
+  color: var(--text-primary);
+  opacity: 1;
+}
+
+.item:active {
+  background: var(--quiet) !important;
+}
+
+.danger {
+  color: var(--accent-700);
+}
+
+.off {
+  opacity: 0.45;
+}
+
+.icon {
+  flex: 0 0 auto;
+}
+
+/* the "⋯" button that opens it outside Studio (public reviews, Admin rows) */
+.trigger {
+  flex: none;
+  width: 36px;
+  height: 36px;
+  margin: -4px -8px 0 0;
+  display: grid;
+  place-items: center;
+  border: none;
+  border-radius: var(--radius-full);
+  background: none;
+  color: var(--text-secondary);
+  cursor: pointer;
+  transition:
+    background var(--duration-fast) var(--ease-out),
+    transform var(--duration-fast) var(--ease-out);
+}
+
+.trigger[aria-expanded="true"] {
+  background: var(--fill-quiet);
+  color: var(--text-primary);
+}
+
+.trigger:active {
+  transform: scale(0.94);
+}
+
+.trigger:focus-visible,
+.item:focus-visible {
+  outline: 3px solid var(--focus-ring);
+}

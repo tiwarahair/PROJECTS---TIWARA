@@ -1,4 +1,4 @@
-import overlay from "../../../styles/features/studio/shell/overlay.module.css";
+import overlay from "../../styles/components/overlay/index.module.css";
 
 /** The enter/leave animation for a sheet, side panel or dialog. */
 export const getOverlayAnimation = (

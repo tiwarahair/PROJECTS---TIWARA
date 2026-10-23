@@ -1,4 +1,3 @@
-import type { LucideIcon } from "lucide-react";
 import type { BlockedTime } from "./availability";
 
 export interface ConfirmDialog {
@@ -14,28 +13,10 @@ export interface ConfirmDialog {
   isBlocking?: boolean;
 }
 
-export interface ActionItem {
-  label: string;
-  icon: LucideIcon;
-  subtitle?: string;
-  disabled?: boolean;
-  danger?: boolean;
-  run: () => void;
-}
-
-interface ActionAnchor {
-  top?: number;
-  right?: number;
-  bottom?: number;
-  left?: number;
-}
-
-export interface ActionSheet {
-  title: string;
-  subtitle: string;
-  anchor?: ActionAnchor | null;
-  items: ActionItem[];
-}
+export type {
+  ActionMenuItem as ActionItem,
+  ActionMenuConfig as ActionSheet,
+} from "../../../../components/action-menu";
 
 export interface Popover {
   kind?: "block";
