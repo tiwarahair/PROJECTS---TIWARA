@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { Button } from "../ds/button";
+import { ReviewRulesLink } from "../review-rules-link";
 import type { ReportReason } from "../../lib/review-api";
 import { Sheet } from "../sheet";
 import { useReportReviewMutation } from "../../stores/api-slice";
@@ -60,9 +61,16 @@ export const ReportReview = ({ reviewId, onClose }: ReportReviewProps) => {
         footer={<Button onClick={onClose}>Done</Button>}
       >
         <p className={styles.text}>
-          {outcome === "already_reported"
-            ? "You’ve already reported this review. We’ll email you when we’ve decided."
-            : "We’ll check it against our review rules and email you what we decided, usually within 5 working days (24 hours for abuse, private details or threats). A bad rating on its own isn’t a reason to remove a review."}
+          {outcome === "already_reported" ? (
+            "You’ve already reported this review. We’ll email you when we’ve decided."
+          ) : (
+            <>
+              We’ll check it against <ReviewRulesLink /> and email you what we
+              decided, usually within 5 working days (24 hours for abuse,
+              private details or threats). A bad rating on its own isn’t a
+              reason to remove a review.
+            </>
+          )}
         </p>
       </Sheet>
     );
@@ -102,6 +110,14 @@ export const ReportReview = ({ reviewId, onClose }: ReportReviewProps) => {
           </label>
         ))}
       </fieldset>
+      <a
+        className={styles.policyLink}
+        href="/reviews"
+        target="_blank"
+        rel="noreferrer"
+      >
+        Read our review policy
+      </a>
       <label className={styles.field}>
         <span className={styles.legend}>
           {reason === "other" ? "What’s wrong with it?" : "Anything else?"}{" "}

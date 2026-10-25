@@ -81,7 +81,7 @@ export const HelpPage = () => {
         </div>
         <h2 className={styles.contactHeading}>Contact us</h2>
         <p className={styles.contactText}>
-          Email us and we’ll reply within one working day.
+          Email us and we’ll get back to you.
         </p>
         <a className={styles.mail} href={mailHref}>
           <Mail size={17} strokeWidth={1.7} />

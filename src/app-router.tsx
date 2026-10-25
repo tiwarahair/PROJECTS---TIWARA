@@ -11,7 +11,6 @@ const UNBUILT_PAGES = [
   "policies",
   "terms-of-service",
   "privacy-policy",
-  "reviews",
   "cookies",
 ];
 
@@ -91,6 +90,13 @@ const appRoutes: RouteObject[] = [
     lazy: () =>
       import("./features/account").then(({ AccountPage }) => ({
         Component: AccountPage,
+      })),
+  },
+  {
+    path: "/reviews",
+    lazy: () =>
+      import("./features/review-policy").then(({ ReviewPolicyPage }) => ({
+        Component: ReviewPolicyPage,
       })),
   },
   {

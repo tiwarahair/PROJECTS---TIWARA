@@ -1,4 +1,5 @@
 import { BadgeCheck, UserRound } from "lucide-react";
+import { ReviewRulesLink } from "../review-rules-link";
 import type { ReactNode } from "react";
 import { getInitials } from "../../utils/initials";
 import { formatReviewDate } from "../../utils/review-date";
@@ -80,8 +81,8 @@ export const ReviewCard = ({
     )}
     {isTextRemoved && (
       <p className={styles.removed}>
-        The words were removed because they broke our review rules. The rating
-        still counts.
+        The words were removed because they broke <ReviewRulesLink />. The
+        rating still counts.
       </p>
     )}
     {!!reply && (

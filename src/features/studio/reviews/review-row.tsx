@@ -7,6 +7,7 @@ import {
   UserRound,
 } from "lucide-react";
 import { useLayoutEffect, useRef, useState } from "react";
+import { ReviewRulesLink } from "../../../components/review-rules-link";
 import { StarRating } from "../../../components/star-rating";
 import type { StudioReview } from "../../../lib/studio-api/reviews";
 import { joinClassNames } from "../../../utils/class-names";
@@ -178,7 +179,7 @@ export const ReviewRow = ({
         )}
         {isTextRemoved && (
           <p className={styles.removed}>
-            The words were removed because they broke our review rules. The
+            The words were removed because they broke <ReviewRulesLink />. The
             rating still counts.
           </p>
         )}
