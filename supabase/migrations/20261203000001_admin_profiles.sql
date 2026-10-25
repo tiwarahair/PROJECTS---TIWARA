@@ -428,6 +428,10 @@ begin
     raise exception 'note_required';
   end if;
 
+  if not exists (select 1 from public.get_admin_profile_rows() where id = target) then
+    raise exception 'not_found';
+  end if;
+
   insert into public.admin_profile_checks (stylist_id, checked_at, checked_by, checked_flags, note, note_updated_at, note_updated_by)
   values (target, now(), auth.uid(), public.get_profile_flags(target), clean_note, now(), auth.uid())
   on conflict (stylist_id) do update
