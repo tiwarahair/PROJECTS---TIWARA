@@ -51,6 +51,8 @@ export const StylistsSection = () => {
               business_name,
               area_label,
               from_pence,
+              rating,
+              review_count,
             }) => (
               <div
                 key={id}
@@ -62,6 +64,7 @@ export const StylistsSection = () => {
                   stylistName={business_name}
                   area={area_label ?? ""}
                   from={formatMoney(from_pence / 100)}
+                  {...(rating == null ? {} : { rating, reviews: review_count })}
                   verified
                 />
               </div>

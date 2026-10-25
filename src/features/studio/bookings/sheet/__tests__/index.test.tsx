@@ -105,7 +105,7 @@ const openMoreItem = async (label: string) => {
       .at(-1) as HTMLElement,
   );
 
-  await user.click(screen.getByRole("button", { name: label }));
+  await user.click(screen.getByRole("menuitem", { name: label }));
   advance(400);
 };
 

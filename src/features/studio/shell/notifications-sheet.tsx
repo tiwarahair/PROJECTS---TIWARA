@@ -55,9 +55,11 @@ export const NotificationsSheet = ({
   ];
 
   const getHandler = (
-    { bookingId, opensEarnings }: StudioNotification,
+    { bookingId, opensEarnings, opensReviews }: StudioNotification,
     index: number,
   ) => {
+    if (opensReviews) return deepLink(() => setState({ tab: "reviews" }));
+
     if (bookingId)
       return deepLink(() => void openBookingById(studio, bookingId));
 

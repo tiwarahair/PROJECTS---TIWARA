@@ -82,8 +82,8 @@ export const toPublicStylist = (profile: PublicProfile): PublicStylist => {
       travelMiles: profile.travel_radius_miles ?? undefined,
       mobile: profile.business_type === "mobile",
       verified: profile.status === "live",
-      rating: 0,
-      reviews: 0,
+      rating: profile.rating ?? 0,
+      reviews: profile.rating == null ? 0 : profile.review_count,
       bio: profile.bio ?? "",
       cover: profile.cover_path ? toPhotoUrl(profile.cover_path) : "",
       portfolio: [...profile.portfolio_photos]

@@ -1,0 +1,98 @@
+/* The decision sheet: the review being decided, the decision and appeal, and who's emailed. Its form uses the
+   report sheet's styles. */
+.review {
+  padding: 14px 16px;
+  border-radius: var(--radius-md);
+  background: var(--neutral-0);
+  box-shadow: var(--shadow-panel);
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.meta {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 4px 8px;
+  font-size: 13.5px;
+  color: var(--text-secondary);
+}
+
+.body {
+  margin: 0;
+  font-size: 15px;
+  line-height: 1.6;
+  white-space: pre-line;
+  overflow-wrap: anywhere;
+}
+
+.reportLine {
+  margin: 0;
+  font-size: 13.5px;
+  color: var(--neutral-600);
+}
+
+.reportLine b,
+.choiceLabel {
+  color: var(--text-primary);
+  font-weight: 600;
+}
+
+.decision,
+.appeal,
+.emails {
+  margin-top: 14px;
+  padding: 12px 16px;
+  border-radius: var(--radius-md);
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  font-size: 14px;
+}
+
+.decision {
+  border: 1px solid var(--border-subtle);
+}
+
+.appeal {
+  background: #faf7f0;
+}
+
+.emails {
+  padding: 0;
+  gap: 4px;
+}
+
+.label {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text-secondary);
+}
+
+.choice {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+}
+
+.muted {
+  font-size: 13.5px;
+  color: var(--neutral-600);
+}
+
+.hint {
+  font-size: 13px;
+  color: var(--text-secondary);
+}
+
+.email {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.emailIcon {
+  flex: none;
+  color: var(--text-secondary);
+}

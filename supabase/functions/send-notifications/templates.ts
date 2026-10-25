@@ -22,6 +22,10 @@ import { cardNotReplaced, cardUpdateNeeded } from "./card-emails.ts";
 import type { CardUpdateNeeded } from "./card-emails.ts";
 import { loginAlert } from "./security-emails.ts";
 import type { LoginAlert } from "./security-emails.ts";
+import { reviewInvited, reviewReceived, reviewReminder, reviewReplied } from "./review-emails.ts";
+import type { ReviewInvite, ReviewReceived, ReviewReply } from "./review-emails.ts";
+import { appealAnswered, decisionForReviewer, decisionForStylist, reportAlert, reportOutcome, reportSummary } from "./admin-emails.ts";
+import type { AppealAnswer, ReportAlert, ReportSummary, ReviewDecision } from "./admin-emails.ts";
 import { disputeOpened, feeCancelled, feeDeclined, feeScheduled, feeUnpaid, feeWaived } from "./fee-emails.ts";
 import type { CancelledFee, DeclinedFee, DisputeNotice, ScheduledFee, UnpaidFeeNotice, WaivedFee } from "./fee-emails.ts";
 import {
@@ -37,6 +41,8 @@ import {
   confirmBookingChanged,
 } from "./studio-booking-emails.ts";
 import type { ConfirmLink, StudioBooking, StylistNotice } from "./studio-booking-emails.ts";
+import { stylistSuspended, stylistUnsuspended } from "./suspension-emails.ts";
+import type { Suspension } from "./suspension-emails.ts";
 
 type TemplateBuilder = (payload: Record<string, unknown>) => RenderedEmail;
 
@@ -137,6 +143,18 @@ const templates: Record<string, TemplateBuilder> = {
   login_alert: (payload) => loginAlert(payload as unknown as LoginAlert),
   card_update_needed: (payload) => cardUpdateNeeded(payload as unknown as CardUpdateNeeded),
   card_not_replaced: (payload) => cardNotReplaced(payload as unknown as StylistNotice),
+  review_invite: (payload) => reviewInvited(payload as unknown as ReviewInvite),
+  review_reminder: (payload) => reviewReminder(payload as unknown as ReviewInvite),
+  review_received: (payload) => reviewReceived(payload as unknown as ReviewReceived),
+  review_reply: (payload) => reviewReplied(payload as unknown as ReviewReply),
+  admin_report_alert: (payload) => reportAlert(payload as unknown as ReportAlert),
+  admin_report_summary: (payload) => reportSummary(payload as unknown as ReportSummary),
+  review_decision_reviewer: (payload) => decisionForReviewer(payload as unknown as ReviewDecision),
+  review_decision_stylist: (payload) => decisionForStylist(payload as unknown as ReviewDecision),
+  review_report_outcome: (payload) => reportOutcome(payload as unknown as ReviewDecision),
+  review_appeal_answered: (payload) => appealAnswered(payload as unknown as AppealAnswer),
+  stylist_suspended: (payload) => stylistSuspended(payload as unknown as Suspension),
+  stylist_unsuspended: (payload) => stylistUnsuspended(payload as unknown as Suspension),
 };
 
 export const renderEmail = (

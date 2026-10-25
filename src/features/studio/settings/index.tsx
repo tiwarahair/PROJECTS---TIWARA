@@ -1,6 +1,6 @@
 import { useNavigate } from "react-router";
 import { joinClassNames } from "../../../utils/class-names";
-import { BackBar } from "./back-bar";
+import { SettingsBackBar } from "./back-bar";
 import { SettingsNav } from "./nav";
 import { SettingsPage } from "./page";
 import { SettingsRoot } from "./root";
@@ -10,6 +10,7 @@ import type { StudioController } from "../core/use-studio";
 import styles from "../../../styles/features/studio/settings/index.module.css";
 import { useAccountBackend } from "./use-account-backend";
 import { useSignOut } from "../../../hooks/use-sign-out";
+import { useAppSelector } from "../../../stores/hooks";
 
 interface SettingsFrameProps {
   studio: StudioController;
@@ -31,7 +32,7 @@ const SettingsFrame = ({ studio, view }: SettingsFrameProps) => {
     >
       {isWide && <SettingsNav studio={studio} view={view} />}
       <div className={styles.content}>
-        {!isWide && <BackBar studio={studio} view={view} />}
+        {!isWide && <SettingsBackBar studio={studio} view={view} />}
         <div
           className={joinClassNames(
             styles.pagePad,
@@ -49,7 +50,8 @@ const SettingsFrame = ({ studio, view }: SettingsFrameProps) => {
 export const StudioSettings = ({ studio }: { studio: StudioController }) => {
   const navigate = useNavigate();
   const signOut = useSignOut();
-  const view = getSettingsView(studio, navigate, signOut);
+  const isAdmin = useAppSelector(({ session }) => !!session.user?.isAdmin);
+  const view = getSettingsView(studio, navigate, signOut, isAdmin);
 
   return (
     <>

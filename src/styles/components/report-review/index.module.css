@@ -1,0 +1,88 @@
+.text {
+  padding-top: 20px;
+  margin: 0;
+  font-size: 15px;
+  line-height: 1.55;
+  color: var(--text-secondary);
+}
+
+.reasons {
+  margin: 20px 0 0;
+  padding: 0;
+  border: none;
+  display: grid;
+  gap: 4px;
+}
+
+.legend {
+  margin-bottom: 8px;
+  padding: 0;
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.optional {
+  font-weight: 400;
+  color: var(--text-secondary);
+}
+
+.reason {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 8px 0;
+  font-size: 15px;
+  color: var(--text-primary);
+  cursor: pointer;
+}
+
+.reason input {
+  width: 18px;
+  height: 18px;
+  margin: 0;
+  flex: none;
+  accent-color: var(--accent-700);
+}
+
+.field {
+  margin-top: 16px;
+  display: grid;
+}
+
+.textarea {
+  box-sizing: border-box;
+  width: 100%;
+  padding: 12px 14px;
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius-md);
+  background: var(--neutral-0);
+  font: inherit;
+  font-size: 16px;
+  line-height: 1.5;
+  resize: vertical;
+}
+
+.textarea:focus {
+  outline: none;
+  border-color: var(--accent-700);
+  box-shadow: 0 0 0 3px var(--focus-ring);
+}
+
+.error {
+  margin: 12px 0 0;
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--accent-700);
+}
+
+.policyLink {
+  align-self: flex-start;
+  margin-top: 12px;
+  display: inline-block;
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--accent-700);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}

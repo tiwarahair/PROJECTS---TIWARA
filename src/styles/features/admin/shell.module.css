@@ -1,0 +1,14 @@
+.wordmark {
+  display: block;
+  height: 26px;
+  margin-left: 8px;
+}
+
+.pageTitle {
+  margin: 0;
+  font-family: "Schibsted Grotesk", sans-serif;
+  font-size: 28px;
+  font-weight: 600;
+  letter-spacing: -0.03em;
+  line-height: 1.1;
+}

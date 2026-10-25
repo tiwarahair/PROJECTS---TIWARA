@@ -33,6 +33,8 @@ export const seedFromAccount = (
       stylistId: studio.id,
       slug: studio.slug,
       slugChangedAt: studio.slug_changed_at,
+      isSuspended: studio.status === "suspended",
+      suspendReason: studio.suspend_reason,
     },
     twoFactorSettings: { devices },
     categories: (patch.categories ?? []).map((category) => ({

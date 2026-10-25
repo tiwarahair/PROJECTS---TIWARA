@@ -41,6 +41,8 @@ const service = (
 
 /** get_stylist_profile for a live shop open Mon–Fri 10–20 and Sat 9–18. */
 export const PUBLIC_PROFILE: PublicProfile = {
+  rating: null,
+  review_count: 0,
   slug: "tiwaras-house",
   business_name: "Tiwára's House",
   business_type: "shop",

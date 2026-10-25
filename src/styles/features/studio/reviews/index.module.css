@@ -1,0 +1,203 @@
+/* Studio → Reviews. `.wide` and `.desk` switch the sidebar layouts. */
+
+.reviews {
+  padding: 18px 18px 110px;
+  box-sizing: border-box;
+  margin-left: auto;
+  margin-right: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  animation: tabin 0.26s cubic-bezier(0.2, 0.8, 0.2, 1) both;
+}
+
+.wide {
+  padding: 18px 22px 40px;
+}
+
+.desk {
+  padding: 22px 28px 40px;
+  max-width: 1180px;
+}
+
+.back {
+  align-self: flex-start;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  margin: 0 0 0 -6px;
+  border: none;
+  background: none;
+  padding: 4px 0;
+  font-size: 14.5px;
+  font-weight: 600;
+  cursor: pointer;
+  color: var(--text-primary);
+}
+
+/* ---- controls: one text size; labels regular grey, values medium ink ---- */
+.controls {
+  --control-text: 16px;
+
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px 10px;
+}
+
+.search {
+  flex: 1 1 240px;
+  min-width: 0;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  height: 42px;
+  padding: 0 16px;
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-full);
+  box-sizing: border-box;
+  background: var(--neutral-0);
+  color: var(--text-secondary);
+}
+
+.searchInput {
+  flex: 1;
+  min-width: 0;
+  border: none;
+  background: transparent;
+  outline: none;
+  font: inherit;
+  font-size: var(--control-text);
+  font-weight: 500;
+  color: var(--text-primary);
+}
+
+.clearSearch {
+  flex: none;
+  width: 24px;
+  height: 24px;
+  margin-right: -4px;
+  padding: 0;
+  border: none;
+  border-radius: var(--radius-full);
+  background: none;
+  color: var(--text-secondary);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+}
+
+/* Studio's page layer sets every field to 17px !important against iOS zoom (16px already prevents it);
+   only a rule in the same layer can outrank it */
+@layer page {
+  .controls .searchInput,
+  .controls .sortSelect {
+    font-size: var(--control-text) !important;
+  }
+}
+
+.searchInput::placeholder {
+  font-weight: 400;
+  color: var(--text-secondary);
+}
+
+.sort {
+  position: relative;
+  flex: 1 1 auto;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  height: 42px;
+  padding: 0 34px 0 14px;
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-full);
+  box-sizing: border-box;
+  background: var(--neutral-0);
+  color: var(--text-secondary);
+  font-size: var(--control-text);
+}
+
+.wide .sort {
+  flex: 0 0 auto;
+}
+
+/* phones keep 16px so iOS doesn't zoom into the field */
+.wide .controls {
+  --control-text: 14.5px;
+}
+
+.sortSelect {
+  appearance: none;
+  min-width: 0;
+  flex: 1;
+  border: none;
+  background: transparent;
+  font: inherit;
+  font-size: var(--control-text);
+  font-weight: 500;
+  color: var(--text-primary);
+  cursor: pointer;
+  outline: none;
+  padding: 0;
+}
+
+.sortChevron {
+  position: absolute;
+  right: 13px;
+  pointer-events: none;
+}
+
+.chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  height: 42px;
+  padding: 0 16px;
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-full);
+  background: var(--neutral-0);
+  font: inherit;
+  font-size: var(--control-text);
+  font-weight: 500;
+  white-space: nowrap;
+  color: var(--text-primary);
+  cursor: pointer;
+  transition:
+    background var(--duration-fast) var(--ease-out),
+    transform var(--duration-fast) var(--ease-out);
+}
+
+.chipCount {
+  font-weight: 400;
+  color: var(--text-secondary);
+}
+
+.chipOn {
+  border-color: var(--accent-700);
+  background: var(--accent-wash);
+  color: var(--accent-700);
+}
+
+.chip:active {
+  transform: scale(0.97);
+}
+
+.note {
+  margin: 0;
+  padding: 14px 18px;
+  border-radius: var(--radius-md);
+  background: var(--quiet);
+  font-size: 14.5px;
+  color: var(--neutral-700);
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .chip:hover {
+    background: var(--quiet);
+  }
+
+  .chipOn:hover {
+    background: var(--accent-wash-strong);
+  }
+}

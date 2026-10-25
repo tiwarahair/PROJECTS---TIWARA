@@ -95,6 +95,91 @@ export type Database = {
           },
         ];
       };
+      admin_actions: {
+        Row: {
+          admin_id: string | null;
+          created_at: string;
+          id: string;
+          kind: string;
+          note: string;
+          review_id: string | null;
+          stylist_id: string | null;
+        };
+        ComputedFields: never;
+        Insert: {
+          admin_id?: string | null;
+          created_at?: string;
+          id?: string;
+          kind: string;
+          note: string;
+          review_id?: string | null;
+          stylist_id?: string | null;
+        };
+        Update: {
+          admin_id?: string | null;
+          created_at?: string;
+          id?: string;
+          kind?: string;
+          note?: string;
+          review_id?: string | null;
+          stylist_id?: string | null;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "admin_actions_review_id_fkey";
+            columns: ["review_id"];
+            isOneToOne: false;
+            referencedRelation: "reviews";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "admin_actions_stylist_id_fkey";
+            columns: ["stylist_id"];
+            isOneToOne: false;
+            referencedRelation: "stylists";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
+      admin_profile_checks: {
+        Row: {
+          checked_at: string | null;
+          checked_by: string | null;
+          checked_flags: string[];
+          note: string;
+          note_updated_at: string | null;
+          note_updated_by: string | null;
+          stylist_id: string;
+        };
+        ComputedFields: never;
+        Insert: {
+          checked_at?: string | null;
+          checked_by?: string | null;
+          checked_flags?: string[];
+          note?: string;
+          note_updated_at?: string | null;
+          note_updated_by?: string | null;
+          stylist_id: string;
+        };
+        Update: {
+          checked_at?: string | null;
+          checked_by?: string | null;
+          checked_flags?: string[];
+          note?: string;
+          note_updated_at?: string | null;
+          note_updated_by?: string | null;
+          stylist_id?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "admin_profile_checks_stylist_id_fkey";
+            columns: ["stylist_id"];
+            isOneToOne: true;
+            referencedRelation: "stylists";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
       booking_codes: {
         Row: {
           attempts: number;
@@ -1381,6 +1466,244 @@ export type Database = {
         };
         Relationships: [];
       };
+      review_appeals: {
+        Row: {
+          answer_note: string | null;
+          answered_at: string | null;
+          answered_by: string | null;
+          appellant: string;
+          body: string;
+          created_at: string;
+          decision_id: string;
+          id: string;
+          review_id: string;
+          status: string;
+        };
+        ComputedFields: never;
+        Insert: {
+          answer_note?: string | null;
+          answered_at?: string | null;
+          answered_by?: string | null;
+          appellant: string;
+          body: string;
+          created_at?: string;
+          decision_id: string;
+          id?: string;
+          review_id: string;
+          status?: string;
+        };
+        Update: {
+          answer_note?: string | null;
+          answered_at?: string | null;
+          answered_by?: string | null;
+          appellant?: string;
+          body?: string;
+          created_at?: string;
+          decision_id?: string;
+          id?: string;
+          review_id?: string;
+          status?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "review_appeals_decision_id_fkey";
+            columns: ["decision_id"];
+            isOneToOne: false;
+            referencedRelation: "review_decisions";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "review_appeals_review_id_fkey";
+            columns: ["review_id"];
+            isOneToOne: false;
+            referencedRelation: "reviews";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
+      review_decisions: {
+        Row: {
+          admin_id: string | null;
+          created_at: string;
+          id: string;
+          is_final: boolean;
+          note: string;
+          outcome: string;
+          review_id: string;
+        };
+        ComputedFields: never;
+        Insert: {
+          admin_id?: string | null;
+          created_at?: string;
+          id?: string;
+          is_final?: boolean;
+          note: string;
+          outcome: string;
+          review_id: string;
+        };
+        Update: {
+          admin_id?: string | null;
+          created_at?: string;
+          id?: string;
+          is_final?: boolean;
+          note?: string;
+          outcome?: string;
+          review_id?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "review_decisions_review_id_fkey";
+            columns: ["review_id"];
+            isOneToOne: false;
+            referencedRelation: "reviews";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
+      review_invites: {
+        Row: {
+          booking_id: string;
+          reminded_at: string | null;
+          sent_at: string;
+        };
+        ComputedFields: never;
+        Insert: {
+          booking_id: string;
+          reminded_at?: string | null;
+          sent_at?: string;
+        };
+        Update: {
+          booking_id?: string;
+          reminded_at?: string | null;
+          sent_at?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "review_invites_booking_id_fkey";
+            columns: ["booking_id"];
+            isOneToOne: true;
+            referencedRelation: "bookings";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
+      review_reports: {
+        Row: {
+          created_at: string;
+          decided_at: string | null;
+          decided_by: string | null;
+          details: string | null;
+          id: string;
+          is_stylist: boolean;
+          reason: string;
+          reporter_id: string;
+          review_id: string;
+          status: string;
+        };
+        ComputedFields: never;
+        Insert: {
+          created_at?: string;
+          decided_at?: string | null;
+          decided_by?: string | null;
+          details?: string | null;
+          id?: string;
+          is_stylist: boolean;
+          reason: string;
+          reporter_id: string;
+          review_id: string;
+          status?: string;
+        };
+        Update: {
+          created_at?: string;
+          decided_at?: string | null;
+          decided_by?: string | null;
+          details?: string | null;
+          id?: string;
+          is_stylist?: boolean;
+          reason?: string;
+          reporter_id?: string;
+          review_id?: string;
+          status?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "review_reports_review_id_fkey";
+            columns: ["review_id"];
+            isOneToOne: false;
+            referencedRelation: "reviews";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
+      reviews: {
+        Row: {
+          body: string | null;
+          booking_id: string;
+          client_id: string | null;
+          created_at: string;
+          id: string;
+          rating: number;
+          replied_at: string | null;
+          reply: string | null;
+          reply_edited_at: string | null;
+          status: string;
+          status_before_hidden: string | null;
+          stylist_id: string;
+          is_review_counted: boolean | null;
+        };
+        ComputedFields: "is_review_counted";
+        Insert: {
+          body?: string | null;
+          booking_id: string;
+          client_id?: string | null;
+          created_at?: string;
+          id?: string;
+          rating: number;
+          replied_at?: string | null;
+          reply?: string | null;
+          reply_edited_at?: string | null;
+          status?: string;
+          status_before_hidden?: string | null;
+          stylist_id: string;
+        };
+        Update: {
+          body?: string | null;
+          booking_id?: string;
+          client_id?: string | null;
+          created_at?: string;
+          id?: string;
+          rating?: number;
+          replied_at?: string | null;
+          reply?: string | null;
+          reply_edited_at?: string | null;
+          status?: string;
+          status_before_hidden?: string | null;
+          stylist_id?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "reviews_booking_id_fkey";
+            columns: ["booking_id"];
+            isOneToOne: true;
+            referencedRelation: "bookings";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "reviews_client_id_fkey";
+            columns: ["client_id"];
+            isOneToOne: false;
+            referencedRelation: "profiles";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "reviews_stylist_id_fkey";
+            columns: ["stylist_id"];
+            isOneToOne: false;
+            referencedRelation: "stylists";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
       service_addons: {
         Row: {
           addon_id: string;
@@ -1941,11 +2264,14 @@ export type Database = {
           stripe_account_id: string | null;
           stripe_requirements: string;
           stripe_synced_at: string | null;
+          suspend_reason: string | null;
+          suspended_at: string | null;
           tiktok: string | null;
           travel_radius_miles: number | null;
           vat_number: string | null;
           vat_registered: boolean;
           website: string | null;
+          went_live_at: string | null;
           youtube: string | null;
         };
         ComputedFields: never;
@@ -1981,11 +2307,14 @@ export type Database = {
           stripe_account_id?: string | null;
           stripe_requirements?: string;
           stripe_synced_at?: string | null;
+          suspend_reason?: string | null;
+          suspended_at?: string | null;
           tiktok?: string | null;
           travel_radius_miles?: number | null;
           vat_number?: string | null;
           vat_registered?: boolean;
           website?: string | null;
+          went_live_at?: string | null;
           youtube?: string | null;
         };
         Update: {
@@ -2020,11 +2349,14 @@ export type Database = {
           stripe_account_id?: string | null;
           stripe_requirements?: string;
           stripe_synced_at?: string | null;
+          suspend_reason?: string | null;
+          suspended_at?: string | null;
           tiktok?: string | null;
           travel_radius_miles?: number | null;
           vat_number?: string | null;
           vat_registered?: boolean;
           website?: string | null;
+          went_live_at?: string | null;
           youtube?: string | null;
         };
         Relationships: [
@@ -2127,6 +2459,75 @@ export type Database = {
         Args: { intent: string; target: string };
         Returns: undefined;
       };
+      add_working_days: {
+        Args: { days: number; start: string };
+        Returns: string;
+      };
+      admin_answer_appeal: {
+        Args: { note: string; outcome: string; target: string };
+        Returns: undefined;
+      };
+      admin_decide_review: {
+        Args: { note: string; outcome: string; target: string };
+        Returns: undefined;
+      };
+      admin_get_action_filters: {
+        Args: Record<PropertyKey, never>;
+        Returns: Json;
+      };
+      admin_get_actions: {
+        Args: {
+          by_admin?: string;
+          for_stylist?: string;
+          kind_group?: string;
+          page?: number;
+          search?: string;
+        };
+        Returns: Json;
+      };
+      admin_get_profile: { Args: { target: string }; Returns: Json };
+      admin_get_profile_stats: {
+        Args: Record<PropertyKey, never>;
+        Returns: Json;
+      };
+      admin_get_profiles: {
+        Args: {
+          page?: number;
+          search?: string;
+          sort?: string;
+          tab: string;
+          went_live?: string;
+        };
+        Returns: Json;
+      };
+      admin_get_report_stats: {
+        Args: Record<PropertyKey, never>;
+        Returns: Json;
+      };
+      admin_get_reports: {
+        Args: { page?: number; sort?: string; tab: string };
+        Returns: Json;
+      };
+      admin_mark_profile_checked: {
+        Args: { note: string; target: string };
+        Returns: undefined;
+      };
+      admin_save_profile_note: {
+        Args: { note: string; target: string };
+        Returns: undefined;
+      };
+      admin_suspend_stylist: {
+        Args: { reason: string; target: string };
+        Returns: undefined;
+      };
+      admin_unsuspend_stylist: {
+        Args: { note: string; target: string };
+        Returns: undefined;
+      };
+      appeal_review_decision: {
+        Args: { body: string; target: string };
+        Returns: string;
+      };
       apply_recovery: {
         Args: {
           account: string;
@@ -2135,6 +2536,15 @@ export type Database = {
           recovered: number;
         };
         Returns: number;
+      };
+      apply_review_decision: {
+        Args: {
+          is_final: boolean;
+          note: string;
+          outcome: string;
+          target: string;
+        };
+        Returns: string;
       };
       auto_cancel_unconfirmed: {
         Args: Record<PropertyKey, never>;
@@ -2320,6 +2730,15 @@ export type Database = {
       };
       get_account_kind: { Args: { lookup_email: string }; Returns: string };
       get_account_security: { Args: Record<PropertyKey, never>; Returns: Json };
+      get_admin_alert_email: {
+        Args: Record<PropertyKey, never>;
+        Returns: string;
+      };
+      get_appeal_page: { Args: { token: string }; Returns: Json };
+      get_appeal_state: {
+        Args: { appellant: string; target: string };
+        Returns: Json;
+      };
       get_available_slots: {
         Args: {
           choices: Json;
@@ -2579,6 +2998,9 @@ export type Database = {
         Args: { from_date: string; to_date: string; token: string };
         Returns: string[];
       };
+      get_review_due_at: { Args: { target: string }; Returns: string };
+      get_review_page: { Args: { token: string }; Returns: Json };
+      get_reviewer_name: { Args: { contact: Json }; Returns: string };
       get_site: { Args: { origin: string }; Returns: string };
       get_studio_activity: {
         Args: { max_rows: number; target: string };
@@ -2633,6 +3055,7 @@ export type Database = {
         Args: { days: number; target: string };
         Returns: Json;
       };
+      get_studio_reviews: { Args: { target: string }; Returns: Json };
       get_studio_snapshot: {
         Args: { addons: Json; priced: Json };
         Returns: Json;
@@ -2667,6 +3090,11 @@ export type Database = {
         }[];
       };
       get_stylist_profile: { Args: { lookup: string }; Returns: Json };
+      get_stylist_rating: { Args: { target: string }; Returns: Json };
+      get_stylist_reviews: {
+        Args: { lookup: string; page?: number; page_size?: number };
+        Returns: Json;
+      };
       get_unanswered_disputes: {
         Args: { batch_size: number };
         Returns: {
@@ -2723,6 +3151,8 @@ export type Database = {
       };
       is_aal2: { Args: Record<PropertyKey, never>; Returns: boolean };
       is_admin: { Args: Record<PropertyKey, never>; Returns: boolean };
+      is_admin_session: { Args: Record<PropertyKey, never>; Returns: boolean };
+      is_harmful_reason: { Args: { reason: string }; Returns: boolean };
       is_in_travel_area: {
         Args: { lat: number; lng: number; target_service: string };
         Returns: boolean;
@@ -2735,6 +3165,15 @@ export type Database = {
             Database["public"]["Tables"]["bookings"]["ComputedFields"]
           >;
           who: string;
+        };
+        Returns: boolean;
+      };
+      is_review_counted: {
+        Args: {
+          review: Omit<
+            Database["public"]["Tables"]["reviews"]["Row"],
+            Database["public"]["Tables"]["reviews"]["ComputedFields"]
+          >;
         };
         Returns: boolean;
       };
@@ -2916,6 +3355,10 @@ export type Database = {
         Args: { message: string; payment: string };
         Returns: undefined;
       };
+      notify_review_decision: {
+        Args: { is_final: boolean; outcome: string; target: string };
+        Returns: undefined;
+      };
       owns_photo_path: { Args: { object_name: string }; Returns: boolean };
       price_booking: {
         Args: { choices: Json; target_service: string };
@@ -2959,6 +3402,10 @@ export type Database = {
         Args: { corrected: boolean; target: string };
         Returns: undefined;
       };
+      queue_review_invite: {
+        Args: { target: string; template: string };
+        Returns: undefined;
+      };
       queue_sms: {
         Args: {
           payload: Json;
@@ -2993,6 +3440,14 @@ export type Database = {
       renew_booking_invite: { Args: { token: string }; Returns: undefined };
       reopen_business: { Args: Record<PropertyKey, never>; Returns: undefined };
       reopen_studio_booking: { Args: { target: string }; Returns: Json };
+      reply_to_review: {
+        Args: { reply: string; target: string };
+        Returns: undefined;
+      };
+      report_review: {
+        Args: { details?: string; reason: string; target: string };
+        Returns: string;
+      };
       reschedule_managed_booking: {
         Args: { slot_start: string; token: string };
         Returns: Json;
@@ -3076,11 +3531,17 @@ export type Database = {
           id: string;
           matches: Json;
           next_start: string;
+          rating: number;
+          review_count: number;
           slug: string;
           total_count: number;
         }[];
       };
       secure_booking_link: { Args: { token: string }; Returns: Json };
+      send_admin_report_summary: {
+        Args: Record<PropertyKey, never>;
+        Returns: boolean;
+      };
       send_balance_link: {
         Args: { link_id: string; target: string };
         Returns: undefined;
@@ -3103,6 +3564,10 @@ export type Database = {
       send_notifications_now: {
         Args: Record<PropertyKey, never>;
         Returns: undefined;
+      };
+      send_review_invites: {
+        Args: Record<PropertyKey, never>;
+        Returns: number;
       };
       send_studio_booking_notice: {
         Args: { target: string; template: string };
@@ -3155,6 +3620,11 @@ export type Database = {
       slugify: { Args: { value: string }; Returns: string };
       start_booking_confirmation: { Args: { token: string }; Returns: Json };
       start_link_payment: { Args: { token: string }; Returns: Json };
+      submit_appeal: { Args: { body: string; token: string }; Returns: string };
+      submit_review: {
+        Args: { body: string; rating: number; token: string };
+        Returns: string;
+      };
       undo_checkout: { Args: { target: string }; Returns: undefined };
       undo_no_show: { Args: { target: string }; Returns: undefined };
       update_studio_booking: {

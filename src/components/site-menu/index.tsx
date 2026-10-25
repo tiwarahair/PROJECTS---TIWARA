@@ -178,6 +178,19 @@ export const SiteMenu = ({
       ]
     : [];
 
+  const adminItem: NavMenuItem[] = identity?.user.isAdmin
+    ? [
+        {
+          kind: "link",
+          key: "admin",
+          label: "Admin",
+          to: "/admin",
+          isCurrent: pathname === "/admin",
+          onClick: closeOnClick,
+        },
+      ]
+    : [];
+
   const helpItem: NavMenuItem = {
     kind: "link",
     key: "help",
@@ -189,6 +202,7 @@ export const SiteMenu = ({
 
   const accountItems: NavMenuItem[] = [
     ...studioItem,
+    ...adminItem,
     ...ACCOUNT_SECTIONS.map(([section, label]): NavMenuItem => ({
       kind: "link",
       key: section,

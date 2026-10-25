@@ -3,9 +3,12 @@ import { Clock, Lock, Pencil, Plus, Trash, X } from "lucide-react";
 import { joinClassNames } from "../../../utils/class-names";
 import type { BookingsView } from "./view";
 import { dayInfo, hhmm, timeToMinutes } from "../core/format";
-import { getDialogPlacement, getOverlayAnimation } from "../shell/overlay";
+import {
+  getDialogPlacement,
+  getOverlayAnimation,
+} from "../../../components/overlay";
 import type { StudioController } from "../core/use-studio";
-import overlay from "../../../styles/features/studio/shell/overlay.module.css";
+import overlay from "../../../styles/components/overlay/index.module.css";
 import styles from "../../../styles/features/studio/bookings/overlays.module.css";
 
 export const FilterSheet = ({

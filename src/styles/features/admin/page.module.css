@@ -1,0 +1,36 @@
+/* An Admin page inside Studio's reviews layout: the tabs share a row with Sort on wider screens; on phones Sort sits under them, opposite the count. */
+.page {
+  padding-bottom: 120px;
+}
+
+.tabsRow {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px 20px;
+}
+
+.tabs {
+  flex: 0 1 auto;
+  min-width: 0;
+}
+
+.sortRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.count {
+  margin: 0;
+  font-size: 14px;
+  color: var(--text-secondary);
+}
+
+@media (max-width: 639px) {
+  .tabs {
+    flex: 1 1 100%;
+  }
+}

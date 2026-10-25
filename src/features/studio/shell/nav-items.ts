@@ -5,6 +5,7 @@ import {
   PoundSterling,
   Scissors,
   Settings,
+  Star,
   Users,
 } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
@@ -26,6 +27,7 @@ const MAIN_TABS: NavDefinition[] = [
 
 const WIDE_TABS: NavDefinition[] = [
   { id: "clients", label: "Clients", icon: Users },
+  { id: "reviews", label: "Reviews", icon: Star },
   { id: "settings", label: "Settings", icon: Settings },
 ];
 
@@ -42,7 +44,9 @@ export const getNavItems = (studio: StudioController) => {
       ...navDefinition,
       isOn:
         state.tab === navDefinition.id ||
-        (!isWide && navDefinition.id === "settings" && state.tab === "clients"),
+        (!isWide &&
+          navDefinition.id === "settings" &&
+          (state.tab === "clients" || state.tab === "reviews")),
       onSelect: () => {
         setState({ tab: navDefinition.id, selectedClientId: null, page: null });
         actions.scrollBody(0, false);

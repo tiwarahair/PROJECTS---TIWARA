@@ -1,0 +1,13 @@
+.stars {
+  display: inline-flex;
+  gap: 2px;
+  vertical-align: middle;
+}
+
+.filled {
+  fill: var(--brand-yellow);
+}
+
+.empty {
+  fill: var(--neutral-200);
+}

@@ -34,7 +34,7 @@ export const ProfileLede = ({
               <Star size={16} strokeWidth={0} fill="var(--brand-yellow)" />
               {reviews ? (
                 <>
-                  {rating}{" "}
+                  {rating.toFixed(1)}{" "}
                   <span className={styles.reviewCount}>({reviews})</span>
                 </>
               ) : (

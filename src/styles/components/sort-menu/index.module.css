@@ -1,0 +1,111 @@
+.anchor {
+  position: relative;
+  flex: 0 0 auto;
+}
+
+.icon {
+  display: block;
+}
+
+.pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  height: 38px;
+  padding: 0 16px;
+  border-radius: var(--radius-full);
+  border: 1px solid var(--border-strong);
+  background: transparent;
+  font: inherit;
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--text-primary);
+  cursor: pointer;
+  white-space: nowrap;
+  transition:
+    background-color 0.16s cubic-bezier(0.2, 0.8, 0.2, 1),
+    transform 0.16s cubic-bezier(0.23, 1, 0.32, 1);
+}
+
+.pill:active {
+  transform: scale(0.97);
+}
+
+.pillSet {
+  background: var(--neutral-900);
+  border-color: var(--neutral-900);
+  color: var(--neutral-50);
+}
+
+.scrim {
+  position: fixed;
+  inset: 0;
+  z-index: 60;
+}
+
+.popover {
+  position: absolute;
+  top: calc(100% + 8px);
+  z-index: 61;
+  width: 240px;
+  background: var(--neutral-0);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-popover);
+  padding: 8px;
+  animation: menuIn 0.18s cubic-bezier(0.2, 0.8, 0.2, 1) both;
+}
+
+.popoverRight {
+  right: 0;
+  transform-origin: top right;
+}
+
+.popoverLeft {
+  left: 0;
+  transform-origin: top left;
+}
+
+.option {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  min-height: 44px;
+  padding: 10px 12px;
+  border: none;
+  border-radius: var(--radius-sm);
+  background: transparent;
+  cursor: pointer;
+  text-align: left;
+  font: inherit;
+  font-size: 15px;
+  color: var(--text-primary);
+  font-weight: 500;
+}
+
+.optionOn {
+  background: var(--accent-wash);
+  color: var(--accent-700);
+  font-weight: 600;
+}
+
+.optionLabel {
+  flex: 1;
+}
+
+@keyframes menuIn {
+  from {
+    opacity: 0;
+    transform: translateY(-6px) scale(0.98);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .popover {
+    animation: none;
+  }
+}

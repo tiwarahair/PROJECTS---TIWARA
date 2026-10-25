@@ -1,5 +1,5 @@
 import type { TwoFactorView } from "./view";
-import styles from "../../../../styles/features/studio/settings/two-factor/index.module.css";
+import styles from "../../../../styles/components/two-factor/index.module.css";
 
 interface StepLearnProps {
   view: TwoFactorView;

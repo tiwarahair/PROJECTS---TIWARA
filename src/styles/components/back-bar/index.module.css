@@ -1,0 +1,36 @@
+.backBar {
+  position: sticky;
+  top: 0;
+  z-index: 5;
+  background: #fffefb;
+  box-shadow: var(--shadow-hairline, 0 1px 0 rgba(26, 23, 20, 0.08));
+  padding: 8px 10px;
+}
+
+.backRow {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.backButton {
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+  height: 38px;
+  padding: 0 14px 0 6px;
+  border: none;
+  background: none;
+  border-radius: var(--radius-full);
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.backButton:active {
+  transform: scale(0.96) !important;
+}
+
+.spacer {
+  flex: 1;
+}

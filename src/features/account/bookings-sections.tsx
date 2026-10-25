@@ -1,8 +1,8 @@
 import { Calendar, CreditCard, MapPin } from "lucide-react";
+import { CountTabs } from "../../components/count-tabs";
 import { ResponsiveImage } from "../../components/responsive-image";
-import type { CSSProperties, KeyboardEvent, MouseEvent } from "react";
+import type { CSSProperties, MouseEvent } from "react";
 import { Link } from "react-router";
-import { joinClassNames } from "../../utils/class-names";
 import type { BookingCardView, QuickAction } from "./view";
 import styles from "../../styles/features/account/bookings-sections.module.css";
 import ui from "../../styles/features/account/ui.module.css";
@@ -162,63 +162,20 @@ export const BookingsSection = ({
   onCalendar,
   onReceipt,
 }: BookingsSectionProps) => {
-  const chips = (
-    [
-      ["up", "Upcoming", upcoming.length],
-      ["past", "Past and cancelled", past.length],
-    ] as const
-  ).filter(([id, , count]) => id === "up" || count > 0);
-
-  const onTabKey = (event: KeyboardEvent) => {
-    if (
-      !past.length ||
-      !["ArrowLeft", "ArrowRight", "Home", "End"].includes(event.key)
-    )
-      return;
-
-    event.preventDefault();
-    onTab(["ArrowRight", "End"].includes(event.key) ? "past" : "up", true);
-  };
+  const tabs = [
+    { id: "up" as const, label: "Upcoming", count: upcoming.length },
+    { id: "past" as const, label: "Past and cancelled", count: past.length },
+  ].filter(({ id, count }) => id === "up" || count > 0);
 
   return (
     <section data-screen-label="Account: Bookings">
-      {/* the tabs' arrow keys are handled on the tablist (the focused tab's keydown bubbles up) */}
-      {/* eslint-disable-next-line jsx-a11y/interactive-supports-focus */}
-      <div
-        className={styles.tabs}
-        role="tablist"
-        aria-label="Bookings"
-        onKeyDown={onTabKey}
-      >
-        {chips.map(([id, label, count]) => {
-          const isOn = activeTab === id;
-
-          return (
-            <button
-              key={id}
-              className={joinClassNames(
-                styles.tab,
-                isOn ? styles.tabOn : styles.tabOff,
-              )}
-              id={`ac-bk-${id}`}
-              role="tab"
-              aria-selected={isOn}
-              tabIndex={isOn ? 0 : -1}
-              onClick={() => onTab(id)}
-            >
-              {label}
-              <span className={styles.tabCount}>{String(count)}</span>
-              <span
-                className={joinClassNames(
-                  styles.tabBar,
-                  isOn ? styles.tabBarOn : styles.tabBarOff,
-                )}
-                aria-hidden="true"
-              ></span>
-            </button>
-          );
-        })}
-      </div>
+      <CountTabs
+        label="Bookings"
+        idPrefix="ac-bk"
+        tabs={tabs}
+        active={activeTab === "past" ? "past" : "up"}
+        onChange={onTab}
+      />
       {showUpcoming && upcoming.length > 0 && (
         <div className={styles.cards}>
           {upcoming.map((card) => (

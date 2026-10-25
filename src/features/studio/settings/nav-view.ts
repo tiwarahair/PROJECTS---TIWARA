@@ -9,6 +9,8 @@ import {
   Link2,
   ListChecks,
   Shield,
+  ShieldCheck,
+  Star,
   Store,
   User,
   UserRound,
@@ -67,6 +69,7 @@ interface SettingsRow {
 export const getSettingsNav = (
   studio: StudioController,
   navigate: (to: string) => void,
+  isAdmin = false,
 ) => {
   const { state, setState, isWide, actions } = studio;
   const { showToast, openSubpage, scrollBody } = actions;
@@ -166,6 +169,17 @@ export const getSettingsNav = (
               scrollBody(0, false);
             },
           },
+          {
+            key: "reviews",
+            label: "Reviews",
+            subtitle: "What clients say, and your replies",
+            icon: Star,
+            isLocked: false,
+            onSelect: () => {
+              setState({ tab: "reviews" });
+              scrollBody(0, false);
+            },
+          },
         ]),
     {
       key: "link",
@@ -224,7 +238,7 @@ export const getSettingsNav = (
     {
       key: "bookings",
       label: "Bookings",
-      rows: pick(["Booking rules", "Payment policy", "Clients"]),
+      rows: pick(["Booking rules", "Payment policy", "Clients", "Reviews"]),
     },
     { key: "account", label: "Account", rows: accountRows },
     {
@@ -232,6 +246,24 @@ export const getSettingsNav = (
       label: "Share",
       rows: pick(["Booking link", "View public profile"]),
     },
+    ...(isAdmin
+      ? [
+          {
+            key: "admin",
+            label: "Tiwára’s House",
+            rows: [
+              {
+                key: "admin",
+                label: "Admin",
+                subtitle: "Reported reviews and appeals",
+                icon: ShieldCheck,
+                isLocked: false,
+                onSelect: () => navigate("/admin"),
+              },
+            ],
+          },
+        ]
+      : []),
   ];
 
   // ---- the wide settings nav ----

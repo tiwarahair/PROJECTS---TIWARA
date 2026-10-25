@@ -1,0 +1,77 @@
+.filters {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.row {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  padding: 18px 0;
+  font-size: 14.5px;
+}
+
+.row + .row {
+  border-top: 1px solid var(--border-subtle);
+}
+
+.card {
+  padding: 16px;
+  border-radius: 20px;
+  background: var(--neutral-0);
+  box-shadow: var(--shadow-panel);
+}
+
+.card + .card {
+  border-top: none;
+}
+
+.avatar {
+  flex: none;
+}
+
+.text {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+
+.target {
+  font-size: 13.5px;
+  color: var(--text-secondary);
+}
+
+.targetLink {
+  align-self: flex-start;
+  padding: 0;
+  border: none;
+  background: none;
+  font: inherit;
+  font-size: 13.5px;
+  font-weight: 600;
+  color: var(--accent-700);
+  cursor: pointer;
+}
+
+.note {
+  margin: 2px 0 0;
+  color: var(--neutral-700);
+  overflow-wrap: anywhere;
+}
+
+.when {
+  flex: none;
+  font-size: 13px;
+  color: var(--text-secondary);
+  white-space: nowrap;
+}
+
+.footnote {
+  margin: 0;
+  text-align: center;
+  font-size: 13px;
+  color: var(--text-muted);
+}

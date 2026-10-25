@@ -1,16 +1,16 @@
-import { ChevronLeft } from "lucide-react";
+import { BackBar } from "../../../components/back-bar";
 import { joinClassNames } from "../../../utils/class-names";
 import type { StudioController } from "../core/use-studio";
 import { SaveButtons } from "./save-buttons";
 import type { SettingsView } from "./view";
 import styles from "../../../styles/features/studio/settings/back-bar.module.css";
 
-export interface BackBarProps {
+export interface SettingsBackBarProps {
   studio: StudioController;
   view: SettingsView;
 }
 
-export const BackBar = ({ studio, view }: BackBarProps) => {
+export const SettingsBackBar = ({ studio, view }: SettingsBackBarProps) => {
   const { state, actions } = studio;
 
   const hostSaves = [
@@ -35,30 +35,23 @@ export const BackBar = ({ studio, view }: BackBarProps) => {
   ];
 
   return (
-    <div className={styles.backBar}>
-      <div className={styles.backRow}>
-        <button className={styles.backButton} onClick={actions.closePage}>
-          <ChevronLeft size={18} strokeWidth={2} />
-          Settings
-        </button>
-        <div className={styles.spacer}></div>
-        <SaveButtons view={view} className={styles.save} label="Save" />
-        {hostSaves
-          .filter(({ isShown }) => isShown)
-          .map(({ key, isOn, onClick }) => (
-            <button
-              key={key}
-              className={joinClassNames(
-                styles.hostSave,
-                isOn && styles.hostSaveOn,
-              )}
-              onClick={onClick}
-              disabled={!isOn}
-            >
-              Save
-            </button>
-          ))}
-      </div>
-    </div>
+    <BackBar back={{ label: "Settings", onClick: actions.closePage }}>
+      <SaveButtons view={view} className={styles.save} label="Save" />
+      {hostSaves
+        .filter(({ isShown }) => isShown)
+        .map(({ key, isOn, onClick }) => (
+          <button
+            key={key}
+            className={joinClassNames(
+              styles.hostSave,
+              isOn && styles.hostSaveOn,
+            )}
+            onClick={onClick}
+            disabled={!isOn}
+          >
+            Save
+          </button>
+        ))}
+    </BackBar>
   );
 };

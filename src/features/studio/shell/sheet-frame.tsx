@@ -2,10 +2,10 @@ import type { ReactNode } from "react";
 import { ChevronLeft, X } from "lucide-react";
 import { markActivitySeen } from "../../../lib/studio-api/home";
 import { joinClassNames } from "../../../utils/class-names";
-import { getOverlayAnimation } from "./overlay";
+import { getOverlayAnimation } from "../../../components/overlay";
 import type { BookingStep } from "../core/types";
 import type { StudioController } from "../core/use-studio";
-import overlay from "../../../styles/features/studio/shell/overlay.module.css";
+import overlay from "../../../styles/components/overlay/index.module.css";
 import styles from "../../../styles/features/studio/shell/sheet-frame.module.css";
 
 const BOOKING_TITLES: Record<BookingStep, string> = {

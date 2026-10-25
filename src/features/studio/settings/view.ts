@@ -19,6 +19,7 @@ export const getSettingsView = (
   studio: StudioController,
   navigate: (to: string) => void,
   signOut: () => void,
+  isAdmin = false,
 ) => {
   const { state, setState, isDesktop, actions, context } = studio;
 
@@ -26,7 +27,7 @@ export const getSettingsView = (
     actions;
 
   const { sync } = context;
-  const nav = getSettingsNav(studio, navigate);
+  const nav = getSettingsNav(studio, navigate, isAdmin);
   const { page, isOn, isAccountPage } = nav;
 
   const savePolicy = (value: PolicyValue) => {

@@ -1,7 +1,13 @@
 import type { StudioState } from "./types";
 
 export const getInitialStudioState = (): StudioState => ({
-  account: { stylistId: "", slug: "", slugChangedAt: null },
+  account: {
+    stylistId: "",
+    slug: "",
+    slugChangedAt: null,
+    isSuspended: false,
+    suspendReason: null,
+  },
   owner: { first: "", last: "", name: "", area: "", email: "", phone: "" },
   notifications: [],
   avatarUrl: null,

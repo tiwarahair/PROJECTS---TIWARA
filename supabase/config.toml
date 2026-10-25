@@ -509,6 +509,9 @@ verify_jwt = false
 [functions.booking-card]
 verify_jwt = false
 
+[functions.booking-review]
+verify_jwt = false
+
 # called by pg_cron with x-cron-secret
 [functions.check-cards]
 verify_jwt = false

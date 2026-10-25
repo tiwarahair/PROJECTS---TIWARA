@@ -51,6 +51,27 @@ const getWording = ({
       ];
     case "payout_paid":
       return ["Payout sent", `${amount} has been paid to your bank.`];
+    case "review_received":
+      return ["New review", `${client} reviewed ${what}.`];
+    case "review_kept":
+      return ["Review kept", `We checked ${client}’s review: it stays up.`];
+    case "review_text_removed":
+      return [
+        "Review words removed",
+        `We removed the words of ${client}’s review. The stars still count.`,
+      ];
+    case "review_removed":
+      return ["Review removed", `We removed ${client}’s review.`];
+    case "appeal_kept":
+      return [
+        "Appeal answered",
+        `We looked again at ${client}’s review and kept our decision.`,
+      ];
+    case "appeal_changed":
+      return [
+        "Appeal answered",
+        `We looked again at ${client}’s review and changed our decision.`,
+      ];
     case "payout_failed":
       return [
         "Payout failed",
@@ -65,6 +86,9 @@ const OPENS_EARNINGS = ["dispute_opened", "payout_paid", "payout_failed"];
 
 const getTarget = (kind: string, bookingId: string | null) => {
   if (OPENS_EARNINGS.includes(kind)) return { opensEarnings: true };
+
+  if (kind.startsWith("review_") || kind.startsWith("appeal_"))
+    return { opensReviews: true };
 
   return bookingId ? { bookingId } : {};
 };

@@ -25,6 +25,7 @@ import {
   limitMenuGroups,
 } from "./profile-menu";
 import { ProfilePortfolio } from "./profile-portfolio";
+import { ProfileReviews } from "./profile-reviews";
 import { ProfileServices } from "./profile-services";
 import { ProfileStickyBar } from "./profile-sticky-bar";
 import { ServiceModal } from "./service-modal";
@@ -141,6 +142,12 @@ export const StylistProfileView = ({
               portfolio={portfolio}
               onZoom={zoomTo}
               onSeeAll={() => zoomTo(portfolio[0] ?? "")}
+            />
+            <ProfileReviews
+              slug={stylist.id}
+              stylistName={name}
+              rating={stylist.rating}
+              reviews={stylist.reviews}
             />
           </div>
           <BookingAside

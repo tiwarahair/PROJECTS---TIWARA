@@ -1,7 +1,7 @@
 import { Check, Lock } from "lucide-react";
 import { joinClassNames } from "../../../../utils/class-names";
 import type { TwoFactorView } from "./view";
-import styles from "../../../../styles/features/studio/settings/two-factor/index.module.css";
+import styles from "../../../../styles/components/two-factor/index.module.css";
 
 interface StepSecureProps {
   view: TwoFactorView;

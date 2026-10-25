@@ -1,5 +1,11 @@
 export type StudioTab =
-  "home" | "bookings" | "services" | "earnings" | "clients" | "settings";
+  | "home"
+  | "bookings"
+  | "services"
+  | "earnings"
+  | "clients"
+  | "reviews"
+  | "settings";
 export type StudioPage =
   | "availability"
   | "profile"

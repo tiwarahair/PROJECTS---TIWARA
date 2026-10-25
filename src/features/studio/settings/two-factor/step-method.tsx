@@ -1,7 +1,7 @@
 import { Smartphone } from "lucide-react";
 import { SmsRow } from "./fields";
 import type { TwoFactorView } from "./view";
-import styles from "../../../../styles/features/studio/settings/two-factor/index.module.css";
+import styles from "../../../../styles/components/two-factor/index.module.css";
 
 interface StepMethodProps {
   view: TwoFactorView;

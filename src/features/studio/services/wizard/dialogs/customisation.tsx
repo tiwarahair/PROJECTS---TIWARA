@@ -3,7 +3,7 @@ import { joinClassNames } from "../../../../../utils/class-names";
 import {
   getDialogPlacement,
   getOverlayAnimation,
-} from "../../../shell/overlay";
+} from "../../../../../components/overlay";
 import type { WizardView } from "../view";
 import shared from "../../../../../styles/features/studio/services/wizard/dialogs/index.module.css";
 import styles from "../../../../../styles/features/studio/services/wizard/dialogs/customisation.module.css";

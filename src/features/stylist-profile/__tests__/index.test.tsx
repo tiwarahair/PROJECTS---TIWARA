@@ -83,7 +83,7 @@ describe("StylistProfilePage", () => {
 
     expect(
       await screen.findByRole("heading", {
-        name: "We couldn’t find this stylist",
+        name: "We couldn’t find this page",
       }),
     ).toBeInTheDocument();
   });
@@ -95,7 +95,7 @@ describe("StylistProfilePage", () => {
 
     expect(
       await screen.findByRole("heading", {
-        name: "We couldn’t find this stylist",
+        name: "We couldn’t find this page",
       }),
     ).toBeInTheDocument();
   });

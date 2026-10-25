@@ -41,6 +41,7 @@ const templates: Record<string, (payload: Record<string, unknown>) => string> = 
   auto_cancel_soon: getLine("Not confirmed yet"),
   auto_cancelled: getLine("Auto-cancelled"),
   card_not_replaced: getLine("Card expired, not replaced"),
+  review_received: getLine("New review"),
 };
 
 export const renderSms = (template: string, payload: Record<string, unknown>) => {

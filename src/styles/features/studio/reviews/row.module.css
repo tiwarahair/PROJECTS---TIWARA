@@ -1,0 +1,257 @@
+/* One review in Studio → Reviews: a row in the panel (wide) or a card (phone). */
+
+.row {
+  padding: 20px 0;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.row + .row {
+  border-top: 1px solid var(--border-subtle);
+}
+
+.card {
+  padding: 16px;
+  border-radius: 20px;
+  background: var(--neutral-0);
+  box-shadow: var(--shadow-panel);
+}
+
+.card + .card {
+  border-top: none;
+}
+
+.head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px 12px;
+}
+
+.who {
+  display: inline-flex;
+  align-items: center;
+  gap: 12px;
+  min-width: 0;
+  padding: 0;
+  border: none;
+  background: none;
+  font: inherit;
+  color: var(--text-primary);
+  text-align: left;
+}
+
+button.who {
+  cursor: pointer;
+}
+
+.avatar {
+  flex: none;
+  width: 40px;
+  height: 40px;
+  border-radius: var(--radius-full);
+  object-fit: cover;
+  background: var(--quiet);
+  color: var(--neutral-700);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 14.5px;
+  font-weight: 500;
+}
+
+.card .avatar {
+  width: 44px;
+  height: 44px;
+  font-size: 15px;
+  font-weight: 600;
+}
+
+.avatarFormer {
+  color: var(--text-muted);
+}
+
+.name {
+  font-size: 15.5px;
+  font-weight: 600;
+}
+
+.former .name {
+  color: var(--neutral-600);
+}
+
+.chevron {
+  margin-left: -8px;
+  color: var(--text-muted);
+  transition: transform var(--duration-fast) var(--ease-out);
+}
+
+.verified {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 13px;
+  color: var(--text-secondary);
+}
+
+.verified svg {
+  color: var(--accent-700);
+}
+
+.checking {
+  padding: 3px 10px;
+  border-radius: var(--radius-full);
+  background: var(--accent-wash);
+  color: var(--accent-900);
+  font-size: 12.5px;
+  font-weight: 600;
+}
+
+.content {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+/* rows on wide screens indent under the avatar */
+.row:not(.card) .content {
+  padding-left: 52px;
+}
+
+.row:not(.card) .checking {
+  margin-left: auto;
+}
+
+.meta {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 4px 8px;
+  font-size: 13.5px;
+  color: var(--text-secondary);
+}
+
+.body {
+  margin: 0;
+  font-size: 15px;
+  line-height: 1.6;
+  white-space: pre-line;
+  overflow-wrap: anywhere;
+}
+
+.clamped {
+  display: -webkit-box;
+  -webkit-line-clamp: 4;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.more {
+  align-self: flex-start;
+  padding: 0;
+  border: none;
+  background: none;
+  font: inherit;
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--text-primary);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  cursor: pointer;
+}
+
+.removed {
+  margin: 0;
+  font-size: 14px;
+  font-style: italic;
+  color: var(--text-secondary);
+}
+
+.reply {
+  padding: 14px 16px;
+  border-radius: var(--radius-md);
+  background: var(--quiet);
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.replyHead {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.edited {
+  padding: 1px 8px;
+  border-radius: var(--radius-full);
+  background: var(--neutral-0);
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  color: var(--text-secondary);
+}
+
+.replyText {
+  margin: 0;
+  font-size: 14.5px;
+  line-height: 1.55;
+  white-space: pre-line;
+  overflow-wrap: anywhere;
+}
+
+.actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px 20px;
+}
+
+.card .actions {
+  padding-top: 8px;
+  border-top: 1px solid var(--border-subtle);
+}
+
+.action {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  height: 36px;
+  padding: 0;
+  border: none;
+  background: none;
+  font: inherit;
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--text-primary);
+  cursor: pointer;
+  transition: transform var(--duration-fast) var(--ease-out);
+}
+
+.action:active {
+  transform: scale(0.97);
+}
+
+.actionQuiet {
+  color: var(--neutral-600);
+}
+
+.reported {
+  font-size: 14px;
+  color: var(--text-secondary);
+}
+
+@media (hover: hover) and (pointer: fine) {
+  button.who:hover .name,
+  .action:hover {
+    text-decoration: underline;
+    text-underline-offset: 3px;
+  }
+
+  button.who:hover .chevron {
+    transform: translateX(2px);
+  }
+}

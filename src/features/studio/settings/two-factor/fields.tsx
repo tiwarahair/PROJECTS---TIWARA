@@ -2,7 +2,7 @@ import { MessageSquare } from "lucide-react";
 import type { ReactNode } from "react";
 import { joinClassNames } from "../../../../utils/class-names";
 import type { TwoFactorView } from "./view";
-import styles from "../../../../styles/features/studio/settings/two-factor/index.module.css";
+import styles from "../../../../styles/components/two-factor/index.module.css";
 
 /** The disabled "Text message (SMS) · Coming soon" row. */
 export const SmsRow = () => (
@@ -15,65 +15,6 @@ export const SmsRow = () => (
       <span className={styles.soon}>Coming soon</span>
     </div>
   </div>
-);
-
-interface CodeFieldProps {
-  view: TwoFactorView;
-  label: string;
-}
-
-/** The 6-digit code field shared by the tax-code, app and remove steps. */
-export const CodeField = ({ view, label }: CodeFieldProps) => (
-  <>
-    <label className={styles.label} htmlFor="tf-code">
-      {label}
-    </label>
-    <input
-      id="tf-code"
-      className={joinClassNames(
-        styles.code,
-        view.isCodeError && styles.inputError,
-      )}
-      value={view.code}
-      onChange={view.onCode}
-      inputMode="numeric"
-      autoComplete="one-time-code"
-      maxLength={6}
-      placeholder="000000"
-      readOnly={view.isVerified}
-      aria-invalid={view.isCodeError ? "true" : "false"}
-    />
-    {view.isCodeError && (
-      <div className={styles.error} role="alert">
-        {view.errorMessage}
-      </div>
-    )}
-  </>
-);
-
-interface BusyButtonProps {
-  className?: string;
-  isBusy: boolean;
-  label: string;
-  onClick: () => void;
-}
-
-/** Shows a spinner while the code is checked; the label stays for screen readers. */
-export const BusyButton = ({
-  className,
-  isBusy,
-  label,
-  onClick,
-}: BusyButtonProps) => (
-  <button
-    className={className}
-    onClick={onClick}
-    disabled={isBusy}
-    aria-busy={isBusy}
-    aria-label={label}
-  >
-    {isBusy ? <span className={styles.spinner}></span> : label}
-  </button>
 );
 
 interface BackupOptionProps {

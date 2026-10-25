@@ -1,5 +1,5 @@
 import { screen } from "@testing-library/react";
-import { beforeEach, describe, expect, it } from "vitest";
+import { beforeEach, describe, expect, it, vi } from "vitest";
 import { renderWithStore } from "../../../test/render-with-store";
 import { StylistCard } from "..";
 import type { UserEvent } from "@testing-library/user-event";
@@ -126,5 +126,39 @@ describe("StylistCard", () => {
         name: "Remove Amara Beauty from favourites",
       }),
     ).toHaveAttribute("aria-pressed", "true");
+  });
+
+  it("opens instead of linking, without a heart, with badges and the page's own lines", async () => {
+    const onOpen = vi.fn();
+
+    renderWithStore(
+      <StylistCard
+        {...BASE}
+        onOpen={onOpen}
+        hasFavourite={false}
+        badges={<span>Not checked</span>}
+        meta="4 services · from £40"
+        facts={[{ text: "Amara Okafor · live 3 days ago" }]}
+        size="compact"
+      />,
+    );
+
+    expect(screen.queryByRole("link")).not.toBeInTheDocument();
+
+    expect(
+      screen.queryByRole("button", { name: /favourites/ }),
+    ).not.toBeInTheDocument();
+
+    expect(screen.getByText("Not checked")).toBeInTheDocument();
+    expect(screen.getByText("4 services · from £40")).toBeInTheDocument();
+
+    expect(
+      screen.getByText("Amara Okafor · live 3 days ago"),
+    ).toBeInTheDocument();
+
+    await user.click(screen.getByRole("button", { name: "Open Amara Beauty" }));
+    await user.click(screen.getByRole("button", { name: "Amara Beauty" }));
+
+    expect(onOpen).toHaveBeenCalledTimes(2);
   });
 });
