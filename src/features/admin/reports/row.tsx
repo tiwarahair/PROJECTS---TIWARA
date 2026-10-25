@@ -1,4 +1,5 @@
 import { ClipboardCheck, Eye } from "lucide-react";
+import { useNavigate } from "react-router";
 import { ActionMenuButton } from "../../../components/action-menu";
 import { Avatar } from "../../../components/ds/avatar";
 import { Tooltip } from "../../../components/ds/tooltip";
@@ -51,6 +52,7 @@ export const ReportRow = ({
     appeal,
   } = report;
 
+  const navigate = useNavigate();
   const isLate = tab !== "decided" && isOverdue(report);
   const dueText = getDueText(report);
 
@@ -70,7 +72,13 @@ export const ReportRow = ({
         isCard ? styles.card : styles.wide,
       )}
     >
-      <div className={joinClassNames(rowStyles.head, styles.head)}>
+      <div
+        className={joinClassNames(
+          rowStyles.head,
+          styles.head,
+          !isLate && !tags.length && styles.headMenuOnly,
+        )}
+      >
         <span className={joinClassNames(rowStyles.who, styles.person)}>
           <Avatar
             className={joinClassNames(rowStyles.avatar, styles.avatar)}
@@ -129,9 +137,12 @@ export const ReportRow = ({
                     },
                   ]),
               {
-                label: "View public profile",
+                label: "View in Profiles",
                 icon: Eye,
-                run: () => window.open(`/${slug}`, "_blank", "noreferrer"),
+                run: () =>
+                  void navigate(
+                    `/admin?tab=profiles&stylist=${report.stylist_id}`,
+                  ),
               },
             ]}
           />

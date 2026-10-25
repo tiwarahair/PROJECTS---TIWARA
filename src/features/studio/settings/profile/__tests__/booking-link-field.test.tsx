@@ -28,6 +28,8 @@ const ACCOUNT: Account = {
   stylistId: "stylist-1",
   slug: "amara-braids",
   slugChangedAt: null,
+  isSuspended: false,
+  suspendReason: null,
 };
 
 let user: UserEvent;
@@ -205,6 +207,8 @@ describe("BookingLinkField", () => {
         stylistId: "stylist-1",
         slug: "amara-hair",
         slugChangedAt: new Date().toISOString(),
+        isSuspended: false,
+        suspendReason: null,
       });
 
       expect(getStatus()).toHaveTextContent("");

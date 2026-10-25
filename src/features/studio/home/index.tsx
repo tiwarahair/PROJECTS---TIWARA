@@ -4,6 +4,7 @@ import type { StudioController } from "../core/use-studio";
 import { ActivityPanel } from "./activity";
 import { DuePanel } from "./due";
 import { GoLiveBanner } from "./gate";
+import { SuspendedBanner } from "./suspended-banner";
 import { TodayHero } from "./hero";
 import { PolicyNudge } from "./nudge";
 import { RevenueChart } from "./chart";
@@ -33,7 +34,11 @@ export const StudioHome = ({ studio }: StudioHomeProps) => {
       )}
       data-screen-label="Home"
     >
-      {view.isGate && <GoLiveBanner studio={studio} />}
+      {studio.state.account.isSuspended ? (
+        <SuspendedBanner studio={studio} />
+      ) : (
+        view.isGate && <GoLiveBanner studio={studio} />
+      )}
       {!isWide && !isComplete && <SetupBanner studio={studio} />}
       {!isWide && state.linkCard && (
         <section

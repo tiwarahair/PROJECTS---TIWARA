@@ -11,6 +11,8 @@ import {
   AppShellTopBar,
 } from "../../components/app-shell";
 import { useGetReportStatsQuery } from "./api";
+import { AdminLog } from "./log";
+import { AdminProfiles } from "./profiles";
 import { AdminReports } from "./reports";
 import { AdminPhoneHeader } from "./shell/headers";
 import { ADMIN_TABS, getAdminTab } from "./shell/nav-items";
@@ -32,6 +34,12 @@ export const AdminPage = ({ isStylist }: AdminPageProps) => {
   const openCount = (stats?.open ?? 0) + (stats?.appealed ?? 0);
 
   const goTo = (next: AdminTab) => setParams({ tab: next });
+
+  const openProfile = (stylistId: string | null) =>
+    setParams(
+      stylistId ? { tab: "profiles", stylist: stylistId } : { tab: "profiles" },
+    );
+
   const isSidebarShown = isSidebarOpen ?? isDesktop;
 
   const navItems = ADMIN_TABS.map(({ id, label, icon }) => ({
@@ -83,6 +91,21 @@ export const AdminPage = ({ isStylist }: AdminPageProps) => {
     >
       {tab.id === "reports" && (
         <AdminReports isWide={isWide} isDesktop={isDesktop} stats={stats} />
+      )}
+      {tab.id === "profiles" && (
+        <AdminProfiles
+          isWide={isWide}
+          isDesktop={isDesktop}
+          openId={params.get("stylist")}
+          onOpen={openProfile}
+        />
+      )}
+      {tab.id === "log" && (
+        <AdminLog
+          isWide={isWide}
+          isDesktop={isDesktop}
+          onOpenProfile={openProfile}
+        />
       )}
     </AppShell>
   );

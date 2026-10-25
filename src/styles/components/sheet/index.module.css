@@ -43,6 +43,21 @@
   color: var(--text-primary);
 }
 
+.headerPlain {
+  border-bottom: none;
+}
+
+.heading {
+  flex: 1;
+  min-width: 0;
+}
+
+.subtitle {
+  margin: 2px 0 0;
+  font-size: 14px;
+  color: var(--text-secondary);
+}
+
 .close {
   flex: none;
   width: 38px;

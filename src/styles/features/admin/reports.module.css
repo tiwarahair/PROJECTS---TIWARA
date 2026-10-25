@@ -70,6 +70,17 @@
   margin: -8px -10px -8px auto;
 }
 
+/* no tags: the menu sits beside the name rather than on a line of its own */
+.card .headMenuOnly .person {
+  flex: 1 1 0;
+}
+
+.card .headMenuOnly .side {
+  order: 0;
+  flex: none;
+  align-self: flex-start;
+}
+
 .about {
   font-size: 13.5px;
   color: var(--text-secondary);

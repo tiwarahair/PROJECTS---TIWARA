@@ -1,12 +1,8 @@
 import type { CSSProperties } from "react";
 import { ActionMenu } from "../../../components/action-menu";
+import { ConfirmDialog } from "../../../components/confirm-dialog";
 import { joinClassNames } from "../../../utils/class-names";
-import {
-  getDialogPlacement,
-  getOverlayAnimation,
-} from "../../../components/overlay";
 import type { StudioController } from "../core/use-studio";
-import overlay from "../../../styles/components/overlay/index.module.css";
 import shell from "../../../styles/features/studio/shell/index.module.css";
 import styles from "../../../styles/features/studio/shell/overlays.module.css";
 
@@ -53,7 +49,7 @@ export const ActionsMenu = ({ studio }: { studio: StudioController }) => {
 };
 
 export const ConfirmSheet = ({ studio }: { studio: StudioController }) => {
-  const { state, setState, isWide, context } = studio;
+  const { state, setState, context } = studio;
   const { confirm } = state;
 
   if (!confirm) return null;
@@ -76,42 +72,17 @@ export const ConfirmSheet = ({ studio }: { studio: StudioController }) => {
   };
 
   return (
-    <>
-      <div
-        className={joinClassNames(
-          styles.confirmScrim,
-          state.confirmOut ? overlay.scrimOut21 : overlay.scrimIn20,
-        )}
-        onClick={confirm.isBlocking ? undefined : onNo}
-      ></div>
-      <div
-        className={joinClassNames(
-          styles.confirmBox,
-          getDialogPlacement(isWide),
-          getOverlayAnimation(state.confirmOut, "dialog", isWide),
-        )}
-      >
-        <div className={styles.confirmTitle}>
-          {confirm.title || "Are you sure you want to remove?"}
-        </div>
-        <div className={styles.confirmBody}>
-          {confirm.emphasis && (
-            <strong className={styles.confirmEmphasis}>
-              {confirm.emphasis}
-            </strong>
-          )}
-          {confirm.body}
-        </div>
-        <div className={styles.confirmActions}>
-          <button className={styles.confirmNo} onClick={onNo}>
-            {confirm.noLabel || "Keep it"}
-          </button>
-          <button className={styles.confirmYes} onClick={() => confirm.yes()}>
-            {confirm.yesLabel || "Remove"}
-          </button>
-        </div>
-      </div>
-    </>
+    <ConfirmDialog
+      title={confirm.title || "Are you sure you want to remove?"}
+      emphasis={confirm.emphasis}
+      body={confirm.body}
+      yesLabel={confirm.yesLabel || "Remove"}
+      noLabel={confirm.noLabel || "Keep it"}
+      onYes={() => confirm.yes()}
+      onNo={onNo}
+      isClosing={!!state.confirmOut}
+      isBlocking={confirm.isBlocking}
+    />
   );
 };
 

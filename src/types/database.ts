@@ -141,6 +141,45 @@ export type Database = {
           },
         ];
       };
+      admin_profile_checks: {
+        Row: {
+          checked_at: string | null;
+          checked_by: string | null;
+          checked_flags: string[];
+          note: string;
+          note_updated_at: string | null;
+          note_updated_by: string | null;
+          stylist_id: string;
+        };
+        ComputedFields: never;
+        Insert: {
+          checked_at?: string | null;
+          checked_by?: string | null;
+          checked_flags?: string[];
+          note?: string;
+          note_updated_at?: string | null;
+          note_updated_by?: string | null;
+          stylist_id: string;
+        };
+        Update: {
+          checked_at?: string | null;
+          checked_by?: string | null;
+          checked_flags?: string[];
+          note?: string;
+          note_updated_at?: string | null;
+          note_updated_by?: string | null;
+          stylist_id?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "admin_profile_checks_stylist_id_fkey";
+            columns: ["stylist_id"];
+            isOneToOne: true;
+            referencedRelation: "stylists";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
       booking_codes: {
         Row: {
           attempts: number;
@@ -2225,11 +2264,14 @@ export type Database = {
           stripe_account_id: string | null;
           stripe_requirements: string;
           stripe_synced_at: string | null;
+          suspend_reason: string | null;
+          suspended_at: string | null;
           tiktok: string | null;
           travel_radius_miles: number | null;
           vat_number: string | null;
           vat_registered: boolean;
           website: string | null;
+          went_live_at: string | null;
           youtube: string | null;
         };
         ComputedFields: never;
@@ -2265,11 +2307,14 @@ export type Database = {
           stripe_account_id?: string | null;
           stripe_requirements?: string;
           stripe_synced_at?: string | null;
+          suspend_reason?: string | null;
+          suspended_at?: string | null;
           tiktok?: string | null;
           travel_radius_miles?: number | null;
           vat_number?: string | null;
           vat_registered?: boolean;
           website?: string | null;
+          went_live_at?: string | null;
           youtube?: string | null;
         };
         Update: {
@@ -2304,11 +2349,14 @@ export type Database = {
           stripe_account_id?: string | null;
           stripe_requirements?: string;
           stripe_synced_at?: string | null;
+          suspend_reason?: string | null;
+          suspended_at?: string | null;
           tiktok?: string | null;
           travel_radius_miles?: number | null;
           vat_number?: string | null;
           vat_registered?: boolean;
           website?: string | null;
+          went_live_at?: string | null;
           youtube?: string | null;
         };
         Relationships: [
@@ -2423,6 +2471,35 @@ export type Database = {
         Args: { note: string; outcome: string; target: string };
         Returns: undefined;
       };
+      admin_get_action_filters: {
+        Args: Record<PropertyKey, never>;
+        Returns: Json;
+      };
+      admin_get_actions: {
+        Args: {
+          by_admin?: string;
+          for_stylist?: string;
+          kind_group?: string;
+          page?: number;
+          search?: string;
+        };
+        Returns: Json;
+      };
+      admin_get_profile: { Args: { target: string }; Returns: Json };
+      admin_get_profile_stats: {
+        Args: Record<PropertyKey, never>;
+        Returns: Json;
+      };
+      admin_get_profiles: {
+        Args: {
+          page?: number;
+          search?: string;
+          sort?: string;
+          tab: string;
+          went_live?: string;
+        };
+        Returns: Json;
+      };
       admin_get_report_stats: {
         Args: Record<PropertyKey, never>;
         Returns: Json;
@@ -2430,6 +2507,22 @@ export type Database = {
       admin_get_reports: {
         Args: { page?: number; sort?: string; tab: string };
         Returns: Json;
+      };
+      admin_mark_profile_checked: {
+        Args: { note: string; target: string };
+        Returns: undefined;
+      };
+      admin_save_profile_note: {
+        Args: { note: string; target: string };
+        Returns: undefined;
+      };
+      admin_suspend_stylist: {
+        Args: { reason: string; target: string };
+        Returns: undefined;
+      };
+      admin_unsuspend_stylist: {
+        Args: { note: string; target: string };
+        Returns: undefined;
       };
       appeal_review_decision: {
         Args: { body: string; target: string };

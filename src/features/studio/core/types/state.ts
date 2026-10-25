@@ -56,6 +56,8 @@ export interface StudioState {
     stylistId: string;
     slug: string;
     slugChangedAt: string | null;
+    isSuspended: boolean;
+    suspendReason: string | null;
   };
   /** The signed-in stylist. */
   owner: {

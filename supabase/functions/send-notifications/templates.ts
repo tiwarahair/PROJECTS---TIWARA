@@ -41,6 +41,8 @@ import {
   confirmBookingChanged,
 } from "./studio-booking-emails.ts";
 import type { ConfirmLink, StudioBooking, StylistNotice } from "./studio-booking-emails.ts";
+import { stylistSuspended, stylistUnsuspended } from "./suspension-emails.ts";
+import type { Suspension } from "./suspension-emails.ts";
 
 type TemplateBuilder = (payload: Record<string, unknown>) => RenderedEmail;
 
@@ -151,6 +153,8 @@ const templates: Record<string, TemplateBuilder> = {
   review_decision_stylist: (payload) => decisionForStylist(payload as unknown as ReviewDecision),
   review_report_outcome: (payload) => reportOutcome(payload as unknown as ReviewDecision),
   review_appeal_answered: (payload) => appealAnswered(payload as unknown as AppealAnswer),
+  stylist_suspended: (payload) => stylistSuspended(payload as unknown as Suspension),
+  stylist_unsuspended: (payload) => stylistUnsuspended(payload as unknown as Suspension),
 };
 
 export const renderEmail = (

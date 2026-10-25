@@ -1,4 +1,4 @@
-/* An Admin page inside Studio's reviews layout: the tabs share a row with Sort on wider screens. */
+/* An Admin page inside Studio's reviews layout: the tabs share a row with Sort on wider screens; on phones Sort sits under them, opposite the count. */
 .page {
   padding-bottom: 120px;
 }
@@ -16,19 +16,21 @@
   min-width: 0;
 }
 
-/* phones: Sort floats at the end of the tabs, which scroll under it (like Studio → Services' chips) */
+.sortRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.count {
+  margin: 0;
+  font-size: 14px;
+  color: var(--text-secondary);
+}
+
 @media (max-width: 639px) {
-  .tabsRow {
-    flex-wrap: nowrap;
-    gap: 0;
-  }
-
   .tabs {
-    flex: 1 1 0;
-  }
-
-  .sort {
-    flex: none;
-    box-shadow: -14px 0 12px -4px var(--canvas);
+    flex: 1 1 100%;
   }
 }

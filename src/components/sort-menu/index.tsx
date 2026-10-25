@@ -13,6 +13,8 @@ export interface SortMenuProps<Key extends string> {
   onPick: (key: Key) => void;
   align?: "left" | "right";
   isSet?: boolean;
+  isValueOnly?: boolean;
+  pillText?: string;
 }
 
 /** The search page's "Sort: …" pill and its menu; also used for filters. */
@@ -27,8 +29,11 @@ export const SortMenu = <Key extends string>({
   onPick,
   align = "right",
   isSet = false,
+  isValueOnly = false,
+  pillText,
 }: SortMenuProps<Key>) => {
   const selected = options.find(([key]) => key === value);
+  const selectedLabel = selected ? selected[1] : "";
 
   return (
     <div className={styles.anchor}>
@@ -37,9 +42,11 @@ export const SortMenu = <Key extends string>({
         onClick={onToggle}
         aria-haspopup="listbox"
         aria-expanded={isOpen ? "true" : "false"}
+        aria-label={isValueOnly ? `${label}: ${selectedLabel}` : undefined}
         className={joinClassNames(styles.pill, isSet && styles.pillSet)}
       >
-        {`${label}: ${selected ? selected[1] : ""}`}
+        {pillText ??
+          (isValueOnly ? selectedLabel : `${label}: ${selectedLabel}`)}
         <ChevronDown className={styles.icon} size={14} strokeWidth={2} />
       </button>
       {isOpen && (

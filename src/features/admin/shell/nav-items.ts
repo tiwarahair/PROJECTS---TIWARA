@@ -1,7 +1,7 @@
-import { Flag } from "lucide-react";
+import { Flag, ScrollText, Users } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
 
-export type AdminTab = "reports";
+export type AdminTab = "reports" | "profiles" | "log";
 
 interface AdminNavItem {
   id: AdminTab;
@@ -17,7 +17,21 @@ const REPORTS: AdminNavItem = {
   icon: Flag,
 };
 
-export const ADMIN_TABS: AdminNavItem[] = [REPORTS];
+export const ADMIN_TABS: AdminNavItem[] = [
+  REPORTS,
+  {
+    id: "profiles",
+    label: "Profiles",
+    note: "Every stylist on Tiwára’s House",
+    icon: Users,
+  },
+  {
+    id: "log",
+    label: "Action log",
+    note: "Everything an admin has done",
+    icon: ScrollText,
+  },
+];
 
 export const getAdminTab = (value: string | null): AdminNavItem =>
   ADMIN_TABS.find(({ id }) => id === value) ?? REPORTS;

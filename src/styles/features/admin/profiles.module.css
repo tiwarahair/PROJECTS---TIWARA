@@ -1,0 +1,296 @@
+/* Admin → Profiles: the toolbar, the grid's photo tags, and the list rows. */
+.toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px 16px;
+}
+
+.results {
+  margin: 0;
+  font-size: 14px;
+  color: var(--text-secondary);
+}
+
+.tools {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+  margin-left: auto;
+}
+
+.layout {
+  flex: none;
+  display: inline-flex;
+  padding: 3px;
+  gap: 2px;
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-full);
+  background: var(--neutral-0);
+}
+
+.layoutButton {
+  width: 34px;
+  height: 32px;
+  display: grid;
+  place-items: center;
+  border: none;
+  border-radius: var(--radius-full);
+  background: transparent;
+  color: var(--text-secondary);
+  cursor: pointer;
+  transition: transform var(--duration-fast) var(--ease-out);
+}
+
+/* phones: Went live, Sort and the layout toggle share a row; the toggle sits on the right */
+@media (max-width: 639px) {
+  .tools {
+    flex: 1;
+    flex-wrap: nowrap;
+    gap: 4px;
+    margin-left: 0;
+  }
+
+  /* the Went live and Sort pills, a little tighter so every choice fits beside the toggle */
+  .tools button[aria-haspopup="listbox"] {
+    gap: 5px;
+    padding: 0 10px;
+  }
+
+  /* the menus open under their pill and stay inside the screen */
+  .tools [role="listbox"] {
+    width: 220px;
+  }
+
+  .layout {
+    margin-left: auto;
+  }
+}
+
+.layoutButton[aria-pressed="true"] {
+  background: var(--neutral-900);
+  color: var(--neutral-50);
+}
+
+.layoutButton:active {
+  transform: scale(0.96);
+}
+
+/* ---- grid: the search page's stylist cards ---- */
+/* compact search cards: three across on desktop, two on tablets, one on phones */
+.grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+  gap: 28px 20px;
+}
+
+@media (min-width: 1024px) {
+  .grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+
+.checkTag,
+.flagTag {
+  position: absolute;
+  top: 12px;
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 5px 11px;
+  border-radius: var(--radius-full);
+  font-size: 12.5px;
+  font-weight: 600;
+}
+
+.checkTag {
+  left: 12px;
+  background: rgba(26, 23, 20, 0.42);
+  -webkit-backdrop-filter: blur(16px) saturate(140%);
+  backdrop-filter: blur(16px) saturate(140%);
+  color: #fffefb;
+}
+
+.checkWaiting {
+  background: var(--neutral-0);
+  color: var(--accent-700);
+}
+
+.checkSuspended {
+  background: rgba(26, 23, 20, 0.78);
+}
+
+.flagTag {
+  right: 12px;
+  background: #fbefd9;
+  color: #5c3a00;
+}
+
+/* ---- list: one panel of rows (wide) or cards (phone) ---- */
+.row {
+  width: 100%;
+  display: grid;
+  grid-template-columns:
+    minmax(0, 2.4fr) minmax(0, 1.6fr) minmax(0, 1.3fr)
+    minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 16px;
+  padding: 16px 0;
+  border: none;
+  background: none;
+  font: inherit;
+  font-size: 14px;
+  color: var(--text-primary);
+  text-align: left;
+  cursor: pointer;
+}
+
+.row + .row {
+  border-top: 1px solid var(--border-subtle);
+}
+
+.rowCard {
+  grid-template-columns: 1fr;
+  gap: 10px;
+  padding: 16px;
+  border-radius: 20px;
+  background: var(--neutral-0);
+  box-shadow: var(--shadow-panel);
+}
+
+.rowCard + .rowCard {
+  border-top: none;
+}
+
+.who {
+  display: flex;
+  gap: 14px;
+  min-width: 0;
+}
+
+.thumb {
+  flex: none;
+  width: 64px;
+  height: 64px;
+  overflow: hidden;
+  border-radius: 14px;
+  background: var(--neutral-100);
+}
+
+.thumbImage {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center 15%;
+}
+
+.owner {
+  font-size: 13.5px;
+  color: var(--neutral-700);
+}
+
+.stack {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+.business {
+  font-family: "Schibsted Grotesk", sans-serif;
+  font-size: 16.5px;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+}
+
+.muted {
+  font-size: 13px;
+  color: var(--text-secondary);
+}
+
+.faint {
+  font-size: 13.5px;
+  color: var(--text-secondary);
+}
+
+.checks {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding-top: 2px;
+  font-weight: 600;
+}
+
+.bars {
+  flex: 0 0 110px;
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 3px;
+}
+
+.bar {
+  height: 4px;
+  border-radius: var(--radius-full);
+  background: var(--neutral-900);
+}
+
+.barFail {
+  background: #e8b04b;
+}
+
+.flagLine {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 13px;
+  color: #5c3a00;
+}
+
+.flagLine svg {
+  flex: none;
+  color: #b07400;
+}
+
+.state {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  justify-self: end;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.chevron {
+  color: var(--text-muted);
+}
+
+.header {
+  display: grid;
+  grid-template-columns:
+    minmax(0, 2.4fr) minmax(0, 1.6fr) minmax(0, 1.3fr)
+    minmax(0, 1fr) auto;
+  gap: 16px;
+  padding: 14px 0 10px;
+  border-bottom: 1px solid var(--border-subtle);
+  font-size: 12.5px;
+  font-weight: 600;
+  color: var(--text-secondary);
+}
+
+.header span:last-child {
+  text-align: right;
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .row:not(.rowCard):hover .business {
+    text-decoration: underline;
+    text-underline-offset: 3px;
+  }
+
+  .layoutButton[aria-pressed="false"]:hover {
+    background: var(--quiet);
+  }
+}

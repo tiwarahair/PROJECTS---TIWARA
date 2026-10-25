@@ -1,4 +1,3 @@
-import { DISCARD_PROMPT } from "../../../hooks/use-unsaved-changes";
 import { getAddressLine } from "../logic";
 import type { AccountController } from "../use-account";
 import type { AccountView } from "../view";
@@ -68,22 +67,6 @@ export const CardRemove = ({ account, id }: CardRemoveProps) => {
     />
   );
 };
-
-interface DiscardChangesProps {
-  account: AccountController;
-  onDiscard: () => void;
-}
-
-export const DiscardChanges = ({ account, onDiscard }: DiscardChangesProps) => (
-  <Confirm
-    title={DISCARD_PROMPT.title}
-    text={DISCARD_PROMPT.body}
-    action={DISCARD_PROMPT.discard}
-    onCancel={account.actions.closeDialog}
-    onConfirm={onDiscard}
-    cancel={DISCARD_PROMPT.keep}
-  />
-);
 
 interface LogoutAllProps {
   account: AccountController;

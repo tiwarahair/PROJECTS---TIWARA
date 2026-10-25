@@ -1,4 +1,6 @@
 import { X } from "lucide-react";
+import { ConfirmDialog } from "../../../components/confirm-dialog";
+import { DISCARD_PROMPT } from "../../../hooks/use-unsaved-changes";
 import { joinClassNames } from "../../../utils/class-names";
 import type { AccountController } from "../use-account";
 import type { AccountView } from "../view";
@@ -7,7 +9,6 @@ import {
   AddressRemove,
   AllergyRemove,
   CardRemove,
-  DiscardChanges,
   LogoutAll,
   SyncReset,
 } from "./confirms";
@@ -40,9 +41,6 @@ const getContent = (account: AccountController, view: AccountView) => {
 
   if (dialog.kind === "addCard") return <AddCardDialog account={account} />;
 
-  if (dialog.kind === "discard")
-    return <DiscardChanges account={account} onDiscard={dialog.then} />;
-
   if (dialog.kind === "logoutAll") return <LogoutAll account={account} />;
 
   if (dialog.kind === "address")
@@ -66,6 +64,18 @@ export const AccountDialogs = ({ account, view }: AccountDialogsProps) => {
   const { dialog } = state;
 
   if (!dialog) return null;
+
+  if (dialog.kind === "discard")
+    return (
+      <ConfirmDialog
+        title={DISCARD_PROMPT.title}
+        body={DISCARD_PROMPT.body}
+        yesLabel={DISCARD_PROMPT.discard}
+        noLabel={DISCARD_PROMPT.keep}
+        onYes={dialog.then}
+        onNo={actions.closeDialog}
+      />
+    );
 
   return (
     // eslint-disable-next-line jsx-a11y/click-events-have-key-events, jsx-a11y/no-static-element-interactions

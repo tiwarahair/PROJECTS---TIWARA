@@ -42,6 +42,10 @@ export interface StylistCardProps {
   bookHref?: string;
   /** Above the fold (the first search results): load the cover straight away. */
   priority?: boolean;
+  onOpen?: () => void;
+  hasFavourite?: boolean;
+  badges?: ReactNode;
+  size?: "regular" | "compact";
 }
 
 interface CardLinkProps {
@@ -98,7 +102,7 @@ const getMeta = (
   return [...serviceNames, fromText].filter(Boolean).join(" · ");
 };
 
-/** Photo-led stylist card with a favourite heart, used by Home, Search and Account. */
+/** Photo-led stylist card with a favourite heart, used by Home, Search, Account & admin */
 export const StylistCard = ({
   href = "#",
   cover = "",
@@ -115,6 +119,10 @@ export const StylistCard = ({
   stylistId,
   bookHref = "",
   priority = false,
+  onOpen,
+  hasFavourite = true,
+  badges,
+  size = "regular",
 }: StylistCardProps) => {
   const { isFavourite, toggleFavourite } = useFavourites();
 
@@ -144,67 +152,102 @@ export const StylistCard = ({
     if (id) toggleFavourite(id, event);
   };
 
-  return (
-    // plain block wrapper: the card's height:100% resolves against it (auto)
-    <div data-dc-host="">
-      <div className={styles.card}>
-        <CardLink
-          href={href}
-          className={styles.coverLink}
-          state={profileState}
-          onIntent={handleIntent}
-        >
-          {/* stycover / rescover: Home and Search style the cover from outside */}
-          {cover ? (
-            <ResponsiveImage
-              hasShimmer
-              className={joinClassNames("stycover rescover", styles.cover)}
-              loading={priority ? "eager" : "lazy"}
-              fetchPriority={priority ? "high" : undefined}
-              src={cover}
-              sizes={COVER_SIZES}
-              alt={stylistName}
-            />
-          ) : (
-            <span
-              role="img"
-              aria-label={stylistName}
-              className={joinClassNames(
-                "stycover rescover",
-                styles.cover,
-                styles.coverPlaceholder,
-              )}
-            />
+  const coverImage = (
+    <>
+      {/* stycover / rescover: Home and Search style the cover from outside */}
+      {cover ? (
+        <ResponsiveImage
+          hasShimmer
+          className={joinClassNames("stycover rescover", styles.cover)}
+          loading={priority ? "eager" : "lazy"}
+          fetchPriority={priority ? "high" : undefined}
+          src={cover}
+          sizes={COVER_SIZES}
+          alt={stylistName}
+        />
+      ) : (
+        <span
+          role="img"
+          aria-label={stylistName}
+          className={joinClassNames(
+            "stycover rescover",
+            styles.cover,
+            styles.coverPlaceholder,
           )}
-        </CardLink>
-        <button
-          type="button"
-          className={joinClassNames("sc-heart", styles.heart)}
-          aria-label={
-            (isSaved ? "Remove " : "Save ") +
-            stylistName +
-            (isSaved ? " from favourites" : " to favourites")
-          }
-          aria-pressed={isSaved ? "true" : "false"}
-          onClick={handleHeart}
-        >
-          <Heart
-            size={20}
-            strokeWidth={2}
-            fill={isSaved ? "var(--accent-700)" : "none"}
-            color={isSaved ? "#fffefb" : "currentColor"}
-          />
-        </button>
+        />
+      )}
+    </>
+  );
+
+  return (
+    <div data-dc-host="">
+      <div
+        className={joinClassNames(
+          styles.card,
+          size === "compact" && styles.compact,
+        )}
+      >
+        {onOpen ? (
+          <button
+            type="button"
+            className={joinClassNames(styles.coverLink, styles.coverButton)}
+            aria-label={`Open ${stylistName}`}
+            onClick={onOpen}
+          >
+            {coverImage}
+            {badges}
+          </button>
+        ) : (
+          <CardLink
+            href={href}
+            className={styles.coverLink}
+            state={profileState}
+            onIntent={handleIntent}
+          >
+            {coverImage}
+            {badges}
+          </CardLink>
+        )}
+        {hasFavourite && (
+          <button
+            type="button"
+            className={joinClassNames("sc-heart", styles.heart)}
+            aria-label={
+              (isSaved ? "Remove " : "Save ") +
+              stylistName +
+              (isSaved ? " from favourites" : " to favourites")
+            }
+            aria-pressed={isSaved ? "true" : "false"}
+            onClick={handleHeart}
+          >
+            <Heart
+              size={20}
+              strokeWidth={2}
+              fill={isSaved ? "var(--accent-700)" : "none"}
+              color={isSaved ? "#fffefb" : "currentColor"}
+            />
+          </button>
+        )}
         <div className={styles.body}>
           <div className={styles.titleRow}>
-            <CardLink
-              href={href}
-              className={styles.name}
-              state={profileState}
-              onIntent={handleIntent}
-            >
-              {stylistName}
-            </CardLink>
+            {onOpen ? (
+              <button
+                type="button"
+                className={joinClassNames(styles.name, styles.nameButton)}
+                onClick={onOpen}
+              >
+                {stylistName}
+              </button>
+            ) : (
+              <CardLink
+                href={href}
+                className={styles.name}
+                state={profileState}
+                onIntent={handleIntent}
+              >
+                {stylistName}
+              </CardLink>
+            )}
             {verified && (
               <VerifiedBadgeIcon size={15} className={styles.verified} />
             )}

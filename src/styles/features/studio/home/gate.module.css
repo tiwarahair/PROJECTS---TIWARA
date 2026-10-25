@@ -49,6 +49,15 @@
   cursor: pointer;
 }
 
+/* the suspended banner's Contact us is a link, which doesn't centre its text like a button */
+a.gateButton,
+a.gateButton:hover {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--neutral-100);
+}
+
 .gateButton:active {
   transform: scale(0.97) !important;
 }

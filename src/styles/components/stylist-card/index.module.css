@@ -14,6 +14,21 @@
   background: var(--neutral-100);
 }
 
+.coverButton {
+  width: 100%;
+  padding: 0;
+  border: none;
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+
+/* the photo keeps the regular 380 × 340 shape and shrinks with its column */
+.compact .coverLink {
+  height: auto;
+  aspect-ratio: 38 / 34;
+}
+
 /* doubled class: wins over the pages' .stycover/.rescover transition rules */
 .cover.cover {
   width: 100%;
@@ -90,6 +105,14 @@
   font-size: 18.5px;
   letter-spacing: -0.01em;
   color: var(--text-primary);
+}
+
+.nameButton {
+  padding: 0;
+  border: none;
+  background: none;
+  text-align: left;
+  cursor: pointer;
 }
 
 .rating {

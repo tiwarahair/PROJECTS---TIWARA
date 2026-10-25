@@ -23,3 +23,16 @@
   bottom: auto;
   top: calc(100% + 8px);
 }
+
+.floating {
+  position: fixed;
+  left: var(--tip-x);
+  top: auto;
+  bottom: calc(100vh - var(--tip-y) + 8px);
+  z-index: 300;
+}
+
+.floating.below {
+  top: calc(var(--tip-y) + 8px);
+  bottom: auto;
+}

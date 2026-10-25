@@ -1,4 +1,4 @@
-// Admin: reported reviews, decisions and appeals. Every call needs an admin with a two-step code entered.
+// Admin: reported reviews, decisions and appeals; stylist profiles and suspensions; the action log. Every call needs an admin with a two-step code entered.
 import type { ReportReason, ReviewOutcome } from "./review-api";
 import { supabase } from "./supabase";
 
@@ -125,3 +125,197 @@ export const answerAppeal = ({ appealId, outcome, note }: AppealAnswerDraft) =>
       note: note.trim(),
     }),
   );
+
+export type ProfilesTab = "all" | "not" | "flags" | "stripe" | "suspended";
+
+export type ProfilesWentLive = "any" | "week" | "month";
+
+export type ProfilesSort = "flags" | "newest" | "oldest" | "bookings";
+
+export type ProfileFlag = "stripe" | "contact" | "prices" | "photos";
+
+export type StripeState = "none" | "action" | "verifying" | "active";
+
+export interface AdminProfileStats {
+  all: number;
+  not_checked: number;
+  oldest_waiting: string | null;
+  flagged: number;
+  multi_flagged: number;
+  stripe: number;
+  live: number;
+  suspended: number;
+}
+
+export interface AdminProfile {
+  id: string;
+  slug: string;
+  business_name: string;
+  owner_name: string;
+  area_label: string | null;
+  cover_path: string | null;
+  status: string;
+  went_live_at: string | null;
+  suspended_at: string | null;
+  flags: ProfileFlag[];
+  /** flags that appeared since the last check */
+  new_flags: ProfileFlag[];
+  checked_at: string | null;
+  checked_by_name: string | null;
+  stripe_state: StripeState;
+  service_count: number;
+  min_pence: number | null;
+  max_pence: number | null;
+  photo_count: number;
+  booking_count: number;
+  cancelled_count: number;
+  review_count: number;
+  rating: number | null;
+  reported_count: number;
+}
+
+export interface ContactMatch {
+  kind: "phone" | "email";
+  name: string;
+}
+
+export interface PriceOutlier {
+  name: string;
+  from_pence: number;
+  usual_pence: number;
+}
+
+export interface AdminProfileDetail extends AdminProfile {
+  owner_email: string | null;
+  owner_phone: string | null;
+  contact_email: string | null;
+  contact_phone: string | null;
+  stripe_account_id: string | null;
+  suspend_reason: string | null;
+  suspended_by: string | null;
+  note: string;
+  contact_matches: ContactMatch[];
+  price_outliers: PriceOutlier[];
+}
+
+export interface AdminProfilesQuery {
+  tab: ProfilesTab;
+  wentLive: ProfilesWentLive;
+  sort: ProfilesSort;
+  search: string;
+}
+
+export interface AdminPage<Item> {
+  items: Item[];
+  has_more: boolean;
+}
+
+export interface ProfileNoteDraft {
+  stylistId: string;
+  note: string;
+}
+
+export type ActionsKindGroup = "all" | "reviews" | "profiles";
+
+export type AdminActionKind =
+  | "review_kept"
+  | "review_text_removed"
+  | "review_removed"
+  | "review_hidden"
+  | "appeal_kept"
+  | "appeal_changed"
+  | "profile_checked"
+  | "stylist_suspended"
+  | "stylist_unsuspended";
+
+export interface AdminAction {
+  id: string;
+  kind: AdminActionKind;
+  note: string;
+  created_at: string;
+  review_id: string | null;
+  admin_name: string;
+  stylist_name: string | null;
+  target_stylist_id: string | null;
+  reviewer_name: string | null;
+}
+
+export interface AdminActionsQuery {
+  adminId: string | null;
+  kindGroup: ActionsKindGroup;
+  stylistId: string | null;
+  search: string;
+}
+
+export interface AdminActionFilters {
+  admins: { id: string; name: string }[];
+  stylists: { id: string; name: string }[];
+}
+
+export const fetchProfileStats = () =>
+  run<AdminProfileStats | null>(supabase.rpc("admin_get_profile_stats"));
+
+export const fetchProfiles = (
+  { tab, wentLive, sort, search }: AdminProfilesQuery,
+  page: number,
+) =>
+  run<AdminPage<AdminProfile> | null>(
+    supabase.rpc("admin_get_profiles", {
+      tab,
+      went_live: wentLive,
+      sort,
+      search: search.trim(),
+      page,
+    }),
+  );
+
+export const fetchProfile = (stylistId: string) =>
+  run<AdminProfileDetail | null>(
+    supabase.rpc("admin_get_profile", { target: stylistId }),
+  );
+
+export const saveProfileNote = ({ stylistId, note }: ProfileNoteDraft) =>
+  run<null>(
+    supabase.rpc("admin_save_profile_note", { target: stylistId, note }),
+  );
+
+export const markProfileChecked = ({ stylistId, note }: ProfileNoteDraft) =>
+  run<null>(
+    supabase.rpc("admin_mark_profile_checked", {
+      target: stylistId,
+      note: note.trim(),
+    }),
+  );
+
+export const suspendStylist = ({ stylistId, note }: ProfileNoteDraft) =>
+  run<null>(
+    supabase.rpc("admin_suspend_stylist", {
+      target: stylistId,
+      reason: note.trim(),
+    }),
+  );
+
+export const unsuspendStylist = ({ stylistId, note }: ProfileNoteDraft) =>
+  run<null>(
+    supabase.rpc("admin_unsuspend_stylist", {
+      target: stylistId,
+      note: note.trim(),
+    }),
+  );
+
+export const fetchActions = (
+  { adminId, kindGroup, stylistId, search }: AdminActionsQuery,
+  page: number,
+) =>
+  run<AdminPage<AdminAction> | null>(
+    supabase.rpc("admin_get_actions", {
+      by_admin: adminId ?? undefined,
+      kind_group: kindGroup,
+      for_stylist: stylistId ?? undefined,
+      search: search.trim(),
+      page,
+    }),
+  );
+
+export const fetchActionFilters = () =>
+  run<AdminActionFilters | null>(supabase.rpc("admin_get_action_filters"));

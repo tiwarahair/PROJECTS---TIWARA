@@ -31,7 +31,7 @@ export const SORTS = [
 
 const TAB_LABELS: [ReportsTab, string][] = [
   ["open", "Open"],
-  ["hidden", "Hidden while checking"],
+  ["hidden", "Hidden"],
   ["appealed", "Appealed"],
   ["decided", "Decided"],
 ];

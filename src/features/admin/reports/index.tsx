@@ -13,6 +13,7 @@ import type {
 } from "../../../lib/admin-api";
 import { joinClassNames } from "../../../utils/class-names";
 import { useGetReportsInfiniteQuery } from "../api";
+import { getCount } from "../profiles/view";
 import { DecisionSheet } from "./decision-sheet";
 import { ReportRow } from "./row";
 import { getDefaultSort, getTabs, SORTS } from "./view";
@@ -83,7 +84,7 @@ export const AdminReports = ({
     {
       label: "Overdue",
       value: stats?.overdue,
-      sub: "Harmful within 24h, others 5 working days",
+      sub: "Overdue within 24h or 5 working days",
       isAlert: !!stats?.overdue,
     },
     {
@@ -92,6 +93,25 @@ export const AdminReports = ({
       sub: "Kept, or the words or review removed",
     },
   ];
+
+  const total = data?.pages[0]?.total;
+
+  const sortMenu = (
+    <SortMenu
+      label="Sort"
+      ariaLabel="Sort reports"
+      options={SORTS}
+      value={sort}
+      isOpen={isSortOpen}
+      onToggle={() => setSortOpen(!isSortOpen)}
+      onClose={() => setSortOpen(false)}
+      onPick={(next) => {
+        setSort(next);
+        setSortOpen(false);
+      }}
+      align="right"
+    />
+  );
 
   const getList = () => {
     if (isError && !data)
@@ -176,23 +196,16 @@ export const AdminReports = ({
             onChange={pickTab}
           />
         </div>
-        <div className={styles.sort}>
-          <SortMenu
-            label="Sort"
-            ariaLabel="Sort reports"
-            options={SORTS}
-            value={sort}
-            isOpen={isSortOpen}
-            onToggle={() => setSortOpen(!isSortOpen)}
-            onClose={() => setSortOpen(false)}
-            onPick={(next) => {
-              setSort(next);
-              setSortOpen(false);
-            }}
-            align="right"
-          />
-        </div>
+        {isWide && sortMenu}
       </div>
+      {!isWide && (
+        <div className={styles.sortRow}>
+          <p className={styles.count}>
+            {total == null ? "" : getCount(total, "report")}
+          </p>
+          {sortMenu}
+        </div>
+      )}
       {getList()}
       {!!deciding && (
         <DecisionSheet report={deciding} onClose={() => setDeciding(null)} />

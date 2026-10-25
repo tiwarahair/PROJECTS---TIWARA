@@ -11,6 +11,9 @@ interface SheetProps {
   open: boolean;
   onClose: () => void;
   title: ReactNode;
+  subtitle?: string;
+  media?: ReactNode; // Before the title, e.g. a photo.
+  hasDivider?: boolean;
   /** Beside the title, e.g. a rating. */
   aside?: ReactNode;
   /** Pinned under the content, e.g. actions. */
@@ -27,6 +30,9 @@ export const Sheet = ({
   open,
   onClose,
   title,
+  subtitle,
+  media,
+  hasDivider = true,
   aside,
   footer,
   size = "md",
@@ -49,8 +55,21 @@ export const Sheet = ({
           aria-describedby={undefined}
         >
           {isPhone && <Drawer.Handle className={styles.handle} />}
-          <header className={styles.header}>
-            <Drawer.Title className={styles.title}>{title}</Drawer.Title>
+          <header
+            className={joinClassNames(
+              styles.header,
+              !hasDivider && styles.headerPlain,
+            )}
+          >
+            {media}
+            {subtitle ? (
+              <div className={styles.heading}>
+                <Drawer.Title className={styles.title}>{title}</Drawer.Title>
+                <p className={styles.subtitle}>{subtitle}</p>
+              </div>
+            ) : (
+              <Drawer.Title className={styles.title}>{title}</Drawer.Title>
+            )}
             {aside}
             <Drawer.Close className={styles.close} aria-label="Close">
               <X size={20} strokeWidth={1.9} />
