@@ -83,7 +83,7 @@ export const ReviewPolicyPage = () => (
         <p className={styles.text}>
           Each booking gets one review, and it can’t be edited once it’s sent. A
           stylist’s rating shows once they have 3 reviews. Stylists can reply to
-          any review.
+          reviews.
         </p>
       </section>
 

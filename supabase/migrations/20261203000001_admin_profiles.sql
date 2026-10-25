@@ -606,6 +606,59 @@ as $$
   where public.is_admin_session()
 $$;
 
+create or replace function public.get_stylist_reviews(lookup text, page integer default 0, page_size integer default 10)
+returns jsonb
+language sql
+stable
+security definer
+set search_path = ''
+as $$
+  with stylist as (
+    select stylists.id from public.stylists
+    where stylists.id = coalesce(
+        (select id from public.stylists where slug = lookup::extensions.citext),
+        (select stylist_id from public.stylist_slug_history where slug = lookup::extensions.citext)
+      )
+      and (stylists.status in ('live', 'paused') or stylists.owner_id = auth.uid())
+  ),
+  visible as (
+    select reviews.* from public.reviews
+    join stylist on stylist.id = reviews.stylist_id
+    where reviews.status <> 'removed'
+      -- a review being checked is left out, except for the person who wrote it
+      and (reviews.status <> 'hidden' or reviews.client_id = auth.uid())
+  ),
+  shown as (
+    select visible.*, bookings.contact, bookings.snapshot ->> 'service_name' as service_name
+    from visible
+    join public.bookings on bookings.id = visible.booking_id
+    order by visible.created_at desc, visible.id
+    limit least(greatest(page_size, 1), 20)
+    offset greatest(page, 0) * least(greatest(page_size, 1), 20)
+  )
+  select jsonb_build_object(
+    'total', (select count(*) from visible),
+    'reviews', coalesce((
+      select jsonb_agg(jsonb_build_object(
+        'id', shown.id,
+        'rating', case when shown.status <> 'hidden' then shown.rating end,
+        'body', case when shown.status = 'published' then shown.body end,
+        'is_text_removed', shown.status = 'text_removed',
+        'is_checking', shown.status = 'hidden',
+        'author', public.get_reviewer_name(shown.contact),
+        'is_former', shown.contact ? 'account_deleted',
+        'service_name', shown.service_name,
+        'created_at', shown.created_at,
+        'reply', case when shown.status <> 'hidden' then shown.reply end,
+        'replied_at', shown.replied_at,
+        'is_reply_edited', shown.reply_edited_at is not null,
+        'is_mine', shown.client_id is not null and shown.client_id = auth.uid()
+      ) order by shown.created_at desc, shown.id)
+      from shown
+    ), '[]')
+  )
+$$;
+
 revoke execute on function
   public.stamp_went_live(),
   public.keep_suspended(),

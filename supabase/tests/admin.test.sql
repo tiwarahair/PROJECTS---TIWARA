@@ -1,5 +1,5 @@
 begin;
-select plan(26);
+select plan(27);
 
 insert into auth.users (id, instance_id, aud, role, email, raw_user_meta_data, raw_app_meta_data)
 values
@@ -113,10 +113,19 @@ select is(pg_temp.emails('admin_report_alert'), 1::bigint, 'a harmful report ale
 select is(public.get_stylist_rating((select stylist from shop)) ->> 'review_count', '3',
   'a hidden review stops counting; a spam-reported one still counts');
 
+select set_config('request.jwt.claims', '{"role": "anon"}', true);
+
+select is(
+  (select count(*) from jsonb_array_elements(public.get_stylist_reviews((select slug from shop)) -> 'reviews')
+    as review where (review ->> 'is_checking')::boolean),
+  0::bigint, 'visitors don''t see a review while it''s checked');
+
+select pg_temp.sign_in('a2222222-2222-2222-2222-222222222222');
+
 select is(
   (select review -> 'rating' from jsonb_array_elements(public.get_stylist_reviews((select slug from shop)) -> 'reviews')
     as review where (review ->> 'is_checking')::boolean),
-  'null'::jsonb, 'the profile shows a hidden review as being checked, with no stars');
+  'null'::jsonb, 'the reviewer sees their own review as being checked, with no stars');
 
 -- access: an admin flag alone isn't enough without a two-step code
 select pg_temp.sign_in('a3333333-3333-3333-3333-333333333333');
