@@ -32,7 +32,7 @@ Deno.serve(async (request) => {
 
   if (await isHandled(notification.id)) return Response.json({ received: true, duplicate: true });
 
-  const accountId = notification.related_object?.id;
+  const accountId = "related_object" in notification ? notification.related_object?.id : undefined;
 
   if (notification.type.startsWith("v2.core.account") && accountId?.startsWith("acct_")) {
     try {
