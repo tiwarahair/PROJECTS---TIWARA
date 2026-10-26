@@ -15,8 +15,10 @@ import {
   useDeleteClientAddressMutation,
   useGetClientBookingsQuery,
   useGetClientCardsQuery,
+  useGetMySensitivitiesQuery,
   useRemoveClientCardMutation,
   useSaveClientAddressMutation,
+  useSaveMySensitivityMutation,
   useSetAccountPhotoMutation,
   useSetDefaultCardMutation,
 } from "../../stores/account-api";
@@ -25,6 +27,7 @@ import { useUpdateProfileMutation } from "../../stores/api-slice";
 import { useAppDispatch, useAppSelector } from "../../stores/hooks";
 import type { SavedAddress } from "../../types/address";
 import type { Profile as SavedProfile } from "../../types/profile";
+import type { SharedSensitivity } from "../../types/sensitivity";
 import type { AccountBooking, SavedCard } from "./data";
 import { useAccountForms } from "./forms";
 import { getInitialState } from "./initial-state";
@@ -34,12 +37,16 @@ import type { AccountProps, StatePatch } from "./state";
 
 const NO_BOOKINGS: AccountBooking[] = [];
 const NO_CARDS: SavedCard[] = [];
+const NO_SENSITIVITIES: SharedSensitivity[] = [];
 
 /** What the account has on the server; read from the queries, never copied into page state. */
 export interface AccountData {
   addresses: SavedAddress[];
   bookings: AccountBooking[];
   cards: SavedCard[];
+  sensitivities: SharedSensitivity[];
+  areSensitivitiesLoaded: boolean;
+  isSensitivitiesError: boolean;
   hasPhoto: boolean;
 }
 
@@ -127,6 +134,18 @@ export const useAccountCore = (props: AccountProps) => {
 
   const { hasPhoto } = useAccountPhoto();
 
+  const { data: sensitivities, isError: isSensitivitiesError } =
+    useGetMySensitivitiesQuery(identity?.user.id ?? skipToken);
+
+  const [saveMySensitivity] = useSaveMySensitivityMutation();
+
+  const saveSensitivity = useCallback(
+    async (stylistId: string, text: string) => {
+      await saveMySensitivity({ stylistId, text }).unwrap();
+    },
+    [saveMySensitivity],
+  );
+
   const [setAccountPhoto] = useSetAccountPhotoMutation();
 
   const setPhoto = useCallback(
@@ -143,9 +162,19 @@ export const useAccountCore = (props: AccountProps) => {
       addresses: savedAddresses,
       bookings: bookings ?? NO_BOOKINGS,
       cards: cards ?? NO_CARDS,
+      sensitivities: sensitivities ?? NO_SENSITIVITIES,
+      areSensitivitiesLoaded: !!sensitivities,
+      isSensitivitiesError,
       hasPhoto,
     }),
-    [savedAddresses, bookings, cards, hasPhoto],
+    [
+      savedAddresses,
+      bookings,
+      cards,
+      sensitivities,
+      isSensitivitiesError,
+      hasPhoto,
+    ],
   );
 
   const dataRef = useRef(data);
@@ -198,6 +227,7 @@ export const useAccountCore = (props: AccountProps) => {
     resendTimer,
     saveProfile,
     setPhoto,
+    saveSensitivity,
     saveAddress,
     deleteAddress,
     setDefaultCard,

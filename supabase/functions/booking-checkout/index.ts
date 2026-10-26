@@ -101,6 +101,14 @@ Deno.serve(async (request) => {
       })
       .eq("id", quote.id);
 
+    // the client removed what they share with this stylist; anything else they type is saved once the booking goes through
+    if (clientId && parsed.data.clearAllergies) {
+      const { data: booking } = await admin.from("bookings").select("stylist_id").eq("id", quote.id).single();
+
+      if (booking)
+        await admin.from("client_sensitivities").delete().eq("client_id", clientId).eq("stylist_id", booking.stylist_id);
+    }
+
     return respond(200, { clientSecret: intent.client_secret });
   } catch (error) {
     console.error(

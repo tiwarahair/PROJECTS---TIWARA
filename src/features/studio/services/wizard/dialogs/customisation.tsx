@@ -49,7 +49,7 @@ export const CustomisationDialog = ({ view }: CustomisationDialogProps) => {
             // eslint-disable-next-line jsx-a11y/no-autofocus
             autoFocus
             onChange={own.onName}
-            placeholder="e.g. Parting"
+            placeholder="e.g. Service type"
           />
         </label>
         <div className={styles.optionsHead}>
@@ -59,14 +59,14 @@ export const CustomisationDialog = ({ view }: CustomisationDialogProps) => {
           <span>Time</span>
           <span></span>
         </div>
-        {own.options.map((option) => (
+        {own.options.map((option, index) => (
           <div key={option.key}>
             <div className={styles.optionRow}>
               <input
                 className={styles.optionInput}
                 value={option.label}
                 onChange={option.onLabel}
-                placeholder="e.g. Zig-zag"
+                placeholder={`e.g. ${index === 0 ? "install" : index === 1 ? "refresh" : ""}`}
                 aria-label="Option name"
               />
               <button

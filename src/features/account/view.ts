@@ -218,9 +218,6 @@ export const getAccountView = (
 
       return next ? formatAccountDate(next.at) : "";
     },
-    getStylistName: (id: string) =>
-      bookings.find(({ stylistSlug }) => stylistSlug === id)?.stylistName ??
-      "Your stylist",
     getAddressLine,
   };
 };

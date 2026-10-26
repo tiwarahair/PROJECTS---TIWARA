@@ -39,7 +39,6 @@ export const CodeField = ({ view, label }: CodeFieldProps) => (
       inputMode="numeric"
       autoComplete="one-time-code"
       maxLength={6}
-      placeholder="000000"
       readOnly={view.isVerified}
       aria-invalid={view.isCodeError ? "true" : "false"}
     />

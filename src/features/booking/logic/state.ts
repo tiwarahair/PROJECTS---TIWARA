@@ -99,6 +99,8 @@ export const getInitialBooking = (stylist: Stylist): BookingState => {
       text: "",
       prior: false,
       focus: false,
+      touched: false,
+      wasShared: false,
     },
     saved: [],
     selectedAddressId: "new",

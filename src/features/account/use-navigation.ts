@@ -91,13 +91,7 @@ export const useAccountNavigation = (
   // an open edit with changes asks before it's dropped
   const goToSection = useCallback(
     (id: string | null) => {
-      if (
-        !hasUnsavedEdits(
-          stateRef.current,
-          getFormValues(),
-          dataRef.current.addresses,
-        )
-      )
+      if (!hasUnsavedEdits(stateRef.current, getFormValues(), dataRef.current))
         return showSection(id);
 
       askDiscard(() => showSection(id));
@@ -131,12 +125,7 @@ export const useAccountNavigation = (
   }, [goToSection, setState, stateRef]);
 
   const hasUnsaved = useCallback(
-    () =>
-      hasUnsavedEdits(
-        stateRef.current,
-        getFormValues(),
-        dataRef.current.addresses,
-      ),
+    () => hasUnsavedEdits(stateRef.current, getFormValues(), dataRef.current),
     [getFormValues, stateRef, dataRef],
   );
 

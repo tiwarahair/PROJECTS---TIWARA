@@ -6,6 +6,10 @@ import { AccountPage } from "..";
 import type { UserEvent } from "@testing-library/user-event";
 import { setupUser } from "../../../test/setup-user";
 
+vi.mock("../../../lib/client-sensitivities", () => ({
+  fetchMySensitivities: vi.fn(() => Promise.resolve([])),
+}));
+
 let user: UserEvent;
 
 beforeEach(() => {
@@ -53,6 +57,9 @@ describe("AccountPage", () => {
     renderWithStore(<AccountPage />, "/account?section=shared", {
       signedIn: true,
     });
+
+    // the list arrives on the next animation frame, a faked timer here
+    await act(() => vi.advanceTimersByTimeAsync(100));
 
     expect(
       screen.getByRole("heading", { name: "Nothing shared yet" }),

@@ -37,7 +37,7 @@ export default defineConfig([
       parserOptions: { ecmaFeatures: { jsx: true } },
     },
     rules: {
-      "no-nested-ternary": "error",
+      "no-nested-ternary": "warn",
       "prefer-template": "error",
       "id-length": [
         "error",

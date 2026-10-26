@@ -20,6 +20,7 @@ export const getSaveActions = (
     dispatch,
     saveProfile,
     setPhoto,
+    saveSensitivity: saveSensitivityText,
   }: AccountCore,
   { focusLater, showToast, saveWith }: AccountFeedback,
 ) => {
@@ -94,6 +95,20 @@ export const getSaveActions = (
         : "Your photo couldn’t be removed. Try again",
     );
 
+  const saveSensitivity = async (stylistId: string, text: string) => {
+    const isSaved = await saveWith(
+      () => saveSensitivityText(stylistId, text.trim()),
+      text.trim() ? "Saved" : "Removed",
+      text.trim()
+        ? "Your allergy details couldn’t be saved. Try again"
+        : "Your allergy details couldn’t be removed. Try again",
+    );
+
+    if (isSaved) setState({ allergyEdit: -1, allergyConsent: false });
+
+    return isSaved;
+  };
+
   const downloadMyData = (userId: string) =>
     saveWith(
       async () =>
@@ -149,6 +164,7 @@ export const getSaveActions = (
     saveMarketing,
     savePhoto,
     onPhoto,
+    saveSensitivity,
     downloadMyData,
     copy,
     endSession,

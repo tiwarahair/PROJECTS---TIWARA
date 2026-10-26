@@ -14,6 +14,7 @@ export const requestSchema = z.object({
   }),
   notes: text(500),
   allergies: text(1000),
+  clearAllergies: z.boolean().default(false),
   address: z
     .object({
       line1: text(120).min(1),

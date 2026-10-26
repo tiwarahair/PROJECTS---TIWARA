@@ -9,6 +9,7 @@ import type { UserEvent } from "@testing-library/user-event";
 import { setupUser } from "../../../test/setup-user";
 import { stripeStub } from "../../../test/setup";
 import { startCheckout } from "../../../lib/booking-api";
+import { fetchMySensitivity } from "../../../lib/client-sensitivities";
 
 vi.mock("../../../lib/public-profiles", async (original) =>
   (await import("../../../test/booking-mocks")).mockPublicProfiles(original),
@@ -17,6 +18,10 @@ vi.mock("../../../lib/public-profiles", async (original) =>
 vi.mock("../../../lib/booking-api", async (original) =>
   (await import("../../../test/booking-mocks")).mockBookingApi(original),
 );
+
+vi.mock("../../../lib/client-sensitivities", () => ({
+  fetchMySensitivity: vi.fn(() => Promise.resolve("")),
+}));
 
 let user: UserEvent;
 
@@ -167,6 +172,45 @@ describe("BookingPage", () => {
 
     expect(screen.getByRole("button", { name: "Log in" })).toBeInTheDocument();
     expect(screen.getByLabelText("First name")).toHaveValue("");
+  });
+
+  it("details: fills in what the client already shares with this stylist, and log out clears it", async () => {
+    vi.mocked(fetchMySensitivity).mockResolvedValueOnce("Sensitive scalp");
+    await renderSavedBooking({ step: 4 }, { signedIn: true });
+    await act(() => vi.advanceTimersByTimeAsync(100));
+
+    expect(fetchMySensitivity).toHaveBeenCalledWith("tiwaras-house");
+    expect(screen.getByText("Still correct?")).toBeInTheDocument();
+    expect(screen.getByText("Sensitive scalp")).toBeInTheDocument();
+
+    await user.click(screen.getByRole("button", { name: "Log out" }));
+
+    expect(screen.queryByText("Sensitive scalp")).not.toBeInTheDocument();
+  });
+
+  it("details: a filled-in note arriving late leaves a box the client already changed alone", async () => {
+    let finishLoading: (text: string) => void = () => {};
+
+    vi.mocked(fetchMySensitivity).mockReturnValueOnce(
+      new Promise((resolve) => {
+        finishLoading = resolve;
+      }),
+    );
+
+    await renderSavedBooking({ step: 4 }, { signedIn: true });
+
+    const optIn = screen.getByRole("checkbox", {
+      name: /I have allergies or sensitivities/,
+    });
+
+    await user.click(optIn);
+    await user.click(optIn);
+
+    await act(async () => finishLoading("Sensitive scalp"));
+    await act(() => vi.advanceTimersByTimeAsync(100));
+
+    expect(optIn).toHaveAttribute("aria-checked", "false");
+    expect(screen.queryByText("Sensitive scalp")).not.toBeInTheDocument();
   });
 
   it("review: shows the policy card and Continue to payment", async () => {

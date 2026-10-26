@@ -708,6 +708,56 @@ export type Database = {
           },
         ];
       };
+      client_sensitivities: {
+        Row: {
+          booking_id: string | null;
+          client_id: string;
+          consent_wording: string;
+          consented_at: string;
+          stylist_id: string;
+          text: string;
+        };
+        ComputedFields: never;
+        Insert: {
+          booking_id?: string | null;
+          client_id: string;
+          consent_wording: string;
+          consented_at?: string;
+          stylist_id: string;
+          text: string;
+        };
+        Update: {
+          booking_id?: string | null;
+          client_id?: string;
+          consent_wording?: string;
+          consented_at?: string;
+          stylist_id?: string;
+          text?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "client_sensitivities_booking_id_fkey";
+            columns: ["booking_id"];
+            isOneToOne: false;
+            referencedRelation: "bookings";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "client_sensitivities_client_id_fkey";
+            columns: ["client_id"];
+            isOneToOne: false;
+            referencedRelation: "profiles";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "client_sensitivities_stylist_id_fkey";
+            columns: ["stylist_id"];
+            isOneToOne: false;
+            referencedRelation: "stylists";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
       closed_periods: {
         Row: {
           ends_on: string;
@@ -1843,6 +1893,7 @@ export type Database = {
       stylist_clients: {
         Row: {
           blocked_at: string | null;
+          client_id: string | null;
           created_at: string;
           deleted_at: string | null;
           email: string | null;
@@ -1857,6 +1908,7 @@ export type Database = {
         ComputedFields: never;
         Insert: {
           blocked_at?: string | null;
+          client_id?: string | null;
           created_at?: string;
           deleted_at?: string | null;
           email?: string | null;
@@ -1870,6 +1922,7 @@ export type Database = {
         };
         Update: {
           blocked_at?: string | null;
+          client_id?: string | null;
           created_at?: string;
           deleted_at?: string | null;
           email?: string | null;
@@ -1882,6 +1935,13 @@ export type Database = {
           stylist_id?: string;
         };
         Relationships: [
+          {
+            foreignKeyName: "stylist_clients_client_id_fkey";
+            columns: ["client_id"];
+            isOneToOne: false;
+            referencedRelation: "profiles";
+            referencedColumns: ["id"];
+          },
           {
             foreignKeyName: "stylist_clients_stylist_id_fkey";
             columns: ["stylist_id"];
@@ -2506,6 +2566,10 @@ export type Database = {
       };
       get_account_kind: { Args: { lookup_email: string }; Returns: string };
       get_account_security: { Args: Record<PropertyKey, never>; Returns: Json };
+      get_allergy_consent_wording: {
+        Args: { is_booking: boolean; target_stylist: string };
+        Returns: string;
+      };
       get_available_slots: {
         Args: {
           choices: Json;
@@ -2741,6 +2805,8 @@ export type Database = {
         Args: Record<PropertyKey, never>;
         Returns: string[];
       };
+      get_my_sensitivities: { Args: Record<PropertyKey, never>; Returns: Json };
+      get_my_sensitivity: { Args: { stylist_slug: string }; Returns: string };
       get_next_start: {
         Args: {
           minutes: number;
@@ -3121,6 +3187,10 @@ export type Database = {
         Args: { contact: Json; target_stylist: string };
         Returns: string;
       };
+      merge_stylist_clients: {
+        Args: { keep: string; other: string };
+        Returns: undefined;
+      };
       normalise_phone: { Args: { phone: string }; Returns: string };
       note_checkout_declined: {
         Args: { intent: string; target: string };
@@ -3177,6 +3247,7 @@ export type Database = {
         Args: Record<PropertyKey, never>;
         Returns: number;
       };
+      push_client_contact: { Args: { target: string }; Returns: undefined };
       queue_booking_change: {
         Args: {
           client_template: string;
@@ -3300,6 +3371,10 @@ export type Database = {
       };
       save_dispute_response: {
         Args: { given: Json; response: string; target: string };
+        Returns: undefined;
+      };
+      save_my_sensitivity: {
+        Args: { sensitivity: string; target_stylist: string };
         Returns: undefined;
       };
       save_open_minutes: { Args: Record<PropertyKey, never>; Returns: number };

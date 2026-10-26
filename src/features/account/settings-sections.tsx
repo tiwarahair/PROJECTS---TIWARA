@@ -5,6 +5,7 @@ import { Link } from "react-router";
 import { AllergyField } from "../../components/allergy-field";
 import { AllergyPrivacySheet } from "../../components/allergy-privacy-sheet";
 import { CalendarSubscribe } from "../../components/calendar-subscribe";
+import { PageMessage } from "../../components/page-message";
 import { useGetCalendarSecretQuery } from "../../stores/account-api";
 import { useAppSelector } from "../../stores/hooks";
 import { joinClassNames } from "../../utils/class-names";
@@ -37,7 +38,6 @@ export const AccountSwitch = ({ id, labelId, on, onToggle }: SwitchProps) => (
 
 interface SharedSectionProps {
   account: AccountController;
-  getStylistName: (id: string) => string;
 }
 
 /** Before a first booking there's no stylist to share anything with. */
@@ -76,13 +76,29 @@ const SharedEmpty = ({ isWide }: { isWide: boolean }) => {
 };
 
 export const SharedSection = ({
-  account: { state, actions },
-  getStylistName,
+  account: { state, data, actions },
 }: SharedSectionProps) => {
-  const { entries, allergyEdit, allergyDraft } = state;
-  const { setState, showToast } = actions;
+  const { allergyEdit, allergyDraft, allergyConsent } = state;
+  const { sensitivities, areSensitivitiesLoaded, isSensitivitiesError } = data;
+  const { setState } = actions;
 
-  if (!entries.length)
+  if (isSensitivitiesError && !areSensitivitiesLoaded)
+    return (
+      <section data-screen-label="Account: Shared with stylists">
+        <PageMessage
+          title="Shared details didn’t load"
+          text="Check your connection, then try again."
+          linkLabel="Try again"
+          linkHref="/account?section=shared"
+          isReload
+        />
+      </section>
+    );
+
+  if (!areSensitivitiesLoaded)
+    return <section data-screen-label="Account: Shared with stylists" />;
+
+  if (!sensitivities.length)
     return (
       <section data-screen-label="Account: Shared with stylists">
         <SharedEmpty isWide={state.wide} />
@@ -93,16 +109,16 @@ export const SharedSection = ({
     <section data-screen-label="Account: Shared with stylists">
       <h2 className={ui.heading}>Allergies or sensitivities</h2>
       <div className={ui.list}>
-        {entries.map(({ id, text }, index) => {
-          const name = getStylistName(id);
+        {sensitivities.map(({ stylistId, stylistName, text }, index) => {
           const hasText = !!text;
           const isEditing = allergyEdit === index;
+          const needsConsent = !!allergyDraft.trim() && !allergyConsent;
 
           return (
-            <div key={id} className={ui.row}>
+            <div key={stylistId} className={ui.row}>
               <div className={ui.rowHead}>
                 <div className={styles.algMain}>
-                  <div className={ui.rowLabel}>{name}</div>
+                  <div className={ui.rowLabel}>{stylistName}</div>
                   {!isEditing && (
                     <div
                       className={joinClassNames(
@@ -119,7 +135,11 @@ export const SharedSection = ({
                     <button
                       className={styles.algButton}
                       onClick={() =>
-                        setState({ allergyEdit: index, allergyDraft: text })
+                        setState({
+                          allergyEdit: index,
+                          allergyDraft: text,
+                          allergyConsent: false,
+                        })
                       }
                     >
                       {hasText ? "Edit" : "Add"}
@@ -140,28 +160,31 @@ export const SharedSection = ({
               {isEditing && (
                 <div className={styles.algEdit}>
                   <AllergyField
-                    stylistName={name}
+                    stylistName={stylistName}
                     value={allergyDraft}
                     onChange={(draft) => setState({ allergyDraft: draft })}
                     autoFocus={true}
                   />
+                  {!!allergyDraft.trim() && (
+                    <label className={ui.checkLabel}>
+                      <input
+                        className={ui.checkbox}
+                        type="checkbox"
+                        checked={allergyConsent}
+                        onChange={() =>
+                          setState({ allergyConsent: !allergyConsent })
+                        }
+                      />
+                      {`I agree to share this with ${stylistName}`}
+                    </label>
+                  )}
                   <div className={styles.algEditActions}>
                     <button
                       className={ui.save}
-                      onClick={() => {
-                        const saved = allergyDraft.trim();
-
-                        setState(({ entries: current }) => ({
-                          entries: current.map((entry, position) =>
-                            position === index
-                              ? { ...entry, text: saved }
-                              : entry,
-                          ),
-                          allergyEdit: -1,
-                        }));
-
-                        showToast(saved ? "Saved" : "Removed");
-                      }}
+                      disabled={needsConsent}
+                      onClick={() =>
+                        void actions.saveSensitivity(stylistId, allergyDraft)
+                      }
                     >
                       Save
                     </button>

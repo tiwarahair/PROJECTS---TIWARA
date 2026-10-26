@@ -3,6 +3,7 @@ import type { Profile } from "./data";
 import type { AddressFormValues, PasswordFormValues } from "./schemas";
 import type { SavedAddress } from "../../types/address";
 import type { AccountState } from "./state";
+import type { AccountData } from "./use-core";
 
 interface FormValues {
   draft: Profile;
@@ -39,14 +40,15 @@ const hasUnsavedAddress = (
 export const hasUnsavedEdits = (
   state: AccountState,
   values: FormValues,
-  addresses: SavedAddress[],
+  { addresses, sensitivities }: AccountData,
 ) => {
-  const { edit, profile, password, allergyEdit, allergyDraft, entries } = state;
+  const { edit, profile, password, allergyEdit, allergyDraft } = state;
 
   return (
     (!!edit && JSON.stringify(values.draft) !== JSON.stringify(profile)) ||
     (password.open && !!(values.password.code || values.password.next)) ||
-    (allergyEdit >= 0 && allergyDraft !== (entries[allergyEdit]?.text ?? "")) ||
+    (allergyEdit >= 0 &&
+      allergyDraft !== (sensitivities[allergyEdit]?.text ?? "")) ||
     hasUnsavedAddress(state, values.address, addresses)
   );
 };

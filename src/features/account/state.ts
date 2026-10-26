@@ -39,9 +39,9 @@ export interface AccountState {
   dialog: DialogState | null;
   toast: string;
   bookingsTab?: "up" | "past";
-  entries: { id: string; text: string }[];
   allergyEdit: number;
   allergyDraft: string;
+  allergyConsent: boolean;
   profile: Profile;
   photoError: string;
   quiz: boolean;

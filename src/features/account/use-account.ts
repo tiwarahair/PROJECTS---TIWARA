@@ -45,6 +45,7 @@ export const useAccount = (props: AccountProps) => {
       ...wallet,
       onPhoto: saves.onPhoto,
       savePhoto: saves.savePhoto,
+      saveSensitivity: saves.saveSensitivity,
       downloadMyData: saves.downloadMyData,
       copy: saves.copy,
       endSession: saves.endSession,

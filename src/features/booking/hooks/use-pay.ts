@@ -5,6 +5,7 @@ import { useEffect, useRef, useState } from "react";
 import type { CheckoutRequest } from "../../../lib/booking-api";
 import type { LatLng } from "../../../lib/google-maps";
 import {
+  api,
   getErrorMessage,
   useGetBookingStatusQuery,
   useStartCheckoutMutation,
@@ -15,6 +16,7 @@ import {
   getRefundedError,
   PAY_ERRORS,
 } from "../logic/payment";
+import { useAppDispatch } from "../../../stores/hooks";
 import type { FlowState } from "./use-flow-state";
 
 const POLL_MS = 1500;
@@ -29,6 +31,7 @@ interface PayOptions {
 
 export const usePay = ({ flow, point, stylist, onConfirm }: PayOptions) => {
   const { state, stateRef, setState } = flow;
+  const dispatch = useAppDispatch();
   const turnstileRef = useRef<TurnstileInstance | null>(null);
   const [turnstileToken, setTurnstileToken] = useState<string | null>(null);
   const [startCheckout] = useStartCheckoutMutation();
@@ -52,6 +55,8 @@ export const usePay = ({ flow, point, stylist, onConfirm }: PayOptions) => {
     if (booked?.status !== "confirmed") return;
 
     onConfirm();
+    // what they shared at booking now shows in their account and the next booking form
+    dispatch(api.util.invalidateTags(["Sensitivities"]));
 
     setState(
       {

@@ -2,7 +2,7 @@ import { describe, expect, it } from "vitest";
 import { getClosedLine, getWhenLine } from "../calendar";
 import { getPreviewIndex, hasPreview, PREVIEW_POOL } from "../content";
 import { getAddressCheck, getContactChanges, getEmailFix } from "../details";
-import { getCheckoutError, PAY_ERRORS } from "../payment";
+import { getCheckoutError, isAllergyCleared, PAY_ERRORS } from "../payment";
 import { getDeltaLabel } from "../pricing";
 
 describe("details", () => {
@@ -129,5 +129,28 @@ describe("checkout errors", () => {
     ).toBe(
       "Tiwára’s House isn’t taking online bookings for this contact. Please get in touch with them directly at hello@tiwaras.house. You haven't been charged.",
     );
+  });
+});
+
+describe("shared allergies at checkout", () => {
+  const filledIn = {
+    on: true,
+    text: "Sensitive scalp",
+    prior: true,
+    focus: false,
+    touched: false,
+    wasShared: true,
+  };
+
+  it("clears the account's note only when the filled-in one was removed or emptied", () => {
+    expect(isAllergyCleared(filledIn)).toBe(false);
+    expect(isAllergyCleared({ ...filledIn, on: false, text: "" })).toBe(true);
+    expect(isAllergyCleared({ ...filledIn, text: "  " })).toBe(true);
+  });
+
+  it("never clears when nothing was filled in, as the note may simply not have loaded", () => {
+    expect(
+      isAllergyCleared({ ...filledIn, on: false, text: "", wasShared: false }),
+    ).toBe(false);
   });
 });

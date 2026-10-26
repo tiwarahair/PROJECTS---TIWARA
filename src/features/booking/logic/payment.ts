@@ -1,7 +1,7 @@
 import type { Appearance } from "@stripe/stripe-js";
 import type { CheckoutRequest } from "../../../lib/booking-api";
 import type { LatLng } from "../../../lib/google-maps";
-import type { BookingState } from "./types";
+import type { AllergyState, BookingState } from "./types";
 
 export const PAY_ERRORS = {
   network: "Something went wrong and you haven't been charged. Try again.",
@@ -61,6 +61,10 @@ export const getCheckoutError = (
   return { payKind: "network", payError: PAY_ERRORS.network };
 };
 
+/** Only a note filled in from their account that the client removed or emptied takes it off their account. */
+export const isAllergyCleared = ({ on, text, wasShared }: AllergyState) =>
+  wasShared && !(on && text.trim());
+
 export const getCheckoutRequest = (
   state: BookingState,
   point: LatLng | null,
@@ -80,6 +84,7 @@ export const getCheckoutRequest = (
     contact,
     notes,
     allergies: allergy.on ? allergy.text.trim() : "",
+    clearAllergies: isAllergyCleared(allergy),
     ...(point && line1
       ? {
           address: {

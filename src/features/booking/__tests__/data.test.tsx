@@ -28,6 +28,10 @@ vi.mock("../../../lib/public-profiles", async (original) =>
   (await import("../../../test/booking-mocks")).mockPublicProfiles(original),
 );
 
+vi.mock("../../../lib/client-sensitivities", () => ({
+  fetchMySensitivity: vi.fn(() => Promise.resolve("")),
+}));
+
 vi.mock("../../../lib/client-addresses", () => ({
   fetchClientAddresses: vi.fn(() => Promise.resolve([])),
   saveClientAddress: vi.fn(),
@@ -257,6 +261,7 @@ describe("booking on real data", () => {
       },
       notes: "",
       allergies: "",
+      clearAllergies: false,
       keepCard: false,
       turnstileToken: "test-captcha-token",
     });

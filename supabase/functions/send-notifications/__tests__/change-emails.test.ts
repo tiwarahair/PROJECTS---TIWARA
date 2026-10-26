@@ -10,7 +10,14 @@ import {
   clientRescheduled,
 } from "../change-emails";
 import type { ChangedBooking } from "../change-emails";
-import { disputeOpened, feeCancelled, feeDeclined, feeScheduled, feeUnpaid, feeWaived } from "../fee-emails";
+import {
+  disputeOpened,
+  feeCancelled,
+  feeDeclined,
+  feeScheduled,
+  feeUnpaid,
+  feeWaived,
+} from "../fee-emails";
 import { renderSms } from "../sms";
 
 const booking: ChangedBooking = {
@@ -38,9 +45,13 @@ describe("cancellation emails", () => {
     const { subject, text } = bookingCancelled(booking);
 
     expect(subject).toBe("Your booking is cancelled");
-    expect(text).toContain("Silk press with Tiwára's House on Thursday 22 October at 17:30 (UK time) is cancelled.");
+    expect(text).toContain(
+      "Silk press with Tiwára's House on Thursday 22 October at 17:30 (UK time) is cancelled.",
+    );
     expect(text).toContain("£20.00 is refunded to your card.");
-    expect(text).toContain("£10.00 is kept under Tiwára's House’s cancellation policy.");
+    expect(text).toContain(
+      "£10.00 is kept under Tiwára's House’s cancellation policy.",
+    );
     expect(text).not.toContain("booking fee");
     expect(text).not.toContain("late cancellation fee");
   });
@@ -51,7 +62,9 @@ describe("cancellation emails", () => {
       cancellation: { refund_pence: 0, kept_pence: 3000, charge_pence: 5000 },
     });
 
-    expect(text).toContain("A £50.00 late cancellation fee is due under Tiwára's House’s policy.");
+    expect(text).toContain(
+      "A £50.00 late cancellation fee is due under Tiwára's House’s policy.",
+    );
     expect(text).not.toContain("refunded to your card");
   });
 
@@ -62,7 +75,9 @@ describe("cancellation emails", () => {
     });
 
     expect(subject).toBe("Tiwára's House cancelled your booking");
-    expect(text).toContain("£31.63 is refunded to your card, including the booking fee.");
+    expect(text).toContain(
+      "£31.63 is refunded to your card, including the booking fee.",
+    );
     expect(text).not.toContain("This wasn’t me");
   });
 
@@ -70,7 +85,9 @@ describe("cancellation emails", () => {
     const { subject, text } = clientCancelled({ ...booking, ...studio });
 
     expect(subject).toBe("Cancelled: Silk press");
-    expect(text).toContain("Nia Okafor cancelled Silk press on Thursday 22 October at 17:30 (UK time). The time is free again.");
+    expect(text).toContain(
+      "Nia Okafor cancelled Silk press on Thursday 22 October at 17:30 (UK time). The time is free again.",
+    );
     expect(text).toContain("£20.00 was refunded to them.");
     expect(text).toContain("You keep £10.00 under your cancellation policy.");
   });
@@ -80,9 +97,13 @@ describe("reschedule emails", () => {
   it("give the client the new time with a new calendar file", () => {
     const email = bookingRescheduled(booking);
 
-    expect(email.text).toContain("Silk press with Tiwára's House is now on Thursday 22 October at 17:30 (UK time).");
+    expect(email.text).toContain(
+      "Silk press with Tiwára's House is now on Thursday 22 October at 17:30 (UK time).",
+    );
     expect(email.text).toContain(`Manage your booking: ${booking.manage_url}`);
-    expect(email.attachments?.[0]?.content).toContain("DTSTART:20261022T163000Z");
+    expect(email.attachments?.[0]?.content).toContain(
+      "DTSTART:20261022T163000Z",
+    );
   });
 
   it("tell the client the stylist moved it, without asking if it was them", () => {
@@ -91,7 +112,9 @@ describe("reschedule emails", () => {
     expect(email.subject).toBe("Tiwára's House moved your booking");
     expect(email.text).toContain(`Manage your booking: ${booking.manage_url}`);
     expect(email.text).not.toContain("This wasn’t me");
-    expect(email.attachments?.[0]?.content).toContain("DTSTART:20261022T163000Z");
+    expect(email.attachments?.[0]?.content).toContain(
+      "DTSTART:20261022T163000Z",
+    );
   });
 
   it("tell the stylist the new time", () => {
@@ -115,7 +138,10 @@ describe("stylist texts", () => {
 
 describe("link safety emails", () => {
   it("cancellation and reschedule emails offer This wasn’t me", () => {
-    for (const { text } of [bookingCancelled(booking), bookingRescheduled(booking)]) {
+    for (const { text } of [
+      bookingCancelled(booking),
+      bookingRescheduled(booking),
+    ]) {
       expect(text).toContain("This wasn’t me");
       expect(text).toContain("https://dev.tiwarashouse.com/manage?secure=xyz");
     }
@@ -125,20 +151,27 @@ describe("link safety emails", () => {
     const { subject, text } = bookingCode({ ...booking, code: "042817" });
 
     expect(subject).toBe("Your code is 042817");
-    expect(text).toContain("It works for 10 minutes.");
     expect(text).toContain("https://dev.tiwarashouse.com/manage?secure=xyz");
   });
 
   it("the new link email carries the new manage link, and a guest's new save-details link", () => {
-    const { subject, text } = bookingLinkReset({ ...booking, save_details_url: null });
+    const { subject, text } = bookingLinkReset({
+      ...booking,
+      save_details_url: null,
+    });
 
     expect(subject).toBe("Your new booking link");
     expect(text).toContain("https://dev.tiwarashouse.com/manage?token=abc");
     expect(text).not.toContain("Save your details");
 
-    const guest = bookingLinkReset({ ...booking, save_details_url: "https://dev.tiwarashouse.com/save-details?token=new" });
+    const guest = bookingLinkReset({
+      ...booking,
+      save_details_url: "https://dev.tiwarashouse.com/save-details?token=new",
+    });
 
-    expect(guest.text).toContain("https://dev.tiwarashouse.com/save-details?token=new");
+    expect(guest.text).toContain(
+      "https://dev.tiwarashouse.com/save-details?token=new",
+    );
   });
 });
 
@@ -158,7 +191,9 @@ describe("fee emails", () => {
 
     expect(subject).toBe("No-show fee: £50.00");
     expect(text).toContain("£30.00 of what you paid is kept towards it.");
-    expect(text).toContain("£20.00 will be charged to your saved card on Friday 23 October at 17:30.");
+    expect(text).toContain(
+      "£20.00 will be charged to your saved card on Friday 23 October at 17:30.",
+    );
     expect(text).toContain("If you did attend, reply to this email");
   });
 
@@ -170,7 +205,11 @@ describe("fee emails", () => {
   });
 
   it("tell the client an undone no-show's fee is off", () => {
-    const { subject, text } = feeCancelled({ ...booking, kind: "no_show", fee_pence: 5000 });
+    const { subject, text } = feeCancelled({
+      ...booking,
+      kind: "no_show",
+      fee_pence: 5000,
+    });
 
     expect(subject).toBe("Your no-show fee is cancelled");
     expect(text).toContain("has undone the no-show for Silk press");
@@ -178,7 +217,12 @@ describe("fee emails", () => {
   });
 
   it("tell the client a fee was waived and what comes back", () => {
-    const { subject, text } = feeWaived({ ...booking, kind: "no_show", fee_pence: 5000, refund_pence: 3000 });
+    const { subject, text } = feeWaived({
+      ...booking,
+      kind: "no_show",
+      fee_pence: 5000,
+      refund_pence: 3000,
+    });
 
     expect(subject).toBe("Your £50.00 fee has been waived");
     expect(text).toContain("£30.00 is refunded to your card.");
@@ -199,7 +243,9 @@ describe("declined fee and dispute emails", () => {
 
     expect(subject).toBe("Pay your £20.00 no-show fee");
     expect(text).toContain("We couldn’t charge Visa •••• 4242");
-    expect(text).toContain("Pay £20.00: https://dev.tiwarashouse.com/pay?token=abc");
+    expect(text).toContain(
+      "Pay £20.00: https://dev.tiwarashouse.com/pay?token=abc",
+    );
   });
 
   it("remind the client two days before the link runs out, with a fresh link", () => {
@@ -227,12 +273,18 @@ describe("declined fee and dispute emails", () => {
       studio_url: "https://dev.tiwarashouse.com/studio",
     });
 
-    expect(text).toContain("Nia Okafor’s card was declined for the £20.00 late cancellation fee");
+    expect(text).toContain(
+      "Nia Okafor’s card was declined for the £20.00 late cancellation fee",
+    );
   });
 
   it("tell the stylist about a dispute", () => {
-    expect(disputeOpened({ ...booking, amount_pence: 3163, reason: "product_not_received" }).text).toContain(
-      "The bank’s reason: product not received.",
-    );
+    expect(
+      disputeOpened({
+        ...booking,
+        amount_pence: 3163,
+        reason: "product_not_received",
+      }).text,
+    ).toContain("The bank’s reason: product not received.");
   });
 });

@@ -33,7 +33,7 @@ const getContent = (account: AccountController, view: AccountView) => {
     return <ReceiptDialog account={account} view={view} />;
 
   if (dialog.kind === "allergy")
-    return <AllergyRemove account={account} view={view} index={dialog.index} />;
+    return <AllergyRemove account={account} index={dialog.index} />;
 
   if (dialog.kind === "card")
     return <CardRemove account={account} id={dialog.id} />;

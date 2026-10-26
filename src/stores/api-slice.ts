@@ -102,6 +102,7 @@ export const api = createApi({
     "ClientBookings",
     "ClientCards",
     "AccountPhoto",
+    "Sensitivities",
   ],
   refetchOnReconnect: true,
   endpoints: (build) => ({

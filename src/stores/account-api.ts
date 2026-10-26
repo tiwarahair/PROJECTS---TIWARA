@@ -5,6 +5,11 @@ import {
 } from "../lib/account-photo";
 import { fetchDeletionBlockers } from "../lib/client-account";
 import { fetchCalendarSecret } from "../lib/client-calendar";
+import {
+  fetchMySensitivities,
+  fetchMySensitivity,
+  saveMySensitivity,
+} from "../lib/client-sensitivities";
 import type { DeletionBlockers } from "../lib/client-account";
 import { fetchClientBookings } from "../lib/client-bookings";
 import {
@@ -21,6 +26,7 @@ import type { AddressDraft } from "../lib/client-addresses";
 import type { SavedAddress } from "../types/address";
 import type { AccountBooking } from "../types/client-booking";
 import type { SavedCard } from "../types/saved-card";
+import type { SharedSensitivity } from "../types/sensitivity";
 import { api, toQueryResult } from "./api-slice";
 
 export const accountApi = api.injectEndpoints({
@@ -72,6 +78,21 @@ export const accountApi = api.injectEndpoints({
         }
       },
     }),
+    getMySensitivities: build.query<SharedSensitivity[], string>({
+      queryFn: () => toQueryResult(fetchMySensitivities()),
+      providesTags: ["Sensitivities"],
+    }),
+    getMySensitivity: build.query<string, string>({
+      queryFn: (stylistSlug) => toQueryResult(fetchMySensitivity(stylistSlug)),
+      providesTags: ["Sensitivities"],
+    }),
+    saveMySensitivity: build.mutation<
+      null,
+      { stylistId: string; text: string }
+    >({
+      queryFn: (request) => toQueryResult(saveMySensitivity(request)),
+      invalidatesTags: ["Sensitivities"],
+    }),
     getCalendarSecret: build.query<string, string>({
       queryFn: () => toQueryResult(fetchCalendarSecret()),
     }),
@@ -122,6 +143,9 @@ export const {
   useGetDeletionBlockersQuery,
   useGetAccountPhotoUrlQuery,
   useGetCalendarSecretQuery,
+  useGetMySensitivitiesQuery,
+  useGetMySensitivityQuery,
+  useSaveMySensitivityMutation,
   useResetCalendarSecretMutation,
   useSetAccountPhotoMutation,
   useSetDefaultCardMutation,

@@ -3,34 +3,33 @@ import { useResetCalendarSecretMutation } from "../../../stores/account-api";
 import { useAppSelector } from "../../../stores/hooks";
 import { getAddressLine } from "../logic";
 import type { AccountController } from "../use-account";
-import type { AccountView } from "../view";
 import { closeThen } from "./close-then";
 import { Confirm } from "./confirm";
 
 interface AllergyRemoveProps {
   account: AccountController;
-  view: AccountView;
   index: number;
 }
 
-export const AllergyRemove = ({ account, view, index }: AllergyRemoveProps) => (
-  <Confirm
-    title="Remove this?"
-    text={`${view.getStylistName(account.state.entries[index]?.id ?? "")} won’t see it any more.`}
-    action="Remove"
-    onCancel={account.actions.closeDialog}
-    onConfirm={() => {
-      closeThen(account, ({ entries: current }) => ({
-        entries: current.map((entry, position) =>
-          position === index ? { ...entry, text: "" } : entry,
-        ),
-        dialog: null,
-      }));
+export const AllergyRemove = ({ account, index }: AllergyRemoveProps) => {
+  const { stylistId, stylistName } = account.data.sensitivities[index] ?? {
+    stylistId: "",
+    stylistName: "Your stylist",
+  };
 
-      account.actions.showToast("Removed");
-    }}
-  />
-);
+  return (
+    <Confirm
+      title="Remove this?"
+      text={`${stylistName} won’t see it any more.`}
+      action="Remove"
+      onCancel={account.actions.closeDialog}
+      onConfirm={() => {
+        closeThen(account, { dialog: null });
+        void account.actions.saveSensitivity(stylistId, "");
+      }}
+    />
+  );
+};
 
 interface CardRemoveProps {
   account: AccountController;

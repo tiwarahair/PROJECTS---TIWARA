@@ -197,12 +197,7 @@ export const AccountPage = (props: AccountPageProps) => {
                   {current === "addresses" && (
                     <AddressesSection account={account} />
                   )}
-                  {current === "shared" && (
-                    <SharedSection
-                      account={account}
-                      getStylistName={view.getStylistName}
-                    />
-                  )}
+                  {current === "shared" && <SharedSection account={account} />}
                   {current === "communication" && (
                     <CommunicationSection account={account} />
                   )}

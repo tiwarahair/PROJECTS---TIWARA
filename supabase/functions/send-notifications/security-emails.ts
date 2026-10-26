@@ -7,7 +7,10 @@ export interface LoginAlert {
   signed_in_at: string;
 }
 
-export const loginAlert = ({ device, signed_in_at: signedInAt }: LoginAlert): RenderedEmail =>
+export const loginAlert = ({
+  device,
+  signed_in_at: signedInAt,
+}: LoginAlert): RenderedEmail =>
   renderNotice({
     title: "New sign-in to your account",
     paragraphs: [
@@ -21,10 +24,7 @@ export const loginAlert = ({ device, signed_in_at: signedInAt }: LoginAlert): Re
 export const accountCode = ({ code }: { code: string }): RenderedEmail =>
   renderNotice({
     title: `Your code is ${code}`,
-    paragraphs: [
-      "Enter this code to delete your Tiwára’s House account.",
-      "It works for 10 minutes.",
-    ],
+    paragraphs: ["Enter this code to delete your Tiwára’s House account."],
     footnote:
       "If you didn’t ask to delete your account, someone may be signed in as you. Change your password in Account → Login & security.",
   });
