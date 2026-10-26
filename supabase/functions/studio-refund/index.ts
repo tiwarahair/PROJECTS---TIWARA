@@ -109,18 +109,16 @@ Deno.serve(async (request) => {
           { idempotencyKey: `refund-reversal:${refund.id}` },
         );
 
-      const { error: saveError } = await admin
-        .from("refunds")
-        .upsert(
-          {
-            booking_id: bookingId,
-            amount_pence: amount,
-            reason: "manual",
-            note: reason || null,
-            stripe_refund_id: refund.id,
-          },
-          { onConflict: "stripe_refund_id" },
-        );
+      const { error: saveError } = await admin.from("refunds").upsert(
+        {
+          booking_id: bookingId,
+          amount_pence: amount,
+          reason: "manual",
+          note: reason || null,
+          stripe_refund_id: refund.id,
+        },
+        { onConflict: "stripe_refund_id" },
+      );
 
       if (saveError) throw saveError;
     }

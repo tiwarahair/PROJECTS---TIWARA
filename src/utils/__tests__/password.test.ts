@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 import {
   checkPassword,
+  getPasswordView,
   isPasswordCheckerReady,
   onPasswordCheckerReady,
 } from "../password";
@@ -45,5 +46,19 @@ describe("checkPassword with zxcvbn loaded", () => {
       level: 0,
       error: "Use at least 8 characters",
     });
+  });
+
+  it("turns down too many accents or emoji without marking the length rule unmet", async () => {
+    await waitForChecker();
+
+    const check = checkPassword("é".repeat(40));
+
+    expect(check).toMatchObject({
+      long: false,
+      level: 0,
+      error: "Use fewer accented letters or emoji",
+    });
+
+    expect(getPasswordView(check).lengthMet).toBe(true);
   });
 });

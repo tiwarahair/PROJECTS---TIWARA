@@ -116,7 +116,7 @@ export const checkPassword = (
   const blocked = !!blockKind;
   const problem = getPasswordProblem(value, min, options);
   const short = length < min;
-  const long = problem === "long" || problem === "bytes";
+  const long = length > PASSWORD_MAX;
 
   if (length) void loadPasswordChecker();
 
@@ -144,8 +144,8 @@ export const checkPassword = (
     }
   }
 
-  // 0-2 Weak, 3 Good, 4 Strong; failing length or blocklist is always Weak
-  const level = getLevel(!length || short || long || blocked, score);
+  // 0-2 Weak, 3 Good, 4 Strong; failing any rule is always Weak
+  const level = getLevel(!length || !!problem, score);
   const labels = ["Weak", "Good", "Strong"] as const;
 
   const error = length

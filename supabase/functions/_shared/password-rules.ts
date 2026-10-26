@@ -1,7 +1,6 @@
-// The password rules: the browser shows them as you type and set-password enforces them.
+// The password rules: the browser shows them as you type and check-password enforces them.
 export const PASSWORD_MAX = 64;
 
-// Supabase stores passwords with bcrypt, which takes at most 72 bytes; accents and emoji take 2 to 4 each
 const PASSWORD_MAX_BYTES = 72;
 
 const SITE_NAMES = ["tiwara", "tiwaras", "tiwarashouse", "tiwarasstudio", "tiwarastudio"];
