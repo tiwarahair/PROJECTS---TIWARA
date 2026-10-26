@@ -7,6 +7,7 @@ import type { UserEvent } from "@testing-library/user-event";
 import { setupUser } from "../../../test/setup-user";
 import { turnstileStub } from "../../../test/setup";
 import * as auth from "../../../lib/auth";
+import * as twoFactor from "../../../lib/two-factor";
 
 vi.mock("../../../lib/auth", async (importOriginal) => ({
   ...(await importOriginal<typeof import("../../../lib/auth")>()),
@@ -16,8 +17,15 @@ vi.mock("../../../lib/auth", async (importOriginal) => ({
   resendEmailCode: vi.fn(),
   signIn: vi.fn(),
   signUpClient: vi.fn(),
+  setNewPassword: vi.fn(async () => null),
   signUpStylist: vi.fn(),
   verifyEmailCode: vi.fn(),
+}));
+
+vi.mock("../../../lib/two-factor", async (importOriginal) => ({
+  ...(await importOriginal<typeof import("../../../lib/two-factor")>()),
+  needsSecondFactor: vi.fn(async () => false),
+  verifySecondFactor: vi.fn(),
 }));
 
 vi.mock("../../../lib/supabase", async (importOriginal) => ({
@@ -440,6 +448,41 @@ describe("OnboardingPage", () => {
     );
 
     expect(auth.signUpClient).not.toHaveBeenCalled();
+  });
+
+  it("a reset on a two-factor account asks for the authenticator code before saving", async () => {
+    vi.mocked(twoFactor.needsSecondFactor).mockResolvedValueOnce(true);
+    vi.mocked(twoFactor.verifySecondFactor).mockResolvedValueOnce(true);
+
+    renderWithStore(<OnboardingPage />, "/login?flow=reset");
+
+    await user.type(
+      screen.getByLabelText("New password"),
+      "copper meadow 47 lantern",
+    );
+
+    await user.type(
+      screen.getByLabelText("Confirm new password"),
+      "copper meadow 47 lantern",
+    );
+
+    await user.click(screen.getByRole("button", { name: "Update password" }));
+    await screen.findByLabelText("Digit 1");
+
+    expect(auth.setNewPassword).not.toHaveBeenCalled();
+
+    for (const [index, digit] of [..."482913"].entries())
+      await user.type(screen.getByLabelText(`Digit ${index + 1}`), digit);
+
+    expect(
+      await screen.findByRole("heading", { name: "Password updated" }),
+    ).toBeInTheDocument();
+
+    expect(twoFactor.verifySecondFactor).toHaveBeenCalledWith("482913");
+
+    expect(auth.setNewPassword).toHaveBeenCalledWith(
+      "copper meadow 47 lantern",
+    );
   });
 
   it("Client Terms opens the terms sheet", async () => {

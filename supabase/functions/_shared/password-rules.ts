@@ -1,6 +1,9 @@
 // The password rules: the browser shows them as you type and set-password enforces them.
 export const PASSWORD_MAX = 64;
 
+// Supabase stores passwords with bcrypt, which takes at most 72 bytes; accents and emoji take 2 to 4 each
+const PASSWORD_MAX_BYTES = 72;
+
 const SITE_NAMES = [
   "tiwara",
   "tiwaras",
@@ -36,7 +39,12 @@ export interface PasswordPerson {
 
 export type BlockKind = "" | "common" | "name" | "site";
 
-export type PasswordProblem = "" | "short" | "long" | Exclude<BlockKind, "">;
+export type PasswordProblem =
+  | ""
+  | "short"
+  | "long"
+  | "bytes"
+  | Exclude<BlockKind, "">;
 
 const toLetters = (text?: string) =>
   normaliseAccents(text).replace(/[^a-z]/g, "");
@@ -76,6 +84,9 @@ export const getPasswordProblem = (
   const length = [...password].length;
 
   if (length > PASSWORD_MAX) return "long";
+
+  if (new TextEncoder().encode(password).length > PASSWORD_MAX_BYTES)
+    return "bytes";
 
   const blockKind = getBlockKind(password, person);
 

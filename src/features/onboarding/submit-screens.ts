@@ -10,7 +10,7 @@ import {
 } from "../../lib/auth";
 import type { NewPasswordProblem } from "../../lib/auth";
 import { rememberDevice } from "../../lib/supabase";
-import { verifySecondFactor } from "../../lib/two-factor";
+import { needsSecondFactor, verifySecondFactor } from "../../lib/two-factor";
 import { getPasswordProblemMessage } from "../../utils/password";
 import { TURNSTILE_SCREENS } from "./data";
 import { getPasswordCheck } from "./field-schemas";
@@ -62,6 +62,24 @@ export const getSubmitValid = (
         },
       });
 
+    const saveReset = async () => {
+      const error = await setNewPassword(form.password);
+
+      if (!error) return goTo("forgot-done");
+
+      if (screen !== "forgot-reset") goTo("forgot-reset", "back");
+
+      setState({
+        busy: false,
+        serverErrors: {
+          password:
+            error === "same_password"
+              ? "Choose a password you haven’t used before"
+              : "Choose a stronger password",
+        },
+      });
+    };
+
     const checkAccount = (onKind: (kind: string) => void) =>
       run(async () => onKind(await getAccountKind(email, takeCaptchaToken())));
 
@@ -94,6 +112,8 @@ export const getSubmitValid = (
             : await verifyEmailCode(email, code);
 
         if (!isRight) return showWrongCode();
+
+        if (current.codeKind === "reset") return saveReset();
 
         await rememberDevice(form.remember);
 
@@ -180,20 +200,11 @@ export const getSubmitValid = (
 
           if (problem) return showPasswordProblem(problem);
 
-          const error = await setNewPassword(form.password);
+          // Supabase only lets a two-factor account change its password after the authenticator code
+          if (await needsSecondFactor())
+            return setState({ codeKind: "reset" }, () => goTo("pro-2fa"));
 
-          if (error)
-            return setState({
-              busy: false,
-              serverErrors: {
-                password:
-                  error === "same_password"
-                    ? "Choose a password you haven’t used before"
-                    : "Choose a stronger password",
-              },
-            });
-
-          goTo("forgot-done");
+          await saveReset();
         }),
     };
 

@@ -13,8 +13,10 @@ describe("getPasswordProblem", () => {
     expect(getPasswordProblem("copper-meadow", 8, person)).toBe("");
   });
 
-  it("caps every password at 64 characters", () => {
+  it("caps every password at 64 characters, and 72 bytes for Supabase", () => {
     expect(getPasswordProblem("a".repeat(65), 8, person)).toBe("long");
+    expect(getPasswordProblem("é".repeat(37), 15, person)).toBe("bytes");
+    expect(getPasswordProblem("é".repeat(36), 15, person)).toBe("");
   });
 
   it("turns down common passwords, names, email and the site name, whatever the case, spaces or digits", () => {

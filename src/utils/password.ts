@@ -1,6 +1,6 @@
 // Password rules for every "create / change password" field.
 // Strength = zxcvbn-ts (guidance only, never blocks); loaded on first use, pages re-render once it's ready.
-// set-password checks the same rules again, plus breached passwords.
+// check-password checks the same rules again, plus breached passwords.
 import {
   getBlockKind,
   getPasswordProblem,
@@ -97,6 +97,8 @@ export const getPasswordProblemMessage = (
 
   if (problem === "long") return `Use ${PASSWORD_MAX} characters or fewer`;
 
+  if (problem === "bytes") return "Use fewer accented letters or emoji";
+
   return problem === "short"
     ? `Use at least ${min} characters`
     : BLOCK_MESSAGES[problem];
@@ -112,8 +114,9 @@ export const checkPassword = (
   const emailName = email.split("@")[0] ?? "";
   const blockKind = getBlockKind(value, options);
   const blocked = !!blockKind;
+  const problem = getPasswordProblem(value, min, options);
   const short = length < min;
-  const long = length > PASSWORD_MAX;
+  const long = problem === "long" || problem === "bytes";
 
   if (length) void loadPasswordChecker();
 
@@ -146,7 +149,7 @@ export const checkPassword = (
   const labels = ["Weak", "Good", "Strong"] as const;
 
   const error = length
-    ? getPasswordProblemMessage(getPasswordProblem(value, min, options), min)
+    ? getPasswordProblemMessage(problem, min)
     : "Enter a password";
 
   return {
