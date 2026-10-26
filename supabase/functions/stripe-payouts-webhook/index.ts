@@ -21,10 +21,7 @@ const getPayoutItems = async (account: string, payoutId: string) => {
     {
       payout: payoutId,
       limit: 100,
-      expand: [
-        "data.source.source_transfer.source_transaction",
-        "data.source.source_transfer_reversal",
-      ],
+      expand: ["data.source.source_transfer.source_transaction", "data.source.source_transfer_reversal"],
     },
     { stripeAccount: account },
   )) {
@@ -32,18 +29,10 @@ const getPayoutItems = async (account: string, payoutId: string) => {
 
     if (!source || typeof source === "string") continue;
 
-    if (
-      source.object === "charge" &&
-      source.source_transfer &&
-      typeof source.source_transfer !== "string"
-    ) {
+    if (source.object === "charge" && source.source_transfer && typeof source.source_transfer !== "string") {
       const charge = source.source_transfer.source_transaction;
 
-      if (
-        charge &&
-        typeof charge !== "string" &&
-        typeof charge.payment_intent === "string"
-      )
+      if (charge && typeof charge !== "string" && typeof charge.payment_intent === "string")
         intents.push(charge.payment_intent);
     }
 
@@ -76,8 +65,7 @@ Deno.serve(async (request) => {
     return new Response("Bad signature", { status: 400 });
   }
 
-  if (await isHandled(event.id))
-    return Response.json({ received: true, duplicate: true });
+  if (await isHandled(event.id)) return Response.json({ received: true, duplicate: true });
 
   try {
     if (event.account && event.type.startsWith("payout.")) {
@@ -86,10 +74,7 @@ Deno.serve(async (request) => {
       await savePayout(event.account, payout);
 
       if (event.type === "payout.reconciliation_completed") {
-        const { intents, refunds } = await getPayoutItems(
-          event.account,
-          payout.id,
-        );
+        const { intents, refunds } = await getPayoutItems(event.account, payout.id);
 
         const { error } = await admin.rpc("link_payout", {
           stripe_payout: payout.id,
@@ -101,11 +86,7 @@ Deno.serve(async (request) => {
       }
     }
   } catch (error) {
-    console.error(
-      event.type,
-      "failed",
-      error instanceof Error ? error.message : error,
-    );
+    console.error(event.type, "failed", error instanceof Error ? error.message : error);
 
     return new Response("failed", { status: 500 });
   }

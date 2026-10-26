@@ -19,10 +19,7 @@ describe("isPwnedPassword", () => {
 
     expect(await isPwnedPassword("password")).toBe(true);
 
-    expect(fetch).toHaveBeenCalledWith(
-      `https://api.pwnedpasswords.com/range/${PREFIX}`,
-      expect.anything(),
-    );
+    expect(fetch).toHaveBeenCalledWith(`https://api.pwnedpasswords.com/range/${PREFIX}`, expect.anything());
   });
 
   it("ignores padding lines", async () => {

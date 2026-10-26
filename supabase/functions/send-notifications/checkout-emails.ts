@@ -51,7 +51,9 @@ const getLines = ({ lines, service_name: service, final_pence: final }: Receipt)
 
 const getPayments = ({ payments }: Receipt) =>
   payments.map(({ kind, method, amount_pence: amount }) =>
-    kind === "booking" ? `Paid when you booked: ${pounds(amount)}` : `Paid by ${METHODS[method] ?? "card"}: ${pounds(amount)}`,
+    kind === "booking"
+      ? `Paid when you booked: ${pounds(amount)}`
+      : `Paid by ${METHODS[method] ?? "card"}: ${pounds(amount)}`,
   );
 
 const getSummary = (receipt: Receipt) => [

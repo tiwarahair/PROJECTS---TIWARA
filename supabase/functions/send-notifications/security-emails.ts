@@ -7,10 +7,7 @@ export interface LoginAlert {
   signed_in_at: string;
 }
 
-export const loginAlert = ({
-  device,
-  signed_in_at: signedInAt,
-}: LoginAlert): RenderedEmail =>
+export const loginAlert = ({ device, signed_in_at: signedInAt }: LoginAlert): RenderedEmail =>
   renderNotice({
     title: "New sign-in to your account",
     paragraphs: [

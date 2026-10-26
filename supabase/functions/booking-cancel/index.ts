@@ -25,27 +25,21 @@ interface Cancellation {
 }
 
 Deno.serve(async (request) => {
-  if (request.method === "OPTIONS")
-    return new Response("ok", { headers: corsHeaders });
+  if (request.method === "OPTIONS") return new Response("ok", { headers: corsHeaders });
 
-  const parsed = requestSchema.safeParse(
-    await request.json().catch(() => null),
-  );
+  const parsed = requestSchema.safeParse(await request.json().catch(() => null));
 
   if (!parsed.success) return respond(400, { error: "invalid_request" });
 
   const { token } = parsed.data;
 
   try {
-    if (
-      !(await isWithinLimit(`booking-cancel:${getClientIp(request)}`, 20, 600))
-    )
+    if (!(await isWithinLimit(`booking-cancel:${getClientIp(request)}`, 20, 600)))
       return respond(429, { error: "rate_limited" });
 
     const { data, error } = await admin.rpc("get_cancellation", { token });
 
-    if (error && ERRORS[error.message])
-      return respond(ERRORS[error.message], { error: error.message });
+    if (error && ERRORS[error.message]) return respond(ERRORS[error.message], { error: error.message });
 
     if (error) throw error;
 
@@ -82,10 +76,7 @@ Deno.serve(async (request) => {
 
     return respond(200, { refund_pence, kept_pence, charge_pence });
   } catch (error) {
-    console.error(
-      "booking-cancel failed",
-      error instanceof Error ? error.message : error,
-    );
+    console.error("booking-cancel failed", error instanceof Error ? error.message : error);
 
     return respond(500, { error: "unknown" });
   }

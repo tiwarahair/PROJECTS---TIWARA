@@ -40,9 +40,7 @@ describe("the client's confirmation email", () => {
       "You paid £16.63 today (£15.00 deposit + £1.63 booking fee). The £60.00 balance is paid to Tiwára's House at your appointment.",
     );
 
-    expect(email.text).toContain(
-      "Free cancellation until Tuesday 20 October at 17:30: your deposit is refunded.",
-    );
+    expect(email.text).toContain("Free cancellation until Tuesday 20 October at 17:30: your deposit is refunded.");
 
     expect(email.text).toContain("Booking reference: TH-ABC123");
   });
@@ -52,9 +50,7 @@ describe("the client's confirmation email", () => {
     expect(email.text).toContain(`Save your details for next time: ${booking.save_details_url}`);
     expect(email.html).toContain(`href="${booking.manage_url}"`);
 
-    expect(bookingConfirmed({ ...booking, save_details_url: null }).text).not.toContain(
-      "Save your details",
-    );
+    expect(bookingConfirmed({ ...booking, save_details_url: null }).text).not.toContain("Save your details");
   });
 
   it("attaches the calendar file", () => {
@@ -85,9 +81,9 @@ describe("the client's confirmation email", () => {
   });
 
   it("says a mobile stylist comes to the client's address", () => {
-    expect(
-      bookingConfirmed({ ...booking, is_mobile: true, where: "12 Dickenson Road, M14 5TQ" }).text,
-    ).toContain("Tiwára's House will come to you at 12 Dickenson Road, M14 5TQ.");
+    expect(bookingConfirmed({ ...booking, is_mobile: true, where: "12 Dickenson Road, M14 5TQ" }).text).toContain(
+      "Tiwára's House will come to you at 12 Dickenson Road, M14 5TQ.",
+    );
   });
 });
 

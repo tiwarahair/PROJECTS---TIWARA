@@ -10,11 +10,21 @@ import { paysStylist } from "../booking-checkout/payment-params.ts";
 import { getConfirmCustomer, getConfirmIntent } from "./stripe-payment.ts";
 import type { ConfirmQuote } from "./stripe-payment.ts";
 
-const CONFIRM_ERRORS = ["link_not_valid", "already_confirmed", "confirm_link_changed", "link_expired", "booking_unavailable"];
+const CONFIRM_ERRORS = [
+  "link_not_valid",
+  "already_confirmed",
+  "confirm_link_changed",
+  "link_expired",
+  "booking_unavailable",
+];
 
 const requestSchema = z.discriminatedUnion("action", [
   z.object({ action: z.literal("view"), token: z.string().min(1).max(100) }),
-  z.object({ action: z.literal("pay"), token: z.string().min(1).max(100), turnstileToken: z.string().min(1).max(2048) }),
+  z.object({
+    action: z.literal("pay"),
+    token: z.string().min(1).max(100),
+    turnstileToken: z.string().min(1).max(2048),
+  }),
 ]);
 
 Deno.serve(async (request) => {

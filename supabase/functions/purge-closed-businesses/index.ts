@@ -13,36 +13,26 @@ const withCopies = (path: string) =>
     ? [
         path,
         ...UPLOAD_WIDTHS.flatMap((width) =>
-          ["webp", "jpg"].map((extension) =>
-            path.replace(/-full\.jpg$/, `-${width}.${extension}`),
-          ),
+          ["webp", "jpg"].map((extension) => path.replace(/-full\.jpg$/, `-${width}.${extension}`)),
         ),
       ]
     : [path];
 
-const supabase = createClient(
-  Deno.env.get("SUPABASE_URL")!,
-  Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!,
-);
+const supabase = createClient(Deno.env.get("SUPABASE_URL")!, Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!);
 
 Deno.serve(async (request) => {
   const secret = Deno.env.get("CRON_SECRET");
 
-  if (!secret || request.headers.get("x-cron-secret") !== secret)
-    return new Response("Forbidden", { status: 403 });
+  if (!secret || request.headers.get("x-cron-secret") !== secret) return new Response("Forbidden", { status: 403 });
 
-  const { data: closurePhotos, error } = await supabase.rpc(
-    "get_due_closure_photos",
-  );
+  const { data: closurePhotos, error } = await supabase.rpc("get_due_closure_photos");
 
   if (error) return new Response(error.message, { status: 500 });
 
   const photos: string[] = closurePhotos.flatMap(withCopies);
 
   for (let start = 0; start < photos.length; start += BATCH) {
-    const { error: removeError } = await supabase.storage
-      .from(PHOTO_BUCKET)
-      .remove(photos.slice(start, start + BATCH));
+    const { error: removeError } = await supabase.storage.from(PHOTO_BUCKET).remove(photos.slice(start, start + BATCH));
 
     if (removeError) return new Response(removeError.message, { status: 500 });
   }

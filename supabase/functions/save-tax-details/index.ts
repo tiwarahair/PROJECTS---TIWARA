@@ -15,9 +15,18 @@ const requestSchema = z.object({
   middle: text(80),
   last: text(80),
   legalName: text(160),
-  day: z.string().regex(/^\d{1,2}$/).or(z.literal("")),
-  month: z.string().regex(/^\d{1,2}$/).or(z.literal("")),
-  year: z.string().regex(/^\d{4}$/).or(z.literal("")),
+  day: z
+    .string()
+    .regex(/^\d{1,2}$/)
+    .or(z.literal("")),
+  month: z
+    .string()
+    .regex(/^\d{1,2}$/)
+    .or(z.literal("")),
+  year: z
+    .string()
+    .regex(/^\d{4}$/)
+    .or(z.literal("")),
   nationalInsuranceNumber: z.string().max(16),
   companyName: text(160),
   companyNumber: z.string().max(12),
@@ -30,10 +39,7 @@ const requestSchema = z.object({
   }),
 });
 
-const admin = createClient(
-  Deno.env.get("SUPABASE_URL")!,
-  Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!,
-);
+const admin = createClient(Deno.env.get("SUPABASE_URL")!, Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!);
 
 const toBase64 = (bytes: Uint8Array) => btoa(String.fromCharCode(...bytes));
 

@@ -6,5 +6,4 @@ export const isHandled = async (eventId: string) => {
   return !!data;
 };
 
-export const markHandled = (eventId: string, type: string) =>
-  admin.from("stripe_events").insert({ id: eventId, type });
+export const markHandled = (eventId: string, type: string) => admin.from("stripe_events").insert({ id: eventId, type });

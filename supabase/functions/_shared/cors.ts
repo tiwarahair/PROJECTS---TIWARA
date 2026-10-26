@@ -4,5 +4,4 @@ export const corsHeaders = {
   "Access-Control-Allow-Methods": "POST, OPTIONS",
 };
 
-export const respond = (status: number, body: object) =>
-  Response.json(body, { status, headers: corsHeaders });
+export const respond = (status: number, body: object) => Response.json(body, { status, headers: corsHeaders });

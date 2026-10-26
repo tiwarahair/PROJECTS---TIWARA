@@ -13,16 +13,12 @@ describe("findPasswordProblem", () => {
   it("then turns down a breached password", async () => {
     vi.mocked(isPwnedPassword).mockResolvedValue(true);
 
-    expect(
-      await findPasswordProblem("correct horse battery staple", "client", {}),
-    ).toBe("pwned");
+    expect(await findPasswordProblem("correct horse battery staple", "client", {})).toBe("pwned");
   });
 
   it("passes a password that's fine on both counts", async () => {
     vi.mocked(isPwnedPassword).mockResolvedValue(false);
 
-    expect(await findPasswordProblem("copper meadow 47", "client", {})).toBe(
-      "",
-    );
+    expect(await findPasswordProblem("copper meadow 47", "client", {})).toBe("");
   });
 });

@@ -23,7 +23,14 @@ import type { CardUpdateNeeded } from "./card-emails.ts";
 import { accountCode, loginAlert } from "./security-emails.ts";
 import type { LoginAlert } from "./security-emails.ts";
 import { disputeOpened, feeCancelled, feeDeclined, feeScheduled, feeUnpaid, feeWaived } from "./fee-emails.ts";
-import type { CancelledFee, DeclinedFee, DisputeNotice, ScheduledFee, UnpaidFeeNotice, WaivedFee } from "./fee-emails.ts";
+import type {
+  CancelledFee,
+  DeclinedFee,
+  DisputeNotice,
+  ScheduledFee,
+  UnpaidFeeNotice,
+  WaivedFee,
+} from "./fee-emails.ts";
 import {
   autoCancelSoon,
   autoCancelled,
@@ -140,10 +147,7 @@ const templates: Record<string, TemplateBuilder> = {
   account_code: (payload) => accountCode(payload as unknown as { code: string }),
 };
 
-export const renderEmail = (
-  template: string,
-  payload: Record<string, unknown>,
-) => {
+export const renderEmail = (template: string, payload: Record<string, unknown>) => {
   const build = templates[template];
 
   if (!build) throw new Error(`unknown template ${template}`);

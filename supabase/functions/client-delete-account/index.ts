@@ -33,7 +33,12 @@ Deno.serve(async (request) => {
   if (!signedIn) return respond(401, { error: "signed_out" });
 
   const parsed = z
-    .object({ code: z.string().regex(/^\d{6}$/).optional() })
+    .object({
+      code: z
+        .string()
+        .regex(/^\d{6}$/)
+        .optional(),
+    })
     .safeParse(await request.json().catch(() => ({})));
 
   if (!parsed.success) return respond(400, { error: "invalid_request" });

@@ -20,10 +20,7 @@ const requestSchema = z.object({
   captchaToken: z.string().min(1).max(2048),
 });
 
-const supabase = createClient(
-  Deno.env.get("SUPABASE_URL")!,
-  Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!,
-);
+const supabase = createClient(Deno.env.get("SUPABASE_URL")!, Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!);
 
 const isWithinLimit = async (key: string, maxHits: number) => {
   const { data, error } = await supabase.rpc("hit_rate_limit", {

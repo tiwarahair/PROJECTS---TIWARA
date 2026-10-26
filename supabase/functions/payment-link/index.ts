@@ -37,26 +37,19 @@ interface LinkPayment {
 
 const getIntent = async (link: LinkPayment) => {
   if (link.payment_intent_id) {
-    const existing = await stripe.paymentIntents.retrieve(
-      link.payment_intent_id,
-      { expand: ["latest_charge"] },
-    );
+    const existing = await stripe.paymentIntents.retrieve(link.payment_intent_id, { expand: ["latest_charge"] });
 
     // a paid or confirming payment is kept too, so the client can't pay a second time before the webhook lands
     if (isCurrentIntent(existing)) return existing;
   }
 
-  const isHeld =
-    link.purpose === "balance" && (await isPayoutHeld(link.stylist_account));
+  const isHeld = link.purpose === "balance" && (await isPayoutHeld(link.stylist_account));
 
-  const canTransfer =
-    !!link.stylist_account && link.stylist_can_receive && !isHeld;
+  const canTransfer = !!link.stylist_account && link.stylist_can_receive && !isHeld;
 
   const stripeFee = getStripeFee(link.amount_pence);
 
-  const recovered = canTransfer
-    ? await getRecovery(link.stylist_account, link.amount_pence - stripeFee)
-    : 0;
+  const recovered = canTransfer ? await getRecovery(link.stylist_account, link.amount_pence - stripeFee) : 0;
 
   return stripe.paymentIntents.create(
     {
@@ -88,20 +81,16 @@ const getIntent = async (link: LinkPayment) => {
 };
 
 Deno.serve(async (request) => {
-  if (request.method === "OPTIONS")
-    return new Response("ok", { headers: corsHeaders });
+  if (request.method === "OPTIONS") return new Response("ok", { headers: corsHeaders });
 
-  const parsed = requestSchema.safeParse(
-    await request.json().catch(() => null),
-  );
+  const parsed = requestSchema.safeParse(await request.json().catch(() => null));
 
   if (!parsed.success) return respond(400, { error: "invalid_request" });
 
   const clientIp = getClientIp(request);
 
   try {
-    if (!(await isWithinLimit(`payment-link:${clientIp}`, 30, 600)))
-      return respond(429, { error: "rate_limited" });
+    if (!(await isWithinLimit(`payment-link:${clientIp}`, 30, 600))) return respond(429, { error: "rate_limited" });
 
     if (parsed.data.action === "view") {
       const { data, error } = await admin.rpc("get_payment_link", {
@@ -110,31 +99,25 @@ Deno.serve(async (request) => {
 
       if (error) throw error;
 
-      return data
-        ? respond(200, data)
-        : respond(404, { error: "link_not_valid" });
+      return data ? respond(200, data) : respond(404, { error: "link_not_valid" });
     }
 
-    if (!(await isHuman(parsed.data.turnstileToken, clientIp)))
-      return respond(403, { error: "turnstile_failed" });
+    if (!(await isHuman(parsed.data.turnstileToken, clientIp))) return respond(403, { error: "turnstile_failed" });
 
     const { data, error } = await admin.rpc("start_link_payment", {
       token: parsed.data.token,
     });
 
-    if (error && LINK_ERRORS.includes(error.message))
-      return respond(409, { error: error.message });
+    if (error && LINK_ERRORS.includes(error.message)) return respond(409, { error: error.message });
 
     if (error) throw error;
 
     const link = data as LinkPayment;
     const intent = await getIntent(link);
 
-    if (intent.status === "succeeded")
-      return respond(409, { error: "link_paid" });
+    if (intent.status === "succeeded") return respond(409, { error: "link_paid" });
 
-    if (intent.status === "processing")
-      return respond(409, { error: "link_processing" });
+    if (intent.status === "processing") return respond(409, { error: "link_processing" });
 
     const { error: saveError } = await admin.rpc("set_link_intent", {
       link: link.link_id,
@@ -145,10 +128,7 @@ Deno.serve(async (request) => {
 
     return respond(200, { clientSecret: intent.client_secret });
   } catch (error) {
-    console.error(
-      "payment-link failed",
-      error instanceof Error ? error.message : error,
-    );
+    console.error("payment-link failed", error instanceof Error ? error.message : error);
 
     return respond(500, { error: "unknown" });
   }

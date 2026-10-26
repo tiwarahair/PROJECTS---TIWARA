@@ -58,7 +58,12 @@ const finishRefunds = async () => {
   const refunds = (data ?? []) as UnfinishedRefund[];
   let failed = 0;
 
-  for (const { booking_id: bookingId, payment_intent_id: paymentIntentId, amount_pence: amount, cancelled_by: by } of refunds) {
+  for (const {
+    booking_id: bookingId,
+    payment_intent_id: paymentIntentId,
+    amount_pence: amount,
+    cancelled_by: by,
+  } of refunds) {
     try {
       await refundCancellation({
         bookingId,
@@ -161,7 +166,10 @@ Deno.serve(async (request) => {
   if (!secret || request.headers.get("x-cron-secret") !== secret) return new Response("Forbidden", { status: 403 });
 
   try {
-    return Response.json({ ...(await settleFees()), ...(await finishRefunds()), ...(await refundUnsavedCharges()),
+    return Response.json({
+      ...(await settleFees()),
+      ...(await finishRefunds()),
+      ...(await refundUnsavedCharges()),
       ...(await followUpDisputes()),
     });
   } catch (error) {

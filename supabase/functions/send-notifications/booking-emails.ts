@@ -45,18 +45,11 @@ const londonClock = new Intl.DateTimeFormat("en-GB", {
   minute: "2-digit",
 });
 
-export const formatWhen = (iso: string) =>
-  `${londonDay.format(new Date(iso))} at ${londonClock.format(new Date(iso))}`;
+export const formatWhen = (iso: string) => `${londonDay.format(new Date(iso))} at ${londonClock.format(new Date(iso))}`;
 
 /** a link's own email sent again two days before it runs out, with a fresh link. */
-export const getLinkWording = (
-  title: string,
-  expiresAt: string,
-  isReminder = false,
-) => ({
-  title: isReminder
-    ? `Reminder: ${title.charAt(0).toLowerCase()}${title.slice(1)}`
-    : title,
+export const getLinkWording = (title: string, expiresAt: string, isReminder = false) => ({
+  title: isReminder ? `Reminder: ${title.charAt(0).toLowerCase()}${title.slice(1)}` : title,
   expiry: `${isReminder ? "This link replaces the one we sent before. It" : "The link"} works until ${formatWhen(expiresAt)}.`,
 });
 
@@ -80,12 +73,7 @@ const getPaidLine = ({
   return `You paid the ${pounds(fee)} booking fee today.${saved} ${pounds(price)} is paid to ${stylist} at your appointment.`;
 };
 
-export const getCancelLine = ({
-  mode,
-  refundable,
-  deposit_pence: deposit,
-  free_cancel_until: until,
-}: Terms) => {
+export const getCancelLine = ({ mode, refundable, deposit_pence: deposit, free_cancel_until: until }: Terms) => {
   const deadline = formatWhen(until);
 
   if (mode === "deposit")
@@ -93,8 +81,7 @@ export const getCancelLine = ({
       ? `Free cancellation until ${deadline}: your deposit is refunded.`
       : `Cancel or reschedule until ${deadline} at no extra charge. Your ${pounds(deposit)} deposit is non-refundable.`;
 
-  if (mode === "full")
-    return `Free cancellation until ${deadline}: you’re refunded in full.`;
+  if (mode === "full") return `Free cancellation until ${deadline}: you’re refunded in full.`;
 
   if (mode === "card") return `Free cancellation until ${deadline}.`;
 
@@ -102,23 +89,14 @@ export const getCancelLine = ({
 };
 
 export const bookingConfirmed = (booking: ConfirmedBooking): RenderedEmail => {
-  const {
-    ref,
-    service_name: service,
-    stylist_name: stylist,
-    starts_at: startsAt,
-    ends_at: endsAt,
-    where,
-  } = booking;
+  const { ref, service_name: service, stylist_name: stylist, starts_at: startsAt, ends_at: endsAt, where } = booking;
 
   return {
     ...renderNotice({
       title: `You’re booked in with ${stylist}`,
       paragraphs: [
         `${service} on ${formatWhen(startsAt)} (UK time).`,
-        booking.is_mobile
-          ? `${stylist} will come to you at ${where}.`
-          : `Where: ${where}.`,
+        booking.is_mobile ? `${stylist} will come to you at ${where}.` : `Where: ${where}.`,
         getPaidLine(booking),
         getCancelLine(booking.terms),
         `Booking reference: ${ref}`,
@@ -132,8 +110,7 @@ export const bookingConfirmed = (booking: ConfirmedBooking): RenderedEmail => {
             },
           }
         : {}),
-      footnote:
-        "The attached calendar file adds the appointment to your calendar.",
+      footnote: "The attached calendar file adds the appointment to your calendar.",
     }),
     attachments: [
       {
@@ -152,22 +129,17 @@ export const bookingConfirmed = (booking: ConfirmedBooking): RenderedEmail => {
   };
 };
 
-export const newBooking = (
-  booking: BookingDetails & { studio_url: string },
-): RenderedEmail =>
+export const newBooking = (booking: BookingDetails & { studio_url: string }): RenderedEmail =>
   renderNotice({
     title: `New booking: ${booking.service_name}`,
     paragraphs: [
       `${booking.client_name} booked ${booking.service_name} on ${formatWhen(booking.starts_at)} (UK time).`,
       `Mobile: ${booking.client_phone}`,
       ...(booking.is_mobile ? [`Their address: ${booking.where}.`] : []),
-      ...(booking.address_notes
-        ? [`Getting in: ${booking.address_notes}`]
-        : []),
+      ...(booking.address_notes ? [`Getting in: ${booking.address_notes}`] : []),
       ...(booking.notes ? [`Notes: ${booking.notes}`] : []),
       `Booking reference: ${booking.ref}`,
     ],
     button: { label: "Open Studio", url: booking.studio_url },
-    footnote:
-      "You can choose which booking emails and texts you get in Studio → Settings → Notifications.",
+    footnote: "You can choose which booking emails and texts you get in Studio → Settings → Notifications.",
   });

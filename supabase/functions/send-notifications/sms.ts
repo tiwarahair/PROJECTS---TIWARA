@@ -21,14 +21,23 @@ const getShortWhen = (iso: string) => {
 };
 
 const toPlain = (text: string) =>
-  text.normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/[’‘]/g, "'").replace(/[^\x20-\x7E]/g, "");
+  text
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .replace(/[’‘]/g, "'")
+    .replace(/[^\x20-\x7E]/g, "");
 
 export const toE164 = (phone: string) => `+44${phone.replace(/\D/g, "").replace(/^44/, "").replace(/^0/, "")}`;
 
 const getLine =
   (label: string, prefix = "") =>
   (payload: Record<string, unknown>) => {
-    const { client_name: client, service_name: service, starts_at: startsAt, ref } = payload as unknown as BookingDetails;
+    const {
+      client_name: client,
+      service_name: service,
+      starts_at: startsAt,
+      ref,
+    } = payload as unknown as BookingDetails;
 
     return `${label}: ${client}, ${service}, ${prefix}${getShortWhen(startsAt)}. Ref ${ref}.`;
   };

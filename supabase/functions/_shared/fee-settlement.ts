@@ -54,10 +54,7 @@ const findUnrecordedRefund = async (fee: FeeSettlement, intentId: string) => {
   });
 
   const made = data.filter(
-    ({ metadata, status }) =>
-      metadata?.fee_id === fee.id &&
-      status !== "failed" &&
-      status !== "canceled",
+    ({ metadata, status }) => metadata?.fee_id === fee.id && status !== "failed" && status !== "canceled",
   );
 
   let total = 0;
@@ -107,9 +104,7 @@ const getSavedCard = async (fee: FeeSettlement) => {
 
   if (!fee.payment_intent_id) return null;
 
-  const { payment_method: method } = await stripe.paymentIntents.retrieve(
-    fee.payment_intent_id,
-  );
+  const { payment_method: method } = await stripe.paymentIntents.retrieve(fee.payment_intent_id);
 
   return typeof method === "string" ? method : (method?.id ?? null);
 };
@@ -192,8 +187,7 @@ const chargeCard = async (fee: FeeSettlement): Promise<ChargeResult> => {
 export const settleFee = async (fee: FeeSettlement) => {
   const refund = await refundRest(fee);
 
-  const charge: ChargeResult =
-    fee.charge_pence > 0 ? await chargeCard(fee) : { outcome: "settled" };
+  const charge: ChargeResult = fee.charge_pence > 0 ? await chargeCard(fee) : { outcome: "settled" };
 
   const result: SettlementResult = { ...refund, ...charge };
 

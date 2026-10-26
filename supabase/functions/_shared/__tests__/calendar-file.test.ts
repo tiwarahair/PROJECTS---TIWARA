@@ -1,9 +1,5 @@
 import { describe, expect, it } from "vitest";
-import {
-  getCalendarFeed,
-  getCalendarFile,
-  getGoogleCalendarUrl,
-} from "../calendar-file";
+import { getCalendarFeed, getCalendarFile, getGoogleCalendarUrl } from "../calendar-file";
 
 const event = {
   ref: "TH-ABC123",
@@ -30,9 +26,7 @@ describe("the calendar file", () => {
   it("escapes commas and semicolons in text", () => {
     const unfolded = file.replace(/\r\n /g, "");
 
-    expect(unfolded).toContain(
-      "LOCATION:12 Dickenson Road\\, Manchester\\, M14 5TQ",
-    );
+    expect(unfolded).toContain("LOCATION:12 Dickenson Road\\, Manchester\\, M14 5TQ");
 
     expect(unfolded).toContain("email\\; long");
   });
@@ -40,12 +34,9 @@ describe("the calendar file", () => {
   it("folds lines at 75 octets, multi-byte letters included", () => {
     const encoder = new TextEncoder();
 
-    for (const line of lines)
-      expect(encoder.encode(line).length).toBeLessThanOrEqual(75);
+    for (const line of lines) expect(encoder.encode(line).length).toBeLessThanOrEqual(75);
 
-    expect(file.replace(/\r\n /g, "")).toContain(
-      "SUMMARY:Silk press with Tiwára's House",
-    );
+    expect(file.replace(/\r\n /g, "")).toContain("SUMMARY:Silk press with Tiwára's House");
   });
 });
 
@@ -65,13 +56,11 @@ describe("the calendar feed", () => {
   });
 
   it("is named for its owner: bookings for a client, Studio for a stylist", () => {
-    expect(getCalendarFeed([event]).split("\r\n")).toContain(
-      "X-WR-CALNAME:Tiwára's House bookings",
-    );
+    expect(getCalendarFeed([event]).split("\r\n")).toContain("X-WR-CALNAME:Tiwára's House bookings");
 
-    expect(
-      getCalendarFeed([event], "Tiwára's House Studio").split("\r\n"),
-    ).toContain("X-WR-CALNAME:Tiwára's House Studio");
+    expect(getCalendarFeed([event], "Tiwára's House Studio").split("\r\n")).toContain(
+      "X-WR-CALNAME:Tiwára's House Studio",
+    );
   });
 
   it("leaves out an empty location", () => {
@@ -88,9 +77,7 @@ describe("the Google Calendar link", () => {
     expect(url.searchParams.get("action")).toBe("TEMPLATE");
     expect(url.searchParams.get("text")).toBe(event.title);
 
-    expect(url.searchParams.get("dates")).toBe(
-      "20261020T093000Z/20261020T113000Z",
-    );
+    expect(url.searchParams.get("dates")).toBe("20261020T093000Z/20261020T113000Z");
 
     expect(url.searchParams.get("location")).toBe(event.location);
   });
@@ -103,8 +90,6 @@ describe("calendar text", () => {
       description: "Bring a scarf\\wrap\nand a towel",
     });
 
-    expect(file.replace(/\r\n /g, "")).toContain(
-      "DESCRIPTION:Bring a scarf\\\\wrap\\nand a towel",
-    );
+    expect(file.replace(/\r\n /g, "")).toContain("DESCRIPTION:Bring a scarf\\\\wrap\\nand a towel");
   });
 });

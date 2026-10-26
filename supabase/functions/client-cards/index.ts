@@ -27,11 +27,7 @@ const requestSchema = z.discriminatedUnion("action", [
 const UPCOMING = ["awaiting_confirmation", "confirmed", "arrived"];
 
 const getSavedCustomerId = async (client: string) => {
-  const { data } = await admin
-    .from("profiles")
-    .select("stripe_customer_id")
-    .eq("id", client)
-    .single();
+  const { data } = await admin.from("profiles").select("stripe_customer_id").eq("id", client).single();
 
   return (data?.stripe_customer_id as string | null) ?? null;
 };
@@ -39,29 +35,20 @@ const getSavedCustomerId = async (client: string) => {
 // checkout uses the same idempotency key, so a race between the two can't make a second customer
 const createCustomer = async (client: string) => {
   const [{ data: profile }, { data: user }] = await Promise.all([
-    admin
-      .from("profiles")
-      .select("first_name, last_name, phone")
-      .eq("id", client)
-      .single(),
+    admin.from("profiles").select("first_name, last_name, phone").eq("id", client).single(),
     admin.auth.admin.getUserById(client),
   ]);
 
   const customer = await stripe.customers.create(
     {
       email: user.user?.email,
-      name:
-        [profile?.first_name, profile?.last_name].filter(Boolean).join(" ") ||
-        undefined,
+      name: [profile?.first_name, profile?.last_name].filter(Boolean).join(" ") || undefined,
       phone: profile?.phone ?? undefined,
     },
     { idempotencyKey: `profile:${client}:customer` },
   );
 
-  await admin
-    .from("profiles")
-    .update({ stripe_customer_id: customer.id })
-    .eq("id", client);
+  await admin.from("profiles").update({ stripe_customer_id: customer.id }).eq("id", client);
 
   return customer.id;
 };
@@ -77,16 +64,9 @@ const listCards = async (customerId: string | null) => {
     }),
   ]);
 
-  const defaultMethod = customer.deleted
-    ? null
-    : customer.invoice_settings.default_payment_method;
+  const defaultMethod = customer.deleted ? null : customer.invoice_settings.default_payment_method;
 
-  return toCardRows(
-    methods.data,
-    typeof defaultMethod === "string"
-      ? defaultMethod
-      : (defaultMethod?.id ?? null),
-  );
+  return toCardRows(methods.data, typeof defaultMethod === "string" ? defaultMethod : (defaultMethod?.id ?? null));
 };
 
 const getOwnCard = async (customerId: string | null, card: string) => {
@@ -98,16 +78,13 @@ const getOwnCard = async (customerId: string | null, card: string) => {
 };
 
 Deno.serve(async (request) => {
-  if (request.method === "OPTIONS")
-    return new Response("ok", { headers: corsHeaders });
+  if (request.method === "OPTIONS") return new Response("ok", { headers: corsHeaders });
 
   const client = await getSignedInUser(admin, request);
 
   if (!client) return respond(401, { error: "signed_out" });
 
-  const parsed = requestSchema.safeParse(
-    await request.json().catch(() => null),
-  );
+  const parsed = requestSchema.safeParse(await request.json().catch(() => null));
 
   if (!parsed.success) return respond(400, { error: "invalid_request" });
 
@@ -116,8 +93,7 @@ Deno.serve(async (request) => {
   try {
     const customerId = await getSavedCustomerId(client);
 
-    if (body.action === "list")
-      return respond(200, { cards: await listCards(customerId) });
+    if (body.action === "list") return respond(200, { cards: await listCards(customerId) });
 
     if (body.action === "setup") {
       const intent = await stripe.setupIntents.create({
@@ -145,11 +121,7 @@ Deno.serve(async (request) => {
                 : { payment_method_save: "disabled" }),
               payment_method_remove: "disabled",
               // cards added in the account are saved without a redisplay choice
-              payment_method_allow_redisplay_filters: [
-                "always",
-                "limited",
-                "unspecified",
-              ],
+              payment_method_allow_redisplay_filters: ["always", "limited", "unspecified"],
             },
           },
         },
@@ -158,8 +130,7 @@ Deno.serve(async (request) => {
       return respond(200, { clientSecret: session.client_secret });
     }
 
-    if (!(await getOwnCard(customerId, body.card)))
-      return respond(404, { error: "card_not_found" });
+    if (!(await getOwnCard(customerId, body.card))) return respond(404, { error: "card_not_found" });
 
     if (body.action === "default") {
       await stripe.customers.update(customerId!, {
@@ -183,10 +154,7 @@ Deno.serve(async (request) => {
 
     return respond(200, { cards: await listCards(customerId) });
   } catch (stripeError) {
-    console.error(
-      "client-cards failed",
-      stripeError instanceof Error ? stripeError.message : stripeError,
-    );
+    console.error("client-cards failed", stripeError instanceof Error ? stripeError.message : stripeError);
 
     return respond(500, { error: "unknown" });
   }

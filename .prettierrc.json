@@ -1,0 +1,8 @@
+{
+  "overrides": [
+    {
+      "files": "supabase/functions/**/*.ts",
+      "options": { "printWidth": 120 }
+    }
+  ]
+}

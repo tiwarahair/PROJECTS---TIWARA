@@ -28,8 +28,7 @@ const onLinkPaid = async (intent: Stripe.PaymentIntent) => {
 
 export const onPaymentSucceeded = async (intent: Stripe.PaymentIntent) => {
   // fee and checkout charges are recorded by the code that made them; a debt payment only settles debts
-  if (["fee", "checkout", "debt"].includes(intent.metadata.kind ?? ""))
-    return false;
+  if (["fee", "checkout", "debt"].includes(intent.metadata.kind ?? "")) return false;
 
   if (intent.metadata.kind === "link") {
     await onLinkPaid(intent);
@@ -54,9 +53,7 @@ export const onPaymentSucceeded = async (intent: Stripe.PaymentIntent) => {
     intent.setup_future_usage &&
     typeof intent.payment_method === "string"
   ) {
-    const { card } = await stripe.paymentMethods.retrieve(
-      intent.payment_method,
-    );
+    const { card } = await stripe.paymentMethods.retrieve(intent.payment_method);
 
     await admin
       .from("bookings")
@@ -88,9 +85,7 @@ export const onPaymentSucceeded = async (intent: Stripe.PaymentIntent) => {
       metadata: {
         reason: outcome === "slot_taken" ? "slot_taken" : "not_needed",
       },
-      ...(intent.transfer_data
-        ? { reverse_transfer: true, refund_application_fee: true }
-        : {}),
+      ...(intent.transfer_data ? { reverse_transfer: true, refund_application_fee: true } : {}),
     },
     {
       idempotencyKey: `payment:${intent.id}:${outcome === "slot_taken" ? "slot-taken" : "not-needed"}-refund`,
@@ -100,15 +95,8 @@ export const onPaymentSucceeded = async (intent: Stripe.PaymentIntent) => {
   return true;
 };
 
-export const onPaymentFailed = async ({
-  id,
-  last_payment_error,
-}: Stripe.PaymentIntent) => {
-  const { data: booking } = await admin
-    .from("bookings")
-    .select("id")
-    .eq("stripe_payment_intent_id", id)
-    .maybeSingle();
+export const onPaymentFailed = async ({ id, last_payment_error }: Stripe.PaymentIntent) => {
+  const { data: booking } = await admin.from("bookings").select("id").eq("stripe_payment_intent_id", id).maybeSingle();
 
   if (!booking) return;
 
@@ -116,27 +104,14 @@ export const onPaymentFailed = async ({
     booking_id: booking.id,
     kind: "payment_failed",
     data: {
-      code:
-        last_payment_error?.decline_code ?? last_payment_error?.code ?? null,
+      code: last_payment_error?.decline_code ?? last_payment_error?.code ?? null,
     },
   });
 };
 
-export const onRefundCreated = async ({
-  id,
-  amount,
-  payment_intent: intent,
-  status,
-  metadata,
-}: Stripe.Refund) => {
+export const onRefundCreated = async ({ id, amount, payment_intent: intent, status, metadata }: Stripe.Refund) => {
   // ours carry the booking and are recorded, with their reason, by the code that made them
-  if (
-    !intent ||
-    metadata?.booking_id ||
-    status === "failed" ||
-    status === "canceled"
-  )
-    return;
+  if (!intent || metadata?.booking_id || status === "failed" || status === "canceled") return;
 
   const { error } = await admin.rpc("record_stripe_refund", {
     intent: typeof intent === "string" ? intent : intent.id,

@@ -9,10 +9,7 @@ export interface CalendarEvent {
 }
 
 // confirmed bookings show plain; the rest say what they are
-const BOOKING_STATUSES: Record<
-  string,
-  { label: string; status?: CalendarEvent["status"] }
-> = {
+const BOOKING_STATUSES: Record<string, { label: string; status?: CalendarEvent["status"] }> = {
   awaiting_confirmation: {
     label: "Awaiting confirmation",
     status: "TENTATIVE",
@@ -23,20 +20,11 @@ const BOOKING_STATUSES: Record<
   no_show: { label: "No-show" },
 };
 
-const HEADER = [
-  "BEGIN:VCALENDAR",
-  "VERSION:2.0",
-  "PRODID:-//Tiwara's House//Bookings//EN",
-  "METHOD:PUBLISH",
-];
+const HEADER = ["BEGIN:VCALENDAR", "VERSION:2.0", "PRODID:-//Tiwara's House//Bookings//EN", "METHOD:PUBLISH"];
 
-const toUtcStamp = (date: string | Date) =>
-  new Date(date).toISOString().replace(/[-:]|\.\d{3}/g, "");
+const toUtcStamp = (date: string | Date) => new Date(date).toISOString().replace(/[-:]|\.\d{3}/g, "");
 
-const escapeText = (text: string) =>
-  text
-    .replace(/[\\;,]/g, (character) => `\\${character}`)
-    .replace(/\r?\n/g, "\\n");
+const escapeText = (text: string) => text.replace(/[\\;,]/g, (character) => `\\${character}`).replace(/\r?\n/g, "\\n");
 
 const encoder = new TextEncoder();
 
@@ -57,15 +45,7 @@ const foldLine = (line: string) => {
   return [...parts, current].join("\r\n ");
 };
 
-const getEventLines = ({
-  ref,
-  title,
-  startsAt,
-  endsAt,
-  location,
-  description,
-  status,
-}: CalendarEvent) => [
+const getEventLines = ({ ref, title, startsAt, endsAt, location, description, status }: CalendarEvent) => [
   "BEGIN:VEVENT",
   `UID:${ref}@tiwarashouse.com`,
   `DTSTAMP:${toUtcStamp(new Date())}`,
@@ -78,17 +58,12 @@ const getEventLines = ({
   "END:VEVENT",
 ];
 
-const toFile = (lines: string[]) =>
-  `${[...HEADER, ...lines, "END:VCALENDAR"].map(foldLine).join("\r\n")}\r\n`;
+const toFile = (lines: string[]) => `${[...HEADER, ...lines, "END:VCALENDAR"].map(foldLine).join("\r\n")}\r\n`;
 
-export const getCalendarFile = (event: CalendarEvent) =>
-  toFile(getEventLines(event));
+export const getCalendarFile = (event: CalendarEvent) => toFile(getEventLines(event));
 
 /** s subscribed calendar: every event, refreshed hourly by apps that honour it. */
-export const getCalendarFeed = (
-  events: CalendarEvent[],
-  name = "Tiwára's House bookings",
-) =>
+export const getCalendarFeed = (events: CalendarEvent[], name = "Tiwára's House bookings") =>
   toFile([
     `X-WR-CALNAME:${escapeText(name)}`,
     "REFRESH-INTERVAL;VALUE=DURATION:PT1H",
@@ -99,18 +74,10 @@ export const getCalendarFeed = (
 export const getBookingEventStatus = (title: string, bookingStatus: string) => {
   const shown = BOOKING_STATUSES[bookingStatus];
 
-  return shown
-    ? { title: `${title} (${shown.label})`, status: shown.status }
-    : { title };
+  return shown ? { title: `${title} (${shown.label})`, status: shown.status } : { title };
 };
 
-export const getGoogleCalendarUrl = ({
-  title,
-  startsAt,
-  endsAt,
-  location,
-  description,
-}: CalendarEvent) =>
+export const getGoogleCalendarUrl = ({ title, startsAt, endsAt, location, description }: CalendarEvent) =>
   `https://calendar.google.com/calendar/render?${new URLSearchParams({
     action: "TEMPLATE",
     text: title,

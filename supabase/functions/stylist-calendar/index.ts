@@ -1,9 +1,6 @@
 // a stylist's subscribed calendar (/cal/studio/<key>.ics on the site): their bookings from 30 days ago to a year ahead, read by calendar apps without signing in, so the key is the only way in
 import { admin } from "../_shared/admin.ts";
-import {
-  getBookingEventStatus,
-  getCalendarFeed,
-} from "../_shared/calendar-file.ts";
+import { getBookingEventStatus, getCalendarFeed } from "../_shared/calendar-file.ts";
 
 interface FeedBooking {
   ref: string;
@@ -25,19 +22,10 @@ Deno.serve(async (request) => {
   // a 404 can make calendar apps drop the subscription, so only an unknown link gets one
   if (error) return new Response("Try again later.", { status: 503 });
 
-  if (!data)
-    return new Response("This calendar link isn't valid.", { status: 404 });
+  if (!data) return new Response("This calendar link isn't valid.", { status: 404 });
 
   const events = (data as FeedBooking[]).map(
-    ({
-      ref,
-      client,
-      service,
-      starts_at: startsAt,
-      ends_at: endsAt,
-      status,
-      studio_url: studioUrl,
-    }) => ({
+    ({ ref, client, service, starts_at: startsAt, ends_at: endsAt, status, studio_url: studioUrl }) => ({
       ref,
       ...getBookingEventStatus(`${client || "Walk-in"} · ${service}`, status),
       startsAt,

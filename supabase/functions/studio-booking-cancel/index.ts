@@ -26,16 +26,13 @@ interface Cancellation {
 }
 
 Deno.serve(async (request) => {
-  if (request.method === "OPTIONS")
-    return new Response("ok", { headers: corsHeaders });
+  if (request.method === "OPTIONS") return new Response("ok", { headers: corsHeaders });
 
   const owner = await getSignedInUser(admin, request);
 
   if (!owner) return respond(401, { error: "signed_out" });
 
-  const parsed = requestSchema.safeParse(
-    await request.json().catch(() => null),
-  );
+  const parsed = requestSchema.safeParse(await request.json().catch(() => null));
 
   if (!parsed.success) return respond(400, { error: "invalid_request" });
 
@@ -49,8 +46,7 @@ Deno.serve(async (request) => {
       waive_fee: waiveFee,
     });
 
-    if (error && ERRORS[error.message])
-      return respond(ERRORS[error.message], { error: error.message });
+    if (error && ERRORS[error.message]) return respond(ERRORS[error.message], { error: error.message });
 
     if (error) throw error;
 
@@ -91,10 +87,7 @@ Deno.serve(async (request) => {
 
     return respond(200, { refund_pence, kept_pence, charge_pence });
   } catch (error) {
-    console.error(
-      "studio-booking-cancel failed",
-      error instanceof Error ? error.message : error,
-    );
+    console.error("studio-booking-cancel failed", error instanceof Error ? error.message : error);
 
     return respond(500, { error: "unknown" });
   }

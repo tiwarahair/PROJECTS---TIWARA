@@ -20,9 +20,6 @@ describe("client cards", () => {
   });
 
   it("with no default set, the first card is shown as the default", () => {
-    expect(toCardRows([visa, mastercard], null).map(({ is_default }) => is_default)).toEqual([
-      true,
-      false,
-    ]);
+    expect(toCardRows([visa, mastercard], null).map(({ is_default }) => is_default)).toEqual([true, false]);
   });
 });

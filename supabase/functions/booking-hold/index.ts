@@ -7,13 +7,7 @@ import { isWithinLimit } from "../_shared/rate-limit.ts";
 const IP_LIMIT = 30;
 const WINDOW_SECONDS = 600;
 
-const BOOKING_ERRORS = [
-  "not_bookable",
-  "invalid_choices",
-  "outside_area",
-  "hold_not_found",
-  "slot_taken",
-];
+const BOOKING_ERRORS = ["not_bookable", "invalid_choices", "outside_area", "hold_not_found", "slot_taken"];
 
 const requestSchema = z.object({
   serviceId: z.uuid(),
@@ -24,26 +18,19 @@ const requestSchema = z.object({
   }),
   startsAt: z.iso.datetime({ offset: true }),
   location: z.object({ lat: z.number(), lng: z.number() }).optional(),
-  hold: z
-    .object({ id: z.uuid(), secret: z.string().min(1).max(100) })
-    .optional(),
+  hold: z.object({ id: z.uuid(), secret: z.string().min(1).max(100) }).optional(),
 });
 
 Deno.serve(async (request) => {
-  if (request.method === "OPTIONS")
-    return new Response("ok", { headers: corsHeaders });
+  if (request.method === "OPTIONS") return new Response("ok", { headers: corsHeaders });
 
-  const parsed = requestSchema.safeParse(
-    await request.json().catch(() => null),
-  );
+  const parsed = requestSchema.safeParse(await request.json().catch(() => null));
 
   if (!parsed.success) return respond(400, { error: "invalid_request" });
 
-  const isAllowed = await isWithinLimit(
-    `booking-hold:${getClientIp(request)}`,
-    IP_LIMIT,
-    WINDOW_SECONDS,
-  ).catch(() => null);
+  const isAllowed = await isWithinLimit(`booking-hold:${getClientIp(request)}`, IP_LIMIT, WINDOW_SECONDS).catch(
+    () => null,
+  );
 
   if (isAllowed === null) return respond(500, { error: "unknown" });
 
@@ -61,8 +48,7 @@ Deno.serve(async (request) => {
     hold_secret: hold?.secret ?? null,
   });
 
-  if (error && BOOKING_ERRORS.includes(error.message))
-    return respond(409, { error: error.message });
+  if (error && BOOKING_ERRORS.includes(error.message)) return respond(409, { error: error.message });
 
   if (error) {
     console.error("hold_booking failed", error.code);

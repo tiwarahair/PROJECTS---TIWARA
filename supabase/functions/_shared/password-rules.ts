@@ -4,13 +4,7 @@ export const PASSWORD_MAX = 64;
 // Supabase stores passwords with bcrypt, which takes at most 72 bytes; accents and emoji take 2 to 4 each
 const PASSWORD_MAX_BYTES = 72;
 
-const SITE_NAMES = [
-  "tiwara",
-  "tiwaras",
-  "tiwarashouse",
-  "tiwarasstudio",
-  "tiwarastudio",
-];
+const SITE_NAMES = ["tiwara", "tiwaras", "tiwarashouse", "tiwarasstudio", "tiwarastudio"];
 
 const COMMON_PASSWORDS = [
   "password",
@@ -25,11 +19,9 @@ const COMMON_PASSWORDS = [
 
 export type PasswordRole = "pro" | "client";
 
-export const getPasswordMin = (who: PasswordRole): number =>
-  who === "pro" ? 8 : 15;
+export const getPasswordMin = (who: PasswordRole): number => (who === "pro" ? 8 : 15);
 
-const normaliseAccents = (value = ""): string =>
-  value.toLowerCase().normalize("NFD").replace(/[̀-ͯ]/g, "");
+const normaliseAccents = (value = ""): string => value.toLowerCase().normalize("NFD").replace(/[̀-ͯ]/g, "");
 
 export interface PasswordPerson {
   first?: string;
@@ -39,21 +31,12 @@ export interface PasswordPerson {
 
 export type BlockKind = "" | "common" | "name" | "site";
 
-export type PasswordProblem =
-  | ""
-  | "short"
-  | "long"
-  | "bytes"
-  | Exclude<BlockKind, "">;
+export type PasswordProblem = "" | "short" | "long" | "bytes" | Exclude<BlockKind, "">;
 
-const toLetters = (text?: string) =>
-  normaliseAccents(text).replace(/[^a-z]/g, "");
+const toLetters = (text?: string) => normaliseAccents(text).replace(/[^a-z]/g, "");
 
 /** Whole-password comparison (lowercase, no spaces): names and the site name may only have digits or symbols added. */
-export const getBlockKind = (
-  password: string,
-  { first, last, email }: PasswordPerson,
-): BlockKind => {
+export const getBlockKind = (password: string, { first, last, email }: PasswordPerson): BlockKind => {
   const flat = normaliseAccents(password).replace(/\s+/g, "");
   const lettersOnly = flat.replace(/[^a-z]/g, "");
   const firstLetters = toLetters(first);
@@ -76,17 +59,12 @@ export const getBlockKind = (
   return SITE_NAMES.includes(lettersOnly) ? "site" : "";
 };
 
-export const getPasswordProblem = (
-  password: string,
-  min: number,
-  person: PasswordPerson,
-): PasswordProblem => {
+export const getPasswordProblem = (password: string, min: number, person: PasswordPerson): PasswordProblem => {
   const length = [...password].length;
 
   if (length > PASSWORD_MAX) return "long";
 
-  if (new TextEncoder().encode(password).length > PASSWORD_MAX_BYTES)
-    return "bytes";
+  if (new TextEncoder().encode(password).length > PASSWORD_MAX_BYTES) return "bytes";
 
   const blockKind = getBlockKind(password, person);
 

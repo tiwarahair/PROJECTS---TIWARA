@@ -33,10 +33,7 @@ const FONT = "'Schibsted Grotesk', Helvetica, Arial, sans-serif";
 
 const renderHtml = ({ title, paragraphs, button, link, footnote }: Notice) => {
   const body = paragraphs
-    .map(
-      (paragraph) =>
-        `<p style="margin:20px 0 0;font-size:15.5px;line-height:1.6">${escapeHtml(paragraph)}</p>`,
-    )
+    .map((paragraph) => `<p style="margin:20px 0 0;font-size:15.5px;line-height:1.6">${escapeHtml(paragraph)}</p>`)
     .join("\n");
 
   const extra = link
@@ -87,9 +84,7 @@ const renderText = ({ title, paragraphs, button, link, footnote }: Notice) =>
   [
     title,
     ...paragraphs,
-    ...[button, link]
-      .filter((item) => !!item)
-      .map(({ label, url }) => `${label}: ${url.replace(/^mailto:/, "")}`),
+    ...[button, link].filter((item) => !!item).map(({ label, url }) => `${label}: ${url.replace(/^mailto:/, "")}`),
     footnote,
   ].join("\n\n");
 

@@ -7,14 +7,12 @@ const toHex = (buffer: ArrayBuffer) =>
 
 export const isPwnedPassword = async (password: string) => {
   try {
-    const hash = toHex(
-      await crypto.subtle.digest("SHA-1", new TextEncoder().encode(password)),
-    );
+    const hash = toHex(await crypto.subtle.digest("SHA-1", new TextEncoder().encode(password)));
 
-    const response = await fetch(
-      `https://api.pwnedpasswords.com/range/${hash.slice(0, 5)}`,
-      { headers: { "Add-Padding": "true" }, signal: AbortSignal.timeout(3000) },
-    );
+    const response = await fetch(`https://api.pwnedpasswords.com/range/${hash.slice(0, 5)}`, {
+      headers: { "Add-Padding": "true" },
+      signal: AbortSignal.timeout(3000),
+    });
 
     if (!response.ok) return false;
 

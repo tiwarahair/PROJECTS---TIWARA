@@ -50,7 +50,14 @@ const makeTransfer = async ({
 
   return stripe.transfers.create(
     // tied to the fee's own charge, so it's paid from that money
-    { amount, currency: "gbp", destination: account, source_transaction: charge.id, transfer_group: group, metadata: { payment_id: paymentId } },
+    {
+      amount,
+      currency: "gbp",
+      destination: account,
+      source_transaction: charge.id,
+      transfer_group: group,
+      metadata: { payment_id: paymentId },
+    },
     { idempotencyKey: getTransferKey(paymentId, failures) },
   );
 };
