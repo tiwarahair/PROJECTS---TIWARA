@@ -1,4 +1,5 @@
 // The stylist's clients: the list with their totals, and adding, editing, blocking and deleting them.
+import { getAccountPhotoUrls } from "../account-photo";
 import { supabase } from "../supabase";
 import { getClientPhotoUrls } from "./photos";
 import { check, writeOrRefuse } from "./request";
@@ -21,13 +22,25 @@ export const fetchStudioClients = async (stylistId: string) => {
       supabase.rpc("get_studio_clients", { target_stylist: stylistId }),
     )) ?? [];
 
-  const photos = await getClientPhotoUrls(
-    rows.flatMap(({ photo_path: path }) => (path ? [path] : [])),
-  );
+  // a client's own account photo stands in where the stylist hasn't taken one
+  const [photos, accountPhotos] = await Promise.all([
+    getClientPhotoUrls(
+      rows.flatMap(({ photo_path: path }) => (path ? [path] : [])),
+    ),
+    // these are only a stand-in, so a failure shows initials rather than stopping the list
+    getAccountPhotoUrls(
+      rows.flatMap(({ photo_path: path, account_photo_path: accountPath }) =>
+        !path && accountPath ? [accountPath] : [],
+      ),
+    ).catch(() => new Map<string, string>()),
+  ]);
 
   return rows.map((row) => ({
     ...row,
-    photo_url: (row.photo_path && photos.get(row.photo_path)) || "",
+    photo_url:
+      (row.photo_path && photos.get(row.photo_path)) ||
+      (row.account_photo_path && accountPhotos.get(row.account_photo_path)) ||
+      "",
   }));
 };
 

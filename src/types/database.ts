@@ -2878,6 +2878,7 @@ export type Database = {
       get_studio_clients: {
         Args: { target_stylist: string };
         Returns: {
+          account_photo_path: string;
           allergies: string;
           allergies_at: string;
           allergies_by: string;

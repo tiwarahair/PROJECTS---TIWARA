@@ -24,6 +24,23 @@ export const getAccountPhotoUrl = async (path: string) => {
   return data.signedUrl;
 };
 
+/** Signed links for the account photos of a stylist's linked clients, keyed by path. */
+export const getAccountPhotoUrls = async (paths: string[]) => {
+  if (!paths.length) return new Map<string, string>();
+
+  const { data, error } = await supabase.storage
+    .from(BUCKET)
+    .createSignedUrls(paths, 86400);
+
+  if (error) throw error;
+
+  return new Map(
+    data.flatMap(({ path, signedUrl }) =>
+      path && signedUrl ? [[path, signedUrl] as const] : [],
+    ),
+  );
+};
+
 export const uploadAccountPhoto = async ({
   userId,
   file,
