@@ -56,7 +56,7 @@ describe("checkPassword with zxcvbn loaded", () => {
     expect(check).toMatchObject({
       long: false,
       level: 0,
-      error: "Use fewer accented letters or emoji",
+      error: "Use fewer accented letters or emojis",
     });
 
     expect(getPasswordView(check).lengthMet).toBe(true);

@@ -97,7 +97,7 @@ export const getPasswordProblemMessage = (
 
   if (problem === "long") return `Use ${PASSWORD_MAX} characters or fewer`;
 
-  if (problem === "bytes") return "Use fewer accented letters or emoji";
+  if (problem === "bytes") return "Use fewer accented letters or emojis";
 
   return problem === "short"
     ? `Use at least ${min} characters`
