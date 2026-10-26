@@ -1,5 +1,5 @@
 // The client's update-card page: "view" shows the booking (finishing a card Stripe saved but we didn't record yet), å"start" sets up a new card with Stripe (Turnstile-checked), "save" makes it the booking's card for fees
-import { z } from "npm:zod@4";
+import { z } from "zod";
 import { admin } from "../_shared/admin.ts";
 import { getClientIp } from "../_shared/client-ip.ts";
 import { corsHeaders, respond } from "../_shared/cors.ts";

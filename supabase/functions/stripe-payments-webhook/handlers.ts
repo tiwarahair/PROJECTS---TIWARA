@@ -1,4 +1,4 @@
-import type Stripe from "npm:stripe@22.6.2";
+import type Stripe from "stripe";
 import { admin } from "../_shared/admin.ts";
 import { getCardLabel } from "../_shared/declines.ts";
 import { handleDispute } from "../_shared/disputes.ts";

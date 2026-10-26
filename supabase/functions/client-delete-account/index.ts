@@ -3,7 +3,7 @@
 // addresses with it.
 import { admin } from "../_shared/admin.ts";
 import { corsHeaders, respond } from "../_shared/cors.ts";
-import { z } from "npm:zod@4";
+import { z } from "zod";
 import { getSignedInSession } from "../_shared/recent-user.ts";
 import { stripe } from "../_shared/stripe.ts";
 

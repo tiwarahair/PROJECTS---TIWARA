@@ -1,5 +1,5 @@
 // Studio's discretionary refund: needs a recent 2FA code; refunds fee charges first, then the booking payment.
-import { z } from "npm:zod@4";
+import { z } from "zod";
 import { admin } from "../_shared/admin.ts";
 import { corsHeaders, respond } from "../_shared/cors.ts";
 import { getRecentUser } from "../_shared/recent-user.ts";

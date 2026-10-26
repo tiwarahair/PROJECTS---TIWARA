@@ -43,7 +43,7 @@ export const getPaymentParams = (
     ...(isHeld ? { hold: "true", kept_pence: String(getStylistFee(quote)) } : {}),
   },
   ...(customerId ? { customer: customerId } : {}),
-  ...(savesCard(quote.mode) ? { setup_future_usage: "off_session" } : {}),
+  ...(savesCard(quote.mode) ? { setup_future_usage: "off_session" as const } : {}),
   // a signed-in client can pay with a saved card, so its CVC is asked for again; always set, so a retry can turn it off
   payment_method_options: { card: { require_cvc_recollection: requireCvc } },
   ...(paysStylist(quote.mode) && !isHeld

@@ -1,5 +1,5 @@
 // Studio's "Retry card" for a fee the card declined: charges it now and says how it went.
-import { z } from "npm:zod@4";
+import { z } from "zod";
 import { admin } from "../_shared/admin.ts";
 import { corsHeaders, respond } from "../_shared/cors.ts";
 import { settleFee } from "../_shared/fee-settlement.ts";

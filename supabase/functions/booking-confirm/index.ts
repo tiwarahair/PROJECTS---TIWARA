@@ -1,6 +1,6 @@
 // The client's confirm page for a booking a stylist made: "view" shows it, "pay" starts the same payment online
 // checkout takes (deposit + fee, full + fee, or the fee with the card saved), Turnstile-checked.
-import { z } from "npm:zod@4";
+import { z } from "zod";
 import { admin } from "../_shared/admin.ts";
 import { getClientIp } from "../_shared/client-ip.ts";
 import { corsHeaders, respond } from "../_shared/cors.ts";

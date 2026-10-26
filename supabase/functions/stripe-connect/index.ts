@@ -1,8 +1,8 @@
 // Stripe Connect (Express) for a stylist: "onboard" creates their account if needed and returns Stripe's
 // onboarding link; "dashboard" returns a link to their Express dashboard; "refresh" re-reads the account
 // (for when they come back from Stripe before the webhook lands). Payout actions need a recent 2FA code.
-import { createClient } from "npm:@supabase/supabase-js@2";
-import { z } from "npm:zod@4";
+import { createClient } from "@supabase/supabase-js";
+import { z } from "zod";
 import { corsHeaders, respond } from "../_shared/cors.ts";
 import { getRecentUser, getSignedInUser } from "../_shared/recent-user.ts";
 import { getSite } from "../_shared/site.ts";

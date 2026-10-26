@@ -1,6 +1,6 @@
 // Stripe for Connect (Accounts v2): marketplace "recipient" accounts that receive transfers and pay out.
-import type { SupabaseClient } from "npm:@supabase/supabase-js@2";
-import Stripe from "npm:stripe@22.6.2";
+import type { SupabaseClient } from "@supabase/supabase-js";
+import Stripe from "stripe";
 
 export const stripe = new Stripe(Deno.env.get("STRIPE_SECRET_KEY") ?? "", {
   httpClient: Stripe.createFetchHttpClient(),

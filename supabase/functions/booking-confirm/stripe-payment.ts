@@ -1,4 +1,4 @@
-import type Stripe from "npm:stripe@22.6.2";
+import type Stripe from "stripe";
 import { getRecovery } from "../_shared/owed.ts";
 import { isPayoutHeld } from "../_shared/payout-hold.ts";
 import { CLEAR_RECOVERY } from "../_shared/recovery-metadata.ts";
