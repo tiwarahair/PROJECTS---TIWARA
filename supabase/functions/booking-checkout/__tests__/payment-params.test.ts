@@ -58,9 +58,19 @@ describe("the booking's payment", () => {
     expect(params).not.toHaveProperty("setup_future_usage");
   });
 
-  it("a signed-in client can keep the card whatever the mode", () => {
-    expect(getPaymentParams(quote("full", 7663), "cus_1", true)).toMatchObject({
-      setup_future_usage: "off_session",
+  it("a signed-in client is asked for a saved card's CVC, and saving one for next time is their own tick", () => {
+    const params = getPaymentParams(quote("full", 7663), "cus_1", true);
+
+    expect(params).toMatchObject({
+      payment_method_options: { card: { require_cvc_recollection: true } },
+    });
+
+    expect(params).not.toHaveProperty("setup_future_usage");
+  });
+
+  it("guests aren't asked for a CVC again, having no saved cards", () => {
+    expect(getPaymentParams(quote("full", 7663), "cus_1")).toMatchObject({
+      payment_method_options: { card: { require_cvc_recollection: false } },
     });
   });
 

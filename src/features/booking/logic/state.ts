@@ -68,7 +68,6 @@ export const getInitialBooking = (stylist: Stylist): BookingState => {
     time: null,
     details: { ...EMPTY_DETAILS },
     photos: [],
-    keepCard: false,
     loggedIn: false,
     guest: false,
     editContact: false,

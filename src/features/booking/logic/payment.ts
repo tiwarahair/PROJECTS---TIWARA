@@ -70,8 +70,7 @@ export const getCheckoutRequest = (
   point: LatLng | null,
   turnstileToken: string,
 ): CheckoutRequest | null => {
-  const { hold, details, appointmentAddress, loggedIn, keepCard, allergy } =
-    state;
+  const { hold, details, appointmentAddress, allergy, loggedIn } = state;
 
   if (!hold) return null;
 
@@ -85,6 +84,7 @@ export const getCheckoutRequest = (
     notes,
     allergies: allergy.on ? allergy.text.trim() : "",
     clearAllergies: isAllergyCleared(allergy),
+    requireCvc: loggedIn,
     ...(point && line1
       ? {
           address: {
@@ -97,7 +97,6 @@ export const getCheckoutRequest = (
           },
         }
       : {}),
-    keepCard: loggedIn && keepCard,
     turnstileToken,
   };
 };
@@ -123,6 +122,22 @@ export const getPaymentAppearance = (): Appearance => ({
       border: "1px solid #d4cbb9",
       boxShadow: "none",
       borderRadius: "12px",
+    },
+    ".Tab": {
+      border: "1px solid #d4cbb9",
+      boxShadow: "none",
+      borderRadius: "12px",
+      padding: "12px 16px",
+    },
+    ".Tab--selected": {
+      borderColor: "#8f1112",
+      boxShadow: "0 0 0 1px #8f1112",
+    },
+    ".PickerItem": {
+      border: "1px solid #d4cbb9",
+      boxShadow: "none",
+      borderRadius: "12px",
+      padding: "14px 16px",
     },
   },
 });

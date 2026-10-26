@@ -24,7 +24,6 @@ export const getAccountPhotoUrl = async (path: string) => {
   return data.signedUrl;
 };
 
-/** Signed links for the account photos of a stylist's linked clients, keyed by path. */
 export const getAccountPhotoUrls = async (paths: string[]) => {
   if (!paths.length) return new Map<string, string>();
 

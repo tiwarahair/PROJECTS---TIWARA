@@ -30,7 +30,7 @@ export const getRecoveryRoom = (quote: CheckoutQuote) =>
 export const getPaymentParams = (
   quote: CheckoutQuote,
   customerId: string | null,
-  keepCard = false,
+  requireCvc = false,
   recovered = 0,
   isHeld = false,
 ) => ({
@@ -48,9 +48,9 @@ export const getPaymentParams = (
       : {}),
   },
   ...(customerId ? { customer: customerId } : {}),
-  ...(savesCard(quote.mode) || keepCard
-    ? { setup_future_usage: "off_session" }
-    : {}),
+  ...(savesCard(quote.mode) ? { setup_future_usage: "off_session" } : {}),
+  // a signed-in client can pay with a saved card, so its CVC is asked for again; always set, so a retry can turn it off
+  payment_method_options: { card: { require_cvc_recollection: requireCvc } },
   ...(paysStylist(quote.mode) && !isHeld
     ? {
         // the booking fee, plus Stripe's fee on the stylist's part (and anything they owe)

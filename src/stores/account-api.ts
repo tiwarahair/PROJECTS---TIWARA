@@ -16,6 +16,7 @@ import {
   fetchClientCards,
   removeClientCard,
   setDefaultCard,
+  startCardsSession,
 } from "../lib/client-cards";
 import {
   deleteClientAddress,
@@ -117,6 +118,11 @@ export const accountApi = api.injectEndpoints({
     getDeletionBlockers: build.query<DeletionBlockers, string>({
       queryFn: () => toQueryResult(fetchDeletionBlockers()),
     }),
+    getCardsSession: build.query<string, { userId: string; canSave: boolean }>({
+      queryFn: ({ canSave }) => toQueryResult(startCardsSession(canSave)),
+      // a session lasts half an hour, so each visit to the pay step starts a new one
+      keepUnusedDataFor: 0,
+    }),
     getClientCards: build.query<SavedCard[], string>({
       queryFn: () => toQueryResult(fetchClientCards()),
       providesTags: ["ClientCards"],
@@ -143,6 +149,7 @@ export const {
   useGetDeletionBlockersQuery,
   useGetAccountPhotoUrlQuery,
   useGetCalendarSecretQuery,
+  useGetCardsSessionQuery,
   useGetMySensitivitiesQuery,
   useGetMySensitivityQuery,
   useSaveMySensitivityMutation,

@@ -9,6 +9,11 @@ import { toCardRows } from "./cards.ts";
 const requestSchema = z.discriminatedUnion("action", [
   z.object({ action: z.literal("list") }),
   z.object({ action: z.literal("setup") }),
+  // canSave: false when the booking's policy keeps the card anyway, so Stripe doesn't offer a tick that changes nothing
+  z.object({
+    action: z.literal("session"),
+    canSave: z.boolean().default(true),
+  }),
   z.object({
     action: z.literal("remove"),
     card: z.string().startsWith("pm_").max(255),
@@ -122,6 +127,35 @@ Deno.serve(async (request) => {
       });
 
       return respond(200, { clientSecret: intent.client_secret });
+    }
+
+    if (body.action === "session") {
+      const session = await stripe.customerSessions.create({
+        customer: customerId ?? (await createCustomer(client)),
+        components: {
+          payment_element: {
+            enabled: true,
+            features: {
+              payment_method_redisplay: "enabled",
+              ...(body.canSave
+                ? {
+                    payment_method_save: "enabled",
+                    payment_method_save_usage: "off_session",
+                  }
+                : { payment_method_save: "disabled" }),
+              payment_method_remove: "disabled",
+              // cards added in the account are saved without a redisplay choice
+              payment_method_allow_redisplay_filters: [
+                "always",
+                "limited",
+                "unspecified",
+              ],
+            },
+          },
+        },
+      });
+
+      return respond(200, { clientSecret: session.client_secret });
     }
 
     if (!(await getOwnCard(customerId, body.card)))

@@ -96,7 +96,6 @@ export interface BookingState {
   time: string | null;
   details: Details;
   photos: Photo[];
-  keepCard: boolean;
   loggedIn: boolean;
   guest: boolean;
   editContact: boolean;

@@ -22,7 +22,6 @@ export const fetchStudioClients = async (stylistId: string) => {
       supabase.rpc("get_studio_clients", { target_stylist: stylistId }),
     )) ?? [];
 
-  // a client's own account photo stands in where the stylist hasn't taken one
   const [photos, accountPhotos] = await Promise.all([
     getClientPhotoUrls(
       rows.flatMap(({ photo_path: path }) => (path ? [path] : [])),

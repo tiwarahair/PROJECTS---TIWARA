@@ -22,6 +22,13 @@ export const startCardSetup = () =>
     action: "setup",
   }).then(({ clientSecret }) => clientSecret);
 
+/** lets the booking pay step list their saved cards & offer to save a new one */
+export const startCardsSession = (canSave: boolean) =>
+  invokeFunction<{ clientSecret: string }>("client-cards", {
+    action: "session",
+    canSave,
+  }).then(({ clientSecret }) => clientSecret);
+
 export const setDefaultCard = (card: string) =>
   callCards({ action: "default", card });
 

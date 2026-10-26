@@ -78,14 +78,13 @@ Deno.serve(async (request) => {
     if (paysStylist(quote.mode) && !quote.stylist_account)
       return respond(409, { error: "stylist_not_ready" });
 
-    const keepCard = parsed.data.keepCard && !!clientId;
-
     const customerId =
       savesCard(quote.mode) || clientId
         ? await getCustomerId(quote, contact, clientId)
         : null;
 
-    const intent = await getPaymentIntent(quote, customerId, keepCard);
+    // follows the page's card box, so the two agree even if the sign-in has lapsed
+    const intent = await getPaymentIntent(quote, customerId, parsed.data.requireCvc);
 
     if (intent.status === "succeeded")
       return respond(409, { error: "already_paid" });

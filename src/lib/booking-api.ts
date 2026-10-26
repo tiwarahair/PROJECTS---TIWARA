@@ -37,6 +37,7 @@ export interface CheckoutRequest {
   notes: string;
   allergies: string;
   clearAllergies: boolean;
+  requireCvc: boolean;
   address?: {
     line1: string;
     line2: string;
@@ -46,7 +47,6 @@ export interface CheckoutRequest {
     lat: number;
     lng: number;
   };
-  keepCard: boolean;
   turnstileToken: string;
 }
 
