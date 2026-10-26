@@ -514,6 +514,9 @@ verify_jwt = false
 [functions.client-delete-account]
 verify_jwt = false
 
+[functions.check-password]
+verify_jwt = false
+
 # called by pg_cron with x-cron-secret, not a user's token
 [functions.send-notifications]
 verify_jwt = false

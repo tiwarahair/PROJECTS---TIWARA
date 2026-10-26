@@ -1,4 +1,5 @@
 import {
+  checkNewPassword,
   completeClientProfile,
   getAccountKind,
   sendPasswordReset,
@@ -7,9 +8,12 @@ import {
   signUpClient,
   verifyEmailCode,
 } from "../../lib/auth";
+import type { NewPasswordProblem } from "../../lib/auth";
 import { rememberDevice } from "../../lib/supabase";
 import { verifySecondFactor } from "../../lib/two-factor";
+import { getPasswordProblemMessage } from "../../utils/password";
 import { TURNSTILE_SCREENS } from "./data";
+import { getPasswordCheck } from "./field-schemas";
 import { isCodeScreen } from "./state";
 import type { SubmitActions, SubmitCore } from "./submit-actions";
 
@@ -46,6 +50,17 @@ export const getSubmitValid = (
 
     const form = formApi.getValues();
     const email = form.email.trim().toLowerCase();
+
+    const showPasswordProblem = (problem: NewPasswordProblem) =>
+      setState({
+        busy: false,
+        serverErrors: {
+          password: getPasswordProblemMessage(
+            problem,
+            getPasswordCheck({ ...current, form }).min,
+          ),
+        },
+      });
 
     const checkAccount = (onKind: (kind: string) => void) =>
       run(async () => onKind(await getAccountKind(email, takeCaptchaToken())));
@@ -124,6 +139,16 @@ export const getSubmitValid = (
       "pro-password": submitPassword,
       "cust-create": () =>
         run(async () => {
+          const { first, last } = form;
+
+          const problem = await checkNewPassword(form.password, "client", {
+            first,
+            last,
+            email,
+          });
+
+          if (problem) return showPasswordProblem(problem);
+
           const isNew = await signUpClient(
             email,
             form.password,
@@ -151,6 +176,10 @@ export const getSubmitValid = (
         }),
       "forgot-reset": () =>
         run(async () => {
+          const problem = await checkNewPassword(form.password);
+
+          if (problem) return showPasswordProblem(problem);
+
           const error = await setNewPassword(form.password);
 
           if (error)
