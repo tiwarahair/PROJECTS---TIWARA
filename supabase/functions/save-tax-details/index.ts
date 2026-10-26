@@ -1,7 +1,7 @@
 // Saves a stylist's tax details. Needs an authenticator-app code from the last 30 days; the NI number is
 // encrypted here
-import { createClient } from "npm:@supabase/supabase-js@2";
-import { z } from "npm:zod@4";
+import { createClient } from "@supabase/supabase-js";
+import { z } from "zod";
 import { corsHeaders, respond } from "../_shared/cors.ts";
 import { getRecentUser } from "../_shared/recent-user.ts";
 

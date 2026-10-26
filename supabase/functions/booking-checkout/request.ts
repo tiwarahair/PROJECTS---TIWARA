@@ -1,4 +1,4 @@
-import { z } from "npm:zod@4";
+import { z } from "zod";
 
 const text = (max: number) => z.string().trim().max(max);
 

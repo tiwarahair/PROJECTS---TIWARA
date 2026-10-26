@@ -1,6 +1,6 @@
 // Email-first log in: "does this email have an account, and what kind?" Turnstile + rate limits, constant-ish time.
-import { createClient } from "npm:@supabase/supabase-js@2";
-import { z } from "npm:zod@4";
+import { createClient } from "@supabase/supabase-js";
+import { z } from "zod";
 import { getClientIp } from "../_shared/client-ip.ts";
 import { isHuman } from "../_shared/turnstile.ts";
 

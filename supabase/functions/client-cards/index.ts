@@ -1,5 +1,5 @@
 // Account → Payment methods: the signed-in client's saved cards on their own Stripe customer (card numbers never reach us)
-import { z } from "npm:zod@4";
+import { z } from "zod";
 import { admin } from "../_shared/admin.ts";
 import { corsHeaders, respond } from "../_shared/cors.ts";
 import { getSignedInUser } from "../_shared/recent-user.ts";

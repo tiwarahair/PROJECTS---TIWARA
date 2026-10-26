@@ -1,5 +1,5 @@
 // Payout events from stylists' Stripe accounts (a "Connected accounts" event destination): keeps each payout's status, and once Stripe has reconciled an automatic payout, marks the payments and refunds it paid out.
-import Stripe from "npm:stripe@22.6.2";
+import Stripe from "stripe";
 import { admin } from "../_shared/admin.ts";
 import { stripe } from "../_shared/stripe.ts";
 import { isHandled, markHandled } from "../_shared/stripe-events.ts";

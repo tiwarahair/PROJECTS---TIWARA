@@ -1,6 +1,6 @@
 // Stripe's Connect events (Accounts v2 "thin" events): verifies the signature, handles each event once, and
 // re-reads the account so stylists' payout status stays current whatever order events arrive in.
-import Stripe from "npm:stripe@22.6.2";
+import Stripe from "stripe";
 import { admin } from "../_shared/admin.ts";
 import { stripe, syncAccount } from "../_shared/stripe.ts";
 import { isHandled, markHandled } from "../_shared/stripe-events.ts";

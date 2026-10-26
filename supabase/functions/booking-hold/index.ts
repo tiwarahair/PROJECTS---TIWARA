@@ -1,4 +1,4 @@
-import { z } from "npm:zod@4";
+import { z } from "zod";
 import { admin } from "../_shared/admin.ts";
 import { getClientIp } from "../_shared/client-ip.ts";
 import { corsHeaders, respond } from "../_shared/cors.ts";

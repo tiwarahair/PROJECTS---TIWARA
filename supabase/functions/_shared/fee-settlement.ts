@@ -1,5 +1,5 @@
 // Settles a claimed fee: refunds what goes back to the client, then charges the saved card for the rest of the fee.
-import Stripe from "npm:stripe@22.6.2";
+import Stripe from "stripe";
 import { admin } from "./admin.ts";
 import { getCardLabel, isHardDecline } from "./declines.ts";
 import { getRefundable } from "./refundable.ts";

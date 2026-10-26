@@ -1,6 +1,6 @@
 // Nightly (pg_cron): deletes the photos of businesses closed over 15 days ago, then clears their details.
 // If a photo can't be deleted nothing is cleared, so tomorrow's run tries again.
-import { createClient } from "npm:@supabase/supabase-js@2";
+import { createClient } from "@supabase/supabase-js";
 
 const PHOTO_BUCKET = "stylist-photos";
 const BATCH = 100;

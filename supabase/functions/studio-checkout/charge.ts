@@ -1,5 +1,5 @@
 // A checkout's card charge on the client's saved card, and the refund when they paid more than the final price.
-import Stripe from "npm:stripe@22.6.2";
+import Stripe from "stripe";
 import { getCardLabel, isHardDecline } from "../_shared/declines.ts";
 import { getRefundable } from "../_shared/refundable.ts";
 import { getRecovery } from "../_shared/owed.ts";
