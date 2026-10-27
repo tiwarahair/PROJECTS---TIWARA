@@ -1,8 +1,13 @@
-import { Copy, Shield } from "lucide-react";
+import { skipToken } from "@reduxjs/toolkit/query";
+import { Shield } from "lucide-react";
 import { useState } from "react";
 import { Link } from "react-router";
 import { AllergyField } from "../../components/allergy-field";
 import { AllergyPrivacySheet } from "../../components/allergy-privacy-sheet";
+import { CalendarSubscribe } from "../../components/calendar-subscribe";
+import { PageMessage } from "../../components/page-message";
+import { useGetCalendarSecretQuery } from "../../stores/account-api";
+import { useAppSelector } from "../../stores/hooks";
 import { joinClassNames } from "../../utils/class-names";
 import type { AccountController } from "./use-account";
 import styles from "../../styles/features/account/settings-sections.module.css";
@@ -33,7 +38,6 @@ export const AccountSwitch = ({ id, labelId, on, onToggle }: SwitchProps) => (
 
 interface SharedSectionProps {
   account: AccountController;
-  getStylistName: (id: string) => string;
 }
 
 /** Before a first booking there's no stylist to share anything with. */
@@ -72,13 +76,29 @@ const SharedEmpty = ({ isWide }: { isWide: boolean }) => {
 };
 
 export const SharedSection = ({
-  account: { state, actions },
-  getStylistName,
+  account: { state, data, actions },
 }: SharedSectionProps) => {
-  const { entries, allergyEdit, allergyDraft } = state;
-  const { setState, showToast } = actions;
+  const { allergyEdit, allergyDraft, allergyConsent } = state;
+  const { sensitivities, areSensitivitiesLoaded, isSensitivitiesError } = data;
+  const { setState } = actions;
 
-  if (!entries.length)
+  if (isSensitivitiesError && !areSensitivitiesLoaded)
+    return (
+      <section data-screen-label="Account: Shared with stylists">
+        <PageMessage
+          title="Shared details didn’t load"
+          text="Check your connection, then try again."
+          linkLabel="Try again"
+          linkHref="/account?section=shared"
+          isReload
+        />
+      </section>
+    );
+
+  if (!areSensitivitiesLoaded)
+    return <section data-screen-label="Account: Shared with stylists" />;
+
+  if (!sensitivities.length)
     return (
       <section data-screen-label="Account: Shared with stylists">
         <SharedEmpty isWide={state.wide} />
@@ -89,16 +109,16 @@ export const SharedSection = ({
     <section data-screen-label="Account: Shared with stylists">
       <h2 className={ui.heading}>Allergies or sensitivities</h2>
       <div className={ui.list}>
-        {entries.map(({ id, text }, index) => {
-          const name = getStylistName(id);
+        {sensitivities.map(({ stylistId, stylistName, text }, index) => {
           const hasText = !!text;
           const isEditing = allergyEdit === index;
+          const needsConsent = !!allergyDraft.trim() && !allergyConsent;
 
           return (
-            <div key={id} className={ui.row}>
+            <div key={stylistId} className={ui.row}>
               <div className={ui.rowHead}>
                 <div className={styles.algMain}>
-                  <div className={ui.rowLabel}>{name}</div>
+                  <div className={ui.rowLabel}>{stylistName}</div>
                   {!isEditing && (
                     <div
                       className={joinClassNames(
@@ -115,7 +135,11 @@ export const SharedSection = ({
                     <button
                       className={styles.algButton}
                       onClick={() =>
-                        setState({ allergyEdit: index, allergyDraft: text })
+                        setState({
+                          allergyEdit: index,
+                          allergyDraft: text,
+                          allergyConsent: false,
+                        })
                       }
                     >
                       {hasText ? "Edit" : "Add"}
@@ -136,28 +160,31 @@ export const SharedSection = ({
               {isEditing && (
                 <div className={styles.algEdit}>
                   <AllergyField
-                    stylistName={name}
+                    stylistName={stylistName}
                     value={allergyDraft}
                     onChange={(draft) => setState({ allergyDraft: draft })}
                     autoFocus={true}
                   />
+                  {!!allergyDraft.trim() && (
+                    <label className={ui.checkLabel}>
+                      <input
+                        className={ui.checkbox}
+                        type="checkbox"
+                        checked={allergyConsent}
+                        onChange={() =>
+                          setState({ allergyConsent: !allergyConsent })
+                        }
+                      />
+                      {`I agree to share this with ${stylistName}`}
+                    </label>
+                  )}
                   <div className={styles.algEditActions}>
                     <button
                       className={ui.save}
-                      onClick={() => {
-                        const saved = allergyDraft.trim();
-
-                        setState(({ entries: current }) => ({
-                          entries: current.map((entry, position) =>
-                            position === index
-                              ? { ...entry, text: saved }
-                              : entry,
-                          ),
-                          allergyEdit: -1,
-                        }));
-
-                        showToast(saved ? "Saved" : "Removed");
-                      }}
+                      disabled={needsConsent}
+                      onClick={() =>
+                        void actions.saveSensitivity(stylistId, allergyDraft)
+                      }
                     >
                       Save
                     </button>
@@ -183,7 +210,15 @@ export const CommunicationSection = ({
 }: {
   account: AccountController;
 }) => {
-  const syncUrl = `webcal://tiwarashouse.com/cal/${state.sync}.ics`;
+  const userId = useAppSelector(({ session }) => session.user?.id);
+
+  const {
+    data: secret,
+    isError,
+    refetch,
+  } = useGetCalendarSecretQuery(userId ?? skipToken);
+
+  const feedUrl = secret ? `${window.location.origin}/cal/${secret}.ics` : "";
 
   return (
     <section data-screen-label="Account: Communication">
@@ -197,17 +232,7 @@ export const CommunicationSection = ({
             id="ac-mkt"
             labelId="ac-mkt-l"
             on={state.marketing}
-            onToggle={() => {
-              const isOn = !state.marketing;
-
-              actions.setState({ marketing: isOn });
-
-              actions.showToast(
-                isOn
-                  ? "You’ll get offers and news by email"
-                  : "You won’t get offers and news by email",
-              );
-            }}
+            onToggle={() => void actions.saveMarketing(!state.marketing)}
           />
         </div>
       </div>
@@ -219,33 +244,14 @@ export const CommunicationSection = ({
               "Add all your Tiwára's House bookings to your calendar automatically."
             }
           </p>
-          <label className={styles.syncLabel}>
-            Your calendar link{" "}
-            <input
-              className={styles.syncInput}
-              readOnly={true}
-              value={syncUrl}
-            />
-          </label>
-          <div className={ui.buttonRow}>
-            <button
-              className={styles.copy}
-              onClick={() => actions.copy(syncUrl, "Calendar link copied")}
-            >
-              <Copy className={ui.icon} size={16} strokeWidth={1.7} />
-              Copy calendar link
-            </button>
-            <button
-              className={ui.quietButton}
-              onClick={() => actions.openDialog({ kind: "sync" })}
-            >
-              Reset link
-            </button>
-          </div>
-          <p className={styles.syncHint}>
-            Paste the link into Google Calendar, Apple Calendar or Outlook as a
-            calendar subscription.
-          </p>
+          <CalendarSubscribe
+            feedUrl={feedUrl}
+            isError={isError}
+            hint="For another calendar app, copy the link and add it as a calendar subscription."
+            onRetry={() => void refetch()}
+            onCopy={(link) => actions.copy(link, "Calendar link copied")}
+            onReset={() => actions.openDialog({ kind: "sync" })}
+          />
         </div>
       </div>
     </section>
@@ -258,51 +264,59 @@ export const PrivacySection = ({
 }: {
   account: AccountController;
   onCookies: () => void;
-}) => (
-  <section data-screen-label="Account: Privacy and data">
-    <div className={ui.list}>
-      <div className={styles.privacyRow}>
-        <div className={ui.itemText}>
-          <div className={ui.itemTitle}>Download your data</div>
-          <div className={ui.itemSub}>
-            A copy of your details, bookings and payments.
+}) => {
+  const userId = useAppSelector(({ session }) => session.user?.id ?? "");
+  const [isDownloading, setDownloading] = useState(false);
+
+  const download = async () => {
+    setDownloading(true);
+    await actions.downloadMyData(userId);
+    setDownloading(false);
+  };
+
+  return (
+    <section data-screen-label="Account: Privacy and data">
+      <div className={ui.list}>
+        <div className={styles.privacyRow}>
+          <div className={ui.itemText}>
+            <div className={ui.itemTitle}>Download your data</div>
+            <div className={ui.itemSub}>
+              A copy of your details, bookings and payments.
+            </div>
           </div>
+          <button
+            className={ui.quietButton}
+            disabled={isDownloading}
+            onClick={() => void download()}
+          >
+            {isDownloading ? "Preparing…" : "Download"}
+          </button>
         </div>
-        <button
-          className={ui.quietButton}
-          onClick={() =>
-            actions.showToast(
-              "We’ll email you a copy of your data within one month.",
-            )
-          }
-        >
-          Request a copy
-        </button>
-      </div>
-      <div className={styles.privacyRow}>
-        <div className={ui.itemText}>
-          <div className={ui.itemTitle}>Cookie settings</div>
-          <div className={ui.itemSub}>Choose which cookies we use.</div>
+        <div className={styles.privacyRow}>
+          <div className={ui.itemText}>
+            <div className={ui.itemTitle}>Cookie settings</div>
+            <div className={ui.itemSub}>Choose which cookies we use.</div>
+          </div>
+          <button className={styles.cookieLink} onClick={onCookies}>
+            Cookie settings
+          </button>
         </div>
-        <button className={styles.cookieLink} onClick={onCookies}>
-          Cookie settings
-        </button>
       </div>
-    </div>
-    <div className={styles.danger} data-screen-label="Danger zone">
-      <h2 className={styles.dangerTitle}>Delete Account</h2>
-      <div className={styles.dangerRow}>
-        <div className={styles.dangerText}>
-          Delete your account and the details stored with it. This can’t be
-          undone.
+      <div className={styles.danger} data-screen-label="Danger zone">
+        <h2 className={styles.dangerTitle}>Delete Account</h2>
+        <div className={styles.dangerRow}>
+          <div className={styles.dangerText}>
+            Delete your account and the details stored with it. This can’t be
+            undone.
+          </div>
+          <button
+            className={styles.dangerButton}
+            onClick={() => actions.openDialog({ kind: "delete" })}
+          >
+            Delete account
+          </button>
         </div>
-        <button
-          className={styles.dangerButton}
-          onClick={() => actions.openDialog({ kind: "delete" })}
-        >
-          Delete account
-        </button>
       </div>
-    </div>
-  </section>
-);
+    </section>
+  );
+};

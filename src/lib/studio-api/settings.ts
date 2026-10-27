@@ -1,5 +1,5 @@
 // The business and its settings: details, hours, time off, rules, payment policy, notifications, booking link,
-// tax details, Stripe, and closing or reopening.
+// tax details, Stripe, the calendar feed, and closing or reopening.
 import type { TaxDetails } from "../../components/tax-details-form/logic";
 import type { TablesInsert, TablesUpdate } from "../../types/database";
 import { supabase } from "../supabase";
@@ -47,6 +47,31 @@ export const isSlugFree = (slug: string, stylistId: string) =>
     supabase.rpc("is_slug_free", { candidate: slug, for_stylist: stylistId }),
   );
 
+const toFeedUrl = (feedKey: string | null | undefined) => {
+  if (!feedKey) throw new Error("no_calendar_feed");
+
+  return `${window.location.origin}/cal/studio/${feedKey}.ics`;
+};
+
+export const fetchCalendarFeedUrl = async (stylistId: string) => {
+  const row = await check(
+    supabase
+      .from("stylist_private")
+      .select("calendar_feed_key")
+      .eq("stylist_id", stylistId)
+      .single(),
+  );
+
+  return toFeedUrl(row?.calendar_feed_key);
+};
+
+export const resetCalendarFeed = async (stylistId: string) =>
+  toFeedUrl(
+    await check(
+      supabase.rpc("reset_calendar_feed", { target_stylist: stylistId }),
+    ),
+  );
+
 /** Returns the new slug; throws with the server's reason (taken, reserved, 30-day limit). */
 export const changeSlug = (slug: string) =>
   write(supabase.rpc("change_slug", { new_slug: slug }));
@@ -75,7 +100,6 @@ export interface StripeAccountState {
 export const callStripe = async (action: "onboard" | "dashboard" | "refresh") =>
   (await invokeStudio<StripeAccountState>("stripe-connect", { action })) ?? {};
 
-/** Takes the booking page offline; it can be reopened for 15 days. */
 export const closeBusiness = () =>
   writeOrRefuse(supabase.rpc("close_business"), {
     has_upcoming:

@@ -1,62 +1,143 @@
 import { describe, expect, it } from "vitest";
-import type { AccountBooking, SavedCard } from "../data";
-import { formatCardDigits, formatCardExpiry, getBookingMoney } from "../logic";
+import type { AccountBooking } from "../data";
+import { getBookingMoney, getReceiptHtml } from "../logic";
 
-const CARDS: SavedCard[] = [
-  { id: "c1", brand: "Visa", last4: "4242", expiry: "08/28", isDefault: true },
-  {
-    id: "c2",
-    brand: "Mastercard",
-    last4: "4444",
-    expiry: "03/27",
-    isDefault: false,
-  },
-];
+const PAID_AT = new Date("2026-10-01T09:00:00Z").getTime();
 
 const getBooking = (patch: Partial<AccountBooking>): AccountBooking => ({
-  id: "TH-47118",
-  stylistId: "studio-zuri",
-  service: "Knotless braids",
-  customisation: "Medium · Mid-back",
-  extra: 15,
-  fallbackPrice: 150,
-  at: Date.now() - 34 * 864e5,
-  minutes: 300,
-  status: "cancelled",
+  id: "b1",
+  ref: "TH-48213",
+  status: "confirmed",
+  service: "Silk press",
+  customisation: "",
+  stylistSlug: "crown-studio",
+  stylistName: "Crown Studio",
+  stylistArea: "Ancoats",
+  cover: "",
+  isMobile: false,
+  where: "Crown Studio, 1 High St, Manchester",
+  at: Date.now() + 3 * 864e5,
+  minutes: 120,
+  pricePence: 6000,
+  feePence: 140,
+  tipPence: 0,
   mode: "deposit",
-  card: "c2",
+  cardLabel: "Visa •••• 4242",
+  paymentMethodId: "pm_1",
+  payments: [
+    { kind: "booking", method: "card", amountPence: 1340, paidAt: PAID_AT },
+  ],
+  refunds: [],
   ...patch,
 });
 
 describe("account logic", () => {
-  it("cancelled bookings refund the deposit and keep the booking fee", () => {
-    const money = getBookingMoney(getBooking({}), [], CARDS);
+  it("an upcoming booking shows what's paid and what's left to pay", () => {
+    const money = getBookingMoney(getBooking({}));
+
+    expect(money.tag[0]).toBe("Confirmed");
+    expect(money.paid).toBe("£13.40 paid");
+    expect(money.due).toBe(" · £48 to pay at your appointment");
+    expect(money.total).toBe("£61.40");
+  });
+
+  it("an appointment that's passed but isn't closed yet has nothing left to pay at it", () => {
+    const money = getBookingMoney(getBooking({ at: Date.now() - 864e5 }));
+
+    expect(money.due).toBe("");
+  });
+
+  it("a cancelled booking shows the refund on the receipt", () => {
+    const money = getBookingMoney(
+      getBooking({
+        status: "cancelled",
+        refunds: [{ amountPence: 1200, refundedAt: PAID_AT + 864e5 }],
+      }),
+    );
 
     expect(money.tag[0]).toBe("Cancelled");
-    expect(money.paid).toMatch(/^Deposit of £[\d.]+ refunded$/);
+    expect(money.paid).toBe("£1.40 paid · £12 refunded");
+    expect(money.due).toBe("");
 
-    expect(money.lines[1]).toMatchObject({
-      label: "Booking fee",
-      subtitle: "Not refundable",
-    });
+    expect(money.payments).toEqual([
+      { label: "Paid Thu 1 Oct · Visa •••• 4242", amount: "£13.40" },
+      { label: "Refunded Fri 2 Oct", amount: "−£12" },
+    ]);
 
-    expect(money.payments[0]?.label).toBe("Paid · Mastercard •••• 4444");
+    expect(money.lines).toEqual([
+      { label: "Silk press", subtitle: "Cancelled", amount: "£1.40" },
+    ]);
+
+    expect(money.total).toBe("£1.40");
   });
 
-  it("mobile stylists come to the default address, else 'your address'", () => {
-    const booking = getBooking({
-      stylistId: "amara-beauty",
-      status: "confirmed",
-      at: Date.now() + 9 * 864e5,
-    });
+  it("what's left to pay counts refunds, and an unknown payment method adds no separator", () => {
+    const money = getBookingMoney(
+      getBooking({
+        payments: [
+          {
+            kind: "booking",
+            method: "voucher",
+            amountPence: 1340,
+            paidAt: PAID_AT,
+          },
+        ],
+        refunds: [{ amountPence: 1340, refundedAt: PAID_AT }],
+      }),
+    );
 
-    const money = getBookingMoney(booking, [], CARDS);
-
-    expect(money.where).toMatch(/^.+(, | will come to your address)/);
+    expect(money.due).toBe(" · £61.40 to pay at your appointment");
+    expect(money.payments[0]?.label).toBe("Paid Thu 1 Oct");
   });
 
-  it("formats card details", () => {
-    expect(formatCardDigits("4242424242424242999")).toBe("4242 4242 4242 4242");
-    expect(formatCardExpiry("0828")).toBe("08 / 28");
+  it("the downloaded receipt escapes what stylists and clients typed", () => {
+    const html = getReceiptHtml(
+      {
+        ref: "TH-1",
+        date: "Thu 1 Oct",
+        stylist: "<img src=x onerror=alert(1)>",
+        where: "1 High St",
+        total: "£1",
+        lines: [{ label: "Silk & press", subtitle: "", amount: "£1" }],
+        payments: [],
+      },
+      { first: "Nia", last: "Okafor", email: "", mobile: "" },
+    );
+
+    expect(html).not.toContain("<img");
+    expect(html).toContain("&#60;img src=x onerror=alert(1)&#62;");
+    expect(html).toContain("Silk &#38; press");
+  });
+
+  it("a checked-out booking lists the tip and every payment", () => {
+    const money = getBookingMoney(
+      getBooking({
+        status: "completed",
+        tipPence: 500,
+        payments: [
+          {
+            kind: "booking",
+            method: "card",
+            amountPence: 1340,
+            paidAt: PAID_AT,
+          },
+          {
+            kind: "booking",
+            method: "cash",
+            amountPence: 5300,
+            paidAt: PAID_AT,
+          },
+        ],
+      }),
+    );
+
+    expect(money.lines.map(({ label }) => label)).toEqual([
+      "Silk press",
+      "Booking fee",
+      "Tip",
+    ]);
+
+    expect(money.payments[1]?.label).toBe("Paid Thu 1 Oct · Cash");
+    expect(money.paid).toBe("£66.40 paid");
   });
 });

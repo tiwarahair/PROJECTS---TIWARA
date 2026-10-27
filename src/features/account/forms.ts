@@ -3,32 +3,16 @@ import { useMemo } from "react";
 import { useForm } from "react-hook-form";
 import type { Profile } from "./data";
 import type { EditKey } from "./logic";
-import {
-  addressSchema,
-  cardSchema,
-  getEditSchema,
-  getPasswordSchema,
-} from "./schemas";
-import type {
-  AddressFormValues,
-  CardFormValues,
-  PasswordFormValues,
-} from "./schemas";
+import { addressSchema, getEditSchema, getPasswordSchema } from "./schemas";
+import type { AddressFormValues, PasswordFormValues } from "./schemas";
 
 interface FormContext {
   edit: EditKey | null;
   profile: Profile;
-  hasPassword: boolean;
+  isCodeSent: boolean;
 }
 
-export const EMPTY_CARD: CardFormValues = {
-  number: "",
-  expiry: "",
-  cvc: "",
-  isDefault: false,
-};
-
-export const EMPTY_PASSWORD: PasswordFormValues = { current: "", next: "" };
+export const EMPTY_PASSWORD: PasswordFormValues = { code: "", next: "" };
 
 export const useAccountForms = (
   draft: Profile,
@@ -52,20 +36,14 @@ export const useAccountForms = (
     mode: "onTouched",
     reValidateMode: "onSubmit",
     resolver: (values, context, options) => {
-      const { hasPassword, profile } = getContext();
+      const { isCodeSent, profile } = getContext();
 
-      return zodResolver(getPasswordSchema(hasPassword, profile))(
+      return zodResolver(getPasswordSchema(isCodeSent, profile))(
         values,
         context,
         options,
       );
     },
-  });
-
-  const card = useForm<CardFormValues>({
-    defaultValues: EMPTY_CARD,
-    reValidateMode: "onSubmit",
-    resolver: zodResolver(cardSchema),
   });
 
   const address = useForm<AddressFormValues>({
@@ -74,8 +52,8 @@ export const useAccountForms = (
   });
 
   return useMemo(
-    () => ({ edit, password, card, address }),
-    [edit, password, card, address],
+    () => ({ edit, password, address }),
+    [edit, password, address],
   );
 };
 

@@ -1,6 +1,6 @@
 // Email-first log in: "does this email have an account, and what kind?" Turnstile + rate limits, constant-ish time.
-import { createClient } from "npm:@supabase/supabase-js@2";
-import { z } from "npm:zod@4";
+import { createClient } from "@supabase/supabase-js";
+import { z } from "zod";
 import { getClientIp } from "../_shared/client-ip.ts";
 import { isHuman } from "../_shared/turnstile.ts";
 
@@ -20,10 +20,7 @@ const requestSchema = z.object({
   captchaToken: z.string().min(1).max(2048),
 });
 
-const supabase = createClient(
-  Deno.env.get("SUPABASE_URL")!,
-  Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!,
-);
+const supabase = createClient(Deno.env.get("SUPABASE_URL")!, Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!);
 
 const isWithinLimit = async (key: string, maxHits: number) => {
   const { data, error } = await supabase.rpc("hit_rate_limit", {

@@ -1,33 +1,34 @@
+import { useResetCalendarSecretMutation } from "../../../stores/account-api";
+import { useAppSelector } from "../../../stores/hooks";
 import { getAddressLine } from "../logic";
 import type { AccountController } from "../use-account";
-import type { AccountView } from "../view";
 import { closeThen } from "./close-then";
 import { Confirm } from "./confirm";
 
 interface AllergyRemoveProps {
   account: AccountController;
-  view: AccountView;
   index: number;
 }
 
-export const AllergyRemove = ({ account, view, index }: AllergyRemoveProps) => (
-  <Confirm
-    title="Remove this?"
-    text={`${view.getStylistName(account.state.entries[index]?.id ?? "")} won’t see it any more.`}
-    action="Remove"
-    onCancel={account.actions.closeDialog}
-    onConfirm={() => {
-      closeThen(account, ({ entries: current }) => ({
-        entries: current.map((entry, position) =>
-          position === index ? { ...entry, text: "" } : entry,
-        ),
-        dialog: null,
-      }));
+export const AllergyRemove = ({ account, index }: AllergyRemoveProps) => {
+  const { stylistId, stylistName } = account.data.sensitivities[index] ?? {
+    stylistId: "",
+    stylistName: "Your stylist",
+  };
 
-      account.actions.showToast("Removed");
-    }}
-  />
-);
+  return (
+    <Confirm
+      title="Remove this?"
+      text={`${stylistName} won’t see it any more.`}
+      action="Remove"
+      onCancel={account.actions.closeDialog}
+      onConfirm={() => {
+        closeThen(account, { dialog: null });
+        void account.actions.saveSensitivity(stylistId, "");
+      }}
+    />
+  );
+};
 
 interface CardRemoveProps {
   account: AccountController;
@@ -35,7 +36,7 @@ interface CardRemoveProps {
 }
 
 export const CardRemove = ({ account, id }: CardRemoveProps) => {
-  const { cards } = account.state;
+  const { cards } = account.data;
   const card = cards.find((item) => item.id === id);
 
   const defaultNote =
@@ -50,19 +51,8 @@ export const CardRemove = ({ account, id }: CardRemoveProps) => {
       action="Remove card"
       onCancel={account.actions.closeDialog}
       onConfirm={() => {
-        closeThen(account, ({ cards: current }) => {
-          let list = current.filter((item) => item.id !== id);
-
-          if (card?.isDefault && list.length)
-            list = list.map((item, index) => ({
-              ...item,
-              isDefault: index === 0,
-            }));
-
-          return { cards: list, dialog: null };
-        });
-
-        account.actions.showToast("Card removed");
+        closeThen(account, { dialog: null });
+        void account.actions.removeSavedCard(id);
       }}
     />
   );
@@ -80,7 +70,7 @@ export const LogoutAll = ({ account: { actions } }: LogoutAllProps) => (
     onCancel={actions.closeDialog}
     onConfirm={() => {
       actions.setState({ dialog: null, loggedOut: true });
-      actions.endSession();
+      actions.endSession("global");
       actions.showToast("You’re logged out of all devices");
     }}
   />
@@ -92,7 +82,7 @@ interface AddressRemoveProps {
 }
 
 export const AddressRemove = ({ account, id }: AddressRemoveProps) => {
-  const { addresses } = account.state;
+  const { addresses } = account.data;
   const address = addresses.find((item) => item.id === id);
 
   return (
@@ -106,17 +96,8 @@ export const AddressRemove = ({ account, id }: AddressRemoveProps) => {
       action="Remove"
       onCancel={account.actions.closeDialog}
       onConfirm={() => {
-        let list = addresses.filter((item) => item.id !== id);
-
-        if (address?.isDefault && list.length)
-          list = list.map((item, index) => ({
-            ...item,
-            isDefault: index === 0,
-          }));
-
-        account.actions.setAddresses(list);
         closeThen(account, { dialog: null });
-        account.actions.showToast("Address removed");
+        void account.actions.removeAddress(id);
       }}
     />
   );
@@ -126,19 +107,27 @@ interface SyncResetProps {
   account: AccountController;
 }
 
-export const SyncReset = ({ account }: SyncResetProps) => (
-  <Confirm
-    title="Reset your calendar link?"
-    text="The old link will stop working."
-    action="Reset link"
-    onCancel={account.actions.closeDialog}
-    onConfirm={() => {
-      closeThen(account, {
-        sync: Math.random().toString(36).slice(2, 10),
-        dialog: null,
-      });
+export const SyncReset = ({ account }: SyncResetProps) => {
+  const userId = useAppSelector(({ session }) => session.user?.id ?? "");
+  const [resetLink] = useResetCalendarSecretMutation();
+  const { closeDialog, showToast } = account.actions;
 
-      account.actions.showToast("New calendar link created");
-    }}
-  />
-);
+  return (
+    <Confirm
+      title="Reset your calendar link?"
+      text="The old link will stop working."
+      action="Reset link"
+      onCancel={closeDialog}
+      onConfirm={() => {
+        closeThen(account, { dialog: null });
+
+        resetLink(userId)
+          .unwrap()
+          .then(
+            () => showToast("New calendar link created"),
+            () => showToast("Your calendar link couldn’t be reset. Try again"),
+          );
+      }}
+    />
+  );
+};

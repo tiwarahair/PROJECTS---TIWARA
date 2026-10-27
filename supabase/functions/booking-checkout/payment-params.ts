@@ -14,15 +14,12 @@ export interface CheckoutQuote {
   payment_intent_id: string | null;
 }
 
-export const savesCard = (mode: CheckoutQuote["mode"]) =>
-  mode === "deposit" || mode === "card";
+export const savesCard = (mode: CheckoutQuote["mode"]) => mode === "deposit" || mode === "card";
 
 /** Deposit and full payments go to the stylist's Stripe account; the other modes only take the booking fee. */
-export const paysStylist = (mode: CheckoutQuote["mode"]) =>
-  mode === "deposit" || mode === "full";
+export const paysStylist = (mode: CheckoutQuote["mode"]) => mode === "deposit" || mode === "full";
 
-const getStylistFee = (quote: CheckoutQuote) =>
-  quote.fee_pence + getStripeFee(quote.due_today_pence - quote.fee_pence);
+const getStylistFee = (quote: CheckoutQuote) => quote.fee_pence + getStripeFee(quote.due_today_pence - quote.fee_pence);
 
 export const getRecoveryRoom = (quote: CheckoutQuote) =>
   paysStylist(quote.mode) ? quote.due_today_pence - getStylistFee(quote) : 0;
@@ -30,7 +27,7 @@ export const getRecoveryRoom = (quote: CheckoutQuote) =>
 export const getPaymentParams = (
   quote: CheckoutQuote,
   customerId: string | null,
-  keepCard = false,
+  requireCvc = false,
   recovered = 0,
   isHeld = false,
 ) => ({
@@ -43,14 +40,12 @@ export const getPaymentParams = (
     booking_id: quote.id,
     booking_ref: quote.ref,
     ...getRecoveryMetadata(quote.stylist_account, recovered),
-    ...(isHeld
-      ? { hold: "true", kept_pence: String(getStylistFee(quote)) }
-      : {}),
+    ...(isHeld ? { hold: "true", kept_pence: String(getStylistFee(quote)) } : {}),
   },
   ...(customerId ? { customer: customerId } : {}),
-  ...(savesCard(quote.mode) || keepCard
-    ? { setup_future_usage: "off_session" }
-    : {}),
+  ...(savesCard(quote.mode) ? { setup_future_usage: "off_session" as const } : {}),
+  // a signed-in client can pay with a saved card, so its CVC is asked for again; always set, so a retry can turn it off
+  payment_method_options: { card: { require_cvc_recollection: requireCvc } },
   ...(paysStylist(quote.mode) && !isHeld
     ? {
         // the booking fee, plus Stripe's fee on the stylist's part (and anything they owe)

@@ -1,7 +1,11 @@
 import { useEffect } from "react";
 import { FAVOURITES_HREF } from "../../hooks/use-favourites";
-import { setFavourite, syncFavourites } from "../../stores/favourites-slice";
-import { useAppDispatch, useAppStore } from "../../stores/hooks";
+import { loadFavourites, saveFavourite } from "../../stores/favourites-slice";
+import {
+  useAppDispatch,
+  useAppSelector,
+  useAppStore,
+} from "../../stores/hooks";
 import { dismissToasts, showToast } from "../../stores/toast-slice";
 import { readSession, writeSession } from "../../utils/page-flags";
 import { ActionToast } from "../action-toast";
@@ -14,41 +18,47 @@ import { FavLoginSheet } from "../fav-login-sheet";
 export const FavHost = () => {
   const dispatch = useAppDispatch();
   const store = useAppStore();
+  const userId = useAppSelector(({ session }) => session.user?.id);
 
-  // page "load": sync session + favourites, then the boot behaviours
+  // page "load": the account's favourites, then a heart tapped before logging in
   useEffect(() => {
-    dispatch(syncFavourites());
     const timers: number[] = [];
+    let isActive = true;
 
     const later = (callback: () => void, delay: number) =>
       timers.push(window.setTimeout(callback, delay));
 
-    const pending = readSession("tw_fav_pending");
+    if (userId) {
+      const pending = readSession("tw_fav_pending");
 
-    if (pending && store.getState().session.loggedIn) {
       writeSession("tw_fav_pending", null);
 
-      if (!store.getState().favourites.ids.includes(pending))
-        dispatch(setFavourite({ id: pending, on: true }));
+      void dispatch(loadFavourites(userId)).then(() => {
+        if (!isActive || !pending) return;
 
-      later(
-        () =>
-          dispatch(
-            showToast(
-              "Saved to favourites",
-              { label: "View", href: FAVOURITES_HREF },
-              { bottom: 84 },
+        if (!store.getState().favourites.ids.includes(pending))
+          void dispatch(saveFavourite({ id: pending, on: true }));
+
+        later(
+          () =>
+            dispatch(
+              showToast(
+                "Saved to favourites",
+                { label: "View", href: FAVOURITES_HREF },
+                { bottom: 84 },
+              ),
             ),
-          ),
-        700,
-      );
+          700,
+        );
+      });
     }
 
     return () => {
+      isActive = false;
       timers.forEach((timer) => window.clearTimeout(timer));
       dispatch(dismissToasts());
     };
-  }, [dispatch, store]);
+  }, [dispatch, store, userId]);
 
   return (
     <>

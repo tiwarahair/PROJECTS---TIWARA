@@ -235,7 +235,7 @@ export const NewClientDialog = ({ studio }: { studio: StudioController }) => {
       >
         <div className={styles.title}>Add a new client</div>
         <div className={styles.intro}>
-          Add phone or email to send confirmation to the client
+          Add phone or email so clients can be notified when needed
         </div>
         <div className={styles.twoColsMin}>
           <label className={styles.field}>

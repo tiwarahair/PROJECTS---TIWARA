@@ -70,7 +70,9 @@ describe("cancellation emails", () => {
     const { subject, text } = clientCancelled({ ...booking, ...studio });
 
     expect(subject).toBe("Cancelled: Silk press");
-    expect(text).toContain("Nia Okafor cancelled Silk press on Thursday 22 October at 17:30 (UK time). The time is free again.");
+    expect(text).toContain(
+      "Nia Okafor cancelled Silk press on Thursday 22 October at 17:30 (UK time). The time is free again.",
+    );
     expect(text).toContain("£20.00 was refunded to them.");
     expect(text).toContain("You keep £10.00 under your cancellation policy.");
   });
@@ -125,18 +127,23 @@ describe("link safety emails", () => {
     const { subject, text } = bookingCode({ ...booking, code: "042817" });
 
     expect(subject).toBe("Your code is 042817");
-    expect(text).toContain("It works for 10 minutes.");
     expect(text).toContain("https://dev.tiwarashouse.com/manage?secure=xyz");
   });
 
   it("the new link email carries the new manage link, and a guest's new save-details link", () => {
-    const { subject, text } = bookingLinkReset({ ...booking, save_details_url: null });
+    const { subject, text } = bookingLinkReset({
+      ...booking,
+      save_details_url: null,
+    });
 
     expect(subject).toBe("Your new booking link");
     expect(text).toContain("https://dev.tiwarashouse.com/manage?token=abc");
     expect(text).not.toContain("Save your details");
 
-    const guest = bookingLinkReset({ ...booking, save_details_url: "https://dev.tiwarashouse.com/save-details?token=new" });
+    const guest = bookingLinkReset({
+      ...booking,
+      save_details_url: "https://dev.tiwarashouse.com/save-details?token=new",
+    });
 
     expect(guest.text).toContain("https://dev.tiwarashouse.com/save-details?token=new");
   });
@@ -170,7 +177,11 @@ describe("fee emails", () => {
   });
 
   it("tell the client an undone no-show's fee is off", () => {
-    const { subject, text } = feeCancelled({ ...booking, kind: "no_show", fee_pence: 5000 });
+    const { subject, text } = feeCancelled({
+      ...booking,
+      kind: "no_show",
+      fee_pence: 5000,
+    });
 
     expect(subject).toBe("Your no-show fee is cancelled");
     expect(text).toContain("has undone the no-show for Silk press");
@@ -178,7 +189,12 @@ describe("fee emails", () => {
   });
 
   it("tell the client a fee was waived and what comes back", () => {
-    const { subject, text } = feeWaived({ ...booking, kind: "no_show", fee_pence: 5000, refund_pence: 3000 });
+    const { subject, text } = feeWaived({
+      ...booking,
+      kind: "no_show",
+      fee_pence: 5000,
+      refund_pence: 3000,
+    });
 
     expect(subject).toBe("Your £50.00 fee has been waived");
     expect(text).toContain("£30.00 is refunded to your card.");
@@ -231,8 +247,12 @@ describe("declined fee and dispute emails", () => {
   });
 
   it("tell the stylist about a dispute", () => {
-    expect(disputeOpened({ ...booking, amount_pence: 3163, reason: "product_not_received" }).text).toContain(
-      "The bank’s reason: product not received.",
-    );
+    expect(
+      disputeOpened({
+        ...booking,
+        amount_pence: 3163,
+        reason: "product_not_received",
+      }).text,
+    ).toContain("The bank’s reason: product not received.");
   });
 });

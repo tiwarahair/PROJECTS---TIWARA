@@ -1,4 +1,4 @@
-import { z } from "npm:zod@4";
+import { z } from "zod";
 
 const text = (max: number) => z.string().trim().max(max);
 
@@ -14,6 +14,8 @@ export const requestSchema = z.object({
   }),
   notes: text(500),
   allergies: text(1000),
+  clearAllergies: z.boolean().default(false),
+  requireCvc: z.boolean().default(false),
   address: z
     .object({
       line1: text(120).min(1),
@@ -25,7 +27,6 @@ export const requestSchema = z.object({
       lng: z.number(),
     })
     .optional(),
-  keepCard: z.boolean(),
   turnstileToken: z.string().min(1).max(2048),
 });
 

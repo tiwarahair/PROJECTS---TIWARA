@@ -1,5 +1,5 @@
 // The public pay page for a fee the client's card declined.
-import { invokeBookingFunction } from "./booking-api";
+import { invokeFunction } from "./invoke-function";
 
 export interface PaymentLink {
   status: "pending" | "paid" | "expired" | "cancelled";
@@ -15,10 +15,10 @@ export interface PaymentLink {
 }
 
 export const fetchPaymentLink = (token: string) =>
-  invokeBookingFunction<PaymentLink>("payment-link", { action: "view", token });
+  invokeFunction<PaymentLink>("payment-link", { action: "view", token });
 
 export const startLinkPayment = (token: string, turnstileToken: string) =>
-  invokeBookingFunction<{ clientSecret: string }>("payment-link", {
+  invokeFunction<{ clientSecret: string }>("payment-link", {
     action: "pay",
     token,
     turnstileToken,

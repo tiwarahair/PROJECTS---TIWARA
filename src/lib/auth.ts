@@ -1,4 +1,9 @@
 // Log in and sign-up: every Supabase Auth call those screens make; one seam for tests to stub.
+import type {
+  PasswordPerson,
+  PasswordProblem,
+  PasswordRole,
+} from "../../supabase/functions/_shared/password-rules";
 import type { AccountKind, PersonDetails, StylistDetails } from "../types/auth";
 import {
   checkEmailCode,
@@ -7,7 +12,14 @@ import {
   getPersonMetadata,
   TERMS_VERSION,
 } from "./auth-helpers";
+import { invokeFunction } from "./invoke-function";
 import { supabase } from "./supabase";
+
+export type NewPasswordProblem = PasswordProblem | "pwned";
+
+interface PasswordAnswer {
+  problem: NewPasswordProblem;
+}
 
 const getRedirect = (flow: string) =>
   `${window.location.origin}/login?flow=${flow}`;
@@ -105,6 +117,29 @@ export const sendPasswordReset = async (
   getErrorCode(error, []);
 };
 
+/**
+ * The server's check of a new password
+ */
+export const checkNewPassword = async (
+  password: string,
+  who?: PasswordRole,
+  { first, last, email }: PasswordPerson = {},
+) => {
+  try {
+    const { problem } = await invokeFunction<PasswordAnswer>("check-password", {
+      password,
+      who,
+      first,
+      last,
+      email,
+    });
+
+    return problem;
+  } catch {
+    return "";
+  }
+};
+
 export const setNewPassword = async (password: string) => {
   const { error } = await supabase.auth.updateUser({ password });
 
@@ -178,4 +213,4 @@ export const completeClientProfile = async (details: PersonDetails) => {
   if (error) throw new Error(error.message);
 };
 
-export const signOut = () => supabase.auth.signOut();
+export const signOut = () => supabase.auth.signOut({ scope: "local" });

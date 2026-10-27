@@ -59,10 +59,16 @@ export const useAccountFeedback = ({
             ],
           );
 
-        if (target === "code") refs.code[0]?.current?.focus();
+        if (target === "code") {
+          const row = current.codes.current.confirmed ? "next" : "current";
+
+          refs.codes[row][0]?.current?.focus();
+        }
 
         if (target === "password")
-          forms.password.setFocus(current.password.has ? "current" : "next");
+          forms.password.setFocus(
+            current.password.isCodeSent ? "code" : "next",
+          );
 
         if (target === "address") forms.address.setFocus("label");
       }, 40);
@@ -100,6 +106,24 @@ export const useAccountFeedback = ({
 
   const stopResendCountdown = () => window.clearInterval(resendTimer.current);
 
+  const saveWith = async (
+    task: () => Promise<unknown>,
+    done: string,
+    failed: string | ((error: unknown) => string),
+  ) => {
+    try {
+      await task();
+    } catch (error) {
+      showToast(typeof failed === "string" ? failed : failed(error));
+
+      return false;
+    }
+
+    showToast(done);
+
+    return true;
+  };
+
   const clearTimers = useCallback(() => {
     window.clearTimeout(toastTimer.current);
     window.clearInterval(resendTimer.current);
@@ -111,6 +135,7 @@ export const useAccountFeedback = ({
     startResendCountdown,
     stopResendCountdown,
     clearTimers,
+    saveWith,
   };
 };
 

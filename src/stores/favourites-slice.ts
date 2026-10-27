@@ -1,34 +1,21 @@
 import { createSlice } from "@reduxjs/toolkit";
-import type { PayloadAction } from "@reduxjs/toolkit";
+import type { Dispatch, PayloadAction } from "@reduxjs/toolkit";
+import { fetchFavourites, writeFavourite } from "../lib/favourites";
 import { sessionChanged } from "./session-slice";
-
-// kept on the device per account until favourites move to the database (Phase 6)
-const getStorageKey = (ownerId: string) => `tw_favs_${ownerId}`;
+import { showToast } from "./toast-slice";
 
 interface FavouritesState {
   ids: string[];
-  /** The signed-in account the saved list belongs to. */
+  isLoaded: boolean;
+  isFailed: boolean;
   ownerId: string | null;
-  /** Guest tapped a heart: the "Log in to save stylists" sheet is open for this stylist. */
   loginSheetFor: string | null;
 }
 
-const readStored = (ownerId: string): string[] => {
-  try {
-    return JSON.parse(
-      window.localStorage.getItem(getStorageKey(ownerId)) || "[]",
-    ) as string[];
-  } catch {
-    return [];
-  }
-};
-
-/** The logged-in account's saved favourites, else none. */
-const readFavourites = (ownerId: string | null): string[] =>
-  ownerId ? readStored(ownerId) : [];
-
 const initialState: FavouritesState = {
   ids: [],
+  isLoaded: false,
+  isFailed: false,
   ownerId: null,
   loginSheetFor: null,
 };
@@ -37,8 +24,22 @@ export const favouritesSlice = createSlice({
   name: "favourites",
   initialState,
   reducers: {
-    syncFavourites: (state) => {
-      state.ids = readFavourites(state.ownerId);
+    favouritesRequested: (state) => {
+      state.isFailed = false;
+    },
+    favouritesFailed: (state, { payload: ownerId }: PayloadAction<string>) => {
+      if (state.ownerId === ownerId && !state.isLoaded) state.isFailed = true;
+    },
+    favouritesLoaded: (
+      state,
+      {
+        payload: { ownerId, ids },
+      }: PayloadAction<{ ownerId: string; ids: string[] }>,
+    ) => {
+      if (state.ownerId !== ownerId) return;
+
+      state.ids = ids;
+      state.isLoaded = true;
     },
     setFavourite: (
       state,
@@ -49,16 +50,6 @@ export const favouritesSlice = createSlice({
       if (on) ids.unshift(id);
 
       state.ids = ids;
-
-      if (state.ownerId)
-        try {
-          window.localStorage.setItem(
-            getStorageKey(state.ownerId),
-            JSON.stringify(ids),
-          );
-        } catch {
-          // storage unavailable
-        }
     },
     openLoginSheet: (state, { payload }: PayloadAction<string>) => {
       state.loginSheetFor = payload;
@@ -69,10 +60,75 @@ export const favouritesSlice = createSlice({
   },
   extraReducers: (builder) =>
     builder.addCase(sessionChanged, (state, { payload }) => {
-      state.ownerId = payload?.id ?? null;
-      state.ids = readFavourites(state.ownerId);
+      const ownerId = payload?.id ?? null;
+
+      if (ownerId === state.ownerId) return;
+
+      state.ownerId = ownerId;
+      state.ids = [];
+      state.isLoaded = false;
+      state.isFailed = false;
     }),
 });
 
-export const { syncFavourites, setFavourite, openLoginSheet, closeLoginSheet } =
+export const { setFavourite, openLoginSheet, closeLoginSheet } =
   favouritesSlice.actions;
+
+const { favouritesRequested, favouritesFailed, favouritesLoaded } =
+  favouritesSlice.actions;
+
+// load the account's favourites
+export const loadFavourites =
+  (ownerId: string) =>
+  async (
+    dispatch: Dispatch,
+    getState: () => { favourites: FavouritesState },
+  ) => {
+    const startIds = getState().favourites.ids;
+
+    dispatch(favouritesRequested());
+
+    try {
+      const savedIds = await fetchFavourites();
+      // hearts tapped while loading win over the list read before they were saved
+      const currentIds = getState().favourites.ids;
+      const added = currentIds.filter((id) => !startIds.includes(id));
+      const removed = startIds.filter((id) => !currentIds.includes(id));
+
+      const ids = [
+        ...added,
+        ...savedIds.filter(
+          (id) => !added.includes(id) && !removed.includes(id),
+        ),
+      ];
+
+      dispatch(favouritesLoaded({ ownerId, ids }));
+    } catch {
+      // a list already shown stays as it is; with none yet, the page offers to try again
+      dispatch(favouritesFailed(ownerId));
+    }
+  };
+
+// each heart's saves wait for the one before, so quick taps reach the server in order
+const savesInFlight = new Map<string, Promise<void>>();
+
+/** Shows the change straight away, then turns the heart back if it can't be saved. */
+export const saveFavourite =
+  ({ id, on }: { id: string; on: boolean }) =>
+  (dispatch: Dispatch) => {
+    dispatch(setFavourite({ id, on }));
+
+    const save = (savesInFlight.get(id) ?? Promise.resolve())
+      .then(() => writeFavourite(id, on))
+      .catch(() => {
+        dispatch(setFavourite({ id, on: !on }));
+        dispatch(showToast("Your favourites couldn’t be saved. Try again"));
+      })
+      .finally(() => {
+        if (savesInFlight.get(id) === save) savesInFlight.delete(id);
+      });
+
+    savesInFlight.set(id, save);
+
+    return save;
+  };

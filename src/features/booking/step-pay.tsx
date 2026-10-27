@@ -1,3 +1,4 @@
+import { skipToken } from "@reduxjs/toolkit/query";
 import {
   Elements,
   ExpressCheckoutElement,
@@ -6,10 +7,12 @@ import {
   useStripe,
 } from "@stripe/react-stripe-js";
 import type { StripeExpressCheckoutElementConfirmEvent } from "@stripe/stripe-js";
-import { ArrowLeft, ArrowRight, Check, CircleAlert } from "lucide-react";
-import { useState } from "react";
+import { ArrowLeft, ArrowRight, CircleAlert } from "lucide-react";
+import { useEffect, useState } from "react";
 import { PaymentFieldsSkeleton } from "../../components/skeleton/payment-fields-skeleton";
 import { stripePromise } from "../../lib/stripe";
+import { useGetCardsSessionQuery } from "../../stores/account-api";
+import { useAppSelector } from "../../stores/hooks";
 import { joinClassNames } from "../../utils/class-names";
 import { OnboardingTurnstile } from "../onboarding/turnstile";
 import { getPayIntro } from "./logic/content";
@@ -24,6 +27,8 @@ import styles from "../../styles/features/booking/step-pay.module.css";
 import step from "../../styles/features/booking/step.module.css";
 import type { BookingController } from "./hooks/use-booking";
 
+const SESSION_WAIT_MS = 5000;
+
 const getPayButtonClass = (paying: boolean, isBlocked: boolean) => {
   if (paying) return styles.payButtonPaying;
 
@@ -35,10 +40,40 @@ interface StepPayProps {
 }
 
 export const StepPay = ({ booking }: StepPayProps) => {
-  const { state, money } = booking;
+  const { state, stylist, money } = booking;
+  const userId = useAppSelector(({ session }) => session.user?.id);
 
-  const savesCard =
-    money.policy.cardSaved || (state.loggedIn && state.keepCard);
+  const [hasGivenUp, setGivenUp] = useState(false);
+
+  // a signed-in client lists their saved cards; without it they still pay with a new card.
+  const { currentData: session, isError } = useGetCardsSessionQuery(
+    state.loggedIn && userId
+      ? { userId, canSave: !money.policy.cardSaved }
+      : skipToken,
+    { refetchOnMountOrArgChange: true, refetchOnReconnect: false },
+  );
+
+  const isWaiting = state.loggedIn && !session && !isError && !hasGivenUp;
+  const cardsSession = hasGivenUp ? undefined : session;
+
+  useEffect(() => {
+    if (!isWaiting) return;
+
+    const timer = window.setTimeout(() => setGivenUp(true), SESSION_WAIT_MS);
+
+    return () => window.clearTimeout(timer);
+  }, [isWaiting]);
+
+  if (isWaiting)
+    return (
+      <>
+        <h1 className={step.title}>{`Pay ${money.dueToday} today`}</h1>
+        <p className={styles.intro}>
+          {getPayIntro(money.policy.mode, stylist.policies.depositPercent)}
+        </p>
+        <PaymentFieldsSkeleton />
+      </>
+    );
 
   return (
     <Elements
@@ -48,7 +83,12 @@ export const StepPay = ({ booking }: StepPayProps) => {
         amount: toPence(money.policy.dueToday),
         currency: "gbp",
         allowedPaymentMethodTypes: ["card"],
-        setupFutureUsage: savesCard ? "off_session" : null,
+        // the policy keeps the card for this booking's charges; otherwise saving it is the client's tick
+        setupFutureUsage: money.policy.cardSaved ? "off_session" : null,
+        ...(state.loggedIn && {
+          paymentMethodOptions: { card: { require_cvc_recollection: true } },
+        }),
+        ...(cardsSession && { customerSessionClientSecret: cardsSession }),
         appearance: getPaymentAppearance(),
         fonts: getPaymentFonts(),
       }}
@@ -132,26 +172,6 @@ const PayForm = ({ booking }: StepPayProps) => {
               setState({ payError: "", payKind: "" });
           }}
         />
-        {state.loggedIn && !policy.cardSaved && (
-          <button
-            role="checkbox"
-            aria-checked={state.keepCard ? "true" : "false"}
-            onClick={() => setState({ keepCard: !state.keepCard })}
-            className={styles.future}
-          >
-            <span
-              className={joinClassNames(
-                styles.futureBox,
-                state.keepCard ? styles.futureBoxOn : styles.futureBoxOff,
-              )}
-            >
-              {state.keepCard && (
-                <Check size={11} strokeWidth={3} color="#fffefb" />
-              )}
-            </span>{" "}
-            Also save this card for future bookings
-          </button>
-        )}
         <div aria-live="assertive">
           {!!payError && (
             <div

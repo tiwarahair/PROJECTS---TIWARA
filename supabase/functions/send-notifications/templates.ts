@@ -20,14 +20,28 @@ import { payoutFailed, payoutPaid } from "./payout-emails.ts";
 import type { PayoutNotice } from "./payout-emails.ts";
 import { cardNotReplaced, cardUpdateNeeded } from "./card-emails.ts";
 import type { CardUpdateNeeded } from "./card-emails.ts";
-import { loginAlert } from "./security-emails.ts";
+import { accountCode, loginAlert } from "./security-emails.ts";
 import type { LoginAlert } from "./security-emails.ts";
 import { reviewInvited, reviewReceived, reviewReminder, reviewReplied } from "./review-emails.ts";
 import type { ReviewInvite, ReviewReceived, ReviewReply } from "./review-emails.ts";
-import { appealAnswered, decisionForReviewer, decisionForStylist, reportAlert, reportOutcome, reportSummary } from "./admin-emails.ts";
+import {
+  appealAnswered,
+  decisionForReviewer,
+  decisionForStylist,
+  reportAlert,
+  reportOutcome,
+  reportSummary,
+} from "./admin-emails.ts";
 import type { AppealAnswer, ReportAlert, ReportSummary, ReviewDecision } from "./admin-emails.ts";
 import { disputeOpened, feeCancelled, feeDeclined, feeScheduled, feeUnpaid, feeWaived } from "./fee-emails.ts";
-import type { CancelledFee, DeclinedFee, DisputeNotice, ScheduledFee, UnpaidFeeNotice, WaivedFee } from "./fee-emails.ts";
+import type {
+  CancelledFee,
+  DeclinedFee,
+  DisputeNotice,
+  ScheduledFee,
+  UnpaidFeeNotice,
+  WaivedFee,
+} from "./fee-emails.ts";
 import {
   autoCancelSoon,
   autoCancelled,
@@ -155,12 +169,10 @@ const templates: Record<string, TemplateBuilder> = {
   review_appeal_answered: (payload) => appealAnswered(payload as unknown as AppealAnswer),
   stylist_suspended: (payload) => stylistSuspended(payload as unknown as Suspension),
   stylist_unsuspended: (payload) => stylistUnsuspended(payload as unknown as Suspension),
+  account_code: (payload) => accountCode(payload as unknown as { code: string }),
 };
 
-export const renderEmail = (
-  template: string,
-  payload: Record<string, unknown>,
-) => {
+export const renderEmail = (template: string, payload: Record<string, unknown>) => {
   const build = templates[template];
 
   if (!build) throw new Error(`unknown template ${template}`);

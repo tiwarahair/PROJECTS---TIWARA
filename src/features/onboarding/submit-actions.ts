@@ -1,7 +1,15 @@
 import { becomeStylist } from "../../lib/account-changes";
-import { isAdminSession, signUpStylist } from "../../lib/auth";
+import {
+  checkNewPassword,
+  isAdminSession,
+  signUpStylist,
+} from "../../lib/auth";
 import { getAuthFailure } from "../../lib/auth-errors";
 import { needsSecondFactor } from "../../lib/two-factor";
+import {
+  getPasswordMin,
+  getPasswordProblemMessage,
+} from "../../utils/password";
 import { getStylistDetails, getWelcomeMessage } from "./submit-logic";
 import type { FinishKind } from "./submit-logic";
 import type { OnboardingCore } from "./use-onboarding";
@@ -145,9 +153,28 @@ export const getSubmitActions = ({
         return finish("newpro");
       }
 
+      const email = form.email.trim().toLowerCase();
+      const { first, last, password } = form;
+
+      const problem = await checkNewPassword(password, "pro", {
+        first,
+        last,
+        email,
+      });
+
+      if (problem) {
+        goTo("w4", "back");
+
+        return setState({
+          serverErrors: {
+            password: getPasswordProblemMessage(problem, getPasswordMin("pro")),
+          },
+        });
+      }
+
       const isNew = await signUpStylist(
-        form.email.trim().toLowerCase(),
-        form.password,
+        email,
+        password,
         takeCaptchaToken(),
         details,
       );

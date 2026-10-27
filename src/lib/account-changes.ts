@@ -6,7 +6,24 @@ import {
   getErrorCode,
   TERMS_VERSION,
 } from "./auth-helpers";
+import { checkNewPassword } from "./auth";
+import { AUTH_FAILURE_MESSAGES } from "./auth-errors";
 import { supabase } from "./supabase";
+
+export const EMAIL_CODE_FAILURES: Record<string, string> = {
+  email_exists: "That email is already used by another account.",
+  over_email_send_rate_limit: AUTH_FAILURE_MESSAGES.emailLimit,
+  failed: "The codes couldn’t be sent. Try again.",
+};
+
+export const PASSWORD_FAILURES: Record<string, string> = {
+  reauthentication_not_valid: "That code isn’t right or has expired.",
+  same_password: "That’s your current password. Choose a new one.",
+  pwned_password:
+    "This password has appeared in a data breach. Choose a different one.",
+  weak_password: "Choose a stronger password.",
+  failed: "Your password couldn’t be changed. Try again.",
+};
 
 /** Adds a business to the account; the refreshed session then carries is_stylist. */
 export const becomeStylist = async (details: StylistDetails) => {
@@ -41,14 +58,18 @@ export const sendReauthenticationCode = async () => {
 };
 
 /**
- * Sets a new password (with the emailed code when Supabase asks for one: `reauthentication_needed`),
- * then optionally signs out every other device.
+ * Sets a new password once the server's check passes (with the emailed code when Supabase asks for one:
+ * `reauthentication_needed`), then optionally signs out every other device.
  */
 export const changePassword = async (
   password: string,
   code: string,
   signOutOthers: boolean,
 ) => {
+  const problem = await checkNewPassword(password);
+
+  if (problem) return problem === "pwned" ? "pwned_password" : "weak_password";
+
   const { error } = await supabase.auth.updateUser({
     password,
     nonce: code || undefined,

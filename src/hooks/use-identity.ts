@@ -24,6 +24,7 @@ export const useIdentity = () => {
     email: user.email,
     mobile: profile?.mobile ?? "",
     marketing: profile?.marketing ?? false,
+    photoPath: profile?.photoPath ?? null,
     isLoaded: !!profile,
   };
 };

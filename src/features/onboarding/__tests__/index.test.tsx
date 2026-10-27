@@ -7,15 +7,25 @@ import type { UserEvent } from "@testing-library/user-event";
 import { setupUser } from "../../../test/setup-user";
 import { turnstileStub } from "../../../test/setup";
 import * as auth from "../../../lib/auth";
+import * as twoFactor from "../../../lib/two-factor";
 
 vi.mock("../../../lib/auth", async (importOriginal) => ({
   ...(await importOriginal<typeof import("../../../lib/auth")>()),
+  checkNewPassword: vi.fn(async () => ""),
   getAccountKind: vi.fn(),
   getSignedInAccount: vi.fn(),
   resendEmailCode: vi.fn(),
   signIn: vi.fn(),
   signUpClient: vi.fn(),
+  setNewPassword: vi.fn(async () => null),
+  signUpStylist: vi.fn(),
   verifyEmailCode: vi.fn(),
+}));
+
+vi.mock("../../../lib/two-factor", async (importOriginal) => ({
+  ...(await importOriginal<typeof import("../../../lib/two-factor")>()),
+  needsSecondFactor: vi.fn(async () => false),
+  verifySecondFactor: vi.fn(),
 }));
 
 vi.mock("../../../lib/supabase", async (importOriginal) => ({
@@ -297,6 +307,40 @@ describe("OnboardingPage", () => {
     expect(auth.getAccountKind).not.toHaveBeenCalled();
   });
 
+  it("a stylist password the server turns down goes back to the account step with why", async () => {
+    vi.mocked(auth.checkNewPassword).mockResolvedValueOnce("pwned");
+
+    localStorage.setItem(
+      "tw_onboarding_v1",
+      JSON.stringify({
+        form: {
+          email: "amara@tiwarashouse.com",
+          first: "Amara",
+          last: "Okonkwo",
+        },
+        geocodedLatLng: [53.45, -2.22],
+      }),
+    );
+
+    renderWithStore(<OnboardingPage />, "/join?screen=w4");
+
+    await user.type(screen.getByLabelText("Mobile"), "7700900456");
+    await user.type(screen.getByLabelText("Password"), "copper meadow 47");
+    await user.click(screen.getByRole("checkbox", { name: /Partner Terms/ }));
+    await user.click(screen.getByRole("button", { name: "Create account" }));
+    await screen.findByRole("heading", { name: "How did you hear about us?" });
+    await user.click(screen.getByRole("button", { name: /Skip/ }));
+
+    expect(
+      await screen.findByText(
+        "This password has appeared in a data breach. Choose a different one.",
+      ),
+    ).toBeInTheDocument();
+
+    expect(screen.getByLabelText("Password")).toBeInTheDocument();
+    expect(auth.signUpStylist).not.toHaveBeenCalled();
+  });
+
   it("the code screen loads the human check only when Resend is tapped", async () => {
     vi.mocked(auth.resendEmailCode).mockResolvedValue();
     saveProgress({ email: "ama@example.com", first: "Ama", last: "Mensah" });
@@ -376,6 +420,68 @@ describe("OnboardingPage", () => {
 
     expect(sessionStorage.getItem("tw_toast")).toBe(
       "Welcome to Tiwára’s House, Ama",
+    );
+  });
+
+  it("a password the server turns down says why, and nobody is signed up", async () => {
+    vi.mocked(auth.checkNewPassword).mockResolvedValueOnce("pwned");
+
+    saveProgress({ email: "ama@example.com", first: "Ama", last: "Mensah" });
+
+    renderWithStore(<OnboardingPage />, "/signup?screen=cust-create");
+
+    await user.type(screen.getByLabelText("Mobile"), "7700900123");
+    await user.type(screen.getByLabelText("Password"), "copper meadow 47");
+    await user.click(screen.getByRole("checkbox", { name: /Client Terms/ }));
+    await user.click(screen.getByRole("button", { name: "Create account" }));
+
+    expect(
+      await screen.findByText(
+        "This password has appeared in a data breach. Choose a different one.",
+      ),
+    ).toBeInTheDocument();
+
+    expect(auth.checkNewPassword).toHaveBeenCalledWith(
+      "copper meadow 47",
+      "client",
+      { first: "Ama", last: "Mensah", email: "ama@example.com" },
+    );
+
+    expect(auth.signUpClient).not.toHaveBeenCalled();
+  });
+
+  it("a reset on a two-factor account asks for the authenticator code before saving", async () => {
+    vi.mocked(twoFactor.needsSecondFactor).mockResolvedValueOnce(true);
+    vi.mocked(twoFactor.verifySecondFactor).mockResolvedValueOnce(true);
+
+    renderWithStore(<OnboardingPage />, "/login?flow=reset");
+
+    await user.type(
+      screen.getByLabelText("New password"),
+      "copper meadow 47 lantern",
+    );
+
+    await user.type(
+      screen.getByLabelText("Confirm new password"),
+      "copper meadow 47 lantern",
+    );
+
+    await user.click(screen.getByRole("button", { name: "Update password" }));
+    await screen.findByLabelText("Digit 1");
+
+    expect(auth.setNewPassword).not.toHaveBeenCalled();
+
+    for (const [index, digit] of [..."482913"].entries())
+      await user.type(screen.getByLabelText(`Digit ${index + 1}`), digit);
+
+    expect(
+      await screen.findByRole("heading", { name: "Password updated" }),
+    ).toBeInTheDocument();
+
+    expect(twoFactor.verifySecondFactor).toHaveBeenCalledWith("482913");
+
+    expect(auth.setNewPassword).toHaveBeenCalledWith(
+      "copper meadow 47 lantern",
     );
   });
 

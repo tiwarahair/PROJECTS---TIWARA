@@ -23,6 +23,7 @@ export const TEST_PROFILE: Profile = {
   last: "Okafor",
   mobile: "7700 900412",
   marketing: false,
+  photoPath: null,
 };
 
 interface RenderOptions {

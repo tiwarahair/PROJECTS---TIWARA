@@ -1,21 +1,17 @@
 // Password rules for every "create / change password" field.
 // Strength = zxcvbn-ts (guidance only, never blocks); loaded on first use, pages re-render once it's ready.
-// Real breached-password screening comes with the back end.
-import { passwordBlocklist } from "../data";
+// check-password checks the same rules again, plus breached passwords.
+import {
+  getBlockKind,
+  getPasswordProblem,
+  PASSWORD_MAX,
+} from "../../supabase/functions/_shared/password-rules";
+import type {
+  BlockKind,
+  PasswordProblem,
+} from "../../supabase/functions/_shared/password-rules";
 
-const PASSWORD_MAX = 64;
-
-// ban site names from the password
-const SITE_NAMES = [
-  "tiwara",
-  "tiwaras",
-  "tiwarashouse",
-  "tiwarasstudio",
-  "tiwarastudio",
-];
-
-export const getPasswordMin = (who: "pro" | "client"): number =>
-  who === "pro" ? 8 : 15;
+export { getPasswordMin } from "../../supabase/functions/_shared/password-rules";
 
 type PasswordChecker = typeof import("./password-checker");
 
@@ -51,17 +47,12 @@ export const onPasswordCheckerReady = (listener: () => void): (() => void) => {
   };
 };
 
-const normaliseAccents = (value = ""): string =>
-  value.toLowerCase().normalize("NFD").replace(/[̀-ͯ]/g, "");
-
 export interface PasswordCheckOptions {
   min?: number;
   first?: string;
   last?: string;
   email?: string;
 }
-
-type BlockKind = "" | "common" | "name" | "site";
 
 export interface PasswordCheck {
   min: number;
@@ -85,28 +76,6 @@ const BLOCK_MESSAGES: Record<Exclude<BlockKind, "">, string> = {
   site: "Your password can’t be the name of this website. Choose a different one.",
 };
 
-interface BlockKindInputs {
-  length: number;
-  flat: string;
-  lettersOnly: string;
-  names: string[];
-}
-
-const getBlockKind = ({
-  length,
-  flat,
-  lettersOnly,
-  names,
-}: BlockKindInputs): BlockKind => {
-  if (!length) return "";
-
-  if (passwordBlocklist.includes(flat)) return "common";
-
-  if (lettersOnly && names.includes(lettersOnly)) return "name";
-
-  return SITE_NAMES.includes(lettersOnly) ? "site" : "";
-};
-
 const getLevel = (failsRules: boolean, score: number | null): 0 | 1 | 2 => {
   if (failsRules) return 0;
 
@@ -117,28 +86,22 @@ const getLevel = (failsRules: boolean, score: number | null): 0 | 1 | 2 => {
   return score === 3 ? 1 : 2;
 };
 
-interface PasswordErrorInputs {
-  length: number;
-  long: boolean;
-  blockKind: BlockKind;
-  short: boolean;
-  min: number;
-}
+export const getPasswordProblemMessage = (
+  problem: PasswordProblem | "pwned",
+  min: number,
+) => {
+  if (!problem) return "";
 
-const getPasswordError = ({
-  length,
-  long,
-  blockKind,
-  short,
-  min,
-}: PasswordErrorInputs) => {
-  if (!length) return "Enter a password";
+  if (problem === "pwned")
+    return "This password has appeared in a data breach. Choose a different one.";
 
-  if (long) return `Use ${PASSWORD_MAX} characters or fewer`;
+  if (problem === "long") return `Use ${PASSWORD_MAX} characters or fewer`;
 
-  if (blockKind) return BLOCK_MESSAGES[blockKind];
+  if (problem === "bytes") return "Use fewer accented letters or emojis";
 
-  return short ? `Use at least ${min} characters` : "";
+  return problem === "short"
+    ? `Use at least ${min} characters`
+    : BLOCK_MESSAGES[problem];
 };
 
 export const checkPassword = (
@@ -147,32 +110,11 @@ export const checkPassword = (
 ): PasswordCheck => {
   const min = options.min || 15;
   const length = [...value].length;
-  const lowered = normaliseAccents(value);
-  // whole-password comparison only: lowercase, no spaces; names/site may only have digits or symbols added
-  const flat = lowered.replace(/\s+/g, "");
-  const lettersOnly = flat.replace(/[^a-z]/g, "");
-
-  const toLetters = (text?: string) =>
-    normaliseAccents(text).replace(/[^a-z]/g, "");
-
-  const first = toLetters(options.first);
-  const last = toLetters(options.last);
-
   const email = (options.email || "").toLowerCase().trim();
-
   const emailName = email.split("@")[0] ?? "";
-
-  const names = [
-    first,
-    last,
-    first + last,
-    last + first,
-    toLetters(emailName),
-    toLetters(email),
-  ].filter(Boolean);
-
-  const blockKind = getBlockKind({ length, flat, lettersOnly, names });
+  const blockKind = getBlockKind(value, options);
   const blocked = !!blockKind;
+  const problem = getPasswordProblem(value, min, options);
   const short = length < min;
   const long = length > PASSWORD_MAX;
 
@@ -202,10 +144,13 @@ export const checkPassword = (
     }
   }
 
-  // 0-2 Weak, 3 Good, 4 Strong; failing length or blocklist is always Weak
-  const level = getLevel(!length || short || long || blocked, score);
-  const error = getPasswordError({ length, long, blockKind, short, min });
+  // 0-2 Weak, 3 Good, 4 Strong; failing any rule is always Weak
+  const level = getLevel(!length || !!problem, score);
   const labels = ["Weak", "Good", "Strong"] as const;
+
+  const error = length
+    ? getPasswordProblemMessage(problem, min)
+    : "Enter a password";
 
   return {
     min,

@@ -1,5 +1,5 @@
 // Studio's checkout: prices it on the server, charges the saved card or refunds an overpayment, then completes it.
-import { z } from "npm:zod@4";
+import { z } from "zod";
 import { admin } from "../_shared/admin.ts";
 import { corsHeaders, respond } from "../_shared/cors.ts";
 import { getSignedInUser } from "../_shared/recent-user.ts";

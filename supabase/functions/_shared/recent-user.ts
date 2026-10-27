@@ -1,10 +1,11 @@
 // The signed-in caller, if their session passed 2FA with an authenticator-app code in the last 30 days.
-import type { SupabaseClient } from "npm:@supabase/supabase-js@2";
+import type { SupabaseClient } from "@supabase/supabase-js";
 
 const RECENT_SECONDS = 30 * 86400;
 
 const getClaims = async (admin: SupabaseClient, request: Request) => {
   const token = request.headers.get("Authorization")?.replace(/^Bearer /, "") ?? "";
+
   const { data } = await admin.auth.getClaims(token);
 
   return data?.claims;
@@ -13,6 +14,12 @@ const getClaims = async (admin: SupabaseClient, request: Request) => {
 /** The signed-in caller, with or without 2FA. */
 export const getSignedInUser = async (admin: SupabaseClient, request: Request) =>
   (await getClaims(admin, request))?.sub ?? null;
+
+export const getSignedInSession = async (admin: SupabaseClient, request: Request) => {
+  const claims = await getClaims(admin, request);
+
+  return claims?.sub && claims.session_id ? { user: claims.sub, sessionId: String(claims.session_id) } : null;
+};
 
 export const getRecentUser = async (admin: SupabaseClient, request: Request) => {
   const claims = await getClaims(admin, request);

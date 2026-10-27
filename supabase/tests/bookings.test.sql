@@ -113,7 +113,9 @@ update public.stylists set pause_on = true where id = (select second from ids);
 select is(pg_temp.times((select second from svc), (select day from ids)), null, 'paused online bookings have no starts');
 update public.stylists set pause_on = false where id = (select second from ids);
 
-update public.booking_rules set max_notice_months = 12 where stylist_id = (select mobile from ids);
+-- the next October change can be just over a year away (25-31 October), past the 12-month limit; the test is rolled back
+alter table public.booking_rules drop constraint booking_rules_max_notice_months_check;
+update public.booking_rules set max_notice_months = 13 where stylist_id = (select mobile from ids);
 select is(array_length(pg_temp.times((select mobile from svc), pg_temp.next_change(10)), 1), 17, 'clocks going back: the same 17 starts');
 select is(
   (select extract(hour from min(slot) at time zone 'UTC')::int

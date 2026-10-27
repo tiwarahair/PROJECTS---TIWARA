@@ -107,32 +107,10 @@ export interface Profile {
   mobile: string;
 }
 
-type BookingStatus =
-  "confirmed" | "awaiting" | "completed" | "cancelled" | "noshow";
-
-export interface AccountBooking {
-  id: string;
-  stylistId: string;
-  service: string;
-  customisation: string;
-  extra: number;
-  /** Fallback price when the service is not on the stylist's menu. */
-  fallbackPrice: number;
-  at: number;
-  minutes: number;
-  status: BookingStatus;
-  mode: "deposit" | "card" | "full";
-  card: string;
-}
+export type { AccountBooking } from "../../types/client-booking";
 
 const DAY_MS = 864e5;
 
 export const QUIZ_DAYS_AGO = 36 * DAY_MS;
 
-export interface SavedCard {
-  id: string;
-  brand: string;
-  last4: string;
-  expiry: string;
-  isDefault: boolean;
-}
+export type { SavedCard } from "../../types/saved-card";

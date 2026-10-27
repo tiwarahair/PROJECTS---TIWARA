@@ -16,7 +16,9 @@ describe("Stripe keys", () => {
 
   it("each retry of a failed cancellation refund or transfer gets a new key", () => {
     expect(getCancelRefundKey("b-1", "client_cancelled", 3000, 0)).toBe("booking:b-1:client_cancelled-refund:3000");
-    expect(getCancelRefundKey("b-1", "client_cancelled", 3000, 2)).toBe("booking:b-1:client_cancelled-refund:3000:retry:2");
+    expect(getCancelRefundKey("b-1", "client_cancelled", 3000, 2)).toBe(
+      "booking:b-1:client_cancelled-refund:3000:retry:2",
+    );
     expect(getTransferKey("p-1", 0)).toBe("fee-transfer:p-1");
     expect(getTransferKey("p-1", 1)).toBe("fee-transfer:p-1:retry:1");
   });

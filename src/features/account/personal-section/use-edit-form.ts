@@ -16,7 +16,7 @@ export const useEditForm = (account: AccountController) => {
     cancelEdit: () => {
       actions.stopResendCountdown();
       forms.edit.clearErrors();
-      actions.setState({ edit: null, emailStep: "", codeError: "" });
+      actions.setState({ edit: null, emailStep: "" });
     },
   };
 };

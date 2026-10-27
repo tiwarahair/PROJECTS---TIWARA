@@ -53,6 +53,10 @@ export interface AllergyState {
   text: string;
   prior: boolean;
   focus: boolean;
+  /** The client has changed the box themselves, so a late prefill leaves it alone. */
+  touched: boolean;
+  /** It was filled in with what they already share with this stylist. */
+  wasShared: boolean;
 }
 
 interface Photo {
@@ -92,7 +96,6 @@ export interface BookingState {
   time: string | null;
   details: Details;
   photos: Photo[];
-  keepCard: boolean;
   loggedIn: boolean;
   guest: boolean;
   editContact: boolean;

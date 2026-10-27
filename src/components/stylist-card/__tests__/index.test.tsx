@@ -5,6 +5,11 @@ import { StylistCard } from "..";
 import type { UserEvent } from "@testing-library/user-event";
 import { setupUser } from "../../../test/setup-user";
 
+vi.mock("../../../lib/favourites", () => ({
+  fetchFavourites: vi.fn(),
+  writeFavourite: vi.fn(() => Promise.resolve()),
+}));
+
 let user: UserEvent;
 
 beforeEach(() => {

@@ -56,9 +56,7 @@ describe("moderation emails", () => {
       "you can appeal once",
     );
 
-    expect(renderEmail("review_decision_stylist", { ...decision, can_appeal: false }).text).not.toContain(
-      "appeal",
-    );
+    expect(renderEmail("review_decision_stylist", { ...decision, can_appeal: false }).text).not.toContain("appeal");
   });
 
   it("says an appeal answer is final", () => {

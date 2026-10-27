@@ -1,9 +1,21 @@
-import { screen } from "@testing-library/react";
+import { act, screen, waitFor } from "@testing-library/react";
 import type { UserEvent } from "@testing-library/user-event";
-import { beforeEach, describe, expect, it } from "vitest";
-import { renderWithStore } from "../../../test/render-with-store";
+import { beforeEach, describe, expect, it, vi } from "vitest";
+import { getAccountPhotoUrl } from "../../../lib/account-photo";
+import { api } from "../../../stores/api-slice";
+import {
+  renderWithStore,
+  TEST_PROFILE,
+  TEST_USER,
+} from "../../../test/render-with-store";
 import { setupUser } from "../../../test/setup-user";
 import { SiteHeader } from "..";
+
+vi.mock("../../../lib/account-photo", () => ({
+  getAccountPhotoUrl: vi.fn(() =>
+    Promise.resolve("https://storage.test/signed/photo.jpg"),
+  ),
+}));
 
 let user: UserEvent;
 
@@ -47,5 +59,59 @@ describe("SiteHeader", () => {
     expect(screen.getByRole("button", { name: "Account" })).toHaveTextContent(
       "AB",
     );
+  });
+
+  it("shows a signed-in client's own photo", async () => {
+    const { container, store } = renderWithStore(<SiteHeader />, "/", {
+      signedIn: true,
+    });
+
+    store.dispatch(
+      api.util.upsertQueryEntries([
+        {
+          endpointName: "getProfile",
+          arg: TEST_USER.id,
+          value: { ...TEST_PROFILE, photoPath: "test-user/photo.jpg" },
+        },
+      ]),
+    );
+
+    await waitFor(() =>
+      expect(
+        container.querySelector(
+          'img[src="https://storage.test/signed/photo.jpg"]',
+        ),
+      ).not.toBeNull(),
+    );
+
+    expect(getAccountPhotoUrl).toHaveBeenCalledWith("test-user/photo.jpg");
+  });
+
+  it("shows a skeleton, not initials, while the photo is on its way", async () => {
+    vi.mocked(getAccountPhotoUrl).mockReturnValueOnce(new Promise(() => {}));
+
+    const { container, store } = renderWithStore(<SiteHeader />, "/", {
+      signedIn: true,
+    });
+
+    act(() => {
+      store.dispatch(
+        api.util.upsertQueryEntries([
+          {
+            endpointName: "getProfile",
+            arg: TEST_USER.id,
+            value: { ...TEST_PROFILE, photoPath: "test-user/photo.jpg" },
+          },
+        ]),
+      );
+    });
+
+    await waitFor(() =>
+      expect(container.querySelector(".react-loading-skeleton")).not.toBeNull(),
+    );
+
+    expect(
+      screen.getByRole("button", { name: "Account" }),
+    ).not.toHaveTextContent("NO");
   });
 });

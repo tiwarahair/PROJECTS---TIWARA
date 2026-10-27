@@ -1,13 +1,12 @@
 import { useCallback } from "react";
 import type { MouseEvent } from "react";
-import { openLoginSheet, setFavourite } from "../stores/favourites-slice";
+import { openLoginSheet, saveFavourite } from "../stores/favourites-slice";
 import { useAppDispatch, useAppSelector } from "../stores/hooks";
 import { showToast } from "../stores/toast-slice";
 import { prefersReducedMotion } from "../utils/page-flags";
 
 export const FAVOURITES_HREF = "/account?section=favourites";
 
-/** Heart "pop" on save. */
 const popHeart = (element: Element) => {
   const svg = element.querySelector("svg") ?? element;
 
@@ -24,7 +23,6 @@ const popHeart = (element: Element) => {
   );
 };
 
-/** Favourites: the one heart handler every heart calls. */
 export const useFavourites = () => {
   const dispatch = useAppDispatch();
   const loggedIn = useAppSelector((state) => state.session.loggedIn);
@@ -48,7 +46,7 @@ export const useFavourites = () => {
 
       const isOn = !favouriteIds.includes(id);
 
-      dispatch(setFavourite({ id, on: isOn }));
+      void dispatch(saveFavourite({ id, on: isOn }));
 
       if (event?.currentTarget && isOn) popHeart(event.currentTarget);
 

@@ -1,8 +1,8 @@
 // Stripe Connect (Express) for a stylist: "onboard" creates their account if needed and returns Stripe's
 // onboarding link; "dashboard" returns a link to their Express dashboard; "refresh" re-reads the account
 // (for when they come back from Stripe before the webhook lands). Payout actions need a recent 2FA code.
-import { createClient } from "npm:@supabase/supabase-js@2";
-import { z } from "npm:zod@4";
+import { createClient } from "@supabase/supabase-js";
+import { z } from "zod";
 import { corsHeaders, respond } from "../_shared/cors.ts";
 import { getRecentUser, getSignedInUser } from "../_shared/recent-user.ts";
 import { getSite } from "../_shared/site.ts";
@@ -30,8 +30,7 @@ type TaxRow = {
 } | null;
 
 /** The embedded one-to-one row arrives as an object, or as a list when nothing matches. */
-const toTaxRow = (value: unknown): TaxRow =>
-  (Array.isArray(value) ? (value[0] ?? null) : value) as TaxRow;
+const toTaxRow = (value: unknown): TaxRow => (Array.isArray(value) ? (value[0] ?? null) : value) as TaxRow;
 
 /** What we already know, so Stripe asks for less. */
 const getIdentity = (tax: TaxRow) => {
@@ -112,21 +111,24 @@ Deno.serve(async (request) => {
   if (!accountId) {
     const syncedAt = new Date().toISOString();
 
-    const account = await stripe.v2.core.accounts.create({
-      contact_email: stylist.contact_email ?? undefined,
-      display_name: stylist.business_name,
-      dashboard: "express",
-      defaults: {
-        currency: "gbp",
-        responsibilities: { fees_collector: "application", losses_collector: "application" },
+    const account = await stripe.v2.core.accounts.create(
+      {
+        contact_email: stylist.contact_email ?? undefined,
+        display_name: stylist.business_name,
+        dashboard: "express",
+        defaults: {
+          currency: "gbp",
+          responsibilities: { fees_collector: "application", losses_collector: "application" },
+        },
+        identity: getIdentity(toTaxRow(stylist.stylist_tax_details)),
+        configuration: {
+          recipient: { capabilities: { stripe_balance: { stripe_transfers: { requested: true } } } },
+        },
+        metadata: { stylist_id: stylist.id },
+        include: ["configuration.recipient", "requirements"],
       },
-      identity: getIdentity(toTaxRow(stylist.stylist_tax_details)),
-      configuration: {
-        recipient: { capabilities: { stripe_balance: { stripe_transfers: { requested: true } } } },
-      },
-      metadata: { stylist_id: stylist.id },
-      include: ["configuration.recipient", "requirements"],
-    }, { idempotencyKey: `onboard-${stylist.id}` });
+      { idempotencyKey: `onboard-${stylist.id}` },
+    );
 
     const { data: saved, error } = await admin
       .from("stylists")

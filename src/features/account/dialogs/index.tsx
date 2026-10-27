@@ -13,7 +13,7 @@ import {
   SyncReset,
 } from "./confirms";
 import { CookieSettings } from "./cookies";
-import { DeleteAccount, DeleteBlocked } from "./delete";
+import { DeleteDialog } from "./delete";
 import { ReceiptDialog } from "./receipt";
 import styles from "../../../styles/features/account/dialogs/index.module.css";
 import pageGlobal from "../../../styles/features/account/index-global.module.css";
@@ -34,7 +34,7 @@ const getContent = (account: AccountController, view: AccountView) => {
     return <ReceiptDialog account={account} view={view} />;
 
   if (dialog.kind === "allergy")
-    return <AllergyRemove account={account} view={view} index={dialog.index} />;
+    return <AllergyRemove account={account} index={dialog.index} />;
 
   if (dialog.kind === "card")
     return <CardRemove account={account} id={dialog.id} />;
@@ -50,12 +50,7 @@ const getContent = (account: AccountController, view: AccountView) => {
 
   if (dialog.kind === "cookies") return <CookieSettings account={account} />;
 
-  if (view.blocked)
-    return (
-      <DeleteBlocked account={account} upcomingCount={view.upcoming.length} />
-    );
-
-  return <DeleteAccount account={account} />;
+  return <DeleteDialog account={account} />;
 };
 
 /** Overlay + dialog for receipts, confirmations, add card, cookie settings and delete account. */

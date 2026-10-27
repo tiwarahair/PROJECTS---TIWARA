@@ -9,6 +9,8 @@ import type { UserEvent } from "@testing-library/user-event";
 import { setupUser } from "../../../test/setup-user";
 import { stripeStub } from "../../../test/setup";
 import { startCheckout } from "../../../lib/booking-api";
+import { startCardsSession } from "../../../lib/client-cards";
+import { fetchMySensitivity } from "../../../lib/client-sensitivities";
 
 vi.mock("../../../lib/public-profiles", async (original) =>
   (await import("../../../test/booking-mocks")).mockPublicProfiles(original),
@@ -17,6 +19,14 @@ vi.mock("../../../lib/public-profiles", async (original) =>
 vi.mock("../../../lib/booking-api", async (original) =>
   (await import("../../../test/booking-mocks")).mockBookingApi(original),
 );
+
+vi.mock("../../../lib/client-cards", () => ({
+  startCardsSession: vi.fn(() => Promise.resolve("cuss_secret")),
+}));
+
+vi.mock("../../../lib/client-sensitivities", () => ({
+  fetchMySensitivity: vi.fn(() => Promise.resolve("")),
+}));
 
 let user: UserEvent;
 
@@ -169,6 +179,45 @@ describe("BookingPage", () => {
     expect(screen.getByLabelText("First name")).toHaveValue("");
   });
 
+  it("details: fills in what the client already shares with this stylist, and log out clears it", async () => {
+    vi.mocked(fetchMySensitivity).mockResolvedValueOnce("Sensitive scalp");
+    await renderSavedBooking({ step: 4 }, { signedIn: true });
+    await act(() => vi.advanceTimersByTimeAsync(100));
+
+    expect(fetchMySensitivity).toHaveBeenCalledWith("tiwaras-house");
+    expect(screen.getByText("Still correct?")).toBeInTheDocument();
+    expect(screen.getByText("Sensitive scalp")).toBeInTheDocument();
+
+    await user.click(screen.getByRole("button", { name: "Log out" }));
+
+    expect(screen.queryByText("Sensitive scalp")).not.toBeInTheDocument();
+  });
+
+  it("details: a filled-in note arriving late leaves a box the client already changed alone", async () => {
+    let finishLoading: (text: string) => void = () => {};
+
+    vi.mocked(fetchMySensitivity).mockReturnValueOnce(
+      new Promise((resolve) => {
+        finishLoading = resolve;
+      }),
+    );
+
+    await renderSavedBooking({ step: 4 }, { signedIn: true });
+
+    const optIn = screen.getByRole("checkbox", {
+      name: /I have allergies or sensitivities/,
+    });
+
+    await user.click(optIn);
+    await user.click(optIn);
+
+    await act(async () => finishLoading("Sensitive scalp"));
+    await act(() => vi.advanceTimersByTimeAsync(100));
+
+    expect(optIn).toHaveAttribute("aria-checked", "false");
+    expect(screen.queryByText("Sensitive scalp")).not.toBeInTheDocument();
+  });
+
   it("review: shows the policy card and Continue to payment", async () => {
     await renderSavedBooking({ step: 5, guest: true, details: GUEST_DETAILS });
 
@@ -189,6 +238,77 @@ describe("BookingPage", () => {
     expect(screen.getByTestId("payment-skeleton")).toBeInTheDocument();
     await user.click(screen.getByTestId("payment-element"));
     expect(screen.queryByTestId("payment-skeleton")).not.toBeInTheDocument();
+  });
+
+  it("pay: a signed-in client's card box lists their saved cards and asks for a saved card's CVC", async () => {
+    await renderSavedBooking({ step: 6 }, { signedIn: true });
+    await act(() => vi.advanceTimersByTimeAsync(100));
+
+    expect(screen.getByTestId("payment-element")).toBeInTheDocument();
+
+    // Stripe offers its save tick only when the policy doesn't keep the card anyway
+    expect(startCardsSession).toHaveBeenCalledWith(
+      !stripeStub.elementsOptions?.setupFutureUsage,
+    );
+
+    expect(stripeStub.elementsOptions).toMatchObject({
+      customerSessionClientSecret: "cuss_secret",
+      paymentMethodOptions: { card: { require_cvc_recollection: true } },
+    });
+
+    expect(
+      screen.queryByRole("checkbox", { name: /save this card/i }),
+    ).not.toBeInTheDocument();
+  });
+
+  it("pay: a signed-in client's payment asks for the CVC like their card box", async () => {
+    await renderSavedBooking({ step: 6 }, { signedIn: true });
+    await act(() => vi.advanceTimersByTimeAsync(100));
+
+    await user.click(
+      screen.getByRole("button", { name: /^Pay £.* & confirm/ }),
+    );
+
+    expect(startCheckout).toHaveBeenCalledWith(
+      expect.objectContaining({ requireCvc: true }),
+    );
+  });
+
+  it("pay: a saved-cards session that doesn't come still lets them pay by card", async () => {
+    let finishSession: (secret: string) => void = () => {};
+
+    vi.mocked(startCardsSession).mockReturnValueOnce(
+      new Promise((resolve) => {
+        finishSession = resolve;
+      }),
+    );
+
+    await renderSavedBooking({ step: 6 }, { signedIn: true });
+
+    expect(screen.queryByTestId("payment-element")).not.toBeInTheDocument();
+
+    await act(() => vi.advanceTimersByTimeAsync(5000));
+
+    expect(screen.getByTestId("payment-element")).toBeInTheDocument();
+
+    await act(async () => finishSession("cuss_late"));
+    await act(() => vi.advanceTimersByTimeAsync(100));
+
+    expect(stripeStub.elementsOptions).not.toHaveProperty(
+      "customerSessionClientSecret",
+    );
+  });
+
+  it("pay: guests just enter a card", async () => {
+    await renderSavedBooking({ step: 6, guest: true, details: GUEST_DETAILS });
+
+    expect(stripeStub.elementsOptions).not.toHaveProperty(
+      "customerSessionClientSecret",
+    );
+
+    expect(stripeStub.elementsOptions).not.toHaveProperty(
+      "paymentMethodOptions",
+    );
   });
 
   it("pay: Stripe's decline shows its message and keeps the hold", async () => {

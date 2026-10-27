@@ -6,6 +6,8 @@ export interface SavedAddress {
   line2: string;
   town: string;
   postcode: string;
+  lat?: number | null;
+  lng?: number | null;
   isDefault: boolean;
 }
 

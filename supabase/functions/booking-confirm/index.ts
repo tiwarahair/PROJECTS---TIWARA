@@ -1,6 +1,6 @@
 // The client's confirm page for a booking a stylist made: "view" shows it, "pay" starts the same payment online
 // checkout takes (deposit + fee, full + fee, or the fee with the card saved), Turnstile-checked.
-import { z } from "npm:zod@4";
+import { z } from "zod";
 import { admin } from "../_shared/admin.ts";
 import { getClientIp } from "../_shared/client-ip.ts";
 import { corsHeaders, respond } from "../_shared/cors.ts";
@@ -10,11 +10,21 @@ import { paysStylist } from "../booking-checkout/payment-params.ts";
 import { getConfirmCustomer, getConfirmIntent } from "./stripe-payment.ts";
 import type { ConfirmQuote } from "./stripe-payment.ts";
 
-const CONFIRM_ERRORS = ["link_not_valid", "already_confirmed", "confirm_link_changed", "link_expired", "booking_unavailable"];
+const CONFIRM_ERRORS = [
+  "link_not_valid",
+  "already_confirmed",
+  "confirm_link_changed",
+  "link_expired",
+  "booking_unavailable",
+];
 
 const requestSchema = z.discriminatedUnion("action", [
   z.object({ action: z.literal("view"), token: z.string().min(1).max(100) }),
-  z.object({ action: z.literal("pay"), token: z.string().min(1).max(100), turnstileToken: z.string().min(1).max(2048) }),
+  z.object({
+    action: z.literal("pay"),
+    token: z.string().min(1).max(100),
+    turnstileToken: z.string().min(1).max(2048),
+  }),
 ]);
 
 Deno.serve(async (request) => {

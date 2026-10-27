@@ -1,16 +1,52 @@
-import { joinClassNames } from "../../../utils/class-names";
+import { skipToken } from "@reduxjs/toolkit/query";
+import { Link } from "react-router";
+import { isDeletionBlocked } from "../../../lib/client-account";
+import type { DeletionBlockers } from "../../../lib/client-account";
+import { useGetDeletionBlockersQuery } from "../../../stores/account-api";
+import { useAppSelector } from "../../../stores/hooks";
+import { formatAccountDate } from "../logic";
+import { DeleteAccount } from "./delete-account";
 import type { AccountController } from "../use-account";
 import shared from "../../../styles/features/account/dialogs/index.module.css";
 import styles from "../../../styles/features/account/dialogs/delete.module.css";
+import ui from "../../../styles/features/account/ui.module.css";
+
+interface DeleteDialogProps {
+  account: AccountController;
+}
+
+export const DeleteDialog = ({ account }: DeleteDialogProps) => {
+  const userId = useAppSelector(({ session }) => session.user?.id);
+
+  const { data: blockers, refetch } = useGetDeletionBlockersQuery(
+    userId ?? skipToken,
+    { refetchOnMountOrArgChange: true },
+  );
+
+  if (!blockers)
+    return (
+      <div data-screen-label="Delete account checking">
+        <h2 className={shared.title} id="ac-dlg-t">
+          Delete your account
+        </h2>
+        <p className={styles.deleteDetail}>Checking your account…</p>
+      </div>
+    );
+
+  if (isDeletionBlocked(blockers))
+    return <DeleteBlocked account={account} blockers={blockers} />;
+
+  return <DeleteAccount account={account} onBlocked={() => void refetch()} />;
+};
 
 interface DeleteBlockedProps {
   account: AccountController;
-  upcomingCount: number;
+  blockers: DeletionBlockers;
 }
 
-export const DeleteBlocked = ({
+const DeleteBlocked = ({
   account: { actions },
-  upcomingCount,
+  blockers: { bookings, owesMoney, hasBusiness },
 }: DeleteBlockedProps) => (
   <div data-screen-label="Delete account blocked">
     <h2 className={shared.title} id="ac-dlg-t">
@@ -21,11 +57,39 @@ export const DeleteBlocked = ({
         "You can't delete your account while you have upcoming bookings or money owed."
       }
     </p>
-    <p className={styles.deleteDetail}>
-      {upcomingCount === 1
-        ? "You have 1 upcoming booking. Cancel it or wait until it’s over, then try again."
-        : `You have ${upcomingCount} upcoming bookings. Cancel them or wait until they’re over, then try again.`}
-    </p>
+    {bookings.length > 0 && (
+      <ul className={styles.deleteList}>
+        {bookings.map(({ ref, stylistName, startsAt }) => (
+          <li key={ref}>
+            {`${stylistName}, ${formatAccountDate(Date.parse(startsAt), true)} · `}
+            <Link
+              className={ui.quietButton}
+              to={`/manage?ref=${ref}`}
+              onClick={actions.closeDialog}
+            >
+              Manage booking
+            </Link>
+          </li>
+        ))}
+      </ul>
+    )}
+    {bookings.length > 0 && (
+      <p className={styles.deleteDetail}>
+        Cancel them or wait until they’re over, then try again.
+      </p>
+    )}
+    {owesMoney && (
+      <p className={styles.deleteDetail}>
+        You have a fee or balance to pay. Pay it from the link in your email,
+        then try again.
+      </p>
+    )}
+    {hasBusiness && (
+      <p className={styles.deleteDetail}>
+        Your login also runs a business on Tiwára’s House. Contact support to
+        close both.
+      </p>
+    )}
     <div className={shared.actions}>
       <button
         className={styles.viewBookings}
@@ -42,70 +106,3 @@ export const DeleteBlocked = ({
     </div>
   </div>
 );
-
-interface DeleteAccountProps {
-  account: AccountController;
-}
-
-export const DeleteAccount = ({
-  account: { state, refs, actions },
-}: DeleteAccountProps) => {
-  const { deleteText } = state;
-  const canDelete = deleteText.trim() === "DELETE";
-
-  return (
-    <div data-screen-label="Delete account allowed">
-      <h2 className={shared.title} id="ac-dlg-t">
-        Delete your account?
-      </h2>
-      <p className={styles.deleteLead}>This can’t be undone.</p>
-      <div className={styles.deleteHeading}>We’ll delete</div>
-      <ul className={styles.deleteList}>
-        <li>Your name and contact details</li>
-        <li>Your favourites</li>
-        <li>Allergies you’ve shared with stylists</li>
-        <li>Your saved cards</li>
-      </ul>
-      <div className={styles.keepHeading}>We’ll keep, anonymised</div>
-      <p className={styles.keepText}>
-        Payment records, because we have to keep them for tax and refunds. Your
-        name won’t be attached.
-      </p>
-      <label className={styles.deleteLabel}>
-        Type DELETE to confirm{" "}
-        <input
-          className={styles.deleteInput}
-          ref={refs.deleteConfirm}
-          value={deleteText}
-          onChange={(event) =>
-            actions.setState({ deleteText: event.target.value.toUpperCase() })
-          }
-          autoComplete="off"
-          autoCapitalize="characters"
-          spellCheck="false"
-        />
-      </label>
-      <div className={shared.actions}>
-        <button className={shared.secondary} onClick={actions.closeDialog}>
-          Cancel
-        </button>
-        <button
-          className={joinClassNames(
-            styles.deleteButton,
-            canDelete ? styles.deleteReady : styles.deleteBlocked,
-          )}
-          onClick={() => {
-            if (!canDelete) return;
-
-            actions.setState({ dialog: null, deleted: true });
-            actions.endSession();
-            actions.showToast("Your account has been deleted");
-          }}
-          disabled={!canDelete}
-        >
-          Delete account
-        </button>
-      </div>
-    </div>
-  );
-};

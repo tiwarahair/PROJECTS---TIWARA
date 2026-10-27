@@ -16,10 +16,7 @@ interface BookingRefund {
  * Refunds a booking's payment once per reason (no more than is still on it), taking the stylist's share back when
  * they were paid. Gives the refund and its amount, or no id when nothing could be refunded.
  */
-const refundBooking = async (
-  { bookingId, paymentIntentId, amount, reason }: BookingRefund,
-  failures: number,
-) => {
+const refundBooking = async ({ bookingId, paymentIntentId, amount, reason }: BookingRefund, failures: number) => {
   if (!paymentIntentId) return { id: null, amount: 0 };
 
   const { data: earlier } = await stripe.refunds.list({
@@ -51,12 +48,7 @@ const refundBooking = async (
       ...(intent.transfer_data ? { reverse_transfer: true } : {}),
     },
     {
-      idempotencyKey: getCancelRefundKey(
-        bookingId,
-        reason,
-        refundAmount,
-        failures,
-      ),
+      idempotencyKey: getCancelRefundKey(bookingId, reason, refundAmount, failures),
     },
   );
 
@@ -67,11 +59,7 @@ const refundBooking = async (
 };
 
 const getCancellation = async (bookingId: string) => {
-  const { data, error } = await admin
-    .from("bookings")
-    .select("cancellation")
-    .eq("id", bookingId)
-    .single();
+  const { data, error } = await admin.from("bookings").select("cancellation").eq("id", bookingId).single();
 
   if (error) throw error;
 
@@ -85,29 +73,20 @@ const getCancellation = async (bookingId: string) => {
  * A free cancellation's booking fee is ours to give back, but Stripe took the whole refund from the stylist's
  * transfer: that part of our fee goes back to them. Once only, even when tried again.
  */
-const giveBookingFeeBack = async (
-  bookingId: string,
-  paymentIntentId: string,
-  amount: number,
-) => {
-  const { latest_charge: charge } = await stripe.paymentIntents.retrieve(
-    paymentIntentId,
-    { expand: ["latest_charge"] },
-  );
+const giveBookingFeeBack = async (bookingId: string, paymentIntentId: string, amount: number) => {
+  const { latest_charge: charge } = await stripe.paymentIntents.retrieve(paymentIntentId, {
+    expand: ["latest_charge"],
+  });
 
   if (!charge || typeof charge === "string" || !charge.application_fee) return;
 
-  const feeId =
-    typeof charge.application_fee === "string"
-      ? charge.application_fee
-      : charge.application_fee.id;
+  const feeId = typeof charge.application_fee === "string" ? charge.application_fee : charge.application_fee.id;
 
   const { data: earlier } = await stripe.applicationFees.listRefunds(feeId, {
     limit: 100,
   });
 
-  if (earlier.some(({ metadata }) => metadata?.booking_fee_back === bookingId))
-    return;
+  if (earlier.some(({ metadata }) => metadata?.booking_fee_back === bookingId)) return;
 
   await stripe.applicationFees.createRefund(
     feeId,
@@ -128,11 +107,7 @@ export const refundCancellation = async (refund: BookingRefund) => {
     const made = await refundBooking(refund, failures);
 
     if (made.id && refund.paymentIntentId && feeRefund > 0)
-      await giveBookingFeeBack(
-        refund.bookingId,
-        refund.paymentIntentId,
-        Math.min(feeRefund, made.amount),
-      );
+      await giveBookingFeeBack(refund.bookingId, refund.paymentIntentId, Math.min(feeRefund, made.amount));
 
     const { error } = await admin.rpc("set_cancel_refund", {
       target: refund.bookingId,
@@ -144,8 +119,7 @@ export const refundCancellation = async (refund: BookingRefund) => {
   } catch (refundError) {
     await admin.rpc("note_refund_failure", {
       target: refund.bookingId,
-      message:
-        refundError instanceof Error ? refundError.message : String(refundError),
+      message: refundError instanceof Error ? refundError.message : String(refundError),
     });
 
     throw refundError;

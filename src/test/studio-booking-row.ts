@@ -78,6 +78,7 @@ export const getClientRow = (
   phone: "07700900123",
   email: "nia@example.com",
   photo_path: "",
+  account_photo_path: "",
   photo_url: "",
   hair_notes: "Rosemary oil",
   blocked: false,

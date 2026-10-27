@@ -28,7 +28,7 @@ export const getCustomerId = async (quote: CheckoutQuote, contact: Contact, clie
   return customer.id;
 };
 
-export const getPaymentIntent = async (quote: CheckoutQuote, customerId: string | null, keepCard: boolean) => {
+export const getPaymentIntent = async (quote: CheckoutQuote, customerId: string | null, requireCvc: boolean) => {
   const existing = quote.payment_intent_id ? await stripe.paymentIntents.retrieve(quote.payment_intent_id) : null;
 
   if (existing && !OPEN_STATUSES.includes(existing.status)) return existing;
@@ -38,7 +38,7 @@ export const getPaymentIntent = async (quote: CheckoutQuote, customerId: string 
     paysStylist(quote.mode) && (existing ? !existing.transfer_data : await isPayoutHeld(quote.stylist_account));
 
   const recovered = isHeld ? 0 : await getRecovery(quote.stylist_account, getRecoveryRoom(quote));
-  const params = getPaymentParams(quote, customerId, keepCard, recovered, isHeld);
+  const params = getPaymentParams(quote, customerId, requireCvc, recovered, isHeld);
 
   // what's owed and the hold are part of the key, as they change the charge
   if (!existing)
@@ -46,7 +46,7 @@ export const getPaymentIntent = async (quote: CheckoutQuote, customerId: string 
       idempotencyKey: `booking:${quote.id}:pi:${recovered}${isHeld ? ":held" : ""}`,
     });
 
-  const { amount, application_fee_amount, customer, setup_future_usage, metadata } = params;
+  const { amount, application_fee_amount, customer, setup_future_usage, payment_method_options, metadata } = params;
 
   return stripe.paymentIntents.update(existing.id, {
     amount,
@@ -54,5 +54,6 @@ export const getPaymentIntent = async (quote: CheckoutQuote, customerId: string 
     ...(application_fee_amount ? { application_fee_amount } : {}),
     ...(customer ? { customer } : {}),
     setup_future_usage: setup_future_usage ?? "",
+    payment_method_options,
   });
 };

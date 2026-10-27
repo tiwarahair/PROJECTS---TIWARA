@@ -176,6 +176,25 @@ describe("the manage booking page", () => {
     ).toHaveAttribute("href", "/tiwaras-house");
   });
 
+  it("an auto-cancelled booking shows as cancelled, with nothing left to change", async () => {
+    vi.mocked(getManagedBooking).mockResolvedValue({
+      ...booking,
+      status: "auto_cancelled",
+      can_cancel: false,
+      can_reschedule: false,
+    });
+
+    renderPage();
+
+    expect(
+      await screen.findByRole("heading", { name: "Your booking is cancelled" }),
+    ).toBeInTheDocument();
+
+    expect(
+      screen.queryByRole("button", { name: "Cancel booking" }),
+    ).not.toBeInTheDocument();
+  });
+
   it("opening the cancel dialog refreshes the terms, so a passed deadline shows", async () => {
     renderPage();
     await screen.findByRole("button", { name: "Cancel booking" });
@@ -377,6 +396,16 @@ describe("the manage booking page", () => {
 
     expect(getOwnerManageToken).toHaveBeenCalledWith("TH-ABC123");
     expect(getManagedBooking).toHaveBeenCalledWith("owner-token");
+  });
+
+  it("from the account, links back to the bookings", async () => {
+    renderWithStore(<ManageBookingPage />, "/manage?ref=TH-ABC123", {
+      signedIn: true,
+    });
+
+    expect(
+      await screen.findByRole("link", { name: "Your bookings" }),
+    ).toHaveAttribute("href", "/account?section=bookings");
   });
 
   it("someone else's booking ref isn't valid", async () => {

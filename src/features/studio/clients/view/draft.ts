@@ -58,8 +58,14 @@ export const getDraftView = ({
       ? findDuplicate(state, draft.phone, draft.email, draft.id)
       : null;
 
-  // clientEdit.img: undefined = untouched (use the client's saved photo), '' = removed, data URL = new pick
-  const savedImage = draft?.id ? getClient(state, draft.id).img || "" : "";
+  // clientEdit.img: undefined = untouched (use the client's saved photo), '' = removed, data URL = new pick.
+  // Only the stylist's own photo is theirs to change, not the client's account photo shown in its place.
+  const editing = draft?.id ? getClient(state, draft.id) : null;
+
+  const isOwnPhoto =
+    !!editing?.photoPath || !!editing?.img?.startsWith("data:");
+
+  const savedImage = isOwnPhoto ? editing?.img || "" : "";
 
   const showAdded = () => {
     if (isWide) {

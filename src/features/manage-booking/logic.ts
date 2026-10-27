@@ -22,6 +22,9 @@ const getParts = (iso: string) =>
       .map(({ type, value }) => [type, value]),
   );
 
+export const isCancelledStatus = (status: string) =>
+  status === "cancelled" || status === "auto_cancelled";
+
 export const formatWhen = (iso: string) => {
   const { weekday, day, month, hour, minute } = getParts(iso);
 
