@@ -180,6 +180,75 @@ export type Database = {
           },
         ];
       };
+      assistant_conversations: {
+        Row: {
+          created_at: string;
+          id: string;
+          title: string | null;
+          user_id: string;
+        };
+        ComputedFields: never;
+        Insert: {
+          created_at?: string;
+          id?: string;
+          title?: string | null;
+          user_id?: string;
+        };
+        Update: {
+          created_at?: string;
+          id?: string;
+          title?: string | null;
+          user_id?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "assistant_conversations_user_id_fkey";
+            columns: ["user_id"];
+            isOneToOne: false;
+            referencedRelation: "profiles";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
+      assistant_messages: {
+        Row: {
+          body: string;
+          conversation_id: string;
+          created_at: string;
+          id: string;
+          image_path: string | null;
+          role: string;
+          safety: string | null;
+        };
+        ComputedFields: never;
+        Insert: {
+          body: string;
+          conversation_id: string;
+          created_at?: string;
+          id?: string;
+          image_path?: string | null;
+          role: string;
+          safety?: string | null;
+        };
+        Update: {
+          body?: string;
+          conversation_id?: string;
+          created_at?: string;
+          id?: string;
+          image_path?: string | null;
+          role?: string;
+          safety?: string | null;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "assistant_messages_conversation_id_fkey";
+            columns: ["conversation_id"];
+            isOneToOne: false;
+            referencedRelation: "assistant_conversations";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
       booking_codes: {
         Row: {
           attempts: number;
@@ -448,9 +517,9 @@ export type Database = {
           cancellation: Json | null;
           cancelled_at: string | null;
           cancelled_by: string | null;
-          card_label: string | null;
           card_checked_at: string | null;
           card_failed_at: string | null;
+          card_label: string | null;
           card_setup_intent_id: string | null;
           card_update_requested_at: string | null;
           checkout: Json | null;
@@ -486,6 +555,8 @@ export type Database = {
           protection_overridden_at: string | null;
           protection_status: string;
           ref: string;
+          reminder_24_at: string | null;
+          reminder_48_at: string | null;
           reschedule_count: number;
           service_id: string | null;
           site: string;
@@ -504,8 +575,12 @@ export type Database = {
           unsaved_refund_failures: number;
           get_balance_due: number | null;
           get_cancellation_terms: Json | null;
+          notify_card_not_replaced: undefined | null;
         };
-        ComputedFields: "get_balance_due" | "get_cancellation_terms";
+        ComputedFields:
+          | "get_balance_due"
+          | "get_cancellation_terms"
+          | "notify_card_not_replaced";
         Insert: {
           address?: Json | null;
           allergies?: string | null;
@@ -520,9 +595,9 @@ export type Database = {
           cancellation?: Json | null;
           cancelled_at?: string | null;
           cancelled_by?: string | null;
-          card_label?: string | null;
           card_checked_at?: string | null;
           card_failed_at?: string | null;
+          card_label?: string | null;
           card_setup_intent_id?: string | null;
           card_update_requested_at?: string | null;
           checkout?: Json | null;
@@ -558,6 +633,8 @@ export type Database = {
           protection_overridden_at?: string | null;
           protection_status?: string;
           ref?: string;
+          reminder_24_at?: string | null;
+          reminder_48_at?: string | null;
           reschedule_count?: number;
           service_id?: string | null;
           site?: string;
@@ -589,9 +666,9 @@ export type Database = {
           cancellation?: Json | null;
           cancelled_at?: string | null;
           cancelled_by?: string | null;
-          card_label?: string | null;
           card_checked_at?: string | null;
           card_failed_at?: string | null;
+          card_label?: string | null;
           card_setup_intent_id?: string | null;
           card_update_requested_at?: string | null;
           checkout?: Json | null;
@@ -627,6 +704,8 @@ export type Database = {
           protection_overridden_at?: string | null;
           protection_status?: string;
           ref?: string;
+          reminder_24_at?: string | null;
+          reminder_48_at?: string | null;
           reschedule_count?: number;
           service_id?: string | null;
           site?: string;
@@ -769,6 +848,33 @@ export type Database = {
             columns: ["group_id"];
             isOneToOne: false;
             referencedRelation: "service_groups";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
+      daily_open_minutes: {
+        Row: {
+          day: string;
+          minutes: number;
+          stylist_id: string;
+        };
+        ComputedFields: never;
+        Insert: {
+          day: string;
+          minutes: number;
+          stylist_id: string;
+        };
+        Update: {
+          day?: string;
+          minutes?: number;
+          stylist_id?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "daily_open_minutes_stylist_id_fkey";
+            columns: ["stylist_id"];
+            isOneToOne: false;
+            referencedRelation: "stylists";
             referencedColumns: ["id"];
           },
         ];
@@ -942,6 +1048,112 @@ export type Database = {
           },
         ];
       };
+      hair_profiles: {
+        Row: {
+          budget_notes: string | null;
+          current_style: string | null;
+          goals: string | null;
+          lifestyle: string | null;
+          location: string | null;
+          sensitivities: string | null;
+          updated_at: string;
+          user_id: string;
+        };
+        ComputedFields: never;
+        Insert: {
+          budget_notes?: string | null;
+          current_style?: string | null;
+          goals?: string | null;
+          lifestyle?: string | null;
+          location?: string | null;
+          sensitivities?: string | null;
+          updated_at?: string;
+          user_id?: string;
+        };
+        Update: {
+          budget_notes?: string | null;
+          current_style?: string | null;
+          goals?: string | null;
+          lifestyle?: string | null;
+          location?: string | null;
+          sensitivities?: string | null;
+          updated_at?: string;
+          user_id?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "hair_profiles_user_id_fkey";
+            columns: ["user_id"];
+            isOneToOne: true;
+            referencedRelation: "profiles";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
+      knowledge_chunks: {
+        Row: {
+          body: string;
+          created_at: string;
+          document_id: string;
+          id: string;
+        };
+        ComputedFields: never;
+        Insert: {
+          body: string;
+          created_at?: string;
+          document_id: string;
+          id?: string;
+        };
+        Update: {
+          body?: string;
+          created_at?: string;
+          document_id?: string;
+          id?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "knowledge_chunks_document_id_fkey";
+            columns: ["document_id"];
+            isOneToOne: false;
+            referencedRelation: "knowledge_documents";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
+      knowledge_documents: {
+        Row: {
+          body: string;
+          created_at: string;
+          id: string;
+          reviewed_at: string | null;
+          reviewer: string | null;
+          slug: string;
+          source: string | null;
+          title: string;
+        };
+        ComputedFields: never;
+        Insert: {
+          body: string;
+          created_at?: string;
+          id?: string;
+          reviewed_at?: string | null;
+          reviewer?: string | null;
+          slug: string;
+          source?: string | null;
+          title: string;
+        };
+        Update: {
+          body?: string;
+          created_at?: string;
+          id?: string;
+          reviewed_at?: string | null;
+          reviewer?: string | null;
+          slug?: string;
+          source?: string | null;
+          title?: string;
+        };
+        Relationships: [];
+      };
       login_devices: {
         Row: {
           device: string;
@@ -1058,6 +1270,7 @@ export type Database = {
           id: string;
           paid_at: string | null;
           purpose: string;
+          reminded_at: string | null;
           sent_count: number;
           status: string;
           stripe_payment_intent_id: string | null;
@@ -1073,6 +1286,7 @@ export type Database = {
           id?: string;
           paid_at?: string | null;
           purpose?: string;
+          reminded_at?: string | null;
           sent_count?: number;
           status?: string;
           stripe_payment_intent_id?: string | null;
@@ -1087,6 +1301,7 @@ export type Database = {
           id?: string;
           paid_at?: string | null;
           purpose?: string;
+          reminded_at?: string | null;
           sent_count?: number;
           status?: string;
           stripe_payment_intent_id?: string | null;
@@ -1180,6 +1395,7 @@ export type Database = {
           corrected_at: string | null;
           created_at: string;
           fee_id: string | null;
+          held: boolean;
           id: string;
           kind: string;
           method: string;
@@ -1200,6 +1416,7 @@ export type Database = {
           corrected_at?: string | null;
           created_at?: string;
           fee_id?: string | null;
+          held?: boolean;
           id?: string;
           kind: string;
           method?: string;
@@ -1219,6 +1436,7 @@ export type Database = {
           corrected_at?: string | null;
           created_at?: string;
           fee_id?: string | null;
+          held?: boolean;
           id?: string;
           kind?: string;
           method?: string;
@@ -2273,8 +2491,9 @@ export type Database = {
           website: string | null;
           went_live_at: string | null;
           youtube: string | null;
+          is_stripe_verified: boolean | null;
         };
-        ComputedFields: never;
+        ComputedFields: "is_stripe_verified";
         Insert: {
           area_label?: string | null;
           availability_confirmed_at?: string | null;
@@ -2589,6 +2808,14 @@ export type Database = {
         Args: { token: string; user_id: string };
         Returns: number;
       };
+      claim_card_checks: {
+        Args: { batch_size: number };
+        Returns: {
+          booking_id: string;
+          payment_method_id: string;
+          starts_at: string;
+        }[];
+      };
       claim_checkout: {
         Args: { input: Json; owner: string; target: string };
         Returns: Json;
@@ -2625,8 +2852,10 @@ export type Database = {
         Args: { batch_size: number };
         Returns: {
           amount_pence: number;
+          fee_refunded_pence: number;
           payment_id: string;
           payment_intent_id: string;
+          platform_fee_pence: number;
           stylist_account: string;
           transfer_failures: number;
         }[];
@@ -2643,6 +2872,10 @@ export type Database = {
       };
       clean_contact: { Args: { contact: Json }; Returns: Json };
       close_business: { Args: Record<PropertyKey, never>; Returns: undefined };
+      complete_past_bookings: {
+        Args: Record<PropertyKey, never>;
+        Returns: number;
+      };
       confirm_booking_payment: {
         Args: { amount?: number; intent: string; target_booking?: string };
         Returns: string;
@@ -2698,6 +2931,11 @@ export type Database = {
         Args: Record<PropertyKey, never>;
         Returns: undefined;
       };
+      fail_card: { Args: { target: string }; Returns: undefined };
+      fail_unreplaced_cards: {
+        Args: Record<PropertyKey, never>;
+        Returns: number;
+      };
       find_stylist_client: {
         Args: { contact: Json; target_stylist: string };
         Returns: {
@@ -2733,6 +2971,34 @@ export type Database = {
       get_admin_alert_email: {
         Args: Record<PropertyKey, never>;
         Returns: string;
+      };
+      get_admin_profile_rows: {
+        Args: Record<PropertyKey, never>;
+        Returns: {
+          area_label: string;
+          booking_count: number;
+          business_name: string;
+          cancelled_count: number;
+          checked_at: string;
+          checked_by_name: string;
+          cover_path: string;
+          flags: string[];
+          id: string;
+          max_pence: number;
+          min_pence: number;
+          new_flags: string[];
+          owner_name: string;
+          photo_count: number;
+          rating: number;
+          reported_count: number;
+          review_count: number;
+          service_count: number;
+          slug: string;
+          status: string;
+          stripe_state: string;
+          suspended_at: string;
+          went_live_at: string;
+        }[];
       };
       get_appeal_page: { Args: { token: string }; Returns: Json };
       get_appeal_state: {
@@ -2774,7 +3040,11 @@ export type Database = {
           cancellation: Json | null;
           cancelled_at: string | null;
           cancelled_by: string | null;
+          card_checked_at: string | null;
+          card_failed_at: string | null;
           card_label: string | null;
+          card_setup_intent_id: string | null;
+          card_update_requested_at: string | null;
           checkout: Json | null;
           checkout_intent_ids: string[];
           checkout_started_at: string | null;
@@ -2808,6 +3078,8 @@ export type Database = {
           protection_overridden_at: string | null;
           protection_status: string;
           ref: string;
+          reminder_24_at: string | null;
+          reminder_48_at: string | null;
           reschedule_count: number;
           service_id: string | null;
           site: string;
@@ -2855,6 +3127,7 @@ export type Database = {
         Returns: Json;
       };
       get_card_fee_pence: { Args: { amount: number }; Returns: number };
+      get_card_update: { Args: { token: string }; Returns: Json };
       get_client_unpaid_fee: {
         Args: { email: string; phone: string; target_stylist: string };
         Returns: Json;
@@ -2871,9 +3144,27 @@ export type Database = {
         Returns: string;
       };
       get_confirm_url: { Args: { target: string }; Returns: string };
+      get_contact_clashes: {
+        Args: Record<PropertyKey, never>;
+        Returns: {
+          kind: string;
+          other_name: string;
+          stylist_id: string;
+        }[];
+      };
       get_contact_clients: {
         Args: { contact: Json; target_stylist: string };
         Returns: string[];
+      };
+      get_contact_matches: { Args: { target: string }; Returns: Json };
+      get_contact_uses: {
+        Args: Record<PropertyKey, never>;
+        Returns: {
+          account_id: string;
+          kind: string;
+          stylist_id: string;
+          value: string;
+        }[];
       };
       get_day_slots: {
         Args: {
@@ -2976,6 +3267,8 @@ export type Database = {
         Args: { first_day: string; last_day: string; target: string };
         Returns: Json;
       };
+      get_price_outliers: { Args: { target: string }; Returns: Json };
+      get_profile_flags: { Args: { target: string }; Returns: string[] };
       get_protection_status: {
         Args: {
           client: Json;
@@ -3001,7 +3294,18 @@ export type Database = {
       get_review_due_at: { Args: { target: string }; Returns: string };
       get_review_page: { Args: { token: string }; Returns: Json };
       get_reviewer_name: { Args: { contact: Json }; Returns: string };
+      get_service_prices: {
+        Args: Record<PropertyKey, never>;
+        Returns: {
+          from_pence: number;
+          is_outlier: boolean;
+          name: string;
+          stylist_id: string;
+          usual_pence: number;
+        }[];
+      };
       get_site: { Args: { origin: string }; Returns: string };
+      get_site_url: { Args: Record<PropertyKey, never>; Returns: string };
       get_studio_activity: {
         Args: { max_rows: number; target: string };
         Returns: {
@@ -3158,6 +3462,14 @@ export type Database = {
         Returns: boolean;
       };
       is_manage_verified: { Args: { token: string }; Returns: boolean };
+      is_payout_held: {
+        Args: { except_booking?: string; target: string };
+        Returns: boolean;
+      };
+      is_payout_held_for_account: {
+        Args: { account: string };
+        Returns: boolean;
+      };
       is_refund_unfinished: {
         Args: {
           booking: Omit<
@@ -3183,6 +3495,15 @@ export type Database = {
       };
       is_slug_free: {
         Args: { candidate: string; for_stylist?: string };
+        Returns: boolean;
+      };
+      is_stripe_verified: {
+        Args: {
+          stylist: Omit<
+            Database["public"]["Tables"]["stylists"]["Row"],
+            Database["public"]["Tables"]["stylists"]["ComputedFields"]
+          >;
+        };
         Returns: boolean;
       };
       is_stylist_owner: {
@@ -3214,7 +3535,11 @@ export type Database = {
           cancellation: Json | null;
           cancelled_at: string | null;
           cancelled_by: string | null;
+          card_checked_at: string | null;
+          card_failed_at: string | null;
           card_label: string | null;
+          card_setup_intent_id: string | null;
+          card_update_requested_at: string | null;
           checkout: Json | null;
           checkout_intent_ids: string[];
           checkout_started_at: string | null;
@@ -3248,6 +3573,8 @@ export type Database = {
           protection_overridden_at: string | null;
           protection_status: string;
           ref: string;
+          reminder_24_at: string | null;
+          reminder_48_at: string | null;
           reschedule_count: number;
           service_id: string | null;
           site: string;
@@ -3324,6 +3651,10 @@ export type Database = {
         Args: { notification_id: string };
         Returns: undefined;
       };
+      mark_payment_untransferred: {
+        Args: { intent: string };
+        Returns: undefined;
+      };
       mark_transfer_sent: {
         Args: { payment: string; transfer: string };
         Returns: undefined;
@@ -3355,10 +3686,24 @@ export type Database = {
         Args: { message: string; payment: string };
         Returns: undefined;
       };
+      notify_card_not_replaced: {
+        Args: {
+          booking: Omit<
+            Database["public"]["Tables"]["bookings"]["Row"],
+            Database["public"]["Tables"]["bookings"]["ComputedFields"]
+          >;
+        };
+        Returns: undefined;
+      };
       notify_review_decision: {
         Args: { is_final: boolean; outcome: string; target: string };
         Returns: undefined;
       };
+      notify_suspension: {
+        Args: { is_suspended: boolean; target: string };
+        Returns: undefined;
+      };
+      owns_assistant_image: { Args: { object_name: string }; Returns: boolean };
       owns_photo_path: { Args: { object_name: string }; Returns: boolean };
       price_booking: {
         Args: { choices: Json; target_service: string };
@@ -3389,6 +3734,10 @@ export type Database = {
         Returns: undefined;
       };
       queue_booking_messages: { Args: { target: string }; Returns: undefined };
+      queue_due_reminders: {
+        Args: Record<PropertyKey, never>;
+        Returns: number;
+      };
       queue_email: {
         Args: {
           payload: Json;
@@ -3437,6 +3786,10 @@ export type Database = {
         Args: { secret: string; target: string };
         Returns: undefined;
       };
+      remind_expiring_links: {
+        Args: Record<PropertyKey, never>;
+        Returns: number;
+      };
       renew_booking_invite: { Args: { token: string }; Returns: undefined };
       reopen_business: { Args: Record<PropertyKey, never>; Returns: undefined };
       reopen_studio_booking: { Args: { target: string }; Returns: Json };
@@ -3466,8 +3819,21 @@ export type Database = {
       retry_stuck_refund: { Args: { target: string }; Returns: undefined };
       retry_stuck_transfer: { Args: { payment: string }; Returns: undefined };
       revoke_confirm_links: { Args: { target: string }; Returns: undefined };
+      save_card_check: {
+        Args: { is_expiring: boolean; target: string };
+        Returns: undefined;
+      };
       save_card_payment: {
         Args: { available: string; destination: string; intent: string };
+        Returns: undefined;
+      };
+      save_card_update: {
+        Args: {
+          intent: string;
+          label: string;
+          payment_method: string;
+          target: string;
+        };
         Returns: undefined;
       };
       save_dispute_fees: {
@@ -3488,6 +3854,7 @@ export type Database = {
         Args: { given: Json; response: string; target: string };
         Returns: undefined;
       };
+      save_open_minutes: { Args: Record<PropertyKey, never>; Returns: number };
       save_payout: { Args: { account: string; payout: Json }; Returns: string };
       save_stylist_client: {
         Args: { details: Json; target?: string; target_stylist: string };
@@ -3584,6 +3951,10 @@ export type Database = {
       };
       set_cancel_refund: {
         Args: { refund_id: string; refunded: number; target: string };
+        Returns: undefined;
+      };
+      set_card_setup_intent: {
+        Args: { intent: string; target: string };
         Returns: undefined;
       };
       set_client_blocked: {
