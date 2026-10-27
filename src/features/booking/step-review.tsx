@@ -71,7 +71,12 @@ export const StepReview = ({ booking }: StepReviewProps) => {
     actions.setState(
       (current) => ({
         step: 4,
-        allergy: { ...current.allergy, prior: false, focus: true },
+        allergy: {
+          ...current.allergy,
+          prior: false,
+          focus: true,
+          touched: true,
+        },
       }),
       actions.scrollToTitle,
     );

@@ -137,7 +137,6 @@ export const CodeDialog = ({
           inputMode="numeric"
           autoComplete="one-time-code"
           maxLength={6}
-          placeholder="000000"
           // eslint-disable-next-line jsx-a11y/no-autofocus
           autoFocus
           aria-invalid={error ? "true" : "false"}

@@ -1,6 +1,7 @@
 import { act, screen, waitFor, within } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { renderWithStore } from "../../../../test/render-with-store";
+import { getClientRow } from "../../../../test/studio-booking-row";
 import { getStudioSeed } from "../../../../test/studio-seed";
 import { StudioPage } from "../..";
 import type { UserEvent } from "@testing-library/user-event";
@@ -36,8 +37,8 @@ const setViewport = (width: number) => {
   });
 };
 
-const openClients = async () => {
-  renderWithStore(<StudioPage seed={getStudioSeed()} />, "/studio");
+const openClients = async (seed = getStudioSeed()) => {
+  renderWithStore(<StudioPage seed={seed} />, "/studio");
   runNextTimer();
   await user.click(within(getLabelled("Sidebar")).getByTitle("Clients"));
 
@@ -75,6 +76,43 @@ describe("Studio → client sheets", () => {
     expect(
       screen.getByRole("button", { name: "Book Nia" }),
     ).toBeInTheDocument();
+  });
+
+  it("shows a linked client's account photo, but editing offers only the stylist's own", async () => {
+    const seed = getStudioSeed();
+
+    seed.bookings.clients = [
+      getClientRow({
+        account_photo_path: "nia/photo.jpg",
+        photo_url: "https://signed/account",
+      }),
+    ];
+
+    const clients = await openClients(seed);
+
+    await user.click(within(clients).getByText("Nia Okafor"));
+
+    const head = screen.getByRole("heading", { name: "Nia Okafor" })
+      .parentElement?.parentElement?.parentElement as HTMLElement;
+
+    expect(
+      head.querySelector('img[src="https://signed/account"]'),
+    ).not.toBeNull();
+
+    const profileActions = screen.getByRole("button", { name: "Book Nia" })
+      .parentElement as HTMLElement;
+
+    await user.click(
+      within(profileActions).getByRole("button", { name: "Edit" }),
+    );
+
+    expect(
+      screen.getByRole("button", { name: "Add a profile photo" }),
+    ).toBeInTheDocument();
+
+    expect(
+      screen.queryByRole("button", { name: "Remove" }),
+    ).not.toBeInTheDocument();
   });
 
   it("adding a client needs a first name and a phone or email", async () => {

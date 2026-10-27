@@ -1,7 +1,7 @@
 import type { Service } from "../../../types/service";
+import type { SavedAddress } from "../../../types/address";
 import type { Stylist } from "../../../types/stylist";
 import { getSearchParams } from "../../../utils/page-flags";
-import { getSavedAddresses } from "../../../utils/saved-addresses";
 import { findService, hasStep2 } from "../../../utils/services";
 import { EMPTY_ADDRESS, EMPTY_DETAILS } from "./constants";
 import { getDraftPatch, readDraft } from "./draft";
@@ -28,8 +28,8 @@ export const getStartStep = (service: Service | null): number => {
 
 export const getSavedAddressPatch = (
   current: BookingAddress,
+  saved: SavedAddress[],
 ): Pick<BookingState, "saved" | "selectedAddressId" | "appointmentAddress"> => {
-  const saved = getSavedAddresses();
   const defaultAddress = saved.find(({ isDefault }) => isDefault) ?? saved[0];
 
   return {
@@ -43,8 +43,8 @@ export const getSavedAddressPatch = (
           town: defaultAddress.town,
           postcode: defaultAddress.postcode,
           source: "saved",
-          lat: null,
-          lng: null,
+          lat: defaultAddress.lat ?? null,
+          lng: defaultAddress.lng ?? null,
         }
       : current,
   };
@@ -68,7 +68,6 @@ export const getInitialBooking = (stylist: Stylist): BookingState => {
     time: null,
     details: { ...EMPTY_DETAILS },
     photos: [],
-    keepCard: false,
     loggedIn: false,
     guest: false,
     editContact: false,
@@ -99,6 +98,8 @@ export const getInitialBooking = (stylist: Stylist): BookingState => {
       text: "",
       prior: false,
       focus: false,
+      touched: false,
+      wasShared: false,
     },
     saved: [],
     selectedAddressId: "new",

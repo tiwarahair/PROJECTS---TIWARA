@@ -16,7 +16,7 @@ import ui from "../../styles/features/account/ui.module.css";
 const getPasswordStatus = ({ has, changed }: PasswordState) => {
   if (!has) return "Not set. You log in with Google.";
 
-  return changed ? "Changed just now" : "Last changed 4 months ago";
+  return changed ? "Changed just now" : "Set";
 };
 
 /** Login & security: password (change / set, with the strength meter), Google / Apple, log out everywhere. */
@@ -28,11 +28,12 @@ export const SecuritySection = ({
   const { password, profile, googleConnected, appleConnected } = state;
   const { setState, showToast } = actions;
 
-  const { register, watch, reset, clearErrors, control } = forms.password;
-  const { errors } = useFormState({ control });
+  const { register, watch, reset, setValue, clearErrors, control } =
+    forms.password;
 
-  const currentField = register("current");
+  const { errors } = useFormState({ control });
   const nextField = register("next");
+  const clearServerError = () => clearErrors("root");
 
   const check = checkPassword(watch("next"), {
     min: getPasswordMin("client"),
@@ -110,30 +111,6 @@ export const SecuritySection = ({
               className={styles.pwForm}
               data-screen-label="Change password open"
             >
-              {password.has && (
-                <label className={ui.label}>
-                  Current password{" "}
-                  <input
-                    className={joinClassNames(
-                      ui.input,
-                      errors.current ? ui.inputErr : ui.inputOk,
-                    )}
-                    type={password.show ? "text" : "password"}
-                    name={currentField.name}
-                    ref={currentField.ref}
-                    onChange={(event) => {
-                      clearErrors("current");
-                      void currentField.onChange(event);
-                    }}
-                    autoComplete="current-password"
-                    aria-invalid={errors.current ? "true" : "false"}
-                    aria-describedby="ac-e-cur"
-                  />
-                  <span className={ui.error} id="ac-e-cur">
-                    {errors.current?.message}
-                  </span>
-                </label>
-              )}
               <div className={ui.field}>
                 <label className={ui.labelText} htmlFor="ac-newpw">
                   New password
@@ -147,6 +124,10 @@ export const SecuritySection = ({
                     id="ac-newpw"
                     type={password.show ? "text" : "password"}
                     {...nextField}
+                    onChange={(event) => {
+                      clearServerError();
+                      void nextField.onChange(event);
+                    }}
                     onBlur={(event) => {
                       if (event.target.value) void nextField.onBlur(event);
                     }}
@@ -201,6 +182,70 @@ export const SecuritySection = ({
                   <div className={ui.smallMuted}>{meter.warning}</div>
                 )}
               </div>
+              {password.isCodeSent && (
+                <div className={ui.field}>
+                  <label className={ui.labelText} htmlFor="ac-pw-code">
+                    Code from your email
+                  </label>
+                  <input
+                    className={joinClassNames(
+                      ui.input,
+                      errors.code ? ui.inputErr : ui.inputOk,
+                    )}
+                    id="ac-pw-code"
+                    inputMode="numeric"
+                    autoComplete="one-time-code"
+                    aria-invalid={errors.code ? "true" : "false"}
+                    aria-describedby="ac-pw-code-help"
+                    {...register("code", {
+                      onChange: (event: { target: { value: string } }) => {
+                        clearServerError();
+
+                        setValue(
+                          "code",
+                          event.target.value.replace(/\D/g, "").slice(0, 6),
+                        );
+                      },
+                    })}
+                  />
+                  <span className={ui.error} role="alert">
+                    {errors.code?.message}
+                  </span>
+                  <div className={ui.smallMuted} id="ac-pw-code-help">
+                    {`It’s been a while since you logged in, so we emailed a code to ${profile.email} to check it’s you.`}
+                  </div>
+                  <button
+                    className={joinClassNames(
+                      ui.quietButton,
+                      styles.resendCode,
+                    )}
+                    onClick={() => void actions.sendPasswordCode()}
+                  >
+                    Resend code
+                  </button>
+                </div>
+              )}
+              <label className={ui.checkLabel}>
+                <input
+                  className={ui.checkbox}
+                  type="checkbox"
+                  checked={password.signOthers}
+                  onChange={() =>
+                    setState(({ password: current }) => ({
+                      password: {
+                        ...current,
+                        signOthers: !current.signOthers,
+                      },
+                    }))
+                  }
+                />
+                Log me out on other devices
+              </label>
+              {!!errors.root && (
+                <span className={ui.error} role="alert">
+                  {errors.root.message}
+                </span>
+              )}
               <div className={ui.actions}>
                 <button
                   className={ui.save}
@@ -214,7 +259,7 @@ export const SecuritySection = ({
                     reset(EMPTY_PASSWORD);
 
                     setState(({ password: current }) => ({
-                      password: { ...current, open: false },
+                      password: { ...current, open: false, isCodeSent: false },
                     }));
                   }}
                 >

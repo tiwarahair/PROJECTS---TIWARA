@@ -38,7 +38,9 @@ export const StepDetails = ({ booking }: StepDetailsProps) => {
   const isAfterAddress = isMobileStylist && (showContactFields || !needsMobile);
 
   const setAllergy = (patch: Partial<AllergyState>) =>
-    setState((current) => ({ allergy: { ...current.allergy, ...patch } }));
+    setState((current) => ({
+      allergy: { ...current.allergy, ...patch, touched: true },
+    }));
 
   return (
     <>

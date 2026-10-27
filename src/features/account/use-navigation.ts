@@ -14,6 +14,7 @@ export const useAccountNavigation = (
   {
     searchParams,
     stateRef,
+    dataRef,
     setState,
     forms,
     navigate,
@@ -90,12 +91,12 @@ export const useAccountNavigation = (
   // an open edit with changes asks before it's dropped
   const goToSection = useCallback(
     (id: string | null) => {
-      if (!hasUnsavedEdits(stateRef.current, getFormValues()))
+      if (!hasUnsavedEdits(stateRef.current, getFormValues(), dataRef.current))
         return showSection(id);
 
       askDiscard(() => showSection(id));
     },
-    [askDiscard, showSection, getFormValues, stateRef],
+    [askDiscard, showSection, getFormValues, stateRef, dataRef],
   );
 
   useEffect(() => {
@@ -124,8 +125,8 @@ export const useAccountNavigation = (
   }, [goToSection, setState, stateRef]);
 
   const hasUnsaved = useCallback(
-    () => hasUnsavedEdits(stateRef.current, getFormValues()),
-    [getFormValues, stateRef],
+    () => hasUnsavedEdits(stateRef.current, getFormValues(), dataRef.current),
+    [getFormValues, stateRef, dataRef],
   );
 
   const blocker = useUnsavedChanges(hasUnsaved);

@@ -69,9 +69,18 @@ vi.mock("@vis.gl/react-google-maps", () => ({
   },
 }));
 
-export const stripeStub = {
+export const stripeStub: {
+  confirmPayment: ReturnType<typeof vi.fn>;
+  confirmSetup: ReturnType<typeof vi.fn>;
+  submit: ReturnType<typeof vi.fn>;
+  elementsOptions: Record<string, unknown> | undefined;
+} = {
   confirmPayment: vi.fn(() => Promise.resolve({})),
+  confirmSetup: vi.fn(() =>
+    Promise.resolve({ setupIntent: { payment_method: "pm_new" } }),
+  ),
   submit: vi.fn(() => Promise.resolve({})),
+  elementsOptions: undefined,
 };
 
 vi.mock("@stripe/stripe-js", () => ({
@@ -82,7 +91,17 @@ vi.mock("@stripe/react-stripe-js", async () => {
   const { createElement } = await import("react");
 
   return {
-    Elements: ({ children }: { children: React.ReactNode }) => children,
+    Elements: ({
+      children,
+      options,
+    }: {
+      children: React.ReactNode;
+      options?: Record<string, unknown>;
+    }) => {
+      stripeStub.elementsOptions = options;
+
+      return children;
+    },
     // clicking it stands in for Stripe finishing loading its fields
     PaymentElement: ({ onReady }: { onReady?: () => void }) =>
       createElement("button", {
@@ -90,7 +109,10 @@ vi.mock("@stripe/react-stripe-js", async () => {
         onClick: onReady,
       }),
     ExpressCheckoutElement: () => null,
-    useStripe: () => ({ confirmPayment: stripeStub.confirmPayment }),
+    useStripe: () => ({
+      confirmPayment: stripeStub.confirmPayment,
+      confirmSetup: stripeStub.confirmSetup,
+    }),
     useElements: () => ({ submit: stripeStub.submit }),
   };
 });

@@ -1,9 +1,12 @@
+import { skipToken } from "@reduxjs/toolkit/query";
 import type { MutableRefObject } from "react";
 import { useEffect } from "react";
 import type { UseFormReturn } from "react-hook-form";
 import { useNavigate } from "react-router";
+import { useSavedAddresses } from "../../../hooks/use-saved-addresses";
 import { useIdentity } from "../../../hooks/use-identity";
 import { startGoogleSignIn } from "../../../lib/auth";
+import { useGetMySensitivityQuery } from "../../../stores/account-api";
 import { useUpdateProfileMutation } from "../../../stores/api-slice";
 import { useAppDispatch } from "../../../stores/hooks";
 import { logOut as logOutSession } from "../../../stores/session-slice";
@@ -36,6 +39,11 @@ export const useAccount = ({
   const hasSession = !!identity;
   const signedIn = identity?.isLoaded ? identity : null;
   const [updateProfile] = useUpdateProfileMutation();
+  const savedAddresses = useSavedAddresses();
+
+  const { currentData: sharedAllergies } = useGetMySensitivityQuery(
+    signedIn ? stylistId : skipToken,
+  );
 
   // signed in: book as them, with their details filled in
   useEffect(() => {
@@ -55,20 +63,48 @@ export const useAccount = ({
     const isLeavingTime = !!loginStart && step === 3;
 
     setState(
-      (current) => ({
+      {
         loggedIn: true,
         editContact: false,
         loginStart: null,
         step: isLeavingTime ? 4 : step,
-        ...(current.appointmentAddress.line1
-          ? {}
-          : getSavedAddressPatch(current.appointmentAddress)),
-      }),
+      },
       isLeavingTime ? scrollToTitle : undefined,
     );
     // once per signed-in account
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [signedIn?.user.id, setState]);
+
+  // what they already share with this stylist fills an untouched allergy box, to confirm or change
+  useEffect(() => {
+    if (!sharedAllergies) return;
+
+    setState(({ allergy }) =>
+      allergy.touched || allergy.wasShared
+        ? {}
+        : {
+            allergy: {
+              ...allergy,
+              on: true,
+              text: sharedAllergies,
+              prior: true,
+              wasShared: true,
+            },
+          },
+    );
+  }, [sharedAllergies, setState]);
+
+  // the default fills an empty appointment address once, when the addresses first arrive; a refetch keeps the client's choice
+  useEffect(() => {
+    if (!signedIn) return;
+
+    setState(({ appointmentAddress, saved }) =>
+      appointmentAddress.line1 || saved.length
+        ? { saved: savedAddresses }
+        : getSavedAddressPatch(appointmentAddress, savedAddresses),
+    );
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [signedIn?.user.id, savedAddresses, setState]);
 
   const saveContactToAccount = () => {
     if (!signedIn) return;
@@ -110,7 +146,21 @@ export const useAccount = ({
         phone: "",
       });
 
-      setState({ loggedIn: false, guest: false, editContact: false });
+      setState(({ allergy }) => ({
+        loggedIn: false,
+        guest: false,
+        editContact: false,
+        ...(allergy.wasShared && {
+          allergy: {
+            on: false,
+            text: "",
+            prior: false,
+            focus: false,
+            touched: false,
+            wasShared: false,
+          },
+        }),
+      }));
     },
     openContactEdit: () => {
       setState({ editContact: true });

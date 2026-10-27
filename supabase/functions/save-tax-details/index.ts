@@ -1,11 +1,16 @@
 // Saves a stylist's tax details. Needs an authenticator-app code from the last 30 days; the NI number is
-// encrypted here (AES-GCM, key in TAX_ENCRYPTION_KEY) and never returned, only a masked hint.
-import { createClient } from "npm:@supabase/supabase-js@2";
-import { z } from "npm:zod@4";
+// encrypted here
+import { createClient } from "@supabase/supabase-js";
+import { z } from "zod";
 import { corsHeaders, respond } from "../_shared/cors.ts";
 import { getRecentUser } from "../_shared/recent-user.ts";
 
 const NI_PATTERN = /^(?!BG|GB|NK|KN|TN|NT|ZZ)[A-CEGHJ-PR-TW-Z][A-CEGHJ-NPR-TW-Z]\d{6}[A-D]$/;
+
+interface StylistWithTaxDetails {
+  id: string;
+  stylist_tax_details: { ni_ciphertext: string | null; ni_hint: string | null } | null;
+}
 
 const text = (max: number) => z.string().trim().max(max);
 
@@ -15,9 +20,18 @@ const requestSchema = z.object({
   middle: text(80),
   last: text(80),
   legalName: text(160),
-  day: z.string().regex(/^\d{1,2}$/).or(z.literal("")),
-  month: z.string().regex(/^\d{1,2}$/).or(z.literal("")),
-  year: z.string().regex(/^\d{4}$/).or(z.literal("")),
+  day: z
+    .string()
+    .regex(/^\d{1,2}$/)
+    .or(z.literal("")),
+  month: z
+    .string()
+    .regex(/^\d{1,2}$/)
+    .or(z.literal("")),
+  year: z
+    .string()
+    .regex(/^\d{4}$/)
+    .or(z.literal("")),
   nationalInsuranceNumber: z.string().max(16),
   companyName: text(160),
   companyNumber: z.string().max(12),
@@ -30,10 +44,7 @@ const requestSchema = z.object({
   }),
 });
 
-const admin = createClient(
-  Deno.env.get("SUPABASE_URL")!,
-  Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!,
-);
+const admin = createClient(Deno.env.get("SUPABASE_URL")!, Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!);
 
 const toBase64 = (bytes: Uint8Array) => btoa(String.fromCharCode(...bytes));
 
@@ -70,7 +81,7 @@ Deno.serve(async (request) => {
     .from("stylists")
     .select("id, stylist_tax_details(ni_ciphertext, ni_hint)")
     .eq("owner_id", userId)
-    .single();
+    .single<StylistWithTaxDetails>();
 
   if (!stylist) return respond(404, { error: "no_business" });
 

@@ -1,18 +1,22 @@
 import { act, screen } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { useFavourites } from "../../../hooks/use-favourites";
-import { renderWithStore, TEST_USER } from "../../../test/render-with-store";
+import { fetchFavourites, writeFavourite } from "../../../lib/favourites";
+import { renderWithStore } from "../../../test/render-with-store";
 import { FavHost } from "..";
 import type { UserEvent } from "@testing-library/user-event";
 import { setupUser } from "../../../test/setup-user";
+
+vi.mock("../../../lib/favourites", () => ({
+  fetchFavourites: vi.fn(),
+  writeFavourite: vi.fn(),
+}));
 
 let user: UserEvent;
 
 beforeEach(() => {
   user = setupUser();
 });
-
-const FAVS_KEY = `tw_favs_${TEST_USER.id}`;
 
 const HeartPage = () => {
   const { isFavourite, toggleFavourite } = useFavourites();
@@ -43,9 +47,14 @@ describe("FavHost", () => {
     vi.useFakeTimers();
     sessionStorage.clear();
     localStorage.clear();
+    vi.mocked(fetchFavourites).mockResolvedValue([]);
+    vi.mocked(writeFavourite).mockResolvedValue();
   });
 
-  afterEach(() => vi.useRealTimers());
+  afterEach(() => {
+    vi.useRealTimers();
+    vi.clearAllMocks();
+  });
 
   it("asks guests to log in and remembers the stylist for after log in", async () => {
     renderWithStore(<HeartPage />, "/search");
@@ -68,12 +77,10 @@ describe("FavHost", () => {
     renderWithStore(<HeartPage />, "/search", { signedIn: true });
     const heart = screen.getByRole("button", { name: "Save Amara" });
 
+    await flush(0);
     await user.click(heart);
-    expect(heart).toHaveTextContent("saved");
-
-    expect(JSON.parse(localStorage.getItem(FAVS_KEY) ?? "[]")).toEqual([
-      "amara-beauty",
-    ]);
+    expect(heart).toHaveTextContent(/^saved$/);
+    expect(writeFavourite).toHaveBeenCalledWith("amara-beauty", true);
 
     expect(screen.getByRole("status")).toHaveTextContent("Saved to favourites");
 
@@ -84,13 +91,15 @@ describe("FavHost", () => {
 
     await user.click(heart);
     expect(heart).toHaveTextContent("not saved");
+    expect(writeFavourite).toHaveBeenLastCalledWith("amara-beauty", false);
 
     expect(screen.getByRole("status")).toHaveTextContent(
       "Removed from favourites",
     );
 
     await user.click(screen.getByRole("button", { name: "Undo" }));
-    expect(heart).toHaveTextContent("saved");
+    expect(heart).toHaveTextContent(/^saved$/);
+    expect(writeFavourite).toHaveBeenLastCalledWith("amara-beauty", true);
 
     await flush(5000);
     await flush(260);
@@ -104,10 +113,85 @@ describe("FavHost", () => {
 
     expect(
       screen.getByRole("button", { name: "Save Amara" }),
-    ).toHaveTextContent("saved");
+    ).toHaveTextContent(/^saved$/);
 
+    expect(writeFavourite).toHaveBeenCalledWith("amara-beauty", true);
     expect(sessionStorage.getItem("tw_fav_pending")).toBeNull();
     await flush(700);
     expect(screen.getByRole("status")).toHaveTextContent("Saved to favourites");
+  });
+
+  it("shows the account's favourites", async () => {
+    vi.mocked(fetchFavourites).mockResolvedValue(["amara-beauty"]);
+    renderWithStore(<HeartPage />, "/search", { signedIn: true });
+    await flush(0);
+
+    expect(
+      screen.getByRole("button", { name: "Save Amara" }),
+    ).toHaveTextContent(/^saved$/);
+  });
+
+  it("turns the heart back and says so when the save fails", async () => {
+    vi.mocked(writeFavourite).mockRejectedValue(new Error("offline"));
+    renderWithStore(<HeartPage />, "/search", { signedIn: true });
+    await flush(0);
+    const heart = screen.getByRole("button", { name: "Save Amara" });
+
+    await user.click(heart);
+    await flush(0);
+
+    expect(heart).toHaveTextContent("not saved");
+
+    expect(screen.getByRole("status")).toHaveTextContent(
+      "Your favourites couldn’t be saved. Try again",
+    );
+  });
+
+  it("keeps a heart tapped while the account's favourites are still loading", async () => {
+    let finishLoading: (ids: string[]) => void = () => {};
+
+    vi.mocked(fetchFavourites).mockReturnValue(
+      new Promise((resolve) => {
+        finishLoading = resolve;
+      }),
+    );
+
+    renderWithStore(<HeartPage />, "/search", { signedIn: true });
+    const heart = screen.getByRole("button", { name: "Save Amara" });
+
+    await user.click(heart);
+    await act(async () => finishLoading([]));
+    await flush(0);
+
+    expect(heart).toHaveTextContent(/^saved$/);
+  });
+
+  it("sends a heart's quick taps to the server one after another", async () => {
+    let finishFirst: () => void = () => {};
+
+    vi.mocked(writeFavourite).mockReturnValueOnce(
+      new Promise((resolve) => {
+        finishFirst = resolve;
+      }),
+    );
+
+    renderWithStore(<HeartPage />, "/search", { signedIn: true });
+    await flush(0);
+    const heart = screen.getByRole("button", { name: "Save Amara" });
+
+    await user.click(heart);
+    await user.click(heart);
+
+    expect(writeFavourite).toHaveBeenCalledTimes(1);
+
+    await act(async () => finishFirst());
+    await flush(0);
+
+    expect(vi.mocked(writeFavourite).mock.calls).toEqual([
+      ["amara-beauty", true],
+      ["amara-beauty", false],
+    ]);
+
+    expect(heart).toHaveTextContent(/^not saved$/);
   });
 });

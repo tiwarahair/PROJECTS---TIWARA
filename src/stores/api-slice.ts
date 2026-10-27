@@ -121,6 +121,11 @@ export const api = createApi({
     "Bookings",
     "Earnings",
     "Reviews",
+    "Addresses",
+    "ClientBookings",
+    "ClientCards",
+    "AccountPhoto",
+    "Sensitivities",
   ],
   refetchOnReconnect: true,
   endpoints: (build) => ({
@@ -129,7 +134,7 @@ export const api = createApi({
       queryFn: async (userId) => {
         const { data, error } = await supabase
           .from("profiles")
-          .select("first_name, last_name, phone, marketing_opt_in")
+          .select("first_name, last_name, phone, marketing_opt_in, photo_path")
           .eq("id", userId)
           .single();
 
@@ -141,6 +146,7 @@ export const api = createApi({
             last: data.last_name ?? "",
             mobile: data.phone ?? "",
             marketing: data.marketing_opt_in,
+            photoPath: data.photo_path,
           },
         };
       },
@@ -149,13 +155,21 @@ export const api = createApi({
       null,
       {
         userId: string;
-        patch: Partial<Pick<Profile, "first" | "last" | "mobile">>;
+        patch: Partial<Profile>;
       }
     >({
-      queryFn: async ({ userId, patch: { first, last, mobile } }) => {
+      queryFn: async ({
+        userId,
+        patch: { first, last, mobile, marketing },
+      }) => {
         const { error } = await supabase
           .from("profiles")
-          .update({ first_name: first, last_name: last, phone: mobile })
+          .update({
+            first_name: first,
+            last_name: last,
+            phone: mobile,
+            marketing_opt_in: marketing,
+          })
           .eq("id", userId);
 
         return error ? { error } : { data: null };
@@ -165,7 +179,12 @@ export const api = createApi({
         { userId, patch },
         { dispatch, queryFulfilled },
       ) => {
-        await queryFulfilled;
+        try {
+          await queryFulfilled;
+        } catch {
+          // the caller shows the failure
+          return;
+        }
 
         dispatch(
           api.util.updateQueryData("getProfile", userId, (profile) => ({
@@ -381,7 +400,7 @@ export const api = createApi({
       void,
       { token: string; startsAt: string }
     >({
-      invalidatesTags: () => ["ManagedBooking"],
+      invalidatesTags: () => ["ManagedBooking", "ClientBookings"],
       queryFn: (request) => toQueryResult(rescheduleBooking(request)),
     }),
     sendBookingCode: build.mutation<{ email: string; sent: boolean }, string>({
@@ -402,7 +421,7 @@ export const api = createApi({
       queryFn: (token) => toQueryResult(secureBookingLink(token)),
     }),
     cancelBooking: build.mutation<CancellationTerms, string>({
-      invalidatesTags: () => ["ManagedBooking"],
+      invalidatesTags: () => ["ManagedBooking", "ClientBookings"],
       queryFn: (token) => toQueryResult(cancelBooking(token)),
     }),
     getOwnerManageToken: build.query<string, string>({

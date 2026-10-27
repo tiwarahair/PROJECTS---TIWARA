@@ -1,4 +1,4 @@
-import Stripe from "npm:stripe@22.6.2";
+import Stripe from "stripe";
 import { saveCardPayment } from "../_shared/card-payment.ts";
 import { settleRecovery } from "../_shared/owed.ts";
 import { stripe } from "../_shared/stripe.ts";

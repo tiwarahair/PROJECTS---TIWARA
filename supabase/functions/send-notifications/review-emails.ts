@@ -71,8 +71,7 @@ export const reviewReceived = ({
       "You can reply publicly from Reviews in Studio.",
     ],
     button: { label: "Open Reviews", url },
-    footnote:
-      "You can choose which emails and texts you get in Studio → Settings → Notifications.",
+    footnote: "You can choose which emails and texts you get in Studio → Settings → Notifications.",
   });
 
 export const reviewReplied = ({
@@ -84,10 +83,7 @@ export const reviewReplied = ({
 }: ReviewReply): RenderedEmail =>
   renderNotice({
     title: `${stylist} replied to your review`,
-    paragraphs: [
-      `${first ? `Hi ${first}, ${stylist}` : stylist} replied to your review of ${service}:`,
-      `“${reply}”`,
-    ],
+    paragraphs: [`${first ? `Hi ${first}, ${stylist}` : stylist} replied to your review of ${service}:`, `“${reply}”`],
     button: { label: "See it on their profile", url },
     footnote: "Replies are public, on the stylist’s profile.",
   });

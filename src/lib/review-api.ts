@@ -1,5 +1,5 @@
 // Reviews: the client's review and appeal pages (by the emailed links), a profile's public reviews and reporting one.
-import { invokeBookingFunction } from "./booking-api";
+import { invokeFunction } from "./invoke-function";
 import { supabase } from "./supabase";
 
 export interface ReviewPage {
@@ -68,13 +68,13 @@ export interface ReviewReport {
 export const REVIEWS_PAGE_SIZE = 10;
 
 export const fetchReviewPage = (token: string) =>
-  invokeBookingFunction<ReviewPage>("booking-review", {
+  invokeFunction<ReviewPage>("booking-review", {
     action: "view",
     token,
   });
 
 export const submitReview = ({ token, rating, body }: ReviewDraft) =>
-  invokeBookingFunction<ReviewPage>("booking-review", {
+  invokeFunction<ReviewPage>("booking-review", {
     action: "submit",
     token,
     rating,
@@ -82,7 +82,7 @@ export const submitReview = ({ token, rating, body }: ReviewDraft) =>
   });
 
 export const fetchAppealPage = (token: string) =>
-  invokeBookingFunction<AppealPage>("booking-review", {
+  invokeFunction<AppealPage>("booking-review", {
     action: "view-appeal",
     token,
   });
@@ -94,7 +94,7 @@ export const submitAppeal = ({
   token: string;
   body: string;
 }) =>
-  invokeBookingFunction<AppealPage>("booking-review", {
+  invokeFunction<AppealPage>("booking-review", {
     action: "appeal",
     token,
     body: body.trim(),

@@ -3,6 +3,7 @@ import { describe, expect, it } from "vitest";
 import {
   AppleLogo,
   GoogleLogo,
+  OutlookLogo,
   SOCIAL_ICONS,
   SocialIcon,
 } from "../brand-icons";
@@ -30,5 +31,11 @@ describe("brand icons", () => {
 
     expect(container.querySelector("img")).toHaveAttribute("width", "17");
     expect(container.querySelector("svg")).toHaveAttribute("width", "19");
+  });
+
+  it("shows the Outlook mark at the given size", () => {
+    const { container } = render(<OutlookLogo size={16} />);
+
+    expect(container.querySelector("img")).toHaveAttribute("width", "16");
   });
 });

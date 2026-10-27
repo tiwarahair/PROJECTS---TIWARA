@@ -1,5 +1,5 @@
 // Studio's discretionary refund: needs a recent 2FA code; refunds fee charges first, then the booking payment.
-import { z } from "npm:zod@4";
+import { z } from "zod";
 import { admin } from "../_shared/admin.ts";
 import { corsHeaders, respond } from "../_shared/cors.ts";
 import { getRecentUser } from "../_shared/recent-user.ts";
@@ -72,7 +72,10 @@ Deno.serve(async (request) => {
     if (left > 0) return respond(409, { error: "more_than_refundable" });
 
     // keyed by what has been refunded so far, so a retried request doesn't refund twice
-    const { count } = await admin.from("refunds").select("id", { count: "exact", head: true }).eq("booking_id", bookingId);
+    const { count } = await admin
+      .from("refunds")
+      .select("id", { count: "exact", head: true })
+      .eq("booking_id", bookingId);
 
     let refunded = 0;
 
@@ -80,12 +83,12 @@ Deno.serve(async (request) => {
       // a later part failing leaves the earlier ones made; say how much went back, so a retry asks for the rest
       const refund = await stripe.refunds
         .create(
-        {
-          payment_intent: intentId,
-          amount,
-          metadata: { booking_id: bookingId, reason: "manual" },
-          ...(isTransferred ? { reverse_transfer: true } : {}),
-        },
+          {
+            payment_intent: intentId,
+            amount,
+            metadata: { booking_id: bookingId, reason: "manual" },
+            ...(isTransferred ? { reverse_transfer: true } : {}),
+          },
           { idempotencyKey: `manual-refund:${bookingId}:${count ?? 0}:${index}:${amount}` },
         )
         .catch((refundError) => {
@@ -100,14 +103,22 @@ Deno.serve(async (request) => {
 
       // a fee sent on to the stylist later: take the refunded part of that transfer back too
       if (transferId)
-        await stripe.transfers.createReversal(transferId, { amount }, { idempotencyKey: `refund-reversal:${refund.id}` });
-
-      const { error: saveError } = await admin
-        .from("refunds")
-        .upsert(
-          { booking_id: bookingId, amount_pence: amount, reason: "manual", note: reason || null, stripe_refund_id: refund.id },
-          { onConflict: "stripe_refund_id" },
+        await stripe.transfers.createReversal(
+          transferId,
+          { amount },
+          { idempotencyKey: `refund-reversal:${refund.id}` },
         );
+
+      const { error: saveError } = await admin.from("refunds").upsert(
+        {
+          booking_id: bookingId,
+          amount_pence: amount,
+          reason: "manual",
+          note: reason || null,
+          stripe_refund_id: refund.id,
+        },
+        { onConflict: "stripe_refund_id" },
+      );
 
       if (saveError) throw saveError;
     }

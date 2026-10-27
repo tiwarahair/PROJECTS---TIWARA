@@ -3,7 +3,7 @@ import type { CSSProperties } from "react";
 import { Link } from "react-router";
 import { useEntered } from "../../hooks/use-entered";
 import { useAppDispatch, useAppSelector } from "../../stores/hooks";
-import { setFavourite } from "../../stores/favourites-slice";
+import { saveFavourite } from "../../stores/favourites-slice";
 import { clearToast } from "../../stores/toast-slice";
 import type { ToastMessage } from "../../stores/toast-slice";
 import styles from "../../styles/components/action-toast/index.module.css";
@@ -66,7 +66,10 @@ const ToastPill = ({ toast }: ToastPillProps) => {
           onClick={() => {
             if (!action.undoFavouriteId) return;
 
-            dispatch(setFavourite({ id: action.undoFavouriteId, on: true }));
+            void dispatch(
+              saveFavourite({ id: action.undoFavouriteId, on: true }),
+            );
+
             setClosing(true);
           }}
         >

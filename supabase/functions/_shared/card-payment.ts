@@ -2,15 +2,10 @@
 import { admin } from "./admin.ts";
 import { stripe } from "./stripe.ts";
 
-const getMessage = (error: unknown) =>
-  error instanceof Error ? error.message : String(error);
+const getMessage = (error: unknown) => (error instanceof Error ? error.message : String(error));
 
 /** The stylist's record of a payment (`py_…` on their account) → its available-on date, saved by payment intent. */
-export const saveDestinationPayment = async (
-  intentId: string,
-  paymentId: string,
-  account: string,
-) => {
+export const saveDestinationPayment = async (intentId: string, paymentId: string, account: string) => {
   try {
     const payment = await stripe.charges.retrieve(
       paymentId,
@@ -30,11 +25,7 @@ export const saveDestinationPayment = async (
 
     if (error) throw error;
   } catch (error) {
-    console.error(
-      "card payment details not saved",
-      intentId,
-      getMessage(error),
-    );
+    console.error("card payment details not saved", intentId, getMessage(error));
   }
 };
 
@@ -47,23 +38,10 @@ export const saveCardPayment = async (intentId: string, chargeId: string) => {
 
     const transfer = charge.transfer;
 
-    if (
-      !transfer ||
-      typeof transfer === "string" ||
-      typeof transfer.destination_payment !== "string"
-    )
-      return;
+    if (!transfer || typeof transfer === "string" || typeof transfer.destination_payment !== "string") return;
 
-    await saveDestinationPayment(
-      intentId,
-      transfer.destination_payment,
-      String(transfer.destination),
-    );
+    await saveDestinationPayment(intentId, transfer.destination_payment, String(transfer.destination));
   } catch (error) {
-    console.error(
-      "card payment details not saved",
-      intentId,
-      getMessage(error),
-    );
+    console.error("card payment details not saved", intentId, getMessage(error));
   }
 };

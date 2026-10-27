@@ -1,3 +1,4 @@
+import { ArrowLeft } from "lucide-react";
 import { useLayoutEffect, useState } from "react";
 import { Link, Navigate } from "react-router";
 import { PageMessage } from "../../components/page-message";
@@ -129,6 +130,12 @@ export const ManageBookingPage = ({
         </div>
       </nav>
       <main className={styles.main} aria-busy={isLoading}>
+        {isOwnerLink && (
+          <Link to="/account?section=bookings" className={styles.back}>
+            <ArrowLeft size={16} strokeWidth={2} aria-hidden="true" />
+            Your bookings
+          </Link>
+        )}
         {getContent()}
       </main>
     </div>

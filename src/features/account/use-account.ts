@@ -1,5 +1,7 @@
 import { getEditActions } from "./edit-actions";
+import { getEmailActions } from "./email-actions";
 import { getSaveActions } from "./save-actions";
+import { getWalletActions } from "./wallet-actions";
 import type { AccountProps } from "./state";
 import { useAccountCore } from "./use-core";
 import { useAccountDialogs } from "./use-dialogs";
@@ -11,12 +13,15 @@ export const useAccount = (props: AccountProps) => {
   const feedback = useAccountFeedback(core);
   const { goToSection } = useAccountNavigation(core, feedback);
   const { openDialog, closeDialog } = useAccountDialogs(core, feedback);
-  const edits = getEditActions(core, feedback);
+  const email = getEmailActions(core, feedback);
+  const edits = getEditActions(core, feedback, email);
   const saves = getSaveActions(core, feedback);
-  const { state, refs, forms, setState, sessionLoggedIn } = core;
+  const wallet = getWalletActions(core, feedback);
+  const { state, data, refs, forms, setState, sessionLoggedIn } = core;
 
   return {
     state,
+    data,
     refs,
     forms,
     loggedIn: sessionLoggedIn && !state.loggedOut && !state.deleted,
@@ -30,16 +35,18 @@ export const useAccount = (props: AccountProps) => {
       startResendCountdown: feedback.startResendCountdown,
       stopResendCountdown: feedback.stopResendCountdown,
       saveEdit: edits.saveEdit,
-      checkCode: edits.checkCode,
-      setCode: edits.setCode,
-      fillCode: edits.fillCode,
-      pasteCode: edits.pasteCode,
-      codeKey: edits.codeKey,
+      setCode: email.setCode,
+      pasteCode: email.pasteCode,
+      codeKey: email.codeKey,
+      resendCodes: email.resendCodes,
       savePassword: saves.savePassword,
-      saveCard: saves.saveCard,
-      saveAddress: saves.saveAddress,
-      setAddresses: saves.setAddresses,
+      sendPasswordCode: saves.sendPasswordCode,
+      saveMarketing: saves.saveMarketing,
+      ...wallet,
       onPhoto: saves.onPhoto,
+      savePhoto: saves.savePhoto,
+      saveSensitivity: saves.saveSensitivity,
+      downloadMyData: saves.downloadMyData,
       copy: saves.copy,
       endSession: saves.endSession,
       logout: saves.logout,

@@ -30,8 +30,7 @@ const record = async (
 Deno.serve(async (request) => {
   const secret = Deno.env.get("CRON_SECRET");
 
-  if (!secret || request.headers.get("x-cron-secret") !== secret)
-    return new Response("Forbidden", { status: 403 });
+  if (!secret || request.headers.get("x-cron-secret") !== secret) return new Response("Forbidden", { status: 403 });
 
   if (!resendKey && Deno.env.get("SUPABASE_URL")?.startsWith("https://")) {
     console.error("RESEND_API_KEY is not set: emails stay queued");
@@ -39,9 +38,7 @@ Deno.serve(async (request) => {
     return new Response("RESEND_API_KEY is not set", { status: 500 });
   }
 
-  const { data: notifications, error } = await admin.rpc(
-    "claim_notifications",
-  );
+  const { data: notifications, error } = await admin.rpc("claim_notifications");
 
   if (error) return new Response(error.message, { status: 500 });
 
@@ -51,8 +48,7 @@ Deno.serve(async (request) => {
     try {
       await send(notification);
     } catch (sendError) {
-      const message =
-        sendError instanceof Error ? sendError.message : String(sendError);
+      const message = sendError instanceof Error ? sendError.message : String(sendError);
 
       await record(sendError instanceof FinalError ? "mark_notification_failed_now" : "mark_notification_failed", {
         notification_id: notification.id,

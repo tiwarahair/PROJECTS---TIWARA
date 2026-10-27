@@ -20,19 +20,24 @@ export interface ChangedBooking extends BookingDetails {
 
 const NOT_ME = "This wasn’t me";
 
-type StylistNotice = BookingDetails & { cancellation: Cancellation | null; studio_url: string };
+type StylistNotice = BookingDetails & {
+  cancellation: Cancellation | null;
+  studio_url: string;
+};
 
 const getMoneyLines = (
   { fee_pence: fee = 0, refund_pence: refund, kept_pence: kept, charge_pence: charge }: Cancellation,
   stylist: string,
 ) => [
   // with a fee, nothing moves until the fee settles a day later
-  ...(refund && fee
-    ? [`${pounds(refund)} goes back to your card when the fee settles in 24 hours.`]
-    : []),
+  ...(refund && fee ? [`${pounds(refund)} goes back to your card when the fee settles in 24 hours.`] : []),
   ...(refund && !fee ? [`${pounds(refund)} is refunded to your card. It can take 5–10 working days to show.`] : []),
   ...(kept ? [`${pounds(kept)} is kept under ${stylist}’s cancellation policy.`] : []),
-  ...(charge ? [`A ${pounds(charge)} late cancellation fee is due under ${stylist}’s policy. We’ve emailed you when it will be charged.`] : []),
+  ...(charge
+    ? [
+        `A ${pounds(charge)} late cancellation fee is due under ${stylist}’s policy. We’ve emailed you when it will be charged.`,
+      ]
+    : []),
 ];
 
 export const bookingCancelled = (booking: ChangedBooking): RenderedEmail =>
@@ -51,9 +56,11 @@ export const bookingCancelledByStylist = (booking: ChangedBooking): RenderedEmai
   renderNotice({
     title: `${booking.stylist_name} cancelled your booking`,
     paragraphs: [
-      `${booking.stylist_name} had to cancel ${booking.service_name} on ${formatWhen(booking.starts_at)} (UK time). Sorry for the change of plans.`,
+      `${booking.stylist_name} had to cancel ${booking.service_name} on ${formatWhen(booking.starts_at)} (UK time).`,
       ...(booking.cancellation?.refund_pence
-        ? [`${pounds(booking.cancellation.refund_pence)} is refunded to your card, including the booking fee. It can take 5–10 working days to show.`]
+        ? [
+            `${pounds(booking.cancellation.refund_pence)} is refunded to your card, including the booking fee. It can take 5–10 working days to show.`,
+          ]
         : []),
       `Booking reference: ${booking.ref}`,
     ],
@@ -130,14 +137,16 @@ export const bookingCode = (booking: BookingDetails & { code: string; secure_url
     title: `Your code is ${booking.code}`,
     paragraphs: [
       `Enter this code to change or cancel ${booking.service_name} with ${booking.stylist_name} on ${formatWhen(booking.starts_at)} (UK time).`,
-      "It works for 10 minutes.",
     ],
     link: { label: NOT_ME, url: booking.secure_url },
     footnote: `If you didn’t ask for this code, someone may have your booking link. Nothing changes without the code, but tap “${NOT_ME}” to stop that link working.`,
   });
 
 export const bookingLinkReset = (
-  booking: BookingDetails & { manage_url: string; save_details_url: string | null },
+  booking: BookingDetails & {
+    manage_url: string;
+    save_details_url: string | null;
+  },
 ): RenderedEmail =>
   renderNotice({
     title: "Your new booking link",
@@ -147,7 +156,12 @@ export const bookingLinkReset = (
     ],
     button: { label: "Manage your booking", url: booking.manage_url },
     ...(booking.save_details_url
-      ? { link: { label: "Save your details for next time", url: booking.save_details_url } }
+      ? {
+          link: {
+            label: "Save your details for next time",
+            url: booking.save_details_url,
+          },
+        }
       : {}),
     footnote: "If your booking was changed or cancelled and you didn’t do it, reply to this email.",
   });

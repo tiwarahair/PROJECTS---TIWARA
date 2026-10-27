@@ -1,4 +1,4 @@
-import { z } from "npm:zod@4";
+import { z } from "zod";
 import { admin } from "../_shared/admin.ts";
 import { corsHeaders, respond } from "../_shared/cors.ts";
 import { getDisputeFacts, isAnswerable, submitDispute } from "../_shared/dispute-evidence.ts";

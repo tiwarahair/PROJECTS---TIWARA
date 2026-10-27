@@ -9,9 +9,32 @@
   overflow-wrap: anywhere;
 }
 
+.codeRow + .codeRow {
+  margin-top: 6px;
+}
+
+.codeLabel {
+  margin: 0 0 8px;
+  font-size: 14px;
+  font-weight: 600;
+  overflow-wrap: anywhere;
+}
+
+.codeLine {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.codeTick {
+  flex: 0 0 auto;
+  color: var(--status-success);
+}
+
 .codeBoxes {
   display: flex;
   gap: 8px;
+  min-width: 0;
 }
 
 .codeBox {
@@ -82,6 +105,10 @@
 
 .codeBoxEmpty {
   border: 1px solid var(--border-strong);
+}
+
+.codeBoxDone {
+  border: 1px solid var(--status-success);
 }
 
 .codeShake {

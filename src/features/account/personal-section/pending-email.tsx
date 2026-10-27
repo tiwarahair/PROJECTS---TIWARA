@@ -1,4 +1,3 @@
-import { EMPTY_CODE } from "../state";
 import type { EditFormController } from "./use-edit-form";
 import styles from "../../../styles/features/account/personal-section/pending-email.module.css";
 import shared from "../../../styles/features/account/personal-section/index.module.css";
@@ -29,14 +28,8 @@ export const PendingEmail = ({
         onClick={() => {
           reset({ ...profile, email: pendingEmail ?? "" });
 
-          setState(
-            {
-              edit: "email",
-              emailStep: "code",
-              code: EMPTY_CODE,
-              codeError: "",
-            },
-            () => focusLater("code"),
+          setState({ edit: "email", emailStep: "code" }, () =>
+            focusLater("code"),
           );
         }}
       >

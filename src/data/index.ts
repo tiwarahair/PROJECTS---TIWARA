@@ -13,7 +13,6 @@ import chatJson from "./chat.json";
 import coloursJson from "./colours.json";
 import defaultAddonsJson from "./default-addons.json";
 import faqsJson from "./faqs.json";
-import passwordBlocklistJson from "./password-blocklist.json";
 import platformCustomisationsJson from "./platform-customisations.json";
 import serviceGroupsJson from "./service-groups.json";
 import serviceSpecsJson from "./service-specs.json";
@@ -31,4 +30,3 @@ export const platformCustomisations =
 export const hairColours: HairColour[] = coloursJson;
 export const defaultAddons = defaultAddonsJson as unknown as DefaultAddons;
 export const categoryColours: CategoryColour[] = categoryColoursJson;
-export const passwordBlocklist: string[] = passwordBlocklistJson;

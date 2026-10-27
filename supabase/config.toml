@@ -430,88 +430,136 @@ enabled = true
 
 # Public endpoint: guarded by Turnstile and rate limits, not a user JWT.
 [functions.email-status]
+import_map = "./functions/deno.json"
 verify_jwt = false
 
 [functions.booking-hold]
+import_map = "./functions/deno.json"
 verify_jwt = false
 
 [functions.booking-checkout]
+import_map = "./functions/deno.json"
 verify_jwt = false
 
 [functions.booking-cancel]
+import_map = "./functions/deno.json"
 verify_jwt = false
 
 [functions.booking-calendar]
+import_map = "./functions/deno.json"
 verify_jwt = false
 
 [functions.booking-invite]
+import_map = "./functions/deno.json"
+verify_jwt = false
+
+[functions.client-calendar]
+import_map = "./functions/deno.json"
+verify_jwt = false
+
+[functions.stylist-calendar]
+import_map = "./functions/deno.json"
 verify_jwt = false
 
 [functions.studio-booking-cancel]
+import_map = "./functions/deno.json"
 verify_jwt = false
 
 [functions.studio-fee]
+import_map = "./functions/deno.json"
 verify_jwt = false
 
 [functions.charge-fees]
+import_map = "./functions/deno.json"
 verify_jwt = false
 
 [functions.payment-link]
+import_map = "./functions/deno.json"
 verify_jwt = false
 
 [functions.booking-confirm]
+import_map = "./functions/deno.json"
 verify_jwt = false
 
 [functions.send-transfers]
+import_map = "./functions/deno.json"
 verify_jwt = false
 
 [functions.studio-refund]
+import_map = "./functions/deno.json"
 verify_jwt = false
 
 [functions.studio-checkout]
+import_map = "./functions/deno.json"
 verify_jwt = false
 
 # called by pg_cron with x-cron-secret, not a user's token
 [functions.purge-closed-businesses]
+import_map = "./functions/deno.json"
 verify_jwt = false
 
 # checks the caller's token itself (getClaims), including the recent 2FA rule
 [functions.save-tax-details]
+import_map = "./functions/deno.json"
 verify_jwt = false
 
 [functions.stripe-connect]
+import_map = "./functions/deno.json"
 verify_jwt = false
 
 # Stripe calls it; the signature is the check
 [functions.stripe-webhook]
+import_map = "./functions/deno.json"
 verify_jwt = false
 
 [functions.stripe-payments-webhook]
+import_map = "./functions/deno.json"
 verify_jwt = false
 
 [functions.stripe-payouts-webhook]
+import_map = "./functions/deno.json"
 verify_jwt = false
 
 [functions.studio-balance]
+import_map = "./functions/deno.json"
 verify_jwt = false
 
 [functions.studio-dispute]
+import_map = "./functions/deno.json"
 verify_jwt = false
 
 [functions.studio-debt]
+import_map = "./functions/deno.json"
+verify_jwt = false
+
+# checks the caller's token itself (getClaims)
+[functions.client-cards]
+import_map = "./functions/deno.json"
+verify_jwt = false
+
+[functions.client-delete-account]
+import_map = "./functions/deno.json"
+verify_jwt = false
+
+[functions.check-password]
+import_map = "./functions/deno.json"
 verify_jwt = false
 
 # called by pg_cron with x-cron-secret, not a user's token
 [functions.send-notifications]
+import_map = "./functions/deno.json"
 verify_jwt = false
 
 # the update-card page, by a link in the client's email
 [functions.booking-card]
+import_map = "./functions/deno.json"
 verify_jwt = false
 
 [functions.booking-review]
+import_map = "./functions/deno.json"
 verify_jwt = false
 
 # called by pg_cron with x-cron-secret
 [functions.check-cards]
+import_map = "./functions/deno.json"
 verify_jwt = false

@@ -152,3 +152,8 @@
 .meterLabel {
   color: var(--label-colour);
 }
+
+.resendCode {
+  align-self: flex-start;
+  margin-top: 12px;
+}

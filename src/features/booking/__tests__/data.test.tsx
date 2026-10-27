@@ -4,14 +4,16 @@ import type { ReactNode } from "react";
 import { Provider } from "react-redux";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import {
-  BookingError,
   getAvailableSlots,
   getBookingStatus,
   holdBooking,
   isInTravelArea,
   startCheckout,
 } from "../../../lib/booking-api";
+import { fetchClientAddresses } from "../../../lib/client-addresses";
+import { FunctionError } from "../../../lib/invoke-function";
 import { fetchPublicProfile } from "../../../lib/public-profiles";
+import { api } from "../../../stores/api-slice";
 import { createStore } from "../../../stores/store";
 import { getDemoProfile } from "../../../test/demo-profile";
 import { renderBooking } from "../../../test/render-booking";
@@ -25,6 +27,20 @@ import { useTravelCheck } from "../hooks/use-travel-check";
 vi.mock("../../../lib/public-profiles", async (original) =>
   (await import("../../../test/booking-mocks")).mockPublicProfiles(original),
 );
+
+vi.mock("../../../lib/client-cards", () => ({
+  startCardsSession: vi.fn(() => Promise.resolve("cuss_secret")),
+}));
+
+vi.mock("../../../lib/client-sensitivities", () => ({
+  fetchMySensitivity: vi.fn(() => Promise.resolve("")),
+}));
+
+vi.mock("../../../lib/client-addresses", () => ({
+  fetchClientAddresses: vi.fn(() => Promise.resolve([])),
+  saveClientAddress: vi.fn(),
+  deleteClientAddress: vi.fn(),
+}));
 
 vi.mock("../../../lib/booking-api", async (original) => ({
   ...(await (
@@ -147,7 +163,7 @@ describe("booking on real data", () => {
 
   it("a time someone else just took says so, clears the time and fetches fresh times", async () => {
     vi.mocked(holdBooking).mockRejectedValueOnce(
-      new BookingError("slot_taken"),
+      new FunctionError("slot_taken"),
     );
 
     await renderBooking(SILK);
@@ -249,7 +265,8 @@ describe("booking on real data", () => {
       },
       notes: "",
       allergies: "",
-      keepCard: false,
+      clearAllergies: false,
+      requireCvc: false,
       turnstileToken: "test-captcha-token",
     });
 
@@ -272,7 +289,7 @@ describe("booking on real data", () => {
     expect(screen.getByText("TH-TEST01")).toBeInTheDocument();
 
     expect(
-      screen.getByRole("link", { name: "+ Google Calendar" }),
+      screen.getByRole("link", { name: "Google Calendar" }),
     ).toHaveAttribute(
       "href",
       expect.stringContaining("dates=20261020T093000Z%2F20261020T113000Z"),
@@ -358,7 +375,7 @@ describe("booking on real data", () => {
 
   it("a hold that ran out before paying says so, with nothing charged", async () => {
     vi.mocked(startCheckout).mockRejectedValueOnce(
-      new BookingError("hold_not_found"),
+      new FunctionError("hold_not_found"),
     );
 
     await renderBooking(SILK);
@@ -377,7 +394,7 @@ describe("booking on real data", () => {
 
   it("a failed Turnstile check blocks paying, and a fresh check lets them try again", async () => {
     vi.mocked(startCheckout).mockRejectedValueOnce(
-      new BookingError("turnstile_failed"),
+      new FunctionError("turnstile_failed"),
     );
 
     await renderBooking(SILK);
@@ -436,20 +453,17 @@ describe("booking on real data", () => {
   });
 
   it("signed-in clients booking a mobile stylist get their saved addresses", async () => {
-    localStorage.setItem(
-      "tw_addrs",
-      JSON.stringify([
-        {
-          id: "home",
-          label: "Home",
-          line1: "12 Dickenson Road",
-          line2: "",
-          town: "Manchester",
-          postcode: "M14 5TQ",
-          isDefault: true,
-        },
-      ]),
-    );
+    vi.mocked(fetchClientAddresses).mockResolvedValue([
+      {
+        id: "home",
+        label: "Home",
+        line1: "12 Dickenson Road",
+        line2: "",
+        town: "Manchester",
+        postcode: "M14 5TQ",
+        isDefault: true,
+      },
+    ]);
 
     await renderBooking(
       "stylist=naturallynia&service=naturallynia--wash-and-style",
@@ -466,6 +480,50 @@ describe("booking on real data", () => {
 
     expect(card).toBeInTheDocument();
     expect(screen.getAllByText(/12 Dickenson Road/).length).toBeGreaterThan(0);
+  });
+
+  it("an address added elsewhere keeps the client's choice of a different address", async () => {
+    const home = {
+      id: "home",
+      label: "Home",
+      line1: "12 Dickenson Road",
+      line2: "",
+      town: "Manchester",
+      postcode: "M14 5TQ",
+      isDefault: true,
+    };
+
+    vi.mocked(fetchClientAddresses)
+      .mockResolvedValueOnce([home])
+      .mockResolvedValue([
+        home,
+        { ...home, id: "work", label: "Work", isDefault: false },
+      ]);
+
+    const { store } = await renderBooking(
+      "stylist=naturallynia&service=naturallynia--wash-and-style",
+      { signedIn: true },
+    );
+
+    await pickTime("10:30");
+    await continueFromTime();
+
+    const different = await screen.findByRole("radio", {
+      name: /A different address/,
+    });
+
+    await user.click(different);
+
+    act(() => {
+      store.dispatch(api.util.invalidateTags(["Addresses"]));
+    });
+
+    await waitFor(() => expect(fetchClientAddresses).toHaveBeenCalledTimes(2));
+    await act(() => vi.advanceTimersByTimeAsync(50));
+
+    expect(
+      screen.getByRole("radio", { name: /A different address/ }),
+    ).toHaveAttribute("aria-checked", "true");
   });
 });
 

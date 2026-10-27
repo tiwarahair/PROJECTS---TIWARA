@@ -55,8 +55,8 @@ export const AppointmentAddress = ({ booking }: AppointmentAddressProps) => {
           postcode: picked.postcode,
           source: "saved",
           notes: current.notes,
-          lat: null,
-          lng: null,
+          lat: picked.lat ?? null,
+          lng: picked.lng ?? null,
         },
       }));
   };

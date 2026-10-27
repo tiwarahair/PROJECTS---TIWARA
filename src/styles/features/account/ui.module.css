@@ -86,6 +86,12 @@
   transform: scale(0.98) !important;
 }
 
+.save:disabled {
+  opacity: 0.55;
+  cursor: default;
+  pointer-events: none;
+}
+
 .label {
   display: flex;
   flex-direction: column;
@@ -188,6 +194,12 @@
 
 .quietButton:active {
   transform: scale(0.97) !important;
+}
+
+.quietButton:disabled {
+  opacity: 0.55;
+  cursor: default;
+  pointer-events: none;
 }
 
 .buttonRow {

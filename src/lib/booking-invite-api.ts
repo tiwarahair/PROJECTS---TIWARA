@@ -1,5 +1,5 @@
 import { TERMS_VERSION } from "./auth-helpers";
-import { invokeBookingFunction } from "./booking-api";
+import { invokeFunction } from "./invoke-function";
 import { supabase } from "./supabase";
 
 export interface BookingInvite {
@@ -10,13 +10,13 @@ export interface BookingInvite {
 }
 
 export const getBookingInvite = (token: string) =>
-  invokeBookingFunction<BookingInvite>("booking-invite", {
+  invokeFunction<BookingInvite>("booking-invite", {
     action: "view",
     token,
   });
 
 export const renewBookingInvite = (token: string) =>
-  invokeBookingFunction<{ email: string }>("booking-invite", {
+  invokeFunction<{ email: string }>("booking-invite", {
     action: "renew",
     token,
   });
@@ -28,7 +28,7 @@ export const claimBookingInvite = ({
   token: string;
   password: string;
 }) =>
-  invokeBookingFunction<{ tokenHash: string }>("booking-invite", {
+  invokeFunction<{ tokenHash: string }>("booking-invite", {
     action: "claim",
     token,
     password,

@@ -8,6 +8,7 @@ import {
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { usePasswordChecker } from "../../hooks/use-password-checker";
+import { PASSWORD_FAILURES } from "../../lib/account-changes";
 import type { TaxBusiness, TaxDetails } from "../tax-details-form/logic";
 import { nameSchema } from "./name-schema";
 import { EMPTY_PASSWORD } from "./password-schema";
@@ -28,13 +29,6 @@ import type {
 
 const TOAST_MS = 2400;
 const PASSWORD_MIN = 8;
-
-const PASSWORD_FAILURES: Record<string, string> = {
-  reauthentication_not_valid: "That code isn’t right or has expired.",
-  same_password: "That’s your current password. Choose a new one.",
-  weak_password: "Choose a stronger password.",
-  failed: "Your password couldn’t be changed. Try again.",
-};
 
 /** What the host (Studio) gets after every render to drive its own save button. */
 export interface AccountSettingsApi {
@@ -110,7 +104,6 @@ export const useAccountSettings = (props: AccountSettingsProps) => {
   const dialogRun = useRef<(() => void) | null>(null);
   const dialogReturn = useRef<HTMLElement | null>(null);
   const toastTimer = useRef(0);
-  const googleTimer = useRef(0);
   const latestSessionsLoad = useRef(0);
 
   usePasswordChecker();
@@ -180,10 +173,26 @@ export const useAccountSettings = (props: AccountSettingsProps) => {
     if (page === "security") loadSessions();
   }, [page]);
 
+  const loadFeed = () => {
+    if (state.feedUrl) return;
+
+    setState({ feedFailed: false });
+
+    props.backend.getCalendarFeed().then(
+      (feedUrl) => setState({ feedUrl }),
+      () => setState({ feedFailed: true }),
+    );
+  };
+
+  const loadFeedOnOpen = useEffectEvent(loadFeed);
+
+  useEffect(() => {
+    if (page === "calendar") loadFeedOnOpen();
+  }, [page]);
+
   useEffect(
     () => () => {
       window.clearTimeout(toastTimer.current);
-      window.clearTimeout(googleTimer.current);
     },
     [],
   );
@@ -301,17 +310,6 @@ export const useAccountSettings = (props: AccountSettingsProps) => {
     props.onState?.({ canSave: isDirty && hasSave, save, discard });
   });
 
-  // TO DO: google first needs to verify our app for this to work which can take weeks
-  const connectGoogle = () => {
-    setState(({ google }) => ({ google: { ...google, state: "connecting" } }));
-    window.clearTimeout(googleTimer.current);
-
-    googleTimer.current = window.setTimeout(() => {
-      setState(({ google }) => ({ google: { ...google, state: "on" } }));
-      toast("Google Calendar connected");
-    }, 1200);
-  };
-
   return {
     page,
     state,
@@ -336,7 +334,7 @@ export const useAccountSettings = (props: AccountSettingsProps) => {
     sendPasswordCode,
     backend,
     sessions,
-    connectGoogle,
+    retryFeed: loadFeed,
   };
 };
 

@@ -83,7 +83,8 @@ export interface OnboardingState {
   codeError: string;
   shake: number;
   resendIn: number;
-  codeKind: "verify" | "2fa";
+  /** "reset": the authenticator code a two-factor account gives before a reset is saved. */
+  codeKind: "verify" | "2fa" | "reset";
   attempts: number;
   lockedUntil: number;
   addressOpen: boolean;
@@ -191,6 +192,7 @@ export const isCodeScreen = (screen: string | null): boolean =>
 export const getBackScreen = ({
   screen,
   audience,
+  codeKind,
 }: OnboardingState): string | undefined => {
   const isCustomer = audience === "customer";
 
@@ -201,7 +203,7 @@ export const getBackScreen = ({
     "cust-create": "cust-email",
     "cust-social": "cust-email",
     "pro-password": "pro-email",
-    "pro-2fa": "pro-password",
+    "pro-2fa": codeKind === "reset" ? "forgot-reset" : "pro-password",
     "forgot-email": isCustomer ? "cust-password" : "pro-password",
     "forgot-sent": "forgot-email",
     "forgot-reset": "forgot-sent",

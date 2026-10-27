@@ -20,7 +20,6 @@ interface SiteHeaderProps {
   signedIn?: boolean;
   /** Defaults to the signed-in person's initials. */
   initials?: string;
-  photo?: string | null;
 }
 
 /**
@@ -31,7 +30,6 @@ export const SiteHeader = ({
   loginHref = "/login",
   signedIn,
   initials,
-  photo,
 }: SiteHeaderProps) => {
   const identity = useIdentity();
   const isSignedIn = signedIn ?? !!identity;
@@ -64,10 +62,7 @@ export const SiteHeader = ({
           ))}
           {isSignedIn ? (
             <SiteMenu isSignedIn linksShownFrom={NAV_LINKS_FROM}>
-              <AccountAvatar
-                initials={initials ?? identity?.initials ?? ""}
-                photo={photo}
-              />
+              <AccountAvatar initials={initials ?? identity?.initials ?? ""} />
             </SiteMenu>
           ) : (
             <>

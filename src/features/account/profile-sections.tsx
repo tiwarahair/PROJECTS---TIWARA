@@ -1,6 +1,7 @@
 import { Heart, Sparkles } from "lucide-react";
 import { useEffect, useMemo } from "react";
 import { Link } from "react-router";
+import { PageMessage } from "../../components/page-message";
 import { StylistCardSkeleton } from "../../components/skeleton/stylist-card-skeleton";
 import { toPublicStylist } from "../../lib/public-stylist";
 import { useGetStylistProfileQuery } from "../../stores/api-slice";
@@ -53,11 +54,30 @@ const FavouriteCard = ({ slug }: { slug: string }) => {
 
 export const FavouritesSection = ({
   favouriteIds,
+  isLoaded,
+  isFailed,
 }: {
   favouriteIds: string[];
+  isLoaded: boolean;
+  isFailed: boolean;
 }) => (
   <section data-screen-label="Account: Favourites">
-    {favouriteIds.length > 0 && (
+    {isFailed && (
+      <PageMessage
+        title="Favourites didn’t load"
+        text="Check your connection, then try again."
+        linkLabel="Try again"
+        linkHref="/account?section=favourites"
+        isReload
+      />
+    )}
+    {!isLoaded && !isFailed && (
+      <div className={styles.favGrid} aria-busy="true">
+        <StylistCardSkeleton />
+        <StylistCardSkeleton />
+      </div>
+    )}
+    {isLoaded && favouriteIds.length > 0 && (
       <>
         <p className={styles.count}>
           {favouriteIds.length === 1
@@ -71,7 +91,7 @@ export const FavouritesSection = ({
         </div>
       </>
     )}
-    {!favouriteIds.length && (
+    {isLoaded && !favouriteIds.length && (
       <div className={ui.emptyState} data-screen-label="Favourites empty">
         <div className={ui.emptyIcon}>
           <Heart size={24} strokeWidth={2} />

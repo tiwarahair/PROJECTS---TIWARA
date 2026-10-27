@@ -47,7 +47,11 @@ describe("confirm link emails", () => {
   });
 
   it("ask a card-protection client to add a card and pay only the booking fee", () => {
-    const { text } = confirmBooking({ ...link, terms: { ...link.terms, mode: "card", deposit_pence: 0 }, due_pence: 200 });
+    const { text } = confirmBooking({
+      ...link,
+      terms: { ...link.terms, mode: "card", deposit_pence: 0 },
+      due_pence: 200,
+    });
 
     expect(text).toContain("add a card and pay the £2.00 booking fee");
   });
@@ -91,13 +95,21 @@ describe("studio booking emails", () => {
   });
 
   it("tell both sides about an auto-cancel", () => {
-    expect(bookingAutoCancelled(details).text).toContain("wasn’t confirmed in time, so it’s been cancelled. Nothing was charged.");
+    expect(bookingAutoCancelled(details).text).toContain(
+      "wasn’t confirmed in time, so it’s been cancelled. Nothing was charged.",
+    );
     expect(autoCancelled({ ...details, studio_url: "https://dev.tiwarashouse.com/studio" }).subject).toBe(
       "Auto-cancelled: Nia Okafor",
     );
     expect(
-      autoCancelSoon({ ...details, studio_url: "https://dev.tiwarashouse.com/studio", confirm_by: "2026-10-21T09:00:00Z" }).text,
+      autoCancelSoon({
+        ...details,
+        studio_url: "https://dev.tiwarashouse.com/studio",
+        confirm_by: "2026-10-21T09:00:00Z",
+      }).text,
     ).toContain("auto-cancels at Wednesday 21 October at 10:00 unless Nia Okafor confirms");
-    expect(renderSms("auto_cancelled", details)).toBe("Auto-cancelled: Nia Okafor, Silk press, Thu 22 Oct, 17:30. Ref TH-ABC123.");
+    expect(renderSms("auto_cancelled", details)).toBe(
+      "Auto-cancelled: Nia Okafor, Silk press, Thu 22 Oct, 17:30. Ref TH-ABC123.",
+    );
   });
 });

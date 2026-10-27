@@ -17,6 +17,14 @@
       "destination": "/api/link-preview?slug=:slug"
     },
     {
+      "source": "/cal/studio/:key([A-Za-z0-9_-]{32}).ics",
+      "destination": "/api/calendar?feed=studio&key=:key"
+    },
+    {
+      "source": "/cal/:key([a-f0-9]{48}).ics",
+      "destination": "/api/calendar?feed=client&key=:key"
+    },
+    {
       "source": "/(.*)",
       "destination": "/index.html"
     }

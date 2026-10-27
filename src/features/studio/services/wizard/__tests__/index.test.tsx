@@ -165,7 +165,7 @@ describe("Studio → service wizard", () => {
     );
 
     await user.type(
-      within(dialog).getByPlaceholderText("e.g. Parting"),
+      within(dialog).getByPlaceholderText("e.g. Service type"),
       "Parting",
     );
 

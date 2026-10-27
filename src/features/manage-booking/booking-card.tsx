@@ -1,8 +1,14 @@
 import { Calendar, MapPin } from "lucide-react";
 import { getGoogleCalendarUrl } from "../../../supabase/functions/_shared/calendar-file";
+import { CalendarAppPills } from "../../components/calendar-app-pills";
 import { getCalendarFileUrl } from "../../lib/manage-booking-api";
 import type { ManagedBooking } from "../../lib/manage-booking-api";
-import { formatWhen, getOptionsLine, toPounds } from "./logic";
+import {
+  formatWhen,
+  getOptionsLine,
+  isCancelledStatus,
+  toPounds,
+} from "./logic";
 import styles from "../../styles/features/manage-booking/booking-card.module.css";
 
 interface BookingCardProps {
@@ -10,7 +16,7 @@ interface BookingCardProps {
 }
 
 export const BookingCard = ({ booking }: BookingCardProps) => {
-  const isCancelled = booking.status === "cancelled";
+  const isCancelled = isCancelledStatus(booking.status);
   const isUpcoming = booking.status === "confirmed" && booking.can_cancel;
   const optionsLine = getOptionsLine(booking);
   const { ref, stylist_name: stylist, starts_at: startsAt, where } = booking;
@@ -49,23 +55,21 @@ export const BookingCard = ({ booking }: BookingCardProps) => {
       </div>
       {isUpcoming && (
         <div className={styles.calendar}>
-          Add to calendar
-          <div className={styles.calendarLinks}>
-            <a
-              href={getCalendarFileUrl({ key: booking.calendar_key })}
-              className={styles.calendarLink}
-            >
-              Apple Calendar
-            </a>
-            <a
-              href={getGoogleCalendarUrl(event)}
-              target="_blank"
-              rel="noopener noreferrer"
-              className={styles.calendarLink}
-            >
-              Google Calendar
-            </a>
-          </div>
+          <CalendarAppPills
+            label="Add to calendar"
+            links={[
+              {
+                app: "apple",
+                label: "Apple Calendar",
+                href: getCalendarFileUrl({ key: booking.calendar_key }),
+              },
+              {
+                app: "google",
+                label: "Google Calendar",
+                href: getGoogleCalendarUrl(event),
+              },
+            ]}
+          />
         </div>
       )}
     </div>

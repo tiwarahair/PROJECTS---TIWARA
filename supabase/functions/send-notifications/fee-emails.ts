@@ -25,12 +25,7 @@ const FEE_NAMES: Record<FeeKind, string> = {
   no_show: "no-show fee",
 };
 
-const getReason = ({
-  kind,
-  stylist_name: stylist,
-  service_name: service,
-  starts_at: startsAt,
-}: ScheduledFee) =>
+const getReason = ({ kind, stylist_name: stylist, service_name: service, starts_at: startsAt }: ScheduledFee) =>
   kind === "no_show"
     ? `${stylist} marked you as not attending ${service} on ${formatWhen(startsAt)} (UK time).`
     : `You cancelled ${service} with ${stylist} on ${formatWhen(startsAt)} (UK time) after the free cancellation deadline.`;
@@ -43,19 +38,9 @@ export const feeScheduled = (fee: ScheduledFee): RenderedEmail => {
     title: `${name.charAt(0).toUpperCase()}${name.slice(1)}: ${pounds(fee.fee_pence)}`,
     paragraphs: [
       `${getReason(fee)} ${fee.stylist_name}’s policy has a ${pounds(fee.fee_pence)} ${name}.`,
-      ...(fee.kept_pence
-        ? [`${pounds(fee.kept_pence)} of what you paid is kept towards it.`]
-        : []),
-      ...(fee.charge_pence
-        ? [
-            `${pounds(fee.charge_pence)} will be charged to your saved card on ${settleOn}.`,
-          ]
-        : []),
-      ...(fee.refund_pence
-        ? [
-            `${pounds(fee.refund_pence)} will be refunded to your card on ${settleOn}.`,
-          ]
-        : []),
+      ...(fee.kept_pence ? [`${pounds(fee.kept_pence)} of what you paid is kept towards it.`] : []),
+      ...(fee.charge_pence ? [`${pounds(fee.charge_pence)} will be charged to your saved card on ${settleOn}.`] : []),
+      ...(fee.refund_pence ? [`${pounds(fee.refund_pence)} will be refunded to your card on ${settleOn}.`] : []),
       `Booking reference: ${fee.ref}`,
     ],
     footnote:
@@ -79,9 +64,7 @@ export const feeWaived = ({
     paragraphs: [
       `${stylist_name} has waived the ${FEE_NAMES[kind]} for ${service_name} on ${formatWhen(starts_at)} (UK time). You won’t be charged it.`,
       ...(refund_pence
-        ? [
-            `${pounds(refund_pence)} is refunded to your card. It can take 5–10 working days to show.`,
-          ]
+        ? [`${pounds(refund_pence)} is refunded to your card. It can take 5–10 working days to show.`]
         : []),
       `Booking reference: ${ref}`,
     ],

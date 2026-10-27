@@ -26,13 +26,22 @@ export const useTravelCheck = (
 
     let isCancelled = false;
 
-    void new geocoding.Geocoder()
-      .geocode({ address: query, componentRestrictions: { country: "GB" } })
-      .then(({ results }) => results[0]?.geometry.location.toJSON() ?? null)
-      .catch(() => null)
-      .then((point) => {
-        if (!isCancelled) setGeocoded({ query, point });
-      });
+    const findPoint = async () => {
+      try {
+        const { results } = await new geocoding.Geocoder().geocode({
+          address: query,
+          componentRestrictions: { country: "GB" },
+        });
+
+        return results[0]?.geometry.location.toJSON() ?? null;
+      } catch {
+        return null;
+      }
+    };
+
+    void findPoint().then((point) => {
+      if (!isCancelled) setGeocoded({ query, point });
+    });
 
     return () => {
       isCancelled = true;

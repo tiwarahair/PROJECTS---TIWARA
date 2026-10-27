@@ -1,3 +1,4 @@
+import { CalendarAppPills } from "../../components/calendar-app-pills";
 import { Calendar, Check, Clock, Mail, MapPin } from "lucide-react";
 import { Link } from "react-router";
 import { AppleLogo, GoogleLogo } from "../../components/icons/brand-icons";
@@ -141,29 +142,29 @@ export const BookingConfirmation = ({ booking }: BookingConfirmationProps) => {
             : "Keep the email — it's the only way back in."}
         </p>
       </div>
-      <div className={styles.calendarRow}>
-        <a
-          href={
-            state.booked
-              ? getCalendarFileUrl({
-                  booking: state.booked.id,
-                  secret: state.booked.secret,
-                })
-              : undefined
-          }
-          className={styles.calendarButton}
-        >
-          + Apple Calendar
-        </a>
-        <a
-          href={calendarEvent ? getGoogleCalendarUrl(calendarEvent) : undefined}
-          target="_blank"
-          rel="noopener noreferrer"
-          className={styles.calendarButton}
-        >
-          + Google Calendar
-        </a>
-      </div>
+      {calendarEvent && (
+        <div className={styles.calendarRow}>
+          <CalendarAppPills
+            label="Add to calendar"
+            isCentered={true}
+            links={[
+              {
+                app: "apple",
+                label: "Apple Calendar",
+                href: getCalendarFileUrl({
+                  booking: calendarEvent.id,
+                  secret: calendarEvent.secret,
+                }),
+              },
+              {
+                app: "google",
+                label: "Google Calendar",
+                href: getGoogleCalendarUrl(calendarEvent),
+              },
+            ]}
+          />
+        </div>
+      )}
       {!loggedIn && !account.saved && !account.hidden && !account.sent && (
         <div data-screen-label="Save your details" className={styles.saveRow}>
           <div className={styles.saveText}>

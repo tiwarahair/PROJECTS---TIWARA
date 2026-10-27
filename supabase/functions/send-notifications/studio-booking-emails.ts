@@ -27,11 +27,7 @@ export type StylistNotice = BookingDetails & {
   confirm_by?: string;
 };
 
-const getWhereLine = ({
-  is_mobile: isMobile,
-  stylist_name: stylist,
-  where,
-}: BookingDetails) =>
+const getWhereLine = ({ is_mobile: isMobile, stylist_name: stylist, where }: BookingDetails) =>
   isMobile ? `${stylist} will come to you at ${where}.` : `Where: ${where}.`;
 
 const getCalendar = ({
@@ -135,8 +131,7 @@ const studioBookingEmail =
         `Booking reference: ${booking.ref}`,
       ],
       button: { label: "Manage your booking", url: booking.manage_url },
-      footnote:
-        "The attached calendar file adds the appointment to your calendar.",
+      footnote: "The attached calendar file adds the appointment to your calendar.",
     }),
     attachments: [getCalendar(booking)],
   });
@@ -153,9 +148,7 @@ export const bookingUpdatedByStylist = (booking: StudioBooking) =>
     `${booking.stylist_name} made a change to your booking. Here are the details now.`,
   )(booking);
 
-export const bookingManageLink = (
-  booking: BookingDetails & { manage_url: string },
-): RenderedEmail =>
+export const bookingManageLink = (booking: BookingDetails & { manage_url: string }): RenderedEmail =>
   renderNotice({
     title: `Your booking with ${booking.stylist_name}`,
     paragraphs: [
@@ -186,8 +179,7 @@ export const autoCancelled = (booking: StylistNotice): RenderedEmail =>
       `Booking reference: ${booking.ref}`,
     ],
     button: { label: "Open Studio", url: booking.studio_url },
-    footnote:
-      "You can choose which booking emails and texts you get in Studio → Settings → Notifications.",
+    footnote: "You can choose which booking emails and texts you get in Studio → Settings → Notifications.",
   });
 
 export const autoCancelSoon = (booking: StylistNotice): RenderedEmail =>
@@ -199,19 +191,14 @@ export const autoCancelSoon = (booking: StylistNotice): RenderedEmail =>
       `Booking reference: ${booking.ref}`,
     ],
     button: { label: "Open Studio", url: booking.studio_url },
-    footnote:
-      "You can choose which booking emails and texts you get in Studio → Settings → Notifications.",
+    footnote: "You can choose which booking emails and texts you get in Studio → Settings → Notifications.",
   });
 
 // once the free window has closed, cancelling may cost the fee in the stylist's policy
-const getReminderCancelLine = ({
-  terms,
-  stylist_name: stylist,
-}: StudioBooking) => {
+const getReminderCancelLine = ({ terms, stylist_name: stylist }: StudioBooking) => {
   if (!terms) return null;
 
-  if (Date.parse(terms.free_cancel_until) > Date.now())
-    return getCancelLine(terms);
+  if (Date.parse(terms.free_cancel_until) > Date.now()) return getCancelLine(terms);
 
   return terms.mode === "none"
     ? null
@@ -234,8 +221,7 @@ const bookingReminder =
           `Booking reference: ${booking.ref}`,
         ],
         button: { label: "Manage your booking", url: booking.manage_url },
-        footnote:
-          "Need to change something? Use the button to reschedule or cancel.",
+        footnote: "Need to change something? Use the button to reschedule or cancel.",
       }),
       attachments: [getCalendar(booking)],
     };

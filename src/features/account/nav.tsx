@@ -1,7 +1,7 @@
 import { ChevronRight, CircleQuestionMark, LogOut } from "lucide-react";
 import type { MouseEvent } from "react";
 import { Link } from "react-router";
-import { resolveAssetUrl } from "../../utils/asset-url";
+import { AccountPhoto } from "../../components/account-photo";
 import { joinClassNames } from "../../utils/class-names";
 import { SECTIONS } from "./data";
 import type { AccountSection } from "./data";
@@ -15,7 +15,6 @@ interface AccountNavProps {
   current: string | null;
   accountName: string;
   initials: string;
-  photo: string | null;
   onGo: (id: string) => void;
   onLogOut: () => void;
 }
@@ -23,18 +22,12 @@ interface AccountNavProps {
 const Avatar = ({
   className,
   initials,
-  photo,
 }: {
   className?: string;
   initials: string;
-  photo: string | null;
 }) => (
   <span className={className} aria-hidden="true">
-    {photo ? (
-      <img className={styles.avatarImage} src={resolveAssetUrl(photo)} alt="" />
-    ) : (
-      initials
-    )}
+    <AccountPhoto initials={initials} />
   </span>
 );
 
@@ -69,7 +62,6 @@ export const AccountSideNav = ({
   current,
   accountName,
   initials,
-  photo,
   onGo,
   onLogOut,
 }: AccountNavProps) => {
@@ -99,11 +91,7 @@ export const AccountSideNav = ({
     <nav className={styles.side} aria-label="Your account">
       <div className={styles.sideProfile}>
         <div className={styles.profile}>
-          <Avatar
-            className={styles.sideAvatar}
-            initials={initials}
-            photo={photo}
-          />
+          <Avatar className={styles.sideAvatar} initials={initials} />
           <div className={styles.profileText}>
             <div className={styles.sideName}>{accountName}</div>
             <div className={styles.memberSince}>{memberSince}</div>
@@ -140,7 +128,6 @@ export const AccountSideNav = ({
 export const AccountMobileList = ({
   accountName,
   initials,
-  photo,
   onGo,
   onLogOut,
 }: Omit<AccountNavProps, "current">) => {
@@ -173,11 +160,7 @@ export const AccountMobileList = ({
     <div data-screen-label="Account list (mobile)">
       <h1 className={styles.srTitle}>Your account</h1>
       <div className={styles.profile}>
-        <Avatar
-          className={styles.listAvatar}
-          initials={initials}
-          photo={photo}
-        />
+        <Avatar className={styles.listAvatar} initials={initials} />
         <div className={styles.profileText}>
           <div className={styles.listName}>{accountName}</div>
           <div className={styles.memberSince}>{memberSince}</div>
