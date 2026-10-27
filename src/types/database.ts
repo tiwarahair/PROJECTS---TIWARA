@@ -3194,6 +3194,10 @@ export type Database = {
         Args: { appellant: string; target: string };
         Returns: Json;
       };
+      get_assistant_image_paths: {
+        Args: { client: string };
+        Returns: string[];
+      };
       get_available_slots: {
         Args: {
           choices: Json;

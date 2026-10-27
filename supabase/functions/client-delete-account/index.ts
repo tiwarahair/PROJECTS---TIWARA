@@ -1,11 +1,11 @@
-// Refused while the client has a booking to come, owes money or owns a business; otherwise their bookings are
-// anonymised (the money stays as records), the photo is deleted and the login goes, taking the profile and saved
-// addresses with it.
+// refused while the client has a booking to come, owes money or owns a business; otherwise their bookings are anonymised (the money stays as records), the account photo and hair assistant photos are deleted and the logingoes etc.
 import { admin } from "../_shared/admin.ts";
 import { corsHeaders, respond } from "../_shared/cors.ts";
 import { z } from "zod";
 import { getSignedInSession } from "../_shared/recent-user.ts";
 import { stripe } from "../_shared/stripe.ts";
+
+const BATCH = 100;
 
 interface Blockers {
   bookings: unknown[];
@@ -78,6 +78,18 @@ Deno.serve(async (request) => {
     if (photoError) throw photoError;
 
     await admin.from("profiles").update({ photo_path: null }).eq("id", client);
+
+    const { data: assistantImages, error: imagesError } = await admin.rpc("get_assistant_image_paths", { client });
+
+    if (imagesError) throw imagesError;
+
+    for (let start = 0; start < assistantImages.length; start += BATCH) {
+      const { error: removeError } = await admin.storage
+        .from("assistant-images")
+        .remove(assistantImages.slice(start, start + BATCH));
+
+      if (removeError) throw removeError;
+    }
 
     const { error: anonymiseError } = await admin.rpc("anonymise_client_bookings", { client });
 
