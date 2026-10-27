@@ -9,3 +9,4 @@ coverage
 !.env.example
 IMPLEMENTATION_PLAN.local.md
 BACKEND_PLAN.local.md
+docs/ai-assistant-execution-handoff.md

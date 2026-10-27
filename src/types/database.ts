@@ -211,6 +211,75 @@ export type Database = {
           },
         ];
       };
+      assistant_conversations: {
+        Row: {
+          created_at: string;
+          id: string;
+          title: string | null;
+          user_id: string;
+        };
+        ComputedFields: never;
+        Insert: {
+          created_at?: string;
+          id?: string;
+          title?: string | null;
+          user_id?: string;
+        };
+        Update: {
+          created_at?: string;
+          id?: string;
+          title?: string | null;
+          user_id?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "assistant_conversations_user_id_fkey";
+            columns: ["user_id"];
+            isOneToOne: false;
+            referencedRelation: "profiles";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
+      assistant_messages: {
+        Row: {
+          body: string;
+          conversation_id: string;
+          created_at: string;
+          id: string;
+          image_path: string | null;
+          role: string;
+          safety: string | null;
+        };
+        ComputedFields: never;
+        Insert: {
+          body: string;
+          conversation_id: string;
+          created_at?: string;
+          id?: string;
+          image_path?: string | null;
+          role: string;
+          safety?: string | null;
+        };
+        Update: {
+          body?: string;
+          conversation_id?: string;
+          created_at?: string;
+          id?: string;
+          image_path?: string | null;
+          role?: string;
+          safety?: string | null;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "assistant_messages_conversation_id_fkey";
+            columns: ["conversation_id"];
+            isOneToOne: false;
+            referencedRelation: "assistant_conversations";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
       booking_codes: {
         Row: {
           attempts: number;
@@ -1137,6 +1206,112 @@ export type Database = {
             referencedColumns: ["id"];
           },
         ];
+      };
+      hair_profiles: {
+        Row: {
+          budget_notes: string | null;
+          current_style: string | null;
+          goals: string | null;
+          lifestyle: string | null;
+          location: string | null;
+          sensitivities: string | null;
+          updated_at: string;
+          user_id: string;
+        };
+        ComputedFields: never;
+        Insert: {
+          budget_notes?: string | null;
+          current_style?: string | null;
+          goals?: string | null;
+          lifestyle?: string | null;
+          location?: string | null;
+          sensitivities?: string | null;
+          updated_at?: string;
+          user_id?: string;
+        };
+        Update: {
+          budget_notes?: string | null;
+          current_style?: string | null;
+          goals?: string | null;
+          lifestyle?: string | null;
+          location?: string | null;
+          sensitivities?: string | null;
+          updated_at?: string;
+          user_id?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "hair_profiles_user_id_fkey";
+            columns: ["user_id"];
+            isOneToOne: true;
+            referencedRelation: "profiles";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
+      knowledge_chunks: {
+        Row: {
+          body: string;
+          created_at: string;
+          document_id: string;
+          id: string;
+        };
+        ComputedFields: never;
+        Insert: {
+          body: string;
+          created_at?: string;
+          document_id: string;
+          id?: string;
+        };
+        Update: {
+          body?: string;
+          created_at?: string;
+          document_id?: string;
+          id?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "knowledge_chunks_document_id_fkey";
+            columns: ["document_id"];
+            isOneToOne: false;
+            referencedRelation: "knowledge_documents";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
+      knowledge_documents: {
+        Row: {
+          body: string;
+          created_at: string;
+          id: string;
+          reviewed_at: string | null;
+          reviewer: string | null;
+          slug: string;
+          source: string | null;
+          title: string;
+        };
+        ComputedFields: never;
+        Insert: {
+          body: string;
+          created_at?: string;
+          id?: string;
+          reviewed_at?: string | null;
+          reviewer?: string | null;
+          slug: string;
+          source?: string | null;
+          title: string;
+        };
+        Update: {
+          body?: string;
+          created_at?: string;
+          id?: string;
+          reviewed_at?: string | null;
+          reviewer?: string | null;
+          slug?: string;
+          source?: string | null;
+          title?: string;
+        };
+        Relationships: [];
       };
       login_devices: {
         Row: {
@@ -3740,6 +3915,7 @@ export type Database = {
         Args: { is_suspended: boolean; target: string };
         Returns: undefined;
       };
+      owns_assistant_image: { Args: { object_name: string }; Returns: boolean };
       owns_photo_path: { Args: { object_name: string }; Returns: boolean };
       price_booking: {
         Args: { choices: Json; target_service: string };
