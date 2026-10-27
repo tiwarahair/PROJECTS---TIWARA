@@ -6,20 +6,16 @@ import {
   getClientNames,
   getProtectionNoun,
 } from "../../core/model";
-import type { StudioBooking } from "../../core/types";
+import type { StudioBooking, StudioClient } from "../../core/types";
 import { toEditDraft } from "../../clients/edit-draft";
 import { getFreshLink } from "./booking";
 import type { SheetContext } from "./context";
 
-const toContact = (state: SheetContext["state"], clientId: string) => {
-  const client = getClient(state, clientId);
-
-  return {
-    ...getClientNames(client),
-    phone: client.phone || "",
-    email: client.email || "",
-  };
-};
+const toContact = (client: StudioClient) => ({
+  ...getClientNames(client),
+  phone: client.phone || "",
+  email: client.email || "",
+});
 
 const NO_PROTECTION: Partial<StudioBooking> = {
   protect: "none",
@@ -42,9 +38,11 @@ export const getChangeClientView = (context: SheetContext) => {
   const everyone = getAllClients(state);
 
   const applyClient = (
-    clientId: string | null,
+    client: StudioClient | null,
     patch: Partial<StudioBooking>,
   ) => {
+    const clientId = client?.id ?? null;
+
     setState({ bookingStepOut: true });
 
     window.setTimeout(() => {
@@ -60,7 +58,7 @@ export const getChangeClientView = (context: SheetContext) => {
         (remoteId) =>
           changeBookingClient(
             remoteId,
-            clientId ? toContact(state, clientId) : null,
+            client ? toContact(client) : null,
             patch.protect === "link",
           ),
       );
@@ -69,9 +67,10 @@ export const getChangeClientView = (context: SheetContext) => {
     window.setTimeout(() => setState({ bookingStepBack: false }), 900);
   };
 
-  const setClient = (clientId: string | null) => {
+  // a client added just now isn't in this render's state yet, so it's passed in
+  const setClient = (clientId: string | null, added?: StudioClient) => {
     // the client needs until 2 hours before the start to confirm
-    const other = everyone.find(({ id }) => id === clientId);
+    const other = added ?? everyone.find(({ id }) => id === clientId);
 
     if (
       !clientId ||
@@ -79,7 +78,10 @@ export const getChangeClientView = (context: SheetContext) => {
       state.policy.mode === "none" ||
       hoursToStart <= 2
     ) {
-      applyClient(clientId, NO_PROTECTION);
+      applyClient(
+        clientId ? (other ?? getClient(state, clientId)) : null,
+        NO_PROTECTION,
+      );
 
       return;
     }
@@ -105,7 +107,7 @@ export const getChangeClientView = (context: SheetContext) => {
               },
               clientEditFocus: "email",
             }),
-          onNo: () => applyClient(clientId, NO_PROTECTION),
+          onNo: () => applyClient(other, NO_PROTECTION),
           isBlocking: true,
         },
       });
@@ -122,7 +124,7 @@ export const getChangeClientView = (context: SheetContext) => {
         noLabel: "No protection",
         body: `Protection was agreed with the previous client, so it does not carry over. Sending a link asks ${name} for ${getProtectionNoun(state)}; the booking waits 48 hrs to be confirmed.`,
         yes: () =>
-          applyClient(clientId, {
+          applyClient(other, {
             protect: "link",
             paid: "link",
             status: "awaiting",
@@ -130,7 +132,7 @@ export const getChangeClientView = (context: SheetContext) => {
             resends: 0,
             ...getFreshLink(booking, sentAt),
           }),
-        onNo: () => applyClient(clientId, NO_PROTECTION),
+        onNo: () => applyClient(other, NO_PROTECTION),
         isBlocking: true,
       },
     });

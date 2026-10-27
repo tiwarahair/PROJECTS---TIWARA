@@ -52,7 +52,11 @@ const getPayoutItems = async (account: string, payoutId: string) => {
       source.source_transfer_reversal &&
       typeof source.source_transfer_reversal !== "string"
     ) {
-      const refund = source.source_transfer_reversal.source_refund;
+      const { source_refund: sourceRefund, metadata } =
+        source.source_transfer_reversal;
+
+      // a reversal made by hand for a later transfer names its refund in metadata
+      const refund = sourceRefund ?? metadata?.refund_id;
 
       if (refund) refunds.push(typeof refund === "string" ? refund : refund.id);
     }

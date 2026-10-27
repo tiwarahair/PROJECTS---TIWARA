@@ -186,7 +186,7 @@ export const NewClientDialog = ({ studio }: { studio: StudioController }) => {
 
     setState({ newClient: null, changeClientQuery: "" });
 
-    addStudioClient(context, {
+    const client = {
       id,
       name,
       first,
@@ -197,9 +197,10 @@ export const NewClientDialog = ({ studio }: { studio: StudioController }) => {
       spent: 0,
       phone: draft.phone || "",
       email: draft.email || "",
-    });
+    };
 
-    context.memo.setChangeClient?.(id);
+    addStudioClient(context, client);
+    context.memo.setChangeClient?.(id, client);
     actions.showToast(`${name} added`);
   };
 

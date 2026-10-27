@@ -1,5 +1,6 @@
 import { admin } from "./admin.ts";
 import { findEarlierRefund } from "./earlier-refund.ts";
+import { reverseLaterTransfer } from "./later-transfer.ts";
 import { getRefundable } from "./refundable.ts";
 import { getCancelRefundKey } from "./stripe-keys.ts";
 import { stripe } from "./stripe.ts";
@@ -28,7 +29,11 @@ const refundBooking = async (
 
   const madeBefore = findEarlierRefund(earlier, reason);
 
-  if (madeBefore) return { id: madeBefore.id, amount: madeBefore.amount };
+  if (madeBefore) {
+    await reverseLaterTransfer(paymentIntentId, madeBefore);
+
+    return { id: madeBefore.id, amount: madeBefore.amount };
+  }
 
   const intent = await stripe.paymentIntents.retrieve(paymentIntentId, {
     expand: ["latest_charge"],
@@ -54,6 +59,9 @@ const refundBooking = async (
       ),
     },
   );
+
+  if (!intent.transfer_data)
+    await reverseLaterTransfer(paymentIntentId, { id, amount: refundAmount });
 
   return { id, amount: refundAmount };
 };

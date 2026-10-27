@@ -1,6 +1,7 @@
 // A checkout's card charge on the client's saved card, and the refund when they paid more than the final price.
 import Stripe from "npm:stripe@22.6.2";
 import { getCardLabel, isHardDecline } from "../_shared/declines.ts";
+import { reverseLaterTransfer } from "../_shared/later-transfer.ts";
 import { getRefundable } from "../_shared/refundable.ts";
 import { getRecovery } from "../_shared/owed.ts";
 import { isPayoutHeld } from "../_shared/payout-hold.ts";
@@ -168,7 +169,11 @@ export const refundOverpaid = async ({
     ({ metadata, status }) => metadata?.reason === "price_lowered" && status !== "failed" && status !== "canceled",
   );
 
-  if (made.length > saved) return { refund_pence: made[0].amount, refund_id: made[0].id };
+  if (made.length > saved) {
+    await reverseLaterTransfer(intentId, made[0]);
+
+    return { refund_pence: made[0].amount, refund_id: made[0].id };
+  }
 
   // the booking fee is never part of it
   const intent = await stripe.paymentIntents.retrieve(intentId, { expand: ["latest_charge"] });
@@ -185,6 +190,8 @@ export const refundOverpaid = async ({
     },
     { idempotencyKey: `checkout:${id}:price-lowered-refund:${saved}:${refundAmount}` },
   );
+
+  if (!intent.transfer_data) await reverseLaterTransfer(intentId, refund);
 
   return { refund_pence: refundAmount, refund_id: refund.id };
 };

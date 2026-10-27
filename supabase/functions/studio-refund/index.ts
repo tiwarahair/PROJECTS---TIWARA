@@ -2,6 +2,7 @@
 import { z } from "npm:zod@4";
 import { admin } from "../_shared/admin.ts";
 import { corsHeaders, respond } from "../_shared/cors.ts";
+import { reverseLaterTransfer } from "../_shared/later-transfer.ts";
 import { getRecentUser } from "../_shared/recent-user.ts";
 import { stripe } from "../_shared/stripe.ts";
 
@@ -14,14 +15,12 @@ const requestSchema = z.object({
 interface RefundSource {
   payment_intent_id: string;
   stylist_share_pence: number;
-  stripe_transfer_id: string | null;
 }
 
 interface RefundPart {
   intentId: string;
   amount: number;
   isTransferred: boolean;
-  transferId: string | null;
 }
 
 // only the stylist's share goes back from Studio: never the platform's booking fee
@@ -62,7 +61,7 @@ Deno.serve(async (request) => {
       const amount = Math.min(left, available);
 
       if (amount > 0) {
-        plan.push({ intentId: source.payment_intent_id, amount, isTransferred, transferId: source.stripe_transfer_id });
+        plan.push({ intentId: source.payment_intent_id, amount, isTransferred });
         left -= amount;
       }
     }
@@ -76,7 +75,7 @@ Deno.serve(async (request) => {
 
     let refunded = 0;
 
-    for (const [index, { intentId, amount, isTransferred, transferId }] of plan.entries()) {
+    for (const [index, { intentId, amount, isTransferred }] of plan.entries()) {
       // a later part failing leaves the earlier ones made; say how much went back, so a retry asks for the rest
       const refund = await stripe.refunds
         .create(
@@ -98,10 +97,6 @@ Deno.serve(async (request) => {
 
       refunded += amount;
 
-      // a fee sent on to the stylist later: take the refunded part of that transfer back too
-      if (transferId)
-        await stripe.transfers.createReversal(transferId, { amount }, { idempotencyKey: `refund-reversal:${refund.id}` });
-
       const { error: saveError } = await admin
         .from("refunds")
         .upsert(
@@ -110,6 +105,8 @@ Deno.serve(async (request) => {
         );
 
       if (saveError) throw saveError;
+
+      if (!isTransferred) await reverseLaterTransfer(intentId, refund);
     }
 
     return respond(200, { refunded_pence: refunded });
