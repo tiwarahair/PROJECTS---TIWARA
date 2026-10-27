@@ -142,6 +142,7 @@ export const getStudioRow = (
   notification_preferences: [],
   stylist_tax_details: null,
   ...patch,
+  is_stripe_verified: patch.is_stripe_verified ?? null,
 });
 
 /** What Studio opens with for a real account: Amara, Nia's upcoming silk press and one finished visit, and Kemi (blocked). */
