@@ -15,14 +15,14 @@ import { AdminLog } from "./log";
 import { AdminProfiles } from "./profiles";
 import { AdminReports } from "./reports";
 import { AdminPhoneHeader } from "./shell/headers";
-import { ADMIN_TABS, getAdminTab } from "./shell/nav-items";
+import { ADMIN_TABS, getAdminParams, getAdminTab } from "./shell/nav-items";
 import type { AdminTab } from "./shell/nav-items";
 
 interface AdminPageProps {
-  isStylist: boolean;
+  isBackToStudio: boolean;
 }
 
-export const AdminPage = ({ isStylist }: AdminPageProps) => {
+export const AdminPage = ({ isBackToStudio }: AdminPageProps) => {
   const isWide = useMediaQuery("(min-width:640px)");
   const isDesktop = useMediaQuery("(min-width:1024px)");
   const [isSidebarOpen, setSidebarOpen] = useState<boolean | null>(null);
@@ -33,11 +33,17 @@ export const AdminPage = ({ isStylist }: AdminPageProps) => {
   // everything waiting for an admin: open reports and appeals
   const openCount = (stats?.open ?? 0) + (stats?.appealed ?? 0);
 
-  const goTo = (next: AdminTab) => setParams({ tab: next });
+  const goTo = (next: AdminTab) =>
+    setParams(getAdminParams(params, { tab: next }));
 
   const openProfile = (stylistId: string | null) =>
     setParams(
-      stylistId ? { tab: "profiles", stylist: stylistId } : { tab: "profiles" },
+      getAdminParams(
+        params,
+        stylistId
+          ? { tab: "profiles", stylist: stylistId }
+          : { tab: "profiles" },
+      ),
     );
 
   const isSidebarShown = isSidebarOpen ?? isDesktop;
@@ -63,7 +69,7 @@ export const AdminPage = ({ isStylist }: AdminPageProps) => {
           items={navItems}
           hasLinksDivider
           links={
-            isStylist
+            isBackToStudio
               ? [{ to: "/studio", label: "Back to Studio", icon: ArrowLeft }]
               : []
           }
@@ -80,7 +86,7 @@ export const AdminPage = ({ isStylist }: AdminPageProps) => {
           />
         ) : (
           <AdminPhoneHeader
-            isStylist={isStylist}
+            isBackToStudio={isBackToStudio}
             initials={identity?.initials ?? ""}
           />
         )

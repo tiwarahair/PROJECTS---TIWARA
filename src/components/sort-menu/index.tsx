@@ -1,4 +1,5 @@
 import { Check, ChevronDown } from "lucide-react";
+import { useLayoutEffect, useRef, useState } from "react";
 import { joinClassNames } from "../../utils/class-names";
 import styles from "../../styles/components/sort-menu/index.module.css";
 
@@ -34,9 +35,26 @@ export const SortMenu = <Key extends string>({
 }: SortMenuProps<Key>) => {
   const selected = options.find(([key]) => key === value);
   const selectedLabel = selected ? selected[1] : "";
+  const anchorRef = useRef<HTMLDivElement>(null);
+  const popoverRef = useRef<HTMLDivElement>(null);
+  const [side, setSide] = useState(align);
+
+  useLayoutEffect(() => {
+    const anchor = anchorRef.current;
+    const popover = popoverRef.current;
+
+    if (!isOpen || !anchor || !popover) return;
+
+    const { left, right } = anchor.getBoundingClientRect();
+    const width = popover.offsetWidth;
+
+    if (align === "left" && left + width > window.innerWidth) setSide("right");
+    else if (align === "right" && right - width < 0) setSide("left");
+    else setSide(align);
+  }, [isOpen, align]);
 
   return (
-    <div className={styles.anchor}>
+    <div className={styles.anchor} ref={anchorRef}>
       <button
         type="button"
         onClick={onToggle}
@@ -53,12 +71,13 @@ export const SortMenu = <Key extends string>({
         <>
           <div onClick={onClose} className={styles.scrim}></div>
           <div
+            ref={popoverRef}
             data-dd=""
             role="listbox"
             aria-label={ariaLabel}
             className={joinClassNames(
               styles.popover,
-              align === "left" ? styles.popoverLeft : styles.popoverRight,
+              side === "left" ? styles.popoverLeft : styles.popoverRight,
             )}
           >
             {options.map(([key, optionLabel]) => {

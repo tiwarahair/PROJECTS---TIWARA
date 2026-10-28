@@ -4,6 +4,7 @@ import { ChevronDown } from "lucide-react";
 import { useLocation } from "react-router";
 import { useIdentity } from "../../hooks/use-identity";
 import { useMediaQuery } from "../../hooks/use-media-query";
+import { STUDIO_ADMIN_URL } from "../../features/admin/shell/nav-items";
 import { useSignOut } from "../../hooks/use-sign-out";
 import { AccountPhoto } from "../account-photo";
 import { NavMenu, NavMenuAccountHead } from "../nav-menu";
@@ -176,7 +177,7 @@ export const SiteMenu = ({
           kind: "link",
           key: "admin",
           label: "Admin",
-          to: "/admin",
+          to: pathname === "/studio" ? STUDIO_ADMIN_URL : "/admin",
           isCurrent: pathname === "/admin",
           onClick: closeOnClick,
         },

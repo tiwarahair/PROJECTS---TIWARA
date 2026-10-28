@@ -114,6 +114,45 @@ describe("SiteMenu", () => {
     );
   });
 
+  it("admins opening Admin from Studio keep the way back to Studio", async () => {
+    const { store } = renderWithStore(
+      <SiteMenu isSignedIn>
+        <AccountAvatar initials="NO" />
+      </SiteMenu>,
+      "/studio",
+      { signedIn: true },
+    );
+
+    store.dispatch(
+      sessionChanged({ ...TEST_USER, isStylist: true, isAdmin: true }),
+    );
+
+    await user.click(screen.getByRole("button", { name: "Account" }));
+
+    expect(screen.getByRole("menuitem", { name: "Admin" })).toHaveAttribute(
+      "href",
+      "/admin?from=studio",
+    );
+  });
+
+  it("admins opening Admin from elsewhere, even a stylist page like /studio-by-ada, go to plain Admin", async () => {
+    const { store } = renderWithStore(
+      <SiteMenu isSignedIn>
+        <AccountAvatar initials="NO" />
+      </SiteMenu>,
+      "/studio-by-ada",
+      { signedIn: true },
+    );
+
+    store.dispatch(sessionChanged({ ...TEST_USER, isAdmin: true }));
+    await user.click(screen.getByRole("button", { name: "Account" }));
+
+    expect(screen.getByRole("menuitem", { name: "Admin" })).toHaveAttribute(
+      "href",
+      "/admin",
+    );
+  });
+
   it("on the account page, a section switches in place instead of navigating", async () => {
     const onTab = vi.fn();
 

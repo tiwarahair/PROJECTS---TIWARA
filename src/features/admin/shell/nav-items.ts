@@ -35,3 +35,13 @@ export const ADMIN_TABS: AdminNavItem[] = [
 
 export const getAdminTab = (value: string | null): AdminNavItem =>
   ADMIN_TABS.find(({ id }) => id === value) ?? REPORTS;
+
+export const STUDIO_ADMIN_URL = "/admin?from=studio";
+
+export const isFromStudio = (params: URLSearchParams) =>
+  params.get("from") === "studio";
+
+export const getAdminParams = (
+  params: URLSearchParams,
+  next: Record<string, string>,
+) => (isFromStudio(params) ? { ...next, from: "studio" } : next);

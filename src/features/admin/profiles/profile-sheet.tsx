@@ -1,5 +1,5 @@
 import { Check, ExternalLink, TriangleAlert } from "lucide-react";
-import { useState } from "react";
+import { useId, useState } from "react";
 import { ConfirmDialog } from "../../../components/confirm-dialog";
 import { Button } from "../../../components/ds/button";
 import { Tooltip } from "../../../components/ds/tooltip";
@@ -97,6 +97,7 @@ export const ProfileSheet = ({ stylistId, onClose }: ProfileSheetProps) => {
   const [reason, setReason] = useState("");
   const [error, setError] = useState("");
   const [isDiscarding, setDiscarding] = useState(false);
+  const reasonId = useId();
   const [saveNote, { isLoading: isSavingNote }] = useSaveProfileNoteMutation();
 
   const [markChecked, { isLoading: isChecking }] =
@@ -240,12 +241,13 @@ export const ProfileSheet = ({ stylistId, onClose }: ProfileSheetProps) => {
             </>
           )}
         </ul>
-        <label className={form.field}>
+        <label className={form.field} htmlFor={reasonId}>
           <span className={form.legend}>
             {mode === "suspend" ? "Reason" : "Note"}{" "}
             <span className={form.optional}>(required)</span>
           </span>
           <textarea
+            id={reasonId}
             className={form.textarea}
             value={reason}
             maxLength={1000}

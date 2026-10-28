@@ -1,8 +1,10 @@
 import { Mail } from "lucide-react";
 import { useState } from "react";
+import { ConfirmDialog } from "../../../components/confirm-dialog";
 import { Button } from "../../../components/ds/button";
 import { PHONE_QUERY, Sheet } from "../../../components/sheet";
 import { useMediaQuery } from "../../../hooks/use-media-query";
+import { DISCARD_PROMPT } from "../../../hooks/use-unsaved-changes";
 import { StarRating } from "../../../components/star-rating";
 import type { AdminReport, DecisionOutcome } from "../../../lib/admin-api";
 import type { ReviewOutcome } from "../../../lib/review-api";
@@ -37,9 +39,17 @@ const CHOICES: { outcome: DecisionOutcome; label: string; note: string }[] = [
 ];
 
 const getEmails = (
-  { client_name: client, stylist_name: stylist, reports }: AdminReport,
+  { client_name: client, stylist_name: stylist, reports, appeal }: AdminReport,
   outcome: DecisionOutcome,
 ) => {
+  if (appeal)
+    return appeal.appellant === "reviewer"
+      ? [`${client}, who appealed`, `${stylist}, the stylist`]
+      : [
+          `${client}, who wrote the review`,
+          `${stylist}, the stylist, who appealed`,
+        ];
+
   if (outcome === "hidden")
     return ["Nobody yet. Everyone is told when you decide."];
 
@@ -70,9 +80,13 @@ export const DecisionSheet = ({ report, onClose }: DecisionSheetProps) => {
   const [outcome, setOutcome] = useState<DecisionOutcome | "">("");
   const [note, setNote] = useState("");
   const [error, setError] = useState("");
+  const [isDiscarding, setDiscarding] = useState(false);
   const [decide, { isLoading: isDeciding }] = useDecideReviewMutation();
   const [answer, { isLoading: isAnswering }] = useAnswerAppealMutation();
   const isAppeal = !!appeal && !!decision && !isChanging;
+  const isDirty = !!outcome || !!note.trim();
+
+  const requestClose = () => (isDirty ? setDiscarding(true) : onClose());
 
   const choices = CHOICES.filter(({ outcome: choice }) =>
     appeal
@@ -153,9 +167,19 @@ export const DecisionSheet = ({ report, onClose }: DecisionSheetProps) => {
     <Sheet
       open
       title={appeal ? "Appeal" : "Decide on this review"}
-      onClose={onClose}
+      onClose={requestClose}
       footer={footer}
     >
+      {isDiscarding && (
+        <ConfirmDialog
+          title={DISCARD_PROMPT.title}
+          body={DISCARD_PROMPT.body}
+          yesLabel={DISCARD_PROMPT.discard}
+          noLabel={DISCARD_PROMPT.keep}
+          onYes={onClose}
+          onNo={() => setDiscarding(false)}
+        />
+      )}
       <div className={styles.review}>
         <div className={styles.meta}>
           <StarRating rating={report.rating} />

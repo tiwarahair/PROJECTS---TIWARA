@@ -12,12 +12,12 @@ import twoFactor from "../../../styles/components/two-factor/index.module.css";
 import styles from "../../../styles/features/admin/gate.module.css";
 
 interface TwoStepGateProps {
-  isStylist: boolean;
+  isBackToStudio: boolean;
   children: ReactNode;
 }
 
 /** Admin opens only after a two-step code this session */
-export const TwoStepGate = ({ isStylist, children }: TwoStepGateProps) => {
+export const TwoStepGate = ({ isBackToStudio, children }: TwoStepGateProps) => {
   const isPhone = useMediaQuery(PHONE_QUERY);
   const { step, appView, verifyCode } = useGate(isPhone);
 
@@ -82,8 +82,8 @@ export const TwoStepGate = ({ isStylist, children }: TwoStepGateProps) => {
             </form>
           )}
         </div>
-        <Link className={styles.back} to={isStylist ? "/studio" : "/"}>
-          {isStylist ? "Back to Studio" : "Not now"}
+        <Link className={styles.back} to={isBackToStudio ? "/studio" : "/"}>
+          {isBackToStudio ? "Back to Studio" : "Not now"}
         </Link>
       </main>
     </div>

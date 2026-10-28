@@ -1,5 +1,6 @@
 import { ShieldCheck } from "lucide-react";
 import { AppShellSidebar } from "../../../components/app-shell";
+import { STUDIO_ADMIN_URL } from "../../admin/shell/nav-items";
 import { useAppSelector } from "../../../stores/hooks";
 import type { StudioController } from "../core/use-studio";
 import { getNavItems } from "./nav-items";
@@ -16,7 +17,9 @@ export const StudioSidebar = ({ studio }: { studio: StudioController }) => {
       onToggle={() => setState({ sidebarOpen: !isOpen })}
       items={getNavItems(studio)}
       links={
-        isAdmin ? [{ to: "/admin", label: "Admin", icon: ShieldCheck }] : []
+        isAdmin
+          ? [{ to: STUDIO_ADMIN_URL, label: "Admin", icon: ShieldCheck }]
+          : []
       }
       profile={{
         name: state.owner.first,
