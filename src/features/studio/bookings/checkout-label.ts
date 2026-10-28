@@ -1,11 +1,14 @@
 import { roundToPence } from "../../../utils/money";
-import type { CheckoutRecord } from "../core/types";
+import type { CheckoutRecord, PastRecord } from "../core/types";
 
 const VIA_NAMES: Record<string, string> = {
   cash: "Cash",
   bank: "Bank transfer",
   reader: "Card reader",
 };
+
+export const getLinkDue = ({ checkout, linkPaid }: PastRecord) =>
+  checkout?.method === "link" && !linkPaid ? checkout.charged : null;
 
 /** How a finished checkout reads in Past and on the booking. */
 export const getCheckoutLabel = (

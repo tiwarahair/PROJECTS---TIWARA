@@ -4,6 +4,7 @@ import {
   resendBalanceLink,
 } from "../../../../../lib/studio-api/checkout";
 import { roundToPence } from "../../../../../utils/money";
+import { getLinkDue } from "../../checkout-label";
 import { getPastCheckout } from "./checkout";
 import { RECORDED_ONLY, getRefundTag } from "./context";
 import type { PastContext } from "./context";
@@ -34,7 +35,7 @@ export const getCompletedView = (context: PastContext) => {
 
   const checkout = getPastCheckout(state, row);
   const first = firstName("your client");
-  const isAwaiting = checkout.done.method === "link" && !row.linkPaid;
+  const isAwaiting = getLinkDue(row) !== null;
   const refunded = row.refunded || 0;
   const left = roundToPence(checkout.cap - refunded);
 
