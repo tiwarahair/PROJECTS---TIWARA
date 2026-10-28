@@ -110,6 +110,7 @@ export interface StudioState {
   notificationPrefs: Partial<NotificationSettings>;
   nudge: boolean;
   serviceNudge: boolean;
+  policyReminder: boolean;
   celebrated: boolean;
   page: StudioPage | null;
   pageFromSetup: boolean;

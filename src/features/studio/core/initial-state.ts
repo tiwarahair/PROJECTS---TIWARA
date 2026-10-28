@@ -38,6 +38,7 @@ export const getInitialStudioState = (): StudioState => ({
   notificationPrefs: {},
   nudge: false,
   serviceNudge: true,
+  policyReminder: false,
   celebrated: false,
   page: null,
   pageFromSetup: false,

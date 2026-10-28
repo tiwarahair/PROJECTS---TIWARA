@@ -60,3 +60,11 @@ export const markActivityRead = (stylistId: string, itemId: string) =>
   write(
     supabase.rpc("mark_activity_read", { target: stylistId, item: itemId }),
   );
+
+export const markPolicyNudged = (stylistId: string, isReminder: boolean) =>
+  write(
+    supabase.rpc("mark_policy_nudged", {
+      target: stylistId,
+      is_reminder: isReminder,
+    }),
+  );

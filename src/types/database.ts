@@ -2536,6 +2536,8 @@ export type Database = {
           city: string | null;
           line1: string | null;
           line2: string | null;
+          policy_nudged_at: string | null;
+          policy_reminded_at: string | null;
           postcode: string;
           stylist_id: string;
         };
@@ -2546,6 +2548,8 @@ export type Database = {
           city?: string | null;
           line1?: string | null;
           line2?: string | null;
+          policy_nudged_at?: string | null;
+          policy_reminded_at?: string | null;
           postcode: string;
           stylist_id: string;
         };
@@ -2555,6 +2559,8 @@ export type Database = {
           city?: string | null;
           line1?: string | null;
           line2?: string | null;
+          policy_nudged_at?: string | null;
+          policy_reminded_at?: string | null;
           postcode?: string;
           stylist_id?: string;
         };
@@ -3882,6 +3888,10 @@ export type Database = {
       };
       mark_activity_read: {
         Args: { item: string; target: string };
+        Returns: undefined;
+      };
+      mark_policy_nudged: {
+        Args: { is_reminder: boolean; target: string };
         Returns: undefined;
       };
       mark_activity_seen: {

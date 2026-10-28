@@ -1,0 +1,154 @@
+.scrim {
+  position: fixed;
+  inset: 0;
+  z-index: 70;
+  background: var(--scrim-modal, rgba(26, 23, 20, 0.45));
+}
+
+.box {
+  position: fixed;
+  left: 50%;
+  width: 100%;
+  box-sizing: border-box;
+  z-index: 71;
+  background: var(--neutral-50);
+  box-shadow: var(--shadow-modal, 0 24px 60px rgba(26, 23, 20, 0.3));
+  padding: 28px 28px 24px;
+}
+
+.close {
+  position: absolute;
+  top: 14px;
+  right: 14px;
+  width: 34px;
+  height: 34px;
+  display: grid;
+  place-items: center;
+  border: none;
+  border-radius: var(--radius-full);
+  background: transparent;
+  color: var(--text-secondary);
+  cursor: pointer;
+  transition: background-color 0.16s ease;
+}
+
+.close:hover {
+  background: var(--quiet);
+}
+
+.badge {
+  width: 48px;
+  height: 48px;
+  display: grid;
+  place-items: center;
+  border-radius: var(--radius-full);
+  background: var(--accent-wash);
+  color: var(--accent-700);
+  animation: badgein 0.42s cubic-bezier(0.2, 0.8, 0.2, 1) 0.08s both;
+}
+
+.title {
+  margin: 16px 0 0;
+  font-family: "Schibsted Grotesk", sans-serif;
+  font-size: 22px;
+  font-weight: 600;
+  letter-spacing: -0.02em;
+  text-wrap: balance;
+}
+
+.body {
+  margin: 6px 0 0;
+  font-size: 14.5px;
+  line-height: 1.55;
+  color: var(--text-secondary);
+  text-wrap: pretty;
+}
+
+.perks {
+  list-style: none;
+  margin: 20px 0 0;
+  padding: 4px 0;
+  border-top: 1px solid var(--border-subtle);
+  border-bottom: 1px solid var(--border-subtle);
+}
+
+.perk {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  padding: 10px 0;
+}
+
+.perkIcon {
+  flex: 0 0 auto;
+  width: 30px;
+  height: 30px;
+  display: grid;
+  place-items: center;
+  border-radius: 10px;
+  background: var(--quiet);
+  color: var(--text-primary);
+}
+
+.perkLabel {
+  display: block;
+  font-size: 14.5px;
+  font-weight: 600;
+}
+
+.perkDetail {
+  display: block;
+  margin-top: 1px;
+  font-size: 13.5px;
+  color: var(--text-secondary);
+}
+
+.actions {
+  display: flex;
+  gap: 10px;
+  margin-top: 22px;
+}
+
+.secondary,
+.primary {
+  flex: 1;
+  border-radius: var(--radius-full);
+  padding: 12px 0;
+  font-size: 15px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.secondary {
+  border: 1px solid var(--border-strong, #d8d2c6);
+  background: transparent;
+  color: var(--text-primary);
+}
+
+.primary {
+  border: none;
+  background: var(--accent-700);
+  color: var(--neutral-100);
+}
+
+.secondary:active,
+.primary:active {
+  transform: scale(0.97) !important;
+}
+
+@keyframes badgein {
+  from {
+    opacity: 0;
+    transform: scale(0.6);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .badge {
+    animation: none;
+  }
+}

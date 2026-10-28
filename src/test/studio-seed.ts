@@ -66,6 +66,8 @@ export const getStudioRow = (
     city: "Manchester",
     postcode: "M4 6AJ",
     activity_seen_at: null,
+    policy_nudged_at: null,
+    policy_reminded_at: null,
   },
   stylist_categories: [
     {

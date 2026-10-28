@@ -18,6 +18,23 @@ export interface StudioSeed {
 
 export const SETUP_MINIMISED_KEY = "tw_setup_minimised";
 
+const REMINDER_AFTER_MS = 2 * 24 * 60 * 60 * 1000; // remind again after 2 days
+
+const isPolicyReminderDue = (
+  { went_live_at: wentLiveAt, stylist_private: details }: StylistStudio,
+  { policy }: StudioState,
+) => {
+  if (policy.mode !== "none" || !wentLiveAt || details?.policy_reminded_at)
+    return false;
+
+  const since = Math.max(
+    Date.parse(wentLiveAt),
+    Date.parse(details?.policy_nudged_at ?? wentLiveAt),
+  );
+
+  return Date.now() - since >= REMINDER_AFTER_MS;
+};
+
 const getCategoryColour = (sort: number) =>
   CATEGORY_COLOURS[sort % CATEGORY_COLOURS.length]?.value ?? "";
 
@@ -47,9 +64,18 @@ export const seedFromAccount = (
     })),
   };
 
+  const isComplete = Object.values(getSteps(seeded)).every(Boolean);
+
+  const isReminder =
+    isComplete &&
+    studio.status !== "suspended" &&
+    isPolicyReminderDue(studio, seeded);
+
   return {
     ...seeded,
-    celebrated: Object.values(getSteps(seeded)).every(Boolean),
+    celebrated: isComplete,
     setupMinimised: readSession(SETUP_MINIMISED_KEY) === "1",
+    nudge: isReminder,
+    policyReminder: isReminder,
   };
 };

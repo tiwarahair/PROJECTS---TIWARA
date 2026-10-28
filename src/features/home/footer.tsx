@@ -25,7 +25,7 @@ const LINK_GROUPS = [
     title: "Company",
     links: [
       { label: "About", href: "#about" },
-      { label: "Contact", href: "#faq" },
+      { label: "Contact", href: "/help" },
       { label: "Policies", href: "#faq" },
     ],
   },
