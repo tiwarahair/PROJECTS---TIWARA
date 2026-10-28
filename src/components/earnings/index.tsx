@@ -44,12 +44,6 @@ export const Earnings = (props: EarningsProps) => {
         <Chart earnings={earnings} />
         <Tabs earnings={earnings} filter={filter} />
         <EarningsLists earnings={earnings} props={props} filter={filter} />
-
-        <div className={styles.footnote}>
-          {
-            "You keep every penny of your price. Clients pay the booking fee.\u00a0"
-          }
-        </div>
       </div>
 
       <EarningsOverlays earnings={earnings} props={props} />

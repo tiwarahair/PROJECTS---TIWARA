@@ -7,7 +7,7 @@ export const isLive = (state: StudioState): boolean =>
   hasTwoFactor(state) && !!state.tax && !!state.check.stripe;
 
 export const getBookingLink = ({ account }: StudioState) =>
-  `tiwarashouse.com/${account.slug}`;
+  `${window.location.host}/${account.slug}`;
 
 export const getProfilePath = ({ account }: StudioState) => `/${account.slug}`;
 

@@ -200,7 +200,7 @@ export const NewClientDialog = ({ studio }: { studio: StudioController }) => {
     });
 
     context.memo.setChangeClient?.(id);
-    actions.showToast(`${name} added`);
+    actions.showToast("Client saved");
   };
 
   const field = (
@@ -254,7 +254,7 @@ export const NewClientDialog = ({ studio }: { studio: StudioController }) => {
         </label>
         <label className={styles.fieldSpaced}>
           <span className={styles.fieldLabel}>Phone</span>
-          {field(draft.phone || "", "phone", "07…", { inputMode: "tel" })}
+          {field(draft.phone || "", "phone", "", { inputMode: "tel" })}
         </label>
         <DuplicateNotice
           duplicate={getDuplicateView(

@@ -130,6 +130,12 @@ export interface StudioState {
   filterPayment: string;
   filterOpen: boolean;
   filterOut: boolean;
+  filterDraft: Partial<
+    Pick<
+      StudioState,
+      "filterRange" | "filterStatus" | "filterPayment" | "pastFilter"
+    >
+  >;
   datePickerOpen: boolean;
   notifAllRead: boolean;
   clientQuery: string;

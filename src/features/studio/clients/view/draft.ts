@@ -131,7 +131,7 @@ export const getDraftView = ({
     setState({ selectedClientId: id });
     closeSheet();
     window.setTimeout(showAdded, 220);
-    showToast(`${(draft.first || "").trim()} added`);
+    showToast("Client saved");
   };
 
   return {

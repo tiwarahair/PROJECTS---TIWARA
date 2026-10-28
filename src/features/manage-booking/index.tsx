@@ -22,16 +22,26 @@ export interface ManageBookingPageProps {
   view?: "booking" | "account";
 }
 
-const getMessage = (isError: boolean) =>
-  isError
-    ? {
-        title: "We couldn’t load your booking",
-        text: "Check your connection and try again.",
-      }
-    : {
-        title: "This link isn’t valid",
-        text: "Manage links work until 30 days after the appointment. Use the link in your latest booking email.",
-      };
+const MESSAGES = {
+  error: {
+    title: "We couldn’t load your booking",
+    text: "Check your connection and try again.",
+  },
+  missing: {
+    title: "Open this from your booking email",
+    text: "For your security, this page only opens from the link in your booking email. Copying the address from your browser won’t work.",
+  },
+  invalid: {
+    title: "This link isn’t valid",
+    text: "Manage links work until 30 days after the appointment. Use the link in your latest booking email.",
+  },
+};
+
+const getMessage = (isError: boolean, hasToken: boolean) => {
+  if (isError) return MESSAGES.error;
+
+  return hasToken ? MESSAGES.invalid : MESSAGES.missing;
+};
 
 /**
  * The booking-link page, route "/manage?token=": the booking, changing its time once, cancelling, and the
@@ -106,7 +116,7 @@ export const ManageBookingPage = ({
 
     return (
       <PageMessage
-        {...getMessage(isLoadError)}
+        {...getMessage(isLoadError, !!token || isOwnerLink)}
         linkLabel="Go to Tiwára’s House"
         linkHref="/"
       />

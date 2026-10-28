@@ -2,7 +2,9 @@ import type { TwoFactorDevice } from "../../../lib/two-factor";
 import type { StylistStudio } from "../../../lib/studio-api";
 import type { StudioBookings } from "../../../lib/studio-api/bookings";
 import { toStudioBookings } from "../bookings/records";
+import { readSession } from "../../../utils/page-flags";
 import { CATEGORY_COLOURS } from "./constants";
+import { getSteps } from "./model";
 import { toStudioPatch } from "./records";
 import type { StudioState } from "./types";
 
@@ -14,6 +16,8 @@ export interface StudioSeed {
   devices: TwoFactorDevice[];
 }
 
+export const SETUP_MINIMISED_KEY = "tw_setup_minimised";
+
 const getCategoryColour = (sort: number) =>
   CATEGORY_COLOURS[sort % CATEGORY_COLOURS.length]?.value ?? "";
 
@@ -24,7 +28,7 @@ export const seedFromAccount = (
 ): StudioState => {
   const patch = toStudioPatch(studio, state);
 
-  return {
+  const seeded: StudioState = {
     ...state,
     ...patch,
     ...toStudioBookings(bookings),
@@ -41,5 +45,11 @@ export const seedFromAccount = (
       ...category,
       colour: category.colour || getCategoryColour(category.sort),
     })),
+  };
+
+  return {
+    ...seeded,
+    celebrated: Object.values(getSteps(seeded)).every(Boolean),
+    setupMinimised: readSession(SETUP_MINIMISED_KEY) === "1",
   };
 };

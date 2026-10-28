@@ -107,7 +107,7 @@ export const BookingLinkField = ({ studio }: { studio: StudioController }) => {
         Booking link
       </label>
       <div className={styles.inputGroup}>
-        <span className={styles.prefix}>tiwarashouse.com/</span>
+        <span className={styles.prefix}>{`${window.location.host}/`}</span>
         <input
           id="booking-link"
           className={styles.input}

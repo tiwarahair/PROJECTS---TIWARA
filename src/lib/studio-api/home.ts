@@ -55,3 +55,8 @@ export const markActivitySeen = (stylistId: string, seenUntil: string) =>
       seen_until: seenUntil,
     }),
   );
+
+export const markActivityRead = (stylistId: string, itemId: string) =>
+  write(
+    supabase.rpc("mark_activity_read", { target: stylistId, item: itemId }),
+  );

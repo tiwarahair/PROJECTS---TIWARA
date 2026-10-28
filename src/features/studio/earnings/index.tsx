@@ -1,5 +1,6 @@
 import { skipToken } from "@reduxjs/toolkit/query";
 import { Earnings } from "../../../components/earnings";
+import { ListSkeleton } from "../../../components/list-skeleton";
 import { PageMessage } from "../../../components/page-message";
 import { useGetStudioEarningsQuery } from "../../../stores/api-slice";
 import { joinClassNames } from "../../../utils/class-names";
@@ -31,7 +32,7 @@ export const StudioEarnings = ({ studio }: { studio: StudioController }) => {
   if (!stylistId || !earnings)
     return (
       <div className={className} data-screen-label="Earnings">
-        {isError && (
+        {isError ? (
           <PageMessage
             title="Earnings didn’t load"
             text="Check your connection, then try again."
@@ -39,6 +40,8 @@ export const StudioEarnings = ({ studio }: { studio: StudioController }) => {
             linkHref="/studio"
             isReload
           />
+        ) : (
+          <ListSkeleton isWide={isWide} />
         )}
       </div>
     );

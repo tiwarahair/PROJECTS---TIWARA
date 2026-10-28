@@ -173,6 +173,16 @@ describe("studio-records", () => {
     ]);
   });
 
+  it("marks every variation offered, so sizes and own options save in one insert", () => {
+    const { variations } = fromStudioService(
+      toStudioService(SERVICE_ROW),
+      "stylist-1",
+      0,
+    );
+
+    expect(variations.map(({ offered }) => offered)).not.toContain(undefined);
+  });
+
   it("gives a service with no type its group's matching type, else the group's Other", () => {
     const service = { ...toStudioService(SERVICE_ROW), typeId: null };
 

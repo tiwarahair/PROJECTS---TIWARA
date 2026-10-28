@@ -142,7 +142,7 @@ describe("Studio → New booking", { timeout: 15_000 }, () => {
       screen.getByRole("button", { name: "Add “Bisi Phone” as a new client" }),
     );
 
-    await user.type(screen.getByPlaceholderText("07700 900000"), "07700900777");
+    await user.type(screen.getByLabelText("Phone"), "07700900777");
     await user.click(getContinue());
     await user.click(screen.getByRole("button", { name: /^Silk press/ }));
     await user.click(getContinue());

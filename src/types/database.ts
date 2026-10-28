@@ -2345,6 +2345,33 @@ export type Database = {
         };
         Relationships: [];
       };
+      stylist_activity_reads: {
+        Row: {
+          item_id: string;
+          read_at: string;
+          stylist_id: string;
+        };
+        ComputedFields: never;
+        Insert: {
+          item_id: string;
+          read_at?: string;
+          stylist_id: string;
+        };
+        Update: {
+          item_id?: string;
+          read_at?: string;
+          stylist_id?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "stylist_activity_reads_stylist_id_fkey";
+            columns: ["stylist_id"];
+            isOneToOne: false;
+            referencedRelation: "stylists";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
       stylist_categories: {
         Row: {
           colour: string | null;
@@ -3842,6 +3869,10 @@ export type Database = {
           isOneToOne: true;
           isSetofReturn: false;
         };
+      };
+      mark_activity_read: {
+        Args: { item: string; target: string };
+        Returns: undefined;
       };
       mark_activity_seen: {
         Args: { seen_until: string; target: string };

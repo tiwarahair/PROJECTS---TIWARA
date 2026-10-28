@@ -154,6 +154,7 @@ export const fromStudioService = (
       kind: "own",
       group_name: name,
       label,
+      offered: true,
       price_delta_pence: toPence(priceDelta),
       minutes_delta: Math.round(parseNumber(minutesDelta)),
       sort: index,

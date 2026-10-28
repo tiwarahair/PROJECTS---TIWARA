@@ -110,6 +110,37 @@ describe("Studio → Bookings", () => {
     expect(within(bookings).queryByText("Nia Okafor")).not.toBeInTheDocument();
   });
 
+  it("the filter dialog only filters the list on Show, and closing it keeps the list as it was", async () => {
+    await renderBookings();
+    await user.click(screen.getByRole("button", { name: "List" }));
+    const bookings = getLabelled("Bookings");
+
+    await user.click(screen.getByRole("button", { name: "Filter bookings" }));
+    await user.click(screen.getByRole("button", { name: /^Arrived/ }));
+
+    expect(within(bookings).getByText("Nia Okafor")).toBeInTheDocument();
+
+    expect(
+      screen.getByRole("button", { name: "Show 0 bookings" }),
+    ).toBeInTheDocument();
+
+    await user.click(screen.getByRole("button", { name: "Close" }));
+    runNextTimer();
+
+    expect(within(bookings).getByText("Nia Okafor")).toBeInTheDocument();
+
+    await user.click(screen.getByRole("button", { name: "Filter bookings" }));
+
+    expect(
+      screen.getByRole("button", { name: "Show 1 booking" }),
+    ).toBeInTheDocument();
+
+    await user.click(screen.getByRole("button", { name: /^Arrived/ }));
+    await user.click(screen.getByRole("button", { name: "Show 0 bookings" }));
+
+    expect(within(bookings).queryByText("Nia Okafor")).not.toBeInTheDocument();
+  });
+
   it("the past list shows finished appointments", async () => {
     await renderBookings();
     await user.click(screen.getByRole("button", { name: "List" }));

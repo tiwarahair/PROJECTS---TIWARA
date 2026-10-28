@@ -43,10 +43,20 @@ export const getOptionsLine = ({ snapshot }: ManagedBooking) =>
     .filter(Boolean)
     .join(" · ");
 
-export const getTermsLine = ({ cancellation }: ManagedBooking) =>
-  cancellation.is_late
+// with no booking policy the only thing lost after the free window is the booking fee
+const hasPolicy = ({ terms }: ManagedBooking) =>
+  (terms.mode ?? "none") !== "none";
+
+export const getTermsLine = (booking: ManagedBooking) => {
+  const { cancellation } = booking;
+
+  if (!cancellation.is_late)
+    return `Free cancellation until ${formatWhen(cancellation.free_cancel_until)}`;
+
+  return hasPolicy(booking)
     ? "The free cancellation time has passed, so late cancellation terms apply."
-    : `Free cancellation until ${formatWhen(cancellation.free_cancel_until)}`;
+    : "The free cancellation time has passed, so the booking fee isn’t refunded.";
+};
 
 export const getRescheduleNote = (booking: ManagedBooking) =>
   booking.reschedule_count > 0
@@ -58,13 +68,16 @@ export const getRescheduleNote = (booking: ManagedBooking) =>
  * so we're telling them => free cancellation doesnt apply if you reschedule to this time
  */
 export const getLateRescheduleWarning = (
-  { terms }: ManagedBooking,
+  booking: ManagedBooking,
   startsAt: string,
   now = Date.now(),
 ) => {
-  const hours = terms.free_window_hours;
+  const hours = booking.terms.free_window_hours;
 
   if (Date.parse(startsAt) - hours * 3_600_000 > now) return null;
+
+  if (!hasPolicy(booking))
+    return `This time is within ${getWindowText(hours)}, so the booking fee won’t be refunded if you cancel.`;
 
   return `This time is within ${getWindowText(hours)}, so free cancellation won’t apply and you can’t reschedule again.`;
 };

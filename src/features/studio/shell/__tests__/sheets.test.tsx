@@ -5,6 +5,7 @@ import { getRow } from "../../../../test/studio-booking-row";
 import { getStudioSeed } from "../../../../test/studio-seed";
 import { fromLondonTime } from "../../../../utils/london-time";
 import { toDate } from "../../core/blocked-time";
+import { markActivityRead } from "../../../../lib/studio-api/home";
 import { StudioPage } from "../..";
 import type { UserEvent } from "@testing-library/user-event";
 import { setupUser } from "../../../../test/setup-user";
@@ -38,6 +39,7 @@ vi.mock("../../../../lib/studio-api/home", async (importOriginal) => ({
     ]),
   ),
   markActivitySeen: vi.fn(() => new Promise(() => {})),
+  markActivityRead: vi.fn(() => new Promise(() => {})),
 }));
 
 // saves stay in flight, so the screen keeps what was done
@@ -134,6 +136,31 @@ describe("Studio sheets", () => {
 
     advance(240);
     expect(getLabelled("Earnings")).toBeInTheDocument();
+  });
+
+  it("opening one notification marks only that one read", async () => {
+    vi.mocked(markActivityRead).mockClear();
+    renderStudio();
+    await user.click(screen.getByRole("button", { name: "Notifications" }));
+    await screen.findAllByText("Payout sent");
+
+    const openPayout = () =>
+      user.click(
+        screen
+          .getAllByRole("button", { name: /^Payout sent/ })
+          .at(-1) as HTMLElement,
+      );
+
+    await openPayout();
+
+    expect(markActivityRead).toHaveBeenCalledWith("stylist-1", "activity-2");
+    expect(markActivityRead).toHaveBeenCalledTimes(1);
+
+    advance(240);
+    await user.click(screen.getByRole("button", { name: "Notifications" }));
+    await openPayout();
+
+    expect(markActivityRead).toHaveBeenCalledTimes(1);
   });
 
   it("blocking time over a booking asks first, then adds it", async () => {

@@ -36,7 +36,12 @@
   justify-content: center;
   color: var(--text-primary);
   text-decoration: none;
+  cursor: pointer;
   transition: background 0.16s cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+
+.contactAction svg {
+  pointer-events: none;
 }
 
 .contactAction:hover {
