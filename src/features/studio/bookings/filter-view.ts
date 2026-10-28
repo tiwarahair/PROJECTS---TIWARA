@@ -12,8 +12,8 @@ const toChip = (
 ) => ({ key: id, label, count: String(count), isOn, pick });
 
 const getUpcomingSections = ({
+  studio: { setState },
   state,
-  setState,
   upcomingBase,
 }: BookingsContext) =>
   UPCOMING_FILTERS.map((filter) => ({
@@ -31,7 +31,7 @@ const getUpcomingSections = ({
   }));
 
 const getPastSections = ({
-  setState,
+  studio: { setState },
   pastBase,
   pastFilter,
 }: BookingsContext) => [
@@ -58,7 +58,12 @@ export const getFilterCount = ({
     : UPCOMING_FILTERS.filter(({ read, idle }) => read(state) !== idle).length;
 
 const getFilterChips = (context: BookingsContext) => {
-  const { state, setState, isUpcoming, pastFilter } = context;
+  const {
+    studio: { setState },
+    state,
+    isUpcoming,
+    pastFilter,
+  } = context;
 
   if (isUpcoming)
     return UPCOMING_FILTERS.filter(
@@ -79,7 +84,8 @@ const getFilterChips = (context: BookingsContext) => {
 };
 
 export const getFilterView = (context: BookingsContext) => {
-  const { studio, setState, query, isPast, pastItems, upcomingItems } = context;
+  const { studio, query, isPast, pastItems, upcomingItems } = context;
+  const { setState } = studio;
   const filterCount = getFilterCount(context);
   const shownCount = isPast ? pastItems.length : upcomingItems.length;
 

@@ -9,7 +9,7 @@ import {
 } from "lucide-react";
 import { joinClassNames } from "../../utils/class-names";
 import { TaxDetailsForm } from "../tax-details-form";
-import { getPayoutStatus, getTaxRows } from "./logic";
+import { getPayoutStatus, getTaxRows } from "./payouts-view";
 import type { AccountSettingsProps } from "./use-account-settings";
 import type { AccountSettingsController } from "./use-account-settings";
 import { SettingsSection } from "./fields";

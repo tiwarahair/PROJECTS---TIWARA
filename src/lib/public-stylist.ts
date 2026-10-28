@@ -2,6 +2,7 @@
 import type { Tables } from "../types/database";
 import type { Policy, PolicyFee } from "../types/policy";
 import type { Stylist } from "../types/stylist";
+import { toFeeKind } from "../utils/fee-kind";
 import { formatMoney } from "../utils/money";
 import { getFromWithFee } from "../utils/services";
 import { bySort } from "../utils/sort";
@@ -30,7 +31,7 @@ export const toPhotoUrl = (path: string) =>
 
 const toFee = (on: boolean, kind: string, percent: number): PolicyFee => ({
   on,
-  kind: kind === "pct" ? "pct" : "keep",
+  kind: toFeeKind(kind),
   percent,
 });
 

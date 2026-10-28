@@ -85,7 +85,14 @@ const getEmptyKind = (context: BookingsContext): EmptyKind => {
 };
 
 export const getListView = (context: BookingsContext) => {
-  const { isPast, pastItems, upcomingItems, state, actions } = context;
+  const {
+    isPast,
+    pastItems,
+    upcomingItems,
+    state,
+    studio: { actions },
+  } = context;
+
   const { title, body } = EMPTY_COPY[getEmptyKind(context)];
 
   const earned = getTotal(

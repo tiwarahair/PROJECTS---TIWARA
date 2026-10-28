@@ -61,7 +61,7 @@ export const WeekView = ({ view }: WeekViewProps) => (
                     <div
                       key={top}
                       className={shared.band}
-                      style={asStyle({ "--top": top, "--h": height })}
+                      style={asStyle({ "--top": top, "--height": height })}
                       aria-hidden="true"
                     ></div>
                   ))}
@@ -72,7 +72,7 @@ export const WeekView = ({ view }: WeekViewProps) => (
                         className={styles.weekBlocked}
                         style={asStyle({
                           "--top": top,
-                          "--h": height,
+                          "--height": height,
                           "--hex": hex,
                         })}
                         onClick={open}
@@ -87,7 +87,7 @@ export const WeekView = ({ view }: WeekViewProps) => (
                       className={styles.weekBooking}
                       style={asStyle({
                         "--top": top,
-                        "--h": height,
+                        "--height": height,
                         ...getBlockTone(booking),
                       })}
                       onClick={(event) => {

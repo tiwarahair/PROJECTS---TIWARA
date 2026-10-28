@@ -134,7 +134,7 @@ export const usePaymentPolicy = ({
             shouldDirty: true,
           });
 
-          setValue(`${name}.kind`, "pct", { shouldDirty: true });
+          setValue(`${name}.kind`, "percent", { shouldDirty: true });
         },
       }),
     getExtraInput: (index: number) =>

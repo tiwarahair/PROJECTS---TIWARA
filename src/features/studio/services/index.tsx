@@ -1,4 +1,3 @@
-import type { CSSProperties } from "react";
 import {
   EllipsisVertical,
   ListFilter,
@@ -8,13 +7,11 @@ import {
   X,
 } from "lucide-react";
 import { joinClassNames } from "../../../utils/class-names";
+import { asStyle } from "../../../utils/as-style";
 import { getServicesView } from "./view";
 import type { ListGroup, ServicesView } from "./view";
 import type { StudioController } from "../core/use-studio";
 import styles from "../../../styles/features/studio/services/index.module.css";
-
-const asStyle = (values: Record<string, string | null | undefined>) =>
-  values as CSSProperties;
 
 const StatusMenu = ({
   studio,

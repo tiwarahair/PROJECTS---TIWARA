@@ -22,7 +22,7 @@ import { END_HOUR, END_MINUTES, WEEK_PX } from "./types";
 const getWeekTop = getTimeToPixels(WEEK_PX);
 
 const getWeekColumns = (
-  { studio, state, setState, upcoming, nowMinutes }: BookingsContext,
+  { studio, state, upcoming, nowMinutes }: BookingsContext,
   weekMonday: number,
 ) =>
   Array.from({ length: 7 }, (_slot, index) => {
@@ -62,7 +62,7 @@ const getWeekColumns = (
           Math.floor((event.clientY - rect.top) / (WEEK_PX / 4)),
         );
 
-        setState({
+        studio.setState({
           dayIndex: offset,
           pop: {
             time: hhmm(minutes),

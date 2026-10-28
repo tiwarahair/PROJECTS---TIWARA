@@ -14,8 +14,8 @@ describe("policyLines", () => {
   it("marks each line with its lucide icon", () => {
     const policy = {
       ...stylists[0]!.policies,
-      late: { on: true, kind: "pct" as const, percent: 25 },
-      noShow: { on: true, kind: "pct" as const, percent: 50 },
+      late: { on: true, kind: "percent" as const, percent: 25 },
+      noShow: { on: true, kind: "percent" as const, percent: 50 },
     };
 
     const icons = policyLines(policy, 80, "Amara").lines.map(

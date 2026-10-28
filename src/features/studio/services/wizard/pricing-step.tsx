@@ -1,13 +1,11 @@
-import type { CSSProperties } from "react";
 import { ChevronDown, Plus } from "lucide-react";
 import { joinClassNames } from "../../../../utils/class-names";
+import { asStyle } from "../../../../utils/as-style";
 import { VariationCard } from "./parts";
 import type { WizardForm } from "./use-wizard-form";
 import type { WizardView } from "./view";
 import parts from "../../../../styles/features/studio/services/wizard/parts.module.css";
 import styles from "../../../../styles/features/studio/services/wizard/pricing-step.module.css";
-
-const asStyle = (values: Record<string, string>) => values as CSSProperties;
 
 interface PricingStepProps {
   view: WizardView;

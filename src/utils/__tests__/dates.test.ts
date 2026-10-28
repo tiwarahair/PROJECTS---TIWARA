@@ -7,6 +7,7 @@ import {
   SHORT_MONTHS_SEPT,
   SHORT_WEEKDAYS,
   formatClockTime,
+  getMinutesOfDay,
   formatDuration,
   formatWeekdayDate,
   toIsoDate,
@@ -75,5 +76,11 @@ describe("formatDuration", () => {
 
   it("rounds to whole minutes", () => {
     expect(formatDuration(44.6)).toBe("45m");
+  });
+});
+
+describe("getMinutesOfDay", () => {
+  it("counts minutes since midnight", () => {
+    expect(getMinutesOfDay(new Date(2026, 8, 7, 9, 45))).toBe(585);
   });
 });

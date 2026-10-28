@@ -1,8 +1,8 @@
 import type { AddonForm } from "./use-addon-form";
-import type { CSSProperties } from "react";
 import { Check, ChevronDown, ChevronUp, Plus, Trash } from "lucide-react";
 import { SearchSelect } from "../../../components/search-select";
 import { joinClassNames } from "../../../utils/class-names";
+import { asStyle } from "../../../utils/as-style";
 import {
   DURATION_HOUR_OPTIONS,
   DURATION_MINUTE_OPTIONS,
@@ -14,8 +14,6 @@ import type {
 } from "./catalog-sheets-view";
 import type { StudioController } from "../core/use-studio";
 import styles from "../../../styles/features/studio/services/catalog-sheets.module.css";
-
-const asStyle = (values: Record<string, string>) => values as CSSProperties;
 
 /** The category colour radio group. */
 export const Swatches = ({ swatches }: { swatches: Swatch[] }) => (

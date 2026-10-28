@@ -7,6 +7,7 @@ import { isGated } from "../shell";
 import type { StudioController } from "../core/use-studio";
 import { getLoadingRange } from "./records";
 import type { HomeRange } from "./records";
+import { getMinutesOfDay } from "../../../utils/dates";
 
 // desktop cards are stretched to the hero's height, so a quiet line under the number fills the room
 const STAT_SUBTITLES: Record<string, string> = {
@@ -35,7 +36,7 @@ export const getHomeView = (
 
   const chart = makeChart(rangeData.chart);
   const now = new Date();
-  const nowMinutes = now.getHours() * 60 + now.getMinutes();
+  const nowMinutes = getMinutesOfDay(now);
 
   const due = upcoming
     .filter(

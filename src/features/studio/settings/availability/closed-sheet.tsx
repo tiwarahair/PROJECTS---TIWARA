@@ -18,6 +18,8 @@ export const ClosedSheet = ({ studio }: { studio: StudioController }) => {
     register,
     handleSubmit,
     watch,
+    getValues,
+    trigger,
     formState: { errors, isValid },
   } = useForm<ClosedValues>({
     defaultValues: { from, to, reason },
@@ -80,14 +82,32 @@ export const ClosedSheet = ({ studio }: { studio: StudioController }) => {
         bookings are unaffected.
       </div>
       <div className={styles.twoCols}>
-        <label className={styles.block}>
-          <span className={fields.fieldLabel}>From</span>
+        <div className={styles.block}>
+          <label className={fields.fieldLabel} htmlFor="closed-from">
+            From
+          </label>
           <input
             className={styles.dateInput}
+            id="closed-from"
             type="date"
-            {...register("from")}
+            aria-invalid={errors.from ? "true" : "false"}
+            aria-describedby={errors.from ? "closed-from-error" : undefined}
+            {...register("from", {
+              onChange: () => {
+                if (getValues("to")) void trigger("to");
+              },
+            })}
           />
-        </label>
+          {errors.from?.message && (
+            <span
+              id="closed-from-error"
+              className={fields.fieldError}
+              role="alert"
+            >
+              {errors.from.message}
+            </span>
+          )}
+        </div>
         <div className={styles.block}>
           <label className={fields.fieldLabel} htmlFor="closed-to">
             To
@@ -122,7 +142,6 @@ export const ClosedSheet = ({ studio }: { studio: StudioController }) => {
       <button
         className={joinClassNames(fields.submit, !isValid && fields.submitOff)}
         onClick={() => void save()}
-        disabled={!isValid}
       >
         {editId ? "Save closed period" : "Add closed period"}
       </button>

@@ -5,15 +5,11 @@ import type { StripeAccountState } from "../../../lib/studio-api/settings";
 import { getPhotoUrl } from "../../../lib/studio-api/photos";
 import { toShownBusinessType } from "../../../utils/business-type";
 import { MONDAY_FIRST_WEEKDAYS } from "../../../utils/dates";
+import { toFeeKind } from "../../../utils/fee-kind";
 import { bySort } from "../../../utils/sort";
 import { buildBlockedTime, formatClosedSpan, toOffset } from "./blocked-time";
 import { toStudioAddon, toStudioService } from "../services/records";
-import {
-  toExtras,
-  toFeeKind,
-  toPolicyMode,
-  toTaxDetails,
-} from "../settings/records";
+import { toExtras, toPolicyMode, toTaxDetails } from "../settings/records";
 import type { StudioState } from "./types";
 
 export const getPayoutStatus = ({

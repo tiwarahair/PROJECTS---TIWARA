@@ -1,5 +1,9 @@
 import { z } from "zod";
-import { isValidEmail, isValidMobile } from "../../utils/validation";
+import {
+  isValidEmail,
+  isValidMobile,
+  EMAIL_ERROR,
+} from "../../utils/validation";
 
 const SIX_DIGITS = /^\d{6}$/;
 
@@ -8,7 +12,7 @@ export const getNewEmailSchema = (currentEmail: string) =>
     email: z
       .string()
       .transform((value) => value.trim().toLowerCase())
-      .refine(isValidEmail, "Enter an email address, like name@example.co.uk.")
+      .refine(isValidEmail, EMAIL_ERROR)
       .refine(
         (value) => value !== currentEmail.toLowerCase(),
         "That’s already your login email.",
@@ -32,15 +36,8 @@ export const phoneSchema = z.object({
     .refine(isValidMobile, "Enter a UK mobile number, like 07700 900418."),
 });
 
-export interface NewEmailValues {
-  email: string;
-}
+export type NewEmailValues = z.infer<ReturnType<typeof getNewEmailSchema>>;
 
-export interface EmailCodesValues {
-  current: string;
-  next: string;
-}
+export type EmailCodesValues = z.infer<ReturnType<typeof getEmailCodesSchema>>;
 
-export interface PhoneValues {
-  phone: string;
-}
+export type PhoneValues = z.infer<typeof phoneSchema>;

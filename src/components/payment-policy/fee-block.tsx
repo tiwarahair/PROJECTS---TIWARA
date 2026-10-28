@@ -31,7 +31,7 @@ export const FeeBlock = ({
   const isKeep = fee.kind === "keep";
 
   const pickPercent = () => {
-    if (fee.kind !== "pct") onUpdate({ kind: "pct" });
+    if (fee.kind !== "percent") onUpdate({ kind: "percent" });
   };
 
   const percentInput = (withFocus: boolean) => (
@@ -127,7 +127,7 @@ export const FeeBlock = ({
                     (event.key === " " || event.key === "Enter")
                   ) {
                     event.preventDefault();
-                    onUpdate({ kind: "pct" });
+                    onUpdate({ kind: "percent" });
                   }
                 }}
               >

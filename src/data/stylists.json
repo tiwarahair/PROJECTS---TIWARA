@@ -28,12 +28,12 @@
       "freeWindowHours": 48,
       "late": {
         "on": false,
-        "kind": "pct",
+        "kind": "percent",
         "percent": 50
       },
       "noShow": {
         "on": false,
-        "kind": "pct",
+        "kind": "percent",
         "percent": 50
       },
       "graceMinutes": 0,
@@ -637,12 +637,12 @@
       "freeWindowHours": 48,
       "late": {
         "on": true,
-        "kind": "pct",
+        "kind": "percent",
         "percent": 50
       },
       "noShow": {
         "on": true,
-        "kind": "pct",
+        "kind": "percent",
         "percent": 100
       },
       "graceMinutes": 0,
@@ -1106,12 +1106,12 @@
       "freeWindowHours": 24,
       "late": {
         "on": false,
-        "kind": "pct",
+        "kind": "percent",
         "percent": 50
       },
       "noShow": {
         "on": true,
-        "kind": "pct",
+        "kind": "percent",
         "percent": 50
       },
       "graceMinutes": 15,
@@ -1273,12 +1273,12 @@
       "freeWindowHours": 24,
       "late": {
         "on": false,
-        "kind": "pct",
+        "kind": "percent",
         "percent": 50
       },
       "noShow": {
         "on": false,
-        "kind": "pct",
+        "kind": "percent",
         "percent": 50
       },
       "graceMinutes": 0,
@@ -2204,12 +2204,12 @@
       "freeWindowHours": 48,
       "late": {
         "on": true,
-        "kind": "pct",
+        "kind": "percent",
         "percent": 50
       },
       "noShow": {
         "on": true,
-        "kind": "pct",
+        "kind": "percent",
         "percent": 100
       },
       "graceMinutes": 0,
@@ -2550,12 +2550,12 @@
       "freeWindowHours": 24,
       "late": {
         "on": true,
-        "kind": "pct",
+        "kind": "percent",
         "percent": 25
       },
       "noShow": {
         "on": true,
-        "kind": "pct",
+        "kind": "percent",
         "percent": 50
       },
       "graceMinutes": 20,
@@ -3001,12 +3001,12 @@
       "freeWindowHours": 24,
       "late": {
         "on": false,
-        "kind": "pct",
+        "kind": "percent",
         "percent": 50
       },
       "noShow": {
         "on": false,
-        "kind": "pct",
+        "kind": "percent",
         "percent": 50
       },
       "graceMinutes": 15,

@@ -36,10 +36,10 @@ const getLinkError = (error: unknown) =>
 // a real client's manage page: copy it, or email it to them again
 const getGuestItems = ({
   booking,
-  raw,
+  storedBooking,
   actions,
 }: SheetContext): ActionItem[] => {
-  const remoteId = raw?.remoteId;
+  const remoteId = storedBooking?.remoteId;
 
   const hasStarted =
     !!booking.startsAt && Date.parse(booking.startsAt) <= Date.now();

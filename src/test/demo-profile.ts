@@ -1,6 +1,7 @@
 import { stylists } from "../data";
 import type { PublicProfile, ServiceRow } from "../lib/public-profiles";
 import type { Service } from "../types/service";
+import { fromFeeKind } from "../utils/fee-kind";
 
 const pence = (pounds: number) => Math.round(pounds * 100);
 
@@ -148,10 +149,10 @@ export const getDemoProfile = (slug: string): PublicProfile => {
       free_window_hours: policies.freeWindowHours,
       grace_minutes: policies.graceMinutes,
       late_on: policies.late.on,
-      late_kind: policies.late.kind,
+      late_kind: fromFeeKind(policies.late.kind),
       late_percent: policies.late.percent,
       no_show_on: policies.noShow.on,
-      no_show_kind: policies.noShow.kind,
+      no_show_kind: fromFeeKind(policies.noShow.kind),
       no_show_percent: policies.noShow.percent,
       extras: [],
       created_at: "",

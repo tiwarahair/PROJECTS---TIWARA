@@ -12,7 +12,7 @@ interface UpcomingFilter {
   matches: (id: string, booking: DecoratedBooking) => boolean;
 }
 
-/** Whether a booking `off` days away falls in a "When" filter option. */
+/** Whether a booking `dayOffset` days away falls in a "When" filter option. */
 const isInRangeOption = (id: string, dayOffset: number) => {
   if (id === "today") return dayOffset === 0;
 
