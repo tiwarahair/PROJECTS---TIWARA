@@ -98,7 +98,7 @@ export const BOOKING_DETAILS = {
           label: "Resend receipt",
           icon: ICONS.send,
           run: () => {
-            checkout.startResend();
+            checkout.startResend("email");
             goTo("resend", 1);
           },
         },

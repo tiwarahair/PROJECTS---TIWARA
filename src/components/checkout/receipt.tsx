@@ -92,7 +92,7 @@ export const CheckoutReceipt = ({
       <button
         className={styles.resend}
         onClick={() => {
-          startResend();
+          startResend("email");
           goTo("resend", 1);
         }}
       >
