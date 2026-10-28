@@ -1,5 +1,5 @@
 import { roundToPence } from "../../utils/money";
-import type { EarningsClient, PeriodStats, Transaction } from "./data";
+import type { EarningsClient, Ledger, PeriodStats, Transaction } from "./data";
 
 const sumOf = <T>(items: T[], getValue: (item: T) => number): number => {
   let total = 0;
@@ -69,4 +69,16 @@ export const openUpdateBank = (
 
   event.preventDefault();
   onUpdateBank();
+};
+
+export const getPausedCauses = ({ transactions, payouts }: Ledger) => {
+  const lastPaid = payouts.find(({ status }) => status === "Paid");
+
+  return transactions.filter(
+    ({ amount, isRecorded, status, at }) =>
+      amount < 0 &&
+      !isRecorded &&
+      status !== "Paid out" &&
+      (!lastPaid || at >= lastPaid.sent),
+  );
 };

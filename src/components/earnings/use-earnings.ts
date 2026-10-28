@@ -14,7 +14,7 @@ import { toIsoDate } from "../../utils/dates";
 const TOAST_MS = 2600;
 const TOAST_OUT_MS = 180;
 const DRAWER_OUT_MS = 200;
-const EXPORT_OUT_MS = 180;
+const DIALOG_OUT_MS = 180;
 const DESKTOP_MIN = 720;
 
 export interface EarningsProps {
@@ -41,7 +41,6 @@ export interface EarningsProps {
   onOpenBooking?: (bookingRef: string, clientId: string) => void;
   onContinueSetup?: () => void;
   onAddTax?: () => void;
-  onLearnMore?: () => void;
 }
 
 interface DrawerRef {
@@ -71,6 +70,8 @@ interface EarningsState {
   exportFrom: string;
   exportTo: string;
   exportFormat: "csv" | "pdf";
+  pausedOn: boolean;
+  pausedOut: boolean;
   toast: string;
   toastOut: boolean;
   width: number;
@@ -98,6 +99,8 @@ const INITIAL_STATE: EarningsState = {
   exportFrom: "",
   exportTo: "",
   exportFormat: "csv",
+  pausedOn: false,
+  pausedOut: false,
   toast: "",
   toastOut: false,
   width: 0,
@@ -107,7 +110,14 @@ export const useEarnings = (props: EarningsProps) => {
   const { ledger, layout = "auto" } = props;
   const [state, setRawState] = useState(INITIAL_STATE);
   const rootRef = useRef<HTMLDivElement>(null);
-  const timers = useRef({ toast: 0, toastOut: 0, drawer: 0, exportOut: 0 });
+
+  const timers = useRef({
+    toast: 0,
+    toastOut: 0,
+    drawer: 0,
+    exportOut: 0,
+    pausedOut: 0,
+  });
 
   const setState = (
     patch:
@@ -180,7 +190,22 @@ export const useEarnings = (props: EarningsProps) => {
 
     timers.current.exportOut = window.setTimeout(
       () => setState({ exportOn: false, exportOut: false }),
-      EXPORT_OUT_MS,
+      DIALOG_OUT_MS,
+    );
+  };
+
+  const openPaused = () => {
+    window.clearTimeout(timers.current.pausedOut);
+    setState({ pausedOn: true, pausedOut: false });
+  };
+
+  const closePaused = () => {
+    window.clearTimeout(timers.current.pausedOut);
+    setState({ pausedOut: true });
+
+    timers.current.pausedOut = window.setTimeout(
+      () => setState({ pausedOn: false, pausedOut: false }),
+      DIALOG_OUT_MS,
     );
   };
 
@@ -262,6 +287,7 @@ export const useEarnings = (props: EarningsProps) => {
       window.clearTimeout(pending.toastOut);
       window.clearTimeout(pending.drawer);
       window.clearTimeout(pending.exportOut);
+      window.clearTimeout(pending.pausedOut);
     };
     // mount only
   }, []);
@@ -282,6 +308,8 @@ export const useEarnings = (props: EarningsProps) => {
     closeDrawer,
     openExport,
     closeExport,
+    openPaused,
+    closePaused,
     doExport,
     lastDay,
   };

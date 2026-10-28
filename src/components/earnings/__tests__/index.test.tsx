@@ -153,6 +153,52 @@ describe("Earnings", () => {
     ).toBeInTheDocument();
   });
 
+  it("paused: Learn more explains why, what caused it and links to Stripe", async () => {
+    const onUpdateBank = vi.fn();
+
+    const refund = {
+      ...getTransaction("TX-3", -80, "Refunded"),
+      description: "Refund",
+      method: "Card",
+    };
+
+    const ledger = getLedger({ scenario: "paused", pausedAmount: 41.18 });
+
+    render(
+      <Earnings
+        ledger={{ ...ledger, transactions: [refund, ...ledger.transactions] }}
+        clients={clients}
+        onUpdateBank={onUpdateBank}
+      />,
+    );
+
+    await user.click(screen.getByRole("button", { name: "Learn more" }));
+
+    const dialog = screen.getByRole("dialog", {
+      name: "Why payouts are paused",
+    });
+
+    expect(within(dialog).getByText(/so it’s at −£41\.18/)).toBeInTheDocument();
+
+    expect(
+      within(dialog).getByText(/Stripe takes the £41\.18 from your next card/),
+    ).toBeInTheDocument();
+
+    expect(
+      within(dialog).getByRole("button", { name: /Refund · Nia Okafor/ }),
+    ).toBeInTheDocument();
+
+    expect(
+      within(dialog).queryByRole("button", { name: /Balance · Nia Okafor/ }),
+    ).not.toBeInTheDocument();
+
+    await user.click(
+      within(dialog).getByRole("link", { name: "View in Stripe" }),
+    );
+
+    expect(onUpdateBank).toHaveBeenCalled();
+  });
+
   it("opens the payout drawer on the payouts tab", async () => {
     render(<Earnings ledger={getLedger()} clients={clients} tab="po" />);
 

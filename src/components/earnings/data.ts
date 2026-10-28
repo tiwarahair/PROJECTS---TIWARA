@@ -80,6 +80,7 @@ export const DAY_MS = 86400000;
 
 export const FALLBACK_BANK = "your bank account";
 export const STRIPE_PAYOUTS = "https://dashboard.stripe.com/settings/payouts";
+export const STRIPE_BALANCE = "https://dashboard.stripe.com/balance/overview";
 
 export const PERIODS: [PeriodId, string][] = [
   ["week", "This week"],
