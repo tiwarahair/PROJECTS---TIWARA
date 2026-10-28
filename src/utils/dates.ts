@@ -99,3 +99,17 @@ export const getTimeAgo = (at: Date, now = new Date()) => {
 
   return `${at.getDate()} ${SHORT_MONTHS[at.getMonth()]}`;
 };
+
+const londonDateTime = new Intl.DateTimeFormat("en-GB", {
+  timeZone: "Europe/London",
+  weekday: "short",
+  day: "numeric",
+  month: "short",
+  hour: "2-digit",
+  minute: "2-digit",
+  hourCycle: "h23",
+});
+
+/** A UK time from an ISO string, wherever the device is: "Fri 20 Nov, 10:00". */
+export const formatLondonDateTime = (iso: string): string =>
+  londonDateTime.format(new Date(iso));

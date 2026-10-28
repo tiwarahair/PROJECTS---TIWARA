@@ -21,11 +21,11 @@ import {
   PAY_ERRORS,
   WALLET_BUTTON_HEIGHT,
   getPaymentFonts,
-  toPence,
 } from "./logic/payment";
 import styles from "../../styles/features/booking/step-pay.module.css";
 import step from "../../styles/features/booking/step.module.css";
 import type { BookingController } from "./hooks/use-booking";
+import { toPence } from "../../utils/money";
 
 const SESSION_WAIT_MS = 5000;
 

@@ -104,8 +104,7 @@ const refundRest = async (fee: FeeSettlement) => {
     { idempotencyKey: getFeeRefundKey(fee, amount) },
   );
 
-  if (!intent.transfer_data)
-    await reverseLaterTransfer(fee.payment_intent_id, { id, amount });
+  if (!intent.transfer_data) await reverseLaterTransfer(fee.payment_intent_id, { id, amount });
 
   return { refund_id: id, refunded_pence: amount };
 };

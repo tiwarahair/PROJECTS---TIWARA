@@ -50,6 +50,7 @@ export interface Ledger {
   payouts: Payout[];
   available: number;
   pending: number;
+  isBalanceKnown: boolean;
   onHold: number;
   pausedAmount: number;
   nextDate: Date | null;

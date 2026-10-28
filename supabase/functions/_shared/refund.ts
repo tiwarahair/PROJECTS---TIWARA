@@ -26,11 +26,7 @@ const refundBooking = async ({ bookingId, paymentIntentId, amount, reason }: Boo
 
   const madeBefore = findEarlierRefund(earlier, reason);
 
-  if (madeBefore) {
-    await reverseLaterTransfer(paymentIntentId, madeBefore);
-
-    return { id: madeBefore.id, amount: madeBefore.amount };
-  }
+  if (madeBefore) return { id: madeBefore.id, amount: madeBefore.amount };
 
   const intent = await stripe.paymentIntents.retrieve(paymentIntentId, {
     expand: ["latest_charge"],
@@ -51,9 +47,6 @@ const refundBooking = async ({ bookingId, paymentIntentId, amount, reason }: Boo
       idempotencyKey: getCancelRefundKey(bookingId, reason, refundAmount, failures),
     },
   );
-
-  if (!intent.transfer_data)
-    await reverseLaterTransfer(paymentIntentId, { id, amount: refundAmount });
 
   return { id, amount: refundAmount };
 };
@@ -105,6 +98,13 @@ export const refundCancellation = async (refund: BookingRefund) => {
   try {
     const { failures, feeRefund } = await getCancellation(refund.bookingId);
     const made = await refundBooking(refund, failures);
+
+    if (made.id && refund.paymentIntentId)
+      await reverseLaterTransfer(
+        refund.paymentIntentId,
+        { id: made.id, amount: made.amount },
+        Math.min(feeRefund, made.amount),
+      );
 
     if (made.id && refund.paymentIntentId && feeRefund > 0)
       await giveBookingFeeBack(refund.bookingId, refund.paymentIntentId, Math.min(feeRefund, made.amount));

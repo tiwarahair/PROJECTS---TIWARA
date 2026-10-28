@@ -3,7 +3,7 @@ import {
   recordBalancePaid,
   resendBalanceLink,
 } from "../../../../../lib/studio-api/checkout";
-import { roundToPence } from "../../../../../utils/money";
+import { formatMoney, roundToPence } from "../../../../../utils/money";
 import { getPastCheckout } from "./checkout";
 import { RECORDED_ONLY, getRefundTag } from "./context";
 import type { PastContext } from "./context";
@@ -40,7 +40,7 @@ export const getCompletedView = (context: PastContext) => {
 
   return {
     hasAwait: isAwaiting,
-    awaitBody: `Payment link for £${checkout.done.charged} sent to ${first}. They can pay by card, Apple Pay or Google Pay.`,
+    awaitBody: `Payment link for ${formatMoney(checkout.done.charged ?? 0)} sent to ${first}. They can pay by card, Apple Pay or Google Pay.`,
     resendLink: () => {
       saveBalance(resendBalanceLink);
       actions.showToast(`Payment link resent to ${first}`);
@@ -48,7 +48,7 @@ export const getCompletedView = (context: PastContext) => {
     recordPaid: () =>
       setState({
         confirm: {
-          title: `Record £${checkout.done.charged} as paid?`,
+          title: `Record ${formatMoney(checkout.done.charged ?? 0)} as paid?`,
           body: RECORDED_ONLY,
           yesLabel: "Record as paid",
           yes: () => {

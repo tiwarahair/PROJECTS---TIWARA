@@ -1,12 +1,5 @@
 import type { ReviewPage } from "../../lib/review-api";
-
-interface ReviewMessage {
-  title: string;
-  text: string;
-  linkLabel: string;
-  linkHref: string;
-  isReload?: boolean;
-}
+import type { PageMessageProps } from "../../components/page-message";
 
 export const MAX_REVIEW_LENGTH = 1000;
 
@@ -16,7 +9,7 @@ const HOME = { linkLabel: "Go to Tiwára’s House", linkHref: "/" };
 export const getClosedMessage = (
   page: ReviewPage | undefined,
   loadError = "",
-): ReviewMessage => {
+): PageMessageProps => {
   if (!page && loadError && loadError !== "link_not_valid")
     return {
       title: "Something went wrong",

@@ -1,4 +1,3 @@
-// Where the onboarding page starts: screen, saved wizard progress, return URL and theme.
 import type { Location } from "react-router";
 import { MODE_KEY, STORAGE_KEY } from "./data";
 import { getRouteForPath, ROUTE_START } from "./routes";

@@ -1,12 +1,5 @@
 import type { AppealPage, ReviewOutcome } from "../../lib/review-api";
-
-interface AppealMessage {
-  title: string;
-  text: string;
-  linkLabel: string;
-  linkHref: string;
-  isReload?: boolean;
-}
+import type { PageMessageProps } from "../../components/page-message";
 
 export const MAX_APPEAL_LENGTH = 1000;
 
@@ -23,7 +16,7 @@ const HOME = { linkLabel: "Go to Tiwára’s House", linkHref: "/" };
 export const getClosedMessage = (
   page: AppealPage | undefined,
   loadError = "",
-): AppealMessage => {
+): PageMessageProps => {
   if (!page && loadError && loadError !== "link_not_valid")
     return {
       title: "Something went wrong",

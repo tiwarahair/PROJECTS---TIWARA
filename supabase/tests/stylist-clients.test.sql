@@ -1,5 +1,5 @@
 begin;
-select plan(29);
+select plan(30);
 
 create function pg_temp.open_business(user_id uuid)
 returns uuid
@@ -212,7 +212,12 @@ select is(
 );
 select is(
   (select count(*)::int from public.bookings where stylist_client_id = (select id from kemi) and contact ->> 'first' = 'Kemi'),
-  1, 'their bookings keep the contact they were made with'
+  1, 'their bookings keep the name, and stay with the deleted client'
+);
+select is(
+  (select count(*)::int from public.bookings where stylist_client_id = (select id from kemi)
+    and (contact ? 'email' or contact ? 'phone')),
+  0, 'but not their email or phone'
 );
 select lives_ok(
   format('select pg_temp.book(%L, 11, %L)', (select shop from ids), '{"first":"Kemi","email":"kemi@clients.test"}'),

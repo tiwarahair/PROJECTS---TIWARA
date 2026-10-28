@@ -1,5 +1,5 @@
 begin;
-select plan(37);
+select plan(38);
 
 create function pg_temp.sign_up(user_id uuid, user_email text, meta jsonb)
 returns void
@@ -83,6 +83,8 @@ select is_empty($$select * from public.addons where stylist_id = (select two fro
 
 -- slugs
 select ok(not public.is_slug_free('studio'), 'route names are reserved');
+select ok(not public.is_slug_free('pay') and not public.is_slug_free('confirm') and not public.is_slug_free('card'),
+  'the pages emailed links open are reserved');
 select ok(not public.is_slug_free('ab'), 'slugs are at least 3 characters');
 select throws_ok($$select public.change_slug('Bad Slug!')$$, 'P0001', 'that booking link is not available', 'invalid slugs are refused');
 select is(public.change_slug('crowned-one'), 'crowned-one', 'an owner changes their slug');

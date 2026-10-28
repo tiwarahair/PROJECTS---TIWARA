@@ -1,4 +1,3 @@
-// CheckoutSheet types and constants.
 import {
   Banknote,
   Check,

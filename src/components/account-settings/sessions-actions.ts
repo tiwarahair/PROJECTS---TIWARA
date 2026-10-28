@@ -67,7 +67,11 @@ export const getSessionsActions = ({
           alerts: current.alerts ?? alerts,
           sessionsLoading: false,
         })),
-      () => setState(() => ({ sessionsLoading: false, sessionsFailed: true })),
+      () =>
+        setState(() => ({
+          sessionsLoading: false,
+          sessionsFailed: loadId === latestLoad.current,
+        })),
     );
   };
 

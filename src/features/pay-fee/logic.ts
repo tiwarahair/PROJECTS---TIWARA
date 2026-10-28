@@ -1,5 +1,5 @@
 import type { PaymentLink } from "../../lib/payment-link-api";
-import { formatMoney } from "../../utils/money";
+import type { PageMessageProps } from "../../components/page-message";
 
 const FEE_NAMES = {
   late_cancel: "Late cancellation fee",
@@ -7,25 +7,10 @@ const FEE_NAMES = {
   balance: "Balance",
 };
 
-const londonWhen = new Intl.DateTimeFormat("en-GB", {
-  timeZone: "Europe/London",
-  weekday: "short",
-  day: "numeric",
-  month: "short",
-  hour: "2-digit",
-  minute: "2-digit",
-  hourCycle: "h23",
-});
-
-export const formatPence = (pence: number) =>
-  formatMoney(pence / 100, { pence: "always" });
-
 export const getFeeName = ({ kind }: PaymentLink) => FEE_NAMES[kind];
 
 export const isBalance = (link: PaymentLink | undefined) =>
   link?.kind === "balance";
-
-export const formatWhen = (iso: string) => londonWhen.format(new Date(iso));
 
 /** The part of the fee the client's earlier payment already covered. */
 export const getCovered = ({
@@ -33,16 +18,9 @@ export const getCovered = ({
   amount_pence: due,
 }: PaymentLink) => Math.max(0, fee - due);
 
-interface LinkMessage {
-  title: string;
-  text: string;
-  linkLabel: string;
-  linkHref: string;
-}
-
 export const getClosedMessage = (
   link: PaymentLink | undefined,
-): LinkMessage => {
+): PageMessageProps => {
   if (link?.status === "paid" && isBalance(link))
     return {
       title: "This is paid",

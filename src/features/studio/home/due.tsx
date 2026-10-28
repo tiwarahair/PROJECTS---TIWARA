@@ -6,11 +6,14 @@ import type { StudioController } from "../core/use-studio";
 import type { HomeView } from "./view";
 import styles from "../../../styles/features/studio/home/due.module.css";
 import shared from "../../../styles/features/studio/home/index.module.css";
+import { formatMoney } from "../../../utils/money";
 
 const getDueLine = (booking: DecoratedBooking) => {
   const dayPrefix = booking.dayOffset < 0 ? `${booking.dayShort} ` : "";
   const endTime = booking.timeRange.split("–")[1] || booking.time;
-  const dueNote = booking.due > 0 ? `£${booking.due} due` : "paid in full";
+
+  const dueNote =
+    booking.due > 0 ? `${formatMoney(booking.due)} due` : "paid in full";
 
   return `${booking.service} · ended ${dayPrefix}${endTime} · ${dueNote}`;
 };

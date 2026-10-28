@@ -58,6 +58,7 @@ const getLedger = (overrides: Partial<Ledger> = {}): Ledger => {
     ],
     available: 38.82,
     pending: 0,
+    isBalanceKnown: true,
     onHold: 0,
     pausedAmount: 0,
     nextDate: null,
@@ -111,6 +112,23 @@ describe("Earnings", () => {
     expect(
       screen.getByText(/£85\.00 on hold · released 24 hours/),
     ).toBeInTheDocument();
+  });
+
+  it("says the balance couldn't load instead of showing nothing available", () => {
+    render(
+      <Earnings
+        ledger={getLedger({ available: 0, isBalanceKnown: false })}
+        clients={clients}
+      />,
+    );
+
+    expect(
+      screen.getByText(
+        "Your balance couldn’t load from Stripe. Refresh to try again.",
+      ),
+    ).toBeInTheDocument();
+
+    expect(screen.getByText("—")).toBeInTheDocument();
   });
 
   it("empty: offers to copy the booking link", async () => {

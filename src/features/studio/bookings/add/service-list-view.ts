@@ -2,6 +2,7 @@ import type { ChangeEvent } from "react";
 import { TAXONOMY } from "../../core/constants";
 import type { StudioService } from "../../core/types";
 import type { AddContext } from "./context";
+import { formatMoney } from "../../../../utils/money";
 
 // ---- step 2: services ----
 export const getServiceListView = ({ state, setState }: AddContext) => {
@@ -19,7 +20,7 @@ export const getServiceListView = ({ state, setState }: AddContext) => {
       key: id,
       name,
       duration,
-      priceLabel: `£${price}`,
+      priceLabel: `${formatMoney(price)}`,
       isOn: state.addService === id,
       pick: () =>
         setState({

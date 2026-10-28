@@ -1,6 +1,7 @@
 import { PAST_TONE } from "../../../core/constants";
 import { getPastTime } from "./checkout";
 import type { PastContext } from "./context";
+import { formatMoney } from "../../../../../utils/money";
 
 const BLANK_TONE = { background: "", color: "", icon: null, meta: "" };
 
@@ -21,7 +22,7 @@ export const getVisitView = ({
   };
 
   const getOutValue = () => {
-    if (isCompleted) return `£${row.price}`;
+    if (isCompleted) return `${formatMoney(row.price)}`;
 
     return isKept ? row.feeLabel : "£0";
   };
@@ -30,13 +31,13 @@ export const getVisitView = ({
     service: row.service,
     when: row.when,
     time: getPastTime(state, row),
-    priceLabel: `£${row.price}`,
+    priceLabel: `${formatMoney(row.price)}`,
     isStruck: !isCompleted,
     status: row.status,
     badgeBackground: tone.background,
     badgeColor: tone.color,
     badgeIcon: tone.icon,
-    totalLabel: `£${row.price}`,
+    totalLabel: `${formatMoney(row.price)}`,
     outLabel: getOutLabel(),
     outValue: getOutValue(),
     canRebook: !!row.client,

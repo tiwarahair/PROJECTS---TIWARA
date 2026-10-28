@@ -2,7 +2,7 @@
 import type { SavedAddress } from "../../types/address";
 import { getAddressOneLine } from "../../utils/address";
 import type { AccountBooking, Profile } from "./data";
-import { formatMoney } from "../../utils/money";
+import { formatPence } from "../../utils/money";
 import { formatWeekdayDate, formatClockTime } from "../../utils/dates";
 import { getCalendarFile } from "../../../supabase/functions/_shared/calendar-file";
 import { escapeHtml } from "../../../supabase/functions/_shared/escape-html";
@@ -18,8 +18,6 @@ export const formatAccountDate = (time: number, withTime = false): string => {
 
 export const getAddressLine = (address: SavedAddress | undefined): string =>
   address ? getAddressOneLine(address) : "";
-
-const formatPence = (pence: number) => formatMoney(pence / 100);
 
 const sumPence = (items: { amountPence: number }[]) => {
   let total = 0;
@@ -115,19 +113,20 @@ export const getBookingMoney = (booking: AccountBooking): BookingMoney => {
     whereShort: booking.isMobile ? "At your address" : booking.stylistArea,
     tag,
     paid: [
-      netPence > 0 && `${formatPence(netPence)} paid`,
-      refundedPence > 0 && `${formatPence(refundedPence)} refunded`,
+      netPence > 0 && `${formatPence(netPence, { pence: "auto" })} paid`,
+      refundedPence > 0 &&
+        `${formatPence(refundedPence, { pence: "auto" })} refunded`,
     ]
       .filter(Boolean)
       .join(" · "),
     due:
       isUpcomingBooking(booking) && duePence > 0
-        ? ` · ${formatPence(duePence)} to pay at your appointment`
+        ? ` · ${formatPence(duePence, { pence: "auto" })} to pay at your appointment`
         : "",
     lines: lines.map(({ label, subtitle, pence }) => ({
       label,
       subtitle,
-      amount: formatPence(pence),
+      amount: formatPence(pence, { pence: "auto" }),
     })),
     payments: [
       ...payments.map(({ kind, method, amountPence, paidAt }) => ({
@@ -137,14 +136,14 @@ export const getBookingMoney = (booking: AccountBooking): BookingMoney => {
         ]
           .filter(Boolean)
           .join(" · "),
-        amount: formatPence(amountPence),
+        amount: formatPence(amountPence, { pence: "auto" }),
       })),
       ...refunds.map(({ amountPence, refundedAt }) => ({
         label: `Refunded ${formatAccountDate(refundedAt)}`,
-        amount: `−${formatPence(amountPence)}`,
+        amount: `−${formatPence(amountPence, { pence: "auto" })}`,
       })),
     ],
-    total: formatPence(totalPence),
+    total: formatPence(totalPence, { pence: "auto" }),
   };
 };
 

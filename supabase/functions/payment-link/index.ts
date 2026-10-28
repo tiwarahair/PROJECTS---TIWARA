@@ -6,7 +6,7 @@ import { corsHeaders, respond } from "../_shared/cors.ts";
 import { isWithinLimit } from "../_shared/rate-limit.ts";
 import { stripe } from "../_shared/stripe.ts";
 import { getRecovery } from "../_shared/owed.ts";
-import { isPayoutHeld } from "../_shared/payout-hold.ts";
+import { holdPayout, isPayoutHeld } from "../_shared/payout-hold.ts";
 import { getRecoveryMetadata } from "../_shared/recovery-metadata.ts";
 import { getStripeFee } from "../_shared/stripe-fee.ts";
 import { isHuman } from "../_shared/turnstile.ts";
@@ -51,7 +51,7 @@ const getIntent = async (link: LinkPayment) => {
 
   const recovered = canTransfer ? await getRecovery(link.stylist_account, link.amount_pence - stripeFee) : 0;
 
-  return stripe.paymentIntents.create(
+  const created = await stripe.paymentIntents.create(
     {
       amount: link.amount_pence,
       currency: "gbp",
@@ -78,6 +78,10 @@ const getIntent = async (link: LinkPayment) => {
       idempotencyKey: `link:${link.link_id}:after:${link.payment_intent_id ?? "none"}:card-fee:${recovered}${canTransfer ? "" : ":kept"}`,
     },
   );
+
+  if (isHeld) await holdPayout(created.id);
+
+  return created;
 };
 
 Deno.serve(async (request) => {

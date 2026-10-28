@@ -1,5 +1,5 @@
 begin;
-select plan(11);
+select plan(12);
 
 insert into auth.users (id, instance_id, aud, role, email, raw_user_meta_data, raw_app_meta_data)
 values ('f1111111-1111-1111-1111-111111111111', '00000000-0000-0000-0000-000000000000', 'authenticated',
@@ -34,14 +34,16 @@ as $$
   returning id
 $$;
 
--- a card payment charged without a transfer, as for a new stylist
+-- a card payment charged without a transfer, as for a new stylist: the charge records that it's held
 create function pg_temp.pay(target uuid, intent text)
 returns uuid
 language sql
 as $$
+  select public.hold_payout(intent);
+
   insert into public.payments (booking_id, kind, amount_pence, platform_fee_pence, stripe_payment_intent_id)
   values (target, 'booking', 1163, 163, intent)
-  returning id
+  returning id;
 $$;
 
 create function pg_temp.claimed()
@@ -81,6 +83,12 @@ select finished, 'fee', 1000, 'pi_fee_not_held' from ids;
 
 select is((select held from public.payments where stripe_payment_intent_id = 'pi_fee_not_held'), false,
   'a late-cancel or no-show fee isn''t held: it''s charged after the waiver window');
+
+insert into public.payments (booking_id, kind, amount_pence, platform_fee_pence, stripe_payment_intent_id)
+select finished, 'balance', 2000, 0, 'pi_sent_straight_away' from ids;
+
+select is((select held from public.payments where stripe_payment_intent_id = 'pi_sent_straight_away'), false,
+  'a payment its charge sent straight to the stylist isn''t held, whatever the count says by the time it''s saved');
 
 select is(pg_temp.claimed(), array['pi_hold_finished'],
   'only money for an appointment that finished over a day ago is sent');

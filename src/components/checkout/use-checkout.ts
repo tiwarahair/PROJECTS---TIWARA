@@ -168,7 +168,12 @@ export const useCheckout = (props: CheckoutSheetProps) => {
       reason,
     }));
 
+  const isPaying = useRef(false);
+
   const pay = (finish: () => void) => {
+    if (isPaying.current) return;
+
+    isPaying.current = true;
     setState({ busy: true });
 
     props
@@ -203,7 +208,10 @@ export const useCheckout = (props: CheckoutSheetProps) => {
               : "That didn’t work. Try again.",
           );
         },
-      );
+      )
+      .finally(() => {
+        isPaying.current = false;
+      });
   };
 
   const complete = () => {

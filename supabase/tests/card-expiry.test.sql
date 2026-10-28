@@ -1,5 +1,5 @@
 begin;
-select plan(11);
+select plan(13);
 
 insert into auth.users (id, instance_id, aud, role, email, raw_user_meta_data, raw_app_meta_data)
 values ('a2222222-1111-1111-1111-111111111111', '00000000-0000-0000-0000-000000000000', 'authenticated',
@@ -91,7 +91,16 @@ select public.save_card_update((select soon from ids), 'seti_other', 'pm_wrong',
 select is((select stripe_payment_method_id from public.bookings where id = (select soon from ids)), 'pm_old',
   'only the setup made for this booking can replace the card');
 
+select ok(
+  exists (select 1 from public.get_unsaved_card_updates(20) where booking_id = (select soon from ids)
+    and setup_intent_id = 'seti_1'),
+  'a card set up but not yet saved is looked up by the hourly job');
+
 select public.save_card_update((select soon from ids), 'seti_1', 'pm_new', 'Mastercard •••• 4444');
+
+select ok(
+  not exists (select 1 from public.get_unsaved_card_updates(20) where booking_id = (select soon from ids)),
+  'and not once it''s saved');
 
 select is(
   (select jsonb_build_array(stripe_payment_method_id, card_label, card_update_requested_at, card_failed_at)

@@ -4,7 +4,7 @@ import { getCardLabel, isHardDecline } from "../_shared/declines.ts";
 import { reverseLaterTransfer } from "../_shared/later-transfer.ts";
 import { getRefundable } from "../_shared/refundable.ts";
 import { getRecovery } from "../_shared/owed.ts";
-import { isPayoutHeld } from "../_shared/payout-hold.ts";
+import { holdPayout, isPayoutHeld } from "../_shared/payout-hold.ts";
 import { getRecoveryMetadata } from "../_shared/recovery-metadata.ts";
 import { getStripeFee } from "../_shared/stripe-fee.ts";
 import { getCheckoutChargeKey } from "../_shared/stripe-keys.ts";
@@ -78,8 +78,8 @@ export const chargeSavedCard = async (
 ): Promise<CardPaid | CardDeclined> => {
   const paymentMethod = quote.payment_method_id as string;
   const cardLabel = await getCard(paymentMethod);
-  const canTransfer =
-    !!quote.stylist_account && quote.stylist_can_receive && !(await isPayoutHeld(quote.stylist_account));
+  const isHeld = await isPayoutHeld(quote.stylist_account);
+  const canTransfer = !!quote.stylist_account && quote.stylist_can_receive && !isHeld;
 
   // a try that charged, then failed before saving: keep that payment rather than charge again
   if (earlier)
@@ -125,6 +125,8 @@ export const chargeSavedCard = async (
 
     createdId = created.id;
     await saveIntent(created.id);
+
+    if (isHeld) await holdPayout(created.id);
 
     const intent = await stripe.paymentIntents.confirm(created.id, { off_session: true });
 

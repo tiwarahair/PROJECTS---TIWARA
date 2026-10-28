@@ -145,7 +145,7 @@ export const getCloseReason = (
     return "A client’s dispute is still open. You can close once their bank decides.";
 
   return owed
-    ? `You owe ${formatMoney(owed, { pence: "always" })} in dispute fees. Pay it to close your business.`
+    ? `You owe ${formatMoney(owed, { pence: "always" })} in fees. Pay it to close your business.`
     : "";
 };
 

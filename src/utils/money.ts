@@ -33,3 +33,13 @@ export const formatMoney = (
 
   return `${sign}${(isWhole ? wholePounds : withPence).format(absolute)}`;
 };
+
+export const toPence = (pounds: number): number => Math.round(pounds * 100);
+
+export const toPounds = (pence: number): number => pence / 100;
+
+/** Pence as money: "£12.50", or "£12" with { pence: "auto" }. */
+export const formatPence = (
+  pence: number,
+  { pence: decimals = "always" }: FormatMoneyOptions = {},
+): string => formatMoney(toPounds(pence), { pence: decimals });

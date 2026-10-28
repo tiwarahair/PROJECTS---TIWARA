@@ -6,6 +6,7 @@ import { formatDuration } from "../../../../utils/dates";
 import { getAddonDialog } from "./addon-dialog";
 import { getAddonMinutes } from "./context";
 import type { EditContext } from "./context";
+import { formatMoney } from "../../../../utils/money";
 
 const getMenuAnchor = (event: MouseEvent) => {
   const host =
@@ -35,7 +36,7 @@ export const getServiceCardView = ({
     return {
       key: (link.addonId ?? "") + index,
       name: addon.name || "Add-on",
-      meta: `+£${price}${minutes ? ` · ${formatDuration(minutes)}` : ""}`,
+      meta: `+${formatMoney(price)}${minutes ? ` · ${formatDuration(minutes)}` : ""}`,
     };
   }),
 });
@@ -72,7 +73,7 @@ export const getAddonRowsView = ({
     return {
       key: (link.addonId ?? "") + index,
       name: addon.name + (quantity > 1 ? ` ×${quantity}` : ""),
-      meta: `+£${price * quantity}${timeNote}`,
+      meta: `+${formatMoney(price * quantity)}${timeNote}`,
       edit: (event?: MouseEvent) => {
         event?.stopPropagation();
         openEdit();
@@ -84,7 +85,7 @@ export const getAddonRowsView = ({
 
         actions.openActionSheet({
           title: addon.name,
-          subtitle: `+£${price * quantity}${quantity > 1 ? ` · ×${quantity}` : ""}`,
+          subtitle: `+${formatMoney(price * quantity)}${quantity > 1 ? ` · ×${quantity}` : ""}`,
           anchor,
           items: [
             { label: "Edit", icon: ICONS.edit, run: openEdit },

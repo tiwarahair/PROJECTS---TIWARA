@@ -3,6 +3,7 @@ import type { VariationRow, WizardDraft } from "../../core/types";
 import { formatDuration } from "../../../../utils/dates";
 import type { WizardBase } from "./adjust";
 import type { WizardContext } from "./context";
+import { formatMoney } from "../../../../utils/money";
 
 const getDelta = (
   row: VariationRow | null,
@@ -30,7 +31,7 @@ const getCell = (
     getDelta(length, "minutesDelta");
 
   return {
-    price: `£${price}`,
+    price: `${formatMoney(price)}`,
     duration: formatDuration(minutes),
   };
 };

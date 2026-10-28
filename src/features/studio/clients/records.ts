@@ -1,5 +1,6 @@
 import type { StudioClientRow } from "../../../lib/studio-api/clients";
 import type { StudioClient } from "../core/types";
+import { toPounds } from "../../../utils/money";
 
 const DELETE_AFTER_DAYS = 120;
 
@@ -8,8 +9,6 @@ const formatDate = (date: string | Date, options: Intl.DateTimeFormatOptions) =>
     timeZone: "Europe/London",
     ...options,
   });
-
-const toPounds = (pence: number) => Math.round(pence) / 100;
 
 const getDeletableFrom = (lastPaymentAt: string | null) => {
   if (!lastPaymentAt) return undefined;

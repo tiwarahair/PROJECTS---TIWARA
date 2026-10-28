@@ -5,6 +5,7 @@ import { getProtectionExpiry } from "../../core/model";
 import type { StudioBooking } from "../../core/types";
 import type { StudioController } from "../../core/use-studio";
 import type { AddonLine } from "./types";
+import { formatMoney } from "../../../../utils/money";
 
 export const getSheetBooking = (
   { state, actions: { openSheet } }: StudioController,
@@ -54,7 +55,7 @@ export const getAddonLines = (
     return {
       key: (name || "Add-on") + quantity,
       label: (name || "Add-on") + (quantity > 1 ? ` × ${quantity}` : ""),
-      value: `£${amount}`,
+      value: `${formatMoney(amount)}`,
       amount,
     };
   });

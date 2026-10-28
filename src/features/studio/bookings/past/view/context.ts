@@ -4,6 +4,7 @@ import { getClient } from "../../../core/model";
 import type { PastRecord } from "../../../core/types";
 import type { StudioController } from "../../../core/use-studio";
 import { mergeBookingRows } from "../../live-records";
+import { formatMoney } from "../../../../../utils/money";
 
 export const DAY_MS = 86400000;
 
@@ -12,7 +13,9 @@ export const RECORDED_ONLY =
 
 export const getRefundTag = (refunded: number, left: number) => {
   if (refunded > 0)
-    return left <= 0 ? "Refunded" : `Partially refunded £${refunded}`;
+    return left <= 0
+      ? "Refunded"
+      : `Partially refunded ${formatMoney(refunded)}`;
 
   return "";
 };

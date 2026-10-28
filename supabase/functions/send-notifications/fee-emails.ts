@@ -1,6 +1,7 @@
 import { renderNotice } from "../_shared/email-layout.ts";
 import type { RenderedEmail } from "../_shared/email-layout.ts";
-import { formatWhen, getLinkWording, pounds } from "./booking-emails.ts";
+import { formatWhen, getLinkWording } from "./booking-emails.ts";
+import { pounds } from "../_shared/money.ts";
 import type { BookingDetails } from "./booking-emails.ts";
 
 type FeeKind = "late_cancel" | "no_show";

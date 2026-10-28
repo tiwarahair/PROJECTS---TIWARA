@@ -1,8 +1,8 @@
 // A booking's service details and booking protection from the database → the fields Studio's tiles and sheet read.
 import type { StudioBookingRow } from "../../../lib/studio-api/bookings";
 import type { BookingAddon, StudioBooking } from "../core/types";
-import { toPounds } from "./fee-records";
 import { getNumber, getText, isRecord } from "./row-values";
+import { toPounds } from "../../../utils/money";
 
 const toAddon = (line: unknown): BookingAddon => ({
   id: getText(line, "id"),

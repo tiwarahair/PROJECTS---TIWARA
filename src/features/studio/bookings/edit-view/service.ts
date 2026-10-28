@@ -4,6 +4,7 @@ import { parseNumber } from "../../core/format";
 import type { StudioService } from "../../core/types";
 import { formatDuration } from "../../../../utils/dates";
 import type { EditContext, ServiceEditDraft } from "./context";
+import { formatMoney } from "../../../../utils/money";
 
 const getServiceMinutes = (service: StudioService) =>
   (service.durationHours || 0) * 60 + (service.durationMinutes || 0);
@@ -43,7 +44,7 @@ export const getServiceView = ({
   categoryLabel:
     TAXONOMY.find((group) => group.id === draft.taxonomyId)?.name ?? "Other",
   serviceName: draft.serviceName || booking.service,
-  serviceMeta: `${formatDuration(duration)} · £${parseNumber(draft.price)}`,
+  serviceMeta: `${formatDuration(duration)} · ${formatMoney(parseNumber(draft.price))}`,
   openChange: () => {
     const changed = getChangedFields(
       draft,
@@ -118,7 +119,7 @@ export const getChangeServiceView = ({
         key: service.id,
         name: service.name,
         duration: service.duration,
-        price: `£${service.price}`,
+        price: `${formatMoney(service.price)}`,
         isOn: service.id === draft.serviceId,
         pick: () => pickService(service),
       }));

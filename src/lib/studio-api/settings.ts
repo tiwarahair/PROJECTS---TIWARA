@@ -106,7 +106,7 @@ export const closeBusiness = () =>
       "You still have upcoming bookings. Cancel or finish them before closing.",
     has_dispute:
       "A client’s dispute is still open. You can close once their bank decides.",
-    has_debt: "Pay what you owe in dispute fees to close your business.",
+    has_debt: "Pay what you owe in fees to close your business.",
   });
 
 export const reopenBusiness = () => write(supabase.rpc("reopen_business"));

@@ -1,6 +1,6 @@
 import { renderNotice } from "../_shared/email-layout.ts";
 import type { RenderedEmail } from "../_shared/email-layout.ts";
-import { pounds } from "./booking-emails.ts";
+import { pounds } from "../_shared/money.ts";
 
 export interface PayoutNotice {
   business_name: string;

@@ -2,10 +2,11 @@
 // their appointment is over.
 import { admin } from "../_shared/admin.ts";
 import { saveDestinationPayment } from "../_shared/card-payment.ts";
-import { getRefundable } from "../_shared/refundable.ts";
+import { reverseLaterTransfer } from "../_shared/later-transfer.ts";
 import { getStripeFee } from "../_shared/stripe-fee.ts";
 import { getTransferKey } from "../_shared/stripe-keys.ts";
 import { stripe } from "../_shared/stripe.ts";
+import { getRefundsBefore, getUncountedRefunds, isLiveRefund } from "../_shared/uncounted-refunds.ts";
 
 const BATCH_SIZE = 20;
 
@@ -17,6 +18,9 @@ interface PendingTransfer {
   stylist_account: string;
   transfer_failures: number;
 }
+
+const getRefunds = async (intentId: string) =>
+  (await stripe.refunds.list({ payment_intent: intentId, limit: 100 })).data;
 
 // a transfer an earlier try made but couldn't record
 const findEarlierTransfer = async (group: string) => {
@@ -36,19 +40,26 @@ const makeTransfer = async ({
   const group = `payment:${paymentId}`;
   const earlier = await findEarlierTransfer(group);
 
-  if (earlier) return earlier;
+  if (earlier) return { transfer: earlier, counted: getRefundsBefore(await getRefunds(intentId), earlier.created) };
 
   const { latest_charge: charge } = await stripe.paymentIntents.retrieve(intentId, { expand: ["latest_charge"] });
 
   if (!charge || typeof charge === "string") throw new Error(`${intentId} has no charge`);
 
+  // what's refunded is read from the refunds themselves, so the ones counted here are known exactly
+  const refunds = (await getRefunds(intentId)).filter(isLiveRefund);
+  let refunded = 0;
+
+  for (const { amount: refundAmount } of refunds) refunded += refundAmount;
+
   // whatever was refunded meanwhile stays with the client; our booking fee (unless it went back to the client) stays
   // with us, and Stripe's fee on the stylist's part is theirs
-  const amount = getRefundable(charge) - (bookingFee - feeRefunded) - getStripeFee(charge.amount - bookingFee);
+  const amount = charge.amount - refunded - (bookingFee - feeRefunded) - getStripeFee(charge.amount - bookingFee);
+  const counted = refunds.map(({ id }) => id);
 
-  if (amount <= 0) return null;
+  if (amount <= 0) return { transfer: null, counted };
 
-  return stripe.transfers.create(
+  const transfer = await stripe.transfers.create(
     // tied to the fee's own charge, so it's paid from that money
     {
       amount,
@@ -60,15 +71,26 @@ const makeTransfer = async ({
     },
     { idempotencyKey: getTransferKey(paymentId, failures) },
   );
+
+  return { transfer, counted };
 };
 
 const sendTransfer = async (pending: PendingTransfer) => {
-  const transfer = await makeTransfer(pending);
-  const { payment_id: paymentId } = pending;
+  const { transfer, counted } = await makeTransfer(pending);
+  const { payment_id: paymentId, payment_intent_id: intentId, fee_refunded_pence: feeRefunded } = pending;
 
   const { error } = await admin.rpc("mark_transfer_sent", { payment: paymentId, transfer: transfer?.id ?? null });
 
   if (error) throw error;
+
+  // a refund made while this was being sent found no transfer to take its part back from
+  if (transfer)
+    for (const refund of getUncountedRefunds(await getRefunds(intentId), counted))
+      await reverseLaterTransfer(
+        intentId,
+        refund,
+        refund.metadata?.reason === "client_cancelled" ? Math.min(feeRefunded, refund.amount) : 0,
+      );
 
   if (transfer && typeof transfer.destination_payment === "string")
     await saveDestinationPayment(pending.payment_intent_id, transfer.destination_payment, pending.stylist_account);

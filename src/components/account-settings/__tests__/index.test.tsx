@@ -308,7 +308,7 @@ describe("AccountSettings", () => {
     ).toBeDisabled();
   });
 
-  it("asks for dispute fees owed to be paid before closing", async () => {
+  it("asks for fees owed to be paid before closing", async () => {
     const onPayOwed = vi.fn();
 
     render(

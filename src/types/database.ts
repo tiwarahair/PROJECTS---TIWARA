@@ -1255,6 +1255,7 @@ export type Database = {
           paid_at: string | null;
           purpose: string;
           reminded_at: string | null;
+          reminder_token_hash: string | null;
           sent_count: number;
           status: string;
           stripe_payment_intent_id: string | null;
@@ -1271,6 +1272,7 @@ export type Database = {
           paid_at?: string | null;
           purpose?: string;
           reminded_at?: string | null;
+          reminder_token_hash?: string | null;
           sent_count?: number;
           status?: string;
           stripe_payment_intent_id?: string | null;
@@ -1286,6 +1288,7 @@ export type Database = {
           paid_at?: string | null;
           purpose?: string;
           reminded_at?: string | null;
+          reminder_token_hash?: string | null;
           sent_count?: number;
           status?: string;
           stripe_payment_intent_id?: string | null;
@@ -1456,6 +1459,22 @@ export type Database = {
             referencedColumns: ["id"];
           },
         ];
+      };
+      payout_hold_intents: {
+        Row: {
+          created_at: string;
+          payment_intent_id: string;
+        };
+        ComputedFields: never;
+        Insert: {
+          created_at?: string;
+          payment_intent_id: string;
+        };
+        Update: {
+          created_at?: string;
+          payment_intent_id?: string;
+        };
+        Relationships: [];
       };
       payouts: {
         Row: {
@@ -2153,17 +2172,20 @@ export type Database = {
       };
       stripe_events: {
         Row: {
+          handled_at: string | null;
           id: string;
           received_at: string;
           type: string;
         };
         ComputedFields: never;
         Insert: {
+          handled_at?: string | null;
           id: string;
           received_at?: string;
           type: string;
         };
         Update: {
+          handled_at?: string | null;
           id?: string;
           received_at?: string;
           type?: string;
@@ -2277,30 +2299,43 @@ export type Database = {
       stylist_debts: {
         Row: {
           amount_pence: number;
+          booking_id: string | null;
           created_at: string;
-          dispute_id: string;
+          dispute_id: string | null;
           id: string;
           recovered_pence: number;
+          stripe_refund_id: string | null;
           stylist_id: string;
         };
         ComputedFields: never;
         Insert: {
           amount_pence: number;
+          booking_id?: string | null;
           created_at?: string;
-          dispute_id: string;
+          dispute_id?: string | null;
           id?: string;
           recovered_pence?: number;
+          stripe_refund_id?: string | null;
           stylist_id: string;
         };
         Update: {
           amount_pence?: number;
+          booking_id?: string | null;
           created_at?: string;
-          dispute_id?: string;
+          dispute_id?: string | null;
           id?: string;
           recovered_pence?: number;
+          stripe_refund_id?: string | null;
           stylist_id?: string;
         };
         Relationships: [
+          {
+            foreignKeyName: "stylist_debts_booking_id_fkey";
+            columns: ["booking_id"];
+            isOneToOne: false;
+            referencedRelation: "bookings";
+            referencedColumns: ["id"];
+          },
           {
             foreignKeyName: "stylist_debts_dispute_id_fkey";
             columns: ["dispute_id"];
@@ -2867,6 +2902,10 @@ export type Database = {
           transfer_failures: number;
         }[];
       };
+      claim_stripe_event: {
+        Args: { event_id: string; event_type: string };
+        Returns: boolean;
+      };
       claim_unsaved_charges: {
         Args: { batch_size: number };
         Returns: {
@@ -2945,6 +2984,7 @@ export type Database = {
         Args: Record<PropertyKey, never>;
         Returns: number;
       };
+      find_payment_link: { Args: { token: string }; Returns: string };
       find_stylist_client: {
         Args: { contact: Json; target_stylist: string };
         Returns: {
@@ -2974,6 +3014,10 @@ export type Database = {
       };
       finish_fee_settlement: {
         Args: { result: Json; target: string };
+        Returns: undefined;
+      };
+      finish_stripe_event: {
+        Args: { event_id: string; is_handled: boolean };
         Returns: undefined;
       };
       get_account_kind: { Args: { lookup_email: string }; Returns: string };
@@ -3455,6 +3499,10 @@ export type Database = {
           stripe_dispute_id: string;
         }[];
       };
+      get_unsaved_card_updates: {
+        Args: { batch_size: number };
+        Returns: { booking_id: string; setup_intent_id: string }[];
+      };
       has_recent_payment: { Args: { target: string }; Returns: boolean };
       has_recent_second_factor: {
         Args: Record<PropertyKey, never>;
@@ -3486,6 +3534,7 @@ export type Database = {
         Returns: Json;
       };
       is_aal2: { Args: Record<PropertyKey, never>; Returns: boolean };
+      hold_payout: { Args: { intent: string }; Returns: undefined };
       is_admin: { Args: Record<PropertyKey, never>; Returns: boolean };
       is_admin_session: { Args: Record<PropertyKey, never>; Returns: boolean };
       is_harmful_reason: { Args: { reason: string }; Returns: boolean };
@@ -3887,7 +3936,7 @@ export type Database = {
       };
       save_dispute_fees: {
         Args: { fees: number; target: string };
-        Returns: undefined;
+        Returns: number;
       };
       save_dispute_recovery: {
         Args: {
@@ -3909,6 +3958,10 @@ export type Database = {
       };
       save_open_minutes: { Args: Record<PropertyKey, never>; Returns: number };
       save_payout: { Args: { account: string; payout: Json }; Returns: string };
+      save_refund_debt: {
+        Args: { amount: number; booking: string; refund: string };
+        Returns: undefined;
+      };
       save_stylist_client: {
         Args: { details: Json; target?: string; target_stylist: string };
         Returns: string;
@@ -4042,6 +4095,15 @@ export type Database = {
           message: string;
           outcome: string;
           target: string;
+        };
+        Returns: undefined;
+      };
+      settle_won_dispute: {
+        Args: {
+          fee_returned: number;
+          returned: number;
+          target: string;
+          transfer: string;
         };
         Returns: undefined;
       };

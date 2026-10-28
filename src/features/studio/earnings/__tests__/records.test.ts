@@ -135,6 +135,15 @@ describe("the stylist's earnings", () => {
     });
   });
 
+  it("doesn't show a balance of nothing when Stripe couldn't be reached", () => {
+    expect(toLedger({ ...earnings, balance: null })).toMatchObject({
+      available: 0,
+      isBalanceKnown: false,
+      nextDate: null,
+      scenario: "default",
+    });
+  });
+
   it("asks about the dispute due soonest, leaving out decided and just-answered ones", () => {
     const open = getOpenDisputes(
       {

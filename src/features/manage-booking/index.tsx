@@ -1,9 +1,10 @@
 import { ArrowLeft } from "lucide-react";
-import { useLayoutEffect, useState } from "react";
+import { useState } from "react";
 import { Link, Navigate } from "react-router";
 import { PageMessage } from "../../components/page-message";
 import { ManageBookingSkeleton } from "../../components/skeleton/manage-booking-skeleton";
 import { useIsSlow } from "../../hooks/use-is-slow";
+import { useLinkPage } from "../../hooks/use-link-page";
 import { usePrivateLink } from "../../hooks/use-private-link";
 import {
   getErrorMessage,
@@ -44,7 +45,7 @@ export const ManageBookingPage = ({
   const ref = params.get("ref") ?? "";
   const isAccount = (params.get("view") || view) === "account";
   const { ready, loggedIn } = useAppSelector(({ session }) => session);
-  const linkToken = usePrivateLink({ storageKey: "tw_manage_token" });
+  const linkToken = useLinkPage("tw_manage_token");
   const secureToken = usePrivateLink({ param: "secure" });
   const isOwnerLink = !!ref && !params.get("token");
 
@@ -73,12 +74,6 @@ export const ManageBookingPage = ({
     (owner.isError && getErrorMessage(owner.error) !== "link_not_valid");
 
   const isSlow = useIsSlow(isLoading && !booking);
-
-  useLayoutEffect(() => {
-    document.documentElement.classList.add("manage-page");
-
-    return () => document.documentElement.classList.remove("manage-page");
-  }, []);
 
   if (isAccount) return <Navigate to="/account?section=shared" replace />;
 
