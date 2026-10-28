@@ -59,7 +59,7 @@ describe("services → quick booking link", () => {
     const showToast = runQuickLink(liveState);
 
     expect(writeText).toHaveBeenCalledWith(
-      "tiwarashouse.com/book?stylist=crowned-by-kemi&service=service%201",
+      `${window.location.host}/book?stylist=crowned-by-kemi&service=service%201`,
     );
 
     expect(showToast).not.toHaveBeenCalled();

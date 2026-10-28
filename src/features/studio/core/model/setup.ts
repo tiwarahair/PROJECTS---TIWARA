@@ -13,7 +13,7 @@ export const getServiceBookingLink = (
   { account }: StudioState,
   serviceId: string,
 ) =>
-  `tiwarashouse.com/book?stylist=${account.slug}&service=${encodeURIComponent(serviceId)}`;
+  `${window.location.host}/book?stylist=${account.slug}&service=${encodeURIComponent(serviceId)}`;
 
 export const getProfilePath = ({ account }: StudioState) => `/${account.slug}`;
 
