@@ -1,6 +1,6 @@
 import { z } from "zod";
 import { isPostcodeValid } from "../../utils/address";
-import { isValidEmail } from "../../utils/validation";
+import { isValidEmail, EMAIL_ERROR } from "../../utils/validation";
 import type { BusinessFieldName, BusinessFormValues } from "./types";
 
 const getPhoneError = (phone: string, email: string): string => {
@@ -16,9 +16,7 @@ const getEmailError = (email: string, phone: string): string => {
   if (!email.trim())
     return !phone.trim() ? "Enter a phone number or an email address." : "";
 
-  return !isValidEmail(email)
-    ? "Enter an email address, like name@example.co.uk."
-    : "";
+  return !isValidEmail(email) ? EMAIL_ERROR : "";
 };
 
 export const getVatError = (vatOn: boolean, vat: string) =>

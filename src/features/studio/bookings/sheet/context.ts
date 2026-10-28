@@ -6,6 +6,7 @@ import { resendConfirmLink } from "../../../../lib/studio-api/booking-writes";
 import { getAddonLines, getPaymentMode, getSheetBooking } from "./booking";
 import { STILL_SAVING } from "./checkout-view";
 import { saveToBooking } from "../save";
+import { getMinutesOfDay } from "../../../../utils/dates";
 
 interface RemoteFinish {
   save: (remoteId: string) => Promise<unknown>;
@@ -18,16 +19,16 @@ export const getContext = (studio: StudioController) => {
 
   if (state.sheet !== "booking") return null;
 
-  const raw =
+  const storedBooking =
     state.bookings.find(({ id }) => id === state.sheetBookingId) ||
     state.bookings[0];
 
-  const booking = getSheetBooking(studio, raw);
+  const booking = getSheetBooking(studio, storedBooking);
 
   if (!booking) return null;
 
   const now = new Date();
-  const nowMinutes = now.getHours() * 60 + now.getMinutes();
+  const nowMinutes = getMinutesOfDay(now);
 
   const hoursToStart =
     (booking.dayOffset * 1440 + booking.startMinutes - nowMinutes) / 60;
@@ -108,7 +109,7 @@ export const getContext = (studio: StudioController) => {
 
     setState(patch);
 
-    if (!raw?.remoteId) return showToast(STILL_SAVING);
+    if (!storedBooking?.remoteId) return showToast(STILL_SAVING);
 
     // the link keeps the deadline set when the booking was made
     saveBooking({ resends: count, linkSentAt: Date.now() }, resendConfirmLink);
@@ -121,7 +122,7 @@ export const getContext = (studio: StudioController) => {
     setState,
     actions,
     memo: context.memo,
-    raw,
+    storedBooking,
     booking,
     nowMinutes,
     hoursToStart,

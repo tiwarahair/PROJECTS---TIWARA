@@ -4,11 +4,12 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { joinClassNames } from "../../utils/class-names";
 import { Reveal } from "./fields";
 import type { LoginDetailsActions } from "./login-details-actions";
-import { phoneSchema } from "./login-schemas";
-import type { PhoneValues } from "./login-schemas";
+import { phoneSchema } from "./login-schema";
+import type { PhoneValues } from "./login-schema";
 import type { AccountSettingsController } from "./use-account-settings";
 import shared from "../../styles/components/account-settings/index.module.css";
-import styles from "../../styles/components/account-settings/login-details.module.css";
+import styles from "../../styles/components/account-settings/phone-form.module.css";
+import loginDetails from "../../styles/components/account-settings/login-details.module.css";
 
 interface PhoneFormProps {
   settings: AccountSettingsController;
@@ -84,7 +85,7 @@ export const PhoneForm = ({ settings, login, uid }: PhoneFormProps) => {
           </button>
           <button
             type="button"
-            className={joinClassNames(styles.cancel, shared.focusRing)}
+            className={joinClassNames(loginDetails.cancel, shared.focusRing)}
             data-ac-in="1"
             onClick={() => setState({ phoneFlow: null })}
           >

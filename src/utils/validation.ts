@@ -1,5 +1,6 @@
-// Shared form rules (the sign-up trigger checks the same UK mobile rule in SQL).
 import { z } from "zod";
+
+export const EMAIL_ERROR = "Enter a valid email address";
 
 const emailSchema = z.email();
 
@@ -16,3 +17,8 @@ const websitePattern = /^(https?:\/\/)?([a-z0-9-]+\.)+[a-z]{2,}(\/\S*)?$/i;
 
 export const isValidWebsite = (value: string): boolean =>
   websitePattern.test(value.trim());
+
+export const getFieldFlagger =
+  <Values>(context: z.RefinementCtx<Values>) =>
+  (path: keyof Values & string, message: string) =>
+    context.addIssue({ code: "custom", path: [path], message });

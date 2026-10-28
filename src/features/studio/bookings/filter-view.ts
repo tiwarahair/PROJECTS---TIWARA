@@ -18,7 +18,10 @@ const getDraftState = ({ state }: BookingsContext): StudioState => ({
 });
 
 const pickDraft =
-  ({ state, setState }: BookingsContext, patch: StudioState["filterDraft"]) =>
+  (
+    { state, studio: { setState } }: BookingsContext,
+    patch: StudioState["filterDraft"],
+  ) =>
   () =>
     setState({ filterDraft: { ...state.filterDraft, ...patch } });
 
@@ -88,7 +91,12 @@ export const getFilterCount = ({
     : UPCOMING_FILTERS.filter(({ read, idle }) => read(state) !== idle).length;
 
 const getFilterChips = (context: BookingsContext) => {
-  const { state, setState, isUpcoming, pastFilter } = context;
+  const {
+    studio: { setState },
+    state,
+    isUpcoming,
+    pastFilter,
+  } = context;
 
   if (isUpcoming)
     return UPCOMING_FILTERS.filter(
@@ -109,7 +117,8 @@ const getFilterChips = (context: BookingsContext) => {
 };
 
 export const getFilterView = (context: BookingsContext) => {
-  const { studio, state, setState, query, isPast } = context;
+  const { studio, state, query, isPast } = context;
+  const { setState } = studio;
   const filterCount = getFilterCount(context);
   const shownCount = getDraftCount(context);
 

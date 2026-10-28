@@ -22,7 +22,11 @@ export const toPolicyFormValues = ({
   grace,
   late: toFeeValues(late),
   noShow: toFeeValues(noShow),
-  extras: extras.map(({ type, text }) => ({ type, text })),
+  extras: extras.map(({ type, text }) => ({
+    key: crypto.randomUUID(),
+    type,
+    text,
+  })),
 });
 
 export const getPercent = ({ percent }: FeeValues): number => {

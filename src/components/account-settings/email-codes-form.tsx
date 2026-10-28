@@ -4,11 +4,12 @@ import { Clock } from "lucide-react";
 import { joinClassNames } from "../../utils/class-names";
 import { TextField } from "./fields";
 import type { LoginDetailsActions } from "./login-details-actions";
-import { getEmailCodesSchema } from "./login-schemas";
-import type { EmailCodesValues } from "./login-schemas";
+import { getEmailCodesSchema } from "./login-schema";
+import type { EmailCodesValues } from "./login-schema";
 import type { AccountSettingsController } from "./use-account-settings";
 import shared from "../../styles/components/account-settings/index.module.css";
-import styles from "../../styles/components/account-settings/login-details.module.css";
+import styles from "../../styles/components/account-settings/email-codes-form.module.css";
+import loginDetails from "../../styles/components/account-settings/login-details.module.css";
 
 interface EmailCodesFormProps {
   settings: AccountSettingsController;
@@ -62,7 +63,7 @@ export const EmailCodesForm = ({
         <strong className={styles.strong}>{pendingEmail}</strong>. Your login
         email changes once both are in.
       </p>
-      <div className={styles.emailForm}>
+      <div className={loginDetails.emailForm}>
         {(
           [
             ["current", email],

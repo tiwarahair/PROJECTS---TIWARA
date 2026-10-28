@@ -44,6 +44,9 @@ export const SHORT_MONTHS_SEPT = LONG_MONTHS.map((name) =>
 const pad2 = (value: number): string => String(value).padStart(2, "0");
 
 /** Local YYYY-MM-DD. */
+export const getMinutesOfDay = (date = new Date()) =>
+  date.getHours() * 60 + date.getMinutes();
+
 export const toIsoDate = (date: Date): string =>
   `${date.getFullYear()}-${pad2(date.getMonth() + 1)}-${pad2(date.getDate())}`;
 

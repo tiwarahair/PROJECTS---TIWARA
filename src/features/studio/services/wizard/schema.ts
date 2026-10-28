@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { getFieldFlagger } from "../../../../utils/validation";
 import { parseNumber } from "../../core/format";
 
 export interface WizardValues {
@@ -24,8 +25,7 @@ export const getWizardSchema = ({ isDetails, isPricing }: WizardChecks) =>
       durationMinutes: z.string(),
     })
     .superRefine((values, context) => {
-      const flag = (path: keyof WizardValues, message: string) =>
-        context.addIssue({ code: "custom", path: [path], message });
+      const flag = getFieldFlagger(context);
 
       if (isDetails && !values.name.trim()) flag("name", "Name this service.");
 

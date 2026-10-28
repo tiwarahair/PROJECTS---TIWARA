@@ -335,7 +335,7 @@
   background: rgba(26, 23, 20, 0.04);
   pointer-events: none;
   top: var(--top);
-  height: var(--h);
+  height: var(--height);
 }
 
 .dayBand {

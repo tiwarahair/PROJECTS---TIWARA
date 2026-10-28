@@ -228,16 +228,26 @@ describe("Studio sheets", () => {
 
     const add = screen.getByRole("button", { name: "Add closed period" });
 
-    expect(add).toBeDisabled();
+    await user.click(add);
+
+    expect(await screen.findByText("Choose a start date.")).toBeInTheDocument();
+    expect(screen.getByText("Choose an end date.")).toBeInTheDocument();
 
     const [from, to] =
       document.querySelectorAll<HTMLInputElement>('input[type="date"]');
 
     await user.type(from as HTMLInputElement, "2026-12-24");
 
-    await user.type(to as HTMLInputElement, "2026-12-28");
-    await waitFor(() => expect(add).toBeEnabled());
+    await waitFor(() =>
+      expect(
+        screen.queryByText("Choose a start date."),
+      ).not.toBeInTheDocument(),
+    );
 
+    await user.click(add);
+    expect(screen.getByText("Choose an end date.")).toBeInTheDocument();
+
+    await user.type(to as HTMLInputElement, "2026-12-28");
     await user.click(add);
 
     expect(
@@ -266,9 +276,32 @@ describe("Studio sheets", () => {
       await screen.findByText("The end date can’t be before the start date."),
     ).toBeInTheDocument();
 
+    await user.click(screen.getByRole("button", { name: "Add closed period" }));
+
     expect(
-      screen.getByRole("button", { name: "Add closed period" }),
-    ).toBeDisabled();
+      screen.queryByText("Closed period added. Online booking blocked"),
+    ).not.toBeInTheDocument();
+  });
+
+  it("moving a closed period's start after its end flags the end date", async () => {
+    renderStudio();
+    await openAvailability();
+
+    await user.click(
+      screen.getAllByRole("button", { name: "Add" })[1] as HTMLElement,
+    );
+
+    const [from, to] =
+      document.querySelectorAll<HTMLInputElement>('input[type="date"]');
+
+    await user.type(from as HTMLInputElement, "2026-12-24");
+    await user.type(to as HTMLInputElement, "2026-12-26");
+    await user.clear(from as HTMLInputElement);
+    await user.type(from as HTMLInputElement, "2026-12-28");
+
+    expect(
+      await screen.findByText("The end date can’t be before the start date."),
+    ).toBeInTheDocument();
   });
 
   it("clearing a closed period's end date asks for one", async () => {
@@ -288,6 +321,26 @@ describe("Studio sheets", () => {
     expect(await screen.findByText("Choose an end date.")).toBeInTheDocument();
   });
 
+  it("picking only a start date doesn't ask for the end date yet", async () => {
+    renderStudio();
+    await openAvailability();
+
+    await user.click(
+      screen.getAllByRole("button", { name: "Add" })[1] as HTMLElement,
+    );
+
+    const [from] =
+      document.querySelectorAll<HTMLInputElement>('input[type="date"]');
+
+    await user.type(from as HTMLInputElement, "2026-12-24");
+
+    expect(
+      await screen
+        .findByText("Choose an end date.", {}, { timeout: 500 })
+        .catch(() => null),
+    ).toBeNull();
+  });
+
   it("editing a closed period saves rather than adds", async () => {
     renderStudio();
     await openAvailability();
@@ -302,10 +355,7 @@ describe("Studio sheets", () => {
     await user.type(from as HTMLInputElement, "2026-12-24");
     await user.type(to as HTMLInputElement, "2026-12-28");
 
-    const add = screen.getByRole("button", { name: "Add closed period" });
-
-    await waitFor(() => expect(add).toBeEnabled());
-    await user.click(add);
+    await user.click(screen.getByRole("button", { name: "Add closed period" }));
     advance(220);
 
     const row = (await screen.findByText("24 Dec to 28 Dec")).parentElement

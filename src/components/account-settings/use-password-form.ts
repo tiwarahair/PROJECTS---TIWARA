@@ -24,11 +24,16 @@ export const usePasswordForm = ({
     formState: { errors, isSubmitted, touchedFields },
   } = passwordForm;
 
-  const [code, next, confirm] = watch(["code", "next", "confirm"]);
-  const passwordCheck = checkPassword(next, checkOptions);
+  const [code, newPassword, confirm] = watch([
+    "code",
+    "newPassword",
+    "confirm",
+  ]);
+
+  const passwordCheck = checkPassword(newPassword, checkOptions);
 
   const passwordView = getPasswordView(passwordCheck, {
-    show: isSubmitted || (!!touchedFields.next && !!next),
+    show: isSubmitted || (!!touchedFields.newPassword && !!newPassword),
     errorColour: "var(--accent-700)",
   });
 
@@ -37,10 +42,10 @@ export const usePasswordForm = ({
     passwordView,
     passwordErrors: {
       code: errors.code?.message ?? "",
-      next: passwordView.hasError ? passwordCheck.error : "",
+      newPassword: passwordView.hasError ? passwordCheck.error : "",
       confirm: errors.confirm?.message ?? "",
       server: errors.root?.message ?? "",
     },
-    isPasswordFilled: !!(code || next || confirm),
+    isPasswordFilled: !!(code || newPassword || confirm),
   };
 };

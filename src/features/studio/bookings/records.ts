@@ -27,7 +27,8 @@ import type {
   StudioPolicy,
 } from "../core/types";
 import { toStudioClient } from "../clients/records";
-import { toFeeKind, toPolicyMode } from "../settings/records";
+import { toFeeKind } from "../../../utils/fee-kind";
+import { toPolicyMode } from "../settings/records";
 import {
   getCheckoutFields,
   getPaidAtBooking,

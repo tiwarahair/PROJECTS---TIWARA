@@ -241,9 +241,7 @@ describe("Studio → Settings", () => {
     await user.tab();
 
     expect(
-      await screen.findByText(
-        "Enter an email address, like name@example.co.uk.",
-      ),
+      await screen.findByText("Enter a valid email address"),
     ).toBeInTheDocument();
 
     expect(

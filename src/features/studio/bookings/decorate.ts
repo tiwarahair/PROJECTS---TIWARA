@@ -17,6 +17,7 @@ import {
 } from "../core/model";
 import type { StudioBooking, StudioClient, StudioState } from "../core/types";
 import { formatMoney } from "../../../utils/money";
+import { getMinutesOfDay } from "../../../utils/dates";
 
 const INK = "#1a1714";
 const YELLOW = "var(--brand-yellow,#f2c94c)";
@@ -184,8 +185,7 @@ export const decorateBooking = (
     booking.duration || getServiceDuration(state, booking.service);
 
   const startMinutes = timeToMinutes(booking.time);
-  const now = new Date();
-  const nowMinutes = now.getHours() * 60 + now.getMinutes();
+  const nowMinutes = getMinutesOfDay();
   const ongoing = isOngoing(booking);
   const isPre = status === "confirmed";
 

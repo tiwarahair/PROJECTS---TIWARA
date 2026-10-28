@@ -8,7 +8,7 @@ import type { AddonLine } from "./types";
 
 export const getSheetBooking = (
   { state, actions: { openSheet } }: StudioController,
-  raw: StudioBooking | undefined,
+  storedBooking: StudioBooking | undefined,
 ) => {
   if (state.bookingStep === "done" && state.doneBooking)
     return decorateBooking(state, state.doneBooking, 0, () => {});
@@ -21,9 +21,9 @@ export const getSheetBooking = (
 
   if (match) return match;
 
-  return raw
-    ? decorateBooking(state, raw, 0, () =>
-        openSheet("booking", { sheetBookingId: raw.id }),
+  return storedBooking
+    ? decorateBooking(state, storedBooking, 0, () =>
+        openSheet("booking", { sheetBookingId: storedBooking.id }),
       )
     : null;
 };

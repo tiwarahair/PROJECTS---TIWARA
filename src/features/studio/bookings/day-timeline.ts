@@ -64,7 +64,6 @@ const getQuarters = () => {
 export const getDayTimeline = ({
   studio,
   state,
-  setState,
   upcoming,
   nowMinutes,
 }: BookingsContext) => {
@@ -125,12 +124,15 @@ export const getDayTimeline = ({
       const minutes = getTappedMinutes(quarter);
 
       if (!studio.isWide) {
-        setState({ quickAdd: { time: hhmm(minutes) }, quickAddOut: false });
+        studio.setState({
+          quickAdd: { time: hhmm(minutes) },
+          quickAddOut: false,
+        });
 
         return;
       }
 
-      setState({
+      studio.setState({
         pop: {
           time: hhmm(minutes),
           ...getPopPosition(event),

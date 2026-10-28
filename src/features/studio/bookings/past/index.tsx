@@ -1,4 +1,3 @@
-import type { CSSProperties } from "react";
 import {
   ChevronRight,
   Link,
@@ -11,6 +10,7 @@ import {
   Undo2,
 } from "lucide-react";
 import { joinClassNames } from "../../../../utils/class-names";
+import { asStyle } from "../../../../utils/as-style";
 import { ContactLinks } from "../sheet/contact-links";
 import { getPastCheckoutView } from "./view";
 import type { PastSheetView } from "./view";
@@ -20,8 +20,6 @@ import type { StudioController } from "../../core/use-studio";
 import bookingStyles from "../../../../styles/features/studio/bookings/sheet/index.module.css";
 import styles from "../../../../styles/features/studio/bookings/past/index.module.css";
 import sheet from "../../../../styles/features/studio/shell/sheet-frame.module.css";
-
-const asStyle = (values: Record<string, string>) => values as CSSProperties;
 
 /** The status pill in the sheet header. */
 export const PastBadge = ({ view }: { view: PastSheetView }) => {

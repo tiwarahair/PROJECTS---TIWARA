@@ -9,7 +9,7 @@ const depositPolicy = (refundable: boolean) => ({
   mode: "deposit" as const,
   deposit: 20,
   refundable,
-  noShow: { on: false, kind: "pct" as const, percent: 50 },
+  noShow: { on: false, kind: "percent" as const, percent: 50 },
 });
 
 describe("getPolicyFee", () => {
@@ -18,7 +18,7 @@ describe("getPolicyFee", () => {
       price: 100,
       agreedPolicy: {
         ...depositPolicy(true),
-        noShow: { on: true, kind: "pct", percent: 50 },
+        noShow: { on: true, kind: "percent", percent: 50 },
       },
     });
 

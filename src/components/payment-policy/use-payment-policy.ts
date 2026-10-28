@@ -134,7 +134,7 @@ export const usePaymentPolicy = ({
             shouldDirty: true,
           });
 
-          setValue(`${name}.kind`, "pct", { shouldDirty: true });
+          setValue(`${name}.kind`, "percent", { shouldDirty: true });
         },
       }),
     getExtraInput: (index: number) =>
@@ -152,7 +152,7 @@ export const usePaymentPolicy = ({
         },
       }),
     addExtra: (type: ExtraType) => {
-      if (!isFull) append({ type, text: "" });
+      if (!isFull) append({ key: crypto.randomUUID(), type, text: "" });
     },
     removeExtra: remove,
   };

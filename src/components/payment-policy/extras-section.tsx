@@ -19,8 +19,8 @@ export const ExtrasSection = ({
     </p>
     {fields.length > 0 && (
       <div className={styles.extras}>
-        {fields.map(({ id, type }, index) => {
-          const fieldId = `${uid}-x${id}`;
+        {fields.map(({ key, type }, index) => {
+          const fieldId = `${uid}-x${key}`;
           const isPreparation = type === "prep";
 
           const extraName = isPreparation
@@ -28,7 +28,7 @@ export const ExtrasSection = ({
             : "custom policy";
 
           return (
-            <div key={id}>
+            <div key={key}>
               <div className={styles.extraHead}>
                 <label className={parts.strong} htmlFor={fieldId}>
                   {isPreparation ? "Preparation note" : "Custom policy"}

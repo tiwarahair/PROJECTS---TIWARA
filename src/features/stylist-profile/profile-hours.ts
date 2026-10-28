@@ -5,6 +5,7 @@ import {
   formatWeekdayDate,
   LONG_WEEKDAYS,
   MONDAY_FIRST_WEEKDAYS,
+  getMinutesOfDay,
 } from "../../utils/dates";
 
 const LONG_MONDAY_FIRST = [...LONG_WEEKDAYS.slice(1), LONG_WEEKDAYS[0]];
@@ -63,7 +64,7 @@ export const getOpenStatus = (
   now = new Date(),
 ): OpenStatus => {
   const today = getDayHours(hours, now);
-  const minutesNow = now.getHours() * 60 + now.getMinutes();
+  const minutesNow = getMinutesOfDay(now);
   const opensLater = !!today && minutesNow < toMinutes(today.start_time);
 
   const isOpen =

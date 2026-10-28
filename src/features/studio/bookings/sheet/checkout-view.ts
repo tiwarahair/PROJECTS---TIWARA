@@ -17,8 +17,12 @@ const toPence = (pounds: number) => Math.round(pounds * 100);
 
 export const STILL_SAVING = "Still saving this booking. Try again in a moment.";
 
-export const openCheckout = ({ raw, setState, actions }: SheetContext) => {
-  if (!raw?.remoteId) return actions.showToast(STILL_SAVING);
+export const openCheckout = ({
+  storedBooking,
+  setState,
+  actions,
+}: SheetContext) => {
+  if (!storedBooking?.remoteId) return actions.showToast(STILL_SAVING);
 
   setState({
     bookingStep: "checkout",
@@ -27,15 +31,25 @@ export const openCheckout = ({ raw, setState, actions }: SheetContext) => {
   });
 };
 
-const getCard = ({ raw }: SheetContext) =>
-  raw?.hasSavedCard
-    ? { card: "saved", brand: "", cardLabel: raw.cardLabel ?? "Saved card" }
+const getCard = ({ storedBooking }: SheetContext) =>
+  storedBooking?.hasSavedCard
+    ? {
+        card: "saved",
+        brand: "",
+        cardLabel: storedBooking.cardLabel ?? "Saved card",
+      }
     : { card: null, brand: "" };
 
 /** The booking in the shape CheckoutSheet takes. */
 const getCheckoutBooking = (context: SheetContext): CheckoutBooking => {
-  const { state, booking, raw, paymentMode, addonLines, servicePrice } =
-    context;
+  const {
+    state,
+    booking,
+    storedBooking,
+    paymentMode,
+    addonLines,
+    servicePrice,
+  } = context;
 
   const client = booking.client ? getClient(state, booking.client) : null;
 
@@ -52,18 +66,18 @@ const getCheckoutBooking = (context: SheetContext): CheckoutBooking => {
     mode: paymentMode,
     paid: booking.paidAmount || 0,
     ...(paymentMode === "none" ? { card: null, brand: "" } : getCard(context)),
-    agreedPrice: raw?.agreedPrice ?? booking.price,
-    paidLater: raw?.paidLater,
-    refundableOnline: raw?.refundableOnline,
-    recordedVia: raw?.recordedVia,
+    agreedPrice: storedBooking?.agreedPrice ?? booking.price,
+    paidLater: storedBooking?.paidLater,
+    refundableOnline: storedBooking?.refundableOnline,
+    recordedVia: storedBooking?.recordedVia,
     paidOn: "",
     phone: client?.phone || "",
     email: client?.email || "",
     day: booking.dayLabel,
     time: booking.timeRange,
-    ref: raw?.ref,
-    receiptDate: raw?.startsAt
-      ? formatFullDate(new Date(raw.startsAt))
+    ref: storedBooking?.ref,
+    receiptDate: storedBooking?.startsAt
+      ? formatFullDate(new Date(storedBooking.startsAt))
       : undefined,
     arrived: "",
   };
@@ -108,9 +122,9 @@ const isUndoable = (
 ) => (method === "record" || method === "none") && !refundAuto && !wasCompleted;
 
 export const getCheckoutView = (context: SheetContext) => {
-  const { state, actions, booking, raw } = context;
+  const { state, actions, booking, storedBooking } = context;
   const rebook = () => actions.rebookFrom(booking);
-  const remoteId = raw?.remoteId;
+  const remoteId = storedBooking?.remoteId;
 
   return {
     // done
@@ -142,7 +156,7 @@ export const getCheckoutView = (context: SheetContext) => {
             if (fresh)
               context.setState((current) => mergeBookingRows(current, [fresh]));
           },
-          ...(isUndoable(result, !!raw?.completed)
+          ...(isUndoable(result, !!storedBooking?.completed)
             ? { undo: undoCheckout }
             : {}),
         },

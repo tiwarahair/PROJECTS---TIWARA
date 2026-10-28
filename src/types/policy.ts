@@ -1,8 +1,10 @@
 export type PolicyMode = "none" | "deposit" | "full" | "card";
 
+export type FeeKind = "keep" | "percent";
+
 export interface PolicyFee {
   on: boolean;
-  kind: "pct" | "keep";
+  kind: FeeKind;
   percent: number;
 }
 

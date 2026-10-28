@@ -1,6 +1,11 @@
 import { z } from "zod";
 import { getSocialHandleError } from "../../../../utils/social-handles";
-import { isValidEmail, isValidWebsite } from "../../../../utils/validation";
+import {
+  isValidEmail,
+  isValidWebsite,
+  getFieldFlagger,
+  EMAIL_ERROR,
+} from "../../../../utils/validation";
 import type { StudioProfile } from "../../core/types";
 
 const MIN_PORTFOLIO = 2;
@@ -19,8 +24,7 @@ export const profileSchema = z
     portfolioCount: z.number(),
   })
   .superRefine((values, context) => {
-    const flag = (path: keyof ProfileValues, message: string) =>
-      context.addIssue({ code: "custom", path: [path], message });
+    const flag = getFieldFlagger(context);
 
     SOCIAL_PLATFORMS.forEach((platform) => {
       const error = getSocialHandleError(platform, values[platform]);
@@ -29,7 +33,7 @@ export const profileSchema = z
     });
 
     if (values.email.trim() && !isValidEmail(values.email))
-      flag("email", "Enter an email address, like name@example.co.uk.");
+      flag("email", EMAIL_ERROR);
 
     if (values.site.trim() && !isValidWebsite(values.site))
       flag("site", "Enter a website address, like tiwarashouse.com.");

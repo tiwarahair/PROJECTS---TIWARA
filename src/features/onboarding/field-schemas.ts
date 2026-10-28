@@ -1,7 +1,11 @@
 import { z } from "zod";
 import { checkPassword } from "../../utils/password";
 import type { PasswordCheck } from "../../utils/password";
-import { isValidEmail, isValidMobile } from "../../utils/validation";
+import {
+  EMAIL_ERROR,
+  isValidEmail,
+  isValidMobile,
+} from "../../utils/validation";
 import type { OnboardingForm, OnboardingState } from "./state";
 
 export type ValidationInput = Pick<OnboardingState, "screen" | "audience"> & {
@@ -47,7 +51,7 @@ export const email = z
   .string()
   .trim()
   .min(1, "Enter your email address")
-  .refine(isValidEmail, "Enter a valid email address");
+  .refine(isValidEmail, EMAIL_ERROR);
 
 export const mobile = z
   .string()

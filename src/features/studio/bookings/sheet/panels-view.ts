@@ -17,7 +17,7 @@ export const getPanelsView = ({
   state,
   setState,
   actions: { showToast },
-  raw,
+  storedBooking,
   booking,
   saveBooking,
   resendLink,
@@ -27,9 +27,9 @@ export const getPanelsView = ({
     if (booking.canResend) resendLink();
   },
   copyPaymentLink: () => {
-    if (!raw?.remoteId) return showToast(STILL_SAVING);
+    if (!storedBooking?.remoteId) return showToast(STILL_SAVING);
 
-    copyLaterText(getConfirmUrl(raw.remoteId)).then(
+    copyLaterText(getConfirmUrl(storedBooking.remoteId)).then(
       () => showToast(`Link copied. Send it to ${booking.firstName} yourself.`),
       (error: unknown) => showToast(getCopyError(error)),
     );
@@ -49,7 +49,7 @@ export const getPanelsView = ({
 
     setState({ bookingAddressOn: false });
 
-    if (address === (raw?.address ?? "")) return;
+    if (address === (storedBooking?.address ?? "")) return;
 
     saveBooking({ address }, (remoteId) =>
       setBookingAddress(remoteId, address),

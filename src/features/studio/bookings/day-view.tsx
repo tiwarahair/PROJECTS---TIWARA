@@ -37,7 +37,7 @@ export const DayView = ({ studio, view }: DayViewProps) => {
           <div
             key={top}
             className={joinClassNames(shared.band, shared.dayBand)}
-            style={asStyle({ "--top": top, "--h": height })}
+            style={asStyle({ "--top": top, "--height": height })}
             aria-hidden="true"
           ></div>
         ))}
@@ -71,7 +71,7 @@ export const DayView = ({ studio, view }: DayViewProps) => {
           <button
             key={key}
             className={styles.dayBlocked}
-            style={asStyle({ "--top": top, "--h": height, "--hex": hex })}
+            style={asStyle({ "--top": top, "--height": height, "--hex": hex })}
             onClick={open}
           >
             <Lock
@@ -89,7 +89,7 @@ export const DayView = ({ studio, view }: DayViewProps) => {
             className={styles.dayBooking}
             style={asStyle({
               "--top": top,
-              "--h": height,
+              "--height": height,
               ...getBlockTone(booking),
             })}
             onClick={(event) => {
@@ -116,7 +116,7 @@ export const DayView = ({ studio, view }: DayViewProps) => {
               className={styles.stub}
               style={asStyle({
                 "--top": top,
-                "--h": height,
+                "--height": height,
                 "--stub-bg": background,
                 "--stub-fg": foreground,
                 "--stub-dash": dash,

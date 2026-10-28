@@ -2,6 +2,7 @@ import { getDecoratedBookings } from "./decorate";
 import { getClient, isPastIn } from "../core/model";
 import type { StudioController } from "../core/use-studio";
 import { isUpcomingMatch } from "./filters";
+import { getMinutesOfDay } from "../../../utils/dates";
 
 export const getContext = (studio: StudioController) => {
   const { state, actions } = studio;
@@ -31,10 +32,8 @@ export const getContext = (studio: StudioController) => {
   return {
     studio,
     state,
-    setState: studio.setState,
-    actions,
     now,
-    nowMinutes: now.getHours() * 60 + now.getMinutes(),
+    nowMinutes: getMinutesOfDay(now),
     upcoming,
     isList,
     isPast,

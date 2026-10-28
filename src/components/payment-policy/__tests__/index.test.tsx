@@ -142,6 +142,37 @@ describe("PaymentPolicy", () => {
     expect(screen.getByRole("button", { name: /Save/ })).toBeEnabled();
   });
 
+  it("keeps the cursor in an additional policy while a save finishes", async () => {
+    let finish: (isSaved: boolean) => void = () => {};
+
+    render(
+      <PaymentPolicy
+        stylistName="Crown & Coil"
+        value={{ ...policy, extras: [{ type: "prep", text: "Clean hair" }] }}
+        onSave={() =>
+          new Promise<boolean>((resolve) => {
+            finish = resolve;
+          })
+        }
+      />,
+    );
+
+    const note = screen.getByLabelText("Preparation note");
+
+    await user.type(note, " please");
+    await settle();
+    await user.click(screen.getByRole("button", { name: "Save policy" }));
+    await settle();
+    await user.click(note);
+    await user.type(note, ".");
+    await act(async () => finish(true));
+    await settle();
+
+    expect(note).toBeInTheDocument();
+    expect(note).toHaveFocus();
+    expect(note).toHaveValue("Clean hair please.");
+  });
+
   it("says how many existing bookings keep their policy", () => {
     render(
       <PaymentPolicy

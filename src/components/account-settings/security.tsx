@@ -37,10 +37,10 @@ export const SettingsSecurity = ({
 
   const passwordFields = [
     {
-      key: "next" as const,
+      key: "newPassword" as const,
       label: "New password",
       autoComplete: "new-password",
-      error: passwordErrors.next,
+      error: passwordErrors.newPassword,
     },
     {
       key: "confirm" as const,
@@ -72,7 +72,7 @@ export const SettingsSecurity = ({
             <div className={styles.pwFields}>
               {passwordFields.map(({ key, label, autoComplete, error }) => {
                 const id = `${uid}-${key}`;
-                const isNew = key === "next";
+                const isNew = key === "newPassword";
 
                 return (
                   <div key={key}>
