@@ -270,7 +270,8 @@ export const SecuritySection = ({
           )}
         </div>
       </div>
-      <h2 className={ui.headingTop}>Connected accounts</h2>
+      {/* COMMENTING OUT 'connected accounts' for now, since we don't have the backend for it yet. We can add it back in later for google at least when we do (apple is out of scope) */}
+      {/* <h2 className={ui.headingTop}>Connected accounts</h2>
       <p className={styles.intro}>
         Log in with Google or Apple instead of a password.
       </p>
@@ -315,7 +316,7 @@ export const SecuritySection = ({
             </div>
           );
         })}
-      </div>
+      </div> */}
       <h2 className={ui.headingTop}>Devices</h2>
       <div className={styles.devices}>
         <div className={ui.itemText}>
