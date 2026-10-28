@@ -3,4 +3,3 @@ export { getVariationErrors, getWizardBase } from "./adjust";
 export { getWizardAddons } from "./addons-view";
 export { getOwnEditor } from "./own-view";
 export { getReview } from "./review-view";
-export { getVariationRows } from "./variations-view";

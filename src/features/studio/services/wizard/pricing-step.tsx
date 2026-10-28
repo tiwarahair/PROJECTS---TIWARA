@@ -1,4 +1,4 @@
-import type { CSSProperties } from "react";
+import type { FocusEvent } from "react";
 import { ChevronDown, Plus } from "lucide-react";
 import { joinClassNames } from "../../../../utils/class-names";
 import { VariationCard } from "./parts";
@@ -6,8 +6,6 @@ import type { WizardForm } from "./use-wizard-form";
 import type { WizardView } from "./view";
 import parts from "../../../../styles/features/studio/services/wizard/parts.module.css";
 import styles from "../../../../styles/features/studio/services/wizard/pricing-step.module.css";
-
-const asStyle = (values: Record<string, string>) => values as CSSProperties;
 
 interface PricingStepProps {
   view: WizardView;
@@ -19,6 +17,14 @@ export const PricingStep = ({ view, form }: PricingStepProps) => {
   const { draft, own } = view;
   const { errors } = form.formState;
 
+  const checkDurationOnLeave = ({
+    currentTarget,
+    relatedTarget,
+  }: FocusEvent<HTMLDivElement>) => {
+    if (!currentTarget.contains(relatedTarget))
+      void form.trigger("durationHours");
+  };
+
   const baseErrors = [
     errors.price?.message,
     errors.durationHours?.message,
@@ -26,93 +32,49 @@ export const PricingStep = ({ view, form }: PricingStepProps) => {
 
   return (
     <>
-      {!view.isPricingCollapsed && (
-        <>
-          <div className={styles.sectionTitle}>Base price &amp; duration</div>
-          <div className={styles.baseBox}>
-            <div className={styles.stack16}>
-              <label className={parts.block}>
-                <span className={parts.fieldLabel}>Price</span>
-                <span
-                  className={joinClassNames(
-                    styles.priceBox,
-                    view.flash.price && parts.flash,
-                  )}
-                  data-flash="1"
-                >
-                  <span className={styles.pound}>£</span>
-                  <input
-                    className={styles.priceInput}
-                    value={draft.price}
-                    onChange={view.onPrice}
-                    inputMode="decimal"
-                    placeholder="0"
-                    aria-label="Base price"
-                  />
-                </span>
-              </label>
-              <div>
-                <span className={parts.fieldLabel}>Duration</span>
-                <div
-                  className={joinClassNames(
-                    styles.durationGrid,
-                    view.flash.price && parts.flash,
-                  )}
-                  data-flash="1"
-                >
-                  <span className={styles.selectWrap}>
-                    <select
-                      className={styles.select}
-                      value={view.durationHourValue}
-                      onChange={view.onDurationHours}
-                      aria-label="Hours"
-                    >
-                      {view.hourOptions.map(({ value, label }) => (
-                        <option key={value} value={value}>
-                          {label}
-                        </option>
-                      ))}
-                    </select>
-                    <ChevronDown
-                      className={styles.selectChevron}
-                      size={16}
-                      strokeWidth={1.7}
-                    />
-                  </span>
-                  <span className={styles.selectWrap}>
-                    <select
-                      className={styles.select}
-                      value={view.durationMinuteValue}
-                      onChange={view.onDurationMinutes}
-                      aria-label="Minutes"
-                    >
-                      {view.minuteOptions.map(({ value, label }) => (
-                        <option key={value} value={value}>
-                          {label}
-                        </option>
-                      ))}
-                    </select>
-                    <ChevronDown
-                      className={styles.selectChevron}
-                      size={16}
-                      strokeWidth={1.7}
-                    />
-                  </span>
-                </div>
-              </div>
-              <label className={parts.block}>
-                <span className={parts.fieldLabel}>Extra time after</span>
+      <>
+        <div className={styles.sectionTitle}>Base price &amp; duration</div>
+        <div className={styles.baseBox}>
+          <div className={styles.stack16}>
+            <label className={parts.block}>
+              <span className={parts.fieldLabel}>Price</span>
+              <span
+                className={joinClassNames(
+                  styles.priceBox,
+                  view.flash.price && parts.flash,
+                )}
+                data-flash="1"
+              >
+                <span className={styles.pound}>£</span>
+                <input
+                  className={styles.priceInput}
+                  value={draft.price}
+                  onChange={view.onPrice}
+                  onBlur={() => void form.trigger("price")}
+                  inputMode="decimal"
+                  placeholder="0"
+                  aria-label="Base price"
+                />
+              </span>
+            </label>
+            <div>
+              <span className={parts.fieldLabel}>Duration</span>
+              <div
+                className={joinClassNames(
+                  styles.durationGrid,
+                  view.flash.price && parts.flash,
+                )}
+                data-flash="1"
+                onBlur={checkDurationOnLeave}
+              >
                 <span className={styles.selectWrap}>
                   <select
-                    className={joinClassNames(
-                      styles.extraSelect,
-                      view.isExtraTyped && styles.extraTyped,
-                    )}
-                    value={view.extraValue}
-                    onChange={view.onExtra}
-                    aria-label="Extra time after"
+                    className={styles.select}
+                    value={view.durationHourValue}
+                    onChange={view.onDurationHours}
+                    aria-label="Hours"
                   >
-                    {view.extraOptions.map(({ value, label }) => (
+                    {view.hourOptions.map(({ value, label }) => (
                       <option key={value} value={value}>
                         {label}
                       </option>
@@ -124,85 +86,61 @@ export const PricingStep = ({ view, form }: PricingStepProps) => {
                     strokeWidth={1.7}
                   />
                 </span>
-                <span className={styles.extraNote}>
-                  Blocked out for clean-down.
+                <span className={styles.selectWrap}>
+                  <select
+                    className={styles.select}
+                    value={view.durationMinuteValue}
+                    onChange={view.onDurationMinutes}
+                    aria-label="Minutes"
+                  >
+                    {view.minuteOptions.map(({ value, label }) => (
+                      <option key={value} value={value}>
+                        {label}
+                      </option>
+                    ))}
+                  </select>
+                  <ChevronDown
+                    className={styles.selectChevron}
+                    size={16}
+                    strokeWidth={1.7}
+                  />
                 </span>
-                {view.isExtraOverride && (
-                  <span className={styles.extraHelp}>{view.extraHelp}</span>
-                )}
-              </label>
+              </div>
             </div>
-          </div>
-        </>
-      )}
-      {view.isPricingCollapsed && (
-        <div className={styles.collapsed}>
-          <div className={styles.collapsedTitle}>Base price &amp; duration</div>
-          <div
-            className={joinClassNames(
-              styles.segments,
-              view.isWide && styles.segmentsWrap,
-            )}
-          >
-            <div className={styles.pricePill}>
-              <span className={styles.pillPound}>£</span>
-              <input
-                className={styles.pillInput}
-                value={draft.price}
-                onChange={view.onPrice}
-                inputMode="decimal"
-                aria-label="Base price"
-                // runtime: the input grows with the typed price
-                style={asStyle({ "--width": view.priceWidth })}
-              />
-            </div>
-            <div className={styles.pill}>
-              <select
-                className={styles.pillHours}
-                value={view.durationHourValue}
-                onChange={view.onDurationHours}
-                aria-label="Hours"
-              >
-                {view.hourOptions.map(({ value, label }) => (
-                  <option key={value} value={value}>
-                    {label}
-                  </option>
-                ))}
-              </select>
-              <span className={styles.pillDivider}></span>
-              <select
-                className={styles.pillMinutes}
-                value={view.durationMinuteValue}
-                onChange={view.onDurationMinutes}
-                aria-label="Minutes"
-              >
-                {view.minuteOptions.map(({ value, label }) => (
-                  <option key={value} value={value}>
-                    {label}
-                  </option>
-                ))}
-              </select>
-            </div>
-            <div className={styles.pill} title="Extra time after">
-              <select
-                className={joinClassNames(
-                  styles.pillExtra,
-                  view.isExtraTyped && styles.extraTyped,
-                )}
-                value={view.extraValue}
-                onChange={view.onExtra}
-                aria-label="Extra time after"
-              >
-                {view.extraOptionsShort.map(({ value, label }) => (
-                  <option key={value} value={value}>
-                    {label}
-                  </option>
-                ))}
-              </select>
-            </div>
+            <label className={parts.block}>
+              <span className={parts.fieldLabel}>Extra time after</span>
+              <span className={styles.selectWrap}>
+                <select
+                  className={joinClassNames(
+                    styles.extraSelect,
+                    view.isExtraTyped && styles.extraTyped,
+                  )}
+                  value={view.extraValue}
+                  onChange={view.onExtra}
+                  aria-label="Extra time after"
+                >
+                  {view.extraOptions.map(({ value, label }) => (
+                    <option key={value} value={value}>
+                      {label}
+                    </option>
+                  ))}
+                </select>
+                <ChevronDown
+                  className={styles.selectChevron}
+                  size={16}
+                  strokeWidth={1.7}
+                />
+              </span>
+              <span className={styles.extraNote}>
+                Blocked out for clean-down.
+              </span>
+              {view.isExtraOverride && (
+                <span className={styles.extraHelp}>{view.extraHelp}</span>
+              )}
+            </label>
           </div>
         </div>
-      )}
+      </>
       {baseErrors.map((message) => (
         <div key={message} className={parts.varError} role="alert">
           {message}
@@ -215,7 +153,7 @@ export const PricingStep = ({ view, form }: PricingStepProps) => {
         <VariationCard
           view={view}
           title="Add size options"
-          subtitle="Adjust price and time by size."
+          subtitle="Adjust price and time by size, click to edit."
           aria="Toggle size options"
           head={view.sizeHead}
           isOn={draft.sizesOn}
@@ -227,7 +165,7 @@ export const PricingStep = ({ view, form }: PricingStepProps) => {
         <VariationCard
           view={view}
           title="Add length options"
-          subtitle="Adjust price and time by hair length."
+          subtitle="Adjust price and time by hair length, click to edit."
           aria="Toggle length options"
           head="Length"
           isOn={draft.lengthsOn}
@@ -242,18 +180,29 @@ export const PricingStep = ({ view, form }: PricingStepProps) => {
           Choices clients pick from when they book, like parting. Each option
           can add to the price or time.
         </div>
-        {own.rows.map(({ key, name, meta, edit, remove }) => (
-          <div key={key} className={styles.ownRow}>
-            <span className={parts.grow}>
-              <span className={styles.ownName}>{name}</span>
-              <span className={styles.ownMeta}>{meta}</span>
-            </span>
-            <button className={styles.ownEdit} type="button" onClick={edit}>
-              Edit
-            </button>
-            <button className={styles.ownDelete} type="button" onClick={remove}>
-              Delete
-            </button>
+        {own.rows.map(({ key, name, meta, error, edit, remove }) => (
+          <div key={key}>
+            <div className={styles.ownRow}>
+              <span className={parts.grow}>
+                <span className={styles.ownName}>{name}</span>
+                <span className={styles.ownMeta}>{meta}</span>
+              </span>
+              <button className={styles.ownEdit} type="button" onClick={edit}>
+                Edit
+              </button>
+              <button
+                className={styles.ownDelete}
+                type="button"
+                onClick={remove}
+              >
+                Delete
+              </button>
+            </div>
+            {!!error && (
+              <div className={parts.varError} role="alert">
+                {error}
+              </div>
+            )}
           </div>
         ))}
         {!own.editor && (

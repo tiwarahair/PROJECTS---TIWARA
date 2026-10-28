@@ -110,6 +110,80 @@ describe("Studio → service wizard", () => {
     expect(screen.getByText("Choose the service type.")).toBeInTheDocument();
   });
 
+  it("size options are chips that each open a sheet to edit and save", async () => {
+    await openWizard();
+    await pickSuggestion("Knotless braids");
+    await user.click(getContinue());
+    await screen.findByText("Pricing");
+
+    expect(screen.getAllByLabelText("Base price")).toHaveLength(1);
+
+    const getChip = (name: RegExp) =>
+      within(screen.getByRole("group", { name: "Size / thickness" })).getByRole(
+        "button",
+        { name },
+      );
+
+    expect(getChip(/^Small, \+£45 \+1h$/)).toBeInTheDocument();
+
+    await user.click(getChip(/^Medium$/));
+
+    const sheet = within(getLabelled("Option dialog"));
+
+    expect(sheet.getByLabelText("Name")).toHaveValue("Size / thickness");
+    expect(sheet.getByLabelText("Option")).toHaveValue("Medium");
+
+    await user.type(sheet.getByLabelText("Medium price in pounds"), "10");
+    await user.selectOptions(sheet.getByLabelText("Medium minutes"), "30");
+    await user.click(sheet.getByRole("button", { name: "Save" }));
+
+    expect(getChip(/^Medium, \+£10 \+30m$/)).toBeInTheDocument();
+
+    await user.click(getChip(/^Large/));
+    await user.type(screen.getByLabelText("Large price in pounds"), "5");
+    await user.click(screen.getByRole("button", { name: "Cancel" }));
+
+    expect(getChip(/^Large, −£10 −30m$/)).toBeInTheDocument();
+
+    await user.click(getChip(/^Jumbo/));
+    await user.click(screen.getByRole("switch", { name: "Offer this size" }));
+    await user.click(screen.getByRole("button", { name: "Save" }));
+
+    expect(getChip(/^Jumbo$/)).toBeInTheDocument();
+    expect(getChip(/^Jumbo$/)).toHaveFocus();
+
+    await user.click(getChip(/^Medium/));
+    await user.selectOptions(screen.getByLabelText("Medium minutes"), "5");
+    await user.click(screen.getByRole("button", { name: "Save" }));
+
+    expect(getChip(/^Medium, \+£10 \+5m$/)).toBeInTheDocument();
+  });
+
+  it("pricing errors wait for the field to be left or Continue", async () => {
+    await openWizard();
+    await pickSuggestion("Knotless braids");
+    await user.click(getContinue());
+    await screen.findByText("Pricing");
+
+    const price = screen.getByLabelText("Base price");
+
+    await user.clear(price);
+
+    expect(screen.queryByText("Enter a price.")).not.toBeInTheDocument();
+
+    expect(
+      screen.queryByText("Add how long it takes."),
+    ).not.toBeInTheDocument();
+
+    await user.tab();
+
+    expect(await screen.findByText("Enter a price.")).toBeInTheDocument();
+
+    expect(
+      screen.queryByText("Add how long it takes."),
+    ).not.toBeInTheDocument();
+  });
+
   it("a suggestion fills the form and the wizard adds the service", async () => {
     await openWizard();
     await pickSuggestion("Knotless braids");

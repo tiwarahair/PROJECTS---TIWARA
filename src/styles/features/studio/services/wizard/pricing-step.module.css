@@ -131,120 +131,6 @@
   line-height: 1.4;
 }
 
-.collapsed {
-  flex: 0 0 auto;
-  display: flex;
-  flex-direction: column;
-  align-items: stretch;
-  gap: 10px;
-  background: transparent;
-  border: 1px solid var(--border-subtle);
-  border-radius: var(--radius-md);
-  padding: 12px 14px;
-  animation: rowin 0.22s cubic-bezier(0.2, 0.8, 0.2, 1) both;
-}
-
-.collapsedTitle {
-  font-size: 14.5px;
-  font-weight: 500;
-}
-
-.segments {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  flex-wrap: nowrap;
-  min-width: 0;
-}
-
-.segmentsWrap {
-  flex-wrap: wrap;
-}
-
-.pricePill {
-  flex: 0 0 auto;
-  display: flex;
-  align-items: center;
-  background: var(--neutral-100, #fdfbf5);
-  border: 1px solid var(--border-subtle);
-  border-radius: var(--radius-sm);
-  height: 32px;
-  padding: 0 4px 0 10px;
-}
-
-.pillPound {
-  font-size: 14.5px;
-  color: var(--text-secondary);
-  font-weight: 500;
-}
-
-.pillInput {
-  min-width: 34px;
-  border: none;
-  background: none;
-  padding: 0 3px;
-  font-size: 16px;
-  font-weight: 600;
-  text-align: center;
-  outline: none;
-  color: var(--text-primary);
-  field-sizing: content;
-  width: var(--width);
-}
-
-.pill {
-  flex: 0 0 auto;
-  display: flex;
-  align-items: center;
-  background: var(--neutral-100, #fdfbf5);
-  border: 1px solid var(--border-subtle);
-  border-radius: var(--radius-sm);
-  height: 32px;
-  overflow: hidden;
-}
-
-.pillHours {
-  border: none;
-  background: none;
-  height: 32px;
-  padding: 0 2px 0 8px;
-  font-size: 16px;
-  font-weight: 600;
-  color: var(--text-primary);
-  font-family: inherit;
-  outline: none;
-}
-
-.pillDivider {
-  width: 1px;
-  height: 16px;
-  background: var(--border-subtle);
-}
-
-.pillMinutes {
-  border: none;
-  background: none;
-  height: 32px;
-  padding: 0 6px 0 8px;
-  font-size: 16px;
-  font-weight: 600;
-  color: var(--text-primary);
-  font-family: inherit;
-  outline: none;
-}
-
-.pillExtra {
-  border: none;
-  background: none;
-  height: 32px;
-  padding: 0 6px;
-  font-size: 16px;
-  font-weight: 600;
-  font-family: inherit;
-  outline: none;
-  color: var(--text-secondary);
-}
-
 .customTitle {
   font-family: "Schibsted Grotesk", sans-serif;
   font-size: 18px;
@@ -374,7 +260,7 @@
   opacity: 0.45;
 }
 
-/* after .extraSelect and .pillExtra, so a typed value wins */
+/* after .extraSelect, so a typed value wins */
 
 .extraTyped {
   color: var(--text-primary);

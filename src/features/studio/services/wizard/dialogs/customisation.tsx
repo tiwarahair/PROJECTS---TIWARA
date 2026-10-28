@@ -1,4 +1,4 @@
-import { X } from "lucide-react";
+import { ChevronDown, X } from "lucide-react";
 import { joinClassNames } from "../../../../../utils/class-names";
 import {
   getDialogPlacement,
@@ -7,8 +7,6 @@ import {
 import type { WizardView } from "../view";
 import shared from "../../../../../styles/features/studio/services/wizard/dialogs/index.module.css";
 import styles from "../../../../../styles/features/studio/services/wizard/dialogs/customisation.module.css";
-
-const OWN_MINUTES = ["0", "5", "10", "15", "20", "30", "45", "60", "90", "120"];
 
 export interface CustomisationDialogProps {
   view: WizardView;
@@ -56,7 +54,8 @@ export const CustomisationDialog = ({ view }: CustomisationDialogProps) => {
           <span>Option</span>
           <span></span>
           <span>£</span>
-          <span>Time</span>
+          <span>Hours</span>
+          <span>Mins</span>
           <span></span>
         </div>
         {own.options.map((option, index) => (
@@ -93,19 +92,46 @@ export const CustomisationDialog = ({ view }: CustomisationDialogProps) => {
                 inputMode="decimal"
                 aria-label={option.priceAria}
               />
-              <select
-                className={styles.optionTime}
-                value={option.minutes}
-                onChange={option.onMinutes}
-                onBlur={option.blur}
-                aria-label={option.minutesAria}
-              >
-                {OWN_MINUTES.map((minutes) => (
-                  <option key={minutes} value={minutes}>
-                    {minutes}
-                  </option>
-                ))}
-              </select>
+              <span className={styles.timeWrap}>
+                <select
+                  className={styles.optionTime}
+                  value={option.hours}
+                  onChange={option.onHours}
+                  onBlur={option.blur}
+                  aria-label={option.hoursAria}
+                >
+                  {option.hourOptions.map(({ value, label }) => (
+                    <option key={value} value={value}>
+                      {label}
+                    </option>
+                  ))}
+                </select>
+                <ChevronDown
+                  className={styles.timeChevron}
+                  size={14}
+                  strokeWidth={1.7}
+                />
+              </span>
+              <span className={styles.timeWrap}>
+                <select
+                  className={styles.optionTime}
+                  value={option.minutePart}
+                  onChange={option.onMinutePart}
+                  onBlur={option.blur}
+                  aria-label={option.minutesAria}
+                >
+                  {option.minuteOptions.map(({ value, label }) => (
+                    <option key={value} value={value}>
+                      {label}
+                    </option>
+                  ))}
+                </select>
+                <ChevronDown
+                  className={styles.timeChevron}
+                  size={14}
+                  strokeWidth={1.7}
+                />
+              </span>
               {option.canRemove && (
                 <button
                   className={styles.removeOption}

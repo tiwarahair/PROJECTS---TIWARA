@@ -11,7 +11,9 @@ import {
   isOwnNegative,
 } from "./adjust";
 import type { WizardBase } from "./adjust";
+import { getHourOptions, getMinuteOptions } from "./time-options";
 import { setLatestWizard } from "./context";
+import { getDeltaLabel } from "../../../booking/logic/pricing";
 
 const makeOption = (): OwnOption => ({
   label: "",
@@ -21,19 +23,36 @@ const makeOption = (): OwnOption => ({
 
 const getMeta = ({ options }: { options: OwnOption[] }) =>
   options
-    .map((option) => {
-      const price = parseFloat(option.priceDelta) || 0;
-      const minutes = parseInt(option.minutesDelta) || 0;
-
-      return (
-        option.label +
-        (price ? (price < 0 ? " −£" : " +£") + Math.abs(price) : "") +
-        (minutes
-          ? `${(minutes < 0 ? " −" : " +") + Math.abs(minutes)} min`
-          : "")
-      );
-    })
+    .map(({ label, priceDelta, minutesDelta }) =>
+      [
+        label,
+        getDeltaLabel(
+          {
+            priceDelta: parseFloat(priceDelta) || 0,
+            minutesDelta: parseInt(minutesDelta) || 0,
+          },
+          true,
+        ),
+      ]
+        .filter(Boolean)
+        .join(" "),
+    )
     .join(" · ");
+
+/** The first option whose take-off is now bigger than the base */
+const getGroupError = (
+  { options }: { options: OwnOption[] },
+  base: WizardBase,
+) => {
+  for (const option of options) {
+    const { priceError, timeError } = getOwnErrors(option, base);
+
+    if (priceError || timeError)
+      return `${option.label}: ${priceError || timeError}`;
+  }
+
+  return "";
+};
 
 const getOptionRows = (
   { actions, serviceActions }: StudioController,
@@ -59,15 +78,30 @@ const getOptionRows = (
       setWizard({ ownEdit: { ...editor, options: next, ...extra } });
     };
 
+    const totalMinutes = Math.round(parseFloat(minutes) || 0);
+    const hourPart = Math.floor(totalMinutes / 60);
+    const minutePart = totalMinutes % 60;
+
+    const putMinutes = (next: number) =>
+      put({
+        negative: isNegativeValue,
+        minutesDelta: getSigned(String(next), isNegativeValue),
+      });
+
     return {
       key: `o${index}`,
       label: option.label,
       price,
       minutes,
+      hours: String(hourPart),
+      minutePart: String(minutePart),
+      hourOptions: getHourOptions(String(hourPart), true),
+      minuteOptions: getMinuteOptions(String(minutePart), true),
       canRemove: editor.options.length > 2,
       ...getSign(isNegativeValue),
       priceAria: `${name} price in pounds`,
-      minutesAria: `${name} time in minutes`,
+      hoursAria: `${name} hours`,
+      minutesAria: `${name} minutes`,
       flip: () => {
         const next = !isNegativeValue;
 
@@ -104,11 +138,10 @@ const getOptionRows = (
           negative: isNegativeValue,
           priceDelta: getSigned(event.target.value, isNegativeValue),
         }),
-      onMinutes: (event: ChangeEvent<HTMLSelectElement>) =>
-        put({
-          negative: isNegativeValue,
-          minutesDelta: getSigned(event.target.value, isNegativeValue),
-        }),
+      onHours: (event: ChangeEvent<HTMLSelectElement>) =>
+        putMinutes(Number(event.target.value) * 60 + minutePart),
+      onMinutePart: (event: ChangeEvent<HTMLSelectElement>) =>
+        putMinutes(hourPart * 60 + Number(event.target.value)),
       remove: () =>
         setWizard({
           ownEdit: {
@@ -137,6 +170,7 @@ export const getOwnEditor = (
       key: group.name + index,
       name: group.name,
       meta: getMeta(group),
+      error: getGroupError(group, base),
       edit: () =>
         setWizard({
           ownEdit: {

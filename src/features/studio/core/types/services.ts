@@ -145,6 +145,11 @@ export interface WizardState {
   pickGroup?: boolean;
   newCategory?: CategoryDraft | null;
   ownEdit?: OwnEditDraft | null;
+  variationEdit?: {
+    key: "sizes" | "lengths";
+    index: number;
+    row: VariationRow;
+  } | null;
   pendingAddons?: StudioAddon[];
   addonCategory?: string | null;
   subcategoryTipOpen?: boolean;

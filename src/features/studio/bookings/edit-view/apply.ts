@@ -5,6 +5,7 @@ import { updateStudioBooking } from "../../../../lib/studio-api/booking-writes";
 import { toStartsAt } from "../records";
 import { saveToBooking } from "../save";
 import type { EditContext } from "./context";
+import { getClashName } from "./time";
 
 const toPence = (pounds: number) => Math.round(pounds * 100);
 
@@ -73,7 +74,7 @@ export const getApplyView = (context: EditContext) => {
     if (clashes.length && !memo.clashOk && firstClash) {
       const who =
         firstClash.kind === "booking" && firstClash.booking
-          ? `${firstClash.booking.client}'s ${firstClash.booking.service}`
+          ? `${getClashName(state, firstClash)}'s ${firstClash.booking.service}`
           : firstClash.block?.reason || "blocked time";
 
       const clashTime = hhmm(draft.time);

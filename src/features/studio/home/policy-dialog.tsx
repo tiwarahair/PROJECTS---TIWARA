@@ -5,6 +5,7 @@ import {
   getDialogPlacement,
   getOverlayAnimation,
 } from "../../../components/overlay";
+import { useFocusLoop } from "../../../hooks/use-focus-loop";
 import { joinClassNames } from "../../../utils/class-names";
 import type { StudioController } from "../core/use-studio";
 import { closePolicyNudge } from "./nudge";
@@ -43,6 +44,8 @@ export const PolicyDialog = ({ studio }: PolicyDialogProps) => {
     }, 210);
   };
 
+  useFocusLoop(boxRef);
+
   const latestClose = useRef(close);
 
   latestClose.current = close;
@@ -50,26 +53,7 @@ export const PolicyDialog = ({ studio }: PolicyDialogProps) => {
   useEffect(() => {
     primaryRef.current?.focus();
 
-    const keepFocusInside = (event: KeyboardEvent) => {
-      const buttons = [...(boxRef.current?.querySelectorAll("button") ?? [])];
-      const first = buttons[0];
-      const last = buttons.at(-1);
-
-      const isLeaving = event.shiftKey
-        ? document.activeElement === first
-        : document.activeElement === last;
-
-      if (!first || !last) return;
-
-      if (isLeaving || !boxRef.current?.contains(document.activeElement)) {
-        event.preventDefault();
-        (event.shiftKey ? last : first).focus();
-      }
-    };
-
     const handleKey = (event: KeyboardEvent) => {
-      if (event.key === "Tab") keepFocusInside(event);
-
       if (event.key !== "Escape") return;
 
       event.stopPropagation();

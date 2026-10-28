@@ -1,4 +1,4 @@
-import { useEffect } from "react";
+import { useCallback, useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import type { StudioController } from "../../core/use-studio";
@@ -38,13 +38,18 @@ export const useWizardForm = ({ state }: StudioController) => {
   const isOpen = !!wizard && !state.out;
   const { name, typeId, price, durationHours, durationMinutes } = values;
 
-  useEffect(() => {
-    if (!isOpen) reset();
-  }, [isOpen, reset]);
+  const resetStep = useCallback(
+    () => reset(undefined, { keepErrors: false, keepIsSubmitted: false }),
+    [reset],
+  );
 
   useEffect(() => {
-    if (!isEdit) reset();
-  }, [wizard?.step, wizard?.review, isEdit, reset]);
+    if (!isOpen) resetStep();
+  }, [isOpen, resetStep]);
+
+  useEffect(() => {
+    if (!isEdit) resetStep();
+  }, [wizard?.step, wizard?.review, isEdit, resetStep]);
 
   useEffect(() => {
     if (isSubmitted) void trigger();

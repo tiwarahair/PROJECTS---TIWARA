@@ -1,23 +1,22 @@
 import type { ChangeEvent } from "react";
 import { hhmm } from "../../core/format";
+import { getClient } from "../../core/model";
 import { HOUR_OPTIONS, MINUTE_OPTIONS } from "../add/types";
 import type { EditContext } from "./context";
 
-const getClashText = (
-  time: number,
-  firstClash: EditContext["clashes"][number] | undefined,
-) => {
+type Clash = EditContext["clashes"][number];
+
+export const getClashName = (state: EditContext["state"], clash: Clash) =>
+  clash.kind === "booking" && clash.booking
+    ? getClient(state, clash.booking.client).name
+    : clash.block?.reason || "blocked";
+
+const getClashText = ({ state, draft, clashes }: EditContext) => {
+  const [firstClash] = clashes;
+
   if (!firstClash) return "";
 
-  const clashTime = hhmm(time);
-
-  // shows the clashing booking's client id here, not the name (kept on purpose)
-  const clashWho =
-    firstClash.kind === "booking"
-      ? ` · ${firstClash.booking?.client}`
-      : ` · ${firstClash.block?.reason || "blocked"}`;
-
-  return `Not available at ${clashTime}${clashWho}`;
+  return `Not available at ${hhmm(draft.time)} · ${getClashName(state, firstClash)}`;
 };
 
 const getTimeOptions = ({ draft, open, close, span }: EditContext) => {
@@ -81,7 +80,7 @@ export const getTimeView = (context: EditContext) => {
     onTime: (event: ChangeEvent<HTMLSelectElement>) =>
       patchServiceEdit({ time: Number(event.target.value) }),
     hasClash: clashes.length > 0,
-    clashText: getClashText(draft.time, clashes[0]),
+    clashText: getClashText(context),
     nextFree: getNextFree(context),
     durationHours: String(Math.floor(duration / 60)),
     durationMinutes: String(duration % 60),
