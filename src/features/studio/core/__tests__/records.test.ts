@@ -294,4 +294,37 @@ describe("toStudioPatch", () => {
       travel: 0,
     });
   });
+
+  it("puts each photo on its service, in portfolio order, and saves the ids back", () => {
+    const photo = (id: string, sort: number, serviceId: string | null) => ({
+      id,
+      stylist_id: "stylist-1",
+      service_id: serviceId,
+      path: `stylist-1/portfolio/${id}-full.jpg`,
+      sort,
+      created_at: "",
+    });
+
+    const { services = [] } = toStudioPatch(
+      getStudioRow({
+        portfolio_photos: [
+          photo("late", 2, "s-1"),
+          photo("loose", 1, null),
+          photo("early", 0, "s-1"),
+        ],
+      }),
+      getInitialStudioState(),
+    );
+
+    const [service] = services;
+
+    if (!service) throw new Error("the studio row has a service");
+
+    expect(service.photoIds).toEqual(["early", "late"]);
+
+    expect(fromStudioService(service, "stylist-1", 0).photoIds).toEqual([
+      "early",
+      "late",
+    ]);
+  });
 });

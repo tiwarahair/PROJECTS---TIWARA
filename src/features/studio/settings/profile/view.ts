@@ -7,6 +7,8 @@ import {
   replacePhoto,
 } from "./photos";
 import { getSavedSettings } from "../../core/unsaved";
+import { PORTFOLIO_LIMIT } from "../../core/constants";
+import { getPhotoServiceName } from "./attach-view";
 import type { StudioController } from "../../core/use-studio";
 
 export const getProfileView = (studio: StudioController) => {
@@ -43,12 +45,13 @@ export const getProfileView = (studio: StudioController) => {
     portfolio: state.portfolio.map(({ id, src }) => ({
       key: id,
       src,
+      serviceName: getPhotoServiceName(state, id),
       remove: () => removePortfolioItem(context, id),
     })),
-    portCount: `${state.portfolio.length} of 20`,
-    canAddPhotos: state.portfolio.length < 20,
+    portCount: `${state.portfolio.length} of ${PORTFOLIO_LIMIT}`,
+    canAddPhotos: state.portfolio.length < PORTFOLIO_LIMIT,
     onPortFiles: (event: ChangeEvent<HTMLInputElement>) => {
-      const room = 20 - state.portfolio.length;
+      const room = PORTFOLIO_LIMIT - state.portfolio.length;
       const files = Array.from(event.target.files || []).slice(0, room);
 
       event.target.value = "";

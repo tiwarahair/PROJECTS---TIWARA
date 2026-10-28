@@ -1,7 +1,10 @@
-import { ImageIcon, Sparkles } from "lucide-react";
+import { useRef } from "react";
+import { ImageIcon, Sparkles, X } from "lucide-react";
+import { ResponsiveImage } from "../../../../components/responsive-image";
 import { SearchSelect } from "../../../../components/search-select";
 import { joinClassNames } from "../../../../utils/class-names";
 import { Swatches } from "../catalog-sheets";
+import { SERVICE_PHOTO_LIMIT } from "../../core/constants";
 import type { WizardForm } from "./use-wizard-form";
 import type { WizardView } from "./view";
 import parts from "../../../../styles/features/studio/services/wizard/parts.module.css";
@@ -16,6 +19,7 @@ interface DetailsStepProps {
 export const DetailsStep = ({ view, form }: DetailsStepProps) => {
   const { errors } = form.formState;
   const { draft, newCategory } = view;
+  const imageInput = useRef<HTMLInputElement>(null);
 
   return (
     <div className={styles.stack12}>
@@ -169,20 +173,57 @@ export const DetailsStep = ({ view, form }: DetailsStepProps) => {
         <span className={parts.fieldLabel}>
           Images <span className={styles.optional}>(optional)</span>
         </span>
-        <div className={styles.images}>
-          <ImageIcon
-            className={parts.block}
-            size={22}
-            strokeWidth={1.8}
-            color="var(--text-primary)"
-          />
-          <span className={styles.imagesTitle}>Add your images here</span>
-          <button className={styles.chooseFile} onClick={view.pickImages}>
-            Choose a file
-          </button>
-        </div>
+        <input
+          className={styles.hiddenInput}
+          type="file"
+          accept="image/*"
+          multiple={true}
+          ref={imageInput}
+          onChange={view.onImageFiles}
+          aria-label="Service images"
+        />
+        {view.photos.length > 0 && (
+          <div className={styles.photos}>
+            {view.photos.map(({ key, src, remove }) => (
+              <div key={key} className={styles.photo}>
+                <ResponsiveImage
+                  className={styles.photoImage}
+                  src={src}
+                  sizes="96px"
+                  alt="Service photo"
+                />
+                <button
+                  type="button"
+                  className={styles.removePhoto}
+                  onClick={remove}
+                  aria-label="Remove photo"
+                >
+                  <X size={13} strokeWidth={2.4} />
+                </button>
+              </div>
+            ))}
+          </div>
+        )}
+        {view.canAddPhotos && (
+          <div className={styles.images}>
+            <ImageIcon
+              className={parts.block}
+              size={22}
+              strokeWidth={1.8}
+              color="var(--text-primary)"
+            />
+            <span className={styles.imagesTitle}>Add your images here</span>
+            <button
+              type="button"
+              className={styles.chooseFile}
+              onClick={() => imageInput.current?.click()}
+            >
+              Choose a file
+            </button>
+          </div>
+        )}
         <div className={styles.fileTypes}>
-          File type .jpg, .png, .avif, .webp · max size 45mb
+          {`Up to ${SERVICE_PHOTO_LIMIT} photos · .jpg, .png, .avif, .webp · max size 45mb · they also go in your portfolio`}
         </div>
       </div>
     </div>

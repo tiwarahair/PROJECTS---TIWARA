@@ -136,3 +136,7 @@ export const TAXONOMY: Taxonomy[] = serviceGroups.map(({ id, name }) => {
 });
 
 export const CATEGORY_COLOURS: CategoryColour[] = categoryColours;
+
+export const PORTFOLIO_LIMIT = 40;
+
+export const SERVICE_PHOTO_LIMIT = 5;

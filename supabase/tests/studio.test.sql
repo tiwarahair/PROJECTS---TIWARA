@@ -124,10 +124,10 @@ select is(
 
 -- photos
 insert into public.portfolio_photos (stylist_id, path, sort)
-select (select one from ids), 'p/' || n, n from generate_series(1, 20) as n;
+select (select one from ids), 'p/' || n, n from generate_series(1, 40) as n;
 select throws_ok(
-  $$insert into public.portfolio_photos (stylist_id, path, sort) values ((select one from ids), 'p/21', 21)$$,
-  'P0001', 'a portfolio holds up to 20 photos', 'portfolios hold up to 20 photos'
+  $$insert into public.portfolio_photos (stylist_id, path, sort) values ((select one from ids), 'p/41', 41)$$,
+  'P0001', 'a portfolio holds up to 40 photos', 'portfolios hold up to 40 photos'
 );
 select lives_ok(
   $$insert into public.portfolio_photos (stylist_id, path, sort) values ((select two from ids), 'p/1', 0)$$,
@@ -166,7 +166,7 @@ select pg_temp.act_as('a1111111-1111-1111-1111-111111111111');
 select throws_ok($$select public.reopen_business()$$, 'P0001', 'this business can no longer be reopened', 'not after 15 days');
 
 reset role;
-select is((select count(*)::int from public.get_due_closure_photos()), 20, 'the clean-up lists the photos to delete first');
+select is((select count(*)::int from public.get_due_closure_photos()), 40, 'the clean-up lists the photos to delete first');
 select public.purge_closed_businesses();
 select ok(
   (select owner_id is null and business_name = 'Closed business' and location is null from public.stylists where id = (select one from ids))

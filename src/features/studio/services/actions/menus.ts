@@ -92,6 +92,7 @@ export const createMenuActions = (
               sizes: (service.sizes || []).map((row) => ({ ...row })),
               lengths: (service.lengths || []).map((row) => ({ ...row })),
               addons: (service.addons || []).map((link) => ({ ...link })),
+              photoIds: [],
             };
 
             setState({

@@ -93,7 +93,15 @@ export const toStudioPatch = (
         sort,
         colour: colour ?? "",
       })),
-    services: [...studio.services].sort(bySort).map(toStudioService),
+    services: [...studio.services].sort(bySort).map((row) =>
+      toStudioService(
+        row,
+        [...studio.portfolio_photos]
+          .sort(bySort)
+          .filter(({ service_id }) => service_id === row.id)
+          .map(({ id }) => id),
+      ),
+    ),
     addons: studio.addons.map(toStudioAddon),
     hours: [...studio.working_hours]
       .sort((left, right) => left.weekday - right.weekday)

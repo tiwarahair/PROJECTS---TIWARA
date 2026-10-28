@@ -49,6 +49,7 @@ export interface StudioService {
   sizes: VariationRow[];
   lengths: VariationRow[];
   addons: ServiceAddonLink[];
+  photoIds?: string[];
 }
 
 export interface StudioAddon {
@@ -100,6 +101,12 @@ interface OwnEditDraft {
   error: string;
 }
 
+export interface WizardPhoto {
+  id: string;
+  src: string;
+  file?: File;
+}
+
 export interface WizardDraft {
   name: string;
   description: string;
@@ -118,6 +125,7 @@ export interface WizardDraft {
   addons: ServiceAddonLink[];
   status: string;
   extra: string;
+  photos: WizardPhoto[];
 }
 
 export interface WizardState {

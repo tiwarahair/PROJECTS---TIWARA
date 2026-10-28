@@ -37,6 +37,7 @@ export interface Stylist {
   cover: string;
   bio: string;
   portfolio: string[];
+  photoServiceIds?: Record<string, string>;
   policies: Policy;
   categories: StylistCategory[];
   availability: Partial<Record<Weekday, AvailabilityWindow[]>>;

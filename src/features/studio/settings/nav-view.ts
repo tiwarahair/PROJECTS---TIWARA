@@ -18,6 +18,7 @@ import {
 } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
 import { GATE_REASON } from "../core/constants";
+import { getShownPage } from "../core/unsaved";
 import { copyText } from "../core/format";
 import {
   getAllClients,
@@ -267,7 +268,7 @@ export const getSettingsNav = (
   ];
 
   // ---- the wide settings nav ----
-  const page: StudioPage | null = isWide ? state.page || "profile" : state.page;
+  const page = getShownPage(state, isWide);
   const isOn = state.tab === "settings";
 
   const navItem = (id: StudioPage, label: string, icon: LucideIcon) => ({

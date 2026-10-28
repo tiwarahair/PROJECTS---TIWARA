@@ -1,5 +1,6 @@
 import { X } from "lucide-react";
 import { Link } from "react-router";
+import { PhotoCarousel } from "../../components/photo-carousel";
 import { joinClassNames } from "../../utils/class-names";
 import type { ServiceModal as ServiceModalData } from "./profile-menu";
 import styles from "../../styles/features/stylist-profile/service-modal.module.css";
@@ -10,9 +11,9 @@ interface ServiceModalProps {
   onClose: () => void;
 }
 
-/** Service details: description, customisation summary, price, duration and Book. */
+/** Service details: photos, description, customisation summary, price, duration and Book. */
 export const ServiceModal = ({
-  service: { name, description, customisation, price, duration, href },
+  service: { name, photos, description, customisation, price, duration, href },
   onClose,
 }: ServiceModalProps) => (
   // eslint-disable-next-line jsx-a11y/click-events-have-key-events, jsx-a11y/no-static-element-interactions
@@ -20,12 +21,23 @@ export const ServiceModal = ({
     onClick={onClose}
     className={joinClassNames(pageGlobal.scpScrim, styles.scrim)}
   >
-    <div className={joinClassNames(pageGlobal.scpPanel, styles.panel)}>
+    {/* eslint-disable-next-line jsx-a11y/click-events-have-key-events, jsx-a11y/no-static-element-interactions */}
+    <div
+      className={joinClassNames(pageGlobal.scpPanel, styles.panel)}
+      onClick={(event) => event.stopPropagation()}
+    >
       <div className={styles.closeRow}>
         <button onClick={onClose} aria-label="Close" className={styles.close}>
           <X size={20} strokeWidth={1.9} />
         </button>
       </div>
+      {photos.length > 0 && (
+        <PhotoCarousel
+          className={styles.photos}
+          photos={photos}
+          sizes="(max-width: 500px) 92vw, 412px"
+        />
+      )}
       <h3 className={styles.title}>{name}</h3>
       <p className={styles.desc}>{description}</p>
       {!!customisation && <p className={styles.cust}>{customisation}</p>}

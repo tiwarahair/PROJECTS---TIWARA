@@ -1691,6 +1691,7 @@ export type Database = {
           created_at: string;
           id: string;
           path: string;
+          service_id: string | null;
           sort: number;
           stylist_id: string;
         };
@@ -1699,6 +1700,7 @@ export type Database = {
           created_at?: string;
           id?: string;
           path: string;
+          service_id?: string | null;
           sort: number;
           stylist_id: string;
         };
@@ -1706,10 +1708,18 @@ export type Database = {
           created_at?: string;
           id?: string;
           path?: string;
+          service_id?: string | null;
           sort?: number;
           stylist_id?: string;
         };
         Relationships: [
+          {
+            foreignKeyName: "portfolio_photos_service_id_fkey";
+            columns: ["service_id"];
+            isOneToOne: false;
+            referencedRelation: "services";
+            referencedColumns: ["id"];
+          },
           {
             foreignKeyName: "portfolio_photos_stylist_id_fkey";
             columns: ["stylist_id"];

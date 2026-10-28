@@ -64,6 +64,27 @@ describe("studio-unsaved", () => {
     );
   });
 
+  it("on wide screens Settings shows Profile with no page picked, and leaving it with edits asks first", () => {
+    const { state, memo } = getStudio();
+
+    const edited = {
+      ...state,
+      tab: "settings" as const,
+      page: null,
+      profile: { ...state.profile, about: "Changed" },
+    };
+
+    expect(hasUnsavedPage(edited, memo)).toBe(false);
+    expect(hasUnsavedPage(edited, memo, true)).toBe(true);
+
+    expect(isLeavingPage(edited, { tab: "services", page: null }, true)).toBe(
+      true,
+    );
+
+    expect(isLeavingPage(edited, { page: "availability" }, true)).toBe(true);
+    expect(isLeavingPage(edited, { page: "profile" }, true)).toBe(false);
+  });
+
   it("only page and tab changes count as leaving", () => {
     const { state } = getStudio();
 

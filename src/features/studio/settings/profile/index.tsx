@@ -1,5 +1,5 @@
 import { ResponsiveImage } from "../../../../components/responsive-image";
-import { useRef } from "react";
+import { useRef, useState } from "react";
 import { Camera, Plus, X } from "lucide-react";
 import { Avatar } from "../../../../components/ds/avatar";
 import type { FieldErrors } from "react-hook-form";
@@ -13,6 +13,8 @@ import { Field } from "../page-parts";
 import parts from "../../../../styles/features/studio/settings/page-parts.module.css";
 import styles from "../../../../styles/features/studio/settings/profile/index.module.css";
 import { BookingLinkField } from "./booking-link-field";
+import { AttachService } from "./attach-service";
+import { PORTFOLIO_LIMIT } from "../../core/constants";
 
 interface ProfilePageProps {
   studio: StudioController;
@@ -27,6 +29,7 @@ export const ProfilePage = ({ studio, view }: ProfilePageProps) => {
   const avatarInput = useRef<HTMLInputElement>(null);
   const portInput = useRef<HTMLInputElement>(null);
   const portfolioRef = useRef<HTMLDivElement>(null);
+  const [attachingId, setAttachingId] = useState<string | null>(null);
 
   const form = useProfileForm(profile, state.portfolio.length);
 
@@ -183,7 +186,7 @@ export const ProfilePage = ({ studio, view }: ProfilePageProps) => {
             <span className={parts.muted}>{view.portCount}</span>
           </div>
           <div className={parts.mutedTop}>
-            Up to twenty photos of your work, shown on your public profile.
+            {`Up to ${PORTFOLIO_LIMIT} photos of your work, shown on your public profile. Attach one to a service to show it with that service.`}
           </div>
           {errors.portfolioCount && (
             <div className={styles.error} role="alert">
@@ -199,7 +202,7 @@ export const ProfilePage = ({ studio, view }: ProfilePageProps) => {
             onChange={view.onPortFiles}
           />
           <div className={styles.photos}>
-            {view.portfolio.map(({ key, src, remove }) => (
+            {view.portfolio.map(({ key, src, serviceName, remove }) => (
               <div key={key} className={styles.photo}>
                 <ResponsiveImage
                   className={styles.photoImage}
@@ -214,6 +217,23 @@ export const ProfilePage = ({ studio, view }: ProfilePageProps) => {
                   aria-label="Remove photo"
                 >
                   <X size={13} strokeWidth={2.4} />
+                </button>
+                <button
+                  type="button"
+                  className={styles.attachPill}
+                  onClick={() => setAttachingId(key)}
+                  aria-label={
+                    serviceName
+                      ? `On ${serviceName}. Change service`
+                      : "Attach to service"
+                  }
+                >
+                  {serviceName || (
+                    <>
+                      <Plus size={13} strokeWidth={2.4} />
+                      Attach to service
+                    </>
+                  )}
                 </button>
               </div>
             ))}
@@ -230,6 +250,11 @@ export const ProfilePage = ({ studio, view }: ProfilePageProps) => {
           </div>
         </div>
       </div>
+      <AttachService
+        studio={studio}
+        photoId={attachingId}
+        onClose={() => setAttachingId(null)}
+      />
     </form>
   );
 };

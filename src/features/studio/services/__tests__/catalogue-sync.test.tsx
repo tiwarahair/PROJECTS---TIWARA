@@ -55,6 +55,28 @@ describe("useCatalogueSync", () => {
     expect(studioApi.saveCategories).not.toHaveBeenCalled();
   });
 
+  it("saves which photos a service shows", async () => {
+    const state = getState();
+    const { rerender } = renderSync(state);
+    const [first, ...rest] = state.services;
+
+    if (!first) throw new Error("the seed has a service");
+
+    rerender({
+      current: {
+        ...state,
+        services: [{ ...first, photoIds: ["p-1", "p-2"] }, ...rest],
+      },
+    });
+
+    await waitFor(() => expect(studioApi.saveService).toHaveBeenCalledTimes(1));
+
+    expect(vi.mocked(studioApi.saveService).mock.calls[0]?.[3]).toEqual([
+      "p-1",
+      "p-2",
+    ]);
+  });
+
   it("removes a deleted add-on", async () => {
     const state = getState();
     const { rerender } = renderSync(state);

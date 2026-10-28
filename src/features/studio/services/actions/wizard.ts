@@ -2,6 +2,7 @@ import type { StudioActions, StudioContext } from "../../core/actions";
 import { getTypeOf } from "../../core/model";
 import type {
   StudioService,
+  StudioState,
   VariationRow,
   WizardDraft,
   WizardState,
@@ -25,9 +26,13 @@ const getBlankDraft = (): WizardDraft => ({
   addons: [],
   status: "active",
   extra: "",
+  photos: [],
 });
 
-const getServiceDraft = (service: StudioService): WizardDraft => {
+const getServiceDraft = (
+  service: StudioService,
+  { portfolio }: StudioState,
+): WizardDraft => {
   const type = getTypeOf(service);
 
   return {
@@ -51,6 +56,9 @@ const getServiceDraft = (service: StudioService): WizardDraft => {
     addons: (service.addons || []).map((link) => ({ ...link })),
     status: service.status,
     extra: service.extraCustom ? String(service.extra || 0) : "",
+    photos: portfolio
+      .filter(({ id }) => service.photoIds?.includes(id))
+      .map(({ id, src }) => ({ id, src })),
   };
 };
 
@@ -91,7 +99,9 @@ export const createWizardActions = (
     service?: StudioService | null,
     preset: Partial<WizardDraft> = {},
   ) => {
-    const draft = service ? getServiceDraft(service) : getBlankDraft();
+    const draft = service
+      ? getServiceDraft(service, getState())
+      : getBlankDraft();
 
     openSheet("svcwiz", {
       wizard: {

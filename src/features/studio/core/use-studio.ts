@@ -74,7 +74,10 @@ export const useStudio = ({ seed }: StudioProps) => {
     const current = stateRef.current;
     const changes = typeof patch === "function" ? patch(current) : patch;
 
-    if (!isLeavingPage(current, changes) || !hasUnsavedPage(current, memo))
+    if (
+      !isLeavingPage(current, changes, wideRef.current) ||
+      !hasUnsavedPage(current, memo, wideRef.current)
+    )
       return applyState(changes);
 
     applyState({
@@ -92,7 +95,7 @@ export const useStudio = ({ seed }: StudioProps) => {
     const current = stateRef.current;
 
     return (
-      hasUnsavedPage(current, memoRef.current) ||
+      hasUnsavedPage(current, memoRef.current, wideRef.current) ||
       (!!current.sheet && hasUnsavedSheet(current, memoRef.current))
     );
   }, []);

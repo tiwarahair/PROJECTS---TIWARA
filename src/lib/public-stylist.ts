@@ -61,9 +61,10 @@ const isTakingBookings = ({ status, pause_on, pause_until }: PublicProfile) =>
   !(pause_on && (!pause_until || new Date(pause_until) > new Date()));
 
 export const toPublicStylist = (profile: PublicProfile): PublicStylist => {
-  const services = [...profile.services]
-    .sort(bySort)
-    .map((row) => toService(row, profile.addons));
+  const services = [...profile.services].sort(bySort).map((row) => ({
+    ...toService(row, profile.addons),
+    photos: (row.photos ?? []).map(toPhotoUrl),
+  }));
 
   const fromFee = services.length
     ? Math.min(...services.map(getFromWithFee))
@@ -89,6 +90,11 @@ export const toPublicStylist = (profile: PublicProfile): PublicStylist => {
       portfolio: [...profile.portfolio_photos]
         .sort(bySort)
         .map(({ path }) => toPhotoUrl(path)),
+      photoServiceIds: Object.fromEntries(
+        profile.portfolio_photos.flatMap(({ path, service_id }) =>
+          service_id ? [[toPhotoUrl(path), service_id]] : [],
+        ),
+      ),
       policies: toPolicy(profile.payment_policy),
       categories: [...profile.stylist_categories]
         .sort(bySort)

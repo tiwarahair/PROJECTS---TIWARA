@@ -24,6 +24,10 @@
   text-transform: uppercase;
 }
 
+.serviceTag {
+  text-transform: none;
+}
+
 .hide {
   border: none;
   background: rgba(26, 23, 20, 0.72);
@@ -312,8 +316,23 @@
   background-position: center 22%;
 }
 
+.coverCarousel {
+  width: 100%;
+  height: 100%;
+  aspect-ratio: auto;
+  border-radius: 0;
+}
+
+.coverCarousel img {
+  object-position: center 26%;
+}
+
 .coverShown {
   height: 300px;
+}
+
+.coverShownPhotos {
+  height: 320px;
 }
 
 .coverHidden {

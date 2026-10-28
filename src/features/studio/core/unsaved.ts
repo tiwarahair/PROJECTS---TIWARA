@@ -1,7 +1,12 @@
 // Unsaved edits in Studio: which settings page or sheet has them, and the "Discard changes?" prompt.
 import { DISCARD_PROMPT } from "../../../hooks/use-unsaved-changes";
 import type { StudioContext } from "./actions";
-import type { ConfirmDialog, SheetKind, StudioState } from "./types";
+import type {
+  ConfirmDialog,
+  SheetKind,
+  StudioPage,
+  StudioState,
+} from "./types";
 
 type Memo = StudioContext["memo"];
 
@@ -51,10 +56,22 @@ export const getSheetDraft = (state: StudioState) => {
 export const hasUnsavedSheet = (state: StudioState, memo: Memo) =>
   getSheetDraft(state) !== memo.sheetDraft;
 
-export const hasUnsavedPage = (state: StudioState, memo: Memo) => {
+export const getShownPage = (
+  { page }: StudioState,
+  isWide: boolean,
+): StudioPage | null => (isWide ? page || "profile" : page);
+
+export const hasUnsavedPage = (
+  state: StudioState,
+  memo: Memo,
+  isWide = false,
+) => {
   const { saved } = memo;
 
-  switch (state.page) {
+  const page =
+    state.tab === "settings" ? getShownPage(state, isWide) : state.page;
+
+  switch (page) {
     case "profile":
       return (
         !isSame(getProfileFields(state), saved?.profile) || !!memo.isSlugEdited
@@ -83,8 +100,11 @@ export const hasUnsavedPage = (state: StudioState, memo: Memo) => {
 export const isLeavingPage = (
   current: StudioState,
   changes: Partial<StudioState>,
+  isWide = false,
 ) =>
-  ("page" in changes && changes.page !== current.page) ||
+  ("page" in changes &&
+    getShownPage({ ...current, ...changes }, isWide) !==
+      getShownPage(current, isWide)) ||
   ("tab" in changes && changes.tab !== current.tab);
 
 /** Puts the open page back to its saved values (pages that unmount drop their own edits). */

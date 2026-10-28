@@ -69,7 +69,10 @@ const toOwnGroups = (rows: ServiceRow["service_variations"]): OwnGroup[] => {
   return [...groups.values()];
 };
 
-export const toStudioService = (row: ServiceRow): StudioService => {
+export const toStudioService = (
+  row: ServiceRow,
+  photoIds: string[] = [],
+): StudioService => {
   const minutes = row.duration_min ?? 0;
 
   const rowsOf = (kind: "size" | "length") =>
@@ -116,6 +119,7 @@ export const toStudioService = (row: ServiceRow): StudioService => {
           minutes_override == null ? null : minutes_override % 60,
       }),
     ),
+    photoIds,
   };
 };
 
@@ -200,7 +204,7 @@ export const fromStudioService = (
     }),
   );
 
-  return { row, variations, addonLinks };
+  return { row, variations, addonLinks, photoIds: service.photoIds ?? [] };
 };
 
 export const toStudioAddon = (

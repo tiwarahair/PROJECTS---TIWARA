@@ -1,11 +1,13 @@
 import { getCategoryById } from "../../core/model";
 import { formatDuration } from "../../../../utils/dates";
+import { addPortfolioPhotos } from "../../settings/profile/photos";
 import type { WizardContext } from "./context";
 
 export const saveService = ({
   state,
   setState,
   actions,
+  context,
   wizard,
   draft,
   base,
@@ -38,7 +40,15 @@ export const saveService = ({
     sizes: draft.sizes,
     lengths: draft.lengths,
     addons: draft.addons,
+    photoIds: draft.photos.map(({ id }) => id),
   };
+
+  const newPhotos = draft.photos.flatMap(({ id, src, file }) =>
+    file ? [{ id, file, previewUrl: src }] : [],
+  );
+
+  // queued before the catalogue save, so the photos exist when the service links them
+  if (newPhotos.length) addPortfolioPhotos(context, newPhotos);
 
   const keepNew = (wizard.pendingAddons || []).filter(({ id }) =>
     draft.addons.some(({ addonId }) => addonId === id),

@@ -141,6 +141,12 @@ describe("StylistProfilePage", () => {
       screen.getByRole("heading", { level: 3, name: "Knotless braids" }),
     ).toBeInTheDocument();
 
+    await user.click(screen.getByText("Hair included"));
+
+    expect(
+      screen.getByRole("heading", { level: 3, name: "Knotless braids" }),
+    ).toBeInTheDocument();
+
     await user.click(screen.getByRole("button", { name: "Close" }));
     expect(screen.queryByRole("heading", { level: 3 })).not.toBeInTheDocument();
   });
@@ -162,6 +168,50 @@ describe("StylistProfilePage", () => {
     expect(screen.getByText(getCounter(first))).toBeInTheDocument();
     await user.keyboard("{Escape}");
     expect(screen.queryByText(getCounter(first))).not.toBeInTheDocument();
+  });
+
+  it("a service's photos show in its modal, and a portfolio photo opens the service it shows", async () => {
+    const [knotless, ...otherServices] = PUBLIC_PROFILE.services;
+    const [firstPhoto, ...otherPhotos] = PUBLIC_PROFILE.portfolio_photos;
+
+    if (!knotless || !firstPhoto) throw new Error("the profile has both");
+
+    vi.mocked(fetchPublicProfile).mockResolvedValue({
+      ...PUBLIC_PROFILE,
+      services: [
+        {
+          ...knotless,
+          photos: ["demo/portfolio/w161156.jpg", "demo/stylists/w161154.jpg"],
+        },
+        ...otherServices,
+      ],
+      portfolio_photos: [
+        { ...firstPhoto, service_id: knotless.id },
+        ...otherPhotos,
+      ],
+    });
+
+    renderWithStore(<StylistProfilePage />, "/tiwaras-house");
+    await user.click(await screen.findByRole("button", { name: "See all" }));
+    await user.click(screen.getByRole("button", { name: "Knotless braids" }));
+
+    expect(
+      screen.getByRole("heading", { level: 3, name: "Knotless braids" }),
+    ).toBeInTheDocument();
+
+    expect(
+      within(screen.getByRole("group", { name: "Photos" })).getAllByRole("img"),
+    ).toHaveLength(2);
+
+    await user.click(screen.getByRole("button", { name: "Close" }));
+
+    await user.click(
+      await screen.findByRole("button", { name: /^Box braids/ }),
+    );
+
+    expect(
+      screen.queryByRole("group", { name: "Photos" }),
+    ).not.toBeInTheDocument();
   });
 
   it("Share opens the share popover; Escape closes it", async () => {
