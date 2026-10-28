@@ -191,22 +191,6 @@ describe("studio-records", () => {
     ).toBe("other-braids");
   });
 
-  it("still saves a type when the group's Other has been retired", () => {
-    const service = {
-      ...toStudioService(SERVICE_ROW),
-      typeId: null,
-      subcategory: "Fishtail braids",
-    };
-
-    const types = TEST_CATALOGUE.types.map((type) =>
-      type.id === "other-braids" ? { ...type, isActive: false } : type,
-    );
-
-    expect(
-      fromStudioService(service, "stylist-1", 0, types).row.service_type_id,
-    ).toBe("other-braids");
-  });
-
   it("saves an add-on's pounds and time as pence and minutes", () => {
     expect(
       fromStudioAddon(

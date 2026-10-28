@@ -75,9 +75,11 @@ export const StylistProfileView = ({
   const menuGroups = useMemo(() => getMenuGroups(stylist), [stylist]);
   const facts = getProfileFacts(stylist, socials);
   const status = getOpenStatus(hours, nextStart);
+
   const back = getLastSearch(
     isCatalogueError ? (catalogue ?? EMPTY_CATALOGUE) : catalogue,
   );
+
   const bookHref = isTakingBookings ? getBookHref(stylist.id) : "";
   const shareData = getShareData({ id: stylist.id, name, area });
   const saved = isFavourite(stylist.id);

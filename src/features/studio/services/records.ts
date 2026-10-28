@@ -121,21 +121,16 @@ export const toStudioService = (row: ServiceRow): StudioService => {
 };
 
 /** The wizard may leave the type blank: match it by name in its group, else the group's "Other". */
-const getServiceTypeId = (service: StudioService, types: ServiceType[]) => {
-  const others = types.filter(
-    ({ groupId, isOther }) => isOther && groupId === service.taxonomyId,
-  );
-
-  return (
-    service.typeId ??
-    (
-      findServiceType(service, types) ??
-      others.find(({ isActive }) => isActive) ??
-      others[0]
-    )?.id ??
-    ""
-  );
-};
+const getServiceTypeId = (service: StudioService, types: ServiceType[]) =>
+  service.typeId ??
+  (
+    findServiceType(service, types) ??
+    types.find(
+      ({ groupId, isOther, isActive }) =>
+        isActive && isOther && groupId === service.taxonomyId,
+    )
+  )?.id ??
+  "";
 
 export const fromStudioService = (
   service: StudioService,
