@@ -1,7 +1,7 @@
 import type { ChangeEvent } from "react";
 import { getAddonPicker } from "../addon-picker";
 import { parseNumber } from "../../core/format";
-import { getTaxonomy } from "../actions";
+import { getTaxonomy } from "../../core/model";
 import {
   formatAddon,
   getCategoryById,
@@ -49,7 +49,7 @@ export const getWizardAddons = (
 
   const all: StudioAddon[] = state.addons.concat(wizard.pendingAddons || []);
   const { newAddon } = wizard;
-  const group = getTaxonomy(draft.taxonomyId);
+  const group = getTaxonomy(state, draft.taxonomyId);
 
   const getNewCategoryLabel = () => {
     if (addonCategory !== "all") return getCategoryName(addonCategory);

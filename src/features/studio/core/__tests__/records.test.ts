@@ -12,6 +12,7 @@ import {
   toVariationRow,
 } from "../../services/records";
 import { fromHours } from "../../settings/records";
+import { TEST_CATALOGUE } from "../../../../test/catalogue";
 import { getStudioRow } from "../../../../test/studio-seed";
 import { getInitialStudioState } from "../initial-state";
 import {
@@ -140,6 +141,7 @@ describe("studio-records", () => {
       toStudioService(SERVICE_ROW),
       "stylist-1",
       3,
+      TEST_CATALOGUE.types,
     );
 
     expect(row).toMatchObject({
@@ -176,15 +178,33 @@ describe("studio-records", () => {
   it("gives a service with no type its group's matching type, else the group's Other", () => {
     const service = { ...toStudioService(SERVICE_ROW), typeId: null };
 
-    expect(fromStudioService(service, "stylist-1", 0).row.service_type_id).toBe(
-      "knotless-braids",
-    );
+    expect(
+      fromStudioService(service, "stylist-1", 0, TEST_CATALOGUE.types).row
+        .service_type_id,
+    ).toBe("knotless-braids");
 
     const renamed = { ...service, subcategory: "Fishtail braids" };
 
-    expect(fromStudioService(renamed, "stylist-1", 0).row.service_type_id).toBe(
-      "other-braids",
+    expect(
+      fromStudioService(renamed, "stylist-1", 0, TEST_CATALOGUE.types).row
+        .service_type_id,
+    ).toBe("other-braids");
+  });
+
+  it("still saves a type when the group's Other has been retired", () => {
+    const service = {
+      ...toStudioService(SERVICE_ROW),
+      typeId: null,
+      subcategory: "Fishtail braids",
+    };
+
+    const types = TEST_CATALOGUE.types.map((type) =>
+      type.id === "other-braids" ? { ...type, isActive: false } : type,
     );
+
+    expect(
+      fromStudioService(service, "stylist-1", 0, types).row.service_type_id,
+    ).toBe("other-braids");
   });
 
   it("saves an add-on's pounds and time as pence and minutes", () => {

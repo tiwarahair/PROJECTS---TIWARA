@@ -2,6 +2,7 @@ import type { TwoFactorDevice } from "../../../lib/two-factor";
 import type { StylistStudio } from "../../../lib/studio-api";
 import type { StudioBookings } from "../../../lib/studio-api/bookings";
 import { toStudioBookings } from "../bookings/records";
+import type { Catalogue } from "../../../types/catalogue";
 import { CATEGORY_COLOURS } from "./constants";
 import { toStudioPatch } from "./records";
 import type { StudioState } from "./types";
@@ -12,6 +13,7 @@ export interface StudioSeed {
   studio: StylistStudio;
   bookings: StudioBookings;
   devices: TwoFactorDevice[];
+  catalogue: Catalogue;
 }
 
 const getCategoryColour = (sort: number) =>
@@ -20,7 +22,7 @@ const getCategoryColour = (sort: number) =>
 /** A real account: everything from the database. */
 export const seedFromAccount = (
   state: StudioState,
-  { owner, studio, bookings, devices }: StudioSeed,
+  { owner, studio, bookings, devices, catalogue }: StudioSeed,
 ): StudioState => {
   const patch = toStudioPatch(studio, state);
 
@@ -28,6 +30,7 @@ export const seedFromAccount = (
     ...state,
     ...patch,
     ...toStudioBookings(bookings),
+    catalogue,
     owner,
     account: {
       stylistId: studio.id,

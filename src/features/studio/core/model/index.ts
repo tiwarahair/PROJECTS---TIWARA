@@ -5,3 +5,4 @@ export * from "./past";
 export * from "./policy";
 export * from "./services";
 export * from "./setup";
+export * from "./taxonomy";

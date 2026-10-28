@@ -13,7 +13,7 @@ import { fromCategories, fromStudioAddon, fromStudioService } from "./records";
 import type { StudioSync } from "../core/sync";
 import type { StudioState } from "../core/types";
 
-type Catalogue = Pick<StudioState, "categories" | "addons" | "services">;
+type SavedItems = Pick<StudioState, "categories" | "addons" | "services">;
 
 const getChanged = <T>(list: T[], previous: T[]) =>
   list.filter((item, index) => previous.indexOf(item) !== index);
@@ -24,10 +24,10 @@ const getRemovedIds = <T extends { id: string }>(list: T[], previous: T[]) =>
     .map(({ id }) => id);
 
 export const useCatalogueSync = (
-  { categories, addons, services }: StudioState,
+  { categories, addons, services, catalogue: { types } }: StudioState,
   sync: StudioSync,
 ) => {
-  const saved = useRef<Catalogue>({ categories, addons, services });
+  const saved = useRef<SavedItems>({ categories, addons, services });
 
   useEffect(() => {
     const before = saved.current;
@@ -57,6 +57,7 @@ export const useCatalogueSync = (
             service,
             stylistId,
             services.indexOf(service),
+            types,
           );
 
           await saveService(row, variations, addonLinks);
@@ -77,5 +78,5 @@ export const useCatalogueSync = (
         saved.current = before;
       },
     );
-  }, [categories, addons, services, sync]);
+  }, [categories, addons, services, types, sync]);
 };

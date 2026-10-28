@@ -1,14 +1,12 @@
-import { defaultAddons, platformCustomisations } from "../../../../data";
-import type { ServiceType } from "../../../../types/service-type";
+import type {
+  Catalogue,
+  PlatformOption,
+  ServiceType,
+} from "../../../../types/catalogue";
 import { getSpec } from "../../../../utils/services";
 import type { VariationRow } from "../../core/types";
-import { getTaxonomy, makeVariationRows } from "./helpers";
 
-const toRow = ([label, price, minutes]: [
-  string,
-  number,
-  number,
-]): VariationRow => {
+const toRow = ({ label, price, minutes }: PlatformOption): VariationRow => {
   const isNegativeValue = price < 0 || minutes < 0;
   const absoluteMinutes = Math.abs(minutes);
   const sign = isNegativeValue ? "-" : "";
@@ -26,25 +24,12 @@ const toRow = ([label, price, minutes]: [
 };
 
 /** What a suggested service type fills in. */
-export const getSuggestionFill = (type: ServiceType) => {
-  const spec = getSpec(type.name);
-
-  const custom =
-    platformCustomisations[type.groupId as keyof typeof platformCustomisations];
-
-  const group = getTaxonomy(type.groupId);
-
-  const getSizes = () => {
-    if (custom) return custom.size.map(toRow);
-
-    return group?.sizes ? makeVariationRows(group.sizes) : [];
-  };
-
-  const getLengths = () => {
-    if (custom) return custom.length.map(toRow);
-
-    return group?.lengths ? makeVariationRows(group.lengths) : [];
-  };
+export const getSuggestionFill = (
+  type: ServiceType,
+  { customisations, addons }: Catalogue,
+) => {
+  const spec = getSpec(type);
+  const platformOptions = customisations[type.groupId];
 
   return {
     name: type.name,
@@ -55,11 +40,11 @@ export const getSuggestionFill = (type: ServiceType) => {
     price: String(spec.addedPrice),
     durationHours: String(Math.floor(spec.minutes / 60)),
     durationMinutes: String(spec.minutes % 60),
-    sizesOn: !!custom,
-    lengthsOn: !!custom,
-    sizes: getSizes(),
-    lengths: getLengths(),
-    addonDefinitions: defaultAddons[type.groupId] || [],
+    sizesOn: !!platformOptions,
+    lengthsOn: !!platformOptions,
+    sizes: platformOptions?.size.map(toRow) ?? [],
+    lengths: platformOptions?.length.map(toRow) ?? [],
+    addonDefinitions: addons[type.groupId] || [],
   };
 };
 

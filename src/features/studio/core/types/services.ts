@@ -1,4 +1,4 @@
-import type { ServiceType } from "../../../../types/service-type";
+import type { ServiceType } from "../../../../types/catalogue";
 
 export interface VariationRow {
   label: string;

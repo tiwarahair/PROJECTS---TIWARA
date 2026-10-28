@@ -1,6 +1,6 @@
 import { Calendar, Clock, CreditCard, UserX } from "lucide-react";
 import { describe, expect, it } from "vitest";
-import { stylists } from "../../data";
+import { DEMO_STYLISTS } from "../../test/fixtures/demo-stylists";
 import { bookingFee, policyLines } from "../pricing";
 
 describe("bookingFee", () => {
@@ -13,7 +13,7 @@ describe("bookingFee", () => {
 describe("policyLines", () => {
   it("marks each line with its lucide icon", () => {
     const policy = {
-      ...stylists[0]!.policies,
+      ...DEMO_STYLISTS[0]!.policies,
       late: { on: true, kind: "pct" as const, percent: 25 },
       noShow: { on: true, kind: "pct" as const, percent: 50 },
     };

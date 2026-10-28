@@ -1,4 +1,6 @@
 import { createApi, fakeBaseQuery } from "@reduxjs/toolkit/query/react";
+import { fetchCatalogue } from "../lib/catalogue";
+import type { Catalogue } from "../types/catalogue";
 import {
   getAvailableSlots,
   getBookingStatus,
@@ -129,6 +131,11 @@ export const api = createApi({
   ],
   refetchOnReconnect: true,
   endpoints: (build) => ({
+    // changes only by migration, so 1 read a day is enough
+    getCatalogue: build.query<Catalogue, void>({
+      keepUnusedDataFor: 86400,
+      queryFn: () => toQueryResult(fetchCatalogue()),
+    }),
     getProfile: build.query<Profile, string>({
       keepUnusedDataFor: 600,
       queryFn: async (userId) => {
@@ -481,6 +488,7 @@ export const {
   useStartCheckoutMutation,
   useHoldBookingMutation,
   useIsInTravelAreaQuery,
+  useGetCatalogueQuery,
   useGetProfileQuery,
   useGetStylistProfileQuery,
   usePeekStylistsQuery,

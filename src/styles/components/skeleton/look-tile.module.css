@@ -1,0 +1,14 @@
+.tile {
+  aspect-ratio: 4/5;
+}
+
+.fill {
+  display: block;
+  height: 100%;
+  line-height: 0;
+}
+
+.photo {
+  height: 100%;
+  border-radius: 16px;
+}

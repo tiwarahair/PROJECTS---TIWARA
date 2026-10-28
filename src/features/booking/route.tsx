@@ -3,7 +3,10 @@ import { PageMessage } from "../../components/page-message";
 import { SiteHeader } from "../../components/site-header";
 import { MapsProvider } from "../../lib/google-maps";
 import { toPublicStylist } from "../../lib/public-stylist";
-import { useGetStylistProfileQuery } from "../../stores/api-slice";
+import {
+  useGetCatalogueQuery,
+  useGetStylistProfileQuery,
+} from "../../stores/api-slice";
 import { getSearchParams } from "../../utils/page-flags";
 import { BookingFlow } from "./page";
 import styles from "../../styles/features/booking/route.module.css";
@@ -17,13 +20,19 @@ export const BookingPage = () => {
     isFetching,
   } = useGetStylistProfileQuery(slug, { skip: !slug });
 
+  const { data: catalogue, isError: isCatalogueError } = useGetCatalogueQuery();
+
   const publicStylist = useMemo(
     () => (profile ? toPublicStylist(profile) : null),
     [profile],
   );
 
-  if (publicStylist?.isTakingBookings) {
-    const flow = <BookingFlow publicStylist={publicStylist} />;
+  const canBook = !!publicStylist?.isTakingBookings;
+
+  if (canBook && catalogue) {
+    const flow = (
+      <BookingFlow publicStylist={publicStylist} catalogue={catalogue} />
+    );
 
     return publicStylist.stylist.mobile ? (
       <MapsProvider>{flow}</MapsProvider>
@@ -32,8 +41,10 @@ export const BookingPage = () => {
     );
   }
 
+  const isWaiting = isFetching || (canBook && !isCatalogueError);
+
   const getMessage = () => {
-    if (isError)
+    if (isError || (canBook && isCatalogueError))
       return {
         title: "We couldn’t load this page",
         text: "Check your connection and try again.",
@@ -58,9 +69,9 @@ export const BookingPage = () => {
   };
 
   return (
-    <div className={styles.page} aria-busy={isFetching}>
+    <div className={styles.page} aria-busy={isWaiting}>
       <SiteHeader />
-      {!isFetching && <PageMessage {...getMessage()} />}
+      {!isWaiting && <PageMessage {...getMessage()} />}
     </div>
   );
 };

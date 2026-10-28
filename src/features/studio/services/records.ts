@@ -1,10 +1,11 @@
 // Services, add-ons and categories ⇄ database rows. Money is pence in the database and pounds in Studio.
-import { serviceTypes } from "../../../data";
+import type { ServiceType } from "../../../types/catalogue";
 import type { ServiceRow, StylistStudio } from "../../../lib/studio-api";
 import type { TablesInsert } from "../../../types/database";
 import { formatDuration } from "../../../utils/dates";
 import { bySort } from "../../../utils/sort";
 import { parseNumber } from "../core/format";
+import { findServiceType } from "../core/model";
 import type {
   OwnGroup,
   StudioAddon,
@@ -120,22 +121,27 @@ export const toStudioService = (row: ServiceRow): StudioService => {
 };
 
 /** The wizard may leave the type blank: match it by name in its group, else the group's "Other". */
-const getServiceTypeId = ({ typeId, taxonomyId, subcategory }: StudioService) =>
-  typeId ??
-  (
-    serviceTypes.find(
-      ({ groupId, name }) => groupId === taxonomyId && name === subcategory,
-    ) ??
-    serviceTypes.find(
-      ({ groupId, isOther }) => groupId === taxonomyId && isOther,
-    )
-  )?.id ??
-  "";
+const getServiceTypeId = (service: StudioService, types: ServiceType[]) => {
+  const others = types.filter(
+    ({ groupId, isOther }) => isOther && groupId === service.taxonomyId,
+  );
+
+  return (
+    service.typeId ??
+    (
+      findServiceType(service, types) ??
+      others.find(({ isActive }) => isActive) ??
+      others[0]
+    )?.id ??
+    ""
+  );
+};
 
 export const fromStudioService = (
   service: StudioService,
   stylistId: string,
   sort: number,
+  types: ServiceType[],
 ) => {
   const variationsOf = (kind: "size" | "length", rows: VariationRow[]) =>
     rows.map(({ label, on, priceDelta, hoursDelta, minutesDelta }, index) => ({
@@ -163,7 +169,7 @@ export const fromStudioService = (
   const row: TablesInsert<"services"> = {
     id: service.id,
     stylist_id: stylistId,
-    service_type_id: getServiceTypeId(service),
+    service_type_id: getServiceTypeId(service, types),
     service_group_id: service.taxonomyId ?? "",
     category_id: service.categoryId,
     name: service.name,

@@ -1,6 +1,6 @@
 import { useLayoutEffect } from "react";
 import { FavHost } from "../../components/fav-host";
-import { StylistCardSkeleton } from "../../components/skeleton/stylist-card-skeleton";
+import { StylistCardSkeleton } from "../../components/skeleton/stylist-card";
 import { StylistCard } from "../../components/stylist-card";
 import { WelcomeToast } from "../../components/welcome-toast";
 import { useLoadMore } from "../../hooks/use-load-more";

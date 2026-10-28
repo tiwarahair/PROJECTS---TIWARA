@@ -6,6 +6,7 @@ import {
   getServiceOptions,
   hasStep2,
 } from "../../../../utils/services";
+import { TEST_CATALOGUE } from "../../../../test/catalogue";
 import { toChoices } from "../choices";
 
 const { stylist } = toPublicStylist(getDemoProfile("tiwaras-house"));
@@ -14,7 +15,7 @@ const knotless = findService(stylist, "Knotless braids");
 describe("toChoices", () => {
   it("sends the ids of the picked size, length, own answers and add-ons, and the colour for braids", () => {
     expect(
-      toChoices(getServiceOptions(knotless), {
+      toChoices(getServiceOptions(knotless, TEST_CATALOGUE.types), {
         size: "Small",
         length: "Waist/Bum",
         colour: "1B Natural Black",
@@ -36,7 +37,7 @@ describe("toChoices", () => {
     const silk = findService(stylist, "Silk press");
 
     expect(
-      toChoices(getServiceOptions(silk), {
+      toChoices(getServiceOptions(silk, TEST_CATALOGUE.types), {
         size: null,
         length: null,
         colour: "30 Auburn",
@@ -62,14 +63,20 @@ describe("the Make it yours step", () => {
 
   it("is skipped for braids with nothing to choose but colour, and no colour is sent", () => {
     expect(hasStep2(plainBraids)).toBe(false);
-    expect(getServiceOptions(plainBraids).colour).toBe(false);
+
+    expect(getServiceOptions(plainBraids, TEST_CATALOGUE.types).colour).toBe(
+      false,
+    );
   });
 
   it("offers colour on braids beside other choices", () => {
     expect(hasStep2({ ...plainBraids, addons: knotless.addons })).toBe(true);
 
     expect(
-      getServiceOptions({ ...plainBraids, addons: knotless.addons }).colour,
+      getServiceOptions(
+        { ...plainBraids, addons: knotless.addons },
+        TEST_CATALOGUE.types,
+      ).colour,
     ).toBe(true);
   });
 });

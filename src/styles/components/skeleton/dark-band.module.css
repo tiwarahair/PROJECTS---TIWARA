@@ -1,0 +1,20 @@
+.container {
+  display: inline-block;
+  line-height: 0;
+}
+
+.bar {
+  --base-color: rgba(250, 246, 238, 0.08);
+  --highlight-color: rgba(250, 246, 238, 0.18);
+}
+
+.chip {
+  width: 96px;
+  height: 41px;
+  border-radius: var(--radius-full, 100px);
+}
+
+.name {
+  width: clamp(140px, 16vw, 240px);
+  height: clamp(26px, 3.2vw, 44px);
+}

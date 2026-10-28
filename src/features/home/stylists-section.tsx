@@ -1,5 +1,5 @@
 import { useRef } from "react";
-import { StylistCardSkeleton } from "../../components/skeleton/stylist-card-skeleton";
+import { StylistCardSkeleton } from "../../components/skeleton/stylist-card";
 import { StylistCard } from "../../components/stylist-card";
 import { useIsSlow } from "../../hooks/use-is-slow";
 import { toPhotoUrl } from "../../lib/public-stylist";

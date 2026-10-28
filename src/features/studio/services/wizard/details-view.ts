@@ -1,15 +1,17 @@
 import type { ChangeEvent, FocusEvent, MouseEvent } from "react";
 import type { SearchSelectOption } from "../../../../components/search-select";
-import { serviceTypes } from "../../../../data";
-import type { ServiceType } from "../../../../types/service-type";
+import type { ServiceType } from "../../../../types/catalogue";
 import { getSwatches } from "../catalog-sheets-view";
-import { NO_CATEGORY_TONE, TAXONOMY } from "../../core/constants";
+import { NO_CATEGORY_TONE } from "../../core/constants";
 import {
   getCategoryById,
   getSortedCategories,
   getNextCategoryColour,
+  getTaxonomies,
+  getTaxonomy,
 } from "../../core/model";
-import { getTaxonomy, makeVariationRows } from "../actions";
+import type { StudioState } from "../../core/types";
+import { makeVariationRows } from "../actions";
 import type { WizardContext } from "./context";
 import { setLatestWizard } from "./context";
 
@@ -18,13 +20,14 @@ const SUBCATEGORY_TIP =
 
 const NEW_CATEGORY = "+ New category";
 
-const typeOptions: SearchSelectOption[] = TAXONOMY.flatMap(({ name, types }) =>
-  types.map((type) => ({
-    label: type.name,
-    group: name,
-    keywords: (type.synonyms || []).concat([name]),
-  })),
-);
+const getTypeOptions = (state: StudioState): SearchSelectOption[] =>
+  getTaxonomies(state).flatMap(({ name, types }) =>
+    types.map((type) => ({
+      label: type.name,
+      group: name,
+      keywords: (type.synonyms || []).concat([name]),
+    })),
+  );
 
 export const getDetailsView = ({
   studio,
@@ -37,7 +40,7 @@ export const getDetailsView = ({
   setDraft,
 }: WizardContext) => {
   const applyType = (type: ServiceType) => {
-    const typeGroup = getTaxonomy(type.groupId);
+    const typeGroup = getTaxonomy(state, type.groupId);
     const isSame = draft.taxonomyId === type.groupId;
 
     return {
@@ -63,7 +66,7 @@ export const getDetailsView = ({
   const sortedCategories = getSortedCategories(state);
 
   const currentType = draft.typeId
-    ? serviceTypes.find(({ id }) => id === draft.typeId)
+    ? state.catalogue.types.find(({ id }) => id === draft.typeId)
     : null;
 
   const newCategory = wizard.newCategory || null;
@@ -145,10 +148,12 @@ export const getDetailsView = ({
       );
     },
     cancelNewCategory: () => setWizard({ newCategory: null }),
-    typeOptions,
+    typeOptions: getTypeOptions(state),
     typeValue: currentType ? currentType.name : "",
     pickType: (label: string) => {
-      const type = serviceTypes.find(({ name }) => name === label);
+      const type = state.catalogue.types.find(
+        ({ name, isActive }) => isActive && name === label,
+      );
 
       if (type) setDraft(applyType(type));
     },

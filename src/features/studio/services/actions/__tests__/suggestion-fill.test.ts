@@ -1,9 +1,9 @@
 import { describe, expect, it } from "vitest";
-import { serviceTypes } from "../../../../../data";
+import { TEST_CATALOGUE } from "../../../../../test/catalogue";
 import { getSuggestionFill } from "../suggestion-fill";
 
 const getType = (id: string) => {
-  const type = serviceTypes.find((item) => item.id === id);
+  const type = TEST_CATALOGUE.types.find((item) => item.id === id);
 
   if (!type) throw new Error(`no service type ${id}`);
 
@@ -12,7 +12,7 @@ const getType = (id: string) => {
 
 describe("services → suggestion fill", () => {
   it("fills the name, type and options from a suggested type", () => {
-    const fill = getSuggestionFill(getType("knotless-braids"));
+    const fill = getSuggestionFill(getType("knotless-braids"), TEST_CATALOGUE);
 
     expect(fill).toMatchObject({
       name: "Knotless braids",
@@ -27,7 +27,10 @@ describe("services → suggestion fill", () => {
   });
 
   it("signs both deltas of a smaller option", () => {
-    const { sizes } = getSuggestionFill(getType("knotless-braids"));
+    const { sizes } = getSuggestionFill(
+      getType("knotless-braids"),
+      TEST_CATALOGUE,
+    );
 
     expect(sizes.find(({ label }) => label === "Large")).toEqual({
       label: "Large",

@@ -2,7 +2,7 @@ import Skeleton from "react-loading-skeleton";
 import { ResponsiveImage } from "../responsive-image";
 import { PROFILE_COVER_SIZES } from "../../utils/image-sources";
 import { joinClassNames } from "../../utils/class-names";
-import styles from "../../styles/components/skeleton/profile-skeleton.module.css";
+import styles from "../../styles/components/skeleton/profile.module.css";
 
 /** What a stylist card already knows, passed along so the profile's top shows straight away. */
 export interface ProfilePreview {

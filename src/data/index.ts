@@ -1,32 +1,13 @@
 import type { CategoryColour } from "../types/category-colour";
 import type { ChatMessage } from "../types/chat";
 import type { HairColour } from "../types/colour";
-import type { DefaultAddons } from "../types/default-addon";
 import type { Faq } from "../types/faq";
-import type { PlatformCustomisations } from "../types/platform-customisation";
-import type { ServiceGroup } from "../types/service-group";
-import type { ServiceSpecs } from "../types/service-spec";
-import type { ServiceType } from "../types/service-type";
-import type { Stylist } from "../types/stylist";
 import categoryColoursJson from "./category-colours.json";
 import chatJson from "./chat.json";
 import coloursJson from "./colours.json";
-import defaultAddonsJson from "./default-addons.json";
 import faqsJson from "./faqs.json";
-import platformCustomisationsJson from "./platform-customisations.json";
-import serviceGroupsJson from "./service-groups.json";
-import serviceSpecsJson from "./service-specs.json";
-import serviceTypesJson from "./service-types.json";
-import stylistsJson from "./stylists.json";
 
-export const stylists = stylistsJson as unknown as Stylist[];
 export const faqs: Faq[] = faqsJson;
 export const chatMessages = chatJson as ChatMessage[];
-export const serviceGroups: ServiceGroup[] = serviceGroupsJson;
-export const serviceTypes: ServiceType[] = serviceTypesJson;
-export const serviceSpecs = serviceSpecsJson as unknown as ServiceSpecs;
-export const platformCustomisations =
-  platformCustomisationsJson as PlatformCustomisations;
 export const hairColours: HairColour[] = coloursJson;
-export const defaultAddons = defaultAddonsJson as unknown as DefaultAddons;
 export const categoryColours: CategoryColour[] = categoryColoursJson;

@@ -1,11 +1,12 @@
 import { describe, expect, it } from "vitest";
+import { TEST_CATALOGUE } from "../../../test/catalogue";
 import { fakeSearch } from "../../../test/search-rows";
 import { toResultCards } from "../cards";
 import { getStyleSelection } from "../logic";
 import { getInitialState } from "../state";
 
 const selectionFor = (search: string) =>
-  getStyleSelection(getInitialState(search, 1440));
+  getStyleSelection(getInitialState(search, 1440), TEST_CATALOGUE);
 
 describe("result cards", () => {
   it("link to the profile and show the fee-inclusive price, distance and next opening", async () => {

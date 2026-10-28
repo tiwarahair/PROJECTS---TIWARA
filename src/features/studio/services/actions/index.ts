@@ -6,12 +6,7 @@ import { createMenuActions } from "./menus";
 import { createSuggestionActions } from "./suggestions";
 import { createWizardActions } from "./wizard";
 
-export {
-  getAnchor,
-  getBlankAddon,
-  getTaxonomy,
-  makeVariationRows,
-} from "./helpers";
+export { getAnchor, getBlankAddon, makeVariationRows } from "./helpers";
 
 export const createServiceActions = (
   context: StudioContext,

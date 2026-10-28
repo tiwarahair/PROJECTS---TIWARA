@@ -1,4 +1,4 @@
-import { stylists } from "../data";
+import { DEMO_STYLISTS } from "./fixtures/demo-stylists";
 import type { PublicProfile, ServiceRow } from "../lib/public-profiles";
 import type { Service } from "../types/service";
 
@@ -20,7 +20,7 @@ const LONDON_HOUR = new Intl.DateTimeFormat("en-GB", {
 });
 
 export const getDemoProfile = (slug: string): PublicProfile => {
-  const stylist = stylists.find(({ id }) => id === slug);
+  const stylist = DEMO_STYLISTS.find(({ id }) => id === slug);
 
   if (!stylist) throw new Error(`No demo stylist ${slug}`);
 

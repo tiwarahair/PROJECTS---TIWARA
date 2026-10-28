@@ -1,5 +1,5 @@
 import Skeleton from "react-loading-skeleton";
-import styles from "../../styles/components/skeleton/suggestion-row-skeleton.module.css";
+import styles from "../../styles/components/skeleton/suggestion-row.module.css";
 
 /** A dropdown suggestion while it loads: round icon, label and sub-line. */
 export const SuggestionRowSkeleton = () => (

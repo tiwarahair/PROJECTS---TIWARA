@@ -114,6 +114,19 @@
   gap: 6px;
 }
 
+.whatRow {
+  position: relative;
+}
+
+.pendingValue {
+  position: absolute;
+  left: 0;
+  top: 50%;
+  transform: translateY(-50%);
+  line-height: 1;
+  pointer-events: none;
+}
+
 .input {
   flex: 1;
   min-width: 0;

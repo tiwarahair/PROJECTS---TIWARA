@@ -3,7 +3,7 @@ import { useLayoutEffect, useState } from "react";
 import { Link } from "react-router";
 import { Button } from "../../components/ds/button";
 import { PageMessage } from "../../components/page-message";
-import { ManageBookingSkeleton } from "../../components/skeleton/manage-booking-skeleton";
+import { ManageBookingSkeleton } from "../../components/skeleton/manage-booking";
 import { StarPicker } from "../../components/star-rating/star-picker";
 import { useIsSlow } from "../../hooks/use-is-slow";
 import { usePrivateLink } from "../../hooks/use-private-link";

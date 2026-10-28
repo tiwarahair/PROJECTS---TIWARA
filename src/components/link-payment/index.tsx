@@ -8,7 +8,7 @@ import {
 } from "@stripe/react-stripe-js";
 import { ArrowRight, CircleAlert } from "lucide-react";
 import { useRef, useState } from "react";
-import { PaymentFieldsSkeleton } from "../skeleton/payment-fields-skeleton";
+import { PaymentFieldsSkeleton } from "../skeleton/payment-fields";
 import { stripePromise } from "../../lib/stripe";
 import { getErrorMessage } from "../../stores/api-slice";
 import { joinClassNames } from "../../utils/class-names";

@@ -1,6 +1,5 @@
 import { bySort } from "./sort";
 // Service catalogue helpers.
-import { serviceSpecs, serviceTypes } from "../data";
 import type {
   CustomisationGroup,
   CustomisationOption,
@@ -8,8 +7,7 @@ import type {
   Service,
   ServiceAddon,
 } from "../types/service";
-import type { ServiceSpec } from "../types/service-spec";
-import type { ServiceType } from "../types/service-type";
+import type { ServiceSpec, ServiceType } from "../types/catalogue";
 import type { Stylist } from "../types/stylist";
 import { bookingFee } from "./pricing";
 import { formatDuration } from "./dates";
@@ -17,14 +15,22 @@ import { roundToPence } from "./money";
 
 const toLower = (value: string): string => value.toLowerCase();
 
-export const getSpec = (name: string): ServiceSpec => {
+export const getSpec = ({
+  name,
+  defaultMinutes,
+  addedPrice,
+  defaultDescription,
+}: ServiceType): ServiceSpec => {
+  if (defaultMinutes != null && addedPrice != null)
+    return {
+      minutes: defaultMinutes,
+      addedPrice,
+      description: defaultDescription ?? "",
+    };
+
   const key = toLower(name);
-  const entry = serviceSpecs[key];
 
-  if (entry)
-    return { minutes: entry[0], addedPrice: entry[1], description: entry[2] };
-
-  // deterministic demo fallback for types without a spec
+  // deterministic demo fallback for types without defaults
   let hashValue = 0;
 
   for (let index = 0; index < key.length; index++)
@@ -41,15 +47,14 @@ export const getSpec = (name: string): ServiceSpec => {
 export const formatServiceDuration = (minutes: number): string =>
   formatDuration(Math.max(15, Math.round(minutes)));
 
-const getTypeById = (id: string | null | undefined): ServiceType | null =>
-  serviceTypes.find((type) => type.id === id) ?? null;
-
 const isActive = (service: Service | null | undefined): boolean =>
   !!service && service.status === "active";
 
 export const getGroupId = (
   service: Service | null | undefined,
-): string | null => getTypeById(service?.serviceTypeId)?.groupId ?? null;
+  types: ServiceType[],
+): string | null =>
+  types.find(({ id }) => id === service?.serviceTypeId)?.groupId ?? null;
 
 export const getActiveServices = (
   stylist: Stylist | null | undefined,
@@ -68,44 +73,37 @@ const getOnOptions = (
 ): CustomisationOption[] =>
   group?.on ? group.options.filter(({ on }) => on) : [];
 
-/** The customisations a client can pick for a service. */
-export const getServiceOptions = (
-  service: Service | null | undefined,
-): ServiceOptions => {
+const getChoices = (service: Service | null | undefined) => {
   const customisations = service?.customisations;
-  const size = customisations ? getOnOptions(customisations.size) : [];
-  const length = customisations ? getOnOptions(customisations.length) : [];
-  const own = service?.ownCustomisations ?? [];
-  const addons = service?.addons ?? [];
-
-  // colour alone isn't worth a "Make it yours" step, so braids offer it only beside other choices
-  const hasChoices = !!(
-    size.length ||
-    length.length ||
-    own.length ||
-    addons.length
-  );
 
   return {
-    size,
-    length,
-    colour: hasChoices && getGroupId(service) === "braids",
-    own,
-    addons,
+    size: customisations ? getOnOptions(customisations.size) : [],
+    length: customisations ? getOnOptions(customisations.length) : [],
+    own: service?.ownCustomisations ?? [],
+    addons: service?.addons ?? [],
   };
 };
 
-export const hasStep2 = (service: Service): boolean => {
-  const { size, length, own, addons } = getServiceOptions(service);
+export const hasStep2 = (service: Service | null | undefined): boolean => {
+  const { size, length, own, addons } = getChoices(service);
 
   return !!(size.length || length.length || own.length || addons.length);
 };
+
+/** The customisations a client can pick for a service. */
+export const getServiceOptions = (
+  service: Service | null | undefined,
+  types: ServiceType[],
+): ServiceOptions => ({
+  ...getChoices(service),
+  colour: hasStep2(service) && getGroupId(service, types) === "braids",
+});
 
 const getLowestDelta = (options: CustomisationOption[]): number =>
   options.length ? Math.min(...options.map(({ priceDelta }) => priceDelta)) : 0;
 
 export const getFromPrice = (service: Service): number => {
-  const { size, length } = getServiceOptions(service);
+  const { size, length } = getChoices(service);
 
   return service.price + getLowestDelta(size) + getLowestDelta(length);
 };
@@ -118,7 +116,7 @@ export const getFromWithFee = (service: Service): number => {
 };
 
 export const getCustomisationSummary = (service: Service): string => {
-  const { size, length, own } = getServiceOptions(service);
+  const { size, length, own } = getChoices(service);
 
   const getRange = (options: CustomisationOption[]): string =>
     options.length > 1
@@ -174,12 +172,15 @@ export const getMenu = (stylist: Stylist | null | undefined): MenuSection[] => {
   return sections;
 };
 
-export const matchTypes = (query: string): ServiceType[] => {
+export const matchTypes = (
+  query: string,
+  types: ServiceType[],
+): ServiceType[] => {
   const needle = toLower(query).trim();
 
-  if (!needle) return serviceTypes.slice();
+  if (!needle) return types.slice();
 
-  return serviceTypes.filter(
+  return types.filter(
     ({ name, synonyms }) =>
       toLower(name).includes(needle) ||
       synonyms.some(

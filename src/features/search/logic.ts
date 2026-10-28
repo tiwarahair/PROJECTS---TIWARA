@@ -1,9 +1,12 @@
 // What the search state asks for: the place, the chosen style and the search_stylists arguments.
-import { serviceGroups, serviceTypes } from "../../data";
+import { EMPTY_CATALOGUE } from "../../lib/catalogue";
 import type { LatLng } from "../../lib/google-maps";
 import type { SearchArgs } from "../../lib/search-api";
-import type { ServiceGroup } from "../../types/service-group";
-import type { ServiceType } from "../../types/service-type";
+import type {
+  Catalogue,
+  ServiceGroup,
+  ServiceType,
+} from "../../types/catalogue";
 import type { FilterDraft, SearchState, Venue } from "./state";
 
 /** A typed area (with its point once picked) or the device's location (null until known). */
@@ -33,26 +36,32 @@ export interface StyleSelection {
   name: string;
   display: string;
   has: boolean;
+  isPending: boolean;
 }
 
 const getSelectedGroup = (
+  groups: ServiceGroup[],
   serviceType: ServiceType | null,
-  groupSlug: string,
+  groupId: string,
 ) => {
-  if (serviceType)
-    return serviceGroups.find(({ id }) => id === serviceType.groupId);
+  if (serviceType) return groups.find(({ id }) => id === serviceType.groupId);
 
-  if (groupSlug) return serviceGroups.find(({ slug }) => slug === groupSlug);
+  if (groupId) return groups.find(({ id }) => id === groupId);
 
   return null;
 };
 
-export const getStyleSelection = ({ query }: SearchState): StyleSelection => {
+export const getStyleSelection = (
+  { query }: SearchState,
+  catalogue: Catalogue | undefined,
+): StyleSelection => {
+  const { groups, types } = catalogue ?? EMPTY_CATALOGUE;
+
   const serviceType = query.type
-    ? serviceTypes.find(({ slug }) => slug === query.type) || null
+    ? types.find(({ id }) => id === query.type) || null
     : null;
 
-  const group = getSelectedGroup(serviceType, query.group);
+  const group = getSelectedGroup(groups, serviceType, query.group);
 
   const freeText =
     !serviceType && !group ? String(query.freeText || "").trim() : "";
@@ -68,6 +77,7 @@ export const getStyleSelection = ({ query }: SearchState): StyleSelection => {
     name: label ?? (freeText ? `‘${freeText}’` : ""),
     display: label ?? freeText,
     has: !!(serviceType || group || freeText),
+    isPending: !catalogue && !!(query.type || query.group),
   };
 };
 
@@ -114,9 +124,14 @@ const VENUE_TYPES: Record<Venue, string[]> = {
 export const toSearchArgs = (
   state: SearchState,
   point: LatLng | null,
+  catalogue: Catalogue,
   overrides: Partial<FilterDraft> = {},
 ): SearchArgs => {
-  const { serviceType, group, isGroup, freeText } = getStyleSelection(state);
+  const { serviceType, group, isGroup, freeText } = getStyleSelection(
+    state,
+    catalogue,
+  );
+
   const venues = overrides.venues ?? state.venues;
 
   const maxPrice =

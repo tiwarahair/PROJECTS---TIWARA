@@ -1,6 +1,7 @@
 import { useLayoutEffect } from "react";
 import { WelcomeToast } from "../../components/welcome-toast";
 import type { PublicStylist } from "../../lib/public-stylist";
+import type { Catalogue } from "../../types/catalogue";
 import { joinClassNames } from "../../utils/class-names";
 import { BookingConfirmation } from "./confirmation";
 import { BookingCrumbs } from "./crumbs";
@@ -34,10 +35,11 @@ const STEP_VIEWS = {
 
 interface BookingFlowProps {
   publicStylist: PublicStylist;
+  catalogue: Catalogue;
 }
 
-export const BookingFlow = ({ publicStylist }: BookingFlowProps) => {
-  const booking = useBooking(publicStylist);
+export const BookingFlow = ({ publicStylist, catalogue }: BookingFlowProps) => {
+  const booking = useBooking(publicStylist, catalogue);
   const { state, stylist, holdOn, holdLeftMs, actions } = booking;
   const { step, confirmed } = state;
   const StepView = STEP_VIEWS[step as keyof typeof STEP_VIEWS];

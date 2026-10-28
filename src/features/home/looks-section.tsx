@@ -1,7 +1,9 @@
 import { ResponsiveImage } from "../../components/responsive-image";
 import { useRef } from "react";
 import { Link } from "react-router";
-import { serviceGroups } from "../../data";
+import { LookTileSkeleton } from "../../components/skeleton/look-tile";
+import { useGetCatalogueQuery } from "../../stores/api-slice";
+import { GROUP_PLACEHOLDERS } from "./group-placeholders";
 import { joinClassNames } from "../../utils/class-names";
 import page from "../../styles/features/home/index.module.css";
 import styles from "../../styles/features/home/looks-section.module.css";
@@ -20,8 +22,15 @@ const LOOK_IMAGES: Record<string, string> = {
 /** "Six ways to find your look" grid. */
 export const LooksSection = () => {
   const sectionRef = useRef<HTMLElement>(null);
+  const { data: catalogue, isLoading } = useGetCatalogueQuery();
+  const groups = catalogue?.groups ?? [];
 
-  useGridReveal(sectionRef, page.looktile ?? "", page.lookgrid ?? "");
+  useGridReveal(
+    sectionRef,
+    page.looktile ?? "",
+    page.lookgrid ?? "",
+    groups.length,
+  );
 
   return (
     <section
@@ -39,10 +48,12 @@ export const LooksSection = () => {
           Six ways to find your look
         </h2>
         <div className={joinClassNames(page.lookgrid, styles.grid)}>
-          {serviceGroups.map(({ id, name, description, image, slug }) => (
+          {isLoading &&
+            GROUP_PLACEHOLDERS.map((key) => <LookTileSkeleton key={key} />)}
+          {groups.map(({ id, name, description, image }) => (
             <Link
               key={id}
-              to={`/search?group=${slug}`}
+              to={`/search?group=${id}`}
               className={joinClassNames(page.looktile, styles.tile)}
             >
               <ResponsiveImage

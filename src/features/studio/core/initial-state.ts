@@ -1,6 +1,8 @@
+import { EMPTY_CATALOGUE } from "../../../lib/catalogue";
 import type { StudioState } from "./types";
 
 export const getInitialStudioState = (): StudioState => ({
+  catalogue: EMPTY_CATALOGUE,
   account: {
     stylistId: "",
     slug: "",

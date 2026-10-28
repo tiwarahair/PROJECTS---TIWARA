@@ -2,7 +2,10 @@ import { act, screen, within } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { installFakeIntersectionObserver } from "../../../test/helpers";
 import type { FakeIntersectionObserver } from "../../../test/helpers";
+import { fetchCatalogue } from "../../../lib/catalogue";
 import { searchStylists } from "../../../lib/search-api";
+import { TEST_CATALOGUE } from "../../../test/catalogue";
+import type { Catalogue } from "../../../types/catalogue";
 import { renderWithStore } from "../../../test/render-with-store";
 import { fakeSearch } from "../../../test/search-rows";
 import { HomePage } from "..";
@@ -104,6 +107,34 @@ describe("HomePage", () => {
         document.querySelector('[data-screen-label="Stylists"]'),
       ).toBeNull(),
     );
+  });
+
+  it("holds the style groups' places until the catalogue loads", async () => {
+    let finish: (catalogue: Catalogue) => void = () => undefined;
+
+    vi.mocked(fetchCatalogue).mockReturnValueOnce(
+      new Promise((resolve) => {
+        finish = resolve;
+      }),
+    );
+
+    renderWithStore(<HomePage />, "/", { isCatalogueLoading: true });
+
+    expect(screen.queryByRole("link", { name: "Locs" })).toBeNull();
+    expect(screen.getAllByTestId("look-tile-skeleton")).toHaveLength(6);
+    expect(screen.getAllByTestId("dark-band-skeleton")).not.toHaveLength(0);
+
+    await act(async () => finish(TEST_CATALOGUE));
+
+    await vi.waitFor(() =>
+      expect(screen.getByRole("link", { name: "Locs" })).toHaveAttribute(
+        "href",
+        "/search?group=locs",
+      ),
+    );
+
+    expect(screen.queryAllByTestId("look-tile-skeleton")).toHaveLength(0);
+    expect(screen.queryAllByTestId("dark-band-skeleton")).toHaveLength(0);
   });
 
   it("guests see Log in; logged-in customers see their initials menu", () => {

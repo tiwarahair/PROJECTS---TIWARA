@@ -1,5 +1,5 @@
 import Skeleton from "react-loading-skeleton";
-import styles from "../../styles/components/skeleton/studio-skeleton.module.css";
+import styles from "../../styles/components/skeleton/studio.module.css";
 
 /** Studio while the stylist's business loads: sidebar (desktop), greeting and a few cards. */
 export const StudioSkeleton = () => (

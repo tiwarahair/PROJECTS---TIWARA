@@ -1,3 +1,4 @@
+import Skeleton from "react-loading-skeleton";
 import type { MouseEvent, RefObject } from "react";
 import { ArrowLeft, Heart, Share } from "lucide-react";
 import { Link } from "react-router";
@@ -63,7 +64,11 @@ export const ProfileCover = ({
             {back.label}
           </Link>
           <span aria-hidden="true" className={styles.backDivider}></span>
-          <span className={styles.backSummary}>{back.summary}</span>
+          <span className={styles.backSummary}>
+            {back.summary ?? (
+              <Skeleton width={220} containerTestId="back-summary-skeleton" />
+            )}
+          </span>
         </div>
       )}
       <div className={joinClassNames(pageGlobal.pfCw, styles.coverWrap)}>
