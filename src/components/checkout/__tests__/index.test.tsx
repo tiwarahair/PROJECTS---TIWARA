@@ -294,6 +294,18 @@ describe("resending the receipt", () => {
     await vi.waitFor(() => expect(onExit).toHaveBeenCalled());
   });
 
+  it("a double tap sends the receipt once", async () => {
+    const onResent = vi.fn(() => new Promise<void>(() => {}));
+
+    renderSheet({ start: "resend", done, onResent });
+
+    await user.dblClick(screen.getByRole("button", { name: "Send receipt" }));
+
+    await screen.findByRole("button", { name: "Sending" });
+
+    expect(onResent).toHaveBeenCalledTimes(1);
+  });
+
   it("a failed send stays open and says why", async () => {
     const onResent = vi
       .fn()
