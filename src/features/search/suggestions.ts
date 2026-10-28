@@ -1,10 +1,12 @@
 // What / Where dropdown models (rows, chips, sections).
 import type { LucideIcon } from "lucide-react";
-import { serviceGroups } from "../../data";
 import type { SearchRow } from "../../lib/search-api";
 import { toPhotoUrl } from "../../lib/public-stylist";
-import type { ServiceGroup } from "../../types/service-group";
-import type { ServiceType } from "../../types/service-type";
+import type {
+  Catalogue,
+  ServiceGroup,
+  ServiceType,
+} from "../../types/catalogue";
 import { matchTypes } from "../../utils/services";
 import { getGroupIcon, SEARCH_ICONS } from "./icons";
 import type { Place, StyleSelection } from "./logic";
@@ -81,6 +83,7 @@ export const getWhatModel = (
   state: SearchState,
   selection: StyleSelection,
   stylists: { rows: SearchRow[]; isLoading: boolean; isSlow: boolean },
+  { groups, types }: Catalogue,
 ) => {
   const raw = state.whatTyped ? String(state.whatText || "").trim() : "";
   const query = raw.toLowerCase();
@@ -103,20 +106,23 @@ export const getWhatModel = (
         icon: SEARCH_ICONS.grid,
         on: !selection.has,
       },
-      ...serviceGroups.map(groupRow),
+      ...groups.map(groupRow),
     ];
   } else {
     styleRows = [
-      ...serviceGroups
+      ...groups
         .filter(({ name }) => name.toLowerCase().includes(query))
         .map(groupRow),
-      ...matchTypes(query)
+      ...matchTypes(
+        query,
+        types.filter(({ isActive }) => isActive),
+      )
         .filter(({ isOther }) => !isOther)
         .map((type): SuggestionRow => ({
           kind: "type",
           serviceType: type,
           label: type.name,
-          subtitle: serviceGroups.find(({ id }) => id === type.groupId)?.name,
+          subtitle: groups.find(({ id }) => id === type.groupId)?.name,
           on: !!selection.serviceType && selection.serviceType.id === type.id,
         })),
     ];

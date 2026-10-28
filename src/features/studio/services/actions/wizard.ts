@@ -1,5 +1,5 @@
 import type { StudioActions, StudioContext } from "../../core/actions";
-import { getTypeOf } from "../../core/model";
+import { findServiceType } from "../../core/model";
 import type {
   StudioService,
   StudioState,
@@ -31,9 +31,9 @@ const getBlankDraft = (): WizardDraft => ({
 
 const getServiceDraft = (
   service: StudioService,
-  { portfolio }: StudioState,
+  { portfolio, catalogue }: StudioState,
 ): WizardDraft => {
-  const type = getTypeOf(service);
+  const type = findServiceType(service, catalogue.types);
 
   return {
     name: service.name,

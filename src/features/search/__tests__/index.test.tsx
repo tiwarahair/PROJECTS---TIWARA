@@ -1,6 +1,9 @@
 import { act, screen, within } from "@testing-library/react";
 import { useMapsLibrary } from "@vis.gl/react-google-maps";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+import { fetchCatalogue } from "../../../lib/catalogue";
+import { TEST_CATALOGUE } from "../../../test/catalogue";
+import type { Catalogue } from "../../../types/catalogue";
 import { searchStylists } from "../../../lib/search-api";
 import { renderWithStore } from "../../../test/render-with-store";
 import { fakeSearch } from "../../../test/search-rows";
@@ -33,6 +36,49 @@ describe("SearchPage", () => {
   afterEach(() => {
     vi.useRealTimers();
     vi.unstubAllGlobals();
+  });
+
+  it("holds the chosen style's place until the catalogue can name it", async () => {
+    let finish: (catalogue: Catalogue) => void = () => undefined;
+
+    vi.mocked(fetchCatalogue).mockReturnValueOnce(
+      new Promise((resolve) => {
+        finish = resolve;
+      }),
+    );
+
+    renderWithStore(<SearchPage />, "/search?type=silk-press", {
+      isCatalogueLoading: true,
+    });
+
+    const what = screen.getByRole("combobox", { name: "Style or stylist" });
+
+    expect(what).toHaveValue("");
+    expect(what).not.toHaveAttribute("placeholder", "All styles");
+    expect(screen.getByTestId("what-skeleton")).toBeInTheDocument();
+
+    await act(async () => finish(TEST_CATALOGUE));
+
+    await vi.waitFor(() => expect(what).toHaveValue("Silk press"));
+
+    expect(screen.queryByTestId("what-skeleton")).toBeNull();
+  });
+
+  it("stops loading, without searching, when the catalogue fails", async () => {
+    vi.mocked(fetchCatalogue).mockRejectedValueOnce(new Error("offline"));
+
+    renderWithStore(<SearchPage />, "/search?type=silk-press", {
+      isCatalogueLoading: true,
+    });
+
+    await act(async () => {
+      await vi.advanceTimersByTimeAsync(500);
+    });
+
+    expect(screen.queryAllByTestId("stylist-card-skeleton")).toHaveLength(0);
+
+    expect(searchStylists).not.toHaveBeenCalled();
+    expect(screen.queryByText("No stylists match that yet")).toBeNull();
   });
 
   it("loads Google's places only once Where is opened", async () => {

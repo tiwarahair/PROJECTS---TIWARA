@@ -1,5 +1,5 @@
 import Skeleton from "react-loading-skeleton";
-import styles from "../../styles/components/skeleton/manage-booking-skeleton.module.css";
+import styles from "../../styles/components/skeleton/manage-booking.module.css";
 
 export const ManageBookingSkeleton = () => (
   <div aria-hidden="true">

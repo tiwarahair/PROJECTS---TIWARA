@@ -1,10 +1,5 @@
 import { LONG_MONTHS, SHORT_MONTHS } from "../../../utils/dates";
-import {
-  categoryColours,
-  platformCustomisations,
-  serviceGroups,
-  serviceTypes,
-} from "../../../data";
+import { categoryColours } from "../../../data";
 import {
   Archive,
   ArchiveRestore,
@@ -22,7 +17,6 @@ import {
 } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
 import type { CategoryColour } from "../../../types/category-colour";
-import type { Taxonomy } from "./types";
 
 export const TIMES = [
   "08:00",
@@ -114,26 +108,6 @@ export const CONTACT_ICONS = {
 };
 
 export const NO_CATEGORY_TONE = "var(--neutral-300,#d8d2c6)";
-
-/** The shared catalogue grouped for Studio. */
-export const TAXONOMY: Taxonomy[] = serviceGroups.map(({ id, name }) => {
-  const types = serviceTypes.filter(({ groupId }) => groupId === id);
-
-  const custom =
-    platformCustomisations[id as keyof typeof platformCustomisations];
-
-  return {
-    id,
-    name,
-    types,
-    subcategories: types
-      .filter(({ isOther }) => !isOther)
-      .map((type) => type.name),
-    other: types.find(({ isOther }) => isOther)?.name,
-    sizes: custom ? custom.size.map(([label]) => label) : null,
-    lengths: custom ? custom.length.map(([label]) => label) : null,
-  };
-});
 
 export const CATEGORY_COLOURS: CategoryColour[] = categoryColours;
 

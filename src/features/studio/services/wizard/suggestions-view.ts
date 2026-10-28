@@ -1,9 +1,10 @@
 import type { ChangeEvent } from "react";
-import type { ServiceType } from "../../../../types/service-type";
-import { TAXONOMY } from "../../core/constants";
+import type { ServiceType } from "../../../../types/catalogue";
+import { getTaxonomies } from "../../core/model";
 import type { WizardContext } from "./context";
 
 export const getSuggestionsView = ({
+  state,
   wizard,
   setWizard,
   serviceActions,
@@ -22,9 +23,8 @@ export const getSuggestionsView = ({
 
   const catalogue = wizard.pickGroup
     ? []
-    : TAXONOMY.filter(
-        ({ id }) => categoryFilter === "all" || id === categoryFilter,
-      )
+    : getTaxonomies(state)
+        .filter(({ id }) => categoryFilter === "all" || id === categoryFilter)
         .map(({ id, name, types }) => ({
           key: id,
           category: name,
@@ -50,7 +50,9 @@ export const getSuggestionsView = ({
     isSearching: !!query,
     clearSearch: () => setWizard({ search: "" }),
     categoryChips: [{ id: "all", label: "All" }]
-      .concat(TAXONOMY.map(({ id, name }) => ({ id, label: name })))
+      .concat(
+        state.catalogue.groups.map(({ id, name }) => ({ id, label: name })),
+      )
       .map(({ id, label }) => ({
         key: id,
         label,

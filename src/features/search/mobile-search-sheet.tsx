@@ -1,3 +1,4 @@
+import Skeleton from "react-loading-skeleton";
 import { ArrowLeft, CircleX, MapPin, Search, X } from "lucide-react";
 import { joinClassNames } from "../../utils/class-names";
 import { ClearButton } from "./clear-button";
@@ -28,7 +29,11 @@ export const MobileSearchSheet = ({ search }: MobileSearchSheetProps) => {
     {
       key: "w",
       caption: "Search",
-      label: selection.display || "All styles",
+      label: selection.isPending ? (
+        <Skeleton width={120} />
+      ) : (
+        selection.display || "All styles"
+      ),
       icon: SEARCH_ICONS.search,
       open: actions.openMobileWhat,
       hasClear: !!selection.display,

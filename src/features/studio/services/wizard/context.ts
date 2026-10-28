@@ -1,6 +1,6 @@
 import type { StudioController } from "../../core/use-studio";
 import type { WizardDraft, WizardState } from "../../core/types";
-import { getTaxonomy } from "../actions";
+import { getTaxonomy } from "../../core/model";
 import {
   getOwnErrors,
   getVariationErrors,
@@ -19,7 +19,7 @@ export const getContext = (studio: StudioController) => {
 
   const { setWizard, setDraft } = serviceActions;
   const { draft } = wizard;
-  const group = draft.taxonomyId ? getTaxonomy(draft.taxonomyId) : null;
+  const group = draft.taxonomyId ? getTaxonomy(state, draft.taxonomyId) : null;
   const stepIndex = STEPS.indexOf(wizard.step);
   const base = getWizardBase(draft);
   const isStep3Valid = base.basePrice > 0 && base.totalMinutes > 0;

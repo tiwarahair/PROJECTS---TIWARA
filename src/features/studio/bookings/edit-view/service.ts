@@ -1,6 +1,6 @@
 import type { ChangeEvent } from "react";
-import { TAXONOMY } from "../../core/constants";
 import { parseNumber } from "../../core/format";
+import { getTaxonomies, getTaxonomy } from "../../core/model";
 import type { StudioService } from "../../core/types";
 import { formatDuration } from "../../../../utils/dates";
 import type { EditContext, ServiceEditDraft } from "./context";
@@ -40,8 +40,7 @@ export const getServiceView = ({
   draft,
   duration,
 }: EditContext) => ({
-  categoryLabel:
-    TAXONOMY.find((group) => group.id === draft.taxonomyId)?.name ?? "Other",
+  categoryLabel: getTaxonomy(state, draft.taxonomyId)?.name ?? "Other",
   serviceName: draft.serviceName || booking.service,
   serviceMeta: `${formatDuration(duration)} · £${parseNumber(draft.price)}`,
   openChange: () => {
@@ -106,30 +105,32 @@ export const getChangeServiceView = ({
     });
   };
 
-  const serviceGroups = TAXONOMY.map((group) => {
-    const items = state.services
-      .filter(
-        (service) =>
-          service.taxonomyId === group.id &&
-          (service.status || "active") !== "archived" &&
-          (!query || service.name.toLowerCase().includes(query)),
-      )
-      .map((service) => ({
-        key: service.id,
-        name: service.name,
-        duration: service.duration,
-        price: `£${service.price}`,
-        isOn: service.id === draft.serviceId,
-        pick: () => pickService(service),
-      }));
+  const serviceGroups = getTaxonomies(state)
+    .map((group) => {
+      const items = state.services
+        .filter(
+          (service) =>
+            service.taxonomyId === group.id &&
+            (service.status || "active") !== "archived" &&
+            (!query || service.name.toLowerCase().includes(query)),
+        )
+        .map((service) => ({
+          key: service.id,
+          name: service.name,
+          duration: service.duration,
+          price: `£${service.price}`,
+          isOn: service.id === draft.serviceId,
+          pick: () => pickService(service),
+        }));
 
-    return {
-      key: group.id,
-      category: group.name,
-      count: String(items.length),
-      items,
-    };
-  }).filter(({ items }) => items.length);
+      return {
+        key: group.id,
+        category: group.name,
+        count: String(items.length),
+        items,
+      };
+    })
+    .filter(({ items }) => items.length);
 
   return {
     serviceQuery: state.changeServiceQuery || "",

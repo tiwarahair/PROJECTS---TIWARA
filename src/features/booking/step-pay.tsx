@@ -9,7 +9,7 @@ import {
 import type { StripeExpressCheckoutElementConfirmEvent } from "@stripe/stripe-js";
 import { ArrowLeft, ArrowRight, CircleAlert } from "lucide-react";
 import { useEffect, useState } from "react";
-import { PaymentFieldsSkeleton } from "../../components/skeleton/payment-fields-skeleton";
+import { PaymentFieldsSkeleton } from "../../components/skeleton/payment-fields";
 import { stripePromise } from "../../lib/stripe";
 import { useGetCardsSessionQuery } from "../../stores/account-api";
 import { useAppSelector } from "../../stores/hooks";

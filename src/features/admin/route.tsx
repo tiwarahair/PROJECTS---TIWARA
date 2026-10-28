@@ -1,5 +1,5 @@
 import { Navigate } from "react-router";
-import { StudioSkeleton } from "../../components/skeleton/studio-skeleton";
+import { StudioSkeleton } from "../../components/skeleton/studio";
 import { useIsSlow } from "../../hooks/use-is-slow";
 import { useAppSelector } from "../../stores/hooks";
 import { NotFoundPage } from "../page-states/not-found";

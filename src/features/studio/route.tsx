@@ -1,9 +1,10 @@
 import { skipToken } from "@reduxjs/toolkit/query";
 import { Navigate } from "react-router";
-import { StudioSkeleton } from "../../components/skeleton/studio-skeleton";
+import { StudioSkeleton } from "../../components/skeleton/studio";
 import { useIdentity } from "../../hooks/use-identity";
 import { useIsSlow } from "../../hooks/use-is-slow";
 import {
+  useGetCatalogueQuery,
   useGetStudioBookingsQuery,
   useGetStylistStudioQuery,
   useGetTwoFactorDevicesQuery,
@@ -37,11 +38,14 @@ export const StudioRoute = () => {
       refetchOnMountOrArgChange: 30,
     });
 
+  const { data: catalogue, isError: isCatalogueError } = useGetCatalogueQuery();
+
   const isLoading =
     !ready ||
     (!!user?.isStylist &&
       (!studio ||
         !bookings ||
+        !catalogue ||
         !identity?.isLoaded ||
         (!devices && !isDevicesError)));
 
@@ -55,7 +59,11 @@ export const StudioRoute = () => {
   if (!user.isStylist) return <Navigate to="/join" replace />;
 
   // a failed background refresh keeps the Studio that's already open
-  if ((isStudioError && !studio) || (isBookingsError && !bookings))
+  if (
+    (isStudioError && !studio) ||
+    (isBookingsError && !bookings) ||
+    (isCatalogueError && !catalogue)
+  )
     return (
       <PageMessage
         title="Studio didn’t load"
@@ -66,7 +74,7 @@ export const StudioRoute = () => {
       />
     );
 
-  if (isLoading || !studio || !bookings || !identity?.isLoaded)
+  if (isLoading || !studio || !bookings || !catalogue || !identity?.isLoaded)
     return isSlow ? <StudioSkeleton /> : null;
 
   if (studio.status === "closed" && studio.closed_at)
@@ -86,6 +94,7 @@ export const StudioRoute = () => {
         studio,
         bookings,
         devices: devices ?? [],
+        catalogue,
       }}
     />
   );

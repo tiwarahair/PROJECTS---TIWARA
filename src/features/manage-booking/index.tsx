@@ -2,7 +2,7 @@ import { ArrowLeft } from "lucide-react";
 import { useLayoutEffect, useState } from "react";
 import { Link, Navigate } from "react-router";
 import { PageMessage } from "../../components/page-message";
-import { ManageBookingSkeleton } from "../../components/skeleton/manage-booking-skeleton";
+import { ManageBookingSkeleton } from "../../components/skeleton/manage-booking";
 import { useIsSlow } from "../../hooks/use-is-slow";
 import { usePrivateLink } from "../../hooks/use-private-link";
 import {

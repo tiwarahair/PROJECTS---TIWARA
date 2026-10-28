@@ -1,5 +1,6 @@
 import type { FieldErrors } from "react-hook-form";
 import type { PublicStylist } from "../../../lib/public-stylist";
+import type { Catalogue } from "../../../types/catalogue";
 import {
   findService,
   getServiceOptions,
@@ -22,7 +23,10 @@ import { useLeaveGuard } from "./use-leave-guard";
 import { usePay } from "./use-pay";
 import { useTravelCheck } from "./use-travel-check";
 
-export const useBooking = ({ stylist, hours }: PublicStylist) => {
+export const useBooking = (
+  { stylist, hours }: PublicStylist,
+  { types }: Catalogue,
+) => {
   const flow = useFlowState(stylist);
   const { state, stateRef, setState, crumbsRef, scrollToTitle } = flow;
 
@@ -37,7 +41,7 @@ export const useBooking = ({ stylist, hours }: PublicStylist) => {
   });
 
   const service = findService(stylist, state.serviceId);
-  const options = getServiceOptions(service);
+  const options = getServiceOptions(service, types);
   const money = getBookingMoney(stylist, service, options, state.selection);
   const isMobileStylist = stylist.businessType === "mobile";
   const choices = toChoices(options, state.selection);

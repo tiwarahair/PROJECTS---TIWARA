@@ -1,4 +1,5 @@
 import { ArrowLeft, Search } from "lucide-react";
+import Skeleton from "react-loading-skeleton";
 import { FavouritesHeartIcon } from "../../components/icons/custom-icons";
 import type { CSSProperties } from "react";
 import { Link } from "react-router";
@@ -27,6 +28,7 @@ export const SearchNav = ({ search }: SearchNavProps) => {
   const identity = useIdentity();
   const isMobileSheet = !!state.mobileView;
   const whatValue = state.whatText != null ? state.whatText : selection.display;
+  const isWhatPending = selection.isPending && state.whatText == null;
   const whereValue = state.whereText != null ? state.whereText : where.display;
   const hasDate = !!state.query.date || state.time !== "any";
   const mobileDateLabel = getMobileDateLabel(state);
@@ -68,7 +70,11 @@ export const SearchNav = ({ search }: SearchNavProps) => {
               className={styles.mobileSummaryButton}
             >
               <span className={styles.mobileTitle}>
-                {selection.display || "All styles"}
+                {selection.isPending ? (
+                  <Skeleton width={120} />
+                ) : (
+                  selection.display || "All styles"
+                )}
               </span>
               <span className={styles.mobileSub}>
                 {`${mobileDateLabel} · ${mobileWhereLabel}`}
@@ -76,7 +82,16 @@ export const SearchNav = ({ search }: SearchNavProps) => {
             </button>
           </div>
           <div className={joinClassNames(pageGlobal.hsField, styles.field)}>
-            <div className={styles.fieldRow}>
+            <div className={joinClassNames(styles.fieldRow, styles.whatRow)}>
+              {isWhatPending && (
+                <span
+                  aria-hidden="true"
+                  data-testid="what-skeleton"
+                  className={styles.pendingValue}
+                >
+                  <Skeleton width={120} />
+                </span>
+              )}
               <input
                 ref={refs.what}
                 type="text"
@@ -84,7 +99,7 @@ export const SearchNav = ({ search }: SearchNavProps) => {
                 onFocus={actions.focusWhat}
                 onChange={actions.changeWhat}
                 onKeyDown={actions.keyWhat}
-                placeholder="All styles"
+                placeholder={isWhatPending ? "" : "All styles"}
                 aria-label="Style or stylist"
                 // no aria-controls on the comboboxes; kept as-is
                 // eslint-disable-next-line jsx-a11y/role-has-required-aria-props

@@ -1,5 +1,6 @@
 import { screen, waitFor, within } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+import { fetchCatalogue } from "../../../lib/catalogue";
 import { fetchPublicProfile } from "../../../lib/public-profiles";
 import { toPublicStylist } from "../../../lib/public-stylist";
 import { PUBLIC_PROFILE } from "../../../test/public-profile";
@@ -45,6 +46,32 @@ describe("StylistProfilePage", () => {
     ).toHaveAttribute("href", "/book?stylist=tiwaras-house");
 
     expect(screen.getByText("New")).toBeInTheDocument();
+  });
+
+  it("Back to results names the last search, even when the catalogue fails", async () => {
+    sessionStorage.setItem("tw_last_search", "/search?type=silk-press");
+
+    const { unmount } = renderWithStore(
+      <StylistProfilePage />,
+      "/tiwaras-house",
+    );
+
+    expect(
+      await screen.findByText("Silk press · Current location · Any time"),
+    ).toBeInTheDocument();
+
+    unmount();
+    vi.mocked(fetchCatalogue).mockRejectedValueOnce(new Error("offline"));
+
+    renderWithStore(<StylistProfilePage />, "/tiwaras-house", {
+      isCatalogueLoading: true,
+    });
+
+    expect(
+      await screen.findByText("silk-press · Current location · Any time"),
+    ).toBeInTheDocument();
+
+    expect(screen.queryByTestId("back-summary-skeleton")).toBeNull();
   });
 
   it("a paused stylist has no Book now", async () => {

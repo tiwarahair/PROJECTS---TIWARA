@@ -1,5 +1,5 @@
 import Skeleton from "react-loading-skeleton";
-import styles from "../../styles/components/skeleton/payment-fields-skeleton.module.css";
+import styles from "../../styles/components/skeleton/payment-fields.module.css";
 
 /** Stripe's card fields (number, expiry and code, country) while its form loads. */
 export const PaymentFieldsSkeleton = () => (

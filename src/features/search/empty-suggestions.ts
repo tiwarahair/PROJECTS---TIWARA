@@ -42,7 +42,7 @@ export const getEmptySuggestions = (
             label: `Try ${group.name}`,
             pick: () =>
               update((current) => ({
-                query: { ...current.query, type: "", group: group.slug },
+                query: { ...current.query, type: "", group: group.id },
               })),
           },
         ]

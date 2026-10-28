@@ -38,18 +38,18 @@ Hosted on Vercel. Local stack needs Docker + `yarn db:start`.
 
 This is **not** a single home page with panels sliding over it. Each main flow has its own path.
 
-| Path | What it is |
-|---|---|
-| `/` | Marketing home |
-| `/search` | Find stylists (live search) |
-| `/:slug` | Public stylist page |
-| `/book` | Client booking flow |
-| `/manage` | Change or cancel a booking (token / code) |
-| `/save-details` | Save details after booking |
-| `/account` | Client account |
-| `/help` | Help and support |
-| `/login`, `/signup`, `/join` | Auth and stylist join |
-| `/studio` | Stylist business app |
+| Path                         | What it is                                |
+| ---------------------------- | ----------------------------------------- |
+| `/`                          | Marketing home                            |
+| `/search`                    | Find stylists (live search)               |
+| `/:slug`                     | Public stylist page                       |
+| `/book`                      | Client booking flow                       |
+| `/manage`                    | Change or cancel a booking (token / code) |
+| `/save-details`              | Save details after booking                |
+| `/account`                   | Client account                            |
+| `/help`                      | Help and support                          |
+| `/login`, `/signup`, `/join` | Auth and stylist join                     |
+| `/studio`                    | Stylist business app                      |
 
 Routing lives in `src/app-router.tsx`. Pages load lazily. `src/app-layout.tsx` only handles scroll restoration and an outlet.
 
@@ -103,7 +103,7 @@ Clients use `/account`. Stylists use `/studio` after join / onboarding.
 
 `/search` calls live stylist search (`src/lib/search-api.ts` → database). Filters include service group, place (Google Places), and more. Results are not a hard-coded front-end list.
 
-`src/data/stylists.json` is seed / reference style data for the product catalogue story — not “the search index.”
+The demo stylists live in `supabase/seed.sql` (local only).
 
 ### Public stylist page
 
@@ -113,11 +113,11 @@ Clients use `/account`. Stylists use `/studio` after join / onboarding.
 
 `/book` is a multi-step flow against a real stylist:
 
-1. Service  
-2. Customise  
-3. Time (slots from the server)  
-4. Details  
-5. Review  
+1. Service
+2. Customise
+3. Time (slots from the server)
+4. Details
+5. Review
 6. Pay (Stripe)
 
 There are holds, travel-area checks, resume banners, size guide, and confirmation. Edge functions cover calendar, hold, checkout, cancel, invite, webhooks, and related jobs.

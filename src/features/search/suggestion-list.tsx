@@ -1,5 +1,5 @@
 import { ResponsiveImage } from "../../components/responsive-image";
-import { SuggestionRowSkeleton } from "../../components/skeleton/suggestion-row-skeleton";
+import { SuggestionRowSkeleton } from "../../components/skeleton/suggestion-row";
 import { joinClassNames } from "../../utils/class-names";
 import controls from "../../styles/features/search/controls.module.css";
 import type { WhatChip } from "./state";

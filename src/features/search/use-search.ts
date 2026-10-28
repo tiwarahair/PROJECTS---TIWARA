@@ -102,7 +102,14 @@ export const useSearch = () => {
 
   const data = useSearchData(state, filterDraft, places);
   const { selection, place } = data;
-  const what = getWhatModel(state, selection, data.stylistSuggestions);
+
+  const what = getWhatModel(
+    state,
+    selection,
+    data.stylistSuggestions,
+    data.catalogue,
+  );
+
   const where = getWhereModel(state, place, data.places);
 
   const closeSheet = (

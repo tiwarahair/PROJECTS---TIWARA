@@ -4,8 +4,10 @@ import { useDebouncedValue } from "../../hooks/use-debounced-value";
 import { useIsSlow } from "../../hooks/use-is-slow";
 import {
   usePeekStylistsQuery,
+  useGetCatalogueQuery,
   useSearchStylistsInfiniteQuery,
 } from "../../stores/api-slice";
+import { EMPTY_CATALOGUE } from "../../lib/catalogue";
 import { toResultCards } from "./cards";
 import { getPlace, getStyleSelection, toSearchArgs } from "./logic";
 import type { FilterDraft, SearchState } from "./state";
@@ -21,20 +23,32 @@ export const useSearchData = (
 ) => {
   const location = useCurrentPosition();
 
+  const { data: loadedCatalogue, isError: isCatalogueError } =
+    useGetCatalogueQuery();
+
+  const catalogue = loadedCatalogue ?? EMPTY_CATALOGUE;
+
   const place = getPlace(state.query, location.position);
-  const selection = getStyleSelection(state);
+
+  const selection = getStyleSelection(
+    state,
+    isCatalogueError ? catalogue : loadedCatalogue,
+  );
 
   // "Current location": hold the search briefly for the position rather than searching twice
   const isWaitingForPlace = location.isWaiting && !place.point;
 
+  const isWaitingForCatalogue = !loadedCatalogue && !isCatalogueError;
+  const isWaiting = isWaitingForPlace || !loadedCatalogue;
+
   const results = useSearchStylistsInfiniteQuery(
-    isWaitingForPlace ? skipToken : toSearchArgs(state, place.point),
+    isWaiting ? skipToken : toSearchArgs(state, place.point, catalogue),
     { refetchOnMountOrArgChange: 60 },
   );
 
   const draftPeek = usePeekStylistsQuery(
-    { args: toSearchArgs(state, place.point, filterDraft), size: 1 },
-    { skip: !state.filtersOpen },
+    { args: toSearchArgs(state, place.point, catalogue, filterDraft), size: 1 },
+    { skip: !state.filtersOpen || !loadedCatalogue },
   );
 
   const typedWhat = state.whatTyped ? (state.whatText ?? "").trim() : "";
@@ -56,7 +70,9 @@ export const useSearchData = (
   const rows = results.currentData?.pages.flat() ?? [];
 
   const isLoading =
-    isWaitingForPlace || (results.isFetching && !results.isFetchingNextPage);
+    isWaitingForPlace ||
+    isWaitingForCatalogue ||
+    (results.isFetching && !results.isFetchingNextPage);
 
   const isStylistsLoading = whatText !== typedWhat || stylistPeek.isFetching;
 
@@ -68,6 +84,7 @@ export const useSearchData = (
 
   return {
     location,
+    catalogue,
     place,
     selection,
     places: { ...places, isSlow: isPlacesSlow },
@@ -75,7 +92,7 @@ export const useSearchData = (
     total: Number(rows[0]?.total_count ?? 0),
     isLoading,
     isSlow,
-    isError: results.isError,
+    isError: results.isError || isCatalogueError,
     hasMore: !!results.hasNextPage,
     isLoadingMore: results.isFetchingNextPage,
     isSlowMore,

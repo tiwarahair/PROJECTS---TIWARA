@@ -1,5 +1,5 @@
 // A booking dressed for display: status, payment, colours and labels.
-import { getTaxonomy } from "../services/actions";
+import { getTaxonomy } from "../core/model";
 import {
   dayInfo,
   durationToMinutes,
@@ -253,7 +253,7 @@ export const decorateBooking = (
   const resends = booking.resends || 0;
   const phone = (client.phone || "").replace(/\s/g, "");
   const service = state.services.find(({ name }) => name === booking.service);
-  const group = service ? getTaxonomy(service.taxonomyId) : null;
+  const group = service ? getTaxonomy(state, service.taxonomyId) : null;
 
   return {
     ...booking,
