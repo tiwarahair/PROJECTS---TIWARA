@@ -278,13 +278,8 @@ export const makeChart = (data: number[]) => {
   return { line, area, points };
 };
 
-export const copyText = (text: string) => {
-  try {
-    void navigator.clipboard.writeText(text);
-  } catch {
-    // clipboard can be unavailable; the toast still confirms
-  }
-};
+export const copyText = async (text: string) =>
+  navigator.clipboard.writeText(text);
 
 /** copies text the server is still making; Safari only allows it while the click is still being handled. */
 export const copyLaterText = async (text: Promise<string>) => {

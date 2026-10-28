@@ -1,6 +1,7 @@
 import type { StudioActions, StudioContext } from "../../core/actions";
-import { ICONS } from "../../core/constants";
-import { formatAddon } from "../../core/model";
+import { GATE_REASON, ICONS } from "../../core/constants";
+import { copyText } from "../../core/format";
+import { formatAddon, getServiceBookingLink, isLive } from "../../core/model";
 import type { StudioAddon, StudioService } from "../../core/types";
 import { getAnchor } from "./helpers";
 import type { WizardActions } from "./wizard";
@@ -60,6 +61,27 @@ export const createMenuActions = (
     };
   };
 
+  const copyServiceLink = ({ id, name, status }: StudioService) => {
+    const state = getState();
+
+    if (!isLive(state)) {
+      showToast(GATE_REASON);
+
+      return;
+    }
+
+    if (status !== "active") {
+      showToast(`Make ${name} active to share its booking link.`);
+
+      return;
+    }
+
+    void copyText(getServiceBookingLink(state, id)).then(
+      () => showToast(`Booking link for ${name} copied`),
+      () => showToast("The booking link couldn’t be copied. Try again."),
+    );
+  };
+
   const openServiceActions = (
     service: StudioService,
     event?: MenuEvent | null,
@@ -104,7 +126,7 @@ export const createMenuActions = (
         {
           label: "Quick booking link",
           icon: ICONS.link,
-          run: () => showToast(`Booking link for ${service.name} copied`),
+          run: () => copyServiceLink(service),
         },
         getStatusItem(service.status, service.name, setStatus),
         {
