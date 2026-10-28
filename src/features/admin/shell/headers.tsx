@@ -5,17 +5,17 @@ import { getAssetUrl } from "../../../utils/asset-url";
 import admin from "../../../styles/features/admin/shell.module.css";
 
 interface AdminPhoneHeaderProps {
-  isStylist: boolean;
+  isBackToStudio: boolean;
   initials: string;
 }
 
 export const AdminPhoneHeader = ({
-  isStylist,
+  isBackToStudio,
   initials,
 }: AdminPhoneHeaderProps) => (
   <BackBar
     screenLabel="Admin back bar"
-    back={isStylist ? { label: "Studio", to: "/studio" } : undefined}
+    back={isBackToStudio ? { label: "Studio", to: "/studio" } : undefined}
     leading={
       <Link to="/" aria-label="Tiwára's House home">
         <img

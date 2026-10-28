@@ -17,6 +17,7 @@ import {
   Users,
 } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
+import { STUDIO_ADMIN_URL } from "../../admin/shell/nav-items";
 import { GATE_REASON } from "../core/constants";
 import { copyText } from "../core/format";
 import {
@@ -258,7 +259,7 @@ export const getSettingsNav = (
                 subtitle: "Reported reviews and appeals",
                 icon: ShieldCheck,
                 isLocked: false,
-                onSelect: () => navigate("/admin"),
+                onSelect: () => navigate(STUDIO_ADMIN_URL),
               },
             ],
           },

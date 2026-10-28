@@ -1,5 +1,5 @@
 import { ClipboardCheck, Eye } from "lucide-react";
-import { useNavigate } from "react-router";
+import { useSearchParams } from "react-router";
 import { ActionMenuButton } from "../../../components/action-menu";
 import { Avatar } from "../../../components/ds/avatar";
 import { Tooltip } from "../../../components/ds/tooltip";
@@ -7,6 +7,7 @@ import { StarRating } from "../../../components/star-rating";
 import type { AdminReport, ReportsTab } from "../../../lib/admin-api";
 import { joinClassNames } from "../../../utils/class-names";
 import { formatReviewDate } from "../../../utils/review-date";
+import { getAdminParams } from "../shell/nav-items";
 import {
   formatWhen,
   getAgeText,
@@ -52,7 +53,7 @@ export const ReportRow = ({
     appeal,
   } = report;
 
-  const navigate = useNavigate();
+  const [params, setParams] = useSearchParams();
   const isLate = tab !== "decided" && isOverdue(report);
   const dueText = getDueText(report);
 
@@ -140,8 +141,11 @@ export const ReportRow = ({
                 label: "View in Profiles",
                 icon: Eye,
                 run: () =>
-                  void navigate(
-                    `/admin?tab=profiles&stylist=${report.stylist_id}`,
+                  setParams(
+                    getAdminParams(params, {
+                      tab: "profiles",
+                      stylist: report.stylist_id,
+                    }),
                   ),
               },
             ]}

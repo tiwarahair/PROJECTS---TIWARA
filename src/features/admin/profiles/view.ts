@@ -130,6 +130,14 @@ const getPricesText = ({ price_outliers: outliers }: AdminProfileDetail) => {
   return `${first.name} from ${pounds(first.from_pence)}, usually about ${pounds(first.usual_pence)}`;
 };
 
+const getPhotosText = (isFlagged: boolean, photos: number) => {
+  if (!photos) return "No photos yet";
+
+  return isFlagged
+    ? `Only ${getCount(photos, "photo")}`
+    : `${getCount(photos, "photo")} of their work`;
+};
+
 /** the four checks in the profile sheet, in the order they're shown */
 export const getChecks = (profile: AdminProfileDetail): CheckRow[] => {
   const { flags, photo_count: photos } = profile;
@@ -155,9 +163,7 @@ export const getChecks = (profile: AdminProfileDetail): CheckRow[] => {
     {
       label: "Photos",
       isOk: !flags.includes("photos"),
-      text: flags.includes("photos")
-        ? `Only ${getCount(photos, "photo")}`
-        : `${getCount(photos, "photo")} of their work`,
+      text: getPhotosText(flags.includes("photos"), photos),
     },
   ];
 };
