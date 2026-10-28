@@ -5,6 +5,8 @@ import { getStudioSeed } from "../../../../../test/studio-seed";
 import { StudioPage } from "../../..";
 import type { UserEvent } from "@testing-library/user-event";
 import { setupUser } from "../../../../../test/setup-user";
+import { saveService } from "../../../../../lib/studio-api/services";
+import { addPortfolioPhoto } from "../../../../../lib/studio-api/photos";
 
 // saves stay in flight, so the screen keeps what was done
 vi.mock("../../../../../lib/studio-api/services", async (importOriginal) => ({
@@ -12,6 +14,16 @@ vi.mock("../../../../../lib/studio-api/services", async (importOriginal) => ({
     typeof import("../../../../../lib/studio-api/services")
   >()),
   saveService: vi.fn(() => new Promise(() => {})),
+  saveCategories: vi.fn().mockResolvedValue(undefined),
+  saveAddon: vi.fn().mockResolvedValue(undefined),
+}));
+
+vi.mock("../../../../../lib/studio-api/photos", async (importOriginal) => ({
+  ...(await importOriginal<
+    typeof import("../../../../../lib/studio-api/photos")
+  >()),
+  uploadPhotoWithCopies: vi.fn((path: string) => Promise.resolve(path)),
+  addPortfolioPhoto: vi.fn().mockResolvedValue(undefined),
 }));
 
 let user: UserEvent;
@@ -127,6 +139,60 @@ describe("Studio → service wizard", () => {
     expect(
       await screen.findByText("Knotless braids added to your services"),
     ).toBeInTheDocument();
+  });
+
+  it("takes up to 5 photos, which upload to the portfolio and go on the service when it saves", async () => {
+    URL.createObjectURL = vi.fn(() => "blob:photo");
+    URL.revokeObjectURL = vi.fn();
+    await openWizard();
+    await pickSuggestion("Knotless braids");
+
+    const images = Array.from(
+      { length: 6 },
+      (_unused, index) =>
+        new File(["x"], `photo-${index}.jpg`, { type: "image/jpeg" }),
+    );
+
+    await user.upload(screen.getByLabelText("Service images"), images);
+
+    expect(screen.getAllByAltText("Service photo")).toHaveLength(5);
+    expect(screen.queryByText("Choose a file")).not.toBeInTheDocument();
+
+    await user.click(
+      screen.getAllByRole("button", { name: "Remove photo" })[0] as HTMLElement,
+    );
+
+    expect(screen.getAllByAltText("Service photo")).toHaveLength(4);
+    expect(screen.getByText("Choose a file")).toBeInTheDocument();
+
+    await user.click(getContinue());
+
+    await user.click(
+      await screen.findByRole("button", { name: "Review your prices" }),
+    );
+
+    await user.click(getContinue());
+    await screen.findByText("Added to this service");
+
+    await user.click(
+      screen
+        .getAllByRole("button", { name: "Add service" })
+        .at(-1) as HTMLElement,
+    );
+
+    expect(
+      await screen.findByText("Knotless braids added to your services"),
+    ).toBeInTheDocument();
+
+    await vi.waitFor(() => expect(saveService).toHaveBeenCalled());
+
+    const photoIds = vi.mocked(saveService).mock.calls.at(-1)?.[3] ?? [];
+
+    expect(photoIds).toHaveLength(4);
+
+    expect(
+      vi.mocked(addPortfolioPhoto).mock.calls.map(([{ id }]) => id),
+    ).toEqual(photoIds);
   });
 
   it("editing jumps to the tab with a missing price on save", async () => {

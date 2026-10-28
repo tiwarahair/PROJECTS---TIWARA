@@ -1,5 +1,6 @@
 import { Star, Sun } from "lucide-react";
 import type { CSSProperties } from "react";
+import { PhotoCarousel } from "../../components/photo-carousel";
 import { resolveAssetUrl } from "../../utils/asset-url";
 import { joinClassNames } from "../../utils/class-names";
 import { getWhenLine } from "./logic/calendar";
@@ -42,11 +43,25 @@ export const BookingSummary = ({ booking }: BookingSummaryProps) => {
     "--preview-image": toImage(previewPath),
   } as CSSProperties;
 
+  const servicePhotos = service?.photos ?? [];
+
   const coverStyle = {
     "--cover-image": stylist.cover ? toImage(stylist.cover) : "none",
   } as CSSProperties;
 
   const motion = isMobile ? styles.motionMobile : styles.motionDesktop;
+
+  const hasPhotos = servicePhotos.length > 0;
+  const shownClass = hasPhotos ? styles.coverShownPhotos : styles.coverShown;
+
+  const coverClass = joinClassNames(
+    pageGlobal.sumcover,
+    showPrev && pageGlobal.sumcoverHidden,
+    styles.cover,
+    showPrev ? styles.coverHidden : shownClass,
+    motion,
+  );
+
   const totalLabel = service ? money.total : "—";
 
   const previewOpenClass = isMobile
@@ -108,18 +123,28 @@ export const BookingSummary = ({ booking }: BookingSummaryProps) => {
         </div>
       </div>
       <div className={joinClassNames(pageGlobal.sumcard, styles.card)}>
-        <div
-          role="img"
-          aria-label={stylist.name}
-          className={joinClassNames(
-            pageGlobal.sumcover,
-            showPrev && pageGlobal.sumcoverHidden,
-            styles.cover,
-            showPrev ? styles.coverHidden : styles.coverShown,
-            motion,
-          )}
-          style={coverStyle}
-        ></div>
+        {hasPhotos ? (
+          <div className={coverClass}>
+            <PhotoCarousel
+              key={service?.id}
+              className={styles.coverCarousel}
+              photos={servicePhotos}
+              label={service?.name}
+              labelClassName={joinClassNames(
+                styles.previewTag,
+                styles.serviceTag,
+              )}
+              sizes="(max-width: 960px) 100vw, 400px"
+            />
+          </div>
+        ) : (
+          <div
+            role="img"
+            aria-label={stylist.name}
+            className={coverClass}
+            style={coverStyle}
+          ></div>
+        )}
         {holdOn && (
           <HoldBar variant="card" time={state.time} leftMs={holdLeftMs} />
         )}

@@ -53,13 +53,13 @@ export const useCatalogueSync = (
           await saveAddon(fromStudioAddon(addon, stylistId));
 
         for (const service of getChanged(services, before.services)) {
-          const { row, variations, addonLinks } = fromStudioService(
+          const { row, variations, addonLinks, photoIds } = fromStudioService(
             service,
             stylistId,
             services.indexOf(service),
           );
 
-          await saveService(row, variations, addonLinks);
+          await saveService(row, variations, addonLinks, photoIds);
         }
 
         for (const id of getRemovedIds(services, before.services))

@@ -21,6 +21,7 @@ import {
   countServices,
   getBookHref,
   getMenuGroups,
+  getPhotoService,
   hasMoreServices,
   limitMenuGroups,
 } from "./profile-menu";
@@ -85,6 +86,11 @@ export const StylistProfileView = ({
     event.preventDefault();
     navigate(back.href);
   };
+
+  const zoomedService =
+    zoomIndex == null
+      ? null
+      : getPhotoService(stylist, menuGroups, gallery[zoomIndex] ?? "");
 
   const zoomTo = (src: string) =>
     setZoomIndex(Math.max(0, gallery.indexOf(src)));
@@ -201,6 +207,15 @@ export const StylistProfileView = ({
           index={zoomIndex}
           onIndexChange={setZoomIndex}
           onClose={() => setZoomIndex(null)}
+          service={
+            zoomedService && {
+              name: zoomedService.name,
+              open: () => {
+                setZoomIndex(null);
+                setServiceModal(zoomedService);
+              },
+            }
+          }
         />
       )}
       <div className={styles.footer}>

@@ -92,3 +92,29 @@
   border-radius: 16px;
   cursor: default;
 }
+
+.service {
+  position: absolute;
+  z-index: 2;
+  bottom: clamp(48px, 4vw + 30px, 66px);
+  left: 50%;
+  transform: translateX(-50%);
+  max-width: calc(100% - 48px);
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding: 8px 12px 8px 16px;
+  border: none;
+  border-radius: var(--radius-full);
+  background: var(--neutral-50);
+  color: var(--text-primary);
+  font-size: 14px;
+  font-weight: 600;
+  white-space: nowrap;
+  cursor: pointer;
+  transition: transform 160ms ease-out;
+}
+
+.service:active {
+  transform: translateX(-50%) scale(0.96) !important;
+}

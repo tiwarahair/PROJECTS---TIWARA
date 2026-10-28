@@ -3,7 +3,12 @@ import type { SearchSelectOption } from "../../../../components/search-select";
 import { serviceTypes } from "../../../../data";
 import type { ServiceType } from "../../../../types/service-type";
 import { getSwatches } from "../catalog-sheets-view";
-import { NO_CATEGORY_TONE, TAXONOMY } from "../../core/constants";
+import {
+  NO_CATEGORY_TONE,
+  PORTFOLIO_LIMIT,
+  SERVICE_PHOTO_LIMIT,
+  TAXONOMY,
+} from "../../core/constants";
 import {
   getCategoryById,
   getSortedCategories,
@@ -171,8 +176,43 @@ export const getDetailsView = ({
         }
       }, 0);
     },
-    pickImages: () =>
-      actions.showToast("Image upload is not part of this prototype"),
+    photos: draft.photos.map(({ id, src, file }) => ({
+      key: id,
+      src,
+      remove: () => {
+        if (file) URL.revokeObjectURL(src);
+
+        setDraft({ photos: draft.photos.filter((photo) => photo.id !== id) });
+      },
+    })),
+    canAddPhotos: draft.photos.length < SERVICE_PHOTO_LIMIT,
+    onImageFiles: (event: ChangeEvent<HTMLInputElement>) => {
+      const picked = Array.from(event.target.files || []);
+      const unsaved = draft.photos.filter(({ file }) => file).length;
+      const portfolioRoom = PORTFOLIO_LIMIT - state.portfolio.length - unsaved;
+
+      const room = Math.min(
+        SERVICE_PHOTO_LIMIT - draft.photos.length,
+        portfolioRoom,
+      );
+
+      event.target.value = "";
+
+      if (picked.length && portfolioRoom <= 0)
+        actions.showToast(
+          `Your portfolio is full (${PORTFOLIO_LIMIT} photos). Remove some in Settings to add more.`,
+        );
+
+      setDraft({
+        photos: draft.photos.concat(
+          picked.slice(0, Math.max(room, 0)).map((file) => ({
+            id: crypto.randomUUID(),
+            src: URL.createObjectURL(file),
+            file,
+          })),
+        ),
+      });
+    },
     onName: (event: ChangeEvent<HTMLInputElement>) =>
       setDraft({ name: event.target.value }),
     onDescription: (event: ChangeEvent<HTMLTextAreaElement>) =>

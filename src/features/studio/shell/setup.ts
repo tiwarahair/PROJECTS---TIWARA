@@ -7,9 +7,20 @@ export const SETUP_COUNT = SETUP_KEYS.length;
 
 type SetupRow = [(typeof SETUP_KEYS)[number], string, string, () => void];
 
+export const openServicesTab = ({ setState, actions }: StudioController) => {
+  setState({
+    tab: "services",
+    servicesTab: "services",
+    page: null,
+    serviceStatusFilter: "all",
+  });
+
+  actions.scrollBody(0, false);
+};
+
 /** The four setup steps with their actions. */
 export const getSetupRows = (studio: StudioController): SetupRow[] => {
-  const { setState, actions } = studio;
+  const { actions } = studio;
 
   return [
     [
@@ -34,16 +45,7 @@ export const getSetupRows = (studio: StudioController): SetupRow[] => {
       "services",
       "Add services",
       "Finish your 2 starter services or add your own. You need at least one to take bookings.",
-      () => {
-        setState({
-          tab: "services",
-          servicesTab: "services",
-          page: null,
-          serviceStatusFilter: "all",
-        });
-
-        actions.scrollBody(0, false);
-      },
+      () => openServicesTab(studio),
     ],
   ];
 };

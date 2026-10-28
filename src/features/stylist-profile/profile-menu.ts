@@ -12,6 +12,7 @@ const MENU_LIMIT = 6;
 
 export interface ServiceModal {
   name: string;
+  photos: string[];
   description: string;
   price: string;
   duration: string;
@@ -56,6 +57,7 @@ export const getMenuGroups = (stylist: Stylist): MenuGroup[] =>
         href,
         modal: {
           name: service.name,
+          photos: service.photos ?? [],
           description: service.description,
           price: `from ${price}`,
           duration,
@@ -65,6 +67,15 @@ export const getMenuGroups = (stylist: Stylist): MenuGroup[] =>
       };
     }),
   }));
+
+export const getPhotoService = (
+  { photoServiceIds = {} }: Stylist,
+  groups: MenuGroup[],
+  src: string,
+): ServiceModal | null =>
+  groups
+    .flatMap(({ items }) => items)
+    .find(({ key }) => key === photoServiceIds[src])?.modal ?? null;
 
 export const countServices = (groups: MenuGroup[]): number =>
   groups.flatMap(({ items }) => items).length;

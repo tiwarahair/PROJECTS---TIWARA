@@ -83,6 +83,7 @@ export const getDemoProfile = (slug: string): PublicProfile => {
       price_override_pence: pence(price),
       minutes_override: minutes,
     })),
+    photos: [],
   });
 
   const { policies } = stylist;
@@ -159,6 +160,7 @@ export const getDemoProfile = (slug: string): PublicProfile => {
     portfolio_photos: stylist.portfolio.map((path, sort) => ({
       id: `${slug}-photo-${sort}`,
       stylist_id: slug,
+      service_id: null,
       path,
       sort,
       created_at: "",

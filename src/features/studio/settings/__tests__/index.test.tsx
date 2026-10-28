@@ -164,7 +164,7 @@ describe("Studio → Settings", () => {
     ]);
 
     vi.useRealTimers();
-    await screen.findByText("2 of 20");
+    await screen.findByText("2 of 40");
 
     await waitFor(() =>
       expect(

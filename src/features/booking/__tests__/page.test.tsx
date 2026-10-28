@@ -11,6 +11,8 @@ import { stripeStub } from "../../../test/setup";
 import { startCheckout } from "../../../lib/booking-api";
 import { startCardsSession } from "../../../lib/client-cards";
 import { fetchMySensitivity } from "../../../lib/client-sensitivities";
+import { fetchPublicProfile } from "../../../lib/public-profiles";
+import { getDemoProfile } from "../../../test/demo-profile";
 
 vi.mock("../../../lib/public-profiles", async (original) =>
   (await import("../../../test/booking-mocks")).mockPublicProfiles(original),
@@ -63,6 +65,42 @@ describe("BookingPage", () => {
     expect(screen.getAllByRole("status")[0]).toHaveTextContent(
       "Choose a size and length",
     );
+  });
+
+  it("the summary shows the picked service's photos with its name instead of the cover", async () => {
+    const profile = getDemoProfile("tiwaras-house");
+
+    if (!profile) throw new Error("the demo stylist exists");
+
+    vi.mocked(fetchPublicProfile).mockResolvedValueOnce({
+      ...profile,
+      services: profile.services.map((service) =>
+        service.name === "Knotless braids"
+          ? {
+              ...service,
+              photos: [
+                "demo/stylists/w160524.jpg",
+                "demo/stylists/w160944.jpg",
+              ],
+            }
+          : service,
+      ),
+    });
+
+    await renderBooking("stylist=tiwaras-house");
+
+    expect(
+      screen.queryByRole("group", { name: /photos/ }),
+    ).not.toBeInTheDocument();
+
+    await user.click(screen.getByRole("button", { name: /^Knotless braids/ }));
+
+    const carousel = screen.getByRole("group", {
+      name: "Knotless braids photos",
+    });
+
+    expect(within(carousel).getAllByRole("img")).toHaveLength(2);
+    expect(within(carousel).getByText("Knotless braids")).toBeInTheDocument();
   });
 
   it("details: Continue shows every field error", async () => {

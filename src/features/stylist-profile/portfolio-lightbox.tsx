@@ -11,6 +11,7 @@ interface PortfolioLightboxProps {
   index: number;
   onIndexChange: (index: number) => void;
   onClose: () => void;
+  service?: { name: string; open: () => void } | null;
 }
 
 /** Full-screen photo viewer: arrows / keys / swipe step through the gallery, the scrim closes it. */
@@ -19,6 +20,7 @@ export const PortfolioLightbox = ({
   index,
   onIndexChange,
   onClose,
+  service,
 }: PortfolioLightboxProps) => {
   const touchStartX = useRef<number | null>(null);
   const src = photos[index] ?? "";
@@ -86,6 +88,19 @@ export const PortfolioLightbox = ({
       >
         <ChevronRight size={22} strokeWidth={1.8} />
       </button>
+      {service && (
+        <button
+          type="button"
+          className={styles.service}
+          onClick={(event) => {
+            event.stopPropagation();
+            service.open();
+          }}
+        >
+          {service.name}
+          <ChevronRight size={15} strokeWidth={2} />
+        </button>
+      )}
       <div className={styles.counter}>{`${index + 1} / ${photos.length}`}</div>
     </div>
   );
