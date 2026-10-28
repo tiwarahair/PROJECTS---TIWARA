@@ -152,7 +152,7 @@ export const usePaymentPolicy = ({
         },
       }),
     addExtra: (type: ExtraType) => {
-      if (!isFull) append({ type, text: "" });
+      if (!isFull) append({ key: crypto.randomUUID(), type, text: "" });
     },
     removeExtra: remove,
   };

@@ -15,6 +15,10 @@ export interface PolicyExtra {
   text: string;
 }
 
+export interface PolicyFormExtra extends PolicyExtra {
+  key: string;
+}
+
 export interface PolicyFormValues {
   mode: PolicyMode;
   deposit: string;
@@ -23,7 +27,7 @@ export interface PolicyFormValues {
   late: FeeValues;
   noShow: FeeValues;
   grace: number;
-  extras: PolicyExtra[];
+  extras: PolicyFormExtra[];
 }
 
 /** What onSave receives; also accepted back as `value` to seed the form. */
