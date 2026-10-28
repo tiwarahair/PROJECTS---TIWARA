@@ -244,3 +244,89 @@ describe("CheckoutSheet", () => {
     );
   });
 });
+
+describe("resending the receipt", () => {
+  const done = {
+    method: "card" as const,
+    via: "",
+    charged: 80,
+    tip: 0,
+    refundAuto: 0,
+  };
+
+  const getEmail = () =>
+    screen.getByRole("textbox", { name: /^Email address/ });
+
+  it("sends by email only, to the client's address by default", () => {
+    renderSheet({ start: "resend", done });
+
+    expect(
+      screen.queryByRole("button", { name: "SMS" }),
+    ).not.toBeInTheDocument();
+
+    expect(getEmail()).toHaveValue("zainab.bello@gmail.com");
+  });
+
+  it("sends to the edited address, then leaves once the host has sent it", async () => {
+    let finish = () => {};
+
+    const onResent = vi.fn(
+      () =>
+        new Promise<void>((resolve) => {
+          finish = resolve;
+        }),
+    );
+
+    const onExit = vi.fn();
+
+    renderSheet({ start: "resend", done, onResent, onExit });
+
+    await user.clear(getEmail());
+    await user.type(getEmail(), "zainab@work.test");
+    await click("Send receipt");
+
+    expect(onResent).toHaveBeenCalledWith("zainab@work.test");
+    expect(screen.getByRole("button", { name: "Sending" })).toBeDisabled();
+    expect(onExit).not.toHaveBeenCalled();
+
+    finish();
+
+    await vi.waitFor(() => expect(onExit).toHaveBeenCalled());
+  });
+
+  it("a failed send stays open and says why", async () => {
+    const onResent = vi
+      .fn()
+      .mockRejectedValue(new Error("Enter a valid email address."));
+
+    const onExit = vi.fn();
+
+    renderSheet({ start: "resend", done, onResent, onExit });
+
+    await click("Send receipt");
+
+    expect(
+      await screen.findByText("Enter a valid email address."),
+    ).toBeInTheDocument();
+
+    expect(screen.getByRole("button", { name: "Send receipt" })).toBeEnabled();
+
+    expect(onExit).not.toHaveBeenCalled();
+  });
+
+  it("checks the address before sending", async () => {
+    const onResent = vi.fn();
+
+    renderSheet({ start: "resend", done, onResent });
+
+    await user.clear(getEmail());
+    await user.type(getEmail(), "zainab");
+    await click("Send receipt");
+
+    expect(await screen.findByRole("alert")).toHaveTextContent(
+      "Enter a valid email address.",
+    );
+
+    expect(onResent).not.toHaveBeenCalled();
+  });
+});

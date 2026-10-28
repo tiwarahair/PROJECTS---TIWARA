@@ -178,7 +178,6 @@ export const getInitialCheckout = ({
     refunded: 0,
     refundLast: "",
     dialog: null,
-    resendVia: "email",
     toast: "",
     done: null,
   };

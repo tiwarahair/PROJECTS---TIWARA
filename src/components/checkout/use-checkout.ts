@@ -65,7 +65,7 @@ export interface CheckoutSheetProps {
     action: "done" | "rebook",
   ) => void;
   onRefund?: (amount: number, reason: string, isOffPlatform: boolean) => void;
-  onResent?: (to: string) => void;
+  onResent?: (to: string) => Promise<void>;
   onCancelLink?: () => void;
 }
 
@@ -86,11 +86,8 @@ export const useCheckout = (props: CheckoutSheetProps) => {
 
   const money = getMoney(state, booking);
 
-  const getResendTo = (via: CheckoutState["resendVia"]) =>
-    via === "email" ? booking.email : booking.phone;
-
   const resendForm = useForm<ResendValues>({
-    defaultValues: { to: getResendTo(state.resendVia) },
+    defaultValues: { to: booking.email },
     resolver: zodResolver(resendSchema),
   });
 
@@ -112,10 +109,7 @@ export const useCheckout = (props: CheckoutSheetProps) => {
 
   const startRefund = () => refundForm.reset(EMPTY_REFUND);
 
-  const startResend = (via: CheckoutState["resendVia"]) => {
-    setState({ resendVia: via });
-    resendForm.reset({ to: getResendTo(via) });
-  };
+  const startResend = () => resendForm.reset({ to: booking.email });
 
   const setState = (
     patch:

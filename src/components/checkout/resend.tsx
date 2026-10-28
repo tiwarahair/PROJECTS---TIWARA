@@ -1,13 +1,12 @@
 import { useFormState } from "react-hook-form";
 import { joinClassNames } from "../../utils/class-names";
 import { getViewAnimation } from "./detail";
-import { Chip } from "./controls";
 import type { CheckoutController } from "./use-checkout";
 import styles from "../../styles/components/checkout/resend.module.css";
 import shared from "../../styles/components/checkout/index.module.css";
 
 export const CheckoutResend = ({
-  checkout: { state, booking, resendForm, startResend },
+  checkout: { state, booking, resendForm },
 }: {
   checkout: CheckoutController;
 }) => {
@@ -26,33 +25,14 @@ export const CheckoutResend = ({
       <div className={styles.resendIntro}>
         {`Send ${booking.first} a copy of the receipt for ${booking.day}, ${booking.time}.`}
       </div>
-      <div className={shared.chipRow}>
-        {(
-          [
-            ["email", "Email"],
-            ["sms", "SMS"],
-          ] as const
-        ).map(([via, label]) => (
-          <Chip
-            key={via}
-            isOn={state.resendVia === via}
-            className={styles.resendChip}
-            onPick={() => startResend(via)}
-          >
-            {label}
-          </Chip>
-        ))}
-      </div>
       <label className={shared.field}>
-        <span className={shared.fieldLabel}>
-          {state.resendVia === "email" ? "Email address" : "Mobile number"}
-        </span>
+        <span className={shared.fieldLabel}>Email address</span>
         <input
           className={joinClassNames(
             styles.resendInput,
             error ? shared.borderErr : shared.borderOk,
           )}
-          type={state.resendVia === "email" ? "email" : "tel"}
+          type="email"
           {...resendForm.register("to")}
         />
         {!!error && (

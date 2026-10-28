@@ -119,13 +119,29 @@ const FOOTERS: Partial<Record<CheckoutView, FooterBuilder>> = {
       isPrimaryDisabled: amount > refundCap,
     };
   },
-  resend: ({ props, resendForm, showToast, goTo }) => ({
-    primaryLabel: "Send receipt",
+  resend: ({ props, state, setState, resendForm, showToast, goTo }) => ({
+    primaryLabel: state.busy ? "Sending" : "Send receipt",
+    isPrimaryDisabled: state.busy,
     primaryRun: () =>
-      void resendForm.handleSubmit(({ to }) => {
-        showToast(`Receipt sent to ${to}`);
-        props.onResent?.(to);
-        goTo("detail", -1);
+      void resendForm.handleSubmit(async ({ to }) => {
+        setState({ busy: true });
+
+        try {
+          await props.onResent?.(to);
+        } catch (error) {
+          setState({ busy: false });
+
+          showToast(
+            error instanceof Error
+              ? error.message
+              : "The receipt didn’t send. Try again.",
+          );
+
+          return;
+        }
+
+        setState({ busy: false });
+        goTo(state.fromDone ? "done" : "detail", -1);
       })(),
   }),
 };

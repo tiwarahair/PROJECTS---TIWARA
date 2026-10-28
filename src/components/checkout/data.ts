@@ -131,7 +131,6 @@ export interface CheckoutState {
   refunded: number;
   refundLast: string;
   dialog: DialogKind | null;
-  resendVia: "email" | "sms";
   toast: string;
   done: CheckoutResult | null;
 }

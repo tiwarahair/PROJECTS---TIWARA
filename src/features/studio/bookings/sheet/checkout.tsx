@@ -11,6 +11,7 @@ interface BookingCheckoutProps {
 export const BookingCheckout = ({ studio, view }: BookingCheckoutProps) => (
   <StudioCheckout
     studio={studio}
+    bookingId={view.checkoutBookingId}
     booking={view.checkoutBooking}
     onExit={() => studio.setState({ bookingStep: "view" })}
     onPay={view.onPay}

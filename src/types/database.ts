@@ -4031,6 +4031,10 @@ export type Database = {
         Returns: Json;
       };
       resend_balance_link: { Args: { target: string }; Returns: undefined };
+      resend_checkout_receipt: {
+        Args: { email: string; target: string };
+        Returns: undefined;
+      };
       resend_confirm_link: { Args: { target: string }; Returns: number };
       resend_payment_link: {
         Args: { target_booking: string };

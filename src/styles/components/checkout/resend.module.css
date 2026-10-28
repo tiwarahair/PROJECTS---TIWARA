@@ -4,19 +4,6 @@
   line-height: 1.5;
 }
 
-.resendChip {
-  height: 44px;
-  padding: 0 20px;
-  border-radius: var(--radius-full);
-  font: inherit;
-  font-size: 14.5px;
-  font-weight: 600;
-  cursor: pointer;
-  transition:
-    background-color 0.16s ease,
-    color 0.16s ease;
-}
-
 .resendInput {
   width: 100%;
   box-sizing: border-box;
