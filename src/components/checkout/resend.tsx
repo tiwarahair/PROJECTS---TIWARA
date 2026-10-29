@@ -1,6 +1,6 @@
 import { useFormState } from "react-hook-form";
 import { joinClassNames } from "../../utils/class-names";
-import { getViewAnimation } from "./detail";
+import { getViewAnimation } from "./motion";
 import { Chip } from "./controls";
 import type { CheckoutController } from "./use-checkout";
 import styles from "../../styles/components/checkout/resend.module.css";

@@ -1,7 +1,7 @@
 import type { ReactNode } from "react";
 import type { LucideIcon } from "lucide-react";
 import { joinClassNames } from "../../utils/class-names";
-import { getViewAnimation } from "./detail";
+import { getViewAnimation } from "./motion";
 import { Chip, RadioMark } from "./controls";
 import { ICONS } from "./data";
 import type { CheckoutViewModel } from "./view";

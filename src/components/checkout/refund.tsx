@@ -1,6 +1,6 @@
 import { CircleAlert } from "lucide-react";
 import { joinClassNames } from "../../utils/class-names";
-import { getViewAnimation } from "./detail";
+import { getViewAnimation } from "./motion";
 import { REFUND_REASONS } from "./data";
 import { RadioMark } from "./controls";
 import { getRefundOverError } from "./schemas";

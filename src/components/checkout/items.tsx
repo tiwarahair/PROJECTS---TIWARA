@@ -1,6 +1,7 @@
 import { Plus, Undo2 } from "lucide-react";
 import { joinClassNames } from "../../utils/class-names";
-import { AmountRow, getViewAnimation } from "./detail";
+import { AmountRow } from "./amount-row";
+import { getViewAnimation } from "./motion";
 import { AdjustPanel } from "./adjust";
 import { getAdjustNote } from "./view";
 import type { CheckoutViewModel } from "./view";

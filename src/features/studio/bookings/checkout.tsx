@@ -68,7 +68,6 @@ export const StudioCheckout = ({
         start={start}
         done={done}
         refunded={refunded}
-        linkPaid={false}
         layout={isWide ? "desktop" : "mobile"}
         radius={isWide ? "var(--radius-lg)" : "24px 24px 0 0"}
         stylist={{
@@ -85,7 +84,6 @@ export const StudioCheckout = ({
         onRefund={onRefund}
         onPay={onPay}
         onResent={() => {}}
-        onCancelLink={() => {}}
       />
     </div>
   );
