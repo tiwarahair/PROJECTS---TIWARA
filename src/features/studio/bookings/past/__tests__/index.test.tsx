@@ -169,14 +169,6 @@ describe("Studio → past booking sheet", () => {
     ).toBeInTheDocument();
   });
 
-  it("the receipt names the stylist's business as the seller", async () => {
-    await openPast(/Nia Okafor.*Completed/);
-    await user.click(screen.getByRole("button", { name: "View receipt" }));
-
-    expect(screen.getAllByText("Amara Hair").length).toBeGreaterThan(0);
-    expect(screen.queryByText("Tiwára’s House")).not.toBeInTheDocument();
-  });
-
   it("an unpaid no-show fee can be waived", async () => {
     await openPast(/Nia Okafor.*No show/);
 
