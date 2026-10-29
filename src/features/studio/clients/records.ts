@@ -47,6 +47,7 @@ export const toStudioClient = (row: StudioClientRow): StudioClient => ({
   last: row.last_visit
     ? formatDate(row.last_visit, { day: "numeric", month: "short" })
     : "",
+  lastAt: row.last_visit,
   since: formatDate(row.created_at, { month: "short", year: "numeric" }),
   spent: toPounds(row.paid_pence),
   notes: { products: row.hair_notes ?? "" },

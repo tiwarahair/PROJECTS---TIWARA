@@ -20,6 +20,7 @@ export interface StudioClient {
   photoPath?: string;
   visits?: number;
   last?: string;
+  lastAt?: string;
   spent?: number;
   fav?: string;
   phone?: string;

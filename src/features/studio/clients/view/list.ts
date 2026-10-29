@@ -26,11 +26,8 @@ const FILTER_TESTS: Record<string, (row: ListRow) => boolean> = {
 
 const getFilterTest = (id: string) => FILTER_TESTS[id] ?? isAny;
 
-const parseDay = (value: string | undefined) => {
-  const time = Date.parse(`${value || ""} 2026`);
-
-  return isNaN(time) ? 0 : time;
-};
+const getLastVisitTime = ({ lastAt }: StudioClient) =>
+  lastAt ? Date.parse(lastAt) || 0 : 0;
 
 const nextKey = ({ stats }: ListRow) =>
   stats.upcoming.length
@@ -38,12 +35,15 @@ const nextKey = ({ stats }: ListRow) =>
       timeToMinutes(stats.upcoming[0]?.time)
     : 1e9;
 
-const SORTERS: Record<string, (first: ListRow, second: ListRow) => number> = {
+const CLIENT_SORTERS: Record<
+  string,
+  (first: ListRow, second: ListRow) => number
+> = {
   next: (first, second) =>
     nextKey(first) - nextKey(second) ||
-    parseDay(second.client.last) - parseDay(first.client.last),
+    getLastVisitTime(second.client) - getLastVisitTime(first.client),
   last: (first, second) =>
-    parseDay(second.client.last) - parseDay(first.client.last),
+    getLastVisitTime(second.client) - getLastVisitTime(first.client),
   visits: (first, second) =>
     (second.client.visits || 0) - (first.client.visits || 0),
   // eslint-disable-next-line id-length -- keyed by the "az" sort option value
@@ -88,7 +88,7 @@ export const getListView = (
   const list = rows
     .filter(getFilterTest(state.clientFilter))
     .filter((row) => isMatch(query, row))
-    .sort(SORTERS[state.clientSort] ?? SORTERS.next);
+    .sort(CLIENT_SORTERS[state.clientSort] ?? CLIENT_SORTERS.next);
 
   const open = (client: StudioClient) => {
     if (isWide) {
