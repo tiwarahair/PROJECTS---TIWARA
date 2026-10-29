@@ -3,6 +3,8 @@
 -- client's name and email in case a card payment is disputed, and the nightly purge_deleted_client_contacts clears
 -- them after, as when a client deletes their account.
 
+-- every business past its 15 days, purged or not, so a photo missed one night is removed the next
+
 create function public.get_due_closure_client_photos()
 returns setof text
 language sql
@@ -11,7 +13,9 @@ security definer
 set search_path = ''
 as $$
   select name from storage.objects
-  where bucket_id = 'client-photos' and (storage.foldername(name))[1] in (select public.get_due_closures()::text)
+  where bucket_id = 'client-photos' and (storage.foldername(name))[1] in (
+    select id::text from public.stylists where status = 'closed' and closed_at < now() - interval '15 days'
+  )
 $$;
 
 -- only a booking waiting to be confirmed needs the email its link goes to, so clearing a cancelled booking's contact
@@ -68,6 +72,11 @@ begin
   delete from public.booking_tokens where booking_id = any (closed_bookings);
   delete from public.booking_codes where booking_id = any (closed_bookings);
 
+  -- emails being sent, or queued in the last day, are left to finish; the 90-day clean-up removes them
+  delete from public.notifications
+  where payload ->> 'ref' in (select ref from public.bookings where id = any (closed_bookings))
+    and (status in ('sent', 'failed') or (status = 'pending' and created_at < now() - interval '1 day'));
+
   update public.booking_events
   set data = data - 'from' - 'to'
   where kind = 'address_changed' and booking_id = any (closed_bookings);
@@ -83,6 +92,7 @@ begin
     notes = null,
     allergies = null,
     allergies_consented_at = null,
+    cancel_reason = null,
     address = null,
     location = null
   where id = any (closed_bookings);

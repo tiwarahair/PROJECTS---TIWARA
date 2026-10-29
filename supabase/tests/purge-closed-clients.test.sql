@@ -1,5 +1,5 @@
 begin;
-select plan(15);
+select plan(18);
 
 create function pg_temp.sign_up(user_id uuid, user_email text, meta jsonb)
 returns void
@@ -59,7 +59,7 @@ select
   pg_temp.book((select closing from stylist_ids), 'cancelled', -12) as cancelled,
   pg_temp.book((select open from stylist_ids), 'completed', -10) as elsewhere;
 
-update public.bookings set protection_status = 'pending' where id = (select cancelled from ids);
+update public.bookings set protection_status = 'pending', cancel_reason = 'Ill' where id = (select cancelled from ids);
 
 insert into public.payments (booking_id, kind, amount_pence, platform_fee_pence, created_at)
 values ((select recent from ids), 'booking', 6140, 140, now() - interval '10 days'),
@@ -84,6 +84,13 @@ values ((select recent from ids), '\x00', now() + interval '10 minutes');
 insert into public.booking_events (booking_id, kind, data)
 values ((select recent from ids), 'address_changed', '{"by": "client", "from": {"line1": "2 Low St"}, "to": "9 New Rd"}');
 
+insert into public.notifications (channel, to_address, template, payload, status, created_at)
+select 'email', 'nia@purging.test', 'booking_confirmed', jsonb_build_object('ref', ref, 'client_name', 'Nia'), sent.status,
+  now() - make_interval(days => sent.days)
+from public.bookings,
+  (values ('sent', 20), ('failed', 20), ('pending', 2), ('pending', 0), ('sending', 2)) as sent (status, days)
+where id in ((select recent from ids), (select elsewhere from ids));
+
 insert into storage.objects (bucket_id, name)
 select 'client-photos', photo_path from public.stylist_clients
 where stylist_id in (select closing from stylist_ids union select open from stylist_ids);
@@ -91,8 +98,10 @@ where stylist_id in (select closing from stylist_ids union select open from styl
 update public.stylists set status = 'closed', closed_at = now() - interval '16 days'
 where id = (select closing from stylist_ids);
 
-select is(array(select public.get_due_closure_client_photos()),
-  array(select photo_path from public.stylist_clients where stylist_id = (select closing from stylist_ids)),
+create temp table closing_photos as
+select photo_path from public.stylist_clients where stylist_id = (select closing from stylist_ids);
+
+select is(array(select public.get_due_closure_client_photos()), array(select photo_path from closing_photos),
   'the clean-up lists only the closed business''s client photos');
 
 select lives_ok($$select public.purge_closed_businesses()$$, 'the purge runs, a cancelled unconfirmed booking too');
@@ -120,9 +129,9 @@ select is((select contact from public.bookings where id = (select old from ids))
 
 select is(
   (select count(*) from public.bookings where stylist_id = (select closing from stylist_ids)
-    and (notes is not null or allergies is not null or allergies_consented_at is not null or address is not null
-      or location is not null)),
-  0::bigint, 'notes, allergies, the address and location go from every booking');
+    and (notes is not null or allergies is not null or allergies_consented_at is not null or cancel_reason is not null
+      or address is not null or location is not null)),
+  0::bigint, 'notes, allergies, the cancel reason, the address and location go from every booking');
 
 select is(
   (select count(*) from public.booking_notes where booking_id = (select recent from ids))
@@ -147,7 +156,21 @@ select ok(
   'another business''s clients are untouched'
 );
 
-select is(array(select public.get_due_closure_client_photos()), '{}'::text[], 'nothing is listed once purged');
+select is(
+  (select array_agg(status order by status) from public.notifications
+    where payload ->> 'ref' = (select ref from public.bookings where id = (select recent from ids))),
+  '{pending,sending}'::text[], 'emails about its bookings go, except ones still sending or queued today'
+);
+
+select is((select count(*) from public.notifications
+    where payload ->> 'ref' = (select ref from public.bookings where id = (select elsewhere from ids))),
+  5::bigint, 'another business''s emails stay');
+
+select is(array(select public.get_due_closure_client_photos()), array(select photo_path from closing_photos),
+  'client photos the edge function missed are listed again the next night');
+
+select is((select count(*) from public.stylist_clients where stylist_id = (select closing from stylist_ids)
+    and photo_path is not null), 0::bigint, 'though the client card no longer points to them');
 
 update public.payments set created_at = now() - interval '130 days' where booking_id = (select recent from ids);
 
