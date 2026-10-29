@@ -1,5 +1,5 @@
 begin;
-select plan(11);
+select plan(13);
 
 create function pg_temp.sign_up(user_id uuid, user_email text, business text)
 returns void
@@ -131,6 +131,19 @@ select lives_ok(
   'a day later it can be resent again'
 );
 reset role;
+
+insert into public.refunds (booking_id, amount_pence, reason, method)
+values ((select paid from b), 2000, 'manual', 'card'), ((select paid from b), 500, 'manual', 'cash');
+select is(
+  (select concat_ws(' ', refunded_pence, given_back_pence, given_back_via)
+    from jsonb_to_record(public.get_receipt_details((select paid from b)))
+      as receipt(refunded_pence int, given_back_pence int, given_back_via text)),
+  '2000 500 cash', 'a refund after checkout is on the receipt'
+);
+select is(
+  (public.get_receipt_details((select paid from b)) ->> 'final_pence')::int, 10000,
+  'and the total stays the checkout’s'
+);
 
 select ok(
   has_function_privilege('authenticated', 'public.resend_checkout_receipt(uuid, text)', 'execute')
