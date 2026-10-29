@@ -3380,6 +3380,10 @@ export type Database = {
         Args: { owner: string; target: string };
         Returns: Json;
       };
+      get_due_closure_client_photos: {
+        Args: Record<PropertyKey, never>;
+        Returns: string[];
+      };
       get_due_closure_photos: {
         Args: Record<PropertyKey, never>;
         Returns: string[];
