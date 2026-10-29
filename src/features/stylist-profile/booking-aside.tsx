@@ -19,7 +19,7 @@ export const BookingAside = ({
   fromLabel,
   bookHref,
   facts: {
-    cancelHours,
+    cancelChip,
     mailto,
     site,
     siteHref,
@@ -40,8 +40,9 @@ export const BookingAside = ({
               Book now
             </Link>
             <div className={styles.note}>
-              {"No account needed. Free cancellation up to "}
-              {cancelHours}h before.
+              {cancelChip
+                ? `No account needed. ${cancelChip}.`
+                : "No account needed."}
             </div>
           </>
         ) : (

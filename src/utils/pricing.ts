@@ -16,6 +16,21 @@ export const getWindowText = (hours: number): string => {
   return hours === 1 ? "1 hour" : `${hours} hours`;
 };
 
+const getShortWindow = (hours: number) =>
+  hours < 1 ? `${Math.round(hours * 60)} min` : `${hours}h`;
+
+export const getCancellationLabel = ({
+  mode,
+  refundable,
+  freeWindowHours,
+}: Pick<Policy, "mode" | "refundable" | "freeWindowHours">): string => {
+  if (mode === "none") return "";
+
+  if (mode === "deposit" && !refundable) return "Deposit non-refundable";
+
+  return `Free cancellation up to ${getShortWindow(freeWindowHours)}`;
+};
+
 interface PolicyLine {
   icon: LucideIcon;
   text: string;
@@ -94,16 +109,17 @@ export const policyLines = (
       `Pay ${formatMoney(fee)} booking fee today. The ${formatMoney(price)} is paid to ${stylistName} at your appointment.`,
     );
 
+  const label = getCancellationLabel(policy);
+
   const getCancellationText = (): string => {
     if (mode === "deposit")
       return refundable
-        ? `Free cancellation up to ${windowText} before; your deposit is refunded.`
-        : `Cancel or reschedule up to ${windowText} before at no additional charge. Your ${formatMoney(deposit)} deposit is non-refundable.`;
+        ? `${label} before; your deposit is refunded.`
+        : `${label}: your ${formatMoney(deposit)} deposit isn’t returned. Cancel or reschedule up to ${windowText} before at no additional charge.`;
 
-    if (mode === "full")
-      return `Free cancellation up to ${windowText} before; you’re refunded in full.`;
+    if (mode === "full") return `${label} before; you’re refunded in full.`;
 
-    if (mode === "card") return `Free cancellation up to ${windowText} before.`;
+    if (mode === "card") return `${label} before.`;
 
     return `Please cancel or reschedule at least ${windowText} before.`;
   };

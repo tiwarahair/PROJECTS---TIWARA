@@ -74,7 +74,7 @@ export const ProfileLede = ({
         </div>
         <div className={styles.chips}>
           {hasPayChip && <span className={styles.chip}>{depositChip}</span>}
-          <span className={styles.chip}>{cancelChip}</span>
+          {!!cancelChip && <span className={styles.chip}>{cancelChip}</span>}
           <span className={styles.chip}>Balance paid in salon</span>
         </div>
       </div>
