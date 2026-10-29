@@ -86,7 +86,7 @@ import {
 } from "../lib/studio-api/reviews";
 import type { StudioReviews } from "../lib/studio-api/reviews";
 import type { PaymentLink } from "../lib/payment-link-api";
-import { listTwoFactorDevices } from "../lib/two-factor";
+import { hasPassedSecondFactor, listTwoFactorDevices } from "../lib/two-factor";
 import type { TwoFactorDevice } from "../lib/two-factor";
 import type { Profile } from "../types/profile";
 
@@ -441,6 +441,10 @@ export const api = createApi({
     >({
       queryFn: (request) => toQueryResult(claimBookingInvite(request)),
     }),
+    getSecondFactorPassed: build.query<boolean, string>({
+      keepUnusedDataFor: 0,
+      queryFn: () => toQueryResult(hasPassedSecondFactor()),
+    }),
     getTwoFactorDevices: build.query<TwoFactorDevice[], string>({
       providesTags: ["TwoFactor"],
       queryFn: () => toQueryResult(listTwoFactorDevices()),
@@ -492,6 +496,7 @@ export const {
   useGetHomeStatsQuery,
   useGetStudioActivityQuery,
   useGetTwoFactorDevicesQuery,
+  useGetSecondFactorPassedQuery,
   useUpdateProfileMutation,
   useSetBusinessClosedMutation,
 } = api;

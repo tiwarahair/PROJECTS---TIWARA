@@ -3736,6 +3736,14 @@ export type Database = {
         };
         Returns: boolean;
       };
+      is_second_factor_passed: {
+        Args: {
+          session_aal: string;
+          target_session: string;
+          target_user: string;
+        };
+        Returns: boolean;
+      };
       is_service_owner: {
         Args: { target_service_id: string };
         Returns: boolean;
@@ -3956,6 +3964,10 @@ export type Database = {
       };
       owns_assistant_image: { Args: { object_name: string }; Returns: boolean };
       owns_photo_path: { Args: { object_name: string }; Returns: boolean };
+      passed_second_factor: {
+        Args: Record<PropertyKey, never>;
+        Returns: boolean;
+      };
       price_booking: {
         Args: { choices: Json; target_service: string };
         Returns: Json;
