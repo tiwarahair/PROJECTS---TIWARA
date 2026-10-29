@@ -1,5 +1,5 @@
 begin;
-select plan(3);
+select plan(4);
 
 insert into auth.users (id, instance_id, aud, role, email, raw_user_meta_data, raw_app_meta_data)
 values ('c9111111-1111-1111-1111-111111111111', '00000000-0000-0000-0000-000000000000', 'authenticated', 'authenticated',
@@ -54,6 +54,11 @@ select is(
   (public.get_next_start((select stylist from shop), 10, (select day from shop), '16:00', null)
     at time zone 'Europe/London')::time,
   '16:00'::time, 'a service shorter than 15 minutes is timed as 15, as at booking'
+);
+
+select is(
+  public.get_next_start((select stylist from shop), null, (select day from shop), null, null), null,
+  'a stylist with no active services has no next available time'
 );
 
 select * from finish();
