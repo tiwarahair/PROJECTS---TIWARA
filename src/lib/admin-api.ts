@@ -23,6 +23,7 @@ export interface AdminReportEntry {
   is_stylist: boolean;
   /** null when the stylist reported it */
   reporter_name: string | null;
+  reporter_deleted: boolean;
   status: "open" | "kept" | "text_removed" | "removed";
   created_at: string;
 }
