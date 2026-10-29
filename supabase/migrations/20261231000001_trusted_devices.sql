@@ -53,8 +53,6 @@ begin
   from auth.sessions
   where sessions.id::text = auth.jwt() ->> 'session_id';
 
-  delete from public.trusted_devices where user_id = caller and expires_at <= now();
-
   insert into public.trusted_devices (user_id, token_hash, label, kind)
   values (caller, sha256(convert_to(token, 'UTF8')), public.get_device_label(user_agent),
     public.get_device_kind(user_agent));
@@ -130,24 +128,16 @@ security definer
 set search_path = ''
 as $$
 begin
-  if tg_op = 'DELETE' then
-    if old.status = 'verified' then
-      delete from public.trusted_devices where user_id = old.user_id;
-    end if;
+  delete from public.trusted_devices where user_id = old.user_id;
 
-    return old;
-  end if;
-
-  if new.status = 'verified' and (tg_op = 'INSERT' or old.status <> 'verified') then
-    delete from public.trusted_devices where user_id = new.user_id;
-  end if;
-
-  return new;
+  return old;
 end;
 $$;
 
-create trigger mfa_factors_revoke_trusted_devices after insert or update of status or delete on auth.mfa_factors
-for each row execute function public.revoke_trusted_devices_on_factor();
+create trigger mfa_factors_revoke_trusted_devices after delete on auth.mfa_factors
+for each row when (old.status = 'verified') execute function public.revoke_trusted_devices_on_factor();
+
+select cron.schedule('purge-trusted-devices', '50 3 * * *', $$delete from public.trusted_devices where expires_at <= now()$$);
 
 revoke execute on function
   public.trust_device(),

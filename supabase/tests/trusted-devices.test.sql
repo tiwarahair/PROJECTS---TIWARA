@@ -1,5 +1,5 @@
 begin;
-select plan(22);
+select plan(23);
 
 insert into auth.users (id, instance_id, aud, role, email, raw_user_meta_data, raw_app_meta_data, encrypted_password)
 values ('e1111111-1111-1111-1111-111111111111', '00000000-0000-0000-0000-000000000000', 'authenticated',
@@ -126,9 +126,9 @@ insert into auth.mfa_factors (id, user_id, friendly_name, factor_type, status, c
 values ('f3333333-3333-3333-3333-333333333333', 'e1111111-1111-1111-1111-111111111111', 'new', 'totp', 'unverified',
   now(), now());
 update auth.mfa_factors set status = 'verified' where id = 'f3333333-3333-3333-3333-333333333333';
-select is(pg_temp.trusted_count('e1111111-1111-1111-1111-111111111111'), 0::bigint, 'a new authenticator revokes them');
+select is(pg_temp.trusted_count('e1111111-1111-1111-1111-111111111111'), 1::bigint,
+  'adding a backup authenticator leaves them alone');
 
-select pg_temp.trust_owner('third');
 delete from auth.mfa_factors where id = 'f1111111-1111-1111-1111-111111111111';
 select is(pg_temp.trusted_count('e1111111-1111-1111-1111-111111111111'), 0::bigint,
   'removing an authenticator revokes them');
@@ -141,6 +141,14 @@ select is(pg_temp.trusted_count('e1111111-1111-1111-1111-111111111111'), 0::bigi
   'signing out everywhere revokes them');
 
 select pg_temp.trust_owner('fifth');
+update public.trusted_devices set expires_at = now() - interval '1 minute';
+select pg_temp.trust_owner('sixth');
+
+do $$ begin execute (select command from cron.job where jobname = 'purge-trusted-devices'); end $$;
+
+select is(pg_temp.trusted_count('e1111111-1111-1111-1111-111111111111'), 1::bigint,
+  'the nightly purge removes only expired ones');
+
 delete from auth.users where id = 'e1111111-1111-1111-1111-111111111111';
 select is(pg_temp.trusted_count('e1111111-1111-1111-1111-111111111111'), 0::bigint, 'deleting the account removes them');
 
