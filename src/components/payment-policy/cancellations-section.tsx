@@ -49,7 +49,7 @@ export const CancellationsSection = ({
       <h2 className={parts.heading}>Cancellations & no-shows</h2>
       <div className={styles.windowField}>
         <label className={parts.label} htmlFor={`${uid}-win`}>
-          Free cancellation & rescheduling until
+          Free cancellation, and one reschedule, until
         </label>
         <div className={styles.windowRow}>
           <Select
