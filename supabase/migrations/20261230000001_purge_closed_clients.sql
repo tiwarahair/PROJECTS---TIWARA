@@ -19,8 +19,9 @@ as $$
   where stylists.status = 'closed' and stylists.closed_at < now() - interval '15 days'
 $$;
 
--- only a booking waiting to be confirmed needs the email its link goes to, so clearing a cancelled booking's contact
--- isn't refused (the same change as fix/phase-5-review-bugs' 20261222000008)
+-- only a booking waiting to be confirmed needs the email its link goes to (as in fix/phase-5-review-bugs'
+-- 20261222000008), and anonymising one isn't refused either: a closed business can still have one when it's purged.
+-- Sending a new link once it's anonymised is still refused
 create or replace function public.require_confirm_email()
 returns trigger
 language plpgsql
@@ -30,7 +31,9 @@ begin
   if new.status = 'awaiting_confirmation' and new.protection_status = 'pending'
     and nullif(trim(new.contact ->> 'email'), '') is null
     and (tg_op = 'INSERT' or new.protection_status is distinct from old.protection_status
-      or new.contact is distinct from old.contact or new.status is distinct from old.status) then
+      or new.contact is distinct from old.contact or new.status is distinct from old.status)
+    and not (tg_op = 'UPDATE' and new.contact ? 'account_deleted' and not coalesce(old.contact ? 'account_deleted', false))
+  then
     raise exception 'email_required';
   end if;
 

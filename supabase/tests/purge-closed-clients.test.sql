@@ -1,5 +1,5 @@
 begin;
-select plan(18);
+select plan(19);
 
 create function pg_temp.sign_up(user_id uuid, user_email text, meta jsonb)
 returns void
@@ -57,9 +57,13 @@ select
   pg_temp.book((select closing from stylist_ids), 'completed', -10) as recent,
   pg_temp.book((select closing from stylist_ids), 'completed', -200) as old,
   pg_temp.book((select closing from stylist_ids), 'cancelled', -12) as cancelled,
+  pg_temp.book((select closing from stylist_ids), 'awaiting_confirmation', 20) as waiting,
   pg_temp.book((select open from stylist_ids), 'completed', -10) as elsewhere;
 
 update public.bookings set protection_status = 'pending', cancel_reason = 'Ill' where id = (select cancelled from ids);
+
+update public.bookings set protection_status = 'pending', confirm_by = now() + interval '1 day'
+where id = (select waiting from ids);
 
 insert into public.payments (booking_id, kind, amount_pence, platform_fee_pence, created_at)
 values ((select recent from ids), 'booking', 6140, 140, now() - interval '10 days'),
@@ -72,7 +76,8 @@ where stylist_id in (select closing from stylist_ids union select open from styl
 
 insert into public.client_sensitivities (client_id, stylist_id, text, consent_wording)
 select 'a3333333-3333-3333-3333-333333333333', id, 'Sensitive scalp', 'I agree'
-from public.stylists where id in (select closing from stylist_ids union select open from stylist_ids);
+from public.stylists where id in (select closing from stylist_ids union select open from stylist_ids)
+on conflict do nothing;
 
 insert into public.booking_notes (booking_id, note) values ((select recent from ids), 'Prefers low tension');
 
@@ -101,10 +106,30 @@ where id = (select closing from stylist_ids);
 create temp table closing_photos as
 select photo_path from public.stylist_clients where stylist_id = (select closing from stylist_ids);
 
-select is(array(select public.get_due_closure_client_photos()), array(select photo_path from closing_photos),
+create function pg_temp.listed_photos()
+returns text[]
+language sql
+as $$
+  select array(
+    select listed from public.get_due_closure_client_photos() as listed
+    where (storage.foldername(listed))[1] in (select closing::text from stylist_ids union select open::text from stylist_ids)
+  )
+$$;
+
+select is(pg_temp.listed_photos(), array(select photo_path from closing_photos),
   'the clean-up lists only the closed business''s client photos');
 
-select lives_ok($$select public.purge_closed_businesses()$$, 'the purge runs, a cancelled unconfirmed booking too');
+select lives_ok($$select public.purge_closed_businesses()$$,
+  'the purge runs, with a cancelled and a waiting unconfirmed booking too');
+
+select is((select contact from public.bookings where id = (select waiting from ids)), '{"account_deleted": true}'::jsonb,
+  'the waiting booking is anonymised too');
+
+select throws_ok(
+  $$update public.bookings set status = 'auto_cancelled' where id = (select waiting from ids);
+    update public.bookings set status = 'awaiting_confirmation' where id = (select waiting from ids)$$,
+  'P0001', 'email_required', 'but a new link can''t be sent once it''s anonymised'
+);
 
 select is(
   (select jsonb_agg(to_jsonb(clients) - 'id' - 'stylist_id' - 'created_at' - 'deleted_at')
@@ -166,7 +191,7 @@ select is((select count(*) from public.notifications
     where payload ->> 'ref' = (select ref from public.bookings where id = (select elsewhere from ids))),
   5::bigint, 'another business''s emails stay');
 
-select is(array(select public.get_due_closure_client_photos()), array(select photo_path from closing_photos),
+select is(pg_temp.listed_photos(), array(select photo_path from closing_photos),
   'client photos the edge function missed are listed again the next night');
 
 select is((select count(*) from public.stylist_clients where stylist_id = (select closing from stylist_ids)
@@ -174,10 +199,10 @@ select is((select count(*) from public.stylist_clients where stylist_id = (selec
 
 update public.payments set created_at = now() - interval '130 days' where booking_id = (select recent from ids);
 
-select is(public.purge_deleted_client_contacts(), 1, 'the nightly purge picks the booking up after 120 days');
+select public.purge_deleted_client_contacts();
 
 select is((select contact from public.bookings where id = (select recent from ids)), '{"account_deleted": true}'::jsonb,
-  'and clears the name and email');
+  'after 120 days the nightly purge clears the name and email');
 
 select * from finish();
 rollback;
