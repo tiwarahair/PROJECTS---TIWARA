@@ -3,8 +3,8 @@
 -- client's name and email in case a card payment is disputed, and the nightly purge_deleted_client_contacts clears
 -- them after, as when a client deletes their account.
 
--- every business past its 15 days, purged or not, so a photo missed one night is removed the next
-
+-- every business past its 15 days, purged or not, so a photo missed one night is removed the next. Each business's
+-- folder is looked up as a name range ('/' is followed by '0'), which uses Storage's (bucket_id, name) index
 create function public.get_due_closure_client_photos()
 returns setof text
 language sql
@@ -12,10 +12,11 @@ stable
 security definer
 set search_path = ''
 as $$
-  select name from storage.objects
-  where bucket_id = 'client-photos' and (storage.foldername(name))[1] in (
-    select id::text from public.stylists where status = 'closed' and closed_at < now() - interval '15 days'
-  )
+  select objects.name
+  from public.stylists
+  join storage.objects on objects.bucket_id = 'client-photos'
+    and objects.name collate "C" >= stylists.id::text || '/' and objects.name collate "C" < stylists.id::text || '0'
+  where stylists.status = 'closed' and stylists.closed_at < now() - interval '15 days'
 $$;
 
 -- only a booking waiting to be confirmed needs the email its link goes to, so clearing a cancelled booking's contact
