@@ -170,6 +170,7 @@ export const toStudioBooking = (row: StudioBookingRow): StudioBooking => {
           paidLater: toPounds(getPaidSoFar(row) - getPaidAtBooking(row)),
           refundableOnline: toPounds(getRefundableOnline(row)),
           recordedVia: getRecordedVia(row),
+          ...(row.can_skip_review_invite ? { canSkipReview: true } : {}),
         }
       : {}),
   };

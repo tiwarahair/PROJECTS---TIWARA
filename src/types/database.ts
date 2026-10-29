@@ -544,6 +544,7 @@ export type Database = {
           block_range: unknown;
           buffer_minutes: number;
           calendar_key: string;
+          can_skip_review_invite: boolean | null;
           cancel_reason: string | null;
           cancellation: Json | null;
           cancelled_at: string | null;
@@ -2953,6 +2954,10 @@ export type Database = {
       };
       become_stylist: { Args: { details: Json }; Returns: undefined };
       booking_fee_pence: { Args: { price_pence: number }; Returns: number };
+      can_skip_review_invite: {
+        Args: { "": Database["public"]["Tables"]["bookings"]["Row"] };
+        Returns: boolean;
+      };
       cancel_balance_link: { Args: { target: string }; Returns: undefined };
       cancel_managed_booking: {
         Args: { cancellation: Json; token: string };
@@ -4230,6 +4235,7 @@ export type Database = {
         Returns: undefined;
       };
       sign_out_session: { Args: { target: string }; Returns: undefined };
+      skip_review_invite: { Args: { target: string }; Returns: undefined };
       slugify: { Args: { value: string }; Returns: string };
       start_booking_confirmation: { Args: { token: string }; Returns: Json };
       start_link_payment: { Args: { token: string }; Returns: Json };

@@ -5,7 +5,10 @@ import { getClientRow, getRow } from "../../../../../test/studio-booking-row";
 import { getStudioSeed } from "../../../../../test/studio-seed";
 import { fromLondonTime } from "../../../../../utils/london-time";
 import { toDate } from "../../../core/blocked-time";
-import { changeBookingClient } from "../../../../../lib/studio-api/booking-writes";
+import {
+  changeBookingClient,
+  skipReviewInvite,
+} from "../../../../../lib/studio-api/booking-writes";
 import { StudioPage } from "../../..";
 import type { UserEvent } from "@testing-library/user-event";
 import { setupUser } from "../../../../../test/setup-user";
@@ -25,6 +28,7 @@ vi.mock(
       typeof import("../../../../../lib/studio-api/booking-writes")
     >()),
     changeBookingClient: vi.fn(() => new Promise(() => {})),
+    skipReviewInvite: vi.fn(() => Promise.resolve()),
   }),
 );
 
@@ -130,6 +134,68 @@ describe("Studio → booking sheet", () => {
   });
 
   afterEach(() => vi.useRealTimers());
+
+  it("a booking never marked arrived can stop its review request", async () => {
+    const seed = getStudioSeed();
+
+    seed.bookings.active = [
+      getRow({
+        id: "b-unmarked",
+        status: "completed",
+        starts_at: fromLondonTime(toDate(0), "07:00"),
+        created_at: BOOKED_AT,
+        unpaid_at: fromLondonTime(toDate(0), "08:00"),
+        can_skip_review_invite: true,
+      }),
+    ];
+
+    await openBooking("Nia Okafor", seed);
+
+    const openStatusMenu = () =>
+      user.click(screen.getByRole("button", { name: "Completed · Unpaid" }));
+
+    await openStatusMenu();
+    await user.click(screen.getByRole("button", { name: /Didn’t attend/ }));
+
+    expect(skipReviewInvite).toHaveBeenCalledWith("b-unmarked");
+
+    expect(
+      screen.getByText("Nia won’t be asked for a review"),
+    ).toBeInTheDocument();
+
+    await openStatusMenu();
+
+    expect(
+      screen.queryByRole("button", { name: /Didn’t attend/ }),
+    ).not.toBeInTheDocument();
+  });
+
+  it("a booking that was marked arrived doesn't offer it", async () => {
+    const seed = getStudioSeed();
+
+    seed.bookings.active = [
+      getRow({
+        status: "completed",
+        starts_at: fromLondonTime(toDate(0), "07:00"),
+        created_at: BOOKED_AT,
+        unpaid_at: fromLondonTime(toDate(0), "08:00"),
+      }),
+    ];
+
+    await openBooking("Nia Okafor", seed);
+
+    await user.click(
+      screen.getByRole("button", { name: "Completed · Unpaid" }),
+    );
+
+    expect(
+      screen.getByRole("button", { name: /^Completed.*collect/i }),
+    ).toBeInTheDocument();
+
+    expect(
+      screen.queryByRole("button", { name: /Didn’t attend/ }),
+    ).not.toBeInTheDocument();
+  });
 
   it("opens a booking with its service and client", async () => {
     await openNia();
