@@ -97,6 +97,13 @@ const getFeeAction = (
 ) => {
   if (!isKept) return { feeAction: null, feeActionLabel: "" };
 
+  if (row.depositKept)
+    return {
+      feeAction:
+        feeLeft > 0 ? () => setState({ pastCheckoutPanel: "refund" }) : null,
+      feeActionLabel: "Refund",
+    };
+
   const pendingNote = row.feePending ? ` (applies in ${hoursLeft}h)` : "";
 
   const waiveFee = () => {
@@ -157,6 +164,9 @@ export const getActionsView = (context: PastContext) => {
   const hasFee = (row.feeKept || row.feePending) && !row.waived;
 
   const getActionTitle = () => {
+    if (hasFee && row.depositKept)
+      return `${row.feeLabel} deposit kept (non-refundable)`;
+
     if (hasFee) {
       const feeKind =
         row.status === "No show" ? "no-show fee" : "late cancellation fee";

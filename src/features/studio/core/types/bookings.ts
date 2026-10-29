@@ -39,6 +39,7 @@ export interface StudioBooking {
   movedByClient?: boolean;
   autoDone?: boolean;
   checkoutUnpaid?: boolean;
+  canSkipReview?: boolean;
   paidOnline?: number; // paid when they booked, for a booking checked out before
   paidLater?: number; // paid at that earlier checkout, less what went back since
   agreedPrice?: number; // what the saved card can be charged up to, when the price shown is the final one
@@ -133,6 +134,7 @@ export interface PastRecord {
   note?: string;
   meta?: string;
   feeKept?: boolean;
+  depositKept?: boolean;
   feePending?: boolean;
   feeUnpaid?: boolean;
   feeLabel?: string;
@@ -158,6 +160,7 @@ export interface PastRecord {
   paid?: number;
   method?: string;
   dispute?: DisputeRecord;
+  canSkipReview?: boolean;
 }
 
 export interface EditServiceDraft {

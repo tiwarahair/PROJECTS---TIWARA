@@ -278,7 +278,7 @@ describe("toStudioPatch", () => {
     expect(shown).toMatchObject({ mode: "none", deposit: 20 });
 
     expect(rules).toEqual({
-      minNotice: 24,
+      minNoticeMinutes: 1440,
       maxNotice: 3,
       extra: 0,
       travel: 0,

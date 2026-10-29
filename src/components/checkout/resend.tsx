@@ -30,7 +30,7 @@ export const CheckoutResend = ({
         {(
           [
             ["email", "Email"],
-            ["sms", "SMS"],
+            // ["sms", "SMS"], // not sending texts to clients for now (check back once we add in sms messages)
           ] as const
         ).map(([via, label]) => (
           <Chip

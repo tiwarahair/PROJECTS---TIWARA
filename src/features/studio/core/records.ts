@@ -126,7 +126,7 @@ export const toStudioPatch = (
     })),
     rules: rules
       ? {
-          minNotice: rules.min_notice_hours,
+          minNoticeMinutes: rules.min_notice_minutes,
           maxNotice: rules.max_notice_months,
           extra: rules.default_extra_minutes,
           travel: rules.travel_buffer_minutes,

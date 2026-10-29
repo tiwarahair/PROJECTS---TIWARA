@@ -15,7 +15,7 @@ export interface StudioProfile {
 
 export interface StudioRules {
   maxNotice: number;
-  minNotice: number;
+  minNoticeMinutes: number;
   extra: number;
   travel: number;
 }

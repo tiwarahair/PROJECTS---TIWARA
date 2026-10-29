@@ -2,6 +2,7 @@ import { joinClassNames } from "../../../utils/class-names";
 import type { EarningsController, EarningsProps } from "../use-earnings";
 import { OverlayDrawer } from "./drawer";
 import { ExportDialog } from "./export-dialog";
+import { PausedDialog } from "./paused-dialog";
 import styles from "../../../styles/components/earnings/overlays/index.module.css";
 
 interface EarningsOverlaysProps {
@@ -43,6 +44,10 @@ export const EarningsOverlays = ({
       )}
 
       {state.exportOn && <ExportDialog earnings={earnings} layer={layer} />}
+
+      {state.pausedOn && (
+        <PausedDialog earnings={earnings} props={props} layer={layer} />
+      )}
 
       {!!state.toast && (
         <div

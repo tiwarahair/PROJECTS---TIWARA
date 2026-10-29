@@ -19,7 +19,7 @@ describe("AllergyField", () => {
       screen.getByText(/Only Amara Beauty will see this\./),
     ).toBeInTheDocument();
 
-    expect(screen.queryByText(/\/ 200/)).not.toBeInTheDocument();
+    expect(screen.queryByText(/\/ 1000/)).not.toBeInTheDocument();
   });
 
   it("falls back to 'your stylist' without a name", () => {
@@ -30,21 +30,26 @@ describe("AllergyField", () => {
     ).toBeInTheDocument();
   });
 
-  it("shows the counter from 150 characters", () => {
-    render(<AllergyField value={"x".repeat(150)} />);
-    expect(screen.getByText("150 / 200")).toBeInTheDocument();
+  it("has no counter below 800 characters", () => {
+    render(<AllergyField value={"x".repeat(799)} />);
+    expect(screen.queryByText(/\/ 1000/)).not.toBeInTheDocument();
   });
 
-  it("caps input at 200 characters", async () => {
+  it("matches the server's 1,000-character limit, counting from 800", () => {
+    render(<AllergyField value={"x".repeat(800)} />);
+    expect(screen.getByText("800 / 1000")).toBeInTheDocument();
+  });
+
+  it("caps input at 1,000 characters", async () => {
     const handleChange = vi.fn();
 
     render(<AllergyField onChange={handleChange} />);
 
     // the field is controlled by its parent, so a paste (one change) is what can exceed the cap here
     await user.click(screen.getByLabelText("Allergies or sensitivities"));
-    await user.paste("y".repeat(240));
+    await user.paste("y".repeat(1040));
 
-    expect(handleChange).toHaveBeenCalledWith("y".repeat(200));
+    expect(handleChange).toHaveBeenCalledWith("y".repeat(1000));
   });
 
   it("opens and closes the privacy sheet", async () => {

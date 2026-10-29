@@ -146,6 +146,8 @@ export const getCheckoutView = (checkout: CheckoutController) => {
       else goTo("detail", -1);
     } else if (state.view === "add") goTo("items", -1);
     else if (state.view === "receipt" && state.fromDone) goTo("done", -1);
+    else if (state.view === "resend" && state.isResendFromReceipt)
+      goTo("receipt", -1);
     else goTo("detail", -1);
   };
 

@@ -16,7 +16,7 @@ describe("profile facts", () => {
   it("builds the policy chips and contact links", () => {
     const facts = getProfileFacts(stylist, socials);
 
-    expect(facts.cancelChip).toBe("Free cancellation up to 48h");
+    expect(facts.cancelChip).toBe("");
     expect(facts.hasPayChip).toBe(false);
     expect(facts.mailto).toBe("");
     expect(facts.siteHref).toBe("https://tiwarashouse.com");

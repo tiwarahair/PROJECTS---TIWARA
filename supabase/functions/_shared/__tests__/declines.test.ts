@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { getCardLabel, isHardDecline } from "../declines";
+import { cannotRetry, getCardLabel, isHardDecline } from "../declines";
 
 describe("declines", () => {
   it("never retries a lost, stolen or blocked card", () => {
@@ -10,6 +10,12 @@ describe("declines", () => {
   it("can retry a soft decline", () => {
     expect(isHardDecline("insufficient_funds")).toBe(false);
     expect(isHardDecline(null)).toBe(false);
+  });
+
+  it("a card the bank wants the client to approve can't be retried, only paid by link", () => {
+    expect(cannotRetry("authentication_required")).toBe(true);
+    expect(cannotRetry("stolen_card")).toBe(true);
+    expect(cannotRetry("insufficient_funds")).toBe(false);
   });
 
   it("names the card", () => {

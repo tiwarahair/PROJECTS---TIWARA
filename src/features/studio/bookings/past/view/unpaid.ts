@@ -52,10 +52,15 @@ export const getUnpaidView = ({
     setState({ confirm: null });
 
     try {
-      const { outcome } = await retryFee(bookingId);
+      const { outcome, hardDecline } = await retryFee(bookingId);
 
       if (outcome === "paid")
         settle(collected("Fee paid"), `${amount} charged`);
+      else if (hardDecline)
+        settle(
+          { feeTries: 0 },
+          "This card can’t be charged again. Send a payment link instead.",
+        );
       else settle({ feeTries: tries - 1 }, "Card declined again");
     } catch (error) {
       actions.showToast(

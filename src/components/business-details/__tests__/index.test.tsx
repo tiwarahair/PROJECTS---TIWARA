@@ -48,6 +48,32 @@ describe("BusinessDetails", () => {
     expect(screen.getByRole("button", { name: "Save changes" })).toBeDisabled();
   });
 
+  it("offers only the travel distances the database accepts", () => {
+    render(
+      <BusinessDetails
+        value={{
+          ...business,
+          type: "mobile",
+          details: { ...business.details, basePostcode: "M14 5AJ" },
+        }}
+        tax={null}
+      />,
+    );
+
+    const options = screen
+      .getAllByRole("option")
+      .map(({ textContent }) => textContent)
+      .filter((text) => text?.endsWith("miles"));
+
+    expect(options).toEqual([
+      "2 miles",
+      "5 miles",
+      "10 miles",
+      "15 miles",
+      "25 miles",
+    ]);
+  });
+
   it("saves an edit, reports and shows the toast for 2.4s", async () => {
     const onSave = vi.fn();
     const onState = vi.fn<(api: BusinessDetailsApi) => void>();

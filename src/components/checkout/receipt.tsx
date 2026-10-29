@@ -14,7 +14,7 @@ export const CheckoutReceipt = ({
   checkout: CheckoutController;
   view: CheckoutViewModel;
 }) => {
-  const { state, goTo, startResend } = checkout;
+  const { state, setState, goTo, startResend } = checkout;
   const receipt = getReceiptView(checkout, view);
 
   return (
@@ -93,6 +93,7 @@ export const CheckoutReceipt = ({
         className={styles.resend}
         onClick={() => {
           startResend("email");
+          setState({ isResendFromReceipt: true });
           goTo("resend", 1);
         }}
       >

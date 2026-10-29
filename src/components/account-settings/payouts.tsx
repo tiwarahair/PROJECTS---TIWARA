@@ -148,7 +148,7 @@ export const SettingsPayouts = ({ props }: SettingsPayoutsProps) => {
                   size={18}
                   strokeWidth={1.7}
                 />
-                Payouts on hold. Add your tax details to get paid.
+                Add your tax details to go live.
               </span>
               <button
                 className={joinClassNames(payouts.addTax, shared.focusRing)}

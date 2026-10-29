@@ -1,4 +1,5 @@
 import { cancelStudioBooking } from "../../../../lib/studio-api/bookings";
+import { getKeptDeposit } from "../../core/model";
 import type { SheetContext } from "./context";
 
 const getNotice = (hoursToStart: number) =>
@@ -10,6 +11,7 @@ const getNotice = (hoursToStart: number) =>
 const getCancelCopy = (
   { state, booking, lateFee }: SheetContext,
   isFeeKept: boolean,
+  isWaived: boolean,
 ) => {
   if (isFeeKept)
     return {
@@ -19,6 +21,13 @@ const getCancelCopy = (
     };
 
   const { mode } = booking.agreedPolicy ?? state.policy;
+
+  if (state.cancelWho === "client" && lateFee.kept > 0 && !isWaived)
+    return {
+      meta: "Deposit kept",
+      noteTail: ` ${lateFee.refund}.`,
+      toast: `Cancelled. ${lateFee.refund}`,
+    };
 
   if (mode === "card" || mode === "none")
     return { meta: "No charge", noteTail: "", toast: "Booking cancelled" };
@@ -67,7 +76,14 @@ export const getCancelView = (context: SheetContext) => {
     const isFeeKept = isFeeShown && state.cancelFee;
     const isMine = state.cancelWho === "me";
     const who = isMine ? "you" : booking.firstName;
-    const { meta, noteTail, toast } = getCancelCopy(context, isFeeKept);
+    const isWaived = isFeeShown && !state.cancelFee;
+
+    const { meta, noteTail, toast } = getCancelCopy(
+      context,
+      isFeeKept,
+      isWaived,
+    );
+
     const reason = state.cancelReason.trim();
     const reasonNote = reason ? ` ${reason}` : "";
 
@@ -79,6 +95,9 @@ export const getCancelView = (context: SheetContext) => {
         feeLabel: lateFee.label,
         meta,
         note: `Cancelled by ${who} ${getNotice(hoursToStart)}.${noteTail}${reasonNote}`,
+        ...(!isMine && !isFeeKept && !isWaived
+          ? getKeptDeposit(lateFee.kept)
+          : {}),
       },
       toast,
       {
@@ -86,7 +105,7 @@ export const getCancelView = (context: SheetContext) => {
           cancelStudioBooking({
             bookingId,
             who: isMine ? "stylist" : "client",
-            waiveFee: isFeeShown && !state.cancelFee,
+            waiveFee: isWaived,
             reason,
           }),
       },

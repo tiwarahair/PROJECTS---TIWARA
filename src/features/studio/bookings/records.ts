@@ -14,6 +14,7 @@ import { fromLondonTime, toLondonTime } from "../../../utils/london-time";
 import { toDate, toOffset } from "../core/blocked-time";
 import {
   getFeeFlags,
+  getKeptDepositPence,
   getLatestFee,
   getRefundNote,
   getRefunded,
@@ -27,6 +28,7 @@ import type {
   StudioPolicy,
 } from "../core/types";
 import { toStudioClient } from "../clients/records";
+import { getKeptDeposit } from "../core/model/policy";
 import { toFeeKind, toPolicyMode } from "../settings/records";
 import {
   getCheckoutFields,
@@ -170,6 +172,7 @@ export const toStudioBooking = (row: StudioBookingRow): StudioBooking => {
           paidLater: toPounds(getPaidSoFar(row) - getPaidAtBooking(row)),
           refundableOnline: toPounds(getRefundableOnline(row)),
           recordedVia: getRecordedVia(row),
+          ...(row.can_skip_review_invite ? { canSkipReview: true } : {}),
         }
       : {}),
   };
@@ -252,8 +255,10 @@ export const toPastRecord = (row: StudioBookingRow): PastRecord => {
         ({ purpose, status }) => purpose === "fee" && status === "pending",
       ),
     ),
+    ...getKeptDeposit(toPounds(getKeptDepositPence(row, fee))),
     ...getCheckoutFields(row),
     ...getDisputeFields(row),
+    ...(row.can_skip_review_invite ? { canSkipReview: true } : {}),
   };
 };
 

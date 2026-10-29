@@ -635,6 +635,10 @@ describe("AccountSettings", () => {
       },
     );
 
+    expect(
+      screen.getByText("Add your tax details to go live."),
+    ).toBeInTheDocument();
+
     await user.click(screen.getByRole("button", { name: "Add tax details" }));
     expect(onTaxAdd).toHaveBeenCalled();
   });

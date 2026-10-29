@@ -126,6 +126,7 @@ export interface CheckoutState {
   tries: number;
   busy: boolean;
   fromDone: boolean;
+  isResendFromReceipt: boolean;
   refund: RefundValues;
   refundFinal: number;
   refunded: number;

@@ -54,6 +54,7 @@ export const getPastCheckoutView = (studio: StudioController) => {
   const back = () => setState({ pastCheckoutPanel: null });
 
   return {
+    bookingId: row.remoteId,
     booking,
     start: state.pastCheckoutPanel as CheckoutView,
     done,

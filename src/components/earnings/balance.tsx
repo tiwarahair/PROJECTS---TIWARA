@@ -11,12 +11,11 @@ interface BalanceProps {
 }
 
 export const Balance = ({
-  earnings: { ledger, showToast },
+  earnings: { ledger, showToast, openPaused },
   props: {
     taxHold,
     failedPayout,
     dispute,
-    onLearnMore,
     onAddTax,
     onContinueSetup,
     onUpdateBank,
@@ -48,13 +47,7 @@ export const Balance = ({
           <div className={styles.pausedText}>
             {`Payouts paused — ${pausedText} being recovered from a refund or dispute`}
           </div>
-          <button
-            className={styles.learnMore}
-            onClick={getHandler(
-              onLearnMore,
-              "Opening the help article on payouts",
-            )}
-          >
+          <button className={styles.learnMore} onClick={openPaused}>
             Learn more
           </button>
         </div>
@@ -122,9 +115,7 @@ export const Balance = ({
             color="var(--brand-yellow)"
             strokeWidth={1.7}
           />
-          <div className={styles.taxText}>
-            Payouts on hold until you add your tax details
-          </div>
+          <div className={styles.taxText}>Add your tax details to go live</div>
           <button
             className={styles.addTax}
             onClick={getHandler(onAddTax, "Opening tax details")}

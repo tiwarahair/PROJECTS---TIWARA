@@ -4,6 +4,8 @@ import type {
   MenuGroup,
 } from "../../../components/checkout/data";
 import { CheckoutSheet } from "../../../components/checkout";
+import { resendCheckoutReceipt } from "../../../lib/studio-api/checkout";
+import { SaveError } from "../../../lib/studio-writes";
 import type { CheckoutSheetProps } from "../../../components/checkout/use-checkout";
 import type { StudioController } from "../core/use-studio";
 import sheet from "../../../styles/features/studio/shell/sheet-frame.module.css";
@@ -11,6 +13,7 @@ import { formatDuration } from "../../../utils/dates";
 
 export interface StudioCheckoutProps {
   studio: StudioController;
+  bookingId: string;
   booking: CheckoutBooking;
   start?: CheckoutView;
   done?: CheckoutSheetProps["done"];
@@ -24,6 +27,7 @@ export interface StudioCheckoutProps {
 /** CheckoutSheet over a Studio sheet. */
 export const StudioCheckout = ({
   studio,
+  bookingId,
   booking,
   start = "items",
   done,
@@ -36,6 +40,18 @@ export const StudioCheckout = ({
   const { state, isWide, actions } = studio;
   const { business } = state;
   const fields = business.details || {};
+
+  const resendReceipt = async (to: string) => {
+    try {
+      await resendCheckoutReceipt(bookingId, to);
+    } catch (error) {
+      throw error instanceof SaveError
+        ? error
+        : new Error("The receipt didn’t send. Try again.");
+    }
+
+    actions.showToast(`Receipt sent to ${to}`);
+  };
 
   const addons = state.addons
     .filter(({ status }) => status !== "archived")
@@ -84,8 +100,7 @@ export const StudioCheckout = ({
         onComplete={onComplete}
         onRefund={onRefund}
         onPay={onPay}
-        onResent={() => {}}
-        onCancelLink={() => {}}
+        onResent={resendReceipt}
       />
     </div>
   );

@@ -28,6 +28,8 @@ const REFUSALS: Record<string, string> = {
   invalid_address: "That address is too long. Keep it to 300 characters.",
   email_required:
     "Add an email for the client first: the confirm link is sent by email.",
+  skip_not_allowed:
+    "Too late to stop it: the review request has already been emailed to the client.",
 };
 
 const send = <T>(
@@ -173,3 +175,6 @@ export const setStylistNote = (id: string, note: string) =>
 
 export const setBookingAddress = (id: string, address: string) =>
   send(supabase.rpc("set_booking_address", { target: id, address }));
+
+export const skipReviewInvite = (id: string) =>
+  send(supabase.rpc("skip_review_invite", { target: id }));

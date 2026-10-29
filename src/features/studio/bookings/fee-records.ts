@@ -2,6 +2,7 @@
 import type { StudioBookingRow } from "../../../lib/studio-api/bookings";
 import { formatMoney } from "../../../utils/money";
 import type { PastRecord } from "../core/types";
+import { getNumber } from "./row-values";
 
 type FeeRow = StudioBookingRow["booking_fees"][number];
 
@@ -65,6 +66,17 @@ const getStatusFlags = (
     return { feeKept: true, meta: "Fee recorded" };
 
   return { feeKept: true, meta: "Fee kept" };
+};
+
+export const getKeptDepositPence = (
+  { status, cancellation }: StudioBookingRow,
+  fee: FeeRow | undefined,
+) => {
+  if (status !== "no_show" && status !== "cancelled") return 0;
+
+  if (fee?.amount_pence || fee?.waived_at) return 0;
+
+  return fee?.kept_pence || getNumber(cancellation, "kept_pence");
 };
 
 /** Past's fee flags; nothing for a no-charge settlement, which only refunds. */

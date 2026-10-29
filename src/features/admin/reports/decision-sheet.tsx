@@ -44,7 +44,10 @@ const getEmails = (
     return ["Nobody yet. Everyone is told when you decide."];
 
   const reporters = reports
-    .filter(({ is_stylist: isStylist }) => !isStylist)
+    .filter(
+      ({ is_stylist: isStylist, reporter_deleted: isDeleted }) =>
+        !isStylist && !isDeleted,
+    )
     .map(({ reporter_name: name }) =>
       name ? `${name}, who reported it` : "The client who reported it",
     );

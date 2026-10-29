@@ -1,5 +1,5 @@
 begin;
-select plan(22);
+select plan(24);
 
 insert into auth.users (id, instance_id, aud, role, email, raw_user_meta_data, raw_app_meta_data)
 values ('a1111111-1111-1111-1111-111111111111', '00000000-0000-0000-0000-000000000000', 'authenticated',
@@ -105,6 +105,17 @@ update public.bookings set status = 'cancelled' where id = (select id from guest
 
 select is(pg_temp.blockers(), '{"bookings": [], "owes_money": false, "has_business": false}'::jsonb,
   'with neither, the client can delete their account');
+
+update public.bookings set unpaid_at = now() where id = (select recent from ids);
+
+select is((pg_temp.blockers() ->> 'owes_money')::boolean, false,
+  'a paid booking left in Due for checkout doesn''t stop it');
+
+update public.bookings set unpaid_at = now() where id = (select guest from ids);
+
+select is((pg_temp.blockers() ->> 'owes_money')::boolean, true, 'one with money still to pay does');
+
+update public.bookings set unpaid_at = null where id in ((select recent from ids), (select guest from ids));
 
 select is((public.get_deletion_blockers('a1111111-1111-1111-1111-111111111111') ->> 'has_business')::boolean, true,
   'a stylist can''t delete their login from here');

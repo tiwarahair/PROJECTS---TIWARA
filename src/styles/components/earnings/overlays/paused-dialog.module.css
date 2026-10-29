@@ -1,0 +1,70 @@
+.text {
+  margin: 12px 0 0;
+  font-size: 14.5px;
+  line-height: 1.5;
+  color: var(--text-secondary);
+}
+
+.causes {
+  display: flex;
+  flex-direction: column;
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-md);
+  overflow: hidden;
+}
+
+.cause {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  width: 100%;
+  padding: 12px 14px;
+  border: none;
+  border-top: 1px solid var(--border-subtle);
+  background: transparent;
+  font: inherit;
+  text-align: left;
+  color: var(--text-primary);
+  cursor: pointer;
+  transition: background-color 0.16s cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+
+.cause:first-child {
+  border-top: none;
+}
+
+.cause:hover {
+  background: var(--fill-quiet);
+}
+
+.causeText {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+.causeTitle {
+  font-size: 14.5px;
+  font-weight: 600;
+}
+
+.causeSub {
+  font-size: 13px;
+  color: var(--text-secondary);
+}
+
+.causeAmount {
+  flex: 0 0 auto;
+  font-size: 14.5px;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+}
+
+.stripeLink {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-decoration: none;
+}

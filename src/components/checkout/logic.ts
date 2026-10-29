@@ -173,6 +173,7 @@ export const getInitialCheckout = ({
     tries: 2,
     busy: false,
     fromDone: false,
+    isResendFromReceipt: false,
     refund: EMPTY_REFUND,
     refundFinal: 0,
     refunded: 0,

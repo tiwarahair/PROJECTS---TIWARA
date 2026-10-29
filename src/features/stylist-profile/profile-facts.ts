@@ -1,13 +1,13 @@
 // The profile's policy chips, contact / social links, gallery and log-in link.
 import type { PublicStylist } from "../../lib/public-stylist";
 import type { Stylist } from "../../types/stylist";
+import { getCancellationLabel } from "../../utils/pricing";
 import { getSocialUrl } from "../../utils/social-handles";
 
 export interface ProfileFacts {
   depositChip: string;
   hasPayChip: boolean;
   cancelChip: string;
-  cancelHours: number;
   mailto: string;
   site: string;
   siteHref: string;
@@ -27,7 +27,7 @@ export const getProfileFacts = (
   { email, policies, site }: Stylist,
   { instagram, tiktok, youtube }: PublicStylist["socials"],
 ): ProfileFacts => {
-  const { mode, depositPercent, refundable, freeWindowHours } = policies;
+  const { mode, depositPercent, refundable } = policies;
 
   const depositChips = {
     deposit: `${depositPercent}% deposit${refundable ? "" : ", non-refundable"}`,
@@ -39,8 +39,7 @@ export const getProfileFacts = (
   return {
     depositChip: depositChips[mode],
     hasPayChip: mode !== "none",
-    cancelChip: `Free cancellation up to ${freeWindowHours}h`,
-    cancelHours: freeWindowHours,
+    cancelChip: getCancellationLabel(policies),
     mailto: email ? `mailto:${email}` : "",
     site: site || "",
     siteHref: toLink(site),

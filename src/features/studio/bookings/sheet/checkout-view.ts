@@ -151,6 +151,7 @@ export const getCheckoutView = (context: SheetContext) => {
       if (action === "rebook") rebook();
       else actions.closeSheet();
     },
+    checkoutBookingId: remoteId ?? "",
     checkoutBooking: getCheckoutBooking(context),
   };
 };
