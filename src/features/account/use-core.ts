@@ -169,8 +169,9 @@ export const useAccountCore = (props: AccountProps) => {
       sensitivities: sensitivities ?? NO_SENSITIVITIES,
       areSensitivitiesLoaded: !!sensitivities,
       isSensitivitiesError,
-      isBookingsError,
-      isCardsError,
+      // a failed reload keeps what already loaded
+      isBookingsError: isBookingsError && !bookings,
+      isCardsError: isCardsError && !cards,
       hasPhoto,
     }),
     [

@@ -182,7 +182,7 @@ export const AdminReports = ({
       {!isWide && <h1 className={shell.pageTitle}>Reports</h1>}
       <StatCards
         isWide={isWide}
-        onRetry={isStatsError ? () => void refetchStats() : undefined}
+        onRetry={isStatsError && !stats ? () => void refetchStats() : undefined}
         cards={statCards.map(({ sub, value, ...card }) => ({
           ...card,
           value,
