@@ -115,9 +115,7 @@ export const Balance = ({
             color="var(--brand-yellow)"
             strokeWidth={1.7}
           />
-          <div className={styles.taxText}>
-            Payouts on hold until you add your tax details
-          </div>
+          <div className={styles.taxText}>Add your tax details to go live</div>
           <button
             className={styles.addTax}
             onClick={getHandler(onAddTax, "Opening tax details")}

@@ -137,6 +137,11 @@ describe("Earnings", () => {
 
     unmount();
     render(<Earnings ledger={ledger} taxHold={true} onAddTax={onAddTax} />);
+
+    expect(
+      screen.getByText("Add your tax details to go live"),
+    ).toBeInTheDocument();
+
     await user.click(screen.getByRole("button", { name: "Add tax details" }));
     expect(onAddTax).toHaveBeenCalled();
   });
