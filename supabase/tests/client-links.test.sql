@@ -1,5 +1,5 @@
 begin;
-select plan(20);
+select plan(21);
 
 insert into auth.users (id, instance_id, aud, role, email, raw_user_meta_data, raw_app_meta_data)
 values ('b1111111-1111-1111-1111-111111111111', '00000000-0000-0000-0000-000000000000', 'authenticated',
@@ -155,6 +155,11 @@ delete from public.payments where booking_id in (select id from public.bookings
 
 create temp table linked_record as select (pg_temp.record_of((select signed_in from ids))).id as id;
 
+-- the sensitivity they shared with this stylist from their account
+insert into public.client_sensitivities (client_id, stylist_id, text, consent_wording)
+select 'b2222222-2222-2222-2222-222222222222', stylist_id, 'Sensitive scalp', 'I agree to share this'
+from public.stylist_clients where id = (select id from linked_record);
+
 select set_config('request.jwt.claims', json_build_object('sub', 'b1111111-1111-1111-1111-111111111111',
   'role', 'authenticated')::text, true);
 
@@ -163,6 +168,11 @@ select lives_ok($$ select public.delete_stylist_client((select id from linked_re
 
 select is((select client_id from public.stylist_clients where id = (select id from linked_record)), null,
   'which drops the account link');
+
+select is(
+  (select count(*)::int from public.client_sensitivities where client_id = 'b2222222-2222-2222-2222-222222222222'
+    and stylist_id = (select stylist_id from public.stylist_clients where id = (select id from linked_record))),
+  0, 'and the sensitivities they shared with that stylist');
 
 select * from finish();
 rollback;

@@ -1,5 +1,5 @@
 begin;
-select plan(31);
+select plan(34);
 
 create function pg_temp.open_business(user_id uuid)
 returns uuid
@@ -189,40 +189,56 @@ select throws_ok(
 reset role;
 update public.bookings set status = 'completed'
 where stylist_client_id = (select id from public.stylist_clients where email = 'kemi@clients.test' and stylist_id = (select shop from ids));
-insert into public.payments (booking_id, kind, amount_pence)
-select id, 'booking', 1000 from public.bookings
-where stylist_client_id = (select id from public.stylist_clients where email = 'kemi@clients.test' and stylist_id = (select shop from ids)) limit 1;
-select pg_temp.act_as('a5111111-1111-1111-1111-111111111111');
-select throws_ok(
-  format('select public.delete_stylist_client(%L)', (select id from public.stylist_clients where email = 'kemi@clients.test' and stylist_id = (select shop from ids))),
-  'recent_payment', 'nor one who paid in the last 120 days'
-);
-reset role;
-update public.payments set created_at = now() - interval '121 days'
-where booking_id in (select id from public.bookings
-  where stylist_client_id = (select id from public.stylist_clients where email = 'kemi@clients.test' and stylist_id = (select shop from ids)));
--- one of their bookings was sent a confirm link nobody answered, so it was auto-cancelled still "pending"
-update public.bookings set status = 'auto_cancelled', protection_status = 'pending'
-where id = (select id from public.bookings
-  where stylist_client_id = (select id from public.stylist_clients where email = 'kemi@clients.test' and stylist_id = (select shop from ids))
-  order by starts_at limit 1);
 create temp table kemi as select id from public.stylist_clients where email = 'kemi@clients.test' and stylist_id = (select shop from ids);
 grant select on kemi to authenticated;
+-- a visit paid 30 days ago, with notes, an allergy, a private note and a manage link; one to come that was
+-- auto-cancelled still "pending"
+create temp table paid as
+select id from public.bookings where stylist_client_id = (select id from kemi) order by starts_at desc limit 1;
+insert into public.payments (booking_id, kind, amount_pence, created_at)
+select id, 'booking', 1000, now() - interval '30 days' from paid;
+update public.bookings set notes = 'Prefers mornings', allergies = 'Latex' where stylist_client_id = (select id from kemi);
+insert into public.booking_notes (booking_id, note) select id, 'Tender scalp' from paid;
+insert into public.booking_tokens (booking_id, purpose, token_hash, expires_at)
+select id, 'manage', sha256(convert_to('kemi-manage', 'UTF8')), now() + interval '30 days' from paid;
+insert into public.bookings (stylist_id, service_id, choices, snapshot, price_pence, fee_pence, minutes, starts_at,
+  ends_at, block_ends_at, status, protection_status, cancelled_at, contact, terms, created_by, overlap_ok)
+select shop, (select id from public.services where stylist_id = shop order by sort limit 1), '{}',
+  '{"service_name": "Silk press"}', 5000, 0, 60, now() + interval '20 days', now() + interval '20 days 1 hour',
+  now() + interval '20 days 1 hour', 'auto_cancelled', 'pending', now(), '{"first": "Kemi", "email": "kemi@clients.test"}',
+  '{"mode": "card"}', 'stylist', true
+from ids;
+create temp table kept as select count(*)::int as visits from public.bookings where stylist_client_id = (select id from kemi);
 select pg_temp.act_as('a5111111-1111-1111-1111-111111111111');
-select public.delete_stylist_client((select id from kemi));
+select lives_ok(format('select public.delete_stylist_client(%L)', (select id from kemi)),
+  'a client who paid in the last 120 days can be deleted straight away');
 reset role;
 select is(
   (select concat_ws(' ', first, coalesce(email, '-'), coalesce(phone, '-'), deleted_at is not null) from public.stylist_clients where id = (select id from kemi)),
   'Deleted client - - t', 'deleting clears their details'
 );
 select is(
-  (select count(*)::int from public.bookings where stylist_client_id = (select id from kemi) and contact ->> 'first' = 'Kemi'),
-  1, 'their bookings keep the name, and stay with the deleted client'
+  (select contact - 'last' from public.bookings where id = (select id from paid)),
+  '{"first": "Kemi", "email": "kemi@clients.test", "account_deleted": true}'::jsonb,
+  'a booking paid in the last 120 days keeps only the name and email, in case the payment is disputed'
+);
+select is(
+  (select count(*)::int from public.bookings where stylist_client_id = (select id from kemi) and id <> (select id from paid)
+    and contact <> '{"account_deleted": true}'::jsonb),
+  0, 'their other bookings keep nothing of them'
 );
 select is(
   (select count(*)::int from public.bookings where stylist_client_id = (select id from kemi)
-    and (contact ? 'email' or contact ? 'phone')),
-  0, 'but not their email or phone'
+    and (notes is not null or allergies is not null))
+    + (select count(*)::int from public.booking_notes where booking_id = (select id from paid))
+    + (select count(*)::int from public.booking_tokens where booking_id = (select id from paid)),
+  0, 'notes, allergies, private notes and manage links go'
+);
+select is(
+  (select jsonb_build_array(count(*)::int, count(*) filter (where status = 'completed')::int > 0, bool_and(price_pence > 0))
+    from public.bookings where stylist_client_id = (select id from kemi)),
+  jsonb_build_array((select visits from kept), true, true),
+  'the visits, their status and money stay, with the deleted client'
 );
 create temp table reopened as
 select id from public.bookings where stylist_client_id = (select id from kemi) and status = 'auto_cancelled' limit 1;
@@ -234,6 +250,10 @@ select throws_ok(
   'email_required', 'and a new confirm link can''t be "sent" to them with no email'
 );
 reset role;
+update public.payments set created_at = now() - interval '121 days' where booking_id = (select id from paid);
+select public.purge_deleted_client_contacts();
+select is((select contact from public.bookings where id = (select id from paid)), '{"account_deleted": true}'::jsonb,
+  'and once the payment is 120 days old, the nightly purge clears the name and email too');
 select lives_ok(
   format('select pg_temp.book(%L, 11, %L)', (select shop from ids), '{"first":"Kemi","email":"kemi@clients.test"}'),
   'and the block goes with them'

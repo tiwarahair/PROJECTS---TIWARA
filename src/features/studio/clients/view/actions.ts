@@ -125,20 +125,6 @@ export const createClientActions = ({
       return;
     }
 
-    if (client.deletableFrom) {
-      setState({
-        confirm: {
-          title: `${first} can’t be deleted yet`,
-          body: `Payments can be disputed for 120 days, so their records stay until ${client.deletableFrom}. You can delete ${first} from then.`,
-          yesLabel: "View appointments",
-          noLabel: "Close",
-          yes: () => setState({ confirm: null, clientAppointmentsTab: "past" }),
-        },
-      });
-
-      return;
-    }
-
     const blockNote = client.blocked
       ? " Deleting also removes the block, so they could book online again. Keep them blocked instead if you don’t want that."
       : "";
@@ -146,7 +132,7 @@ export const createClientActions = ({
     setState({
       confirm: {
         title: `Delete ${first}?`,
-        body: `This can’t be undone. ${first}’s details will be removed permanently.${blockNote}`,
+        body: `This can’t be undone. ${first}’s details, notes and sensitivities are removed, and their bookings keep only the service, time and payments. A booking paid in the last 120 days keeps their name until then, in case the payment is disputed.${blockNote}`,
         yesLabel: "Delete client",
         noLabel: "Keep client",
         yes: () => {

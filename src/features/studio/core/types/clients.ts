@@ -32,7 +32,6 @@ export interface StudioClient {
   money?: ClientMoney;
   noShows?: number;
   lateCancels?: number;
-  deletableFrom?: string;
   blocked?: boolean;
   deleted?: boolean;
   walkIn?: boolean;
