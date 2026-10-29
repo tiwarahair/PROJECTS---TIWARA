@@ -47,7 +47,7 @@ grant select on ids to authenticated;
 -- defaults for a new stylist
 select is((select count(*)::int from public.working_hours where stylist_id = (select one from ids)), 7, 'a new stylist gets 7 days of hours');
 select is((select count(*)::int from public.working_hours where stylist_id = (select one from ids) and is_open), 6, 'open Monday to Saturday');
-select is((select min_notice_hours from public.booking_rules where stylist_id = (select one from ids)), 24::smallint, 'default booking rules');
+select is((select min_notice_minutes from public.booking_rules where stylist_id = (select one from ids)), 1440, 'default booking rules');
 select is((select mode from public.payment_policies where stylist_id = (select one from ids)), 'none', 'starts with no payment protection');
 
 select pg_temp.act_as('a1111111-1111-1111-1111-111111111111');

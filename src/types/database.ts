@@ -462,7 +462,7 @@ export type Database = {
         Row: {
           default_extra_minutes: number;
           max_notice_months: number;
-          min_notice_hours: number;
+          min_notice_minutes: number;
           stylist_id: string;
           travel_buffer_minutes: number;
         };
@@ -470,14 +470,14 @@ export type Database = {
         Insert: {
           default_extra_minutes?: number;
           max_notice_months?: number;
-          min_notice_hours?: number;
+          min_notice_minutes?: number;
           stylist_id: string;
           travel_buffer_minutes?: number;
         };
         Update: {
           default_extra_minutes?: number;
           max_notice_months?: number;
-          min_notice_hours?: number;
+          min_notice_minutes?: number;
           stylist_id?: string;
           travel_buffer_minutes?: number;
         };

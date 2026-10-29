@@ -32,7 +32,7 @@ select pg_temp.sign_up('c2222222-2222-2222-2222-222222222222', 'other@desk.test'
 update public.working_hours set is_open = true, start_time = '09:00', end_time = '18:00'
 where stylist_id = (select id from public.stylists where slug = 'desk-test');
 
-update public.booking_rules set min_notice_hours = 0
+update public.booking_rules set min_notice_minutes = 0
 where stylist_id = (select id from public.stylists where slug = 'desk-test');
 
 update public.stylists set status = 'live' where slug = 'desk-test';
