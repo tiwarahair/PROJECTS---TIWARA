@@ -4,6 +4,7 @@ import {
   type PayloadAction,
 } from "@reduxjs/toolkit";
 import { supabase } from "../lib/supabase";
+import { revokeTrustedDevices } from "../lib/trusted-devices";
 import type { SessionUser } from "../types/session";
 
 interface SessionState {
@@ -46,5 +47,16 @@ export const logOut =
   (scope: "local" | "global" = "local") =>
   (dispatch: Dispatch) => {
     dispatch(signedOut());
-    void supabase.auth.signOut({ scope });
+
+    if (scope === "local") return void supabase.auth.signOut({ scope });
+
+    const revoking = revokeTrustedDevices().catch(() => undefined);
+
+    const waiting = new Promise((resolve) => {
+      setTimeout(resolve, 2000);
+    });
+
+    void Promise.race([revoking, waiting]).finally(() =>
+      supabase.auth.signOut({ scope }),
+    );
   };

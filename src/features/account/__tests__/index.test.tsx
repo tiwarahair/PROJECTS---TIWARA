@@ -174,6 +174,11 @@ describe("AccountPage", () => {
       .spyOn(supabase.auth, "signOut")
       .mockResolvedValue({ error: null });
 
+    vi.spyOn(supabase, "rpc").mockResolvedValue({
+      data: null,
+      error: null,
+    } as never);
+
     renderAccount("?section=security");
 
     await user.click(
@@ -186,7 +191,10 @@ describe("AccountPage", () => {
       within(dialog).getByRole("button", { name: "Log out everywhere" }),
     );
 
-    expect(signOut).toHaveBeenCalledWith({ scope: "global" });
+    await vi.waitFor(() =>
+      expect(signOut).toHaveBeenCalledWith({ scope: "global" }),
+    );
+
     expect(sessionStorage.getItem("tw_cust")).toBeNull();
 
     expect(

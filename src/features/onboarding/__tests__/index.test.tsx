@@ -8,6 +8,7 @@ import { setupUser } from "../../../test/setup-user";
 import { turnstileStub } from "../../../test/setup";
 import * as auth from "../../../lib/auth";
 import * as twoFactor from "../../../lib/two-factor";
+import { supabase } from "../../../lib/supabase";
 
 vi.mock("../../../lib/auth", async (importOriginal) => ({
   ...(await importOriginal<typeof import("../../../lib/auth")>()),
@@ -483,6 +484,156 @@ describe("OnboardingPage", () => {
     expect(auth.setNewPassword).toHaveBeenCalledWith(
       "copper meadow 47 lantern",
     );
+  });
+
+  describe("two-step sign-in on a trusted device", () => {
+    const TOKEN_KEY = "tw_trusted_device:user-1";
+
+    const getCheckResult = (token?: string) => {
+      if (token === "limited") return null;
+
+      return token === "trusted";
+    };
+
+    const mockTrustRpc = () =>
+      vi.spyOn(supabase, "rpc").mockImplementation(((
+        name: string,
+        args?: { token?: string },
+      ) =>
+        Promise.resolve({
+          data:
+            name === "trust_device" ? "new-token" : getCheckResult(args?.token),
+          error: null,
+        })) as never);
+
+    const signInAs = async (isAdmin = false) => {
+      vi.mocked(twoFactor.needsSecondFactor).mockResolvedValue(true);
+      vi.mocked(auth.signIn).mockResolvedValue(null);
+
+      vi.spyOn(supabase.auth, "getSession").mockResolvedValue({
+        data: {
+          session: {
+            user: { id: "user-1", app_metadata: { is_admin: isAdmin } },
+          },
+        },
+        error: null,
+      } as never);
+
+      const rpc = mockTrustRpc();
+
+      renderWithStore(<OnboardingPage />, "/login?screen=pro-password");
+
+      await user.type(screen.getByLabelText("Password"), "a long password");
+      await user.click(screen.getByRole("button", { name: "Log in" }));
+
+      return rpc;
+    };
+
+    it("a trusted device goes straight to Studio", async () => {
+      localStorage.setItem(TOKEN_KEY, "trusted");
+
+      const rpc = await signInAs();
+
+      await vi.waitFor(async () => {
+        await advance(500);
+        expect(screen.getByTestId("location").textContent).toBe("/studio");
+      });
+
+      expect(rpc).toHaveBeenCalledWith("check_trusted_device", {
+        token: "trusted",
+      });
+
+      expect(screen.queryByLabelText("Digit 1")).not.toBeInTheDocument();
+    });
+
+    it("an expired or unknown token asks for the code and is forgotten", async () => {
+      localStorage.setItem(TOKEN_KEY, "expired");
+
+      await signInAs();
+
+      expect(await screen.findByLabelText("Digit 1")).toBeInTheDocument();
+      expect(localStorage.getItem(TOKEN_KEY)).toBeNull();
+    });
+
+    it("a rate-limited check asks for the code but keeps the token", async () => {
+      localStorage.setItem(TOKEN_KEY, "limited");
+
+      await signInAs();
+
+      expect(await screen.findByLabelText("Digit 1")).toBeInTheDocument();
+      expect(localStorage.getItem(TOKEN_KEY)).toBe("limited");
+    });
+
+    it("opened straight on the code step, a trusted device goes on to Studio", async () => {
+      localStorage.setItem(TOKEN_KEY, "trusted");
+      mockTrustRpc();
+
+      vi.spyOn(supabase.auth, "getSession").mockResolvedValue({
+        data: { session: { user: { id: "user-1", app_metadata: {} } } },
+        error: null,
+      } as never);
+
+      renderWithStore(<OnboardingPage />, "/login?screen=pro-2fa");
+
+      await vi.waitFor(async () => {
+        await advance(500);
+        expect(screen.getByTestId("location").textContent).toBe("/studio");
+      });
+    });
+
+    it("an admin always enters the code and can't trust the device", async () => {
+      localStorage.setItem(TOKEN_KEY, "trusted");
+
+      const rpc = await signInAs(true);
+
+      expect(await screen.findByLabelText("Digit 1")).toBeInTheDocument();
+      expect(rpc).not.toHaveBeenCalled();
+
+      expect(
+        screen.queryByLabelText("Trust this device for 30 days"),
+      ).not.toBeInTheDocument();
+    });
+
+    it("opened straight on the code step, a signed-in stylist can trust the device", async () => {
+      vi.spyOn(supabase.auth, "getSession").mockResolvedValue({
+        data: {
+          session: {
+            user: {
+              id: "user-1",
+              email: "ama@example.com",
+              app_metadata: {},
+            },
+          },
+        },
+        error: null,
+      } as never);
+
+      renderWithStore(<OnboardingPage />, "/login?screen=pro-2fa");
+
+      expect(
+        await screen.findByLabelText("Trust this device for 30 days"),
+      ).not.toBeChecked();
+    });
+
+    it("ticking Trust this device keeps a token after the code", async () => {
+      vi.mocked(twoFactor.verifySecondFactor).mockResolvedValueOnce(true);
+
+      const rpc = await signInAs();
+
+      const trustBox = await screen.findByLabelText(
+        "Trust this device for 30 days",
+      );
+
+      expect(trustBox).not.toBeChecked();
+
+      await user.click(trustBox);
+
+      for (const [index, digit] of [..."482913"].entries())
+        await user.type(screen.getByLabelText(`Digit ${index + 1}`), digit);
+
+      await vi.waitFor(() => expect(rpc).toHaveBeenCalledWith("trust_device"));
+      expect(localStorage.getItem(TOKEN_KEY)).toBe("new-token");
+    });
   });
 
   it("Client Terms opens the terms sheet", async () => {

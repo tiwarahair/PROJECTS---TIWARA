@@ -4,7 +4,7 @@
 import { createClient } from "@supabase/supabase-js";
 import { z } from "zod";
 import { corsHeaders, respond } from "../_shared/cors.ts";
-import { getRecentUser, getSignedInUser } from "../_shared/recent-user.ts";
+import { getRecentUser, getStudioUser } from "../_shared/recent-user.ts";
 import { getSite } from "../_shared/site.ts";
 import { getAccountState, stripe, syncAccount } from "../_shared/stripe.ts";
 
@@ -78,7 +78,7 @@ Deno.serve(async (request) => {
   if (!parsed.success) return respond(400, { error: "invalid_request" });
 
   const { action } = parsed.data;
-  const ownerId = action === "refresh" ? await getSignedInUser(admin, request) : await getRecentUser(admin, request);
+  const ownerId = action === "refresh" ? await getStudioUser(admin, request) : await getRecentUser(admin, request);
 
   if (!ownerId) return respond(403, { error: action === "refresh" ? "sign_in_required" : "second_factor_required" });
 

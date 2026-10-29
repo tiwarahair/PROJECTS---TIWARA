@@ -86,6 +86,41 @@ describe("two-step verification actions", () => {
     expect(getState().tax?.nationalInsuranceHint).toBe("QQ •• •• 56 C");
   });
 
+  it("a trusted device asks for a code before a step that needs one, then carries on", async () => {
+    const { actions, getState } = setup();
+    const then = vi.fn();
+
+    actions.askForCode("backup", then);
+
+    expect(getState().twoFactor).toMatchObject({
+      step: "taxcode",
+      from: "backup",
+    });
+
+    actions.setTwoFactor({ code: "123456" });
+    await actions.confirmTaxCode();
+
+    expect(verifySecondFactor).toHaveBeenCalledWith("123456");
+    expect(then).toHaveBeenCalledOnce();
+    expect(getState().taxEdit).toBeUndefined();
+  });
+
+  it("closing the code prompt cancels what was waiting on it, and a code doesn't", async () => {
+    const { actions } = setup();
+    const onCancel = vi.fn();
+
+    actions.askForCode("trust", vi.fn(), onCancel);
+    actions.closeTwoFactor();
+    expect(onCancel).toHaveBeenCalledOnce();
+
+    const onCodeCancel = vi.fn();
+
+    actions.askForCode("trust", vi.fn(), onCodeCancel);
+    actions.setTwoFactor({ code: "123456" });
+    await actions.confirmTaxCode();
+    expect(onCodeCancel).not.toHaveBeenCalled();
+  });
+
   it("the code step is busy while the code is checked", async () => {
     let finishCheck: (isRight: boolean) => void = () => undefined;
 

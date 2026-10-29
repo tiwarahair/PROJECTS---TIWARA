@@ -54,6 +54,14 @@ export const needsSecondFactor = async () => {
   return data?.nextLevel === "aal2" && data.currentLevel !== "aal2";
 };
 
+export const hasPassedSecondFactor = async () => {
+  const { data, error } = await supabase.rpc("passed_second_factor");
+
+  if (error) throw error;
+
+  return data;
+};
+
 /** Where this session stands: a code entered ("passed"), an app set up but no code yet ("code"), or no app ("setup"). */
 export const getSecondFactorStep = async () => {
   const { data, error } =

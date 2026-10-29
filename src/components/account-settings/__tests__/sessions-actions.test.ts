@@ -44,7 +44,7 @@ describe("the sessions list", () => {
     const reloading = actions.load();
 
     await actions.signOut(state.sessions[1]!);
-    finishReload({ login_alerts: true, sessions: rows });
+    finishReload({ login_alerts: true, sessions: rows, trusted_devices: [] });
     await reloading;
 
     expect(state.sessions.map(({ id }) => id)).toEqual(["a"]);

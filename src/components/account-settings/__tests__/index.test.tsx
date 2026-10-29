@@ -45,10 +45,20 @@ const getTestBackend = (): AccountSettingsBackend => ({
           is_current: false,
         },
       ],
+      trusted_devices: [
+        {
+          id: "t1",
+          label: "Mac · Chrome",
+          kind: "laptop" as const,
+          expires_at: "2026-11-20T09:00:00Z",
+          last_used_at: null,
+        },
+      ],
     }),
   ),
   signOutSession: vi.fn(() => Promise.resolve()),
   signOutOthers: vi.fn(() => Promise.resolve()),
+  removeTrustedDevice: vi.fn(() => Promise.resolve(true)),
   saveLoginAlerts: vi.fn(() => Promise.resolve()),
   getCalendarFeed: vi.fn(() => Promise.resolve(`${FEED}/first.ics`)),
   resetCalendarFeed: vi.fn(() => Promise.resolve(`${FEED}/second.ics`)),
@@ -380,10 +390,51 @@ describe("AccountSettings", () => {
     ).toBeInTheDocument();
   });
 
+  it("security: lists trusted devices and stops trusting one", async () => {
+    render(
+      <AccountSettings person={person} backend={backend} page="security" />,
+      { wrapper: MemoryRouter },
+    );
+
+    expect(await screen.findByText("Trusted until 20 Nov")).toBeInTheDocument();
+
+    await user.click(
+      screen.getByRole("button", { name: "Stop trusting Mac · Chrome" }),
+    );
+
+    expect(backend.removeTrustedDevice).toHaveBeenCalledWith("t1");
+
+    expect(
+      await screen.findByText("Mac · Chrome will ask for a code next time"),
+    ).toBeInTheDocument();
+
+    expect(screen.queryByText("Trusted until 20 Nov")).not.toBeInTheDocument();
+  });
+
+  it("security: closing the code prompt keeps the device trusted", async () => {
+    vi.mocked(backend.removeTrustedDevice).mockResolvedValueOnce(false);
+
+    render(
+      <AccountSettings person={person} backend={backend} page="security" />,
+      { wrapper: MemoryRouter },
+    );
+
+    await user.click(
+      await screen.findByRole("button", { name: "Stop trusting Mac · Chrome" }),
+    );
+
+    expect(screen.getByText("Trusted until 20 Nov")).toBeInTheDocument();
+
+    expect(
+      screen.queryByText("Mac · Chrome will ask for a code next time"),
+    ).not.toBeInTheDocument();
+  });
+
   it("security: login alerts show the saved setting once it's loaded", async () => {
     vi.mocked(backend.getSecurity).mockResolvedValueOnce({
       login_alerts: false,
       sessions: [],
+      trusted_devices: [],
     });
 
     render(

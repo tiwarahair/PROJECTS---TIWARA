@@ -305,17 +305,17 @@ export const CodeScreen = ({ onboarding, layout, view }: ScreenProps) => {
       >
         {codeError}
       </div>
-      {is2fa && (
+      {is2fa && state.codeKind === "2fa" && state.canTrustDevice && (
         <label className={styles.remember}>
           <input
             type="checkbox"
-            checked={form.remember}
+            checked={form.trustDevice}
             onChange={(event) =>
-              actions.setField("remember", event.target.checked, true)
+              actions.setField("trustDevice", event.target.checked, true)
             }
             className={styles.rememberBox}
           />
-          <span>Remember this device for 30 days</span>
+          <span>Trust this device for 30 days</span>
         </label>
       )}
       {view.turnstileShown && (

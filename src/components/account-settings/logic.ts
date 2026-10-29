@@ -34,6 +34,14 @@ export interface SettingsSession {
   kind: "phone" | "laptop" | "tablet";
 }
 
+export interface SettingsTrustedDevice {
+  id: string;
+  device: string;
+  kind: SettingsSession["kind"];
+  trustedUntil: string;
+  last: string;
+}
+
 export interface ChannelSetting {
   email: boolean;
   sms: boolean;
@@ -68,6 +76,7 @@ export interface SettingsState {
   isPasswordCodeSent: boolean;
   signOthers: boolean;
   sessions: SettingsSession[];
+  trustedDevices: SettingsTrustedDevice[];
   sessionsLoading: boolean;
   sessionsFailed: boolean;
   alerts: boolean | null;
@@ -109,6 +118,7 @@ export const getInitialSettingsState = (
     isPasswordCodeSent: false,
     signOthers: true,
     sessions: [],
+    trustedDevices: [],
     sessionsLoading: false,
     sessionsFailed: false,
     alerts: null,

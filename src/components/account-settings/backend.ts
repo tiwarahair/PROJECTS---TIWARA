@@ -25,6 +25,8 @@ export interface AccountSettingsBackend {
   getSecurity: () => Promise<AccountSecurity>;
   signOutSession: (id: string) => Promise<void>;
   signOutOthers: () => Promise<void>;
+  /** False when they closed the code prompt instead of entering the code. */
+  removeTrustedDevice: (id: string) => Promise<boolean>;
   saveLoginAlerts: (isOn: boolean) => Promise<void>;
   getCalendarFeed: () => Promise<string>;
   resetCalendarFeed: () => Promise<string>;

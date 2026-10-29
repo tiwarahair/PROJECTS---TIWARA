@@ -155,12 +155,25 @@ export const startGoogleSignIn = async (isPro: boolean) => {
   getErrorCode(error, []);
 };
 
-export const isAdminSession = async () => {
+export const getSessionUser = async () => {
   const {
     data: { session },
   } = await supabase.auth.getSession();
 
-  return session?.user.app_metadata.is_admin === true;
+  return session?.user ?? null;
+};
+
+export const isAdminSession = async () =>
+  (await getSessionUser())?.app_metadata.is_admin === true;
+
+export const getSessionAccount = async () => {
+  const user = await getSessionUser();
+
+  if (!user) return null;
+
+  const { email = "", app_metadata: appMetadata } = user;
+
+  return { email, isAdmin: appMetadata.is_admin === true };
 };
 
 /** The signed-in user after a Google redirect: are they a stylist, and have they finished their profile? */
