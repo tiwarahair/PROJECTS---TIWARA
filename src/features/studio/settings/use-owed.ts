@@ -46,6 +46,7 @@ export const useOwed = ({
   return {
     owed: owedPence / 100,
     hasOpenDispute: !!data?.hasOpenDispute,
+    isCloseChecking: !data,
     onPayOwed: stylistId ? () => void pay() : undefined,
     isPayingOwed: isPaying || !!isOwedSettling,
   };

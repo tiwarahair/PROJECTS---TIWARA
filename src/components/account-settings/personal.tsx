@@ -28,6 +28,7 @@ export const SettingsPersonal = ({
     upcoming = 0,
     owed = 0,
     hasOpenDispute = false,
+    isCloseChecking = false,
     onPayOwed,
     isPayingOwed,
   } = props;
@@ -100,10 +101,12 @@ export const SettingsPersonal = ({
             className={joinClassNames(
               styles.closeButton,
               shared.focusRing,
-              closeReason ? styles.closeBlocked : styles.closeOpen,
+              closeReason || isCloseChecking
+                ? styles.closeBlocked
+                : styles.closeOpen,
             )}
             data-ac-in="1"
-            disabled={!!closeReason}
+            disabled={!!closeReason || isCloseChecking}
             onClick={() =>
               ask(
                 {
@@ -125,7 +128,7 @@ export const SettingsPersonal = ({
               )
             }
           >
-            Close business
+            {isCloseChecking ? "Checking…" : "Close business"}
           </button>
         </div>
       </SettingsSection>

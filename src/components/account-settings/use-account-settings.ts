@@ -45,6 +45,8 @@ export interface AccountSettingsProps {
   /** Money owed (pounds) and open disputes block closing the business. */
   owed?: number;
   hasOpenDispute?: boolean;
+  /** The money and dispute checks haven't loaded yet. */
+  isCloseChecking?: boolean;
   onPayOwed?: () => void;
   isPayingOwed?: boolean;
   pauseReason?: string;

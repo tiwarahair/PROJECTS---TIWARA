@@ -292,6 +292,15 @@ describe("AccountSettings", () => {
     expect(screen.getByText("amara@example.com")).toBeInTheDocument();
   });
 
+  it("keeps Close business off until the money and dispute checks load", () => {
+    render(
+      <AccountSettings person={person} backend={backend} isCloseChecking />,
+      { wrapper: MemoryRouter },
+    );
+
+    expect(screen.getByRole("button", { name: "Checking…" })).toBeDisabled();
+  });
+
   it("blocks closing the business while bookings are upcoming", () => {
     render(<AccountSettings person={person} backend={backend} upcoming={2} />, {
       wrapper: MemoryRouter,
