@@ -4089,6 +4089,10 @@ export type Database = {
       };
       save_open_minutes: { Args: Record<PropertyKey, never>; Returns: number };
       save_payout: { Args: { account: string; payout: Json }; Returns: string };
+      save_service: {
+        Args: { addon_links: Json; service: Json; variations: Json };
+        Returns: undefined;
+      };
       save_stylist_client: {
         Args: { details: Json; target?: string; target_stylist: string };
         Returns: string;

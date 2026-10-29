@@ -71,9 +71,9 @@ export const useCatalogueSync = (
         for (const id of getRemovedIds(categories, before.categories))
           await removeCategory(id);
       },
-      before,
+      // a failed save keeps the stylist's edits on screen (the error says it didn't save); the next change saves them again
+      {},
       () => {
-        // the put-back lists are what's saved, so they don't count as a new change
         saved.current = before;
       },
     );
