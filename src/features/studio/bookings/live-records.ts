@@ -1,5 +1,7 @@
 // Bookings that changed while Studio was open, or an older page of Past → Studio's state.
 import type { StudioBookingRow } from "../../../lib/studio-api/bookings";
+import type { StudioClientRow } from "../../../lib/studio-api/clients";
+import { toStudioClient } from "../clients/records";
 import type { StudioState } from "../core/types";
 import {
   getLocalId,
@@ -58,4 +60,23 @@ export const mergeBookingRows = (
   }
 
   return merged;
+};
+
+export const mergeClientRows = (
+  {
+    bookingClients,
+    extraClients,
+  }: Pick<StudioState, "bookingClients" | "extraClients">,
+  rows: StudioClientRow[],
+) => {
+  const fresh = rows.map(toStudioClient);
+  const ids = new Set(fresh.map(({ id }) => id));
+
+  return {
+    bookingClients: [
+      ...fresh,
+      ...bookingClients.filter(({ id }) => !ids.has(id)),
+    ],
+    extraClients: extraClients.filter(({ id }) => !ids.has(id)),
+  };
 };

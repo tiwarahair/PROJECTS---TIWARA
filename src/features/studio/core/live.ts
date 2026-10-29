@@ -4,8 +4,10 @@ import {
   fetchStudioBookings,
 } from "../../../lib/studio-api/bookings";
 import type { StudioBookingRow } from "../../../lib/studio-api/bookings";
+import { fetchStudioClients } from "../../../lib/studio-api/clients";
+import type { StudioClientRow } from "../../../lib/studio-api/clients";
 import { supabase } from "../../../lib/supabase";
-import { mergeBookingRows } from "../bookings/live-records";
+import { mergeBookingRows, mergeClientRows } from "../bookings/live-records";
 import { isWaiting } from "../bookings/save";
 import {
   getLocalId,
@@ -72,6 +74,31 @@ export const watchStudio = (stylistId: string, getStudio: () => LiveStudio) => {
     }
   };
 
+  const applyClients = (rows: StudioClientRow[]) =>
+    getStudio().context.applyState((current) => mergeClientRows(current, rows));
+
+  const { bookings, pastNew } = getStudio().context.getState();
+
+  // visits already in the client list when Studio opened; a fee or refund on one of them doesn't change its client's visits
+  const countedVisits = new Set<string | undefined>([
+    ...bookings
+      .filter(({ completed }) => completed)
+      .map(({ remoteId }) => remoteId),
+    ...pastNew
+      .filter(({ status }) => status === "Completed")
+      .map(({ remoteId }) => remoteId),
+  ]);
+
+  let clientsTicket = 0;
+
+  const refreshClients = async () => {
+    clientsTicket += 1;
+    const ticket = clientsTicket;
+    const rows = await fetchStudioClients(stylistId).catch(() => null);
+
+    if (rows && ticket === clientsTicket) applyClients(rows);
+  };
+
   // several changes to one booking arrive close together; only the newest fetch's answer is used
   const latestFetch = new Map<string, number>();
 
@@ -82,13 +109,24 @@ export const watchStudio = (stylistId: string, getStudio: () => LiveStudio) => {
 
     const row = await fetchStudioBooking(bookingId).catch(() => null);
 
-    if (row && latestFetch.get(bookingId) === ticket) apply([row]);
+    if (!row || latestFetch.get(bookingId) !== ticket) return;
+
+    apply([row]);
+
+    if (row.status === "completed" && !countedVisits.has(row.id)) {
+      countedVisits.add(row.id);
+      void refreshClients();
+    }
   };
 
   const refreshAll = async () => {
     const latest = await fetchStudioBookings(stylistId).catch(() => null);
 
-    if (latest) apply([...latest.active, ...latest.past]);
+    if (!latest) return;
+
+    apply([...latest.active, ...latest.past]);
+    clientsTicket += 1;
+    applyClients(latest.clients);
   };
 
   const channel = supabase
