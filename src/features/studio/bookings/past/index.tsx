@@ -138,7 +138,11 @@ export const PastSheetBody = ({ view }: { view: PastSheetView }) => (
         </div>
         <div className={styles.buttons}>
           {view.feeUnpaidRetryShown && (
-            <button className={styles.retry} onClick={view.feeUnpaidRetry}>
+            <button
+              className={styles.retry}
+              onClick={view.feeUnpaidRetry}
+              disabled={view.isFeeUnpaidBusy}
+            >
               {view.feeUnpaidRetryLabel}
             </button>
           )}
@@ -179,7 +183,11 @@ export const PastSheetBody = ({ view }: { view: PastSheetView }) => (
             <div className={styles.actWhy}>{view.actionReason}</div>
           </div>
         )}
-        <button className={styles.act} onClick={view.action ?? undefined}>
+        <button
+          className={styles.act}
+          onClick={view.action ?? undefined}
+          disabled={view.isActionBusy}
+        >
           <Undo size={14} strokeWidth={1.7} />
           {view.actionLabel}
         </button>
@@ -202,7 +210,11 @@ export const PastSheetBody = ({ view }: { view: PastSheetView }) => (
           </div>
         </div>
         <div className={styles.buttons}>
-          <button className={styles.whiteButton} onClick={view.resendLink}>
+          <button
+            className={styles.whiteButton}
+            onClick={view.resendLink}
+            disabled={view.isResendBusy}
+          >
             Resend link
           </button>
           <button className={styles.whiteButton} onClick={view.recordPaid}>

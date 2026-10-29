@@ -13,6 +13,7 @@ vi.mock("../../../../../lib/studio-api/money", async (importOriginal) => ({
     typeof import("../../../../../lib/studio-api/money")
   >()),
   waiveFee: vi.fn(() => Promise.resolve()),
+  retryFee: vi.fn(() => new Promise(() => {})),
 }));
 
 let user: UserEvent;
@@ -185,6 +186,14 @@ describe("Studio → past booking sheet", () => {
     expect(screen.getAllByText("Fee waived").length).toBeGreaterThan(0);
 
     expect(screen.queryByText("Card declined")).not.toBeInTheDocument();
+  });
+
+  it("retrying the card keeps the button off until the charge settles", async () => {
+    await openPast(/Nia Okafor.*No show/);
+    await user.click(screen.getByRole("button", { name: /^Retry card/ }));
+    await user.click(screen.getByRole("button", { name: /^Charge £/ }));
+
+    expect(screen.getByRole("button", { name: /^Retry card/ })).toBeDisabled();
   });
 
   it("a cancellation fee shows as pending with a waive action", async () => {

@@ -20,6 +20,8 @@ export const getCompletedView = (context: PastContext) => {
     patch,
     firstName,
     saveAndRefresh: saveBalance,
+    isBusy,
+    startBusy,
   } = context;
 
   if (!isCompleted)
@@ -42,7 +44,7 @@ export const getCompletedView = (context: PastContext) => {
     hasAwait: isAwaiting,
     awaitBody: `Payment link for £${checkout.done.charged} sent to ${first}. They can pay by card, Apple Pay or Google Pay.`,
     resendLink: () => {
-      saveBalance(resendBalanceLink);
+      saveBalance(startBusy(resendBalanceLink));
       actions.showToast(`Payment link resent to ${first}`);
     },
     recordPaid: () =>
@@ -65,6 +67,7 @@ export const getCompletedView = (context: PastContext) => {
           },
         },
       }),
+    isResendBusy: isBusy,
     canCancelLink: isAwaiting,
     cancelLink: () =>
       setState({

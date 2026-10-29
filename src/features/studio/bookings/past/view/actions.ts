@@ -8,7 +8,7 @@ import { getRefundTag } from "./context";
 import type { PastContext } from "./context";
 
 // >> "send a new link" on a booking nobody confirmed in time; the server checks the time is still free
-const getReopen = ({ actions, row, client }: PastContext) => {
+const getReopen = ({ actions, row, client, startBusy }: PastContext) => {
   const { remoteId, startsAt } = row;
 
   if (
@@ -22,7 +22,7 @@ const getReopen = ({ actions, row, client }: PastContext) => {
 
   return {
     action: () =>
-      reopenStudioBooking(remoteId).then(
+      startBusy(reopenStudioBooking)(remoteId).then(
         () => {
           actions.closeSheet();
           actions.showToast(`New link sent to ${first}`);
@@ -142,8 +142,16 @@ const getFeeAction = (
 };
 
 export const getActionsView = (context: PastContext) => {
-  const { row, isCompleted, isFresh, hoursLeft, isKept, feeNumber, why } =
-    context;
+  const {
+    row,
+    isCompleted,
+    isFresh,
+    hoursLeft,
+    isKept,
+    feeNumber,
+    why,
+    isBusy,
+  } = context;
 
   const feeLeft = roundToPence(feeNumber - (row.refunded || 0));
 
@@ -189,6 +197,7 @@ export const getActionsView = (context: PastContext) => {
         : ""),
     feeRefundTag: isCompleted ? "" : getRefundTag(row.refunded || 0, feeLeft),
     action,
+    isActionBusy: isBusy,
     actionLabel,
     actionTitle: getActionTitle(),
     actionReason: hasFee ? `${why} ${feeTiming}` : actionHint,
