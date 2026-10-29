@@ -155,24 +155,23 @@ export const startGoogleSignIn = async (isPro: boolean) => {
   getErrorCode(error, []);
 };
 
-export const isAdminSession = async () => {
+export const getSessionUser = async () => {
   const {
     data: { session },
   } = await supabase.auth.getSession();
 
-  return session?.user.app_metadata.is_admin === true;
+  return session?.user ?? null;
 };
 
+export const isAdminSession = async () =>
+  (await getSessionUser())?.app_metadata.is_admin === true;
+
 export const getSessionAccount = async () => {
-  const {
-    data: { session },
-  } = await supabase.auth.getSession();
+  const user = await getSessionUser();
 
-  if (!session) return null;
+  if (!user) return null;
 
-  const {
-    user: { email = "", app_metadata: appMetadata },
-  } = session;
+  const { email = "", app_metadata: appMetadata } = user;
 
   return { email, isAdmin: appMetadata.is_admin === true };
 };

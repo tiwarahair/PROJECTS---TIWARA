@@ -118,7 +118,7 @@ export const getSubmitValid = (
 
         const isSignInCode = screen === "pro-2fa";
 
-        await rememberDevice(!isSignInCode || form.trustDevice);
+        await rememberDevice(true);
 
         if (isSignInCode && form.trustDevice && current.canTrustDevice)
           await trustThisDevice();

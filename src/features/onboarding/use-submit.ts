@@ -6,6 +6,7 @@ import {
   signOut,
   startGoogleSignIn,
 } from "../../lib/auth";
+import { isTrustedDevice } from "../../lib/trusted-devices";
 import { getSubmitActions } from "./submit-actions";
 import type { SubmitCore } from "./submit-actions";
 import { getSubmitValid } from "./submit-screens";
@@ -76,15 +77,16 @@ export const useOnboardingSubmit = (core: SubmitCore) => {
 
     if (screen !== "pro-2fa" || codeKind !== "verify") return;
 
-    void getSessionAccount().then((account) => {
+    void getSessionAccount().then(async (account) => {
       if (!account) return;
+
+      if (await isTrustedDevice()) return finish("pro");
 
       const { email, isAdmin } = account;
 
       reset({ ...getValues(), email });
       setState({ codeKind: "2fa", canTrustDevice: !isAdmin });
     });
-    // mount only
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 

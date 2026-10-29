@@ -1,5 +1,5 @@
 begin;
-select plan(22);
+select plan(23);
 
 insert into auth.users (id, instance_id, aud, role, email, raw_user_meta_data, raw_app_meta_data)
 select id, '00000000-0000-0000-0000-000000000000', 'authenticated', 'authenticated', email,
@@ -145,6 +145,11 @@ select ok(not public.is_admin_session(), 'nor has admin access');
 select pg_temp.act_as('c3333333-3333-3333-3333-333333333333', 'a3333333-0000-0000-0000-000000000001', 'aal2', true);
 reset role;
 select ok(public.is_admin_session(), 'admin access needs aal2');
+
+select pg_temp.act_as('c3333333-3333-3333-3333-333333333333', 'a3333333-0000-0000-0000-000000000001', 'aal2', false);
+select throws_ok($$ select public.trust_device() $$, 'admin_not_trusted',
+  'an admin whose sign-in predates the role still can''t trust a device');
+reset role;
 
 select * from finish();
 rollback;

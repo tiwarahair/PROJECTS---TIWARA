@@ -63,6 +63,8 @@ export const createTaxActions = (
       () => {
         const next = memo.afterSecondFactor;
 
+        memo.cancelSecondFactor = undefined;
+
         closeTwoFactor();
 
         if (next) next();

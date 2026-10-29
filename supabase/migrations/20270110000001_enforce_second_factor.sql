@@ -7,6 +7,16 @@ create index trusted_sessions_device_idx on public.trusted_sessions (device_id);
 
 alter table public.trusted_sessions enable row level security;
 
+create function public.is_admin_account(target_user uuid)
+returns boolean
+language sql
+stable
+security definer
+set search_path = ''
+as $$
+  select coalesce((select (raw_app_meta_data ->> 'is_admin')::boolean from auth.users where id = target_user), false)
+$$;
+
 create function public.is_second_factor_passed(target_user uuid, target_session text, session_aal text)
 returns boolean
 language sql
@@ -20,9 +30,10 @@ as $$
     or exists (
       select 1 from public.trusted_sessions
       join public.trusted_devices on trusted_devices.id = trusted_sessions.device_id
-      where trusted_sessions.session_id::text = target_session
+      where trusted_sessions.session_id = nullif(target_session, '')::uuid
         and trusted_devices.user_id = target_user
         and trusted_devices.expires_at > now()
+        and not public.is_admin_account(target_user)
     )
   )
 $$;
@@ -53,7 +64,7 @@ begin
     raise exception 'second_factor_required';
   end if;
 
-  if public.is_admin() then
+  if public.is_admin() or public.is_admin_account(caller) then
     raise exception 'admin_not_trusted';
   end if;
 
@@ -85,7 +96,8 @@ as $$
   delete from public.trusted_devices
   where user_id = (select auth.uid())
     and id is distinct from (
-      select device_id from public.trusted_sessions where session_id::text = auth.jwt() ->> 'session_id'
+      select device_id from public.trusted_sessions
+      where session_id = nullif(auth.jwt() ->> 'session_id', '')::uuid
     )
 $$;
 
@@ -100,7 +112,7 @@ declare
   attempts int;
   found_id uuid;
 begin
-  if caller is null or public.is_admin() then
+  if caller is null or public.is_admin() or public.is_admin_account(caller) then
     return false;
   end if;
 
@@ -112,7 +124,7 @@ begin
   returning checks.attempts into attempts;
 
   if attempts > 10 then
-    return false;
+    return null;
   end if;
 
   update public.trusted_devices set last_used_at = now()
@@ -292,3 +304,5 @@ grant execute on function public.is_second_factor_passed(uuid, text, text) to se
 
 revoke execute on function public.revoke_other_trusted_devices() from public, anon, authenticated;
 grant execute on function public.revoke_other_trusted_devices() to authenticated;
+
+revoke execute on function public.is_admin_account(uuid) from public, anon, authenticated;

@@ -133,7 +133,9 @@ export const getSessionsActions = ({
 
   const removeTrusted = ({ id, device }: SettingsTrustedDevice) =>
     backend.removeTrustedDevice(id).then(
-      () => {
+      (isRemoved) => {
+        if (!isRemoved) return;
+
         forgetLoads();
 
         setState(({ trustedDevices }) => ({

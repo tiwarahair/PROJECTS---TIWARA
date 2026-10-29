@@ -68,12 +68,19 @@ export const useAccountBackend = ({
     signOutSession,
     signOutOthers: signOutOtherSessions,
     removeTrustedDevice: async (id) => {
-      if (await needsSecondFactor().catch(() => false))
-        await new Promise<void>((resolve) => {
-          actions.askForCode("trust", resolve);
-        });
+      const isCodeEntered =
+        !(await needsSecondFactor()) ||
+        (await new Promise<boolean>((resolve) => {
+          actions.askForCode(
+            "trust",
+            () => resolve(true),
+            () => resolve(false),
+          );
+        }));
 
-      await removeTrustedDevice(id);
+      if (isCodeEntered) await removeTrustedDevice(id);
+
+      return isCodeEntered;
     },
     saveLoginAlerts: (isOn) => saveLoginAlerts(user.id, isOn),
     getCalendarFeed: () => fetchCalendarFeedUrl(stylistId),

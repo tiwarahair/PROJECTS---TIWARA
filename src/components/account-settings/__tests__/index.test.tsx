@@ -58,7 +58,7 @@ const getTestBackend = (): AccountSettingsBackend => ({
   ),
   signOutSession: vi.fn(() => Promise.resolve()),
   signOutOthers: vi.fn(() => Promise.resolve()),
-  removeTrustedDevice: vi.fn(() => Promise.resolve()),
+  removeTrustedDevice: vi.fn(() => Promise.resolve(true)),
   saveLoginAlerts: vi.fn(() => Promise.resolve()),
   getCalendarFeed: vi.fn(() => Promise.resolve(`${FEED}/first.ics`)),
   resetCalendarFeed: vi.fn(() => Promise.resolve(`${FEED}/second.ics`)),
@@ -409,6 +409,25 @@ describe("AccountSettings", () => {
     ).toBeInTheDocument();
 
     expect(screen.queryByText("Trusted until 20 Nov")).not.toBeInTheDocument();
+  });
+
+  it("security: closing the code prompt keeps the device trusted", async () => {
+    vi.mocked(backend.removeTrustedDevice).mockResolvedValueOnce(false);
+
+    render(
+      <AccountSettings person={person} backend={backend} page="security" />,
+      { wrapper: MemoryRouter },
+    );
+
+    await user.click(
+      await screen.findByRole("button", { name: "Stop trusting Mac · Chrome" }),
+    );
+
+    expect(screen.getByText("Trusted until 20 Nov")).toBeInTheDocument();
+
+    expect(
+      screen.queryByText("Mac · Chrome will ask for a code next time"),
+    ).not.toBeInTheDocument();
   });
 
   it("security: login alerts show the saved setting once it's loaded", async () => {

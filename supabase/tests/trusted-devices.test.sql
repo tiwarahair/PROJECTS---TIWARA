@@ -101,8 +101,8 @@ update public.trusted_devices set expires_at = now() + interval '30 days';
 
 select pg_temp.act_as('e1111111-1111-1111-1111-111111111111', 'aal1');
 select public.check_trusted_device('guess') from generate_series(1, 10);
-select ok(not public.check_trusted_device((select token from tokens where name = 'first')),
-  'after 10 checks in 15 minutes even the right token is refused');
+select is(public.check_trusted_device((select token from tokens where name = 'first')), null,
+  'after 10 checks in 15 minutes the check is refused without calling the token wrong');
 reset role;
 
 update public.trusted_device_checks set window_started_at = now() - interval '16 minutes';

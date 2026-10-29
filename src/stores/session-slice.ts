@@ -50,7 +50,13 @@ export const logOut =
 
     if (scope === "local") return void supabase.auth.signOut({ scope });
 
-    void revokeTrustedDevices()
-      .catch(() => undefined)
-      .finally(() => supabase.auth.signOut({ scope }));
+    const revoking = revokeTrustedDevices().catch(() => undefined);
+
+    const waiting = new Promise((resolve) => {
+      setTimeout(resolve, 2000);
+    });
+
+    void Promise.race([revoking, waiting]).finally(() =>
+      supabase.auth.signOut({ scope }),
+    );
   };

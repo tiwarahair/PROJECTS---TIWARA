@@ -489,6 +489,23 @@ describe("OnboardingPage", () => {
   describe("two-step sign-in on a trusted device", () => {
     const TOKEN_KEY = "tw_trusted_device:user-1";
 
+    const getCheckResult = (token?: string) => {
+      if (token === "limited") return null;
+
+      return token === "trusted";
+    };
+
+    const mockTrustRpc = () =>
+      vi.spyOn(supabase, "rpc").mockImplementation(((
+        name: string,
+        args?: { token?: string },
+      ) =>
+        Promise.resolve({
+          data:
+            name === "trust_device" ? "new-token" : getCheckResult(args?.token),
+          error: null,
+        })) as never);
+
     const signInAs = async (isAdmin = false) => {
       vi.mocked(twoFactor.needsSecondFactor).mockResolvedValue(true);
       vi.mocked(auth.signIn).mockResolvedValue(null);
@@ -502,15 +519,7 @@ describe("OnboardingPage", () => {
         error: null,
       } as never);
 
-      const rpc = vi.spyOn(supabase, "rpc").mockImplementation(((
-        name: string,
-        args?: { token?: string },
-      ) =>
-        Promise.resolve({
-          data:
-            name === "trust_device" ? "new-token" : args?.token === "trusted",
-          error: null,
-        })) as never);
+      const rpc = mockTrustRpc();
 
       renderWithStore(<OnboardingPage />, "/login?screen=pro-password");
 
@@ -544,6 +553,32 @@ describe("OnboardingPage", () => {
 
       expect(await screen.findByLabelText("Digit 1")).toBeInTheDocument();
       expect(localStorage.getItem(TOKEN_KEY)).toBeNull();
+    });
+
+    it("a rate-limited check asks for the code but keeps the token", async () => {
+      localStorage.setItem(TOKEN_KEY, "limited");
+
+      await signInAs();
+
+      expect(await screen.findByLabelText("Digit 1")).toBeInTheDocument();
+      expect(localStorage.getItem(TOKEN_KEY)).toBe("limited");
+    });
+
+    it("opened straight on the code step, a trusted device goes on to Studio", async () => {
+      localStorage.setItem(TOKEN_KEY, "trusted");
+      mockTrustRpc();
+
+      vi.spyOn(supabase.auth, "getSession").mockResolvedValue({
+        data: { session: { user: { id: "user-1", app_metadata: {} } } },
+        error: null,
+      } as never);
+
+      renderWithStore(<OnboardingPage />, "/login?screen=pro-2fa");
+
+      await vi.waitFor(async () => {
+        await advance(500);
+        expect(screen.getByTestId("location").textContent).toBe("/studio");
+      });
     });
 
     it("an admin always enters the code and can't trust the device", async () => {

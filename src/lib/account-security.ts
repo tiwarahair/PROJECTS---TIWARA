@@ -28,9 +28,9 @@ const trustedDevicesSchema = z.array(
   }),
 );
 
-export type AccountSecurity = z.infer<typeof securitySchema> & {
+export interface AccountSecurity extends z.infer<typeof securitySchema> {
   trusted_devices: z.infer<typeof trustedDevicesSchema>;
-};
+}
 
 const throwIfFailed = ({ error }: { error: Error | null }) => {
   if (error) throw error;

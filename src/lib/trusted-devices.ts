@@ -1,3 +1,4 @@
+import { getSessionUser } from "./auth";
 import { supabase } from "./supabase";
 
 const getTokenKey = (userId: string) => `tw_trusted_device:${userId}`;
@@ -18,14 +19,6 @@ const forgetToken = (userId: string) => {
   }
 };
 
-const getSessionUser = async () => {
-  const {
-    data: { session },
-  } = await supabase.auth.getSession();
-
-  return session?.user ?? null;
-};
-
 export const isTrustedDevice = async () => {
   const user = await getSessionUser();
 
@@ -41,9 +34,9 @@ export const isTrustedDevice = async () => {
 
   if (error) return false;
 
-  if (!data) forgetToken(user.id);
+  if (data === false) forgetToken(user.id);
 
-  return data;
+  return data === true;
 };
 
 export const trustThisDevice = async () => {
