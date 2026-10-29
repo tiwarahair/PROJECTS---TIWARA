@@ -51,6 +51,7 @@ export interface PaymentPolicyProps {
   value: PolicyValue;
   bookingsCount?: number;
   stylistName: string;
+  /** A promise resolves false when nothing was saved yet, and rejects when the save failed. */
   onSave?: (value: PolicyValue) => void | Promise<boolean>;
   onState?: (api: PaymentPolicyApi) => void;
 }
