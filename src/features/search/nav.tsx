@@ -30,7 +30,7 @@ export const SearchNav = ({ search }: SearchNavProps) => {
   const whereValue = state.whereText != null ? state.whereText : where.display;
   const hasDate = !!state.query.date || state.time !== "any";
   const mobileDateLabel = getMobileDateLabel(state);
-  const mobileWhereLabel = where.display || "Current location";
+  const mobileWhereLabel = where.display || where.placeholder;
 
   // the pill grows with the window, leaving room for the logo and the right rail
   const pillStyle = {
@@ -122,7 +122,7 @@ export const SearchNav = ({ search }: SearchNavProps) => {
                 onFocus={actions.focusWhere}
                 onChange={actions.changeWhere}
                 onKeyDown={actions.keyWhere}
-                placeholder="Current location"
+                placeholder={where.placeholder}
                 aria-label="Area or postcode"
                 // no aria-controls on the comboboxes; kept as-is
                 // eslint-disable-next-line jsx-a11y/role-has-required-aria-props

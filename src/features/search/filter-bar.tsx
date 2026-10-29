@@ -12,6 +12,7 @@ import {
   toMaxPrice,
   VENUES,
 } from "./filters";
+import { getSort } from "./logic";
 import { RADII } from "./state";
 import pageGlobal from "../../styles/features/search/index-global.module.css";
 import styles from "../../styles/features/search/filter-bar.module.css";
@@ -35,6 +36,11 @@ export const FilterBar = ({ search }: FilterBarProps) => {
   const findingPlaceholder = search.isSlow ? <Skeleton width={150} /> : null;
   const serviceText = selection.name ? ` for ${selection.name}` : "";
 
+  const hasPoint = !!place.point;
+  const isRadiusOn = hasPoint && state.radius !== 10;
+
+  const sorts = hasPoint ? SORTS : SORTS.filter(([key]) => key !== "distance");
+
   const hasFilter =
     selection.has ||
     !place.current ||
@@ -42,12 +48,12 @@ export const FilterBar = ({ search }: FilterBarProps) => {
     state.time !== "any" ||
     state.venues.length > 0 ||
     state.maxPrice != null ||
-    state.radius !== 10;
+    isRadiusOn;
 
   const filterCount =
     state.venues.length +
     (state.maxPrice != null ? 1 : 0) +
-    (state.radius !== 10 ? 1 : 0);
+    (isRadiusOn ? 1 : 0);
 
   return (
     <div className={joinClassNames(pageGlobal.flWrap, styles.wrap)}>
@@ -154,69 +160,71 @@ export const FilterBar = ({ search }: FilterBarProps) => {
               </>
             )}
           </div>
-          <div className={styles.popoverAnchor}>
-            <button
-              type="button"
-              onClick={actions.toggleDistance}
-              aria-expanded={state.distanceOpen ? "true" : "false"}
-              aria-haspopup="listbox"
-              className={joinClassNames(
-                controls.chip,
-                controls.chipLarge,
-                state.radius !== 10 && controls.chipOn,
-              )}
-            >
-              {`Within ${state.radius} miles`}
-              <ChevronDown
-                className={styles.iconBlock}
-                size={14}
-                strokeWidth={2}
-              />
-            </button>
-            {state.distanceOpen && (
-              <>
-                <div
-                  onClick={actions.closeDistance}
-                  className={styles.popoverScrim}
-                ></div>
-                <div
-                  data-dd=""
-                  role="listbox"
-                  aria-label="Distance"
-                  className={styles.distancePopover}
-                >
-                  {RADII.map((radius) => {
-                    const isSelected = state.radius === radius;
+          {hasPoint && (
+            <div className={styles.popoverAnchor}>
+              <button
+                type="button"
+                onClick={actions.toggleDistance}
+                aria-expanded={state.distanceOpen ? "true" : "false"}
+                aria-haspopup="listbox"
+                className={joinClassNames(
+                  controls.chip,
+                  controls.chipLarge,
+                  state.radius !== 10 && controls.chipOn,
+                )}
+              >
+                {`Within ${state.radius} miles`}
+                <ChevronDown
+                  className={styles.iconBlock}
+                  size={14}
+                  strokeWidth={2}
+                />
+              </button>
+              {state.distanceOpen && (
+                <>
+                  <div
+                    onClick={actions.closeDistance}
+                    className={styles.popoverScrim}
+                  ></div>
+                  <div
+                    data-dd=""
+                    role="listbox"
+                    aria-label="Distance"
+                    className={styles.distancePopover}
+                  >
+                    {RADII.map((radius) => {
+                      const isSelected = state.radius === radius;
 
-                    return (
-                      <button
-                        key={`d${radius}`}
-                        type="button"
-                        role="option"
-                        aria-selected={isSelected ? "true" : "false"}
-                        onClick={() => actions.pickDistance(radius)}
-                        className={joinClassNames(
-                          controls.option,
-                          isSelected && controls.optionOn,
-                        )}
-                      >
-                        <span className={styles.optionLabel}>
-                          {`Within ${radius} miles`}
-                        </span>
-                        {isSelected && (
-                          <Check
-                            className={styles.iconBlock}
-                            size={14}
-                            strokeWidth={2.4}
-                          />
-                        )}
-                      </button>
-                    );
-                  })}
-                </div>
-              </>
-            )}
-          </div>
+                      return (
+                        <button
+                          key={`d${radius}`}
+                          type="button"
+                          role="option"
+                          aria-selected={isSelected ? "true" : "false"}
+                          onClick={() => actions.pickDistance(radius)}
+                          className={joinClassNames(
+                            controls.option,
+                            isSelected && controls.optionOn,
+                          )}
+                        >
+                          <span className={styles.optionLabel}>
+                            {`Within ${radius} miles`}
+                          </span>
+                          {isSelected && (
+                            <Check
+                              className={styles.iconBlock}
+                              size={14}
+                              strokeWidth={2.4}
+                            />
+                          )}
+                        </button>
+                      );
+                    })}
+                  </div>
+                </>
+              )}
+            </div>
+          )}
           {hasFilter && (
             <button
               type="button"
@@ -262,8 +270,8 @@ export const FilterBar = ({ search }: FilterBarProps) => {
             <SortMenu
               label="Sort"
               ariaLabel="Sort"
-              options={SORTS}
-              value={state.sort}
+              options={sorts}
+              value={getSort(state.sort, place.point)}
               isOpen={state.sortOpen}
               onToggle={actions.toggleSort}
               onClose={actions.closeSort}
