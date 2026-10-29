@@ -197,6 +197,34 @@ describe("Studio → booking sheet", () => {
     ).not.toBeInTheDocument();
   });
 
+  it("a no-show with a non-refundable deposit and no fee keeps the deposit, with nothing to charge", async () => {
+    const seed = getStudioSeed();
+
+    seed.bookings.active = [
+      getRow({
+        starts_at: fromLondonTime(toDate(0), "07:00"),
+        created_at: BOOKED_AT,
+        terms: {
+          mode: "deposit",
+          deposit_percent: 20,
+          deposit_pence: 1300,
+          refundable: false,
+          no_show_on: false,
+          grace_minutes: 0,
+        },
+      }),
+    ];
+
+    await openBooking("Nia Okafor", seed);
+    await openMoreItem("No-show");
+
+    expect(screen.queryByText(/Charge the/)).not.toBeInTheDocument();
+
+    expect(
+      screen.getByText(/£13 deposit kept \(non-refundable\)/),
+    ).toBeInTheDocument();
+  });
+
   it("opens a booking with its service and client", async () => {
     await openNia();
 

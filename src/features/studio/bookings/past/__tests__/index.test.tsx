@@ -227,6 +227,30 @@ describe("Studio → past booking sheet", () => {
     ).not.toBeInTheDocument();
   });
 
+  it("a no-show that kept a non-refundable deposit, with no fee, offers a refund", async () => {
+    await openPast(/Nia Okafor.*No show/, [
+      getPastRow("b-kept", 4, {
+        status: "no_show",
+        no_show_at: "2026-09-04T10:00:00+00:00",
+        booking_fees: [
+          getFee({
+            status: "paid",
+            amount_pence: 0,
+            kept_pence: 2000,
+            refund_pence: 0,
+          }),
+        ],
+      }),
+    ]);
+
+    expect(
+      screen.getByText("£20 deposit kept (non-refundable)"),
+    ).toBeInTheDocument();
+
+    expect(screen.queryByText(/Waive/)).not.toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Refund" })).toBeInTheDocument();
+  });
+
   it("an unpaid no-show fee can be waived", async () => {
     await openPast(/Nia Okafor.*No show/);
 

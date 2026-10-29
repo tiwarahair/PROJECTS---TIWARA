@@ -134,6 +134,7 @@ export interface PastRecord {
   note?: string;
   meta?: string;
   feeKept?: boolean;
+  depositKept?: boolean;
   feePending?: boolean;
   feeUnpaid?: boolean;
   feeLabel?: string;

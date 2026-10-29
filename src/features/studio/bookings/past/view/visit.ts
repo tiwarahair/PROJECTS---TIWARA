@@ -17,6 +17,8 @@ export const getVisitView = ({
   const getOutLabel = () => {
     if (isCompleted || !isKept) return "Paid";
 
+    if (row.depositKept) return "Deposit kept";
+
     return row.feePending && isFresh ? "Fee pending" : "Fee kept";
   };
 

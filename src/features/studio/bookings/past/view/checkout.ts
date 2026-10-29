@@ -18,6 +18,12 @@ interface PastCheckout {
 export const getPastTime = (state: StudioState, row: PastRecord) =>
   timeRange(row.time, row.duration || getServiceDuration(state, row.service));
 
+const getFeeLineName = ({ status, depositKept }: PastRecord) => {
+  if (depositKept) return "Deposit (non-refundable)";
+
+  return status === "No show" ? "No-show fee" : "Late cancellation fee";
+};
+
 const getFeeCheckout = (
   row: PastRecord,
   shared: Omit<CheckoutBooking, "price" | "lines" | "mode" | "paid">,
@@ -30,8 +36,7 @@ const getFeeCheckout = (
       price: fee,
       lines: [
         {
-          name:
-            row.status === "No show" ? "No-show fee" : "Late cancellation fee",
+          name: getFeeLineName(row),
           subtitle: row.service,
           base: fee,
           adjustment: 0,
