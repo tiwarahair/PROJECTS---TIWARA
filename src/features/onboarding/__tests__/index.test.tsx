@@ -559,6 +559,27 @@ describe("OnboardingPage", () => {
       ).not.toBeInTheDocument();
     });
 
+    it("opened straight on the code step, a signed-in stylist can trust the device", async () => {
+      vi.spyOn(supabase.auth, "getSession").mockResolvedValue({
+        data: {
+          session: {
+            user: {
+              id: "user-1",
+              email: "ama@example.com",
+              app_metadata: {},
+            },
+          },
+        },
+        error: null,
+      } as never);
+
+      renderWithStore(<OnboardingPage />, "/login?screen=pro-2fa");
+
+      expect(
+        await screen.findByLabelText("Trust this device for 30 days"),
+      ).not.toBeChecked();
+    });
+
     it("ticking Trust this device keeps a token after the code", async () => {
       vi.mocked(twoFactor.verifySecondFactor).mockResolvedValueOnce(true);
 

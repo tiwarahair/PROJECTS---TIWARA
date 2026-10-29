@@ -163,6 +163,20 @@ export const isAdminSession = async () => {
   return session?.user.app_metadata.is_admin === true;
 };
 
+export const getSessionAccount = async () => {
+  const {
+    data: { session },
+  } = await supabase.auth.getSession();
+
+  if (!session) return null;
+
+  const {
+    user: { email = "", app_metadata: appMetadata },
+  } = session;
+
+  return { email, isAdmin: appMetadata.is_admin === true };
+};
+
 /** The signed-in user after a Google redirect: are they a stylist, and have they finished their profile? */
 export const getSignedInAccount = async () => {
   const {
