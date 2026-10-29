@@ -88,9 +88,9 @@ export const AdminReports = ({
       isAlert: !!stats?.overdue,
     },
     {
-      label: isWide ? "Decided this week" : "This week",
+      label: isWide ? "Decided, last 7 days" : "Last 7 days",
       value: stats?.decided_this_week,
-      sub: "Kept, or the words or review removed",
+      sub: "Reviews in the Decided tab",
     },
   ];
 
