@@ -38,23 +38,20 @@ const throwIfFailed = ({ error }: { error: Error | null }) => {
 };
 
 export const fetchAccountSecurity = async () => {
-  const [{ data, error }, { data: trustedDevices, error: trustedError }] =
-    await Promise.all([
-      supabase.rpc("get_account_security"),
-      supabase
-        .from("trusted_devices")
-        .select("id, label, kind, expires_at, last_used_at")
-        .gt("expires_at", new Date().toISOString())
-        .order("created_at", { ascending: false }),
-    ]);
+  const [{ data, error }, { data: trustedDevices }] = await Promise.all([
+    supabase.rpc("get_account_security"),
+    supabase
+      .from("trusted_devices")
+      .select("id, label, kind, expires_at, last_used_at")
+      .gt("expires_at", new Date().toISOString())
+      .order("created_at", { ascending: false }),
+  ]);
 
   if (error) throw error;
 
-  if (trustedError) throw trustedError;
-
   return {
     ...securitySchema.parse(data),
-    trusted_devices: trustedDevicesSchema.parse(trustedDevices),
+    trusted_devices: trustedDevicesSchema.catch([]).parse(trustedDevices),
   };
 };
 
