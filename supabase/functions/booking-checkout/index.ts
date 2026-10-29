@@ -53,7 +53,7 @@ Deno.serve(async (request) => {
       client_lat: lat ?? null,
       client_lng: lng ?? null,
       client: clientId,
-      shown: agreement ? { agreement, policy_lines: policyLines ?? [] } : null,
+      ...(agreement ? { shown: { agreement, policy_lines: policyLines ?? [] } } : {}),
     });
 
     // turned away for an unpaid fee: the slot they were holding goes back
