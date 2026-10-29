@@ -3,6 +3,7 @@ import type { ManagedBooking } from "../../../lib/manage-booking-api";
 import {
   getCancelLines,
   getLateRescheduleWarning,
+  getRescheduleNote,
   getTermsLine,
 } from "../logic";
 
@@ -133,6 +134,18 @@ describe("a stylist with no booking policy", () => {
       ),
     ).toBe(
       "This time is within 48 hours, so the booking fee won’t be refunded if you cancel.",
+    );
+  });
+
+  it("never says rescheduling closes at the free-cancellation time", () => {
+    expect(getRescheduleNote(noPolicy(true))).toBe("");
+
+    expect(getRescheduleNote({ ...noPolicy(true), reschedule_count: 1 })).toBe(
+      "You've already used your 1 free reschedule.",
+    );
+
+    expect(getRescheduleNote(booking)).toBe(
+      "You can't reschedule after the free cancellation time.",
     );
   });
 });

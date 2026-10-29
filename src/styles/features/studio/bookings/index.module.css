@@ -34,10 +34,14 @@
 }
 
 /* ---- header ---- */
+/* its own layer: iOS Safari otherwise paints the day view's transformed (swiping) track over a sticky header;
+   not a transform, which would shrink the date picker's full-screen tap-to-close layer to the header */
 .header {
   position: sticky;
   top: 0;
-  z-index: 5;
+  z-index: 20;
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
   background: var(--canvas);
   backdrop-filter: none;
   -webkit-backdrop-filter: none;

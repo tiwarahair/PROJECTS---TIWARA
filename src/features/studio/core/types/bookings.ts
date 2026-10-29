@@ -133,6 +133,7 @@ export interface PastRecord {
   note?: string;
   meta?: string;
   feeKept?: boolean;
+  isLateClientCancel?: boolean;
   feePending?: boolean;
   feeUnpaid?: boolean;
   feeLabel?: string;

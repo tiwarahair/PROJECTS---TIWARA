@@ -185,6 +185,24 @@ const getCancelNote = (row: StudioBookingRow, refundNote: string) => {
   return `Cancelled by ${who}.${refundNote}`;
 };
 
+/** As the server counts it (20261227000001): the client cancelled, themselves or recorded by the stylist, after the free-cancellation cutoff. */
+const isLateClientCancel = ({
+  status,
+  cancelled_by: cancelledBy,
+  cancelled_at: cancelledAt,
+  terms,
+}: StudioBookingRow) => {
+  const cutoff = getText(terms, "free_cancel_until");
+
+  return (
+    status === "cancelled" &&
+    cancelledBy === "client" &&
+    !!cancelledAt &&
+    !!cutoff &&
+    Date.parse(cancelledAt) >= Date.parse(cutoff)
+  );
+};
+
 export const toPastRecord = (row: StudioBookingRow): PastRecord => {
   const booking = toStudioBooking(row);
   const status = PAST_STATUSES[row.status] ?? "Completed";
@@ -224,6 +242,7 @@ export const toPastRecord = (row: StudioBookingRow): PastRecord => {
     status,
     at: Date.parse(markedAt),
     pastAt,
+    isLateClientCancel: isLateClientCancel(row),
     ...(status === "Cancelled" && row.status !== "auto_cancelled"
       ? {
           meta: getMeta(),

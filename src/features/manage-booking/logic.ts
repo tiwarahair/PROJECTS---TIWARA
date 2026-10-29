@@ -58,10 +58,14 @@ export const getTermsLine = (booking: ManagedBooking) => {
     : "The free cancellation time has passed, so the booking fee isn’t refunded.";
 };
 
-export const getRescheduleNote = (booking: ManagedBooking) =>
-  booking.reschedule_count > 0
-    ? "You've already used your 1 free reschedule."
-    : "You can't reschedule after the free cancellation time.";
+export const getRescheduleNote = (booking: ManagedBooking) => {
+  if (booking.reschedule_count > 0)
+    return "You've already used your 1 free reschedule.";
+
+  return hasPolicy(booking)
+    ? "You can't reschedule after the free cancellation time."
+    : "";
+};
 
 /**
  * EDGE CASE: a user trying to reschedule a booking that is close to the start time e.g. selecting a booking for the next day (so it's already within the cancellation window - free cancellation is gone)

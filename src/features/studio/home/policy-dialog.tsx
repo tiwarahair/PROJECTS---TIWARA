@@ -8,7 +8,7 @@ import {
 import { useFocusLoop } from "../../../hooks/use-focus-loop";
 import { joinClassNames } from "../../../utils/class-names";
 import type { StudioController } from "../core/use-studio";
-import { closePolicyNudge } from "./nudge";
+import { closePolicyNudge, getPolicyNudgeBody } from "./nudge";
 import overlay from "../../../styles/components/overlay/index.module.css";
 import styles from "../../../styles/features/studio/home/policy-dialog.module.css";
 
@@ -101,10 +101,7 @@ export const PolicyDialog = ({ studio }: PolicyDialogProps) => {
         <h2 id="policy-dialog-title" className={styles.title}>
           Make your policy your own
         </h2>
-        <p className={styles.body}>
-          You can take bookings now. Until you set a booking policy, clients
-          book without a deposit or card, and can cancel at any time.
-        </p>
+        <p className={styles.body}>{getPolicyNudgeBody(studio.state)}</p>
         <ul className={styles.perks}>
           {PERKS.map(([PerkIcon, label, detail]) => (
             <li key={label} className={styles.perk}>

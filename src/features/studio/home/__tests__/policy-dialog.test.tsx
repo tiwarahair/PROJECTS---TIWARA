@@ -11,7 +11,11 @@ const getStudio = (policyReminder = false) => {
 
   return {
     studio: {
-      state: { account: { stylistId: "stylist-1" }, policyReminder },
+      state: {
+        account: { stylistId: "stylist-1" },
+        policyReminder,
+        policy: { window: 24 },
+      },
       setState,
       actions: { openSubpage },
       context: { sync: { save } },
@@ -34,6 +38,12 @@ describe("the policy dialog", () => {
 
     expect(
       screen.getByRole("dialog", { name: "Make your policy your own" }),
+    ).toBeInTheDocument();
+
+    expect(
+      screen.getByText(
+        "You can take bookings now. Until you set a booking policy, clients book without a deposit or card. Only the booking fee is non-refundable if they cancel within 24 hours of the appointment.",
+      ),
     ).toBeInTheDocument();
 
     await user.click(screen.getByRole("button", { name: "Set your policy" }));

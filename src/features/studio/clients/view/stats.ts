@@ -57,8 +57,7 @@ export const getClientStats = (state: StudioState, id: string | null) => {
       noShows ?? past.filter(({ status }) => status === "No show").length,
     lateCancel:
       lateCancels ??
-      past.filter(({ status, feeKept }) => status === "Cancelled" && feeKept)
-        .length,
+      past.filter(({ isLateClientCancel }) => isLateClientCancel).length,
     fees,
     refunds,
     deposits,

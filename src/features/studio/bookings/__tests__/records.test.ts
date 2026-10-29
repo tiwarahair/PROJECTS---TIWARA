@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 import type { StudioBookingRow } from "../../../../lib/studio-api/bookings";
 import { getClientRow, getRow } from "../../../../test/studio-booking-row";
-import { toStartsAt, toStudioBookings } from "../records";
+import { toPastRecord, toStartsAt, toStudioBookings } from "../records";
 
 // the opening load: each row is sorted into upcoming or Past by its status
 const load = (rows: StudioBookingRow[]) =>
@@ -178,5 +178,26 @@ describe("toStudioBookings", () => {
     expect(pastNew.map(({ pastId }) => pastId)).toEqual(["new-1", "old-1"]);
     expect(pastNew[1]?.month).toBe("October 2024");
     expect(pastNew[0]?.month).not.toMatch(/\d/);
+  });
+});
+
+describe("late client cancellations", () => {
+  // the free-cancellation cutoff in the fixture is 18 Oct, 10:00
+  const cancelled = (cancelledAt: string, who: "client" | "stylist") =>
+    toPastRecord(
+      getRow({
+        status: "cancelled",
+        cancelled_at: cancelledAt,
+        cancelled_by: who,
+      }),
+    ).isLateClientCancel;
+
+  it("counts the client cancelling after the cutoff, with or without a fee", () => {
+    expect(cancelled("2026-10-18T12:00:00+00:00", "client")).toBe(true);
+  });
+
+  it("doesn't count an early cancel or the stylist's own", () => {
+    expect(cancelled("2026-10-17T12:00:00+00:00", "client")).toBe(false);
+    expect(cancelled("2026-10-18T12:00:00+00:00", "stylist")).toBe(false);
   });
 });

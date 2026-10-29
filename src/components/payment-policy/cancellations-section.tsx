@@ -49,7 +49,9 @@ export const CancellationsSection = ({
       <h2 className={parts.heading}>Cancellations & no-shows</h2>
       <div className={styles.windowField}>
         <label className={parts.label} htmlFor={`${uid}-win`}>
-          Free cancellation & rescheduling until
+          {mode === "none"
+            ? "Free cancellation until"
+            : "Free cancellation & rescheduling until"}
         </label>
         <div className={styles.windowRow}>
           <Select
@@ -61,9 +63,11 @@ export const CancellationsSection = ({
           />
           <span className={parts.muted}>before the appointment</span>
         </div>
-        <div className={styles.help}>
-          Online rescheduling also closes at this point.
-        </div>
+        {mode !== "none" && (
+          <div className={styles.help}>
+            Online rescheduling also closes at this point.
+          </div>
+        )}
       </div>
 
       <Reveal open={mode !== "none"}>
