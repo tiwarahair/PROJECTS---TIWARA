@@ -1,9 +1,15 @@
 import type { AccountSecurity } from "../../lib/account-security";
 import { getTimeAgo, SHORT_MONTHS } from "../../utils/dates";
 import type { AccountSettingsBackend } from "./backend";
-import type { SettingsSession, SettingsState } from "./logic";
+import type {
+  SettingsSession,
+  SettingsState,
+  SettingsTrustedDevice,
+} from "./logic";
 
 type SessionRow = AccountSecurity["sessions"][number];
+
+type TrustedDeviceRow = AccountSecurity["trusted_devices"][number];
 
 export const toSettingsSession = (
   {
@@ -25,6 +31,27 @@ export const toSettingsSession = (
     isCurrent,
     signedIn: `Signed in ${signedIn.getDate()} ${SHORT_MONTHS[signedIn.getMonth()]}`,
     last: isCurrent ? "Active now" : getTimeAgo(new Date(activeAt), now),
+  };
+};
+
+export const toSettingsTrustedDevice = (
+  {
+    id,
+    label,
+    kind,
+    expires_at: expiresAt,
+    last_used_at: lastUsedAt,
+  }: TrustedDeviceRow,
+  now = new Date(),
+): SettingsTrustedDevice => {
+  const expires = new Date(expiresAt);
+
+  return {
+    id,
+    device: label,
+    kind,
+    trustedUntil: `Trusted until ${expires.getDate()} ${SHORT_MONTHS[expires.getMonth()]}`,
+    last: lastUsedAt ? getTimeAgo(new Date(lastUsedAt), now) : "Not used yet",
   };
 };
 
@@ -58,12 +85,16 @@ export const getSessionsActions = ({
     }));
 
     return backend.getSecurity().then(
-      ({ sessions, login_alerts: alerts }) =>
+      ({ sessions, trusted_devices: trustedDevices, login_alerts: alerts }) =>
         setState((current) => ({
           sessions:
             loadId === latestLoad.current
               ? sessions.map((row) => toSettingsSession(row))
               : current.sessions,
+          trustedDevices:
+            loadId === latestLoad.current
+              ? trustedDevices.map((row) => toSettingsTrustedDevice(row))
+              : current.trustedDevices,
           alerts: current.alerts ?? alerts,
           sessionsLoading: false,
         })),
@@ -92,11 +123,26 @@ export const getSessionsActions = ({
 
         setState(({ sessions }) => ({
           sessions: sessions.filter(({ isCurrent }) => isCurrent),
+          trustedDevices: [],
         }));
 
         toast("Signed out of other sessions");
       },
       () => toast("Your other sessions couldn’t be signed out. Try again."),
+    );
+
+  const removeTrusted = ({ id, device }: SettingsTrustedDevice) =>
+    backend.removeTrustedDevice(id).then(
+      () => {
+        forgetLoads();
+
+        setState(({ trustedDevices }) => ({
+          trustedDevices: trustedDevices.filter((item) => item.id !== id),
+        }));
+
+        toast(`${device} will ask for a code next time`);
+      },
+      () => toast("That device couldn’t be removed. Try again."),
     );
 
   const toggleAlerts = (isOn: boolean) => {
@@ -111,5 +157,5 @@ export const getSessionsActions = ({
     );
   };
 
-  return { load, signOut, signOutOthers, toggleAlerts };
+  return { load, signOut, signOutOthers, removeTrusted, toggleAlerts };
 };

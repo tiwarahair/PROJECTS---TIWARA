@@ -10,6 +10,7 @@ import {
 } from "../../lib/auth";
 import type { NewPasswordProblem } from "../../lib/auth";
 import { rememberDevice } from "../../lib/supabase";
+import { trustThisDevice } from "../../lib/trusted-devices";
 import { needsSecondFactor, verifySecondFactor } from "../../lib/two-factor";
 import { getPasswordProblemMessage } from "../../utils/password";
 import { TURNSTILE_SCREENS } from "./data";
@@ -115,9 +116,14 @@ export const getSubmitValid = (
 
         if (current.codeKind === "reset") return saveReset();
 
-        await rememberDevice(form.remember);
+        const isSignInCode = screen === "pro-2fa";
 
-        if (screen === "pro-2fa") finish("pro");
+        await rememberDevice(!isSignInCode || form.trustDevice);
+
+        if (isSignInCode && form.trustDevice && current.canTrustDevice)
+          await trustThisDevice();
+
+        if (isSignInCode) finish("pro");
         else
           finish(current.audience === "customer" ? "customer-new" : "newpro");
       });

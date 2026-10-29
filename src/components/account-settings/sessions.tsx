@@ -1,4 +1,4 @@
-import { LogOut } from "lucide-react";
+import { LogOut, ShieldOff } from "lucide-react";
 import { joinClassNames } from "../../utils/class-names";
 import { SESSION_ICONS } from "./logic";
 import { SettingsSection, Switch } from "./fields";
@@ -84,6 +84,41 @@ export const SettingsSessions = ({
                   </div>
                 );
               })}
+              {state.trustedDevices.map((trusted) => {
+                const { id, device, kind, trustedUntil, last } = trusted;
+
+                const DeviceIcon = SESSION_ICONS[kind];
+
+                return (
+                  <div key={id} className={styles.sessionRow}>
+                    <span className={styles.sessionIcon}>
+                      <DeviceIcon size={18} strokeWidth={1.7} />
+                    </span>
+                    <div className={styles.sessionBody}>
+                      <div className={styles.sessionMain}>
+                        <div className={shared.badgeRow}>
+                          <span className={shared.strongText}>{device}</span>
+                          <span className={styles.currentTag}>Trusted</span>
+                        </div>
+                        <div className={shared.rowLabel}>{trustedUntil}</div>
+                      </div>
+                      <div className={styles.sessionLast}>{last}</div>
+                    </div>
+                    <button
+                      className={joinClassNames(
+                        styles.signOut,
+                        shared.focusRing,
+                      )}
+                      data-ac-in="1"
+                      onClick={() => sessions.removeTrusted(trusted)}
+                      aria-label={`Stop trusting ${device}`}
+                      title="Stop trusting"
+                    >
+                      <ShieldOff size={17} strokeWidth={1.7} />
+                    </button>
+                  </div>
+                );
+              })}
               {!hasOthers && (
                 <p className={styles.noOthers}>
                   No other devices are signed in.
@@ -101,7 +136,7 @@ export const SettingsSessions = ({
                   ask(
                     {
                       title: "Sign out all other sessions?",
-                      body: "Every device except this one will need to sign in again.",
+                      body: "Every device except this one will need to sign in again, and trusted devices will ask for a code.",
                       cta: "Sign out",
                     },
                     sessions.signOutOthers,

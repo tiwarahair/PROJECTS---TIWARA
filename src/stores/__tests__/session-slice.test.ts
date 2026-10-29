@@ -65,10 +65,14 @@ describe("session slice", () => {
     expect(createStore().getState().session.loggedIn).toBe(false);
   });
 
-  it("signs this device out of Supabase and clears the session", () => {
+  it("signs this device out of Supabase and clears the session", async () => {
     const signOut = vi
       .spyOn(supabase.auth, "signOut")
       .mockResolvedValue({ error: null });
+
+    const rpc = vi
+      .spyOn(supabase, "rpc")
+      .mockResolvedValue({ data: null, error: null } as never);
 
     const store = createStore();
 
@@ -79,6 +83,11 @@ describe("session slice", () => {
     expect(store.getState().session.loggedIn).toBe(false);
 
     store.dispatch(logOut("global"));
-    expect(signOut).toHaveBeenLastCalledWith({ scope: "global" });
+
+    await vi.waitFor(() =>
+      expect(signOut).toHaveBeenLastCalledWith({ scope: "global" }),
+    );
+
+    expect(rpc).toHaveBeenCalledWith("revoke_trusted_devices");
   });
 });

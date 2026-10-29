@@ -25,6 +25,7 @@ export interface AccountSettingsBackend {
   getSecurity: () => Promise<AccountSecurity>;
   signOutSession: (id: string) => Promise<void>;
   signOutOthers: () => Promise<void>;
+  removeTrustedDevice: (id: string) => Promise<void>;
   saveLoginAlerts: (isOn: boolean) => Promise<void>;
   getCalendarFeed: () => Promise<string>;
   resetCalendarFeed: () => Promise<string>;

@@ -276,7 +276,11 @@ export const useAccountSettings = (props: AccountSettingsProps) => {
 
         passwordForm.reset(EMPTY_PASSWORD);
 
-        setState({ isPasswordCodeSent: false, isSettingPassword: false });
+        setState({
+          isPasswordCodeSent: false,
+          isSettingPassword: false,
+          trustedDevices: [],
+        });
 
         if (state.signOthers) sessions.load();
 

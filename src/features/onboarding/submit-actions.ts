@@ -5,6 +5,7 @@ import {
   signUpStylist,
 } from "../../lib/auth";
 import { getAuthFailure } from "../../lib/auth-errors";
+import { isTrustedDevice } from "../../lib/trusted-devices";
 import { needsSecondFactor } from "../../lib/two-factor";
 import {
   getPasswordMin,
@@ -101,9 +102,12 @@ export const getSubmitActions = ({
   };
 
   const afterProAuth = async () => {
-    if (await needsSecondFactor())
-      setState({ codeKind: "2fa" }, () => goTo("pro-2fa"));
-    else finish("pro");
+    if (!(await needsSecondFactor()) || (await isTrustedDevice()))
+      return finish("pro");
+
+    const canTrustDevice = !(await isAdminSession());
+
+    setState({ codeKind: "2fa", canTrustDevice }, () => goTo("pro-2fa"));
   };
 
   const showWrongPassword = () => {

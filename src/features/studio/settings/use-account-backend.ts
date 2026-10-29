@@ -7,6 +7,7 @@ import {
 } from "../../../lib/account-changes";
 import {
   fetchAccountSecurity,
+  removeTrustedDevice,
   saveLoginAlerts,
   signOutOtherSessions,
   signOutSession,
@@ -23,7 +24,11 @@ import { toNotificationEvent } from "../core/records";
 import type { StudioController } from "../core/use-studio";
 
 /** Settings → Account: Supabase Auth and the stylist's profile; null while nobody is signed in. */
-export const useAccountBackend = ({ state, setState }: StudioController) => {
+export const useAccountBackend = ({
+  state,
+  setState,
+  actions,
+}: StudioController) => {
   const user = useAppSelector(({ session }) => session.user);
   const [updateProfile] = useUpdateProfileMutation();
   const dispatch = useAppDispatch();
@@ -31,6 +36,15 @@ export const useAccountBackend = ({ state, setState }: StudioController) => {
   if (!user) return null;
 
   const { stylistId } = state.account;
+
+  const askForCodeOn = (failure: string | null) => {
+    if (failure === "insufficient_aal")
+      actions.askForCode("account", () =>
+        actions.showToast("Code accepted. Save your change again."),
+      );
+
+    return failure;
+  };
 
   const backend: AccountSettingsBackend = {
     saveName: async (first, last) => {
@@ -43,13 +57,16 @@ export const useAccountBackend = ({ state, setState }: StudioController) => {
     savePhone: async (mobile) => {
       await updateProfile({ userId: user.id, patch: { mobile } }).unwrap();
     },
-    sendEmailCodes: sendEmailChangeCodes,
+    sendEmailCodes: async (email) =>
+      askForCodeOn(await sendEmailChangeCodes(email)),
     verifyEmailCode: verifyEmailChangeCode,
     sendPasswordCode: sendReauthenticationCode,
-    changePassword,
+    changePassword: async (password, code, signOutOthers) =>
+      askForCodeOn(await changePassword(password, code, signOutOthers)),
     getSecurity: fetchAccountSecurity,
     signOutSession,
     signOutOthers: signOutOtherSessions,
+    removeTrustedDevice,
     saveLoginAlerts: (isOn) => saveLoginAlerts(user.id, isOn),
     getCalendarFeed: () => fetchCalendarFeedUrl(stylistId),
     resetCalendarFeed: () => resetCalendarFeed(stylistId),

@@ -2814,6 +2814,40 @@ export type Database = {
           },
         ];
       };
+      trusted_devices: {
+        Row: {
+          created_at: string;
+          expires_at: string;
+          id: string;
+          kind: string;
+          label: string;
+          last_used_at: string | null;
+          token_hash: string;
+          user_id: string;
+        };
+        ComputedFields: never;
+        Insert: {
+          created_at?: string;
+          expires_at?: string;
+          id?: string;
+          kind: string;
+          label: string;
+          last_used_at?: string | null;
+          token_hash: string;
+          user_id: string;
+        };
+        Update: {
+          created_at?: string;
+          expires_at?: string;
+          id?: string;
+          kind?: string;
+          label?: string;
+          last_used_at?: string | null;
+          token_hash?: string;
+          user_id?: string;
+        };
+        Relationships: [];
+      };
       working_hours: {
         Row: {
           end_time: string;
@@ -2973,6 +3007,7 @@ export type Database = {
         Returns: Json;
       };
       change_slug: { Args: { new_slug: string }; Returns: string };
+      check_trusted_device: { Args: { token: string }; Returns: boolean };
       checkout_booking: {
         Args: {
           address: Json;
@@ -4044,6 +4079,10 @@ export type Database = {
       retry_stuck_refund: { Args: { target: string }; Returns: undefined };
       retry_stuck_transfer: { Args: { payment: string }; Returns: undefined };
       revoke_confirm_links: { Args: { target: string }; Returns: undefined };
+      revoke_trusted_devices: {
+        Args: Record<PropertyKey, never>;
+        Returns: undefined;
+      };
       save_card_check: {
         Args: { is_expiring: boolean; target: string };
         Returns: undefined;
@@ -4234,6 +4273,7 @@ export type Database = {
         Args: { body: string; rating: number; token: string };
         Returns: string;
       };
+      trust_device: { Args: Record<PropertyKey, never>; Returns: string };
       undo_checkout: { Args: { target: string }; Returns: undefined };
       undo_no_show: { Args: { target: string }; Returns: undefined };
       update_studio_booking: {

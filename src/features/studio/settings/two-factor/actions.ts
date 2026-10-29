@@ -48,6 +48,11 @@ export const createTwoFactorActions = (
     });
   };
 
+  const askForCode = (from: string, then: () => void) => {
+    openTwoFactor("taxcode", { flow: "info", from });
+    memo.afterSecondFactor = then;
+  };
+
   const closeTwoFactor = () => {
     if (!getState().twoFactor) return;
 
@@ -252,6 +257,7 @@ export const createTwoFactorActions = (
 
   return {
     openTwoFactor,
+    askForCode,
     closeTwoFactor,
     setTwoFactor,
     goStep,

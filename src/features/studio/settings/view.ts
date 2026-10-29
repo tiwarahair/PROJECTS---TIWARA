@@ -5,7 +5,10 @@ import type { PaymentPolicyApi } from "../../../components/payment-policy";
 import type { AccountSettingsApi } from "../../../components/account-settings/use-account-settings";
 import type { TaxDetails } from "../../../components/tax-details-form/logic";
 import { addPaymentPolicy } from "../../../lib/studio-api/settings";
-import { hasRecentSecondFactor } from "../../../lib/two-factor";
+import {
+  hasRecentSecondFactor,
+  needsSecondFactor,
+} from "../../../lib/two-factor";
 import { getAvailabilityView } from "./availability/view";
 import { getSettingsNav } from "./nav-view";
 import { getProfileView } from "./profile/view";
@@ -40,6 +43,15 @@ export const getSettingsView = (
     });
 
     showToast("Payment policy saved");
+  };
+
+  const addBackup = async () => {
+    const openBackup = () => openTwoFactor("backup", { flow: "add" });
+
+    if (await needsSecondFactor().catch(() => false))
+      return actions.askForCode("backup", openBackup);
+
+    openBackup();
   };
 
   const checkPolicy = async (value: PolicyValue) => {
@@ -176,7 +188,7 @@ export const getSettingsView = (
     },
     onTaxLearn: () => openTwoFactor("learn", { flow: "info" }),
     onTwoFactorTurnOn: () => openTwoFactor("method", { flow: "settings" }),
-    onTwoFactorAddBackup: () => openTwoFactor("backup", { flow: "add" }),
+    onTwoFactorAddBackup: () => void addBackup(),
     onTwoFactorRemove: (name: string) => openTwoFactor("remove", { name }),
   };
 };

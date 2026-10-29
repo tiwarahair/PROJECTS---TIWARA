@@ -7,6 +7,8 @@ const CODE_REASONS: Record<string, string> = {
   stripe: "continue to Stripe",
   policy: "save your payment policy",
   refund: "make this refund",
+  backup: "add another authenticator app",
+  account: "change your login details",
 };
 
 export const getTwoFactorView = (studio: StudioController) => {
