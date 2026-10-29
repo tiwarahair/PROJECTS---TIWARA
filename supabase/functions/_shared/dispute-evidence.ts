@@ -18,6 +18,7 @@ export interface DisputeFacts {
   arrived_at: string | null;
   completed_at: string | null;
   terms: Record<string, unknown> | null;
+  policy_accepted_at: string | null;
   lines:
     | {
         name: string;
@@ -41,7 +42,15 @@ const londonTime = new Intl.DateTimeFormat("en-GB", {
 const londonDate = (iso: string) =>
   new Intl.DateTimeFormat("en-CA", { timeZone: "Europe/London" }).format(new Date(iso));
 
-const getPolicy = (terms: Record<string, unknown> | null) => {
+const getAcceptance = ({ terms, policy_accepted_at: acceptedAt }: DisputeFacts) =>
+  [
+    acceptedAt ? `The client accepted these terms at ${londonTime.format(new Date(acceptedAt))} (UK time).` : "",
+    terms?.agreement ? `The booking page showed them: "${terms.agreement}"` : "",
+  ].filter(Boolean);
+
+const getPolicy = (facts: DisputeFacts) => {
+  const { terms } = facts;
+
   if (!terms) return "";
 
   const parts = [];
@@ -57,7 +66,9 @@ const getPolicy = (terms: Record<string, unknown> | null) => {
 
   if (terms.no_show_on) parts.push(`a no-show fee of ${terms.no_show_percent ?? ""}%`);
 
-  return parts.length ? `Agreed when booking: ${parts.join(", ")}.` : "";
+  return [parts.length ? `Agreed when booking: ${parts.join(", ")}.` : "", ...getAcceptance(facts)]
+    .filter(Boolean)
+    .join(" ");
 };
 
 const getAppointment = (facts: DisputeFacts) =>
@@ -79,7 +90,7 @@ const getAppointment = (facts: DisputeFacts) =>
 
 export const getEvidence = (facts: DisputeFacts) => {
   const { evidence } = facts;
-  const policy = getPolicy(facts.terms);
+  const policy = getPolicy(facts);
 
   const text = [evidence.text ? `From ${facts.business_name}: ${evidence.text}` : "", ...getAppointment(facts), policy]
     .filter(Boolean)

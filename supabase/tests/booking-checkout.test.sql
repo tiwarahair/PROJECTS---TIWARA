@@ -1,5 +1,5 @@
 begin;
-select plan(26);
+select plan(29);
 
 create function pg_temp.open_business(user_id uuid, business_type text, radius int)
 returns uuid
@@ -94,8 +94,24 @@ select is(
   'Tender scalp', 'the notes are kept'
 );
 
+select is(
+  (select policy_accepted_at from public.bookings where id = (select (deposit ->> 'id')::uuid from holds)),
+  now(), 'pressing Pay records when the client accepted the policy'
+);
+
+select is(
+  (select terms ->> 'agreement' from public.bookings where id = (select (deposit ->> 'id')::uuid from holds)),
+  'By booking, you agree to Pay shop''s cancellation policy and our Terms.',
+  'a guest saving a card keeps the agreement line the review step showed'
+);
+
 select pg_temp.set_policy((select shop from ids), 'full');
 select is((pg_temp.checkout((select full_price from holds)) ->> 'due_today_pence')::int, 5125, 'full: the price plus the fee');
+
+select is(
+  (select terms ->> 'agreement' from public.bookings where id = (select (full_price ->> 'id')::uuid from holds)),
+  null, 'no agreement line is kept when the review step showed none'
+);
 
 select pg_temp.set_policy((select shop from ids), 'card');
 select is((pg_temp.checkout((select fee_only from holds)) ->> 'due_today_pence')::int, 125, 'card on file: the fee only');

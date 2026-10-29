@@ -1,5 +1,5 @@
 begin;
-select plan(8);
+select plan(9);
 
 insert into auth.users (id, instance_id, aud, role, email, raw_user_meta_data, raw_app_meta_data)
 values ('d1111111-1111-1111-1111-111111111111', '00000000-0000-0000-0000-000000000000', 'authenticated',
@@ -41,6 +41,20 @@ $$;
 
 select pg_temp.dispute(1);
 select pg_temp.dispute(1);
+
+update public.bookings
+set policy_accepted_at = '2026-10-20 14:30+00', terms = terms || '{"agreement": "By booking, you agree"}'
+where stripe_payment_intent_id = 'pi_disputed_1';
+
+select is(
+  (select jsonb_build_object('accepted_at', (facts ->> 'policy_accepted_at')::timestamptz, 'agreement', facts #>> '{terms,agreement}')
+    from (
+      select public.get_dispute_evidence(id, 'd1111111-1111-1111-1111-111111111111') as facts
+      from public.disputes where stripe_dispute_id = 'du_disputes_1'
+    ) as evidence),
+  jsonb_build_object('accepted_at', '2026-10-20 14:30+00'::timestamptz, 'agreement', 'By booking, you agree'),
+  'the dispute evidence has when the client accepted the policy and the line they saw'
+);
 
 select is(
   (select count(*)::integer from public.notifications where template = 'dispute_opened'
