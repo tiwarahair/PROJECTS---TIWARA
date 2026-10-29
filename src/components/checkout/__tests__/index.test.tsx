@@ -294,6 +294,38 @@ describe("resending the receipt", () => {
     await vi.waitFor(() => expect(onExit).toHaveBeenCalled());
   });
 
+  it("resending from the receipt goes back to the receipt", async () => {
+    const onResent = vi.fn(() => Promise.resolve());
+    const onExit = vi.fn();
+
+    renderSheet({ start: "receipt", done, onResent, onExit });
+
+    await click("Resend receipt");
+    await click("Send receipt");
+
+    expect(
+      await screen.findByRole("button", { name: "Resend receipt" }),
+    ).toBeInTheDocument();
+
+    expect(onResent).toHaveBeenCalled();
+    expect(onExit).not.toHaveBeenCalled();
+  });
+
+  it("back from resending goes back to the receipt it came from", async () => {
+    const onExit = vi.fn();
+
+    renderSheet({ start: "receipt", done, onExit });
+
+    await click("Resend receipt");
+    await click("Back");
+
+    expect(
+      screen.getByRole("button", { name: "Resend receipt" }),
+    ).toBeInTheDocument();
+
+    expect(onExit).not.toHaveBeenCalled();
+  });
+
   it("a failed send stays open and says why", async () => {
     const onResent = vi
       .fn()

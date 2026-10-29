@@ -179,7 +179,7 @@ export const useCheckout = (props: CheckoutSheetProps) => {
         }
 
         setState({ busy: false });
-        goTo(state.fromDone ? "done" : "detail", -1);
+        goTo(state.isResendFromReceipt ? "receipt" : "detail", -1);
       })();
     } finally {
       isResending.current = false;

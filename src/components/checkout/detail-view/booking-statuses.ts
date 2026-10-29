@@ -99,6 +99,7 @@ export const BOOKING_DETAILS = {
           icon: ICONS.send,
           run: () => {
             checkout.startResend("email");
+            setState({ isResendFromReceipt: false });
             goTo("resend", 1);
           },
         },
