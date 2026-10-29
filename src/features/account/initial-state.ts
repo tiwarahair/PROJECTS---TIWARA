@@ -41,7 +41,6 @@ export const getInitialState = (
     signOthers: false,
   },
   googleConnected: false,
-  appleConnected: false,
   addressForm: null,
   marketing: false,
   cookies: { analytics: false, marketing: false },

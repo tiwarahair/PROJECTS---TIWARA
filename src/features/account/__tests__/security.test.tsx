@@ -46,6 +46,18 @@ describe("Account password", () => {
 
   afterEach(() => vi.useRealTimers());
 
+  it("offers only Google as a connected account", () => {
+    renderWithStore(<AccountPage />, "/account?section=security", {
+      signedIn: true,
+    });
+
+    expect(
+      screen.getByText("Log in with Google instead of a password."),
+    ).toBeInTheDocument();
+
+    expect(screen.queryByText("Apple")).not.toBeInTheDocument();
+  });
+
   it("asks only for the new password, saves it and can log out other devices", async () => {
     vi.mocked(changePassword).mockResolvedValue(null);
     await openPasswordForm();

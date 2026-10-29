@@ -542,7 +542,7 @@ describe("AccountSettings", () => {
         person={person}
         backend={backend}
         page="security"
-        signIn="apple"
+        signIn="google"
       />,
       {
         wrapper: MemoryRouter,
@@ -551,7 +551,7 @@ describe("AccountSettings", () => {
 
     expect(
       screen.getByText(
-        "You sign in with Apple. Set a password to also sign in with email.",
+        "You sign in with Google. Set a password to also sign in with email.",
       ),
     ).toBeInTheDocument();
   });

@@ -52,7 +52,6 @@ export interface AccountState {
   resendIn: number;
   password: PasswordState;
   googleConnected: boolean;
-  appleConnected: boolean;
   addressForm: AddressForm | null;
   addressMenu?: string | null;
   /** A card or address change is in flight. */

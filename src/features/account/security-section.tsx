@@ -1,6 +1,6 @@
 import { useFormState } from "react-hook-form";
 import type { CSSProperties } from "react";
-import { AppleLogo, GoogleLogo } from "../../components/icons/brand-icons";
+import { GoogleLogo } from "../../components/icons/brand-icons";
 import { joinClassNames } from "../../utils/class-names";
 import {
   checkPassword,
@@ -19,13 +19,13 @@ const getPasswordStatus = ({ has, changed }: PasswordState) => {
   return changed ? "Changed just now" : "Set";
 };
 
-/** Login & security: password (change / set, with the strength meter), Google / Apple, log out everywhere. */
+/** Login & security: password (change / set, with the strength meter), Google, log out everywhere. */
 export const SecuritySection = ({
   account: { state, actions, forms },
 }: {
   account: AccountController;
 }) => {
-  const { password, profile, googleConnected, appleConnected } = state;
+  const { password, profile, googleConnected } = state;
   const { setState, showToast } = actions;
 
   const { register, watch, reset, setValue, clearErrors, control } =
@@ -44,10 +44,7 @@ export const SecuritySection = ({
 
   const meter = getPasswordView(check, { show: !!errors.next });
 
-  const methods =
-    (password.has ? 1 : 0) +
-    (googleConnected ? 1 : 0) +
-    (appleConnected ? 1 : 0);
+  const methods = (password.has ? 1 : 0) + (googleConnected ? 1 : 0);
 
   const openPassword = () =>
     setState(
@@ -62,13 +59,6 @@ export const SecuritySection = ({
       Logo: GoogleLogo,
       on: googleConnected,
       subtitle: profile.email,
-    },
-    {
-      key: "appleConnected" as const,
-      name: "Apple",
-      Logo: AppleLogo,
-      on: appleConnected,
-      subtitle: "",
     },
   ];
 
@@ -271,9 +261,7 @@ export const SecuritySection = ({
         </div>
       </div>
       <h2 className={ui.headingTop}>Connected accounts</h2>
-      <p className={styles.intro}>
-        Log in with Google or Apple instead of a password.
-      </p>
+      <p className={styles.intro}>Log in with Google instead of a password.</p>
       <div className={ui.list}>
         {socials.map(({ key, name, Logo, on, subtitle }) => {
           const isLast = on && methods <= 1;
@@ -295,11 +283,7 @@ export const SecuritySection = ({
                 <button
                   className={ui.outlineButton}
                   onClick={() => {
-                    setState(
-                      key === "googleConnected"
-                        ? { googleConnected: !on }
-                        : { appleConnected: !on },
-                    );
+                    setState({ [key]: !on });
 
                     showToast(name + (on ? " disconnected" : " connected"));
                   }}

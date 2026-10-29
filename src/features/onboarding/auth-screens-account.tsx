@@ -187,9 +187,7 @@ export const SocialScreen = (props: ScreenProps) => {
     <>
       <h1 className={styles.title}>Finish creating your account</h1>
       <p className={styles.lead}>
-        {state.socialProvider === "apple"
-          ? "Signed in with Apple. Check your name, then add your mobile."
-          : "Signed in with Google. Check your name, then add your mobile."}
+        Signed in with Google. Check your name, then add your mobile.
       </p>
       {names("ob-s")}
       <div className={styles.readonlyLabel}>Email address</div>
