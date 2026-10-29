@@ -82,11 +82,6 @@
   font-weight: 600;
 }
 
-.bankDigits {
-  font-variant-numeric: tabular-nums;
-  letter-spacing: 0.04em;
-}
-
 .updateStripe {
   flex: 0 0 auto;
   display: inline-flex;
