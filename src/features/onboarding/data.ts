@@ -140,7 +140,7 @@ export const TERMS_BODY = {
   partner: [
     "These terms cover listing your services on Tiwára’s House and using Tiwára’s Studio.",
     "You confirm you have the right to work in the UK, and hold any insurance and licences your services need.",
-    "Clients pay a £0.50 + 1.5% booking fee. There’s no commission. Card fees on every card payment you receive through Tiwára’s House are deducted from your payout.",
+    "Clients pay a £0.50 + 1.5% booking fee. There’s no commission. Card processing fees on every card payment you receive through Tiwára’s House are deducted from your payout.",
     "Payouts are made through Stripe. Your legal name and bank details are collected there.",
   ],
   client: [
