@@ -66,14 +66,15 @@ const getPolicy = (facts: DisputeFacts) => {
 
   if (terms.no_show_on) parts.push(`a no-show fee of ${terms.no_show_percent ?? ""}%`);
 
-  const getAgreed = () => {
-    if (Array.isArray(terms.policy_lines) && terms.policy_lines.length)
-      return `Shown when booking: ${terms.policy_lines.join(" ")}`;
+  const shownLines = Array.isArray(terms.policy_lines) ? terms.policy_lines.join(" ") : "";
 
-    return parts.length ? `Agreed when booking: ${parts.join(", ")}.` : "";
-  };
-
-  return [getAgreed(), ...getAcceptance(facts)].filter(Boolean).join(" ");
+  return [
+    parts.length ? `Agreed when booking: ${parts.join(", ")}.` : "",
+    shownLines ? `The booking page showed: ${shownLines}` : "",
+    ...getAcceptance(facts),
+  ]
+    .filter(Boolean)
+    .join(" ");
 };
 
 const getAppointment = (facts: DisputeFacts) =>
