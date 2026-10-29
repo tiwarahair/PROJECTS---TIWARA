@@ -76,13 +76,7 @@ export const SettingsPayouts = ({ props }: SettingsPayoutsProps) => {
                 Managed in Stripe
               </div>
               <div className={payouts.bankName}>
-                {props.payoutBank === undefined ? (
-                  <>
-                    Monzo <span className={payouts.bankDigits}>•••• 4821</span>
-                  </>
-                ) : (
-                  (props.payoutBank ?? "No bank account yet")
-                )}
+                {props.payoutBank ?? "No bank account yet"}
               </div>
             </div>
             <button

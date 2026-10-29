@@ -26,10 +26,17 @@ interface PayOptions {
   flow: FlowState;
   point: LatLng | null;
   stylist: { name: string; email?: string };
+  policyLines: string[];
   onConfirm: () => void;
 }
 
-export const usePay = ({ flow, point, stylist, onConfirm }: PayOptions) => {
+export const usePay = ({
+  flow,
+  point,
+  stylist,
+  policyLines,
+  onConfirm,
+}: PayOptions) => {
   const { state, stateRef, setState } = flow;
   const dispatch = useAppDispatch();
   const turnstileRef = useRef<TurnstileInstance | null>(null);
@@ -115,7 +122,10 @@ export const usePay = ({ flow, point, stylist, onConfirm }: PayOptions) => {
   const pay = async (stripe: Stripe, elements: StripeElements) => {
     const request =
       turnstileToken &&
-      getCheckoutRequest(stateRef.current, point, turnstileToken);
+      getCheckoutRequest(stateRef.current, point, turnstileToken, {
+        stylistName: stylist.name,
+        policyLines,
+      });
 
     if (!request) return false;
 

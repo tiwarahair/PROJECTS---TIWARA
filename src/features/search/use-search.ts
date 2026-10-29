@@ -103,7 +103,15 @@ export const useSearch = () => {
   const data = useSearchData(state, filterDraft, places);
   const { selection, place } = data;
   const what = getWhatModel(state, selection, data.stylistSuggestions);
-  const where = getWhereModel(state, place, data.places);
+
+  const isLocationOff =
+    place.current &&
+    (data.location.status === "denied" ||
+      data.location.status === "unavailable");
+
+  const where = getWhereModel(state, place, data.places, isLocationOff);
+
+  const hasDistance = place.current ? !isLocationOff : !!place.point;
 
   const closeSheet = (
     closingKey: "mobileClosing" | "filtersClosing",
@@ -180,12 +188,14 @@ export const useSearch = () => {
     viewportWidth,
     what,
     where,
+    hasDistance,
     filterDraft,
     suggestions: getEmptySuggestions(
       state,
       selection,
       update,
       filterActions.clearDate,
+      hasDistance,
     ),
     actions,
   };

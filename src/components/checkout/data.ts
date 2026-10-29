@@ -1,21 +1,17 @@
 // CheckoutSheet types and constants.
 import {
   Banknote,
-  Check,
   Clock,
   CreditCard,
   Link,
-  Receipt,
   Send,
   TriangleAlert,
   Undo2,
-  UserCheck,
 } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
 
 export type PaymentMode = "deposit" | "full" | "card" | "none";
 export type CheckoutView =
-  | "detail"
   | "items"
   | "add"
   | "tip"
@@ -25,20 +21,10 @@ export type CheckoutView =
   | "receipt"
   | "refund"
   | "resend";
-export type CheckoutStatus =
-  | "arrived"
-  | "unpaid"
-  | "paid"
-  | "awaiting"
-  | "feePending"
-  | "feeWaived"
-  | "feeUnpaid"
-  | "feeCollected";
 
 export type PayMethod = "card" | "link" | "record";
 export type RecordVia = "cash" | "bank" | "reader";
-export type DialogKind =
-  "waive" | "refund" | "cancelLink" | "retryFee" | "recordFee" | "undoNs";
+export type DialogKind = "refund";
 
 export type TipChoice = "none" | "custom" | number;
 
@@ -62,7 +48,6 @@ export interface CheckoutBooking {
   day: string;
   time: string;
   arrived: string;
-  fee?: number;
   agreedPrice?: number;
   /** Paid at an earlier checkout (cash, bank, reader), less what went back since. */
   paidLater?: number;
@@ -107,7 +92,6 @@ export const EMPTY_REFUND: RefundValues = {
 export interface CheckoutState {
   mode: PaymentMode;
   paid: number;
-  isNonRefundable: boolean;
   view: CheckoutView;
   direction: number;
   lines: CheckoutLine[];
@@ -120,7 +104,6 @@ export interface CheckoutState {
   linkVia: "sms" | "email";
   recordVia: RecordVia;
   tipReceived: string;
-  status: CheckoutStatus;
   decline: "soft" | "hard" | null;
   declineMessage?: string;
   tries: number;
@@ -163,15 +146,12 @@ export interface CheckoutStylist {
 }
 
 export const ICONS = {
-  check: Check,
   clock: Clock,
   alert: TriangleAlert,
-  person: UserCheck,
   card: CreditCard,
   link: Link,
   cash: Banknote,
   returnArrow: Undo2,
-  receipt: Receipt,
   send: Send,
 } satisfies Record<string, LucideIcon>;
 
@@ -180,7 +160,6 @@ export interface CheckoutSeedProps {
   start?: CheckoutView;
   done?: Partial<CheckoutResult> & { tip?: number };
   refunded?: number;
-  linkPaid?: boolean;
 }
 
 export interface CheckoutMoney {

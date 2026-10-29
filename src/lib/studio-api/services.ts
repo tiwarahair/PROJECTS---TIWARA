@@ -23,9 +23,6 @@ export const saveService = (
     }),
   );
 
-export const saveServiceStatus = (id: string, status: string) =>
-  write(supabase.from("services").update({ status }).eq("id", id));
-
 export const removeService = (id: string) =>
   write(supabase.from("services").delete().eq("id", id));
 

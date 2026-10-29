@@ -8,25 +8,45 @@ interface HoldBarProps {
   variant: "nav" | "card";
   time: string | null;
   leftMs: number;
+  isConfirming: boolean;
 }
 
 /** "We're holding 10:30 for you · 9:59" — turns amber under 2 minutes. */
-export const HoldBar = ({ variant, time, leftMs }: HoldBarProps) => {
+export const HoldBar = ({
+  variant,
+  time,
+  leftMs,
+  isConfirming,
+}: HoldBarProps) => {
   const minutes = Math.floor(leftMs / 60000);
   const seconds = Math.floor(leftMs / 1000) % 60;
   const isNav = variant === "nav";
+
+  const barClass = joinClassNames(
+    isNav && pageGlobal.holdmob,
+    isNav ? styles.barMobile : styles.barCard,
+    styles.tone,
+    !isConfirming && leftMs < 120000 && styles.toneAmber,
+  );
+
+  if (isConfirming)
+    return (
+      <div
+        data-screen-label={isNav ? "Slot hold bar" : "Slot hold"}
+        role="status"
+        className={barClass}
+      >
+        <Clock size={15} strokeWidth={1.5} className={styles.icon} />
+        <span>Confirming your booking…</span>
+      </div>
+    );
 
   return (
     <div
       data-screen-label={isNav ? "Slot hold bar" : "Slot hold"}
       role="timer"
       aria-label={`Holding ${time} for you, ${minutes} minutes ${seconds} seconds left`}
-      className={joinClassNames(
-        isNav && pageGlobal.holdmob,
-        isNav ? styles.barMobile : styles.barCard,
-        styles.tone,
-        leftMs < 120000 && styles.toneAmber,
-      )}
+      className={barClass}
     >
       <Clock size={15} strokeWidth={1.5} className={styles.icon} />
       <span>

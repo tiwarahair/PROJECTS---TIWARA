@@ -90,9 +90,9 @@ export const PayFeePage = () => {
         </div>
         <PayForm link={link} token={token} onPaid={() => setPaid(true)} />
         <p className={styles.note}>
-          {isBalance(link)
-            ? "Questions? Reply to the email we sent you."
-            : `You can’t book with ${link.stylist_name} again until it’s paid. Questions? Reply to the email we sent you.`}
+          {!isBalance(link) &&
+            `You can’t book with ${link.stylist_name} again until it’s paid. `}
+          Questions? <Link to="/help">Contact us</Link>
         </p>
       </>
     );

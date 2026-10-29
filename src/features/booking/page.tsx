@@ -58,7 +58,12 @@ export const BookingFlow = ({ publicStylist }: BookingFlowProps) => {
         exitHref={`/${stylist.id}`}
         holdBar={
           holdOn && (
-            <HoldBar variant="nav" time={state.time} leftMs={holdLeftMs} />
+            <HoldBar
+              variant="nav"
+              time={state.time}
+              leftMs={holdLeftMs}
+              isConfirming={state.paying || state.confirming}
+            />
           )
         }
       />

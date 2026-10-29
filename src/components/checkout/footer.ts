@@ -37,16 +37,6 @@ const getReviewPrimaryLabel = ({ state, money }: CheckoutController) => {
 };
 
 const FOOTERS: Partial<Record<CheckoutView, FooterBuilder>> = {
-  detail: ({ state, startCheckout }, view) =>
-    state.status === "arrived" || state.status === "unpaid"
-      ? {
-          hasTotal: true,
-          totalLabel: view.balanceLabel,
-          totalValue: view.balanceValue,
-          primaryLabel: "Checkout",
-          primaryRun: startCheckout,
-        }
-      : null,
   items: ({ setState }, view) => ({
     hasTotal: true,
     totalLabel: view.balanceLabel,

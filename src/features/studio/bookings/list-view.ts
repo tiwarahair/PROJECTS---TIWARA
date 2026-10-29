@@ -1,5 +1,7 @@
+import { roundToPence } from "../../../utils/money";
 import { PAST_MONTHS } from "../core/constants";
 import { dayInfo } from "../core/format";
+import { getLinkDue } from "./checkout-label";
 import type { BookingsContext } from "./context";
 import type { DecoratedBooking } from "./decorate";
 import { getFilterCount } from "./filter-view";
@@ -89,7 +91,11 @@ export const getListView = (context: BookingsContext) => {
   const { title, body } = EMPTY_COPY[getEmptyKind(context)];
 
   const earned = getTotal(
-    pastItems.filter(({ status }) => status === "Completed"),
+    pastItems
+      .filter(({ status }) => status === "Completed")
+      .map((row) => ({
+        price: roundToPence(row.price - (getLinkDue(row) ?? 0)),
+      })),
   );
 
   return {

@@ -65,10 +65,14 @@ export const getCheckoutError = (
 export const isAllergyCleared = ({ on, text, wasShared }: AllergyState) =>
   wasShared && !(on && text.trim());
 
+export const getAgreementLead = (stylistName: string) =>
+  `By booking, you agree to ${stylistName}'s cancellation policy and our `;
+
 export const getCheckoutRequest = (
   state: BookingState,
   point: LatLng | null,
   turnstileToken: string,
+  { stylistName, policyLines }: { stylistName: string; policyLines: string[] },
 ): CheckoutRequest | null => {
   const { hold, details, appointmentAddress, allergy, loggedIn } = state;
 
@@ -98,6 +102,8 @@ export const getCheckoutRequest = (
         }
       : {}),
     turnstileToken,
+    agreement: `${getAgreementLead(stylistName)}Terms.`,
+    policyLines,
   };
 };
 

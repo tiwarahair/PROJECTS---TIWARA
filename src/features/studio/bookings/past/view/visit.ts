@@ -1,4 +1,6 @@
+import { formatMoney } from "../../../../../utils/money";
 import { PAST_TONE } from "../../../core/constants";
+import { getLinkDue } from "../../checkout-label";
 import { getPastTime } from "./checkout";
 import type { PastContext } from "./context";
 
@@ -13,8 +15,11 @@ export const getVisitView = ({
   isKept,
 }: PastContext) => {
   const tone = PAST_TONE[row.status] ?? BLANK_TONE;
+  const linkDue = isCompleted ? getLinkDue(row) : null;
 
   const getOutLabel = () => {
+    if (linkDue !== null) return "Awaiting";
+
     if (isCompleted || !isKept) return "Paid";
 
     if (row.depositKept) return "Deposit kept";
@@ -23,6 +28,8 @@ export const getVisitView = ({
   };
 
   const getOutValue = () => {
+    if (linkDue !== null) return formatMoney(linkDue);
+
     if (isCompleted) return `£${row.price}`;
 
     return isKept ? row.feeLabel : "£0";

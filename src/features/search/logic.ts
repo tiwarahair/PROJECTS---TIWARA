@@ -4,7 +4,7 @@ import type { LatLng } from "../../lib/google-maps";
 import type { SearchArgs } from "../../lib/search-api";
 import type { ServiceGroup } from "../../types/service-group";
 import type { ServiceType } from "../../types/service-type";
-import type { FilterDraft, SearchState, Venue } from "./state";
+import type { FilterDraft, SearchState, SortKey, Venue } from "./state";
 
 /** A typed area (with its point once picked) or the device's location (null until known). */
 export interface Place {
@@ -24,6 +24,9 @@ export const getPlace = (
         current: false,
         point: lat != null && lng != null ? { lat, lng } : null,
       };
+
+export const getSort = (sort: SortKey, hasDistance: boolean): SortKey =>
+  !hasDistance && sort === "distance" ? "earliest" : sort;
 
 export interface StyleSelection {
   serviceType: ServiceType | null;
@@ -138,6 +141,6 @@ export const toSearchArgs = (
     on_date: state.query.date || undefined,
     time_from: timeFrom,
     time_to: timeTo,
-    sort: overrides.sort ?? state.sort,
+    sort: getSort(overrides.sort ?? state.sort, !!point),
   };
 };

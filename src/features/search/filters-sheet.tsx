@@ -84,35 +84,37 @@ export const FiltersSheet = ({ search }: FiltersSheetProps) => {
               })}
             </div>
           </div>
-          <div>
-            <div className={styles.groupTitle}>Distance</div>
-            <div
-              role="radiogroup"
-              aria-label="Distance"
-              className={styles.chips}
-            >
-              {RADII.map((radius) => {
-                const isOn = (filterDraft.radius || 10) === radius;
+          {search.hasDistance && (
+            <div>
+              <div className={styles.groupTitle}>Distance</div>
+              <div
+                role="radiogroup"
+                aria-label="Distance"
+                className={styles.chips}
+              >
+                {RADII.map((radius) => {
+                  const isOn = (filterDraft.radius || 10) === radius;
 
-                return (
-                  <button
-                    key={`fd${radius}`}
-                    type="button"
-                    role="radio"
-                    aria-checked={isOn ? "true" : "false"}
-                    onClick={() => actions.setFilterDraft({ radius })}
-                    className={joinClassNames(
-                      controls.chip,
-                      controls.chipLarge,
-                      isOn && controls.chipOn,
-                    )}
-                  >
-                    {`${radius} miles`}
-                  </button>
-                );
-              })}
+                  return (
+                    <button
+                      key={`fd${radius}`}
+                      type="button"
+                      role="radio"
+                      aria-checked={isOn ? "true" : "false"}
+                      onClick={() => actions.setFilterDraft({ radius })}
+                      className={joinClassNames(
+                        controls.chip,
+                        controls.chipLarge,
+                        isOn && controls.chipOn,
+                      )}
+                    >
+                      {`${radius} miles`}
+                    </button>
+                  );
+                })}
+              </div>
             </div>
-          </div>
+          )}
           <div>
             <div className={styles.priceHeader}>
               <span className={styles.priceTitle}>Max price</span>

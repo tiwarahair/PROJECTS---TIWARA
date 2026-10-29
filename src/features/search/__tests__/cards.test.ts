@@ -34,20 +34,22 @@ describe("result cards", () => {
     ]);
   });
 
-  it("mobile stylists travel to you; no point means no distance", async () => {
+  it("mobile stylists travel to you only inside their radius; no point means no distance", async () => {
     const [row] = await fakeSearch({});
 
     if (!row) throw new Error("no fixture rows");
 
-    const [mobile, unknown] = toResultCards(
+    const [mobile, mobileNoPoint, unknown] = toResultCards(
       [
         { ...row, business_type: "mobile" },
+        { ...row, business_type: "mobile", distance_miles: null },
         { ...row, distance_miles: null },
       ],
       selectionFor(""),
     );
 
     expect(mobile?.facts[0]?.text).toBe("Travels to you");
+    expect(mobileNoPoint?.facts[0]?.text).toBe("Mobile stylist");
     expect(unknown?.facts[0]?.text).toMatch(/^Next available: /);
   });
 });

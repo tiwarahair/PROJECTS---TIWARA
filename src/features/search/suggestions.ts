@@ -207,6 +207,7 @@ export const getWhereModel = (
     isSearching: boolean;
     isSlow: boolean;
   },
+  isLocationOff: boolean,
 ) => {
   const raw = state.whereTyped ? String(state.whereText || "").trim() : "";
   const query = raw.toLowerCase();
@@ -228,7 +229,7 @@ export const getWhereModel = (
           kind: "current",
           label: "Current location",
           icon: SEARCH_ICONS.arrow,
-          on: place.current,
+          on: place.current && !isLocationOff,
         },
       ];
 
@@ -247,5 +248,6 @@ export const getWhereModel = (
     isEmpty: !!query && !places.isSearching && !locationRows.length,
     emptyText: `No places match ‘${raw}’. Try a town, area or postcode.`,
     display: place.current ? "" : place.name,
+    placeholder: isLocationOff ? "Choose a location" : "Current location",
   };
 };

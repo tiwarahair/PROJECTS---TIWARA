@@ -108,7 +108,7 @@ export const getMoney = (
 export const getFinalized = (
   state: CheckoutState,
   booking: CheckoutBooking,
-): Pick<CheckoutState, "done" | "status"> => {
+): Pick<CheckoutState, "done"> => {
   const money = getMoney(state, booking);
 
   return {
@@ -120,7 +120,6 @@ export const getFinalized = (
       refundAuto: money.refundCard,
       cashBack: money.cashBack,
     },
-    status: money.method === "link" ? "awaiting" : "paid",
   };
 };
 
@@ -130,13 +129,11 @@ export const getInitialCheckout = ({
   start,
   done,
   refunded,
-  linkPaid,
 }: CheckoutSeedProps): CheckoutState => {
   const state: CheckoutState = {
     mode: booking.mode,
     paid: booking.paid,
-    isNonRefundable: false,
-    view: "detail",
+    view: start || "items",
     direction: 0,
     lines: [
       {
@@ -168,7 +165,6 @@ export const getInitialCheckout = ({
     linkVia: "email",
     recordVia: "cash",
     tipReceived: "",
-    status: "arrived",
     decline: null,
     tries: 2,
     busy: false,
@@ -195,8 +191,6 @@ export const getInitialCheckout = ({
       ...line,
     }));
 
-  state.view = start || "items";
-
   if (done) {
     state.done = {
       method: done.method ?? "none",
@@ -206,8 +200,6 @@ export const getInitialCheckout = ({
       refundAuto: done.refundAuto ?? 0,
       cashBack: done.cashBack ?? 0,
     };
-
-    state.status = done.method === "link" && !linkPaid ? "awaiting" : "paid";
 
     if (done.tip && typeof done.tip === "number") {
       state.tip = "custom";
@@ -231,10 +223,7 @@ export const getInitialCheckout = ({
 /** How much can be refunded through the platform, or recorded as refunded off it. */
 export const getRefundContext = (
   state: CheckoutState,
-  booking: CheckoutBooking,
 ): { platform: number; off: number } => {
-  if (/^fee/.test(state.status)) return { platform: booking.fee || 0, off: 0 };
-
   const done = state.done ?? { charged: 0, refundAuto: 0, method: "none" };
 
   return {
@@ -246,11 +235,8 @@ export const getRefundContext = (
   };
 };
 
-export const getRefundCap = (
-  state: CheckoutState,
-  booking: CheckoutBooking,
-) => {
-  const refundContext = getRefundContext(state, booking);
+export const getRefundCap = (state: CheckoutState) => {
+  const refundContext = getRefundContext(state);
   const isOffPlatform = !(refundContext.platform > 0);
 
   const refundCapAll = roundToPence(

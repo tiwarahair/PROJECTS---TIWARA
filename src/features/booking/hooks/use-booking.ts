@@ -61,6 +61,10 @@ export const useBooking = ({ stylist, hours }: PublicStylist) => {
     flow,
     point: travel.point,
     stylist: { name: stylist.name, email: stylist.email },
+    policyLines: [
+      ...money.policy.lines.map(({ text }) => text),
+      ...money.policy.notes.map((note) => `From your stylist: ${note}`),
+    ],
     onConfirm: account.saveContactToAccount,
   });
 

@@ -46,7 +46,6 @@ export interface CheckoutSheetProps {
   start?: CheckoutView;
   done?: Partial<CheckoutResult> & { tip?: number };
   refunded?: number;
-  linkPaid?: boolean;
   /** The host's sheet corner radius. */
   radius?: string;
   stylist: CheckoutStylist;
@@ -66,7 +65,6 @@ export interface CheckoutSheetProps {
   ) => void;
   onRefund?: (amount: number, reason: string, isOffPlatform: boolean) => void;
   onResent?: (to: string) => Promise<void>;
-  onCancelLink?: () => void;
 }
 
 export const useCheckout = (props: CheckoutSheetProps) => {
@@ -76,7 +74,6 @@ export const useCheckout = (props: CheckoutSheetProps) => {
       start: props.start,
       done: props.done,
       refunded: props.refunded,
-      linkPaid: props.linkPaid,
     }),
   );
 
@@ -95,7 +92,7 @@ export const useCheckout = (props: CheckoutSheetProps) => {
     resolver: zodResolver(resendSchema),
   });
 
-  const { refundCap } = getRefundCap(state, booking);
+  const { refundCap } = getRefundCap(state);
 
   const refundForm = useForm<RefundValues>({
     defaultValues: state.refund,
@@ -136,10 +133,7 @@ export const useCheckout = (props: CheckoutSheetProps) => {
 
   const exit = () => props.onExit?.();
 
-  /** Show a view; leaving to "detail" exits the sheet instead. */
   const goTo = (view: CheckoutView, direction = 1) => {
-    if (view === "detail") return exit();
-
     setState({ view, direction, adjustingLineId: null });
     resendForm.clearErrors();
     scrollTop();
@@ -179,16 +173,13 @@ export const useCheckout = (props: CheckoutSheetProps) => {
         }
 
         setState({ busy: false });
-        goTo(state.isResendFromReceipt ? "receipt" : "detail", -1);
+
+        if (state.isResendFromReceipt) goTo("receipt", -1);
+        else exit();
       })();
     } finally {
       isResending.current = false;
     }
-  };
-
-  const startCheckout = () => {
-    setState({ decline: null });
-    goTo("items", 1);
   };
 
   const getLines = () =>
@@ -290,7 +281,6 @@ export const useCheckout = (props: CheckoutSheetProps) => {
     refundValues,
     pickRefundKind,
     startRefund,
-    startCheckout,
     complete,
     getResult,
   };

@@ -1,5 +1,5 @@
 import { joinClassNames } from "../../utils/class-names";
-import { getViewAnimation } from "./detail";
+import { getViewAnimation } from "./motion";
 import { ICONS } from "./data";
 import { getReceiptView } from "./receipt-view";
 import type { CheckoutViewModel } from "./view";
