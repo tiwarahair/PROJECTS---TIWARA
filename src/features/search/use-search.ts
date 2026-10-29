@@ -195,6 +195,7 @@ export const useSearch = () => {
       selection,
       update,
       filterActions.clearDate,
+      hasDistance,
     ),
     actions,
   };
