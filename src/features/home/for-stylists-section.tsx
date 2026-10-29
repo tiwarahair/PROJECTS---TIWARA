@@ -76,7 +76,7 @@ export const ForStylistsSection = ({ variant }: ForStylistsSectionProps) => (
               Run your chair like a business
             </h2>
             <p data-rv="" className={styles.splitLede}>
-              List for free. Get booked faster. Keep every penny of your price.
+              List for free. Get booked faster. No commission on your price.
               Tiwára&apos;s House handles bookings, deposits and reminders so
               you can focus on what matters.
             </p>

@@ -109,7 +109,7 @@ export const SettingsPayouts = ({ props }: SettingsPayoutsProps) => {
             bookings are released 24 hours after each appointment.
           </div>
           <p className={payouts.cardFees}>
-            Card fees on balance payments taken through Tiwára’s House are
+            Card fees on every card payment taken through Tiwára’s House are
             deducted from your payout.
           </p>
           <button

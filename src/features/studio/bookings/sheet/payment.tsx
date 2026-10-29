@@ -72,7 +72,7 @@ export const PaymentStep = ({ view }: PaymentStepProps) => {
           <span className={styles.inkNumeric}>{view.payFeeLabel}</span>
         </div>
         <div className={styles.feeNote}>
-          {`£0.50 + 1.5% on top of your price. You keep the full ${booking.priceLabel}.`}
+          {`£0.50 + 1.5% on top of your price. Card fees (about 1.5% + 20p) come out of your ${booking.priceLabel}.`}
         </div>
       </div>
     </div>

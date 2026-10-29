@@ -17,14 +17,14 @@
   },
   {
     "question": "What does it cost to use Tiwára’s House?",
-    "answer": "Clients pay a small booking fee of £0.50 + 1.5% of the service price, itemised before you pay. Stylists pay nothing — no listing fee and no commission."
+    "answer": "Clients pay a small booking fee of £0.50 + 1.5% of the service price, itemised before you pay. Stylists pay no listing fee and no commission, just card fees on payments they receive."
   },
   {
     "question": "How do I pay?",
-    "answer": "Card, Apple Pay or Google Pay, processed securely by Stripe. Your deposit is charged at booking; the balance is settled at the salon."
+    "answer": "Card, Apple Pay or Google Pay, processed securely by Stripe. Depending on the stylist, you pay a deposit or the full price when you book. Any balance is due on the day, by card or however the stylist accepts."
   },
   {
     "question": "I’m a stylist — how do I get listed?",
-    "answer": "Onboarding takes about five minutes: your business details, the services you offer, and your availability. Listing is free, you keep 100% of your service price, and clients can book you the same day."
+    "answer": "Onboarding takes about five minutes: your business details, the services you offer, and your availability. Listing is free with no commission, card fees come out of your payout, and clients can book you the same day."
   }
 ]
