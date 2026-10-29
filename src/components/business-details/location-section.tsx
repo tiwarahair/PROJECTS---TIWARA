@@ -1,4 +1,5 @@
 import { ChevronDown, Lock, MapPin } from "lucide-react";
+import { RADII } from "../../features/onboarding/data";
 import { joinClassNames } from "../../utils/class-names";
 import { AddressFinder } from "../address-finder";
 import { getAreaLabel } from "./display";
@@ -7,8 +8,6 @@ import type { BusinessType } from "./types";
 import type { BusinessDetailsController } from "./use-business-details";
 import styles from "../../styles/components/business-details/location-section.module.css";
 import parts from "../../styles/components/business-details/parts.module.css";
-
-const RADIUS_OPTIONS = ["3", "5", "10", "15", "20", "30"];
 
 const LOCATION_HEADINGS: Partial<Record<BusinessType, string>> = {
   mobile: "Where you work",
@@ -142,8 +141,8 @@ export const LocationSection = ({
                   id={`${uid}-rad`}
                   {...radiusInput}
                 >
-                  {RADIUS_OPTIONS.map((miles) => (
-                    <option key={miles} value={miles}>
+                  {RADII.map((miles) => (
+                    <option key={miles} value={String(miles)}>
                       {`${miles} miles`}
                     </option>
                   ))}
