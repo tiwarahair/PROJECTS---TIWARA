@@ -55,7 +55,7 @@ describe("checkout receipt", () => {
 
     const oldText = getText({ refunded_pence: 2000, refunded_at: old });
 
-    expect(oldText).toContain("Refunded to your card: £20.00.");
+    expect(oldText).toContain("Refunded to your card: £20.00\n");
     expect(oldText).not.toContain("working days");
   });
 });

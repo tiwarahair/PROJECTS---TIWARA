@@ -70,7 +70,7 @@ const getCardRefund = ({ refunded_pence: refunded, refunded_at: refundedAt }: Re
 
   const isRecent = !refundedAt || Date.now() - new Date(refundedAt).getTime() < CARD_REFUND_SHOWING_MS;
 
-  return [`Refunded to your card: ${pounds(refunded)}.${isRecent ? " It can take 5–10 working days to show." : ""}`];
+  return [`Refunded to your card: ${pounds(refunded)}${isRecent ? ". It can take 5–10 working days to show." : ""}`];
 };
 
 const getGivenBack = ({ given_back: givenBack, given_back_pence: total, given_back_via: via }: Receipt) =>
