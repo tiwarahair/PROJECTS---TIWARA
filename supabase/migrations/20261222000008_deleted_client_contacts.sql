@@ -48,3 +48,29 @@ begin
   where stylist_client_id = target and contact is not null;
 end;
 $$;
+
+-- only a booking waiting to be confirmed needs the email its link goes to: a cancelled or auto-cancelled one keeps its
+-- "pending" protection, and clearing its contact (a deleted client, a deleted account) mustn't be refused. Sending a
+-- new link (status back to awaiting) is checked too, so a link is never "sent" to nobody
+create or replace function public.require_confirm_email()
+returns trigger
+language plpgsql
+set search_path = ''
+as $$
+begin
+  if new.status = 'awaiting_confirmation' and new.protection_status = 'pending'
+    and nullif(trim(new.contact ->> 'email'), '') is null
+    and (tg_op = 'INSERT' or new.protection_status is distinct from old.protection_status
+      or new.contact is distinct from old.contact or new.status is distinct from old.status) then
+    raise exception 'email_required';
+  end if;
+
+  return new;
+end;
+$$;
+
+drop trigger bookings_require_confirm_email on public.bookings;
+
+create trigger bookings_require_confirm_email before insert or update of protection_status, contact, status
+on public.bookings
+for each row execute function public.require_confirm_email();

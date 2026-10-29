@@ -37,10 +37,16 @@ const finishUnsavedUpdates = async () => {
 
   if (error) throw error;
 
-  for (const { booking_id: bookingId, setup_intent_id: intentId } of (data ?? []) as UnsavedUpdate[])
-    await saveCardUpdate(bookingId, intentId).catch((saveError) =>
-      console.error("check-cards save failed", bookingId, saveError instanceof Error ? saveError.message : saveError),
-    );
+  for (const { booking_id: bookingId, setup_intent_id: intentId } of (data ?? []) as UnsavedUpdate[]) {
+    const isSaved = await saveCardUpdate(bookingId, intentId).catch((saveError) => {
+      console.error("check-cards save failed", bookingId, saveError instanceof Error ? saveError.message : saveError);
+
+      return false;
+    });
+
+    // one the client left unfinished waits before it's looked at again
+    if (!isSaved) await admin.rpc("note_card_setup_checked", { target: bookingId });
+  }
 };
 
 Deno.serve(async (request) => {

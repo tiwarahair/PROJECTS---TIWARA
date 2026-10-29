@@ -1,5 +1,5 @@
 begin;
-select plan(30);
+select plan(31);
 
 create function pg_temp.open_business(user_id uuid)
 returns uuid
@@ -201,6 +201,11 @@ reset role;
 update public.payments set created_at = now() - interval '121 days'
 where booking_id in (select id from public.bookings
   where stylist_client_id = (select id from public.stylist_clients where email = 'kemi@clients.test' and stylist_id = (select shop from ids)));
+-- one of their bookings was sent a confirm link nobody answered, so it was auto-cancelled still "pending"
+update public.bookings set status = 'auto_cancelled', protection_status = 'pending'
+where id = (select id from public.bookings
+  where stylist_client_id = (select id from public.stylist_clients where email = 'kemi@clients.test' and stylist_id = (select shop from ids))
+  order by starts_at limit 1);
 create temp table kemi as select id from public.stylist_clients where email = 'kemi@clients.test' and stylist_id = (select shop from ids);
 grant select on kemi to authenticated;
 select pg_temp.act_as('a5111111-1111-1111-1111-111111111111');
@@ -219,6 +224,16 @@ select is(
     and (contact ? 'email' or contact ? 'phone')),
   0, 'but not their email or phone'
 );
+create temp table reopened as
+select id from public.bookings where stylist_client_id = (select id from kemi) and status = 'auto_cancelled' limit 1;
+grant select on reopened to authenticated;
+update public.bookings set terms = coalesce(terms, '{}'::jsonb) || '{"mode": "card"}' where id = (select id from reopened);
+select pg_temp.act_as('a5111111-1111-1111-1111-111111111111');
+select throws_ok(
+  format('select public.reopen_studio_booking(%L)', (select id from reopened)),
+  'email_required', 'and a new confirm link can''t be "sent" to them with no email'
+);
+reset role;
 select lives_ok(
   format('select pg_temp.book(%L, 11, %L)', (select shop from ids), '{"first":"Kemi","email":"kemi@clients.test"}'),
   'and the block goes with them'

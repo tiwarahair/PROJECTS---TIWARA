@@ -1,12 +1,19 @@
 // Run by cron for card money we kept: sent on once the stylist's account can receive it, and a new stylist's once
 // their appointment is over.
+import type Stripe from "stripe";
 import { admin } from "../_shared/admin.ts";
 import { saveDestinationPayment } from "../_shared/card-payment.ts";
 import { reverseLaterTransfer } from "../_shared/later-transfer.ts";
 import { getStripeFee } from "../_shared/stripe-fee.ts";
 import { getTransferKey } from "../_shared/stripe-keys.ts";
 import { stripe } from "../_shared/stripe.ts";
-import { getRefundsBefore, getUncountedRefunds, isLiveRefund } from "../_shared/uncounted-refunds.ts";
+import {
+  getRefundsBefore,
+  getUncountedRefunds,
+  isLiveRefund,
+  readCountedRefunds,
+  toCountedMetadata,
+} from "../_shared/uncounted-refunds.ts";
 
 const BATCH_SIZE = 20;
 
@@ -29,6 +36,9 @@ const findEarlierTransfer = async (group: string) => {
   return data[0] ?? null;
 };
 
+const getCounted = async ({ metadata, created }: Stripe.Transfer, intentId: string) =>
+  readCountedRefunds(metadata) ?? getRefundsBefore(await getRefunds(intentId), created);
+
 const makeTransfer = async ({
   payment_id: paymentId,
   payment_intent_id: intentId,
@@ -40,7 +50,7 @@ const makeTransfer = async ({
   const group = `payment:${paymentId}`;
   const earlier = await findEarlierTransfer(group);
 
-  if (earlier) return { transfer: earlier, counted: getRefundsBefore(await getRefunds(intentId), earlier.created) };
+  if (earlier) return { transfer: earlier, counted: await getCounted(earlier, intentId) };
 
   const { latest_charge: charge } = await stripe.paymentIntents.retrieve(intentId, { expand: ["latest_charge"] });
 
@@ -67,7 +77,7 @@ const makeTransfer = async ({
       destination: account,
       source_transaction: charge.id,
       transfer_group: group,
-      metadata: { payment_id: paymentId },
+      metadata: { payment_id: paymentId, ...toCountedMetadata(counted) },
     },
     { idempotencyKey: getTransferKey(paymentId, failures) },
   );
@@ -75,25 +85,58 @@ const makeTransfer = async ({
   return { transfer, counted };
 };
 
+// the booking fee a free cancellation gave back, read now: it may have happened while the transfer was being sent
+const getFeeRefunded = async (paymentId: string) => {
+  const { data: payment, error } = await admin
+    .from("payments")
+    .select("booking_id, kind, platform_fee_pence")
+    .eq("id", paymentId)
+    .single();
+
+  if (error) throw error;
+
+  if (payment.kind !== "booking") return 0;
+
+  const { data: booking, error: bookingError } = await admin
+    .from("bookings")
+    .select("cancellation")
+    .eq("id", payment.booking_id)
+    .single();
+
+  if (bookingError) throw bookingError;
+
+  return Math.min(Number(booking.cancellation?.fee_refund_pence ?? 0), payment.platform_fee_pence);
+};
+
+// a refund made while this was being sent found no transfer to take its part back from
+const takeBackUncounted = async (paymentId: string, intentId: string, counted: string[]) => {
+  const uncounted = getUncountedRefunds(await getRefunds(intentId), counted);
+  const feeRefunded = uncounted.length ? await getFeeRefunded(paymentId) : 0;
+
+  for (const refund of uncounted)
+    await reverseLaterTransfer(
+      intentId,
+      refund,
+      refund.metadata?.reason === "client_cancelled" ? Math.min(feeRefunded, refund.amount) : 0,
+    );
+};
+
+const logPostCheckFailure = (paymentId: string) => (error: unknown) =>
+  console.error("send-transfers refund check failed", paymentId, error instanceof Error ? error.message : error);
+
 const sendTransfer = async (pending: PendingTransfer) => {
   const { transfer, counted } = await makeTransfer(pending);
-  const { payment_id: paymentId, payment_intent_id: intentId, fee_refunded_pence: feeRefunded } = pending;
+  const { payment_id: paymentId, payment_intent_id: intentId } = pending;
 
   const { error } = await admin.rpc("mark_transfer_sent", { payment: paymentId, transfer: transfer?.id ?? null });
 
   if (error) throw error;
 
-  // a refund made while this was being sent found no transfer to take its part back from
-  if (transfer)
-    for (const refund of getUncountedRefunds(await getRefunds(intentId), counted))
-      await reverseLaterTransfer(
-        intentId,
-        refund,
-        refund.metadata?.reason === "client_cancelled" ? Math.min(feeRefunded, refund.amount) : 0,
-      );
-
   if (transfer && typeof transfer.destination_payment === "string")
     await saveDestinationPayment(pending.payment_intent_id, transfer.destination_payment, pending.stylist_account);
+
+  // the transfer is sent and recorded, so failing here mustn't count against it
+  if (transfer) await takeBackUncounted(paymentId, intentId, counted).catch(logPostCheckFailure(paymentId));
 };
 
 Deno.serve(async (request) => {

@@ -482,6 +482,7 @@ export type Database = {
           card_checked_at: string | null;
           card_failed_at: string | null;
           card_label: string | null;
+          card_setup_checked_at: string | null;
           card_setup_intent_id: string | null;
           card_update_requested_at: string | null;
           checkout: Json | null;
@@ -560,6 +561,7 @@ export type Database = {
           card_checked_at?: string | null;
           card_failed_at?: string | null;
           card_label?: string | null;
+          card_setup_checked_at?: string | null;
           card_setup_intent_id?: string | null;
           card_update_requested_at?: string | null;
           checkout?: Json | null;
@@ -631,6 +633,7 @@ export type Database = {
           card_checked_at?: string | null;
           card_failed_at?: string | null;
           card_label?: string | null;
+          card_setup_checked_at?: string | null;
           card_setup_intent_id?: string | null;
           card_update_requested_at?: string | null;
           checkout?: Json | null;
@@ -3751,6 +3754,7 @@ export type Database = {
         Returns: undefined;
       };
       normalise_phone: { Args: { phone: string }; Returns: string };
+      note_card_setup_checked: { Args: { target: string }; Returns: undefined };
       note_checkout_declined: {
         Args: { intent: string; target: string };
         Returns: undefined;

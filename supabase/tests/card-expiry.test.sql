@@ -1,5 +1,5 @@
 begin;
-select plan(13);
+select plan(15);
 
 insert into auth.users (id, instance_id, aud, role, email, raw_user_meta_data, raw_app_meta_data)
 values ('a2222222-1111-1111-1111-111111111111', '00000000-0000-0000-0000-000000000000', 'authenticated',
@@ -95,6 +95,18 @@ select ok(
   exists (select 1 from public.get_unsaved_card_updates(20) where booking_id = (select soon from ids)
     and setup_intent_id = 'seti_1'),
   'a card set up but not yet saved is looked up by the hourly job');
+
+select public.note_card_setup_checked((select soon from ids));
+
+select ok(
+  not exists (select 1 from public.get_unsaved_card_updates(20) where booking_id = (select soon from ids)),
+  'one the client left unfinished isn''t looked up again for a while');
+
+select public.set_card_setup_intent((select soon from ids), 'seti_1');
+
+select ok(
+  exists (select 1 from public.get_unsaved_card_updates(20) where booking_id = (select soon from ids)),
+  'but a new setup is looked up straight away');
 
 select public.save_card_update((select soon from ids), 'seti_1', 'pm_new', 'Mastercard •••• 4444');
 

@@ -61,14 +61,15 @@ const toPage = (
 const startSetup = async (update: CardUpdate) => {
   const earlier = update.setup_intent_id ? await stripe.setupIntents.retrieve(update.setup_intent_id) : null;
 
-  if (earlier && OPEN_STATUSES.includes(earlier.status)) return earlier.client_secret;
-
-  const intent = await stripe.setupIntents.create({
-    customer: update.customer_id as string,
-    usage: "off_session",
-    payment_method_types: ["card"],
-    metadata: { booking_id: update.booking_id, kind: "card_update" },
-  });
+  const intent =
+    earlier && OPEN_STATUSES.includes(earlier.status)
+      ? earlier
+      : await stripe.setupIntents.create({
+          customer: update.customer_id as string,
+          usage: "off_session",
+          payment_method_types: ["card"],
+          metadata: { booking_id: update.booking_id, kind: "card_update" },
+        });
 
   const { error } = await admin.rpc("set_card_setup_intent", {
     target: update.booking_id,
