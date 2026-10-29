@@ -1,5 +1,5 @@
 begin;
-select plan(34);
+select plan(35);
 
 create function pg_temp.open_business(user_id uuid)
 returns uuid
@@ -209,6 +209,12 @@ select shop, (select id from public.services where stylist_id = shop order by so
   '{"mode": "card"}', 'stylist', true
 from ids;
 create temp table kept as select count(*)::int as visits from public.bookings where stylist_client_id = (select id from kemi);
+update public.bookings set unpaid_at = now() where id = (select id from paid);
+select pg_temp.act_as('a5111111-1111-1111-1111-111111111111');
+select throws_ok(format('select public.delete_stylist_client(%L)', (select id from kemi)),
+  'unpaid_balance', 'nor one whose visit is still due for checkout');
+reset role;
+update public.bookings set unpaid_at = null where id = (select id from paid);
 select pg_temp.act_as('a5111111-1111-1111-1111-111111111111');
 select lives_ok(format('select public.delete_stylist_client(%L)', (select id from kemi)),
   'a client who paid in the last 120 days can be deleted straight away');

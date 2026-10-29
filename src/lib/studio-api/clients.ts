@@ -11,6 +11,7 @@ const REFUSALS: Record<string, string> = {
   duplicate_email: "Another client already uses that email.",
   has_upcoming: "Cancel their upcoming bookings first.",
   unpaid_fee: "Settle their fee first.",
+  unpaid_balance: "Take or record their payment first.",
   email_required:
     "They have a booking waiting for them to confirm by email. Keep an email until it’s confirmed, or cancel it.",
 };

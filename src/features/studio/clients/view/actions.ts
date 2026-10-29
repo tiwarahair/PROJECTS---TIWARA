@@ -125,6 +125,29 @@ export const createClientActions = ({
       return;
     }
 
+    const dueVisit = studio.context
+      .getState()
+      .bookings.find(
+        (booking) => booking.client === client.id && booking.checkoutUnpaid,
+      );
+
+    if (dueVisit) {
+      setState({
+        confirm: {
+          title: `Take ${first}’s payment first`,
+          body: `${first}’s visit is still due for checkout. Take or record the payment, then you can delete this client.`,
+          yesLabel: "View booking",
+          noLabel: "Close",
+          yes: () => {
+            setState({ confirm: null });
+            openSheet("booking", { sheetBookingId: dueVisit.id });
+          },
+        },
+      });
+
+      return;
+    }
+
     const blockNote = client.blocked
       ? " Deleting also removes the block, so they could book online again. Keep them blocked instead if you don’t want that."
       : "";

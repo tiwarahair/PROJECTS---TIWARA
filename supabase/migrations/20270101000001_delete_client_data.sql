@@ -1,7 +1,8 @@
 -- a stylist deleting a client removes the client's data from their bookings too, as deleting their own account does:
 -- the service, times, status and money stay. A booking paid in the last 120 days keeps the name and email (a payment
 -- can still be disputed or refunded) until the nightly purge_deleted_client_contacts clears them, so deleting no
--- longer waits for those 120 days
+-- longer waits for those 120 days. Still refused while they have a booking to come, an unpaid fee or a visit due for
+-- checkout
 create or replace function public.delete_stylist_client(target uuid)
 returns void
 language plpgsql
@@ -31,6 +32,13 @@ begin
     where bookings.stylist_client_id = target and booking_fees.status in ('pending', 'charging', 'unpaid')
   ) then
     raise exception 'unpaid_fee';
+  end if;
+
+  -- a visit still due for checkout needs their email for its payment link, reminder and receipt
+  if exists (
+    select 1 from public.bookings where stylist_client_id = target and status = 'completed' and unpaid_at is not null
+  ) then
+    raise exception 'unpaid_balance';
   end if;
 
   update public.stylist_clients
