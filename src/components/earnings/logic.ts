@@ -73,12 +73,18 @@ export const openUpdateBank = (
 
 export const getPausedCauses = ({ transactions, payouts }: Ledger) => {
   const lastPaid = payouts.find(({ status }) => status === "Paid");
+  const ids = new Set(transactions.map(({ id }) => id));
+
+  const isReturned = (id: string) =>
+    id.startsWith("dispute:") &&
+    ids.has(id.replace("dispute:", "dispute-return:"));
 
   return transactions.filter(
-    ({ amount, isRecorded, status, at }) =>
+    ({ id, amount, isRecorded, status, at }) =>
       amount < 0 &&
       !isRecorded &&
       status !== "Paid out" &&
+      !isReturned(id) &&
       (!lastPaid || at >= lastPaid.sent),
   );
 };
