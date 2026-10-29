@@ -9,6 +9,7 @@ import {
   TriangleAlert,
   Undo,
   Undo2,
+  UserX,
 } from "lucide-react";
 import { joinClassNames } from "../../../../utils/class-names";
 import { ContactLinks } from "../sheet/contact-links";
@@ -237,6 +238,17 @@ export const PastSheetBody = ({ view }: { view: PastSheetView }) => (
             color="var(--neutral-500)"
           />
         </button>
+        {view.canSkipReview && (
+          <button className={styles.linkRow} onClick={view.skipReview}>
+            <UserX size={18} strokeWidth={1.7} color="var(--neutral-600)" />
+            <span className={styles.linkLabel}>Didn’t attend</span>
+            <ChevronRight
+              size={16}
+              strokeWidth={1.7}
+              color="var(--neutral-500)"
+            />
+          </button>
+        )}
         {view.canCorrect && !view.correctDraft && (
           <button className={styles.linkRow} onClick={view.openCorrect}>
             <Pencil size={18} strokeWidth={1.7} color="var(--neutral-600)" />

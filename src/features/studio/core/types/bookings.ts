@@ -159,6 +159,7 @@ export interface PastRecord {
   paid?: number;
   method?: string;
   dispute?: DisputeRecord;
+  canSkipReview?: boolean;
 }
 
 export interface EditServiceDraft {

@@ -4,6 +4,7 @@ import { renderWithStore } from "../../../../../test/render-with-store";
 import { getRow } from "../../../../../test/studio-booking-row";
 import { getStudioSeed } from "../../../../../test/studio-seed";
 import type { StudioBookingRow } from "../../../../../lib/studio-api/bookings";
+import { skipReviewInvite } from "../../../../../lib/studio-api/booking-writes";
 import { StudioPage } from "../../..";
 import type { UserEvent } from "@testing-library/user-event";
 import { setupUser } from "../../../../../test/setup-user";
@@ -13,6 +14,23 @@ vi.mock("../../../../../lib/studio-api/money", async (importOriginal) => ({
     typeof import("../../../../../lib/studio-api/money")
   >()),
   waiveFee: vi.fn(() => Promise.resolve()),
+}));
+
+vi.mock(
+  "../../../../../lib/studio-api/booking-writes",
+  async (importOriginal) => ({
+    ...(await importOriginal<
+      typeof import("../../../../../lib/studio-api/booking-writes")
+    >()),
+    skipReviewInvite: vi.fn(() => Promise.resolve()),
+  }),
+);
+
+vi.mock("../../../../../lib/studio-api/bookings", async (importOriginal) => ({
+  ...(await importOriginal<
+    typeof import("../../../../../lib/studio-api/bookings")
+  >()),
+  fetchStudioBooking: vi.fn(() => Promise.resolve(null)),
 }));
 
 let user: UserEvent;
@@ -114,10 +132,10 @@ const setViewport = (width: number) => {
 };
 
 /** Opens Bookings → List → Past and the row whose text matches. */
-const openPast = async (match: RegExp) => {
+const openPast = async (match: RegExp, rows = PAST_ROWS) => {
   const seed = getStudioSeed();
 
-  seed.bookings.past = PAST_ROWS;
+  seed.bookings.past = rows;
   renderWithStore(<StudioPage seed={seed} />, "/studio");
   runNextTimer();
   await user.click(screen.getByRole("button", { name: "Bookings" }));
@@ -167,6 +185,46 @@ describe("Studio → past booking sheet", () => {
     expect(
       screen.getByRole("button", { name: "Book again" }),
     ).toBeInTheDocument();
+  });
+
+  it("a paid booking never marked arrived can stop its review request", async () => {
+    await openPast(/Nia Okafor.*Completed/, [
+      getPastRow("b-unmarked", 5, {
+        status: "completed",
+        can_skip_review_invite: true,
+        payments: [
+          {
+            id: "p-3",
+            kind: "booking",
+            method: "card",
+            amount_pence: 6648,
+            platform_fee_pence: 148,
+            tip_pence: 0,
+            created_at: "2026-08-20T10:00:00+00:00",
+          },
+        ],
+      }),
+    ]);
+
+    await user.click(screen.getByRole("button", { name: "Didn’t attend" }));
+
+    expect(skipReviewInvite).toHaveBeenCalledWith("b-unmarked");
+
+    expect(
+      screen.getByText("Nia won’t be asked for a review"),
+    ).toBeInTheDocument();
+
+    expect(
+      screen.queryByRole("button", { name: "Didn’t attend" }),
+    ).not.toBeInTheDocument();
+  });
+
+  it("a checked-out booking doesn't offer it", async () => {
+    await openPast(/Nia Okafor.*Completed/);
+
+    expect(
+      screen.queryByRole("button", { name: "Didn’t attend" }),
+    ).not.toBeInTheDocument();
   });
 
   it("an unpaid no-show fee can be waived", async () => {

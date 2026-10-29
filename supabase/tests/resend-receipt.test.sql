@@ -1,5 +1,5 @@
 begin;
-select plan(15);
+select plan(16);
 
 create function pg_temp.sign_up(user_id uuid, user_email text, business text)
 returns void
@@ -90,6 +90,17 @@ select pg_temp.act_as('c6111111-1111-1111-1111-111111111111');
 select throws_ok(
   format('select public.resend_checkout_receipt(%L, %L)', (select open from b), 'nia@resend.test'),
   'receipt_not_available', 'a booking that isn’t checked out has no receipt'
+);
+reset role;
+create temp table prepaid as select pg_temp.book(interval '-3 hours') as id;
+grant select on prepaid to authenticated;
+update public.bookings set status = 'completed', completed_at = now() where id = (select id from prepaid);
+insert into public.payments (booking_id, kind, amount_pence, platform_fee_pence)
+select id, 'booking', 10000, 0 from prepaid;
+select pg_temp.act_as('c6111111-1111-1111-1111-111111111111');
+select lives_ok(
+  format('select public.resend_checkout_receipt(%L, %L)', (select id from prepaid), 'nia@resend.test'),
+  'a booking that completed on its own, paid in full, has one'
 );
 select throws_ok(
   format('select public.resend_checkout_receipt(%L, %L)', (select paid from b), 'not an email'),

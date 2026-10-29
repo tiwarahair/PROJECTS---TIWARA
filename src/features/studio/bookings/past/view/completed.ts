@@ -1,3 +1,4 @@
+import { skipReviewInvite } from "../../../../../lib/studio-api/booking-writes";
 import {
   cancelBalanceLink,
   recordBalancePaid,
@@ -30,6 +31,7 @@ export const getCompletedView = (context: PastContext) => {
       refundTag: "",
       awaitBody: "",
       canCancelLink: false,
+      canSkipReview: false,
     };
 
   const checkout = getPastCheckout(state, row);
@@ -84,6 +86,12 @@ export const getCompletedView = (context: PastContext) => {
     hasLinks: !isAwaiting,
     viewReceipt: () => setState({ pastCheckoutPanel: "receipt" }),
     resendReceipt: () => setState({ pastCheckoutPanel: "resend" }),
+    canSkipReview: !!row.canSkipReview,
+    skipReview: () => {
+      patch({ canSkipReview: false });
+      saveBalance(skipReviewInvite);
+      actions.showToast(`${first} won’t be asked for a review`);
+    },
     // a disputed payment is the bank's to settle, unless the stylist won it or an inquiry closed
     canRefund:
       !isAwaiting &&

@@ -255,6 +255,7 @@ export const toPastRecord = (row: StudioBookingRow): PastRecord => {
     ),
     ...getCheckoutFields(row),
     ...getDisputeFields(row),
+    ...(row.can_skip_review_invite ? { canSkipReview: true } : {}),
   };
 };
 
