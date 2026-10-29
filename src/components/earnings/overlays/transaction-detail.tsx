@@ -26,7 +26,7 @@ interface TransactionDetailProps {
 }
 
 export const TransactionDetail = ({
-  earnings: { ledger, openDrawer, showToast },
+  earnings: { ledger, openDrawer, closeDrawer, showToast },
   props,
   transaction,
 }: TransactionDetailProps) => {
@@ -72,9 +72,11 @@ export const TransactionDetail = ({
         <button
           className={styles.factButton}
           onClick={() => {
-            if (props.onOpenBooking)
+            // the drawer sits above the host's sheets, so it closes first
+            if (props.onOpenBooking) {
+              closeDrawer();
               props.onOpenBooking(transaction.bookingRef, transaction.client);
-            else showToast(`Opening booking ${transaction.bookingRef}`);
+            } else showToast(`Opening booking ${transaction.bookingRef}`);
           }}
         >
           <span className={styles.factLabel}>Appointment</span>
