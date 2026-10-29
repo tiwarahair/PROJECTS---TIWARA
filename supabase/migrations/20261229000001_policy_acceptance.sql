@@ -1,6 +1,8 @@
-create or replace function public.checkout_booking(
+drop function public.checkout_booking(uuid, text, jsonb, text, jsonb, double precision, double precision, uuid);
+
+create function public.checkout_booking(
   target uuid, secret text, contact jsonb, notes text, address jsonb, client_lat double precision,
-  client_lng double precision, client uuid
+  client_lng double precision, client uuid, shown jsonb default null
 )
 returns jsonb
 language plpgsql
@@ -77,8 +79,8 @@ begin
     terms = to_jsonb(policy) - 'id' - 'stylist_id' - 'created_at' || jsonb_build_object(
       'deposit_pence', deposit,
       'free_cancel_until', held.starts_at - make_interval(secs => policy.free_window_hours * 3600),
-      'agreement', case when policy.mode in ('deposit', 'card') and client is null
-        then 'By booking, you agree to ' || stylist.business_name || '''s cancellation policy and our Terms.' end
+      'agreement', shown ->> 'agreement',
+      'policy_lines', shown -> 'policy_lines'
     ),
     due_today_pence = due,
     policy_accepted_at = now()
@@ -101,6 +103,14 @@ begin
   );
 end;
 $$;
+
+revoke execute on function
+  public.checkout_booking(uuid, text, jsonb, text, jsonb, double precision, double precision, uuid, jsonb)
+  from public, anon, authenticated;
+
+grant execute on function
+  public.checkout_booking(uuid, text, jsonb, text, jsonb, double precision, double precision, uuid, jsonb)
+  to service_role;
 
 create or replace function public.get_dispute_evidence(target uuid, owner uuid)
 returns jsonb

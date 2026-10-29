@@ -1,5 +1,6 @@
 import { getWhenLine } from "./logic/calendar";
 import { getWhereRow } from "./logic/details";
+import { getAgreementLead } from "./logic/payment";
 import fields from "../../styles/features/booking/fields.module.css";
 import step from "../../styles/features/booking/step.module.css";
 import styles from "../../styles/features/booking/step-review.module.css";
@@ -183,18 +184,16 @@ export const StepReview = ({ booking }: StepReviewProps) => {
           </>
         )}
       </div>
-      {policy.cardSaved && !state.loggedIn && (
-        <p data-screen-label="Agreement line" className={styles.agreement}>
-          {`By booking, you agree to ${stylist.name}'s cancellation policy and our `}
-          <button
-            onClick={() => actions.setState({ legalDocument: "terms" })}
-            className={fields.linkButton}
-          >
-            Terms
-          </button>
-          .
-        </p>
-      )}
+      <p data-screen-label="Agreement line" className={styles.agreement}>
+        {getAgreementLead(stylist.name)}
+        <button
+          onClick={() => actions.setState({ legalDocument: "terms" })}
+          className={fields.linkButton}
+        >
+          Terms
+        </button>
+        .
+      </p>
     </>
   );
 };

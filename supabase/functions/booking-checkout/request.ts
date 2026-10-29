@@ -28,6 +28,8 @@ export const requestSchema = z.object({
     })
     .optional(),
   turnstileToken: z.string().min(1).max(2048),
+  agreement: text(300).min(1),
+  policyLines: z.array(text(500)).max(12),
 });
 
 export type Contact = z.infer<typeof requestSchema>["contact"];

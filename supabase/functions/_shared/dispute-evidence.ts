@@ -53,7 +53,7 @@ const getPolicy = (facts: DisputeFacts) => {
 
   if (!terms) return "";
 
-  const parts = [];
+  const parts: string[] = [];
 
   if (terms.mode === "deposit")
     parts.push(`${terms.deposit_percent}% deposit (${terms.refundable ? "refundable" : "non-refundable"})`);
@@ -66,9 +66,14 @@ const getPolicy = (facts: DisputeFacts) => {
 
   if (terms.no_show_on) parts.push(`a no-show fee of ${terms.no_show_percent ?? ""}%`);
 
-  return [parts.length ? `Agreed when booking: ${parts.join(", ")}.` : "", ...getAcceptance(facts)]
-    .filter(Boolean)
-    .join(" ");
+  const getAgreed = () => {
+    if (Array.isArray(terms.policy_lines) && terms.policy_lines.length)
+      return `Shown when booking: ${terms.policy_lines.join(" ")}`;
+
+    return parts.length ? `Agreed when booking: ${parts.join(", ")}.` : "";
+  };
+
+  return [getAgreed(), ...getAcceptance(facts)].filter(Boolean).join(" ");
 };
 
 const getAppointment = (facts: DisputeFacts) =>

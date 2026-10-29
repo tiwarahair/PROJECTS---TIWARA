@@ -48,6 +48,8 @@ export interface CheckoutRequest {
     lng: number;
   };
   turnstileToken: string;
+  agreement: string;
+  policyLines: string[];
 }
 
 export interface BookingStatus {
