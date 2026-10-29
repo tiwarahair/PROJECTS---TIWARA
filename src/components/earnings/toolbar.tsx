@@ -13,7 +13,11 @@ export const Toolbar = ({ earnings }: ToolbarProps) => (
     <PeriodPicker earnings={earnings} />
     <div className={styles.rangeLabel}>{getRangeLabel(earnings.range)}</div>
     <span className={styles.spacer}></span>
-    <button className={styles.export} onClick={earnings.openExport}>
+    <button
+      className={styles.export}
+      disabled={!earnings.canExport}
+      onClick={earnings.openExport}
+    >
       <ArrowDownToLine size={16} strokeWidth={1.7} />
       Export
     </button>

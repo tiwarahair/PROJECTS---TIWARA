@@ -72,7 +72,7 @@ export const StudioCheckout = ({
         layout={isWide ? "desktop" : "mobile"}
         radius={isWide ? "var(--radius-lg)" : "24px 24px 0 0"}
         stylist={{
-          name: state.profile?.salon || "Tiwára’s House",
+          name: state.profile.salon,
           address: [fields.line1, fields.city, fields.postcode]
             .filter(Boolean)
             .join(", "),
