@@ -229,7 +229,7 @@ export const getWhereModel = (
           kind: "current",
           label: "Current location",
           icon: SEARCH_ICONS.arrow,
-          on: place.current,
+          on: place.current && !isLocationOff,
         },
       ];
 

@@ -84,7 +84,7 @@ export const FiltersSheet = ({ search }: FiltersSheetProps) => {
               })}
             </div>
           </div>
-          {!!search.place.point && (
+          {search.hasDistance && (
             <div>
               <div className={styles.groupTitle}>Distance</div>
               <div

@@ -89,6 +89,23 @@ describe("SearchPage", () => {
     );
   });
 
+  it("keeps the distance controls while the location is on its way", async () => {
+    vi.stubGlobal("navigator", {
+      ...navigator,
+      geolocation: { getCurrentPosition: vi.fn() },
+    });
+
+    renderWithStore(<SearchPage />, "/search");
+
+    expect(
+      await screen.findByRole("button", { name: "Sort: Distance" }),
+    ).toBeInTheDocument();
+
+    expect(
+      screen.getByRole("button", { name: "Within 10 miles" }),
+    ).toBeInTheDocument();
+  });
+
   it("with the location refused, it asks for one and sorts by earliest without a distance filter", async () => {
     vi.stubGlobal("navigator", {
       ...navigator,

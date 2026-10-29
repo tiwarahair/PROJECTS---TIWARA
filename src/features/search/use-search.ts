@@ -111,6 +111,8 @@ export const useSearch = () => {
 
   const where = getWhereModel(state, place, data.places, isLocationOff);
 
+  const hasDistance = place.current ? !isLocationOff : !!place.point;
+
   const closeSheet = (
     closingKey: "mobileClosing" | "filtersClosing",
     finished: Partial<SearchState>,
@@ -186,6 +188,7 @@ export const useSearch = () => {
     viewportWidth,
     what,
     where,
+    hasDistance,
     filterDraft,
     suggestions: getEmptySuggestions(
       state,

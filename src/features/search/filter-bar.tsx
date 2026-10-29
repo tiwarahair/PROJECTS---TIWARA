@@ -24,7 +24,7 @@ interface FilterBarProps {
 
 /** Venue / price / distance chips (desktop), result count, Filters button (mobile) and Sort. */
 export const FilterBar = ({ search }: FilterBarProps) => {
-  const { state, selection, place, actions } = search;
+  const { state, selection, place, hasDistance, actions } = search;
   const count = search.total;
 
   const nearText = place.point
@@ -36,10 +36,11 @@ export const FilterBar = ({ search }: FilterBarProps) => {
   const findingPlaceholder = search.isSlow ? <Skeleton width={150} /> : null;
   const serviceText = selection.name ? ` for ${selection.name}` : "";
 
-  const hasPoint = !!place.point;
-  const isRadiusOn = hasPoint && state.radius !== 10;
+  const isRadiusOn = hasDistance && state.radius !== 10;
 
-  const sorts = hasPoint ? SORTS : SORTS.filter(([key]) => key !== "distance");
+  const sorts = hasDistance
+    ? SORTS
+    : SORTS.filter(([key]) => key !== "distance");
 
   const hasFilter =
     selection.has ||
@@ -160,7 +161,7 @@ export const FilterBar = ({ search }: FilterBarProps) => {
               </>
             )}
           </div>
-          {hasPoint && (
+          {hasDistance && (
             <div className={styles.popoverAnchor}>
               <button
                 type="button"
@@ -271,7 +272,7 @@ export const FilterBar = ({ search }: FilterBarProps) => {
               label="Sort"
               ariaLabel="Sort"
               options={sorts}
-              value={getSort(state.sort, place.point)}
+              value={getSort(state.sort, hasDistance)}
               isOpen={state.sortOpen}
               onToggle={actions.toggleSort}
               onClose={actions.closeSort}

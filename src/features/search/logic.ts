@@ -25,8 +25,8 @@ export const getPlace = (
         point: lat != null && lng != null ? { lat, lng } : null,
       };
 
-export const getSort = (sort: SortKey, point: LatLng | null): SortKey =>
-  !point && sort === "distance" ? "earliest" : sort;
+export const getSort = (sort: SortKey, hasDistance: boolean): SortKey =>
+  !hasDistance && sort === "distance" ? "earliest" : sort;
 
 export interface StyleSelection {
   serviceType: ServiceType | null;
@@ -141,6 +141,6 @@ export const toSearchArgs = (
     on_date: state.query.date || undefined,
     time_from: timeFrom,
     time_to: timeTo,
-    sort: getSort(overrides.sort ?? state.sort, point),
+    sort: getSort(overrides.sort ?? state.sort, !!point),
   };
 };
