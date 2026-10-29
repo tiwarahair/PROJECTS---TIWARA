@@ -56,7 +56,12 @@ export const AdminProfiles = ({
   const [menu, setMenu] = useState<OpenMenu>("");
   const [isGrid, setGrid] = useState(true);
   const settledSearch = useDebouncedValue(search);
-  const { data: stats } = useGetProfileStatsQuery();
+
+  const {
+    data: stats,
+    isError: isStatsError,
+    refetch: refetchStats,
+  } = useGetProfileStatsQuery();
 
   const {
     data,
@@ -230,6 +235,7 @@ export const AdminProfiles = ({
       {!isWide && <h1 className={shell.pageTitle}>Profiles</h1>}
       <StatCards
         isWide={isWide}
+        onRetry={isStatsError ? () => void refetchStats() : undefined}
         cards={statCards.map(({ sub, value, ...card }) => ({
           ...card,
           value,
