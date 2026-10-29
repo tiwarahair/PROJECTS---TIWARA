@@ -65,13 +65,13 @@ export const getDayTimeline = ({
   studio,
   state,
   setState,
-  upcoming,
+  calendarBookings,
   nowMinutes,
 }: BookingsContext) => {
   const { dayIndex } = state;
   const hours = getWorkingHours(state, dayIndex);
 
-  const dayBookings = upcoming.filter(
+  const dayBookings = calendarBookings.filter(
     ({ dayOffset }) => dayOffset === dayIndex,
   );
 

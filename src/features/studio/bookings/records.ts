@@ -218,6 +218,8 @@ export const toPastRecord = (row: StudioBookingRow): PastRecord => {
     price: booking.price,
     duration: booking.duration,
     when: dateLabel(booking.dayOffset),
+    dayOffset: booking.dayOffset,
+    startsAt: row.starts_at,
     time: booking.time,
     month: getMonthLabel(row.starts_at),
     status,
@@ -235,7 +237,6 @@ export const toPastRecord = (row: StudioBookingRow): PastRecord => {
           meta: "Auto-cancelled",
           note: "Not confirmed in time, so it was cancelled automatically. Nothing was charged.",
           autoCancelled: true,
-          startsAt: row.starts_at,
         }
       : {}),
     ...(status === "No show"
