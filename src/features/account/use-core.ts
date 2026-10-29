@@ -47,6 +47,8 @@ export interface AccountData {
   sensitivities: SharedSensitivity[];
   areSensitivitiesLoaded: boolean;
   isSensitivitiesError: boolean;
+  isBookingsError: boolean;
+  isCardsError: boolean;
   hasPhoto: boolean;
 }
 
@@ -120,14 +122,16 @@ export const useAccountCore = (props: AccountProps) => {
   const [deleteAddress] = useDeleteClientAddressMutation();
 
   // a booking made or changed since the last visit shows straight away
-  const { data: bookings } = useGetClientBookingsQuery(
-    identity?.user.id ?? skipToken,
-    { refetchOnMountOrArgChange: true },
-  );
+  const { data: bookings, isError: isBookingsError } =
+    useGetClientBookingsQuery(identity?.user.id ?? skipToken, {
+      refetchOnMountOrArgChange: true,
+    });
 
-  const { data: cards, refetch: refetchCards } = useGetClientCardsQuery(
-    identity?.user.id ?? skipToken,
-  );
+  const {
+    data: cards,
+    isError: isCardsError,
+    refetch: refetchCards,
+  } = useGetClientCardsQuery(identity?.user.id ?? skipToken);
 
   const [setDefaultCard] = useSetDefaultCardMutation();
   const [removeCard] = useRemoveClientCardMutation();
@@ -165,6 +169,9 @@ export const useAccountCore = (props: AccountProps) => {
       sensitivities: sensitivities ?? NO_SENSITIVITIES,
       areSensitivitiesLoaded: !!sensitivities,
       isSensitivitiesError,
+      // a failed reload keeps what already loaded
+      isBookingsError: isBookingsError && !bookings,
+      isCardsError: isCardsError && !cards,
       hasPhoto,
     }),
     [
@@ -173,6 +180,8 @@ export const useAccountCore = (props: AccountProps) => {
       cards,
       sensitivities,
       isSensitivitiesError,
+      isBookingsError,
+      isCardsError,
       hasPhoto,
     ],
   );

@@ -1,6 +1,7 @@
 import { act, screen, within } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { renderWithStore } from "../../../../test/render-with-store";
+import { getClientRow } from "../../../../test/studio-booking-row";
 import { getStudioSeed } from "../../../../test/studio-seed";
 import { StudioPage } from "../..";
 import type { UserEvent } from "@testing-library/user-event";
@@ -29,8 +30,8 @@ const setViewport = (width: number) => {
   });
 };
 
-const openTab = async (label: string) => {
-  renderWithStore(<StudioPage seed={getStudioSeed()} />, "/studio");
+const openTab = async (label: string, seed = getStudioSeed()) => {
+  renderWithStore(<StudioPage seed={seed} />, "/studio");
   runNextTimer();
   await user.click(within(getLabelled("Sidebar")).getByTitle(label));
 
@@ -70,6 +71,34 @@ describe("Studio → Clients", () => {
 
     expect(names[0]).toMatch(/Nia Okafor/);
     expect(within(clients).getAllByText("Blocked").length).toBeGreaterThan(0);
+  });
+
+  it("sorts by last visit across the new year", async () => {
+    const seed = getStudioSeed();
+
+    seed.bookings.clients = [
+      getClientRow({ last_visit: "2026-12-20T10:00:00+00:00" }),
+      getClientRow({
+        id: "client-kemi",
+        first: "Kemi",
+        last: "Adeyemi",
+        last_visit: "2027-01-05T10:00:00+00:00",
+      }),
+    ];
+
+    const clients = await openTab("Clients", seed);
+
+    await user.selectOptions(
+      within(clients).getByRole("combobox", { name: "Sort clients" }),
+      "last",
+    );
+
+    const names = within(clients)
+      .getAllByRole("button")
+      .map(({ textContent }) => textContent)
+      .filter((text) => /Okafor|Adeyemi/.test(text || ""));
+
+    expect(names[0]).toMatch(/Kemi Adeyemi/);
   });
 
   it("searches by phone digits and filters blocked clients", async () => {

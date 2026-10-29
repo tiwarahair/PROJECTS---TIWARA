@@ -1,9 +1,0 @@
-/*
- * Email Change Notice page-wide rule that differs from the base layer: the page behind
- * the mock email. Scoped to html.email-notice-page (set while mounted).
- */
-@layer page {
-  :global(html.email-notice-page) body {
-    background: var(--fill-quiet, #f4f2ef);
-  }
-}

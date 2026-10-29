@@ -111,7 +111,7 @@ export interface OnboardingState {
   entryScreen: string;
   exitTo: string | null;
   toast: string | null;
-  socialProvider: "google" | "apple" | null;
+  socialProvider: "google" | null;
   mode: "light" | "dark" | null;
   benefitIndex: number;
 }

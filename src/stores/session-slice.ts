@@ -42,21 +42,25 @@ export const sessionSlice = createSlice({
 
 export const { sessionChanged, signedOut } = sessionSlice.actions;
 
-/** logs out this device only; "global" logs out every device */
-export const logOut =
-  (scope: "local" | "global" = "local") =>
-  (dispatch: Dispatch) => {
-    dispatch(signedOut());
+/** logs out this device only */
+export const logOut = () => (dispatch: Dispatch) => {
+  dispatch(signedOut());
+  void supabase.auth.signOut({ scope: "local" });
+};
 
-    if (scope === "local") return void supabase.auth.signOut({ scope });
+/** Ends every session and trusted device; this device stays signed in if the server didn't confirm it. */
+export const logOutEverywhere = () => async (dispatch: Dispatch) => {
+  const revoking = revokeTrustedDevices().catch(() => undefined);
 
-    const revoking = revokeTrustedDevices().catch(() => undefined);
+  const waiting = new Promise((resolve) => {
+    setTimeout(resolve, 2000);
+  });
 
-    const waiting = new Promise((resolve) => {
-      setTimeout(resolve, 2000);
-    });
+  await Promise.race([revoking, waiting]);
 
-    void Promise.race([revoking, waiting]).finally(() =>
-      supabase.auth.signOut({ scope }),
-    );
-  };
+  const { error } = await supabase.auth.signOut({ scope: "global" });
+
+  if (error) throw error;
+
+  dispatch(signedOut());
+};

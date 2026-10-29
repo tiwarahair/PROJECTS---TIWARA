@@ -142,6 +142,7 @@ export const AccountPage = (props: AccountPageProps) => {
                 <div className={styles.body}>
                   {current === "overview" && (
                     <OverviewSection
+                      isFailed={account.data.isBookingsError}
                       upcoming={view.upcoming}
                       quick={view.quick}
                       onCalendar={onCalendar}
@@ -150,6 +151,7 @@ export const AccountPage = (props: AccountPageProps) => {
                   )}
                   {current === "bookings" && (
                     <BookingsSection
+                      isFailed={account.data.isBookingsError}
                       upcoming={view.upcoming}
                       past={view.past}
                       activeTab={view.activeTab}

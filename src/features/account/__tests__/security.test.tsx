@@ -46,6 +46,15 @@ describe("Account password", () => {
 
   afterEach(() => vi.useRealTimers());
 
+  it("hides connected accounts until they work", () => {
+    renderWithStore(<AccountPage />, "/account?section=security", {
+      signedIn: true,
+    });
+
+    expect(screen.queryByText("Connected accounts")).not.toBeInTheDocument();
+    expect(screen.queryByText("Apple")).not.toBeInTheDocument();
+  });
+
   it("asks only for the new password, saves it and can log out other devices", async () => {
     vi.mocked(changePassword).mockResolvedValue(null);
     await openPasswordForm();

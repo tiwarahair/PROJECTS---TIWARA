@@ -11,6 +11,7 @@ import { ReviewRulesLink } from "../../../components/review-rules-link";
 import { StarRating } from "../../../components/star-rating";
 import type { StudioReview } from "../../../lib/studio-api/reviews";
 import { joinClassNames } from "../../../utils/class-names";
+import { formatWeekdayDate } from "../../../utils/dates";
 import { formatReviewDate } from "../../../utils/review-date";
 import { getInitials } from "../../../utils/initials";
 import type { StudioClient } from "../core/types";
@@ -80,6 +81,7 @@ export const ReviewRow = ({
     is_reported: isReported,
     status,
     appeal_state: appealState,
+    appeal_until: appealUntil,
     id,
   } = review;
 
@@ -213,6 +215,11 @@ export const ReviewRow = ({
                 <Scale size={15} strokeWidth={1.8} />
                 Appeal
               </button>
+            )}
+            {appealState === "open" && !!appealUntil && (
+              <span className={styles.reported}>
+                {`You can appeal until ${formatWeekdayDate(new Date(appealUntil))}`}
+              </span>
             )}
             {appealState === "appealed" && (
               <span className={styles.reported}>Appeal sent</span>

@@ -113,6 +113,24 @@ describe("Earnings", () => {
     ).toBeInTheDocument();
   });
 
+  it("export waits for the business name", () => {
+    const { rerender } = render(
+      <Earnings ledger={getLedger()} clients={clients} />,
+    );
+
+    expect(screen.getByRole("button", { name: "Export" })).toBeDisabled();
+
+    rerender(
+      <Earnings
+        ledger={getLedger()}
+        clients={clients}
+        businessName="Nia Hair"
+      />,
+    );
+
+    expect(screen.getByRole("button", { name: "Export" })).toBeEnabled();
+  });
+
   it("empty: offers to copy the booking link", async () => {
     render(
       <Earnings
@@ -224,7 +242,14 @@ describe("Earnings", () => {
   });
 
   it("export: the dialog closes after download with a toast", async () => {
-    render(<Earnings ledger={getLedger()} clients={clients} />);
+    render(
+      <Earnings
+        ledger={getLedger()}
+        clients={clients}
+        businessName="Nia Hair"
+      />,
+    );
+
     await user.click(screen.getByRole("button", { name: "Export" }));
     const dialog = screen.getByRole("dialog", { name: "Export earnings" });
 

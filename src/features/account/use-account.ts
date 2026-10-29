@@ -49,6 +49,7 @@ export const useAccount = (props: AccountProps) => {
       downloadMyData: saves.downloadMyData,
       copy: saves.copy,
       endSession: saves.endSession,
+      endAllSessions: saves.endAllSessions,
       logout: saves.logout,
     },
   };

@@ -107,7 +107,7 @@ const INITIAL_STATE: EarningsState = {
 };
 
 export const useEarnings = (props: EarningsProps) => {
-  const { ledger, layout = "auto" } = props;
+  const { ledger, layout = "auto", businessName = "" } = props;
   const [state, setRawState] = useState(INITIAL_STATE);
   const rootRef = useRef<HTMLDivElement>(null);
 
@@ -215,6 +215,8 @@ export const useEarnings = (props: EarningsProps) => {
   };
 
   const doExport = () => {
+    if (!businessName) return;
+
     const exportPeriod = state.exportPeriod || state.period || "week";
 
     const exportRange =
@@ -251,7 +253,7 @@ export const useEarnings = (props: EarningsProps) => {
               (first, second) => first.sent.getTime() - second.sent.getTime(),
             ),
           clients: props.clients,
-          businessName: props.businessName || "Tiwára’s House",
+          businessName,
           legalName: props.legalName ?? "",
           vatNumber: props.vatNumber || "",
           bankLabel: props.bankLabel,
@@ -306,6 +308,7 @@ export const useEarnings = (props: EarningsProps) => {
     showToast,
     openDrawer,
     closeDrawer,
+    canExport: !!businessName,
     openExport,
     closeExport,
     openPaused,

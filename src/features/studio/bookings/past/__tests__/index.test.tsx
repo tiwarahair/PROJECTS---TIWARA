@@ -5,6 +5,7 @@ import { getRow } from "../../../../../test/studio-booking-row";
 import { getStudioSeed } from "../../../../../test/studio-seed";
 import type { StudioBookingRow } from "../../../../../lib/studio-api/bookings";
 import { skipReviewInvite } from "../../../../../lib/studio-api/booking-writes";
+import { retryFee } from "../../../../../lib/studio-api/money";
 import { StudioPage } from "../../..";
 import type { UserEvent } from "@testing-library/user-event";
 import { setupUser } from "../../../../../test/setup-user";
@@ -290,6 +291,15 @@ describe("Studio → past booking sheet", () => {
     expect(
       screen.queryByRole("button", { name: /^Retry card/ }),
     ).not.toBeInTheDocument();
+  });
+
+  it("retrying the card keeps the button off until the charge settles", async () => {
+    vi.mocked(retryFee).mockImplementationOnce(() => new Promise(() => {}));
+    await openPast(/Nia Okafor.*No show/);
+    await user.click(screen.getByRole("button", { name: /^Retry card/ }));
+    await user.click(screen.getByRole("button", { name: /^Charge £/ }));
+
+    expect(screen.getByRole("button", { name: /^Retry card/ })).toBeDisabled();
   });
 
   it("a cancellation fee shows as pending with a waive action", async () => {

@@ -9,7 +9,7 @@ export interface StudioSync {
     task: (stylistId: string) => Promise<unknown>,
     revert: StudioPatch,
     onRevert?: () => void,
-  ) => void;
+  ) => Promise<boolean>;
 }
 
 export const createStudioSync = (
@@ -23,10 +23,10 @@ export const createStudioSync = (
   return {
     stylistId,
     save: (task, revert, onRevert) => {
-      queue = queue
+      const saved = queue
         .then(() => task(stylistId))
         .then(
-          () => undefined,
+          () => true,
           (error: unknown) => {
             onRevert?.();
             setState(revert);
@@ -36,8 +36,14 @@ export const createStudioSync = (
                 ? error.message
                 : "That change didn’t save. Check your connection and try again.",
             );
+
+            return false;
           },
         );
+
+      queue = saved.then(() => undefined);
+
+      return saved;
     },
   };
 };

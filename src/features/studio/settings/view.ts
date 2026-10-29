@@ -33,14 +33,17 @@ export const getSettingsView = (
   const nav = getSettingsNav(studio, navigate, isAdmin);
   const { page, isOn, isAccountPage } = nav;
 
-  const savePolicy = (value: PolicyValue) => {
+  const savePolicy = async (value: PolicyValue) => {
     const { policy } = context.getState();
 
     setState({ policy: { ...policy, ...value } });
 
-    sync.save((stylistId) => addPaymentPolicy(fromPolicy(value, stylistId)), {
-      policy,
-    });
+    const isSaved = await sync.save(
+      (stylistId) => addPaymentPolicy(fromPolicy(value, stylistId)),
+      { policy },
+    );
+
+    if (!isSaved) throw new Error("policy_not_saved");
 
     showToast("Payment policy saved");
   };
@@ -59,7 +62,7 @@ export const getSettingsView = (
       !hasTwoFactor(state) ||
       (await hasRecentSecondFactor().catch(() => false))
     ) {
-      savePolicy(value);
+      await savePolicy(value);
 
       return true;
     }
@@ -178,7 +181,7 @@ export const getSettingsView = (
       setState({ taxEdit: true });
     },
     onTaxSave: (value: TaxDetails) =>
-      void actions.saveTax(value, () => {
+      actions.saveTax(value, () => {
         context.memo.isTaxEdited = false;
         setState({ taxEdit: false });
       }),

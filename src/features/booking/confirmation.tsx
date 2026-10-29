@@ -1,7 +1,7 @@
 import { CalendarAppPills } from "../../components/calendar-app-pills";
 import { Calendar, Check, Clock, Mail, MapPin } from "lucide-react";
 import { Link } from "react-router";
-import { AppleLogo, GoogleLogo } from "../../components/icons/brand-icons";
+import { GoogleLogo } from "../../components/icons/brand-icons";
 import { joinClassNames } from "../../utils/class-names";
 import { getGoogleCalendarUrl } from "../../../supabase/functions/_shared/calendar-file";
 import { getCalendarFileUrl } from "../../lib/manage-booking-api";
@@ -192,13 +192,6 @@ export const BookingConfirmation = ({ booking }: BookingConfirmationProps) => {
               className={styles.socialButton}
             >
               <GoogleLogo size={17} />
-            </button>
-            <button
-              onClick={() => setState({ account: { ...account, saved: true } })}
-              aria-label="Continue with Apple"
-              className={styles.socialButton}
-            >
-              <AppleLogo size={17} />
             </button>
             <button
               onClick={() =>

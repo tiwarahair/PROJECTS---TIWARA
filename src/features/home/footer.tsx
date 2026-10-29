@@ -107,7 +107,7 @@ export const HomeFooter = () => (
         </div>
       </div>
       <div className={styles.bottom}>
-        <span>© 2026 Tiwára&apos;s House.</span>
+        <span>© {new Date().getFullYear()} Tiwára&apos;s House.</span>
         <div className={joinClassNames(page.nolinks, styles.legal)}>
           <a href="#faq" className={styles.legalLink}>
             Privacy policy

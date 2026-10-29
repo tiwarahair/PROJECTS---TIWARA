@@ -2,7 +2,12 @@ import type { Session } from "@supabase/supabase-js";
 import { describe, expect, it, vi } from "vitest";
 import { supabase } from "../../lib/supabase";
 import { toSessionUser } from "../auth-listener";
-import { logOut, sessionChanged, signedOut } from "../session-slice";
+import {
+  logOut,
+  logOutEverywhere,
+  sessionChanged,
+  signedOut,
+} from "../session-slice";
 import { createStore } from "../store";
 
 const buildSession = (appMetadata: Record<string, unknown>) =>
@@ -82,12 +87,9 @@ describe("session slice", () => {
     expect(signOut).toHaveBeenCalledWith({ scope: "local" });
     expect(store.getState().session.loggedIn).toBe(false);
 
-    store.dispatch(logOut("global"));
+    await store.dispatch(logOutEverywhere());
 
-    await vi.waitFor(() =>
-      expect(signOut).toHaveBeenLastCalledWith({ scope: "global" }),
-    );
-
+    expect(signOut).toHaveBeenLastCalledWith({ scope: "global" });
     expect(rpc).toHaveBeenCalledWith("revoke_trusted_devices");
   });
 });

@@ -11,6 +11,12 @@ interface Dialog {
   run: () => void;
 }
 
+// the last 4 digits aren't always known (a card saved at booking shows as "saved")
+const getCardText = (name: string, card: string | null) =>
+  /^\d{4}$/.test(card ?? "")
+    ? `${name}’s card ending ${card}`
+    : "their saved card";
+
 const getWaiveWhat = (
   { state }: CheckoutController,
   { fee, feeExtra }: CheckoutViewModel,
@@ -49,7 +55,7 @@ const DIALOGS: Record<
     return {
       title: isOffPlatform
         ? `Record a ${formatMoney(amount)} refund?`
-        : `Refund ${formatMoney(amount)} to ${name}’s card ending ${booking.card}?`,
+        : `Refund ${formatMoney(amount)} to ${getCardText(name, booking.card)}?`,
       body: isOffPlatform
         ? "Recorded only, refund the client directly."
         : "It usually takes 5–10 business days to arrive. The card fee isn’t returned.",
@@ -85,7 +91,7 @@ const DIALOGS: Record<
     },
   }),
   retryFee: ({ setState, showToast, booking }, { name, feeExtra }) => ({
-    title: `Charge ${formatMoney(feeExtra)} to ${name}’s card ending ${booking.card}?`,
+    title: `Charge ${formatMoney(feeExtra)} to ${getCardText(name, booking.card)}?`,
     body: "This uses your last retry. If it’s declined again, send a payment link or record the payment instead.",
     yes: `Charge ${formatMoney(feeExtra)}`,
     cancel: "Not now",

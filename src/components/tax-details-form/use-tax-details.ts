@@ -47,7 +47,7 @@ export const useTaxDetails = ({
   const {
     control,
     handleSubmit,
-    formState: { errors, isDirty },
+    formState: { errors, isDirty, isSubmitting },
   } = form;
 
   useEffect(() => onDirtyChange?.(isDirty), [isDirty, onDirtyChange]);
@@ -91,6 +91,7 @@ export const useTaxDetails = ({
       .filter(Boolean)
       .join(", "),
     isSettings: mode === "settings",
+    isSubmitting,
     save: () => void submit(),
   };
 };

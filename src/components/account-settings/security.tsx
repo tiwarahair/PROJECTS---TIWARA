@@ -30,8 +30,6 @@ export const SettingsSecurity = ({
     sendPasswordCode,
   } = settings;
 
-  const provider = props.signIn === "apple" ? "Apple" : "Google";
-
   const { register, setValue, clearErrors } = passwordForm;
   const clearServerError = () => clearErrors("root");
 
@@ -57,7 +55,8 @@ export const SettingsSecurity = ({
           {isSocial && !state.isSettingPassword && (
             <div className={styles.socialIntro}>
               <p className={styles.socialText}>
-                {`You sign in with ${provider}. Set a password to also sign in with email.`}
+                You sign in with Google. Set a password to also sign in with
+                email.
               </p>
               <button
                 className={joinClassNames(styles.setPassword, shared.focusRing)}

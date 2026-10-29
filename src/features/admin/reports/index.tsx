@@ -12,7 +12,7 @@ import type {
   ReportsTab,
 } from "../../../lib/admin-api";
 import { joinClassNames } from "../../../utils/class-names";
-import { useGetReportsInfiniteQuery } from "../api";
+import { useGetReportStatsQuery, useGetReportsInfiniteQuery } from "../api";
 import { getCount } from "../profiles/view";
 import { DecisionSheet } from "./decision-sheet";
 import { ReportRow } from "./row";
@@ -66,6 +66,9 @@ export const AdminReports = ({
     fetchNextPage,
     isFetchingNextPage,
   } = useGetReportsInfiniteQuery({ tab, sort });
+
+  const { isError: isStatsError, refetch: refetchStats } =
+    useGetReportStatsQuery();
 
   const reports =
     data?.pages.flatMap((reportsPage) => reportsPage?.items ?? []) ?? [];
@@ -179,6 +182,7 @@ export const AdminReports = ({
       {!isWide && <h1 className={shell.pageTitle}>Reports</h1>}
       <StatCards
         isWide={isWide}
+        onRetry={isStatsError && !stats ? () => void refetchStats() : undefined}
         cards={statCards.map(({ sub, value, ...card }) => ({
           ...card,
           value,

@@ -227,6 +227,21 @@ describe("CheckoutSheet", () => {
     expect(onPay).toHaveBeenCalledTimes(2);
   });
 
+  it("a refund to a saved card without its last 4 digits says their saved card", async () => {
+    renderSheet({
+      booking: { ...nia, card: "saved" },
+      start: "refund",
+      done: { method: "card", via: "sms", charged: 0, tip: 0, refundAuto: 0 },
+    });
+
+    await user.selectOptions(screen.getByRole("combobox"), "Goodwill");
+    await click(/^Refund £/);
+
+    expect(
+      screen.getByText("Refund £100 to their saved card?"),
+    ).toBeInTheDocument();
+  });
+
   it("finishing hands the result to the host", async () => {
     const onComplete = vi.fn();
 

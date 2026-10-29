@@ -45,6 +45,10 @@ export interface AccountSettingsProps {
   /** Money owed (pounds) and open disputes block closing the business. */
   owed?: number;
   hasOpenDispute?: boolean;
+  /** The money and dispute checks haven't loaded yet. */
+  isCloseChecking?: boolean;
+  /** The checks failed to load: Close business stays off with a Try again. */
+  onRetryCloseChecks?: () => void;
   onPayOwed?: () => void;
   isPayingOwed?: boolean;
   pauseReason?: string;
@@ -73,7 +77,7 @@ export interface AccountSettingsProps {
   onTwoFactorAddBackup?: () => void;
   onTaxEdit?: () => void;
   onTaxAdd?: () => void;
-  onTaxSave?: (details: TaxDetails) => void;
+  onTaxSave?: (details: TaxDetails) => void | Promise<void>;
   onTaxCancel?: () => void;
   onTaxDirty?: (isDirty: boolean) => void;
   /** Opens the stylist's Stripe Express dashboard. */

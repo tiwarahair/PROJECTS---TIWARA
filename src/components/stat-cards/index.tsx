@@ -1,6 +1,7 @@
 import type { ReactNode } from "react";
 import Skeleton from "react-loading-skeleton";
 import { joinClassNames } from "../../utils/class-names";
+import { InlineRetry } from "../inline-retry";
 import styles from "../../styles/components/stat-cards/index.module.css";
 
 export interface StatCard {
@@ -15,27 +16,45 @@ export interface StatCard {
 interface StatCardsProps {
   cards: StatCard[];
   isWide: boolean;
+  /** The numbers' query failed: dashes and a Try again line instead of skeletons. */
+  onRetry?: () => void;
 }
 
-export const StatCards = ({ cards, isWide }: StatCardsProps) => (
-  <div className={joinClassNames(styles.stats, isWide && styles.wide)}>
-    {cards.map(({ label, value, sub, isEmpty, isLoading, isAlert }) => (
-      <div key={label} className={styles.stat}>
-        <span className={styles.statLabel}>{label}</span>
-        {isLoading && <Skeleton width={36} height={26} />}
-        {!isLoading && isEmpty && <span className={styles.statEmpty}>—</span>}
-        {!isLoading && !isEmpty && (
-          <span
-            className={joinClassNames(
-              styles.statValue,
-              isAlert && styles.alert,
+export const StatCards = ({ cards, isWide, onRetry }: StatCardsProps) => (
+  <>
+    <div className={joinClassNames(styles.stats, isWide && styles.wide)}>
+      {cards.map(({ label, value, sub, isEmpty, isLoading, isAlert }) => {
+        const isMissing = !!onRetry || isEmpty;
+        const isWaiting = !onRetry && isLoading;
+
+        return (
+          <div key={label} className={styles.stat}>
+            <span className={styles.statLabel}>{label}</span>
+            {isWaiting && <Skeleton width={36} height={26} />}
+            {!isWaiting && isMissing && (
+              <span className={styles.statEmpty}>—</span>
             )}
-          >
-            {value}
-          </span>
-        )}
-        {!!sub && <span className={styles.statSub}>{sub}</span>}
-      </div>
-    ))}
-  </div>
+            {!isWaiting && !isMissing && (
+              <span
+                className={joinClassNames(
+                  styles.statValue,
+                  isAlert && styles.alert,
+                )}
+              >
+                {value}
+              </span>
+            )}
+            {!!sub && <span className={styles.statSub}>{sub}</span>}
+          </div>
+        );
+      })}
+    </div>
+    {onRetry && (
+      <InlineRetry
+        className={styles.retry}
+        text="These numbers didn’t load."
+        onRetry={onRetry}
+      />
+    )}
+  </>
 );

@@ -18,7 +18,7 @@ export type SettingsPage =
   "personal" | "security" | "notifications" | "payouts" | "calendar";
 export type PayoutStatus =
   "none" | "verifying" | "action" | "paused" | "active";
-export type SignIn = "email" | "google" | "apple";
+export type SignIn = "email" | "google";
 
 export interface TwoFactorDevice {
   name: string;

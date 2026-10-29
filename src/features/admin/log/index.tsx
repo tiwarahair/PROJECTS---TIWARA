@@ -3,6 +3,7 @@ import { useState } from "react";
 import { Avatar } from "../../../components/ds/avatar";
 import { EmptyBox } from "../../../components/empty-box";
 import { ListSkeleton } from "../../../components/list-skeleton";
+import { InlineRetry } from "../../../components/inline-retry";
 import { PageMessage } from "../../../components/page-message";
 import { SortMenu } from "../../../components/sort-menu";
 import { useDebouncedValue } from "../../../hooks/use-debounced-value";
@@ -59,7 +60,12 @@ export const AdminLog = ({
   const [search, setSearch] = useState("");
   const [menu, setMenu] = useState<OpenMenu>("");
   const settledSearch = useDebouncedValue(search);
-  const { data: filters } = useGetActionFiltersQuery();
+
+  const {
+    data: filters,
+    isError: isFiltersError,
+    refetch: refetchFilters,
+  } = useGetActionFiltersQuery();
 
   const {
     data,
@@ -280,6 +286,12 @@ export const AdminLog = ({
           align="left"
         />
       </div>
+      {isFiltersError && (
+        <InlineRetry
+          text="The admin and stylist filters didn’t load."
+          onRetry={() => void refetchFilters()}
+        />
+      )}
       {getList()}
     </div>
   );

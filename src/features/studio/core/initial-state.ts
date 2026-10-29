@@ -33,6 +33,7 @@ export const getInitialStudioState = (): StudioState => ({
   twoFactorOut: false,
   shareTip: false,
   stripeBusy: false,
+  pastBusyId: null,
   payoutStatus: null,
   payoutBank: null,
   notificationPrefs: {},

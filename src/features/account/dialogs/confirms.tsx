@@ -69,9 +69,8 @@ export const LogoutAll = ({ account: { actions } }: LogoutAllProps) => (
     action="Log out everywhere"
     onCancel={actions.closeDialog}
     onConfirm={() => {
-      actions.setState({ dialog: null, loggedOut: true });
-      actions.endSession("global");
-      actions.showToast("You’re logged out of all devices");
+      actions.setState({ dialog: null });
+      void actions.endAllSessions();
     }}
   />
 );

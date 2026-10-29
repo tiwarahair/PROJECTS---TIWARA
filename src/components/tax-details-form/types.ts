@@ -6,7 +6,8 @@ export interface TaxDetailsFormProps {
   businessName: string;
   business?: TaxBusiness;
   value?: Partial<TaxDetails>;
-  onSubmit?: (details: TaxDetails) => void;
+  /** Submit stays off until a returned promise settles. */
+  onSubmit?: (details: TaxDetails) => void | Promise<void>;
   onCancel?: () => void;
   /** Whether the fields differ from how the form opened. */
   onDirtyChange?: (isDirty: boolean) => void;

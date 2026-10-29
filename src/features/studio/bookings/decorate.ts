@@ -316,7 +316,7 @@ export const decorateBooking = (
     expiryLabel: booking.expiresAt ? formatDateTime(booking.expiresAt) : "",
     hoursLeft: booking.expiresAt ? `${leftShort} left` : "",
     resendsLeft: Math.max(0, 2 - resends),
-    resendLabel: `Resend by email/SMS (${Math.max(0, 2 - resends)} of 2 left)`,
+    resendLabel: `Resend by email (${Math.max(0, 2 - resends)} of 2 left)`,
     canResend: resends < 2,
     resendOpacity: resends < 2 ? "1" : ".45",
     protectionAmountLabel: formatMoney(
