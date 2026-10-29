@@ -40,6 +40,7 @@ import type {
   StudioService,
   WizardState,
 } from "./services";
+import type { Catalogue } from "../../../../types/catalogue";
 import type {
   StudioCheck,
   StudioPolicy,
@@ -51,7 +52,7 @@ import type {
 import type { BookingStep, SheetKind, StudioPage, StudioTab } from "./views";
 
 export interface StudioState {
-  /** The stylist's ids (empty until Studio is seeded from their account). */
+  catalogue: Catalogue;
   account: {
     stylistId: string;
     slug: string;
@@ -68,7 +69,6 @@ export interface StudioState {
     email: string;
     phone: string;
   };
-  /** Home feed and notifications sheet; a new account has none. */
   notifications: StudioNotification[];
   avatarUrl: string | null;
   coverUrl: string | null;
@@ -81,7 +81,6 @@ export interface StudioState {
   clientOverrides: Record<string, Partial<StudioClient>>;
   clientEdit: ClientEditDraft | null;
   clientEditFromView?: boolean;
-  /** opened from the add-booking flow, which it goes back to */
   clientEditFromAdd?: boolean;
   clientEditFromBooking?: {
     bookingId: number;
@@ -103,6 +102,8 @@ export interface StudioState {
   twoFactorOut: boolean;
   shareTip: boolean;
   stripeBusy: boolean;
+  /** The past booking with a retry or link request in flight. */
+  pastBusyId: string | number | null;
   /** The account's Stripe status and payout bank. */
   payoutStatus: PayoutStatus | null;
   payoutBank: string | null;
@@ -110,6 +111,7 @@ export interface StudioState {
   notificationPrefs: Partial<NotificationSettings>;
   nudge: boolean;
   serviceNudge: boolean;
+  policyReminder: boolean;
   celebrated: boolean;
   page: StudioPage | null;
   pageFromSetup: boolean;
@@ -130,6 +132,12 @@ export interface StudioState {
   filterPayment: string;
   filterOpen: boolean;
   filterOut: boolean;
+  filterDraft: Partial<
+    Pick<
+      StudioState,
+      "filterRange" | "filterStatus" | "filterPayment" | "pastFilter"
+    >
+  >;
   datePickerOpen: boolean;
   notifAllRead: boolean;
   clientQuery: string;

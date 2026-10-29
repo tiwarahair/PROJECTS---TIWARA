@@ -1,11 +1,11 @@
 import { Calendar } from "lucide-react";
-import { useLayoutEffect, useState } from "react";
+import { useState } from "react";
 import { Link } from "react-router";
 import { Button } from "../../components/ds/button";
 import { PageMessage } from "../../components/page-message";
-import { ManageBookingSkeleton } from "../../components/skeleton/manage-booking-skeleton";
+import { ManageBookingSkeleton } from "../../components/skeleton/manage-booking";
 import { useIsSlow } from "../../hooks/use-is-slow";
-import { usePrivateLink } from "../../hooks/use-private-link";
+import { useLinkPage } from "../../hooks/use-link-page";
 import {
   getErrorMessage,
   useGetAppealPageQuery,
@@ -13,7 +13,6 @@ import {
 } from "../../stores/api-slice";
 import { getAssetUrl } from "../../utils/asset-url";
 import { joinClassNames } from "../../utils/class-names";
-import { formatWhen } from "../pay-fee/logic";
 import {
   APPEAL_ERRORS,
   getClosedMessage,
@@ -23,10 +22,11 @@ import {
 import "../../styles/features/manage-booking/global.module.css";
 import frame from "../../styles/features/manage-booking/index.module.css";
 import styles from "../../styles/features/review/index.module.css";
+import { formatLondonDateTime } from "../../utils/dates";
 
 /** The reviewer's appeal against a decision on their review, route "/appeal?token=" from the decision email. */
 export const AppealPage = () => {
-  const token = usePrivateLink({ storageKey: "tw_appeal_token" });
+  const token = useLinkPage("tw_appeal_token");
   const [body, setBody] = useState("");
   const [error, setError] = useState("");
   const [submit, { isLoading: isSubmitting }] = useSubmitAppealMutation();
@@ -38,12 +38,6 @@ export const AppealPage = () => {
   } = useGetAppealPageQuery(token, { skip: !token });
 
   const isSlow = useIsSlow(isFetching && !page);
-
-  useLayoutEffect(() => {
-    document.documentElement.classList.add("manage-page");
-
-    return () => document.documentElement.classList.remove("manage-page");
-  }, []);
 
   const send = async () => {
     if (!body.trim()) {
@@ -86,7 +80,7 @@ export const AppealPage = () => {
             </div>
             <div className={styles.visitWhen}>
               <Calendar size={14} strokeWidth={1.6} />
-              {formatWhen(page.starts_at)}
+              {formatLondonDateTime(page.starts_at)}
             </div>
           </div>
         </div>

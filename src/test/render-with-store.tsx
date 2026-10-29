@@ -7,6 +7,7 @@ import { sessionChanged } from "../stores/session-slice";
 import { createStore } from "../stores/store";
 import { startCacheListener } from "../stores/cache-listener";
 import type { Profile } from "../types/profile";
+import { TEST_CATALOGUE } from "./catalogue";
 import type { SessionUser } from "../types/session";
 
 export const TEST_USER: SessionUser = {
@@ -29,6 +30,7 @@ export const TEST_PROFILE: Profile = {
 interface RenderOptions {
   /** Signs in TEST_USER with TEST_PROFILE already loaded. */
   signedIn?: boolean;
+  isCatalogueLoading?: boolean;
 }
 
 /** Shows the current router location so tests can assert navigation. */
@@ -45,12 +47,17 @@ const LocationProbe = () => {
 export const renderWithStore = (
   ui: ReactElement,
   url = "/",
-  { signedIn = false }: RenderOptions = {},
+  { signedIn = false, isCatalogueLoading = false }: RenderOptions = {},
 ) => {
   window.history.replaceState(null, "", url);
   const store = createStore();
 
   startCacheListener(store);
+
+  if (!isCatalogueLoading)
+    store.dispatch(
+      api.util.upsertQueryData("getCatalogue", undefined, TEST_CATALOGUE),
+    );
 
   if (signedIn) {
     store.dispatch(sessionChanged(TEST_USER));

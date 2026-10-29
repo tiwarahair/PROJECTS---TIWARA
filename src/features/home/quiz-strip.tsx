@@ -1,6 +1,7 @@
 import { CtaArrowIcon } from "../../components/icons/custom-icons";
 import { Link } from "react-router";
-import { serviceGroups } from "../../data";
+import { DarkBandSkeleton } from "../../components/skeleton/dark-band";
+import { useGetCatalogueQuery } from "../../stores/api-slice";
 import { joinClassNames } from "../../utils/class-names";
 import page from "../../styles/features/home/index.module.css";
 import styles from "../../styles/features/home/quiz-strip.module.css";
@@ -8,8 +9,10 @@ import styles from "../../styles/features/home/quiz-strip.module.css";
 const QUIZ_GROUP_IDS = ["braids", "locs", "natural", "wigs"];
 
 export const QuizStrip = () => {
+  const { data: catalogue, isLoading } = useGetCatalogueQuery();
+
   const chips = QUIZ_GROUP_IDS.map((id) =>
-    serviceGroups.find((group) => group.id === id),
+    catalogue?.groups.find((group) => group.id === id),
   ).filter((group) => !!group);
 
   return (
@@ -22,8 +25,12 @@ export const QuizStrip = () => {
       <div className={joinClassNames(page.quizrow, styles.row)}>
         <h3 className={styles.title}>Not sure what your hair needs?</h3>
         <div className={styles.actions}>
-          {chips.map(({ id, name, slug }) => (
-            <Link key={id} to={`/search?group=${slug}`} className={styles.chip}>
+          {isLoading &&
+            QUIZ_GROUP_IDS.map((id) => (
+              <DarkBandSkeleton key={id} variant="chip" />
+            ))}
+          {chips.map(({ id, name }) => (
+            <Link key={id} to={`/search?group=${id}`} className={styles.chip}>
               {name}
             </Link>
           ))}

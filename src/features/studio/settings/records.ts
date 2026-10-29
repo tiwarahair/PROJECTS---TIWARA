@@ -4,14 +4,12 @@ import type { TaxDetails } from "../../../components/tax-details-form/logic";
 import type { StylistStudio } from "../../../lib/studio-api";
 import type { Json, TablesInsert } from "../../../types/database";
 import type { StudioState } from "../core/types";
+import { fromFeeKind } from "../../../utils/fee-kind";
 
 const POLICY_MODES = ["none", "deposit", "full", "card"] as const;
 
 export const toPolicyMode = (value: string) =>
   POLICY_MODES.find((mode) => mode === value) ?? "none";
-
-export const toFeeKind = (value: string): "keep" | "pct" =>
-  value === "pct" ? "pct" : "keep";
 
 export const toExtras = (value: Json): PolicyValue["extras"] =>
   Array.isArray(value)
@@ -36,6 +34,11 @@ export const fromHours = (hours: StudioState["hours"], stylistId: string) =>
     end_time: end,
   }));
 
+const DEFAULT_FEE_PERCENT = 50;
+
+const getSavablePercent = (percent: number) =>
+  percent >= 1 && percent <= 100 ? percent : DEFAULT_FEE_PERCENT;
+
 export const fromPolicy = (
   policy: PolicyValue,
   stylistId: string,
@@ -47,12 +50,12 @@ export const fromPolicy = (
   free_window_hours: policy.window,
   grace_minutes: policy.grace,
   late_on: policy.late.on,
-  late_kind: policy.late.kind,
-  late_percent: policy.late.percent,
+  late_kind: fromFeeKind(policy.late.kind),
+  late_percent: getSavablePercent(policy.late.percent),
   no_show_on: policy.noShow.on,
-  no_show_kind: policy.noShow.kind,
-  no_show_percent: policy.noShow.percent,
-  extras: policy.extras,
+  no_show_kind: fromFeeKind(policy.noShow.kind),
+  no_show_percent: getSavablePercent(policy.noShow.percent),
+  extras: policy.extras.map(({ type, text }) => ({ type, text })),
 });
 
 /** Saved tax details back into the form's shape; the NI number itself never leaves the server. */

@@ -20,6 +20,7 @@ export interface StudioClient {
   photoPath?: string;
   visits?: number;
   last?: string;
+  lastAt?: string;
   spent?: number;
   fav?: string;
   phone?: string;
@@ -32,7 +33,6 @@ export interface StudioClient {
   money?: ClientMoney;
   noShows?: number;
   lateCancels?: number;
-  deletableFrom?: string;
   blocked?: boolean;
   deleted?: boolean;
   walkIn?: boolean;

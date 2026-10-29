@@ -1,6 +1,8 @@
 import { Plus, X } from "lucide-react";
 import type { CSSProperties } from "react";
+import { useWatch } from "react-hook-form";
 import { AllergyField } from "../../components/allergy-field";
+import { CharacterCount } from "../../components/character-count";
 import { AppointmentAddress } from "./appointment-address";
 import type { AllergyState } from "./logic/types";
 import { ContactFields } from "./contact-fields";
@@ -17,6 +19,7 @@ interface StepDetailsProps {
 }
 
 const MAX_PHOTOS = 8;
+const MAX_NOTES = 500;
 
 /** Step 4 (Your details): log-in line or booking-as card, contact fields, mobile address (below the fields when they all show), then extra details: notes, allergies and photos. */
 export const StepDetails = ({ booking }: StepDetailsProps) => {
@@ -30,7 +33,8 @@ export const StepDetails = ({ booking }: StepDetailsProps) => {
     actions,
   } = booking;
 
-  const { register } = detailsForm;
+  const { register, control } = detailsForm;
+  const notes = useWatch({ control, name: "notes" }) ?? "";
   const { setState } = actions;
   const { loggedIn, allergy, photos } = state;
 
@@ -75,8 +79,14 @@ export const StepDetails = ({ booking }: StepDetailsProps) => {
           <textarea
             {...register("notes")}
             rows={3}
+            maxLength={MAX_NOTES}
             className={styles.notes}
           ></textarea>
+          <CharacterCount
+            length={notes.length}
+            max={MAX_NOTES}
+            showFrom={400}
+          />
         </label>
       </div>
       <div data-screen-label="Allergies opt-in" className={styles.allergies}>

@@ -13,6 +13,7 @@ import { supabase } from "./supabase";
 export const EMAIL_CODE_FAILURES: Record<string, string> = {
   email_exists: "That email is already used by another account.",
   over_email_send_rate_limit: AUTH_FAILURE_MESSAGES.emailLimit,
+  insufficient_aal: "Enter a code from your authenticator app, then try again.",
   failed: "The codes couldn’t be sent. Try again.",
 };
 
@@ -22,6 +23,7 @@ export const PASSWORD_FAILURES: Record<string, string> = {
   pwned_password:
     "This password has appeared in a data breach. Choose a different one.",
   weak_password: "Choose a stronger password.",
+  insufficient_aal: "Enter a code from your authenticator app, then try again.",
   failed: "Your password couldn’t be changed. Try again.",
 };
 
@@ -43,7 +45,11 @@ export const becomeStylist = async (details: StylistDetails) => {
 export const sendEmailChangeCodes = async (email: string) => {
   const { error } = await supabase.auth.updateUser({ email });
 
-  return getErrorCode(error, ["email_exists", "over_email_send_rate_limit"]);
+  return getErrorCode(error, [
+    "email_exists",
+    "over_email_send_rate_limit",
+    "insufficient_aal",
+  ]);
 };
 
 /** Confirms one of the two codes; the email changes once both are in. */
@@ -80,6 +86,7 @@ export const changePassword = async (
     "reauthentication_not_valid",
     "same_password",
     "weak_password",
+    "insufficient_aal",
   ]);
 
   if (!failure && signOutOthers)

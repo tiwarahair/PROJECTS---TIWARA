@@ -58,6 +58,7 @@ const getLedger = (overrides: Partial<Ledger> = {}): Ledger => {
     ],
     available: 38.82,
     pending: 0,
+    isBalanceKnown: true,
     onHold: 0,
     pausedAmount: 0,
     nextDate: null,
@@ -113,6 +114,41 @@ describe("Earnings", () => {
     ).toBeInTheDocument();
   });
 
+  it("says the balance couldn't load instead of showing nothing available", () => {
+    render(
+      <Earnings
+        ledger={getLedger({ available: 0, isBalanceKnown: false })}
+        clients={clients}
+      />,
+    );
+
+    expect(
+      screen.getByText(
+        "Your balance couldn’t load from Stripe. Refresh to try again.",
+      ),
+    ).toBeInTheDocument();
+
+    expect(screen.getByText("—")).toBeInTheDocument();
+  });
+
+  it("export waits for the business name", () => {
+    const { rerender } = render(
+      <Earnings ledger={getLedger()} clients={clients} />,
+    );
+
+    expect(screen.getByRole("button", { name: "Export" })).toBeDisabled();
+
+    rerender(
+      <Earnings
+        ledger={getLedger()}
+        clients={clients}
+        businessName="Nia Hair"
+      />,
+    );
+
+    expect(screen.getByRole("button", { name: "Export" })).toBeEnabled();
+  });
+
   it("empty: offers to copy the booking link", async () => {
     render(
       <Earnings
@@ -137,6 +173,11 @@ describe("Earnings", () => {
 
     unmount();
     render(<Earnings ledger={ledger} taxHold={true} onAddTax={onAddTax} />);
+
+    expect(
+      screen.getByText("Add your tax details to go live"),
+    ).toBeInTheDocument();
+
     await user.click(screen.getByRole("button", { name: "Add tax details" }));
     expect(onAddTax).toHaveBeenCalled();
   });
@@ -151,6 +192,52 @@ describe("Earnings", () => {
     expect(
       screen.getByText(/Payouts paused — £62\.40 being recovered/),
     ).toBeInTheDocument();
+  });
+
+  it("paused: Learn more explains why, what caused it and links to Stripe", async () => {
+    const onUpdateBank = vi.fn();
+
+    const refund = {
+      ...getTransaction("TX-3", -80, "Refunded"),
+      description: "Refund",
+      method: "Card",
+    };
+
+    const ledger = getLedger({ scenario: "paused", pausedAmount: 41.18 });
+
+    render(
+      <Earnings
+        ledger={{ ...ledger, transactions: [refund, ...ledger.transactions] }}
+        clients={clients}
+        onUpdateBank={onUpdateBank}
+      />,
+    );
+
+    await user.click(screen.getByRole("button", { name: "Learn more" }));
+
+    const dialog = screen.getByRole("dialog", {
+      name: "Why payouts are paused",
+    });
+
+    expect(within(dialog).getByText(/so it’s at −£41\.18/)).toBeInTheDocument();
+
+    expect(
+      within(dialog).getByText(/Stripe takes the £41\.18 from your next card/),
+    ).toBeInTheDocument();
+
+    expect(
+      within(dialog).getByRole("button", { name: /Refund · Nia Okafor/ }),
+    ).toBeInTheDocument();
+
+    expect(
+      within(dialog).queryByRole("button", { name: /Balance · Nia Okafor/ }),
+    ).not.toBeInTheDocument();
+
+    await user.click(
+      within(dialog).getByRole("link", { name: "View in Stripe" }),
+    );
+
+    expect(onUpdateBank).toHaveBeenCalled();
   });
 
   it("opens the payout drawer on the payouts tab", async () => {
@@ -173,7 +260,14 @@ describe("Earnings", () => {
   });
 
   it("export: the dialog closes after download with a toast", async () => {
-    render(<Earnings ledger={getLedger()} clients={clients} />);
+    render(
+      <Earnings
+        ledger={getLedger()}
+        clients={clients}
+        businessName="Nia Hair"
+      />,
+    );
+
     await user.click(screen.getByRole("button", { name: "Export" }));
     const dialog = screen.getByRole("dialog", { name: "Export earnings" });
 

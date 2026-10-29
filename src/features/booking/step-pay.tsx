@@ -9,7 +9,7 @@ import {
 import type { StripeExpressCheckoutElementConfirmEvent } from "@stripe/stripe-js";
 import { ArrowLeft, ArrowRight, CircleAlert } from "lucide-react";
 import { useEffect, useState } from "react";
-import { PaymentFieldsSkeleton } from "../../components/skeleton/payment-fields-skeleton";
+import { PaymentFieldsSkeleton } from "../../components/skeleton/payment-fields";
 import { stripePromise } from "../../lib/stripe";
 import { useGetCardsSessionQuery } from "../../stores/account-api";
 import { useAppSelector } from "../../stores/hooks";
@@ -21,11 +21,11 @@ import {
   PAY_ERRORS,
   WALLET_BUTTON_HEIGHT,
   getPaymentFonts,
-  toPence,
 } from "./logic/payment";
 import styles from "../../styles/features/booking/step-pay.module.css";
 import step from "../../styles/features/booking/step.module.css";
 import type { BookingController } from "./hooks/use-booking";
+import { toPence } from "../../utils/money";
 
 const SESSION_WAIT_MS = 5000;
 

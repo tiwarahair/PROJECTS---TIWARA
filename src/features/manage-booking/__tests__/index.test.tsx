@@ -133,6 +133,19 @@ describe("the manage booking page", () => {
     ).toBeInTheDocument();
   });
 
+  it("an address copied without its token points back to the booking email", async () => {
+    window.sessionStorage.clear();
+    renderPage("");
+
+    expect(
+      await screen.findByRole("heading", {
+        name: "Open this from your booking email",
+      }),
+    ).toBeInTheDocument();
+
+    expect(getManagedBooking).not.toHaveBeenCalled();
+  });
+
   it("cancelling shows what's refunded before confirming, then the cancelled booking", async () => {
     renderPage();
 

@@ -1,6 +1,7 @@
 import { renderNotice } from "../_shared/email-layout.ts";
 import type { RenderedEmail } from "../_shared/email-layout.ts";
-import { formatWhen, getLinkWording, pounds } from "./booking-emails.ts";
+import { formatWhen, getLinkWording } from "./booking-emails.ts";
+import { pounds } from "../_shared/money.ts";
 import type { BookingDetails } from "./booking-emails.ts";
 
 interface ReceiptLine {
@@ -8,6 +9,11 @@ interface ReceiptLine {
   base_pence: number;
   adjustment_pence: number;
   reason: string;
+}
+
+interface GivenBack {
+  method: string;
+  amount_pence: number;
 }
 
 interface ReceiptPayment {
@@ -25,6 +31,8 @@ export interface Receipt extends BookingDetails {
   refunded_pence: number;
   given_back_pence?: number;
   given_back_via?: string | null;
+  given_back?: GivenBack[];
+  refunded_at?: string | null;
   corrected?: boolean;
 }
 
@@ -56,17 +64,28 @@ const getPayments = ({ payments }: Receipt) =>
       : `Paid by ${METHODS[method] ?? "card"}: ${pounds(amount)}`,
   );
 
+const CARD_REFUND_SHOWING_MS = 14 * 24 * 60 * 60 * 1000;
+
+const getCardRefund = ({ refunded_pence: refunded, refunded_at: refundedAt }: Receipt) => {
+  if (!refunded) return [];
+
+  const isRecent = !refundedAt || Date.now() - new Date(refundedAt).getTime() < CARD_REFUND_SHOWING_MS;
+
+  return [`Refunded to your card: ${pounds(refunded)}${isRecent ? ". It can take 5–10 working days to show." : ""}`];
+};
+
+const getGivenBack = ({ given_back: givenBack, given_back_pence: total, given_back_via: via }: Receipt) =>
+  (givenBack ?? (total ? [{ method: via ?? "", amount_pence: total }] : [])).map(
+    ({ method, amount_pence: amount }) => `Given back by ${METHODS[method] ?? "another way"}: ${pounds(amount)}`,
+  );
+
 const getSummary = (receipt: Receipt) => [
   ...getLines(receipt),
   `Total: ${pounds(receipt.final_pence)}`,
   ...(receipt.tip_pence ? [`Tip: ${pounds(receipt.tip_pence)}`] : []),
   ...getPayments(receipt),
-  ...(receipt.refunded_pence
-    ? [`Refunded to your card: ${pounds(receipt.refunded_pence)}. It can take 5–10 working days to show.`]
-    : []),
-  ...(receipt.given_back_pence
-    ? [`Given back by ${METHODS[receipt.given_back_via ?? ""] ?? "another way"}: ${pounds(receipt.given_back_pence)}`]
-    : []),
+  ...getCardRefund(receipt),
+  ...getGivenBack(receipt),
 ];
 
 export const checkoutReceipt = (receipt: Receipt): RenderedEmail =>

@@ -16,8 +16,7 @@ import { getAddonValue } from "./addon-values";
 import type { AddContext } from "./context";
 import type { NewClient } from "./types";
 import { checkUnpaidFee } from "./unpaid-fee";
-
-const toPence = (pounds: number) => Math.round(pounds * 100);
+import { toPence } from "../../../../utils/money";
 
 export const saveNewClient = (
   { studio, state, setState }: AddContext,

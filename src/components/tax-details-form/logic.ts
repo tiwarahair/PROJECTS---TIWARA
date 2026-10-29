@@ -1,4 +1,3 @@
-// TaxDetailsForm values and output.
 import { formatPostcode } from "../../utils/address";
 
 export type TaxKind = "sole" | "ltd";

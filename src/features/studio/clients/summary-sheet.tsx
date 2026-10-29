@@ -2,6 +2,7 @@ import { getAvatarSrc } from "../core/format";
 import { getClient } from "../core/model";
 import type { StudioController } from "../core/use-studio";
 import styles from "../../../styles/features/studio/clients/summary-sheet.module.css";
+import { formatMoney } from "../../../utils/money";
 
 /** The older "Client" sheet, still reachable from the booking flow. */
 export const ClientSummarySheet = ({
@@ -20,7 +21,7 @@ export const ClientSummarySheet = ({
     .map((row) => ({
       key: row.when + row.time,
       service: row.service,
-      when: `${row.when} · £${row.price}`,
+      when: `${row.when} · ${formatMoney(row.price)}`,
     }));
 
   const subtitleLine = [
@@ -49,7 +50,9 @@ export const ClientSummarySheet = ({
           <div className={styles.statLabel}>Visits</div>
         </div>
         <div className={styles.clientStat}>
-          <div className={styles.statValue}>{`£${client.spent || 0}`}</div>
+          <div
+            className={styles.statValue}
+          >{`${formatMoney(client.spent || 0)}`}</div>
           <div className={styles.statLabel}>Spent</div>
         </div>
         <div className={styles.clientStat}>

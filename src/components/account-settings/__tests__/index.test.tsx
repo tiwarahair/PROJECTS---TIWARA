@@ -45,10 +45,20 @@ const getTestBackend = (): AccountSettingsBackend => ({
           is_current: false,
         },
       ],
+      trusted_devices: [
+        {
+          id: "t1",
+          label: "Mac · Chrome",
+          kind: "laptop" as const,
+          expires_at: "2026-11-20T09:00:00Z",
+          last_used_at: null,
+        },
+      ],
     }),
   ),
   signOutSession: vi.fn(() => Promise.resolve()),
   signOutOthers: vi.fn(() => Promise.resolve()),
+  removeTrustedDevice: vi.fn(() => Promise.resolve(true)),
   saveLoginAlerts: vi.fn(() => Promise.resolve()),
   getCalendarFeed: vi.fn(() => Promise.resolve(`${FEED}/first.ics`)),
   resetCalendarFeed: vi.fn(() => Promise.resolve(`${FEED}/second.ics`)),
@@ -171,9 +181,7 @@ describe("AccountSettings", () => {
     await user.click(screen.getByRole("button", { name: "Send codes" }));
 
     expect(
-      await screen.findByText(
-        "Enter an email address, like name@example.co.uk.",
-      ),
+      await screen.findByText("Enter a valid email address"),
     ).toBeInTheDocument();
 
     await user.clear(screen.getByLabelText("New email"));
@@ -292,6 +300,15 @@ describe("AccountSettings", () => {
     expect(screen.getByText("amara@example.com")).toBeInTheDocument();
   });
 
+  it("keeps Close business off until the money and dispute checks load", () => {
+    render(
+      <AccountSettings person={person} backend={backend} isCloseChecking />,
+      { wrapper: MemoryRouter },
+    );
+
+    expect(screen.getByRole("button", { name: "Checking…" })).toBeDisabled();
+  });
+
   it("blocks closing the business while bookings are upcoming", () => {
     render(<AccountSettings person={person} backend={backend} upcoming={2} />, {
       wrapper: MemoryRouter,
@@ -308,7 +325,7 @@ describe("AccountSettings", () => {
     ).toBeDisabled();
   });
 
-  it("asks for dispute fees owed to be paid before closing", async () => {
+  it("asks for fees owed to be paid before closing", async () => {
     const onPayOwed = vi.fn();
 
     render(
@@ -380,10 +397,51 @@ describe("AccountSettings", () => {
     ).toBeInTheDocument();
   });
 
+  it("security: lists trusted devices and stops trusting one", async () => {
+    render(
+      <AccountSettings person={person} backend={backend} page="security" />,
+      { wrapper: MemoryRouter },
+    );
+
+    expect(await screen.findByText("Trusted until 20 Nov")).toBeInTheDocument();
+
+    await user.click(
+      screen.getByRole("button", { name: "Stop trusting Mac · Chrome" }),
+    );
+
+    expect(backend.removeTrustedDevice).toHaveBeenCalledWith("t1");
+
+    expect(
+      await screen.findByText("Mac · Chrome will ask for a code next time"),
+    ).toBeInTheDocument();
+
+    expect(screen.queryByText("Trusted until 20 Nov")).not.toBeInTheDocument();
+  });
+
+  it("security: closing the code prompt keeps the device trusted", async () => {
+    vi.mocked(backend.removeTrustedDevice).mockResolvedValueOnce(false);
+
+    render(
+      <AccountSettings person={person} backend={backend} page="security" />,
+      { wrapper: MemoryRouter },
+    );
+
+    await user.click(
+      await screen.findByRole("button", { name: "Stop trusting Mac · Chrome" }),
+    );
+
+    expect(screen.getByText("Trusted until 20 Nov")).toBeInTheDocument();
+
+    expect(
+      screen.queryByText("Mac · Chrome will ask for a code next time"),
+    ).not.toBeInTheDocument();
+  });
+
   it("security: login alerts show the saved setting once it's loaded", async () => {
     vi.mocked(backend.getSecurity).mockResolvedValueOnce({
       login_alerts: false,
       sessions: [],
+      trusted_devices: [],
     });
 
     render(
@@ -533,7 +591,7 @@ describe("AccountSettings", () => {
         person={person}
         backend={backend}
         page="security"
-        signIn="apple"
+        signIn="google"
       />,
       {
         wrapper: MemoryRouter,
@@ -542,7 +600,7 @@ describe("AccountSettings", () => {
 
     expect(
       screen.getByText(
-        "You sign in with Apple. Set a password to also sign in with email.",
+        "You sign in with Google. Set a password to also sign in with email.",
       ),
     ).toBeInTheDocument();
   });
@@ -583,6 +641,10 @@ describe("AccountSettings", () => {
         wrapper: MemoryRouter,
       },
     );
+
+    expect(
+      screen.getByText("Add your tax details to go live."),
+    ).toBeInTheDocument();
 
     await user.click(screen.getByRole("button", { name: "Add tax details" }));
     expect(onTaxAdd).toHaveBeenCalled();

@@ -5,15 +5,11 @@ import type { StripeAccountState } from "../../../lib/studio-api/settings";
 import { getPhotoUrl } from "../../../lib/studio-api/photos";
 import { toShownBusinessType } from "../../../utils/business-type";
 import { MONDAY_FIRST_WEEKDAYS } from "../../../utils/dates";
+import { toFeeKind } from "../../../utils/fee-kind";
 import { bySort } from "../../../utils/sort";
 import { buildBlockedTime, formatClosedSpan, toOffset } from "./blocked-time";
 import { toStudioAddon, toStudioService } from "../services/records";
-import {
-  toExtras,
-  toFeeKind,
-  toPolicyMode,
-  toTaxDetails,
-} from "../settings/records";
+import { toExtras, toPolicyMode, toTaxDetails } from "../settings/records";
 import type { StudioState } from "./types";
 
 export const getPayoutStatus = ({
@@ -93,7 +89,15 @@ export const toStudioPatch = (
         sort,
         colour: colour ?? "",
       })),
-    services: [...studio.services].sort(bySort).map(toStudioService),
+    services: [...studio.services].sort(bySort).map((row) =>
+      toStudioService(
+        row,
+        [...studio.portfolio_photos]
+          .sort(bySort)
+          .filter(({ service_id }) => service_id === row.id)
+          .map(({ id }) => id),
+      ),
+    ),
     addons: studio.addons.map(toStudioAddon),
     hours: [...studio.working_hours]
       .sort((left, right) => left.weekday - right.weekday)
@@ -126,7 +130,7 @@ export const toStudioPatch = (
     })),
     rules: rules
       ? {
-          minNotice: rules.min_notice_hours,
+          minNoticeMinutes: rules.min_notice_minutes,
           maxNotice: rules.max_notice_months,
           extra: rules.default_extra_minutes,
           travel: rules.travel_buffer_minutes,

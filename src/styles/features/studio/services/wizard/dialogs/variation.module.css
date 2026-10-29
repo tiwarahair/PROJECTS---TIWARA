@@ -1,0 +1,91 @@
+/* ---- Size / length option ---- */
+.box {
+  gap: 16px;
+}
+
+.head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.close {
+  width: 34px;
+  height: 34px;
+  flex: 0 0 auto;
+  display: grid;
+  place-items: center;
+  border: none;
+  border-radius: var(--radius-full);
+  background: transparent;
+  color: var(--text-secondary);
+  cursor: pointer;
+  transition: background-color 0.16s ease;
+}
+
+.close:hover {
+  background: var(--quiet);
+}
+
+.offerRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 12px 14px;
+  border-radius: var(--radius-sm);
+  background: #fff;
+  box-shadow: inset 0 0 0 1px var(--border-subtle);
+}
+
+.pair {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+}
+
+.readOnly {
+  background: var(--quiet);
+  color: var(--text-secondary);
+  cursor: not-allowed;
+}
+
+.adjust {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  transition: opacity 0.2s ease;
+}
+
+.adjustOff {
+  opacity: 0.45;
+}
+
+/* one line: sign, price, hours, minutes; sized so "55 mins" still fits on a phone */
+.priceRow {
+  display: grid;
+  grid-template-columns: 46px 76px minmax(0, 1fr) minmax(0, 1fr);
+  align-items: center;
+  gap: 8px;
+}
+
+/* as tall as the fields beside it */
+.sign {
+  width: 46px;
+  height: 46px;
+  border-radius: var(--radius-sm);
+}
+
+.price {
+  min-width: 0;
+  padding: 0 10px;
+}
+
+.select {
+  padding: 0 28px 0 10px;
+}
+
+.chevron {
+  right: 9px;
+}

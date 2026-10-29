@@ -140,7 +140,6 @@ export const ClientEditSheet = ({ view, form }: ClientEditProps) => {
           className={styles.input}
           type="tel"
           {...onField("phone")}
-          placeholder="07700 900000"
           id={`${uid}-phone`}
           aria-invalid={errors.phone ? "true" : "false"}
           aria-describedby={errors.phone ? `${uid}-phone-error` : undefined}

@@ -157,11 +157,14 @@ export const removePortfolioPhoto = (id: string) =>
 const CLIENT_PHOTO_BUCKET = "client-photos";
 
 export const uploadClientPhoto = async (path: string, file: Blob) => {
-  const resized = await compressPhoto(new File([file], "photo"), {
-    maxWidthOrHeight: 600,
-    maxSizeMB: 0.5,
-    fileType: "image/jpeg",
-  });
+  const resized = await compressPhoto(
+    new File([file], "photo.jpg", { type: file.type || "image/jpeg" }),
+    {
+      maxWidthOrHeight: 600,
+      maxSizeMB: 0.5,
+      fileType: "image/jpeg",
+    },
+  );
 
   await putFile(path, resized, "image/jpeg", CLIENT_PHOTO_BUCKET);
 

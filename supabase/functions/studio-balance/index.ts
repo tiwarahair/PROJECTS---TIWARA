@@ -1,7 +1,7 @@
 // Earnings' balance card: what's available and pending in the stylist's Stripe balance, and the next payout's arrival.
 import { admin } from "../_shared/admin.ts";
 import { corsHeaders, respond } from "../_shared/cors.ts";
-import { getSignedInUser } from "../_shared/recent-user.ts";
+import { getStudioUser } from "../_shared/recent-user.ts";
 import { stripe } from "../_shared/stripe.ts";
 
 const getPence = (amounts: { amount: number; currency: string }[]) => {
@@ -15,7 +15,7 @@ const getPence = (amounts: { amount: number; currency: string }[]) => {
 Deno.serve(async (request) => {
   if (request.method === "OPTIONS") return new Response("ok", { headers: corsHeaders });
 
-  const owner = await getSignedInUser(admin, request);
+  const owner = await getStudioUser(admin, request);
 
   if (!owner) return respond(401, { error: "signed_out" });
 

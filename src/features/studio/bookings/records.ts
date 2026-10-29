@@ -14,10 +14,10 @@ import { fromLondonTime, toLondonTime } from "../../../utils/london-time";
 import { toDate, toOffset } from "../core/blocked-time";
 import {
   getFeeFlags,
+  getKeptDepositPence,
   getLatestFee,
   getRefundNote,
   getRefunded,
-  toPounds,
 } from "./fee-records";
 import { dateLabel } from "../core/format";
 import type {
@@ -27,7 +27,9 @@ import type {
   StudioPolicy,
 } from "../core/types";
 import { toStudioClient } from "../clients/records";
-import { toFeeKind, toPolicyMode } from "../settings/records";
+import { toFeeKind } from "../../../utils/fee-kind";
+import { getKeptDeposit } from "../core/model/policy";
+import { toPolicyMode } from "../settings/records";
 import {
   getCheckoutFields,
   getPaidAtBooking,
@@ -38,6 +40,7 @@ import {
 import { getDisputeFields } from "./dispute-records";
 import { getProtectionFields, getServiceFields } from "./protection-records";
 import { getNumber, getText, isRecord } from "./row-values";
+import { toPounds } from "../../../utils/money";
 
 const UPCOMING_STATUSES: Record<string, string> = {
   awaiting_confirmation: "awaiting",
@@ -83,7 +86,7 @@ const isRefundStuck = ({ cancellation }: StudioBookingRow) =>
   !getText(cancellation, "refund_id") &&
   getNumber(cancellation, "refund_failures") >= MAX_REFUND_FAILURES;
 
-/** a real client's key in Studio: their email, else their phone (the same person across their bookings) */
+/** a real client's key in Studio: the stylist's client record (matched by email or phone), else the booking on its own */
 const getClientKey = ({ id, stylist_client_id: clientId }: StudioBookingRow) =>
   clientId ?? `booking:${id}`;
 
@@ -170,6 +173,7 @@ export const toStudioBooking = (row: StudioBookingRow): StudioBooking => {
           paidLater: toPounds(getPaidSoFar(row) - getPaidAtBooking(row)),
           refundableOnline: toPounds(getRefundableOnline(row)),
           recordedVia: getRecordedVia(row),
+          ...(row.can_skip_review_invite ? { canSkipReview: true } : {}),
         }
       : {}),
   };
@@ -182,6 +186,24 @@ const getCancelNote = (row: StudioBookingRow, refundNote: string) => {
       : getText(row.contact, "first") || "the client";
 
   return `Cancelled by ${who}.${refundNote}`;
+};
+
+/** As the server counts it (20261227000001): the client cancelled, themselves or recorded by the stylist, after the free-cancellation cutoff. */
+const isLateClientCancel = ({
+  status,
+  cancelled_by: cancelledBy,
+  cancelled_at: cancelledAt,
+  terms,
+}: StudioBookingRow) => {
+  const cutoff = getText(terms, "free_cancel_until");
+
+  return (
+    status === "cancelled" &&
+    cancelledBy === "client" &&
+    !!cancelledAt &&
+    !!cutoff &&
+    Date.parse(cancelledAt) >= Date.parse(cutoff)
+  );
 };
 
 export const toPastRecord = (row: StudioBookingRow): PastRecord => {
@@ -218,11 +240,14 @@ export const toPastRecord = (row: StudioBookingRow): PastRecord => {
     price: booking.price,
     duration: booking.duration,
     when: dateLabel(booking.dayOffset),
+    dayOffset: booking.dayOffset,
+    startsAt: row.starts_at,
     time: booking.time,
     month: getMonthLabel(row.starts_at),
     status,
     at: Date.parse(markedAt),
     pastAt,
+    isLateClientCancel: isLateClientCancel(row),
     ...(status === "Cancelled" && row.status !== "auto_cancelled"
       ? {
           meta: getMeta(),
@@ -235,7 +260,6 @@ export const toPastRecord = (row: StudioBookingRow): PastRecord => {
           meta: "Auto-cancelled",
           note: "Not confirmed in time, so it was cancelled automatically. Nothing was charged.",
           autoCancelled: true,
-          startsAt: row.starts_at,
         }
       : {}),
     ...(status === "No show"
@@ -252,8 +276,10 @@ export const toPastRecord = (row: StudioBookingRow): PastRecord => {
         ({ purpose, status }) => purpose === "fee" && status === "pending",
       ),
     ),
+    ...getKeptDeposit(toPounds(getKeptDepositPence(row, fee))),
     ...getCheckoutFields(row),
     ...getDisputeFields(row),
+    ...(row.can_skip_review_invite ? { canSkipReview: true } : {}),
   };
 };
 

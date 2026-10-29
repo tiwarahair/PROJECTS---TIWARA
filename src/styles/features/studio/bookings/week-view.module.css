@@ -101,7 +101,7 @@
   align-items: flex-start;
   gap: 4px;
   top: var(--top);
-  height: var(--h);
+  height: var(--height);
 }
 
 .weekBlockedLabel {
@@ -128,7 +128,7 @@
   gap: 1px;
   transition: transform 0.16s cubic-bezier(0.2, 0.8, 0.2, 1);
   top: var(--top);
-  height: var(--h);
+  height: var(--height);
   background: var(--bk-bg);
   box-shadow: inset 3px 0 0 var(--bk-bar);
   border: 1px var(--bk-dash) var(--bk-line);

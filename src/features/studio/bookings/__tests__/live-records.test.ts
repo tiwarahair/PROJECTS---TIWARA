@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
-import { getRow } from "../../../../test/studio-booking-row";
-import { mergeBookingRows } from "../live-records";
+import { getClientRow, getRow } from "../../../../test/studio-booking-row";
+import { mergeBookingRows, mergeClientRows } from "../live-records";
+import { toStudioClient } from "../../clients/records";
 
 const empty = { bookings: [], pastNew: [], bookingClients: [] };
 
@@ -75,5 +76,35 @@ describe("mergeBookingRows", () => {
       "past-1",
       "past-2",
     ]);
+  });
+});
+
+describe("mergeClientRows", () => {
+  it("replaces a client with the fresh row, so a finished visit is counted", () => {
+    const before = toStudioClient(getClientRow({ visits: 0 }));
+
+    const merged = mergeClientRows(
+      { bookingClients: [before], extraClients: [] },
+      [getClientRow({ visits: 1 })],
+    );
+
+    expect(merged.bookingClients.map(({ visits }) => visits)).toEqual([1]);
+  });
+
+  it("keeps clients the list doesn't return and drops this visit's stand-in", () => {
+    const walkIn = { id: "booking:b-9", name: "Walk-in", first: "Walk-in" };
+    const added = { ...toStudioClient(getClientRow({})), visits: 0 };
+
+    const merged = mergeClientRows(
+      { bookingClients: [walkIn], extraClients: [added] },
+      [getClientRow({ visits: 2 })],
+    );
+
+    expect(merged.bookingClients.map(({ id }) => id)).toEqual([
+      "client-nia",
+      "booking:b-9",
+    ]);
+
+    expect(merged.extraClients).toEqual([]);
   });
 });

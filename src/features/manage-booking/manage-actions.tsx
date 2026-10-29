@@ -19,7 +19,7 @@ export const ManageActions = ({
   return (
     <div className={styles.actions}>
       <p className={styles.terms}>{getTermsLine(booking)}</p>
-      {!booking.can_reschedule && (
+      {!booking.can_reschedule && !!getRescheduleNote(booking) && (
         <p className={styles.note}>{getRescheduleNote(booking)}</p>
       )}
       <div className={styles.buttons}>

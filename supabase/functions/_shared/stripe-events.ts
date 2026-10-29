@@ -1,9 +1,17 @@
 import { admin } from "./admin.ts";
 
-export const isHandled = async (eventId: string) => {
-  const { data } = await admin.from("stripe_events").select("id").eq("id", eventId).maybeSingle();
+/** True when this delivery is the one to handle the event: not handled already, nor being handled right now. */
+export const claimEvent = async (eventId: string, type: string) => {
+  const { data, error } = await admin.rpc("claim_stripe_event", { event_id: eventId, event_type: type });
+
+  if (error) throw error;
 
   return !!data;
 };
 
-export const markHandled = (eventId: string, type: string) => admin.from("stripe_events").insert({ id: eventId, type });
+/** Handled, or given up so Stripe's next delivery tries again. */
+export const finishEvent = async (eventId: string, isHandled: boolean) => {
+  const { error } = await admin.rpc("finish_stripe_event", { event_id: eventId, is_handled: isHandled });
+
+  if (error) console.error("finish_stripe_event failed", eventId, error.message);
+};

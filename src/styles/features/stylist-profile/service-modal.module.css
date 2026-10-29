@@ -45,6 +45,10 @@
   transform: scale(0.9) !important;
 }
 
+.photos {
+  margin: 4px 0 16px;
+}
+
 .title {
   margin: 0;
   font-family: "Schibsted Grotesk", sans-serif;

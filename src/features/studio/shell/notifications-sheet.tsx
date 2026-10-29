@@ -1,6 +1,10 @@
 import type { CSSProperties } from "react";
+import { skipToken } from "@reduxjs/toolkit/query";
 import { ChevronRight } from "lucide-react";
+import { InlineRetry } from "../../../components/inline-retry";
+import { useGetStudioActivityQuery } from "../../../stores/api-slice";
 import { joinClassNames } from "../../../utils/class-names";
+import { markActivityRead } from "../../../lib/studio-api/home";
 import { openBookingById } from "../bookings/open-by-id";
 import { getNotificationTime } from "../home/activity-records";
 import type { StudioNotification } from "../core/types";
@@ -12,52 +16,22 @@ export const NotificationsSheet = ({
 }: {
   studio: StudioController;
 }) => {
-  const { state, setState, isWide, actions } = studio;
+  const { state, setState, actions } = studio;
+
+  const { isError, refetch } = useGetStudioActivityQuery(
+    state.account.stylistId || skipToken,
+  );
 
   const deepLink = (run: () => void) => () => {
     actions.closeSheet();
     window.setTimeout(run, 230);
   };
 
-  const handlers = [
-    deepLink(() =>
-      setState({
-        tab: "bookings",
-        bookingsLayout: "list",
-        listScope: "past",
-        pastFilter: "off",
-      }),
-    ),
-    deepLink(() => {
-      setState({ tab: "bookings", dayIndex: 3, bookingsLayout: "cal" });
-      actions.openSheet("booking", { sheetBookingId: 4 });
-    }),
-    deepLink(() => {
-      if (isWide) {
-        setState({ tab: "clients" });
-
-        actions.openSheet("cliView", {
-          selectedClientId: "kemi",
-          clientAppointmentsTab: "past",
-        });
-      } else
-        setState({
-          tab: "clients",
-          selectedClientId: "kemi",
-          clientAppointmentsTab: "past",
-        });
-    }),
-    deepLink(() => setState({ tab: "earnings" })),
-    deepLink(() => {
-      setState({ tab: "bookings", dayIndex: 0, bookingsLayout: "cal" });
-      actions.openSheet("booking", { sheetBookingId: 1 });
-    }),
-  ];
-
-  const getHandler = (
-    { bookingId, opensEarnings, opensReviews }: StudioNotification,
-    index: number,
-  ) => {
+  const getNavigation = ({
+    bookingId,
+    opensEarnings,
+    opensReviews,
+  }: StudioNotification) => {
     if (opensReviews) return deepLink(() => setState({ tab: "reviews" }));
 
     if (bookingId)
@@ -65,8 +39,44 @@ export const NotificationsSheet = ({
 
     if (opensEarnings) return deepLink(() => setState({ tab: "earnings" }));
 
-    return handlers[index];
+    return undefined;
   };
+
+  const markRead = ({ id, unread }: StudioNotification) => {
+    const { stylistId } = state.account;
+
+    if (!id || !unread || state.notifAllRead || !stylistId) return;
+
+    const notifications = state.notifications.map((item) =>
+      item.id === id ? { ...item, unread: false } : item,
+    );
+
+    setState({
+      notifications,
+      notifAllRead: !notifications.some(({ unread: isUnread }) => isUnread),
+    });
+
+    studio.context.sync.save(() => markActivityRead(stylistId, id), {
+      notifications: state.notifications,
+      notifAllRead: state.notifAllRead,
+    });
+  };
+
+  const open = (item: StudioNotification) => () => {
+    markRead(item);
+    getNavigation(item)?.();
+  };
+
+  if (!state.notifications.length && isError)
+    return (
+      <div className={styles.empty}>
+        <InlineRetry
+          className={styles.retry}
+          text="Couldn’t load notifications ·"
+          onRetry={() => void refetch()}
+        />
+      </div>
+    );
 
   if (!state.notifications.length)
     return <div className={styles.empty}>Nothing new yet</div>;
@@ -81,7 +91,7 @@ export const NotificationsSheet = ({
           style={
             { "--delay": `${(index * 0.05).toFixed(2)}s` } as CSSProperties
           }
-          onClick={getHandler(item, index)}
+          onClick={open(item)}
         >
           <span
             className={joinClassNames(

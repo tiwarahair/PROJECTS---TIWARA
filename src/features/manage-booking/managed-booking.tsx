@@ -11,15 +11,11 @@ import { BookingNotes } from "./booking-notes";
 import { CodeDialog } from "./code-dialog";
 import { ConfirmDialog } from "./confirm-dialog";
 import { ManageActions } from "./manage-actions";
-import {
-  getCancelLines,
-  getRefundTiming,
-  isCancelledStatus,
-  toPounds,
-} from "./logic";
+import { getCancelLines, getRefundTiming, isCancelledStatus } from "./logic";
 import { RescheduleSheet } from "./reschedule-sheet";
 import styles from "../../styles/features/manage-booking/index.module.css";
 import toastStyles from "../../styles/features/manage-booking/manage-toast.module.css";
+import { formatPence } from "../../utils/money";
 
 const TOAST_MS = 2600;
 
@@ -115,12 +111,12 @@ export const ManagedBooking = ({
           {!!refunded && (
             <p>
               {fee
-                ? `${toPounds(refunded)} ${getRefundTiming(fee)}`
-                : `${toPounds(refunded)} is refunded to your card. It can take 5 to 10 working days.`}
+                ? `${formatPence(refunded)} ${getRefundTiming(fee)}`
+                : `${formatPence(refunded)} is refunded to your card. It can take 5 to 10 working days.`}
             </p>
           )}
           {!!charge && (
-            <p>{`A ${toPounds(charge)} late cancellation fee is due under ${stylist}'s policy.`}</p>
+            <p>{`A ${formatPence(charge)} late cancellation fee is due under ${stylist}'s policy.`}</p>
           )}
           <Link to={`/${booking.stylist_slug}`} className={styles.bookAgain}>
             {`Book again with ${stylist}`}

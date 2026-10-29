@@ -1,12 +1,12 @@
 import { Calendar } from "lucide-react";
-import { useLayoutEffect, useState } from "react";
+import { useState } from "react";
 import { Link } from "react-router";
 import { Button } from "../../components/ds/button";
 import { PageMessage } from "../../components/page-message";
-import { ManageBookingSkeleton } from "../../components/skeleton/manage-booking-skeleton";
+import { ManageBookingSkeleton } from "../../components/skeleton/manage-booking";
 import { StarPicker } from "../../components/star-rating/star-picker";
 import { useIsSlow } from "../../hooks/use-is-slow";
-import { usePrivateLink } from "../../hooks/use-private-link";
+import { useLinkPage } from "../../hooks/use-link-page";
 import {
   getErrorMessage,
   useGetReviewPageQuery,
@@ -14,15 +14,15 @@ import {
 } from "../../stores/api-slice";
 import { getAssetUrl } from "../../utils/asset-url";
 import { joinClassNames } from "../../utils/class-names";
-import { formatWhen } from "../pay-fee/logic";
 import { getClosedMessage, MAX_REVIEW_LENGTH, REVIEW_ERRORS } from "./logic";
 import "../../styles/features/manage-booking/global.module.css";
 import frame from "../../styles/features/manage-booking/index.module.css";
 import styles from "../../styles/features/review/index.module.css";
+import { formatLondonDateTime } from "../../utils/dates";
 
 /** The client's review of a completed booking, route "/review?token=" from the invite email. */
 export const ReviewPage = () => {
-  const token = usePrivateLink({ storageKey: "tw_review_token" });
+  const token = useLinkPage("tw_review_token");
   const [rating, setRating] = useState(0);
   const [body, setBody] = useState("");
   const [error, setError] = useState("");
@@ -35,12 +35,6 @@ export const ReviewPage = () => {
   } = useGetReviewPageQuery(token, { skip: !token });
 
   const isSlow = useIsSlow(isFetching && !page);
-
-  useLayoutEffect(() => {
-    document.documentElement.classList.add("manage-page");
-
-    return () => document.documentElement.classList.remove("manage-page");
-  }, []);
 
   const send = async () => {
     if (!rating) {
@@ -85,7 +79,7 @@ export const ReviewPage = () => {
             </div>
             <div className={styles.visitWhen}>
               <Calendar size={14} strokeWidth={1.6} />
-              {formatWhen(page.starts_at)}
+              {formatLondonDateTime(page.starts_at)}
             </div>
           </div>
         </div>

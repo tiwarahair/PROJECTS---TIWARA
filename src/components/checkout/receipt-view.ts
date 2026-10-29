@@ -3,7 +3,7 @@ import type { CheckoutViewModel } from "./view";
 import type { CheckoutController } from "./use-checkout";
 import { formatMoney } from "../../utils/money";
 
-const formatPence = (amount: number) =>
+const formatPounds = (amount: number) =>
   formatMoney(amount, { pence: "always" });
 
 export const getReceiptView = (
@@ -23,7 +23,7 @@ export const getReceiptView = (
     {
       key: `l${line.id}`,
       label: line.name,
-      value: formatPence(line.base),
+      value: formatPounds(line.base),
       isAdjust: false,
     },
     ...(line.adjustment
@@ -31,7 +31,7 @@ export const getReceiptView = (
           {
             key: `a${line.id}`,
             label: `Price adjusted: ${line.reason}`,
-            value: formatPence(line.adjustment),
+            value: formatPounds(line.adjustment),
             isAdjust: true,
           },
         ]
@@ -45,39 +45,39 @@ export const getReceiptView = (
       key: "p",
       label: state.mode === "full" ? "Prepayment applied" : "Deposit applied",
       subtitle: `Paid at booking${booking.paidOn ? `, ${booking.paidOn}` : ""}`,
-      value: formatPence(-state.paid),
+      value: formatPounds(-state.paid),
     },
     !!booking.paidLater &&
       booking.paidLater > 0 && {
         key: "pl",
         label: "Paid at an earlier checkout",
         subtitle: `${RECORD_VIA_LABELS[booking.recordedVia ?? ""] ?? "Recorded"}, recorded by the stylist`,
-        value: formatPence(-booking.paidLater),
+        value: formatPounds(-booking.paidLater),
       },
     done.charged > 0 && {
       key: "c",
       label: done.method === "link" ? "Awaiting payment" : "Paid at checkout",
       subtitle:
         done.method === "record" ? `${via}, recorded by the stylist` : "",
-      value: formatPence(done.charged),
+      value: formatPounds(done.charged),
     },
     done.refundAuto > 0 && {
       key: "ra",
       label: "Refunded to card",
       subtitle: "Price lowered after booking",
-      value: formatPence(done.refundAuto),
+      value: formatPounds(done.refundAuto),
     },
     !!done.cashBack && {
       key: "cb",
       label: "Given back",
       subtitle: `${RECORD_VIA_LABELS[booking.recordedVia ?? ""] ?? "Recorded"}, price lowered after booking`,
-      value: formatPence(done.cashBack),
+      value: formatPounds(done.cashBack),
     },
     state.refunded > 0 && {
       key: "rf",
       label: "Refunded",
       subtitle: state.refundLast,
-      value: formatPence(state.refunded),
+      value: formatPounds(state.refunded),
     },
   ].filter((pay) => !!pay);
 
@@ -106,11 +106,11 @@ export const getReceiptView = (
     date: booking.receiptDate ?? booking.day,
     client: `For ${booking.client}`,
     lines,
-    subtotal: formatPence(money.items),
-    tip: done.tip > 0 ? formatPence(done.tip || 0) : "",
+    subtotal: formatPounds(money.items),
+    tip: done.tip > 0 ? formatPounds(done.tip || 0) : "",
     pays,
-    fee: money.bookFee > 0 ? formatPence(money.bookFee) : "",
-    paid: formatPence(paid),
+    fee: money.bookFee > 0 ? formatPounds(money.bookFee) : "",
+    paid: formatPounds(paid),
     method: getMethod(),
   };
 };

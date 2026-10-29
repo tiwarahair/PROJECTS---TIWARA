@@ -55,6 +55,65 @@ describe("useCatalogueSync", () => {
     expect(studioApi.saveCategories).not.toHaveBeenCalled();
   });
 
+  it("saves which photos a service shows", async () => {
+    const state = getState();
+    const { rerender } = renderSync(state);
+    const [first, ...rest] = state.services;
+
+    if (!first) throw new Error("the seed has a service");
+
+    rerender({
+      current: {
+        ...state,
+        services: [{ ...first, photoIds: ["p-1", "p-2"] }, ...rest],
+      },
+    });
+
+    await waitFor(() => expect(studioApi.saveService).toHaveBeenCalledTimes(1));
+
+    expect(vi.mocked(studioApi.saveService).mock.calls[0]?.[3]).toEqual([
+      "p-1",
+      "p-2",
+    ]);
+  });
+
+  it("a failed service save keeps the edits on screen and saves them with the next change", async () => {
+    const setState = vi.fn();
+    const notify = vi.fn();
+    const failing = createStudioSync("stylist-1", setState, notify);
+    const state = getState();
+    const [first, ...rest] = state.services;
+
+    if (!first) throw new Error("the seed has a service");
+
+    vi.mocked(studioApi.saveService).mockRejectedValueOnce(
+      new Error("offline"),
+    );
+
+    const { rerender } = renderHook(
+      ({ current }) => useCatalogueSync(current, failing),
+      { initialProps: { current: state } },
+    );
+
+    const renamed = { ...first, name: "Renamed" };
+
+    rerender({ current: { ...state, services: [renamed, ...rest] } });
+
+    await waitFor(() => expect(notify).toHaveBeenCalled());
+
+    expect(setState).toHaveBeenCalledWith({});
+
+    rerender({
+      current: { ...state, services: [renamed, ...rest], addons: [] },
+    });
+
+    await waitFor(() => expect(studioApi.saveService).toHaveBeenCalledTimes(2));
+
+    expect(vi.mocked(studioApi.saveService).mock.calls[1]?.[0]).toMatchObject({
+      name: "Renamed",
+    });
+  });
+
   it("removes a deleted add-on", async () => {
     const state = getState();
     const { rerender } = renderSync(state);

@@ -12,6 +12,7 @@ import {
 } from "../../../lib/booking-api";
 import { fetchClientAddresses } from "../../../lib/client-addresses";
 import { FunctionError } from "../../../lib/invoke-function";
+import { fetchCatalogue } from "../../../lib/catalogue";
 import { fetchPublicProfile } from "../../../lib/public-profiles";
 import { api } from "../../../stores/api-slice";
 import { createStore } from "../../../stores/store";
@@ -268,6 +269,10 @@ describe("booking on real data", () => {
       clearAllergies: false,
       requireCvc: false,
       turnstileToken: "test-captcha-token",
+      agreement: expect.stringMatching(
+        /^By booking, you agree to .+'s cancellation policy and our Terms\.$/,
+      ),
+      policyLines: expect.arrayContaining([expect.any(String)]),
     });
 
     expect(
@@ -450,6 +455,41 @@ describe("booking on real data", () => {
       "href",
       "/tiwaras-house",
     );
+  });
+
+  it("without the catalogue, a stylist who isn't taking bookings still says so; a bookable one can't load", async () => {
+    vi.mocked(fetchCatalogue)
+      .mockRejectedValueOnce(new Error("offline"))
+      .mockRejectedValueOnce(new Error("offline"));
+
+    vi.mocked(fetchPublicProfile).mockResolvedValueOnce({
+      ...getDemoProfile("tiwaras-house"),
+      pause_on: true,
+    });
+
+    const { unmount } = renderWithStore(
+      <BookingPage />,
+      "/book?stylist=tiwaras-house",
+      { isCatalogueLoading: true },
+    );
+
+    expect(
+      await screen.findByRole("heading", {
+        name: "Tiwára's House isn’t taking bookings right now",
+      }),
+    ).toBeInTheDocument();
+
+    unmount();
+
+    renderWithStore(<BookingPage />, "/book?stylist=tiwaras-house", {
+      isCatalogueLoading: true,
+    });
+
+    expect(
+      await screen.findByRole("heading", {
+        name: "We couldn’t load this page",
+      }),
+    ).toBeInTheDocument();
   });
 
   it("signed-in clients booking a mobile stylist get their saved addresses", async () => {

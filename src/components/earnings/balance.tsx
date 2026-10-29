@@ -11,12 +11,11 @@ interface BalanceProps {
 }
 
 export const Balance = ({
-  earnings: { ledger, showToast },
+  earnings: { ledger, showToast, openPaused },
   props: {
     taxHold,
     failedPayout,
     dispute,
-    onLearnMore,
     onAddTax,
     onContinueSetup,
     onUpdateBank,
@@ -24,7 +23,10 @@ export const Balance = ({
 }: BalanceProps) => {
   const { scenario } = ledger;
   const pausedText = formatMoney(ledger.pausedAmount, { pence: "always" });
-  const availableText = formatMoney(ledger.available, { pence: "always" });
+
+  const availableText = ledger.isBalanceKnown
+    ? formatMoney(ledger.available, { pence: "always" })
+    : "—";
 
   const nextPayoutDay = ledger.nextDate
     ? formatWeekdayDate(ledger.nextDate)
@@ -48,19 +50,18 @@ export const Balance = ({
           <div className={styles.pausedText}>
             {`Payouts paused — ${pausedText} being recovered from a refund or dispute`}
           </div>
-          <button
-            className={styles.learnMore}
-            onClick={getHandler(
-              onLearnMore,
-              "Opening the help article on payouts",
-            )}
-          >
+          <button className={styles.learnMore} onClick={openPaused}>
             Learn more
           </button>
         </div>
       )}
       <div className={styles.availableLabel}>Available</div>
       <div className={styles.availableAmount}>{availableText}</div>
+      {!ledger.isBalanceKnown && (
+        <div className={styles.nextLine}>
+          Your balance couldn’t load from Stripe. Refresh to try again.
+        </div>
+      )}
       {!!ledger.nextDate && scenario !== "setup" && (
         <div className={styles.nextLine}>
           <span className={styles.nextDot}></span>
@@ -122,9 +123,7 @@ export const Balance = ({
             color="var(--brand-yellow)"
             strokeWidth={1.7}
           />
-          <div className={styles.taxText}>
-            Payouts on hold until you add your tax details
-          </div>
+          <div className={styles.taxText}>Add your tax details to go live</div>
           <button
             className={styles.addTax}
             onClick={getHandler(onAddTax, "Opening tax details")}

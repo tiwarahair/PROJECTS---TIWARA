@@ -47,7 +47,7 @@ export interface OnboardingForm {
   mobile: string;
   terms: boolean;
   marketing: boolean;
-  remember: boolean;
+  trustDevice: boolean;
   businessName: string;
   postcode: string;
   line1: string;
@@ -85,6 +85,7 @@ export interface OnboardingState {
   resendIn: number;
   /** "reset": the authenticator code a two-factor account gives before a reset is saved. */
   codeKind: "verify" | "2fa" | "reset";
+  canTrustDevice: boolean;
   attempts: number;
   lockedUntil: number;
   addressOpen: boolean;
@@ -110,7 +111,7 @@ export interface OnboardingState {
   entryScreen: string;
   exitTo: string | null;
   toast: string | null;
-  socialProvider: "google" | "apple" | null;
+  socialProvider: "google" | null;
   mode: "light" | "dark" | null;
   benefitIndex: number;
 }
@@ -133,7 +134,7 @@ export const INITIAL_FORM: OnboardingForm = {
   mobile: "",
   terms: false,
   marketing: false,
-  remember: true,
+  trustDevice: false,
   businessName: "",
   postcode: "",
   line1: "",
@@ -160,6 +161,7 @@ export const INITIAL_STATE: OnboardingState = {
   shake: 0,
   resendIn: 30,
   codeKind: "verify",
+  canTrustDevice: false,
   attempts: 0,
   lockedUntil: 0,
   addressOpen: false,

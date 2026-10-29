@@ -9,12 +9,7 @@ import {
 import type { BlockedTime, StudioBooking, StudioState } from "../types";
 import { getClient } from "./clients";
 import { getBookingBuffer, getBookingDuration } from "./services";
-
-export const getNowMinutes = () => {
-  const now = new Date();
-
-  return now.getHours() * 60 + now.getMinutes();
-};
+import { getMinutesOfDay } from "../../../../utils/dates";
 
 export const getBlockColour = () =>
   BLOCK_COLORS[0] ?? { id: "ink", label: "Blocked", hex: "#1a1714" };
@@ -157,7 +152,7 @@ export const getSlots = (
   const open = timeToMinutes(hours.start);
   const close = timeToMinutes(hours.end);
   const busy = getBusy(state, offset, excludeId);
-  const nowMinutes = getNowMinutes();
+  const nowMinutes = getMinutesOfDay();
   const length = duration + (buffer || 0);
   const slots: string[] = [];
 
@@ -214,5 +209,11 @@ export const isOngoing = (
   )
     return false;
 
-  return getNowMinutes() >= timeToMinutes(booking.time);
+  const start = timeToMinutes(booking.time);
+  const nowMinutes = getMinutesOfDay();
+
+  return (
+    nowMinutes >= start &&
+    nowMinutes < start + durationToMinutes(booking.duration)
+  );
 };

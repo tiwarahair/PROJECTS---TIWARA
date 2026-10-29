@@ -2,6 +2,9 @@ import { act, screen, within } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { renderWithStore } from "../../../../test/render-with-store";
 import { getNewStudioSeed, getStudioSeed } from "../../../../test/studio-seed";
+import { getRow } from "../../../../test/studio-booking-row";
+import { fromLondonTime } from "../../../../utils/london-time";
+import { toDate } from "../../core/blocked-time";
 import { StudioPage } from "../..";
 import type { UserEvent } from "@testing-library/user-event";
 import { setupUser } from "../../../../test/setup-user";
@@ -110,6 +113,37 @@ describe("Studio → Bookings", () => {
     expect(within(bookings).queryByText("Nia Okafor")).not.toBeInTheDocument();
   });
 
+  it("the filter dialog only filters the list on Show, and closing it keeps the list as it was", async () => {
+    await renderBookings();
+    await user.click(screen.getByRole("button", { name: "List" }));
+    const bookings = getLabelled("Bookings");
+
+    await user.click(screen.getByRole("button", { name: "Filter bookings" }));
+    await user.click(screen.getByRole("button", { name: /^Arrived/ }));
+
+    expect(within(bookings).getByText("Nia Okafor")).toBeInTheDocument();
+
+    expect(
+      screen.getByRole("button", { name: "Show 0 bookings" }),
+    ).toBeInTheDocument();
+
+    await user.click(screen.getByRole("button", { name: "Close" }));
+    runNextTimer();
+
+    expect(within(bookings).getByText("Nia Okafor")).toBeInTheDocument();
+
+    await user.click(screen.getByRole("button", { name: "Filter bookings" }));
+
+    expect(
+      screen.getByRole("button", { name: "Show 1 booking" }),
+    ).toBeInTheDocument();
+
+    await user.click(screen.getByRole("button", { name: /^Arrived/ }));
+    await user.click(screen.getByRole("button", { name: "Show 0 bookings" }));
+
+    expect(within(bookings).queryByText("Nia Okafor")).not.toBeInTheDocument();
+  });
+
   it("the past list shows finished appointments", async () => {
     await renderBookings();
     await user.click(screen.getByRole("button", { name: "List" }));
@@ -171,6 +205,140 @@ describe("Studio → Bookings", () => {
 
     expect(screen.getByText("20:00")).toBeInTheDocument();
     expect(screen.getByText("· outside working hours")).toBeInTheDocument();
+  });
+
+  const getArrivedSeed = () =>
+    getStudioSeed({
+      bookings: {
+        ...getStudioSeed().bookings,
+        active: [
+          getRow({
+            status: "arrived",
+            starts_at: fromLondonTime(toDate(0), "08:00"),
+          }),
+        ],
+      },
+    });
+
+  it("an arrived booking is in progress until its end time", async () => {
+    await renderBookings(getArrivedSeed());
+
+    expect(
+      within(getLabelled("Bookings")).getByText("In progress"),
+    ).toBeInTheDocument();
+  });
+
+  it("an arrived booking past its end time is due for checkout", async () => {
+    vi.setSystemTime(new Date(2026, 8, 7, 10, 0));
+    await renderBookings(getArrivedSeed());
+    const bookings = getLabelled("Bookings");
+
+    expect(within(bookings).getByText("Due for checkout")).toBeInTheDocument();
+    expect(within(bookings).queryByText("In progress")).not.toBeInTheDocument();
+  });
+
+  it("a checked-out booking stays on the day, marked completed", async () => {
+    await renderBookings(
+      getStudioSeed({
+        bookings: {
+          ...getStudioSeed().bookings,
+          past: [
+            getRow({
+              id: "b-paid",
+              status: "completed",
+              starts_at: fromLondonTime(toDate(0), "07:00"),
+              past_at: fromLondonTime(toDate(0), "08:45"),
+            }),
+          ],
+        },
+      }),
+    );
+
+    const bookings = getLabelled("Bookings");
+
+    expect(within(bookings).getByText("Nia Okafor")).toBeInTheDocument();
+    expect(within(bookings).getByText("Completed")).toBeInTheDocument();
+  });
+
+  it("after midnight, yesterday's checked-out booking leaves today", async () => {
+    await renderBookings(
+      getStudioSeed({
+        bookings: {
+          ...getStudioSeed().bookings,
+          past: [
+            getRow({
+              id: "b-paid",
+              status: "completed",
+              starts_at: fromLondonTime(toDate(0), "07:00"),
+              past_at: fromLondonTime(toDate(0), "08:45"),
+            }),
+          ],
+        },
+      }),
+    );
+
+    vi.setSystemTime(new Date(2026, 8, 8, 9, 0));
+    act(() => vi.advanceTimersByTime(30000));
+
+    expect(
+      within(getLabelled("Bookings")).queryByText("Completed"),
+    ).not.toBeInTheDocument();
+  });
+
+  it("an ended booking whose card failed says so instead of due for checkout", async () => {
+    vi.setSystemTime(new Date(2026, 8, 7, 10, 0));
+
+    await renderBookings(
+      getStudioSeed({
+        bookings: {
+          ...getStudioSeed().bookings,
+          active: [
+            getRow({
+              status: "arrived",
+              starts_at: fromLondonTime(toDate(0), "08:00"),
+              card_failed_at: "2026-09-07T07:00:00+00:00",
+            }),
+          ],
+        },
+      }),
+    );
+
+    const bookings = getLabelled("Bookings");
+
+    expect(within(bookings).getByText("Payment failed")).toBeInTheDocument();
+
+    expect(
+      within(bookings).queryByText("Due for checkout"),
+    ).not.toBeInTheDocument();
+  });
+
+  it("the week strip marks a day that only has finished bookings", async () => {
+    vi.setSystemTime(new Date(2026, 8, 9, 9, 0));
+
+    await renderBookings(
+      getStudioSeed({
+        bookings: {
+          ...getStudioSeed().bookings,
+          active: [],
+          past: [
+            getRow({
+              id: "b-paid",
+              status: "completed",
+              starts_at: fromLondonTime(toDate(-2), "11:00"),
+              past_at: fromLondonTime(toDate(-2), "12:45"),
+            }),
+          ],
+        },
+      }),
+    );
+
+    const monday = within(getLabelled("Bookings"))
+      .getAllByRole("button", { name: /^mon\s*7$/i })
+      .at(0) as HTMLElement;
+
+    expect(monday.querySelector("[style]")).toHaveStyle({
+      "--dot": "var(--accent-700)",
+    });
   });
 
   it("a new account sees the empty calendar card until it is closed", async () => {

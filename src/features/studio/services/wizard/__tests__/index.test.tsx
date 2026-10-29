@@ -5,6 +5,8 @@ import { getStudioSeed } from "../../../../../test/studio-seed";
 import { StudioPage } from "../../..";
 import type { UserEvent } from "@testing-library/user-event";
 import { setupUser } from "../../../../../test/setup-user";
+import { saveService } from "../../../../../lib/studio-api/services";
+import { addPortfolioPhoto } from "../../../../../lib/studio-api/photos";
 
 // saves stay in flight, so the screen keeps what was done
 vi.mock("../../../../../lib/studio-api/services", async (importOriginal) => ({
@@ -12,6 +14,16 @@ vi.mock("../../../../../lib/studio-api/services", async (importOriginal) => ({
     typeof import("../../../../../lib/studio-api/services")
   >()),
   saveService: vi.fn(() => new Promise(() => {})),
+  saveCategories: vi.fn().mockResolvedValue(undefined),
+  saveAddon: vi.fn().mockResolvedValue(undefined),
+}));
+
+vi.mock("../../../../../lib/studio-api/photos", async (importOriginal) => ({
+  ...(await importOriginal<
+    typeof import("../../../../../lib/studio-api/photos")
+  >()),
+  uploadPhotoWithCopies: vi.fn((path: string) => Promise.resolve(path)),
+  addPortfolioPhoto: vi.fn().mockResolvedValue(undefined),
 }));
 
 let user: UserEvent;
@@ -98,6 +110,80 @@ describe("Studio → service wizard", () => {
     expect(screen.getByText("Choose the service type.")).toBeInTheDocument();
   });
 
+  it("size options are chips that each open a sheet to edit and save", async () => {
+    await openWizard();
+    await pickSuggestion("Knotless braids");
+    await user.click(getContinue());
+    await screen.findByText("Pricing");
+
+    expect(screen.getAllByLabelText("Base price")).toHaveLength(1);
+
+    const getChip = (name: RegExp) =>
+      within(screen.getByRole("group", { name: "Size / thickness" })).getByRole(
+        "button",
+        { name },
+      );
+
+    expect(getChip(/^Small, \+£45 \+1h$/)).toBeInTheDocument();
+
+    await user.click(getChip(/^Medium$/));
+
+    const sheet = within(getLabelled("Option dialog"));
+
+    expect(sheet.getByLabelText("Name")).toHaveValue("Size / thickness");
+    expect(sheet.getByLabelText("Option")).toHaveValue("Medium");
+
+    await user.type(sheet.getByLabelText("Medium price in pounds"), "10");
+    await user.selectOptions(sheet.getByLabelText("Medium minutes"), "30");
+    await user.click(sheet.getByRole("button", { name: "Save" }));
+
+    expect(getChip(/^Medium, \+£10 \+30m$/)).toBeInTheDocument();
+
+    await user.click(getChip(/^Large/));
+    await user.type(screen.getByLabelText("Large price in pounds"), "5");
+    await user.click(screen.getByRole("button", { name: "Cancel" }));
+
+    expect(getChip(/^Large, −£10 −30m$/)).toBeInTheDocument();
+
+    await user.click(getChip(/^Jumbo/));
+    await user.click(screen.getByRole("switch", { name: "Offer this size" }));
+    await user.click(screen.getByRole("button", { name: "Save" }));
+
+    expect(getChip(/^Jumbo$/)).toBeInTheDocument();
+    expect(getChip(/^Jumbo$/)).toHaveFocus();
+
+    await user.click(getChip(/^Medium/));
+    await user.selectOptions(screen.getByLabelText("Medium minutes"), "5");
+    await user.click(screen.getByRole("button", { name: "Save" }));
+
+    expect(getChip(/^Medium, \+£10 \+5m$/)).toBeInTheDocument();
+  });
+
+  it("pricing errors wait for the field to be left or Continue", async () => {
+    await openWizard();
+    await pickSuggestion("Knotless braids");
+    await user.click(getContinue());
+    await screen.findByText("Pricing");
+
+    const price = screen.getByLabelText("Base price");
+
+    await user.clear(price);
+
+    expect(screen.queryByText("Enter a price.")).not.toBeInTheDocument();
+
+    expect(
+      screen.queryByText("Add how long it takes."),
+    ).not.toBeInTheDocument();
+
+    await user.tab();
+
+    expect(await screen.findByText("Enter a price.")).toBeInTheDocument();
+
+    expect(
+      screen.queryByText("Add how long it takes."),
+    ).not.toBeInTheDocument();
+  });
+
   it("a suggestion fills the form and the wizard adds the service", async () => {
     await openWizard();
     await pickSuggestion("Knotless braids");
@@ -127,6 +213,60 @@ describe("Studio → service wizard", () => {
     expect(
       await screen.findByText("Knotless braids added to your services"),
     ).toBeInTheDocument();
+  });
+
+  it("takes up to 5 photos, which upload to the portfolio and go on the service when it saves", async () => {
+    URL.createObjectURL = vi.fn(() => "blob:photo");
+    URL.revokeObjectURL = vi.fn();
+    await openWizard();
+    await pickSuggestion("Knotless braids");
+
+    const images = Array.from(
+      { length: 6 },
+      (_unused, index) =>
+        new File(["x"], `photo-${index}.jpg`, { type: "image/jpeg" }),
+    );
+
+    await user.upload(screen.getByLabelText("Service images"), images);
+
+    expect(screen.getAllByAltText("Service photo")).toHaveLength(5);
+    expect(screen.queryByText("Choose a file")).not.toBeInTheDocument();
+
+    await user.click(
+      screen.getAllByRole("button", { name: "Remove photo" })[0] as HTMLElement,
+    );
+
+    expect(screen.getAllByAltText("Service photo")).toHaveLength(4);
+    expect(screen.getByText("Choose a file")).toBeInTheDocument();
+
+    await user.click(getContinue());
+
+    await user.click(
+      await screen.findByRole("button", { name: "Review your prices" }),
+    );
+
+    await user.click(getContinue());
+    await screen.findByText("Added to this service");
+
+    await user.click(
+      screen
+        .getAllByRole("button", { name: "Add service" })
+        .at(-1) as HTMLElement,
+    );
+
+    expect(
+      await screen.findByText("Knotless braids added to your services"),
+    ).toBeInTheDocument();
+
+    await vi.waitFor(() => expect(saveService).toHaveBeenCalled());
+
+    const photoIds = vi.mocked(saveService).mock.calls.at(-1)?.[3] ?? [];
+
+    expect(photoIds).toHaveLength(4);
+
+    expect(
+      vi.mocked(addPortfolioPhoto).mock.calls.map(([{ id }]) => id),
+    ).toEqual(photoIds);
   });
 
   it("editing jumps to the tab with a missing price on save", async () => {

@@ -1,10 +1,11 @@
 // Services, add-ons and categories ⇄ database rows. Money is pence in the database and pounds in Studio.
-import { serviceTypes } from "../../../data";
+import type { ServiceType } from "../../../types/catalogue";
 import type { ServiceRow, StylistStudio } from "../../../lib/studio-api";
 import type { TablesInsert } from "../../../types/database";
 import { formatDuration } from "../../../utils/dates";
 import { bySort } from "../../../utils/sort";
 import { parseNumber } from "../core/format";
+import { findServiceType } from "../core/model";
 import type {
   OwnGroup,
   StudioAddon,
@@ -12,11 +13,7 @@ import type {
   StudioService,
   VariationRow,
 } from "../core/types";
-
-const toPence = (pounds: string | number) =>
-  Math.round(parseNumber(pounds) * 100);
-
-const toPounds = (pence: number | null) => (pence ?? 0) / 100;
+import { toPence, toPounds } from "../../../utils/money";
 
 const toWholeMinutes = (hours: string | number, minutes: string | number) =>
   Math.round(parseNumber(hours) * 60 + parseNumber(minutes));
@@ -69,7 +66,10 @@ const toOwnGroups = (rows: ServiceRow["service_variations"]): OwnGroup[] => {
   return [...groups.values()];
 };
 
-export const toStudioService = (row: ServiceRow): StudioService => {
+export const toStudioService = (
+  row: ServiceRow,
+  photoIds: string[] = [],
+): StudioService => {
   const minutes = row.duration_min ?? 0;
 
   const rowsOf = (kind: "size" | "length") =>
@@ -93,7 +93,7 @@ export const toStudioService = (row: ServiceRow): StudioService => {
     categoryId: row.category_id,
     name: row.name,
     description: row.description ?? "",
-    price: toPounds(row.price_pence),
+    price: toPounds(row.price_pence ?? 0),
     durationHours: Math.floor(minutes / 60),
     durationMinutes: minutes % 60,
     duration: minutes ? formatDuration(minutes) : "",
@@ -116,18 +116,18 @@ export const toStudioService = (row: ServiceRow): StudioService => {
           minutes_override == null ? null : minutes_override % 60,
       }),
     ),
+    photoIds,
   };
 };
 
 /** The wizard may leave the type blank: match it by name in its group, else the group's "Other". */
-const getServiceTypeId = ({ typeId, taxonomyId, subcategory }: StudioService) =>
-  typeId ??
+const getServiceTypeId = (service: StudioService, types: ServiceType[]) =>
+  service.typeId ??
   (
-    serviceTypes.find(
-      ({ groupId, name }) => groupId === taxonomyId && name === subcategory,
-    ) ??
-    serviceTypes.find(
-      ({ groupId, isOther }) => groupId === taxonomyId && isOther,
+    findServiceType(service, types) ??
+    types.find(
+      ({ groupId, isOther, isActive }) =>
+        isActive && isOther && groupId === service.taxonomyId,
     )
   )?.id ??
   "";
@@ -136,6 +136,7 @@ export const fromStudioService = (
   service: StudioService,
   stylistId: string,
   sort: number,
+  types: ServiceType[],
 ) => {
   const variationsOf = (kind: "size" | "length", rows: VariationRow[]) =>
     rows.map(({ label, on, priceDelta, hoursDelta, minutesDelta }, index) => ({
@@ -143,7 +144,7 @@ export const fromStudioService = (
       kind,
       label,
       offered: on,
-      price_delta_pence: toPence(priceDelta),
+      price_delta_pence: toPence(parseNumber(priceDelta)),
       minutes_delta: toWholeMinutes(hoursDelta, minutesDelta),
       sort: index,
     }));
@@ -154,7 +155,8 @@ export const fromStudioService = (
       kind: "own",
       group_name: name,
       label,
-      price_delta_pence: toPence(priceDelta),
+      offered: true,
+      price_delta_pence: toPence(parseNumber(priceDelta)),
       minutes_delta: Math.round(parseNumber(minutesDelta)),
       sort: index,
     })),
@@ -163,12 +165,12 @@ export const fromStudioService = (
   const row: TablesInsert<"services"> = {
     id: service.id,
     stylist_id: stylistId,
-    service_type_id: getServiceTypeId(service),
+    service_type_id: getServiceTypeId(service, types),
     service_group_id: service.taxonomyId ?? "",
     category_id: service.categoryId,
     name: service.name,
     description: service.description,
-    price_pence: toPence(service.price),
+    price_pence: toPence(parseNumber(service.price)),
     duration_min:
       toWholeMinutes(service.durationHours, service.durationMinutes) || null,
     extra_time_min: service.extraCustom ? (service.extra ?? 0) : null,
@@ -191,7 +193,7 @@ export const fromStudioService = (
       price_override_pence:
         priceOverride == null || priceOverride === ""
           ? null
-          : toPence(priceOverride),
+          : toPence(parseNumber(priceOverride)),
       minutes_override:
         hoursOverride == null && minutesOverride == null
           ? null
@@ -199,7 +201,7 @@ export const fromStudioService = (
     }),
   );
 
-  return { row, variations, addonLinks };
+  return { row, variations, addonLinks, photoIds: service.photoIds ?? [] };
 };
 
 export const toStudioAddon = (
@@ -224,7 +226,7 @@ export const fromStudioAddon = (
   service_group_id: addon.taxonomyId ?? null,
   category_id: addon.categoryId,
   name: addon.name.trim(),
-  price_pence: toPence(addon.price),
+  price_pence: toPence(parseNumber(addon.price)),
   minutes: toWholeMinutes(addon.hours, addon.min),
   status: addon.status ?? "active",
 });

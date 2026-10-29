@@ -29,6 +29,12 @@ describe("profile checks", () => {
 
     expect(prices?.text).toBe("Silk press from £420, usually about £65");
   });
+
+  it("says when there are no photos yet", () => {
+    const [, , , photos] = getChecks({ ...PROFILE, photo_count: 0 });
+
+    expect(photos?.text).toBe("No photos yet");
+  });
 });
 
 describe("profile list", () => {

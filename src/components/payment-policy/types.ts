@@ -1,18 +1,22 @@
 // PaymentPolicy state, validation and save-bar summary.
-import type { PolicyMode } from "../../types/policy";
+import type { FeeKind, PolicyFee, PolicyMode } from "../../types/policy";
 
 export type ExtraType = "prep" | "custom";
 export type FeeName = "late" | "noShow";
 
 export interface FeeValues {
   on: boolean;
-  kind: "keep" | "pct";
+  kind: FeeKind;
   percent: string;
 }
 
 export interface PolicyExtra {
   type: ExtraType;
   text: string;
+}
+
+export interface PolicyFormExtra extends PolicyExtra {
+  key: string;
 }
 
 export interface PolicyFormValues {
@@ -23,7 +27,7 @@ export interface PolicyFormValues {
   late: FeeValues;
   noShow: FeeValues;
   grace: number;
-  extras: PolicyExtra[];
+  extras: PolicyFormExtra[];
 }
 
 /** What onSave receives; also accepted back as `value` to seed the form. */
@@ -33,9 +37,9 @@ export interface PolicyValue {
   refundable: boolean;
   window: number;
   grace: number;
-  late: { on: boolean; kind: "keep" | "pct"; percent: number };
-  noShow: { on: boolean; kind: "keep" | "pct"; percent: number };
-  extras: { type: ExtraType; text: string }[];
+  late: PolicyFee;
+  noShow: PolicyFee;
+  extras: PolicyExtra[];
 }
 
 /** What the host (Studio) gets after every render to drive its own save button. */
@@ -51,6 +55,7 @@ export interface PaymentPolicyProps {
   value: PolicyValue;
   bookingsCount?: number;
   stylistName: string;
+  /** A promise resolves false when nothing was saved yet, and rejects when the save failed. */
   onSave?: (value: PolicyValue) => void | Promise<boolean>;
   onState?: (api: PaymentPolicyApi) => void;
 }

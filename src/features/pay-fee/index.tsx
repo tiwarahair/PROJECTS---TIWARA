@@ -1,30 +1,25 @@
 import { Calendar } from "lucide-react";
-import { useLayoutEffect, useState } from "react";
+import { useState } from "react";
 import { Link } from "react-router";
 import { PageMessage } from "../../components/page-message";
-import { ManageBookingSkeleton } from "../../components/skeleton/manage-booking-skeleton";
+import { ManageBookingSkeleton } from "../../components/skeleton/manage-booking";
 import { useIsSlow } from "../../hooks/use-is-slow";
-import { usePrivateLink } from "../../hooks/use-private-link";
+import { useLinkPage } from "../../hooks/use-link-page";
 import { useGetPaymentLinkQuery } from "../../stores/api-slice";
 import { getAssetUrl } from "../../utils/asset-url";
 import { joinClassNames } from "../../utils/class-names";
 import "../../styles/features/manage-booking/global.module.css";
-import {
-  formatPence,
-  formatWhen,
-  getClosedMessage,
-  getCovered,
-  getFeeName,
-  isBalance,
-} from "./logic";
+import { getClosedMessage, getCovered, getFeeName, isBalance } from "./logic";
 import { PayForm } from "./pay-form";
 import card from "../../styles/features/manage-booking/booking-card.module.css";
 import frame from "../../styles/features/manage-booking/index.module.css";
 import styles from "../../styles/features/pay-fee/index.module.css";
+import { formatPence } from "../../utils/money";
+import { formatLondonDateTime } from "../../utils/dates";
 
 /** The pay page for a fee the card declined, route "/pay?token=" from the client's email. */
 export const PayFeePage = () => {
-  const token = usePrivateLink({ storageKey: "tw_pay_token" });
+  const token = useLinkPage("tw_pay_token");
   const [isPaid, setPaid] = useState(false);
 
   const { currentData: link, isFetching } = useGetPaymentLinkQuery(token, {
@@ -32,12 +27,6 @@ export const PayFeePage = () => {
   });
 
   const isSlow = useIsSlow(isFetching && !link);
-
-  useLayoutEffect(() => {
-    document.documentElement.classList.add("manage-page");
-
-    return () => document.documentElement.classList.remove("manage-page");
-  }, []);
 
   const getContent = () => {
     if (isSlow) return <ManageBookingSkeleton />;
@@ -68,7 +57,7 @@ export const PayFeePage = () => {
           <div className={card.facts}>
             <span className={card.fact}>
               <Calendar size={15} strokeWidth={1.5} />
-              {formatWhen(link.starts_at)}
+              {formatLondonDateTime(link.starts_at)}
             </span>
           </div>
           <dl className={styles.lines}>
@@ -90,9 +79,9 @@ export const PayFeePage = () => {
         </div>
         <PayForm link={link} token={token} onPaid={() => setPaid(true)} />
         <p className={styles.note}>
-          {isBalance(link)
-            ? "Questions? Reply to the email we sent you."
-            : `You can’t book with ${link.stylist_name} again until it’s paid. Questions? Reply to the email we sent you.`}
+          {!isBalance(link) &&
+            `You can’t book with ${link.stylist_name} again until it’s paid. `}
+          Questions? <Link to="/help">Contact us</Link>
         </p>
       </>
     );

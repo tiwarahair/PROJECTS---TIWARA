@@ -6,7 +6,7 @@ import {
 } from "@stripe/react-stripe-js";
 import { Lock } from "lucide-react";
 import { useState } from "react";
-import { PaymentFieldsSkeleton } from "../../../components/skeleton/payment-fields-skeleton";
+import { PaymentFieldsSkeleton } from "../../../components/skeleton/payment-fields";
 import { startCardSetup } from "../../../lib/client-cards";
 import { stripePromise } from "../../../lib/stripe";
 import {

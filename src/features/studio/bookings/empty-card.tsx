@@ -1,6 +1,6 @@
 import { Calendar, X } from "lucide-react";
 import { GATE_REASON } from "../core/constants";
-import { copyText } from "../core/format";
+import { copyWithToast } from "../core/format";
 import { getBookingLink } from "../core/model";
 import type { StudioController } from "../core/use-studio";
 import { isGated } from "../shell";
@@ -21,8 +21,7 @@ export const EmptyCard = ({ studio }: EmptyCardProps) => {
       return;
     }
 
-    copyText(getBookingLink(state));
-    actions.showToast("Booking link copied");
+    copyWithToast(getBookingLink(state), actions.showToast);
   };
 
   return (

@@ -4,6 +4,7 @@ import { getClient } from "../../../core/model";
 import type { PastRecord } from "../../../core/types";
 import type { StudioController } from "../../../core/use-studio";
 import { mergeBookingRows } from "../../live-records";
+import { formatMoney } from "../../../../../utils/money";
 
 export const DAY_MS = 86400000;
 
@@ -12,7 +13,9 @@ export const RECORDED_ONLY =
 
 export const getRefundTag = (refunded: number, left: number) => {
   if (refunded > 0)
-    return left <= 0 ? "Refunded" : `Partially refunded £${refunded}`;
+    return left <= 0
+      ? "Refunded"
+      : `Partially refunded ${formatMoney(refunded)}`;
 
   return "";
 };
@@ -29,6 +32,21 @@ export const getContext = (studio: StudioController, row: PastRecord) => {
     setState({ confirm: null });
     patch(value);
     actions.showToast(message);
+  };
+
+  // the row's retry and link buttons stay off until the request settles
+  const startBusy = <Args extends unknown[], Result>(
+    task: (...args: Args) => Promise<Result>,
+  ) => {
+    setState({ pastBusyId: row.pastId });
+
+    return async (...args: Args) => {
+      try {
+        return await task(...args);
+      } finally {
+        setState({ pastBusyId: null });
+      }
+    };
   };
 
   /** Saves a real booking's fee change (after any save before it); a failure puts the row back. */
@@ -69,6 +87,8 @@ export const getContext = (studio: StudioController, row: PastRecord) => {
       row.status === "No show"
         ? "They didn’t turn up."
         : `Cancelled inside your ${state.policy.window}h window.`,
+    isBusy: state.pastBusyId === row.pastId,
+    startBusy,
     patch,
     settle,
     saveFee,

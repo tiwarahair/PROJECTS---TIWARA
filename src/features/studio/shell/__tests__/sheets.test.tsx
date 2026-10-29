@@ -5,6 +5,10 @@ import { getRow } from "../../../../test/studio-booking-row";
 import { getStudioSeed } from "../../../../test/studio-seed";
 import { fromLondonTime } from "../../../../utils/london-time";
 import { toDate } from "../../core/blocked-time";
+import {
+  fetchStudioActivity,
+  markActivityRead,
+} from "../../../../lib/studio-api/home";
 import { StudioPage } from "../..";
 import type { UserEvent } from "@testing-library/user-event";
 import { setupUser } from "../../../../test/setup-user";
@@ -38,6 +42,7 @@ vi.mock("../../../../lib/studio-api/home", async (importOriginal) => ({
     ]),
   ),
   markActivitySeen: vi.fn(() => new Promise(() => {})),
+  markActivityRead: vi.fn(() => new Promise(() => {})),
 }));
 
 // saves stay in flight, so the screen keeps what was done
@@ -136,6 +141,45 @@ describe("Studio sheets", () => {
     expect(getLabelled("Earnings")).toBeInTheDocument();
   });
 
+  it("opening one notification marks only that one read", async () => {
+    vi.mocked(markActivityRead).mockClear();
+    renderStudio();
+    await user.click(screen.getByRole("button", { name: "Notifications" }));
+    await screen.findAllByText("Payout sent");
+
+    const openPayout = () =>
+      user.click(
+        screen
+          .getAllByRole("button", { name: /^Payout sent/ })
+          .at(-1) as HTMLElement,
+      );
+
+    await openPayout();
+
+    expect(markActivityRead).toHaveBeenCalledWith("stylist-1", "activity-2");
+    expect(markActivityRead).toHaveBeenCalledTimes(1);
+
+    advance(240);
+    await user.click(screen.getByRole("button", { name: "Notifications" }));
+    await openPayout();
+
+    expect(markActivityRead).toHaveBeenCalledTimes(1);
+  });
+
+  it("notifications that don't load say so with try again", async () => {
+    vi.mocked(fetchStudioActivity).mockRejectedValueOnce(new Error("offline"));
+    renderStudio();
+    await user.click(screen.getByRole("button", { name: "Notifications" }));
+
+    expect(
+      await screen.findByText(/Couldn’t load notifications/),
+    ).toBeInTheDocument();
+
+    expect(
+      screen.getByRole("button", { name: "Try again" }),
+    ).toBeInTheDocument();
+  });
+
   it("blocking time over a booking asks first, then adds it", async () => {
     renderStudio();
     await openAvailability();
@@ -201,16 +245,26 @@ describe("Studio sheets", () => {
 
     const add = screen.getByRole("button", { name: "Add closed period" });
 
-    expect(add).toBeDisabled();
+    await user.click(add);
+
+    expect(await screen.findByText("Choose a start date.")).toBeInTheDocument();
+    expect(screen.getByText("Choose an end date.")).toBeInTheDocument();
 
     const [from, to] =
       document.querySelectorAll<HTMLInputElement>('input[type="date"]');
 
     await user.type(from as HTMLInputElement, "2026-12-24");
 
-    await user.type(to as HTMLInputElement, "2026-12-28");
-    await waitFor(() => expect(add).toBeEnabled());
+    await waitFor(() =>
+      expect(
+        screen.queryByText("Choose a start date."),
+      ).not.toBeInTheDocument(),
+    );
 
+    await user.click(add);
+    expect(screen.getByText("Choose an end date.")).toBeInTheDocument();
+
+    await user.type(to as HTMLInputElement, "2026-12-28");
     await user.click(add);
 
     expect(
@@ -239,9 +293,32 @@ describe("Studio sheets", () => {
       await screen.findByText("The end date can’t be before the start date."),
     ).toBeInTheDocument();
 
+    await user.click(screen.getByRole("button", { name: "Add closed period" }));
+
     expect(
-      screen.getByRole("button", { name: "Add closed period" }),
-    ).toBeDisabled();
+      screen.queryByText("Closed period added. Online booking blocked"),
+    ).not.toBeInTheDocument();
+  });
+
+  it("moving a closed period's start after its end flags the end date", async () => {
+    renderStudio();
+    await openAvailability();
+
+    await user.click(
+      screen.getAllByRole("button", { name: "Add" })[1] as HTMLElement,
+    );
+
+    const [from, to] =
+      document.querySelectorAll<HTMLInputElement>('input[type="date"]');
+
+    await user.type(from as HTMLInputElement, "2026-12-24");
+    await user.type(to as HTMLInputElement, "2026-12-26");
+    await user.clear(from as HTMLInputElement);
+    await user.type(from as HTMLInputElement, "2026-12-28");
+
+    expect(
+      await screen.findByText("The end date can’t be before the start date."),
+    ).toBeInTheDocument();
   });
 
   it("clearing a closed period's end date asks for one", async () => {
@@ -261,6 +338,26 @@ describe("Studio sheets", () => {
     expect(await screen.findByText("Choose an end date.")).toBeInTheDocument();
   });
 
+  it("picking only a start date doesn't ask for the end date yet", async () => {
+    renderStudio();
+    await openAvailability();
+
+    await user.click(
+      screen.getAllByRole("button", { name: "Add" })[1] as HTMLElement,
+    );
+
+    const [from] =
+      document.querySelectorAll<HTMLInputElement>('input[type="date"]');
+
+    await user.type(from as HTMLInputElement, "2026-12-24");
+
+    expect(
+      await screen
+        .findByText("Choose an end date.", {}, { timeout: 500 })
+        .catch(() => null),
+    ).toBeNull();
+  });
+
   it("editing a closed period saves rather than adds", async () => {
     renderStudio();
     await openAvailability();
@@ -275,10 +372,7 @@ describe("Studio sheets", () => {
     await user.type(from as HTMLInputElement, "2026-12-24");
     await user.type(to as HTMLInputElement, "2026-12-28");
 
-    const add = screen.getByRole("button", { name: "Add closed period" });
-
-    await waitFor(() => expect(add).toBeEnabled());
-    await user.click(add);
+    await user.click(screen.getByRole("button", { name: "Add closed period" }));
     advance(220);
 
     const row = (await screen.findByText("24 Dec to 28 Dec")).parentElement

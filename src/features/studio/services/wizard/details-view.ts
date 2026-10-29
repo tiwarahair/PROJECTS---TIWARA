@@ -1,15 +1,21 @@
 import type { ChangeEvent, FocusEvent, MouseEvent } from "react";
 import type { SearchSelectOption } from "../../../../components/search-select";
-import { serviceTypes } from "../../../../data";
-import type { ServiceType } from "../../../../types/service-type";
+import type { ServiceType } from "../../../../types/catalogue";
 import { getSwatches } from "../catalog-sheets-view";
-import { NO_CATEGORY_TONE, TAXONOMY } from "../../core/constants";
+import {
+  NO_CATEGORY_TONE,
+  PORTFOLIO_LIMIT,
+  SERVICE_PHOTO_LIMIT,
+} from "../../core/constants";
 import {
   getCategoryById,
   getSortedCategories,
   getNextCategoryColour,
+  getTaxonomies,
+  getTaxonomy,
 } from "../../core/model";
-import { getTaxonomy, makeVariationRows } from "../actions";
+import type { StudioState } from "../../core/types";
+import { makeVariationRows } from "../actions";
 import type { WizardContext } from "./context";
 import { setLatestWizard } from "./context";
 
@@ -18,13 +24,14 @@ const SUBCATEGORY_TIP =
 
 const NEW_CATEGORY = "+ New category";
 
-const typeOptions: SearchSelectOption[] = TAXONOMY.flatMap(({ name, types }) =>
-  types.map((type) => ({
-    label: type.name,
-    group: name,
-    keywords: (type.synonyms || []).concat([name]),
-  })),
-);
+const getTypeOptions = (state: StudioState): SearchSelectOption[] =>
+  getTaxonomies(state).flatMap(({ name, types }) =>
+    types.map((type) => ({
+      label: type.name,
+      group: name,
+      keywords: (type.synonyms || []).concat([name]),
+    })),
+  );
 
 export const getDetailsView = ({
   studio,
@@ -37,7 +44,7 @@ export const getDetailsView = ({
   setDraft,
 }: WizardContext) => {
   const applyType = (type: ServiceType) => {
-    const typeGroup = getTaxonomy(type.groupId);
+    const typeGroup = getTaxonomy(state, type.groupId);
     const isSame = draft.taxonomyId === type.groupId;
 
     return {
@@ -63,7 +70,7 @@ export const getDetailsView = ({
   const sortedCategories = getSortedCategories(state);
 
   const currentType = draft.typeId
-    ? serviceTypes.find(({ id }) => id === draft.typeId)
+    ? state.catalogue.types.find(({ id }) => id === draft.typeId)
     : null;
 
   const newCategory = wizard.newCategory || null;
@@ -145,10 +152,12 @@ export const getDetailsView = ({
       );
     },
     cancelNewCategory: () => setWizard({ newCategory: null }),
-    typeOptions,
+    typeOptions: getTypeOptions(state),
     typeValue: currentType ? currentType.name : "",
     pickType: (label: string) => {
-      const type = serviceTypes.find(({ name }) => name === label);
+      const type = state.catalogue.types.find(
+        ({ name, isActive }) => isActive && name === label,
+      );
 
       if (type) setDraft(applyType(type));
     },
@@ -171,8 +180,43 @@ export const getDetailsView = ({
         }
       }, 0);
     },
-    pickImages: () =>
-      actions.showToast("Image upload is not part of this prototype"),
+    photos: draft.photos.map(({ id, src, file }) => ({
+      key: id,
+      src,
+      remove: () => {
+        if (file) URL.revokeObjectURL(src);
+
+        setDraft({ photos: draft.photos.filter((photo) => photo.id !== id) });
+      },
+    })),
+    canAddPhotos: draft.photos.length < SERVICE_PHOTO_LIMIT,
+    onImageFiles: (event: ChangeEvent<HTMLInputElement>) => {
+      const picked = Array.from(event.target.files || []);
+      const unsaved = draft.photos.filter(({ file }) => file).length;
+      const portfolioRoom = PORTFOLIO_LIMIT - state.portfolio.length - unsaved;
+
+      const room = Math.min(
+        SERVICE_PHOTO_LIMIT - draft.photos.length,
+        portfolioRoom,
+      );
+
+      event.target.value = "";
+
+      if (picked.length && portfolioRoom <= 0)
+        actions.showToast(
+          `Your portfolio is full (${PORTFOLIO_LIMIT} photos). Remove some in Settings to add more.`,
+        );
+
+      setDraft({
+        photos: draft.photos.concat(
+          picked.slice(0, Math.max(room, 0)).map((file) => ({
+            id: crypto.randomUUID(),
+            src: URL.createObjectURL(file),
+            file,
+          })),
+        ),
+      });
+    },
     onName: (event: ChangeEvent<HTMLInputElement>) =>
       setDraft({ name: event.target.value }),
     onDescription: (event: ChangeEvent<HTMLTextAreaElement>) =>

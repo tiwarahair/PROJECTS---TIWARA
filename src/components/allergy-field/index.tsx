@@ -1,10 +1,10 @@
 import { useEffect, useLayoutEffect, useRef, useState } from "react";
-import { joinClassNames } from "../../utils/class-names";
 import { AllergyPrivacySheet } from "../allergy-privacy-sheet";
+import { CharacterCount } from "../character-count";
 import styles from "../../styles/components/allergy-field/index.module.css";
 
-const MAX_LENGTH = 200;
-const COUNTER_FROM = 150;
+const MAX_LENGTH = 1000;
+const COUNTER_FROM = 800;
 
 export interface AllergyFieldProps {
   stylistName?: string;
@@ -13,7 +13,7 @@ export interface AllergyFieldProps {
   autoFocus?: boolean;
 }
 
-/** The allergy note opt-in field with a 200-char counter (from 150) and its privacy sheet. */
+/** The allergy note opt-in field with a 1,000-char counter (from 800) and its privacy sheet. */
 export const AllergyField = ({
   stylistName,
   value = "",
@@ -71,18 +71,12 @@ export const AllergyField = ({
           maxLength={MAX_LENGTH}
           aria-describedby={`${ids.hint} ${ids.count}`}
         ></textarea>
-        {length >= COUNTER_FROM && (
-          <div
-            id={ids.count}
-            aria-live="polite"
-            className={joinClassNames(
-              styles.count,
-              length >= MAX_LENGTH && styles.countFull,
-            )}
-          >
-            {length} / {MAX_LENGTH}
-          </div>
-        )}
+        <CharacterCount
+          id={ids.count}
+          length={length}
+          max={MAX_LENGTH}
+          showFrom={COUNTER_FROM}
+        />
         <p className={styles.consent}>
           By sharing this, you agree to Tiwára&apos;s House and {name} storing
           this health information to keep you safe.{" "}

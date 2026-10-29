@@ -32,7 +32,7 @@ Deno.serve(async (request) => {
 
   if (!parsed.success) return respond(400, { error: "invalid_request" });
 
-  const { hold, contact, notes, allergies, address, turnstileToken } = parsed.data;
+  const { hold, contact, notes, allergies, address, turnstileToken, agreement, policyLines } = parsed.data;
 
   const clientIp = getClientIp(request);
 
@@ -53,6 +53,7 @@ Deno.serve(async (request) => {
       client_lat: lat ?? null,
       client_lng: lng ?? null,
       client: clientId,
+      ...(agreement ? { shown: { agreement, policy_lines: policyLines ?? [] } } : {}),
     });
 
     // turned away for an unpaid fee: the slot they were holding goes back

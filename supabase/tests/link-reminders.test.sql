@@ -1,5 +1,5 @@
 begin;
-select plan(8);
+select plan(11);
 
 insert into auth.users (id, instance_id, aud, role, email, raw_user_meta_data, raw_app_meta_data)
 values ('a3333333-1111-1111-1111-111111111111', '00000000-0000-0000-0000-000000000000', 'authenticated',
@@ -48,7 +48,8 @@ select
   pg_temp.link(pg_temp.book('ada@remind.test'), now() + interval '1 day') as expiring,
   pg_temp.link(pg_temp.book('bea@remind.test'), now() + interval '5 days') as fresh;
 
-create temp table before as select token_hash from public.payment_links where id = (select expiring from ids);
+update public.payment_links set token_hash = sha256(convert_to('first-token', 'UTF8'))
+where id = (select expiring from ids);
 
 select is(public.remind_expiring_links(), 1, 'only a link two days from running out is reminded');
 
@@ -58,9 +59,28 @@ select is(
   'true', 'with the same email, marked as a reminder');
 
 select ok(
-  (select token_hash <> (select token_hash from before) and sent_count = 1 and expires_at < now() + interval '2 days'
+  (select reminder_token_hash is not null and sent_count = 1 and expires_at < now() + interval '2 days'
     from public.payment_links where id = (select expiring from ids)),
-  'a fresh link that keeps its expiry, and not one of the stylist''s resends');
+  'a second link that keeps its expiry, and not one of the stylist''s resends');
+
+create temp table reminder as
+select split_part(payload ->> 'pay_url', '?token=', 2) as token from public.notifications
+where template = 'balance_due' and to_address = 'ada@remind.test';
+
+select ok(
+  public.get_payment_link('first-token') is not null and public.get_payment_link((select token from reminder)) is not null,
+  'the link first emailed still works, and so does the reminder''s');
+
+update public.payment_links set token_hash = sha256(convert_to('resent-token', 'UTF8'))
+where id = (select expiring from ids);
+
+select ok(
+  public.get_payment_link('first-token') is null and public.get_payment_link((select token from reminder)) is null
+    and public.get_payment_link('resent-token') is not null,
+  'a resend makes both earlier links stop working');
+
+select throws_ok($$ select public.start_link_payment('first-token') $$, 'link_not_valid',
+  'and they can''t be paid');
 
 select is(public.remind_expiring_links(), 0, 'once only');
 

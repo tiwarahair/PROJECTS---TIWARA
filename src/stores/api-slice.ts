@@ -1,4 +1,6 @@
 import { createApi, fakeBaseQuery } from "@reduxjs/toolkit/query/react";
+import { fetchCatalogue } from "../lib/catalogue";
+import type { Catalogue } from "../types/catalogue";
 import {
   getAvailableSlots,
   getBookingStatus,
@@ -86,7 +88,7 @@ import {
 } from "../lib/studio-api/reviews";
 import type { StudioReviews } from "../lib/studio-api/reviews";
 import type { PaymentLink } from "../lib/payment-link-api";
-import { listTwoFactorDevices } from "../lib/two-factor";
+import { hasPassedSecondFactor, listTwoFactorDevices } from "../lib/two-factor";
 import type { TwoFactorDevice } from "../lib/two-factor";
 import type { Profile } from "../types/profile";
 
@@ -129,6 +131,11 @@ export const api = createApi({
   ],
   refetchOnReconnect: true,
   endpoints: (build) => ({
+    // changes only by migration, so 1 read a day is enough
+    getCatalogue: build.query<Catalogue, void>({
+      keepUnusedDataFor: 86400,
+      queryFn: () => toQueryResult(fetchCatalogue()),
+    }),
     getProfile: build.query<Profile, string>({
       keepUnusedDataFor: 600,
       queryFn: async (userId) => {
@@ -441,6 +448,10 @@ export const api = createApi({
     >({
       queryFn: (request) => toQueryResult(claimBookingInvite(request)),
     }),
+    getSecondFactorPassed: build.query<boolean, string>({
+      keepUnusedDataFor: 0,
+      queryFn: () => toQueryResult(hasPassedSecondFactor()),
+    }),
     getTwoFactorDevices: build.query<TwoFactorDevice[], string>({
       providesTags: ["TwoFactor"],
       queryFn: () => toQueryResult(listTwoFactorDevices()),
@@ -481,6 +492,7 @@ export const {
   useStartCheckoutMutation,
   useHoldBookingMutation,
   useIsInTravelAreaQuery,
+  useGetCatalogueQuery,
   useGetProfileQuery,
   useGetStylistProfileQuery,
   usePeekStylistsQuery,
@@ -492,6 +504,7 @@ export const {
   useGetHomeStatsQuery,
   useGetStudioActivityQuery,
   useGetTwoFactorDevicesQuery,
+  useGetSecondFactorPassedQuery,
   useUpdateProfileMutation,
   useSetBusinessClosedMutation,
 } = api;

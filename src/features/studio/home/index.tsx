@@ -6,7 +6,7 @@ import { DuePanel } from "./due";
 import { GoLiveBanner } from "./gate";
 import { SuspendedBanner } from "./suspended-banner";
 import { TodayHero } from "./hero";
-import { PolicyNudge } from "./nudge";
+import { PolicyNudge, isPolicyNudgeShown } from "./nudge";
 import { RevenueChart } from "./chart";
 import { SetupBanner } from "./setup-banner";
 import { OverviewStats } from "./stats";
@@ -49,7 +49,7 @@ export const StudioHome = ({ studio }: StudioHomeProps) => {
           <LinkCardBody studio={studio} />
         </section>
       )}
-      {isComplete && !state.linkCard && !state.setupExit && state.nudge && (
+      {!isWide && isPolicyNudgeShown(state, isComplete) && (
         <PolicyNudge studio={studio} />
       )}
 

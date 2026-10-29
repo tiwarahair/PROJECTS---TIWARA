@@ -1,5 +1,6 @@
 import { screen, waitFor, within } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+import { fetchCatalogue } from "../../../lib/catalogue";
 import { fetchPublicProfile } from "../../../lib/public-profiles";
 import { toPublicStylist } from "../../../lib/public-stylist";
 import { PUBLIC_PROFILE } from "../../../test/public-profile";
@@ -45,6 +46,32 @@ describe("StylistProfilePage", () => {
     ).toHaveAttribute("href", "/book?stylist=tiwaras-house");
 
     expect(screen.getByText("New")).toBeInTheDocument();
+  });
+
+  it("Back to results names the last search, even when the catalogue fails", async () => {
+    sessionStorage.setItem("tw_last_search", "/search?type=silk-press");
+
+    const { unmount } = renderWithStore(
+      <StylistProfilePage />,
+      "/tiwaras-house",
+    );
+
+    expect(
+      await screen.findByText("Silk press · Current location · Any time"),
+    ).toBeInTheDocument();
+
+    unmount();
+    vi.mocked(fetchCatalogue).mockRejectedValueOnce(new Error("offline"));
+
+    renderWithStore(<StylistProfilePage />, "/tiwaras-house", {
+      isCatalogueLoading: true,
+    });
+
+    expect(
+      await screen.findByText("silk-press · Current location · Any time"),
+    ).toBeInTheDocument();
+
+    expect(screen.queryByTestId("back-summary-skeleton")).toBeNull();
   });
 
   it("a paused stylist has no Book now", async () => {
@@ -141,6 +168,12 @@ describe("StylistProfilePage", () => {
       screen.getByRole("heading", { level: 3, name: "Knotless braids" }),
     ).toBeInTheDocument();
 
+    await user.click(screen.getByText("Hair included"));
+
+    expect(
+      screen.getByRole("heading", { level: 3, name: "Knotless braids" }),
+    ).toBeInTheDocument();
+
     await user.click(screen.getByRole("button", { name: "Close" }));
     expect(screen.queryByRole("heading", { level: 3 })).not.toBeInTheDocument();
   });
@@ -162,6 +195,50 @@ describe("StylistProfilePage", () => {
     expect(screen.getByText(getCounter(first))).toBeInTheDocument();
     await user.keyboard("{Escape}");
     expect(screen.queryByText(getCounter(first))).not.toBeInTheDocument();
+  });
+
+  it("a service's photos show in its modal, and a portfolio photo opens the service it shows", async () => {
+    const [knotless, ...otherServices] = PUBLIC_PROFILE.services;
+    const [firstPhoto, ...otherPhotos] = PUBLIC_PROFILE.portfolio_photos;
+
+    if (!knotless || !firstPhoto) throw new Error("the profile has both");
+
+    vi.mocked(fetchPublicProfile).mockResolvedValue({
+      ...PUBLIC_PROFILE,
+      services: [
+        {
+          ...knotless,
+          photos: ["demo/portfolio/w161156.jpg", "demo/stylists/w161154.jpg"],
+        },
+        ...otherServices,
+      ],
+      portfolio_photos: [
+        { ...firstPhoto, service_id: knotless.id },
+        ...otherPhotos,
+      ],
+    });
+
+    renderWithStore(<StylistProfilePage />, "/tiwaras-house");
+    await user.click(await screen.findByRole("button", { name: "See all" }));
+    await user.click(screen.getByRole("button", { name: "Knotless braids" }));
+
+    expect(
+      screen.getByRole("heading", { level: 3, name: "Knotless braids" }),
+    ).toBeInTheDocument();
+
+    expect(
+      within(screen.getByRole("group", { name: "Photos" })).getAllByRole("img"),
+    ).toHaveLength(2);
+
+    await user.click(screen.getByRole("button", { name: "Close" }));
+
+    await user.click(
+      await screen.findByRole("button", { name: /^Box braids/ }),
+    );
+
+    expect(
+      screen.queryByRole("group", { name: "Photos" }),
+    ).not.toBeInTheDocument();
   });
 
   it("Share opens the share popover; Escape closes it", async () => {

@@ -2,7 +2,7 @@ import { ArrowRight, Check } from "lucide-react";
 import type { CSSProperties } from "react";
 import { hairColours } from "../../data";
 import { joinClassNames } from "../../utils/class-names";
-import { formatServiceDuration } from "../../utils/services";
+import { formatDuration } from "../../utils/dates";
 import pageGlobal from "../../styles/features/booking/page-global.module.css";
 import { getDeltaLabel } from "./logic/pricing";
 import type { Selection } from "./logic/types";
@@ -204,7 +204,7 @@ export const StepCustomise = ({ booking }: StepCustomiseProps) => {
                   const on = selection.addons.includes(name);
 
                   const timeExtra = minutes
-                    ? ` · +${formatServiceDuration(minutes)}`
+                    ? ` · +${formatDuration(minutes)}`
                     : "";
 
                   return (

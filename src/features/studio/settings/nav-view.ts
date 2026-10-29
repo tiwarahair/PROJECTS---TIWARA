@@ -17,8 +17,10 @@ import {
   Users,
 } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
+import { STUDIO_ADMIN_URL } from "../../admin/shell/nav-items";
 import { GATE_REASON } from "../core/constants";
-import { copyText } from "../core/format";
+import { getShownPage } from "../core/unsaved";
+import { copyWithToast } from "../core/format";
 import {
   getAllClients,
   getBookingLink,
@@ -84,8 +86,7 @@ export const getSettingsNav = (
       return;
     }
 
-    copyText(getBookingLink(state));
-    showToast("Booking link copied");
+    copyWithToast(getBookingLink(state), showToast);
   };
 
   // ---- the narrow root menu ----
@@ -258,7 +259,7 @@ export const getSettingsNav = (
                 subtitle: "Reported reviews and appeals",
                 icon: ShieldCheck,
                 isLocked: false,
-                onSelect: () => navigate("/admin"),
+                onSelect: () => navigate(STUDIO_ADMIN_URL),
               },
             ],
           },
@@ -267,7 +268,7 @@ export const getSettingsNav = (
   ];
 
   // ---- the wide settings nav ----
-  const page: StudioPage | null = isWide ? state.page || "profile" : state.page;
+  const page = getShownPage(state, isWide);
   const isOn = state.tab === "settings";
 
   const navItem = (id: StudioPage, label: string, icon: LucideIcon) => ({

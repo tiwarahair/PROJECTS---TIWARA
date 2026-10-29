@@ -67,13 +67,14 @@ interface PolicyFee {
   label?: string;
   subtitle?: string;
   refund: string;
+  kept: number;
 }
 
 /** Late-cancellation ("late") or no-show ("noShow") charge from the saved payment policy. */
 export const getPolicyFee = (
   state: StudioState,
   kind: "late" | "noShow",
-  booking: { price: number; agreedPolicy?: StudioPolicy },
+  booking: { price: number; agreedPolicy?: StudioPolicy; paid?: string },
 ): PolicyFee => {
   const policy = booking.agreedPolicy ?? state.policy;
   const mode = policy.mode || "none";
@@ -82,18 +83,25 @@ export const getPolicyFee = (
 
   const deposit = roundToPence((price * (policy.deposit || 0)) / 100);
 
+  const isUnpaid = booking.paid === "none";
+  const isDepositKept = mode === "deposit" && !policy.refundable && !isUnpaid;
+
   const getRefund = () => {
+    if (mode === "deposit" && isUnpaid) return "Nothing charged";
+
     if (mode === "deposit")
       return policy.refundable
         ? "Deposit refunded"
-        : "Deposit kept (non-refundable)";
+        : `${formatMoney(deposit)} deposit kept (non-refundable)`;
 
     return mode === "full" ? "Refunded in full" : "Nothing charged";
   };
 
   const refund = getRefund();
 
-  if (mode === "none") return { amount: 0, refund };
+  const kept = isDepositKept ? deposit : 0;
+
+  if (mode === "none") return { amount: 0, refund, kept };
 
   const getBaseAmount = () => {
     if (!fee.on) return 0;
@@ -105,12 +113,11 @@ export const getPolicyFee = (
 
   let amount = getBaseAmount();
 
-  if (mode === "deposit" && !policy.refundable)
-    amount = Math.max(amount, deposit);
+  if (isDepositKept && fee.on) amount = Math.max(amount, deposit);
 
   if (mode === "full") amount = Math.min(amount, price);
 
-  if (amount <= 0) return { amount: 0, refund };
+  if (amount <= 0) return { amount: 0, refund, kept };
 
   const getSubtitle = () => {
     if (mode === "deposit") {
@@ -138,8 +145,18 @@ export const getPolicyFee = (
 
   const subtitle = getSubtitle();
 
-  return { amount, label: formatMoney(amount), subtitle, refund };
+  return { amount, label: formatMoney(amount), subtitle, refund, kept };
 };
+
+export const getKeptDeposit = (kept: number): Partial<PastRecord> =>
+  kept > 0
+    ? {
+        meta: "Deposit kept",
+        feeKept: true,
+        depositKept: true,
+        feeLabel: formatMoney(kept),
+      }
+    : {};
 
 export const getWaiveConfirm = (
   state: StudioState,

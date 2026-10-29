@@ -1,6 +1,6 @@
 import type { HomePeriod, HomeStats } from "../../../lib/studio-api/home";
 import { SHORT_MONTHS, SHORT_WEEKDAYS } from "../../../utils/dates";
-import { formatMoney } from "../../../utils/money";
+import { formatMoney, toPounds } from "../../../utils/money";
 import type { StudioState } from "../core/types";
 
 export const RANGE_LENGTHS: Record<StudioState["range"], number> = {
@@ -86,14 +86,14 @@ const getChart = (
   today: string,
   buckets: HomeStats["buckets"],
 ) => {
-  const toPounds = (key: string) => (buckets[key] ?? 0) / 100;
+  const getBucketPounds = (key: string) => toPounds(buckets[key] ?? 0);
 
   if (range === "today") {
     const hours = getHours(today, buckets);
     const toHour = (hour: number) => String(hour).padStart(2, "0");
 
     return {
-      chart: hours.map((hour) => toPounds(`${today}T${toHour(hour)}`)),
+      chart: hours.map((hour) => getBucketPounds(`${today}T${toHour(hour)}`)),
       labels: hours.map((hour, index) => (index % 2 ? "" : toHour(hour))),
       tips: hours.map((hour) => `${toHour(hour)}:00`),
     };
@@ -109,7 +109,7 @@ const getChart = (
   };
 
   return {
-    chart: days.map(toPounds),
+    chart: days.map(getBucketPounds),
     labels: days.map(getLabel),
     tips: days.map((day) => (day === today ? "Today" : getDayLabel(day))),
   };

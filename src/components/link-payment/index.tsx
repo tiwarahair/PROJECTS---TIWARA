@@ -8,7 +8,7 @@ import {
 } from "@stripe/react-stripe-js";
 import { ArrowRight, CircleAlert } from "lucide-react";
 import { useRef, useState } from "react";
-import { PaymentFieldsSkeleton } from "../skeleton/payment-fields-skeleton";
+import { PaymentFieldsSkeleton } from "../skeleton/payment-fields";
 import { stripePromise } from "../../lib/stripe";
 import { getErrorMessage } from "../../stores/api-slice";
 import { joinClassNames } from "../../utils/class-names";
@@ -52,6 +52,7 @@ const Form = ({
   const stripe = useStripe();
   const elements = useElements();
   const turnstileRef = useRef<TurnstileInstance | null>(null);
+  const payingRef = useRef(false);
   const [turnstileToken, setTurnstileToken] = useState<string | null>(null);
   const [isPaying, setPaying] = useState(false);
   const [error, setError] = useState("");
@@ -72,13 +73,15 @@ const Form = ({
     }
   };
 
-  const pay = async () => {
-    if (!stripe || !elements || !turnstileToken) return false;
-
+  const confirm = async (
+    loadedStripe: NonNullable<typeof stripe>,
+    loadedElements: NonNullable<typeof elements>,
+    humanToken: string,
+  ) => {
     setPaying(true);
     setError("");
 
-    const { error: cardError } = await elements.submit();
+    const { error: cardError } = await loadedElements.submit();
 
     if (cardError) {
       setPaying(false);
@@ -87,7 +90,7 @@ const Form = ({
       return false;
     }
 
-    const clientSecret = await getClientSecret(turnstileToken);
+    const clientSecret = await getClientSecret(humanToken);
 
     if (!clientSecret) {
       setPaying(false);
@@ -96,15 +99,15 @@ const Form = ({
     }
 
     const confirmation = {
-      elements,
+      elements: loadedElements,
       clientSecret,
       confirmParams: { return_url: window.location.href },
       redirect: "if_required" as const,
     };
 
     const { error: payError } = isSetup
-      ? await stripe.confirmSetup(confirmation)
-      : await stripe.confirmPayment(confirmation);
+      ? await loadedStripe.confirmSetup(confirmation)
+      : await loadedStripe.confirmPayment(confirmation);
 
     setPaying(false);
 
@@ -117,6 +120,19 @@ const Form = ({
     onPaid();
 
     return true;
+  };
+
+  const pay = async () => {
+    if (!stripe || !elements || !turnstileToken || payingRef.current)
+      return false;
+
+    payingRef.current = true;
+
+    try {
+      return await confirm(stripe, elements, turnstileToken);
+    } finally {
+      payingRef.current = false;
+    }
   };
 
   return (

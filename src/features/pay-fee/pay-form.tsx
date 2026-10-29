@@ -1,7 +1,8 @@
 import { LinkPayment } from "../../components/link-payment";
 import type { PaymentLink } from "../../lib/payment-link-api";
 import { useStartLinkPaymentMutation } from "../../stores/api-slice";
-import { formatPence, LINK_PAY_ERRORS } from "./logic";
+import { LINK_PAY_ERRORS } from "./logic";
+import { formatPence } from "../../utils/money";
 
 interface PayFormProps {
   link: PaymentLink;

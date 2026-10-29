@@ -24,6 +24,7 @@ export const usePaymentPolicy = ({
   const uid = `pp${useId().replace(/[^a-zA-Z0-9]/g, "")}`;
   const [initial] = useState(() => toPolicyFormValues(value));
   const [isFlashing, setIsFlashing] = useState(false);
+  const [isSaving, setIsSaving] = useState(false);
   const flashTimer = useRef(0);
 
   const {
@@ -49,7 +50,7 @@ export const usePaymentPolicy = ({
   const getError = (name: "deposit" | FeeName) => errors[name]?.message ?? "";
 
   const hasError = !!(errors.deposit || errors.late || errors.noShow);
-  const canSave = isDirty && !hasError;
+  const canSave = isDirty && !hasError && !isSaving;
 
   const submit = handleSubmit((submitted) => {
     const markSaved = () => {
@@ -72,9 +73,17 @@ export const usePaymentPolicy = ({
 
     const result = onSave?.(getPolicyOutput(submitted));
 
-    if (result instanceof Promise)
-      void result.then((isSaved) => isSaved && markSaved());
-    else markSaved();
+    if (!(result instanceof Promise)) return markSaved();
+
+    setIsSaving(true);
+
+    // a failed save shows the last saved policy again
+    void result
+      .then(
+        (isSaved) => isSaved && markSaved(),
+        () => reset(),
+      )
+      .finally(() => setIsSaving(false));
   });
 
   const save = () => {
@@ -134,7 +143,7 @@ export const usePaymentPolicy = ({
             shouldDirty: true,
           });
 
-          setValue(`${name}.kind`, "pct", { shouldDirty: true });
+          setValue(`${name}.kind`, "percent", { shouldDirty: true });
         },
       }),
     getExtraInput: (index: number) =>
@@ -152,7 +161,7 @@ export const usePaymentPolicy = ({
         },
       }),
     addExtra: (type: ExtraType) => {
-      if (!isFull) append({ type, text: "" });
+      if (!isFull) append({ key: crypto.randomUUID(), type, text: "" });
     },
     removeExtra: remove,
   };

@@ -1,11 +1,14 @@
+import { roundToPence } from "../../../utils/money";
 import { PAST_MONTHS } from "../core/constants";
 import { dayInfo } from "../core/format";
+import { getLinkDue } from "./checkout-label";
 import type { BookingsContext } from "./context";
 import type { DecoratedBooking } from "./decorate";
 import { getFilterCount } from "./filter-view";
 import { getPastItem } from "./past-item";
 import { DAY_NAMES, EMPTY_COPY } from "./types";
 import type { EmptyKind } from "./types";
+import { formatMoney } from "../../../utils/money";
 
 const getTotal = (items: { price: number }[]) => {
   let total = 0;
@@ -29,7 +32,7 @@ const getUpcomingGroups = (items: DecoratedBooking[]) => {
       isLast: index === offsets.length - 1,
       label: DAY_NAMES[dayOffset] ?? dayInfo(dayOffset).label,
       isToday: dayOffset === 0,
-      meta: `${getCountLabel(dayItems.length, "booking")} · £${getTotal(dayItems)}`,
+      meta: `${getCountLabel(dayItems.length, "booking")} · ${formatMoney(getTotal(dayItems))}`,
       items: dayItems,
     };
   });
@@ -85,19 +88,30 @@ const getEmptyKind = (context: BookingsContext): EmptyKind => {
 };
 
 export const getListView = (context: BookingsContext) => {
-  const { isPast, pastItems, upcomingItems, state, actions } = context;
+  const {
+    isPast,
+    pastItems,
+    upcomingItems,
+    state,
+    studio: { actions },
+  } = context;
+
   const { title, body } = EMPTY_COPY[getEmptyKind(context)];
 
   const earned = getTotal(
-    pastItems.filter(({ status }) => status === "Completed"),
+    pastItems
+      .filter(({ status }) => status === "Completed")
+      .map((row) => ({
+        price: roundToPence(row.price - (getLinkDue(row) ?? 0)),
+      })),
   );
 
   return {
     upcomingGroups: getUpcomingGroups(upcomingItems),
     listSummary: getListSummary(context),
     listTotal: isPast
-      ? `£${earned} earned`
-      : `£${getTotal(upcomingItems)} booked`,
+      ? `${formatMoney(earned)} earned`
+      : `${formatMoney(getTotal(upcomingItems))} booked`,
     isListEmpty: isPast ? pastItems.length === 0 : upcomingItems.length === 0,
     listEmptyTitle: title,
     listEmptyBody: body,

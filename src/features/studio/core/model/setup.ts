@@ -7,7 +7,13 @@ export const isLive = (state: StudioState): boolean =>
   hasTwoFactor(state) && !!state.tax && !!state.check.stripe;
 
 export const getBookingLink = ({ account }: StudioState) =>
-  `tiwarashouse.com/${account.slug}`;
+  `${window.location.host}/${account.slug}`;
+
+export const getServiceBookingLink = (
+  { account }: StudioState,
+  serviceId: string,
+) =>
+  `${window.location.host}/book?stylist=${account.slug}&service=${encodeURIComponent(serviceId)}`;
 
 export const getProfilePath = ({ account }: StudioState) => `/${account.slug}`;
 

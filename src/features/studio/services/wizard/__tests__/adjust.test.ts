@@ -70,4 +70,60 @@ describe("wizard adjustments", () => {
     expect(review.head).toEqual(["Long"]);
     expect(review.rows[0]?.cells[0]?.price).toBe("£50");
   });
+
+  it("shows pence and leaves no maths artefacts in review prices", () => {
+    const review = getReview(
+      {
+        sizesOn: true,
+        lengthsOn: false,
+        sizes: [
+          makeRow({ priceDelta: "2.2" }),
+          makeRow({ label: "Large", priceDelta: "-0.1" }),
+        ],
+      } as Parameters<typeof getReview>[0],
+      getWizardBase({
+        price: "10.1",
+        durationHours: "1",
+        durationMinutes: "0",
+      } as Parameters<typeof getWizardBase>[0]),
+    );
+
+    expect(review.items.map(({ price }) => price)).toEqual(["£12.30", "£10"]);
+  });
+
+  it("lists own customisations as the change they add to any combination", () => {
+    const review = getReview(
+      {
+        sizesOn: false,
+        lengthsOn: false,
+        own: [
+          {
+            name: "Parting",
+            options: [
+              { label: "Middle", priceDelta: "5", minutesDelta: "15" },
+              { label: "Side", priceDelta: "0", minutesDelta: "0" },
+              {
+                label: "Quick",
+                negative: true,
+                priceDelta: "-2.5",
+                minutesDelta: "-5",
+              },
+            ],
+          },
+        ],
+      } as Parameters<typeof getReview>[0],
+      base,
+    );
+
+    expect(review.own).toEqual([
+      {
+        name: "Parting",
+        options: [
+          { label: "Middle", change: "+£5 +15m" },
+          { label: "Side", change: "No change" },
+          { label: "Quick", change: "−£2.50 −5m" },
+        ],
+      },
+    ]);
+  });
 });

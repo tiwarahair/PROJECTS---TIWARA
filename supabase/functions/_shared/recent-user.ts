@@ -15,6 +15,20 @@ const getClaims = async (admin: SupabaseClient, request: Request) => {
 export const getSignedInUser = async (admin: SupabaseClient, request: Request) =>
   (await getClaims(admin, request))?.sub ?? null;
 
+export const getStudioUser = async (admin: SupabaseClient, request: Request) => {
+  const claims = await getClaims(admin, request);
+
+  if (!claims?.sub) return null;
+
+  const { data } = await admin.rpc("is_second_factor_passed", {
+    target_user: claims.sub,
+    target_session: String(claims.session_id ?? ""),
+    session_aal: String(claims.aal ?? ""),
+  });
+
+  return data === true ? claims.sub : null;
+};
+
 export const getSignedInSession = async (admin: SupabaseClient, request: Request) => {
   const claims = await getClaims(admin, request);
 

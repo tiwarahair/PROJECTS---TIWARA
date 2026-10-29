@@ -1,4 +1,4 @@
-import type { ServiceType } from "../../../../types/service-type";
+import type { ServiceType } from "../../../../types/catalogue";
 import type { StudioActions, StudioContext } from "../../core/actions";
 import { getCategoryById } from "../../core/model";
 import type { StudioState, WizardDraft, WizardState } from "../../core/types";
@@ -17,7 +17,7 @@ const getAddonLinks = (
   const addons = state.addons.concat(pending);
   const links: WizardDraft["addons"] = [];
 
-  fill.addonDefinitions.forEach(([name, price, minutes]) => {
+  fill.addonDefinitions.forEach(({ name, price, minutes }) => {
     let addon = addons.find(
       (item) =>
         (item.status || "active") !== "archived" &&
@@ -149,7 +149,7 @@ export const createSuggestionActions = (
     if (!wizard) return;
 
     const draft = wizard.draft;
-    const fill = getSuggestionFill(type);
+    const fill = getSuggestionFill(type, state.catalogue);
     const { pending, links } = getAddonLinks(state, wizard, fill);
     const { patch, flash } = getFillPatch(draft, fill, links, isReplace);
 

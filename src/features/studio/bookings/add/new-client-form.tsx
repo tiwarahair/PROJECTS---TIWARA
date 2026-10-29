@@ -35,7 +35,6 @@ export const NewClientForm = ({ view, newClient }: NewClientFormProps) => (
           inputMode="tel"
           value={newClient.contact}
           onChange={(event) => view.patchNew({ contact: event.target.value })}
-          placeholder="07700 900000"
         />
       </label>
       <label className={shared.block}>

@@ -1,6 +1,7 @@
 import type { StylistStudio } from "../lib/studio-api";
 import type { StudioSeed } from "../features/studio/core/use-studio";
 import { getClientRow, getRow } from "./studio-booking-row";
+import { TEST_CATALOGUE } from "./catalogue";
 
 const STYLIST_ID = "stylist-1";
 
@@ -66,6 +67,8 @@ export const getStudioRow = (
     city: "Manchester",
     postcode: "M4 6AJ",
     activity_seen_at: null,
+    policy_nudged_at: null,
+    policy_reminded_at: null,
   },
   stylist_categories: [
     {
@@ -183,6 +186,7 @@ export const getStudioSeed = (patch: Partial<StudioSeed> = {}): StudioSeed => ({
     ],
   },
   devices: [],
+  catalogue: TEST_CATALOGUE,
   ...patch,
 });
 

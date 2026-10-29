@@ -44,6 +44,9 @@ export const SHORT_MONTHS_SEPT = LONG_MONTHS.map((name) =>
 const pad2 = (value: number): string => String(value).padStart(2, "0");
 
 /** Local YYYY-MM-DD. */
+export const getMinutesOfDay = (date = new Date()) =>
+  date.getHours() * 60 + date.getMinutes();
+
 export const toIsoDate = (date: Date): string =>
   `${date.getFullYear()}-${pad2(date.getMonth() + 1)}-${pad2(date.getDate())}`;
 
@@ -99,3 +102,17 @@ export const getTimeAgo = (at: Date, now = new Date()) => {
 
   return `${at.getDate()} ${SHORT_MONTHS[at.getMonth()]}`;
 };
+
+const londonDateTime = new Intl.DateTimeFormat("en-GB", {
+  timeZone: "Europe/London",
+  weekday: "short",
+  day: "numeric",
+  month: "short",
+  hour: "2-digit",
+  minute: "2-digit",
+  hourCycle: "h23",
+});
+
+/** A UK time from an ISO string, wherever the device is: "Fri 20 Nov, 10:00". */
+export const formatLondonDateTime = (iso: string): string =>
+  londonDateTime.format(new Date(iso));

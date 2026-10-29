@@ -1,6 +1,6 @@
 import type Stripe from "stripe";
 import { getRecovery } from "../_shared/owed.ts";
-import { isPayoutHeld } from "../_shared/payout-hold.ts";
+import { holdPayout, isPayoutHeld } from "../_shared/payout-hold.ts";
 import { CLEAR_RECOVERY } from "../_shared/recovery-metadata.ts";
 import { stripe } from "../_shared/stripe.ts";
 import { getPaymentParams, getRecoveryRoom, paysStylist } from "../booking-checkout/payment-params.ts";
@@ -53,8 +53,11 @@ export const getConfirmIntent = async (quote: ConfirmQuote, customerId: string) 
 
     if (OPEN_STATUSES.includes(existing.status) && existing.customer === customerId) {
       const {
+        isHeld,
         params: { amount, application_fee_amount, setup_future_usage, metadata },
       } = await getParams(quote, customerId, existing);
+
+      if (isHeld) await holdPayout(existing.id);
 
       return stripe.paymentIntents.update(existing.id, {
         amount,
@@ -67,7 +70,11 @@ export const getConfirmIntent = async (quote: ConfirmQuote, customerId: string) 
 
   const { isHeld, recovered, params } = await getParams(quote, customerId, null);
 
-  return stripe.paymentIntents.create(params, {
+  const created = await stripe.paymentIntents.create(params, {
     idempotencyKey: `confirm:${quote.id}:${quote.link_version}:after:${quote.payment_intent_id ?? "none"}:${quote.due_today_pence}:${recovered}${isHeld ? ":held" : ""}`,
   });
+
+  if (isHeld) await holdPayout(created.id);
+
+  return created;
 };

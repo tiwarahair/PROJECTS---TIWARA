@@ -1,5 +1,5 @@
 begin;
-select plan(13);
+select plan(15);
 
 insert into auth.users (id, instance_id, aud, role, email, raw_user_meta_data, raw_app_meta_data)
 values ('e1111111-1111-1111-1111-111111111111', '00000000-0000-0000-0000-000000000000', 'authenticated',
@@ -65,7 +65,23 @@ select
 
 grant select on ids to authenticated;
 
+create temp table prepaid as select pg_temp.book(now() - interval '25 hours', 'confirmed') as id;
+
+insert into public.payments (booking_id, kind, amount_pence, platform_fee_pence)
+select id, 'booking', 5000, 0 from prepaid;
+
 select public.complete_past_bookings();
+
+select ok(
+  (select status = 'completed' and unpaid_at is not null from public.bookings where id = (select id from prepaid)),
+  'a booking paid in full still waits in Due for checkout, so a tip or a change can be checked out');
+
+select lives_ok(
+  format($sql$select public.claim_checkout(%L, %L, %L)$sql$, (select id from prepaid),
+    'e1111111-1111-1111-1111-111111111111',
+    '{"method": "record", "via": "cash", "tip_pence": 500, "lines": [{"name": "Silk press", "subtitle": "",
+      "base_pence": 5000, "adjustment_pence": 0, "reason": ""}]}'),
+  'and it can still be checked out, with a tip');
 
 select is(
   (select array_agg(bookings.status order by listed.position)

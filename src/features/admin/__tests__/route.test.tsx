@@ -1,6 +1,6 @@
 import { screen, waitFor } from "@testing-library/react";
 import type { UserEvent } from "@testing-library/user-event";
-import { beforeEach, describe, expect, it, vi } from "vitest";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import {
   decideReview,
   fetchReports,
@@ -48,6 +48,7 @@ const REPORT: AdminReport = {
       details: "Her phone number is in the review.",
       is_stylist: true,
       reporter_name: null,
+      reporter_deleted: false,
       status: "open",
       created_at: "2026-10-21T09:12:00Z",
     },
@@ -66,11 +67,18 @@ const STATS = {
 };
 
 let user: UserEvent;
+const { matchMedia } = window;
 
-const renderAs = (isAdmin: boolean) => {
-  const result = renderWithStore(<AdminRoute />, "/admin");
+afterEach(() => {
+  window.matchMedia = matchMedia;
+});
 
-  result.store.dispatch(sessionChanged({ ...TEST_USER, isAdmin }));
+const renderAs = (isAdmin: boolean, url = "/admin") => {
+  const result = renderWithStore(<AdminRoute />, url);
+
+  result.store.dispatch(
+    sessionChanged({ ...TEST_USER, isAdmin, isStylist: true }),
+  );
 
   return result;
 };
@@ -152,5 +160,141 @@ describe("Admin route", () => {
         note: "Phone number in the text",
       }),
     );
+  });
+
+  it("offers Not now, not Studio, to a stylist who didn't come from Studio", async () => {
+    vi.mocked(getSecondFactorStep).mockResolvedValue("code");
+
+    renderAs(true);
+
+    expect(
+      await screen.findByRole("link", { name: "Not now" }),
+    ).toHaveAttribute("href", "/");
+
+    expect(
+      screen.queryByRole("link", { name: "Back to Studio" }),
+    ).not.toBeInTheDocument();
+  });
+
+  it("offers the way back to Studio from the two-step screen when they came from Studio", async () => {
+    vi.mocked(getSecondFactorStep).mockResolvedValue("code");
+
+    renderAs(true, "/admin?from=studio");
+
+    expect(
+      await screen.findByRole("link", { name: "Back to Studio" }),
+    ).toHaveAttribute("href", "/studio");
+  });
+
+  it("shows no way back to Studio in Admin when they didn't come from Studio", async () => {
+    vi.mocked(getSecondFactorStep).mockResolvedValue("passed");
+
+    renderAs(true);
+
+    expect(await screen.findByText("Yasmin Bello")).toBeInTheDocument();
+
+    expect(
+      screen.queryByRole("link", { name: /Studio/ }),
+    ).not.toBeInTheDocument();
+  });
+
+  it("shows the phone's Studio back link only when they came from Studio", async () => {
+    vi.mocked(getSecondFactorStep).mockResolvedValue("passed");
+
+    renderAs(true, "/admin?from=studio");
+
+    expect(await screen.findByText("Yasmin Bello")).toBeInTheDocument();
+
+    expect(screen.getByRole("link", { name: "Studio" })).toHaveAttribute(
+      "href",
+      "/studio",
+    );
+  });
+
+  it("keeps Back to Studio in the sidebar across tabs and the profile link", async () => {
+    window.matchMedia = vi.fn().mockImplementation(() => ({
+      matches: true,
+      addEventListener: vi.fn(),
+      removeEventListener: vi.fn(),
+    }));
+
+    vi.mocked(getSecondFactorStep).mockResolvedValue("passed");
+
+    renderAs(true, "/admin?from=studio");
+
+    expect(await screen.findByText("Yasmin Bello")).toBeInTheDocument();
+
+    expect(
+      screen.getByRole("link", { name: "Back to Studio" }),
+    ).toBeInTheDocument();
+
+    await user.click(screen.getByRole("button", { name: /Action log/ }));
+
+    expect(screen.getByTestId("location")).toHaveTextContent(
+      "/admin?tab=log&from=studio",
+    );
+
+    await user.click(screen.getByRole("button", { name: /Reports/ }));
+
+    await user.click(
+      await screen.findByRole("button", {
+        name: "More actions for Yasmin Bello’s review",
+      }),
+    );
+
+    await user.click(
+      screen.getByRole("menuitem", { name: "View in Profiles" }),
+    );
+
+    await waitFor(() =>
+      expect(screen.getByTestId("location")).toHaveTextContent(
+        "/admin?tab=profiles&stylist=stylist-1&from=studio",
+      ),
+    );
+
+    expect(
+      screen.getByRole("link", { name: "Back to Studio", hidden: true }),
+    ).toBeInTheDocument();
+  });
+
+  it("a report from a deleted account stays, and that client isn't listed as told", async () => {
+    vi.mocked(getSecondFactorStep).mockResolvedValue("passed");
+
+    vi.mocked(fetchReports).mockResolvedValue({
+      total: 1,
+      items: [
+        {
+          ...REPORT,
+          reports: [
+            {
+              reason: "spam",
+              details: null,
+              is_stylist: false,
+              reporter_name: "",
+              reporter_deleted: true,
+              status: "open",
+              created_at: "2026-10-21T09:12:00Z",
+            },
+          ],
+        },
+      ],
+    });
+
+    renderAs(true);
+
+    await user.click(
+      await screen.findByRole("button", {
+        name: "More actions for Yasmin Bello’s review",
+      }),
+    );
+
+    await user.click(screen.getByRole("menuitem", { name: "Decide" }));
+    await user.click(await screen.findByLabelText(/Remove the words/));
+
+    expect(
+      screen.getByText("Crowned by Kemi, the stylist"),
+    ).toBeInTheDocument();
+
+    expect(screen.queryByText(/who reported it/)).not.toBeInTheDocument();
   });
 });

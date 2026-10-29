@@ -15,6 +15,8 @@ import { StudioSheets } from "./shell/sheets";
 import { TwoFactorDialog } from "./settings/two-factor";
 import { BookingAddonDialog } from "./bookings/sheet/addon-dialog";
 import { NewClientDialog } from "./bookings/dialogs";
+import { isPolicyNudgeShown } from "./home/nudge";
+import { PolicyDialog } from "./home/policy-dialog";
 import {
   WizardNewAddonDialog,
   WizardSuggestionDialogs,
@@ -88,6 +90,9 @@ export const StudioPage = (props: StudioPageProps) => {
               <SetupPill studio={studio} />
             )}
             {isWide && linkCard && <LinkCard studio={studio} />}
+            {isWide && isPolicyNudgeShown(studio.state, isComplete) && (
+              <PolicyDialog studio={studio} />
+            )}
             {!isWide &&
               !sheet &&
               !wizard &&

@@ -64,9 +64,9 @@ export const createFieldActions = ({
 
     const style = { ...NO_STYLE };
 
-    if (row.kind === "group" && row.group) style.group = row.group.slug;
+    if (row.kind === "group" && row.group) style.group = row.group.id;
     else if (row.kind === "type" && row.serviceType)
-      style.type = row.serviceType.slug;
+      style.type = row.serviceType.id;
     else if (row.kind === "all-results") style.freeText = row.raw ?? "";
 
     update((current) => ({

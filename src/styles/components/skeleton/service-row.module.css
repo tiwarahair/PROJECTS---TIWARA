@@ -1,0 +1,16 @@
+.row {
+  display: grid;
+  grid-template-columns: 64px 1fr;
+  align-items: baseline;
+  gap: clamp(12px, 3vw, 32px);
+  padding: clamp(20px, 3vw, 30px) 4px;
+  border-top: 1px solid var(--border-subtle);
+}
+
+.name {
+  height: clamp(28px, 4vw, 48px);
+}
+
+.description {
+  margin-top: 12px;
+}

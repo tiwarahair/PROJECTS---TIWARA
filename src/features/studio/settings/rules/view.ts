@@ -35,7 +35,7 @@ export const getRulesView = (studio: StudioController) => {
     setState({ rules: { ...rules, ...patch } });
 
   const minLabel = (MIN_OPTIONS.find(
-    ([value]) => value === rules.minNotice * 60,
+    ([value]) => value === rules.minNoticeMinutes,
   ) ?? [0, "24 hours"])[1];
 
   const example = state.services.find(
@@ -59,7 +59,7 @@ export const getRulesView = (studio: StudioController) => {
       (stylistId) =>
         saveBookingRules({
           stylist_id: stylistId,
-          min_notice_hours: rules.minNotice,
+          min_notice_minutes: rules.minNoticeMinutes,
           max_notice_months: rules.maxNotice,
           default_extra_minutes: rules.extra,
           travel_buffer_minutes: rules.travel,
@@ -88,7 +88,9 @@ export const getRulesView = (studio: StudioController) => {
     rulesMaxLabel:
       rules.maxNotice + (rules.maxNotice === 1 ? " month" : " months"),
     rulesMinLabel:
-      rules.minNotice === 0 ? "the moment" : `${minLabel.toLowerCase()} before`,
+      rules.minNoticeMinutes === 0
+        ? "the moment"
+        : `${minLabel.toLowerCase()} before`,
     rulesMaxOptions: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12].map((months) => ({
       value: String(months),
       label: months + (months === 1 ? " month" : " months"),
@@ -100,7 +102,7 @@ export const getRulesView = (studio: StudioController) => {
       label,
     })),
     onRulesMin: (event: ChangeEvent<HTMLSelectElement>) =>
-      setRules({ minNotice: parseInt(event.target.value) / 60 }),
+      setRules({ minNoticeMinutes: parseInt(event.target.value) }),
     rulesExtra: formatMinutes(rules.extra),
     rulesExtraDown: () => setRules({ extra: Math.max(0, rules.extra - 5) }),
     rulesExtraUp: () => setRules({ extra: Math.min(30, rules.extra + 5) }),

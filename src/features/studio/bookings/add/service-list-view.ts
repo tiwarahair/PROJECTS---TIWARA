@@ -1,7 +1,8 @@
 import type { ChangeEvent } from "react";
-import { TAXONOMY } from "../../core/constants";
+import { getTaxonomies } from "../../core/model";
 import type { StudioService } from "../../core/types";
 import type { AddContext } from "./context";
+import { formatMoney } from "../../../../utils/money";
 
 // ---- step 2: services ----
 export const getServiceListView = ({ state, setState }: AddContext) => {
@@ -19,7 +20,7 @@ export const getServiceListView = ({ state, setState }: AddContext) => {
       key: id,
       name,
       duration,
-      priceLabel: `£${price}`,
+      priceLabel: `${formatMoney(price)}`,
       isOn: state.addService === id,
       pick: () =>
         setState({
@@ -32,19 +33,22 @@ export const getServiceListView = ({ state, setState }: AddContext) => {
         }),
     }));
 
-  const groups = TAXONOMY.map(({ id, name }) => ({
-    key: id,
-    category: name,
-    items: toItems(services.filter((item) => item.taxonomyId === id)),
-  })).concat({
-    key: "other",
-    category: "Other",
-    items: toItems(
-      services.filter(
-        (item) => !TAXONOMY.some(({ id }) => id === item.taxonomyId),
+  const groups = getTaxonomies(state)
+    .map(({ id, name }) => ({
+      key: id,
+      category: name,
+      items: toItems(services.filter((item) => item.taxonomyId === id)),
+    }))
+    .concat({
+      key: "other",
+      category: "Other",
+      items: toItems(
+        services.filter(
+          (item) =>
+            !state.catalogue.groups.some(({ id }) => id === item.taxonomyId),
+        ),
       ),
-    ),
-  });
+    });
 
   const serviceGroups = groups
     .filter(({ items }) => items.length)

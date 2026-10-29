@@ -19,7 +19,7 @@ export type { TaxDetailsFormProps } from "./types";
 export const TaxDetailsForm = (props: TaxDetailsFormProps) => {
   const { onCancel } = props;
   const tax = useTaxDetails(props);
-  const { isSole, isSettings, save } = tax;
+  const { isSole, isSettings, isSubmitting, save } = tax;
 
   return (
     <div className={styles.form} data-screen-label="Tax details form">
@@ -49,7 +49,11 @@ export const TaxDetailsForm = (props: TaxDetailsFormProps) => {
             Cancel
           </button>
         )}
-        <button className={styles.submit} onClick={save}>
+        <button
+          className={styles.submit}
+          onClick={save}
+          disabled={isSubmitting}
+        >
           {isSettings ? "Save" : "Continue to Stripe"}
         </button>
       </div>

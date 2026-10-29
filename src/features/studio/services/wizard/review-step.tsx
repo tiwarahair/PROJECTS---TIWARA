@@ -1,3 +1,4 @@
+import { joinClassNames } from "../../../../utils/class-names";
 import type { WizardView } from "./view";
 import parts from "../../../../styles/features/studio/services/wizard/parts.module.css";
 import styles from "../../../../styles/features/studio/services/wizard/review-step.module.css";
@@ -49,6 +50,23 @@ export const ReviewStep = ({ view }: ReviewStepProps) => {
             </div>
           ))}
       </div>
+      {review.own.map(({ name, options }, groupIndex) => (
+        <div
+          key={`${groupIndex}-${name}`}
+          className={joinClassNames(styles.reviewBox, styles.ownBox)}
+        >
+          <div className={styles.reviewBase}>
+            <span className={styles.ownName}>{name}</span>
+            {review.ownNote}
+          </div>
+          {options.map(({ label, change }, optionIndex) => (
+            <div key={`${optionIndex}-${label}`} className={styles.listRow}>
+              <div className={styles.listLabel}>{label}</div>
+              <div className={styles.amount}>{change}</div>
+            </div>
+          ))}
+        </div>
+      ))}
     </>
   );
 };

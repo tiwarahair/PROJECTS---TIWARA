@@ -92,7 +92,7 @@ describe("ReviewPage", () => {
     renderWithStore(<ReviewPage />, "/review?token=old");
 
     expect(
-      await screen.findByRole("heading", { name: "This link has expired" }),
+      await screen.findByRole("heading", { name: "This link isn’t valid" }),
     ).toBeInTheDocument();
   });
 });

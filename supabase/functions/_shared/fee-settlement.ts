@@ -1,7 +1,8 @@
 // Settles a claimed fee: refunds what goes back to the client, then charges the saved card for the rest of the fee.
 import Stripe from "stripe";
 import { admin } from "./admin.ts";
-import { getCardLabel, isHardDecline } from "./declines.ts";
+import { cannotRetry, getCardLabel } from "./declines.ts";
+import { reverseLaterTransfer } from "./later-transfer.ts";
 import { getRefundable } from "./refundable.ts";
 import { getRecovery } from "./owed.ts";
 import { getRecoveryMetadata } from "./recovery-metadata.ts";
@@ -71,7 +72,14 @@ const refundRest = async (fee: FeeSettlement) => {
 
   const unrecorded = await findUnrecordedRefund(fee, fee.payment_intent_id);
 
-  if (unrecorded) return unrecorded;
+  if (unrecorded) {
+    await reverseLaterTransfer(fee.payment_intent_id, {
+      id: unrecorded.refund_id,
+      amount: unrecorded.refunded_pence,
+    });
+
+    return unrecorded;
+  }
 
   const intent = await stripe.paymentIntents.retrieve(fee.payment_intent_id, {
     expand: ["latest_charge"],
@@ -95,6 +103,8 @@ const refundRest = async (fee: FeeSettlement) => {
     },
     { idempotencyKey: getFeeRefundKey(fee, amount) },
   );
+
+  if (!intent.transfer_data) await reverseLaterTransfer(fee.payment_intent_id, { id, amount });
 
   return { refund_id: id, refunded_pence: amount };
 };
@@ -177,7 +187,7 @@ const chargeCard = async (fee: FeeSettlement): Promise<ChargeResult> => {
 
     return {
       outcome: "unpaid",
-      hard_decline: isHardDecline(error.decline_code ?? error.code),
+      hard_decline: cannotRetry(error.decline_code ?? error.code),
       decline_message: error.message,
       card_label: cardLabel,
     };

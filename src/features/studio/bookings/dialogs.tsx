@@ -186,7 +186,7 @@ export const NewClientDialog = ({ studio }: { studio: StudioController }) => {
 
     setState({ newClient: null, changeClientQuery: "" });
 
-    addStudioClient(context, {
+    const client = {
       id,
       name,
       first,
@@ -197,10 +197,11 @@ export const NewClientDialog = ({ studio }: { studio: StudioController }) => {
       spent: 0,
       phone: draft.phone || "",
       email: draft.email || "",
-    });
+    };
 
-    context.memo.setChangeClient?.(id);
-    actions.showToast(`${name} added`);
+    addStudioClient(context, client);
+    context.memo.setChangeClient?.(id, client);
+    actions.showToast("Client saved");
   };
 
   const field = (
@@ -254,7 +255,7 @@ export const NewClientDialog = ({ studio }: { studio: StudioController }) => {
         </label>
         <label className={styles.fieldSpaced}>
           <span className={styles.fieldLabel}>Phone</span>
-          {field(draft.phone || "", "phone", "07…", { inputMode: "tel" })}
+          {field(draft.phone || "", "phone", "", { inputMode: "tel" })}
         </label>
         <DuplicateNotice
           duplicate={getDuplicateView(

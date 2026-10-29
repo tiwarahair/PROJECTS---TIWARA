@@ -12,7 +12,8 @@
   font-size: 14.5px;
   font-weight: 500;
   box-shadow: var(--shadow-pill, 0 8px 24px rgba(26, 23, 20, 0.35));
-  white-space: nowrap;
+  /* one line when it fits, wrapping (up to 3 lines) on a narrow screen */
+  width: max-content;
   max-width: 88%;
   display: flex;
   align-items: center;
@@ -25,8 +26,11 @@
 }
 
 .toastText {
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 3;
+  line-clamp: 3;
   overflow: hidden;
-  text-overflow: ellipsis;
 }
 
 .undo {

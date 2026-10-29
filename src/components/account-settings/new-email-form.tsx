@@ -4,11 +4,12 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { joinClassNames } from "../../utils/class-names";
 import { Reveal, TextField } from "./fields";
 import type { LoginDetailsActions } from "./login-details-actions";
-import { getNewEmailSchema } from "./login-schemas";
-import type { NewEmailValues } from "./login-schemas";
+import { getNewEmailSchema } from "./login-schema";
+import type { NewEmailValues } from "./login-schema";
 import type { AccountSettingsController } from "./use-account-settings";
 import shared from "../../styles/components/account-settings/index.module.css";
-import styles from "../../styles/components/account-settings/login-details.module.css";
+import styles from "../../styles/components/account-settings/new-email-form.module.css";
+import loginDetails from "../../styles/components/account-settings/login-details.module.css";
 
 interface NewEmailFormProps {
   settings: AccountSettingsController;
@@ -44,7 +45,7 @@ export const NewEmailForm = ({ settings, login, uid }: NewEmailFormProps) => {
   return (
     <Reveal open={isOpen}>
       <form
-        className={styles.emailForm}
+        className={loginDetails.emailForm}
         noValidate
         onSubmit={(event) => void sendCodes(event)}
       >
@@ -77,7 +78,7 @@ export const NewEmailForm = ({ settings, login, uid }: NewEmailFormProps) => {
           </button>
           <button
             type="button"
-            className={joinClassNames(styles.cancel, shared.focusRing)}
+            className={joinClassNames(loginDetails.cancel, shared.focusRing)}
             data-ac-in="1"
             onClick={() => setState({ emailFlow: null })}
           >

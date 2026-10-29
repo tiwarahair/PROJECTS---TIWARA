@@ -19,7 +19,7 @@ describe("appeal page messages", () => {
 
   it("tells an expired link from a failed load", () => {
     expect(getClosedMessage(undefined, "link_not_valid").title).toBe(
-      "This link has expired",
+      "This link isn’t valid",
     );
 
     expect(getClosedMessage(undefined, "unknown")).toMatchObject({

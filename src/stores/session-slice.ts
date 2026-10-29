@@ -4,6 +4,7 @@ import {
   type PayloadAction,
 } from "@reduxjs/toolkit";
 import { supabase } from "../lib/supabase";
+import { revokeTrustedDevices } from "../lib/trusted-devices";
 import type { SessionUser } from "../types/session";
 
 interface SessionState {
@@ -41,10 +42,25 @@ export const sessionSlice = createSlice({
 
 export const { sessionChanged, signedOut } = sessionSlice.actions;
 
-/** logs out this device only; "global" logs out every device */
-export const logOut =
-  (scope: "local" | "global" = "local") =>
-  (dispatch: Dispatch) => {
-    dispatch(signedOut());
-    void supabase.auth.signOut({ scope });
-  };
+/** logs out this device only */
+export const logOut = () => (dispatch: Dispatch) => {
+  dispatch(signedOut());
+  void supabase.auth.signOut({ scope: "local" });
+};
+
+/** Ends every session and trusted device; this device stays signed in if the server didn't confirm it. */
+export const logOutEverywhere = () => async (dispatch: Dispatch) => {
+  const revoking = revokeTrustedDevices().catch(() => undefined);
+
+  const waiting = new Promise((resolve) => {
+    setTimeout(resolve, 2000);
+  });
+
+  await Promise.race([revoking, waiting]);
+
+  const { error } = await supabase.auth.signOut({ scope: "global" });
+
+  if (error) throw error;
+
+  dispatch(signedOut());
+};

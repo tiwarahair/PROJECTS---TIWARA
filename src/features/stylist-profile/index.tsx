@@ -6,6 +6,8 @@ import { SiteHeader } from "../../components/site-header";
 import { WelcomeToast } from "../../components/welcome-toast";
 import { useFavourites } from "../../hooks/use-favourites";
 import { getShareData, useShare } from "../../hooks/use-share";
+import { EMPTY_CATALOGUE } from "../../lib/catalogue";
+import { useGetCatalogueQuery } from "../../stores/api-slice";
 import { getAssetUrl } from "../../utils/asset-url";
 import { joinClassNames } from "../../utils/class-names";
 import { getLastSearch, markSearchBack } from "../../utils/last-search";
@@ -21,6 +23,7 @@ import {
   countServices,
   getBookHref,
   getMenuGroups,
+  getPhotoService,
   hasMoreServices,
   limitMenuGroups,
 } from "./profile-menu";
@@ -57,6 +60,7 @@ export const StylistProfileView = ({
   const navigate = useNavigate();
   const { isFavourite, toggleFavourite } = useFavourites();
   const { share, copyLink } = useShare();
+  const { data: catalogue, isError: isCatalogueError } = useGetCatalogueQuery();
 
   useRevealSweep(pageGlobal.rvIn ?? "");
 
@@ -72,7 +76,11 @@ export const StylistProfileView = ({
   const menuGroups = useMemo(() => getMenuGroups(stylist), [stylist]);
   const facts = getProfileFacts(stylist, socials);
   const status = getOpenStatus(hours, nextStart);
-  const back = getLastSearch();
+
+  const back = getLastSearch(
+    isCatalogueError ? (catalogue ?? EMPTY_CATALOGUE) : catalogue,
+  );
+
   const bookHref = isTakingBookings ? getBookHref(stylist.id) : "";
   const shareData = getShareData({ id: stylist.id, name, area });
   const saved = isFavourite(stylist.id);
@@ -85,6 +93,11 @@ export const StylistProfileView = ({
     event.preventDefault();
     navigate(back.href);
   };
+
+  const zoomedService =
+    zoomIndex == null
+      ? null
+      : getPhotoService(stylist, menuGroups, gallery[zoomIndex] ?? "");
 
   const zoomTo = (src: string) =>
     setZoomIndex(Math.max(0, gallery.indexOf(src)));
@@ -201,6 +214,15 @@ export const StylistProfileView = ({
           index={zoomIndex}
           onIndexChange={setZoomIndex}
           onClose={() => setZoomIndex(null)}
+          service={
+            zoomedService && {
+              name: zoomedService.name,
+              open: () => {
+                setZoomIndex(null);
+                setServiceModal(zoomedService);
+              },
+            }
+          }
         />
       )}
       <div className={styles.footer}>

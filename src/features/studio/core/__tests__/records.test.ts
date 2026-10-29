@@ -12,6 +12,7 @@ import {
   toVariationRow,
 } from "../../services/records";
 import { fromHours } from "../../settings/records";
+import { TEST_CATALOGUE } from "../../../../test/catalogue";
 import { getStudioRow } from "../../../../test/studio-seed";
 import { getInitialStudioState } from "../initial-state";
 import {
@@ -140,6 +141,7 @@ describe("studio-records", () => {
       toStudioService(SERVICE_ROW),
       "stylist-1",
       3,
+      TEST_CATALOGUE.types,
     );
 
     expect(row).toMatchObject({
@@ -173,18 +175,31 @@ describe("studio-records", () => {
     ]);
   });
 
+  it("marks every variation offered, so sizes and own options save in one insert", () => {
+    const { variations } = fromStudioService(
+      toStudioService(SERVICE_ROW),
+      "stylist-1",
+      0,
+      TEST_CATALOGUE.types,
+    );
+
+    expect(variations.map(({ offered }) => offered)).not.toContain(undefined);
+  });
+
   it("gives a service with no type its group's matching type, else the group's Other", () => {
     const service = { ...toStudioService(SERVICE_ROW), typeId: null };
 
-    expect(fromStudioService(service, "stylist-1", 0).row.service_type_id).toBe(
-      "knotless-braids",
-    );
+    expect(
+      fromStudioService(service, "stylist-1", 0, TEST_CATALOGUE.types).row
+        .service_type_id,
+    ).toBe("knotless-braids");
 
     const renamed = { ...service, subcategory: "Fishtail braids" };
 
-    expect(fromStudioService(renamed, "stylist-1", 0).row.service_type_id).toBe(
-      "other-braids",
-    );
+    expect(
+      fromStudioService(renamed, "stylist-1", 0, TEST_CATALOGUE.types).row
+        .service_type_id,
+    ).toBe("other-braids");
   });
 
   it("saves an add-on's pounds and time as pence and minutes", () => {
@@ -278,10 +293,42 @@ describe("toStudioPatch", () => {
     expect(shown).toMatchObject({ mode: "none", deposit: 20 });
 
     expect(rules).toEqual({
-      minNotice: 24,
+      minNoticeMinutes: 1440,
       maxNotice: 3,
       extra: 0,
       travel: 0,
     });
+  });
+
+  it("puts each photo on its service, in portfolio order, and saves the ids back", () => {
+    const photo = (id: string, sort: number, serviceId: string | null) => ({
+      id,
+      stylist_id: "stylist-1",
+      service_id: serviceId,
+      path: `stylist-1/portfolio/${id}-full.jpg`,
+      sort,
+      created_at: "",
+    });
+
+    const { services = [] } = toStudioPatch(
+      getStudioRow({
+        portfolio_photos: [
+          photo("late", 2, "s-1"),
+          photo("loose", 1, null),
+          photo("early", 0, "s-1"),
+        ],
+      }),
+      getInitialStudioState(),
+    );
+
+    const [service] = services;
+
+    if (!service) throw new Error("the studio row has a service");
+
+    expect(service.photoIds).toEqual(["early", "late"]);
+
+    expect(
+      fromStudioService(service, "stylist-1", 0, TEST_CATALOGUE.types).photoIds,
+    ).toEqual(["early", "late"]);
   });
 });

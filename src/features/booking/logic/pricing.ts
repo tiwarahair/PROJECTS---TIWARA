@@ -2,6 +2,7 @@
 import type { Stylist } from "../../../types/stylist";
 import { policyLines } from "../../../utils/pricing";
 import type { PolicySummary } from "../../../utils/pricing";
+import { formatDuration } from "../../../utils/dates";
 import { formatServiceDuration } from "../../../utils/services";
 import type { ServiceOptions } from "../../../utils/services";
 import type { Service } from "../../../types/service";
@@ -88,12 +89,10 @@ export const getDeltaLabel = (
   const minutes = minutesDelta || 0;
   const parts: string[] = [];
 
-  if (price) parts.push((price > 0 ? "+£" : "−£") + Math.abs(price));
+  if (price) parts.push((price > 0 ? "+" : "−") + formatMoney(Math.abs(price)));
 
   if (minutes && showMinutes)
-    parts.push(
-      (minutes > 0 ? "+" : "−") + formatServiceDuration(Math.abs(minutes)),
-    );
+    parts.push((minutes > 0 ? "+" : "−") + formatDuration(Math.abs(minutes)));
 
   return parts.join(" ");
 };

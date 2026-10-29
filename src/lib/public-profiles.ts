@@ -5,6 +5,7 @@ import { supabase } from "./supabase";
 export type ServiceRow = Tables<"services"> & {
   service_variations: Tables<"service_variations">[];
   service_addons: Tables<"service_addons">[];
+  photos: string[];
 };
 
 export type WorkingHours = Tables<"working_hours">;

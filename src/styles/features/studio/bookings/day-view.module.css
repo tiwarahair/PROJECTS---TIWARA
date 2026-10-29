@@ -62,7 +62,7 @@
   align-items: flex-start;
   gap: 6px;
   top: var(--top);
-  height: var(--h);
+  height: var(--height);
 }
 
 .dayBlocked:active {
@@ -98,7 +98,7 @@
   gap: 1px;
   transition: transform 0.16s cubic-bezier(0.2, 0.8, 0.2, 1);
   top: var(--top);
-  height: var(--h);
+  height: var(--height);
   background: var(--bk-bg);
   box-shadow: inset 3px 0 0 var(--bk-bar);
   border: 1px var(--bk-dash) var(--bk-line);
@@ -173,7 +173,7 @@
   padding: 0 8px;
   overflow: hidden;
   top: var(--top);
-  height: var(--h);
+  height: var(--height);
   background: var(--stub-bg);
   border: 1px dashed var(--stub-dash);
   border-top: none;

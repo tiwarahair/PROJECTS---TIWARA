@@ -34,7 +34,9 @@ export const SearchBar = ({ studio, view }: SearchBarProps) => {
           styles.filterButton,
           !!view.filterCount && styles.filterButtonOn,
         )}
-        onClick={() => setState({ filterOpen: true, filterOut: false })}
+        onClick={() =>
+          setState({ filterOpen: true, filterOut: false, filterDraft: {} })
+        }
         aria-label="Filter bookings"
       >
         <ListFilter size={15} strokeWidth={1.8} />

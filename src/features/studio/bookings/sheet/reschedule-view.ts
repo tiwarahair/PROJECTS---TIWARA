@@ -5,7 +5,6 @@ import { dayInfo, timeToMinutes } from "../../core/format";
 import {
   getBookingBuffer,
   getConflicts,
-  getNowMinutes,
   getSlots,
   getWorkingHours,
 } from "../../core/model";
@@ -14,6 +13,7 @@ import { saveToBooking } from "../save";
 import { getTimeHints } from "../time-hints";
 import type { StudioBooking } from "../../core/types";
 import type { SheetContext } from "./context";
+import { getMinutesOfDay } from "../../../../utils/dates";
 
 /** The free-cancellation deadline moves with the booking, as it does when saved. */
 const getMovedDeadline = (
@@ -61,7 +61,7 @@ export const getRescheduleView = ({
   const isPastTime =
     rescheduleDay === 0 &&
     !!rescheduleTime &&
-    timeToMinutes(rescheduleTime) <= getNowMinutes();
+    timeToMinutes(rescheduleTime) <= getMinutesOfDay();
 
   const canMove = rescheduleDay != null && !!rescheduleTime && !isPastTime;
   const isDoubleBooking = conflicts.some(({ kind }) => kind === "booking");

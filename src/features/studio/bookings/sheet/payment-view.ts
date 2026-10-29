@@ -11,7 +11,7 @@ const getReceived = (booking: DecoratedBooking): ReceivedLine => {
       key: "paid",
       label: paidKind === "deposit" ? "Deposit" : "Paid in full",
       subtitle: "Card · online at booking",
-      value: `£${booking.price - booking.dueAmount}`,
+      value: `${formatMoney(booking.price - booking.dueAmount)}`,
       tone: "paid",
     };
 
@@ -51,7 +51,11 @@ export const getPaymentView = ({
   servicePrice,
 }: SheetContext) => ({
   payLines: [
-    { key: "svc", label: booking.service, value: `£${servicePrice}` },
+    {
+      key: "svc",
+      label: booking.service,
+      value: `${formatMoney(servicePrice)}`,
+    },
   ].concat(addonLines.map(({ key, label, value }) => ({ key, label, value }))),
   payReceived: [getReceived(booking)],
   payFeeLabel: formatMoney(

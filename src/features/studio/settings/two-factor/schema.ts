@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { getFieldFlagger } from "../../../../utils/validation";
 
 export interface TwoFactorValues {
   name: string;
@@ -14,8 +15,7 @@ export const getTwoFactorSchema = ({ isNaming, deviceNames }: TwoFactorRules) =>
   z
     .object({ name: z.string(), code: z.string() })
     .superRefine(({ name, code }, context) => {
-      const flag = (path: keyof TwoFactorValues, message: string) =>
-        context.addIssue({ code: "custom", path: [path], message });
+      const flag = getFieldFlagger(context);
 
       const trimmed = name.trim().toLowerCase();
 

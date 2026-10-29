@@ -1,7 +1,8 @@
 // A booking's fee and refunds from the database → the flags Past shows and acts on.
 import type { StudioBookingRow } from "../../../lib/studio-api/bookings";
-import { formatMoney } from "../../../utils/money";
+import { formatPence, toPounds } from "../../../utils/money";
 import type { PastRecord } from "../core/types";
+import { getNumber } from "./row-values";
 
 type FeeRow = StudioBookingRow["booking_fees"][number];
 
@@ -9,11 +10,6 @@ type FeeRow = StudioBookingRow["booking_fees"][number];
 const MAX_TRIES = 3;
 // after this many failed settlement runs the fee is left for us to look at
 const MAX_FAILED_RUNS = 5;
-
-export const toPounds = (pence: number) => pence / 100;
-
-const formatPence = (pence: number) =>
-  formatMoney(toPounds(pence), { pence: "always" });
 
 /** The booking's current fee (a voided one belongs to an undone no-show). */
 export const getLatestFee = ({ booking_fees: fees }: StudioBookingRow) =>
@@ -65,6 +61,17 @@ const getStatusFlags = (
     return { feeKept: true, meta: "Fee recorded" };
 
   return { feeKept: true, meta: "Fee kept" };
+};
+
+export const getKeptDepositPence = (
+  { status, cancellation }: StudioBookingRow,
+  fee: FeeRow | undefined,
+) => {
+  if (status !== "no_show" && status !== "cancelled") return 0;
+
+  if (fee?.amount_pence || fee?.waived_at) return 0;
+
+  return fee?.kept_pence || getNumber(cancellation, "kept_pence");
 };
 
 /** Past's fee flags; nothing for a no-charge settlement, which only refunds. */

@@ -1,8 +1,8 @@
 import { render } from "@testing-library/react";
 import { describe, expect, it } from "vitest";
-import { AddressRowSkeleton } from "../address-row-skeleton";
-import { ProfileSkeleton } from "../profile-skeleton";
-import { StudioSkeleton } from "../studio-skeleton";
+import { AddressRowSkeleton } from "../address-row";
+import { ProfileSkeleton } from "../profile";
+import { StudioSkeleton } from "../studio";
 
 describe("skeletons", () => {
   it("AddressRowSkeleton renders hidden from screen readers", () => {

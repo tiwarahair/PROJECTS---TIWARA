@@ -49,4 +49,5 @@ export interface Service {
   customisations: ServiceCustomisations | null;
   ownCustomisations: OwnCustomisation[];
   addons: ServiceAddon[];
+  photos?: string[];
 }

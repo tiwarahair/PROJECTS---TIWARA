@@ -1,11 +1,11 @@
 import { Calendar, MapPin } from "lucide-react";
-import { useEffect, useLayoutEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { Link } from "react-router";
 import { LinkPayment } from "../../components/link-payment";
 import { PageMessage } from "../../components/page-message";
-import { ManageBookingSkeleton } from "../../components/skeleton/manage-booking-skeleton";
+import { ManageBookingSkeleton } from "../../components/skeleton/manage-booking";
 import { useIsSlow } from "../../hooks/use-is-slow";
-import { usePrivateLink } from "../../hooks/use-private-link";
+import { useLinkPage } from "../../hooks/use-link-page";
 import {
   useGetBookingConfirmationQuery,
   useStartBookingConfirmationMutation,
@@ -13,7 +13,6 @@ import {
 import { getAssetUrl } from "../../utils/asset-url";
 import { joinClassNames } from "../../utils/class-names";
 import "../../styles/features/manage-booking/global.module.css";
-import { formatPence, formatWhen } from "../pay-fee/logic";
 import {
   CONFIRM_ERRORS,
   getClosedMessage,
@@ -25,10 +24,12 @@ import card from "../../styles/features/manage-booking/booking-card.module.css";
 import frame from "../../styles/features/manage-booking/index.module.css";
 import pay from "../../styles/features/pay-fee/index.module.css";
 import styles from "../../styles/features/confirm-booking/index.module.css";
+import { formatPence } from "../../utils/money";
+import { formatLondonDateTime } from "../../utils/dates";
 
 /** The client's confirm page for a booking their >stylist< made, opened from their email. */
 export const ConfirmBookingPage = () => {
-  const token = usePrivateLink({ storageKey: "tw_confirm_token" });
+  const token = useLinkPage("tw_confirm_token");
   const [isPaid, setPaid] = useState(false);
   const [isWaiting, setWaiting] = useState(false);
   const [startConfirmation] = useStartBookingConfirmationMutation();
@@ -45,12 +46,6 @@ export const ConfirmBookingPage = () => {
   }, [isWaiting, confirmation]);
 
   const isSlow = useIsSlow(isFetching && !confirmation);
-
-  useLayoutEffect(() => {
-    document.documentElement.classList.add("manage-page");
-
-    return () => document.documentElement.classList.remove("manage-page");
-  }, []);
 
   const getContent = () => {
     if (isSlow) return <ManageBookingSkeleton />;
@@ -78,7 +73,7 @@ export const ConfirmBookingPage = () => {
           <div className={card.facts}>
             <span className={card.fact}>
               <Calendar size={15} strokeWidth={1.5} />
-              {formatWhen(confirmation.starts_at)}
+              {formatLondonDateTime(confirmation.starts_at)}
             </span>
             <span className={card.fact}>
               <MapPin size={15} strokeWidth={1.5} />
@@ -133,7 +128,7 @@ export const ConfirmBookingPage = () => {
           }}
         />
         <p className={pay.note}>
-          {`By confirming, you agree to ${confirmation.stylist_name}’s cancellation policy and our Terms. Please confirm by ${formatWhen(confirmation.confirm_by)}, or the appointment is cancelled and the time released.`}
+          {`By confirming, you agree to ${confirmation.stylist_name}’s cancellation policy and our Terms. Please confirm by ${formatLondonDateTime(confirmation.confirm_by)}, or the appointment is cancelled and the time released.`}
         </p>
       </>
     );

@@ -1,5 +1,5 @@
 // "Back to results" memory shared by Search and Stylist Profile.
-import { serviceGroups, serviceTypes } from "../data";
+import type { Catalogue } from "../types/catalogue";
 import { readSession, writeSession } from "./page-flags";
 import { formatWeekdayDate } from "./dates";
 
@@ -11,23 +11,21 @@ export interface LastSearch {
   has: boolean;
   href: string;
   label: string;
-  summary: string;
+  summary: string | null;
 }
 
-const findByIdOrSlug = <T extends { id: string; slug: string }>(
-  list: T[],
-  value: string,
-): T | undefined =>
-  list.filter(({ id, slug }) => id === value || slug === value)[0];
+const findName = (list: { id: string; name: string }[], value: string) =>
+  list.find(({ id }) => id === value)?.name || value;
 
 const getSearchWhat = (
+  { groups, types }: Catalogue,
   type: string | null,
   group: string | null,
   query: string | null,
 ) => {
-  if (type) return findByIdOrSlug(serviceTypes, type)?.name || type;
+  if (type) return findName(types, type);
 
-  if (group) return findByIdOrSlug(serviceGroups, group)?.name || group;
+  if (group) return findName(groups, group);
 
   if (query) return `‘${query}’`;
 
@@ -35,12 +33,15 @@ const getSearchWhat = (
 };
 
 /** "Knotless braids · Chorlton · Sat 12 Sep, Morning" */
-export const getSearchSummary = (href: string): string => {
+export const getSearchSummary = (
+  href: string,
+  catalogue: Catalogue,
+): string => {
   const params = new URLSearchParams(href.split("?")[1] || "");
   const group = params.get("group") || params.get("service");
   const type = params.get("type");
   const query = params.get("q");
-  const what = getSearchWhat(type, group, query);
+  const what = getSearchWhat(catalogue, type, group, query);
   const where = params.get("loc") || "Current location";
   const date = params.get("date");
   const time = params.get("time");
@@ -58,7 +59,7 @@ export const getSearchSummary = (href: string): string => {
   return [what, where, when || "Any time"].join(" · ");
 };
 
-export const getLastSearch = (): LastSearch => {
+export const getLastSearch = (catalogue?: Catalogue): LastSearch => {
   const href = readSession(LAST_SEARCH_KEY);
 
   if (!href)
@@ -73,11 +74,11 @@ export const getLastSearch = (): LastSearch => {
     has: true,
     href,
     label: "Back to results",
-    summary: getSearchSummary(href),
+    summary: catalogue ? getSearchSummary(href, catalogue) : null,
   };
 };
 
 /** Marks the next Search visit as a "back" so it restores the saved scroll position. */
 export const markSearchBack = (): void => {
-  if (getLastSearch().has) writeSession(SEARCH_BACK_KEY, "1");
+  if (readSession(LAST_SEARCH_KEY)) writeSession(SEARCH_BACK_KEY, "1");
 };

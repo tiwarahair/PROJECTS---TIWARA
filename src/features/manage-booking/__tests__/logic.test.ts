@@ -1,6 +1,11 @@
 import { describe, expect, it } from "vitest";
 import type { ManagedBooking } from "../../../lib/manage-booking-api";
-import { getCancelLines, getLateRescheduleWarning } from "../logic";
+import {
+  getCancelLines,
+  getLateRescheduleWarning,
+  getRescheduleNote,
+  getTermsLine,
+} from "../logic";
 
 const booking = {
   stylist_name: "Tiwára's House",
@@ -103,5 +108,44 @@ describe("the late reschedule warning", () => {
     expect(
       getLateRescheduleWarning(withWindow(1), "2026-10-14T09:30:00Z", now),
     ).toContain("within 1 hour,");
+  });
+});
+
+describe("a stylist with no booking policy", () => {
+  const noPolicy = (isLate: boolean) =>
+    ({
+      ...booking,
+      terms: { ...booking.terms, mode: "none" },
+      cancellation: terms(0, 0, 0, isLate),
+    }) as ManagedBooking;
+
+  it("after the free window, only the booking fee is kept, with no late terms", () => {
+    expect(getTermsLine(noPolicy(true))).toBe(
+      "The free cancellation time has passed, so the booking fee isn’t refunded.",
+    );
+  });
+
+  it("warns that moving inside the window only costs the booking fee", () => {
+    expect(
+      getLateRescheduleWarning(
+        noPolicy(false),
+        "2026-10-14T10:00:00Z",
+        Date.parse("2026-10-14T09:00:00Z"),
+      ),
+    ).toBe(
+      "This time is within 48 hours, so the booking fee won’t be refunded if you cancel.",
+    );
+  });
+
+  it("never says rescheduling closes at the free-cancellation time", () => {
+    expect(getRescheduleNote(noPolicy(true))).toBe("");
+
+    expect(getRescheduleNote({ ...noPolicy(true), reschedule_count: 1 })).toBe(
+      "You've already used your 1 free reschedule.",
+    );
+
+    expect(getRescheduleNote(booking)).toBe(
+      "You can't reschedule after the free cancellation time.",
+    );
   });
 });

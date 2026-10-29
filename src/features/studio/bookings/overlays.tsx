@@ -72,10 +72,10 @@ export const FilterSheet = ({
           ))}
         </div>
         <div className={styles.actions}>
-          <button className={styles.clear} onClick={view.clearFilter}>
+          <button className={styles.clear} onClick={view.clearDraft}>
             Clear all
           </button>
-          <button className={styles.show} onClick={view.closeFilter}>
+          <button className={styles.show} onClick={view.applyFilter}>
             {view.filterCta}
           </button>
         </div>

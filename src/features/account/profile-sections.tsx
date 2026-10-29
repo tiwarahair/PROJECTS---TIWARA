@@ -2,7 +2,7 @@ import { Heart, Sparkles } from "lucide-react";
 import { useEffect, useMemo } from "react";
 import { Link } from "react-router";
 import { PageMessage } from "../../components/page-message";
-import { StylistCardSkeleton } from "../../components/skeleton/stylist-card-skeleton";
+import { StylistCardSkeleton } from "../../components/skeleton/stylist-card";
 import { toPublicStylist } from "../../lib/public-stylist";
 import { useGetStylistProfileQuery } from "../../stores/api-slice";
 import { setFavourite } from "../../stores/favourites-slice";

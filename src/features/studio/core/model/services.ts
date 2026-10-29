@@ -1,4 +1,3 @@
-import { serviceTypes } from "../../../../data";
 import { formatDuration } from "../../../../utils/dates";
 import { CATEGORY_COLOURS, NO_CATEGORY_TONE } from "../constants";
 import { parseNumber, parseWholeNumber } from "../format";
@@ -9,6 +8,7 @@ import type {
   StudioService,
   StudioState,
 } from "../types";
+import { formatMoney } from "../../../../utils/money";
 
 export const getSortedCategories = (state: StudioState): StudioCategory[] =>
   state.categories.slice().sort((first, second) => first.sort - second.sort);
@@ -59,19 +59,6 @@ export const getCategoryNameError = (
   return duplicate
     ? `You already have a category called ‘${duplicate.name}’`
     : "";
-};
-
-export const getTypeOf = (service: StudioService | null | undefined) => {
-  if (!service) return null;
-
-  return (
-    serviceTypes.find(({ id }) => id === service.typeId) ??
-    serviceTypes.find(
-      ({ groupId, name }) =>
-        groupId === service.taxonomyId && name === service.subcategory,
-    ) ??
-    null
-  );
 };
 
 const findService = (state: StudioState, name: string) =>
@@ -130,5 +117,5 @@ export const formatAddon = (addon: AddonAmounts): string => {
   const price = parseNumber(addon.price);
   const timeLabel = minutes ? formatDuration(minutes) : "no extra time";
 
-  return `+£${price}, ${timeLabel}`;
+  return `+${formatMoney(price)}, ${timeLabel}`;
 };

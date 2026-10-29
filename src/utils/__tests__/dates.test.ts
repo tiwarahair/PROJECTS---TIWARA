@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
 import {
+  formatLondonDateTime,
   LONG_MONTHS,
   LONG_WEEKDAYS,
   MONDAY_FIRST_WEEKDAYS,
@@ -7,6 +8,7 @@ import {
   SHORT_MONTHS_SEPT,
   SHORT_WEEKDAYS,
   formatClockTime,
+  getMinutesOfDay,
   formatDuration,
   formatWeekdayDate,
   toIsoDate,
@@ -75,5 +77,23 @@ describe("formatDuration", () => {
 
   it("rounds to whole minutes", () => {
     expect(formatDuration(44.6)).toBe("45m");
+  });
+});
+
+describe("getMinutesOfDay", () => {
+  it("counts minutes since midnight", () => {
+    expect(getMinutesOfDay(new Date(2026, 8, 7, 9, 45))).toBe(585);
+  });
+});
+
+describe("formatLondonDateTime", () => {
+  it("shows UK time in winter and summer", () => {
+    expect(formatLondonDateTime("2026-11-20T10:00:00Z")).toBe(
+      "Fri 20 Nov, 10:00",
+    );
+
+    expect(formatLondonDateTime("2026-07-20T10:00:00Z")).toBe(
+      "Mon 20 Jul, 11:00",
+    );
   });
 });

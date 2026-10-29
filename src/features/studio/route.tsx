@@ -1,9 +1,11 @@
 import { skipToken } from "@reduxjs/toolkit/query";
 import { Navigate } from "react-router";
-import { StudioSkeleton } from "../../components/skeleton/studio-skeleton";
+import { StudioSkeleton } from "../../components/skeleton/studio";
 import { useIdentity } from "../../hooks/use-identity";
 import { useIsSlow } from "../../hooks/use-is-slow";
 import {
+  useGetCatalogueQuery,
+  useGetSecondFactorPassedQuery,
   useGetStudioBookingsQuery,
   useGetStylistStudioQuery,
   useGetTwoFactorDevicesQuery,
@@ -21,9 +23,19 @@ export const StudioRoute = () => {
 
   const identity = useIdentity();
 
+  const {
+    data: isSecondFactorPassed,
+    isFetching: isCheckingSecondFactor,
+    isError: isSecondFactorError,
+  } = useGetSecondFactorPassedQuery(user?.isStylist ? user.id : skipToken, {
+    refetchOnMountOrArgChange: true,
+  });
+
+  const canLoadStudio = !!user?.isStylist && isSecondFactorPassed === true;
+
   // every Studio save invalidates this cache (onStudioWrite), so a cached copy is never older than the last save
   const { data: studio, isError: isStudioError } = useGetStylistStudioQuery(
-    user?.isStylist ? user.id : skipToken,
+    canLoadStudio && user ? user.id : skipToken,
     { refetchOnMountOrArgChange: 30 },
   );
 
@@ -37,11 +49,14 @@ export const StudioRoute = () => {
       refetchOnMountOrArgChange: 30,
     });
 
+  const { data: catalogue, isError: isCatalogueError } = useGetCatalogueQuery();
+
   const isLoading =
     !ready ||
     (!!user?.isStylist &&
       (!studio ||
         !bookings ||
+        !catalogue ||
         !identity?.isLoaded ||
         (!devices && !isDevicesError)));
 
@@ -54,8 +69,16 @@ export const StudioRoute = () => {
 
   if (!user.isStylist) return <Navigate to="/join" replace />;
 
+  if (isSecondFactorPassed === false && !isCheckingSecondFactor)
+    return <Navigate to="/login?screen=pro-2fa" replace />;
+
   // a failed background refresh keeps the Studio that's already open
-  if ((isStudioError && !studio) || (isBookingsError && !bookings))
+  if (
+    (isStudioError && !studio) ||
+    (isBookingsError && !bookings) ||
+    (isCatalogueError && !catalogue) ||
+    (isSecondFactorError && !isSecondFactorPassed)
+  )
     return (
       <PageMessage
         title="Studio didn’t load"
@@ -66,7 +89,7 @@ export const StudioRoute = () => {
       />
     );
 
-  if (isLoading || !studio || !bookings || !identity?.isLoaded)
+  if (isLoading || !studio || !bookings || !catalogue || !identity?.isLoaded)
     return isSlow ? <StudioSkeleton /> : null;
 
   if (studio.status === "closed" && studio.closed_at)
@@ -86,6 +109,7 @@ export const StudioRoute = () => {
         studio,
         bookings,
         devices: devices ?? [],
+        catalogue,
       }}
     />
   );

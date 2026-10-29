@@ -1,4 +1,4 @@
--- Local only (runs on db reset): the demo stylists from src/data/stylists.json as live businesses.
+-- Local only (runs on db reset): the demo stylists as live businesses (this file is their source now).
 -- Generated; photo paths starting with demo/ are app assets, not Storage objects.
 insert into auth.users (id, instance_id, aud, role, email, raw_user_meta_data, raw_app_meta_data,
   created_at, updated_at, confirmation_token, recovery_token, email_change, email_change_token_new) values

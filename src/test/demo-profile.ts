@@ -1,6 +1,7 @@
-import { stylists } from "../data";
+import { DEMO_STYLISTS } from "./fixtures/demo-stylists";
 import type { PublicProfile, ServiceRow } from "../lib/public-profiles";
 import type { Service } from "../types/service";
+import { fromFeeKind } from "../utils/fee-kind";
 
 const pence = (pounds: number) => Math.round(pounds * 100);
 
@@ -20,7 +21,7 @@ const LONDON_HOUR = new Intl.DateTimeFormat("en-GB", {
 });
 
 export const getDemoProfile = (slug: string): PublicProfile => {
-  const stylist = stylists.find(({ id }) => id === slug);
+  const stylist = DEMO_STYLISTS.find(({ id }) => id === slug);
 
   if (!stylist) throw new Error(`No demo stylist ${slug}`);
 
@@ -83,6 +84,7 @@ export const getDemoProfile = (slug: string): PublicProfile => {
       price_override_pence: pence(price),
       minutes_override: minutes,
     })),
+    photos: [],
   });
 
   const { policies } = stylist;
@@ -148,10 +150,10 @@ export const getDemoProfile = (slug: string): PublicProfile => {
       free_window_hours: policies.freeWindowHours,
       grace_minutes: policies.graceMinutes,
       late_on: policies.late.on,
-      late_kind: policies.late.kind,
+      late_kind: fromFeeKind(policies.late.kind),
       late_percent: policies.late.percent,
       no_show_on: policies.noShow.on,
-      no_show_kind: policies.noShow.kind,
+      no_show_kind: fromFeeKind(policies.noShow.kind),
       no_show_percent: policies.noShow.percent,
       extras: [],
       created_at: "",
@@ -159,6 +161,7 @@ export const getDemoProfile = (slug: string): PublicProfile => {
     portfolio_photos: stylist.portfolio.map((path, sort) => ({
       id: `${slug}-photo-${sort}`,
       stylist_id: slug,
+      service_id: null,
       path,
       sort,
       created_at: "",

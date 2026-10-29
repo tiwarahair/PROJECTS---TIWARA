@@ -1,9 +1,10 @@
 import { ArrowLeft } from "lucide-react";
-import { useLayoutEffect, useState } from "react";
+import { useState } from "react";
 import { Link, Navigate } from "react-router";
 import { PageMessage } from "../../components/page-message";
-import { ManageBookingSkeleton } from "../../components/skeleton/manage-booking-skeleton";
+import { ManageBookingSkeleton } from "../../components/skeleton/manage-booking";
 import { useIsSlow } from "../../hooks/use-is-slow";
+import { useLinkPage } from "../../hooks/use-link-page";
 import { usePrivateLink } from "../../hooks/use-private-link";
 import {
   getErrorMessage,
@@ -22,16 +23,26 @@ export interface ManageBookingPageProps {
   view?: "booking" | "account";
 }
 
-const getMessage = (isError: boolean) =>
-  isError
-    ? {
-        title: "We couldn’t load your booking",
-        text: "Check your connection and try again.",
-      }
-    : {
-        title: "This link isn’t valid",
-        text: "Manage links work until 30 days after the appointment. Use the link in your latest booking email.",
-      };
+const MESSAGES = {
+  error: {
+    title: "We couldn’t load your booking",
+    text: "Check your connection and try again.",
+  },
+  missing: {
+    title: "Open this from your booking email",
+    text: "For your security, this page only opens from the link in your booking email. Copying the address from your browser won’t work.",
+  },
+  invalid: {
+    title: "This link isn’t valid",
+    text: "Manage links work until 30 days after the appointment. Use the link in your latest booking email.",
+  },
+};
+
+const getMessage = (isError: boolean, hasToken: boolean) => {
+  if (isError) return MESSAGES.error;
+
+  return hasToken ? MESSAGES.invalid : MESSAGES.missing;
+};
 
 /**
  * The booking-link page, route "/manage?token=": the booking, changing its time once, cancelling, and the
@@ -44,7 +55,7 @@ export const ManageBookingPage = ({
   const ref = params.get("ref") ?? "";
   const isAccount = (params.get("view") || view) === "account";
   const { ready, loggedIn } = useAppSelector(({ session }) => session);
-  const linkToken = usePrivateLink({ storageKey: "tw_manage_token" });
+  const linkToken = useLinkPage("tw_manage_token");
   const secureToken = usePrivateLink({ param: "secure" });
   const isOwnerLink = !!ref && !params.get("token");
 
@@ -74,12 +85,6 @@ export const ManageBookingPage = ({
 
   const isSlow = useIsSlow(isLoading && !booking);
 
-  useLayoutEffect(() => {
-    document.documentElement.classList.add("manage-page");
-
-    return () => document.documentElement.classList.remove("manage-page");
-  }, []);
-
   if (isAccount) return <Navigate to="/account?section=shared" replace />;
 
   if (isOwnerLink && ready && !loggedIn) {
@@ -106,7 +111,7 @@ export const ManageBookingPage = ({
 
     return (
       <PageMessage
-        {...getMessage(isLoadError)}
+        {...getMessage(isLoadError, !!token || isOwnerLink)}
         linkLabel="Go to Tiwára’s House"
         linkHref="/"
       />

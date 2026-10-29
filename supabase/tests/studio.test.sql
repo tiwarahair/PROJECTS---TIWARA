@@ -1,5 +1,5 @@
 begin;
-select plan(37);
+select plan(38);
 
 create function pg_temp.sign_up(user_id uuid, user_email text, meta jsonb)
 returns void
@@ -47,7 +47,7 @@ grant select on ids to authenticated;
 -- defaults for a new stylist
 select is((select count(*)::int from public.working_hours where stylist_id = (select one from ids)), 7, 'a new stylist gets 7 days of hours');
 select is((select count(*)::int from public.working_hours where stylist_id = (select one from ids) and is_open), 6, 'open Monday to Saturday');
-select is((select min_notice_hours from public.booking_rules where stylist_id = (select one from ids)), 24::smallint, 'default booking rules');
+select is((select min_notice_minutes from public.booking_rules where stylist_id = (select one from ids)), 1440, 'default booking rules');
 select is((select mode from public.payment_policies where stylist_id = (select one from ids)), 'none', 'starts with no payment protection');
 
 select pg_temp.act_as('a1111111-1111-1111-1111-111111111111');
@@ -83,6 +83,8 @@ select is_empty($$select * from public.addons where stylist_id = (select two fro
 
 -- slugs
 select ok(not public.is_slug_free('studio'), 'route names are reserved');
+select ok(not public.is_slug_free('pay') and not public.is_slug_free('confirm') and not public.is_slug_free('card'),
+  'the pages emailed links open are reserved');
 select ok(not public.is_slug_free('ab'), 'slugs are at least 3 characters');
 select throws_ok($$select public.change_slug('Bad Slug!')$$, 'P0001', 'that booking link is not available', 'invalid slugs are refused');
 select is(public.change_slug('crowned-one'), 'crowned-one', 'an owner changes their slug');
@@ -124,10 +126,10 @@ select is(
 
 -- photos
 insert into public.portfolio_photos (stylist_id, path, sort)
-select (select one from ids), 'p/' || n, n from generate_series(1, 20) as n;
+select (select one from ids), 'p/' || n, n from generate_series(1, 40) as n;
 select throws_ok(
-  $$insert into public.portfolio_photos (stylist_id, path, sort) values ((select one from ids), 'p/21', 21)$$,
-  'P0001', 'a portfolio holds up to 20 photos', 'portfolios hold up to 20 photos'
+  $$insert into public.portfolio_photos (stylist_id, path, sort) values ((select one from ids), 'p/41', 41)$$,
+  'P0001', 'a portfolio holds up to 40 photos', 'portfolios hold up to 40 photos'
 );
 select lives_ok(
   $$insert into public.portfolio_photos (stylist_id, path, sort) values ((select two from ids), 'p/1', 0)$$,
@@ -166,7 +168,7 @@ select pg_temp.act_as('a1111111-1111-1111-1111-111111111111');
 select throws_ok($$select public.reopen_business()$$, 'P0001', 'this business can no longer be reopened', 'not after 15 days');
 
 reset role;
-select is((select count(*)::int from public.get_due_closure_photos()), 20, 'the clean-up lists the photos to delete first');
+select is((select count(*)::int from public.get_due_closure_photos()), 40, 'the clean-up lists the photos to delete first');
 select public.purge_closed_businesses();
 select ok(
   (select owner_id is null and business_name = 'Closed business' and location is null from public.stylists where id = (select one from ids))

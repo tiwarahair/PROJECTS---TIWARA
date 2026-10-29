@@ -64,14 +64,13 @@ const getQuarters = () => {
 export const getDayTimeline = ({
   studio,
   state,
-  setState,
-  upcoming,
+  calendarBookings,
   nowMinutes,
 }: BookingsContext) => {
   const { dayIndex } = state;
   const hours = getWorkingHours(state, dayIndex);
 
-  const dayBookings = upcoming.filter(
+  const dayBookings = calendarBookings.filter(
     ({ dayOffset }) => dayOffset === dayIndex,
   );
 
@@ -125,12 +124,15 @@ export const getDayTimeline = ({
       const minutes = getTappedMinutes(quarter);
 
       if (!studio.isWide) {
-        setState({ quickAdd: { time: hhmm(minutes) }, quickAddOut: false });
+        studio.setState({
+          quickAdd: { time: hhmm(minutes) },
+          quickAddOut: false,
+        });
 
         return;
       }
 
-      setState({
+      studio.setState({
         pop: {
           time: hhmm(minutes),
           ...getPopPosition(event),

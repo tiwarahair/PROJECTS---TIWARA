@@ -1,6 +1,6 @@
 import { useFormState } from "react-hook-form";
 import type { CSSProperties } from "react";
-import { AppleLogo, GoogleLogo } from "../../components/icons/brand-icons";
+// import { GoogleLogo } from "../../components/icons/brand-icons";
 import { joinClassNames } from "../../utils/class-names";
 import {
   checkPassword,
@@ -19,14 +19,14 @@ const getPasswordStatus = ({ has, changed }: PasswordState) => {
   return changed ? "Changed just now" : "Set";
 };
 
-/** Login & security: password (change / set, with the strength meter), Google / Apple, log out everywhere. */
+/** Login & security: password (change / set, with the strength meter), Google, log out everywhere. */
 export const SecuritySection = ({
   account: { state, actions, forms },
 }: {
   account: AccountController;
 }) => {
-  const { password, profile, googleConnected, appleConnected } = state;
-  const { setState, showToast } = actions;
+  const { password, profile } = state;
+  const { setState } = actions;
 
   const { register, watch, reset, setValue, clearErrors, control } =
     forms.password;
@@ -44,10 +44,7 @@ export const SecuritySection = ({
 
   const meter = getPasswordView(check, { show: !!errors.next });
 
-  const methods =
-    (password.has ? 1 : 0) +
-    (googleConnected ? 1 : 0) +
-    (appleConnected ? 1 : 0);
+  // const methods = (password.has ? 1 : 0) + (googleConnected ? 1 : 0);
 
   const openPassword = () =>
     setState(
@@ -55,22 +52,15 @@ export const SecuritySection = ({
       () => actions.focusLater("password"),
     );
 
-  const socials = [
-    {
-      key: "googleConnected" as const,
-      name: "Google",
-      Logo: GoogleLogo,
-      on: googleConnected,
-      subtitle: profile.email,
-    },
-    {
-      key: "appleConnected" as const,
-      name: "Apple",
-      Logo: AppleLogo,
-      on: appleConnected,
-      subtitle: "",
-    },
-  ];
+  // const socials = [
+  //   {
+  //     key: "googleConnected" as const,
+  //     name: "Google",
+  //     Logo: GoogleLogo,
+  //     on: googleConnected,
+  //     subtitle: profile.email,
+  //   },
+  // ];
 
   // the meter colours come from the password checker
   const segmentStyle = (background: string) =>
@@ -270,7 +260,8 @@ export const SecuritySection = ({
           )}
         </div>
       </div>
-      <h2 className={ui.headingTop}>Connected accounts</h2>
+      {/* COMMENTING OUT 'connected accounts' for now, since we don't have the backend for it yet. We can add it back in later for google at least when we do (apple is out of scope) */}
+      {/* <h2 className={ui.headingTop}>Connected accounts</h2>
       <p className={styles.intro}>
         Log in with Google or Apple instead of a password.
       </p>
@@ -295,11 +286,7 @@ export const SecuritySection = ({
                 <button
                   className={ui.outlineButton}
                   onClick={() => {
-                    setState(
-                      key === "googleConnected"
-                        ? { googleConnected: !on }
-                        : { appleConnected: !on },
-                    );
+                    setState({ [key]: !on });
 
                     showToast(name + (on ? " disconnected" : " connected"));
                   }}
@@ -315,7 +302,7 @@ export const SecuritySection = ({
             </div>
           );
         })}
-      </div>
+      </div> */}
       <h2 className={ui.headingTop}>Devices</h2>
       <div className={styles.devices}>
         <div className={ui.itemText}>

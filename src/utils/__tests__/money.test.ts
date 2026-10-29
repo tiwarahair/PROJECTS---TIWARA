@@ -1,5 +1,11 @@
 import { describe, expect, it } from "vitest";
-import { formatMoney, roundToPence } from "../money";
+import {
+  formatMoney,
+  formatPence,
+  roundToPence,
+  toPence,
+  toPounds,
+} from "../money";
 
 describe("formatMoney", () => {
   it("drops pence on whole pounds by default", () => {
@@ -38,5 +44,22 @@ describe("roundToPence", () => {
     expect(roundToPence(1.005 + 0.0001)).toBe(1.01);
     expect(roundToPence(2.344)).toBe(2.34);
     expect(roundToPence(-3.456)).toBe(-3.46);
+  });
+});
+
+describe("pence and pounds", () => {
+  it("turns pounds into whole pence, float leftovers and all", () => {
+    expect(toPence(17.26)).toBe(1726);
+    expect(toPence(20 - 2.74)).toBe(1726);
+  });
+
+  it("turns pence into pounds", () => {
+    expect(toPounds(3150)).toBe(31.5);
+  });
+
+  it("formats pence with pence by default, or short for whole pounds", () => {
+    expect(formatPence(8500)).toBe("£85.00");
+    expect(formatPence(8500, { pence: "auto" })).toBe("£85");
+    expect(formatPence(1726)).toBe("£17.26");
   });
 });

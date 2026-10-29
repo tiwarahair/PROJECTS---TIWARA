@@ -136,15 +136,12 @@ describe("Studio → client sheets", () => {
       screen.getByText("Add a phone number or an email address."),
     ).toBeInTheDocument();
 
-    await user.type(
-      screen.getByPlaceholderText("07700 900000"),
-      "07700 900999",
-    );
+    await user.type(screen.getByLabelText("Phone"), "07700 900999");
 
     await user.type(screen.getByLabelText("First name"), "Ada");
     await user.click(save);
     await act(() => vi.advanceTimersByTimeAsync(300));
-    expect(screen.getByText("Ada added")).toBeInTheDocument();
+    expect(screen.getByText("Client saved")).toBeInTheDocument();
   });
 
   it("client errors stay until their own field is fixed", async () => {

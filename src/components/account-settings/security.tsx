@@ -30,17 +30,15 @@ export const SettingsSecurity = ({
     sendPasswordCode,
   } = settings;
 
-  const provider = props.signIn === "apple" ? "Apple" : "Google";
-
   const { register, setValue, clearErrors } = passwordForm;
   const clearServerError = () => clearErrors("root");
 
   const passwordFields = [
     {
-      key: "next" as const,
+      key: "newPassword" as const,
       label: "New password",
       autoComplete: "new-password",
-      error: passwordErrors.next,
+      error: passwordErrors.newPassword,
     },
     {
       key: "confirm" as const,
@@ -57,7 +55,8 @@ export const SettingsSecurity = ({
           {isSocial && !state.isSettingPassword && (
             <div className={styles.socialIntro}>
               <p className={styles.socialText}>
-                {`You sign in with ${provider}. Set a password to also sign in with email.`}
+                You sign in with Google. Set a password to also sign in with
+                email.
               </p>
               <button
                 className={joinClassNames(styles.setPassword, shared.focusRing)}
@@ -72,7 +71,7 @@ export const SettingsSecurity = ({
             <div className={styles.pwFields}>
               {passwordFields.map(({ key, label, autoComplete, error }) => {
                 const id = `${uid}-${key}`;
-                const isNew = key === "next";
+                const isNew = key === "newPassword";
 
                 return (
                   <div key={key}>

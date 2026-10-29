@@ -5,10 +5,11 @@ import { getProtectionExpiry } from "../../core/model";
 import type { StudioBooking } from "../../core/types";
 import type { StudioController } from "../../core/use-studio";
 import type { AddonLine } from "./types";
+import { formatMoney } from "../../../../utils/money";
 
 export const getSheetBooking = (
   { state, actions: { openSheet } }: StudioController,
-  raw: StudioBooking | undefined,
+  storedBooking: StudioBooking | undefined,
 ) => {
   if (state.bookingStep === "done" && state.doneBooking)
     return decorateBooking(state, state.doneBooking, 0, () => {});
@@ -21,9 +22,9 @@ export const getSheetBooking = (
 
   if (match) return match;
 
-  return raw
-    ? decorateBooking(state, raw, 0, () =>
-        openSheet("booking", { sheetBookingId: raw.id }),
+  return storedBooking
+    ? decorateBooking(state, storedBooking, 0, () =>
+        openSheet("booking", { sheetBookingId: storedBooking.id }),
       )
     : null;
 };
@@ -54,7 +55,7 @@ export const getAddonLines = (
     return {
       key: (name || "Add-on") + quantity,
       label: (name || "Add-on") + (quantity > 1 ? ` × ${quantity}` : ""),
-      value: `£${amount}`,
+      value: `${formatMoney(amount)}`,
       amount,
     };
   });

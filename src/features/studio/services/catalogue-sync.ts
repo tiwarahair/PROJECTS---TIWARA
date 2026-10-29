@@ -13,7 +13,7 @@ import { fromCategories, fromStudioAddon, fromStudioService } from "./records";
 import type { StudioSync } from "../core/sync";
 import type { StudioState } from "../core/types";
 
-type Catalogue = Pick<StudioState, "categories" | "addons" | "services">;
+type SavedItems = Pick<StudioState, "categories" | "addons" | "services">;
 
 const getChanged = <T>(list: T[], previous: T[]) =>
   list.filter((item, index) => previous.indexOf(item) !== index);
@@ -24,10 +24,10 @@ const getRemovedIds = <T extends { id: string }>(list: T[], previous: T[]) =>
     .map(({ id }) => id);
 
 export const useCatalogueSync = (
-  { categories, addons, services }: StudioState,
+  { categories, addons, services, catalogue: { types } }: StudioState,
   sync: StudioSync,
 ) => {
-  const saved = useRef<Catalogue>({ categories, addons, services });
+  const saved = useRef<SavedItems>({ categories, addons, services });
 
   useEffect(() => {
     const before = saved.current;
@@ -53,13 +53,14 @@ export const useCatalogueSync = (
           await saveAddon(fromStudioAddon(addon, stylistId));
 
         for (const service of getChanged(services, before.services)) {
-          const { row, variations, addonLinks } = fromStudioService(
+          const { row, variations, addonLinks, photoIds } = fromStudioService(
             service,
             stylistId,
             services.indexOf(service),
+            types,
           );
 
-          await saveService(row, variations, addonLinks);
+          await saveService(row, variations, addonLinks, photoIds);
         }
 
         for (const id of getRemovedIds(services, before.services))
@@ -71,11 +72,11 @@ export const useCatalogueSync = (
         for (const id of getRemovedIds(categories, before.categories))
           await removeCategory(id);
       },
-      before,
+      // a failed save keeps the stylist's edits on screen (the error says it didn't save); the next change saves them again
+      {},
       () => {
-        // the put-back lists are what's saved, so they don't count as a new change
         saved.current = before;
       },
     );
-  }, [categories, addons, services, sync]);
+  }, [categories, addons, services, types, sync]);
 };

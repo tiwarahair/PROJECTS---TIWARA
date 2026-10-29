@@ -1,9 +1,10 @@
 // A checkout's card charge on the client's saved card, and the refund when they paid more than the final price.
 import Stripe from "stripe";
-import { getCardLabel, isHardDecline } from "../_shared/declines.ts";
+import { cannotRetry, getCardLabel } from "../_shared/declines.ts";
+import { reverseLaterTransfer } from "../_shared/later-transfer.ts";
 import { getRefundable } from "../_shared/refundable.ts";
 import { getRecovery } from "../_shared/owed.ts";
-import { isPayoutHeld } from "../_shared/payout-hold.ts";
+import { holdPayout, isPayoutHeld } from "../_shared/payout-hold.ts";
 import { getRecoveryMetadata } from "../_shared/recovery-metadata.ts";
 import { getStripeFee } from "../_shared/stripe-fee.ts";
 import { getCheckoutChargeKey } from "../_shared/stripe-keys.ts";
@@ -77,8 +78,8 @@ export const chargeSavedCard = async (
 ): Promise<CardPaid | CardDeclined> => {
   const paymentMethod = quote.payment_method_id as string;
   const cardLabel = await getCard(paymentMethod);
-  const canTransfer =
-    !!quote.stylist_account && quote.stylist_can_receive && !(await isPayoutHeld(quote.stylist_account));
+  const isHeld = await isPayoutHeld(quote.stylist_account);
+  const canTransfer = !!quote.stylist_account && quote.stylist_can_receive && !isHeld;
 
   // a try that charged, then failed before saving: keep that payment rather than charge again
   if (earlier)
@@ -125,6 +126,8 @@ export const chargeSavedCard = async (
     createdId = created.id;
     await saveIntent(created.id);
 
+    if (isHeld) await holdPayout(created.id);
+
     const intent = await stripe.paymentIntents.confirm(created.id, { off_session: true });
 
     return {
@@ -143,7 +146,7 @@ export const chargeSavedCard = async (
     return {
       paid: false,
       payment_intent_id: createdId,
-      hard: isHardDecline(code) || code === "authentication_required",
+      hard: cannotRetry(code),
       message: error.message,
       card_label: cardLabel,
     };
@@ -168,7 +171,11 @@ export const refundOverpaid = async ({
     ({ metadata, status }) => metadata?.reason === "price_lowered" && status !== "failed" && status !== "canceled",
   );
 
-  if (made.length > saved) return { refund_pence: made[0].amount, refund_id: made[0].id };
+  if (made.length > saved) {
+    await reverseLaterTransfer(intentId, made[0]);
+
+    return { refund_pence: made[0].amount, refund_id: made[0].id };
+  }
 
   // the booking fee is never part of it
   const intent = await stripe.paymentIntents.retrieve(intentId, { expand: ["latest_charge"] });
@@ -185,6 +192,8 @@ export const refundOverpaid = async ({
     },
     { idempotencyKey: `checkout:${id}:price-lowered-refund:${saved}:${refundAmount}` },
   );
+
+  if (!intent.transfer_data) await reverseLaterTransfer(intentId, refund);
 
   return { refund_pence: refundAmount, refund_id: refund.id };
 };

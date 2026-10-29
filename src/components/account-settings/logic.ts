@@ -1,24 +1,14 @@
 // AccountSettings state, validators and display tables.
 import type { NameValues } from "./name-schema";
-import {
-  Check,
-  CircleMinus,
-  CirclePause,
-  Clock,
-  Laptop,
-  Smartphone,
-  Tablet,
-  TriangleAlert,
-} from "lucide-react";
+import { Laptop, Smartphone, Tablet } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
-import type { TaxDetails } from "../tax-details-form/logic";
 import { formatMoney } from "../../utils/money";
 
 export type SettingsPage =
   "personal" | "security" | "notifications" | "payouts" | "calendar";
 export type PayoutStatus =
   "none" | "verifying" | "action" | "paused" | "active";
-export type SignIn = "email" | "google" | "apple";
+export type SignIn = "email" | "google";
 
 export interface TwoFactorDevice {
   name: string;
@@ -32,6 +22,14 @@ export interface SettingsSession {
   last: string;
   isCurrent: boolean;
   kind: "phone" | "laptop" | "tablet";
+}
+
+export interface SettingsTrustedDevice {
+  id: string;
+  device: string;
+  kind: SettingsSession["kind"];
+  trustedUntil: string;
+  last: string;
 }
 
 export interface ChannelSetting {
@@ -68,6 +66,7 @@ export interface SettingsState {
   isPasswordCodeSent: boolean;
   signOthers: boolean;
   sessions: SettingsSession[];
+  trustedDevices: SettingsTrustedDevice[];
   sessionsLoading: boolean;
   sessionsFailed: boolean;
   alerts: boolean | null;
@@ -109,6 +108,7 @@ export const getInitialSettingsState = (
     isPasswordCodeSent: false,
     signOthers: true,
     sessions: [],
+    trustedDevices: [],
     sessionsLoading: false,
     sessionsFailed: false,
     alerts: null,
@@ -145,7 +145,7 @@ export const getCloseReason = (
     return "A client’s dispute is still open. You can close once their bank decides.";
 
   return owed
-    ? `You owe ${formatMoney(owed, { pence: "always" })} in dispute fees. Pay it to close your business.`
+    ? `You owe ${formatMoney(owed, { pence: "always" })} in fees. Pay it to close your business.`
     : "";
 };
 
@@ -167,9 +167,11 @@ export const NOTIFICATION_GROUPS: [string, [NotificationKey, string][]][] = [
   [
     "Payments",
     [
-      ["paymentPaid", "Deposit or payment link paid"],
+      // TO DO: no email/sms is sent for this yet
+      // ["paymentPaid", "Deposit or payment link paid"],
       ["paymentFailed", "Payment failed"],
-      ["feeCharged", "Fee charged"],
+      // TO DO: no email/sms is sent for this yet
+      // ["feeCharged", "Fee charged"],
       ["feeFailed", "Fee failed"],
     ],
   ],
@@ -185,7 +187,8 @@ export const NOTIFICATION_GROUPS: [string, [NotificationKey, string][]][] = [
 
 export const ALWAYS_ON = [
   "Payout paid or failed",
-  "Stripe needs action",
+  // TO DO: no email/sms is sent for this yet
+  // "Stripe needs action",
   "Security alerts",
 ];
 
@@ -198,112 +201,3 @@ export const CLIENT_MESSAGES = [
   "Reminders",
   "Review request",
 ];
-
-interface PayoutStatusView {
-  title: string;
-  body: string;
-  icon: LucideIcon;
-  foreground: string;
-  background: string;
-  chip: string;
-  buttonLabel: string;
-  primary?: boolean;
-  flat?: boolean;
-}
-
-const INK = "var(--neutral-900,#1a1714)";
-
-export const getPayoutStatus = (
-  status: PayoutStatus,
-  pauseReason?: string,
-): PayoutStatusView =>
-  ({
-    none: {
-      title: "Not connected",
-      body: "Connect Stripe to take deposits and get paid.",
-      icon: CircleMinus,
-      foreground: INK,
-      background: "#fff",
-      chip: "var(--fill-quiet)",
-      buttonLabel: "Connect Stripe",
-      primary: true,
-    },
-    verifying: {
-      title: "Stripe is checking your details",
-      body: "We’ll let you know when it’s done. You can keep taking bookings.",
-      icon: Clock,
-      foreground: INK,
-      background: "#fff",
-      chip: "var(--fill-quiet)",
-      buttonLabel: "View in Stripe",
-    },
-    action: {
-      title: "Stripe needs more information",
-      body: "Finish the missing steps so your payouts keep running.",
-      icon: TriangleAlert,
-      foreground: "#7a3511",
-      background: "rgba(181,84,31,.13)",
-      chip: "rgba(181,84,31,.16)",
-      buttonLabel: "Continue in Stripe",
-      primary: true,
-      flat: true,
-    },
-    paused: {
-      title: "Payouts paused",
-      body:
-        pauseReason === "review"
-          ? "Your account is under review. Stripe will email you if they need anything."
-          : "A negative balance is being recovered from your payouts.",
-      icon: CirclePause,
-      foreground: "var(--accent-700)",
-      background: "var(--accent-wash)",
-      chip: "rgba(143,17,18,.10)",
-      buttonLabel: "View in Stripe",
-      flat: true,
-    },
-    active: {
-      title: "Payouts active",
-      body: "Stripe pays out to your bank automatically.",
-      icon: Check,
-      foreground: "#2f6b3e",
-      background: "#fff",
-      chip: "rgba(47,107,62,.12)",
-      buttonLabel: "View in Stripe",
-    },
-  })[status];
-
-/** The saved tax details as rows (NI number and date of birth masked). */
-export const getTaxRows = (
-  tax: Partial<TaxDetails>,
-): { label: string; value: string; isSpaced: boolean }[] => {
-  const mask = (nationalInsuranceNumber?: string) =>
-    nationalInsuranceNumber
-      ? `•• •• •• ${nationalInsuranceNumber.slice(6, 8)} ${nationalInsuranceNumber.slice(8)}`
-      : "";
-
-  const address = tax.address
-    ? [tax.address.line1, tax.address.postcode].filter(Boolean).join(", ")
-    : "";
-
-  const rows =
-    tax.kind === "ltd"
-      ? [
-          { label: "Company name", value: tax.companyName ?? "" },
-          { label: "Company number", value: tax.companyNumber ?? "" },
-          { label: "Registered office", value: address },
-        ]
-      : [
-          { label: "Legal name", value: tax.legalName ?? "" },
-          { label: "Date of birth", value: `•• / •• / ${tax.year}` },
-          { label: "Home address", value: address },
-          {
-            label: "National Insurance number",
-            value: mask(tax.nationalInsuranceNumber),
-          },
-        ];
-
-  return rows.map((row) => ({
-    ...row,
-    isSpaced: row.label === "National Insurance number",
-  }));
-};

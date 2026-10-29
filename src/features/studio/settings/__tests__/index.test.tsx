@@ -2,6 +2,7 @@ import { act, screen, waitFor, within } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { renderWithStore } from "../../../../test/render-with-store";
 import { getStudioSeed } from "../../../../test/studio-seed";
+import { saveBookingRules } from "../../../../lib/studio-api/settings";
 import { StudioPage } from "../..";
 import type { UserEvent } from "@testing-library/user-event";
 import { setupUser } from "../../../../test/setup-user";
@@ -164,7 +165,7 @@ describe("Studio → Settings", () => {
     ]);
 
     vi.useRealTimers();
-    await screen.findByText("2 of 20");
+    await screen.findByText("2 of 40");
 
     await waitFor(() =>
       expect(
@@ -241,9 +242,7 @@ describe("Studio → Settings", () => {
     await user.tab();
 
     expect(
-      await screen.findByText(
-        "Enter an email address, like name@example.co.uk.",
-      ),
+      await screen.findByText("Enter a valid email address"),
     ).toBeInTheDocument();
 
     expect(
@@ -344,6 +343,33 @@ describe("Studio → Settings", () => {
     );
 
     expect(screen.getByText("Booking rules saved")).toBeInTheDocument();
+  });
+
+  it("minimum notice saves in minutes, so 30 minutes is kept", async () => {
+    setViewport(1440);
+    renderStudio();
+    await user.click(within(getLabelled("Sidebar")).getByTitle("Settings"));
+
+    await user.click(
+      within(getLabelled("Settings nav")).getByRole("button", {
+        name: "Booking rules",
+      }),
+    );
+
+    await user.selectOptions(
+      screen.getByRole("combobox", { name: "Minimum notice" }),
+      "30",
+    );
+
+    await user.click(
+      screen
+        .getAllByRole("button", { name: "Save changes" })
+        .at(-1) as HTMLElement,
+    );
+
+    expect(saveBookingRules).toHaveBeenCalledWith(
+      expect.objectContaining({ min_notice_minutes: 30 }),
+    );
   });
 
   it("saving availability ticks the setup step", async () => {

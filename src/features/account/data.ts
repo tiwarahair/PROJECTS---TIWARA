@@ -1,4 +1,3 @@
-// Account sections, icons, legacy tab names and the booking and card shapes.
 import {
   Calendar,
   CreditCard,

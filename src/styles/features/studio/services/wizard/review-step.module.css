@@ -73,3 +73,12 @@
   font-size: 15px;
   font-weight: 600;
 }
+
+.ownBox {
+  margin-top: 12px;
+}
+
+.ownName {
+  font-weight: 600;
+  color: var(--text-primary);
+}

@@ -6,6 +6,7 @@ import { RouterProvider } from "react-router";
 import "./styles/global.css";
 import { appRouter } from "./app-router";
 import { preloadHeroImage } from "./features/home/hero-image";
+import { api } from "./stores/api-slice";
 import { startAuthListener } from "./stores/auth-listener";
 import { startCacheListener } from "./stores/cache-listener";
 import { createStore } from "./stores/store";
@@ -27,6 +28,9 @@ const store = createStore();
 startAuthListener(store);
 startCacheListener(store);
 setupListeners(store.dispatch);
+
+// most pages need the service catalogue: start loading it early
+store.dispatch(api.util.prefetch("getCatalogue", undefined, {}));
 
 createRoot(rootElement).render(
   <StrictMode>

@@ -116,3 +116,12 @@ vi.mock("@stripe/react-stripe-js", async () => {
     useElements: () => ({ submit: stripeStub.submit }),
   };
 });
+
+vi.mock("../lib/catalogue", async (importOriginal) => {
+  const { TEST_CATALOGUE } = await import("./catalogue");
+
+  return {
+    ...(await importOriginal<typeof import("../lib/catalogue")>()),
+    fetchCatalogue: vi.fn(() => Promise.resolve(TEST_CATALOGUE)),
+  };
+});

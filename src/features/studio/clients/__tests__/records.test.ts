@@ -17,14 +17,4 @@ describe("toStudioClient", () => {
       sensitivitiesNote: "Added by Nia on 3 Oct",
     });
   });
-
-  it("can be deleted once 120 days have passed since their last payment", () => {
-    expect(toStudioClient(getClientRow({})).deletableFrom).toBeUndefined();
-
-    expect(
-      toStudioClient(
-        getClientRow({ last_payment_at: new Date().toISOString() }),
-      ).deletableFrom,
-    ).toMatch(/\d{4}$/);
-  });
 });

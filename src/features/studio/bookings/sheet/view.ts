@@ -18,11 +18,11 @@ export const getBookingSheetView = (studio: StudioController) => {
 
   if (!context) return null;
 
-  const { booking, raw, patchBooking, finish } = context;
+  const { booking, storedBooking, patchBooking, finish } = context;
 
   return {
     booking,
-    raw,
+    storedBooking,
     patchBooking,
     finish,
     ...getStepsView(context),

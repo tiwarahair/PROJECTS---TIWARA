@@ -1,4 +1,3 @@
-import { TAXONOMY } from "../../core/constants";
 import type { StudioAddon, VariationRow } from "../../core/types";
 
 export const makeVariationRows = (
@@ -20,9 +19,6 @@ export const getBlankAddon = (): StudioAddon => ({
   hours: "",
   min: "",
 });
-
-export const getTaxonomy = (id: string | null | undefined) =>
-  TAXONOMY.find((group) => group.id === id) ?? null;
 
 /** Anchor a menu under the element that opened it (wide layouts only). */
 export const getAnchor = (

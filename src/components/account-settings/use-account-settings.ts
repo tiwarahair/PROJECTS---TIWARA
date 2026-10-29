@@ -8,7 +8,6 @@ import {
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { usePasswordChecker } from "../../hooks/use-password-checker";
-import { PASSWORD_FAILURES } from "../../lib/account-changes";
 import type { TaxBusiness, TaxDetails } from "../tax-details-form/logic";
 import { nameSchema } from "./name-schema";
 import { EMPTY_PASSWORD } from "./password-schema";
@@ -16,6 +15,7 @@ import { usePasswordForm } from "./use-password-form";
 import type { NameValues } from "./name-schema";
 import type { AccountSettingsBackend } from "./backend";
 import { getInitialName, getInitialSettingsState } from "./logic";
+import { getPasswordActions } from "./password-actions";
 import { getSessionsActions } from "./sessions-actions";
 import type { SettingsPerson, NotificationSettings } from "./logic";
 import type {
@@ -45,6 +45,10 @@ export interface AccountSettingsProps {
   /** Money owed (pounds) and open disputes block closing the business. */
   owed?: number;
   hasOpenDispute?: boolean;
+  /** The money and dispute checks haven't loaded yet. */
+  isCloseChecking?: boolean;
+  /** The checks failed to load: Close business stays off with a Try again. */
+  onRetryCloseChecks?: () => void;
   onPayOwed?: () => void;
   isPayingOwed?: boolean;
   pauseReason?: string;
@@ -73,12 +77,12 @@ export interface AccountSettingsProps {
   onTwoFactorAddBackup?: () => void;
   onTaxEdit?: () => void;
   onTaxAdd?: () => void;
-  onTaxSave?: (details: TaxDetails) => void;
+  onTaxSave?: (details: TaxDetails) => void | Promise<void>;
   onTaxCancel?: () => void;
   onTaxDirty?: (isDirty: boolean) => void;
   /** Opens the stylist's Stripe Express dashboard. */
   onOpenStripe?: () => void;
-  /** The payout bank Stripe reports, e.g. "Monzo •••• 4821". */
+  /** The payout bank Stripe reports, or null before there is one. */
   payoutBank?: string | null;
   /** Where the changes save. */
   backend: AccountSettingsBackend;
@@ -235,12 +239,22 @@ export const useAccountSettings = (props: AccountSettingsProps) => {
       : page === "security" &&
         !!(
           passwordErrors.code ||
-          passwordErrors.next ||
+          passwordErrors.newPassword ||
           passwordErrors.confirm ||
           passwordErrors.server
         );
 
   const { backend } = props;
+
+  const password = getPasswordActions({
+    backend,
+    passwordForm,
+    state,
+    setState,
+    toast,
+    loadSessions: sessions.load,
+    isSocial,
+  });
 
   const save = async () => {
     if (page === "personal")
@@ -255,55 +269,13 @@ export const useAccountSettings = (props: AccountSettingsProps) => {
         toast("Personal details saved");
       })();
 
-    if (page === "security")
-      return passwordForm.handleSubmit(async ({ code, next }) => {
-        const failure = await backend
-          .changePassword(next, code, state.signOthers)
-          .catch(() => "failed");
-
-        // signed in over 24 hours ago: Supabase wants the emailed code first
-        if (failure === "reauthentication_needed") return sendPasswordCode();
-
-        if (failure)
-          return passwordForm.setError(
-            failure === "reauthentication_not_valid" ? "code" : "root",
-            { message: PASSWORD_FAILURES[failure] ?? PASSWORD_FAILURES.failed },
-          );
-
-        const others = state.signOthers
-          ? state.sessions.filter(({ isCurrent }) => !isCurrent).length
-          : 0;
-
-        passwordForm.reset(EMPTY_PASSWORD);
-
-        setState({ isPasswordCodeSent: false, isSettingPassword: false });
-
-        if (state.signOthers) sessions.load();
-
-        const deviceSuffix = others === 1 ? "" : "s";
-
-        const updatedText = others
-          ? `Password updated. Signed out of ${others} other device${deviceSuffix}`
-          : "Password updated";
-
-        toast(isSocial ? "Password set" : updatedText);
-      })();
+    if (page === "security") return password.save();
   };
 
   const discard = () => {
     nameForm.reset();
     passwordForm.reset(EMPTY_PASSWORD);
   };
-
-  const sendPasswordCode = () =>
-    backend
-      .sendPasswordCode()
-      .then(() => {
-        passwordForm.clearErrors("root");
-        setState({ isPasswordCodeSent: true });
-        toast(`We emailed a code to ${state.email}`);
-      })
-      .catch(() => toast("The code couldn’t be sent. Try again."));
 
   // report after every render (on mount and on every update)
   useEffect(() => {
@@ -331,7 +303,7 @@ export const useAccountSettings = (props: AccountSettingsProps) => {
     hasSave,
     hasBarError,
     save,
-    sendPasswordCode,
+    sendPasswordCode: password.sendCode,
     backend,
     sessions,
     retryFeed: loadFeed,

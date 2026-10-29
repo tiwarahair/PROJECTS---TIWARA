@@ -64,7 +64,6 @@ export const STEP_LABELS: Partial<Record<CheckoutView, string>> = {
 };
 
 export const VIEW_TITLES: Record<CheckoutView, string> = {
-  detail: "Booking",
   items: "Checkout",
   tip: "Checkout",
   pay: "Checkout",
@@ -143,21 +142,18 @@ export const getCheckoutView = (checkout: CheckoutController) => {
   const back = () => {
     if (isInCheckout) {
       if (stepIndex > 0) goTo(money.steps[stepIndex - 1]!, -1);
-      else goTo("detail", -1);
+      else checkout.exit();
     } else if (state.view === "add") goTo("items", -1);
     else if (state.view === "receipt" && state.fromDone) goTo("done", -1);
-    else goTo("detail", -1);
+    else if (state.view === "resend" && state.isResendFromReceipt)
+      goTo("receipt", -1);
+    else checkout.exit();
   };
 
   const leaveDone = (action: "done" | "rebook") =>
     props.onComplete(checkout.getResult(), action);
 
-  const { isOffPlatform, refundCapAll, refundCap } = getRefundCap(
-    state,
-    booking,
-  );
-
-  const fee = booking.fee || 0;
+  const { isOffPlatform, refundCapAll, refundCap } = getRefundCap(state);
 
   return {
     name,
@@ -183,8 +179,6 @@ export const getCheckoutView = (checkout: CheckoutController) => {
     isOffPlatform,
     refundCapAll,
     refundCap,
-    fee,
-    feeExtra: Math.max(0, fee - state.paid),
     linkTarget: state.linkVia === "sms" ? booking.phone : booking.email,
     refundNote: isRefund
       ? getRefundNote(money, name, cardText, booking.recordedVia)

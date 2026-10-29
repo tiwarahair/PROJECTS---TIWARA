@@ -50,7 +50,7 @@
 
 .optionsHead {
   display: grid;
-  grid-template-columns: minmax(0, 1fr) 44px 84px 92px 32px;
+  grid-template-columns: minmax(0, 1fr) 32px 56px 68px 68px 32px;
   gap: 6px;
   width: 100%;
   box-sizing: border-box;
@@ -60,7 +60,7 @@
 
 .optionRow {
   display: grid;
-  grid-template-columns: minmax(0, 1fr) 44px 84px 92px 32px;
+  grid-template-columns: minmax(0, 1fr) 32px 56px 68px 68px 32px;
   gap: 6px;
   width: 100%;
   box-sizing: border-box;
@@ -69,7 +69,8 @@
 
 .optionInput {
   min-width: 0;
-  width: 100%;
+  width: calc(100% - 6px);
+  margin-right: 6px;
   padding: 10px 12px;
   box-sizing: border-box;
   border: 1px solid var(--border-subtle);
@@ -117,16 +118,35 @@
   font-variant-numeric: tabular-nums;
 }
 
+.timeWrap {
+  position: relative;
+  min-width: 0;
+}
+
 .optionTime {
+  appearance: none;
+  -webkit-appearance: none;
   min-width: 0;
   width: 100%;
-  padding: 10px 6px;
+  padding: 10px 26px 10px 12px;
   box-sizing: border-box;
   border: 1px solid var(--border-subtle);
   border-radius: var(--radius-sm);
   background: #fff;
+  font: inherit;
   font-size: 16px;
+  color: var(--text-primary);
   outline: none;
+  cursor: pointer;
+}
+
+.timeChevron {
+  position: absolute;
+  right: 9px;
+  top: 50%;
+  transform: translateY(-50%);
+  pointer-events: none;
+  color: var(--text-secondary);
 }
 
 .removeOption {
@@ -206,4 +226,35 @@
 
 .ownSave:active {
   transform: scale(0.97) !important;
+}
+
+/* phones: slimmer price, time and remove columns, so the option name has room for real words */
+@media (max-width: 639px) {
+  .optionsHead,
+  .optionRow {
+    grid-template-columns: minmax(0, 1fr) 32px 48px 62px 62px 28px;
+    gap: 4px;
+  }
+
+  .optionInput {
+    width: calc(100% - 4px);
+    margin-right: 4px;
+    padding: 10px 8px;
+  }
+
+  .optionPrice {
+    padding: 10px 6px;
+  }
+
+  .optionTime {
+    padding: 10px 20px 10px 8px;
+  }
+
+  .timeChevron {
+    right: 6px;
+  }
+
+  .removeOption {
+    width: 28px;
+  }
 }

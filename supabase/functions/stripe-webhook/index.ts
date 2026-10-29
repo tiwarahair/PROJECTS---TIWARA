@@ -3,7 +3,7 @@
 import Stripe from "stripe";
 import { admin } from "../_shared/admin.ts";
 import { stripe, syncAccount } from "../_shared/stripe.ts";
-import { isHandled, markHandled } from "../_shared/stripe-events.ts";
+import { claimEvent, finishEvent } from "../_shared/stripe-events.ts";
 
 const cryptoProvider = Stripe.createSubtleCryptoProvider();
 
@@ -30,7 +30,8 @@ Deno.serve(async (request) => {
     return new Response("Bad signature", { status: 400 });
   }
 
-  if (await isHandled(notification.id)) return Response.json({ received: true, duplicate: true });
+  if (!(await claimEvent(notification.id, notification.type)))
+    return Response.json({ received: true, duplicate: true });
 
   const accountId = "related_object" in notification ? notification.related_object?.id : undefined;
 
@@ -41,11 +42,13 @@ Deno.serve(async (request) => {
       // an unknown business means the account is from another environment sharing this Stripe sandbox
       if (!saved && stylistId && (await hasBusiness(stylistId))) throw new Error(`${accountId} isn't saved yet`);
     } catch (error) {
+      await finishEvent(notification.id, false);
+
       return new Response(error instanceof Error ? error.message : "failed", { status: 500 });
     }
   }
 
-  await markHandled(notification.id, notification.type);
+  await finishEvent(notification.id, true);
 
   return Response.json({ received: true });
 });

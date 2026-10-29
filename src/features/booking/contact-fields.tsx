@@ -56,7 +56,6 @@ export const ContactFields = ({ booking }: ContactFieldsProps) => {
               type="tel"
               inputMode="numeric"
               autoComplete="tel-national"
-              placeholder="07700 900123"
               onChange={(event) =>
                 onChange(event.target.value.replace(/[^\d ]/g, "").slice(0, 13))
               }

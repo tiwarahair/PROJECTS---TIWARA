@@ -1,11 +1,13 @@
 import { skipToken } from "@reduxjs/toolkit/query";
 import { Earnings } from "../../../components/earnings";
+import { ListSkeleton } from "../../../components/list-skeleton";
 import { PageMessage } from "../../../components/page-message";
 import { useGetStudioEarningsQuery } from "../../../stores/api-slice";
 import { joinClassNames } from "../../../utils/class-names";
-import { getBookingLink, getClient, hasTwoFactor, isLive } from "../core/model";
+import { getBookingLink, hasTwoFactor, isLive } from "../core/model";
 import type { StudioController } from "../core/use-studio";
 import { getDisputeBanner } from "./dispute";
+import { openLedgerBooking } from "./open-booking";
 import { getFailedPayout, getLedgerClients, toLedger } from "./records";
 import styles from "../../../styles/features/studio/earnings/index.module.css";
 
@@ -31,7 +33,7 @@ export const StudioEarnings = ({ studio }: { studio: StudioController }) => {
   if (!stylistId || !earnings)
     return (
       <div className={className} data-screen-label="Earnings">
-        {isError && (
+        {isError ? (
           <PageMessage
             title="Earnings didn’t load"
             text="Check your connection, then try again."
@@ -39,6 +41,8 @@ export const StudioEarnings = ({ studio }: { studio: StudioController }) => {
             linkHref="/studio"
             isReload
           />
+        ) : (
+          <ListSkeleton isWide={isWide} />
         )}
       </div>
     );
@@ -63,19 +67,9 @@ export const StudioEarnings = ({ studio }: { studio: StudioController }) => {
         bankLabel={payoutBank || "your bank account"}
         onUpdateBank={() => void actions.openStripeDashboard()}
         businessName={state.profile.salon}
-        onOpenBooking={(_bookingRef, clientId) => {
-          setState({
-            tab: "bookings",
-            bookingsLayout: "list",
-            listScope: "past",
-          });
-
-          const name =
-            clients.find(({ id }) => id === clientId)?.name ??
-            getClient(state, clientId).name;
-
-          actions.showToast(`Showing past bookings for ${name}`);
-        }}
+        onOpenBooking={(bookingRef) =>
+          openLedgerBooking(studio, earnings.lines, bookingRef)
+        }
         onContinueSetup={() => {
           setState({ tab: "home", setupMinimised: false });
 

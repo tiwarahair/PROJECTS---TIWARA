@@ -1,7 +1,8 @@
 import { describe, expect, it } from "vitest";
-import { stylists } from "../../../../data";
+import { DEMO_STYLISTS } from "../../../../test/fixtures/demo-stylists";
 import type { Service } from "../../../../types/service";
 import { getServiceOptions } from "../../../../utils/services";
+import { TEST_CATALOGUE } from "../../../../test/catalogue";
 import { getBookingMoney } from "../pricing";
 
 const SERVICE: Service = {
@@ -44,14 +45,14 @@ const SERVICE: Service = {
 describe("getBookingMoney", () => {
   it("matches the database's price_booking for the same picks", () => {
     const stylist = {
-      ...stylists[0]!,
-      policies: { ...stylists[0]!.policies, mode: "none" as const },
+      ...DEMO_STYLISTS[0]!,
+      policies: { ...DEMO_STYLISTS[0]!.policies, mode: "none" as const },
     };
 
     const money = getBookingMoney(
       stylist,
       SERVICE,
-      getServiceOptions(SERVICE),
+      getServiceOptions(SERVICE, TEST_CATALOGUE.types),
       {
         size: "Small",
         length: "Waist",

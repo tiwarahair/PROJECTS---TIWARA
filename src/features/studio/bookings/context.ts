@@ -1,7 +1,8 @@
-import { getDecoratedBookings } from "./decorate";
-import { getClient, isPastIn } from "../core/model";
+import { getCalendarBookings, getDecoratedBookings } from "./decorate";
+import { getClient, getPastKey, isPastIn } from "../core/model";
 import type { StudioController } from "../core/use-studio";
 import { isUpcomingMatch } from "./filters";
+import { getMinutesOfDay } from "../../../utils/dates";
 
 export const getContext = (studio: StudioController) => {
   const { state, actions } = studio;
@@ -31,11 +32,12 @@ export const getContext = (studio: StudioController) => {
   return {
     studio,
     state,
-    setState: studio.setState,
-    actions,
     now,
-    nowMinutes: now.getHours() * 60 + now.getMinutes(),
+    nowMinutes: getMinutesOfDay(now),
     upcoming,
+    calendarBookings: getCalendarBookings(state, upcoming, (row) =>
+      actions.openSheet("past", { selectedPastId: getPastKey(row) }),
+    ),
     isList,
     isPast,
     isUpcoming: isList && !isPast,

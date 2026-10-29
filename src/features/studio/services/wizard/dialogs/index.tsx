@@ -3,6 +3,7 @@ import { getWizardView } from "../view";
 import { CustomisationDialog } from "./customisation";
 import { NewAddonDialog } from "./new-addon";
 import { SuggestionsDialog } from "./suggestions";
+import { VariationDialog } from "./variation";
 
 /** The wizard's dialogs, rendered in order with the page's other dialogs. */
 export const WizardNewAddonDialog = ({
@@ -26,6 +27,7 @@ export const WizardSuggestionDialogs = ({
     <>
       <SuggestionsDialog view={view} />
       <CustomisationDialog view={view} />
+      <VariationDialog view={view} />
     </>
   ) : null;
 };

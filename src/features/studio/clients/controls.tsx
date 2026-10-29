@@ -41,7 +41,11 @@ export const ClientControls = ({ studio, view }: ClientControlsProps) => {
         )}
       </label>
       <label className={styles.sort}>
-        <ArrowDownWideNarrow size={15} strokeWidth={1.5} />
+        <ArrowDownWideNarrow
+          className={styles.sortIcon}
+          size={15}
+          strokeWidth={1.5}
+        />
         <select
           className={styles.sortSelect}
           value={state.clientSort}

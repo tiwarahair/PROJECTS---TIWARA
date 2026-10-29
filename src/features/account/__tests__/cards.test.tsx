@@ -63,6 +63,37 @@ describe("Account payment methods", () => {
     stripeStub.confirmSetup.mockClear();
   });
 
+  it("cards that don't load say so with try again, not that there are none", async () => {
+    vi.mocked(fetchClientCards)
+      .mockReset()
+      .mockRejectedValue(new Error("offline"));
+
+    renderWithStore(<AccountPage />, "/account?section=payments", {
+      signedIn: true,
+    });
+
+    expect(
+      await screen.findByText("Saved cards didn’t load"),
+    ).toBeInTheDocument();
+
+    expect(screen.queryByText(/No saved cards/)).not.toBeInTheDocument();
+  });
+
+  it("make default stays off while the change is saving", async () => {
+    vi.mocked(setDefaultCard)
+      .mockReset()
+      .mockReturnValue(new Promise(() => {}));
+
+    await renderPayments();
+    await user.click(screen.getByRole("button", { name: "Make default" }));
+
+    expect(screen.getByRole("button", { name: "Make default" })).toBeDisabled();
+
+    expect(
+      screen.getByRole("button", { name: "Remove Mastercard ending 4444" }),
+    ).toBeDisabled();
+  });
+
   it("lists the cards saved with Stripe, default first", async () => {
     await renderPayments();
 

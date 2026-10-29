@@ -60,6 +60,7 @@ export const createPageActions = (
 
     setState({
       celebrated: true,
+      nudge: getState().policy.mode === "none",
       setupMinimised: false,
       setupExit: wide ? "hold" : null,
       linkCard: !wide,

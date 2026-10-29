@@ -1,4 +1,3 @@
-import { Check } from "lucide-react";
 import { joinClassNames } from "../../../../utils/class-names";
 import type { WizardView } from "./view";
 import styles from "../../../../styles/features/studio/services/wizard/parts.module.css";
@@ -52,120 +51,34 @@ export const VariationCard = ({
     </div>
     <div className={joinClassNames(styles.reveal, isOn && styles.revealOpen)}>
       <div className={styles.revealInner}>
-        <div className={styles.varHead}>
-          <div className={styles.varHeadLabel}>{head}</div>
-          <div className={styles.varHeadPrice}>Price</div>
-          <div
-            className={joinClassNames(
-              styles.varHeadDuration,
-              view.isWide && styles.durGap,
-            )}
-          >
-            Duration
-          </div>
-          <div className={styles.varHeadEnd}></div>
-        </div>
-        {rows.map((row) => {
-          const fade = !row.isOn && styles.faded;
+        <div className={styles.chips} role="group" aria-label={head}>
+          {rows.map((row) => {
+            const error = row.isOn && (row.priceError || row.timeError);
 
-          return (
-            <div key={row.key} className={styles.varRowWrap}>
-              <div
+            return (
+              <button
+                key={row.key}
+                type="button"
                 className={joinClassNames(
-                  styles.varRow,
-                  row.isOn && styles.varRowOn,
+                  styles.chip,
+                  row.isOn ? styles.chipOn : styles.chipOff,
+                  !!error && styles.chipError,
                 )}
+                onClick={row.open}
+                aria-haspopup="dialog"
+                aria-label={[row.label, row.deltaText, error || ""]
+                  .filter(Boolean)
+                  .join(", ")}
+                disabled={!isOn}
               >
-                <div className={joinClassNames(styles.varLabel, fade)}>
-                  {row.label}
-                </div>
-                <button
-                  className={joinClassNames(
-                    styles.sign,
-                    row.isOn && styles.signActive,
-                    row.isNegativeValue && styles.signNeg,
-                    fade,
-                  )}
-                  type="button"
-                  onClick={row.flip}
-                  disabled={!row.isOn}
-                  aria-label={row.signAria}
-                  onMouseEnter={row.tipSign}
-                  onFocus={row.tipSign}
-                  onMouseLeave={view.hideSubcategoryTip}
-                  onBlur={view.hideSubcategoryTip}
-                >
-                  {row.signText}
-                </button>
-                <span className={joinClassNames(styles.muted135, fade)}>£</span>
-                <input
-                  className={joinClassNames(styles.varPrice, fade)}
-                  value={row.price}
-                  onChange={row.setPrice}
-                  onFocus={view.selectAll}
-                  onBlur={row.blur}
-                  disabled={!row.isOn}
-                  inputMode="decimal"
-                  aria-label={`${row.label} price in pounds`}
-                />
-                <input
-                  className={joinClassNames(
-                    styles.varTime,
-                    view.isWide && styles.durGap,
-                    fade,
-                  )}
-                  value={row.hours}
-                  onChange={row.setHours}
-                  onFocus={view.selectAll}
-                  onBlur={row.blur}
-                  disabled={!row.isOn}
-                  inputMode="decimal"
-                  aria-label={`${row.label} hours`}
-                />
-                <span className={joinClassNames(styles.unit, fade)}>hr</span>
-                <input
-                  className={joinClassNames(styles.varTime, fade)}
-                  value={row.minutes}
-                  onChange={row.setMinutes}
-                  onFocus={view.selectAll}
-                  onBlur={row.blur}
-                  disabled={!row.isOn}
-                  inputMode="decimal"
-                  aria-label={`${row.label} minutes`}
-                />
-                <span className={joinClassNames(styles.unit, fade)}>min</span>
-                <button
-                  className={joinClassNames(
-                    styles.check,
-                    row.isOn && styles.checkOn,
-                  )}
-                  type="button"
-                  onClick={row.toggle}
-                  aria-label={`Offer ${row.label}`}
-                  aria-pressed={row.isOn ? "true" : "false"}
-                  onMouseEnter={row.tipCheck}
-                  onFocus={row.tipCheck}
-                  onMouseLeave={view.hideSubcategoryTip}
-                  onBlur={view.hideSubcategoryTip}
-                >
-                  {row.isOn && <Check size={11} strokeWidth={3} color="#fff" />}
-                </button>
-              </div>
-              <div aria-live="polite">
-                {!!row.priceError && (
-                  <div className={styles.varError} role="alert">
-                    {row.priceError}
-                  </div>
+                {row.label}
+                {!!row.deltaText && (
+                  <span className={styles.chipDelta}>{row.deltaText}</span>
                 )}
-                {!!row.timeError && (
-                  <div className={styles.varError} role="alert">
-                    {row.timeError}
-                  </div>
-                )}
-              </div>
-            </div>
-          );
-        })}
+              </button>
+            );
+          })}
+        </div>
       </div>
     </div>
   </div>

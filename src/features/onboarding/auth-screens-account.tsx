@@ -187,9 +187,7 @@ export const SocialScreen = (props: ScreenProps) => {
     <>
       <h1 className={styles.title}>Finish creating your account</h1>
       <p className={styles.lead}>
-        {state.socialProvider === "apple"
-          ? "Signed in with Apple. Check your name, then add your mobile."
-          : "Signed in with Google. Check your name, then add your mobile."}
+        Signed in with Google. Check your name, then add your mobile.
       </p>
       {names("ob-s")}
       <div className={styles.readonlyLabel}>Email address</div>
@@ -305,17 +303,17 @@ export const CodeScreen = ({ onboarding, layout, view }: ScreenProps) => {
       >
         {codeError}
       </div>
-      {is2fa && (
+      {is2fa && state.codeKind === "2fa" && state.canTrustDevice && (
         <label className={styles.remember}>
           <input
             type="checkbox"
-            checked={form.remember}
+            checked={form.trustDevice}
             onChange={(event) =>
-              actions.setField("remember", event.target.checked, true)
+              actions.setField("trustDevice", event.target.checked, true)
             }
             className={styles.rememberBox}
           />
-          <span>Remember this device for 30 days</span>
+          <span>Trust this device for 30 days</span>
         </label>
       )}
       {view.turnstileShown && (

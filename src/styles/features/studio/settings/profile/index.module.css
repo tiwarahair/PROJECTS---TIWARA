@@ -189,6 +189,34 @@
   transform: scale(0.92) !important;
 }
 
+.attachPill {
+  position: absolute;
+  left: 50%;
+  bottom: 8px;
+  transform: translateX(-50%);
+  max-width: calc(100% - 16px);
+  box-sizing: border-box;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding: 5px 10px;
+  border: none;
+  border-radius: var(--radius-full);
+  background: var(--neutral-50);
+  color: var(--text-primary);
+  box-shadow: 0 2px 8px rgba(26, 23, 20, 0.18);
+  font-size: 12px;
+  font-weight: 600;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  transition: transform 160ms ease-out;
+}
+
+.attachPill:active {
+  transform: translateX(-50%) scale(0.96) !important;
+}
+
 .addPhotos {
   aspect-ratio: 4/5;
   border-radius: var(--radius-sm);

@@ -37,6 +37,7 @@ const service = (
   lengths_on: false,
   service_variations: [],
   service_addons: [],
+  photos: [],
 });
 
 /** get_stylist_profile for a live shop open Mon–Fri 10–20 and Sat 9–18. */
@@ -100,6 +101,7 @@ export const PUBLIC_PROFILE: PublicProfile = {
     {
       id: "photo-1",
       stylist_id: STYLIST_ID,
+      service_id: null,
       path: "demo/portfolio/w161156.jpg",
       sort: 0,
       created_at: "",
@@ -107,6 +109,7 @@ export const PUBLIC_PROFILE: PublicProfile = {
     {
       id: "photo-2",
       stylist_id: STYLIST_ID,
+      service_id: null,
       path: "demo/stylists/w161154.jpg",
       sort: 1,
       created_at: "",

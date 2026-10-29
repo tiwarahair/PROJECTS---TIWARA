@@ -1,13 +1,20 @@
 import type { CSSProperties } from "react";
 import { Check, ChevronDown, ChevronRight } from "lucide-react";
 import { joinClassNames } from "../../../utils/class-names";
+import { writeSession } from "../../../utils/page-flags";
+import { SETUP_MINIMISED_KEY } from "../core/seed-account";
 import type { StudioController } from "../core/use-studio";
 import shared from "../../../styles/features/studio/shell/index.module.css";
 import styles from "../../../styles/features/studio/shell/setup-card.module.css";
 import { SETUP_COUNT, getSetupProgress, getSetupRows } from "./setup";
 
+const setMinimised = ({ setState }: StudioController, isMinimised: boolean) => {
+  writeSession(SETUP_MINIMISED_KEY, isMinimised ? "1" : null);
+  setState({ setupMinimised: isMinimised });
+};
+
 export const SetupCard = ({ studio }: { studio: StudioController }) => {
-  const { state, setState } = studio;
+  const { state } = studio;
   const { steps, doneCount, isComplete } = getSetupProgress(studio);
 
   // runtime: the progress bar's fill
@@ -41,7 +48,7 @@ export const SetupCard = ({ studio }: { studio: StudioController }) => {
         </div>
         <button
           className={shared.cardClose}
-          onClick={() => setState({ setupMinimised: true })}
+          onClick={() => setMinimised(studio, true)}
           aria-label="Minimise checklist"
         >
           <ChevronDown size={18} strokeWidth={2} />
@@ -95,7 +102,7 @@ export const SetupCard = ({ studio }: { studio: StudioController }) => {
 export const SetupPill = ({ studio }: { studio: StudioController }) => (
   <button
     className={styles.setupPill}
-    onClick={() => studio.setState({ setupMinimised: false })}
+    onClick={() => setMinimised(studio, false)}
     aria-label="Open setup checklist"
   >
     <span className={styles.pillCount}>

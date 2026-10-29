@@ -26,6 +26,8 @@ export const getUnpaidView = ({
   settle,
   saveFee,
   firstName,
+  isBusy,
+  startBusy,
 }: PastContext) => {
   const unpaidFirst = firstName("the client");
   const tries = row.feeTries == null ? 1 : row.feeTries;
@@ -52,10 +54,15 @@ export const getUnpaidView = ({
     setState({ confirm: null });
 
     try {
-      const { outcome } = await retryFee(bookingId);
+      const { outcome, hardDecline } = await startBusy(retryFee)(bookingId);
 
       if (outcome === "paid")
         settle(collected("Fee paid"), `${amount} charged`);
+      else if (hardDecline)
+        settle(
+          { feeTries: 0 },
+          "This card can’t be charged again. Send a payment link instead.",
+        );
       else settle({ feeTries: tries - 1 }, "Card declined again");
     } catch (error) {
       actions.showToast(
@@ -71,6 +78,7 @@ export const getUnpaidView = ({
     feeUnpaidTitle: "Card declined",
     feeUnpaidBody: `${amount} of ${unpaidFirst}’s ${row.feeLabel} fee couldn’t be charged to ${card}.`,
     feeUnpaidRetryShown: tries > 0,
+    isFeeUnpaidBusy: isBusy,
     feeUnpaidRetryLabel: `Retry card (${tries} of 2 left)`,
     feeUnpaidRetry: () =>
       setState({
@@ -85,7 +93,7 @@ export const getUnpaidView = ({
         },
       }),
     feeUnpaidLinkLabel: getLinkLabel(row),
-    isFeeUnpaidLinkOff: !row.feeLinkResends,
+    isFeeUnpaidLinkOff: !row.feeLinkResends || isBusy,
     feeUnpaidLink: () => {
       const resends = row.feeLinkResends ?? 0;
 
@@ -95,7 +103,7 @@ export const getUnpaidView = ({
 
       patch({ meta: "Fee link sent", feeLinkResends: resends - 1 });
       actions.showToast(`Payment link for ${amount} sent to ${unpaidFirst}`);
-      saveFee(resendPaymentLink, previous);
+      saveFee(startBusy(resendPaymentLink), previous);
     },
     feeUnpaidRecord: () =>
       setState({

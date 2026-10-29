@@ -106,10 +106,6 @@ const appRoutes: RouteObject[] = [
         Component: HelpPage,
       })),
   },
-  // {
-  //   path: "/email/email-change-notice",
-  //   element: <EmailChangeNoticePage />,
-  // } /* ^ TO DO - MAKE THIS AN ACTUAL EMAIL */,
   {
     lazy: () =>
       import("./features/onboarding").then(({ OnboardingPage }) => ({

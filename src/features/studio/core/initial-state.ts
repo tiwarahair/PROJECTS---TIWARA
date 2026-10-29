@@ -1,6 +1,8 @@
+import { EMPTY_CATALOGUE } from "../../../lib/catalogue";
 import type { StudioState } from "./types";
 
 export const getInitialStudioState = (): StudioState => ({
+  catalogue: EMPTY_CATALOGUE,
   account: {
     stylistId: "",
     slug: "",
@@ -33,11 +35,13 @@ export const getInitialStudioState = (): StudioState => ({
   twoFactorOut: false,
   shareTip: false,
   stripeBusy: false,
+  pastBusyId: null,
   payoutStatus: null,
   payoutBank: null,
   notificationPrefs: {},
-  nudge: true,
+  nudge: false,
   serviceNudge: true,
+  policyReminder: false,
   celebrated: false,
   page: null,
   pageFromSetup: false,
@@ -56,6 +60,7 @@ export const getInitialStudioState = (): StudioState => ({
   filterPayment: "any",
   filterOpen: false,
   filterOut: false,
+  filterDraft: {},
   datePickerOpen: false,
   notifAllRead: true,
   clientQuery: "",
@@ -182,5 +187,5 @@ export const getInitialStudioState = (): StudioState => ({
     noShow: { on: false, kind: "keep", percent: 50 },
     extras: [],
   },
-  rules: { maxNotice: 3, minNotice: 24, extra: 0, travel: 0 },
+  rules: { maxNotice: 3, minNoticeMinutes: 1440, extra: 0, travel: 0 },
 });

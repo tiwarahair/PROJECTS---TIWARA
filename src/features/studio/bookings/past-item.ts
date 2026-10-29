@@ -13,6 +13,7 @@ import {
 } from "../core/model";
 import type { PastRecord } from "../core/types";
 import type { StudioController } from "../core/use-studio";
+import { formatMoney } from "../../../utils/money";
 
 const QUIET_TONE = {
   background: "var(--quiet)",
@@ -56,7 +57,7 @@ export const getPastItem = (
     badgeBackground: tone.background,
     badgeColor: tone.color,
     open: () => actions.openSheet("past", { selectedPastId: getPastKey(row) }),
-    priceLabel: `£${row.price}`,
+    priceLabel: `${formatMoney(row.price)}`,
     isStruck: !isCompleted,
     priceMeta: row.feePending && !row.waived ? feeMeta : settledMeta,
     delay: `${(index * 0.04).toFixed(2)}s`,

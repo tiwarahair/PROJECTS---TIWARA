@@ -1,17 +1,11 @@
 import type { CardUpdate } from "../../lib/card-update-api";
-
-interface CardMessage {
-  title: string;
-  text: string;
-  linkLabel: string;
-  linkHref: string;
-}
+import type { PageMessageProps } from "../../components/page-message";
 
 const HOME = { linkLabel: "Go to Tiwára’s House", linkHref: "/" };
 
 export const getClosedMessage = (
   update: CardUpdate | undefined,
-): CardMessage => {
+): PageMessageProps => {
   if (update?.state === "updated")
     return {
       title: "Your card is updated",
@@ -39,6 +33,13 @@ export const getClosedMessage = (
     text: "Use the link in the latest email we sent you.",
     ...HOME,
   };
+};
+
+export const UNSAVED_MESSAGE: PageMessageProps = {
+  title: "We’re still saving your card",
+  text: "Your card went through, but we couldn’t finish saving it. Check again in a minute. Nothing has been charged.",
+  linkLabel: "Check again",
+  linkHref: "/card",
 };
 
 export const CARD_UPDATE_ERRORS: Record<string, string> = {

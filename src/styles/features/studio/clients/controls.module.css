@@ -53,9 +53,7 @@
   flex: 0 0 auto;
   display: flex;
   align-items: center;
-  gap: 6px;
   height: 42px;
-  padding: 0 34px 0 14px;
   border: 1px solid var(--border-subtle);
   border-radius: var(--radius-full);
   box-sizing: border-box;
@@ -68,12 +66,33 @@
   border: none;
   background: transparent;
   font: inherit;
-  font-size: 16px;
   font-weight: 600;
   color: var(--text-primary);
   cursor: pointer;
   outline: none;
-  padding: 0;
+  height: 100%;
+  /* the select spans the whole pill (under the icon and chevron) so any click opens it */
+  padding: 0 34px 0 35px;
+}
+
+/* Studio's page layer sets every field to 17px !important; phones keep 16px so iOS doesn't zoom in,
+   wider screens match "Add client" */
+@layer page {
+  .sort .sortSelect {
+    font-size: 16px !important;
+  }
+
+  @media (min-width: 640px) {
+    .sort .sortSelect {
+      font-size: 14.5px !important;
+    }
+  }
+}
+
+.sortIcon {
+  position: absolute;
+  left: 14px;
+  pointer-events: none;
 }
 
 .sortChevron {

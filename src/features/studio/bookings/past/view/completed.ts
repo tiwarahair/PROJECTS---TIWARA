@@ -1,9 +1,11 @@
+import { skipReviewInvite } from "../../../../../lib/studio-api/booking-writes";
 import {
   cancelBalanceLink,
   recordBalancePaid,
   resendBalanceLink,
 } from "../../../../../lib/studio-api/checkout";
-import { roundToPence } from "../../../../../utils/money";
+import { formatMoney, roundToPence } from "../../../../../utils/money";
+import { getLinkDue } from "../../checkout-label";
 import { getPastCheckout } from "./checkout";
 import { RECORDED_ONLY, getRefundTag } from "./context";
 import type { PastContext } from "./context";
@@ -20,6 +22,8 @@ export const getCompletedView = (context: PastContext) => {
     patch,
     firstName,
     saveAndRefresh: saveBalance,
+    isBusy,
+    startBusy,
   } = context;
 
   if (!isCompleted)
@@ -30,25 +34,26 @@ export const getCompletedView = (context: PastContext) => {
       refundTag: "",
       awaitBody: "",
       canCancelLink: false,
+      canSkipReview: false,
     };
 
   const checkout = getPastCheckout(state, row);
   const first = firstName("your client");
-  const isAwaiting = checkout.done.method === "link" && !row.linkPaid;
+  const isAwaiting = getLinkDue(row) !== null;
   const refunded = row.refunded || 0;
   const left = roundToPence(checkout.cap - refunded);
 
   return {
     hasAwait: isAwaiting,
-    awaitBody: `Payment link for £${checkout.done.charged} sent to ${first}. They can pay by card, Apple Pay or Google Pay.`,
+    awaitBody: `Payment link for ${formatMoney(checkout.done.charged ?? 0)} sent to ${first}. They can pay by card, Apple Pay or Google Pay.`,
     resendLink: () => {
-      saveBalance(resendBalanceLink);
+      saveBalance(startBusy(resendBalanceLink));
       actions.showToast(`Payment link resent to ${first}`);
     },
     recordPaid: () =>
       setState({
         confirm: {
-          title: `Record £${checkout.done.charged} as paid?`,
+          title: `Record ${formatMoney(checkout.done.charged ?? 0)} as paid?`,
           body: RECORDED_ONLY,
           yesLabel: "Record as paid",
           yes: () => {
@@ -65,6 +70,7 @@ export const getCompletedView = (context: PastContext) => {
           },
         },
       }),
+    isResendBusy: isBusy,
     canCancelLink: isAwaiting,
     cancelLink: () =>
       setState({
@@ -84,6 +90,12 @@ export const getCompletedView = (context: PastContext) => {
     hasLinks: !isAwaiting,
     viewReceipt: () => setState({ pastCheckoutPanel: "receipt" }),
     resendReceipt: () => setState({ pastCheckoutPanel: "resend" }),
+    canSkipReview: !!row.canSkipReview,
+    skipReview: () => {
+      patch({ canSkipReview: false });
+      saveBalance(skipReviewInvite);
+      actions.showToast(`${first} won’t be asked for a review`);
+    },
     // a disputed payment is the bank's to settle, unless the stylist won it or an inquiry closed
     canRefund:
       !isAwaiting &&

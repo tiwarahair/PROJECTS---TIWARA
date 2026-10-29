@@ -2,7 +2,7 @@
 import Stripe from "stripe";
 import { admin } from "../_shared/admin.ts";
 import { stripe } from "../_shared/stripe.ts";
-import { isHandled, markHandled } from "../_shared/stripe-events.ts";
+import { claimEvent, finishEvent } from "../_shared/stripe-events.ts";
 
 const cryptoProvider = Stripe.createSubtleCryptoProvider();
 
@@ -41,7 +41,10 @@ const getPayoutItems = async (account: string, payoutId: string) => {
       source.source_transfer_reversal &&
       typeof source.source_transfer_reversal !== "string"
     ) {
-      const refund = source.source_transfer_reversal.source_refund;
+      const { source_refund: sourceRefund, metadata } = source.source_transfer_reversal;
+
+      // a reversal made by hand for a later transfer names its refund in metadata
+      const refund = sourceRefund ?? metadata?.refund_id;
 
       if (refund) refunds.push(typeof refund === "string" ? refund : refund.id);
     }
@@ -65,7 +68,7 @@ Deno.serve(async (request) => {
     return new Response("Bad signature", { status: 400 });
   }
 
-  if (await isHandled(event.id)) return Response.json({ received: true, duplicate: true });
+  if (!(await claimEvent(event.id, event.type))) return Response.json({ received: true, duplicate: true });
 
   try {
     if (event.account && event.type.startsWith("payout.")) {
@@ -88,10 +91,12 @@ Deno.serve(async (request) => {
   } catch (error) {
     console.error(event.type, "failed", error instanceof Error ? error.message : error);
 
+    await finishEvent(event.id, false);
+
     return new Response("failed", { status: 500 });
   }
 
-  await markHandled(event.id, event.type);
+  await finishEvent(event.id, true);
 
   return Response.json({ received: true });
 });

@@ -6,6 +6,7 @@ import {
   toSearchArgs,
 } from "../logic";
 import { getInitialState, getStateSearch } from "../state";
+import { TEST_CATALOGUE } from "../../../test/catalogue";
 
 const stateFor = (search: string) => getInitialState(search, 1440);
 
@@ -81,18 +82,24 @@ describe("search logic", () => {
   });
 
   it("describes the style selection", () => {
-    expect(getStyleSelection(stateFor("?type=knotless-braids"))).toMatchObject({
+    expect(
+      getStyleSelection(stateFor("?type=knotless-braids"), TEST_CATALOGUE),
+    ).toMatchObject({
       name: "Knotless braids",
       isGroup: false,
       has: true,
     });
 
-    expect(getStyleSelection(stateFor("?group=locs"))).toMatchObject({
+    expect(
+      getStyleSelection(stateFor("?group=locs"), TEST_CATALOGUE),
+    ).toMatchObject({
       display: "Locs",
       isGroup: true,
     });
 
-    expect(getStyleSelection(stateFor("?q=silk")).name).toBe("‘silk’");
+    expect(getStyleSelection(stateFor("?q=silk"), TEST_CATALOGUE).name).toBe(
+      "‘silk’",
+    );
   });
 
   it("converts 12-hour times", () => {
@@ -104,12 +111,31 @@ describe("search logic", () => {
     ]).toEqual([480, 720, 0, 1080]);
   });
 
+  it("names a retired style in the URL, and waits for the catalogue to name one", () => {
+    const catalogue = {
+      ...TEST_CATALOGUE,
+      types: TEST_CATALOGUE.types.map((type) => ({ ...type, isActive: false })),
+    };
+
+    expect(
+      getStyleSelection(stateFor("?type=box-braids"), catalogue),
+    ).toMatchObject({ name: "Box braids", isPending: false });
+
+    expect(
+      getStyleSelection(stateFor("?type=box-braids"), undefined),
+    ).toMatchObject({ has: false, isPending: true });
+
+    expect(getStyleSelection(stateFor(""), undefined).isPending).toBe(false);
+  });
+
   it("turns the state into search_stylists arguments", () => {
     const state = stateFor(
       "?group=locs&venue=salon,mobile&maxPrice=80&dist=15&date=2026-10-20&time=9am-5pm&sort=price",
     );
 
-    expect(toSearchArgs(state, { lat: 53.48, lng: -2.24 })).toEqual({
+    expect(
+      toSearchArgs(state, { lat: 53.48, lng: -2.24 }, TEST_CATALOGUE),
+    ).toEqual({
       lat: 53.48,
       lng: -2.24,
       radius_miles: 15,
@@ -126,7 +152,7 @@ describe("search logic", () => {
   });
 
   it("the filter sheet's draft overrides venues, price, distance and sort", () => {
-    const args = toSearchArgs(stateFor("?maxPrice=80"), null, {
+    const args = toSearchArgs(stateFor("?maxPrice=80"), null, TEST_CATALOGUE, {
       venues: ["Home-based"],
       maxPrice: null,
       radius: 25,

@@ -8,7 +8,7 @@ import type {
   ProfilesWentLive,
   StripeState,
 } from "../../../lib/admin-api";
-import { formatMoney } from "../../../utils/money";
+import { formatPence } from "../../../utils/money";
 import { formatReviewDate } from "../../../utils/review-date";
 
 const TAB_LABELS: [ProfilesTab, string, keyof AdminProfileStats][] = [
@@ -53,19 +53,19 @@ export const STRIPE_LABELS: Record<StripeState, string> = {
   active: "Active",
 };
 
-const pounds = (pence: number) => formatMoney(pence / 100);
-
 export const getPriceRange = ({
   min_pence: min,
   max_pence: max,
 }: AdminProfile) => {
   if (min == null || max == null) return "No prices yet";
 
-  return min === max ? pounds(min) : `${pounds(min)} to ${pounds(max)}`;
+  return min === max
+    ? formatPence(min, { pence: "auto" })
+    : `${formatPence(min, { pence: "auto" })} to ${formatPence(max, { pence: "auto" })}`;
 };
 
 export const getFromPrice = ({ min_pence: min }: AdminProfile) =>
-  min == null ? "" : `from ${pounds(min)}`;
+  min == null ? "" : `from ${formatPence(min, { pence: "auto" })}`;
 
 export const getCount = (count: number, word: string) =>
   `${count} ${word}${count === 1 ? "" : "s"}`;
@@ -127,7 +127,15 @@ const getPricesText = ({ price_outliers: outliers }: AdminProfileDetail) => {
 
   if (!first) return "In the usual range";
 
-  return `${first.name} from ${pounds(first.from_pence)}, usually about ${pounds(first.usual_pence)}`;
+  return `${first.name} from ${formatPence(first.from_pence, { pence: "auto" })}, usually about ${formatPence(first.usual_pence, { pence: "auto" })}`;
+};
+
+const getPhotosText = (isFlagged: boolean, photos: number) => {
+  if (!photos) return "No photos yet";
+
+  return isFlagged
+    ? `Only ${getCount(photos, "photo")}`
+    : `${getCount(photos, "photo")} of their work`;
 };
 
 /** the four checks in the profile sheet, in the order they're shown */
@@ -155,9 +163,7 @@ export const getChecks = (profile: AdminProfileDetail): CheckRow[] => {
     {
       label: "Photos",
       isOk: !flags.includes("photos"),
-      text: flags.includes("photos")
-        ? `Only ${getCount(photos, "photo")}`
-        : `${getCount(photos, "photo")} of their work`,
+      text: getPhotosText(flags.includes("photos"), photos),
     },
   ];
 };

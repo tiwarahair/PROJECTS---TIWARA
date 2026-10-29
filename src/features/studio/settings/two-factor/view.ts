@@ -7,6 +7,9 @@ const CODE_REASONS: Record<string, string> = {
   stripe: "continue to Stripe",
   policy: "save your payment policy",
   refund: "make this refund",
+  backup: "add another authenticator app",
+  account: "change your login details",
+  trust: "stop trusting a device",
 };
 
 export const getTwoFactorView = (studio: StudioController) => {
@@ -162,7 +165,7 @@ export const getTwoFactorView = (studio: StudioController) => {
       else closeTwoFactor();
     },
     taxSubmit: (value: TaxDetails) =>
-      void actions.saveTax(value, isStripe ? closeTwoFactor : toStripe),
+      actions.saveTax(value, isStripe ? closeTwoFactor : toStripe),
     taxCodeGo: () => void actions.confirmTaxCode(),
     isSecure: step === "secure",
     isMethod: step === "method",

@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { getFieldFlagger } from "../../utils/validation";
 import { formatMoney, roundToPence } from "../../utils/money";
 import type { RefundValues } from "./data";
 import { parsePounds } from "./logic";
@@ -16,8 +17,7 @@ export const getAdjustSchema = (base: number) =>
   z
     .object({ amount: z.string(), reason: z.string(), other: z.string() })
     .superRefine(({ amount, reason, other }, context) => {
-      const flag = (path: keyof AdjustValues, message: string) =>
-        context.addIssue({ code: "custom", path: [path], message });
+      const flag = getFieldFlagger(context);
 
       if (!amount.trim()) flag("amount", "Enter the new price.");
       else if (getAdjustDelta(amount, base) === 0)
@@ -33,7 +33,11 @@ export interface ResendValues {
 }
 
 export const resendSchema = z.object({
-  to: z.string().trim().min(1, "Enter where to send it."),
+  to: z
+    .string()
+    .trim()
+    .min(1, "Enter an email address.")
+    .pipe(z.email("Enter a valid email address.")),
 }) satisfies z.ZodType<ResendValues>;
 
 export const getRefundAmount = ({ kind, amount }: RefundValues, cap: number) =>
@@ -52,8 +56,7 @@ export const getRefundSchema = (cap: number) =>
       reason: z.string(),
     })
     .superRefine((values, context) => {
-      const flag = (path: keyof RefundValues, message: string) =>
-        context.addIssue({ code: "custom", path: [path], message });
+      const flag = getFieldFlagger(context);
 
       const overError = getRefundOverError(values, cap);
 

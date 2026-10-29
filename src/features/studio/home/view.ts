@@ -1,8 +1,11 @@
 import type { PointerEvent } from "react";
 import { GATE_REASON } from "../core/constants";
-import { getDecoratedBookings } from "../bookings/decorate";
-import { copyText, makeChart } from "../core/format";
-import { getBookingLink } from "../core/model";
+import {
+  getCalendarBookings,
+  getDecoratedBookings,
+} from "../bookings/decorate";
+import { copyWithToast, makeChart } from "../core/format";
+import { getBookingLink, getPastKey } from "../core/model";
 import { isGated } from "../shell";
 import type { StudioController } from "../core/use-studio";
 import { getLoadingRange } from "./records";
@@ -34,8 +37,6 @@ export const getHomeView = (
   const rangeData = real ?? getLoadingRange(state.range);
 
   const chart = makeChart(rangeData.chart);
-  const now = new Date();
-  const nowMinutes = now.getHours() * 60 + now.getMinutes();
 
   const due = upcoming
     .filter(
@@ -48,14 +49,11 @@ export const getHomeView = (
         first.startMinutes - second.startMinutes,
     );
 
-  const today = upcoming
-    .filter(({ dayOffset }) => dayOffset === 0)
-    .sort((first, second) => first.startMinutes - second.startMinutes);
+  const today = getCalendarBookings(state, upcoming, (row) =>
+    actions.openSheet("past", { selectedPastId: getPastKey(row) }),
+  ).filter(({ dayOffset }) => dayOffset === 0);
 
-  const next = today.find(
-    ({ startMinutes, durationMinutes }) =>
-      startMinutes + durationMinutes > nowMinutes,
-  );
+  const next = today.find(({ ended }) => !ended);
 
   const limit = RANGE_DAYS[state.range] ?? 30;
   const { stats } = rangeData;
@@ -73,9 +71,9 @@ export const getHomeView = (
   const getEmptyTitle = () => {
     if (!hasBookings) return "No appointments yet";
 
-    return state.range === "today"
-      ? "Nothing booked today"
-      : "Nothing booked in this range";
+    if (state.range !== "today") return "Nothing booked in this range";
+
+    return today.length ? "Nothing else today" : "Nothing booked today";
   };
 
   const onChartMove = (event: PointerEvent<HTMLDivElement>) => {
@@ -108,7 +106,7 @@ export const getHomeView = (
     due,
     today,
     homeUpcoming: upcoming
-      .filter(({ dayOffset }) => dayOffset >= 0 && dayOffset < limit)
+      .filter(({ dayOffset, ended }) => !ended && dayOffset < limit)
       .slice(0, isDesktop ? 5 : 3),
     statCards: (
       [
@@ -140,8 +138,7 @@ export const getHomeView = (
         return;
       }
 
-      copyText(getBookingLink(state));
-      actions.showToast("Booking link copied");
+      copyWithToast(getBookingLink(state), actions.showToast);
     },
     onChartMove,
   };
