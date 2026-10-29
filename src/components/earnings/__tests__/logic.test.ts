@@ -55,11 +55,13 @@ describe("earnings logic", () => {
     const older = { ...transaction(-30, 0), id: "older", ...at(1) };
     const disputed = { ...transaction(-25, 0), id: "dispute:open", ...at(5) };
     const won = { ...transaction(-25, 0), id: "dispute:won", ...at(5) };
+
     const returned = {
       ...transaction(25, 0),
       id: "dispute-return:won",
       ...at(6),
     };
+
     const recorded = { ...refund, id: "recorded", isRecorded: true };
     const paidOut = { ...refund, id: "paid", status: "Paid out" as const };
     const payment = { ...transaction(40, 1), ...at(5) };
