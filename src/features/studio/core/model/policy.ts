@@ -74,7 +74,7 @@ interface PolicyFee {
 export const getPolicyFee = (
   state: StudioState,
   kind: "late" | "noShow",
-  booking: { price: number; agreedPolicy?: StudioPolicy },
+  booking: { price: number; agreedPolicy?: StudioPolicy; paid?: string },
 ): PolicyFee => {
   const policy = booking.agreedPolicy ?? state.policy;
   const mode = policy.mode || "none";
@@ -83,9 +83,12 @@ export const getPolicyFee = (
 
   const deposit = roundToPence((price * (policy.deposit || 0)) / 100);
 
-  const isDepositKept = mode === "deposit" && !policy.refundable;
+  const isUnpaid = booking.paid === "none";
+  const isDepositKept = mode === "deposit" && !policy.refundable && !isUnpaid;
 
   const getRefund = () => {
+    if (mode === "deposit" && isUnpaid) return "Nothing charged";
+
     if (mode === "deposit")
       return policy.refundable
         ? "Deposit refunded"
