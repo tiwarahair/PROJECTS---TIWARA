@@ -1,5 +1,5 @@
 begin;
-select plan(44);
+select plan(45);
 
 create function pg_temp.sign_up(user_id uuid, user_email text, business text)
 returns void
@@ -180,7 +180,7 @@ select is(
 select throws_ok(
   format('select public.claim_fee_retry(%L, %L)', (select deposit_over from b),
     'd1111111-1111-1111-1111-111111111111'),
-  'retry_not_allowed', 'no retry within a day of the last try'
+  'too_soon', 'no retry within a day of the last try'
 );
 
 update public.booking_fees set last_tried_at = now() - interval '25 hours' where booking_id = (select deposit_over from b);
@@ -198,8 +198,16 @@ update public.booking_fees set last_tried_at = now() - interval '25 hours' where
 select throws_ok(
   format('select public.claim_fee_retry(%L, %L)', (select deposit_over from b),
     'd1111111-1111-1111-1111-111111111111'),
-  'retry_not_allowed', 'never after a hard decline'
+  'hard_decline', 'never after a hard decline'
 );
+
+update public.booking_fees set hard_decline = false, tries = 3 where booking_id = (select deposit_over from b);
+select throws_ok(
+  format('select public.claim_fee_retry(%L, %L)', (select deposit_over from b),
+    'd1111111-1111-1111-1111-111111111111'),
+  'no_retries_left', 'nor after the third try'
+);
+update public.booking_fees set hard_decline = true where booking_id = (select deposit_over from b);
 
 select pg_temp.act_as('d1111111-1111-1111-1111-111111111111');
 select public.record_fee_paid((select deposit_over from b), 'cash');

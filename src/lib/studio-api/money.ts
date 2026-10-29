@@ -1,4 +1,5 @@
 // Fees and refunds from Studio: waive, record, retry, resend the payment link, refund.
+import { FunctionsHttpError } from "@supabase/supabase-js";
 import { SaveError } from "../studio-writes";
 import { supabase } from "../supabase";
 import { invokeStudio, write } from "./request";
@@ -22,14 +23,37 @@ export const resendPaymentLink = (bookingId: string) =>
 export interface FeeRetry {
   outcome: "paid" | "unpaid";
   declineMessage: string | null;
+  hardDecline: boolean;
 }
 
-/** Charges a declined fee again; throws SaveError when it can't be retried yet. */
+const RETRY_REFUSALS: Record<string, string> = {
+  too_soon: "You can retry 24 hours after the last try.",
+  no_retries_left:
+    "No retries left. Send a payment link or record the payment instead.",
+  hard_decline:
+    "This card can’t be charged again. Send a payment link or record the payment instead.",
+  retry_not_allowed: "This fee can’t be retried now.",
+};
+
+const getRetryRefusal = async (error: FunctionsHttpError) => {
+  const body = (await error.context.json().catch(() => ({}))) as {
+    error?: string;
+  };
+
+  return new SaveError(
+    RETRY_REFUSALS[body.error ?? ""] ?? RETRY_REFUSALS.retry_not_allowed,
+  );
+};
+
+/** Charges a declined fee again; throws SaveError saying why when it can't be retried. */
 export const retryFee = async (bookingId: string) => {
-  const data = await invokeStudio<FeeRetry>(
-    "studio-fee",
-    { bookingId },
-    { 409: () => new SaveError("You can retry 24 hours after the last try.") },
+  const data = await invokeStudio<FeeRetry>("studio-fee", { bookingId }).catch(
+    async (error: unknown) => {
+      if (error instanceof FunctionsHttpError && error.context.status === 409)
+        throw await getRetryRefusal(error);
+
+      throw error;
+    },
   );
 
   if (!data) throw new Error("retry failed");
