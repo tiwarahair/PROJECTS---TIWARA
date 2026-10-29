@@ -10,7 +10,7 @@ export const saveCategories = (rows: TablesInsert<"stylist_categories">[]) =>
 export const removeCategory = (id: string) =>
   write(supabase.from("stylist_categories").delete().eq("id", id));
 
-/** A service and its sizes / lengths / own options / add-on links / photos, replaced as a whole. */
+/** A service and its sizes / lengths / own options / add-on links, replaced as a whole in one transaction, then its photos. */
 export const saveService = async (
   service: TablesInsert<"services">,
   variations: TablesInsert<"service_variations">[],
@@ -19,23 +19,14 @@ export const saveService = async (
 ) => {
   const serviceId = service.id ?? "";
 
-  // even a half-finished save has changed the menu
   try {
-    await check(supabase.from("services").upsert(service));
-
     await check(
-      supabase.from("service_variations").delete().eq("service_id", serviceId),
+      supabase.rpc("save_service", {
+        service,
+        variations,
+        addon_links: addonLinks,
+      }),
     );
-
-    await check(
-      supabase.from("service_addons").delete().eq("service_id", serviceId),
-    );
-
-    if (variations.length)
-      await check(supabase.from("service_variations").insert(variations));
-
-    if (addonLinks.length)
-      await check(supabase.from("service_addons").insert(addonLinks));
 
     // unlink first, so a service swapping a photo never counts six
     const unlinked = supabase
@@ -60,9 +51,6 @@ export const saveService = async (
     notifyStudioWrite();
   }
 };
-
-export const saveServiceStatus = (id: string, status: string) =>
-  write(supabase.from("services").update({ status }).eq("id", id));
 
 export const removeService = (id: string) =>
   write(supabase.from("services").delete().eq("id", id));

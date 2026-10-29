@@ -1,6 +1,12 @@
 // What each onboarding screen sends to the server, and where it goes next.
 import { useEffect } from "react";
-import { getSignedInAccount, signOut, startGoogleSignIn } from "../../lib/auth";
+import {
+  getSessionAccount,
+  getSignedInAccount,
+  signOut,
+  startGoogleSignIn,
+} from "../../lib/auth";
+import { isTrustedDevice } from "../../lib/trusted-devices";
 import { getSubmitActions } from "./submit-actions";
 import type { SubmitCore } from "./submit-actions";
 import { getSubmitValid } from "./submit-screens";
@@ -62,6 +68,25 @@ export const useOnboardingSubmit = (core: SubmitCore) => {
       );
     });
     // mount only
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  // Studio sends a sign-in that stopped before the code straight to the code step
+  useEffect(() => {
+    const { screen, codeKind } = stateRef.current;
+
+    if (screen !== "pro-2fa" || codeKind !== "verify") return;
+
+    void getSessionAccount().then(async (account) => {
+      if (!account) return;
+
+      if (await isTrustedDevice()) return finish("pro");
+
+      const { email, isAdmin } = account;
+
+      reset({ ...getValues(), email });
+      setState({ codeKind: "2fa", canTrustDevice: !isAdmin });
+    });
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 

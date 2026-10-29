@@ -41,13 +41,13 @@ export const getClosedMessage = (
     };
 
   return {
-    title: "This link has expired",
-    text: "Appeal links work for 14 days after the decision.",
+    title: "This link isn’t valid",
+    text: "Use the link in the latest email we sent you. Appeal links work for 14 days after the decision.",
     ...HOME,
   };
 };
 
 export const APPEAL_ERRORS: Record<string, string> = {
   rate_limited: "Too many tries. Wait a few minutes, then try again.",
-  link_not_valid: "This link has expired.",
+  link_not_valid: "This link isn’t valid.",
 };

@@ -24,6 +24,10 @@ const REFUSALS: Record<string, string> = {
   invalid_amount: "Check the amount and tip.",
   resend_not_allowed: "No resends left. Record the payment or cancel the link.",
   link_not_pending: "That link isn’t active any more.",
+  receipt_not_available: "There’s no receipt for this booking yet.",
+  invalid_email: "Enter a valid email address.",
+  resend_limit:
+    "This receipt has been resent 3 times today. Try again tomorrow.",
 };
 
 export interface CheckoutLineInput {
@@ -118,5 +122,11 @@ export const resendBalanceLink = (bookingId: string) =>
 export const cancelBalanceLink = (bookingId: string) =>
   writeOrRefuse(
     supabase.rpc("cancel_balance_link", { target: bookingId }),
+    REFUSALS,
+  );
+
+export const resendCheckoutReceipt = (bookingId: string, email: string) =>
+  writeOrRefuse(
+    supabase.rpc("resend_checkout_receipt", { target: bookingId, email }),
     REFUSALS,
   );

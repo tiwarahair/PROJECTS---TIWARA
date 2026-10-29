@@ -20,6 +20,7 @@ export const useOnboardingStorage = ({
           pinLatLng,
           geocodedLatLng,
           area,
+          savedAt: Date.now(),
         }),
       );
     } catch {

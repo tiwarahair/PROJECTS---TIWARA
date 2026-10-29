@@ -135,6 +135,57 @@ describe("SearchPage", () => {
     );
   });
 
+  it("keeps the distance controls while the location is on its way", async () => {
+    vi.stubGlobal("navigator", {
+      ...navigator,
+      geolocation: { getCurrentPosition: vi.fn() },
+    });
+
+    renderWithStore(<SearchPage />, "/search");
+
+    expect(
+      await screen.findByRole("button", { name: "Sort: Distance" }),
+    ).toBeInTheDocument();
+
+    expect(
+      screen.getByRole("button", { name: "Within 10 miles" }),
+    ).toBeInTheDocument();
+  });
+
+  it("with the location refused, it asks for one and sorts by earliest without a distance filter", async () => {
+    vi.stubGlobal("navigator", {
+      ...navigator,
+      geolocation: {
+        getCurrentPosition: (
+          _found: PositionCallback,
+          failed: PositionErrorCallback,
+        ) =>
+          failed({ code: 1, PERMISSION_DENIED: 1 } as GeolocationPositionError),
+      },
+    });
+
+    renderWithStore(<SearchPage />, "/search");
+
+    expect(
+      await screen.findByPlaceholderText("Choose a location"),
+    ).toBeInTheDocument();
+
+    expect(
+      screen.getByRole("button", { name: "Sort: Earliest available" }),
+    ).toBeInTheDocument();
+
+    expect(
+      screen.queryByRole("button", { name: /^Within/ }),
+    ).not.toBeInTheDocument();
+
+    await vi.waitFor(() =>
+      expect(searchStylists).toHaveBeenLastCalledWith(
+        expect.objectContaining({ sort: "earliest" }),
+        0,
+      ),
+    );
+  });
+
   it("a typed area searches around its point", async () => {
     renderWithStore(<SearchPage />, "/search?loc=Chorlton&ll=53.44,-2.27");
 
@@ -203,7 +254,7 @@ describe("SearchPage", () => {
   });
 
   it("sort and distance pick from their popovers", async () => {
-    renderWithStore(<SearchPage />, "/search");
+    renderWithStore(<SearchPage />, "/search?loc=Chorlton&ll=53.44,-2.27");
     await user.click(screen.getByRole("button", { name: "Sort: Distance" }));
 
     expect(

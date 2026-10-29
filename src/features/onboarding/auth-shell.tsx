@@ -4,6 +4,7 @@ import { joinClassNames } from "../../utils/class-names";
 import { BENEFITS, FOOTER_SCREENS, PHOTOS } from "./data";
 import type { OnboardingLayout } from "./layout";
 import { ChevronLeft } from "lucide-react";
+import { Link } from "react-router";
 import { ModeIcon } from "./fields";
 import styles from "../../styles/features/onboarding/auth-shell.module.css";
 import type { OnboardingController } from "./use-onboarding";
@@ -221,10 +222,9 @@ export const AuthShell = ({ onboarding, layout, children }: AuthShellProps) => {
             )}
           >
             {/* placeholder links */}
-            {/* eslint-disable-next-line jsx-a11y/anchor-is-valid */}
-            <a href="#" className={styles.footerLink}>
+            <Link to="/help" className={styles.footerLink}>
               Support
-            </a>
+            </Link>
             {/* eslint-disable-next-line jsx-a11y/anchor-is-valid */}
             <a
               href="#"

@@ -1,5 +1,8 @@
 import type { CSSProperties } from "react";
+import { skipToken } from "@reduxjs/toolkit/query";
 import { ChevronRight } from "lucide-react";
+import { InlineRetry } from "../../../components/inline-retry";
+import { useGetStudioActivityQuery } from "../../../stores/api-slice";
 import { joinClassNames } from "../../../utils/class-names";
 import { markActivityRead } from "../../../lib/studio-api/home";
 import { openBookingById } from "../bookings/open-by-id";
@@ -14,6 +17,10 @@ export const NotificationsSheet = ({
   studio: StudioController;
 }) => {
   const { state, setState, actions } = studio;
+
+  const { isError, refetch } = useGetStudioActivityQuery(
+    state.account.stylistId || skipToken,
+  );
 
   const deepLink = (run: () => void) => () => {
     actions.closeSheet();
@@ -59,6 +66,17 @@ export const NotificationsSheet = ({
     markRead(item);
     getNavigation(item)?.();
   };
+
+  if (!state.notifications.length && isError)
+    return (
+      <div className={styles.empty}>
+        <InlineRetry
+          className={styles.retry}
+          text="Couldn’t load notifications ·"
+          onRetry={() => void refetch()}
+        />
+      </div>
+    );
 
   if (!state.notifications.length)
     return <div className={styles.empty}>Nothing new yet</div>;

@@ -9,8 +9,12 @@ export const getEmptySuggestions = (
   selection: StyleSelection,
   update: Update,
   clearDate: () => void,
+  hasDistance: boolean,
 ) => {
-  const nextRadius = RADII.find((radius) => radius > state.radius);
+  const nextRadius = hasDistance
+    ? RADII.find((radius) => radius > state.radius)
+    : undefined;
+
   const { group, serviceType } = selection;
 
   return [

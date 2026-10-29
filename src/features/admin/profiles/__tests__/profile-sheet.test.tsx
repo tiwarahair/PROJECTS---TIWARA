@@ -152,6 +152,18 @@ describe("ProfileSheet", () => {
     ).toBeInTheDocument();
   });
 
+  it("a profile that doesn't load offers to try again", async () => {
+    vi.mocked(fetchProfile)
+      .mockRejectedValueOnce(new Error("offline"))
+      .mockResolvedValue(PROFILE);
+
+    renderSheet();
+
+    await user.click(await screen.findByRole("button", { name: "Try again" }));
+
+    expect(await screen.findByText("Plaits & Petals")).toBeInTheDocument();
+  });
+
   it("says when the business has closed", async () => {
     vi.mocked(fetchProfile).mockResolvedValue(null);
     renderSheet();

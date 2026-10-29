@@ -35,6 +35,7 @@ export const getInitialStudioState = (): StudioState => ({
   twoFactorOut: false,
   shareTip: false,
   stripeBusy: false,
+  pastBusyId: null,
   payoutStatus: null,
   payoutBank: null,
   notificationPrefs: {},
@@ -186,5 +187,5 @@ export const getInitialStudioState = (): StudioState => ({
     noShow: { on: false, kind: "keep", percent: 50 },
     extras: [],
   },
-  rules: { maxNotice: 3, minNotice: 24, extra: 0, travel: 0 },
+  rules: { maxNotice: 3, minNoticeMinutes: 1440, extra: 0, travel: 0 },
 });

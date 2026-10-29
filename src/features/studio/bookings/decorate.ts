@@ -15,7 +15,13 @@ import {
   getTileTone,
   isOngoing,
 } from "../core/model";
-import type { StudioBooking, StudioClient, StudioState } from "../core/types";
+import type {
+  PastRecord,
+  StudioBooking,
+  StudioClient,
+  StudioState,
+} from "../core/types";
+import { getLocalId } from "./records";
 import { formatMoney } from "../../../utils/money";
 import { getMinutesOfDay } from "../../../utils/dates";
 
@@ -34,6 +40,8 @@ interface Tone {
 interface StatusFlags {
   awaiting: boolean;
   ongoing: boolean;
+  isDue: boolean;
+  isFailed: boolean;
   status: string;
 }
 
@@ -117,7 +125,7 @@ const getPayTone = (isPaid: boolean, paid: string): Tone => {
 };
 
 const getBadge = (
-  { awaiting, ongoing, status }: StatusFlags,
+  { awaiting, ongoing, isDue, isFailed, status }: StatusFlags,
   paid: string,
   msLeft: number,
   leftShort: string,
@@ -127,13 +135,17 @@ const getBadge = (
   if (awaiting)
     return msLeft > 0 ? `Auto-cancels in ${leftShort}` : "Auto-cancels now";
 
+  if (isFailed) return "Payment failed";
+
+  if (isDue) return "Due for checkout";
+
   if (status === "arrived") return "Arrived";
 
   return PAID_BADGES[paid] ?? "";
 };
 
 const getStatusLabel = (
-  { awaiting, ongoing, status }: StatusFlags,
+  { awaiting, ongoing, isDue, isFailed, status }: StatusFlags,
   autoDone: boolean | undefined,
 ) => {
   if (awaiting) return "Awaiting confirmation";
@@ -141,6 +153,10 @@ const getStatusLabel = (
   if (autoDone) return "Completed · Unpaid";
 
   if (ongoing) return "In progress";
+
+  if (isFailed) return "Payment failed";
+
+  if (isDue) return "Due for checkout";
 
   if (status === "arrived") return "Arrived";
 
@@ -186,7 +202,7 @@ export const decorateBooking = (
 
   const startMinutes = timeToMinutes(booking.time);
   const nowMinutes = getMinutesOfDay();
-  const ongoing = isOngoing(booking);
+  const ongoing = isOngoing({ ...booking, duration });
   const isPre = status === "confirmed";
 
   const canArrive =
@@ -230,9 +246,21 @@ export const decorateBooking = (
       ? `${Math.round(msLeft / 3600000)} h`
       : `${Math.max(1, Math.round(msLeft / 60000))} min`;
 
-  const flags: StatusFlags = { awaiting, ongoing, status };
+  const ended =
+    booking.dayOffset < 0 ||
+    (booking.dayOffset === 0 &&
+      startMinutes + durationToMinutes(duration) <= nowMinutes);
 
   const badgePaid = booking.cardFailed ? "failed" : paid;
+  const isOver = ended && (status === "confirmed" || status === "arrived");
+
+  const flags: StatusFlags = {
+    awaiting,
+    ongoing,
+    isDue: isOver && badgePaid !== "failed",
+    isFailed: isOver && badgePaid === "failed",
+    status,
+  };
 
   const badge = booking.autoDone
     ? "Completed · Unpaid"
@@ -316,7 +344,7 @@ export const decorateBooking = (
     expiryLabel: booking.expiresAt ? formatDateTime(booking.expiresAt) : "",
     hoursLeft: booking.expiresAt ? `${leftShort} left` : "",
     resendsLeft: Math.max(0, 2 - resends),
-    resendLabel: `Resend by email/SMS (${Math.max(0, 2 - resends)} of 2 left)`,
+    resendLabel: `Resend by email (${Math.max(0, 2 - resends)} of 2 left)`,
     canResend: resends < 2,
     resendOpacity: resends < 2 ? "1" : ".45",
     protectionAmountLabel: formatMoney(
@@ -330,10 +358,7 @@ export const decorateBooking = (
     paidKind: paid,
     dueAmount: due,
     visits: client.visits || 0,
-    ended:
-      booking.dayOffset < 0 ||
-      (booking.dayOffset === 0 &&
-        startMinutes + durationToMinutes(duration) <= nowMinutes),
+    ended,
     unpaidFlag:
       !!booking.checkoutUnpaid ||
       ((status === "confirmed" || status === "arrived") &&
@@ -377,3 +402,70 @@ export const getDecoratedBookings = (
     .map((booking, index) =>
       decorateBooking(state, booking, index, () => onOpen(booking)),
     );
+
+const FINISHED_TONES: Record<string, Tone> = {
+  Completed: PAID_TONE,
+  "No show": FAILED_TONE,
+};
+
+export const getFinishedBookings = (
+  state: StudioState,
+  onOpen: (row: PastRecord) => void,
+): DecoratedBooking[] =>
+  state.pastNew
+    .filter(
+      ({ status, dayOffset }) => status in FINISHED_TONES && dayOffset != null,
+    )
+    .map((row, index) => {
+      const {
+        remoteId,
+        original,
+        dayOffset = 0,
+        time,
+        duration = "",
+        client,
+        service,
+        price,
+        status,
+      } = row;
+
+      const tone = FINISHED_TONES[status] ?? PAID_TONE;
+
+      const booking: StudioBooking = {
+        id: original?.id ?? getLocalId(remoteId),
+        remoteId,
+        dayOffset,
+        time,
+        duration,
+        client,
+        service,
+        price,
+        pending: false,
+        status: "completed",
+        paid: "full",
+      };
+
+      return {
+        ...decorateBooking(state, booking, index, () => onOpen(row)),
+        ended: true,
+        badge: status,
+        badgeBackground: tone.background,
+        badgeBorder: tone.border,
+        badgeColor: tone.color,
+        statusLabel: status,
+        statusBackground: tone.background,
+        statusBorder: tone.border,
+        statusColor: tone.color,
+      };
+    });
+
+export const getCalendarBookings = (
+  state: StudioState,
+  upcoming: DecoratedBooking[],
+  openPast: (row: PastRecord) => void,
+) =>
+  [...upcoming, ...getFinishedBookings(state, openPast)].sort(
+    (first, second) =>
+      first.dayOffset - second.dayOffset ||
+      first.startMinutes - second.startMinutes,
+  );

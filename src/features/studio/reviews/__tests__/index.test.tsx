@@ -132,6 +132,10 @@ describe("Studio → Reviews", () => {
 
     expect(await screen.findByText("Kept after checking")).toBeInTheDocument();
 
+    expect(
+      screen.getByText("You can appeal until Thu 5 Nov"),
+    ).toBeInTheDocument();
+
     await user.click(screen.getByRole("button", { name: "Appeal" }));
 
     await user.type(

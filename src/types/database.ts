@@ -462,7 +462,7 @@ export type Database = {
         Row: {
           default_extra_minutes: number;
           max_notice_months: number;
-          min_notice_hours: number;
+          min_notice_minutes: number;
           stylist_id: string;
           travel_buffer_minutes: number;
         };
@@ -470,14 +470,14 @@ export type Database = {
         Insert: {
           default_extra_minutes?: number;
           max_notice_months?: number;
-          min_notice_hours?: number;
+          min_notice_minutes?: number;
           stylist_id: string;
           travel_buffer_minutes?: number;
         };
         Update: {
           default_extra_minutes?: number;
           max_notice_months?: number;
-          min_notice_hours?: number;
+          min_notice_minutes?: number;
           stylist_id?: string;
           travel_buffer_minutes?: number;
         };
@@ -544,6 +544,7 @@ export type Database = {
           block_range: unknown;
           buffer_minutes: number;
           calendar_key: string;
+          can_skip_review_invite: boolean | null;
           cancel_reason: string | null;
           cancellation: Json | null;
           cancelled_at: string | null;
@@ -2895,6 +2896,40 @@ export type Database = {
           },
         ];
       };
+      trusted_devices: {
+        Row: {
+          created_at: string;
+          expires_at: string;
+          id: string;
+          kind: string;
+          label: string;
+          last_used_at: string | null;
+          token_hash: string;
+          user_id: string;
+        };
+        ComputedFields: never;
+        Insert: {
+          created_at?: string;
+          expires_at?: string;
+          id?: string;
+          kind: string;
+          label: string;
+          last_used_at?: string | null;
+          token_hash: string;
+          user_id: string;
+        };
+        Update: {
+          created_at?: string;
+          expires_at?: string;
+          id?: string;
+          kind?: string;
+          label?: string;
+          last_used_at?: string | null;
+          token_hash?: string;
+          user_id?: string;
+        };
+        Relationships: [];
+      };
       working_hours: {
         Row: {
           end_time: string;
@@ -3034,6 +3069,10 @@ export type Database = {
       };
       become_stylist: { Args: { details: Json }; Returns: undefined };
       booking_fee_pence: { Args: { price_pence: number }; Returns: number };
+      can_skip_review_invite: {
+        Args: { "": Database["public"]["Tables"]["bookings"]["Row"] };
+        Returns: boolean;
+      };
       cancel_balance_link: { Args: { target: string }; Returns: undefined };
       cancel_managed_booking: {
         Args: { cancellation: Json; token: string };
@@ -3054,6 +3093,7 @@ export type Database = {
         Returns: Json;
       };
       change_slug: { Args: { new_slug: string }; Returns: string };
+      check_trusted_device: { Args: { token: string }; Returns: boolean };
       checkout_booking: {
         Args: {
           address: Json;
@@ -3470,6 +3510,10 @@ export type Database = {
         Args: { owner: string; target: string };
         Returns: Json;
       };
+      get_due_closure_client_photos: {
+        Args: Record<PropertyKey, never>;
+        Returns: string[];
+      };
       get_due_closure_photos: {
         Args: Record<PropertyKey, never>;
         Returns: string[];
@@ -3796,6 +3840,14 @@ export type Database = {
         };
         Returns: boolean;
       };
+      is_second_factor_passed: {
+        Args: {
+          session_aal: string;
+          target_session: string;
+          target_user: string;
+        };
+        Returns: boolean;
+      };
       is_service_owner: {
         Args: { target_service_id: string };
         Returns: boolean;
@@ -4025,6 +4077,10 @@ export type Database = {
       };
       owns_assistant_image: { Args: { object_name: string }; Returns: boolean };
       owns_photo_path: { Args: { object_name: string }; Returns: boolean };
+      passed_second_factor: {
+        Args: Record<PropertyKey, never>;
+        Returns: boolean;
+      };
       price_booking: {
         Args: { choices: Json; target_service: string };
         Returns: Json;
@@ -4135,6 +4191,10 @@ export type Database = {
         Returns: Json;
       };
       resend_balance_link: { Args: { target: string }; Returns: undefined };
+      resend_checkout_receipt: {
+        Args: { email: string; target: string };
+        Returns: undefined;
+      };
       resend_confirm_link: { Args: { target: string }; Returns: number };
       resend_payment_link: {
         Args: { target_booking: string };
@@ -4148,6 +4208,14 @@ export type Database = {
       retry_stuck_refund: { Args: { target: string }; Returns: undefined };
       retry_stuck_transfer: { Args: { payment: string }; Returns: undefined };
       revoke_confirm_links: { Args: { target: string }; Returns: undefined };
+      revoke_other_trusted_devices: {
+        Args: Record<PropertyKey, never>;
+        Returns: undefined;
+      };
+      revoke_trusted_devices: {
+        Args: Record<PropertyKey, never>;
+        Returns: undefined;
+      };
       save_card_check: {
         Args: { is_expiring: boolean; target: string };
         Returns: undefined;
@@ -4195,6 +4263,10 @@ export type Database = {
       save_payout: { Args: { account: string; payout: Json }; Returns: string };
       save_refund_debt: {
         Args: { amount: number; booking: string; refund: string };
+        Returns: undefined;
+      };
+      save_service: {
+        Args: { addon_links: Json; service: Json; variations: Json };
         Returns: undefined;
       };
       save_stylist_client: {
@@ -4343,6 +4415,7 @@ export type Database = {
         Returns: undefined;
       };
       sign_out_session: { Args: { target: string }; Returns: undefined };
+      skip_review_invite: { Args: { target: string }; Returns: undefined };
       slugify: { Args: { value: string }; Returns: string };
       start_booking_confirmation: { Args: { token: string }; Returns: Json };
       start_link_payment: { Args: { token: string }; Returns: Json };
@@ -4351,6 +4424,7 @@ export type Database = {
         Args: { body: string; rating: number; token: string };
         Returns: string;
       };
+      trust_device: { Args: Record<PropertyKey, never>; Returns: string };
       undo_checkout: { Args: { target: string }; Returns: undefined };
       undo_no_show: { Args: { target: string }; Returns: undefined };
       update_studio_booking: {

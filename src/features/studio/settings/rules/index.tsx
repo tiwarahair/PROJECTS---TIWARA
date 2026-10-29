@@ -124,7 +124,7 @@ export const RulesPage = ({ studio, view }: RulesPageProps) => {
           isLast={true}
           title="Minimum notice"
           hint="Protects you from surprise bookings"
-          value={String(rules.minNotice * 60)}
+          value={String(rules.minNoticeMinutes)}
           onChange={view.onRulesMin}
           label="Minimum notice"
           options={view.rulesMinOptions}

@@ -48,10 +48,23 @@ export const createTwoFactorActions = (
     });
   };
 
+  const askForCode = (
+    from: string,
+    then: () => void,
+    onCancel?: () => void,
+  ) => {
+    openTwoFactor("taxcode", { flow: "info", from });
+    memo.afterSecondFactor = then;
+    memo.cancelSecondFactor = onCancel;
+  };
+
   const closeTwoFactor = () => {
     if (!getState().twoFactor) return;
 
+    const { cancelSecondFactor } = memo;
+
     memo.afterSecondFactor = undefined;
+    memo.cancelSecondFactor = undefined;
     window.clearTimeout(timers.twoFactorNext);
 
     setState({ twoFactorOut: true });
@@ -61,6 +74,8 @@ export const createTwoFactorActions = (
       () => setState({ twoFactor: null, twoFactorOut: false }),
       160,
     );
+
+    cancelSecondFactor?.();
   };
 
   const setTwoFactor = (patch: Partial<TwoFactorFlow>) =>
@@ -252,6 +267,7 @@ export const createTwoFactorActions = (
 
   return {
     openTwoFactor,
+    askForCode,
     closeTwoFactor,
     setTwoFactor,
     goStep,

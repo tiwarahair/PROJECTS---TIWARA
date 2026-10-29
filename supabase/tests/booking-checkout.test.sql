@@ -1,5 +1,5 @@
 begin;
-select plan(26);
+select plan(29);
 
 create function pg_temp.open_business(user_id uuid, business_type text, radius int)
 returns uuid
@@ -50,7 +50,8 @@ language sql
 as $$
   select public.checkout_booking((held ->> 'id')::uuid, held ->> 'secret',
     '{"first":"Nia","last":"Okafor","email":"nia@pay.test","phone":"07700900123"}', 'Tender scalp',
-    case when lat is null then null else '{"line1":"2 Low St","postcode":"M1 2AA"}'::jsonb end, lat, lng, null)
+    case when lat is null then null else '{"line1":"2 Low St","postcode":"M1 2AA"}'::jsonb end, lat, lng, null,
+    '{"agreement":"By booking, you agree to Pay shop''s cancellation policy and our Terms.","policy_lines":["Free cancellation up to 48 hours before."]}')
 $$;
 
 create temp table ids as
@@ -94,8 +95,25 @@ select is(
   'Tender scalp', 'the notes are kept'
 );
 
+select is(
+  (select policy_accepted_at from public.bookings where id = (select (deposit ->> 'id')::uuid from holds)),
+  now(), 'pressing Pay records when the client accepted the policy'
+);
+
+select is(
+  (select terms ->> 'agreement' from public.bookings where id = (select (deposit ->> 'id')::uuid from holds)),
+  'By booking, you agree to Pay shop''s cancellation policy and our Terms.',
+  'the booking keeps the agreement line the review step showed'
+);
+
+select is(
+  (select terms -> 'policy_lines' from public.bookings where id = (select (deposit ->> 'id')::uuid from holds)),
+  '["Free cancellation up to 48 hours before."]'::jsonb, 'and the policy card''s lines'
+);
+
 select pg_temp.set_policy((select shop from ids), 'full');
 select is((pg_temp.checkout((select full_price from holds)) ->> 'due_today_pence')::int, 5125, 'full: the price plus the fee');
+
 
 select pg_temp.set_policy((select shop from ids), 'card');
 select is((pg_temp.checkout((select fee_only from holds)) ->> 'due_today_pence')::int, 125, 'card on file: the fee only');
@@ -173,7 +191,7 @@ select is(
 
 select ok(
   has_function_privilege('anon', 'public.get_booking_status(uuid, text)', 'execute')
-    and not has_function_privilege('anon', 'public.checkout_booking(uuid, text, jsonb, text, jsonb, double precision, double precision, uuid)', 'execute')
+    and not has_function_privilege('anon', 'public.checkout_booking(uuid, text, jsonb, text, jsonb, double precision, double precision, uuid, jsonb)', 'execute')
     and not has_function_privilege('authenticated', 'public.confirm_booking_payment(text, integer, uuid)', 'execute'),
   'browsers can only read the status; checkout and confirming are server-only'
 );

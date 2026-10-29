@@ -82,6 +82,8 @@ export const getContext = (studio: StudioController) => {
           price: booking.price,
           duration: booking.durationLabel,
           when: dateLabel(booking.dayOffset || 0),
+          dayOffset: booking.dayOffset || 0,
+          startsAt: original?.startsAt,
           time: booking.time,
           at: Date.now(),
           original,

@@ -1,6 +1,7 @@
 import { Check, ExternalLink, TriangleAlert } from "lucide-react";
 import { useId, useState } from "react";
 import { ConfirmDialog } from "../../../components/confirm-dialog";
+import { InlineRetry } from "../../../components/inline-retry";
 import { Button } from "../../../components/ds/button";
 import { Tooltip } from "../../../components/ds/tooltip";
 import { ResponsiveImage } from "../../../components/responsive-image";
@@ -90,6 +91,7 @@ export const ProfileSheet = ({ stylistId, onClose }: ProfileSheetProps) => {
     data: profile,
     isError,
     isLoading,
+    refetch,
   } = useGetAdminProfileQuery(stylistId);
 
   const [mode, setMode] = useState<Mode>("view");
@@ -173,18 +175,28 @@ export const ProfileSheet = ({ stylistId, onClose }: ProfileSheetProps) => {
       );
   };
 
-  const getMissingText = () => {
-    if (isLoading) return "Loading…";
+  const getMissing = () => {
+    if (isLoading) return <p className={styles.muted}>Loading…</p>;
 
-    return isError
-      ? "This profile didn’t load. Try again."
-      : "This business has closed, so it’s no longer in Profiles.";
+    if (isError)
+      return (
+        <InlineRetry
+          text="This profile didn’t load."
+          onRetry={() => void refetch()}
+        />
+      );
+
+    return (
+      <p className={styles.muted}>
+        This business has closed, so it’s no longer in Profiles.
+      </p>
+    );
   };
 
   if (!profile)
     return (
       <Sheet open title="Profile" onClose={onClose}>
-        <p className={styles.muted}>{getMissingText()}</p>
+        {getMissing()}
       </Sheet>
     );
 

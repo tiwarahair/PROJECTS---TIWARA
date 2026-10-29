@@ -5,7 +5,10 @@ import { getRow } from "../../../../test/studio-booking-row";
 import { getStudioSeed } from "../../../../test/studio-seed";
 import { fromLondonTime } from "../../../../utils/london-time";
 import { toDate } from "../../core/blocked-time";
-import { markActivityRead } from "../../../../lib/studio-api/home";
+import {
+  fetchStudioActivity,
+  markActivityRead,
+} from "../../../../lib/studio-api/home";
 import { StudioPage } from "../..";
 import type { UserEvent } from "@testing-library/user-event";
 import { setupUser } from "../../../../test/setup-user";
@@ -161,6 +164,20 @@ describe("Studio sheets", () => {
     await openPayout();
 
     expect(markActivityRead).toHaveBeenCalledTimes(1);
+  });
+
+  it("notifications that don't load say so with try again", async () => {
+    vi.mocked(fetchStudioActivity).mockRejectedValueOnce(new Error("offline"));
+    renderStudio();
+    await user.click(screen.getByRole("button", { name: "Notifications" }));
+
+    expect(
+      await screen.findByText(/Couldn’t load notifications/),
+    ).toBeInTheDocument();
+
+    expect(
+      screen.getByRole("button", { name: "Try again" }),
+    ).toBeInTheDocument();
   });
 
   it("blocking time over a booking asks first, then adds it", async () => {

@@ -5,7 +5,7 @@ export const MAX_REVIEW_LENGTH = 1000;
 
 const HOME = { linkLabel: "Go to Tiwára’s House", linkHref: "/" };
 
-/** the page's state, or why it didn't load: an expired link, or anything else going wrong */
+/** the page's state, or why it didn't load: a missing, wrong or expired link, or anything else going wrong */
 export const getClosedMessage = (
   page: ReviewPage | undefined,
   loadError = "",
@@ -35,13 +35,13 @@ export const getClosedMessage = (
     };
 
   return {
-    title: "This link has expired",
-    text: "Review links work for 30 days after the appointment.",
+    title: "This link isn’t valid",
+    text: "Use the link in the latest email we sent you. Review links work for 30 days after the appointment.",
     ...HOME,
   };
 };
 
 export const REVIEW_ERRORS: Record<string, string> = {
   rate_limited: "Too many tries. Wait a few minutes, then try again.",
-  link_not_valid: "This link has expired.",
+  link_not_valid: "This link isn’t valid.",
 };

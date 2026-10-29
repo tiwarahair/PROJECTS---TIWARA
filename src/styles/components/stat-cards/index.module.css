@@ -70,3 +70,7 @@
 .alert {
   color: var(--accent-700);
 }
+
+.retry {
+  margin-top: 10px;
+}

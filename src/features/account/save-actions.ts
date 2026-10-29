@@ -5,7 +5,7 @@ import {
   sendReauthenticationCode,
 } from "../../lib/account-changes";
 import { fetchMyData } from "../../lib/my-data";
-import { logOut } from "../../stores/session-slice";
+import { logOut, logOutEverywhere } from "../../stores/session-slice";
 import { downloadFile } from "../../utils/download-file";
 import { EMPTY_PASSWORD } from "./forms";
 import type { AccountCore } from "./use-core";
@@ -150,8 +150,21 @@ export const getSaveActions = (
     }
   };
 
-  /** Ends the session without leaving the page (log out everywhere, delete account). */
-  const endSession = (scope?: "global") => dispatch(logOut(scope));
+  /** Ends the session without leaving the page (delete account). */
+  const endSession = () => dispatch(logOut());
+
+  const endAllSessions = async () => {
+    try {
+      await dispatch(logOutEverywhere());
+    } catch {
+      showToast("You couldn’t be logged out everywhere. Try again");
+
+      return;
+    }
+
+    setState({ loggedOut: true });
+    showToast("You’re logged out of all devices");
+  };
 
   const logout = () => {
     endSession();
@@ -168,6 +181,7 @@ export const getSaveActions = (
     downloadMyData,
     copy,
     endSession,
+    endAllSessions,
     logout,
   };
 };

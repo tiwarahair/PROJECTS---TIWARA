@@ -76,13 +76,7 @@ export const SettingsPayouts = ({ props }: SettingsPayoutsProps) => {
                 Managed in Stripe
               </div>
               <div className={payouts.bankName}>
-                {props.payoutBank === undefined ? (
-                  <>
-                    Monzo <span className={payouts.bankDigits}>•••• 4821</span>
-                  </>
-                ) : (
-                  (props.payoutBank ?? "No bank account yet")
-                )}
+                {props.payoutBank ?? "No bank account yet"}
               </div>
             </div>
             <button
@@ -109,8 +103,8 @@ export const SettingsPayouts = ({ props }: SettingsPayoutsProps) => {
             bookings are released 24 hours after each appointment.
           </div>
           <p className={payouts.cardFees}>
-            Card fees on balance payments taken through Tiwára’s House are
-            deducted from your payout.
+            Card processing fees on every card payment taken through Tiwára’s
+            House are deducted from your payout.
           </p>
           <button
             className={joinClassNames(payouts.earningsLink, shared.focusRing)}
@@ -148,7 +142,7 @@ export const SettingsPayouts = ({ props }: SettingsPayoutsProps) => {
                   size={18}
                   strokeWidth={1.7}
                 />
-                Payouts on hold. Add your tax details to get paid.
+                Add your tax details to go live.
               </span>
               <button
                 className={joinClassNames(payouts.addTax, shared.focusRing)}

@@ -8,7 +8,7 @@ export type SettingsPage =
   "personal" | "security" | "notifications" | "payouts" | "calendar";
 export type PayoutStatus =
   "none" | "verifying" | "action" | "paused" | "active";
-export type SignIn = "email" | "google" | "apple";
+export type SignIn = "email" | "google";
 
 export interface TwoFactorDevice {
   name: string;
@@ -22,6 +22,14 @@ export interface SettingsSession {
   last: string;
   isCurrent: boolean;
   kind: "phone" | "laptop" | "tablet";
+}
+
+export interface SettingsTrustedDevice {
+  id: string;
+  device: string;
+  kind: SettingsSession["kind"];
+  trustedUntil: string;
+  last: string;
 }
 
 export interface ChannelSetting {
@@ -58,6 +66,7 @@ export interface SettingsState {
   isPasswordCodeSent: boolean;
   signOthers: boolean;
   sessions: SettingsSession[];
+  trustedDevices: SettingsTrustedDevice[];
   sessionsLoading: boolean;
   sessionsFailed: boolean;
   alerts: boolean | null;
@@ -99,6 +108,7 @@ export const getInitialSettingsState = (
     isPasswordCodeSent: false,
     signOthers: true,
     sessions: [],
+    trustedDevices: [],
     sessionsLoading: false,
     sessionsFailed: false,
     alerts: null,
@@ -157,9 +167,11 @@ export const NOTIFICATION_GROUPS: [string, [NotificationKey, string][]][] = [
   [
     "Payments",
     [
-      ["paymentPaid", "Deposit or payment link paid"],
+      // TO DO: no email/sms is sent for this yet
+      // ["paymentPaid", "Deposit or payment link paid"],
       ["paymentFailed", "Payment failed"],
-      ["feeCharged", "Fee charged"],
+      // TO DO: no email/sms is sent for this yet
+      // ["feeCharged", "Fee charged"],
       ["feeFailed", "Fee failed"],
     ],
   ],
@@ -175,7 +187,8 @@ export const NOTIFICATION_GROUPS: [string, [NotificationKey, string][]][] = [
 
 export const ALWAYS_ON = [
   "Payout paid or failed",
-  "Stripe needs action",
+  // TO DO: no email/sms is sent for this yet
+  // "Stripe needs action",
   "Security alerts",
 ];
 

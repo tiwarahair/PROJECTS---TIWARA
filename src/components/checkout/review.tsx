@@ -1,6 +1,7 @@
 import { Plus } from "lucide-react";
 import { joinClassNames } from "../../utils/class-names";
-import { AmountRow, getViewAnimation } from "./detail";
+import { AmountRow } from "./amount-row";
+import { getViewAnimation } from "./motion";
 import { ICONS } from "./data";
 import { RECORD_VIA_LABELS, getAdjustNote, getReviewTotal } from "./view";
 import type { CheckoutViewModel, DetailRow } from "./view";

@@ -11,7 +11,10 @@ interface SavedProgress {
   pinLatLng?: [number, number] | null;
   geocodedLatLng?: [number, number] | null;
   area?: string | null;
+  savedAt?: number;
 }
+
+const PROGRESS_MS = 7 * 864e5;
 
 export const readStorage = (storage: Storage, key: string): string | null => {
   try {
@@ -100,6 +103,17 @@ export const getStartState = (
     ) as SavedProgress | null;
   } catch {
     // unreadable progress: start fresh
+  }
+
+  // progress is kept for 7 days
+  if (saved && Date.now() - (saved.savedAt ?? 0) > PROGRESS_MS) {
+    saved = null;
+
+    try {
+      localStorage.removeItem(STORAGE_KEY);
+    } catch {
+      // storage unavailable
+    }
   }
 
   const handoff = readStorage(sessionStorage, "tw_flow");

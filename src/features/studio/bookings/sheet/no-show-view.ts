@@ -1,4 +1,5 @@
 import { markNoShow, undoNoShow } from "../../../../lib/studio-api/bookings";
+import { getKeptDeposit } from "../../core/model";
 import type { SheetContext } from "./context";
 
 const getNoShowChoices = ({ noShowFee }: SheetContext) =>
@@ -42,6 +43,7 @@ export const getNoShowView = (context: SheetContext) => {
           feePending: isCharging,
           feeLabel: noShowFee.label,
           note: `Client did not attend. ${isCharging ? noShowFee.subtitle : noShowFee.refund}.`,
+          ...(isCharging ? {} : getKeptDeposit(noShowFee.kept)),
         },
         "Marked as no-show",
         {

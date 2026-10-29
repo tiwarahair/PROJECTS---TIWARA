@@ -14,6 +14,7 @@ import { fromLondonTime, toLondonTime } from "../../../utils/london-time";
 import { toDate, toOffset } from "../core/blocked-time";
 import {
   getFeeFlags,
+  getKeptDepositPence,
   getLatestFee,
   getRefundNote,
   getRefunded,
@@ -27,6 +28,7 @@ import type {
 } from "../core/types";
 import { toStudioClient } from "../clients/records";
 import { toFeeKind } from "../../../utils/fee-kind";
+import { getKeptDeposit } from "../core/model/policy";
 import { toPolicyMode } from "../settings/records";
 import {
   getCheckoutFields,
@@ -171,6 +173,7 @@ export const toStudioBooking = (row: StudioBookingRow): StudioBooking => {
           paidLater: toPounds(getPaidSoFar(row) - getPaidAtBooking(row)),
           refundableOnline: toPounds(getRefundableOnline(row)),
           recordedVia: getRecordedVia(row),
+          ...(row.can_skip_review_invite ? { canSkipReview: true } : {}),
         }
       : {}),
   };
@@ -237,6 +240,8 @@ export const toPastRecord = (row: StudioBookingRow): PastRecord => {
     price: booking.price,
     duration: booking.duration,
     when: dateLabel(booking.dayOffset),
+    dayOffset: booking.dayOffset,
+    startsAt: row.starts_at,
     time: booking.time,
     month: getMonthLabel(row.starts_at),
     status,
@@ -255,7 +260,6 @@ export const toPastRecord = (row: StudioBookingRow): PastRecord => {
           meta: "Auto-cancelled",
           note: "Not confirmed in time, so it was cancelled automatically. Nothing was charged.",
           autoCancelled: true,
-          startsAt: row.starts_at,
         }
       : {}),
     ...(status === "No show"
@@ -272,8 +276,10 @@ export const toPastRecord = (row: StudioBookingRow): PastRecord => {
         ({ purpose, status }) => purpose === "fee" && status === "pending",
       ),
     ),
+    ...getKeptDeposit(toPounds(getKeptDepositPence(row, fee))),
     ...getCheckoutFields(row),
     ...getDisputeFields(row),
+    ...(row.can_skip_review_invite ? { canSkipReview: true } : {}),
   };
 };
 

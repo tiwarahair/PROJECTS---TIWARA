@@ -5,7 +5,10 @@ import type { PaymentPolicyApi } from "../../../components/payment-policy";
 import type { AccountSettingsApi } from "../../../components/account-settings/use-account-settings";
 import type { TaxDetails } from "../../../components/tax-details-form/logic";
 import { addPaymentPolicy } from "../../../lib/studio-api/settings";
-import { hasRecentSecondFactor } from "../../../lib/two-factor";
+import {
+  hasRecentSecondFactor,
+  needsSecondFactor,
+} from "../../../lib/two-factor";
 import { getAvailabilityView } from "./availability/view";
 import { getSettingsNav } from "./nav-view";
 import { getProfileView } from "./profile/view";
@@ -30,16 +33,28 @@ export const getSettingsView = (
   const nav = getSettingsNav(studio, navigate, isAdmin);
   const { page, isOn, isAccountPage } = nav;
 
-  const savePolicy = (value: PolicyValue) => {
+  const savePolicy = async (value: PolicyValue) => {
     const { policy } = context.getState();
 
     setState({ policy: { ...policy, ...value } });
 
-    sync.save((stylistId) => addPaymentPolicy(fromPolicy(value, stylistId)), {
-      policy,
-    });
+    const isSaved = await sync.save(
+      (stylistId) => addPaymentPolicy(fromPolicy(value, stylistId)),
+      { policy },
+    );
+
+    if (!isSaved) throw new Error("policy_not_saved");
 
     showToast("Payment policy saved");
+  };
+
+  const addBackup = async () => {
+    const openBackup = () => openTwoFactor("backup", { flow: "add" });
+
+    if (await needsSecondFactor().catch(() => false))
+      return actions.askForCode("backup", openBackup);
+
+    openBackup();
   };
 
   const checkPolicy = async (value: PolicyValue) => {
@@ -47,7 +62,7 @@ export const getSettingsView = (
       !hasTwoFactor(state) ||
       (await hasRecentSecondFactor().catch(() => false))
     ) {
-      savePolicy(value);
+      await savePolicy(value);
 
       return true;
     }
@@ -166,7 +181,7 @@ export const getSettingsView = (
       setState({ taxEdit: true });
     },
     onTaxSave: (value: TaxDetails) =>
-      void actions.saveTax(value, () => {
+      actions.saveTax(value, () => {
         context.memo.isTaxEdited = false;
         setState({ taxEdit: false });
       }),
@@ -176,7 +191,7 @@ export const getSettingsView = (
     },
     onTaxLearn: () => openTwoFactor("learn", { flow: "info" }),
     onTwoFactorTurnOn: () => openTwoFactor("method", { flow: "settings" }),
-    onTwoFactorAddBackup: () => openTwoFactor("backup", { flow: "add" }),
+    onTwoFactorAddBackup: () => void addBackup(),
     onTwoFactorRemove: (name: string) => openTwoFactor("remove", { name }),
   };
 };

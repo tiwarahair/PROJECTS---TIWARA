@@ -146,7 +146,12 @@ export const BookingSummary = ({ booking }: BookingSummaryProps) => {
           ></div>
         )}
         {holdOn && (
-          <HoldBar variant="card" time={state.time} leftMs={holdLeftMs} />
+          <HoldBar
+            variant="card"
+            time={state.time}
+            leftMs={holdLeftMs}
+            isConfirming={state.paying || state.confirming}
+          />
         )}
         {!showPrev && (
           <div className={styles.body}>

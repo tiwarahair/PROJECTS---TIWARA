@@ -1,7 +1,7 @@
 // Settles a claimed fee: refunds what goes back to the client, then charges the saved card for the rest of the fee.
 import Stripe from "stripe";
 import { admin } from "./admin.ts";
-import { getCardLabel, isHardDecline } from "./declines.ts";
+import { cannotRetry, getCardLabel } from "./declines.ts";
 import { reverseLaterTransfer } from "./later-transfer.ts";
 import { getRefundable } from "./refundable.ts";
 import { getRecovery } from "./owed.ts";
@@ -187,7 +187,7 @@ const chargeCard = async (fee: FeeSettlement): Promise<ChargeResult> => {
 
     return {
       outcome: "unpaid",
-      hard_decline: isHardDecline(error.decline_code ?? error.code),
+      hard_decline: cannotRetry(error.decline_code ?? error.code),
       decline_message: error.message,
       card_label: cardLabel,
     };

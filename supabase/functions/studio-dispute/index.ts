@@ -2,7 +2,7 @@ import { z } from "zod";
 import { admin } from "../_shared/admin.ts";
 import { corsHeaders, respond } from "../_shared/cors.ts";
 import { getDisputeFacts, isAnswerable, submitDispute } from "../_shared/dispute-evidence.ts";
-import { getSignedInUser } from "../_shared/recent-user.ts";
+import { getStudioUser } from "../_shared/recent-user.ts";
 import { stripe } from "../_shared/stripe.ts";
 
 // Stripe's advice for evidence files: PDF, JPEG or PNG, small enough to send together
@@ -33,7 +33,7 @@ const toBytes = (base64: string) => Uint8Array.from(atob(base64), (character) =>
 Deno.serve(async (request) => {
   if (request.method === "OPTIONS") return new Response("ok", { headers: corsHeaders });
 
-  const owner = await getSignedInUser(admin, request);
+  const owner = await getStudioUser(admin, request);
 
   if (!owner) return respond(401, { error: "signed_out" });
 

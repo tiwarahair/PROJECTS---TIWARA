@@ -12,7 +12,6 @@ vi.mock("../../../../lib/studio-api/services", async (importOriginal) => ({
     typeof import("../../../../lib/studio-api/services")
   >()),
   saveService: vi.fn(() => new Promise(() => {})),
-  saveServiceStatus: vi.fn(() => new Promise(() => {})),
 }));
 
 let user: UserEvent;

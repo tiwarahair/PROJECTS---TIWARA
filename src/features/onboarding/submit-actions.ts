@@ -5,11 +5,13 @@ import {
   signUpStylist,
 } from "../../lib/auth";
 import { getAuthFailure } from "../../lib/auth-errors";
+import { isTrustedDevice } from "../../lib/trusted-devices";
 import { needsSecondFactor } from "../../lib/two-factor";
 import {
   getPasswordMin,
   getPasswordProblemMessage,
 } from "../../utils/password";
+import { getLoginLock, saveLoginLock } from "./login-lock";
 import { getStylistDetails, getWelcomeMessage } from "./submit-logic";
 import type { FinishKind } from "./submit-logic";
 import type { OnboardingCore } from "./use-onboarding";
@@ -101,19 +103,25 @@ export const getSubmitActions = ({
   };
 
   const afterProAuth = async () => {
-    if (await needsSecondFactor())
-      setState({ codeKind: "2fa" }, () => goTo("pro-2fa"));
-    else finish("pro");
+    if (!(await needsSecondFactor()) || (await isTrustedDevice()))
+      return finish("pro");
+
+    const canTrustDevice = !(await isAdminSession());
+
+    setState({ codeKind: "2fa", canTrustDevice }, () => goTo("pro-2fa"));
   };
 
-  const showWrongPassword = () => {
-    const attempts = stateRef.current.attempts + 1;
+  const showWrongPassword = (email: string) => {
+    const attempts = getLoginLock(email).attempts + 1;
+    const lockedUntil = attempts >= MAX_ATTEMPTS ? Date.now() + LOCK_MS : 0;
 
-    if (attempts >= MAX_ATTEMPTS)
+    saveLoginLock(email, { attempts, lockedUntil });
+
+    if (lockedUntil)
       setState({
         busy: false,
         attempts,
-        lockedUntil: Date.now() + LOCK_MS,
+        lockedUntil,
         serverErrors: {
           password: "Too many attempts. Try again in 15 minutes.",
         },

@@ -33,7 +33,11 @@ export interface ResendValues {
 }
 
 export const resendSchema = z.object({
-  to: z.string().trim().min(1, "Enter where to send it."),
+  to: z
+    .string()
+    .trim()
+    .min(1, "Enter an email address.")
+    .pipe(z.email("Enter a valid email address.")),
 }) satisfies z.ZodType<ResendValues>;
 
 export const getRefundAmount = ({ kind, amount }: RefundValues, cap: number) =>

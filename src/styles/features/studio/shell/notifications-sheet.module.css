@@ -90,3 +90,9 @@
   font-size: 14.5px;
   color: var(--text-secondary);
 }
+
+.retry {
+  justify-content: center;
+  gap: 4px;
+  font-size: inherit;
+}

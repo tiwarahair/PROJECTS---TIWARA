@@ -1,5 +1,5 @@
 begin;
-select plan(27);
+select plan(31);
 
 insert into auth.users (id, instance_id, aud, role, email, raw_user_meta_data, raw_app_meta_data)
 values
@@ -90,7 +90,14 @@ from ids;
 create temp table baseline as
 select
   (select count(distinct review_id) from public.review_reports where status = 'open') as open,
-  (select count(*) from public.reviews where status = 'hidden') as hidden;
+  (select count(*) from public.reviews where status = 'hidden') as hidden,
+  (select count(distinct review_id) from public.review_decisions where outcome <> 'hidden'
+    and review_id not in (select review_id from public.review_reports where status = 'open'
+      union select review_id from public.review_appeals where status = 'open')) as decided,
+  (select count(distinct review_id) from public.review_decisions where outcome <> 'hidden'
+    and created_at > now() - interval '7 days'
+    and review_id not in (select review_id from public.review_reports where status = 'open'
+      union select review_id from public.review_appeals where status = 'open')) as decided_week;
 
 grant select on posted, shop, ids, clock, baseline to authenticated;
 
@@ -210,6 +217,32 @@ select is((select status from public.reviews where id = (select threatened from 
 select is(pg_temp.emails('review_appeal_answered'), 2::bigint, 'both sides hear the answer');
 select is(public.get_appeal_page((select token from appeal_link)) ->> 'state', 'closed',
   'an answered appeal can''t be appealed again');
+
+reset role;
+delete from auth.users where id = 'a3333333-3333-3333-3333-333333333333';
+
+select is(
+  (select count(*) from public.review_reports where review_id = (select spammy from posted) and reporter_id is null),
+  1::bigint, 'a report outlives its reporter''s account'
+);
+
+select pg_temp.sign_in('a4444444-4444-4444-4444-444444444444', true, 'aal2');
+set local role authenticated;
+
+select ok(
+  exists (
+    select 1 from unnest(array['open', 'hidden', 'appealed', 'decided']) as tabs (tab),
+      jsonb_array_elements(public.admin_get_reports(tab, 'newest') -> 'items') as item,
+      jsonb_array_elements(item -> 'reports') as report
+    where item ->> 'id' = (select spammy::text from posted) and (report ->> 'reporter_deleted')::boolean
+  ),
+  'and the admin queue shows it came from a deleted account'
+);
+select is((public.admin_get_report_stats() ->> 'decided_this_week')::bigint - (select decided_week from baseline),
+  2::bigint, 'a decision changed on appeal still counts its review once this week');
+select is((public.admin_get_report_stats() ->> 'decided')::bigint - (select decided from baseline), 2::bigint,
+  'the Decided tab counts the same two reviews');
+reset role;
 
 select * from finish();
 rollback;

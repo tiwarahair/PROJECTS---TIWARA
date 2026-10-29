@@ -1,4 +1,5 @@
-import { act, screen, within } from "@testing-library/react";
+import { act, screen, waitFor, within } from "@testing-library/react";
+import { AuthError } from "@supabase/supabase-js";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { supabase } from "../../../lib/supabase";
 import { renderWithStore } from "../../../test/render-with-store";
@@ -174,6 +175,11 @@ describe("AccountPage", () => {
       .spyOn(supabase.auth, "signOut")
       .mockResolvedValue({ error: null });
 
+    vi.spyOn(supabase, "rpc").mockResolvedValue({
+      data: null,
+      error: null,
+    } as never);
+
     renderAccount("?section=security");
 
     await user.click(
@@ -186,12 +192,43 @@ describe("AccountPage", () => {
       within(dialog).getByRole("button", { name: "Log out everywhere" }),
     );
 
-    expect(signOut).toHaveBeenCalledWith({ scope: "global" });
+    await vi.waitFor(() =>
+      expect(signOut).toHaveBeenCalledWith({ scope: "global" }),
+    );
+
     expect(sessionStorage.getItem("tw_cust")).toBeNull();
 
     expect(
       screen.getByRole("heading", { name: "Log in to see your account" }),
     ).toBeInTheDocument();
+  });
+
+  it("log out everywhere that fails keeps you signed in and says so", async () => {
+    vi.spyOn(supabase.auth, "signOut").mockResolvedValue({
+      error: new AuthError("offline"),
+    });
+
+    renderAccount("?section=security");
+
+    await user.click(
+      screen.getByRole("button", { name: "Log out everywhere" }),
+    );
+
+    await user.click(
+      within(screen.getByRole("dialog")).getByRole("button", {
+        name: "Log out everywhere",
+      }),
+    );
+
+    await waitFor(() =>
+      expect(screen.getByRole("status")).toHaveTextContent(
+        "You couldn’t be logged out everywhere. Try again",
+      ),
+    );
+
+    expect(
+      screen.queryByRole("heading", { name: "Log in to see your account" }),
+    ).not.toBeInTheDocument();
   });
 
   it("Escape closes the dialog", async () => {

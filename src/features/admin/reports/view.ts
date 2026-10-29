@@ -111,5 +111,14 @@ export const getDueText = (report: AdminReport, now = new Date()) => {
 export const getReporter = ({
   is_stylist: isStylist,
   reporter_name: name,
-}: Pick<AdminReportEntry, "is_stylist" | "reporter_name">) =>
-  isStylist ? "the stylist" : `a client${name ? `, ${name}` : ""}`;
+  reporter_deleted: isDeleted,
+}: Pick<
+  AdminReportEntry,
+  "is_stylist" | "reporter_name" | "reporter_deleted"
+>) => {
+  if (isStylist) return "the stylist";
+
+  if (isDeleted) return "a client who has since deleted their account";
+
+  return `a client${name ? `, ${name}` : ""}`;
+};

@@ -8,6 +8,7 @@ import {
   TriangleAlert,
   Undo,
   Undo2,
+  UserX,
 } from "lucide-react";
 import { joinClassNames } from "../../../../utils/class-names";
 import { asStyle } from "../../../../utils/as-style";
@@ -136,7 +137,11 @@ export const PastSheetBody = ({ view }: { view: PastSheetView }) => (
         </div>
         <div className={styles.buttons}>
           {view.feeUnpaidRetryShown && (
-            <button className={styles.retry} onClick={view.feeUnpaidRetry}>
+            <button
+              className={styles.retry}
+              onClick={view.feeUnpaidRetry}
+              disabled={view.isFeeUnpaidBusy}
+            >
               {view.feeUnpaidRetryLabel}
             </button>
           )}
@@ -177,7 +182,11 @@ export const PastSheetBody = ({ view }: { view: PastSheetView }) => (
             <div className={styles.actWhy}>{view.actionReason}</div>
           </div>
         )}
-        <button className={styles.act} onClick={view.action ?? undefined}>
+        <button
+          className={styles.act}
+          onClick={view.action ?? undefined}
+          disabled={view.isActionBusy}
+        >
           <Undo size={14} strokeWidth={1.7} />
           {view.actionLabel}
         </button>
@@ -200,7 +209,11 @@ export const PastSheetBody = ({ view }: { view: PastSheetView }) => (
           </div>
         </div>
         <div className={styles.buttons}>
-          <button className={styles.whiteButton} onClick={view.resendLink}>
+          <button
+            className={styles.whiteButton}
+            onClick={view.resendLink}
+            disabled={view.isResendBusy}
+          >
             Resend link
           </button>
           <button className={styles.whiteButton} onClick={view.recordPaid}>
@@ -235,6 +248,17 @@ export const PastSheetBody = ({ view }: { view: PastSheetView }) => (
             color="var(--neutral-500)"
           />
         </button>
+        {view.canSkipReview && (
+          <button className={styles.linkRow} onClick={view.skipReview}>
+            <UserX size={18} strokeWidth={1.7} color="var(--neutral-600)" />
+            <span className={styles.linkLabel}>Didn’t attend</span>
+            <ChevronRight
+              size={16}
+              strokeWidth={1.7}
+              color="var(--neutral-500)"
+            />
+          </button>
+        )}
         {view.canCorrect && !view.correctDraft && (
           <button className={styles.linkRow} onClick={view.openCorrect}>
             <Pencil size={18} strokeWidth={1.7} color="var(--neutral-600)" />

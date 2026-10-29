@@ -1,8 +1,19 @@
-import { Check, CreditCard, Send, TriangleAlert, Undo, X } from "lucide-react";
+import {
+  Check,
+  CreditCard,
+  Send,
+  TriangleAlert,
+  Undo,
+  UserX,
+  X,
+} from "lucide-react";
 import type { DecoratedBooking } from "../decorate";
 import { hhmm } from "../../core/format";
 import type { ActionItem } from "../../core/types";
-import { confirmWithoutProtection } from "../../../../lib/studio-api/booking-writes";
+import {
+  confirmWithoutProtection,
+  skipReviewInvite,
+} from "../../../../lib/studio-api/booking-writes";
 import { openCheckout } from "./checkout-view";
 import type { SheetContext } from "./context";
 import { CANCEL_STEP } from "./types";
@@ -34,6 +45,20 @@ const getCancelItem = ({ setState }: SheetContext): ActionItem => ({
   icon: X,
   danger: true,
   run: () => setState(CANCEL_STEP),
+});
+
+const getDidNotAttendItem = ({
+  booking,
+  actions,
+  saveBooking,
+}: SheetContext): ActionItem => ({
+  label: "Didn’t attend",
+  icon: UserX,
+  subtitle: "Don’t ask for a review",
+  run: () => {
+    saveBooking({ canSkipReview: false }, skipReviewInvite);
+    actions.showToast(`${booking.firstName} won’t be asked for a review`);
+  },
 });
 
 const askToConfirmUnprotected = ({
@@ -134,6 +159,7 @@ const STATUS_ITEMS: Record<
             : "Nothing left to collect",
         run: () => openCheckout(context),
       },
+      ...(booking.canSkipReview ? [getDidNotAttendItem(context)] : []),
       ...(booking.completed
         ? []
         : [

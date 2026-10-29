@@ -76,8 +76,9 @@ export const useSearchData = (
 
   const isStylistsLoading = whatText !== typedWhat || stylistPeek.isFetching;
 
-  // placeholders only once a wait is noticeable
-  const isSlow = useIsSlow(isLoading && !rows.length);
+  // placeholders only once a wait is noticeable, or straight away while the device's location is on its way
+  const isResultsSlow = useIsSlow(isLoading && !rows.length);
+  const isSlow = isWaitingForPlace || isResultsSlow;
   const isSlowMore = useIsSlow(results.isFetchingNextPage);
   const isPlacesSlow = useIsSlow(places.isSearching);
   const isStylistsSlow = useIsSlow(isStylistsLoading);

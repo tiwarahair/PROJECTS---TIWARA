@@ -35,10 +35,15 @@
     transform 0.12s cubic-bezier(0.2, 0.8, 0.2, 1);
 }
 
-.export:hover {
+.export:hover:not(:disabled) {
   background: var(--fill-quiet) !important;
 }
 
-.export:active {
+.export:active:not(:disabled) {
   transform: scale(0.97) !important;
+}
+
+.export:disabled {
+  opacity: 0.5;
+  cursor: default;
 }

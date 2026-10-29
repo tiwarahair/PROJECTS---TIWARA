@@ -77,6 +77,43 @@ describe("useCatalogueSync", () => {
     ]);
   });
 
+  it("a failed service save keeps the edits on screen and saves them with the next change", async () => {
+    const setState = vi.fn();
+    const notify = vi.fn();
+    const failing = createStudioSync("stylist-1", setState, notify);
+    const state = getState();
+    const [first, ...rest] = state.services;
+
+    if (!first) throw new Error("the seed has a service");
+
+    vi.mocked(studioApi.saveService).mockRejectedValueOnce(
+      new Error("offline"),
+    );
+
+    const { rerender } = renderHook(
+      ({ current }) => useCatalogueSync(current, failing),
+      { initialProps: { current: state } },
+    );
+
+    const renamed = { ...first, name: "Renamed" };
+
+    rerender({ current: { ...state, services: [renamed, ...rest] } });
+
+    await waitFor(() => expect(notify).toHaveBeenCalled());
+
+    expect(setState).toHaveBeenCalledWith({});
+
+    rerender({
+      current: { ...state, services: [renamed, ...rest], addons: [] },
+    });
+
+    await waitFor(() => expect(studioApi.saveService).toHaveBeenCalledTimes(2));
+
+    expect(vi.mocked(studioApi.saveService).mock.calls[1]?.[0]).toMatchObject({
+      name: "Renamed",
+    });
+  });
+
   it("removes a deleted add-on", async () => {
     const state = getState();
     const { rerender } = renderSync(state);

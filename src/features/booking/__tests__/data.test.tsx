@@ -269,6 +269,10 @@ describe("booking on real data", () => {
       clearAllergies: false,
       requireCvc: false,
       turnstileToken: "test-captcha-token",
+      agreement: expect.stringMatching(
+        /^By booking, you agree to .+'s cancellation policy and our Terms\.$/,
+      ),
+      policyLines: expect.arrayContaining([expect.any(String)]),
     });
 
     expect(

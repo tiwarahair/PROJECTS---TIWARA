@@ -48,6 +48,7 @@ const REPORT: AdminReport = {
       details: "Her phone number is in the review.",
       is_stylist: true,
       reporter_name: null,
+      reporter_deleted: false,
       status: "open",
       created_at: "2026-10-21T09:12:00Z",
     },
@@ -254,5 +255,46 @@ describe("Admin route", () => {
     expect(
       screen.getByRole("link", { name: "Back to Studio", hidden: true }),
     ).toBeInTheDocument();
+  });
+
+  it("a report from a deleted account stays, and that client isn't listed as told", async () => {
+    vi.mocked(getSecondFactorStep).mockResolvedValue("passed");
+
+    vi.mocked(fetchReports).mockResolvedValue({
+      total: 1,
+      items: [
+        {
+          ...REPORT,
+          reports: [
+            {
+              reason: "spam",
+              details: null,
+              is_stylist: false,
+              reporter_name: "",
+              reporter_deleted: true,
+              status: "open",
+              created_at: "2026-10-21T09:12:00Z",
+            },
+          ],
+        },
+      ],
+    });
+
+    renderAs(true);
+
+    await user.click(
+      await screen.findByRole("button", {
+        name: "More actions for Yasmin Bello’s review",
+      }),
+    );
+
+    await user.click(screen.getByRole("menuitem", { name: "Decide" }));
+    await user.click(await screen.findByLabelText(/Remove the words/));
+
+    expect(
+      screen.getByText("Crowned by Kemi, the stylist"),
+    ).toBeInTheDocument();
+
+    expect(screen.queryByText(/who reported it/)).not.toBeInTheDocument();
   });
 });

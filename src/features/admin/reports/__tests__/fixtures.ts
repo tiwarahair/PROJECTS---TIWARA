@@ -18,6 +18,7 @@ export const APPEALED_REPORT: AdminReport = {
       reason: "abusive",
       details: null,
       is_stylist: false,
+      reporter_deleted: false,
       reporter_name: "Tola",
       status: "text_removed",
       created_at: "2026-10-21T09:00:00Z",

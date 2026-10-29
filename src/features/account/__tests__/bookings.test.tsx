@@ -72,6 +72,15 @@ describe("Account bookings", () => {
     vi.mocked(fetchClientBookings).mockResolvedValue([BOOKING, PAST]);
   });
 
+  it("bookings that don't load say so with try again, not that there are none", async () => {
+    vi.mocked(fetchClientBookings).mockRejectedValueOnce(new Error("offline"));
+    renderAccount("bookings");
+
+    expect(await screen.findByText("Bookings didn’t load")).toBeInTheDocument();
+    expect(screen.getByRole("link", { name: "Try again" })).toBeInTheDocument();
+    expect(screen.queryByText("No upcoming bookings.")).not.toBeInTheDocument();
+  });
+
   it("the overview shows the next real booking with what's left to pay", async () => {
     renderAccount("overview");
 

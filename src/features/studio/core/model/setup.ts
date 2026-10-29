@@ -9,6 +9,12 @@ export const isLive = (state: StudioState): boolean =>
 export const getBookingLink = ({ account }: StudioState) =>
   `${window.location.host}/${account.slug}`;
 
+export const getServiceBookingLink = (
+  { account }: StudioState,
+  serviceId: string,
+) =>
+  `${window.location.host}/book?stylist=${account.slug}&service=${encodeURIComponent(serviceId)}`;
+
 export const getProfilePath = ({ account }: StudioState) => `/${account.slug}`;
 
 export const getSteps = (state: StudioState) => ({

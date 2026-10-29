@@ -256,6 +256,24 @@ describe("BookingPage", () => {
     expect(screen.queryByText("Sensitive scalp")).not.toBeInTheDocument();
   });
 
+  it("details: notes stop at the server's 500 characters and count down from 400", async () => {
+    await renderSavedBooking({
+      step: 4,
+      guest: true,
+      details: { ...GUEST_DETAILS, notes: "x".repeat(399) },
+    });
+
+    expect(screen.queryByText(/\/ 500/)).not.toBeInTheDocument();
+
+    const notes = screen.getByRole("textbox", {
+      name: /Notes for your stylist/,
+    });
+
+    expect(notes).toHaveAttribute("maxLength", "500");
+    await user.type(notes, "y");
+    expect(screen.getByText("400 / 500")).toBeInTheDocument();
+  });
+
   it("review: shows the policy card and Continue to payment", async () => {
     await renderSavedBooking({ step: 5, guest: true, details: GUEST_DETAILS });
 

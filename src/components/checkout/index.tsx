@@ -5,7 +5,6 @@ import { CheckoutDone } from "./done";
 import { CheckoutReceipt } from "./receipt";
 import { CheckoutRefund } from "./refund";
 import { CheckoutResend } from "./resend";
-import { CheckoutDetail } from "./detail";
 import { CheckoutAdd, CheckoutItems } from "./items";
 import { CheckoutPay } from "./pay";
 import { CheckoutReview } from "./review";
@@ -20,15 +19,15 @@ import shared from "../../styles/components/checkout/index.module.css";
 export type { CheckoutSheetProps } from "./use-checkout";
 
 /**
- * Studio → booking checkout: booking detail, items with price adjustments, payment
- * method, tip and review, then done / receipt / resend / refund, plus the no-show fee flows.
+ * Studio → booking checkout: items with price adjustments, payment method, tip and
+ * review, then done / receipt / resend / refund.
  */
 export const CheckoutSheet = (props: CheckoutSheetProps) => {
   const checkout = useCheckout(props);
   const { state, setState, money, scrollRef } = checkout;
   const view = getCheckoutView(checkout);
   const isMobile = (props.layout || "mobile") !== "desktop";
-  const hasBack = state.view !== "detail" && state.view !== "done";
+  const hasBack = state.view !== "done";
   const footer = getFooter(checkout, view);
   const dialog = getDialog(checkout, view);
 
@@ -109,9 +108,6 @@ export const CheckoutSheet = (props: CheckoutSheetProps) => {
         )}
 
         <div className={shared.scroll} ref={scrollRef}>
-          {state.view === "detail" && (
-            <CheckoutDetail checkout={checkout} view={view} />
-          )}
           {state.view === "items" && (
             <CheckoutItems checkout={checkout} view={view} />
           )}

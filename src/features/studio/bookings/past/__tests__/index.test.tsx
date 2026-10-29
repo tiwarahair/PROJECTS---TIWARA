@@ -4,6 +4,8 @@ import { renderWithStore } from "../../../../../test/render-with-store";
 import { getRow } from "../../../../../test/studio-booking-row";
 import { getStudioSeed } from "../../../../../test/studio-seed";
 import type { StudioBookingRow } from "../../../../../lib/studio-api/bookings";
+import { skipReviewInvite } from "../../../../../lib/studio-api/booking-writes";
+import { retryFee } from "../../../../../lib/studio-api/money";
 import { StudioPage } from "../../..";
 import type { UserEvent } from "@testing-library/user-event";
 import { setupUser } from "../../../../../test/setup-user";
@@ -13,6 +15,30 @@ vi.mock("../../../../../lib/studio-api/money", async (importOriginal) => ({
     typeof import("../../../../../lib/studio-api/money")
   >()),
   waiveFee: vi.fn(() => Promise.resolve()),
+  retryFee: vi.fn(() =>
+    Promise.resolve({
+      outcome: "unpaid",
+      declineMessage: "Your card needs authentication.",
+      hardDecline: true,
+    }),
+  ),
+}));
+
+vi.mock(
+  "../../../../../lib/studio-api/booking-writes",
+  async (importOriginal) => ({
+    ...(await importOriginal<
+      typeof import("../../../../../lib/studio-api/booking-writes")
+    >()),
+    skipReviewInvite: vi.fn(() => Promise.resolve()),
+  }),
+);
+
+vi.mock("../../../../../lib/studio-api/bookings", async (importOriginal) => ({
+  ...(await importOriginal<
+    typeof import("../../../../../lib/studio-api/bookings")
+  >()),
+  fetchStudioBooking: vi.fn(() => Promise.resolve(null)),
 }));
 
 let user: UserEvent;
@@ -114,10 +140,10 @@ const setViewport = (width: number) => {
 };
 
 /** Opens Bookings → List → Past and the row whose text matches. */
-const openPast = async (match: RegExp) => {
+const openPast = async (match: RegExp, rows = PAST_ROWS) => {
   const seed = getStudioSeed();
 
-  seed.bookings.past = PAST_ROWS;
+  seed.bookings.past = rows;
   renderWithStore(<StudioPage seed={seed} />, "/studio");
   runNextTimer();
   await user.click(screen.getByRole("button", { name: "Bookings" }));
@@ -169,6 +195,70 @@ describe("Studio → past booking sheet", () => {
     ).toBeInTheDocument();
   });
 
+  it("a paid booking never marked arrived can stop its review request", async () => {
+    await openPast(/Nia Okafor.*Completed/, [
+      getPastRow("b-unmarked", 5, {
+        status: "completed",
+        can_skip_review_invite: true,
+        payments: [
+          {
+            id: "p-3",
+            kind: "booking",
+            method: "card",
+            amount_pence: 6648,
+            platform_fee_pence: 148,
+            tip_pence: 0,
+            created_at: "2026-08-20T10:00:00+00:00",
+          },
+        ],
+      }),
+    ]);
+
+    await user.click(screen.getByRole("button", { name: "Didn’t attend" }));
+
+    expect(skipReviewInvite).toHaveBeenCalledWith("b-unmarked");
+
+    expect(
+      screen.getByText("Nia won’t be asked for a review"),
+    ).toBeInTheDocument();
+
+    expect(
+      screen.queryByRole("button", { name: "Didn’t attend" }),
+    ).not.toBeInTheDocument();
+  });
+
+  it("a checked-out booking doesn't offer it", async () => {
+    await openPast(/Nia Okafor.*Completed/);
+
+    expect(
+      screen.queryByRole("button", { name: "Didn’t attend" }),
+    ).not.toBeInTheDocument();
+  });
+
+  it("a no-show that kept a non-refundable deposit, with no fee, offers a refund", async () => {
+    await openPast(/Nia Okafor.*No show/, [
+      getPastRow("b-kept", 4, {
+        status: "no_show",
+        no_show_at: "2026-09-04T10:00:00+00:00",
+        booking_fees: [
+          getFee({
+            status: "paid",
+            amount_pence: 0,
+            kept_pence: 2000,
+            refund_pence: 0,
+          }),
+        ],
+      }),
+    ]);
+
+    expect(
+      screen.getByText("£20 deposit kept (non-refundable)"),
+    ).toBeInTheDocument();
+
+    expect(screen.queryByText(/Waive/)).not.toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Refund" })).toBeInTheDocument();
+  });
+
   it("an unpaid no-show fee can be waived", async () => {
     await openPast(/Nia Okafor.*No show/);
 
@@ -185,6 +275,31 @@ describe("Studio → past booking sheet", () => {
     expect(screen.getAllByText("Fee waived").length).toBeGreaterThan(0);
 
     expect(screen.queryByText("Card declined")).not.toBeInTheDocument();
+  });
+
+  it("a retry the bank won't allow without the client stops offering retries", async () => {
+    await openPast(/Nia Okafor.*No show/);
+    await user.click(screen.getByRole("button", { name: /^Retry card/ }));
+    await user.click(screen.getByRole("button", { name: /^Charge/ }));
+
+    expect(
+      await screen.findByText(
+        "This card can’t be charged again. Send a payment link instead.",
+      ),
+    ).toBeInTheDocument();
+
+    expect(
+      screen.queryByRole("button", { name: /^Retry card/ }),
+    ).not.toBeInTheDocument();
+  });
+
+  it("retrying the card keeps the button off until the charge settles", async () => {
+    vi.mocked(retryFee).mockImplementationOnce(() => new Promise(() => {}));
+    await openPast(/Nia Okafor.*No show/);
+    await user.click(screen.getByRole("button", { name: /^Retry card/ }));
+    await user.click(screen.getByRole("button", { name: /^Charge £/ }));
+
+    expect(screen.getByRole("button", { name: /^Retry card/ })).toBeDisabled();
   });
 
   it("a cancellation fee shows as pending with a waive action", async () => {

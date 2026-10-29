@@ -22,7 +22,7 @@ const isPrevMonthOff = (
 
 // ---- the date picker ----
 export const getDateNav = (
-  { studio, state, now, upcoming }: BookingsContext,
+  { studio, state, now, calendarBookings }: BookingsContext,
   weekMonday: number,
 ) => {
   const { actions, context } = studio;
@@ -34,7 +34,10 @@ export const getDateNav = (
 
   const pickerMonth = state.bookingCalendarMonth ?? now.getMonth();
   const pickerYear = state.bookingCalendarYear ?? now.getFullYear();
-  const hasBookings = new Set(upcoming.map(({ dayOffset }) => dayOffset));
+
+  const hasBookings = new Set(
+    calendarBookings.map(({ dayOffset }) => dayOffset),
+  );
 
   return {
     calendarDateLabel: `${dayPrefix}${day.weekday} ${day.dayNumber} ${day.monthName}`,

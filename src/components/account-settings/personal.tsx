@@ -1,6 +1,7 @@
 import { Controller } from "react-hook-form";
 import { Info } from "lucide-react";
 import { SaveError } from "../../lib/studio-writes";
+import { InlineRetry } from "../inline-retry";
 import { joinClassNames } from "../../utils/class-names";
 import { formatMoney } from "../../utils/money";
 import { getCloseReason } from "./logic";
@@ -28,11 +29,14 @@ export const SettingsPersonal = ({
     upcoming = 0,
     owed = 0,
     hasOpenDispute = false,
+    isCloseChecking = false,
+    onRetryCloseChecks,
     onPayOwed,
     isPayingOwed,
   } = props;
 
   const closeReason = getCloseReason(upcoming, owed, hasOpenDispute);
+  const isCloseOff = !!closeReason || isCloseChecking || !!onRetryCloseChecks;
   const canPayOwed = !!onPayOwed && owed > 0 && !upcoming && !hasOpenDispute;
 
   return (
@@ -85,6 +89,12 @@ export const SettingsPersonal = ({
               {closeReason}
             </div>
           )}
+          {onRetryCloseChecks && (
+            <InlineRetry
+              text="We couldn’t check whether anything is still owed."
+              onRetry={onRetryCloseChecks}
+            />
+          )}
           {canPayOwed && (
             <button
               className={joinClassNames(styles.payOwed, shared.focusRing)}
@@ -100,10 +110,10 @@ export const SettingsPersonal = ({
             className={joinClassNames(
               styles.closeButton,
               shared.focusRing,
-              closeReason ? styles.closeBlocked : styles.closeOpen,
+              isCloseOff ? styles.closeBlocked : styles.closeOpen,
             )}
             data-ac-in="1"
-            disabled={!!closeReason}
+            disabled={isCloseOff}
             onClick={() =>
               ask(
                 {
@@ -125,7 +135,7 @@ export const SettingsPersonal = ({
               )
             }
           >
-            Close business
+            {isCloseChecking ? "Checking…" : "Close business"}
           </button>
         </div>
       </SettingsSection>

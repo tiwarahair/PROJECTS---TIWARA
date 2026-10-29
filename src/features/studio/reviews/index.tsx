@@ -7,7 +7,7 @@ import { PageMessage } from "../../../components/page-message";
 import { ReportReview } from "../../../components/report-review";
 import { useGetStudioReviewsQuery } from "../../../stores/api-slice";
 import { joinClassNames } from "../../../utils/class-names";
-import { copyText } from "../core/format";
+import { copyWithToast } from "../core/format";
 import { getAllClients, getBookingLink } from "../core/model";
 import type { StudioController } from "../core/use-studio";
 import { ReviewControls } from "./controls";
@@ -63,8 +63,7 @@ export const StudioReviews = ({ studio }: { studio: StudioController }) => {
   };
 
   const copyLink = () => {
-    copyText(getBookingLink(state));
-    actions.showToast("Booking link copied");
+    copyWithToast(getBookingLink(state), actions.showToast);
   };
 
   const getContent = () => {

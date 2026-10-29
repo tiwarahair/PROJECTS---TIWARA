@@ -55,7 +55,11 @@ export const getPasswordActions = ({
 
       passwordForm.reset(EMPTY_PASSWORD);
 
-      setState({ isPasswordCodeSent: false, isSettingPassword: false });
+      setState({
+        isPasswordCodeSent: false,
+        isSettingPassword: false,
+        trustedDevices: [],
+      });
 
       if (state.signOthers) loadSessions();
 

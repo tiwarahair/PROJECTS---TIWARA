@@ -10,10 +10,12 @@ import {
 } from "../../lib/auth";
 import type { NewPasswordProblem } from "../../lib/auth";
 import { rememberDevice } from "../../lib/supabase";
+import { trustThisDevice } from "../../lib/trusted-devices";
 import { needsSecondFactor, verifySecondFactor } from "../../lib/two-factor";
 import { getPasswordProblemMessage } from "../../utils/password";
 import { TURNSTILE_SCREENS } from "./data";
 import { getPasswordCheck } from "./field-schemas";
+import { clearLoginLock, getLoginLock } from "./login-lock";
 import { isCodeScreen } from "./state";
 import type { SubmitActions, SubmitCore } from "./submit-actions";
 
@@ -83,11 +85,24 @@ export const getSubmitValid = (
     const checkAccount = (onKind: (kind: string) => void) =>
       run(async () => onKind(await getAccountKind(email, takeCaptchaToken())));
 
-    const submitPassword = () =>
+    const submitPassword = () => {
+      const lock = getLoginLock(email);
+
+      if (lock.lockedUntil > Date.now())
+        return setState({
+          busy: false,
+          ...lock,
+          serverErrors: {
+            password: "Too many attempts. Try again in 15 minutes.",
+          },
+        });
+
       run(async () => {
         const error = await signIn(email, form.password, takeCaptchaToken());
 
-        if (error === "invalid_credentials") return showWrongPassword();
+        if (error === "invalid_credentials") return showWrongPassword(email);
+
+        clearLoginLock(email);
 
         if (error === "email_not_confirmed")
           return setState({ codeKind: "verify", resendIn: 0 }, () => {
@@ -98,6 +113,7 @@ export const getSubmitValid = (
         if (screen === "pro-password") await afterProAuth();
         else finish("customer-login");
       });
+    };
 
     const submitCode = () => {
       const code = current.code.join("");
@@ -115,9 +131,14 @@ export const getSubmitValid = (
 
         if (current.codeKind === "reset") return saveReset();
 
-        await rememberDevice(form.remember);
+        const isSignInCode = screen === "pro-2fa";
 
-        if (screen === "pro-2fa") finish("pro");
+        await rememberDevice(true);
+
+        if (isSignInCode && form.trustDevice && current.canTrustDevice)
+          await trustThisDevice();
+
+        if (isSignInCode) finish("pro");
         else
           finish(current.audience === "customer" ? "customer-new" : "newpro");
       });

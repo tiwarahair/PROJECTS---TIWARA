@@ -1,7 +1,7 @@
 import { Link2, X } from "lucide-react";
 import { Link } from "react-router";
 import { joinClassNames } from "../../../utils/class-names";
-import { copyText } from "../core/format";
+import { copyWithToast } from "../core/format";
 import { getBookingLink, getProfilePath } from "../core/model";
 import type { StudioController } from "../core/use-studio";
 import shared from "../../../styles/features/studio/shell/index.module.css";
@@ -42,8 +42,7 @@ export const LinkCardBody = ({ studio }: { studio: StudioController }) => {
         <button
           className={styles.copyLink}
           onClick={() => {
-            copyText(bookingLink);
-            actions.showToast("Booking link copied");
+            copyWithToast(bookingLink, actions.showToast);
             setState({ linkCard: false });
           }}
         >

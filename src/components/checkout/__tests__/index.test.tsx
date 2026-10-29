@@ -250,6 +250,21 @@ describe("CheckoutSheet", () => {
     expect(onPay).toHaveBeenCalledTimes(1);
   });
 
+  it("a refund to a saved card without its last 4 digits says their saved card", async () => {
+    renderSheet({
+      booking: { ...nia, card: "saved" },
+      start: "refund",
+      done: { method: "card", via: "sms", charged: 0, tip: 0, refundAuto: 0 },
+    });
+
+    await user.selectOptions(screen.getByRole("combobox"), "Goodwill");
+    await click(/^Refund £/);
+
+    expect(
+      screen.getByText("Refund £100 to their saved card?"),
+    ).toBeInTheDocument();
+  });
+
   it("finishing hands the result to the host", async () => {
     const onComplete = vi.fn();
 
@@ -265,5 +280,123 @@ describe("CheckoutSheet", () => {
       expect.objectContaining({ method: "card", charged: 80, total: 100 }),
       "done",
     );
+  });
+});
+
+describe("resending the receipt", () => {
+  const done = {
+    method: "card" as const,
+    via: "",
+    charged: 80,
+    tip: 0,
+    refundAuto: 0,
+  };
+
+  const getEmail = () =>
+    screen.getByRole("textbox", { name: /^Email address/ });
+
+  it("sends by email only, to the client's address by default", () => {
+    renderSheet({ start: "resend", done });
+
+    expect(
+      screen.queryByRole("button", { name: "SMS" }),
+    ).not.toBeInTheDocument();
+
+    expect(getEmail()).toHaveValue("zainab.bello@gmail.com");
+  });
+
+  it("sends to the edited address, then leaves once the host has sent it", async () => {
+    let finish = () => {};
+
+    const onResent = vi.fn(
+      () =>
+        new Promise<void>((resolve) => {
+          finish = resolve;
+        }),
+    );
+
+    const onExit = vi.fn();
+
+    renderSheet({ start: "resend", done, onResent, onExit });
+
+    await user.clear(getEmail());
+    await user.type(getEmail(), "zainab@work.test");
+    await click("Send receipt");
+
+    expect(onResent).toHaveBeenCalledWith("zainab@work.test");
+    expect(screen.getByRole("button", { name: "Sending" })).toBeDisabled();
+    expect(onExit).not.toHaveBeenCalled();
+
+    finish();
+
+    await vi.waitFor(() => expect(onExit).toHaveBeenCalled());
+  });
+
+  it("resending from the receipt goes back to the receipt", async () => {
+    const onResent = vi.fn(() => Promise.resolve());
+    const onExit = vi.fn();
+
+    renderSheet({ start: "receipt", done, onResent, onExit });
+
+    await click("Resend receipt");
+    await click("Send receipt");
+
+    expect(
+      await screen.findByRole("button", { name: "Resend receipt" }),
+    ).toBeInTheDocument();
+
+    expect(onResent).toHaveBeenCalled();
+    expect(onExit).not.toHaveBeenCalled();
+  });
+
+  it("back from resending goes back to the receipt it came from", async () => {
+    const onExit = vi.fn();
+
+    renderSheet({ start: "receipt", done, onExit });
+
+    await click("Resend receipt");
+    await click("Back");
+
+    expect(
+      screen.getByRole("button", { name: "Resend receipt" }),
+    ).toBeInTheDocument();
+
+    expect(onExit).not.toHaveBeenCalled();
+  });
+
+  it("a failed send stays open and says why", async () => {
+    const onResent = vi
+      .fn()
+      .mockRejectedValue(new Error("Enter a valid email address."));
+
+    const onExit = vi.fn();
+
+    renderSheet({ start: "resend", done, onResent, onExit });
+
+    await click("Send receipt");
+
+    expect(
+      await screen.findByText("Enter a valid email address."),
+    ).toBeInTheDocument();
+
+    expect(screen.getByRole("button", { name: "Send receipt" })).toBeEnabled();
+
+    expect(onExit).not.toHaveBeenCalled();
+  });
+
+  it("checks the address before sending", async () => {
+    const onResent = vi.fn();
+
+    renderSheet({ start: "resend", done, onResent });
+
+    await user.clear(getEmail());
+    await user.type(getEmail(), "zainab");
+    await click("Send receipt");
+
+    expect(await screen.findByRole("alert")).toHaveTextContent(
+      "Enter a valid email address.",
+    );
+
+    expect(onResent).not.toHaveBeenCalled();
   });
 });

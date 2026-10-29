@@ -32,7 +32,7 @@ select pg_temp.sign_up('c2222222-2222-2222-2222-222222222222', 'other@desk.test'
 update public.working_hours set is_open = true, start_time = '09:00', end_time = '18:00'
 where stylist_id = (select id from public.stylists where slug = 'desk-test');
 
-update public.booking_rules set min_notice_hours = 0
+update public.booking_rules set min_notice_minutes = 0
 where stylist_id = (select id from public.stylists where slug = 'desk-test');
 
 update public.stylists set status = 'live' where slug = 'desk-test';
@@ -172,7 +172,7 @@ select is(
 select is(
   public.get_studio_cancellation((select next_week_after from b), 'c1111111-1111-1111-1111-111111111111', 'stylist', true)
     - 'id' - 'payment_intent_id',
-  '{"is_late": false, "fee_pence": 0, "refund_pence": 3163, "kept_pence": 0, "charge_pence": 0, "fee_recovery_pence": 163}',
+  '{"is_late": false, "fee_pence": 0, "refund_pence": 3163, "kept_pence": 0, "charge_pence": 0}',
   'the stylist cancelling refunds everything, the booking fee to recover'
 );
 

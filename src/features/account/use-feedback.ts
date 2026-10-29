@@ -111,12 +111,16 @@ export const useAccountFeedback = ({
     done: string,
     failed: string | ((error: unknown) => string),
   ) => {
+    setState({ isSaving: true });
+
     try {
       await task();
     } catch (error) {
       showToast(typeof failed === "string" ? failed : failed(error));
 
       return false;
+    } finally {
+      setState({ isSaving: false });
     }
 
     showToast(done);

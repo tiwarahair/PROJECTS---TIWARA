@@ -46,13 +46,17 @@ describe("reports view", () => {
   });
 
   it("names who reported it", () => {
-    expect(getReporter({ is_stylist: true, reporter_name: null })).toBe(
-      "the stylist",
-    );
+    const reporter = { reporter_name: null, reporter_deleted: false };
 
-    expect(getReporter({ is_stylist: false, reporter_name: "Joy Eze" })).toBe(
-      "a client, Joy Eze",
-    );
+    expect(getReporter({ ...reporter, is_stylist: true })).toBe("the stylist");
+
+    expect(
+      getReporter({ ...reporter, is_stylist: false, reporter_name: "Joy Eze" }),
+    ).toBe("a client, Joy Eze");
+
+    expect(
+      getReporter({ ...reporter, is_stylist: false, reporter_deleted: true }),
+    ).toBe("a client who has since deleted their account");
   });
 
   it("reads decided reviews newest first", () => {

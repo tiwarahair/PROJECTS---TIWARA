@@ -1,6 +1,6 @@
 // A checkout's card charge on the client's saved card, and the refund when they paid more than the final price.
 import Stripe from "stripe";
-import { getCardLabel, isHardDecline } from "../_shared/declines.ts";
+import { cannotRetry, getCardLabel } from "../_shared/declines.ts";
 import { reverseLaterTransfer } from "../_shared/later-transfer.ts";
 import { getRefundable } from "../_shared/refundable.ts";
 import { getRecovery } from "../_shared/owed.ts";
@@ -146,7 +146,7 @@ export const chargeSavedCard = async (
     return {
       paid: false,
       payment_intent_id: createdId,
-      hard: isHardDecline(code) || code === "authentication_required",
+      hard: cannotRetry(code),
       message: error.message,
       card_label: cardLabel,
     };

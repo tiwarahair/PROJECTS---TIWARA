@@ -30,7 +30,9 @@ const formatDay = (date: Date): string => {
 };
 
 const getDistanceText = ({ business_type, distance_miles }: SearchRow) => {
-  if (business_type === "mobile") return "Travels to you";
+  // a mobile stylist only has a distance when the search point is inside their travel radius
+  if (business_type === "mobile")
+    return distance_miles == null ? "Mobile stylist" : "Travels to you";
 
   if (distance_miles == null) return "";
 

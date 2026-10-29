@@ -1,6 +1,6 @@
 import { useFormState } from "react-hook-form";
 import { joinClassNames } from "../../utils/class-names";
-import { getViewAnimation } from "./detail";
+import { getViewAnimation } from "./motion";
 import { Chip } from "./controls";
 import type { CheckoutController } from "./use-checkout";
 import styles from "../../styles/components/checkout/resend.module.css";
@@ -30,7 +30,7 @@ export const CheckoutResend = ({
         {(
           [
             ["email", "Email"],
-            ["sms", "SMS"],
+            // ["sms", "SMS"], // not sending texts to clients for now (check back once we add in sms messages)
           ] as const
         ).map(([via, label]) => (
           <Chip

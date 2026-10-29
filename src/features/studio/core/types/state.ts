@@ -102,6 +102,9 @@ export interface StudioState {
   twoFactorOut: boolean;
   shareTip: boolean;
   stripeBusy: boolean;
+  /** The past booking with a retry or link request in flight. */
+  pastBusyId: string | number | null;
+  /** The account's Stripe status and payout bank. */
   payoutStatus: PayoutStatus | null;
   payoutBank: string | null;
   /** A real account's saved notification choices (Settings → Notifications). */

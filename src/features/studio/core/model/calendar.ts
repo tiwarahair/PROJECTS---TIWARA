@@ -209,5 +209,11 @@ export const isOngoing = (
   )
     return false;
 
-  return getMinutesOfDay() >= timeToMinutes(booking.time);
+  const start = timeToMinutes(booking.time);
+  const nowMinutes = getMinutesOfDay();
+
+  return (
+    nowMinutes >= start &&
+    nowMinutes < start + durationToMinutes(booking.duration)
+  );
 };

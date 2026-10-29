@@ -3,7 +3,7 @@ import { getAssetImageSet, getAssetSources, getAssetUrl } from "../asset-url";
 
 describe("getAssetUrl", () => {
   it("resolves image and logo paths inside assets/", () => {
-    expect(getAssetUrl("site/old-hero.jpg")).toContain("hero");
+    expect(getAssetUrl("site/hero.jpg")).toContain("hero");
     expect(getAssetUrl("site/ceo.jpeg")).toContain("ceo");
 
     expect(getAssetUrl("logos/logo-crimson.png")).toContain("logo-crimson");

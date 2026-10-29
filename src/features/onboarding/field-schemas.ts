@@ -24,7 +24,7 @@ export const formSchema = z.object({
   mobile: z.string(),
   terms: z.boolean(),
   marketing: z.boolean(),
-  remember: z.boolean(),
+  trustDevice: z.boolean(),
   businessName: z.string(),
   postcode: z.string(),
   line1: z.string(),

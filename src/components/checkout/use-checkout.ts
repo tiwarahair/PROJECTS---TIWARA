@@ -46,7 +46,6 @@ export interface CheckoutSheetProps {
   start?: CheckoutView;
   done?: Partial<CheckoutResult> & { tip?: number };
   refunded?: number;
-  linkPaid?: boolean;
   /** The host's sheet corner radius. */
   radius?: string;
   stylist: CheckoutStylist;
@@ -65,8 +64,7 @@ export interface CheckoutSheetProps {
     action: "done" | "rebook",
   ) => void;
   onRefund?: (amount: number, reason: string, isOffPlatform: boolean) => void;
-  onResent?: (to: string) => void;
-  onCancelLink?: () => void;
+  onResent?: (to: string) => Promise<void>;
 }
 
 export const useCheckout = (props: CheckoutSheetProps) => {
@@ -76,12 +74,12 @@ export const useCheckout = (props: CheckoutSheetProps) => {
       start: props.start,
       done: props.done,
       refunded: props.refunded,
-      linkPaid: props.linkPaid,
     }),
   );
 
   const scrollRef = useRef<HTMLDivElement>(null);
   const toastTimer = useRef(0);
+  const isResending = useRef(false);
   const { booking } = props;
 
   const money = getMoney(state, booking);
@@ -94,7 +92,7 @@ export const useCheckout = (props: CheckoutSheetProps) => {
     resolver: zodResolver(resendSchema),
   });
 
-  const { refundCap } = getRefundCap(state, booking);
+  const { refundCap } = getRefundCap(state);
 
   const refundForm = useForm<RefundValues>({
     defaultValues: state.refund,
@@ -135,10 +133,7 @@ export const useCheckout = (props: CheckoutSheetProps) => {
 
   const exit = () => props.onExit?.();
 
-  /** Show a view; leaving to "detail" exits the sheet instead. */
   const goTo = (view: CheckoutView, direction = 1) => {
-    if (view === "detail") return exit();
-
     setState({ view, direction, adjustingLineId: null });
     resendForm.clearErrors();
     scrollTop();
@@ -154,9 +149,37 @@ export const useCheckout = (props: CheckoutSheetProps) => {
     );
   };
 
-  const startCheckout = () => {
-    setState({ decline: null });
-    goTo("items", 1);
+  const resendReceipt = async () => {
+    if (isResending.current) return;
+
+    isResending.current = true;
+
+    try {
+      await resendForm.handleSubmit(async ({ to }) => {
+        setState({ busy: true });
+
+        try {
+          await props.onResent?.(to);
+        } catch (error) {
+          setState({ busy: false });
+
+          showToast(
+            error instanceof Error
+              ? error.message
+              : "The receipt didn’t send. Try again.",
+          );
+
+          return;
+        }
+
+        setState({ busy: false });
+
+        if (state.isResendFromReceipt) goTo("receipt", -1);
+        else exit();
+      })();
+    } finally {
+      isResending.current = false;
+    }
   };
 
   const getLines = () =>
@@ -261,11 +284,11 @@ export const useCheckout = (props: CheckoutSheetProps) => {
     showToast,
     resendForm,
     startResend,
+    resendReceipt,
     refundForm,
     refundValues,
     pickRefundKind,
     startRefund,
-    startCheckout,
     complete,
     getResult,
   };
