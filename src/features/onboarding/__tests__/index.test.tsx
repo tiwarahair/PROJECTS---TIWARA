@@ -43,7 +43,10 @@ const advance = (ms: number) => act(() => vi.advanceTimersByTime(ms));
 
 /** Progress saved on this device from an earlier visit (the form's email and name). */
 const saveProgress = (form: Record<string, string>) =>
-  localStorage.setItem("tw_onboarding_v1", JSON.stringify({ form }));
+  localStorage.setItem(
+    "tw_onboarding_v1",
+    JSON.stringify({ form, savedAt: Date.now() }),
+  );
 
 describe("OnboardingPage", () => {
   beforeEach(() => {
@@ -271,6 +274,43 @@ describe("OnboardingPage", () => {
     ).toBeInTheDocument();
   });
 
+  it("a login lock survives a page refresh", async () => {
+    saveProgress({ email: "ama@example.com" });
+
+    localStorage.setItem(
+      "tw_login_locks",
+      JSON.stringify({
+        "ama@example.com": { attempts: 5, lockedUntil: Date.now() + 6e5 },
+      }),
+    );
+
+    renderWithStore(<OnboardingPage />, "/login?screen=cust-password");
+
+    await user.type(screen.getByLabelText("Password"), "a long password");
+    await user.click(screen.getByRole("button", { name: "Log in" }));
+
+    expect(
+      await screen.findByText("Too many attempts. Try again in 15 minutes."),
+    ).toBeInTheDocument();
+
+    expect(auth.signIn).not.toHaveBeenCalled();
+  });
+
+  it("saved progress older than 7 days is dropped", () => {
+    localStorage.setItem(
+      "tw_onboarding_v1",
+      JSON.stringify({
+        form: { email: "ama@example.com" },
+        savedAt: Date.now() - 8 * 864e5,
+      }),
+    );
+
+    renderWithStore(<OnboardingPage />, "/login?screen=cust-email");
+
+    expect(screen.getByLabelText("Email address")).toHaveValue("");
+    expect(localStorage.getItem("tw_onboarding_v1")).toBeNull();
+  });
+
   it("backing out of Google sign-in returns to the chooser without an error", async () => {
     vi.mocked(auth.getSignedInAccount).mockResolvedValue(null);
     renderWithStore(<OnboardingPage />, "/login?flow=social");
@@ -319,6 +359,7 @@ describe("OnboardingPage", () => {
           last: "Okonkwo",
         },
         geocodedLatLng: [53.45, -2.22],
+        savedAt: Date.now(),
       }),
     );
 

@@ -10,6 +10,7 @@ import {
   getPasswordMin,
   getPasswordProblemMessage,
 } from "../../utils/password";
+import { getLoginLock, saveLoginLock } from "./login-lock";
 import { getStylistDetails, getWelcomeMessage } from "./submit-logic";
 import type { FinishKind } from "./submit-logic";
 import type { OnboardingCore } from "./use-onboarding";
@@ -106,14 +107,17 @@ export const getSubmitActions = ({
     else finish("pro");
   };
 
-  const showWrongPassword = () => {
-    const attempts = stateRef.current.attempts + 1;
+  const showWrongPassword = (email: string) => {
+    const attempts = getLoginLock(email).attempts + 1;
+    const lockedUntil = attempts >= MAX_ATTEMPTS ? Date.now() + LOCK_MS : 0;
 
-    if (attempts >= MAX_ATTEMPTS)
+    saveLoginLock(email, { attempts, lockedUntil });
+
+    if (lockedUntil)
       setState({
         busy: false,
         attempts,
-        lockedUntil: Date.now() + LOCK_MS,
+        lockedUntil,
         serverErrors: {
           password: "Too many attempts. Try again in 15 minutes.",
         },
