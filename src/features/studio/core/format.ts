@@ -278,8 +278,17 @@ export const makeChart = (data: number[]) => {
   return { line, area, points };
 };
 
-export const copyText = async (text: string) =>
-  navigator.clipboard.writeText(text);
+const copyText = async (text: string) => navigator.clipboard.writeText(text);
+
+export const copyWithToast = (
+  text: string,
+  showToast: (message: string) => void,
+  copied = "Booking link copied",
+) =>
+  void copyText(text).then(
+    () => showToast(copied),
+    () => showToast("The booking link couldn’t be copied. Try again."),
+  );
 
 /** copies text the server is still making; Safari only allows it while the click is still being handled. */
 export const copyLaterText = async (text: Promise<string>) => {

@@ -1,6 +1,6 @@
 import type { StudioActions, StudioContext } from "../../core/actions";
 import { GATE_REASON, ICONS } from "../../core/constants";
-import { copyText } from "../../core/format";
+import { copyWithToast } from "../../core/format";
 import { formatAddon, getServiceBookingLink, isLive } from "../../core/model";
 import type { StudioAddon, StudioService } from "../../core/types";
 import { getAnchor } from "./helpers";
@@ -76,9 +76,10 @@ export const createMenuActions = (
       return;
     }
 
-    void copyText(getServiceBookingLink(state, id)).then(
-      () => showToast(`Booking link for ${name} copied`),
-      () => showToast("The booking link couldn’t be copied. Try again."),
+    copyWithToast(
+      getServiceBookingLink(state, id),
+      showToast,
+      `Booking link for ${name} copied`,
     );
   };
 

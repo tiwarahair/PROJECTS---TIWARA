@@ -18,7 +18,7 @@ import {
 } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
 import { GATE_REASON } from "../core/constants";
-import { copyText } from "../core/format";
+import { copyWithToast } from "../core/format";
 import {
   getAllClients,
   getBookingLink,
@@ -84,8 +84,7 @@ export const getSettingsNav = (
       return;
     }
 
-    copyText(getBookingLink(state));
-    showToast("Booking link copied");
+    copyWithToast(getBookingLink(state), showToast);
   };
 
   // ---- the narrow root menu ----

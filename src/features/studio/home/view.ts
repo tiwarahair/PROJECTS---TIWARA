@@ -1,7 +1,7 @@
 import type { PointerEvent } from "react";
 import { GATE_REASON } from "../core/constants";
 import { getDecoratedBookings } from "../bookings/decorate";
-import { copyText, makeChart } from "../core/format";
+import { copyWithToast, makeChart } from "../core/format";
 import { getBookingLink } from "../core/model";
 import { isGated } from "../shell";
 import type { StudioController } from "../core/use-studio";
@@ -140,8 +140,7 @@ export const getHomeView = (
         return;
       }
 
-      copyText(getBookingLink(state));
-      actions.showToast("Booking link copied");
+      copyWithToast(getBookingLink(state), actions.showToast);
     },
     onChartMove,
   };
