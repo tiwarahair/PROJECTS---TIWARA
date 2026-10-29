@@ -1,3 +1,4 @@
+import { formatMoney } from "../../../../../utils/money";
 import { PAST_TONE } from "../../../core/constants";
 import { getLinkDue } from "../../checkout-label";
 import { getPastTime } from "./checkout";
@@ -25,7 +26,7 @@ export const getVisitView = ({
   };
 
   const getOutValue = () => {
-    if (linkDue !== null) return `£${linkDue}`;
+    if (linkDue !== null) return formatMoney(linkDue);
 
     if (isCompleted) return `£${row.price}`;
 
