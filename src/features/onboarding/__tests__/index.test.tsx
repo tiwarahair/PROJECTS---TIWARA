@@ -65,6 +65,15 @@ describe("OnboardingPage", () => {
     turnstileStub.isHeld = false;
   });
 
+  it("the footer's Support link goes to the help page", () => {
+    renderWithStore(<OnboardingPage />, "/login?screen=cust-email");
+
+    expect(screen.getByRole("link", { name: "Support" })).toHaveAttribute(
+      "href",
+      "/help",
+    );
+  });
+
   it("a signed-in customer's account step shows their own details, locked, with no password", () => {
     renderWithStore(<OnboardingPage />, "/join?screen=w4", {
       signedIn: true,

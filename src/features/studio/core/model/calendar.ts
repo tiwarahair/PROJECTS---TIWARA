@@ -214,5 +214,11 @@ export const isOngoing = (
   )
     return false;
 
-  return getNowMinutes() >= timeToMinutes(booking.time);
+  const start = timeToMinutes(booking.time);
+  const nowMinutes = getNowMinutes();
+
+  return (
+    nowMinutes >= start &&
+    nowMinutes < start + durationToMinutes(booking.duration)
+  );
 };

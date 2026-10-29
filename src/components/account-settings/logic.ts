@@ -177,9 +177,11 @@ export const NOTIFICATION_GROUPS: [string, [NotificationKey, string][]][] = [
   [
     "Payments",
     [
-      ["paymentPaid", "Deposit or payment link paid"],
+      // TO DO: no email/sms is sent for this yet
+      // ["paymentPaid", "Deposit or payment link paid"],
       ["paymentFailed", "Payment failed"],
-      ["feeCharged", "Fee charged"],
+      // TO DO: no email/sms is sent for this yet
+      // ["feeCharged", "Fee charged"],
       ["feeFailed", "Fee failed"],
     ],
   ],
@@ -195,7 +197,8 @@ export const NOTIFICATION_GROUPS: [string, [NotificationKey, string][]][] = [
 
 export const ALWAYS_ON = [
   "Payout paid or failed",
-  "Stripe needs action",
+  // TO DO: no email/sms is sent for this yet
+  // "Stripe needs action",
   "Security alerts",
 ];
 

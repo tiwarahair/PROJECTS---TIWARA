@@ -19,6 +19,7 @@ vi.mock("../../../../../lib/studio-api/bookings", async (importOriginal) => ({
     typeof import("../../../../../lib/studio-api/bookings")
   >()),
   rescheduleStudioBooking: vi.fn(() => new Promise(() => {})),
+  markNoShow: vi.fn(() => new Promise(() => {})),
 }));
 
 vi.mock(
@@ -284,6 +285,19 @@ describe("Studio → booking sheet", () => {
     advance(400);
     await openMoreItem("Cancel");
     expect(screen.getByText("I am cancelling")).toBeInTheDocument();
+  });
+
+  it("a booking marked as a no-show stays on the day straight away", async () => {
+    vi.setSystemTime(new Date(2026, 8, 7, 10, 30));
+    await openNia();
+    await openMoreItem("No-show");
+    await user.click(screen.getByRole("button", { name: "Mark as no-show" }));
+    advance(400);
+
+    const bookings = getLabelled("Bookings");
+
+    expect(within(bookings).getByText("Nia Okafor")).toBeInTheDocument();
+    expect(within(bookings).getByText("No show")).toBeInTheDocument();
   });
 
   it("asks before moving onto another booking, and Go back keeps it", async () => {

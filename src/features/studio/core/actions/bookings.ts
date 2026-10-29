@@ -111,7 +111,7 @@ export const createBookingActions = (
     );
   };
 
-  /** Past midnight, real bookings move to their new day offsets. */
+  /** Past midnight, real bookings (upcoming and finished) move to their new day offsets. */
   const followToday = () => {
     const today = toIsoDate(new Date());
 
@@ -123,11 +123,16 @@ export const createBookingActions = (
 
     if (isFirstCheck) return;
 
+    const { bookings, pastNew } = getState();
+
     setState({
-      bookings: getState().bookings.map((booking) =>
+      bookings: bookings.map((booking) =>
         booking.startsAt
           ? { ...booking, dayOffset: toDayOffset(booking.startsAt) }
           : booking,
+      ),
+      pastNew: pastNew.map((row) =>
+        row.startsAt ? { ...row, dayOffset: toDayOffset(row.startsAt) } : row,
       ),
     });
   };

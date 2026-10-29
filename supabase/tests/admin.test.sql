@@ -1,5 +1,5 @@
 begin;
-select plan(29);
+select plan(31);
 
 insert into auth.users (id, instance_id, aud, role, email, raw_user_meta_data, raw_app_meta_data)
 values
@@ -90,7 +90,14 @@ from ids;
 create temp table baseline as
 select
   (select count(distinct review_id) from public.review_reports where status = 'open') as open,
-  (select count(*) from public.reviews where status = 'hidden') as hidden;
+  (select count(*) from public.reviews where status = 'hidden') as hidden,
+  (select count(distinct review_id) from public.review_decisions where outcome <> 'hidden'
+    and review_id not in (select review_id from public.review_reports where status = 'open'
+      union select review_id from public.review_appeals where status = 'open')) as decided,
+  (select count(distinct review_id) from public.review_decisions where outcome <> 'hidden'
+    and created_at > now() - interval '7 days'
+    and review_id not in (select review_id from public.review_reports where status = 'open'
+      union select review_id from public.review_appeals where status = 'open')) as decided_week;
 
 grant select on posted, shop, ids, clock, baseline to authenticated;
 
@@ -231,6 +238,10 @@ select ok(
   ),
   'and the admin queue shows it came from a deleted account'
 );
+select is((public.admin_get_report_stats() ->> 'decided_this_week')::bigint - (select decided_week from baseline),
+  2::bigint, 'a decision changed on appeal still counts its review once this week');
+select is((public.admin_get_report_stats() ->> 'decided')::bigint - (select decided from baseline), 2::bigint,
+  'the Decided tab counts the same two reviews');
 reset role;
 
 select * from finish();

@@ -130,6 +130,7 @@ export interface PastRecord {
   time: string;
   status: string;
   duration?: string;
+  dayOffset?: number;
   at?: number;
   note?: string;
   meta?: string;

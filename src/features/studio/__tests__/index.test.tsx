@@ -2,6 +2,9 @@ import { act, screen, within } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { renderWithStore } from "../../../test/render-with-store";
 import { getNewStudioSeed, getStudioSeed } from "../../../test/studio-seed";
+import { getRow } from "../../../test/studio-booking-row";
+import { fromLondonTime } from "../../../utils/london-time";
+import { toDate } from "../core/blocked-time";
 import { GATE_REASON } from "../core/constants";
 import { StudioPage } from "..";
 import type { UserEvent } from "@testing-library/user-event";
@@ -113,5 +116,60 @@ describe("StudioPage", () => {
     expect(
       screen.getByText("Welcome, Amara. Let’s get you ready to take bookings."),
     ).toBeInTheDocument();
+  });
+
+  describe("a day with a finished, a checked-out and a later booking", () => {
+    const getDaySeed = () =>
+      getStudioSeed({
+        bookings: {
+          ...getStudioSeed().bookings,
+          active: [
+            getRow({
+              id: "b-ended",
+              starts_at: fromLondonTime(toDate(0), "07:00"),
+            }),
+            getRow({}),
+          ],
+          past: [
+            getRow({
+              id: "b-paid",
+              status: "completed",
+              starts_at: fromLondonTime(toDate(0), "05:00"),
+              past_at: fromLondonTime(toDate(0), "06:45"),
+            }),
+          ],
+        },
+      });
+
+    it("Today counts and lists the checked-out booking as completed", () => {
+      setViewport(1440);
+      renderStudio("", getDaySeed());
+
+      expect(getLabelled("Today hero")).toHaveTextContent("2 appointments");
+
+      const today = getLabelled("Today") as HTMLElement;
+
+      expect(within(today).getByText("Completed")).toBeInTheDocument();
+      expect(within(today).getByText("Due for checkout")).toBeInTheDocument();
+    });
+
+    it("Today's appointments says nothing else is booked once the day's bookings are over", async () => {
+      vi.setSystemTime(new Date(2026, 8, 7, 21, 0));
+      renderStudio("", getDaySeed());
+      await user.click(screen.getByRole("button", { name: "Today" }));
+
+      expect(screen.getByText("Nothing else today")).toBeInTheDocument();
+    });
+
+    it("Upcoming leaves out a booking that has already ended", () => {
+      renderStudio("", getDaySeed());
+
+      const upcoming = screen
+        .getByRole("heading", { name: "Upcoming appointments" })
+        .closest("section") as HTMLElement;
+
+      expect(within(upcoming).getByText("14:30")).toBeInTheDocument();
+      expect(within(upcoming).queryByText("07:00")).not.toBeInTheDocument();
+    });
   });
 });
