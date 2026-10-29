@@ -73,7 +73,7 @@ export interface AccountSettingsProps {
   onTwoFactorAddBackup?: () => void;
   onTaxEdit?: () => void;
   onTaxAdd?: () => void;
-  onTaxSave?: (details: TaxDetails) => void;
+  onTaxSave?: (details: TaxDetails) => void | Promise<void>;
   onTaxCancel?: () => void;
   onTaxDirty?: (isDirty: boolean) => void;
   /** Opens the stylist's Stripe Express dashboard. */

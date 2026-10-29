@@ -165,6 +165,35 @@ describe("TaxDetailsForm", () => {
     );
   });
 
+  it("keeps Save off while the details are saving", async () => {
+    render(
+      <TaxDetailsForm
+        {...names}
+        mode="settings"
+        business={{
+          type: "chair",
+          details: {
+            line1: "48 Oxford Road",
+            city: "Manchester",
+            postcode: "M1 5QA",
+          },
+        }}
+        onSubmit={() => new Promise<void>(() => {})}
+      />,
+    );
+
+    await user.click(screen.getByRole("radio", { name: "Limited company" }));
+
+    await user.type(
+      screen.getByLabelText("Company registration number"),
+      "sc123456",
+    );
+
+    await user.click(screen.getByRole("button", { name: "Save" }));
+
+    expect(screen.getByRole("button", { name: "Save" })).toBeDisabled();
+  });
+
   it("reports unsaved changes, and none once they're undone", async () => {
     const onDirtyChange = vi.fn();
 

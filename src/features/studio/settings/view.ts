@@ -169,7 +169,7 @@ export const getSettingsView = (
       setState({ taxEdit: true });
     },
     onTaxSave: (value: TaxDetails) =>
-      void actions.saveTax(value, () => {
+      actions.saveTax(value, () => {
         context.memo.isTaxEdited = false;
         setState({ taxEdit: false });
       }),
