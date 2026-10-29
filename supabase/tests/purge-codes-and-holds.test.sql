@@ -1,5 +1,5 @@
 begin;
-select plan(5);
+select plan(6);
 
 insert into auth.users (id, instance_id, aud, role, email, raw_user_meta_data, raw_app_meta_data)
 values
@@ -34,7 +34,10 @@ select
   pg_temp.hold('expired', interval '2 days') as old_expired,
   pg_temp.hold('held', interval '2 days') as old_held,
   pg_temp.hold('expired', interval '1 hour') as recent,
-  pg_temp.hold('expired', interval '2 days') as paid;
+  pg_temp.hold('expired', interval '2 days') as paid,
+  pg_temp.hold('expired', interval '2 days') as paying;
+
+update public.bookings set stripe_payment_intent_id = 'pi_purge_paying' where id = (select paying from b);
 
 insert into public.payments (booking_id, kind, amount_pence, platform_fee_pence) select paid, 'booking', 5000, 0 from b;
 
@@ -51,6 +54,10 @@ select is(
 );
 select ok(exists (select 1 from public.bookings where id = (select recent from b)), 'a hold that just ran out stays');
 select ok(exists (select 1 from public.bookings where id = (select paid from b)), 'one with a payment stays');
+select ok(
+  exists (select 1 from public.bookings where id = (select paying from b)),
+  'one that reached Pay stays, in case its payment still completes'
+);
 select is(
   (select count(*) from public.account_codes where user_id = 'ca222222-2222-2222-2222-222222222222'),
   1::bigint, 'account codes over a day old are removed'
