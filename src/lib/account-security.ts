@@ -1,7 +1,6 @@
 // A signed-in account's sign-ins: where it's signed in, signing those out, and new-device alerts.
 import { z } from "zod";
 import { supabase } from "./supabase";
-import { revokeTrustedDevices } from "./trusted-devices";
 
 const kindSchema = z.enum(["phone", "laptop", "tablet"]);
 
@@ -59,8 +58,7 @@ export const signOutSession = async (id: string) =>
   throwIfFailed(await supabase.rpc("sign_out_session", { target: id }));
 
 export const signOutOtherSessions = async () => {
-  await revokeTrustedDevices();
-
+  throwIfFailed(await supabase.rpc("revoke_other_trusted_devices"));
   throwIfFailed(await supabase.auth.signOut({ scope: "others" }));
 };
 

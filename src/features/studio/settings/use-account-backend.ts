@@ -12,6 +12,7 @@ import {
   signOutOtherSessions,
   signOutSession,
 } from "../../../lib/account-security";
+import { needsSecondFactor } from "../../../lib/two-factor";
 import { api, useUpdateProfileMutation } from "../../../stores/api-slice";
 import {
   closeBusiness,
@@ -66,7 +67,14 @@ export const useAccountBackend = ({
     getSecurity: fetchAccountSecurity,
     signOutSession,
     signOutOthers: signOutOtherSessions,
-    removeTrustedDevice,
+    removeTrustedDevice: async (id) => {
+      if (await needsSecondFactor().catch(() => false))
+        await new Promise<void>((resolve) => {
+          actions.askForCode("trust", resolve);
+        });
+
+      await removeTrustedDevice(id);
+    },
     saveLoginAlerts: (isOn) => saveLoginAlerts(user.id, isOn),
     getCalendarFeed: () => fetchCalendarFeedUrl(stylistId),
     resetCalendarFeed: () => resetCalendarFeed(stylistId),

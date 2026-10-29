@@ -136,7 +136,7 @@ export const SettingsSessions = ({
                   ask(
                     {
                       title: "Sign out all other sessions?",
-                      body: "Every device except this one will need to sign in again, and trusted devices will ask for a code.",
+                      body: "Every device except this one will need to sign in again, and other trusted devices will ask for a code.",
                       cta: "Sign out",
                     },
                     sessions.signOutOthers,

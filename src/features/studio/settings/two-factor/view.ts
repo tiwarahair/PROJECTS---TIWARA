@@ -9,6 +9,7 @@ const CODE_REASONS: Record<string, string> = {
   refund: "make this refund",
   backup: "add another authenticator app",
   account: "change your login details",
+  trust: "stop trusting a device",
 };
 
 export const getTwoFactorView = (studio: StudioController) => {

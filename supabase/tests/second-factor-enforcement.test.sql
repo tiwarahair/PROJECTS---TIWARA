@@ -1,5 +1,5 @@
 begin;
-select plan(20);
+select plan(22);
 
 insert into auth.users (id, instance_id, aud, role, email, raw_user_meta_data, raw_app_meta_data)
 select id, '00000000-0000-0000-0000-000000000000', 'authenticated', 'authenticated', email,
@@ -114,6 +114,23 @@ select ok(not public.check_trusted_device((select token from tokens)), 'a remove
 reset role;
 
 select is((select count(*) from public.trusted_sessions), 0::bigint, 'removing the device ends its trusted sessions');
+
+select pg_temp.act_as('c1111111-1111-1111-1111-111111111111', 'a1111111-0000-0000-0000-000000000002', 'aal2');
+select public.trust_device();
+reset role;
+
+insert into public.trusted_devices (user_id, token_hash, label, kind)
+values ('c1111111-1111-1111-1111-111111111111', sha256('other'), 'iPhone · Safari', 'phone');
+
+select is((select count(*) from public.trusted_sessions where session_id = 'a1111111-0000-0000-0000-000000000002'),
+  1::bigint, 'trusting a device links the session that trusted it');
+
+select pg_temp.act_as('c1111111-1111-1111-1111-111111111111', 'a1111111-0000-0000-0000-000000000002', 'aal2');
+select public.revoke_other_trusted_devices();
+reset role;
+
+select is((select array_agg(label) from public.trusted_devices), array['Mac · Chrome'],
+  'signing out other sessions keeps this device trusted');
 
 select pg_temp.act_as('c2222222-2222-2222-2222-222222222222', 'a1111111-0000-0000-0000-000000000009', 'aal1');
 select is(pg_temp.studio_reads(), 2::bigint, 'a stylist without an authenticator still reaches Studio to set one up');

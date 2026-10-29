@@ -123,9 +123,9 @@ export const getSessionsActions = ({
 
         setState(({ sessions }) => ({
           sessions: sessions.filter(({ isCurrent }) => isCurrent),
-          trustedDevices: [],
         }));
 
+        void load();
         toast("Signed out of other sessions");
       },
       () => toast("Your other sessions couldn’t be signed out. Try again."),

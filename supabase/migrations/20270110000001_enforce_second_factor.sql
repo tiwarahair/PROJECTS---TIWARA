@@ -37,6 +37,58 @@ as $$
   select public.is_second_factor_passed(auth.uid(), auth.jwt() ->> 'session_id', auth.jwt() ->> 'aal')
 $$;
 
+create or replace function public.trust_device()
+returns text
+language plpgsql
+security definer
+set search_path = ''
+as $$
+declare
+  caller uuid := (select auth.uid());
+  token text := translate(encode(extensions.gen_random_bytes(32), 'base64'), '+/=', '-_');
+  user_agent text;
+  device_id uuid;
+begin
+  if caller is null or not public.is_aal2() then
+    raise exception 'second_factor_required';
+  end if;
+
+  if public.is_admin() then
+    raise exception 'admin_not_trusted';
+  end if;
+
+  select sessions.user_agent into user_agent
+  from auth.sessions
+  where sessions.id::text = auth.jwt() ->> 'session_id';
+
+  insert into public.trusted_devices (user_id, token_hash, label, kind)
+  values (caller, sha256(convert_to(token, 'UTF8')), public.get_device_label(user_agent),
+    public.get_device_kind(user_agent))
+  returning id into device_id;
+
+  if auth.jwt() ->> 'session_id' is not null then
+    insert into public.trusted_sessions (session_id, device_id)
+    values ((auth.jwt() ->> 'session_id')::uuid, device_id)
+    on conflict (session_id) do update set device_id = excluded.device_id;
+  end if;
+
+  return token;
+end;
+$$;
+
+create function public.revoke_other_trusted_devices()
+returns void
+language sql
+security definer
+set search_path = ''
+as $$
+  delete from public.trusted_devices
+  where user_id = (select auth.uid())
+    and id is distinct from (
+      select device_id from public.trusted_sessions where session_id::text = auth.jwt() ->> 'session_id'
+    )
+$$;
+
 create or replace function public.check_trusted_device(token text)
 returns boolean
 language plpgsql
@@ -237,3 +289,6 @@ revoke execute on function public.is_second_factor_passed(uuid, text, text), pub
 
 grant execute on function public.passed_second_factor() to authenticated;
 grant execute on function public.is_second_factor_passed(uuid, text, text) to service_role;
+
+revoke execute on function public.revoke_other_trusted_devices() from public, anon, authenticated;
+grant execute on function public.revoke_other_trusted_devices() to authenticated;

@@ -4091,6 +4091,10 @@ export type Database = {
       retry_stuck_refund: { Args: { target: string }; Returns: undefined };
       retry_stuck_transfer: { Args: { payment: string }; Returns: undefined };
       revoke_confirm_links: { Args: { target: string }; Returns: undefined };
+      revoke_other_trusted_devices: {
+        Args: Record<PropertyKey, never>;
+        Returns: undefined;
+      };
       revoke_trusted_devices: {
         Args: Record<PropertyKey, never>;
         Returns: undefined;
