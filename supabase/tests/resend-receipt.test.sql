@@ -1,5 +1,5 @@
 begin;
-select plan(13);
+select plan(15);
 
 create function pg_temp.sign_up(user_id uuid, user_email text, business text)
 returns void
@@ -139,6 +139,17 @@ select is(
     from jsonb_to_record(public.get_receipt_details((select paid from b)))
       as receipt(refunded_pence int, given_back_pence int, given_back_via text)),
   '2000 500 cash', 'a refund after checkout is on the receipt'
+);
+insert into public.refunds (booking_id, amount_pence, reason, method)
+values ((select paid from b), 300, 'manual', 'bank'), ((select paid from b), 200, 'manual', 'cash');
+select is(
+  public.get_receipt_details((select paid from b)) -> 'given_back',
+  '[{"method": "bank", "amount_pence": 300}, {"method": "cash", "amount_pence": 700}]'::jsonb,
+  'money given back is listed once per method'
+);
+select ok(
+  (public.get_receipt_details((select paid from b)) ->> 'refunded_at') is not null,
+  'with when the card refund was made'
 );
 select is(
   (public.get_receipt_details((select paid from b)) ->> 'final_pence')::int, 10000,
