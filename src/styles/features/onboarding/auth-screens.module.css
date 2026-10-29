@@ -573,28 +573,6 @@
   color: var(--ob-fg);
 }
 
-.openLink {
-  width: 100%;
-  height: 54px;
-  border-radius: var(--radius-full);
-  border: 1px solid var(--ob-ghost);
-  background: transparent;
-  color: var(--ob-fg);
-  font: inherit;
-  font-size: 16px;
-  font-weight: 600;
-  cursor: pointer;
-  transition: background-color 0.16s;
-}
-
-.openLink:hover {
-  background: var(--ob-hover) !important;
-}
-
-.openLink:active {
-  transform: scale(0.98) !important;
-}
-
 .sentLinks {
   display: flex;
   flex-direction: column;
