@@ -41,13 +41,11 @@ export const sessionSlice = createSlice({
 
 export const { sessionChanged, signedOut } = sessionSlice.actions;
 
-/** logs out this device only; "global" logs out every device */
-export const logOut =
-  (scope: "local" | "global" = "local") =>
-  (dispatch: Dispatch) => {
-    dispatch(signedOut());
-    void supabase.auth.signOut({ scope });
-  };
+/** logs out this device only */
+export const logOut = () => (dispatch: Dispatch) => {
+  dispatch(signedOut());
+  void supabase.auth.signOut({ scope: "local" });
+};
 
 /** Ends every session; this device stays signed in if the server didn't confirm it. */
 export const logOutEverywhere = () => async (dispatch: Dispatch) => {
