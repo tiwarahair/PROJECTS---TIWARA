@@ -1,7 +1,7 @@
 import type { getSteps } from "../model";
 import type { StudioSync } from "../sync";
 import type { SavedSettings } from "../unsaved";
-import type { StudioPatch, StudioState } from "../types";
+import type { StudioClient, StudioPatch, StudioState } from "../types";
 
 export interface StudioContext {
   getState: () => StudioState;
@@ -25,7 +25,7 @@ export interface StudioContext {
     swipe?: { x: number; y: number } | null;
     slideFrame?: number;
     applyEdit?: () => void;
-    setChangeClient?: (id: string | null) => void;
+    setChangeClient?: (id: string | null, added?: StudioClient) => void;
     saveAddonEdit?: (draft: NonNullable<StudioState["addonEdit"]>) => void;
     removeAddonEdit?: (id: string) => void;
     statusItems?: {

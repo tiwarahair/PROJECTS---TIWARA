@@ -12,3 +12,10 @@ export const isPayoutHeld = async (account: string | null) => {
 
   return data === true;
 };
+
+/** The charge's decision, which the payment recorded for it follows. */
+export const holdPayout = async (intentId: string) => {
+  const { error } = await admin.rpc("hold_payout", { intent: intentId });
+
+  if (error) throw error;
+};

@@ -2,8 +2,8 @@
 import type { StudioBookingRow } from "../../../lib/studio-api/bookings";
 import type { CheckoutRecord, PastRecord } from "../core/types";
 import { getCheckoutLabel } from "./checkout-label";
-import { toPounds } from "./fee-records";
 import { getNumber, getText, isRecord } from "./row-values";
+import { toPounds } from "../../../utils/money";
 
 type PaymentRow = StudioBookingRow["payments"][number];
 

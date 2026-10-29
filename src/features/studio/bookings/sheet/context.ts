@@ -9,7 +9,7 @@ import { saveToBooking } from "../save";
 import { getMinutesOfDay } from "../../../../utils/dates";
 
 interface RemoteFinish {
-  save: (remoteId: string) => Promise<unknown>;
+  save: (remoteId: string, isUndone: () => boolean) => Promise<unknown>;
   undo?: (remoteId: string) => Promise<unknown>;
 }
 
@@ -91,13 +91,21 @@ export const getContext = (studio: StudioController) => {
     };
 
     const restore = { bookings: previousBookings, pastNew: previousPast };
+    let isUndone = false;
 
     setState(next);
-    saveToBooking(context, target, save, restore);
+
+    saveToBooking(
+      context,
+      target,
+      (remoteId) => save(remoteId, () => isUndone),
+      restore,
+    );
 
     if (!undo) return showToast(message);
 
     showToast(message, () => {
+      isUndone = true;
       setState(restore);
       closeSheet();
       saveToBooking(context, target, undo, next);

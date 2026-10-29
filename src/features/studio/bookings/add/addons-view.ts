@@ -7,6 +7,7 @@ import { formatDuration } from "../../../../utils/dates";
 import { getAddonMinutes, getAddonValue } from "./addon-values";
 import type { AddContext } from "./context";
 import type { AddonValue } from "./types";
+import { formatMoney } from "../../../../utils/money";
 
 const getRowAnchor = (event: MouseEvent) => {
   const target = event.currentTarget as Element;
@@ -117,7 +118,7 @@ export const getAddonsView = ({
     return {
       key: addon.id,
       name: addon.name + (value.quantity > 1 ? ` ×${value.quantity}` : ""),
-      meta: `+£${addonTotal}${timeNote}`,
+      meta: `+${formatMoney(addonTotal)}${timeNote}`,
       edit: openEdit,
       menu: (event: MouseEvent) => {
         const anchor = getRowAnchor(event);
@@ -126,7 +127,7 @@ export const getAddonsView = ({
 
         actions.openActionSheet({
           title: addon.name,
-          subtitle: `+£${addonTotal}${quantityNote}`,
+          subtitle: `+${formatMoney(addonTotal)}${quantityNote}`,
           anchor,
           items: [
             { label: "Edit", icon: ICONS.edit, run: () => openEdit() },

@@ -13,15 +13,13 @@ import type {
   StudioEarnings,
 } from "../../../lib/studio-api/earnings";
 import { getTotals } from "../../../components/earnings/logic";
-import { roundToPence } from "../../../utils/money";
+import { roundToPence, toPounds } from "../../../utils/money";
 import { isAnswerable, toDisputeRecord } from "../bookings/dispute-records";
 
 const PAYOUT_STATES: Record<string, PayoutState> = {
   paid: "Paid",
   failed: "Failed",
 };
-
-const toPounds = (pence: number) => pence / 100;
 
 const toTransaction = (row: LedgerRow): Transaction => {
   const amount = toPounds(row.amount_pence);
@@ -88,20 +86,26 @@ export const toLedger = ({
   );
 
   // below zero after a refund or dispute: Stripe takes it from new payments before paying out again
-  const owed = Math.max(0, -balance.available_pence);
+  const {
+    available_pence: availablePence = 0,
+    pending_pence: pendingPence = 0,
+    next_payout: nextPayout = null,
+  } = balance ?? {};
+
+  const owed = Math.max(0, -availablePence);
 
   return {
     transactions,
     payouts: payouts
       .filter(({ status }) => status !== "canceled")
       .map((row) => toPayout(row, transactions)),
-    available: toPounds(Math.max(0, balance.available_pence)),
-    pending: toPounds(balance.pending_pence),
+    available: toPounds(Math.max(0, availablePence)),
+    pending: toPounds(pendingPence),
+    isBalanceKnown: !!balance,
     onHold: getTotals(transactions.filter(({ status }) => status === "On hold"))
       .net,
     pausedAmount: toPounds(owed),
-    nextDate:
-      balance.next_payout && !owed ? new Date(balance.next_payout) : null,
+    nextDate: nextPayout && !owed ? new Date(nextPayout) : null,
     today: new Date(),
     scenario: owed ? "paused" : "default",
   };

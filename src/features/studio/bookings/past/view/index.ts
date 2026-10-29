@@ -7,8 +7,7 @@ import {
 } from "../../../../../lib/studio-api/money";
 import { recordRefund } from "../../../../../lib/studio-api/earnings";
 import { SaveError } from "../../../../../lib/studio-writes";
-import { formatMoney, roundToPence } from "../../../../../utils/money";
-import { toPence } from "../../../../booking/logic/payment";
+import { formatMoney, roundToPence, toPence } from "../../../../../utils/money";
 import { hasTwoFactor } from "../../../core/model";
 import { getActionsView } from "./actions";
 import { findPastRow, getPastCheckout } from "./checkout";

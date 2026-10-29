@@ -1,11 +1,11 @@
 import { Calendar } from "lucide-react";
-import { useLayoutEffect, useState } from "react";
+import { useState } from "react";
 import { Link } from "react-router";
 import { CardSetup } from "../../components/link-payment";
 import { PageMessage } from "../../components/page-message";
 import { ManageBookingSkeleton } from "../../components/skeleton/manage-booking";
 import { useIsSlow } from "../../hooks/use-is-slow";
-import { usePrivateLink } from "../../hooks/use-private-link";
+import { useLinkPage } from "../../hooks/use-link-page";
 import {
   useGetCardUpdateQuery,
   useSaveCardUpdateMutation,
@@ -13,17 +13,17 @@ import {
 } from "../../stores/api-slice";
 import { getAssetUrl } from "../../utils/asset-url";
 import { joinClassNames } from "../../utils/class-names";
-import { formatWhen } from "../pay-fee/logic";
 import "../../styles/features/manage-booking/global.module.css";
-import { CARD_UPDATE_ERRORS, getClosedMessage } from "./logic";
+import { CARD_UPDATE_ERRORS, getClosedMessage, UNSAVED_MESSAGE } from "./logic";
 import card from "../../styles/features/manage-booking/booking-card.module.css";
 import frame from "../../styles/features/manage-booking/index.module.css";
 import styles from "../../styles/features/pay-fee/index.module.css";
+import { formatLondonDateTime } from "../../utils/dates";
 
 /** the page for a new card when the saved one expires before the appointment, route "/card?token=" from an email. */
 export const UpdateCardPage = () => {
-  const token = usePrivateLink({ storageKey: "tw_card_token" });
-  const [isSaved, setSaved] = useState(false);
+  const token = useLinkPage("tw_card_token");
+  const [saveState, setSaveState] = useState<"saved" | "unsaved" | null>(null);
   const [startUpdate] = useStartCardUpdateMutation();
   const [saveUpdate] = useSaveCardUpdateMutation();
 
@@ -33,36 +33,33 @@ export const UpdateCardPage = () => {
 
   const isSlow = useIsSlow(isFetching && !update);
 
-  useLayoutEffect(() => {
-    document.documentElement.classList.add("manage-page");
-
-    return () => document.documentElement.classList.remove("manage-page");
-  }, []);
-
   // Stripe has the card by now: recording it is tried a few times, and opening the link again finishes it too
-  const record = async (triesLeft: number): Promise<void> => {
+  const record = async (triesLeft: number): Promise<boolean> => {
     const saved = await saveUpdate(token)
       .unwrap()
       .catch(() => null);
 
-    if (!saved && triesLeft > 1) await record(triesLeft - 1);
+    if (saved || triesLeft <= 1) return !!saved;
+
+    return record(triesLeft - 1);
   };
 
-  const finish = async () => {
-    await record(3);
-    setSaved(true);
-  };
+  const finish = async () =>
+    setSaveState((await record(3)) ? "saved" : "unsaved");
 
   const getContent = () => {
     if (isSlow) return <ManageBookingSkeleton />;
 
     if (isFetching && !update) return null;
 
-    if (!update || update.state !== "open" || isSaved)
+    if (saveState === "unsaved")
+      return <PageMessage {...UNSAVED_MESSAGE} isReload />;
+
+    if (!update || update.state !== "open" || saveState)
       return (
         <PageMessage
           {...getClosedMessage(
-            update && isSaved ? { ...update, state: "updated" } : update,
+            update && saveState ? { ...update, state: "updated" } : update,
           )}
         />
       );
@@ -80,7 +77,7 @@ export const UpdateCardPage = () => {
           <div className={card.facts}>
             <span className={card.fact}>
               <Calendar size={15} strokeWidth={1.5} />
-              {formatWhen(update.starts_at)}
+              {formatLondonDateTime(update.starts_at)}
             </span>
           </div>
           <dl className={styles.lines}>

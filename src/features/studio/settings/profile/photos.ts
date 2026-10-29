@@ -1,4 +1,3 @@
-// Studio photo uploads: cover, avatar and portfolio.
 import {
   addPortfolioPhoto,
   getPhotoPath,

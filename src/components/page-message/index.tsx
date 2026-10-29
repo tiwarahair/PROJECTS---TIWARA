@@ -1,7 +1,7 @@
 import { Link } from "react-router";
 import styles from "../../styles/components/page-message/index.module.css";
 
-interface PageMessageProps {
+export interface PageMessageProps {
   title: string;
   text: string;
   linkLabel: string;

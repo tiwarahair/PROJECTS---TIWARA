@@ -1,9 +1,10 @@
-import { render, screen } from "@testing-library/react";
+import { act, render, renderHook, screen } from "@testing-library/react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { CheckoutSheet } from "..";
 import type { CheckoutSheetProps } from "..";
 import type { CheckoutBooking } from "../data";
 import { getFinalized, getInitialCheckout, getMoney } from "../logic";
+import { useCheckout } from "../use-checkout";
 import { formatMoney } from "../../../utils/money";
 import type { UserEvent } from "@testing-library/user-event";
 import { setupUser } from "../../../test/setup-user";
@@ -225,6 +226,28 @@ describe("CheckoutSheet", () => {
     ).toBeInTheDocument();
 
     expect(onPay).toHaveBeenCalledTimes(2);
+  });
+
+  it("a double tap on Charge charges once", async () => {
+    const onPay = vi.fn(() => new Promise<never>(() => {}));
+
+    const { result } = renderHook(() =>
+      useCheckout({
+        booking: zainab,
+        stylist: { name: "Amara Beauty", address: "", vat: "" },
+        menu: [],
+        start: "review",
+        onPay,
+        onComplete: vi.fn(),
+      }),
+    );
+
+    act(() => {
+      result.current.complete();
+      result.current.complete();
+    });
+
+    expect(onPay).toHaveBeenCalledTimes(1);
   });
 
   it("finishing hands the result to the host", async () => {

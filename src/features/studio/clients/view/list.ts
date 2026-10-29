@@ -4,6 +4,7 @@ import type { StudioBooking, StudioClient } from "../../core/types";
 import type { ClientActions } from "./actions";
 import type { ClientsContext } from "./context";
 import type { ClientStats } from "./stats";
+import { formatMoney } from "../../../../utils/money";
 
 interface ListRow {
   client: StudioClient;
@@ -131,7 +132,7 @@ export const getListView = (
       noShows: stats.noShows,
       noShowLabel:
         stats.noShows + (stats.noShows === 1 ? " no-show" : " no-shows"),
-      spend: `£${client.spent || 0}`,
+      spend: `${formatMoney(client.spent || 0)}`,
       meta: getMeta({ client, stats }),
       delay: `${(Math.min(index, 10) * 0.04).toFixed(2)}s`,
       open: () => open(client),

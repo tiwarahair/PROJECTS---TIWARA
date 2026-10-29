@@ -3,13 +3,9 @@ import { getGoogleCalendarUrl } from "../../../supabase/functions/_shared/calend
 import { CalendarAppPills } from "../../components/calendar-app-pills";
 import { getCalendarFileUrl } from "../../lib/manage-booking-api";
 import type { ManagedBooking } from "../../lib/manage-booking-api";
-import {
-  formatWhen,
-  getOptionsLine,
-  isCancelledStatus,
-  toPounds,
-} from "./logic";
+import { formatWhen, getOptionsLine, isCancelledStatus } from "./logic";
 import styles from "../../styles/features/manage-booking/booking-card.module.css";
+import { formatPence } from "../../utils/money";
 
 interface BookingCardProps {
   booking: ManagedBooking;
@@ -38,7 +34,7 @@ export const BookingCard = ({ booking }: BookingCardProps) => {
           <div className={styles.cancelled}>Cancelled</div>
         ) : (
           <div className={styles.total}>
-            {toPounds(booking.price_pence + booking.fee_pence)}
+            {formatPence(booking.price_pence + booking.fee_pence)}
           </div>
         )}
       </div>

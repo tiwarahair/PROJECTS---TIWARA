@@ -4,6 +4,7 @@ import { formatAddon } from "../../core/model";
 import type { StudioAddon, StudioService } from "../../core/types";
 import { getAnchor } from "./helpers";
 import type { WizardActions } from "./wizard";
+import { formatMoney } from "../../../../utils/money";
 
 interface MenuEvent {
   currentTarget?: EventTarget | null;
@@ -73,7 +74,7 @@ export const createMenuActions = (
 
     openActionSheet({
       title: service.name,
-      subtitle: `${service.duration} · £${service.price}`,
+      subtitle: `${service.duration} · ${formatMoney(service.price)}`,
       anchor: getAnchor(event),
       items: [
         {

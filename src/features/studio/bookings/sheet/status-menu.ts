@@ -7,6 +7,7 @@ import { openCheckout } from "./checkout-view";
 import type { SheetContext } from "./context";
 import { CANCEL_STEP } from "./types";
 import type { StatusMenuKind } from "./types";
+import { formatMoney } from "../../../../utils/money";
 
 /** A status action's hint when it is not available yet: only on the day, else from a set time. */
 const getOnTheDaySubtitle = (
@@ -129,7 +130,7 @@ const STATUS_ITEMS: Record<
         icon: CreditCard,
         subtitle:
           booking.due > 0
-            ? `Collect £${booking.due}`
+            ? `Collect ${formatMoney(booking.due)}`
             : "Nothing left to collect",
         run: () => openCheckout(context),
       },

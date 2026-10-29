@@ -8,6 +8,7 @@ import type {
   StudioService,
   StudioState,
 } from "../types";
+import { formatMoney } from "../../../../utils/money";
 
 export const getSortedCategories = (state: StudioState): StudioCategory[] =>
   state.categories.slice().sort((first, second) => first.sort - second.sort);
@@ -116,5 +117,5 @@ export const formatAddon = (addon: AddonAmounts): string => {
   const price = parseNumber(addon.price);
   const timeLabel = minutes ? formatDuration(minutes) : "no extra time";
 
-  return `+£${price}, ${timeLabel}`;
+  return `+${formatMoney(price)}, ${timeLabel}`;
 };

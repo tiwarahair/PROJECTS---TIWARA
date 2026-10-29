@@ -1,5 +1,6 @@
 import { admin } from "./admin.ts";
 import { findEarlierRefund } from "./earlier-refund.ts";
+import { reverseLaterTransfer } from "./later-transfer.ts";
 import { getRefundable } from "./refundable.ts";
 import { getCancelRefundKey } from "./stripe-keys.ts";
 import { stripe } from "./stripe.ts";
@@ -97,6 +98,13 @@ export const refundCancellation = async (refund: BookingRefund) => {
   try {
     const { failures, feeRefund } = await getCancellation(refund.bookingId);
     const made = await refundBooking(refund, failures);
+
+    if (made.id && refund.paymentIntentId)
+      await reverseLaterTransfer(
+        refund.paymentIntentId,
+        { id: made.id, amount: made.amount },
+        Math.min(feeRefund, made.amount),
+      );
 
     if (made.id && refund.paymentIntentId && feeRefund > 0)
       await giveBookingFeeBack(refund.bookingId, refund.paymentIntentId, Math.min(feeRefund, made.amount));

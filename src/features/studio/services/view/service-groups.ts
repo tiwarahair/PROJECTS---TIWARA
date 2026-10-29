@@ -8,6 +8,7 @@ import {
 import type { StudioService } from "../../core/types";
 import { getCountLabel } from "./context";
 import type { ListGroup, ListRow, ServicesContext } from "./context";
+import { formatMoney } from "../../../../utils/money";
 
 interface RawGroup {
   category: string;
@@ -70,7 +71,7 @@ const getServiceRow = (
     isArchived: service.status === "archived",
     isDraft: service.status === "draft",
     duration: service.duration,
-    priceLabel: `£${service.price}`,
+    priceLabel: `${formatMoney(service.price)}`,
     extraLabel: extra ? `+${extra}m` : "",
     open: () => openWizard("edit", service),
     menu: (event: MouseEvent) => {

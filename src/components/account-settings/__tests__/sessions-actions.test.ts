@@ -49,4 +49,45 @@ describe("the sessions list", () => {
 
     expect(state.sessions.map(({ id }) => id)).toEqual(["a"]);
   });
+
+  it("doesn't show an error over a list a newer load got", async () => {
+    let state = getInitialSettingsState({
+      first: "",
+      last: "",
+      email: "",
+      phone: "",
+    });
+
+    const loads: {
+      resolve: (security: AccountSecurity) => void;
+      reject: () => void;
+    }[] = [];
+
+    const backend = {
+      getSecurity: () =>
+        new Promise<AccountSecurity>((resolve, reject) => {
+          loads.push({ resolve, reject });
+        }),
+    } as unknown as AccountSettingsBackend;
+
+    const actions = getSessionsActions({
+      backend,
+      setState: (patch) => {
+        state = { ...state, ...patch(state) };
+      },
+      toast: vi.fn(),
+      latestLoad: { current: 0 },
+    });
+
+    const older = actions.load();
+    const newer = actions.load();
+
+    loads[1]?.resolve({ login_alerts: true, sessions: rows });
+    await newer;
+    loads[0]?.reject();
+    await older;
+
+    expect(state.sessionsFailed).toBe(false);
+    expect(state.sessions).toHaveLength(2);
+  });
 });

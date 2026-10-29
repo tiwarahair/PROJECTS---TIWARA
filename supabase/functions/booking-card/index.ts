@@ -1,9 +1,9 @@
-// The client's update-card page: "view" shows the booking (finishing a card Stripe saved but we didn't record yet), å"start" sets up a new card with Stripe (Turnstile-checked), "save" makes it the booking's card for fees
+// The client's update-card page: "view" shows the booking (finishing a card Stripe saved but we didn't record yet), "start" sets up a new card with Stripe (Turnstile-checked), "save" makes it the booking's card for fees
 import { z } from "zod";
 import { admin } from "../_shared/admin.ts";
+import { saveCardUpdate } from "../_shared/card-update.ts";
 import { getClientIp } from "../_shared/client-ip.ts";
 import { corsHeaders, respond } from "../_shared/cors.ts";
-import { getCardLabel } from "../_shared/declines.ts";
 import { isWithinLimit } from "../_shared/rate-limit.ts";
 import { stripe } from "../_shared/stripe.ts";
 import { isHuman } from "../_shared/turnstile.ts";
@@ -44,29 +44,6 @@ const getUpdate = async (token: string) => {
   return data as CardUpdate | null;
 };
 
-// a card Stripe confirmed for this booking becomes its card for fees
-const saveCard = async ({ booking_id: bookingId, setup_intent_id: intentId }: CardUpdate) => {
-  if (!intentId) return false;
-
-  const intent = await stripe.setupIntents.retrieve(intentId);
-
-  if (intent.status !== "succeeded" || intent.metadata?.booking_id !== bookingId) return false;
-
-  const paymentMethod = String(intent.payment_method);
-  const { card } = await stripe.paymentMethods.retrieve(paymentMethod);
-
-  const { error } = await admin.rpc("save_card_update", {
-    target: bookingId,
-    intent: intentId,
-    payment_method: paymentMethod,
-    label: getCardLabel(card?.brand, card?.last4),
-  });
-
-  if (error) throw error;
-
-  return true;
-};
-
 // what the page shows: none of our ids, nor what the stylist noted about the client
 const toPage = (
   {
@@ -84,14 +61,15 @@ const toPage = (
 const startSetup = async (update: CardUpdate) => {
   const earlier = update.setup_intent_id ? await stripe.setupIntents.retrieve(update.setup_intent_id) : null;
 
-  if (earlier && OPEN_STATUSES.includes(earlier.status)) return earlier.client_secret;
-
-  const intent = await stripe.setupIntents.create({
-    customer: update.customer_id as string,
-    usage: "off_session",
-    payment_method_types: ["card"],
-    metadata: { booking_id: update.booking_id, kind: "card_update" },
-  });
+  const intent =
+    earlier && OPEN_STATUSES.includes(earlier.status)
+      ? earlier
+      : await stripe.setupIntents.create({
+          customer: update.customer_id as string,
+          usage: "off_session",
+          payment_method_types: ["card"],
+          metadata: { booking_id: update.booking_id, kind: "card_update" },
+        });
 
   const { error } = await admin.rpc("set_card_setup_intent", {
     target: update.booking_id,
@@ -123,7 +101,7 @@ Deno.serve(async (request) => {
 
     if (!update) return respond(404, { error: "link_not_valid" });
 
-    if (update.state === "open" && (await saveCard(update)))
+    if (update.state === "open" && (await saveCardUpdate(update.booking_id, update.setup_intent_id)))
       return action === "start" ? respond(409, { error: "card_updated" }) : respond(200, toPage(update, "updated"));
 
     if (action === "view") return respond(200, toPage(update));

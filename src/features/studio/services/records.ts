@@ -13,11 +13,7 @@ import type {
   StudioService,
   VariationRow,
 } from "../core/types";
-
-const toPence = (pounds: string | number) =>
-  Math.round(parseNumber(pounds) * 100);
-
-const toPounds = (pence: number | null) => (pence ?? 0) / 100;
+import { toPence, toPounds } from "../../../utils/money";
 
 const toWholeMinutes = (hours: string | number, minutes: string | number) =>
   Math.round(parseNumber(hours) * 60 + parseNumber(minutes));
@@ -97,7 +93,7 @@ export const toStudioService = (
     categoryId: row.category_id,
     name: row.name,
     description: row.description ?? "",
-    price: toPounds(row.price_pence),
+    price: toPounds(row.price_pence ?? 0),
     durationHours: Math.floor(minutes / 60),
     durationMinutes: minutes % 60,
     duration: minutes ? formatDuration(minutes) : "",
@@ -148,7 +144,7 @@ export const fromStudioService = (
       kind,
       label,
       offered: on,
-      price_delta_pence: toPence(priceDelta),
+      price_delta_pence: toPence(parseNumber(priceDelta)),
       minutes_delta: toWholeMinutes(hoursDelta, minutesDelta),
       sort: index,
     }));
@@ -160,7 +156,7 @@ export const fromStudioService = (
       group_name: name,
       label,
       offered: true,
-      price_delta_pence: toPence(priceDelta),
+      price_delta_pence: toPence(parseNumber(priceDelta)),
       minutes_delta: Math.round(parseNumber(minutesDelta)),
       sort: index,
     })),
@@ -174,7 +170,7 @@ export const fromStudioService = (
     category_id: service.categoryId,
     name: service.name,
     description: service.description,
-    price_pence: toPence(service.price),
+    price_pence: toPence(parseNumber(service.price)),
     duration_min:
       toWholeMinutes(service.durationHours, service.durationMinutes) || null,
     extra_time_min: service.extraCustom ? (service.extra ?? 0) : null,
@@ -197,7 +193,7 @@ export const fromStudioService = (
       price_override_pence:
         priceOverride == null || priceOverride === ""
           ? null
-          : toPence(priceOverride),
+          : toPence(parseNumber(priceOverride)),
       minutes_override:
         hoursOverride == null && minutesOverride == null
           ? null
@@ -230,7 +226,7 @@ export const fromStudioAddon = (
   service_group_id: addon.taxonomyId ?? null,
   category_id: addon.categoryId,
   name: addon.name.trim(),
-  price_pence: toPence(addon.price),
+  price_pence: toPence(parseNumber(addon.price)),
   minutes: toWholeMinutes(addon.hours, addon.min),
   status: addon.status ?? "active",
 });

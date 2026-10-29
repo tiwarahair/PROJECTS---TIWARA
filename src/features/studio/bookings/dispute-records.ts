@@ -1,9 +1,8 @@
 // A client's dispute on a booking's payment, from the database → what Past and Earnings show.
 import type { StudioBookingRow } from "../../../lib/studio-api/bookings";
 import { formatWeekdayDate } from "../../../utils/dates";
-import { formatMoney } from "../../../utils/money";
+import { formatMoney, toPounds } from "../../../utils/money";
 import type { DisputeRecord } from "../core/types";
-import { toPounds } from "./fee-records";
 
 // what the client told their bank, in Stripe's reasons
 const REASONS: Record<string, string> = {

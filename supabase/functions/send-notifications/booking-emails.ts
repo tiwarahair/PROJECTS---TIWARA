@@ -1,6 +1,7 @@
 import { getCalendarFile } from "../_shared/calendar-file.ts";
 import { renderNotice } from "../_shared/email-layout.ts";
 import type { RenderedEmail } from "../_shared/email-layout.ts";
+import { pounds } from "../_shared/money.ts";
 
 export interface BookingDetails {
   ref: string;
@@ -52,8 +53,6 @@ export const getLinkWording = (title: string, expiresAt: string, isReminder = fa
   title: isReminder ? `Reminder: ${title.charAt(0).toLowerCase()}${title.slice(1)}` : title,
   expiry: `${isReminder ? "This link replaces the one we sent before. It" : "The link"} works until ${formatWhen(expiresAt)}.`,
 });
-
-export const pounds = (pence: number) => `£${(pence / 100).toFixed(2)}`;
 
 const getPaidLine = ({
   terms,

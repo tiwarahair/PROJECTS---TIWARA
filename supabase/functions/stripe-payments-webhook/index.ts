@@ -2,7 +2,7 @@ import Stripe from "stripe";
 import { saveCardPayment } from "../_shared/card-payment.ts";
 import { settleRecovery } from "../_shared/owed.ts";
 import { stripe } from "../_shared/stripe.ts";
-import { isHandled, markHandled } from "../_shared/stripe-events.ts";
+import { claimEvent, finishEvent } from "../_shared/stripe-events.ts";
 import { onDispute, onPaymentFailed, onPaymentSucceeded, onRefundCreated } from "./handlers.ts";
 
 const cryptoProvider = Stripe.createSubtleCryptoProvider();
@@ -22,7 +22,7 @@ Deno.serve(async (request) => {
     return new Response("Bad signature", { status: 400 });
   }
 
-  if (await isHandled(event.id)) return Response.json({ received: true, duplicate: true });
+  if (!(await claimEvent(event.id, event.type))) return Response.json({ received: true, duplicate: true });
 
   try {
     // a payment refunded straight away (slot taken, no longer needed) gives our fee back, so recovers nothing
@@ -42,10 +42,12 @@ Deno.serve(async (request) => {
   } catch (error) {
     console.error(event.type, "failed", error instanceof Error ? error.message : error);
 
+    await finishEvent(event.id, false);
+
     return new Response("failed", { status: 500 });
   }
 
-  await markHandled(event.id, event.type);
+  await finishEvent(event.id, true);
 
   return Response.json({ received: true });
 });

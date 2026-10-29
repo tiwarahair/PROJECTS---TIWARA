@@ -341,8 +341,8 @@ export const decorateBooking = (
         (booking.dayOffset < 0 ||
           (booking.dayOffset === 0 &&
             nowMinutes - (startMinutes + durationToMinutes(duration)) >= 60))),
-    paidLabel: `£${paidAmount}`,
-    dueLabel: `£${due}`,
+    paidLabel: `${formatMoney(paidAmount)}`,
+    dueLabel: `${formatMoney(due)}`,
     dueColor: due > 0 ? "var(--text-primary)" : "var(--text-secondary)",
     addressLabel: address || "No address yet",
     addressColor: address ? "var(--text-primary)" : "var(--text-secondary)",
@@ -350,7 +350,7 @@ export const decorateBooking = (
     hasStylistNote: !!booking.stylistNote,
     noStylistNote: !booking.stylistNote,
     stylistNote: booking.stylistNote || "",
-    priceLabel: `£${booking.price}`,
+    priceLabel: `${formatMoney(booking.price)}`,
     dayShort: day.short,
     dayLabel: day.label,
     deposit: formatMoney(depositAmount, { pence: "always" }),

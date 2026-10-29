@@ -2,7 +2,7 @@ import type {
   CancellationTerms,
   ManagedBooking,
 } from "../../lib/manage-booking-api";
-import { formatMoney } from "../../utils/money";
+import { formatPence } from "../../utils/money";
 import { getWindowText } from "../../utils/pricing";
 
 const londonParts = new Intl.DateTimeFormat("en-GB", {
@@ -30,9 +30,6 @@ export const formatWhen = (iso: string) => {
 
   return `${weekday} ${day} ${month}, ${hour}:${minute}`;
 };
-
-export const toPounds = (pence: number) =>
-  formatMoney(pence / 100, { pence: "always" });
 
 export const getOptionsLine = ({ snapshot }: ManagedBooking) =>
   [
@@ -91,11 +88,11 @@ const getKeptLine = (
   kept: number,
 ) => {
   if (terms.mode !== "deposit")
-    return `${toPounds(kept)} is kept under ${stylist}'s policy.`;
+    return `${formatPence(kept)} is kept under ${stylist}'s policy.`;
 
   return kept === terms.deposit_pence
-    ? `Your ${toPounds(kept)} deposit is kept under ${stylist}'s policy.`
-    : `${toPounds(kept)} of your deposit is kept under ${stylist}'s policy.`;
+    ? `Your ${formatPence(kept)} deposit is kept under ${stylist}'s policy.`
+    : `${formatPence(kept)} of your deposit is kept under ${stylist}'s policy.`;
 };
 
 /** with a late fee, the refund waits for the fee to settle a day later. */
@@ -111,12 +108,12 @@ const getRefundLine = (
   fee: number,
 ) => {
   if (feeRefund)
-    return `${toPounds(refund)} is refunded to your card, including the ${toPounds(feeRefund)} booking fee.`;
+    return `${formatPence(refund)} is refunded to your card, including the ${formatPence(feeRefund)} booking fee.`;
 
   const isWholeDeposit =
     terms.mode === "deposit" && refund === terms.deposit_pence;
 
-  return `${isWholeDeposit ? `Your ${toPounds(refund)} deposit` : toPounds(refund)} ${getRefundTiming(fee)}`;
+  return `${isWholeDeposit ? `Your ${formatPence(refund)} deposit` : formatPence(refund)} ${getRefundTiming(fee)}`;
 };
 
 export const getCancelLines = (
@@ -138,7 +135,7 @@ export const getCancelLines = (
     ...(kept ? [getKeptLine(booking, kept)] : []),
     ...(charge
       ? [
-          `A ${toPounds(charge)} late cancellation fee is due under ${stylist}'s policy.`,
+          `A ${formatPence(charge)} late cancellation fee is due under ${stylist}'s policy.`,
         ]
       : []),
     ...(refund || kept || charge ? [] : ["Nothing more to pay."]),

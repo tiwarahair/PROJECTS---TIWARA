@@ -1,7 +1,8 @@
 import type { BookingConfirmation } from "../../lib/booking-confirm-api";
 import { toPolicy } from "../../lib/public-stylist";
 import { policyLines } from "../../utils/pricing";
-import { formatPence } from "../pay-fee/logic";
+import { formatPence } from "../../utils/money";
+import type { PageMessageProps } from "../../components/page-message";
 
 /** the stylist's policy as the client agrees to it, in the same words as online checkout. */
 export const getPolicyLines = ({
@@ -20,18 +21,11 @@ export const getPayLabel = ({ terms, due_pence: due }: BookingConfirmation) =>
     ? `Save card and pay ${formatPence(due)}`
     : `Confirm and pay ${formatPence(due)}`;
 
-interface ConfirmMessage {
-  title: string;
-  text: string;
-  linkLabel: string;
-  linkHref: string;
-}
-
 const HOME = { linkLabel: "Go to Tiwára’s House", linkHref: "/" };
 
 const getStateMessage = (
   confirmation: BookingConfirmation | undefined,
-): ConfirmMessage => {
+): PageMessageProps => {
   const stylist = confirmation?.stylist_name ?? "your stylist";
 
   if (confirmation?.state === "confirmed")
@@ -73,7 +67,7 @@ const getStateMessage = (
 export const getClosedMessage = (
   confirmation: BookingConfirmation | undefined,
   isPaid: boolean,
-): ConfirmMessage => {
+): PageMessageProps => {
   if (!isPaid || confirmation?.state === "confirmed")
     return getStateMessage(confirmation);
 

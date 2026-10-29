@@ -5,6 +5,7 @@ import type {
   PlatformOptions,
 } from "../types/catalogue";
 import { supabase } from "./supabase";
+import { toPounds } from "../utils/money";
 
 interface CatalogueRows {
   groups: Tables<"service_groups">[];
@@ -20,8 +21,6 @@ export const EMPTY_CATALOGUE: Catalogue = {
   customisations: {},
   addons: {},
 };
-
-const toPounds = (pence: number) => pence / 100;
 
 export const toCatalogue = ({
   groups,

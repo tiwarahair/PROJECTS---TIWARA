@@ -17,7 +17,6 @@ import {
   getLatestFee,
   getRefundNote,
   getRefunded,
-  toPounds,
 } from "./fee-records";
 import { dateLabel } from "../core/format";
 import type {
@@ -39,6 +38,7 @@ import {
 import { getDisputeFields } from "./dispute-records";
 import { getProtectionFields, getServiceFields } from "./protection-records";
 import { getNumber, getText, isRecord } from "./row-values";
+import { toPounds } from "../../../utils/money";
 
 const UPCOMING_STATUSES: Record<string, string> = {
   awaiting_confirmation: "awaiting",
@@ -84,7 +84,7 @@ const isRefundStuck = ({ cancellation }: StudioBookingRow) =>
   !getText(cancellation, "refund_id") &&
   getNumber(cancellation, "refund_failures") >= MAX_REFUND_FAILURES;
 
-/** a real client's key in Studio: their email, else their phone (the same person across their bookings) */
+/** a real client's key in Studio: the stylist's client record (matched by email or phone), else the booking on its own */
 const getClientKey = ({ id, stylist_client_id: clientId }: StudioBookingRow) =>
   clientId ?? `booking:${id}`;
 

@@ -101,8 +101,6 @@ export const getCheckoutRequest = (
   };
 };
 
-export const toPence = (pounds: number) => Math.round(pounds * 100);
-
 export const WALLET_BUTTON_HEIGHT = 48;
 
 export const getPaymentAppearance = (): Appearance => ({

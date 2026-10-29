@@ -12,8 +12,7 @@ import type { CheckoutRecord } from "../../core/types";
 import { getCheckoutLabel } from "../checkout-label";
 import { mergeBookingRows } from "../live-records";
 import type { SheetContext } from "./context";
-
-const toPence = (pounds: number) => Math.round(pounds * 100);
+import { formatMoney, toPence } from "../../../../utils/money";
 
 export const STILL_SAVING = "Still saving this booking. Try again in a moment.";
 
@@ -131,7 +130,7 @@ export const getCheckoutView = (context: SheetContext) => {
     doneTitle: `Done, ${booking.firstName} is all set`,
     doneBody:
       state.checkoutMethod === "link"
-        ? `A payment link for £${booking.due} is on its way to ${booking.firstName}. The booking is in Past.`
+        ? `A payment link for ${formatMoney(booking.due)} is on its way to ${booking.firstName}. The booking is in Past.`
         : "Marked completed and moved to Past.",
     rebook,
     onPay: (payment: CheckoutPayment) =>
@@ -149,11 +148,11 @@ export const getCheckoutView = (context: SheetContext) => {
         },
         "Checkout complete",
         {
-          // already saved by the checkout: Past gets the server's record of it
-          save: async (bookingId: string) => {
+          // already saved by the checkout: Past gets the server's record of it, unless it was undone meanwhile
+          save: async (bookingId: string, isUndone: () => boolean) => {
             const fresh = await fetchStudioBooking(bookingId);
 
-            if (fresh)
+            if (fresh && !isUndone())
               context.setState((current) => mergeBookingRows(current, [fresh]));
           },
           ...(isUndoable(result, !!storedBooking?.completed)

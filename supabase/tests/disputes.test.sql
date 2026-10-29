@@ -1,5 +1,5 @@
 begin;
-select plan(8);
+select plan(12);
 
 insert into auth.users (id, instance_id, aud, role, email, raw_user_meta_data, raw_app_meta_data)
 values ('d1111111-1111-1111-1111-111111111111', '00000000-0000-0000-0000-000000000000', 'authenticated',
@@ -85,6 +85,21 @@ select throws_ok('select public.close_business()', 'has_debt',
   'nor while it owes dispute fees');
 
 reset role;
+
+-- the first dispute is won and Stripe gives its fee back: the £20 already taken goes back to the stylist
+select is(public.save_dispute_fees((pg_temp.dispute(1) ->> 'id')::uuid, 0), 2000,
+  'a fee Stripe gave back counts as taken from the stylist beyond what''s owed');
+
+select public.settle_won_dispute((pg_temp.dispute(1) ->> 'id')::uuid, 2000, 2000, 'tr_disputes_return');
+
+select is(
+  (select jsonb_build_array(stylist_debts.amount_pence, stylist_debts.recovered_pence) from public.stylist_debts
+    join public.disputes on disputes.id = stylist_debts.dispute_id where disputes.stripe_dispute_id = 'du_disputes_1'),
+  '[0, 0]'::jsonb, 'once it''s sent back, nothing is owed or held for that dispute');
+
+select is(public.save_dispute_fees((pg_temp.dispute(1) ->> 'id')::uuid, 0), 0, 'and nothing is sent back twice');
+
+select is(public.get_owed_pence('acct_disputes'), 1500, 'the other dispute''s fee is still owed');
 
 select * from finish();
 rollback;

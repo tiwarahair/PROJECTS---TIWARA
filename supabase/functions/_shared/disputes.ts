@@ -96,34 +96,40 @@ const recover = async ({ id, amount, charge: chargeId }: Stripe.Dispute, saved: 
   }
 };
 
+// their share, and any of Stripe's fee already taken from them that Stripe gave back to us; a transfer an earlier try
+// sent is kept, with what it sent, even if Stripe's fee figure has changed since
 const giveBack = async (
   { id, charge }: Stripe.Dispute,
   { id: target, reversed_pence: reversed, stylist_account: account }: RecordedDispute,
+  feeReturned: number,
 ) => {
-  if (!reversed || !account)
-    return rpc("settle_dispute", {
-      target,
-      won: true,
-      returned: 0,
-      transfer: null,
-    });
+  if (!account) return rpc("settle_won_dispute", { target, returned: 0, fee_returned: 0, transfer: null });
 
-  const transfer = await stripe.transfers.create(
-    {
-      amount: reversed,
-      currency: "gbp",
-      destination: account,
-      // paid from the reinstated charge, so it doesn't wait for our balance
-      source_transaction: String(charge),
-      metadata: { dispute_id: id },
-    },
-    { idempotencyKey: `dispute:${id}:return` },
-  );
+  // found by its metadata: a transfer paid from the charge keeps the charge's own transfer group
+  const { data: sent } = await stripe.transfers.list({ destination: account, limit: 100 });
+  const earlier = sent.find(({ metadata }) => metadata?.dispute_id === id);
+  const returned = earlier ? earlier.amount : reversed + feeReturned;
 
-  await rpc("settle_dispute", {
+  if (!returned) return rpc("settle_won_dispute", { target, returned: 0, fee_returned: 0, transfer: null });
+
+  const transfer =
+    earlier ??
+    (await stripe.transfers.create(
+      {
+        amount: returned,
+        currency: "gbp",
+        destination: account,
+        // paid from the reinstated charge, so it doesn't wait for our balance
+        source_transaction: String(charge),
+        metadata: { dispute_id: id },
+      },
+      { idempotencyKey: `dispute:${id}:return` },
+    ));
+
+  await rpc("settle_won_dispute", {
     target,
-    won: true,
-    returned: reversed,
+    returned,
+    fee_returned: Math.max(0, returned - reversed),
     transfer: transfer.id,
   });
 };
@@ -139,9 +145,9 @@ export const handleDispute = async (dispute: Stripe.Dispute) => {
   if (OPEN.includes(status) && !saved.reversed_pence && !saved.is_held && outcome !== "won")
     await recover(dispute, saved);
 
-  await rpc("save_dispute_fees", { target: saved.id, fees: await getFees(id) });
+  const feeOverpaid = Number(await rpc("save_dispute_fees", { target: saved.id, fees: await getFees(id) }));
 
-  if (status === "won" && outcome !== "won") await giveBack(dispute, saved);
+  if (status === "won" && outcome !== "won") await giveBack(dispute, saved, feeOverpaid);
 
   if (status === "lost" && outcome !== "lost" && outcome !== "accepted")
     await rpc("settle_dispute", {

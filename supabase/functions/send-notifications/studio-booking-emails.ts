@@ -2,7 +2,8 @@
 import { getCalendarFile } from "../_shared/calendar-file.ts";
 import { renderNotice } from "../_shared/email-layout.ts";
 import type { RenderedEmail } from "../_shared/email-layout.ts";
-import { formatWhen, getCancelLine, pounds } from "./booking-emails.ts";
+import { formatWhen, getCancelLine } from "./booking-emails.ts";
+import { pounds } from "../_shared/money.ts";
 import type { BookingDetails, Terms } from "./booking-emails.ts";
 
 export interface ConfirmLink extends BookingDetails {

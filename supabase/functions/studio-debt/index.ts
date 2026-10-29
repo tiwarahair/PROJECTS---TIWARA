@@ -46,12 +46,12 @@ Deno.serve(async (request) => {
           price_data: {
             currency: "gbp",
             unit_amount: owed,
-            product_data: { name: "Dispute fees owed" },
+            product_data: { name: "Fees owed to Tiwara’s House" },
           },
         },
       ],
       payment_intent_data: {
-        description: `Dispute fees owed by ${business}`,
+        description: `Fees owed to Tiwara’s House by ${business}`,
         metadata: {
           kind: "debt",
           stylist_id: id,

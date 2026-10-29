@@ -6,6 +6,7 @@ import { getFilterCount } from "./filter-view";
 import { getPastItem } from "./past-item";
 import { DAY_NAMES, EMPTY_COPY } from "./types";
 import type { EmptyKind } from "./types";
+import { formatMoney } from "../../../utils/money";
 
 const getTotal = (items: { price: number }[]) => {
   let total = 0;
@@ -29,7 +30,7 @@ const getUpcomingGroups = (items: DecoratedBooking[]) => {
       isLast: index === offsets.length - 1,
       label: DAY_NAMES[dayOffset] ?? dayInfo(dayOffset).label,
       isToday: dayOffset === 0,
-      meta: `${getCountLabel(dayItems.length, "booking")} · £${getTotal(dayItems)}`,
+      meta: `${getCountLabel(dayItems.length, "booking")} · ${formatMoney(getTotal(dayItems))}`,
       items: dayItems,
     };
   });
@@ -103,8 +104,8 @@ export const getListView = (context: BookingsContext) => {
     upcomingGroups: getUpcomingGroups(upcomingItems),
     listSummary: getListSummary(context),
     listTotal: isPast
-      ? `£${earned} earned`
-      : `£${getTotal(upcomingItems)} booked`,
+      ? `${formatMoney(earned)} earned`
+      : `${formatMoney(getTotal(upcomingItems))} booked`,
     isListEmpty: isPast ? pastItems.length === 0 : upcomingItems.length === 0,
     listEmptyTitle: title,
     listEmptyBody: body,

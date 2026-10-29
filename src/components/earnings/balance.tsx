@@ -24,7 +24,10 @@ export const Balance = ({
 }: BalanceProps) => {
   const { scenario } = ledger;
   const pausedText = formatMoney(ledger.pausedAmount, { pence: "always" });
-  const availableText = formatMoney(ledger.available, { pence: "always" });
+
+  const availableText = ledger.isBalanceKnown
+    ? formatMoney(ledger.available, { pence: "always" })
+    : "—";
 
   const nextPayoutDay = ledger.nextDate
     ? formatWeekdayDate(ledger.nextDate)
@@ -61,6 +64,11 @@ export const Balance = ({
       )}
       <div className={styles.availableLabel}>Available</div>
       <div className={styles.availableAmount}>{availableText}</div>
+      {!ledger.isBalanceKnown && (
+        <div className={styles.nextLine}>
+          Your balance couldn’t load from Stripe. Refresh to try again.
+        </div>
+      )}
       {!!ledger.nextDate && scenario !== "setup" && (
         <div className={styles.nextLine}>
           <span className={styles.nextDot}></span>

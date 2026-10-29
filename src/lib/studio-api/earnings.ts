@@ -40,22 +40,16 @@ export type EarningsDispute = NonNullable<
 export interface StudioEarnings {
   lines: LedgerRow[];
   payouts: PayoutRow[];
-  balance: StripeBalance;
+  balance: StripeBalance | null;
   disputes: EarningsDispute[];
 }
 
-const NO_BALANCE: StripeBalance = {
-  available_pence: 0,
-  pending_pence: 0,
-  next_payout: null,
-};
-
-// the ledger still shows if Stripe can't be reached; only the balance card goes blank
+// the ledger still shows if Stripe can't be reached; only the balance card says it couldn't load
 const fetchBalance = async () => {
   const { data, error } =
     await supabase.functions.invoke<StripeBalance>("studio-balance");
 
-  return error || !data ? NO_BALANCE : data;
+  return error || !data ? null : data;
 };
 
 export const fetchStudioEarnings = async (

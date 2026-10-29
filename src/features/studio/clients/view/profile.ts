@@ -10,6 +10,7 @@ import { saveStudioClient } from "../save";
 import type { ClientActions } from "./actions";
 import { getFirstName, readImage } from "./context";
 import type { ClientsContext } from "./context";
+import { formatMoney } from "../../../../utils/money";
 
 interface ContactAction {
   key: string;
@@ -112,7 +113,7 @@ const getProfile = (
       key: `u${booking.id}`,
       service: booking.service,
       when: `${dateLabel(booking.dayOffset || 0)} · ${booking.time}`,
-      price: `£${booking.price}`,
+      price: `${formatMoney(booking.price)}`,
       isStruck: false,
       status: tone.label,
       statusBackground: tone.background,
@@ -135,7 +136,7 @@ const getProfile = (
       key: `p${index}-${row.pastId || ""}`,
       service: row.service,
       when: `${row.when} · ${row.time}`,
-      price: `£${row.price}`,
+      price: `${formatMoney(row.price)}`,
       isStruck: row.status !== "Completed",
       status: row.status,
       statusBackground: tone.background,
@@ -190,10 +191,10 @@ const getProfile = (
     hasNoShows: !!stats.noShows,
     hasLateCancel: !!stats.lateCancel,
     money: [
-      ["Total spend", `£${client.spent || 0}`],
-      ["Deposits paid", `£${stats.deposits}`],
-      ["Fees charged", `£${stats.fees}`],
-      ["Refunds", `£${stats.refunds}`],
+      ["Total spend", `${formatMoney(client.spent || 0)}`],
+      ["Deposits paid", `${formatMoney(stats.deposits)}`],
+      ["Fees charged", `${formatMoney(stats.fees)}`],
+      ["Refunds", `${formatMoney(stats.refunds)}`],
     ].map(([label, value]) => ({
       key: label ?? "",
       label: label ?? "",

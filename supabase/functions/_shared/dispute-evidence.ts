@@ -1,5 +1,6 @@
 import { admin } from "./admin.ts";
 import { stripe } from "./stripe.ts";
+import { pounds } from "./money.ts";
 
 export interface DisputeFacts {
   stripe_dispute_id: string;
@@ -29,8 +30,6 @@ export interface DisputeFacts {
   final_pence: number;
   business_name: string;
 }
-
-const pounds = (pence: number) => `£${(pence / 100).toFixed(2)}`;
 
 const londonTime = new Intl.DateTimeFormat("en-GB", {
   timeZone: "Europe/London",

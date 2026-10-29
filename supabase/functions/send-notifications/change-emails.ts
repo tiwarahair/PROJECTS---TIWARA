@@ -1,7 +1,8 @@
 import { getCalendarFile } from "../_shared/calendar-file.ts";
 import { renderNotice } from "../_shared/email-layout.ts";
 import type { RenderedEmail } from "../_shared/email-layout.ts";
-import { formatWhen, pounds } from "./booking-emails.ts";
+import { formatWhen } from "./booking-emails.ts";
+import { pounds } from "../_shared/money.ts";
 import type { BookingDetails } from "./booking-emails.ts";
 
 interface Cancellation {

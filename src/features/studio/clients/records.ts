@@ -1,27 +1,12 @@
 import type { StudioClientRow } from "../../../lib/studio-api/clients";
 import type { StudioClient } from "../core/types";
-
-const DELETE_AFTER_DAYS = 120;
+import { toPounds } from "../../../utils/money";
 
 const formatDate = (date: string | Date, options: Intl.DateTimeFormatOptions) =>
   new Date(date).toLocaleDateString("en-GB", {
     timeZone: "Europe/London",
     ...options,
   });
-
-const toPounds = (pence: number) => Math.round(pence) / 100;
-
-const getDeletableFrom = (lastPaymentAt: string | null) => {
-  if (!lastPaymentAt) return undefined;
-
-  const from = new Date(lastPaymentAt);
-
-  from.setDate(from.getDate() + DELETE_AFTER_DAYS);
-
-  return from > new Date()
-    ? formatDate(from, { day: "numeric", month: "long", year: "numeric" })
-    : undefined;
-};
 
 const getAllergyNote = ({
   allergies_by: addedBy,
@@ -59,5 +44,4 @@ export const toStudioClient = (row: StudioClientRow): StudioClient => ({
   },
   noShows: row.no_shows,
   lateCancels: row.late_cancels,
-  deletableFrom: getDeletableFrom(row.last_payment_at),
 });

@@ -2,8 +2,7 @@
 import { getClientUnpaidFee } from "../../../../lib/studio-api/booking-writes";
 import { getClient } from "../../core/model";
 import type { StudioState } from "../../core/types";
-import { formatMoney } from "../../../../utils/money";
-import { toPounds } from "../fee-records";
+import { formatMoney, toPounds } from "../../../../utils/money";
 import type { AddContext } from "./context";
 
 const FEE_NAMES: Record<string, string> = {

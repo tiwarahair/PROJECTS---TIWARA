@@ -6,8 +6,7 @@ import { toStartsAt } from "../records";
 import { saveToBooking } from "../save";
 import type { EditContext } from "./context";
 import { getClashName } from "./time";
-
-const toPence = (pounds: number) => Math.round(pounds * 100);
+import { formatMoney, toPence } from "../../../../utils/money";
 
 const getAppliedToast = ({ booking }: EditContext, isClientFacing: boolean) => {
   if (!booking.client || !isClientFacing) return "Service updated";
@@ -156,7 +155,7 @@ export const getApplyView = (context: EditContext) => {
   memo.applyEdit = apply;
 
   return {
-    totalLabel: `${formatDuration(duration + extra + addonsMinutes)}  £${totalPrice}`,
+    totalLabel: `${formatDuration(duration + extra + addonsMinutes)}  ${formatMoney(totalPrice)}`,
     apply,
   };
 };
