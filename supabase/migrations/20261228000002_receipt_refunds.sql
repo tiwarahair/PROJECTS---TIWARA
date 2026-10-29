@@ -1,5 +1,3 @@
--- Receipts also show what the stylist refunded after checkout, so a resent receipt is up to date.
-
 create or replace function public.get_receipt_details(target uuid)
 returns jsonb
 language sql

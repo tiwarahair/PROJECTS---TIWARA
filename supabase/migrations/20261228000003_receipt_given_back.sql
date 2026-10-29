@@ -1,5 +1,3 @@
--- Receipts list money given back outside the app once per method, and say when the last card refund was made.
-
 create or replace function public.get_receipt_details(target uuid)
 returns jsonb
 language sql

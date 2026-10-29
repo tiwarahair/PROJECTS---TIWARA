@@ -1,5 +1,3 @@
--- Studio's "Resend receipt": the checkout receipt again, by email to the address the stylist chooses.
-
 create function public.resend_checkout_receipt(target uuid, email text)
 returns void
 language plpgsql
