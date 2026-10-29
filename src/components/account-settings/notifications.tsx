@@ -82,7 +82,8 @@ export const SettingsNotifications = ({
         heading="Always on"
         intro={
           <p className={shared.introText}>
-            Sent by email and SMS. These can’t be turned off.
+            {/* TO DO: say "email and SMS" again once these have SMS templates */}
+            Sent by email. These can’t be turned off.
           </p>
         }
       >
