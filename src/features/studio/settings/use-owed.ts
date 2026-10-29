@@ -13,10 +13,13 @@ export const useOwed = ({
   const { stylistId } = account;
   const [isPaying, setIsPaying] = useState(false);
 
-  const { data } = useGetCloseChecksQuery(stylistId || skipToken, {
-    pollingInterval: isOwedSettling ? 3000 : 0,
-    refetchOnMountOrArgChange: true,
-  });
+  const { data, isError, refetch } = useGetCloseChecksQuery(
+    stylistId || skipToken,
+    {
+      pollingInterval: isOwedSettling ? 3000 : 0,
+      refetchOnMountOrArgChange: true,
+    },
+  );
 
   const owedPence = data?.owedPence ?? 0;
 
@@ -46,7 +49,8 @@ export const useOwed = ({
   return {
     owed: owedPence / 100,
     hasOpenDispute: !!data?.hasOpenDispute,
-    isCloseChecking: !data,
+    isCloseChecking: !data && !isError,
+    onRetryCloseChecks: !data && isError ? () => void refetch() : undefined,
     onPayOwed: stylistId ? () => void pay() : undefined,
     isPayingOwed: isPaying || !!isOwedSettling,
   };

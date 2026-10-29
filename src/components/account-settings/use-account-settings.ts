@@ -47,6 +47,8 @@ export interface AccountSettingsProps {
   hasOpenDispute?: boolean;
   /** The money and dispute checks haven't loaded yet. */
   isCloseChecking?: boolean;
+  /** The checks failed to load: Close business stays off with a Try again. */
+  onRetryCloseChecks?: () => void;
   onPayOwed?: () => void;
   isPayingOwed?: boolean;
   pauseReason?: string;
