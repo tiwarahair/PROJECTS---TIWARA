@@ -1,6 +1,7 @@
 import { Ellipsis, Info, Lock, Plus } from "lucide-react";
 import { Controller, useFormState } from "react-hook-form";
 import { AddressFinder } from "../../components/address-finder";
+import { PageMessage } from "../../components/page-message";
 import { joinClassNames } from "../../utils/class-names";
 import { getAddressLine } from "./logic";
 import type { AccountController } from "./use-account";
@@ -22,10 +23,19 @@ const getCardMark = (brand: string) => {
 };
 
 export const PaymentsSection = ({
-  account: { data, actions },
+  account: { data, actions, state },
   getCardInUse,
 }: PaymentsSectionProps) => (
   <section data-screen-label="Account: Payment methods">
+    {data.isCardsError && (
+      <PageMessage
+        title="Saved cards didn’t load"
+        text="Check your connection, then try again."
+        linkLabel="Try again"
+        linkHref="/account?section=payments"
+        isReload
+      />
+    )}
     {data.cards.length > 0 && (
       <div className={ui.list}>
         {data.cards.map((card) => {
@@ -62,6 +72,7 @@ export const PaymentsSection = ({
                   <button
                     className={styles.cardButton}
                     onClick={() => void actions.makeDefaultCard(card)}
+                    disabled={state.isSaving}
                   >
                     Make default
                   </button>
@@ -70,6 +81,7 @@ export const PaymentsSection = ({
                   <button
                     className={styles.cardButton}
                     onClick={() => actions.openDialog({ kind: "card", id })}
+                    disabled={state.isSaving}
                     aria-label={`Remove ${brand} ending ${last4}`}
                   >
                     Remove
@@ -93,7 +105,7 @@ export const PaymentsSection = ({
         })}
       </div>
     )}
-    {!data.cards.length && (
+    {!data.cards.length && !data.isCardsError && (
       <p className={ui.emptyLine} data-screen-label="Payment methods empty">
         No saved cards. You can save a card when you book.
       </p>
@@ -115,7 +127,7 @@ interface AddressFormFieldsProps {
 
 /** Label, AddressFinder, default checkbox and Save / Cancel (shared by add and edit). */
 const AddressFormFields = ({
-  account: { actions, forms },
+  account: { actions, forms, state },
   showDefault,
 }: AddressFormFieldsProps) => {
   const { register, control } = forms.address;
@@ -161,7 +173,11 @@ const AddressFormFields = ({
         </label>
       )}
       <div className={ui.actions}>
-        <button className={ui.save} onClick={() => void actions.saveAddress()}>
+        <button
+          className={ui.save}
+          onClick={() => void actions.saveAddress()}
+          disabled={state.isSaving}
+        >
           Save address
         </button>
         <button
@@ -289,6 +305,7 @@ export const AddressesSection = ({
                                   setState({ addressMenu: null });
                                   void actions.makeDefaultAddress(address);
                                 }}
+                                disabled={state.isSaving}
                               >
                                 Make default
                               </button>
@@ -300,6 +317,7 @@ export const AddressesSection = ({
                                 setState({ addressMenu: null });
                                 actions.openDialog({ kind: "address", id });
                               }}
+                              disabled={state.isSaving}
                             >
                               Remove
                             </button>

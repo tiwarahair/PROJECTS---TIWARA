@@ -48,3 +48,12 @@ export const logOut =
     dispatch(signedOut());
     void supabase.auth.signOut({ scope });
   };
+
+/** Ends every session; this device stays signed in if the server didn't confirm it. */
+export const logOutEverywhere = () => async (dispatch: Dispatch) => {
+  const { error } = await supabase.auth.signOut({ scope: "global" });
+
+  if (error) throw error;
+
+  dispatch(signedOut());
+};

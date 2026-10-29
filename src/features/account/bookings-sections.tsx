@@ -1,5 +1,6 @@
 import { Calendar, CreditCard, MapPin } from "lucide-react";
 import { CountTabs } from "../../components/count-tabs";
+import { PageMessage } from "../../components/page-message";
 import { ResponsiveImage } from "../../components/responsive-image";
 import type { CSSProperties, MouseEvent } from "react";
 import { Link } from "react-router";
@@ -51,7 +52,18 @@ const CardHead = ({ card }: { card: BookingCardView }) => (
   </>
 );
 
+const BookingsLoadError = ({ href }: { href: string }) => (
+  <PageMessage
+    title="Bookings didn’t load"
+    text="Check your connection, then try again."
+    linkLabel="Try again"
+    linkHref={href}
+    isReload
+  />
+);
+
 interface OverviewSectionProps {
+  isFailed: boolean;
   upcoming: BookingCardView[];
   quick: QuickAction[];
   onCalendar: (card: BookingCardView) => void;
@@ -59,6 +71,7 @@ interface OverviewSectionProps {
 }
 
 export const OverviewSection = ({
+  isFailed,
   upcoming,
   quick,
   onCalendar,
@@ -66,44 +79,46 @@ export const OverviewSection = ({
 }: OverviewSectionProps) => (
   <section data-screen-label="Account: Overview">
     <h2 className={ui.heading}>Next appointment</h2>
-    {upcoming.slice(0, 1).map((card) => (
-      <article
-        key={card.booking.id}
-        className={styles.nextCard}
-        aria-label={card.aria}
-      >
-        <div className={styles.cardTop}>
-          <ResponsiveImage
-            className={styles.cover}
-            src={card.booking.cover}
-            sizes="88px"
-            alt=""
-          />
-          <div className={styles.cardBody}>
-            <CardHead card={card} />
-            <div className={styles.facts}>
-              <span className={styles.fact}>
-                <CalendarIcon />
-                <span className={styles.factStrong}>{card.when}</span>
-              </span>
-              <span className={styles.fact}>
-                <PinIcon />
-                <span>{card.booking.where}</span>
-              </span>
+    {isFailed && <BookingsLoadError href="/account" />}
+    {!isFailed &&
+      upcoming.slice(0, 1).map((card) => (
+        <article
+          key={card.booking.id}
+          className={styles.nextCard}
+          aria-label={card.aria}
+        >
+          <div className={styles.cardTop}>
+            <ResponsiveImage
+              className={styles.cover}
+              src={card.booking.cover}
+              sizes="88px"
+              alt=""
+            />
+            <div className={styles.cardBody}>
+              <CardHead card={card} />
+              <div className={styles.facts}>
+                <span className={styles.fact}>
+                  <CalendarIcon />
+                  <span className={styles.factStrong}>{card.when}</span>
+                </span>
+                <span className={styles.fact}>
+                  <PinIcon />
+                  <span>{card.booking.where}</span>
+                </span>
+              </div>
             </div>
           </div>
-        </div>
-        <div className={styles.nextActions}>
-          <Link className={styles.nextManage} to={card.manage}>
-            Manage booking
-          </Link>
-          <button className={ui.quietButton} onClick={() => onCalendar(card)}>
-            Add to calendar
-          </button>
-        </div>
-      </article>
-    ))}
-    {!upcoming.length && (
+          <div className={styles.nextActions}>
+            <Link className={styles.nextManage} to={card.manage}>
+              Manage booking
+            </Link>
+            <button className={ui.quietButton} onClick={() => onCalendar(card)}>
+              Add to calendar
+            </button>
+          </div>
+        </article>
+      ))}
+    {!isFailed && !upcoming.length && (
       <div
         className={styles.overviewEmpty}
         data-screen-label="Overview: no upcoming"
@@ -142,6 +157,7 @@ export const OverviewSection = ({
 );
 
 interface BookingsSectionProps {
+  isFailed: boolean;
   upcoming: BookingCardView[];
   past: BookingCardView[];
   activeTab: string;
@@ -153,6 +169,7 @@ interface BookingsSectionProps {
 }
 
 export const BookingsSection = ({
+  isFailed,
   upcoming,
   past,
   activeTab,
@@ -166,6 +183,13 @@ export const BookingsSection = ({
     { id: "up" as const, label: "Upcoming", count: upcoming.length },
     { id: "past" as const, label: "Past and cancelled", count: past.length },
   ].filter(({ id, count }) => id === "up" || count > 0);
+
+  if (isFailed)
+    return (
+      <section data-screen-label="Account: Bookings">
+        <BookingsLoadError href="/account?section=bookings" />
+      </section>
+    );
 
   return (
     <section data-screen-label="Account: Bookings">

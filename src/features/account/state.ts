@@ -55,6 +55,8 @@ export interface AccountState {
   appleConnected: boolean;
   addressForm: AddressForm | null;
   addressMenu?: string | null;
+  /** A card or address change is in flight. */
+  isSaving?: boolean;
   marketing: boolean;
   cookies: { analytics: boolean; marketing: boolean };
   cookiesDraft: { analytics: boolean; marketing: boolean };
