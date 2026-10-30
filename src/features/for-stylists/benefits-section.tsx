@@ -12,6 +12,7 @@ export const BenefitsSection = () => {
   const [selectedGroup, setSelectedGroup] = useState(
     benefitGroups[0]?.label ?? "",
   );
+
   const panelRef = useRef<HTMLDivElement>(null);
   const hasPickedRef = useRef(false);
 
