@@ -15,14 +15,9 @@ const NAV_LINKS_FROM = 901;
 interface MarketingNavProps {
   morph: NavMorphState;
   loggedIn: boolean;
-  hasRustBookNow?: boolean;
 }
 
-export const MarketingNav = ({
-  morph,
-  loggedIn,
-  hasRustBookNow = false,
-}: MarketingNavProps) => {
+export const MarketingNav = ({ morph, loggedIn }: MarketingNavProps) => {
   const identity = useIdentity();
 
   const { navSolid, navDark, navHidden, navBackground } = morph;
@@ -114,11 +109,7 @@ export const MarketingNav = ({
             )}
             <Link
               to="/search"
-              className={joinClassNames(
-                styles.desktopOnly,
-                styles.bookNow,
-                hasRustBookNow && styles.rust,
-              )}
+              className={joinClassNames(styles.desktopOnly, styles.bookNow)}
             >
               Book now
             </Link>

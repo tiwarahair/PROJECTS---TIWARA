@@ -9,16 +9,10 @@ import styles from "../../styles/components/story-page/index.module.css";
 interface StoryPageProps {
   label: string;
   rootRef: RefObject<HTMLDivElement | null>;
-  hasRustBookNow?: boolean;
   children: ReactNode;
 }
 
-export const StoryPage = ({
-  label,
-  rootRef,
-  hasRustBookNow = false,
-  children,
-}: StoryPageProps) => {
+export const StoryPage = ({ label, rootRef, children }: StoryPageProps) => {
   const loggedIn = useAppSelector(({ session }) => session.loggedIn);
   const morph = useNavMorph();
 
@@ -30,11 +24,7 @@ export const StoryPage = ({
 
   return (
     <div ref={rootRef} data-screen-label={label} className={styles.page}>
-      <MarketingNav
-        morph={morph}
-        loggedIn={loggedIn}
-        hasRustBookNow={hasRustBookNow}
-      />
+      <MarketingNav morph={morph} loggedIn={loggedIn} />
       {children}
       <MarketingFooter />
     </div>

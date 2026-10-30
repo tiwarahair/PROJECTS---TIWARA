@@ -13,7 +13,7 @@ export const ForStylistsPage = () => {
   preloadForStylistsHero();
 
   return (
-    <StoryPage label="For stylists" rootRef={rootRef} hasRustBookNow>
+    <StoryPage label="For stylists" rootRef={rootRef}>
       <HeroSection />
       <BenefitsSection />
       <StatementSection />

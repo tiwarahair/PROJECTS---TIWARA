@@ -190,11 +190,6 @@
   transition: background 0.2s ease;
 }
 
-.rust {
-  background: var(--accent-500);
-  border-color: var(--accent-500);
-}
-
 .bookNow:hover {
   background: var(--accent-900) !important;
   border-color: var(--accent-900) !important;
