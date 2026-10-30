@@ -6,8 +6,6 @@ import { RouteError } from "./features/page-states/route-error";
 
 // reserved for pages not built yet, so they don't open as a stylist profile
 const UNBUILT_PAGES = [
-  "about",
-  "for-stylists",
   "policies",
   "terms-of-service",
   "privacy-policy",
@@ -20,6 +18,20 @@ const appRoutes: RouteObject[] = [
     lazy: () =>
       import("./features/home").then(({ HomePage }) => ({
         Component: HomePage,
+      })),
+  },
+  {
+    path: "/about",
+    lazy: () =>
+      import("./features/about").then(({ AboutPage }) => ({
+        Component: AboutPage,
+      })),
+  },
+  {
+    path: "/for-stylists",
+    lazy: () =>
+      import("./features/for-stylists").then(({ ForStylistsPage }) => ({
+        Component: ForStylistsPage,
       })),
   },
   {

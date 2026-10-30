@@ -1,7 +1,10 @@
 import { useLayoutEffect, useRef } from "react";
 import type { CSSProperties } from "react";
 import { FavHost } from "../../components/fav-host";
+import { MarketingFooter } from "../../components/marketing-footer";
+import { MarketingNav } from "../../components/marketing-nav";
 import { WelcomeToast } from "../../components/welcome-toast";
+import { useNavMorph } from "../../hooks/use-nav-morph";
 import { useAppSelector } from "../../stores/hooks";
 import { BookSlotTiles } from "./book-slot-tiles";
 import { FaqSection } from "./faq-section";
@@ -9,8 +12,6 @@ import { ForStylistsSection } from "./for-stylists-section";
 import { HeroSection } from "./hero-section";
 import { preloadHeroImage } from "./hero-image";
 import layout from "../../styles/features/home/layout.module.css";
-import { HomeFooter } from "./footer";
-import { HomeNav } from "./nav";
 import page from "../../styles/features/home/index.module.css";
 import { LooksSection } from "./looks-section";
 import { MeetSection } from "./meet-section";
@@ -20,7 +21,6 @@ import { ServicesSection } from "./services-section";
 import { StylesMarquee } from "./styles-marquee";
 import { StylistsSection } from "./stylists-section";
 import { useHomeMotion } from "./use-home-motion";
-import { useNavMorph } from "./use-nav-morph";
 import { WhySection } from "./why-section";
 
 export interface HomePageProps {
@@ -88,7 +88,7 @@ export const HomePage = ({
         // --morph-bg: cream of the section in the middle of the viewport
         style={{ "--morph-bg": morph.morphBackground } as CSSProperties}
       >
-        <HomeNav morph={morph} loggedIn={loggedIn} />
+        <MarketingNav morph={morph} loggedIn={loggedIn} />
         <HeroSection />
         <StylesMarquee />
       </div>
@@ -105,7 +105,7 @@ export const HomePage = ({
       <MeetSection />
       <ForStylistsSection variant={stylistSection} />
       <FaqSection />
-      <HomeFooter />
+      <MarketingFooter />
       <WelcomeToast />
       <FavHost />
     </div>

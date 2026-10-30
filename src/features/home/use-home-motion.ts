@@ -2,6 +2,7 @@ import { useEffect } from "react";
 import type { RefObject } from "react";
 import { gsap } from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
+import { getImageFrame } from "../../utils/image-frame";
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -62,14 +63,6 @@ export const useHomeMotion = (
 
       // images drift against the scroll inside their own frame — the frame clips, so nothing gaps
       images.forEach((image) => {
-        const wrapper = image.parentElement;
-
-        // a <picture> has no box of its own (display: contents): the frame is the element around it
-        const frame =
-          wrapper instanceof HTMLPictureElement
-            ? wrapper.parentElement
-            : wrapper;
-
         const tween = gsap.fromTo(
           image,
           { yPercent: -4 },
@@ -77,7 +70,7 @@ export const useHomeMotion = (
             yPercent: 4,
             ease: "none",
             scrollTrigger: {
-              trigger: frame,
+              trigger: getImageFrame(image),
               start: "top bottom",
               end: "bottom top",
               scrub: 0.6,

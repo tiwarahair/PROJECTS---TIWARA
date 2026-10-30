@@ -1,0 +1,73 @@
+.statement {
+  padding: 0 0 clamp(96px, 12vw, 160px);
+}
+
+.frame {
+  height: 110svh;
+  min-height: 640px;
+  clip-path: inset(0 0 0 0 round 0px);
+}
+
+.image {
+  object-position: center 60%;
+}
+
+.scrim {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    160deg,
+    rgba(36, 24, 17, 0.78),
+    rgba(36, 24, 17, 0.55) 50%,
+    rgba(20, 16, 8, 0.72)
+  );
+}
+
+.copy {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  padding: clamp(24px, 6vw, 96px);
+}
+
+.quote {
+  margin: 0;
+  font-family: "Schibsted Grotesk", sans-serif;
+  font-weight: 400;
+  letter-spacing: -0.05em;
+  line-height: 1.02;
+  font-size: clamp(36px, 6.4vw, 104px);
+  color: #faf6ee;
+  max-width: 100%;
+}
+
+.findStylist {
+  padding: clamp(80px, 10vw, 144px) clamp(24px, 5vw, 56px);
+  border-top: 1px solid rgba(26, 23, 20, 0.12);
+}
+
+.findInner {
+  max-width: 1240px;
+  margin: 0 auto;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 40px;
+}
+
+.findCopy {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  max-width: 760px;
+}
+
+.lede {
+  margin: 0;
+  font-size: 16.5px;
+  line-height: 1.6;
+  color: var(--text-secondary);
+  max-width: 44ch;
+}

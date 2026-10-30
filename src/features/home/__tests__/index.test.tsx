@@ -189,9 +189,10 @@ describe("HomePage", () => {
   it("stylistSection split shows the text-and-photo variant", () => {
     renderHome({ stylistSection: "split" });
 
-    expect(
-      screen.getByRole("button", { name: "About us" }),
-    ).toBeInTheDocument();
+    expect(screen.getByRole("link", { name: "About us" })).toHaveAttribute(
+      "href",
+      "/about",
+    );
 
     expect(
       screen.getByRole("img", { name: "Stylist at work in the chair" }),

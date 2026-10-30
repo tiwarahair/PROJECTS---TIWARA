@@ -1,24 +1,28 @@
 import type { CSSProperties } from "react";
-import { Link } from "react-router";
+import { Link, NavLink } from "react-router";
 import { useIdentity } from "../../hooks/use-identity";
-import { AccountAvatar, SiteMenu } from "../../components/site-menu";
+import type { NavMorphState } from "../../hooks/use-nav-morph";
 import { getAssetUrl } from "../../utils/asset-url";
 import { joinClassNames } from "../../utils/class-names";
-import { hexToRgba } from "./colours";
-import page from "../../styles/features/home/index.module.css";
-import styles from "../../styles/features/home/nav.module.css";
-import type { NavMorphState } from "./use-nav-morph";
+import { hexToRgba } from "../../utils/colours";
+import { HomeSectionLink } from "../home-section-link";
+import { AccountAvatar, SiteMenu } from "../site-menu";
+import styles from "../../styles/components/marketing-nav/index.module.css";
 
-/** The centre links show from this width (index.module.css .mqDesk hides them up to 900px). */
+/** The centre links show from this width */
 const NAV_LINKS_FROM = 901;
 
-interface HomeNavProps {
+interface MarketingNavProps {
   morph: NavMorphState;
   loggedIn: boolean;
+  hasRustBookNow?: boolean;
 }
 
-/** Fixed marketing nav: centre links, Log in or the account menu, Book now, and the site menu button on mobile. */
-export const HomeNav = ({ morph, loggedIn }: HomeNavProps) => {
+export const MarketingNav = ({
+  morph,
+  loggedIn,
+  hasRustBookNow = false,
+}: MarketingNavProps) => {
   const identity = useIdentity();
 
   const { navSolid, navDark, navHidden, navBackground } = morph;
@@ -53,31 +57,27 @@ export const HomeNav = ({ morph, loggedIn }: HomeNavProps) => {
             </span>
           </Link>
           <div
-            className={joinClassNames(
-              page.mqDesk,
-              page.nolinks,
-              styles.centreLinks,
-            )}
+            className={joinClassNames(styles.desktopOnly, styles.centreLinks)}
           >
-            <Link to="/search" className={styles.navLink}>
+            <NavLink to="/search" className={styles.navLink}>
               Find a stylist
-            </Link>
-            <a href="#stylegrid" className={styles.navLink}>
+            </NavLink>
+            <HomeSectionLink hash="#stylegrid" className={styles.navLink}>
               Services
-            </a>
-            <a href="#stylists" className={styles.navLink}>
+            </HomeSectionLink>
+            <NavLink to="/about" className={styles.navLink}>
               About
-            </a>
-            <a href="#for-stylists" className={styles.navLink}>
+            </NavLink>
+            <NavLink to="/for-stylists" className={styles.navLink}>
               For stylists
-            </a>
+            </NavLink>
           </div>
           <div className={styles.right}>
             {!loggedIn && (
               <Link
                 to="/login"
                 className={joinClassNames(
-                  page.mqDesk,
+                  styles.desktopOnly,
                   styles.navLink,
                   styles.logIn,
                 )}
@@ -100,7 +100,7 @@ export const HomeNav = ({ morph, loggedIn }: HomeNavProps) => {
             ) : (
               <SiteMenu
                 isSignedIn={false}
-                className={joinClassNames(page.mqMob, styles.burger)}
+                className={joinClassNames(styles.mobileOnly, styles.burger)}
                 linksShownFrom={NAV_LINKS_FROM}
               >
                 <span
@@ -114,7 +114,11 @@ export const HomeNav = ({ morph, loggedIn }: HomeNavProps) => {
             )}
             <Link
               to="/search"
-              className={joinClassNames(page.mqDesk, styles.bookNow)}
+              className={joinClassNames(
+                styles.desktopOnly,
+                styles.bookNow,
+                hasRustBookNow && styles.rust,
+              )}
             >
               Book now
             </Link>

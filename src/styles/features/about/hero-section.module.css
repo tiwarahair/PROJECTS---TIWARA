@@ -1,0 +1,86 @@
+.hero {
+  padding: 0;
+}
+
+.frame {
+  height: 100svh;
+  min-height: 600px;
+}
+
+.frame::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: url("../../../../assets/generated/site/about/living-room-placeholder.webp")
+    center 42% / cover no-repeat;
+  filter: blur(24px);
+  transform: scale(1.15);
+}
+
+.image {
+  position: absolute;
+  left: 0;
+  top: -6%;
+  width: 100%;
+  height: 118%;
+  object-fit: cover;
+  object-position: center 42%;
+  will-change: transform;
+}
+
+.scrim {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    180deg,
+    rgba(36, 24, 17, 0.55) 0%,
+    rgba(36, 24, 17, 0.12) 32%,
+    rgba(20, 16, 8, 0.78) 100%
+  );
+}
+
+.copy {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  padding: clamp(24px, 5vw, 64px);
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 32px;
+  align-items: end;
+  color: #faf6ee;
+}
+
+.eyebrow {
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--brand-yellow);
+  margin-bottom: 22px;
+}
+
+.title {
+  margin: 0;
+  font-family: "Schibsted Grotesk", sans-serif;
+  font-weight: 400;
+  letter-spacing: -0.06em;
+  line-height: 0.98;
+  font-size: clamp(46px, 7.6vw, 124px);
+}
+
+.lede {
+  margin: 0;
+  max-width: 30ch;
+  font-size: 15px;
+  line-height: 1.6;
+  color: rgba(250, 246, 238, 0.86);
+  text-wrap: pretty;
+}
+
+@media (max-width: 860px) {
+  .copy {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}

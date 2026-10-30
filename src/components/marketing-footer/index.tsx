@@ -1,16 +1,15 @@
 import { Link } from "react-router";
-import { SOCIAL_ICONS, SocialIcon } from "../../components/icons/brand-icons";
+import { SOCIAL_ICONS, SocialIcon } from "../icons/brand-icons";
 import { getAssetUrl } from "../../utils/asset-url";
-import { joinClassNames } from "../../utils/class-names";
-import page from "../../styles/features/home/index.module.css";
-import styles from "../../styles/features/home/footer.module.css";
+import { HomeSectionLink } from "../home-section-link";
+import styles from "../../styles/components/marketing-footer/index.module.css";
 
 const LINK_GROUPS = [
   {
     title: "Clients",
     links: [
       { label: "Find a stylist", to: "/search" },
-      { label: "FAQs", href: "#faq" },
+      { label: "FAQs", to: "#faq" },
     ],
   },
   {
@@ -18,15 +17,15 @@ const LINK_GROUPS = [
     links: [
       { label: "List your business", to: "/join" },
       { label: "Tiwára's Studio", to: "/login?flow=pro" },
-      { label: "Why join", href: "#for-stylists" },
+      { label: "Why join", to: "/for-stylists" },
     ],
   },
   {
     title: "Company",
     links: [
-      { label: "About", href: "#about" },
-      { label: "Contact", href: "/help" },
-      { label: "Policies", href: "#faq" },
+      { label: "About", to: "/about" },
+      { label: "Contact", to: "/help" },
+      { label: "Policies", to: "#faq" },
     ],
   },
 ];
@@ -52,11 +51,10 @@ const SOCIAL_LINKS = [
   },
 ];
 
-/** Ink footer. */
-export const HomeFooter = () => (
+export const MarketingFooter = () => (
   <footer data-screen-label="Footer" className={styles.footer}>
     <div className={styles.inner}>
-      <div className={joinClassNames(page.ftcols, styles.columns)}>
+      <div className={styles.columns}>
         <div className={styles.brand}>
           <a href="#" aria-label="Back to top" className={styles.logoLink}>
             <img
@@ -70,19 +68,23 @@ export const HomeFooter = () => (
             — discovery, booking and payment all in one place.
           </p>
         </div>
-        <div className={joinClassNames(page.nolinks, styles.linkGroups)}>
+        <div className={styles.linkGroups}>
           {LINK_GROUPS.map(({ title, links }) => (
             <div key={title} className={styles.linkGroup}>
               <div className={styles.groupTitle}>{title}</div>
-              {links.map(({ label, to, href }) =>
-                to ? (
+              {links.map(({ label, to }) =>
+                to.startsWith("#") ? (
+                  <HomeSectionLink
+                    key={label}
+                    hash={to}
+                    className={styles.link}
+                  >
+                    {label}
+                  </HomeSectionLink>
+                ) : (
                   <Link key={label} to={to} className={styles.link}>
                     {label}
                   </Link>
-                ) : (
-                  <a key={label} href={href} className={styles.link}>
-                    {label}
-                  </a>
                 ),
               )}
             </div>
@@ -108,13 +110,13 @@ export const HomeFooter = () => (
       </div>
       <div className={styles.bottom}>
         <span>© {new Date().getFullYear()} Tiwára&apos;s House.</span>
-        <div className={joinClassNames(page.nolinks, styles.legal)}>
-          <a href="#faq" className={styles.legalLink}>
+        <div className={styles.legal}>
+          <HomeSectionLink hash="#faq" className={styles.legalLink}>
             Privacy policy
-          </a>
-          <a href="#faq" className={styles.legalLink}>
+          </HomeSectionLink>
+          <HomeSectionLink hash="#faq" className={styles.legalLink}>
             Terms of service
-          </a>
+          </HomeSectionLink>
         </div>
       </div>
     </div>

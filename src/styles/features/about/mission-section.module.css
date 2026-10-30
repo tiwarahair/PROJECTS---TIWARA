@@ -1,0 +1,68 @@
+.mission {
+  padding: clamp(96px, 13vw, 176px) clamp(24px, 5vw, 56px)
+    clamp(72px, 9vw, 128px);
+}
+
+.inner {
+  max-width: 1240px;
+  margin: 0 auto;
+}
+
+.words {
+  margin: 0;
+  font-family: "Schibsted Grotesk", sans-serif;
+  font-weight: 500;
+  letter-spacing: -0.035em;
+  line-height: 1.08;
+  font-size: clamp(30px, 4.6vw, 68px);
+  max-width: 20ch;
+  text-wrap: pretty;
+}
+
+.ink {
+  color: var(--neutral-900);
+}
+
+.muted {
+  color: #8a8072;
+}
+
+.grid {
+  gap: 24px;
+  margin-top: clamp(56px, 7vw, 96px);
+  border-top: 1px solid rgba(26, 23, 20, 0.14);
+  padding-top: 28px;
+}
+
+.label {
+  grid-column: 1 / span 4;
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--text-secondary);
+  line-height: 1.7;
+}
+
+.copy {
+  grid-column: 6 / span 7;
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+
+.lead {
+  margin: 0;
+  font-size: 16.5px;
+  line-height: 1.7;
+  color: var(--text-primary);
+  text-wrap: pretty;
+}
+
+.body {
+  margin: 0;
+  font-size: 15px;
+  line-height: 1.7;
+  color: var(--text-secondary);
+  text-wrap: pretty;
+}

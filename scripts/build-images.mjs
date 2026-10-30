@@ -46,11 +46,15 @@ const FORMATS = [
   },
 ];
 
-// drops metadata but keeps the colour profile: wide-colour (Display P3) photos shift colour without it
+//  (Display P3) photos shift colour without this
 const COMMON_OPTIONS = ["-auto-orient", "+profile", "!icc,*"];
 
-// tiny copies shown blurred while the full photo loads; Vite inlines them into the CSS
-const PLACEHOLDERS = ["site/hero.jpg"];
+// tiny copies shown blurred while the full photo loads;
+const PLACEHOLDERS = [
+  "site/hero.jpg",
+  "site/about/living-room.jpeg",
+  "site/for-stylists/hero.jpeg",
+];
 
 // changing these options regenerates every copy
 const SETTINGS_FILE = join(OUTPUT, "settings.json");

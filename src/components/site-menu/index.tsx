@@ -130,6 +130,15 @@ export const SiteMenu = ({
     onClick: goToSection(id),
   });
 
+  const getPageItem = (to: string, label: string): NavMenuItem => ({
+    kind: "link",
+    key: to,
+    label,
+    to,
+    isCurrent: pathname === to,
+    onClick: closeOnClick,
+  });
+
   const currentSection =
     pathname === "/account" ? getCurrentSection(search) : "";
 
@@ -153,8 +162,8 @@ export const SiteMenu = ({
     ...(isWide
       ? []
       : [
-          getSectionItem("stylists", "About"),
-          getSectionItem("for-stylists", "For stylists"),
+          getPageItem("/about", "About"),
+          getPageItem("/for-stylists", "For stylists"),
         ]),
   ];
 
