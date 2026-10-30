@@ -88,9 +88,9 @@ export const ForStylistsSection = ({ variant }: ForStylistsSectionProps) => (
               >
                 List your business
               </Link>
-              <a role="button" className={styles.splitAbout}>
+              <Link to="/about" className={styles.splitAbout}>
                 About us
-              </a>
+              </Link>
             </div>
           </div>
           <div data-rv="" className={styles.splitPhotoFrame}>

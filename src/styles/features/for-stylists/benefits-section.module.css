@@ -1,0 +1,130 @@
+.benefits {
+  padding: clamp(96px, 12vw, 160px) clamp(24px, 5vw, 56px)
+    clamp(96px, 12vw, 160px);
+}
+
+.inner {
+  max-width: 1240px;
+  margin: 0 auto;
+}
+
+.intro {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  max-width: 900px;
+  margin-bottom: clamp(40px, 5vw, 64px);
+}
+
+.lede {
+  margin: 0;
+  font-size: 16.5px;
+  line-height: 1.65;
+  color: var(--text-secondary);
+  max-width: 52ch;
+  text-wrap: pretty;
+}
+
+.tabs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px clamp(20px, 3vw, 40px);
+  margin-bottom: clamp(32px, 4vw, 56px);
+  border-bottom: 1px solid rgba(26, 23, 20, 0.14);
+  padding-bottom: 20px;
+}
+
+.tab {
+  all: unset;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: flex-start;
+  gap: 6px;
+  font-family: "Schibsted Grotesk", sans-serif;
+  font-weight: 500;
+  letter-spacing: -0.04em;
+  line-height: 1.05;
+  font-size: clamp(30px, 4.4vw, 64px);
+  color: #b3a999;
+  transition: color 260ms cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+
+.tab:hover,
+.tab[aria-selected="true"] {
+  color: var(--neutral-900) !important;
+}
+
+.count {
+  font-family: "Hanken Grotesk", sans-serif;
+  font-size: 13px;
+  font-weight: 600;
+  letter-spacing: 0;
+  margin-top: 0.5em;
+  color: #b3a999;
+}
+
+.tab[aria-selected="true"] .count {
+  color: var(--accent-700);
+}
+
+.grid {
+  gap: clamp(24px, 4vw, 64px);
+  align-items: start;
+}
+
+.photos {
+  grid-column: 1 / span 6;
+  aspect-ratio: 4 / 5;
+  border-radius: 24px;
+}
+
+.photo {
+  object-position: center 30%;
+  opacity: 0;
+  transform: scale(1.06);
+  transition:
+    opacity 600ms cubic-bezier(0.2, 0.8, 0.2, 1),
+    transform 1200ms cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+
+.middle {
+  object-position: center 50%;
+}
+
+.shown {
+  opacity: 1;
+  transform: scale(1);
+}
+
+.panel {
+  grid-column: 7 / span 6;
+  display: flex;
+  flex-direction: column;
+  align-self: center;
+}
+
+.benefit {
+  padding: 28px 0;
+  border-top: 1px solid rgba(26, 23, 20, 0.14);
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.benefitTitle {
+  margin: 0;
+  font-family: "Schibsted Grotesk", sans-serif;
+  font-weight: 600;
+  letter-spacing: -0.03em;
+  line-height: 1.1;
+  font-size: clamp(26px, 2.8vw, 38px);
+}
+
+.benefitText {
+  margin: 0;
+  font-size: 15.5px;
+  line-height: 1.7;
+  color: var(--text-secondary);
+  max-width: 46ch;
+  text-wrap: pretty;
+}

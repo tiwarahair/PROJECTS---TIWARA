@@ -1,4 +1,4 @@
-/* Home nav, including the runtime nav and logo states. */
+/* Marketing nav, including the runtime nav and logo states. */
 .nav {
   position: fixed;
   top: 0;
@@ -99,9 +99,23 @@
   transform: translateX(-50%);
 }
 
+.centreLinks a {
+  color: inherit;
+}
+
 .navLink {
   font-weight: 400;
   opacity: 0.7;
+  transition: opacity 200ms ease;
+}
+
+.navLink:hover {
+  opacity: 1 !important;
+}
+
+.navLink[aria-current="page"] {
+  opacity: 1;
+  font-weight: 500;
 }
 
 .right {
@@ -202,4 +216,16 @@
 
 .burgerLineFirst {
   font-weight: 400;
+}
+
+@media (max-width: 900px) {
+  .desktopOnly {
+    display: none !important;
+  }
+}
+
+@media (min-width: 901px) {
+  .mobileOnly {
+    display: none !important;
+  }
 }

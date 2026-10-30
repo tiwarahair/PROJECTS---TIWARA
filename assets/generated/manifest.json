@@ -1,4 +1,39 @@
 {
+  "site/about/grace.jpeg": {
+    "width": 860,
+    "height": 1094,
+    "widths": [
+      640,
+      860
+    ]
+  },
+  "site/about/hair-products.jpeg": {
+    "width": 1536,
+    "height": 2304,
+    "widths": [
+      640,
+      1080,
+      1536
+    ]
+  },
+  "site/about/living-room.jpeg": {
+    "width": 1536,
+    "height": 2304,
+    "widths": [
+      640,
+      1080,
+      1536
+    ]
+  },
+  "site/about/locs-by-sofa.jpeg": {
+    "width": 1536,
+    "height": 2304,
+    "widths": [
+      640,
+      1080,
+      1536
+    ]
+  },
   "site/ceo.jpeg": {
     "width": 1536,
     "height": 2304,
@@ -18,6 +53,33 @@
     ]
   },
   "site/duo-lounge.jpeg": {
+    "width": 1536,
+    "height": 2304,
+    "widths": [
+      640,
+      1080,
+      1536
+    ]
+  },
+  "site/for-stylists/afro.jpeg": {
+    "width": 1333,
+    "height": 2000,
+    "widths": [
+      640,
+      1080,
+      1333
+    ]
+  },
+  "site/for-stylists/hero.jpeg": {
+    "width": 1536,
+    "height": 2304,
+    "widths": [
+      640,
+      1080,
+      1536
+    ]
+  },
+  "site/for-stylists/locs.jpeg": {
     "width": 1536,
     "height": 2304,
     "widths": [

@@ -1,0 +1,50 @@
+{
+  "mission": [
+    {
+      "text": "Tiwára’s House is a booking platform for afro hair care.",
+      "tone": "ink"
+    },
+    {
+      "text": "We’re here to modernise a process that has looked the same for years,",
+      "tone": "muted"
+    },
+    { "text": "and to give stylists the tools to grow.", "tone": "ink" }
+  ],
+  "milestones": [
+    {
+      "year": "Early years",
+      "title": "Braiding from a young age",
+      "description": "Kashope Afolabi picked up braiding young, doing hair for family and friends long before it was ever a business."
+    },
+    {
+      "year": "September 2019",
+      "title": "Kashope meets Grace",
+      "description": "The two meet at the University of Manchester. Grace sees the vision early and partners with Kashope to bring it to life."
+    },
+    {
+      "year": "2019 to 2026",
+      "title": "Braiding alongside the day job",
+      "description": "Kashope keeps braiding while working full time, and sees how little the process around an appointment has changed."
+    },
+    {
+      "year": "July 2026",
+      "title": "All in",
+      "description": "Kashope leaves her job to build Tiwára’s House full time."
+    },
+    {
+      "year": "August 2026",
+      "title": "Learning in Lagos",
+      "description": "She travels to Lagos, Nigeria to learn more about hair: the craft, the techniques and the people behind them."
+    },
+    {
+      "year": "November 2026",
+      "title": "Tiwára’s House launches",
+      "description": "We open as a booking platform for afro hair stylists all over the UK."
+    },
+    {
+      "year": "Next",
+      "title": "Just the beginning",
+      "description": "Booking is where we start. It leads to so much more."
+    }
+  ]
+}

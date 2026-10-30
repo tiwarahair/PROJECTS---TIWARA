@@ -1,13 +1,21 @@
+import type { Milestone, MissionLine } from "../types/about";
 import type { CategoryColour } from "../types/category-colour";
 import type { ChatMessage } from "../types/chat";
 import type { HairColour } from "../types/colour";
 import type { Faq } from "../types/faq";
+import type { Benefit, BenefitGroup } from "../types/for-stylists";
+import aboutJson from "./about.json";
 import categoryColoursJson from "./category-colours.json";
 import chatJson from "./chat.json";
 import coloursJson from "./colours.json";
 import faqsJson from "./faqs.json";
+import forStylistsJson from "./for-stylists.json";
 
 export const faqs: Faq[] = faqsJson;
 export const chatMessages = chatJson as ChatMessage[];
 export const hairColours: HairColour[] = coloursJson;
 export const categoryColours: CategoryColour[] = categoryColoursJson;
+export const missionLines = aboutJson.mission as MissionLine[];
+export const milestones: Milestone[] = aboutJson.milestones;
+export const benefitGroups = forStylistsJson.groups as BenefitGroup[];
+export const benefits: Benefit[] = forStylistsJson.benefits;

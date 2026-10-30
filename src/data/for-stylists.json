@@ -1,0 +1,65 @@
+{
+  "groups": [
+    {
+      "label": "Grow",
+      "image": "site/for-stylists/afro.jpeg",
+      "imagePosition": "top",
+      "alt": "A stylist shaping a client’s afro"
+    },
+    {
+      "label": "Save time",
+      "image": "site/about/living-room.jpeg",
+      "imagePosition": "middle",
+      "alt": "A calm salon living room with braiding posters"
+    },
+    {
+      "label": "Protect",
+      "image": "site/for-stylists/locs.jpeg",
+      "imagePosition": "top",
+      "alt": "A stylist’s hands adding cuffs to a client’s locs"
+    },
+    {
+      "label": "Your way",
+      "image": "site/about/locs-by-sofa.jpeg",
+      "imagePosition": "top",
+      "alt": "A woman with locs sitting beside a leather sofa"
+    }
+  ],
+  "benefits": [
+    {
+      "group": "Grow",
+      "title": "Fill your calendar",
+      "description": "Get in front of more clients looking for what you offer. They can see your availability and book in minutes, so there are fewer gaps in your week."
+    },
+    {
+      "group": "Grow",
+      "title": "Reach clients across the UK",
+      "description": "You are listed on a UK-wide marketplace, so new clients can find you by style, area and date, not only through the people who already follow you."
+    },
+    {
+      "group": "Grow",
+      "title": "A profile that shows off your work",
+      "description": "Your own shareable page with your portfolio, services, prices, reviews and policies. Attach the link to your socials and let it do the explaining."
+    },
+    {
+      "group": "Save time",
+      "title": "Less admin, more hair",
+      "description": "No more back-and-forth in your DMs. Clients choose a service, pick a time and pay in one go, and automatic email and SMS reminders keep them on track."
+    },
+    {
+      "group": "Protect",
+      "title": "Protect your income",
+      "description": "Take deposits or full payment upfront with secure card payments. Set your own cancellation window and late or no-show fees, so a no-show does not cost you."
+    },
+    {
+      "group": "Your way",
+      "title": "Run it your way",
+      "description": "Set your own services, prices, hours and policies. Add options like size and length, block out time off and decide how clients book you."
+    },
+    {
+      "group": "Your way",
+      "title": "Know how your business is doing",
+      "description": "See bookings, takings and insights in one place. Track what is earning, export statements and plan your next month with real numbers."
+    }
+  ]
+}

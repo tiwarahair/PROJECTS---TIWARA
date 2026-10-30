@@ -1,0 +1,117 @@
+.team {
+  padding: 0 clamp(24px, 5vw, 56px) clamp(96px, 12vw, 160px);
+}
+
+.inner {
+  max-width: 1240px;
+  margin: 0 auto;
+}
+
+.intro {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+  margin-bottom: clamp(40px, 6vw, 96px);
+}
+
+.lede {
+  margin: 0;
+  font-size: 16.5px;
+  line-height: 1.6;
+  color: var(--text-secondary);
+  max-width: 42ch;
+}
+
+.member {
+  align-items: center;
+}
+
+.panelSlot {
+  grid-row: 1;
+  z-index: 2;
+  position: relative;
+}
+
+.panel {
+  background: var(--neutral-900);
+  color: #faf6ee;
+  padding: clamp(28px, 4vw, 52px);
+  border-radius: 24px;
+}
+
+.role {
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--brand-yellow);
+  margin-bottom: 16px;
+}
+
+.name {
+  margin: 0;
+  font-family: "Schibsted Grotesk", sans-serif;
+  font-weight: 500;
+  letter-spacing: -0.03em;
+  line-height: 1.05;
+  font-size: clamp(32px, 3.6vw, 50px);
+}
+
+.photo {
+  grid-row: 1;
+  aspect-ratio: 4 / 5;
+  max-height: 860px;
+  border-radius: 24px;
+  background: var(--neutral-100);
+}
+
+.founderImage {
+  object-position: center 22%;
+}
+
+.strategistImage {
+  object-position: center 30%;
+}
+
+.panelFirst {
+  margin-bottom: clamp(72px, 10vw, 144px);
+}
+
+.panelFirst .panelSlot {
+  grid-column: 1 / span 5;
+}
+
+.panelFirst .panel {
+  margin-right: -14%;
+}
+
+.panelFirst .photo {
+  grid-column: 5 / span 8;
+}
+
+.photoFirst .photo {
+  grid-column: 1 / span 8;
+}
+
+.photoFirst .panelSlot {
+  grid-column: 8 / span 5;
+}
+
+.photoFirst .panel {
+  margin-left: -14%;
+}
+
+@media (max-width: 860px) {
+  .panel {
+    position: relative;
+    z-index: 2;
+  }
+
+  .panelFirst .panel {
+    margin: 0 14px -36px;
+  }
+
+  .photoFirst .panel {
+    margin: -36px 14px 0;
+  }
+}
